@@ -32,13 +32,18 @@
 #include "SharedConstants.h"
 #include "SlopeShader.h"
 #include "TopoDataItemSettings.h"
+
 using namespace mb_system;
-/// Define TopoDataItem::Pipeline::New() (factory method)
+
 vtkStandardNewMacro(TopoDataItem::Pipeline);
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Constructor
+// ─────────────────────────────────────────────────────────────────────────────
 
 TopoDataItem::TopoDataItem() {
   dataFilename_ = QString("");
-  verticalExagg_ = 1.;
+  verticalExagg_ = 1.f;
   showAxes_ = false;
   colormapScheme_ = TopoColorMap::Haxby;
   coloredScalar_ = ColoredScalar::Elevation;
@@ -46,17 +51,120 @@ TopoDataItem::TopoDataItem() {
   forceRender_ = false;
   surfaceRenderType_ = SurfaceRenderType::Polys;
 
-  // Instantiate interactor styles
-  pickInteractorStyle_ = new PickInteractorStyle(this);
+  pickInteractorStyle_     = new PickInteractorStyle(this);
   lightingInteractorStyle_ = new LightingInteractorStyle(this);
   pointsSelectInteractorStyle_->setTopoDataItem(this);
-  pointsSelectInteractorStyle_->
-    setDrawingMode(MyRubberBandStyle::DrawingMode::Rectangle);
+  pointsSelectInteractorStyle_->setDrawingMode(
+      MyRubberBandStyle::DrawingMode::Rectangle);
   drawInteractorStyle_->setTopoDataItem(this);
   drawInteractorStyle_->setDrawingMode(DrawInteractorStyle::DrawingMode::Line);
   testStyle_->setTopoDataItem(this);
   testStyle_->setDrawingMode(DrawInteractorStyle::DrawingMode::Line);
 }
+
+TopoDataItem::Pipeline::Pipeline() {
+  
+        firstRender_ = true;
+        // One-time actor/mapper wiring
+        surfaceActor_->SetMapper(surfaceMapper_);
+
+        contourActor_->SetMapper(contourMapper_);
+        contourMapper_->SetInputConnection(contourFilter_->GetOutputPort());
+        contourMapper_->ScalarVisibilityOff();
+        contourMapper_->SetResolveCoincidentTopologyToPolygonOffset();
+        contourMapper_->SetResolveCoincidentTopologyLineOffsetParameters(
+                                                              -1.0, -1.0);
+        contourActor_->GetProperty()->SetColor(0.0, 0.0, 0.0);
+        contourActor_->GetProperty()->SetLineWidth(1.2);
+        contourActor_->GetProperty()->LightingOff();
+
+        // ── Contour-label sub-pipeline ────────────────────────────────────
+        contourStripper_->SetInputConnection(contourFilter_->GetOutputPort());
+        contourPointToCell_->SetInputConnection(
+            contourStripper_->GetOutputPort());
+        contourLabelPoints_->SetInputConnection(
+            contourPointToCell_->GetOutputPort());
+        contourLabelTransformFilter_->SetInputConnection(
+            contourLabelPoints_->GetOutputPort());
+        contourLabelTransformFilter_->SetTransform(contourLabelTransform_);
+
+        contourLabelTextProperty_->SetColor(0.0, 0.0, 0.0);
+        contourLabelTextProperty_->SetFontSize(16);
+        contourLabelTextProperty_->SetBold(false);
+        contourLabelTextProperty_->SetItalic(false);
+        contourLabelTextProperty_->SetJustificationToCentered();
+        contourLabelTextProperty_->SetVerticalJustificationToCentered();
+        contourLabelTextProperty_->SetBackgroundColor(1.0, 1.0, 1.0);
+        contourLabelTextProperty_->SetBackgroundOpacity(0.75);
+        contourLabelTextProperty_->SetFrame(0);
+
+        contourLabelMapper_->SetInputConnection(
+            contourLabelTransformFilter_->GetOutputPort());
+        contourLabelMapper_->SetLabelMode(VTK_LABEL_SCALARS);
+        contourLabelMapper_->SetLabelFormat("%.0f");
+        contourLabelMapper_->SetLabelTextProperty(contourLabelTextProperty_);
+
+        contourLabelActor_->SetMapper(contourLabelMapper_);
+}
+// ─────────────────────────────────────────────────────────────────────────────
+//  Dataset binding
+// ─────────────────────────────────────────────────────────────────────────────
+
+void TopoDataItem::setDataset(TopoDataset *dataset) {
+  if (dataset_ == dataset) return;
+
+  // Disconnect from any previous dataset
+  if (dataset_) {
+    disconnect(dataset_, nullptr, this, nullptr);
+  }
+
+  dataset_ = dataset;
+  emit datasetChanged();
+
+  if (!dataset_) return;
+
+  // Forward error signal directly to QML
+  connect(dataset_, &TopoDataset::errorOccurred,
+          this,     &TopoDataItem::errorOccurred);
+
+  // A new file load requires a full pipeline rebuild
+  connect(dataset_, &TopoDataset::dataLoaded,
+          this,     &TopoDataItem::onDatasetLoaded);
+
+  // A quality change only needs a re-render (the polyData is already modified)
+  connect(dataset_, &TopoDataset::qualityChanged,
+          this,     &TopoDataItem::onQualityChanged);
+
+  // If the dataset already has data (bound after load), rebuild now
+  if (dataset_->isLoaded() && pipeline_) {
+    onDatasetLoaded();
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+void TopoDataItem::onDatasetLoaded() {
+  if (!pipeline_) return;   // initializeVTK not yet called; assemblePipeline
+                             // will call connectDataset when the window opens
+  pipeline_->firstRender_ = true;
+  // Keep displayed filename in sync with what the dataset loaded
+  setDataFilename(dataset_->reader()->GetFileName()
+                  ? QString(dataset_->reader()->GetFileName()) : QString());
+  reassemblePipeline();
+}
+
+void TopoDataItem::onQualityChanged() {
+  // polyData()->Modified() was already called by TopoDataset::setPointQuality.
+  // A bare Render() is enough — VTK's demand-driven execution will propagate
+  // the modified MTime through the pipeline automatically.
+  dispatch_async([](vtkRenderWindow *rw, vtkUserData) {
+    rw->Render();
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  QQuickVTKItem overrides
+// ─────────────────────────────────────────────────────────────────────────────
 
 QQuickVTKItem::vtkUserData
 TopoDataItem::initializeVTK(vtkRenderWindow *renderWindow) {
@@ -65,84 +173,102 @@ TopoDataItem::initializeVTK(vtkRenderWindow *renderWindow) {
   pipeline_ = new TopoDataItem::Pipeline();
   renderWindow->AddRenderer(pipeline_->renderer_);
   pipeline_->interactorStyle_ = pickInteractorStyle_;
-  // Full assembly (will be a no-op for the data load until a file is set)
   assemblePipeline(pipeline_);
   setupLightSource();
+
+  // Dataset may have been loaded before this item's VTK context existed
+  // (e.g. edit window starts invisible). Assemble the pipeline now if so.
+  if (dataset_ && dataset_->isLoaded()) {
+    assemblePipeline(pipeline_);
+  }
+  
   return pipeline_;
 }
 
 void TopoDataItem::destroyingVTK(vtkRenderWindow *renderWindow,
-                                 vtkUserData userData) {
+                                  vtkUserData userData) {
   qInfo() << "TopoDataItem::destroyingVTK() not implemented";
-  return;
 }
 
-// vtkCubeAxesActor version
-void TopoDataItem::setupAxes(vtkCubeAxesActor *axesActor,
-                             vtkNamedColors *namedColors,
-                             double *surfaceBounds,
-                             double *gridBounds,
-                             const char *xUnits, const char *yUnits,
-                             const char *zUnits,
-                             bool geographicCRS) {
-  qDebug() << "setupAxes(): " <<
-    " xMin: " << surfaceBounds[0] << ", xMax: " << surfaceBounds[1] <<
-    ", yMin: " << surfaceBounds[2] << ", yMax: " << surfaceBounds[3] <<
-    ", zMin: " << surfaceBounds[4] << ", zMax: " << surfaceBounds[5];
-  axesActor->SetBounds(surfaceBounds);
-  axesActor->SetXAxisRange(gridBounds[0], gridBounds[1]);
-  axesActor->SetYAxisRange(gridBounds[2], gridBounds[3]);
-  axesActor->SetZAxisRange(gridBounds[4], gridBounds[5]);
-  vtkColor3d axisColor = namedColors->GetColor3d("Black");
-  axesActor->GetTitleTextProperty(0)->SetColor(axisColor.GetData());
-  axesActor->GetTitleTextProperty(0)->SetFontSize(100);
-  axesActor->GetLabelTextProperty(0)->SetColor(axisColor.GetData());
-  axesActor->GetLabelTextProperty(0)->SetFontSize(30);
-  axesActor->GetTitleTextProperty(1)->SetColor(axisColor.GetData());
-  axesActor->GetLabelTextProperty(1)->SetColor(axisColor.GetData());
-  axesActor->GetTitleTextProperty(2)->SetColor(axisColor.GetData());
-  axesActor->GetLabelTextProperty(2)->SetColor(axisColor.GetData());
-  axesActor->GetXAxesLinesProperty()->SetColor(axisColor.GetData());
-  axesActor->GetYAxesLinesProperty()->SetColor(axisColor.GetData());
-  axesActor->GetZAxesLinesProperty()->SetColor(axisColor.GetData());
-  axesActor->DrawXGridlinesOn();
-  axesActor->DrawYGridlinesOn();
-  axesActor->SetXTitle(xUnits);
-  axesActor->SetYTitle(yUnits);
-  axesActor->SetZTitle(zUnits);
-  axesActor->SetGridLineLocation(axesActor->VTK_GRID_LINES_FURTHEST);
-  axesActor->XAxisMinorTickVisibilityOff();
-  axesActor->YAxisMinorTickVisibilityOff();
-  axesActor->ZAxisMinorTickVisibilityOff();
-  axesActor->SetLabelScaling(0, 0, 0, 0);
-  if (geographicCRS) {
-    axesActor->SetXLabelFormat("%.2f");
-    axesActor->SetYLabelFormat("%.2f");
+// ─────────────────────────────────────────────────────────────────────────────
+//  Full assembly
+// ─────────────────────────────────────────────────────────────────────────────
+
+void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
+  qDebug() << "assemblePipeline() — full rebuild";
+
+  pipeline->surfaceMapper_->RemoveAllInputConnections(0);
+  pipeline->renderer_->RemoveAllViewProps();
+  pipeline->renderer_->RemoveAllLights();
+
+  auto *sp = pipeline->surfaceActor_->GetShaderProperty();
+  sp->ClearAllVertexShaderReplacements();
+  sp->ClearAllFragmentShaderReplacements();
+
+  // Stage 1: wire the shared polyData into this pipeline.
+  // connectDataset() returns false if the dataset is not yet loaded
+  // (e.g. on first init before a file has been opened), in which case return.
+  // The remaining stages are silently skipped; the
+  // window renders an empty scene until a file is loaded.
+  if (!connectDataset(pipeline)) {
+    return;
   }
-  else {
-    axesActor->SetXLabelFormat("%.0f");
-    axesActor->SetYLabelFormat("%.0f");
+
+  // Stages 2–N: apply current display settings
+  applyColormap(pipeline);
+  applyColoredScalar(pipeline);   // also calls applyShadowSource() internally
+  applyRenderType(pipeline);
+  applyVerticalExagg(pipeline);
+  applyAxes(pipeline);
+  applyContours(pipeline);
+
+  // Final actors / lights / interactor
+  pipeline->renderer_->AddActor(pipeline->surfaceActor_);
+  pipeline->renderer_->AddLight(pipeline->lightSource_);
+  pipeline->renderer_->SetBackground(
+      pipeline->colors_->GetColor3d("White").GetData());
+
+  pipeline->interactorStyle_->SetDefaultRenderer(pipeline->renderer_);
+  pipeline->windowInteractor_->SetPicker(pipeline->areaPicker_);
+  pipeline->windowInteractor_->SetInteractorStyle(pipeline->interactorStyle_);
+  pipeline->windowInteractor_->SetRenderWindow(renderWindow_);
+
+  if (pipeline->firstRender_) {
+    pipeline->renderer_->ResetCamera();
   }
-  axesActor->SetScreenSize(15.0);
+  pipeline->firstRender_ = false;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Stage 1 — connect shared dataset (replaces loadDataPipeline)
+// ─────────────────────────────────────────────────────────────────────────────
+
+bool TopoDataItem::connectDataset(Pipeline *pipeline) {
+  if (!dataset_ || !dataset_->isLoaded()) {
+    qDebug() << "connectDataset(): no loaded dataset — skipping";
+    return false;
+  }
+
+  // Wrap the shared polyData in a trivial producer so downstream filters can
+  // use SetInputConnection() and VTK's MTime-based re-execution still works.
+  pipeline->source_->SetOutput(dataset_->polyData());
+  pipeline->polyData_ = dataset_->polyData();
+
+  qDebug() << "connectDataset(): polyData has"
+           << pipeline->polyData_->GetNumberOfPoints() << "points";
+  return true;
 }
 
 void TopoDataItem::initializePipeline() {
   // Kept for compatibility; everything happens in assemblePipeline now.
 }
 
-bool TopoDataItem::loadDatafile(QUrl fileUrl) {
-  char *filename = strdup(fileUrl.toLocalFile().toLatin1().data());
-  qDebug() << "loadGridfile " << filename;
-  setDataFilename(filename);
-  pipeline_->firstRender_ = true;
-  // New data → full rebuild
-  reassemblePipeline();
-  return true;
-}
+// ─────────────────────────────────────────────────────────────────────────────
+//  dataOutputPort — virtual; base returns the full shared dataset
+// ─────────────────────────────────────────────────────────────────────────────
 
-
-QString TopoDataItem::getDataFileName() const {
-  return dataFilename_;
+vtkAlgorithmOutput *TopoDataItem::dataOutputPort(Pipeline *pipeline) {
+  return pipeline->source_->GetOutputPort();
 }
 
 void TopoDataItem::reassemblePipeline() {
@@ -154,142 +280,32 @@ void TopoDataItem::reassemblePipeline() {
   });
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-//  Full assembly — called on init and on data file load
-// ═════════════════════════════════════════════════════════════════════════════
-void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
-  qDebug() << "assemblePipeline() — full rebuild";
-  // Clear stale state from previous runs
-  pipeline->surfaceMapper_->RemoveAllInputConnections(0);
-  pipeline->renderer_->RemoveAllViewProps();
-  pipeline->renderer_->RemoveAllLights();
-  // Drop any GPU shader replacements left over from a previous pass
-  auto *sp = pipeline->surfaceActor_->GetShaderProperty();
-  sp->ClearAllVertexShaderReplacements();
-  sp->ClearAllFragmentShaderReplacements();
-  // Stage 1: load data
-  if (!loadDataPipeline(pipeline)) {
-    return;
-  }
-  // Stages 2–N: apply current settings to the pipeline tail
-  applyColormap(pipeline);
-  applyColoredScalar(pipeline);    // also calls applyShadowSource() internally
-  applyRenderType(pipeline);
-  applyVerticalExagg(pipeline);
-  applyAxes(pipeline);
-  applyContours(pipeline);
-  // Final assembly: actors / lights / interactor
-  pipeline->renderer_->AddActor(pipeline->surfaceActor_);
-  pipeline->renderer_->AddLight(pipeline->lightSource_);
-  pipeline->renderer_->SetBackground(
-      pipeline->colors_->GetColor3d("White").GetData());
-  qDebug() << "assemblePipeline(): GetLightIntensity="
-           << pipeline->lightSource_->GetIntensity();
-  pipeline->interactorStyle_->SetDefaultRenderer(pipeline->renderer_);
-  pipeline->windowInteractor_->SetPicker(pipeline->areaPicker_);
-  pipeline->windowInteractor_->SetInteractorStyle(pipeline->interactorStyle_);
-  pipeline->windowInteractor_->SetRenderWindow(renderWindow_);
-  if (pipeline->firstRender_) {
-    pipeline->renderer_->ResetCamera();
-  }
-  pipeline->firstRender_ = false;
-  vtkActorCollection* actors = pipeline->renderer_->GetActors();
-  std::cerr << "TOTAL actors: " << actors->GetNumberOfItems() << "\n";
-}
-
-// ═════════════════════════════════════════════════════════════════════════════
-//  Stage 1 — read data file, cache bounds, build quality array
-// ═════════════════════════════════════════════════════════════════════════════
-bool TopoDataItem::loadDataPipeline(Pipeline *pipeline) {
-  qDebug() << "loadDataPipeline()";
-
-  // Get dataFilename_ char* representation
-  // 1. Convert to a QByteArray (this owns the actual memory bytes)
-  QByteArray byteArray = dataFilename_.toUtf8(); 
-
-  // 2. Get the const char* pointer from the byte array
-  char* dataFilename = byteArray.data();
-
-  if (access(dataFilename, R_OK) == -1) {
-    qWarning() << "Can't access input file " << dataFilename;
-    emit errorOccurred(QString("Cannot access input file ") + dataFilename);
-    dataLoaded_ = false;
-    return false;
-  }
-  qDebug() << "set filename to " << dataFilename;
-  pipeline->topoReader_->SetFileName(dataFilename);
-  TopoDataType dataType = TopoDataReader::getDataType(dataFilename);
-  pipeline->topoReader_->setDataType(dataType);
-  pipeline->topoReader_->Modified();
-  pipeline->topoReader_->UpdateInformation();
-  pipeline->topoReader_->Update();
-  unsigned long errorCode = pipeline->topoReader_->GetErrorCode();
-  if (errorCode != 0) {
-    qWarning() << "grid reader error during Update(): " << errorCode;
-    qWarning() << dataFilename << ": "
-               << vtkErrorCode::GetStringFromErrorCode(errorCode);
-    emit errorOccurred(QString("Cannot access input file ") + dataFilename +
-                       "\n" + vtkErrorCode::GetStringFromErrorCode(errorCode));
-    dataLoaded_ = false;
-    return false;
-  }
-  // Tag points/cells with original IDs
-  pipeline->idFilter_->SetInputData(pipeline->topoReader_->GetOutput());
-  pipeline->idFilter_->SetCellIdsArrayName(ORIGINAL_IDS);
-  pipeline->idFilter_->SetPointIdsArrayName(ORIGINAL_IDS);
-  pipeline->idFilter_->Update();
-  // Cache bounds
-  pipeline->topoReader_->gridBounds(&gridBounds_[0], &gridBounds_[1],
-                                    &gridBounds_[2], &gridBounds_[3],
-                                    &gridBounds_[4], &gridBounds_[5]);
-  elevMin_ = gridBounds_[4];
-  elevMax_ = gridBounds_[5];
-  qDebug() << "xMin: " << gridBounds_[0] << ", xMax: " << gridBounds_[1]
-           << " yMin: " << gridBounds_[2] << ", yMax: " << gridBounds_[3]
-           << " zMin: " << gridBounds_[4] << ", zMax: " << gridBounds_[5];
-  // Elevation filter
-  pipeline->elevFilter_->SetInputConnection(pipeline->idFilter_->
-                                            GetOutputPort());
-  pipeline->elevFilter_->SetLowPoint (0, 0, elevMin_);
-  pipeline->elevFilter_->SetHighPoint(0, 0, elevMax_);
-  pipeline->elevFilter_->SetScalarRange(elevMin_, elevMax_);
-  pipeline->elevFilter_->Update();
-  pipeline->polyData_ =
-      vtkPolyData::SafeDownCast(pipeline->elevFilter_->GetOutput());
-  // Quality array (initially all GOOD_DATA)
-  pipeline->quality_->SetName(DATA_QUALITY_NAME);
-  pipeline->quality_->SetNumberOfTuples(
-      pipeline->polyData_->GetNumberOfPoints());
-  for (vtkIdType i = 0; i < pipeline->polyData_->GetNumberOfPoints(); i++) {
-    pipeline->quality_->SetValue(i, GOOD_DATA);
-  }
-  pipeline->polyData_->GetPointData()->AddArray(pipeline->quality_);
-  dataLoaded_ = true;
-  return true;
-}
-
-// ═════════════════════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────────────────────
 //  Stage 2 — select colored scalar; route upstream port
-// ═════════════════════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────────────────────
+
 void TopoDataItem::applyColoredScalar(Pipeline *pipeline) {
-  if (!dataLoaded_) return;
+  if (!dataset_ || !dataset_->isLoaded()) return;
   qDebug() << "applyColoredScalar(): " << coloredScalar_;
+
   switch (coloredScalar_) {
   case ColoredScalar::Elevation:
-    coloredOutputPort_ = pipeline->elevFilter_->GetOutputPort();
-    coloredMin_ = elevMin_;
-    coloredMax_ = elevMax_;
+    // dataOutputPort() carries the "Elevation" scalar from the dataset
+    // (base: source_ directly; EditDataItem: after the spatial clip filter)
+    coloredOutputPort_ = dataOutputPort(pipeline);
+    coloredMin_ = dataset_->elevMin();
+    coloredMax_ = dataset_->elevMax();
     pipeline->surfaceMapper_->SetScalarModeToDefault();
     pipeline->surfaceMapper_->SelectColorArray("");
     break;
+
   case ColoredScalar::Slope: {
-    // Compute per-vertex normals then derive a "Slopes" point-data array
-    pipeline->normalsFilter_->SetInputConnection(
-        pipeline->elevFilter_->GetOutputPort());
+    pipeline->normalsFilter_->SetInputConnection(dataOutputPort(pipeline));
     pipeline->normalsFilter_->ComputePointNormalsOn();
     pipeline->normalsFilter_->ComputeCellNormalsOff();
     pipeline->normalsFilter_->SplittingOff();
     pipeline->normalsFilter_->Update();
+
     pipeline->slopeCalc_->SetInputConnection(
         pipeline->normalsFilter_->GetOutputPort());
     pipeline->slopeCalc_->SetAttributeTypeToPointData();
@@ -298,7 +314,9 @@ void TopoDataItem::applyColoredScalar(Pipeline *pipeline) {
     pipeline->slopeCalc_->SetFunction("acos(Normals[2]) * 57.2957795");
     pipeline->slopeCalc_->SetResultArrayName("Slopes");
     pipeline->slopeCalc_->Update();
+
     coloredOutputPort_ = pipeline->slopeCalc_->GetOutputPort();
+
     vtkPolyData *slopeOutput =
         vtkPolyData::SafeDownCast(pipeline->slopeCalc_->GetOutput());
     if (slopeOutput) {
@@ -316,32 +334,36 @@ void TopoDataItem::applyColoredScalar(Pipeline *pipeline) {
     pipeline->surfaceMapper_->SetScalarModeToUsePointFieldData();
     break;
   }
+
   case ColoredScalar::DataQuality:
-    coloredOutputPort_ = pipeline->elevFilter_->GetOutputPort();
+    coloredOutputPort_ = dataOutputPort(pipeline);
     coloredMin_ = BAD_DATA;
     coloredMax_ = GOOD_DATA;
     pipeline->surfaceMapper_->SetArrayAccessMode(VTK_GET_ARRAY_BY_NAME);
     pipeline->surfaceMapper_->SelectColorArray(DATA_QUALITY_NAME);
     pipeline->surfaceMapper_->SetScalarModeToUsePointFieldData();
     break;
+
   default:
-    qWarning() << "Unhandled coloredScalar_: " << coloredScalar_;
+    qWarning() << "applyColoredScalar(): unhandled value" << coloredScalar_;
     return;
   }
-  // The shadow source consumes coloredOutputPort_, so re-apply it.
+
   applyShadowSource(pipeline);
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-//  Stage 3 — configure mapper tail and lighting based on shadowSource_
-// ═════════════════════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────────────────────
+//  Stage 3 — configure mapper tail and lighting
+// ─────────────────────────────────────────────────────────────────────────────
+
 void TopoDataItem::applyShadowSource(Pipeline *pipeline) {
-  if (!dataLoaded_ || !coloredOutputPort_) return;
+  if (!dataset_ || !dataset_->isLoaded() || !coloredOutputPort_) return;
   qDebug() << "applyShadowSource(): " << shadowSource_;
-  // Always start with a clean shader state — cheap; just empties a map.
+
   auto *sp = pipeline->surfaceActor_->GetShaderProperty();
   sp->ClearAllVertexShaderReplacements();
   sp->ClearAllFragmentShaderReplacements();
+
   switch (shadowSource_) {
   case ShadowSource::Illumination: {
     pipeline->surfaceMapper_->SetInputConnection(coloredOutputPort_);
@@ -362,7 +384,6 @@ void TopoDataItem::applyShadowSource(Pipeline *pipeline) {
     break;
   }
   case ShadowSource::LocalSlope: {
-    // CPU path: programmable filter writes RGBA per vertex
     pipeline->shadeNormalsFilter_->SetInputConnection(coloredOutputPort_);
     pipeline->shadeNormalsFilter_->ComputePointNormalsOn();
     pipeline->shadeNormalsFilter_->ComputeCellNormalsOff();
@@ -370,10 +391,9 @@ void TopoDataItem::applyShadowSource(Pipeline *pipeline) {
     pipeline->shadeNormalsFilter_->ConsistencyOn();
     pipeline->shadeNormalsFilter_->AutoOrientNormalsOn();
     pipeline->shadeNormalsFilter_->Update();
+
     pipeline->slopeColorFilter_->SetInputConnection(coloredOutputPort_);
     if (!slopeCallbackData_) {
-      // First time entering CPU slope mode — allocate and register.
-      // Pipeline owns it from here via SetExecuteMethodArgDelete.
       slopeCallbackData_ = new SlopeShader::CallbackData{
           pipeline->slopeColorFilter_.Get(),
           pipeline->shadeNormalsFilter_.Get(),
@@ -386,7 +406,6 @@ void TopoDataItem::applyShadowSource(Pipeline *pipeline) {
       pipeline->slopeColorFilter_->
           SetExecuteMethodArgDelete(SlopeShader::deleteCallbackData);
     } else {
-      // Reuse: just update parameters (pointer stays registered).
       slopeCallbackData_->elevMin       = coloredMin_;
       slopeCallbackData_->elevMax       = coloredMax_;
       slopeCallbackData_->slopeGamma    = slopeGamma_;
@@ -401,7 +420,6 @@ void TopoDataItem::applyShadowSource(Pipeline *pipeline) {
     break;
   }
   case ShadowSource::LocalSlopeGpu: {
-    // GPU path: normals in series, mapper does LUT, fragment shader darkens
     pipeline->shadeNormalsFilter_->SetInputConnection(coloredOutputPort_);
     pipeline->shadeNormalsFilter_->ComputePointNormalsOn();
     pipeline->shadeNormalsFilter_->ComputeCellNormalsOff();
@@ -420,22 +438,25 @@ void TopoDataItem::applyShadowSource(Pipeline *pipeline) {
     break;
   }
   default:
-    qWarning() << "Unhandled shadowSource: " << shadowSource_;
+    qWarning() << "applyShadowSource(): unhandled value" << shadowSource_;
     return;
   }
+
   pipeline->surfaceActor_->GetProperty()->SetLighting(lightsEnabled_);
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────────────────────
 //  Stage 4 — colormap
-// ═════════════════════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────────────────────
+
 void TopoDataItem::applyColormap(Pipeline *pipeline) {
   TopoColorMap::makeLUT(colormapScheme_, pipeline->elevLookupTable_);
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────────────────────
 //  Stage 5 — surface representation
-// ═════════════════════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────────────────────
+
 void TopoDataItem::applyRenderType(Pipeline *pipeline) {
   switch (surfaceRenderType_) {
   case SurfaceRenderType::Polys:
@@ -450,52 +471,48 @@ void TopoDataItem::applyRenderType(Pipeline *pipeline) {
   }
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────────────────────
 //  Stage 6 — axes visibility
-// ═════════════════════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────────────────────
+
 void TopoDataItem::applyAxes(Pipeline *pipeline) {
-  // Idempotent: remove first, then add back if needed
   pipeline->renderer_->RemoveActor(pipeline->axesActor_);
-  if (showAxes_ && dataLoaded_) {
-    // Pivot Z-scaling about the data's vertical centre so the axes box
-    // tracks the surface actor (which uses the same pivot in
-    // applyVerticalExagg) instead of swinging around world Z=0.
-    const double zCenter = 0.5 * (gridBounds_[4] + gridBounds_[5]);
-    pipeline->axesActor_->SetOrigin(0., 0., zCenter);
-    pipeline->axesActor_->SetScale (1., 1., verticalExagg_);
-    pipeline->axesActor_->SetCamera(pipeline->renderer_->GetActiveCamera());
-    setupAxes(pipeline->axesActor_,
-              pipeline->colors_,
-              pipeline->surfaceMapper_->GetBounds(),
-              gridBounds_,
-              pipeline->topoReader_->xUnits(),
-              pipeline->topoReader_->yUnits(),
-              pipeline->topoReader_->zUnits(),
-              pipeline->topoReader_->geographicCRS());
-    pipeline->renderer_->AddActor(pipeline->axesActor_);
-  }
+  if (!showAxes_ || !dataset_ || !dataset_->isLoaded()) return;
+
+  double gb[6];
+  dataset_->gridBounds(&gb[0], &gb[1], &gb[2], &gb[3], &gb[4], &gb[5]);
+  const double zCenter = 0.5 * (gb[4] + gb[5]);
+
+  pipeline->axesActor_->SetOrigin(0., 0., zCenter);
+  pipeline->axesActor_->SetScale (1., 1., verticalExagg_);
+  pipeline->axesActor_->SetCamera(pipeline->renderer_->GetActiveCamera());
+  setupAxes(pipeline->axesActor_,
+            pipeline->colors_,
+            pipeline->surfaceMapper_->GetBounds(),
+            gb,
+            dataset_->reader()->xUnits(),
+            dataset_->reader()->yUnits(),
+            dataset_->reader()->zUnits(),
+            dataset_->reader()->geographicCRS());
+  pipeline->renderer_->AddActor(pipeline->axesActor_);
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────────────────────
 //  Stage 7 — vertical exaggeration
-// ═════════════════════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────────────────────
+
 void TopoDataItem::applyVerticalExagg(Pipeline *pipeline) {
-  // Pivot Z-scaling about the data's vertical centre so the surface
-  // grows/shrinks symmetrically around its midplane instead of swinging
-  // around world Z=0.
-  const double zCenter = 0.5 * (gridBounds_[4] + gridBounds_[5]);
+  if (!dataset_ || !dataset_->isLoaded()) return;
+
+  const double zCenter = 0.5 * (dataset_->elevMin() + dataset_->elevMax());
+
   pipeline->surfaceActor_->SetOrigin(0., 0., zCenter);
   pipeline->surfaceActor_->SetScale (1., 1., verticalExagg_);
   pipeline->contourActor_->SetOrigin(0., 0., zCenter);
   pipeline->contourActor_->SetScale (1., 1., verticalExagg_);
 
-  // The label actor is 2D and can't carry a 3D transform, so we bake the
-  // same pivot-Z-scale into a transform filter that runs on the label
-  // points before they reach the labeled-data mapper.  Order matters:
-  // PreMultiply (vtkTransform default) applies the last-specified op first,
-  // so this evaluates as  T(zC) · S(1,1,vExagg) · T(-zC)  on each point.
   pipeline->contourLabelTransform_->Identity();
-  pipeline->contourLabelTransform_->Translate(0., 0., zCenter);
+  pipeline->contourLabelTransform_->Translate(0., 0.,  zCenter);
   pipeline->contourLabelTransform_->Scale    (1., 1., verticalExagg_);
   pipeline->contourLabelTransform_->Translate(0., 0., -zCenter);
   pipeline->contourLabelTransformFilter_->Modified();
@@ -503,54 +520,98 @@ void TopoDataItem::applyVerticalExagg(Pipeline *pipeline) {
   pipeline->renderer_->ResetCameraClippingRange();
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────────────────────
 //  Stage 8 — contour lines
-// ═════════════════════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────────────────────
+
 void TopoDataItem::applyContours(Pipeline *pipeline) {
-  // Idempotent: always remove both actors first.
   pipeline->renderer_->RemoveActor(pipeline->contourActor_);
   pipeline->renderer_->RemoveActor2D(pipeline->contourLabelActor_);
-  if (!showContours_ || !dataLoaded_) {
-    return;
-  }
-  // Feed contours from the elevation scalar.  Note we don't go through the
-  // colored port: contours should reflect elevation regardless of whether
-  // the surface is currently colored by Slope or DataQuality.
-  pipeline->contourFilter_->SetInputConnection(
-      pipeline->elevFilter_->GetOutputPort());
-  // Tell vtkContourFilter which scalar drives the iso-extraction.
+  if (!showContours_ || !dataset_ || !dataset_->isLoaded()) return;
+
+  pipeline->contourFilter_->SetInputConnection(dataOutputPort(pipeline));
   pipeline->contourFilter_->SetInputArrayToProcess(
       0, 0, 0,
       vtkDataObject::FIELD_ASSOCIATION_POINTS, "Elevation");
-  pipeline->contourFilter_->GenerateValues(contourCount_, elevMin_, elevMax_);
+  pipeline->contourFilter_->GenerateValues(
+      contourCount_, dataset_->elevMin(), dataset_->elevMax());
   pipeline->contourFilter_->Modified();
 
-  // Always draw the lines through the plain mapper.
   pipeline->renderer_->AddActor(pipeline->contourActor_);
-
-  // Optionally also draw labels through the separate 2D actor.  The label
-  // sub-pipeline (stripper → ptDataToCellData → cellCenters → transform →
-  // labeledDataMapper) was wired up once in the Pipeline constructor; it
-  // re-executes automatically when contourFilter_ becomes Modified above.
   if (showContourLabels_) {
-    // Make sure the iso-value scalar drives the labels.  vtkLabeledDataMapper
-    // with LabelMode=LABEL_SCALARS uses the active point scalars of its
-    // input — vtkCellCenters carries our cell data through as point data.
     pipeline->renderer_->AddActor2D(pipeline->contourLabelActor_);
   }
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-//  Q_INVOKABLE setters — dispatch only the narrow stage they affect
-// ═════════════════════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────────────────────
+//  Axes helper
+// ─────────────────────────────────────────────────────────────────────────────
+
+void TopoDataItem::setupAxes(vtkCubeAxesActor *axesActor,
+                              vtkNamedColors *namedColors,
+                              double *surfaceBounds,
+                              double *gridBounds,
+                              const char *xUnits, const char *yUnits,
+                              const char *zUnits,
+                              bool geographicCRS) {
+  qDebug() << "setupAxes():"
+           << " xMin:" << surfaceBounds[0] << "xMax:" << surfaceBounds[1]
+           << " yMin:" << surfaceBounds[2] << "yMax:" << surfaceBounds[3]
+           << " zMin:" << surfaceBounds[4] << "zMax:" << surfaceBounds[5];
+
+  axesActor->SetBounds(surfaceBounds);
+  axesActor->SetXAxisRange(gridBounds[0], gridBounds[1]);
+  axesActor->SetYAxisRange(gridBounds[2], gridBounds[3]);
+  axesActor->SetZAxisRange(gridBounds[4], gridBounds[5]);
+
+  vtkColor3d axisColor = namedColors->GetColor3d("Black");
+  for (int i = 0; i < 3; i++) {
+    axesActor->GetTitleTextProperty(i)->SetColor(axisColor.GetData());
+    axesActor->GetLabelTextProperty(i)->SetColor(axisColor.GetData());
+  }
+  axesActor->GetTitleTextProperty(0)->SetFontSize(100);
+  axesActor->GetLabelTextProperty(0)->SetFontSize(30);
+  axesActor->GetXAxesLinesProperty()->SetColor(axisColor.GetData());
+  axesActor->GetYAxesLinesProperty()->SetColor(axisColor.GetData());
+  axesActor->GetZAxesLinesProperty()->SetColor(axisColor.GetData());
+  axesActor->DrawXGridlinesOn();
+  axesActor->DrawYGridlinesOn();
+  axesActor->SetXTitle(xUnits);
+  axesActor->SetYTitle(yUnits);
+  axesActor->SetZTitle(zUnits);
+  axesActor->SetGridLineLocation(axesActor->VTK_GRID_LINES_FURTHEST);
+  axesActor->XAxisMinorTickVisibilityOff();
+  axesActor->YAxisMinorTickVisibilityOff();
+  axesActor->ZAxisMinorTickVisibilityOff();
+  axesActor->SetLabelScaling(0, 0, 0, 0);
+  axesActor->SetXLabelFormat(geographicCRS ? "%.2f" : "%.0f");
+  axesActor->SetYLabelFormat(geographicCRS ? "%.2f" : "%.0f");
+  axesActor->SetScreenSize(15.0);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Q_INVOKABLE setters
+// ─────────────────────────────────────────────────────────────────────────────
+
+bool TopoDataItem::loadDatafile(QUrl fileUrl) {
+  if (!dataset_) {
+    qWarning() << "loadDatafile(): no dataset bound — call setDataset() first";
+    emit errorOccurred("No dataset bound to this view.");
+    return false;
+  }
+  QString path = fileUrl.toLocalFile();
+  setDataFilename(path);        // update label immediately for responsiveness
+  return dataset_->loadFile(path);
+  // onDatasetLoaded() will fire via the dataLoaded signal and trigger rebuild
+}
+
 void TopoDataItem::setColoredScalar(ColoredScalar coloredScalar) {
   qDebug() << "setColoredScalar to " << coloredScalar;
   coloredScalar_ = coloredScalar;
   emit coloredScalarChanged();
-
   dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
     auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
-    applyColoredScalar(p);     // calls applyShadowSource internally
+    applyColoredScalar(p);
     rw->Render();
   });
 }
@@ -559,7 +620,6 @@ void TopoDataItem::setShadowSource(ShadowSource source) {
   qDebug() << "setShadowSource to " << source;
   shadowSource_ = source;
   emit shadowSourceChanged();
-
   dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
     auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
     applyShadowSource(p);
@@ -570,7 +630,6 @@ void TopoDataItem::setShadowSource(ShadowSource source) {
 void TopoDataItem::setSurfaceRenderType(SurfaceRenderType renderType) {
   surfaceRenderType_ = renderType;
   emit surfaceRenderTypeChanged();
-
   dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
     auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
     applyRenderType(p);
@@ -581,11 +640,10 @@ void TopoDataItem::setSurfaceRenderType(SurfaceRenderType renderType) {
 void TopoDataItem::setVerticalExagg(float verticalExagg) {
   verticalExagg_ = verticalExagg;
   emit verticalExaggChanged();
-
   dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
     auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
     applyVerticalExagg(p);
-    applyAxes(p);  // axes scale with terrain
+    applyAxes(p);
     rw->Render();
   });
 }
@@ -593,11 +651,8 @@ void TopoDataItem::setVerticalExagg(float verticalExagg) {
 void TopoDataItem::setSlopeGamma(double gamma) {
   slopeGamma_ = gamma;
   emit slopeGammaChanged();
-
-  qDebug() << "setSlopeGamma(" << gamma << ")";
   switch (shadowSource_) {
   case ShadowSource::LocalSlopeGpu:
-    // Cheapest path: just write the uniform and render.
     dispatch_async([this, gamma](vtkRenderWindow *rw, vtkUserData ud) {
       auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
       p->surfaceActor_->GetShaderProperty()->GetFragmentCustomUniforms()
@@ -606,7 +661,6 @@ void TopoDataItem::setSlopeGamma(double gamma) {
     });
     break;
   case ShadowSource::LocalSlope:
-    // CPU path: update callback data, mark filter dirty, render.
     dispatch_async([this, gamma](vtkRenderWindow *rw, vtkUserData ud) {
       auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
       if (slopeCallbackData_) {
@@ -617,7 +671,6 @@ void TopoDataItem::setSlopeGamma(double gamma) {
     });
     break;
   default:
-    // Gamma has no effect in Illumination / NoShadows modes; nothing to do.
     break;
   }
 }
@@ -625,8 +678,6 @@ void TopoDataItem::setSlopeGamma(double gamma) {
 void TopoDataItem::setMinBrightness(double minBrightness) {
   minBrightness_ = minBrightness;
   emit minBrightnessChanged();
-
-  qDebug() << "setMinBrightness(" << minBrightness << ")";
   switch (shadowSource_) {
   case ShadowSource::LocalSlopeGpu:
     dispatch_async([this, minBrightness](vtkRenderWindow *rw, vtkUserData ud) {
@@ -653,11 +704,8 @@ void TopoDataItem::setMinBrightness(double minBrightness) {
 
 bool TopoDataItem::setColormap(QString name) {
   QByteArray ba = name.toLocal8Bit();
-  char *cname = ba.data();
-  TopoColorMap::Scheme scheme = TopoColorMap::schemeFromName(cname);
-  if (scheme == TopoColorMap::Unknown) {
-    return false;
-  }
+  TopoColorMap::Scheme scheme = TopoColorMap::schemeFromName(ba.data());
+  if (scheme == TopoColorMap::Unknown) return false;
   colormapScheme_ = scheme;
   dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
     auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
@@ -671,7 +719,6 @@ void TopoDataItem::setShowAxes(bool plotAxes) {
   qDebug() << "setShowAxes(): " << plotAxes;
   showAxes_ = plotAxes;
   emit showAxesChanged();
-
   dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
     auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
     applyAxes(p);
@@ -683,7 +730,6 @@ void TopoDataItem::setContours(bool showContours) {
   qDebug() << "setContours(): " << showContours;
   showContours_ = showContours;
   emit showContoursChanged();
-
   dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
     auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
     applyContours(p);
@@ -692,12 +738,8 @@ void TopoDataItem::setContours(bool showContours) {
 }
 
 void TopoDataItem::setShowContourLabels(bool enabled) {
-  qDebug() << "setShowContourLabels(): " << enabled;
   showContourLabels_ = enabled;
   emit showContourLabelsChanged();
-
-  // Swap of mapper happens inside applyContours.  Cheap — no upstream
-  // re-execution; the contour polylines are already cached.
   dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
     auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
     applyContours(p);
@@ -706,28 +748,15 @@ void TopoDataItem::setShowContourLabels(bool enabled) {
 }
 
 void TopoDataItem::setContourInterval(double interval) {
-  qDebug() << "setContourInterval(): " << interval;
-  int nContours = (elevMax_ - elevMin_) / interval;
-  setContourCount(nContours);
+  if (!dataset_ || !dataset_->isLoaded()) return;
+  const double range = dataset_->elevMax() - dataset_->elevMin();
+  if (interval <= 0.0 || range <= 0.0) return;
+  setContourCount(static_cast<int>(range / interval));
 }
-
-void TopoDataItem::setDataFilename(const QString newName) {
-    // Prevent infinite evaluation loops by checking if the value actually changed
-    if (dataFilename_ == newName)
-        return;
-
-    dataFilename_ = newName;
-    
-    // Emit the notification signal so QML or other observers update automatically
-    emit dataFilenameChanged(dataFilename_);
-}
-
 
 void TopoDataItem::setContourCount(int n) {
-  qDebug() << "setContourCount(): " << n;
   if (n < 1) n = 1;
   contourCount_ = n;
-  // Only meaningful when contours are on; otherwise applyContours is a no-op.
   dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
     auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
     applyContours(p);
@@ -736,44 +765,47 @@ void TopoDataItem::setContourCount(int n) {
 }
 
 double TopoDataItem::getContourInterval() {
-  qDebug() << "getContourInterval()";
-  return (elevMax_ - elevMin_) / contourCount_;
+  if (!dataset_ || !dataset_->isLoaded() || contourCount_ < 1) return 0.0;
+  return (dataset_->elevMax() - dataset_->elevMin()) / contourCount_;
+}
+
+void TopoDataItem::setDataFilename(const QString newName) {
+  if (dataFilename_ == newName) return;
+  dataFilename_ = newName;
+  emit dataFilenameChanged(dataFilename_);
+}
+
+QString TopoDataItem::getDataFileName() const {
+  return dataFilename_;
 }
 
 void TopoDataItem::setPickedPoint(double *worldCoords) {
-  pointPicked_ = true;
+  pointPicked_     = true;
+  qDebug() << "setPickedPoint() " << worldCoords[0] << " " <<
+    worldCoords[1] << " " << worldCoords[2];
+  
   pickedCoords_[0] = worldCoords[0];
   pickedCoords_[1] = worldCoords[1];
   pickedCoords_[2] = worldCoords[2];
-  forceRender_ = true;
-}
-
-TopoDataReader *TopoDataItem::getDataReader() {
-  return pipeline_->topoReader_;
+  forceRender_     = true;
 }
 
 bool TopoDataItem::setMouseMode(QString mouseMode) {
   qDebug() << "setMouseMode(): " << mouseMode;
-  if (mouseMode == MousePanAndZoom) {
+  if (mouseMode == MousePanAndZoom)
     pipeline_->interactorStyle_ = pickInteractorStyle_;
-  }
-  else if (mouseMode == MouseLighting) {
+  else if (mouseMode == MouseLighting)
     pipeline_->interactorStyle_ = lightingInteractorStyle_;
-  }
-  else if (mouseMode == MouseDataSelect) {
+  else if (mouseMode == MouseDataSelect)
     pipeline_->interactorStyle_ = pointsSelectInteractorStyle_;
-  }
-  else if (mouseMode == MouseElevProfile) {
+  else if (mouseMode == MouseElevProfile)
     pipeline_->interactorStyle_ = drawInteractorStyle_;
-  }
-  else if (mouseMode == MouseTest) {
+  else if (mouseMode == MouseTest)
     pipeline_->interactorStyle_ = testStyle_;
-  }
   else {
-    qDebug() << "setMouseMode(): " << mouseMode << " not yet implemented";
+    qDebug() << "setMouseMode(): " << mouseMode << " not implemented";
     return false;
   }
-  // Swap the interactor style on the existing interactor — no rebuild.
   dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
     auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
     p->interactorStyle_->SetDefaultRenderer(p->renderer_);
@@ -784,7 +816,6 @@ bool TopoDataItem::setMouseMode(QString mouseMode) {
 }
 
 void TopoDataItem::setupLightSource() {
-  qDebug() << "setupLightSource()";
   vtkLight *light = pipeline_->lightSource_;
   light->SetColor(1.0, 1.0, 1.0);
   light->SetPosition(lightPosition_);
@@ -793,14 +824,12 @@ void TopoDataItem::setupLightSource() {
 }
 
 void TopoDataItem::setLight(bool lightsEnabled, float intensity,
-                            double x, double y, double z) {
-  qDebug() << "setLight()";
-  lightsEnabled_ = lightsEnabled;
-  lightIntensity_ = intensity;
-  lightPosition_[0] = x;
-  lightPosition_[1] = y;
-  lightPosition_[2] = z;
-
+                             double x, double y, double z) {
+  lightsEnabled_   = lightsEnabled;
+  lightIntensity_  = intensity;
+  lightPosition_[0]= x;
+  lightPosition_[1]= y;
+  lightPosition_[2]= z;
   dispatch_async([this, lightsEnabled, intensity, x, y, z]
                  (vtkRenderWindow *rw, vtkUserData ud) {
     auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
@@ -819,11 +848,15 @@ double TopoDataItem::getLightIntensity() {
   return lightIntensity_;
 }
 
-vtkPolyData *TopoDataItem::getPolyData() {
-  return pipeline_->polyData_;
+TopoDataReader *TopoDataItem::getDataReader() {
+  return dataset_ ? dataset_->reader() : nullptr;
 }
+
+vtkPolyData *TopoDataItem::getPolyData() {
+  return pipeline_ ? pipeline_->polyData_ : nullptr;
+}
+
 void TopoDataItem::resetCamera() {
-  std::cerr << "now in resetCamera()!\n";
   dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
     auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
     p->renderer_->ResetCamera();
@@ -832,15 +865,7 @@ void TopoDataItem::resetCamera() {
 }
 
 void TopoDataItem::setPBR(double roughness, double metallic) {
-  qDebug() << "setPBR(): check pipeline_ pointer";
-  if (!pipeline_) {
-    qDebug() << "setPBR(): pipeline_ is null";
-    return;
-  }
-  if (!pipeline_->surfaceActor_) {
-    qDebug() << "setPBR(): surfaceActor_ is null";
-    return;
-  }
+  if (!pipeline_ || !pipeline_->surfaceActor_) return;
   vtkProperty *prop = pipeline_->surfaceActor_->GetProperty();
   prop->SetInterpolationToPBR();
   prop->SetRoughness(roughness);
@@ -854,7 +879,7 @@ void TopoDataItem::setOrthographicView() {
   double cx = (bounds[0] + bounds[1]) / 2.0;
   double cy = (bounds[2] + bounds[3]) / 2.0;
   double cz = (bounds[4] + bounds[5]) / 2.0;
-  double cameraHeight = bounds[5] + 2000.0;
+  double cameraHeight  = bounds[5] + 2000.0;
   double parallelScale = (bounds[3] - bounds[2]) / 2.0;
   auto camera = pipeline_->renderer_->GetActiveCamera();
   camera->ParallelProjectionOn();
@@ -867,38 +892,25 @@ void TopoDataItem::setOrthographicView() {
 }
 
 bool TopoDataItem::saveSettings() {
-
-  QString appName = QCoreApplication::applicationName();
-  qDebug() << "appName = " << appName;
-  
   auto configPath = std::filesystem::path(getenv("HOME"))
-    / ".config" / appName.toStdString() / "settings.toml";
-  
-  std::cout << "in TopoDataItem::saveSettings()\n";
-
-  std::cout << "saveSettings() to " << configPath << "\n";
-
+    / ".config"
+    / QCoreApplication::applicationName().toStdString()
+    / "settings.toml";
   return TopoDataItemSettings::save(configPath, this);
 }
 
 bool TopoDataItem::loadSettings() {
-  
-  QString appName = QCoreApplication::applicationName();  
-
   auto configPath = std::filesystem::path(getenv("HOME"))
-    / ".config" / appName.toStdString()  / "settings.toml";
-
-  std::cout << "in TopoDataItem::loadSettings()\n";
-
-  std::cout << "loadSettings() from " << configPath << "\n";
-
+    / ".config"
+    / QCoreApplication::applicationName().toStdString()
+    / "settings.toml";
   return TopoDataItemSettings::load(configPath, this);
 }
 
 void TopoDataItem::foo() {
-    std::cout << "in TopoDataItem::foo()\n";
+  std::cout << "in TopoDataItem::foo()\n";
 }
 
-const char * TopoDataItem::getColormapScheme() {
+const char *TopoDataItem::getColormapScheme() {
   return TopoColorMap::schemeName(colormapScheme_);
 }
