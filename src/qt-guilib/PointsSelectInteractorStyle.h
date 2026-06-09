@@ -7,14 +7,7 @@
 
 namespace mb_system {
 
-// Edit modes
-typedef enum {
-  EraseMode,
-  RestoreMode
-
-} EditMode;
-  
-class TopoDataItem;
+  class TopoDataItem;
 
   /// User can select data points in rectangular 'rubber band' area, by
   /// left-dragging mouse.
@@ -25,6 +18,15 @@ class TopoDataItem;
     static PointsSelectInteractorStyle* New();
     vtkTypeMacro(PointsSelectInteractorStyle, vtkInteractorStyleRubberBandPick);
 
+    /// Edit modes
+    typedef enum {
+      EraseMode,
+      RestoreMode,
+      SelectOnlyMode,
+
+    } EditMode;
+  
+
     PointsSelectInteractorStyle() : MyRubberBandStyle()  {
       editMode_ = EditMode::EraseMode;
       selectedMapper_ = vtkSmartPointer<vtkDataSetMapper>::New();
@@ -33,6 +35,9 @@ class TopoDataItem;
       topoDataItem_ = nullptr;
     }
 
+    /// Set edit mode
+    void setEditMode(EditMode mode) { editMode_ = mode; }
+    
     virtual void OnLeftButtonUp() override;
 
     /// Set associated TopoDataItem
