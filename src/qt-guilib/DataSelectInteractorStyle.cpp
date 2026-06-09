@@ -86,8 +86,7 @@ void DataSelectInteractorStyle::OnLeftButtonUp() {
   // Forward events
   vtkInteractorStyleRubberBandPick::OnLeftButtonUp();    
 
-  if (CurrentMode == VTKISRBP_SELECT)
-    {
+  if (CurrentMode == VTKISRBP_SELECT) {
       vtkNew<vtkNamedColors> colors;
 
       vtkPlanes* frustum =
@@ -95,7 +94,7 @@ void DataSelectInteractorStyle::OnLeftButtonUp() {
 	->GetFrustum();
 
       vtkPolyData *polyData =
-	topoDataItem_->getPipeline()->topoReader_->GetOutput();
+	topoDataItem_->dataset()->polyData();
       
       vtkNew<vtkExtractPolyDataGeometry> extractor;
       extractor->SetInputData(polyData);
@@ -190,6 +189,10 @@ void DataSelectInteractorStyle::OnLeftButtonUp() {
 	std::cout << "Couldn't get original point Ids\n";
       }
 
-    }
+      double bounds[6];
+      extractedData->GetBounds(bounds);
+      topoDataItem_->onRegionSelected(bounds);
+      
+  }
 }
 
