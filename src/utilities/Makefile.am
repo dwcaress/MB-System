@@ -27,6 +27,7 @@ bin_PROGRAMS += mbhistogram
 bin_PROGRAMS += mbinfo
 bin_PROGRAMS += mblevitus
 bin_PROGRAMS += mblist
+bin_PROGRAMS += mbmakedatalist
 bin_PROGRAMS += mbmakeplatform
 bin_PROGRAMS += mbminirovnav
 bin_PROGRAMS += mbmosaic

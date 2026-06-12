@@ -31,13 +31,10 @@ man_MANS =  \
 	mbeditviz.1 \
 	mbextractsegy.1 \
 	mbfilter.1 \
-	mbfnv2navlab.1 \
 	mbformat.1 \
 	mbgetesf.1 \
 	mbgpstide.1 \
-	mbmesh.1 \
 	mbgrd2obj.1 \
-	mbgrd2gltf.1 \
 	mbgrdtiff.1 \
 	mbgrdviz.1 \
 	mbgrid.1 \
@@ -66,11 +63,9 @@ man_MANS =  \
 	mbm_plot.1 \
 	mbm_route2mission.1 \
 	mbm_stat.1 \
-	mbm_tmap.1 \
 	mbm_utm.1 \
 	mbm_xbt.1 \
 	mbm_xyplot.1 \
-	mbmesh.1 \
 	mbmosaic.1 \
 	mbmakedatalist.1 \
 	mbmakeplatform.1 \
@@ -78,7 +73,6 @@ man_MANS =  \
 	mbnavadjust.1 \
 	mbnavadjustmerge.1 \
 	mbnavedit.1 \
-	mbnavlab2fnv.1 \
 	mbnavlist.1 \
 	mbotps.1 \
 	mbpreprocess.1 \

@@ -713,7 +713,7 @@ int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                 %u\n", spo->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:                     %s\n", spo->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:                     %.4s\n", spo->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:                  %u\n", spo->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:                    %u\n", spo->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:               %u\n", spo->header.echoSounderID);
@@ -827,7 +827,7 @@ int mbr_kemkmall_rd_spe(int verbose, char *buffer, void *store_ptr, void *header
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                 %u\n", spe->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:                     %s\n", spe->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:                     %.4s\n", spe->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:                  %u\n", spe->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:                    %u\n", spe->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:               %u\n", spe->header.echoSounderID);
@@ -936,7 +936,7 @@ int mbr_kemkmall_rd_spd(int verbose, char *buffer, void *store_ptr, void *header
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                 %u\n", spd->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:                     %s\n", spd->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:                     %.4s\n", spd->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:                  %u\n", spd->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:                    %u\n", spd->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:               %u\n", spd->header.echoSounderID);
@@ -1101,7 +1101,7 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                %u\n", skm->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:                    %s\n", skm->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:                    %.4s\n", skm->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:                 %u\n", skm->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:                   %u\n", skm->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:              %u\n", skm->header.echoSounderID);
@@ -1359,7 +1359,7 @@ int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:             %u\n", svt->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:                 %s\n", svt->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:                 %.4s\n", svt->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:              %u\n", svt->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:                %u\n", svt->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:           %u\n", svt->header.echoSounderID);
@@ -1461,7 +1461,7 @@ int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, void *header
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:         %u\n", scl->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:             %s\n", scl->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:             %.4s\n", scl->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:          %u\n", scl->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:            %u\n", scl->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:       %u\n", scl->header.echoSounderID);
@@ -1545,20 +1545,23 @@ int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header
   // sensor data block
   mb_get_binary_float(true, &buffer[index], &(sde->sensorData.depthUsed_m));
   index += 4;
+  mb_get_binary_float(true, &buffer[index], &(sde->sensorData.depthRaw_m));
+  index += 4;
   mb_get_binary_float(true, &buffer[index], &(sde->sensorData.offset));
   index += 4;
   mb_get_binary_float(true, &buffer[index], &(sde->sensorData.scale));
   index += 4;
-  mb_get_binary_float(true, &buffer[index], &(sde->sensorData.latitude_deg));
-  index += 4;
-  mb_get_binary_float(true, &buffer[index], &(sde->sensorData.longitude_deg));
-  index += 4;
+  mb_get_binary_double(true, &buffer[index], &(sde->sensorData.latitude_deg));
+  index += 8;
+  mb_get_binary_double(true, &buffer[index], &(sde->sensorData.longitude_deg));
+  index += 8;
   memcpy(&(sde->sensorData.dataFromSensor), &buffer[index], numBytesRawSensorData);
+  index += numBytesRawSensorData;
 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", sde->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:          %s\n", sde->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:          %.4s\n", sde->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:       %u\n", sde->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:         %u\n", sde->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:    %u\n", sde->header.echoSounderID);
@@ -1571,6 +1574,7 @@ int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       padding:          %u\n", sde->cmnPart.padding);
 
     fprintf(stderr, "dbg5       depthUsed_m:      %f\n", sde->sensorData.depthUsed_m);
+    fprintf(stderr, "dbg5       depthRaw_m:       %f\n", sde->sensorData.depthRaw_m);
     fprintf(stderr, "dbg5       offset:           %f\n", sde->sensorData.offset);
     fprintf(stderr, "dbg5       scale:            %f\n", sde->sensorData.scale);
     fprintf(stderr, "dbg5       latitude_deg:     %f\n", sde->sensorData.latitude_deg);
@@ -1653,7 +1657,7 @@ int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, void *header
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", shi->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:          %s\n", shi->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:          %.4s\n", shi->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:       %u\n", shi->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:         %u\n", shi->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:    %u\n", shi->header.echoSounderID);
@@ -1756,7 +1760,7 @@ int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:            %u\n", sha->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:                %s\n", sha->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:                %.4s\n", sha->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:             %u\n", sha->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:               %u\n", sha->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:          %u\n", sha->header.echoSounderID);
@@ -2913,7 +2917,7 @@ int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                  %u\n", cpo->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:                      %s\n", cpo->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:                      %.4s\n", cpo->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:                   %u\n", cpo->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:                     %u\n", cpo->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:                %u\n", cpo->header.echoSounderID);
@@ -3107,7 +3111,7 @@ int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", iip->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:          %s\n", iip->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:          %.4s\n", iip->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:       %u\n", iip->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:         %u\n", iip->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:    %u\n", iip->header.echoSounderID);
@@ -3264,7 +3268,7 @@ int mbr_kemkmall_rd_ibe(int verbose, char *buffer, void *store_ptr, void *header
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                %u\n", ibe->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:                    %s\n", ibe->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:                    %.4s\n", ibe->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:                 %u\n", ibe->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:                   %u\n", ibe->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:              %u\n", ibe->header.echoSounderID);
@@ -3428,7 +3432,7 @@ int mbr_kemkmall_rd_ibs(int verbose, char *buffer, void *store_ptr, void *header
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                %u\n", ibs->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:                    %s\n", ibs->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:                    %.4s\n", ibs->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:                 %u\n", ibs->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:                   %u\n", ibs->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:              %u\n", ibs->header.echoSounderID);
@@ -3520,7 +3524,7 @@ int mbr_kemkmall_rd_fcf(int verbose, char *buffer, void *store_ptr, void *header
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                %u\n", fcf->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:                    %s\n", fcf->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:                    %.4s\n", fcf->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:                 %u\n", fcf->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:                   %u\n", fcf->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:              %u\n", fcf->header.echoSounderID);
@@ -3610,7 +3614,7 @@ int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:    %u\n", xmb->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:        %s\n", xmb->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:        %.4s\n", xmb->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:     %u\n", xmb->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:       %u\n", xmb->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:  %u\n", xmb->header.echoSounderID);
@@ -3755,7 +3759,7 @@ int mbr_kemkmall_rd_xmt(int verbose, char *buffer, void *store_ptr, void *header
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:    %u\n", header->numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:        %s\n", header->dgmType);
+    fprintf(stderr, "dbg5       dgmType:        %.4s\n", header->dgmType);
     fprintf(stderr, "dbg5       dgmVersion:     %u\n", header->dgmVersion);
     fprintf(stderr, "dbg5       systemID:       %u\n", header->systemID);
     fprintf(stderr, "dbg5       echoSounderID:  %u\n", header->echoSounderID);
@@ -3968,7 +3972,9 @@ int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header
   index += 4;
   mb_get_binary_int(true, &buffer[index], &xms->pixels_ss);
   index += 4;
-  for (int i=0;i<32;i++) {
+  mb_get_binary_int(true, &buffer[index], &xms->num_swaths);
+  index += 4;
+  for (int i=0;i<28;i++) {
     xms->unused[i] = buffer[index];
     index++;
   }
@@ -3980,11 +3986,17 @@ int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header
     mb_get_binary_float(true, &buffer[index], &xms->ss_alongtrack[i]);
     index += 4;
   }
+  
+  /* fix num_swaths for older data in which it was not defined */
+  if (xms->num_swaths <= 0)
+		xms->num_swaths = (store->n_mrz_read > 0)
+													 ? store->mrz[0].cmnPart.swathsPerPing
+													 : 1;
 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:    %u\n", xms->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:        %s\n", xms->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:        %.4s\n", xms->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:     %u\n", xms->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:       %u\n", xms->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:  %u\n", xms->header.echoSounderID);
@@ -3995,6 +4007,7 @@ int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       spare:          %d\n", xms->spare);
     fprintf(stderr, "dbg5       pixel_size:     %f\n", xms->pixel_size);
     fprintf(stderr, "dbg5       pixels_ss:      %d\n", xms->pixels_ss);
+    fprintf(stderr, "dbg5       num_swaths:     %d\n", xms->num_swaths);
     for (int i=0;i<32;i++)
       fprintf(stderr, "dbg5       unused[%2d]:    %u\n", i, xms->unused[i]);
     for (int i=0;i<xms->pixels_ss;i++)
@@ -5378,7 +5391,7 @@ int mbr_kemkmall_wr_header(int verbose, char **bufferptr, void *header_ptr, int 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:    %u\n", header->numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:        %s\n", header->dgmType);
+    fprintf(stderr, "dbg5       dgmType:        %.4s\n", header->dgmType);
     fprintf(stderr, "dbg5       dgmVersion:     %u\n", header->dgmVersion);
     fprintf(stderr, "dbg5       systemID:       %u\n", header->systemID);
     fprintf(stderr, "dbg5       echoSounderID:  %u\n", header->echoSounderID);
@@ -5579,7 +5592,7 @@ int mbr_kemkmall_wr_spe(int verbose, size_t *bufferalloc, char **bufferptr, void
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                 %u\n", spe->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:                     %s\n", spe->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:                     %.4s\n", spe->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:                  %u\n", spe->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:                    %u\n", spe->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:               %u\n", spe->header.echoSounderID);
@@ -5712,7 +5725,7 @@ int mbr_kemkmall_wr_spd(int verbose, size_t *bufferalloc, char **bufferptr, void
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                 %u\n", spd->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:                     %s\n", spd->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:                     %.4s\n", spd->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:                  %u\n", spd->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:                    %u\n", spd->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:               %u\n", spd->header.echoSounderID);
@@ -5835,7 +5848,7 @@ int mbr_kemkmall_wr_skm(int verbose, size_t *bufferalloc, char **bufferptr, void
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                %u\n", skm->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:                    %s\n", skm->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:                    %.4s\n", skm->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:                 %u\n", skm->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:                   %u\n", skm->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:              %u\n", skm->header.echoSounderID);
@@ -6177,7 +6190,7 @@ int mbr_kemkmall_wr_svt(int verbose, size_t *bufferalloc, char **bufferptr, void
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:              %u\n", svt->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:                  %s\n", svt->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:                  %.4s\n", svt->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:               %u\n", svt->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:                 %u\n", svt->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:            %u\n", svt->header.echoSounderID);
@@ -6309,7 +6322,7 @@ int mbr_kemkmall_wr_scl(int verbose, size_t *bufferalloc, char **bufferptr, void
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:         %u\n", scl->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:             %s\n", scl->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:             %.4s\n", scl->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:          %u\n", scl->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:            %u\n", scl->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:       %u\n", scl->header.echoSounderID);
@@ -6419,7 +6432,7 @@ int mbr_kemkmall_wr_sde(int verbose, size_t *bufferalloc, char **bufferptr, void
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", sde->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:          %s\n", sde->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:          %.4s\n", sde->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:       %u\n", sde->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:         %u\n", sde->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:    %u\n", sde->header.echoSounderID);
@@ -6432,6 +6445,7 @@ int mbr_kemkmall_wr_sde(int verbose, size_t *bufferalloc, char **bufferptr, void
     fprintf(stderr, "dbg5       padding:          %u\n", sde->cmnPart.padding);
 
     fprintf(stderr, "dbg5       depthUsed_m:      %f\n", sde->sensorData.depthUsed_m);
+    fprintf(stderr, "dbg5       depthRaw_m:       %f\n", sde->sensorData.depthUsed_m);
     fprintf(stderr, "dbg5       offset:           %f\n", sde->sensorData.offset);
     fprintf(stderr, "dbg5       scale:            %f\n", sde->sensorData.scale);
     fprintf(stderr, "dbg5       latitude_deg:     %f\n", sde->sensorData.latitude_deg);
@@ -6480,6 +6494,8 @@ int mbr_kemkmall_wr_sde(int verbose, size_t *bufferalloc, char **bufferptr, void
     /* sensor data block */
     mb_put_binary_float(true, sde->sensorData.depthUsed_m, &buffer[index]);
     index += 4;
+    mb_put_binary_float(true, sde->sensorData.depthRaw_m, &buffer[index]);
+    index += 4;
     mb_put_binary_float(true, sde->sensorData.offset, &buffer[index]);
     index += 4;
     mb_put_binary_float(true, sde->sensorData.scale, &buffer[index]);
@@ -6488,7 +6504,7 @@ int mbr_kemkmall_wr_sde(int verbose, size_t *bufferalloc, char **bufferptr, void
     index += 8;
     mb_put_binary_double(true, sde->sensorData.longitude_deg, &buffer[index]);
     index += 8;
-    memcpy(&(sde->sensorData.dataFromSensor), &buffer[index], numBytesRawSensorData);
+    memcpy(&buffer[index], &(sde->sensorData.dataFromSensor), numBytesRawSensorData);
     index += numBytesRawSensorData;
 
     /* insert closing byte count */
@@ -6538,7 +6554,7 @@ int mbr_kemkmall_wr_shi(int verbose, size_t *bufferalloc, char **bufferptr, void
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", shi->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:          %s\n", shi->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:          %.4s\n", shi->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:       %u\n", shi->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:         %u\n", shi->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:    %u\n", shi->header.echoSounderID);
@@ -6647,7 +6663,7 @@ int mbr_kemkmall_wr_sha(int verbose, size_t *bufferalloc, char **bufferptr, void
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:            %u\n", sha->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:                %s\n", sha->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:                %.4s\n", sha->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:             %u\n", sha->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:               %u\n", sha->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:          %u\n", sha->header.echoSounderID);
@@ -6820,7 +6836,7 @@ int mbr_kemkmall_wr_mrz(int verbose, size_t *bufferalloc, char **bufferptr, void
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       numBytesDgm:    %u\n", mrz->header.numBytesDgm);
-      fprintf(stderr, "dbg5       dgmType:        %s\n", mrz->header.dgmType);
+      fprintf(stderr, "dbg5       dgmType:        %.4s\n", mrz->header.dgmType);
       fprintf(stderr, "dbg5       dgmVersion:     %u\n", mrz->header.dgmVersion);
       fprintf(stderr, "dbg5       systemID:       %u\n", mrz->header.systemID);
       fprintf(stderr, "dbg5       echoSounderID:  %u\n", mrz->header.echoSounderID);
@@ -7658,7 +7674,7 @@ int mbr_kemkmall_wr_msc(int verbose, size_t *bufferalloc, char **bufferptr, void
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                  %u\n", msc->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:                      %s\n", msc->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:                      %.4s\n", msc->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:                   %u\n", msc->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:                     %u\n", msc->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:                %u\n", msc->header.echoSounderID);
@@ -7900,7 +7916,7 @@ int mbr_kemkmall_wr_che(int verbose, size_t *bufferalloc, char **bufferptr, void
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       numBytesDgm:    %u\n", che->header.numBytesDgm);
-      fprintf(stderr, "dbg5       dgmType:        %s\n", che->header.dgmType);
+      fprintf(stderr, "dbg5       dgmType:        %.4s\n", che->header.dgmType);
       fprintf(stderr, "dbg5       dgmVersion:     %u\n", che->header.dgmVersion);
       fprintf(stderr, "dbg5       systemID:       %u\n", che->header.systemID);
       fprintf(stderr, "dbg5       echoSounderID:  %u\n", che->header.echoSounderID);
@@ -8000,7 +8016,7 @@ int mbr_kemkmall_wr_iip(int verbose, size_t *bufferalloc, char **bufferptr, void
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", iip->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:          %s\n", iip->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:          %.4s\n", iip->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:       %u\n", iip->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:         %u\n", iip->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:    %u\n", iip->header.echoSounderID);
@@ -8098,7 +8114,7 @@ int mbr_kemkmall_wr_iop(int verbose, size_t *bufferalloc, char **bufferptr, void
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", iop->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:          %s\n", iop->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:          %.4s\n", iop->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:       %u\n", iop->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:         %u\n", iop->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:    %u\n", iop->header.echoSounderID);
@@ -8194,7 +8210,7 @@ int mbr_kemkmall_wr_ibe(int verbose, size_t *bufferalloc, char **bufferptr, void
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", ibe->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:          %s\n", ibe->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:          %.4s\n", ibe->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:       %u\n", ibe->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:         %u\n", ibe->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:    %u\n", ibe->header.echoSounderID);
@@ -8294,7 +8310,7 @@ int mbr_kemkmall_wr_ibr(int verbose, size_t *bufferalloc, char **bufferptr, void
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", ibr->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:          %s\n", ibr->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:          %.4s\n", ibr->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:       %u\n", ibr->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:         %u\n", ibr->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:    %u\n", ibr->header.echoSounderID);
@@ -8394,7 +8410,7 @@ int mbr_kemkmall_wr_ibs(int verbose, size_t *bufferalloc, char **bufferptr, void
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", ibs->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:          %s\n", ibs->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:          %.4s\n", ibs->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:       %u\n", ibs->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:         %u\n", ibs->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:    %u\n", ibs->header.echoSounderID);
@@ -8526,7 +8542,7 @@ int mbr_kemkmall_wr_fcf(int verbose, size_t *bufferalloc, char **bufferptr, void
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       numBytesDgm:                %u\n", fcf->header.numBytesDgm);
-      fprintf(stderr, "dbg5       dgmType:                    %s\n", fcf->header.dgmType);
+      fprintf(stderr, "dbg5       dgmType:                    %.4s\n", fcf->header.dgmType);
       fprintf(stderr, "dbg5       dgmVersion:                 %u\n", fcf->header.dgmVersion);
       fprintf(stderr, "dbg5       systemID:                   %u\n", fcf->header.systemID);
       fprintf(stderr, "dbg5       echoSounderID:              %u\n", fcf->header.echoSounderID);
@@ -8632,7 +8648,7 @@ int mbr_kemkmall_wr_xmb(int verbose, size_t *bufferalloc, char **bufferptr, void
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:             %u\n", xmb->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:                 %s\n", xmb->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:                 %.4s\n", xmb->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:              %u\n", xmb->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:                %u\n", xmb->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:           %u\n", xmb->header.echoSounderID);
@@ -8735,7 +8751,7 @@ int mbr_kemkmall_wr_xmc(int verbose, size_t *bufferalloc, char **bufferptr, void
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:    %u\n", xmc->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:        %s\n", xmc->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:        %.4s\n", xmc->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:     %u\n", xmc->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:       %u\n", xmc->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:  %u\n", xmc->header.echoSounderID);
@@ -8860,7 +8876,7 @@ int mbr_kemkmall_wr_xmt(int verbose, size_t *bufferalloc, char **bufferptr, void
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       numBytesDgm:    %u\n", xmt->header.numBytesDgm);
-      fprintf(stderr, "dbg5       dgmType:        %s\n", xmt->header.dgmType);
+      fprintf(stderr, "dbg5       dgmType:        %.4s\n", xmt->header.dgmType);
       fprintf(stderr, "dbg5       dgmVersion:     %u\n", xmt->header.dgmVersion);
       fprintf(stderr, "dbg5       systemID:       %u\n", xmt->header.systemID);
       fprintf(stderr, "dbg5       echoSounderID:  %u\n", xmt->header.echoSounderID);
@@ -9043,7 +9059,7 @@ int mbr_kemkmall_wr_xms(int verbose, size_t *bufferalloc, char **bufferptr, void
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:    %u\n", xms->header.numBytesDgm);
-    fprintf(stderr, "dbg5       dgmType:        %s\n", xms->header.dgmType);
+    fprintf(stderr, "dbg5       dgmType:        %.4s\n", xms->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:     %u\n", xms->header.dgmVersion);
     fprintf(stderr, "dbg5       systemID:       %u\n", xms->header.systemID);
     fprintf(stderr, "dbg5       echoSounderID:  %u\n", xms->header.echoSounderID);
@@ -9054,6 +9070,7 @@ int mbr_kemkmall_wr_xms(int verbose, size_t *bufferalloc, char **bufferptr, void
     fprintf(stderr, "dbg5       spare:          %d\n", xms->spare);
     fprintf(stderr, "dbg5       pixel_size:     %f\n", xms->pixel_size);
     fprintf(stderr, "dbg5       pixels_ss:      %d\n", xms->pixels_ss);
+    fprintf(stderr, "dbg5       num_swaths:     %d\n", xms->num_swaths);
     for (int i=0;i<32;i++)
       fprintf(stderr, "dbg5       unused[%2d]:    %u\n", i, xms->unused[i]);
     for (int i=0;i<xms->pixels_ss;i++)
@@ -9094,7 +9111,9 @@ int mbr_kemkmall_wr_xms(int verbose, size_t *bufferalloc, char **bufferptr, void
     index += 4;
     mb_put_binary_int(true, xms->pixels_ss, &buffer[index]);
     index += 4;
-    for (int i=0;i<32;i++) {
+    mb_put_binary_int(true, xms->num_swaths, &buffer[index]);
+    index += 4;
+    for (int i=0;i<28;i++) {
       buffer[index] = xms->unused[i];
       index++;
     }

@@ -117,8 +117,11 @@ The \fBmbprocess\fP commands found in parameter files are:
         sets navigation file path [no default]
    NAVFORMAT constant
         sets navigation file format [9]
- 	see below for documentation of the
- 	supported navigation formats
+ 	see below (NAVIGATION FORMATS section) for
+ 	documentation of the supported navigation formats;
+ 	formats 1-10 are ASCII text, format 11 is RVDAS
+ 	binary-like text, and format 12 is Kongsberg
+ 	Navlab binary
    NAVHEADING boolean
         sets heading to be merged from navigation file
         \- note: heading merged from navigation before
@@ -229,12 +232,18 @@ The \fBmbprocess\fP commands found in parameter files are:
         sets attitude file path
     ATTITUDEFORMAT constant
         sets attitude file format [1]
-        \- attitude files can be in one of four ASCII
-          table formats
+        \- attitude files can be in one of several formats:
           1: format is <time_d roll pitch heave>
           2: format is <yr mon day hour min sec roll pitch heave>
           3: format is <yr jday hour min sec roll pitch heave>
           4: format is <yr jday daymin sec roll pitch heave>
+          9: format is full MBPRONAV (*.nve) format with
+             roll, pitch, and heave fields
+          11: RVDAS $SPRINT format; roll and pitch extracted;
+              heave set to zero
+          12: Kongsberg Navlab binary (navlab_smooth.bin);
+              roll from field 7, pitch from field 8;
+              heave set to zero (not available)
         \- time_d = decimal seconds since 1/1/1970
         \- daymin = decimal minutes start of day
         \- roll = positive starboard up, degrees
@@ -254,12 +263,17 @@ The \fBmbprocess\fP commands found in parameter files are:
         sets sonardepth file path
     SONARDEPTHFORMAT constant
         sets sonardepth file format [1]
-        \- sonardepth files can be in one of four ASCII
-          table formats
+        \- sonardepth files can be in one of several formats:
           1: format is <time_d sonardepth>
           2: format is <yr mon day hour min sec sonardepth>
           3: format is <yr jday hour min sec sonardepth>
           4: format is <yr jday daymin sec sonardepth>
+          9: format is full MBPRONAV (*.nve) format;
+             sonardepth from the sensordepth field
+          11: RVDAS $SPRINT format; depth extracted from
+              the depth field of the $SPRINT sentence
+          12: Kongsberg Navlab binary (navlab_smooth.bin);
+              sensordepth from field 3 (meters, positive down)
         \- time_d = decimal seconds since 1/1/1970
         \- daymin = decimal minutes start of day
         \- sonardepth = sonar depth positive down, meters
@@ -919,6 +933,8 @@ include the following:
  	         8              Simrad 90 Nav
  	         9              MBPRONAV (*.nve Files)
  	         10             R2RNAV (*_hires.r2rnav Files)
+ 	         11             RVDAS ($SPRINT sentences)
+ 	         12             Kongsberg Navlab Binary (navlab_smooth.bin)
 
 Format 1 (Simple Decimal Time):
  	\- text
@@ -1073,6 +1089,53 @@ Format 10 (R2RNAV (*_hires.r2rnav Files)):
   	\- n: number of GPS satellites
   	\- d: GPS dilution
  	\- h: GPS antenna height (m)
+
+Format 11 (RVDAS ($SPRINT sentences)):
+ 	\- text
+ 	\- fields separated by commas, one record per line
+ 	\- each line contains the following fields:
+ 		yyyy\-mm\-ddThh:mm:ss.sssZ,$SPRINT,roll,pitch,heading,
+ 		attitude_status,lat,lon,position_status,vel_fwd,vel_stbd,
+ 		vel_down,altitude,altitude_status,depth,depth_status
+ 	\- yyyy\-mm\-ddThh:mm:ss.sssZ: ISO 8601 UTC timestamp
+ 	\- roll: decimal roll (deg, positive starboard up)
+ 	\- pitch: decimal pitch (deg, positive bow up)
+ 	\- heading: decimal heading (deg, 0\-360 clockwise from north)
+ 	\- attitude_status: integer quality flag
+ 	\- lat: decimal latitude (deg, positive north)
+ 	\- lon: decimal longitude (deg, positive east)
+ 	\- position_status: integer quality flag
+ 	\- vel_fwd: forward velocity (m/s)
+ 	\- vel_stbd: starboard velocity (m/s)
+ 	\- vel_down: downward velocity (m/s)
+ 	\- altitude: altitude above seafloor (m)
+ 	\- altitude_status: integer quality flag
+ 	\- depth: sensor depth (m, positive down)
+ 	\- depth_status: integer quality flag
+
+Format 12 (Kongsberg Navlab Binary (navlab_smooth.bin)):
+ 	\- binary
+ 	\- no file header
+ 	\- each record consists of exactly 21 IEEE 754 double\-precision
+ 	  (64\-bit) floating\-point values in little\-endian byte order
+ 	\- record size: 168 bytes (21 x 8 bytes)
+ 	\- typically sampled at 100 Hz (10 ms time steps)
+ 	\- output of the Kongsberg Navlab post\-processing software,
+ 	  which computes a smoothed navigation and attitude solution
+ 	  for Kongsberg Hugin AUVs
+ 	\- fields used by mbprocess:
+ 		field  0: time_d (decimal seconds since 1970 Jan 1 00:00:00.00)
+ 		field  1: latitude (decimal degrees, positive north)
+ 		field  2: longitude (decimal degrees, positive east)
+ 		field  3: depth (m, positive down); used as sensor depth
+ 		field  6: heading (deg, 0\-360, clockwise from north)
+ 		field  7: roll (deg, positive starboard up)
+ 		field  8: pitch (deg, positive bow up)
+ 	\- speed is not stored; set to zero when used as nav source
+ 	\- heave is not stored; set to zero when used as attitude source
+ 	\- NAVHEADING, NAVATTITUDE flags are supported with this format
+ 	\- the same file can be specified for NAVFILE, ATTITUDEFILE,
+ 	  and SONARDEPTHFILE simultaneously
 
 .SH EXAMPLES
 Suppose the user has a Simrad EM120 data file called
