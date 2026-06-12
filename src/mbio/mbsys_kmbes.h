@@ -204,7 +204,7 @@
 #define MBSYS_KMBES_SPE_VAR_OFFSET 68
 #define MBSYS_KMBES_SPD_VAR_OFFSET 116
 #define MBSYS_KMBES_SCL_VAR_OFFSET 36
-#define MBSYS_KMBES_SDE_VAR_OFFSET 40
+#define MBSYS_KMBES_SDE_VAR_OFFSET 64
 #define MBSYS_KMBES_SHI_VAR_OFFSET 40
 #define MBSYS_KMBES_CPO_VAR_OFFSET 72
 #define MBSYS_KMBES_IIP_VAR_OFFSET 30
@@ -741,6 +741,7 @@ struct mbsys_kmbes_sde_data_from_sensor {
     /* Part of depth datagram giving depth as used, offsets, scale factor and data as
      * received from sensor (uncorrected). */
     float depthUsed_m;      /* Depth as used. Corrected with installation parameters. Unit meter. */
+    float depthRaw_m;       /* Uncorrected Depth. Unit meter. */
     float offset;           /* Offset used measuring this sample. */
     float scale;            /* Scaling factor for depth. */
     double latitude_deg;    /* Latitude in degrees. Negative if southern hemisphere. Position extracted from the
@@ -1608,7 +1609,8 @@ struct mbsys_kmbes_xms {
     unsigned short spare;
     float pixel_size;                                  /* Pseudosidescan pixel width (meters) */
     int pixels_ss;                                     /* Number of pseudosidescan pixels */
-    mb_u_char unused[32];
+    int num_swaths;            /* NEW: 1 for single swath, 2 for dual swath */
+    mb_u_char unused[28];      /* reduced from 32 to keep struct size consistent */
     float ss[MBSYS_KMBES_MAX_PIXELS];           /* the processed sidescan values ordered port to starboard */
     float ss_alongtrack[MBSYS_KMBES_MAX_PIXELS]; /* the processed sidescan alongtrack distances (meters) */
 };

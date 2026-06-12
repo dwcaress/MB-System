@@ -1451,6 +1451,13 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 				ping->png_beamflag[i] = MB_FLAG_NULL;
 				ping->png_raw_rxdetection[i] = ping->png_raw_rxdetection[i] | 128;
 			}
+			else if (store->sonar == MBSYS_SIMRAD3_HISAS) {
+				if ((ping->png_detection[i] & 128) == 128) {
+					ping->png_beamflag[i] = MB_FLAG_NULL;
+				} else {
+					ping->png_beamflag[i] = MB_FLAG_NONE;
+				}
+			}
 			else if ((detection_mask & 128) == 128) {
 				if ((detection_mask & 15) == 0) {
 					ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
@@ -1637,6 +1644,9 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 				break;
 			case MBSYS_SIMRAD3_EM1000:
 				strcpy(multibeam_model, "EM1000");
+				break;
+			case MBSYS_SIMRAD3_HISAS:
+				strcpy(multibeam_model, "HISAS");
 				break;
 			default:
 				sprintf(multibeam_model, "Unknown sonar model %d", store->sonar);

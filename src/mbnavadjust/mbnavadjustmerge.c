@@ -1704,6 +1704,7 @@ int main(int argc, char **argv) {
     project_output.num_files_alloc = 0;
     project_output.files = NULL;
     project_output.num_surveys = project_inputbase.num_surveys;
+    project_output.num_blocks = project_inputbase.num_blocks;
     project_output.num_snavs = project_inputbase.num_snavs;
     project_output.num_pings = project_inputbase.num_pings;
     project_output.num_beams = project_inputbase.num_beams;
@@ -1953,7 +1954,8 @@ int main(int argc, char **argv) {
     for (int i = 0; i < project_inputadd.num_files && status == MB_SUCCESS; i++) {
       const int j = project_output.num_files + i;
       project_output.files[j].id += project_output.num_files;
-      project_output.files[j].block += project_output.num_surveys;
+      project_output.files[j].block += project_output.num_blocks;
+      project_output.files[j].survey += project_output.num_surveys;
 
       /* allocate and then copy the sections in this file */
       project_output.files[j].sections = NULL;
@@ -2002,8 +2004,8 @@ int main(int argc, char **argv) {
         project_output.crossings[j].file_id_1 = project_inputadd.crossings[i].file_id_1 + project_output.num_files;
         project_output.crossings[j].file_id_2 = project_inputadd.crossings[i].file_id_2 + project_output.num_files;
         for (int k = 0; k < project_output.crossings[j].num_ties; k++) {
-          project_output.crossings[j].ties[k].block_1 += project_output.num_surveys;
-          project_output.crossings[j].ties[k].block_2 += project_output.num_surveys;
+          project_output.crossings[j].ties[k].block_1 += project_output.num_blocks;
+          project_output.crossings[j].ties[k].block_2 += project_output.num_blocks;
         }
       }
     }
@@ -2066,7 +2068,7 @@ int main(int argc, char **argv) {
         sprintf(dstfile, "%s/nvs_%4.4d_%4.4d.mb71.tri", project_output.datadir, k, j);
         copy_status = mb_copyfile(verbose, srcfile, dstfile, &copy_error);
         if (copy_status == MB_SUCCESS) {
-		  num_tri_copied++;
+		  		num_tri_copied++;
         }
       }
     }
@@ -2095,6 +2097,7 @@ int main(int argc, char **argv) {
     /* update all of the global counters */
     project_output.num_files += project_inputadd.num_files;
     project_output.num_surveys += project_inputadd.num_surveys;
+    project_output.num_blocks += project_inputadd.num_blocks;
     project_output.num_snavs += project_inputadd.num_snavs;
     project_output.num_pings += project_inputadd.num_pings;
     project_output.num_beams += project_inputadd.num_beams;

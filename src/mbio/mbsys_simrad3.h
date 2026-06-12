@@ -32,7 +32,7 @@
  *      MBF_EM12IFRM : MBIO ID 53 - IFREMER EM12S and EM12D
  *      MBF_EM12DARW : MBIO ID 54 - NERC EM12S
  *                   : MBIO ID 55 - aliased to 51
- *    MBSYS_SIMRAD3 formats (code in mbsys_simrad2.c and mbsys_simrad2.h):
+ *    MBSYS_SIMRAD2 formats (code in mbsys_simrad2.c and mbsys_simrad2.h):
  *      MBF_EM300RAW : MBIO ID 56 - Vendor EM3000, EM300, EM120
  *      MBF_EM300MBA : MBIO ID 57 - MBARI EM3000, EM300, EM120 for processing
  *    MBSYS_SIMRAD3 formats (code in mbsys_simrad3.c and mbsys_simrad3.h):
@@ -219,6 +219,8 @@
 #define MBSYS_SIMRAD3_EM100 9904
 #define MBSYS_SIMRAD3_EM1000 9905
 
+#define MBSYS_SIMRAD3_HISAS 11034
+
 /* number of ping structures available to store data */
 #define MBSYS_SIMRAD3_NUM_PING_STRUCTURES 4
 
@@ -292,7 +294,9 @@
 #define EM3_WATERCOLUMN 0x026B
 #define EM3_NETATTITUDE 0x026E
 #define EM3_REMOTE 0x0270
+#define EM3_0x0272 0x0272
 #define EM3_SSP 0x0273
+#define EM3_0x027B 0x027B
 #define EM3_BATH_MBA 0x02E1
 #define EM3_SS_MBA 0x02E2
 #define EM3_BATH2_MBA 0x02E3
@@ -332,7 +336,9 @@
 #define EM3_ID_WATERCOLUMN 0x6B
 #define EM3_ID_NETATTITUDE 0x6E
 #define EM3_ID_REMOTE 0x70
+#define EM3_ID_0x72 0x72
 #define EM3_ID_SSP 0x73
+#define EM3_ID_0x7B 0x7B
 #define EM3_ID_BATH_MBA 0xE1
 #define EM3_ID_SS_MBA 0xE2
 #define EM3_ID_BATH2_MBA 0xE3
@@ -542,7 +548,9 @@ struct mbsys_simrad3_ping_struct {
 	        3: Rejected candidate
 	        4: No detection data is available for this beam (all parameters
 	            are set to zero)
-	        5-7: Future use
+	        5-7: Future use 
+	        			(though in HISAS bathymetry data having bit 7 set so that
+	        			png_detection == 128 indicates an invalid sounding)
 	    The invalid range has been used to fill in amplitude samples in
 	    the seabed image datagram. */
 	int png_clean[MBSYS_SIMRAD3_MAXBEAMS];

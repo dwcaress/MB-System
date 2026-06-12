@@ -1,0 +1,189 @@
+.TH mbnavlab2fnv 1 "2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbnavlab2fnv\fP \- converts a Kongsberg Navlab smoothed navigation binary
+file to an MB-System fast navigation (fnv) text file.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbnavlab2fnv\fP [\fB\-I\fP\fIfile\fP] [\fB\-O\fP\fIfile\fP] [\fB\-V\fP] [\fB\-H\fP]
+.br
+\fBmbnavlab2fnv\fP [\fB\-\-input\fP=\fIfile\fP] [\fB\-\-output\fP=\fIfile\fP]
+[\fB\-\-verbose\fP] [\fB\-\-help\fP]
+
+.SH DESCRIPTION
+\fBmbnavlab2fnv\fP converts a Kongsberg Navlab smoothed navigation binary
+file (typically named \fInavlab_smooth.bin\fP) to an MB-System fast
+navigation (fnv) ASCII text file.
+
+Kongsberg Navlab is a post-processing software package that computes a
+smoothed navigation and attitude solution for Kongsberg Hugin autonomous
+underwater vehicles (AUVs). The output binary file contains a time series
+sampled at 100 Hz (10 ms intervals) with no file header. Each record
+consists of 21 IEEE 754 double-precision (64-bit) floating-point values
+stored in little-endian byte order (record size: 168 bytes). The fields
+extracted by \fBmbnavlab2fnv\fP are:
+
+.nf
+  field  0: time (Unix epoch seconds)
+  field  1: latitude (decimal degrees, positive north)
+  field  2: longitude (decimal degrees, positive east)
+  field  3: depth (meters, positive down) \- used as draft
+  field  6: heading (degrees, 0\-360, clockwise from north)
+  field  7: roll (degrees, positive starboard up)
+  field  8: pitch (degrees, positive bow up)
+  field 10: speed through water (m/s)
+.fi
+
+Heave is not stored in the navlab_smooth.bin format and is written as
+0.0 in the fnv output.
+
+The fnv format is a tab-separated ASCII text file. The first line is a
+comment beginning with \fB##\fP that names the columns. Each subsequent
+data line contains the following tab-separated fields:
+
+.nf
+  yyyy mm dd hh mm ss.ssssss
+  epoch_seconds
+  longitude (deg)
+  latitude (deg)
+  heading (deg)
+  speed (km/hr)
+  draft (m)
+  roll (deg)
+  pitch (deg)
+  heave (m)
+.fi
+
+The date and time in the first field are space-delimited within their
+tab field. Speed is converted from m/s to km/hr. The optional port and
+starboard swath edge columns present in some fnv files are not written
+by \fBmbnavlab2fnv\fP as no swath geometry is available from the
+navlab_smooth.bin format.
+
+If no input file is specified, \fBmbnavlab2fnv\fP reads from standard
+input. If no output file is specified, it writes to standard output.
+Bytes are automatically swapped on big-endian host architectures so
+that the output is always correct on any platform.
+
+Records with retrograde (non-increasing) timestamps are silently skipped
+unless verbose mode is active.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+
+.SH OPTIONS
+.TP
+.B \-H
+.TP
+.B \-\-help
+Prints the program name, usage, and a description of the navlab_smooth.bin
+field layout, then exits.
+.TP
+.B \-V
+.TP
+.B \-\-verbose
+Increases the verbosity of \fBmbnavlab2fnv\fP. With this option the
+program prints the input and output file names to standard error when
+they are opened, reports any skipped records with their timestamps,
+and prints a final summary of the number of records read and written.
+.TP
+.B \-I \fIfile\fP
+.TP
+.B \-\-input=\fIfile\fP
+Sets the path of the input Kongsberg Navlab binary file. If this option
+is not given, the program reads from standard input.
+.TP
+.B \-O \fIfile\fP
+.TP
+.B \-\-output=\fIfile\fP
+Sets the path of the output fnv file. If this option is not given,
+the program writes to standard output.
+
+.SH NAVLAB BINARY FORMAT
+The navlab_smooth.bin format has the following properties:
+
+.RS
+.IP \(bu 2
+No file header of any kind.
+.IP \(bu 2
+Each record is exactly 168 bytes: 21 values \(mu 8 bytes (float64).
+.IP \(bu 2
+All values are IEEE 754 double-precision floating point,
+little-endian byte order.
+.IP \(bu 2
+Nominal sample rate: 100 Hz (10 ms steps).
+.IP \(bu 2
+The complete field inventory is:
+.RE
+
+.nf
+  field  0: time_d      \- Unix epoch seconds
+  field  1: latitude    \- decimal degrees, positive north
+  field  2: longitude   \- decimal degrees, positive east
+  field  3: depth       \- meters, positive down
+  field  4: unknown     \- (not used)
+  field  5: unknown     \- (not used)
+  field  6: heading     \- degrees, 0\-360, clockwise from north
+  field  7: roll        \- degrees, positive starboard up
+  field  8: pitch       \- degrees, positive bow up
+  field  9: vert_vel    \- vertical velocity, m/s, positive down
+  field 10: speed       \- speed through water, m/s
+  field 11: speed_2     \- speed through water, m/s (alternate source)
+  field 12: unknown     \- (not used)
+  field 13: unknown     \- (not used)
+  field 14: std_lat     \- position uncertainty, latitude (deg)
+  field 15: std_lon     \- position uncertainty, longitude (deg)
+  field 16: std_hdg     \- heading uncertainty (deg)
+  field 17: std_17      \- velocity/attitude uncertainty
+  field 18: std_18      \- velocity/attitude uncertainty
+  field 19: std_19      \- velocity/attitude uncertainty
+  field 20: cov_20      \- Kalman covariance cross-term
+.fi
+
+.SH EXAMPLES
+Convert a navlab binary file to an fnv file:
+.PP
+.nf
+    mbnavlab2fnv \-I navlab_smooth.bin \-O mission.fnv
+.fi
+.PP
+Use standard input and output (e.g. within a pipeline):
+.PP
+.nf
+    cat navlab_smooth.bin | mbnavlab2fnv > mission.fnv
+.fi
+.PP
+Convert with verbose progress reporting:
+.PP
+.nf
+    mbnavlab2fnv \-\-verbose \-\-input=navlab_smooth.bin \-\-output=mission.fnv
+.fi
+.PP
+Use the fnv output to supply navigation, attitude, sensor depth, and
+heading to \fBmbpreprocess\fP for preprocessing Kongsberg KMALL sonar data:
+.PP
+.nf
+    mbnavlab2fnv \-I navlab_smooth.bin \-O mission.fnv
+    mbpreprocess \-\-format=261 \-\-input=datalist.mb\-1 \\
+        \-\-nav\-file=mission.fnv \-\-nav\-file\-format=9 \\
+        \-\-sensordepth\-file=mission.fnv \-\-sensordepth\-file\-format=9 \\
+        \-\-attitude\-file=mission.fnv \-\-attitude\-file\-format=9 \\
+        \-\-heading\-file=mission.fnv \-\-heading\-file\-format=9
+.fi
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbfnv2navlab\fP(1), \fBmbpreprocess\fP(1), \fBmbprocess\fP(1)
+
+.SH BUGS
+Heave is not available in the navlab_smooth.bin format and is always
+written as 0.0 in the fnv output. Applications that require heave
+(e.g. for motion correction of multibeam bathymetry) should obtain
+heave from the raw sonar data stream instead.
+
+The optional port and starboard swath edge columns in the fnv format
+are not written by \fBmbnavlab2fnv\fP; they are only meaningful in fnv
+files generated from processed swath data.

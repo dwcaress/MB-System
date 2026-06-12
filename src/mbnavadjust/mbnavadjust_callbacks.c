@@ -2037,7 +2037,6 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
       XmListSetPos(list_data, MAX(iselect + 1 - 5, 1));
     }
   }
-fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
 
   XtVaSetValues(toggleButton_showallsurveys, XmNsensitive, True, NULL);
   XtVaSetValues(toggleButton_showselectedsurvey, XmNsensitive, True, NULL);

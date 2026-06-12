@@ -2508,8 +2508,13 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr) {
           /* read the data from the buffer */
           if (route_version_major > 1) {
             nget = sscanf(buffer, "%lf,%lf,%lf,%d", &lon, &lat, &topo, &waypoint);
-          } else {
+          } else if (route_version_major == 1) {
             nget = sscanf(buffer, "%lf %lf %lf %d", &lon, &lat, &topo, &waypoint);
+          } else {
+            nget = sscanf(buffer, "%lf,%lf,%lf,%d", &lon, &lat, &topo, &waypoint);
+            if (nget < 2) {
+            	nget = sscanf(buffer, "%lf %lf %lf %d", &lon, &lat, &topo, &waypoint);
+            }
           }
           if ((rawroutefile && nget >= 2) ||
               (!rawroutefile && nget >= 3 && waypoint > MBV_ROUTE_WAYPOINT_NONE))

@@ -222,9 +222,9 @@ int main(int argc, char **argv) {
 				  sscanf(optarg, "%lf/%lf", &tidelon, &tidelat);
 				}
 				else if (strcmp("tide-format", options[option_index].name) == 0) {
-          sscanf(optarg, "%d", &tidestation_format);
-          if (tidestation_format < 1 || tidestation_format > 4)
-            tidestation_format = 2;
+          sscanf(optarg, "%d", &tideformat);
+          if (tideformat < 1 || tideformat > 4)
+            tideformat = 2;
 				}
 				else if (strcmp("interval", options[option_index].name) == 0) {
           sscanf(optarg, "%lf", &interval);
@@ -273,8 +273,8 @@ int main(int argc, char **argv) {
 			case 'A':
 			case 'a':
 				sscanf(optarg, "%d", &tideformat);
-				if (tideformat != 2)
-					tideformat = 1;
+        if (tideformat < 1 || tideformat > 4)
+          tideformat = 2;
 				break;
 			case 'B':
 			case 'b':

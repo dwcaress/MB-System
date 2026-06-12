@@ -339,13 +339,6 @@ value are:
       mmmmmmm is minutes * 100000, and N is 'N' for north and 'S' for south latitude.
       The longitude is given as dddmmmmmmmE where ddd are integer degrees,
       mmmmmmm is minutes * 100000, and E is 'E' for east and 'W' for west longitude.
-
-
-      day_minute values are integers,
-      the second value is decimal, and longitude and latitude are in decimal
-      degrees. The longitude is given as
-      Edddmmmmmmand where E is 'E' for east and 'W' for west, ddd are integer
-      degrees, and mmmmm is minutes * 10000.
 .br
    9: ASCCI text file with white-space delimited lines of the form:
         yr mon day hour min sec time_d lon lat heading speed sensordepth
@@ -364,8 +357,25 @@ value are:
       of the form:
          yyyy-mm-ddThh:mm:ss.sssZ lon lat quality nsat dilution height
       where the lon and lat fields are in decimal degrees with south latitudes
-      and west longitudes negative, and the last four quantities relating to
+      and west longitudes negative, and the last four quantities relate to
       GPS fix quality.
+.br
+   11: RVDAS (Research Vessel Data Acquisition System) navigation format with
+      ASCII text lines of the form:
+        yyyy-mm-ddThh:mm:ss.sssZ,$SPRINT,roll,pitch,heading,attitude_status,lat,lon,
+        position_status,vel_fwd,vel_stbd,vel_down,altitude,altitude_status,depth,depth_status
+      where the date-time string precedes the $SPRINT sentence containing roll,
+      pitch, heading, latitude, longitude, velocity components, altitude, and depth.
+      All angular values are in decimal degrees and velocities are in meters per second.
+.br
+   12: Kongsberg Navlab smoothed navigation binary file (typically named
+      navlab_smooth.bin). Records consist of 21 IEEE 754 double-precision
+      floating-point values in little-endian byte order with no file header.
+      The fields used for navigation are:
+        field 0: time in decimal epoch seconds (seconds since 1970)
+        field 1: latitude in decimal degrees (positive north)
+        field 2: longitude in decimal degrees (positive east)
+      Speed is not stored in this format and is set to zero.
 .TP
 .B \-\-nav-async\fP=\fIrecord_kind\fP
 .br
@@ -437,6 +447,16 @@ value are:
       South latitudes are negative. Longitude may be defined on either the
       -180.0 to +180.0 or 0.0 to 360.0 domains. If present, roll and pitch are in
       decimal degrees and heave is in meters.
+.br
+   11: RVDAS (Research Vessel Data Acquisition System) navigation format (same
+      as nav format 11). The sensor depth is extracted from the depth field of
+      the $SPRINT sentence.
+.br
+   12: Kongsberg Navlab smoothed navigation binary file (typically named
+      navlab_smooth.bin). Records consist of 21 IEEE 754 double-precision
+      floating-point values in little-endian byte order with no file header.
+      Sensor depth is taken from field 3 (depth in meters, positive down).
+      Field 0 provides the time in decimal epoch seconds (seconds since 1970).
 .TP
 .B --sensordepth-async=\fIRECORDTYPE\fP
 Specifies the type of data records from which sensor depth values
@@ -504,10 +524,20 @@ value are:
       month, min is the minute, second is the decimal seconds, time_d is time in
       decimal epoch seconds (seconds since 1970), lon is the longitude
       in decimal degrees, lat is the latitude in decimal degrees, heading is in
-      decimal degrees, speed is in km/hour, and heading is in meters.
+      decimal degrees, speed is in km/hour, and sensordepth is in meters.
       South latitudes are negative. Longitude may be defined on either the
       -180.0 to +180.0 or 0.0 to 360.0 domains. If present, roll and pitch are in
       decimal degrees and heave is in meters.
+.br
+   11: RVDAS (Research Vessel Data Acquisition System) navigation format (same
+      as nav format 11). The heading is extracted from the heading field of
+      the $SPRINT sentence.
+.br
+   12: Kongsberg Navlab smoothed navigation binary file (typically named
+      navlab_smooth.bin). Records consist of 21 IEEE 754 double-precision
+      floating-point values in little-endian byte order with no file header.
+      Heading is taken from field 6 (degrees, 0 to 360, clockwise from north).
+      Field 0 provides the time in decimal epoch seconds (seconds since 1970).
 .TP
 .B --heading-async=\fIRECORDTYPE\fP
 Specifies the type of data records from which heading values
@@ -602,23 +632,23 @@ value are:
 .br
    1: ASCCI text file with lines of the form:
         time_d roll pitch heave
-      where time_d is time in decimal epoch seconds (seconds since 1970), and
-      sensordepth values are in meters positive down.
+      where time_d is time in decimal epoch seconds (seconds since 1970),
+      roll and pitch are in decimal degrees, and heave is in meters.
 .br
    2: ASCCI text file with lines of the form:
         year month day hour minute second roll pitch heave
       where year, month, day, hour, and minute values are integers, the second
-      value is decimal, and sensordepth values are in meters positive down.
+      value is decimal, roll and pitch are in decimal degrees, and heave is in meters.
 .br
    3: ASCCI text file with lines of the form:
         year julian_day hour minute second roll pitch heave
       where year, julian_day, hour, and minute values are integers, the second
-      value is decimal, and sensordepth values are in meters positive down.
+      value is decimal, roll and pitch are in decimal degrees, and heave is in meters.
 .br
    4: ASCCI text file with lines of the form:
         year julian_day day_minute second roll pitch heave
       where year, julian_day, and day_minute values are integers, the second
-      value is decimal, and sensordepth values are in meters positive down.
+      value is decimal, roll and pitch are in decimal degrees, and heave is in meters.
 .br
    9: ASCCI text file with white-space delimited lines of the form:
         yr mon day hour min sec time_d lon lat heading speed sensordepth roll pitch heave
@@ -630,6 +660,18 @@ value are:
       South latitudes are negative. Longitude may be defined on either the
       -180.0 to +180.0 or 0.0 to 360.0 domains. Roll and pitch are in
       decimal degrees and heave is in meters.
+.br
+   11: RVDAS (Research Vessel Data Acquisition System) navigation format (same
+      as nav format 11). Roll and pitch are extracted from the $SPRINT sentence;
+      heave is set to zero.
+.br
+   12: Kongsberg Navlab smoothed navigation binary file (typically named
+      navlab_smooth.bin). Records consist of 21 IEEE 754 double-precision
+      floating-point values in little-endian byte order with no file header.
+      Roll is taken from field 7 (degrees, positive starboard up) and pitch
+      from field 8 (degrees, positive bow up). Heave is not available in this
+      format and is set to zero. Field 0 provides the time in decimal epoch
+      seconds (seconds since 1970).
 .TP
 .B --attitude-async=\fIRECORDTYPE\fP
 Specifies the type of data records from which attitude values
@@ -645,7 +687,7 @@ are derived (as defined with \fB\-\-attitude-file-format\fP). Options for the
     MB_DATA_ATTITUDE1: 56 (attitude data from attitude system 1)
     MB_DATA_ATTITUDE2: 57 (attitude data from attitude system 2)
     MB_DATA_ATTITUDE3: 58 (attitude data from attitude system 3)
-#.br
+.br
 What types of data records are present is format-dependent, as is the default
 choice of which record type is used as the attitude source. The
 program \fBmbinfo\fP can be used with the \fB-N\fP option to determine the numbers
@@ -699,7 +741,7 @@ are derived (as defined with \fB\-\-soundspeed-file-format\fP). Options for the
     MB_DATA_DATA:       1 (survey data)
     MB_DATA_SSV:       19 (sound speed data)
     MB_DATA_CTD:       34 (sound speed data)
-#.br
+.br
 What types of data records are present is format-dependent, as is the default
 choice of which record type is used as the sound speed source. The
 program \fBmbinfo\fP can be used with the \fB-N\fP option to determine the numbers

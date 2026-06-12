@@ -41,6 +41,7 @@ set(executables
     mbdumpesf
     mbextractsegy
     mbfilter
+    mbfnv2navlab
     mbformat
     mbgetesf
     mbgpstide
@@ -48,6 +49,8 @@ set(executables
     mbhistogram
     mbinfo
     mblist
+    mbnavlab2fnv
+    mbmakedatalist
     mbmakeplatform
     mbmapscale
     mbminirovnav

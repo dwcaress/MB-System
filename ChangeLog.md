@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.3beta14    June 12, 2026
 - Version 5.8.3beta13    April 29, 2026
 - Version 5.8.3beta12    January 7, 2026
 - Version 5.8.3beta11    December 27, 2025
@@ -71,7 +72,24 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
-#### 5.8.3beta13 (January 29, 2026)
+#### 5.8.3beta14 (June 12, 2026)
+
+Build system: Make MB-System buildable on Windows with MSVC (no cygwin or mingw). Contributed by Joaquim Luis.
+
+Format MBF_KEMKALL (261): Fixed support for platform files used for preprocessing.
+
+Format MBF_EM710RAW (58): Added support for *.all files associate with the HISAS sonar from Kongsberg.
+
+Programs mbpreprocess and mbprocess: Added support for merging navigation from Kongsberg Navlab software 
+that is commonly used for Hugin AUV data processing.
+Programs mbnavlab2fnv and mbfnv2navlab: Added tools that translate between navlab_smooth.bin and fnv files.
+
+Programs mbnavadjust and mbnavadjustmerge: Fixed problems with new and merged project files resulting 
+from treating surveys and blocks of continuous data separately.
+
+Program mbmakedatalist: Compiled C version of macro mbm_makedatalist
+
+#### 5.8.3beta13 (April 29, 2026)
 
 Library mbtrnav/gctp: Added modern function definitions to function pointer arrays.
 

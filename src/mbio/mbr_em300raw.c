@@ -47,7 +47,7 @@
 #include "mbsys_simrad2.h"
 
 /* turn on debug statements here */
-// #define MBR_EM300RAW_DEBUG 1
+//#define MBR_EM300RAW_DEBUG 1
 
 /*--------------------------------------------------------------------*/
 int mbr_info_em300raw(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
@@ -141,9 +141,11 @@ int mbr_alm_em300raw(int verbose, void *mbio_ptr, int *error) {
 	int *databyteswapped = (int *)&mb_io_ptr->save10;
 	double *pixel_size = &mb_io_ptr->saved1;
 	double *swath_width = &mb_io_ptr->saved2;
+	bool *make_depth_from_rawbeam = &mb_io_ptr->saveb1;
 	*databyteswapped = -1;
 	*pixel_size = 0.0;
 	*swath_width = 0.0;
+	*make_depth_from_rawbeam = false;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -221,6 +223,7 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	bool sonargood = true;
 
 	/* check for data byte swapping if necessary */
+	bool sonarswapgood = true;
 	if (typegood && *databyteswapped == -1) {
 		const short sonarunswap = *((short *)&label[2]);
 		const short sonarswap = mb_swap_short(sonarunswap);
@@ -241,7 +244,6 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		}
 
 		/* check for valid sonarswap */
-		bool sonarswapgood = true;
 		if (sonarswap == MBSYS_SIMRAD2_EM120 || sonarswap == MBSYS_SIMRAD2_EM300 || sonarswap == MBSYS_SIMRAD2_EM1002 ||
 		    sonarswap == MBSYS_SIMRAD2_EM2000 || sonarswap == MBSYS_SIMRAD2_EM3000 || sonarswap == MBSYS_SIMRAD2_EM3000D_1 ||
 		    sonarswap == MBSYS_SIMRAD2_EM3000D_2 || sonarswap == MBSYS_SIMRAD2_EM3000D_3 ||
