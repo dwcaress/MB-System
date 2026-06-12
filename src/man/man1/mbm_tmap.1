@@ -1,0 +1,124 @@
+.TH mbm_tmap 1 "18 April 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbm_tmap\fP \- Macro to convert XYZ point clouds to 3D Tiles and generate a Cesium viewer.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbm_tmap\fP \fB-I\fP\fIpointcloud.xyz\fP
+[\fB-O\fP\fItiles_dir\fP]
+[\fB-P\fP\fIport\fP]
+[\fB--serve-only\fP | \fB--no-convert\fP]
+[\fB-N\fP]
+[\fB-S\fP]
+[\fB-W\fP]
+[\fB-V\fP]
+[\fB-H\fP]
+
+.SH DESCRIPTION
+\fBmbm_tmap\fP is a macro that automates point cloud web visualization setup.
+It runs \fBpy3dtiles convert\fP on an input XYZ point cloud file, writes an
+\fBindex.html\fP Cesium viewer file into the output tiles directory, and can
+optionally start a local HTTP server using \fBpython -m http.server\fP.
+
+By default \fBmbm_tmap\fP performs conversion from XYZ input. If
+\fB--serve-only\fP (or \fB--no-convert\fP) is specified, conversion is skipped
+and an existing tiles directory is served directly.
+
+This macro is intended for quick local testing and browsing of tiled point cloud
+data products.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian do Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-I
+\fIpointcloud.xyz\fP
+.br
+Input XYZ point cloud file. This option is required unless
+\fB--serve-only\fP or \fB--no-convert\fP is specified.
+
+.TP
+.B \-O
+\fItiles_dir\fP
+.br
+Output directory for 3D Tiles and generated \fBindex.html\fP.
+Default is \fBtiles\fP.
+
+.TP
+.B \-P
+\fIport\fP
+.br
+HTTP server port used when starting \fBpython -m http.server\fP.
+Default is \fB8000\fP.
+
+.TP
+.B --serve-only, --no-convert
+.br
+Skip \fBpy3dtiles\fP conversion and serve an existing tiles directory.
+In this mode \fB-O\fP should point to an existing tiles directory.
+If \fBindex.html\fP already exists it is reused.
+
+.TP
+.B \-N
+.br
+Do not open a browser automatically.
+
+.TP
+.B \-S
+.br
+Do not start a local HTTP server.
+
+.TP
+.B \-W
+.br
+Wait on the server process after starting it. Use Ctrl+C to stop.
+
+.TP
+.B \-V
+.br
+Verbose output.
+
+.TP
+.B \-H
+.br
+Print help message and exit.
+
+.SH EXAMPLES
+Convert an XYZ file to tiles and start local server:
+.br
+\fBmbm_tmap -I cloud.xyz -O tiles -V\fP
+
+Serve an existing tiles directory without reconversion:
+.br
+\fBmbm_tmap --serve-only -O tiles -P 8081 -W -V\fP
+
+Convert an XYZ file to tiles without starting server:
+.br
+\fBmbm_tmap -I cloud.xyz -O tiles -S\fP
+
+Start server and keep the macro attached to server lifetime:
+.br
+\fBmbm_tmap -I cloud.xyz -O tiles -W\fP
+
+.SH SEE ALSO
+\fBmbgrd2gltf\fP(1), \fBmbsystem\fP(1)
+
+.SH BUGS
+No known bugs.
