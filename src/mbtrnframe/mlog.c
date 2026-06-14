@@ -554,7 +554,7 @@ static int s_log_set_seg(mlog_t *self, int16_t segno)
         size_t len = strlen(self->name);
          char *bp = NULL;
         
-        #if defined(__QNX__)
+        #if defined(__QNX__) || defined(_WIN32)
         	char *new_name=NULL;
          #endif
 
@@ -566,8 +566,8 @@ static int s_log_set_seg(mlog_t *self, int16_t segno)
 		// for delimiter(s), NULL
         len += 2;
         // init buffer
-        #if defined(__QNX__)
-        new_name=(char *)malloc(len);
+        #if defined(__QNX__) || defined(_WIN32)
+        new_name=(char *)alloca(len);  /* MSVC has no VLA; use alloca (stack) */
         #else
         char new_name[len];
         #endif
@@ -861,8 +861,8 @@ void mlog_info_show(mlog_info_t *self, bool verbose, uint16_t indent)
         fprintf(stderr,"%*s[seg_max   %10hu]\n",indent,(indent>0?" ":""), self->seg_max);
         fprintf(stderr,"%*s[seg_b     %10hu]\n",indent,(indent>0?" ":""), self->seg_b);
         fprintf(stderr,"%*s[seg_e     %10hu]\n",indent,(indent>0?" ":""), self->seg_e);
-        fprintf(stderr,"%*s[tb        %10ld]\n",indent,(indent>0?" ":""), self->tb);
-        fprintf(stderr,"%*s[te        %10ld]\n",indent,(indent>0?" ":""), self->te);
+        fprintf(stderr,"%*s[tb        %10lld]\n",indent,(indent>0?" ":""), (long long)self->tb);
+        fprintf(stderr,"%*s[te        %10lld]\n",indent,(indent>0?" ":""), (long long)self->te);
     }
 }
 // End function mlog_info_show
@@ -880,7 +880,7 @@ void mlog_config_show(mlog_config_t *self, bool verbose, uint16_t indent)
         fprintf(stderr,"%*s[self     %10p]\n",indent,(indent>0?" ":""), self);
         fprintf(stderr,"%*s[lim_b    %10u]\n",indent,(indent>0?" ":""), self->lim_b);
         fprintf(stderr,"%*s[lim_s    %10u]\n",indent,(indent>0?" ":""), self->lim_s);
-        fprintf(stderr,"%*s[lim_t    %10ld]\n",indent,(indent>0?" ":""), self->lim_t);
+        fprintf(stderr,"%*s[lim_t    %10lld]\n",indent,(indent>0?" ":""), (long long)self->lim_t);
         fprintf(stderr,"%*s[flags    %10X]\n",indent,(indent>0?" ":""), self->flags);
         fprintf(stderr,"%*s[dest     %10X]\n",indent,(indent>0?" ":""), self->dest);
         fprintf(stderr,"%*s[tfmt     %10s]\n",indent,(indent>0?" ":""), self->tfmt);

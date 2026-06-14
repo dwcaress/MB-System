@@ -97,7 +97,7 @@ GNU General Public License for more details
 // Module Global Variables
 /////////////////////////
 
-int me_errno=ME_OK;
+MF_EXPORT int me_errno=ME_OK;
 static const char *err_undef="UNDEFINED_ERR";
 static me_error_str_func_t *me_strerror_ext=NULL;
 

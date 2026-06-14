@@ -44,7 +44,7 @@ static TLModule tl_module_config[TL_N_MODULES]={
     {TL_LOG,TL_NONE}, // TL_TEST_TRN_LOG
     {TL_LOG,TL_NONE}  // TL_TNAV_BANK_FILTER
 };
-TLModule *tl_modules=&tl_module_config[0];
+TNAV_API TLModule *tl_modules=&tl_module_config[0];
 
 // ring buffer
 static char ringbuf[TL_RING_BYTES];

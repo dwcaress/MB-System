@@ -10,9 +10,13 @@
 /* CMake build system section */
 #ifdef CMAKE_BUILD_SYSTEM
 
-#  include <rpc/rpc.h>
-#  include <rpc/types.h>
-#  include <rpc/xdr.h>
+#  ifdef _WIN32
+#    include "xdr_win32.h"
+#  else
+#    include <rpc/rpc.h>
+#    include <rpc/types.h>
+#    include <rpc/xdr.h>
+#  endif
 
 #else // Begin Autotools section supporting legacy OS's
 

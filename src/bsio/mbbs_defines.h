@@ -49,9 +49,46 @@
 
   #include <stdint.h>
 
-  #include <rpc/rpc.h>
-  #include <rpc/types.h>
-  #include <rpc/xdr.h>
+  /* Windows has no SunRPC/XDR. Project's src/surf/xdr_win32.h provides a minimal
+     XDR shim; reuse its public typedef here so bsio function signatures parse.
+     XDR call sites in bsio link against the surf-side implementation. */
+  #ifndef _WIN32
+    #include <rpc/rpc.h>
+    #include <rpc/types.h>
+    #include <rpc/xdr.h>
+  #else
+    #include <sys/types.h>  /* u_long / u_short / u_char / u_int via _CRT_DECLARE_NONSTDC_NAMES */
+    #ifndef _MB_WIN_XDR_DEFINED
+    #define _MB_WIN_XDR_DEFINED
+    typedef enum { XDR_ENCODE=0, XDR_DECODE=1, XDR_FREE=2 } XdrOp;
+    typedef struct {
+        XdrOp x_op;
+        char *x_public;
+        char *x_private;
+        char *x_base;
+        int   x_handy;
+    } XDR;
+    #endif
+    /* Forward decls — actual impls live in src/surf/xdr_win32.c (built into sapi). */
+    void xdrstdio_create(XDR*, FILE*, XdrOp);
+    int  xdr_long(XDR*, long*);
+    int  xdr_u_long(XDR*, unsigned long*);
+    int  xdr_short(XDR*, short*);
+    int  xdr_u_short(XDR*, unsigned short*);
+    int  xdr_int(XDR*, int*);
+    int  xdr_u_int(XDR*, unsigned int*);
+    int  xdr_char(XDR*, char*);
+    int  xdr_u_char(XDR*, unsigned char*);
+    int  xdr_opaque(XDR*, char*, unsigned int);
+    int  xdr_bytes(XDR*, char**, unsigned int*, unsigned int);
+    int  xdr_double(XDR*, double*);
+    int  xdr_float(XDR*, float*);
+    /* SunRPC's xdr_destroy is a macro that calls the stream's x_destroy fn ptr.
+       xdr_win32.h's XDR has no x_ops table; just fflush the FILE* and clear. */
+    #define xdr_destroy(xdrs) do { \
+        if ((xdrs) && (xdrs)->x_private) fflush((FILE*)((xdrs)->x_private)); \
+    } while (0)
+  #endif
 
 #else // Begin Autotools section supporting legacy OS's
 

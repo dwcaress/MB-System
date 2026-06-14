@@ -496,7 +496,7 @@ static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_t *src, app_cfg_t 
             
             if(NULL!=cfg && cfg->verbose>0){
                 //            fprintf(stderr,"size double[%d] float[%d] int[%d] uchar[%d] ushort[%d] short[%d] mbf71v5_hdr_t[%d]\r\n",sizeof(double),sizeof(float),sizeof(int),sizeof(unsigned char),sizeof(unsigned short),sizeof(short),sizeof(mbf71v5_hdr_t));
-                fprintf(stderr,"nb[%2d] mb71_sz[%d] beams[%p/%ld]\r\n", nbeams,mb71_size,&pmb71->beam_bytes[0],((long)&pmb71->beam_bytes[0]-(long)pmb71));
+                fprintf(stderr,"nb[%2d] mb71_sz[%d] beams[%p/%lld]\r\n", nbeams,mb71_size,&pmb71->beam_bytes[0],(long long)((intptr_t)&pmb71->beam_bytes[0]-(intptr_t)pmb71));
                 fprintf(stderr,"ts[%.3lf] lat[%.3lf] lon[%.3lf] sonar_depth[%.3lf]\r\n",src->ts,src->lat,src->lon,src->depth);
                 fprintf(stderr,"max_depth[%.4lf] max_distance[%.4lf]\r\n",depthmax,distmax);
                 fprintf(stderr,"depth_scale[%.4lf] distance_scale[%.4lf]\r\n\r\n",pmb71->depth_scale,pmb71->distance_scale);

@@ -370,8 +370,8 @@ int main(int argc, char *argv[])
 
         addrlen=sizeof(mcast_addr);
 
-        fprintf(stderr,"PUB - mtx msg[%-*s] len[%7lu] dest[%s : %hu]\n",
-                wmsg, txbuf,tx_len,
+        fprintf(stderr,"PUB - mtx msg[%-*s] len[%7zu] dest[%s : %hu]\n",
+                wmsg, txbuf,(size_t)tx_len,
                 inet_ntoa(mcast_addr.sin_addr),
                 htons(mcast_addr.sin_port));
 
@@ -422,8 +422,8 @@ int main(int argc, char *argv[])
                     if ( (tx_bytes=sendto(fd,txbuf, tx_len, 0,(struct sockaddr *) &x_addr,
                                           addrlen)) >= 0){
 
-                        fprintf(stderr,"PUB - utx msg[%-*s] len[%3lu/%-3lu] dest[%s : %hu]\n",
-                                wmsg, txbuf, tx_len,tx_bytes,
+                        fprintf(stderr,"PUB - utx msg[%-*s] len[%3zu/%-3lld] dest[%s : %hu]\n",
+                                wmsg, txbuf, (size_t)tx_len,(long long)tx_bytes,
                                 inet_ntoa(x_addr.sin_addr),
                                 htons(x_addr.sin_port));
                     }else{

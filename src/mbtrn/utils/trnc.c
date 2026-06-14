@@ -617,7 +617,7 @@ static int s_app_main(app_cfg_t *cfg)
     int retval=0;
     
     // init receive buffer
-    byte buf[cfg->bsize];
+    byte *buf = (byte *)alloca(cfg->bsize);
     memset(buf,0,cfg->bsize);
 
     // create socket

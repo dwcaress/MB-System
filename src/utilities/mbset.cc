@@ -1046,11 +1046,11 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 			fprintf(stderr, "\nOutput MBprocess Parameters:\n");
 			fprintf(stderr, "\nInput and Output Files:\n");
-			if (process.mbp_format_specified == true)
+			if (process.mbp_format_specified)
 				fprintf(stderr, "  Format:                        %d\n", process.mbp_format);
-			if (process.mbp_ifile_specified == true)
+			if (process.mbp_ifile_specified)
 				fprintf(stderr, "  Input file:                    %s\n", process.mbp_ifile);
-			if (process.mbp_ofile_specified == true)
+			if (process.mbp_ofile_specified)
 				fprintf(stderr, "  Output file:                   %s\n", process.mbp_ofile);
 
 			fprintf(stderr, "\nNavigation Merging:\n");
@@ -1166,18 +1166,18 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "  Raytrace angle mode:           %d\n", process.mbp_angle_mode);
 
 			fprintf(stderr, "\nBathymetry Water Sound Speed Reference:\n");
-			if (process.mbp_corrected == true)
+			if (process.mbp_corrected)
 				fprintf(stderr, "  Output bathymetry reference:   CORRECTED\n");
-			else if (process.mbp_corrected == false)
+			else
 				fprintf(stderr, "  Bathymetry reference:          UNCORRECTED\n");
 			if (process.mbp_svp_mode == MBP_SVP_SOUNDSPEEDREF) {
-				if (process.mbp_corrected == true)
+				if (process.mbp_corrected)
 					fprintf(stderr, "  Depths modified from uncorrected to corrected\n");
 				else
 					fprintf(stderr, "  Depths modified from corrected to uncorrected\n");
 			}
 			else if (process.mbp_svp_mode == MBP_SVP_ON) {
-				if (process.mbp_corrected == true)
+				if (process.mbp_corrected)
 					fprintf(stderr, "  Depths recalculated as corrected\n");
 				else
 					fprintf(stderr, "  Depths recalculated as uncorrected\n");

@@ -46,7 +46,9 @@
 #ifdef ENABLE_GSF
 #include "gsf.h"
 #endif
-#ifdef _WIN32
+/* rpc/xdr.h is POSIX-only; Windows has no SunRPC. Original code mistakenly
+   gated this with _WIN32 — flip to NOT-_WIN32. */
+#ifndef _WIN32
 #	include <rpc/xdr.h>
 #endif
 

@@ -40,6 +40,11 @@ set(tests
     mbtime_test
     mbvoxelclean_test)
 
+find_package(Python3 COMPONENTS Interpreter)
 foreach(test ${tests})
-  add_test(NAME ${test} COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/${test}.py")
+  if(WIN32)
+    add_test(NAME ${test} COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/${test}.py")
+  else()
+    add_test(NAME ${test} COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/${test}.py")
+  endif()
 endforeach()

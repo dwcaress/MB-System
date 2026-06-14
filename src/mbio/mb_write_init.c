@@ -44,7 +44,8 @@
 #ifdef ENABLE_GSF
 #include "gsf.h"
 #endif
-#ifdef _WIN32
+/* rpc/xdr.h is POSIX-only; original gating with _WIN32 was inverted. */
+#ifndef _WIN32
 #	include <rpc/xdr.h>			/* Don't understand why this is now need. It wasn't till recently. 26 Juin 2018 (JL)*/
 #endif
 

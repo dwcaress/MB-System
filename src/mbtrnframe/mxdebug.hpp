@@ -434,7 +434,7 @@ public:
             if(fp == NULL){
                 fp = stderr;
             }
-            fprintf(fp, "%*s%*s %*lu\n", indent, "", wkey, "m_size", wval, mlist_size(m_mlist));
+            fprintf(fp, "%*s%*s %*zu\n", indent, "", wkey, "m_size", wval, (size_t)mlist_size(m_mlist));
             mx_module_t *mod = (mx_module_t *)mlist_first(m_mlist);
             int i=0;
             while(mod != NULL){

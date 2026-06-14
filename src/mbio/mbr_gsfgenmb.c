@@ -381,7 +381,7 @@ fprintf(stderr, "dataID->recordID: %d  Read GSF_RECORD_ATTITUDE\n", dataID->reco
 		fprintf(stderr, "\ndbg4  New comment read by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg4  New comment values:\n");
 		fprintf(stderr, "dbg4       kind:              %d\n", data->kind);
-		fprintf(stderr, "dbg4       comment time sec:  %ld\n", records->comment.comment_time.tv_sec);
+		fprintf(stderr, "dbg4       comment time sec:  %lld\n", (long long)records->comment.comment_time.tv_sec);
 		fprintf(stderr, "dbg4       comment time nsec: %ld\n", records->comment.comment_time.tv_nsec);
 		fprintf(stderr, "dbg4       comment length:    %d\n", records->comment.comment_length);
 		fprintf(stderr, "dbg4       comment:           %s\n", records->comment.comment);
@@ -390,7 +390,7 @@ fprintf(stderr, "dataID->recordID: %d  Read GSF_RECORD_ATTITUDE\n", dataID->reco
 		fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg4  New ping values:\n");
 		fprintf(stderr, "dbg4       kind:       %d\n", data->kind);
-		fprintf(stderr, "dbg4       time sec:   %ld\n", mb_ping->ping_time.tv_sec);
+		fprintf(stderr, "dbg4       time sec:   %lld\n", (long long)mb_ping->ping_time.tv_sec);
 		fprintf(stderr, "dbg4       time nsec:  %ld\n", mb_ping->ping_time.tv_nsec);
 		fprintf(stderr, "dbg4       longitude:  %f\n", mb_ping->longitude);
 		fprintf(stderr, "dbg4       latitude:   %f\n", mb_ping->latitude);
@@ -468,7 +468,7 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "\ndbg4  New comment to be written by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg4  New comment values:\n");
 		fprintf(stderr, "dbg4       kind:              %d\n", data->kind);
-		fprintf(stderr, "dbg4       comment time sec:  %ld\n", records->comment.comment_time.tv_sec);
+		fprintf(stderr, "dbg4       comment time sec:  %lld\n", (long long)records->comment.comment_time.tv_sec);
 		fprintf(stderr, "dbg4       comment time nsec: %ld\n", records->comment.comment_time.tv_nsec);
 		fprintf(stderr, "dbg4       comment length:    %d\n", records->comment.comment_length);
 		fprintf(stderr, "dbg4       comment:           %s\n", records->comment.comment);
@@ -477,7 +477,7 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "\ndbg4  New ping to be written by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg4  New ping values:\n");
 		fprintf(stderr, "dbg4       kind:       %d\n", data->kind);
-		fprintf(stderr, "dbg4       time sec:   %ld\n", mb_ping->ping_time.tv_sec);
+		fprintf(stderr, "dbg4       time sec:   %lld\n", (long long)mb_ping->ping_time.tv_sec);
 		fprintf(stderr, "dbg4       time nsec:  %ld\n", mb_ping->ping_time.tv_nsec);
 		fprintf(stderr, "dbg4       longitude:  %f\n", mb_ping->longitude);
 		fprintf(stderr, "dbg4       latitude:   %f\n", mb_ping->latitude);

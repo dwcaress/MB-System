@@ -76,7 +76,8 @@ char buf[100];		/* buffer for error messages */
 			/* projection parameters */
 double r_maj,r_min,scale_fact,center_lon;
 double center_lat,false_east,false_north;
-double azimuth,lat_orig,lon_orig,lon1,lat1,lon2,lat2;
+double azimuth,lat_orig,lon_orig;
+double lon1=0.0,lat1=0.0,lon2=0.0,lat2=0.0;
 long mode,iflg;
 FILE *ptr;
 

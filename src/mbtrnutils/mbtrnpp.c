@@ -775,7 +775,7 @@ trnw_oflags_t trn_oflags=TRN_OUT_DFL;
 netif_t *trnsvr=NULL;
 netif_t *trnusvr=NULL;
 netif_t *trnumsvr=NULL;
-int s_mbtrnpp_trnu_reset_callback();
+int s_mbtrnpp_trnu_reset_callback(void);
 trnuif_res_t rr_resources={0},*g_trnu_res=&rr_resources;
 FILE *output_trn_fp = NULL;
 
@@ -5970,7 +5970,7 @@ int mbtrnpp_init_mb1svr(netif_t **psvr, char *host, int port, bool verbose)
 }
 /*--------------------------------------------------------------------*/
 
-int s_mbtrnpp_trnu_reset_callback()
+int s_mbtrnpp_trnu_reset_callback(void)
 {
     int retval=0;
     int reinits_pre=wtnav_get_num_reinits(trn_instance);
@@ -8946,7 +8946,7 @@ int mbtrnpp_em710raw_input_read_ser(int verbose, void *mbio_ptr, size_t *size,
 int mbtrnpp_em710raw_input_close_ser(int verbose, void *mbio_ptr, int *error) {
 
     /* local variables */
-    int status = mbtrnpp_em710raw_input_close_ser(verbose, mbio_ptr, error);
+    int status = MB_SUCCESS;
     struct mb_io_struct *mb_io_ptr;
 
     /* print input debug statements */

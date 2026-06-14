@@ -42,9 +42,25 @@
 /* CMake supports current OS's and so there is only one form of RPC and XDR and no mb_config.h file */
 #ifdef CMAKE_BUILD_SYSTEM
 
-#  include <rpc/rpc.h>
-#  include <rpc/types.h>
-#  include <rpc/xdr.h>
+/* Windows has no SunRPC/XDR. Provide minimal XDR shim so consumers
+   (mb_read_init.c, mb_write_init.c, format readers) still parse. */
+#  ifndef _WIN32
+#    include <rpc/rpc.h>
+#    include <rpc/types.h>
+#    include <rpc/xdr.h>
+#  else
+#    ifndef _MB_WIN_XDR_DEFINED
+#    define _MB_WIN_XDR_DEFINED
+typedef enum { XDR_ENCODE=0, XDR_DECODE=1, XDR_FREE=2 } XdrOp;
+typedef struct {
+    XdrOp x_op;
+    char *x_public;
+    char *x_private;
+    char *x_base;
+    int   x_handy;
+} XDR;
+#    endif
+#  endif
 
 #else // Begin Autotools section supporting legacy OS's
 

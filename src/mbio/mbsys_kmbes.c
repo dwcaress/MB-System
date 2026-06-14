@@ -47,35 +47,9 @@
 #include "mb_status.h"
 #include "mbsys_kmbes.h"
 
-#ifdef _WIN32
-
-/* Based on https://stackoverflow.com/questions/5404277/porting-clock-gettime-to-windows */
-/* - modified to not use static variables for thread safety */
-#include <Windows.h>
-#define CLOCK_REALTIME 0
-#if defined(_MSC_VER) && (_MSC_VER <= 1800)
-struct timespec { long tv_sec; long tv_nsec; };
-#endif
-static LARGE_INTEGER g_counts_per_sec;
-
-int clock_gettime(int dummy, struct timespec *ct) {
-    LARGE_INTEGER g_counts_per_sec, count;
-    if (NULL == ct) {
-      return -1;
-    }
-    if (0 == QueryPerformanceFrequency(&g_counts_per_sec) || g_counts_per_sec.QuadPart == 0) {
-      return = -1;
-    }
-    if (0 == QueryPerformanceCounter(&count)) {
-        return -1;
-    }
-
-    ct->tv_sec = count.QuadPart / g_counts_per_sec.QuadPart;
-    ct->tv_nsec = ((count.QuadPart % g_counts_per_sec.QuadPart) * 1e9) / g_counts_per_sec.QuadPart;
-
-    return 0;
-}
-#endif
+/* Local clock_gettime() Win32 implementation removed — provided globally by
+   include/mb_win_compat.h (force-included via /FI on MSVC). Original block
+   also contained a typo ("return = -1") that would never have compiled. */
 
 /*--------------------------------------------------------------------*/
 int mbsys_kmbes_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {

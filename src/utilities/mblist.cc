@@ -4028,7 +4028,7 @@ if (error == MB_ERROR_NO_ERROR)
                 case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
                   time_u = (int)time_d;
                   if (ascii)
-                    fprintf(output[i], "%ld", time_u);
+                    fprintf(output[i], "%lld", (long long)time_u);
                   else {
                     b = time_u;
                     fwrite(&b, sizeof(double), 1, outfile);
@@ -4041,7 +4041,7 @@ if (error == MB_ERROR_NO_ERROR)
                     first_u = false;
                   }
                   if (ascii)
-                    fprintf(output[i], "%ld", time_u - time_u_ref);
+                    fprintf(output[i], "%lld", (long long)(time_u - time_u_ref));
                   else {
                     b = time_u - time_u_ref;
                     fwrite(&b, sizeof(double), 1, outfile);
@@ -5076,7 +5076,7 @@ if (error == MB_ERROR_NO_ERROR)
                 case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
                   time_u = (int)time_d;
                   if (ascii)
-                    fprintf(output[i], "%ld", time_u);
+                    fprintf(output[i], "%lld", (long long)time_u);
                   else {
                     b = time_u;
                     fwrite(&b, sizeof(double), 1, outfile);
@@ -5089,7 +5089,7 @@ if (error == MB_ERROR_NO_ERROR)
                     first_u = false;
                   }
                   if (ascii)
-                    fprintf(output[i], "%ld", time_u - time_u_ref);
+                    fprintf(output[i], "%lld", (long long)(time_u - time_u_ref));
                   else {
                     b = time_u - time_u_ref;
                     fwrite(&b, sizeof(double), 1, outfile);

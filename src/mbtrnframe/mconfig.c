@@ -234,18 +234,18 @@ char *netif_ch_names[NETIF_CHAN_COUNT]={
 };
 
 static mmd_module_config_t mmd_config_defaults[]={
-    {MOD_R7KR,"MOD_R7KR",R7KR_CH_COUNT,((MM_ERR|MM_WARN)|R7KR_V1),r7kr_ch_names},
-    {MOD_R7K,"MOD_R7K",R7K_CH_COUNT,((MM_ERR|MM_WARN)|R7K_V1),r7k_ch_names},
-    {MOD_MB1R,"MOD_MB1R",MB1R_CH_COUNT,((MM_ERR|MM_WARN)|MB1R_V1),mb1r_ch_names},
-    {MOD_MB1,"MOD_MB1",MB1_CH_COUNT,((MM_ERR|MM_WARN)|MB1_V1),mb1_ch_names},
+    {MOD_R7KR,"MOD_R7KR",R7KR_CH_COUNT,((int)(MM_ERR|MM_WARN)|(int)R7KR_V1),r7kr_ch_names},
+    {MOD_R7K,"MOD_R7K",R7K_CH_COUNT,((int)(MM_ERR|MM_WARN)|(int)R7K_V1),r7k_ch_names},
+    {MOD_MB1R,"MOD_MB1R",MB1R_CH_COUNT,((int)(MM_ERR|MM_WARN)|(int)MB1R_V1),mb1r_ch_names},
+    {MOD_MB1,"MOD_MB1",MB1_CH_COUNT,((int)(MM_ERR|MM_WARN)|(int)MB1_V1),mb1_ch_names},
     {MOD_S7K,"MOD_S7K",S7K_CH_COUNT,((MM_ERR|MM_WARN)),s7k_ch_names},
     {MOD_F7K,"MOD_F7K",F7K_CH_COUNT,((MM_ERR|MM_WARN)),f7k_ch_names},
     {MOD_TRNC,"MOD_TRNC",TRNC_CH_COUNT,((MM_ERR|MM_WARN)),trnc_ch_names},
     {MOD_EMU7K,"MOD_EMU7K",EMU7K_CH_COUNT,((MM_ERR|MM_WARN)),emu7k_ch_names},
-    {MOD_TBINX,"MOD_TBINX",TBINX_CH_COUNT,((MM_ERR|MM_WARN)|TBINX_V1),tbinx_ch_names},
-    {MOD_MBTRNPP,"MOD_MBTRNPP",MBTRNPP_CH_COUNT,((MM_ERR|MM_WARN)|MBTRNPP_V1),mbtrnpp_ch_names},
-    {MOD_MBTNAV,"MOD_MBTNAV",MBTNAV_CH_COUNT,((MM_ERR|MM_WARN)|MBTNAV_V1),mbtnav_ch_names},
-    {MOD_NETIF,"MOD_NETIF",NETIF_CHAN_COUNT,((MM_ERR|MM_WARN)|NETIF_V1),netif_ch_names}
+    {MOD_TBINX,"MOD_TBINX",TBINX_CH_COUNT,((int)(MM_ERR|MM_WARN)|(int)TBINX_V1),tbinx_ch_names},
+    {MOD_MBTRNPP,"MOD_MBTRNPP",MBTRNPP_CH_COUNT,((int)(MM_ERR|MM_WARN)|(int)MBTRNPP_V1),mbtrnpp_ch_names},
+    {MOD_MBTNAV,"MOD_MBTNAV",MBTNAV_CH_COUNT,((int)(MM_ERR|MM_WARN)|(int)MBTNAV_V1),mbtnav_ch_names},
+    {MOD_NETIF,"MOD_NETIF",NETIF_CHAN_COUNT,((int)(MM_ERR|MM_WARN)|(int)NETIF_V1),netif_ch_names}
 };
 
 /////////////////////////

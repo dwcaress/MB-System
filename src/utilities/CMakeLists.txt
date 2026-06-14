@@ -63,7 +63,6 @@ set(executables
     mbsegyinfo
     mbsegylist
     mbsegypsd
-    mbpreprocess
     mbset
     mbsslayout
     mbsvplist
@@ -73,14 +72,25 @@ set(executables
 
 foreach(executable ${executables})
   add_executable(${executable} ${executable}.cc)
-  target_link_libraries(${executable} PRIVATE mbio mbbsio mbaux mbsapi mbgsf m pthread)
+  target_link_libraries(${executable} PRIVATE mbio mbbsio mbaux mbsapi mbgsf ${MB_SYSLIBS})
+  # MSVC default stack is 1 MB; mbfilter / mbauvloglist crash with stack
+  # overflow when stdin is a pipe. Bump reserve to 8 MB.
+  if(MSVC)
+    target_link_options(${executable} PRIVATE /STACK:8388608)
+  endif()
 endforeach()
 
+add_executable(mbpreprocess mbpreprocess.cc)
+target_link_libraries(mbpreprocess PRIVATE mbio mbbsio mbaux mbsapi mbgsf ${MB_SYSLIBS})
+if(MSVC)
+  target_link_options(mbpreprocess PRIVATE /STACK:8388608)
+endif()
+
 add_executable(mblevitus mblevitus.cc levitus.h)
-target_link_libraries(mblevitus PRIVATE mbio mbbsio mbaux mbsapi mbgsf m pthread)
+target_link_libraries(mblevitus PRIVATE mbio mbbsio mbaux mbsapi mbgsf ${MB_SYSLIBS})
 
 add_executable(mbconfig mbconfig.cc levitus.h)
-target_link_libraries(mbconfig PRIVATE mbio mbbsio mbaux mbsapi mbgsf m pthread)
+target_link_libraries(mbconfig PRIVATE mbio mbbsio mbaux mbsapi mbgsf ${MB_SYSLIBS})
 
 file(WRITE levitus.h
   "const char *levitusfile = \"${CMAKE_INSTALL_PREFIX}/${levitusDir}/LevitusAnnual82.dat\";\nconst char *otps_location = \"${otpsDir}\";\n")
@@ -96,4 +106,4 @@ target_compile_definitions(
 target_compile_definitions(
   mblevitus PRIVATE ENV_LEVITUSANNUAL82="${CMAKE_INSTALL_PREFIX}/${levitusDir}/LevitusAnnual82.dat")
 
-install(TARGETS ${executables} mbconfig mblevitus DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS ${executables} mbpreprocess mbconfig mblevitus DESTINATION ${CMAKE_INSTALL_BINDIR})

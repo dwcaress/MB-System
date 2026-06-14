@@ -84,6 +84,10 @@ endif()
 
 # Specify sources for the executable
 add_executable(mbgrd2gltf ${SOURCES})
+if(MSVC)
+	# Draco 3rd-party: silence C4661 (template instantiation) + C4804/C4805 (bool ops)
+	target_compile_options(mbgrd2gltf PRIVATE /wd4661 /wd4804 /wd4805)
+endif()
 
 # Set and link the include directories
 target_include_directories(mbgrd2gltf

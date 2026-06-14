@@ -38,6 +38,9 @@ S. Nelson, EROS		Jan, 1998	Changed misspelled error message
 #include "cproj.h"
 
 #define MAX_VAL 4
+#ifdef MAXLONG
+#undef MAXLONG
+#endif
 #define MAXLONG 2147483647.
 #define DBLLONG 4.61168601e18
 

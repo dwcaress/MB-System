@@ -51,6 +51,16 @@
 
 #include "include.h"
 
+#if defined(_WIN32) || defined(__CYGWIN__)
+#  ifdef newmat_EXPORTS
+#    define NEWMAT_API __declspec(dllexport)
+#  else
+#    define NEWMAT_API __declspec(dllimport)
+#  endif
+#else
+#  define NEWMAT_API
+#endif
+
 #ifdef use_namespace
 namespace RBD_COMMON {
 #endif
@@ -63,7 +73,7 @@ void Terminate();
 
 class BaseException;
 
-class Tracer                             // linked list showing how
+class NEWMAT_API Tracer                  // linked list showing how
 {                                        // we got here
    const char* entry;
    Tracer* previous;
@@ -78,7 +88,7 @@ public:
 };
 
 
-class BaseException                          // The base exception class
+class NEWMAT_API BaseException               // The base exception class
 {
 protected:
    static char* what_error;              // error message

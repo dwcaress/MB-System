@@ -192,7 +192,12 @@ int mthread_thread_start(mthread_thread_t *thread, mthread_thread_fn func, void 
 /// @return 0 on success, -1 otherwise
 int mthread_thread_join(mthread_thread_t *thread){
     int retval=0;
+#if defined(_WIN32)
+    /* pthreads-win32: pthread_t is a struct, so "thread->t" is not boolean-testable. */
+    if ( thread && pthread_join ( thread->t, (void **)&thread->status ) ) {
+#else
     if ( thread && thread->t && pthread_join ( thread->t, (void **)&thread->status ) ) {
+#endif
         fprintf(stderr,"error joining thread.");
         retval=-1;
     }

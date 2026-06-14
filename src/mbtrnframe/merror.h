@@ -111,7 +111,7 @@ extern "C" {
 
 /// @var int me_errno
 /// @brief application specific global error value.
-extern int me_errno;
+extern MF_EXPORT int me_errno;
 const char *me_strerror(int m_errno);
 void me_set_strerror_func(me_error_str_func_t *func);
     

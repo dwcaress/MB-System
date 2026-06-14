@@ -75,7 +75,7 @@
 // Macros
 /////////////////////////
 
-#if defined(__unix__) || defined(__APPLE__) || defined(__CYGWIN__)
+#if defined(__unix__) || defined(__APPLE__) || defined(__CYGWIN__) || defined(_WIN32)
 //#pragma message "Compiling __unix__"
 /// @def MSOCK_ADDR_LEN
 /// @brief address structure size

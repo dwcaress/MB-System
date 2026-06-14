@@ -33,7 +33,11 @@
 #include "gsf.h"
 
 /* global external data required by this module */
+#if defined(_MSC_VER)
+__declspec(dllimport) extern int gsfError;  /* MSVC needs dllimport for data syms */
+#else
 extern int gsfError;
+#endif
 
 /* static global data for this module */
 static gsfRecords gsfRec;

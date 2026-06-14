@@ -75,7 +75,7 @@ TEST(MbDebug, MallocThenClear) {
 TEST(MbDebug, FreeBadPtr) {
   int error = MB_ERROR_NO_ERROR;
   int verbose = 0;
-  void *ptr = reinterpret_cast<void *>(0xDEADBEEF);
+  void *ptr = reinterpret_cast<void *>(static_cast<uintptr_t>(0xDEADBEEFu));
 
   EXPECT_EQ(MB_SUCCESS, mb_free(verbose, &ptr, &error));
   EXPECT_EQ(MB_ERROR_NO_ERROR, error);

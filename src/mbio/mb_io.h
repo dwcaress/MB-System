@@ -137,9 +137,25 @@ const char *mb_platform_type(mb_platform_enum platform);
 #define MB_SENSOR_TYPE_PRESSURE 111
 #define MB_SENSOR_TYPE_SOUNDSPEED 120
 
-/* These arrays are defined in mb_platform.c and extern elsewhere */
+/* These arrays are defined in mb_platform.c and extern elsewhere.
+   MSVC export/import of data symbols requires explicit __declspec markers;
+   CMake's CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS only handles functions. */
+#if defined(_MSC_VER)
+#  ifdef MB_NEED_SENSOR_TYPE
+#    define MB_SENSOR_TYPE_DECL __declspec(dllexport)
+#  else
+#    define MB_SENSOR_TYPE_DECL __declspec(dllimport) extern
+#  endif
+#else
+#  ifdef MB_NEED_SENSOR_TYPE
+#    define MB_SENSOR_TYPE_DECL
+#  else
+#    define MB_SENSOR_TYPE_DECL extern
+#  endif
+#endif
+
 #ifdef MB_NEED_SENSOR_TYPE
-const int mb_sensor_type_id[] = {
+MB_SENSOR_TYPE_DECL const int mb_sensor_type_id[] = {
     MB_SENSOR_TYPE_NONE,                    // 0
     MB_SENSOR_TYPE_SONAR_ECHOSOUNDER,       // 10
     MB_SENSOR_TYPE_SONAR_MULTIECHOSOUNDER,  // 11
@@ -163,7 +179,7 @@ const int mb_sensor_type_id[] = {
     MB_SENSOR_TYPE_PRESSURE,                // 111
     MB_SENSOR_TYPE_SOUNDSPEED,              // 120
 };
-const char *mb_sensor_type_string[] = {"Unknown sensor type",
+MB_SENSOR_TYPE_DECL const char *mb_sensor_type_string[] = {"Unknown sensor type",
                                         "Sonar echosounder",
                                         "Sonar multiechosounder",
                                         "Sonar sidescan",
@@ -186,8 +202,14 @@ const char *mb_sensor_type_string[] = {"Unknown sensor type",
                                         "Pressure",
                                         "Soundspeed"};
 #else
-extern const int mb_sensor_type_id[];
-extern const char *mb_sensor_type_string[];
+#ifdef __cplusplus
+extern "C" {  /* match C linkage of definitions in mb_platform.c */
+#endif
+MB_SENSOR_TYPE_DECL const int mb_sensor_type_id[];
+MB_SENSOR_TYPE_DECL const char *mb_sensor_type_string[];
+#ifdef __cplusplus
+}
+#endif
 #endif  // MB_NEED_SENSOR_TYPE
 
 /* survey platform sensor capability bitmask defines */

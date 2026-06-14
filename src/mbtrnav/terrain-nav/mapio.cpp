@@ -198,10 +198,10 @@ void mapsrc_free(struct mapsrc** psrc) {
 
 char* mapsrc_tostring(struct mapsrc* src) {
 
-    int ssz = 180 * sizeof(char);
-    int bsz = 100;
+    const int ssz = 180 * sizeof(char);
+    const int bsz = 100;
     char* str = (char*) malloc(ssz);
-	char buf[bsz];
+	char buf[100];  /* MSVC has no VLAs; bsz is compile-time constant 100 */
 	//char *buf = malloc(100 * sizeof(char));
 	snprintf(str, ssz, "mapsrc {\n\tncid = %i\n", src->ncid);
 	snprintf(buf, bsz, "\txid = %i\n", src->xid);
@@ -388,8 +388,8 @@ char* mapdata_tostring(struct mapdata* data) {
         char* str = (char*) malloc(ssz);
         if(NULL!=str){
             memset(str,0,ssz * sizeof(char));
-            int bsz = 100;
-            char buf[bsz];
+            const int bsz = 100;
+            char buf[100];  /* MSVC has no VLAs; bsz is compile-time constant 100 */
             strcpy(str, "mapdata {\n");
             snprintf(buf,  bsz, "\txcenter = %f\n", data->xcenter);
             strcat(str, buf);

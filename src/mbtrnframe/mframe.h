@@ -217,6 +217,35 @@
 
 #endif
 
+/* Native Windows / MSVC: none of the unix/apple/cygwin/QNX branches above fire,
+   so pull in the POSIX-flavoured headers needed by mthread.h / mfile.c / mlog.c.
+   pthread.h comes from pthreads-win32 (wired via CMakeLists). dirent.h is the
+   project's shipped stub. */
+#if defined(_WIN32) && !defined(__CYGWIN__)
+#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include <string.h>
+#include <errno.h>
+#include <math.h>
+#include <inttypes.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <time.h>
+#include <ctype.h>
+#include <signal.h>
+#include <float.h>
+#include <assert.h>
+#include <dirent.h>
+#include <pthread.h>
+#include <winsock2.h>
+#include <WS2tcpip.h>
+#endif
+
 //#elif defined(_WIN32)
 ////#pragma message "Compiling __WIN32"
 ////define something for Windows (32-bit and 64-bit, this part is common)
@@ -242,13 +271,22 @@
 // Macros
 /////////////////////////
 
-#if defined(__CYGWIN__)
-
-/// @def WIN_DECLSPEC
-/// @brief declaration for windows.
-#define WIN_DECLSPEC __declspec(dllimport)
+#if defined(_WIN32) || defined(__CYGWIN__)
+#  ifdef mbtrnframe_EXPORTS
+#    define MF_EXPORT __declspec(dllexport)
+#  else
+#    define MF_EXPORT __declspec(dllimport)
+#  endif
 #else
-#define WIN_DECLSPEC
+#  define MF_EXPORT
+#endif
+
+/* Legacy macro retained for source compatibility — only Cygwin builds asked
+   for dllimport here; native MSVC keeps it neutral. */
+#if defined(__CYGWIN__)
+#  define WIN_DECLSPEC __declspec(dllimport)
+#else
+#  define WIN_DECLSPEC
 #endif
 
 /// @def VERSION_HELPER
@@ -257,17 +295,6 @@
 /// @def VERSION_STRING
 /// @brief version string macro.
 #define VERSION_STRING(s) VERSION_HELPER(s)
-
-#if defined(__CYGWIN__)
-//#pragma message "__CYGWIN__ is defined"
-/// @def MF_EXPORT
-/// @brief TBD
-#define MF_EXPORT __declspec(dllimport)
-#else
-/// @def MF_EXPORT
-/// @brief TBD
-#define MF_EXPORT
-#endif
 
 
 /////////////////////////
@@ -326,7 +353,9 @@ typedef int pthread_mutex_t;
 
 /// @typedef unsigned char byte
 /// @brief typedef for byte
+#if !defined(__RPCNDR_H_VERSION__) && !defined(__RPC_FAR)
 typedef unsigned char byte;
+#endif
 
 
 

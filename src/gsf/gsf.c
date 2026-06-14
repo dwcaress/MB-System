@@ -209,7 +209,11 @@ static int      numOpenFiles;
 static GSF_FILE_TABLE gsfFileTable[GSF_MAX_OPEN_FILES];
 
 /* Global external data defined in this module */
+#if defined(_MSC_VER)
+__declspec(dllexport) int gsfError;  /* CMake auto-export doesn't cover data syms */
+#else
 int             gsfError;       /* used to report most recent error */
+#endif
 
 /* Static functions used, but not exported from this source file */
 static gsfuLong gsfChecksum(unsigned char *buff, unsigned int num_bytes);
