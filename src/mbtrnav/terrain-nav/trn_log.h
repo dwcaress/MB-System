@@ -186,17 +186,7 @@ struct TLModule_s{
 };
 typedef struct TLModule_s TLModule;
 
-#if defined(_WIN32) || defined(__CYGWIN__)
-#  ifdef tnav_EXPORTS
-#    define TNAV_API __declspec(dllexport)
-#  else
-#    define TNAV_API __declspec(dllimport)
-#  endif
-#else
-#  define TNAV_API
-#endif
-
-extern TNAV_API TLModule *tl_modules;
+extern TLModule *tl_modules;
 
 
 #define TL_OMASK(mid,dfl) ( (dfl | tl_modules[mid].g_en) & (~tl_modules[mid].g_di))

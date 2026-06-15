@@ -736,7 +736,6 @@
 #define MB_PR_NAV_FORMAT_FNV	   	9
 #define MB_PR_NAV_FORMAT_R2NAV		10
 #define MB_PR_NAV_FORMAT_RVDAS		11
-#define MB_PR_NAV_FORMAT_NAVLAB		12  /* Kongsberg Navlab binary (navlab_smooth.bin) */
 
 #define MB_PR_SENSORDEPTH_FORMAT_TD			1
 #define MB_PR_SENSORDEPTH_FORMAT_YMDHMSD	2
@@ -744,7 +743,6 @@
 #define MB_PR_SENSORDEPTH_FORMAT_YJMSD		4
 #define MB_PR_SENSORDEPTH_FORMAT_FBT		9
 #define MB_PR_SENSORDEPTH_FORMAT_RVDAS		11
-#define MB_PR_SENSORDEPTH_FORMAT_NAVLAB		12  /* Kongsberg Navlab binary (navlab_smooth.bin) */
 
 #define MB_PR_ALTITUDE_FORMAT_TA			1
 #define MB_PR_ALTITUDE_FORMAT_YMDHMSA		2
@@ -757,7 +755,6 @@
 #define MB_PR_HEADING_FORMAT_YJMSH			4
 #define MB_PR_HEADING_FORMAT_FBT			9
 #define MB_PR_HEADING_FORMAT_RVDAS			11
-#define MB_PR_HEADING_FORMAT_NAVLAB			12  /* Kongsberg Navlab binary (navlab_smooth.bin) */
 
 #define MB_PR_ATTITUDE_FORMAT_TRPH			1
 #define MB_PR_ATTITUDE_FORMAT_YMDHMSRPH		2
@@ -765,7 +762,6 @@
 #define MB_PR_ATTITUDE_FORMAT_YJMSRPH		4
 #define MB_PR_ATTITUDE_FORMAT_FBT			9
 #define MB_PR_ATTITUDE_FORMAT_RVDAS			11
-#define MB_PR_ATTITUDE_FORMAT_NAVLAB		12  /* Kongsberg Navlab binary (navlab_smooth.bin) */
 
 #define MB_PR_SOUNDSPEED_FORMAT_TS			1
 #define MB_PR_SOUNDSPEED_FORMAT_YMDHMSS		2

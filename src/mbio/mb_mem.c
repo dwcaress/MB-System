@@ -48,7 +48,7 @@ static bool mb_mem_debug = false;
 static int n_mb_alloc = 0;
 static void *mb_alloc_ptr[MB_MEMORY_HEAP_MAX];
 static size_t mb_alloc_size[MB_MEMORY_HEAP_MAX];
-static mb_longname mb_alloc_sourcefile[MB_MEMORY_HEAP_MAX];
+static mb_name mb_alloc_sourcefile[MB_MEMORY_HEAP_MAX];
 static int mb_alloc_sourceline[MB_MEMORY_HEAP_MAX];
 static bool mb_alloc_overflow = false;
 
@@ -289,7 +289,7 @@ int mb_mallocd(int verbose, const char *sourcefile, int sourceline, size_t size,
       if (n_mb_alloc < MB_MEMORY_HEAP_MAX) {
         mb_alloc_ptr[n_mb_alloc] = *ptr;
         mb_alloc_size[n_mb_alloc] = size;
-        strncpy(mb_alloc_sourcefile[n_mb_alloc], sourcefile, MB_LONGNAME_LENGTH - 1);
+        strncpy(mb_alloc_sourcefile[n_mb_alloc], sourcefile, MB_NAME_LENGTH - 1);
         mb_alloc_sourceline[n_mb_alloc] = sourceline;
         n_mb_alloc++;
       }
@@ -473,7 +473,7 @@ int mb_reallocd(int verbose, const char *sourcefile, int sourceline, size_t size
       if (size > 0 && *ptr != NULL) {
         mb_alloc_ptr[iptr] = *ptr;
         mb_alloc_size[iptr] = size;
-        strncpy(mb_alloc_sourcefile[iptr], sourcefile, MB_LONGNAME_LENGTH - 1);
+        strncpy(mb_alloc_sourcefile[iptr], sourcefile, MB_NAME_LENGTH - 1);
         mb_alloc_sourceline[iptr] = sourceline;
       }
 
@@ -482,7 +482,7 @@ int mb_reallocd(int verbose, const char *sourcefile, int sourceline, size_t size
         for (int i = iptr; i < n_mb_alloc - 1; i++) {
           mb_alloc_ptr[i] = mb_alloc_ptr[i + 1];
           mb_alloc_size[i] = mb_alloc_size[i + 1];
-          strncpy(mb_alloc_sourcefile[i], mb_alloc_sourcefile[i + 1], MB_LONGNAME_LENGTH - 1);
+          strncpy(mb_alloc_sourcefile[i], mb_alloc_sourcefile[i + 1], MB_NAME_LENGTH - 1);
           mb_alloc_sourceline[i] = mb_alloc_sourceline[i + 1];
         }
         n_mb_alloc--;
@@ -494,7 +494,7 @@ int mb_reallocd(int verbose, const char *sourcefile, int sourceline, size_t size
       if (n_mb_alloc < MB_MEMORY_HEAP_MAX) {
         mb_alloc_ptr[n_mb_alloc] = *ptr;
         mb_alloc_size[n_mb_alloc] = size;
-        strncpy(mb_alloc_sourcefile[n_mb_alloc], sourcefile, MB_LONGNAME_LENGTH - 1);
+        strncpy(mb_alloc_sourcefile[n_mb_alloc], sourcefile, MB_NAME_LENGTH - 1);
         mb_alloc_sourceline[n_mb_alloc] = sourceline;
         n_mb_alloc++;
       }
@@ -565,7 +565,7 @@ int mb_free(int verbose, void **ptr, int *error) {
       for (int i = iptr; i < n_mb_alloc - 1; i++) {
         mb_alloc_ptr[i] = mb_alloc_ptr[i + 1];
         mb_alloc_size[i] = mb_alloc_size[i + 1];
-        strncpy(mb_alloc_sourcefile[i], mb_alloc_sourcefile[i + 1], MB_LONGNAME_LENGTH - 1);
+        strncpy(mb_alloc_sourcefile[i], mb_alloc_sourcefile[i + 1], MB_NAME_LENGTH - 1);
         mb_alloc_sourceline[i] = mb_alloc_sourceline[i + 1];
       }
       n_mb_alloc--;
@@ -652,7 +652,7 @@ int mb_freed(int verbose, const char *sourcefile, int sourceline, void **ptr, in
       for (int i = iptr; i < n_mb_alloc - 1; i++) {
         mb_alloc_ptr[i] = mb_alloc_ptr[i + 1];
         mb_alloc_size[i] = mb_alloc_size[i + 1];
-        strncpy(mb_alloc_sourcefile[i], mb_alloc_sourcefile[i + 1], MB_LONGNAME_LENGTH - 1);
+        strncpy(mb_alloc_sourcefile[i], mb_alloc_sourcefile[i + 1], MB_NAME_LENGTH - 1);
         mb_alloc_sourceline[i] = mb_alloc_sourceline[i + 1];
       }
       n_mb_alloc--;

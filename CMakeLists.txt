@@ -93,8 +93,8 @@ if (CMAKE_C_BYTE_ORDER STREQUAL "LITTLE_ENDIAN")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBYTESWAPPED")
 endif()
 
-# MSVC has no <unistd.h>; project ships a stub at include/unistd.h.
-# Make it resolvable globally so POSIX-flavoured sources compile on Windows.
+# MSVC has no <unistd.h>; the substitute lives in src/mbio/unistd_w.h, pulled in
+# by src/mbio/mb_define.h (force-included below) under #ifdef _WIN32.
 if(MSVC)
   # Most project libraries have no __declspec(dllexport) markers, so building
   # them as SHARED produces a .dll with no .lib import library and downstream
@@ -102,18 +102,20 @@ if(MSVC)
   # the import lib automatically. Equivalent to MinGW's --export-all-symbols.
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-  # NOTE: NOT "BEFORE" — include/ has stale untracked shadows of mb_define.h /
-  # mb_sapi.h / gsf.h that must not preempt src/mbio etc. POSIX stubs here
-  # (unistd.h, libgen.h, dirent.h, rpc/) have no MSVC counterparts so they still
-  # resolve from this dir.
-  include_directories(${CMAKE_SOURCE_DIR}/include)
+  # src/mbio holds mb_define.h + unistd_w.h; make resolvable from every TU so the
+  # force-included mb_define.h can pull "unistd_w.h" regardless of the includer.
+  include_directories(${CMAKE_SOURCE_DIR}/src/mbio)
   # Silence the most common POSIX-name warnings (open vs _open, etc.)
   # NOMINMAX prevents Windows.h from defining min/max macros that clobber
   # std::numeric_limits<>::max(), std::min(), etc.
   add_compile_definitions(_CRT_NONSTDC_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS NOMINMAX WIN32_LEAN_AND_MEAN NOGDI)
-  # Force-include POSIX compatibility shim (provides clock_gettime, CLOCK_REALTIME, etc.)
+  # Force-include mb_define.h on every translation unit. It carries the Windows
+  # POSIX compatibility shim under #ifdef _WIN32 (clock_gettime, strcasecmp,
+  # sockets, getopt, S_IS*, etc.) plus the <unistd.h> selector. Its XDR shim
+  # has identical XdrOp/XDR types to src/surf/xdr_win32.h, which is guarded with
+  # _MB_WIN_XDR_DEFINED so the two do not collide.
   # /FI<file> = "include this header at the top of every translation unit".
-  add_compile_options(/FI${CMAKE_SOURCE_DIR}/include/mb_win_compat.h)
+  add_compile_options(/FI${CMAKE_SOURCE_DIR}/src/mbio/mb_define.h)
 
   # getopt (POSIX) — utilities pervasively call getopt; MSVC ships none.
   if(GETOPT_INCLUDE_DIR)

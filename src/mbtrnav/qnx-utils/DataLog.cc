@@ -18,7 +18,6 @@
 #include <sys/stat.h>
 #include <stdint.h>
 #include <string.h>
-#include <vector>
 
 #if !defined(__APPLE__)
 #include <malloc.h>
@@ -52,18 +51,18 @@ bool DataLog::newJulianDayLogDirName(std::string& dirName,
   struct tm st={0};
   localtime_r(&now, &st);
 
-  // Make a place for the name (VLA replaced with std::vector for MSVC compatibility)
+  // Make a place for the name
   const uint32_t max_dirs = 100000;
   uint32_t max_dirs_digits = (unsigned int)floor(log10(max_dirs)) + 1;
-  std::vector<char> name(homeDir.length() + strlen("/YYYY.JJJ.") + max_dirs_digits + 1);
+  char name[homeDir.length() + strlen("/YYYY.JJJ.") + max_dirs_digits + 1];
 
   // Test dirnames until one pops
   uint32_t dirs = 0;
   for (dirs = 0; dirs < max_dirs; dirs++) {
-    snprintf(name.data(), name.size(), "%s/%4d.%03d.%03d", homeDir.c_str(),
+    snprintf(name,homeDir.length(), "%s/%4d.%03d.%03d", homeDir.c_str(),
             st.tm_year+1900, st.tm_yday+1, dirs);
     // We're done if the pathname does not exist
-    if (stat(name.data(), &sb) != 0) {
+    if (stat(name, &sb) != 0) {
       break;
     }
   }
@@ -72,7 +71,7 @@ bool DataLog::newJulianDayLogDirName(std::string& dirName,
   if (dirs >= max_dirs) {
     return false;
   } else {
-    dirName = name.data();
+    dirName = name;
     return true;
   }
 }

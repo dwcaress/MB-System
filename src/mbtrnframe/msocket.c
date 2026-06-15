@@ -323,8 +323,8 @@ void msock_pstats_show(msock_pstats_t *self, bool verbose, uint16_t indent)
 {
     if (NULL != self) {
         fprintf(stderr,"%*s[self         %10p]\n",indent,(indent>0?" ":""), self);
-        fprintf(stderr,"%*s[t_connect    %10lld]\n",indent,(indent>0?" ":""), (long long)self->t_connect);
-        fprintf(stderr,"%*s[t_disconnect %10lld]\n",indent,(indent>0?" ":""), (long long)self->t_disconnect);
+        fprintf(stderr,"%*s[t_connect    %10ld]\n",indent,(indent>0?" ":""), self->t_connect);
+        fprintf(stderr,"%*s[t_disconnect %10ld]\n",indent,(indent>0?" ":""), self->t_disconnect);
         fprintf(stderr,"%*s[tx_count     %10u]\n",indent,(indent>0?" ":""), self->tx_count);
         fprintf(stderr,"%*s[tx_bytes     %10u]\n",indent,(indent>0?" ":""), self->tx_bytes);
         fprintf(stderr,"%*s[rx_count     %10u]\n",indent,(indent>0?" ":""), self->rx_count);

@@ -335,7 +335,7 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
   struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
   /* data structure pointers */
-  struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
+  // struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
   // struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
   // struct mbsys_kmbes_xmt *xmt = (struct mbsys_kmbes_xmt *)&store->xmt[0];
@@ -674,54 +674,6 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
         mrz->pingInfo.soundSpeedAtTxDepth_mPerSec = soundspeednew;
       }
 
-			/* do lever arm correction */
-			if (platform != NULL) {
-				/* calculate sonar Position */
-				status = mb_platform_position(verbose, (void *)platform, pars->target_sensor, 0, navlon, navlat, sensordepth,
-																			heading, roll, pitch, &navlon, &navlat, &sensordepth, error);
-	
-				/* calculate sonar Attitude */
-				status = mb_platform_orientation_target(verbose, (void *)platform, pars->target_sensor, 0, heading, roll, pitch,
-																								&heading, &roll, &pitch, error);
-			}
-
-      /* get transducer angular offsets */
-			mb_3D_orientation tx_align = {0.0, 0.0, 0.0};
-			mb_3D_orientation tx_orientation;
-			double tx_steer;
-			mb_3D_orientation rx_align = {0.0, 0.0, 0.0};
-			mb_3D_orientation rx_orientation;
-			double rx_steer;
-      int tx_sign = 1.0;
-      int rx_sign = 1.0;
-      if (platform != NULL) {
-        status = mb_platform_orientation_offset(verbose, (void *)platform, pars->target_sensor, 0,
-                                                &(tx_align.heading), &(tx_align.roll), &(tx_align.pitch), error);
-
-        // handle reverse mounting of transmit array */
-        if (tx_align.heading > 100.0 || tx_align.heading < -100.0) {
-          tx_align.heading -= 180.0;
-          if (tx_align.heading < 0.0)
-            tx_align.heading += 360.0;
-          //tx_align.heading *= -1;
-          //tx_align.roll *= -1;
-          //tx_align.pitch *= -1;
-          tx_sign = -1.0;
-        }
-
-        status = mb_platform_orientation_offset(verbose, (void *)platform, pars->target_sensor, 1,
-                                                &(rx_align.heading), &(rx_align.roll), &(rx_align.pitch), error);
-        if (rx_align.heading > 100.0 || rx_align.heading < -100.0) {
-          rx_align.heading -= 180.0;
-          if (rx_align.heading < 0.0)
-            rx_align.heading += 360.0;
-          //rx_align.heading *= -1;
-          //rx_align.roll *= -1;
-          //rx_align.pitch *= -1;
-          rx_sign = -1.0;
-        }
-      }
-
       /* if requested apply kluge scaling of sound speed - which means
           changing beam angles by Snell's law and changing the sound
           speed used to calculate Bathymetry */
@@ -736,6 +688,12 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
       // loop over all soundings
       for (int i = 0; i < xmt->xmtPingInfo.numSoundings; i++) {
         /* variables for beam angle calculation */
+        mb_3D_orientation tx_align = {0.0, 0.0, 0.0};
+        mb_3D_orientation tx_orientation;
+        double tx_steer;
+        mb_3D_orientation rx_align = {0.0, 0.0, 0.0};
+        mb_3D_orientation rx_orientation;
+        double rx_steer;
         double reference_heading;
         double beamAzimuth;
         double beamDepression;
@@ -784,18 +742,18 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
             3) flip the sign of the beam steering angle from that array
                 (reverse TX means flip sign of TX steer, reverse RX
                 means flip sign of RX steer) */
-        tx_steer = tx_sign * mrz->sectorInfo[mrz->sounding[i].txSectorNumb].tiltAngleReTx_deg;
+        tx_steer = mrz->sectorInfo[mrz->sounding[i].txSectorNumb].tiltAngleReTx_deg;
         tx_orientation.roll = roll;
         tx_orientation.pitch = pitch;
         tx_orientation.heading = heading;
-        rx_steer = rx_sign * (mrz->sounding[i].beamAngleReRx_deg - mrz->sounding[i].beamAngleCorrection_deg);
+        rx_steer = mrz->sounding[i].beamAngleReRx_deg - mrz->sounding[i].beamAngleCorrection_deg;
         rx_orientation.roll = beamroll;
         rx_orientation.pitch = beampitch;
         rx_orientation.heading = beamheading;
         reference_heading = heading;
-//fprintf(stderr, "%s:%d:%s: beam %d: beamAngleReRx_deg:%f beamAngleCorrection_deg:%f roll:%f %f rx_steer:%f  tx_steer:%f tx att: %f %f %f\n",
+//fprintf(stderr, "%s:%d:%s: beam %d: beamAngleReRx_deg:%f beamAngleCorrection_deg:%f roll:%f %f rx_steer:%f\n",
 //__FILE__, __LINE__, __func__, i, mrz->sounding[i].beamAngleReRx_deg, mrz->sounding[i].beamAngleCorrection_deg,
-//roll, beamroll, rx_steer, tx_steer, roll, pitch, heading);
+//roll, beamroll, rx_steer);
 
         status = mb_beaudoin(verbose, tx_align, tx_orientation, tx_steer, rx_align, rx_orientation, rx_steer,
                              reference_heading, &beamAzimuth, &beamDepression, error);
@@ -838,10 +796,6 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
         xmt->xmtSounding[i].angle_azimuthal = phi;
         xmt->xmtSounding[i].beam_heave = (receive_sensordepth - sensordepth) + (receive_heave - heave);
         xmt->xmtSounding[i].alongtrack_offset = receive_time_delay * xmt->xmtPingInfo.speed;
-//fprintf(stderr, "receive_time_delay:%f xmt->xmtPingInfo.speed:%f\n", receive_time_delay, xmt->xmtPingInfo.speed);
-//fprintf(stderr, "preprocess: imrz:%d beam %d %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f\n",
-//imrz, i, xmt->xmtSounding[i].soundingIndex, xmt->xmtSounding[i].twtt, xmt->xmtSounding[i].angle_vertical, xmt->xmtSounding[i].angle_azimuthal, 
-//0.0, xmt->xmtSounding[i].beam_heave, xmt->xmtSounding[i].alongtrack_offset);
 
         if (kluge_auvsentrysensordepth) {
           mrz->pingInfo.z_waterLevelReRefPoint_m = -sensordepth;
@@ -961,27 +915,23 @@ if (verbose >= 2) {
     }
     *nbath = numSoundings;
     *namp = numSoundings;
-		*nss = MIN(xms->pixels_ss, MBSYS_KMBES_MAX_PIXELS);
-		store->num_pixels = *nss;
-		double pixel_size = xms->pixel_size;
-		int pixels_per_swath = MBSYS_KMBES_MAX_PIXELS / xms->num_swaths;
+    *nss = MIN(xms->pixels_ss, MBSYS_KMBES_MAX_PIXELS);
+    store->num_pixels = *nss;
+    double pixel_size = xms->pixel_size;
+    for (int i = 0; i < MBSYS_KMBES_MAX_PIXELS; i++) {
+      if (xms->ss[i] == MBSYS_KMBES_INVALID_SS
+        || (xms->ss[i] == MBSYS_KMBES_INVALID_AMP && xms->ss_alongtrack[i] == 0.0)) {
+        ss[i] = MB_SIDESCAN_NULL;
+        ssacrosstrack[i] = pixel_size * (i - MBSYS_KMBES_MAX_PIXELS / 2);
+        ssalongtrack[i] = 0.0;
+      } else {
+        ss[i] = xms->ss[i];
+        ssacrosstrack[i] = pixel_size * (i - MBSYS_KMBES_MAX_PIXELS / 2);
+        ssalongtrack[i] = xms->ss_alongtrack[i];
+      }
+    }
 
-		for (int iswath = 0; iswath < xms->num_swaths; iswath++) {
-				int pixel_offset = iswath * pixels_per_swath;
-				int center_pixel = pixel_offset + pixels_per_swath / 2;
-				for (int i = pixel_offset; i < pixel_offset + pixels_per_swath; i++) {
-						ssacrosstrack[i] = pixel_size * (i - center_pixel);
-						if (xms->ss[i] == MBSYS_KMBES_INVALID_SS
-								|| (xms->ss[i] == MBSYS_KMBES_INVALID_AMP && xms->ss_alongtrack[i] == 0.0)) {
-								ss[i] = MB_SIDESCAN_NULL;
-								ssalongtrack[i] = 0.0;
-						} else {
-								ss[i] = xms->ss[i];
-								ssalongtrack[i] = xms->ss_alongtrack[i];
-						}
-				}
-		}
-    if (verbose >= 2) {
+    if (verbose >= 5) {
       fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  Extracted values:\n");
       fprintf(stderr, "dbg4       kind:       %d\n", *kind);
@@ -3235,213 +3185,211 @@ int mbsys_kmbes_makess(
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
 
   /* insert data in structure */
-	if (store->kind == MB_DATA_DATA) {
-		/* get number of swaths */
-		const int num_swaths = (store->n_mrz_read > 0)
-													 ? store->mrz[0].cmnPart.swathsPerPing
-													 : 1;
-		const int pixels_per_swath = MBSYS_KMBES_MAX_PIXELS / num_swaths;
-		
-		/* initialize per-swath sidescan binning arrays */
-		double ss[MBSYS_KMBES_MAX_PIXELS];
-		int ss_cnt[MBSYS_KMBES_MAX_PIXELS];
-		double ssalongtrack[MBSYS_KMBES_MAX_PIXELS];
-		for (int i = 0; i < MBSYS_KMBES_MAX_PIXELS; i++) {
-				ss[i] = 0.0;
-				ss_cnt[i] = 0;
-				ssalongtrack[i] = 0.0;
-		}
-		
-		/* if not set get swath width from sonar settings */
-		if (!swath_width_set) {
-				*swath_width = MAX(fabs(store->mrz[0].pingInfo.portSectorEdge_deg),
-													fabs(store->mrz[0].pingInfo.starbSectorEdge_deg));
-		}
-		
-		/* get median altitude across all sub-pings for pixel size calculation */
-		if (!pixel_size_set) {
-				int nbathsort = 0;
-				double bathsort[MBSYS_KMBES_MAX_PIXELS];
-				for (int imrz = 0; imrz < store->n_mrz_read; imrz++) {
-						struct mbsys_kmbes_mrz *mrz = &store->mrz[imrz];
-						for (int i = 0; i < (mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections); i++) {
-								if (mb_beam_ok(mrz->sounding[i].beamflag)) {
-										bathsort[nbathsort++] = mrz->sounding[i].z_reRefPoint_m;
-								}
-						}
-				}
-				qsort((char *)bathsort, nbathsort, sizeof(double), (void *)mb_double_compare);
-				double median_altitude = bathsort[nbathsort / 2];
-				double pixel_size_calc = 2 * tan(DTR * (*swath_width)) * median_altitude / pixels_per_swath;
-				pixel_size_calc = MAX(pixel_size_calc, median_altitude * tan(DTR * 0.1));
-				if ((*pixel_size) <= 0.0)
-						(*pixel_size) = pixel_size_calc;
-				else if (0.95 * (*pixel_size) > pixel_size_calc)
-						(*pixel_size) = 0.95 * (*pixel_size);
-				else if (1.05 * (*pixel_size) < pixel_size_calc)
-						(*pixel_size) = 1.05 * (*pixel_size);
-				else
-						(*pixel_size) = pixel_size_calc;
-		}
-		
-		/* loop over all sub-ping MRZ datagrams, binning into per-swath pixel strips */
-		for (int imrz = 0; imrz < store->n_mrz_read; imrz++) {
-				struct mbsys_kmbes_mrz *mrz = &store->mrz[imrz];
-		
-				/* determine which strip this swath maps to:
-				 * swathAlongPosition 0 = aft = first strip (pixel offset 0)
-				 * swathAlongPosition 1 = forward = second strip (pixel offset pixels_per_swath) */
-				const int swath_index = mrz->cmnPart.swathAlongPosition;
-				const int pixel_offset = swath_index * pixels_per_swath;
-				const int center_pixel = pixel_offset + pixels_per_swath / 2;
-		
-				int nsoundings = mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections;
-				int nsamples = 0;
-				for (int i = 0; i < nsoundings; i++) {
-						if (mb_beam_ok(mrz->sounding[i].beamflag)) {
-								int k1 = nsamples;
-								int kc = k1 + mrz->sounding[i].SIcentreSample - 1;
-								int k2 = k1 + mrz->sounding[i].SInumSamples - 1;
-		
-								/* dx1, dx2 geometry - same logic as original, unchanged */
-								double dx1, dx2;
-								if (mrz->sounding[i].y_reRefPoint_m < 0.0) {
-										/* port side */
-										dx1 = (i > 0)
-													? (mrz->sounding[i].y_reRefPoint_m - mrz->sounding[i-1].y_reRefPoint_m)
-														/ (mrz->sounding[i].SInumSamples - mrz->sounding[i].SIcentreSample)
-													: 0.0;
-										dx2 = (i < nsoundings - 1)
-													? (mrz->sounding[i+1].y_reRefPoint_m - mrz->sounding[i].y_reRefPoint_m)
-														/ mrz->sounding[i].SIcentreSample
-													: dx1;
-										if (i == 0) dx1 = dx2;
-		
-										for (int k = k1; k <= k2; k++) {
-												double xx = mrz->sounding[i].y_reRefPoint_m
-																		- (k < kc ? dx2 : dx1) * (k - kc);
-												const int kk = center_pixel + (int)(xx / (*pixel_size));
-												if (kk >= pixel_offset && kk < pixel_offset + pixels_per_swath
-																&& mrz->SIsample_desidB[k] > -32767) {
-														ss[kk] += 0.1 * (float)(mrz->SIsample_desidB[k]);
-														ssalongtrack[kk] += mrz->sounding[i].x_reRefPoint_m;
-														ss_cnt[kk]++;
-												}
-										}
-								} else {
-										/* starboard side */
-										dx1 = (i > 0)
-													? (mrz->sounding[i].y_reRefPoint_m - mrz->sounding[i-1].y_reRefPoint_m)
-														/ mrz->sounding[i].SIcentreSample
-													: 0.0;
-										dx2 = (i < nsoundings - 1)
-													? (mrz->sounding[i+1].y_reRefPoint_m - mrz->sounding[i].y_reRefPoint_m)
-														/ (mrz->sounding[i].SInumSamples - mrz->sounding[i].SIcentreSample)
-													: dx1;
-										if (i == 0) dx1 = dx2;
-		
-										for (int k = k1; k <= k2; k++) {
-												double xx = mrz->sounding[i].y_reRefPoint_m
-																		+ (k < kc ? dx1 : dx2) * (k - kc);
-												const int kk = center_pixel + (int)(xx / (*pixel_size));
-												if (kk >= pixel_offset && kk < pixel_offset + pixels_per_swath
-																&& mrz->SIsample_desidB[k] > -32767) {
-														ss[kk] += 0.1 * (float)(mrz->SIsample_desidB[k]);
-														ssalongtrack[kk] += mrz->sounding[i].x_reRefPoint_m;
-														ss_cnt[kk]++;
-												}
-										}
-								}
-								nsamples += mrz->sounding[i].SInumSamples;
-						}
-				}
-		}
-		
-		/* average, find bounds, and interpolate — do this per swath strip */
-		int first = MBSYS_KMBES_MAX_PIXELS;
-		int last = -1;
-		for (int k = 0; k < MBSYS_KMBES_MAX_PIXELS; k++) {
-				if (ss_cnt[k] > 0) {
-						ss[k] /= ss_cnt[k];
-						ssalongtrack[k] /= ss_cnt[k];
-						first = MIN(first, k);
-						last = k;
-				} else {
-						ss[k] = MB_SIDESCAN_NULL;
-				}
-		}
-		
-		/* interpolate within each swath strip only — do not interpolate across the boundary */
-		for (int iswath = 0; iswath < num_swaths; iswath++) {
-				int strip_start = iswath * pixels_per_swath;
-				int strip_end   = strip_start + pixels_per_swath - 1;
-		
-				/* find first and last valid pixel in this strip */
-				int sfirst = strip_end + 1, slast = strip_start - 1;
-				for (int k = strip_start; k <= strip_end; k++) {
-						if (ss_cnt[k] > 0) { sfirst = MIN(sfirst, k); slast = k; }
-				}
-		
-				int k1 = sfirst, k2 = sfirst;
-				for (int k = sfirst + 1; k < slast; k++) {
-						if (ss_cnt[k] <= 0) {
-								if (k2 <= k) {
-										k2 = k + 1;
-										while (ss_cnt[k2] <= 0 && k2 < slast) k2++;
-								}
-								if (k2 - k1 <= pixel_int_use) {
-										ss[k] = ss[k1] + (ss[k2] - ss[k1]) * ((double)(k - k1)) / ((double)(k2 - k1));
-										ssalongtrack[k] = ssalongtrack[k1]
-												+ (ssalongtrack[k2] - ssalongtrack[k1])
-												* ((double)(k - k1)) / ((double)(k2 - k1));
-								}
-						} else {
-								k1 = k;
-						}
-				}
-		}
-		
-		/* insert pseudosidescan into XMS datagram */
-		store->num_pixels = MBSYS_KMBES_MAX_PIXELS;
-		struct mbsys_kmbes_mrz *mrz0 = &store->mrz[0];
-		struct mbsys_kmbes_xms *xms_out = &store->xms;
-		xms_out->header = mrz0->header;
-		xms_out->header.numBytesDgm = MBSYS_KMBES_HEADER_SIZE + 8 * MBSYS_KMBES_MAX_PIXELS + 48;
-		strncpy((char *)xms_out->header.dgmType, "#XMS", 4);
-		xms_out->pingCnt = mrz0->cmnPart.pingCnt;
-		xms_out->spare = 0;
-		xms_out->pixel_size = *pixel_size;
-		xms_out->pixels_ss = MBSYS_KMBES_MAX_PIXELS;
-		xms_out->num_swaths = num_swaths;   /* NEW field */
-		memset((char *)xms_out->unused, 0, 28);
-		for (int k = 0; k < MBSYS_KMBES_MAX_PIXELS; k++) {
-			xms_out->ss[k] = ss[k];
-			xms_out->ss_alongtrack[k] = ssalongtrack[k];
-		}
+  if (store->kind == MB_DATA_DATA) {
 
-		if (verbose >= 4) {
-			fprintf(stderr, "\ndbg5  Values calculated in MBIO function <%s>\n", __func__);
-			fprintf(stderr, "dbg4  xms->header.numBytesDgm:          %d\n", xms_out->header.numBytesDgm);
-			fprintf(stderr, "dbg4  xms->header.dgmType:              %c\n", *xms_out->header.dgmType);
-			fprintf(stderr, "dbg4  xms->pingCnt:                     %d\n", xms_out->pingCnt);
-			fprintf(stderr, "dbg4  xms->spare:                       %d\n", xms_out->spare);
-			fprintf(stderr, "dbg4  xms->pixel_size:                  %f\n", xms_out->pixel_size);
-			fprintf(stderr, "dbg4  xms->pixels_ss:                   %d\n", xms_out->pixels_ss);
-			fprintf(stderr, "dbg4  xms->num_swaths:                  %d\n", xms_out->num_swaths);
-			fprintf(stderr, "dbg4  xms->unused:                      ");
-			for (int i=0; i< 28; i++) {
-				fprintf(stderr, "%x ", xms_out->unused[i]);
-			}
-			fprintf(stderr, "\n");
-			fprintf(stderr, "dbg4  pixel swath xtrack ltrack ss\n");
-			for (int k = 0; k < MBSYS_KMBES_MAX_PIXELS; k++) {
-				int swath = k / pixels_per_swath;
-				int center_pixel = pixels_per_swath * swath + pixels_per_swath / 2;
-				double ssacrosstrack = xms_out->pixel_size * (k - center_pixel);
-				fprintf(stderr, "dbg4    %5d %d   %.3f %.3f %.6f\n", k, swath, ssacrosstrack, ssalongtrack[k], ss[k]);
-			}
-		}
-	}
+    /* initialize the sidescan binning arrays */
+    // double ssacrosstrack[MBSYS_KMBES_MAX_PIXELS];
+    for (int i = 0; i < MBSYS_KMBES_MAX_PIXELS; i++) {
+      ss[i] = 0.0;
+      ss_cnt[i] = 0;
+      // ssacrosstrack[i] = 0.0;
+      ssalongtrack[i] = 0.0;
+    }
+
+    /* if not set get swath width from sonar settings */
+    if (!swath_width_set) {
+      *swath_width = MAX(fabs(store->mrz[0].pingInfo.portSectorEdge_deg),
+                            fabs(store->mrz[0].pingInfo.starbSectorEdge_deg));
+    }
+
+    /* get median altitude if needed to calculate pixel size in meters */
+    if (!pixel_size_set) {
+
+      /* loop over sub-ping datagrams */
+      nbathsort = 0;
+      for(int imrz = 0; imrz < store->n_mrz_read; imrz++) {
+
+        /* get the current MRZ datagram */
+        struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
+
+        /* loop over all soundings to get the median altitude for this ping */
+        for (int i = 0; i < (mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections); i++) {
+          if (mb_beam_ok(mrz->sounding[i].beamflag)) {
+            bathsort[nbathsort] = mrz->sounding[i].z_reRefPoint_m;
+            nbathsort++;
+          }
+        }
+      }
+      qsort((char *)bathsort, nbathsort, sizeof(double), (void *)mb_double_compare);
+      median_altitude = bathsort[nbathsort/2];
+
+      /* calculate pixel size from swath width of median altitude */
+      pixel_size_calc = 2 * tan(DTR * (*swath_width)) * median_altitude / MBSYS_KMBES_MAX_PIXELS;
+      pixel_size_calc = MAX(pixel_size_calc, median_altitude * tan(DTR * 0.1));
+      if ((*pixel_size) <= 0.0)
+        (*pixel_size) = pixel_size_calc;
+      else if (0.95 * (*pixel_size) > pixel_size_calc)
+        (*pixel_size) = 0.95 * (*pixel_size);
+      else if (1.05 * (*pixel_size) < pixel_size_calc)
+        (*pixel_size) = 1.05 * (*pixel_size);
+      else
+        (*pixel_size) = pixel_size_calc;
+    }
+
+    /* loop over all valid soundings, binning the raw backscatter samples into the sidescan */
+    for(int imrz = 0; imrz < store->n_mrz_read; imrz++) {
+
+      /* get the current MRZ datagram */
+      struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
+
+      /* get raw sample size */
+      // const double sample_size_m = 750.0 / mrz->rxInfo.seabedImageSampleRate;
+
+      /* use only valid, unflagged soundings */
+      nsoundings = mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections;
+      nsamples = 0;
+      for (int i = 0; i < nsoundings; i++) {
+        if (mb_beam_ok(mrz->sounding[i].beamflag)) {
+
+          /* deal with backscatter samples */
+          k1 = nsamples;
+          kc = k1 + mrz->sounding[i].SIcentreSample - 1;
+          k2 = k1 + mrz->sounding[i].SInumSamples - 1;
+
+          /* calculate nominal pixel size */
+          // const double dx = sample_size_m * sin(DTR * mrz->sounding[i].beamAngleReRx_deg);
+
+          /* deal with sounding to port of nadir - samples ordered right-to-left */
+          if (mrz->sounding[i].y_reRefPoint_m < 0.0) {
+            if (i > 0) {
+              dx1 = (mrz->sounding[i].y_reRefPoint_m - mrz->sounding[i-1].y_reRefPoint_m)
+                      / (mrz->sounding[i].SInumSamples - mrz->sounding[i].SIcentreSample);
+            }
+            if (i < nsoundings - 1) {
+              dx2 = (mrz->sounding[i+1].y_reRefPoint_m - mrz->sounding[i].y_reRefPoint_m)
+                      / (mrz->sounding[i].SIcentreSample);
+            }
+            if (i== 0) {
+              dx1 = dx2;
+            }
+            if (i == nsoundings - 1) {
+              dx2 = dx1;
+            }
+            for (int k = k1; k < kc; k++) {
+              xx = mrz->sounding[i].y_reRefPoint_m - dx2 * (k - kc);
+              const int kk = MBSYS_KMBES_MAX_PIXELS / 2 + (int)(xx / (*pixel_size));
+              if (kk > 0 && kk < MBSYS_KMBES_MAX_PIXELS && mrz->SIsample_desidB[k] > -32767) {
+                ss[kk] += 0.1 * (float)(mrz->SIsample_desidB[k]);
+                ssalongtrack[kk] += mrz->sounding[i].x_reRefPoint_m;
+                ss_cnt[kk]++;
+              }
+            }
+            for (int k = kc; k <= k2; k++) {
+              xx = mrz->sounding[i].y_reRefPoint_m - dx1 * (k - kc);
+              const int kk = MBSYS_KMBES_MAX_PIXELS / 2 + (int)(xx / (*pixel_size));
+              if (kk > 0 && kk < MBSYS_KMBES_MAX_PIXELS && mrz->SIsample_desidB[k] > -32767) {
+                ss[kk] += 0.1 * (float)(mrz->SIsample_desidB[k]);
+                ssalongtrack[kk] += mrz->sounding[i].x_reRefPoint_m;
+                ss_cnt[kk]++;
+              }
+            }
+          }
+
+          /* else deal with sounding to starboard of nadir - samples ordered left-to-right */
+          else {
+            if (i > 0) {
+              dx1 = (mrz->sounding[i].y_reRefPoint_m - mrz->sounding[i-1].y_reRefPoint_m)
+                      / (mrz->sounding[i].SIcentreSample);
+            }
+            if (i < nsoundings - 1) {
+              dx2 = (mrz->sounding[i+1].y_reRefPoint_m - mrz->sounding[i].y_reRefPoint_m)
+                      / (mrz->sounding[i].SInumSamples - mrz->sounding[i].SIcentreSample);
+            }
+            if (i== 0) {
+              dx1 = dx2;
+            }
+            if (i == nsoundings - 1) {
+              dx2 = dx1;
+            }
+            for (int k = k1; k < kc; k++) {
+              xx = mrz->sounding[i].y_reRefPoint_m + dx1 * (k - kc);
+              const int kk = MBSYS_KMBES_MAX_PIXELS / 2 + (int)(xx / (*pixel_size));
+              if (kk > 0 && kk < MBSYS_KMBES_MAX_PIXELS && mrz->SIsample_desidB[k] > -32767) {
+                ss[kk] += 0.1 * (float)(mrz->SIsample_desidB[k]);
+                ssalongtrack[kk] += mrz->sounding[i].x_reRefPoint_m;
+                ss_cnt[kk]++;
+              }
+            }
+            for (int k = kc; k <= k2; k++) {
+              xx = mrz->sounding[i].y_reRefPoint_m + dx2 * (k - kc);
+              const int kk = MBSYS_KMBES_MAX_PIXELS / 2 + (int)(xx / (*pixel_size));
+              if (kk > 0 && kk < MBSYS_KMBES_MAX_PIXELS && mrz->SIsample_desidB[k] > -32767) {
+                ss[kk] += 0.1 * (float)(mrz->SIsample_desidB[k]);
+                ssalongtrack[kk] += mrz->sounding[i].x_reRefPoint_m;
+                ss_cnt[kk]++;
+              }
+            }
+          }
+          nsamples += mrz->sounding[i].SInumSamples;
+        }
+      }
+    }
+
+    /* average the sidescan */
+    first = MBSYS_KMBES_MAX_PIXELS;
+    last = -1;
+    // double ssacrosstrack[MBSYS_KMBES_MAX_PIXELS];
+    for (int k = 0; k < MBSYS_KMBES_MAX_PIXELS; k++) {
+      if (ss_cnt[k] > 0) {
+        ss[k] /= ss_cnt[k];
+        ssalongtrack[k] /= ss_cnt[k];
+        // ssacrosstrack[k] = (k - MBSYS_KMBES_MAX_PIXELS / 2) * (*pixel_size);
+        first = MIN(first, k);
+        last = k;
+      }
+      else
+        ss[k] = MB_SIDESCAN_NULL;
+    }
+
+    /* interpolate the sidescan */
+    k1 = first;
+    k2 = first;
+    for (int k = first + 1; k < last; k++) {
+      if (ss_cnt[k] <= 0) {
+        if (k2 <= k) {
+          k2 = k + 1;
+          while (ss_cnt[k2] <= 0 && k2 < last)
+            k2++;
+        }
+        if (k2 - k1 <= pixel_int_use) {
+          ss[k] = ss[k1] + (ss[k2] - ss[k1]) * ((double)(k - k1)) / ((double)(k2 - k1));
+          // ssacrosstrack[k] = (k - MBSYS_KMBES_MAX_PIXELS / 2) * (*pixel_size);
+          ssalongtrack[k] =
+              ssalongtrack[k1] + (ssalongtrack[k2] - ssalongtrack[k1]) * ((double)(k - k1)) / ((double)(k2 - k1));
+        }
+      }
+      else {
+        k1 = k;
+      }
+    }
+
+    /* insert the pseudosidescan into the data structure for an XMS datagram */
+    store->num_pixels = MBSYS_KMBES_MAX_PIXELS;
+    struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
+    struct mbsys_kmbes_xms *xms = (struct mbsys_kmbes_xms *)&store->xms;
+    xms->header = mrz->header;
+    xms->header.numBytesDgm = MBSYS_KMBES_HEADER_SIZE + 8 * MBSYS_KMBES_MAX_PIXELS + 48;
+    strncpy((char *)xms->header.dgmType, "#XMS", 4);
+    xms->pingCnt = mrz->cmnPart.pingCnt;
+    xms->spare = 0;
+    xms->pixel_size = *pixel_size;
+    xms->pixels_ss = MBSYS_KMBES_MAX_PIXELS;
+    memset((char *)xms->unused, 0, 32);
+    for (int k = 0; k < xms->pixels_ss; k++) {
+      xms->ss[k] = ss[k];
+      xms->ss_alongtrack[k] = ssalongtrack[k];
+    }
+  }
 
   const int status = MB_SUCCESS;
 

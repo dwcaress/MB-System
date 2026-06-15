@@ -404,8 +404,8 @@ int main(int argc, char *argv[])
 
         	// format and print message
             // summary
-            fprintf(stderr,"SUB - mrx msg[%-*s] len[%7lld]  src[%s : %hu]\n",
-                    wmsg, (aout_en?rxbuf:""), (long long)tx_bytes,
+            fprintf(stderr,"SUB - mrx msg[%-*s] len[%7lu]  src[%s : %hu]\n",
+                    wmsg, (aout_en?rxbuf:""), tx_bytes,
                     inet_ntoa(x_addr.sin_addr),
                     htons(x_addr.sin_port));
 
@@ -435,8 +435,8 @@ int main(int argc, char *argv[])
             if( (tx_bytes=sendto(fd, txbuf, tx_len, 0, (struct sockaddr *) &x_addr,
                                addrlen))>0){
 
-                fprintf(stderr,"SUB - utx msg[%-*s] len[%3zu/%-3lld] dest[%s : %hu]\n",
-                        wmsg, txbuf, (size_t)tx_len,(long long)tx_bytes,
+                fprintf(stderr,"SUB - utx msg[%-*s] len[%3lu/%-3lu] dest[%s : %hu]\n",
+                        wmsg, txbuf, tx_len,tx_bytes,
                         inet_ntoa(x_addr.sin_addr),
                         htons(x_addr.sin_port));
 
@@ -449,8 +449,8 @@ int main(int argc, char *argv[])
                 if ((rx_bytes=recvfrom(fd, rxbuf, MSGBUFSIZE, 0,
                                      (struct sockaddr *) &x_addr, &addrlen)) > 0){
 
-                    fprintf(stderr,"SUB - urx msg[%-*s] len[%7lld]  src[%s : %hu]\n",
-                            wmsg, rxbuf, (long long)rx_bytes,
+                    fprintf(stderr,"SUB - urx msg[%-*s] len[%7lu]  src[%s : %hu]\n",
+                            wmsg, rxbuf, rx_bytes,
                             inet_ntoa(x_addr.sin_addr),
                             htons(x_addr.sin_port));
                 }

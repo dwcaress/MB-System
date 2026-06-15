@@ -16,6 +16,10 @@
 
 
 
+/* mb_define.h is force-included on MSVC and defines an identical XdrOp/XDR
+   under _MB_WIN_XDR_DEFINED; guard ours so we don't redefine them. */
+#ifndef _MB_WIN_XDR_DEFINED
+#define _MB_WIN_XDR_DEFINED
 typedef enum
 {
 	XDR_ENCODE=0,
@@ -32,6 +36,7 @@ typedef struct
   char*   x_base;
   int       x_handy;
 } XDR;
+#endif
 
 
 void xdrstdio_create(XDR* xdrs,FILE* file,XdrOp op);

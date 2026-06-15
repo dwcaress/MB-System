@@ -7,10 +7,6 @@
 
 #include "OctreeSupport.hpp"
 
-#ifdef _MSC_VER
-#pragma warning(disable: 4661) /* explicit instantiation of Octree<bool> methods unused */
-#endif
-
 template <class ValueType>
 bool
 Octree<ValueType>::OctreeNode::

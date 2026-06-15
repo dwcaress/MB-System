@@ -64,36 +64,36 @@ long tmpspheroid;	/* temporary spheroid for UTM			*/
 
 	/* Function declarations for inverse function pointer
 	---------------------------------------------------*/
-long utminv(double, double, double *, double *);
-long stplninv(double, double, double *, double *);
-long alberinv(double, double, double *, double *);
-long lamccinv(double, double, double *, double *);
-long merinv(double, double, double *, double *);
-long psinv(double, double, double *, double *);
-long polyinv(double, double, double *, double *);
-long eqconinv(double, double, double *, double *);
-long tminv(double, double, double *, double *);
-long sterinv(double, double, double *, double *);
-long lamazinv(double, double, double *, double *);
-long aziminv(double, double, double *, double *);
-long gnominv(double, double, double *, double *);
-long orthinv(double, double, double *, double *);
-long gvnspinv(double, double, double *, double *);
-long sininv(double, double, double *, double *);
-long equiinv(double, double, double *, double *);
-long millinv(double, double, double *, double *);
-long vandginv(double, double, double *, double *);
-long omerinv(double, double, double *, double *);
-long sominv(double, double, double *, double *);
-long haminv(double, double, double *, double *);
-long robinv(double, double, double *, double *);
-long goodinv(double, double, double *, double *);
-long molwinv(double, double, double *, double *);
-long imolwinv(double, double, double *, double *);
-long alconinv(double, double, double *, double *);
-long wivinv(double, double, double *, double *);
-long wviiinv(double, double, double *, double *);
-long obleqinv(double, double, double *, double *);
+long utminv();
+long stplninv();
+long alberinv();
+long lamccinv();
+long merinv();
+long psinv();
+long polyinv();
+long eqconinv();
+long tminv();
+long sterinv();
+long lamazinv();
+long aziminv();
+long gnominv();
+long orthinv();
+long gvnspinv();
+long sininv();
+long equiinv();
+long millinv();
+long vandginv();
+long omerinv();
+long sominv();
+long haminv();
+long robinv();
+long goodinv();
+long molwinv();
+long imolwinv();
+long alconinv();
+long wivinv();
+long wviiinv();
+long obleqinv();
 
 /* Initialize inverse transformations
 -----------------------------------*/

@@ -700,7 +700,7 @@ static void *s_server_publish(void *arg)
                                     if(svr->cfg->xds>1){
                                         time_t xdnow=time(NULL);
                                         if ( (xdnow-svr->cfg->xdstart) >= svr->cfg->xdt) {
-                                            fprintf(stderr,"xdelay[%lld][%d]\n",(long long)svr->cfg->xdt, svr->cfg->xds);
+                                            fprintf(stderr,"xdelay[%ld][%d]\n",svr->cfg->xdt, svr->cfg->xds);
                                             sleep(svr->cfg->xds);
                                             svr->cfg->xdstart=xdnow;
                                         }
@@ -1196,7 +1196,7 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
                 }
                 // xdelay
                 else if (strcmp("xdelay", options[option_index].name) == 0) {
-                    { long long _xdt_tmp=0; sscanf(optarg,"%lld/%d",&_xdt_tmp,&cfg->xds); cfg->xdt=(time_t)_xdt_tmp; }
+                    sscanf(optarg,"%ld/%d",&cfg->xdt,&cfg->xds);
                 }
                 // nf
                 else if (strcmp("nf", options[option_index].name) == 0) {

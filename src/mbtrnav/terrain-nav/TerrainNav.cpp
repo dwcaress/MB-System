@@ -987,13 +987,13 @@ void TerrainNav::computeMeasVariance(measT& currMeas) {
 	//compute variance based on sensor's percent range error
 	if(currMeas.dataType == TRN_SENSOR_MB) { // mb measurement
 		for(int i = 0; i < currMeas.numMeas; i++) {
-			double rangeSq = pow(currMeas.crossTrack[i], 2.0) + pow(currMeas.alongTrack[i], 2.0)
-					  + pow(currMeas.altitudes[i], 2.0);
-			currMeas.covariance[i] = rangeSq * pow(perError / 100.0, 2.0);
+			double rangeSq = pow(currMeas.crossTrack[i], 2) + pow(currMeas.alongTrack[i], 2)
+					  + pow(currMeas.altitudes[i], 2);
+			currMeas.covariance[i] = rangeSq * pow(perError / 100.0, 2);
 		}
 	} else { //dvl or altimeter measurement
 		for(int i = 0; i < currMeas.numMeas; i++) {
-			currMeas.covariance[i] = pow(currMeas.ranges[i] * perError / 100.0, 2.0);
+			currMeas.covariance[i] = pow(currMeas.ranges[i] * perError / 100.0, 2);
 		}
 	}
 
@@ -1485,7 +1485,7 @@ char *TerrainNav::getSessionDir(const char *dir_prefix, char *dest, size_t len, 
     const char *db_prefix = (dir_prefix != NULL ? dir_prefix : LOGDIR_DFL);
     size_t db_len = strlen(db_prefix) + 1;
 
-    char *dir_base = (char*)alloca(db_len);  /* was VLA: char dir_base[db_len]; */
+    char dir_base[db_len];
     memset(dir_base, 0, db_len);
 
     snprintf(dir_base, db_len, "%s", db_prefix);
@@ -1506,7 +1506,7 @@ char *TerrainNav::getSessionDir(const char *dir_prefix, char *dest, size_t len, 
     fprintf(stderr,"%s:%d - dir_prefix[%s] db_prefix[%s] dir_base[%s] logPath[%s] del[%s]\n",__func__,  __LINE__,dir_prefix, db_prefix, dir_base, logPath, del);
 
     size_t sd_len = strlen(logPath) + strlen(dir_base) + strlen(del) + strlen("/TRN.dddd");
-    char *sessiondir = (char*)alloca(sd_len);  /* was VLA */
+    char sessiondir[sd_len];
     memset(sessiondir, 0, sd_len);
 
 

@@ -796,7 +796,7 @@ static void s_init_log(trnucli_ctx_t *ctx)
                 gmt->tm_hour,gmt->tm_min,gmt->tm_sec);
 
 
-        snprintf(ctx->log_path, TRNUCLI_LOG_PATH_BYTES, "%s//%s-%s-%0llx-%s",ctx->log_dir,ctx->log_name,session_date,(unsigned long long)(uintptr_t)ctx,TRNUCLI_TEST_LOG_EXT);
+        snprintf(ctx->log_path, TRNUCLI_LOG_PATH_BYTES, "%s//%s-%s-%0lx-%s",ctx->log_dir,ctx->log_name,session_date,((unsigned long )ctx),TRNUCLI_TEST_LOG_EXT);
 
         ctx->log_id = mlog_get_instance(ctx->log_path, ctx->log_cfg, ctx->log_name);
 

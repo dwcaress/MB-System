@@ -35,7 +35,11 @@
 #include <exception>
 #include <typeinfo>
 #include <stdexcept>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 #include <limits.h>
 #include <sys/stat.h>
 #include <ctime>

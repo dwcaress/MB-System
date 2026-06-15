@@ -1,0 +1,62 @@
+LIBRARY
+; Extracted from those declared as 'extern' in .h files
+
+EXPORTS
+; from mbbs.h
+    mbbs_appendlog
+    mbbs_appendstr
+    mbbs_cal2jul
+    mbbs_copypng
+    mbbs_freebsfmem
+    mbbs_getpngdataptrs
+    mbbs_isnand
+    mbbs_isnanf
+    mbbs_jul2cal
+    mbbs_leapyr
+    mbbs_mrkget
+    mbbs_mrkmemalloc
+    mbbs_mrkset
+    mbbs_nand
+    mbbs_nanf
+    mbbs_pngdatabufsz
+    mbbs_pngmemalloc
+    mbbs_pngrealloc
+    mbbs_rdbsfhdr
+    mbbs_rdpng
+    mbbs_rdpngdata
+    mbbs_rdpnghdr
+    mbbs_rdpngpddata
+    mbbs_rdversion
+    mbbs_replacestr
+    mbbs_seekpng
+    mbbs_seekpngdata
+    mbbs_setgmttz
+    mbbs_setswradius
+    mbbs_splitfile
+    mbbs_striptail
+    mbbs_tmparse
+    mbbs_tmparsegmttz
+    mbbs_wrbsfhdr
+    mbbs_wrfflagsclrbits
+    mbbs_wrfflagssetbits
+    mbbs_wrpflagsclrbits
+    mbbs_wrpflags
+    mbbs_wrpflagssetbits
+    mbbs_wrpng
+    mbbs_wrpngdata
+    mbbs_wrpngpddata
+    mbbs_wrpnghdr
+    mbbs_wrsllc
+    mbbs_wrtll
+    mbbs_wrtllc
+    mbbs_xdrstring
+; from mbbs_mem.h
+    mbbs_memalloc
+    mbbs_memmaxalloc
+; from mbbs_io.h
+    mbbs_getpngdataptrs
+    mbbs_nand
+    mbbs_nanf
+    mbbs_pngmemalloc
+    mbbs_mr1_xdrpnghdrv1
+    mbbs_mr1_xdrpnghdrv2

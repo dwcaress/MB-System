@@ -123,7 +123,7 @@ measUpdate(measT& currMeas) {
 	*/
 	Matrix beamsVF(3, currMeas.numMeas);
 	Matrix tempBeamsVF(3, currMeas.numMeas);
-	int *beamIndices = (int*)alloca(sizeof(int) * currMeas.numMeas);  //beamsVF to currMeas index correspondence (was VLA)
+	int beamIndices[currMeas.numMeas];  //beamsVF to currMeas index correspondence
 	double sumSquaresWeights = 0;
 	double sumWeights = 0;
 	double sumMeasWeights = 0;
@@ -134,7 +134,7 @@ measUpdate(measT& currMeas) {
 	bool successfulMeas = false;
 
 	double nisVal = 0.0;
-	double *totalVar = (double*)alloca(sizeof(double) * currMeas.numMeas);
+	double totalVar[currMeas.numMeas];
 	double mapVar = 1;//map variance for adding into sensor variance
 	double modMapVar = 0.01;//map variance for calculating delta_rms and alpha
 
@@ -316,9 +316,9 @@ measUpdate(measT& currMeas) {
 				bool atLeastOneBeamUsed = false;
 
 				//tempWeights allows reverting (ignoring this measirement) if it results in Nan values somehow
-				double *tempWeights             = (double*)alloca(sizeof(double) * nParticles);
-				double *tempWindowedNis         = (double*)alloca(sizeof(double) * nParticles);
-				int    *numBeamsForEachParticle = (int*)   alloca(sizeof(int)    * nParticles);
+				double tempWeights[nParticles];
+				double tempWindowedNis[nParticles];
+				int numBeamsForEachParticle[nParticles];
 				for(int indexP = 0; indexP < nParticles; indexP++) {
 					tempWeights[indexP] = allParticles[indexP].weight;
 					tempWindowedNis[indexP] = 0.0;
@@ -332,15 +332,15 @@ measUpdate(measT& currMeas) {
 					}
 
 					//particle indices in subcloud
-					int *particleIndicies = (int*)alloca(sizeof(int) * nParticles);
+					int particleIndicies[nParticles];
 					int numParticlesWithBeamM = 0;
 
 					//indicies for particles not in the subcloud; needed for correctly handling their weights
-					int *nonSubcloudIndicies = (int*)alloca(sizeof(int) * nParticles);
+					int nonSubcloudIndicies[nParticles];
 					int nonSubcloudCount = 0;
 
 					//we need to normalize the conditional distribution of particles with beam M
-					double *tempSubcloudWeights = (double*)alloca(sizeof(double) * nParticles);
+					double tempSubcloudWeights[nParticles];
 					double sumWeightsInSubcloud = 0.0;
 
 					for(int indexP = 0; indexP < nParticles; indexP++){
@@ -368,7 +368,7 @@ measUpdate(measT& currMeas) {
 					}
 
 					//for calculating alpha and weight updates
-					double *weightUpdatesForSubcloud = (double*)alloca(sizeof(double) * nParticles);
+					double weightUpdatesForSubcloud[nParticles];
 					double totalVariance = mapVar + currMeas.covariance[beamIndices[indexM]];
 					double meanExpectedMeasurementDifference = 0;
 					double partialDeltaRmsComputation = 0;
@@ -377,7 +377,7 @@ measUpdate(measT& currMeas) {
 
 					for(int indexS = 0; indexS < numParticlesWithBeamM; indexS++){
 						//weight update
-						weightUpdatesForSubcloud[indexS] = exp(-0.5 * pow(allParticles[particleIndicies[indexS]].expectedMeasDiff[indexM], 2.0) / totalVariance);
+						weightUpdatesForSubcloud[indexS] = exp(-0.5 * pow(allParticles[particleIndicies[indexS]].expectedMeasDiff[indexM],2) / totalVariance);
 
 						//normalize subcloud weights
 						tempSubcloudWeights[indexS] = tempSubcloudWeights[indexS]/sumWeightsInSubcloud;
@@ -388,10 +388,10 @@ measUpdate(measT& currMeas) {
 						partialOneMinusSumSquareWeights -= tempSubcloudWeights[indexS] * tempSubcloudWeights[indexS];
 
 						//for particle NIS calculations; part of Subcloud NIS
-						subcloudInnovationVariance += pow(allParticles[particleIndicies[indexS]].expectedMeasDiff[indexM], 2.0) * allParticles[particleIndicies[indexS]].weight -
-							pow(allParticles[particleIndicies[indexS]].expectedMeasDiff[indexM] * allParticles[particleIndicies[indexS]].weight, 2.0);
+						subcloudInnovationVariance += pow(allParticles[particleIndicies[indexS]].expectedMeasDiff[indexM], 2) * allParticles[particleIndicies[indexS]].weight -
+							pow(allParticles[particleIndicies[indexS]].expectedMeasDiff[indexM] * allParticles[particleIndicies[indexS]].weight, 2);
 
-						tempWindowedNis[particleIndicies[indexS]] += pow(allParticles[particleIndicies[indexS]].expectedMeasDiff[indexM], 2.0) / (totalVariance + subcloudInnovationVariance);
+						tempWindowedNis[particleIndicies[indexS]] += pow(allParticles[particleIndicies[indexS]].expectedMeasDiff[indexM],2) / (totalVariance + subcloudInnovationVariance);
 					}
 
 					double alpha;
@@ -511,8 +511,8 @@ measUpdate(measT& currMeas) {
 				//	max of MAX_CROSS_BEAM_COMPARISONS
 				//	Also find the particle with the fewest good beams in case it's less
 				//	currently takes beams in numbered order rather than randomly or ordered by terrain information
-				int *numGoodBeamsParticle = (int*)alloca(sizeof(int) * nParticles);
-				int *goodBeamIndicies     = (int*)alloca(sizeof(int) * nParticles * MAX_CROSS_BEAM_COMPARISONS);
+				int numGoodBeamsParticle[nParticles];
+				int goodBeamIndicies[nParticles * MAX_CROSS_BEAM_COMPARISONS];
 				for(int indexP = 0; indexP < nParticles; indexP++) {
 					numGoodBeamsParticle[indexP] = 0;
 				}
@@ -538,13 +538,13 @@ measUpdate(measT& currMeas) {
 				}
 
 				//tempWeights allows reverting (ignoring this measirement) if it results in Nan values somehow
-				double *tempWeights = (double*)alloca(sizeof(double) * nParticles);
+				double tempWeights[nParticles];
 				for(int indexP = 0; indexP < nParticles; indexP++) {
 					tempWeights[indexP] = allParticles[indexP].weight;
 				}
 
 				//compute the weight updates
-				double *tempWeightUpdate = (double*)alloca(sizeof(double) * nParticles);
+				double tempWeightUpdate[nParticles];
 				for(int beamNumber=0; beamNumber < minNumBeams; beamNumber++){
 
 					double partialDeltaRmsComputation = 0;
@@ -564,7 +564,7 @@ measUpdate(measT& currMeas) {
 							maxSensorVar = currMeas.covariance[beamIndices[goodBeamIndicies[indexP * MAX_CROSS_BEAM_COMPARISONS + beamNumber]]];
 						}
 
-						tempWeightUpdate[indexP] = exp(-0.5 * pow(allParticles[indexP].expectedMeasDiff[goodBeamIndicies[indexP * MAX_CROSS_BEAM_COMPARISONS + beamNumber]], 2.0) / totalVariance);
+						tempWeightUpdate[indexP] = exp(-0.5 * pow(allParticles[indexP].expectedMeasDiff[goodBeamIndicies[indexP * MAX_CROSS_BEAM_COMPARISONS + beamNumber]],2) / totalVariance);
 						double beamEndpointTerrainDepth = 0;
 						beamEndpointTerrainDepth = allParticles[indexP].position[2] + beamsVF(3, goodBeamIndicies[indexP * MAX_CROSS_BEAM_COMPARISONS + beamNumber] + 1);
 
@@ -660,7 +660,7 @@ measUpdate(measT& currMeas) {
 					if(this->useBeam[beamInd]){	//edit to allow using any good beams from measurement
 						for(i = 0; i < nParticles; i++) {
 							//As we already have the expected measurement difference, compute mean and square of measurement difference
-							mapSquared[beamInd] += pow(allParticles[i].expectedMeasDiff[beamInd], 2.0) * allParticles[i].weight;
+							mapSquared[beamInd] += pow(allParticles[i].expectedMeasDiff[beamInd], 2) * allParticles[i].weight;
 							mapMean[beamInd] += allParticles[i].expectedMeasDiff[beamInd] * allParticles[i].weight;
 						}
 					}
@@ -678,7 +678,7 @@ measUpdate(measT& currMeas) {
 				for(i = 0; i < beamsVF.Ncols(); i++) {
 
 					beamVar[i] = currMeas.covariance[beamIndices[i]];
-					mapVariance[i] = mapSquared[i] - pow(mapMean[i], 2.0);
+					mapVariance[i] = mapSquared[i] - pow(mapMean[i], 2);
 					if(mapVariance[i] > modMapVar) {
 						mapInfoCov[i] = mapVariance[i] - modMapVar;
 					} else {
@@ -739,7 +739,7 @@ measUpdate(measT& currMeas) {
 
 						//As we already have the expected measurement difference, just apply the measurement model to it
 						sumWeightedError += (1.0 / (totalVar[beamInd])) * allParticles[i].expectedMeasDiff[beamInd]; //Weighted mean error
-						sumSquaredError += (1.0 / (totalVar[beamInd])) * pow(allParticles[i].expectedMeasDiff[beamInd], 2.0); //Weighted Squared Error
+						sumSquaredError += (1.0 / (totalVar[beamInd])) * pow(allParticles[i].expectedMeasDiff[beamInd], 2); //Weighted Squared Error
 						sumInvVar += (1.0 / (totalVar[beamInd]));		//Beam Variance
 						//					logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),"TNavPF:totalVar[%i] is %f\n",beamInd,totalVar[beamInd]);
 						if(ISNIN(sumSquaredError))
@@ -766,7 +766,7 @@ measUpdate(measT& currMeas) {
 					}
 
 					//calculate likelihood equation.
-					//currMeasWeights[i] = exp(-0.5*(sumSquaredError-2*currDepthBias*sumWeightedError+pow(currDepthBias, 2.0)*sumInvVar));
+					//currMeasWeights[i] = exp(-0.5*(sumSquaredError-2*currDepthBias*sumWeightedError+pow(currDepthBias,2)*sumInvVar));
 					currMeasWeights[i] = exp(-0.5 * (sumSquaredError - currDepthBias * sumWeightedError));
 					//newWeight *= exp(-0.5*(currDepthBias*currDepthBias));
 				} else {
@@ -831,10 +831,10 @@ measUpdate(measT& currMeas) {
 					//currMeasWeight was not nan for the particular failure I examined.
 					//sumWeights == 0.0
 
-					sumSquaresWeights += pow(allParticles[i].weight, 2.0);
+					sumSquaresWeights += pow(allParticles[i].weight, 2);
 					//compute variance of measurement weights
 					currMeasWeights[i] /= sumMeasWeights;
-					measVariance += pow(currMeasWeights[i] - 1.0 / nParticles, 2.0) / nParticles;
+					measVariance += pow(currMeasWeights[i] - 1.0 / nParticles, 2) / nParticles;
 					if(saveDirectory != NULL) {
 						//logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),"%.2f",currMeasWeights[i]);
 						measWeightsFile << currMeasWeights[i] << "\t";
@@ -1506,8 +1506,8 @@ attitudeMeasUpdate(const poseT& currPose) {
 
 	//Loop through & apply measurement update to all particles
 	for(i = 0; i < nParticles; i++) {
-		sumSquaredError = (1.0 / phiVar) * pow(allParticles[i].attitude[0] - currPose.phi, 2.0)
-						  + (1.0 / thetaVar) * pow(allParticles[i].attitude[1] - currPose.theta, 2.0);
+		sumSquaredError = (1.0 / phiVar) * pow(allParticles[i].attitude[0] - currPose.phi, 2)
+						  + (1.0 / thetaVar) * pow(allParticles[i].attitude[1] - currPose.theta, 2);
 		measProb = pow(2 * PI, -1.0) * pow(thetaVar * phiVar, -0.5) *
 				   exp(-0.5 * sumSquaredError);
 		allParticles[i].weight *= measProb;
@@ -1516,7 +1516,7 @@ attitudeMeasUpdate(const poseT& currPose) {
 	//Normalize the distribution
 	for(i = 0; i < nParticles; i++) {
 		allParticles[i].weight /= sumWeights;
-		sumSquaresWeights += pow(allParticles[i].weight, 2.0);
+		sumSquaresWeights += pow(allParticles[i].weight, 2);
 	}
 	effSampSize = 1.0 / sumSquaresWeights;
 

@@ -50,24 +50,6 @@
 message("In src/mbtrnav")
 #
 #------------------------------------------------------------------------------
-# Compiler-specific flag sets. MSVC cl.exe does not accept GCC/Clang -Wno-* or
-# -std= flags (errors with D8021 "invalid numeric argument"). Use empty lists
-# on MSVC; on GCC/Clang use the originals.
-if(MSVC)
-  set(MBTRN_WARN_OPTS "")
-  set(MBTRN_CXX_STD_OPT "")
-else()
-  set(MBTRN_WARN_OPTS
-    -Wno-deprecated-non-prototype
-    -Wno-unused-result
-    -Wno-unused-variable
-    -Wno-unused-but-set-variable
-    -Wno-uninitialized
-    -Wno-sometimes-uninitialized)
-  set(MBTRN_CXX_STD_OPT -std=c++11)
-endif()
-#
-#------------------------------------------------------------------------------
 # set build option defaults
 option(buildVerbose "build with verbose output" ON)
 option(buildTRNOptional "build targets in buildTRNOptional" OFF)
@@ -271,14 +253,21 @@ add_library(geolib
    ${GCTP_SRC_DIR}/br_gctp.c
 )
 
-target_compile_options(geolib PRIVATE ${MBTRN_WARN_OPTS})
+target_compile_options(geolib PRIVATE
+"-Wno-deprecated-non-prototype"
+"-Wno-unused-result"
+"-Wno-unused-variable"
+"-Wno-unused-but-set-variable"
+"-Wno-uninitialized"
+"-Wno-sometimes-uninitialized"
+)
 
 #
 #------------------------------------------------------------------------------
 #
 # build libnewmat (matrix math)
 
-add_library(newmat
+add_library(newmat 
    ${NEWMAT_SRC_DIR}/newmat1.cpp
    ${NEWMAT_SRC_DIR}/newmat2.cpp
    ${NEWMAT_SRC_DIR}/newmat3.cpp
@@ -371,7 +360,7 @@ target_include_directories(tnav PRIVATE BEFORE
 )
 
 target_compile_options(tnav PRIVATE
-${MBTRN_CXX_STD_OPT}
+-std=c++11
 )
 
 #
@@ -392,7 +381,7 @@ target_include_directories(geocon PRIVATE BEFORE
 )
 
 target_compile_options(geocon PRIVATE
-${MBTRN_CXX_STD_OPT}
+-std=c++11
 )
 
 #
@@ -408,7 +397,7 @@ add_library(trnw
 )
 
 # specify include paths and libraries
-target_link_libraries(trnw PRIVATE tnav qnx newmat geocon ${MB_SYSLIBS})
+target_link_libraries(trnw PRIVATE tnav qnx newmat geocon m pthread)
 
 target_include_directories(trnw PRIVATE BEFORE
     ${CMAKE_SOURCE_DIR}/src/mbio
@@ -476,7 +465,7 @@ target_include_directories(trncli PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
 )
 target_compile_options(trncli PRIVATE
-${MBTRN_CXX_STD_OPT}
+-std=c++11
 )
 
 #
@@ -579,7 +568,7 @@ add_executable(mb1rs
 )
 
 # specify include paths and libraries
-target_link_libraries(mb1rs PRIVATE mbtrnframe ${MB_SYSLIBS})
+target_link_libraries(mb1rs PRIVATE mbtrnframe m)
 
 target_include_directories(mb1rs PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
@@ -606,7 +595,7 @@ target_include_directories(trn-player PRIVATE BEFORE
 )
 
 target_compile_options(trn-player PRIVATE
-${MBTRN_CXX_STD_OPT}
+-std=c++11
 )
 #
 #------------------------------------------------------------------------------
@@ -629,7 +618,7 @@ target_include_directories(replay PRIVATE BEFORE
 )
 
 target_compile_options(replay PRIVATE
-${MBTRN_CXX_STD_OPT}
+-std=c++11
 )
 #
 #------------------------------------------------------------------------------
@@ -652,7 +641,7 @@ target_include_directories(mb1log-player PRIVATE BEFORE
 )
 
 target_compile_options(mb1log-player PRIVATE
-${MBTRN_CXX_STD_OPT}
+-std=c++11
 )
 #
 #------------------------------------------------------------------------------
@@ -676,7 +665,7 @@ target_include_directories(trnlog-player PRIVATE BEFORE
 )
 
 target_compile_options(trnlog-player PRIVATE
-${MBTRN_CXX_STD_OPT}
+-std=c++11
 )
 #
 #------------------------------------------------------------------------------
@@ -700,7 +689,7 @@ target_include_directories(csvlog-player PRIVATE BEFORE
 )
 
 target_compile_options(csvlog-player PRIVATE
-${MBTRN_CXX_STD_OPT}
+-std=c++11
 )
 #
 #------------------------------------------------------------------------------
@@ -755,7 +744,7 @@ target_include_directories(trn-client PRIVATE BEFORE
 )
 
 target_compile_options(trn-client PRIVATE
-${MBTRN_CXX_STD_OPT}
+-std=c++11
 )
 
 #
@@ -769,7 +758,7 @@ add_executable(trn-cli
 )
 
 # specify include paths and libraries
-target_link_libraries(trn-cli PRIVATE mbtrnframe trnw trnwcli qnx newmat geocon ${MB_SYSLIBS})
+target_link_libraries(trn-cli PRIVATE mbtrnframe trnw trnwcli qnx newmat geocon m)
 
 target_include_directories(trn-cli PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
@@ -1003,7 +992,7 @@ target_include_directories(test-geocon PRIVATE BEFORE
 )
 
 target_compile_options(test-geocon PRIVATE
-${MBTRN_CXX_STD_OPT}
+-std=c++11
 )
 
 #
@@ -1026,7 +1015,7 @@ target_include_directories(test-trnattr PRIVATE BEFORE
 )
 
 target_compile_options(test-trnattr PRIVATE
-${MBTRN_CXX_STD_OPT}
+-std=c++11
 )
 
 # update this list when targets are moved

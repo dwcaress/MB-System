@@ -510,11 +510,7 @@ void r7k_update_time(r7k_time_t *t7k)
         // supported on OSX, Windows, *NIX
         struct tm tms={0};
         time_t tt = time(NULL);
-#ifdef _WIN32
-        gmtime_s(&tms, &tt);
-#else
         gmtime_r(&tt, &tms);
-#endif
         t7k->year    = tms.tm_year%100;
         t7k->day     = tms.tm_yday;
         t7k->hours   = tms.tm_hour;

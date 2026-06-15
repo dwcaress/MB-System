@@ -596,7 +596,7 @@ int Replay::loadCfgAttributes()
       // Use the MbTrn.log file data when using either MbTrn data mode
       trn_attr->_useMbTrnData = strcasecmp("false", value);
     } else if (!strcmp("useMbTrnServer",       key)) {
-      trn_attr->_useMbTrnData = trn_attr->_useMbTrnData || (strcasecmp("false", value) != 0);
+      trn_attr->_useMbTrnData |= strcasecmp("false", value);
     } else {
       fprintf(stderr, "\n\tReplay: Unknown key in cfg: %s\n\n", key);
     }

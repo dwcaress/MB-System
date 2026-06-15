@@ -40,7 +40,11 @@
 #include <getopt.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 
 #include "mb_aux.h"
 #include "mb_define.h"
@@ -3246,7 +3250,6 @@ int main(int argc, char **argv) {
            *   2) if attitude values changed rotate bathymetry accordingly
            *   3) if any values changed reinsert the data */
           if (status == MB_FAILURE) {
-fprintf(stderr, "**** DOING GENERIC PREPROCESS!!!\n");
             /* reset status and error */
             status = MB_SUCCESS;
             error = MB_ERROR_NO_ERROR;

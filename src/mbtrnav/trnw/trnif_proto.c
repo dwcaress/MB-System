@@ -156,7 +156,7 @@ trnuif_msg_t *trnu_msg_d6(const char *mid, double d0, double d1, double d2, doub
     return trnu_msg_pd(mid, 6, &da[0]);
 }
 
-#if defined (__UNIX__) || defined (__unix__) || defined (__APPLE__) || defined(_WIN32)
+#if defined (__UNIX__) || defined (__unix__) || defined (__APPLE__)
 static uint32_t s_trnif_dfl_send_tcp(msock_connection_t *peer, char *msg, int32_t send_len, int *errout)
 {
     uint32_t retval=0;

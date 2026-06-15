@@ -870,7 +870,7 @@ void netif_show(netif_t *self, bool verbose, int indent)
         fprintf(stderr,"%*s%*s  %*p\n",indent,(indent>0?" ":""),wkey,"socket",wval,self->socket);
         fprintf(stderr,"%*s%*s  %*p\n",indent,(indent>0?" ":""),wkey,"peer",wval,self->peer);
         fprintf(stderr,"%*s%*s  %*p\n",indent,(indent>0?" ":""), wkey,"list@",wval,self->list);
-        fprintf(stderr,"%*s%*s  %*zu\n",indent,(indent>0?" ":""),wkey,"list len",wval,(size_t)mlist_size(self->list));
+        fprintf(stderr,"%*s%*s  %*lu\n",indent,(indent>0?" ":""),wkey,"list len",wval,mlist_size(self->list));
         fprintf(stderr,"%*s%*s  %*p\n",indent,(indent>0?" ":""),wkey,"profile",wval,self->profile);
         fprintf(stderr,"%*s%*s  %*d\n",indent,(indent>0?" ":""),wkey,"mlog_id",wval,self->mlog_id);
         fprintf(stderr,"%*s%*s  %*s\n",indent,(indent>0?" ":""),wkey,"mlog_path",wval,self->mlog_path);

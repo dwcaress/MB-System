@@ -1,0 +1,152 @@
+LIBRARY
+EXPORTS
+; from mbview.h
+    mbview_startup
+    mbview_init
+    mbview_quit
+    mbview_getdataptr
+    mbview_getsharedptr
+    mbview_setwindowparms
+    mbview_setviewcontrols
+    mbview_open
+    mbview_update
+    mbview_set_widgets
+    mbview_addaction
+    mbview_addpicknotify
+    mbview_setsensitivitynotify
+    mbview_resize
+    mbview_destroy
+    mbview_quit
+    do_mbview_message_on
+    do_mbview_message_off
+    set_mbview_label_string
+    set_mbview_label_multiline_string
+
+;   /* mbview_primary.c function prototypes */
+    mbview_setprimarygrid
+    mbview_updateprimarygrid
+    mbview_updateprimarygridcell
+    mbview_setprimarycolortable
+    mbview_setslopecolortable
+
+;   /* mbview_secondary.c function prototypes */
+    mbview_setsecondarygrid
+    mbview_updatesecondarygrid
+    mbview_updatesecondarygridcell
+    mbview_setsecondarycolortable
+    mbview_setsecondaryname
+
+;   /* mbview_process.c function prototypes */
+    mbview_projectdata
+    mbview_projectforward
+    mbview_projectinverse
+    mbview_projectfromlonlat
+    mbview_projectgrid2ll
+    mbview_projectll2xygrid
+    mbview_projectll2xyzgrid
+    mbview_projectll2display
+    mbview_projectdisplay2ll
+    mbview_projectdistance
+    mbview_getzdata
+    mbview_getzdata
+
+;   /*mbview_plot.c function prototypes */
+    mbview_reset_glx
+    mbview_drawdata
+    mbview_plotlowall
+    mbview_plotlowhighall
+    mbview_plothighall
+    mbview_plotlow
+    mbview_plotlowhigh
+    mbview_plothigh
+    mbview_plotfull
+    mbview_plot
+    mbview_drapesegment
+    mbview_clearpicks
+    mbview_clearnavpicks
+
+;   /* mbview_pick.c function prototypes */
+
+;   /* mbview_nav.c function prototypes */
+    mbview_getnavcount
+    mbview_getnavpointcount
+    mbview_allocnavarrays
+    mbview_freenavarrays
+    mbview_addnav
+    mbview_enableviewnavs
+    mbview_enableadjustnavs
+    mbview_picknavbyname
+    mbview_getvectorcount
+    mbview_getvectorpointcount
+    mbview_allocvectorarrays
+    mbview_freevectorarrays
+    mbview_addvector
+    mbview_enableviewvectors
+;   mbview_pick_vec_select
+    mbview_vector_delete
+;   mbview_drawvectorpick
+    mbview_drawvector
+
+;   /* mbview_route.c function prototypes */
+    mbview_getroutecount
+    mbview_getroutepointcount
+    mbview_getrouteselected
+    mbview_getrouteinfo
+    mbview_allocroutearrays
+    mbview_freeroutearrays
+    mbview_addroute
+    mbview_deleteroute
+    mbview_getroute
+    mbview_enableviewroutes
+    mbview_enableeditroutes
+    mbview_route_add
+    mbview_pick_routebyname
+    mbview_deleteallroutes
+    mbview_enableviewties
+
+;   /* mbview_site.c function prototypes */
+    mbview_getsitecount
+    mbview_allocsitearrays
+    mbview_freesitearrays
+    mbview_addsites
+    mbview_getsites
+    mbview_enableviewsites
+    mbview_enableeditsites
+
+;   /* mbview_profile.c function prototypes */
+    mbview_getprofilecount
+    mbview_allocprofilepoints
+    mbview_freeprofilepoints
+    mbview_allocprofilearrays
+    mbview_freeprofilearrays
+    mbview_getprofile
+
+;   /* mb3dsounding API functions */
+    mb3dsoundings_startup
+    mb3dsoundings_open
+    mb3dsoundings_end
+    mb3dsoundings_set_dismiss_notify
+    mb3dsoundings_set_edit_notify
+    mb3dsoundings_set_info_notify
+    mb3dsoundings_set_bias_notify
+    mb3dsoundings_set_biasapply_notify
+    mb3dsoundings_set_colorsoundings_notify
+    mb3dsoundings_plot
+    mb3dsoundings_get_bias_values
+;
+    RegisterBxConverters
+    BxWidgetIdsFromNames
+    BX_CONVERT
+
+; from mbaux\mb_xgraphics.h  ... but they error with unresolved external symbol
+    xg_init
+    xg_free
+    xg_drawpoint
+    xg_drawline
+    xg_drawrectangle
+    xg_drawtriangle
+    xg_fillrectangle
+    xg_filltriangle
+    xg_drawstring
+    xg_justify
+    xg_setclip

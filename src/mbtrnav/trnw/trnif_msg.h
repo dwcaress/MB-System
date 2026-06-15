@@ -200,7 +200,7 @@ typedef struct trn_box_s{
 // (so may use this struct or
 // just overlay buffer w/ pt_cdata_t*)
 typedef struct trn_pose_s{
-    char _placeholder; // MSVC rejects empty struct; upstream intent unclear (was stray ';')
+    ;// pose (fixed len)
 }trn_pose_t;
 
 #pragma pack(pop)
@@ -234,20 +234,10 @@ typedef pt_cdata_t trn_mmse_t;
 // Exports
 /////////////////////////
 
-#if defined(_WIN32) || defined(__CYGWIN__)
-#  ifdef trnw_EXPORTS
-#    define TRNW_API __declspec(dllexport)
-#  else
-#    define TRNW_API __declspec(dllimport)
-#  endif
-#else
-#  define TRNW_API
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-    extern TRNW_API trn_sync_t g_trn_sync;
+    extern trn_sync_t g_trn_sync;
 
     // message API
     trnmsg_t *trnmsg_new(trnmsg_id_t id, byte *data, uint32_t data_len);

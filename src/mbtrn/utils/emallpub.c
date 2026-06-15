@@ -304,7 +304,7 @@ static bool validate_frame(byte *src, unsigned int len, app_cfg_t *cfg)
         return false;
     } else {
         if(cfg->verbose > 1){
-            fprintf(stderr, "%s - petx ofs(%04llX) pchk ofs (%04llx)  etx %02X\n", __func__, (long long)(petx-src), (long long)(pbchk-src), *petx);
+            fprintf(stderr, "%s - petx ofs(%04lX) pchk ofs (%04lx)  etx %02X\n", __func__, petx-src, pbchk-src, *petx);
             fprintf(stderr, "%s - sum %04hu/%04X  checksum %04hu/%04X \n", __func__, sum, sum, *pchk, *pchk);
         }
     }

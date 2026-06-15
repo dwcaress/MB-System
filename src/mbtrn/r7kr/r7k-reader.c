@@ -545,7 +545,7 @@ void r7kr_reader_flush(r7kr_reader_t *self, uint32_t len, int32_t retries, uint3
 {
     if (NULL != self) {
         // read until timeout
-        byte *buf = (byte *)alloca(len);
+        byte buf[len];
         int64_t x=0;
         uint32_t n=0;
         bool use_retries = (retries>0 ? true : false);

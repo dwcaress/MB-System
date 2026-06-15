@@ -821,10 +821,10 @@ void commst_initialize(wtnav_t *self, wcommst_t *msg)
         if(NULL!=ct && NULL!=trn){
 
             int errors=0;
-            const int BUF_SIZE=512;
-            char mapname[512];      /* was VLA-via-int; BUF_SIZE compile-time constant */
-            char cfgname[512];
-            char particlename[512];
+            int BUF_SIZE=512;
+            char mapname[BUF_SIZE];
+            char cfgname[BUF_SIZE];
+            char particlename[BUF_SIZE];
             memset(mapname, 0, BUF_SIZE);
             memset(cfgname, 0, BUF_SIZE);
             memset(particlename, 0, BUF_SIZE);

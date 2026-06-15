@@ -17,11 +17,10 @@ set(manpages
     mbeditviz.1
     mbextractsegy.1
     mbfilter.1
-    mbfnv2navlab.1
     mbformat.1
     mbgetesf.1
     mbgpstide.1
-    mbgrd2gltf.1
+	mbgrd2gltf.1
     mbgrd2obj.1
     mbgrdtiff.1
     mbgrdviz.1
@@ -29,7 +28,6 @@ set(manpages
     mbhistogram.1
     mbimagelist.1
     mbinfo.1
-    mbnavlab2fnv.1
     mblevitus.1
     mblist.1
     mbm_arc2grd.1
@@ -58,7 +56,6 @@ set(manpages
     mbm_utm.1
     mbm_xbt.1
     mbm_xyplot.1
-    mbmakedatalist.1
     mbmakeplatform.1
     mbmesh.1
     mbminirovnav.1

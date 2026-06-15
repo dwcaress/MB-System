@@ -1,0 +1,38 @@
+LIBRARY
+; Extracted from those declared as 'extern' in .h files
+
+EXPORTS
+; from gsf.h
+    gsfOpen
+    gsfOpenBuffered
+    gsfClose
+    gsfError
+    gsfSeek
+    gsfRead
+    gsfWrite
+    gsfLoadScaleFactor
+    gsfGetScaleFactor
+    gsfFree
+    gsfPrintError
+    gsfIntError
+    gsfStringError
+    gsfIndexTime
+    gsfPercent 
+    gsfGetNumberRecords 
+    gsfCopyRecords 
+    gsfPutMBParams
+    gsfGetMBParams
+    gsfGetSwathBathyBeamWidths
+    gsfIsStarboardPing
+    gsfLoadDepthScaleFactorAutoOffset
+    gsfGetSwathBathyArrayMinMax
+    gsfGetSonarTextName
+    gsfFileSupportsRecalculateXYZ
+    gsfFileSupportsRecalculateTPU
+    gsfFileSupportsRecalculateNominalDepth
+    gsfFileContainsMBAmplitude
+    gsfFileContainsMBImagery
+    gsfIsNewSurveyLine
+    gsfInitializeMBParams 
+    gsfStat 
+    gsfSetDefaultScaleFactor 

@@ -33,7 +33,11 @@
 #include <iostream>
 #include <stdio.h>
 #include <getopt.h>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 #include <ctype.h>
 #include <sstream>
 #include <fstream>

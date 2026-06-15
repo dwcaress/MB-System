@@ -64,7 +64,7 @@ add_library(
   mtime.c
   mutils.c
   mxdebug.cpp)
-target_link_libraries(mbtrnframe PRIVATE ${MB_SYSLIBS})
+target_link_libraries(mbtrnframe PRIVATE m pthread)
 #
 #------------------------------------------------------------------------------
 #

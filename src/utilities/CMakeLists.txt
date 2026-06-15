@@ -41,7 +41,6 @@ set(executables
     mbdumpesf
     mbextractsegy
     mbfilter
-    mbfnv2navlab
     mbformat
     mbgetesf
     mbgpstide
@@ -49,8 +48,6 @@ set(executables
     mbhistogram
     mbinfo
     mblist
-    mbnavlab2fnv
-    mbmakedatalist
     mbmakeplatform
     mbmapscale
     mbminirovnav
@@ -68,7 +65,10 @@ set(executables
     mbsvplist
     mbsvpselect
     mbtime
-    mbvoxelclean)
+    mbvoxelclean
+    mbfnv2navlab
+    mbmakedatalist
+    mbnavlab2fnv)
 
 foreach(executable ${executables})
   add_executable(${executable} ${executable}.cc)

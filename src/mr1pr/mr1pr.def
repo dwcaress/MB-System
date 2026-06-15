@@ -1,0 +1,31 @@
+LIBRARY
+; Extracted from those declared as 'extern' in .h files
+
+EXPORTS
+; from mr1pr.h
+    mr1_appendlog
+    mr1_appendstr
+    mr1_copypng
+    mr1_getpngdataptrs
+    mr1_isnand
+    mr1_isnanf
+    mr1_mrkget
+    mr1_mrkmemalloc
+    mr1_mrkset
+    mr1_nand
+    mr1_nanf
+    mr1_pngdatabufsz
+    mr1_pngmemalloc
+    mr1_pngrealloc
+    mr1_rdmrfhdr
+    mr1_rdpng
+    mr1_rdpngdata
+    mr1_rdpnghdr
+    mr1_replacestr
+    mr1_seekpng
+    mr1_seekpngdata
+;   mr1_tmparse
+    mr1_wrmrfhdr
+    mr1_wrpng
+    mr1_wrpngdata
+    mr1_wrpnghdr

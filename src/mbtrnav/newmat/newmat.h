@@ -37,7 +37,7 @@ namespace NEWMAT {
 #define ReturnMatrix ReturnMatrixX&
 #endif
 
-#if __cplusplus >= 201103L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201103L)
+#if __cplusplus >= 201103L
 #define NOEXCEPT_FALSE noexcept(false)
 #else
 #define NOEXCEPT_FALSE

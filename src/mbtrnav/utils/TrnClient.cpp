@@ -189,7 +189,7 @@ int TrnClient::loadCfgAttributes(const char *cfg_file)
             cfg_dir = ".";
 
         size_t cb_len = strlen(cfg_dir) + strlen("/terrainAid.cfg") + 1;
-        char *cfg_buf = (char *)alloca(cb_len);
+        char cfg_buf[cb_len];
         memset(cfg_buf, 0, cb_len);
 
         snprintf(cfg_buf, cb_len, "%s/terrainAid.cfg", cfg_dir);

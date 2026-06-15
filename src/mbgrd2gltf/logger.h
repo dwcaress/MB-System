@@ -22,7 +22,11 @@
 #include <chrono>
 #include <iomanip>
 #include <ctime>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 #include <vector>
 #include <string>
 

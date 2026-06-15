@@ -67,11 +67,13 @@
 // Includes 
 /////////////////////////
 
+#if defined (__UNIX__) || defined (__unix__) || defined (__APPLE__)
 #include "netif.h"
 #include "trnw.h"
 #include "msocket.h"
 #include "mutils.h"
 #include "mxdebug.h"
+#endif
 
 /////////////////////////
 // Macros
@@ -117,6 +119,7 @@
 // Type Definitions
 /////////////////////////
 
+#if defined (__UNIX__) || defined (__unix__) || defined (__APPLE__)
 // resource bundle points to
 // objects/data needed by message handlers, etc.
 typedef struct trnif_res_s{
@@ -133,6 +136,7 @@ typedef struct trnuif_res_s{
     trnu_reset_ofs_callback_fn reset_ofs_callback;
     trnu_reset_box_callback_fn reset_box_callback;
 }trnuif_res_t;
+#endif
 
 #pragma pack(push,1)
 typedef struct trnuif_msg_s
@@ -155,6 +159,7 @@ trnuif_msg_t *trnu_msg_pd(const char *mid, int n, double *darr);
 trnuif_msg_t *trnu_msg_d3(const char *mid, double d0, double d1, double d2);
 trnuif_msg_t *trnu_msg_d6(const char *mid, double d0, double d1, double d2, double d3, double d4, double d5);
 
+#if defined (__UNIX__) || defined (__unix__) || defined (__APPLE__)
     int trnif_msg_read_ct(byte **pdest, uint32_t *len, netif_t *self, msock_connection_t *peer, int *errout);
     int trnif_msg_handle_ct(void *msg, netif_t *self, msock_connection_t *peer, int *errout);
 
@@ -170,6 +175,7 @@ trnuif_msg_t *trnu_msg_d6(const char *mid, double d0, double d1, double d2, doub
     int trnif_msg_handle_trnmsg(void *msg, netif_t *self, msock_connection_t *peer, int *errout);
 
     int trnif_msg_pub(netif_t *self, msock_connection_t *peer, char *data, size_t len);
+#endif
 #ifdef __cplusplus
 }
 #endif

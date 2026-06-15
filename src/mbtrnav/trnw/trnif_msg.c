@@ -97,7 +97,7 @@
 /////////////////////////
 // Module Global Variables
 /////////////////////////
-TRNW_API trn_sync_t g_trn_sync=0xCAFEBEEF;
+trn_sync_t g_trn_sync=0xCAFEBEEF;
 const char *trnmsg_id_names[TRNIF_MSG_ID_COUNT]={
 "TRNIF_INIT",
 "TRNIF_MEAS",

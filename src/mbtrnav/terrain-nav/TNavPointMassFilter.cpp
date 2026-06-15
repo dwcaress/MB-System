@@ -252,9 +252,9 @@ void TNavPointMassFilter::motionUpdate(poseT& currNavPose) {
 			velocity_sf_sigma[1] += 0.01 * fabs(lastNavPose->time - this->timeLastDvlValid);
 			velocity_sf_sigma[2] += 0.01 * fabs(lastNavPose->time - this->timeLastDvlValid);
 		}
-		Cv(1) = pow(velocity_sf_sigma[0] * elapsedTime, 2.0);
-		Cv(2) = pow(velocity_sf_sigma[1] * elapsedTime, 2.0);
-		Cv(3) = pow(velocity_sf_sigma[2] * elapsedTime, 2.0);
+		Cv(1) = pow(velocity_sf_sigma[0] * elapsedTime, 2);
+		Cv(2) = pow(velocity_sf_sigma[1] * elapsedTime, 2);
+		Cv(3) = pow(velocity_sf_sigma[2] * elapsedTime, 2);
 		
 		Cx << A* Cv* A.t();
 		Cx = Cx.SymSubMatrix(1, 2);
@@ -360,7 +360,7 @@ void TNavPointMassFilter::checkConvergence() {
 	computeMLE(&mle);
 	
 	//check similarity between mean and mle estimates
-	diff = sqrt(pow(mmse.x - mle.x, 2.0) + pow(mmse.y - mle.y, 2.0));
+	diff = sqrt(pow(mmse.x - mle.x, 2) + pow(mmse.y - mle.y, 2));
 	if(diff > 10) {
 		converged = false;
 		return;
@@ -542,7 +542,7 @@ bool TNavPointMassFilter::generateMeasCorrData(const measT& currMeas) {
 	corrT* newCorr;
 	Matrix beamsVF(3, currMeas.numMeas);
 	Matrix beamsIF, Rvi;
-	int *beamIndices = (int*)alloca(sizeof(int) * currMeas.numMeas);  /* was VLA */
+	int beamIndices[currMeas.numMeas];
 	double attitude[3] = {currMeas.phi, currMeas.theta, currMeas.psi};
 	int i;
 	

@@ -1387,8 +1387,8 @@ void TrnPlayer::init_io()
 void TrnPlayer::copy_config()
 {
     if(strlen(ctx->cpath) > 0) {
-        size_t blen = LBUF_SZ+16;
-        char *syscmd = (char *)alloca(blen);
+        size_t blen = LBUF_SZ+16; 
+        char syscmd[blen];
         memset(syscmd, 0, blen);
         snprintf(syscmd, blen, "cp %s latestTRN/.", ctx->cpath);
         int rv = system(syscmd);
