@@ -89,7 +89,13 @@ Window {
 		    checkable: true;
 		    checked: topoDataItem.showContours
                     onTriggered: {topoDataItem.setContours(checked)}
-                }		
+                }
+                Action {
+                    text: qsTr('Navigation');
+		    checkable: true;
+		    checked: topoDataItem.showNavigation
+                    onTriggered: {topoDataItem.setShowNavTrack(checked)}
+                }				
             }
 
             Menu {
