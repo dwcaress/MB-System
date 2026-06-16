@@ -186,7 +186,7 @@ if (($suffix eq ".all" || $suffix eq ".ALL" || $suffix eq ".mb56"
     $ok = 0;
     $file = $outfilelist[$i];
     $format = $outformatlist[$i];
-    ($start, $yyyymmdd, $hhmmss, $end) = $file =~ /(\d{4})_(\d{8})_(\d{6})(\S+)/;
+    ($start, $yyyymmdd, $hhmmss, $end) = $file =~ /(\d{5})_(\d{8})_(\d{6})(\S+)/;
     if ($yyyymmdd != "" && $hhmmss != "") {
       $ok = 1;
     }
@@ -210,6 +210,7 @@ if (($suffix eq ".all" || $suffix eq ".ALL" || $suffix eq ".mb56"
     if ($case == 0) {
       $file = $start . "_" . $yyyymmdd . "_" . $hhmmss . $end;
     } else {
+      $end =~ s/^_//;
       $file = $start . "_" . $yyyymmdd . "_" . $hhmmss . "_" . $end;
     }
     if ($directory) {
