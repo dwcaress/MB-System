@@ -84,6 +84,11 @@ namespace mb_system {
       dataType_ = dataType;
     }
 
+    /// Return data type
+    TopoDataType getDataType() {
+      return dataType_;
+    }
+    
     /// Return file data type
     static TopoDataType getDataType(const char *filename);
 
