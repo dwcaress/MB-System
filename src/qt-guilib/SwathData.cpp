@@ -108,6 +108,16 @@ bool SwathData::readDatafile(char *swathFile) {
   // Point to swath data just loaded into global array
   mbev_file_struct* swathData = &mbev_files[0];
 
+  // Load navigation track points for each ping in the swath
+  navTrackPoints_->Reset();
+  navTrackPoints_->SetNumberOfPoints(swathData->num_pings);
+  for (vtkIdType i = 0; i < swathData->num_pings; i++) {
+    
+    navTrackPoints_->SetPoint(i, swathData->pings[i].navlonx,
+			     swathData->pings[i].navlaty,
+			     swathData->pings[i].sensordepth);
+  }
+  
   // Get bounds of loaded swath data
   mbeditviz_get_grid_bounds();
 

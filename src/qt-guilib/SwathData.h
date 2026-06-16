@@ -1,5 +1,7 @@
 #ifndef SwathData_h
 #define SwathData_h
+#include <vtkNew.h>
+#include <vtkPoints.h>
 #include "TopoData.h"
 
 /// Forward declaration
@@ -60,7 +62,11 @@ namespace mb_system {
     /// reference system. 
     /// Returns true on success, false on error
     bool setProjString() override;
-    
+
+    /// Get navigation track points
+    vtkPoints *navTrackPoints() {
+      return navTrackPoints_;
+    }
     
   protected:
 
@@ -81,6 +87,10 @@ namespace mb_system {
     struct mbev_grid_struct *gridData_;
 
     char *appName_;
+
+    /// Navigation track points loaded from swath file
+    vtkNew<vtkPoints> navTrackPoints_;
+  
   };
 
 };
