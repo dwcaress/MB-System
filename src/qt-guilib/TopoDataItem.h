@@ -33,6 +33,8 @@
 #include <vtkTextProperty.h>
 #include <vtkAreaPicker.h>
 #include <vtkTrivialProducer.h>
+#include <vtkCellArray.h>
+#include <vtkPoints.h>
 #include <QList>
 #include <QVector2D>
 #include <QVariant>
@@ -108,6 +110,8 @@ namespace mb_system {
       vtkNew<vtkAreaPicker>              areaPicker_;
       vtkNew<vtkCubeAxesActor>           axesActor_;
       vtkNew<vtkNamedColors>             colors_;
+      vtkNew<vtkPolyDataMapper>          trackMapper_;
+      vtkNew<vtkActor>                   trackActor_;
       vtkInteractorStyle                *interactorStyle_ = nullptr;
       bool firstRender_ = true;
     };
@@ -176,6 +180,22 @@ namespace mb_system {
     Q_INVOKABLE bool   loadSettings();
     Q_INVOKABLE double getContourInterval();
     Q_INVOKABLE void   foo();
+
+    // ── Navigation track ─────────────────────────────────────────────────────
+
+    /// Set the navigation track from parallel x, y, z coordinate arrays.
+    /// A polyline is built from the points in order and rendered in black
+    /// overlaid on the surface.  Replaces any previously set track.
+    /// Safe to call before initializeVTK(); the track is applied when the
+    /// pipeline is next assembled or via dispatch if already initialised.
+    bool setNavigationTrack(const std::vector<double> &x,
+                            const std::vector<double> &y,
+                            const std::vector<double> &z);
+
+    bool setNavigationTrack(vtkPoints *points);
+    
+    /// Show or hide the navigation track without rebuilding the pipeline.
+    Q_INVOKABLE void setShowNavTrack(bool show);
 
     // ── Non-invokable public API ──────────────────────────────────────────────
 
@@ -294,6 +314,7 @@ namespace mb_system {
     void applyAxes(Pipeline *pipeline);
     void applyVerticalExagg(Pipeline *pipeline);
     void applyContours(Pipeline *pipeline);
+    void applyNavTrack(Pipeline *pipeline);
 
     void setupAxes(vtkCubeAxesActor *axesActor,
                    vtkNamedColors *colors,
@@ -328,6 +349,11 @@ namespace mb_system {
 
     Pipeline         *pipeline_          = nullptr;
     vtkRenderWindow  *renderWindow_      = nullptr;
+
+    /// Navigation track polydata — owned here so it survives pipeline rebuilds.
+    /// Null points / no cells = no track set yet.
+    vtkNew<vtkPolyData> trackPolyData_;
+    bool showNavTrack_ = false;
 
     double slopeGamma_       = 0.35;
     double minBrightness_    = 0.15;

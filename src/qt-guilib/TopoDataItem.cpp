@@ -32,6 +32,7 @@
 #include "SharedConstants.h"
 #include "SlopeShader.h"
 #include "TopoDataItemSettings.h"
+#include "SwathData.h"
 
 using namespace mb_system;
 
@@ -63,10 +64,11 @@ TopoDataItem::TopoDataItem() {
 }
 
 TopoDataItem::Pipeline::Pipeline() {
-  
+
         firstRender_ = true;
         // One-time actor/mapper wiring
         surfaceActor_->SetMapper(surfaceMapper_);
+        trackActor_->SetMapper(trackMapper_);
 
         contourActor_->SetMapper(contourMapper_);
         contourMapper_->SetInputConnection(contourFilter_->GetOutputPort());
@@ -150,6 +152,13 @@ void TopoDataItem::onDatasetLoaded() {
   // Keep displayed filename in sync with what the dataset loaded
   setDataFilename(dataset_->reader()->GetFileName()
                   ? QString(dataset_->reader()->GetFileName()) : QString());
+
+  // If swath is loaded, set navigation track
+  if (dataset_->reader()->getDataType() == TopoDataType::Swath) {
+    SwathData *data = (SwathData *)dataset_->reader()->topoData();
+    setNavigationTrack(data->navTrackPoints());
+  }
+  
   reassemblePipeline();
 }
 
@@ -224,6 +233,7 @@ void TopoDataItem::assemblePipeline(TopoDataItem::Pipeline *pipeline) {
 
   // Final actors / lights / interactor
   pipeline->renderer_->AddActor(pipeline->surfaceActor_);
+  applyNavTrack(pipeline);
   pipeline->renderer_->AddLight(pipeline->lightSource_);
   pipeline->renderer_->SetBackground(
       pipeline->colors_->GetColor3d("White").GetData());
@@ -510,6 +520,8 @@ void TopoDataItem::applyVerticalExagg(Pipeline *pipeline) {
   pipeline->surfaceActor_->SetScale (1., 1., verticalExagg_);
   pipeline->contourActor_->SetOrigin(0., 0., zCenter);
   pipeline->contourActor_->SetScale (1., 1., verticalExagg_);
+  pipeline->trackActor_->SetOrigin  (0., 0., zCenter);
+  pipeline->trackActor_->SetScale   (1., 1., verticalExagg_);
 
   pipeline->contourLabelTransform_->Identity();
   pipeline->contourLabelTransform_->Translate(0., 0.,  zCenter);
@@ -913,4 +925,120 @@ void TopoDataItem::foo() {
 
 const char *TopoDataItem::getColormapScheme() {
   return TopoColorMap::schemeName(colormapScheme_);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Navigation track
+// ─────────────────────────────────────────────────────────────────────────────
+
+bool TopoDataItem::setNavigationTrack(const std::vector<double> &x,
+				      const std::vector<double> &y,
+				      const std::vector<double> &z) {
+  if (x.size() != y.size() || x.size() != z.size() || x.empty()) {
+    qWarning() << "setNavigationTrack(): mismatched or empty coordinate arrays";
+    return false;
+  }
+
+  // Build a single polyline cell connecting all points in order.
+  vtkNew<vtkPoints>    pts;
+  vtkNew<vtkCellArray> lines;
+
+  const vtkIdType n = static_cast<vtkIdType>(x.size());
+  pts->SetNumberOfPoints(n);
+  lines->InsertNextCell(n);
+  for (vtkIdType i = 0; i < n; ++i) {
+    pts->SetPoint(i, x[i], y[i], z[i]);
+    lines->InsertCellPoint(i);
+  }
+
+  trackPolyData_->SetPoints(pts);
+  trackPolyData_->SetLines(lines);
+  trackPolyData_->Modified();
+  showNavTrack_ = true;
+
+  qDebug() << "setNavigationTrack():" << n << "points";
+
+  if (!pipeline_) return false;   // initializeVTK not yet called; applyNavTrack will
+                             // run during the next assemblePipeline
+  dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
+    auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
+    applyNavTrack(p);
+    rw->Render();
+  });
+
+  return true;
+}
+
+
+
+bool TopoDataItem::setNavigationTrack(vtkPoints *points) {
+
+  // Build a single polyline cell connecting all points in order.
+  vtkNew<vtkCellArray> lines;
+
+  const vtkIdType n = points->GetNumberOfPoints();
+  
+  lines->InsertNextCell(n);
+  for (vtkIdType i = 0; i < n; ++i) {
+    lines->InsertCellPoint(i);
+  }
+
+  trackPolyData_->SetPoints(points);
+  trackPolyData_->SetLines(lines);
+  trackPolyData_->Modified();
+  showNavTrack_ = true;
+
+  qDebug() << "setNavigationTrack():" << n << "points";
+
+  if (!pipeline_) return false;   // initializeVTK not yet called; applyNavTrack will
+                                  // run during the next assemblePipeline
+  dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
+    auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
+    applyNavTrack(p);
+    rw->Render();
+  });
+
+  return true;
+}
+
+
+
+void TopoDataItem::setShowNavTrack(bool show) {
+  showNavTrack_ = show;
+  qDebug() << "setShowNavTrack():" << show;
+  dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
+    auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
+    applyNavTrack(p);
+    rw->Render();
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  applyNavTrack — add/remove track actor; called from assemblePipeline and
+//  whenever the track data or visibility changes.
+// ─────────────────────────────────────────────────────────────────────────────
+
+void TopoDataItem::applyNavTrack(Pipeline *pipeline) {
+  // Always remove first so we start from a clean state (handles hide and
+  // re-assembly without duplicating the actor).
+  pipeline->renderer_->RemoveActor(pipeline->trackActor_);
+
+  if (!showNavTrack_ || trackPolyData_->GetNumberOfPoints() == 0) return;
+
+  pipeline->trackMapper_->SetInputData(trackPolyData_);
+  pipeline->trackMapper_->ScalarVisibilityOff();
+
+  pipeline->trackActor_->GetProperty()->SetColor(0.0, 0.0, 0.0);  // black
+  pipeline->trackActor_->GetProperty()->SetLineWidth(2.0);
+  pipeline->trackActor_->GetProperty()->LightingOff();
+
+  // Apply the same vertical-exaggeration transform as the surface actor so
+  // the track follows the rendered surface geometry.
+  if (dataset_ && dataset_->isLoaded()) {
+    const double zCenter = 0.5 * (dataset_->elevMin() + dataset_->elevMax());
+    pipeline->trackActor_->SetOrigin(0., 0., zCenter);
+    pipeline->trackActor_->SetScale (1., 1., verticalExagg_);
+  }
+
+  pipeline->renderer_->AddActor(pipeline->trackActor_);
 }
