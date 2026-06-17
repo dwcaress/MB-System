@@ -1,9 +1,9 @@
 #include "TopoDataset.h"
+#include "SwathData.h"
 #include <unistd.h>
 #include <vtkErrorCode.h>
 #include <vtkPointData.h>
 #include <QDebug>
-
 
 using namespace mb_system;
 
@@ -18,6 +18,7 @@ TopoDataset::TopoDataset(QObject *parent)
 // ─────────────────────────────────────────────────────────────────────────────
 //  loadFile — was TopoDataItem::loadDataPipeline()
 // ─────────────────────────────────────────────────────────────────────────────
+
 bool TopoDataset::loadFile(const QString &path) {
     QByteArray ba = path.toUtf8();
     const char *filename = ba.constData();
@@ -51,7 +52,6 @@ bool TopoDataset::loadFile(const QString &path) {
     idFilter_->SetInputData(reader_->GetOutput());
     idFilter_->SetCellIdsArrayName(ORIGINAL_IDS);
     idFilter_->SetPointIdsArrayName(ORIGINAL_IDS);
-    idFilter_->PointIdsOn();
     idFilter_->Update();
 
     // Cache grid bounds
@@ -72,12 +72,12 @@ bool TopoDataset::loadFile(const QString &path) {
     // Build the quality array — one entry per point, all GOOD_DATA initially.
     // AddArray() is idempotent: on a reload it replaces the old array in place.
     vtkPolyData *pd = polyData();
-    quality_->SetName(DATA_QUALITY_NAME);
     quality_->SetNumberOfTuples(pd->GetNumberOfPoints());
-    quality_->Fill(GOOD_DATA);
+    for (vtkIdType i = 0; i < pd->GetNumberOfPoints(); i++) {
+        quality_->SetValue(i, GOOD_DATA);
+    }
     pd->GetPointData()->AddArray(quality_);
-    qDebug() << "quality fill: tuples=" << quality_->GetNumberOfTuples()
-	     << "value[0]=" << quality_->GetValue(0);
+
     dataLoaded_ = true;
     emit dataLoaded();
     return true;
@@ -105,6 +105,28 @@ void TopoDataset::setPointQuality(vtkIdType originalId, int quality) {
     polyData()->Modified();
 
     emit qualityChanged();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+vtkPoints *TopoDataset::navTrackPoints() {
+    if (!dataLoaded_) {
+        qDebug() << "navTrackPoints(): data not loaded";
+        return nullptr;
+    }
+    if (reader_->getDataType() != TopoDataType::Swath) {
+        qDebug() << "navTrackPoints(): not a swath file, dataType="
+                 << reader_->getDataType();
+        return nullptr;
+    }
+    TopoData *td = reader_->topoData();
+    qDebug() << "navTrackPoints(): topoData()=" << (void*)td;
+    SwathData *sd = dynamic_cast<SwathData *>(td);
+    qDebug() << "navTrackPoints(): dynamic_cast<SwathData*>=" << (void*)sd;
+    if (!sd) return nullptr;
+    vtkPoints *pts = sd->navTrackPoints();
+    qDebug() << "navTrackPoints(): points=" << (pts ? pts->GetNumberOfPoints() : -1);
+    return pts;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
