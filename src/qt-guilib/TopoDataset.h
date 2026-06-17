@@ -8,18 +8,15 @@
 #include <vtkIntArray.h>
 #include <vtkElevationFilter.h>
 #include <vtkIdFilter.h>
+#include <vtkPoints.h>
 #include "TopoDataReader.h"
 
 /// Point-data array name for the data-quality flag
 #define DATA_QUALITY_NAME "dataQuality"
-
-/// Point-data array name for dataset's original point indices
-/// (written by vtkIdFilter)
+/// Point-data array name for original point indices (written by vtkIdFilter)
 #define ORIGINAL_IDS      "originalIDs"
-
 /// Quality value for a flagged-bad point
 #define BAD_DATA  0
-
 /// Quality value for an unflagged point
 #define GOOD_DATA 1
 
@@ -54,8 +51,7 @@ public:
   // ── Shared data access ────────────────────────────────────────────────────
 
   /// The shared vtkPolyData produced by the elevation filter.
-  /// TopoDataItem and subclasses (SurfaceDataItem, EditDataItem...) wire
-  /// their pipeline tails to this.
+  /// Both SurfaceDataItem and EditDataItem wire their pipeline tails to this.
   /// The polyData already carries the "Elevation" scalar and the
   /// DATA_QUALITY_NAME point-data array.
   vtkPolyData *polyData();
@@ -70,9 +66,8 @@ public:
   void setPointQuality(vtkIdType originalId, int quality);
 
   // ── Metadata accessors ────────────────────────────────────────────────────
-  /// Minimum elevation in dataset
+
   double elevMin()  const { return elevMin_; }
-  /// Maximum elevation in dataset
   double elevMax()  const { return elevMax_; }
 
   /// Fill caller's six doubles with xMin,xMax,yMin,yMax,zMin,zMax
@@ -80,21 +75,25 @@ public:
                   double *yMin, double *yMax,
                   double *zMin, double *zMax) const;
 
-  /// Returns true if dataset has been loaded
   bool isLoaded() const { return dataLoaded_; }
 
   /// Direct access to the reader for units, CRS queries (e.g. in setupAxes).
   TopoDataReader *reader() { return reader_; }
 
-  /// Quality array
+  /// Quality array — one int per point, BAD_DATA or GOOD_DATA.
   vtkIntArray *qualityArray() { return quality_; }
-  
+
+  /// Navigation track points from swath data, or nullptr for GMTGrid files.
+  /// The returned vtkPoints is owned by SwathData and valid for the lifetime
+  /// of this dataset (i.e. until the next loadFile call).
+  vtkPoints *navTrackPoints();
+
 signals:
-  /// Emitted after a successful loadFile().  Connected TopoDataItems can
+  /// Emitted after a successful loadFile().  Connected TopoDataItems will
   /// rebuild their rendering pipelines in response.
   void dataLoaded();
 
-  /// Emitted after setPointQuality().  Connected TopoDataItems can dispatch a
+  /// Emitted after setPointQuality().  Connected TopoDataItems dispatch a
   /// re-render in response.
   void qualityChanged();
 
@@ -102,7 +101,7 @@ signals:
   void errorOccurred(QString message);
 
 private:
-  // Early pipeline stages — reading, filtering data, not rendering
+  // Early pipeline stages — data, not rendering
   vtkNew<TopoDataReader>     reader_;
   vtkNew<vtkIdFilter>        idFilter_;
   vtkNew<vtkElevationFilter> elevFilter_;
