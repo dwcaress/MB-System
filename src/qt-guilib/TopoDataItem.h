@@ -183,17 +183,7 @@ namespace mb_system {
 
     // ── Navigation track ─────────────────────────────────────────────────────
 
-    /// Set the navigation track from parallel x, y, z coordinate arrays.
-    /// A polyline is built from the points in order and rendered in black
-    /// overlaid on the surface.  Replaces any previously set track.
-    /// Safe to call before initializeVTK(); the track is applied when the
-    /// pipeline is next assembled or via dispatch if already initialised.
-    bool setNavigationTrack(const std::vector<double> &x,
-                            const std::vector<double> &y,
-                            const std::vector<double> &z);
 
-    bool setNavigationTrack(vtkPoints *points);
-    
     /// Show or hide the navigation track without rebuilding the pipeline.
     Q_INVOKABLE void setShowNavTrack(bool show);
 
@@ -223,6 +213,8 @@ namespace mb_system {
                READ showContours        NOTIFY showContoursChanged)
     Q_PROPERTY(bool showContourLabels
                READ showContourLabels   NOTIFY showContourLabelsChanged)
+    Q_PROPERTY(bool showNavigation
+               READ showNavigation      NOTIFY showNavigationChanged)
     Q_PROPERTY(float verticalExagg
                READ getVerticalExagg    NOTIFY verticalExaggChanged)
     Q_PROPERTY(double slopeGamma
@@ -245,6 +237,7 @@ namespace mb_system {
     bool showAxes()         const { return showAxes_; }
     bool showContours()     const { return showContours_; }
     bool showContourLabels()const { return showContourLabels_; }
+    bool showNavigation()   const { return showNavTrack_; }
     float getVerticalExagg()const { return verticalExagg_; }
     QString getDataFileName()const;
 
@@ -268,6 +261,7 @@ namespace mb_system {
     void showAxesChanged();
     void showContoursChanged();
     void showContourLabelsChanged();
+    void showNavigationChanged();
     void verticalExaggChanged();
     void slopeGammaChanged();
     void minBrightnessChanged();
@@ -382,6 +376,12 @@ namespace mb_system {
     /// Called when the dataset's quality array is modified in place.
     /// Dispatches a lightweight re-render (no pipeline rebuild).
     virtual void onQualityChanged();
+
+  private:
+    /// Extract navigation track points from the current dataset (swath files
+    /// only) and populate trackPolyData_.  Does not change showNavTrack_.
+    /// Called from onDatasetLoaded() before reassemblePipeline().
+    void updateNavTrackData();
   };
 }
 #endif

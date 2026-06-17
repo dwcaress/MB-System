@@ -32,7 +32,6 @@
 #include "SharedConstants.h"
 #include "SlopeShader.h"
 #include "TopoDataItemSettings.h"
-#include "SwathData.h"
 
 using namespace mb_system;
 
@@ -152,13 +151,9 @@ void TopoDataItem::onDatasetLoaded() {
   // Keep displayed filename in sync with what the dataset loaded
   setDataFilename(dataset_->reader()->GetFileName()
                   ? QString(dataset_->reader()->GetFileName()) : QString());
-
-  // If swath is loaded, set navigation track
-  if (dataset_->reader()->getDataType() == TopoDataType::Swath) {
-    SwathData *data = (SwathData *)dataset_->reader()->topoData();
-    setNavigationTrack(data->navTrackPoints());
-  }
-  
+  // Populate trackPolyData_ from swath nav track (no-op for GMTGrid files).
+  // Must happen before reassemblePipeline() so applyNavTrack() sees the data.
+  updateNavTrackData();
   reassemblePipeline();
 }
 
@@ -187,7 +182,10 @@ TopoDataItem::initializeVTK(vtkRenderWindow *renderWindow) {
 
   // Dataset may have been loaded before this item's VTK context existed
   // (e.g. edit window starts invisible). Assemble the pipeline now if so.
+  // updateNavTrackData() must be called here because onDatasetLoaded() skipped
+  // it earlier (pipeline_ was null at that point).
   if (dataset_ && dataset_->isLoaded()) {
+    updateNavTrackData();
     assemblePipeline(pipeline_);
   }
   
@@ -927,84 +925,10 @@ const char *TopoDataItem::getColormapScheme() {
   return TopoColorMap::schemeName(colormapScheme_);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Navigation track
-// ─────────────────────────────────────────────────────────────────────────────
-
-bool TopoDataItem::setNavigationTrack(const std::vector<double> &x,
-				      const std::vector<double> &y,
-				      const std::vector<double> &z) {
-  if (x.size() != y.size() || x.size() != z.size() || x.empty()) {
-    qWarning() << "setNavigationTrack(): mismatched or empty coordinate arrays";
-    return false;
-  }
-
-  // Build a single polyline cell connecting all points in order.
-  vtkNew<vtkPoints>    pts;
-  vtkNew<vtkCellArray> lines;
-
-  const vtkIdType n = static_cast<vtkIdType>(x.size());
-  pts->SetNumberOfPoints(n);
-  lines->InsertNextCell(n);
-  for (vtkIdType i = 0; i < n; ++i) {
-    pts->SetPoint(i, x[i], y[i], z[i]);
-    lines->InsertCellPoint(i);
-  }
-
-  trackPolyData_->SetPoints(pts);
-  trackPolyData_->SetLines(lines);
-  trackPolyData_->Modified();
-  showNavTrack_ = true;
-
-  qDebug() << "setNavigationTrack():" << n << "points";
-
-  if (!pipeline_) return false;   // initializeVTK not yet called; applyNavTrack will
-                             // run during the next assemblePipeline
-  dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
-    auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
-    applyNavTrack(p);
-    rw->Render();
-  });
-
-  return true;
-}
-
-
-
-bool TopoDataItem::setNavigationTrack(vtkPoints *points) {
-
-  // Build a single polyline cell connecting all points in order.
-  vtkNew<vtkCellArray> lines;
-
-  const vtkIdType n = points->GetNumberOfPoints();
-  
-  lines->InsertNextCell(n);
-  for (vtkIdType i = 0; i < n; ++i) {
-    lines->InsertCellPoint(i);
-  }
-
-  trackPolyData_->SetPoints(points);
-  trackPolyData_->SetLines(lines);
-  trackPolyData_->Modified();
-  showNavTrack_ = true;
-
-  qDebug() << "setNavigationTrack():" << n << "points";
-
-  if (!pipeline_) return false;   // initializeVTK not yet called; applyNavTrack will
-                                  // run during the next assemblePipeline
-  dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
-    auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
-    applyNavTrack(p);
-    rw->Render();
-  });
-
-  return true;
-}
-
-
 
 void TopoDataItem::setShowNavTrack(bool show) {
   showNavTrack_ = show;
+  emit showNavigationChanged();
   qDebug() << "setShowNavTrack():" << show;
   dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
     auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
@@ -1013,9 +937,66 @@ void TopoDataItem::setShowNavTrack(bool show) {
   });
 }
 
+
 // ─────────────────────────────────────────────────────────────────────────────
 //  applyNavTrack — add/remove track actor; called from assemblePipeline and
 //  whenever the track data or visibility changes.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  updateNavTrackData — extract swath nav track into trackPolyData_
+// ─────────────────────────────────────────────────────────────────────────────
+
+void TopoDataItem::updateNavTrackData() {
+  // Clear any previous track geometry
+  trackPolyData_->Initialize();
+
+  if (!dataset_) return;
+
+  vtkPoints *srcPts = dataset_->navTrackPoints();
+  if (!srcPts || srcPts->GetNumberOfPoints() == 0) {
+    qDebug() << "updateNavTrackData(): no nav track (GMTGrid or empty swath)";
+    return;
+  }
+
+  const vtkIdType n = srcPts->GetNumberOfPoints();
+
+  // Use the actual sensor depth for z (already in VTK z-up convention:
+  // sea surface = 0, deeper = more negative).  The track will appear above
+  // the bathymetry surface, at the vehicle/vessel depth.
+  vtkNew<vtkPoints> trackPts;
+  trackPts->SetNumberOfPoints(n);
+  double xMin =  1e18, xMax = -1e18;
+  double yMin =  1e18, yMax = -1e18;
+  double zMin =  1e18, zMax = -1e18;
+  for (vtkIdType i = 0; i < n; ++i) {
+    double p[3];
+    srcPts->GetPoint(i, p);
+    if (p[0] < xMin) xMin = p[0]; if (p[0] > xMax) xMax = p[0];
+    if (p[1] < yMin) yMin = p[1]; if (p[1] > yMax) yMax = p[1];
+    if (p[2] < zMin) zMin = p[2]; if (p[2] > zMax) zMax = p[2];
+    trackPts->SetPoint(i, p[0], p[1], p[2]);
+  }
+
+  double gb[6];
+  dataset_->gridBounds(&gb[0], &gb[1], &gb[2], &gb[3], &gb[4], &gb[5]);
+  qDebug() << "updateNavTrackData():" << n << "points"
+           << "  track xy=[" << xMin << "," << xMax << "] x ["
+           << yMin << "," << yMax << "]  z=[" << zMin << "," << zMax << "]";
+  qDebug() << "  surface bounds: x=[" << gb[0] << "," << gb[1]
+           << "]  y=[" << gb[2] << "," << gb[3]
+           << "]  z=[" << gb[4] << "," << gb[5] << "]";
+
+  vtkNew<vtkCellArray> lines;
+  lines->InsertNextCell(n);
+  for (vtkIdType i = 0; i < n; ++i)
+    lines->InsertCellPoint(i);
+
+  trackPolyData_->SetPoints(trackPts);
+  trackPolyData_->SetLines(lines);
+  trackPolyData_->Modified();
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 void TopoDataItem::applyNavTrack(Pipeline *pipeline) {
@@ -1023,13 +1004,23 @@ void TopoDataItem::applyNavTrack(Pipeline *pipeline) {
   // re-assembly without duplicating the actor).
   pipeline->renderer_->RemoveActor(pipeline->trackActor_);
 
+  qDebug() << "applyNavTrack(): showNavTrack_=" << showNavTrack_
+           << "  trackPoints=" << trackPolyData_->GetNumberOfPoints();
+
   if (!showNavTrack_ || trackPolyData_->GetNumberOfPoints() == 0) return;
+
+  // Print actor bounds after wiring — confirms actual rendered position.
+  // (Printed after SetInputData and transform so bounds are meaningful.)
+
 
   pipeline->trackMapper_->SetInputData(trackPolyData_);
   pipeline->trackMapper_->ScalarVisibilityOff();
+  // Track is at elevMax+1 (1 m above shallowest surface) — no polygon offset
+  // needed, and enabling it on macOS/core-profile can push lines the wrong way.
+  pipeline->trackMapper_->SetResolveCoincidentTopologyToOff();
 
   pipeline->trackActor_->GetProperty()->SetColor(0.0, 0.0, 0.0);  // black
-  pipeline->trackActor_->GetProperty()->SetLineWidth(2.0);
+  pipeline->trackActor_->GetProperty()->SetLineWidth(3.0);
   pipeline->trackActor_->GetProperty()->LightingOff();
 
   // Apply the same vertical-exaggeration transform as the surface actor so
@@ -1041,4 +1032,31 @@ void TopoDataItem::applyNavTrack(Pipeline *pipeline) {
   }
 
   pipeline->renderer_->AddActor(pipeline->trackActor_);
+  // Adding an actor may change the scene bounding box, which can push the
+  // clipping planes past the surface actor.  Reset here to keep everything visible.
+  pipeline->renderer_->ResetCameraClippingRange();
+
+  double tb[6];
+  pipeline->trackActor_->GetBounds(tb);
+  qDebug() << "trackActor bounds:"
+           << " x=[" << tb[0] << "," << tb[1] << "]"
+           << " y=[" << tb[2] << "," << tb[3] << "]"
+           << " z=[" << tb[4] << "," << tb[5] << "]";
+  double sb[6];
+  pipeline->surfaceActor_->GetBounds(sb);
+  qDebug() << "surfaceActor bounds:"
+           << " x=[" << sb[0] << "," << sb[1] << "]"
+           << " y=[" << sb[2] << "," << sb[3] << "]"
+           << " z=[" << sb[4] << "," << sb[5] << "]";
+
+  // Camera diagnostics: confirm track is within view frustum.
+  {
+    double pos[3], fp[3], clip[2];
+    pipeline->renderer_->GetActiveCamera()->GetPosition(pos);
+    pipeline->renderer_->GetActiveCamera()->GetFocalPoint(fp);
+    pipeline->renderer_->GetActiveCamera()->GetClippingRange(clip);
+    qDebug() << "camera pos=(" << pos[0] << "," << pos[1] << "," << pos[2] << ")"
+             << "  focal=(" << fp[0] << "," << fp[1] << "," << fp[2] << ")"
+             << "  clip=[" << clip[0] << "," << clip[1] << "]";
+  }
 }
