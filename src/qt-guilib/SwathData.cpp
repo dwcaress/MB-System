@@ -25,7 +25,7 @@ extern "C" {
 #include "mb_io.h"
 
 // Defines mbeditviz functions and  extern variables
-#include "mbeditviz.h"   
+#include "mbeditviz.h"
 
 }
 
@@ -45,7 +45,7 @@ SwathData::SwathData() {
                  &SwathData::hideMessage,
                  &SwathData::updateGui,
                  &SwathData::showErrorDialog);
-  
+
 }
 
 SwathData::~SwathData() {
@@ -53,7 +53,7 @@ SwathData::~SwathData() {
 
 
 bool SwathData::readDatafile(char *swathFile) {
-  
+
   int verbose = 1;
   int error = 0;
 
@@ -71,7 +71,7 @@ bool SwathData::readDatafile(char *swathFile) {
   if (access(infFile, F_OK) != 0) {
     // File does not exist
     std::cerr << "File " << infFile << " not found\n";
-    /// free((void *)infFile);    
+    /// free((void *)infFile);
     /// return false;
   }
 
@@ -84,7 +84,7 @@ bool SwathData::readDatafile(char *swathFile) {
     std::cerr << "Couldn't determine sonar format of " << swathFile << std::endl;
     return false;
   }
-  
+
   // Get list of relevant files into global C structure
   if (mbeditviz_import_file((char *)swathFile, sonarFormat) != MB_SUCCESS) {
     std::cerr << "Couldn't import data from " << swathFile << std::endl;
@@ -105,19 +105,6 @@ bool SwathData::readDatafile(char *swathFile) {
     return false;
   }
 
-  // Point to swath data just loaded into global array
-  mbev_file_struct* swathData = &mbev_files[0];
-
-  // Load navigation track points for each ping in the swath
-  navTrackPoints_->Reset();
-  navTrackPoints_->SetNumberOfPoints(swathData->num_pings);
-  for (vtkIdType i = 0; i < swathData->num_pings; i++) {
-    
-    navTrackPoints_->SetPoint(i, swathData->pings[i].navlonx,
-			     swathData->pings[i].navlaty,
-			     swathData->pings[i].sensordepth);
-  }
-  
   // Get bounds of loaded swath data
   mbeditviz_get_grid_bounds();
 
@@ -128,6 +115,9 @@ bool SwathData::readDatafile(char *swathFile) {
   mbeditviz_setup_grid();
 
   // Allocate memory and load individual swath soundings
+  // NOTE: mbeditviz_project_soundings() must be called before reading
+  // navlonx/navlaty, as it fills those fields with the projected (UTM)
+  // coordinates.  Before this call they are zero/uninitialised.
   mbeditviz_project_soundings();
 
   // Load sounding data into grid
@@ -136,11 +126,27 @@ bool SwathData::readDatafile(char *swathFile) {
   // Save pointer to grid struct
   gridData_ = &mbev_grid;
 
+  // Point to swath data (still valid after mbeditviz calls above)
+  mbev_file_struct* swathData = &mbev_files[0];
+
+  // Load navigation track points now that projection has been applied.
+  // getXYZ() uses boundsutm[0] (easting) → VTK x and boundsutm[2] (northing) → VTK y,
+  // so navlonx (easting) → VTK x and navlaty (northing) → VTK y — no swap needed.
+  // sensordepth is positive meters below surface in MB-System; negate for VTK z-up.
+  navTrackPoints_->Reset();
+  navTrackPoints_->SetNumberOfPoints(swathData->num_pings);
+  for (vtkIdType i = 0; i < swathData->num_pings; i++) {
+    navTrackPoints_->SetPoint(i,
+                              swathData->pings[i].navlonx,  // easting  → VTK x
+                              swathData->pings[i].navlaty,  // northing → VTK y
+                              -swathData->pings[i].sensordepth); // negate: positive depth → negative VTK z
+  }
+
   // Set grid zmin and zmax, since the above mbeditviz functions do not
   int nPts = gridData_->n_rows * gridData_->n_columns;
   gridData_->min = std::numeric_limits<float>::max();
   gridData_->max = -std::numeric_limits<float>::max();
-  
+
   for (int i = 0; i < nPts; i++) {
     if (gridData_->val[i] == gridData_->nodatavalue) {
       // No z data at this point
@@ -160,7 +166,7 @@ bool SwathData::readDatafile(char *swathFile) {
   }
   std::cerr << "done getting grid min/max: min=" << gridData_->min <<
     "  max=" << gridData_->max << std::endl;
-  
+
   std::cout << "Done with SwathData::readDatafile()" << std::endl;
   return true;
 }
@@ -185,16 +191,19 @@ void SwathData::getParameters(int *nRows, int *nColumns,
   *xUnits = strdup("easting");
   *yUnits = strdup("northing");
   *zUnits = strdup("meters");
-  
+
 }
 
 
 bool SwathData::getXYZ(int row, int col,
 		       double *x, double *y, double *z) {
 
-  *x = gridData_->boundsutm[2] + col * gridData_->dx; 
-  *y = gridData_->boundsutm[0] + row * gridData_->dy;
-  //  int index = row * gridData_->n_columns + col;
+  // boundsutm[0/1] = west/east easting; boundsutm[2/3] = south/north northing.
+  // col goes east-west (easting direction), row goes north-south (northing direction).
+  // This matches getParameters() which labels boundsutm[0] as xMin (easting)
+  // and boundsutm[2] as yMin (northing).
+  *x = gridData_->boundsutm[0] + col * gridData_->dx;  // easting → VTK x
+  *y = gridData_->boundsutm[2] + row * gridData_->dy;  // northing → VTK y
   int index = col * gridData_->n_rows + row;
   *z = gridData_->val[index];
 
@@ -203,7 +212,7 @@ bool SwathData::getXYZ(int row, int col,
 
 
 bool SwathData::unlockSwath(char *swathfile) {
-  
+
   bool usingLocks = false;
   std::cout << "unlockSwath(" << swathfile << ")" << std::endl;
   if (usingLocks) {
@@ -233,7 +242,7 @@ bool SwathData::setProjString() {
                strlen(TopoData::UtmType_))) {
     sprintf(projString_, "+proj=utm +zone=%s +datum=WGS84",
             gridData_->projection_id + strlen(TopoData::UtmType_));
-    
+
     return true;
   }
   else {
