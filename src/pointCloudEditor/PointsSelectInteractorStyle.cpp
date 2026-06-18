@@ -76,13 +76,12 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
     selectedMapper_->SetInputData(extractedData);
     selectedMapper_->ScalarVisibilityOff();
 
+    std::cerr << "set actor color BLACK\n";
     selectedActor_->
       GetProperty()->SetColor(colors->GetColor3d("Black").GetData());
       
-    selectedActor_->GetProperty()->SetPointSize(1);
-    // selectedActor_->GetProperty()->SetRepresentationToWireframe();
-    // selectedActor_->GetProperty()->SetRepresentationToSurface();
     selectedActor_->GetProperty()->SetRepresentationToPoints();
+    selectedActor_->GetProperty()->SetPointSize(10.);
 
     GetInteractor()
       ->GetRenderWindow()
