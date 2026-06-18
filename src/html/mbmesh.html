@@ -1,0 +1,328 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbmesh</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbmesh</H1>
+Section: User Commands  (1)<BR>Updated:  6 March 2026 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+mbmesh - Process swath bathymetry data and generate 3D point clouds and GLB models
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbmesh</B> <B>-I</B><I> datalist</I> [<B>-O</B><I> outputdir</I>] [<B>-R</B><I> west/east/south/north</I>]
+[<B>-html</B>] [<B>-V</B> [<B>-V</B>]] [<B>-H</B>]
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<P>
+
+<B>mbmesh</B> reads swath sonar data files and processes bathymetric soundings 
+to generate 3D point cloud data in multiple formats. The primary use is to 
+extract multibeam echosounder (MBES) data and convert it to point clouds 
+suitable for 3D visualization and analysis.
+<P>
+<B>mbmesh</B> reads a datalist file containing references to swath data files
+in MB-System supported formats. It extracts all valid bathymetry soundings,
+applies optional geographic filtering, and outputs the data in multiple formats:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT><B>adjustedPointcloud.xyz</B>
+
+<DD>
+Point cloud in local projected coordinates (meters) relative to data centroid
+<DT><B>ecefPointcloud.xyz</B>
+
+<DD>
+Point cloud in WGS84 Earth-Centered Earth-Fixed (ECEF) coordinates
+<DT><B>adjustedPointcloud.glb</B>
+
+<DD>
+Binary GLB (glTF) format suitable for 3D viewer applications
+<DT><B>adjustedPointcloud.html</B>
+
+<DD>
+Optional HTML viewer for interactive 3D visualization
+</DL></DL>
+
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-I</B><I> datalist</I>
+
+<DD>
+<BR>
+
+Input datalist file containing list of swath data files. This is a required
+option. Each line in the datalist file should contain: path format [processed_path]
+following MB-System datalist format conventions.
+The default datalist file is <I>datalist.mb-1</I> if not specified.
+<DT><B>-O</B><I> outputdir</I>
+
+<DD>
+<BR>
+
+Output directory for all generated files. The directory will be created if it
+does not exist. Default is <I>./tileset</I>.
+<DT><B>-R</B><I> west/east/south/north</I>
+
+<DD>
+<BR>
+
+Specify geographic bounds for filtering soundings. Only soundings within the
+specified rectangle (in degrees longitude/latitude) will be included in the
+output. The format is west/east/south/north where west and south are typically
+negative. If not specified, all soundings are included.
+<DT><B>-html</B>
+
+<DD>
+<BR>
+
+Also generate an HTML viewer file (adjustedPointcloud.html) for interactive
+3D visualization of the point cloud. When this option is used, mbmesh will
+attempt to launch an HTTP server and open the viewer in the default web browser.
+<DT><B>-V</B>
+
+<DD>
+<BR>
+
+Increase verbosity level. By default, only essential information is printed.
+Can be specified multiple times (<B>-V -V</B>) to increase debugging output.
+Higher verbosity levels provide detailed progress information, data statistics,
+and sample soundings from the dataset.
+<DT><B>-H</B>
+
+<DD>
+<BR>
+
+Display help message and exit.
+<DT><B>-h</B>
+
+<DD>
+<BR>
+
+Display help message and exit (alternative to <B>-H</B>).
+<P>
+</DL>
+<A NAME="lbAF">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+<P>
+
+Process all files in a datalist and output to default directory:
+<DL COMPACT><DT><DD>
+<B>mbmesh -Idatalist.mb-1</B>
+
+</DL>
+
+<P>
+
+Process files in a specific geographic region:
+<DL COMPACT><DT><DD>
+<B>mbmesh -Idatalist.mb-1 -R-122.5/-121.8/36.5/37.2 -V</B>
+
+</DL>
+
+<P>
+
+Process files with custom output directory and HTML viewer:
+<DL COMPACT><DT><DD>
+<B>mbmesh -Idatalist.mb-1 -O./my_output -html -V</B>
+
+</DL>
+
+<P>
+
+Process files with increased verbosity for detailed debugging:
+<DL COMPACT><DT><DD>
+<B>mbmesh -Idatalist.mb-1 -V -V</B>
+
+</DL>
+
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OUTPUT FILES</H2>
+
+<P>
+
+<B>mbmesh</B> generates the following output files in the specified output directory:
+<P>
+<DL COMPACT>
+<DT><B>adjustedPointcloud.xyz</B>
+
+<DD>
+Standard XYZ point cloud in local projected coordinates where longitude/latitude
+are converted to meters relative to the data centroid and depth is centered
+around the mean depth. This format is suitable for visualization in standard
+3D point cloud viewers. Format: X(meters) Y(meters) Z(meters)
+<DT><B>ecefPointcloud.xyz</B>
+
+<DD>
+Point cloud in WGS84 ECEF coordinates with GeoOrigin offset applied. This format
+preserves accurate Earth-centered coordinates suitable for analysis requiring
+geodetic precision. Format: X(meters) Y(meters) Z(meters)
+<DT><B>adjustedPointcloud.glb</B>
+
+<DD>
+Binary GLB (GL Transmission Format) file containing the point cloud as a 3D model.
+This format is widely supported by web-based 3D viewers and applications.
+Can be directly embedded in web pages or used with tools like Cesium.js or
+Three.js for interactive visualization.
+<DT><B>adjustedPointcloud.html</B>
+
+<DD>
+Optional HTML file generated when <B>-html</B> option is used. This file provides
+an interactive web-based viewer for the GLB model. When generated, mbmesh attempts
+to launch a local HTTP server and open the viewer in the default web browser.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>DATA STATISTICS</H2>
+
+<P>
+
+Upon completion, <B>mbmesh</B> prints detailed statistics including:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Number of datalist files processed and successfully read<DD>
+<DT>Total pings processed from all files<DD>
+<DT>Total beams encountered vs. valid beams (acceptance rate)<DD>
+<DT>Geographic bounds of the processed data<DD>
+<DT>Sample soundings (first 10) with coordinates and quality flags<DD>
+</DL></DL>
+
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>PROCESSING NOTES</H2>
+
+<P>
+
+<B>Beam Quality Filtering</B>
+
+<BR>
+
+<B>mbmesh</B> automatically filters out beams flagged as bad or suspect using
+MB-System's standard beam quality flags. Only beams marked as good are included
+in the output point clouds. The percentage of valid beams vs. total beams
+is reported in the statistics.
+<P>
+<B>Geographic Filtering</B>
+
+<BR>
+
+When <B>-R</B> is specified, soundings outside the geographic bounding box are
+excluded from output. This is useful for processing large datasets or focusing
+on areas of interest.
+<P>
+<B>Coordinate Transformations</B>
+
+<BR>
+
+The adjusted point cloud uses a local projected coordinate system relative to
+the data centroid for better numerical stability in 3D applications. The ECEF
+point cloud preserves absolute WGS84 coordinates. Both formats include reference
+information in file headers for reproducibility.
+<P>
+<B>Memory Usage</B>
+
+<BR>
+
+<B>mbmesh</B> stores all soundings in memory during processing. For very large datasets,
+this may require significant RAM. The program reports total soundings collected
+upon completion.
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>MB-SYSTEM INTEGRATION</H2>
+
+<P>
+
+<B>mbmesh</B> integrates with the MB-System datalist processing framework,
+allowing it to process multiple files in any MB-System supported format.
+File format is determined automatically or can be specified via the datalist
+file. Processed files (if available) are preferred over raw files unless
+the datalist indicates otherwise.
+<P>
+<A NAME="lbAK">&nbsp;</A>
+<H2>FUTURE DEVELOPMENT</H2>
+
+<P>
+
+Planned enhancements to <B>mbmesh</B> include:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>Triangle mesh generation from point cloud with seafloor feature preservation<DD>
+<DT>Py3dtiles integration and evaluation of alternative 3D Tiles libraries<DD>
+<DT>Draco compression support for efficient GLB file transmission<DD>
+<DT>Improved X3DOM visualization and viewer enhancements<DD>
+<DT>Refinement of GeoOrigin handling and direct ECEF coordinate output<DD>
+</DL></DL>
+
+<P>
+<A NAME="lbAL">&nbsp;</A>
+<H2>AUTHOR</H2>
+
+<P>
+
+David W. Caress and Dale N. Chayes
+<BR>
+
+Monterey Bay Aquarium Research Institute
+<BR>
+
+Original implementation: CSUMB Capstone - Spring 2026
+<P>
+<A NAME="lbAM">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mb-system.html">mb-system</A></B>(1),
+
+<B><A HREF="mbgrid.html">mbgrid</A></B>(1),
+
+<B><A HREF="mbgrd2gltf.html">mbgrd2gltf</A></B>(1),
+
+<B><A HREF="mbgrdviz.html">mbgrdviz</A></B>(1)
+
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">OPTIONS</A><DD>
+<DT><A HREF="#lbAF">EXAMPLES</A><DD>
+<DT><A HREF="#lbAG">OUTPUT FILES</A><DD>
+<DT><A HREF="#lbAH">DATA STATISTICS</A><DD>
+<DT><A HREF="#lbAI">PROCESSING NOTES</A><DD>
+<DT><A HREF="#lbAJ">MB-SYSTEM INTEGRATION</A><DD>
+<DT><A HREF="#lbAK">FUTURE DEVELOPMENT</A><DD>
+<DT><A HREF="#lbAL">AUTHOR</A><DD>
+<DT><A HREF="#lbAM">SEE ALSO</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 6 March 2026</P></CENTER>
+
+<HR>
+<center>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>

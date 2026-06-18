@@ -1,0 +1,281 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbnavlab2fnv</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbnavlab2fnv</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  2026 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbnavlab2fnv</B> - converts a Kongsberg Navlab smoothed navigation binary
+file to an MB-System fast navigation (fnv) text file.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbnavlab2fnv</B> [<B>-I</B><I>file</I>] [<B>-O</B><I>file</I>] [<B>-V</B>] [<B>-H</B>]
+<BR>
+
+<B>mbnavlab2fnv</B> [<B>--input</B>=<I>file</I>] [<B>--output</B>=<I>file</I>]
+[<B>--verbose</B>] [<B>--help</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbnavlab2fnv</B> converts a Kongsberg Navlab smoothed navigation binary
+file (typically named <I>navlab_smooth.bin</I>) to an MB-System fast
+navigation (fnv) ASCII text file.
+<P>
+Kongsberg Navlab is a post-processing software package that computes a
+smoothed navigation and attitude solution for Kongsberg Hugin autonomous
+underwater vehicles (AUVs). The output binary file contains a time series
+sampled at 100 Hz (10 ms intervals) with no file header. Each record
+consists of 21 IEEE 754 double-precision (64-bit) floating-point values
+stored in little-endian byte order (record size: 168 bytes). The fields
+extracted by <B>mbnavlab2fnv</B> are:
+<P>
+<PRE>
+  field  0: time (Unix epoch seconds)
+  field  1: latitude (decimal degrees, positive north)
+  field  2: longitude (decimal degrees, positive east)
+  field  3: depth (meters, positive down) - used as draft
+  field  6: heading (degrees, 0-360, clockwise from north)
+  field  7: roll (degrees, positive starboard up)
+  field  8: pitch (degrees, positive bow up)
+  field 10: speed through water (m/s)
+</PRE>
+
+<P>
+Heave is not stored in the navlab_smooth.bin format and is written as
+0.0 in the fnv output.
+<P>
+The fnv format is a tab-separated ASCII text file. The first line is a
+comment beginning with <B>##</B> that names the columns. Each subsequent
+data line contains the following tab-separated fields:
+<P>
+<PRE>
+  yyyy mm dd hh mm ss.ssssss
+  epoch_seconds
+  longitude (deg)
+  latitude (deg)
+  heading (deg)
+  speed (km/hr)
+  draft (m)
+  roll (deg)
+  pitch (deg)
+  heave (m)
+</PRE>
+
+<P>
+The date and time in the first field are space-delimited within their
+tab field. Speed is converted from m/s to km/hr. The optional port and
+starboard swath edge columns present in some fnv files are not written
+by <B>mbnavlab2fnv</B> as no swath geometry is available from the
+navlab_smooth.bin format.
+<P>
+If no input file is specified, <B>mbnavlab2fnv</B> reads from standard
+input. If no output file is specified, it writes to standard output.
+Bytes are automatically swapped on big-endian host architectures so
+that the output is always correct on any platform.
+<P>
+Records with retrograde (non-increasing) timestamps are silently skipped
+unless verbose mode is active.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-H</B>
+
+<DD>
+<DT><B>--help</B>
+
+<DD>
+Prints the program name, usage, and a description of the navlab_smooth.bin
+field layout, then exits.
+<DT><B>-V</B>
+
+<DD>
+<DT><B>--verbose</B>
+
+<DD>
+Increases the verbosity of <B>mbnavlab2fnv</B>. With this option the
+program prints the input and output file names to standard error when
+they are opened, reports any skipped records with their timestamps,
+and prints a final summary of the number of records read and written.
+<DT><B>-I </B><I>file</I>
+
+<DD>
+<DT><B>--input=</B><I>file</I>
+
+<DD>
+Sets the path of the input Kongsberg Navlab binary file. If this option
+is not given, the program reads from standard input.
+<DT><B>-O </B><I>file</I>
+
+<DD>
+<DT><B>--output=</B><I>file</I>
+
+<DD>
+Sets the path of the output fnv file. If this option is not given,
+the program writes to standard output.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>NAVLAB BINARY FORMAT</H2>
+
+The navlab_smooth.bin format has the following properties:
+<P>
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT>*<DD>
+No file header of any kind.
+<DT>*<DD>
+Each record is exactly 168 bytes: 21 values &#215; 8 bytes (float64).
+<DT>*<DD>
+All values are IEEE 754 double-precision floating point,
+little-endian byte order.
+<DT>*<DD>
+Nominal sample rate: 100 Hz (10 ms steps).
+<DT>*<DD>
+The complete field inventory is:
+</DL></DL>
+
+<P>
+<PRE>
+  field  0: time_d      - Unix epoch seconds
+  field  1: latitude    - decimal degrees, positive north
+  field  2: longitude   - decimal degrees, positive east
+  field  3: depth       - meters, positive down
+  field  4: unknown     - (not used)
+  field  5: unknown     - (not used)
+  field  6: heading     - degrees, 0-360, clockwise from north
+  field  7: roll        - degrees, positive starboard up
+  field  8: pitch       - degrees, positive bow up
+  field  9: vert_vel    - vertical velocity, m/s, positive down
+  field 10: speed       - speed through water, m/s
+  field 11: speed_2     - speed through water, m/s (alternate source)
+  field 12: unknown     - (not used)
+  field 13: unknown     - (not used)
+  field 14: std_lat     - position uncertainty, latitude (deg)
+  field 15: std_lon     - position uncertainty, longitude (deg)
+  field 16: std_hdg     - heading uncertainty (deg)
+  field 17: std_17      - velocity/attitude uncertainty
+  field 18: std_18      - velocity/attitude uncertainty
+  field 19: std_19      - velocity/attitude uncertainty
+  field 20: cov_20      - Kalman covariance cross-term
+</PRE>
+
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Convert a navlab binary file to an fnv file:
+<P>
+
+<PRE>
+    mbnavlab2fnv -I navlab_smooth.bin -O mission.fnv
+</PRE>
+
+<P>
+
+Use standard input and output (e.g. within a pipeline):
+<P>
+
+<PRE>
+    cat navlab_smooth.bin | mbnavlab2fnv &gt; mission.fnv
+</PRE>
+
+<P>
+
+Convert with verbose progress reporting:
+<P>
+
+<PRE>
+    mbnavlab2fnv --verbose --input=navlab_smooth.bin --output=mission.fnv
+</PRE>
+
+<P>
+
+Use the fnv output to supply navigation, attitude, sensor depth, and
+heading to <B>mbpreprocess</B> for preprocessing Kongsberg KMALL sonar data:
+<P>
+
+<PRE>
+    mbnavlab2fnv -I navlab_smooth.bin -O mission.fnv
+    mbpreprocess --format=261 --input=datalist.mb-1 \
+        --nav-file=mission.fnv --nav-file-format=9 \
+        --sensordepth-file=mission.fnv --sensordepth-file-format=9 \
+        --attitude-file=mission.fnv --attitude-file-format=9 \
+        --heading-file=mission.fnv --heading-file-format=9
+</PRE>
+
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbfnv2navlab.html">mbfnv2navlab</A></B>(1), <B><A HREF="mbpreprocess.html">mbpreprocess</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1)
+<P>
+<A NAME="lbAK">&nbsp;</A>
+<H2>BUGS</H2>
+
+Heave is not available in the navlab_smooth.bin format and is always
+written as 0.0 in the fnv output. Applications that require heave
+(e.g. for motion correction of multibeam bathymetry) should obtain
+heave from the raw sonar data stream instead.
+<P>
+The optional port and starboard swath edge columns in the fnv format
+are not written by <B>mbnavlab2fnv</B>; they are only meaningful in fnv
+files generated from processed swath data.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">NAVLAB BINARY FORMAT</A><DD>
+<DT><A HREF="#lbAI">EXAMPLES</A><DD>
+<DT><A HREF="#lbAJ">SEE ALSO</A><DD>
+<DT><A HREF="#lbAK">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 2026" "MB-System 5.0</P></CENTER>
+
+<HR>
+<center>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>

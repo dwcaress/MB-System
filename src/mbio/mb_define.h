@@ -37,7 +37,7 @@
 
 /* Define version and date for this release */
 #define MB_VERSION "5.8.3beta13"
-#define MB_VERSION_DATE "29 April 2026"
+#define MB_VERSION_DATE "18 June 2026"
 
 /* CMake supports current OS's and so there is only one form of RPC and XDR and no mb_config.h file */
 #ifdef CMAKE_BUILD_SYSTEM

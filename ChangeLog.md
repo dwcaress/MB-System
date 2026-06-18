@@ -22,8 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
-- Version 5.8.3beta14    June 12, 2026
-- Version 5.8.3beta13    April 29, 2026
+- Version 5.8.3beta13    June 18, 2026
 - Version 5.8.3beta12    January 7, 2026
 - Version 5.8.3beta11    December 27, 2025
 - Version 5.8.3beta10    December 22, 2025
@@ -72,7 +71,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
-#### 5.8.3beta14 (June 12, 2026)
+#### 5.8.3beta13 (June 18, 2026)
 
 Build system: Make MB-System buildable on Windows with MSVC (no cygwin or mingw). Contributed by Joaquim Luis.
 
@@ -88,8 +87,6 @@ Programs mbnavadjust and mbnavadjustmerge: Fixed problems with new and merged pr
 from treating surveys and blocks of continuous data separately.
 
 Program mbmakedatalist: Compiled C version of macro mbm_makedatalist
-
-#### 5.8.3beta13 (April 29, 2026)
 
 Library mbtrnav/gctp: Added modern function definitions to function pointer arrays.
 

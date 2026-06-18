@@ -1,0 +1,216 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbm_tmap</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbm_tmap</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  18 April 2026 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbm_tmap</B> - Macro to convert XYZ point clouds to 3D Tiles and generate a Cesium viewer.
+
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbm_tmap</B> <B>-I</B><I>pointcloud.xyz</I>
+[<B>-O</B><I>tiles_dir</I>]
+[<B>-P</B><I>port</I>]
+[<B>--serve-only</B> | <B>--no-convert</B>]
+[<B>-N</B>]
+[<B>-S</B>]
+[<B>-W</B>]
+[<B>-V</B>]
+[<B>-H</B>]
+
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbm_tmap</B> is a macro that automates point cloud web visualization setup.
+It runs <B>py3dtiles convert</B> on an input XYZ point cloud file, writes an
+<B>index.html</B> Cesium viewer file into the output tiles directory, and can
+optionally start a local HTTP server using <B>python -m http.server</B>.
+
+By default <B>mbm_tmap</B> performs conversion from XYZ input. If
+<B>--serve-only</B> (or <B>--no-convert</B>) is specified, conversion is skipped
+and an existing tiles directory is served directly.
+
+This macro is intended for quick local testing and browsing of tiled point cloud
+data products.
+
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-I</B>
+
+<DD>
+<I>pointcloud.xyz</I>
+<BR>
+
+Input XYZ point cloud file. This option is required unless
+<B>--serve-only</B> or <B>--no-convert</B> is specified.
+
+<DT><B>-O</B>
+
+<DD>
+<I>tiles_dir</I>
+<BR>
+
+Output directory for 3D Tiles and generated <B>index.html</B>.
+Default is <B>tiles</B>.
+
+<DT><B>-P</B>
+
+<DD>
+<I>port</I>
+<BR>
+
+HTTP server port used when starting <B>python -m http.server</B>.
+Default is <B>8000</B>.
+
+<DT><B>--serve-only, --no-convert</B>
+
+<DD>
+<BR>
+
+Skip <B>py3dtiles</B> conversion and serve an existing tiles directory.
+In this mode <B>-O</B> should point to an existing tiles directory.
+If <B>index.html</B> already exists it is reused.
+
+<DT><B>-N</B>
+
+<DD>
+<BR>
+
+Do not open a browser automatically.
+
+<DT><B>-S</B>
+
+<DD>
+<BR>
+
+Do not start a local HTTP server.
+
+<DT><B>-W</B>
+
+<DD>
+<BR>
+
+Wait on the server process after starting it. Use Ctrl+C to stop.
+
+<DT><B>-V</B>
+
+<DD>
+<BR>
+
+Verbose output.
+
+<DT><B>-H</B>
+
+<DD>
+<BR>
+
+Print help message and exit.
+
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Convert an XYZ file to tiles and start local server:
+<BR>
+
+<B>mbm_tmap -I cloud.xyz -O tiles -V</B>
+
+Serve an existing tiles directory without reconversion:
+<BR>
+
+<B>mbm_tmap --serve-only -O tiles -P 8081 -W -V</B>
+
+Convert an XYZ file to tiles without starting server:
+<BR>
+
+<B>mbm_tmap -I cloud.xyz -O tiles -S</B>
+
+Start server and keep the macro attached to server lifetime:
+<BR>
+
+<B>mbm_tmap -I cloud.xyz -O tiles -W</B>
+
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbgrd2gltf.html">mbgrd2gltf</A></B>(1), <B><A HREF="mbsystem.html">mbsystem</A></B>(1)
+
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+No known bugs.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 18 April 2026</P></CENTER>
+
+<HR>
+<center>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>
