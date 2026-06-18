@@ -56,7 +56,6 @@ int main(int argc, char* argv[])
     std::cerr << "Qt 6 not running on X11\n";
 
   QGuiApplication app(argc, argv);
-  app.setApplicationName("qt-mbgrdviz");
 
   QQmlApplicationEngine engine;
 
