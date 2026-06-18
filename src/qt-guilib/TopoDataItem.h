@@ -1,5 +1,6 @@
 #ifndef TOPOGRIDITEM_H
 #define TOPOGRIDITEM_H
+#include <filesystem>
 #include <QObject>
 #include <QQuickVTKItem.h>
 #include <vtkActor.h>
@@ -251,7 +252,20 @@ namespace mb_system {
       return pointsSelectInteractorStyle_;
     }
 
+    /// Return name of current colormap scheme
     const char *getColormapScheme();
+
+    
+    /// Return path of default config file
+    const std::filesystem::path getConfigfilePath() {
+      auto path = std::filesystem::path(getenv("HOME"))
+	/ ".config"
+	/ QCoreApplication::applicationName().toStdString()
+	/ "settings.toml";
+      qDebug() << "getConfigfilePath(): " << path.string();
+      return path;
+    }
+    
 
   signals:
     void datasetChanged();
