@@ -114,6 +114,7 @@ bool SwathData::readDatafile(char *swathFile) {
   // Prepare grid to contain loaded swath data
   mbeditviz_setup_grid();
 
+
   // Allocate memory and load individual swath soundings
   // NOTE: mbeditviz_project_soundings() must be called before reading
   // navlonx/navlaty, as it fills those fields with the projected (UTM)
@@ -139,7 +140,8 @@ bool SwathData::readDatafile(char *swathFile) {
     navTrackPoints_->SetPoint(i,
                               swathData->pings[i].navlonx,  // easting  → VTK x
                               swathData->pings[i].navlaty,  // northing → VTK y
-                              -swathData->pings[i].sensordepth); // negate: positive depth → negative VTK z
+			      // negate: positive depth → negative VTK z   
+                              -swathData->pings[i].sensordepth); 
   }
 
   // Set grid zmin and zmax, since the above mbeditviz functions do not
