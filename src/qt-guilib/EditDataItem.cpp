@@ -40,6 +40,7 @@ void EditDataItem::buildQualityLut() {
     // GOOD_DATA: bright yellow — high luminance, very visible on dark background
     qualityLut_->SetTableValue(GOOD_DATA, 1.0, 1.0, 0.0, 1.0);
 
+
     // BAD_DATA: bright red; alpha is controlled by showBadPoints_
     const double badAlpha = showBadPoints_ ? 1.0 : 0.0;
     qualityLut_->SetTableValue(BAD_DATA, 1.0, 0.1, 0.1, badAlpha);
