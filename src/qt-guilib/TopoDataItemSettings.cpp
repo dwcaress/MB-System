@@ -16,11 +16,12 @@ using namespace mb_system;
 #define ContourInterval "contourInterval"
 #define Axes "axes"
 #define VerticalExagg "verticalExagg"
-
+#define NavTrack "navTrack"
 /**
    Helper class saves and loads TopoDataItem settings from a file
 */
-bool TopoDataItemSettings::save(std::filesystem::path &path, TopoDataItem *item) {
+bool TopoDataItemSettings::save(const std::filesystem::path &path,
+				TopoDataItem *item) {
 
   // Round double values
   double contourInterval = round(item->getContourInterval(), 0);
@@ -31,7 +32,8 @@ bool TopoDataItemSettings::save(std::filesystem::path &path, TopoDataItem *item)
 	    { Contours, item->getShowContours() },
 	    { ContourLabels, item->getShowContourLabels() },
 	    { ContourInterval, contourInterval },    
-	    { Axes, item->showAxes() }	    
+	    { Axes, item->showAxes() },
+	    { NavTrack, item->showNavigation() }
 	  }} },
       { ColorMap, item->getColormapScheme() },
       { SurfaceColoredBy, item->coloredScalar() },
@@ -48,7 +50,8 @@ bool TopoDataItemSettings::save(std::filesystem::path &path, TopoDataItem *item)
 }
 
 
-bool TopoDataItemSettings::load(std::filesystem::path &path, TopoDataItem *item) {
+bool TopoDataItemSettings::load(const std::filesystem::path &path,
+				TopoDataItem *item) {
   if (!std::filesystem::exists(path)) {
     std::cerr << "unable to open file " << path << "\n";
     return false;
@@ -75,6 +78,7 @@ bool TopoDataItemSettings::load(std::filesystem::path &path, TopoDataItem *item)
     item->setShowContourLabels(tbl[Overlay][ContourLabels].value_or(false));
     item->setContourInterval(tbl[Overlay][ContourInterval].value_or(100.));    
     item->setShowAxes(tbl[Overlay][Axes].value_or(false));
+    item->setShowNavTrack(tbl[Overlay][NavTrack].value_or(false));
   }
   catch (const toml::parse_error &e) {
       std::cerr << "parse error: " << e.description() << "\n";

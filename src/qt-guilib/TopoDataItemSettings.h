@@ -12,10 +12,10 @@ class TopoDataItemSettings {
  public:
 
   /// Write TopoDataItem properties to settings file; returns false on error
-  static bool save(std::filesystem::path &path, TopoDataItem *item);  
+  static bool save(const std::filesystem::path &path, TopoDataItem *item);  
 
   /// Read TopoDataItem properties from settings file; returns false on error
-  static bool load(std::filesystem::path &path, TopoDataItem *item);
+  static bool load(const std::filesystem::path &path, TopoDataItem *item);
 
   /// Round double value to specified precision
   static double round(double value, int precision);
