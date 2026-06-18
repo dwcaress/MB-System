@@ -3,6 +3,7 @@
 #include <vtkIdTypeArray.h>
 #include <vtkIntArray.h>
 #include <vtkIdList.h>
+#include <vtkShaderProperty.h>
 #include <QDebug>
 #include <QMetaObject>
 
@@ -37,7 +38,7 @@ void EditDataItem::buildQualityLut() {
     qualityLut_->SetTableRange(BAD_DATA, GOOD_DATA);
 
     // GOOD_DATA: bright yellow — high luminance, very visible on dark background
-    qualityLut_->SetTableValue(GOOD_DATA, 0.0, 0.0, 0.0, 1.0);
+    qualityLut_->SetTableValue(GOOD_DATA, 1.0, 1.0, 0.0, 1.0);
 
     // BAD_DATA: bright red; alpha is controlled by showBadPoints_
     const double badAlpha = showBadPoints_ ? 1.0 : 0.0;
@@ -141,19 +142,31 @@ void EditDataItem::assemblePipeline(Pipeline *pipeline) {
     pipeline->surfaceMapper_->SetScalarModeToUsePointFieldData();
     pipeline->surfaceMapper_->SetColorModeToMapScalars();
 
-    // Point cloud: make points larger so they are easier to click
+    // Point cloud rendering.
     pipeline->surfaceActor_->GetProperty()->SetRepresentationToPoints();
-    qDebug() << "SetPointSize()";
-    pipeline->surfaceActor_->GetProperty()->SetPointSize(15.0);
-    qDebug() << "actual pointsize:"
-	     << pipeline->surfaceActor_->GetProperty()->GetPointSize();    
+    pipeline->surfaceActor_->GetProperty()->SetPointSize(5.0);
+
+    // On OpenGL core profile (required on macOS and Linux), glPointSize() is a
+    // no-op — gl_PointSize must be written in the vertex shader.  Inject a
+    // replacement that sets it after the PositionVC block.
+    {
+        auto *sp = pipeline->surfaceActor_->GetShaderProperty();
+        sp->ClearAllVertexShaderReplacements();
+        sp->AddVertexShaderReplacement(
+            "//VTK::PositionVC::Impl",
+            true,
+            "//VTK::PositionVC::Impl\n"
+            "  gl_PointSize = 5.0;\n",
+            false);
+    }
+
     // No lighting needed for quality-colour point cloud
     pipeline->surfaceActor_->GetProperty()->LightingOff();
     pipeline->surfaceActor_->GetProperty()->SetAmbient(1.0);
     pipeline->surfaceActor_->GetProperty()->SetDiffuse(0.0);
     pipeline->surfaceActor_->GetProperty()->SetSpecular(0.0);
     // Very dark blue-gray background
-    pipeline->renderer_->SetBackground(1.0, 1.0, 1.0);
+    pipeline->renderer_->SetBackground(0.08, 0.08, 0.12);
     qDebug() << "renderer actors:"
              << pipeline->renderer_->GetActors()->GetNumberOfItems();
 }
