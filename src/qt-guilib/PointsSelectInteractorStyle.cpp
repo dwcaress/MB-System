@@ -120,10 +120,10 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
     selectedActor_->
       GetProperty()->SetColor(colors->GetColor3d("Red").GetData());
       
-    selectedActor_->GetProperty()->SetPointSize(1);
     // selectedActor_->GetProperty()->SetRepresentationToWireframe();
     // selectedActor_->GetProperty()->SetRepresentationToSurface();
     selectedActor_->GetProperty()->SetRepresentationToPoints();
+    selectedActor_->GetProperty()->SetPointSize(5.0);
 
     // 
     GetInteractor()
@@ -176,9 +176,12 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
 	    qDebug() << "set value to BAD";
 	    quality->SetValue(pointId, BAD_DATA);
 	  }
-	  else {
+	  else if (editMode_ == RestoreMode) {
 	    qDebug() << "set value to GOOD";
 	    quality->SetValue(pointId, GOOD_DATA);	    
+	  }
+	  else {
+	    // do nothing to quality
 	  }
 	}
 
