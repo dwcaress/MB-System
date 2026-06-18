@@ -23,8 +23,7 @@ using namespace mb_system;
 static constexpr const char *SurfaceItemName = "surfaceDataItem";
 static constexpr const char *EditItemName    = "editDataItem";
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
 #if defined(Q_OS_MACOS)
   QGuiApplication::setAttribute(Qt::AA_DontUseNativeMenuBar);
   QGuiApplication::setAttribute(Qt::AA_DontUseNativeMenuWindows);
