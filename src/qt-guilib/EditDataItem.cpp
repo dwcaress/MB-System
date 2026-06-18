@@ -6,6 +6,8 @@
 #include <vtkShaderProperty.h>
 #include <QDebug>
 #include <QMetaObject>
+#include <QGuiApplication>
+#include <QScreen>
 
 using namespace mb_system;
 
@@ -39,7 +41,6 @@ void EditDataItem::buildQualityLut() {
 
     // GOOD_DATA: bright yellow — high luminance, very visible on dark background
     qualityLut_->SetTableValue(GOOD_DATA, 1.0, 1.0, 0.0, 1.0);
-
 
     // BAD_DATA: bright red; alpha is controlled by showBadPoints_
     const double badAlpha = showBadPoints_ ? 1.0 : 0.0;
@@ -126,12 +127,14 @@ void EditDataItem::assemblePipeline(Pipeline *pipeline) {
     // applyRenderType, etc.)
     TopoDataItem::assemblePipeline(pipeline);
 
-    if (!dataset_ || !dataset_->isLoaded()) return;
-
-    // Install pick style directly on the render window interactor.
-    // The edit window has no Mouse menu, so this is the only install point.
+    // Background and interactor style are edit-view constants — set them
+    // regardless of whether the dataset is loaded yet, so the window looks
+    // correct even before the first reassembly after load.
+    pipeline->renderer_->SetBackground(0.08, 0.08, 0.12);   // very dark blue-gray
     if (renderWindow_ && renderWindow_->GetInteractor())
         renderWindow_->GetInteractor()->SetInteractorStyle(pickInteractorStyle_);
+
+    if (!dataset_ || !dataset_->isLoaded()) return;
 
     // Override: install the quality LUT on the mapper in place of the
     // elevation LUT that applyColoredScalar / applyShadowSource installed.
@@ -144,21 +147,42 @@ void EditDataItem::assemblePipeline(Pipeline *pipeline) {
     pipeline->surfaceMapper_->SetColorModeToMapScalars();
 
     // Point cloud rendering.
-    pipeline->surfaceActor_->GetProperty()->SetRepresentationToPoints();
-    pipeline->surfaceActor_->GetProperty()->SetPointSize(5.0);
-
     // On OpenGL core profile (required on macOS and Linux), glPointSize() is a
-    // no-op — gl_PointSize must be written in the vertex shader.  Inject a
-    // replacement that sets it after the PositionVC block.
+    // no-op — gl_PointSize must be written in the vertex shader.  applyShadowSource()
+    // (called above via TopoDataItem::assemblePipeline) already cleared all vertex
+    // shader replacements; we add ours here so it is the only one in effect.
+    //
+    // gl_PointSize is in physical (framebuffer) pixels.  QQuickVTKItem renders
+    // into a HiDPI FBO whose resolution equals the device-pixel size of the
+    // widget.  On a 2× Retina display gl_PointSize=5 gives 5 device pixels ≈
+    // 2.5 logical pixels.  Multiply by devicePixelRatio so the apparent size
+    // matches the logical SetPointSize() value on every platform.
     {
+        auto *primaryScreen = QGuiApplication::primaryScreen();
+        const float dpr = primaryScreen
+                              ? static_cast<float>(primaryScreen->devicePixelRatio())
+                              : 1.0f;
+	
+        const float physPtSize = 2.0f * dpr;
+
+        pipeline->surfaceActor_->GetProperty()->SetRepresentationToPoints();
+        pipeline->surfaceActor_->GetProperty()->SetPointSize(physPtSize);
+
+        const std::string glsl =
+            "//VTK::PositionVC::Impl\n"
+            "  gl_PointSize = " + std::to_string(physPtSize) + ";\n";
+
         auto *sp = pipeline->surfaceActor_->GetShaderProperty();
-        sp->ClearAllVertexShaderReplacements();
+        // Do NOT call ClearAllVertexShaderReplacements() here — applyShadowSource()
+        // already cleared them.  Adding a fresh replacement is sufficient.
         sp->AddVertexShaderReplacement(
             "//VTK::PositionVC::Impl",
             true,
-            "//VTK::PositionVC::Impl\n"
-            "  gl_PointSize = 5.0;\n",
+            glsl,
             false);
+
+        qDebug() << "EditDataItem: devicePixelRatio=" << dpr
+                 << " physPtSize=" << physPtSize;
     }
 
     // No lighting needed for quality-colour point cloud
@@ -166,10 +190,11 @@ void EditDataItem::assemblePipeline(Pipeline *pipeline) {
     pipeline->surfaceActor_->GetProperty()->SetAmbient(1.0);
     pipeline->surfaceActor_->GetProperty()->SetDiffuse(0.0);
     pipeline->surfaceActor_->GetProperty()->SetSpecular(0.0);
-    // Very dark blue-gray background
-    pipeline->renderer_->SetBackground(0.08, 0.08, 0.12);
-    qDebug() << "renderer actors:"
-             << pipeline->renderer_->GetActors()->GetNumberOfItems();
+
+    qDebug() << "EditDataItem::assemblePipeline done: actors="
+             << pipeline->renderer_->GetActors()->GetNumberOfItems()
+             << " clipOutputPts="
+             << clipFilter_->GetOutput()->GetNumberOfPoints();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
