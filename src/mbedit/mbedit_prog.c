@@ -290,7 +290,7 @@ static int borders[4];
 static int margin;
 static int xmin, xmax;
 static int ymin, ymax;
-static int exager = 100;
+static int exagger = 100;
 static int plot_width = 5000;
 static double xscale;
 static double yscale;
@@ -501,7 +501,7 @@ int mbedit_set_scaling(int *brdr, int sh_time) {
 		ymin = margin;
 		ymax = borders[3] - margin / 2;
 		xscale = 100.0 * plot_width / (xmax - xmin);
-		yscale = (xscale * exager) / 100.0;
+		yscale = (xscale * exagger) / 100.0;
 	}
 	else {
 		margin = (borders[1] - borders[0]) / 16;
@@ -510,7 +510,7 @@ int mbedit_set_scaling(int *brdr, int sh_time) {
 		ymin = margin;
 		ymax = borders[3] - margin / 2;
 		xscale = 100.0 * plot_width / (xmax - xmin);
-		yscale = (xscale * exager) / 100.0;
+		yscale = (xscale * exagger) / 100.0;
 	}
 
 	const int status = MB_SUCCESS;
@@ -704,7 +704,7 @@ int mbedit_get_defaults(int *plt_size_max, int *plt_size, int *sh_mode, int *sh_
 
 	/* get scaling */
 	*plwd = plot_width;
-	*exgr = exager;
+	*exgr = exagger;
 
 	/* get tick intervals */
 	*xntrvl = x_interval;
@@ -738,7 +738,7 @@ int mbedit_get_defaults(int *plt_size_max, int *plt_size, int *sh_mode, int *sh_
 		fprintf(stderr, "dbg2       hold_size:              %d\n", *hold_size);
 		fprintf(stderr, "dbg2       format:                 %d\n", *form);
 		fprintf(stderr, "dbg2       plot_width:             %d\n", *plwd);
-		fprintf(stderr, "dbg2       exager:                 %d\n", *exgr);
+		fprintf(stderr, "dbg2       exagger:                %d\n", *exgr);
 		fprintf(stderr, "dbg2       x_interval:             %d\n", *xntrvl);
 		fprintf(stderr, "dbg2       y_interval:             %d\n", *yntrvl);
 		for (int i = 0; i < 7; i++)
@@ -810,7 +810,7 @@ int mbedit_action_open(char *file, int form, int fileid, int numfiles, int savem
 		fprintf(stderr, "dbg2       savemode:        %d\n", savemode);
 		fprintf(stderr, "dbg2       outmode:         %d\n", outmode);
 		fprintf(stderr, "dbg2       plot_width:      %d\n", plwd);
-		fprintf(stderr, "dbg2       exager:          %d\n", exgr);
+		fprintf(stderr, "dbg2       exagger:         %d\n", exgr);
 		fprintf(stderr, "dbg2       x_interval:      %d\n", xntrvl);
 		fprintf(stderr, "dbg2       y_interval:      %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:       %d\n", plt_size);
@@ -899,7 +899,7 @@ int mbedit_action_next_buffer(int hold_size, int buffer_size, int plwd, int exgr
 		fprintf(stderr, "dbg2       hold_size:   %d\n", hold_size);
 		fprintf(stderr, "dbg2       buffer_size: %d\n", buffer_size);
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
-		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
+		fprintf(stderr, "dbg2       exagger:     %d\n", exgr);
 		fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
@@ -1162,7 +1162,7 @@ int mbedit_action_step(int step, int plwd, int exgr, int xntrvl, int yntrvl, int
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       step:        %d\n", step);
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
-		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
+		fprintf(stderr, "dbg2       exagger:     %d\n", exgr);
 		fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
@@ -1236,7 +1236,7 @@ int mbedit_action_plot(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
-		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
+		fprintf(stderr, "dbg2       exagger:     %d\n", exgr);
 		fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
@@ -1294,7 +1294,7 @@ int mbedit_action_mouse_toggle(int x_loc, int y_loc, int plwd, int exgr, int xnt
 		fprintf(stderr, "dbg2       x_loc:       %d\n", x_loc);
 		fprintf(stderr, "dbg2       y_loc:       %d\n", y_loc);
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
-		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
+		fprintf(stderr, "dbg2       exagger:     %d\n", exgr);
 		fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
@@ -1458,7 +1458,7 @@ int mbedit_action_mouse_pick(int x_loc, int y_loc, int plwd, int exgr, int xntrv
 		fprintf(stderr, "dbg2       x_loc:       %d\n", x_loc);
 		fprintf(stderr, "dbg2       y_loc:       %d\n", y_loc);
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
-		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
+		fprintf(stderr, "dbg2       exagger:     %d\n", exgr);
 		fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
@@ -1604,7 +1604,7 @@ int mbedit_action_mouse_erase(int x_loc, int y_loc, int plwd, int exgr, int xntr
 		fprintf(stderr, "dbg2       x_loc:       %d\n", x_loc);
 		fprintf(stderr, "dbg2       y_loc:       %d\n", y_loc);
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
-		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
+		fprintf(stderr, "dbg2       exagger:     %d\n", exgr);
 		fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
@@ -1740,7 +1740,7 @@ int mbedit_action_mouse_restore(int x_loc, int y_loc, int plwd, int exgr, int xn
 		fprintf(stderr, "dbg2       x_loc:       %d\n", x_loc);
 		fprintf(stderr, "dbg2       y_loc:       %d\n", y_loc);
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
-		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
+		fprintf(stderr, "dbg2       exagger:     %d\n", exgr);
 		fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
@@ -1877,7 +1877,7 @@ int mbedit_action_mouse_grab(int grabmode, int x_loc, int y_loc, int plwd, int e
 		fprintf(stderr, "dbg2       x_loc:       %d\n", x_loc);
 		fprintf(stderr, "dbg2       y_loc:       %d\n", y_loc);
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
-		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
+		fprintf(stderr, "dbg2       exagger:     %d\n", exgr);
 		fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
@@ -2134,7 +2134,7 @@ int mbedit_action_mouse_info(int x_loc, int y_loc, int plwd, int exgr, int xntrv
 		fprintf(stderr, "dbg2       x_loc:       %d\n", x_loc);
 		fprintf(stderr, "dbg2       y_loc:       %d\n", y_loc);
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
-		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
+		fprintf(stderr, "dbg2       exagger:     %d\n", exgr);
 		fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
@@ -2251,7 +2251,7 @@ int mbedit_action_zap_outbounds(int iping, int plwd, int exgr, int xntrvl, int y
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       iping:       %d\n", iping);
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
-		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
+		fprintf(stderr, "dbg2       exagger:     %d\n", exgr);
 		fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
@@ -2354,7 +2354,7 @@ int mbedit_action_bad_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_s
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
-		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
+		fprintf(stderr, "dbg2       exagger:     %d\n", exgr);
 		fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
@@ -2452,7 +2452,7 @@ int mbedit_action_good_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
-		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
+		fprintf(stderr, "dbg2       exagger:     %d\n", exgr);
 		fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
@@ -2539,7 +2539,7 @@ int mbedit_action_left_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
-		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
+		fprintf(stderr, "dbg2       exagger:     %d\n", exgr);
 		fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
@@ -2637,7 +2637,7 @@ int mbedit_action_right_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
-		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
+		fprintf(stderr, "dbg2       exagger:     %d\n", exgr);
 		fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
@@ -2735,7 +2735,7 @@ int mbedit_action_zero_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
-		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
+		fprintf(stderr, "dbg2       exagger:     %d\n", exgr);
 		fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
@@ -2823,7 +2823,7 @@ int mbedit_action_flag_view(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
-		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
+		fprintf(stderr, "dbg2       exagger:     %d\n", exgr);
 		fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
@@ -2916,7 +2916,7 @@ int mbedit_action_unflag_view(int plwd, int exgr, int xntrvl, int yntrvl, int pl
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
-		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
+		fprintf(stderr, "dbg2       exagger:     %d\n", exgr);
 		fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
@@ -3005,7 +3005,7 @@ int mbedit_action_unflag_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
-		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
+		fprintf(stderr, "dbg2       exagger:     %d\n", exgr);
 		fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
@@ -3093,7 +3093,7 @@ int mbedit_action_filter_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
-		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
+		fprintf(stderr, "dbg2       exagger:     %d\n", exgr);
 		fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
@@ -4237,7 +4237,7 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
-		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
+		fprintf(stderr, "dbg2       exagger:     %d\n", exgr);
 		fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
@@ -4251,7 +4251,7 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
 
 	/* set scales and tick intervals */
 	plot_width = plwd;
-	exager = exgr;
+	exagger = exgr;
 	show_mode = sh_mode;
 	show_flaggedsoundings = sh_flggdsdg;
 	show_flaggedprofiles = sh_flggdprf;
@@ -4393,7 +4393,7 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
 	// const double dx = ((double)(xmax - xmin)) / plot_size;
 	const double dy = ((double)(ymax - ymin)) / plot_size;
 	xscale = 100.0 * plot_width / (xmax - xmin);
-	yscale = (xscale * 100.0) / exager;
+	yscale = (xscale * 100.0) / exagger;
 	const double dxscale = 100.0 / xscale;
 	const double dyscale = 100.0 / yscale;
 
@@ -4488,7 +4488,7 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
 		xg_drawstring(mbedit_xgid, sxstart, ymin - margin / 2 + sascent + 5, string, pixel_values[MB_COLOR_GREEN], XG_SOLIDLINE);
 	}
 
-	sprintf(string, "Vertical Exageration: %4.2f   All Distances and Depths in Meters", (exager / 100.));
+	sprintf(string, "Vertical exaggeration: %4.2f   All Distances and Depths in Meters", (exagger / 100.));
 	xg_justify(mbedit_xgid, string, &swidth, &sascent, &sdescent);
 	xg_drawstring(mbedit_xgid, xcen - swidth / 2, ymin - margin / 2 + 2 * (sascent + sdescent) + 5, string, pixel_values[MB_COLOR_BLACK],
 	              XG_SOLIDLINE);
@@ -5122,7 +5122,7 @@ int mbedit_action_goto(int ttime_i[7], int hold_size, int buffer_size, int plwd,
 		fprintf(stderr, "dbg2       hold_size:   %d\n", hold_size);
 		fprintf(stderr, "dbg2       buffer_size: %d\n", buffer_size);
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
-		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
+		fprintf(stderr, "dbg2       exagger:     %d\n", exgr);
 		fprintf(stderr, "dbg2       x_interval:  %d\n", xntrvl);
 		fprintf(stderr, "dbg2       y_interval:  %d\n", yntrvl);
 		fprintf(stderr, "dbg2       plot_size:   %d\n", plt_size);
