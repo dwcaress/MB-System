@@ -73,8 +73,6 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 #### 5.8.3beta13 (June 18, 2026)
 
-Build system: Make MB-System buildable on Windows with MSVC (no cygwin or mingw). Contributed by Joaquim Luis.
-
 Format MBF_KEMKALL (261): Fixed support for platform files used for preprocessing.
 
 Format MBF_EM710RAW (58): Added support for *.all files associate with the HISAS sonar from Kongsberg.
