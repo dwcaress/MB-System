@@ -902,19 +902,11 @@ void TopoDataItem::setOrthographicView() {
 }
 
 bool TopoDataItem::saveSettings() {
-  auto configPath = std::filesystem::path(getenv("HOME"))
-    / ".config"
-    / QCoreApplication::applicationName().toStdString()
-    / "settings.toml";
-  return TopoDataItemSettings::save(configPath, this);
+  return TopoDataItemSettings::save(getConfigfilePath(), this);
 }
 
 bool TopoDataItem::loadSettings() {
-  auto configPath = std::filesystem::path(getenv("HOME"))
-    / ".config"
-    / QCoreApplication::applicationName().toStdString()
-    / "settings.toml";
-  return TopoDataItemSettings::load(configPath, this);
+  return TopoDataItemSettings::load(getConfigfilePath(), this);
 }
 
 void TopoDataItem::foo() {
