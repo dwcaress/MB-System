@@ -28,7 +28,7 @@ namespace mb_system {
   
 
     PointsSelectInteractorStyle() : MyRubberBandStyle()  {
-      editMode_ = EditMode::EraseMode;
+      editMode_ = EditMode::SelectOnlyMode;
       selectedMapper_ = vtkSmartPointer<vtkDataSetMapper>::New();
       selectedActor_ = vtkSmartPointer<vtkActor>::New();
       selectedActor_->SetMapper(selectedMapper_);
@@ -43,6 +43,7 @@ namespace mb_system {
     /// Set associated TopoDataItem
     void setTopoDataItem(TopoDataItem *item);
 
+    
   protected:
 
     EditMode editMode_;
