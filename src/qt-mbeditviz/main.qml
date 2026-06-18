@@ -76,6 +76,12 @@ Window {
                     checked: surfaceView.showContours
                     onTriggered: surfaceView.setContours(checked)
                 }
+                Action {
+                    text: qsTr('Navigation');
+		    checkable: true;
+		    checked: surfaceView.showNavigation
+                    onTriggered: {surfaceView.setShowNavTrack(checked)}
+                }						
             }
 
             Menu {
