@@ -736,6 +736,24 @@ int mb_get_raw(int verbose, void *mbio_ptr, int *mode, int *ipulse_length, int *
                        start_sample, range, depression, bs, ss_pixels, error);
 
     break;
+  case MBF_RESON7K3:
+    {
+    /* Reson 7k3: pull the recorded 7000 Sonar Settings via the format-independent
+       mb_sonarsettings() accessor (these are values written by the sonar; no vendor
+       gain/TVG model is applied). Transmit power and receiver gain are also available
+       through the -O.T/.t (mb_gains) codes. */
+    double ss_frequency, ss_sample_rate, ss_tx_pulse_width, ss_power, ss_gain;
+    double ss_absorption, ss_spreading, ss_sound_velocity, ss_beamwidth_tx, ss_beamwidth_rx;
+    int ss_kind = MB_DATA_NONE;
+    if (mb_sonarsettings(verbose, mbio_ptr, mb_io_ptr->store_data, &ss_kind, &ss_frequency, &ss_sample_rate,
+                         &ss_tx_pulse_width, &ss_power, &ss_gain, &ss_absorption, &ss_spreading, &ss_sound_velocity,
+                         &ss_beamwidth_tx, &ss_beamwidth_rx, error) == MB_SUCCESS) {
+      *sample_rate = (int)(ss_sample_rate + 0.5);
+      *absorption = ss_absorption;
+      *ipulse_length = (int)(ss_tx_pulse_width * 1.0e6 + 0.5);  /* seconds -> usec (as for .L) */
+    }
+    }
+    break;
   }
 
   int status = MB_SUCCESS;

@@ -3516,6 +3516,10 @@ int mbsys_reson7k3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 int mbsys_reson7k3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error);
 int mbsys_reson7k3_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
                         double *receive_gain, int *error);
+int mbsys_reson7k3_sonarsettings(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *frequency,
+                        double *sample_rate, double *tx_pulse_width, double *power_selection, double *gain_selection,
+                        double *absorption, double *spreading, double *sound_velocity, double *beamwidth_tx,
+                        double *beamwidth_rx, int *error);
 int mbsys_reson7k3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                    double *altitude, int *error);
 int mbsys_reson7k3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,

@@ -503,6 +503,10 @@ int mb_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbe
 int mb_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *pulses, int *error);
 int mb_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
              double *receive_gain, int *error);
+int mb_sonarsettings(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *frequency,
+             double *sample_rate, double *tx_pulse_width, double *power_selection, double *gain_selection,
+             double *absorption, double *spreading, double *sound_velocity, double *beamwidth_tx,
+             double *beamwidth_rx, int *error);
 int mb_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error);
 int mb_extract_rawssdimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *sample_interval,

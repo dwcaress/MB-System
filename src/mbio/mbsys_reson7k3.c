@@ -7342,6 +7342,86 @@ int mbsys_reson7k3_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind
   return (status);
 }
 /*--------------------------------------------------------------------*/
+int mbsys_reson7k3_sonarsettings(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *frequency,
+                        double *sample_rate, double *tx_pulse_width, double *power_selection, double *gain_selection,
+                        double *absorption, double *spreading, double *sound_velocity, double *beamwidth_tx,
+                        double *beamwidth_rx, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+  }
+
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
+  s7k3_SonarSettings *SonarSettings = (s7k3_SonarSettings *)&store->SonarSettings;
+
+  /* get data kind */
+  *kind = store->kind;
+
+  int status = MB_SUCCESS;
+
+  /* extract the recorded Reson 7k Sonar Settings (record 7000) values — these are
+     values written into the file by the sonar; no proprietary gain model is applied */
+  if (*kind == MB_DATA_DATA) {
+    if (store->read_SonarSettings) {
+      *frequency = (double)SonarSettings->frequency;             /* Hz */
+      *sample_rate = (double)SonarSettings->sample_rate;         /* Hz */
+      *tx_pulse_width = (double)SonarSettings->tx_pulse_width;   /* seconds */
+      *power_selection = (double)SonarSettings->power_selection; /* dB re 1 uPa */
+      *gain_selection = (double)SonarSettings->gain_selection;   /* dB */
+      *absorption = (double)SonarSettings->absorption;           /* dB/km */
+      *spreading = (double)SonarSettings->spreading;             /* dB */
+      *sound_velocity = (double)SonarSettings->sound_velocity;   /* m/s */
+      *beamwidth_tx = (double)SonarSettings->beamwidth_vertical; /* radians (projector) */
+      *beamwidth_rx = (double)SonarSettings->rx_width;           /* radians (receiver) */
+
+      *error = MB_ERROR_NO_ERROR;
+      status = MB_SUCCESS;
+    }
+    else {
+      *error = MB_ERROR_UNINTELLIGIBLE;
+      status = MB_FAILURE;
+    }
+  }
+
+  /* deal with comment */
+  else if (*kind == MB_DATA_COMMENT) {
+    *error = MB_ERROR_COMMENT;
+    status = MB_FAILURE;
+  }
+
+  /* deal with other record type */
+  else {
+    *error = MB_ERROR_OTHER;
+    status = MB_FAILURE;
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       kind:           %d\n", *kind);
+    if (*error == MB_ERROR_NO_ERROR) {
+      fprintf(stderr, "dbg2       frequency:       %f\n", *frequency);
+      fprintf(stderr, "dbg2       sample_rate:     %f\n", *sample_rate);
+      fprintf(stderr, "dbg2       tx_pulse_width:  %f\n", *tx_pulse_width);
+      fprintf(stderr, "dbg2       power_selection: %f\n", *power_selection);
+      fprintf(stderr, "dbg2       gain_selection:  %f\n", *gain_selection);
+      fprintf(stderr, "dbg2       absorption:      %f\n", *absorption);
+      fprintf(stderr, "dbg2       spreading:       %f\n", *spreading);
+      fprintf(stderr, "dbg2       sound_velocity:  %f\n", *sound_velocity);
+      fprintf(stderr, "dbg2       beamwidth_tx:    %f\n", *beamwidth_tx);
+      fprintf(stderr, "dbg2       beamwidth_rx:    %f\n", *beamwidth_rx);
+    }
+    fprintf(stderr, "dbg2       error:          %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:         %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbsys_reson7k3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
                                     int *kind, double *transducer_depth,
                                     double *altitudev, int *error) {
