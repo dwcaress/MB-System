@@ -10,7 +10,7 @@
 #define MouseRotateModel "Rotate model"
 #define MouseRotateView "Rotate view"
 #define MouseLighting "Lighting"
-#define MouseDataSelect "Select data"
+#define MouseDataSelect "Select/edit data"
 #define MousePickArea "Pick area"
 #define MouseEditSites "Edit sites"
 #define MouseEditRoutes "Edit routes"
@@ -88,6 +88,11 @@ namespace mb_system {
     /// List of supported mouse modes
     Q_PROPERTY(QList<MouseMode *> mouseModes MEMBER mouseModes_
 	       NOTIFY mouseModesChanged)
+
+    Q_PROPERTY(QString editSwathModeName READ editSwathModeName CONSTANT)
+
+    QString editSwathModeName() const { return QStringLiteral(MouseDataSelect); }
+    
 
   signals:
     // Emit this if cmaps changes (probably never)
