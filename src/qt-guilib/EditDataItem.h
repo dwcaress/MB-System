@@ -8,6 +8,9 @@
 
 namespace mb_system {
 
+// Defined in EditDataItem.cpp; installed as the interactor style for this view.
+class EditPickInteractorStyle;
+
 /**
    EditDataItem is the edit-window view.  It renders a spatial subset of the
    shared TopoDataset as a point cloud, coloured by data quality, and lets the
@@ -25,8 +28,10 @@ namespace mb_system {
 
    Point flagging
    ──────────────
-   The existing PickInteractorStyle calls setPickedPoint(worldCoords) on the
-   item.  EditDataItem overrides that method to:
+   EditPickInteractorStyle (a private helper class in EditDataItem.cpp) handles
+   mouse events.  On a plain left-click (≤ 4 px drag) it calls
+   setPickedPoint(worldCoords) on this item.  EditDataItem overrides that
+   virtual method to:
      1. Find the closest point in the *extracted* polyData using a static KD-tree
         locator rebuilt after each setEditBounds() call.
      2. Read the ORIGINAL_IDS array to get the stable index into the shared
@@ -46,6 +51,27 @@ class EditDataItem : public TopoDataItem {
 
 public:
   EditDataItem();
+  ~EditDataItem() override;
+
+  /// Returns the current clip-filter output (extracted point subset).
+  /// Called by EditPickInteractorStyle for screen-space point picking.
+  vtkPolyData *clipOutput();
+
+  /// Returns the polyData that the surface mapper is actually rendering.
+  /// This is the output of the last filter in the pipeline before the mapper
+  /// (which may differ from clipOutput() if the base class added intermediate
+  /// filters such as a normals or glyph filter).  EditPickInteractorStyle
+  /// should iterate THIS polyData for screen-space picking so that the point
+  /// indices it finds match the indices the mapper uses to read scalar colours.
+  /// Returns nullptr if the pipeline has not been assembled yet.
+  vtkPolyData *mapperInputData();
+
+  /// Returns the surface actor's composite model-to-world matrix (position ×
+  /// origin × scale × rotation × -origin).  EditPickInteractorStyle must apply
+  /// this before calling WorldToDisplay() so that vertical exaggeration and any
+  /// other actor-level transforms are reflected in the projected screen position.
+  /// Returns nullptr if the pipeline has not been assembled yet.
+  vtkMatrix4x4 *surfaceActorMatrix();
 
   // ── Edit volume ────────────────────────────────────────────────────────────
 
@@ -60,6 +86,13 @@ public:
   /// Set the quality value applied when the user clicks a point.
   /// Pass BAD_DATA (0) to flag as bad, GOOD_DATA (1) to unflag.  Default: BAD_DATA.
   Q_INVOKABLE void setFlagValue(int quality);
+
+  /// Called by EditPickInteractorStyle with the local index (into the clip
+  /// output) of the screen-space nearest point.  Looks up ORIGINAL_IDS and
+  /// calls dataset_->setPointQuality() directly, avoiding any 3D-locator
+  /// round-trip that can select a different point when vertical exaggeration
+  /// displaces the visual position from the object-space position.
+  void setPickedLocalId(vtkIdType localId);
 
   /// Override: maps world coordinates to the nearest point in the extracted
   /// subset, looks up its ORIGINAL_IDS value, and calls
@@ -125,6 +158,14 @@ private:
   /// == DataQuality.  Entries: index 0 = BAD_DATA (red / transparent),
   ///                            index 1 = GOOD_DATA (blue-green).
   vtkNew<vtkLookupTable>             qualityLut_;
+
+  // ── Interactor style ───────────────────────────────────────────────────────
+  /// Screen-space point-flagging interactor (defined in EditDataItem.cpp).
+  /// Replaces the generic PickInteractorStyle for this view because:
+  ///  (a) PickInteractorStyle's zero-tolerance drag detection misses clicks on
+  ///      HiDPI displays; and
+  ///  (b) vtkPointPicker is unreliable on point clouds with no mesh cells.
+  EditPickInteractorStyle *editPickStyle_ = nullptr;
 
   // ── State ──────────────────────────────────────────────────────────────────
   double editBounds_[6]  = {0, 0, 0, 0, 0, 0};
