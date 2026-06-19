@@ -5,7 +5,7 @@ import QtQuick.Layouts 1.14
 import QtQuick.Dialogs
 import QtGraphs 6.8
 import "ui-components"
-import Mbgrdviz 1.0
+import Mbeditviz 1.0    // Registered in main.cpp
 
 Window {
     id: mainWindow
@@ -181,7 +181,6 @@ Window {
                     }
                 }
             }
-
             MenuSeparator {}
             MenuItem {
                 text: qsTr('Reset camera')
@@ -193,12 +192,15 @@ Window {
             id: mouseModeMenu
             title: qsTr('Mouse')
             property string currentMode: ''
+	    property var disabledModes: []
+	    
             Repeater {
                 model: SharedConstants.mouseModes
                 MenuItem {
                     text: modelData.name
                     checkable: true
                     checked: mouseModeMenu.currentMode === modelData.name
+		    enabled: mouseModeMenu.disabledModes.indexOf(modelData.name) == -1
                     ToolTip.visible: hovered
                     ToolTip.text: modelData.toolTip
                     onTriggered: {
@@ -434,6 +436,13 @@ Window {
         // Update the filename label when a new file is loaded
         function onDataFilenameChanged(newName) {
             dataFilenameLabel.text = newName
+	    if (newName.endsWith('.grd')) {
+		/// If data file name is a GMT grid, than cannot edit swath data
+		mouseModeMenu.disabledModes = [SharedConstants.editSwathModeName]
+	    }
+	    else {
+		mouseModeMenu.disabledModes = []
+	    }
         }
 
         // Open the edit window when the user completes a rubber-band selection.
