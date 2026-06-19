@@ -81,6 +81,10 @@ public:
                                   double yMin, double yMax,
                                   double zMin, double zMax);
 
+  /// Reset the camera to fit the current clip-filter output and re-render.
+  /// Called by the "Reset view" toolbar button in the edit window.
+  Q_INVOKABLE void resetCamera();
+
   // ── Point flagging ─────────────────────────────────────────────────────────
 
   /// Set the quality value applied when the user clicks a point.

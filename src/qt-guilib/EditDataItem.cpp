@@ -552,6 +552,18 @@ void EditDataItem::setFlagValue(int quality) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+//  resetCamera — fit camera to current clip output and re-render
+// ─────────────────────────────────────────────────────────────────────────────
+
+void EditDataItem::resetCamera() {
+    dispatch_async([this](vtkRenderWindow *rw, vtkUserData) {
+        if (pipeline_ && pipeline_->renderer_)
+            pipeline_->renderer_->ResetCamera();
+        rw->Render();
+    });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 //  setShowBadPoints — adjust quality LUT alpha without pipeline rebuild
 // ─────────────────────────────────────────────────────────────────────────────
 
