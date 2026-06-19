@@ -19,6 +19,8 @@
 using namespace std;
 using namespace mb_system;
 
+#define APP_NAME "Mbeditviz"
+
 // objectName values assigned in main.qml
 static constexpr const char *SurfaceItemName = "surfaceDataItem";
 static constexpr const char *EditItemName    = "editDataItem";
@@ -62,17 +64,17 @@ int main(int argc, char* argv[]) {
   // SurfaceDataItem and EditDataItem are the concrete types instantiated by
   // QML.  TopoDataItem is registered so any QML code that references the base
   // type (e.g. property declarations) continues to compile.
-  qmlRegisterType<TopoDataItem>    ("Mbgrdviz", 1, 0, "TopoDataItem");
-  qmlRegisterType<SurfaceDataItem> ("Mbgrdviz", 1, 0, "SurfaceDataItem");
-  qmlRegisterType<EditDataItem>    ("Mbgrdviz", 1, 0, "EditDataItem");
+  qmlRegisterType<TopoDataItem>    (APP_NAME, 1, 0, "TopoDataItem");
+  qmlRegisterType<SurfaceDataItem> (APP_NAME, 1, 0, "SurfaceDataItem");
+  qmlRegisterType<EditDataItem>    (APP_NAME, 1, 0, "EditDataItem");
 
   // Dataset is created in C++; QML only holds a pointer to it via properties.
   qmlRegisterUncreatableType<TopoDataset>(
-      "Mbgrdviz", 1, 0, "TopoDataset",
+      APP_NAME, 1, 0, "TopoDataset",
       "TopoDataset instances are created in C++, not QML");
 
   auto *sharedConstants = new SharedConstants();
-  qmlRegisterSingletonInstance("Mbgrdviz", 1, 0, "SharedConstants",
+  qmlRegisterSingletonInstance(APP_NAME, 1, 0, "SharedConstants",
                                sharedConstants);
 
   // ── Shared dataset ────────────────────────────────────────────────────────
