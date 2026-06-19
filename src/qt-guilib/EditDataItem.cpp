@@ -4,6 +4,13 @@
 #include <vtkIntArray.h>
 #include <vtkIdList.h>
 #include <vtkShaderProperty.h>
+#include <vtkOpenGLRenderWindow.h>
+#include <vtkOpenGLState.h>
+// GL_PROGRAM_POINT_SIZE may not be exposed by VTK's transitive headers on all
+// platforms; define the raw enum value directly (OpenGL 3.2 core, §14.4).
+#ifndef GL_PROGRAM_POINT_SIZE
+#  define GL_PROGRAM_POINT_SIZE 0x8642
+#endif
 #include <QDebug>
 #include <QMetaObject>
 #include <QGuiApplication>
@@ -131,6 +138,11 @@ void EditDataItem::assemblePipeline(Pipeline *pipeline) {
     // regardless of whether the dataset is loaded yet, so the window looks
     // correct even before the first reassembly after load.
     pipeline->renderer_->SetBackground(0.08, 0.08, 0.12);   // very dark blue-gray
+    // SetBackground() sets RGB but leaves alpha at 0 (transparent) by default.
+    // On Ubuntu + Mesa, Qt Quick composites VTK's FBO over the window background
+    // (white), so a transparent VTK background shows as white.  macOS defaults to
+    // opaque and is not affected.  Force alpha=1 so the colour is actually visible.
+    pipeline->renderer_->SetBackgroundAlpha(1.0);
     if (renderWindow_ && renderWindow_->GetInteractor())
         renderWindow_->GetInteractor()->SetInteractorStyle(pickInteractorStyle_);
 
@@ -147,42 +159,68 @@ void EditDataItem::assemblePipeline(Pipeline *pipeline) {
     pipeline->surfaceMapper_->SetColorModeToMapScalars();
 
     // Point cloud rendering.
-    // On OpenGL core profile (required on macOS and Linux), glPointSize() is a
-    // no-op — gl_PointSize must be written in the vertex shader.  applyShadowSource()
-    // (called above via TopoDataItem::assemblePipeline) already cleared all vertex
-    // shader replacements; we add ours here so it is the only one in effect.
     //
-    // gl_PointSize is in physical (framebuffer) pixels.  QQuickVTKItem renders
-    // into a HiDPI FBO whose resolution equals the device-pixel size of the
-    // widget.  On a 2× Retina display gl_PointSize=5 gives 5 device pixels ≈
-    // 2.5 logical pixels.  Multiply by devicePixelRatio so the apparent size
-    // matches the logical SetPointSize() value on every platform.
+    // Strategy for cross-platform point size on OpenGL core profile:
+    //
+    // VTK sets a "pointSize" uniform in its built-in vertex shader
+    // (//VTK::PointSizeUniform::Impl) from vtkProperty::GetPointSize(), and
+    // writes that value to gl_PointSize — but only when GL_PROGRAM_POINT_SIZE is
+    // enabled.  glPointSize() is a no-op in core profile.
+    //
+    // On macOS, Qt Quick / VTK enables GL_PROGRAM_POINT_SIZE automatically.
+    // On some Mesa (Ubuntu) configurations it is not enabled by default, so we
+    // do it explicitly here via the VTK state tracker so VTK's own context
+    // management does not accidentally undo it.
+    //
+    // gl_PointSize / SetPointSize() is in *physical* (framebuffer) pixels.
+    // QQuickVTKItem renders into a HiDPI FBO at device-pixel resolution, so on
+    // a 2× Retina display SetPointSize(5) gives 5 device pixels ≈ 2.5 logical
+    // pixels.  Multiply by devicePixelRatio so the apparent size matches on
+    // every platform.
     {
         auto *primaryScreen = QGuiApplication::primaryScreen();
         const float dpr = primaryScreen
                               ? static_cast<float>(primaryScreen->devicePixelRatio())
                               : 1.0f;
-	
+
         const float physPtSize = 2.0f * dpr;
 
         pipeline->surfaceActor_->GetProperty()->SetRepresentationToPoints();
         pipeline->surfaceActor_->GetProperty()->SetPointSize(physPtSize);
 
+        // Belt-and-suspenders: also enable GL_PROGRAM_POINT_SIZE via the VTK
+        // state wrapper so the GL capability is on even if VTK would otherwise
+        // skip it (e.g. after applyShadowSource() clears the shader property).
+        auto *oglrw = vtkOpenGLRenderWindow::SafeDownCast(renderWindow_);
+        if (oglrw) {
+            oglrw->GetState()->vtkglEnable(GL_PROGRAM_POINT_SIZE);
+        }
+
+        // Inject gl_PointSize into the vertex shader explicitly.  Relying on
+        // VTK's built-in //VTK::PointSizeUniform::Impl is unreliable here
+        // because applyShadowSource() clears all user shader replacements
+        // earlier in the same assembly pass, and VTK's own injection may not
+        // fire after that.  applyShadowSource() (Illumination case) adds no
+        // replacements of its own, so there is nothing to conflict with.
+        //
+        // Use snprintf("%.1f") not std::to_string(): the latter produces
+        // "70.000000" which some GLSL compilers (Mesa) reject as a double
+        // literal when assigned to the float gl_PointSize built-in.
+        char ptSizeLiteral[32];
+        snprintf(ptSizeLiteral, sizeof(ptSizeLiteral), "%.1f", physPtSize);
         const std::string glsl =
             "//VTK::PositionVC::Impl\n"
-            "  gl_PointSize = " + std::to_string(physPtSize) + ";\n";
+            "  gl_PointSize = " + std::string(ptSizeLiteral) + ";\n";
 
         auto *sp = pipeline->surfaceActor_->GetShaderProperty();
-        // Do NOT call ClearAllVertexShaderReplacements() here — applyShadowSource()
-        // already cleared them.  Adding a fresh replacement is sufficient.
         sp->AddVertexShaderReplacement(
             "//VTK::PositionVC::Impl",
             true,
             glsl,
             false);
 
-        qDebug() << "EditDataItem: devicePixelRatio=" << dpr
-                 << " physPtSize=" << physPtSize;
+        qDebug() << "EditDataItem: dpr=" << dpr << " physPtSize=" << physPtSize
+                 << " gl_PointSize literal=" << ptSizeLiteral;
     }
 
     // No lighting needed for quality-colour point cloud
