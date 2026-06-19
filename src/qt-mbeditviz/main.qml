@@ -190,7 +190,7 @@ Window {
 
         Menu {
             id: mouseModeMenu
-            title: qsTr('Mouse')
+            title: qsTr('Mouse-Action')
             property string currentMode: ''
 	    property var disabledModes: []
 	    
@@ -436,12 +436,14 @@ Window {
         // Update the filename label when a new file is loaded
         function onDataFilenameChanged(newName) {
             dataFilenameLabel.text = newName
-	    if (newName.endsWith('.grd')) {
-		/// If data file name is a GMT grid, than cannot edit swath data
-		mouseModeMenu.disabledModes = [SharedConstants.editSwathModeName]
+
+	    if (/\.mb.*$/.test(newName)) {
+		// This is a swath file; all mouse modes relevant
+ 		mouseModeMenu.disabledModes = []
 	    }
 	    else {
-		mouseModeMenu.disabledModes = []
+		// Not a swath file; edit swath data not relevant
+		mouseModeMenu.disabledModes = [SharedConstants.editSwathModeName]
 	    }
         }
 
