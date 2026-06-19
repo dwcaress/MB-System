@@ -24,19 +24,16 @@ using namespace mb_system;
 // ─────────────────────────────────────────────────────────────────────────────
 //  EditPickInteractorStyle — screen-space point-flagging interactor
 //
-//  Inherits trackball-camera navigation.  On a plain left-click (mouse moved
-//  ≤ kDragThreshold px) it projects the clip-output point cloud into screen
-//  space and calls EditDataItem::setPickedLocalId() for the nearest point
-//  within kPickRadius px.  Among candidates in that radius the FRONTMOST point
-//  (smallest NDC depth) is chosen so the selection matches what is visually
-//  rendered on top.
+//  Left-click            flag the single frontmost point under the cursor.
+//  Left-drag             camera rotation (trackball, unchanged).
+//  Alt+left-click        flag the single frontmost point under the cursor.
+//  Alt+left-drag         paint — flag every point whose disc the cursor passes
+//                        over; camera does NOT rotate.
+//  Right-drag / scroll   zoom  (superclass, unchanged).
+//  Middle-drag           pan   (superclass, unchanged).
 //
-//  Why not reuse PickInteractorStyle?
-//   • PickInteractorStyle treats ANY mouse movement as a drag and bails — even
-//     a 1-pixel jitter on HiDPI/Retina displays silently swallows every click.
-//   • vtkPointPicker requires cell geometry; a sonar point cloud built from
-//     soundings often has no mesh cells, so GetPointId() always returns -1 and
-//     GetPickPosition() returns {0,0,0}, flagging the wrong point.
+//  Among candidate points inside the pick radius the FRONTMOST (smallest NDC
+//  depth) is chosen, matching what is visually rendered on top.
 // ─────────────────────────────────────────────────────────────────────────────
 
 namespace mb_system {
@@ -57,9 +54,34 @@ public:
     void setPhysicalPointSize(float s) { pickRadius_ = s * 0.5f; }
 
     void OnLeftButtonDown() override {
-        startPos_[0] = Interactor->GetEventPosition()[0];
-        startPos_[1] = Interactor->GetEventPosition()[1];
-        Superclass::OnLeftButtonDown();
+        startPos_[0]    = Interactor->GetEventPosition()[0];
+        startPos_[1]    = Interactor->GetEventPosition()[1];
+        leftButtonDown_ = true;
+        isDragging_     = false;
+        paintMode_      = (Interactor->GetAltKey() != 0);
+
+        if (paintMode_) {
+            // Alt is held: capture this gesture for point painting.
+            // Do NOT start the trackball rotation state.
+        } else {
+            // No modifier: normal left-drag rotates the camera.
+            Superclass::OnLeftButtonDown();
+        }
+    }
+
+    void OnMouseMove() override {
+        if (leftButtonDown_ && paintMode_ && item_) {
+            const int ex = Interactor->GetEventPosition()[0];
+            const int ey = Interactor->GetEventPosition()[1];
+            const int dx = ex - startPos_[0];
+            const int dy = ey - startPos_[1];
+            if (dx*dx + dy*dy > kDragThreshold * kDragThreshold) {
+                isDragging_ = true;
+                pickNearest(ex, ey);
+                return;  // don't pass to superclass during alt-paint drag
+            }
+        }
+        Superclass::OnMouseMove();  // handles rotation, pan, zoom
     }
 
     void OnLeftButtonUp() override {
@@ -68,17 +90,31 @@ public:
         const int dx = ex - startPos_[0];
         const int dy = ey - startPos_[1];
 
-        if (dx*dx + dy*dy <= kDragThreshold * kDragThreshold)
-            pickNearest(ex, ey);
+        if (paintMode_) {
+            // Alt was held at button-down.
+            if (!isDragging_ && dx*dx + dy*dy <= kDragThreshold * kDragThreshold)
+                pickNearest(ex, ey);  // alt+click: flag one point
+            // Don't call superclass: rotation was never started.
+        } else {
+            // Normal left gesture.
+            if (dx*dx + dy*dy <= kDragThreshold * kDragThreshold)
+                pickNearest(ex, ey);  // plain click: flag one point
+            Superclass::OnLeftButtonUp();  // end rotation state
+        }
 
-        Superclass::OnLeftButtonUp();
+        leftButtonDown_ = false;
+        isDragging_     = false;
+        paintMode_      = false;
     }
 
 private:
     EditDataItem *item_ = nullptr;
-    int startPos_[2] = {0, 0};
+    int  startPos_[2]    = {0, 0};
+    bool leftButtonDown_ = false;
+    bool isDragging_     = false;
+    bool paintMode_      = false;  // true when Alt was held at button-down
 
-    // Clicks within this many pixels of drag are treated as a click, not a pan.
+    // Travel threshold (physical px) distinguishing a click from a drag.
     static constexpr int kDragThreshold = 4;
 
     // Pick radius in physical pixels.  Initialised to a reasonable default;
