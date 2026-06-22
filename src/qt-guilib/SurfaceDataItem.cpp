@@ -3,6 +3,7 @@
 #include <vtkIntArray.h>
 #include <vtkCellArray.h>
 #include <QDebug>
+#include <QThread>
 
 using namespace mb_system;
 
@@ -71,9 +72,26 @@ vtkAlgorithmOutput *SurfaceDataItem::dataOutputPort(Pipeline *pipeline) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 void SurfaceDataItem::onQualityChanged() {
-    // qualityChanged() is emitted on the render thread; this slot is connected
-    // with Qt::QueuedConnection so it runs on the main thread first, then we
-    // dispatch VTK work back to the render thread.
+    // On Ubuntu/X11 qualityChanged fires from the VTK render thread via
+    // DirectConnection.  dispatch_async calls QQuickItem::update() internally;
+    // update() from the render thread does NOT reliably schedule a repaint for
+    // an idle window (SurfaceDataItem is not the item currently being rendered
+    // when EditDataItem fires this signal).
+    //
+    // Fix: if we're not on the main thread, re-invoke on the main thread via
+    // QueuedConnection.  The queued event sits in the main thread's event queue
+    // while the QSG sync phase runs; once sync completes the main thread
+    // unblocks, processes the event, and calls dispatch_async from the main
+    // thread where update() is always safe.
+    //
+    // On macOS, qualityChanged fires from the main thread, so the check is a
+    // no-op and dispatch_async is called directly as before.
+    if (QThread::currentThread() != thread()) {
+        QMetaObject::invokeMethod(this,
+            [this]() { onQualityChanged(); },
+            Qt::QueuedConnection);
+        return;
+    }
     dispatch_async([this](vtkRenderWindow *rw, vtkUserData) {
         if (!dataset_ || !dataset_->isLoaded()) {
             rw->Render();
