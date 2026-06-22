@@ -1,6 +1,7 @@
 #ifndef TOPOGRIDITEM_H
 #define TOPOGRIDITEM_H
 #include <filesystem>
+#include <vector>
 #include <QObject>
 #include <QQuickVTKItem.h>
 #include <vtkActor.h>
@@ -184,6 +185,11 @@ namespace mb_system {
 
     // ── Navigation track ─────────────────────────────────────────────────────
 
+    /// Set the navigation track geometry from raw coordinate arrays.
+    /// All three vectors must be the same size and non-empty.
+    Q_INVOKABLE void setNavigationTrack(const std::vector<double> &x,
+					const std::vector<double> &y,
+					const std::vector<double> &z);
 
     /// Show or hide the navigation track without rebuilding the pipeline.
     Q_INVOKABLE void setShowNavTrack(bool show);

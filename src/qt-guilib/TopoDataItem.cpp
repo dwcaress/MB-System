@@ -132,9 +132,15 @@ void TopoDataItem::setDataset(TopoDataset *dataset) {
   connect(dataset_, &TopoDataset::dataLoaded,
           this,     &TopoDataItem::onDatasetLoaded);
 
-  // A quality change only needs a re-render (the polyData is already modified)
+  // A quality change only needs a re-render (the polyData is already modified).
+  // DirectConnection: setPointQuality() is called from the VTK render thread
+  // on Ubuntu/X11; AutoConnection would choose QueuedConnection (render thread
+  // → main thread) but the main thread is blocked during QSG sync, so the
+  // event is never delivered.  onQualityChanged() only calls dispatch_async(),
+  // which is safe from any thread, so DirectConnection is correct here.
   connect(dataset_, &TopoDataset::qualityChanged,
-          this,     &TopoDataItem::onQualityChanged);
+          this,     &TopoDataItem::onQualityChanged,
+          Qt::DirectConnection);
 
   // If the dataset already has data (bound after load), rebuild now
   if (dataset_->isLoaded() && pipeline_) {
@@ -902,11 +908,19 @@ void TopoDataItem::setOrthographicView() {
 }
 
 bool TopoDataItem::saveSettings() {
-  return TopoDataItemSettings::save(getConfigfilePath(), this);
+  auto configPath = std::filesystem::path(getenv("HOME"))
+    / ".config"
+    / QCoreApplication::applicationName().toStdString()
+    / "settings.toml";
+  return TopoDataItemSettings::save(configPath, this);
 }
 
 bool TopoDataItem::loadSettings() {
-  return TopoDataItemSettings::load(getConfigfilePath(), this);
+  auto configPath = std::filesystem::path(getenv("HOME"))
+    / ".config"
+    / QCoreApplication::applicationName().toStdString()
+    / "settings.toml";
+  return TopoDataItemSettings::load(configPath, this);
 }
 
 void TopoDataItem::foo() {
@@ -917,6 +931,45 @@ const char *TopoDataItem::getColormapScheme() {
   return TopoColorMap::schemeName(colormapScheme_);
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  Navigation track
+// ─────────────────────────────────────────────────────────────────────────────
+
+void TopoDataItem::setNavigationTrack(const std::vector<double> &x,
+                                       const std::vector<double> &y,
+                                       const std::vector<double> &z) {
+  if (x.size() != y.size() || x.size() != z.size() || x.empty()) {
+    qWarning() << "setNavigationTrack(): mismatched or empty coordinate arrays";
+    return;
+  }
+
+  // Build a single polyline cell connecting all points in order.
+  vtkNew<vtkPoints>    pts;
+  vtkNew<vtkCellArray> lines;
+
+  const vtkIdType n = static_cast<vtkIdType>(x.size());
+  pts->SetNumberOfPoints(n);
+  lines->InsertNextCell(n);
+  for (vtkIdType i = 0; i < n; ++i) {
+    pts->SetPoint(i, x[i], y[i], z[i]);
+    lines->InsertCellPoint(i);
+  }
+
+  trackPolyData_->SetPoints(pts);
+  trackPolyData_->SetLines(lines);
+  trackPolyData_->Modified();
+  showNavTrack_ = true;
+
+  qDebug() << "setNavigationTrack():" << n << "points";
+
+  if (!pipeline_) return;   // initializeVTK not yet called; applyNavTrack will
+                             // run during the next assemblePipeline
+  dispatch_async([this](vtkRenderWindow *rw, vtkUserData ud) {
+    auto *p = TopoDataItem::Pipeline::SafeDownCast(ud);
+    applyNavTrack(p);
+    rw->Render();
+  });
+}
 
 void TopoDataItem::setShowNavTrack(bool show) {
   showNavTrack_ = show;
@@ -928,7 +981,6 @@ void TopoDataItem::setShowNavTrack(bool show) {
     rw->Render();
   });
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  applyNavTrack — add/remove track actor; called from assemblePipeline and
