@@ -117,26 +117,25 @@ int main(int argc, char* argv[])
   editItem->setDataset(dataset);
 
   // ── Wire selection → edit window ──────────────────────────────────────────
-  // Connection type is platform-dependent due to Qt render-loop differences:
+  // DirectConnection on all platforms:
   //
-  // Ubuntu / X11 (xcb): VTK interactor fires OnLeftButtonUp() on the QSG
-  //   render thread.  QueuedConnection posts setEditBounds() to the main-thread
-  //   event queue so it runs safely on the main thread.
+  // setEditBounds() when pipeline_==null only writes plain data members
+  // (boundsSet_, editBounds_[]) and returns immediately — safe to call from
+  // any thread.  connectDataset() runs on the render thread during the first
+  // render frame and reads boundsSet_; because both the write (here) and the
+  // read happen on the render thread (same thread, no race), the clip bounds
+  // are always applied correctly on the first frame.
   //
-  // macOS / Windows: VTK events fire on the main thread.  DirectConnection
-  //   delivers setEditBounds() synchronously inside the emit call — before
-  //   editWindow.visible=true triggers the first render frame — so
-  //   connectDataset() sees boundsSet_=true and applies the clip immediately.
-  //   QueuedConnection would defer past the first frame; dispatch_async() cannot
-  //   reliably re-trigger a new Metal frame after that, leaving the window black.
-  const Qt::ConnectionType editConnType =
-      (QGuiApplication::platformName() == QLatin1String("xcb"))
-      ? Qt::QueuedConnection
-      : Qt::DirectConnection;
-
+  // When pipeline_ is already assembled (subsequent selections), setEditBounds()
+  // calls dispatch_async(), which is explicitly designed for render-thread use.
+  //
+  // QueuedConnection was tried for Ubuntu/X11 but fails: the render thread
+  // emits the signal during the QSG sync phase while the main thread is blocked,
+  // so the queued event sits unprocessed until after assemblePipeline has already
+  // run with boundsSet_==false.
   QObject::connect(surfaceItem, &SurfaceDataItem::editBoundsChanged,
                    editItem,    &EditDataItem::setEditBounds,
-                   editConnType);
+                   Qt::DirectConnection);
 
   // ── Load command-line file (if given) ─────────────────────────────────────
   // loadFile() emits dataLoaded(); pipeline_ is still null on both items at
