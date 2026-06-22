@@ -25,7 +25,8 @@ using namespace mb_system;
 static constexpr const char *SurfaceItemName = "surfaceDataItem";
 static constexpr const char *EditItemName    = "editDataItem";
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
 #if defined(Q_OS_MACOS)
   QGuiApplication::setAttribute(Qt::AA_DontUseNativeMenuBar);
   QGuiApplication::setAttribute(Qt::AA_DontUseNativeMenuWindows);
@@ -116,16 +117,27 @@ int main(int argc, char* argv[]) {
   editItem->setDataset(dataset);
 
   // ── Wire selection → edit window ──────────────────────────────────────────
-  // When the user draws a rubber-band on the surface view, SurfaceDataItem
-  // emits editBoundsChanged(xMin,xMax,yMin,yMax,zMin,zMax).  The direct
-  // connection here passes those bounds straight to EditDataItem::setEditBounds,
-  // which updates the spatial clip filter and re-renders the edit view.
-  // Qt's typed connect() enforces that the six-double signatures match.
-  auto conn = QObject::connect(surfaceItem, &SurfaceDataItem::editBoundsChanged,
-			       editItem,    &EditDataItem::setEditBounds);
+  // Connection type is platform-dependent due to Qt render-loop differences:
+  //
+  // Ubuntu / X11 (xcb): VTK interactor fires OnLeftButtonUp() on the QSG
+  //   render thread.  QueuedConnection posts setEditBounds() to the main-thread
+  //   event queue so it runs safely on the main thread.
+  //
+  // macOS / Windows: VTK events fire on the main thread.  DirectConnection
+  //   delivers setEditBounds() synchronously inside the emit call — before
+  //   editWindow.visible=true triggers the first render frame — so
+  //   connectDataset() sees boundsSet_=true and applies the clip immediately.
+  //   QueuedConnection would defer past the first frame; dispatch_async() cannot
+  //   reliably re-trigger a new Metal frame after that, leaving the window black.
+  const Qt::ConnectionType editConnType =
+      (QGuiApplication::platformName() == QLatin1String("xcb"))
+      ? Qt::QueuedConnection
+      : Qt::DirectConnection;
 
-  qDebug() << "editBoundsChanged->setEditBounds connected: " << conn;
-	 
+  QObject::connect(surfaceItem, &SurfaceDataItem::editBoundsChanged,
+                   editItem,    &EditDataItem::setEditBounds,
+                   editConnType);
+
   // ── Load command-line file (if given) ─────────────────────────────────────
   // loadFile() emits dataLoaded(); pipeline_ is still null on both items at
   // this point so onDatasetLoaded() is a no-op.  initializeVTK() fires from
@@ -133,7 +145,6 @@ int main(int argc, char* argv[]) {
   // finds the data already loaded and wires up both pipelines immediately.
   if (topoDataFile) {
     dataset->loadFile(QString::fromLocal8Bit(topoDataFile));
-    emit surfaceItem->dataFilenameChanged(topoDataFile);
   }
 
   QQuickWindow *window = qobject_cast<QQuickWindow*>(topLevel);
