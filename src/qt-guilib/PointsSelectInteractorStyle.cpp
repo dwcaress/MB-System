@@ -167,8 +167,8 @@ void PointsSelectInteractorStyle::OnLeftButtonUp() {
 	vtkIdType pointId = filteredPointIds->GetValue(i);
 	double xyz[3];
 	points->GetPoint(pointId, xyz);
-	qDebug() << "x: " << xyz[0] << ", y: " << xyz[1] <<
-	  ", z: " << xyz[2];
+	// qDebug() << "x: " << xyz[0] << ", y: " << xyz[1] <<
+	//  ", z: " << xyz[2];
 
 	// Set selected point data quality
 	if (quality) {
