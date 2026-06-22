@@ -163,8 +163,10 @@ void SurfaceDataItem::onRegionSelected(double worldBounds[6]) {
         return;
     }
 
-    // Emit directly; Qt AutoConnection queues the call cross-thread if needed.
-    emit editBoundsChanged(worldBounds[0], worldBounds[1],
-                           worldBounds[2], worldBounds[3],
-                           worldBounds[4], worldBounds[5]);
+    const double xMin = worldBounds[0], xMax = worldBounds[1];
+    const double yMin = worldBounds[2], yMax = worldBounds[3];
+    const double zMin = worldBounds[4], zMax = worldBounds[5];
+
+    qDebug() << "SurfaceDataItem::onRegionSelected(): emitting editBoundsChanged";
+    emit editBoundsChanged(xMin, xMax, yMin, yMax, zMin, zMax);
 }

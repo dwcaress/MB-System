@@ -511,9 +511,20 @@ void EditDataItem::setEditBounds(double xMin, double xMax,
     qDebug() << "EditDataItem::setEditBounds()"
              << "x[" << xMin << "," << xMax << "]"
              << "y[" << yMin << "," << yMax << "]"
-             << "z[" << zMin << "," << zMax << "]";
+             << "z[" << zMin << "," << zMax << "]"
+             << "pipelineReady=" << (pipeline_ != nullptr);
 
-    // Capture by value: the lambda runs on the render thread
+    if (!pipeline_) {
+        // Pipeline not yet assembled (first-render path).
+        // connectDataset() already checks boundsSet_ and will apply editBounds_
+        // when the first frame renders, so nothing else is needed here.
+        // Calling dispatch_async() without a render window would be a no-op at
+        // best and a crash at worst.
+        return;
+    }
+
+    // Pipeline is already assembled: push a clip-update job to the render thread.
+    // Capture by value: the lambda runs on the render thread.
     dispatch_async([this, xMin, xMax, yMin, yMax, zMin, zMax]
                    (vtkRenderWindow *rw, vtkUserData) {
         qDebug() << "setEditBounds() dispatched";
