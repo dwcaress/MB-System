@@ -4,6 +4,9 @@
 #include <vtkCellArray.h>
 #include <QDebug>
 #include <QThread>
+#include <QCoreApplication>
+#include <QEvent>
+#include <QQuickWindow>
 
 using namespace mb_system;
 
@@ -72,27 +75,32 @@ vtkAlgorithmOutput *SurfaceDataItem::dataOutputPort(Pipeline *pipeline) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 void SurfaceDataItem::onQualityChanged() {
-    // On Ubuntu/X11 qualityChanged fires from the VTK render thread via
-    // DirectConnection.  dispatch_async calls QQuickItem::update() internally;
-    // update() from the render thread does NOT reliably schedule a repaint for
-    // an idle window (SurfaceDataItem is not the item currently being rendered
-    // when EditDataItem fires this signal).
+    // On Ubuntu/X11 qualityChanged fires from the VTK render thread.
     //
-    // Fix: if we're not on the main thread, re-invoke on the main thread via
-    // QueuedConnection.  The queued event sits in the main thread's event queue
-    // while the QSG sync phase runs; once sync completes the main thread
-    // unblocks, processes the event, and calls dispatch_async from the main
-    // thread where update() is always safe.
+    // QQuickItem::update() and QQuickWindow::update() are BOTH rejected from
+    // the render thread ("Updates can only be scheduled from GUI thread or from
+    // QQuickItem::updatePaintNode()"), so dispatch_async's internal update()
+    // call is silently dropped and the callback never fires.
     //
-    // On macOS, qualityChanged fires from the main thread, so the check is a
-    // no-op and dispatch_async is called directly as before.
-    if (QThread::currentThread() != thread()) {
-        QMetaObject::invokeMethod(this,
-            [this]() { onQualityChanged(); },
-            Qt::QueuedConnection);
-        return;
-    }
+    // QMetaObject::invokeMethod(..., Qt::QueuedConnection) posts to the main
+    // thread but that event is never drained in Qt Quick's threaded render loop.
+    //
+    // What DOES work: QCoreApplication::postEvent with QEvent::UpdateRequest.
+    // This is always thread-safe and routes through Qt Quick's own render-
+    // scheduling machinery rather than the general event queue, so the render
+    // loop picks it up and calls updatePaintNode() — which runs the dispatch_async
+    // callback.
+    //
+    // On macOS qualityChanged fires from the main thread so dispatch_async alone
+    // is sufficient; the postEvent is harmless there.
+
+    bool onMainThread = (QThread::currentThread() == thread());
+    qDebug() << "SurfaceDataItem::onQualityChanged()"
+             << "onMainThread=" << onMainThread
+             << "window=" << (window() ? "ok" : "NULL");
+
     dispatch_async([this](vtkRenderWindow *rw, vtkUserData) {
+        qDebug() << "SurfaceDataItem::onQualityChanged() dispatch_async callback fired";
         if (!dataset_ || !dataset_->isLoaded()) {
             rw->Render();
             return;
@@ -100,6 +108,15 @@ void SurfaceDataItem::onQualityChanged() {
         rebuildSurfacePolyData();
         rw->Render();
     });
+
+    // Trigger a render of this window via UpdateRequest, which bypasses the
+    // render-thread restriction on update() and uses Qt Quick's own scheduling.
+    if (QQuickWindow *w = window()) {
+        qDebug() << "  -> posting QEvent::UpdateRequest";
+        QCoreApplication::postEvent(w,
+            new QEvent(QEvent::UpdateRequest),
+            Qt::HighEventPriority);
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -113,6 +130,7 @@ void SurfaceDataItem::onQualityChanged() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 void SurfaceDataItem::rebuildSurfacePolyData() {
+    qDebug() << "SurfaceDataItem::rebuildSurfacePolyData() ENTERED";
     vtkPolyData *src = dataset_->polyData();
 
     // ShallowCopy: new container object, shared underlying array references.
