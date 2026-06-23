@@ -18,6 +18,9 @@
 #include <QMetaObject>
 #include <QGuiApplication>
 #include <QScreen>
+#include <QCoreApplication>
+#include <QEvent>
+#include <QQuickWindow>
 
 using namespace mb_system;
 
@@ -538,6 +541,23 @@ void EditDataItem::setEditBounds(double xMin, double xMax,
         rw->GetRenderers()->GetFirstRenderer()->ResetCamera();
         rw->Render();
     });
+
+    // setEditBounds() is called via DirectConnection from SurfaceDataItem's
+    // render thread (inside SurfaceDataItem's updatePaintNode()).  dispatch_async
+    // calls QQuickItem::update() internally, but update() from a foreign item's
+    // updatePaintNode() is rejected ("Updates can only be scheduled from GUI
+    // thread or from QQuickItem::updatePaintNode()"), so the callback sits queued
+    // and EditDataItem only refreshes when the user next interacts with it.
+    //
+    // Fix: post QEvent::UpdateRequest directly to EditDataItem's window.
+    // QCoreApplication::postEvent is always thread-safe and routes through
+    // Qt Quick's render-scheduling machinery, which accepts UpdateRequest events
+    // regardless of which thread posts them.
+    if (QQuickWindow *w = window()) {
+        QCoreApplication::postEvent(w,
+            new QEvent(QEvent::UpdateRequest),
+            Qt::HighEventPriority);
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
