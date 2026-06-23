@@ -144,6 +144,7 @@ int main(int argc, char* argv[])
   // finds the data already loaded and wires up both pipelines immediately.
   if (topoDataFile) {
     dataset->loadFile(QString::fromLocal8Bit(topoDataFile));
+    emit surfaceItem->dataFilenameChanged(topoDataFile);
   }
 
   QQuickWindow *window = qobject_cast<QQuickWindow*>(topLevel);
