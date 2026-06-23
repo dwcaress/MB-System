@@ -188,28 +188,43 @@ Window {
             }
         }
 
-        Menu {
-            id: mouseModeMenu
-            title: qsTr('Mouse-Action')
-            property string currentMode: ''
-	    property var disabledModes: []
+	Menu {
+	    id: toolsMenu
+	    title: qsTr('Tools')
+
+	    Menu {
+		id: mouseModeMenu
+		title: qsTr('Mouse-Action')
+		property string currentMode: ''
+		property var disabledModes: []
 	    
-            Repeater {
-                model: SharedConstants.mouseModes
-                MenuItem {
-                    text: modelData.name
-                    checkable: true
-                    checked: mouseModeMenu.currentMode === modelData.name
-		    enabled: mouseModeMenu.disabledModes.indexOf(modelData.name) == -1
-                    ToolTip.visible: hovered
-                    ToolTip.text: modelData.toolTip
-                    onTriggered: {
-                        mouseModeMenu.currentMode = modelData.name
-                        surfaceView.setMouseMode(modelData.name)
+		Repeater {
+                    model: SharedConstants.mouseModes
+                    MenuItem {
+			text: modelData.name
+			checkable: true
+			checked: mouseModeMenu.currentMode === modelData.name
+			enabled: mouseModeMenu.disabledModes.indexOf(modelData.name) == -1
+			ToolTip.visible: hovered
+			ToolTip.text: modelData.toolTip
+			onTriggered: {
+                            mouseModeMenu.currentMode = modelData.name
+                            surfaceView.setMouseMode(modelData.name)
+			}
                     }
-                }
+		}
             }
-        }
+
+	    Action {
+		id: updateGrid
+		text: qsTr('Update grid')
+	    }
+	    
+	    Action {
+		text: qsTr('Options')
+	    }
+	}
+
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -440,10 +455,12 @@ Window {
 	    if (/\.mb.*$/.test(newName)) {
 		// This is a swath file; all mouse modes relevant
  		mouseModeMenu.disabledModes = []
+		updateGrid.enabled = true
 	    }
 	    else {
 		// Not a swath file; edit swath data not relevant
 		mouseModeMenu.disabledModes = [SharedConstants.editSwathModeName]
+		updateGrid.enabled = false
 	    }
         }
 
