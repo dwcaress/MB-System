@@ -2,6 +2,7 @@
 #include <vtkIdList.h>
 #include <vtkIntArray.h>
 #include <vtkCellArray.h>
+#include <vtkPoints.h>
 #include <QDebug>
 #include <QThread>
 #include <QCoreApplication>
@@ -57,6 +58,34 @@ bool SurfaceDataItem::connectDataset(Pipeline *pipeline) {
 
     qDebug() << "SurfaceDataItem::connectDataset(): qualitySource_ wired,"
              << surfacePolyData_->GetNumberOfCells() << "cells in render copy";
+
+    // Persistent selection rectangle — flat 4-edge outline, invisible until
+    // the first rubber-band pick.
+    // SetInputData so the mapper reads selectionRectPolyData_ directly; we
+    // rebuild the points/lines in-place in onRegionSelected() and just call
+    // Modified().
+    selectionOutlineMapper_->SetInputData(selectionRectPolyData_);
+    selectionOutlineActor_->SetMapper(selectionOutlineMapper_);
+    selectionOutlineActor_->GetProperty()->SetColor(0.0, 0.0, 0.0); // black
+    selectionOutlineActor_->GetProperty()->SetLineWidth(2.5);
+    selectionOutlineActor_->GetProperty()->LightingOff();
+    selectionOutlineActor_->VisibilityOff();
+    // SetUseBounds(false): exclude this actor from ResetCamera() /
+    // ResetCameraClippingRange() / ComputeVisiblePropBounds().
+    // Without this, once VisibilityOn() is called (after the first rubber-band
+    // selection), the outline's bounds participate in clipping-plane calculation.
+    // The outline is in model/unscaled coordinates while the surface actor has a
+    // vertical-exaggeration scale transform, so the two actors' world-space bounds
+    // diverge.  That mismatch shifts the near/far clip planes and pushes the
+    // surface out of view on the next camera interaction.
+    // SetUseBounds(false) keeps the actor fully visible but never lets it affect
+    // camera geometry.
+    selectionOutlineActor_->SetUseBounds(false);
+    // RemoveActor before AddActor: connectDataset() is called on every pipeline
+    // reassembly; without this guard, duplicate actor entries corrupt VTK's
+    // ResetCameraClippingRange() and push the camera out of view.
+    pipeline->renderer_->RemoveActor(selectionOutlineActor_);
+    pipeline->renderer_->AddActor(selectionOutlineActor_);
 
     return true;
 }
@@ -202,6 +231,58 @@ void SurfaceDataItem::onRegionSelected(double worldBounds[6]) {
     const double xMin = worldBounds[0], xMax = worldBounds[1];
     const double yMin = worldBounds[2], yMax = worldBounds[3];
     const double zMin = worldBounds[4], zMax = worldBounds[5];
+
+    // Update the persistent selection rectangle only when the rubber-band covers
+    // a real area.  A plain left-click produces worldBounds where xMin≈xMax
+    // and/or yMin≈yMax.  The threshold is 0.01% of each dataset axis — small
+    // enough to pass any real rubber-band but large enough to exclude single-click
+    // noise.
+    if (pipeline_) {
+        double *db = dataset_->polyData()->GetBounds(); // [xMin,xMax,yMin,yMax,zMin,zMax]
+        const double dsXRange = db[1] - db[0];
+        const double dsYRange = db[3] - db[2];
+        const bool realSelection =
+            (xMax - xMin) > 1e-4 * dsXRange &&
+            (yMax - yMin) > 1e-4 * dsYRange;
+
+        if (realSelection) {
+            // Build a flat 4-edge rectangle at zMax (topmost world Z in the
+            // selection).  Using worldBounds[5] (the actual world-space max Z
+            // returned by the area picker) places the rectangle at the surface
+            // level regardless of vertical exaggeration, since worldBounds are
+            // already in world/camera space rather than model space.
+            vtkNew<vtkPoints> pts;
+            pts->SetNumberOfPoints(4);
+            pts->SetPoint(0, xMin, yMin, zMax);
+            pts->SetPoint(1, xMax, yMin, zMax);
+            pts->SetPoint(2, xMax, yMax, zMax);
+            pts->SetPoint(3, xMin, yMax, zMax);
+
+            vtkNew<vtkCellArray> edges;
+            auto addEdge = [&](vtkIdType a, vtkIdType b) {
+                vtkIdType ids[2] = {a, b};
+                edges->InsertNextCell(2, ids);
+            };
+            addEdge(0, 1);
+            addEdge(1, 2);
+            addEdge(2, 3);
+            addEdge(3, 0);
+
+            selectionRectPolyData_->SetPoints(pts);
+            selectionRectPolyData_->SetLines(edges);
+            selectionRectPolyData_->Modified();
+            selectionOutlineActor_->VisibilityOn();
+
+            // We're inside SurfaceDataItem's own updatePaintNode() here, so
+            // dispatch_async is explicitly allowed.
+            dispatch_async([](vtkRenderWindow *rw, vtkUserData) {
+                rw->Render();
+            });
+        } else {
+            qDebug() << "SurfaceDataItem::onRegionSelected(): degenerate/trivial bounds,"
+                        " skipping outline update";
+        }
+    }
 
     qDebug() << "SurfaceDataItem::onRegionSelected(): emitting editBoundsChanged";
     emit editBoundsChanged(xMin, xMax, yMin, yMax, zMin, zMax);

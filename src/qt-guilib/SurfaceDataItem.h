@@ -2,6 +2,9 @@
 #define SURFACEDATAITEM_H
 
 #include "TopoDataItem.h"
+#include <vtkPolyData.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkActor.h>
 
 namespace mb_system {
 
@@ -81,6 +84,14 @@ private:
   /// Wraps surfacePolyData_ as a VTK pipeline source so downstream filters
   /// can use SetInputConnection().
   vtkNew<vtkTrivialProducer> qualitySource_;
+
+  /// Flat 4-edge rectangle showing the most recent rubber-band selection.
+  /// Corners are all at zMax (topmost world Z in the selection) so it lies
+  /// on the surface rather than forming a 3-D box.  Invisible until the
+  /// first selection; updated by onRegionSelected().
+  vtkNew<vtkPolyData>       selectionRectPolyData_;
+  vtkNew<vtkPolyDataMapper> selectionOutlineMapper_;
+  vtkNew<vtkActor>          selectionOutlineActor_;
 };
 
 } // namespace mb_system
