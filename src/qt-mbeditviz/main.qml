@@ -279,13 +279,13 @@ Window {
             ToolBar {
                 Layout.fillWidth: true
 
-                RowLayout {
+                Flow {
                     anchors.fill: parent
                     anchors.leftMargin: 6
                     anchors.rightMargin: 6
-                    spacing: 6
-
-                    Label { text: qsTr("Flag clicked point as:") }
+		    spacing: 20
+		    
+                    Label { text: qsTr("Flag selected point as:") }
 
                     // RadioButton pair controls EditDataItem::setFlagValue()
                     RadioButton {
@@ -324,6 +324,8 @@ Window {
                         ToolTip.visible: hovered
                         ToolTip.text: qsTr("Reset camera to fit the current edit volume")
                     }
+                    ToolSeparator {}		    
+                    Label { text: qsTr("Left-click or Left-alt-drag to select")}
 
                     Item { Layout.fillWidth: true }   // push controls left
                 }
