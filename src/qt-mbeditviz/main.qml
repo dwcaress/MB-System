@@ -214,11 +214,6 @@ Window {
                     }
 		}
             }
-
-	    Action {
-		id: updateGrid
-		text: qsTr('Update grid')
-	    }
 	    
 	    Action {
 		text: qsTr('Options')
@@ -271,6 +266,13 @@ Window {
 
         onClosing: surfaceView.forceActiveFocus()
 
+        // Ctrl+Z undoes the most recent edit gesture when the edit window
+        // has focus.  Mirrors the Undo toolbar button.
+        Shortcut {
+            sequence: "Ctrl+Z"
+            onActivated: editView.undoLastEdit()
+        }
+
         ColumnLayout {
             anchors.fill: parent
             spacing: 0
@@ -283,9 +285,9 @@ Window {
                     anchors.fill: parent
                     anchors.leftMargin: 6
                     anchors.rightMargin: 6
-		    spacing: 20
-		    
-                    Label { text: qsTr("Flag selected point as:") }
+                    spacing: 6
+
+                    Label { text: qsTr("Flag selected point() as:") }
 
                     // RadioButton pair controls EditDataItem::setFlagValue()
                     RadioButton {
@@ -324,8 +326,18 @@ Window {
                         ToolTip.visible: hovered
                         ToolTip.text: qsTr("Reset camera to fit the current edit volume")
                     }
-                    ToolSeparator {}		    
-                    Label { text: qsTr("Left-click or Left-alt-drag to select")}
+
+                    ToolSeparator {}
+
+                    Button {
+                        text: qsTr("Undo")
+                        flat: true
+                        onClicked: editView.undoLastEdit()
+                        ToolTip.visible: hovered
+                        ToolTip.text: qsTr("Undo the most recent click or alt-drag edit (Ctrl+Z)")
+                    }
+
+                    Label { text: qsTr('Select points with left-click or alt-drag-left') }		    
 
                     Item { Layout.fillWidth: true }   // push controls left
                 }
@@ -457,12 +469,10 @@ Window {
 	    if (/\.mb.*$/.test(newName)) {
 		// This is a swath file; all mouse modes relevant
  		mouseModeMenu.disabledModes = []
-		updateGrid.enabled = true
 	    }
 	    else {
 		// Not a swath file; edit swath data not relevant
 		mouseModeMenu.disabledModes = [SharedConstants.editSwathModeName]
-		updateGrid.enabled = false
 	    }
         }
 
