@@ -5,6 +5,10 @@
 #include <vtkBox.h>
 #include <vtkStaticPointLocator.h>
 #include "TopoDataItem.h"
+#include "TopoDataset.h"
+#include <set>
+#include <vector>
+#include <QMutex>
 
 namespace mb_system {
 
@@ -111,6 +115,22 @@ public:
   /// Takes effect immediately without a pipeline rebuild.
   Q_INVOKABLE void setShowBadPoints(bool show);
 
+  // ── Undo ───────────────────────────────────────────────────────────────────
+
+  /// Undo the most recent edit gesture (a single left-click or a complete
+  /// alt-left-drag paint stroke).  Restores the quality values that were in
+  /// effect before that gesture and re-renders both views via qualityChanged().
+  /// No-op when the undo stack is empty.  Safe to call from QML (main thread).
+  Q_INVOKABLE void undoLastEdit();
+
+  /// Called by EditPickInteractorStyle on OnLeftButtonDown to start recording
+  /// a new undo snapshot for the upcoming gesture.
+  void beginEdit();
+
+  /// Called by EditPickInteractorStyle on OnLeftButtonUp to commit the
+  /// accumulated snapshot to the undo stack.
+  void endEdit();
+
 protected:
   // ── TopoDataItem overrides ─────────────────────────────────────────────────
 
@@ -176,6 +196,24 @@ private:
   bool   boundsSet_      = false;
   bool   showBadPoints_  = true;
   int    flagValue_      = BAD_DATA;
+
+  // ── Undo stack ─────────────────────────────────────────────────────────────
+  // Threading:
+  //   pendingRecord_ and editedIds_ are accessed ONLY on the render thread
+  //   (from beginEdit, setPickedLocalId, endEdit — all called by the VTK
+  //   interactor).  No mutex needed for them.
+  //
+  //   undoStack_ is accessed on the render thread (endEdit pushes) and on the
+  //   main thread (undoLastEdit pops).  Protected by undoMutex_.
+
+  using EditRecord = TopoDataset::EditRecord;
+
+  mutable QMutex          undoMutex_;
+  std::vector<EditRecord> undoStack_;     ///< Protected by undoMutex_
+
+  EditRecord              pendingRecord_; ///< Accumulates during current gesture (render thread)
+  std::set<vtkIdType>     editedIds_;     ///< De-duplicates points within a gesture (render thread)
+  bool                    inEdit_ = false;///< True between beginEdit() and endEdit() (render thread)
 };
 
 } // namespace mb_system

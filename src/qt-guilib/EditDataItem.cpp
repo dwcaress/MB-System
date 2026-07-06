@@ -63,6 +63,10 @@ public:
         isDragging_     = false;
         paintMode_      = (Interactor->GetAltKey() != 0);
 
+        // Begin an undo snapshot for this gesture (click or alt-drag).
+        // endEdit() is called in OnLeftButtonUp() once all picks are done.
+        if (item_) item_->beginEdit();
+
         if (paintMode_) {
             // Alt is held: capture this gesture for point painting.
             // Do NOT start the trackball rotation state.
@@ -104,6 +108,11 @@ public:
                 pickNearest(ex, ey);  // plain click: flag one point
             Superclass::OnLeftButtonUp();  // end rotation state
         }
+
+        // Commit the accumulated snapshot to the undo stack.
+        // Must come AFTER all pickNearest() calls above so every point
+        // flagged during this gesture is included in the record.
+        if (item_) item_->endEdit();
 
         leftButtonDown_ = false;
         isDragging_     = false;
@@ -409,6 +418,18 @@ void EditDataItem::assemblePipeline(Pipeline *pipeline) {
 
     if (!dataset_ || !dataset_->isLoaded()) return;
 
+    // A new dataset was loaded — prior undo history is invalid.
+    // Clear the stack under the mutex because undoLastEdit() may call from
+    // the main thread concurrently (though in practice the user cannot undo
+    // while a load is in progress).
+    {
+        QMutexLocker lock(&undoMutex_);
+        undoStack_.clear();
+    }
+    pendingRecord_.clear();
+    editedIds_.clear();
+    inEdit_ = false;
+
     // Override: install the quality LUT on the mapper in place of the
     // elevation LUT that applyColoredScalar / applyShadowSource installed.
     pipeline->surfaceMapper_->SetLookupTable(qualityLut_);
@@ -654,6 +675,15 @@ void EditDataItem::setPickedLocalId(vtkIdType localId) {
              << " originalId=" << originalId
              << " flagValue=" << flagValue_;
 
+    // Snapshot old quality for undo — only on the first encounter of this
+    // originalId within the current gesture so a slow alt-drag that revisits
+    // the same point doesn't overwrite the pre-edit value.
+    if (!editedIds_.count(originalId)) {
+        editedIds_.insert(originalId);
+        pendingRecord_.emplace_back(originalId,
+                                    dataset_->qualityArray()->GetValue(originalId));
+    }
+
     dataset_->setPointQuality(originalId, flagValue_);
 
     dispatch_async([this](vtkRenderWindow *rw, vtkUserData) {
@@ -780,4 +810,73 @@ void EditDataItem::syncQualityArray() {
              << " mapperPts="
              << (mapperIn ? mapperIn->GetNumberOfPoints() : 0)
              << " sample srcQA[0]=" << srcQA->GetValue(0);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  beginEdit — start recording an undo snapshot for the current gesture
+//
+//  Called by EditPickInteractorStyle::OnLeftButtonDown().
+//  Render-thread only — no mutex needed.
+// ─────────────────────────────────────────────────────────────────────────────
+
+void EditDataItem::beginEdit() {
+    pendingRecord_.clear();
+    editedIds_.clear();
+    inEdit_ = true;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  endEdit — commit the accumulated snapshot to the undo stack
+//
+//  Called by EditPickInteractorStyle::OnLeftButtonUp(), after all picks for
+//  the gesture have fired.  Pushes to undoStack_ under the mutex so that
+//  undoLastEdit() (main thread) can safely pop it.
+// ─────────────────────────────────────────────────────────────────────────────
+
+void EditDataItem::endEdit() {
+    inEdit_ = false;
+    if (pendingRecord_.empty()) return;  // camera rotation — no points flagged
+
+    {
+        QMutexLocker lock(&undoMutex_);
+        undoStack_.push_back(std::move(pendingRecord_));
+    }
+    pendingRecord_.clear();
+    editedIds_.clear();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  undoLastEdit — restore the most recent edit gesture
+//
+//  Called from QML (main thread).  Pops the top undo record under the mutex,
+//  then dispatches restoreQualityBatch() + syncQualityArray() + Render() to
+//  the render thread.  SurfaceDataItem is notified via the qualityChanged()
+//  signal emitted inside restoreQualityBatch().
+// ─────────────────────────────────────────────────────────────────────────────
+
+void EditDataItem::undoLastEdit() {
+    EditRecord rec;
+    {
+        QMutexLocker lock(&undoMutex_);
+        if (undoStack_.empty()) {
+            qDebug() << "EditDataItem::undoLastEdit(): stack empty, nothing to undo";
+            return;
+        }
+        rec = std::move(undoStack_.back());
+        undoStack_.pop_back();
+    }
+
+    qDebug() << "EditDataItem::undoLastEdit(): restoring" << (int)rec.size() << "point(s)";
+
+    dispatch_async([this, rec = std::move(rec)](vtkRenderWindow *rw, vtkUserData) {
+        if (!dataset_ || !dataset_->isLoaded()) return;
+        // restoreQualityBatch() emits qualityChanged() which fires
+        // EditDataItem::onQualityChanged() (DirectConnection → render thread)
+        // and SurfaceDataItem::onQualityChanged() (also DirectConnection).
+        // Both will dispatch their own sync+render; we also call them here
+        // explicitly to guarantee immediate update of this view.
+        dataset_->restoreQualityBatch(rec);
+        syncQualityArray();
+        rw->Render();
+    });
 }
