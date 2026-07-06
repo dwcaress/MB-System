@@ -138,3 +138,17 @@ void TopoDataset::gridBounds(double *xMin, double *xMax,
     *yMin = gridBounds_[2];  *yMax = gridBounds_[3];
     *zMin = gridBounds_[4];  *zMax = gridBounds_[5];
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  restoreQualityBatch — undo helper: restore multiple quality values at once
+// ─────────────────────────────────────────────────────────────────────────────
+
+void TopoDataset::restoreQualityBatch(const EditRecord &rec) {
+    if (!dataLoaded_ || rec.empty()) return;
+    for (const auto &[id, q] : rec) {
+        quality_->SetValue(id, q);
+    }
+    quality_->Modified();
+    polyData()->Modified();
+    emit qualityChanged();
+}

@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QString>
+#include <vector>
+#include <utility>
 #include <vtkNew.h>
 #include <vtkPolyData.h>
 #include <vtkIntArray.h>
@@ -65,6 +67,16 @@ public:
   /// response to the signal.
   void setPointQuality(vtkIdType originalId, int quality);
 
+  /// Type alias for undo records.  Each entry is (originalPointId, oldQuality)
+  /// captured before a quality-edit gesture in EditDataItem.
+  using EditRecord = std::vector<std::pair<vtkIdType, int>>;
+
+  /// Restore a batch of (originalId, oldQuality) pairs in one operation and
+  /// emit qualityChanged() once.  Called by EditDataItem::undoLastEdit() on
+  /// the VTK render thread; safe there for the same reason setPointQuality()
+  /// is safe from the render thread.
+  void restoreQualityBatch(const EditRecord &rec);
+
   // ── Metadata accessors ────────────────────────────────────────────────────
 
   double elevMin()  const { return elevMin_; }
@@ -102,14 +114,8 @@ signals:
 
 private:
   // Early pipeline stages — data, not rendering
-
-  /// Reads topo data 
   vtkNew<TopoDataReader>     reader_;
-
-  /// Keeps track of point IDs
   vtkNew<vtkIdFilter>        idFilter_;
-
-  /// Generate scalar elevation values from the topo data
   vtkNew<vtkElevationFilter> elevFilter_;
 
   /// Per-point quality flags; lives in polyData's PointData as DATA_QUALITY_NAME
