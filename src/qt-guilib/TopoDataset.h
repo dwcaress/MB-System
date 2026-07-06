@@ -102,8 +102,14 @@ signals:
 
 private:
   // Early pipeline stages — data, not rendering
+
+  /// Reads topo data 
   vtkNew<TopoDataReader>     reader_;
+
+  /// Keeps track of point IDs
   vtkNew<vtkIdFilter>        idFilter_;
+
+  /// Generate scalar elevation values from the topo data
   vtkNew<vtkElevationFilter> elevFilter_;
 
   /// Per-point quality flags; lives in polyData's PointData as DATA_QUALITY_NAME
