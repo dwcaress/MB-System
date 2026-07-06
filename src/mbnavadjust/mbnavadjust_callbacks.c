@@ -415,11 +415,11 @@ void do_mbnavadjust_init(int argc, char **argv) {
        <KeyUp>:    DrawingAreaInput() ManagerGadgetKeyInput()";
 
   /* get additional widgets */
-  fileSelectionBox_list = (Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_LIST);
-  fileSelectionBox_text = (Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_TEXT);
-  XtAddCallback(fileSelectionBox_list, XmNbrowseSelectionCallback, do_fileselection_list, NULL);
-
-  XtUnmanageChild((Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_HELP_BUTTON));
+  fileSelectionBox_list = (Widget)XtNameToWidget(fileSelectionBox, "*ItemsList");
+  fileSelectionBox_text = (Widget)XtNameToWidget(fileSelectionBox, "Text");
+  XtUnmanageChild((Widget)XtNameToWidget(fileSelectionBox, "Help"));
+	XtAddCallback(fileSelectionBox_list, XmNbrowseSelectionCallback, do_fileselection_list, NULL);
+  
   ac = 0;
   tmp0 = (XmString)BX_CONVERT(fileSelectionBox, "*.nvh", XmRXmString, 0, &argok);
   XtSetArg(args[ac], XmNpattern, tmp0);
@@ -3003,7 +3003,6 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
 
     if (mbna_view_list == MBNA_VIEW_LIST_REFERENCEGRIDS) {
       project.refgrid_select = position_list[0] - 2;
-fprintf(stderr,"mbna_referencegrid_select:%d of %d\n", project.refgrid_select, project.num_refgrids);
     }
     else if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS) {
       mbna_section_select = 0;
@@ -3022,12 +3021,17 @@ fprintf(stderr,"mbna_referencegrid_select:%d of %d\n", project.refgrid_select, p
       project.modelplot_uptodate = false;
     }
     else if (mbna_view_list == MBNA_VIEW_LIST_BLOCKS) {
-      if ((acs->item != NULL && XmStringGetLtoR(acs->item, XmFONTLIST_DEFAULT_TAG, &tmp))
-          || (acs->selected_items != NULL && XmStringGetLtoR(acs->selected_items[0], XmFONTLIST_DEFAULT_TAG, &tmp))) {
-        strncpy(selected_item, tmp, sizeof(selected_item));
-        XtFree(tmp);
-        tmp = NULL;
-      }
+    	if (acs->item != NULL) {
+    		tmp = (char *)XmStringUnparse(acs->item, NULL, XmCHARSET_TEXT, XmCHARSET_TEXT, NULL, 0, XmOUTPUT_ALL);
+    		if (tmp == NULL && acs->selected_items != NULL) {
+    			tmp = (char *)XmStringUnparse(acs->selected_items[0], NULL, XmCHARSET_TEXT, XmCHARSET_TEXT, NULL, 0, XmOUTPUT_ALL);
+    		}
+    		if (tmp != NULL) {
+        	strncpy(selected_item, tmp, sizeof(selected_item));
+        	XtFree(tmp);
+        	tmp = NULL;
+    		}
+    	}
       int iblock_select, isurvey1, isurvey2, d1, d2, d3, d4, d5;
       const int nscan = sscanf(selected_item, "block %d: Survey %d vs Survey %d : Crossings: %d %d %d %d : Ties: %d",
              &iblock_select, &isurvey1, &isurvey2, &d1, &d2, &d3, &d4, &d5);
@@ -3162,22 +3166,27 @@ fprintf(stderr,"mbna_referencegrid_select:%d of %d\n", project.refgrid_select, p
               || mbna_view_list == MBNA_VIEW_LIST_TIESSORTEDWORST
               || mbna_view_list == MBNA_VIEW_LIST_TIESSORTEDBAD) {
       /* get crossing and tie from selected item in the list */
-      if ((acs->item != NULL && XmStringGetLtoR(acs->item, XmFONTLIST_DEFAULT_TAG, &tmp))
-          || (acs->selected_items != NULL && XmStringGetLtoR(acs->selected_items[0], XmFONTLIST_DEFAULT_TAG, &tmp))) {
-        strncpy(selected_item, tmp, sizeof(selected_item));
-        XtFree(tmp);
-        tmp = NULL;
-        int i;
-        int j;
-        const int nscan = sscanf(selected_item, "%d %d ", &i, &j);
-        if (nscan == 2 && i >= 0 && i < project.num_crossings
-            && do_check_crossing_listok(i)
-            && j >= 0 && j < project.crossings[i].num_ties) {
-          mbna_crossing_select = i;
-          mbna_tie_select = j;
-          found = true;
-        }
-      }
+    	if (acs->item != NULL) {
+    		tmp = (char *)XmStringUnparse(acs->item, NULL, XmCHARSET_TEXT, XmCHARSET_TEXT, NULL, 0, XmOUTPUT_ALL);
+    		if (tmp == NULL && acs->selected_items != NULL) {
+    			tmp = (char *)XmStringUnparse(acs->selected_items[0], NULL, XmCHARSET_TEXT, XmCHARSET_TEXT, NULL, 0, XmOUTPUT_ALL);
+    		}
+    		if (tmp != NULL) {
+        	strncpy(selected_item, tmp, sizeof(selected_item));
+        	XtFree(tmp);
+        	tmp = NULL;
+					int i;
+					int j;
+					const int nscan = sscanf(selected_item, "%d %d ", &i, &j);
+					if (nscan == 2 && i >= 0 && i < project.num_crossings
+							&& do_check_crossing_listok(i)
+							&& j >= 0 && j < project.crossings[i].num_ties) {
+						mbna_crossing_select = i;
+						mbna_tie_select = j;
+						found = true;
+					}
+    		}
+    	}
 
       /* load selected crossing tie into naverr window, global ties ignored */
       if (found) {
@@ -3197,20 +3206,25 @@ fprintf(stderr,"mbna_referencegrid_select:%d of %d\n", project.refgrid_select, p
     }
     else if (mbna_view_list == MBNA_VIEW_LIST_GLOBALTIES || mbna_view_list == MBNA_VIEW_LIST_GLOBALTIESSORTED) {
       /* get global tie from selected item in the list */
-      if ((acs->item != NULL && XmStringGetLtoR(acs->item, XmFONTLIST_DEFAULT_TAG, &tmp))
-          || (acs->selected_items != NULL && XmStringGetLtoR(acs->selected_items[0], XmFONTLIST_DEFAULT_TAG, &tmp))) {
-        strncpy(selected_item, tmp, sizeof(selected_item));
-        XtFree(tmp);
-        tmp = NULL;
-        int isurvey, ifile, jsection, ksnav;
-        const int nscan = sscanf(selected_item, "%d:%d:%d:%d ", &isurvey, &ifile, &jsection, &ksnav);
-        if (nscan == 4 && ifile >= 0 && ifile < project.num_files
-            && jsection >= 0 && jsection < project.files[ifile].num_sections) {
-          mbna_file_select = ifile;
-          mbna_section_select = jsection;
-          found = true;
-        }
-      }
+    	if (acs->item != NULL) {
+    		tmp = (char *)XmStringUnparse(acs->item, NULL, XmCHARSET_TEXT, XmCHARSET_TEXT, NULL, 0, XmOUTPUT_ALL);
+    		if (tmp == NULL && acs->selected_items != NULL) {
+    			tmp = (char *)XmStringUnparse(acs->selected_items[0], NULL, XmCHARSET_TEXT, XmCHARSET_TEXT, NULL, 0, XmOUTPUT_ALL);
+    		}
+    		if (tmp != NULL) {
+        	strncpy(selected_item, tmp, sizeof(selected_item));
+        	XtFree(tmp);
+        	tmp = NULL;
+					int isurvey, ifile, jsection, ksnav;
+					const int nscan = sscanf(selected_item, "%d:%d:%d:%d ", &isurvey, &ifile, &jsection, &ksnav);
+					if (nscan == 4 && ifile >= 0 && ifile < project.num_files
+							&& jsection >= 0 && jsection < project.files[ifile].num_sections) {
+						mbna_file_select = ifile;
+						mbna_section_select = jsection;
+						found = true;
+					}
+    		}
+    	}
 
       /* load selected section into naverr window */
       if (found) {

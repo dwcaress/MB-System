@@ -399,11 +399,10 @@ void do_mbvelocity_init(int argc, char **argv) {
 	expose_plot_ok = False;
 
 	/* get additional widgets */
-	fileSelectionList = (Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_LIST);
-	fileSelectionText = (Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_TEXT);
+  fileSelectionList = (Widget)XtNameToWidget(fileSelectionBox, "*ItemsList");
+  fileSelectionText = (Widget)XtNameToWidget(fileSelectionBox, "Text");
 	XtAddCallback(fileSelectionList, XmNbrowseSelectionCallback, do_fileselection_list, NULL);
-
-	XtUnmanageChild((Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_HELP_BUTTON));
+  XtUnmanageChild((Widget)XtNameToWidget(fileSelectionBox, "Help"));
 
 	/* Setup the entire screen. */
 	display = XtDisplay(drawingArea);
@@ -756,10 +755,12 @@ void do_open(Widget w, XtPointer client_data, XtPointer call_data) {
 	int selected;
 	int status = 0;
 	char format_text[10];
-	char *input_file_ptr;
 
 	/* read the input file name */
-	if (!XmStringGetLtoR(acs->value, XmSTRING_DEFAULT_CHARSET, &input_file_ptr)) {
+	// char *input_file_ptr;
+	// XmStringGetLtoR(acs->value, XmSTRING_DEFAULT_CHARSET, &input_file_ptr);
+	char *input_file_ptr = (char *)XmStringUnparse(acs->value, NULL, XmCHARSET_TEXT, XmCHARSET_TEXT, NULL, 0, XmOUTPUT_ALL);
+	if (input_file_ptr == NULL) {
 		selected = 0;
 	}
 	else {

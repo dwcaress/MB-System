@@ -201,10 +201,11 @@ int do_mbeditviz_init(Widget parentwidget, XtAppContext appcon) {
   set_mbview_label_multiline_string(label_about_version, value_text);
 
   // set file selection widgets
-  fileSelectionList = (Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_LIST);
-  fileSelectionText = (Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_TEXT);
-  XtAddCallback(fileSelectionList, XmNbrowseSelectionCallback, do_mbeditviz_fileselection_list, NULL);
-  XtUnmanageChild((Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_HELP_BUTTON));
+  fileSelectionList = (Widget)XtNameToWidget(fileSelectionBox, "*ItemsList");
+  fileSelectionText = (Widget)XtNameToWidget(fileSelectionBox, "Text");
+  XtUnmanageChild((Widget)XtNameToWidget(fileSelectionBox, "Help"));
+	XtAddCallback(fileSelectionList, XmNbrowseSelectionCallback, do_mbeditviz_fileselection_list, NULL);
+
   mformat = -1;
   snprintf(value_text, sizeof(value_text), "%d", mformat);
   XmTextSetString(text_format, value_text);
@@ -307,8 +308,9 @@ void do_mbeditviz_openfile(Widget w, XtPointer client_data, XtPointer call_data)
   XmFileSelectionBoxCallbackStruct *acs = (XmFileSelectionBoxCallbackStruct *)call_data;
 
   /* read the input file name */
-  char *file_ptr;
-  XmStringGetLtoR(acs->value, XmSTRING_DEFAULT_CHARSET, &file_ptr);
+  // char *file_ptr;
+  // XmStringGetLtoR(acs->value, XmSTRING_DEFAULT_CHARSET, &file_ptr);
+	char *file_ptr = (char *)XmStringUnparse(acs->value, NULL, XmCHARSET_TEXT, XmCHARSET_TEXT, NULL, 0, XmOUTPUT_ALL);
   if (strlen(file_ptr) <= 0 && file_ptr != NULL) {
     XtFree(file_ptr);
     file_ptr = NULL;

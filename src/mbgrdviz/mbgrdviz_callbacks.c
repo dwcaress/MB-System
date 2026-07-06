@@ -435,9 +435,9 @@ int do_mbgrdviz_init(int argc, char **argv, int verbosity) {
   set_mbview_label_multiline_string(label_about_version, value_text);
 
   /* get additional widgets */
-  fileSelectionList = (Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_LIST);
-  fileSelectionText = (Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_TEXT);
-  XtUnmanageChild((Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_HELP_BUTTON));
+  fileSelectionList = (Widget)XtNameToWidget(fileSelectionBox, "*ItemsList");
+  fileSelectionText = (Widget)XtNameToWidget(fileSelectionBox, "Text");
+  XtUnmanageChild((Widget)XtNameToWidget(fileSelectionBox, "Help"));
 
   /* set up survey planning widgets */
 
@@ -1475,7 +1475,7 @@ void do_mbgrdviz_openfile(Widget w, XtPointer client_data, XtPointer call_data) 
   XmFileSelectionBoxCallbackStruct *acs = (XmFileSelectionBoxCallbackStruct *)call_data;
 
   /* read the input file name */
-  XmStringGetLtoR(acs->value, XmSTRING_DEFAULT_CHARSET, &file_ptr);
+  file_ptr = (char *)XmStringUnparse(acs->value, NULL, XmCHARSET_TEXT, XmCHARSET_TEXT, NULL, 0, XmOUTPUT_ALL);
   if (strlen(file_ptr) <= 0 && file_ptr != NULL) {
     XtFree(file_ptr);
     file_ptr = NULL;
