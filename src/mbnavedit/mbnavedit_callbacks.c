@@ -393,12 +393,12 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
 /*--------------------------------------------------------------------*/
 
 void do_mbnavedit_init(int argc, char **argv) {
-	/* get additional widgets */
-	fileSelectionBox_list = (Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_LIST);
-	fileSelectionBox_text = (Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_TEXT);
-	XtAddCallback(fileSelectionBox_list, XmNbrowseSelectionCallback, do_fileselection_list, NULL);
 
-	XtUnmanageChild((Widget)XmFileSelectionBoxGetChild(fileSelectionBox, XmDIALOG_HELP_BUTTON));
+	/* get additional widgets */
+  fileSelectionBox_list = (Widget)XtNameToWidget(fileSelectionBox, "*ItemsList");
+  fileSelectionBox_text = (Widget)XtNameToWidget(fileSelectionBox, "Text");
+  XtUnmanageChild((Widget)XtNameToWidget(fileSelectionBox, "Help"));
+	XtAddCallback(fileSelectionBox_list, XmNbrowseSelectionCallback, do_fileselection_list, NULL);
 
 	XtVaGetValues(scrolledWindow, XmNhorizontalScrollBar, &scrolledWindow_hscrollbar, NULL);
 	XtVaGetValues(scrolledWindow, XmNverticalScrollBar, &scrolledWindow_vscrollbar, NULL);
@@ -2191,10 +2191,12 @@ void do_fileselection_ok(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)client_data;  // Unused parameter
 
 	XmFileSelectionBoxCallbackStruct *acs = (XmFileSelectionBoxCallbackStruct *)call_data;
-	char *input_file_ptr;
 
 	/* read the input file name */
-	if (!XmStringGetLtoR(acs->value, XmSTRING_DEFAULT_CHARSET, &input_file_ptr)) {
+	// char *input_file_ptr;
+	// XmStringGetLtoR(acs->value, XmSTRING_DEFAULT_CHARSET, &input_file_ptr);
+	char *input_file_ptr = (char *)XmStringUnparse(acs->value, NULL, XmCHARSET_TEXT, XmCHARSET_TEXT, NULL, 0, XmOUTPUT_ALL);
+	if (input_file_ptr == NULL) {
 		fprintf(stderr, "\nno input multibeam file selected\n");
 		return;
 	}

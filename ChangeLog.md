@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.3beta14    July 6, 2026
 - Version 5.8.3beta13    June 18, 2026
 - Version 5.8.3beta12    January 7, 2026
 - Version 5.8.3beta11    December 27, 2025
@@ -71,6 +72,14 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
+#### 5.8.3beta14 (July 6, 2026)
+
+Programs mbedit, mbnavedit, mbvelocitytool, mbgrdviz, mbeditviz, mbnavadjust: updated
+Motif GUI code to eliminate two deprecated functions, replacing XmFileSelectionBoxGetChild()
+with XtNameToWidget() and replacing XmStringGetLtoR() with XmStringUnparse(). This appears
+to be necessary for the Motif code to work on MacOs Tahoe with prerequisites installed
+via MacPorts. 
+
 #### 5.8.3beta13 (June 18, 2026)
 
 Format MBF_KEMKALL (261): Fixed support for platform files used for preprocessing.
@@ -79,6 +88,7 @@ Format MBF_EM710RAW (58): Added support for *.all files associate with the HISAS
 
 Programs mbpreprocess and mbprocess: Added support for merging navigation from Kongsberg Navlab software 
 that is commonly used for Hugin AUV data processing.
+
 Programs mbnavlab2fnv and mbfnv2navlab: Added tools that translate between navlab_smooth.bin and fnv files.
 
 Programs mbnavadjust and mbnavadjustmerge: Fixed problems with new and merged project files resulting 
