@@ -81,6 +81,7 @@ long mode,iflg;
 FILE *ptr;
 
 ind = -1;
+lon1 = lat1 = lon2 = lat2 = 0.0;
 
 /* Find the index for the zone
   --------------------------*/
