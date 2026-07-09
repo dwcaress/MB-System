@@ -35,7 +35,7 @@
  *    MBSYS_SIMRAD2 formats (code in mbsys_simrad2.c and mbsys_simrad2.h):
  *      MBF_EM300RAW : MBIO ID 56 - Vendor EM3000, EM300, EM120
  *      MBF_EM300MBA : MBIO ID 57 - MBARI EM3000, EM300, EM120 for processing
- *    MBSYS_SIMRAD3formats (code in mbsys_simrad3.c and mbsys_simrad3.h):
+ *    MBSYS_SIMRAD2 formats (code in mbsys_simrad2.c and mbsys_simrad2.h):
  *      MBF_EM710RAW : MBIO ID 58 - Vendor EM710
  *      MBF_EM710MBA : MBIO ID 59 - MBARI EM710 for processing
  *
@@ -263,7 +263,7 @@
 #define MBSYS_SIMRAD2_EM1000 9905
 
 /* maximum number of beams and pixels */
-#define MBSYS_SIMRAD2_MAXBEAMS 256
+#define MBSYS_SIMRAD2_MAXBEAMS 254
 #define MBSYS_SIMRAD2_MAXPIXELS 1024
 #define MBSYS_SIMRAD2_MAXRAWPIXELS 65535
 #define MBSYS_SIMRAD2_MAXTX 19

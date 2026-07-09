@@ -11,6 +11,12 @@
 
 #define BYTES_PER_XDR_UNIT 4
 
+/* Rename to avoid colliding with winsock2.h's __declspec(dllimport) ntohl/htonl
+   which gets pulled in transitively via mb_win_compat.h. The shipped impls
+   below are bit-identical to winsock's; use either, but keep these unique. */
+#define ntohl xdr_local_ntohl
+#define htonl xdr_local_htonl
+
 static long ntohl(long val) {
  u_long ret,uval;
 

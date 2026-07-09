@@ -37,7 +37,11 @@
 #include <cstring>
 #include <ctime>
 #include <getopt.h>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 
 #include "mb_define.h"
 #include "mb_format.h"
@@ -811,7 +815,7 @@ int main(int argc, char **argv) {
 							case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
 								time_u = (int)time_d;
 								if (ascii) {
-									printf("%ld", time_u);
+									printf("%lld", (long long)time_u);
 								} else {
 									double b = time_u;
 									fwrite(&b, sizeof(double), 1, stdout);
@@ -824,7 +828,7 @@ int main(int argc, char **argv) {
 									first_u = false;
 								}
 								if (ascii) {
-									printf("%ld", time_u - time_u_ref);
+									printf("%lld", (long long)(time_u - time_u_ref));
 								} else {
 									double b = time_u - time_u_ref;
 									fwrite(&b, sizeof(double), 1, stdout);

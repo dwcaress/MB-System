@@ -39,7 +39,11 @@
 #include <getopt.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 #include <limits>
 
 #include "mb_aux.h"
@@ -470,6 +474,7 @@ int main(int argc, char **argv) {
 		if (help) {
 			fprintf(outfp, "\n%s\n", help_message);
 			fprintf(outfp, "\nusage: %s\n", usage_message);
+			fflush(outfp);  /* MSVC: force flush before exit() */
 			exit(MB_ERROR_NO_ERROR);
 		}
 	}
@@ -519,11 +524,13 @@ int main(int argc, char **argv) {
 	if (traceend < 1 || traceend < tracestart) {
 		fprintf(outfp, "\nBad trace numbers: %d %d specified...\n", tracestart, traceend);
 		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+		fflush(outfp);
 		exit(error);
 	}
 	if (timesweep <= 0.0) {
 		fprintf(outfp, "\nBad time sweep: %f specified...\n", timesweep);
 		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+		fflush(outfp);
 		exit(error);
 	}
 	if (tracemode == MBSEGYGRID_USESHOTONLY) {
@@ -541,6 +548,7 @@ int main(int argc, char **argv) {
 		fprintf(outfp, "\nMBIO Error returned from function <mb_segy_read_init>:\n%s\n", message);
 		fprintf(outfp, "\nSEGY File <%s> not initialized for reading\n", segyfile);
 		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+		fflush(outfp);
 		exit(error);
 	}
 

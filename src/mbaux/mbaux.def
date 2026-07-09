@@ -1,0 +1,35 @@
+LIBRARY
+; Extracted from those declared as 'extern' in .h files
+
+EXPORTS
+; from mb_aux.h
+    mb_contour_init
+    mb_contour_deall
+    mb_contour
+    mb_track
+    mb_trackpingnumber
+    mb_trackname
+    mb_surface
+    mb_zgrid
+    mb_zgrid2
+    mb_delaun
+    mb_read_gmt_grd
+    mb_write_gmt_grd
+    mb_spline_init
+    mb_spline_interp
+    mb_linear_interp
+    mb_linear_interp_longitude
+    mb_linear_interp_latitude
+    mb_linear_interp_heading
+    lsqup
+    chebyu
+    splits
+    errlim
+    errrat
+    lspeig
+    mb_topogrid_init
+    mb_topogrid_deall
+    mb_topogrid_topo
+    mb_topogrid_intersect
+    mb_topogrid_getangletable
+	mblsqr_lsqr

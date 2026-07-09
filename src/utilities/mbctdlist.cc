@@ -43,7 +43,11 @@
 #include <cstring>
 #include <ctime>
 #include <getopt.h>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 
 #include "mb_aux.h"
 #include "mb_define.h"
@@ -650,7 +654,7 @@ int main(int argc, char **argv) {
 
 						/* only output if interpolation of nav etc has worked */
 						// TODO(schwehr): true should be MB_SUCCESS?
-						if (interp_status == true) {
+						if (interp_status) {
 
 							/* calculate course made good and distance */
 							mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
@@ -912,7 +916,7 @@ int main(int argc, char **argv) {
 									case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
 										time_u = (int)time_d;
 										if (ascii)
-											printf("%ld", time_u);
+											printf("%lld", (long long)time_u);
 										else {
 											const double b = time_u;
 											fwrite(&b, sizeof(double), 1, stdout);
@@ -925,7 +929,7 @@ int main(int argc, char **argv) {
 											first_u = false;
 										}
 										if (ascii)
-											printf("%ld", time_u - time_u_ref);
+											printf("%lld", (long long)(time_u - time_u_ref));
 										else {
 											const double b = time_u - time_u_ref;
 											fwrite(&b, sizeof(double), 1, stdout);

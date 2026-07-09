@@ -79,9 +79,83 @@ if (${srcdir} STREQUAL ${bindir})
 endif (${srcdir} STREQUAL ${bindir})
 
 add_compile_definitions(CMAKE_BUILD_SYSTEM=1)
+
+# Platform system libs commonly tacked onto utility executables. On POSIX:
+# libm (math) and pthread are external; on MSVC they're built into the CRT
+# and pthreads-win32 is already linked globally.
+if(WIN32)
+  set(MB_SYSLIBS "")
+else()
+  set(MB_SYSLIBS m pthread)
+endif()
 if (CMAKE_C_BYTE_ORDER STREQUAL "LITTLE_ENDIAN")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DBYTESWAPPED")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBYTESWAPPED")
+endif()
+
+# MSVC has no <unistd.h>; the substitute lives in src/mbio/unistd_w.h, pulled in
+# by src/mbio/mb_define.h (force-included below) under #ifdef _WIN32.
+if(MSVC)
+  # Most project libraries have no __declspec(dllexport) markers, so building
+  # them as SHARED produces a .dll with no .lib import library and downstream
+  # targets fail to link. Force auto-export of all symbols, which generates
+  # the import lib automatically. Equivalent to MinGW's --export-all-symbols.
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+  # src/mbio holds mb_define.h + unistd_w.h; make resolvable from every TU so the
+  # force-included mb_define.h can pull "unistd_w.h" regardless of the includer.
+  include_directories(${CMAKE_SOURCE_DIR}/src/mbio)
+  # Silence the most common POSIX-name warnings (open vs _open, etc.)
+  # NOMINMAX prevents Windows.h from defining min/max macros that clobber
+  # std::numeric_limits<>::max(), std::min(), etc.
+  add_compile_definitions(_CRT_NONSTDC_NO_DEPRECATE _CRT_SECURE_NO_WARNINGS NOMINMAX WIN32_LEAN_AND_MEAN NOGDI)
+  # Force-include mb_define.h on every translation unit. It carries the Windows
+  # POSIX compatibility shim under #ifdef _WIN32 (clock_gettime, strcasecmp,
+  # sockets, getopt, S_IS*, etc.) plus the <unistd.h> selector. Its XDR shim
+  # has identical XdrOp/XDR types to src/surf/xdr_win32.h, which is guarded with
+  # _MB_WIN_XDR_DEFINED so the two do not collide.
+  # /FI<file> = "include this header at the top of every translation unit".
+  add_compile_options(/FI${CMAKE_SOURCE_DIR}/src/mbio/mb_define.h)
+
+  # getopt (POSIX) — utilities pervasively call getopt; MSVC ships none.
+  if(GETOPT_INCLUDE_DIR)
+    include_directories(${GETOPT_INCLUDE_DIR})
+  endif()
+  if(GETOPT_LIBRARY)
+    link_libraries(${GETOPT_LIBRARY})
+  endif()
+
+  # NetCDF — GMT public headers (gmt_shore.h etc) include <netcdf.h>.
+  if(NetCDF_INCLUDE_DIR)
+    include_directories(${NetCDF_INCLUDE_DIR})
+  endif()
+
+  # GLib (needed by GMT public headers when HAVE_GLIB_GTHREAD set).
+  if(GLIB_INCLUDE_DIR)
+    include_directories(${GLIB_INCLUDE_DIR})
+  endif()
+  if(GLIB_CONFIG_DIR)
+    include_directories(${GLIB_CONFIG_DIR})
+  endif()
+  if(GLIB_LIBRARY)
+    link_libraries(${GLIB_LIBRARY})
+  endif()
+
+  # pthreads-win32 (path supplied via PTHREADINC / PTHREADLIB in ConfigUser.cmake).
+  # Wire include path + global link library so every target that uses pthread_*
+  # resolves it without per-target plumbing.
+  if(PTHREADINC)
+    include_directories(${PTHREADINC})
+    # PTW32_STATIC_LIB only when linking the static variant (pthreadVC2.lib here
+    # is the DLL import lib, so leave it dynamic).
+    add_compile_definitions(HAVE_STRUCT_TIMESPEC)
+  endif()
+  if(PTHREADLIB)
+    link_libraries(${PTHREADLIB})
+  endif()
+
+  # Winsock — htonl/ntohl and friends live in Ws2_32.lib on Windows.
+  link_libraries(Ws2_32)
 endif()
 
 if(NOT CMAKE_BUILD_TYPE)

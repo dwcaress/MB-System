@@ -52,7 +52,11 @@
 #include <getopt.h>
 #include <sys/stat.h>
 #include <time.h>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 
 #include <algorithm>
 

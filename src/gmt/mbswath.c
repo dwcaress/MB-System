@@ -43,6 +43,8 @@
 #define THIS_MODULE_LIB "mbsystem"
 #define THIS_MODULE_PURPOSE "Plot swath bathymetry, amplitude, or backscatter"
 #define THIS_MODULE_KEYS ""
+#define THIS_MODULE_NEEDS		""
+#define THIS_MODULE_OPTIONS		"->V"
 
 /* include GMT header file gmt_dev.h without including glib headers not needed by MB-System */
 #ifdef HAVE_GLIB_GTHREAD
@@ -1851,17 +1853,8 @@ int mbswath_ping_copy(int verbose, int one, int two, struct swath *swath, int *e
 }
 /*--------------------------------------------------------------------*/
 
-#define bailout(code)                                                                                                            \
-	{                                                                                                                            \
-		gmt_M_free_options(mode);                                                                                                \
-		return (code);                                                                                                           \
-	}
-#define Return(code)                                                                                                             \
-	{                                                                                                                            \
-		Free_mbswath_Ctrl(GMT, Ctrl);                                                                                            \
-		gmt_end_module(GMT, GMT_cpy);                                                                                            \
-		bailout(code);                                                                                                           \
-	}
+#define bailout(code)  { gmt_M_free_options(mode); return (code); }
+#define Return(code)   { Free_mbswath_Ctrl(GMT, Ctrl); gmt_end_module(GMT, GMT_cpy); bailout(code); }
 
 int GMT_mbswath(void *V_API, int mode, void *args) {
 	//	bool done, need_to_project, normal_x, normal_y, resampled = false, gray_only = false;
@@ -1887,7 +1880,6 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 	//	struct GMT_GRID_HEADER *header_work = NULL;	/* Pointer to a GMT header for the image or grid */
 	//	struct GMTAPI_CTRL *API = gmt_get_api_ptr (V_API);	/* Cast from void to GMTAPI_CTRL pointer */
 
-	static const char program_name[] = "mbswath";
 	//	char help_message[] =  "mbswath is a GMT compatible utility which creates a color postscript \nimage of swath bathymetry
 	// or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction
 	// with the usual GMT programs."; 	char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north
@@ -1948,11 +1940,10 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 #else
 	GMT = gmt_begin_module(API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
 #endif
-	if (GMT_Parse_Common(API, GMT_PROG_OPTIONS, options))
-		Return(API->error);
+	if (GMT_Parse_Common(API, GMT_PROG_OPTIONS, options)) Return(API->error);
+
 	Ctrl = (struct MBSWATH_CTRL *)New_mbswath_Ctrl(GMT); /* Allocate and initialize a new control structure */
-	if ((error = GMT_mbswath_parse(GMT, Ctrl, options)))
-		Return(error);
+	if ((error = GMT_mbswath_parse(GMT, Ctrl, options))) Return(error);
 
 	/*---------------------------- This is the mbswath main code ----------------------------*/
 
@@ -2097,7 +2088,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 		    MB_SUCCESS) {
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", Ctrl->I.inputfile);
-			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", THIS_MODULE_NAME);
 			exit(error);
 		}
 		if ((status = mb_datalist_read(verbose, Ctrl->datalist, file, dfile, &format, &Ctrl->file_weight, &error)) == MB_SUCCESS)
@@ -2138,7 +2129,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 					fprintf(stderr, "\nMBIO Error returned from function <mb_get_ffa>:\n%s\n", message);
 					fprintf(stderr, "Requested filtered amplitude file missing\n");
 					fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", file);
-					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+					fprintf(stderr, "\nProgram <%s> Terminated\n", THIS_MODULE_NAME);
 					exit(error);
 				}
 			}
@@ -2148,7 +2139,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 					fprintf(stderr, "\nMBIO Error returned from function <mb_get_ffs>:\n%s\n", message);
 					fprintf(stderr, "Requested filtered sidescan file missing\n");
 					fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", file);
-					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+					fprintf(stderr, "\nProgram <%s> Terminated\n", THIS_MODULE_NAME);
 					exit(error);
 				}
 			}
@@ -2161,7 +2152,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 				fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", file);
-				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+				fprintf(stderr, "\nProgram <%s> Terminated\n", THIS_MODULE_NAME);
 				exit(error);
 			}
 
@@ -2241,7 +2232,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 			if (error != MB_ERROR_NO_ERROR) {
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
-				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+				fprintf(stderr, "\nProgram <%s> Terminated\n", THIS_MODULE_NAME);
 				exit(error);
 			}
 
@@ -2265,7 +2256,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 				            pingcur->bathlat, pingcur->ss, pingcur->sslon, pingcur->sslat, pingcur->comment, &error);
 
 				if (verbose >= 2) {
-					fprintf(stderr, "\ndbg2  Ping read in program <%s>\n", program_name);
+					fprintf(stderr, "\ndbg2  Ping read in program <%s>\n", THIS_MODULE_NAME);
 					fprintf(stderr, "dbg2       kind:           %d\n", pingcur->kind);
 					fprintf(stderr, "dbg2       beams_bath:     %d\n", pingcur->beams_bath);
 					fprintf(stderr, "dbg2       beams_amp:      %d\n", pingcur->beams_amp);

@@ -61,7 +61,9 @@
 #define MBSYS_SURF_H_
 
 #include "mb_define.h"
-#include "mb_sapi.h"
+/* Use the project's authoritative copy in src/surf/, not the local
+   include/mb_sapi.h (untracked, conflicts on struct definitions). */
+#include "../surf/mb_sapi.h"
 
 #define MBSYS_SURF_MAXBEAMS 1440
 #define MBSYS_SURF_MAXCVALUES 1024

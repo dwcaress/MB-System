@@ -36,7 +36,11 @@
 #include <cstdlib>
 #include <cstring>
 #include <getopt.h>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 
 #include "mb_define.h"
 #include "mb_format.h"

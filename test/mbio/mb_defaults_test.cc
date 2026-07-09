@@ -15,7 +15,7 @@ namespace {
 TEST(MbVersion, Basic) {
   int error = MB_ERROR_NO_ERROR;
   int verbose = 0;
-  mb_path version_string;
+  mb_path version_string = {};  /* zero-init — gtest ContainsRegex on MSVC scans past \0 into uninit stack */
   int version_id;
   int version_major;
   int version_minor;
@@ -25,8 +25,12 @@ TEST(MbVersion, Basic) {
             mb_version(verbose, version_string, &version_id, &version_major,
                        &version_minor, &version_archive, &error));
   EXPECT_EQ(MB_ERROR_NO_ERROR, error);
-  EXPECT_THAT(version_string,
-              testing::ContainsRegex("^[0-9]+[.][0-9]+[.][0-9]+"));
+  /* ContainsRegex behaves erratically on MSVC gtest; check structure with
+     sscanf instead — same intent, no regex engine involved. */
+  {
+    int maj, mn, ar;
+    EXPECT_EQ(3, sscanf(version_string, "%d.%d.%d", &maj, &mn, &ar));
+  }
   EXPECT_GE(version_id, 50700009);
   EXPECT_LT(version_id, 70000000);
   EXPECT_GE(version_major, 4);

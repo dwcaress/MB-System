@@ -53,9 +53,10 @@
 #ifndef MBSYS_GSF_H_
 #define MBSYS_GSF_H_
 
-#include "gsf.h"
-#include "gsf_ft.h"
-#include "gsf_enc.h"
+/* Use src/gsf/ copies, not stale include/gsf.h (untracked, missing KMALL). */
+#include "../gsf/gsf.h"
+#include "../gsf/gsf_ft.h"
+#include "../gsf/gsf_enc.h"
 
 /* internal data structure */
 struct mbsys_gsf_struct {

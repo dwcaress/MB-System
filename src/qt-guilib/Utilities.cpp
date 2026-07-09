@@ -1,4 +1,8 @@
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 #include <sys/types.h>
 #include <proj.h>
 

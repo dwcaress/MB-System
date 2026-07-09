@@ -37,7 +37,11 @@
 #include <cstdlib>
 #include <cstring>
 #include <getopt.h>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 
 #include "mb_define.h"
 #include "mb_format.h"
@@ -63,7 +67,7 @@ typedef enum {
 } waypoint_t;
 constexpr double MBES_ONLINE_THRESHOLD = 15.0;
 constexpr int MBES_ONLINE_COUNT = 30;
-constexpr int MBES_NUM_PLOT_MAX = 100;
+constexpr int MBES_NUM_PLOT_MAX = 50;
 constexpr double MBES_MAX_SWEEP = 1.0;
 
 constexpr char program_name[] = "MBextractsegy";
@@ -332,10 +336,6 @@ int main(int argc, char **argv) {
   double seafloordepthmax = -1.0;
   double seafloordepthminplot[MBES_NUM_PLOT_MAX];
   double seafloordepthmaxplot[MBES_NUM_PLOT_MAX];
-	for (int i = 0; i < MBES_NUM_PLOT_MAX; i++) {
-		seafloordepthminplot[i] = -1.0;
-		seafloordepthmaxplot[i] = -1.0;
-	}
   double sweep;
   double delay;
   double startlon;
@@ -521,8 +521,8 @@ int main(int argc, char **argv) {
     seafloordepthmax = -1.0;
     nplot = 0;
     for (int i = 0; i < MBES_NUM_PLOT_MAX; i++) {
-      seafloordepthminplot[i] = -1.0;
-      seafloordepthmaxplot[i] = -1.0;
+      seafloordepthminplot[i] = -1;
+      seafloordepthmaxplot[i] = -1;
     }
     oktowrite = 0;
     rangeok = false;
@@ -773,8 +773,8 @@ int main(int argc, char **argv) {
           seafloordepthmax = -1.0;
           nplot = 0;
           for (int i = 0; i < MBES_NUM_PLOT_MAX; i++) {
-            seafloordepthminplot[i] = -1.0;
-            seafloordepthmaxplot[i] = -1.0;
+            seafloordepthminplot[i] = -1;
+            seafloordepthmaxplot[i] = -1;
           }
           oktowrite = 0;
           rangeok = false;
@@ -797,8 +797,8 @@ int main(int argc, char **argv) {
 
         /* allocate the required memory */
         if (status == MB_SUCCESS && segytraceheader.nsamps > segydata_alloc) {
-          status = mb_reallocd(verbose, __FILE__, __LINE__, segytraceheader.nsamps * samplesize, 
-          										(void **)&segydata, &error);
+          status =
+              mb_mallocd(verbose, __FILE__, __LINE__, segytraceheader.nsamps * samplesize, (void **)&segydata, &error);
           if (status == MB_SUCCESS)
             segydata_alloc = segytraceheader.nsamps;
           else
@@ -807,7 +807,7 @@ int main(int argc, char **argv) {
         if (status == MB_SUCCESS &&
             (buffer_alloc < MB_SEGY_TRACEHEADER_LENGTH || buffer_alloc < segytraceheader.nsamps * samplesize)) {
           buffer_alloc = std::max(MB_SEGY_TRACEHEADER_LENGTH, segytraceheader.nsamps * samplesize);
-          status = mb_reallocd(verbose, __FILE__, __LINE__, buffer_alloc, (void **)&buffer, &error);
+          status = mb_mallocd(verbose, __FILE__, __LINE__, buffer_alloc, (void **)&buffer, &error);
           if (status != MB_SUCCESS)
             buffer_alloc = 0;
         }
@@ -1455,20 +1455,8 @@ int mbes_generateplots(int verbose, FILE *sfp, char *output_root, char *segy_suf
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
   }
 
-
   int status = MB_SUCCESS;
   mb_command command = {0};
-  
-  /* The maximum useful plot length is about nshotmax shots, so
-      we break longer files up into multiple plots */
-  // const int nshot = endshot - startshot + 1;
-  int nplot = nwrite / nshotmax;
-  if (nwrite % nshotmax > 0)
-    nplot++;
-fprintf(stderr, "%s:%d:%s: seafloordepthminmax: %f %f \n", __FILE__, __LINE__, __FUNCTION__, seafloordepthmin, seafloordepthmax);
-for (int i = 0; i <   nwrite / nshotmax; i++) {
-fprintf(stderr, "%s:%d:%s: nplot: %d seafloordepthminmax: %f %f \n", __FILE__, __LINE__, __FUNCTION__, i, seafloordepthminplot[i], seafloordepthmaxplot[i]);
-}
 
   /* use mbsegyinfo to generate sinf files */
   if (sampleformat == MB_SEGY_SAMPLEFORMAT_ANALYTIC) {
@@ -1524,6 +1512,12 @@ fprintf(stderr, "%s:%d:%s: nplot: %d seafloordepthminmax: %f %f \n", __FILE__, _
     snprintf(scale, sizeof(scale), "-Jx-%f/%f", xscale, yscale);
 
   /* output commands to first cut plotting script file */
+  /* The maximum useful plot length is about nshotmax shots, so
+      we break longer files up into multiple plots */
+  // const int nshot = endshot - startshot + 1;
+  int nplot = nwrite / nshotmax;
+  if (nwrite % nshotmax > 0)
+    nplot++;
 
   /* calculate sweep needed for all of the data in the line - if this is more than 1.0 seconds,
     then make section plots using only the sweep needed for each section alone */

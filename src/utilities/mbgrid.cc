@@ -53,7 +53,11 @@
 #include <ctime>
 #include <getopt.h>
 #include <limits>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 
 #include "mb_aux.h"
 #include "mb_define.h"
@@ -140,8 +144,10 @@ constexpr double FOOT_THETA_MAX = 85.0;
 /* #define USESURFACE */
 
 /* output stream for basic stuff (stdout if verbose <= 1,
-    stderr if verbose > 1) */
-FILE *outfp = stdout;
+    stderr if verbose > 1). Initialized to NULL; main() assigns stdout at runtime.
+    On MSVC, `stdout` is a function-call macro and can't be safely used in a
+    file-scope C++ dynamic initializer (subtle static-init ordering issue). */
+FILE *outfp = NULL;
 
 /* program identifiers */
 constexpr char program_name[] = "mbgrid";
@@ -439,6 +445,7 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b, double pcx, double 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
+  outfp = stdout;  /* set here, not at file scope — MSVC compat */
   int verbose = 0;
   int format;
   int pings;
@@ -779,6 +786,7 @@ int main(int argc, char **argv) {
     if (help) {
       fprintf(outfp, "\n%s\n", help_message);
       fprintf(outfp, "\nusage: %s\n", usage_message);
+      fflush(outfp);  /* MSVC: stdio not always auto-flushed at exit() — force */
       exit(MB_ERROR_NO_ERROR);
     }
   }

@@ -30,8 +30,7 @@ else()
   add_library(TIRPC::TIRPC INTERFACE IMPORTED)
 endif()
 
-add_library(
-  mbbsio
+set(MBBSIO_SOURCES
   mbbs_io.c
   mbbs_iomrv1.c
   mbbs_iomrv2.c
@@ -41,6 +40,15 @@ add_library(
   mbbs_tm.c
   mbbs_wrhdrfields.c
   mbbs_wrsampflags.c)
+
+# Windows lacks SunRPC/XDR. src/surf/xdr_win32.c is a minimal XDR shim shipped
+# with the project; pull it directly into mbbsio so xdr_int/xdr_double/etc.
+# resolve at link time without adding a cross-module dependency on libsapi.
+if(WIN32)
+  list(APPEND MBBSIO_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../surf/xdr_win32.c)
+endif()
+
+add_library(mbbsio ${MBBSIO_SOURCES})
 
 set_target_properties(mbbsio PROPERTIES VERSION "0" SOVERSION "0")
 target_include_directories(mbbsio PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

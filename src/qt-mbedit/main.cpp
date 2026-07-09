@@ -1,5 +1,9 @@
 #include <signal.h>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQuickView>

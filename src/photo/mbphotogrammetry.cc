@@ -43,7 +43,11 @@
 #include <stdio.h>
 #include <string>
 #include <thread>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 #include <vector>
 
 /* MB-System include files */

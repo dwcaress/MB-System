@@ -153,7 +153,11 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <errno.h>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 #endif
 
 #ifdef  WITH_DMALLOC

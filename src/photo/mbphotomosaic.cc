@@ -35,7 +35,11 @@
 #include <iostream>
 #include <stdio.h>
 #include <getopt.h>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 #include <ctype.h>
 #include <sstream>
 #include <fstream>
@@ -631,10 +635,12 @@ void load_image_quality(int verbose, mb_path ImageQualityFile, int *nquality, do
 void load_calibration(int verbose, mb_path StereoCameraCalibrationFile, struct mbpm_control_struct *control, int *error)
 {
     FileStorage fstorage;
+fprintf(stderr, "%s:%d:%s: control->camera_type:%d %s\n", __FILE__, __LINE__, __FUNCTION__, control->camera_type, StereoCameraCalibrationFile);
 
     /* if stereo camera read OpenCV style calibration yaml file for a stereo camera rig  */
     if (control->camera_type == MB_SENSOR_TYPE_CAMERA_STEREO) {
 
+fprintf(stderr, "%s:%d:%s: %s\n", __FILE__, __LINE__, __FUNCTION__, StereoCameraCalibrationFile);
 				/* read intrinsic and extrinsic stereo camera calibration parameters */
 				fstorage.open(StereoCameraCalibrationFile, FileStorage::READ);
 				if(fstorage.isOpened() ) {
@@ -677,10 +683,12 @@ void load_calibration(int verbose, mb_path StereoCameraCalibrationFile, struct m
 						cerr << "P2:" << endl << control->P2 << endl << endl;
 						cerr << "Q:" << endl << control->Q << endl << endl;
 				}
+fprintf(stderr, "%s:%d:%s: %s\n", __FILE__, __LINE__, __FUNCTION__, StereoCameraCalibrationFile);
     }
     
     /* else read OpenCV style calibration yaml file for a mono camera  */
     else {
+fprintf(stderr, "%s:%d:%s: %s\n", __FILE__, __LINE__, __FUNCTION__, StereoCameraCalibrationFile);
 
 				/* read intrinsic and extrinsic stereo camera calibration parameters */
 				fstorage.open(StereoCameraCalibrationFile, FileStorage::READ);
@@ -710,6 +718,7 @@ void load_calibration(int verbose, mb_path StereoCameraCalibrationFile, struct m
 						cerr << "R:" << endl << control->R << endl << endl;
 						cerr << "T:" << endl << control->T << endl << endl;
 				}
+fprintf(stderr, "%s:%d:%s: %s\n", __FILE__, __LINE__, __FUNCTION__, StereoCameraCalibrationFile);
     }
 
 }
@@ -4869,6 +4878,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
 
     /* release correction tables */
     if (control.corr_tables_loaded) {
+fprintf(stderr, "%s:%d:%s: About to release correction table Mats\n", __FILE__, __LINE__, __FUNCTION__);
         control.corr_bounds.release();
         control.corr_table_y[0].release();
         control.corr_table_y[1].release();
@@ -4883,21 +4893,25 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
 
     /* deallocate platform */
     if (platform != NULL) {
+fprintf(stderr, "%s:%d:%s: About to deallocate platform model\n", __FILE__, __LINE__, __FUNCTION__);
         status = mb_platform_deall(verbose, (void **)&platform, &error);
     }
 
     /* deallocate topography grid array if necessary */
     if (control.use_topography) {
+fprintf(stderr, "%s:%d:%s: About to deallocate topography grid\n", __FILE__, __LINE__, __FUNCTION__);
         status = mb_topogrid_deall(verbose, &control.topogrid_ptr, &error);
     }
 
     /* deallocate projection */
     if (control.use_projection) {
+fprintf(stderr, "%s:%d:%s: About to deallocate projection\n", __FILE__, __LINE__, __FUNCTION__);
         int proj_status = mb_proj_free(verbose, &(control.pjptr), &error);
     }
 
     /* deallocate navigation arrays if necessary */
     if (navigation_specified && nnav > 0) {
+fprintf(stderr, "%s:%d:%s: About to deallocate navigation arrays\n", __FILE__, __LINE__, __FUNCTION__);
         status = mb_freed(verbose,__FILE__,__LINE__,(void **)&ntime,&error);
         status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nlon,&error);
         status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nlat,&error);
@@ -4911,6 +4925,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
 
     /* deallocate tide arrays if necessary */
     if (ntide > 0) {
+fprintf(stderr, "%s:%d:%s: About to deallocate tide arrays\n", __FILE__, __LINE__, __FUNCTION__);
         status = mb_freed(verbose,__FILE__,__LINE__,(void **)&ttime,&error);
         status = mb_freed(verbose,__FILE__,__LINE__,(void **)&ttide,&error);
         ntide = 0;
@@ -4918,6 +4933,7 @@ control.OutputBounds[0], control.OutputBounds[1], control.OutputBounds[2], contr
 
     /* deallocate image quality arrays if necessary */
     if (nquality > 0) {
+fprintf(stderr, "%s:%d:%s: About to deallocate image quality arrays\n", __FILE__, __LINE__, __FUNCTION__);
         status = mb_freed(verbose,__FILE__,__LINE__,(void **)&qtime,&error);
         status = mb_freed(verbose,__FILE__,__LINE__,(void **)&qquality,&error);
         nquality = 0;

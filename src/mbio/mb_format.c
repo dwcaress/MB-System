@@ -35,7 +35,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 
 #include "mb_define.h"
 #include "mb_format.h"
@@ -4154,7 +4158,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr,
                           strcat(path1, tmpstr);
                       }
 
-                      /* check if path1 exists and can be opened */
+                      /* check if path0 exists and can be opened */
                       const int fstat = stat(path1, &file_status);
                       if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR && file_status.st_size > 0) {
                           *imagestatus = *imagestatus | MB_IMAGESTATUS_RIGHT;

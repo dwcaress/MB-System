@@ -232,10 +232,6 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	short *sonar_save = (short *)(&mb_io_ptr->save11);
 	int *databyteswapped = (int *)&mb_io_ptr->save1;
 
-#ifdef MBR_EM710MBA_DEBUG
-	fprintf(stderr, "Check label: %x|%x|%x|%x   databyteswapped:%d\n", label[0], label[1], label[2], label[3], *databyteswapped);
-#endif
-
 	/* check for valid start byte and type */
 	const mb_u_char startbyte = label[0];
 	const mb_u_char typebyte = label[1];
@@ -249,9 +245,8 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	     typebyte == EM3_ID_RUN_PARAMETER || typebyte == EM3_ID_SS || typebyte == EM3_ID_TIDE || typebyte == EM3_ID_SVP2 ||
 	     typebyte == EM3_ID_SVP || typebyte == EM3_ID_SSPINPUT || typebyte == EM3_ID_BATH2 || typebyte == EM3_ID_SS2 ||
 	     typebyte == EM3_ID_RAWBEAM2 || typebyte == EM3_ID_RAWBEAM3 || typebyte == EM3_ID_HEIGHT || typebyte == EM3_ID_STOP ||
-	     typebyte == EM3_ID_WATERCOLUMN || typebyte == EM3_ID_REMOTE || 
-	     typebyte == EM3_ID_0x72 || typebyte == EM3_ID_SSP || typebyte == EM3_ID_0x7B ||
-	     typebyte == EM3_ID_BATH_MBA || typebyte == EM3_ID_SS_MBA || typebyte == EM3_ID_BATH2_MBA || typebyte == EM3_ID_SS2_MBA ||
+	     typebyte == EM3_ID_WATERCOLUMN || typebyte == EM3_ID_REMOTE || typebyte == EM3_ID_SSP || typebyte == EM3_ID_BATH_MBA ||
+	     typebyte == EM3_ID_SS_MBA || typebyte == EM3_ID_BATH2_MBA || typebyte == EM3_ID_SS2_MBA ||
 	     typebyte == EM3_ID_BATH3_MBA)) {
 		typegood = true;
 	}
@@ -290,8 +285,7 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_6
 		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_7
 		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_8
-		    || sonarunswap == MBSYS_SIMRAD3_EM3002
-		    || sonarunswap == MBSYS_SIMRAD3_HISAS) {
+		    || sonarunswap == MBSYS_SIMRAD3_EM3002) {
 			sonarunswapgood = true;
 		}
 		else {
@@ -322,8 +316,7 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		    || sonarswap == MBSYS_SIMRAD3_EM3000D_6
 		    || sonarswap == MBSYS_SIMRAD3_EM3000D_7
 		    || sonarswap == MBSYS_SIMRAD3_EM3000D_8
-		    || sonarswap == MBSYS_SIMRAD3_EM3002
-		    || sonarswap == MBSYS_SIMRAD3_HISAS) {
+		    || sonarswap == MBSYS_SIMRAD3_EM3002) {
 			sonarswapgood = true;
 		}
 		else {
@@ -352,9 +345,8 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	}
 
 #ifdef MBR_EM710MBA_DEBUG
-	fprintf(stderr,
-	        "typegood:%d mb_io_ptr->byteswapped:%d sonarunswapgood:%d sonarswapgood:%d *databyteswapped:%d *type:%d *sonar:%d\n",
-	        typegood, mb_io_ptr->byteswapped, sonarunswapgood, sonarswapgood, *databyteswapped, *type, *sonar);
+	fprintf(stderr, "typegood:%d mb_io_ptr->byteswapped:%d sonarswapgood:%d *databyteswapped:%d *type:%d *sonar:%d\n", typegood,
+	        mb_io_ptr->byteswapped, sonarswapgood, *databyteswapped, *type, *sonar);
 #endif
 
 	/* check for valid sonar */
@@ -382,8 +374,7 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	    || *sonar == MBSYS_SIMRAD3_EM3000D_6
 	    || *sonar == MBSYS_SIMRAD3_EM3000D_7
 	    || *sonar == MBSYS_SIMRAD3_EM3000D_8
-	    || *sonar == MBSYS_SIMRAD3_EM3002
-	    || *sonar == MBSYS_SIMRAD3_HISAS) {
+	    || *sonar == MBSYS_SIMRAD3_EM3002) {
 		sonargood = true;
 	}
 	else {
@@ -5113,12 +5104,6 @@ Have a nice day...\n");
 					done = true;
 				}
 			}
-			else if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD3_HISAS) {
-				if (store->pings[store->ping_index].png_bath_read) {
-					store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_COMPLETE;
-					done = true;
-				}
-			}
 			else if (status == MB_SUCCESS) {
 				if (store->pings[store->ping_index].png_bath_read &&
 				    store->pings[store->ping_index].png_ss_read &&
@@ -5150,12 +5135,6 @@ Have a nice day...\n");
 					done = true;
 				}
 			}
-			else if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD3_HISAS) {
-				if (store->pings[store->ping_index].png_bath_read) {
-					store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_COMPLETE;
-					done = true;
-				}
-			}
 			else if (status == MB_SUCCESS) {
 				if (store->pings[store->ping_index].png_bath_read &&
 				    store->pings[store->ping_index].png_ss_read &&
@@ -5183,12 +5162,6 @@ Have a nice day...\n");
 				if (store->pings[store->ping_index].png_bath_read &&
 				    store->pings[store->ping_index].png_raw_read &&
 				    store->pings[store->ping_index].png_count == store->pings[store->ping_index].png_raw_count) {
-					store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_COMPLETE;
-					done = true;
-				}
-			}
-			else if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD3_HISAS) {
-				if (store->pings[store->ping_index].png_bath_read) {
 					store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_COMPLETE;
 					done = true;
 				}

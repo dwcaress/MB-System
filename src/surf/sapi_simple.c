@@ -7,7 +7,11 @@
 #ifdef _WIN32
 #include "types_win32.h"
 #else
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 #endif
 
 #include "xdr_surf.h"

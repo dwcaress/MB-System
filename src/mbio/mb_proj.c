@@ -50,7 +50,11 @@
 #include <math.h>
 #include <stdio.h>
 #include <sys/stat.h>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 #include <string.h>
 
 #include "mb_define.h"
@@ -77,7 +81,11 @@ int mb_proj_init(int verbose, char *projection, void **pjptr, int *error) {
 
 #ifdef _WIN32
   /* But on Windows get it from the bin dir */
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
   char projectionfile[MB_PATH_MAXLINE + 1];
 
   /* Find the path to the bin directory and from it, the location of the Projections.dat file */

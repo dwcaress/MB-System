@@ -58,10 +58,18 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#ifdef _WIN32
+#include "dirent_w.h"
+#else
 #include <dirent.h>
+#endif
 #include <getopt.h>
 #include <sys/stat.h>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 
 #include "mb_define.h"
 #include "mb_format.h"

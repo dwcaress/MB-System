@@ -1,6 +1,10 @@
 #define QT_NO_DEBUG_OUTPUT
 
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 #include <climits>
 #include <array>
 #include <vector>

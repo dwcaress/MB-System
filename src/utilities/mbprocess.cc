@@ -55,7 +55,11 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <thread>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 
 #include "mb_aux.h"
 #include "mb_define.h"
@@ -666,7 +670,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
   if (process->mbp_nav_mode == MBP_NAV_ON &&
       (process->mbp_nav_heading == MBP_NAV_ON || process->mbp_nav_speed == MBP_NAV_ON ||
        process->mbp_nav_draft == MBP_NAV_ON || process->mbp_nav_attitude == MBP_NAV_ON) &&
-      process->mbp_nav_format != 9 && process->mbp_nav_format != MB_PR_NAV_FORMAT_NAVLAB) {
+      process->mbp_nav_format != 9) {
     fprintf(stderr, "\nWarning:\n\tNavigation format <%d> does not include \n", process->mbp_nav_format);
     fprintf(stderr, "\theading, speed, draft, roll, pitch and heave values.\n");
     if (process->mbp_nav_heading == MBP_NAV_ON) {
@@ -1220,30 +1224,15 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
 
     /* count the data points in the nav file */
     nnav = 0;
+    if ((tfp = fopen(process->mbp_navfile, "r")) == nullptr) {
+      fprintf(stderr, "\nUnable to Open Navigation File <%s> for reading\n", process->mbp_navfile);
+      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      exit(MB_ERROR_OPEN_FAIL);
+    }
     char *result;
-    if (process->mbp_nav_format == MB_PR_NAV_FORMAT_NAVLAB) {
-      /* Kongsberg Navlab binary: count records by file size */
-      FILE *bfp;
-      if ((bfp = fopen(process->mbp_navfile, "rb")) == nullptr) {
-        fprintf(stderr, "\nUnable to Open Navigation File <%s> for reading\n", process->mbp_navfile);
-        fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-        exit(MB_ERROR_OPEN_FAIL);
-      }
-      fseeko(bfp, 0, SEEK_END);
-      off_t filesize = ftello(bfp);
-      fclose(bfp);
-      nnav = (int)(filesize / (21 * sizeof(double)));
-    }
-    else {
-      if ((tfp = fopen(process->mbp_navfile, "r")) == nullptr) {
-        fprintf(stderr, "\nUnable to Open Navigation File <%s> for reading\n", process->mbp_navfile);
-        fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-        exit(MB_ERROR_OPEN_FAIL);
-      }
-      while ((result = fgets(buffer, nchar, tfp)) == buffer)
-        nnav++;
-      fclose(tfp);
-    }
+    while ((result = fgets(buffer, nchar, tfp)) == buffer)
+      nnav++;
+    fclose(tfp);
 
     /* allocate arrays for nav */
     if (nnav > 1) {
@@ -1279,50 +1268,6 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
 
     /* read the data points in the nav file */
     nnav = 0;
-
-    /* Kongsberg Navlab binary format: read directly, bypassing ASCII loop */
-    if (process->mbp_nav_format == MB_PR_NAV_FORMAT_NAVLAB) {
-      FILE *bfp;
-      if ((bfp = fopen(process->mbp_navfile, "rb")) == nullptr) {
-        fprintf(stderr, "\nUnable to Open Navigation File <%s> for reading\n", process->mbp_navfile);
-        fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-        exit(MB_ERROR_OPEN_FAIL);
-      }
-      bool swap = (mb_swap_check() == MB_YES);
-      double brec[21];
-      while (fread(brec, sizeof(double), 21, bfp) == 21) {
-        if (swap)
-          for (int ii = 0; ii < 21; ii++)
-            mb_swap_double(&brec[ii]);
-        if (nnav > 0 && brec[0] <= ntime[nnav - 1])
-          continue;
-        ntime[nnav]    = brec[0];
-        nlon[nnav]     = brec[2];
-        nlat[nnav]     = brec[1];
-        nheading[nnav] = brec[6];
-        nspeed[nnav]   = 0.0;
-        ndraft[nnav]   = 0.0;
-        nroll[nnav]    = brec[7];
-        npitch[nnav]   = brec[8];
-        nheave[nnav]   = 0.0;
-        /* apply lonflip */
-        if (lonflip == -1 && nlon[nnav] > 0.0)
-          nlon[nnav] -= 360.0;
-        else if (lonflip == 0 && nlon[nnav] < -180.0)
-          nlon[nnav] += 360.0;
-        else if (lonflip == 0 && nlon[nnav] > 180.0)
-          nlon[nnav] -= 360.0;
-        else if (lonflip == 1 && nlon[nnav] < 0.0)
-          nlon[nnav] += 360.0;
-        if (verbose >= 5)
-          fprintf(stderr, "\ndbg5  New navigation point read in program <%s>\ndbg5       nav[%d]: %f %f %f\n",
-                  program_name, nnav, ntime[nnav], nlon[nnav], nlat[nnav]);
-        nnav++;
-      }
-      fclose(bfp);
-    }
-    else {
-
     if ((tfp = fopen(process->mbp_navfile, "r")) == nullptr) {
       fprintf(stderr, "\nUnable to Open navigation File <%s> for reading\n", process->mbp_navfile);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1648,7 +1593,6 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
       strncpy(buffer, "", sizeof(buffer));
     }
     fclose(tfp);
-    } /* end else (ASCII nav formats) */
 
     /* check for nav */
     if (nnav < 2) {
@@ -1704,7 +1648,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
     fclose(tfp);
 
     /* allocate arrays for adjusted nav */
-    if (nanav >= 1) {
+    if (nanav > 1) {
       // size = (nanav + 1) * sizeof(double);
       /* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nanav * sizeof(double), (void **)&natime, error);
       /* status = */ mb_mallocd(verbose, __FILE__, __LINE__, nanav * sizeof(double), (void **)&nalon, error);
@@ -1830,29 +1774,15 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
 
     /* count the data points in the attitude file */
     nattitude = 0;
-    char *result;
-    if (process->mbp_attitude_format == MB_PR_ATTITUDE_FORMAT_NAVLAB) {
-      FILE *bfp;
-      if ((bfp = fopen(process->mbp_attitudefile, "rb")) == nullptr) {
-        fprintf(stderr, "\nUnable to Open Attitude File <%s> for reading\n", process->mbp_attitudefile);
-        fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-        exit(MB_ERROR_OPEN_FAIL);
-      }
-      fseeko(bfp, 0, SEEK_END);
-      off_t filesize = ftello(bfp);
-      fclose(bfp);
-      nattitude = (int)(filesize / (21 * sizeof(double)));
-    }
-    else {
     if ((tfp = fopen(process->mbp_attitudefile, "r")) == nullptr) {
       fprintf(stderr, "\nUnable to Open Attitude File <%s> for reading\n", process->mbp_attitudefile);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(MB_ERROR_OPEN_FAIL);
     }
+    char *result;
     while ((result = fgets(buffer, nchar, tfp)) == buffer)
       nattitude++;
     fclose(tfp);
-    } /* end else (ASCII attitude formats) */
 
     /* allocate arrays for attitude */
     if (nattitude > 1) {
@@ -1881,37 +1811,6 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
 
     /* read the data points in the attitude file */
     nattitude = 0;
-
-    /* Kongsberg Navlab binary format */
-    if (process->mbp_attitude_format == MB_PR_ATTITUDE_FORMAT_NAVLAB) {
-      FILE *bfp;
-      if ((bfp = fopen(process->mbp_attitudefile, "rb")) == nullptr) {
-        fprintf(stderr, "\nUnable to Open Attitude File <%s> for reading\n", process->mbp_attitudefile);
-        fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-        exit(MB_ERROR_OPEN_FAIL);
-      }
-      bool swap = (mb_swap_check() == MB_YES);
-      double brec[21];
-      while (fread(brec, sizeof(double), 21, bfp) == 21) {
-        if (swap)
-          for (int ii = 0; ii < 21; ii++)
-            mb_swap_double(&brec[ii]);
-        if (nattitude > 0 && brec[0] <= attitudetime[nattitude - 1])
-          continue;
-        attitudetime[nattitude]  = brec[0];
-        attituderoll[nattitude]  = brec[7];
-        attitudepitch[nattitude] = brec[8];
-        attitudeheave[nattitude] = 0.0;
-        if (verbose >= 5)
-          fprintf(stderr, "\ndbg5  New attitude point read in program <%s>\ndbg5       attitude[%d]: %f %f %f %f\n",
-                  program_name, nattitude, attitudetime[nattitude],
-                  attituderoll[nattitude], attitudepitch[nattitude], attitudeheave[nattitude]);
-        nattitude++;
-      }
-      fclose(bfp);
-    }
-    else {
-
     if ((tfp = fopen(process->mbp_attitudefile, "r")) == nullptr) {
       fprintf(stderr, "\nUnable to Open Attitude File <%s> for reading\n", process->mbp_attitudefile);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2000,7 +1899,6 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
       strncpy(buffer, "", sizeof(buffer));
     }
     fclose(tfp);
-    } /* end else (ASCII attitude formats) */
 
     /* check for attitude */
     if (nattitude < 2) {
@@ -2034,29 +1932,15 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
 
     /* count the data points in the sensordepth file */
     nsensordepth = 0;
-    char *result;
-    if (process->mbp_sensordepth_format == MB_PR_SENSORDEPTH_FORMAT_NAVLAB) {
-      FILE *bfp;
-      if ((bfp = fopen(process->mbp_sensordepthfile, "rb")) == nullptr) {
-        fprintf(stderr, "\nUnable to Open Sensordepth File <%s> for reading\n", process->mbp_sensordepthfile);
-        fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-        exit(MB_ERROR_OPEN_FAIL);
-      }
-      fseeko(bfp, 0, SEEK_END);
-      off_t filesize = ftello(bfp);
-      fclose(bfp);
-      nsensordepth = (int)(filesize / (21 * sizeof(double)));
-    }
-    else {
     if ((tfp = fopen(process->mbp_sensordepthfile, "r")) == nullptr) {
       fprintf(stderr, "\nUnable to Open Sensordepth File <%s> for reading\n", process->mbp_sensordepthfile);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(MB_ERROR_OPEN_FAIL);
     }
+    char *result;
     while ((result = fgets(buffer, nchar, tfp)) == buffer)
       nsensordepth++;
     fclose(tfp);
-    } /* end else (ASCII sensordepth formats) */
 
     /* allocate arrays for sensordepth */
     if (nsensordepth > 1) {
@@ -2084,34 +1968,6 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
 
     /* read the data points in the sensordepth file */
     nsensordepth = 0;
-
-    /* Kongsberg Navlab binary format */
-    if (process->mbp_sensordepth_format == MB_PR_SENSORDEPTH_FORMAT_NAVLAB) {
-      FILE *bfp;
-      if ((bfp = fopen(process->mbp_sensordepthfile, "rb")) == nullptr) {
-        fprintf(stderr, "\nUnable to Open Sensordepth File <%s> for reading\n", process->mbp_sensordepthfile);
-        fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-        exit(MB_ERROR_OPEN_FAIL);
-      }
-      bool swap = (mb_swap_check() == MB_YES);
-      double brec[21];
-      while (fread(brec, sizeof(double), 21, bfp) == 21) {
-        if (swap)
-          for (int ii = 0; ii < 21; ii++)
-            mb_swap_double(&brec[ii]);
-        if (nsensordepth > 0 && brec[0] <= fsensordepthtime[nsensordepth - 1])
-          continue;
-        fsensordepthtime[nsensordepth] = brec[0];
-        fsensordepth[nsensordepth]     = brec[3];
-        if (verbose >= 5)
-          fprintf(stderr, "\ndbg5  New sensordepth point read in program <%s>\ndbg5       sensordepth[%d]: %f %f\n",
-                  program_name, nsensordepth, fsensordepthtime[nsensordepth], fsensordepth[nsensordepth]);
-        nsensordepth++;
-      }
-      fclose(bfp);
-    }
-    else {
-
     if ((tfp = fopen(process->mbp_sensordepthfile, "r")) == nullptr) {
       fprintf(stderr, "\nUnable to Open sensordepth File <%s> for reading\n", process->mbp_sensordepthfile);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2199,7 +2055,6 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
       strncpy(buffer, "", sizeof(buffer));
     }
     fclose(tfp);
-    } /* end else (ASCII sensordepth formats) */
 
     /* check for sensordepth */
     if (nsensordepth < 2) {

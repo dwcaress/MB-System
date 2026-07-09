@@ -217,10 +217,17 @@ target_include_directories(mbio PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 if(buildGSF)
   target_link_libraries(mbio PRIVATE mbgsf)
 endif()
-target_link_libraries(
-  mbio
-  PRIVATE NetCDF::NetCDF mbbitpack mbbsio mbsapi LibPROJ::LibPROJ
-  PUBLIC TIRPC::TIRPC m)
+if(WIN32)
+  target_link_libraries(
+    mbio
+    PRIVATE NetCDF::NetCDF mbbitpack mbbsio mbsapi LibPROJ::LibPROJ
+    PUBLIC TIRPC::TIRPC)  # libm is built into MSVC CRT
+else()
+  target_link_libraries(
+    mbio
+    PRIVATE NetCDF::NetCDF mbbitpack mbbsio mbsapi LibPROJ::LibPROJ
+    PUBLIC TIRPC::TIRPC m)
+endif()
 if (buildTRN)
   target_link_libraries(
     mbio

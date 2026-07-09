@@ -42,7 +42,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 #include <limits>
 
 #include "mb_aux.h"
@@ -1441,6 +1445,7 @@ int main(int argc, char **argv) {
 		if (help) {
 			fprintf(outfp, "\n%s\n", help_message);
 			fprintf(outfp, "\nusage: %s\n", usage_message);
+			fflush(outfp);  /* MSVC: force flush before exit() */
 			exit(MB_ERROR_NO_ERROR);
 		}
 	}
@@ -3529,7 +3534,7 @@ int main(int argc, char **argv) {
 #else
 					const int kint = i + j * gxdim;
 #endif
-					if (num[kgrid] == true) {
+					if (num[kgrid]) {
 						grid[kgrid] = sgrid[kint];
 						nbinspline++;
 					}
@@ -3596,7 +3601,7 @@ int main(int argc, char **argv) {
 #else
 					const int kint = i + j * gxdim;
 #endif
-					if (num[kgrid] == true) {
+					if (num[kgrid]) {
 						grid[kgrid] = sgrid[kint];
 						nbinspline++;
 					}
@@ -3626,7 +3631,7 @@ int main(int argc, char **argv) {
 			for (int j = 0; j < gydim; j++) {
 				const int kgrid = i * gydim + j;
 				const int kint = i + j * gxdim;
-				if (num[kgrid] == true) {
+				if (num[kgrid]) {
 					grid[kgrid] = sgrid[kint];
 					nbinspline++;
 				}

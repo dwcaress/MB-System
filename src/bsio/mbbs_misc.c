@@ -52,7 +52,7 @@
 #include "mbbs_defines.h"
 #include "mbbs_mem.h"
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(isnan)
 #define isnan _isnan
 #endif
 

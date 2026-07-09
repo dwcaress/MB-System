@@ -1,27 +1,4 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	gmt_mbsystem_glue.c.in	6/10/2026
- *
- *    Copyright (c) 2026-2026 by
- *    David W. Caress (caress@mbari.org)
- *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, California, USA
- *    Dale N. Chayes 
- *      Center for Coastal and Ocean Mapping
- *      University of New Hampshire
- *      Durham, New Hampshire, USA
- *    Christian dos Santos Ferreira
- *      MARUM
- *      University of Bremen
- *      Bremen Germany
- *     
- *    MB-System was created by Caress and Chayes in 1992 at the
- *      Lamont-Doherty Earth Observatory
- *      Columbia University
- *      Palisades, NY 10964
- *
- *    See README.md file for copying and redistribution conditions.
- *
- *--------------------------------------------------------------------
  *
  *  MB-System out-of-tree GMT supplement glue.
  *  Generated from gmt_mbsystem_glue.c.in by configure_file.
@@ -33,9 +10,6 @@
  *  dlsym("<libname>_module_*"). The libname is the DLL basename (here,
  *  "mbsystem"), so the exported entry points MUST be named
  *  mbsystem_module_show_all / _list_all / _classic_all / _keys / _group.
- *
- * Joaquim Luis
- * June 2026
  *
  *--------------------------------------------------------------------*/
 
