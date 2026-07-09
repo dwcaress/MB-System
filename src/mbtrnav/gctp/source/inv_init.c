@@ -62,38 +62,11 @@ long satnum;		/* SOM satellite number				*/
 long mode;		/* which format is used	A or B			*/
 long tmpspheroid;	/* temporary spheroid for UTM			*/
 
-	/* Function declarations for inverse function pointer
+	/* Note: forward declarations for these functions are no longer
+	   needed here - they are already fully prototyped in proj.h
+	   (included via cproj.h). See the matching comment in for_init.c
+	   for why the old empty-parens declarations were removed.
 	---------------------------------------------------*/
-long utminv();
-long stplninv();
-long alberinv();
-long lamccinv();
-long merinv();
-long psinv();
-long polyinv();
-long eqconinv();
-long tminv();
-long sterinv();
-long lamazinv();
-long aziminv();
-long gnominv();
-long orthinv();
-long gvnspinv();
-long sininv();
-long equiinv();
-long millinv();
-long vandginv();
-long omerinv();
-long sominv();
-long haminv();
-long robinv();
-long goodinv();
-long molwinv();
-long imolwinv();
-long alconinv();
-long wivinv();
-long wviiinv();
-long obleqinv();
 
 /* Initialize inverse transformations
 -----------------------------------*/

@@ -7961,7 +7961,7 @@ gsfNumberParams (const char *params)
 
     if (params)
     {
-        char *s = strchr (params, '=');
+        const char *s = strchr (params, '=');
 
         while (s)
         {

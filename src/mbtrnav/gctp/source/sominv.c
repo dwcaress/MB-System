@@ -25,6 +25,8 @@ ALGORITHM REFERENCES
 #define LANDSAT_RATIO 0.5201613
 
 static double lon_center,a,b,a2,a4,c1,c3,q,t,u,w,xj,p21,sa,ca,es,s,start;
+static double som_series(double *fb, double *fa2, double *fa4, double *fc1,
+	double *fc3, double *dlam);
 static double false_easting;
 static double false_northing;
 

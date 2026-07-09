@@ -60,38 +60,15 @@ long path;		/* SOM path number				*/
 long satnum;		/* SOM satellite number				*/
 long mode;		/* which initialization method  to use A or B	*/
 
-	/* Function declarations for function pointer use
+	/* Note: forward declarations for these functions are no longer
+	   needed here - they are already fully prototyped in proj.h
+	   (included via cproj.h). The old empty-parens declarations that
+	   used to live here ("long utmfor();" etc.) meant "unspecified
+	   arguments" under pre-C23 rules, but C23 redefines empty
+	   parentheses to mean "takes no arguments", which conflicts with
+	   the real prototypes and is a hard compile error on newer
+	   compilers.
 	-----------------------------------------------*/
-long utmfor();
-long stplnfor();
-long alberfor();
-long lamccfor();
-long merfor();
-long psfor();
-long polyfor();
-long eqconfor();
-long tmfor();
-long sterfor();
-long lamazfor();
-long azimfor();
-long gnomfor();
-long orthfor();
-long gvnspfor();
-long sinfor();
-long equifor();
-long millfor();
-long vandgfor();
-long omerfor();
-long somfor();
-long hamfor();
-long robfor();
-long goodfor();
-long molwfor();
-long imolwfor();
-long alconfor();
-long wivfor();
-long wviifor();
-long obleqfor();
 
 /* Initialize forward transformations
 -----------------------------------*/

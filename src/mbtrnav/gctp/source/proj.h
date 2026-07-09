@@ -162,7 +162,8 @@ long equiinvint(double r_maj, double center_lon, double lat1,
 	double false_east, double false_north);
 long equiinv(double x, double y, double *lon, double *lat);
 void for_init(long outsys, long outzone, double *outparm, long outspheroid,
-	char *fn27, char *fn83, long *iflg, long (*for_trans[])());
+	char *fn27, char *fn83, long *iflg,
+	long (*for_trans[])(double lon, double lat, double *x, double *y));
 void gctp(double *incoor, long *insys, long *inzone, double *inparm,
 	long *inunit, long *inspheroid, long *ipr, char *efile, long *jpr,
 	char *pfile, double *outcoor, long *outsys, long *outzone,
@@ -195,7 +196,8 @@ long imolwfor(double lon, double lat, double *x, double *y);
 long imolwinvint(double r);
 long imolwinv(double x, double y, double *lon, double *lat);
 void inv_init(long insys, long inzone, double *inparm, long inspheroid,
-	char *fn27, char *fn83, long *iflg, long (*inv_trans[])());
+	char *fn27, char *fn83, long *iflg,
+	long (*inv_trans[])(double x, double y, double *lon, double *lat));
 long lamazforint(double r, double center_long, double center_lat,
 	double false_east, double false_north);
 long lamazfor(double lon, double lat, double *x, double *y);
@@ -233,6 +235,7 @@ long obleqfor(double lon, double lat, double *x, double *y);
 long obleqinvint(double r, double center_long, double center_lat,
 	double shape_m, double shape_n, double angle, double false_east,
 	double false_north);
+long obleqinv(double x, double y, double *lon, double *lat);
 long omerforint(double r_maj, double r_min, double scale_fact,
 	double azimuth, double lon_orig, double lat_orig, double false_east,
 	double false_north, double lon1, double lat1, double lon2, double lat2,
@@ -297,8 +300,6 @@ long somforint(double r_major, double r_minor, long satnum, long path,
 	double alf_in, double lon, double false_east, double false_north,
 	double time, long start1, long flag);
 long somfor(double lon, double lat, double *x, double *y);
-static double som_series(double *fb, double *fa2, double *fa4, double *fc1,
-	double *fc3,double *dlam);
 long sominvint(double  r_major, double  r_minor, long satnum, long path,
 	double alf_in, double lon, double false_east, double false_north,
 	double time, long start1, long flag);
@@ -327,6 +328,7 @@ long untfz(long inunit, long outunit, double *factor);
 long utmforint(double r_maj, double r_min, double scale_fact, long zone);
 long utmfor(double lon, double lat, double *x, double *y);
 long utminvint(double r_maj, double r_min, double scale_fact, long zone);
+long utminv(double x, double y, double *lon, double *lat);
 long vandgforint(double r, double center_long, double false_east,
 	double false_north);
 long vandgfor( double lon, double lat, double *x, double *y);
