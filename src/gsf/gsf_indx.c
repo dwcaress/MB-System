@@ -137,6 +137,7 @@ static int gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *
 static int gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft);
 static int is_path(const char *path);
 static void temp_file_name(int type, char *d_name, int d_name_size, char *f_name, int f_name_size);
+static int ReadIndexRec(void *ptr, size_t size, size_t nmemb, FILE *fp);
 
 /* JCD: Variables and functions for the index progress callback */
 static GSF_PROGRESS_CALLBACK  gsf_progress_callback = NULL;
@@ -175,6 +176,42 @@ static GSF_PROGRESS_CALLBACK  gsf_progress_callback = NULL;
 void gsf_register_progress_callback (GSF_PROGRESS_CALLBACK progressCB)
 {
     gsf_progress_callback = progressCB;
+}
+
+
+/********************************************************************
+ *
+ * Function Name : ReadIndexRec
+ *
+ * Description : This function is a thin wrapper around fread() used
+ *  when reading fields from a GSF index file.  It checks that the
+ *  requested number of elements were actually read, and sets gsfError
+ *  and returns -1 if the read was short (e.g. truncated or corrupt
+ *  index file), instead of silently ignoring the return value of
+ *  fread() as was done previously.
+ *
+ * Inputs :
+ *  ptr = pointer to the buffer to read into
+ *  size = size in bytes of a single element
+ *  nmemb = number of elements to read
+ *  fp = index file stream to read from
+ *
+ * Returns :
+ *  This function returns zero if successful, or -1 if an error occured.
+ *
+ * Error Conditions :
+ *   GSF_INDEX_FILE_READ_ERROR
+ *
+ ********************************************************************/
+static int
+ReadIndexRec(void *ptr, size_t size, size_t nmemb, FILE *fp)
+{
+    if (fread(ptr, size, nmemb, fp) != nmemb)
+    {
+        gsfError = GSF_INDEX_FILE_READ_ERROR;
+        return (-1);
+    }
+    return (0);
 }
 
 
@@ -302,7 +339,16 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
      * find the expected text then assume this is an old index file
      * (pre-version 01.01) and that we need to create a new index file.
      */
-    fread(index_header.version, GSF_INDEX_VERSION_SIZE, 1, ft->index_data.fp);
+    if (ReadIndexRec(index_header.version, GSF_INDEX_VERSION_SIZE, 1, ft->index_data.fp))
+    {
+        fclose (ft->index_data.fp);
+        ret = gsfCreateIndexFile(ndx_file, handle, ft);
+        if (ret)
+        {
+            return(-1);
+        }
+        return(0);
+    }
     if ((index_header.version[0] == 0) ||
         (strncmp(index_header.version, "INDEX-GSF-", strlen("INDEX-GSF-"))))
     {
@@ -325,7 +371,11 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
     /* Next four bytes contain the size of the GSF file when the index file was created */
     if (maj_indx_num > 1)
     {
-        fread(&u_temp, 8, 1, ft->index_data.fp);
+        if (ReadIndexRec(&u_temp, 8, 1, ft->index_data.fp))
+        {
+            fclose (ft->index_data.fp);
+            return (-1);
+        }
         if (ft->index_data.swap)
         {
             SwapLongLong((long long *) &u_temp, 1);
@@ -350,7 +400,11 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
     /* The next four bytes contain the endian indicator.  Read this to determine whether
      * to swap incoming data. If the endian indicator is not kosher, error out.
      */
-    fread(&index_header.endian, 4, 1, ft->index_data.fp);
+    if (ReadIndexRec(&index_header.endian, 4, 1, ft->index_data.fp))
+    {
+        fclose (ft->index_data.fp);
+        return (-1);
+    }
     if (index_header.endian == 0x00010203)
     {
         ft->index_data.swap = 0;
@@ -396,7 +450,11 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
     /* If we get here, then the index file that exists is ready to use. */
 
     /* Read the number of record types in the index file. */
-    fread(&index_header.number_record_types, 4, 1, ft->index_data.fp);
+    if (ReadIndexRec(&index_header.number_record_types, 4, 1, ft->index_data.fp))
+    {
+        fclose (ft->index_data.fp);
+        return (-1);
+    }
     if (ft->index_data.swap)
     {
         SwapLong((unsigned int *) &index_header.number_record_types, 1);
@@ -412,17 +470,25 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
     }
 
     /* Read the four four byte reserved fields */
-    fread(&index_header.spare1, 4, 1, ft->index_data.fp);
-    fread(&index_header.spare2, 4, 1, ft->index_data.fp);
-    fread(&index_header.spare3, 4, 1, ft->index_data.fp);
-    fread(&index_header.spare4, 4, 1, ft->index_data.fp);
+    if (ReadIndexRec(&index_header.spare1, 4, 1, ft->index_data.fp) ||
+        ReadIndexRec(&index_header.spare2, 4, 1, ft->index_data.fp) ||
+        ReadIndexRec(&index_header.spare3, 4, 1, ft->index_data.fp) ||
+        ReadIndexRec(&index_header.spare4, 4, 1, ft->index_data.fp))
+    {
+        fclose (ft->index_data.fp);
+        return (-1);
+    }
 
     /*  For each record type, read the record type, start address and
      *  number of records.
      */
     for (i = 0; i < ft->index_data.number_of_types; i++)
     {
-        fread(&j, 4, 1, ft->index_data.fp);
+        if (ReadIndexRec(&j, 4, 1, ft->index_data.fp))
+        {
+            fclose (ft->index_data.fp);
+            return (-1);
+        }
         if (ft->index_data.swap)
         {
             SwapLong((unsigned int *) &j, 1);
@@ -436,21 +502,33 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
 
         if (maj_indx_num > 1)
         {
-            fread(&u_temp, 8, 1, ft->index_data.fp);
+            if (ReadIndexRec(&u_temp, 8, 1, ft->index_data.fp))
+            {
+                fclose (ft->index_data.fp);
+                return (-1);
+            }
             if (ft->index_data.swap)
                 SwapLongLong((long long *) &u_temp, 1);
             ft->index_data.start_addr[j] = (long long) u_temp;
         }
         else
         {
-            fread(&l_temp, 4, 1, ft->index_data.fp);
+            if (ReadIndexRec(&l_temp, 4, 1, ft->index_data.fp))
+            {
+                fclose (ft->index_data.fp);
+                return (-1);
+            }
             if (ft->index_data.swap)
                 SwapLong((unsigned int *) &l_temp, 1);
             ft->index_data.start_addr[j] = (long long) l_temp;
         }
 
-        fread(&ft->index_data.number_of_records[j], 4, 1,
-              ft->index_data.fp);
+        if (ReadIndexRec(&ft->index_data.number_of_records[j], 4, 1,
+              ft->index_data.fp))
+        {
+            fclose (ft->index_data.fp);
+            return (-1);
+        }
 
         if (ft->index_data.swap) {
             SwapLong((unsigned int *) &ft->index_data.number_of_records[j], 1);
@@ -475,8 +553,11 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
         fseek(ft->index_data.fp, ft->index_data.start_addr[0], 0);
         for (i = 0; i < ft->index_data.number_of_records[0]; i++)
         {
-            fread(&ft->index_data.scale_factor_addr[i], sizeof(INDEX_REC), 1,
-                ft->index_data.fp);
+            if (ReadIndexRec(&ft->index_data.scale_factor_addr[i], sizeof(INDEX_REC), 1,
+                ft->index_data.fp))
+            {
+                return (-1);
+            }
             if (ft->index_data.swap)
             {
                 SwapLong((unsigned int *) &ft->index_data.scale_factor_addr[i].sec, 1);
@@ -1088,8 +1169,11 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
         fseek(ft->index_data.fp, ft->index_data.start_addr[0], 0);
         for (i = 0; i < ft->index_data.number_of_records[0]; i++)
         {
-            fread(&ft->index_data.scale_factor_addr[i], sizeof(INDEX_REC), 1,
-                ft->index_data.fp);
+            if (ReadIndexRec(&ft->index_data.scale_factor_addr[i], sizeof(INDEX_REC), 1,
+                ft->index_data.fp))
+            {
+                return (-1);
+            }
         }
     }
 
@@ -1162,7 +1246,10 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
     }
 
     /* Read the number of record types in the index file. */
-    fread(&index_header.number_record_types, 4, 1, ft->index_data.fp);
+    if (ReadIndexRec(&index_header.number_record_types, 4, 1, ft->index_data.fp))
+    {
+        return (-1);
+    }
     if (ft->index_data.swap)
     {
         SwapLong((unsigned int *) &index_header.number_record_types, 1);
@@ -1178,17 +1265,23 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
     }
 
     /* Read the four four byte reserved fields */
-    fread(&index_header.spare1, 4, 1, ft->index_data.fp);
-    fread(&index_header.spare2, 4, 1, ft->index_data.fp);
-    fread(&index_header.spare3, 4, 1, ft->index_data.fp);
-    fread(&index_header.spare4, 4, 1, ft->index_data.fp);
+    if (ReadIndexRec(&index_header.spare1, 4, 1, ft->index_data.fp) ||
+        ReadIndexRec(&index_header.spare2, 4, 1, ft->index_data.fp) ||
+        ReadIndexRec(&index_header.spare3, 4, 1, ft->index_data.fp) ||
+        ReadIndexRec(&index_header.spare4, 4, 1, ft->index_data.fp))
+    {
+        return (-1);
+    }
 
     /*  For each record type, read the record type, start address and
      *  number of records.
      */
     for (i = 0; i < ft->index_data.number_of_types; i++)
     {
-        fread(&j, 4, 1, ft->index_data.fp);
+        if (ReadIndexRec(&j, 4, 1, ft->index_data.fp))
+        {
+            return (-1);
+        }
         if (ft->index_data.swap)
         {
             SwapLong((unsigned int *) &j, 1);
@@ -1200,10 +1293,16 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
          */
         ft->index_data.record_type[j] = j;
 
-        fread(&ft->index_data.start_addr[j], 8, 1,
-            ft->index_data.fp);
-        fread(&ft->index_data.number_of_records[j], 4, 1,
-            ft->index_data.fp);
+        if (ReadIndexRec(&ft->index_data.start_addr[j], 8, 1,
+            ft->index_data.fp))
+        {
+            return (-1);
+        }
+        if (ReadIndexRec(&ft->index_data.number_of_records[j], 4, 1,
+            ft->index_data.fp))
+        {
+            return (-1);
+        }
 
         if (ft->index_data.swap)
         {
@@ -1225,7 +1324,10 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
             for(j=0; j<ft->index_data.number_of_records[i]; j++)
             {
                 /* Read the index record from the disk */
-                fread(&index_rec, sizeof(INDEX_REC), 1, ft->index_data.fp);
+                if (ReadIndexRec(&index_rec, sizeof(INDEX_REC), 1, ft->index_data.fp))
+                {
+                    return (-1);
+                }
                 if (ft->index_data.swap)
                 {
                     SwapLong((unsigned int *) &index_rec.sec,  1);
@@ -1272,8 +1374,11 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
         fseek(ft->index_data.fp, ft->index_data.start_addr[0], 0);
         for (i = 0; i < ft->index_data.number_of_records[0]; i++)
         {
-            fread(&ft->index_data.scale_factor_addr[i], sizeof(INDEX_REC), 1,
-                ft->index_data.fp);
+            if (ReadIndexRec(&ft->index_data.scale_factor_addr[i], sizeof(INDEX_REC), 1,
+                ft->index_data.fp))
+            {
+                return (-1);
+            }
             if (ft->index_data.swap)
             {
                 SwapLong((unsigned int *) &ft->index_data.scale_factor_addr[i].sec, 1);
