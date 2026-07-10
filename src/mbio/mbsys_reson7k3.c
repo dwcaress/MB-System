@@ -7362,7 +7362,7 @@ int mbsys_reson7k3_sonarsettings(int verbose, void *mbio_ptr, void *store_ptr, i
 
   int status = MB_SUCCESS;
 
-  /* extract the recorded Reson 7k Sonar Settings (record 7000) values — these are
+  /* extract the recorded Reson 7k Sonar Settings (record 7000) values - these are
      values written into the file by the sonar; no proprietary gain model is applied */
   if (*kind == MB_DATA_DATA) {
     if (store->read_SonarSettings) {
