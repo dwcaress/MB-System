@@ -343,7 +343,13 @@ int tiff_offset[] = {
 #ifdef HAVE_GLIB_GTHREAD
 #undef HAVE_GLIB_GTHREAD
 #endif
+/* On Windows, gmt_dev.h's GDAL headers declare something named Compression;
+   shadow our own tag macro of the same name so it doesn't corrupt that
+   declaration, then restore it since we still use it as a tag value below. */
+#pragma push_macro("Compression")
+#undef Compression
 #include "gmt_dev.h"
+#pragma pop_macro("Compression")
 
 /*  Compatibility with old lower-function/macro names use prior to GMT 5.3.0 */
 #if GMT_MAJOR_VERSION == 5 && GMT_MINOR_VERSION < 3

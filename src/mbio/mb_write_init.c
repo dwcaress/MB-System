@@ -45,7 +45,8 @@
 #include "gsf.h"
 #endif
 #ifdef _WIN32
-#	include <rpc/xdr.h>			/* Don't understand why this is now need. It wasn't till recently. 26 Juin 2018 (JL)*/
+/* Windows lacks SunRPC/TIRPC, so use the mb_xdr_win32 replacement */
+#	include <mb_xdr_win32.h>
 #endif
 
 
