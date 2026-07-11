@@ -228,7 +228,11 @@ static int ensure_directory_exists(const char *path) {
     return MB_FAILURE;
   }
 
+#ifdef _WIN32
+  if (mkdir(path) == 0) {
+#else
   if (mkdir(path, 0755) == 0) {
+#endif
     if (verbose > 0) {
       fprintf(stderr, "Created output directory: %s\n", path);
     }

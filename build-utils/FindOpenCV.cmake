@@ -28,14 +28,21 @@
 # it splits the old "calib3d" module into "geometry", "calib", and "stereo"
 # (calib3d.hpp is kept only as a legacy header that forwards to the three).
 # Rather than chase component/library names across major versions, this
-# module asks for the whole package and links the full ${OpenCV_LIBS} set
-# that OpenCV's own config exports, so it works unchanged against OpenCV 4.x
-# and 5.x (and whatever module names later versions choose to use).
+# module asks for the whole package and exposes it as the OpenCV::OpenCV
+# imported target, linking the full ${OpenCV_LIBS} (or pkg-config) set,
+# so it works unchanged against OpenCV 4.x and 5.x (and whatever module
+# names later versions choose to use).
 #
-set (OPENCV_FOUND FALSE)
+# On success this module sets the usual OpenCV_FOUND and defines the
+# OpenCV::OpenCV INTERFACE IMPORTED target; callers should simply do:
+#
+#   find_package(OpenCV REQUIRED)
+#   target_link_libraries(mytarget PRIVATE OpenCV::OpenCV)
+#
+set(OpenCV_FOUND FALSE)
 
 # First try find_package() in config mode
-if (NOT OPENCV_FOUND)
+if(NOT OpenCV_FOUND)
 
   # No minimum version is passed to find_package() here: OpenCV's own
   # OpenCVConfigVersion.cmake treats a requested major version as an exact
@@ -49,25 +56,20 @@ if (NOT OPENCV_FOUND)
   endif()
 
   if(OpenCV_FOUND)
-    include_directories(${OpenCV_INCLUDE_DIRS})
-    foreach(executable ${executables})
-      add_executable(${executable} ${executable}.cc)
-      target_compile_features(${executable} PRIVATE cxx_std_17)
-      target_link_libraries(${executable} PRIVATE
-                  mbio mbaux pthread ${OpenCV_LIBS})
-    endforeach()
-    set(OPENCV_FOUND TRUE)
-  endif(OpenCV_FOUND)
+    add_library(OpenCV::OpenCV INTERFACE IMPORTED)
+    target_include_directories(OpenCV::OpenCV INTERFACE ${OpenCV_INCLUDE_DIRS})
+    target_link_libraries(OpenCV::OpenCV INTERFACE ${OpenCV_LIBS})
+  endif()
 
 endif()
 
 #
 # Else if pkg-config exists then look for opencv4/opencv5
-if (NOT OPENCV_FOUND)
+if(NOT OpenCV_FOUND)
 
   find_package(PkgConfig)
-  if (PkgConfig_FOUND)
-    if (APPLE)
+  if(PkgConfig_FOUND)
+    if(APPLE)
       set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:/opt/local/lib/opencv4/pkgconfig:/opt/local/lib/opencv5/pkgconfig")
     endif(APPLE)
     # Try version-specific pkg-config module names first, then the
@@ -78,20 +80,18 @@ if (NOT OPENCV_FOUND)
       message(FATAL_ERROR "OpenCV version ${OPENCV_PKGCONFIG_VERSION} is not supported. Requires 4.x or later.")
     endif()
 
-    if (OPENCV_PKGCONFIG_FOUND)
-      foreach(executable ${executables})
-        add_executable(${executable} ${executable}.cc)
-        target_compile_features(${executable} PRIVATE cxx_std_17)
-        target_link_libraries(${executable} PRIVATE mbio mbaux pthread PkgConfig::OPENCV_PKGCONFIG)
-      endforeach()
-      set(OPENCV_FOUND TRUE)
+    if(OPENCV_PKGCONFIG_FOUND)
+      add_library(OpenCV::OpenCV INTERFACE IMPORTED)
+      target_link_libraries(OpenCV::OpenCV INTERFACE PkgConfig::OPENCV_PKGCONFIG)
+      set(OpenCV_FOUND TRUE)
+      set(OpenCV_VERSION ${OPENCV_PKGCONFIG_VERSION})
     endif(OPENCV_PKGCONFIG_FOUND)
 
   endif(PkgConfig_FOUND)
-endif(NOT OPENCV_FOUND)
+endif(NOT OpenCV_FOUND)
 
-if (OPENCV_FOUND)
+if(OpenCV_FOUND)
   message("-- OpenCV found!")
 else()
-  message ("-- OpenCV NOT found...")
-endif ()
+  message("-- OpenCV NOT found...")
+endif()

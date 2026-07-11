@@ -22,7 +22,6 @@
 #include <chrono>
 #include <iomanip>
 #include <ctime>
-#include <unistd.h>
 #include <vector>
 #include <string>
 
@@ -57,7 +56,11 @@ private:
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
 
     std::tm tm_buf;
+#ifdef _WIN32
+    localtime_s(&tm_buf, &time);
+#else
     localtime_r(&time, &tm_buf);
+#endif
 
     std::ostringstream oss;
     oss << std::put_time(&tm_buf, "%Y-%m-%d %H:%M:%S") << '.' << std::setfill('0') << std::setw(3)
