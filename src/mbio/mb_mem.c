@@ -644,7 +644,7 @@ int mb_freed(int verbose, const char *sourcefile, int sourceline, void **ptr, in
 
     /* if pointer is in list remove it from list */
     size_t ptrsize;
-    long ptrvalue;
+    size_t ptrvalue;
     if (iptr > -1) {
       /* remove it from list */
       ptrvalue = (size_t)mb_alloc_ptr[iptr];
@@ -845,7 +845,7 @@ int mb_register_array(int verbose, void *mbio_ptr, int type, size_t size, void *
     fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
     fprintf(stderr, "dbg2       type:       %d\n", type);
     fprintf(stderr, "dbg2       size:       %p\n", (void *)size);
-    fprintf(stderr, "dbg2       handle:     %lx\n", (size_t)handle);
+    fprintf(stderr, "dbg2       handle:     %p\n", (void *)handle);
   }
 
   /* get mbio descriptor */

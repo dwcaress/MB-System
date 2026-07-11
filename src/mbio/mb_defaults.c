@@ -40,7 +40,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#ifdef _WIN32
+#include <winsock2.h> /* for gethostname() */
+#else
 #include <unistd.h>
+#endif
 
 #include "mb_define.h"
 #include "mb_status.h"
