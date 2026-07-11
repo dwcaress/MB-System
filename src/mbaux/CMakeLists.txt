@@ -55,6 +55,7 @@ target_include_directories(mbaux PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(mbaux GMT::GMT GDAL::GDAL mbio)
 
 install(TARGETS mbaux DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 if(buildGUIs)
   find_package(X11 REQUIRED)
@@ -65,5 +66,20 @@ if(buildGUIs)
   install(TARGETS mbxgr DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 
-install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+# Windows lacks SunRPC/XDR or TIRPC/XDR, so provide an alternative library to support data formats
+# built on XDR, such as Atlas SURF and HMRG BSIO
+if(WIN32)
+	add_library(
+		mb_xdr_win32
+		mb_xdr_win32.c)
+	set(HEADERS
+    mb_xdr_win32.h
+    mb_types_win32.h)
+
+	target_include_directories(mb_xdr_win32 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+	install(TARGETS mb_xdr_win32 DESTINATION ${CMAKE_INSTALL_LIBDIR})
+	install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+endif()
+
 

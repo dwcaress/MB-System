@@ -10,9 +10,14 @@
 /* CMake build system section */
 #ifdef CMAKE_BUILD_SYSTEM
 
+#ifdef _WIN32
+  /* Windows lacks SunRPC/TIRPC, so use the mb_xdr_win32 replacement */
+#  include <mb_xdr_win32.h>
+#else
 #  include <rpc/rpc.h>
 #  include <rpc/types.h>
 #  include <rpc/xdr.h>
+#endif
 
 #else // Begin Autotools section supporting legacy OS's
 

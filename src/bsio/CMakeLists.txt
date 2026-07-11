@@ -46,4 +46,8 @@ set_target_properties(mbbsio PROPERTIES VERSION "0" SOVERSION "0")
 target_include_directories(mbbsio PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(mbbsio PRIVATE TIRPC::TIRPC)
 
+if(WIN32)
+  target_link_libraries(mbbsio PRIVATE mb_xdr_win32)
+endif()
+
 install(TARGETS mbbsio DESTINATION ${CMAKE_INSTALL_LIBDIR})
