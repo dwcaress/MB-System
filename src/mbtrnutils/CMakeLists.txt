@@ -47,7 +47,7 @@ MST_STATS_EN
 )
 
 add_executable(mbtrnpp mbtrnpp.c)
-target_include_directories(mbtrnpp PRIVATE ${NetCDF_INCLUDE_DIRS} ${libPROJ_INCLUDE_DIRS}
+target_include_directories(mbtrnpp PRIVATE ${NetCDF_INCLUDE_DIRS} ${LibPROJ_INCLUDE_DIRS}
 										${CMAKE_SOURCE_DIR}/src/mbtrnframe
                                         ${CMAKE_SOURCE_DIR}/src/mbtrnav/terrain-nav
                                         ${CMAKE_SOURCE_DIR}/src/mbtrn/r7kr

@@ -33,7 +33,6 @@ set(manpages
     mblevitus.1
     mblist.1
     mbm_arc2grd.1
-    mbm_bpr
     mbm_bpr.1
     mbm_copy.1
     mbm_fmtvel.1

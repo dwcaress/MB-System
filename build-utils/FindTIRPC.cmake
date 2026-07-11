@@ -1,8 +1,6 @@
 find_package(PkgConfig)
 pkg_check_modules(TIRPC libtirpc)
 
-set(TIRPC_VERSION ${TIRPC_VERSION})
-
 find_path(
   TIRPC_INCLUDE_DIR
   NAMES rpc/rpc.h
@@ -13,8 +11,6 @@ find_library(
   TIRPC_LIBRARY
   NAMES tirpc
   HINTS ${TIRPC_LIBRARY_DIRS} ${TIRPC_LIBDIR})
-
-set(TIRPC_VERSION ${PC_RapidJSON_VERSION})
 
 mark_as_advanced(TIRPC_FOUND TIRPC_INCLUDE_DIR TIRPC_VERSION TIRPC_LIBRARY)
 

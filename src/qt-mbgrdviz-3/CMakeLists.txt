@@ -36,3 +36,5 @@ set(CMAKE_AUTOUIC ON)
 add_executable(qt-mbgrdviz-3 main.cpp qml.qrc)
 target_link_libraries(qt-mbgrdviz-3 PRIVATE MBGui Qt6::Core Qt6::Quick
                       VTK::GUISupportQtQuick)
+
+install(TARGETS qt-mbgrdviz-3 DESTINATION ${CMAKE_INSTALL_BINDIR})
