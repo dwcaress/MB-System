@@ -35,6 +35,11 @@ add_library(
   gsf_info.c)
 target_compile_definitions(mbgsf PRIVATE USE_DEFAULT_FILE_FUNCTIONS=1)
 target_include_directories(mbgsf PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+if(WIN32)
+  # gsf.c, gsf_compress.c, gsf_dec.c, and gsf_enc.c use the Winsock
+  # byte-order functions (htonl/htons/ntohl/ntohs) via <winsock.h>
+  target_link_libraries(mbgsf PRIVATE ws2_32)
+endif()
 
 add_executable(dump_gsf dump_gsf.c gsf.h)
 target_link_libraries(dump_gsf PRIVATE mbgsf m)
