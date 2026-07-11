@@ -68,6 +68,7 @@ set(executables
     mbsslayout
     mbsvplist
     mbsvpselect
+    mbswath2las
     mbtime
     mbvoxelclean)
 
@@ -82,8 +83,14 @@ target_link_libraries(mblevitus PRIVATE mbio mbbsio mbaux mbsapi mbgsf pthread)
 add_executable(mbconfig mbconfig.cc levitus.h)
 target_link_libraries(mbconfig PRIVATE mbio mbbsio mbaux mbsapi mbgsf pthread)
 
+# Escape backslashes (e.g. from a Windows path like C:\otps) so that
+# embedding these paths in generated C string literals and compiler
+# -D macro definitions below does not corrupt the path via unintended
+# escape sequences such as \t or \n.
+string(REPLACE "\\" "\\\\" otpsDir_escaped "${otpsDir}")
+
 file(WRITE levitus.h
-  "const char *levitusfile = \"${CMAKE_INSTALL_PREFIX}/${levitusDir}/LevitusAnnual82.dat\";\nconst char *otps_location = \"${otpsDir}\";\n")
+  "const char *levitusfile = \"${CMAKE_INSTALL_PREFIX}/${levitusDir}/LevitusAnnual82.dat\";\nconst char *otps_location = \"${otpsDir_escaped}\";\n")
 
 target_link_libraries(mbsvpselect PRIVATE LibPROJ::LibPROJ)
 target_link_libraries(mbgrid PRIVATE mbaux)
@@ -91,7 +98,7 @@ target_link_libraries(mbsegypsd PRIVATE FFTW::Double)
 target_compile_definitions(
   mbconfig
   PRIVATE MBSYSTEM_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}"
-          ENV_OTPSDIR="${otpsDir}"
+          ENV_OTPSDIR="${otpsDir_escaped}"
           ENV_LEVITUSANNUAL82="${levitusDir}/LevitusAnnual82.dat")
 target_compile_definitions(
   mblevitus PRIVATE ENV_LEVITUSANNUAL82="${CMAKE_INSTALL_PREFIX}/${levitusDir}/LevitusAnnual82.dat")
