@@ -47,7 +47,8 @@
 #include "gsf.h"
 #endif
 #ifdef _WIN32
-#	include <rpc/xdr.h>
+/* Windows lacks SunRPC/TIRPC, so use the mb_xdr_win32 replacement */
+#	include <mb_xdr_win32.h>
 #endif
 
 /*--------------------------------------------------------------------*/

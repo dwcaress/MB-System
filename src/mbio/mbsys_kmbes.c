@@ -47,16 +47,17 @@
 #include "mb_status.h"
 #include "mbsys_kmbes.h"
 
-#ifdef _WIN32
+/* MinGW-w64 already supplies clock_gettime() via pthread_time.h (included
+ * from time.h), so this replacement is only needed for MSVC. */
+#if defined(_MSC_VER)
 
 /* Based on https://stackoverflow.com/questions/5404277/porting-clock-gettime-to-windows */
 /* - modified to not use static variables for thread safety */
 #include <Windows.h>
 #define CLOCK_REALTIME 0
-#if defined(_MSC_VER) && (_MSC_VER <= 1800)
+#if _MSC_VER <= 1800
 struct timespec { long tv_sec; long tv_nsec; };
 #endif
-static LARGE_INTEGER g_counts_per_sec;
 
 int clock_gettime(int dummy, struct timespec *ct) {
     LARGE_INTEGER g_counts_per_sec, count;
@@ -64,7 +65,7 @@ int clock_gettime(int dummy, struct timespec *ct) {
       return -1;
     }
     if (0 == QueryPerformanceFrequency(&g_counts_per_sec) || g_counts_per_sec.QuadPart == 0) {
-      return = -1;
+      return -1;
     }
     if (0 == QueryPerformanceCounter(&count)) {
         return -1;

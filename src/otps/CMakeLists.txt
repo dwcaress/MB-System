@@ -27,8 +27,12 @@ message("In src/otps")
 add_executable(mbotps mbotps.c otps.h)
 
 message("-- Setting otpsDir to ${otpsDir}")
+# Escape backslashes (e.g. from a Windows path like C:\otps) so the
+# generated string is a valid C string literal rather than corrupting
+# the path via unintended escape sequences such as \t or \n.
+string(REPLACE "\\" "\\\\" otpsDir_escaped "${otpsDir}")
 file(WRITE otps.h
-	"const char *otps_location = \"${otpsDir}\";")
+	"const char *otps_location = \"${otpsDir_escaped}\";")
  
 target_link_libraries(mbotps PRIVATE mbio)
 

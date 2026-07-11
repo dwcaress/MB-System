@@ -221,6 +221,9 @@ target_link_libraries(
   mbio
   PRIVATE NetCDF::NetCDF mbbitpack mbbsio mbsapi LibPROJ::LibPROJ
   PUBLIC TIRPC::TIRPC m)
+if(WIN32)
+  target_link_libraries(mbio PRIVATE mb_xdr_win32)
+endif()
 if (buildTRN)
   target_link_libraries(
     mbio

@@ -59,6 +59,12 @@ extern "C"
 
 /* OpenCV include files */
 #include "opencv2/opencv.hpp"
+/* opencv2/opencv.hpp does not pull in the camera calibration API on all
+ * OpenCV versions (e.g. OpenCV 5's aggregator header omits the "geometry"
+ * module); calib3d.hpp is the header guaranteed to provide it on both
+ * OpenCV 4.x (as the real module header) and 5.x (as a compatibility
+ * header forwarding to geometry.hpp/calib.hpp/stereo.hpp). */
+#include "opencv2/calib3d.hpp"
 
 using namespace std;
 using namespace cv;

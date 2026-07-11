@@ -5,7 +5,7 @@
 #    David W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, California, USA
-#    Dale N. Chayes 
+#    Dale N. Chayes
 #      Center for Coastal and Ocean Mapping
 #      University of New Hampshire
 #      Durham, New Hampshire, USA
@@ -13,7 +13,7 @@
 #      MARUM
 #      University of Bremen
 #      Bremen Germany
-#      
+#
 #    MB-System was created by Caress and Chayes in 1992 at the
 #      Lamont-Doherty Earth Observatory
 #      Columbia University
@@ -24,13 +24,23 @@
 
 message("In src/photo")
 
-set(executables mbphotomosaic mbgetphotocorrection mbphotogrammetry
-                  mbimagecorrect mbtiff2png mbimagelist)
-set(scripts mbm_makeimagelist)
+find_package(OpenCV REQUIRED)
 
-find_package(OpenCV 4 REQUIRED COMPONENTS core highgui calib3d imgproc)
+set(executables
+    mbphotomosaic
+    mbgetphotocorrection
+    mbphotogrammetry
+    mbimagecorrect
+    mbtiff2png
+    mbimagelist)
+
+foreach(executable ${executables})
+  add_executable(${executable} ${executable}.cc)
+  target_compile_features(${executable} PRIVATE cxx_std_17)
+  target_link_libraries(${executable} PRIVATE mbio mbaux pthread OpenCV::OpenCV)
+endforeach()
+
+set(scripts mbm_makeimagelist)
 
 install(TARGETS ${executables} DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(PROGRAMS ${scripts} DESTINATION ${CMAKE_INSTALL_BINDIR})
-
- 

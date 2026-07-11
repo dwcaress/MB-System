@@ -35,7 +35,10 @@
 #include <exception>
 #include <typeinfo>
 #include <stdexcept>
+#include <cstdlib>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 #include <limits.h>
 #include <sys/stat.h>
 #include <ctime>
@@ -107,6 +110,12 @@ int main(int argc, char* argv[]) {
     // Get absolute path
     char abs_path[PATH_MAX];
     std::string abs_output_file = output_file;
+#ifdef _WIN32
+    // _fullpath does not require the target file to already exist.
+    if (_fullpath(abs_path, output_file.c_str(), PATH_MAX) != nullptr) {
+      abs_output_file = abs_path;
+    }
+#else
     if (realpath(output_file.c_str(), abs_path) != nullptr) {
       abs_output_file = abs_path;
     } else {
@@ -118,6 +127,7 @@ int main(int argc, char* argv[]) {
         }
       }
     }
+#endif
 
     model::write_gltf(geometry, options);
     
