@@ -1660,6 +1660,59 @@ int mb_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *tr
   return (status);
 }
 /*--------------------------------------------------------------------*/
+int mb_sonarsettings(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *frequency,
+                     double *sample_rate, double *tx_pulse_width, double *power_selection, double *gain_selection,
+                     double *absorption, double *spreading, double *sound_velocity, double *beamwidth_tx,
+                     double *beamwidth_rx, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+  }
+
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+  /* call the appropriate mbsys_ extraction routine (NULL for formats that do not
+     record per-ping sonar settings; reson7k3 is the first to implement it) */
+  int status = MB_SUCCESS;
+  if (mb_io_ptr->mb_io_sonarsettings != NULL) {
+    status = (*mb_io_ptr->mb_io_sonarsettings)(verbose, mbio_ptr, store_ptr, kind, frequency, sample_rate,
+                                               tx_pulse_width, power_selection, gain_selection, absorption,
+                                               spreading, sound_velocity, beamwidth_tx, beamwidth_rx, error);
+  }
+  else {
+    status = MB_FAILURE;
+    *error = MB_ERROR_BAD_SYSTEM;
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       kind:       %d\n", *kind);
+  }
+  if (verbose >= 2 && *error == MB_ERROR_NO_ERROR) {
+    fprintf(stderr, "dbg2       frequency:       %f\n", *frequency);
+    fprintf(stderr, "dbg2       sample_rate:     %f\n", *sample_rate);
+    fprintf(stderr, "dbg2       tx_pulse_width:  %f\n", *tx_pulse_width);
+    fprintf(stderr, "dbg2       power_selection: %f\n", *power_selection);
+    fprintf(stderr, "dbg2       gain_selection:  %f\n", *gain_selection);
+    fprintf(stderr, "dbg2       absorption:      %f\n", *absorption);
+    fprintf(stderr, "dbg2       spreading:       %f\n", *spreading);
+    fprintf(stderr, "dbg2       sound_velocity:  %f\n", *sound_velocity);
+    fprintf(stderr, "dbg2       beamwidth_tx:    %f\n", *beamwidth_tx);
+    fprintf(stderr, "dbg2       beamwidth_rx:    %f\n", *beamwidth_rx);
+  }
+  if (verbose >= 2) {
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
   int mb_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error) {
   if (verbose >= 2) {

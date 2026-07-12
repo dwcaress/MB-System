@@ -794,6 +794,10 @@ struct mb_io_struct {
   int (*mb_io_pulses)(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *pulses, int *error);
   int (*mb_io_gains)(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
                      double *receive_gain, int *error);
+  int (*mb_io_sonarsettings)(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *frequency,
+                     double *sample_rate, double *tx_pulse_width, double *power_selection, double *gain_selection,
+                     double *absorption, double *spreading, double *sound_velocity, double *beamwidth_tx,
+                     double *beamwidth_rx, int *error);
   int (*mb_io_extract_rawssdimensions)(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *sample_interval,
                                        int *num_samples_port, int *num_samples_stbd, int *error);
   int (*mb_io_extract_rawss)(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *sidescan_type,

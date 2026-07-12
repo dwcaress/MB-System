@@ -22386,6 +22386,7 @@ int mbr_register_reson7k3(int verbose, void *mbio_ptr, int *error) {
   mb_io_ptr->mb_io_ttimes = &mbsys_reson7k3_ttimes;
   mb_io_ptr->mb_io_detects = &mbsys_reson7k3_detects;
   mb_io_ptr->mb_io_gains = &mbsys_reson7k3_gains;
+  mb_io_ptr->mb_io_sonarsettings = &mbsys_reson7k3_sonarsettings;
   mb_io_ptr->mb_io_copyrecord = &mbsys_reson7k3_copy;
   mb_io_ptr->mb_io_makess = &mbsys_reson7k3_makess;
   mb_io_ptr->mb_io_extract_rawss = NULL;
