@@ -342,7 +342,7 @@ int TopoDataReader::RequestData(vtkInformation* request,
 
 
 void TopoDataReader::SetFileName(const char *fileName) {
-  fprintf(stderr, "In TopoDataReader::SetFileName()\n");
+  std::cerr << "In TopoDataReader::SetFileName()" << fileName << "\n";
 
   SetErrorCode(0);
   
