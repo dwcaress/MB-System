@@ -174,7 +174,7 @@ private:
   vtkNew<vtkExtractPolyDataGeometry> clipFilter_;
   vtkNew<vtkBox>                     clipBox_;
 
-  // ── Point locator for pick → point-ID mapping ─────────────────────────────
+  // ── Point locator for quick pick → point-ID mapping ─────────────────────────────
   vtkNew<vtkStaticPointLocator>      pointLocator_;
 
   // ── Two-entry quality lookup table ────────────────────────────────────────
