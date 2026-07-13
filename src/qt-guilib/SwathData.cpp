@@ -57,27 +57,14 @@ bool SwathData::readDatafile(char *swathFile) {
   int verbose = 1;
   int error = 0;
 
-  // Verify that accompanying .inf file exists;
-  // append extension .inf and check...
-  std::cerr << "readDataFile() " << swathFile << "\n";
-  char *infFile;
-  if (asprintf(&infFile, "%s.inf", swathFile) == -1) {
-    fprintf(stderr, "asprintf() failed in SwathData::readDatafile()\n");
+  // Check that file is accessible
+  if (access(swathFile, R_OK) == -1) {
+    std::cerr << "SwathData::readDatafile(): cannot access" << swathFile << "\n";
     return false;
   }
 
-  // Check that inf file exists
-  std::cerr << "try to access infFile: " << infFile << "\n";
-  if (access(infFile, F_OK) != 0) {
-    // File does not exist
-    std::cerr << "File " << infFile << " not found\n";
-    /// free((void *)infFile);
-    /// return false;
-  }
-
-  free((void *)infFile);
-
-  // Call mbeditviz functions to read data from file
+  // swathfile is either an individual swath file or a datalist (file extension
+  // ".mb-1"). 
   int sonarFormat = 0;
   if (mb_get_format(verbose, (char *)swathFile, NULL, &sonarFormat, &error) !=
       MB_SUCCESS) {
@@ -85,19 +72,70 @@ bool SwathData::readDatafile(char *swathFile) {
     return false;
   }
 
+  // Determine if input swathFile is a datalist
+  bool inputIsDataList = false;
+  if (sonarFormat == -1) {
+    inputIsDataList = true;
+  }
+  
+  // Call mbeditviz functions to load data from swath file(s)
+  // Note mbeditviz.h defines global variables prefixed with mbev_*
+  
   // Get list of relevant files into global C structure
-  if (mbeditviz_import_file((char *)swathFile, sonarFormat) != MB_SUCCESS) {
-    std::cerr << "Couldn't import data from " << swathFile << std::endl;
-    return false;
+  if (!inputIsDataList) {
+    // Input of single swath file (not datalist) specified
+    if (mbeditviz_import_file((char *)swathFile, sonarFormat) != MB_SUCCESS) {
+      std::cerr << "Couldn't import data from " << swathFile << std::endl;
+      return false;
+    }
+    // Read swath data from first file into global structures
+    // Just reading file, so no need to lock
+    if (mbeditviz_load_file(0, false) != MB_SUCCESS) {
+      std::cerr << "Couldn't load data from " << swathFile << std::endl;
+      return false;
+    }
   }
-
-  // Read swath data from first file into global structures
-  // Just reading file, so no need to lock
-  if (mbeditviz_load_file(0, false) != MB_SUCCESS) {
-    std::cerr << "Couldn't load data from " << swathFile << std::endl;
-    return false;
+  else {
+    // Import each file in the datalist
+    // NOTE: all files get imported at this point
+    bool done = false;
+    int status;
+    void *datalist;
+    int fileStatus;
+    int rawFormat;
+    double weight;
+    char rawFile[MB_PATH_MAXLINE];
+    char processedFile[MB_PATH_MAXLINE];
+    char dfile[MB_PATH_MAXLINE];    
+    int nFile = 0;
+    
+    if ((status = mb_datalist_open(mbev_verbose, &datalist, swathFile,
+				   MB_DATALIST_LOOK_NO,
+				   &mbev_error)) == MB_SUCCESS) {
+      while (!done) {
+	if (mb_datalist_read2(mbev_verbose, datalist, &fileStatus,
+			      rawFile, processedFile, dfile,
+			      &rawFormat, &weight, &mbev_error) == MB_SUCCESS) {
+	
+	  mbev_status = mbeditviz_import_file(rawFile, rawFormat);
+	  if (mbeditviz_load_file(nFile++, false) != MB_SUCCESS) {
+	    std::cerr << "Couldn't load data from " << swathFile << std::endl;
+	    return false;
+	  }	  
+	}
+	else {
+	  // Done reading datalist
+	  mbev_status = mb_datalist_close(mbev_verbose, &datalist, &mbev_error);
+	  done = true;
+	}
+      }
+    }
+    else {
+      std::cerr << "Error " << status << " from mb_dataList_open()\n";
+      return false;
+    }
   }
-
+    
   // Need to unlock file when done reading
   std::cout << "Unlock swath file" << std::endl;
   if (!unlockSwath((char *)swathFile)) {
@@ -108,20 +146,19 @@ bool SwathData::readDatafile(char *swathFile) {
   // Get bounds of loaded swath data
   mbeditviz_get_grid_bounds();
 
-  // Release previously loaded sounding memory
+  // Release any previously loaded sounding memory
   mbeditviz_mb3dsoundings_dismiss();
 
   // Prepare grid to contain loaded swath data
   mbeditviz_setup_grid();
 
-
-  // Allocate memory and load individual swath soundings
+  // Allocate memory and load individual imported swath soundings
   // NOTE: mbeditviz_project_soundings() must be called before reading
   // navlonx/navlaty, as it fills those fields with the projected (UTM)
   // coordinates.  Before this call they are zero/uninitialised.
   mbeditviz_project_soundings();
 
-  // Load sounding data into grid
+  // Load imported sounding data into grid
   mbeditviz_make_grid();
 
   // Save pointer to grid struct
@@ -130,10 +167,14 @@ bool SwathData::readDatafile(char *swathFile) {
   // Point to swath data (still valid after mbeditviz calls above)
   mbev_file_struct* swathData = &mbev_files[0];
 
-  // Load navigation track points now that projection has been applied.
-  // getXYZ() uses boundsutm[0] (easting) → VTK x and boundsutm[2] (northing) → VTK y,
-  // so navlonx (easting) → VTK x and navlaty (northing) → VTK y — no swap needed.
-  // sensordepth is positive meters below surface in MB-System; negate for VTK z-up.
+  // Load navigation track points for each imported swath file now that
+  // projection has been applied.
+  // getXYZ() uses
+  // boundsutm[0] (easting) → VTK x and boundsutm[2] (northing) → VTK y,
+  // so navlonx (easting) → VTK x and
+  // navlaty (northing) → VTK y — no swap needed.
+  // sensordepth is positive meters below surface in MB-System;
+  // negate for VTK z-up.
   navTrackPoints_->Reset();
   navTrackPoints_->SetNumberOfPoints(swathData->num_pings);
   for (vtkIdType i = 0; i < swathData->num_pings; i++) {
