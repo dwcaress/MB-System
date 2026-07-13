@@ -83,7 +83,7 @@ namespace mb_system {
     /// Unlock specified swath file; return true on success, else return false
     bool unlockSwath(char *swathFile);
 
-    /// Swath data read from file, old mb-system struct
+    /// Swath data read from file(s), old mb-system struct
     struct mbev_grid_struct *gridData_;
 
     char *appName_;
