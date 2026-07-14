@@ -164,9 +164,6 @@ bool SwathData::readDatafile(char *swathFile) {
   // Save pointer to grid struct
   gridData_ = &mbev_grid;
 
-  // Point to swath data (still valid after mbeditviz calls above)
-  mbev_file_struct* swathData = &mbev_files[0];
-
   // Load navigation track points for each imported swath file now that
   // projection has been applied.
   // getXYZ() uses
@@ -175,16 +172,33 @@ bool SwathData::readDatafile(char *swathFile) {
   // navlaty (northing) → VTK y — no swap needed.
   // sensordepth is positive meters below surface in MB-System;
   // negate for VTK z-up.
-  navTrackPoints_->Reset();
-  navTrackPoints_->SetNumberOfPoints(swathData->num_pings);
-  for (vtkIdType i = 0; i < swathData->num_pings; i++) {
-    navTrackPoints_->SetPoint(i,
-                              swathData->pings[i].navlonx,  // easting  → VTK x
-                              swathData->pings[i].navlaty,  // northing → VTK y
-			      // negate: positive depth → negative VTK z   
-                              -swathData->pings[i].sensordepth); 
-  }
+  // Point to swath data (still valid after mbeditviz calls above)
+  mbev_file_struct* swathData = mbev_files;
 
+  navTrackPoints_->Reset();
+  int nPoints = 0;
+  std::cerr << "mbev_num_file=" << mbev_num_files << "\n";
+  // Compute total number of points in all swath nav tracks
+  for (int nFile = 0; nFile < mbev_num_files; nFile++) {
+    nPoints += swathData[nFile].num_pings;
+    std::cerr << "nPoints=" << nPoints << "\n";
+  }
+  navTrackPoints_->SetNumberOfPoints(nPoints);
+
+  // Add nav points from all swath files
+  vtkIdType ind = 0;
+  for (int nFile = 0; nFile < mbev_num_files; nFile++) {
+    // Add nav points from this swath file
+    for (vtkIdType i = 0; i < swathData[nFile].num_pings; i++) {
+      navTrackPoints_->SetPoint(ind++,
+				// easting  → VTK x				
+				swathData[nFile].pings[i].navlonx,
+				// northing → VTK y				
+				swathData[nFile].pings[i].navlaty,
+				// negate: positive depth → negative VTK z   
+				-swathData[nFile].pings[i].sensordepth); 
+    }
+  }
   // Set grid zmin and zmax, since the above mbeditviz functions do not
   int nPts = gridData_->n_rows * gridData_->n_columns;
   gridData_->min = std::numeric_limits<float>::max();
