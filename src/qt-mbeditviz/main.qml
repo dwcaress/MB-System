@@ -14,6 +14,7 @@ Window {
     title: "mbeditviz"
 
     property list<vector2d> myProfile
+    property string toolBarEdge: "top"   // "top" | "bottom" | "left" | "right"
 
     Component.onCompleted: {
         colormapMenu.currentCmap = 'Haxby'
@@ -52,6 +53,13 @@ Window {
         Menu {
             title: qsTr('View')
 
+            Action {
+                text: qsTr('Toolbar')
+                checkable: true
+                checked: toolBar.visible
+                onTriggered: toolBar.visible = !toolBar.visible
+            }
+            MenuSeparator {}
             Action {
                 text: qsTr('2D preferences')
                 onTriggered: settings2d.show()
@@ -229,14 +237,162 @@ Window {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    //  Toolbar dock-position context menu (right-click on toolbar)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    Menu {
+        id: toolBarDockMenu
+        MenuItem { text: qsTr("Dock to top");    onTriggered: mainWindow.toolBarEdge = "top"    }
+        MenuItem { text: qsTr("Dock to bottom"); onTriggered: mainWindow.toolBarEdge = "bottom" }
+        MenuItem { text: qsTr("Dock to left");   onTriggered: mainWindow.toolBarEdge = "left"   }
+        MenuItem { text: qsTr("Dock to right");  onTriggered: mainWindow.toolBarEdge = "right"  }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    //  Toolbar-visibility toggle — floats at top-right, always visible
+    // ─────────────────────────────────────────────────────────────────────────
+
+    ToolButton {
+        id: toolBarToggle
+        z: 2                              // above menu bar and toolbar
+        anchors.top:   parent.top
+        anchors.right: parent.right
+        anchors.topMargin:   2
+        anchors.rightMargin: 4
+        text: "☰"
+        checkable: true
+        checked: toolBar.visible
+        onClicked: toolBar.visible = !toolBar.visible
+        ToolTip.visible: hovered
+        ToolTip.text: toolBar.visible ? qsTr("Hide toolbar") : qsTr("Show toolbar")
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    //  Mouse-mode toolbar (dockable — right-click to move to any edge)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    ToolBar {
+        id: toolBar
+
+        // ── position & size ──────────────────────────────────────────────────
+        readonly property bool vertical:
+            mainWindow.toolBarEdge === "left" || mainWindow.toolBarEdge === "right"
+        readonly property real menuBottom: menuBar.y + menuBar.height
+
+        x:      mainWindow.toolBarEdge === "right" ? parent.width - width : 0
+        y:      mainWindow.toolBarEdge === "bottom" ? parent.height - height : menuBottom
+        // For vertical docking use a fixed width; a plain-child Flow does NOT
+        // propagate its implicitWidth to the ToolBar (the internal contentItem
+        // always reports 0), so implicitWidth-based sizing would collapse the bar.
+        width:  vertical ? 100 : parent.width
+        height: vertical ? (parent.height - menuBottom) : implicitHeight
+
+        // ── button group ─────────────────────────────────────────────────────
+        ButtonGroup { id: mouseToolGroup }
+
+        // ── button flow ──────────────────────────────────────────────────────
+        // Plain child (not contentItem:) so Qt Controls does not interfere with
+        // the Flow's layout bootstrap.  Declared before the MouseArea so the
+        // MouseArea sits on top in z-order and can catch right-clicks.
+        Flow {
+            anchors.fill: parent
+            anchors.margins: 2
+            flow:    toolBar.vertical ? Flow.TopToBottom : Flow.LeftToRight
+            spacing: 2
+
+            Repeater {
+                model: SharedConstants.mouseModes
+
+                ToolButton {
+                    id: modeBtn
+                    text: modelData.name
+                    checkable: true
+                    checked: mouseModeMenu.currentMode === modelData.name
+                    enabled: mouseModeMenu.disabledModes.indexOf(modelData.name) === -1
+                    ButtonGroup.group: mouseToolGroup
+
+                    // Vertical toolbar: fill the toolbar width so the label can wrap.
+                    // Horizontal toolbar: size naturally (one line, no wrap needed).
+                    width: toolBar.vertical ? (toolBar.width - 4) : implicitWidth
+
+                    // ── label ──────────────────────────────────────────────────
+                    contentItem: Label {
+                        text:                modeBtn.text
+                        font:                modeBtn.font
+                        wrapMode:            Text.WordWrap
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment:   Text.AlignVCenter
+                        // White text on the blue checked background; dark otherwise.
+                        color:   modeBtn.checked ? "#ffffff" : "#1a1a1a"
+                        opacity: modeBtn.enabled ? 1.0 : 0.4
+                    }
+
+                    // ── background with outline + gradient shading ─────────────
+                    background: Rectangle {
+                        radius: 3
+                        border.width: 1
+
+                        // Border darkens on interaction; blue tint when checked.
+                        border.color: !modeBtn.enabled ? "#cccccc"
+                                    : modeBtn.checked  ? "#1a4a89"
+                                    : modeBtn.pressed  ? "#666666"
+                                    : modeBtn.hovered  ? "#888888"
+                                    :                    "#aaaaaa"
+
+                        gradient: Gradient {
+                            // Top stop — lighter edge gives the "lit from above" look.
+                            GradientStop {
+                                position: 0.0
+                                color: !modeBtn.enabled ? "#eeeeee"
+                                     : modeBtn.checked  ? "#5090d9"
+                                     : modeBtn.pressed  ? "#c0c0c0"
+                                     : modeBtn.hovered  ? "#fefefe"
+                                     :                    "#f6f6f6"
+                            }
+                            // Bottom stop — darker edge; reversed for pressed (sunken look).
+                            GradientStop {
+                                position: 1.0
+                                color: !modeBtn.enabled ? "#e0e0e0"
+                                     : modeBtn.checked  ? "#1a5a99"
+                                     : modeBtn.pressed  ? "#e0e0e0"
+                                     : modeBtn.hovered  ? "#d4d4d4"
+                                     :                    "#dcdcdc"
+                            }
+                        }
+                    }
+
+                    ToolTip.visible: hovered
+                    ToolTip.text: modelData.toolTip
+
+                    onClicked: {
+                        mouseModeMenu.currentMode = modelData.name
+                        surfaceView.setMouseMode(modelData.name)
+                    }
+                }
+            }
+        }
+
+        // ── right-click to reposition ────────────────────────────────────────
+        // Declared last → highest z → catches right-clicks on the background.
+        // acceptedButtons: RightButton means left-clicks are never consumed here;
+        // hoverEnabled defaults to false so hover propagates to buttons below.
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.RightButton
+            onClicked: toolBarDockMenu.popup()
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     //  Main surface view
     // ─────────────────────────────────────────────────────────────────────────
 
     ColumnLayout {
-        anchors.top: menuBar.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
+        // Respond to all four possible dock edges, plus the hidden state.
+        anchors.top:    (toolBar.visible && mainWindow.toolBarEdge === "top")    ? toolBar.bottom : menuBar.bottom
+        anchors.bottom: (toolBar.visible && mainWindow.toolBarEdge === "bottom") ? toolBar.top    : parent.bottom
+        anchors.left:   (toolBar.visible && mainWindow.toolBarEdge === "left")   ? toolBar.right  : parent.left
+        anchors.right:  (toolBar.visible && mainWindow.toolBarEdge === "right")  ? toolBar.left   : parent.right
         spacing: 0
 
         Label {
