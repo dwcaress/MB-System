@@ -1450,7 +1450,9 @@ int main(int argc, char **argv) {
 	/* if bounds not set get bounds of input data */
 	if (!gbndset) {
 		int formatread = -1;
+		int formatmakeinf = formatread;
 		struct mb_info_struct mb_info;
+		mb_make_info_datalist(verbose, false, filelist, &formatmakeinf, &error);
 		status = mb_get_info_datalist(verbose, filelist, &formatread, &mb_info, lonflip, &error);
 
 		gbnd[0] = mb_info.lon_min;

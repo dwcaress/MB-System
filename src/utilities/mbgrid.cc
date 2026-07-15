@@ -790,6 +790,8 @@ int main(int argc, char **argv) {
   if (!gbndset || (!set_spacing && !set_dimensions)) {
     struct mb_info_struct mb_info;
     int formatread = -1;
+    int formatmakeinf = formatread;
+    mb_make_info_datalist(verbose, false, filelist, &formatmakeinf, &error);
     status = mb_get_info_datalist(verbose, filelist, &formatread, &mb_info, lonflip, &error);
 
     if (!gbndset) {

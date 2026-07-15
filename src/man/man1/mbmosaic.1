@@ -42,7 +42,11 @@ either the dimensions (\fB\-D\fP) or node spacing \fB\-E\fP of the grid,
 If the bounds and grid dimensions (or spacing) are not specified, the
 program will select the region encompassing all of the data in the
 input files and a grid spacing equivalent to 0.02 times the maximum
-sonar altitude. If the bounds and grid dimensions (or spacing) are not
+sonar altitude. This automatic bounds calculation reads each input
+file's ".inf" file (see below); any ".inf" (and ".fbt"/".fnv") file that
+is missing or older than its swath data file is generated automatically
+first, the same as running \fBmbdatalist\fP(1) with its \fB\-N\fP option.
+If the bounds and grid dimensions (or spacing) are not
 specified, the program will select the region encompassing all of the
 data in the input files and a grid spacing equivalent to 0.02 times the maximum
 sonar altitude. The automatically calculated grid bounds will exactly
