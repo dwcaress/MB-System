@@ -31,7 +31,7 @@ Window {
         Menu {
             title: qsTr('File')
             Action {
-                text: qsTr('Open GMT grid or swath...')
+                text: qsTr('Open GMT grid, swath or datalist...')
                 onTriggered: datafileDialog.open()
             }
             Action {
@@ -214,7 +214,13 @@ Window {
                     }
 		}
             }
-	    
+	    Action {
+		text: qsTr('Build swath grid')
+		onTriggered: {
+		    console.log('Show grid parameters')
+		    gridParamterDialog.show()
+		}
+	    }
 	    Action {
 		text: qsTr('Options')
 	    }
@@ -374,6 +380,29 @@ Window {
     }
 
     Window {
+	id: gridParamterDialog
+	title: qsTr('Grid parameters')
+	visible: false
+        width:       gridParameters.implicitWidth
+        height:      gridParameters.implicitHeight
+        minimumWidth:  gridParameters.implicitWidth
+        minimumHeight: gridParameters.implicitHeight
+
+
+	   GridParameters {
+               id: gridParameters
+               anchors.fill: parent
+               onAccepted: {
+		   // read gridParameters.cellSize, .algorithm,
+		   // .interpScale, ._selected
+		   // and apply them, then close
+		   gridParameterDialog.close()
+               }
+               onRejected: gridParameterDialog.close()
+	   }
+    }
+    
+    Window {
         id: settings3dDialog
         title: qsTr('3D preferences')
         visible: false
@@ -431,7 +460,7 @@ Window {
     FileDialog {
         id: datafileDialog
         title: qsTr('Open GMT grid or swath file')
-        nameFilters: ['Swath files (*.grd *.mb[0-9][0-9])']
+        nameFilters: ['Swath files (*.grd *.mb-1 *.mb[0-9][0-9])']
         onAccepted: {
             surfaceView.loadDatafile(selectedFile)
             surfaceView.forceActiveFocus()
