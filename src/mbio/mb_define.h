@@ -404,6 +404,7 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], bool *
 bool mb_should_make_fbt(int verbose, int format);
 bool mb_should_make_fnv(int verbose, int format);
 int mb_make_info(int verbose, bool force, char *file, int format, int *error);
+int mb_make_info_datalist(int verbose, bool force, char *read_file, int *format, int *error);
 int mb_get_fbt(int verbose, char *file, int *format, int *error);
 int mb_get_fnv(int verbose, char *file, int *format, int *error);
 int mb_get_ffa(int verbose, char *file, int *format, int *error);

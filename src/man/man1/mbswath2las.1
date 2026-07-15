@@ -1,0 +1,357 @@
+.TH mbswath2las 1 "11 July 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbswath2las\fP \- exports swath bathymetry soundings to LAS 1.4 point cloud files.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbswath2las\fP
+.br
+[
+.br
+\fB\-\-use-amplitude\fP {\fB\-A\fP}
+.br
+\fB\-\-begin-time\fP=\fIyr/mo/da/hr/mn/sc\fP {\fB\-B\fP\fIyr/mo/da/hr/mn/sc\fP}
+.br
+\fB\-\-end-time\fP=\fIyr/mo/da/hr/mn/sc\fP {\fB\-E\fP\fIyr/mo/da/hr/mn/sc\fP}
+.br
+\fB\-\-format\fP=\fIformat\fP {\fB\-F\fP\fIformat\fP}
+.br
+\fB\-\-help\fP {\fB\-H\fP}
+.br
+\fB\-\-input\fP=\fIfile\fP {\fB\-I\fP\fIfile\fP}
+.br
+\fB\-\-projection\fP=\fIprojection\fP {\fB\-J\fP\fIprojection\fP}
+.br
+\fB\-\-lonflip\fP=\fIlonflip\fP {\fB\-L\fP\fIlonflip\fP}
+.br
+\fB\-\-output\fP=\fIfile\fP {\fB\-O\fP\fIfile\fP}
+.br
+\fB\-\-write-prj\fP {\fB\-P\fP}
+.br
+\fB\-\-bounds\fP=\fIwest/east/south/north\fP {\fB\-R\fP\fIwest/east/south/north\fP}
+.br
+\fB\-\-speed-minimum\fP=\fIspeed\fP {\fB\-S\fP\fIspeed\fP}
+.br
+\fB\-\-time-gap\fP=\fItimegap\fP {\fB\-T\fP\fItimegap\fP}
+.br
+\fB\-\-verbose\fP {\fB\-V\fP}
+.br
+]
+
+.SH DESCRIPTION
+\fBmbswath2las\fP reads swath bathymetry data in any format supported by
+\fBMBIO\fP and writes the individual soundings as points in LAS format
+files, one point per valid (unflagged) beam. This allows swath bathymetry
+to be loaded directly into LAS/LIDAR-oriented point cloud viewers, GIS
+packages, and processing pipelines (e.g. CloudCompare, QGIS, PDAL) that do
+not otherwise read \fBMBIO\fP formats.
+
+For each beam, the sounding position is computed from the ship navigation,
+heading, and the beam's acrosstrack/alongtrack offsets, following the same
+geometry used by \fBmblist\fP. By default the position is written as
+geographic longitude/latitude in decimal degrees (WGS84). If the \fB\-J\fP
+option is used to specify a projected coordinate system, the position is
+instead written as easting/northing in meters. In both cases the LAS
+elevation (Z) value is the negative of the sounding depth, since LAS
+elevations are positive up while \fBMBIO\fP bathymetry values are positive
+down. Beams flagged bad or otherwise unusable are skipped and do not
+appear in the output.
+
+By default \fBmbswath2las\fP reads each input swath file's faster ".fbt"
+derivative when one is available, since this program otherwise only needs
+bathymetry; ".fbt" files do not carry amplitude, so LAS intensity is left
+0 unless \fB\-\-use-amplitude\fP is given, in which case the original
+swath file is read instead (more slowly) so that real per-beam amplitude
+is available. When populated, the intensity value is the input data's
+per-beam sonar amplitude linearly rescaled from the minimum/maximum
+amplitude found across the entire input (from the ".inf" files, the same
+source used for \fB\-\-projection\fP's automatic bounds, see below) into
+the unsigned 16-bit (0-65535) range required by the LAS format; this
+preserves relative amplitude regardless of whether the input format
+reports amplitude as signed dB (as Kongsberg and other sonars commonly
+do) or as raw positive counts, but it is not a radiometrically calibrated
+reflectivity value. The LAS point's GPS time field is set to the
+sounding's Unix epoch timestamp (see \fBBUGS\fP below).
+
+\fBmbswath2las\fP automatically generates any missing or out-of-date
+".inf", ".fbt", and ".fnv" ancillary files for its input (the same files
+\fBmbdatalist\fP(1)'s \fB\-N\fP option produces), both to support the
+".fbt" read path above and to determine survey bounds for automatic
+projection selection (see \fB\-\-projection\fP below).
+
+Some GIS software (notably ArcGIS) looks for the coordinate system of a
+point cloud or other geospatial file in an accompanying ".prj" sidecar
+file rather than (or in addition to) reading it from the file itself. If
+the \fB\-\-write-prj\fP option is given, \fBmbswath2las\fP writes such a
+".prj" file next to each LAS output file, containing the same coordinate
+system as the LAS file's own WKT VLR (see \fBLAS OUTPUT FORMAT\fP below),
+but in the older, Esri-specific WKT1 dialect that ".prj" files
+conventionally use rather than the WKT2 used in the VLR.
+
+\fBmbswath2las\fP operates on a single input swath file or on a datalist
+referencing many swath files (see \fBmbdatalist\fP(1)). By default, a
+separate LAS output file is created for each input swath file, named by
+appending ".las" to the input file name. If the \fB\-O\fP option is used
+to specify an output file name, all of the soundings from every input file
+are instead collected into that single LAS file.
+
+\fBmbswath2las\fP writes standard LAS 1.4 files (public header block, an
+"OGC Coordinate System WKT" variable length record describing the
+sounding coordinate reference system, and point data record format 1)
+using its own internal writer; no third-party LAS/LIDAR library (e.g.
+libLAS, LASzip, PDAL) is required to build or run this program, though
+the coordinate system description is obtained from the \fBPROJ\fP
+library. See \fBLAS OUTPUT FORMAT\fP below for details.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian dos Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-\-use-amplitude {\fB\-A\fP}
+.br
+Populates the LAS intensity field from each sounding's per-beam sonar
+amplitude. This forces \fBmbswath2las\fP to read the original swath
+file(s) rather than substituting the faster ".fbt" derivative, since
+".fbt" files do not carry amplitude. Default: intensity is left 0, and
+the ".fbt" file is used in place of the original swath file when one is
+available.
+.TP
+.B \-\-begin-time=\fIyr/mo/da/hr/mn/sc\fP {\fB\-B\fP\fIyr/mo/da/hr/mn/sc\fP}
+.br
+This option sets the starting time for data allowed in the input data.
+The \fB\-E\fP option sets the ending time for data. If the
+starting time is before the ending time, then any data
+with a time stamp before the starting time or after the
+ending time is ignored. Default: \fIyr/mo/da/hr/mn/sc\fP =
+1962/2/21/10/30/0, i.e. of no effect.
+.TP
+.B \-\-end-time=\fIyr/mo/da/hr/mn/sc\fP {\fB\-E\fP\fIyr/mo/da/hr/mn/sc\fP}
+.br
+This option sets the ending time for data allowed in the input data.
+The \fB\-\-begin-time\fP option sets the starting time for data. Default:
+\fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0, i.e. of no effect.
+.TP
+.B \-\-format=\fIformat\fP {\fB\-F\fP\fIformat\fP}
+.br
+Sets the data format of the input swath file(s). If \fIformat\fP < 0, then
+the file specified with the \fB\-I\fP option is a datalist referencing
+multiple swath data files and their formats (see \fBmbdatalist\fP(1)).
+Default: the format is guessed from the input file's suffix, as set by
+\fBmbdefaults\fP(1).
+.TP
+.B \-\-help {\fB\-H\fP}
+This "help" flag causes the program to print out a description
+of its operation and then exit immediately.
+.TP
+.B \-\-input=\fIfile\fP {\fB\-I\fP\fIfile\fP}
+.br
+Sets the input file path. If \fIformat\fP > 0, \fIfile\fP is a single swath
+data file. If \fIformat\fP < 0, \fIfile\fP is an ASCII datalist naming one
+or more swath data files, each followed by its \fBMBIO\fP format identifier,
+e.g.:
+.nf
+ 	datafile1 88
+ 	datafile2 88
+.fi
+Default: \fIfile\fP = "datalist.mb\-1".
+.TP
+.B \-\-projection=\fIprojection\fP {\fB\-J\fP\fIprojection\fP}
+.br
+Specifies a projected coordinate system (PCS) to be used for the output
+sounding positions in place of the default geographic (longitude/latitude,
+WGS84) coordinates. When a PCS is specified, positions are written to the
+LAS file as eastings and northings in meters. The \fIprojection\fP argument
+may be a PCS identifier as accepted by \fBmblist\fP(1) and \fBmbgrid\fP(1);
+simply \fBU\fP (or \fBUTM\fP) to use Universal Transverse Mercator in
+whatever zone contains the center of the input data's geographic bounds;
+simply \fBL\fP (or \fBLTM\fP) for a local-origin Transverse Mercator
+projection centered on that same bounds center, with unit scale factor and
+zero false easting/northing (so that north lies along the LAS Y axis);
+\fBLTM\fP\fIlon0\fP/\fIlat0\fP for a local-origin Transverse Mercator
+projection centered at an explicit \fIlon0\fP/\fIlat0\fP instead; or any
+coordinate system string understood directly by the \fBPROJ\fP library
+(e.g. an EPSG code, or a full \fB+proj=\fP... definition). The bare
+\fBU\fP/\fBUTM\fP and \fBL\fP/\fBLTM\fP forms determine the input data's
+geographic bounds the same way \fBmbgrid\fP(1) and \fBmbmosaic\fP(1) do:
+from each input file's ".inf" sidecar (generating it first if missing or
+out of date, see above), not by reading any sounding data. Whichever
+coordinate system is selected is recorded in the output LAS file's "OGC
+Coordinate System WKT" variable length record (see \fBLAS OUTPUT FORMAT\fP
+below), so downstream software can recover it automatically.
+.TP
+.B \-\-lonflip=\fIlonflip\fP {\fB\-L\fP\fIlonflip\fP}
+.br
+Sets the range of the longitude values used.
+If \fIlonflip\fP=\-1 then the longitude values will be in
+the range from \-360 to 0 degrees. If \fIlonflip\fP=0
+then the longitude values will be in
+the range from \-180 to 180 degrees. If \fIlonflip\fP=1
+then the longitude values will be in
+the range from 0 to 360 degrees.
+Default: \fIlonflip\fP is set by \fBmbdefaults\fP(1).
+.TP
+.B \-\-output=\fIfile\fP {\fB\-O\fP\fIfile\fP}
+.br
+Sets the output LAS file path. If \fB\-O\fP is given, all soundings from
+every input swath file are written to this single LAS file. If \fB\-O\fP
+is not given, one LAS output file is created per input swath file, named
+by appending ".las" to the input swath file name (e.g. \fIsurvey.mb59\fP
+produces \fIsurvey.mb59.las\fP).
+.TP
+.B \-\-write-prj {\fB\-P\fP}
+.br
+Writes an Esri-style ".prj" sidecar file next to each LAS output file,
+containing the coordinate system used, for GIS software that looks for
+one there instead of (or in addition to) reading it from the LAS file
+itself. Named by replacing the LAS output file's ".las" suffix with
+".prj" (e.g. \fIsurvey.las\fP produces \fIsurvey.prj\fP). Default: no
+".prj" file is written.
+.TP
+.B \-\-bounds=\fIwest/east/south/north\fP {\fB\-R\fP\fIwest/east/south/north\fP}
+.br
+Sets the longitude and latitude bounds within which swath sonar
+data will be read. Only the data which lies within these bounds will
+be output to the LAS file(s). Default: \fIwest/east/south/north\fP =
+\-360/360/\-90/90, i.e. of no effect.
+.TP
+.B \-\-speed-minimum=\fIspeed\fP {\fB\-S\fP\fIspeed\fP}
+.br
+Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in
+the input data; pings associated with a smaller ship speed will not be
+output to the LAS file(s). Default: \fIspeed\fP = 0, i.e. of no effect.
+.TP
+.B \-\-time-gap=\fItimegap\fP {\fB\-T\fP\fItimegap\fP}
+.br
+Sets the maximum time gap in minutes between adjacent pings allowed before
+the data is considered to have a gap. Time gaps do not stop
+\fBmbswath2las\fP from processing an input file; the option only
+affects how gaps are reported when \fB\-\-verbose\fP is used.
+Default: \fItimegap\fP = 1.
+.TP
+.B \-\-verbose {\fB\-V\fP}
+This option increases the verbosity of \fBmbswath2las\fP, causing it
+to print out the coordinate system actually used -- the projection
+identifier when \fB\-J\fP is given (useful with the bare \fBU\fP/\fBUTM\fP
+and \fBL\fP/\fBLTM\fP forms, since the specific zone or origin selected is
+otherwise not shown), or a note that plain geographic (WGS84) coordinates
+are being used otherwise -- the name of each LAS output file as it is
+opened, any comments encountered in the input data, and a final count of
+the total number of LAS points written. This option can be repeated (e.g.
+\fB\-VV\fP) to obtain more detailed \fBMBIO\fP debugging output.
+
+.SH LAS OUTPUT FORMAT
+\fBmbswath2las\fP writes standard LAS 1.4 files with the following
+properties:
+
+.RS
+.IP \(bu 2
+A 375-byte LAS 1.4 public header block, with the Global Encoding WKT bit
+(bit 4) set to indicate that the coordinate reference system is described
+by WKT rather than the older GeoTIFF key mechanism used by LAS 1.2/1.3.
+LAS 1.4 (rather than the 1.2 header used by earlier versions of this
+program) is used specifically so that this WKT-based CRS description can
+be written; LAS 1.5 goes further and requires WKT while dropping GeoTIFF
+keys entirely, but also drops point data record formats 0\-5, which is
+why this program does not target it.
+.IP \(bu 2
+A single "OGC Coordinate System WKT" variable length record (User ID
+"LASF_Projection", Record ID 2112) immediately following the header,
+containing a null-terminated WKT2 description of the sounding coordinate
+system: plain geographic WGS84 (EPSG:4326) by default, or the actual
+projected coordinate system requested with \fB\-J\fP (including a fully
+custom definition, e.g. a local-origin Transverse Mercator specified as
+\fB\-J\fP\fILTMlon0/lat0\fP, or as a raw PROJ string). This WKT is
+obtained directly from \fBPROJ\fP, so it always matches the actual
+projection used, whatever it is.
+.IP \(bu 2
+Point data record format 1 (X, Y, Z, intensity, return/classification
+flags, scan angle, user data, point source ID, and GPS time), 28 bytes
+per point.
+.IP \(bu 2
+X/Y scale factor: 1e\-7 degree (geographic mode) or 0.01 m (projected
+mode). Z scale factor: 0.001 m. No coordinate offset is applied; these
+scale factors comfortably span a full survey within the signed 32\-bit
+integer range used for LAS point coordinates.
+.IP \(bu 2
+All multi\-byte fields are stored little\-endian per the LAS specification.
+On a big\-endian host, \fBmbswath2las\fP byte\-swaps every field on write
+so the output file is always correct regardless of build platform.
+.RE
+
+.SH EXAMPLES
+Convert a single swath file to a LAS file, using the default output
+name (adds a ".las" suffix):
+.PP
+.nf
+    mbswath2las \-I 0002_20180911_020351_EX1811_MB.mb88 \-F 88
+.fi
+.PP
+which produces \fI0002_20180911_020351_EX1811_MB.mb88.las\fP.
+.PP
+Convert every file referenced by a datalist to its own LAS file, printing
+progress and a final point count:
+.PP
+.nf
+    mbswath2las \-\-input=datalist.mb\-1 \-\-verbose
+.fi
+.PP
+Collect an entire datalist's soundings into a single combined LAS file,
+projected to UTM instead of geographic coordinates:
+.PP
+.nf
+    mbswath2las \-\-input=datalist.mb\-1 \-\-projection=UTM \\
+        \-\-output=survey.las
+.fi
+.PP
+Same as above, but centered on a local Transverse Mercator origin instead
+of UTM, and with intensity populated from the original swath files'
+amplitude data (reading the ".fbt" files would otherwise be faster but
+leaves intensity at 0):
+.PP
+.nf
+    mbswath2las \-\-input=datalist.mb\-1 \-\-projection=LTM \\
+        \-\-use-amplitude \-\-output=survey.las
+.fi
+.PP
+Same as the UTM example above, but also write a ".prj" sidecar file
+(\fIsurvey.prj\fP) for GIS software that expects one:
+.PP
+.nf
+    mbswath2las \-\-input=datalist.mb\-1 \-\-projection=UTM \\
+        \-\-write-prj \-\-output=survey.las
+.fi
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbswath\fP(1), \fBmblist\fP(1), \fBmbcopy\fP(1),
+\fBmbinfo\fP(1), \fBmbdatalist\fP(1), \fBmbgrid\fP(1), \fBmbmosaic\fP(1)
+
+.SH BUGS
+The LAS point GPS time field is set to the raw Unix epoch timestamp of
+each sounding rather than the leap-second-adjusted GPS time nominally
+expected by the LAS format; this is sufficient for ordering and lookup of
+points by time but is not standards-compliant GPS time.
+
+When \fB\-\-use-amplitude\fP is given, sounding intensity is rescaled
+linearly from the minimum/maximum amplitude found across the entire input
+(read from the ".inf" files) into the unsigned 16-bit (0-65535) range
+required by LAS, so it is not a radiometrically calibrated reflectivity
+value. If the ".inf" files report a degenerate range (maximum not greater
+than minimum, e.g. an input format with no amplitude data at all),
+intensity is left 0 throughout rather than divided by zero.

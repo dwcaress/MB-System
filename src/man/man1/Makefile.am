@@ -95,6 +95,7 @@ man_MANS =  \
 	mbsvplist.1 \
 	mbsvpselect.1 \
 	mbswath.1 \
+	mbswath2las.1 \
 	mbsystem.1 \
 	mbtiff2png.1 \
 	mbtime.1 \

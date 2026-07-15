@@ -1373,3 +1373,83 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 	return (status);
 }
 /*--------------------------------------------------------------------*/
+int mb_make_info_datalist(int verbose, bool force, char *read_file, int *format, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       force:      %d\n", force);
+		fprintf(stderr, "dbg2       read_file:  %s\n", read_file);
+		fprintf(stderr, "dbg2       format:     %d\n", *format);
+	}
+
+	/* get format if required */
+	if (*format == 0)
+		mb_get_format(verbose, read_file, NULL, format, error);
+
+	/* determine whether to read one file or a list of files */
+	const bool read_datalist = *format < 0;
+
+	/* open file list */
+	char swathfile[MB_PATH_MAXLINE];
+	void *datalist = NULL;
+	bool read_data;
+	char dfile[MB_PATH_MAXLINE];
+	int status = MB_SUCCESS;
+	if (read_datalist) {
+		const int look_processed = MB_DATALIST_LOOK_UNSET;
+		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, error)) != MB_SUCCESS) {
+			*error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
+			fprintf(stderr, "\nProgram terminated in function <%s>\n", __func__);
+			exit(status);
+		}
+		double file_weight;
+		if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, format, &file_weight, error)) == MB_SUCCESS)
+			read_data = true;
+		else
+			read_data = false;
+	}
+	/* else copy single filename to be read */
+	else {
+		strcpy(swathfile, read_file);
+		read_data = true;
+	}
+
+	/* loop over all files to be read, generating or refreshing ancillary
+	 * files (.inf, .fbt, .fnv) for each one as needed */
+	while (read_data) {
+		status = mb_make_info(verbose, force, swathfile, *format, error);
+
+		/* figure out whether and what to read next */
+		if (read_datalist) {
+			double file_weight;
+			if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, format, &file_weight, error)) == MB_SUCCESS)
+				read_data = true;
+			else
+				read_data = false;
+		}
+		else {
+			read_data = false;
+		}
+
+		/* end loop over files in list */
+	}
+	if (read_datalist)
+		mb_datalist_close(verbose, &datalist, error);
+
+	/* set error and status (if you got here you succeeded */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:          %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
