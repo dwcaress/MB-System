@@ -231,7 +231,7 @@ int mbview_getrouteinfo(int verbose, size_t instance, int working_route, int *nr
 	// struct mbview_struct *data = &(view->data);
 
 	/* check that the route is valid */
-	if (working_route < 0 && working_route >= shared.shareddata.nroute) {
+	if (working_route < 0 || working_route >= shared.shareddata.nroute) {
 		*nroutewaypoint = 0;
 		*nroutpoint = 0;
 		routename[0] = '\0';
@@ -499,14 +499,18 @@ int mbview_addroute(int verbose, size_t instance, int npoint, double *routelon, 
 		}
 	}
 
-	/* set color size and name for new route */
-	shared.shareddata.routes[*iroute].color = routecolor;
-	shared.shareddata.routes[*iroute].size = routesize;
-	shared.shareddata.routes[*iroute].editmode = routeeditmode;
-	strcpy(shared.shareddata.routes[*iroute].name, routename);
+	/* set color size and name for new route - only if a route was actually
+	    created above by mbview_route_add(); with npoint <= 0 that loop never
+	    ran, so routes[*iroute] was never allocated and must not be touched */
+	if (npoint > 0) {
+		shared.shareddata.routes[*iroute].color = routecolor;
+		shared.shareddata.routes[*iroute].size = routesize;
+		shared.shareddata.routes[*iroute].editmode = routeeditmode;
+		strcpy(shared.shareddata.routes[*iroute].name, routename);
 
-	/* set distance values */
-	mbview_route_setdistance(instance, *iroute);
+		/* set distance values */
+		mbview_route_setdistance(instance, *iroute);
+	}
 
 	/* make routes viewable */
 	if (data->route_view_mode != MBV_VIEW_ON) {
@@ -2120,6 +2124,14 @@ int mbview_route_delete(size_t instance, int iroute, int ipoint) {
 
 		/* if last point deleted then move remaining routes if necessary */
 		if (shared.shareddata.routes[iroute].npoints <= 0) {
+			/* free memory owned by the now-empty route before its slot is overwritten */
+			mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.routes[iroute].waypoint), &error);
+			mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.routes[iroute].distlateral), &error);
+			mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.routes[iroute].disttopo), &error);
+			mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.routes[iroute].points), &error);
+			mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.routes[iroute].segments), &error);
+			shared.shareddata.routes[iroute].npoints_alloc = 0;
+
 			/* move route data if necessary */
 			for (i = iroute; i < shared.shareddata.nroute - 1; i++) {
 				shared.shareddata.routes[i] = shared.shareddata.routes[i + 1];
@@ -2127,6 +2139,21 @@ int mbview_route_delete(size_t instance, int iroute, int ipoint) {
 
 			/* decrement nroute */
 			shared.shareddata.nroute--;
+
+			/* reset last route so its stale/aliased pointers cannot be reused by mbview_route_add */
+			shared.shareddata.routes[shared.shareddata.nroute].active = false;
+			shared.shareddata.routes[shared.shareddata.nroute].color = MBV_COLOR_BLACK;
+			shared.shareddata.routes[shared.shareddata.nroute].size = 1;
+			shared.shareddata.routes[shared.shareddata.nroute].editmode = true;
+			shared.shareddata.routes[shared.shareddata.nroute].name[0] = '\0';
+			shared.shareddata.routes[shared.shareddata.nroute].npoints = 0;
+			shared.shareddata.routes[shared.shareddata.nroute].npoints_alloc = 0;
+			shared.shareddata.routes[shared.shareddata.nroute].nroutepoint = 0;
+			shared.shareddata.routes[shared.shareddata.nroute].waypoint = NULL;
+			shared.shareddata.routes[shared.shareddata.nroute].distlateral = NULL;
+			shared.shareddata.routes[shared.shareddata.nroute].disttopo = NULL;
+			shared.shareddata.routes[shared.shareddata.nroute].points = NULL;
+			shared.shareddata.routes[shared.shareddata.nroute].segments = NULL;
 		}
 
 		/* no route selection now */
@@ -2586,10 +2613,13 @@ int mbview_updateroutelist() {
 
   			/* select list item for selected route */
   			if (shared.shareddata.route_selected != MBV_SELECT_NONE) {
-          if (shared.shareddata.routes[iroute].active) {
-    				/* get item number */
+    				/* get item number - inactive routes contribute no rows to the
+    				    widget (see the nitems loops above), so they must be skipped
+    				    here too to keep iitem in sync with the actual widget position */
     				iitem = 0;
     				for (iroute = 0; iroute < shared.shareddata.nroute; iroute++) {
+    					if (!shared.shareddata.routes[iroute].active)
+    						continue;
     					iitem++;
     					if (iroute == shared.shareddata.route_selected && shared.shareddata.route_point_selected == MBV_SELECT_ALL) {
     						XmListSelectPos(shared.mb3d_routelist.mbview_list_routelist, iitem, 0);
@@ -2603,7 +2633,6 @@ int mbview_updateroutelist() {
     						}
     					}
     				}
-    			}
         }
 
   			/* deallocate memory no longer needed */

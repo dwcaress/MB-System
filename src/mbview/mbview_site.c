@@ -1140,10 +1140,23 @@ int mbview_updatesitelist() {
   	}
 
 		if (shared.shareddata.nsite > 0) {
-			/* allocate array of label XmStrings */
-			XmString *xstr = (XmString *)malloc(shared.shareddata.nsite * sizeof(XmString));
+			/* count active sites - inactive sites (currently only possible in
+			    unused tail slots beyond nsite, but checked defensively here
+			    since nothing else in this file assumes that invariant) contribute
+			    no row to the widget */
+			int nitems = 0;
+			for (int isite = 0; isite < shared.shareddata.nsite; isite++) {
+				if (shared.shareddata.sites[isite].active)
+					nitems++;
+			}
+
+		if (nitems > 0) {
+			/* allocate array of label XmStrings, sized to only the active sites
+			    actually being added, so every slot gets initialized below */
+			XmString *xstr = (XmString *)malloc(nitems * sizeof(XmString));
 
 			/* loop over the sites */
+			nitems = 0;
 			for (int isite = 0; isite < shared.shareddata.nsite; isite++) {
         if (shared.shareddata.sites[isite].active) {
   				/* add list item for each site */
@@ -1159,24 +1172,35 @@ int mbview_updatesitelist() {
   					sprintf(value_string, "%3d | %s | %s | %.3f | %s | %d | %s", isite, lonmstr0, latmstr0,
   					        shared.shareddata.sites[isite].point.zdata, mbview_colorname[shared.shareddata.sites[isite].color],
   					        shared.shareddata.sites[isite].size, shared.shareddata.sites[isite].name);
-  				xstr[isite] = XmStringCreateLocalized(value_string);
+  				xstr[nitems] = XmStringCreateLocalized(value_string);
+  				nitems++;
   			}
       }
 
 			/* add list items */
-			XmListAddItems(shared.mb3d_sitelist.mbview_list_sitelist, xstr, shared.shareddata.nsite, 0);
+			XmListAddItems(shared.mb3d_sitelist.mbview_list_sitelist, xstr, nitems, 0);
 
-			/* select list item for selected site */
-			if (shared.shareddata.site_selected != MBV_SELECT_NONE) {
-				XmListSelectPos(shared.mb3d_sitelist.mbview_list_sitelist, shared.shareddata.site_selected + 1, 0);
-				XmListSetPos(shared.mb3d_sitelist.mbview_list_sitelist, MAX(shared.shareddata.site_selected + 1 - 5, 1));
+			/* select list item for selected site - translate the site index to
+			    a widget position by counting only active sites up to and
+			    including it, keeping this in sync with the active-only rows
+			    just added above */
+			if (shared.shareddata.site_selected != MBV_SELECT_NONE &&
+			    shared.shareddata.sites[shared.shareddata.site_selected].active) {
+				int iitem = 0;
+				for (int isite = 0; isite <= shared.shareddata.site_selected; isite++) {
+					if (shared.shareddata.sites[isite].active)
+						iitem++;
+				}
+				XmListSelectPos(shared.mb3d_sitelist.mbview_list_sitelist, iitem, 0);
+				XmListSetPos(shared.mb3d_sitelist.mbview_list_sitelist, MAX(iitem - 5, 1));
 			}
 
 			/* deallocate memory no longer needed */
-			for (int isite = 0; isite < shared.shareddata.nsite; isite++) {
-				XmStringFree(xstr[isite]);
+			for (int iitem = 0; iitem < nitems; iitem++) {
+				XmStringFree(xstr[iitem]);
 			}
 			free(xstr);
+		}
 		}
 	}
 

@@ -70,6 +70,7 @@ set(executables
     mbsvpselect
     mbswath2las
     mbtime
+    mbusbl2fnv
     mbvoxelclean)
 
 foreach(executable ${executables})

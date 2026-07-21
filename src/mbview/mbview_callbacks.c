@@ -7446,6 +7446,11 @@ void do_mbview_routelistselect(Widget w, XtPointer client_data, XtPointer call_d
 		const int iposition = position_list[0] - 1;
 		int iroutepos = 0;
 		for (int iroute = 0; iroute < shared.shareddata.nroute; iroute++) {
+			/* mbview_updateroutelist() skips inactive routes when building the
+			    widget's rows, so they must be skipped here too to keep iroutepos
+			    in sync with the actual widget position */
+			if (!shared.shareddata.routes[iroute].active)
+				continue;
 			if (iroutepos == iposition) {
 				shared.shareddata.route_selected = iroute;
 				shared.shareddata.route_point_selected = MBV_SELECT_ALL;
@@ -7512,6 +7517,25 @@ void do_mbview_routelistselect(Widget w, XtPointer client_data, XtPointer call_d
 }
 /*------------------------------------------------------------------------------*/
 
+/* Translate a 1-based nav-list widget position back to the corresponding
+    index into shared.shareddata.navs[]. mbview_updatenavlist() skips
+    inactive navs when building the widget's rows, so a raw
+    (position - 1) is only correct as long as every nav in range is
+    active; this walks the same active-only enumeration to stay in sync.
+    Returns MBV_SELECT_NONE if the position doesn't match any active nav. */
+static int mbview_navlist_position_to_inav(int position) {
+	int iitem = 0;
+	for (int inav = 0; inav < shared.shareddata.nnav; inav++) {
+		if (shared.shareddata.navs[inav].active) {
+			iitem++;
+			if (iitem == position)
+				return inav;
+		}
+	}
+	return MBV_SELECT_NONE;
+}
+
+/*------------------------------------------------------------------------------*/
 void do_mbview_navlistselect(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
@@ -7546,8 +7570,8 @@ void do_mbview_navlistselect(Widget w, XtPointer client_data, XtPointer call_dat
 
 	/* now select all nav points in selected files */
 	for (int j = 0; j < position_count; j++) {
-		int inav = position_list[j] - 1;
-		if (shared.shareddata.navs[inav].npoints > 0) {
+		int inav = mbview_navlist_position_to_inav(position_list[j]);
+		if (inav != MBV_SELECT_NONE && shared.shareddata.navs[inav].npoints > 0) {
 
 			/* Select all nav points in inav */
 			for (int jpt = 0; jpt < shared.shareddata.navs[inav].npoints; jpt++) {
@@ -7718,6 +7742,11 @@ void do_mbview_routelist_delete(Widget w, XtPointer client_data, XtPointer call_
 		int iposition = 0;
 		bool done = false;
 		for (int iroute = 0; iroute < shared.shareddata.nroute && !done; iroute++) {
+			/* mbview_updateroutelist() skips inactive routes when building the
+			    widget's rows, so they must be skipped here too to keep iposition
+			    in sync with the actual widget position */
+			if (!shared.shareddata.routes[iroute].active)
+				continue;
 			iposition++;
 
 			/* delete entire route */
@@ -7809,8 +7838,9 @@ void do_mbview_navlist_delete(Widget w, XtPointer client_data, XtPointer call_da
 
 	/* delete selected nav points in reverse order if any */
 	for (int i = position_count - 1; i >= 0; i--) {
-		const int inav = position_list[i] - 1;
-		mbview_nav_delete(instance, inav);
+		const int inav = mbview_navlist_position_to_inav(position_list[i]);
+		if (inav != MBV_SELECT_NONE)
+			mbview_nav_delete(instance, inav);
 	}
 
 	/* reset pick annotation */

@@ -1711,6 +1711,14 @@ int mbview_nav_delete(size_t instance, int inav) {
 	if (inav >= 0 && inav < shared.shareddata.nnav) {
 		/* free memory for deleted nav */
 		int error = MB_ERROR_NO_ERROR;
+		for (int j = 0; j < shared.shareddata.navs[inav].npoints_alloc; j++) {
+			struct mbview_linesegmentw_struct *segment = &shared.shareddata.navs[inav].segments[j];
+			if (segment->nls_alloc > 0 && segment->lspoints != NULL) {
+				mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(segment->lspoints), &error);
+				segment->nls = 0;
+				segment->nls_alloc = 0;
+			}
+		}
 		mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.navs[inav].navpts), &error);
 		mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.navs[inav].segments), &error);
 

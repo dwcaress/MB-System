@@ -1774,6 +1774,8 @@ XtAddCallback(toggleButton_gridalgorithm_footprint, XmNvalueChangedCallback, do_
 	XtAddCallback(pushButton_gridparameters_apply, XmNactivateCallback, do_mbeditviz_updategrid, (XtPointer)0);
 
 	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Error");
+	ac++;
 	XtSetArg(args[ac], XmNwidth, 311);
 	ac++;
 	XtSetArg(args[ac], XmNheight, 205);

@@ -284,8 +284,6 @@ int mbview_addvector(int verbose, size_t instance, int npoint, double *veclon, d
 			shared.shareddata.vectors[ivec].segments[j].nls = 0;
 			shared.shareddata.vectors[ivec].segments[j].nls_alloc = 0;
 			shared.shareddata.vectors[ivec].segments[j].lspoints = NULL;
-			shared.shareddata.vectors[ivec].segments[j].endpoints[0] = shared.shareddata.vectors[ivec].vectorpts[j].point;
-			shared.shareddata.vectors[ivec].segments[j].endpoints[1] = shared.shareddata.vectors[ivec].vectorpts[j + 1].point;
 		}
 	}
 
@@ -350,6 +348,12 @@ int mbview_addvector(int verbose, size_t instance, int npoint, double *veclon, d
 			shared.shareddata.vectors[ivec].vectorpts[i].point.zdisplay[instance]);*/
 
 			/* ************************************************* */
+		}
+
+		/* set segment endpoints now that all vector points are populated */
+		for (int j = 0; j < shared.shareddata.vectors[ivec].npoints - 1; j++) {
+			shared.shareddata.vectors[ivec].segments[j].endpoints[0] = shared.shareddata.vectors[ivec].vectorpts[j].point;
+			shared.shareddata.vectors[ivec].segments[j].endpoints[1] = shared.shareddata.vectors[ivec].vectorpts[j + 1].point;
 		}
 
 		/* make vecs viewable */
@@ -628,8 +632,19 @@ int mbview_vector_delete(size_t instance, int ivec) {
 
 	/* delete vec if its the same as previously selected */
 	if (ivec >= 0 && ivec < shared.shareddata.nvector) {
-		/* free memory for deleted vec */
+		/* free memory for deleted vec, including each segment's own drape
+		    buffer - not currently populated for vectors, but freed here
+		    defensively to match mbview_nav_delete()/mbview_deleteallroutes()
+		    in case vector draping is ever wired up */
 		int error = MB_ERROR_NO_ERROR;
+		for (int j = 0; j < shared.shareddata.vectors[ivec].npoints_alloc; j++) {
+			struct mbview_linesegmentw_struct *segment = &shared.shareddata.vectors[ivec].segments[j];
+			if (segment->nls_alloc > 0 && segment->lspoints != NULL) {
+				mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(segment->lspoints), &error);
+				segment->nls = 0;
+				segment->nls_alloc = 0;
+			}
+		}
 		mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.vectors[ivec].vectorpts), &error);
 		mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.vectors[ivec].segments), &error);
 
@@ -643,8 +658,12 @@ int mbview_vector_delete(size_t instance, int ivec) {
 		shared.shareddata.vectors[shared.shareddata.nvector - 1].color = MBV_COLOR_RED;
 		shared.shareddata.vectors[shared.shareddata.nvector - 1].size = 4;
 		shared.shareddata.vectors[shared.shareddata.nvector - 1].name[0] = '\0';
+		shared.shareddata.vectors[shared.shareddata.nvector - 1].format = 0;
 		shared.shareddata.vectors[shared.shareddata.nvector - 1].npoints = 0;
 		shared.shareddata.vectors[shared.shareddata.nvector - 1].npoints_alloc = 0;
+		shared.shareddata.vectors[shared.shareddata.nvector - 1].nselected = 0;
+		shared.shareddata.vectors[shared.shareddata.nvector - 1].datamin = 0.0;
+		shared.shareddata.vectors[shared.shareddata.nvector - 1].datamax = 0.0;
 		shared.shareddata.vectors[shared.shareddata.nvector - 1].vectorpts = NULL;
 		shared.shareddata.vectors[shared.shareddata.nvector - 1].segments = NULL;
 

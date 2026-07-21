@@ -22,6 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.3beta15    July 21, 2026
 - Version 5.8.3beta14    July 6, 2026
 - Version 5.8.3beta13    June 18, 2026
 - Version 5.8.3beta12    January 7, 2026
@@ -71,6 +72,58 @@ or beta, are equally accessible as tarballs through the Github interface.
 - **Version 5.8.0          January 22, 2024**
 
 ---
+
+#### 5.8.3beta15 (July 21, 2026)
+
+Program mbusbl2fnv: New program that converts a USBL (ultra-short baseline) ROV
+tracking CSV file to an MB-System fast navigation (fnv) text file. The input CSV
+format has one header line followed by data lines giving epoch time, latitude,
+longitude, and ROV depth; heading, speed, roll, pitch, and heave are not present
+in USBL tracking data and are output as 0.0.
+
+Library mbview: Fixed a memory-management bug in route handling in which deleting the
+last point of a route (removing the whole route) shifted the internal route array down
+without first freeing the deleted route's own point/segment arrays and without clearing
+the vacated array slot afterward. This leaked memory, silently caused two routes to alias
+the same underlying arrays, and could crash mbgrdviz and other mbview-based programs with
+a double free when routes were deleted and new routes subsequently added. A broader audit
+of the mbview route, navigation, site, and vector handling code found and fixed several
+related problems: an inverted bounds check in mbview_getrouteinfo() that allowed
+out-of-bounds array reads; a memory leak on navigation-line deletion (per-segment drape
+buffers were never freed); dead code in the route list widget that silently disabled
+selection highlighting; uninitialized segment endpoint data when adding vectors; and
+list-selection and list-deletion callbacks for the route and navigation list dialogs
+that could act on the wrong entry if a list item were ever marked inactive. Also fixed
+the title bars of the 2D Parameters, 3D Parameters, Shading Parameters, Profile Display,
+About, and "please wait" message dialogs, which previously displayed internal Motif
+widget names (e.g. "mbview_dialogShell_2dparms") instead of readable titles.
+
+Program mbgrdviz: Fixed a bug in the Generate Survey Route feature in which a cached
+route index could go stale if the user deleted an unrelated route via the 3D view while
+the Area Route dialog remained open, causing the next "Generate Survey" click to delete
+the wrong route. Also fixed the title bar of the Area Route dialog, which previously
+displayed the internal widget name "dialogShell_arearoute" instead of "Generate Survey
+Route for Selected Area...".
+
+Program mbeditviz: Fixed a crash on opening a swath file that MBIO cannot actually read,
+caused by a missing status check before dereferencing the file handle. Fixed a
+memory-management bug in file deletion analogous to the mbview route bug above, in
+which removing a file from the loaded-files list left a stale duplicate array slot that
+could later alias data between two loaded files. Fixed several file-record fields
+(including processed-file-info and sensordepth navigation arrays) that were left
+uninitialized on newly imported files. Added a bounds check to the ping-reading loop to
+prevent a heap buffer overflow when a swath file's *.inf index file undercounts its
+actual number of pings. Fixed a bug in which dismissing the 3D soundings window
+overwrote the global verbosity setting rather than the intended error-code variable.
+Fixed a bug in which a single navigation-loading failure for one file silently skipped
+loading navigation for every subsequent file in the same session. Fixed a leak and
+potential crash on the (rare) memory allocation failure path when importing files. Fixed
+the title bar of the Error dialog (previously showed "dialogShell_error") and corrected
+a garbled status message ("Reading data list...").
+
+The bugs described above were identified and fixed with the assistance of the AI coding
+assistant Claude Sonnet 5 (Anthropic, model claude-sonnet-5), operating as Claude Code
+under developer supervision and review.
 
 #### 5.8.3beta14 (July 6, 2026)
 

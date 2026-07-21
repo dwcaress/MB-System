@@ -1090,6 +1090,8 @@ Widget CreatemainWindow_mbgrdviz(Widget parent) {
 	XtAddCallback(fileSelectionBox, XmNokCallback, do_mbgrdviz_openfile, (XtPointer)0);
 
 	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Generate Survey Route for Selected Area...");
+	ac++;
 	XtSetArg(args[ac], XmNwidth, 481);
 	ac++;
 	XtSetArg(args[ac], XmNheight, 691);

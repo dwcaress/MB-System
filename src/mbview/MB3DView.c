@@ -2207,6 +2207,8 @@ MB3DViewDataPtr MB3DViewCreate(MB3DViewDataPtr class_in, Widget parent, String n
 	XtManageChild(class_in->mbview_drawingArea_mbview);
 
 	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "MBview Profile Display");
+	ac++;
 	XtSetArg(args[ac], XmNx, 814);
 	ac++;
 	XtSetArg(args[ac], XmNy, 1149);
@@ -2841,6 +2843,8 @@ MB3DViewDataPtr MB3DViewCreate(MB3DViewDataPtr class_in, Widget parent, String n
 	              (XtPointer)0);
 
 	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "MBview 2D Parameters");
+	ac++;
 	XtSetArg(args[ac], XmNx, 1187);
 	ac++;
 	XtSetArg(args[ac], XmNy, 1229);
@@ -3149,6 +3153,8 @@ MB3DViewDataPtr MB3DViewCreate(MB3DViewDataPtr class_in, Widget parent, String n
 	XtAddCallback(class_in->mbview_pushButton_view_2d_dismiss, XmNactivateCallback, do_mbview_2dparmspopdown, (XtPointer)0);
 
 	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "MBview 3D Parameters");
+	ac++;
 	XtSetArg(args[ac], XmNx, 1140);
 	ac++;
 	XtSetArg(args[ac], XmNy, 1098);
@@ -3873,6 +3879,8 @@ MB3DViewDataPtr MB3DViewCreate(MB3DViewDataPtr class_in, Widget parent, String n
 	XtAddCallback(class_in->mbview_pushButton_view_3d_dismiss, XmNactivateCallback, do_mbview_3dparmspopdown, (XtPointer)0);
 
 	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "MBview Shading Parameters");
+	ac++;
 	XtSetArg(args[ac], XmNx, 1141);
 	ac++;
 	XtSetArg(args[ac], XmNy, 1117);
@@ -4505,6 +4513,8 @@ MB3DViewDataPtr MB3DViewCreate(MB3DViewDataPtr class_in, Widget parent, String n
 	              (XtPointer)0);
 
 	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "About MBview...");
+	ac++;
 	XtSetArg(args[ac], XmNx, 1049);
 	ac++;
 	XtSetArg(args[ac], XmNy, 1071);
@@ -4893,6 +4903,8 @@ MB3DViewDataPtr MB3DViewCreate(MB3DViewDataPtr class_in, Widget parent, String n
 	XtAddCallback(class_in->mbview_pushButton_about_dismiss, XmNactivateCallback, do_mbview_aboutpopdown, (XtPointer)0);
 
 	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "MBview: Please wait...");
+	ac++;
 	XtSetArg(args[ac], XmNx, 1070);
 	ac++;
 	XtSetArg(args[ac], XmNy, 1289);

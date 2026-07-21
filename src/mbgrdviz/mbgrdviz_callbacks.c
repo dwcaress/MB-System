@@ -3122,10 +3122,23 @@ int do_mbgrdviz_saverisiscriptheading(size_t instance, char *output_file_ptr) {
             mb_path projection_id;
 
             /* calculate eastings and northings using an LTM projection */
+            //if (reference_lat > -80.0 && reference_lat < 84.0) {
+            //  if (reference_lon > 180.0)
+            //    reference_lon -= 360.0;
+            //  sprintf(projection_id, "LTM%.5f/%.5f", reference_lon, reference_lat);
+            //}
+
+            /* calculate eastings and northings using an UTM projection */
             if (reference_lat > -80.0 && reference_lat < 84.0) {
-              if (reference_lon > 180.0)
-                reference_lon -= 360.0;
-              sprintf(projection_id, "LTM%.5f/%.5f", reference_lon, reference_lat);
+							if (reference_lon < 180.0)
+								reference_lon += 360.0;
+							if (reference_lon >= 180.0)
+								reference_lon -= 360.0;
+							const int utm_zone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
+							if (reference_lat >= 0.0)
+								snprintf(projection_id, sizeof(projection_id), "UTM%2.2dN", utm_zone);
+							else
+								snprintf(projection_id, sizeof(projection_id), "UTM%2.2dS", utm_zone);
             }
 
             /* else if more northerly than 84 deg N then use
@@ -6568,9 +6581,22 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
 
   /* generate survey lines from area and add as new route */
   if (status == MB_SUCCESS) {
-    /* delete current working route if defined */
+    /* delete current working route if defined - but first confirm that
+       working_route still refers to the survey route we created. Its
+       index can go stale if the user deleted some other route via
+       3D-view picking while this dialog stayed open, which shifts route
+       array indices and would otherwise make working_route refer to an
+       unrelated route */
     if (working_route > -1) {
-      mbview_deleteroute(verbose, instance, working_route, &error);
+      int wr_nroutewaypoint, wr_nroutpoint, wr_routecolor, wr_routesize;
+      double wr_routedistancelateral, wr_routedistancetopo;
+      char wr_routename[MB_PATH_MAXLINE];
+      int wr_status = mbview_getrouteinfo(verbose, instance, working_route, &wr_nroutewaypoint, &wr_nroutpoint,
+                                          wr_routename, &wr_routecolor, &wr_routesize, &wr_routedistancelateral,
+                                          &wr_routedistancetopo, &error);
+      if (wr_status == MB_SUCCESS && strcmp(wr_routename, survey_name) == 0) {
+        mbview_deleteroute(verbose, instance, working_route, &error);
+      }
       working_route = -1;
     }
 

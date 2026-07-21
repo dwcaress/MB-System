@@ -430,8 +430,13 @@ int mbeditviz_import_file(char *path, int format) {
       mbev_files = (struct mbev_file_struct *)nptr;
       mbev_num_files_alloc += MBEV_ALLOC_NUM;
     } else {
-      free(mbev_files);
-      mbev_files = NULL;
+      /* realloc() failure leaves the original block untouched and still
+          owned by mbev_files - freeing it here would discard every
+          already-loaded file (and leak each one's own pings/esf/async
+          arrays in the process) while leaving mbev_num_files non-zero
+          and mbev_files NULL, so any later loop over mbev_files[] would
+          dereference NULL. Just report the failure and keep the
+          existing array intact. */
       mbev_status = MB_FAILURE;
       mbev_error = MB_ERROR_MEMORY_FAIL;
     }
@@ -440,6 +445,17 @@ int mbeditviz_import_file(char *path, int format) {
   /* set new file structure */
   if (mbev_status == MB_SUCCESS) {
     struct mbev_file_struct *file = &(mbev_files[mbev_num_files]);
+
+    /* zero every field first - a freshly grown slot comes from a plain
+        realloc() and is uninitialized, and a slot reused after a prior
+        deletion is zeroed by mbeditviz_delete_file() but this does not
+        rely on that; either way every field must start from a known
+        state rather than relying on the explicit sets below to cover
+        every field that matters (e.g. processed_info_loaded and the
+        async_sensordepth arrays have no non-zero default and were
+        previously left uninitialized here) */
+    memset(file, 0, sizeof(struct mbev_file_struct));
+
     file->load_status = false;
     file->load_status_shown = false;
     file->locked = false;
@@ -699,11 +715,14 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
       }
     }
 
-    /* set the topo_type and beamwidths */
-    struct mb_io_struct *imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
-    file->beamwidth_xtrack = imb_io_ptr->beamwidth_xtrack;
-    file->beamwidth_ltrack = imb_io_ptr->beamwidth_ltrack;
-    mbev_status = mb_sonartype(mbev_verbose, imbio_ptr, imb_io_ptr->store_data, &file->topo_type, &mbev_error);
+    /* set the topo_type and beamwidths - only if the file was actually
+        opened above; imbio_ptr is still NULL if mb_read_init() failed */
+    if (mbev_status == MB_SUCCESS) {
+      struct mb_io_struct *imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
+      file->beamwidth_xtrack = imb_io_ptr->beamwidth_xtrack;
+      file->beamwidth_ltrack = imb_io_ptr->beamwidth_ltrack;
+      mbev_status = mb_sonartype(mbev_verbose, imbio_ptr, imb_io_ptr->store_data, &file->topo_type, &mbev_error);
+    }
 
     struct mbev_ping_struct *ping;
     struct stat file_status;
@@ -744,6 +763,17 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
     if (mbev_status == MB_SUCCESS) {
       file->num_pings = 0;
       while (mbev_error <= MB_ERROR_NO_ERROR) {
+        /* stop if the ping array (sized from the *.inf file's reported
+            record count) is already full - guards against a stale or
+            incorrect *.inf undercounting the actual number of records
+            and overflowing file->pings */
+        if (file->num_pings >= file->num_pings_alloc) {
+          fprintf(stderr,
+                  "\nWarning: file %s contains more pings than reported by its *.inf file; truncating at %d pings\n",
+                  file->path, file->num_pings);
+          break;
+        }
+
         /* get pointer to next ping */
         ping = &(file->pings[file->num_pings]);
 
@@ -2150,10 +2180,18 @@ int mbeditviz_delete_file(int ifile) {
   }
 
   /* delete the file */
-  for (int i = ifile; i < mbev_num_files - 1; i++) {
-    mbev_files[i] = mbev_files[i + 1];
+  if (ifile >= 0 && ifile < mbev_num_files) {
+    for (int i = ifile; i < mbev_num_files - 1; i++) {
+      mbev_files[i] = mbev_files[i + 1];
+    }
+    mbev_num_files--;
+
+    /* zero the now-vacated trailing slot so it holds no leftover pointers -
+        after the shift above it is a byte-for-byte duplicate of what is now
+        the last live file, and if left uncleared a later mbeditviz_import_file()
+        call reusing this slot could alias its pointers/counts with that file */
+    memset(&mbev_files[mbev_num_files], 0, sizeof(struct mbev_file_struct));
   }
-  mbev_num_files--;
 
   if (mbev_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);

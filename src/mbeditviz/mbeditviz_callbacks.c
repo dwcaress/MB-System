@@ -1137,6 +1137,12 @@ void do_mbeditviz_viewgrid() {
         snprintf(value_text, sizeof(value_text), "Loading nav %d of %d...", ifile + 1, mbev_num_files);
         do_mbeditviz_message_on(value_text);
 
+        /* reset status for this file - mbev_status is a global gating every
+            allocation below, and must not carry a failure over from a
+            previous file in this loop or every subsequent file would
+            silently skip having its navigation added to the view */
+        mbev_status = MB_SUCCESS;
+
         /* allocate arrays */
         if ((navtime_d = (double *)malloc(file->num_pings * sizeof(double))) == NULL)
           mbev_status = MB_FAILURE;
@@ -1291,7 +1297,7 @@ int do_mbeditviz_mbview_dismiss_notify(size_t instance) {
 #ifdef MBEDITVIZ_GUI_DEBUG
   fprintf(stderr, "1 do_mbeditviz_mbview_dismiss_notify status:%d\n", mbev_status);
 #endif
-  mbev_status = mb3dsoundings_end(mbev_verbose, &mbev_verbose);
+  mbev_status = mb3dsoundings_end(mbev_verbose, &mbev_error);
 #ifdef MBEDITVIZ_GUI_DEBUG
   fprintf(stderr, "2 do_mbeditviz_mbview_dismiss_notify status:%d\n", mbev_status);
 #endif
@@ -1413,7 +1419,7 @@ int do_mbeditviz_opendata(char *input_file_ptr, int format) {
 #ifdef MBEDITVIZ_GUI_DEBUG
   fprintf(stderr, "do_mbeditviz_opendata:%s %d\n", input_file_ptr, format);
 #endif
-  do_mbeditviz_message_on("Reading datalismbeditviz_unload_filet...");
+  do_mbeditviz_message_on("Reading data list...");
 
   mbeditviz_open_data(input_file_ptr, format);
 
