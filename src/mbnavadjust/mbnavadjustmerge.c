@@ -337,11 +337,11 @@ int main(int argc, char **argv) {
       /* input */
       else if (strcmp("input", options[option_index].name) == 0) {
         if (!project_inputbase_set) {
-          strcpy(project_inputbase_path, optarg);
+          snprintf(project_inputbase_path, sizeof(mb_path), "%s", optarg);
           project_inputbase_set = true;
         }
         else if (!project_inputadd_set) {
-          strcpy(project_inputadd_path, optarg);
+          snprintf(project_inputadd_path, sizeof(mb_path), "%s", optarg);
           project_inputadd_set = true;
          }
         else {
@@ -353,7 +353,7 @@ int main(int argc, char **argv) {
       /* output */
       else if (strcmp("output", options[option_index].name) == 0) {
         if (!project_output_set) {
-          strcpy(project_output_path, optarg);
+          snprintf(project_output_path, sizeof(mb_path), "%s", optarg);
           project_output_set = true;
         }
         else {
@@ -1369,11 +1369,11 @@ int main(int argc, char **argv) {
           --import-tie-list=file
           --export-tie-list=file */
       else if (strcmp("import-tie-list", options[option_index].name) == 0) {
-        strcpy(import_tie_list_path, optarg);
+        snprintf(import_tie_list_path, sizeof(mb_path), "%s", optarg);
         import_tie_list_set = true;
       }
       else if (strcmp("export-tie-list", options[option_index].name) == 0) {
-        strcpy(export_tie_list_path, optarg);
+        snprintf(export_tie_list_path, sizeof(mb_path), "%s", optarg);
         export_tie_list_set = true;
       }
 
@@ -2593,38 +2593,52 @@ int main(int argc, char **argv) {
         }
       }
 
-      /* if the crossing does not exist, create it */
+      /* if the crossing does not exist, create it - but only if the
+          file/section references are actually valid */
       if (!found_crossing) {
-        /* allocate mbna_crossing array if needed */
-        if (project_output.num_crossings_alloc <= project_output.num_crossings) {
-          project_output.crossings = (struct mbna_crossing *)realloc(
-              project_output.crossings,
-              sizeof(struct mbna_crossing) * (project_output.num_crossings_alloc + ALLOC_NUM));
-          if (project_output.crossings != NULL)
-            project_output.num_crossings_alloc += ALLOC_NUM;
-          else {
-            status = MB_FAILURE;
-            error = MB_ERROR_MEMORY_FAIL;
+        if (mods[imod].file1 >= 0 && mods[imod].file1 < project_output.num_files &&
+            mods[imod].file2 >= 0 && mods[imod].file2 < project_output.num_files &&
+            mods[imod].section1 >= 0 && mods[imod].section1 < project_output.files[mods[imod].file1].num_sections &&
+            mods[imod].section2 >= 0 && mods[imod].section2 < project_output.files[mods[imod].file2].num_sections) {
+          /* allocate mbna_crossing array if needed */
+          if (project_output.num_crossings_alloc <= project_output.num_crossings) {
+            project_output.crossings = (struct mbna_crossing *)realloc(
+                project_output.crossings,
+                sizeof(struct mbna_crossing) * (project_output.num_crossings_alloc + ALLOC_NUM));
+            if (project_output.crossings != NULL)
+              project_output.num_crossings_alloc += ALLOC_NUM;
+            else {
+              status = MB_FAILURE;
+              error = MB_ERROR_MEMORY_FAIL;
+            }
+          }
+
+          if (status == MB_SUCCESS) {
+            /* add crossing to list */
+            crossing = (struct mbna_crossing *)&project_output.crossings[project_output.num_crossings];
+            crossing->status = MBNA_CROSSING_STATUS_NONE;
+            crossing->truecrossing = false;
+            crossing->overlap = 0;
+            crossing->file_id_1 = mods[imod].file1;
+            crossing->section_1 = mods[imod].section1;
+            crossing->file_id_2 = mods[imod].file2;
+            crossing->section_2 = mods[imod].section2;
+            crossing->num_ties = 0;
+            current_crossing = project_output.num_crossings;
+            project_output.num_crossings++;
+
+            /* only look up file1/file2 (for the block numbers in the message
+                below) after crossing->file_id_1/2 have actually been assigned */
+            file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
+            file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
+            fprintf(stderr, "Added crossing: %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", current_crossing, file1->block,
+                    crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2, crossing->section_2);
           }
         }
-
-        /* add crossing to list */
-        crossing = (struct mbna_crossing *)&project_output.crossings[project_output.num_crossings];
-        file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
-        file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
-        crossing->status = MBNA_CROSSING_STATUS_NONE;
-        crossing->truecrossing = false;
-        crossing->overlap = 0;
-        crossing->file_id_1 = mods[imod].file1;
-        crossing->section_1 = mods[imod].section1;
-        crossing->file_id_2 = mods[imod].file2;
-        crossing->section_2 = mods[imod].section2;
-        crossing->num_ties = 0;
-        current_crossing = project_output.num_crossings;
-        project_output.num_crossings++;
-
-        fprintf(stderr, "Added crossing: %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", current_crossing, file1->block,
-                crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2, crossing->section_2);
+        else {
+          fprintf(stderr, "Invalid add-crossing=%4.4d:%4.4d/%4.4d:%4.4d - file/section out of range, crossing not added\n",
+                  mods[imod].file1, mods[imod].section1, mods[imod].file2, mods[imod].section2);
+        }
       }
       break;
 
@@ -2676,29 +2690,35 @@ int main(int argc, char **argv) {
           }
         }
 
-        /* add crossing to list */
-        current_crossing = project_output.num_crossings;
-        crossing = (struct mbna_crossing *)&project_output.crossings[current_crossing];
-        file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
-        file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
-        crossing->status = MBNA_CROSSING_STATUS_NONE;
-        crossing->truecrossing = false;
-        crossing->overlap = 0;
-        crossing->file_id_1 = mods[imod].file1;
-        crossing->section_1 = mods[imod].section1;
-        crossing->file_id_2 = mods[imod].file2;
-        crossing->section_2 = mods[imod].section2;
-        crossing->num_ties = 0;
-        current_crossing = project_output.num_crossings;
-        project_output.num_crossings++;
+        /* add crossing to list - but only if the array growth above (if
+            any was needed) actually succeeded */
+        if (status == MB_SUCCESS) {
+          current_crossing = project_output.num_crossings;
+          crossing = (struct mbna_crossing *)&project_output.crossings[current_crossing];
+          crossing->status = MBNA_CROSSING_STATUS_NONE;
+          crossing->truecrossing = false;
+          crossing->overlap = 0;
+          crossing->file_id_1 = mods[imod].file1;
+          crossing->section_1 = mods[imod].section1;
+          crossing->file_id_2 = mods[imod].file2;
+          crossing->section_2 = mods[imod].section2;
+          crossing->num_ties = 0;
+          current_crossing = project_output.num_crossings;
+          project_output.num_crossings++;
 
-        fprintf(stderr, "Added crossing: %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", current_crossing, file1->block,
-                crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2, crossing->section_2);
+          /* only look up file1/file2 (for the block numbers in the message
+              below) after crossing->file_id_1/2 have actually been assigned */
+          file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
+          file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
+          fprintf(stderr, "Added crossing: %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", current_crossing, file1->block,
+                  crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2, crossing->section_2);
+        }
       }
 
-      /* if the tie does not exist, create it */
+      /* if the tie does not exist, create it - guard against a prior
+          allocation failure above having left crossing unset/stale */
       bool existing_tie = true;
-      if (crossing->num_ties == 0) {
+      if (status == MB_SUCCESS && crossing->num_ties == 0) {
 
         existing_tie = false;
 
@@ -3583,10 +3603,15 @@ int main(int argc, char **argv) {
     case MOD_MODE_MERGE_SURVEYS:
       fprintf(stderr, "\nCommand merge-surveys=%2.2d/%2.2d\n", mods[imod].survey1, mods[imod].survey2);
 
-      if (mods[imod].survey1 >= 0 && mods[imod].survey1 < project_output.num_surveys
-          && mods[imod].survey2 >= 0 && mods[imod].survey2 < project_output.num_surveys
+      /* this command actually merges two adjacent BLOCKS (file1->block),
+          not surveys - a single survey can span multiple blocks when it
+          contains internal navigation discontinuities, so num_blocks can
+          exceed num_surveys and is the counter that must be validated
+          against and decremented here, not num_surveys */
+      if (mods[imod].survey1 >= 0 && mods[imod].survey1 < project_output.num_blocks
+          && mods[imod].survey2 >= 0 && mods[imod].survey2 < project_output.num_blocks
           && mods[imod].survey2 == mods[imod].survey1 + 1) {
-        // loop over files,resetting block id for all files with blocks (surveys) >= survey2 to be one less
+        // loop over files, resetting block id for all files with blocks >= survey2 to be one less
         for (int ifile=0; ifile < project_output.num_files; ifile++) {
           file1 = &(project_output.files[ifile]);
           if (file1->block > mods[imod].survey1) {
@@ -3594,10 +3619,10 @@ int main(int argc, char **argv) {
               file1->sections[0].continuity = true;
             }
             file1->block--;
-            fprintf(stderr, "Reset file %d to be in survey %d instead of %d\n", ifile, file1->block, file1->block +1);
+            fprintf(stderr, "Reset file %d to be in block %d instead of %d\n", ifile, file1->block, file1->block +1);
           }
         }
-        project_output.num_surveys--;
+        project_output.num_blocks--;
       }
       break;
 
@@ -4193,31 +4218,37 @@ int main(int argc, char **argv) {
               }
             }
 
-            /* add crossing to list */
-            current_crossing = project_output.num_crossings;
-            crossing = (struct mbna_crossing *)&project_output.crossings[current_crossing];
-            file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
-            file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
-            crossing->status = MBNA_CROSSING_STATUS_NONE;
-            crossing->truecrossing = false;
-            crossing->overlap = 0;
-            crossing->file_id_1 = import_tie_file_1;
-            crossing->section_1 = import_tie_section_1_id;
-            crossing->file_id_2 = import_tie_file_2;
-            crossing->section_2 = import_tie_section_2_id;
-            crossing->num_ties = 0;
-            current_crossing = project_output.num_crossings;
-            project_output.num_crossings++;
+            /* add crossing to list - but only if the array growth above
+                (if any was needed) actually succeeded */
+            if (status == MB_SUCCESS) {
+              current_crossing = project_output.num_crossings;
+              crossing = (struct mbna_crossing *)&project_output.crossings[current_crossing];
+              crossing->status = MBNA_CROSSING_STATUS_NONE;
+              crossing->truecrossing = false;
+              crossing->overlap = 0;
+              crossing->file_id_1 = import_tie_file_1;
+              crossing->section_1 = import_tie_section_1_id;
+              crossing->file_id_2 = import_tie_file_2;
+              crossing->section_2 = import_tie_section_2_id;
+              crossing->num_ties = 0;
+              current_crossing = project_output.num_crossings;
+              project_output.num_crossings++;
 
-            fprintf(stderr, "Added crossing: %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", current_crossing,
-                    file1->block, crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2,
-                    crossing->section_2);
+              /* only look up file1/file2 (for the block numbers in the
+                  message below) after crossing->file_id_1/2 have actually
+                  been assigned */
+              file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
+              file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
+              fprintf(stderr, "Added crossing: %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", current_crossing,
+                      file1->block, crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2,
+                      crossing->section_2);
+            }
           }
 
           /* check if this tie already exists */
           found = false;
           int itie = 0; // Used after for
-          if (crossing->num_ties > 0) {
+          if (status == MB_SUCCESS && crossing->num_ties > 0) {
             for (; itie < crossing->num_ties; itie++) {
               tie = &crossing->ties[itie];
               if (tie->snav_1 == import_tie_snav_1 && tie->snav_2 == import_tie_snav_2) {

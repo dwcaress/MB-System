@@ -342,7 +342,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         mb_path obuffer;
         if (status == MB_SUCCESS &&
             ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-             (nscan = sscanf(buffer, "%s %s", label, obuffer)) != 2 || strcmp(label, "MB-SYSTEM_VERSION") != 0))
+             (nscan = sscanf(buffer, "%1023s %1023s", label, obuffer)) != 2 || strcmp(label, "MB-SYSTEM_VERSION") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
           fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
@@ -351,7 +351,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
 
         if (status == MB_SUCCESS &&
             ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-             (nscan = sscanf(buffer, "%s %s", label, obuffer)) != 2 || strcmp(label, "PROGRAM_VERSION") != 0))
+             (nscan = sscanf(buffer, "%1023s %1023s", label, obuffer)) != 2 || strcmp(label, "PROGRAM_VERSION") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
           fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
@@ -361,7 +361,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         int versionmajor;
         int versionminor;
         if (status == MB_SUCCESS && ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-                   (nscan = sscanf(buffer, "%s %d.%d", label, &versionmajor, &versionminor)) != 3 ||
+                   (nscan = sscanf(buffer, "%1023s %d.%d", label, &versionmajor, &versionminor)) != 3 ||
                    strcmp(label, "FILE_VERSION") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
@@ -383,7 +383,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         if (version_id >= 302) {
           if (status == MB_SUCCESS &&
               ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-               (nscan = sscanf(buffer, "%s %s", label, obuffer)) != 2 || strcmp(label, "ORIGIN") != 0))
+               (nscan = sscanf(buffer, "%1023s %1023s", label, obuffer)) != 2 || strcmp(label, "ORIGIN") != 0))
             status = MB_FAILURE;
         }
         if (status == MB_FAILURE) {
@@ -393,7 +393,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
 
         if (status == MB_SUCCESS &&
             ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-             (nscan = sscanf(buffer, "%s %s", label, obuffer)) != 2 || strcmp(label, "NAME") != 0))
+             (nscan = sscanf(buffer, "%1023s %1023s", label, obuffer)) != 2 || strcmp(label, "NAME") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
           fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
@@ -402,7 +402,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
 
         if (status == MB_SUCCESS &&
             ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-             (nscan = sscanf(buffer, "%s %s", label, obuffer)) != 2 || strcmp(label, "PATH") != 0))
+             (nscan = sscanf(buffer, "%1023s %1023s", label, obuffer)) != 2 || strcmp(label, "PATH") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
           fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
@@ -411,7 +411,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
 
         if (status == MB_SUCCESS &&
             ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-             (nscan = sscanf(buffer, "%s %s", label, obuffer)) != 2 || strcmp(label, "HOME") != 0))
+             (nscan = sscanf(buffer, "%1023s %1023s", label, obuffer)) != 2 || strcmp(label, "HOME") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
           fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
@@ -420,7 +420,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
 
         if (status == MB_SUCCESS &&
             ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-             (nscan = sscanf(buffer, "%s %s", label, obuffer)) != 2 || strcmp(label, "DATADIR") != 0))
+             (nscan = sscanf(buffer, "%1023s %1023s", label, obuffer)) != 2 || strcmp(label, "DATADIR") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
           fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
@@ -430,7 +430,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         if (version_id >= 312) {
           if (status == MB_SUCCESS &&
               ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-               (nscan = sscanf(buffer, "%s %d", label, &project->num_refgrids)) != 2 || strcmp(label, "NUMREFERENCEGRIDS") != 0))
+               (nscan = sscanf(buffer, "%1023s %d", label, &project->num_refgrids)) != 2 || strcmp(label, "NUMREFERENCEGRIDS") != 0))
             status = MB_FAILURE;
           if (status == MB_FAILURE) {
             fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
@@ -441,7 +441,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
               if ((result = fgets(buffer, sizeof(buffer), hfp)) == buffer
                   && strncmp("REFERENCEGRID", buffer, 13) == 0) {
                 if (irefgrid < MBNA_REFGRID_NUM_MAX) {
-                  nscan = sscanf(buffer, "%s %s %lf %lf %lf %lf",
+                  nscan = sscanf(buffer, "%1023s %1023s %lf %lf %lf %lf",
                                   label, project->refgrid_names[irefgrid],
                                   &project->refgrid_bounds[0][irefgrid],
                                   &project->refgrid_bounds[1][irefgrid],
@@ -486,7 +486,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
           project->num_refgrids = 0;
           if ((result = fgets(buffer, sizeof(buffer), hfp)) == buffer
               && strncmp("REFERENCEGRID", buffer, 13) == 0) {
-            nscan = sscanf(buffer, "%s %s", label, project->refgrid_names[0]);
+            nscan = sscanf(buffer, "%1023s %1023s", label, project->refgrid_names[0]);
             if (nscan == 2 && strncmp(project->refgrid_names[0], "NONE", 4) != 0) {
               struct mbna_grid refgrid;
               memset(&refgrid, 0, sizeof(refgrid));
@@ -525,7 +525,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
 
         if (status == MB_SUCCESS &&
             ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-             (nscan = sscanf(buffer, "%s %d", label, &project->num_files)) != 2 || strcmp(label, "NUMFILES") != 0))
+             (nscan = sscanf(buffer, "%1023s %d", label, &project->num_files)) != 2 || strcmp(label, "NUMFILES") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
           fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
@@ -535,17 +535,17 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         if (version_id >= 316) {
           if (status == MB_SUCCESS &&
               ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-               (nscan = sscanf(buffer, "%s %d", label, &project->num_surveys)) != 2 || strcmp(label, "NUMSURVEYS") != 0))
+               (nscan = sscanf(buffer, "%1023s %d", label, &project->num_surveys)) != 2 || strcmp(label, "NUMSURVEYS") != 0))
             status = MB_FAILURE;
           if (status == MB_SUCCESS &&
               ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-               (nscan = sscanf(buffer, "%s %d", label, &project->num_blocks)) != 2 || strcmp(label, "NUMBLOCKS") != 0))
+               (nscan = sscanf(buffer, "%1023s %d", label, &project->num_blocks)) != 2 || strcmp(label, "NUMBLOCKS") != 0))
             status = MB_FAILURE;
         }
         else if (version_id >= 306) {
           if (status == MB_SUCCESS &&
               ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-               (nscan = sscanf(buffer, "%s %d", label, &project->num_blocks)) != 2 || strcmp(label, "NUMBLOCKS") != 0))
+               (nscan = sscanf(buffer, "%1023s %d", label, &project->num_blocks)) != 2 || strcmp(label, "NUMBLOCKS") != 0))
             status = MB_FAILURE;
           if (status == MB_SUCCESS)
             project->num_surveys = project->num_blocks;
@@ -560,7 +560,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         }
 
         if (status == MB_SUCCESS && ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-                   (nscan = sscanf(buffer, "%s %d", label, &project->num_crossings)) != 2 ||
+                   (nscan = sscanf(buffer, "%1023s %d", label, &project->num_crossings)) != 2 ||
                    strcmp(label, "NUMCROSSINGS") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
@@ -569,7 +569,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         }
 
         if (status == MB_SUCCESS && ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-                   (nscan = sscanf(buffer, "%s %lf", label, &project->section_length)) != 2 ||
+                   (nscan = sscanf(buffer, "%1023s %lf", label, &project->section_length)) != 2 ||
                    strcmp(label, "SECTIONLENGTH") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
@@ -579,7 +579,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
 
         if (status == MB_SUCCESS && version_id >= 101 &&
             ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-             (nscan = sscanf(buffer, "%s %d", label, &project->section_soundings)) != 2 ||
+             (nscan = sscanf(buffer, "%1023s %d", label, &project->section_soundings)) != 2 ||
              strcmp(label, "SECTIONSOUNDINGS") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
@@ -591,7 +591,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
 
         if (status == MB_SUCCESS &&
             ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-             (nscan = sscanf(buffer, "%s %d", label, &project->decimation)) != 2 || strcmp(label, "DECIMATION") != 0))
+             (nscan = sscanf(buffer, "%1023s %d", label, &project->decimation)) != 2 || strcmp(label, "DECIMATION") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
           fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
@@ -600,7 +600,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
 
         if (status == MB_SUCCESS &&
             ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-             (nscan = sscanf(buffer, "%s %lf", label, &project->cont_int)) != 2 || strcmp(label, "CONTOURINTERVAL") != 0))
+             (nscan = sscanf(buffer, "%1023s %lf", label, &project->cont_int)) != 2 || strcmp(label, "CONTOURINTERVAL") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
           fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
@@ -609,7 +609,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
 
         if (status == MB_SUCCESS &&
             ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-             (nscan = sscanf(buffer, "%s %lf", label, &project->col_int)) != 2 || strcmp(label, "COLORINTERVAL") != 0))
+             (nscan = sscanf(buffer, "%1023s %lf", label, &project->col_int)) != 2 || strcmp(label, "COLORINTERVAL") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
           fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
@@ -618,7 +618,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
 
         if (status == MB_SUCCESS &&
             ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-             (nscan = sscanf(buffer, "%s %lf", label, &project->tick_int)) != 2 || strcmp(label, "TICKINTERVAL") != 0))
+             (nscan = sscanf(buffer, "%1023s %lf", label, &project->tick_int)) != 2 || strcmp(label, "TICKINTERVAL") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
           fprintf(stderr, "Die at line:%d file:%s buffer:%s\n", __LINE__, __FILE__, buffer);
@@ -626,7 +626,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         }
 
         if (status == MB_SUCCESS && ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-                   (nscan = sscanf(buffer, "%s %d", label, &project->inversion_status)) != 2 ||
+                   (nscan = sscanf(buffer, "%1023s %d", label, &project->inversion_status)) != 2 ||
                    strcmp(label, "INVERSION") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
@@ -637,7 +637,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         if (status == MB_SUCCESS) {
           if (version_id >= 307) {
             if ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-                (nscan = sscanf(buffer, "%s %d", label, &project->grid_status)) != 2 ||
+                (nscan = sscanf(buffer, "%1023s %d", label, &project->grid_status)) != 2 ||
                 strcmp(label, "GRIDSTATUS") != 0)
               status = MB_FAILURE;
           }
@@ -645,14 +645,14 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         if (status == MB_SUCCESS) {
           if (version_id >= 301) {
             if ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-                (nscan = sscanf(buffer, "%s %lf", label, &project->smoothing)) != 2 ||
+                (nscan = sscanf(buffer, "%1023s %lf", label, &project->smoothing)) != 2 ||
                 strcmp(label, "SMOOTHING") != 0)
               status = MB_FAILURE;
             project->precision = SIGMA_MINIMUM;
           }
           else if (version_id >= 103) {
             if ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-                (nscan = sscanf(buffer, "%s %lf", label, &project->precision)) != 2 ||
+                (nscan = sscanf(buffer, "%1023s %lf", label, &project->precision)) != 2 ||
                 strcmp(label, "PRECISION") != 0)
               status = MB_FAILURE;
             project->smoothing = MBNA_SMOOTHING_DEFAULT;
@@ -670,7 +670,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         if (status == MB_SUCCESS) {
           if (version_id >= 105) {
             if ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-                (nscan = sscanf(buffer, "%s %lf", label, &project->zoffsetwidth)) != 2 ||
+                (nscan = sscanf(buffer, "%1023s %lf", label, &project->zoffsetwidth)) != 2 ||
                 strcmp(label, "ZOFFSETWIDTH") != 0)
               status = MB_FAILURE;
           }
@@ -679,7 +679,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
         }
 
         if (status == MB_SUCCESS && version_id >= 315 && ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-                   (nscan = sscanf(buffer, "%s %d", label, &project->use_mode)) != 2 ||
+                   (nscan = sscanf(buffer, "%1023s %d", label, &project->use_mode)) != 2 ||
                    strcmp(label, "USEMODE") != 0))
           status = MB_FAILURE;
         if (status == MB_FAILURE) {
@@ -745,7 +745,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
           if (version_id >= 316) {
             if (status == MB_SUCCESS &&
                 ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-                 (nscan = sscanf(buffer, "FILE %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %d %d %s", &idummy,
+                 (nscan = sscanf(buffer, "FILE %d %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %d %d %1023s", &idummy,
                      &(file->status), &(file->id), &(file->format), &(file->survey), &(file->block),
                      &(file->block_offset_x), &(file->block_offset_y), &(file->block_offset_z),
                      &(file->heading_bias_import), &(file->roll_bias_import), &(file->heading_bias),
@@ -759,7 +759,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
           else if (version_id >= 306) {
             if (status == MB_SUCCESS &&
                 ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-                 (nscan = sscanf(buffer, "FILE %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %d %d %s", &idummy,
+                 (nscan = sscanf(buffer, "FILE %d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %d %d %1023s", &idummy,
                      &(file->status), &(file->id), &(file->format), &(file->block),
                      &(file->block_offset_x), &(file->block_offset_y), &(file->block_offset_z),
                      &(file->heading_bias_import), &(file->roll_bias_import), &(file->heading_bias),
@@ -770,7 +770,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
           else {
             if (status == MB_SUCCESS &&
                 ((result = fgets(buffer, sizeof(buffer), hfp)) != buffer ||
-                 (nscan = sscanf(buffer, "FILE %d %d %d %d %lf %lf %lf %lf %d %d %s", &idummy, &(file->status),
+                 (nscan = sscanf(buffer, "FILE %d %d %d %d %lf %lf %lf %lf %d %d %1023s", &idummy, &(file->status),
                      &(file->id), &(file->format), &(file->heading_bias_import),
                      &(file->roll_bias_import), &(file->heading_bias), &(file->roll_bias),
                      &(file->num_sections), &(file->output_id), file->file)) != 11))
@@ -837,6 +837,12 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
             }
             if (nscan < 15)
               section->contoursuptodate = false;
+            if (section->num_snav < 0 || section->num_snav > MBNA_SNAV_NUM) {
+              fprintf(stderr, "Corrupted project file: section num_snav %d exceeds maximum %d\n",
+                      section->num_snav, MBNA_SNAV_NUM);
+              fprintf(stderr, "Die at line:%d file:%s\n", __LINE__, __FILE__);
+              exit(0);
+            }
             for (k = MBNA_MASK_DIM - 1; k >= 0; k--) {
               if (status == MB_SUCCESS)
                 result = fgets(buffer, sizeof(buffer), hfp);
@@ -1182,6 +1188,14 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
               }
             }
 
+            if (section->globaltie.snav != MBNA_SELECT_NONE &&
+                (section->globaltie.snav < 0 || section->globaltie.snav >= section->num_snav)) {
+              fprintf(stderr, "Corrupted project file: section globaltie.snav %d out of range [0,%d)\n",
+                      section->globaltie.snav, section->num_snav);
+              fprintf(stderr, "Die at line:%d file:%s\n", __LINE__, __FILE__);
+              exit(0);
+            }
+
             if (section->globaltie.status == MBNA_TIE_NONE && section->globaltie.snav == -1) {
               section->globaltie.inversion_status = 0;
               section->globaltie.offset_x = 0.0;
@@ -1364,6 +1378,31 @@ __FILE__, __LINE__, __FUNCTION__, ifile, isection, buffer, result, nscan);
             crossing->section_1 = crossing->section_2;
             crossing->file_id_2 = idummy;
             crossing->section_2 = jdummy;
+          }
+
+          /* validate crossing references before using them to index into
+              project->files[]/sections[] and the fixed-size ties[] array */
+          if (status == MB_SUCCESS) {
+            if (crossing->file_id_1 < 0 || crossing->file_id_1 >= project->num_files ||
+                crossing->file_id_2 < 0 || crossing->file_id_2 >= project->num_files) {
+              fprintf(stderr, "Corrupted project file: crossing %d references invalid file_id (%d, %d) with num_files=%d\n",
+                      icrossing, crossing->file_id_1, crossing->file_id_2, project->num_files);
+              fprintf(stderr, "Die at line:%d file:%s\n", __LINE__, __FILE__);
+              exit(0);
+            }
+            else if (crossing->section_1 < 0 || crossing->section_1 >= project->files[crossing->file_id_1].num_sections ||
+                     crossing->section_2 < 0 || crossing->section_2 >= project->files[crossing->file_id_2].num_sections) {
+              fprintf(stderr, "Corrupted project file: crossing %d references invalid section (%d, %d)\n",
+                      icrossing, crossing->section_1, crossing->section_2);
+              fprintf(stderr, "Die at line:%d file:%s\n", __LINE__, __FILE__);
+              exit(0);
+            }
+            else if (crossing->num_ties < 0 || crossing->num_ties > MBNA_SNAV_NUM) {
+              fprintf(stderr, "Corrupted project file: crossing %d num_ties %d exceeds maximum %d\n",
+                      icrossing, crossing->num_ties, MBNA_SNAV_NUM);
+              fprintf(stderr, "Die at line:%d file:%s\n", __LINE__, __FILE__);
+              exit(0);
+            }
           }
 
           /* read ties */
@@ -1749,8 +1788,13 @@ int mbnavadjust_close_project(int verbose, struct mbna_project *project, int *er
   /* deallocate memory and reset values */
   for (int i = 0; i < project->num_files; i++) {
     file = &project->files[i];
-    if (file->sections != NULL)
-      mb_freed(verbose, __FILE__, __LINE__, (void **)&file->sections, error);
+    if (file->sections != NULL) {
+      /* file->sections is allocated with raw malloc()/realloc(), not
+          mb_mallocd()/mb_reallocd(), so it must be freed with raw free() -
+          mb_freed() silently no-ops on a pointer it never allocated */
+      free(file->sections);
+      file->sections = NULL;
+    }
   }
   if (project->files != NULL) {
     free(project->files);
@@ -2042,7 +2086,6 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   /* write mbgrdviz route file for all unfixed true crossings */
   snprintf(routefile,sizeof(mb_pathplusplus), "%s%s_truecrossing.rte", project->path, project->name);
   if ((hfp = fopen(routefile, "w")) == NULL) {
-    fclose(hfp);
     status = MB_FAILURE;
     *error = MB_ERROR_OPEN_FAIL;
     fprintf(stderr, " > Unable to open output tie route file %s\n", routefile);
@@ -2110,7 +2153,6 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   /* write mbgrdviz route file for all unfixed >=50% crossings */
   snprintf(routefile, sizeof(mb_pathplusplus), "%s%s_gt50crossing.rte", project->path, project->name);
   if ((hfp = fopen(routefile, "w")) == NULL) {
-    fclose(hfp);
     status = MB_FAILURE;
     *error = MB_ERROR_OPEN_FAIL;
     fprintf(stderr, " > Unable to open output tie route file %s\n", routefile);
@@ -2178,7 +2220,6 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   /* write mbgrdviz route file for all unfixed >=25% but less than 50% crossings */
   snprintf(routefile, sizeof(mb_pathplusplus), "%s%s_gt25crossing.rte", project->path, project->name);
   if ((hfp = fopen(routefile, "w")) == NULL) {
-    fclose(hfp);
     status = MB_FAILURE;
     *error = MB_ERROR_OPEN_FAIL;
     fprintf(stderr, " > Unable to open output tie route file %s\n", routefile);
@@ -2246,7 +2287,6 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   /* write mbgrdviz route file for all unfixed <25% crossings */
   snprintf(routefile, sizeof(mb_pathplusplus), "%s%s_lt25crossing.rte", project->path, project->name);
   if ((hfp = fopen(routefile, "w")) == NULL) {
-    fclose(hfp);
     status = MB_FAILURE;
     *error = MB_ERROR_OPEN_FAIL;
     fprintf(stderr, " > Unable to open output tie route file %s\n", routefile);
@@ -2314,7 +2354,6 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   /* write mbgrdviz route file for all fixed crossings */
   snprintf(routefile, sizeof(mb_pathplusplus), "%s%s_fixedcrossing.rte", project->path, project->name);
   if ((hfp = fopen(routefile, "w")) == NULL) {
-    fclose(hfp);
     status = MB_FAILURE;
     *error = MB_ERROR_OPEN_FAIL;
     fprintf(stderr, " > Unable to open output fixed crossings route file %s\n", routefile);
@@ -2382,7 +2421,6 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   /* write mbgrdviz route file for all unfixed ties */
   snprintf(routefile, sizeof(mb_pathplusplus), "%s%s_unfixedties.rte", project->path, project->name);
   if ((hfp = fopen(routefile, "w")) == NULL) {
-    fclose(hfp);
     status = MB_FAILURE;
     *error = MB_ERROR_OPEN_FAIL;
     fprintf(stderr, " > Unable to open output unfixed ties route file %s\n", routefile);
@@ -2449,7 +2487,6 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project,
   /* write mbgrdviz route file for all fixed ties */
   snprintf(routefile, sizeof(mb_pathplusplus), "%s%s_fixedties.rte", project->path, project->name);
   if ((hfp = fopen(routefile, "w")) == NULL) {
-    fclose(hfp);
     status = MB_FAILURE;
     *error = MB_ERROR_OPEN_FAIL;
     fprintf(stderr, " > Unable to open output fixed ties route file %s\n", routefile);
@@ -2701,6 +2738,9 @@ int mbnavadjust_remove_short_sections(int verbose, struct mbna_project *project,
         /* move remaining sections in file up by one */
         for (int jsection=isection; jsection < file->num_sections - 1; jsection++) {
           memcpy(&file->sections[jsection], &file->sections[jsection+1], sizeof(struct mbna_section));
+          /* the copied section keeps its old section_id - renumber it to
+              match its new (shifted-down) position */
+          file->sections[jsection].section_id = jsection;
 
           mb_path oldfile, newfile;
           
@@ -3174,7 +3214,11 @@ int mbnavadjust_remove_file_by_id(int verbose, struct mbna_project *project,
   /* delete the file */
   struct mbna_file *file = &project->files[ifile];
   if (file->num_sections_alloc > 0 && file->sections != NULL) {
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&file->sections, error);
+    /* file->sections is allocated with raw malloc()/realloc(), not
+        mb_mallocd()/mb_reallocd(), so it must be freed with raw free() -
+        mb_freed() silently no-ops on a pointer it never allocated */
+    free(file->sections);
+    file->sections = NULL;
   }
   mb_pathplusplus deletefile, oldfile, newfile;
   snprintf(deletefile, sizeof(mb_path), "%s/nvs_%4.4d.mb166", project->datadir, ifile);
@@ -3205,6 +3249,11 @@ int mbnavadjust_remove_file_by_id(int verbose, struct mbna_project *project,
     project->files[jfile] = project->files[jfile+1];
     file = &project->files[jfile];
     file->id--;
+    /* sections carry their own file_id set when read/created; keep it in
+        sync with this file's new (shifted-down) index */
+    for (int ksection = 0; ksection < file->num_sections; ksection++) {
+      file->sections[ksection].file_id = jfile;
+    }
     snprintf(oldfile, sizeof(mb_path), "%s/nvs_%4.4d.mb166", project->datadir, jfile+1);
     snprintf(newfile, sizeof(mb_path), "%s/nvs_%4.4d.mb166", project->datadir, jfile);
     rename(oldfile, newfile);
@@ -4030,6 +4079,12 @@ int mbnavadjust_write_triangles(int verbose, struct mbna_project *project,
       if (status != MB_SUCCESS)
         *error = MB_ERROR_WRITE_FAIL;
     }
+    else {
+      /* fopen() failed - without this, a full/unwritable data directory
+          silently reports success while no .tri cache file is written */
+      status = MB_FAILURE;
+      *error = MB_ERROR_OPEN_FAIL;
+    }
   }
   else {
     status &= MB_FAILURE;
@@ -4152,12 +4207,22 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
 
       /* initialize data storage */
       status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbna_swathraw), (void **)swathraw_ptr, error);
+      if (status != MB_SUCCESS) {
+        fprintf(stderr, "\nMBIO Error allocating swathraw structure\n");
+        fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+        exit(*error);
+      }
       swathraw = (struct mbna_swathraw *)*swathraw_ptr;
       swathraw->beams_bath = beams_bath;
       swathraw->npings_max = section->num_pings;
       swathraw->npings = 0;
       status = mb_mallocd(verbose, __FILE__, __LINE__, section->num_pings * sizeof(struct mbna_pingraw),
               (void **)&swathraw->pingraws, error);
+      if (status != MB_SUCCESS) {
+        fprintf(stderr, "\nMBIO Error allocating pingraws array\n");
+        fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+        exit(*error);
+      }
       for (int i = 0; i < swathraw->npings_max; i++) {
         pingraw = &swathraw->pingraws[i];
         pingraw->beams_bath = 0;
@@ -7029,8 +7094,8 @@ int mbnavadjust_addcrossing(int verbose, struct mbna_project *project, int ifile
       struct mbna_crossing *crossing = (struct mbna_crossing *)&project->crossings[icrossing];
       if ((ifile1 == crossing->file_id_1 && isection1 == crossing->section_1 && ifile2 == crossing->file_id_2 &&
            isection2 == crossing->section_2) ||
-          (ifile1 == crossing->file_id_1 && isection1 == crossing->section_1 && ifile2 == crossing->file_id_2 &&
-           isection2 == crossing->section_2))
+          (ifile1 == crossing->file_id_2 && isection1 == crossing->section_2 && ifile2 == crossing->file_id_1 &&
+           isection2 == crossing->section_1))
         disqualify = true;
     }
   }

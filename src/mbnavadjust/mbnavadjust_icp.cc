@@ -153,7 +153,9 @@ int mbsystem::get_section_Central_nav(const int verbose, struct swath *swathIn, 
                 }
             }
         }
-        draft = (sum / count) - 3;
+        /* count stays 0 if every beam in every ping is flagged - guard
+            against dividing by zero and producing a NaN draft */
+        draft = (count > 0) ? (sum / count) - 3 : 0.0;
     }
 
     return status;
@@ -288,11 +290,11 @@ int mbsystem::load_crossing(const int verbose, mbna_project &project, mbna_cross
     /* load sections */
     if(verbose) { fprintf(stderr, "Loading section 1 of crossing %d:%d/%d:%d...\n", crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2); }
     status = mbnavadjust_section_load(verbose, &project, crossing->file_id_1, crossing->section_1,
-                                      (void **)&swathraw1, (void **)&tgtSwath, tgtSection->num_pings, &error);
+                                      (void **)&swathraw1, (void **)&tgtSwath, &error);
 
     if(verbose) { fprintf(stderr, "Loading section 2 of crossing %d:%d/%d:%d...\n", crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2); }
     status = mbnavadjust_section_load(verbose, &project, crossing->file_id_2, crossing->section_2,
-                                      (void **)&swathraw2, (void **)&srcSwath, srcSection->num_pings, &error);
+                                      (void **)&swathraw2, (void **)&srcSwath, &error);
 
     /* get lon lat positions for soundings */
     if(verbose) { fprintf(stderr, "Transforming section 1 of crossing %d:%d/%d:%d...\n", crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2); }
@@ -450,6 +452,17 @@ int mbsystem::perform_icp(const int verbose, struct mbna_section* targetSection,
     if(src_idx.size() < source->size()) {
         dbgLog << "FATAL ERROR: Cloud contains non-finite points in " << results.srcFile << ":" << results.srcSection << endl;
         status = MB_FAILURE;
+    }
+
+    // a fatal NaN detection above, or an empty cloud (e.g. every sounding
+    // in a section flagged), must not be allowed to reach icp.align() below -
+    // report the failure now instead of computing/logging a meaningless result
+    if(status == MB_FAILURE || source->empty() || target->empty()) {
+        if (source->empty() || target->empty()) {
+            dbgLog << "FATAL ERROR: Empty point cloud for crossing " << results.tgtFile << ":" << results.tgtSection
+                   << "/" << results.srcFile << ":" << results.srcSection << endl;
+        }
+        return MB_FAILURE;
     }
 
     if(verbose) {

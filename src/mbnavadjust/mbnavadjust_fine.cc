@@ -202,8 +202,12 @@ int main(int argc, char **argv) {
 
         }
         else {
-            std::cerr << "\nERROR: Crossing " << crossing->file_id_1 << ":" << crossing->section_1 << "/"
-                                              << crossing->file_id_2 << ":" << crossing->section_2
+            /* report the crossing that was searched for, not `crossing` -
+                it is unassigned if project.num_crossings == 0, and even
+                otherwise only holds the last crossing checked, not the
+                one the user asked for */
+            std::cerr << "\nERROR: Crossing " << params.iFile1 << ":" << params.iSection1 << "/"
+                                              << params.iFile2 << ":" << params.iSection2
                       << "not found in the specified project!\n";
         }
 
@@ -455,11 +459,21 @@ int mbnavadjust_align_arguments(int argc, char** argv, mbnavadjust_align_params 
                             exit(EXIT_FAILURE);
                         }
                         break;
-            case 's' : error = sscanf(optarg, "%u,%u,%u,%lf", &params.icpSettings.srcSOR, &params.icpSettings.tgtSOR, &params.icpSettings.SOR_neighbors, &params.icpSettings.SOR_stdDev);
+            case 's' : {
+                       /* srcSOR/tgtSOR are bool fields - sscanf with %u into
+                           them directly would write 4 bytes through a 1-byte
+                           pointer, corrupting adjacent struct fields, so parse
+                           into unsigned int locals first */
+                       unsigned int srcSOR = 0, tgtSOR = 0;
+                       error = sscanf(optarg, "%u,%u,%u,%lf", &srcSOR, &tgtSOR,
+                                      &params.icpSettings.SOR_neighbors, &params.icpSettings.SOR_stdDev);
                        if (error < 2) {
                            std::cerr << "Failure to parse --SOR=" << optarg << "\n\tAborting Program.\n\n";
+                           exit(EXIT_FAILURE);
                        }
-                       exit(EXIT_FAILURE);
+                       params.icpSettings.srcSOR = (srcSOR != 0);
+                       params.icpSettings.tgtSOR = (tgtSOR != 0);
+                       }
                        break;
             default  :  print_usage('h' == c);
                         exit(EXIT_FAILURE);
@@ -549,9 +563,15 @@ void do_icp_thread(const int verbose, mbna_project project, const vector<mbna_cr
             errOut << "Alignment complete on crossing " << cross->file_id_1 << ":" << cross->section_1 << "/" << cross->file_id_2 << ":" << cross->section_2 << "\n";
         }
 
-        // deallocate swath memory
+        // deallocate swath memory - mb_contour_deall() only frees the
+        // contents of the struct swath, not the struct itself (which was
+        // allocated by mb_mallocd() in mb_contour_init()/load_crossing()),
+        // so the struct itself must also be freed here before the next
+        // iteration's load_crossing() overwrites the pointer
         status = mb_contour_deall(verbose, tgtSwath, &error);
         status = mb_contour_deall(verbose, srcSwath, &error);
+        status = mb_freed(verbose, __FILE__, __LINE__, (void **)&tgtSwath, &error);
+        status = mb_freed(verbose, __FILE__, __LINE__, (void **)&srcSwath, &error);
 
     } // end of for loop
 }

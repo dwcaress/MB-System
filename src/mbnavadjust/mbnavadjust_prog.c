@@ -3210,7 +3210,7 @@ int mbnavadjust_deletetie(int icrossing, int jtie, int delete_status) {
       section2->snav_num_ties[tie->snav_2]--;
 
       /* delete tie and set number */
-      for (int i = mbna_current_tie; i < crossing->num_ties - 1; i++) {
+      for (int i = jtie; i < crossing->num_ties - 1; i++) {
         crossing->ties[i].status = crossing->ties[i + 1].status;
         crossing->ties[i].snav_1 = crossing->ties[i + 1].snav_1;
         crossing->ties[i].snav_1_time_d = crossing->ties[i + 1].snav_1_time_d;

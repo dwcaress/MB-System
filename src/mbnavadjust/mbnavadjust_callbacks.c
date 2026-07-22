@@ -764,7 +764,6 @@ void do_update_status() {
     if (mbna_verbose > 0)
       fprintf(stderr, "%s\n", string);
     if (project.num_surveys > 0 && project.num_files > 0) {
-    	int num_surveys_listed = 0;
       XmString *xstr = (XmString *)malloc(project.num_surveys * sizeof(XmString));
     	for (int isurvey = 0; isurvey < project.num_surveys; isurvey++) {
     		int num_files_survey = 0;
@@ -792,6 +791,7 @@ void do_update_status() {
 							else
 								filestatus = filestatus_unknown;
 						}
+						num_files_survey++;
 						etime_d = file->sections[file->num_sections-1].etime_d;
 						for (int isection=0; isection < file->num_sections; isection++) {
 							struct mbna_section *section = &file->sections[isection];
@@ -954,6 +954,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
         struct mbna_file *file = &(project.files[i]);
         if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
             (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->survey) ||
+            (mbna_view_mode == MBNA_VIEW_MODE_BLOCK && (mbna_survey_select1 == file->survey || mbna_survey_select2 == file->survey)) ||
             (mbna_view_mode == MBNA_VIEW_MODE_FILE) ||
             (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->survey) ||
             (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE) || (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION))
@@ -1040,6 +1041,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
         for (int j = 0; j < file->num_sections; j++) {
           if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
               (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->survey) ||
+              (mbna_view_mode == MBNA_VIEW_MODE_BLOCK && (mbna_survey_select1 == file->survey || mbna_survey_select2 == file->survey)) ||
               (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == i) ||
               (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->survey) ||
               (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE && mbna_file_select == i) ||
@@ -1059,6 +1061,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
           struct mbna_section *section = &(file->sections[j]);
           if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
               (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->survey) ||
+              (mbna_view_mode == MBNA_VIEW_MODE_BLOCK && (mbna_survey_select1 == file->survey || mbna_survey_select2 == file->survey)) ||
               (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == i) ||
               (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->survey) ||
               (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE && mbna_file_select == i) ||
@@ -3072,6 +3075,7 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
         for (int j = 0; j < file->num_sections; j++) {
           if ((mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
               (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->survey) ||
+              (mbna_view_mode == MBNA_VIEW_MODE_BLOCK && (mbna_survey_select1 == file->survey || mbna_survey_select2 == file->survey)) ||
               (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == i) ||
               (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->survey) ||
               (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE && mbna_file_select == i) ||
@@ -3969,9 +3973,10 @@ void do_naverr_selecttie(Widget w, XtPointer client_data, XtPointer call_data) {
     do_update_modelplot_status();
     mbnavadjust_modelplot_plot(__FILE__, __LINE__);
   }
-  if (project.visualization_status)
+  if (project.visualization_status) {
     mbnavadjust_reset_visualization_navties();
     do_update_visualization_status();
+  }
 }
 
 /*--------------------------------------------------------------------*/
@@ -4133,9 +4138,10 @@ void do_naverr_dismiss(Widget w, XtPointer client_data, XtPointer call_data) {
     do_update_modelplot_status();
     mbnavadjust_modelplot_plot(__FILE__, __LINE__);
   }
-  if (project.visualization_status)
+  if (project.visualization_status) {
     mbnavadjust_reset_visualization_navties();
     do_update_visualization_status();
+  }
 }
 
 /*--------------------------------------------------------------------*/
@@ -4433,9 +4439,10 @@ void do_biases_applyall(Widget w, XtPointer client_data, XtPointer call_data) {
     do_update_modelplot_status();
     mbnavadjust_modelplot_plot(__FILE__, __LINE__);
   }
-  if (project.visualization_status)
+  if (project.visualization_status) {
     mbnavadjust_reset_visualization_navties();
     do_update_visualization_status();
+  }
 }
 
 /*--------------------------------------------------------------------*/
@@ -4914,9 +4921,10 @@ void do_file_close(Widget w, XtPointer client_data, XtPointer call_data) {
     do_update_modelplot_status();
     mbnavadjust_modelplot_plot(__FILE__, __LINE__);
   }
-  if (project.visualization_status)
+  if (project.visualization_status) {
     mbnavadjust_reset_visualization_navties();
     do_update_visualization_status();
+  }
 }
 
 /*--------------------------------------------------------------------*/

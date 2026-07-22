@@ -81,6 +81,24 @@ format has one header line followed by data lines giving epoch time, latitude,
 longitude, and ROV depth; heading, speed, roll, pitch, and heave are not present
 in USBL tracking data and are output as 0.0.
 
+Program mbswath2las: New program that exports swath bathymetry soundings to LAS 1.4
+point cloud files, one point per valid (unflagged) beam, allowing swath bathymetry to
+be loaded directly into LAS/LIDAR-oriented point cloud viewers, GIS packages, and
+processing pipelines (e.g. CloudCompare, QGIS, PDAL) that do not otherwise read MBIO
+formats. By default sounding positions are written as geographic longitude/latitude
+in decimal degrees (WGS84); a projected coordinate system may instead be specified so
+that positions are written as easting/northing in meters.
+
+Build system: Continued work to allow MB-System to build on Windows, extending fixes
+made previously to the CMake configuration and to src/mbtrn and src/mbtrnav. This
+round of changes covers the non-TRN libraries and programs: src/gsf (CMakeLists.txt
+changes only, no code changes required), src/mbio (mb_defaults.c, mb_mem.c, and
+mbsys_kmbes.c), src/gmt, and src/mbaux, src/bsio, and src/surf, where the Windows
+shim for XDR is now built as its own library, libmb_xdr_win32, within src/mbaux.
+Also updated src/mbgrd2ltf, src/mbmesh, src/otps, and src/photo to build consistently
+on MacOs, Linux, and Windows, along with a number of general CMake project-structure
+fixes.
+
 Library mbview: Fixed a memory-management bug in route handling in which deleting the
 last point of a route (removing the whole route) shifted the internal route array down
 without first freeing the deleted route's own point/segment arrays and without clearing
@@ -120,6 +138,36 @@ loading navigation for every subsequent file in the same session. Fixed a leak a
 potential crash on the (rare) memory allocation failure path when importing files. Fixed
 the title bar of the Error dialog (previously showed "dialogShell_error") and corrected
 a garbled status message ("Reading data list...").
+
+Program mbnavadjust (and the mbnavadjustmerge and mbnavadjustfine tools that share its
+project I/O and data structures): Fixed a bug in which deleting a tie point used a
+stale, unrelated global variable instead of the tie actually being deleted, corrupting
+which tie was removed and, in one call path, capable of an out-of-bounds write into the
+crossings array. Fixed a wide-ranging set of missing bounds checks in the project file
+reader, which previously trusted the file's own record counts and array indices to size
+loops and index fixed-size per-crossing and per-section arrays, and used unbounded string
+conversions into fixed-size path buffers - a corrupted or hand-edited project file could
+overflow multiple buffers. Fixed a bug in which removing a file from a project (via
+mbnavadjustmerge) left remaining sections' file/section identity fields stale, able to
+silently misattribute sections to the wrong file. Fixed a memory leak in which a file's
+section array was allocated with the standard C library and freed with an MB-System
+function that only recognizes memory it allocated itself, so the free silently did
+nothing. Fixed three sites in mbnavadjustmerge where a newly grown crossing's file
+references were read before being assigned, an out-of-range crossing could be added
+with no validation, and a failed allocation was not checked before the new crossing was
+used. Fixed four missing-brace bugs that caused a visualization update function to run
+unconditionally regardless of whether a visualization window was ever open. Fixed a
+command-line tool (mbnavadjustfine) build break caused by a call with the wrong number
+of arguments, a numeric option that corrupted adjacent settings and always aborted the
+program, an uninitialized pointer used in an error message, a per-crossing memory leak,
+continuing an alignment computation after detecting invalid input, and a divide-by-zero
+when every sounding in a section was flagged. Fixed a project-merging command that
+validated and updated the wrong internal counter, and a project list display that never
+showed survey-vs-survey "block" comparisons. Also fixed a missing dialog title, a
+silent failure to write cached triangulation data, an unchecked allocation before use,
+several unbounded command-line path arguments, a dead duplicate-crossing check, an
+undefined-behavior fclose() on a failed file open (7 sites), and a display counter that
+was always zero.
 
 The bugs described above were identified and fixed with the assistance of the AI coding
 assistant Claude Sonnet 5 (Anthropic, model claude-sonnet-5), operating as Claude Code
