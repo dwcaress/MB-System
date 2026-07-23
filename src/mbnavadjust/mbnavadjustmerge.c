@@ -103,9 +103,9 @@
 #define MOD_MODE_INSERT_DISCONTINUITY 47
 #define MOD_MODE_REMOVE_DISCONTINUITY 48
 #define MOD_MODE_MERGE_SURVEYS 49
-#define MOD_MODE_REIMPORT_FILE 50
-#define MOD_MODE_REIMPORT_SURVEY 51
-#define MOD_MODE_REIMPORT_ALL_FILES 52
+#define MOD_MODE_UPDATE_FILE 50
+#define MOD_MODE_UPDATE_SURVEY 51
+#define MOD_MODE_UPDATE_ALL_FILES 52
 #define MOD_MODE_TRIANGULATE 53
 #define MOD_MODE_TRIANGULATE_SECTION 54
 #define MOD_MODE_UNSET_SHORT_SECTION_TIES 55
@@ -195,9 +195,9 @@ static char usage_message[] =
     "\t--insert-discontinuity=file:section\n"
     "\t--remove-discontinuity=file:section\n"
     "\t--merge-surveys=survey1:survey2\n"
-    "\t--reimport-file=file\n"
-    "\t--reimport-survey=survey\n"
-    "\t--reimport-all-files\n"
+    "\t--update-file=file\n"
+    "\t--update-survey=survey\n"
+    "\t--update-all-files\n"
     "\t--import-tie-list=file\n"
     "\t--export-tie-list=file\n"
     "\t--triangulate\n"
@@ -294,9 +294,9 @@ int main(int argc, char **argv) {
                                     {"insert-discontinuity", required_argument, NULL, 0},
                                     {"remove-discontinuity", required_argument, NULL, 0},
                                     {"merge-surveys", required_argument, NULL, 0},
-                                    {"reimport-file", required_argument, NULL, 0},
-                                    {"reimport-survey", required_argument, NULL, 0},
-                                    {"reimport-all-files", no_argument, NULL, 0},
+                                    {"update-file", required_argument, NULL, 0},
+                                    {"update-survey", required_argument, NULL, 0},
+                                    {"update-all-files", no_argument, NULL, 0},
                                     {"import-tie-list", required_argument, NULL, 0},
                                     {"export-tie-list", required_argument, NULL, 0},
                                     {"triangulate", no_argument, NULL, 0},
@@ -1326,41 +1326,42 @@ int main(int argc, char **argv) {
       }
 
       /*-------------------------------------------------------
-       * Reimport file (or survey or all files)
-          --reimport-file=file
-          --reimport-survey=survey
-          --reimport-all-files */
-      else if (strcmp("reimport-file", options[option_index].name) == 0) {
+       * Update beam flags for a file (or survey or all files) to match
+          the current processed version of the swath data
+          --update-file=file
+          --update-survey=survey
+          --update-all-files */
+      else if (strcmp("update-file", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
           int nscan;
           if ((nscan = sscanf(optarg, "%d", &mods[num_mods].file1)) == 1) {
-            mods[num_mods].mode = MOD_MODE_REIMPORT_FILE;
+            mods[num_mods].mode = MOD_MODE_UPDATE_FILE;
             num_mods++;
           }
         }
         else {
-          fprintf(stderr, "Maximum number of mod commands reached:\n\tskip-unset-crossings command ignored\n\n");
+          fprintf(stderr, "Maximum number of mod commands reached:\n\tupdate-file command ignored\n\n");
         }
       }
-      else if (strcmp("reimport-survey", options[option_index].name) == 0) {
+      else if (strcmp("update-survey", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
           int nscan;
           if ((nscan = sscanf(optarg, "%d", &mods[num_mods].file1)) == 1) {
-            mods[num_mods].mode = MOD_MODE_REIMPORT_SURVEY;
+            mods[num_mods].mode = MOD_MODE_UPDATE_SURVEY;
             num_mods++;
           }
         }
         else {
-          fprintf(stderr, "Maximum number of mod commands reached:\n\tskip-unset-crossings command ignored\n\n");
+          fprintf(stderr, "Maximum number of mod commands reached:\n\tupdate-survey command ignored\n\n");
         }
       }
-      else if (strcmp("reimport-all-files", options[option_index].name) == 0) {
+      else if (strcmp("update-all-files", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
-          mods[num_mods].mode = MOD_MODE_REIMPORT_ALL_FILES;
+          mods[num_mods].mode = MOD_MODE_UPDATE_ALL_FILES;
           num_mods++;
         }
         else {
-          fprintf(stderr, "Maximum number of mod commands reached:\n\tskip-unset-crossings command ignored\n\n");
+          fprintf(stderr, "Maximum number of mod commands reached:\n\tupdate-all-files command ignored\n\n");
         }
       }
 
@@ -3628,39 +3629,39 @@ int main(int argc, char **argv) {
       }
       break;
 
-    case MOD_MODE_REIMPORT_FILE:
-      fprintf(stderr, "\nCommand reimport-file=%2.2d\n", mods[imod].file1);
-      status = mbnavadjust_reimport_file(verbose, &project_output, mods[imod].file1, &error);
+    case MOD_MODE_UPDATE_FILE:
+      fprintf(stderr, "\nCommand update-file=%2.2d\n", mods[imod].file1);
+      status = mbnavadjust_update_file(verbose, &project_output, mods[imod].file1, &error);
       break;
-    
-    case MOD_MODE_REIMPORT_SURVEY:
-      fprintf(stderr, "\nCommand reimport-survey=%2.2d\n", mods[imod].file1);
+
+    case MOD_MODE_UPDATE_SURVEY:
+      fprintf(stderr, "\nCommand update-survey=%2.2d\n", mods[imod].file1);
       for (int ifile = 0; ifile < project_output.num_files; ifile++) {
         struct mbna_file *file = &project_output.files[ifile];
         if (file->block == mods[imod].file1) {
-		  status = mbnavadjust_reimport_file(verbose, &project_output, ifile, &error);
+		  status = mbnavadjust_update_file(verbose, &project_output, ifile, &error);
 		  if (status == MB_SUCCESS) {
-			fprintf(stderr, "Reimported file %d of %d: %s\n", 
+			fprintf(stderr, "Updated beam flags for file %d of %d: %s\n",
 					  ifile, project_output.num_files, project_output.files[ifile].file);
 		  }
 		  else {
-			fprintf(stderr, "**FAILED to reimport file %d of %d: %s\n", 
+			fprintf(stderr, "**FAILED to update beam flags for file %d of %d: %s\n",
 					  ifile, project_output.num_files, project_output.files[ifile].file);
 		  }
 	    }
       }
       break;
-    
-    case MOD_MODE_REIMPORT_ALL_FILES:
-      fprintf(stderr, "\nCommand reimport-all-files\n");
+
+    case MOD_MODE_UPDATE_ALL_FILES:
+      fprintf(stderr, "\nCommand update-all-files\n");
       for (int ifile = 0; ifile < project_output.num_files; ifile++) {
-        status = mbnavadjust_reimport_file(verbose, &project_output, ifile, &error);
+        status = mbnavadjust_update_file(verbose, &project_output, ifile, &error);
         if (status == MB_SUCCESS) {
-          fprintf(stderr, "Reimported file %d of %d: %s\n", 
+          fprintf(stderr, "Updated beam flags for file %d of %d: %s\n",
           			ifile, project_output.num_files, project_output.files[ifile].file);
         }
         else {
-          fprintf(stderr, "**FAILED to reimport file %d of %d: %s\n", 
+          fprintf(stderr, "**FAILED to update beam flags for file %d of %d: %s\n",
           			ifile, project_output.num_files, project_output.files[ifile].file);
         }
       }

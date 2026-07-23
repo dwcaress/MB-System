@@ -517,7 +517,7 @@ int mbnavadjust_reference_unload(int verbose, void **swath, int *error);
 int mbnavadjust_refgrid_unload(int verbose, struct mbna_project *project, int *error);
 int mbnavadjust_import_data(int verbose, struct mbna_project *project, char *path, int format, bool import_single_survey, int *error);
 int mbnavadjust_import_file(int verbose, struct mbna_project *project, char *path, int format, bool firstfile, int *error);
-int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,int ifile, int *error);
+int mbnavadjust_update_file(int verbose, struct mbna_project *project,int ifile, int *error);
 int mbnavadjust_coverage_mask(int verbose, struct mbna_project *project, int ifile, int isection, int *error);
 int mbnavadjust_import_reference(int verbose, struct mbna_project *project, char *path, int *error);
 int mbnavadjust_findcrossings(int verbose, struct mbna_project *project, int *error);

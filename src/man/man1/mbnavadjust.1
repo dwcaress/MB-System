@@ -80,7 +80,14 @@ can be reversed manually using \fBmbset\fP, but then the user will
 unnecessarily complicating his or her efforts.
 
 A companion program \fBmbnavadjustmerge\fP can add \fBmbnavadjust\fP projects
-together or or modify \fBmbnavadjust\fP project settings. 
+together or modify \fBmbnavadjust\fP project settings. This includes updating
+the beam flags (which soundings are valid and which are ignored) already
+imported into a project's sections to match the current processed version of
+each swath file, using the \fB--update-file\fP, \fB--update-survey\fP, and
+\fB--update-all-files\fP options. This allows bathymetry re-edited with
+\fBmbclean\fP or \fBmbedit\fP after a file was already imported into the
+project - to remove bad soundings, for example - to be brought into the
+project without a full reimport of the file.
 
 The inversion for an optimal navigation which fits the offsets identified
 at matching features must also be reasonable. This is achieved by

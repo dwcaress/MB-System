@@ -22,7 +22,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
-- Version 5.8.3beta15    July 21, 2026
+- Version 5.8.3beta15    July 23, 2026
 - Version 5.8.3beta14    July 6, 2026
 - Version 5.8.3beta13    June 18, 2026
 - Version 5.8.3beta12    January 7, 2026
@@ -73,7 +73,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
-#### 5.8.3beta15 (July 21, 2026)
+#### 5.8.3beta15 (July 23, 2026)
 
 Program mbusbl2fnv: New program that converts a USBL (ultra-short baseline) ROV
 tracking CSV file to an MB-System fast navigation (fnv) text file. The input CSV
@@ -242,6 +242,25 @@ mbsslayout, mbsvpselect), and incorrect descriptions or default values (mb7k2jst
 mbclean, mbcopy, mbextractsegy, mbfilter, mbminirovnav, mbmosaic, mbpreprocess,
 mbrolltimelag, mbroutetime, mbset, mbsvplist, mbsvpselect, mbvoxelclean). This audit
 also surfaced the mbsslayout and mbpreprocess source-code bugs described above.
+
+Program mbnavadjustmerge: Added --update-file, --update-survey, and --update-all-files
+options that update the beam-validity flags in an mbnavadjust project's section data to
+match the current processed version of each swath file, matching pings by timestamp and
+copying over only the flag byte - the navigation, attitude, bathymetry, amplitude, and
+sidescan values already stored in the project are left untouched. This lets soundings
+newly flagged bad by re-editing a file (e.g. with mbclean or mbedit) after it was
+originally imported be excluded from the project without a full, riskier re-import of the
+file's bathymetry. If a matched ping's beam count no longer matches what is stored in the
+project, that ping's flags are left unchanged and a warning is printed rather than risk
+misapplying flags to the wrong beams; beams that never held real sounding geometry when
+originally imported are likewise left flagged null regardless of what the current
+processed file reports for that beam index, since marking such a placeholder beam as
+flagged-but-real would otherwise corrupt the scaled short-integer depth encoding used by
+the project's section file format. Every updated section's coverage mask and triangulated
+surface are automatically regenerated. These options replace an earlier, incomplete
+--reimport-file/--reimport-survey/--reimport-all-files implementation that instead
+substituted bathymetry, amplitude, and sidescan values wholesale from the reprocessed
+file; that implementation was never released and has been removed.
 
 The bugs described above were identified and fixed with the assistance of the AI coding
 assistant Claude Sonnet 5 (Anthropic, model claude-sonnet-5), operating as Claude Code

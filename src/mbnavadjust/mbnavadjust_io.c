@@ -5679,7 +5679,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
+int mbnavadjust_update_file(int verbose, struct mbna_project *project,
             int ifile, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -5690,7 +5690,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
 
   int status = MB_SUCCESS;
   char *error_message;
-  
+
   /* MBIO control parameters */
   const int pings = 1;
   const int lonflip = 0;
@@ -5702,7 +5702,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
   double speedmin = 0.0;
   double timegap = 1000000000.0;
 
-  /* mbio read and write values */
+  /* mbio read values - current processed file being read to obtain up to date beam flags */
   void *imbio_ptr = NULL;
   void *istore_ptr = NULL;
   int kind = MB_DATA_NONE;
@@ -5731,7 +5731,8 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
   double *ss = NULL;
   double *ssacrosstrack = NULL;
   double *ssalongtrack = NULL;
-	
+
+  /* mbio read/write values - existing project section data being updated with new flags */
   mb_path spath;
   void *smbio_ptr = NULL;
   void *sstore_ptr = NULL;
@@ -5770,24 +5771,26 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
   double beamwidth_ltrack = 0.0;
   bool beamwidths_set = false;
   int *bin_nbath = NULL;
-  double *bin_bath = NULL;
-  double *bin_bathacrosstrack = NULL;
-  double *bin_bathalongtrack = NULL;
   int side;
-  double port_time_d, stbd_time_d;
-  double angle, dt, alongtrackdistance, xtrackavg, xtrackmax;
+  double angle, xtrackavg, xtrackmax;
   int nxtrack;
+
+  /* section depth range accumulated from beams left valid after the flag update */
+  double section_depthmin = 0.0;
+  double section_depthmax = 0.0;
+  bool section_depth_set = false;
 
   mb_path ipath;
   int iformat;
-  int reimport_sections = 0;
-  int reimport_pings = 0;
-  double reimport_ping_maxtimediff = 100.0 * MB_ESF_MAXTIMEDIFF;
-  
+  int updated_sections = 0;
+  int updated_pings = 0;
+  int updated_flag_pings = 0;
+  double update_ping_maxtimediff = 100.0 * MB_ESF_MAXTIMEDIFF;
+
 
   /* if specified file id is valid for the project try to identify and open the current
   		processed data file, using the fbt file if possible */
-  bool reimport = false;
+  bool update = false;
   if (ifile >=  0 && ifile < project->num_files) {
 
     /* look for raw file first, then look for processed file and use if available */
@@ -5817,8 +5820,8 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
         strcpy(ipath, project->files[ifile].path);
       }
       iformat = project->files[ifile].format;
-      reimport = true;
-      
+      update = true;
+
       /* now check if the fbt file is available, and open it if possible */
       mb_path fbtpath;
       strncpy(fbtpath, ipath, sizeof(mb_path));
@@ -5830,12 +5833,12 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
 	  }
 	}
   }
-      
-	 /* if file can be reimported, do it */
-  if (reimport) {
+
+	 /* if the current processed file can be found and read, update beam flags from it */
+  if (update) {
 
     if (verbose > 0)
-      fprintf(stderr, "\n > Reimporting from format %d file: %s\n", iformat, ipath);
+      fprintf(stderr, "\n > Updating beam flags from format %d file: %s\n", iformat, ipath);
 
 	/* initialize reading the swath file */
 	*error = MB_ERROR_NO_ERROR;
@@ -5875,7 +5878,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
 	bool done = false;
 	if (*error != MB_ERROR_NO_ERROR) {
 	  done = true;
-	  reimport = false;
+	  update = false;
 	}
 		
 	/* loop over reading the current processed bathymetry */
@@ -5930,23 +5933,16 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
         int error_sensorhead = MB_ERROR_NO_ERROR;
         mb_sensorhead(verbose, imbio_ptr, istore_ptr, &sensorhead, &error_sensorhead);
 
-        /* if sonar is interferometric, bin the bathymetry */
+        /* if sonar is interferometric, bin the beam validity the same way section data was
+            binned into pseudo-beams at original import time, so that pseudo-beam indices
+            line up between this processed reading and the project's existing section pings */
         if (sonartype == MB_TOPOGRAPHY_TYPE_INTERFEROMETRIC) {
-          /* allocate bin arrays if needed */
+          /* allocate bin array if needed */
           if (bin_nbath == NULL) {
             status = mb_mallocd(verbose, __FILE__, __LINE__, project->bin_beams_bath * sizeof(int),
                     (void **)&bin_nbath, error);
-            status = mb_mallocd(verbose, __FILE__, __LINE__, project->bin_beams_bath * sizeof(double),
-                    (void **)&bin_bath, error);
-            status = mb_mallocd(verbose, __FILE__, __LINE__, project->bin_beams_bath * sizeof(double),
-                    (void **)&bin_bathacrosstrack, error);
-            status = mb_mallocd(verbose, __FILE__, __LINE__, project->bin_beams_bath * sizeof(double),
-                    (void **)&bin_bathalongtrack, error);
             for (int i = 0; i < project->bin_beams_bath; i++) {
               bin_nbath[i] = 0;
-              bin_bath[i] = 0.0;
-              bin_bathacrosstrack[i] = 0.0;
-              bin_bathalongtrack[i] = 0.0;
             }
           }
 
@@ -5966,76 +5962,43 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
           }
           if (xtrackavg > 0.25 * xtrackmax) {
             side = SIDE_STBD;
-            port_time_d = time_d;
           }
           else if (xtrackavg < -0.25 * xtrackmax) {
             side = SIDE_PORT;
-            stbd_time_d = time_d;
           }
           else {
             side = SIDE_FULLSWATH;
-            stbd_time_d = time_d;
           }
 
-          /* if side = PORT or FULLSWATH then initialize bin arrays */
+          /* if side = PORT or FULLSWATH then initialize bin array */
           if (side == SIDE_PORT || side == SIDE_FULLSWATH) {
             for (int i = 0; i < project->bin_beams_bath; i++) {
               bin_nbath[i] = 0;
-              bin_bath[i] = 0.0;
-              bin_bathacrosstrack[i] = 0.0;
-              bin_bathalongtrack[i] = 0.0;
             }
           }
 
-          /* bin the bathymetry */
+          /* bin the beam validity counts */
           for (int i = 0; i < beams_bath; i++) {
             if (mb_beam_ok(beamflag[i])) {
               /* get apparent acrosstrack beam angle and bin accordingly */
               angle = RTD * atan(bathacrosstrack[i] / (bath[i] - sensordepth));
               const int j = (int)floor((angle + 0.5 * project->bin_swathwidth + 0.5 * project->bin_pseudobeamwidth) /
                      project->bin_pseudobeamwidth);
-              /* fprintf(stderr,"i:%d bath:%f %f %f sensordepth:%f angle:%f j:%d\n",
-                 i,bath[i],bathacrosstrack[i],bathalongtrack[i],sensordepth,angle,j); */
               if (j >= 0 && j < project->bin_beams_bath) {
-                bin_bath[j] += bath[i];
-                bin_bathacrosstrack[j] += bathacrosstrack[i];
-                bin_bathalongtrack[j] += bathalongtrack[i];
                 bin_nbath[j]++;
               }
             }
           }
 
-          /* if side = STBD or FULLSWATH calculate output bathymetry
-              - add alongtrack offset to port data from previous ping */
+          /* if side = STBD or FULLSWATH calculate the output pseudo-beam flags */
           if (side == SIDE_STBD || side == SIDE_FULLSWATH) {
-            dt = port_time_d - stbd_time_d;
-            if (dt > 0.0 && dt < 0.5)
-              alongtrackdistance = -(port_time_d - stbd_time_d) * speed / 3.6;
-            else
-              alongtrackdistance = 0.0;
             beams_bath = project->bin_beams_bath;
             for (int j = 0; j < project->bin_beams_bath; j++) {
-              /* fprintf(stderr,"j:%d angle:%f n:%d bath:%f %f %f\n",
-                 j,j*project->bin_pseudobeamwidth - 0.5 *
-                 project->bin_swathwidth,bin_nbath[j],bin_bath[j],bin_bathacrosstrack[j],bin_bathalongtrack[j]); */
-              if (bin_nbath[j] > 0) {
-                bath[j] = bin_bath[j] / bin_nbath[j];
-                bathacrosstrack[j] = bin_bathacrosstrack[j] / bin_nbath[j];
-                bathalongtrack[j] = bin_bathalongtrack[j] / bin_nbath[j];
-                beamflag[j] = MB_FLAG_NONE;
-                if (bin_bathacrosstrack[j] < 0.0)
-                  bathalongtrack[j] += alongtrackdistance;
-              }
-              else {
-                beamflag[j] = MB_FLAG_NULL;
-                bath[j] = 0.0;
-                bathacrosstrack[j] = 0.0;
-                bathalongtrack[j] = 0.0;
-              }
+              beamflag[j] = (bin_nbath[j] > 0) ? MB_FLAG_NONE : MB_FLAG_NULL;
             }
           }
 
-          /* if side = PORT set nonfatal error so that bathymetry isn't output until
+          /* if side = PORT set nonfatal error so that flags aren't output until
               the STBD data are read too */
           else if (side == SIDE_PORT) {
             *error = MB_ERROR_IGNORE;
@@ -6071,18 +6034,25 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
 		  snprintf(opath, sizeof(mb_path), "%s/tmp_nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, current_section);
 		  rename(opath, spath);
 		  status = mb_make_info(verbose, true, spath, MBF_MBLDEOIH, error);
-		  
+
+		  /* record the updated depth range for this section, if any valid beams remain */
+		  if (section_depth_set) {
+			struct mbna_section *depthsection = &project->files[ifile].sections[current_section];
+			depthsection->depthmin = section_depthmin;
+			depthsection->depthmax = section_depthmax;
+		  }
+
 		  if (verbose > 0) {
 			struct mbna_section *section = &project->files[ifile].sections[current_section];
-			fprintf(stderr, " > Reimport section %4.4d:%4.4d - pings updated and expected: %d %d\n", 
+			fprintf(stderr, " > Update section %4.4d:%4.4d - pings updated and expected: %d %d\n",
 				  ifile, current_section, current_section_num_pings, section->num_pings);
 		  }
-		  reimport_sections++;
-		  reimport_pings += current_section_num_pings;
+		  updated_sections++;
+		  updated_pings += current_section_num_pings;
 		  section_initialized = false;
 		  current_section_num_pings = 0;
         }
-        
+
         /* open new section if needed */
         if (!section_initialized && new_section >= 0) {
           /* open existing section file for reading */
@@ -6129,6 +6099,9 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
             section_initialized = true;
             current_section = new_section;
             section_saved = false;
+            section_depthmin = 0.0;
+            section_depthmax = 0.0;
+            section_depth_set = false;
 		  }
         }
 
@@ -6145,36 +6118,57 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
           }
               		
           if (status == MB_SUCCESS) {
-            /* write out the ping substituting the bathymetry arrays read from the current 
-               processed file for the arrays read from the existing section file, but only
-               after correcting for any change in sensordepth between the original section
-               and the current processed data */
-            if (fabs(stime_d - time_d) <= reimport_ping_maxtimediff) {
-              double sensordepthcorrection = ssensordepth - sensordepth;
-              for (int i = 0; i < beams_bath; i++) {
-                bath[i] += sensordepthcorrection;
+            /* update beam flags from the current processed data when timestamps match,
+               but always write out the section's own position, bathymetry, amplitude,
+               and sidescan values unchanged - only the flag byte may change */
+            const bool have_processed_match = (fabs(stime_d - time_d) <= update_ping_maxtimediff);
+            if (have_processed_match) {
+              if (beams_bath == sbeams_bath) {
+                /* only adjust beams that already carry real geometry in the section
+                   (sbath != 0) - beams with sbath == 0 are structural placeholders
+                   (never had a real sounding) and must stay MB_FLAG_NULL, since
+                   mbsys_ldeoih_insert() treats any non-null flag as "real data to
+                   scale and encode": marking a placeholder beam non-null would make
+                   it write a bogus scaled depth and can blow out the ping's whole
+                   depth_scale (as every null slot's implicit "depth" is -sensordepth) */
+                for (int i = 0; i < sbeams_bath; i++) {
+                  if (sbath[i] != 0.0) {
+                    sbeamflag[i] = beamflag[i];
+                  }
+                }
+                updated_flag_pings++;
               }
-			  /* write out data */
-			  status = mb_put_all(verbose, ombio_ptr, sstore_ptr,
-					  true, MB_DATA_DATA, stime_i, stime_d, snavlon, snavlat,
-					  sspeed, sheading, beams_bath, 0, 0,
-					  beamflag, bath, amp,
-					  bathacrosstrack, bathalongtrack,
-					  ss, ssacrosstrack, ssalongtrack, comment, error);
-			  if (status == MB_SUCCESS) {
-				current_section_num_pings++;
-			  }
-		    }
-		    
-		    /* if section timestamp later than processed file timestamp then save the section data */
-		    else if (stime_d > time_d) {
-		      section_saved = true;
-              fprintf(stderr, "%s:%d:%s: Skipped writing ping to section: status:%d timediff:%f\n", 
+              else {
+                fprintf(stderr, "Warning: beam count mismatch (processed:%d section:%d) at time %.3f"
+                        " - flags not updated for this ping\n", beams_bath, sbeams_bath, stime_d);
+              }
+            }
+
+            /* if section timestamp later than processed file timestamp then save the section
+               data and retry it against the next processed ping */
+            if (!have_processed_match && stime_d > time_d) {
+              section_saved = true;
+              fprintf(stderr, "%s:%d:%s: Skipped writing ping to section: status:%d timediff:%f\n",
             		__FILE__, __LINE__, __FUNCTION__, status, (stime_d - time_d));
 		    }
-		    
-		    /* if section timestamp earlier than processed file timestamp then write out the existing section data */
+
+		    /* otherwise write out the section ping now, with any updated flags */
 		    else {
+			  /* accumulate the depth range over beams left valid by the flag update */
+			  for (int i = 0; i < sbeams_bath; i++) {
+			    if (mb_beam_ok(sbeamflag[i]) && sbath[i] != 0.0) {
+			      if (!section_depth_set) {
+			        section_depthmin = sbath[i];
+			        section_depthmax = sbath[i];
+			        section_depth_set = true;
+			      }
+			      else {
+			        section_depthmin = MIN(section_depthmin, sbath[i]);
+			        section_depthmax = MAX(section_depthmax, sbath[i]);
+			      }
+			    }
+			  }
+
 			  /* write out data */
 			  status = mb_put_all(verbose, ombio_ptr, sstore_ptr,
 					  true, MB_DATA_DATA, stime_i, stime_d, snavlon, snavlat,
@@ -6187,7 +6181,7 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
 			  }
 		    }
           }
-          
+
           /* else write out ping from processed file */
           else {
             fprintf(stderr, "%s:%d:%s: Not writing ping to section because it is missing from the existing section file:\n", 
@@ -6215,36 +6209,67 @@ int mbnavadjust_reimport_file(int verbose, struct mbna_project *project,
 		snprintf(opath, sizeof(mb_path), "%s/tmp_nvs_%4.4d_%4.4d.mb71", project->datadir, ifile, current_section);
 		rename(opath, spath);
 		status = mb_make_info(verbose, true, spath, MBF_MBLDEOIH, error);
-		
+
+		/* record the updated depth range for this section, if any valid beams remain */
+		if (section_depth_set) {
+		  struct mbna_section *depthsection = &project->files[ifile].sections[current_section];
+		  depthsection->depthmin = section_depthmin;
+		  depthsection->depthmax = section_depthmax;
+		}
+
 		if (verbose > 0) {
           struct mbna_section *section = &project->files[ifile].sections[current_section];
-          fprintf(stderr, " > Reimport section %4.4d:%4.4d - pings updated and expected: %d %d\n", 
+          fprintf(stderr, " > Update section %4.4d:%4.4d - pings updated and expected: %d %d\n",
 				ifile, current_section, current_section_num_pings, section->num_pings);
 		}
-		reimport_sections++;
-		reimport_pings += current_section_num_pings;
+		updated_sections++;
+		updated_pings += current_section_num_pings;
 		section_initialized = false;
 		current_section_num_pings = 0;
 	  }
 	} /* loop over input data and variable done */
-	
-	/* close the file that was reimported */
+
+	/* close the file whose flags were being read for the update */
 	status = mb_close(verbose, &imbio_ptr, error);
+
+	/* deallocate the interferometric-sonar binning array, if it was used */
+	if (bin_nbath != NULL) {
+	  status = mb_freed(verbose, __FILE__, __LINE__, (void **)&bin_nbath, error);
+	}
+
+	/* the set of valid soundings may have changed, so recompute the coverage mask and
+	   regenerate the triangulated surface for every section of this file */
+	struct mbna_file *ufile = &project->files[ifile];
+	for (int isection = 0; isection < ufile->num_sections; isection++) {
+	  struct mbna_section *usection = &ufile->sections[isection];
+	  for (int i = 0; i < MBNA_MASK_DIM * MBNA_MASK_DIM; i++) {
+	    usection->coverage[i] = 0;
+	  }
+	  status = mbnavadjust_coverage_mask(verbose, project, ifile, isection, error);
+
+	  mb_pathplus trianglefile;
+	  snprintf(trianglefile, sizeof(mb_pathplus), "%s/nvs_%4.4d_%4.4d.mb71.tri", project->datadir, ifile, isection);
+	  remove(trianglefile);
+	  struct mbna_swathraw *swathraw = NULL;
+	  struct swath *swath = NULL;
+	  status = mbnavadjust_section_load(verbose, project, ifile, isection, (void **)&swathraw, (void **)&swath, error);
+	  status = mbnavadjust_section_unload(verbose, (void **)&swathraw, (void **)&swath, error);
+	}
 
 	if (verbose > 0) {
       mb_path message;
-      snprintf(message, sizeof(mb_path), " > Updated total %d pings in %d sections\n", 
-    			reimport_pings, reimport_sections);
+      snprintf(message, sizeof(mb_path), " > Updated beam flags in %d of %d pings across %d sections\n",
+    			updated_flag_pings, updated_pings, updated_sections);
       mbnavadjust_info_add(verbose, project, message, true, error);
 	}
-  } /* reimport */
-  
-  /* file cannot be reimported */
+  } /* update */
+
+  /* file's current processed version cannot be found and read, so flags cannot be updated */
   else {
     *error = MB_ERROR_BAD_DATA;
     status = MB_FAILURE;
     mb_pathplus message;
-    snprintf(message, sizeof(mb_pathplus), "Unable to reimport format %d file: %s\n", iformat, ipath);
+    snprintf(message, sizeof(mb_pathplus), "Unable to update beam flags for format %d file: %s\n", iformat, ipath);
     mbnavadjust_info_add(verbose, project, message, true, error);
   }
 
