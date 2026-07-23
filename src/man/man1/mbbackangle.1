@@ -10,6 +10,7 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbbackangle\fP [\fB\-A\fIkind\fP
+\fB\-B\fImode\fP[\fI/ssbeamwidth\fP[\fI/ssdepression\fP]]
 \fB\-C\fP \fB\-D\fP \fB\-F\fIformat\fP
 \fB\-G\fIkind/angle/min/max/nx/ny\fP
 \fB\-I\fIfile\fP
@@ -105,6 +106,20 @@ Christian do Santos Ferreira
 Determines if beam amplitude (\fIkind\fP = 1)
 and/or sidescan (\fIkind\fP = 2) data will be processed.
 Default: both amplitude and sidescan data are processed.
+.TP
+.B \-B
+\fImode\fP[\fI/ssbeamwidth\fP[\fI/ssdepression\fP]]
+.br
+Sets the algorithm used to represent the sonar's beam pattern when
+generating the amplitude and/or sidescan versus grazing angle tables.
+If \fImode\fP = 0, an empirical correction is used: the table is defined
+directly by the average amplitude or sidescan value observed at each
+grazing angle bin. If \fImode\fP = 1, a parametric model combining a
+Gaussian transmit/receive beam pattern with spherical spreading is used
+instead; in this case \fIssbeamwidth\fP sets the effective angular beam
+width in degrees of the sidescan sonar, and \fIssdepression\fP sets the
+sonar's depression angle from the horizontal in degrees.
+Default: \fImode\fP = 0; \fIssbeamwidth\fP = 50.0; \fIssdepression\fP = 20.0.
 .TP
 .B \-C
 Normally, \fBmbbackangle\fP produces a table of amplitude vs

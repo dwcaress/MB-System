@@ -230,6 +230,10 @@ int main(int argc, char **argv) {
 				    (char *)strstr(format_description, "Informal Description:");
 				const char *format_attributes_ptr =
 				    (char *)strstr(format_description, "Attributes:");
+				if (format_informal_ptr == nullptr || format_attributes_ptr == nullptr ||
+				    format_attributes_ptr < format_informal_ptr) {
+					continue;
+				}
 				char format_name[MB_DESCRIPTION_LENGTH];
         		size_t format_name_len = MIN(MB_DESCRIPTION_LENGTH, strlen(format_description) - strlen(format_informal_ptr));
 				strncpy(format_name, format_description, MIN(format_name_len, sizeof(format_description)));

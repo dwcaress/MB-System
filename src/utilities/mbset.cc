@@ -906,39 +906,39 @@ int main(int argc, char **argv) {
 			/* metadata insertion */
 			if (!found && strncmp(pargv[i], "METAVESSEL:", 11) == 0) {
         found = true;
-				strcpy(process.mbp_meta_vessel, &(pargv[i][11]));
+				snprintf(process.mbp_meta_vessel, sizeof(process.mbp_meta_vessel), "%s", &(pargv[i][11]));
 			}
 			if (!found && strncmp(pargv[i], "METAINSTITUTION:", 16) == 0) {
         found = true;
-				strcpy(process.mbp_meta_institution, &(pargv[i][16]));
+				snprintf(process.mbp_meta_institution, sizeof(process.mbp_meta_institution), "%s", &(pargv[i][16]));
 			}
 			if (!found && strncmp(pargv[i], "METAPLATFORM:", 13) == 0) {
         found = true;
-				strcpy(process.mbp_meta_platform, &(pargv[i][13]));
+				snprintf(process.mbp_meta_platform, sizeof(process.mbp_meta_platform), "%s", &(pargv[i][13]));
 			}
 			if (!found && strncmp(pargv[i], "METASONARVERSION:", 17) == 0) {
         found = true;
-				strcpy(process.mbp_meta_sonarversion, &(pargv[i][17]));
+				snprintf(process.mbp_meta_sonarversion, sizeof(process.mbp_meta_sonarversion), "%s", &(pargv[i][17]));
 			}
 			if (!found && strncmp(pargv[i], "METASONAR:", 10) == 0) {
         found = true;
-				strcpy(process.mbp_meta_sonar, &(pargv[i][10]));
+				snprintf(process.mbp_meta_sonar, sizeof(process.mbp_meta_sonar), "%s", &(pargv[i][10]));
 			}
 			if (!found && strncmp(pargv[i], "METACRUISEID:", 13) == 0) {
         found = true;
-				strcpy(process.mbp_meta_cruiseid, &(pargv[i][13]));
+				snprintf(process.mbp_meta_cruiseid, sizeof(process.mbp_meta_cruiseid), "%s", &(pargv[i][13]));
 			}
 			if (!found && strncmp(pargv[i], "METACRUISENAME:", 15) == 0) {
         found = true;
-				strcpy(process.mbp_meta_cruisename, &(pargv[i][15]));
+				snprintf(process.mbp_meta_cruisename, sizeof(process.mbp_meta_cruisename), "%s", &(pargv[i][15]));
 			}
 			if (!found && strncmp(pargv[i], "METAPIINSTITUTION:", 18) == 0) {
         found = true;
-				strcpy(process.mbp_meta_piinstitution, &(pargv[i][18]));
+				snprintf(process.mbp_meta_piinstitution, sizeof(process.mbp_meta_piinstitution), "%s", &(pargv[i][18]));
 			}
 			if (!found && strncmp(pargv[i], "METACLIENT:", 11) == 0) {
         found = true;
-				strcpy(process.mbp_meta_client, &(pargv[i][11]));
+				snprintf(process.mbp_meta_client, sizeof(process.mbp_meta_client), "%s", &(pargv[i][11]));
 			}
 			if (!found && strncmp(pargv[i], "METASVCORRECTED:", 16) == 0) {
         found = true;
@@ -966,7 +966,7 @@ int main(int argc, char **argv) {
 			}
 			if (!found && strncmp(pargv[i], "METAPI:", 7) == 0) {
         found = true;
-				strcpy(process.mbp_meta_pi, &(pargv[i][7]));
+				snprintf(process.mbp_meta_pi, sizeof(process.mbp_meta_pi), "%s", &(pargv[i][7]));
 			}
 			if (!found && strncmp(pargv[i], "METAHEADINGBIAS:", 16) == 0) {
         found = true;

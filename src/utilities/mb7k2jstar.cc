@@ -793,7 +793,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* save current_output_file */
-				strcpy(current_output_file, output_file);
+				snprintf(current_output_file, sizeof(current_output_file), "%s", output_file);
 
 				/* get pointers to data storage */
 				omb_io_ptr = (struct mb_io_struct *)ombio_ptr;

@@ -191,6 +191,12 @@ int main(int argc, char **argv) {
 	int *timelaghistogram = nullptr;
 	status &= mb_reallocd(verbose, __FILE__, __LINE__, nlag * sizeof(int), (void **)&timelaghistogram, &error);
 
+	if (status != MB_SUCCESS) {
+		fprintf(stderr, "\nUnable to allocate cross correlation arrays for nlag=%d\n", nlag);
+		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+		exit(MB_ERROR_MEMORY_FAIL);
+	}
+
 	if (verbose > 0) {
 		fprintf(stderr, "Program %s parameters:\n", program_name);
 		fprintf(stderr, "  Input:                           %s\n", swathdata);
@@ -223,6 +229,11 @@ int main(int argc, char **argv) {
 			nroll_alloc += MBRTL_ALLOC_CHUNK;
 			status &= mb_reallocd(verbose, __FILE__, __LINE__, nroll_alloc * sizeof(double), (void **)&roll_time_d, &error);
 			status &= mb_reallocd(verbose, __FILE__, __LINE__, nroll_alloc * sizeof(double), (void **)&roll_roll, &error);
+			if (status != MB_SUCCESS) {
+				fprintf(stderr, "\nUnable to allocate roll data arrays\n");
+				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+				exit(MB_ERROR_MEMORY_FAIL);
+			}
 		}
 		if (nroll == 0 || time_d > roll_time_d[nroll - 1]) {
 			roll_time_d[nroll] = time_d;
@@ -345,6 +356,11 @@ int main(int argc, char **argv) {
 				status &= mb_reallocd(verbose, __FILE__, __LINE__, nslope_alloc * sizeof(double), (void **)&slope_time_d, &error);
 				status &= mb_reallocd(verbose, __FILE__, __LINE__, nslope_alloc * sizeof(double), (void **)&slope_slope, &error);
 				status &= mb_reallocd(verbose, __FILE__, __LINE__, nslope_alloc * sizeof(double), (void **)&slope_roll, &error);
+				if (status != MB_SUCCESS) {
+					fprintf(stderr, "\nUnable to allocate slope data arrays\n");
+					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+					exit(MB_ERROR_MEMORY_FAIL);
+				}
 			}
 			if (nslope == 0 || time_d > slope_time_d[nslope - 1]) {
 				slope_time_d[nslope] = time_d;

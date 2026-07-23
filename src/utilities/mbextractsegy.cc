@@ -965,7 +965,7 @@ int main(int argc, char **argv) {
           }
 
           /* check for new section plot */
-          if (nwrite > 0 && (nwrite % nshotmax) == 0)
+          if (nwrite > 0 && (nwrite % nshotmax) == 0 && nplot < MBES_NUM_PLOT_MAX - 1)
             nplot++;
 
           /* get seafloor depth min and max */

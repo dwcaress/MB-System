@@ -1200,10 +1200,10 @@ int main(int argc, char **argv) {
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&gsndgnum_alloc, &error);
 
 	for (int i = 0; i < nfile; i++) {
-		mb_freed(verbose, __FILE__, __LINE__, (void **)&(files[nfile - 1].ping_time_d), &error);
-		mb_freed(verbose, __FILE__, __LINE__, (void **)&(files[nfile - 1].pingmultiplicity), &error);
-		mb_freed(verbose, __FILE__, __LINE__, (void **)&(files[nfile - 1].ping_altitude), &error);
-		mb_freed(verbose, __FILE__, __LINE__, (void **)&(files[nfile - 1].sndg), &error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&(files[i].ping_time_d), &error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&(files[i].pingmultiplicity), &error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&(files[i].ping_altitude), &error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&(files[i].sndg), &error);
 	}
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&files, &error);
 

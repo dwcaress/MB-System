@@ -544,8 +544,12 @@ int mbcopy_xse_to_elacmk2(int verbose, struct mbsys_xse_struct *istore, struct m
       ostore->beams[i].angle = 0;
     }
     ostore->beams_bath = istore->beams[istore->mul_num_beams - 1].beam;
+    if (ostore->beams_bath >= MBSYS_ELACMK2_MAXBEAMS)
+      ostore->beams_bath = MBSYS_ELACMK2_MAXBEAMS - 1;
     for (int i = 0; i < istore->mul_num_beams; i++) {
       const int j = ostore->beams_bath - istore->beams[i].beam;
+      if (j < 0 || j >= MBSYS_ELACMK2_MAXBEAMS)
+        continue;
       ostore->beams[j].bath = 100 * istore->beams[i].depth;
       ostore->beams[j].bath_acrosstrack = -100 * istore->beams[i].lateral;
       ostore->beams[j].bath_alongtrack = 100 * istore->beams[i].along;

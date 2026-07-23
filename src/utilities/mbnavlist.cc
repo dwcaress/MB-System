@@ -139,7 +139,7 @@ int main(int argc, char **argv) {
 	int aux_nav_channel = -1;
 	bool ascii = true;
 	bool segment = false;
-	char segment_tag[MB_PATH_MAXLINE];
+	char segment_tag[MB_PATH_MAXLINE] = "";
 	bool use_projection = false;
 
 	/* set up the default list controls

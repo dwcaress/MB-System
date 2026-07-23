@@ -363,6 +363,12 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	if (decimatex <= 0) {
+		fprintf(outfp, "\nBad trace decimation: %d specified...\n", decimatex);
+		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+		exit(MB_ERROR_BAD_PARAMETER);
+	}
+
 	int error = MB_ERROR_NO_ERROR;
 
 	tracemode_t sinftracemode = MBSEGYPSD_USESHOT;
@@ -419,13 +425,11 @@ int main(int argc, char **argv) {
 
 
 	/* calculate implied grid parameters */
-	char gridfile[MB_PATH_MAXLINE] = "";
-	strcpy(gridfile, fileroot);
-	strcat(gridfile, ".grd");
+	char gridfile[MB_PATH_MAXLINE+10] = "";
+	snprintf(gridfile, sizeof(gridfile), "%s.grd", fileroot);
 
-	char psdfile[MB_PATH_MAXLINE] = "";
-	strcpy(psdfile, fileroot);
-	strcat(psdfile, "_psd.txt");
+	char psdfile[MB_PATH_MAXLINE+10] = "";
+	snprintf(psdfile, sizeof(psdfile), "%s_psd.txt", fileroot);
 
 	const int ntraces =
 		chanend >= chanstart
@@ -464,6 +468,12 @@ int main(int argc, char **argv) {
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, ngridy * sizeof(double), (void **)&spsdtot, &error);
 	double *wpsdtot = nullptr;
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, ngridy * sizeof(double), (void **)&wpsdtot, &error);
+
+	if (status != MB_SUCCESS) {
+		fprintf(outfp, "\nUnable to allocate grid/psd arrays\n");
+		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+		exit(MB_ERROR_MEMORY_FAIL);
+	}
 
 	/* zero working psd array */
 	for (int iy = 0; iy < ngridy; iy++) {
@@ -600,7 +610,7 @@ int main(int argc, char **argv) {
 				double tracemax = trace[0];
 				for (int i = 0; i < traceheader.nsamps; i++) {
 					tracemin = std::min(tracemin, static_cast<double>(trace[i]));
-					tracemax = std::max(tracemin, static_cast<double>(trace[i]));
+					tracemax = std::max(tracemax, static_cast<double>(trace[i]));
 				}
 
 				if ((verbose == 0 && nread % 250 == 0) || (nread % 25 == 0)) {

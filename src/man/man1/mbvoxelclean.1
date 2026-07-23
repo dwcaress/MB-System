@@ -36,6 +36,8 @@ Version 5.0
 .br
 \fB\-\-ignore-occupied\fP
 .br
+\fB\-\-neighborhood\fP=\fIvalue\fP
+.br
 \fB\-\-range-minimum\fP=\fIvalue\fP
 .br
 \fB\-\-range-maximum\fP=\fIvalue\fP
@@ -129,7 +131,8 @@ page. Default: \fIdatalist\fP = "datalist.mb-1".
 .br
 Sets the data format id of the input file specified with the \fB\-\-input\fP option.
 If \fIformat\fP < 0, then the input file specified
-with the \fB\-I\fP option will actually contain a list of input swath sonar
+with the \fB\-\-input\fP option will actually contain a list of input
+swath sonar
 data files. This program uses the \fBMBIO\fP library
 and will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
@@ -169,12 +172,22 @@ empty are are left unflagged.
 \fB\-\-unflag-occupied\fP
 .br
 If this option is specified then any flagged soundings in voxels considered
-occupied are unflagged. This is the default behavior.
+occupied are unflagged.
 .TP
 \fB\-\-ignore-occupied\fP
 .br
 If this option is specified then any flagged soundings in voxels considered
 occupied are left flagged. This is the default behavior.
+.TP
+\fB\-\-neighborhood\fP=\fIvalue\fP
+.br
+Sets the size, in voxels, of the neighborhood used to expand the region of
+voxels considered occupied. Any voxel within \fIvalue\fP voxels (in the x, y,
+and z directions) of a voxel already classified as occupied is also treated
+as occupied, even if its own sounding count is below the occupancy threshold.
+This allows the empty-voxel flagging test to be relaxed in the neighborhood of
+dense regions of soundings. Default: \fIvalue\fP = 0 (no neighborhood
+expansion).
 .TP
 \fB\-\-range-minimum\fP=\fImin-range\fP
 .br

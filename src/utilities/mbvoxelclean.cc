@@ -196,7 +196,7 @@ int main(int argc, char **argv) {
         {"format", required_argument, nullptr, 0},
         {"voxel-size", required_argument, nullptr, 0},
         {"occupy-threshold", required_argument, nullptr, 0},
-        {"count-flagged", required_argument, nullptr, 0},
+        {"count-flagged", no_argument, nullptr, 0},
         {"flag-empty", no_argument, nullptr, 0},
         {"ignore-empty", no_argument, nullptr, 0},
         {"unflag-occupied", no_argument, nullptr, 0},
@@ -972,7 +972,7 @@ int main(int argc, char **argv) {
       const int n_voxel_x = (x_max - x_min) / voxel_size_xy + 3;
       x_min = x_min - 0.5 * voxel_size_xy;
       x_max = x_min + n_voxel_x * voxel_size_xy;
-      const int n_voxel_y = (x_max - y_min) / voxel_size_xy + 3;
+      const int n_voxel_y = (y_max - y_min) / voxel_size_xy + 3;
       y_min = y_min - 0.5 * voxel_size_xy;
       y_max = y_min + n_voxel_y * voxel_size_xy;
       const int n_voxel_z = (z_max - z_min) / voxel_size_z + 3;

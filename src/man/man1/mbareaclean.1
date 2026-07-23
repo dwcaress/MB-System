@@ -10,7 +10,7 @@ Version 5.0
 \fBmbareaclean\fP  \fB\-R\fP\fIwest/east/south/north\fP  \fB\-S\fP\fIbinsize\fP
 [\fB\-D\fP\fIthreshold\fP \fB\-F\fP\fIformat\fP \fB\-I\fP\fIinfile\fP
 \fB\-B \-G \-H \-M\fP\fIthreshold\fP[\fI/nmin\fP[\fI/nmax\fP]]
-\fB\-N\fP[-]\fImin_beam\fP[\fI/maxbeam\fP] \fB\-T\fP\fItype\fP \-V\fP]
+\fB\-N\fP[-]\fImin_beam\fP[\fI/maxbeam\fP] \fB\-P\fP\fIarg\fP \fB\-T\fP\fItype\fP \-V\fP]
 
 .SH DESCRIPTION
 \fBmbareaclean\fP identifies and flags artifacts in swath sonar
@@ -178,6 +178,17 @@ lay below \fImin_beam\fP. So for a Simrad EM1002 sounder with 111 beams \fB\-N-3
 beam numbers 1 to 29 and 82 to 111.
 All good soundings, regardless of beam, will be included in the calculations of median, mean
 and standard deviation for the bin.
+.TP
+.B \-P
+\fIarg\fP
+.br
+Turns on use of a plane-fit test for the soundings in each bin, as an
+alternative to the \fB\-M\fP and \fB\-D\fP tests. An argument value is
+required by the command line parser but its contents are not currently
+used. Specifying \fB\-P\fP suppresses the default behavior of enabling
+the median filter (\fB\-M\fP) when no test option is given, so if
+\fB\-P\fP is used by itself, no median or standard deviation filtering
+will be applied to the data.
 .TP
 .B \-R
 \fIwest/east/south/north\fP

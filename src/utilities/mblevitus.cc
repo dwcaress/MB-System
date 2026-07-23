@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
       }
       case 'O':
       case 'o':
-        sscanf(optarg, "%s", ofile);
+        sscanf(optarg, "%1023s", ofile);
         break;
       case '?':
         errflg = true;
@@ -166,10 +166,19 @@ int main(int argc, char **argv) {
 
 #ifdef _WIN32
   /* Find the path to the bin directory and from it, the location of the Levitus file */
-  char levitusfile[PATH_MAX + 1];
+  char levitusfile[PATH_MAX + 1] = "";
 
-  GMT_runtime_bindir_win32(levitusfile);
+  if (GMT_runtime_bindir_win32(levitusfile) == nullptr) {
+    fprintf(stderr, "\nUnable to determine executable directory (path too long)\n");
+    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+    exit(MB_ERROR_OPEN_FAIL);
+  }
   char *pch = strrchr(levitusfile, '\\');
+  if (pch == nullptr) {
+    fprintf(stderr, "\nUnable to locate Levitus database relative to executable path <%s>\n", levitusfile);
+    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+    exit(MB_ERROR_OPEN_FAIL);
+  }
   pch[0] = '\0';
   strcat(levitusfile, "\\share\\mbsystem\\LevitusAnnual82.dat");
 #endif
@@ -219,7 +228,9 @@ int main(int argc, char **argv) {
   else
     ilon = (int)longitude;
   const double lon_actual = ilon + 0.5;
-  const int ilat = (int)(latitude + 90.0);
+  int ilat = (int)(latitude + 90.0);
+  if (ilat > 179)
+    ilat = 179;
   const double lat_actual = ilat - 89.5;
   fprintf(outfp, "\nLocation for mean annual water velocity profile:\n");
   fprintf(outfp, "  Requested:  %6.4f longitude   %6.4f latitude\n", longitude, latitude);

@@ -61,7 +61,7 @@ constexpr char usage_message[] =
 int main(int argc, char **argv) {
 	int verbose = 0;
 	int mode = MBMAPSCALE_MODE_WGS72;
-	double latitude;
+	double latitude = 0.0;
 	int status = MB_SUCCESS;
 
 	/* process argument list */

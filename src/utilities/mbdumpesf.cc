@@ -67,8 +67,9 @@ int main(int argc, char **argv) {
 	int verbose = 0;
 
 	/* MBIO read and write control parameters */
-	char iesffile[MB_PATH_MAXLINE];
-	char oesffile[MB_PATH_MAXLINE];
+	char iesffile[MB_PATH_MAXLINE] = "";
+	char oesffile[MB_PATH_MAXLINE] = "";
+	bool input_specified = false;
 	omode_t omode = OUTPUT_TEXT;
 	FILE *iesffp = nullptr;
 	FILE *oesffp = nullptr;
@@ -106,10 +107,11 @@ int main(int argc, char **argv) {
 					help = true;
 				}
 				else if (strcmp("input", options[option_index].name) == 0) {
-					strcpy(iesffile, optarg);
+					snprintf(iesffile, sizeof(iesffile), "%s", optarg);
+					input_specified = true;
 				}
 				else if (strcmp("output", options[option_index].name) == 0) {
-					strcpy(oesffile, optarg);
+					snprintf(oesffile, sizeof(oesffile), "%s", optarg);
 					omode = OUTPUT_ESF;
 				}
 				else if (strcmp("ignore-unflag", options[option_index].name) == 0) {
@@ -137,6 +139,7 @@ int main(int argc, char **argv) {
 			case 'I':
 			case 'i':
 				sscanf(optarg, "%1023s", iesffile);
+				input_specified = true;
 				break;
 			case '?':
 				errflg = true;
@@ -193,6 +196,13 @@ int main(int argc, char **argv) {
 	const int byteswapped = mb_swap_check();
 
 	int error = MB_ERROR_NO_ERROR;
+
+	if (!input_specified) {
+		fprintf(stderr, "\nNo input edit save file specified\n");
+		fprintf(stderr, "usage: %s\n", usage_message);
+		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+		exit(MB_ERROR_OPEN_FAIL);
+	}
 
 	/* check that esf file exists */
 	struct stat file_status;

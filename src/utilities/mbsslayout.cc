@@ -55,6 +55,7 @@ constexpr int MBSSLAYOUT_ALLOC_NUM = 128;
 constexpr int MBSSLAYOUT_LINE_OFF = 0;
 constexpr int MBSSLAYOUT_LINE_TIME = 1;
 constexpr int MBSSLAYOUT_LINE_ROUTE = 2;
+constexpr int MBSSLAYOUT_LINE_POSITION = 3;
 
 constexpr int MBSSLAYOUT_LAYOUT_FLATBOTTOM = 0;
 constexpr int MBSSLAYOUT_LAYOUT_3DTOPO = 1;
@@ -193,6 +194,7 @@ int main(int argc, char **argv) {
 	                                  {"output-source", required_argument, nullptr, 0},
 	                                  {"line-time-list", required_argument, nullptr, 0},
 	                                  {"line-position-list", required_argument, nullptr, 0},
+	                                  {"line-route", required_argument, nullptr, 0},
 	                                  {"line-range-threshold", required_argument, nullptr, 0},
 	                                  {"line-name1", required_argument, nullptr, 0},
 	                                  {"line-name2", required_argument, nullptr, 0},
@@ -236,6 +238,13 @@ int main(int argc, char **argv) {
 	                                  {"time-latency-apply-all-ancilliary", no_argument, nullptr, 0},
 	                                  {"time-latency-apply-survey", no_argument, nullptr, 0},
 	                                  {"time-latency-apply-all", no_argument, nullptr, 0},
+	                                  {"filter", required_argument, nullptr, 0},
+	                                  {"filter-apply-nav", no_argument, nullptr, 0},
+	                                  {"filter-apply-sensordepth", no_argument, nullptr, 0},
+	                                  {"filter-apply-altitude", no_argument, nullptr, 0},
+	                                  {"filter-apply-heading", no_argument, nullptr, 0},
+	                                  {"filter-apply-attitude", no_argument, nullptr, 0},
+	                                  {"filter-apply-all-ancilliary", no_argument, nullptr, 0},
 	                                  {nullptr, 0, nullptr, 0}};
 
 	mb_path read_file = "datalist.mb-1";
@@ -248,6 +257,8 @@ int main(int argc, char **argv) {
 	mb_path line_time_list = "";
 	int line_mode = MBSSLAYOUT_LINE_OFF;
 	mb_path line_route = "";
+	mb_path line_position_list = "";
+	double line_range_threshold = 50.0;
 	mb_path topo_grid_file = "";
 	int layout_mode = MBSSLAYOUT_LAYOUT_FLATBOTTOM;
 	int ss_altitude_mode = MBSSLAYOUT_ALTITUDE_ALTITUDE;
@@ -316,7 +327,7 @@ int main(int argc, char **argv) {
 				/*-------------------------------------------------------
 				 * Define input file and format (usually a datalist) */
 				else if (strcmp("input", options[option_index].name) == 0) {
-					strcpy(read_file, optarg);
+					snprintf(read_file, sizeof(read_file), "%s", optarg);
 				}
 				else if (strcmp("format", options[option_index].name) == 0) {
 					/* n = */ sscanf(optarg, "%d", &format);
@@ -344,30 +355,38 @@ int main(int argc, char **argv) {
                      || (strcmp("line_name1", options[option_index].name) == 0)
 				         || (strcmp("output-name1", options[option_index].name) == 0)
                      || (strcmp("output_name1", options[option_index].name) == 0)) {
-					strcpy(line_name1, optarg);
+					snprintf(line_name1, sizeof(line_name1), "%s", optarg);
 				}
 				else if ((strcmp("line-name2", options[option_index].name) == 0)
                     || (strcmp("line_name2", options[option_index].name) == 0)
 				        || (strcmp("output-name2", options[option_index].name) == 0)
                     || (strcmp("output_name2", options[option_index].name) == 0)) {
-					strcpy(line_name2, optarg);
+					snprintf(line_name2, sizeof(line_name2), "%s", optarg);
 				}
 				/*-------------------------------------------------------
 				 * Define survey line specification */
 				else if ((strcmp("line-time-list", options[option_index].name) == 0)
                      || (strcmp("line_time_list", options[option_index].name) == 0)){
-					strcpy(line_time_list, optarg);
+					snprintf(line_time_list, sizeof(line_time_list), "%s", optarg);
 					line_mode = MBSSLAYOUT_LINE_TIME;
 				}
 				else if (strcmp("line-route", options[option_index].name) == 0) {
-					strcpy(line_route, optarg);
+					snprintf(line_route, sizeof(line_route), "%s", optarg);
 					line_mode = MBSSLAYOUT_LINE_ROUTE;
+				}
+				else if (strcmp("line-position-list", options[option_index].name) == 0) {
+					snprintf(line_position_list, sizeof(line_position_list), "%s", optarg);
+					line_mode = MBSSLAYOUT_LINE_POSITION;
+				}
+				else if ((strcmp("line-range-threshold", options[option_index].name) == 0)
+                    || (strcmp("line_range_threshold", options[option_index].name) == 0)) {
+					/* n = */ sscanf(optarg, "%lf", &line_range_threshold);
 				}
 				/*-------------------------------------------------------
 				 * Define sidescan layout algorithm parameters */
 				else if ((strcmp("topo-grid-file", options[option_index].name) == 0)
                     || (strcmp("topo_grid_file", options[option_index].name) == 0)) {
-					strcpy(topo_grid_file, optarg);
+					snprintf(topo_grid_file, sizeof(topo_grid_file), "%s", optarg);
 					layout_mode = MBSSLAYOUT_LAYOUT_3DTOPO;
 					ss_altitude_mode = MBSSLAYOUT_ALTITUDE_TOPO_GRID;
 				}
@@ -403,7 +422,7 @@ int main(int argc, char **argv) {
 				 * Define source of navigation - could be an external file
 				 * or an internal asynchronous record */
 				else if (strcmp("nav-file", options[option_index].name) == 0) {
-					strcpy(nav_file, optarg);
+					snprintf(nav_file, sizeof(nav_file), "%s", optarg);
 					nav_mode = MBSSLAYOUT_MERGE_FILE;
 				}
 				else if (strcmp("nav-file-format", options[option_index].name) == 0) {
@@ -421,7 +440,7 @@ int main(int argc, char **argv) {
 				 * Define source of sensordepth - could be an external file
 				 * or an internal asynchronous record */
 				else if (strcmp("sensordepth-file", options[option_index].name) == 0) {
-					strcpy(sensordepth_file, optarg);
+					snprintf(sensordepth_file, sizeof(sensordepth_file), "%s", optarg);
 					sensordepth_mode = MBSSLAYOUT_MERGE_FILE;
 				}
 				else if (strcmp("sensordepth-file-format", options[option_index].name) == 0) {
@@ -439,7 +458,7 @@ int main(int argc, char **argv) {
 				 * Define source of heading - could be an external file
 				 * or an internal asynchronous record */
 				else if (strcmp("heading-file", options[option_index].name) == 0) {
-					strcpy(heading_file, optarg);
+					snprintf(heading_file, sizeof(heading_file), "%s", optarg);
 					heading_mode = MBSSLAYOUT_MERGE_FILE;
 				}
 				else if (strcmp("heading-file-format", options[option_index].name) == 0) {
@@ -460,7 +479,7 @@ int main(int argc, char **argv) {
 
 				/* altitude-file */
 				else if (strcmp("altitude-file", options[option_index].name) == 0) {
-					strcpy(altitude_file, optarg);
+					snprintf(altitude_file, sizeof(altitude_file), "%s", optarg);
 					altitude_mode = MBSSLAYOUT_MERGE_FILE;
 				}
 
@@ -482,7 +501,7 @@ int main(int argc, char **argv) {
 				 * Define source of attitude - could be an external file
 				 * or an internal asynchronous record */
 				else if (strcmp("attitude-file", options[option_index].name) == 0) {
-					strcpy(attitude_file, optarg);
+					snprintf(attitude_file, sizeof(attitude_file), "%s", optarg);
 					attitude_mode = MBSSLAYOUT_MERGE_FILE;
 				}
 				else if (strcmp("attitude-file-format", options[option_index].name) == 0) {
@@ -504,7 +523,7 @@ int main(int argc, char **argv) {
 					soundspeed_mode = MBSSLAYOUT_MERGE_OFF;
 				}
 				else if (strcmp("soundspeed-file", options[option_index].name) == 0) {
-					strcpy(soundspeed_file, optarg);
+					snprintf(soundspeed_file, sizeof(soundspeed_file), "%s", optarg);
 					soundspeed_mode = MBSSLAYOUT_MERGE_FILE;
 				}
 				else if (strcmp("soundspeed-file-format", options[option_index].name) == 0) {
@@ -521,7 +540,7 @@ int main(int argc, char **argv) {
 				 * will be applied to - nav, sensordepth, heading, attitude,
 				 * or all. */
 				else if (strcmp("time-latency-file", options[option_index].name) == 0) {
-					strcpy(time_latency_file, optarg);
+					snprintf(time_latency_file, sizeof(time_latency_file), "%s", optarg);
 					time_latency_mode = MB_SENSOR_TIME_LATENCY_MODEL;
 				}
 				else if (strcmp("time-latency-file-format", options[option_index].name) == 0) {
@@ -545,7 +564,7 @@ int main(int argc, char **argv) {
 					time_latency_apply = time_latency_apply | MBSSLAYOUT_TIME_LATENCY_APPLY_ATTITUDE;
 				}
 				else if (strcmp("time-latency-apply-altitude", options[option_index].name) == 0) {
-					time_latency_apply = time_latency_apply | MBSSLAYOUT_TIME_LATENCY_APPLY_ATTITUDE;
+					time_latency_apply = time_latency_apply | MBSSLAYOUT_TIME_LATENCY_APPLY_ALTITUDE;
 				}
 				else if (strcmp("time-latency-apply-all-ancilliary", options[option_index].name) == 0) {
 					time_latency_apply = MBSSLAYOUT_TIME_LATENCY_APPLY_ALL_ANCILLIARY;
@@ -575,7 +594,7 @@ int main(int argc, char **argv) {
 					filter_apply = filter_apply | MBSSLAYOUT_TIME_LATENCY_APPLY_ATTITUDE;
 				}
 				else if (strcmp("filter-apply-altitude", options[option_index].name) == 0) {
-					filter_apply = filter_apply | MBSSLAYOUT_TIME_LATENCY_APPLY_ATTITUDE;
+					filter_apply = filter_apply | MBSSLAYOUT_TIME_LATENCY_APPLY_ALTITUDE;
 				}
 				else if (strcmp("filter-apply-all-ancilliary", options[option_index].name) == 0) {
 					filter_apply = MBSSLAYOUT_TIME_LATENCY_APPLY_ALL_ANCILLIARY;
@@ -640,7 +659,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "dbg2       line_mode:                  %d\n", line_mode);
 			fprintf(stderr, "dbg2       line_time_list:             %s\n", line_time_list);
 			fprintf(stderr, "dbg2       line_route:                 %s\n", line_route);
-			// fprintf(stderr, "dbg2       line_range_threshold:       %f\n", line_range_threshold);
+			fprintf(stderr, "dbg2       line_range_threshold:       %f\n", line_range_threshold);
 			fprintf(stderr, "dbg2  Sidescan Layout Algorithm Parameters:\n");
 			fprintf(stderr, "dbg2       layout_mode:                %d\n", layout_mode);
 			fprintf(stderr, "dbg2       topo_grid_file:             %s\n", topo_grid_file);
@@ -728,6 +747,10 @@ int main(int argc, char **argv) {
 		else if (line_mode == MBSSLAYOUT_LINE_ROUTE) {
 			fprintf(stderr, "     line_mode:                Lines defined by route waypoint position list.\n");
 			fprintf(stderr, "     line_route:               %s\n", line_route);
+		}
+		else if (line_mode == MBSSLAYOUT_LINE_POSITION) {
+			fprintf(stderr, "     line_mode:                Lines defined by waypoint position list.\n");
+			fprintf(stderr, "     line_position_list:       %s\n", line_position_list);
 		}
 		fprintf(stderr, "Sidescan Layout Algorithm Parameters:\n");
 		if (layout_mode == MBSSLAYOUT_LAYOUT_FLATBOTTOM) {
@@ -1062,7 +1085,6 @@ int main(int argc, char **argv) {
 	double mtodeglat;
 	double rangelast;
 	/* survey line variables */
-	double line_range_threshold = 50.0;
 	double topo;
 	int nroutepoint = 0;
 	int nroutepointalloc = 0;
@@ -1213,6 +1235,68 @@ int main(int argc, char **argv) {
 		if (verbose > 0) {
 			/* output info on file output */
 			fprintf(stderr, "\nImported %d waypoints from route file: %s\n", nroutepoint, line_route);
+		}
+	}
+
+	/* if specified read waypoint position list file */
+	else if (line_mode == MBSSLAYOUT_LINE_POSITION) {
+		/* open the input file */
+		FILE *fp = fopen(line_position_list, "r");
+		if (fp == nullptr) {
+			error = MB_ERROR_OPEN_FAIL;
+			status = MB_FAILURE;
+			fprintf(stderr, "\nUnable to open position list file <%s> for reading\n", line_position_list);
+			exit(status);
+		}
+		char *result = nullptr;
+		while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
+			if (comment[0] != '#') {
+				const int nget = sscanf(comment, "%lf %lf", &navlon, &navlat);
+				const bool point_ok = nget >= 2;
+
+				/* if good data check for need to allocate more space */
+				if (point_ok && nroutepoint + 1 > nroutepointalloc) {
+					nroutepointalloc += MBSSLAYOUT_ALLOC_NUM;
+					status =
+					    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelon, &error);
+					status &=
+					    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelat, &error);
+					status &= mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routeheading,
+					                     &error);
+					status &=
+					    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(int), (void **)&routewaypoint, &error);
+					if (status != MB_SUCCESS) {
+						char *message;
+						mb_error(verbose, error, &message);
+						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
+						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+						exit(error);
+					}
+				}
+
+				/* add good point to the waypoint list */
+				if (point_ok && nroutepointalloc > nroutepoint + 1) {
+					routelon[nroutepoint] = navlon;
+					routelat[nroutepoint] = navlat;
+					routeheading[nroutepoint] = 0.0;
+					routewaypoint[nroutepoint] = MBSSLAYOUT_ROUTE_WAYPOINT_SIMPLE;
+					nroutepoint++;
+				}
+			}
+		}
+
+		fclose(fp);
+		fp = nullptr;
+
+		/* set starting values */
+		activewaypoint = 1;
+		mb_coor_scale(verbose, routelat[activewaypoint], &mtodeglon, &mtodeglat);
+		rangelast = 1000 * line_range_threshold;
+
+		/* output status */
+		if (verbose > 0) {
+			/* output info on file output */
+			fprintf(stderr, "\nImported %d waypoints from position list file: %s\n", nroutepoint, line_position_list);
 		}
 	}
 
@@ -1821,7 +1905,7 @@ int main(int argc, char **argv) {
 	/* sound speed */
 	if (n_soundspeed > 0 && n_soundspeed_alloc >= n_soundspeed) {
 		/* apply time latency correction called for on the command line */
-		if ((time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) && (time_latency_apply & MBSSLAYOUT_TIME_LATENCY_APPLY_ATTITUDE)) {
+		if ((time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) && (time_latency_apply & MBSSLAYOUT_TIME_LATENCY_APPLY_SOUNDSPEED)) {
 			if (verbose > 0)
 				fprintf(stderr, "Applying time latency correction from command line to %d soundspeed data using mode %d\n",
 				        n_soundspeed, time_latency_mode);
@@ -1829,6 +1913,45 @@ int main(int argc, char **argv) {
 			                      time_latency_num, time_latency_time_d, time_latency_time_latency, &error);
 		}
 		fprintf(stderr, "Attitude first sample after: %f %f\n", soundspeed_time_d[0], soundspeed_soundspeed[0]);
+	}
+
+	/* filter position */
+	if ((filter_apply & MBSSLAYOUT_TIME_LATENCY_APPLY_NAV) && n_nav > 0 && n_nav_alloc >= n_nav) {
+		if (verbose > 0)
+			fprintf(stderr, "Applying %f second Gaussian filter to %d position data\n", filter_length, n_nav);
+		mb_apply_time_filter(verbose, n_nav, nav_time_d, nav_navlon, filter_length, &error);
+		mb_apply_time_filter(verbose, n_nav, nav_time_d, nav_navlat, filter_length, &error);
+	}
+
+	/* filter sensordepth */
+	if ((filter_apply & MBSSLAYOUT_TIME_LATENCY_APPLY_SENSORDEPTH) && n_sensordepth > 0 &&
+	    n_sensordepth_alloc >= n_sensordepth) {
+		if (verbose > 0)
+			fprintf(stderr, "Applying %f second Gaussian filter to %d sensordepth data\n", filter_length, n_sensordepth);
+		mb_apply_time_filter(verbose, n_sensordepth, sensordepth_time_d, sensordepth_sensordepth, filter_length, &error);
+	}
+
+	/* filter heading */
+	if ((filter_apply & MBSSLAYOUT_TIME_LATENCY_APPLY_HEADING) && n_heading > 0 && n_heading_alloc >= n_heading) {
+		if (verbose > 0)
+			fprintf(stderr, "Applying %f second Gaussian filter to %d heading data\n", filter_length, n_heading);
+		mb_apply_time_filter(verbose, n_heading, heading_time_d, heading_heading, filter_length, &error);
+	}
+
+	/* filter altitude */
+	if ((filter_apply & MBSSLAYOUT_TIME_LATENCY_APPLY_ALTITUDE) && n_altitude > 0 && n_altitude_alloc >= n_altitude) {
+		if (verbose > 0)
+			fprintf(stderr, "Applying %f second Gaussian filter to %d altitude data\n", filter_length, n_altitude);
+		mb_apply_time_filter(verbose, n_altitude, altitude_time_d, altitude_altitude, filter_length, &error);
+	}
+
+	/* filter attitude */
+	if ((filter_apply & MBSSLAYOUT_TIME_LATENCY_APPLY_ATTITUDE) && n_attitude > 0 && n_attitude_alloc >= n_attitude) {
+		if (verbose > 0)
+			fprintf(stderr, "Applying %f second Gaussian filter to %d attitude data\n", filter_length, n_attitude);
+		mb_apply_time_filter(verbose, n_attitude, attitude_time_d, attitude_roll, filter_length, &error);
+		mb_apply_time_filter(verbose, n_attitude, attitude_time_d, attitude_pitch, filter_length, &error);
+		mb_apply_time_filter(verbose, n_attitude, attitude_time_d, attitude_heave, filter_length, &error);
 	}
 
 	/*-------------------------------------------------------------------*/
@@ -2103,7 +2226,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* check waypoint position list */
-				else if (line_mode == MBSSLAYOUT_LINE_ROUTE) {
+				else if (line_mode == MBSSLAYOUT_LINE_ROUTE || line_mode == MBSSLAYOUT_LINE_POSITION) {
 					const double dx = (navlon - routelon[activewaypoint]) / mtodeglon;
 					const double dy = (navlat - routelat[activewaypoint]) / mtodeglat;
 					const double range = sqrt(dx * dx + dy * dy);
@@ -2712,7 +2835,7 @@ int main(int argc, char **argv) {
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routewaypoint, &error);
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routetime_d, &error);
 	}
-	else if (line_mode == MBSSLAYOUT_LINE_ROUTE) {
+	else if (line_mode == MBSSLAYOUT_LINE_ROUTE || line_mode == MBSSLAYOUT_LINE_POSITION) {
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routelon, &error);
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routelat, &error);
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routeheading, &error);

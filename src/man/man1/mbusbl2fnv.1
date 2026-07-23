@@ -1,0 +1,135 @@
+.TH mbusbl2fnv 1 "2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbusbl2fnv\fP \- converts a USBL (ultra-short baseline) ROV tracking CSV
+file to an MB-System fast navigation (fnv) text file.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbusbl2fnv\fP [\fB\-I\fP\fIusbl.csv\fP] [\fB\-O\fP\fIoutput.fnv\fP] [\fB\-V\fP] [\fB\-H\fP]
+.br
+\fBmbusbl2fnv\fP [\fB\-\-input\fP=\fIusbl.csv\fP] [\fB\-\-output\fP=\fIoutput.fnv\fP]
+[\fB\-\-verbose\fP] [\fB\-\-help\fP]
+
+.SH DESCRIPTION
+\fBmbusbl2fnv\fP converts a USBL (ultra-short baseline) ROV tracking CSV
+file to an MB-System fast navigation (fnv) ASCII text file.
+
+The input CSV file is expected to have one header line followed by
+data lines, each containing four comma-separated fields:
+
+.nf
+  field 0: epoch time (Unix epoch seconds)
+  field 1: latitude (decimal degrees, positive north)
+  field 2: longitude (decimal degrees, positive east)
+  field 3: ROV depth (meters, positive down) \- used as draft
+.fi
+
+Heading, speed, roll, pitch, and heave are not present in the USBL
+tracking data and are output as 0.0 in the fnv file.
+
+Lines are treated as data only if their first non-whitespace character
+could begin a number (a digit, \fB+\fP, \fB\-\fP, or \fB.\fP); this allows
+the header line and any comment lines beginning with \fB#\fP to be
+skipped automatically. Lines that do not parse into exactly four
+numeric fields are skipped with a warning in verbose mode. Records
+with retrograde (non-increasing) timestamps are also skipped.
+
+The fnv format is a tab-separated ASCII text file. The first line is a
+comment beginning with \fB##\fP that names the columns. Each subsequent
+data line contains the following tab-separated fields:
+
+.nf
+  yyyy mm dd hh mm ss.ssssss
+  epoch_seconds
+  longitude (deg)
+  latitude (deg)
+  heading (deg)
+  speed (km/hr)
+  draft (m)
+  roll (deg)
+  pitch (deg)
+  heave (m)
+.fi
+
+The date and time in the first field are space-delimited within their
+tab field.
+
+If no input file is specified, \fBmbusbl2fnv\fP reads from standard
+input. If no output file is specified, it writes to standard output.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+
+.SH OPTIONS
+.TP
+.B \-H
+.TP
+.B \-\-help
+Prints the program name, usage, and a description of the expected
+USBL CSV field layout, then exits.
+.TP
+.B \-V
+.TP
+.B \-\-verbose
+Increases the verbosity of \fBmbusbl2fnv\fP. With this option the
+program prints the input and output file names to standard error when
+they are opened, reports any malformed or retrograde-timestamp lines
+that are skipped, and prints a final summary of the number of records
+read, written, and skipped.
+.TP
+.B \-I \fIusbl.csv\fP
+.TP
+.B \-\-input=\fIusbl.csv\fP
+Sets the path of the input USBL tracking CSV file. If this option is
+not given, the program reads from standard input.
+.TP
+.B \-O \fIoutput.fnv\fP
+.TP
+.B \-\-output=\fIoutput.fnv\fP
+Sets the path of the output fnv file. If this option is not given,
+the program writes to standard output.
+
+.SH EXAMPLES
+Convert a USBL tracking CSV file to an fnv file:
+.PP
+.nf
+    mbusbl2fnv \-I usbl_track.csv \-O rov.fnv
+.fi
+.PP
+Use standard input and output (e.g. within a pipeline):
+.PP
+.nf
+    cat usbl_track.csv | mbusbl2fnv > rov.fnv
+.fi
+.PP
+Convert with verbose progress reporting:
+.PP
+.nf
+    mbusbl2fnv \-\-verbose \-\-input=usbl_track.csv \-\-output=rov.fnv
+.fi
+.PP
+Use the fnv output to supply ROV navigation to \fBmbpreprocess\fP:
+.PP
+.nf
+    mbusbl2fnv \-I usbl_track.csv \-O rov.fnv
+    mbpreprocess \-\-format=<format> \-\-input=datalist.mb\-1 \\
+        \-\-nav\-file=rov.fnv \-\-nav\-file\-format=9 \\
+        \-\-sensordepth\-file=rov.fnv \-\-sensordepth\-file\-format=9
+.fi
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbnavlab2fnv\fP(1), \fBmbfnv2navlab\fP(1), \fBmbpreprocess\fP(1), \fBmbprocess\fP(1)
+
+.SH BUGS
+Heading, speed, roll, pitch, and heave are not available in USBL
+tracking data and are always written as 0.0 in the fnv output.
+Applications that require these values should obtain them from another
+navigation or attitude source.
+
+The optional port and starboard swath edge columns present in some fnv
+files are not written by \fBmbusbl2fnv\fP, as no swath geometry is
+available from USBL tracking data.

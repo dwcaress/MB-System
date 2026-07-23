@@ -40,7 +40,7 @@ Sets the format for the input swath data using
 This program uses the \fBMBIO\fP library and will read any swath
 format supported by \fBMBIO\fP. A list of the swath data formats
 currently supported by \fBMBIO\fP and their identifier values
-is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
+is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 0.
 .TP
 .B \-H
 This "help" flag cause the program to print out a description
@@ -65,6 +65,29 @@ format supported by \fBMBIO\fP. A list of the swath data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIinfile\fP = "datalist.mb-1".
+.TP
+.B \-O
+\fIwaypointtimefile\fP
+.br
+Sets the name of the output file listing, for each route waypoint
+reached, the longitude, latitude, and time (in decimal epoch seconds)
+at which the survey passed that waypoint.
+Default: \fIwaypointtimefile\fP is the input file or datalist name
+(set with the \fB\-I\fP option) with the suffix "_wpttime_d.txt" appended.
+.TP
+.B \-R
+\fIroutefile\fP
+.br
+Sets the name of the input \fBMBgrdviz\fP route file containing the
+planned survey waypoints against which the survey data are checked.
+This option is required.
+.TP
+.B \-U
+\fIrangethreshold\fP
+.br
+Sets the distance in meters that the survey navigation must come within
+a route waypoint for that waypoint to be considered reached.
+Default: \fIrangethreshold\fP = 25.0.
 .TP
 .B \-V
 The \fB\-V\fP option causes \fBmbroutetime\fP to print out status messages.

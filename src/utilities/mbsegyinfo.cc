@@ -169,9 +169,8 @@ int main(int argc, char **argv) {
 
 	FILE *output = nullptr;
 	if (output_usefile) {
-		char output_file[MB_PATH_MAXLINE];
-		strcpy(output_file, read_file);
-		strcat(output_file, ".sinf");
+		char output_file[MB_PATH_MAXLINE + 5];
+		snprintf(output_file, sizeof(output_file), "%s.sinf", read_file);
 		if ((output = fopen(output_file, "w")) == nullptr)
 			output = stream;
 	}

@@ -216,7 +216,7 @@ static int parse_kongsberg_filename(const char *basename, FileRecord *rec) {
     {
         int seq_i, y_i, t_i;
         char tail[max_path];
-        if (sscanf(basename, "%4d_%8d_%6d%s", &seq_i, &y_i, &t_i, tail) == 4) {
+        if (sscanf(basename, "%4d_%8d_%6d%4095s", &seq_i, &y_i, &t_i, tail) == 4) {
             /* Verify the fields occupy contiguous digit runs by checking
              * positions manually. */
             const char *p = basename;

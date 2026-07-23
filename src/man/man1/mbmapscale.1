@@ -1,0 +1,92 @@
+.TH mbmapscale 1 "2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbmapscale\fP \- Outputs the local scaling between geographic coordinates
+and meters east and north at a specified latitude.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbmapscale\fP [\fB\-L\fIlatitude\fP \fB\-A \-V \-H\fP]
+
+.SH DESCRIPTION
+The program \fBmbmapscale\fP outputs the scaling between geographic
+coordinates (longitude and latitude) and local meters east and north
+at a user defined latitude. This is useful for converting between
+degrees and meters when working with local Cartesian approximations
+of swath data positions.
+
+By default the scaling is calculated using the WGS72 ellipsoid. If the
+\fB\-A\fP flag is given, the scaling is instead calculated using the 1866
+Clark Spheroid as employed by the AlvinXY local coordinate convention.
+
+The map scale is written to stdout in the form of meters per degree
+longitude and latitude, and the inverse (degrees per meter, i.e.
+"meters to degree").
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian do Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-H
+This "help" flag causes the program to print out a description
+of its operation and then exit immediately.
+.TP
+.B \-A
+Calculate the map scale using the 1866 Clark Spheroid as employed by
+the AlvinXY local coordinate convention, rather than the default WGS72
+ellipsoid.
+.TP
+.B \-L
+\fIlatitude\fP
+.br
+Sets the latitude (in decimal degrees, positive north) at which the
+map scale is calculated. If \fB\-L\fP is not specified, the scale is
+calculated at the equator (latitude 0.0).
+.TP
+.B \-V
+Normally, \fBmbmapscale\fP only prints out the calculated scale values.
+If the \fB\-V\fP flag is given, then \fBmbmapscale\fP works in a "verbose"
+mode and also outputs the program version and control parameters being
+used.
+
+.SH EXAMPLES
+Suppose one wishes to obtain the map scale at 36.8 degrees north
+latitude using the default WGS72 ellipsoid. The following command:
+ 	mbmapscale \-L36.8
+.br
+yields a result of the form:
+.nf
+
+Local scaling between degrees longitude and latitude and meters east and north:
+	Using WGS72 ellipsoid
+	Meters per degree longitude: 89244.230
+	Meters per degree latitude:  110973.870
+	Meters to degree longitude:  0.000011205
+	Meters to degree latitude:   0.000009011
+.fi
+
+Suppose instead one wishes to obtain the map scale at the same latitude
+using the AlvinXY (1866 Clark Spheroid) convention:
+ 	mbmapscale \-L36.8 \-A
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbtime\fP(1), \fBmbio\fP(1)
+
+.SH BUGS
+Never bugs, but perhaps our good friends, the terrestrial isopods.

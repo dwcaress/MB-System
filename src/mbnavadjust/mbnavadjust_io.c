@@ -3213,6 +3213,14 @@ int mbnavadjust_remove_file_by_id(int verbose, struct mbna_project *project,
 
   /* delete the file */
   struct mbna_file *file = &project->files[ifile];
+  /* drop the global ties held by this file's sections before the section
+      array is freed, so the project's global tie counts stay accurate */
+  for (int isection = 0; isection < file->num_sections; isection++) {
+    if (file->sections[isection].globaltie.status != MBNA_TIE_NONE) {
+      project->num_globalties--;
+      project->num_globalties_analyzed--;
+    }
+  }
   if (file->num_sections_alloc > 0 && file->sections != NULL) {
     /* file->sections is allocated with raw malloc()/realloc(), not
         mb_mallocd()/mb_reallocd(), so it must be freed with raw free() -
@@ -6471,7 +6479,8 @@ int mbnavadjust_reference_load(int verbose, struct mbna_project *project, int re
     fprintf(stderr, "dbg2       project->datadir:                       %s\n", project->datadir);
     fprintf(stderr, "dbg2       project->refgrid_status:                %d\n", project->refgrid_status);
     fprintf(stderr, "dbg2       refgrid_select:                         %d\n", refgrid_select);
-    fprintf(stderr, "dbg2       project->refgrid_names[refgrid_select]: %s\n", project->refgrid_names[project->refgrid_select]);
+    if (refgrid_select >= 0 && refgrid_select < project->num_refgrids)
+      fprintf(stderr, "dbg2       project->refgrid_names[refgrid_select]: %s\n", project->refgrid_names[refgrid_select]);
     fprintf(stderr, "dbg2       section:                                %p\n", section);
     fprintf(stderr, "dbg2       swath_ptr:                              %p  %p\n", swath_ptr, *swath_ptr);
   }
@@ -6488,7 +6497,7 @@ int mbnavadjust_reference_load(int verbose, struct mbna_project *project, int re
   }
 
   /* load reference grid if needed */
-  if (project->num_refgrids > 0 && refgrid_select < project->num_refgrids) {
+  if (project->num_refgrids > 0 && refgrid_select >= 0 && refgrid_select < project->num_refgrids) {
     mb_pathplusplus path;
     int grid_projection_mode;
     int nxy;
@@ -7275,18 +7284,24 @@ int mbnavadjust_tie_compare(const void *a, const void *b) {
   struct mbna_tie *tie_a = *((struct mbna_tie **)a);
   struct mbna_tie *tie_b = *((struct mbna_tie **)b);
 
+  const bool a_valid = tie_a->inversion_status != MBNA_INVERSION_NONE;
+  const bool b_valid = tie_b->inversion_status != MBNA_INVERSION_NONE;
+
   /* return according to the misfit magnitude */
-  if (tie_a->inversion_status != MBNA_INVERSION_NONE
-      && tie_b->inversion_status != MBNA_INVERSION_NONE) {
+  if (a_valid && b_valid) {
     if (tie_a->sigma_m > tie_b->sigma_m) {
       return(1);
-    } else {
+    } else if (tie_a->sigma_m < tie_b->sigma_m) {
       return(-1);
+    } else {
+      return(0);
     }
-  } else if (tie_a->inversion_status != MBNA_INVERSION_NONE) {
+  } else if (a_valid && !b_valid) {
     return(1);
-  } else {
+  } else if (!a_valid && b_valid) {
     return(-1);
+  } else {
+    return(0);
   }
 }
 /*--------------------------------------------------------------------*/
@@ -7297,18 +7312,24 @@ int mbnavadjust_globaltie_compare(const void *a, const void *b) {
   struct mbna_section *section_a = *((struct mbna_section **)a);
   struct mbna_section *section_b = *((struct mbna_section **)b);
 
+  const bool a_valid = section_a->globaltie.inversion_status != MBNA_INVERSION_NONE;
+  const bool b_valid = section_b->globaltie.inversion_status != MBNA_INVERSION_NONE;
+
   /* return according to the misfit magnitude */
-  if (section_a->globaltie.inversion_status != MBNA_INVERSION_NONE
-      && section_b->globaltie.inversion_status != MBNA_INVERSION_NONE) {
+  if (a_valid && b_valid) {
     if (section_a->globaltie.sigma_m > section_b->globaltie.sigma_m) {
       return(1);
-    } else {
+    } else if (section_a->globaltie.sigma_m < section_b->globaltie.sigma_m) {
       return(-1);
+    } else {
+      return(0);
     }
-  } else if (section_a->globaltie.inversion_status != MBNA_INVERSION_NONE) {
+  } else if (a_valid && !b_valid) {
     return(1);
-  } else {
+  } else if (!a_valid && b_valid) {
     return(-1);
+  } else {
+    return(0);
   }
 }
 

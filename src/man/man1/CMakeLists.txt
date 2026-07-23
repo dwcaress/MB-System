@@ -59,6 +59,7 @@ set(manpages
     mbm_xyplot.1
     mbmakedatalist.1
     mbmakeplatform.1
+    mbmapscale.1
     mbmesh.1
     mbminirovnav.1
     mbmosaic.1
@@ -85,6 +86,7 @@ set(manpages
     mbsystem.1
     mbtiff2png.1
     mbtime.1
+    mbusbl2fnv.1
     mbvelocitytool.1
     mbvoxelclean.1)
 

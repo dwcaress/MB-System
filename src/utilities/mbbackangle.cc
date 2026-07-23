@@ -914,8 +914,7 @@ int main(int argc, char **argv) {
       }
       bool output_uptodate = true;
       if (amplitude_on) {
-				strcpy(amptablefile, swathfile);
-				strcat(amptablefile, ".aga");
+				snprintf(amptablefile, sizeof(amptablefile), "%s.aga", swathfile);
 				if (stat(amptablefile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 					output_modtime = file_status.st_mtime;
 					output_size = file_status.st_size;
@@ -929,8 +928,7 @@ int main(int argc, char **argv) {
 				}
 			}
       if (sidescan_on) {
-				strcpy(sstablefile, swathfile);
-				strcat(sstablefile, ".aga");
+				snprintf(sstablefile, sizeof(sstablefile), "%s.aga", swathfile);
 				if (stat(sstablefile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 					output_modtime = file_status.st_mtime;
 					output_size = file_status.st_size;
@@ -1087,8 +1085,7 @@ int main(int argc, char **argv) {
 			}
 			else if (error == MB_ERROR_NO_ERROR) {
 				if (amplitude_on) {
-					strcpy(amptablefile, swathfile);
-					strcat(amptablefile, ".aga");
+					snprintf(amptablefile, sizeof(amptablefile), "%s.aga", swathfile);
 					if ((atfp = fopen(amptablefile, "w")) == nullptr) {
 						char *message;
 						mb_error(verbose, error, &message);
@@ -1098,8 +1095,7 @@ int main(int argc, char **argv) {
 					}
 				}
 				if (sidescan_on) {
-					strcpy(sstablefile, swathfile);
-					strcat(sstablefile, ".sga");
+					snprintf(sstablefile, sizeof(sstablefile), "%s.sga", swathfile);
 					if ((stfp = fopen(sstablefile, "w")) == nullptr) {
 						char *message;
 						mb_error(verbose, error, &message);
@@ -1547,8 +1543,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* set the strings */
-				strcpy(gridfile, swathfile);
-				strcat(gridfile, "_aga.grd");
+				snprintf(gridfile, sizeof(gridfile), "%s_aga.grd", swathfile);
 				strcpy(zlabel, "Beam Amplitude PDF (X1000)");
 				strcpy(title, "Beam Amplitude vs. Grazing Angle PDF");
 
@@ -1589,8 +1584,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* set the strings */
-				strcpy(gridfile, swathfile);
-				strcat(gridfile, "_sga.grd");
+				snprintf(gridfile, sizeof(gridfile), "%s_sga.grd", swathfile);
 				strcpy(zlabel, "Sidescan Amplitude PDF (X1000)");
 				strcpy(title, "Sidescan Amplitude vs. Grazing Angle PDF");
 
@@ -1661,8 +1655,7 @@ int main(int argc, char **argv) {
 	time_d_totavg /= ntotavg;
 	altitude_totavg /= ntotavg;
 	if (!dump && amplitude_on) {
-		strcpy(amptablefile, read_file);
-		strcat(amptablefile, "_tot.aga");
+		snprintf(amptablefile, sizeof(amptablefile), "%s_tot.aga", read_file);
 		if ((atfp = fopen(amptablefile, "w")) == nullptr) {
 			error = MB_ERROR_OPEN_FAIL;
 			char *message;
@@ -1694,8 +1687,7 @@ int main(int argc, char **argv) {
 		fclose(atfp);
 	}
 	if (!dump && sidescan_on) {
-		strcpy(sstablefile, read_file);
-		strcat(sstablefile, "_tot.sga");
+		snprintf(sstablefile, sizeof(sstablefile), "%s_tot.sga", read_file);
 		if ((stfp = fopen(sstablefile, "w")) == nullptr) {
 			error = MB_ERROR_OPEN_FAIL;
 			char *message;

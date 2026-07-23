@@ -451,7 +451,7 @@ int main(int argc, char **argv) {
 		/* deal with data without errors */
 		if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
 			/* fix a problem with EM300/EM3000 data in HDCS format */
-			if (format == 151 && kluge == 1) {
+			if (format == 151 && kluge == 1 && nbath > 0) {
 				for (int i = 0; i < nbath - 1; i++)
 					beamflag[i] = beamflag[i + 1];
 				beamflag[nbath - 1] = MB_FLAG_FLAG;

@@ -74,6 +74,7 @@ man_MANS =  \
 	mbmosaic.1 \
 	mbmakedatalist.1 \
 	mbmakeplatform.1 \
+	mbmapscale.1 \
 	mbminirovnav.1 \
 	mbnavadjust.1 \
 	mbnavadjustmerge.1 \
@@ -99,6 +100,7 @@ man_MANS =  \
 	mbsystem.1 \
 	mbtiff2png.1 \
 	mbtime.1 \
+	mbusbl2fnv.1 \
 	mbvelocitytool.1 \
 	mbvoxelclean.1 \
 	$(MAN_DEPRECATED)

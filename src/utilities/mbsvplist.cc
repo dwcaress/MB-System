@@ -563,6 +563,11 @@ int main(int argc, char **argv) {
             svp_save_alloc += MBSVPLIST_SVP_NUM_ALLOC;
             status = mb_reallocd(verbose, __FILE__, __LINE__, svp_save_alloc * sizeof(struct mbsvplist_svp_struct),
                                  (void **)&svp_save, &error);
+            if (status != MB_SUCCESS) {
+              fprintf(stderr, "\nUnable to allocate SVP save array\n");
+              fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+              exit(MB_ERROR_MEMORY_FAIL);
+            }
           }
 
           /* save the svp */

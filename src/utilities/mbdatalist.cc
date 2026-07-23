@@ -30,7 +30,6 @@
  * Date:	October 10, 2001
  */
 
-#include <assert.h>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -121,7 +120,7 @@ int main(int argc, char **argv) {
 					copyfiles = true;
 				}
 				else if (strcmp("report", options[option_index].name) == 0) {
-					copyfiles = true;
+					reportdatalists = true;
 				}
 				else if (strcmp("format", options[option_index].name) == 0) {
 					sscanf(optarg, "%d", &format);
@@ -302,7 +301,11 @@ int main(int argc, char **argv) {
 		/* figure out data format and fileroot if possible */
 		char fileroot[MB_PATH_MAXLINE] = {0};
 		status = mb_get_format(verbose, read_file, fileroot, &format, &error);
-    assert(strlen(fileroot) < MB_PATH_MAXLINE - 6);
+    if (strlen(fileroot) >= MB_PATH_MAXLINE - 6) {
+      fprintf(stderr, "\nFile root too long: %s\n", fileroot);
+      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      exit(MB_ERROR_BAD_PARAMETER);
+    }
     char file[MB_PATH_MAXLINE+10];
 		snprintf(file, sizeof(file), "%sp.mb-1", fileroot);
 
@@ -417,9 +420,12 @@ int main(int argc, char **argv) {
 							fprintf(output, "\t<Locked>");
 					}
 					if (locked && remove_locks) {
-            assert(strlen(read_file) < MB_PATH_MAXLINE - 4);
-						snprintf(lockfile, sizeof(lockfile), "%s.lck", read_file);
-            remove(lockfile);
+            if (strlen(read_file) >= MB_PATH_MAXLINE - 4) {
+              fprintf(stderr, "\nFilename too long to construct lock file name: %s\n", read_file);
+            } else {
+						  snprintf(lockfile, sizeof(lockfile), "%s.lck", read_file);
+              remove(lockfile);
+            }
 					}
 				}
 
@@ -442,7 +448,8 @@ int main(int argc, char **argv) {
 		while (mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS) {
 			nfile++;
 			mb_path pwd = "";
-      		assert(getcwd(pwd, MB_PATH_MAXLINE) != NULL);
+			if (getcwd(pwd, MB_PATH_MAXLINE) == nullptr)
+				pwd[0] = '\0';
 			mb_get_relative_path(verbose, file, pwd, &error);
 			mb_get_relative_path(verbose, dfile, pwd, &error);
 
@@ -553,10 +560,13 @@ int main(int argc, char **argv) {
 								fprintf(output, "\t<Locked>");
 						}
 						if (locked && remove_locks) {
-              assert(strlen(file) < MB_PATH_MAXLINE - 4);
-							snprintf(lockfile, sizeof(lockfile), "%s.lck", file);
-							fprintf(output, "\tRemoving lock file %s\n", lockfile);
-              /* shellstatus = */ remove(lockfile);
+              if (strlen(file) >= MB_PATH_MAXLINE - 4) {
+                fprintf(stderr, "\nFilename too long to construct lock file name: %s\n", file);
+              } else {
+							  snprintf(lockfile, sizeof(lockfile), "%s.lck", file);
+							  fprintf(output, "\tRemoving lock file %s\n", lockfile);
+                /* shellstatus = */ remove(lockfile);
+              }
 						}
 					}
 

@@ -6,7 +6,8 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbauvloglist\fP \fB\-I\fP\fIfile\fP [\fB-C\fP \fB\-F\fP\fIprintformat\fP \fB\-L\fP\fIlonflip\fP
+\fBmbauvloglist\fP \fB\-I\fP\fIfile\fP [\fB\-A\fP\fIaltitudefile\fP \fB-C\fP \fB\-D\fP\fIdecimate\fP
+\fB\-F\fP\fIprintformat\fP \fB\-L\fP\fIlonflip\fP
 \fB\-M\fP\fImode\fP \fB\-N\fP\fInavfile\fP \fB\-O\fP\fIlist\fP \fB\-P\fP \fB\-R\fP\fIid\fP \fB-S\fP \fB-X\fp\fIscale\fP \fB\-V \-H\fP ]
 
 .SH DESCRIPTION
@@ -287,6 +288,14 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
+.B \-A
+\fIaltitudefile\fP
+.br
+Specifies an ascii altitude file containing time and altitude values
+(one "time altitude" pair per line, in seconds and meters) to be merged
+(interpolated) with the primary log file data. The merged altitude values
+can be output using the \fBmergeAltitude\fP valuename in the \fB\-O\fP option.
+.TP
 .B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
@@ -298,6 +307,14 @@ then the \fB-C\fP option causes input records with times before the beginning or
 after the end of the external navigation to not be output by \fBmbauvloglist\fP.
 The default behavior is to output all records, and for the values merged from the
 external navigation to be zero when outside the navigation time bounds.
+.TP
+.B \-D
+\fIdecimate\fP
+.br
+Sets a decimation factor for the output records. If \fIdecimate\fP is
+greater than 1, then only every \fIdecimate\fPth input record is output;
+the intervening records are skipped. Default: \fIdecimate\fP = 1 (no
+decimation, all records output).
 .TP
 .B \-F
 \fIprintformat\fP

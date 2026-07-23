@@ -139,11 +139,18 @@ must both be based on the same raw data.
 Normally, \fBmbcopy\fP generates a set of comment records at
 the beginning of the output stream which record when, how,
 and by whom \fBmbcopy\fP was run.  If the
-\fB\-N\fP flag is given, these comments are not included in 
+\fB\-N\fP flag is given once, these comments are not included in
 the output stream, and, in addition, any preexisting comment records
 in the input data stream are not passed to the output data stream.
 However, the \fB\-N\fP option does not affect the insertion of
 comments from a text file if specified using the \fB\-C\fP option.
+If the \fB\-N\fP flag is given a second time (i.e. \fB\-N \-N\fP), then,
+in addition to stripping comments as described above, only raw
+bathymetry, navigation, heading, and attitude data records are
+passed through to the output stream (supported for formats that
+distinguish these record types, e.g. Reson 7k formats). Specifying
+\fB\-N\fP more than twice is an error and causes \fBmbcopy\fP to
+exit immediately.
 .TP
 .B \-O
 \fIoutfilename\fP

@@ -1976,7 +1976,9 @@ int main(int argc, char **argv) {
       for (int k = 0; k < project_output.files[j].num_sections; k++) {
         project_output.files[j].sections[k].global_start_ping += project_output.num_pings;
         project_output.files[j].sections[k].global_start_snav += project_output.num_snavs;
-        project_output.files[j].sections[k].globaltie.refgrid_id += project_output.num_refgrids;
+        if (project_output.files[j].sections[k].globaltie.refgrid_id >= 0) {
+          project_output.files[j].sections[k].globaltie.refgrid_id += project_output.num_refgrids;
+        }
       }
     }
 

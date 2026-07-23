@@ -67,6 +67,15 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
+.B \-C
+\fIrthreshold\fP
+.br
+Sets the correlation coefficient threshold used to decide whether the peak
+cross correlation value found for a given set of pings represents a valid
+time lag estimate. Only peak correlation values exceeding \fIrthreshold\fP
+are included in the output time lag histogram and estimate files.
+Default: \fIrthreshold\fP = 0.9.
+.TP
 .B \-F
 \fIformat\fP
 .br
@@ -143,7 +152,7 @@ data records. This option supercedes the \fB\-S\fP option.
 \fInping\fP
 .br
 Sets the number of pings to be read for each cross correlation calculation.
-Default: \fInping\fP = 50.
+Default: \fInping\fP = 100.
 .TP
 .B \-O
 \fIoutroot\fP
@@ -168,9 +177,9 @@ navigation sources, so that there are more than one channel of
 asynchronous data records. In this case one channel is always designated
 as the primary or active navigation channel. The \fB\-S\fP option allows
 the user to specify that \fBMBrolltimelag\fP uses roll from
-the primary asynchronous navigation (\fB\-N\fP\fI0\fP) or from one
+the primary asynchronous navigation (\fB\-S\fP\fI0\fP) or from one
 of three auxiliary navigation channels
-(\fB\-N\fP\fI1\fP, \fB\-N\fP\fI2\fP, or \fB\-N\fP\fI3\fP). If \fB\-N\fP is
+(\fB\-S\fP\fI1\fP, \fB\-S\fP\fI2\fP, or \fB\-S\fP\fI3\fP). If \fB\-S\fP is
 used but the data file
 does not contain asynchronous navigation or the specified auxiliary
 navigation channels, then \fBmbnavlist\fP will output nothing. To

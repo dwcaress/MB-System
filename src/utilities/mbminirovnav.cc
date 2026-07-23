@@ -148,15 +148,15 @@ int main(int argc, char **argv) {
           }
           // Define input and output files
           else if (strcmp("input-nav-file", options[option_index].name) == 0) {
-            strcpy(input_nav_file, optarg);
+            snprintf(input_nav_file, sizeof(mb_path), "%s", optarg);
           } else if (strcmp("input-rov-file", options[option_index].name) == 0) {
-            strcpy(input_rov_file, optarg);
+            snprintf(input_rov_file, sizeof(mb_path), "%s", optarg);
           } else if (strcmp("input-ctd-file", options[option_index].name) == 0) {
-            strcpy(input_ctd_file, optarg);
+            snprintf(input_ctd_file, sizeof(mb_path), "%s", optarg);
           } else if (strcmp("input-dvl-file", options[option_index].name) == 0) {
-            strcpy(input_dvl_file, optarg);
+            snprintf(input_dvl_file, sizeof(mb_path), "%s", optarg);
           } else if (strcmp("output", options[option_index].name) == 0) {
-            strcpy(output_file, optarg);
+            snprintf(output_file, sizeof(mb_path), "%s", optarg);
           } else if (strcmp("interval", options[option_index].name) == 0) {
             /* const int nscan = */ sscanf(optarg, "%lf", &interval);
             if (interval <= 0.0) {
@@ -346,27 +346,27 @@ int main(int argc, char **argv) {
             start_time_d = time_d;
           if (time_d > end_time_d)
             end_time_d = time_d;
-          nav_time_d[num_nav] = time_d;
-          double ldegrees = floor(rawlat / 100.0);
-          double lminutes = rawlat - ldegrees * 100;
-          nav_lat[num_nav] = ldegrees + (lminutes / 60.0);
-          if (NorS == 'S' || NorS == 's')
-            nav_lat[num_nav] *= -1;
-          ldegrees = floor(rawlon / 100.0);
-          lminutes = rawlon - ldegrees * 100;
-          nav_lon[num_nav] = ldegrees + (lminutes / 60.0);
-          if (EorW == 'W' || EorW == 'w')
-            nav_lon[num_nav] *= -1;
+          if (num_nav < num_nav_alloc) {
+            nav_time_d[num_nav] = time_d;
+            double ldegrees = floor(rawlat / 100.0);
+            double lminutes = rawlat - ldegrees * 100;
+            nav_lat[num_nav] = ldegrees + (lminutes / 60.0);
+            if (NorS == 'S' || NorS == 's')
+              nav_lat[num_nav] *= -1;
+            ldegrees = floor(rawlon / 100.0);
+            lminutes = rawlon - ldegrees * 100;
+            nav_lon[num_nav] = ldegrees + (lminutes / 60.0);
+            if (EorW == 'W' || EorW == 'w')
+              nav_lon[num_nav] *= -1;
 
-          if ((num_nav < num_nav_alloc)
-              && (!interpolate_position
-                  || num_nav <= 1
-                  || nav_lon[num_nav] != nav_lon[num_nav-1]
-                  || nav_lat[num_nav] != nav_lat[num_nav-1])) {
-            reference_lon += nav_lon[num_nav];
-            reference_lat += nav_lat[num_nav];
-            if (num_nav < num_nav_alloc)
+            if (!interpolate_position
+                || num_nav <= 1
+                || nav_lon[num_nav] != nav_lon[num_nav-1]
+                || nav_lat[num_nav] != nav_lat[num_nav-1]) {
+              reference_lon += nav_lon[num_nav];
+              reference_lat += nav_lat[num_nav];
               num_nav++;
+            }
           }
         }
       }
@@ -431,10 +431,11 @@ int main(int argc, char **argv) {
           if (time_d > end_time_d)
             end_time_d = time_d;
 
-          ctd_time_d[num_ctd] = time_d;
-          ctd_depth[num_ctd] = ctd_D;
-          if (num_ctd < num_ctd_alloc)
+          if (num_ctd < num_ctd_alloc) {
+            ctd_time_d[num_ctd] = time_d;
+            ctd_depth[num_ctd] = ctd_D;
             num_ctd++;
+          }
         }
       }
     }
@@ -503,12 +504,13 @@ int main(int argc, char **argv) {
           if (time_d > end_time_d)
             end_time_d = time_d;
 
-          rov_time_d[num_rov] = time_d;
-          rov_heading[num_rov] = rov_Heading;
-          rov_roll[num_rov] = rov_Roll;
-          rov_pitch[num_rov] = rov_Pitch;
-          if (num_rov < num_rov_alloc)
+          if (num_rov < num_rov_alloc) {
+            rov_time_d[num_rov] = time_d;
+            rov_heading[num_rov] = rov_Heading;
+            rov_roll[num_rov] = rov_Roll;
+            rov_pitch[num_rov] = rov_Pitch;
             num_rov++;
+          }
         }
       }
     }
@@ -577,15 +579,16 @@ int main(int argc, char **argv) {
           if (time_d > end_time_d)
             end_time_d = time_d;
 
-          dvl_time_d[num_dvl] = time_d;
-          dvl_altitude[num_dvl] = dvl_Altitude;
-          dvl_stime[num_dvl] = dvl_Stime;
-          dvl_vx[num_dvl] = dvl_Vx;
-          dvl_vy[num_dvl] = dvl_Vy;
-          dvl_vz[num_dvl] = dvl_Vz;
-          dvl_status[num_dvl] = dvl_Status;
-          if (num_dvl < num_dvl_alloc)
+          if (num_dvl < num_dvl_alloc) {
+            dvl_time_d[num_dvl] = time_d;
+            dvl_altitude[num_dvl] = dvl_Altitude;
+            dvl_stime[num_dvl] = dvl_Stime;
+            dvl_vx[num_dvl] = dvl_Vx;
+            dvl_vy[num_dvl] = dvl_Vy;
+            dvl_vz[num_dvl] = dvl_Vz;
+            dvl_status[num_dvl] = dvl_Status;
             num_dvl++;
+          }
         }
       }
 

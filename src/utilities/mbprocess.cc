@@ -6015,10 +6015,13 @@ int main(int argc, char **argv) {
     int len;
     if (status == MB_SUCCESS && !mbp_ofile_specified && process->mbp_ofile[0] != '/' && process->mbp_ofile[1] != ':' &&
         strrchr(process->mbp_ifile, '/') != nullptr && (len = strrchr(process->mbp_ifile, '/') - process->mbp_ifile + 1) > 1) {
-      strcpy(mbp_ofile, process->mbp_ofile);
-      strncpy(process->mbp_ofile, process->mbp_ifile, len);
-      process->mbp_ofile[len] = '\0';
-      strcat(process->mbp_ofile, mbp_ofile);
+      snprintf(mbp_ofile, sizeof(mbp_ofile), "%s", process->mbp_ofile);
+      char dirprefix[MBP_FILENAMESIZE];
+      if (len >= (int)sizeof(dirprefix))
+        len = sizeof(dirprefix) - 1;
+      strncpy(dirprefix, process->mbp_ifile, len);
+      dirprefix[len] = '\0';
+      snprintf(process->mbp_ofile, sizeof(process->mbp_ofile), "%s%s", dirprefix, mbp_ofile);
     }
 
     /* get mod time for the input file */

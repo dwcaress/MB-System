@@ -301,9 +301,13 @@ int main(int argc, char **argv) {
 
 	/* write out new ~/.mbio_defaults file if needed */
 	if (flag) {
+		const char *home = getenv("HOME");
+		if (home == nullptr) {
+			fprintf(stderr, "Could not determine home directory (HOME environment variable not set)\n");
+			exit(MB_ERROR_OPEN_FAIL);
+		}
 		char file[MB_PATH_MAXLINE];
-		strcpy(file, getenv("HOME"));
-		strcat(file, "/.mbio_defaults");
+		snprintf(file, sizeof(file), "%s/.mbio_defaults", home);
 		FILE *fp = fopen(file, "w");
 		if (fp == nullptr) {
 			fprintf(stderr, "Could not open file %s\n", file);

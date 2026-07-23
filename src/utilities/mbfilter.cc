@@ -714,6 +714,10 @@ int main(int argc, char **argv) {
 			case 'C':
 			case 'c':
 			{
+				if (num_filters >= MBFILTER_NFILTER_MAX) {
+					fprintf(stderr, "\nToo many filters specified (max %d) - ignoring: -C%s\n", MBFILTER_NFILTER_MAX, optarg);
+					break;
+				}
 				int tmp;
 				const int n = sscanf(optarg, "%d/%d/%d/%d", &tmp, &contrast_xdim, &contrast_ldim, &contrast_iter);
 				contrast_mode = (contrast_mode_t)tmp;
@@ -734,6 +738,10 @@ int main(int argc, char **argv) {
 			case 'D':
 			case 'd':
 			{
+				if (num_filters >= MBFILTER_NFILTER_MAX) {
+					fprintf(stderr, "\nToo many filters specified (max %d) - ignoring: -D%s\n", MBFILTER_NFILTER_MAX, optarg);
+					break;
+				}
 				int tmp;
 				const int n = sscanf(optarg, "%d/%d/%d/%d/%lf", &tmp, &hipass_xdim, &hipass_ldim, &hipass_iter, &hipass_offset);
 				hipass_mode = (hipass_mode_t)tmp;  // TODO(schwehr): Range check.
@@ -785,6 +793,10 @@ int main(int argc, char **argv) {
 			case 'S':
 			case 's':
 			{
+				if (num_filters >= MBFILTER_NFILTER_MAX) {
+					fprintf(stderr, "\nToo many filters specified (max %d) - ignoring: -S%s\n", MBFILTER_NFILTER_MAX, optarg);
+					break;
+				}
 				int tmp;
 				const int n = sscanf(optarg, "%d/%d/%d/%d/%lf/%lf", &tmp, &smooth_xdim, &smooth_ldim, &smooth_iter, &threshold_lo,
 				           &threshold_hi);
@@ -1115,7 +1127,11 @@ int main(int argc, char **argv) {
 		int nweightmax = 1;
 		for (int i = 0; i < num_filters; i++) {
 			nhold_ping = std::max(nhold_ping, filters[i].ldim);
-			nweightmax = std::max(nweightmax, filters[i].xdim * filters[i].ldim);
+			/* the actual window used below is (2*(xdim/2)+1) x (2*(ldim/2)+1), which
+			    is one larger per dimension than xdim/ldim itself when they are even */
+			const int actual_xdim = 2 * (filters[i].xdim / 2) + 1;
+			const int actual_ldim = 2 * (filters[i].ldim / 2) + 1;
+			nweightmax = std::max(nweightmax, actual_xdim * actual_ldim);
 		}
 
 		/* allocate memory for weights */

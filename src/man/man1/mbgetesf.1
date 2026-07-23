@@ -63,6 +63,26 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
+.B \-B
+\fIyr/mo/da/hr/mn/sc\fP
+.br
+This option sets the starting time for data allowed in the input data.
+The \fB\-E\fP option sets the ending time for data. If the
+starting time is before the ending time, then any data
+with a time stamp before the starting time or after the
+ending time is ignored. If instead the starting time is
+after the ending time, then any data between the ending
+and starting time will be ignored. This scheme allows time
+windowing both inside and outside a specified interval.
+Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
+.TP
+.B \-E
+\fIyr/mo/da/hr/mn/sc\fP
+.br
+This option sets the ending time for data allowed in the input data.
+See the \fB\-B\fP option above.
+Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
+.TP
 .B \-F
 \fIformat\fP
 .br
@@ -83,6 +103,17 @@ of its operation and then exit immediately.
 Data file from which the input data will be read. If
 no input file is specified, the input will be read
 from stdin. Default: \fIinfile\fP = stdin.
+.TP
+.B \-K
+\fIkluge\fP
+.br
+Applies a kluge fix for a problem with EM300/EM3000 data stored
+in HDCS format (\fBMBIO\fP format id 151). If \fIkluge\fP = 1, then
+the beam flag values read in each ping are shifted down by one beam
+(with the last beam flagged null), correcting for a beam indexing
+offset found in some HDCS EM300/EM3000 datasets. This kluge is
+applied only when the input data format is 151 and has no effect
+otherwise. Default: \fIkluge\fP = 0 (no kluge applied).
 .TP
 .B \-M
 \fImode\fP

@@ -10,7 +10,6 @@ Version 5.0
 mbsvpselect -N -V -Idatalist -Ssvplist -Pmode[/criteria[/submode]]
 
 [-P0, -P1, -P2/period, -P3/range, -P3/range/1]
-\fBmbsvpselect\fP [\fB\-C \-D \fB\-F\fIformat \fB\-H \fB\-I\fIfile \fB\-M\fImode\fP \fB\-O \-P \-S \-V \-Z\fP]
 
 .SH DESCRIPTION
 Mbsvpselect chooses and implements the best available sound speed model
@@ -172,7 +171,9 @@ is given in the \fBMBIO\fP manual page. Default: \fIfile\fP = "datalist.mb-1".
 .TP
 .B \-N
 .br
-Causes the program to check for SVPs with zero longitude and latitude values.
+Causes the program to check for survey profile (swath file) positions, as read
+from the \fI.inf\fP files, that have erroneous zero longitude and zero latitude
+values. This does not affect handling of the SVP position values.
 .TP
 .B \-P
 .br

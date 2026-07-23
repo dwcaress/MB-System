@@ -580,7 +580,7 @@ int main(int argc, char **argv) {
       case 'g':
         if (optarg[0] == '=') {
           gridkind = MBGRID_GMTGRD;
-          strcpy(gridkindstring, optarg);
+          snprintf(gridkindstring, sizeof(gridkindstring), "%s", optarg);
         }
         else {
           int tmp;
@@ -1772,8 +1772,7 @@ int main(int argc, char **argv) {
   }
 
   /* open datalist file for list of all files that contribute to the grid */
-  strcpy(dfile, fileroot);
-  strcat(dfile, ".mb-1");
+  snprintf(dfile, sizeof(dfile), "%s.mb-1", fileroot);
   if ((dfp = fopen(dfile, "w")) == nullptr) {
     error = MB_ERROR_OPEN_FAIL;
     fprintf(outfp, "\nUnable to open datalist file: %s\n", dfile);

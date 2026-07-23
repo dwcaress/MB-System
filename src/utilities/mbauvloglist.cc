@@ -316,6 +316,11 @@ int main(int argc, char **argv) {
 			case 'O':
 			case 'o':
 			{
+				if (nprintfields >= NFIELDSMAX) {
+					fprintf(stderr, "\nToo many -O print fields specified (max %d) - ignoring: %s\n",
+					        NFIELDSMAX, optarg);
+					break;
+				}
 				/* const int nscan = */ sscanf(optarg, "%1023s", printfields[nprintfields].name);
 				if (strlen(printformat) > 0 && strcmp(printformat, "default") != 0) {
 					printfields[nprintfields].formatset = true;
@@ -624,9 +629,18 @@ int main(int argc, char **argv) {
 	bool temperature_available = false;
 	bool pressure_available = false;
 
+	bool nfields_overflow_warned = false;
 	char *result;
 	while ((result = fgets(buffer, MB_PATH_MAXLINE, fp)) == buffer &&
                strncmp(buffer, "# begin", 7) != 0) {
+		if (nfields >= NFIELDSMAX) {
+			if (!nfields_overflow_warned) {
+				fprintf(stderr, "\nToo many header fields in log file <%s> (max %d) - remaining fields ignored\n",
+				        file, NFIELDSMAX);
+				nfields_overflow_warned = true;
+			}
+			continue;
+		}
 		char type[MB_PATH_MAXLINE];
 		const int nscan = sscanf(buffer, "# %1023s %1023s %1023s", type, fields[nfields].name, fields[nfields].format);
 		if (nscan == 2) {
@@ -637,10 +651,22 @@ int main(int argc, char **argv) {
 				fprintf(stdout, "%s", buffer);
 
 			result = (char *)strchr(buffer, ',');
+			if (result == nullptr) {
+				fprintf(stderr, "\nWarning: malformed header line in log file <%s>, skipping: %s", file, buffer);
+				continue;
+			}
 			strcpy(fields[nfields].description, &(result[1]));
 			result = (char *)strchr(fields[nfields].description, ',');
+			if (result == nullptr) {
+				fprintf(stderr, "\nWarning: malformed header line in log file <%s>, skipping: %s", file, buffer);
+				continue;
+			}
 			result[0] = 0;
 			result = (char *)strrchr(buffer, ',');
+			if (result == nullptr) {
+				fprintf(stderr, "\nWarning: malformed header line in log file <%s>, skipping: %s", file, buffer);
+				continue;
+			}
 			strcpy(fields[nfields].units, &(result[1]));
 
 			fields[nfields].index = static_cast<index_t>(recordsize);

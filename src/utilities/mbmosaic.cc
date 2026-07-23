@@ -1164,7 +1164,7 @@ int main(int argc, char **argv) {
       case 'g':
         if (optarg[0] == '=') {
           gridkind = MBMOSAIC_GMTGRD;
-          strcpy(gridkindstring, optarg);
+          snprintf(gridkindstring, sizeof(gridkindstring), "%s", optarg);
         }
         else {
           int tmp;
@@ -2130,8 +2130,7 @@ int main(int argc, char **argv) {
 
 	/* open datalist file for list of all files that contribute to the grid */
 	mb_path dfile = "";
-	strcpy(dfile, fileroot);
-	strcat(dfile, ".mb-1");
+	snprintf(dfile, sizeof(dfile), "%s.mb-1", fileroot);
 	FILE *dfp = fopen(dfile, "w");
 	if (dfp == nullptr) {
 		error = MB_ERROR_OPEN_FAIL;

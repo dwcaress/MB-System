@@ -736,6 +736,11 @@ int read_recursive2(char *fname) {
 	strcat(fname, ".inf");
 	FILE *dataFile = fopen(fname, "r");
 	if (dataFile != nullptr) {
+		if (surveyLines_total >= 1000) {
+			fprintf(stderr, "\nToo many survey files referenced (max 1000) - ignoring: %s\n", fname);
+			fclose(dataFile);
+			return counter;
+		}
 		my_strcpy(holder[surveyLines_total], fname);
 		counter += 1;
 		surveyLines_total += 1;
@@ -804,8 +809,12 @@ int read_recursive(char *fileName) {
 
 	int counter = 0;
 	if ((ptr_caris != nullptr) || (ptr_mb1 != nullptr) || (ptr_mb2 != nullptr)) {
-		my_strcpy(svps[svp_total], fileName);
-		counter += 1;
+		if (svp_total >= 1000) {
+			fprintf(stderr, "\nToo many SVP files referenced (max 1000) - ignoring: %s\n", fileName);
+		} else {
+			my_strcpy(svps[svp_total], fileName);
+			counter += 1;
+		}
 	} else {
 		read_recursive(str);
 	}

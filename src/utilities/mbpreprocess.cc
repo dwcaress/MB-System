@@ -313,12 +313,13 @@ int main(int argc, char **argv) {
                                       {"time-latency-apply-all-ancilliary", no_argument, nullptr, 0},
                                       {"time-latency-apply-survey", no_argument, nullptr, 0},
                                       {"time-latency-apply-all", no_argument, nullptr, 0},
-                                      {"time-latency-apply-nav", no_argument, nullptr, 0},
+                                      {"time-latency-apply-altitude", no_argument, nullptr, 0},
                                       {"filter", required_argument, nullptr, 0},
                                       {"filter-apply-nav", no_argument, nullptr, 0},
                                       {"filter-apply-sensordepth", no_argument, nullptr, 0},
                                       {"filter-apply-heading", no_argument, nullptr, 0},
                                       {"filter-apply-attitude", no_argument, nullptr, 0},
+                                      {"filter-apply-altitude", no_argument, nullptr, 0},
                                       {"filter-apply-all-ancilliary", no_argument, nullptr, 0},
                                       {"recalculate-bathymetry", no_argument, nullptr, 0},
                                       {"no-change-survey", no_argument, nullptr, 0},
@@ -371,7 +372,7 @@ int main(int argc, char **argv) {
         /*-------------------------------------------------------
          * Define input file and format (usually a datalist) */
         else if (strcmp("input", options[option_index].name) == 0) {
-          strcpy(read_file, optarg);
+          snprintf(read_file, sizeof(read_file), "%s", optarg);
         }
         else if (strcmp("format", options[option_index].name) == 0) {
           /* n = */ sscanf(optarg, "%d", &format);
@@ -404,7 +405,7 @@ int main(int argc, char **argv) {
          * Define source of navigation - could be an external file
          * or an internal asynchronous record */
         else if (strcmp("nav-file", options[option_index].name) == 0) {
-          strcpy(nav_file, optarg);
+          snprintf(nav_file, sizeof(nav_file), "%s", optarg);
           nav_mode = MBPREPROCESS_MERGE_FILE;
           preprocess_pars.recalculate_bathymetry = true;
         }
@@ -425,7 +426,7 @@ int main(int argc, char **argv) {
          * Define source of sensordepth - could be an external file
          * or an internal asynchronous record */
         else if (strcmp("sensordepth-file", options[option_index].name) == 0) {
-          strcpy(sensordepth_file, optarg);
+          snprintf(sensordepth_file, sizeof(sensordepth_file), "%s", optarg);
           sensordepth_mode = MBPREPROCESS_MERGE_FILE;
           preprocess_pars.recalculate_bathymetry = true;
         }
@@ -446,7 +447,7 @@ int main(int argc, char **argv) {
          * Define source of heading - could be an external file
          * or an internal asynchronous record */
         else if (strcmp("heading-file", options[option_index].name) == 0) {
-          strcpy(heading_file, optarg);
+          snprintf(heading_file, sizeof(heading_file), "%s", optarg);
           heading_mode = MBPREPROCESS_MERGE_FILE;
           preprocess_pars.recalculate_bathymetry = true;
         }
@@ -467,7 +468,7 @@ int main(int argc, char **argv) {
          * Define source of altitude - could be an external file
          * or an internal asynchronous record */
         else if (strcmp("altitude-file", options[option_index].name) == 0) {
-          strcpy(altitude_file, optarg);
+          snprintf(altitude_file, sizeof(altitude_file), "%s", optarg);
           altitude_mode = MBPREPROCESS_MERGE_FILE;
         }
         else if (strcmp("altitude-file-format", options[option_index].name) == 0) {
@@ -485,7 +486,7 @@ int main(int argc, char **argv) {
          * Define source of attitude - could be an external file
          * or an internal asynchronous record */
         else if (strcmp("attitude-file", options[option_index].name) == 0) {
-          strcpy(attitude_file, optarg);
+          snprintf(attitude_file, sizeof(attitude_file), "%s", optarg);
           attitude_mode = MBPREPROCESS_MERGE_FILE;
           preprocess_pars.recalculate_bathymetry = true;
         }
@@ -509,7 +510,7 @@ int main(int argc, char **argv) {
          * Define source of soundspeed - could be an external file
          * or an internal asynchronous record */
         else if (strcmp("soundspeed-file", options[option_index].name) == 0) {
-          strcpy(soundspeed_file, optarg);
+          snprintf(soundspeed_file, sizeof(soundspeed_file), "%s", optarg);
           soundspeed_mode = MBPREPROCESS_MERGE_FILE;
           preprocess_pars.modify_soundspeed = true;
           preprocess_pars.recalculate_bathymetry = true;
@@ -535,7 +536,7 @@ int main(int argc, char **argv) {
          * will be applied to - nav, sensordepth, heading, attitude,
          * or all. */
         else if (strcmp("time-latency-file", options[option_index].name) == 0) {
-          strcpy(time_latency_file, optarg);
+          snprintf(time_latency_file, sizeof(time_latency_file), "%s", optarg);
           time_latency_mode = MB_SENSOR_TIME_LATENCY_MODEL;
         }
         else if (strcmp("time-latency-file-format", options[option_index].name) == 0) {
@@ -563,7 +564,7 @@ int main(int argc, char **argv) {
           preprocess_pars.recalculate_bathymetry = true;
         }
         else if (strcmp("time-latency-apply-altitude", options[option_index].name) == 0) {
-          time_latency_apply = time_latency_apply | MBPREPROCESS_TIME_LATENCY_APPLY_ATTITUDE;
+          time_latency_apply = time_latency_apply | MBPREPROCESS_TIME_LATENCY_APPLY_ALTITUDE;
           preprocess_pars.recalculate_bathymetry = true;
         }
         else if (strcmp("time-latency-apply-all-ancilliary", options[option_index].name) == 0) {
@@ -601,7 +602,7 @@ int main(int argc, char **argv) {
           preprocess_pars.recalculate_bathymetry = true;
         }
         else if (strcmp("filter-apply-altitude", options[option_index].name) == 0) {
-          filter_apply = filter_apply | MBPREPROCESS_TIME_LATENCY_APPLY_ATTITUDE;
+          filter_apply = filter_apply | MBPREPROCESS_TIME_LATENCY_APPLY_ALTITUDE;
           preprocess_pars.recalculate_bathymetry = true;
         }
         else if (strcmp("filter-apply-all-ancilliary", options[option_index].name) == 0) {
@@ -1564,17 +1565,15 @@ int main(int argc, char **argv) {
 
     /* if a different output directory was set by user, reset file path */
     if (output_directory_set) {
-      char buffer[MB_PATH_MAXLINE] = "";
-      strcpy(buffer, output_directory);
-      if (buffer[strlen(output_directory) - 1] != '/')
-        strcat(buffer, "/");
-      char *filenameptr;
-      if (strrchr(ofile, '/') != nullptr)
-        filenameptr = strrchr(ofile, '/') + 1;
+      char filenameptr_buf[MB_PATH_MAXLINE];
+      const char *filenameptr = strrchr(ofile, '/');
+      filenameptr = (filenameptr != nullptr) ? filenameptr + 1 : ofile;
+      snprintf(filenameptr_buf, sizeof(filenameptr_buf), "%s", filenameptr);
+      const size_t dirlen = strlen(output_directory);
+      if (dirlen > 0 && output_directory[dirlen - 1] == '/')
+        snprintf(ofile, sizeof(ofile), "%s%s", output_directory, filenameptr_buf);
       else
-        filenameptr = ofile;
-      strcat(buffer, filenameptr);
-      strcpy(ofile, buffer);
+        snprintf(ofile, sizeof(ofile), "%s/%s", output_directory, filenameptr_buf);
     }
 
     /* Figure out if the file should be preprocessed - don't if it looks like
@@ -2706,17 +2705,15 @@ int main(int argc, char **argv) {
 
     /* if a different output directory was set by user, reset file path */
     if (output_directory_set) {
-      char buffer[MB_PATH_MAXLINE] = "";
-      strcpy(buffer, output_directory);
-      if (buffer[strlen(output_directory) - 1] != '/')
-        strcat(buffer, "/");
-      char *filenameptr;
-      if (strrchr(ofile, '/') != nullptr)
-        filenameptr = strrchr(ofile, '/') + 1;
+      char filenameptr_buf[MB_PATH_MAXLINE];
+      const char *filenameptr = strrchr(ofile, '/');
+      filenameptr = (filenameptr != nullptr) ? filenameptr + 1 : ofile;
+      snprintf(filenameptr_buf, sizeof(filenameptr_buf), "%s", filenameptr);
+      const size_t dirlen = strlen(output_directory);
+      if (dirlen > 0 && output_directory[dirlen - 1] == '/')
+        snprintf(ofile, sizeof(ofile), "%s%s", output_directory, filenameptr_buf);
       else
-        filenameptr = ofile;
-      strcat(buffer, filenameptr);
-      strcpy(ofile, buffer);
+        snprintf(ofile, sizeof(ofile), "%s/%s", output_directory, filenameptr_buf);
     }
 
     /* Figure out if the file should be preprocessed - don't if it looks like

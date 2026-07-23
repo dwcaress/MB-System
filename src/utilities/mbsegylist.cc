@@ -250,9 +250,8 @@ int main(int argc, char **argv) {
 			case 'O':
 			case 'o':
         n_list = 0;
-				for (int j = 0; j < (int)strlen(optarg); j++) {
-					if (n_list < MAX_OPTIONS)
-						list[n_list] = optarg[j];
+				for (int j = 0; j < (int)strlen(optarg) && n_list < MAX_OPTIONS; j++) {
+					list[n_list] = optarg[j];
           n_list++;
         }
 				break;

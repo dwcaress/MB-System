@@ -236,6 +236,7 @@ int main(int argc, char **argv) {
           }
         }
         else if (strcmp("ping-variances", options[option_index].name) == 0) {
+          sscanf(optarg, "%d", &pings_read);
           if (pings_read < 1)
             pings_read = 1;
           if (pings_read > MBINFO_MAXPINGS)
@@ -475,19 +476,19 @@ int main(int argc, char **argv) {
 
   /* Open output file if requested */
   if (output_usefile) {
-    char output_file[MB_PATH_MAXLINE];
-    strcpy(output_file, read_file);
+    char output_file[MB_PATH_MAXLINE+10];
     switch (output_format) {
     case FREE_TEXT:
-      strcat(output_file, ".inf");
+      snprintf(output_file, sizeof(output_file), "%s.inf", read_file);
       break;
     case JSON:
-      strcat(output_file, "_inf.json");
+      snprintf(output_file, sizeof(output_file), "%s_inf.json", read_file);
       break;
     case XML:
-      strcat(output_file, "_inf.xml");
+      snprintf(output_file, sizeof(output_file), "%s_inf.xml", read_file);
       break;
     default:
+      snprintf(output_file, sizeof(output_file), "%s", read_file);
       break;
     }
     if ((output = fopen(output_file, "w")) == nullptr)

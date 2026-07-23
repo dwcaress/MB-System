@@ -85,6 +85,16 @@ time interval. This approach can emphasize coherent arrivals regardless of ampli
 the entire trace is normalized using the same scale factor, and all traces has the same maximum
 value of \fImaxvalue\fP.
 .TP
+.B \-C
+\fImode\fP
+.br
+Sets the geometry mode used to locate trace samples in the output grid.
+If \fImode\fP = 0 (the default), a simple vertical geometry is used
+in which each sample is placed directly below its trace location. If
+\fImode\fP = 1, the trace's recorded pitch angle is used to correct the
+vertical (y-axis) location of each sample, projecting the samples along
+the pitched ray path rather than straight down.
+.TP
 .B \-D
 \fIdecimatex/decimatey\fP
 .br

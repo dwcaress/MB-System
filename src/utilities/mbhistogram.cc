@@ -612,8 +612,13 @@ int main(int argc, char **argv) {
 				if (total <= 0.0)
 					intervals[0] = value_bin_min + dvalue_bin * ibin;
 			}
-			bin_fraction = 1.0 - (total - target) / histogram[ibin];
-			intervals[j] = value_bin_min + dvalue_bin * ibin + bin_fraction * dvalue_bin;
+			if (ibin >= 0) {
+				bin_fraction = 1.0 - (total - target) / histogram[ibin];
+				intervals[j] = value_bin_min + dvalue_bin * ibin + bin_fraction * dvalue_bin;
+			}
+			else {
+				intervals[j] = value_bin_min;
+			}
 		}
 	}
 

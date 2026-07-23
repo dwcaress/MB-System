@@ -137,7 +137,7 @@ in inches per shot, and the \fIyscale\fP value is in inches per second.
 The \fImaxwidth\fP value sets the maximum plot width in inches. If
 \fIxscale\fP and the shot range imply a width greater than \fImaxwidth\fP,
 then the section will be broken up into multiple plots.
-Default: \fIxscale\fP = 0.01; \fIyscale\fP = 75; \fImaxwidth\fP = 45.0
+Default: \fIxscale\fP = 0.01; \fIyscale\fP = 50.0; \fImaxwidth\fP = 30.0
 .TP
 .B \-L
 \fIstartline/lineroot\fP
@@ -211,8 +211,9 @@ two traces with positive and negative values. An envelope signal is calculated
 as the magnitude of an analytic signal and so forms a single positive-only trace.
 The \fIsampleformat\fP sets the form of the output trace stored in one or more
 output SEGY files. If the output sample format differs from the input, then
-\fBmbextractsegy\fP must make the implied transformation. The default value of
-MB_SEGY_SAMPLEFORMAT_NONE to output data in the existing form. In the case of an
+\fBmbextractsegy\fP must make the implied transformation. MB_SEGY_SAMPLEFORMAT_NONE
+outputs the data in the existing form without transformation. The default value
+is MB_SEGY_SAMPLEFORMAT_ENVELOPE. In the case of an
 output MB_SEGY_SAMPLEFORMAT_TRACE, a single trace is output. If the input is an
 analytic time series, then the output will be a single trace comprised of the
 real part of the signal. In the case of MB_SEGY_SAMPLEFORMAT_ENVELOPE, if the
@@ -221,6 +222,15 @@ envelope function calculated from the analytic time series. In the case of
 MB_SEGY_SAMPLEFORMAT_ANALYTIC, then there will be three traces (and three
 SEGY files) output, the real part of the analytic data, the imaginary part
 of the analytic data, and the envelope function calculated from the analytic data.
+.TP
+.B \-T
+\fItimeshift\fP
+.br
+This option applies a time shift of \fItimeshift\fP seconds to the
+timestamps stored in the output SEGY trace headers. A positive
+\fItimeshift\fP value shifts the trace timestamps later; a negative
+value shifts them earlier. Default: \fItimeshift\fP = 0.0 (no time
+shift applied).
 .TP
 .B \-U
 \fIrangethreshold\fP

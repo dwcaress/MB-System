@@ -9,7 +9,8 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbsegypsd\fP \fB\-I\fIfile\fP \fB\-O\fIroot
-[\fB\-A\fIshotscale\fP \fB\-D\fIdecimatex\fP \fB\-R\fP
+[\fB\-A\fIshotscale/frequencyscale\fP \fB\-D\fIdecimatex\fP
+\fB\-N\fInfft\fP
 \fB\-S\fImode[/start/end[/schan/echan]]\fP \fB\-T\fIsweep[/delay]\fP
 \fB\-W\fImode/start/end\fP \fB\-H\fP \fB\-V\fP]";
 
@@ -68,10 +69,13 @@ Christian do Santos Ferreira
 .SH OPTIONS
 .TP
 .B \-A
-\fIshotscale\fP
+\fIshotscale/frequencyscale\fP
 .br
 This option causes the x-axis to be rescaled from shot number to distance in meters.
-The \fIshotscale\fP value represents the shot spacing in meters.
+The \fIshotscale\fP value represents the shot spacing in meters, and the
+\fIfrequencyscale\fP value is also recorded as a scaling factor. Both values must
+be supplied together, separated by a slash. Default: \fIshotscale\fP = 1.0,
+\fIfrequencyscale\fP = 1.0 (no rescaling).
 .TP
 .B \-D
 \fIdecimatex\fP
@@ -90,6 +94,14 @@ Sets the filename of the input segy seismic data file to be gridded.
 .B \-L
 .br
 Sets the PSD grid output to be in dB/Hz.
+.TP
+.B \-N
+\fInfft\fP
+.br
+Sets the FFT length (\fInfft\fP) used to calculate the PSD estimate for
+each trace by ensemble averaging; the trace is broken into segments of
+length \fInfft\fP samples.
+Default: \fInfft\fP = 1024.
 .TP
 .B \-O
 \fIroot\fP

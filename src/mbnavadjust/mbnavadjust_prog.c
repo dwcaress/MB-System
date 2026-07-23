@@ -6947,9 +6947,14 @@ int mbnavadjust_autosetsvsvertical() {
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols_alloc * sizeof(double), (void **)&x, &error);
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols_alloc * sizeof(double), (void **)&se, &error);
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows_alloc * sizeof(double), (void **)&b, &error);
+    /* matrix.ia/matrix.a are indexed by mb_aprod() as [matrix.ia_dim * row + col],
+        and ia_dim is set below to ncols_ba (3 * nblock) for the preliminary
+        block-offset solution - which can exceed 6 whenever nblock > 2 - so the
+        allocation must cover ia_dim per row, not a fixed 6 */
+    const int ia_dim_alloc = MAX(6, ncols_alloc);
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows_alloc * sizeof(int), (void **)&matrix.nia, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, 6 * nrows_alloc * sizeof(int), (void **)&matrix.ia, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, 6 * nrows_alloc * sizeof(double), (void **)&matrix.a, &error);
+    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ia_dim_alloc * nrows_alloc * sizeof(int), (void **)&matrix.ia, &error);
+    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ia_dim_alloc * nrows_alloc * sizeof(double), (void **)&matrix.a, &error);
     memset(u, 0, nrows_alloc * sizeof(double));
     memset(v, 0, ncols_alloc * sizeof(double));
     memset(w, 0, ncols_alloc * sizeof(double));
@@ -6957,8 +6962,8 @@ int mbnavadjust_autosetsvsvertical() {
     memset(se, 0, ncols_alloc * sizeof(double));
     memset(b, 0, nrows_alloc * sizeof(double));
     memset(matrix.nia, 0, nrows_alloc * sizeof(int));
-    memset(matrix.ia, 0, 6 * nrows_alloc * sizeof(int));
-    memset(matrix.a, 0, 6 * nrows_alloc * sizeof(double));
+    memset(matrix.ia, 0, ia_dim_alloc * nrows_alloc * sizeof(int));
+    memset(matrix.a, 0, ia_dim_alloc * nrows_alloc * sizeof(double));
 
     /*----------------------------------------------------------------*/
     /* Create block offset inversion matrix problem                   */
@@ -7042,7 +7047,7 @@ int mbnavadjust_autosetsvsvertical() {
           matrix.ia[index_m] = index_n;
           matrix.a[index_m] = 1.0;
 
-          b[irow] = bxfix[jbvb];
+          b[irow] = bxfix[iblock];
           matrix.nia[irow] = 1;
           irow++;
         }
@@ -7052,7 +7057,7 @@ int mbnavadjust_autosetsvsvertical() {
           matrix.ia[index_m] = index_n;
           matrix.a[index_m] = 1.0;
 
-          b[irow] = byfix[jbvb];
+          b[irow] = byfix[iblock];
           matrix.nia[irow] = 1;
           irow++;
         }
@@ -7062,7 +7067,7 @@ int mbnavadjust_autosetsvsvertical() {
           matrix.ia[index_m] = index_n;
           matrix.a[index_m] = 1.0;
 
-          b[irow] = bzfix[jbvb];
+          b[irow] = bzfix[iblock];
           matrix.nia[irow] = 1;
           irow++;
         }
@@ -8930,9 +8935,14 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols_alloc * sizeof(int), (void **)&nx, &error);
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols_alloc * sizeof(double), (void **)&se, &error);
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows_alloc * sizeof(double), (void **)&b, &error);
+    /* matrix.ia/matrix.a are indexed by mb_aprod() as [matrix.ia_dim * row + col],
+        and ia_dim is set below to ncols_ba (3 * nblock) for the preliminary
+        block-offset solution - which can exceed 6 whenever nblock > 2 - so the
+        allocation must cover ia_dim per row, not a fixed 6 */
+    const int ia_dim_alloc = MAX(6, ncols_alloc);
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows_alloc * sizeof(int), (void **)&matrix.nia, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, 6 * nrows_alloc * sizeof(int), (void **)&matrix.ia, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, 6 * nrows_alloc * sizeof(double), (void **)&matrix.a, &error);
+    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ia_dim_alloc * nrows_alloc * sizeof(int), (void **)&matrix.ia, &error);
+    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ia_dim_alloc * nrows_alloc * sizeof(double), (void **)&matrix.a, &error);
     memset(u, 0, nrows_alloc * sizeof(double));
     memset(v, 0, ncols_alloc * sizeof(double));
     memset(w, 0, ncols_alloc * sizeof(double));
@@ -8941,8 +8951,8 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
     memset(se, 0, ncols_alloc * sizeof(double));
     memset(b, 0, nrows_alloc * sizeof(double));
     memset(matrix.nia, 0, nrows_alloc * sizeof(int));
-    memset(matrix.ia, 0, 6 * nrows_alloc * sizeof(int));
-    memset(matrix.a, 0, 6 * nrows_alloc * sizeof(double));
+    memset(matrix.ia, 0, ia_dim_alloc * nrows_alloc * sizeof(int));
+    memset(matrix.a, 0, ia_dim_alloc * nrows_alloc * sizeof(double));
 
     /*----------------------------------------------------------------*/
     /* Create block offset inversion matrix problem                   */

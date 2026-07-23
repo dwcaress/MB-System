@@ -500,7 +500,7 @@ int main(int argc, char **argv) {
     {"platform-type-satellite", no_argument, nullptr, 0},
     {"platform-name", required_argument, nullptr, 0},
     {"platform-organization", required_argument, nullptr, 0},
-    {"platform-documenation-url", required_argument, nullptr, 0},
+    {"platform-documentation-url", required_argument, nullptr, 0},
     {"platform-start-time", required_argument, nullptr, 0},
     {"platform-end-time", required_argument, nullptr, 0},
     {"add-sensor-sonar-echosounder", no_argument, nullptr, 0},
@@ -619,9 +619,9 @@ int main(int argc, char **argv) {
     {"sensor-source-subbottom2", no_argument, nullptr, 0},
     {"sensor-source-subbottom3", no_argument, nullptr, 0},
     {"sensor-source-camera", no_argument, nullptr, 0},
-    {"sensor-source-camera", no_argument, nullptr, 0},
-    {"sensor-source-camera", no_argument, nullptr, 0},
-    {"sensor-source-camera", no_argument, nullptr, 0},
+    {"sensor-source-camera1", no_argument, nullptr, 0},
+    {"sensor-source-camera2", no_argument, nullptr, 0},
+    {"sensor-source-camera3", no_argument, nullptr, 0},
     {"sensor-source-position", no_argument, nullptr, 0},
     {"sensor-source-position1", no_argument, nullptr, 0},
     {"sensor-source-position2", no_argument, nullptr, 0},
@@ -661,9 +661,9 @@ int main(int argc, char **argv) {
     {"set-source-subbottom2", required_argument, nullptr, 0},
     {"set-source-subbottom3", required_argument, nullptr, 0},
     {"set-source-camera", required_argument, nullptr, 0},
-    {"set-source-camera", required_argument, nullptr, 0},
-    {"set-source-camera", required_argument, nullptr, 0},
-    {"set-source-camera", required_argument, nullptr, 0},
+    {"set-source-camera1", required_argument, nullptr, 0},
+    {"set-source-camera2", required_argument, nullptr, 0},
+    {"set-source-camera3", required_argument, nullptr, 0},
     {"set-source-position", required_argument, nullptr, 0},
     {"set-source-position1", required_argument, nullptr, 0},
     {"set-source-position2", required_argument, nullptr, 0},
@@ -758,7 +758,7 @@ int main(int argc, char **argv) {
 
         case option_input:
           /* set the name of the input platform file */
-          strcpy(input_platform_file, optarg);
+          snprintf(input_platform_file, sizeof(input_platform_file), "%s", optarg);
 
           /* read the pre-existing platform file */
           status = mb_platform_read(verbose, input_platform_file, (void **)&platform, &error);
@@ -874,7 +874,7 @@ int main(int argc, char **argv) {
 
         case option_swath:
           /* set the name of the input platform file */
-          strcpy(input_swath_file, optarg);
+          snprintf(input_swath_file, sizeof(input_swath_file), "%s", optarg);
 
           /* get format if required */
           if (input_swath_format == 0)
@@ -1057,7 +1057,7 @@ int main(int argc, char **argv) {
 
         case option_output:
           /* set output platform file */
-          strcpy(output_platform_file, optarg);
+          snprintf(output_platform_file, sizeof(output_platform_file), "%s", optarg);
           output_platform_file_defined = true;
           break;
 
@@ -1086,15 +1086,15 @@ int main(int argc, char **argv) {
           break;
 
         case option_platform_name:
-          strcpy(platform->name, optarg);
+          snprintf(platform->name, sizeof(platform->name), "%s", optarg);
           break;
 
         case option_platform_organization:
-          strcpy(platform->organization, optarg);
+          snprintf(platform->organization, sizeof(platform->organization), "%s", optarg);
           break;
 
         case option_platform_documentation_url:
-          strcpy(platform->documentation_url, optarg);
+          snprintf(platform->documentation_url, sizeof(platform->documentation_url), "%s", optarg);
           break;
 
         case option_platform_start_time:
@@ -1767,15 +1767,15 @@ int main(int argc, char **argv) {
           break;
 
         case option_sensor_model:
-          strcpy(tmp_sensor.model, optarg);
+          snprintf(tmp_sensor.model, sizeof(tmp_sensor.model), "%s", optarg);
           break;
 
         case option_sensor_manufacturer:
-          strcpy(tmp_sensor.manufacturer, optarg);
+          snprintf(tmp_sensor.manufacturer, sizeof(tmp_sensor.manufacturer), "%s", optarg);
           break;
 
         case option_sensor_serialnumber:
-          strcpy(tmp_sensor.serialnumber, optarg);
+          snprintf(tmp_sensor.serialnumber, sizeof(tmp_sensor.serialnumber), "%s", optarg);
           break;
 
         case option_sensor_capability_position:
@@ -1965,7 +1965,7 @@ int main(int argc, char **argv) {
 
         case option_sensor_time_latency_model:
           /* set the name of the input time latency file */
-          strcpy(time_latency_model_file, optarg);
+          snprintf(time_latency_model_file, sizeof(time_latency_model_file), "%s", optarg);
           tmp_sensor.time_latency_mode = MB_SENSOR_TIME_LATENCY_MODEL;
 
           /* count the data points in the time latency file */
@@ -2207,7 +2207,7 @@ int main(int argc, char **argv) {
         case option_modify_time_latency_model:
           if (sensor_mode == SENSOR_MODIFY || sensor_mode == SENSOR_ADD) {
             /* set the name of the input time latency file */
-            strcpy(time_latency_model_file, optarg);
+            snprintf(time_latency_model_file, sizeof(time_latency_model_file), "%s", optarg);
             active_sensor->time_latency_mode = MB_SENSOR_TIME_LATENCY_MODEL;
 
             /* count the data points in the time latency file */

@@ -9,12 +9,12 @@ Version 5.0
 .SH SYNOPSIS
 \fBmbmosaic\fP \fB\-I\fIfilelist\fP \fB\-O\fIroot\fP
 [\fB\-A\fIdatatype[F]\fP
-\fB\-B\fIborder\fP \-C\fIclip\fP \fB\-D\fIxdim/ydim\fP
+\fB\-B\fIborder\fP \-C\fIclip/mode/tension\fP \fB\-D\fIxdim/ydim\fP
 \fB\-E\fIdx/dy/units[!]\fP \fB\-F\fIpriority_range[/weight]\fP
 \fB\-G\fIgridkind\fP  \fB\-J\fIprojection\fP
 \fB\-H \-L\fIlonflip\fP \fB\-M \-N \-P\fIpings\fP
 \fB\-R\fIwest/east/south/north\fP \fB\-R\fIfactor\fP
-\fB\-S\fIspeed\fP \fB\-T\fItension\fP \fB\-U\fIbearing/factor[/mode]\fP
+\fB\-S\fIspeed\fP \fB\-T\fItopogridfile\fP \fB\-U\fIbearing/factor[/mode]\fP
 \fB\-V\fP \-W\fIscale\fP \fB\-X\fIextend\fP
 \fB\-Y\fIpriority_source\fP \fB\-Z\fIbath_default\fP]
 
@@ -276,13 +276,28 @@ wherever no data exist, provided \fIborder\fP > 0.0.
 Default: \fIborder\fP = 0.0
 .TP
 .B \-C
-\fIclip\fP
+\fIclip/mode/tension\fP
 .br
-Sets the clipping dimension for the spline interpolation. If \fIclip\fP=0
-no spline interpolation will be done.  If \fIclip\fP>0 then the spline
-interpolation will fill data gaps to a distance of \fIclip\fP times
-the grid spacing.
-Default: \fIclip\fP = 0.
+Controls the use of spline interpolation to fill grid cells not
+filled by swath data, and sets the tension used in that interpolation.
+The \fIclip\fP value sets the distance from
+swath data (in grid cells) that the spline interpolation may be
+applied. If \fIclip\fP=0 no spline interpolation will be done.
+If \fImode\fP=0 then no spline interpolation will be done regardless of
+\fIclip\fP. If \fImode\fP=1 then the interpolation will fill
+data gaps up to \fIclip\fP grid cells in size. If \fImode\fP=2
+then the spline interpolation will fill all undefined cells within
+a distance of \fIclip\fP cells from data. If \fImode\fP >= 3 or \fIclip\fP is
+set to a value greater than both dimensions of the output grid, then
+all grid cells not set by swath data will be filled by interpolation.
+The \fItension\fP value sets the tension used in the thin plate spline
+interpolation. A \fItension\fP of 0 gives a minimum curvature surface
+with free edges; this is a pure Laplacian solution. A nonzero
+\fItension\fP tends to suppress spurious oscillations and flatten
+the interpolation toward the edges; a \fItension\fP of infinity
+yields a pure spline solution. The \fItension\fP must be zero or
+greater.
+Default: \fIclip\fP = 0, \fImode\fP = 0, \fItension\fP = 0.0.
 .TP
 .B \-D
 \fIxdim/ydim\fP
@@ -590,16 +605,14 @@ the input data; pings associated with a smaller ship speed will not be
 output. Default: \fIspeed\fP = 0.
 .TP
 .B \-T
-\fItension\fP
+\fItopogridfile\fP
 .br
-Sets the \fItension\fP value used in the thin plate spline interpolation.
-A \fItension\fP of 0 gives a minimum curvature surface with free edges;
-this is a pure Laplacian solution. A nonzero \fItension\fP tends to
-suppress spurious oscillations and flatten
-the interpolation toward the edges; a \fItension\fP of infinity
-yields a pure spline solution. The \fItension\fP must be zero or
-greater.
-Default: \fItension\fP = 1.0e10 (pure spline solution).
+Sets \fItopogridfile\fP as a topography grid to be used when calculating
+the footprint of each amplitude or sidescan value on the seafloor. If
+this option is used, the acrosstrack distance versus grazing angle table
+used to position and size the beam or pixel footprints is derived from
+the specified topography grid rather than from a flat bottom assumption.
+By default, no topography grid is used.
 .TP
 .B \-U
 \fIbearing/factor[/mode]\fP

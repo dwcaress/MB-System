@@ -9,8 +9,10 @@ Version 5.0
 .SH SYNOPSIS
 \fBmb7k2jstar\fP [\fB\-I\fIfile \fB\-A\fItype\fP
 \fB\-B\fIbottompickmode/bottompickthreshold\fP \fB\-C\fP
-\fB\-F\fIformat\fP \fB\-L\fP\fIstartline/lineroot\fP
-\fB\-M \-O\fIoutfile\fP \fB\-R\fIroutefile\fP \fB\-X \-H \-V\fP]
+\fB\-F\fIformat\fP \fB\-G\fIgainmode/gainfactor\fP
+\fB\-L\fP\fIstartline/lineroot\fP
+\fB\-M \-O\fIoutfile\fP \fB\-R\fIroutefile\fP \fB\-S\fIsmooth\fP
+\fB\-T\fItimeshift\fP \fB\-X \-H \-V\fP]
 
 .SH DESCRIPTION
 \fBMB7k2jstar\fP is a utility that extracts Edgetech subbottom
@@ -83,14 +85,14 @@ profiler records are extracted.
 This option sets the source of the sonar first arrival time embedded into
 the Jstar format trace headers. This value can be used for
 laying out sidescan on the seafloor. If \fIbottompickmode\fP = 1,
-then \fBmb7k2jstar\fP will use the altitude value associated with
-platform navigation. If \fIbottompickmode\fP = 2, then \fBmb7k2jstar\fP
-will extract the first arrival time from multibeam bathymetry in the
-7k data stream. If \fIbottompickmode\fP = 3, then \fBmb7k2jstar\fP
+then \fBmb7k2jstar\fP will extract the first arrival time from multibeam
+bathymetry in the 7k data stream. If \fIbottompickmode\fP = 2, then
+\fBmb7k2jstar\fP will use the altitude value associated with
+platform navigation. If \fIbottompickmode\fP = 3, then \fBmb7k2jstar\fP
 will pick the first arrival time in the sidescan sonar data by looking
 for the first sample with an amplitude > \fIbottompickthreshold\fP times the
 maximum amplitude in the trace.
-Default: \fIbottompickmode\fP = 1.
+Default: \fIbottompickmode\fP = 2.
 .TP
 .B \-C
 .br
@@ -105,6 +107,15 @@ or from a file. If \fIformat\fP < 0, then the input file specified
 with the \fB\-I\fP option will actually contain a list of input swath sonar
 data files. This program only reads Reson 7k format data files (\fBMBIO\fP
 format 88).
+.TP
+.B \-G
+\fIgainmode/gainfactor\fP
+.br
+This option applies a gain correction to the extracted sidescan data.
+If \fIgainmode\fP = 0, no gain correction is applied. If \fIgainmode\fP = 1,
+a time-varying gain (proportional to range squared beyond the bottom
+return) scaled by \fIgainfactor\fP is applied to the sidescan samples.
+Default: \fIgainmode\fP = 0; \fIgainfactor\fP = 1.0.
 .TP
 .B \-H
 This "help" flag cause the program to print out a description
@@ -165,6 +176,22 @@ the output Jstar filename (or files if a datalist is being processed) will
 be the input swath filename with an appropriate suffix appended (".jsf" for
 mixed Jstar files, ".mb132" for low frequency sidescan only files, and ".mb133"
 for high frequency sidescan only files).
+.TP
+.B \-S
+\fIsmooth\fP
+.br
+This option applies smoothing to the extracted sidescan trace samples.
+If \fIsmooth\fP is positive, each sample is replaced by the boxcar
+average of the samples within \fIsmooth\fP samples on either side.
+If \fIsmooth\fP is negative, each sample is replaced by the RMS value
+of the samples within \fI|smooth|\fP samples on either side. Default:
+\fIsmooth\fP = 0 (no smoothing).
+.TP
+.B \-T
+\fItimeshift\fP
+.br
+This option shifts the timestamps of the extracted data by \fItimeshift\fP
+seconds. Default: \fItimeshift\fP = 0.0.
 .TP
 .B \-V
 This option increases the verbosity of \fBmb7k2jstar\fP, causing it

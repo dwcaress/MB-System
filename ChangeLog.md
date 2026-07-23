@@ -169,6 +169,80 @@ several unbounded command-line path arguments, a dead duplicate-crossing check, 
 undefined-behavior fclose() on a failed file open (7 sites), and a display counter that
 was always zero.
 
+Program mbnavadjust (and mbnavadjustmerge): A follow-up round of fixes targeting crashes
+reported when displaying and selecting global ties. Fixed invalid qsort() comparator
+functions for the sorted global-tie and sorted crossing-tie list displays that never
+returned zero for equal or incomparable elements, violating the strict-weak-ordering
+contract required by qsort() and able to crash on quicksort-family implementations
+(including those used by both Linux glibc and macOS/BSD libc). Fixed a heap buffer
+overflow in the sparse inversion matrix built for the preliminary per-block offset
+solution (used by both the main navigation inversion and the "Autoset Z Offsets"
+feature): the matrix's row stride was set to 3 times the number of survey blocks, but
+the backing array was only ever allocated for a fixed stride of 6, overflowing on any
+project combining more than two surveys - an entirely ordinary case - during exactly the
+step that folds global tie offsets into the solution. Fixed a stale-variable bug in the
+"Autoset Z Offsets" feature where the per-block averaged global tie offset was indexed
+with a leftover loop variable from an unrelated, already-finished loop instead of the
+current block index, an out-of-bounds heap read. Fixed a bug in mbnavadjustmerge where
+merging additional files into a project unconditionally renumbered every copied
+section's reference-grid ID, corrupting the "no reference grid assigned" sentinel value
+into a bogus but plausible-looking grid index for any section without a global tie or
+reference grid; a section thus corrupted could cause mbnavadjust to load and display the
+wrong reference grid when its global tie was later selected. Also fixed a missing bounds
+check (and a related debug-only variable mixup) in the reference grid loader that could
+read the reference-grid name array out of bounds given a negative grid index, and fixed
+the project's global-tie counters not being decremented when mbnavadjustmerge removes a
+file that held global ties, which left the "ties analyzed" status display overcounted.
+
+Program mbdatalist: Fixed a bug in which the long option --report incorrectly triggered
+the same behavior as --copy instead of generating a datalist report, due to a copy-paste
+error in the option-parsing code.
+
+Program mbinfo: Fixed a bug in which the long option --ping-variances accepted but
+silently ignored its argument; only the equivalent short option -P worked correctly.
+
+Program mbmakeplatform: Fixed a typo (--platform-documenation-url) that made the
+correctly-spelled --platform-documentation-url option unrecognized. Fixed a bug in which
+--sensor-source-camera1/2/3 and --set-source-camera1/2/3 were all registered under the
+same un-numbered option name, making the numbered variants unreachable.
+
+Program mbpreprocess: Fixed missing option-table entries for --time-latency-apply-altitude
+and --filter-apply-altitude, which had working handlers but were never recognized by the
+command-line parser. Also fixed both handlers, which incorrectly applied the correction
+to attitude data instead of altitude data due to using the wrong internal flag bit.
+
+Program mbvoxelclean: Fixed a bug in which --count-flagged was declared as requiring an
+argument even though it is a boolean flag, causing the documented bare-flag usage to be
+rejected by the command-line parser.
+
+Program mbsslayout: Fixed several option-parsing and ancillary-data-correction bugs found
+during a documentation audit. --line-route had a working handler but was never registered
+with the option parser, making it unusable. --line-range-threshold was accepted but
+silently discarded, so the survey-line range threshold was always hardcoded to 50 meters
+regardless of what was specified on the command line. --time-latency-apply-altitude
+applied its time latency correction to attitude data instead of altitude data (the same
+bit-flag bug as in mbpreprocess), and a soundspeed time-latency correction was gated on
+that same wrong (attitude) flag bit, causing it to fire whenever --time-latency-apply-attitude
+was used alone. The entire --filter/--filter-apply-* family of options, intended to apply
+a Gaussian time-domain filter to ancillary data (navigation, sensordepth, heading,
+attitude, altitude), was never registered with the option parser and had no
+implementation; this has now been implemented using the existing mb_apply_time_filter()
+library function, mirroring the equivalent feature in mbpreprocess. Added a new
+--line-position-list option that defines survey lines from a simple ASCII file of
+waypoint longitude/latitude pairs, as a lighter-weight alternative to --line-route's full
+MB-System route file format.
+
+Man pages: Audited the man pages for all 46 programs in src/utilities against their
+actual command-line option implementations, finding and fixing documentation
+discrepancies in 24 of them, including missing options (mb7k2jstar, mbareaclean,
+mbauvloglist, mbbackangle, mbgetesf, mbrolltimelag, mbroutetime, mbsegygrid, mbsegypsd,
+mbset, mbsvplist, mbsslayout, mbvoxelclean, mbmakeplatform), stale options describing
+command-line flags that no longer exist (mbclean, mbhistogram, mbsegylist, mbsegypsd,
+mbsslayout, mbsvpselect), and incorrect descriptions or default values (mb7k2jstar,
+mbclean, mbcopy, mbextractsegy, mbfilter, mbminirovnav, mbmosaic, mbpreprocess,
+mbrolltimelag, mbroutetime, mbset, mbsvplist, mbsvpselect, mbvoxelclean). This audit
+also surfaced the mbsslayout and mbpreprocess source-code bugs described above.
+
 The bugs described above were identified and fixed with the assistance of the AI coding
 assistant Claude Sonnet 5 (Anthropic, model claude-sonnet-5), operating as Claude Code
 under developer supervision and review.
@@ -503,7 +577,9 @@ Miscellaneous: Removed top level files "NEWS", "NOTES", and "INSTALL.md". These 
 to conform to GNU expectations for a package structure. We are no longer trying to match the
 GNU structure, and so have removed these unnecessary files.
 
-Most SeaBeam Classic formats (MBF_SBSIOMRG, MBF_SBSIOCEN, MBF_SBSIOLSI, MBF_SBURICEN, MBF_SBURIVAX): Added code to handle rare condition where the ping timestamp has a seconds value of 60. Now the code will add one to the minutes value, and set the seconds value to 0.
+Most SeaBeam Classic formats (MBF_SBSIOMRG, MBF_SBSIOCEN, MBF_SBSIOLSI, MBF_SBURICEN, 
+MBF_SBURIVAX): Added code to handle rare condition where the ping timestamp has a seconds 
+value of 60. Now the code will add one to the minutes value, and set the seconds value to 0.
 
 #### 5.8.2beta17 (November 7, 2024)
 
@@ -728,7 +804,10 @@ printed out information when reading height datagrams.
 
 #### 5.8.2beta04 (May 13, 2024)
 
-Mbpreprocess: Added kluge option to fix large shifts in survey record timestamps in Teledyne s7k format data (specifically MBARI Mapping AUV multibeam data collected with the sonar computer experiencing large shifts in time). This option is accessed as --kluge-fix-7k-timestamps=time
+Mbpreprocess: Added kluge option to fix large shifts in survey record timestamps in 
+Teledyne s7k format data (specifically MBARI Mapping AUV multibeam data collected with 
+the sonar computer experiencing large shifts in time). This option is accessed as 
+--kluge-fix-7k-timestamps=time
 
 Mbroutetime: Now works with the recently changed route file format.
 
@@ -737,7 +816,9 @@ that the Levitus database location was incorrectly embedded in the compiled prog
 
 #### 5.8.2beta02 (May 1, 2024)
 
-Format 261 (MBF_KEMKMALL): Fixed bug in handing pings for which there are multiple MRZ datagrams that have different timestamps. This bug resulted in MB-System dropping many pings in some deepwater Kongsberg data (mostly EM124 data).
+Format 261 (MBF_KEMKMALL): Fixed bug in handing pings for which there are multiple MRZ 
+datagrams that have different timestamps. This bug resulted in MB-System dropping many 
+pings in some deepwater Kongsberg data (mostly EM124 data).
 
 #### 5.8.2beta01 (April 29, 2024)
 
@@ -926,16 +1007,30 @@ The source code distribution can be downloaded from the MB-System Github reposit
 In addition to many bug fixes, the changes of 5.8.0 relative to the prior major release (5.7.8) include:
 
 **New build system:**  
-MB-System is now built and installed using the CMake package, rather than GNU Autotools. The old build system is still present and can be used to install MB-System on old operating systems (e.g. Ubuntu 18.04), but all support for building on recent, current and future operating systems will be for use of CMake. See the Download and Install (https://www.mbari.org/technology/mb-system/installation/) instructions page for details.
+MB-System is now built and installed using the CMake package, rather than GNU Autotools. 
+The old build system is still present and can be used to install MB-System on old operating 
+systems (e.g. Ubuntu 18.04), but all support for building on recent, current and future 
+operating systems will be for use of CMake. See the Download and Install 
+(https://www.mbari.org/technology/mb-system/installation/) instructions page for details.
 
 **Global ties to reference grids in MBnavadjust:**  
-MBnavadjust is a toolset used adjust navigation of submerged platform (e.g. AUV or ROV) surveys so that features match where swaths overlap and cross. The primary information comes from measuring the navigation offsets required to match features using cross correlation of the bathymetry data. MBnavadjust now also allows the survey navigation to be tied to reference bathymetry models, typically from GPS-navigated hull mounted surveys, so that the navigation can be tied to the world frame of reference.
+MBnavadjust is a toolset used adjust navigation of submerged platform (e.g. AUV or ROV) 
+surveys so that features match where swaths overlap and cross. The primary information 
+comes from measuring the navigation offsets required to match features using cross 
+correlation of the bathymetry data. MBnavadjust now also allows the survey navigation to 
+be tied to reference bathymetry models, typically from GPS-navigated hull mounted surveys, 
+so that the navigation can be tied to the world frame of reference.
 
 **Realtime Terrain Relative Navigation:**  
-MB-System now includes a Terrain Relative Navigation (TRN) codebase developed at Stanford and MBARI that uses realtime topography information to where a platform is located on a pre-existing topography map. The MB-System tool mbtrnpp implements TRN in the case of an AUV or ROV equipped with a multibeam sonar. 
+MB-System now includes a Terrain Relative Navigation (TRN) codebase developed at Stanford 
+and MBARI that uses realtime topography information to where a platform is located on a 
+pre-existing topography map. The MB-System tool mbtrnpp implements TRN in the case of an 
+AUV or ROV equipped with a multibeam sonar. 
 
 **Photomosaicing tools available:**  
-Tools for generating photomosaics from sets of still seafloor photographs are now built as part of MB-System. Documentation and examples are being developed but are not available at the time of this release.
+Tools for generating photomosaics from sets of still seafloor photographs are now built as 
+part of MB-System. Documentation and examples are being developed but are not available 
+at the time of this release.
 
 ---
 ### MB-System Version 5.7 Releases and Release Notes:
@@ -2064,9 +2159,11 @@ that were breaking test Cmake builds.
 
 #### 5.7.9beta02 (January 27, 2021)
 
-Fixed bug in format 58 and 59 support for bathymetry recalculation. The per beam heave values were being calculated incorrectly when bathymetry was recalculated by raytracing.
+Fixed bug in format 58 and 59 support for bathymetry recalculation. The per beam heave 
+values were being calculated incorrectly when bathymetry was recalculated by raytracing.
 
-Fixed bug in format 57 in which reprocessing did not trigger recalculation of multibeam pseudosidescan.
+Fixed bug in format 57 in which reprocessing did not trigger recalculation of multibeam 
+pseudosidescan.
 
 These bugs were introduced during the 2020 code modernization.
 
@@ -2541,7 +2638,8 @@ the order of "bestness" being:
 1. Calibrated sidescan
 1. Sidescan
 
-You can force mbpreprocess to use a desired backscatter source with the --multibeam-sidescan-source option, where:
+You can force mbpreprocess to use a desired backscatter source with the 
+--multibeam-sidescan-source option, where:
 
 -  --multibeam-sidescan-source=C ==> Calibrated snippet records
 -  --multibeam-sidescan-source=S ==> Snippet records
@@ -2870,10 +2968,12 @@ commits to the Github repository.
 
 Code style: Kurt Schwehr is systematically altering the code to conform to best
 practices and adding build tests. The improvements included in this beta release
-include work on mbview and programs using mbview, the auxilliary library in src/mbaux, particularly including mb_cheb.c, mb_intersectgrid.c, and mb_zgrid.c,
+include work on mbview and programs using mbview, the auxilliary library in src/mbaux, 
+particularly including mb_cheb.c, mb_intersectgrid.c, and mb_zgrid.c,
 and on mbedit.
 
-Code style: Tom O'Reilly and David Caress added README.md files in each of the subdirectories under src/.
+Code style: Tom O'Reilly and David Caress added README.md files in each of the 
+subdirectories under src/.
 
 #### 5.7.6beta31 (March 2, 2020)
 
@@ -2948,7 +3048,8 @@ include work on mbedit, mbnavedit, and mbnavadjust.
 mbpreprocess: Corrected prior fix to error in calculating lever arms, which
 didn't include all of the sign changes needed in mb_platform.c.
 
-mbgrid: Fixed flaw in min or max weighted mean algorithm that produced array overflows in mbgrid.
+mbgrid: Fixed flaw in min or max weighted mean algorithm that produced array overflows in 
+mbgrid.
 
 #### 5.7.6beta26 (February 2, 2020)
 
@@ -2974,16 +3075,23 @@ the GMT modules mbswath, mbcontour, and mbgrdtiff.
 
 #### 5.7.6beta25 (January 20, 2020)
 
-Info files: The top level information files README, ChangeLog, and GPL have been removed. The Markdown format versions (README.md, ChangeLog.md, GPL.md) remain and have been updated.
+Info files: The top level information files README, ChangeLog, and GPL have been removed. 
+The Markdown format versions (README.md, ChangeLog.md, GPL.md) remain and have been updated.
 
-Mbeditviz: Fixed a bug recently introduced (inadvertently) that caused a crash when bringing up the sounding 3D cloud.
+Mbeditviz: Fixed a bug recently introduced (inadvertently) that caused a crash when 
+bringing up the sounding 3D cloud.
 
-Mbm_grd2arc: Fixed failure with GMT 6. Basically, there is a GMT module grdconvert that accomplishes exactly the same task, so this macro is unnecessary. It has been recast to simply call gmt grdconvert. It will be listed as deprecated, but left in the distribution to maintain the viability of old processing scripts.
+Mbm_grd2arc: Fixed failure with GMT 6. Basically, there is a GMT module grdconvert that 
+accomplishes exactly the same task, so this macro is unnecessary. It has been recast to 
+simply call gmt grdconvert. It will be listed as deprecated, but left in the distribution 
+to maintain the viability of old processing scripts.
 
-Code style: Kurt Schwehr is systematically altering the code to conform to best practices and adding build tests. The tests are performed by running
+Code style: Kurt Schwehr is systematically altering the code to conform to best practices 
+and adding build tests. The tests are performed by running
     make check
 and are executed automatically by the Travis CI service integrated with Github
-whenever commits are made to the Github repository. The current changes mostly consist of cleaning up the code of the graphical utilities such as mbedit, mbnavedit, mbnavadjust.
+whenever commits are made to the Github repository. The current changes mostly consist of 
+cleaning up the code of the graphical utilities such as mbedit, mbnavedit, mbnavadjust.
 
 #### 5.7.6beta24 (January 16, 2020)
 
@@ -3004,7 +3112,8 @@ will continue to be used when building with Proj releases 5.0 through 6.0.
 In practice, the build system sets preprocessor values that determine at compile
 time which Proj API is used by the functions in src/mbio/mb_proj.c.
 
-Code style: Kurt Schwehr is systematically altering the code to conform to best practices and adding build tests. The tests are performed by running
+Code style: Kurt Schwehr is systematically altering the code to conform to best practices 
+and adding build tests. The tests are performed by running
     make check
 and are executed automatically by the Travis CI service integrated with Github
 whenever commits are made to the Github repository.
@@ -3049,7 +3158,8 @@ directory had included the files geodetic.h and geodetic.c to provide this capab
 those are now not included. Consequently, if MB-System is built with Proj versions 4 or 5,
 then mbsvpselect will not be built.
 
-Code style: Kurt Schwehr is systematically altering the code to conform to best practices and adding build tests. The tests are performed by running
+Code style: Kurt Schwehr is systematically altering the code to conform to best practices 
+and adding build tests. The tests are performed by running
     make check
 and are executed automatically by the Travis CI service integrated with Github
 whenever commits are made to the Github repository.
@@ -3080,11 +3190,15 @@ entirely from MB-System distributions at the time of the 6.0 release.
 
 #### 5.7.6beta21 (December 12, 2019)
 
-GMT modules (mbcontour, mbswath, mbgrdtiff): modified the #ifdefs to allow building with GMT 6.1 and later.
+GMT modules (mbcontour, mbswath, mbgrdtiff): modified the #ifdefs to allow building with 
+GMT 6.1 and later.
 
-MBnavadjustmerge: augmented --set-tie option to allow changing the z-offset value of an existing tie.
+MBnavadjustmerge: augmented --set-tie option to allow changing the z-offset value of an 
+existing tie.
 
-MBprocess: Change behavior when reading grid files for backscatter correction fails - the functions in mb_readwritegrd.c used to wait 1 millisecond before trying to read again; now the code waits for 25 milliseconds.
+MBprocess: Change behavior when reading grid files for backscatter correction fails - the 
+functions in mb_readwritegrd.c used to wait 1 millisecond before trying to read again; now 
+the code waits for 25 milliseconds.
 
 Code stye: Kurt Schwehr is systematically altering the code to conform to best practices
 
@@ -6646,7 +6760,8 @@ provided by Val Schmidt of CCOM/JHC at University of New Hampshire.
 
 #### 5.3.1917 (January 10, 2012)
 
-Added preliminary support for HYSWEEP HSX format as MBIO format 201. Added program mbhysweeppreprocess to preprocess the HSX data.
+Added preliminary support for HYSWEEP HSX format as MBIO format 201. Added program 
+mbhysweeppreprocess to preprocess the HSX data.
 
 Fixed bug in mb_lever() function in mb_angle.c.
 
@@ -7204,8 +7319,10 @@ Fixed issues with a number of manual pages.
 #### 5.1.3beta1860
 
 Further changes to mbnavadjust:
-- The inversion stops if it is diverging rather than converging on a navigation adjustment model solution.
-- The program will insure that all crossings have the later section second by flipping the order of crossings if necessary while reading an old project.
+- The inversion stops if it is diverging rather than converging on a navigation adjustment 
+	model solution.
+- The program will insure that all crossings have the later section second by flipping the 
+	order of crossings if necessary while reading an old project.
 - The program also resorts the crossings when it reads a project.
 
 #### 5.1.3beta1858
