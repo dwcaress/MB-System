@@ -324,6 +324,49 @@ mbnavadjustmerge's --apply-navigation, run against a project created with
 --create-project, would silently skip updating each file's processing parameters with no
 error reported.
 
+Programs mbedit, mbnavedit, and mbvelocitytool: A memory-management and correctness audit
+of these three interactive Motif editors (paralleling the earlier audits of src/utilities
+and mbview/mbeditviz) found and fixed a critical NULL-pointer-write crash in mbnavedit's
+"Invert Navigation" modeling mode, triggered by ordinary use whenever exactly one point is
+visible: the inversion matrix's row-count formula went to zero for a single point, and
+mb_mallocd() treats a zero-byte allocation as a successful NULL return, so the code
+proceeded to write through the NULL buffer. All three programs shared a second bug: their
+get_text_string() helper did an unbounded strcpy() from any Motif text field into
+fixed-size buffers as small as 10 bytes, with no widget-side length limit set on any of the
+fields - fixed by adding an explicit destination-size parameter to the helper in all three
+programs. All three also shared an unterminated strncpy() when copying a user-selected file
+path from the file-selection dialog, which could read past the destination buffer on
+sufficiently long paths. Several additional bugs specific to each program were also fixed:
+in mbedit, undersized bottom-detect-type and pulse-type name lookup tables that indexed
+past their end on lidar/photogrammetry data, a reversed bit-shift that corrupted the
+extracted detection-priority value, and an out-of-bounds neighbor read in the median-spike
+filter's along-track window; in mbnavedit, an uninitialized-neighbor read that produced
+garbage speed/course-made-good values for single-point buffers, an off-by-one that silently
+excluded the first visible point from mouse "pick" mode, and unreliable time-interval
+bookkeeping after deleting bad-time records (replaced with a straightforward recompute
+pass); in mbvelocitytool, four sites where a chain of unchecked mb_mallocd() calls could let
+a later successful allocation mask an earlier failure and use the resulting NULL pointer, a
+divide-by-zero (surfacing as a silently propagated NaN) in the per-ping depth-residual
+linear fit when only one beam survived flagging, an uninitialized sensor-depth value used
+when every beam in a ping was flagged bad, a stray "!= 60" condition that silently skipped
+freeing all per-ping data buffers for any ping with exactly 60 beams, and a latent
+(then-unreachable) heap overflow in the profile-deletion code that copied array contents
+into a differently-sized, already-freed destination buffer rather than moving the whole
+profile record.
+
+Man pages: Audited the mbedit, mbnavedit, and mbvelocitytool man pages against their actual
+command-line options and current GUI behavior. Fixed a wrong option letter (mbedit's browse
+mode is -D, not -B, as the man page stated), two stale/nonexistent options in mbnavedit's
+synopsis and options list (-O and -T, neither implemented in the code), and several wrong
+default values and figures across all three (data buffer sizes, mbvelocitytool's default
+format id, default editable-profile point count, and maximum number of display profiles).
+Also fixed a self-contradicting keyboard-macro table in mbedit's man page (Grab and Info
+mode keys were listed backwards in one place and correctly in another), a mislabeled
+duplicate section heading, and added documentation for several existing but previously
+undocumented features: mbedit's "Flag by Beam Angle" filter and median-filter window-size
+sliders, its three-way exclusive "Show Flag States / Show Bottom Detect Algorithms / Show
+Source Pulse Types" view toggle, and mbnavedit's "Sonar Depth Plot" toggle.
+
 The bugs described above were identified and fixed with the assistance of the AI coding
 assistant Claude Sonnet 5 (Anthropic, model claude-sonnet-5), operating as Claude Code
 under developer supervision and review.

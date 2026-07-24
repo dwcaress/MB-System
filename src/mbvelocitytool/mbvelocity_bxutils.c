@@ -3285,8 +3285,8 @@ void SetAppDefaults(Widget w, UIAppDefault *defs, char *inst_name, Boolean overr
 		if (wclass == applicationShellWidgetClass)
 			break;
 
-		strncpy(buf, lineage, sizeof(buf));
-		sprintf(lineage, "*%s%s", XtName(parent), buf);
+		snprintf(buf, sizeof(buf), "%s", lineage);
+		snprintf(lineage, sizeof(lineage), "*%s%s", XtName(parent), buf);
 
 		parent = XtParent(parent);
 	}

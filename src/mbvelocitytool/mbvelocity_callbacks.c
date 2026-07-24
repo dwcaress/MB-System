@@ -136,7 +136,7 @@ static int borders[4] = {0, 1019, 0, 550};
 void do_fileselection_list(Widget w, XtPointer client_data, XtPointer call_data);
 void set_label_string(Widget, String);
 void set_label_multiline_string(Widget, String);
-void get_text_string(Widget, String);
+void get_text_string(Widget, String, size_t);
 void do_set_controls();
 
 /*--------------------------------------------------------------------*/
@@ -730,7 +730,7 @@ void do_fileselection_list(Widget w, XtPointer client_data, XtPointer call_data)
 	int form;
 
 	/* get selected text */
-	get_text_string(fileSelectionText, selection_text);
+	get_text_string(fileSelectionText, selection_text, sizeof(selection_text));
 
 	/* get output file */
 	if ((int)strlen(selection_text) > 0) {
@@ -765,7 +765,8 @@ void do_open(Widget w, XtPointer client_data, XtPointer call_data) {
 	}
 	else {
 		selected = 1;
-		strncpy(input_file, input_file_ptr, MB_PATH_MAXLINE);
+		strncpy(input_file, input_file_ptr, MB_PATH_MAXLINE - 1);
+		input_file[MB_PATH_MAXLINE - 1] = '\0';
 		XtFree(input_file_ptr);
 	}
 
@@ -807,7 +808,7 @@ void do_open(Widget w, XtPointer client_data, XtPointer call_data) {
 			expose_plot_ok = False;
 
 			/* get format id value */
-			get_text_string(textField_mbformat, format_text);
+			get_text_string(textField_mbformat, format_text, sizeof(format_text));
 			sscanf(format_text, "%d", &format_gui);
 
 			/* open file */
@@ -1252,11 +1253,12 @@ void set_label_multiline_string(Widget w, String str) {
 /* Get text item string cleanly, no memory leak */
 /*--------------------------------------------------------------------*/
 
-void get_text_string(Widget w, String str) {
+void get_text_string(Widget w, String str, size_t len) {
 	char *str_tmp;
 
 	str_tmp = (char *)XmTextGetString(w);
-	strcpy(str, str_tmp);
+	strncpy(str, str_tmp, len - 1);
+	str[len - 1] = '\0';
 	XtFree(str_tmp);
 }
 /*--------------------------------------------------------------------*/

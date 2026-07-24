@@ -641,6 +641,7 @@ void do_editlistselection(Widget w, XtPointer client_data, XtPointer call_data) 
 			do_load_specific_file(currentfile);
 		}
 	}
+	XtFree((char *)position_list);
 
 	/* turn on expose plots */
 	expose_plot_ok = true;
@@ -682,6 +683,7 @@ void do_filelist_remove(Widget w, XtPointer client_data, XtPointer call_data) {
 		if (currentfile > position_list[0] - 1)
 			currentfile--;
 	}
+	XtFree((char *)position_list);
 
 	/* turn on expose plots */
 	expose_plot_ok = true;
@@ -1057,6 +1059,7 @@ void do_build_filelist() {
 				XmListSelectPos(list_filelist, selection, False);
 			}
 		}
+		XtFree((char *)position_list);
 	}
 }
 
@@ -1822,12 +1825,12 @@ void do_modeling_apply(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)w;  // Unused parameter
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
-	get_text_string(textField_modeling_speed, string);
+	get_text_string(textField_modeling_speed, string, sizeof(string));
 	double dvalue;
 	if (sscanf(string, "%lf", &dvalue) == 1)
 		weight_speed = dvalue;
 
-	get_text_string(textField_modeling_acceleration, string);
+	get_text_string(textField_modeling_acceleration, string, sizeof(string));
 	if (sscanf(string, "%lf", &dvalue) == 1)
 		weight_acceleration = dvalue;
 
@@ -1957,11 +1960,11 @@ void do_offset_apply(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)call_data;  // Unused parameter
 
 	/* get values from widgets */
-	get_text_string(textField_lon_offset, string);
+	get_text_string(textField_lon_offset, string, sizeof(string));
 	double dvalue;
 	if (sscanf(string, "%lf", &dvalue) == 1)
 		offset_lon = dvalue;
-	get_text_string(textField_lat_offset, string);
+	get_text_string(textField_lat_offset, string, sizeof(string));
 	if (sscanf(string, "%lf", &dvalue) == 1)
 		offset_lat = dvalue;
 
@@ -2213,12 +2216,13 @@ void do_fileselection_ok(Widget w, XtPointer client_data, XtPointer call_data) {
 
 	/* read the input file name */
 	const int numfilessave = numfiles;
-	strncpy(input_file, input_file_ptr, MB_PATH_MAXLINE);
+	strncpy(input_file, input_file_ptr, MB_PATH_MAXLINE - 1);
+	input_file[MB_PATH_MAXLINE - 1] = '\0';
 	XtFree(input_file_ptr);
 
 	/* read the mbio format number from the dialog */
 	static char format_text[40];
-	get_text_string(textField_format, format_text);
+	get_text_string(textField_format, format_text, sizeof(format_text));
 	int format;
 	sscanf(format_text, "%d", &format);
 
@@ -2304,7 +2308,7 @@ void do_fileselection_list(Widget w, XtPointer client_data, XtPointer call_data)
 	(void)call_data;  // Unused parameter
 
 	/* get selected text */
-	get_text_string(fileSelectionBox_text, string);
+	get_text_string(fileSelectionBox_text, string, sizeof(string));
 
 	/* get output file */
 	if ((int)strlen(string) > 0) {
@@ -2713,9 +2717,10 @@ void set_label_multiline_string(Widget w, String str) {
 /* Get text item string cleanly, no memory leak */
 /*--------------------------------------------------------------------*/
 
-void get_text_string(Widget w, String str) {
+void get_text_string(Widget w, String str, size_t len) {
 	char *str_tmp = (char *)XmTextGetString(w);
-	strcpy(str, str_tmp);
+	strncpy(str, str_tmp, len - 1);
+	str[len - 1] = '\0';
 	XtFree(str_tmp);
 }
 /*--------------------------------------------------------------------*/

@@ -106,10 +106,10 @@
 #define MBEDIT_GRAB_END 2
 
 /* Bottom detect type names */
-char *detect_name[] = {"Unknown", "Amplitude", "Phase"};
+char *detect_name[] = {"Unknown", "Amplitude", "Phase", "Lidar", "Photogrammetry"};
 
 /* Source pulse type names */
-char *pulse_name[] = {"Unknown", "CW", "Up-Chirp", "Down-Chirp"};
+char *pulse_name[] = {"Unknown", "CW", "Up-Chirp", "Down-Chirp", "Lidar"};
 
 /* ping structure definition */
 struct mbedit_ping_struct {
@@ -378,7 +378,7 @@ int mbedit_init(int argc, char **argv, int *startup_file) {
 			break;
 		case 'I':
 		case 'i':
-			sscanf(optarg, "%s", ifile);
+			sscanf(optarg, "%1023s", ifile);
 			do_parse_datalist(ifile, format);
 			fileflag++;
 			break;
@@ -3222,7 +3222,7 @@ int mbedit_filter_ping(int iping) {
 						const int iend = MIN(iping + filter_medianspike_ltrack / 2, nbuff - 1);
 						for (int i = istart; i <= iend; i++) {
 							const int jstart = MAX(jbeam - filter_medianspike_xtrack / 2, 0);
-							const int jend = MIN(jbeam + filter_medianspike_xtrack / 2, ping[iping].beams_bath - 1);
+							const int jend = MIN(jbeam + filter_medianspike_xtrack / 2, ping[i].beams_bath - 1);
 							for (int j = jstart; j <= jend; j++) {
 								if (mb_beam_ok(ping[i].beamflag[j])) {
 									bathlist[nbathlist] = ping[i].bath[j];
@@ -3965,7 +3965,7 @@ int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, in
 			}
 			else {
 				for (int i = 0; i < ping[nbuff].beams_bath; i++) {
-          priority[i] = (detect[i] & 0x0000FF00) << 8;
+          priority[i] = (detect[i] & 0x0000FF00) >> 8;
 					detect[i] = detect[i] & 0x000000FF;
 				}
 			}
@@ -4022,7 +4022,39 @@ int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, in
 			ping[nbuff].pulses = (int *)malloc(ping[nbuff].beams_bath * sizeof(int));
 			ping[nbuff].bath_x = (int *)malloc(ping[nbuff].beams_bath * sizeof(int));
 			ping[nbuff].bath_y = (int *)malloc(ping[nbuff].beams_bath * sizeof(int));
-			ping[nbuff].allocated = ping[nbuff].beams_bath;
+			if (ping[nbuff].beamflag == NULL || ping[nbuff].beamflagorg == NULL || ping[nbuff].bath == NULL ||
+			    ping[nbuff].amp == NULL || ping[nbuff].bathacrosstrack == NULL || ping[nbuff].bathalongtrack == NULL ||
+			    ping[nbuff].detect == NULL || ping[nbuff].priority == NULL || ping[nbuff].pulses == NULL ||
+			    ping[nbuff].bath_x == NULL || ping[nbuff].bath_y == NULL) {
+				free(ping[nbuff].beamflag);
+				free(ping[nbuff].beamflagorg);
+				free(ping[nbuff].bath);
+				free(ping[nbuff].amp);
+				free(ping[nbuff].bathacrosstrack);
+				free(ping[nbuff].bathalongtrack);
+				free(ping[nbuff].detect);
+				free(ping[nbuff].priority);
+				free(ping[nbuff].pulses);
+				free(ping[nbuff].bath_x);
+				free(ping[nbuff].bath_y);
+				ping[nbuff].beamflag = NULL;
+				ping[nbuff].beamflagorg = NULL;
+				ping[nbuff].bath = NULL;
+				ping[nbuff].amp = NULL;
+				ping[nbuff].bathacrosstrack = NULL;
+				ping[nbuff].bathalongtrack = NULL;
+				ping[nbuff].detect = NULL;
+				ping[nbuff].priority = NULL;
+				ping[nbuff].pulses = NULL;
+				ping[nbuff].bath_x = NULL;
+				ping[nbuff].bath_y = NULL;
+				ping[nbuff].allocated = 0;
+				status = MB_FAILURE;
+				error = MB_ERROR_MEMORY_FAIL;
+			}
+			else {
+				ping[nbuff].allocated = ping[nbuff].beams_bath;
+			}
 		}
 		if (status == MB_SUCCESS && ping[nbuff].allocated > 0) {
 			for (int i = 0; i < ping[nbuff].beams_bath; i++) {

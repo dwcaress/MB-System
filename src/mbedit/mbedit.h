@@ -185,7 +185,7 @@ int do_message_off(void);
 int do_error_dialog(char *s1, char *s2, char *s3);
 void set_label_string(Widget w, String str);
 void set_label_multiline_string(Widget w, String str);
-void get_text_string(Widget w, String str);
+void get_text_string(Widget w, String str, size_t len);
 
 void BxUnmanageCB(Widget w, XtPointer client, XtPointer call);
 void BxManageCB(Widget w, XtPointer client, XtPointer call);

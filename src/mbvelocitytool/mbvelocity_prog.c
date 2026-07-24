@@ -597,13 +597,16 @@ int mbvt_open_edit_profile(char *file) {
 	profile->nalloc = MAX(10 * profile->n, 60);
 	size = profile->nalloc * sizeof(int);
 	status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&edit_x, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&edit_y, &error);
+	if (status == MB_SUCCESS)
+		status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&edit_y, &error);
 	size = profile->nalloc * sizeof(double);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&(profile->depth), &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&(profile->velocity), &error);
+	if (status == MB_SUCCESS)
+		status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&(profile->depth), &error);
+	if (status == MB_SUCCESS)
+		status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&(profile->velocity), &error);
 
 	/* if error initializing memory then quit */
-	if (error != MB_ERROR_NO_ERROR) {
+	if (status != MB_SUCCESS) {
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -690,15 +693,18 @@ int mbvt_new_edit_profile() {
 	profile->nalloc = 10 * NUM_EDIT_START;
 	size = profile->nalloc * sizeof(int);
 	status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&edit_x, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&edit_y, &error);
+	if (status == MB_SUCCESS)
+		status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&edit_y, &error);
 	size = profile->nalloc * sizeof(double);
 	profile->depth = NULL;
 	profile->velocity = NULL;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&(profile->depth), &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&(profile->velocity), &error);
+	if (status == MB_SUCCESS)
+		status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&(profile->depth), &error);
+	if (status == MB_SUCCESS)
+		status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&(profile->velocity), &error);
 
 	/* if error initializing memory then quit */
-	if (error != MB_ERROR_NO_ERROR) {
+	if (status != MB_SUCCESS) {
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1021,10 +1027,11 @@ int mbvt_open_display_profile(char *file) {
 	profile->velocity = NULL;
 	profile->nalloc = profile->n;
 	status = mb_mallocd(verbose, __FILE__, __LINE__, profile->nalloc * sizeof(double), (void **)&(profile->depth), &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, profile->nalloc * sizeof(double), (void **)&(profile->velocity), &error);
+	if (status == MB_SUCCESS)
+		status = mb_mallocd(verbose, __FILE__, __LINE__, profile->nalloc * sizeof(double), (void **)&(profile->velocity), &error);
 
 	/* if error initializing memory then quit */
-	if (error != MB_ERROR_NO_ERROR) {
+	if (status != MB_SUCCESS) {
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1120,7 +1127,7 @@ int mbvt_get_display_names(int *nlist, char *list[MAX_PROFILES]) {
 int mbvt_delete_display_profile(int select) {
 	struct profile *profile;
 	int status = MB_SUCCESS;
-	int i, j;
+	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1138,16 +1145,13 @@ int mbvt_delete_display_profile(int select) {
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&profile->depth, &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&profile->velocity, &error);
 
-		/* reorder remaining profiles */
+		/* reorder remaining profiles -- move each struct (including its
+		   depth/velocity pointers and nalloc) down as a unit rather than
+		   copying array elements into the previous slot's existing buffer,
+		   which was sized for that slot's own (possibly smaller) profile */
 		for (i = select + 1; i < ndisplay; i++) {
-			profile_display[i - 1].n = profile_display[i].n;
-			strcpy(profile_display[i - 1].name, profile_display[i].name);
-			for (j = 0; j < profile_display[i - 1].n; j++) {
-				profile_display[i - 1].depth[j] = profile_display[i].depth[j];
-				profile_display[i - 1].velocity[j] = profile_display[i].velocity[j];
-			}
+			profile_display[i - 1] = profile_display[i];
 		}
-		ndisplay--;
 	}
 	else
 		status = MB_FAILURE;
@@ -2148,15 +2152,34 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 	/* if successful, process and display */
 	if (status == MB_SUCCESS && nbuffer > 0) {
 
-		/* allocate resicual arrays to accommodate greatest number of beams */
+		/* allocate resicual arrays to accommodate greatest number of beams
+		   (check status after every call -- mb_mallocd() resets *error to
+		   MB_ERROR_NO_ERROR on each successful call, so a later success would
+		   otherwise silently mask an earlier allocation failure and let the
+		   NULL result be used below) */
 		status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&depth, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&acrosstrack, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&angle, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&residual_acrosstrack, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&residual_altitude, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&residual, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&res_sd, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(int), (void **)&nresidual, &error);
+		if (status == MB_SUCCESS)
+			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&acrosstrack, &error);
+		if (status == MB_SUCCESS)
+			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&angle, &error);
+		if (status == MB_SUCCESS)
+			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&residual_acrosstrack, &error);
+		if (status == MB_SUCCESS)
+			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&residual_altitude, &error);
+		if (status == MB_SUCCESS)
+			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&residual, &error);
+		if (status == MB_SUCCESS)
+			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&res_sd, &error);
+		if (status == MB_SUCCESS)
+			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(int), (void **)&nresidual, &error);
+
+		/* if error initializing memory then quit rather than use the NULL result below */
+		if (status != MB_SUCCESS) {
+			mb_error(verbose, error, &message);
+			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(error);
+		}
 
 		if (ssv_start <= 0.0)
 			ssv_start = 1500.0;
@@ -2228,18 +2251,23 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 	
 		/* allocate memory for raytracing arrays */
 		status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(int), (void **)&nraypath, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double *), (void **)&raypathx, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double *), (void **)&raypathy, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double *), (void **)&raypatht, &error);
+		if (status == MB_SUCCESS)
+			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double *), (void **)&raypathx, &error);
+		if (status == MB_SUCCESS)
+			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double *), (void **)&raypathy, &error);
+		if (status == MB_SUCCESS)
+			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double *), (void **)&raypatht, &error);
 		nraypathmax = 100 * profile_edit.n;
-		for (i = 0; i < beams_bath; i++) {
+		for (i = 0; status == MB_SUCCESS && i < beams_bath; i++) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, nraypathmax * sizeof(double), (void **)&(raypathx[i]), &error);
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nraypathmax * sizeof(double), (void **)&(raypathy[i]), &error);
-			status = mb_mallocd(verbose, __FILE__, __LINE__, nraypathmax * sizeof(double), (void **)&(raypatht[i]), &error);
+			if (status == MB_SUCCESS)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nraypathmax * sizeof(double), (void **)&(raypathy[i]), &error);
+			if (status == MB_SUCCESS)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, nraypathmax * sizeof(double), (void **)&(raypatht[i]), &error);
 		}
-	
+
 		/* if error initializing memory then quit */
-		if (error != MB_ERROR_NO_ERROR) {
+		if (status != MB_SUCCESS) {
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2317,7 +2345,7 @@ int mbvt_deallocate_swath() {
 		nresidual = NULL;
 
 		for (i = 0; i < MBVT_BUFFER_SIZE; i++) {
-			if (ping[i].allocated > 0 && ping[i].allocated != 60) {
+			if (ping[i].allocated > 0) {
 				ping[i].allocated = 0;
 				free(ping[i].beamflag);
 				free(ping[i].bath);
@@ -2365,7 +2393,7 @@ int mbvt_process_multibeam() {
 	int ray_stat;
 	double factor;
 	double sx, sy, sxx, sxy;
-	double delta, a, b;
+	double delta, a = 0.0, b = 0.0;
 	int ns;
 	double depth_predict, res;
 	double sensordepth, sensordepthshift, heave_use;
@@ -2436,6 +2464,7 @@ int mbvt_process_multibeam() {
 
 		/* find a good heave value */
 		found = false;
+		heave_use = 0.0;
 		for (i = 0; i < ping[k].beams_bath && !found; i++) {
 			if (mb_beam_ok(ping[k].beamflag[i])) {
 				heave_use = ping[k].heave[i];
@@ -2517,15 +2546,18 @@ int mbvt_process_multibeam() {
 		/* reset first flag */
 		first = false;
 
-		/* get linear fit to ping */
-		if (ns > 0) {
+		/* get linear fit to ping -- need at least two points for a well-defined
+		   fit; with exactly one point delta is exactly zero (0/0 = NaN) */
+		if (ns > 1) {
 			delta = ns * sxx - sx * sx;
-			a = (sxx * sy - sx * sxy) / delta;
-			b = (ns * sxy - sx * sy) / delta;
+			if (delta != 0.0) {
+				a = (sxx * sy - sx * sxy) / delta;
+				b = (ns * sxy - sx * sy) / delta;
+			}
 		}
 
 		/* get residuals */
-		if (ns > 0) {
+		if (ns > 1) {
 			/* output some debug values */
 			if (verbose >= 5)
 				fprintf(stderr, "dbg5       beam   xtrack   depth     fit    residual\n");

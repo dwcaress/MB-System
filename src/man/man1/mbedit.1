@@ -1,4 +1,4 @@
-.TH mbedit 1 "24 November 2018" "MB-System 5.0" "MB-System 5.0"
+.TH mbedit 1 "24 July 2026" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbedit\fP \- Interactive editor used to flag bad bathymetry values in swath sonar bathymetry data.
 
@@ -87,19 +87,19 @@ to the editing process.
 
 \fBMBedit\fP has some limited automatic flagging and unflagging
 options. The \fBUnflag View\fP button allows users to unflag all of
-the currently visible soundings, and the \fBUnflag Forward\fP
+the currently visible soundings, the \fBFlag View\fP button flags all
+of the currently unflagged soundings, and the \fBUnflag Forward\fP
 button unflags all soundings from the current position forward
 to the end of the data held in memory. The \fBControls\fP menu
 includes a \fBFilters...\fP button that brings up a dialog
 which sets the automatic flagging functions. At present, these
 include a median filter algorithm, a "wrong side filter", "data
-cutting" by beam number, and "data cutting" by acrosstrack
-distance. The "wrong side" filter flags soundings positioned on
+cutting" by beam number, "data cutting" by acrosstrack
+distance, and "data cutting" by beam angle. The "wrong side" filter flags soundings positioned on
 the "wrong" side of the swath (port soundings incorrectly located
-on the starboard side, or vice versa). The two "data cutting"
+on the starboard side, or vice versa). The three "data cutting"
 algorithms flag beams inside or outside of specified beam number
-ranges or acrosstrack distance ranges, respectively.  Additional
-automatic filters will be added in later versions.
+ranges, acrosstrack distance ranges, or beam angle ranges, respectively.
 
 If the ping includes flagged depths outside the plotting box, the ping label
 is underlain by a green box. If
@@ -124,7 +124,7 @@ and \fBReverse\fP buttons provide a duplicate stepping capability.
 Left-handed users may reverse the right and left mouse button functions by pulling down
 the \fBReverse Mouse Buttons\fP menu item from the \fBControls\fP button.
 
-\fBMBedit\fP can hold up to 25000 swath bathymetry
+\fBMBedit\fP can hold up to 30000 swath bathymetry
 profiles at a time in memory. In the case that
 a data file contains more survey data records than can be held in memory,
 users will find it necessary to step through multiple buffers of
@@ -225,7 +225,7 @@ This program uses the \fBMBIO\fP library and will read any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
-By default the \fIformat\fP id value is inferred fusing the \fBMB-System\fP
+By default the \fIformat\fP id value is inferred using the \fBMB-System\fP
 convention of an ".mbXX" suffix (the XX corresponds to the \fBMBIO\fP format id).
 .TP
 .B \-G
@@ -246,7 +246,7 @@ This option is usually used only when \fBMBedit\fP is started
 automatically from some other process. The \fB\-F\fP option can
 be used to set the data format id if the filename does not conform to the
 \fBMB-System\fP convention of an ".mbXX" suffix (the XX corresponds to the
-\fBMBIO\fP format id). If the \fB\-B\fP option is
+\fBMBIO\fP format id). If the \fB\-D\fP option is
 not used to specify browse mode, then the edit save output file is
 automatically set as \fIinfile\fP with ".esf" appended.
 .TP
@@ -297,7 +297,7 @@ If the specified input is a datalist (format
 id = \-1), then all of the files referenced through that datalist
 will be added to the internal list, and the first of those files
 loaded. When a file is loaded for editing, \fBMBedit\fP reads
-as much data as will fit into the data buffer (typically 25000 records)
+as much data as will fit into the data buffer (typically 30000 records)
 and several pings are displayed as stacked bathymetry profiles.
 .TP
 .B File->File Selection List
@@ -324,9 +324,11 @@ This button accesses a pulldown menu with several toggle buttons:
 \fBAlongtrack View\fP,
 \fBAcrosstrack View\fP,
 \fBShow Flagged Profile\fP,
+\fBShow Flag States\fP,
 \fBShow Bottom Detect Algorithms\fP,
+\fBShow Source Pulse Types\fP,
 \fBWide Bathymetry Profiles\fP,
-\fBPlot Time Stamps\fP,
+\fBPrint Time Stamps\fP,
 \fBPlot Ping Interval\fP,
 \fBPlot Longitude\fP,
 \fBPlot Latitude\fP,
@@ -378,19 +380,31 @@ whether the profile also includes the flagged or "bad" bathymetry
 the latter case, red line segments show the portion of the profile
 associated with the flagged depth points.
 .TP
-.B View->Show Bottom Detect Algorithms
-This toggle allows the user to specify whether the beams are
-colored according to their flagging status (toggle set to "Off"
-or according to the bottom detect algorithm used by the sonar
-(toggle set to "On"). The default is to color each sounding
-according to its flagging status \- unflagged beams are black,
-manually flagged beams are red, and filter flagged beams are
-green. If the beams are colored according to bottom detect
-algorithm, then amplitude detects are shown in black, phase
-detects are shown in red, and beams for which the bottom
-detection algorithm is unknown are shown in green. Users should
-be aware that many swath data formats do not include bottom
-detection algorithm information.
+.B View->Show Flag States, View->Show Bottom Detect Algorithms, View->Show Source Pulse Types
+These three toggles are mutually exclusive \- setting any one of them
+turns the other two off \- and together control how individual
+soundings are colored in the bathymetry profile plots.
+.br
+When \fBShow Flag States\fP is on (the default), each sounding is
+colored according to its flagging status: unflagged beams are
+black, manually flagged beams are red, and filter flagged beams
+are green.
+.br
+When \fBShow Bottom Detect Algorithms\fP is on, each sounding is
+colored according to the bottom detect algorithm used by the sonar:
+amplitude detects are shown in black, phase detects are shown in
+red, and beams for which the bottom detection algorithm is unknown
+(including lidar and photogrammetry detects) are shown in green.
+Users should be aware that many swath data formats do not include
+bottom detection algorithm information.
+.br
+When \fBShow Source Pulse Types\fP is on, each sounding is colored
+according to the type of sonar pulse used to obtain it: CW pulses
+are shown in black, up\-chirp pulses are shown in red, down\-chirp
+pulses are shown in blue, and beams for which the pulse type is
+unknown (including lidar pulses) are shown in green. Users should
+be aware that many swath data formats do not include source pulse
+type information.
 .TP
 .B View->Wide Bathymetry Profiles
 This toggle, when set, causes \fBmbedit\fP to display the widest
@@ -398,7 +412,7 @@ possible plots of the bathymetry profiles. All of the other options
 discussed immediately below narrow the primary plot in order to
 present additional information on the left side of the window.
 .TP
-.B View->Plot Time Stamps
+.B View->Print Time Stamps
 This toggle, when set, causes \fBmbedit\fP to display time stamp
 information to the left of the bathymetry profiles.
 .TP
@@ -556,15 +570,28 @@ were applied last.
 This toggle button turns automatic median filtering of
 bathymetry profiles on and off.
 When median filtering is enabled, the median depth is
-calculated for each bathymetry ping. Each sounding in the
+calculated over a local window of neighboring pings and beams
+(set by the \fBMedian Alongtrack Dimension\fP and
+\fBMedian Acrosstrack Dimension\fP sliders discussed below).
+Each sounding in the
 ping is compared with the median value; any sounding that
-differs from the median by a percentage
-greater than a threshold percentage
+differs from the median by more than a threshold percentage
+of the sonar altitude
 is flagged as bad data.
 .TP
 .B Controls->Filters->% Median Depth Threshold
 This slider sets the threshold of the median depth
-filter in units of percentage of the median depth.
+filter in units of percentage of the sonar altitude.
+.TP
+.B Controls->Filters->Median Alongtrack Dimension
+This slider sets the number of pings (centered on the ping
+being filtered) included in the local window used to calculate
+the median depth.
+.TP
+.B Controls->Filters->Median Acrosstrack Dimension
+This slider sets the number of beams (centered on the beam
+being filtered) included in the local window used to calculate
+the median depth.
 .TP
 .B Controls->Filters->Wrong Side Fllter
 This toggle button turns automatic wrong side filtering of
@@ -627,6 +654,31 @@ by acrosstrack distance starts.
 .B Controls->Filters->End Flagging Distance
 This slider sets the beam number at which flagging
 by acrosstrack distance ends.
+.TP
+.B Controls->Filters->Flag by Beam Angle
+This toggle button turns automatic beam flagging by
+beam angle (relative to vertical, calculated from the
+acrosstrack distance and sonar altitude) on and off. The flagging is
+controlled by start and end angle values in degrees (set by the two
+sliders discussed immediately below). If the start angle
+is less than or equal to the end angle, then
+all beams with angles between
+the start and end angles are
+flagged, producing a flagged zone within the swath. If
+the start angle is greater than the end angle,
+then all beams with angle less than
+the end angle are flagged,
+and all beams with angle greater than
+the start angle are flagged.
+This produces flagging of both swath edges.
+.TP
+.B Controls->Filters->Start Flagging Angle
+This slider sets the beam angle in degrees at which flagging
+by beam angle starts.
+.TP
+.B Controls->Filters->End Flagging Angle
+This slider sets the beam angle in degrees at which flagging
+by beam angle ends.
 .TP
 .B Controls->Reverse Right/Left Key Macros
 This toggle button, when set, reverses the
@@ -696,7 +748,7 @@ width of 10 meters but the slider jumps from 1 to 47), the slider
 can be changed by increments of 1 by clicking with the left button
 inside the slider area, but not on the slider itself.
 .TP
-.B Vertical Exageration
+.B Vertical Exaggeration
 This slider sets the depth scale in terms of vertical exaggeration.
 The depth scale will change as the cross track distance scale is
 changed to maintain the same vertical exaggeration.
@@ -728,10 +780,10 @@ action section):
  	Pick:		'W', 'w', 'I', 'i'
  	Erase:		'E', 'e', 'O', 'o'
  	Restore:	'R', 'r', 'P', 'p'
- 	Grab:		'Y', 'y', '}, ']'
- 	Info:		'T', 't', '{', '['
+ 	Grab:		'T', 't', '{', '['
+ 	Info:		'Y', 'y', '}, ']'
 .TP
-.B Unflag View
+.B Flag View
 This button flags all unflagged beams among the currently
 displayed pings. Pings in the buffer before or after the current
 display are unaffected.
@@ -790,15 +842,15 @@ Pressing one of these keys causes all of the beams in the last picked
 ping to be flagged as bad.
 .TP
 .B 'X', 'x', '<', or ','
-.B Right:
+.B Flag View:
 Pressing one of these keys causes all of the unflagged beams
-in the current display to to be flagged as bad. This is equivalent
-to the CFlag View\fP button.
+in the current display to be flagged as bad. This is equivalent
+to the \fBFlag View\fP button.
 .TP
 .B 'C', 'c', '>', or '.'
-.B Right:
+.B Unflag View:
 Pressing one of these keys causes all of the flagged beams
-in the current display to to be unflagged. This is equivalent
+in the current display to be unflagged. This is equivalent
 to the \fBUnflag View\fP button.
 .TP
 .B 'S', 's', 'K', or 'k'

@@ -2973,8 +2973,8 @@ void SetAppDefaults(
 			break;
 
 		char buf[1000];
-		strcpy(buf, lineage);
-		sprintf(lineage, "*%s%s", XtName(parent), buf);
+		snprintf(buf, sizeof(buf), "%s", lineage);
+		snprintf(lineage, sizeof(lineage), "*%s%s", XtName(parent), buf);
 
 		parent = XtParent(parent);
 	}

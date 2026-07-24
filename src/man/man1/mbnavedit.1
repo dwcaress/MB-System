@@ -1,4 +1,4 @@
-.TH mbnavedit 1 "24 November 2018" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavedit 1 "24 July 2026" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavedit\fP \- Interactive navigation editor for swath sonar data.
 
@@ -8,7 +8,7 @@ Version 5.0
 .SH SYNOPSIS
 \fBmbnavedit\fP [\fB\-B\fIyr/mo/da/hr/mn/sc\fP
 \fB\-D\fP \fB\-E\fIyr/mo/da/hr/mn/sc\fP
-\fB\-F\fIformat \fB\-G\fP \fB\-I\fIinfile \fB\-N \-P \-T \-X \-V \-H\fP]
+\fB\-F\fIformat \fB\-G\fP \fB\-I\fIinfile \fB\-N \-P \-X \-V \-H\fP]
 
 .SH DESCRIPTION
 \fBMBnavedit\fP is an interactive editor used to identify and fix
@@ -178,7 +178,7 @@ This program uses the \fBMBIO\fP library and will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
-By default the \fIformat\fP id value is inferred fusing the \fBMB-System\fP
+By default the \fIformat\fP id value is inferred using the \fBMB-System\fP
 convention of an ".mbXX" suffix (the XX corresponds to the \fBMBIO\fP format id).
 .TP
 .B \-G
@@ -206,12 +206,6 @@ causes \fBMBnavedit\fP to invoke \fBmbprocess\fP with it's
 \fB\-N\fP option. In turn, this causes \fBmbprocess\fP to
 generate an output, processed swath data file without any
 comment records.
-.TP
-.B \-O
-\fIoutfile\fP
-.br
-Sets the output data file, overriding the file naming conventions
-discussed above in the \fB\-I\fP option.
 .TP
 .B \-P
 Causes \fBMBnavedit\fP to load and work with navigation from
@@ -267,7 +261,7 @@ If the specified input is a datalist (format
 id = \-1), then all of the files referenced through that datalist
 will be added to the internal list, and the first of those files
 loaded. When a file is loaded for editing, \fBMBnavedit\fP reads
-as much data as will fit into the data buffer (typically 25000 records)
+as much data as will fit into the data buffer (typically 1000000 records)
 and several pings are displayed as stacked bathymetry profiles.
 .TP
 .B File->File Selection List
@@ -635,6 +629,13 @@ from the longitude and latitude time series.
 .B Use Course-Made-Good (Heading Plot)
 When this button is pushed, any selected data in the heading
 plot will be replaced by the current estimates of course-made-good.
+.TP
+.B Sonar Depth Plot
+This toggle button turns the sonar depth (draft) plot on and off.
+.TP
+.B Show Original Data (Sonar Depth Plot)
+When this toggle button is on, the sonar depth plot includes a
+green line representing the original sonar depth values.
 .TP
 .B Roll, Pitch, and Heave Plots
 This toggle button turns the roll, pitch, and heave plots on and off.
