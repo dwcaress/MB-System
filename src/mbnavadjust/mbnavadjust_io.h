@@ -34,6 +34,9 @@
 
 /*--------------------------------------------------------------------*/
 
+#ifndef MBNAVADJUST_IO_H_
+#define MBNAVADJUST_IO_H_
+
 #ifndef MB_DEFINE_DEF
 #include "mb_define.h"
 #endif
@@ -150,6 +153,18 @@
 #define MBNA_INTERP_INTERP 2
 
 #define MBNA_SMOOTHING_DEFAULT 3.0
+
+/* bit flags for mbnavadjust_apply_settings(), marking which settings
+    fields the caller actually wants changed */
+#define MBNA_SETTINGS_SECTION_LENGTH 0x0001
+#define MBNA_SETTINGS_SECTION_SOUNDINGS 0x0002
+#define MBNA_SETTINGS_CONT_INT 0x0004
+#define MBNA_SETTINGS_COL_INT 0x0008
+#define MBNA_SETTINGS_TICK_INT 0x0010
+#define MBNA_SETTINGS_LABEL_INT 0x0020
+#define MBNA_SETTINGS_DECIMATION 0x0040
+#define MBNA_SETTINGS_SMOOTHING 0x0080
+#define MBNA_SETTINGS_ZOFFSETWIDTH 0x0100
 
 #define MBNA_Z_OFFSET_RESET_THRESHOLD 0.10
 
@@ -478,6 +493,10 @@ struct mbna_swathraw {
 int mbnavadjust_new_project(int verbose, char *projectpath, double section_length, int section_soundings, double cont_int,
                             double col_int, double tick_int, double label_int, int decimation, double smoothing,
                             double zoffsetwidth, struct mbna_project *project, int *error);
+int mbnavadjust_apply_settings(int verbose, struct mbna_project *project, unsigned int mask,
+                            double section_length, int section_soundings, double cont_int,
+                            double col_int, double tick_int, double label_int, int decimation, double smoothing,
+                            double zoffsetwidth, int *error);
 int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project *project, int *error);
 int mbnavadjust_close_project(int verbose, struct mbna_project *project, int *error);
 int mbnavadjust_write_project(int verbose, struct mbna_project *project,
@@ -534,4 +553,5 @@ int mbnavadjust_tie_compare(const void *a, const void *b);
 int mbnavadjust_globaltie_compare(const void *a, const void *b);
 int mbnavadjust_info_add(int verbose, struct mbna_project *project, char *info, bool timetag, int *error);
 
+#endif /* MBNAVADJUST_IO_H_ */
 /*--------------------------------------------------------------------*/

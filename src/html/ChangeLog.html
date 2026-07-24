@@ -1,4 +1,3 @@
-<p>--</p>
 <h2 id="mb-system-changelog-file">MB-System ChangeLog File:</h2>
 <p>This file lists changes to the source code of the MB-System open
 source software package for the processing and display of swath sonar
@@ -23,7 +22,26 @@ accessible as tarballs through the Github interface.</p>
 Version 5.8 Releases and Release Notes:</h3>
 <hr />
 <ul>
-<li>Version 5.8.2beta20 March 15, 2025</li>
+<li>Version 5.8.3beta15 July 23, 2026</li>
+<li>Version 5.8.3beta14 July 6, 2026</li>
+<li>Version 5.8.3beta13 June 18, 2026</li>
+<li>Version 5.8.3beta12 January 7, 2026</li>
+<li>Version 5.8.3beta11 December 27, 2025</li>
+<li>Version 5.8.3beta10 December 22, 2025</li>
+<li>Version 5.8.3beta09 December 4, 2025</li>
+<li>Version 5.8.3beta08 November 16, 2025</li>
+<li>Version 5.8.3beta07 October 22, 2025</li>
+<li>Version 5.8.3beta06 October 1, 2025</li>
+<li>Version 5.8.3beta05 September 30, 2025</li>
+<li>Version 5.8.3beta04 September 18, 2025</li>
+<li>Version 5.8.3beta03 August 31, 2025</li>
+<li>Version 5.8.3beta02 August 29, 2025</li>
+<li>Version 5.8.3beta01 August 27, 2025</li>
+<li><strong>Version 5.8.2 August 19, 2025</strong></li>
+<li>Version 5.8.2beta24 July 19, 2025</li>
+<li>Version 5.8.2beta23 June 25, 2025</li>
+<li>Version 5.8.2beta22 June 16, 2025</li>
+<li>Version 5.8.2beta21 March 15, 2025</li>
 <li>Version 5.8.2beta20 February 22, 2025</li>
 <li>Version 5.8.2beta19 January 19, 2025</li>
 <li>Version 5.8.2beta18 December 8, 2024</li>
@@ -54,6 +72,523 @@ Version 5.8 Releases and Release Notes:</h3>
 <li><strong>Version 5.8.0 January 22, 2024</strong></li>
 </ul>
 <hr />
+<h4 id="583beta15-july-23-2026">5.8.3beta15 (July 23, 2026)</h4>
+<p>Program mbusbl2fnv: New program that converts a USBL (ultra-short
+baseline) ROV tracking CSV file to an MB-System fast navigation (fnv)
+text file. The input CSV format has one header line followed by data
+lines giving epoch time, latitude, longitude, and ROV depth; heading,
+speed, roll, pitch, and heave are not present in USBL tracking data and
+are output as 0.0.</p>
+<p>Program mbswath2las: New program that exports swath bathymetry
+soundings to LAS 1.4 point cloud files, one point per valid (unflagged)
+beam, allowing swath bathymetry to be loaded directly into
+LAS/LIDAR-oriented point cloud viewers, GIS packages, and processing
+pipelines (e.g. CloudCompare, QGIS, PDAL) that do not otherwise read
+MBIO formats. By default sounding positions are written as geographic
+longitude/latitude in decimal degrees (WGS84); a projected coordinate
+system may instead be specified so that positions are written as
+easting/northing in meters.</p>
+<p>Build system: Continued work to allow MB-System to build on Windows,
+extending fixes made previously to the CMake configuration and to
+src/mbtrn and src/mbtrnav. This round of changes covers the non-TRN
+libraries and programs: src/gsf (CMakeLists.txt changes only, no code
+changes required), src/mbio (mb_defaults.c, mb_mem.c, and
+mbsys_kmbes.c), src/gmt, and src/mbaux, src/bsio, and src/surf, where
+the Windows shim for XDR is now built as its own library,
+libmb_xdr_win32, within src/mbaux. Also updated src/mbgrd2ltf,
+src/mbmesh, src/otps, and src/photo to build consistently on MacOs,
+Linux, and Windows, along with a number of general CMake
+project-structure fixes.</p>
+<p>Library mbview: Fixed a memory-management bug in route handling in
+which deleting the last point of a route (removing the whole route)
+shifted the internal route array down without first freeing the deleted
+route's own point/segment arrays and without clearing the vacated array
+slot afterward. This leaked memory, silently caused two routes to alias
+the same underlying arrays, and could crash mbgrdviz and other
+mbview-based programs with a double free when routes were deleted and
+new routes subsequently added. A broader audit of the mbview route,
+navigation, site, and vector handling code found and fixed several
+related problems: an inverted bounds check in mbview_getrouteinfo() that
+allowed out-of-bounds array reads; a memory leak on navigation-line
+deletion (per-segment drape buffers were never freed); dead code in the
+route list widget that silently disabled selection highlighting;
+uninitialized segment endpoint data when adding vectors; and
+list-selection and list-deletion callbacks for the route and navigation
+list dialogs that could act on the wrong entry if a list item were ever
+marked inactive. Also fixed the title bars of the 2D Parameters, 3D
+Parameters, Shading Parameters, Profile Display, About, and "please
+wait" message dialogs, which previously displayed internal Motif widget
+names (e.g. "mbview_dialogShell_2dparms") instead of readable
+titles.</p>
+<p>Program mbgrdviz: Fixed a bug in the Generate Survey Route feature in
+which a cached route index could go stale if the user deleted an
+unrelated route via the 3D view while the Area Route dialog remained
+open, causing the next "Generate Survey" click to delete the wrong
+route. Also fixed the title bar of the Area Route dialog, which
+previously displayed the internal widget name "dialogShell_arearoute"
+instead of "Generate Survey Route for Selected Area...".</p>
+<p>Program mbeditviz: Fixed a crash on opening a swath file that MBIO
+cannot actually read, caused by a missing status check before
+dereferencing the file handle. Fixed a memory-management bug in file
+deletion analogous to the mbview route bug above, in which removing a
+file from the loaded-files list left a stale duplicate array slot that
+could later alias data between two loaded files. Fixed several
+file-record fields (including processed-file-info and sensordepth
+navigation arrays) that were left uninitialized on newly imported files.
+Added a bounds check to the ping-reading loop to prevent a heap buffer
+overflow when a swath file's *.inf index file undercounts its actual
+number of pings. Fixed a bug in which dismissing the 3D soundings window
+overwrote the global verbosity setting rather than the intended
+error-code variable. Fixed a bug in which a single navigation-loading
+failure for one file silently skipped loading navigation for every
+subsequent file in the same session. Fixed a leak and potential crash on
+the (rare) memory allocation failure path when importing files. Fixed
+the title bar of the Error dialog (previously showed
+"dialogShell_error") and corrected a garbled status message ("Reading
+data list...").</p>
+<p>Program mbnavadjust (and the mbnavadjustmerge and mbnavadjustfine
+tools that share its project I/O and data structures): Fixed a bug in
+which deleting a tie point used a stale, unrelated global variable
+instead of the tie actually being deleted, corrupting which tie was
+removed and, in one call path, capable of an out-of-bounds write into
+the crossings array. Fixed a wide-ranging set of missing bounds checks
+in the project file reader, which previously trusted the file's own
+record counts and array indices to size loops and index fixed-size
+per-crossing and per-section arrays, and used unbounded string
+conversions into fixed-size path buffers - a corrupted or hand-edited
+project file could overflow multiple buffers. Fixed a bug in which
+removing a file from a project (via mbnavadjustmerge) left remaining
+sections' file/section identity fields stale, able to silently
+misattribute sections to the wrong file. Fixed a memory leak in which a
+file's section array was allocated with the standard C library and freed
+with an MB-System function that only recognizes memory it allocated
+itself, so the free silently did nothing. Fixed three sites in
+mbnavadjustmerge where a newly grown crossing's file references were
+read before being assigned, an out-of-range crossing could be added with
+no validation, and a failed allocation was not checked before the new
+crossing was used. Fixed four missing-brace bugs that caused a
+visualization update function to run unconditionally regardless of
+whether a visualization window was ever open. Fixed a command-line tool
+(mbnavadjustfine) build break caused by a call with the wrong number of
+arguments, a numeric option that corrupted adjacent settings and always
+aborted the program, an uninitialized pointer used in an error message,
+a per-crossing memory leak, continuing an alignment computation after
+detecting invalid input, and a divide-by-zero when every sounding in a
+section was flagged. Fixed a project-merging command that validated and
+updated the wrong internal counter, and a project list display that
+never showed survey-vs-survey "block" comparisons. Also fixed a missing
+dialog title, a silent failure to write cached triangulation data, an
+unchecked allocation before use, several unbounded command-line path
+arguments, a dead duplicate-crossing check, an undefined-behavior
+fclose() on a failed file open (7 sites), and a display counter that was
+always zero.</p>
+<p>Program mbnavadjust (and mbnavadjustmerge): A follow-up round of
+fixes targeting crashes reported when displaying and selecting global
+ties. Fixed invalid qsort() comparator functions for the sorted
+global-tie and sorted crossing-tie list displays that never returned
+zero for equal or incomparable elements, violating the
+strict-weak-ordering contract required by qsort() and able to crash on
+quicksort-family implementations (including those used by both Linux
+glibc and macOS/BSD libc). Fixed a heap buffer overflow in the sparse
+inversion matrix built for the preliminary per-block offset solution
+(used by both the main navigation inversion and the "Autoset Z Offsets"
+feature): the matrix's row stride was set to 3 times the number of
+survey blocks, but the backing array was only ever allocated for a fixed
+stride of 6, overflowing on any project combining more than two surveys
+- an entirely ordinary case - during exactly the step that folds global
+tie offsets into the solution. Fixed a stale-variable bug in the
+"Autoset Z Offsets" feature where the per-block averaged global tie
+offset was indexed with a leftover loop variable from an unrelated,
+already-finished loop instead of the current block index, an
+out-of-bounds heap read. Fixed a bug in mbnavadjustmerge where merging
+additional files into a project unconditionally renumbered every copied
+section's reference-grid ID, corrupting the "no reference grid assigned"
+sentinel value into a bogus but plausible-looking grid index for any
+section without a global tie or reference grid; a section thus corrupted
+could cause mbnavadjust to load and display the wrong reference grid
+when its global tie was later selected. Also fixed a missing bounds
+check (and a related debug-only variable mixup) in the reference grid
+loader that could read the reference-grid name array out of bounds given
+a negative grid index, and fixed the project's global-tie counters not
+being decremented when mbnavadjustmerge removes a file that held global
+ties, which left the "ties analyzed" status display overcounted.</p>
+<p>Program mbdatalist: Fixed a bug in which the long option --report
+incorrectly triggered the same behavior as --copy instead of generating
+a datalist report, due to a copy-paste error in the option-parsing
+code.</p>
+<p>Program mbinfo: Fixed a bug in which the long option --ping-variances
+accepted but silently ignored its argument; only the equivalent short
+option -P worked correctly.</p>
+<p>Program mbmakeplatform: Fixed a typo (--platform-documenation-url)
+that made the correctly-spelled --platform-documentation-url option
+unrecognized. Fixed a bug in which --sensor-source-camera1/2/3 and
+--set-source-camera1/2/3 were all registered under the same un-numbered
+option name, making the numbered variants unreachable.</p>
+<p>Program mbpreprocess: Fixed missing option-table entries for
+--time-latency-apply-altitude and --filter-apply-altitude, which had
+working handlers but were never recognized by the command-line parser.
+Also fixed both handlers, which incorrectly applied the correction to
+attitude data instead of altitude data due to using the wrong internal
+flag bit.</p>
+<p>Program mbvoxelclean: Fixed a bug in which --count-flagged was
+declared as requiring an argument even though it is a boolean flag,
+causing the documented bare-flag usage to be rejected by the
+command-line parser.</p>
+<p>Program mbsslayout: Fixed several option-parsing and
+ancillary-data-correction bugs found during a documentation audit.
+--line-route had a working handler but was never registered with the
+option parser, making it unusable. --line-range-threshold was accepted
+but silently discarded, so the survey-line range threshold was always
+hardcoded to 50 meters regardless of what was specified on the command
+line. --time-latency-apply-altitude applied its time latency correction
+to attitude data instead of altitude data (the same bit-flag bug as in
+mbpreprocess), and a soundspeed time-latency correction was gated on
+that same wrong (attitude) flag bit, causing it to fire whenever
+--time-latency-apply-attitude was used alone. The entire
+--filter/--filter-apply-* family of options, intended to apply a
+Gaussian time-domain filter to ancillary data (navigation, sensordepth,
+heading, attitude, altitude), was never registered with the option
+parser and had no implementation; this has now been implemented using
+the existing mb_apply_time_filter() library function, mirroring the
+equivalent feature in mbpreprocess. Added a new --line-position-list
+option that defines survey lines from a simple ASCII file of waypoint
+longitude/latitude pairs, as a lighter-weight alternative to
+--line-route's full MB-System route file format.</p>
+<p>Man pages: Audited the man pages for all 46 programs in src/utilities
+against their actual command-line option implementations, finding and
+fixing documentation discrepancies in 24 of them, including missing
+options (mb7k2jstar, mbareaclean, mbauvloglist, mbbackangle, mbgetesf,
+mbrolltimelag, mbroutetime, mbsegygrid, mbsegypsd, mbset, mbsvplist,
+mbsslayout, mbvoxelclean, mbmakeplatform), stale options describing
+command-line flags that no longer exist (mbclean, mbhistogram,
+mbsegylist, mbsegypsd, mbsslayout, mbsvpselect), and incorrect
+descriptions or default values (mb7k2jstar, mbclean, mbcopy,
+mbextractsegy, mbfilter, mbminirovnav, mbmosaic, mbpreprocess,
+mbrolltimelag, mbroutetime, mbset, mbsvplist, mbsvpselect,
+mbvoxelclean). This audit also surfaced the mbsslayout and mbpreprocess
+source-code bugs described above.</p>
+<p>Program mbnavadjustmerge: Added --update-file, --update-survey, and
+--update-all-files options that update the beam-validity flags in an
+mbnavadjust project's section data to match the current processed
+version of each swath file, matching pings by timestamp and copying over
+only the flag byte - the navigation, attitude, bathymetry, amplitude,
+and sidescan values already stored in the project are left untouched.
+This lets soundings newly flagged bad by re-editing a file (e.g. with
+mbclean or mbedit) after it was originally imported be excluded from the
+project without a full, riskier re-import of the file's bathymetry. If a
+matched ping's beam count no longer matches what is stored in the
+project, that ping's flags are left unchanged and a warning is printed
+rather than risk misapplying flags to the wrong beams; beams that never
+held real sounding geometry when originally imported are likewise left
+flagged null regardless of what the current processed file reports for
+that beam index, since marking such a placeholder beam as
+flagged-but-real would otherwise corrupt the scaled short-integer depth
+encoding used by the project's section file format. Every updated
+section's coverage mask and triangulated surface are automatically
+regenerated. These options replace an earlier, incomplete
+--reimport-file/--reimport-survey/--reimport-all-files implementation
+that instead substituted bathymetry, amplitude, and sidescan values
+wholesale from the reprocessed file; that implementation was never
+released and has been removed.</p>
+<p>Program mbnavadjustmerge: Added --create-project, --section-length,
+--section-soundings, --contour-interval, --color-interval,
+--tick-interval, --label-interval, --decimation, --smoothing, and
+--zoffsetwidth options to create new mbnavadjust projects and change
+project settings from the command line, matching functionality
+previously available only in the mbnavadjust graphical interface. Added
+--import and --import-as-survey to import swath data (a single file or a
+recursive datalist), and --find-crossings to detect new crossings
+between imported sections. Added --autopick and --autopick-horizontal to
+automatically pick navigation ties at unanalyzed crossings, together
+with --autopick-crossing-type, --autopick-scope, --autopick-survey,
+--autopick-survey2, --autopick-file, --autopick-section, and
+--autopick-overlap-threshold options to restrict which crossings are
+considered. Implementing this required extracting the crossing-loading,
+bathymetric misfit, and autopick logic out of mbnavadjust_prog.c
+(previously usable only by the mbnavadjust graphical interface) into a
+new shared library, mbnavadjust_core, linked by mbnavadjust,
+mbnavadjustmerge, and mbnavadjustfine; the CMake build was restructured
+so this library and mbnavadjustmerge no longer require Motif or X11 to
+build, unblocking headless and CI builds of the command-line tool.</p>
+<p>Program mbnavadjust (and mbnavadjustmerge): Fixed a bug in
+mbnavadjust_new_project() in which the section_soundings setting was
+accepted as a parameter but never actually stored in the new project, so
+every newly created project silently used a section_soundings value of
+zero regardless of what was requested, whether created via the graphical
+New Project dialog or the command line.</p>
+<p>Program mbnavadjust: Fixed a crash in the "Invert Navigation" menu
+item (and the "Auto-Set Survey-vs-Survey Vertical Offsets" feature,
+which shares the same code) in which a failed memory allocation for the
+sparse least-squares matrix used by the navigation inversion was never
+checked before the buffer was zeroed, crashing instead of reporting an
+error; large enough projects could also silently compute the wrong,
+too-small allocation size due to a 32-bit integer overflow in the
+row-count/column-count multiplication used to size that matrix, risking
+heap corruption on a subsequent write rather than a clean allocation
+failure. Both are now fixed, with a dialog reported to the user if the
+allocation still fails.</p>
+<p>Program mbnavadjust: Fixed a bug in which selecting a
+survey-vs-survey "block" from the Data Table list and then displaying
+crossings restricted to that block could show no crossings at all. The
+code that extracts the clicked list item's text had a fallback for when
+Motif's primary text-retrieval method returns nothing, but the fallback
+was nested inside a check that skipped it entirely whenever the primary
+XmString field itself was null, rather than being reached whenever it
+was actually needed.</p>
+<p>Program mbnavadjust: Added long-form equivalents (--verbose, --help,
+--dark-background, --input=project, --reset-crossings) for all existing
+single-letter command-line options.</p>
+<p>Program mbnavadjustmerge: Added --invert-navigation, --update-grids,
+and --apply-navigation options, completing the navigation-adjustment
+workflow begun with --autopick above. --invert-navigation solves the
+network of ties and crossings for a corrected navigation model, exactly
+as the "Invert Navigation" menu item does in mbnavadjust. --update-grids
+regenerates the project's reference bathymetry grids from the current
+navigation solution, equivalent to "Update Grids". --apply-navigation
+writes the corrected navigation out to the swath data files' processing
+parameters, equivalent to "Apply Navigation", and is normally the last
+step in the workflow. Implementing this required moving the
+navigation-inversion solver, grid-regeneration, and navigation-output
+logic (previously usable only by the mbnavadjust graphical interface,
+over 3000 lines in mbnavadjust_prog.c) into the shared mbnavadjust_core
+library alongside the autopick logic moved previously.</p>
+<p>Program mbnavadjust (and mbnavadjustmerge): Fixed a bug in
+mbnavadjust_new_project() in which newly created projects never had
+their navigation "use mode" initialized, silently defaulting to an
+invalid value of zero. This had no visible effect in the graphical
+interface, where a separate program-startup default masked the gap, but
+meant that mbnavadjustmerge's --apply-navigation, run against a project
+created with --create-project, would silently skip updating each file's
+processing parameters with no error reported.</p>
+<p>The bugs described above were identified and fixed with the
+assistance of the AI coding assistant Claude Sonnet 5 (Anthropic, model
+claude-sonnet-5), operating as Claude Code under developer supervision
+and review.</p>
+<h4 id="583beta14-july-6-2026">5.8.3beta14 (July 6, 2026)</h4>
+<p>Programs mbedit, mbnavedit, mbvelocitytool, mbgrdviz, mbeditviz,
+mbnavadjust: updated Motif GUI code to eliminate two deprecated
+functions, replacing XmFileSelectionBoxGetChild() with XtNameToWidget()
+and replacing XmStringGetLtoR() with XmStringUnparse(). This appears to
+be necessary for the Motif code to work on MacOs Tahoe with
+prerequisites installed via MacPorts.</p>
+<h4 id="583beta13-june-18-2026">5.8.3beta13 (June 18, 2026)</h4>
+<p>Format MBF_KEMKALL (261): Fixed support for platform files used for
+preprocessing.</p>
+<p>Format MBF_EM710RAW (58): Added support for *.all files associate
+with the HISAS sonar from Kongsberg.</p>
+<p>Programs mbpreprocess and mbprocess: Added support for merging
+navigation from Kongsberg Navlab software that is commonly used for
+Hugin AUV data processing.</p>
+<p>Programs mbnavlab2fnv and mbfnv2navlab: Added tools that translate
+between navlab_smooth.bin and fnv files.</p>
+<p>Programs mbnavadjust and mbnavadjustmerge: Fixed problems with new
+and merged project files resulting from treating surveys and blocks of
+continuous data separately.</p>
+<p>Program mbmakedatalist: Compiled C version of macro
+mbm_makedatalist</p>
+<p>Library mbtrnav/gctp: Added modern function definitions to function
+pointer arrays.</p>
+<p>Program mbphotomosaic: Fix bug in which if one photo of a stereo pair
+is dropped, the other photo is not used.</p>
+<p>Program mbnavadjust: Changed so that surveys can be imported as a
+single piece even if there are time breaks between some of the
+files.</p>
+<p>Format MBF_3DWISSL2 (id 234): Add kluge to deal with WiSSL2 lidar
+bathymetry needing additional correction.</p>
+<h4 id="583beta12-january-7-2026">5.8.3beta12 (January 7, 2026)</h4>
+<p>CMake build system: Extended to handle complications of MacOs Tahoe.
+Building the graphical tools in MB-System on MacOs has been complicated
+for a number of years because of the requirement for X11/Motif and also,
+for programs mbgrdviz, mbeditviz, and mbnavadjust, OpenGL and GLX. For
+MacOs versions Sequoia (15) and earlier, the only way to successfully
+build and run MB-System has been to install all of the prerequisite
+packages using the MacPorts package manager. For reasons that have never
+been understood, the MB-System graphical programs failed to run
+correctly when built with prerequisites installed through the
+alternative package managers Homebrew and Fink. This situation changes
+with MacOs Tahoe because now the MB-System graphical programs fail when
+prerequisites are installed through MacPorts, but succeed when the
+prerequisites are installed through Homebrew. This update to the build
+system handles the differences between the two MacOs scenarios (before
+Tahoe vs Tahoe or later). The installation documentation on the
+MB-System website will be updated to reflect the necessity of using
+Homebrew for installations on MacOs Tahoe. A significant issue with all
+X11 programs running on MacOs Tahoe so far is that when windows are
+resized, the GUI elements are not refreshed properly, and parts of the
+GUI wind up overwritten in solid black. Hopefully this will be fixed in
+a new version of the X11 server XQuartz. In the meantime, minimizing the
+program window using the middle (yellow) button on the upper left of the
+window (or the command-M shortcut), and then restoring that window by
+clicking on it's icon in the dock will properly refresh the GUI
+graphics.</p>
+<p>Program mbgrd2gltf: Continued updates to this tool for translating
+gridded topography to Graphics Library Transmission Format (GLTF) files
+that can be visualized by GLTF viewers.</p>
+<h4 id="583beta11-december-27-2025">5.8.3beta11 (December 27, 2025)</h4>
+<p>Formats 56 (MBF_EM300RAW) and 57 (MBF_EM300MBA): Fixed erroneous
+calculation of a large sensordepth value by mbprocess when the draft of
+a surface vessel has not been defined.</p>
+<h4 id="583beta10-december-22-2025">5.8.3beta10 (December 22, 2025)</h4>
+<p>Program mbbackangle: A skipping existing feature implemented in
+beta04 had a small error in the source code that made it not work as
+intended. This release contains a bug fix to correct that behavior.</p>
+<h4 id="583beta09-december-4-2025">5.8.3beta09 (December 4, 2025)</h4>
+<p>Program mbnavadjustmerge: Fixed options --unset-tie,
+--unset-ties-file, --unset-ties-survey, --unset-ties-by-survey,
+--unset-ties-block, --unset-ties-all.</p>
+<p>Program mbbackangle: A skipping existing feature implemented in
+beta04 had a small error in the source code that made it not work as
+intended. This release contains a bug fix to correct that behavior.</p>
+<h4 id="583beta08-november-16-2025">5.8.3beta08 (November 16, 2025)</h4>
+<p>Programs mbedit and mbeditviz: Now display dual swath Kongsberg
+multibeam data in the kmall format (id 261) with two separate
+acrosstrack profiles. As before the two profiles are associated with a
+single ping cycle and set of datagrams.</p>
+<p>Format MBF_3DWISSL2 (id 234): Updates to handle the evolving
+representation for the 3D at Depth 2nd generation Wide Swath Subsea
+Lidar (WiSSL2)</p>
+<p>Programs mbphotomosaic, mbgetphotocorrection, and mbphotogrammetry:
+Augmented to handle seafloor photographs that have already been
+rectified (corrected for distortion). This capability has not been fully
+tested at this point.</p>
+<h4 id="583beta07-october-22-2025">5.8.3beta07 (October 22, 2025)</h4>
+<p>Program mbeditviz: Fixed display of swath width when navigation is
+selected in the survey view.</p>
+<p>Format 234 (MBF_3DWISSL2): Supports data from new 3D at Depth 2nd
+Generation Wide swath Subsea Lidar (WiSSL2).</p>
+<p>Program mbpreprocess: Added option attitude-zero-heave to zero heave
+values in attitude data to be merged with survey data. The immediate use
+is for integration of Exail Phins C7 navigation and attitude data with
+multibeam data, all collected on a submerged AUV for which the platform
+depth is defined by a pressure sensor rather than the heave output by
+the INS.</p>
+<p>Programs mbgrdviz, mbeditviz, mbnavadjust: Fixed the mouse button
+description for Rotate View mode so that the right button is properly
+labeled as zoom rather than exaggeration.</p>
+<h4 id="583beta06-october-1-2025">5.8.3beta06 (October 1, 2025)</h4>
+<p>GMT integration: Fixed compiler directives insuring that the GMT
+header file gmt_dev.h does not implicitly include a glib header file not
+needed by MB-System.</p>
+<h4 id="583beta05-september-30-2025">5.8.3beta05 (September 30,
+2025)</h4>
+<p>GMT grid i/o functions (src/mbaux/mb_readwritegrd.c): Added compiler
+directives insuring that the GMT header file gmt_dev.h does not
+implicitly include a glib header file not needed by MB-System.</p>
+<p>GMT module mbcontour: Added compiler directives insuring that the GMT
+header file gmt_dev.h does not implicitly include a glib header file not
+needed by MB-System.</p>
+<p>GMT module mbgrd2obj: Added compiler directives insuring that the GMT
+header file gmt_dev.h does not implicitly include a glib header file not
+needed by MB-System.</p>
+<p>GMT module mbgrdtiff: Added compiler directives insuring that the GMT
+header file gmt_dev.h does not implicitly include a glib header file not
+needed by MB-System.</p>
+<p>GMT module mbswath: Added compiler directives insuring that the GMT
+header file gmt_dev.h does not implicitly include a glib header file not
+needed by MB-System.</p>
+<p>Programs mbedit, mbeditviz, mbgrdviz, mbnavadjust, mbnavedit,
+mbvelocitytool: Removed code ensuring that a message display dialog is
+displayed when created or updated by processing all outstanding X11
+events, as this causes mbeditviz to get lost in an infinite event
+processing loop on Ubuntu 24 installations.</p>
+<h4 id="583beta04-september-18-2025">5.8.3beta04 (September 18,
+2025)</h4>
+<p>Many source files: Addressed code style issues raised previously by
+Kurt Schwehr, particularly using bool type for logical variables</p>
+<p>Program mbinfo: Recast mbinfo to use long options as well as short
+options. Added a new capability to list records comprising a data file
+and the contents of selected records using the --debug-record-types and
+--debug-record-contents options, which is so far implemented for formats
+58, 59, and 89.</p>
+<p>Program mbpreprocess: Added several new "kluge" options:
+--kluge-set-beamwidths --kluge-set-beamwidth-acrosstrack
+--kluge-set-beamwidth-alongtrack --kluge-ignore-duplicate-pings
+--kluge-xducer-depth-from-heave --kluge-xducer-depth-from-sensordepth
+--kluge-xducer-depth-from-heave-and-sensordepth</p>
+<p>Macro mbm_route2mission: Fixed end of mission battery behavior to use
+mode 2 so that the AUV sonars are only shut off if the batteries are
+mostly exhausted.</p>
+<p>Formats 58 and 59 (MBF_EM710RAW and MBF_EM710MBA): Recast handling of
+transducer depth modes so as to work correctly for more data sets, and
+added mbpreprocess kluge options to handle the less common combinations
+of data record types and sonar settings.</p>
+<p>Program mbphotomosaic: Augmented handling of camera types to include
+monocular cameras and single camera calibration models.</p>
+<h4 id="583beta03-august-31-2025">5.8.3beta03 (August 31, 2025)</h4>
+<p>Program mbotps: Added long option commands, and altered the manual
+page to document use of long options. Fixed the --skip-existing {-M}
+command so that mbotps actually skips files that already have tide
+correction defined.</p>
+<p>Program mbnavadjust: Now displays the reference grid used for global
+ties in data section and global tie listings.</p>
+<h4 id="583beta02-august-29-2025">5.8.3beta02 (August 29, 2025)</h4>
+<p>Program mbeditviz: Fixed bias parameter optimization when soundings
+are selected by navigation.</p>
+<p>Program mbnavadjust: changed default section sizes to 0.2 km (200 m)
+and 400,000 soundings.</p>
+<h4 id="583beta01-august-27-2025">5.8.3beta01 (August 27, 2025)</h4>
+<p>Program mbgrd2gltf: Fixed compile problem that occurs when the draco
+library is installed.</p>
+<h4 id="582-august-19-2025">5.8.2 (August 19, 2025)</h4>
+<p><strong>Version 5.8.2</strong> is now the current release of
+MB-System.</p>
+<p>The source code distribution can be downloaded from the MB-System
+Github repository at:<br />
+<a
+href=""><span>https://github.com/dwcaress/MB-System/archive/refs/tags/5.8.2.tar.gz</span></a></p>
+<p>The changes and bug fixes of 5.8.2 relative to the prior stable
+release (5.8.1) are listed in the ChangeLog.md file entries for the
+preliminary releases 5.8.2beta01 through 5.8.2beta24.</p>
+<h4 id="582beta24-july-19-2025">5.8.2beta24 (July 19, 2025)</h4>
+<p>Program mbgrdviz: Added capability to export an MB-System route file
+in a file format that can be loaded into a Kongsberg dynamic positioning
+(DP) system, enabling using the DP to run the survey lines described by
+the route file.</p>
+<p>Program mbgrdviz: Added capability to export an MB-System route file
+in a file format that can be loaded into the Kongsberg multibeam control
+software called SIS (Seafloor information System). The route can be
+imported in two forms: one where each segment between major waypoints
+translates to a separate line in SIS, and another that generates a
+multisegment line in SIS.</p>
+<p>Program mbpreprocess: Altered the --skip-existing options so that
+previously preprocessed files are entirely skipped.</p>
+<h4 id="582beta23-june-25-2025">5.8.2beta23 (June 25, 2025)</h4>
+<p>Program mbgrdviz: Fixed capability to export routes in the form of
+Kongsberg Dynamic Positioning system waypoints, allowing importation of
+the MB-System derived survey plans to the bridge control system on
+MBARI's R/V David Packard.</p>
+<p>Format 89 (Teledyne Reson and Norbit (*.s7k)): Removed an errant
+debug message.</p>
+<p>Program mbnavadjust: Greatly improved picking data sections and
+global ties from the model time series plots. Reorganized the List menu
+so that the choices switching the data pick mode on the model plot and
+the map visualization are together. When the list shows data sections,
+global ties, or sorted global ties, then picking on the model plot or on
+navigation in the visualization will bring up the analysis window with a
+data section and potentially a reference grid. Otherwise the picking and
+the analysis window will be of crossings and crossing ties.</p>
+<p>Program mbpreprocess: Fixed generation of asynchronous navigation,
+attitude, heading and sensor depth files for use by mbeditviz.</p>
+<h4 id="582beta22-june-16-2025">5.8.2beta22 (June 16, 2025)</h4>
+<p>Program mbtrnpp: Improved beam decimation and median filtering
+algorithms and some included performance analysis plotting tools. Also
+fixed string construction code that triggered buffer overflow signals
+(falsely) when compiled with strict security rules, as is the default
+for Ubuntu 24.</p>
+<p>Program mbgrdviz: Added capability to export routes in the form of
+Kongsberg Dynamic Positioning system waypoints, allowing importation of
+the MB-System derived survey plans to the bridge control system on
+MBARI's R/V David Packard.</p>
+<p>Format MBF_3DWISSL2 (234): First work on i/o module for data from the
+3D at Depth WiSSL2 (2nd Generation Wide Swath Subsea Lidar) - this is
+not complete.</p>
+<p>Macro mbm_route2mission: Altered the \fB-G\fP option so that instead
+of causing the AUV mission to include surfacing at survey line starting
+and/or ending waypoints, now \fB-G\fP causes AUV surfacing to occur at
+the specified waypoint type.</p>
+<p>Program mbimagelist: New utility program that parses \fBMB-System\fP
+imagelist structures and can also be used to generate metadata files
+used by other MB-System programs.</p>
 <h4 id="582beta21-march-15-2025">5.8.2beta21 (March 15, 2025)</h4>
 <p>Program mbeditviz: Improved the algorithm used to solve for optimal
 roll bias, pitch bias, heading bias, time lag, and Snell factor values

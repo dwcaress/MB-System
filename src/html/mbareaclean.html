@@ -31,7 +31,7 @@ Version 5.0
 <B>mbareaclean</B>  <B>-R</B><I>west/east/south/north</I>  <B>-S</B><I>binsize</I>
 [<B>-D</B><I>threshold</I> <B>-F</B><I>format</I> <B>-I</B><I>infile</I>
 <B>-B -G -H -M</B><I>threshold</I>[<I>/nmin</I>[<I>/nmax</I>]]
-<B>-N</B>[-]<I>min_beam</I>[<I>/maxbeam</I>] <B>-T</B><I>type</I> -V]
+<B>-N</B>[-]<I>min_beam</I>[<I>/maxbeam</I>] <B>-P</B><I>arg</I> <B>-T</B><I>type</I> -V]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -228,6 +228,19 @@ lay below <I>min_beam</I>. So for a Simrad EM1002 sounder with 111 beams <B>-N-3
 beam numbers 1 to 29 and 82 to 111.
 All good soundings, regardless of beam, will be included in the calculations of median, mean
 and standard deviation for the bin.
+<DT><B>-P</B>
+
+<DD>
+<I>arg</I>
+<BR>
+
+Turns on use of a plane-fit test for the soundings in each bin, as an
+alternative to the <B>-M</B> and <B>-D</B> tests. An argument value is
+required by the command line parser but its contents are not currently
+used. Specifying <B>-P</B> suppresses the default behavior of enabling
+the median filter (<B>-M</B>) when no test option is given, so if
+<B>-P</B> is used by itself, no median or standard deviation filtering
+will be applied to the data.
 <DT><B>-R</B>
 
 <DD>

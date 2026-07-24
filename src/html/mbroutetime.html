@@ -77,7 +77,7 @@ Sets the format for the input swath data using
 This program uses the <B>MBIO</B> library and will read any swath
 format supported by <B>MBIO</B>. A list of the swath data formats
 currently supported by <B>MBIO</B> and their identifier values
-is given in the <B>MBIO</B> manual page. Default: <I>format</I> = 11.
+is given in the <B>MBIO</B> manual page. Default: <I>format</I> = 0.
 <DT><B>-H</B>
 
 <DD>
@@ -106,6 +106,35 @@ format supported by <B>MBIO</B>. A list of the swath data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page.
 Default: <I>infile</I> = &quot;datalist.mb-1&quot;.
+<DT><B>-O</B>
+
+<DD>
+<I>waypointtimefile</I>
+<BR>
+
+Sets the name of the output file listing, for each route waypoint
+reached, the longitude, latitude, and time (in decimal epoch seconds)
+at which the survey passed that waypoint.
+Default: <I>waypointtimefile</I> is the input file or datalist name
+(set with the <B>-I</B> option) with the suffix &quot;_wpttime_d.txt&quot; appended.
+<DT><B>-R</B>
+
+<DD>
+<I>routefile</I>
+<BR>
+
+Sets the name of the input <B>MBgrdviz</B> route file containing the
+planned survey waypoints against which the survey data are checked.
+This option is required.
+<DT><B>-U</B>
+
+<DD>
+<I>rangethreshold</I>
+<BR>
+
+Sets the distance in meters that the survey navigation must come within
+a route waypoint for that waypoint to be considered reached.
+Default: <I>rangethreshold</I> = 25.0.
 <DT><B>-V</B>
 
 <DD>

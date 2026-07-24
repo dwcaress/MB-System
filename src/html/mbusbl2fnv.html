@@ -1,0 +1,221 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbusbl2fnv</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbusbl2fnv</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  2026 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbusbl2fnv</B> - converts a USBL (ultra-short baseline) ROV tracking CSV
+file to an MB-System fast navigation (fnv) text file.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbusbl2fnv</B> [<B>-I</B><I>usbl.csv</I>] [<B>-O</B><I>output.fnv</I>] [<B>-V</B>] [<B>-H</B>]
+<BR>
+
+<B>mbusbl2fnv</B> [<B>--input</B>=<I>usbl.csv</I>] [<B>--output</B>=<I>output.fnv</I>]
+[<B>--verbose</B>] [<B>--help</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbusbl2fnv</B> converts a USBL (ultra-short baseline) ROV tracking CSV
+file to an MB-System fast navigation (fnv) ASCII text file.
+<P>
+The input CSV file is expected to have one header line followed by
+data lines, each containing four comma-separated fields:
+<P>
+<PRE>
+  field 0: epoch time (Unix epoch seconds)
+  field 1: latitude (decimal degrees, positive north)
+  field 2: longitude (decimal degrees, positive east)
+  field 3: ROV depth (meters, positive down) - used as draft
+</PRE>
+
+<P>
+Heading, speed, roll, pitch, and heave are not present in the USBL
+tracking data and are output as 0.0 in the fnv file.
+<P>
+Lines are treated as data only if their first non-whitespace character
+could begin a number (a digit, <B>+</B>, <B>-</B>, or <B>.</B>); this allows
+the header line and any comment lines beginning with <B>#</B> to be
+skipped automatically. Lines that do not parse into exactly four
+numeric fields are skipped with a warning in verbose mode. Records
+with retrograde (non-increasing) timestamps are also skipped.
+<P>
+The fnv format is a tab-separated ASCII text file. The first line is a
+comment beginning with <B>##</B> that names the columns. Each subsequent
+data line contains the following tab-separated fields:
+<P>
+<PRE>
+  yyyy mm dd hh mm ss.ssssss
+  epoch_seconds
+  longitude (deg)
+  latitude (deg)
+  heading (deg)
+  speed (km/hr)
+  draft (m)
+  roll (deg)
+  pitch (deg)
+  heave (m)
+</PRE>
+
+<P>
+The date and time in the first field are space-delimited within their
+tab field.
+<P>
+If no input file is specified, <B>mbusbl2fnv</B> reads from standard
+input. If no output file is specified, it writes to standard output.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-H</B>
+
+<DD>
+<DT><B>--help</B>
+
+<DD>
+Prints the program name, usage, and a description of the expected
+USBL CSV field layout, then exits.
+<DT><B>-V</B>
+
+<DD>
+<DT><B>--verbose</B>
+
+<DD>
+Increases the verbosity of <B>mbusbl2fnv</B>. With this option the
+program prints the input and output file names to standard error when
+they are opened, reports any malformed or retrograde-timestamp lines
+that are skipped, and prints a final summary of the number of records
+read, written, and skipped.
+<DT><B>-I </B><I>usbl.csv</I>
+
+<DD>
+<DT><B>--input=</B><I>usbl.csv</I>
+
+<DD>
+Sets the path of the input USBL tracking CSV file. If this option is
+not given, the program reads from standard input.
+<DT><B>-O </B><I>output.fnv</I>
+
+<DD>
+<DT><B>--output=</B><I>output.fnv</I>
+
+<DD>
+Sets the path of the output fnv file. If this option is not given,
+the program writes to standard output.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Convert a USBL tracking CSV file to an fnv file:
+<P>
+
+<PRE>
+    mbusbl2fnv -I usbl_track.csv -O rov.fnv
+</PRE>
+
+<P>
+
+Use standard input and output (e.g. within a pipeline):
+<P>
+
+<PRE>
+    cat usbl_track.csv | mbusbl2fnv &gt; rov.fnv
+</PRE>
+
+<P>
+
+Convert with verbose progress reporting:
+<P>
+
+<PRE>
+    mbusbl2fnv --verbose --input=usbl_track.csv --output=rov.fnv
+</PRE>
+
+<P>
+
+Use the fnv output to supply ROV navigation to <B>mbpreprocess</B>:
+<P>
+
+<PRE>
+    mbusbl2fnv -I usbl_track.csv -O rov.fnv
+    mbpreprocess --format=&lt;format&gt; --input=datalist.mb-1 \
+        --nav-file=rov.fnv --nav-file-format=9 \
+        --sensordepth-file=rov.fnv --sensordepth-file-format=9
+</PRE>
+
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbnavlab2fnv.html">mbnavlab2fnv</A></B>(1), <B><A HREF="mbfnv2navlab.html">mbfnv2navlab</A></B>(1), <B><A HREF="mbpreprocess.html">mbpreprocess</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Heading, speed, roll, pitch, and heave are not available in USBL
+tracking data and are always written as 0.0 in the fnv output.
+Applications that require these values should obtain them from another
+navigation or attitude source.
+<P>
+The optional port and starboard swath edge columns present in some fnv
+files are not written by <B>mbusbl2fnv</B>, as no swath geometry is
+available from USBL tracking data.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 2026" "MB-System 5.0</P></CENTER>
+
+<HR>
+<center>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>

@@ -1,4 +1,4 @@
-.TH mbnavadjust 1 "28 November 2016" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavadjust 1 "23 July 2026" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavadjust\fP \- Package that solves for optimal navigation by
 matching bathymetry of overlapping swaths.
@@ -7,7 +7,17 @@ matching bathymetry of overlapping swaths.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbnavadjust\fP [\fB\-V \-H \-D \-R\fP]
+\fBmbnavadjust\fP
+.br
+[--input=project {-Iproject}
+.br
+--dark-background {-D}
+.br
+--reset-crossings {-R}
+.br
+--verbose {-V}
+.br
+--help {-H}]
 
 .SH DESCRIPTION
 \fBMBnavadjust\fP is an interactive graphical program used to
@@ -79,15 +89,36 @@ navigation files that are ignored by \fBmbprocess\fP. This behavior
 can be reversed manually using \fBmbset\fP, but then the user will
 unnecessarily complicating his or her efforts.
 
-A companion program \fBmbnavadjustmerge\fP can add \fBmbnavadjust\fP projects
-together or modify \fBmbnavadjust\fP project settings. This includes updating
+A companion command line program \fBmbnavadjustmerge\fP provides access to
+most of \fBmbnavadjust\fP's project-management functionality without the
+graphical interface, making it possible to script and automate
+\fBmbnavadjust\fP project workflows. This includes creating a new project
+(\fB--create-project\fP) and changing project settings such as the section
+length, maximum soundings per section, and contour intervals (the
+\fB--section-length\fP, \fB--section-soundings\fP, \fB--contour-interval\fP,
+and related options); importing swath data (\fB--import\fP,
+\fB--import-as-survey\fP); searching for new crossings
+(\fB--find-crossings\fP); automatically picking navigation ties at
+crossings, optionally restricted to a particular survey, survey pair,
+file, or section (\fB--autopick\fP, \fB--autopick-horizontal\fP, and the
+associated \fB--autopick-*\fP filter options); solving the tie/crossing
+network for a corrected navigation model (\fB--invert-navigation\fP),
+equivalent to the \fBAction->Invert Navigation\fP menu item; regenerating
+the project's reference bathymetry grids from that solution
+(\fB--update-grids\fP), equivalent to \fBAction->Update Grids\fP; writing
+the corrected navigation out to the swath data files
+(\fB--apply-navigation\fP), equivalent to \fBAction->Apply Adjusted
+Navigation\fP; and adding
+\fBmbnavadjust\fP projects together or otherwise modifying an existing
+project's contents. This includes updating
 the beam flags (which soundings are valid and which are ignored) already
 imported into a project's sections to match the current processed version of
 each swath file, using the \fB--update-file\fP, \fB--update-survey\fP, and
 \fB--update-all-files\fP options. This allows bathymetry re-edited with
 \fBmbclean\fP or \fBmbedit\fP after a file was already imported into the
 project - to remove bad soundings, for example - to be brought into the
-project without a full reimport of the file.
+project without a full reimport of the file. See the \fBmbnavadjustmerge\fP
+manual page for the full list of available options.
 
 The inversion for an optimal navigation which fits the offsets identified
 at matching features must also be reasonable. This is achieved by
@@ -127,30 +158,37 @@ Christian do Santos Ferreira
 .SH OPTIONS
 
 .TP
-.B \-H
-This "help" flag cause the program to print out a description
-of its operation and then exit immediately.
+.B \-\-input=project \-Iproject
+This option specifies an existing \fBmbnavadjust\fP project to open
+automatically at startup, equivalent to using the \fBFile->Open\fP menu
+item. A project may be specified by a relative or absolute path to the
+project *.nvh file or the project *.dir directory.
 
 .TP
-.B \-D
+.B \-\-dark\-background \-D
 Normally, \fBmbnavadjust\fP uses a white background for the
 interactive plots. This option causes the program to use a
 black background for the plots.
 
 .TP
-.B \-R
+.B \-\-reset\-crossings \-R
 This option causes \fBmbnavadjust\fP to discard all navigation ties,
 set all crossings to "unanalyzed" status, and to save the project
 in this pristine state. Only use this option if you really, really
 want to start over.
 
 .TP
-.B \-V
+.B \-\-verbose \-V
 Normally, \fBmbnavadjust\fP outputs nothing to the stderr stream.
-If the \fB\-V\fP flag is given, then \fBmbnavadjust\fP
+If the \fB\-\-verbose\fP (\fB\-V\fP) flag is given, then \fBmbnavadjust\fP
 works in a "verbose" mode and
 outputs the program version being used, all error status messages,
 and a large amount of other information.
+
+.TP
+.B \-\-help \-H
+This "help" flag cause the program to print out a description
+of its operation and then exit immediately.
 
 .SH INTERACTIVE CONTROLS
 
@@ -649,9 +687,10 @@ window.
 .SS Controls Window
 This dialog window is brought up by clicking the \fBOption->Controls\fP
 menu item in the \fBMBnavadjust Window\fP. This window includes two slider
-widgets setting data importation parameters, four slider widgets setting
-data display parameters, a button to apply any changes, and a button to
-dismiss the window.
+widgets setting data importation parameters, six slider widgets setting
+data display and navigation-inversion parameters, a radio box selecting
+the navigation adjustment processing stage, a button to apply any changes,
+and a button to dismiss the window.
 
 .TP
 .B Max Section Length (km)
@@ -707,6 +746,35 @@ derivative of the adjusted navigation perturbation is:
       10^(S - 2)
 .br
 divided by the time difference between the relevant navigation points in seconds.
+
+.TP
+.B Z Offset Width (m)
+This slider widget sets the width in meters of the vertical offset search
+range used when computing the bathymetric misfit grid for a crossing, both
+interactively in the \fBNav Err\fP window and during automatic picking
+(\fBAction->Auto-Pick Offsets\fP). The search range is centered on the
+current best estimate of the vertical offset. The default is 1.0 m, and
+the possible range is 0.1 to 5.0 m; a wider range is useful when crossings
+have large, poorly known vertical offsets, at the cost of coarser
+resolution in the misfit grid for a given grid size.
+
+.TP
+.B MB-System Use of Navigation Adjustment Model
+This radio box (\fBPrimary\fP, \fBSecondary\fP, or \fBTertiary\fP) selects
+which stage of swath data processing the files imported into the project
+represent, determining how \fBAction->Apply Adjusted Navigation\fP attaches
+the corrected navigation model to the data. \fBPrimary\fP, the default,
+treats the imported files as the original, unprocessed swath data: the
+adjusted navigation is written to a ".na0" file alongside each imported
+file, and that file's own \fBmbprocess\fP parameters are updated to
+reference it directly. \fBSecondary\fP and \fBTertiary\fP instead treat the
+imported files as already-processed output from one or two prior
+\fBmbprocess\fP passes; in these modes the adjusted navigation is written
+(as ".na1" or ".na2", respectively) alongside the file that \fBmbprocess\fP
+would next produce from each imported file, without modifying the imported
+files' own processing parameters. \fBPrimary\fP is correct for the great
+majority of projects, which import raw swath data directly.
+
 .TP
 .B Apply
 This button applies any changed values in the slider widgets of the \fBControls Window\fP.

@@ -184,7 +184,7 @@ in inches per shot, and the <I>yscale</I> value is in inches per second.
 The <I>maxwidth</I> value sets the maximum plot width in inches. If
 <I>xscale</I> and the shot range imply a width greater than <I>maxwidth</I>,
 then the section will be broken up into multiple plots.
-Default: <I>xscale</I> = 0.01; <I>yscale</I> = 75; <I>maxwidth</I> = 45.0
+Default: <I>xscale</I> = 0.01; <I>yscale</I> = 50.0; <I>maxwidth</I> = 30.0
 <DT><B>-L</B>
 
 <DD>
@@ -272,8 +272,9 @@ two traces with positive and negative values. An envelope signal is calculated
 as the magnitude of an analytic signal and so forms a single positive-only trace.
 The <I>sampleformat</I> sets the form of the output trace stored in one or more
 output SEGY files. If the output sample format differs from the input, then
-<B>mbextractsegy</B> must make the implied transformation. The default value of
-MB_SEGY_SAMPLEFORMAT_NONE to output data in the existing form. In the case of an
+<B>mbextractsegy</B> must make the implied transformation. MB_SEGY_SAMPLEFORMAT_NONE
+outputs the data in the existing form without transformation. The default value
+is MB_SEGY_SAMPLEFORMAT_ENVELOPE. In the case of an
 output MB_SEGY_SAMPLEFORMAT_TRACE, a single trace is output. If the input is an
 analytic time series, then the output will be a single trace comprised of the
 real part of the signal. In the case of MB_SEGY_SAMPLEFORMAT_ENVELOPE, if the
@@ -282,6 +283,17 @@ envelope function calculated from the analytic time series. In the case of
 MB_SEGY_SAMPLEFORMAT_ANALYTIC, then there will be three traces (and three
 SEGY files) output, the real part of the analytic data, the imaginary part
 of the analytic data, and the envelope function calculated from the analytic data.
+<DT><B>-T</B>
+
+<DD>
+<I>timeshift</I>
+<BR>
+
+This option applies a time shift of <I>timeshift</I> seconds to the
+timestamps stored in the output SEGY trace headers. A positive
+<I>timeshift</I> value shifts the trace timestamps later; a negative
+value shifts them earlier. Default: <I>timeshift</I> = 0.0 (no time
+shift applied).
 <DT><B>-U</B>
 
 <DD>

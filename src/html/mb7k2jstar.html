@@ -30,8 +30,10 @@ Version 5.0
 
 <B>mb7k2jstar</B> [<B>-I</B><I>file </I><B>-A</B><I>type</I>
 <B>-B</B><I>bottompickmode/bottompickthreshold</I> <B>-C</B>
-<B>-F</B><I>format</I> <B>-L</B><I>startline/lineroot</I>
-<B>-M -O</B><I>outfile</I> <B>-R</B><I>routefile</I> <B>-X -H -V</B>]
+<B>-F</B><I>format</I> <B>-G</B><I>gainmode/gainfactor</I>
+<B>-L</B><I>startline/lineroot</I>
+<B>-M -O</B><I>outfile</I> <B>-R</B><I>routefile</I> <B>-S</B><I>smooth</I>
+<B>-T</B><I>timeshift</I> <B>-X -H -V</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -122,14 +124,14 @@ profiler records are extracted.
 This option sets the source of the sonar first arrival time embedded into
 the Jstar format trace headers. This value can be used for
 laying out sidescan on the seafloor. If <I>bottompickmode</I> = 1,
-then <B>mb7k2jstar</B> will use the altitude value associated with
-platform navigation. If <I>bottompickmode</I> = 2, then <B>mb7k2jstar</B>
-will extract the first arrival time from multibeam bathymetry in the
-7k data stream. If <I>bottompickmode</I> = 3, then <B>mb7k2jstar</B>
+then <B>mb7k2jstar</B> will extract the first arrival time from multibeam
+bathymetry in the 7k data stream. If <I>bottompickmode</I> = 2, then
+<B>mb7k2jstar</B> will use the altitude value associated with
+platform navigation. If <I>bottompickmode</I> = 3, then <B>mb7k2jstar</B>
 will pick the first arrival time in the sidescan sonar data by looking
 for the first sample with an amplitude &gt; <I>bottompickthreshold</I> times the
 maximum amplitude in the trace.
-Default: <I>bottompickmode</I> = 1.
+Default: <I>bottompickmode</I> = 2.
 <DT><B>-C</B>
 
 <DD>
@@ -148,6 +150,17 @@ or from a file. If <I>format</I> &lt; 0, then the input file specified
 with the <B>-I</B> option will actually contain a list of input swath sonar
 data files. This program only reads Reson 7k format data files (<B>MBIO</B>
 format 88).
+<DT><B>-G</B>
+
+<DD>
+<I>gainmode/gainfactor</I>
+<BR>
+
+This option applies a gain correction to the extracted sidescan data.
+If <I>gainmode</I> = 0, no gain correction is applied. If <I>gainmode</I> = 1,
+a time-varying gain (proportional to range squared beyond the bottom
+return) scaled by <I>gainfactor</I> is applied to the sidescan samples.
+Default: <I>gainmode</I> = 0; <I>gainfactor</I> = 1.0.
 <DT><B>-H</B>
 
 <DD>
@@ -220,6 +233,26 @@ the output Jstar filename (or files if a datalist is being processed) will
 be the input swath filename with an appropriate suffix appended (&quot;.jsf&quot; for
 mixed Jstar files, &quot;.mb132&quot; for low frequency sidescan only files, and &quot;.mb133&quot;
 for high frequency sidescan only files).
+<DT><B>-S</B>
+
+<DD>
+<I>smooth</I>
+<BR>
+
+This option applies smoothing to the extracted sidescan trace samples.
+If <I>smooth</I> is positive, each sample is replaced by the boxcar
+average of the samples within <I>smooth</I> samples on either side.
+If <I>smooth</I> is negative, each sample is replaced by the RMS value
+of the samples within <I>|smooth|</I> samples on either side. Default:
+<I>smooth</I> = 0 (no smoothing).
+<DT><B>-T</B>
+
+<DD>
+<I>timeshift</I>
+<BR>
+
+This option shifts the timestamps of the extracted data by <I>timeshift</I>
+seconds. Default: <I>timeshift</I> = 0.0.
 <DT><B>-V</B>
 
 <DD>

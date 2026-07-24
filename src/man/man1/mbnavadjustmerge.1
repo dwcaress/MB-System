@@ -1,8 +1,10 @@
-.TH mbnavadjustmerge 1 "15 November 2022" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavadjustmerge 1 "23 July 2026" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbnavadjustmerge\fP \- Tool to modify MBnavadjust projects,
-including merging projects, adding global ties, setting tie modes, exporting
-or importing crossing ties, and pre-generating the triangular meshes .
+\fBmbnavadjustmerge\fP \- Command line tool to create and modify MBnavadjust
+projects, including creating new projects, importing swath data, changing
+project settings, merging projects, adding global ties, setting tie modes,
+automatically picking crossing ties, checking for new crossings, exporting
+or importing crossing ties, and pre-generating the triangular meshes.
 
 .SH VERSION
 Version 5.0
@@ -13,6 +15,56 @@ Version 5.0
 [--input=project_path
 .br
 --output=project_path
+.br
+--create-project=project_path
+.br
+--section-length=km
+.br
+--section-soundings=count
+.br
+--contour-interval=meters
+.br
+--color-interval=meters
+.br
+--tick-interval=meters
+.br
+--label-interval=meters
+.br
+--decimation=value
+.br
+--smoothing=value
+.br
+--zoffsetwidth=meters
+.br
+--import=path[:format]
+.br
+--import-as-survey=path[:format]
+.br
+--find-crossings
+.br
+--autopick
+.br
+--autopick-horizontal
+.br
+--autopick-crossing-type=all|mediocre|good|better|true
+.br
+--autopick-scope=all|survey|withsurvey|block|file|withfile|withsection
+.br
+--autopick-survey=survey
+.br
+--autopick-survey2=survey
+.br
+--autopick-file=file
+.br
+--autopick-section=section
+.br
+--autopick-overlap-threshold=percent
+.br
+--invert-navigation
+.br
+--update-grids
+.br
+--apply-navigation
 .br
 --set-global-tie=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]
 .br
@@ -123,15 +175,51 @@ Version 5.0
 --help]
 
 .SH DESCRIPTION
-\fBMBnavadjustmerge\fP is a command line program that merges two
-existing \fBMBnavadjust\fP projects or modifies a single
-\fBMBnavadjust\fP project.
+\fBMBnavadjustmerge\fP is a command line program that creates new
+\fBMBnavadjust\fP projects, imports swath data and changes project settings,
+automatically picks navigation ties at crossings, checks for new crossings,
+merges two existing \fBMBnavadjust\fP projects, or otherwise modifies a
+single \fBMBnavadjust\fP project. It provides command-line access to most of
+the project-management functionality found in the interactive
+\fBmbnavadjust\fP graphical program, making it possible to script and
+automate \fBMBnavadjust\fP project workflows.
 
 \fBMBnavadjust\fP is an interactive graphical program used to
 adjust swath data navigation by matching bathymetric features
 in overlapping and crossing swaths. The primary purpose of
 \fBmbnavadjust\fP is to eliminate relative navigational errors in swath
 data obtained from poorly navigated sonars.
+
+To create a new project, use the \fB--create-project\fP option, optionally
+combined with the section-length, section-soundings, contour-interval,
+color-interval, tick-interval, label-interval, decimation, smoothing, and
+zoffsetwidth settings options; these same settings options can be applied
+to an existing project as well. Swath data (a single file or a recursive
+datalist) can then be imported with the \fB--import\fP or
+\fB--import-as-survey\fP option. The \fB--find-crossings\fP option searches
+for overlapping and crossing swath sections among the imported data (this
+happens automatically as data are imported, so \fB--find-crossings\fP is
+mainly useful after a merge or after inserting/removing discontinuities).
+The \fB--autopick\fP and \fB--autopick-horizontal\fP options automatically
+pick navigation ties at unanalyzed crossings by computing and searching a
+bathymetric misfit grid, exactly as the interactive
+\fBAction->Auto-Pick Offsets\fP menu item does in \fBmbnavadjust\fP; the
+\fB--autopick-crossing-type\fP, \fB--autopick-scope\fP,
+\fB--autopick-survey\fP[\fB2\fP], \fB--autopick-file\fP,
+\fB--autopick-section\fP, and \fB--autopick-overlap-threshold\fP options
+narrow which crossings are considered, mirroring the crossing-type and
+scope filters available under the \fBView\fP menu in \fBmbnavadjust\fP.
+
+Once ties have been picked, the \fB--invert-navigation\fP option solves the
+network of ties and crossings for a corrected navigation model, exactly as
+the interactive \fBAction->Invert Navigation\fP menu item does in
+\fBmbnavadjust\fP. The \fB--update-grids\fP option regenerates the project's
+reference bathymetry grids from the current navigation, equivalent to
+\fBAction->Update Grids\fP. The \fB--apply-navigation\fP option writes the
+corrected navigation solution out to the swath data files' processing
+parameters, equivalent to \fBAction->Apply Navigation\fP; this is normally
+the last step in a navigation adjustment workflow, run after
+\fB--invert-navigation\fP.
 
 With respect to the merging function, if the \fBMBnavadjustmerge\fP
 user specifies two input projects and no output project, then the
@@ -140,10 +228,16 @@ two projects are merged and the new combined project is output.
 
 In order to make use of the project modification commands, a
 single input project must be specified, along with one or more
-of the modification commands. These can include adding crossings,
+of the modification commands. These can include creating a project,
+importing swath data, changing project settings, automatically picking
+ties, checking for new crossings, adding crossings,
 setting tie z-offset values, setting tie offsets (even if no
 corresponding crossing already exists), setting tie modes
-(xy only, z only, xyz), and deleting ties.
+(xy only, z only, xyz), and deleting ties. When more than one modification
+command is given, they are applied in the order in which they appear on
+the command line (project settings changes are always applied first,
+since section splitting during import depends on the section-length and
+section-soundings settings).
 
 .SH MB-SYSTEM AUTHORSHIP
 David W. Caress
@@ -189,6 +283,208 @@ If the \fBoutput\fP option is
 not specified, then the \fIproject-base\fP project is used as the
 output, and the \fIproject-add\fP project is added on to the
 \fIproject-base\fP project.
+.TP
+.B \--create-project=project-path
+This option creates a new, empty \fBMBnavadjust\fP project at \fIproject-path\fP,
+exactly as the \fBFile->New\fP menu item does in \fBmbnavadjust\fP. As with
+\fB--input\fP, a project may be defined by a relative or absolute path to the
+project *.nvh file or the project *.dir directory. This option cannot be
+combined with \fB--input\fP. Any of the section-length, section-soundings,
+contour-interval, color-interval, tick-interval, label-interval, decimation,
+smoothing, or zoffsetwidth settings options given on the same command line
+are applied to the new project as it is created; any not given default to
+the same values used by \fBmbnavadjust\fP for a new project. Other
+modification commands (e.g. \fB--import\fP, \fB--find-crossings\fP,
+\fB--autopick\fP) given on the same command line are then applied to the
+newly created project.
+.TP
+.B \--section-length=km
+This option sets the maximum swath data section length in kilometers, exactly
+as the \fBMax Section Length (km)\fP slider does in the \fBmbnavadjust\fP
+\fBControls\fP window. This setting only affects how files imported
+afterward (in the same command, or in a later command) are broken up into
+sections; it does not resection files already imported into the project.
+.TP
+.B \--section-soundings=count
+This option sets the maximum number of soundings (not pings) that may be
+included in a single swath data section, exactly as the \fBMax # Soundings in
+Section\fP slider does in the \fBmbnavadjust\fP \fBControls\fP window. Like
+\fB--section-length\fP, this only affects files imported afterward.
+.TP
+.B \--contour-interval=meters
+This option sets the depth interval in meters for the bathymetric contours
+used in the \fBmbnavadjust\fP \fBNav Err\fP window, exactly as the
+\fBContour Interval (m)\fP slider does in the \fBControls\fP window.
+.TP
+.B \--color-interval=meters
+This option sets the depth interval in meters at which the color of the
+bathymetric contours changes, exactly as the \fBColor Interval (m)\fP slider
+does in the \fBmbnavadjust\fP \fBControls\fP window. This should be a
+multiple of the contour interval.
+.TP
+.B \--tick-interval=meters
+This option sets the depth interval in meters at which contours have
+downhill facing tickmarks, exactly as the \fBTick Interval (m)\fP slider
+does in the \fBmbnavadjust\fP \fBControls\fP window. This should be a
+multiple of the contour interval.
+.TP
+.B \--label-interval=meters
+This option sets the depth interval in meters at which bathymetric contours
+are annotated with their depth value.
+.TP
+.B \--decimation=value
+This option sets the ping decimation used when calculating bathymetric
+contours for the \fBmbnavadjust\fP \fBNav Err\fP window, exactly as the
+\fBDecimation\fP slider does in the \fBControls\fP window. A value of 1 uses
+all soundings; a value of 2 uses soundings from every second ping, and so on.
+.TP
+.B \--smoothing=value
+This option sets the importance of smoothing in the adjusted navigation
+model calculated by \fBAction->Invert Navigation\fP in \fBmbnavadjust\fP,
+exactly as the \fBInversion Smoothing\fP slider does in the \fBControls\fP
+window. Larger values yield a smoother model, smaller values a rougher
+model; the default is 3.0 and the useful range is about 0.10 to 10.0.
+.TP
+.B \--zoffsetwidth=meters
+This option sets the width in meters of the vertical offset search range
+used when computing the bathymetric misfit grid for a crossing (both
+interactively in the \fBmbnavadjust\fP \fBNav Err\fP window and by
+\fB--autopick\fP).
+.TP
+.B \--import=path[:format]
+This option imports swath data into the project, exactly as the
+\fBFile->Import Swath Data\fP menu item does in \fBmbnavadjust\fP. If
+\fIpath\fP refers to a single swath data file, the \fIformat\fP id must be
+given explicitly as \fIpath\fP\fB:\fP\fIformat\fP; unlike the graphical
+file selection dialog, the \fBMB-System\fP filename suffix convention is
+not used to infer the format here. If no \fIformat\fP is given, \fIpath\fP
+is instead read as a recursive \fBMB-System\fP datalist naming one or more
+swath files (see the \fBMB-System\fP manual page for a description of
+recursive datalists), and the format of each listed file is taken from the
+datalist. As with the interactive import, each file is
+broken into sections according to the current section-length and
+section-soundings settings, and any new crossings with previously imported
+data are found automatically. This option may be given more than once on the
+same command line to import multiple files or datalists in sequence. Swath
+files that continue in time from the file imported immediately before them
+are treated as part of the same survey; a time gap starts a new survey,
+unless \fB--import-as-survey\fP is used instead.
+.TP
+.B \--import-as-survey=path[:format]
+This option behaves exactly like \fB--import\fP, except that every file
+imported by this option (including a multi-file datalist) is forced into a
+single new survey regardless of any time gaps between files, exactly as
+selecting the \fBSurvey\fP file mode does in the \fBmbnavadjust\fP file
+import dialog.
+.TP
+.B \--find-crossings
+This option searches for new crossings among the swath data sections
+already imported into the project, exactly as the
+\fBAction->Check For New Crossings\fP menu item does in \fBmbnavadjust\fP.
+The percentage of overlap is also recalculated for all existing crossings.
+This happens automatically as data are imported with \fB--import\fP, so
+\fB--find-crossings\fP is mainly useful after a \fB--merge-surveys\fP,
+after inserting or removing a discontinuity, or after merging two projects.
+.TP
+.B \--autopick
+This option automatically picks navigation ties at crossings that have not
+yet been analyzed, exactly as the \fBAction->Auto-Pick Offsets\fP menu item
+does in \fBmbnavadjust\fP. For each qualifying crossing, the swath data are
+loaded, a three-dimensional (longitude, latitude, and vertical offset)
+bathymetric misfit grid is computed, and a tie is added at the offset with
+the smallest misfit \fIif\fP the uncertainty in that minimum is small
+relative to the size of the overlap region; otherwise the crossing is left
+unset. As with interactive auto-picking, unsupervised offset picks are
+frequently erroneous, so the resulting ties should be reviewed (e.g. in
+\fBmbnavadjust\fP, or with \fB--export-tie-list\fP) before relying on them
+for a navigation inversion. By default all unanalyzed crossings are
+considered; use \fB--autopick-crossing-type\fP, \fB--autopick-scope\fP, and
+the associated survey/file/section options to narrow the crossings
+considered, and \fB--autopick-overlap-threshold\fP to change the minimum
+overlap percentage required.
+.TP
+.B \--autopick-horizontal
+This option behaves exactly like \fB--autopick\fP, except that only the
+horizontal (longitude and latitude) offset of the minimum misfit is used;
+the vertical offset is left unchanged. This corresponds to the horizontal-only
+auto-pick behavior available in the interactive \fBmbnavadjust\fP
+"Nav Err" window, and is appropriate when the data are already corrected
+for vertical offsets (e.g. tides).
+.TP
+.B \--autopick-crossing-type=all|mediocre|good|better|true
+This option limits which crossings \fB--autopick\fP or
+\fB--autopick-horizontal\fP consider, mirroring the crossing-type items
+under the \fBView\fP menu in \fBmbnavadjust\fP: \fIall\fP considers any
+crossing meeting the overlap threshold (the default), \fImediocre\fP
+requires at least 10% overlap, \fIgood\fP at least 25% overlap, \fIbetter\fP
+at least 50% overlap, and \fItrue\fP restricts to crossings where the
+navigation tracks actually cross ("true crossings").
+.TP
+.B \--autopick-scope=all|survey|withsurvey|block|file|withfile|withsection
+This option limits which crossings \fB--autopick\fP or
+\fB--autopick-horizontal\fP consider by survey, file, or section, mirroring
+the \fBView->Show Only Selected ...\fP items in \fBmbnavadjust\fP:
+\fIall\fP considers every crossing (the default); \fIsurvey\fP restricts to
+crossings where both sections belong to the survey given by
+\fB--autopick-survey\fP; \fIwithsurvey\fP restricts to crossings where
+either section belongs to that survey; \fIblock\fP restricts to crossings
+between the two surveys given by \fB--autopick-survey\fP and
+\fB--autopick-survey2\fP; \fIfile\fP restricts to crossings where both
+sections belong to the file given by \fB--autopick-file\fP; \fIwithfile\fP
+restricts to crossings where either section belongs to that file; and
+\fIwithsection\fP restricts to crossings involving the specific section
+given by \fB--autopick-file\fP and \fB--autopick-section\fP.
+.TP
+.B \--autopick-survey=survey
+This option sets the survey used to filter crossings when
+\fB--autopick-scope\fP is \fIsurvey\fP, \fIwithsurvey\fP, or \fIblock\fP
+(as the first of the two surveys in the \fIblock\fP case).
+.TP
+.B \--autopick-survey2=survey
+This option sets the second survey used to filter crossings when
+\fB--autopick-scope\fP is \fIblock\fP.
+.TP
+.B \--autopick-file=file
+This option sets the file used to filter crossings when
+\fB--autopick-scope\fP is \fIfile\fP, \fIwithfile\fP, or \fIwithsection\fP.
+.TP
+.B \--autopick-section=section
+This option sets the section (within the file given by
+\fB--autopick-file\fP) used to filter crossings when
+\fB--autopick-scope\fP is \fIwithsection\fP.
+.TP
+.B \--autopick-overlap-threshold=percent
+This option sets the minimum percentage of overlap a crossing must have to
+be considered by \fB--autopick\fP or \fB--autopick-horizontal\fP, overriding
+the default threshold of 10%. This is a floor applied in addition to
+whatever minimum overlap is implied by \fB--autopick-crossing-type\fP.
+.TP
+.B \--invert-navigation
+This option solves the network of navigation ties and crossings for a
+corrected navigation model, exactly as the \fBAction->Invert Navigation\fP
+menu item does in \fBmbnavadjust\fP. The inversion is a sparse
+least-squares solve over all files and sections in the project using
+their current ties and global ties; it requires that ties already exist
+(e.g. from \fB--autopick\fP or \fB--set-tie\fP) and updates the project's
+navigation solution and per-section offsets in place. This does not modify
+the swath data files themselves; use \fB--apply-navigation\fP afterward to
+do so.
+.TP
+.B \--update-grids
+This option regenerates the project's reference bathymetry grids from the
+current navigation solution, exactly as the \fBAction->Update Grids\fP menu
+item does in \fBmbnavadjust\fP. This is normally run after
+\fB--invert-navigation\fP so that the reference grids reflect the corrected
+navigation, and requires \fBmbdatalist\fP, \fBmbgrid\fP, and \fBmbprocess\fP
+to be available.
+.TP
+.B \--apply-navigation
+This option writes the current navigation solution out to the swath data
+files' processing parameters, exactly as the \fBAction->Apply Navigation\fP
+menu item does in \fBmbnavadjust\fP. This is normally the last step in a
+navigation adjustment workflow, run after \fB--invert-navigation\fP;
+running it before an inversion has been computed for the project has no
+effect on the data files.
 .TP
 .B \--set-global-tie=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]
 This options sets a global tie for a navigation point in the project. Global ties are
@@ -501,10 +797,31 @@ means that more information than by default is output to the stderr stream of th
 shell.
 .TP
 .B \--help
-This option causes \fBMBnavadjustmerge\P to output a list of the
+This option causes \fBMBnavadjustmerge\fP to output a list of the
 possible command line options, and then exit.
 
 .SH EXAMPLES
+Suppose you want to build a new \fBMBnavadjust\fP project from a survey's
+recursive datalist and automatically pick as many navigation ties as
+possible without ever opening the interactive \fBmbnavadjust\fP program.
+The following creates the project, imports the datalist, and auto-picks
+ties at every unanalyzed crossing:
+.br
+    mbnavadjustmerge --create-project=Navadjust20240510.nvh \
+                      --section-length=0.1 \
+.br
+    mbnavadjustmerge --input=Navadjust20240510.nvh \
+                      --import=datalist.mb-1 \
+.br
+    mbnavadjustmerge --input=Navadjust20240510.nvh \
+                      --autopick --autopick-scope=all
+.br
+The resulting project can then be opened in \fBmbnavadjust\fP to review the
+automatically picked ties before running \fBAction->Invert Navigation\fP,
+or the ties can be reviewed non-interactively with \fB--export-tie-list\fP.
+Since unsupervised offset picks are frequently erroneous, reviewing them is
+recommended.
+
 Suppose you have two AUV survey missions, 20140515m1 and 10140515m2, that overlap
 slightly. If you have used \fBMBnavadjust\fP to adjust the navigation of the
 two missions separately, you can use \fBMBnavadjustmerge\fP to merge the two

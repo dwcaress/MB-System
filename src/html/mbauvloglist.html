@@ -27,7 +27,8 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbauvloglist</B> <B>-I</B><I>file</I> [<B>-C</B> <B>-F</B><I>printformat</I> <B>-L</B><I>lonflip</I>
+<B>mbauvloglist</B> <B>-I</B><I>file</I> [<B>-A</B><I>altitudefile</I> <B>-C</B> <B>-D</B><I>decimate</I>
+<B>-F</B><I>printformat</I> <B>-L</B><I>lonflip</I>
 <B>-M</B><I>mode</I> <B>-N</B><I>navfile</I> <B>-O</B><I>list</I> <B>-P</B> <B>-R</B><I>id</I> <B>-S</B> <B>-X</B><I>scale</I> <B>-V -H</B> ]
 <P>
 <A NAME="lbAE">&nbsp;</A>
@@ -332,6 +333,16 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
+<DT><B>-A</B>
+
+<DD>
+<I>altitudefile</I>
+<BR>
+
+Specifies an ascii altitude file containing time and altitude values
+(one &quot;time altitude&quot; pair per line, in seconds and meters) to be merged
+(interpolated) with the primary log file data. The merged altitude values
+can be output using the <B>mergeAltitude</B> valuename in the <B>-O</B> option.
 <DT><B>-H</B>
 
 <DD>
@@ -347,6 +358,16 @@ then the <B>-C</B> option causes input records with times before the beginning o
 after the end of the external navigation to not be output by <B>mbauvloglist</B>.
 The default behavior is to output all records, and for the values merged from the
 external navigation to be zero when outside the navigation time bounds.
+<DT><B>-D</B>
+
+<DD>
+<I>decimate</I>
+<BR>
+
+Sets a decimation factor for the output records. If <I>decimate</I> is
+greater than 1, then only every <I>decimate</I>th input record is output;
+the intervening records are skipped. Default: <I>decimate</I> = 1 (no
+decimation, all records output).
 <DT><B>-F</B>
 
 <DD>

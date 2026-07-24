@@ -55,16 +55,13 @@ Version 5.0
 <B>--output-source</B>=<I>record_kind</I>
 <BR>
 
-<B>--line-nameroot</B>=<I>name</I>
-<BR>
-
 <B>--line-time-list</B>=<I>filename</I>
 <BR>
 
 <B>--line-route</B>=<I>filename</I>
 <BR>
 
-<B>--line-check-bearing</B>
+<B>--line-position-list</B>=<I>filename</I>
 <BR>
 
 <B>--line-name1</B>=<I>name</I>
@@ -82,7 +79,7 @@ Version 5.0
 <B>--altitude-altitude</B>
 <BR>
 
-<B>--altitude-bottomppick</B>
+<B>--altitude-bottompick</B>
 <BR>
 
 <B>--altitude-bottompick-threshold</B>=<I>threshold[/blank]</I>
@@ -95,6 +92,9 @@ Version 5.0
 <BR>
 
 <B>--swath-width</B>=<I>value</I>
+<BR>
+
+<B>--gain</B>=<I>value</I>
 <BR>
 
 <B>--interpolation</B>=<I>value</I>
@@ -123,7 +123,7 @@ Version 5.0
 <B>--altitude-file</B>=<I>filename</I>
 <BR>
 
-<B>--altitude_file-format</B>=<I>format_id</I>
+<B>--altitude-file-format</B>=<I>format_id</I>
 <BR>
 
 <B>--altitude-async</B>=<I>record_kind</I>
@@ -159,34 +159,55 @@ Version 5.0
 <B>--soundspeed-async</B>=<I>record_kind</I>
 <BR>
 
-<B>--timeshift-file</B>=<I>filename</I>
+<B>--time-latency-file</B>=<I>filename</I>
 <BR>
 
-<B>--timeshift-constant</B>=<I>value</I>
+<B>--time-latency-constant</B>=<I>value</I>
 <BR>
 
-<B>--timeshift-apply-nav</B>
+<B>--time-latency-apply-nav</B>
 <BR>
 
-<B>--timeshift-apply-sensordepth</B>
+<B>--time-latency-apply-sensordepth</B>
 <BR>
 
-<B>--timeshift-apply-altitude</B>
+<B>--time-latency-apply-altitude</B>
 <BR>
 
-<B>--timeshift-apply-heading</B>
+<B>--time-latency-apply-heading</B>
 <BR>
 
-<B>--timeshift-apply-attitude</B>
+<B>--time-latency-apply-attitude</B>
 <BR>
 
-<B>--timeshift-apply-all-ancilliary</B>
+<B>--time-latency-apply-all-ancilliary</B>
 <BR>
 
-<B>--timeshift-apply-survey</B>
+<B>--time-latency-apply-survey</B>
 <BR>
 
-<B>--timeshift-apply-all</B>
+<B>--time-latency-apply-all</B>
+<BR>
+
+<B>--filter</B>=<I>value</I>
+<BR>
+
+<B>--filter-apply-nav</B>
+<BR>
+
+<B>--filter-apply-sensordepth</B>
+<BR>
+
+<B>--filter-apply-altitude</B>
+<BR>
+
+<B>--filter-apply-heading</B>
+<BR>
+
+<B>--filter-apply-attitude</B>
+<BR>
+
+<B>--filter-apply-all-ancilliary</B>
 <BR>
 
 ]
@@ -383,13 +404,34 @@ survey lines, allowing <B>mbsslayout</B> to structure the output files according
 to those survey lines. Since the navigation of real surveys rarely passes through the
 planned waypoints exactly, the times at which waypoints are reached is calculated
 using a range threshold specified using the <B>--line-range-threshold</B> option.
+<DT><B>--line-position-list</B>=<I>filename</I>
+
+<DD>
+<BR>
+
+Specifies an ASCII text file containing a simple list of waypoint positions
+that define the start and ends of survey lines, allowing <B>mbsslayout</B> to
+structure the output files according to those survey lines. Each non-comment
+line (lines beginning with <B>#</B> are ignored) contains one waypoint as two
+whitespace-separated decimal values:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;longitude&nbsp;latitude
+<BR>
+
+Unlike <B>--line-route</B>, no depth, waypoint-type flag, or heading fields are
+expected. As with <B>--line-route</B>, the times at which waypoints are
+reached are determined by comparing the survey navigation to the waypoint
+positions using the range threshold specified with the
+<B>--line-range-threshold</B> option.
 <DT><B>--line-range-threshold</B>=<I>value</I>
 
 <DD>
 <BR>
 
 Specifies the range threshold used to define when survey navigation reaches a
-survey line waypoint. The range (distance) of the survey navigation to the waypoint
+survey line waypoint, whether the waypoints derive from <B>--line-route</B> or
+<B>--line-position-list</B>. The range (distance) of the survey navigation to the waypoint
 should decrease as the waypoint is approached. The waypoint is considered to be
 reached when the range stops decreasing and starts to increase, provided the range
 is less than the range threshold when that occurs. The default value is 50 meters.
@@ -433,7 +475,7 @@ the full three dimensional survey geometry. If a topography model is not specifi
 with this option, then the sidescan will be laid out using a flat bottom assumption
 and an altitude value derived either from the survey navigation or by picking the
 initial bottom return in the time series sidescan data.
-<DT><B>--altitude-bottomppick</B>
+<DT><B>--altitude-bottompick</B>
 
 <DD>
 <BR>
@@ -456,7 +498,7 @@ Specifies the threshold used to pick the initial bottom return in the time serie
 sidescan data. The default threshold is 0.5. If given, the value <I>blank</I> is
 the blanking interval in seconds that will be ignored in looking for the first
 bottom return. This option turns the bottompick
-altitude mode on, so it is unnecessary to also specify the <B>--altitude-bottomppick</B>
+altitude mode on, so it is unnecessary to also specify the <B>--altitude-bottompick</B>
 option.
 <DT><B>--channel-swap</B>
 
@@ -476,6 +518,13 @@ sidescan data. See the description section for details of the default swath widt
 calculation and the sidescan layout process.
 <BR>
 
+<DT><B>--gain</B>=<I>value</I>
+
+<DD>
+<BR>
+
+Specifies a gain value and turns on a gain correction mode for the
+output sidescan amplitude. The default gain value is 1.0.
 <DT><B>--interpolation</B>=<I>value</I>
 
 <DD>
@@ -662,7 +711,7 @@ Specifies an external file from which to merge altitude,
 replacing any altitude data included in the input time series sidescan files.
 By default <B>mbsslayout</B> attempts to use altitude values included in the
 input data.
-<DT><B>--altitude_file-format</B>=<I>format_id</I>
+<DT><B>--altitude-file-format</B>=<I>format_id</I>
 
 <DD>
 <BR>
@@ -734,56 +783,130 @@ input data.
 <DD>
 <BR>
 
-<DT><B>--timeshift-file</B>=<I>filename</I>
+<DT><B>--time-latency-file</B>=<I>filename</I>
 
 <DD>
 <BR>
 
-<DT><B>--timeshift-constant</B>=<I>value</I>
+Specifies an external file defining a time-varying time latency (time shift)
+correction model to be applied to the ancillary data selected with the
+<B>--time-latency-apply-*</B> options below.
+<DT><B>--time-latency-constant</B>=<I>value</I>
 
 <DD>
 <BR>
 
-<DT><B>--timeshift-apply-nav</B>
+Specifies a constant time latency (time shift) correction, in seconds, to be
+applied to the ancillary data selected with the <B>--time-latency-apply-*</B>
+options below.
+<DT><B>--time-latency-apply-nav</B>
 
 <DD>
 <BR>
 
-<DT><B>--timeshift-apply-sensordepth</B>
+Applies the time latency correction (specified with <B>--time-latency-file</B>
+or <B>--time-latency-constant</B>) to the navigation data.
+<DT><B>--time-latency-apply-sensordepth</B>
 
 <DD>
 <BR>
 
-<DT><B>--timeshift-apply-altitude</B>
+Applies the time latency correction (specified with <B>--time-latency-file</B>
+or <B>--time-latency-constant</B>) to the sensordepth data.
+<DT><B>--time-latency-apply-altitude</B>
 
 <DD>
 <BR>
 
-<DT><B>--timeshift-apply-heading</B>
+Applies the time latency correction (specified with <B>--time-latency-file</B>
+or <B>--time-latency-constant</B>) to the altitude data.
+<DT><B>--time-latency-apply-heading</B>
 
 <DD>
 <BR>
 
-<DT><B>--timeshift-apply-attitude</B>
+Applies the time latency correction (specified with <B>--time-latency-file</B>
+or <B>--time-latency-constant</B>) to the heading data.
+<DT><B>--time-latency-apply-attitude</B>
 
 <DD>
 <BR>
 
-<DT><B>--timeshift-apply-all-ancilliary</B>
+Applies the time latency correction (specified with <B>--time-latency-file</B>
+or <B>--time-latency-constant</B>) to the attitude (roll and pitch) data.
+<DT><B>--time-latency-apply-all-ancilliary</B>
 
 <DD>
 <BR>
 
-<DT><B>--timeshift-apply-survey</B>
+Applies the time latency correction (specified with <B>--time-latency-file</B>
+or <B>--time-latency-constant</B>) to all ancillary data (navigation,
+sensordepth, altitude, heading, and attitude).
+<DT><B>--time-latency-apply-survey</B>
 
 <DD>
 <BR>
 
-<DT><B>--timeshift-apply-all</B>
+Applies the time latency correction (specified with <B>--time-latency-file</B>
+or <B>--time-latency-constant</B>) to the survey (sidescan) data.
+<DT><B>--time-latency-apply-all</B>
 
 <DD>
 <BR>
 
+Applies the time latency correction (specified with <B>--time-latency-file</B>
+or <B>--time-latency-constant</B>) to both the survey data and all ancillary
+data.
+<DT><B>--filter</B>=<I>value</I>
+
+<DD>
+<BR>
+
+Specifies the length, in seconds, of a Gaussian time-domain filter to be applied
+to the ancillary data selected with the <B>--filter-apply-*</B> options below.
+The default is 0.0, meaning no filtering is applied.
+<DT><B>--filter-apply-nav</B>
+
+<DD>
+<BR>
+
+Applies the time-domain filter (specified with <B>--filter</B>) to the
+navigation data.
+<DT><B>--filter-apply-sensordepth</B>
+
+<DD>
+<BR>
+
+Applies the time-domain filter (specified with <B>--filter</B>) to the
+sensordepth data.
+<DT><B>--filter-apply-altitude</B>
+
+<DD>
+<BR>
+
+Applies the time-domain filter (specified with <B>--filter</B>) to the
+altitude data.
+<DT><B>--filter-apply-heading</B>
+
+<DD>
+<BR>
+
+Applies the time-domain filter (specified with <B>--filter</B>) to the
+heading data.
+<DT><B>--filter-apply-attitude</B>
+
+<DD>
+<BR>
+
+Applies the time-domain filter (specified with <B>--filter</B>) to the
+attitude (roll, pitch, and heave) data.
+<DT><B>--filter-apply-all-ancilliary</B>
+
+<DD>
+<BR>
+
+Applies the time-domain filter (specified with <B>--filter</B>) to all
+ancillary data (navigation, sensordepth, altitude, heading, and attitude).
 <P>
 <P>
 <P>

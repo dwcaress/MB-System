@@ -123,6 +123,18 @@ time interval. This approach can emphasize coherent arrivals regardless of ampli
 <I>window</I> is not specified, then the <I>window is taken to be the trace length in time so that
 the entire trace is normalized using the same scale factor, and all traces has the same maximum
 value of maxvalue</I>.
+<DT><B>-C</B>
+
+<DD>
+<I>mode</I>
+<BR>
+
+Sets the geometry mode used to locate trace samples in the output grid.
+If <I>mode</I> = 0 (the default), a simple vertical geometry is used
+in which each sample is placed directly below its trace location. If
+<I>mode</I> = 1, the trace's recorded pitch angle is used to correct the
+vertical (y-axis) location of each sample, projecting the samples along
+the pitched ray path rather than straight down.
 <DT><B>-D</B>
 
 <DD>

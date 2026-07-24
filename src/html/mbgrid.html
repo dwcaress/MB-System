@@ -61,7 +61,11 @@ either the dimensions (<B>-D</B>) or node spacing <B>-E</B> of the grid,
 If the bounds and grid dimensions (or spacing) are not specified, the
 program will select the region encompassing all of the data in the
 input files and a grid spacing equivalent to 0.02 times the maximum
-sonar altitude. The automatically calculated grid bounds will exactly
+sonar altitude. This automatic bounds calculation reads each input
+file's &quot;.inf&quot; file (see below); any &quot;.inf&quot; (and &quot;.fbt&quot;/&quot;.fnv&quot;) file that
+is missing or older than its swath data file is generated automatically
+first, the same as running <B><A HREF="mbdatalist.html">mbdatalist</A></B>(1) with its <B>-N</B> option.
+The automatically calculated grid bounds will exactly
 correspond to the smallest rectangular region including the data unless
 the user specifies a larger region using <B>-R</B><I>factor</I>. The value
 <I>factor</I> must be greater than one; if <I>factor</I> = 1.1 then the

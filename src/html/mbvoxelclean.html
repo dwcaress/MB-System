@@ -71,6 +71,9 @@ Version 5.0
 <B>--ignore-occupied</B>
 <BR>
 
+<B>--neighborhood</B>=<I>value</I>
+<BR>
+
 <B>--range-minimum</B>=<I>value</I>
 <BR>
 
@@ -183,7 +186,8 @@ page. Default: datalist</I> = &quot;datalist.mb-1&quot;.
 
 Sets the data format id of the input file specified with the <B>--input</B> option.
 If <I>format</I> &lt; 0, then the input file specified
-with the <B>-I</B> option will actually contain a list of input swath sonar
+with the <B>--input</B> option will actually contain a list of input
+swath sonar
 data files. This program uses the <B>MBIO</B> library
 and will read or write any swath sonar
 format supported by <B>MBIO</B>. A list of the swath sonar data formats
@@ -223,12 +227,22 @@ empty are are left unflagged.
 <BR>
 
 If this option is specified then any flagged soundings in voxels considered
-occupied are unflagged. This is the default behavior.
+occupied are unflagged.
 <DT><B>--ignore-occupied</B><DD>
 <BR>
 
 If this option is specified then any flagged soundings in voxels considered
 occupied are left flagged. This is the default behavior.
+<DT><B>--neighborhood</B>=<I>value</I><DD>
+<BR>
+
+Sets the size, in voxels, of the neighborhood used to expand the region of
+voxels considered occupied. Any voxel within <I>value</I> voxels (in the x, y,
+and z directions) of a voxel already classified as occupied is also treated
+as occupied, even if its own sounding count is below the occupancy threshold.
+This allows the empty-voxel flagging test to be relaxed in the neighborhood of
+dense regions of soundings. Default: <I>value</I> = 0 (no neighborhood
+expansion).
 <DT><B>--range-minimum</B>=<I>min-range</I><DD>
 <BR>
 

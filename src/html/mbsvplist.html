@@ -28,7 +28,7 @@ Version 5.0
 <H2>SYNOPSIS</H2>
 
 <B>mbsvplist</B> [<B>-A</B><I>source</I> <B>-C -D -F</B><I>format</I> <B>-H -I</B><I>file</I> <B>-M</B><I>mode</I>
-<B>-O -P</B> <B>-R</B><I>west/east/south/north</I> <B>-S -V -Z</B>]
+<B>-N</B><I>min_num_pairs</I> <B>-O -P</B> <B>-R</B><I>west/east/south/north</I> <B>-S -T -V -Z</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -108,7 +108,7 @@ Sets the source data record type for the SVPs to be output. By default,
 <B>mbsvplist</B> uses MB_DATA_VELOCITY_PROFILE type records as the source for the SVPs. For
 some data formats, CTD profile records may also be a source of SVP models, and
 these are typically identified as MB_DATA_CTD type records. Use <B>-A</B><I>S</I>
-to specify use of SVP records, and <B>-C</B><I>S</I> to specify use of CTD records.
+to specify use of SVP records, and <B>-A</B><I>C</I> to specify use of CTD records.
 <DT><B>-C</B>
 
 <DD>
@@ -175,6 +175,17 @@ each file will be output, plus any SVP that is different from the previous SVP.
 If <I>mode</I>=1, then only the first instance of each unique SVP will be output, even
 through multiple files referenced through a datalist structure. If <I>mode</I>=2,
 then all SVPs will be output even if they are duplicates (equivalent to the <B>-D</B> option).
+<DT><B>-N</B>
+
+<DD>
+<I>min_num_pairs</I>
+<BR>
+
+Sets the minimum number of depth-velocity pairs an SVP must contain in order
+to be listed or output. SVPs with fewer than <I>min_num_pairs</I> pairs are
+ignored. This is particularly useful for data formats (e.g. Isis/.xse data)
+in which a single sound speed value may be recorded as a one-point &quot;SVP&quot;.
+Default: <I>min_num_pairs</I> = 0 (no minimum, all SVPs are considered).
 <DT><B>-O</B>
 
 <DD>
@@ -213,6 +224,14 @@ used for beamforming by the sonar (often called surface sound velocity, or SSV)
 instead of SVP profiles. Each SSV value will be paired with the
 corresponding sonar depth, and in general one depth-SSV pair will be output
 for each survey ping.
+<DT><B>-T</B>
+
+<DD>
+<BR>
+
+Causes <B>mbsvplist</B> to output a CSV table to stdout listing, for each SVP,
+the SVP count number, time, longitude, latitude, and number of depth-velocity
+pairs, rather than outputting the full SVP profile listing.
 <DT><B>-V</B>
 
 <DD>

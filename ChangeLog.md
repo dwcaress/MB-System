@@ -1,4 +1,3 @@
---
 ## MB-System ChangeLog File:
 
 This file lists changes to the source code of the MB-System open
@@ -261,6 +260,69 @@ surface are automatically regenerated. These options replace an earlier, incompl
 --reimport-file/--reimport-survey/--reimport-all-files implementation that instead
 substituted bathymetry, amplitude, and sidescan values wholesale from the reprocessed
 file; that implementation was never released and has been removed.
+
+Program mbnavadjustmerge: Added --create-project, --section-length, --section-soundings,
+--contour-interval, --color-interval, --tick-interval, --label-interval, --decimation,
+--smoothing, and --zoffsetwidth options to create new mbnavadjust projects and change
+project settings from the command line, matching functionality previously available only
+in the mbnavadjust graphical interface. Added --import and --import-as-survey to import
+swath data (a single file or a recursive datalist), and --find-crossings to detect new
+crossings between imported sections. Added --autopick and --autopick-horizontal to
+automatically pick navigation ties at unanalyzed crossings, together with
+--autopick-crossing-type, --autopick-scope, --autopick-survey, --autopick-survey2,
+--autopick-file, --autopick-section, and --autopick-overlap-threshold options to restrict
+which crossings are considered. Implementing this required extracting the crossing-loading,
+bathymetric misfit, and autopick logic out of mbnavadjust_prog.c (previously usable only by
+the mbnavadjust graphical interface) into a new shared library, mbnavadjust_core, linked by
+mbnavadjust, mbnavadjustmerge, and mbnavadjustfine; the CMake build was restructured so this
+library and mbnavadjustmerge no longer require Motif or X11 to build, unblocking headless
+and CI builds of the command-line tool.
+
+Program mbnavadjust (and mbnavadjustmerge): Fixed a bug in mbnavadjust_new_project() in
+which the section_soundings setting was accepted as a parameter but never actually stored
+in the new project, so every newly created project silently used a section_soundings value
+of zero regardless of what was requested, whether created via the graphical New Project
+dialog or the command line.
+
+Program mbnavadjust: Fixed a crash in the "Invert Navigation" menu item (and the "Auto-Set
+Survey-vs-Survey Vertical Offsets" feature, which shares the same code) in which a failed
+memory allocation for the sparse least-squares matrix used by the navigation inversion was
+never checked before the buffer was zeroed, crashing instead of reporting an error; large
+enough projects could also silently compute the wrong, too-small allocation size due to a
+32-bit integer overflow in the row-count/column-count multiplication used to size that
+matrix, risking heap corruption on a subsequent write rather than a clean allocation
+failure. Both are now fixed, with a dialog reported to the user if the allocation still
+fails.
+
+Program mbnavadjust: Fixed a bug in which selecting a survey-vs-survey "block" from the
+Data Table list and then displaying crossings restricted to that block could show no
+crossings at all. The code that extracts the clicked list item's text had a fallback for
+when Motif's primary text-retrieval method returns nothing, but the fallback was nested
+inside a check that skipped it entirely whenever the primary XmString field itself was
+null, rather than being reached whenever it was actually needed.
+
+Program mbnavadjust: Added long-form equivalents (--verbose, --help, --dark-background,
+--input=project, --reset-crossings) for all existing single-letter command-line options.
+
+Program mbnavadjustmerge: Added --invert-navigation, --update-grids, and --apply-navigation
+options, completing the navigation-adjustment workflow begun with --autopick above.
+--invert-navigation solves the network of ties and crossings for a corrected navigation
+model, exactly as the "Invert Navigation" menu item does in mbnavadjust. --update-grids
+regenerates the project's reference bathymetry grids from the current navigation solution,
+equivalent to "Update Grids". --apply-navigation writes the corrected navigation out to the
+swath data files' processing parameters, equivalent to "Apply Navigation", and is normally
+the last step in the workflow. Implementing this required moving the navigation-inversion
+solver, grid-regeneration, and navigation-output logic (previously usable only by the
+mbnavadjust graphical interface, over 3000 lines in mbnavadjust_prog.c) into the shared
+mbnavadjust_core library alongside the autopick logic moved previously.
+
+Program mbnavadjust (and mbnavadjustmerge): Fixed a bug in mbnavadjust_new_project() in
+which newly created projects never had their navigation "use mode" initialized, silently
+defaulting to an invalid value of zero. This had no visible effect in the graphical
+interface, where a separate program-startup default masked the gap, but meant that
+mbnavadjustmerge's --apply-navigation, run against a project created with
+--create-project, would silently skip updating each file's processing parameters with no
+error reported.
 
 The bugs described above were identified and fixed with the assistance of the AI coding
 assistant Claude Sonnet 5 (Anthropic, model claude-sonnet-5), operating as Claude Code

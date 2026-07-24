@@ -241,7 +241,7 @@ Version 5.0
 <B>--kluge-ignore-snippets</B>
 <BR>
 
-<B>--kluge-sonardepth-from-heave</B>
+<B>--kluge-sensordepth-from-heave</B>
 <BR>
 
 <B>--kluge-flipsign-roll</B>
@@ -1180,14 +1180,14 @@ The i/o module for this format views pings without snippet records as incomplete
 When <B>--kluge-ignore-snippets</B> is specified, <B>mbpreprocess</B> creates an empty
 snippet record for each ping, and ignores any snippet records actually in the
 input datastream.
-<DT><B>--kluge-sonardepth-from-heave</B>
+<DT><B>--kluge-sensordepth-from-heave</B>
 
 <DD>
 This option causes heave values to be moved to the sonardepth (sometimes sensordepth)
 field, leaving the heave value as zero, for each survey ping. This is currently
 only relevant to the preprocessing of Imagenex DeltaT multibeam data in the vendor
 83P format (191). The output of preprocessing format 191 data are format 192 files.
-<DT><B>--kluge-early-mbari-mapping-auv</B>
+<DT><B>--kluge-early-MBARI-Mapping-AUV</B>
 
 <DD>
 This option pertains only to Reson 7125 200 kHz multibeam data collected on the first
@@ -1234,10 +1234,21 @@ submerged platforms).
 <DT><B>--kluge-xducer-depth-from-heave-and-sensordepth</B>
 
 <DD>
-This option overrides settings in the installation parameters record in third generation 
-Kongsberg multibeam data (formats 58 and 59) so that the transducer depth derives from 
+This option overrides settings in the installation parameters record in third generation
+Kongsberg multibeam data (formats 58 and 59) so that the transducer depth derives from
 a combination of the sensor height recorded in height datagrams, heave from a motion
 sensor and the draft from the installation offsets.
+<DT><B>--kluge-rangescale=</B><I>FACTOR</I>
+
+<DD>
+This option multiplies the range values of 3D at Depth WiSSL2 lidar soundings (format 234)
+by <I>FACTOR</I>.
+<DT><B>--kluge-fix-wissl2-ranges</B>
+
+<DD>
+This option corrects the range values of 3D at Depth WiSSL2 lidar soundings (format 234)
+by subtracting a range offset calculated from the scan line index and the water
+refractive index.
 <P>
 </DL>
 <A NAME="lbAH">&nbsp;</A>

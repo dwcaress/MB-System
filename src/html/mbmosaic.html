@@ -30,12 +30,12 @@ Version 5.0
 
 <B>mbmosaic</B> <B>-I</B><I>filelist</I> <B>-O</B><I>root</I>
 [<B>-A</B><I>datatype[F]</I>
-<B>-B</B><I>border</I> -C<I>clip</I> <B>-D</B><I>xdim/ydim</I>
+<B>-B</B><I>border</I> -C<I>clip/mode/tension</I> <B>-D</B><I>xdim/ydim</I>
 <B>-E</B><I>dx/dy/units[!]</I> <B>-F</B><I>priority_range[/weight]</I>
 <B>-G</B><I>gridkind</I>  <B>-J</B><I>projection</I>
 <B>-H -L</B><I>lonflip</I> <B>-M -N -P</B><I>pings</I>
 <B>-R</B><I>west/east/south/north</I> <B>-R</B><I>factor</I>
-<B>-S</B><I>speed</I> <B>-T</B><I>tension</I> <B>-U</B><I>bearing/factor[/mode]</I>
+<B>-S</B><I>speed</I> <B>-T</B><I>topogridfile</I> <B>-U</B><I>bearing/factor[/mode]</I>
 <B>-V</B> -W<I>scale</I> <B>-X</B><I>extend</I>
 <B>-Y</B><I>priority_source</I> <B>-Z</B><I>bath_default</I>]
 <P>
@@ -65,7 +65,11 @@ either the dimensions (<B>-D</B>) or node spacing <B>-E</B> of the grid,
 If the bounds and grid dimensions (or spacing) are not specified, the
 program will select the region encompassing all of the data in the
 input files and a grid spacing equivalent to 0.02 times the maximum
-sonar altitude. If the bounds and grid dimensions (or spacing) are not
+sonar altitude. This automatic bounds calculation reads each input
+file's &quot;.inf&quot; file (see below); any &quot;.inf&quot; (and &quot;.fbt&quot;/&quot;.fnv&quot;) file that
+is missing or older than its swath data file is generated automatically
+first, the same as running <B><A HREF="mbdatalist.html">mbdatalist</A></B>(1) with its <B>-N</B> option.
+If the bounds and grid dimensions (or spacing) are not
 specified, the program will select the region encompassing all of the
 data in the input files and a grid spacing equivalent to 0.02 times the maximum
 sonar altitude. The automatically calculated grid bounds will exactly
@@ -316,14 +320,29 @@ Default: <I>border</I> = 0.0
 <DT><B>-C</B>
 
 <DD>
-<I>clip</I>
+<I>clip/mode/tension</I>
 <BR>
 
-Sets the clipping dimension for the spline interpolation. If <I>clip</I>=0
-no spline interpolation will be done.  If <I>clip</I>&gt;0 then the spline
-interpolation will fill data gaps to a distance of <I>clip</I> times
-the grid spacing.
-Default: <I>clip</I> = 0.
+Controls the use of spline interpolation to fill grid cells not
+filled by swath data, and sets the tension used in that interpolation.
+The <I>clip</I> value sets the distance from
+swath data (in grid cells) that the spline interpolation may be
+applied. If <I>clip</I>=0 no spline interpolation will be done.
+If <I>mode</I>=0 then no spline interpolation will be done regardless of
+<I>clip</I>. If <I>mode</I>=1 then the interpolation will fill
+data gaps up to <I>clip</I> grid cells in size. If <I>mode</I>=2
+then the spline interpolation will fill all undefined cells within
+a distance of <I>clip</I> cells from data. If <I>mode</I> &gt;= 3 or <I>clip</I> is
+set to a value greater than both dimensions of the output grid, then
+all grid cells not set by swath data will be filled by interpolation.
+The <I>tension</I> value sets the tension used in the thin plate spline
+interpolation. A <I>tension</I> of 0 gives a minimum curvature surface
+with free edges; this is a pure Laplacian solution. A nonzero
+<I>tension</I> tends to suppress spurious oscillations and flatten
+the interpolation toward the edges; a <I>tension</I> of infinity
+yields a pure spline solution. The <I>tension</I> must be zero or
+greater.
+Default: <I>clip</I> = 0, <I>mode</I> = 0, <I>tension</I> = 0.0.
 <DT><B>-D</B>
 
 <DD>
@@ -673,17 +692,15 @@ output. Default: <I>speed</I> = 0.
 <DT><B>-T</B>
 
 <DD>
-<I>tension</I>
+<I>topogridfile</I>
 <BR>
 
-Sets the <I>tension</I> value used in the thin plate spline interpolation.
-A <I>tension</I> of 0 gives a minimum curvature surface with free edges;
-this is a pure Laplacian solution. A nonzero <I>tension</I> tends to
-suppress spurious oscillations and flatten
-the interpolation toward the edges; a <I>tension</I> of infinity
-yields a pure spline solution. The <I>tension</I> must be zero or
-greater.
-Default: <I>tension</I> = 1.0e10 (pure spline solution).
+Sets <I>topogridfile</I> as a topography grid to be used when calculating
+the footprint of each amplitude or sidescan value on the seafloor. If
+this option is used, the acrosstrack distance versus grazing angle table
+used to position and size the beam or pixel footprints is derived from
+the specified topography grid rather than from a flat bottom assumption.
+By default, no topography grid is used.
 <DT><B>-U</B>
 
 <DD>

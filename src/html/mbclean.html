@@ -28,14 +28,14 @@ Version 5.0
 <H2>SYNOPSIS</H2>
 
 <B>mbclean</B> [<B>-A</B><I>max</I> <B>-B</B><I>low/high</I> <B>-C</B><I>slope/units</I>
-<B>-D</B><I>min/max</I> <B>-F</B><I>format</I>
+<B>-D</B><I>min/max</I> <B>-E</B><I>max</I> <B>-F</B><I>format</I>
 <B>-G</B><I>fraction_low/fraction_high</I>
 <B>-I</B><I>infile</I> <B>-K</B><I>range_min</I> <B>-L</B><I>lonflip</I>
-<B>-M</B><I>mode</I> <B>-N</B><I>tolerance</I> <B>-O</B><I>outfile</I>
+<B>-M</B><I>mode</I> <B>-N</B><I>tolerance</I>
 <B>-P</B><I>min_speed/max_speed</I> <B>-Q</B><I>backup</I>
 <B>-R</B><I>maxheadingrate</I> <B>-S</B><I>slope/mode/units</I>
 <B>-T</B><I>tolerance</I> <B>-U</B><I>nmin</I> <B>-W</B><I>west/east/south/north</I> <B>-X</B><I>beamsleft/beamsright</I>
-<B>-Y</B><I>distanceleft/distanceright</I> <B>-Z -V -H</B>]
+<B>-Y</B><I>distanceleft/distanceright[/mode]</I> <B>-Z -V -H</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -81,7 +81,7 @@ as follows:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>9.&nbsp;Zap&nbsp;&quot;rails&quot;&nbsp;(<B>-Q</B>&nbsp;option).<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>10.&nbsp;Flag&nbsp;soundings&nbsp;with&nbsp;acrosstrack&nbsp;distances<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>greater&nbsp;than&nbsp;specified&nbsp;maximum&nbsp;value<BR>
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>(<B>-B</B>&nbsp;option).<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>(<B>-E</B>&nbsp;option).<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>11.&nbsp;Flag&nbsp;soundings&nbsp;outside&nbsp;acceptable&nbsp;depth&nbsp;range<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>using&nbsp;fractions&nbsp;of&nbsp;local&nbsp;median&nbsp;depth<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>(<B>-G</B>&nbsp;option).<BR>
@@ -216,6 +216,17 @@ in evaluating the current beam. For instance, only beams within the
 maximum distance are used to calculate the local median depth, and only
 beams within the maximum distance are used to check for excessive slopes.
 Default: <I>min/max</I> = 0.01/0.25.
+<DT><B>-E</B>
+
+<DD>
+<I>max</I>
+<BR>
+
+This option sets the maximum acceptable acrosstrack distance for a
+sounding. If the absolute value of a beam's acrosstrack distance
+exceeds <I>max</I>, then it will be flagged. No acrosstrack distance
+checking is done if the <B>-E</B> option is not used.
+Default: <I>max</I> = 120.0 meters.
 <DT><B>-F</B>
 
 <DD>
@@ -444,6 +455,18 @@ If <I>mode</I>=2, then all beams inside the specified range
 (acrosstrack distances more to starboard/right than <I>distanceleft</I>
 and more to port/left than <I>distanceright</I>) will be flagged as good.
 The distances are defined in meters, and distances to port of nadir are
+negative.
+If <I>mode</I>=3, then all beams outside the specified range of beam
+angles (angles from vertical more to port/left than <I>distanceleft</I>
+or more to starboard/right than <I>distanceright</I>) will be flagged as
+bad; this is the angular equivalent of <I>mode</I>=1.
+If <I>mode</I>=4, then all beams inside the specified range of beam
+angles (angles from vertical more to starboard/right than
+<I>distanceleft</I> and more to port/left than <I>distanceright</I>)
+will be flagged as good; this is the angular equivalent of <I>mode</I>=2.
+For <I>mode</I>=3 and <I>mode</I>=4, <I>distanceleft</I> and
+<I>distanceright</I> are beam angles expressed in degrees rather than
+acrosstrack distances in meters, with angles to port of vertical
 negative.
 <DT><B>-Z</B>
 

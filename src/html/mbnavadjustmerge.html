@@ -11,15 +11,17 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbnavadjustmerge</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  15 November 2022 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  23 July 2026 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
 <H2>NAME</H2>
 
-<B>mbnavadjustmerge</B> - Tool to modify MBnavadjust projects,
-including merging projects, adding global ties, setting tie modes, exporting
-or importing crossing ties, and pre-generating the triangular meshes .
+<B>mbnavadjustmerge</B> - Command line tool to create and modify MBnavadjust
+projects, including creating new projects, importing swath data, changing
+project settings, merging projects, adding global ties, setting tie modes,
+automatically picking crossing ties, checking for new crossings, exporting
+or importing crossing ties, and pre-generating the triangular meshes.
 <P>
 <A NAME="lbAC">&nbsp;</A>
 <H2>VERSION</H2>
@@ -36,6 +38,81 @@ Version 5.0
 <BR>
 
 --output=project_path
+<BR>
+
+--create-project=project_path
+<BR>
+
+--section-length=km
+<BR>
+
+--section-soundings=count
+<BR>
+
+--contour-interval=meters
+<BR>
+
+--color-interval=meters
+<BR>
+
+--tick-interval=meters
+<BR>
+
+--label-interval=meters
+<BR>
+
+--decimation=value
+<BR>
+
+--smoothing=value
+<BR>
+
+--zoffsetwidth=meters
+<BR>
+
+--import=path[:format]
+<BR>
+
+--import-as-survey=path[:format]
+<BR>
+
+--find-crossings
+<BR>
+
+--autopick
+<BR>
+
+--autopick-horizontal
+<BR>
+
+--autopick-crossing-type=all|mediocre|good|better|true
+<BR>
+
+--autopick-scope=all|survey|withsurvey|block|file|withfile|withsection
+<BR>
+
+--autopick-survey=survey
+<BR>
+
+--autopick-survey2=survey
+<BR>
+
+--autopick-file=file
+<BR>
+
+--autopick-section=section
+<BR>
+
+--autopick-overlap-threshold=percent
+<BR>
+
+--invert-navigation
+<BR>
+
+--update-grids
+<BR>
+
+--apply-navigation
 <BR>
 
 --set-global-tie=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]
@@ -161,10 +238,13 @@ Version 5.0
 --merge-surveys=survey1:survey2
 <BR>
 
---reimport-file=file
+--update-file=file
 <BR>
 
---reimport-all-files
+--update-survey=survey
+<BR>
+
+--update-all-files
 <BR>
 
 --import-tie-list=file
@@ -199,15 +279,51 @@ Version 5.0
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
-<B>MBnavadjustmerge</B> is a command line program that merges two
-existing <B>MBnavadjust</B> projects or modifies a single
-<B>MBnavadjust</B> project.
+<B>MBnavadjustmerge</B> is a command line program that creates new
+<B>MBnavadjust</B> projects, imports swath data and changes project settings,
+automatically picks navigation ties at crossings, checks for new crossings,
+merges two existing <B>MBnavadjust</B> projects, or otherwise modifies a
+single <B>MBnavadjust</B> project. It provides command-line access to most of
+the project-management functionality found in the interactive
+<B>mbnavadjust</B> graphical program, making it possible to script and
+automate <B>MBnavadjust</B> project workflows.
 <P>
 <B>MBnavadjust</B> is an interactive graphical program used to
 adjust swath data navigation by matching bathymetric features
 in overlapping and crossing swaths. The primary purpose of
 <B>mbnavadjust</B> is to eliminate relative navigational errors in swath
 data obtained from poorly navigated sonars.
+<P>
+To create a new project, use the <B>--create-project</B> option, optionally
+combined with the section-length, section-soundings, contour-interval,
+color-interval, tick-interval, label-interval, decimation, smoothing, and
+zoffsetwidth settings options; these same settings options can be applied
+to an existing project as well. Swath data (a single file or a recursive
+datalist) can then be imported with the <B>--import</B> or
+<B>--import-as-survey</B> option. The <B>--find-crossings</B> option searches
+for overlapping and crossing swath sections among the imported data (this
+happens automatically as data are imported, so <B>--find-crossings</B> is
+mainly useful after a merge or after inserting/removing discontinuities).
+The <B>--autopick</B> and <B>--autopick-horizontal</B> options automatically
+pick navigation ties at unanalyzed crossings by computing and searching a
+bathymetric misfit grid, exactly as the interactive
+<B>Action-&gt;Auto-Pick Offsets</B> menu item does in <B>mbnavadjust</B>; the
+<B>--autopick-crossing-type</B>, <B>--autopick-scope</B>,
+<B>--autopick-survey</B>[<B>2</B>], <B>--autopick-file</B>,
+<B>--autopick-section</B>, and <B>--autopick-overlap-threshold</B> options
+narrow which crossings are considered, mirroring the crossing-type and
+scope filters available under the <B>View</B> menu in <B>mbnavadjust</B>.
+<P>
+Once ties have been picked, the <B>--invert-navigation</B> option solves the
+network of ties and crossings for a corrected navigation model, exactly as
+the interactive <B>Action-&gt;Invert Navigation</B> menu item does in
+<B>mbnavadjust</B>. The <B>--update-grids</B> option regenerates the project's
+reference bathymetry grids from the current navigation, equivalent to
+<B>Action-&gt;Update Grids</B>. The <B>--apply-navigation</B> option writes the
+corrected navigation solution out to the swath data files' processing
+parameters, equivalent to <B>Action-&gt;Apply Navigation</B>; this is normally
+the last step in a navigation adjustment workflow, run after
+<B>--invert-navigation</B>.
 <P>
 With respect to the merging function, if the <B>MBnavadjustmerge</B>
 user specifies two input projects and no output project, then the
@@ -216,10 +332,16 @@ two projects are merged and the new combined project is output.
 <P>
 In order to make use of the project modification commands, a
 single input project must be specified, along with one or more
-of the modification commands. These can include adding crossings,
+of the modification commands. These can include creating a project,
+importing swath data, changing project settings, automatically picking
+ties, checking for new crossings, adding crossings,
 setting tie z-offset values, setting tie offsets (even if no
 corresponding crossing already exists), setting tie modes
-(xy only, z only, xyz), and deleting ties.
+(xy only, z only, xyz), and deleting ties. When more than one modification
+command is given, they are applied in the order in which they appear on
+the command line (project settings changes are always applied first,
+since section splitting during import depends on the section-length and
+section-soundings settings).
 <P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>MB-SYSTEM AUTHORSHIP</H2>
@@ -280,6 +402,233 @@ If the <B>output</B> option is
 not specified, then the <I>project-base</I> project is used as the
 output, and the <I>project-add</I> project is added on to the
 <I>project-base</I> project.
+<DT><B>--create-project=project-path</B>
+
+<DD>
+This option creates a new, empty <B>MBnavadjust</B> project at <I>project-path</I>,
+exactly as the <B>File-&gt;New</B> menu item does in <B>mbnavadjust</B>. As with
+<B>--input</B>, a project may be defined by a relative or absolute path to the
+project *.nvh file or the project *.dir directory. This option cannot be
+combined with <B>--input</B>. Any of the section-length, section-soundings,
+contour-interval, color-interval, tick-interval, label-interval, decimation,
+smoothing, or zoffsetwidth settings options given on the same command line
+are applied to the new project as it is created; any not given default to
+the same values used by <B>mbnavadjust</B> for a new project. Other
+modification commands (e.g. <B>--import</B>, <B>--find-crossings</B>,
+<B>--autopick</B>) given on the same command line are then applied to the
+newly created project.
+<DT><B>--section-length=km</B>
+
+<DD>
+This option sets the maximum swath data section length in kilometers, exactly
+as the <B>Max Section Length (km)</B> slider does in the <B>mbnavadjust</B>
+<B>Controls</B> window. This setting only affects how files imported
+afterward (in the same command, or in a later command) are broken up into
+sections; it does not resection files already imported into the project.
+<DT><B>--section-soundings=count</B>
+
+<DD>
+This option sets the maximum number of soundings (not pings) that may be
+included in a single swath data section, exactly as the <B>Max # Soundings in
+Section</B> slider does in the <B>mbnavadjust</B> <B>Controls</B> window. Like
+<B>--section-length</B>, this only affects files imported afterward.
+<DT><B>--contour-interval=meters</B>
+
+<DD>
+This option sets the depth interval in meters for the bathymetric contours
+used in the <B>mbnavadjust</B> <B>Nav Err</B> window, exactly as the
+<B>Contour Interval (m)</B> slider does in the <B>Controls</B> window.
+<DT><B>--color-interval=meters</B>
+
+<DD>
+This option sets the depth interval in meters at which the color of the
+bathymetric contours changes, exactly as the <B>Color Interval (m)</B> slider
+does in the <B>mbnavadjust</B> <B>Controls</B> window. This should be a
+multiple of the contour interval.
+<DT><B>--tick-interval=meters</B>
+
+<DD>
+This option sets the depth interval in meters at which contours have
+downhill facing tickmarks, exactly as the <B>Tick Interval (m)</B> slider
+does in the <B>mbnavadjust</B> <B>Controls</B> window. This should be a
+multiple of the contour interval.
+<DT><B>--label-interval=meters</B>
+
+<DD>
+This option sets the depth interval in meters at which bathymetric contours
+are annotated with their depth value.
+<DT><B>--decimation=value</B>
+
+<DD>
+This option sets the ping decimation used when calculating bathymetric
+contours for the <B>mbnavadjust</B> <B>Nav Err</B> window, exactly as the
+<B>Decimation</B> slider does in the <B>Controls</B> window. A value of 1 uses
+all soundings; a value of 2 uses soundings from every second ping, and so on.
+<DT><B>--smoothing=value</B>
+
+<DD>
+This option sets the importance of smoothing in the adjusted navigation
+model calculated by <B>Action-&gt;Invert Navigation</B> in <B>mbnavadjust</B>,
+exactly as the <B>Inversion Smoothing</B> slider does in the <B>Controls</B>
+window. Larger values yield a smoother model, smaller values a rougher
+model; the default is 3.0 and the useful range is about 0.10 to 10.0.
+<DT><B>--zoffsetwidth=meters</B>
+
+<DD>
+This option sets the width in meters of the vertical offset search range
+used when computing the bathymetric misfit grid for a crossing (both
+interactively in the <B>mbnavadjust</B> <B>Nav Err</B> window and by
+<B>--autopick</B>).
+<DT><B>--import=path[:format]</B>
+
+<DD>
+This option imports swath data into the project, exactly as the
+<B>File-&gt;Import Swath Data</B> menu item does in <B>mbnavadjust</B>. If
+<I>path</I> refers to a single swath data file, the <I>format</I> id must be
+given explicitly as <I>path</I><B>:</B><I>format</I>; unlike the graphical
+file selection dialog, the <B>MB-System</B> filename suffix convention is
+not used to infer the format here. If no <I>format</I> is given, <I>path</I>
+is instead read as a recursive <B>MB-System</B> datalist naming one or more
+swath files (see the <B>MB-System</B> manual page for a description of
+recursive datalists), and the format of each listed file is taken from the
+datalist. As with the interactive import, each file is
+broken into sections according to the current section-length and
+section-soundings settings, and any new crossings with previously imported
+data are found automatically. This option may be given more than once on the
+same command line to import multiple files or datalists in sequence. Swath
+files that continue in time from the file imported immediately before them
+are treated as part of the same survey; a time gap starts a new survey,
+unless <B>--import-as-survey</B> is used instead.
+<DT><B>--import-as-survey=path[:format]</B>
+
+<DD>
+This option behaves exactly like <B>--import</B>, except that every file
+imported by this option (including a multi-file datalist) is forced into a
+single new survey regardless of any time gaps between files, exactly as
+selecting the <B>Survey</B> file mode does in the <B>mbnavadjust</B> file
+import dialog.
+<DT><B>--find-crossings</B>
+
+<DD>
+This option searches for new crossings among the swath data sections
+already imported into the project, exactly as the
+<B>Action-&gt;Check For New Crossings</B> menu item does in <B>mbnavadjust</B>.
+The percentage of overlap is also recalculated for all existing crossings.
+This happens automatically as data are imported with <B>--import</B>, so
+<B>--find-crossings</B> is mainly useful after a <B>--merge-surveys</B>,
+after inserting or removing a discontinuity, or after merging two projects.
+<DT><B>--autopick</B>
+
+<DD>
+This option automatically picks navigation ties at crossings that have not
+yet been analyzed, exactly as the <B>Action-&gt;Auto-Pick Offsets</B> menu item
+does in <B>mbnavadjust</B>. For each qualifying crossing, the swath data are
+loaded, a three-dimensional (longitude, latitude, and vertical offset)
+bathymetric misfit grid is computed, and a tie is added at the offset with
+the smallest misfit <I>if</I> the uncertainty in that minimum is small
+relative to the size of the overlap region; otherwise the crossing is left
+unset. As with interactive auto-picking, unsupervised offset picks are
+frequently erroneous, so the resulting ties should be reviewed (e.g. in
+<B>mbnavadjust</B>, or with <B>--export-tie-list</B>) before relying on them
+for a navigation inversion. By default all unanalyzed crossings are
+considered; use <B>--autopick-crossing-type</B>, <B>--autopick-scope</B>, and
+the associated survey/file/section options to narrow the crossings
+considered, and <B>--autopick-overlap-threshold</B> to change the minimum
+overlap percentage required.
+<DT><B>--autopick-horizontal</B>
+
+<DD>
+This option behaves exactly like <B>--autopick</B>, except that only the
+horizontal (longitude and latitude) offset of the minimum misfit is used;
+the vertical offset is left unchanged. This corresponds to the horizontal-only
+auto-pick behavior available in the interactive <B>mbnavadjust</B>
+&quot;Nav Err&quot; window, and is appropriate when the data are already corrected
+for vertical offsets (e.g. tides).
+<DT><B>--autopick-crossing-type=all|mediocre|good|better|true</B>
+
+<DD>
+This option limits which crossings <B>--autopick</B> or
+<B>--autopick-horizontal</B> consider, mirroring the crossing-type items
+under the <B>View</B> menu in <B>mbnavadjust</B>: <I>all</I> considers any
+crossing meeting the overlap threshold (the default), <I>mediocre</I>
+requires at least 10% overlap, <I>good</I> at least 25% overlap, <I>better</I>
+at least 50% overlap, and <I>true</I> restricts to crossings where the
+navigation tracks actually cross (&quot;true crossings&quot;).
+<DT><B>--autopick-scope=all|survey|withsurvey|block|file|withfile|withsection</B>
+
+<DD>
+This option limits which crossings <B>--autopick</B> or
+<B>--autopick-horizontal</B> consider by survey, file, or section, mirroring
+the <B>View-&gt;Show Only Selected ...</B> items in <B>mbnavadjust</B>:
+<I>all</I> considers every crossing (the default); <I>survey</I> restricts to
+crossings where both sections belong to the survey given by
+<B>--autopick-survey</B>; <I>withsurvey</I> restricts to crossings where
+either section belongs to that survey; <I>block</I> restricts to crossings
+between the two surveys given by <B>--autopick-survey</B> and
+<B>--autopick-survey2</B>; <I>file</I> restricts to crossings where both
+sections belong to the file given by <B>--autopick-file</B>; <I>withfile</I>
+restricts to crossings where either section belongs to that file; and
+<I>withsection</I> restricts to crossings involving the specific section
+given by <B>--autopick-file</B> and <B>--autopick-section</B>.
+<DT><B>--autopick-survey=survey</B>
+
+<DD>
+This option sets the survey used to filter crossings when
+<B>--autopick-scope</B> is <I>survey</I>, <I>withsurvey</I>, or <I>block</I>
+(as the first of the two surveys in the <I>block</I> case).
+<DT><B>--autopick-survey2=survey</B>
+
+<DD>
+This option sets the second survey used to filter crossings when
+<B>--autopick-scope</B> is <I>block</I>.
+<DT><B>--autopick-file=file</B>
+
+<DD>
+This option sets the file used to filter crossings when
+<B>--autopick-scope</B> is <I>file</I>, <I>withfile</I>, or <I>withsection</I>.
+<DT><B>--autopick-section=section</B>
+
+<DD>
+This option sets the section (within the file given by
+<B>--autopick-file</B>) used to filter crossings when
+<B>--autopick-scope</B> is <I>withsection</I>.
+<DT><B>--autopick-overlap-threshold=percent</B>
+
+<DD>
+This option sets the minimum percentage of overlap a crossing must have to
+be considered by <B>--autopick</B> or <B>--autopick-horizontal</B>, overriding
+the default threshold of 10%. This is a floor applied in addition to
+whatever minimum overlap is implied by <B>--autopick-crossing-type</B>.
+<DT><B>--invert-navigation</B>
+
+<DD>
+This option solves the network of navigation ties and crossings for a
+corrected navigation model, exactly as the <B>Action-&gt;Invert Navigation</B>
+menu item does in <B>mbnavadjust</B>. The inversion is a sparse
+least-squares solve over all files and sections in the project using
+their current ties and global ties; it requires that ties already exist
+(e.g. from <B>--autopick</B> or <B>--set-tie</B>) and updates the project's
+navigation solution and per-section offsets in place. This does not modify
+the swath data files themselves; use <B>--apply-navigation</B> afterward to
+do so.
+<DT><B>--update-grids</B>
+
+<DD>
+This option regenerates the project's reference bathymetry grids from the
+current navigation solution, exactly as the <B>Action-&gt;Update Grids</B> menu
+item does in <B>mbnavadjust</B>. This is normally run after
+<B>--invert-navigation</B> so that the reference grids reflect the corrected
+navigation, and requires <B>mbdatalist</B>, <B>mbgrid</B>, and <B>mbprocess</B>
+to be available.
+<DT><B>--apply-navigation</B>
+
+<DD>
+This option writes the current navigation solution out to the swath data
+files' processing parameters, exactly as the <B>Action-&gt;Apply Navigation</B>
+menu item does in <B>mbnavadjust</B>. This is normally the last step in a
+navigation adjustment workflow, run after <B>--invert-navigation</B>;
+running it before an inversion has been computed for the project has no
+effect on the data files.
 <DT><B>--set-global-tie=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]</B>
 
 <DD>
@@ -553,24 +902,30 @@ file and section (if the discontinuity exists).
 
 <DD>
 This option merges two surveys.
-<DT><B>--reimport-file=file</B>
+<DT><B>--update-file=file</B>
 
 <DD>
-This option reimports the specified swath file into the project from the current processed 
-version of that file. The file is broken into the same sections as previously, regardless 
-of any changes to the settings for the maximum section length or the maximum number of soundings 
-in a section. The original navigation and attitude data are also preserved, but the 
-bathymetry is changed to reflect the current processed values. This means that updates
-to the bathymetry editing can be brought into the mbnavadjust project.
-<DT><B>--reimport-all-files</B>
+This option updates the beam flags (which soundings are valid and which are ignored) for
+the specified file's sections to match the current processed version of that swath file.
+Pings in each section are matched to pings in the current processed file by timestamp, and
+only the beam-flag byte is changed; the section's navigation, attitude, bathymetry,
+amplitude, and sidescan values are all preserved unchanged. This allows bad soundings
+removed by re-editing (e.g. with <B>mbclean</B> or <B>mbedit</B>) after the file was
+originally imported to be excluded from the mbnavadjust project as well. If a matched
+ping's beam count differs from what is stored in the project (e.g. because the file has
+been reprocessed with a different sonar model or binning), that ping's flags are left
+unchanged and a warning is printed. The coverage mask and triangulated surface for every
+updated section are automatically recomputed to reflect the new flags.
+<DT><B>--update-survey=survey</B>
 
 <DD>
-This option reimports all of the swath files into the project from the current processed 
-versions of those files. Each file is broken into the same sections as previously, regardless 
-of any changes to the settings for the maximum section length or the maximum number of soundings 
-in a section. The original navigation and attitude data are also preserved, but the 
-bathymetry is changed to reflect the current processed values. This means that updates
-to the bathymetry editing can be brought into the mbnavadjust project.
+This option updates the beam flags for every file in the specified survey (block), as
+described above for <B>--update-file</B>.
+<DT><B>--update-all-files</B>
+
+<DD>
+This option updates the beam flags for every file in the project, as described above for
+<B>--update-file</B>.
 <DT><B>--import-tie-list=filename</B>
 
 <DD>
@@ -644,13 +999,33 @@ shell.
 <DT><B>--help</B>
 
 <DD>
-This option causes <B>MBnavadjustmergeP to output a list of the
+This option causes <B>MBnavadjustmerge</B> to output a list of the
 possible command line options, and then exit.
 <P>
 </DL>
-</B><A NAME="lbAH">&nbsp;</A>
+<A NAME="lbAH">&nbsp;</A>
 <H2>EXAMPLES</H2>
 
+Suppose you want to build a new <B>MBnavadjust</B> project from a survey's
+recursive datalist and automatically pick as many navigation ties as
+possible without ever opening the interactive <B>mbnavadjust</B> program.
+The following creates the project, imports the datalist, and auto-picks
+ties at every unanalyzed crossing:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mbnavadjustmerge&nbsp;--create-project=Navadjust20240510.nvh&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--section-length=0.1&nbsp;<BR>
+
+&nbsp;&nbsp;&nbsp;&nbsp;mbnavadjustmerge&nbsp;--input=Navadjust20240510.nvh&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--import=datalist.mb-1&nbsp;<BR>
+
+&nbsp;&nbsp;&nbsp;&nbsp;mbnavadjustmerge&nbsp;--input=Navadjust20240510.nvh&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--autopick&nbsp;--autopick-scope=all
+<BR>
+
+The resulting project can then be opened in <B>mbnavadjust</B> to review the
+automatically picked ties before running <B>Action-&gt;Invert Navigation</B>,
+or the ties can be reviewed non-interactively with <B>--export-tie-list</B>.
+Since unsupervised offset picks are frequently erroneous, reviewing them is
+recommended.
+<P>
 Suppose you have two AUV survey missions, 20140515m1 and 10140515m2, that overlap
 slightly. If you have used <B>MBnavadjust</B> to adjust the navigation of the
 two missions separately, you can use <B>MBnavadjustmerge</B> to merge the two
@@ -704,7 +1079,7 @@ Good luck.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 15 November 2022</P></CENTER>
+Last Updated: 23 July 2026</P></CENTER>
 
 <HR>
 <center>

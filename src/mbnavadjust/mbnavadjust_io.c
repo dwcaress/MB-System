@@ -178,6 +178,7 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
       memset((void *)project->refgrid_bounds, 0, 4 * MBNA_REFGRID_NUM_MAX * sizeof(double));
 
       project->section_length = section_length;
+      project->section_soundings = section_soundings;
       project->bin_beams_bath = 0;
       project->bin_swathwidth = 0;
       project->bin_pseudobeamwidth = 0.0;
@@ -208,6 +209,7 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
       project->modelplot = false;
       project->modelplot_style = MBNA_MODELPLOT_TIMESERIES;
       project->modelplot_uptodate = false;
+      project->use_mode = MBNA_USE_MODE_PRIMARY;
 
       /* create data directory */
 #ifdef _WIN32
@@ -241,6 +243,86 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
         fprintf(project->logfp, "New project initialized: %s\n > Project home: %s\n", project->name, project->home);
       }
     }
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:       %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:      %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbnavadjust_apply_settings(int verbose, struct mbna_project *project, unsigned int mask,
+                               double section_length, int section_soundings, double cont_int,
+                               double col_int, double tick_int, double label_int, int decimation,
+                               double smoothing, double zoffsetwidth, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
+    fprintf(stderr, "dbg2       project:      %p\n", (void *)project);
+    fprintf(stderr, "dbg2       mask:         %u\n", mask);
+    fprintf(stderr, "dbg2       section_length:     %f\n", section_length);
+    fprintf(stderr, "dbg2       section_soundings:  %d\n", section_soundings);
+    fprintf(stderr, "dbg2       cont_int:     %f\n", cont_int);
+    fprintf(stderr, "dbg2       col_int:      %f\n", col_int);
+    fprintf(stderr, "dbg2       tick_int:     %f\n", tick_int);
+    fprintf(stderr, "dbg2       label_int:    %f\n", label_int);
+    fprintf(stderr, "dbg2       decimation:   %d\n", decimation);
+    fprintf(stderr, "dbg2       smoothing:    %f\n", smoothing);
+    fprintf(stderr, "dbg2       zoffsetwidth: %f\n", zoffsetwidth);
+  }
+
+  int status = MB_SUCCESS;
+
+  if (mask & MBNA_SETTINGS_SECTION_LENGTH) {
+    project->section_length = section_length;
+    if (verbose > 0)
+      fprintf(stderr, "Setting section_length to %f\n", section_length);
+  }
+  if (mask & MBNA_SETTINGS_SECTION_SOUNDINGS) {
+    project->section_soundings = section_soundings;
+    if (verbose > 0)
+      fprintf(stderr, "Setting section_soundings to %d\n", section_soundings);
+  }
+  if (mask & MBNA_SETTINGS_CONT_INT) {
+    project->cont_int = cont_int;
+    if (verbose > 0)
+      fprintf(stderr, "Setting cont_int to %f\n", cont_int);
+  }
+  if (mask & MBNA_SETTINGS_COL_INT) {
+    project->col_int = col_int;
+    if (verbose > 0)
+      fprintf(stderr, "Setting col_int to %f\n", col_int);
+  }
+  if (mask & MBNA_SETTINGS_TICK_INT) {
+    project->tick_int = tick_int;
+    if (verbose > 0)
+      fprintf(stderr, "Setting tick_int to %f\n", tick_int);
+  }
+  if (mask & MBNA_SETTINGS_LABEL_INT) {
+    project->label_int = label_int;
+    if (verbose > 0)
+      fprintf(stderr, "Setting label_int to %f\n", label_int);
+  }
+  if (mask & MBNA_SETTINGS_DECIMATION) {
+    project->decimation = decimation;
+    if (verbose > 0)
+      fprintf(stderr, "Setting decimation to %d\n", decimation);
+  }
+  if (mask & MBNA_SETTINGS_SMOOTHING) {
+    project->smoothing = smoothing;
+    if (verbose > 0)
+      fprintf(stderr, "Setting smoothing to %f\n", smoothing);
+  }
+  if (mask & MBNA_SETTINGS_ZOFFSETWIDTH) {
+    project->zoffsetwidth = zoffsetwidth;
+    if (verbose > 0)
+      fprintf(stderr, "Setting zoffsetwidth to %f\n", zoffsetwidth);
   }
 
   if (verbose >= 2) {

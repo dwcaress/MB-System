@@ -101,6 +101,17 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
+<DT><B>-C</B>
+
+<DD>
+<I>rthreshold</I>
+<BR>
+
+Sets the correlation coefficient threshold used to decide whether the peak
+cross correlation value found for a given set of pings represents a valid
+time lag estimate. Only peak correlation values exceeding <I>rthreshold</I>
+are included in the output time lag histogram and estimate files.
+Default: <I>rthreshold</I> = 0.9.
 <DT><B>-F</B>
 
 <DD>
@@ -189,7 +200,7 @@ data records. This option supercedes the <B>-S</B> option.
 <BR>
 
 Sets the number of pings to be read for each cross correlation calculation.
-Default: <I>nping</I> = 50.
+Default: <I>nping</I> = 100.
 <DT><B>-O</B>
 
 <DD>
@@ -218,9 +229,9 @@ navigation sources, so that there are more than one channel of
 asynchronous data records. In this case one channel is always designated
 as the primary or active navigation channel. The <B>-S</B> option allows
 the user to specify that <B>MBrolltimelag</B> uses roll from
-the primary asynchronous navigation (<B>-N</B><I>0</I>) or from one
+the primary asynchronous navigation (<B>-S</B><I>0</I>) or from one
 of three auxiliary navigation channels
-(<B>-N</B><I>1</I>, <B>-N</B><I>2</I>, or <B>-N</B><I>3</I>). If <B>-N</B> is
+(<B>-S</B><I>1</I>, <B>-S</B><I>2</I>, or <B>-S</B><I>3</I>). If <B>-S</B> is
 used but the data file
 does not contain asynchronous navigation or the specified auxiliary
 navigation channels, then <B>mbnavlist</B> will output nothing. To

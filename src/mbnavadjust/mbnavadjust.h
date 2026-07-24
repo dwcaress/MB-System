@@ -44,154 +44,12 @@
 #include "mb_status.h"
 #endif
 
-#ifdef MBNAVADJUST_DECLARE_GLOBALS
-#define MBNAVADJUST_EXTERNAL
-#else
-#define MBNAVADJUST_EXTERNAL extern
-#endif
+#include "mbnavadjust_core.h"
 
-/* mbnavadjust global control parameters */
-MBNAVADJUST_EXTERNAL int mbna_verbose;
-MBNAVADJUST_EXTERNAL int mbna_status;
-MBNAVADJUST_EXTERNAL int mbna_view_list;
-MBNAVADJUST_EXTERNAL int mbna_view_mode;
-MBNAVADJUST_EXTERNAL int mbna_invert_mode;
-MBNAVADJUST_EXTERNAL int mbna_save_frequency;
-MBNAVADJUST_EXTERNAL int mbna_color_foreground;
-MBNAVADJUST_EXTERNAL int mbna_color_background;
-MBNAVADJUST_EXTERNAL int mbna_survey_select;
-MBNAVADJUST_EXTERNAL int mbna_survey_select;
-MBNAVADJUST_EXTERNAL int mbna_survey_select1;
-MBNAVADJUST_EXTERNAL int mbna_survey_select2;
-MBNAVADJUST_EXTERNAL int mbna_file_select;
-MBNAVADJUST_EXTERNAL int mbna_section_select;
-MBNAVADJUST_EXTERNAL int mbna_crossing_select;
-MBNAVADJUST_EXTERNAL int mbna_tie_select;
-MBNAVADJUST_EXTERNAL int mbna_current_crossing;
-MBNAVADJUST_EXTERNAL int mbna_current_tie;
-MBNAVADJUST_EXTERNAL int mbna_current_file;
-MBNAVADJUST_EXTERNAL int mbna_current_section;
-MBNAVADJUST_EXTERNAL int mbna_naverr_mode;
-MBNAVADJUST_EXTERNAL int mbna_file_id_1;
-MBNAVADJUST_EXTERNAL int mbna_section_1;
-MBNAVADJUST_EXTERNAL int mbna_file_id_2;
-MBNAVADJUST_EXTERNAL int mbna_section_2;
-MBNAVADJUST_EXTERNAL int mbna_snav_1;
-MBNAVADJUST_EXTERNAL double mbna_snav_1_time_d;
-MBNAVADJUST_EXTERNAL double mbna_snav_1_lon;
-MBNAVADJUST_EXTERNAL double mbna_snav_1_lat;
-MBNAVADJUST_EXTERNAL int mbna_snav_2;
-MBNAVADJUST_EXTERNAL double mbna_snav_2_time_d;
-MBNAVADJUST_EXTERNAL double mbna_snav_2_lon;
-MBNAVADJUST_EXTERNAL double mbna_snav_2_lat;
-MBNAVADJUST_EXTERNAL double mbna_offset_x;
-MBNAVADJUST_EXTERNAL double mbna_offset_y;
-MBNAVADJUST_EXTERNAL double mbna_offset_z;
-MBNAVADJUST_EXTERNAL double mbna_invert_offset_x;
-MBNAVADJUST_EXTERNAL double mbna_invert_offset_y;
-MBNAVADJUST_EXTERNAL double mbna_invert_offset_z;
-MBNAVADJUST_EXTERNAL double mbna_offset_x_old;
-MBNAVADJUST_EXTERNAL double mbna_offset_y_old;
-MBNAVADJUST_EXTERNAL double mbna_offset_z_old;
-MBNAVADJUST_EXTERNAL double mbna_lon_min;
-MBNAVADJUST_EXTERNAL double mbna_lon_max;
-MBNAVADJUST_EXTERNAL double mbna_lat_min;
-MBNAVADJUST_EXTERNAL double mbna_lat_max;
-MBNAVADJUST_EXTERNAL double mbna_mtodeglon;
-MBNAVADJUST_EXTERNAL double mbna_mtodeglat;
-MBNAVADJUST_EXTERNAL double mbna_ox;
-MBNAVADJUST_EXTERNAL double mbna_oy;
-MBNAVADJUST_EXTERNAL int mbna_bin_beams_bath;
-MBNAVADJUST_EXTERNAL double mbna_bin_swathwidth;
-MBNAVADJUST_EXTERNAL double mbna_bin_pseudobeamwidth;
-MBNAVADJUST_EXTERNAL double mbna_plot_lon_min;
-MBNAVADJUST_EXTERNAL double mbna_plot_lon_max;
-MBNAVADJUST_EXTERNAL double mbna_plot_lat_min;
-MBNAVADJUST_EXTERNAL double mbna_plot_lat_max;
-MBNAVADJUST_EXTERNAL double mbna_overlap_lon_min;
-MBNAVADJUST_EXTERNAL double mbna_overlap_lon_max;
-MBNAVADJUST_EXTERNAL double mbna_overlap_lat_min;
-MBNAVADJUST_EXTERNAL double mbna_overlap_lat_max;
-MBNAVADJUST_EXTERNAL double mbna_plotx_scale;
-MBNAVADJUST_EXTERNAL double mbna_ploty_scale;
-MBNAVADJUST_EXTERNAL int mbna_misfit_center;
-MBNAVADJUST_EXTERNAL double mbna_misfit_xscale;
-MBNAVADJUST_EXTERNAL double mbna_misfit_yscale;
-MBNAVADJUST_EXTERNAL double mbna_misfit_offset_x;
-MBNAVADJUST_EXTERNAL double mbna_misfit_offset_y;
-MBNAVADJUST_EXTERNAL double mbna_misfit_offset_z;
-MBNAVADJUST_EXTERNAL int mbna_minmisfit_nthreshold;
-MBNAVADJUST_EXTERNAL double mbna_minmisfit;
-MBNAVADJUST_EXTERNAL int mbna_minmisfit_n;
-MBNAVADJUST_EXTERNAL double mbna_minmisfit_x;
-MBNAVADJUST_EXTERNAL double mbna_minmisfit_y;
-MBNAVADJUST_EXTERNAL double mbna_minmisfit_z;
-MBNAVADJUST_EXTERNAL double mbna_minmisfit_xh;
-MBNAVADJUST_EXTERNAL double mbna_minmisfit_yh;
-MBNAVADJUST_EXTERNAL double mbna_minmisfit_zh;
-MBNAVADJUST_EXTERNAL double mbna_minmisfit_sr1;
-MBNAVADJUST_EXTERNAL double mbna_minmisfit_sx1[4];
-MBNAVADJUST_EXTERNAL double mbna_minmisfit_sr2;
-MBNAVADJUST_EXTERNAL double mbna_minmisfit_sx2[4];
-MBNAVADJUST_EXTERNAL double mbna_minmisfit_sr3;
-MBNAVADJUST_EXTERNAL double mbna_minmisfit_sx3[4];
-MBNAVADJUST_EXTERNAL double mbna_zoff_scale_x;
-MBNAVADJUST_EXTERNAL double mbna_zoff_scale_y;
-
-MBNAVADJUST_EXTERNAL int mbna_zoom_x1;
-MBNAVADJUST_EXTERNAL int mbna_zoom_y1;
-MBNAVADJUST_EXTERNAL int mbna_zoom_x2;
-MBNAVADJUST_EXTERNAL int mbna_zoom_y2;
-MBNAVADJUST_EXTERNAL double mbna_smoothweight;
-MBNAVADJUST_EXTERNAL double mbna_offsetweight;
-MBNAVADJUST_EXTERNAL double mbna_zweightfactor;
-MBNAVADJUST_EXTERNAL double mbna_global_tie_influence;
-MBNAVADJUST_EXTERNAL int mbna_bias_mode;
-MBNAVADJUST_EXTERNAL int mbna_allow_set_tie;
-MBNAVADJUST_EXTERNAL int mbna_allow_add_tie;
-
-/* plot vector data */
-MBNAVADJUST_EXTERNAL struct mbna_contour_vector *mbna_contour;
-MBNAVADJUST_EXTERNAL struct mbna_contour_vector mbna_contour1;
-MBNAVADJUST_EXTERNAL struct mbna_contour_vector mbna_contour2;
-
-/* model plot parameters */
-MBNAVADJUST_EXTERNAL int mbna_modelplot_mode;
-MBNAVADJUST_EXTERNAL int mbna_modelplot_width;
-MBNAVADJUST_EXTERNAL int mbna_modelplot_height;
-MBNAVADJUST_EXTERNAL int mbna_modelplot_count;
-MBNAVADJUST_EXTERNAL int mbna_modelplot_start;
-MBNAVADJUST_EXTERNAL int mbna_modelplot_end;
-MBNAVADJUST_EXTERNAL int mbna_modelplot_xo;
-MBNAVADJUST_EXTERNAL int mbna_modelplot_yo_lon;
-MBNAVADJUST_EXTERNAL int mbna_modelplot_yo_lat;
-MBNAVADJUST_EXTERNAL int mbna_modelplot_yo_z;
-MBNAVADJUST_EXTERNAL double mbna_modelplot_yxmid;
-MBNAVADJUST_EXTERNAL double mbna_modelplot_yymid;
-MBNAVADJUST_EXTERNAL double mbna_modelplot_yzmid;
-MBNAVADJUST_EXTERNAL double mbna_modelplot_xscale;
-MBNAVADJUST_EXTERNAL double mbna_modelplot_yscale;
-MBNAVADJUST_EXTERNAL double mbna_modelplot_yzscale;
-MBNAVADJUST_EXTERNAL int mbna_modelplot_zoom_x1;
-MBNAVADJUST_EXTERNAL int mbna_modelplot_zoom_x2;
-MBNAVADJUST_EXTERNAL int mbna_modelplot_zoom;
-MBNAVADJUST_EXTERNAL int mbna_modelplot_startzoom;
-MBNAVADJUST_EXTERNAL int mbna_modelplot_endzoom;
-MBNAVADJUST_EXTERNAL int mbna_num_ties_plot;
-MBNAVADJUST_EXTERNAL int mbna_modelplot_tiestart;
-MBNAVADJUST_EXTERNAL int mbna_modelplot_tieend;
-MBNAVADJUST_EXTERNAL int mbna_modelplot_tiezoom;
-MBNAVADJUST_EXTERNAL int mbna_modelplot_tiestartzoom;
-MBNAVADJUST_EXTERNAL int mbna_modelplot_tieendzoom;
-MBNAVADJUST_EXTERNAL int mbna_modelplot_pickfile;
-MBNAVADJUST_EXTERNAL int mbna_modelplot_picksection;
-MBNAVADJUST_EXTERNAL int mbna_modelplot_picksnav;
-
-/* mbnavadjust global project parameters */
-MBNAVADJUST_EXTERNAL struct mbna_project project;
-
-/* flag to reset all crossings to unanalyzed when a project is opened */
-MBNAVADJUST_EXTERNAL int mbna_reset_crossings;
+/* Note: the mbna_* global control parameters, the "project" global, and
+    the GUI-free crossing-analysis/autopick function prototypes formerly
+    declared here now live in mbnavadjust_core.h (included above), shared
+    with mbnavadjustmerge. */
 
 /* function prototype definitions */
 void do_mbnavadjust_init(int argc, char **argv);
@@ -235,7 +93,6 @@ int mbnavadjust_naverr_previous_section(void);
 int mbnavadjust_naverr_nextunset_crossing(void);
 int mbnavadjust_naverr_nextunset_section(void);
 int mbnavadjust_naverr_selecttie(void);
-int mbnavadjust_naverr_addtie(void);
 int mbnavadjust_naverr_deletetie(void);
 int mbnavadjust_deletetie(int icrossing, int jtie, int deletestatus);
 int mbnavadjust_naverr_settie(void);
@@ -243,30 +100,20 @@ int mbnavadjust_naverr_resettie(void);
 int mbnavadjust_naverr_checkoksettie(void);
 int mbnavadjust_naverr_skip(void);
 int mbnavadjust_naverr_unset(void);
-int mbnavadjust_crossing_load(void);
-int mbnavadjust_crossing_unload(void);
 int mbnavadjust_naverr_replot(void);
-int mbnavadjust_crossing_replot(void);
 int mbnavadjust_referencesection_replot(void);
-int mbnavadjust_naverr_snavpoints(int ix, int iy);
-int mbnavadjust_get_misfit(void);
-int mbnavadjust_get_misfitxy(void);
 void plot(double x, double y, int ipen);
 void newpen(int ipen);
 void justify_string(double height, char *string, double *s);
 void plot_string(double x, double y, double hgt, double angle, char *label);
-void mbnavadjust_naverr_scale(void);
 void mbnavadjust_naverr_plot(int plotmode);
-int mbnavadjust_autopick(bool do_vertical);
 int mbnavadjust_autosetsvsvertical(void);
 int mbnavadjust_zerozoffsets(void);
 int mbnavadjust_unsetskipped(void);
 int mbnavadjust_referenceplussection_load(void);
-int mbnavadjust_referenceplussection_unload(void);
 int mbnavadjust_referencegrid_unload(void);
-int mbnavadjust_invertnav(void);
-int mbnavadjust_applynav(void);
-int mbnavadjust_updategrid(void);
+/* mbnavadjust_invertnav()/mbnavadjust_updategrid()/mbnavadjust_applynav()
+    are now GUI-free and declared in mbnavadjust_core.h (included above). */
 int mbnavadjust_modelplot_plot(const char *sourcefile, int sourceline);
 int mbnavadjust_set_modelplot_graphics(void *modp_xgid, int *modp_borders);
 int mbnavadjust_modelplot_plot_timeseries(void);

@@ -30,6 +30,7 @@ Version 5.0
 <H2>SYNOPSIS</H2>
 
 <B>mbbackangle</B> [<B>-A</B><I>kind</I>
+<B>-B</B><I>mode</I>[<I>/ssbeamwidth</I>[<I>/ssdepression</I>]]
 <B>-C</B> <B>-D</B> <B>-F</B><I>format</I>
 <B>-G</B><I>kind/angle/min/max/nx/ny</I>
 <B>-I</B><I>file</I>
@@ -141,6 +142,22 @@ Christian do Santos Ferreira
 Determines if beam amplitude (<I>kind</I> = 1)
 and/or sidescan (<I>kind</I> = 2) data will be processed.
 Default: both amplitude and sidescan data are processed.
+<DT><B>-B</B>
+
+<DD>
+<I>mode</I>[<I>/ssbeamwidth</I>[<I>/ssdepression</I>]]
+<BR>
+
+Sets the algorithm used to represent the sonar's beam pattern when
+generating the amplitude and/or sidescan versus grazing angle tables.
+If <I>mode</I> = 0, an empirical correction is used: the table is defined
+directly by the average amplitude or sidescan value observed at each
+grazing angle bin. If <I>mode</I> = 1, a parametric model combining a
+Gaussian transmit/receive beam pattern with spherical spreading is used
+instead; in this case <I>ssbeamwidth</I> sets the effective angular beam
+width in degrees of the sidescan sonar, and <I>ssdepression</I> sets the
+sonar's depression angle from the horizontal in degrees.
+Default: <I>mode</I> = 0; <I>ssbeamwidth</I> = 50.0; <I>ssdepression</I> = 20.0.
 <DT><B>-C</B>
 
 <DD>

@@ -30,7 +30,8 @@ Version 5.0
 <H2>SYNOPSIS</H2>
 
 <B>mbsegypsd</B> <B>-I</B><I>file</I> <B>-O</B><I>root
-[</I><B>-A</B><I>shotscale</I> <B>-D</B><I>decimatex</I> <B>-R</B>
+[</I><B>-A</B><I>shotscale/frequencyscale</I> <B>-D</B><I>decimatex</I>
+<B>-N</B><I>nfft</I>
 <B>-S</B><I>mode[/start/end[/schan/echan]]</I> <B>-T</B><I>sweep[/delay]</I>
 <B>-W</B><I>mode/start/end</I> <B>-H</B> <B>-V</B>]&quot;;
 <P>
@@ -104,11 +105,14 @@ Christian do Santos Ferreira
 <DT><B>-A</B>
 
 <DD>
-<I>shotscale</I>
+<I>shotscale/frequencyscale</I>
 <BR>
 
 This option causes the x-axis to be rescaled from shot number to distance in meters.
-The <I>shotscale</I> value represents the shot spacing in meters.
+The <I>shotscale</I> value represents the shot spacing in meters, and the
+<I>frequencyscale</I> value is also recorded as a scaling factor. Both values must
+be supplied together, separated by a slash. Default: <I>shotscale</I> = 1.0,
+<I>frequencyscale</I> = 1.0 (no rescaling).
 <DT><B>-D</B>
 
 <DD>
@@ -134,6 +138,16 @@ Sets the filename of the input segy seismic data file to be gridded.
 <BR>
 
 Sets the PSD grid output to be in dB/Hz.
+<DT><B>-N</B>
+
+<DD>
+<I>nfft</I>
+<BR>
+
+Sets the FFT length (<I>nfft</I>) used to calculate the PSD estimate for
+each trace by ensemble averaging; the trace is broken into segments of
+length <I>nfft</I> samples.
+Default: <I>nfft</I> = 1024.
 <DT><B>-O</B>
 
 <DD>

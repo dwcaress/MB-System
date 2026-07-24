@@ -31,7 +31,6 @@ Version 5.0
 mbsvpselect -N -V -Idatalist -Ssvplist -Pmode[/criteria[/submode]]
 <P>
 [-P0, -P1, -P2/period, -P3/range, -P3/range/1]
-<B>mbsvpselect</B> [<B>-C -D -F</B><I>format </I><B>-H -I</B><I>file </I><B>-M</B><I>mode</I> <B>-O -P -S -V -Z</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -220,7 +219,9 @@ is given in the <B>MBIO</B> manual page. Default: <I>file</I> = &quot;datalist.m
 <DD>
 <BR>
 
-Causes the program to check for SVPs with zero longitude and latitude values.
+Causes the program to check for survey profile (swath file) positions, as read
+from the <I>.inf</I> files, that have erroneous zero longitude and zero latitude
+values. This does not affect handling of the SVP position values.
 <DT><B>-P</B>
 
 <DD>
