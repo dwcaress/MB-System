@@ -70,7 +70,6 @@ set(manpages
     mbotps.1
     mbpreprocess.1
     mbprocess.1
-    mbps.1
     mbrolltimelag.1
     mbroutetime.1
     mbsegygrid.1

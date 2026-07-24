@@ -78,7 +78,6 @@ dist_mbsystemhtml_DATA = \
     mbotps.html \
     mbpreprocess.html \
     mbprocess.html \
-    mbps.html \
     mbrollbias.html \
     mbrolltimelag.html \
     mbroutetime.html \
@@ -169,7 +168,6 @@ dist_mbsystemhtml_DATA = \
     mbotps.pdf \
     mbpreprocess.pdf \
     mbprocess.pdf \
-    mbps.pdf \
     mbrollbias.pdf \
     mbrolltimelag.pdf \
     mbroutetime.pdf \

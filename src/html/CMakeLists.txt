@@ -105,7 +105,6 @@ set(HTML
     mbotps.html
     mbpreprocess.html
     mbprocess.html
-    mbps.html
     mbrollbias.html
     mbrolltimelag.html
     mbroutetime.html
@@ -199,7 +198,6 @@ set(PDF
     mbotps.pdf
     mbpreprocess.pdf
     mbprocess.pdf
-    mbps.pdf
     mbrollbias.pdf
     mbrolltimelag.pdf
     mbroutetime.pdf

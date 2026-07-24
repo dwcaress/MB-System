@@ -367,6 +367,15 @@ undocumented features: mbedit's "Flag by Beam Angle" filter and median-filter wi
 sliders, its three-way exclusive "Show Flag States / Show Bottom Detect Algorithms / Show
 Source Pulse Types" view toggle, and mbnavedit's "Sonar Depth Plot" toggle.
 
+Man pages: Removed the mbps, geod, and proj man pages (and mbps's generated html/pdf docs).
+The mbps man page documented a program with no corresponding source file or build target
+anywhere in the current source tree - it was already gone from the build, just not from the
+documentation. The geod and proj man pages documented command-line tools belonging to the
+external PROJ library dependency rather than programs developed as part of MB-System, and
+were never actually wired into either build system to begin with. Updated both the CMake
+and autotools build files for src/man/man1 and src/html to remove the now-dangling
+references to these three pages.
+
 The bugs described above were identified and fixed with the assistance of the AI coding
 assistant Claude Sonnet 5 (Anthropic, model claude-sonnet-5), operating as Claude Code
 under developer supervision and review.
