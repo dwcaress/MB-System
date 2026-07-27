@@ -149,11 +149,16 @@
 /* #include <errno.h> */
 #ifndef LESSTIF
 #include <sys/types.h>
-#include <sys/time.h>
 #include <sys/stat.h>
+#ifdef _WIN32
+#include "dirent_w.h"
+#include "unistd_w.h"
+#else
+#include <sys/time.h>
 #include <dirent.h>
-#include <errno.h>
 #include <unistd.h>
+#endif
+#include <errno.h>
 #endif
 
 #ifdef  WITH_DMALLOC

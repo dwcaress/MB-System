@@ -36,7 +36,9 @@
 #include <typeinfo>
 #include <stdexcept>
 #include <cstdlib>
-#ifndef _WIN32
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
 #endif
 #include <limits.h>

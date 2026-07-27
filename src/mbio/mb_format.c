@@ -35,9 +35,19 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 
 #include "mb_define.h"
+
+/* POSIX strtok_r — MSVC has strtok_s with the same signature. */
+#ifdef _WIN32
+#define strtok_r(str, delim, saveptr) strtok_s((str), (delim), (saveptr))
+#endif
+
 #include "mb_format.h"
 #include "mb_io.h"
 #include "mb_process.h"

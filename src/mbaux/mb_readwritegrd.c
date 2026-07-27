@@ -34,7 +34,11 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 
 /* include GMT header file gmt_dev.h without including glib headers not needed by MB-System */
 #ifdef HAVE_GLIB_GTHREAD

@@ -41,7 +41,11 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 #include <errno.h>
 
 #include "mb_aux.h"
@@ -212,10 +216,12 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
       project->use_mode = MBNA_USE_MODE_PRIMARY;
 
       /* create data directory */
+      int mode;
 #ifdef _WIN32
-      if (mkdir(project->datadir) != 0) {
+      mode = mkdir(project->datadir);
+      if (mode != 0) {
 #else
-	  int mode = mkdir(project->datadir, 00775);
+	  mode = mkdir(project->datadir, 00775);
       if (mode != 0) {
 #endif
         fprintf(stderr, "Error creating data directory %s\nmode:%d errno:%d\nError: %s\n", 

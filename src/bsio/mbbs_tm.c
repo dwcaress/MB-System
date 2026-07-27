@@ -46,6 +46,11 @@
 #include "mbbs.h"
 #include "mbbs_defines.h"
 
+/* POSIX strtok_r — MSVC has strtok_s with the same signature. */
+#ifdef _WIN32
+#define strtok_r(str, delim, saveptr) strtok_s((str), (delim), (saveptr))
+#endif
+
 static int tm_monthdays[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31};
 static int tm_callertz = TM_TZ_UNKNOWN;
 

@@ -58,12 +58,27 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#ifdef _WIN32
+#include "dirent_w.h"
+#else
 #include <dirent.h>
+#endif
 #include <getopt.h>
 #include <sys/stat.h>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
-
+#endif
 #include "mb_define.h"
+
+/* POSIX S_ISREG — MSVC has only the _S_IFMT/_S_IFREG bit constants. */
+#ifdef _WIN32
+#ifndef S_ISREG
+#define S_ISREG(m) (((m) & _S_IFMT) == _S_IFREG)
+#endif
+#endif
+
 #include "mb_format.h"
 #include "mb_status.h"
 
@@ -185,7 +200,7 @@ static int get_format(const char *filepath) {
 
 /*--------------------------------------------------------------------
  * Kongsberg filename time-sort comparator.
- * Sort key is "YYYYMMDD^HHMMSS" — plain lexicographic order works
+ * Sort key is "YYYYMMDD^HHMMSS" â€” plain lexicographic order works
  * because the fields are zero-padded numeric strings.
  *--------------------------------------------------------------------*/
 static int kongsberg_cmp(const void *a, const void *b) {
@@ -427,7 +442,7 @@ int main(int argc, char **argv) {
 
     /* The Perl script doubles the threshold because `ls -s` reports sizes
      * in 512-byte blocks and the user supplies KB.  1 KB = 2 blocks of 512
-     * bytes.  We compare against stat.st_size (bytes), so convert KB→bytes. */
+     * bytes.  We compare against stat.st_size (bytes), so convert KBâ†’bytes. */
     long size_threshold_bytes = size_threshold * 1024L;
 
     bool do_kongsberg_sort = is_kongsberg_suffix(suffix) && !disablesorting;

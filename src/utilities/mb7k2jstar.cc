@@ -36,8 +36,11 @@
 #include <cstdlib>
 #include <cstring>
 #include <getopt.h>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
-
+#endif
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
@@ -1034,11 +1037,11 @@ int main(int argc, char **argv) {
 					channel->NMEAantennaeO =
 					    s7ksegyheader->NMEAantennaeO; /* 38-39 : Distance to antennae starboard direction in cm */
 					for (int i = 0; i < 2; i++) {
-						channel->reserved4[i] = 0;   /* 40-43 : Reserved – Do not use */
+						channel->reserved4[i] = 0;   /* 40-43 : Reserved â€“ Do not use */
 					}
-					channel->kmOfPipe = 0;      /* 44-47 : Kilometers of Pipe - See Validity Flag (bytes 30 – 31). */
+					channel->kmOfPipe = 0;      /* 44-47 : Kilometers of Pipe - See Validity Flag (bytes 30 â€“ 31). */
 					for (int i = 0; i < 16; i++) {
-						channel->reserved5[i] = 0;  /* 48-79 : Reserved – Do not use */
+						channel->reserved5[i] = 0;  /* 48-79 : Reserved â€“ Do not use */
 					}
 
 					/* -------------------------------------------------------------------- */
@@ -1300,11 +1303,11 @@ int main(int argc, char **argv) {
 					                                               /*   3 = 1 short  per sample  - real part analytic signal */
 					                                               /*   4 = 1 short  per sample  - pixel data / ceros data */
 					for (int i = 0; i < 2; i++) {
-						channel->reserved4[i] = 0;   /* 40-43 : Reserved – Do not use */
+						channel->reserved4[i] = 0;   /* 40-43 : Reserved â€“ Do not use */
 					}
-					channel->kmOfPipe = 0;      /* 44-47 : Kilometers of Pipe - See Validity Flag (bytes 30 – 31). */
+					channel->kmOfPipe = 0;      /* 44-47 : Kilometers of Pipe - See Validity Flag (bytes 30 â€“ 31). */
 					for (int i = 0; i < 16; i++) {
-						channel->reserved5[i] = 0;  /* 48-79 : Reserved – Do not use */
+						channel->reserved5[i] = 0;  /* 48-79 : Reserved â€“ Do not use */
 					}
 
 					/* -------------------------------------------------------------------- */
@@ -1568,11 +1571,11 @@ int main(int argc, char **argv) {
 					                                               /*   3 = 1 short  per sample  - real part analytic signal */
 					                                               /*   4 = 1 short  per sample  - pixel data / ceros data */
 					for (int i = 0; i < 2; i++) {
-						channel->reserved4[i] = 0;   /* 40-43 : Reserved – Do not use */
+						channel->reserved4[i] = 0;   /* 40-43 : Reserved â€“ Do not use */
 					}
-					channel->kmOfPipe = 0;      /* 44-47 : Kilometers of Pipe - See Validity Flag (bytes 30 – 31). */
+					channel->kmOfPipe = 0;      /* 44-47 : Kilometers of Pipe - See Validity Flag (bytes 30 â€“ 31). */
 					for (int i = 0; i < 16; i++) {
-						channel->reserved5[i] = 0;  /* 48-79 : Reserved – Do not use */
+						channel->reserved5[i] = 0;  /* 48-79 : Reserved â€“ Do not use */
 					}
 
 					/* -------------------------------------------------------------------- */
@@ -1846,11 +1849,11 @@ int main(int argc, char **argv) {
 					                                               /*   3 = 1 short  per sample  - real part analytic signal */
 					                                               /*   4 = 1 short  per sample  - pixel data / ceros data */
 					for (int i = 0; i < 2; i++) {
-						channel->reserved4[i] = 0;   /* 40-43 : Reserved – Do not use */
+						channel->reserved4[i] = 0;   /* 40-43 : Reserved â€“ Do not use */
 					}
-					channel->kmOfPipe = 0;      /* 44-47 : Kilometers of Pipe - See Validity Flag (bytes 30 – 31). */
+					channel->kmOfPipe = 0;      /* 44-47 : Kilometers of Pipe - See Validity Flag (bytes 30 â€“ 31). */
 					for (int i = 0; i < 16; i++) {
-						channel->reserved5[i] = 0;  /* 48-79 : Reserved – Do not use */
+						channel->reserved5[i] = 0;  /* 48-79 : Reserved â€“ Do not use */
 					}
 
 					/* -------------------------------------------------------------------- */
@@ -2098,11 +2101,11 @@ int main(int argc, char **argv) {
 					                                               /*   3 = 1 short  per sample  - real part analytic signal */
 					                                               /*   4 = 1 short  per sample  - pixel data / ceros data */
 					for (int i = 0; i < 2; i++) {
-						channel->reserved4[i] = 0;   /* 40-43 : Reserved – Do not use */
+						channel->reserved4[i] = 0;   /* 40-43 : Reserved â€“ Do not use */
 					}
-					channel->kmOfPipe = 0;      /* 44-47 : Kilometers of Pipe - See Validity Flag (bytes 30 – 31). */
+					channel->kmOfPipe = 0;      /* 44-47 : Kilometers of Pipe - See Validity Flag (bytes 30 â€“ 31). */
 					for (int i = 0; i < 16; i++) {
-						channel->reserved5[i] = 0;  /* 48-79 : Reserved – Do not use */
+						channel->reserved5[i] = 0;  /* 48-79 : Reserved â€“ Do not use */
 					}
 
 					/* -------------------------------------------------------------------- */

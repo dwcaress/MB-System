@@ -53,10 +53,20 @@
 #include <ctime>
 #include <getopt.h>
 #include <limits>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
-
+#endif
 #include "mb_aux.h"
 #include "mb_define.h"
+
+/* POSIX popen/pclose — MSVC has _popen/_pclose with the same signatures. */
+#ifdef _WIN32
+#define popen _popen
+#define pclose _pclose
+#endif
+
 #include "mb_format.h"
 #include "mb_info.h"
 #include "mb_io.h"
