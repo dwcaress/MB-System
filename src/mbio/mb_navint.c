@@ -40,6 +40,13 @@
 #include "mb_process.h"
 #include "mb_status.h"
 
+/* MSVC has no off_t/fseeko/ftello; use the native 64-bit file APIs instead. */
+#ifdef _WIN32
+typedef __int64 off_t;
+#define ftello _ftelli64
+#define fseeko(fp, off, whence) _fseeki64((fp), (off), (whence))
+#endif
+
 //    #define MB_NAVINT_DEBUG 1
 //    #define MB_ATTINT_DEBUG 1
 //    #define MB_HEDINT_DEBUG 1

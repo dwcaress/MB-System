@@ -55,10 +55,20 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <thread>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
-
+#endif
 #include "mb_aux.h"
 #include "mb_define.h"
+
+/* MSVC has no fseeko/ftello; use the native 64-bit file APIs instead. */
+#ifdef _WIN32
+#define ftello _ftelli64
+#define fseeko(fp, off, whence) _fseeki64((fp), (off), (whence))
+#endif
+
 #include "mb_format.h"
 #include "mb_process.h"
 #include "mb_status.h"

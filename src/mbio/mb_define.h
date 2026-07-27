@@ -43,6 +43,9 @@
 #ifdef CMAKE_BUILD_SYSTEM
 
 #ifdef _WIN32
+  /* struct timeval, sockets — MUST precede windows.h on MSVC */
+#  include <winsock2.h>
+#  include <windows.h>
   /* Windows lacks SunRPC/TIRPC, so use the mb_xdr_win32 replacement */
 #  include <mb_xdr_win32.h>
 #else

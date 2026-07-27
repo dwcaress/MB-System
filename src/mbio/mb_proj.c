@@ -50,7 +50,11 @@
 #include <math.h>
 #include <stdio.h>
 #include <sys/stat.h>
+#ifdef _WIN32
+#include "unistd_w.h"
+#else
 #include <unistd.h>
+#endif
 #include <string.h>
 
 #include "mb_define.h"
