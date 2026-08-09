@@ -1,1022 +1,663 @@
-/*--------------------------------------------------------------------
- *    The MB-system:  mbmesh.cc  3/6/2026
- *
- *    Copyright (c) 2026 by
- *    David W. Caress (caress@mbari.org)
- *      Monterey Bay Aquarium Research Institute
- *      Moss Landing, California, USA
- *    Dale N. Chayes
- *      Center for Coastal and Ocean Mapping
- *      University of New Hampshire
- *      Durham, New Hampshire, USA
- *    Christian dos Santos Ferreira
- *      MARUM
- *      University of Bremen
- *      Bremen Germany
- *
- *    MB-System was created by Caress and Chayes in 1992 at the
- *      Lamont-Doherty Earth Observatory
- *      Columbia University
- *      Palisades, NY 10964
- *
- *    See README.md file for copying and redistribution conditions.
- *--------------------------------------------------------------------*/
-/**
- * @file mbmesh.cc
- * @brief Generate 3D Tiles from swath bathymetry data
- *
- * mbmesh reads swath sonar data files and generates OGC 3D Tiles
- * for visualization of bathymetric data with full 3D structure.
- * This preserves features like cliffs, overhangs, and caves that
- * are lost in traditional 2D gridding.
- *
- * Author:  CSUMB Capstone - Spring 2026
- * Date:    March 6, 2026
- */
-
-#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
 #include <getopt.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <system_error>
+#include <utility>
 #include <vector>
-#include <algorithm>
 
+#include "settings.h"
 
-// Point cloud GLB export
-#include "pointcloud_glb_writer.h"
+#include "io/xyz_writer.h"
+#include "io/glb_writer.h"
+#include "io/x3dom_writer.h"
 
-// MB-System includes
-extern "C" {
-#include "mb_define.h"
-#include "mb_format.h"
-#include "mb_io.h"
-#include "mb_status.h"
+#include "algorithms/point_decimation.h"
+#include "algorithms/normal_estimation.h"
+#include "algorithms/screened_poisson.h"
+#include "algorithms/marching_cubes.h"
+#include "algorithms/support_trimming.h"
+
+// ========================================================================================================
+
+Options parse_options(int argc, char **argv);
+
+void print_usage();
+
+namespace {
+
+void log_message(const std::string &stage, const std::string &message, bool verbose, bool always_print = false) {
+    if (!verbose && !always_print) {
+        return;
+    }
+    std::cerr << "mbmesh: [" << stage << "] " << message << '\n';
 }
 
-constexpr char program_name[] = "mbmesh";
-constexpr char help_message[] =
-    "mbmesh generates 3D point clouds from swath sonar bathymetry data.\n"
-    "This tool reads swath data files and produces multiple output formats\n"
-    "suitable for 3D visualization and analysis of seafloor bathymetry.";
+void log_warning(const std::string &message) {
+    std::cerr << "mbmesh: [warning] " << message << '\n';
+}
 
-constexpr char usage_message[] =
-  "mbmesh -Idatalist [-Rwest/east/south/north] [-Ooutdir] [-html]\n"
-    "       [-V -H]";
+void log_fatal(const std::string &message) {
+    std::cerr << "mbmesh: [fatal] " << message << '\n';
+}
 
-/*--------------------------------------------------------------------*/
-/* SOUNDING STRUCTURE */
-/*--------------------------------------------------------------------*/
+} // namespace
 
-/**
- * @brief A single sonar sounding (one beam return)
- *
- * This structure represents one bathymetry measurement from the
- * multibeam sonar, storing coordinates and metadata for later processing
- * and visualization.
- */
-struct Sounding {
-  double longitude;   // Degrees east
-  double latitude;    // Degrees north
-  double depth;       // Meters (negative = below sea level)
-  char beamflag;      // MB-System beam quality flag
-  int beam_number;    // Beam index within ping
-  double time_d;      // Unix timestamp (seconds since epoch)
-};
+bool write_outputs(
+    const Mesh &mesh,
+    const Mesh &raw_mesh,
+    const PointCloud &points,
+    const OrientedPointCloud &oriented_points,
+    const CollectedPointCloud &collected_points,
+    const CoordinateFrame &frame,
+    const Options &options,
+    std::string *error);
 
-/*--------------------------------------------------------------------*/
-/* GLOBAL VARIABLES */
-/*--------------------------------------------------------------------*/
+bool launch_html_viewer_server(
+    const std::filesystem::path &directory,
+    const std::string &html_filename);
 
-// Command-line options
-static int verbose = 0;
-static char read_datalist[MB_PATH_MAXLINE] = "datalist.mb-1";
-static char output_dir[MB_PATH_MAXLINE] = "./tileset";
-static bool bounds_specified = false;
-static double bounds[4] = {-180.0, 180.0, -90.0, 90.0};  // west, east, south, north
-static bool html_output = false;
-
-// Statistics
-static int nfile = 0;               // Number of files in datalist
-static int nfile_read = 0;          // Number successfully read
-static int npings = 0;              // Total pings processed
-static int nbeams_total = 0;        // Total beams encountered
-static int nbeams_good = 0;         // Valid beams
-static int nbeams_flagged = 0;      // Flagged/rejected beams
-
-// Storage for soundings (in-memory collection of all valid beams)
-static std::vector<Sounding> all_soundings;
-
-/*--------------------------------------------------------------------*/
-/* FUNCTION PROTOTYPES */
-/*--------------------------------------------------------------------*/
-
-static void print_help();
-static int parse_options(int argc, char **argv);
-static int read_datalist_file(int verbose);
-static int read_swath_file(int verbose, char *file, int format, double file_weight);
-static int process_ping(int verbose, int beams_bath, char *beamflag,
-                       double *bath, double *bathlon, double *bathlat,
-                       double time_d);
-static int write_xyz_file(const char *filename);
-static int write_projected_xyz_file(const char *filename);
-static int write_html_file(const char *filename, const char *glb_filename);
-static int launch_html_viewer_server(const char *directory, const char *html_filename);
-static int ensure_directory_exists(const char *path);
-static void print_statistics();
-static int write_ecef_xyz_file(const char *filename);
-static void geodetic_to_ecef(double lon_deg, double lat_deg, double height, double *x, double *y, double *z);
-
-/*--------------------------------------------------------------------*/
-/* MAIN FUNCTION */
-/*--------------------------------------------------------------------*/
+// ========================================================================================================
 
 int main(int argc, char **argv) {
-  fprintf(stderr, "\nProgram %s\n", program_name);
-  fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 
-  /* Parse command-line options */
-  if (parse_options(argc, argv) != MB_SUCCESS) {
-    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-    exit(MB_ERROR_BAD_USAGE);
-  }
+    Options options = parse_options(argc, argv);
 
-  /* Print starting info */
-  if (verbose > 0) {
-    fprintf(stderr, "\nmbmesh settings:\n");
-    fprintf(stderr, "  Input datalist: %s\n", read_datalist);
-    fprintf(stderr, "  Output directory: %s\n", output_dir);
-    if (bounds_specified) {
-      fprintf(stderr, "  Geographic bounds: %.6f/%.6f/%.6f/%.6f\n",
-              bounds[0], bounds[1], bounds[2], bounds[3]);
+    if (options.help_requested) {
+        print_usage();
+        return 0;
+    }
+
+    log_message("startup",
+                "input=" + options.input_datalist.string() + " output=" + options.output_directory.string(),
+                options.verbose,
+                true);
+
+    if (options.input_datalist.empty()) {
+        log_fatal("input datalist path is empty; use -I <path>");
+        return 1;
+    }
+
+    log_message("input", "reading datalist " + options.input_datalist.string(), options.verbose);
+
+    std::string error;
+    PreprocessedDatalist preprocessed;
+    if (!preprocess_datalist(options, &preprocessed, &error)) {
+        log_fatal(error);
+        return 1;
+    }
+
+    log_message("input", "completed: accepted " + std::to_string(preprocessed.read_result.points.size()) +
+                              " of " + std::to_string(preprocessed.read_result.stats.soundings_read) +
+                              " soundings from " + std::to_string(preprocessed.read_result.stats.files_read) +
+                              " files",
+                options.verbose);
+
+    if (options.metadata_requested) {
+        print_datalist_metadata(preprocessed, options);
+        return 0;
+    }
+
+    CollectedPointCloud collected_points = std::move(preprocessed.read_result.points);
+
+    // ====================================================================================================
+    // Point Decimation
+    // ====================================================================================================
+
+    const std::size_t input_sample_count = collected_points.size();
+
+    CollectedPointCloud decimated_points;
+
+    if (options.decimation.decimate) {
+
+        log_message("decimation", "starting: cell_size=" + std::to_string(options.decimation.cell_size), options.verbose);
+
+        decimated_points = point_decimation(std::move(collected_points), options.decimation);
+
+        if (decimated_points.empty()) {
+            log_fatal("point decimation produced no samples");
+            return 1;
+        }
+        log_message("decimation",
+                    "completed: retained " + std::to_string(decimated_points.size()) + " of " +
+                        std::to_string(input_sample_count) + " samples",
+                    options.verbose);
+
     } else {
-      fprintf(stderr, "  Geographic bounds: [unbounded]\n");
+        log_message("decimation",
+                    "disabled; using " + std::to_string(input_sample_count) + " input samples",
+                    options.verbose);
+        decimated_points = std::move(collected_points);
     }
-    fprintf(stderr, "  HTML output: %s\n", html_output ? "enabled" : "disabled");
-    fprintf(stderr, "  Verbose level: %d\n", verbose);
-  }
 
-  /* Read swath data from datalist */
-  fprintf(stderr, "\n=== Reading Swath Data ===\n");
-  int status = read_datalist_file(verbose);
+    // ====================================================================================================
+    // Normal Estimation
+    // ====================================================================================================
 
-  if (status != MB_SUCCESS) {
-    fprintf(stderr, "\nError reading datalist\n");
-    fprintf(stderr, "Program <%s> Terminated\n", program_name);
-    exit(status);
-  }
+    if (options.verbose) {
+        const bool using_search_radius = options.normals.search_radius > 0.0;
+        std::ostringstream verbose_message;
+        verbose_message << "starting: search_radius=" << options.normals.search_radius
+                        << ", radius_mode=" << (using_search_radius ? "enabled" : "disabled")
+                        << ", k_nearest=" << options.normals.k
+                        << ", fallback_min_neighbors=" << options.normals.minimum_neighbors
+                        << ", fallback_to_knearest="
+                        << (using_search_radius ? "when radius neighborhood < minimum_neighbors" : "always");
+        log_message("normal-estimation", verbose_message.str(), options.verbose);
+    }
 
-  /* Print statistics */
-  fprintf(stderr, "\nSwath data reading complete\n");
-  print_statistics();
+    OrientedPointCloud oriented_points = normal_estimation(decimated_points, options.normals);
 
-  if (ensure_directory_exists(output_dir) != MB_SUCCESS) {
-    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-    exit(MB_FAILURE);
-  }
+    if (oriented_points.empty()) {
+        log_fatal("normal estimation produced no oriented samples");
+        return 1;
+    }
+    log_message("normal-estimation",
+                "completed: oriented " + std::to_string(oriented_points.size()) + " samples",
+                options.verbose);
 
-  /* Write projected XYZ point cloud (local meters) */
-  char projected_file[MB_PATH_MAXLINE];
-  snprintf(projected_file, sizeof(projected_file), "%s/adjustedPointcloud.xyz", output_dir);
-  write_projected_xyz_file(projected_file);
+    // ====================================================================================================
+    // Screened Poisson
+    // ====================================================================================================
 
-  /* Write ECEF XYZ point cloud (WGS84) */
-  char ecef_file[MB_PATH_MAXLINE];
-  snprintf(ecef_file, sizeof(ecef_file), "%s/ecefPointcloud.xyz", output_dir);
-  write_ecef_xyz_file(ecef_file);
+    if (options.verbose) {
+        std::ostringstream verbose_message;
+        verbose_message << "starting: cell_size=" << options.poisson.cell_size
+                        << ", padding=" << options.poisson.padding
+                        << ", splat_radius=" << options.poisson.normal_splat_radius
+                        << ", iterations=" << options.poisson.solver_iterations
+                        << ", screening=" << (options.poisson.use_screening ? "enabled" : "disabled")
+                        << ", screening_weight=" << options.poisson.screening_weight;
+        log_message("poisson", verbose_message.str(), options.verbose);
+    }
 
-  fprintf(stderr, "\nProcessing complete\n");
-  fprintf(stderr, "Soundings collected: %zu\n", all_soundings.size());
-  fprintf(stderr, "Adjusted XYZ file written: %s\n", projected_file);
+    ScalarGrid3D poisson_surface = screened_poisson(oriented_points, options.poisson);
 
-  /* Write a GLB point cloud from the adjusted XYZ file without modifying it */
-  char glb_file[MB_PATH_MAXLINE];
-  snprintf(glb_file, sizeof(glb_file), "%s/adjustedPointcloud.glb", output_dir);
-  if (write_pointcloud_glb_file(projected_file, glb_file, verbose) == 0) {
-    fprintf(stderr, "GLB point cloud file written: %s\n", glb_file);
-  } else {
-    fprintf(stderr, "Failed to write GLB point cloud file: %s\n", glb_file);
-  }
+    if (poisson_surface.values.empty()) {
+        log_fatal("screened Poisson reconstruction produced an empty field");
+        return 1;
+    }
 
-  if (html_output) {
-    char html_file[MB_PATH_MAXLINE];
-    snprintf(html_file, sizeof(html_file), "%s/adjustedPointcloud.html", output_dir);
-    if (write_html_file(html_file, "adjustedPointcloud.glb") == MB_SUCCESS) {
-      fprintf(stderr, "HTML viewer file written: %s\n", html_file);
-      if (launch_html_viewer_server(output_dir, "adjustedPointcloud.html") != MB_SUCCESS) {
-        fprintf(stderr, "Warning: Failed to auto-launch Python web server/viewer.\n");
-      }
+    log_message("poisson",
+                "completed: grid=" + std::to_string(poisson_surface.nx) + "x" +
+                    std::to_string(poisson_surface.ny) + "x" + std::to_string(poisson_surface.nz),
+                options.verbose);
+
+    // ====================================================================================================
+    // Marching Cubes
+    // ====================================================================================================
+
+    log_message("marching-cubes",
+                "starting: iso_value=" + std::to_string(options.marching_cubes.iso_value),
+                options.verbose);
+
+    Mesh raw_mesh = marching_cubes(poisson_surface, options.marching_cubes);
+
+    if (raw_mesh.vertices.empty() || raw_mesh.indices.empty()) {
+        log_fatal("marching cubes produced an empty mesh");
+        return 1;
+    }
+
+    log_message("marching-cubes",
+                "completed: " + std::to_string(raw_mesh.vertices.size()) + " vertices, " +
+                    std::to_string(raw_mesh.indices.size() / 3) + " triangles",
+                options.verbose);
+
+    // ====================================================================================================
+    // Support Trimming
+    // ====================================================================================================
+
+    Mesh clean_mesh;
+
+    SupportTrimmingDiagnostics trimming_diagnostics;
+
+    if (options.trimming.enabled) {
+        if (options.verbose) {
+            std::ostringstream verbose_message;
+            verbose_message << "starting: radius="
+                            << ((options.trimming.support_radius > 0.0) ? std::to_string(options.trimming.support_radius) : "auto")
+                            << ", normal_offset="
+                            << ((options.trimming.max_normal_offset > 0.0) ? std::to_string(options.trimming.max_normal_offset) : "auto")
+                            << ", minimum_neighbors=" << options.trimming.minimum_neighbors
+                            << ", minimum_normal_alignment="
+                            << ((options.trimming.minimum_normal_alignment > 0.0) ? std::to_string(options.trimming.minimum_normal_alignment) : "disabled");
+            log_message("support-trimming", verbose_message.str(), options.verbose);
+        }
+        clean_mesh = support_trimming(raw_mesh, oriented_points, options.trimming, &trimming_diagnostics);
     } else {
-      fprintf(stderr, "Failed to write HTML viewer file: %s\n", html_file);
-    }
-  }
-
-  fprintf(stderr, "\nProgram <%s> completed successfully\n", program_name);
-  exit(MB_SUCCESS);
-}
-
-static int ensure_directory_exists(const char *path) {
-  struct stat st;
-  if (stat(path, &st) == 0) {
-    if (S_ISDIR(st.st_mode)) {
-      return MB_SUCCESS;
+        log_message("support-trimming", "disabled; using raw mesh", options.verbose);
+        clean_mesh = raw_mesh;
     }
 
-    fprintf(stderr, "Error: Output path exists but is not a directory: %s\n", path);
-    return MB_FAILURE;
-  }
-
-#ifdef _WIN32
-  if (mkdir(path) == 0) {
-#else
-  if (mkdir(path, 0755) == 0) {
-#endif
-    if (verbose > 0) {
-      fprintf(stderr, "Created output directory: %s\n", path);
+    if (clean_mesh.vertices.empty() || clean_mesh.indices.empty()) {
+        log_fatal("support trimming removed the entire mesh; adjust the trimming thresholds or disable trimming");
+        return 1;
     }
-    return MB_SUCCESS;
-  }
 
-  fprintf(stderr, "Error: Cannot create output directory %s\n", path);
-  return MB_FAILURE;
-}
-
-/*--------------------------------------------------------------------*/
-/* GEODETIC TO ECEF CONVERSION */
-/*--------------------------------------------------------------------*/
-static void geodetic_to_ecef(double lon_deg, double lat_deg, double height, double *x, double *y, double *z) {
-  // WGS84 ellipsoid constants
-  constexpr double a = 6378137.0;         // semi-major axis (meters)
-  constexpr double f = 1.0 / 298.257223563; // flattening
-  constexpr double e2 = f * (2 - f);      // eccentricity squared
-
-  double lon = lon_deg * M_PI / 180.0;
-  double lat = lat_deg * M_PI / 180.0;
-  double sin_lat = sin(lat);
-  double cos_lat = cos(lat);
-  double sin_lon = sin(lon);
-  double cos_lon = cos(lon);
-  double N = a / sqrt(1 - e2 * sin_lat * sin_lat);
-
-  *x = (N + height) * cos_lat * cos_lon;
-  *y = (N + height) * cos_lat * sin_lon;
-  *z = (N * (1 - e2) + height) * sin_lat;
-}
-
-/*--------------------------------------------------------------------*/
-/* CREATE ECEF .XYZ FILE (WGS84) */
-/*--------------------------------------------------------------------*/
-static int write_ecef_xyz_file(const char *filename) {
-  if (all_soundings.empty()) {
-    fprintf(stderr, "Warning: No soundings to write ECEF XYZ file\n");
-    return MB_FAILURE;
-  }
-
-  /* TODO: FIXME - GeoOrigin offset loses precision detail. Consider:
-     1. Making GeoOrigin an optional command-line parameter (--geo-origin)
-     2. Writing global ECEF coordinates directly (no offset subtraction)
-     3. Or increasing output precision to compensate for subtraction artifacts */
-
-  /* Compute centroid (GeoOrigin, same as projected) */
-  double sum_lon = 0.0, sum_lat = 0.0, sum_depth = 0.0;
-  for (const auto &s : all_soundings) {
-    sum_lon += s.longitude;
-    sum_lat += s.latitude;
-    sum_depth += s.depth;
-  }
-  double ref_lon = sum_lon / all_soundings.size();
-  double ref_lat = sum_lat / all_soundings.size();
-  double ref_depth = sum_depth / all_soundings.size();
-
-  // Compute GeoOrigin ECEF offset
-  double x0, y0, z0;
-  geodetic_to_ecef(ref_lon, ref_lat, -ref_depth, &x0, &y0, &z0);
-
-  FILE *fp = fopen(filename, "w");
-  if (!fp) {
-    fprintf(stderr, "Error: Cannot create ECEF XYZ file: %s\n", filename);
-    return MB_FAILURE;
-  }
-
-  // User-facing output, matching other point cloud writers
-  fprintf(stderr, "\nWriting ECEF XYZ point cloud: %s\n", filename);
-  fprintf(stderr, "  Points: %zu\n", all_soundings.size());
-
-  /* Write ECEF points with GeoOrigin offset */
-  for (const auto &s : all_soundings) {
-    double x, y, z;
-    // Note: depth is positive down, so height = -depth
-    geodetic_to_ecef(s.longitude, s.latitude, -s.depth, &x, &y, &z);
-    fprintf(fp, "%.3f %.3f %.3f\n", x - x0, y - y0, z - z0);
-  }
-
-  fclose(fp);
-  fprintf(stderr, "  ECEF XYZ file written successfully\n");
-  fprintf(stderr, "  Location: %s\n", filename);
-  return MB_SUCCESS;
-}
-
-/*--------------------------------------------------------------------*/
-/* PARSE COMMAND-LINE OPTIONS */
-/*--------------------------------------------------------------------*/
-
-static int parse_options(int argc, char **argv) {
-  int option_index;
-  int errflg = 0;
-  int c;
-  bool help = false;
-
-  static struct option long_options[] = {
-      {"verbose", no_argument, nullptr, 0},
-      {"help", no_argument, nullptr, 0},
-      {"input", required_argument, nullptr, 0},
-      {"html", no_argument, nullptr, 0},
-      {nullptr, 0, nullptr, 0}};
-
-  // Support legacy single-dash long form requested by users: -html
-  for (int i = 1; i < argc; i++) {
-    if (strcmp(argv[i], "-html") == 0) {
-      argv[i] = (char *)"--html";
+    if (options.verbose && options.trimming.enabled) {
+        std::ostringstream verbose_message;
+        verbose_message << "completed: spacing=" << trimming_diagnostics.estimated_point_spacing
+                        << ", resolved_radius=" << trimming_diagnostics.resolved_support_radius
+                        << ", resolved_normal_offset=" << trimming_diagnostics.resolved_max_normal_offset
+                        << ", supported_vertices=" << trimming_diagnostics.supported_vertices << '/' << trimming_diagnostics.input_vertices
+                        << ", rejected=(neighbors=" << trimming_diagnostics.rejected_for_neighbors
+                        << ", offset=" << trimming_diagnostics.rejected_for_normal_offset
+                        << ", alignment=" << trimming_diagnostics.rejected_for_normal_alignment << ")"
+                        << ", output=" << clean_mesh.vertices.size() << " vertices, "
+                        << clean_mesh.indices.size() / 3 << " triangles";
+        log_message("support-trimming", verbose_message.str(), options.verbose);
     }
-  }
 
-  /* Process command line options */
-  while ((c = getopt_long(argc, argv, "I:O:R:VvHh", long_options, &option_index)) != -1) {
-    switch (c) {
-    case 0:
-      /* Handle long options */
-      if (strcmp(long_options[option_index].name, "html") == 0) {
-        html_output = true;
-      }
-      break;
+    // ====================================================================================================
+    // Write Outputs
+    // ====================================================================================================
 
-    case 'I':
-      sscanf(optarg, "%s", read_datalist);
-      break;
+    if (options.verbose) {
+        std::ostringstream verbose_message;
+        verbose_message << "starting: directory=" << options.output_directory
+                        << ", glb=enabled"
+                        << ", html=" << (options.write_html ? "enabled" : "disabled")
+                        << ", local_xyz=" << (options.write_local_xyz ? "enabled" : "disabled")
+                        << ", ecef_xyz=" << (options.write_ecef_xyz ? "enabled" : "disabled")
+                        << ", oriented_ply=" << (options.write_oriented_ply ? "enabled" : "disabled")
+                        << ", pointcloud_glb=" << (options.write_pointcloud_glb ? "enabled" : "disabled")
+                        << ", normal_glb=" << (options.write_normal_glb ? "enabled" : "disabled")
+                        << ", origin_glb=" << (options.write_origin_glb ? "enabled" : "disabled")
+                        << ", raw_mesh_glb=" << (options.write_raw_mesh_glb ? "enabled" : "disabled");
+        log_message("output", verbose_message.str(), options.verbose);
+    }
 
-    case 'O':
-      sscanf(optarg, "%s", output_dir);
-      break;
+    PointCloud output_points;
+    output_points.reserve(decimated_points.size());
+    for (const CollectedPoint &collected_point : decimated_points) {
+        output_points.push_back(collected_point.point);
+    }
 
-    case 'R':
-      /* Parse bounds: west/east/south/north */
-      {
-        int n = sscanf(optarg, "%lf/%lf/%lf/%lf",
-                      &bounds[0], &bounds[1], &bounds[2], &bounds[3]);
-        if (n == 4) {
-          bounds_specified = true;
+    if (!write_outputs(clean_mesh, raw_mesh, output_points, oriented_points, decimated_points, preprocessed.read_result.frame, options, &error)) {
+        log_fatal(error);
+        return 1;
+    }
+
+    log_message("output", "completed", options.verbose);
+    log_message("complete", "wrote " + (options.output_directory / "mesh.glb").string(), options.verbose, true);
+
+    // ====================================================================================================
+    // Launch Local Server for X3DOM Viewer
+    // ====================================================================================================
+
+    if (options.write_html && !launch_html_viewer_server(options.output_directory, "mesh.html")) {
+        log_warning("failed to auto-launch Python web server/viewer");
+    }
+
+    return 0;
+}
+
+// ========================================================================================================
+
+Options parse_options(int argc, char **argv) {
+
+    Options options;
+
+    struct SingleDashLongOption {
+        const char *single_dash;
+        const char *double_dash;
+    };
+
+    static const SingleDashLongOption single_dash_long_options[] = {
+        {"-html", "--html"},
+        {"-local-xyz", "--local-xyz"},
+        {"-ecef-xyz", "--ecef-xyz"},
+        {"-xyz", "--xyz"},
+        {"-oriented-ply", "--oriented-ply"},
+        {"-pointcloud-glb", "--pointcloud-glb"},
+        {"-normal-glb", "--normal-glb"},
+        {"-origin-glb", "--origin-glb"},
+        {"-raw-mesh-glb", "--raw-mesh-glb"},
+        {"-decimate", "--decimate"},
+        {"-diagnostics", "--diagnostics"},
+        {"-all-outputs", "--all-outputs"},
+    };
+
+    for (int i = 1; i < argc; i++) {
+        for (const SingleDashLongOption &option_alias : single_dash_long_options) {
+            if (std::strcmp(argv[i], option_alias.single_dash) == 0) {
+                argv[i] = const_cast<char *>(option_alias.double_dash);
+                break;
+            }
+        }
+    }
+
+    static const struct option long_options[] = {
+        {"input", required_argument, nullptr, 'I'},
+        {"output", required_argument, nullptr, 'O'},
+        {"bounds", required_argument, nullptr, 'R'},
+        {"lod", required_argument, nullptr, 'L'},
+        {"level-of-detail", required_argument, nullptr, 'L'},
+        {"metadata", no_argument, nullptr, 1000},
+        {"info", no_argument, nullptr, 1000},
+        {"html", no_argument, nullptr, 1001},
+        {"local-xyz", no_argument, nullptr, 1002},
+        {"ecef-xyz", no_argument, nullptr, 1003},
+        {"xyz", no_argument, nullptr, 1004},
+        {"oriented-ply", no_argument, nullptr, 1005},
+        {"pointcloud-glb", no_argument, nullptr, 1006},
+        {"normal-glb", no_argument, nullptr, 1007},
+        {"origin-glb", no_argument, nullptr, 1008},
+        {"raw-mesh-glb", no_argument, nullptr, 1009},
+        {"decimate", required_argument, nullptr, 1010},
+        {"diagnostics", no_argument, nullptr, 1011},
+        {"all-outputs", no_argument, nullptr, 1012},
+        {"verbose", no_argument, nullptr, 'V'},
+        {"help", no_argument, nullptr, 'H'},
+        {nullptr, 0, nullptr, 0},
+    };
+
+    int c = 0;
+    int option_index = 0;
+    while ((c = getopt_long(argc, argv, "I:O:R:L:VHh", long_options, &option_index)) != -1) {
+
+        switch (c) {
+
+        case 'I':
+            options.input_datalist = optarg;
+            break;
+
+        case 'O':
+            options.output_directory = optarg;
+            break;
+
+        case 'R': {
+            double west = 0.0, east = 0.0, south = 0.0, north = 0.0;
+            if (std::sscanf(optarg, "%lf/%lf/%lf/%lf", &west, &east, &south, &north) == 4) {
+                options.bounds.degrees_W = west;
+                options.bounds.degrees_E = east;
+                options.bounds.degrees_S = south;
+                options.bounds.degrees_N = north;
+                options.use_bounds = true;
+            } else {
+                log_warning("invalid bounds argument: " + std::string(optarg));
+            }
+            break;
+        }
+
+        case 'L':
+            options.level_of_detail = std::strtod(optarg, nullptr);
+            options.level_of_detail_requested = true;
+            break;
+
+        case 'V':
+            options.verbose = true;
+            break;
+
+        case 1000:
+            options.metadata_requested = true;
+            break;
+
+        case 1001:
+            options.write_html = true;
+            break;
+
+        case 1002:
+            options.write_local_xyz = true;
+            break;
+
+        case 1003:
+            options.write_ecef_xyz = true;
+            break;
+
+        case 1004:
+            options.write_local_xyz = true;
+            options.write_ecef_xyz = true;
+            break;
+
+        case 1005:
+            options.write_oriented_ply = true;
+            break;
+
+        case 1006:
+            options.write_pointcloud_glb = true;
+            break;
+
+        case 1007:
+            options.write_normal_glb = true;
+            break;
+
+        case 1008:
+            options.write_origin_glb = true;
+            break;
+
+        case 1009:
+            options.write_raw_mesh_glb = true;
+            break;
+
+        case 1010:
+            options.decimation.decimate = true;
+            options.decimation.cell_size = std::strtod(optarg, nullptr);
+            options.decimation_requested = true;
+            break;
+
+        case 1011:
+            options.write_pointcloud_glb = true;
+            options.write_normal_glb = true;
+            options.write_origin_glb = true;
+            break;
+
+        case 1012:
+            options.write_html = true;
+            options.write_local_xyz = true;
+            options.write_ecef_xyz = true;
+            options.write_oriented_ply = true;
+            options.write_pointcloud_glb = true;
+            options.write_normal_glb = true;
+            options.write_origin_glb = true;
+            options.write_raw_mesh_glb = true;
+            break;
+
+        case 'H':
+        case 'h':
+            options.help_requested = true;
+            break;
+
+        default:
+            break;
+        }
+    }
+
+    if (options.input_datalist.empty() && optind < argc) {
+        options.input_datalist = argv[optind];
+    }
+
+    return options;
+}
+
+void print_usage() {
+    std::cout << "mbmesh generates 3D meshes from swath sonar bathymetry data.\n\n";
+    std::cout << "usage: mbmesh -I datalist [-R west/east/south/north] [-O outputdir] [-L meters] [output options] [-V]\n\n";
+    std::cout << "Required:\n";
+    std::cout << "  -I, --input <datalist>       Input MB-System datalist file\n\n";
+    std::cout << "Optional:\n";
+    std::cout << "  -O, --output <outputdir>     Output directory [mbmesh_output]\n";
+    std::cout << "  -R, --bounds <w/e/s/n>       Geographic bounds in degrees\n";
+    std::cout << "  -L, --lod <meters>           Requested smallest feature size; auto if omitted\n";
+    std::cout << "      --decimate <meters>      Enable voxel-grid point decimation\n";
+    std::cout << "      --metadata, --info       Print dataset metadata and exit\n";
+    std::cout << "  -V, --verbose                Enable progress and diagnostic logging\n";
+    std::cout << "  -H, -h, --help               Print this help message\n\n";
+    std::cout << "Output options:\n";
+    std::cout << "      --html                   Also write mesh.html and launch local X3DOM viewer\n";
+    std::cout << "      --xyz                    Also write local and ECEF XYZ point clouds\n";
+    std::cout << "      --local-xyz              Also write pointcloud-local.xyz\n";
+    std::cout << "      --ecef-xyz               Also write pointcloud-ecef.xyz\n";
+    std::cout << "      --oriented-ply           Also write oriented-pointcloud-ecef.ply\n";
+    std::cout << "      --pointcloud-glb         Also write pointcloud.glb\n";
+    std::cout << "      --normal-glb             Also write normals.glb\n";
+    std::cout << "      --origin-glb             Also write origins.glb\n";
+    std::cout << "      --raw-mesh-glb           Also write raw_mesh.glb before support trimming\n";
+    std::cout << "      --diagnostics            Also write pointcloud, normal, and origin GLBs\n";
+    std::cout << "      --all-outputs            Write all optional outputs\n\n";
+    std::cout << "The default output is mesh.glb.\n";
+    std::cout << "Single-dash long output options such as -html are accepted for legacy compatibility.\n";
+}
+
+namespace {
+
+constexpr std::size_t maximum_diagnostic_glb_points = 2'000'000;
+
+std::string shell_quote(const std::string &value) {
+    std::string quoted = "'";
+    for (const char character : value) {
+        if (character == '\'') {
+            quoted += "'\\''";
         } else {
-          fprintf(stderr, "Error parsing -R option: %s\n", optarg);
-          fprintf(stderr, "Expected format: -Rwest/east/south/north\n");
-          errflg++;
+            quoted += character;
         }
-      }
-      break;
-
-    case 'V':
-    case 'v':
-      verbose++;
-      break;
-
-    case 'H':
-    case 'h':
-      help = true;
-      break;
-
-    case '?':
-      errflg++;
-      break;
     }
-  }
-
-  if (errflg || help) {
-    print_help();
-    return MB_FAILURE;
-  }
-
-  return MB_SUCCESS;
+    quoted += "'";
+    return quoted;
 }
 
-/*--------------------------------------------------------------------*/
-/* PRINT HELP MESSAGE */
-/*--------------------------------------------------------------------*/
+} // namespace
 
-static void print_help() {
-  fprintf(stderr, "\n%s\n", help_message);
-  fprintf(stderr, "\nusage: %s\n", usage_message);
-  fprintf(stderr, "\nRequired:\n");
-  fprintf(stderr, "  -I<datalist>       Input datalist file [datalist.mb-1]\n");
-  fprintf(stderr, "\nOptional:\n");
-  fprintf(stderr, "  -O<outputdir>      Output directory [./tileset]\n");
-  fprintf(stderr, "  -R<w/e/s/n>        Geographic bounds (degrees)\n");
-  fprintf(stderr, "  -html              Also write adjustedPointcloud.html viewer file\n");
-  fprintf(stderr, "  -V                 Increase verbosity (can repeat: -V -V)\n");
-  fprintf(stderr, "  -H                 Print this help message\n");
-  fprintf(stderr, "\nExample:\n");
-  fprintf(stderr, "  mbmesh -Idatalist.mb-1 -R-122.5/-121.8/36.5/37.2 -V\n\n");
-}
+// ========================================================================================================
 
-/*--------------------------------------------------------------------*/
-/* READ DATALIST FILE */
-/*--------------------------------------------------------------------*/
-
-/**
- * @brief Read datalist and process all swath files
- *
- * This function follows the pattern from mbgrid.cc lines 1800-2100.
- * It opens the datalist, iterates through each file entry, and
- * calls read_swath_file() for each valid swath file.
- *
- * @param verbose Verbosity level
- * @return MB_SUCCESS or error code
- */
-static int read_datalist_file(int verbose) {
-  void *datalist = nullptr;
-  int look_processed = MB_DATALIST_LOOK_UNSET;
-  int error = MB_ERROR_NO_ERROR;
-
-  /* Open datalist */
-  int status = mb_datalist_open(verbose, &datalist, read_datalist,
-                                look_processed, &error);
-  if (status != MB_SUCCESS) {
-    fprintf(stderr, "\nUnable to open datalist file: %s\n", read_datalist);
-    fprintf(stderr, "Error: %d\n", error);
-    return status;
-  }
-
-  if (verbose > 0) {
-    fprintf(stderr, "Datalist opened: %s\n", read_datalist);
-  }
-
-  
-  /* Variables for mb_datalist_read3() */
-  int pstatus = MB_PROCESSED_NONE; // Indicates whether to use raw or processed file
-  int astatus = MB_ALTNAV_NONE; // Indicates whether alternative navigation is available
-  char path[MB_PATH_MAXLINE] = ""; // Raw file path
-  char ppath[MB_PATH_MAXLINE] = ""; // Processed file path (if available)
-  char apath[MB_PATH_MAXLINE] = ""; // Alternative navigation file path (if available)
-  char dpath[MB_PATH_MAXLINE] = ""; // Optional data file path (not used in this project)
-  int format = 0; // MB-System format code
-  double file_weight = 1.0; // Weight for this file (usually 1.0)
-
-  // int mb_datalist_read3(int verbose, void *datalist,
-  //                       int *pstatus, char *path, char *ppath,
-  //                       int *astatus, char *apath, char *dpath,
-  //                       int *format, double *file_weight, int *error);
-
-  while (mb_datalist_read3(verbose, datalist,
-                           &pstatus, path, ppath,
-                           &astatus, apath, dpath,
-                           &format, &file_weight, &error) == MB_SUCCESS) {
-    // Skip non-swath files (format <= 0)
-    if (format <= 0) continue;
-
-    // Skip comment lines
-    if (path[0] == '#') continue;
-
-    // Choose raw or processed file
-    char *file_to_read = (pstatus == MB_PROCESSED_USE) ? ppath : path;
-
-    // Count files
-    nfile++;
-
-    // Read this file
-    if (verbose > 0) {
-      fprintf(stderr, "\nProcessing file %d: %s\n", nfile, file_to_read);
-    }
-
-    status = read_swath_file(verbose, file_to_read, format, file_weight);
-
-    if (status != MB_SUCCESS) {
-      fprintf(stderr, "Warning: Failed to read file: %s\n", file_to_read);
-      // Continue with next file
-    }
-  }
-
-  /* Close datalist */
-  mb_datalist_close(verbose, &datalist, &error);
-
-  return MB_SUCCESS;
-}
-
-/*--------------------------------------------------------------------*/
-/* READ SINGLE SWATH FILE */
-/*--------------------------------------------------------------------*/
-
-/**
- * @brief Read bathymetry data from a single swath file
- *
- * This function follows the pattern from mbgrid.cc lines 2600-2800.
- * It initializes MB-System I/O, reads pings in a loop, and extracts
- * bathymetry soundings from each ping.
- *
- * @param verbose Verbosity level
- * @param file Path to swath file
- * @param format MB-System format code
- * @param file_weight Weight for this file (usually 1.0)
- * @return MB_SUCCESS or error code
- */
-static int read_swath_file(int verbose, char *file, int format,
-                          double file_weight) {
-  (void)file_weight;
-  if (verbose > 0) {
-    fprintf(stderr, "  Opening file (format %d)...\n", format);
-  }
-
-  /* MB-System I/O variables */
-  void *mbio_ptr = nullptr;
-  void *store_ptr = nullptr;
-  int error = MB_ERROR_NO_ERROR;
-
-  /* Data arrays (will be allocated after mb_read_init) */
-  char *beamflag = nullptr;
-  double *bath = nullptr;
-  double *bathacrosstrack = nullptr;
-  double *bathalongtrack = nullptr;
-  double *amp = nullptr;
-  double *ss = nullptr;
-  double *ssacrosstrack = nullptr;
-  double *ssalongtrack = nullptr;
-  char comment[MB_COMMENT_MAXLINE] = "";
-  //int kind, time_i[7];
-  //double time_d, navlon, navlat, speed, heading, distance, altitude, sensordepth;
-
-  /* Ping data variables */
-  int kind;
-  int time_i[7];
-  double time_d;
-  double navlon, navlat;
-  double speed, heading;
-  double distance, altitude, sensordepth;
-  int beams_bath, beams_amp, pixels_ss;
-
-  // Initializing MB-System I/O and reading pings will be implemented in the next steps.
-  //REFERENCE: See mbgrid.cc lines 2630-2650 for example
-
-  // Time limits: full range = no filtering,]
-  // full range of valid times referenced from mb_time.cc lines 72-77
-  int btime_i[7] = {1930, 1, 1, 0, 0, 0, 0};
-  int etime_i[7] = {3000, 1, 1, 0, 0, 0, 0};
-  double btime_d, etime_d;
-
-  int status = mb_read_init(verbose, file, format, 1, 0, bounds,
-                            btime_i, etime_i, 0.0, 1.0,
-                            &mbio_ptr, &btime_d, &etime_d,
-                            &beams_bath, &beams_amp, &pixels_ss,
-                            &error);
-
-  // if mb_read_init fails, print error message and return failure
-  if (status != MB_SUCCESS) {
-    char *message = nullptr;
-    mb_error(verbose, error, &message);
-    fprintf(stderr, "  Error initializing file: %s\n", message);
-    return MB_FAILURE;
-  }
-  // if mb_read_init succeeds, print number of beams and pixels
-  if (verbose > 0) {
-    fprintf(stderr, "  File opened: %d beams, %d amp, %d ss\n",
-            beams_bath, beams_amp, pixels_ss);
-  }
-
-  // Register arrays with MB-System I/O system
-  // This is CRITICAL - arrays must be registered before mb_read/mb_get_all calls
-  status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char),
-                            (void **)&beamflag, &error);
-  if (status != MB_SUCCESS) {
-    fprintf(stderr, "Error registering beamflag array\n");
-    mb_close(verbose, &mbio_ptr, &error);
-    return MB_FAILURE;
-  }
-
-  status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-                            (void **)&bath, &error);
-  if (status != MB_SUCCESS) {
-    fprintf(stderr, "Error registering bath array\n");
-    mb_close(verbose, &mbio_ptr, &error);
-    return MB_FAILURE;
-  }
-
-  status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-                            (void **)&bathacrosstrack, &error);
-  if (status != MB_SUCCESS) {
-    fprintf(stderr, "Error registering bathacrosstrack array\n");
-    mb_close(verbose, &mbio_ptr, &error);
-    return MB_FAILURE;
-  }
-
-  status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
-                            (void **)&bathalongtrack, &error);
-  if (status != MB_SUCCESS) {
-    fprintf(stderr, "Error registering bathalongtrack array\n");
-    mb_close(verbose, &mbio_ptr, &error);
-    return MB_FAILURE;
-  }
-
-  status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double),
-                            (void **)&amp, &error);
-  if (status != MB_SUCCESS) {
-    fprintf(stderr, "Error registering amp array\n");
-    mb_close(verbose, &mbio_ptr, &error);
-    return MB_FAILURE;
-  }
-
-  status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
-                            (void **)&ss, &error);
-  if (status != MB_SUCCESS) {
-    fprintf(stderr, "Error registering ss array\n");
-    mb_close(verbose, &mbio_ptr, &error);
-    return MB_FAILURE;
-  }
-
-  status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
-                            (void **)&ssacrosstrack, &error);
-  if (status !=  MB_SUCCESS) {
-    fprintf(stderr, "Error registering ssacrosstrack array\n");
-    mb_close(verbose, &mbio_ptr, &error);
-    return MB_FAILURE;
-  }
-
-  status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
-                            (void **)&ssalongtrack, &error);
-  if (status != MB_SUCCESS) {
-    fprintf(stderr, "Error registering ssalongtrack array\n");
-    mb_close(verbose, &mbio_ptr, &error);
-    return MB_FAILURE;
-  }
-
-  // For now, don't pre-allocate arrays - let mb_get_all handle it
-  // Just initialize pointers to NULL
-
-/* Read pings in loop */
-  int pings = 0; // Local counter for this file
-  int total_records = 0;
-  int data_records = 0;
-
-  fprintf(stderr, "  [DEBUG] About to start mb_read loop, mbio_ptr=%p\n", (void*)mbio_ptr);
-  while ((status = mb_read(
-      verbose, mbio_ptr, &kind, &pings,
-      time_i, &time_d,
-      &navlon, &navlat, &speed, &heading,
-      &distance, &altitude, &sensordepth,
-      &beams_bath, &beams_amp, &pixels_ss,
-      beamflag, bath, amp, bathacrosstrack, bathalongtrack,
-      ss, ssacrosstrack, ssalongtrack,
-      comment, &error)) == MB_SUCCESS) {
-    
-    total_records++;
-    
-    /* Only process survey data */
-    if (kind == MB_DATA_DATA) {
-      data_records++;
-      /* Process this ping */
-      process_ping(verbose, beams_bath, beamflag,
-                  bath, bathacrosstrack, bathalongtrack, time_d);
-
-      /* Update global counter */
-      npings++;
-      pings++;
-
-      /* Progress report */
-      if (verbose > 1 && pings % 100 == 0) {
-        fprintf(stderr, "    Processed %d pings...\r", pings);
-        fflush(stderr);
-      }
-    }
-  }
-
-  fprintf(stderr, "  [DEBUG] mb_read loop exited: status=%d\n", status);
-
-  if (verbose > 0) {
-    fprintf(stderr, "  File complete: %d pings processed\n", pings);
-  }
-
-  // Cleanup and close file
-  if (ssalongtrack != nullptr)
-    mb_freed(verbose, __FILE__, __LINE__, (void **)&ssalongtrack, &error);
-  if (ssacrosstrack != nullptr)
-    mb_freed(verbose, __FILE__, __LINE__, (void **)&ssacrosstrack, &error);
-  if (ss != nullptr)
-    mb_freed(verbose, __FILE__, __LINE__, (void **)&ss, &error);
-  if (bathalongtrack != nullptr)
-    mb_freed(verbose, __FILE__, __LINE__, (void **)&bathalongtrack, &error);
-  if (bathacrosstrack != nullptr)
-    mb_freed(verbose, __FILE__, __LINE__, (void **)&bathacrosstrack, &error);
-  if (bath != nullptr)
-    mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, &error);
-  if (amp != nullptr)
-    mb_freed(verbose, __FILE__, __LINE__, (void **)&amp, &error);
-  if (beamflag != nullptr)
-    mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &error);
-
-  // Reset arrays to NULL for next file
-  ssalongtrack = nullptr;
-  ssacrosstrack = nullptr;
-  ss = nullptr;
-  bathalongtrack = nullptr;
-  bathacrosstrack = nullptr;
-  bath = nullptr;
-  amp = nullptr;
-  beamflag = nullptr;
-
-  status = mb_close(verbose, &mbio_ptr, &error);
-  if (status != MB_SUCCESS && verbose > 0) {
-    fprintf(stderr, "  Warning: Error closing file\n");
-  }
-
-  nfile_read++;
-  return MB_SUCCESS;
-}
-
-/*--------------------------------------------------------------------*/
-/* PROCESS SINGLE PING */
-/*--------------------------------------------------------------------*/
-
-/**
- * @brief Process bathymetry beams from one ping
- *
- * This function extracts valid soundings from a ping and stores
- * them in the global all_soundings vector for later processing.
- *
- * @param verbose Verbosity level
- * @param beams_bath Number of bathymetry beams in ping
- * @param beamflag Quality flag array [beams_bath]
- * @param bath Depth array [beams_bath] (meters)
- * @param bathacrosstrack Across-track distance array [beams_bath] (meters)
- * @param bathalongtrack Along-track distance array [beams_bath] (meters)
- * @param time_d Timestamp (Unix seconds)
- * @return MB_SUCCESS
- */
-static int process_ping(int verbose, int beams_bath, char *beamflag,
-                       double *bath, double *bathacrosstrack, double *bathalongtrack,
-                       double time_d) {
-
-  // Process each beam in the ping
-   
-   // Loop through all beams and extract valid soundings.
-   // Calculate longitude and latitude from acrosstrack and alongtrack distances.
-   
-    for (int i = 0; i < beams_bath; i++) {
-      // Count total beams
-      nbeams_total++;
-   
-      // Check beam quality
-      if (!mb_beam_ok(beamflag[i])) {
-        nbeams_flagged++;
-        continue;  // Skip bad beam
-      }
-   
-      // Create sounding
-      Sounding s;
-      s.longitude = bathacrosstrack[i];
-      s.latitude = bathalongtrack[i];
-      s.depth = bath[i];
-      s.beamflag = beamflag[i];
-      s.beam_number = i;
-      s.time_d = time_d;
-   
-      // Filter by geographic bounds if specified
-      if (bounds_specified) {
-        if (s.longitude < bounds[0] || s.longitude > bounds[1] ||
-            s.latitude < bounds[2] || s.latitude > bounds[3]) {
-          continue;  // Outside bounds, skip
+bool write_outputs(
+    const Mesh &mesh,
+    const Mesh &raw_mesh,
+    const PointCloud &points,
+    const OrientedPointCloud &oriented_points,
+    const CollectedPointCloud &collected_points,
+    const CoordinateFrame &frame,
+    const Options &options,
+    std::string *error)
+{
+    if (options.output_directory.empty()) {
+        if (error != nullptr) {
+            *error = "Output directory path is empty";
         }
-      }
-   
-      // Add to collection
-      all_soundings.push_back(s);
-      nbeams_good++;
-    }
-   
-  return MB_SUCCESS;
-}
-
-/*--------------------------------------------------------------------*/
-/* CREATE .XYZ FILE */
-/*--------------------------------------------------------------------*/
-
-/**
- * @brief Write soundings to XYZ point cloud file
- * @param filename Output file path
- * @return MB_SUCCESS or error code
- */
-static int write_xyz_file(const char *filename) {
-  FILE *fp = fopen(filename, "w");
-  if (!fp) {
-    fprintf(stderr, "Error: Cannot create XYZ file: %s\n", filename);
-    return MB_FAILURE;
-  }
-
-  fprintf(stderr, "\nWriting XYZ point cloud: %s\n", filename);
-  fprintf(stderr, "  Points: %zu\n", all_soundings.size());
-
-  // Write points
-  for (const auto &s : all_soundings) {
-    fprintf(fp, "%.8f %.8f %.3f\n", s.longitude, s.latitude, s.depth);
-  }
-
-  fclose(fp);
-  fprintf(stderr, "  XYZ file written successfully\n");
-  return MB_SUCCESS;
-}
-
-/*--------------------------------------------------------------------*/
-/* CREATE PROJECTED .XYZ FILE (LOCAL METERS) */
-/*--------------------------------------------------------------------*/
-
-/**
- * @brief Write soundings to XYZ file in local projected coordinates (meters)
- *
- * Converts lon/lat to local meters relative to the data centroid and
- * centers depth around the mean. This makes the file viewable in
- * generic 3D point cloud viewers without axis scale mismatch.
- *
- * @param filename Output file path
- * @return MB_SUCCESS or error code
- */
-static int write_projected_xyz_file(const char *filename) {
-  if (all_soundings.empty()) {
-    fprintf(stderr, "Warning: No soundings to write projected XYZ file\n");
-    return MB_FAILURE;
-  }
-
-  FILE *fp = fopen(filename, "w");
-  if (!fp) {
-    fprintf(stderr, "Error: Cannot create projected XYZ file: %s\n", filename);
-    return MB_FAILURE;
-  }
-
-  /* Compute centroid */
-  double sum_lon = 0.0, sum_lat = 0.0, sum_depth = 0.0;
-  for (const auto &s : all_soundings) {
-    sum_lon += s.longitude;
-    sum_lat += s.latitude;
-    sum_depth += s.depth;
-  }
-  double ref_lon = sum_lon / all_soundings.size();
-  double ref_lat = sum_lat / all_soundings.size();
-  double ref_depth = sum_depth / all_soundings.size();
-
-  /* Meters per degree at the reference latitude */
-  constexpr double m_per_deg_lat = 111132.0;
-  double m_per_deg_lon = 111132.0 * cos(ref_lat * M_PI / 180.0);
-
-  fprintf(stderr, "\nWriting projected XYZ point cloud: %s\n", filename);
-  fprintf(stderr, "  Reference point: lon=%.6f lat=%.6f depth=%.1f\n",
-          ref_lon, ref_lat, ref_depth);
-  fprintf(stderr, "  Scale: 1 deg lon = %.1f m, 1 deg lat = %.1f m\n",
-          m_per_deg_lon, m_per_deg_lat);
-  fprintf(stderr, "  Points: %zu\n", all_soundings.size());
-
-  /* Write projected points */
-  for (const auto &s : all_soundings) {
-    double x = (s.longitude - ref_lon) * m_per_deg_lon;
-    double y = (s.latitude - ref_lat) * m_per_deg_lat;
-    double z = s.depth - ref_depth;
-    fprintf(fp, "%.3f %.3f %.3f\n", x, y, z);
-  }
-
-  fclose(fp);
-  fprintf(stderr, "  Projected XYZ file written successfully\n");
-  return MB_SUCCESS;
-}
-
-/*--------------------------------------------------------------------*/
-/* CREATE HTML VIEWER FILE */
-/*--------------------------------------------------------------------*/
-
-static int write_html_file(const char *filename, const char *glb_filename) {
-  FILE *fp = fopen(filename, "w");
-  if (!fp) {
-    fprintf(stderr, "Error: Cannot create HTML file: %s\n", filename);
-    return MB_FAILURE;
-  }
-
-  fprintf(fp, "<html>\n");
-  fprintf(fp, "    <head>\n");
-  fprintf(fp, "        <title>MB-System Adjusted Point Cloud Viewer</title>\n");
-  fprintf(fp, "        <script type='text/javascript' src='http://www.x3dom.org/download/x3dom.js'></script>\n");
-  fprintf(fp, "        <link rel='stylesheet' type='text/css' href='http://www.x3dom.org/download/x3dom.css'></link>\n");
-  fprintf(fp, "    </head>\n");
-  fprintf(fp, "    <body>\n");
-  fprintf(fp, "        <h1>MB-System Adjusted Point Cloud Viewer</h1>\n");
-  fprintf(fp, "        <p>\n");
-  fprintf(fp, "            Viewing adjustedPointcloud.glb exported by mbmesh from swath sonar data.\n");
-  fprintf(fp, "        </p>\n");
-  fprintf(fp, "        <x3d>\n");
-  fprintf(fp, "            <scene>\n");
-  fprintf(fp, "                <transform>\n");
-  fprintf(fp, "                    <inline url=\"%s\"></inline>\n", glb_filename);
-  fprintf(fp, "                </transform>\n");
-  fprintf(fp, "            </scene>\n");
-  fprintf(fp, "        </x3d>\n");
-  fprintf(fp, "    </body>\n");
-  fprintf(fp, "</html>\n");
-
-  fclose(fp);
-  return MB_SUCCESS;
-}
-
-/*--------------------------------------------------------------------*/
-/* LAUNCH HTML VIEWER */
-/*--------------------------------------------------------------------*/
-
-static int launch_html_viewer_server(const char *directory, const char *html_filename) {
-  if (directory == nullptr || html_filename == nullptr) {
-    return MB_FAILURE;
-  }
-
-  const int port = 8000;
-
-  char server_command[MB_PATH_MAXLINE * 2];
-  snprintf(server_command, sizeof(server_command),
-           "python3 -m http.server %d --bind 127.0.0.1 --directory \"%s\" >/tmp/mbmesh_http.log 2>&1 &",
-           port, directory);
-
-  int server_status = system(server_command);
-  if (server_status != 0) {
-    return MB_FAILURE;
-  }
-
-  char open_command[MB_PATH_MAXLINE * 2];
-  snprintf(open_command, sizeof(open_command),
-           "python3 -c \"import webbrowser; webbrowser.open('http://127.0.0.1:%d/%s')\"",
-           port, html_filename);
-
-  int open_status = system(open_command);
-  if (open_status != 0) {
-    return MB_FAILURE;
-  }
-
-  fprintf(stderr, "Started Python web server at http://127.0.0.1:%d/%s\n", port, html_filename);
-  fprintf(stderr, "Server logs: /tmp/mbmesh_http.log\n");
-  return MB_SUCCESS;
-}
-
-/*--------------------------------------------------------------------*/
-/* PRINT STATISTICS */
-/*--------------------------------------------------------------------*/
-
-/**
- * @brief Print statistics about data reading
- */
-static void print_statistics() {
-  fprintf(stderr, "\n");
-  fprintf(stderr, "========================================\n");
-  fprintf(stderr, "    Swath Data Reading Statistics\n");
-  fprintf(stderr, "========================================\n");
-  fprintf(stderr, "Files in datalist:       %d\n", nfile);
-  fprintf(stderr, "Files successfully read: %d\n", nfile_read);
-  fprintf(stderr, "Pings processed:         %d\n", npings);
-  fprintf(stderr, "Beams total:             %d\n", nbeams_total);
-  fprintf(stderr, "Beams good:              %d\n", nbeams_good);
-  fprintf(stderr, "Beams flagged:           %d\n", nbeams_flagged);
-  fprintf(stderr, "Soundings stored:        %zu\n", all_soundings.size());
-
-  if (nbeams_total > 0) {
-    double percent_good = 100.0 * nbeams_good / nbeams_total;
-    fprintf(stderr, "Acceptance rate:         %.1f%%\n", percent_good);
-  }
-
-  fprintf(stderr, "========================================\n");
-
-  /* Print sample soundings if verbose */
-  if (verbose > 1 && !all_soundings.empty()) {
-    fprintf(stderr, "\nSample soundings (first 10):\n");
-    fprintf(stderr, "  %-13s %-13s %-11s %-6s\n",
-            "Longitude", "Latitude", "Depth", "Flag");
-    fprintf(stderr, "  %-13s %-13s %-11s %-6s\n",
-            "-------------", "-------------", "-----------", "------");
-
-    int nsamples = std::min(10, (int)all_soundings.size());
-    for (int i = 0; i < nsamples; i++) {
-      const Sounding &s = all_soundings[i];
-      fprintf(stderr, "  %13.7f %13.7f %11.2f %6d\n",
-              s.longitude, s.latitude, s.depth, (int)s.beamflag);
-    }
-  }
-
-  /* Compute geographic bounds */
-  if (!all_soundings.empty()) {
-    double min_lon = 999.0, max_lon = -999.0;
-    double min_lat = 999.0, max_lat = -999.0;
-    double min_depth = 99999.0, max_depth = -99999.0;
-
-    for (const auto &s : all_soundings) {
-      min_lon = std::min(min_lon, s.longitude);
-      max_lon = std::max(max_lon, s.longitude);
-      min_lat = std::min(min_lat, s.latitude);
-      max_lat = std::max(max_lat, s.latitude);
-      min_depth = std::min(min_depth, s.depth);
-      max_depth = std::max(max_depth, s.depth);
+        return false;
     }
 
-    fprintf(stderr, "\nData bounds:\n");
-    fprintf(stderr, "  Longitude: %11.6f to %11.6f\n", min_lon, max_lon);
-    fprintf(stderr, "  Latitude:  %11.6f to %11.6f\n", min_lat, max_lat);
-    fprintf(stderr, "  Depth:     %11.2f to %11.2f meters\n", min_depth, max_depth);
-  }
+    std::error_code filesystem_error;
+    std::filesystem::create_directories(options.output_directory, filesystem_error);
 
-  fprintf(stderr, "\n");
+    if (filesystem_error) {
+        if (error != nullptr) {
+            *error = "Error creating output directory '" + options.output_directory.string() + "': " + filesystem_error.message();
+        }
+        return false;
+    }
+
+    if (options.write_ecef_xyz) {
+        const auto ecef_xyz_path = options.output_directory / "pointcloud-ecef.xyz";
+        if (!write_ecef_xyz_pointcloud(points, frame, ecef_xyz_path.string(), error)) {
+            return false;
+        }
+        log_message("output", "wrote " + ecef_xyz_path.string(), options.verbose);
+    }
+
+    if (options.write_local_xyz) {
+        const auto local_xyz_path = options.output_directory / "pointcloud-local.xyz";
+        if (!write_local_xyz_pointcloud(points, local_xyz_path.string(), error)) {
+            return false;
+        }
+        log_message("output", "wrote " + local_xyz_path.string(), options.verbose);
+    }
+
+    if (options.write_oriented_ply) {
+        const auto oriented_ply_path = options.output_directory / "oriented-pointcloud-ecef.ply";
+        if (!write_ply_oriented_pointcloud(oriented_points, frame, oriented_ply_path.string(), error)) {
+            return false;
+        }
+        log_message("output", "wrote " + oriented_ply_path.string(), options.verbose);
+    }
+
+    if (options.write_pointcloud_glb) {
+        const auto pointcloud_glb_path = options.output_directory / "pointcloud.glb";
+        if (!write_pointcloud_glb_file(pointcloud_glb_path, points, error)) {
+            return false;
+        }
+        log_message("output", "wrote " + pointcloud_glb_path.string(), options.verbose);
+    }
+
+    if (options.write_normal_glb) {
+        const auto normals_glb_path = options.output_directory / "normals.glb";
+        if (!write_normal_lines_glb_file(normals_glb_path, oriented_points, 0.25, error)) {
+            return false;
+        }
+        log_message("output", "wrote " + normals_glb_path.string(), options.verbose);
+    }
+
+    if (options.write_origin_glb) {
+        const auto origins_glb_path = options.output_directory / "origins.glb";
+        if (!write_origin_ray_lines_glb_file(origins_glb_path, collected_points, 0.25, error)) {
+            return false;
+        }
+        log_message("output", "wrote " + origins_glb_path.string(), options.verbose);
+    }
+
+    if (options.write_raw_mesh_glb) {
+        const auto raw_mesh_glb_path = options.output_directory / "raw_mesh.glb";
+        if (!write_mesh_glb_file(raw_mesh_glb_path, raw_mesh, error)) {
+            return false;
+        }
+        log_message("output", "wrote " + raw_mesh_glb_path.string(), options.verbose);
+    }
+
+    const auto clean_mesh_glb_path = options.output_directory / "mesh.glb";
+    if (!write_mesh_glb_file(clean_mesh_glb_path, mesh, error)) {
+        return false;
+    }
+    log_message("output", "wrote " + clean_mesh_glb_path.string(), options.verbose);
+
+    if (options.write_html) {
+        const auto html_path = options.output_directory / "mesh.html";
+        if (!write_glb_x3dom_file(html_path, "mesh.glb", {}, error)) {
+            return false;
+        }
+        log_message("output", "wrote " + html_path.string(), options.verbose);
+    }
+
+    return true;
+}
+
+// ========================================================================================================
+
+bool launch_html_viewer_server(
+    const std::filesystem::path &directory,
+    const std::string &html_filename)
+{
+    if (directory.empty() || html_filename.empty()) {
+        return false;
+    }
+
+    const int port = 8000;
+    const std::string directory_string = directory.string();
+
+    std::string server_command =
+        "python3 -m http.server " + std::to_string(port) +
+        " --bind 127.0.0.1 --directory " + shell_quote(directory_string) +
+        " >/tmp/mbmesh_http.log 2>&1 &";
+
+    const int server_status = std::system(server_command.c_str());
+    if (server_status != 0) {
+        return false;
+    }
+
+    const std::string url =
+        "http://127.0.0.1:" + std::to_string(port) + "/" + html_filename;
+    const std::string open_command =
+        "python3 -c \"import webbrowser; webbrowser.open('" + url + "')\"";
+
+    const int open_status = std::system(open_command.c_str());
+    if (open_status != 0) {
+        return false;
+    }
+
+    std::cerr << "mbmesh: [output] started Python web server at " << url << '\n';
+    std::cerr << "mbmesh: [output] server logs: /tmp/mbmesh_http.log\n";
+    return true;
 }
