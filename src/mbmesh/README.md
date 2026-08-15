@@ -6,15 +6,19 @@
 
 The current implementation is an end-to-end mesh-generation prototype. It reads MB-System swath files, converts valid soundings and sensor origins into a local Cartesian frame, estimates dataset spacing, derives reconstruction parameters from either a requested or automatic level of detail, estimates oriented normals, reconstructs a scalar field with screened Poisson, extracts a raw mesh with marching cubes, trims unsupported regions, and writes a binary glTF mesh.
 
+`mesh.glb` vertices are written in the same local Cartesian coordinate frame used for reconstruction, with units in meters. This is an east-north-up frame initialized from the first accepted ping's sensor position: X is positive east, Y is positive north, and Z is positive up relative to that origin. Longitude and latitude are converted to local meters using an equirectangular approximation based on the origin latitude.
+
+This frame is not the Earth-Centered, Earth-Fixed (ECEF) frame used by `mbgrd2gltf` by default, and it is not the ECEF-offset frame produced by `mbgrd2gltf --geoorigin`. `mbgrd2gltf --geoorigin` expresses vertices as offsets from a local origin point in the ECEF coordinate system to reduce coordinate magnitudes and improve rendering precision. `mbmesh` currently uses its own local projected reconstruction frame instead. When combining `mbmesh` GLB output with `mbgrd2gltf` output, transform both products into the same coordinate frame first; otherwise the vertices can appear offset or fail to line up.
+
 The default output is:
 
-- **`mesh.glb`** - support-trimmed final triangle mesh in binary glTF format
+- **`mesh.glb`** - support-trimmed final triangle mesh in binary glTF format, using the `mbmesh` local Cartesian coordinate frame
 
 Optional command-line flags can also write:
 
 - **`raw_mesh.glb`** - untrimmed marching-cubes mesh before support trimming
-- **`pointcloud-local.xyz`** - accepted/decimated samples in the local reconstruction frame
-- **`pointcloud-ecef.xyz`** - accepted/decimated samples in WGS84 Earth-Centered Earth-Fixed coordinates
+- **`pointcloud-local.xyz`** - accepted/decimated samples in the same local reconstruction frame as `mesh.glb`
+- **`pointcloud-ecef.xyz`** - accepted/decimated samples in WGS84 Earth-Centered, Earth-Fixed coordinates
 - **`oriented-pointcloud-ecef.ply`** - oriented samples and PCA lambda values
 - **`pointcloud.glb`** - diagnostic point-cloud GLB
 - **`normals.glb`** - diagnostic normal-vector GLB
@@ -99,6 +103,7 @@ Notes:
 1. **`mesh.glb`** - Final support-trimmed triangle mesh
    - Always written on successful reconstruction runs
    - Uses binary glTF format
+   - Uses the `mbmesh` local Cartesian reconstruction frame, not ECEF or `mbgrd2gltf --geoorigin` offsets
    - Intended for web and desktop GLB viewers
 
 ### Optional Outputs
@@ -114,11 +119,11 @@ Notes:
 
 4. **`pointcloud-local.xyz`** - Local Cartesian point cloud
    - Written with `--local-xyz`, `--xyz`, or `--all-outputs`
-   - Uses the local reconstruction frame in meters
+   - Uses the same local reconstruction frame as `mesh.glb`
 
 5. **`pointcloud-ecef.xyz`** - ECEF point cloud
    - Written with `--ecef-xyz`, `--xyz`, or `--all-outputs`
-   - Uses WGS84 Earth-Centered Earth-Fixed coordinates
+   - Uses WGS84 Earth-Centered, Earth-Fixed coordinates
 
 6. **`oriented-pointcloud-ecef.ply`** - Oriented point cloud
    - Written with `--oriented-ply` or `--all-outputs`
@@ -171,7 +176,9 @@ An MB-System datalist contains one or more swath sonar files. Each swath file co
 - Convert accepted soundings into local Cartesian coordinates
 - Store the sonar sensor origin for each accepted sounding
 
-The current local coordinate frame is initialized from the first accepted ping's sensor position. Longitude and latitude are converted to meters using an equirectangular local approximation based on that origin latitude. Sounding elevation is stored as negative bathymetry, and sensor elevation is stored as negative sensor depth.
+The current local coordinate frame is initialized from the first accepted ping's sensor position. This is an east-north-up Cartesian frame in meters: X is positive east, Y is positive north, and Z is positive up relative to that origin. Longitude and latitude are converted to meters using an equirectangular local approximation based on the origin latitude. Sounding elevation is stored as negative bathymetry, and sensor elevation is stored as negative sensor depth.
+
+This frame is intentionally small-magnitude for reconstruction and GLB output, but it is not directly compatible with `mbgrd2gltf` GLB output. `mbgrd2gltf` writes vertices in full WGS84 ECEF coordinates by default. With `--geoorigin`, `mbgrd2gltf` writes ECEF offsets from the selected GeoOrigin rather than from Earth's center. `mbmesh` does not currently expose a matching `--geoorigin` option, so combined `mbmesh` and `mbgrd2gltf` products must be transformed into a common coordinate frame before overlaying or merging them.
 
 Each accepted sample is stored as a `CollectedPoint`:
 
@@ -401,6 +408,7 @@ Important limitations:
 
 High-value future work:
 
+- Implement a `--geoorigin[=LON,LAT,ELEV]` option matching `mbgrd2gltf` semantics so `mbmesh` GLB vertices can be written as WGS84 ECEF offsets from an explicit or automatically selected GeoOrigin. This would allow `mbmesh` outputs to line up directly with `mbgrd2gltf --geoorigin` outputs when both tools use the same origin.
 - Expose selected reconstruction parameters as documented CLI options.
 - Add chunked or tiled reconstruction for large surveys.
 - Investigate octree/adaptive Poisson reconstruction.
