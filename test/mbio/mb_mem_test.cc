@@ -111,10 +111,8 @@ void InitMinimalMbio(struct mb_io_struct *mbio, int beams, int pixels) {
   mbio->pixels_ss_alloc = pixels;
 }
 
-// mb_read() holds local copies of registered data pointers. After a ping that
-// grows both bathymetry and sidescan (e.g. EM304 GSF with BRB intensity),
-// mb_update_arrayptr() must rebind those copies to the matching allocation
-// rather than a recycled heap address from a different type.
+// Simulate mb_read() after bathymetry and sidescan arrays grow in one cycle;
+// each local pointer copy must be rebound to its registered allocation.
 TEST(MbMem, UpdateArrayptrLocalCopyAfterBathAndSidescanGrow) {
   int error = MB_ERROR_NO_ERROR;
   const int verbose = 0;
@@ -192,6 +190,9 @@ TEST(MbMem, UpdateArrayptrLocalCopyAfterStagedBathThenSidescanGrow) {
   ASSERT_EQ(MB_SUCCESS, mb_update_arrayptr(verbose, &mbio, (void **)&bath_local, &error));
   EXPECT_EQ(bath_local, bath);
 
+  // Simulate allocator reuse: the stale bathymetry address now identifies the
+  // current sidescan allocation.
+  mbio.regarray_oldptr[0] = sslon;
   double *sslon_local = sslon;
   ASSERT_EQ(MB_SUCCESS, mb_update_arrays(verbose, &mbio, 800, 800, 9664, &error));
   EXPECT_EQ(mbio.regarray_oldptr[0], nullptr);

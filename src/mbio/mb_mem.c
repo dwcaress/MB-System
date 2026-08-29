@@ -931,10 +931,8 @@ int mb_update_arrays(int verbose, void *mbio_ptr, int nbath, int namp, int nss, 
   /* get mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-  /* Drop stale freed addresses from prior reallocations. mb_update_arrayptr()
-     used to match *handle against leftover regarray_oldptr[] values, so a
-     recycled heap address could rebind a sidescan pointer to a bathymetry
-     buffer (Linux malloc). Only this call's reallocs should populate oldptr. */
+  /* Discard pointer values from earlier reallocation cycles so allocator
+     address reuse cannot cause a false match in mb_update_arrayptr(). */
   for (int i = 0; i < mb_io_ptr->n_regarray; i++) {
     mb_io_ptr->regarray_oldptr[i] = NULL;
   }
@@ -1178,10 +1176,8 @@ int mb_update_arrayptr(int verbose, void *mbio_ptr, void **handle, int *error) {
   /* get mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-  /* Match by the stable handle address. mb_register_array() stores the caller's
-     pointer-to-pointer in regarray_handle[]; that address does not change when
-     the data buffer is reallocated, so this cannot cross-bind bathymetry and
-     sidescan registrations when the heap recycles a freed address. */
+  /* Prefer the registered pointer variable's address, which remains stable
+     when its allocation is resized. */
   bool found = false;
   for (int i = 0; i < mb_io_ptr->n_regarray; i++) {
     if ((void *)handle == mb_io_ptr->regarray_handle[i]) {
@@ -1192,11 +1188,9 @@ int mb_update_arrayptr(int verbose, void *mbio_ptr, void **handle, int *error) {
     }
   }
 
-  /* mb_read(), mb_get(), and mb_get_all() pass addresses of local copies of
-     the data pointers, not the original registered handles. Fall back to
-     matching the stale data pointer against this realloc cycle's oldptr
-     values, which are unique because they were live allocations at the start
-     of mb_update_arrays(). */
+  /* The read APIs call this function with addresses of local pointer copies,
+     which do not match regarray_handle[]. Fall back to the pointer value saved
+     by the current mb_update_arrays() call. */
   if (!found) {
     for (int i = 0; i < mb_io_ptr->n_regarray; i++) {
       if (mb_io_ptr->regarray_oldptr[i] != NULL && *handle == mb_io_ptr->regarray_oldptr[i]) {
