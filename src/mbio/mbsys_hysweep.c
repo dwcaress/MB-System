@@ -1217,9 +1217,9 @@ int mbsys_hysweep_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 				for (ioffset = 0; ioffset < num_offsets; ioffset++) {
 					struct mbsys_hysweep_device_offset_struct *offset = (struct mbsys_hysweep_device_offset_struct *)&(device->offsets[ioffset]);
 					status = mb_platform_set_sensor_offset(
-					    verbose, (void *)platform, isensor, ioffset, MB_SENSOR_POSITION_OFFSET_STATIC,
+					    verbose, (void *)platform, isensor, ioffset,
 					    (double)offset->OF2_offset_starboard, (double)offset->OF2_offset_forward,
-					    (double)offset->OF2_offset_vertical, MB_SENSOR_ATTITUDE_OFFSET_STATIC, (double)offset->OF2_offset_yaw,
+					    (double)offset->OF2_offset_vertical, (double)offset->OF2_offset_yaw,
 					    (double)-offset->OF2_offset_roll, (double)offset->OF2_offset_pitch, error);
 					if (ioffset == 0 && num_time_latency > 0) {
 						status =

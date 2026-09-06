@@ -369,7 +369,6 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @BUILD_DEPRECATED_TRUE@MAN_DEPRECATED = \
-@BUILD_DEPRECATED_TRUE@	mb7k2jstar.1 \
 @BUILD_DEPRECATED_TRUE@	mb7k2ss.1 \
 @BUILD_DEPRECATED_TRUE@	mb7kpreprocess.1 \
 @BUILD_DEPRECATED_TRUE@	mbauvnavusbl.1 \
@@ -377,6 +376,7 @@ top_srcdir = @top_srcdir@
 @BUILD_DEPRECATED_TRUE@	mbhysweeppreprocess.1 \
 @BUILD_DEPRECATED_TRUE@	mbkongsbergpreprocess.1 \
 @BUILD_DEPRECATED_TRUE@	mbneptune2esf.1 \
+@BUILD_DEPRECATED_TRUE@	mbotpsold.1 \
 @BUILD_DEPRECATED_TRUE@	mbrollbias.1 \
 @BUILD_DEPRECATED_TRUE@	mbstripnan.1 \
 @BUILD_DEPRECATED_TRUE@	mbswplspreprocess.1
@@ -384,6 +384,7 @@ top_srcdir = @top_srcdir@
 @BUILD_MBTRNUTILS_TRUE@	mbtrnpp.1
 
 man_MANS = \
+	mb7k2jstar.1 \
 	mbabsorption.1 \
 	mbareaclean.1 \
 	mbauvloglist.1 \

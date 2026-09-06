@@ -120,12 +120,17 @@ int mb_close(int verbose, void **mbio_ptr, int *error) {
       status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->mbsp, error);
   }
 
-  /* deallocate UTM projection if required */
+  /* deallocate projection if required */
   if (mb_io_ptr->projection_initialized) {
     mb_io_ptr->projection_initialized = false;
     mb_proj_free(verbose, &(mb_io_ptr->pjptr), error);
   }
 
+	// deallocate platform
+	if (mb_io_ptr->platform_initialized && mb_io_ptr->platformptr != NULL) {
+		status = mb_platform_deall(verbose, &mb_io_ptr->platformptr, error);
+	}
+  
   /* deallocate alternative navigation arrays if initialized */
   if (mb_io_ptr->alternative_navigation && mb_io_ptr->nav_alt_num_alloc > 0) {
     mb_io_ptr->nav_alt_num = 0;

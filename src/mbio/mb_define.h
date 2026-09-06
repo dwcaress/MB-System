@@ -36,8 +36,8 @@
 #include <stdint.h>
 
 /* Define version and date for this release */
-#define MB_VERSION "5.8.3beta16"
-#define MB_VERSION_DATE "26 July 2026"
+#define MB_VERSION "5.8.3beta17"
+#define MB_VERSION_DATE "6 September 2026"
 
 /* CMake supports current OS's and so there is only one form of RPC and XDR and no mb_config.h file */
 #ifdef CMAKE_BUILD_SYSTEM
@@ -337,7 +337,88 @@ typedef enum {
 #define MB_PROJECTION_GEOGRAPHIC 0
 #define MB_PROJECTION_PROJECTED 1
 
-/* MBIO core function prototypes */
+#define MB_INFO_MASK_DIM 20
+
+/* structure holding output of mbinfo -N -G */
+struct mb_info_struct {
+	int loaded;
+	char file[MB_PATH_MAXLINE];
+
+	int nrecords;
+	int nrecords_ss1;
+	int nrecords_ss2;
+	int nrecords_sbp;
+	int nbeams_bath;
+	int nbeams_bath_total;
+	int nbeams_bath_good;
+	int nbeams_bath_zero;
+	int nbeams_bath_flagged;
+	int nbeams_amp;
+	int nbeams_amp_total;
+	int nbeams_amp_good;
+	int nbeams_amp_zero;
+	int nbeams_amp_flagged;
+	int npixels_ss;
+	int npixels_ss_total;
+	int npixels_ss_good;
+	int npixels_ss_zero;
+	int npixels_ss_flagged;
+
+	double time_total;
+	double dist_total;
+	double speed_avg;
+
+	double time_start;
+	double lon_start;
+	double lat_start;
+	double depth_start;
+	double heading_start;
+	double speed_start;
+	double sensordepth_start;
+	double sonaraltitude_start;
+
+	double time_end;
+	double lon_end;
+	double lat_end;
+	double depth_end;
+	double heading_end;
+	double speed_end;
+	double sensordepth_end;
+	double sonaraltitude_end;
+
+	double lon_min;
+	double lon_max;
+	double lat_min;
+	double lat_max;
+	double sensordepth_min;
+	double sensordepth_max;
+	double altitude_min;
+	double altitude_max;
+	double depth_min;
+	double depth_max;
+	double amp_min;
+	double amp_max;
+	double ss_min;
+	double ss_max;
+
+	int problem_nodata;
+	int problem_zeronav;
+	int problem_toofast;
+	int problem_avgtoofast;
+	int problem_toodeep;
+	int problem_baddatagram;
+
+	// int	mask_nx;
+	// int	mask_ny;
+	// double	mask_dx;
+	// double	mask_dy;
+	// int	mask_alloc;
+	// int	*mask;
+};
+
+/* MBIO core function prototypes, grouped by the mbio/mb_*.c source file that defines them */
+
+/* Function prototypes from mb_defaults.c */
 int mb_version(int verbose, char *version_string, int *version_id, int *version_major, int *version_minor, int *version_archive,
                int *error);
 int mb_user_host_date(int verbose, char user[256], char host[256], char date[32], int *error);
@@ -354,6 +435,8 @@ int mb_mbview_defaults(int verbose, int *primary_colortable, int *primary_colort
 int mb_fbtversion(int verbose, int *fbtversion);
 int mb_uselockfiles(int verbose, bool *uselockfiles);
 int mb_fileiobuffer(int verbose, int *fileiobuffer);
+
+/* Function prototypes from mb_format.c */
 int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error);
 int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max,
                    char *format_name, char *system_name, char *format_description, int *numfile, int *filetype,
@@ -368,28 +451,18 @@ int mb_format_flags(int verbose, int *format, bool *variable_beams, bool *travel
 int mb_format_source(int verbose, int *format, int *platform_source, int *nav_source, int *sensordepth_source, int *heading_source,
                      int *attitude_source, int *svp_source, int *error);
 int mb_format_beamwidth(int verbose, int *format, double *beamwidth_xtrack, double *beamwidth_ltrack, int *error);
-
-/** Get swath file format code
-    @param verbose verbose debug output, True or False
-    @param filename swath data file
-    @param fileroot ???
-    @param format swath code
-    @param error error code, if returns MB_FAILURE
-    @return MB_SUCCESS or MB_FAILURE
- */
  int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int *error);
-  
 int mb_datalist_open(int verbose, void **datalist_ptr, char *path, int look_processed, int *error);
 int mb_datalist_read(int verbose, void *datalist_ptr, char *path, char *dpath, int *format, double *weight, int *error);
 int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path, char *ppath, char *dpath, int *format,
                       double *weight, int *error);
-int mb_datalist_read3(int verbose, void *datalist_ptr, int *pstatus, char *path, char *ppath, int *astatus, char *apath, 
+int mb_datalist_read3(int verbose, void *datalist_ptr, int *pstatus, char *path, char *ppath, int *astatus, char *apath,
                       char *dpath, int *format, double *weight, int *error);
 int mb_datalist_readorg(int verbose, void *datalist_ptr, char *path, int *format, double *weight, int *error);
 int mb_datalist_recursion(int verbose, void *datalist_ptr, bool print, int *recursion, int *error);
 int mb_datalist_close(int verbose, void **datalist_ptr, int *error);
 int mb_imagelist_open(int verbose, void **imagelist_ptr, char *path, int *error);
-int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, bool *rectified, 
+int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, bool *rectified,
                       char *path0, char *path1, char *dpath,
                       double *time_d0, double *time_d1,
                       double *gain0, double *gain1,
@@ -400,6 +473,11 @@ int mb_get_relative_path(int verbose, char *path, char *pwd, int *error);
 int mb_get_absolute_path(int verbose, char *path, char *pwd, int *error);
 int mb_get_shortest_path(int verbose, char *path, int *error);
 int mb_get_basename(int verbose, char *path, int *error);
+#ifdef WIN32
+void mb_cvt_to_nix_path(char *path);
+#endif
+
+/* Function prototypes from mb_check_info.c */
 int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], bool *file_in_bounds, int *error);
 bool mb_should_make_fbt(int verbose, int format);
 bool mb_should_make_fnv(int verbose, int format);
@@ -414,13 +492,18 @@ int mb_swathbounds(int verbose, int checkgood, int nbath, int nss,
                   double *ss, double *ssacrosstrack,
                   int *ibeamport, int *ibeamcntr, int *ibeamstbd,
                   int *ipixelport, int *ipixelcntr, int *ipixelstbd, int *error);
+int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error);
+int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lonflip, int *error);
+int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_info_struct *mb_info, int lonflip, int *error);
+
+/* Function prototypes from mb_read_init.c */
 int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, double bounds[4], int btime_i[7], int etime_i[7],
                   double speedmin, double timegap, void **mbio_ptr, double *btime_d, double *etime_d, int *beams_bath,
                   int *beams_amp, int *pixels_ss, int *error);
-int mb_read_init_altnav(int verbose, char *file, int format, int pings, 
+int mb_read_init_altnav(int verbose, char *file, int format, int pings,
                   int lonflip, double bounds[4], int btime_i[7], int etime_i[7],
-                  double speedmin, double timegap, int astatus, char *apath, 
-                  void **mbio_ptr, double *btime_d, double *etime_d, 
+                  double speedmin, double timegap, int astatus, char *apath,
+                  void **mbio_ptr, double *btime_d, double *etime_d,
                   int *beams_bath, int *beams_amp, int *pixels_ss, int *error);
 int mb_input_init(int verbose, char *socket_definition, int format, int pings,
                   int lonflip, double bounds[4], int btime_i[7], int etime_i[7],
@@ -431,39 +514,64 @@ int mb_input_init(int verbose, char *socket_definition, int format, int pings,
                   int (*input_read)(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error),
                   int (*input_close)(int verbose, void *mbio_ptr, int *error),
                   int *error);
-int mb_set_debug_records(int verbose, void *mbio_ptr, 
-									bool enable_debug_record_type_listing, 
-									int num_debug_record_identifiers, 
+int mb_set_debug_records(int verbose, void *mbio_ptr,
+									bool enable_debug_record_type_listing,
+									int num_debug_record_identifiers,
 									mb_name *debug_record_identifiers,
 									int *error);
+int mb_set_platform(int verbose, void *mbio_ptr,
+									void *mbplatform_ptr, 
+									int *error);
+
+/* Function prototypes from mb_write_init.c */
 int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *beams_bath, int *beams_amp, int *pixels_ss,
                   int *error);
+
+/* Function prototypes from mb_close.c */
 int mb_close(int verbose, void **mbio_ptr, int *error);
+
+/* Function prototypes from mb_read_ping.c */
 int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *error);
+
+/* Function prototypes from mb_get_all.c */
 int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
                   double *navlat, double *speed, double *heading, double *distance, double *altitude, double *sensordepth, int *nbath,
                   int *namp, int *nss, char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
                   double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error);
+
+/* Function prototypes from mb_get.c */
 int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], double *time_d, double *navlon, double *navlat,
                   double *speed, double *heading, double *distance, double *altitude, double *sensordepth, int *nbath, int *namp,
                   int *nss, char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                   double *ssacrosstrack, double *ssalongtrack, char *comment, int *error);
+
+/* Function prototypes from mb_read.c */
 int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], double *time_d, double *navlon, double *navlat,
                   double *speed, double *heading, double *distance, double *altitude, double *sensordepth, int *nbath, int *namp,
                   int *nss, char *beamflag, double *bath, double *amp, double *bathlon, double *bathlat, double *ss, double *sslon,
                   double *sslat, char *comment, int *error);
+
+/* Function prototypes from mb_write_ping.c */
 int mb_write_ping(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+
+/* Function prototypes from mb_put_all.c */
 int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr, int usevalues, int kind, int time_i[7], double time_d, double navlon,
                   double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                   double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                   double *ssalongtrack, char *comment, int *error);
+
+/* Function prototypes from mb_put_comment.c */
 int mb_put_comment(int verbose, void *mbio_ptr, char *comment, int *error);
+
+/* Function prototypes from mb_fileio.c */
 int mb_fileio_open(int verbose, void *mbio_ptr, int *error);
 int mb_fileio_close(int verbose, void *mbio_ptr, int *error);
 int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *error);
 int mb_fileio_put(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *error);
 int mb_copyfile(int verbose, const char *src, const char *dst, int *error);
 int mb_catfiles(int verbose, const char *src1, const char *src2, const char *dst, int *error);
+
+/* Function prototypes from mb_access.c */
 int mb_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mb_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mb_get_store(int verbose, void *mbio_ptr, void **store_ptr, int *error);
@@ -474,6 +582,7 @@ int mb_beamwidths(int verbose, void *mbio_ptr, double *beamwidth_xtrack, double 
 int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error);
 int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error);
 int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr, void *preprocess_pars_ptr, int *error);
+int mb_preprocess_generic(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr, void *preprocess_pars_ptr, int *error);
 int mb_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void **platform_ptr, int *error);
 int mb_sensorhead(int verbose, void *mbio_ptr, void *store_ptr, int *sensorhead, int *error);
 int mb_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
@@ -537,19 +646,24 @@ int mb_indextable(int verbose, void *mbio_ptr, int *num_indextable, void **index
 int mb_indextablefix(int verbose, void *mbio_ptr, int num_indextable, void *indextable_ptr, int *error);
 int mb_indextableapply(int verbose, void *mbio_ptr, int num_indextable, void *indextable_ptr, int n_file, int *error);
 
+/* Function prototypes from mb_platform.c */
 int mb_platform_init(int verbose, void **platform_ptr, int *error);
 int mb_platform_setinfo(int verbose, void *platform_ptr, int type, char *name, char *organization, char *documentation_url,
                         double start_time_d, double end_time_d, int *error);
 int mb_platform_add_sensor(int verbose, void *platform_ptr, int type, mb_longname model, mb_longname manufacturer,
                            mb_longname serialnumber, int capability1, int capability2, int num_offsets, int num_time_latency,
                            int *error);
-int mb_platform_set_sensor_offset(int verbose, void *platform_ptr, int isensor, int ioffset, int position_offset_mode,
-                                  double position_offset_x, double position_offset_y, double position_offset_z,
-                                  int attitude_offset_mode, double attitude_offset_azimuth, double attitude_offset_roll,
+int mb_platform_set_sensor_offset(int verbose, void *platform_ptr, int isensor, int ioffset,
+                                  double position_offset_x, double position_offset_y,
+                                  double position_offset_z,
+                                  double attitude_offset_azimuth, double attitude_offset_roll,
                                   double attitude_offset_pitch, int *error);
 int mb_platform_set_sensor_timelatency(int verbose, void *platform_ptr, int isensor, int time_latency_mode,
                                        double time_latency_static, int num_time_latency, double *time_latency_time_d,
                                        double *time_latency_value, int *error);
+int mb_platform_set_sensor_flipsign_heading(int verbose, void *platform_ptr, int isensor, int *error);
+int mb_platform_set_sensor_flipsign_roll(int verbose, void *platform_ptr, int isensor, int *error);
+int mb_platform_set_sensor_flipsign_pitch(int verbose, void *platform_ptr, int isensor, int *error);
 int mb_platform_set_source_sensor(int verbose, void *platform_ptr, int source_type, int sensor, int *error);
 int mb_platform_deall(int verbose, void **platform_ptr, int *error);
 int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int *error);
@@ -562,6 +676,8 @@ int mb_platform_position(int verbose, void *platform_ptr, int targetsensor, int 
 int mb_platform_position_offset(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset,
                                    double *target_x_offset, double *target_y_offset, double *target_z_offset,
                                    int *error);
+int mb_platform_apply_flipsign_attitude(int verbose, void *platform_ptr, double *roll, double *pitch, int *error);
+int mb_platform_apply_flipsign_heading(int verbose, void *platform_ptr, double *heading, int *error);
 int mb_platform_orientation(int verbose, void *platform_ptr, double heading, double roll, double pitch, double *platform_heading,
                             double *platform_roll, double *platform_pitch, int *error);
 int mb_platform_orientation_offset(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset,
@@ -570,8 +686,11 @@ int mb_platform_orientation_offset(int verbose, void *platform_ptr, int targetse
 int mb_platform_orientation_target(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset, double heading,
                                    double roll, double pitch, double *target_heading, double *target_roll, double *target_pitch,
                                    int *error);
+int mb_platform_copy(int verbose, void *platform_ptr, void *platform_copy_ptr, int *error);
 int mb_platform_print(int verbose, void *platform_ptr, int *error);
+/* mb_platform_type is also defined in mb_platform.c; its prototype is declared in mb_io.h */
 
+/* Function prototypes from mb_platform_math.c */
 void mb_platform_math_matrix_times_vector_3x1(double *A, double *b, double *Ab);
 void mb_platform_math_matrix_times_matrix_3x3(double *A, double *B, double *AB);
 void mb_platform_math_matrix_transpose_3x3(double *R, double *R_T);
@@ -600,12 +719,12 @@ int mb_platform_math_attitude_rotate_beam(int verbose, double beam_acrosstrack, 
                                           double attitude_roll, double attitude_pitch, double attitude_heading,
                                           double *newbeam_easting, double *newbeam_northing, double *newbeam_bath, int *error);
 
+/* Function prototypes from mb_buffer.c */
 int mb_buffer_init(int verbose, void **buff_ptr, int *error);
 int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, int *error);
 int mb_buffer_load(int verbose, void *buff_ptr, void *mbio_ptr, int nwant, int *nload, int *nbuff, int *error);
 int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr, int nhold, int *ndump, int *nbuff, int *error);
 int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int *ndump, int *nbuff, int *error);
-int mb_buffer_info(int verbose, void *buff_ptr, void *mbio_ptr, int id, int *system, int *kind, int *error);
 int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr, int start, int *id, int time_i[7], double *time_d,
                             double *navlon, double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss,
                             char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
@@ -630,16 +749,20 @@ int mb_buffer_insert_nav(int verbose, void *buff_ptr, void *mbio_ptr, int id, in
 int mb_buffer_get_kind(int verbose, void *buff_ptr, void *mbio_ptr, int id, int *kind, int *error);
 int mb_buffer_get_ptr(int verbose, void *buff_ptr, void *mbio_ptr, int id, void **store_ptr, int *error);
 
+/* Function prototypes from mb_coor_scale.c */
 int mb_coor_scale(int verbose, double latitude, double *mtodeglon, double *mtodeglat);
 int mb_alvinxy_scale(int verbose, double latitude, double *mtodeglon, double *mtodeglat);
 int mb_apply_lonflip(int verbose, int lonflip, double *longitude);
 
+/* Function prototypes from mb_error.c */
 int mb_error(int, int, char **);
 int mb_notice_log_datatype(int verbose, void *mbio_ptr, int data_id);
 int mb_notice_log_error(int verbose, void *mbio_ptr, int error_id);
 int mb_notice_log_problem(int verbose, void *mbio_ptr, int problem_id);
 int mb_notice_get_list(int verbose, void *mbio_ptr, int *notice_list);
 int mb_notice_message(int verbose, int notice, char **message);
+
+/* Function prototypes from mb_navint.c */
 int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon_easting, double lat_northing, int *error);
 int mb_navint_interp(int verbose, void *mbio_ptr, double time_d, double heading, double rawspeed, double *lon, double *lat,
                      double *speed, int *error);
@@ -679,10 +802,9 @@ int mb_apply_time_latency(int verbose, int data_num, double *data_time_d, int ti
                           int time_latency_num, double *time_latency_time_d, double *time_latency_value, int *error);
 int mb_apply_time_filter(int verbose, int data_num, double *data_time_d, double *data_value, double filter_length, int *error);
 
-int mb_swap_check(void);
+/* Function prototypes from mb_get_value.c */
 int mb_get_double(double *, char *, int);
 int mb_get_int(int *, char *, int);
-
 int mb_get_binary_short(bool swapped, void *buffer, const void *ptr);
 int mb_get_binary_int(bool swapped, void *buffer, const void *ptr);
 int mb_get_binary_float(bool swapped, void *buffer, const void *ptr);
@@ -693,24 +815,48 @@ int mb_put_binary_int(bool swapped, int value, void *buffer);
 int mb_put_binary_float(bool swapped, float value, void *buffer);
 int mb_put_binary_double(bool swapped, double value, void *buffer);
 int mb_put_binary_long(bool swapped, mb_s_long value, void *buffer);
-
 int mb_get_bounds(char *text, double *bounds);
 double mb_ddmmss_to_degree(const char *text);
+
+/* Function prototypes from mb_angle.c */
 int mb_takeoff_to_rollpitch(int verbose, double theta, double phi, double *pitch, double *roll, int *error);
 int mb_rollpitch_to_takeoff(int verbose, double pitch, double roll, double *theta, double *phi, int *error);
 int mb_xyz_to_takeoff(int verbose, double x, double y, double z, double *theta, double *phi, int *error);
 int mb_lever(int verbose, double sonar_offset_x, double sonar_offset_y, double sonar_offset_z, double nav_offset_x,
              double nav_offset_y, double nav_offset_z, double vru_offset_x, double vru_offset_y, double vru_offset_z,
              double vru_pitch, double vru_roll, double *lever_x, double *lever_y, double *lever_z, int *error);
-//int mb_mergesort(void *base, size_t nmemb, register size_t size, int (*cmp)(const void *, const void *));
-int mb_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *, const void *));
+int mb_beaudoin(int verbose, mb_3D_orientation tx_align, mb_3D_orientation tx_orientation, double tx_steer,
+                mb_3D_orientation rx_align, mb_3D_orientation rx_orientation, double rx_steer, double reference_heading,
+                double *beamAzimuth, double *beamDepression, int *error);
+int mb_beaudoin_unrotate(int verbose, mb_3D_vector orig, mb_3D_orientation rotate, mb_3D_vector *final, int *error);
+
+/* Function prototypes from mb_compare.c */
 int mb_double_compare(const void *a, const void *b);
 int mb_int_compare(const void *a, const void *b);
 int mb_edit_compare(const void *a, const void *b);
 int mb_edit_compare_coarse(const void *a, const void *b);
-void hilbert(int n, double delta[], double kappa[]);
-void hilbert2(int n, double data[]);
 
+/* mb_process.h declares prototypes for all functions defined in mb_process.c (mb_pr_checkstatus,
+   mb_pr_readpar, mb_pr_writepar, mb_pr_compare, mb_pr_bathmode, mb_pr_default_output, mb_pr_get_output,
+   mb_pr_check, mb_pr_update_ofile, mb_pr_update_format, mb_pr_update_rollbias, mb_pr_update_pitchbias,
+   mb_pr_update_draft, mb_pr_update_heave, mb_pr_update_lever, mb_pr_update_tide, mb_pr_update_tt,
+   mb_pr_update_ssv, mb_pr_update_svp, mb_pr_update_static, mb_pr_update_navadj, mb_pr_update_nav,
+   mb_pr_update_attitude, mb_pr_update_sensordepth, mb_pr_update_navshift, mb_pr_update_heading,
+   mb_pr_update_datacut, mb_pr_update_edit, mb_pr_update_ampcorr, mb_pr_update_sscorr, mb_pr_update_ssrecalc,
+   mb_pr_update_metadata, mb_pr_update_kluges, mb_pr_get_ofile, mb_pr_get_format, mb_pr_get_rollbias,
+   mb_pr_get_pitchbias, mb_pr_get_draft, mb_pr_get_heave, mb_pr_get_lever, mb_pr_get_tide, mb_pr_get_tt,
+   mb_pr_get_ssv, mb_pr_get_svp, mb_pr_get_static, mb_pr_get_navadj, mb_pr_get_nav, mb_pr_get_attitude,
+   mb_pr_get_sensordepth, mb_pr_get_navshift, mb_pr_get_heading, mb_pr_get_datacut, mb_pr_get_edit,
+   mb_pr_get_ampcorr, mb_pr_get_sscorr, mb_pr_get_ssrecalc, mb_pr_get_metadata, mb_pr_get_kluges,
+   mb_pr_set_bathyslope, mb_pr_set_bathyslopenew, mb_pr_get_bathyslope, mb_pr_point_in_quad,
+   mb_pr_lockswathfile, mb_pr_unlockswathfile, and mb_pr_lockinfo), plus all functions defined in mb_esf.c
+   (mb_esf_check, mb_esf_load, mb_esf_open, mb_esf_fixtimestamps, mb_esf_apply, mb_esf_save, mb_ess_save,
+   mb_esf_close, mb_mergesort, mb_mergesort_setup, and mb_mergesort_insertionsort) */
+
+/* mb_segy.h declares prototypes for all functions defined in mb_segy.c: mb_segy_read_init,
+   mb_segy_write_init, mb_segy_close, mb_segy_read_trace, mb_segy_write_trace, hilbert, and hilbert2 */
+
+/* Function prototypes from mb_absorption.c */
 int mb_absorption(int verbose, double frequency, double temperature, double salinity, double depth, double ph, double soundspeed,
                   double *absorption, int *error);
 int mb_potential_temperature(int verbose, double temperature, double salinity, double pressure, double *potential_temperature,
@@ -724,6 +870,7 @@ int mb_seabird_soundspeed(int verbose, int algorithm, double salinity,
               double temperature, double pressure,
               double *soundspeed, int *error);
 
+/* Function prototypes from mb_mem.c */
 int mb_mem_list_enable(int verbose, int *error);
 int mb_mem_list_disable(int verbose, int *error);
 int mb_mem_debug_on(int verbose, int *error);
@@ -743,6 +890,7 @@ int mb_update_arrayptr(int verbose, void *mbio_ptr, void **handle, int *error);
 int mb_list_arrays(int verbose, void *mbio_ptr, int *error);
 int mb_deall_ioarrays(int verbose, void *mbio_ptr, int *error);
 
+/* Function prototypes from mb_time.c */
 int mb_get_time(int verbose, int time_i[7], double *time_d);
 int mb_get_date(int verbose, double time_d, int time_i[7]);
 int mb_get_date_string(int verbose, double time_d, char *string);
@@ -753,17 +901,13 @@ char *mb_month_name(int verbose, int month);
 int mb_fix_y2k(int verbose, int year_short, int *year_long);
 int mb_unfix_y2k(int verbose, int year_long, int *year_short);
 
+/* Function prototypes from mb_proj.c */
 int mb_proj_init(int verbose, char *projection, void **pjptr, int *error);
 int mb_proj_free(int verbose, void **pjptr, int *error);
 int mb_proj_forward(int verbose, void *pjptr, double lon, double lat, double *easting, double *northing, int *error);
 int mb_proj_inverse(int verbose, void *pjptr, double easting, double northing, double *lon, double *lat, int *error);
-int mb_geod_init(int verbose, double radius_equatorial, double flattening, void **g_ptr, int *error);
-int mb_geod_free(int verbose, void **g_ptr, int *error);
-int mb_geod_inverse(int verbose, void *g_ptr,
-                    double lat1, double lon1, double lat2, double lon2,
-                    double *distance, double *azimuth1, double *azimuth2, int *error);
 
-/* mb_spline function prototypes */
+/* Function prototypes from mb_spline.c */
 int mb_spline_init(int verbose, const double *x, const double *y, int n, double yp1, double ypn, double *y2, int *error);
 int mb_spline_interp(int verbose, const double *xa, const double *ya, double *y2a, int n, double x, double *y, int *i, int *error);
 int mb_linear_interp(int verbose, const double *xa, const double *ya, int n, double x, double *y, int *i, int *error);
@@ -771,27 +915,30 @@ int mb_linear_interp_longitude(int verbose, const double *xa, const double *ya, 
 int mb_linear_interp_latitude(int verbose, const double *xa, const double *ya, int n, double x, double *y, int *i, int *error);
 int mb_linear_interp_heading(int verbose, const double *xa, const double *ya, int n, double x, double *y, int *i, int *error);
 
-/* byte swap function prototypes */
-int mb_swap_check();
+/* Function prototypes from mb_swap.c */
+int mb_swap_check(void);
 int mb_swap_float(float *a);
 int mb_swap_double(double *a);
 int mb_swap_long(mb_s_long *a);
 
-/* beam angle calculation function prototypes */
-int mb_beaudoin(int verbose, mb_3D_orientation tx_align, mb_3D_orientation tx_orientation, double tx_steer,
-                mb_3D_orientation rx_align, mb_3D_orientation rx_orientation, double rx_steer, double reference_heading,
-                double *beamAzimuth, double *beamDepression, int *error);
-int mb_beaudoin_unrotate(int verbose, mb_3D_vector orig, mb_3D_orientation rotate, mb_3D_vector *final, int *error);
-
-/* mb_rt function prototypes */
+/* Function prototypes from mb_rt.c */
 int mb_rt_init(int verbose, int number_node, double *depth, double *velocity, void **modelptr, int *error);
 int mb_rt_deall(int verbose, void **modelptr, int *error);
+int mb_rt_get_depth(int verbose, void *modelptr, double beta, int dir_sign, int turn_sign, double *depth, int *error);
+int mb_rt_quad1(int verbose, void *modelptr, int *error);
+int mb_rt_quad2(int verbose, void *modelptr, int *error);
+int mb_rt_quad3(int verbose, void *modelptr, int *error);
+int mb_rt_quad4(int verbose, void *modelptr, int *error);
+int mb_rt_plot_circular(int verbose, void *modelptr, int *error);
+int mb_rt_circular(int verbose, void *modelptr, int *error);
+int mb_rt_line(int verbose, void *modelptr, int *error);
+int mb_rt_vertical(int verbose, void *modelptr, int *error);
 int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle, double end_time, int ssv_mode,
           double surface_vel, double null_angle, int nplot_max,
           int *nplot, double *xplot, double *zplot, double *tplot,
           double *x, double *z, double *travel_time, int *ray_stat, int *error);
-          
-/* mb_bitpack C API function prototypes */
+
+/* Function prototypes from src/mbbitpack/mb_bitpack.cc (outside src/mbio, kept here for the C API it exposes) */
 void *mb_bitpack_new();
 void mb_bitpack_delete(void **mbbpptr);
 void mb_bitpack_clear(void *mbbpptr);
@@ -800,7 +947,8 @@ bool mb_bitpack_resize(void *mbbpptr, unsigned int arraySize, char **buffer, uns
 int mb_bitpack_getbytestoread(void *mbbpptr);
 int mb_bitpack_getbytestowrite(void *mbbpptr);
 bool mb_bitpack_readvalue(void *mbbpptr, unsigned int* value);
-bool mb_bitpack_writevalue(void *mbbpptr, unsigned int value); 
+bool mb_bitpack_writevalue(void *mbbpptr, unsigned int value);
+
 
 #ifdef __cplusplus
 }  /* extern "C" */

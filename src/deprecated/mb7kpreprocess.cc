@@ -1267,7 +1267,7 @@ int main(int argc, char **argv) {
 			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_POSITION, nullptr, nullptr, nullptr, 0, 0, 1,
 			                                ntimelag, &error);
 		if (status == MB_SUCCESS)
-			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 1, 0, position_offset_mode, position_offset_x,
+			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 1, 0, position_offset_x,
 			                                       position_offset_y, position_offset_z, false, 0.0, 0.0, 0.0, &error);
 		if (status == MB_SUCCESS)
 			status = mb_platform_set_sensor_timelatency(verbose, (void *)platform, 1, timelagmode, timelagconstant, ntimelag,

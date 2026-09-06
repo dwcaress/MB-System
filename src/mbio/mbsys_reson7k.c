@@ -5773,14 +5773,14 @@ int mbsys_reson7k_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
       }
       if (status == MB_SUCCESS)
         status = mb_platform_set_sensor_offset(
-            verbose, (void *)platform, 0, 0, MB_SENSOR_POSITION_OFFSET_STATIC, (double)installation->transmit_x,
-            (double)installation->transmit_y, (double)installation->transmit_z, MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+            verbose, (void *)platform, 0, 0, (double)installation->transmit_x,
+            (double)installation->transmit_y, (double)installation->transmit_z,
             (double)installation->transmit_heading, (double)installation->transmit_roll,
             (double)installation->transmit_pitch, error);
       if (status == MB_SUCCESS)
-        status = mb_platform_set_sensor_offset(verbose, (void *)platform, 0, 1, MB_SENSOR_POSITION_OFFSET_STATIC,
+        status = mb_platform_set_sensor_offset(verbose, (void *)platform, 0, 1,
                                                (double)installation->receive_x, (double)installation->receive_y,
-                                               (double)installation->receive_z, MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+                                               (double)installation->receive_z,
                                                (double)installation->receive_heading, (double)installation->receive_roll,
                                                (double)installation->receive_pitch, error);
     }
@@ -5812,9 +5812,9 @@ int mbsys_reson7k_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
       }
 
       if (status == MB_SUCCESS)
-        status = mb_platform_set_sensor_offset(verbose, (void *)platform, 1, 0, MB_SENSOR_POSITION_OFFSET_STATIC,
+        status = mb_platform_set_sensor_offset(verbose, (void *)platform, 1, 0,
                                                (double)installation->position_x, (double)installation->position_y,
-                                               (double)installation->position_z, MB_SENSOR_ATTITUDE_OFFSET_NONE,
+                                               (double)installation->position_z,
                                                (double)0.0, (double)0.0, (double)0.0, error);
       if (status == MB_SUCCESS && installation->position_time_delay != 0) {
         status =
@@ -5852,9 +5852,9 @@ int mbsys_reson7k_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
       }
 
       if (status == MB_SUCCESS)
-        status = mb_platform_set_sensor_offset(verbose, (void *)platform, 2, 0, MB_SENSOR_POSITION_OFFSET_STATIC,
+        status = mb_platform_set_sensor_offset(verbose, (void *)platform, 2, 0,
                                                (double)installation->motion_x, (double)installation->motion_y,
-                                               (double)installation->motion_z, MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+                                               (double)installation->motion_z,
                                                (double)installation->motion_heading, (double)installation->motion_roll,
                                                (double)installation->motion_pitch, error);
       if (status == MB_SUCCESS && installation->motion_time_delay != 0) {

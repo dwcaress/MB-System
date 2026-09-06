@@ -2269,6 +2269,10 @@ int main(int argc, char **argv) {
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&sonardepth_sonardepth, &error);
 	}
 
+	/* deallocate platform structure */
+	if (platform != nullptr)
+		status &= mb_platform_deall(verbose, (void **)&platform, &error);
+
 	/* check memory */
 	if (verbose >= 4)
 		status &= mb_memory_list(verbose, &error);

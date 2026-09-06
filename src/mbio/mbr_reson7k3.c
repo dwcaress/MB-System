@@ -176,9 +176,6 @@ int mbr_alm_reson7k3(int verbose, void *mbio_ptr, int *error) {
   fileheaders = (int *)&mb_io_ptr->save12;
   pixel_size = (double *)&mb_io_ptr->saved1;
   swath_width = (double *)&mb_io_ptr->saved2;
-  // int *preprocess_pars_set = (int *)&mb_io_ptr->save13;
-  // int *platform_set = (int *)&mb_io_ptr->save7;
-  // struct mb_platform_struct **platform_ptr = (struct mb_platform_struct **)&mb_io_ptr->saveptr3;
 
   *current_ping = -1;
   *last_ping = -1;
@@ -429,8 +426,6 @@ int mbr_dem_reson7k3(int verbose, void *mbio_ptr, int *error) {
   int *bufferalloc = NULL;
   char **buffersaveptr = NULL;
   int *filecatalogoffsetoffset = NULL;
-  int *platform_set = NULL;
-	struct mb_platform_struct **platform_ptr = NULL;
   int size;
   long offset;
 
@@ -452,7 +447,6 @@ int mbr_dem_reson7k3(int verbose, void *mbio_ptr, int *error) {
   buffersaveptr = (char **)&mb_io_ptr->saveptr2;
   // char *buffersave = (char *)*buffersaveptr;
   filecatalogoffsetoffset = (int *)&mb_io_ptr->save5;
-  platform_ptr = (struct mb_platform_struct **)&mb_io_ptr->saveptr3;
 
   int status = MB_SUCCESS;
 
@@ -512,15 +506,6 @@ int mbr_dem_reson7k3(int verbose, void *mbio_ptr, int *error) {
     write_len = index;
     status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
     fseek(mb_io_ptr->mbfp, 0L, SEEK_END);
-  }
-
-  /* deallocate memory for preprocessing parameters */
-  platform_set = (int *)&mb_io_ptr->save7;
-  platform_ptr = (struct mb_platform_struct **)&mb_io_ptr->saveptr3;
-  if (*platform_set) {
-    status = mb_platform_deall(verbose, (void **)platform_ptr, error);
-    *platform_set = false;
-    *platform_ptr = NULL;
   }
 
   /* deallocate memory for data descriptor */
@@ -9719,7 +9704,7 @@ int mbr_reson7k3_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   double *last_7k_time_d = (double *)&mb_io_ptr->saved5;
   unsigned int *icatalog = (unsigned int *)&mb_io_ptr->save15;
   int *kluge_fix7ktimestamps = (int *)&mb_io_ptr->save20;
-  double *kluge_fix7ktimestamps_targetoffset = (double *)&mb_io_ptr->saved1;
+  double *kluge_fix7ktimestamps_targetoffset = (double *)&mb_io_ptr->saved3;
 
   /* set file position */
   mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
@@ -11668,16 +11653,6 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  int *preprocess_pars_set;
-  struct mb_preprocess_struct *preprocess_pars;
-  int *platform_set;
-	struct mb_platform_struct **platform_ptr = NULL;
-  double soundspeed;
-  int *asynch_source_nav = NULL;
-  int *asynch_source_sensordepth = NULL;
-  int *asynch_source_heading = NULL;
-  int *asynch_source_attitude = NULL;
-  int *asynch_source_altitude = NULL;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -11708,15 +11683,12 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   s7k3_SonarSettings *SonarSettings = &store->SonarSettings;
   s7k3_RawDetection *RawDetection = &store->RawDetection;
   s7k3_SegmentedRawDetection *SegmentedRawDetection = &store->SegmentedRawDetection;
-  preprocess_pars_set = (int *)&mb_io_ptr->save13;
-  preprocess_pars = (struct mb_preprocess_struct *)&mb_io_ptr->preprocess_pars;
-  platform_set = (int *)&mb_io_ptr->save7;
-  platform_ptr = (struct mb_platform_struct **)&mb_io_ptr->saveptr3;
-  asynch_source_nav = (int *)&mb_io_ptr->save16;
-  asynch_source_sensordepth = (int *)&mb_io_ptr->save17;
-  asynch_source_heading = (int *)&mb_io_ptr->save18;
-  asynch_source_attitude = (int *)&mb_io_ptr->save19;
-  asynch_source_altitude = (int *)&mb_io_ptr->save20;
+  struct mb_preprocess_struct *preprocess_pars = (struct mb_preprocess_struct *)&mb_io_ptr->preprocess_pars;
+  int *asynch_source_nav = (int *)&mb_io_ptr->save16;
+  int *asynch_source_sensordepth = (int *)&mb_io_ptr->save17;
+  int *asynch_source_heading = (int *)&mb_io_ptr->save18;
+  int *asynch_source_attitude = (int *)&mb_io_ptr->save19;
+  int *asynch_source_altitude = (int *)&mb_io_ptr->save20;
 
   // Use the following asynchronous data source priority order:
   //    Position lon lat -
@@ -11740,6 +11712,11 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
   // deal with buffering asynchronous data if status == MB_SUCCESS
   if (status == MB_SUCCESS) {
+
+  	// Note: platform-based sign-flip calibration for heading, roll, and pitch
+  	// is applied centrally by mb_hedint_add()/mb_attint_add() (see mb_navint.c),
+  	// so the raw sensor values are passed through unmodified here. Flipping the
+  	// sign again in this file would cancel out the correction applied there.
 
     // save position, sensordepth, heading if Navigation record
     if (store->kind == MB_DATA_NAV) {
@@ -11779,8 +11756,10 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
         mb_io_ptr->nattitude = 0;
       }
       for (unsigned int i = 0; i < Attitude->n; i++) {
-        mb_attint_add(verbose, mbio_ptr, (double)(store->time_d + 0.001 * ((double)Attitude->delta_time[i])),
-                      (double)(Attitude->heave[i]), (double)(RTD * Attitude->roll[i]), (double)(RTD * Attitude->pitch[i]),
+        mb_attint_add(verbose, mbio_ptr,
+        							(double)(store->time_d + 0.001 * ((double)Attitude->delta_time[i])),
+                      (double)(Attitude->heave[i]),
+                      (double)(RTD * Attitude->roll[i]), (double)(RTD * Attitude->pitch[i]),
                       error);
       }
 
@@ -11790,7 +11769,8 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
         mb_io_ptr->nheading = 0;
       }
       for (unsigned int i = 0; i < Attitude->n; i++) {
-        mb_hedint_add(verbose, mbio_ptr, (double)(store->time_d + 0.001 * ((double)Attitude->delta_time[i])),
+        mb_hedint_add(verbose, mbio_ptr,
+        							(double)(store->time_d + 0.001 * ((double)Attitude->delta_time[i])),
                       (double)(RTD * Attitude->heading[i]), error);
       }
     }
@@ -11828,8 +11808,7 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
         mb_io_ptr->nheading = 0;
       }
       if (*asynch_source_heading == MB_DATA_HEADING) {
-        mb_hedint_add(verbose, mbio_ptr, (double)(store->time_d),
-                      (double)(RTD * Heading->heading), error);
+        mb_hedint_add(verbose, mbio_ptr, (double)(store->time_d), (double)(RTD * Heading->heading), error);
       }
     }
 
@@ -11846,8 +11825,7 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       if (*asynch_source_attitude == MB_DATA_ATTITUDE1) {
         mb_attint_add(verbose, mbio_ptr, (double)(store->time_d),
                       (double)(RollPitchHeave->heave),
-                      (double)(RTD * RollPitchHeave->roll),
-                      (double)(RTD * RollPitchHeave->pitch), error);
+                      (double)(RTD * RollPitchHeave->roll), (double)(RTD * RollPitchHeave->pitch), error);
       }
     }
 
@@ -11863,11 +11841,9 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       if (*asynch_source_attitude == MB_DATA_ATTITUDE2) {
         for (unsigned int i = 0; i < CustomAttitude->n; i++) {
           mb_attint_add(verbose, mbio_ptr,
-                    (double)(store->time_d + ((double)i)
-                              / ((double)CustomAttitude->frequency)),
+                    (double)(store->time_d + ((double)i) / ((double)CustomAttitude->frequency)),
                     (double)(CustomAttitude->heave[i]),
-                    (double)(RTD * CustomAttitude->roll[i]),
-                    (double)(RTD * CustomAttitude->pitch[i]), error);
+                    (double)(RTD * CustomAttitude->roll[i]), (double)(RTD * CustomAttitude->pitch[i]), error);
         }
       }
 
@@ -11922,21 +11898,42 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     fprintf(stderr, "Record returned: type:%d status:%d error:%d\n\n", store->kind, status, *error);
 #endif
 
-  /* if needed calculate bathymetry using preprocess function */
+	/* deal with survey data, which generally means that a set of data records has been 
+		 read that together make up a single ping */
   if (status == MB_SUCCESS && store->kind == MB_DATA_DATA) {
-    if ((store->read_RawDetection
-             && !RawDetection->optionaldata)
-            || (store->read_SegmentedRawDetection
-                && !SegmentedRawDetection->optionaldata)) {
-      /* get platform model if needed */
-      if (!*platform_set) {
-        status = mbsys_reson7k3_extract_platform(verbose, mbio_ptr, store_ptr, &store->kind, (void **)platform_ptr, error);
-        *platform_set = true;
+
+		/* if needed calculate or recalculate bathymetry using preprocess function
+				If preprocessing is specified (mb_io_ptr->preprocess_initialized == true) this 
+		 		is applied whenever a RawDetection or SegmentedRawDetection record has been read, 
+		 		regardless of whether the sonar already embedded its own processed bathymetry 
+		 		(RawDetection->optionaldata == true or SegmentedRawDetection->optionaldata == true)
+		 		If calculated bathymetry do not already exist (optionaldata == false) but 
+		 		preprocessing is not specified then load a platform model if needed, set default 
+		 		preprocess parameters, and apply preprocessing */  
+    if (store->read_RawDetection || store->read_SegmentedRawDetection) {
+			bool preprocess = false;
+			if (mb_io_ptr->preprocess_initialized || 
+							((store->read_RawDetection && !RawDetection->optionaldata)
+							|| (store->read_SegmentedRawDetection && !SegmentedRawDetection->optionaldata))) {
+				preprocess = true;
+			}
+			
+      /* get platform model if needed because bathymetry is not already calculated */
+      if (preprocess && !mb_io_ptr->platform_initialized) {
+        status = mbsys_reson7k3_extract_platform(verbose, mbio_ptr, store_ptr, &store->kind, 
+        																					(void **)&mb_io_ptr->platformptr, error);
+        mb_io_ptr->platform_initialized = true;
       }
 
-      /* set preprocess parameters if needed - have to update counts of ancilliary data arrays each time */
-      if (!*preprocess_pars_set) {
-        preprocess_pars->target_sensor = 0;
+      /* In the case that preprocessing has not been defined (mb_io_ptr->preprocess_initialized == false)
+      		and bathymetry is not already calculated (RawDetection->optionaldata == false) then initialize
+      		the preprocessing parameters. This must be done each time in order to use the
+      		current ancilliary data arrays stored in the mb_io struct and the current sound speed. */
+      if (preprocess && !mb_io_ptr->preprocess_initialized) {
+        if (mb_io_ptr->platformptr != NULL)
+          preprocess_pars->target_sensor = ((struct mb_platform_struct *)mb_io_ptr->platformptr)->source_bathymetry;
+        else
+          preprocess_pars->target_sensor = 0;
 
         preprocess_pars->timestamp_changed = false;
         preprocess_pars->time_d = 0.0;
@@ -11966,9 +11963,10 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
         preprocess_pars->attitude_heave = mb_io_ptr->attitude_heave;
 
         preprocess_pars->n_soundspeed = 1;
-        soundspeed = SonarSettings->sound_velocity;
-        preprocess_pars->soundspeed_time_d = &store->time_d;
-        preprocess_pars->soundspeed_soundspeed = &soundspeed;
+        mb_io_ptr->saved4 = store->time_d;
+        mb_io_ptr->saved5 = SonarSettings->sound_velocity;
+        preprocess_pars->soundspeed_time_d = &mb_io_ptr->saved4;
+        preprocess_pars->soundspeed_soundspeed = &mb_io_ptr->saved5;
 
         preprocess_pars->no_change_survey = false;
         preprocess_pars->multibeam_sidescan_source = MB_PR_SSSOURCE_SNIPPET;
@@ -11995,16 +11993,15 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
         preprocess_pars->head2_offsets_pitch = 0.0;
 
         preprocess_pars->n_kluge = 0;
-      } else {
-        preprocess_pars->n_nav = mb_io_ptr->nfix;
-        preprocess_pars->n_sensordepth = mb_io_ptr->nsensordepth;
-        preprocess_pars->n_heading = mb_io_ptr->nheading;
-        preprocess_pars->n_altitude = mb_io_ptr->naltitude;
-        preprocess_pars->n_attitude = mb_io_ptr->nattitude;
       }
 
-      status = mbsys_reson7k3_preprocess(verbose, mbio_ptr, store_ptr,
-                  *platform_ptr, preprocess_pars, error);
+			/* Run the preprocess function to calculate or recalculate bathymetry either if
+					bathymetry have not yet been calculated (store->optionaldata == false) or if 
+					preprocessing has been defined (mb_io_ptr->preprocess_initialized == true) */
+      if (preprocess) {
+      	status = mbsys_reson7k3_preprocess(verbose, mbio_ptr, store_ptr,
+                  mb_io_ptr->platformptr, preprocess_pars, error);
+      }
     }
 
     else if (!store->read_ProcessedSideScan) {

@@ -24,7 +24,7 @@
 
 message("In src/otps")
 
-add_executable(mbotps mbotps.c otps.h)
+add_executable(mbotps mbotps.c mb_otps_predict.c mb_otps_predict.h otps.h)
 
 message("-- Setting otpsDir to ${otpsDir}")
 # Escape backslashes (e.g. from a Windows path like C:\otps) so the
@@ -33,7 +33,7 @@ message("-- Setting otpsDir to ${otpsDir}")
 string(REPLACE "\\" "\\\\" otpsDir_escaped "${otpsDir}")
 file(WRITE otps.h
 	"const char *otps_location = \"${otpsDir_escaped}\";")
- 
+
 target_link_libraries(mbotps PRIVATE mbio)
 
 install(TARGETS mbotps
