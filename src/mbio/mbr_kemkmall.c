@@ -5294,9 +5294,15 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   if (status == MB_SUCCESS && store->kind == MB_DATA_DATA
       && !store->xmb.mbsystem_extensions) {
 
+    /* if a platform model has been supplied (e.g. via mb_set_platform()), use it
+       to apply lever arm and attitude corrections below - kmall data has no
+       embedded installation parameters to auto-extract a platform from, so
+       unlike reson7k3 there is no fallback extraction here */
+    struct mb_platform_struct *platform_for_pars = (struct mb_platform_struct *)mb_io_ptr->platformptr;
+
     /* set preprocess parameters */
     struct mb_preprocess_struct *preprocess_pars_ptr = &mb_io_ptr->preprocess_pars;
-    preprocess_pars_ptr->target_sensor = 0;
+    preprocess_pars_ptr->target_sensor = (platform_for_pars != NULL) ? platform_for_pars->source_bathymetry : 0;
     preprocess_pars_ptr->timestamp_changed = false;
     preprocess_pars_ptr->time_d = 0.0;
     preprocess_pars_ptr->n_nav = mb_io_ptr->nfix;
@@ -5324,7 +5330,7 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     preprocess_pars_ptr->no_change_survey = false;
     preprocess_pars_ptr->multibeam_sidescan_source = MB_PR_SSSOURCE_SNIPPET;
     preprocess_pars_ptr->modify_soundspeed = false;
-    preprocess_pars_ptr->recalculate_bathymetry = false;
+    preprocess_pars_ptr->recalculate_bathymetry = true;
     preprocess_pars_ptr->sounding_amplitude_filter = false;
     preprocess_pars_ptr->sounding_amplitude_threshold = 0.0;
     preprocess_pars_ptr->sounding_altitude_filter = false;
@@ -5347,8 +5353,12 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     preprocess_pars_ptr->n_kluge = 0;
 
     // call the preprocess routine
-    //  - this will fill in information for xmt record and generate pseudosidescan
-    status = mbsys_kmbes_preprocess(verbose, mbio_ptr, store_ptr, NULL,
+    //  - this fills in information for the xmt record and generates pseudosidescan,
+    //    and - when a platform model is available - applies the lever arm and
+    //    attitude-driven beam angle recalculation (mb_platform_position(),
+    //    mb_platform_orientation_target(), mb_beaudoin()) already implemented
+    //    in mbsys_kmbes_preprocess() below
+    status = mbsys_kmbes_preprocess(verbose, mbio_ptr, store_ptr, (void *)platform_for_pars,
                                     preprocess_pars_ptr, error);
   }
 

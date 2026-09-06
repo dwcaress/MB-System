@@ -41,6 +41,7 @@
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
+#include "mb_process.h"
 #include "mb_status.h"
 
 /*--------------------------------------------------------------------*/
@@ -143,6 +144,73 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 			double heave;
 			status = mb_extract_nav(verbose, mbio_ptr, *store_ptr, kind, time_i, time_d, navlon, navlat, speed, heading,
 			                        sensordepth, &roll, &pitch, &heave, error);
+		}
+
+		/* If a platform model has been supplied (e.g. via mb_set_platform()) and
+		   this format has not registered its own mb_io_preprocess function,
+		   apply the generic (format-independent) preprocessing fallback here so
+		   that real-time consumers of mb_get_all() - such as mbtrnpp - get the
+		   same platform-based attitude/navigation/bathymetry corrections that
+		   mbpreprocess applies offline. Formats that register their own
+		   mb_io_preprocess function and need real-time recalculation are
+		   expected to invoke it themselves during the low-level read (as
+		   mbr_reson7k3.c does), so this is skipped here to avoid preprocessing
+		   the same ping twice. */
+		if (status == MB_SUCCESS && *kind == MB_DATA_DATA && mb_io_ptr->platform_initialized &&
+		    mb_io_ptr->platformptr != NULL && mb_io_ptr->mb_io_preprocess == NULL) {
+			struct mb_platform_struct *platform = (struct mb_platform_struct *)mb_io_ptr->platformptr;
+			struct mb_preprocess_struct *pars = &mb_io_ptr->preprocess_pars;
+
+			pars->target_sensor = platform->source_bathymetry;
+			pars->timestamp_changed = false;
+			pars->time_d = 0.0;
+			pars->n_nav = mb_io_ptr->nfix;
+			pars->nav_time_d = mb_io_ptr->fix_time_d;
+			pars->nav_lon = mb_io_ptr->fix_lon;
+			pars->nav_lat = mb_io_ptr->fix_lat;
+			pars->nav_speed = NULL;
+			pars->n_sensordepth = mb_io_ptr->nsensordepth;
+			pars->sensordepth_time_d = mb_io_ptr->sensordepth_time_d;
+			pars->sensordepth_sensordepth = mb_io_ptr->sensordepth_sensordepth;
+			pars->n_heading = mb_io_ptr->nheading;
+			pars->heading_time_d = mb_io_ptr->heading_time_d;
+			pars->heading_heading = mb_io_ptr->heading_heading;
+			pars->n_altitude = mb_io_ptr->naltitude;
+			pars->altitude_time_d = mb_io_ptr->altitude_time_d;
+			pars->altitude_altitude = mb_io_ptr->altitude_altitude;
+			pars->n_attitude = mb_io_ptr->nattitude;
+			pars->attitude_time_d = mb_io_ptr->attitude_time_d;
+			pars->attitude_roll = mb_io_ptr->attitude_roll;
+			pars->attitude_pitch = mb_io_ptr->attitude_pitch;
+			pars->attitude_heave = mb_io_ptr->attitude_heave;
+			pars->n_soundspeed = 0;
+			pars->soundspeed_time_d = NULL;
+			pars->soundspeed_soundspeed = NULL;
+			pars->no_change_survey = false;
+			pars->multibeam_sidescan_source = MB_PR_SSSOURCE_UNKNOWN;
+			pars->modify_soundspeed = false;
+			pars->recalculate_bathymetry = true;
+			pars->sounding_amplitude_filter = false;
+			pars->sounding_amplitude_threshold = 0.0;
+			pars->sounding_altitude_filter = false;
+			pars->sounding_target_altitude = 0.0;
+			pars->ignore_water_column = false;
+			pars->head1_offsets = false;
+			pars->head2_offsets = false;
+			pars->n_kluge = 0;
+
+			int error_preprocess = MB_ERROR_NO_ERROR;
+			const int status_preprocess = mb_preprocess_generic(verbose, mbio_ptr, *store_ptr, mb_io_ptr->platformptr, pars,
+			                                                    &error_preprocess);
+			if (status_preprocess == MB_SUCCESS) {
+				/* re-extract so the caller sees the corrected values */
+				status = mb_extract(verbose, mbio_ptr, *store_ptr, kind, time_i, time_d, navlon, navlat, speed, heading,
+				                    nbath, namp, nss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss,
+				                    ssacrosstrack, ssalongtrack, comment, error);
+				if (status == MB_SUCCESS) {
+					status = mb_extract_altitude(verbose, mbio_ptr, *store_ptr, kind, sensordepth, altitude, error);
+				}
+			}
 		}
 	}
 
@@ -430,7 +498,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
-
+	
 	return (status);
 }
 /*--------------------------------------------------------------------*/

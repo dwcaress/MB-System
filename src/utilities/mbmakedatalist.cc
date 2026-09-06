@@ -593,8 +593,10 @@ int main(int argc, char **argv) {
             filelist_init(&outlist);
             for (int i = 0; i < sortable.size; i++) {
                 FileRecord *rec = &sortable.data[i];
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstringop-truncation"
+#endif
                 char newbase[max_path];
                 build_kongsberg_basename(rec, newbase, sizeof(newbase));
                 if (directory[0]) {
@@ -609,7 +611,9 @@ int main(int argc, char **argv) {
                 strncpy(rec->basename, newbase, sizeof(rec->basename) - 1);
                 rec->basename[sizeof(rec->basename) - 1] = '\0';
                 filelist_push(&outlist, rec);
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop
+#endif
             }
             filelist_free(&sortable);
         }

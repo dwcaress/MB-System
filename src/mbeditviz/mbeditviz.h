@@ -57,7 +57,6 @@
 #endif
 
 #ifndef MB_INFO_DEF
-#include "mb_info.h"
 #endif
 
 #ifdef MBEDITVIZ_DECLARE_GLOBALS

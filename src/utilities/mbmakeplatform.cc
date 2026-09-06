@@ -176,6 +176,9 @@ constexpr char usage_message[] =
     "\t--sensor-offset-angles=azimuth/roll/pitch\n"
     "\t--sensor-time-latency=value\n"
     "\t--sensor-time-latency-model=file\n"
+    "\t--sensor-flipsign-heading\n"
+    "\t--sensor-flipsign-roll\n"
+    "\t--sensor-flipsign-pitch\n"
     "\t--sensor-source-bathymetry\n"
     "\t--sensor-source-bathymetry1\n"
     "\t--sensor-source-bathymetry2\n"
@@ -405,6 +408,9 @@ int main(int argc, char **argv) {
     option_sensor_offset_angles,
     option_sensor_time_latency,
     option_sensor_time_latency_model,
+    option_sensor_flipsign_heading,
+    option_sensor_flipsign_roll,
+    option_sensor_flipsign_pitch,
     option_sensor_source_bathymetry,
     option_sensor_source_bathymetry1,
     option_sensor_source_bathymetry2,
@@ -606,6 +612,9 @@ int main(int argc, char **argv) {
     {"sensor-offset-angles", required_argument, nullptr, 0},
     {"sensor-time-latency", required_argument, nullptr, 0},
     {"sensor-time-latency-model", required_argument, nullptr, 0},
+    {"sensor-flipsign-heading", no_argument, nullptr, 0},
+    {"sensor-flipsign-roll", no_argument, nullptr, 0},
+    {"sensor-flipsign-pitch", no_argument, nullptr, 0},
     {"sensor-source-bathymetry", no_argument, nullptr, 0},
     {"sensor-source-bathymetry1", no_argument, nullptr, 0},
     {"sensor-source-bathymetry2", no_argument, nullptr, 0},
@@ -841,16 +850,12 @@ int main(int argc, char **argv) {
               fprintf(stderr, "    platform->sensors[%d].num_offsets:          %d\n", i,
                       platform->sensors[i].num_offsets);
               for (int j = 0; j < platform->sensors[i].num_offsets; j++) {
-                fprintf(stderr, "    platform->sensors[%d].offsets[%d].position_offset_mode:       %d\n", i, j,
-                        platform->sensors[i].offsets[j].position_offset_mode);
                 fprintf(stderr, "    platform->sensors[%d].offsets[%d].position_offset_x:          %f\n", i, j,
                         platform->sensors[i].offsets[j].position_offset_x);
                 fprintf(stderr, "    platform->sensors[%d].offsets[%d].position_offset_y:          %f\n", i, j,
                         platform->sensors[i].offsets[j].position_offset_y);
                 fprintf(stderr, "    platform->sensors[%d].offsets[%d].position_offset_z:          %f\n", i, j,
                         platform->sensors[i].offsets[j].position_offset_z);
-                fprintf(stderr, "    platform->sensors[%d].offsets[%d].attitude_offset_mode:       %d\n", i, j,
-                        platform->sensors[i].offsets[j].attitude_offset_mode);
                 fprintf(stderr, "    platform->sensors[%d].offsets[%d].attitude_offset_heading:    %f\n", i, j,
                         platform->sensors[i].offsets[j].attitude_offset_heading);
                 fprintf(stderr, "    platform->sensors[%d].offsets[%d].attitude_offset_roll:       %f\n", i, j,
@@ -868,6 +873,12 @@ int main(int argc, char **argv) {
                 fprintf(stderr, "    platform->sensors[%d].time_latency[%d]:                       %16.6f %8.6f\n", i,
                         j, platform->sensors[i].time_latency_time_d[j], platform->sensors[i].time_latency_value[j]);
               }
+              fprintf(stderr, "    platform->sensors[%d].heading_flipsign_heading:  %d\n", i,
+                      platform->sensors[i].heading_flipsign_heading);
+              fprintf(stderr, "    platform->sensors[%d].attitude_flipsign_roll:     %d\n", i,
+                      platform->sensors[i].attitude_flipsign_roll);
+              fprintf(stderr, "    platform->sensors[%d].attitude_flipsign_pitch:    %d\n", i,
+                      platform->sensors[i].attitude_flipsign_pitch);
             }
           }
           break;
@@ -1019,16 +1030,12 @@ int main(int argc, char **argv) {
               fprintf(stderr, "    platform->sensors[%d].num_offsets:          %d\n", i,
                       platform->sensors[i].num_offsets);
               for (int j = 0; j < platform->sensors[i].num_offsets; j++) {
-                fprintf(stderr, "    platform->sensors[%d].offsets[%d].position_offset_mode:       %d\n", i, j,
-                        platform->sensors[i].offsets[j].position_offset_mode);
                 fprintf(stderr, "    platform->sensors[%d].offsets[%d].position_offset_x:          %f\n", i, j,
                         platform->sensors[i].offsets[j].position_offset_x);
                 fprintf(stderr, "    platform->sensors[%d].offsets[%d].position_offset_y:          %f\n", i, j,
                         platform->sensors[i].offsets[j].position_offset_y);
                 fprintf(stderr, "    platform->sensors[%d].offsets[%d].position_offset_z:          %f\n", i, j,
                         platform->sensors[i].offsets[j].position_offset_z);
-                fprintf(stderr, "    platform->sensors[%d].offsets[%d].attitude_offset_mode:       %d\n", i, j,
-                        platform->sensors[i].offsets[j].attitude_offset_mode);
                 fprintf(stderr, "    platform->sensors[%d].offsets[%d].attitude_offset_heading:    %f\n", i, j,
                         platform->sensors[i].offsets[j].attitude_offset_heading);
                 fprintf(stderr, "    platform->sensors[%d].offsets[%d].attitude_offset_roll:       %f\n", i, j,
@@ -1046,6 +1053,12 @@ int main(int argc, char **argv) {
                 fprintf(stderr, "    platform->sensors[%d].time_latency[%d]:                       %16.6f %8.6f\n", i,
                         j, platform->sensors[i].time_latency_time_d[j], platform->sensors[i].time_latency_value[j]);
               }
+              fprintf(stderr, "    platform->sensors[%d].heading_flipsign_heading:  %d\n", i,
+                      platform->sensors[i].heading_flipsign_heading);
+              fprintf(stderr, "    platform->sensors[%d].attitude_flipsign_roll:     %d\n", i,
+                      platform->sensors[i].attitude_flipsign_roll);
+              fprintf(stderr, "    platform->sensors[%d].attitude_flipsign_pitch:    %d\n", i,
+                      platform->sensors[i].attitude_flipsign_pitch);
             }
           }
           break;
@@ -1383,9 +1396,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_bathymetry1:
           if (platform->source_bathymetry1 >= 0 && platform->source_bathymetry1 < platform_num_sensors) {
-			sensor_id = platform->source_bathymetry1;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_bathymetry1;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-bathymetry1 failed because no sensor is defined as the source for bathymetry1\n");
@@ -1394,9 +1407,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_bathymetry2:
           if (platform->source_bathymetry2 >= 0 && platform->source_bathymetry2 < platform_num_sensors) {
-			sensor_id = platform->source_bathymetry2;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_bathymetry2;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-bathymetry2 failed because no sensor is defined as the source for bathymetry2\n");
@@ -1405,9 +1418,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_bathymetry3:
           if (platform->source_bathymetry3 >= 0 && platform->source_bathymetry3 < platform_num_sensors) {
-			sensor_id = platform->source_bathymetry3;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_bathymetry3;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-bathymetry3 failed because no sensor is defined as the source for bathymetry3\n");
@@ -1416,9 +1429,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_backscatter:
           if (platform->source_backscatter >= 0 && platform->source_backscatter < platform_num_sensors) {
-			sensor_id = platform->source_backscatter;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_backscatter;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-backscatter failed because no sensor is defined as the source for backscatter\n");
@@ -1427,9 +1440,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_backscatter1:
           if (platform->source_backscatter1 >= 0 && platform->source_backscatter1 < platform_num_sensors) {
-			sensor_id = platform->source_backscatter1;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_backscatter1;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-backscatter1 failed because no sensor is defined as the source for backscatter1\n");
@@ -1438,9 +1451,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_backscatter2:
           if (platform->source_backscatter2 >= 0 && platform->source_backscatter2 < platform_num_sensors) {
-			sensor_id = platform->source_backscatter2;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_backscatter2;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-backscatter2 failed because no sensor is defined as the source for backscatter2\n");
@@ -1449,9 +1462,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_backscatter3:
           if (platform->source_backscatter3 >= 0 && platform->source_backscatter3 < platform_num_sensors) {
-			sensor_id = platform->source_backscatter3;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_backscatter3;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-backscatter3 failed because no sensor is defined as the source for backscatter3\n");
@@ -1460,9 +1473,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_subbottom:
           if (platform->source_subbottom >= 0 && platform->source_subbottom < platform_num_sensors) {
-			sensor_id = platform->source_subbottom;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_subbottom;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-subbottom failed because no sensor is defined as the source for subbottom\n");
@@ -1471,9 +1484,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_subbottom1:
           if (platform->source_subbottom1 >= 0 && platform->source_subbottom1 < platform_num_sensors) {
-			sensor_id = platform->source_subbottom1;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_subbottom1;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-subbottom1 failed because no sensor is defined as the source for subbottom1\n");
@@ -1482,9 +1495,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_subbottom2:
           if (platform->source_subbottom2 >= 0 && platform->source_subbottom2 < platform_num_sensors) {
-			sensor_id = platform->source_subbottom2;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_subbottom2;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-subbottom2 failed because no sensor is defined as the source for subbottom2\n");
@@ -1493,9 +1506,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_subbottom3:
           if (platform->source_subbottom3 >= 0 && platform->source_subbottom3 < platform_num_sensors) {
-			sensor_id = platform->source_subbottom3;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_subbottom3;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-subbottom3 failed because no sensor is defined as the source for subbottom3\n");
@@ -1515,9 +1528,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_camera1:
           if (platform->source_camera1 >= 0 && platform->source_camera1 < platform_num_sensors) {
-			sensor_id = platform->source_camera1;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_camera1;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-camera1 failed because no sensor is defined as the source for camera1\n");
@@ -1526,9 +1539,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_camera2:
           if (platform->source_camera2 >= 0 && platform->source_camera2 < platform_num_sensors) {
-			sensor_id = platform->source_camera2;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_camera2;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-camera2 failed because no sensor is defined as the source for camera2\n");
@@ -1537,9 +1550,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_camera3:
           if (platform->source_camera3 >= 0 && platform->source_camera3 < platform_num_sensors) {
-			sensor_id = platform->source_camera3;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_camera3;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-camera3 failed because no sensor is defined as the source for camera3\n");
@@ -1548,9 +1561,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_position:
           if (platform->source_position >= 0 && platform->source_position < platform_num_sensors) {
-			sensor_id = platform->source_position;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_position;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-position failed because no sensor is defined as the source for position\n");
@@ -1559,9 +1572,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_position1:
           if (platform->source_position1 >= 0 && platform->source_position1 < platform_num_sensors) {
-			sensor_id = platform->source_position1;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_position1;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-position1 failed because no sensor is defined as the source for position1\n");
@@ -1570,9 +1583,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_position2:
           if (platform->source_position2 >= 0 && platform->source_position2 < platform_num_sensors) {
-			sensor_id = platform->source_position2;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_position2;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-position2 failed because no sensor is defined as the source for position2\n");
@@ -1581,9 +1594,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_position3:
           if (platform->source_position3 >= 0 && platform->source_position3 < platform_num_sensors) {
-			sensor_id = platform->source_position3;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_position3;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-position3 failed because no sensor is defined as the source for position3\n");
@@ -1592,9 +1605,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_depth:
           if (platform->source_depth >= 0 && platform->source_depth < platform_num_sensors) {
-			sensor_id = platform->source_depth;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_depth;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-depth failed because no sensor is defined as the source for depth\n");
@@ -1603,9 +1616,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_depth1:
           if (platform->source_depth1 >= 0 && platform->source_depth1 < platform_num_sensors) {
-			sensor_id = platform->source_depth1;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_depth1;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-depth1 failed because no sensor is defined as the source for depth1\n");
@@ -1614,9 +1627,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_depth2:
           if (platform->source_depth2 >= 0 && platform->source_depth2 < platform_num_sensors) {
-			sensor_id = platform->source_depth2;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_depth2;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-depth2 failed because no sensor is defined as the source for depth2\n");
@@ -1625,9 +1638,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_depth3:
           if (platform->source_depth3 >= 0 && platform->source_depth3 < platform_num_sensors) {
-			sensor_id = platform->source_depth3;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_depth3;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-depth3 failed because no sensor is defined as the source for depth3\n");
@@ -1636,9 +1649,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_heading:
           if (platform->source_heading >= 0 && platform->source_heading < platform_num_sensors) {
-			sensor_id = platform->source_heading;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_heading;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-heading failed because no sensor is defined as the source for heading\n");
@@ -1647,9 +1660,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_heading1:
           if (platform->source_heading1 >= 0 && platform->source_heading1 < platform_num_sensors) {
-			sensor_id = platform->source_heading1;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_heading1;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-heading1 failed because no sensor is defined as the source for heading1\n");
@@ -1658,9 +1671,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_heading2:
           if (platform->source_heading2 >= 0 && platform->source_heading2 < platform_num_sensors) {
-			sensor_id = platform->source_heading2;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_heading2;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-heading2 failed because no sensor is defined as the source for heading2\n");
@@ -1669,9 +1682,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_heading3:
           if (platform->source_heading3 >= 0 && platform->source_heading3 < platform_num_sensors) {
-			sensor_id = platform->source_heading3;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_heading3;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-heading3 failed because no sensor is defined as the source for heading3\n");
@@ -1680,9 +1693,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_rollpitch:
           if (platform->source_rollpitch >= 0 && platform->source_rollpitch < platform_num_sensors) {
-			sensor_id = platform->source_rollpitch;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_rollpitch;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-rollpitch failed because no sensor is defined as the source for rollpitch\n");
@@ -1691,9 +1704,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_rollpitch1:
           if (platform->source_rollpitch1 >= 0 && platform->source_rollpitch1 < platform_num_sensors) {
-			sensor_id = platform->source_rollpitch1;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_rollpitch1;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-rollpitch1 failed because no sensor is defined as the source for rollpitch1\n");
@@ -1702,9 +1715,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_rollpitch2:
           if (platform->source_rollpitch2 >= 0 && platform->source_rollpitch2 < platform_num_sensors) {
-			sensor_id = platform->source_rollpitch2;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_rollpitch2;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-rollpitch2 failed because no sensor is defined as the source for rollpitch2\n");
@@ -1713,9 +1726,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_rollpitch3:
           if (platform->source_rollpitch3 >= 0 && platform->source_rollpitch3 < platform_num_sensors) {
-			sensor_id = platform->source_rollpitch3;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_rollpitch3;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-rollpitch3 failed because no sensor is defined as the source for rollpitch3\n");
@@ -1724,9 +1737,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_heave:
           if (platform->source_heave >= 0 && platform->source_heave < platform_num_sensors) {
-			sensor_id = platform->source_heave;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_heave;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-heave failed because no sensor is defined as the source for heave\n");
@@ -1735,9 +1748,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_heave1:
           if (platform->source_heave1 >= 0 && platform->source_heave1 < platform_num_sensors) {
-			sensor_id = platform->source_heave1;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_heave1;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-heave1 failed because no sensor is defined as the source for heave1\n");
@@ -1746,9 +1759,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_heave2:
           if (platform->source_heave2 >= 0 && platform->source_heave2 < platform_num_sensors) {
-			sensor_id = platform->source_heave2;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_heave2;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-heave2 failed because no sensor is defined as the source for heave2\n");
@@ -1757,9 +1770,9 @@ int main(int argc, char **argv) {
 
         case option_modify_sensor_heave3:
           if (platform->source_heave3 >= 0 && platform->source_heave3 < platform_num_sensors) {
-			sensor_id = platform->source_heave3;
-			sensor_mode = SENSOR_MODIFY;
-			active_sensor = &platform->sensors[sensor_id];
+						sensor_id = platform->source_heave3;
+						sensor_mode = SENSOR_MODIFY;
+						active_sensor = &platform->sensors[sensor_id];
           }
           else {
             fprintf(stderr, "Option modify-sensor-heave3 failed because no sensor is defined as the source for heave3\n");
@@ -1935,8 +1948,6 @@ int main(int argc, char **argv) {
                  &tmp_offsets[tmp_sensor.num_offsets].attitude_offset_heading,
                  &tmp_offsets[tmp_sensor.num_offsets].attitude_offset_roll,
                  &tmp_offsets[tmp_sensor.num_offsets].attitude_offset_pitch);
-          tmp_offsets[tmp_sensor.num_offsets].position_offset_mode = true;
-          tmp_offsets[tmp_sensor.num_offsets].attitude_offset_mode = true;
           tmp_sensor.num_offsets++;
           break;
 
@@ -1944,8 +1955,6 @@ int main(int argc, char **argv) {
           sscanf(optarg, "%lf/%lf/%lf", &tmp_offsets[tmp_sensor.num_offsets].position_offset_x,
                  &tmp_offsets[tmp_sensor.num_offsets].position_offset_y,
                  &tmp_offsets[tmp_sensor.num_offsets].position_offset_z);
-          tmp_offsets[tmp_sensor.num_offsets].position_offset_mode = true;
-          tmp_offsets[tmp_sensor.num_offsets].attitude_offset_mode = false;
           tmp_sensor.num_offsets++;
           break;
 
@@ -1953,8 +1962,6 @@ int main(int argc, char **argv) {
           sscanf(optarg, "%lf/%lf/%lf", &tmp_offsets[tmp_sensor.num_offsets].attitude_offset_heading,
                  &tmp_offsets[tmp_sensor.num_offsets].attitude_offset_roll,
                  &tmp_offsets[tmp_sensor.num_offsets].attitude_offset_pitch);
-          tmp_offsets[tmp_sensor.num_offsets].position_offset_mode = false;
-          tmp_offsets[tmp_sensor.num_offsets].attitude_offset_mode = true;
           tmp_sensor.num_offsets++;
           break;
 
@@ -2009,6 +2016,18 @@ int main(int argc, char **argv) {
             }
           }
           fclose(tfp);
+          break;
+
+        case option_sensor_flipsign_heading:
+          tmp_sensor.heading_flipsign_heading = true;
+          break;
+
+        case option_sensor_flipsign_roll:
+          tmp_sensor.attitude_flipsign_roll = true;
+          break;
+
+        case option_sensor_flipsign_pitch:
+          tmp_sensor.attitude_flipsign_pitch = true;
           break;
 
         case option_sensor_source_bathymetry:
@@ -2165,8 +2184,6 @@ int main(int argc, char **argv) {
               active_sensor->offsets[ioffset].attitude_offset_heading = d4;
               active_sensor->offsets[ioffset].attitude_offset_roll = d5;
               active_sensor->offsets[ioffset].attitude_offset_pitch = d6;
-              active_sensor->offsets[ioffset].position_offset_mode = true;
-              active_sensor->offsets[ioffset].attitude_offset_mode = true;
             }
           }
           break;
@@ -2178,8 +2195,6 @@ int main(int argc, char **argv) {
               active_sensor->offsets[ioffset].position_offset_x = d1;
               active_sensor->offsets[ioffset].position_offset_y = d2;
               active_sensor->offsets[ioffset].position_offset_z = d3;
-              active_sensor->offsets[ioffset].position_offset_mode = true;
-              active_sensor->offsets[ioffset].attitude_offset_mode = false;
             }
           }
           break;
@@ -2191,8 +2206,6 @@ int main(int argc, char **argv) {
               active_sensor->offsets[ioffset].attitude_offset_heading = d1;
               active_sensor->offsets[ioffset].attitude_offset_roll = d2;
               active_sensor->offsets[ioffset].attitude_offset_pitch = d3;
-              active_sensor->offsets[ioffset].position_offset_mode = false;
-              active_sensor->offsets[ioffset].attitude_offset_mode = true;
             }
           }
           break;
@@ -2262,15 +2275,22 @@ int main(int argc, char **argv) {
                                             &error);
             for (ioffset = 0; ioffset < tmp_sensor.num_offsets; ioffset++) {
               status = mb_platform_set_sensor_offset(
-                  verbose, (void *)platform, sensor_id, ioffset, tmp_offsets[ioffset].position_offset_mode,
+                  verbose, (void *)platform, sensor_id, ioffset, 
                   tmp_offsets[ioffset].position_offset_x, tmp_offsets[ioffset].position_offset_y,
-                  tmp_offsets[ioffset].position_offset_z, tmp_offsets[ioffset].attitude_offset_mode,
+                  tmp_offsets[ioffset].position_offset_z, 
                   tmp_offsets[ioffset].attitude_offset_heading, tmp_offsets[ioffset].attitude_offset_roll,
                   tmp_offsets[ioffset].attitude_offset_pitch, &error);
             }
             status &= mb_platform_set_sensor_timelatency(
                 verbose, (void *)platform, sensor_id, tmp_sensor.time_latency_mode, tmp_sensor.time_latency_static,
                 tmp_sensor.num_time_latency, tmp_sensor.time_latency_time_d, tmp_sensor.time_latency_value, &error);
+            if (tmp_sensor.heading_flipsign_heading)
+            	status &= mb_platform_set_sensor_flipsign_heading(verbose, (void *)platform, sensor_id, &error);
+            if (tmp_sensor.attitude_flipsign_roll)
+            	status &= mb_platform_set_sensor_flipsign_roll(verbose, (void *)platform, sensor_id, &error);
+            if (tmp_sensor.attitude_flipsign_pitch)
+            	status &= mb_platform_set_sensor_flipsign_pitch(verbose, (void *)platform, sensor_id, &error);
+
             sensor_mode = SENSOR_OFF;
             sensor_id = -1;
           }
@@ -2518,8 +2538,8 @@ int main(int argc, char **argv) {
                                (MB_SENSOR_CAPABILITY1_POSITION + MB_SENSOR_CAPABILITY1_DEPTH + MB_SENSOR_CAPABILITY1_HEAVE +
                                 MB_SENSOR_CAPABILITY1_ROLLPITCH + MB_SENSOR_CAPABILITY1_HEADING),
                                MB_SENSOR_CAPABILITY2_TOPOGRAPHY_MULTIBEAM, 1, 0, &error);
-    status &= mb_platform_set_sensor_offset(verbose, (void *)platform, 0, 0, MB_SENSOR_POSITION_OFFSET_STATIC, 0.0, 0.0, 0.0,
-                                           MB_SENSOR_ATTITUDE_OFFSET_STATIC, 0.0, 0.0, 0.0, &error);
+    status &= mb_platform_set_sensor_offset(verbose, (void *)platform, 0, 0, 0.0, 0.0, 0.0,
+                                           0.0, 0.0, 0.0, &error);
   }
 
   /* write out the platform file */
@@ -2593,16 +2613,12 @@ int main(int argc, char **argv) {
       fprintf(stderr, "    platform->sensors[%d].capability2:          %d\n", i, platform->sensors[i].capability2);
       fprintf(stderr, "    platform->sensors[%d].num_offsets:          %d\n", i, platform->sensors[i].num_offsets);
       for (int j = 0; j < platform->sensors[i].num_offsets; j++) {
-        fprintf(stderr, "    platform->sensors[%d].offsets[%d].position_offset_mode:       %d\n", i, j,
-                platform->sensors[i].offsets[j].position_offset_mode);
         fprintf(stderr, "    platform->sensors[%d].offsets[%d].position_offset_x:          %f\n", i, j,
                 platform->sensors[i].offsets[j].position_offset_x);
         fprintf(stderr, "    platform->sensors[%d].offsets[%d].position_offset_y:          %f\n", i, j,
                 platform->sensors[i].offsets[j].position_offset_y);
         fprintf(stderr, "    platform->sensors[%d].offsets[%d].position_offset_z:          %f\n", i, j,
                 platform->sensors[i].offsets[j].position_offset_z);
-        fprintf(stderr, "    platform->sensors[%d].offsets[%d].attitude_offset_mode:       %d\n", i, j,
-                platform->sensors[i].offsets[j].attitude_offset_mode);
         fprintf(stderr, "    platform->sensors[%d].offsets[%d].attitude_offset_heading:    %f\n", i, j,
                 platform->sensors[i].offsets[j].attitude_offset_heading);
         fprintf(stderr, "    platform->sensors[%d].offsets[%d].attitude_offset_roll:       %f\n", i, j,
@@ -2617,6 +2633,9 @@ int main(int argc, char **argv) {
         fprintf(stderr, "    platform->sensors[%d].time_latency[%d]:                       %16.6f %8.6f\n", i, j,
                 platform->sensors[i].time_latency_time_d[j], platform->sensors[i].time_latency_value[j]);
       }
+      fprintf(stderr, "    platform->sensors[%d].heading_flipsign_heading:  %d\n", i, platform->sensors[i].heading_flipsign_heading);
+      fprintf(stderr, "    platform->sensors[%d].attitude_flipsign_roll:    %d\n", i, platform->sensors[i].attitude_flipsign_roll);
+      fprintf(stderr, "    platform->sensors[%d].attitude_flipsign_pitch:   %d\n", i, platform->sensors[i].attitude_flipsign_pitch);
     }
   }
 

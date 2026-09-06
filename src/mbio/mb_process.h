@@ -1166,6 +1166,9 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 int mb_esf_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam, int action, int *error);
 int mb_ess_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam, int action, int *error);
 int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error);
+int mb_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *, const void *));
+void mb_mergesort_setup(mb_u_char *list1, mb_u_char *list2, size_t n, size_t size, int (*cmp)(const void *, const void *));
+void mb_mergesort_insertionsort(mb_u_char *a, size_t n, size_t size, int (*cmp)(const void *, const void *));
 
 int mb_pr_lockswathfile(int verbose, const char *file, int purpose, const char *program_name, int *error);
 int mb_pr_unlockswathfile(int verbose, const char *file, int purpose, const char *program_name, int *error);

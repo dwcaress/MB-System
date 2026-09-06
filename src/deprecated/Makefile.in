@@ -91,11 +91,11 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = mb7k2jstar$(EXEEXT) mb7k2ss$(EXEEXT) \
-	mb7kpreprocess$(EXEEXT) mbauvnavusbl$(EXEEXT) \
-	mbhsdump$(EXEEXT) mbhysweeppreprocess$(EXEEXT) \
-	mbinsreprocess$(EXEEXT) mbkongsbergpreprocess$(EXEEXT) \
-	mbneptune2esf$(EXEEXT) mbrollbias$(EXEEXT) mbrphsbias$(EXEEXT) \
+bin_PROGRAMS = mb7k2ss$(EXEEXT) mb7kpreprocess$(EXEEXT) \
+	mbauvnavusbl$(EXEEXT) mbhsdump$(EXEEXT) \
+	mbhysweeppreprocess$(EXEEXT) mbinsreprocess$(EXEEXT) \
+	mbkongsbergpreprocess$(EXEEXT) mbneptune2esf$(EXEEXT) \
+	mbotpsold$(EXEEXT) mbrollbias$(EXEEXT) mbrphsbias$(EXEEXT) \
 	mbstripnan$(EXEEXT) mbswplspreprocess$(EXEEXT)
 subdir = src/deprecated
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -117,16 +117,13 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_mb7k2jstar_OBJECTS = mb7k2jstar.$(OBJEXT)
-mb7k2jstar_OBJECTS = $(am_mb7k2jstar_OBJECTS)
-mb7k2jstar_LDADD = $(LDADD)
+am_mb7k2ss_OBJECTS = mb7k2ss.$(OBJEXT)
+mb7k2ss_OBJECTS = $(am_mb7k2ss_OBJECTS)
+mb7k2ss_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-am_mb7k2ss_OBJECTS = mb7k2ss.$(OBJEXT)
-mb7k2ss_OBJECTS = $(am_mb7k2ss_OBJECTS)
-mb7k2ss_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
 am_mb7kpreprocess_OBJECTS = mb7kpreprocess.$(OBJEXT)
 mb7kpreprocess_OBJECTS = $(am_mb7kpreprocess_OBJECTS)
 mb7kpreprocess_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
@@ -150,6 +147,11 @@ mbkongsbergpreprocess_DEPENDENCIES =  \
 am_mbneptune2esf_OBJECTS = mbneptune2esf.$(OBJEXT)
 mbneptune2esf_OBJECTS = $(am_mbneptune2esf_OBJECTS)
 mbneptune2esf_LDADD = $(LDADD)
+am_mbotpsold_OBJECTS = mbotpsold.$(OBJEXT)
+nodist_mbotpsold_OBJECTS =
+mbotpsold_OBJECTS = $(am_mbotpsold_OBJECTS) \
+	$(nodist_mbotpsold_OBJECTS)
+mbotpsold_LDADD = $(LDADD)
 am_mbrollbias_OBJECTS = mbrollbias.$(OBJEXT)
 mbrollbias_OBJECTS = $(am_mbrollbias_OBJECTS)
 mbrollbias_LDADD = $(LDADD)
@@ -205,15 +207,33 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/mbio
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/mb7k2jstar.Po ./$(DEPDIR)/mb7k2ss.Po \
+am__depfiles_remade = ./$(DEPDIR)/mb7k2ss.Po \
 	./$(DEPDIR)/mb7kpreprocess.Po ./$(DEPDIR)/mbauvnavusbl.Po \
 	./$(DEPDIR)/mbhsdump.Po ./$(DEPDIR)/mbhysweeppreprocess.Po \
 	./$(DEPDIR)/mbinsreprocess.Po \
 	./$(DEPDIR)/mbkongsbergpreprocess.Po \
-	./$(DEPDIR)/mbneptune2esf.Po ./$(DEPDIR)/mbrollbias.Po \
-	./$(DEPDIR)/mbrphsbias.Po ./$(DEPDIR)/mbstripnan.Po \
-	./$(DEPDIR)/mbswplspreprocess.Po
+	./$(DEPDIR)/mbneptune2esf.Po ./$(DEPDIR)/mbotpsold.Po \
+	./$(DEPDIR)/mbrollbias.Po ./$(DEPDIR)/mbrphsbias.Po \
+	./$(DEPDIR)/mbstripnan.Po ./$(DEPDIR)/mbswplspreprocess.Po
 am__mv = mv -f
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CFLAGS) $(CFLAGS)
+AM_V_CC = $(am__v_CC_@AM_V@)
+am__v_CC_ = $(am__v_CC_@AM_DEFAULT_V@)
+am__v_CC_0 = @echo "  CC      " $@;
+am__v_CC_1 = 
+CCLD = $(CC)
+LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+AM_V_CCLD = $(am__v_CCLD_@AM_V@)
+am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
+am__v_CCLD_0 = @echo "  CCLD    " $@;
+am__v_CCLD_1 = 
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
@@ -232,13 +252,13 @@ AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
 am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(mb7k2jstar_SOURCES) $(mb7k2ss_SOURCES) \
-	$(mb7kpreprocess_SOURCES) $(mbauvnavusbl_SOURCES) \
-	$(mbhsdump_SOURCES) $(mbhysweeppreprocess_SOURCES) \
-	$(mbinsreprocess_SOURCES) $(mbkongsbergpreprocess_SOURCES) \
-	$(mbneptune2esf_SOURCES) $(mbrollbias_SOURCES) \
-	$(mbrphsbias_SOURCES) $(mbstripnan_SOURCES) \
-	$(mbswplspreprocess_SOURCES)
+SOURCES = $(mb7k2ss_SOURCES) $(mb7kpreprocess_SOURCES) \
+	$(mbauvnavusbl_SOURCES) $(mbhsdump_SOURCES) \
+	$(mbhysweeppreprocess_SOURCES) $(mbinsreprocess_SOURCES) \
+	$(mbkongsbergpreprocess_SOURCES) $(mbneptune2esf_SOURCES) \
+	$(mbotpsold_SOURCES) $(nodist_mbotpsold_SOURCES) \
+	$(mbrollbias_SOURCES) $(mbrphsbias_SOURCES) \
+	$(mbstripnan_SOURCES) $(mbswplspreprocess_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -478,7 +498,6 @@ AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio -I${top_srcdir}/src/mbaux \
 	${libgmt_CPPFLAGS} ${libnetcdf_CPPFLAGS} ${libfftw_CPPFLAGS}
 AM_LDFLAGS = 
-mb7k2jstar_SOURCES = mb7k2jstar.cc
 mb7k2ss_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mb7k2ss_SOURCES = mb7k2ss.cc
 mb7kpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
@@ -492,20 +511,28 @@ mbinsreprocess_SOURCES = mbinsreprocess.cc
 mbkongsbergpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbkongsbergpreprocess_SOURCES = mbkongsbergpreprocess.cc
 mbneptune2esf_SOURCES = mbneptune2esf.cc
+mbotpsold_SOURCES = mbotpsold.c
 mbrollbias_SOURCES = mbrollbias.cc
 mbrphsbias_SOURCES = mbrphsbias.cc
 mbstripnan_SOURCES = mbstripnan.cc
 mbswplspreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbswplspreprocess_SOURCES = mbswplspreprocess.cc
+
+# mbotpsold needs the OTPS installation location compiled in, same as mbotps
+nodist_mbotpsold_SOURCES = otps.h
+BUILT_SOURCES = otps.h
+CLEANFILES = otps.h
+DISTCLEANFILES = otps.h
 bin_SCRIPTS = \
 	mbm_fmtvel \
 	mbm_grid \
 	mbm_grd2geovrml
 
-all: all-am
+all: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
-.SUFFIXES: .cc .lo .o .obj
+.SUFFIXES: .c .cc .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -580,10 +607,6 @@ clean-binPROGRAMS:
 	$(am__rm_f) $(bin_PROGRAMS)
 	test -z "$(EXEEXT)" || $(am__rm_f) $(bin_PROGRAMS:$(EXEEXT)=)
 
-mb7k2jstar$(EXEEXT): $(mb7k2jstar_OBJECTS) $(mb7k2jstar_DEPENDENCIES) $(EXTRA_mb7k2jstar_DEPENDENCIES) 
-	@rm -f mb7k2jstar$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(mb7k2jstar_OBJECTS) $(mb7k2jstar_LDADD) $(LIBS)
-
 mb7k2ss$(EXEEXT): $(mb7k2ss_OBJECTS) $(mb7k2ss_DEPENDENCIES) $(EXTRA_mb7k2ss_DEPENDENCIES) 
 	@rm -f mb7k2ss$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(mb7k2ss_OBJECTS) $(mb7k2ss_LDADD) $(LIBS)
@@ -615,6 +638,10 @@ mbkongsbergpreprocess$(EXEEXT): $(mbkongsbergpreprocess_OBJECTS) $(mbkongsbergpr
 mbneptune2esf$(EXEEXT): $(mbneptune2esf_OBJECTS) $(mbneptune2esf_DEPENDENCIES) $(EXTRA_mbneptune2esf_DEPENDENCIES) 
 	@rm -f mbneptune2esf$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(mbneptune2esf_OBJECTS) $(mbneptune2esf_LDADD) $(LIBS)
+
+mbotpsold$(EXEEXT): $(mbotpsold_OBJECTS) $(mbotpsold_DEPENDENCIES) $(EXTRA_mbotpsold_DEPENDENCIES) 
+	@rm -f mbotpsold$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(mbotpsold_OBJECTS) $(mbotpsold_LDADD) $(LIBS)
 
 mbrollbias$(EXEEXT): $(mbrollbias_OBJECTS) $(mbrollbias_DEPENDENCIES) $(EXTRA_mbrollbias_DEPENDENCIES) 
 	@rm -f mbrollbias$(EXEEXT)
@@ -673,7 +700,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb7k2jstar.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb7k2ss.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb7kpreprocess.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbauvnavusbl.Po@am__quote@ # am--include-marker
@@ -682,6 +708,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbinsreprocess.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbkongsbergpreprocess.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbneptune2esf.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbotpsold.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbrollbias.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbrphsbias.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbstripnan.Po@am__quote@ # am--include-marker
@@ -692,6 +719,30 @@ $(am__depfiles_remade):
 	@: >>$@
 
 am--depfiles: $(am__depfiles_remade)
+
+.c.o:
+@am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ $<
+
+.c.obj:
+@am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`;\
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ `$(CYGPATH_W) '$<'` &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.c.lo:
+@am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.lo$$||'`;\
+@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -775,14 +826,17 @@ cscopelist-am: $(am__tagged_files)
 distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 check-am: all-am
-check: check-am
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(PROGRAMS) $(SCRIPTS)
 installdirs:
 	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-am
-install-exec: install-exec-am
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-am
+install-exec: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
 
@@ -803,20 +857,22 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-$(am__rm_f) $(CLEANFILES)
 
 distclean-generic:
 	-$(am__rm_f) $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || $(am__rm_f) $(CONFIG_CLEAN_VPATH_FILES)
+	-$(am__rm_f) $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-$(am__rm_f) $(BUILT_SOURCES)
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
 
 distclean: distclean-am
-	-rm -f ./$(DEPDIR)/mb7k2jstar.Po
 	-rm -f ./$(DEPDIR)/mb7k2ss.Po
 	-rm -f ./$(DEPDIR)/mb7kpreprocess.Po
 	-rm -f ./$(DEPDIR)/mbauvnavusbl.Po
@@ -825,6 +881,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/mbinsreprocess.Po
 	-rm -f ./$(DEPDIR)/mbkongsbergpreprocess.Po
 	-rm -f ./$(DEPDIR)/mbneptune2esf.Po
+	-rm -f ./$(DEPDIR)/mbotpsold.Po
 	-rm -f ./$(DEPDIR)/mbrollbias.Po
 	-rm -f ./$(DEPDIR)/mbrphsbias.Po
 	-rm -f ./$(DEPDIR)/mbstripnan.Po
@@ -874,7 +931,6 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -f ./$(DEPDIR)/mb7k2jstar.Po
 	-rm -f ./$(DEPDIR)/mb7k2ss.Po
 	-rm -f ./$(DEPDIR)/mb7kpreprocess.Po
 	-rm -f ./$(DEPDIR)/mbauvnavusbl.Po
@@ -883,6 +939,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/mbinsreprocess.Po
 	-rm -f ./$(DEPDIR)/mbkongsbergpreprocess.Po
 	-rm -f ./$(DEPDIR)/mbneptune2esf.Po
+	-rm -f ./$(DEPDIR)/mbotpsold.Po
 	-rm -f ./$(DEPDIR)/mbrollbias.Po
 	-rm -f ./$(DEPDIR)/mbrphsbias.Po
 	-rm -f ./$(DEPDIR)/mbstripnan.Po
@@ -905,7 +962,7 @@ ps-am:
 
 uninstall-am: uninstall-binPROGRAMS uninstall-binSCRIPTS
 
-.MAKE: install-am install-strip
+.MAKE: all check install install-am install-exec install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am am--depfiles check check-am clean \
 	clean-binPROGRAMS clean-generic clean-libtool cscopelist-am \
@@ -924,6 +981,9 @@ uninstall-am: uninstall-binPROGRAMS uninstall-binSCRIPTS
 
 .PRECIOUS: Makefile
 
+
+otps.h: Makefile
+	echo 'char *otps_location = "$(OTPS_DIR)";' >$@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -17,9 +17,15 @@ class MbdumpesfTest(unittest.TestCase):
     self.cmd = '../../src/utilities/mbdumpesf'
 
   def testNoArgs(self):
+    # mbdumpesf now requires --input=esffile and exits with an error
+    # instead of silently running with an uninitialized filename.
     cmd = [self.cmd]
-    output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
-    self.assertEqual('', output.strip())
+    with self.assertRaises(subprocess.CalledProcessError) as cm:
+      subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+    self.assertEqual(2, cm.exception.returncode)
+    output = cm.exception.output.decode()
+    self.assertIn('No input edit save file specified', output)
+    self.assertIn('usage:', output)
 
   def testHelp(self):
     cmd = [self.cmd, '-h']

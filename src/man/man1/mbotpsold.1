@@ -1,14 +1,14 @@
-.TH mbotps 1 "2 September 2026" "MB-System 5.0" "MB-System 5.0"
+.TH mbotpsold 1 "30 August 2025" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbotps\fP \- Predicts tides using tidal prediction methods and data derived from the OSU Tidal Prediction Software (OTPS) distribution.
+\fBmbotpsold\fP \- (DEPRECATED) Predicts tides using the OSU Tidal Prediction Software (OTPS) distribution.
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbotps\fP
+\fBmbotpsold\fP 
 .br
-[
+[ 
 .br
 \fB--input\fP=\fIdatalist\fP {\fB-I\fP\fIdatalist\fP}
 .br
@@ -42,34 +42,31 @@ Version 5.0
 .br
 \fB--help\fP {\fB-H\fP}
 .br
-\fB--verbose\fP {\fB-V\fP}
+\fB--verbose\fP {\fB-V\fP} 
 .br
 ]
 
 
 .SH DESCRIPTION
-\fBMBotps\fP is a utility that predicts tides using tidal prediction methods and global
-tidal models developed by Gary Egbert and Lana Erofeeva of Oregon State University (OSU),
-whose OSU Tidal Prediction Software (OTPS) and TPXO tidal models are available at:
+\fBMBotpsold\fP is DEPRECATED and is only built if \fBMB-System\fP is configured with
+\fB--enable-deprecated\fP (autotools) or \fB-DbuildDeprecated=ON\fP (CMake). It is the
+original implementation of \fBMB-System\fP's tide prediction utility, retained under
+this name as a fallback and as a cross-check against the OSU Tidal Prediction Software
+(OTPS) Fortran reference implementation. New users should use \fBmbotps\fP(1) instead,
+which implements the same tidal prediction methods natively and does not require
+installing or building OTPS's predict_tide program. \fBmbotpsold\fP may be removed in
+a future \fBMB-System\fP release.
+
+\fBMBotpsold\fP is a utility that predicts tides using software and global tidal models available
+from Gary Egbert and Svetlana Erofeeva of Oregon State University (OSU) at:
     https://www.tpxo.net
+In order for \fBmbotpsold\fP to function, users must separately obtain and install the
+OSU Tidal Prediction Software (OTPS) and the associated TPXO tidal models. Both software
+and models are made available at no cost for academic, research or other noncommercial use, 
+but must be licensed for a fee for commercial use. Instructions (current as of 2024) are 
+given below for installing the software and a model. 
 
-Unlike earlier versions of this program (still available, deprecated, as \fBmbotpsold\fP(1)),
-\fBmbotps\fP does not install, build, or run any part of the OTPS Fortran software. Instead
-it implements the same harmonic tidal prediction methods natively - equilibrium tidal
-arguments and nodal corrections, inference of minor constituents from major ones, and
-bilinear interpolation of the tidal atlas grids - reading OTPS "atlas" format tide model
-binary files directly. This removes the need to separately obtain, install, and compile
-OTPS's predict_tide program, which previously required a working Fortran compiler and was
-one of the more error-prone steps in setting up \fBmbotps\fP.
-
-Users must still separately obtain and install one or more OTPS tidal models (the binary
-model data files themselves); these remain outside the \fBMB-System\fP installation, at
-the location given by the \fB\-\-otps-path\fP option. Model data are made available by OSU
-at no cost for academic, research, or other noncommercial use, but must be licensed for a
-fee for commercial use. Instructions for obtaining and installing a tidal model are given
-below.
-
-\fBMBotps\fP can be operated in two modes. First, users may use the \fB\-R\fP,
+\fBMBotpsold\fP can be operated in two modes. First, users may use the \fB\-R\fP,
 \fB\-B\fP, and \fB\-E\fP options to specify a location and the beginning and end times of
 a tidal model for that location. The \fB\-D\fP option sets the time interval of values in
 the output tidal model, and the \fB\-O\fP option sets the output tidal model filename.
@@ -85,54 +82,139 @@ The \fB\-C\fP\fItidestationformat\fP, \fB\-N\fP\fItidestationfile\fP, and
 \fB\-U\fP\fItidestationlon/tidestationlat\fP commands together allow users to input
 observations from a tide station; these observations can be used to calculate
 corrections to tidal model values in the vicinity of the tide station.
-If tide station data are specified, then \fBMBotps\fP calculates
+If tide station data are specified, then \fBMBotpsold\fP calculates
 the difference between the observed and modeled tide at that station for each data
 point in the input tide station data. This difference time series is then used as
 a correction to the output tide models, whether at a location specified with the
 \fB\-R\fP\fIlon/lat\fP option or for swath data specified with the
 \fB\-I\fP\fIdatalist\fP option.
 
-.SH ATTRIBUTION AND LICENSING OF TIDAL PREDICTION METHODS
-The tidal prediction methods used by \fBmbotps\fP - equilibrium tidal arguments and nodal
-corrections, inference of minor tidal constituents from major ones, and the OTPS binary
-tidal atlas file format itself - are derived from the OSU Tidal Prediction Software
-(OTPS), authored by:
-.br
-    Gary Egbert & Lana Erofeeva
-.br
-    College of Earth, Ocean, and Atmospheric Sciences
-.br
-    Oregon State University, Corvallis, OR 97331-5503
-.br
-    https://www.tpxo.net/
-.br
-The equilibrium argument and nodal correction formulas, and the minor-constituent
-inference method, were originally supplied to OTPS by Richard Ray (NASA/GSFC).
+.SH OBTAINING AND INSTALLING OTPS AND TXPO MODELS
 
-OTPS (both its source code and the TPXO tidal model data it works with) is copyrighted
-by Oregon State University and distributed under a royalty-free, nonexclusive license for
-academic, research, and other noncommercial use, which permits modification and
-redistribution of the software subject to conditions including attribution of the
-original copyright; see OTPS's own COPYRIGHT file for the complete license text.
-\fBMB-System\fP's native implementation of these methods (in mb_otps_predict.c and
-mb_otps_predict.h) is a transcription and reimplementation of OTPS's numerical methods
-in C, not a copy of the OTPS Fortran source code, and is provided as a derivative work
-under that same OSU license.
+The OSU Tidal Prediction Software (OTPS) can be downloaded from 
+     https://www.tpxo.net/otps
+.br
+Three versions of the software are available, the first of which consists of Fortran 90 programs
+that work with OTPS binary model files, the second of which is a \fBMATLAB\fP package also working
+with the binary model files, and the third of which is Fortran 90 programs that work with
+netCDF format model files. These instructions discuss only the first binary file case that 
+has been tested with \fBMB-System\fP, and present only one of many possible installation
+scenarios (but this case fits MB-System default settings).
 
-.SH OBTAINING AND INSTALLING A TPXO TIDAL MODEL
+On the OTPS web page, use the "Download OTPS" button to download the OTPS software 
+distribution in the form of a file named "OTPS.tar.Z". The MB-System default settings 
+include locating the OTPS installation in the directory /usr/local/src/ . Move the 
+distribution file to this directory:
+.br
+     mv OTPS.tar.Z /usr/local/src
+.br
+If the user does not have write privileges in /usr/local/src, then it may be necessary to 
+operate in "sudo" mode (which assumes the user is a system administrator):
+.br
+     sudo mv OTPS.tar.Z /usr/local/src
 
-\fBmbotps\fP reads OTPS "atlas" format tidal model binary data files directly; it does
-not require the OTPS software distribution or a Fortran compiler to be installed at all.
-Only a tidal model's data files are needed, obtained separately from OSU.
+Move to /usr/local/src and unpack the distribution:
+.br
+     cd /usr/local/src
+.br
+     gunzip OTPS.tar.Z
+.br
+     tar xvf OTPS.tar
+or
+.br
+     uncompress OTPS.tar.Z
+.br
+     tar xvf OTPS.tar
 
-A tidal model can be requested from OSU via the web pages:
+This will unpack a directory called OTPS. Moving into the directory and listing the
+contents:
+.br
+     cd OTPS
+     ls
+.br
+yields:
+.br
+        COPYRIGHT                 makefile*
+.br
+        DATA/                     matlab/
+.br
+        README                    predict_tide.f90
+.br
+        constit.h*                predict_tide_sample_out
+.br
+        dumsetup                  setup.atl
+.br
+        extract_HC.f90*           setup.inp
+.br
+        extract_HC_sample_out     setup.local
+.br
+        extract_local_model.f90   subs.f90
+.br
+        lat_lon                   time
+.br
+        lat_lon_time
+.br
+
+The component of OTPS that is required for \fBmbotpsold\fP is the program predict_tide, which
+must be compiled from the Fortran 90 source file predict_tide.f90. 
+
+On a Linux computer with the GCC compiler suite installed, the gfortran program 
+(a Fortran compiler) is already available, or can be easily installed via apt on Debian
+and Ubuntu or via yum on CentOs or Red Hat:
+.br
+     sudo apt install gfortran
+.br
+or
+.br
+     sudo yum install gcc-gfortran
+
+On a Mac, the LLVM compiler suite installed with the XCode development tools
+does not include a Fortran compiler, and so it is necessary to install GCC as well.
+Assuming that a Mac user is already installing prerequisite packages for \fBMB-System\fP
+using the MacPorts package manager, then \fBgfortran\fP can be installed via the
+commands:
+.br
+     sudo port install gcc14 +gfortran
+     sudo port select --set gcc mp-gcc14
+     sudo ln -s /opt/local/bin/gfortran-mp-14 gfortran
+.br
+Note that the version of GCC will continue to increment over time, and so may no longer
+be GCC 14.
+The last command links the installed Fortran compiler to the name "gfortran" (to allow
+the use of the OTPS makefile without modification). 
+
+In the OTPS directory, apply the Fortran compiler using the make utility:
+.br
+     sudo make predict_tide
+.br
+The program predict_tide now exists in a location known to \fBmbotpsold\fP.
+
+The OTPS directory described above includes a directory named DATA, which has the following
+contents:
+.br
+		HAW/				Model_tpxo9.v2
+.br
+		Model_Hawaii		Model_tpxo9_atlas_v5
+.br
+		Model_tpxo10.v2		load_file
+.br
+		Model_tpxo10_atlas
+.br
+Here the files with names beginning with "Model_" describe different available tidal models,
+each of which consists of a directory containing many model files. In order to install
+a tidal model, the associated directory and files must be obtained and placed inside
+the DATA directory. We recommend use of the TPXO10-atlas-v2 bin model, which combines 
+a global model with higher resolution local models for many coastal areas. This is 
+described in the Model_tpxo10_atlas file. 
+
+The tidal model must be obtained from OSU via instructions on the web pages:
 .br
     https://www.tpxo.net/global
 .br
     https://www.tpxo.net/tpxo-products-and-registration
 .br
-Basically, one must request access to a model via email. If approved, you will receive a
-link to download a directory named e.g. TPXO10_atlas_v2 which contains files named:
+Basically, one must request access to a model via email. If approved, you will receive a 
+link to download a directory named TPXO10_atlas_v2 which contains the following files:
 .br
         grid_tpxo10_atlas_30_v2     u_2n2_tpxo10_atlas_30_v2
 .br
@@ -166,52 +248,26 @@ link to download a directory named e.g. TPXO10_atlas_v2 which contains files nam
 .br
         h_s2_tpxo10_atlas_30_v2
 .br
-(\fBmbotps\fP only ever reads the "h_*" elevation files; the "u_*" current/transport
-files and the "grid_*" bathymetry file are not used and need not be present.)
 
-\fBmbotps\fP expects tidal models to be organized under a directory structure matching
-the OTPS convention: a top-level directory (the \fB\-\-otps-path\fP location, default
-/usr/local/src/otps/) containing a "DATA" subdirectory. Move the downloaded model
-directory into place there, e.g.:
+Move the directory TPXO10_atlas_v2 to /usr/local/src/OTPS/DATA/ :
 .br
-    mv TPXO10_atlas_v2 /usr/local/src/otps/DATA/
+    mv TPXO10_atlas_v2 /usr/local/src/OTPS/DATA/
 .br
-That alone is enough for \fBmbotps\fP to find and use the model: pass the model
-directory's own name as \fB\-\-otps-model\fP (e.g. \fB\-\-otps-model=TPXO10_atlas_v2\fP),
-and \fBmbotps\fP will scan it directly for the "h_*" elevation files it needs. No
-"Model_"-prefixed control file is required.
-
-Alternatively, a "Model_"-prefixed control file (e.g. "Model_tpxo10_atlas") may be used
-instead, exactly as with the original OTPS software: this is a small text file, one per
-installed model, containing three lines naming the elevation, transport, and bathymetry
-files using a "*" in place of the constituent name, e.g.:
-.br
-    DATA/TPXO10_atlas_v2/h_*_tpxo10_atlas_30_v2
-.br
-    DATA/TPXO10_atlas_v2/u_*_tpxo10_atlas_30_v2
-.br
-    DATA/TPXO10_atlas_v2/grid_tpxo10_atlas_30_v2
-.br
-Such a control file, if present, takes precedence over scanning the model directory
-directly, and lets \fB\-\-otps-model\fP be set to a short name (e.g. "tpxo10_atlas")
-that need not match the model directory's own name. This is mainly useful for
-compatibility with an existing OTPS installation that already has these files (they
-are part of the OTPS software distribution, not the tidal model data downloads).
-
-This can be tested by running \fBmbotps\fP with the \-\-help option:
+The tidal model should now be installed, and \fBmbotpsold\fP should access it successfully.
+This can be tested by running \fBmbotpsold\fP with the \-\-help option:
 
 .br
-Program mbotps
+Program mbotpsold
 .br
-MB-system Version 5.8.3beta16
+MB-system Version 5.8.3beta03
 .br
 
 .br
-MBotps predicts tides using methods and data derived from the OSU Tidal Prediction Software (OTPS) distributions.
+MBotpsold predicts tides using methods and data derived from the OSU Tidal Prediction Software (OTPS) distributions by installing and calling the OTPS Fortran program predict_tide. See mbotps for a newer implementation that does not require building or calling predict_tide.
 .br
 
 .br
-usage: mbotps
+usage: mbotpsold
 .br
 	[
 .br
@@ -261,7 +317,7 @@ Checking for available OTPS tide models
 .br
   Default OTPS model name: tpxo10_atlas
 .br
-  Specified OTPS model name:
+  Specified OTPS model name: 
 .br
   Possible OTPS tidal models:
 .br
@@ -273,11 +329,8 @@ Checking for available OTPS tide models
 .br
 Using OTPS tide model:  tpxo10_atlas
 .br
-Opened OTPS atlas model 'tpxo10_atlas': 10800 x 5401 grid, 15 constituents: m2 s2 k1 o1 n2 p1 k2 q1 2n2 mf mm m4 ms4 mn4 s1
-.br
 
-The output of \fBmbotps\fP indicates that the desired tidal model is available and was
-opened directly (no external predict_tide program is invoked).
+The output of \fBmbotpsold\fP indicates that the desired tidal model is available.
 
 .SH MB-SYSTEM AUTHORSHIP
 David W. Caress
@@ -331,7 +384,7 @@ set using \fBmbdefaults\fP.
 If the \fB\-I\fP option has been used so that tidal models are created for swath files,
 then this option causes each swath file's parameter file to be modified so that
 \fBmbprocess\fP will read and apply the ancillary tidal model file created by
-\fBmbotps\fP.
+\fBmbotpsold\fP.
 .TP
 .B \-\-skip-existing\fP
 If tide models are being generated for swath files specified using the \fB-I\fP option,
@@ -397,19 +450,15 @@ format 4 the value daymin = decimal minutes since the start of day.
 .TP
 .B \-\-otps-model\fP=\fImodel_name\fP
 .br
-Sets the name of the OTPS tidal model to be used. This model must be part of
-the local OTPS model installation at the location given by \fB\-\-otps-path\fP,
-either as a "Model_"-prefixed control file (e.g. "tpxo9_atlas_v5" for
-"Model_tpxo9_atlas_v5") or as the name of a model directory found directly
-under DATA/ (e.g. "TPXO10_atlas_v2"); see OBTAINING AND INSTALLING A TPXO
-TIDAL MODEL above.
+Sets the name of the OTPSnc tidal model to be used. This model must be part of
+the local OTPSnc installation. Examples include "tpxo7.2" and "altas".
 Default: "tpxo10_atlas"
 .TP
 .B \-\-otps-path\fP=\fIpath\fP
 .br
-Sets the path to the local installation of OTPS tidal model data, i.e. the directory
-containing the "DATA" subdirectory with the "Model_"-prefixed control files and the
-tidal model data files themselves. Default: /usr/local/src/otps
+Sets the path to the local installation of OTPS, which in turn defines the
+location of the program \fBpredict_tide\fP called by \fBmbotpsold\fP and
+the tide model to be used by \fBpredict_tide\fP.
 .TP
 .B \-\-help\fP
 .br
@@ -418,20 +467,20 @@ of its operation and then exit immediately.
 .TP
 .B \-\-verbose\fP
 .br
-Increases the verbosity of \fBmbotps\fP.
+Increases the verbosity of \fBmbotpsold\fP.
 
 .SH EXAMPLES
 Suppose one wishes to obtain a tidal model for the location 121W 36N extending
 at 60 second intervals over the day February 21, 2009. The following will suffice:
- 	mbotps \-\-tide-position=125/36 \-\-start-time=2009/02/21/00/00/00 \\
+ 	mbotpsold \-\-tide-position=125/36 \-\-start-time=2009/02/21/00/00/00 \\
  			\-\-end-time=2009/02/21/23/59/59 \-\-verbose
 .br
 The shell output looks like:
 .br
 
-Program mbotps
+Program mbotpsold
 .br
-MB-system Version 5.8.3beta16
+MB-system Version 5.8.3beta03
 
 .br
 Checking for available OTPS tide models
@@ -440,7 +489,7 @@ Checking for available OTPS tide models
 .br
   Default OTPS model name: tpxo10_atlas
 .br
-  Specified OTPS model name:
+  Specified OTPS model name: 
 .br
   Possible OTPS tidal models:
 .br
@@ -451,36 +500,61 @@ Checking for available OTPS tide models
 .br
 Using OTPS tide model:  tpxo10_atlas
 .br
-Opened OTPS atlas model 'tpxo10_atlas': 10800 x 5401 grid, 15 constituents: m2 s2 k1 o1 n2 p1 k2 q1 2n2 mf mm m4 ms4 mn4 s1
+Running: cd /usr/local/src/otps; ./predict_tide
+
+.br
+ Lat/Lon/Time file:/Users/caress/t30135.txt
+.br
+ Predict OCEAN tide
+.br
+ DATA/TPXO10_atlas_v2/h_m2_tpxo10_atlas_30_v2
+.br
+ Model:        src/otps/DATA/Model_tpxo10_atlas
+.br
+ Lat limits:     -90.0166702       90.0166702    
+.br
+ Lon limits:      1.66666675E-02   360.016663    
+.br
+ Constituents: m2  s2  k1  o1  n2  p1  k2  q1  2n2 mf  mm  m4  ms4 mn4 s1  
+.br
+ Predict elevations (m)
+.br
+ Constituents to include: m2  s2  k1  o1  n2  p1  k2  q1  2n2 mf  mm  m4  ms4 mn4 s1  
+.br
+ Infer minor constituents except those listed above.
+.br
+ The grid bathymetry defined in z, u, v - nodes
+.br
+ Bathymetry at u/v nodes is used to calculate currents
+.br
+Opening atlas files:m2  s2  k1  o1  n2  p1  k2  q1  2n2 mf  mm  m4  ms4 mn4 s1   done
+.br
+ Results are in /Users/caress/u30135.txt
 .br
 
 .br
-Results are in tide_model.txt
+Results are really in tide_model.txt
 
 
 .br
 The output tidal model is in the file tide_model.txt, which includes
 data that look like:
 .br
-	# Tide model generated by program mbotps
+	# Tide model generated by program mbotpsold
 .br
-	# MB-System Version: 5.8.3beta16
+	# MB-System Version: 5.8.3beta03
 .br
-	# Tide model generated by program mbotps
+	# Tide model generated by program mbotpsold
 .br
-	# using tidal prediction methods and data derived from the
+	# which in turn calls OTPS program predict_tide obtained from:
 .br
-	# OSU Tidal Prediction Software (OTPS) distribution, see:
-.br
-	#     https://www.tpxo.net/
+	#     http://www.coas.oregonstate.edu/research/po/research/tide/
 .br
 	#
 .br
-	# OTPS tide model:
+	# OTPSnc tide model: 
 .br
 	#      tpxo10_atlas
-.br
-	# Constituents included: m2  s2  k1  o1  n2  p1  k2  q1  2n2 mf  mm  m4  ms4 mn4 s1
 .br
 	# Output format:
 .br
@@ -489,6 +563,10 @@ data that look like:
 	# where tide is in meters
 .br
 	# Run by user <caress> on cpu <RAITT-1121.local> at <Tue Nov 19 21:36:30 2024>
+.br
+	# Model:        src/otps/DATA/Model_tpxo10_atlas
+.br
+	# Constituents included: m2  s2  k1  o1  n2  p1  k2  q1  2n2 mf  mm  m4  ms4 mn4 s1  
 .br
 	2009 02 21 00 00 00   -0.6780
 .br
@@ -535,15 +613,15 @@ data that look like:
 
 .br
 Now, suppose that one wants to apply tide corrections directly to a set of EM3002
-data in GSF format. First, execute \fBmbotps\fP with the datalist for the swath
+data in GSF format. First, execute \fBmbotpsold\fP with the datalist for the swath
 data specified as input:
- 	mbotps \-\-input=datalist.mb-1 \-\-verbose
+ 	mbotpsold \-\-input=datalist.mb-1 \-\-verbose
 .br
 The resulting shell output looks like:
 .br
- 	Program mbotps
+ 	Program mbotpsold
 .br
- 	MB-system Version 5.8.3beta16
+ 	MB-system Version 5.8.3beta03
 .br
 
 .br
@@ -553,7 +631,7 @@ The resulting shell output looks like:
 .br
 	  Default OTPS model name: tpxo10_atlas
 .br
-	  Specified OTPS model name:
+	  Specified OTPS model name: 
 .br
 	  Possible OTPS tidal models:
 .br
@@ -561,19 +639,65 @@ The resulting shell output looks like:
 .br
 	  Number of available OTPS tide models: 1
 .br
-
+	
 .br
 	Using OTPS tide model:  tpxo10_atlas
 .br
-	Opened OTPS atlas model 'tpxo10_atlas': 10800 x 5401 grid, 15 constituents: m2 s2 k1 o1 n2 p1 k2 q1 2n2 mf mm m4 ms4 mn4 s1
+	Running: cd /usr/local/src/otps; ./predict_tide
 .br
 
 .br
- 	Model tide for swath data referenced by datalist.mb-1
+ 	---------------------------------------
 .br
 
 .br
- 	himbb05291.d23.mb121 : model tide at 412 of 35602 records
+ 	Processing tides for himbb05291.d23.mb121
+.br
+
+.br
+ 	35602 records read from himbb05291.d23.mb121.fnv
+.br
+
+.br
+ 	 Lat/Lon/Time file:tmp_mbotps_llt_7413.txt
+.br
+ 	 Constituents to include: m2  s2  n2  k2  k1  o1  p1  q1
+.br
+ 	 Predict OCEAN tide
+.br
+ 	 Interpolate minor constituents
+.br
+
+.br
+ 	 DATA/TPXO10_atlas_v2/h_m2_tpxo10_atlas_30_v2
+.br
+ 	 Model:        src/OTPS/DATA/Model_tpxo10_atlas
+.br
+ 	 Model is on grid uniform in lat,lon
+.br
+ 	 Lat limits:    \-90.125 90.125
+.br
+ 	 Lon limits:    0.125 360.125
+.br
+     Constituents: m2  s2  k1  o1  n2  p1  k2  q1  2n2 mf  mm  m4  ms4 mn4 s1  
+.br
+	 Predict elevations (m)
+.br
+	 Constituents to include: m2  s2  k1  o1  n2  p1  k2  q1  2n2 mf  mm  m4  ms4 mn4 s1  
+.br
+	 Infer minor constituents except those listed above.
+.br
+	 The grid bathymetry defined in z, u, v - nodes
+.br
+	 Bathymetry at u/v nodes is used to calculate currents
+.br
+	Opening atlas files:m2  s2  k1  o1  n2  p1  k2  q1  2n2 mf  mm  m4  ms4 mn4 s1   done
+.br
+ 	 Results are in tmp_mbotps_llttd_7413.txt
+.br
+
+.br
+ 	Results are really in himbb05291.d23.mb121.tde
 .br
 
 .br
@@ -581,25 +705,21 @@ The output tide files have the same structure shown above:
 .br
 
 .br
- 	# Tide model generated by program mbotps
+ 	# Tide model generated by program mbotpsold
 .br
- 	# MB-System Version: 5.8.3beta16
+ 	# MB-System Version: 5.8.3beta03
 .br
- 	# Tide model generated by program mbotps
+ 	# Tide model generated by program mbotpsold
 .br
- 	# using tidal prediction methods and data derived from the
+ 	# which in turn calls OTPS program predict_tide obtained from:
 .br
- 	# OSU Tidal Prediction Software (OTPS) distribution, see:
-.br
- 	#     https://www.tpxo.net/
+ 	#     http://www.coas.oregonstate.edu/research/po/research/tide/
 .br
  	#
 .br
- 	# OTPS tide model:
+ 	# OTPSnc tide model:
 .br
  	#      tpxo10_atlas
-.br
- 	# Constituents included: m2  s2  k1  o1  n2  p1  k2  q1  2n2 mf  mm  m4  ms4 mn4 s1
 .br
  	# Output format:
 .br
@@ -608,6 +728,10 @@ The output tide files have the same structure shown above:
  	# where tide is in meters
 .br
  	# Run by user <caress> on cpu <deitz> at <Tue Nov 19 17:53:22 2024>
+.br
+ 	# Model:        src/OTPS/DATA/Model_tpxo10_atlas
+.br
+ 	# Constituents included: m2  s2  n2  k2  k1  o1  p1  q1  mf  mm  m4  ms4 mn4
 .br
  	2005 10 18 19 01 36    0.0800
 .br
@@ -627,24 +751,18 @@ The output tide files have the same structure shown above:
 .br
  	2005 10 18 19 09 37    0.0700
 .br
-
+ 
 .br
 In addition to generating *.tde files for each swath file referenced by the
 input datalist structure, when the \fB\-\-use\-mbprocess\fP option is specified,
-\fBmbotps\fP modifies the parameter file associated
+\fBmbotpsold\fP modifies the parameter file associated
 with each swath file (creating it if necessary) so that tide correction is enabled
 using the *.tde file and tide format 2. When \fBmbprocess\fP is run on the same
 datalist, the files will be reprocessed, and the processing will include the
 application of the tide correction to all bathymetry.
 
 .SH SEE ALSO
-\fBmbsystem\fP(1), \fBmbotpsold\fP(1), \fBmbprocess\fP, \fBmbset\fP
+\fBmbsystem\fP(1), \fBmbotps\fP(1), \fBmbprocess\fP, \fBmbset\fP
 
 .SH BUGS
-None known. If \fBmbotps\fP cannot find a usable tidal model, obtaining and installing
-one is somewhat involved (see OBTAINING AND INSTALLING A TPXO TIDAL MODEL above), since
-it requires registering with OSU to download TPXO tidal model data. The deprecated
-\fBmbotpsold\fP is retained (in src/deprecated, built only with --enable-deprecated or
--DbuildDeprecated=ON) as a fallback and as a cross-check against the original OTPS
-Fortran reference implementation (predict_tide), for users who have that program
-already installed.
+Installing the OTPS package from OSU is not excessively easy.

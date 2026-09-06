@@ -28,14 +28,14 @@ class MbAreaCleanTest(unittest.TestCase):
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
     self.assertIn('identifies and flags artifacts', output)
     self.assertIn('usage:', output)
-    self.assertIn('minbeam/maxbeam', output)
+    self.assertIn('minbeam[/maxbeam]', output)
 
   def testHelpVerbose2(self):
     cmd = [self.cmd, '-h', '-V', '-V']
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
     self.assertIn('identifies and flags artifacts', output)
     self.assertIn('usage:', output)
-    self.assertIn('minbeam/maxbeam', output)
+    self.assertIn('minbeam[/maxbeam]', output)
     self.assertIn('dbg2', output)
     self.assertIn('lonflip', output)
     self.assertIn('median_filter', output)

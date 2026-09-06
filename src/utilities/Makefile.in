@@ -91,17 +91,17 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = mbconfig$(EXEEXT) mbabsorption$(EXEEXT) \
-	mbareaclean$(EXEEXT) mbauvloglist$(EXEEXT) \
-	mbbackangle$(EXEEXT) mbclean$(EXEEXT) mbcopy$(EXEEXT) \
-	mbctdlist$(EXEEXT) mbdatalist$(EXEEXT) mbdefaults$(EXEEXT) \
-	mbdumpesf$(EXEEXT) mbextractsegy$(EXEEXT) mbfilter$(EXEEXT) \
-	mbformat$(EXEEXT) mbgetesf$(EXEEXT) mbgpstide$(EXEEXT) \
-	mbgrid$(EXEEXT) mbhistogram$(EXEEXT) mbinfo$(EXEEXT) \
-	mblevitus$(EXEEXT) mblist$(EXEEXT) mbmakeplatform$(EXEEXT) \
-	mbminirovnav$(EXEEXT) mbmosaic$(EXEEXT) mbnavlist$(EXEEXT) \
-	mbpreprocess$(EXEEXT) mbprocess$(EXEEXT) \
-	mbrolltimelag$(EXEEXT) mbroutetime$(EXEEXT) \
+bin_PROGRAMS = mbconfig$(EXEEXT) mb7k2jstar$(EXEEXT) \
+	mbabsorption$(EXEEXT) mbareaclean$(EXEEXT) \
+	mbauvloglist$(EXEEXT) mbbackangle$(EXEEXT) mbclean$(EXEEXT) \
+	mbcopy$(EXEEXT) mbctdlist$(EXEEXT) mbdatalist$(EXEEXT) \
+	mbdefaults$(EXEEXT) mbdumpesf$(EXEEXT) mbextractsegy$(EXEEXT) \
+	mbfilter$(EXEEXT) mbformat$(EXEEXT) mbgetesf$(EXEEXT) \
+	mbgpstide$(EXEEXT) mbgrid$(EXEEXT) mbhistogram$(EXEEXT) \
+	mbinfo$(EXEEXT) mblevitus$(EXEEXT) mblist$(EXEEXT) \
+	mbmakeplatform$(EXEEXT) mbminirovnav$(EXEEXT) \
+	mbmosaic$(EXEEXT) mbnavlist$(EXEEXT) mbpreprocess$(EXEEXT) \
+	mbprocess$(EXEEXT) mbrolltimelag$(EXEEXT) mbroutetime$(EXEEXT) \
 	mbsegygrid$(EXEEXT) mbsegyinfo$(EXEEXT) mbsegylist$(EXEEXT) \
 	mbset$(EXEEXT) mbsslayout$(EXEEXT) mbsvplist$(EXEEXT) \
 	$(am__EXEEXT_1) mbswath2las$(EXEEXT) mbtime$(EXEEXT) \
@@ -129,13 +129,16 @@ CONFIG_CLEAN_VPATH_FILES =
 @BUILD_FFTW_TRUE@am__EXEEXT_2 = mbsegypsd$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(includedir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_mbabsorption_OBJECTS = mbabsorption.$(OBJEXT)
-mbabsorption_OBJECTS = $(am_mbabsorption_OBJECTS)
-mbabsorption_LDADD = $(LDADD)
+am_mb7k2jstar_OBJECTS = mb7k2jstar.$(OBJEXT)
+mb7k2jstar_OBJECTS = $(am_mb7k2jstar_OBJECTS)
+mb7k2jstar_LDADD = $(LDADD)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+am_mbabsorption_OBJECTS = mbabsorption.$(OBJEXT)
+mbabsorption_OBJECTS = $(am_mbabsorption_OBJECTS)
+mbabsorption_LDADD = $(LDADD)
 am_mbareaclean_OBJECTS = mbareaclean.$(OBJEXT)
 mbareaclean_OBJECTS = $(am_mbareaclean_OBJECTS)
 mbareaclean_LDADD = $(LDADD)
@@ -277,27 +280,27 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/mbio
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/mbabsorption.Po \
-	./$(DEPDIR)/mbareaclean.Po ./$(DEPDIR)/mbauvloglist.Po \
-	./$(DEPDIR)/mbbackangle.Po ./$(DEPDIR)/mbclean.Po \
-	./$(DEPDIR)/mbconfig.Po ./$(DEPDIR)/mbcopy.Po \
-	./$(DEPDIR)/mbctdlist.Po ./$(DEPDIR)/mbdatalist.Po \
-	./$(DEPDIR)/mbdefaults.Po ./$(DEPDIR)/mbdumpesf.Po \
-	./$(DEPDIR)/mbextractsegy.Po ./$(DEPDIR)/mbfilter.Po \
-	./$(DEPDIR)/mbformat.Po ./$(DEPDIR)/mbgetesf.Po \
-	./$(DEPDIR)/mbgpstide.Po ./$(DEPDIR)/mbgrid.Po \
-	./$(DEPDIR)/mbhistogram.Po ./$(DEPDIR)/mbinfo.Po \
-	./$(DEPDIR)/mblevitus.Po ./$(DEPDIR)/mblist.Po \
-	./$(DEPDIR)/mbmakeplatform.Po ./$(DEPDIR)/mbminirovnav.Po \
-	./$(DEPDIR)/mbmosaic.Po ./$(DEPDIR)/mbnavlist.Po \
-	./$(DEPDIR)/mbpreprocess.Po ./$(DEPDIR)/mbprocess.Po \
-	./$(DEPDIR)/mbrolltimelag.Po ./$(DEPDIR)/mbroutetime.Po \
-	./$(DEPDIR)/mbsegygrid.Po ./$(DEPDIR)/mbsegyinfo.Po \
-	./$(DEPDIR)/mbsegylist.Po ./$(DEPDIR)/mbsegypsd.Po \
-	./$(DEPDIR)/mbset.Po ./$(DEPDIR)/mbsslayout.Po \
-	./$(DEPDIR)/mbsvplist.Po ./$(DEPDIR)/mbsvpselect.Po \
-	./$(DEPDIR)/mbswath2las.Po ./$(DEPDIR)/mbtime.Po \
-	./$(DEPDIR)/mbvoxelclean.Po
+am__depfiles_remade = ./$(DEPDIR)/mb7k2jstar.Po \
+	./$(DEPDIR)/mbabsorption.Po ./$(DEPDIR)/mbareaclean.Po \
+	./$(DEPDIR)/mbauvloglist.Po ./$(DEPDIR)/mbbackangle.Po \
+	./$(DEPDIR)/mbclean.Po ./$(DEPDIR)/mbconfig.Po \
+	./$(DEPDIR)/mbcopy.Po ./$(DEPDIR)/mbctdlist.Po \
+	./$(DEPDIR)/mbdatalist.Po ./$(DEPDIR)/mbdefaults.Po \
+	./$(DEPDIR)/mbdumpesf.Po ./$(DEPDIR)/mbextractsegy.Po \
+	./$(DEPDIR)/mbfilter.Po ./$(DEPDIR)/mbformat.Po \
+	./$(DEPDIR)/mbgetesf.Po ./$(DEPDIR)/mbgpstide.Po \
+	./$(DEPDIR)/mbgrid.Po ./$(DEPDIR)/mbhistogram.Po \
+	./$(DEPDIR)/mbinfo.Po ./$(DEPDIR)/mblevitus.Po \
+	./$(DEPDIR)/mblist.Po ./$(DEPDIR)/mbmakeplatform.Po \
+	./$(DEPDIR)/mbminirovnav.Po ./$(DEPDIR)/mbmosaic.Po \
+	./$(DEPDIR)/mbnavlist.Po ./$(DEPDIR)/mbpreprocess.Po \
+	./$(DEPDIR)/mbprocess.Po ./$(DEPDIR)/mbrolltimelag.Po \
+	./$(DEPDIR)/mbroutetime.Po ./$(DEPDIR)/mbsegygrid.Po \
+	./$(DEPDIR)/mbsegyinfo.Po ./$(DEPDIR)/mbsegylist.Po \
+	./$(DEPDIR)/mbsegypsd.Po ./$(DEPDIR)/mbset.Po \
+	./$(DEPDIR)/mbsslayout.Po ./$(DEPDIR)/mbsvplist.Po \
+	./$(DEPDIR)/mbsvpselect.Po ./$(DEPDIR)/mbswath2las.Po \
+	./$(DEPDIR)/mbtime.Po ./$(DEPDIR)/mbvoxelclean.Po
 am__mv = mv -f
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -317,10 +320,10 @@ AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
 am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(mbabsorption_SOURCES) $(mbareaclean_SOURCES) \
-	$(mbauvloglist_SOURCES) $(mbbackangle_SOURCES) \
-	$(mbclean_SOURCES) $(mbconfig_SOURCES) $(mbcopy_SOURCES) \
-	$(mbctdlist_SOURCES) $(mbdatalist_SOURCES) \
+SOURCES = $(mb7k2jstar_SOURCES) $(mbabsorption_SOURCES) \
+	$(mbareaclean_SOURCES) $(mbauvloglist_SOURCES) \
+	$(mbbackangle_SOURCES) $(mbclean_SOURCES) $(mbconfig_SOURCES) \
+	$(mbcopy_SOURCES) $(mbctdlist_SOURCES) $(mbdatalist_SOURCES) \
 	$(mbdefaults_SOURCES) $(mbdumpesf_SOURCES) \
 	$(mbextractsegy_SOURCES) $(mbfilter_SOURCES) \
 	$(mbformat_SOURCES) $(mbgetesf_SOURCES) $(mbgpstide_SOURCES) \
@@ -606,6 +609,7 @@ AM_CPPFLAGS = -I${top_srcdir}/src/mbio -I${top_srcdir}/src/mbaux \
 	${libnetcdf_CPPFLAGS} ${libfftw_CPPFLAGS}
 AM_LDFLAGS = 
 mbconfig_SOURCES = mbconfig.cc
+mb7k2jstar_SOURCES = mb7k2jstar.cc
 mbabsorption_SOURCES = mbabsorption.cc
 mbareaclean_SOURCES = mbareaclean.cc
 mbauvloglist_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
@@ -741,6 +745,10 @@ uninstall-binPROGRAMS:
 clean-binPROGRAMS:
 	$(am__rm_f) $(bin_PROGRAMS)
 	test -z "$(EXEEXT)" || $(am__rm_f) $(bin_PROGRAMS:$(EXEEXT)=)
+
+mb7k2jstar$(EXEEXT): $(mb7k2jstar_OBJECTS) $(mb7k2jstar_DEPENDENCIES) $(EXTRA_mb7k2jstar_DEPENDENCIES) 
+	@rm -f mb7k2jstar$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(mb7k2jstar_OBJECTS) $(mb7k2jstar_LDADD) $(LIBS)
 
 mbabsorption$(EXEEXT): $(mbabsorption_OBJECTS) $(mbabsorption_DEPENDENCIES) $(EXTRA_mbabsorption_DEPENDENCIES) 
 	@rm -f mbabsorption$(EXEEXT)
@@ -908,6 +916,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb7k2jstar.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbabsorption.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbareaclean.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbauvloglist.Po@am__quote@ # am--include-marker
@@ -1105,6 +1114,7 @@ clean: clean-am
 clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
 
 distclean: distclean-am
+	-rm -f ./$(DEPDIR)/mb7k2jstar.Po
 	-rm -f ./$(DEPDIR)/mbabsorption.Po
 	-rm -f ./$(DEPDIR)/mbareaclean.Po
 	-rm -f ./$(DEPDIR)/mbauvloglist.Po
@@ -1190,6 +1200,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
+	-rm -f ./$(DEPDIR)/mb7k2jstar.Po
 	-rm -f ./$(DEPDIR)/mbabsorption.Po
 	-rm -f ./$(DEPDIR)/mbareaclean.Po
 	-rm -f ./$(DEPDIR)/mbauvloglist.Po

@@ -1,6 +1,7 @@
 message("In src/man/man1")
 
 set(manpages
+    mb7k2jstar.1
     mbabsorption.1
     mbareaclean.1
     mbauvloglist.1
@@ -91,7 +92,6 @@ set(manpages
 
 if(buildDeprecated)
     set(deprecated
-        mb7k2jstar.1
         mb7k2ss.1
         mb7kpreprocess.1
         mbauvnavusbl.1
@@ -99,6 +99,7 @@ if(buildDeprecated)
         mbhysweeppreprocess.1
         mbkongsbergpreprocess.1
         mbneptune2esf.1
+        mbotpsold.1
         mbrollbias.1
         mbstripnan.1
         mbswplspreprocess.1)

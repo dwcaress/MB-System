@@ -437,6 +437,11 @@ int mb_attint_add(int verbose, void *mbio_ptr, double time_d, double heave, doub
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
+	/* apply platform-based sensor sign-flip calibration, if a platform model is loaded */
+	if (mb_io_ptr->platform_initialized && mb_io_ptr->platformptr != NULL) {
+		mb_platform_apply_flipsign_attitude(verbose, mb_io_ptr->platformptr, &roll, &pitch, error);
+	}
+
 	/* add another attitude fix only if time stamp has changed */
 	if (mb_io_ptr->nattitude == 0 || (time_d > mb_io_ptr->attitude_time_d[mb_io_ptr->nattitude - 1])) {
 		/* if list if full make room for another attitude fix */
@@ -521,16 +526,25 @@ int mb_attint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 		mb_io_ptr->nattitude = mb_io_ptr->nattitude - shift;
 	}
 
+	/* apply platform-based sensor sign-flip calibration, if a platform model is loaded */
+	const bool apply_flipsign_attitude = (mb_io_ptr->platform_initialized && mb_io_ptr->platformptr != NULL);
+
 	/* add fixes */
 	for (int i = 0; i < nsamples; i++) {
+		double roll_i = roll[i];
+		double pitch_i = pitch[i];
+		if (apply_flipsign_attitude) {
+			mb_platform_apply_flipsign_attitude(verbose, mb_io_ptr->platformptr, &roll_i, &pitch_i, error);
+		}
+
 		/* add new fix to list */
 		mb_io_ptr->attitude_time_d[mb_io_ptr->nattitude] = time_d[i];
 		mb_io_ptr->attitude_heave[mb_io_ptr->nattitude] = heave[i];
-		mb_io_ptr->attitude_roll[mb_io_ptr->nattitude] = roll[i];
-		mb_io_ptr->attitude_pitch[mb_io_ptr->nattitude] = pitch[i];
+		mb_io_ptr->attitude_roll[mb_io_ptr->nattitude] = roll_i;
+		mb_io_ptr->attitude_pitch[mb_io_ptr->nattitude] = pitch_i;
 #ifdef MB_ATTINT_DEBUG
 		fprintf(stderr, "mb_attint_add:    Attitude fix %d of %d: time:%f roll:%f pitch:%f heave:%f added\n", i,
-		        mb_io_ptr->nattitude, time_d[i], roll[i], pitch[i], heave[i]);
+		        mb_io_ptr->nattitude, time_d[i], roll_i, pitch_i, heave[i]);
 #endif
 		mb_io_ptr->nattitude++;
 
@@ -673,6 +687,11 @@ int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, in
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
+	/* apply platform-based sensor sign-flip calibration, if a platform model is loaded */
+	if (mb_io_ptr->platform_initialized && mb_io_ptr->platformptr != NULL) {
+		mb_platform_apply_flipsign_heading(verbose, mb_io_ptr->platformptr, &heading, error);
+	}
+
 	/* add another fix only if time stamp has changed */
 	if (mb_io_ptr->nheading == 0 || (time_d > mb_io_ptr->heading_time_d[mb_io_ptr->nheading - 1])) {
 		/* if list if full make room for another heading fix */
@@ -747,13 +766,21 @@ int mb_hedint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 		mb_io_ptr->nheading = mb_io_ptr->nheading - shift;
 	}
 
+	/* apply platform-based sensor sign-flip calibration, if a platform model is loaded */
+	const bool apply_flipsign_heading = (mb_io_ptr->platform_initialized && mb_io_ptr->platformptr != NULL);
+
 	/* add fixes */
 	for (int i = 0; i < nsamples; i++) {
+		double heading_i = heading[i];
+		if (apply_flipsign_heading) {
+			mb_platform_apply_flipsign_heading(verbose, mb_io_ptr->platformptr, &heading_i, error);
+		}
+
 		/* add new fix to list */
 		mb_io_ptr->heading_time_d[mb_io_ptr->nheading] = time_d[i];
-		mb_io_ptr->heading_heading[mb_io_ptr->nheading] = heading[i];
+		mb_io_ptr->heading_heading[mb_io_ptr->nheading] = heading_i;
 #ifdef MB_HEDINT_DEBUG
-		fprintf(stderr, "mb_hedint_nadd:    Heading fix %d of %d: %f added\n", i, mb_io_ptr->nheading, heading[i]);
+		fprintf(stderr, "mb_hedint_nadd:    Heading fix %d of %d: %f added\n", i, mb_io_ptr->nheading, heading_i);
 #endif
 		mb_io_ptr->nheading++;
 

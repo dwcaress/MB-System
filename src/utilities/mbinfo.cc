@@ -45,7 +45,6 @@
 #include <unistd.h>
 
 #include "mb_define.h"
-#include "mb_info.h"
 #include "mb_io.h"
 #include "mb_status.h"
 

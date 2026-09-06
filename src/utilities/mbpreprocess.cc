@@ -1324,10 +1324,9 @@ int main(int argc, char **argv) {
   double altitude_org;
   double sensordepth_org;
   double draft_org;
-  double roll_org, roll_delta;
-  double pitch_org, pitch_delta;
+  double roll_org;
+  double pitch_org;
   double heave_org;
-  double depth_offset_change;
 
   /* arrays for asynchronous data accessed using mb_extract_nnav() */
   int nanavmax = MB_NAV_MAX;
@@ -2562,34 +2561,63 @@ int main(int argc, char **argv) {
 
   /*-------------------------------------------------------------------*/
 
-  /* deal with flipping the sign of roll and/or pitch */
-  if ((kluge_flipsign_roll || kluge_flipsign_pitch) && n_attitude > 0 && n_attitude_alloc >= n_attitude) {
-    if (verbose > 0) {
-      fprintf(stderr, "\n-----------------------------------------------\n");
-      if (kluge_flipsign_roll)
-        fprintf(stderr, "Flipping sign of roll\n");
-      if (kluge_flipsign_pitch)
-        fprintf(stderr, "Flipping sign of pitch\n");
-    }
+  /* deal with flipping the sign of heading */
+  bool flipsign_heading = false;
+  if (n_heading_alloc >= n_heading) {
+  	if (sensor_heading != nullptr && sensor_heading->heading_flipsign_heading)
+  		flipsign_heading = true;
+		if (verbose > 0 && flipsign_heading) {
+			fprintf(stderr, "\n-----------------------------------------------\n");
+			if (flipsign_heading)
+				fprintf(stderr, "Flipping sign of heading\n");
+		}
 
-	/* roll */
-	if (kluge_flipsign_roll && n_attitude > 0 && n_attitude_alloc >= n_attitude) {
-	  for (int i = 0;i<n_attitude;i++) {
-		attitude_roll[i] *= -1.0;
-	  }
+		/* heading */
+		if (flipsign_heading) {
+			for (int i = 0;i<n_heading;i++) {
+				heading_heading[i] = -heading_heading[i];
+			}
+		}
 	}
-  
-	/* roll */
-	if (kluge_flipsign_pitch && n_attitude > 0 && n_attitude_alloc >= n_attitude) {
-	  for (int i = 0;i<n_attitude;i++) {
-		attitude_pitch[i] *= -1.0;
-	  }
+
+  /* deal with flipping the sign of roll and/or pitch */
+  bool flipsign_roll = false;
+  bool flipsign_pitch = false;
+  if (n_attitude_alloc >= n_attitude) {
+  	if (kluge_flipsign_roll)
+  		flipsign_roll = true;
+  	if (kluge_flipsign_pitch)
+  		flipsign_pitch = true;
+  	if (sensor_rollpitch != nullptr && sensor_rollpitch->attitude_flipsign_roll)
+  		flipsign_roll = true;
+  	if (sensor_rollpitch != nullptr && sensor_rollpitch->attitude_flipsign_pitch)
+  		flipsign_pitch = true;
+		if (verbose > 0 && (flipsign_roll || flipsign_pitch)) {
+			fprintf(stderr, "\n-----------------------------------------------\n");
+			if (flipsign_roll)
+				fprintf(stderr, "Flipping sign of roll\n");
+			if (flipsign_pitch)
+				fprintf(stderr, "Flipping sign of pitch\n");
+		}
+
+		/* roll */
+		if (flipsign_roll) {
+			for (int i = 0;i<n_attitude;i++) {
+				attitude_roll[i] = -attitude_roll[i];
+			}
+		}
+
+		/* pitch */
+		if (flipsign_pitch) {
+			for (int i = 0;i<n_attitude;i++) {
+				attitude_pitch[i] = -attitude_pitch[i];
+			}
+		}
 	}
 
 	if (verbose > 0) {
 	  fprintf(stderr, "-----------------------------------------------\n");
 	}
-  }
 
   /*-------------------------------------------------------------------*/
 
@@ -3234,97 +3262,14 @@ int main(int argc, char **argv) {
           preprocess_pars.soundspeed_time_d = soundspeed_time_d;
           preprocess_pars.soundspeed_soundspeed = soundspeed_soundspeed;
 
-          /* attempt to execute a preprocess function for these data */
+          /* Execute a preprocess function for these data - mb_preprocess()
+           * dispatches to this format's own mb_io_preprocess function if one
+           * is registered, and otherwise falls back to mb_preprocess_generic()
+           * (lever arm repositioning plus attitude-driven rigid rotation of
+           * the already-extracted bathymetry), so platform-based preprocessing
+           * is applied here regardless of whether this format has a dedicated
+           * implementation. */
           status = mb_preprocess(verbose, imbio_ptr, istore_ptr, (void *)platform, (void *)&preprocess_pars, &error);
-
-          /* If a predefined preprocess function does not exist for
-           * this format then standard preprocessing will be done
-           *      1) Replace time tag, nav, attitude
-           *   2) if attitude values changed rotate bathymetry accordingly
-           *   3) if any values changed reinsert the data */
-          if (status == MB_FAILURE) {
-fprintf(stderr, "**** DOING GENERIC PREPROCESS!!!\n");
-            /* reset status and error */
-            status = MB_SUCCESS;
-            error = MB_ERROR_NO_ERROR;
-
-            /* if platform defined, do lever arm correction */
-            if (platform != nullptr) {
-              /* calculate target sensor position */
-              status = mb_platform_position(verbose, (void *)platform, target_sensor, 0, navlon, navlat, sensordepth,
-                              heading, roll, pitch, &navlon, &navlat, &sensordepth, &error);
-              draft = sensordepth - heave;
-              nav_changed = true;
-              sensordepth_changed = true;
-
-              /* calculate target sensor attitude */
-              status = mb_platform_orientation_target(verbose, (void *)platform, target_sensor, 0, heading, roll, pitch,
-                                  &heading, &roll, &pitch, &error);
-              roll_delta = roll - roll_org;
-              pitch_delta = pitch - pitch_org;
-              if (roll_delta != 0.0 || pitch_delta != 0.0)
-                attitude_changed = true;
-            }
-
-            /* if attitude changed apply rigid rotations to any bathymetry */
-            if (attitude_changed) {
-              /* loop over the beams */
-              for (int i = 0; i < beams_bath; i++) {
-                if (beamflag[i] != MB_FLAG_NULL) {
-                  /* strip off original heave + draft */
-                  bath[i] -= sensordepth_org;
-                  /* rotate beam by
-                     rolldelta:  Roll relative to previous correction and bias included
-                     pitchdelta: Pitch relative to previous correction and bias included
-                     heading:    Heading absolute (bias included) */
-                  mb_platform_math_attitude_rotate_beam(verbose, bathacrosstrack[i], bathalongtrack[i], bath[i],
-                                      roll_delta, pitch_delta, 0.0, &(bathacrosstrack[i]),
-                                      &(bathalongtrack[i]), &(bath[i]), &error);
-
-                  /* add heave and draft back in */
-                  bath[i] += sensordepth_org;
-                }
-              }
-            }
-
-            /* recalculate bathymetry by changes to sensor depth  */
-            if (sensordepth_changed) {
-              /* get draft change */
-              depth_offset_change = draft - draft_org;
-
-              /* loop over the beams */
-              for (int i = 0; i < beams_bath; i++) {
-                if (beamflag[i] != MB_FLAG_NULL) {
-                  /* apply transducer depth change to depths */
-                  bath[i] += depth_offset_change;
-                }
-              }
-            }
-
-            /* insert navigation */
-            if (timestamp_changed || nav_changed || heading_changed ||
-              sensordepth_changed || attitude_changed) {
-              status = mb_insert_nav(verbose, imbio_ptr, istore_ptr, time_i, time_d, navlon, navlat, speed, heading,
-                           draft, roll, pitch, heave, &error);
-            }
-
-            /* insert altitude */
-            if (altitude_changed) {
-              status = mb_insert_altitude(verbose, imbio_ptr, istore_ptr, sensordepth, altitude, &error);
-              if (status == MB_FAILURE) {
-                status = MB_SUCCESS;
-                error = MB_ERROR_NO_ERROR;
-              }
-            }
-
-            /* if attitude changed apply rigid rotations to the bathymetry */
-            if (!preprocess_pars.no_change_survey &&
-              (attitude_changed || sensordepth_changed)) {
-              status = mb_insert(verbose, imbio_ptr, istore_ptr, kind, time_i, time_d, navlon, navlat, speed, heading,
-                         beams_bath, beams_amp, pixels_ss, beamflag, bath, amp, bathacrosstrack, bathalongtrack,
-                         ss, ssacrosstrack, ssalongtrack, comment, &error);
-            }
-          }
         }
         
         if (kluge_ignore_duplicate_pings && kind == MB_DATA_DATA) {

@@ -178,6 +178,10 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 	/* initialize projection parameters */
 	mb_io_ptr->projection_initialized = false;
 	mb_io_ptr->pjptr = NULL;
+  
+  /* initialize variables for embedded platform descriptions */
+  mb_io_ptr->platform_initialized = false;
+  mb_io_ptr->platformptr = NULL;
 
 	/* initialize ancillary variables used
 	    to save information in certain cases */

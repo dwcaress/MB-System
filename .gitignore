@@ -96,6 +96,8 @@ src/utilities/mbminirovnav
 src/utilities/mbmosaic
 src/utilities/mbnavlist
 src/deprecated/mbneptune2esf
+src/deprecated/mbotpsold
+src/deprecated/otps.h
 src/utilities/mbpreprocess
 src/utilities/mbprocess
 src/deprecated/mbrollbias

@@ -29,7 +29,7 @@ class MbsegygridTest(unittest.TestCase):
     self.assertIn('Version', output)
     self.assertIn('grids trace data from segy data files', output)
     self.assertIn('usage:', output)
-    self.assertIn('-Wmode/start/end', output)
+    self.assertIn('-Wwindowmode/windowstart/windowend', output)
 
   def testHelpVerbose2(self):
     cmd = [self.cmd, '-h', '-V', '-V']
@@ -37,7 +37,7 @@ class MbsegygridTest(unittest.TestCase):
     self.assertIn('Version', output)
     self.assertIn('grids trace data from segy data files', output)
     self.assertIn('usage:', output)
-    self.assertIn('-Wmode/start/end', output)
+    self.assertIn('-Wwindowmode/windowstart/windowend', output)
     self.assertIn('dbg2', output)
     self.assertIn('scale2distance:', output)
 

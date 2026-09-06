@@ -193,10 +193,9 @@ if(buildGSF)
   set(SRC ${SRC} mbsys_gsf.c mbr_gsfgenmb.c)
 endif()
 
-set(HEADERS 
+set(HEADERS
     mb_define.h
     mb_format.h
-    mb_info.h
     mb_io.h
     mb_process.h
     mb_segy.h

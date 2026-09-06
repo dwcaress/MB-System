@@ -26,7 +26,7 @@ class MbAuvLogListTest(unittest.TestCase):
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
     self.assertIn('Version', output)
     self.assertIn('lists table data from an MBARI AUV mission log file', output)
-    self.assertIn('-Fprintformat', output)
+    self.assertIn('-Fformat', output)
 
 
   def testHelpVerbose2(self):
@@ -34,7 +34,7 @@ class MbAuvLogListTest(unittest.TestCase):
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
     self.assertIn('Version', output)
     self.assertIn('lists table data from an MBARI AUV mission log file', output)
-    self.assertIn('-Fprintformat', output)
+    self.assertIn('-Fformat', output)
     self.assertIn('dbg2', output)
     self.assertIn('lonflip', output)
     self.assertIn('nprintfields', output)

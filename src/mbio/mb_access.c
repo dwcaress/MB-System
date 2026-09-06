@@ -29,6 +29,7 @@
  * Date:  October 1, 2000
  */
 
+#include <assert.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -39,6 +40,7 @@
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
+#include "mb_process.h"
 #include "mb_segy.h"
 #include "mb_status.h"
 
@@ -409,20 +411,258 @@ int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_p
   /* get mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-  /* call the appropriate mbsys_ extraction routine */
+  /* call the appropriate mbsys_ extraction routine, falling back on the
+   * generic (format-independent) preprocessing implementation if this
+   * format has not registered its own - this makes platform-based
+   * preprocessing available for every format, not just those with a
+   * dedicated mb_io_preprocess function */
   int status = MB_SUCCESS;
   if (mb_io_ptr->mb_io_preprocess != NULL) {
     status = (*mb_io_ptr->mb_io_preprocess)(verbose, mbio_ptr, store_ptr, platform_ptr, preprocess_pars_ptr, error);
   }
 
   else {
-    status = MB_FAILURE;
-    *error = MB_ERROR_BAD_SYSTEM;
+    status = mb_preprocess_generic(verbose, mbio_ptr, store_ptr, platform_ptr, preprocess_pars_ptr, error);
   }
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:         %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:        %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+/* 	function mb_preprocess_generic implements the standard,
+	format-independent attitude/navigation/bathymetry recalculation
+	applied when the i/o module for the current format has not
+	registered its own mb_io_preprocess function. It is installed as
+	the fallback used by mb_preprocess() (see above) so that
+	platform-based preprocessing - lever arm repositioning and
+	attitude-driven rigid rotation of the already-extracted bathymetry -
+	is available for every format, not just those with a dedicated
+	preprocess function. This mirrors the "standard preprocessing" that
+	mbpreprocess applied inline when mb_preprocess() returned failure. */
+int mb_preprocess_generic(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr, void *preprocess_pars_ptr, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:                    %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:                   %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:                  %p\n", (void *)store_ptr);
+    fprintf(stderr, "dbg2       platform_ptr:               %p\n", (void *)platform_ptr);
+    fprintf(stderr, "dbg2       preprocess_pars_ptr:        %p\n", (void *)preprocess_pars_ptr);
+  }
+
+  assert(mbio_ptr != NULL);
+  assert(store_ptr != NULL);
+  assert(preprocess_pars_ptr != NULL);
+
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+  struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
+
+  *error = MB_ERROR_NO_ERROR;
+  int status = MB_SUCCESS;
+
+  /* make sure the scratch arrays used to extract/reinsert bathymetry are large enough */
+  status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char),
+                              (void **)&mb_io_ptr->generic_preprocess_beamflag, error);
+  status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
+                              (void **)&mb_io_ptr->generic_preprocess_bath, error);
+  status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double),
+                              (void **)&mb_io_ptr->generic_preprocess_amp, error);
+  status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
+                              (void **)&mb_io_ptr->generic_preprocess_bathacrosstrack, error);
+  status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double),
+                              (void **)&mb_io_ptr->generic_preprocess_bathalongtrack, error);
+  status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
+                              (void **)&mb_io_ptr->generic_preprocess_ss, error);
+  status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
+                              (void **)&mb_io_ptr->generic_preprocess_ssacrosstrack, error);
+  status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
+                              (void **)&mb_io_ptr->generic_preprocess_ssalongtrack, error);
+  if (status != MB_SUCCESS)
+    return status;
+
+  char *beamflag = mb_io_ptr->generic_preprocess_beamflag;
+  double *bath = mb_io_ptr->generic_preprocess_bath;
+  double *amp = mb_io_ptr->generic_preprocess_amp;
+  double *bathacrosstrack = mb_io_ptr->generic_preprocess_bathacrosstrack;
+  double *bathalongtrack = mb_io_ptr->generic_preprocess_bathalongtrack;
+  double *ss = mb_io_ptr->generic_preprocess_ss;
+  double *ssacrosstrack = mb_io_ptr->generic_preprocess_ssacrosstrack;
+  double *ssalongtrack = mb_io_ptr->generic_preprocess_ssalongtrack;
+  char comment[MB_COMMENT_MAXLINE];
+
+  /* extract the currently stored survey record */
+  int kind;
+  int time_i[7];
+  double time_d;
+  double navlon, navlat, speed, heading;
+  int nbath, namp, nss;
+  status = mb_extract(verbose, mbio_ptr, store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading, &nbath,
+                      &namp, &nss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack,
+                      comment, error);
+
+  /* only survey-type records with bathymetry are recalculated here */
+  if (status != MB_SUCCESS ||
+      !(kind == MB_DATA_DATA || kind == MB_DATA_SUBBOTTOM_MCS || kind == MB_DATA_SUBBOTTOM_CNTRBEAM ||
+        kind == MB_DATA_SUBBOTTOM_SUBBOTTOM || kind == MB_DATA_SIDESCAN2 || kind == MB_DATA_SIDESCAN3 ||
+        kind == MB_DATA_WATER_COLUMN)) {
+    if (verbose >= 2) {
+      fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+      fprintf(stderr, "dbg2       status:        %d\n", status);
+    }
+    return status;
+  }
+
+  /* get the raw (as stored) navigation, attitude, and altitude */
+  double draft_org, roll_org, pitch_org, heave_org;
+  status = mb_extract_nav(verbose, mbio_ptr, store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
+                          &draft_org, &roll_org, &pitch_org, &heave_org, error);
+  double sensordepth_org, altitude_org;
+  status &= mb_extract_altitude(verbose, mbio_ptr, store_ptr, &kind, &sensordepth_org, &altitude_org, error);
+  const double navlon_org = navlon;
+  const double navlat_org = navlat;
+  const double speed_org = speed;
+  const double heading_org = heading;
+
+  /* apply a timestamp correction requested by the caller (e.g. a duplicate-
+     timestamp or time-jump kluge applied upstream) */
+  if (pars->timestamp_changed) {
+    time_d = pars->time_d;
+    mb_get_date(verbose, time_d, time_i);
+  }
+
+  /* interpolate corrected navigation, sensordepth, heading, altitude, and
+     attitude from the (already platform-corrected, see
+     mb_platform_apply_flipsign_attitude/heading) merged asynchronous series
+     supplied by the caller, evaluated at this ping's own timestamp - this is
+     the same pattern used internally by format-specific preprocess functions
+     such as mbsys_reson7k3_preprocess() */
+  int jnav = 0, jsensordepth = 0, jheading = 0, jaltitude = 0, jattitude = 0;
+  int interp_error = MB_ERROR_NO_ERROR;
+  bool nav_changed = false;
+  if (pars->n_nav > 0) {
+    mb_linear_interp_longitude(verbose, pars->nav_time_d - 1, pars->nav_lon - 1, pars->n_nav, time_d, &navlon, &jnav,
+                                &interp_error);
+    mb_linear_interp_latitude(verbose, pars->nav_time_d - 1, pars->nav_lat - 1, pars->n_nav, time_d, &navlat, &jnav,
+                              &interp_error);
+    if (pars->nav_speed != NULL)
+      mb_linear_interp(verbose, pars->nav_time_d - 1, pars->nav_speed - 1, pars->n_nav, time_d, &speed, &jnav,
+                        &interp_error);
+    nav_changed = (navlon != navlon_org || navlat != navlat_org || speed != speed_org);
+  }
+  double sensordepth = sensordepth_org;
+  bool sensordepth_changed = false;
+  if (pars->n_sensordepth > 0) {
+    mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1, pars->n_sensordepth, time_d,
+                      &sensordepth, &jsensordepth, &interp_error);
+    sensordepth_changed = (sensordepth != sensordepth_org);
+  }
+  bool heading_changed = false;
+  if (pars->n_heading > 0) {
+    mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1, pars->n_heading, time_d,
+                              &heading, &jheading, &interp_error);
+    heading_changed = (heading != heading_org);
+  }
+  double altitude = altitude_org;
+  bool altitude_changed = false;
+  if (pars->n_altitude > 0) {
+    mb_linear_interp(verbose, pars->altitude_time_d - 1, pars->altitude_altitude - 1, pars->n_altitude, time_d, &altitude,
+                      &jaltitude, &interp_error);
+    altitude_changed = (altitude != altitude_org);
+  }
+  double roll = roll_org;
+  double pitch = pitch_org;
+  double heave = heave_org;
+  bool attitude_changed = false;
+  if (pars->n_attitude > 0) {
+    mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude, time_d, &roll,
+                      &jattitude, &interp_error);
+    mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude, time_d, &pitch,
+                      &jattitude, &interp_error);
+    mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude, time_d, &heave,
+                      &jattitude, &interp_error);
+    attitude_changed = (roll != roll_org || pitch != pitch_org || heave != heave_org);
+  }
+  double draft = draft_org;
+  if (sensordepth_changed || attitude_changed) {
+    draft = sensordepth - heave;
+  }
+
+  /* if a platform model is available, reposition and reorient from the
+     roll-pitch/heading sensor to the target sensor (typically the sonar) */
+  double roll_delta = 0.0;
+  double pitch_delta = 0.0;
+  if (platform_ptr != NULL && pars->target_sensor >= 0) {
+    status = mb_platform_position(verbose, platform_ptr, pars->target_sensor, 0, navlon, navlat, sensordepth, heading,
+                                  roll, pitch, &navlon, &navlat, &sensordepth, error);
+    draft = sensordepth - heave;
+    nav_changed = true;
+    sensordepth_changed = true;
+
+    status = mb_platform_orientation_target(verbose, platform_ptr, pars->target_sensor, 0, heading, roll, pitch,
+                                            &heading, &roll, &pitch, error);
+    roll_delta = roll - roll_org;
+    pitch_delta = pitch - pitch_org;
+    if (roll_delta != 0.0 || pitch_delta != 0.0)
+      attitude_changed = true;
+  }
+
+  /* if attitude changed apply rigid rotations to the already-extracted bathymetry */
+  if (attitude_changed) {
+    for (int i = 0; i < nbath; i++) {
+      if (beamflag[i] != MB_FLAG_NULL) {
+        /* strip off original heave + draft */
+        bath[i] -= sensordepth_org;
+        /* rotate beam by the change in roll and pitch (heading held fixed) */
+        mb_platform_math_attitude_rotate_beam(verbose, bathacrosstrack[i], bathalongtrack[i], bath[i], roll_delta,
+                                              pitch_delta, 0.0, &(bathacrosstrack[i]), &(bathalongtrack[i]), &(bath[i]),
+                                              error);
+        /* add heave and draft back in */
+        bath[i] += sensordepth_org;
+      }
+    }
+  }
+
+  /* recalculate bathymetry for the change in sensor depth */
+  if (sensordepth_changed) {
+    const double depth_offset_change = draft - draft_org;
+    for (int i = 0; i < nbath; i++) {
+      if (beamflag[i] != MB_FLAG_NULL) {
+        bath[i] += depth_offset_change;
+      }
+    }
+  }
+
+  /* reinsert the corrected navigation and attitude */
+  if (pars->timestamp_changed || nav_changed || heading_changed || sensordepth_changed || attitude_changed) {
+    status = mb_insert_nav(verbose, mbio_ptr, store_ptr, time_i, time_d, navlon, navlat, speed, heading, draft, roll,
+                            pitch, heave, error);
+  }
+
+  /* reinsert the corrected altitude */
+  if (altitude_changed) {
+    status = mb_insert_altitude(verbose, mbio_ptr, store_ptr, sensordepth, altitude, error);
+    if (status == MB_FAILURE) {
+      status = MB_SUCCESS;
+      *error = MB_ERROR_NO_ERROR;
+    }
+  }
+
+  /* reinsert the corrected bathymetry */
+  if (!pars->no_change_survey && (attitude_changed || sensordepth_changed)) {
+    status = mb_insert(verbose, mbio_ptr, store_ptr, kind, time_i, time_d, navlon, navlat, speed, heading, nbath, namp,
+                        nss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack,
+                        comment, error);
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2       error:         %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:        %d\n", status);
@@ -503,16 +743,12 @@ int mb_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
       fprintf(stderr, "dbg2       platform->sensors[%2d].capability2:          %d\n", i, platform->sensors[i].capability2);
       fprintf(stderr, "dbg2       platform->sensors[%2d].num_offsets:          %d\n", i, platform->sensors[i].num_offsets);
       for (int j = 0; j < platform->sensors[i].num_offsets; j++) {
-        fprintf(stderr, "dbg2       platform->sensors[%2d].offsets[%d].position_offset_mode:          %d\n", i, j,
-                platform->sensors[i].offsets[j].position_offset_mode);
         fprintf(stderr, "dbg2       platform->sensors[%2d].offsets[%d].position_offset_x:          %f\n", i, j,
                 platform->sensors[i].offsets[j].position_offset_x);
         fprintf(stderr, "dbg2       platform->sensors[%2d].offsets[%d].position_offset_y:          %f\n", i, j,
                 platform->sensors[i].offsets[j].position_offset_y);
         fprintf(stderr, "dbg2       platform->sensors[%2d].offsets[%d].position_offset_z:          %f\n", i, j,
                 platform->sensors[i].offsets[j].position_offset_z);
-        fprintf(stderr, "dbg2       platform->sensors[%2d].offsets[%d].attitude_offset_mode:          %d\n", i, j,
-                platform->sensors[i].offsets[j].attitude_offset_mode);
         fprintf(stderr, "dbg2       platform->sensors[%2d].offsets[%d].attitude_offset_heading:      %f\n", i, j,
                 platform->sensors[i].offsets[j].attitude_offset_heading);
         fprintf(stderr, "dbg2       platform->sensors[%2d].offsets[%d].attitude_offset_roll:          %f\n", i, j,

@@ -16,7 +16,7 @@ LIBS += ${libnetcdf_LIBS}
 LIBS += ${libproj_LIBS}
 LIBS += $(LIBM)
 
-mbotps_SOURCES = mbotps.c
+mbotps_SOURCES = mbotps.c mb_otps_predict.c mb_otps_predict.h
 
 nodist_mbotps_SOURCES = otps.h
 

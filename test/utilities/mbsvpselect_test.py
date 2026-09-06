@@ -24,7 +24,7 @@ class MbsvpselectTest(unittest.TestCase):
     self.assertIn('Version', output)
     self.assertIn('chooses and implements the best available sound', output)
     self.assertIn('usage:', output)
-    self.assertIn('-P3/range/1', output)
+    self.assertIn('-Pmode[/period_or_range[/seasonal]]', output)
 
   def testHelpVerbose2(self):
     cmd = [self.cmd, '-h', '-V', '-V']
@@ -32,7 +32,7 @@ class MbsvpselectTest(unittest.TestCase):
     self.assertIn('Version', output)
     self.assertIn('chooses and implements the best available sound', output)
     self.assertIn('usage:', output)
-    self.assertIn('-P3/range/1', output)
+    self.assertIn('-Pmode[/period_or_range[/seasonal]]', output)
     self.assertIn('dbg2', output)
     self.assertIn('svplist:', output)
     self.assertIn('zero_test:', output)

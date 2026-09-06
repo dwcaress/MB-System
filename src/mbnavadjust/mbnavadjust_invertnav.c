@@ -125,6 +125,9 @@ int mbnavadjust_invertnav(int verbose, struct mbna_project *project_ptr) {
   double *x_time_d = NULL;
   int *chunk_center = NULL;
   bool *chunk_continuity = NULL;
+  double *snav_lon_offset_best = NULL;
+  double *snav_lat_offset_best = NULL;
+  double *snav_z_offset_best = NULL;
   int *global_ties_xy_files = NULL;
   int *global_ties_xy_sections = NULL;
   int *global_ties_z_files = NULL;
@@ -427,6 +430,9 @@ int mbnavadjust_invertnav(int verbose, struct mbna_project *project_ptr) {
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&x_time_d, &error);
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(int), (void **)&chunk_center, &error);
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(bool), (void **)&chunk_continuity, &error);
+    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&snav_lon_offset_best, &error);
+    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&snav_lat_offset_best, &error);
+    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&snav_z_offset_best, &error);
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nglobaltiexy * sizeof(int), (void **)&global_ties_xy_files, &error);
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nglobaltiexy * sizeof(int), (void **)&global_ties_xy_sections, &error);
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nglobaltiez * sizeof(int), (void **)&global_ties_z_files, &error);
@@ -448,6 +454,9 @@ int mbnavadjust_invertnav(int verbose, struct mbna_project *project_ptr) {
     memset(x_time_d, 0, nnav * sizeof(double));
     memset(chunk_center, 0, nnav * sizeof(int));
     memset(chunk_continuity, 0, nnav * sizeof(bool));
+    memset(snav_lon_offset_best, 0, nnav * sizeof(double));
+    memset(snav_lat_offset_best, 0, nnav * sizeof(double));
+    memset(snav_z_offset_best, 0, nnav * sizeof(double));
     memset(global_ties_xy_files, 0, nglobaltiexy * sizeof(int));
     memset(global_ties_xy_sections, 0, nglobaltiexy * sizeof(int));
     memset(global_ties_z_files, 0, nglobaltiez * sizeof(int));
@@ -1656,6 +1665,28 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
         convergence_prior = 1000.0;
         convergence_threshold = 0.000005;
         damping = 0.02;
+
+        /* snapshot the pre-relaxation model (global ties only) as the initial best-known
+           solution, and track the best misfit seen so far - this makes the loop below
+           self-correcting: if the relaxation ever diverges instead of converging, the
+           model is rolled back to the best state found rather than left however the
+           runaway happened to leave it */
+        double rms_misfit_best = rms_misfit_initial;
+        int n_no_improvement = 0;
+        const int n_no_improvement_limit = 10;
+        for (int ifile = 0; ifile < project.num_files; ifile++) {
+            file = &project.files[ifile];
+            for (int isection = 0; isection < file->num_sections; isection++) {
+                section = &file->sections[isection];
+                for (int isnav = 0; isnav < section->num_snav; isnav++) {
+                    inav = section->snav_invert_id[isnav];
+                    snav_lon_offset_best[inav] = section->snav_lon_offset[isnav];
+                    snav_lat_offset_best[inav] = section->snav_lat_offset[isnav];
+                    snav_z_offset_best[inav] = section->snav_z_offset[isnav];
+                }
+            }
+        }
+
         for (int iteration=0;
             iteration < n_iteration
                 && convergence > convergence_threshold
@@ -1943,6 +1974,18 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
                 }
             }
 
+            /* normalize accumulated offsets into per-chunk averages - each chunk may be
+               touched by multiple crossing/global ties, and without this the correction
+               applied below scales with tie density instead of representing the mean
+               residual, which produces an over-relaxed (unstable) update */
+            for (int k = 0; k < nchunk; k++) {
+                if (nx[k] > 0) {
+                    x[3*k]   /= (double)nx[k];
+                    x[3*k+1] /= (double)nx[k];
+                    x[3*k+2] /= (double)nx[k];
+                }
+            }
+
             /* linearly interpolate over gaps between impacted chunks */
             int klast = 0;
             for (int k=0; k < nchunk; k++) {
@@ -2138,7 +2181,54 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
                     " > Convergence:          %12g\n",
                     rms_solution, rms_solution_total, rms_misfit_initial,
                     rms_misfit_previous, rms_misfit_current, convergence);
+
+            /* track the best solution seen so far and bail out of the relaxation - reverting
+               to that best solution - if the misfit fails to improve for several iterations
+               in a row. This guards against a runaway update compounding for many more
+               iterations while the loop's own convergence <= convergence_prior test is
+               fooled: for a geometrically diverging solution that ratio is roughly constant
+               and never trips the exit condition. */
+            if (rms_misfit_current < rms_misfit_best) {
+                rms_misfit_best = rms_misfit_current;
+                n_no_improvement = 0;
+                for (int ifile = 0; ifile < project.num_files; ifile++) {
+                    file = &project.files[ifile];
+                    for (int isection = 0; isection < file->num_sections; isection++) {
+                        section = &file->sections[isection];
+                        for (int isnav = 0; isnav < section->num_snav; isnav++) {
+                            inav = section->snav_invert_id[isnav];
+                            snav_lon_offset_best[inav] = section->snav_lon_offset[isnav];
+                            snav_lat_offset_best[inav] = section->snav_lat_offset[isnav];
+                            snav_z_offset_best[inav] = section->snav_z_offset[isnav];
+                        }
+                    }
+                }
+            }
+            else if (++n_no_improvement >= n_no_improvement_limit) {
+                fprintf(stderr,
+                        "\nStage 2 relaxation misfit failed to improve for %d iterations (best %g, current %g)"
+                        " - stopping and reverting to the best solution found\n",
+                        n_no_improvement_limit, rms_misfit_best, rms_misfit_current);
+                break;
+            }
         } // iteration
+
+        /* restore the best solution found during the relaxation - iterations after the
+           best point (if any) may have diverged rather than continuing to improve */
+        for (int ifile = 0; ifile < project.num_files; ifile++) {
+            file = &project.files[ifile];
+            for (int isection = 0; isection < file->num_sections; isection++) {
+                section = &file->sections[isection];
+                for (int isnav = 0; isnav < section->num_snav; isnav++) {
+                    inav = section->snav_invert_id[isnav];
+                    section->snav_lon_offset[isnav] = snav_lon_offset_best[inav];
+                    section->snav_lat_offset[isnav] = snav_lat_offset_best[inav];
+                    section->snav_z_offset[isnav] = snav_z_offset_best[inav];
+                }
+            }
+        }
+        fprintf(stderr, "\nStage 2 relaxation complete: best misfit achieved %g (initial %g)\n",
+                rms_misfit_best, rms_misfit_initial);
 
     /* set message dialog on */
     snprintf(message, sizeof(message), "Completed chunk inversion...");
@@ -3219,6 +3309,9 @@ offset_x, offset_y, offset_z); */
     status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&x_time_d, &error);
     status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&chunk_center, &error);
     status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&chunk_continuity, &error);
+    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&snav_lon_offset_best, &error);
+    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&snav_lat_offset_best, &error);
+    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&snav_z_offset_best, &error);
     status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&u, &error);
     status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&v, &error);
     status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&w, &error);

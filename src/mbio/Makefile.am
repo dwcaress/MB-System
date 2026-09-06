@@ -9,7 +9,6 @@ include_HEADERS =
 include_HEADERS += mb_config.h
 include_HEADERS += mb_define.h
 include_HEADERS += mb_format.h
-include_HEADERS += mb_info.h
 include_HEADERS += mb_io.h
 include_HEADERS += mb_process.h
 include_HEADERS += mb_segy.h

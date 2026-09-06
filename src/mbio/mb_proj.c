@@ -292,7 +292,6 @@ int mb_proj_inverse(int verbose, void *pjptr, double easting, double northing, d
 
 /*--------------------------------------------------------------------*/
 static int mb_proj6_init(int verbose, char *source_crs, char *target_crs, void **pjptr, int *error) {
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");

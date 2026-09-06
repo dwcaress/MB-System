@@ -1,7 +1,6 @@
 
 if BUILD_DEPRECATED
 MAN_DEPRECATED = \
-	mb7k2jstar.1 \
 	mb7k2ss.1 \
 	mb7kpreprocess.1 \
 	mbauvnavusbl.1 \
@@ -9,6 +8,7 @@ MAN_DEPRECATED = \
 	mbhysweeppreprocess.1 \
 	mbkongsbergpreprocess.1 \
 	mbneptune2esf.1 \
+	mbotpsold.1 \
 	mbrollbias.1 \
 	mbstripnan.1 \
 	mbswplspreprocess.1
@@ -20,6 +20,7 @@ MAN_MBTRN = \
 endif
 
 man_MANS =  \
+	mb7k2jstar.1 \
 	mbabsorption.1 \
 	mbareaclean.1 \
 	mbauvloglist.1 \

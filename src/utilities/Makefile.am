@@ -7,6 +7,7 @@ endif
 
 bin_PROGRAMS =
 bin_PROGRAMS += mbconfig
+bin_PROGRAMS += mb7k2jstar
 bin_PROGRAMS += mbabsorption
 bin_PROGRAMS += mbareaclean
 bin_PROGRAMS += mbauvloglist
@@ -74,6 +75,7 @@ LIBS += ${libproj_LIBS}
 LIBS += $(LIBM)
 
 mbconfig_SOURCES = mbconfig.cc
+mb7k2jstar_SOURCES = mb7k2jstar.cc
 mbabsorption_SOURCES = mbabsorption.cc
 mbareaclean_SOURCES = mbareaclean.cc
 mbauvloglist_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
