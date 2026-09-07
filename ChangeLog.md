@@ -378,6 +378,15 @@ Removed the top-level googletest/ directory, an untracked, gitignored full clone
 GoogleTest repository left over from prior exploration; it was never referenced by any build file,
 CMake or Autotools.
 
+Further repository housekeeping: removed stale top-level cruft left over from earlier stages of
+the project's history. This included the old Travis CI configuration (.travis.yml and
+the ci/travis/ build scripts), superseded years ago by the GitHub Actions workflows
+under .github/workflows/; a leftover "GitHub Actions Demo" placeholder workflow
+(.github/workflows/github-actions-demo.yml) that was never more than the tutorial stub
+GitHub generates when Actions is first enabled; two empty, untracked top-level
+directories (config/ and maps/) with no evident purpose; and a stray configure~ backup
+file left behind by a local autoreconf run. No functional code changed.
+
 The changes described above were done with the assistance of the AI coding assistant
 Claude Sonnet 5 (Anthropic, model claude-sonnet-5), operating as Claude Code under
 developer supervision and review.
