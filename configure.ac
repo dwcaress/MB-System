@@ -106,7 +106,7 @@ AS_ECHO(["        --enable-rovtrn       - enable building terrain relative navig
 AS_ECHO(["        --enable-deprecated   - enable building deprecated programs (optional)"])
 AS_ECHO(["        --disable-mbtools     - disable building graphical tools (use with --enable-mbtrn and --enable-mbtnav)"])
 AS_ECHO(["        --enable-hardening    - Enable compiler and linker options to frustrate memory corruption exploits  (e.g. -fPIE and -pie) (optional)"])
-AS_ECHO(["        --enable-test         - Enable building unit tests in test/ and third-party/"])
+AS_ECHO(["        --enable-test         - Enable building the Python CLI smoke tests in test/ (the GoogleTest-based test/mbio suite is CMake-only)"])
 AS_ECHO(["        --enable-qt           - Enable building graphical tools using the Qt5 framework (Not functional yet)"])
 AS_ECHO(["        --with-debug          - Set compiler flags to allow full debugging"])
 AS_ECHO([" "])
@@ -1578,12 +1578,11 @@ fi
 dnl if test "$build_pcltools" = "yes" ; then
 dnl fi
 if test "$build_test" = "yes" ; then
+    dnl The GoogleTest-based test/mbio suite is CMake-only (see
+    dnl third_party/CMakeLists.txt); GoogleTest upstream no longer ships
+    dnl Autotools build files, so it is not built by ./configure && make.
     AC_CONFIG_FILES([\
-          third_party/Makefile \
-          third_party/googletest/Makefile \
-          third_party/googlemock/Makefile \
           test/Makefile \
-          test/mbio/Makefile \
           test/utilities/Makefile \
           ])
     if test "$enable_deprecated" = "yes" ; then

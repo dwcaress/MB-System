@@ -322,6 +322,66 @@ sections into the deprecated list, and removing the dead mbps entry. This work w
 with the assistance of the AI coding assistant Claude Sonnet 5 (Anthropic, model
 claude-sonnet-5), operating as Claude Code under developer supervision and review.
 
+Testing infrastructure: Upgraded the vendored GoogleTest/GoogleMock copy in third_party/googletest
+and third_party/googlemock from 1.13.0 to the current 1.18.0 release, scoping the newer version's
+C++17 requirement to that subtree only (via `set(CMAKE_CXX_STANDARD 17)` inside
+third_party/CMakeLists.txt, which does not propagate back up to the rest of the build, which still
+targets C++11) and adding the same requirement to the test/mbio GoogleTest executables and to the
+src/mbmesh algorithm tests that already needed it. In the process, found and fixed a latent bug in
+which `INSTALL_GTEST` defaulted to ON, meaning a normal `make install` also installed the bundled
+GoogleTest/GoogleMock headers and libraries system-wide under CMAKE_INSTALL_PREFIX (default
+/usr/local); on the development machine used for this work, a stale 1.13.0 install from an earlier
+build shadowed the newly vendored 1.18.0 headers at compile time via the compiler's implicit
+/usr/local/include search path, breaking the build until the stale files were removed by hand.
+`INSTALL_GTEST` is now forced OFF, since MB-System only ever consumes this copy privately as a test
+dependency and has no reason to install it for other projects to find.
+
+Build system: Because upstream GoogleTest has not shipped Autotools build files since well before
+the vendored 1.13.0 snapshot, upgrading it in place would have required hand-writing new Automake
+glue with no upstream template to follow. Rather than take on that maintenance burden for a legacy
+build path, `./configure && make check` no longer attempts to build the GoogleTest-based test suite
+at all (third_party/Makefile.am, third_party/googletest/Makefile.am, third_party/googlemock/Makefile.am,
+and test/mbio/Makefile.am were removed, along with the corresponding entries in configure.ac's
+AC_CONFIG_FILES and test/Makefile.am's SUBDIRS); CMake (`cmake --build . --target ... && ctest`) is
+now the only way to build and run it. The plain Python `unittest`-based smoke tests in test/utilities
+and test/deprecated are unaffected and remain buildable and runnable under both Autotools and CMake
+as before.
+
+Testing: Wired two smoke tests, tests/test_marching_cubes.cpp and tests/test_normal_estimation.cpp,
+into src/mbmesh/CMakeLists.txt; both already existed in the source tree from the original
+mesh-generation work but were never added to the build, so `ctest` never ran them. Also added a
+smoke test for the mbmesh command line program itself, checking that -h prints usage and that
+running with no input datalist fails with a clear error rather than a crash.
+
+Testing: Added command line smoke tests (Python `unittest`, run through `ctest`, following the
+existing pattern in test/utilities) for the standard, non-deprecated programs across the source
+tree that previously had none: mbfnv2navlab, mbmakedatalist, mbmapscale, mbnavlab2fnv, mbswath2las,
+and mbusbl2fnv in src/utilities; mbphotomosaic, mbgetphotocorrection, mbphotogrammetry,
+mbimagecorrect, mbtiff2png, and mbimagelist in src/photo; dump_gsf in src/gsf; mbgrd2gltf; mbotps;
+and mbnavadjust/mbnavadjustmerge in src/mbnavadjust. Each test exercises the program's help/usage
+output (or, where a program does not special-case --help, its documented behavior when required
+arguments are missing), checking that the program starts, parses arguments, and exits cleanly
+rather than crashing. One of these, mbimagecorrect, currently crashes with an uncaught OpenCV
+exception under both --help and no arguments instead of printing usage; test/photo/mbimagecorrect_test.py
+documents the expected, non-crashing behavior via Python's `@unittest.expectedFailure`, so the
+underlying bug is tracked by the test suite without blocking it, pending a fix.
+
+Testing: The Motif-based interactive editors mbedit, mbnavedit, mbvelocitytool, mbeditviz, and the
+mbnavadjust GUI all call XtOpenDisplay() before parsing any arguments, so they need a working X
+display even to print -h usage; their new smoke tests run under a private Xvfb server started and
+torn down per test via a new shared helper, test/xvfb_helper.py, and are skipped (not failed) on a
+machine with no Xvfb binary installed. mbgrdviz, also Motif-based, needed no such helper, since it
+is the only one of the six that parses -h before opening a display, and so has an ordinary smoke
+test alongside the others above.
+
+Removed the top-level googletest/ directory, an untracked, gitignored full clone of the upstream
+GoogleTest repository left over from prior exploration; it was never referenced by any build file,
+CMake or Autotools.
+
+The changes described above were done with the assistance of the AI coding assistant
+Claude Sonnet 5 (Anthropic, model claude-sonnet-5), operating as Claude Code under
+developer supervision and review.
+
 #### 5.8.3beta16 (July 26, 2026)
 
 Program mbusbl2fnv: New program that converts a USBL (ultra-short baseline) ROV
