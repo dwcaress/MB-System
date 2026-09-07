@@ -28,7 +28,7 @@ Version 5.0
 <H2>SYNOPSIS</H2>
 
 <B>mbctdlist</B> [<B>-A</B> <B>-D</B><I>decimate</I> <B>-F</B><I>format</I>
-<B>-G</B><I>delimeter</I> <B>-H</B> <B>-I</B><I>file </I>
+<B>-G</B><I>delimeter</I> <B>-H</B> <B>-I</B><I>file </I> <B>-L</B><I>lonflip</I>
 <B>-O</B><I>output_format</I> <B>-V</B> <B>-Z</B><I>segment</I>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
@@ -177,6 +177,16 @@ Default: <I>lonflip</I> = 0.
 Determines the form of the output. <I>Output_format</I> is a string composed
 of one or more of the following characters:
 <P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>/</B>&nbsp;&nbsp;inverts&nbsp;the&nbsp;next&nbsp;simple&nbsp;value&nbsp;(e.g.&nbsp;1/value)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>-</B>&nbsp;&nbsp;flips&nbsp;the&nbsp;sign&nbsp;of&nbsp;the&nbsp;next&nbsp;simple&nbsp;value<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>1</B>&nbsp;&nbsp;for&nbsp;sensor&nbsp;1&nbsp;value&nbsp;(volts)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>2</B>&nbsp;&nbsp;for&nbsp;sensor&nbsp;2&nbsp;value&nbsp;(volts)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>3</B>&nbsp;&nbsp;for&nbsp;sensor&nbsp;3&nbsp;value&nbsp;(volts)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>4</B>&nbsp;&nbsp;for&nbsp;sensor&nbsp;4&nbsp;value&nbsp;(volts)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>5</B>&nbsp;&nbsp;for&nbsp;sensor&nbsp;5&nbsp;value&nbsp;(volts)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>6</B>&nbsp;&nbsp;for&nbsp;sensor&nbsp;6&nbsp;value&nbsp;(volts)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>7</B>&nbsp;&nbsp;for&nbsp;sensor&nbsp;7&nbsp;value&nbsp;(volts)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>8</B>&nbsp;&nbsp;for&nbsp;sensor&nbsp;8&nbsp;value&nbsp;(volts)<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>C</B>&nbsp;&nbsp;for&nbsp;conductivity&nbsp;(S/m)<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>^C</B>&nbsp;for&nbsp;sonar&nbsp;altitude&nbsp;(meters)<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>c</B>&nbsp;&nbsp;for&nbsp;temperature&nbsp;(degree&nbsp;C)<BR>
@@ -207,8 +217,8 @@ of one or more of the following characters:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>Y</B>&nbsp;&nbsp;for&nbsp;latitude&nbsp;(decimal&nbsp;degrees)<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>y</B>&nbsp;&nbsp;for&nbsp;latitude&nbsp;(degrees&nbsp;+&nbsp;decimal&nbsp;minutes&nbsp;+&nbsp;N/S)<BR>
 <P>
-Default <I>output_format</I> = <B>TXYCc^cSs</B> (Time, lon, lat, conductivity,
-temperature, depth, salinity, sound speed).
+Default <I>output_format</I> = <B>TXYHCc^cSs</B> (Time, lon, lat, heading,
+conductivity, temperature, depth, salinity, sound speed).
 <DT><B>-V</B>
 
 <DD>
@@ -229,7 +239,7 @@ is a single character, then the output is a multiple segment
 file of the sort accepted by the <B>GMT</B> program <B>psxy</B>.
 This option only works with ascii output, and is thus disabled
 when the <B>-A</B> option is specified. The most common usage
-is <B>-Z</B>I&gt;.
+is <B>-Z</B><I>&gt;</I>.
 <P>
 </DL>
 <A NAME="lbAH">&nbsp;</A>

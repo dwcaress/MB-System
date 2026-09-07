@@ -43,7 +43,17 @@ foreach(executable ${executables})
   target_link_libraries(${executable} mbio mbaux)
 endforeach()
 
-install(TARGETS ${executables} DESTINATION ${CMAKE_INSTALL_BINDIR})
+# mbotpsold is a deprecated C program (not C++, and needs no mbaux) that
+# needs the OTPS installation location compiled in, same as mbotps
+message("-- Setting otpsDir to ${otpsDir}")
+string(REPLACE "\\" "\\\\" otpsDir_escaped "${otpsDir}")
+file(WRITE otps.h
+	"const char *otps_location = \"${otpsDir_escaped}\";")
+
+add_executable(mbotpsold mbotpsold.c otps.h)
+target_link_libraries(mbotpsold PRIVATE mbio)
+
+install(TARGETS ${executables} mbotpsold DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 set(macros
     mbm_fmtvel

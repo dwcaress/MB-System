@@ -79,5 +79,4 @@ mbswath(1)               - GMT compatible utility for color fill or color shaded
 mbsystem(1)              - A set of utilities for manipulating and processing swath sonar bathymetry, amplitude, and sidescan data
 mbtime(1)                - Translate between calendar time values and unix time
 mbvelocitytool(1)        - Interactive water sound velocity profile editor
-pj_init(3)               - initialize cartographic projection pj_init_plus - initialize cartographic projection pj_fwd - forward cartographic projection pj_inv - inverse cartographic projection pj_transform - transform between coordinate systems pj_free - de-initialize projection
 proj(1)                  - forward cartographic projection filter invproj - inverse cartographic projection filter

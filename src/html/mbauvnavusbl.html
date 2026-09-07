@@ -28,8 +28,8 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbauvnavusbl</B> <B>-I</B><I>inavfile</I> [<B>-L</B>
-<B>-O</B><I>onavfile</I>  <B>-U</B><I>usblfile</I><B>-V -H</B> ]
+<B>mbauvnavusbl</B> <B>-I</B><I>inavfile</I> <B>-O</B><I>onavfile</I> <B>-U</B><I>usblfile</I>
+[<B>-A</B> <B>-F</B><I>navformat</I> <B>-L</B><I>lonflip</I> <B>-M</B><I>usblformat</I> <B>-V -H</B> ]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -74,6 +74,23 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
+<DT><B>-A</B>
+
+<DD>
+<BR>
+
+Causes <B>mbauvnavusbl</B> to use the average calculated position offset over
+the whole dataset, rather than interpolating a time-varying offset, when
+adjusting the primary navigation.
+<DT><B>-F</B>
+
+<DD>
+<I>navformat</I>
+<BR>
+
+Accepted but currently unused: the input primary navigation file is always
+parsed as whitespace-delimited ASCII text regardless of this value.
+Default: <I>navformat</I> = 9.
 <DT><B>-H</B>
 
 <DD>
@@ -87,8 +104,9 @@ of its operation and then exit immediately.
 
 Sets the input navigation filename. The navigation data must be
 in format 166.
-<B>-L</B>
+<DT><B>-L</B>
 
+<DD>
 <I>lonflip</I>
 <BR>
 
@@ -101,6 +119,15 @@ then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: <B>mbauvnavusbl</B> uses the user default <I>lonflip</I> set using
 <B>mbdefaults</B>.
+<DT><B>-M</B>
+
+<DD>
+<I>usblformat</I>
+<BR>
+
+Accepted but currently unused: the input USBL navigation file is always
+parsed as whitespace-delimited ASCII text regardless of this value.
+Default: <I>usblformat</I> = 165.
 <DT><B>-O</B>
 
 <DD>

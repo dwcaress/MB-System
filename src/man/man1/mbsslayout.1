@@ -347,6 +347,13 @@ with this option, then the sidescan will be laid out using a flat bottom assumpt
 and an altitude value derived either from the survey navigation or by picking the
 initial bottom return in the time series sidescan data.
 .TP
+.B \-\-altitude-altitude\fP
+.br
+Specifies obtaining the altitude value from the survey navigation (the sonar
+altitude above the seafloor as recorded with the input data or merged navigation).
+This is the default altitude source used for the flat bottom layout assumption
+when neither \fB\-\-altitude-bottompick\fP nor \fB\-\-topo-grid-file\fP is specified.
+.TP
 .B \-\-altitude-bottompick\fP
 .br
 Specifies obtaining the altitude value by picking the initial bottom return in
@@ -367,6 +374,13 @@ the blanking interval in seconds that will be ignored in looking for the first
 bottom return. This option turns the bottompick
 altitude mode on, so it is unnecessary to also specify the \fB\-\-altitude-bottompick\fP
 option.
+.TP
+.B \-\-altitude-topo-grid\fP
+.br
+Turns on the topographic model altitude mode explicitly. This is normally set
+automatically by specifying the \fB\-\-topo-grid-file\fP option, so it is
+unnecessary to also specify this option unless a topography grid file has
+already been set by other means.
 .TP
 .B \-\-channel-swap\fP
 .br

@@ -1,0 +1,204 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbm_trnplot</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbm_trnplot</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  7 September 2026 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbm_trnplot</B> - Macro to plot map views of an <B>mbtrnpp</B> terrain relative
+navigation (TRN) session.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbm_trnplot</B> [<B>-i</B><I>inputdirectory</I> <B>-g</B><I>gridfile</I>
+<B>-j</B><I>crs</I> <B>--mission=</B><I>missionname</I> <B>-d</B> <B>-h</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbm_trnplot</B> generates map-view plots comparing an <B>mbtrnpp</B> terrain
+relative navigation (TRN) session's estimated vehicle track against
+reference bathymetry, using <B>mbm_grdplot</B>, <B>GMT</B>, and (for a second,
+locally regridded comparison) <B>mbgrid</B>.
+<P>
+The macro searches an input session directory (<B>-i</B>/<B>--input</B>; by
+default the directory pointed to by a symbolic link named
+&quot;mbtrnpp-latest&quot; in the current directory if one exists, otherwise the
+current directory) for <B>mbtrnpp</B> session log files matching the pattern
+&quot;*_trn.txt&quot;. For each session log found, the macro determines a
+reference topography grid to plot the track over. This grid can be given
+explicitly with <B>-g</B>/<B>--grid</B>; otherwise the macro looks for a symbolic
+link named &quot;mbtrnpp-grid&quot; in the current directory, and failing that it
+parses the session log's own header comments for a line beginning
+&quot;## Reference topography model:&quot; to locate the TRN octree/grid used
+during the session (translating a &quot;.bo&quot; octree reference to the
+corresponding &quot;source_grid.grd&quot; grid, or otherwise appending
+&quot;/source_grid.grd&quot; to a bare tileset directory name).
+<P>
+Each session log's data lines are parsed to extract, per ping: the
+navigation-only position, the TRN-estimated position, and lon/lat
+equivalents of both when present. TRN offset estimates flagged in the log
+as &quot;CNV&quot;, &quot;USE&quot;, or &quot;RNT&quot; are additionally written out as separate subsets
+so that converged, actively-used, and reinitialized fixes can be
+distinguished on the plot. These extracted positions are written to a set
+of companion text files in the input directory (with suffixes such as
+&quot;_trn_Nxy.txt&quot;, &quot;_trn_Txy.txt&quot;, &quot;_trn_TxyC.txt&quot;, &quot;_trn_TxyU.txt&quot;,
+&quot;_trn_TxyR.txt&quot;, and lon/lat equivalents ending in &quot;Nll&quot;/&quot;Tll&quot;/etc.), and
+the overall bounding box of the plotted positions (padded by 10%) is
+computed.
+<P>
+<B>mbm_trnplot</B> then constructs and runs an <B>mbm_grdplot</B> command to
+generate a shaded-relief map of the reference topography with the
+navigation-only track, the raw TRN-estimated track, and the CNV/USE/RNT
+position subsets overlaid, converts the resulting PostScript plot to a
+JPEG image with <B>gmt psconvert</B>, and (unless <B>-d</B>/<B>--display</B> is given,
+in which case the plot is also displayed immediately) runs the generated
+plotting script in non-interactive mode. The macro then repeats this
+process a second time against a bathymetry grid built on the fly from any
+MB1-format (&quot;.mb1&quot;) processed data files found in the input directory,
+using <B>mbm_makedatalist</B>, <B>mbdatalist</B>, and <B>mbgrid</B> (with the
+projection set by <B>-j</B>/<B>--crs</B>), so that TRN performance can also be
+compared against bathymetry gridded directly from the vehicle's own
+logged soundings.
+<P>
+The plot title uses the mission name given with <B>--mission</B> if supplied,
+otherwise a session name derived from the log filename.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-h</B>, <B>--help</B>
+
+<DD>
+This &quot;help&quot; flag causes the macro to print out a description
+of its command line options and then exit immediately.
+<DT><B>-d</B>, <B>--display</B>
+
+<DD>
+Causes each generated plot to be displayed interactively as soon as it is
+produced. If this option is not given, the plotting scripts are instead
+run in non-interactive (batch) mode.
+<DT><B>-i</B><I>inputdirectory</I>, <B>--input=</B><I>inputdirectory</I>
+
+<DD>
+<BR>
+
+Sets the path to the directory containing the <B>mbtrnpp</B> session log(s)
+and associated processed results to be plotted. If this option is not
+given (or is given the literal value &quot;mbtrnpp-latest&quot;), the macro uses
+the directory pointed to by a symbolic link named &quot;mbtrnpp-latest&quot; in the
+current directory if one exists, and otherwise uses the current directory.
+<DT><B>-g</B><I>gridfile</I>, <B>--grid=</B><I>gridfile</I>
+
+<DD>
+<BR>
+
+Sets the path to the reference topography grid plotted beneath the TRN
+track. If this option is not given (or is given the literal value
+&quot;mbtrnpp-grid&quot;), the macro looks for a symbolic link named &quot;mbtrnpp-grid&quot;
+in the current directory, and failing that attempts to determine the
+reference grid from the &quot;## Reference topography model:&quot; header comment
+recorded in the session log.
+<DT><B>-j</B><I>crs</I>, <B>--crs=</B><I>crs</I>
+
+<DD>
+<BR>
+
+Sets the coordinate reference system code passed to <B>mbgrid</B>'s <B>-J</B>
+option when regridding the session's MB1-format processed data for the
+second comparison plot. Default: <I>crs</I> = &quot;U&quot; (an automatically selected
+UTM projection).
+<DT><B>--mission=</B><I>missionname</I>
+
+<DD>
+<BR>
+
+Sets a mission name used in the plot titles in place of the session name
+derived from the log filename. Note: in the installed version of this
+macro the short option <B>-m</B> does not itself take an attached value (a
+current limitation of its command line option parsing); use the long
+form <B>--mission=</B><I>missionname</I> to set this value.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbtrnpp.html">mbtrnpp</A></B>(1), <B><A HREF="mbm_grdplot.html">mbm_grdplot</A></B>(1), <B><A HREF="mbgrdviz.html">mbgrdviz</A></B>(1),
+<B><A HREF="mbgrid.html">mbgrid</A></B>(1)
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>BUGS</H2>
+
+Maybe. Maybe not.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">SEE ALSO</A><DD>
+<DT><A HREF="#lbAI">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 7 September 2026</P></CENTER>
+
+<HR>
+<center>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>

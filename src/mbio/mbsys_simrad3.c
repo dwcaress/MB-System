@@ -1694,91 +1694,91 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 			if (store->par_stc == 0) {
 				if (status == MB_SUCCESS)
 					status = mb_platform_set_sensor_offset(
-					    verbose, (void *)platform, sensor_multibeam, 0, MB_SENSOR_POSITION_OFFSET_STATIC, (double)store->par_s1y,
-					    (double)store->par_s1x, (double)-store->par_s1z, MB_SENSOR_ATTITUDE_OFFSET_STATIC, (double)store->par_s1h,
+					    verbose, (void *)platform, sensor_multibeam, 0, (double)store->par_s1y,
+					    (double)store->par_s1x, (double)-store->par_s1z, (double)store->par_s1h,
 					    (double)store->par_s1r, (double)store->par_s1p, error);
 				if (status == MB_SUCCESS)
 					status = mb_platform_set_sensor_offset(
-					    verbose, (void *)platform, sensor_multibeam, 1, MB_SENSOR_POSITION_OFFSET_STATIC, (double)store->par_s2y,
-					    (double)store->par_s2x, (double)-store->par_s2z, MB_SENSOR_ATTITUDE_OFFSET_STATIC, (double)store->par_s2h,
+					    verbose, (void *)platform, sensor_multibeam, 1, (double)store->par_s2y,
+					    (double)store->par_s2x, (double)-store->par_s2z, (double)store->par_s2h,
 					    (double)store->par_s2r, (double)store->par_s2p, error);
 			}
 			else if (store->par_stc == 1) {
 				if (status == MB_SUCCESS)
 					status = mb_platform_set_sensor_offset(
-					    verbose, (void *)platform, sensor_multibeam, 0, MB_SENSOR_POSITION_OFFSET_STATIC, (double)store->par_s1y,
-					    (double)store->par_s1x, (double)-store->par_s1z, MB_SENSOR_ATTITUDE_OFFSET_STATIC, (double)store->par_s1h,
+					    verbose, (void *)platform, sensor_multibeam, 0, (double)store->par_s1y,
+					    (double)store->par_s1x, (double)-store->par_s1z, (double)store->par_s1h,
 					    (double)store->par_s1r, (double)store->par_s1p, error);
 				if (status == MB_SUCCESS)
 					status = mb_platform_set_sensor_offset(
-					    verbose, (void *)platform, sensor_multibeam, 1, MB_SENSOR_POSITION_OFFSET_STATIC, (double)store->par_s1y,
-					    (double)store->par_s1x, (double)-store->par_s1z, MB_SENSOR_ATTITUDE_OFFSET_STATIC, (double)store->par_s1h,
+					    verbose, (void *)platform, sensor_multibeam, 1, (double)store->par_s1y,
+					    (double)store->par_s1x, (double)-store->par_s1z, (double)store->par_s1h,
 					    (double)store->par_s1r, (double)store->par_s1p, error);
 			}
 			else if (store->par_stc == 2) {
 				if (status == MB_SUCCESS)
 					status = mb_platform_set_sensor_offset(
-					    verbose, (void *)platform, sensor_multibeam, 0, MB_SENSOR_POSITION_OFFSET_STATIC, (double)store->par_s1y,
-					    (double)store->par_s1x, (double)-store->par_s1z, MB_SENSOR_ATTITUDE_OFFSET_STATIC, (double)store->par_s1h,
+					    verbose, (void *)platform, sensor_multibeam, 0, (double)store->par_s1y,
+					    (double)store->par_s1x, (double)-store->par_s1z, (double)store->par_s1h,
 					    (double)store->par_s1r, (double)store->par_s1p, error);
 				if (status == MB_SUCCESS)
 					status = mb_platform_set_sensor_offset(
-					    verbose, (void *)platform, sensor_multibeam, 1, MB_SENSOR_POSITION_OFFSET_STATIC, (double)store->par_s1y,
-					    (double)store->par_s1x, (double)-store->par_s1z, MB_SENSOR_ATTITUDE_OFFSET_STATIC, (double)store->par_s1h,
+					    verbose, (void *)platform, sensor_multibeam, 1, (double)store->par_s1y,
+					    (double)store->par_s1x, (double)-store->par_s1z, (double)store->par_s1h,
 					    (double)store->par_s1r, (double)store->par_s1p, error);
 				if (status == MB_SUCCESS)
 					status = mb_platform_set_sensor_offset(
-					    verbose, (void *)platform, sensor_multibeam, 2, MB_SENSOR_POSITION_OFFSET_STATIC, (double)store->par_s2y,
-					    (double)store->par_s2x, (double)-store->par_s2z, MB_SENSOR_ATTITUDE_OFFSET_STATIC, (double)store->par_s2h,
+					    verbose, (void *)platform, sensor_multibeam, 2, (double)store->par_s2y,
+					    (double)store->par_s2x, (double)-store->par_s2z, (double)store->par_s2h,
 					    (double)store->par_s2r, (double)store->par_s2p, error);
 				if (status == MB_SUCCESS)
 					status = mb_platform_set_sensor_offset(
-					    verbose, (void *)platform, sensor_multibeam, 3, MB_SENSOR_POSITION_OFFSET_STATIC, (double)store->par_s2y,
-					    (double)store->par_s2x, (double)-store->par_s2z, MB_SENSOR_ATTITUDE_OFFSET_STATIC, (double)store->par_s2h,
+					    verbose, (void *)platform, sensor_multibeam, 3, (double)store->par_s2y,
+					    (double)store->par_s2x, (double)-store->par_s2z, (double)store->par_s2h,
 					    (double)store->par_s2r, (double)store->par_s2p, error);
 			}
 			else if (store->par_stc == 3) {
 				if (status == MB_SUCCESS)
 					status = mb_platform_set_sensor_offset(
-					    verbose, (void *)platform, sensor_multibeam, 0, MB_SENSOR_POSITION_OFFSET_STATIC, (double)store->par_s1y,
-					    (double)store->par_s1x, (double)-store->par_s1z, MB_SENSOR_ATTITUDE_OFFSET_STATIC, (double)store->par_s1h,
+					    verbose, (void *)platform, sensor_multibeam, 0, (double)store->par_s1y,
+					    (double)store->par_s1x, (double)-store->par_s1z, (double)store->par_s1h,
 					    (double)store->par_s1r, (double)store->par_s1p, error);
 				if (status == MB_SUCCESS)
 					status = mb_platform_set_sensor_offset(
-					    verbose, (void *)platform, sensor_multibeam, 1, MB_SENSOR_POSITION_OFFSET_STATIC, (double)store->par_s2y,
-					    (double)store->par_s2x, (double)-store->par_s2z, MB_SENSOR_ATTITUDE_OFFSET_STATIC, (double)store->par_s2h,
+					    verbose, (void *)platform, sensor_multibeam, 1, (double)store->par_s2y,
+					    (double)store->par_s2x, (double)-store->par_s2z, (double)store->par_s2h,
 					    (double)store->par_s2r, (double)store->par_s2p, error);
 				if (status == MB_SUCCESS)
 					status = mb_platform_set_sensor_offset(
-					    verbose, (void *)platform, sensor_multibeam, 2, MB_SENSOR_POSITION_OFFSET_STATIC, (double)store->par_s1y,
-					    (double)store->par_s1x, (double)-store->par_s1z, MB_SENSOR_ATTITUDE_OFFSET_STATIC, (double)store->par_s1h,
+					    verbose, (void *)platform, sensor_multibeam, 2, (double)store->par_s1y,
+					    (double)store->par_s1x, (double)-store->par_s1z, (double)store->par_s1h,
 					    (double)store->par_s1r, (double)store->par_s1p, error);
 				if (status == MB_SUCCESS)
 					status = mb_platform_set_sensor_offset(
-					    verbose, (void *)platform, sensor_multibeam, 3, MB_SENSOR_POSITION_OFFSET_STATIC, (double)store->par_s3y,
-					    (double)store->par_s3x, (double)-store->par_s3z, MB_SENSOR_ATTITUDE_OFFSET_STATIC, (double)store->par_s3h,
+					    verbose, (void *)platform, sensor_multibeam, 3, (double)store->par_s3y,
+					    (double)store->par_s3x, (double)-store->par_s3z, (double)store->par_s3h,
 					    (double)store->par_s3r, (double)store->par_s3p, error);
 			}
 			else if (store->par_stc == 4) {
 				if (status == MB_SUCCESS)
 					status = mb_platform_set_sensor_offset(
-					    verbose, (void *)platform, sensor_multibeam, 0, MB_SENSOR_POSITION_OFFSET_STATIC, (double)store->par_s0y,
-					    (double)store->par_s0x, (double)-store->par_s0z, MB_SENSOR_ATTITUDE_OFFSET_STATIC, (double)store->par_s0h,
+					    verbose, (void *)platform, sensor_multibeam, 0, (double)store->par_s0y,
+					    (double)store->par_s0x, (double)-store->par_s0z, (double)store->par_s0h,
 					    (double)store->par_s0r, (double)store->par_s0p, error);
 				if (status == MB_SUCCESS)
 					status = mb_platform_set_sensor_offset(
-					    verbose, (void *)platform, sensor_multibeam, 1, MB_SENSOR_POSITION_OFFSET_STATIC, (double)store->par_s2y,
-					    (double)store->par_s2x, (double)-store->par_s2z, MB_SENSOR_ATTITUDE_OFFSET_STATIC, (double)store->par_s2h,
+					    verbose, (void *)platform, sensor_multibeam, 1, (double)store->par_s2y,
+					    (double)store->par_s2x, (double)-store->par_s2z, (double)store->par_s2h,
 					    (double)store->par_s2r, (double)store->par_s2p, error);
 				if (status == MB_SUCCESS)
 					status = mb_platform_set_sensor_offset(
-					    verbose, (void *)platform, sensor_multibeam, 2, MB_SENSOR_POSITION_OFFSET_STATIC, (double)store->par_s1y,
-					    (double)store->par_s1x, (double)-store->par_s1z, MB_SENSOR_ATTITUDE_OFFSET_STATIC, (double)store->par_s1h,
+					    verbose, (void *)platform, sensor_multibeam, 2, (double)store->par_s1y,
+					    (double)store->par_s1x, (double)-store->par_s1z, (double)store->par_s1h,
 					    (double)store->par_s1r, (double)store->par_s1p, error);
 				if (status == MB_SUCCESS)
 					status = mb_platform_set_sensor_offset(
-					    verbose, (void *)platform, sensor_multibeam, 3, MB_SENSOR_POSITION_OFFSET_STATIC, (double)store->par_s3y,
-					    (double)store->par_s3x, (double)-store->par_s3z, MB_SENSOR_ATTITUDE_OFFSET_STATIC, (double)store->par_s3h,
+					    verbose, (void *)platform, sensor_multibeam, 3, (double)store->par_s3y,
+					    (double)store->par_s3x, (double)-store->par_s3z, (double)store->par_s3h,
 					    (double)store->par_s3r, (double)store->par_s3p, error);
 			}
 		}
@@ -1810,30 +1810,24 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 		/* set offsets for position sensor 1 */
 		if (store->par_p1q && platform->source_position1 >= 0 && platform->sensors[platform->source_position1].num_offsets == 1) {
 			/* set offsets based on whether position data are already motion compensated */
-			int position_offset_mode;
 			double position_offset_x;
 			double position_offset_y;
 			double position_offset_z;
-			int attitude_offset_mode;
 			double attitude_offset_heading;
 			double attitude_offset_roll;
 			double attitude_offset_pitch;
 			if (store->par_p1m) {
-				position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
 				position_offset_x = 0.0;
 				position_offset_y = 0.0;
 				position_offset_z = 0.0;
-				attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_NONE;
 				attitude_offset_heading = 0.0;
 				attitude_offset_roll = 0.0;
 				attitude_offset_pitch = 0.0;
 			}
 			else {
-				position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
 				position_offset_x = store->par_p1y;
 				position_offset_y = store->par_p1x;
 				position_offset_z = -store->par_p1z;
-				attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_NONE;
 				attitude_offset_heading = 0.0;
 				attitude_offset_roll = 0.0;
 				attitude_offset_pitch = 0.0;
@@ -1841,13 +1835,12 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 
 			/* if position sensor 1 is also the heading sensor, add heading offset */
 			if ((store->par_ahs == 1 || store->par_gcg != 0.0) && !store->par_p1m) {
-				attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_STATIC;
 				attitude_offset_heading = store->par_gcg;
 			}
 
 			/* now set the offsets for position sensor 1 */
-			status = mb_platform_set_sensor_offset(verbose, (void *)platform, platform->source_position1, 0, position_offset_mode,
-			                                       position_offset_x, position_offset_y, position_offset_z, attitude_offset_mode,
+			status = mb_platform_set_sensor_offset(verbose, (void *)platform, platform->source_position1, 0,
+			                                       position_offset_x, position_offset_y, position_offset_z,
 			                                       attitude_offset_heading, attitude_offset_roll, attitude_offset_pitch, error);
 
 			/* set time latency for position sensor 1 */
@@ -1885,30 +1878,24 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 		/* set offsets for position sensor 2 */
 		if (store->par_p2q && platform->source_position2 >= 0 && platform->sensors[platform->source_position2].num_offsets == 1) {
 			/* set offsets based on whether position data are already motion compensated */
-			int position_offset_mode;
 			double position_offset_x;
 			double position_offset_y;
 			double position_offset_z;
-			int attitude_offset_mode;
 			double attitude_offset_heading;
 			double attitude_offset_roll;
 			double attitude_offset_pitch;
 			if (store->par_p2m) {
-				position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
 				position_offset_x = 0.0;
 				position_offset_y = 0.0;
 				position_offset_z = 0.0;
-				attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_NONE;
 				attitude_offset_heading = 0.0;
 				attitude_offset_roll = 0.0;
 				attitude_offset_pitch = 0.0;
 			}
 			else {
-				position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
 				position_offset_x = store->par_p2y;
 				position_offset_y = store->par_p2x;
 				position_offset_z = -store->par_p2z;
-				attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_NONE;
 				attitude_offset_heading = 0.0;
 				attitude_offset_roll = 0.0;
 				attitude_offset_pitch = 0.0;
@@ -1916,13 +1903,12 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 
 			/* if position sensor 2 is also the heading sensor, add heading offset */
 			if (store->par_ahs == 2 && !store->par_p2m) {
-				attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_STATIC;
 				attitude_offset_heading = store->par_gcg;
 			}
 
 			/* now set the offsets for position sensor 2 */
-			status = mb_platform_set_sensor_offset(verbose, (void *)platform, platform->source_position2, 0, position_offset_mode,
-			                                       position_offset_x, position_offset_y, position_offset_z, attitude_offset_mode,
+			status = mb_platform_set_sensor_offset(verbose, (void *)platform, platform->source_position2, 0,
+			                                       position_offset_x, position_offset_y, position_offset_z,
 			                                       attitude_offset_heading, attitude_offset_roll, attitude_offset_pitch, error);
 
 			/* set time latency for position sensor 2 */
@@ -1960,30 +1946,24 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 		/* set offsets for position sensor 3 */
 		if (store->par_p3q && platform->source_position3 >= 0 && platform->sensors[platform->source_position3].num_offsets == 1) {
 			/* set offsets based on whether position data are already motion compensated */
-			int position_offset_mode;
 			double position_offset_x;
 			double position_offset_y;
 			double position_offset_z;
-			int attitude_offset_mode;
 			double attitude_offset_heading;
 			double attitude_offset_roll;
 			double attitude_offset_pitch;
 			if (store->par_p3m) {
-				position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
 				position_offset_x = 0.0;
 				position_offset_y = 0.0;
 				position_offset_z = 0.0;
-				attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_NONE;
 				attitude_offset_heading = 0.0;
 				attitude_offset_roll = 0.0;
 				attitude_offset_pitch = 0.0;
 			}
 			else {
-				position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
 				position_offset_x = store->par_p3y;
 				position_offset_y = store->par_p3x;
 				position_offset_z = -store->par_p3z;
-				attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_NONE;
 				attitude_offset_heading = 0.0;
 				attitude_offset_roll = 0.0;
 				attitude_offset_pitch = 0.0;
@@ -1991,13 +1971,12 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 
 			/* if position sensor 3 is also the heading sensor, add heading offset */
 			if (store->par_ahs == 3 && !store->par_p3m) {
-				attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_STATIC;
 				attitude_offset_heading = store->par_gcg;
 			}
 
 			/* now set the offsets for position sensor 3 */
-			status = mb_platform_set_sensor_offset(verbose, (void *)platform, platform->source_position3, 0, position_offset_mode,
-			                                       position_offset_x, position_offset_y, position_offset_z, attitude_offset_mode,
+			status = mb_platform_set_sensor_offset(verbose, (void *)platform, platform->source_position3, 0,
+			                                       position_offset_x, position_offset_y, position_offset_z,
 			                                       attitude_offset_heading, attitude_offset_roll, attitude_offset_pitch, error);
 
 			/* set time latency for position sensor 3 */
@@ -2023,16 +2002,14 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		}
 		if (platform->source_depth1 >= 0 && platform->sensors[platform->source_depth1].num_offsets == 1) {
-			const int position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
 			const double position_offset_x = store->par_dsy;
 			const double position_offset_y = store->par_dsx;
 			const double position_offset_z = -store->par_dsz;
-			const int attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_NONE;
 			const double attitude_offset_heading = 0.0;
 			const double attitude_offset_roll = 0.0;
 			const double attitude_offset_pitch = 0.0;
-			status = mb_platform_set_sensor_offset(verbose, (void *)platform, platform->source_depth1, 0, position_offset_mode,
-			                                       position_offset_x, position_offset_y, position_offset_z, attitude_offset_mode,
+			status = mb_platform_set_sensor_offset(verbose, (void *)platform, platform->source_depth1, 0,
+			                                       position_offset_x, position_offset_y, position_offset_z,
 			                                       attitude_offset_heading, attitude_offset_roll, attitude_offset_pitch, error);
 			if (status == MB_SUCCESS && store->par_dsd != 0.0) {
 				status = mb_platform_set_sensor_timelatency(verbose, (void *)platform, platform->source_depth1,
@@ -2061,17 +2038,15 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 		/* set motion sensor 1 offsets */
 		if (platform->source_rollpitch1 >= 0 && platform->sensors[platform->source_rollpitch1].num_offsets == 1) {
 			/* set offsets */
-			const int position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
 			const double position_offset_x = store->par_msy;
 			const double position_offset_y = store->par_msx;
 			const double position_offset_z = -store->par_msz;
-			int attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_STATIC;
 			const double attitude_offset_heading = store->par_msg;
 			const double attitude_offset_roll = store->par_msr;
 			const double attitude_offset_pitch = store->par_msp;
 			status =
-			    mb_platform_set_sensor_offset(verbose, (void *)platform, platform->source_rollpitch1, 0, position_offset_mode,
-			                                  position_offset_x, position_offset_y, position_offset_z, attitude_offset_mode,
+			    mb_platform_set_sensor_offset(verbose, (void *)platform, platform->source_rollpitch1, 0,
+			                                  position_offset_x, position_offset_y, position_offset_z,
 			                                  attitude_offset_heading, attitude_offset_roll, attitude_offset_pitch, error);
 
 			/* set time latency */
@@ -2101,38 +2076,32 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 		/* set motion sensor 2 offsets */
 		if (platform->source_rollpitch2 >= 0 && platform->sensors[platform->source_rollpitch2].num_offsets == 1) {
 			/* set offsets - same as motion sensor 1 if not specified */
-			int position_offset_mode;
 			double position_offset_x;
 			double position_offset_y;
 			double position_offset_z;
-			int attitude_offset_mode;
 			double attitude_offset_heading;
 			double attitude_offset_roll;
 			double attitude_offset_pitch;
 			if (store->par_nsx != 0.0 || store->par_nsy != 0.0 || store->par_nsz != 0.0 || store->par_nsg != 0.0 ||
 			    store->par_nsr != 0.0 || store->par_nsp != 0.0) {
-				position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
 				position_offset_x = store->par_nsy;
 				position_offset_y = store->par_nsx;
 				position_offset_z = -store->par_nsz;
-				attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_STATIC;
 				attitude_offset_heading = store->par_nsg;
 				attitude_offset_roll = store->par_nsr;
 				attitude_offset_pitch = store->par_nsp;
 			}
 			else {
-				position_offset_mode = MB_SENSOR_POSITION_OFFSET_STATIC;
 				position_offset_x = store->par_msy;
 				position_offset_y = store->par_msx;
 				position_offset_z = -store->par_msz;
-				attitude_offset_mode = MB_SENSOR_ATTITUDE_OFFSET_STATIC;
 				attitude_offset_heading = store->par_msg;
 				attitude_offset_roll = store->par_msr;
 				attitude_offset_pitch = store->par_msp;
 			}
 			status =
-			    mb_platform_set_sensor_offset(verbose, (void *)platform, platform->source_rollpitch2, 0, position_offset_mode,
-			                                  position_offset_x, position_offset_y, position_offset_z, attitude_offset_mode,
+			    mb_platform_set_sensor_offset(verbose, (void *)platform, platform->source_rollpitch2, 0,
+			                                  position_offset_x, position_offset_y, position_offset_z,
 			                                  attitude_offset_heading, attitude_offset_roll, attitude_offset_pitch, error);
 
 			/* set time latency */

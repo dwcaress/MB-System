@@ -224,6 +224,10 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 	mb_io_ptr->projection_initialized = false;
 	mb_io_ptr->projection_id[0] = '\0';
 	mb_io_ptr->pjptr = NULL;
+  
+  /* initialize variables for embedded platform descriptions */
+  mb_io_ptr->platform_initialized = false;
+  mb_io_ptr->platformptr = NULL;
 
 	/* initialize ancillary variables used
 	    to save information in certain cases */
@@ -1057,6 +1061,10 @@ int mb_input_init(int verbose, char *socket_definition, int format,
 	mb_io_ptr->projection_initialized = false;
 	mb_io_ptr->projection_id[0] = '\0';
 	mb_io_ptr->pjptr = NULL;
+  
+  /* initialize variables for embedded platform descriptions */
+  mb_io_ptr->platform_initialized = false;
+  mb_io_ptr->platformptr = NULL;
 
 	/* initialize ancillary variables used
 	    to save information in certain cases */
@@ -1076,6 +1084,8 @@ int mb_input_init(int verbose, char *socket_definition, int format,
 	mb_io_ptr->save12 = 0;
 	mb_io_ptr->save13 = 0;
 	mb_io_ptr->save14 = 0;
+	mb_io_ptr->save15 = 0;
+	mb_io_ptr->save16 = 0;
 	mb_io_ptr->saved1 = 0;
 	mb_io_ptr->saved2 = 0;
 	mb_io_ptr->saved3 = 0;
@@ -1329,7 +1339,7 @@ int mb_set_debug_records(int verbose, void *mbio_ptr,
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       verbose:                           %d\n", verbose);
 		fprintf(stderr, "dbg2       enable_debug_record_type_listing:  %d\n", enable_debug_record_type_listing);
 		fprintf(stderr, "dbg2       num_debug_record_identifiers:      %d\n", num_debug_record_identifiers);
 		for (int i = 0; i < num_debug_record_identifiers; i++) {
@@ -1351,6 +1361,59 @@ int mb_set_debug_records(int verbose, void *mbio_ptr,
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mb_set_platform(int verbose, void *mbio_ptr,
+									void *mbplatform_ptr, 
+									int *error) {
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:                %p\n", mbio_ptr);
+		fprintf(stderr, "dbg2       mbplatform_ptr:          %p\n", mbplatform_ptr);
+	}
+
+	/* initialize error and status */
+	*error = MB_ERROR_NO_ERROR;
+	int status = MB_SUCCESS;
+
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	if (mbio_ptr != NULL && mbplatform_ptr != NULL) {
+		struct mb_platform_struct *platform = (struct mb_platform_struct *) mbplatform_ptr;
+    mb_platform_print(verbose, mbplatform_ptr, error);
+		if (platform->type > MB_PLATFORM_NONE && platform->type < MB_PLATFORM_COUNT) {
+			status = mb_platform_init(verbose, &mb_io_ptr->platformptr, error);
+			if (status == MB_SUCCESS) {
+				/* the platform structure is allocated as soon as mb_platform_init()
+				 * succeeds, so mark it initialized now - this guarantees mb_close()
+				 * will deallocate it even if the copy below fails partway through */
+				mb_io_ptr->platform_initialized = true;
+				status = mb_platform_copy(verbose, mbplatform_ptr, mb_io_ptr->platformptr, error);
+			}
+		}
+		else {
+			status = MB_FAILURE;
+			*error = MB_ERROR_BAD_DESCRIPTOR;
+		}
+	}
+	else {
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_USAGE;
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       mb_io_ptr:               %p\n", mb_io_ptr);
+		fprintf(stderr, "dbg2       mb_io_ptr->platformptr:  %p\n", mb_io_ptr->platformptr);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);

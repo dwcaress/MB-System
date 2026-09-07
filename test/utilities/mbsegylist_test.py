@@ -35,7 +35,7 @@ class MbsegylistTest(unittest.TestCase):
     self.assertIn('Version', output)
     self.assertIn('lists table data from a segy data file', output)
     self.assertIn('usage:', output)
-    self.assertIn('-Gdelimiter', output)
+    self.assertIn('-Gcharacter', output)
 
   def testHelpVerbose2(self):
     cmd = [self.cmd, '-h', '-V', '-V']
@@ -43,7 +43,7 @@ class MbsegylistTest(unittest.TestCase):
     self.assertIn('Version', output)
     self.assertIn('lists table data from a segy data file', output)
     self.assertIn('usage:', output)
-    self.assertIn('-Gdelimiter', output)
+    self.assertIn('-Gcharacter', output)
     self.assertIn('dbg2', output)
     self.assertIn('lonflip', output)
     self.assertIn('segment_tag:', output)

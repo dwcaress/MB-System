@@ -96,12 +96,14 @@ time order. However, Kongsberg multibeam data filenames usually start with a sur
 file number that restarts at 0001 whenever datalogging is stopped and restarted.
 Consequently, when data from multiple instances of logging are present in a
 single directory, the simple listing of files will not in general be in time
-order. If the file suffix is declared to be &quot;.all&quot;, &quot;.ALL&quot;, &quot;.kmall&quot;, or &quot;.KMALL&quot;
+order. If the file suffix is declared to be &quot;.all&quot;, &quot;.ALL&quot;, &quot;.kmall&quot;, &quot;.KMALL&quot;,
+&quot;.mb56&quot;, &quot;.mb57&quot;, &quot;.mb58&quot;, &quot;.mb59&quot;, or &quot;.mb261&quot;
 using the <B>-S</B> (or <B>--suffix</B>) option, then <B>mbmakedatalist</B> will
 attempt to sort the swath files into time order before generating the final
 datalist. This behavior can be disabled by specifying the <B>-T</B>
 (or <B>--no-time-sort</B>) option. Kongsberg dataloggers often create junk data
-files with names such as &quot;9999.all&quot; or &quot;9999.ALL&quot;; these filenames are ignored.
+files with names such as &quot;9999.all&quot;, &quot;9999.ALL&quot;, &quot;9999.kmall&quot;, or &quot;9999.KMALL&quot;;
+these filenames are ignored.
 <P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>MB-SYSTEM AUTHORSHIP</H2>
@@ -184,9 +186,10 @@ conventions.
 If the file suffix declared with this option corresponds to one of the formats
 associated with Kongsberg multibeam sonar data, then <B>mbmakedatalist</B> will
 attempt to sort the swath files into time order before generating the final
-datalist. This behavior applies to files with the &quot;.all&quot; or &quot;.ALL&quot; suffix used
-for raw logged Kongsberg files, and also to files with suffixes following the
-<B>MB-System</B> convention (e.g. &quot;.mb56&quot;, &quot;.mb57&quot;, &quot;.mb58&quot;, &quot;.mb59&quot; suffixes).
+datalist. This behavior applies to files with the &quot;.all&quot;, &quot;.ALL&quot;, &quot;.kmall&quot;, or
+&quot;.KMALL&quot; suffix used for raw logged Kongsberg files, and also to files with
+suffixes following the <B>MB-System</B> convention (&quot;.mb56&quot;, &quot;.mb57&quot;, &quot;.mb58&quot;,
+&quot;.mb59&quot;, or &quot;.mb261&quot;).
 This behavior is disabled by the <B>-T</B> (<B>--no-time-sort</B>) option.
 <DT><B>-T</B> ,  <B>--no-time-sort</B>
 

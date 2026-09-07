@@ -12,8 +12,8 @@ Version 5.0
 \fB\-B\fItickinfo\fP \fB\-b\fIyr/mo/da/hr/mn/sc\fP
 \fB\-C\fIcontourfile\fP \fB\-c\fIcopies\fP
 \fB\-D\fItime_tick/time_annot/date_annot/time_tick_len\fP
-\fB\-E\fIyr/mo/da/hr/mn/sc\fP
-\fB\-f\fIformat\fP \fB\-F\fIred/green/blue\fP \fB\-G\fIname_hgt[/name_perp]\fP
+\fB\-e\fIyr/mo/da/hr/mn/sc\fP
+\fB\-f\fIformat\fP \fB\-F\fIformat\fP \fB\-G\fIname_hgt[/name_perp]\fP
 \fB\-I\fIinfile\fP \fB\-K\fP \fB\-L\fIlonflip\fP
 \fB\-M\fIpingnumber_tick/pingnumber_annot/pingnumber_tick_len\fP
 \fB\-N\fInplot\fP \fB\-O\fP \fB\-P\fP \fB\-p\fIpings\fP
@@ -111,8 +111,8 @@ if \fIlab_spacing\fP = 0.0 then the spacing will be defined by
 \fIlab_hgt\fP. If fewer than seven parameters are specified, the
 default values are used for the missing parameters.
 Defaults: \fIcont_int\fP = 25; \fIcol_int\fP = 100;
-\fItic_int\fP = 100; \fIlab_int\fP = 100; \fItic_int\fP = 0.1;
-\fIlab_hgt\fP = 0.05; \fIlab_spacing\fP = 0.0.
+\fItic_int\fP = 100; \fIlab_int\fP = 100; \fItic_len\fP = 0.05;
+\fIlab_hgt\fP = 0.1; \fIlab_spacing\fP = 0.0.
 .TP
 .B \-B
 \fItickinfo\fP
@@ -162,7 +162,7 @@ annotated date ticks are given in hours by
 Defaults: \fItime_tick\fP = 0.25; \fItime_annot\fP = 1.0;
 \fIdate_annot\fP = 4.0; \fItime_tick_len\fP = 0.1.
 .TP
-.B \-E
+.B \-e
 \fIyr/mo/da/hr/mn/sc\fP
 .br
 Sets the ending time for data allowed in the input data; pings
@@ -182,9 +182,10 @@ currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = \-1.
 .TP
 .B \-F
-\fIred/green/blue\fP
+\fIformat\fP
 .br
-Sets the color used for Frame and annotation. [Default is black]
+A synonym for \fB\-f\fP\fIformat\fP; sets the data format exactly as
+described above for the \fB\-f\fP option.
 .TP
 .B \-G
 \fIname_hgt[/name_perp]\fP

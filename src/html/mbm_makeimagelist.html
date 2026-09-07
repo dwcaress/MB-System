@@ -1,0 +1,213 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbm_makeimagelist</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbm_makeimagelist</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  7 September 2026 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbm_makeimagelist</B> - Generate an MB-System stereo imagelist file from a MBARI Low Altitude Survey System (LASS) camera data directory.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+mbm_makeimagelist [<B>--help</B> <B>--check-bayer</B> <B>--imdir=</B><I>path2images</I>
+<B>--imformat=</B><I>image_format</I> <B>--outfile=</B><I>outfname</I>
+<B>--gpsfile=</B><I>gpsfname</I> <B>--nogpsfile</B> <B>--nogains</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>Mbm_makeimagelist</B> is a Python macro that generates an MB-System stereo
+imagelist file from the directory structure and filenames used by the MBARI
+Low Altitude Survey System (LASS) stereo seafloor photography system. It
+expects to find left camera images in a subdirectory named <I>PROSILICA_L</I> and
+right camera images in a subdirectory named <I>PROSILICA_R</I> of the input image
+directory, with each image file's basename being an integer image
+acquisition timestamp expressed in microseconds since the Unix epoch.
+
+The left and right image time lists are matched into stereo pairs. By
+default this matching also uses a separate GPS trigger time log (a CSV file
+whose first column is a microsecond epoch trigger time for each stereo
+capture, by default named <I>logfile_gpstime_cam_sync.csv</I> one directory above
+the image directory); each left and right image is paired with the closest
+GPS trigger time, and left or right images with no corresponding trigger
+within a fixed time tolerance are recorded as unmatched. If <B>--nogpsfile</B> is
+given, the left and right image time lists are instead matched directly
+against each other using the same time tolerance, without reference to any
+GPS trigger log.
+
+Unless <B>--nogains</B> is given, <B>mbm_makeimagelist</B> also opens every input
+image with the Python Imaging Library and reads its embedded TIFF
+<I>ImageDescription</I> tag (tag 270), extracting the first two numeric values
+found in that tag's text as the camera's gain and exposure settings at the
+time the image was captured. If <B>--check-bayer</B> is given, the word &quot;color&quot;
+in each image's filename is first replaced with &quot;bayer&quot; before the file is
+opened to read this tag, on the premise that the original raw Bayer-pattern
+image (rather than a subsequently color-processed copy) is more likely to
+carry the camera gain/exposure metadata; this substitution only affects
+which file is opened to read the gain and exposure values; it does not
+change which image files are listed in the output imagelist.
+
+The result is written as a single MB-System imagelist file in the <I>.mb-2</I>
+format, with one line per stereo pair (or single, unmatched image) giving
+the left image path (or <B>NULL</B> if there is no left image), the right image
+path (or <B>NULL</B>), the paired time (twice), and the left and right camera
+gain and exposure values (zero if <B>--nogains</B> was used or no metadata could
+be read). The first five lines of the data are additionally prefixed with a
+&quot;##&quot; comment marker in the output file.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-h, --help</B>
+
+<DD>
+This &quot;help&quot; flag causes the program to print out a description
+of its command line options and then exit immediately.
+<DT><B>-b, --check-bayer</B>
+
+<DD>
+<BR>
+
+Reads camera gain and exposure settings from the corresponding raw Bayer
+pattern image file rather than from the (possibly color-processed) image file
+actually being listed, by substituting &quot;bayer&quot; for &quot;color&quot; in the filename
+used only for that metadata lookup. Has no effect if <B>--nogains</B> is also
+given.
+<DT><B>-d, --imdir=</B><I>path2images</I>
+
+<DD>
+<BR>
+
+Sets the path to the directory containing the <I>PROSILICA_L</I> and
+<I>PROSILICA_R</I> image subdirectories to be listed. The default is the current
+directory (<I>./</I>).
+<DT><B>-f, --imformat=</B><I>image_format</I>
+
+<DD>
+<BR>
+
+Intended to set the image file suffix (for example <I>tif</I>) searched for in
+the <I>PROSILICA_L</I> and <I>PROSILICA_R</I> subdirectories. In the current
+implementation this option instead mistakenly overwrites the image directory
+path (<B>--imdir</B>) with the supplied value and has no effect on the image
+format searched for, which always remains the default, <I>tif</I>.
+<DT><B>-o, --outfile=</B><I>outfname</I>
+
+<DD>
+<BR>
+
+Sets the name of the output imagelist file to be written, without the
+<I>.mb-2</I> suffix, which is appended automatically. If <I>outfname</I> includes a
+directory path, the output file is written to that directory; otherwise it
+is written to the image directory set by <B>--imdir</B>. The default output
+filename is <I>imagelist</I>, producing <I>imagelist.mb-2</I>.
+<DT><B>-g, --gpsfile=</B><I>gpsfname</I>
+
+<DD>
+<BR>
+
+Sets the filename of the GPS trigger time CSV log used to match left and
+right images into stereo pairs. The default is
+<I>./../logfile_gpstime_cam_sync.csv</I> relative to the image directory (that
+is, one directory above <B>--imdir</B>). Has no effect if <B>--nogpsfile</B> is
+given.
+<DT><B>-x, --nogpsfile</B>
+
+<DD>
+<BR>
+
+Matches left and right camera images into stereo pairs directly by comparing
+their timestamps, without reading or requiring a GPS trigger time log file.
+<DT><B>-y, --nogains</B>
+
+<DD>
+<BR>
+
+Skips opening the image files to read embedded camera gain and exposure
+metadata; the gain and exposure values written to the output imagelist are
+all zero. This significantly speeds up processing of large image sets when
+gain/exposure correction is not needed.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbimagelist.html">mbimagelist</A></B>(1), <B><A HREF="mbgetphotocorrection.html">mbgetphotocorrection</A></B>(1),
+<B><A HREF="mbphotomosaic.html">mbphotomosaic</A></B>(1), <B><A HREF="mbphotogrammetry.html">mbphotogrammetry</A></B>(1)
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>BUGS</H2>
+
+Maybe. Maybe not.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">SEE ALSO</A><DD>
+<DT><A HREF="#lbAI">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 7 September 2026</P></CENTER>
+
+<HR>
+<center>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>

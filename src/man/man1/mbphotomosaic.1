@@ -1,0 +1,394 @@
+.TH mbphotomosaic 1 "7 September 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbphotomosaic\fP \- Generate a georeferenced photomosaic image from a set of navigated downlooking seafloor photographs.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+mbphotomosaic [\fB\-\-verbose\fP \fB\-\-help\fP \fB\-\-threads=\fP\fInthreads\fP
+\fB\-\-input=\fP\fIimagelist\fP \fB\-\-output=\fP\fIfile\fP
+\fB\-\-output\-tiff\fP \fB\-\-output\-png\fP
+\fB\-\-image\-dimensions=\fP\fIwidth\fP/\fIheight\fP
+\fB\-\-image\-spacing=\fP\fIdx\fP/\fIdy\fP[/\fIunits\fP]
+\fB\-\-sensor\-size=\fP\fIwidth\fP/\fIheight\fP[/\fIcellsize\fP]
+\fB\-\-fov\-fudgefactor=\fP\fIfactor\fP \fB\-\-projection=\fP\fIprojection_pars\fP
+\fB\-\-altitude=\fP\fItarget\fP/\fIrange\fP | \fB\-\-standoff=\fP\fItarget\fP/\fIrange\fP
+\fB\-\-priority\-weight=\fP\fIweight\fP
+\fB\-\-priority\-heading=\fP\fItarget\fP/\fIfactor\fP/\fImode\fP
+\fB\-\-trim=\fP\fItrim_pixels\fP \fB\-\-section=\fP\fIsection_pixels\fP
+\fB\-\-section\-length\-max=\fP\fIvalue\fP \fB\-\-rangemax=\fP\fIrange_max\fP
+\fB\-\-bounds=\fP\fIlonmin\fP/\fIlonmax\fP/\fIlatmin\fP/\fIlatmax\fP \fB\-\-bounds\-buffer=\fP\fIvalue\fP
+\fB\-\-correction\-brightness\fP \fB\-\-correction\-camera\-settings\fP
+\fB\-\-correction\-range=\fP\fItarget\fP/\fIcoeff\fP
+\fB\-\-correction\-standoff=\fP\fItarget\fP/\fIcoeff\fP
+\fB\-\-correction\-file=\fP\fIimagecorrection.yaml\fP
+\fB\-\-reference\-gain=\fP\fIgain\fP \fB\-\-reference\-exposure=\fP\fIexposure\fP
+\fB\-\-reference\-intensity=\fP\fIintensity\fP
+\fB\-\-reference\-crcb=\fP\fIintensity\fP/\fIintensity\fP
+\fB\-\-dark\-image\-ignore=\fP\fIthreshold\fP
+\fB\-\-dark\-image\-multiply=\fP\fIthreshold\fP/\fIfactor\fP
+\fB\-\-platform\-file=\fP\fIplatform.plf\fP \fB\-\-camera\-sensor=\fP\fIid\fP
+\fB\-\-nav\-sensor=\fP\fIid\fP \fB\-\-sensordepth\-sensor=\fP\fIid\fP
+\fB\-\-heading\-sensor=\fP\fIid\fP \fB\-\-altitude\-sensor=\fP\fIid\fP
+\fB\-\-attitude\-sensor=\fP\fIid\fP
+\fB\-\-use\-left\-camera\fP | \fB\-\-use\-right\-camera\fP | \fB\-\-use\-both\-cameras\fP
+\fB\-\-calibration\-file=\fP\fIstereocalibration.yaml\fP
+\fB\-\-navigation\-file=\fP\fIfile\fP \fB\-\-tide\-file=\fP\fIfile\fP
+\fB\-\-image\-quality\-file=\fP\fIfile\fP \fB\-\-image\-quality\-threshold=\fP\fIvalue\fP
+\fB\-\-image\-quality\-filter\-length=\fP\fIvalue\fP
+\fB\-\-topography\-grid=\fP\fIfile\fP]
+
+.SH DESCRIPTION
+\fBMbphotomosaic\fP generates a single georeferenced mosaic image from a set of
+navigated downlooking photographs, typically taken from a camera or stereo
+camera rig towed or flown close to the seafloor. The program reads single or
+stereo pair images and their associated navigation, attitude, and camera
+settings from an MB-System imagelist file, projects each image's pixels onto
+either an assumed flat seafloor at a nominal standoff or an actual bathymetric
+topography grid, and writes the projected pixels into a regular output raster
+covering a specified geographic (or projected) area.
+.P
+Each output pixel of the mosaic is written from whichever contributing input
+pixel is judged to have the highest priority. By default priority is based
+purely on how close a pixel lies to the center of its source image
+(pixels near the middle of a photograph are usually less distorted and less
+vignetted than pixels near the edges); if \fB\-\-altitude\fP or \fB\-\-standoff\fP is
+given, priority also favors pixels whose projected standoff distance is close
+to a specified target value. Priority can additionally be biased by vehicle
+heading using \fB\-\-priority\-heading\fP, for example to favor images taken while
+running a particular compass heading. Pixels are also weeded out if their
+line of sight is too vertical, if the projected slant range exceeds
+\fB\-\-rangemax\fP, or if they fall in the black borders introduced by camera lens
+undistortion (unless a fixed \fB\-\-trim\fP margin is set instead).
+.P
+Optional corrections can be applied to pixel intensity before it is written
+into the mosaic: a fixed correction for recorded camera gain and exposure
+settings, a simple brightness normalization, a range- or standoff-dependent
+correction using a supplied target/coefficient pair, or the pixel-position-
+and-standoff-dependent 3D correction table produced by
+\fBmbgetphotocorrection\fP. Reference intensity and color values, as well as
+handling of unusually dark images (either ignored outright or boosted by a
+multiplicative factor), can also be specified. Camera images can be
+undistorted and, for stereo pairs, restricted to the left camera, the right
+camera, or both, using a supplied stereo camera calibration file.
+.P
+The output raster's dimensions, pixel spacing, geographic bounds, and map
+projection can all be controlled explicitly; if left unspecified, suitable
+defaults are derived from the imagelist's navigation, the target standoff, and
+the camera field of view. The output image is written as a GeoTiff or PNG file
+according to the output filename's suffix, or as forced by
+\fB\-\-output\-tiff\fP/\fB\-\-output\-png\fP. \fBMbphotomosaic\fP can process images
+using multiple threads (see \fB\-\-threads\fP), and can incorporate an external
+tide correction, a per-image quality filter, and an MB-System platform offset
+model in the same manner as \fBmbgetphotocorrection\fP.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian do Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-\-help
+This "help" flag causes the program to print out a description
+of its operation and then exit immediately.
+.TP
+.B \-\-verbose
+The \fB\-\-verbose\fP option causes \fBmbphotomosaic\fP to print out status and debug
+messages. Using it more than once increases the verbosity level.
+.TP
+.B \-\-threads=\fInthreads\fP
+.br
+Sets the number of processing threads used to work through the image list.
+The requested number of threads is limited to the number of hardware threads
+available and to the MB-System maximum thread count. The default is 1 thread.
+.TP
+.B \-\-input=\fIimagelist\fP
+.br
+Sets the filename of the input MB-System imagelist file listing the images
+(single or stereo pairs) to be mosaicked, along with their navigation,
+attitude, and camera settings. The default input filename is
+\fIimagelist.mb\-1\fP.
+.TP
+.B \-\-output=\fIfile\fP
+.br
+Sets the filename of the output mosaic image. If the filename ends in
+\fI.png\fP the output format defaults to PNG; otherwise the output format
+defaults to GeoTiff unless overridden by \fB\-\-output\-tiff\fP or \fB\-\-output\-png\fP.
+.TP
+.B \-\-output\-tiff
+.br
+Forces the output mosaic image to be written in GeoTiff format.
+.TP
+.B \-\-output\-png
+.br
+Forces the output mosaic image to be written in PNG format.
+.TP
+.B \-\-image\-dimensions=\fIwidth\fP/\fIheight\fP
+.br
+Sets the output mosaic image's dimensions in pixels. If not specified, the
+default is 1000 by 1000 pixels, adjusted as needed to be consistent with any
+pixel spacing and geographic bounds that are set.
+.TP
+.B \-\-image\-spacing=\fIdx\fP/\fIdy\fP[/\fIunits\fP]
+.br
+Sets the output mosaic pixel spacing in the x and y directions, in the given
+\fIunits\fP (default \fImeters\fP). Appending an exclamation point to the value
+(for example \fB\-\-image\-spacing=0.05/0.05!\fP) gives the requested spacing
+priority over the requested image dimensions when the two are in conflict.
+.TP
+.B \-\-sensor\-size=\fIwidth\fP/\fIheight\fP[/\fIcellsize\fP]
+.br
+Sets the camera sensor's physical width and height in millimeters and,
+optionally, its pixel cell size in millimeters, used together with the
+camera's field of view to project pixels onto the seafloor. The defaults are
+8.789 mm by 6.610 mm with a 0.00454 mm cell size.
+.TP
+.B \-\-fov\-fudgefactor=\fIfactor\fP
+.br
+Sets a multiplicative fudge factor applied to the camera field of view
+angles. The default value is 1.0 (no adjustment).
+.TP
+.B \-\-projection=\fIprojection_pars\fP
+.br
+Sets the map projection used for the output mosaic (in the form accepted by
+MB-System's projection parameter parsing, e.g. a UTM zone specification). If
+not specified, the output mosaic remains in geographic (longitude/latitude)
+coordinates.
+.TP
+.B \-\-altitude=\fItarget\fP/\fIrange\fP
+.br
+.TP
+.B \-\-standoff=\fItarget\fP/\fIrange\fP
+.br
+These two equivalent options set a target standoff distance and an
+acceptable range around it, both in meters. When set, pixel priority favors
+pixels whose projected standoff distance is close to \fItarget\fP, in addition
+to the default centrality-based priority. The default target standoff is 3.0
+meters with a range of 1.0 meter, but this standoff-based priority
+contribution is only enabled once one of these options is used.
+.TP
+.B \-\-priority\-weight=\fIweight\fP
+.br
+Sets the relative weight given to the standoff-based priority contribution
+(enabled by \fB\-\-altitude\fP/\fB\-\-standoff\fP) versus the default centrality-based
+priority. The default is 1.0.
+.TP
+.B \-\-priority\-heading=\fItarget\fP/\fIfactor\fP/\fImode\fP
+.br
+Sets a target vehicle heading, in degrees, and a weighting factor used to
+additionally favor pixels from images taken close to that heading. If
+\fImode\fP is omitted or the target heading alone is given, a single-direction
+preference is used; supplying a nonpositive target disables heading-based
+priority (the default state).
+.TP
+.B \-\-trim=\fItrim_pixels\fP
+.br
+Sets the number of pixels to ignore around the margins of each undistorted
+image. If this option is not used (the default, 0 pixels), the program
+instead automatically ignores any purely black pixel and any pixel adjacent
+to a purely black pixel, which is intended to exclude the black borders that
+can appear around the edges of an undistorted image.
+.TP
+.B \-\-section=\fIsection_pixels\fP
+.br
+Sets the size, in pixels, of image sections processed together. The default
+is 0.
+.TP
+.B \-\-section\-length\-max=\fIvalue\fP
+.br
+Intended to set a maximum section length. Although this option is accepted
+on the command line, the current implementation's argument parsing
+incorrectly re-tests for the \fB\-\-section\fP option name rather than
+\fB\-\-section\-length\-max\fP, so this option has no effect; the internal default
+value of 0.5 is always used.
+.TP
+.B \-\-rangemax=\fIrange_max\fP
+.br
+Sets the maximum acceptable projected slant range, in meters, from the camera
+to a pixel's location on the seafloor; pixels with a greater range are
+excluded from the mosaic. The default is 200.0 meters.
+.TP
+.B \-\-bounds=\fIlonmin\fP/\fIlonmax\fP/\fIlatmin\fP/\fIlatmax\fP
+.br
+Sets the geographic (or projected, if \fB\-\-projection\fP is used) bounds of the
+output mosaic explicitly, in the same bounds syntax accepted by other
+MB-System programs (west/east/south/north order, with a variety of
+coordinate notations supported).
+.TP
+.B \-\-bounds\-buffer=\fIvalue\fP
+.br
+Sets a buffer distance, in meters, added around the mosaic bounds
+automatically derived from the imagelist's navigation when \fB\-\-bounds\fP is not
+used explicitly. The default is 6.0 meters.
+.TP
+.B \-\-correction\-brightness
+.br
+Selects a correction mode that normalizes each image's average intensity
+(after gain/exposure correction) to a reference value.
+.TP
+.B \-\-correction\-camera\-settings
+.br
+Selects a correction mode that normalizes pixel intensity for the camera's
+recorded gain and exposure settings relative to the reference gain and
+exposure values, without any additional brightness, range, or standoff
+correction.
+.TP
+.B \-\-correction\-range=\fItarget\fP/\fIcoeff\fP
+.br
+Selects a correction mode that adjusts pixel intensity, after gain/exposure
+correction, based on the pixel's projected slant range from the camera,
+using the given target range and coefficient.
+.TP
+.B \-\-correction\-standoff=\fItarget\fP/\fIcoeff\fP
+.br
+Selects a correction mode that adjusts pixel intensity, after gain/exposure
+correction, based on the pixel's projected standoff distance from the
+seafloor, using the given target standoff and coefficient.
+.TP
+.B \-\-correction\-file=\fIimagecorrection.yaml\fP
+.br
+Selects a correction mode that uses a precomputed 3D pixel-position-and-
+standoff correction table, as generated by \fBmbgetphotocorrection\fP, to
+correct pixel intensity after gain/exposure correction. If the given filename
+does not already end in \fI.yml\fP, that suffix is appended. If none of the
+correction mode options is used, no intensity correction at all is applied to
+the mosaic.
+.TP
+.B \-\-reference\-gain=\fIgain\fP
+.br
+Sets the reference camera gain value, in dB, used by the gain/exposure and
+other correction modes. The default is 0.0.
+.TP
+.B \-\-reference\-exposure=\fIexposure\fP
+.br
+Sets the reference camera exposure time, in microseconds, used by the
+gain/exposure and other correction modes. The default is 0.0.
+.TP
+.B \-\-reference\-intensity=\fIintensity\fP
+.br
+Sets a positive reference Y (luminance) intensity value used by the
+brightness correction mode. If not set, an internal default value is used.
+.TP
+.B \-\-reference\-crcb=\fIintensity\fP/\fIintensity\fP
+.br
+Sets positive reference Cr and Cb (color) intensity values used together
+with the brightness correction mode.
+.TP
+.B \-\-dark\-image\-ignore=\fIthreshold\fP
+.br
+Sets a positive average-intensity threshold below which an entire image is
+ignored as too dark to usefully contribute to the mosaic.
+.TP
+.B \-\-dark\-image\-multiply=\fIthreshold\fP/\fIfactor\fP
+.br
+Sets a positive average-intensity threshold and a positive multiplicative
+factor used to boost the intensity of images darker than the threshold,
+rather than discarding them outright.
+.TP
+.B \-\-platform\-file=\fIplatform.plf\fP
+.br
+Sets the filename of an MB-System platform definition file describing the
+geometric offsets between the vehicle's navigation, attitude, and camera
+sensors.
+.TP
+.B \-\-camera\-sensor=\fIcamera_sensor_id\fP
+.br
+Sets the platform sensor id number of the stereo camera used to look up the
+camera's position and orientation offsets within the platform model.
+.TP
+.B \-\-nav\-sensor=\fInav_sensor_id\fP
+.br
+Overrides the platform model's navigation (position) source sensor id number.
+.TP
+.B \-\-sensordepth\-sensor=\fIsensordepth_sensor_id\fP
+.br
+Overrides the platform model's pressure/depth source sensor id number.
+.TP
+.B \-\-heading\-sensor=\fIheading_sensor_id\fP
+.br
+Overrides the platform model's heading source sensor id number.
+.TP
+.B \-\-altitude\-sensor=\fIaltitude_sensor_id\fP
+.br
+Sets the platform sensor id number used as the altitude source.
+.TP
+.B \-\-attitude\-sensor=\fIattitude_sensor_id\fP
+.br
+Overrides the platform model's roll/pitch and heave source sensor id number.
+.TP
+.B \-\-use\-left\-camera
+.br
+Process only the left image of each stereo pair (or single images acquired
+by the left camera).
+.TP
+.B \-\-use\-right\-camera
+.br
+Process only the right image of each stereo pair (or single images acquired
+by the right camera).
+.TP
+.B \-\-use\-both\-cameras
+.br
+Process both the left and right images of each stereo pair. This is the
+default camera usage mode.
+.TP
+.B \-\-calibration\-file=\fIstereocalibration.yaml\fP
+.br
+Sets the filename of an OpenCV YAML file containing the intrinsic and
+extrinsic stereo camera calibration parameters (camera matrices, distortion
+coefficients, and the rotation/translation between the two cameras) used to
+undistort images that are not already rectified.
+.TP
+.B \-\-navigation\-file=\fIfile\fP
+.br
+Sets the filename of an ASCII navigation file used in place of, or to
+supplement, navigation carried in the imagelist file.
+.TP
+.B \-\-tide\-file=\fIfile\fP
+.br
+Sets the filename of an ASCII tide file (time and tide height pairs) used to
+apply a tidal correction to the water depth used in the photomosaic
+projection.
+.TP
+.B \-\-image\-quality\-file=\fIfile\fP
+.br
+Sets the filename of an ASCII file of time-stamped image quality values used
+to filter out low quality images.
+.TP
+.B \-\-image\-quality\-threshold=\fIvalue\fP
+.br
+Sets the minimum image quality value (in the range 0 to 1) required for an
+image to contribute to the mosaic.
+.TP
+.B \-\-image\-quality\-filter\-length=\fIvalue\fP
+.br
+Sets a time filter length, in seconds, applied when interpolating image
+quality values from the image quality file.
+.TP
+.B \-\-topography\-grid=\fIfile\fP
+.br
+Sets the filename of a bathymetric grid (in a format read by
+\fBmbgrid\fP/GMT) used to intersect each pixel's line of sight with the actual
+seafloor topography rather than an assumed flat seafloor at a nominal
+standoff. Specifying this option enables use of the topography grid.
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbgetphotocorrection\fP(1), \fBmbphotogrammetry\fP(1),
+\fBmbimagelist\fP(1), \fBmbm_makeimagelist\fP(1), \fBmbtiff2png\fP(1),
+\fBmbgrid\fP(1), \fBmbmosaic\fP(1)
+
+.SH BUGS
+Maybe. Maybe not.

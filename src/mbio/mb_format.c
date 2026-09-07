@@ -64,7 +64,7 @@ const int format_alias_table[] = {
 
 /* local prototypes not found in mb_define.h */
 #ifdef WIN32
-void cvt_to_nix_path(char *path);
+void mb_cvt_to_nix_path(char *path);
 #endif  /* WIN32 */
 
 /*--------------------------------------------------------------------*/
@@ -4412,7 +4412,7 @@ int mb_imagelist_close(int verbose, void **imagelist_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 #ifdef WIN32
-void cvt_to_nix_path(char *path) {
+void mb_cvt_to_nix_path(char *path) {
   /* Replace back slashes by slashes and trim first two chars in paths like "C:/path" */
   const size_t len = strlen(path);
 
@@ -4452,8 +4452,8 @@ int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
      because we trim the first 2 chars in strings like C:\blabla and don't put it back. But
      test have shown that it was maybe not necessary.
   */
-  cvt_to_nix_path(path);
-  cvt_to_nix_path(ipwd);
+  mb_cvt_to_nix_path(path);
+  mb_cvt_to_nix_path(ipwd);
 #endif
 
   int status = MB_SUCCESS;
@@ -4466,8 +4466,8 @@ int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
     bufptr = getcwd(path, MB_PATH_MAXLINE);
     assert(strlen(path) > 0);
 #ifdef WIN32
-    cvt_to_nix_path(path);
-    cvt_to_nix_path(bufptr);
+    mb_cvt_to_nix_path(path);
+    mb_cvt_to_nix_path(bufptr);
 #endif
     if (bufptr == NULL || strlen(path) + pathlen + 1 >= MB_PATH_MAXLINE) {
       strcpy(path, relativepath);
@@ -4491,8 +4491,8 @@ int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
     bufptr = getcwd(pwd, MB_PATH_MAXLINE);
     assert(strlen(pwd) > 0);
 #ifdef WIN32
-    cvt_to_nix_path(pwd);
-    cvt_to_nix_path(bufptr);
+    mb_cvt_to_nix_path(pwd);
+    mb_cvt_to_nix_path(bufptr);
 #endif
     if (bufptr == NULL || strlen(pwd) + pwdlen + 1 >= MB_PATH_MAXLINE) {
       strncpy(pwd, ipwd, MB_PATH_MAXLINE);
@@ -4598,8 +4598,8 @@ int mb_get_absolute_path(int verbose, char *path, char *ipwd, int *error) {
      because we trim the first 2 chars in strings like C:\blabla and don't put it back. But
      test have shown that it was maybe not necessary.
   */
-  cvt_to_nix_path(path);
-  cvt_to_nix_path(ipwd);
+  mb_cvt_to_nix_path(path);
+  mb_cvt_to_nix_path(ipwd);
 #endif
 
   int status = MB_SUCCESS;

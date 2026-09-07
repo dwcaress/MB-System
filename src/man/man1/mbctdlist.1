@@ -7,7 +7,7 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbctdlist\fP [\fB\-A\fP \fB\-D\fP\fIdecimate\fP \fB\-F\fP\fIformat\fP
-\fB\-G\fP\fIdelimeter\fP \fB\-H\fP \fB\-I\fP\fIfile \fP
+\fB\-G\fP\fIdelimeter\fP \fB\-H\fP \fB\-I\fP\fIfile \fP \fB\-L\fP\fIlonflip\fP
 \fB\-O\fP\fIoutput_format\fP \fB\-V\fP \fB\-Z\fP\fIsegment\fP]
 
 .SH DESCRIPTION
@@ -126,6 +126,16 @@ Default: \fIlonflip\fP = 0.
 Determines the form of the output. \fIOutput_format\fP is a string composed
 of one or more of the following characters:
 
+ 	\fB/\fP  inverts the next simple value (e.g. 1/value)
+ 	\fB\-\fP  flips the sign of the next simple value
+ 	\fB1\fP  for sensor 1 value (volts)
+ 	\fB2\fP  for sensor 2 value (volts)
+ 	\fB3\fP  for sensor 3 value (volts)
+ 	\fB4\fP  for sensor 4 value (volts)
+ 	\fB5\fP  for sensor 5 value (volts)
+ 	\fB6\fP  for sensor 6 value (volts)
+ 	\fB7\fP  for sensor 7 value (volts)
+ 	\fB8\fP  for sensor 8 value (volts)
  	\fBC\fP  for conductivity (S/m)
  	\fB^C\fP for sonar altitude (meters)
  	\fBc\fP  for temperature (degree C)
@@ -156,8 +166,8 @@ of one or more of the following characters:
  	\fBY\fP  for latitude (decimal degrees)
  	\fBy\fP  for latitude (degrees + decimal minutes + N/S)
 
-Default \fIoutput_format\fP = \fBTXYCc^cSs\fP (Time, lon, lat, conductivity,
-temperature, depth, salinity, sound speed).
+Default \fIoutput_format\fP = \fBTXYHCc^cSs\fP (Time, lon, lat, heading,
+conductivity, temperature, depth, salinity, sound speed).
 .TP
 .B \-V
 Normally, \fBmbctdlist\fP works "silently" without outputting
@@ -175,7 +185,7 @@ is a single character, then the output is a multiple segment
 file of the sort accepted by the \fBGMT\fP program \fBpsxy\fP.
 This option only works with ascii output, and is thus disabled
 when the \fB\-A\fP option is specified. The most common usage
-is \fB\-Z\fP\I>\fP.
+is \fB\-Z\fP\fI>\fP.
 
 .SH EXAMPLES
 Suppose one wishes to obtain a ctd list from a Reson 7125 data file

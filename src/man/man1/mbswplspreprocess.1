@@ -148,6 +148,13 @@ handle 3 or more transducer channel systems. The transducer channel will
 be appended to the output filename as follows:
 .br
 outfile_txer<channel>.mb222
+.TP
+.B \-V
+Normally, \fBmbswplspreprocess\fP works "silently" without outputting
+anything to the stderr stream. If the \fB\-V\fP flag is given, then
+\fBmbswplspreprocess\fP works in a "verbose" mode and outputs the program
+version being used and the values of the control parameters. This option
+can be repeated (e.g. \fB\-VV\fP) to obtain more detailed debugging output.
 .SH EXAMPLES
 Suppose that one has collected a SWATHplus datafile incorporating interferometric 
 sonar data from a 2-transducer system pinging simultaneously. The file name 

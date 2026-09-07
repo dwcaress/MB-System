@@ -1,0 +1,559 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbphotomosaic</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbphotomosaic</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  7 September 2026 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbphotomosaic</B> - Generate a georeferenced photomosaic image from a set of navigated downlooking seafloor photographs.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+mbphotomosaic [<B>--verbose</B> <B>--help</B> <B>--threads=</B><I>nthreads</I>
+<B>--input=</B><I>imagelist</I> <B>--output=</B><I>file</I>
+<B>--output-tiff</B> <B>--output-png</B>
+<B>--image-dimensions=</B><I>width</I>/<I>height</I>
+<B>--image-spacing=</B><I>dx</I>/<I>dy</I>[/<I>units</I>]
+<B>--sensor-size=</B><I>width</I>/<I>height</I>[/<I>cellsize</I>]
+<B>--fov-fudgefactor=</B><I>factor</I> <B>--projection=</B><I>projection_pars</I>
+<B>--altitude=</B><I>target</I>/<I>range</I> | <B>--standoff=</B><I>target</I>/<I>range</I>
+<B>--priority-weight=</B><I>weight</I>
+<B>--priority-heading=</B><I>target</I>/<I>factor</I>/<I>mode</I>
+<B>--trim=</B><I>trim_pixels</I> <B>--section=</B><I>section_pixels</I>
+<B>--section-length-max=</B><I>value</I> <B>--rangemax=</B><I>range_max</I>
+<B>--bounds=</B><I>lonmin</I>/<I>lonmax</I>/<I>latmin</I>/<I>latmax</I> <B>--bounds-buffer=</B><I>value</I>
+<B>--correction-brightness</B> <B>--correction-camera-settings</B>
+<B>--correction-range=</B><I>target</I>/<I>coeff</I>
+<B>--correction-standoff=</B><I>target</I>/<I>coeff</I>
+<B>--correction-file=</B><I>imagecorrection.yaml</I>
+<B>--reference-gain=</B><I>gain</I> <B>--reference-exposure=</B><I>exposure</I>
+<B>--reference-intensity=</B><I>intensity</I>
+<B>--reference-crcb=</B><I>intensity</I>/<I>intensity</I>
+<B>--dark-image-ignore=</B><I>threshold</I>
+<B>--dark-image-multiply=</B><I>threshold</I>/<I>factor</I>
+<B>--platform-file=</B><I>platform.plf</I> <B>--camera-sensor=</B><I>id</I>
+<B>--nav-sensor=</B><I>id</I> <B>--sensordepth-sensor=</B><I>id</I>
+<B>--heading-sensor=</B><I>id</I> <B>--altitude-sensor=</B><I>id</I>
+<B>--attitude-sensor=</B><I>id</I>
+<B>--use-left-camera</B> | <B>--use-right-camera</B> | <B>--use-both-cameras</B>
+<B>--calibration-file=</B><I>stereocalibration.yaml</I>
+<B>--navigation-file=</B><I>file</I> <B>--tide-file=</B><I>file</I>
+<B>--image-quality-file=</B><I>file</I> <B>--image-quality-threshold=</B><I>value</I>
+<B>--image-quality-filter-length=</B><I>value</I>
+<B>--topography-grid=</B><I>file</I>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>Mbphotomosaic</B> generates a single georeferenced mosaic image from a set of
+navigated downlooking photographs, typically taken from a camera or stereo
+camera rig towed or flown close to the seafloor. The program reads single or
+stereo pair images and their associated navigation, attitude, and camera
+settings from an MB-System imagelist file, projects each image's pixels onto
+either an assumed flat seafloor at a nominal standoff or an actual bathymetric
+topography grid, and writes the projected pixels into a regular output raster
+covering a specified geographic (or projected) area.
+
+Each output pixel of the mosaic is written from whichever contributing input
+pixel is judged to have the highest priority. By default priority is based
+purely on how close a pixel lies to the center of its source image
+(pixels near the middle of a photograph are usually less distorted and less
+vignetted than pixels near the edges); if <B>--altitude</B> or <B>--standoff</B> is
+given, priority also favors pixels whose projected standoff distance is close
+to a specified target value. Priority can additionally be biased by vehicle
+heading using <B>--priority-heading</B>, for example to favor images taken while
+running a particular compass heading. Pixels are also weeded out if their
+line of sight is too vertical, if the projected slant range exceeds
+<B>--rangemax</B>, or if they fall in the black borders introduced by camera lens
+undistortion (unless a fixed <B>--trim</B> margin is set instead).
+
+Optional corrections can be applied to pixel intensity before it is written
+into the mosaic: a fixed correction for recorded camera gain and exposure
+settings, a simple brightness normalization, a range- or standoff-dependent
+correction using a supplied target/coefficient pair, or the pixel-position-
+and-standoff-dependent 3D correction table produced by
+<B>mbgetphotocorrection</B>. Reference intensity and color values, as well as
+handling of unusually dark images (either ignored outright or boosted by a
+multiplicative factor), can also be specified. Camera images can be
+undistorted and, for stereo pairs, restricted to the left camera, the right
+camera, or both, using a supplied stereo camera calibration file.
+
+The output raster's dimensions, pixel spacing, geographic bounds, and map
+projection can all be controlled explicitly; if left unspecified, suitable
+defaults are derived from the imagelist's navigation, the target standoff, and
+the camera field of view. The output image is written as a GeoTiff or PNG file
+according to the output filename's suffix, or as forced by
+<B>--output-tiff</B>/<B>--output-png</B>. <B>Mbphotomosaic</B> can process images
+using multiple threads (see <B>--threads</B>), and can incorporate an external
+tide correction, a per-image quality filter, and an MB-System platform offset
+model in the same manner as <B>mbgetphotocorrection</B>.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>--help</B>
+
+<DD>
+This &quot;help&quot; flag causes the program to print out a description
+of its operation and then exit immediately.
+<DT><B>--verbose</B>
+
+<DD>
+The <B>--verbose</B> option causes <B>mbphotomosaic</B> to print out status and debug
+messages. Using it more than once increases the verbosity level.
+<DT><B>--threads=</B><I>nthreads</I>
+
+<DD>
+<BR>
+
+Sets the number of processing threads used to work through the image list.
+The requested number of threads is limited to the number of hardware threads
+available and to the MB-System maximum thread count. The default is 1 thread.
+<DT><B>--input=</B><I>imagelist</I>
+
+<DD>
+<BR>
+
+Sets the filename of the input MB-System imagelist file listing the images
+(single or stereo pairs) to be mosaicked, along with their navigation,
+attitude, and camera settings. The default input filename is
+<I>imagelist.mb-1</I>.
+<DT><B>--output=</B><I>file</I>
+
+<DD>
+<BR>
+
+Sets the filename of the output mosaic image. If the filename ends in
+<I>.png</I> the output format defaults to PNG; otherwise the output format
+defaults to GeoTiff unless overridden by <B>--output-tiff</B> or <B>--output-png</B>.
+<DT><B>--output-tiff</B>
+
+<DD>
+<BR>
+
+Forces the output mosaic image to be written in GeoTiff format.
+<DT><B>--output-png</B>
+
+<DD>
+<BR>
+
+Forces the output mosaic image to be written in PNG format.
+<DT><B>--image-dimensions=</B><I>width</I>/<I>height</I>
+
+<DD>
+<BR>
+
+Sets the output mosaic image's dimensions in pixels. If not specified, the
+default is 1000 by 1000 pixels, adjusted as needed to be consistent with any
+pixel spacing and geographic bounds that are set.
+<DT><B>--image-spacing=</B><I>dx</I>/<I>dy</I>[/<I>units</I>]
+
+<DD>
+<BR>
+
+Sets the output mosaic pixel spacing in the x and y directions, in the given
+<I>units</I> (default <I>meters</I>). Appending an exclamation point to the value
+(for example <B>--image-spacing=0.05/0.05!</B>) gives the requested spacing
+priority over the requested image dimensions when the two are in conflict.
+<DT><B>--sensor-size=</B><I>width</I>/<I>height</I>[/<I>cellsize</I>]
+
+<DD>
+<BR>
+
+Sets the camera sensor's physical width and height in millimeters and,
+optionally, its pixel cell size in millimeters, used together with the
+camera's field of view to project pixels onto the seafloor. The defaults are
+8.789 mm by 6.610 mm with a 0.00454 mm cell size.
+<DT><B>--fov-fudgefactor=</B><I>factor</I>
+
+<DD>
+<BR>
+
+Sets a multiplicative fudge factor applied to the camera field of view
+angles. The default value is 1.0 (no adjustment).
+<DT><B>--projection=</B><I>projection_pars</I>
+
+<DD>
+<BR>
+
+Sets the map projection used for the output mosaic (in the form accepted by
+MB-System's projection parameter parsing, e.g. a UTM zone specification). If
+not specified, the output mosaic remains in geographic (longitude/latitude)
+coordinates.
+<DT><B>--altitude=</B><I>target</I>/<I>range</I>
+
+<DD>
+<BR>
+
+<DT><B>--standoff=</B><I>target</I>/<I>range</I>
+
+<DD>
+<BR>
+
+These two equivalent options set a target standoff distance and an
+acceptable range around it, both in meters. When set, pixel priority favors
+pixels whose projected standoff distance is close to <I>target</I>, in addition
+to the default centrality-based priority. The default target standoff is 3.0
+meters with a range of 1.0 meter, but this standoff-based priority
+contribution is only enabled once one of these options is used.
+<DT><B>--priority-weight=</B><I>weight</I>
+
+<DD>
+<BR>
+
+Sets the relative weight given to the standoff-based priority contribution
+(enabled by <B>--altitude</B>/<B>--standoff</B>) versus the default centrality-based
+priority. The default is 1.0.
+<DT><B>--priority-heading=</B><I>target</I>/<I>factor</I>/<I>mode</I>
+
+<DD>
+<BR>
+
+Sets a target vehicle heading, in degrees, and a weighting factor used to
+additionally favor pixels from images taken close to that heading. If
+<I>mode</I> is omitted or the target heading alone is given, a single-direction
+preference is used; supplying a nonpositive target disables heading-based
+priority (the default state).
+<DT><B>--trim=</B><I>trim_pixels</I>
+
+<DD>
+<BR>
+
+Sets the number of pixels to ignore around the margins of each undistorted
+image. If this option is not used (the default, 0 pixels), the program
+instead automatically ignores any purely black pixel and any pixel adjacent
+to a purely black pixel, which is intended to exclude the black borders that
+can appear around the edges of an undistorted image.
+<DT><B>--section=</B><I>section_pixels</I>
+
+<DD>
+<BR>
+
+Sets the size, in pixels, of image sections processed together. The default
+is 0.
+<DT><B>--section-length-max=</B><I>value</I>
+
+<DD>
+<BR>
+
+Intended to set a maximum section length. Although this option is accepted
+on the command line, the current implementation's argument parsing
+incorrectly re-tests for the <B>--section</B> option name rather than
+<B>--section-length-max</B>, so this option has no effect; the internal default
+value of 0.5 is always used.
+<DT><B>--rangemax=</B><I>range_max</I>
+
+<DD>
+<BR>
+
+Sets the maximum acceptable projected slant range, in meters, from the camera
+to a pixel's location on the seafloor; pixels with a greater range are
+excluded from the mosaic. The default is 200.0 meters.
+<DT><B>--bounds=</B><I>lonmin</I>/<I>lonmax</I>/<I>latmin</I>/<I>latmax</I>
+
+<DD>
+<BR>
+
+Sets the geographic (or projected, if <B>--projection</B> is used) bounds of the
+output mosaic explicitly, in the same bounds syntax accepted by other
+MB-System programs (west/east/south/north order, with a variety of
+coordinate notations supported).
+<DT><B>--bounds-buffer=</B><I>value</I>
+
+<DD>
+<BR>
+
+Sets a buffer distance, in meters, added around the mosaic bounds
+automatically derived from the imagelist's navigation when <B>--bounds</B> is not
+used explicitly. The default is 6.0 meters.
+<DT><B>--correction-brightness</B>
+
+<DD>
+<BR>
+
+Selects a correction mode that normalizes each image's average intensity
+(after gain/exposure correction) to a reference value.
+<DT><B>--correction-camera-settings</B>
+
+<DD>
+<BR>
+
+Selects a correction mode that normalizes pixel intensity for the camera's
+recorded gain and exposure settings relative to the reference gain and
+exposure values, without any additional brightness, range, or standoff
+correction.
+<DT><B>--correction-range=</B><I>target</I>/<I>coeff</I>
+
+<DD>
+<BR>
+
+Selects a correction mode that adjusts pixel intensity, after gain/exposure
+correction, based on the pixel's projected slant range from the camera,
+using the given target range and coefficient.
+<DT><B>--correction-standoff=</B><I>target</I>/<I>coeff</I>
+
+<DD>
+<BR>
+
+Selects a correction mode that adjusts pixel intensity, after gain/exposure
+correction, based on the pixel's projected standoff distance from the
+seafloor, using the given target standoff and coefficient.
+<DT><B>--correction-file=</B><I>imagecorrection.yaml</I>
+
+<DD>
+<BR>
+
+Selects a correction mode that uses a precomputed 3D pixel-position-and-
+standoff correction table, as generated by <B>mbgetphotocorrection</B>, to
+correct pixel intensity after gain/exposure correction. If the given filename
+does not already end in <I>.yml</I>, that suffix is appended. If none of the
+correction mode options is used, no intensity correction at all is applied to
+the mosaic.
+<DT><B>--reference-gain=</B><I>gain</I>
+
+<DD>
+<BR>
+
+Sets the reference camera gain value, in dB, used by the gain/exposure and
+other correction modes. The default is 0.0.
+<DT><B>--reference-exposure=</B><I>exposure</I>
+
+<DD>
+<BR>
+
+Sets the reference camera exposure time, in microseconds, used by the
+gain/exposure and other correction modes. The default is 0.0.
+<DT><B>--reference-intensity=</B><I>intensity</I>
+
+<DD>
+<BR>
+
+Sets a positive reference Y (luminance) intensity value used by the
+brightness correction mode. If not set, an internal default value is used.
+<DT><B>--reference-crcb=</B><I>intensity</I>/<I>intensity</I>
+
+<DD>
+<BR>
+
+Sets positive reference Cr and Cb (color) intensity values used together
+with the brightness correction mode.
+<DT><B>--dark-image-ignore=</B><I>threshold</I>
+
+<DD>
+<BR>
+
+Sets a positive average-intensity threshold below which an entire image is
+ignored as too dark to usefully contribute to the mosaic.
+<DT><B>--dark-image-multiply=</B><I>threshold</I>/<I>factor</I>
+
+<DD>
+<BR>
+
+Sets a positive average-intensity threshold and a positive multiplicative
+factor used to boost the intensity of images darker than the threshold,
+rather than discarding them outright.
+<DT><B>--platform-file=</B><I>platform.plf</I>
+
+<DD>
+<BR>
+
+Sets the filename of an MB-System platform definition file describing the
+geometric offsets between the vehicle's navigation, attitude, and camera
+sensors.
+<DT><B>--camera-sensor=</B><I>camera_sensor_id</I>
+
+<DD>
+<BR>
+
+Sets the platform sensor id number of the stereo camera used to look up the
+camera's position and orientation offsets within the platform model.
+<DT><B>--nav-sensor=</B><I>nav_sensor_id</I>
+
+<DD>
+<BR>
+
+Overrides the platform model's navigation (position) source sensor id number.
+<DT><B>--sensordepth-sensor=</B><I>sensordepth_sensor_id</I>
+
+<DD>
+<BR>
+
+Overrides the platform model's pressure/depth source sensor id number.
+<DT><B>--heading-sensor=</B><I>heading_sensor_id</I>
+
+<DD>
+<BR>
+
+Overrides the platform model's heading source sensor id number.
+<DT><B>--altitude-sensor=</B><I>altitude_sensor_id</I>
+
+<DD>
+<BR>
+
+Sets the platform sensor id number used as the altitude source.
+<DT><B>--attitude-sensor=</B><I>attitude_sensor_id</I>
+
+<DD>
+<BR>
+
+Overrides the platform model's roll/pitch and heave source sensor id number.
+<DT><B>--use-left-camera</B>
+
+<DD>
+<BR>
+
+Process only the left image of each stereo pair (or single images acquired
+by the left camera).
+<DT><B>--use-right-camera</B>
+
+<DD>
+<BR>
+
+Process only the right image of each stereo pair (or single images acquired
+by the right camera).
+<DT><B>--use-both-cameras</B>
+
+<DD>
+<BR>
+
+Process both the left and right images of each stereo pair. This is the
+default camera usage mode.
+<DT><B>--calibration-file=</B><I>stereocalibration.yaml</I>
+
+<DD>
+<BR>
+
+Sets the filename of an OpenCV YAML file containing the intrinsic and
+extrinsic stereo camera calibration parameters (camera matrices, distortion
+coefficients, and the rotation/translation between the two cameras) used to
+undistort images that are not already rectified.
+<DT><B>--navigation-file=</B><I>file</I>
+
+<DD>
+<BR>
+
+Sets the filename of an ASCII navigation file used in place of, or to
+supplement, navigation carried in the imagelist file.
+<DT><B>--tide-file=</B><I>file</I>
+
+<DD>
+<BR>
+
+Sets the filename of an ASCII tide file (time and tide height pairs) used to
+apply a tidal correction to the water depth used in the photomosaic
+projection.
+<DT><B>--image-quality-file=</B><I>file</I>
+
+<DD>
+<BR>
+
+Sets the filename of an ASCII file of time-stamped image quality values used
+to filter out low quality images.
+<DT><B>--image-quality-threshold=</B><I>value</I>
+
+<DD>
+<BR>
+
+Sets the minimum image quality value (in the range 0 to 1) required for an
+image to contribute to the mosaic.
+<DT><B>--image-quality-filter-length=</B><I>value</I>
+
+<DD>
+<BR>
+
+Sets a time filter length, in seconds, applied when interpolating image
+quality values from the image quality file.
+<DT><B>--topography-grid=</B><I>file</I>
+
+<DD>
+<BR>
+
+Sets the filename of a bathymetric grid (in a format read by
+<B>mbgrid</B>/GMT) used to intersect each pixel's line of sight with the actual
+seafloor topography rather than an assumed flat seafloor at a nominal
+standoff. Specifying this option enables use of the topography grid.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbgetphotocorrection.html">mbgetphotocorrection</A></B>(1), <B><A HREF="mbphotogrammetry.html">mbphotogrammetry</A></B>(1),
+<B><A HREF="mbimagelist.html">mbimagelist</A></B>(1), <B><A HREF="mbm_makeimagelist.html">mbm_makeimagelist</A></B>(1), <B><A HREF="mbtiff2png.html">mbtiff2png</A></B>(1),
+<B><A HREF="mbgrid.html">mbgrid</A></B>(1), <B><A HREF="mbmosaic.html">mbmosaic</A></B>(1)
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>BUGS</H2>
+
+Maybe. Maybe not.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">SEE ALSO</A><DD>
+<DT><A HREF="#lbAI">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 7 September 2026</P></CENTER>
+
+<HR>
+<center>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>

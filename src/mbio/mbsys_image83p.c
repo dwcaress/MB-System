@@ -713,15 +713,15 @@ int mbsys_image83p_extract_platform(int verbose, void *mbio_ptr, void *store_ptr
       }
       if (status == MB_SUCCESS)
         status = mb_platform_set_sensor_offset(
-            verbose, (void *)platform, 0, 0, MB_SENSOR_POSITION_OFFSET_STATIC,
+            verbose, (void *)platform, 0, 0,
             (double)store->sonar_x_offset, (double)store->sonar_y_offset,
-            (double)store->sonar_z_offset, MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+            (double)store->sonar_z_offset,
             (double)0.0, (double)0.0, (double)0.0, error);
       if (status == MB_SUCCESS)
         status = mb_platform_set_sensor_offset(
-            verbose, (void *)platform, 0, 1, MB_SENSOR_POSITION_OFFSET_STATIC,
+            verbose, (void *)platform, 0, 1,
            (double)store->sonar_x_offset, (double)store->sonar_y_offset,
-           (double)store->sonar_z_offset, MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+           (double)store->sonar_z_offset,
            (double)0.0, (double)0.0, (double)0.0, error);
     }
 
@@ -751,8 +751,8 @@ int mbsys_image83p_extract_platform(int verbose, void *mbio_ptr, void *store_ptr
       }
 
       if (status == MB_SUCCESS)
-        status = mb_platform_set_sensor_offset(verbose, (void *)platform, 1, 0, MB_SENSOR_POSITION_OFFSET_STATIC,
-                                               (double)0.0, (double)0.0, (double)0.0, MB_SENSOR_ATTITUDE_OFFSET_NONE,
+        status = mb_platform_set_sensor_offset(verbose, (void *)platform, 1, 0,
+                                               (double)0.0, (double)0.0, (double)0.0,
                                                (double)0.0, (double)0.0, (double)0.0, error);
       if (status == MB_SUCCESS && store->ping_latency != 0) {
         status =
@@ -789,8 +789,8 @@ int mbsys_image83p_extract_platform(int verbose, void *mbio_ptr, void *store_ptr
       }
 
       if (status == MB_SUCCESS)
-        status = mb_platform_set_sensor_offset(verbose, (void *)platform, 2, 0, MB_SENSOR_POSITION_OFFSET_STATIC,
-                                               (double)0.0, (double)0.0, (double)0.0, MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+        status = mb_platform_set_sensor_offset(verbose, (void *)platform, 2, 0,
+                                               (double)0.0, (double)0.0, (double)0.0,
                                                (double)0.0, (double)0.0, (double)0.0, error);
       if (status == MB_SUCCESS && store->ping_latency != 0) {
         status =

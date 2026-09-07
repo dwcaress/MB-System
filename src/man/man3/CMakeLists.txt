@@ -1,8 +1,7 @@
 message("In src/man/man3")
 
 set(manpages
-    mbio.3
-    pj_init.3)
+    mbio.3)
 
 install(FILES ${manpages} DESTINATION ${CMAKE_INSTALL_MANPAGES}/man3)
 

@@ -30,6 +30,7 @@ Version 5.0
 
 <B>mbm_grd3dplot</B> <B>-I</B><I>file</I>
 [<B>-A</B>[<I>magnitude</I>[<I>/azimuth/elevation</I>]
+<B>-C</B>[<I>contour_control</I>]
 <B>-D</B>[<I>flipcolor/flipshade</I>]
 <B>-E</B>[<I>view_az/view_el</I>] <B>-F</B><I>exaggeration</I>
 <B>-G</B><I>color_mode</I> <B>-H</B> <B>-K</B><I>intensity_file </I>
@@ -44,7 +45,7 @@ Additional Options:
 [<B>-B</B><I>tickinfo</I>
 <B>-J</B><I>projection</I>[<I>/scale | width</I>]
 <B>-L</B><I>title</I>[<I>:scale_label</I>] <B>-M</B><I>misc</I>
-<B>-Q</B> <B>-R</B><I>w/e/s/n</I> <B>-X</B> <B>-Y</B>
+<B>-Q</B> <B>-R</B><I>w/e/s/n</I> <B>-T</B> <B>-X</B> <B>-Y</B>
 <B>-Z</B><I>min/max</I> ]
 <P>
 Miscellaneous Options:
@@ -56,6 +57,10 @@ Miscellaneous Options:
 <B>-MGT</B><I>x/y/size/angle/font/just/text</I>
 <B>-MGU</B>[<I>/dx/dy/</I>][<I>label</I>]
 <B>-MIE</B><I>resolution</I> <B>-MIT</B><I>type</I>
+<B>-MTC</B><I>fill</I> <B>-MTD</B><I>resolution</I>
+<B>-MTG</B><I>fill</I> <B>-MTI</B><I>river</I>
+<B>-MTN</B><I>border</I> <B>-MTS</B><I>fill</I>
+<B>-MTW</B><I>pen</I>
 <B>-MVM</B><I>mesh_pen</I> <B>-MVN</B>[<I>null[/r/g/b]</I>] ]
 <P>
 <A NAME="lbAE">&nbsp;</A>
@@ -87,7 +92,7 @@ If a Postscript viewer is not explicitly defined by either method, then the user
 default program for viewing Postscript is invoked.
 Invoking the plot generation shellscript with
 a <B>-N</B> command line argument suppresses the screen
-display of the plot. The <B>-MIE</B> and <B>-MIP</B> arguments cause the
+display of the plot. The <B>-MIE</B> and <B>-MIT</B> arguments cause the
 plot generation shellscript to render the Postscript map onto an image in the
 specified format.
 <P>
@@ -142,6 +147,17 @@ The value <I>elevation</I> is the elevation of the illumination
 in degrees from horizontal.
 Defaults: <I>magnitude</I> = 0.2; <I>azimuth</I> = 0.0;
 <I>elevation</I> = 30.0;
+<DT><B>-C</B>
+
+<DD>
+<I>[contour_control]</I>
+<BR>
+
+Turns on contour mode; if neither <B>-C</B> nor <B>-G</B> is specified, <B>mbm_grd3dplot</B>
+defaults to color fill mode (equivalent to <B>-G</B><I>1</I>). If <I>contour_control</I> is
+not supplied, a default contour interval is calculated from the range of the gridded
+data; this value is reported when the <B>-V</B> option is used. To have actual contour
+lines drawn on a mesh plot, use <B>-G</B><I>7</I> (3D mesh plot with contours).
 <DT><B>-D</B>
 
 <DD>
@@ -346,17 +362,20 @@ color scheme will be used for the plot
 <DT><B>-A</B>
 
 <DD>
-<I>magnitude[/azimuth]</I>
+<I>magnitude[/azimuth/elevation]</I>
 <BR>
 
 Sets the parameters which control the
 synthetic illumination of the gridded data (shaded relief).
 The value <I>magnitude</I>
 is an effective vertical exaggeration which modulates the intensity of
-the shading; typical values are in the 0.1 to 0.5 range.
+the shading; typical values are in the 0.1 to 10 range.
 The value <I>azimuth</I>
-is the azimuth from which the data is illuminated.
+is the azimuth in degrees from north from which the data is illuminated.
+The value <I>elevation</I> is the elevation of the illumination
+in degrees from horizontal.
 Defaults: <I>magnitude</I> = 0.2; <I>azimuth</I> = 0.0;
+<I>elevation</I> = 30.0;
 <DT><B>-B</B>
 
 <DD>
@@ -366,6 +385,17 @@ Defaults: <I>magnitude</I> = 0.2; <I>azimuth</I> = 0.0;
 Sets map boundary tickmark intervals. See the <B>psbasemap</B>
 manual page for details. By default the program chooses
 basemap annotations based on the map boundaries.
+<DT><B>-C</B>
+
+<DD>
+<I>[contour_control]</I>
+<BR>
+
+Turns on contour mode; if neither <B>-C</B> nor <B>-G</B> is specified, <B>mbm_grd3dplot</B>
+defaults to color fill mode (equivalent to <B>-G</B><I>1</I>). If <I>contour_control</I> is
+not supplied, a default contour interval is calculated from the range of the gridded
+data; this value is reported when the <B>-V</B> option is used. To have actual contour
+lines drawn on a mesh plot, use <B>-G</B><I>7</I> (3D mesh plot with contours).
 <DT><B>-D</B>
 
 <DD>
@@ -581,9 +611,12 @@ label use <B>-L</B>&quot; : &quot;.
 A series of &quot;miscellaneous&quot; options are provided which are
 given as <B>-M</B> followed by a two character identifier, followed
 by any other parameters associated with that option.
-The <B>-M</B> options may be strung together separated by
-colons, e.g. &quot;-MGQ100:GU&quot;, which is equivalent to
-&quot;-MGQ -MGU&quot;.
+The <B>-M</B> option may be repeated as many times as needed on the
+command line, e.g. &quot;-MGQ100 -MGU&quot;, and the resulting suboptions are
+concatenated internally. A single colon does not serve as a
+suboption separator within one <B>-M</B> argument (colons are
+reserved for use within suboption values, e.g. Windows drive-letter
+paths such as &quot;C:\&quot;).
 <DT><B>-N</B>
 
 <DD>
@@ -730,6 +763,93 @@ multi-page PDF (<B>-MIT</B><I>F</I>), JPEG (<B>-MIT</B><I>j</I>),
 PNG (<B>-MIT</B><I>g</I>), transparent PNG (<B>-MIT</B><I>G</I>),
 PPM (<B>-MIT</B><I>m</I>,  SVG (<B>-MIT</B><I>s</I>, or TIFF (<B>-MIT</B><I>t</I>.
 The default image format is JPEG.
+<DT><B>-MTC</B>
+
+<DD>
+<I>fill</I>
+<BR>
+
+Coastline plotting option.
+Set the shade (0-255), color (r/g/b), or pattern
+(p|Pdpi/pattern; see <B>-MTG</B>) for lakes  [Default is the
+fill chosen for &quot;wet&quot; areas (<B>-MTS</B>)].
+<DT><B>-MTD</B>
+
+<DD>
+<I>resolution</I>
+<BR>
+
+Coastline plotting option.
+Selects the resolution of the coastline data set to use ((f)ull,
+(h)igh, (i)ntermediate, (l)ow, and (c)rude). [Default is l].
+<DT><B>-MTG</B>
+
+<DD>
+<I>fill</I>
+<BR>
+
+Coastline plotting option.
+Select painting of &quot;dry&quot; areas. Specify the
+shade (0-255) or color (r/g/b), or <B>-MTG</B><I>pdpi/pattern</I>,
+where <I>pattern</I> gives the number of the built-in pattern
+(1-90) OR the name of an icon-format file. <I>dpi</I> sets the
+resolution of the image.
+<DT><B>-MTI</B>
+
+<DD>
+<I>river</I>
+<BR>
+
+Coastline plotting option.
+Draws rivers. Specify the type of rivers to be drawn. Choose
+from the list of river types below.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;=&nbsp;Permanent&nbsp;major&nbsp;rivers
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;=&nbsp;Additional&nbsp;major&nbsp;rivers
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;=&nbsp;Additional&nbsp;rivers
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;=&nbsp;Minor&nbsp;rivers
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;=&nbsp;Intermittent&nbsp;rivers&nbsp;-&nbsp;major
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6&nbsp;=&nbsp;Intermittent&nbsp;rivers&nbsp;-&nbsp;additional
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7&nbsp;=&nbsp;Intermittent&nbsp;rivers&nbsp;-&nbsp;minor
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8&nbsp;=&nbsp;Major&nbsp;canals
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9&nbsp;=&nbsp;Minor&nbsp;canals
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10&nbsp;=&nbsp;Irrigation&nbsp;canals
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;=&nbsp;All&nbsp;rivers&nbsp;and&nbsp;canals&nbsp;(1-10)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;r&nbsp;=&nbsp;All&nbsp;permanent&nbsp;rivers&nbsp;(1-4)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i&nbsp;=&nbsp;All&nbsp;intermittent&nbsp;rivers&nbsp;(5-7)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c&nbsp;=&nbsp;All&nbsp;canals&nbsp;(8-10)
+<DT><B>-MTN</B>
+
+<DD>
+<I>border</I>
+<BR>
+
+Coastline plotting option.
+Draws political boundaries. Specify the type of
+boundary to be drawn. Choose from the list of boundaries below.
+This option may be given repeatedly to draw more than one type
+of boundary.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;=&nbsp;National&nbsp;boundaries
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;=&nbsp;State&nbsp;boundaries&nbsp;within&nbsp;the&nbsp;Americas
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;=&nbsp;Marine&nbsp;boundaries
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;=&nbsp;All&nbsp;boundaries&nbsp;(1-3)
+<DT><B>-MTS</B>
+
+<DD>
+<I>fill</I>
+<BR>
+
+Coastline plotting option.
+Select painting of &quot;wet&quot; areas. Specify the
+shade (0-255), color (r/g/b), or pattern (see <B>-MTG</B>).
+<DT><B>-MTW</B>
+
+<DD>
+<I>pen</I>
+<BR>
+
+Coastline plotting option.
+Sets the pen attributes used to draw the coastline.
+[Defaults: width = 1, color = 0/0/0, texture = solid].
 <DT><B>-MVM</B>
 
 <DD>
@@ -882,6 +1002,16 @@ or using an intensity file (<B>-K</B> and <B>-G</B><I>3</I> options), then
 setting <I>shade</I> = 1 will cause the shading to be equalized.
 Using <B>-S</B><I>0/1</I> will equalize the shading without
 equalizing the color table.
+<DT><B>-T</B>
+
+<DD>
+If <B>-T</B> is given, it causes a coastline to be drawn
+on the map. The default is to draw the coastline as the thinnest possible
+line. To exercise greater control of
+the coastline plotting, including color fill of &quot;dry&quot; areas and
+display of lakes, rivers, and political boundaries, use the
+<B>-MTC</B>, <B>-MTD</B>, <B>-MTG</B>, <B>-MTI</B>,
+<B>-MTN</B>, <B>-MTS</B>, and <B>-MTW</B> options described above.
 <DT><B>-U</B>
 
 <DD>

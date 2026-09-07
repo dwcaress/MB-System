@@ -151,8 +151,6 @@ int main(int argc, char **argv) {
 				}
 				else if (strcmp("tideformat", options[option_index].name) == 0) {
 					sscanf(optarg, "%d", &tideformat);
-					if (tideformat != 2)
-						tideformat = 1;
 				}
 				else if (strcmp("interval", options[option_index].name) == 0) {
 					sscanf(optarg, "%lf", &interval);

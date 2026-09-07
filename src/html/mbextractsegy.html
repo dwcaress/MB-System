@@ -29,11 +29,61 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbextractsegy</B> [<B>-B</B><I>yr/mo/da/hr/mn/sc</I> <B>-E</B><I>yr/mo/da/hr/mn/sc</I>
-<B>-F</B><I>format</I> <B>-I</B><I>file</I> <B>-J</B><I>xscale/yscale/maxwidth</I>
-<B>-L</B><I>startline/lineroot</I> <B>-M -O</B><I>segyfile</I> <B>-Q</B><I>routetimefile</I>
-<B>-R</B><I>routefile</I> <B>-S</B><I>sampleformat</I>
-<B>-T</B><I>timeshift</I> <B>-U</B><I>rangethreshold</I> <B>-Z</B><I>plotmax</I> <B>-V -H</B>]
+<B>mbextractsegy</B>
+<BR>
+
+[
+<BR>
+
+<B>--begin-time</B>=<I>yr/mo/da/hr/mn/sc/us</I> {<B>-B</B><I>yr/mo/da/hr/mn/sc/us</I>}
+<BR>
+
+<B>--check-route-bearing</B> {<B>-M</B>}
+<BR>
+
+<B>--end-time</B>=<I>yr/mo/da/hr/mn/sc/us</I> {<B>-E</B><I>yr/mo/da/hr/mn/sc/us</I>}
+<BR>
+
+<B>--format</B>=<I>format</I> {<B>-F</B><I>format</I>}
+<BR>
+
+<B>--help</B> {<B>-H</B>}
+<BR>
+
+<B>--input</B>=<I>file</I> {<B>-I</B><I>file</I>}
+<BR>
+
+<B>--output</B>=<I>segyfile</I> {<B>-O</B><I>segyfile</I>}
+<BR>
+
+<B>--plot-max</B>=<I>plotmax</I> {<B>-Z</B><I>plotmax</I>}
+<BR>
+
+<B>--plot-scale</B>=<I>xscale/yscale/maxwidth</I> {<B>-J</B><I>xscale/yscale/maxwidth</I>}
+<BR>
+
+<B>--range-threshold</B>=<I>rangethreshold</I> {<B>-U</B><I>rangethreshold</I>}
+<BR>
+
+<B>--route</B>=<I>routefile</I> {<B>-R</B><I>routefile</I>}
+<BR>
+
+<B>--sample-format</B>=<I>sampleformat</I> {<B>-S</B><I>sampleformat</I>}
+<BR>
+
+<B>--start-line</B>=<I>startline/lineroot</I> {<B>-L</B><I>startline/lineroot</I>}
+<BR>
+
+<B>--time-list</B>=<I>routetimefile</I> {<B>-Q</B><I>routetimefile</I>}
+<BR>
+
+<B>--time-shift</B>=<I>timeshift</I> {<B>-T</B><I>timeshift</I>}
+<BR>
+
+<B>--verbose</B> {<B>-V</B>}
+<BR>
+
+]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -102,10 +152,9 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-B</B>
+<DT><B>--begin-time=</B><I>yr/mo/da/hr/mn/sc/us</I> <B>-B</B><I>yr/mo/da/hr/mn/sc/us</I>
 
 <DD>
-<I>yr/mo/da/hr/mn/sc</I>
 <BR>
 
 This option sets the starting time for data allowed in the input data.
@@ -117,9 +166,9 @@ after the ending time, then any data between the ending
 and starting time will be ignored. This scheme allows time
 windowing both inside and outside a specified interval.
 Default: <I>yr/mo/da/hr/mn/sc</I> = 1962/2/21/10/30/0.
-<B>-E</B>
+<DT><B>--end-time=</B><I>yr/mo/da/hr/mn/sc/us</I> <B>-E</B><I>yr/mo/da/hr/mn/sc/us</I>
 
-<I>yr/mo/da/hr/mn/sc</I>
+<DD>
 <BR>
 
 This option sets the ending time for data allowed in the input data.
@@ -131,10 +180,9 @@ after the ending time, then any data between the ending
 and starting time will be ignored. This scheme allows time
 windowing both inside and outside a specified interval.
 Default: <I>yr/mo/da/hr/mn/sc</I> = 2062/2/21/10/30/0.
-<DT><B>-F</B>
+<DT><B>--format=</B><I>format</I> <B>-F</B><I>format</I>
 
 <DD>
-<I>format</I>
 <BR>
 
 Sets the data format used if the input is read from stdin
@@ -146,15 +194,14 @@ format supported by <B>MBIO</B>. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page. The default format is set
 using the program <B>mbdefaults</B>..
-<DT><B>-H</B>
+<DT><B>--help {-H</B>}
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-I</B>
+<DT><B>--input=</B><I>infile</I> <B>-I</B><I>infile</I>
 
 <DD>
-<I>infile</I>
 <BR>
 
 Sets the input file path. If <I>format</I> &gt; 0 (set with the
@@ -173,10 +220,9 @@ This program uses the <B>MBIO</B> library and will read or write any swath sonar
 format supported by <B>MBIO</B>. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page. Default: <I>infile</I> = &quot;stdin&quot;.
-<DT><B>-J</B>
+<DT><B>--plot-scale=</B><I>xscale/yscale/maxwidth</I> <B>-J</B><I>xscale/yscale/maxwidth</I>
 
 <DD>
-<I>xscale/yscale/maxwidth</I>
 <BR>
 
 Sets the scale of the default section plots. The <I>xscale</I> value is
@@ -185,25 +231,22 @@ The <I>maxwidth</I> value sets the maximum plot width in inches. If
 <I>xscale</I> and the shot range imply a width greater than <I>maxwidth</I>,
 then the section will be broken up into multiple plots.
 Default: <I>xscale</I> = 0.01; <I>yscale</I> = 50.0; <I>maxwidth</I> = 30.0
-<DT><B>-L</B>
+<DT><B>--start-line=</B><I>startline/lineroot</I> <B>-L</B><I>startline/lineroot</I>
 
 <DD>
-<I>startline/lineroot</I>
 <BR>
 
 This option sets the starting line number and the output filename root
 used when <B>-R</B> is specified so that data are output according
 to planned survey lines. Default: <I>startline</I> = 1; <I>lineroot</I> = &quot;sbp&quot;.
-<DT><B>-M</B>
+<DT><B>--check-route-bearing {-M</B>}
 
 <DD>
-<BR>
-
 This option causes <B>mbextractsegy</B> to omit data during turns when
 extracting into line files according to a specified set of waypoints
 (<B>-R</B> option). The traces will not be output until the heading is
 within 15 degrees of the next survey line's bearing.
-<DT><B>-O</B>
+<DT><B>--output=</B><I>segyfile</I> <B>-O</B><I>segyfile</I>
 
 <DD>
 <BR>

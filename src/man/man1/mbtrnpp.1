@@ -18,7 +18,7 @@ Version 5.0
 .br
 --log-directory=path
 .br
---input=datalist|file|socket_definition
+--input=datalist|file|socket_definition|serial_definition
 .br
 --output=file|socket
 .br
@@ -229,18 +229,21 @@ exist. The default is the current working directory (\fB.\fP). A symbolic
 link named \fBmbtrnpp-latest\fP pointing at this directory is created (or
 replaced) each time \fBmbtrnpp\fP starts.
 .TP
-.B \--input=datalist|file|socket_definition
+.B \--input=datalist|file|socket_definition|serial_definition
 This option specifies the source of input bathymetry data, exactly as the
 \fB--input\fP (\fB-I\fP) option does in other \fBMB-System\fP utilities,
-with the addition of live socket input. If the value does not begin with
-\fIsocket:\fP, it is read as an \fBMB-System\fP recursive datalist (in which
-case \fB--format\fP is not required, since each listed file names its own
-format) or as a single swath data file (in which case \fB--format\fP must
-also be given). If the value begins \fIsocket:\fP, the remainder is a
-socket definition string (e.g. identifying a Reson/Teledyne sonar or 7k
-Center host and port) used to read multibeam pings from a live network
-connection instead of a file; \fB--format\fP must be set to the format ID
-appropriate for the socket data stream. The default input is \fBstdin\fP.
+with the addition of live socket and serial input. If the value does not
+begin with \fIsocket:\fP or \fIserial:\fP, it is read as an \fBMB-System\fP
+recursive datalist (in which case \fB--format\fP is not required, since each
+listed file names its own format) or as a single swath data file (in which
+case \fB--format\fP must also be given). If the value begins \fIsocket:\fP,
+the remainder is a socket definition string (e.g. identifying a
+Reson/Teledyne sonar or 7k Center host and port) used to read multibeam
+pings from a live network connection instead of a file. If the value begins
+\fIserial:\fP, the remainder is a serial port definition string used to read
+multibeam pings from a live serial connection instead of a file. In either
+live case, \fB--format\fP must be set to the format ID appropriate for the
+data stream. The default input is \fBstdin\fP.
 .TP
 .B \--output=file|socket
 This option enables output of processed MB1 records to a binary file
@@ -281,6 +284,7 @@ the input bathymetry, following the same tide model file format used by
 This option sets the width of the sonar swath, in decimal degrees measured
 from nadir, that is retained from each ping; soundings outside this swath
 are excluded from output. The default is 90.0 (the full swath).
+\fB--swath\fP is accepted as an equivalent, shorter alias for this option.
 .TP
 .B \--soundings=value
 This option sets the number of soundings output per ping after decimation.

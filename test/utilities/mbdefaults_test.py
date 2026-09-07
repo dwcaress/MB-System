@@ -29,7 +29,7 @@ class MbdefaultsTest(unittest.TestCase):
     self.assertIn('Version', output)
     self.assertIn('sets and retrieves', output)
     self.assertIn('parameters', output)
-    self.assertIn('-Wproject', output)
+    self.assertIn('-Wmbproject', output)
 
   def testHelpVerbose2(self):
     cmd = [self.cmd, '-h', '-V', '-V']
@@ -37,7 +37,7 @@ class MbdefaultsTest(unittest.TestCase):
     self.assertIn('Version', output)
     self.assertIn('sets and retrieves', output)
     self.assertIn('parameters', output)
-    self.assertIn('-Wproject', output)
+    self.assertIn('-Wmbproject', output)
     self.assertIn('dbg2', output)
     self.assertIn('lonflip', output)
     self.assertIn('illuminate_azimuth:', output)

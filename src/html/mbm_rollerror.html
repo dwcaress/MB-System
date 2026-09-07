@@ -1,0 +1,184 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbm_rollerror</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbm_rollerror</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  7 September 2026 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbm_rollerror</B> - Macro to read a multibeam bathymetry file, calculate the
+noise in the vertical reference used by the sonar, and generate a file of
+roll corrections for use by <B>mbprocess</B>.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbm_rollerror</B> <B>-I</B><I>file</I>
+[<B>-F</B><I>format</I> <B>-W</B><I>filterwidth</I>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbm_rollerror</B> is a Perl macro that estimates a time series of roll bias
+correction values from the crosstrack seafloor slope reported by a swath
+sonar system, on the assumption that short-timescale variations in the
+apparent crosstrack slope of an otherwise smooth seafloor are caused by
+noise in the sonar's roll reference rather than by real topography.
+<P>
+The macro first runs <B>mblist</B> on the input file to extract two columns
+of data: the ping time (as unix/epoch seconds) and the apparent seafloor
+crosstrack slope (in degrees, calculated by fitting a line to the
+bathymetry of each ping, with positive values indicating slopes dipping to
+port). It then runs the GMT program <B>filter1d</B> on this time series using
+a cosine-arch (boxcar-like) low-pass filter of width <I>filterwidth</I>
+(<B>-Fc</B><I>filterwidth</I>, with the <B>-E</B> option so that filtered values are
+also produced near the ends of the time series) to obtain a smoothed
+estimate of the true, slowly varying seafloor slope. Finally, for each
+ping, the macro subtracts the smoothed slope from the raw slope to obtain
+a residual, high-frequency roll noise estimate, and writes the ping time
+and residual value to an output file. This output file can be applied as
+a roll bias correction to the survey data using <B>mbprocess</B> (see the
+<B>mbprocess</B> roll correction file options), or examined directly to
+assess the roll noise characteristics of the sonar/vessel combination.
+<P>
+The output correction file is named by appending the suffix &quot;.cor&quot; to the
+input filename <I>file</I>. Two temporary files (containing, respectively,
+the raw <B>mblist</B> time/slope output and the <B>filter1d</B> filtered output)
+are created during processing and removed before the macro exits.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-I</B>
+
+<DD>
+<I>file</I>
+<BR>
+
+Sets the input filename. This is a required argument; if it is not
+supplied the macro prints a diagnostic message and aborts. This program
+uses the <B>MBIO</B> library and will read any swath sonar format supported
+by <B>MBIO</B>, though useful roll noise estimates depend on the bathymetry
+in <I>file</I> being reasonably dense and reasonably free of a real
+crosstrack seafloor slope trend.
+<DT><B>-F</B>
+
+<DD>
+<I>format</I>
+<BR>
+
+Sets the data format identifier for <I>file</I>. If this option is omitted,
+the format is determined automatically by running <B>mbformat</B> on
+<I>file</I>; if that automatic detection reports a format of 0 (no format
+recognized), <I>format</I> is instead set to -1, the <B>MBIO</B> convention
+indicating that <I>file</I> should be treated as a datalist of swath data
+files rather than as a single swath data file. A list of the swath sonar
+data formats currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page.
+<DT><B>-W</B>
+
+<DD>
+<I>filterwidth</I>
+<BR>
+
+Sets the width, in seconds, of the cosine-arch low-pass filter (GMT
+<B>filter1d</B> <B>-Fc</B> option) used to separate the slowly varying seafloor
+slope trend from the higher-frequency roll noise signal. Default:
+<I>filterwidth</I> = 60.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose we have a swath file named survey.mb59 covering a reasonably flat
+area of seafloor, and we suspect the sonar's roll reference is noisy. The
+command:
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_rollerror -Isurvey.mb59 -W60<BR>
+<BR>
+
+will generate a roll correction file named survey.mb59.cor containing a
+time series of estimated roll noise values, suitable for use as a roll
+bias correction file with <B>mbprocess</B>.
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mblist.html">mblist</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1), <B><A HREF="mbformat.html">mbformat</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Maybe. Maybe not.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 7 September 2026</P></CENTER>
+
+<HR>
+<center>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>

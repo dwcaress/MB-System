@@ -1,0 +1,106 @@
+.TH mbm_rollerror 1 "7 September 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbm_rollerror\fP \- Macro to read a multibeam bathymetry file, calculate the
+noise in the vertical reference used by the sonar, and generate a file of
+roll corrections for use by \fBmbprocess\fP.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbm_rollerror\fP \fB\-I\fP\fIfile\fP
+[\fB\-F\fP\fIformat\fP \fB\-W\fP\fIfilterwidth\fP]
+
+.SH DESCRIPTION
+\fBmbm_rollerror\fP is a Perl macro that estimates a time series of roll bias
+correction values from the crosstrack seafloor slope reported by a swath
+sonar system, on the assumption that short\-timescale variations in the
+apparent crosstrack slope of an otherwise smooth seafloor are caused by
+noise in the sonar's roll reference rather than by real topography.
+
+The macro first runs \fBmblist\fP on the input file to extract two columns
+of data: the ping time (as unix/epoch seconds) and the apparent seafloor
+crosstrack slope (in degrees, calculated by fitting a line to the
+bathymetry of each ping, with positive values indicating slopes dipping to
+port). It then runs the GMT program \fBfilter1d\fP on this time series using
+a cosine\-arch (boxcar-like) low\-pass filter of width \fIfilterwidth\fP
+(\fB\-Fc\fP\fIfilterwidth\fP, with the \fB\-E\fP option so that filtered values are
+also produced near the ends of the time series) to obtain a smoothed
+estimate of the true, slowly varying seafloor slope. Finally, for each
+ping, the macro subtracts the smoothed slope from the raw slope to obtain
+a residual, high\-frequency roll noise estimate, and writes the ping time
+and residual value to an output file. This output file can be applied as
+a roll bias correction to the survey data using \fBmbprocess\fP (see the
+\fBmbprocess\fP roll correction file options), or examined directly to
+assess the roll noise characteristics of the sonar/vessel combination.
+
+The output correction file is named by appending the suffix ".cor" to the
+input filename \fIfile\fP. Two temporary files (containing, respectively,
+the raw \fBmblist\fP time/slope output and the \fBfilter1d\fP filtered output)
+are created during processing and removed before the macro exits.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian do Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-I
+\fIfile\fP
+.br
+Sets the input filename. This is a required argument; if it is not
+supplied the macro prints a diagnostic message and aborts. This program
+uses the \fBMBIO\fP library and will read any swath sonar format supported
+by \fBMBIO\fP, though useful roll noise estimates depend on the bathymetry
+in \fIfile\fP being reasonably dense and reasonably free of a real
+crosstrack seafloor slope trend.
+.TP
+.B \-F
+\fIformat\fP
+.br
+Sets the data format identifier for \fIfile\fP. If this option is omitted,
+the format is determined automatically by running \fBmbformat\fP on
+\fIfile\fP; if that automatic detection reports a format of 0 (no format
+recognized), \fIformat\fP is instead set to \-1, the \fBMBIO\fP convention
+indicating that \fIfile\fP should be treated as a datalist of swath data
+files rather than as a single swath data file. A list of the swath sonar
+data formats currently supported by \fBMBIO\fP and their identifier values
+is given in the \fBMBIO\fP manual page.
+.TP
+.B \-W
+\fIfilterwidth\fP
+.br
+Sets the width, in seconds, of the cosine\-arch low\-pass filter (GMT
+\fBfilter1d\fP \fB\-Fc\fP option) used to separate the slowly varying seafloor
+slope trend from the higher\-frequency roll noise signal. Default:
+\fIfilterwidth\fP = 60.
+
+.SH EXAMPLES
+Suppose we have a swath file named survey.mb59 covering a reasonably flat
+area of seafloor, and we suspect the sonar's roll reference is noisy. The
+command:
+.br
+	mbm_rollerror \-Isurvey.mb59 \-W60
+.br
+will generate a roll correction file named survey.mb59.cor containing a
+time series of estimated roll noise values, suitable for use as a roll
+bias correction file with \fBmbprocess\fP.
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmblist\fP(1), \fBmbprocess\fP(1), \fBmbformat\fP(1)
+
+.SH BUGS
+Maybe. Maybe not.

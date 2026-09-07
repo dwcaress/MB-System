@@ -156,7 +156,7 @@ currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "datalist.mb-1".
 .TP
 .B \-M
-\fIthreshold\fP[\fI/nmin\fP]
+\fIthreshold\fP[\fI/nmin\fP[\fI/nmax\fP]]
 .br
 Turns on use of a median filter test for the soundings. If no other test is
 specified, the median filter test is used by default. Soundings that differ from the
@@ -164,8 +164,12 @@ median depth by a value greater than \fIthreshold\fP times the sonar
 altitude will be considered "bad". So, if \fIthreshold\fP = 0.05, then
 any sounding that is 5% greater or less than the median depth will be
 considered bad. The \fInmin\fP parameter sets the minimum number of
-soundings required to use the median filter, The default values are
-\fIthreshold\fP = 0.25 and \fInmin\fP = 10.
+soundings required to use the median filter. The \fInmax\fP parameter
+sets the maximum number of soundings allowed within a cell; if the number
+of initially good beams in a cell exceeds \fInmax\fP, then only the \fInmax\fP
+soundings nearest the median value remain unflagged, and the rest are
+flagged even if they meet the threshold test. The default values are
+\fIthreshold\fP = 0.25, \fInmin\fP = 10, and \fInmax\fP = infinite.
 .TP
 .B \-N
 [-]\fImin_beam\fP[\fI/max_beam\fP]
@@ -219,6 +223,8 @@ use the specified bottom detection algorithm.
       0 \- unknown algorithm
       1 \- amplitude detection
       2 \- phase detection
+      3 \- lidar detection
+      4 \- photogrammetry detection
 .TP
 .B \-V
 Normally, \fBmbareaclean\fP works "silently" without outputting

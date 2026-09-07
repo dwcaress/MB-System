@@ -2497,6 +2497,46 @@ int main(int argc, char **argv) {
     }
   }
 
+  /* (re)compute the output project's lon/lat bounds and the meters-per-degree scale
+     factors derived from them. The COPY/MERGE/ADD setup above assembles project_output's
+     files and sections field-by-field rather than through mbnavadjust_read_project(), so
+     project_output.lon_min/lon_max/lat_min/lat_max/mtodeglon/mtodeglat are still whatever
+     mbnavadjust_new_project() initialized them to (0.0) - they are never carried over from
+     project_inputbase or recomputed from the copied section data. Left at 0.0, any global
+     tie or crossing tie offset that happens to be recorded in meters gets divided by a
+     mtodeglon/mtodeglat of 0.0 downstream (e.g. mbnavadjust_invertnav.c), producing Inf or,
+     for an exactly-zero offset, NaN that then poisons the whole navigation inversion. */
+  if (mbnavadjustmerge_mode == MBNAVADJUSTMERGE_MODE_COPY || mbnavadjustmerge_mode == MBNAVADJUSTMERGE_MODE_MERGE
+      || mbnavadjustmerge_mode == MBNAVADJUSTMERGE_MODE_ADD) {
+    bool first_bounds = true;
+    for (int ifile = 0; ifile < project_output.num_files; ifile++) {
+      struct mbna_file *file0 = &project_output.files[ifile];
+      if (file0->status != MBNA_FILE_FIXEDNAV) {
+        for (int isection = 0; isection < file0->num_sections; isection++) {
+          struct mbna_section *section0 = &file0->sections[isection];
+          if (!(isnan(section0->lonmin) || isnan(section0->lonmax) || isnan(section0->latmin) ||
+                isnan(section0->latmax))) {
+            if (first_bounds) {
+              project_output.lon_min = section0->lonmin;
+              project_output.lon_max = section0->lonmax;
+              project_output.lat_min = section0->latmin;
+              project_output.lat_max = section0->latmax;
+              first_bounds = false;
+            }
+            else {
+              project_output.lon_min = MIN(project_output.lon_min, section0->lonmin);
+              project_output.lon_max = MAX(project_output.lon_max, section0->lonmax);
+              project_output.lat_min = MIN(project_output.lat_min, section0->latmin);
+              project_output.lat_max = MAX(project_output.lat_max, section0->latmax);
+            }
+          }
+        }
+      }
+    }
+    mb_coor_scale(verbose, 0.5 * (project_output.lat_min + project_output.lat_max),
+                  &project_output.mtodeglon, &project_output.mtodeglat);
+  }
+
   struct mbna_file *file1;
   struct mbna_section *section1;
   struct mbna_file *file2;

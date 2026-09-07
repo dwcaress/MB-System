@@ -22,6 +22,8 @@ accessible as tarballs through the Github interface.</p>
 Version 5.8 Releases and Release Notes:</h3>
 <hr />
 <ul>
+<li>Version 5.8.3beta17 September 7, 2026</li>
+<li>Version 5.8.3beta16 July 26, 2026</li>
 <li>Version 5.8.3beta15 July 26, 2026</li>
 <li>Version 5.8.3beta14 July 6, 2026</li>
 <li>Version 5.8.3beta13 June 18, 2026</li>
@@ -72,7 +74,295 @@ Version 5.8 Releases and Release Notes:</h3>
 <li><strong>Version 5.8.0 January 22, 2024</strong></li>
 </ul>
 <hr />
-<h4 id="583beta15-july-26-2026">5.8.3beta15 (July 26, 2026)</h4>
+<h4 id="583beta17-september-7-2026">5.8.3beta17 (September 7, 2026)</h4>
+<p>Program mbotps: Replaced this program's dependency on a separately
+installed and built copy of the OSU Tidal Prediction Software (OTPS)
+Fortran program predict_tide with a native C implementation of the same
+harmonic tidal prediction methods (new files src/otps/mb_otps_predict.c
+and mb_otps_predict.h): equilibrium tidal arguments and nodal
+corrections, inference of minor constituents from major ones, and
+bilinear interpolation of the tidal atlas grids, reading OTPS "atlas"
+format tide model binary files (e.g. TPXO9_atlas, TPXO10_atlas) directly
+via computed byte offsets rather than loading whole files into memory.
+mbotps no longer needs OTPS's Fortran source, its makefile, or a Fortran
+compiler installed at all; only the tidal model data files themselves
+are needed, at the location given by --otps-path, exactly as before. The
+new engine was validated against the actual OTPS Fortran predict_tide
+across more than 1500 randomized positions and times spanning both
+currently supported atlas models, matching to within 0.5 mm (consistent
+with single-precision rounding in the source data) with zero land/ocean
+classification mismatches; this process also caught and fixed a genuine
+off-by-one bug in the new code's own direct-access byte-offset
+arithmetic, and separately caught and fixed a bug in which a shared MBIO
+error-code variable was reused for the tidal prediction call inside the
+per-record navigation-mode loop, silently clearing the end-of-file
+condition that loop depends on and causing an effectively infinite loop
+that could fill disk with output before it was noticed. Also enhanced
+model discovery so that a model directory obtained from OSU (e.g.
+TPXO10_atlas_v2/, copied directly into DATA/) can be used as
+--otps-model with no accompanying "Model_"-prefixed control file
+required at all; mbotps scans the directory itself for the needed
+elevation ("h_") atlas files. A "Model_" control file, if present, is
+still honored and takes precedence, for compatibility with an existing
+OTPS installation that already has one.</p>
+<p>Program mbotpsold: The previous, OTPS-Fortran-dependent
+implementation of mbotps is retained under this new name as a fallback
+and as a cross-check against the OTPS Fortran reference implementation,
+but is now deprecated: moved from src/otps to src/deprecated, built only
+when MB-System is configured with --enable-deprecated (autotools) or
+-DbuildDeprecated=ON (CMake), with its man page moved from the regular
+man page list to the existing deprecated-program man page list in both
+build systems. Its own man page and mbotps's man page were both updated
+to describe this relationship and to give full attribution to Oregon
+State University and to Gary Egbert, Lana Erofeeva, and Richard Ray for
+the tidal prediction methods both programs implement or (for mbotpsold)
+invoke.</p>
+<p>Program mbotpsold: Fixed a bug in which the optional tide-station
+correction (applying the difference between an observed tide station's
+data and the model's own prediction at that station's position and
+times, as a correction to tide predictions made elsewhere) used a stale
+epoch time left over from unrelated earlier code, rather than the epoch
+time of the specific output line the correction was being applied to.
+This affected both the single-position and swath-navigation modes
+whenever a tide-station correction was requested, and could apply the
+wrong point of the correction time series to a given prediction. Fixed
+by computing the correct epoch time from the freshly parsed output line,
+immediately before each correction lookup, in both modes.</p>
+<p>The changes described above were done with the assistance of the AI
+coding assistant Claude Sonnet 5 (Anthropic, model claude-sonnet-5),
+operating as Claude Code under developer supervision and review.</p>
+<p>Man pages: Fixed a bug in which the mb7k2jstar man page was listed
+among the deprecated man pages (in src/man/man1/CMakeLists.txt's
+<code>deprecated</code> list and src/man/man1/Makefile.am's
+<code>MAN_DEPRECATED</code> variable, plus the corresponding generated
+Makefile.in) even though mb7k2jstar itself is a current, non-deprecated
+program, as already reflected in src/utilities/CMakeLists.txt and
+src/deprecated/CMakeLists.txt. As a result, a normal build installed no
+man page for mb7k2jstar at all, since deprecated man pages are only
+installed when deprecated programs are explicitly enabled. Moved the
+mb7k2jstar.1 entry into the current man page lists in both the CMake and
+autotools build files. Also audited every other man page in the
+deprecated lists against the current-vs-deprecated program lists in
+src/utilities/CMakeLists.txt and src/deprecated/CMakeLists.txt; no other
+man pages were misclassified. This bug was found and fixed with the
+assistance of the AI coding assistant Claude Sonnet 5 (Anthropic, model
+claude-sonnet-5), operating as Claude Code under developer supervision
+and review.</p>
+<p>Build system: Fixed the autotools build for the program mb7k2jstar,
+which had moved from src/deprecated to src/utilities to match its CMake
+configuration (already correct in src/utilities/CMakeLists.txt and
+src/deprecated/CMakeLists.txt) without a corresponding update to the
+autotools files. src/deprecated/Makefile.am still listed mb7k2jstar as a
+deprecated program even though its source file no longer exists there,
+so <code>./configure --enable-deprecated &amp;&amp; make</code> failed
+with a missing-source-file error, while src/utilities/Makefile.am never
+listed the program at all, so the autotools build never built it as a
+current program either. Removed the stale mb7k2jstar entries from
+src/deprecated/Makefile.am and added mb7k2jstar to
+src/utilities/Makefile.am, with no extra library dependencies beyond
+what libmbio.la already provides transitively, then regenerated both
+Makefile.in files and confirmed with automake, ./config.status, and an
+actual compile of mb7k2jstar.cc that the fix builds correctly. This bug
+was found and fixed with the assistance of the AI coding assistant
+Claude Sonnet 5 (Anthropic, model claude-sonnet-5), operating as Claude
+Code under developer supervision and review.</p>
+<p>Header mb_define.h: Reorganized so that function prototypes are
+grouped under comments naming the src/mbio/mb_*.c source file that
+defines each one, replacing the previous layout, which mixed functions
+from different source files together with no consistent order. While
+auditing the header against the actual mbio source, found and fixed
+several inconsistencies: added prototypes for twelve functions that had
+no declaration anywhere in the tree (mb_format.c's cvt_to_nix_path;
+mb_esf.c's mb_mergesort_setup and mb_mergesort_insertionsort; and nine
+internal mb_rt.c ray-tracing helpers - mb_rt_get_depth, mb_rt_quad1
+through mb_rt_quad4, mb_rt_plot_circular, mb_rt_circular, mb_rt_line,
+and mb_rt_vertical); removed seven stale prototypes for functions with
+no implementation anywhere in the source tree
+(mb_platform_set_sensor_flipsign_x/y/z, mb_buffer_info, and
+mb_geod_init/mb_geod_free/mb_geod_inverse); and removed a duplicated
+mb_swap_check() declaration. Functions already declared in another mbio
+header (mb_process.h, mb_segy.h, mb_info.h, mb_io.h) were left there
+rather than duplicated, with a comment in mb_define.h noting where each
+lives; the mb_process.h and mb_segy.h comments were checked to confirm
+they enumerate every function each of those headers actually declares,
+not just the ones originating from one particular source file.</p>
+<p>Removed src/mbio/mb_info.h, folding its contents into mb_define.h:
+the mb_info_struct structure, the MB_INFO_MASK_DIM macro, and the three
+mb_check_info.c function prototypes it declared (mb_info_init,
+mb_get_info, mb_get_info_datalist). All nine source files that
+referenced mb_info.h already included mb_define.h directly, so the
+#include "mb_info.h" lines were simply removed; the header was also
+dropped from src/mbio/CMakeLists.txt, Makefile.am, and Makefile.in.</p>
+<p>Moved the declarations of mb_mergesort(), mb_mergesort_setup(), and
+mb_mergesort_insertionsort() - all three defined in mb_esf.c - from
+mb_define.h to mb_process.h, alongside the other mb_esf.c functions
+already declared there, since mb_process.h is already included by
+mbnavadjust_io.c, the only caller of mb_mergesort() outside mb_esf.c
+itself. Also dropped mb_define.h's now-redundant hilbert()/hilbert2()
+declarations (both defined in mb_segy.c), which were already declared in
+mb_segy.h.</p>
+<p>The changes described above were done with the assistance of the AI
+coding assistant Claude Sonnet 5 (Anthropic, model claude-sonnet-5),
+operating as Claude Code under developer supervision and review.</p>
+<p>Program mbmakeplatform, library mbio: Added support for recording,
+per sensor, that the raw heading, roll, and/or pitch values reported by
+that sensor should have their sign flipped before use, correcting a raw
+sensor calibration or wiring polarity error that is independent of any
+sensor mounting offset. New platform file keywords
+SENSOR_FLIPSIGN_HEADING, SENSOR_FLIPSIGN_ROLL, and SENSOR_FLIPSIGN_PITCH
+record these per-sensor flags and are read, written, and applied by new
+functions in src/mbio/mb_platform.c
+(mb_platform_set_sensor_flipsign_heading/roll/pitch,
+mb_platform_apply_flipsign_heading,
+mb_platform_apply_flipsign_attitude), with the corresponding prototypes
+added to src/mbio/mb_define.h. The sign flip is applied to the
+platform's designated source_heading and source_rollpitch sensors during
+navigation/attitude interpolation in src/mbio/mb_navint.c, so it takes
+effect wherever a program reads heading, roll, or pitch through the
+standard MBIO interpolation path. In mbmakeplatform, the new
+command-line arguments --sensor-flipsign-heading,
+--sensor-flipsign-roll, and --sensor-flipsign-pitch set these flags for
+the sensor currently being defined, i.e. any sensor added between an
+--add-sensor-* argument and the matching --end-sensor argument; giving
+one of these arguments outside a sensor definition has no effect. Also
+documented the three new arguments in the mbmakeplatform man page.</p>
+<p>The changes described above were done with the assistance of the AI
+coding assistant Claude Sonnet 5 (Anthropic, model claude-sonnet-5),
+operating as Claude Code under developer supervision and review.</p>
+<p>Program mbtrnpp and Format 89 (MBF_RESON7K3): Fixed two bugs in the
+automatic, real-time bathymetry preprocessing that
+src/mbio/mbr_reson7k3.c applies inside its own low-level record-reading
+function (mbr_rt_reson7k3()) whenever a program reads reson7k3 survey
+data through mb_get_all() with a platform model loaded via
+mb_set_platform() - the code path used by mbtrnpp, which never calls the
+separate, explicit mb_preprocess() API that mbpreprocess uses. First,
+the target sensor used to compute the multibeam sonar's lever arm and
+attitude offsets was hardcoded to sensor index 0 (typically the
+platform's INS) rather than being taken from the platform's
+SOURCE_BATHYMETRY sensor, so none of the actual sonar's mounting
+position or attitude offsets were applied; fixed to use
+platform-&gt;source_bathymetry, mirroring the convention already used by
+mb_get_all.c's own generic preprocessing fallback. Second, the attitude
+system's roll, pitch, and heading were sign-flipped once in
+mbr_reson7k3.c according to the platform's
+SENSOR_FLIPSIGN_ROLL/PITCH/HEADING flags, then flipped a second time
+inside mb_attint_add()/mb_hedint_add() (src/mbio/mb_navint.c), which
+already apply this same platform-based correction centrally; the double
+negation silently canceled the flip. Fixed by removing the redundant
+manual flip in mbr_reson7k3.c so the correction is applied exactly once,
+as intended by mb_navint.c's design. Both bugs were found by comparing
+bathymetry computed by mbtrnpp in real time against bathymetry computed
+for the identical raw data by mbpreprocess run offline with the same
+platform file, for an MBARI Mapping AUV survey logged in reson7k3 (.s7k)
+format.</p>
+<p>Format 89 (MBF_RESON7K3): Fixed a bug in mbsys_reson7k3_preprocess()
+(src/mbio/mbsys_reson7k3.c) in which the interpolated attitude-system
+heave value was subtracted from sensordepth when computing each beam's
+depth (bathydata-&gt;depth = zz + sensordepth - heave), even when
+sensordepth was itself already sourced from a real pressure sensor and
+therefore already reflected the vehicle's actual instantaneous depth,
+double-counting the vertical motion and producing bathymetry that could
+be off by roughly a meter, with the error's magnitude and sign varying
+with heave. This is the same heave-versus-real-sensordepth convention
+already applied in mbsys_reson7k3_extract_nav(), which zeroes heave
+whenever draft/sensordepth data is available (mb_io_ptr-&gt;nsensordepth
+&gt; 0); mbsys_reson7k3_preprocess() now applies the same rule. Found
+and fixed using the same mbtrnpp-versus-mbpreprocess comparison
+described above; after both fixes, per-beam depths from mbtrnpp and
+mbpreprocess for the same pings agreed to within a few centimeters, down
+from roughly a meter.</p>
+<p>The changes described above were done with the assistance of the AI
+coding assistant Claude Sonnet 5 (Anthropic, model claude-sonnet-5),
+operating as Claude Code under developer supervision and review.</p>
+<p>Test suite (test/utilities): Fixed 7 of 46 <code>make test</code>
+(ctest/GoogleMock-style) test failures in
+test/utilities/mbdefaults_test.py, mbdumpesf_test.py,
+mbsegygrid_test.py, mbsegylist_test.py, mbsvpselect_test.py,
+mbareaclean_test.py, and mbauvloglist_test.py. None of these were
+regressions in the programs under test; each test asserted on a literal
+substring of <code>-H</code>/<code>--help</code> usage-string output
+that predated the getopt_long conversion (5.8.3beta15/16) and was never
+updated afterward, so the assertions checked for short-option-only
+placeholder names (e.g. <code>-Wproject</code>,
+<code>-Gdelimiter</code>, <code>-Fprintformat</code>) that the converted
+usage strings no longer emit verbatim (now e.g.
+<code>-Wmbproject</code>, <code>-Gcharacter</code>,
+<code>-Fformat</code>). Separately, mbdumpesf_test.py's testNoArgs still
+expected running mbdumpesf with no arguments to exit silently and
+successfully; this predated an earlier fix (mbdumpesf batch of the
+src/utilities memory-safety audit) that made the program correctly
+require --input and exit with an error instead of proceeding with an
+uninitialized filename. Updated all 7 test files' assertions to match
+current, correct program behavior; <code>make test</code> now passes
+46/46. This work was done with the assistance of the AI coding assistant
+Claude Sonnet 5 (Anthropic, model claude-sonnet-5), operating as Claude
+Code under developer supervision and review.</p>
+<p>Program mbmakedatalist: Fixed a spurious
+<code>-Wunknown-warning-option</code> compiler warning under Clang: a
+<code>#pragma GCC diagnostic ignored "-Wstringop-truncation"</code>
+block (added to silence a real GCC-only warning around a bounded
+<code>strncpy</code>/<code>strncat</code> sequence building a Kongsberg
+output filename) named a warning group that only GCC defines, so Clang
+warned that it did not recognize the option at all. Guarded both the
+<code>#pragma GCC diagnostic push</code>/<code>ignored</code> and the
+matching <code>#pragma GCC diagnostic pop</code> with
+<code>#if defined(__GNUC__) &amp;&amp; !defined(__clang__)</code>, so
+the suppression is applied only on the compiler it is meant for, with no
+warning generated on Clang. This work was done with the assistance of
+the AI coding assistant Claude Sonnet 5 (Anthropic, model
+claude-sonnet-5), operating as Claude Code under developer supervision
+and review.</p>
+<p>Program mbgpstide: Fixed an inconsistency between the long and short
+forms of the --tideformat/-A option introduced by the getopt_long
+conversion (5.8.3beta15/16): the long-option handler unconditionally
+clamped any parsed value other than 2 down to 1, while the equivalent
+short-option handler simply stored whatever value was parsed. This meant
+<code>--tideformat=5</code> (the documented CARIS output format, also
+reachable as <code>-A5</code> and checked explicitly elsewhere in the
+program) was silently turned into tideformat=1 when given as a long
+option, while <code>-A5</code> worked correctly. Removed the clamp from
+the long-option branch so both option forms behave identically. This bug
+was found and fixed with the assistance of the AI coding assistant
+Claude Sonnet 5 (Anthropic, model claude-sonnet-5), operating as Claude
+Code under developer supervision and review.</p>
+<p>Program mbtiff2png: Fixed a getopt_long table bug in which the
+no-argument flags --transparency-white and --transparency-black were
+declared with required_argument instead of no_argument, meaning either
+flag would silently consume the next command-line token as an ignored
+argument instead of taking effect as a bare switch (the man page and the
+program's own usage text had always correctly described both as
+argument-free). This bug was found and fixed with the assistance of the
+AI coding assistant Claude Sonnet 5 (Anthropic, model claude-sonnet-5),
+operating as Claude Code under developer supervision and review.</p>
+<p>Man pages: Completed a full accuracy pass over every MB-System man
+page. Rewrote src/man/man3/mbio.3 to document roughly 185
+previously-undocumented mb_* library functions, remove one that no
+longer exists (mb_buffer_info, replaced by mb_buffer_get_kind), fix
+roughly 50 stale function signatures, add 3 missing entries to the
+SUPPORTED FORMATS table, and correct stale beam-flag bit meanings.
+Updated src/man/man1/mbsystem.1's program/macro/GMT-module inventory to
+match the actual current build (about 20 additions, several
+deprecated-list corrections, mbps removed as dead). Audited the
+OPTIONS/SYNOPSIS sections of all 97 other existing man pages against
+their current option-parsing code, fixing 59 of them: undocumented
+options, options no longer in the code, stale defaults, and swapped or
+otherwise wrong descriptions (notably mbimagelist.1, which had been
+largely copy-pasted from mbdatalist.1, and mbvelocitytool.1 and
+mbswath.1, which were missing or misdescribing several real options).
+Wrote 10 new man pages from scratch, with html/pdf renderings, for
+actively-built programs and macros that previously had no documentation
+at all (mbgetphotocorrection, mbimagecorrect, mbphotogrammetry,
+mbphotomosaic, mbm_makeimagelist, mbgrd2octree, mbgrdtilemaker,
+mbm_phins2fnv, mbm_rollerror, mbm_trnplot), each cross-checked against
+its actual getopt/argv-parsing code rather than assumed behavior. Also
+brought src/html/mbsystem_man_list.html up to date with links to every
+current man page, fixing a broken mbio pdf link, moving several
+deprecated programs (mbauvnavusbl, mbrollbias, mbstripnan, mbm_fmtvel)
+out of active-program sections into the deprecated list, and removing
+the dead mbps entry. This work was done with the assistance of the AI
+coding assistant Claude Sonnet 5 (Anthropic, model claude-sonnet-5),
+operating as Claude Code under developer supervision and review.</p>
+<h4 id="583beta16-july-26-2026">5.8.3beta16 (July 26, 2026)</h4>
 <p>Program mbusbl2fnv: New program that converts a USBL (ultra-short
 baseline) ROV tracking CSV file to an MB-System fast navigation (fnv)
 text file. The input CSV format has one header line followed by data
@@ -569,6 +859,10 @@ never installed alongside a build that lacks the program itself.</p>
 and written with the assistance of the AI coding assistant Claude Sonnet
 5 (Anthropic, model claude-sonnet-5), operating as Claude Code under
 developer supervision and review.</p>
+<h4 id="583beta15-july-26-2026">5.8.3beta15 (July 26, 2026)</h4>
+<p>This release was botched due to a faulty merge of conflicting pull
+requests. All changes intended for this release are described above for
+5.8.3beta16.</p>
 <h4 id="583beta14-july-6-2026">5.8.3beta14 (July 6, 2026)</h4>
 <p>Programs mbedit, mbnavedit, mbvelocitytool, mbgrdviz, mbeditviz,
 mbnavadjust: updated Motif GUI code to eliminate two deprecated
@@ -576,6 +870,11 @@ functions, replacing XmFileSelectionBoxGetChild() with XtNameToWidget()
 and replacing XmStringGetLtoR() with XmStringUnparse(). This appears to
 be necessary for the Motif code to work on MacOs Tahoe with
 prerequisites installed via MacPorts.</p>
+<p>Program mbnavadjust: Fixed a copy-paste bug in mbnavadjust_io.c in
+which the section depthmax tracking during data import checked the
+depthmin initialization sentinel instead of its own, so depthmax was
+never properly initialized from the first bathymetry value in a
+section.</p>
 <h4 id="583beta13-june-18-2026">5.8.3beta13 (June 18, 2026)</h4>
 <p>Format MBF_KEMKALL (261): Fixed support for platform files used for
 preprocessing.</p>

@@ -9,14 +9,14 @@ Version 5.0\fP
 .SH SYNOPSIS
 \fBmbm_route2mission\fP \fB\-I\fP\fIroutefile\fP
 [\fB\-A\fP\fIaltmin/altabort[/altdesired[/altdesired2[/altdesired3]]]\fP
-\fB\-B\fP\fIbehavior\fP \fB\-C\fP\fImissiontime\fP
+\fB\-B\fP\fIbehavior1[/behavior2[/behavior3[/behavior4[/behavior5]]]]\fP \fB\-C\fP\fImissiontime\fP
 \fB\-D\fP\fIdepthconstant[/depthconstant2]\fP \fB\-E\fP\fIstarttime\fP
 \fB\-F\fP\fIforwarddistance\fP \fB\-G\fP\fIsurfacewaypoint\fP
-\fB\-J\fP\fIdepthprofilefile\fP \fB\-L\fP\fIapproachdepth\fP
-\fB\-M\fP\fI[sensorlist]\fP \fB\-N\fP[\fIspiraldescentaltitude\fP] \fB\-O\fP\fImissionfile\fP
+\fB\-J\fP\fIdepthprofilefile\fP \fB\-K\fP\fIinsmode\fP \fB\-L\fP\fIapproachdepth\fP
+\fB\-M\fP\fI[sensorlist]\fP \fB\-N\fP[\fIspiraldescentaltitude\fP[\fI/mode\fP]] \fB\-O\fP\fImissionfile\fP
 \fB\-P\fP\fI[startlon/startlat | startdistance]\fP
-\fB\-R\fP\fItransmitpower/receivegain[/rangeminfraction[/pulsewidth]]\fP
-\fB\-S\fP\fIspeed\fP \fB\-T\fP \fB\-U\fP\fImaxclimbrate\fP
+\fB\-R\fP\fItransmitpower/receivegain[/rangeminfraction[/rangemaxfraction[/pulsewidth]]]\fP
+\fB\-S\fP\fIsurveyspeed[/ascentdescentspeed[/transitspeed]]\fP \fB\-T\fP \fB\-U\fP\fImaxclimbrate\fP
 \fB\-W\fP\fIwaypointspacing\fP \fB\-Z\fP \fB\-V\fP \fB\-H\fP]
 
 .SH DESCRIPTION
@@ -144,14 +144,21 @@ and END3, respectively, as defined in
 \fBMBgrdviz\fP routes.
 .TP
 .B \-B
-\fIbehavior\fP
+\fIbehavior1[/behavior2[/behavior3[/behavior4[/behavior5]]]]\fP
 .br
-Sets the AUV behavior used to fly the mission. If \fIbehavior\fP = 0, then
-the AUV uses the WayPoint behavior in which a single vehicle depth is specified
-for the approach to each waypoint. If \fIbehavior\fP = 1, then the AUV uses
-the WayPointDepth behavior in which each mission segment has both a starting
-and an ending depth specified, and the vehicle is commanded to fly a depth
-profile that is a linear ramp between the two depths. Default: \fIbehavior\fP = 1;
+Sets the AUV behavior used to fly each type of survey line, where \fIbehavior1\fP
+applies to lines of type STARTLINE/ENDLINE, \fIbehavior2\fP to
+STARTLINE2/ENDLINE2, \fIbehavior3\fP to STARTLINE3/ENDLINE3, \fIbehavior4\fP to
+STARTLINE4/ENDLINE4, and \fIbehavior5\fP to STARTLINE5/ENDLINE5 (waypoint types
+as defined in \fBMBgrdviz\fP routes). If fewer than five values are given, the
+last value specified is used for the remaining line types. Each \fIbehaviorN\fP
+value may be 0 (WayPoint, in which a single vehicle depth is specified
+for the approach to each waypoint), 1 (WayPointDepth, in which each mission
+segment has both a starting and an ending depth specified, and the vehicle is
+commanded to fly a depth profile that is a linear ramp between the two
+depths), 2 (WayPointWall), or 3 (WayPointBottom); any other value is treated
+as 1 (WayPointDepth). Default: \fIbehavior1\fP = \fIbehavior2\fP = \fIbehavior3\fP
+= \fIbehavior4\fP = \fIbehavior5\fP = 1.
 .TP
 .B \-C
 \fImissiontime\fP
@@ -174,8 +181,8 @@ AUV is commanded to the specified constant depth value.
 .br
 This sets the expected time required for the AUV to reach the first waypoint
 in the survey mission. If neither
-the \fB\-P\fP or \fB\-E\fP options are specified, a distance of 500 meters
-to the first waypoint is assumed.
+the \fB\-P\fP or \fB\-E\fP options are specified, a default transit time of
+2000 seconds (with a floor of 600 seconds) is assumed.
 .TP
 .B \-F
 \fIforwarddistance\fP
@@ -226,6 +233,14 @@ Sets the filename of an input desired depth profile file. This is the depth
 profile that the vehicle should follow when flying the mission (as opposed to
 following the bottom at a particular altitude).
 .TP
+.B \-K
+\fIinsmode\fP
+.br
+Sets the type of inertial navigation system (INS) carried by the vehicle,
+which affects the behaviors written into the mission script. Use
+\fIinsmode\fP = 0 for a Kearfott SeaDevil INS, or \fIinsmode\fP = 1 for a
+Phins-Tasman INS. Default: \fIinsmode\fP = 0 (Kearfott SeaDevil).
+.TP
 .B \-L
 \fIapproachdepth\fP
 .br
@@ -248,17 +263,23 @@ made up of one or more of the following characters:
  		H	high frequency sidescan (and multibeam)
  		B	multibeam beam (water column) data
  		C	benthic imaging camera and strobes
+ 		I	Edgetech DeltaT bathymetric sonar
 .br
 Thus, \fB\-M\fP\fISL\fP will cause the multibeam, the subbottom profiler, and
 the low frequency sidescan to be enabled while leaving the high frequency
 sidescan off.
 .TP
 .B \-N
-\fIspiraldescentaltitude\fP
+\fIspiraldescentaltitude\fP[\fI/mode\fP]
 Sets the mission to include a shallow transit to the first waypoint followed by a
 spiral descent to depth to start the survey. The descent is terminated at the
 altitude \fIspiraldescentaltitude\fP if specified here. Otherwise, the descent is
-terminated at the altitude \fIaltdesired\fP from the \fB\-A\fP option.
+terminated at the altitude \fIaltdesired\fP from the \fB\-A\fP option. The optional
+\fImode\fP value controls the StartSurvey and magnetometer calibration behaviors
+executed before the spiral descent: \fImode\fP = 0 disables both, \fImode\fP = 1
+(the default whenever \fB\-N\fP is used) enables the StartSurvey behavior only,
+and \fImode\fP = 2 enables both the StartSurvey and magnetometer calibration
+behaviors.
 .TP
 .B \-O
 \fImissionfile\fP
@@ -271,11 +292,11 @@ Sets the filename of the output MBARI AUV mission script.
 This sets the expected starting position (\fIlon\fP longitude
 and \fIlat\fP latitude) of the Mapping AUV so that the
 expected time to run to the first waypoint can be estimated. If neither
-the \fB\-P\fP or \fB\-T\fP options are specified, a distance of 500 meters
-to the first waypoint is assumed.
+the \fB\-P\fP or \fB\-E\fP options are specified, a default transit time of
+2000 seconds (with a floor of 600 seconds) is assumed.
 .TP
 .B \-R
-\fItransmitpower/receivegain[/rangeminfraction[/pulsewidth]]\fP
+\fItransmitpower/receivegain[/rangeminfraction[/rangemaxfraction[/pulsewidth]]]\fP
 .br
 This sets the key multibeam sonar parameters. Here \fItransmitpower\fP is
 the transmit power of the multibeam in dB, with a range of 0-220 dB. The
@@ -284,14 +305,22 @@ sets the minimum range at which the multibeam will make bottom picks; this
 prevents the multibeam from picking on nearfield arrivals usually reflecting
 interference from other sonars. If the sonar is operating with an altitude of
 50 m and \fIrangeminfraction\fP = 0.2, then the range gating minimum range will be
-0.2 * 50 m = 10 m. The \fIpulsewidth\fP variable sets the multibeam sonar
-transmit pulse width in microseconds. Default: \fItransmitpower\fP = 220, \fIreceivegain\fP = 220,
-\fIrangeminfraction\fP = 0.2, \fIpulsewidth\fP = 60.
+0.2 * 50 m = 10 m. The \fIrangemaxfraction\fP variable similarly sets the maximum
+sonar range as a fraction of the vehicle altitude (e.g. \fIrangemaxfraction\fP = 3.5
+allows for a swath of about 150 degrees on a flat bottom). The \fIpulsewidth\fP
+variable sets the multibeam sonar transmit pulse width in microseconds.
+Default: \fItransmitpower\fP = 220, \fIreceivegain\fP = 75,
+\fIrangeminfraction\fP = 0.2, \fIrangemaxfraction\fP = 3.5, \fIpulsewidth\fP = 60.
 .TP
 .B \-S
-\fIspeed\fP
+\fIsurveyspeed[/ascentdescentspeed[/transitspeed]]\fP
 .br
-This sets the commanded AUV speed in meters/second. Default: \fIspeed\fP = 1.5 m/s.
+This sets the commanded AUV speed(s) in meters/second. \fIsurveyspeed\fP is used
+while running survey lines, \fIascentdescentspeed\fP is used during ascent and
+descent (and to estimate the time to reach the first waypoint when \fB\-P\fP is
+used), and \fItransitspeed\fP is used while transiting between survey lines. If
+only \fIsurveyspeed\fP is given, it is also used for the other two speeds.
+Default: \fIsurveyspeed\fP = \fIascentdescentspeed\fP = \fItransitspeed\fP = 1.5 m/s.
 .TP
 .B \-T
 .br
@@ -315,6 +344,7 @@ The \fB\-V\fP option causes \fBmbm_route2mission\fP to print out status messages
 \fIwaypointspacing\fP
 .br
 Sets the spacing in meters of the waypoints output to the mission script.
+Default: \fIwaypointspacing\fP = 200 m.
 .TP
 .B \-Z
 .br

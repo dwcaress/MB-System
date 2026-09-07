@@ -28,12 +28,13 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mb7k2jstar</B> [<B>-I</B><I>file </I><B>-A</B><I>type</I>
-<B>-B</B><I>bottompickmode/bottompickthreshold</I> <B>-C</B>
-<B>-F</B><I>format</I> <B>-G</B><I>gainmode/gainfactor</I>
-<B>-L</B><I>startline/lineroot</I>
-<B>-M -O</B><I>outfile</I> <B>-R</B><I>routefile</I> <B>-S</B><I>smooth</I>
-<B>-T</B><I>timeshift</I> <B>-X -H -V</B>]
+<B>mb7k2jstar</B> [<B>--input=</B><I>file</I> <B>--extract-mode=</B><I>type</I>
+<B>--bottom-pick=</B><I>bottompickmode/bottompickthreshold</I> <B>--comments</B>
+<B>--format=</B><I>format</I> <B>--gain=</B><I>gainmode/gainfactor</I>
+<B>--line-root=</B><I>startline/lineroot</I>
+<B>--check-route-bearing</B> <B>--output=</B><I>outfile</I> <B>--route-file=</B><I>routefile</I>
+<B>--smooth=</B><I>smooth</I>
+<B>--time-shift=</B><I>timeshift</I> <B>--flip-sidescan</B> <B>--help</B> <B>--verbose</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -102,10 +103,9 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-A</B>
+<DT><B>--extract-mode=</B><I>mode</I> <B>-A</B><I>mode</I>
 
 <DD>
-<I>mode</I>
 <BR>
 
 This option sets the types of data to be extracted and output.
@@ -115,10 +115,9 @@ is given, then any high frequency sidescan records are extracted.
 The <B>-A</B><I>3</I> option causes subbottom profiler records to
 be extracted. Default: All Edgetech sidescan and subbottom
 profiler records are extracted.
-<DT><B>-B</B>
+<DT><B>--bottom-pick=</B><I>bottompickmode/bottompickthreshold</I> <B>-B</B><I>bottompickmode/bottompickthreshold</I>
 
 <DD>
-<I>bottompickmode/bottompickthreshold</I>
 <BR>
 
 This option sets the source of the sonar first arrival time embedded into
@@ -132,17 +131,16 @@ will pick the first arrival time in the sidescan sonar data by looking
 for the first sample with an amplitude &gt; <I>bottompickthreshold</I> times the
 maximum amplitude in the trace.
 Default: <I>bottompickmode</I> = 2.
-<DT><B>-C</B>
+<DT><B>--comments -C</B>
 
 <DD>
 <BR>
 
 This option causes <B>mb7k2jstar</B> to print out any comment records
 encountered in the input Reson 7k data.
-<DT><B>-F</B>
+<DT><B>--format=</B><I>format</I> <B>-F</B><I>format</I>
 
 <DD>
-<I>format</I>
 <BR>
 
 Sets the data format used if the input is read from stdin
@@ -150,10 +148,9 @@ or from a file. If <I>format</I> &lt; 0, then the input file specified
 with the <B>-I</B> option will actually contain a list of input swath sonar
 data files. This program only reads Reson 7k format data files (<B>MBIO</B>
 format 88).
-<DT><B>-G</B>
+<DT><B>--gain=</B><I>gainmode/gainfactor</I> <B>-G</B><I>gainmode/gainfactor</I>
 
 <DD>
-<I>gainmode/gainfactor</I>
 <BR>
 
 This option applies a gain correction to the extracted sidescan data.
@@ -161,15 +158,14 @@ If <I>gainmode</I> = 0, no gain correction is applied. If <I>gainmode</I> = 1,
 a time-varying gain (proportional to range squared beyond the bottom
 return) scaled by <I>gainfactor</I> is applied to the sidescan samples.
 Default: <I>gainmode</I> = 0; <I>gainfactor</I> = 1.0.
-<DT><B>-H</B>
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-I</B>
+<DT><B>--input=</B><I>infile</I> <B>-I</B><I>infile</I>
 
 <DD>
-<I>infile</I>
 <BR>
 
 Sets the input file path. If <I>format</I> &gt; 0 (set with the
@@ -186,16 +182,15 @@ data file should be followed by a data format identifier, e.g.:
 
 This program only reads Reson 7k format data files (<B>MBIO</B>
 format 88).
-<DT><B>-L</B>
+<DT><B>--line-root=</B><I>startline/lineroot</I> <B>-L</B><I>startline/lineroot</I>
 
 <DD>
-<I>startline/lineroot</I>
 <BR>
 
 This option sets the starting line number and the output filename root
 used when <B>-R</B> is specified so that data are output according
 to planned survey lines. Default: <I>startline</I> = 1; <I>lineroot</I> = &quot;jstar&quot;.
-<DT><B>-M</B>
+<DT><B>--check-route-bearing -M</B>
 
 <DD>
 <BR>
@@ -204,7 +199,7 @@ This option causes <B>mb7k2jstar</B> to omit data during turns when
 extracting into line files according to a specified set of waypoints
 (<B>-R</B> option). The traces will not be output until the heading is
 within 15 degrees of the next survey line's bearing.
-<DT><B>-O</B>
+<DT><B>--output=</B><I>outfile</I> <B>-O</B><I>outfile</I>
 
 <DD>
 <BR>
@@ -217,10 +212,9 @@ An &quot;.jsf&quot; suffix is used when all Edgetech record types are extracted
 to the output, &quot;.mb132&quot; is used when the low frequency sidescan records are extracted,
 and &quot;.mb133&quot; is used when the high frequency sidescan records are extracted. The record
 types to be extracted are set using the <B>-A</B> option.
-<DT><B>-R</B>
+<DT><B>--route-file=</B><I>routefile</I> <B>-R</B><I>routefile</I>
 
 <DD>
-<I>routefile</I>
 <BR>
 
 This option specifies an <B>mbgrdviz</B> route file containing the intended
@@ -233,10 +227,9 @@ the output Jstar filename (or files if a datalist is being processed) will
 be the input swath filename with an appropriate suffix appended (&quot;.jsf&quot; for
 mixed Jstar files, &quot;.mb132&quot; for low frequency sidescan only files, and &quot;.mb133&quot;
 for high frequency sidescan only files).
-<DT><B>-S</B>
+<DT><B>--smooth=</B><I>smooth</I> <B>-S</B><I>smooth</I>
 
 <DD>
-<I>smooth</I>
 <BR>
 
 This option applies smoothing to the extracted sidescan trace samples.
@@ -245,20 +238,19 @@ average of the samples within <I>smooth</I> samples on either side.
 If <I>smooth</I> is negative, each sample is replaced by the RMS value
 of the samples within <I>|smooth|</I> samples on either side. Default:
 <I>smooth</I> = 0 (no smoothing).
-<DT><B>-T</B>
+<DT><B>--time-shift=</B><I>timeshift</I> <B>-T</B><I>timeshift</I>
 
 <DD>
-<I>timeshift</I>
 <BR>
 
 This option shifts the timestamps of the extracted data by <I>timeshift</I>
 seconds. Default: <I>timeshift</I> = 0.0.
-<DT><B>-V</B>
+<DT><B>--verbose -V</B>
 
 <DD>
 This option increases the verbosity of <B>mb7k2jstar</B>, causing it
 to print out messages regarding its progress to stdout.
-<DT><B>-X</B>
+<DT><B>--flip-sidescan -X</B>
 
 <DD>
 This option switches port and starboard sidescan channels.

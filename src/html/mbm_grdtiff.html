@@ -115,19 +115,8 @@ The value <I>azimuth</I>
 is the azimuth in degrees from north from which the data is illuminated.
 The value <I>elevation</I> is the elevation of the illumination
 in degrees from horizontal.
-Defaults: <I>magnitude</I> = 0.2; <I>azimuth</I> = 0.0;
+Defaults: <I>magnitude</I> = 1.0; <I>azimuth</I> = 0.0;
 <I>elevation</I> = 30.0;
-<DT><B>-C</B>
-
-<DD>
-<I>contour_control</I>
-<BR>
-
-If <B>-C</B> is given alone, it causes unannotated contours
-to be drawn using a contour interval calculated from the
-data. The user may also use <I>contour_control</I>
-to specify the contour interval. See the COMPLETE DESCRIPTION OF OPTIONS
-section below for a more complete discussion.
 <DT><B>-D</B>
 
 <DD>
@@ -231,17 +220,6 @@ or using an intensity file (<B>-K</B> and <B>-G</B><I>3</I> options), then
 setting <I>shade</I> = 1 will cause the shading to be equalized.
 Using <B>-S</B><I>0/1</I> will equalize the shading without
 equalizing the color table.
-<DT><B>-U</B>
-
-<DD>
-<I>orientation</I>
-<BR>
-
-Normally the orientation of the plot (portrait or landscape)
-is selected automatically so as to maximize the plot scale.
-The <B>-U</B> option allows the user to set the plot orientation. If
-<I>orientation</I> = 1, a portrait plot will be produced; if
-<I>orientation</I> = 2, a landscape plot will be produced.
 <DT><B>-V</B>
 
 <DD>
@@ -290,17 +268,20 @@ color scheme will be used for the plot
 <DT><B>-A</B>
 
 <DD>
-<I>magnitude[/azimuth]</I>
+<I>magnitude[/azimuth/elevation]</I>
 <BR>
 
 Sets the parameters which control the
 synthetic illumination of the gridded data (shaded relief).
 The value <I>magnitude</I>
 is an effective vertical exaggeration which modulates the intensity of
-the shading; typical values are in the 0.1 to 0.5 range.
+the shading; typical values are in the 0.1 to 10 range.
 The value <I>azimuth</I>
-is the azimuth from which the data is illuminated.
-Defaults: <I>magnitude</I> = 0.2; <I>azimuth</I> = 0.0;
+is the azimuth in degrees from north from which the data is illuminated.
+The value <I>elevation</I> is the elevation of the illumination
+in degrees from horizontal.
+Defaults: <I>magnitude</I> = 1.0; <I>azimuth</I> = 0.0;
+<I>elevation</I> = 30.0;
 <DT><B>-D</B>
 
 <DD>
@@ -560,7 +541,7 @@ in the background before <B>mbm_grdtiff</B> exits.
 <DT><B>-Y</B>
 
 <DD>
-Normally, <B>mbm_grdplot</B> generates nicely rounded numbers
+Normally, <B>mbm_grdtiff</B> generates nicely rounded numbers
 for the boundaries of the color palette. Often, the resulting
 color bounds extend well outside the range of the gridded data.
 This option causes the minimum and maximum color boundaries to

@@ -330,6 +330,9 @@ typedef struct mbtrnpp_cfg_s{
     // platform file name
     mb_path platform_file;
 
+    // platform target sensor
+    int platform_target_sensor;
+
     // platform file enable
     bool use_platform_file;
 
@@ -652,8 +655,8 @@ s=NULL;\
 #define SONAR_SIM_HOST "localhost"
 
 #define MBTPP 1
-#define OUTPUT_FLAG_SET(m)  ((m&mbtrn_cfg->output_flags)==0 ? false : true)
-#define OUTPUT_FLAG_CLR(m)  ((m&mbtrn_cfg->output_flags)==0 ? true : false)
+#define OUTPUT_FLAG_SET(m)  ((m & mbtrn_cfg->output_flags)==0 ? false : true)
+#define OUTPUT_FLAG_CLR(m)  ((m & mbtrn_cfg->output_flags)==0 ? true : false)
 #define OUTPUT_FLAGS_ZERO() ((mbtrn_cfg->output_flags==0) ? true : false)
 
 #define MBTRN_CFG_NAME    "mbtrn.cfg"
@@ -733,8 +736,8 @@ s=NULL;\
 #define MBTRNPP_STAT_PERIOD_SEC ((double)20.0)
 
 
-mbtrnpp_opts_t mbtrn_opts_s, *mbtrn_opts=&mbtrn_opts_s;
-mbtrnpp_cfg_t mbtrn_cfg_s, *mbtrn_cfg=&mbtrn_cfg_s;
+mbtrnpp_opts_t mbtrn_opts_s, *mbtrn_opts = &mbtrn_opts_s;
+mbtrnpp_cfg_t mbtrn_cfg_s, *mbtrn_cfg = &mbtrn_cfg_s;
 
 static char program_name[] = "mbtrnpp";
 
@@ -3555,9 +3558,12 @@ int main(int argc, char **argv) {
 #endif // WITH_MBTNAV
 
   /* load platform definition if specified */
-  if (mbtrn_cfg->use_platform_file == true) {
+  if (mbtrn_cfg->use_platform_file) {
     status = mb_platform_read(mbtrn_cfg->verbose, mbtrn_cfg->platform_file, (void **)&platform, &error);
-    if (status == MB_FAILURE) {
+    if (status == MB_SUCCESS) {
+      fprintf(stderr, "\nRead platform file: %s\n", mbtrn_cfg->platform_file);
+    }
+    else {
       error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nUnable to open and parse platform file: %s\n", mbtrn_cfg->platform_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3583,6 +3589,10 @@ int main(int argc, char **argv) {
       mbtrn_cfg->target_sensor = platform->source_bathymetry;
     if (mbtrn_cfg->target_sensor >= 0)
       sensor_target = &(platform->sensors[mbtrn_cfg->target_sensor]);
+    
+    if (mbtrn_cfg->verbose > 0) {
+    	status = mb_platform_print(mbtrn_cfg->verbose, (void *)platform, &error);
+    }
   }
 
   /* load tide model if specified */
@@ -4094,6 +4104,10 @@ int main(int argc, char **argv) {
         status = mb_register_array(mbtrn_cfg->verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double),
                                    (void **)&ping[i].ssalongtrack, &error);
     }
+    
+    if (platform != NULL) {
+			status = mb_set_platform(mbtrn_cfg->verbose, imbio_ptr, (void *)platform, &error);
+    }
 
     /* if option for AUV Sentry is set, then set flag in mb_io_ptr structure that
         will apply the Sentry sensordepth kluge to the multibem data - the sensordepth
@@ -4184,6 +4198,7 @@ int main(int argc, char **argv) {
       }
 
       if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
+
         ping[idataread].count = ndata;
         ndata++;
         n_pings_read++;
@@ -4223,6 +4238,7 @@ int main(int argc, char **argv) {
                                 &ping[idataread].pitch, &ping[idataread].heave, &error);
         status = mb_extract_altitude(mbtrn_cfg->verbose, imbio_ptr, store_ptr, &kind, &ping[idataread].sensordepth,
                                      &ping[idataread].altitude, &error);
+
 
         // apply static nav offset if specified
         if (mbtrn_cfg->random_offset_enable) {
@@ -4878,10 +4894,15 @@ int main(int argc, char **argv) {
     fclose(output_trn_fp);
 #endif
 
-    // release coordinate transformation resources
-    if(mbtrn_cfg->use_proj) {
-        mb_proj_free(mbtrn_cfg->verbose, &pjptr, &error);
-    }
+	// deallocate platform
+	if (mbtrn_cfg->use_platform_file && platform != NULL) {
+		status = mb_platform_deall(mbtrn_cfg->verbose, (void **)&platform, &error);
+	}
+
+	// deallocate coordinate transformation resources
+	if(mbtrn_cfg->use_proj) {
+			mb_proj_free(mbtrn_cfg->verbose, &pjptr, &error);
+	}
 
   /* deallocate arrays allocated with mb_mallocd() */
   if (median_filter_soundings != NULL) {
@@ -4901,11 +4922,10 @@ int main(int argc, char **argv) {
   MEM_CHKINVALIDATE(mbtrn_cfg->trn_mission_id);
 
   /* check memory */
-    status = mb_memory_list(mbtrn_cfg->verbose, &error);
+  status = mb_memory_list(mbtrn_cfg->verbose, &error);
 
   /* give the statistics */
   if (mbtrn_cfg->verbose >= 1) {
-  }
 
     mlog_tprintf(mbtrnpp_mlog_id, "uptime,%0.3lf\n", app_stats->uptime);
     mlog_tprintf(mbtrnpp_mlog_id,"i,end session\n");
@@ -4913,6 +4933,7 @@ int main(int argc, char **argv) {
     mlog_tprintf(netif_log(trnsvr),"i,end session\n");
     mlog_tprintf(netif_log(trnusvr),"i,end session\n");
     mlog_tprintf(netif_log(trnumsvr),"i,end session\n");
+  }
 
   fprintf(stderr, "\nExiting program - error mode:[%d]\n", error);
 

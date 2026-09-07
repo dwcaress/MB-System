@@ -41,7 +41,7 @@ Additional Options:
 [<B>-B</B><I>tickinfo</I> 
 <B>-J</B><I>projection</I>[<I>/scale | width</I>]
 <B>-L</B><I>title</I>[<I>:xlabel:ylabel</I>] <B>-M</B><I>misc</I>
-<B>-Q</B> <B>-R</B><I>w/e/s/n</I> <B>-X</B> <B>-Z</B>]
+<B>-N</B> <B>-Q</B> <B>-R</B><I>w/e/s/n</I> <B>-T</B> <B>-X</B> <B>-Z</B>]
 <P>
 Miscellaneous Options:
 <BR>
@@ -50,7 +50,11 @@ Miscellaneous Options:
 <B>-MGL</B><I>scalebar</I>
 <B>-MGT</B><I>x/y/size/angle/font/just/text</I>
 <B>-MGU</B>[<I>/dx/dy/</I>][<I>label</I>]
-<B>-MIE</B><I>resolution</I> <B>-MIT</B><I>type</I> ]
+<B>-MIE</B><I>resolution</I> <B>-MIT</B><I>type</I>
+<B>-MTC</B><I>fill</I> <B>-MTD</B><I>resolution</I>
+<B>-MTG</B><I>fill</I> <B>-MTI</B><I>river</I>
+<B>-MTN</B><I>border</I> <B>-MTS</B><I>fill</I>
+<B>-MTW</B><I>pen</I> ]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -106,7 +110,7 @@ If a Postscript viewer is not explicitly defined by either method, then the user
 default program for viewing Postscript is invoked.
 Invoking the plot generation shellscript with
 a <B>-N</B> command line argument suppresses the screen
-display of the plot. The <B>-MIE</B> and <B>-MIP</B> arguments cause the
+display of the plot. The <B>-MIE</B> and <B>-MIT</B> arguments cause the
 plot generation shellscript to render the Postscript map onto an image in the
 specified format.
 <P>
@@ -529,9 +533,9 @@ alone, no x or y-axis labels will be provided.
 A series of &quot;miscellaneous&quot; options are provided which are
 given as <B>-M</B> followed by a two character identifier, followed
 by any other parameters associated with that option.
-The <B>-M</B> options may be strung together separated by
-colons, e.g. &quot;-MGQ100:GU:CA200/10&quot;, which is equivalent to
-&quot;-MGQ -MGU -MCA200/10&quot;.
+Multiple miscellaneous options are specified by repeating the
+<B>-M</B> flag once for each one, e.g. &quot;-MGD ANOT_FONT/Courier -MTC200
+-MTW1p&quot;.
 <DT><B>-MGD</B>
 
 <DD>
@@ -634,6 +638,86 @@ multi-page PDF (<B>-MIT</B><I>F</I>), JPEG (<B>-MIT</B><I>j</I>),
 PNG (<B>-MIT</B><I>g</I>), transparent PNG (<B>-MIT</B><I>G</I>),
 PPM (<B>-MIT</B><I>m</I>,  SVG (<B>-MIT</B><I>s</I>, or TIFF (<B>-MIT</B><I>t</I>.
 The default image format is JPEG.
+<DT><B>-MTC</B>
+
+<DD>
+<I>fill</I>
+<BR>
+
+Coastline plotting option.
+Set the shade (0-255) or color (r/g/b) used to fill lakes [Default is
+the fill chosen for &quot;wet&quot; areas (<B>-MTS</B>)]. Setting this option also
+turns on coastline plotting as if <B>-T</B> had been given.
+<DT><B>-MTD</B>
+
+<DD>
+<I>resolution</I>
+<BR>
+
+Coastline plotting option.
+Selects the resolution of the coastline data set to use ((f)ull,
+(h)igh, (i)ntermediate, (l)ow, and (c)rude). [Default is f].
+<DT><B>-MTG</B>
+
+<DD>
+<I>fill</I>
+<BR>
+
+Coastline plotting option.
+Set the shade (0-255) or color (r/g/b) used to fill &quot;dry&quot; (land) areas
+[Default is 200 if <B>-T</B> is given but no other coastline options are
+specified]. Setting this option also turns on coastline plotting as if
+<B>-T</B> had been given.
+<DT><B>-MTI</B>
+
+<DD>
+<I>river</I>
+<BR>
+
+Coastline plotting option.
+Draw rivers. Specify the type of rivers to be drawn using the codes
+accepted by the <B>pscoast</B> <B>-I</B> option. Setting this option also
+turns on coastline plotting as if <B>-T</B> had been given.
+<DT><B>-MTN</B>
+
+<DD>
+<I>border</I>
+<BR>
+
+Coastline plotting option.
+Draw political boundaries. Specify the type of boundary using the codes
+accepted by the <B>pscoast</B> <B>-N</B> option. This option may be given
+repeatedly to draw more than one type of boundary. Setting this option
+also turns on coastline plotting as if <B>-T</B> had been given.
+<DT><B>-MTS</B>
+
+<DD>
+<I>fill</I>
+<BR>
+
+Coastline plotting option.
+Set the shade (0-255) or color (r/g/b) used to fill &quot;wet&quot; (water) areas.
+Setting this option also turns on coastline plotting as if <B>-T</B> had
+been given.
+<DT><B>-MTW</B>
+
+<DD>
+<I>pen</I>
+<BR>
+
+Coastline plotting option.
+Sets the pen used to draw the coastline itself [Default is 1p if
+<B>-T</B> is given but no other coastline options are specified].
+Setting this option also turns on coastline plotting as if <B>-T</B> had
+been given.
+<DT><B>-N</B>
+
+<DD>
+Sets the default value of the <B>M</B> (multiple data segments) file
+parameter (see <B>-I</B> above) to &quot;on&quot; for all input files. This is
+equivalent to appending the <B>M</B> parameter to every <B>-I</B> file
+argument, so that lines containing a lone &quot;&gt;&quot; in an input file are
+treated as a break between plotted data segments.
 <DT><B>-O</B>
 
 <DD>
@@ -823,6 +907,16 @@ unchanged.)
 
 <DD>
 cross.  Give length in inch.
+<DT><B>-T</B>
+
+<DD>
+If <B>-T</B> is given, it causes a coastline to be drawn on the map using
+the <B>GMT</B> module <B>pscoast</B>. The default is to draw the coastline
+as the thinnest possible line. To exercise greater control of the
+coastline plotting, including color fill of &quot;wet&quot; and &quot;dry&quot; areas and
+display of lakes, rivers, and political boundaries, use the
+<B>-MTC</B>, <B>-MTD</B>, <B>-MTG</B>, <B>-MTI</B>,
+<B>-MTN</B>, <B>-MTS</B>, and <B>-MTW</B> options described above.
 <DT><B>-U</B>
 
 <DD>

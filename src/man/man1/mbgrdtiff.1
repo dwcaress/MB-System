@@ -7,8 +7,10 @@ located GeoTIFF image from a GMT grid file.
 Version 5.0
 
 .SH SYNOPSIS
-\fBgmt mbgrdtiff\fP \fB\-C\fIcptfile\fP \fB\-I\fIgrdfile\fP
-\fB\-O\fItiff_file\fP [\fB\-H\fP \fB\-K\fIintensfile\fP \fB-N\fInudge_x/nudge_y\fP \fB\-V -W\fP]
+\fBgmt mbgrdtiff\fP \fB\-C\fIcptfile\fP \fB\-I\fIgrdfile\fP \fB\-J\fIparameters\fP
+\fB\-O\fItiff_file\fP [\fB\-E\fP[\fBi\fP|\fIdpi\fP]] [\fB\-G\fP[\fBf\fP|\fBb\fP]\fIrgb\fP]
+[\fB\-I\fIintensfile\fP|\fIvalue\fP] [\fB\-M\fP] [\fB\-N\fInudge_x/nudge_y\fP]
+[\fB\-Q\fP] [\fB\-R\fIwest/east/south/north\fP] [\fB\-V\fP]
 
 .SH DESCRIPTION
 \fBmbgrdtiff\fP is a plug-in module to generate a Geographically located

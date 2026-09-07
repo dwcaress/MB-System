@@ -11,13 +11,13 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbotps</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  30 August 2025 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  2 September 2026 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
 <H2>NAME</H2>
 
-<B>mbotps</B> - Predicts tides using the OSU Tidal Prediction Software (OTPS) distribution.
+<B>mbotps</B> - Predicts tides using tidal prediction methods and data derived from the OSU Tidal Prediction Software (OTPS) distribution.
 <P>
 <A NAME="lbAC">&nbsp;</A>
 <H2>VERSION</H2>
@@ -27,10 +27,10 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbotps</B> 
+<B>mbotps</B>
 <BR>
 
-[ 
+[
 <BR>
 
 <B>--input</B>=<I>datalist</I> {<B>-I</B><I>datalist</I>}
@@ -81,7 +81,7 @@ Version 5.0
 <B>--help</B> {<B>-H</B>}
 <BR>
 
-<B>--verbose</B> {<B>-V</B>} 
+<B>--verbose</B> {<B>-V</B>}
 <BR>
 
 ]
@@ -90,14 +90,26 @@ Version 5.0
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
-<B>MBotps</B> is a utility that predicts tides using software and global tidal models available 
-from Gary Egbert and Svetlana Erofeeva of Oregon State University (OSU) at:
+<B>MBotps</B> is a utility that predicts tides using tidal prediction methods and global
+tidal models developed by Gary Egbert and Lana Erofeeva of Oregon State University (OSU),
+whose OSU Tidal Prediction Software (OTPS) and TPXO tidal models are available at:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="https://www.tpxo.net">https://www.tpxo.net</A>
-In order for <B>mbotps</B> to function, users must separately obtain and install the
-OSU Tidal Prediction Software (OTPS) and the associated TPXO tidal models. Both software
-and models are made available at no cost for academic, research or other noncommercial use, 
-but must be licensed for a fee for commercial use. Instructions (current as of 2024) are 
-given below for installing the software and a model. 
+<P>
+Unlike earlier versions of this program (still available, deprecated, as <B><A HREF="mbotpsold.html">mbotpsold</A></B>(1)),
+<B>mbotps</B> does not install, build, or run any part of the OTPS Fortran software. Instead
+it implements the same harmonic tidal prediction methods natively - equilibrium tidal
+arguments and nodal corrections, inference of minor constituents from major ones, and
+bilinear interpolation of the tidal atlas grids - reading OTPS &quot;atlas&quot; format tide model
+binary files directly. This removes the need to separately obtain, install, and compile
+OTPS's predict_tide program, which previously required a working Fortran compiler and was
+one of the more error-prone steps in setting up <B>mbotps</B>.
+<P>
+Users must still separately obtain and install one or more OTPS tidal models (the binary
+model data files themselves); these remain outside the <B>MB-System</B> installation, at
+the location given by the <B>--otps-path</B> option. Model data are made available by OSU
+at no cost for academic, research, or other noncommercial use, but must be licensed for a
+fee for commercial use. Instructions for obtaining and installing a tidal model are given
+below.
 <P>
 <B>MBotps</B> can be operated in two modes. First, users may use the <B>-R</B>,
 <B>-B</B>, and <B>-E</B> options to specify a location and the beginning and end times of
@@ -123,160 +135,48 @@ a correction to the output tide models, whether at a location specified with the
 <B>-I</B><I>datalist</I> option.
 <P>
 <A NAME="lbAF">&nbsp;</A>
-<H2>OBTAINING AND INSTALLING OTPS AND TXPO MODELS</H2>
+<H2>ATTRIBUTION AND LICENSING OF TIDAL PREDICTION METHODS</H2>
+
+The tidal prediction methods used by <B>mbotps</B> - equilibrium tidal arguments and nodal
+corrections, inference of minor tidal constituents from major ones, and the OTPS binary
+tidal atlas file format itself - are derived from the OSU Tidal Prediction Software
+(OTPS), authored by:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Gary&nbsp;Egbert&nbsp;&amp;&nbsp;Lana&nbsp;Erofeeva
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;College&nbsp;of&nbsp;Earth,&nbsp;Ocean,&nbsp;and&nbsp;Atmospheric&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;Oregon&nbsp;State&nbsp;University,&nbsp;Corvallis,&nbsp;OR&nbsp;97331-5503
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="https://www.tpxo.net/">https://www.tpxo.net/</A>
+<BR>
+
+The equilibrium argument and nodal correction formulas, and the minor-constituent
+inference method, were originally supplied to OTPS by Richard Ray (NASA/GSFC).
+<P>
+OTPS (both its source code and the TPXO tidal model data it works with) is copyrighted
+by Oregon State University and distributed under a royalty-free, nonexclusive license for
+academic, research, and other noncommercial use, which permits modification and
+redistribution of the software subject to conditions including attribution of the
+original copyright; see OTPS's own COPYRIGHT file for the complete license text.
+<B>MB-System</B>'s native implementation of these methods (in mb_otps_predict.c and
+mb_otps_predict.h) is a transcription and reimplementation of OTPS's numerical methods
+in C, not a copy of the OTPS Fortran source code, and is provided as a derivative work
+under that same OSU license.
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OBTAINING AND INSTALLING A TPXO TIDAL MODEL</H2>
 
 <P>
-The OSU Tidal Prediction Software (OTPS) can be downloaded from 
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="https://www.tpxo.net/otps">https://www.tpxo.net/otps</A>
-<BR>
-
-Three versions of the software are available, the first of which consists of Fortran 90 programs
-that work with OTPS binary model files, the second of which is a <B>MATLAB</B> package also working
-with the binary model files, and the third of which is Fortran 90 programs that work with
-netCDF format model files. These instructions discuss only the first binary file case that 
-has been tested with <B>MB-System</B>, and present only one of many possible installation
-scenarios (but this case fits MB-System default settings).
+<B>mbotps</B> reads OTPS &quot;atlas&quot; format tidal model binary data files directly; it does
+not require the OTPS software distribution or a Fortran compiler to be installed at all.
+Only a tidal model's data files are needed, obtained separately from OSU.
 <P>
-On the OTPS web page, use the &quot;Download OTPS&quot; button to download the OTPS software 
-distribution in the form of a file named &quot;OTPS.tar.Z&quot;. The MB-System default settings 
-include locating the OTPS installation in the directory /usr/local/src/ . Move the 
-distribution file to this directory:
-<BR>
-
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mv&nbsp;OTPS.tar.Z&nbsp;/usr/local/src
-<BR>
-
-If the user does not have write privileges in /usr/local/src, then it may be necessary to 
-operate in &quot;sudo&quot; mode (which assumes the user is a system administrator):
-<BR>
-
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sudo&nbsp;mv&nbsp;OTPS.tar.Z&nbsp;/usr/local/src
-<P>
-Move to /usr/local/src and unpack the distribution:
-<BR>
-
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cd&nbsp;/usr/local/src
-<BR>
-
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gunzip&nbsp;OTPS.tar.Z
-<BR>
-
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tar&nbsp;xvf&nbsp;OTPS.tar
-or
-<BR>
-
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;uncompress&nbsp;OTPS.tar.Z
-<BR>
-
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tar&nbsp;xvf&nbsp;OTPS.tar
-<P>
-This will unpack a directory called OTPS. Moving into the directory and listing the
-contents:
-<BR>
-
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cd&nbsp;OTPS
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ls
-<BR>
-
-yields:
-<BR>
-
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;COPYRIGHT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;makefile*
-<BR>
-
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DATA/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;matlab/
-<BR>
-
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;README&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;predict_tide.f90
-<BR>
-
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;constit.h*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;predict_tide_sample_out
-<BR>
-
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dumsetup&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;setup.atl
-<BR>
-
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;extract_HC.f90*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;setup.inp
-<BR>
-
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;extract_HC_sample_out&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;setup.local
-<BR>
-
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;extract_local_model.f90&nbsp;&nbsp;&nbsp;subs.f90
-<BR>
-
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lat_lon&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time
-<BR>
-
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lat_lon_time
-<BR>
-
-<P>
-The component of OTPS that is required for <B>mbotps</B> is the program predict_tide, which
-must be compiled from the Fortran 90 source file predict_tide.f90. 
-<P>
-On a Linux computer with the GCC compiler suite installed, the gfortran program 
-(a Fortran compiler) is already available, or can be easily installed via apt on Debian
-and Ubuntu or via yum on CentOs or Red Hat:
-<BR>
-
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sudo&nbsp;apt&nbsp;install&nbsp;gfortran
-<BR>
-
-or
-<BR>
-
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sudo&nbsp;yum&nbsp;install&nbsp;gcc-gfortran
-<P>
-On a Mac, the LLVM compiler suite installed with the XCode development tools
-does not include a Fortran compiler, and so it is necessary to install GCC as well.
-Assuming that a Mac user is already installing prerequisite packages for <B>MB-System</B>
-using the MacPorts package manager, then <B>gfortran</B> can be installed via the
-commands:
-<BR>
-
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sudo&nbsp;port&nbsp;install&nbsp;gcc14&nbsp;+gfortran
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sudo&nbsp;port&nbsp;select&nbsp;--set&nbsp;gcc&nbsp;mp-gcc14
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sudo&nbsp;ln&nbsp;-s&nbsp;/opt/local/bin/gfortran-mp-14&nbsp;gfortran
-<BR>
-
-Note that the version of GCC will continue to increment over time, and so may no longer
-be GCC 14.
-The last command links the installed Fortran compiler to the name &quot;gfortran&quot; (to allow
-the use of the OTPS makefile without modification). 
-<P>
-In the OTPS directory, apply the Fortran compiler using the make utility:
-<BR>
-
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sudo&nbsp;make&nbsp;predict_tide
-<BR>
-
-The program predict_tide now exists in a location known to <B>mbotps</B>.
-<P>
-The OTPS directory described above includes a directory named DATA, which has the following
-contents:
-<BR>
-
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>HAW/<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Model_tpxo9.v2<BR>
-<BR>
-
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Model_Hawaii<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Model_tpxo9_atlas_v5<BR>
-<BR>
-
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Model_tpxo10.v2<TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>load_file<BR>
-<BR>
-
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Model_tpxo10_atlas<BR>
-<BR>
-
-Here the files with names beginning with &quot;Model_&quot; describe different available tidal models,
-each of which consists of a directory containing many model files. In order to install
-a tidal model, the associated directory and files must be obtained and placed inside
-the DATA directory. We recommend use of the TPXO10-atlas-v2 bin model, which combines 
-a global model with higher resolution local models for many coastal areas. This is 
-described in the Model_tpxo10_atlas file. 
-<P>
-The tidal model must be obtained from OSU via instructions on the web pages:
+A tidal model can be requested from OSU via the web pages:
 <BR>
 
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="https://www.tpxo.net/global">https://www.tpxo.net/global</A>
@@ -285,8 +185,8 @@ The tidal model must be obtained from OSU via instructions on the web pages:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="https://www.tpxo.net/tpxo-products-and-registration">https://www.tpxo.net/tpxo-products-and-registration</A>
 <BR>
 
-Basically, one must request access to a model via email. If approved, you will receive a 
-link to download a directory named TPXO10_atlas_v2 which contains the following files:
+Basically, one must request access to a model via email. If approved, you will receive a
+link to download a directory named e.g. TPXO10_atlas_v2 which contains files named:
 <BR>
 
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;grid_tpxo10_atlas_30_v2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;u_2n2_tpxo10_atlas_30_v2
@@ -337,14 +237,44 @@ link to download a directory named TPXO10_atlas_v2 which contains the following 
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h_s2_tpxo10_atlas_30_v2
 <BR>
 
+(<B>mbotps</B> only ever reads the &quot;h_*&quot; elevation files; the &quot;u_*&quot; current/transport
+files and the &quot;grid_*&quot; bathymetry file are not used and need not be present.)
 <P>
-Move the directory TPXO10_atlas_v2 to /usr/local/src/OTPS/DATA/ :
+<B>mbotps</B> expects tidal models to be organized under a directory structure matching
+the OTPS convention: a top-level directory (the <B>--otps-path</B> location, default
+/usr/local/src/otps/) containing a &quot;DATA&quot; subdirectory. Move the downloaded model
+directory into place there, e.g.:
 <BR>
 
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;mv&nbsp;TPXO10_atlas_v2&nbsp;/usr/local/src/OTPS/DATA/
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;mv&nbsp;TPXO10_atlas_v2&nbsp;/usr/local/src/otps/DATA/
 <BR>
 
-The tidal model should now be installed, and <B>mbotps</B> should access it successfully.
+That alone is enough for <B>mbotps</B> to find and use the model: pass the model
+directory's own name as <B>--otps-model</B> (e.g. <B>--otps-model=TPXO10_atlas_v2</B>),
+and <B>mbotps</B> will scan it directly for the &quot;h_*&quot; elevation files it needs. No
+&quot;Model_&quot;-prefixed control file is required.
+<P>
+Alternatively, a &quot;Model_&quot;-prefixed control file (e.g. &quot;Model_tpxo10_atlas&quot;) may be used
+instead, exactly as with the original OTPS software: this is a small text file, one per
+installed model, containing three lines naming the elevation, transport, and bathymetry
+files using a &quot;*&quot; in place of the constituent name, e.g.:
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;DATA/TPXO10_atlas_v2/h_*_tpxo10_atlas_30_v2
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;DATA/TPXO10_atlas_v2/u_*_tpxo10_atlas_30_v2
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;DATA/TPXO10_atlas_v2/grid_tpxo10_atlas_30_v2
+<BR>
+
+Such a control file, if present, takes precedence over scanning the model directory
+directly, and lets <B>--otps-model</B> be set to a short name (e.g. &quot;tpxo10_atlas&quot;)
+that need not match the model directory's own name. This is mainly useful for
+compatibility with an existing OTPS installation that already has these files (they
+are part of the OTPS software distribution, not the tidal model data downloads).
+<P>
 This can be tested by running <B>mbotps</B> with the --help option:
 <P>
 <BR>
@@ -352,7 +282,7 @@ This can be tested by running <B>mbotps</B> with the --help option:
 Program mbotps
 <BR>
 
-MB-system Version 5.8.3beta03
+MB-system Version 5.8.3beta16
 <BR>
 
 <P>
@@ -439,7 +369,7 @@ Checking for available OTPS tide models
 <BR>&nbsp;&nbsp;Default&nbsp;OTPS&nbsp;model&nbsp;name:&nbsp;tpxo10_atlas
 <BR>
 
-<BR>&nbsp;&nbsp;Specified&nbsp;OTPS&nbsp;model&nbsp;name:&nbsp;
+<BR>&nbsp;&nbsp;Specified&nbsp;OTPS&nbsp;model&nbsp;name:
 <BR>
 
 <BR>&nbsp;&nbsp;Possible&nbsp;OTPS&nbsp;tidal&nbsp;models:
@@ -457,10 +387,14 @@ Checking for available OTPS tide models
 Using OTPS tide model:  tpxo10_atlas
 <BR>
 
+Opened OTPS atlas model 'tpxo10_atlas': 10800 x 5401 grid, 15 constituents: m2 s2 k1 o1 n2 p1 k2 q1 2n2 mf mm m4 ms4 mn4 s1
+<BR>
+
 <P>
-The output of <B>mbotps</B> indicates that the desired tidal model is available.
+The output of <B>mbotps</B> indicates that the desired tidal model is available and was
+opened directly (no external predict_tide program is invoked).
 <P>
-<A NAME="lbAG">&nbsp;</A>
+<A NAME="lbAH">&nbsp;</A>
 <H2>MB-SYSTEM AUTHORSHIP</H2>
 
 David W. Caress
@@ -486,6 +420,9 @@ Christian do Santos Ferreira
 
 <BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
 <P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>OPTIONS</H2>
+
 <DL COMPACT>
 <DT><B>--input=</B><I>datalist</I>
 
@@ -552,17 +489,11 @@ calculated.
 <DD>
 <BR>
 
-This option sets the format of the tide station data in the file specified using
-the <B>-N</B><I>tidestationfile</I> option. The tide station data may be in one of
-four ASCII, space delimited, table formats:
-<BR>&nbsp;&nbsp;<I>tidestationformat</I>=1:&nbsp;format&nbsp;is&nbsp;&lt;time_d&nbsp;tide&gt;
-<BR>&nbsp;&nbsp;<I>tidestationformat</I>=2:&nbsp;format&nbsp;is&nbsp;&lt;yr&nbsp;mon&nbsp;day&nbsp;hour&nbsp;min&nbsp;sec&nbsp;tide&gt;
-<BR>&nbsp;&nbsp;<I>tidestationformat</I>=3:&nbsp;format&nbsp;is&nbsp;&lt;yr&nbsp;jday&nbsp;hour&nbsp;min&nbsp;sec&nbsp;tide&gt;
-<BR>&nbsp;&nbsp;<I>tidestationformat</I>=4:&nbsp;format&nbsp;is&nbsp;&lt;yr&nbsp;jday&nbsp;daymin&nbsp;sec&nbsp;tide&gt;
-<BR>
-
-Note that in format 1 the value time_d = decimal seconds since 1/1/1970 and that
-format 4 the value daymin = decimal minutes since the start of day.
+This option sets the format used to write the output tidal model.
+If <I>format_id</I>=2, each output line has the format &lt;yr mon day hour min sec tide&gt;.
+Any other value (<I>format_id</I>=1, 3, or 4) produces output lines with the
+format &lt;time_d tide&gt;, where time_d is the decimal seconds since 1/1/1970.
+Default: <I>format_id</I> = 2.
 <DT><B>--interval</B>=<I>interval</I>
 
 <DD>
@@ -589,13 +520,13 @@ This option sets the ending time for the output tidal model
 
 Sets the filename of the tide station data file used to correct the output tide
 model.
-<DT><B>--tide-station-position</B>=<I>lon/lat</I>
+<DT><B>--tide-station-position=</B><I>lon/lat</I>
 
 <DD>
 <BR>
 
 Sets the longitude and latitude position of the tide station from which the data
-specified with the <B>\--tide-station-file</B>=<I>fItidestationfile</I>.
+specified with the <B>--tide-station-file</B> option were obtained.
 <DT><B>--tide-station-format</B>=<I>format_id</I>
 
 <DD>
@@ -617,17 +548,21 @@ format 4 the value daymin = decimal minutes since the start of day.
 <DD>
 <BR>
 
-Sets the name of the OTPSnc tidal model to be used. This model must be part of
-the local OTPSnc installation. Examples include &quot;tpxo7.2&quot; and &quot;altas&quot;.
+Sets the name of the OTPS tidal model to be used. This model must be part of
+the local OTPS model installation at the location given by <B>--otps-path</B>,
+either as a &quot;Model_&quot;-prefixed control file (e.g. &quot;tpxo9_atlas_v5&quot; for
+&quot;Model_tpxo9_atlas_v5&quot;) or as the name of a model directory found directly
+under DATA/ (e.g. &quot;TPXO10_atlas_v2&quot;); see OBTAINING AND INSTALLING A TPXO
+TIDAL MODEL above.
 Default: &quot;tpxo10_atlas&quot;
 <DT><B>--otps-path</B>=<I>path</I>
 
 <DD>
 <BR>
 
-Sets the path to the local installation of OTPS, which in turn defines the
-location of the program <B>predict_tide</B> called by <B>mbotps</B> and
-the tide model to be used by <B>predict_tide</B>.
+Sets the path to the local installation of OTPS tidal model data, i.e. the directory
+containing the &quot;DATA&quot; subdirectory with the &quot;Model_&quot;-prefixed control files and the
+tidal model data files themselves. Default: /usr/local/src/otps
 <DT><B>--help</B>
 
 <DD>
@@ -643,7 +578,7 @@ of its operation and then exit immediately.
 Increases the verbosity of <B>mbotps</B>.
 <P>
 </DL>
-<A NAME="lbAH">&nbsp;</A>
+<A NAME="lbAJ">&nbsp;</A>
 <H2>EXAMPLES</H2>
 
 Suppose one wishes to obtain a tidal model for the location 121W 36N extending
@@ -659,7 +594,7 @@ The shell output looks like:
 Program mbotps
 <BR>
 
-MB-system Version 5.8.3beta03
+MB-system Version 5.8.3beta16
 <P>
 <BR>
 
@@ -672,7 +607,7 @@ Checking for available OTPS tide models
 <BR>&nbsp;&nbsp;Default&nbsp;OTPS&nbsp;model&nbsp;name:&nbsp;tpxo10_atlas
 <BR>
 
-<BR>&nbsp;&nbsp;Specified&nbsp;OTPS&nbsp;model&nbsp;name:&nbsp;
+<BR>&nbsp;&nbsp;Specified&nbsp;OTPS&nbsp;model&nbsp;name:
 <BR>
 
 <BR>&nbsp;&nbsp;Possible&nbsp;OTPS&nbsp;tidal&nbsp;models:
@@ -688,56 +623,13 @@ Checking for available OTPS tide models
 Using OTPS tide model:  tpxo10_atlas
 <BR>
 
-Running: cd /usr/local/src/otps; ./predict_tide
-<P>
-<BR>
-
-<BR>&nbsp;Lat/Lon/Time&nbsp;file:/Users/caress/t30135.txt
-<BR>
-
-<BR>&nbsp;Predict&nbsp;OCEAN&nbsp;tide
-<BR>
-
-<BR>&nbsp;DATA/TPXO10_atlas_v2/h_m2_tpxo10_atlas_30_v2
-<BR>
-
-<BR>&nbsp;Model:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src/otps/DATA/Model_tpxo10_atlas
-<BR>
-
-<BR>&nbsp;Lat&nbsp;limits:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-90.0166702&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;90.0166702&nbsp;&nbsp;&nbsp;&nbsp;
-<BR>
-
-<BR>&nbsp;Lon&nbsp;limits:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.66666675E-02&nbsp;&nbsp;&nbsp;360.016663&nbsp;&nbsp;&nbsp;&nbsp;
-<BR>
-
-<BR>&nbsp;Constituents:&nbsp;m2&nbsp;&nbsp;s2&nbsp;&nbsp;k1&nbsp;&nbsp;o1&nbsp;&nbsp;n2&nbsp;&nbsp;p1&nbsp;&nbsp;k2&nbsp;&nbsp;q1&nbsp;&nbsp;2n2&nbsp;mf&nbsp;&nbsp;mm&nbsp;&nbsp;m4&nbsp;&nbsp;ms4&nbsp;mn4&nbsp;s1&nbsp;&nbsp;
-<BR>
-
-<BR>&nbsp;Predict&nbsp;elevations&nbsp;(m)
-<BR>
-
-<BR>&nbsp;Constituents&nbsp;to&nbsp;include:&nbsp;m2&nbsp;&nbsp;s2&nbsp;&nbsp;k1&nbsp;&nbsp;o1&nbsp;&nbsp;n2&nbsp;&nbsp;p1&nbsp;&nbsp;k2&nbsp;&nbsp;q1&nbsp;&nbsp;2n2&nbsp;mf&nbsp;&nbsp;mm&nbsp;&nbsp;m4&nbsp;&nbsp;ms4&nbsp;mn4&nbsp;s1&nbsp;&nbsp;
-<BR>
-
-<BR>&nbsp;Infer&nbsp;minor&nbsp;constituents&nbsp;except&nbsp;those&nbsp;listed&nbsp;above.
-<BR>
-
-<BR>&nbsp;The&nbsp;grid&nbsp;bathymetry&nbsp;defined&nbsp;in&nbsp;z,&nbsp;u,&nbsp;v&nbsp;-&nbsp;nodes
-<BR>
-
-<BR>&nbsp;Bathymetry&nbsp;at&nbsp;u/v&nbsp;nodes&nbsp;is&nbsp;used&nbsp;to&nbsp;calculate&nbsp;currents
-<BR>
-
-Opening atlas files:m2  s2  k1  o1  n2  p1  k2  q1  2n2 mf  mm  m4  ms4 mn4 s1   done
-<BR>
-
-<BR>&nbsp;Results&nbsp;are&nbsp;in&nbsp;/Users/caress/u30135.txt
+Opened OTPS atlas model 'tpxo10_atlas': 10800 x 5401 grid, 15 constituents: m2 s2 k1 o1 n2 p1 k2 q1 2n2 mf mm m4 ms4 mn4 s1
 <BR>
 
 <P>
 <BR>
 
-Results are really in tide_model.txt
+Results are in tide_model.txt
 <P>
 <P>
 <BR>
@@ -749,25 +641,31 @@ data that look like:
 <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT># Tide model generated by program mbotps<BR>
 <BR>
 
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT># MB-System Version: 5.8.3beta03<BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT># MB-System Version: 5.8.3beta16<BR>
 <BR>
 
 <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT># Tide model generated by program mbotps<BR>
 <BR>
 
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT># which in turn calls OTPS program predict_tide obtained from:<BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT># using tidal prediction methods and data derived from the<BR>
 <BR>
 
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#     <A HREF="http://www.coas.oregonstate.edu/research/po/research/tide/">http://www.coas.oregonstate.edu/research/po/research/tide/</A><BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT># OSU Tidal Prediction Software (OTPS) distribution, see:<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#     <A HREF="https://www.tpxo.net/">https://www.tpxo.net/</A><BR>
 <BR>
 
 <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#<BR>
 <BR>
 
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT># OTPSnc tide model: <BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT># OTPS tide model:<BR>
 <BR>
 
 <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#      tpxo10_atlas<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT># Constituents included: m2  s2  k1  o1  n2  p1  k2  q1  2n2 mf  mm  m4  ms4 mn4 s1<BR>
 <BR>
 
 <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT># Output format:<BR>
@@ -780,12 +678,6 @@ data that look like:
 <BR>
 
 <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT># Run by user &lt;caress&gt; on cpu &lt;RAITT-1121.local&gt; at &lt;Tue Nov 19 21:36:30 2024&gt;<BR>
-<BR>
-
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT># Model:        src/otps/DATA/Model_tpxo10_atlas<BR>
-<BR>
-
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT># Constituents included: m2  s2  k1  o1  n2  p1  k2  q1  2n2 mf  mm  m4  ms4 mn4 s1  <BR>
 <BR>
 
 <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2009 02 21 00 00 00   -0.6780<BR>
@@ -866,7 +758,7 @@ The resulting shell output looks like:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Program&nbsp;mbotps<BR>
 <BR>
 
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB-system&nbsp;Version&nbsp;5.8.3beta03<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MB-system&nbsp;Version&nbsp;5.8.3beta16<BR>
 <BR>
 
 <P>
@@ -881,7 +773,7 @@ The resulting shell output looks like:
 <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  Default OTPS model name: tpxo10_atlas<BR>
 <BR>
 
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  Specified OTPS model name: <BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  Specified OTPS model name:<BR>
 <BR>
 
 <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  Possible OTPS tidal models:<BR>
@@ -893,94 +785,25 @@ The resulting shell output looks like:
 <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>  Number of available OTPS tide models: 1<BR>
 <BR>
 
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><BR>
+<P>
 <BR>
 
 <TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Using OTPS tide model:  tpxo10_atlas<BR>
 <BR>
 
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Running: cd /usr/local/src/otps; ./predict_tide<BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Opened OTPS atlas model 'tpxo10_atlas': 10800 x 5401 grid, 15 constituents: m2 s2 k1 o1 n2 p1 k2 q1 2n2 mf mm m4 ms4 mn4 s1<BR>
 <BR>
 
 <P>
 <BR>
 
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>---------------------------------------<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Model&nbsp;tide&nbsp;for&nbsp;swath&nbsp;data&nbsp;referenced&nbsp;by&nbsp;datalist.mb-1<BR>
 <BR>
 
 <P>
 <BR>
 
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Processing&nbsp;tides&nbsp;for&nbsp;himbb05291.d23.mb121<BR>
-<BR>
-
-<P>
-<BR>
-
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>35602&nbsp;records&nbsp;read&nbsp;from&nbsp;himbb05291.d23.mb121.fnv<BR>
-<BR>
-
-<P>
-<BR>
-
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;Lat/Lon/Time&nbsp;file:tmp_mbotps_llt_7413.txt<BR>
-<BR>
-
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;Constituents&nbsp;to&nbsp;include:&nbsp;m2&nbsp;&nbsp;s2&nbsp;&nbsp;n2&nbsp;&nbsp;k2&nbsp;&nbsp;k1&nbsp;&nbsp;o1&nbsp;&nbsp;p1&nbsp;&nbsp;q1<BR>
-<BR>
-
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;Predict&nbsp;OCEAN&nbsp;tide<BR>
-<BR>
-
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;Interpolate&nbsp;minor&nbsp;constituents<BR>
-<BR>
-
-<P>
-<BR>
-
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;DATA/TPXO10_atlas_v2/h_m2_tpxo10_atlas_30_v2<BR>
-<BR>
-
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;Model:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src/OTPS/DATA/Model_tpxo10_atlas<BR>
-<BR>
-
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;Model&nbsp;is&nbsp;on&nbsp;grid&nbsp;uniform&nbsp;in&nbsp;lat,lon<BR>
-<BR>
-
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;Lat&nbsp;limits:&nbsp;&nbsp;&nbsp;&nbsp;-90.125&nbsp;90.125<BR>
-<BR>
-
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;Lon&nbsp;limits:&nbsp;&nbsp;&nbsp;&nbsp;0.125&nbsp;360.125<BR>
-<BR>
-
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Constituents:&nbsp;m2&nbsp;&nbsp;s2&nbsp;&nbsp;k1&nbsp;&nbsp;o1&nbsp;&nbsp;n2&nbsp;&nbsp;p1&nbsp;&nbsp;k2&nbsp;&nbsp;q1&nbsp;&nbsp;2n2&nbsp;mf&nbsp;&nbsp;mm&nbsp;&nbsp;m4&nbsp;&nbsp;ms4&nbsp;mn4&nbsp;s1&nbsp;&nbsp;
-<BR>
-
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT> Predict elevations (m)<BR>
-<BR>
-
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT> Constituents to include: m2  s2  k1  o1  n2  p1  k2  q1  2n2 mf  mm  m4  ms4 mn4 s1  <BR>
-<BR>
-
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT> Infer minor constituents except those listed above.<BR>
-<BR>
-
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT> The grid bathymetry defined in z, u, v - nodes<BR>
-<BR>
-
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT> Bathymetry at u/v nodes is used to calculate currents<BR>
-<BR>
-
-<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Opening atlas files:m2  s2  k1  o1  n2  p1  k2  q1  2n2 mf  mm  m4  ms4 mn4 s1   done<BR>
-<BR>
-
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;Results&nbsp;are&nbsp;in&nbsp;tmp_mbotps_llttd_7413.txt<BR>
-<BR>
-
-<P>
-<BR>
-
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Results&nbsp;are&nbsp;really&nbsp;in&nbsp;himbb05291.d23.mb121.tde<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>himbb05291.d23.mb121&nbsp;:&nbsp;model&nbsp;tide&nbsp;at&nbsp;412&nbsp;of&nbsp;35602&nbsp;records<BR>
 <BR>
 
 <P>
@@ -995,25 +818,31 @@ The output tide files have the same structure shown above:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Tide&nbsp;model&nbsp;generated&nbsp;by&nbsp;program&nbsp;mbotps<BR>
 <BR>
 
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;MB-System&nbsp;Version:&nbsp;5.8.3beta03<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;MB-System&nbsp;Version:&nbsp;5.8.3beta16<BR>
 <BR>
 
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Tide&nbsp;model&nbsp;generated&nbsp;by&nbsp;program&nbsp;mbotps<BR>
 <BR>
 
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;which&nbsp;in&nbsp;turn&nbsp;calls&nbsp;OTPS&nbsp;program&nbsp;predict_tide&nbsp;obtained&nbsp;from:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;using&nbsp;tidal&nbsp;prediction&nbsp;methods&nbsp;and&nbsp;data&nbsp;derived&nbsp;from&nbsp;the<BR>
 <BR>
 
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://www.coas.oregonstate.edu/research/po/research/tide/">http://www.coas.oregonstate.edu/research/po/research/tide/</A><BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;OSU&nbsp;Tidal&nbsp;Prediction&nbsp;Software&nbsp;(OTPS)&nbsp;distribution,&nbsp;see:<BR>
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="https://www.tpxo.net/">https://www.tpxo.net/</A><BR>
 <BR>
 
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#<BR>
 <BR>
 
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;OTPSnc&nbsp;tide&nbsp;model:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;OTPS&nbsp;tide&nbsp;model:<BR>
 <BR>
 
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tpxo10_atlas<BR>
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Constituents&nbsp;included:&nbsp;m2&nbsp;&nbsp;s2&nbsp;&nbsp;k1&nbsp;&nbsp;o1&nbsp;&nbsp;n2&nbsp;&nbsp;p1&nbsp;&nbsp;k2&nbsp;&nbsp;q1&nbsp;&nbsp;2n2&nbsp;mf&nbsp;&nbsp;mm&nbsp;&nbsp;m4&nbsp;&nbsp;ms4&nbsp;mn4&nbsp;s1<BR>
 <BR>
 
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Output&nbsp;format:<BR>
@@ -1026,12 +855,6 @@ The output tide files have the same structure shown above:
 <BR>
 
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Run&nbsp;by&nbsp;user&nbsp;&lt;caress&gt;&nbsp;on&nbsp;cpu&nbsp;&lt;deitz&gt;&nbsp;at&nbsp;&lt;Tue&nbsp;Nov&nbsp;19&nbsp;17:53:22&nbsp;2024&gt;<BR>
-<BR>
-
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Model:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src/OTPS/DATA/Model_tpxo10_atlas<BR>
-<BR>
-
-<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>#&nbsp;Constituents&nbsp;included:&nbsp;m2&nbsp;&nbsp;s2&nbsp;&nbsp;n2&nbsp;&nbsp;k2&nbsp;&nbsp;k1&nbsp;&nbsp;o1&nbsp;&nbsp;p1&nbsp;&nbsp;q1&nbsp;&nbsp;mf&nbsp;&nbsp;mm&nbsp;&nbsp;m4&nbsp;&nbsp;ms4&nbsp;mn4<BR>
 <BR>
 
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2005&nbsp;10&nbsp;18&nbsp;19&nbsp;01&nbsp;36&nbsp;&nbsp;&nbsp;&nbsp;0.0800<BR>
@@ -1061,7 +884,7 @@ The output tide files have the same structure shown above:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2005&nbsp;10&nbsp;18&nbsp;19&nbsp;09&nbsp;37&nbsp;&nbsp;&nbsp;&nbsp;0.0700<BR>
 <BR>
 
-<BR>&nbsp;
+<P>
 <BR>
 
 In addition to generating *.tde files for each swath file referenced by the
@@ -1072,15 +895,21 @@ using the *.tde file and tide format 2. When <B>mbprocess</B> is run on the same
 datalist, the files will be reprocessed, and the processing will include the
 application of the tide correction to all bathymetry.
 <P>
-<A NAME="lbAI">&nbsp;</A>
+<A NAME="lbAK">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B>mbprocess</B>, <B>mbset</B>
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbotpsold.html">mbotpsold</A></B>(1), <B>mbprocess</B>, <B>mbset</B>
 <P>
-<A NAME="lbAJ">&nbsp;</A>
+<A NAME="lbAL">&nbsp;</A>
 <H2>BUGS</H2>
 
-Installing the OTPS package from OSU is not excessively easy.
+None known. If <B>mbotps</B> cannot find a usable tidal model, obtaining and installing
+one is somewhat involved (see OBTAINING AND INSTALLING A TPXO TIDAL MODEL above), since
+it requires registering with OSU to download TPXO tidal model data. The deprecated
+<B>mbotpsold</B> is retained (in src/deprecated, built only with --enable-deprecated or
+-DbuildDeprecated=ON) as a fallback and as a cross-check against the original OTPS
+Fortran reference implementation (predict_tide), for users who have that program
+already installed.
 <P>
 
 <HR>
@@ -1090,17 +919,19 @@ Installing the OTPS package from OSU is not excessively easy.
 <DT><A HREF="#lbAC">VERSION</A><DD>
 <DT><A HREF="#lbAD">SYNOPSIS</A><DD>
 <DT><A HREF="#lbAE">DESCRIPTION</A><DD>
-<DT><A HREF="#lbAF">OBTAINING AND INSTALLING OTPS AND TXPO MODELS</A><DD>
-<DT><A HREF="#lbAG">MB-SYSTEM AUTHORSHIP</A><DD>
-<DT><A HREF="#lbAH">EXAMPLES</A><DD>
-<DT><A HREF="#lbAI">SEE ALSO</A><DD>
-<DT><A HREF="#lbAJ">BUGS</A><DD>
+<DT><A HREF="#lbAF">ATTRIBUTION AND LICENSING OF TIDAL PREDICTION METHODS</A><DD>
+<DT><A HREF="#lbAG">OBTAINING AND INSTALLING A TPXO TIDAL MODEL</A><DD>
+<DT><A HREF="#lbAH">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAI">OPTIONS</A><DD>
+<DT><A HREF="#lbAJ">EXAMPLES</A><DD>
+<DT><A HREF="#lbAK">SEE ALSO</A><DD>
+<DT><A HREF="#lbAL">BUGS</A><DD>
 </DL>
 <HR>
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 30 August 2025</P></CENTER>
+Last Updated: 2 September 2026</P></CENTER>
 
 <HR>
 <center>

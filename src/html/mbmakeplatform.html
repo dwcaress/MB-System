@@ -396,6 +396,15 @@ Version 5.0
 <B>--sensor-time-latency-model</B>=<I>file</I>
 <BR>
 
+<B>--sensor-flipsign-heading</B>
+<BR>
+
+<B>--sensor-flipsign-roll</B>
+<BR>
+
+<B>--sensor-flipsign-pitch</B>
+<BR>
+
 <B>--sensor-source-bathymetry</B>
 <BR>
 
@@ -1212,7 +1221,7 @@ y is positive forward, and z is positive up. Roll is positive starboard up, pitc
 positive forward up, and azimuth is positive clockwise from forward. Generally one sensor
 has zero offsets and thus serves as the platform origin. For sensors with two elements
 (e.g. bistatic multibeam sonars with separate transmit and receive arrays, or stereo
-camera rigs with two cameras), two <B>--sensor_offsets</B> calls are made. In the case
+camera rigs with two cameras), two <B>--sensor-offsets</B> calls are made. In the case
 of a multibeam the first set of offsets is for the transmit array, and in the case of a
 stereo camera rig the first offsets are for the left camera.
 <DT><B>--sensor-offset-positions</B>=<I>x/y/z</I><DD>
@@ -1323,7 +1332,7 @@ y is positive forward, and z is positive up. Roll is positive starboard up, pitc
 positive forward up, and azimuth is positive clockwise from forward. Generally one sensor
 has zero offsets and thus serves as the platform origin. For sensors with two elements
 (e.g. bistatic multibeam sonars with separate transmit and receive arrays, or stereo
-camera rigs with two cameras), two <B>--sensor_offsets</B> calls are made. In the case
+camera rigs with two cameras), two <B>--sensor-offsets</B> calls are made. In the case
 of a multibeam the first set of offsets is for the transmit array, and in the case of a
 stereo camera rig the first offsets are for the left camera.
 <DT><B>--modify-offset-positions</B>=<I>ioff/x/y/z</I><DD>

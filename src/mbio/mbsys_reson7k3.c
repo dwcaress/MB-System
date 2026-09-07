@@ -4887,6 +4887,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
   }
 
   *error = MB_ERROR_NO_ERROR;
+  int status = MB_SUCCESS;
 
   /* check for non-null data */
   assert(mbio_ptr != NULL);
@@ -4950,7 +4951,12 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
     }
   }
 
+  if (verbose >= 2 && platform_ptr != NULL) {
+		status = mb_platform_print(verbose, platform_ptr, error);
+	}
+
   if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  Preprocess parameters:\n");
     fprintf(stderr, "dbg2       target_sensor:                 %d\n", pars->target_sensor);
     fprintf(stderr, "dbg2       timestamp_changed:             %d\n", pars->timestamp_changed);
     fprintf(stderr, "dbg2       time_d:                        %f\n", pars->time_d);
@@ -5009,8 +5015,6 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
       }
     }
   }
-
-  int status = MB_SUCCESS;
 
   /* variables for beam angle calculation */
   mb_3D_orientation tx_align;
@@ -5527,6 +5531,16 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                                      time_d, &pitch, &jAttitude, &interp_error);
     interp_status &= mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude,
                                      time_d, &heave, &jAttitude, &interp_error);
+
+    /* If a real sensordepth source (e.g. a pressure sensor) is available, the vehicle's
+       instantaneous vertical position is already fully captured by the interpolated
+       sensordepth value above, so applying the attitude system's heave on top of that
+       would double-count the vertical motion. This matches the convention already used
+       in mbsys_reson7k3_extract_nav(), which zeroes heave whenever draft/sensordepth is
+       available from mb_io_ptr->nsensordepth. */
+    if (pars->n_sensordepth > 0) {
+      heave = 0.0;
+    }
 
     /* interpolate soundspeed */
     if (pars->modify_soundspeed || kluge_soundspeedsnell) {
@@ -6106,14 +6120,14 @@ int mbsys_reson7k3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr
       }
       if (status == MB_SUCCESS)
         status = mb_platform_set_sensor_offset(
-            verbose, (void *)platform, 0, 0, MB_SENSOR_POSITION_OFFSET_STATIC, (double)InstallationParameters->transmit_x,
-            (double)InstallationParameters->transmit_y, (double)InstallationParameters->transmit_z, MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+            verbose, (void *)platform, 0, 0, (double)InstallationParameters->transmit_x,
+            (double)InstallationParameters->transmit_y, (double)InstallationParameters->transmit_z,
             (double)InstallationParameters->transmit_heading, (double)InstallationParameters->transmit_roll,
             (double)InstallationParameters->transmit_pitch, error);
       if (status == MB_SUCCESS)
-        status = mb_platform_set_sensor_offset(verbose, (void *)platform, 0, 1, MB_SENSOR_POSITION_OFFSET_STATIC,
+        status = mb_platform_set_sensor_offset(verbose, (void *)platform, 0, 1,
                                                (double)InstallationParameters->receive_x, (double)InstallationParameters->receive_y,
-                                               (double)InstallationParameters->receive_z, MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+                                               (double)InstallationParameters->receive_z,
                                                (double)InstallationParameters->receive_heading, (double)InstallationParameters->receive_roll,
                                                (double)InstallationParameters->receive_pitch, error);
     }
@@ -6144,9 +6158,9 @@ int mbsys_reson7k3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr
       }
 
       if (status == MB_SUCCESS)
-        status = mb_platform_set_sensor_offset(verbose, (void *)platform, 1, 0, MB_SENSOR_POSITION_OFFSET_STATIC,
+        status = mb_platform_set_sensor_offset(verbose, (void *)platform, 1, 0,
                                                (double)InstallationParameters->position_x, (double)InstallationParameters->position_y,
-                                               (double)InstallationParameters->position_z, MB_SENSOR_ATTITUDE_OFFSET_NONE,
+                                               (double)InstallationParameters->position_z,
                                                (double)0.0, (double)0.0, (double)0.0, error);
       if (status == MB_SUCCESS && InstallationParameters->position_time_delay != 0) {
         status =
@@ -6183,9 +6197,9 @@ int mbsys_reson7k3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr
       }
 
       if (status == MB_SUCCESS)
-        status = mb_platform_set_sensor_offset(verbose, (void *)platform, 2, 0, MB_SENSOR_POSITION_OFFSET_STATIC,
+        status = mb_platform_set_sensor_offset(verbose, (void *)platform, 2, 0,
                                                (double)InstallationParameters->motion_x, (double)InstallationParameters->motion_y,
-                                               (double)InstallationParameters->motion_z, MB_SENSOR_ATTITUDE_OFFSET_STATIC,
+                                               (double)InstallationParameters->motion_z,
                                                (double)InstallationParameters->motion_heading, (double)InstallationParameters->motion_roll,
                                                (double)InstallationParameters->motion_pitch, error);
       if (status == MB_SUCCESS && InstallationParameters->motion_time_delay != 0) {

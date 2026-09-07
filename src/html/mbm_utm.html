@@ -29,7 +29,7 @@ Version 5.0
 <H2>SYNOPSIS</H2>
 
 mbm_utm <B>-I</B><I>infile</I> <B>-O</B><I>outfile</I>
-<B>-Z</B><I>zone</I> <B>-E</B><I>ellipsoid</I> [<B>-F -Q -H -V</B>]
+<B>-Z</B><I>zone</I> <B>-E</B><I>ellipsoid</I> [<B>-F -L</B><I>lonflip</I> <B>-Q -H -V</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -95,6 +95,12 @@ latitude values (for geographic to projected
 transformation) or easting and northing values
 (for projected to geographic transformation).
 Any additional columns of data are passed unaltered to the output.
+<DT><B>-L</B><I>lonflip</I><DD>
+Sets the range used to normalize output longitude values produced by
+an inverse (<B>-Q</B>) projection. A <I>lonflip</I> of -1 forces longitudes
+into the range -360 to 0, a <I>lonflip</I> of 0 forces the range -180 to
+180, and a <I>lonflip</I> of 1 forces the range 0 to 360. Default:
+<I>lonflip</I> = 0.
 <DT><B>-O</B><I>outfile</I><DD>
 Sets the name of the output data file to be generated.
 The first two columns of the ASCII output
@@ -110,7 +116,7 @@ geographic coordinates (longitude and latitude).
 The default is to transform from geographic to
 projected coordinates.
 <DT><B>-Z</B><I>zone</I><DD>
-Sets the UTM zone.
+Sets the UTM zone. Default: <I>zone</I> = 10.
 <P>
 </DL>
 <A NAME="lbAH">&nbsp;</A>

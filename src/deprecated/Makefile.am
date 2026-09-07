@@ -1,6 +1,5 @@
 
 bin_PROGRAMS =
-bin_PROGRAMS += mb7k2jstar
 bin_PROGRAMS += mb7k2ss
 bin_PROGRAMS += mb7kpreprocess
 bin_PROGRAMS += mbauvnavusbl
@@ -9,6 +8,7 @@ bin_PROGRAMS += mbhysweeppreprocess
 bin_PROGRAMS += mbinsreprocess
 bin_PROGRAMS += mbkongsbergpreprocess
 bin_PROGRAMS += mbneptune2esf
+bin_PROGRAMS += mbotpsold
 bin_PROGRAMS += mbrollbias
 bin_PROGRAMS += mbrphsbias
 bin_PROGRAMS += mbstripnan
@@ -32,7 +32,6 @@ LIBS += ${libnetcdf_LIBS}
 LIBS += ${libproj_LIBS}
 LIBS += $(LIBM)
 
-mb7k2jstar_SOURCES = mb7k2jstar.cc
 mb7k2ss_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mb7k2ss_SOURCES = mb7k2ss.cc
 mb7kpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
@@ -46,11 +45,21 @@ mbinsreprocess_SOURCES = mbinsreprocess.cc
 mbkongsbergpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbkongsbergpreprocess_SOURCES = mbkongsbergpreprocess.cc
 mbneptune2esf_SOURCES = mbneptune2esf.cc
+mbotpsold_SOURCES = mbotpsold.c
 mbrollbias_SOURCES = mbrollbias.cc
 mbrphsbias_SOURCES = mbrphsbias.cc
 mbstripnan_SOURCES = mbstripnan.cc
 mbswplspreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbswplspreprocess_SOURCES = mbswplspreprocess.cc
+
+# mbotpsold needs the OTPS installation location compiled in, same as mbotps
+nodist_mbotpsold_SOURCES = otps.h
+BUILT_SOURCES = otps.h
+CLEANFILES = otps.h
+DISTCLEANFILES = otps.h
+
+otps.h: Makefile
+	echo 'char *otps_location = "$(OTPS_DIR)";' >$@
 
 bin_SCRIPTS = \
 	mbm_fmtvel \

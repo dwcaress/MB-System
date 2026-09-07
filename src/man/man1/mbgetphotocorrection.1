@@ -1,0 +1,260 @@
+.TH mbgetphotocorrection 1 "7 September 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbgetphotocorrection\fP \- Generate a 3D table of image intensity correction values from a set of navigated stereo or mono seafloor photographs.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+mbgetphotocorrection [\fB\-\-verbose\fP \fB\-\-help\fP \fB\-\-threads=\fP\fInthreads\fP
+\fB\-\-input=\fP\fIimagelist\fP
+\fB\-\-output=\fP\fIfile\fP | \fB\-\-correction\-file=\fP\fIfile\fP
+\fB\-\-correction\-x\-dimension=\fP\fIvalue\fP \fB\-\-correction\-y\-dimension=\fP\fIvalue\fP
+\fB\-\-correction\-z\-dimension=\fP\fIvalue\fP \fB\-\-correction\-z\-minmax=\fP\fIvalue\fP/\fIvalue\fP
+\fB\-\-fov\-fudgefactor=\fP\fIfactor\fP \fB\-\-trim=\fP\fItrim_pixels\fP
+\fB\-\-reference\-gain=\fP\fIgain\fP \fB\-\-reference\-exposure=\fP\fIexposure\fP
+\fB\-\-platform\-file=\fP\fIplatform.plf\fP \fB\-\-camera\-sensor=\fP\fIid\fP
+\fB\-\-nav\-sensor=\fP\fIid\fP \fB\-\-sensordepth\-sensor=\fP\fIid\fP
+\fB\-\-heading\-sensor=\fP\fIid\fP \fB\-\-altitude\-sensor=\fP\fIid\fP
+\fB\-\-attitude\-sensor=\fP\fIid\fP
+\fB\-\-use\-left\-camera\fP | \fB\-\-use\-right\-camera\fP | \fB\-\-use\-both\-cameras\fP
+\fB\-\-calibration\-file=\fP\fIstereocalibration.yaml\fP
+\fB\-\-navigation\-file=\fP\fIfile\fP \fB\-\-tide\-file=\fP\fIfile\fP
+\fB\-\-image\-quality\-file=\fP\fIfile\fP \fB\-\-image\-quality\-threshold=\fP\fIvalue\fP
+\fB\-\-image\-quality\-filter\-length=\fP\fIvalue\fP
+\fB\-\-topography\-grid=\fP\fIfile\fP]
+
+.SH DESCRIPTION
+\fBMbgetphotocorrection\fP generates a 3D table of image intensity correction
+values, indexed by lateral pixel position (x, y with respect to the camera
+image) and by standoff distance (z, the range from the camera to the seafloor
+along the line of sight). This table is intended for later use by
+\fBmbphotomosaic\fP to flatten illumination variation across a photomosaic
+built from many overlapping downlooking photographs.
+.P
+The program reads a sequence of single or stereo pair images and associated
+per-image navigation, attitude, and camera settings from an MB-System
+imagelist file (in the format written by \fBmbm_makeimagelist\fP or similar
+tools). For each image, the camera position and orientation are combined with
+an optional platform offset model and an optional bathymetric topography grid
+(or, absent a topography grid, an assumed flat seafloor at a nominal standoff)
+to project every pixel onto the seafloor and calculate that pixel's standoff
+distance. Each image is optionally undistorted using a stereo camera
+calibration model before being processed. Pixels are excluded from the
+correction table if their line of sight is too vertical (more than 80 degrees
+from vertical, since this program assumes a 2D downlooking photomosaic
+geometry) or if the standoff falls outside the requested z range. Purely black
+pixels, and pixels adjacent to purely black pixels, are also excluded unless
+an explicit pixel trim margin is set with \fB\-\-trim\fP.
+.P
+Prior to binning, each pixel's YCrCb intensity is corrected for the camera's
+recorded gain and exposure settings relative to user-specified reference gain
+and exposure values, so that images captured under different camera settings
+contribute consistently to the same correction table.
+.P
+The 3D correction table (separate tables are maintained for each of the two
+cameras of a stereo pair) accumulates the mean Y, Cr, and Cb values in each
+x/y/z bin. After all images have been processed, any empty bins are filled in
+by two iterative passes: first averaging over neighboring x/y bins at the same
+standoff, then averaging over neighboring standoff bins at the same x/y
+location. The completed correction tables are written to an OpenCV YAML file
+using \fBcv::FileStorage\fP, together with the correction table dimensions and
+bounds and the reference gain and exposure values used. This file can be
+supplied to \fBmbphotomosaic\fP with its own \fB\-\-correction\-file\fP option to
+correct pixel intensities using this table.
+.P
+\fBMbgetphotocorrection\fP can process images using multiple threads (see
+\fB\-\-threads\fP). Any parameter change statements embedded in the imagelist
+file are honored, causing all in-flight threads to complete before the new
+parameters take effect.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian do Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-\-help
+This "help" flag causes the program to print out a description
+of its operation and then exit immediately.
+.TP
+.B \-\-verbose
+The \fB\-\-verbose\fP option causes \fBmbgetphotocorrection\fP to print out status
+and debug messages. Using it more than once increases the verbosity level.
+.TP
+.B \-\-threads=\fInthreads\fP
+.br
+Sets the number of processing threads used to work through the image list.
+The requested number of threads is limited to the number of hardware threads
+available and to the MB-System maximum thread count. The default is 1 thread.
+.TP
+.B \-\-input=\fIimagelist\fP
+.br
+Sets the filename of the input MB-System imagelist file listing the images
+(single or stereo pairs) to be processed, along with their navigation,
+attitude, and camera settings. The default input filename is
+\fIimagelist.mb\-1\fP.
+.TP
+.B \-\-output=\fIfile\fP
+.br
+.TP
+.B \-\-correction\-file=\fIfile\fP
+.br
+These two equivalent options set the filename of the output OpenCV YAML file
+that will contain the 3D image correction tables. The default output filename
+is \fIimagelist_cameracorrection.yml\fP.
+.TP
+.B \-\-correction\-x\-dimension=\fIvalue\fP
+.br
+Sets the number of bins along the image x (column) dimension of the
+correction table. The default is 11.
+.TP
+.B \-\-correction\-y\-dimension=\fIvalue\fP
+.br
+Sets the number of bins along the image y (row) dimension of the correction
+table. The default is 11.
+.TP
+.B \-\-correction\-z\-dimension=\fIvalue\fP
+.br
+Sets the number of bins along the standoff (z) dimension of the correction
+table. The default is 41.
+.TP
+.B \-\-correction\-z\-minmax=\fIvalue\fP/\fIvalue\fP
+.br
+Sets the minimum and maximum standoff distance in meters spanned by the
+correction table's z dimension; pixels with a calculated standoff outside this
+range are not used. The default range is 1.0 to 9.0 meters.
+.TP
+.B \-\-fov\-fudgefactor=\fIfactor\fP
+.br
+Sets a multiplicative fudge factor applied to the camera field of view angles
+when calculating the reference depth used to derive per-pixel takeoff angles.
+The default value is 1.0 (no adjustment).
+.TP
+.B \-\-trim=\fItrim_pixels\fP
+.br
+Sets the number of pixels to ignore around the margins of each undistorted
+image. If this option is not used (the default, 0 pixels), the program
+instead automatically ignores any purely black pixel and any pixel adjacent to
+a purely black pixel, which is intended to exclude the black borders that can
+appear around the edges of an undistorted image.
+.TP
+.B \-\-reference\-gain=\fIgain\fP
+.br
+Sets the reference camera gain value, in dB, to which all image intensities
+are normalized before being added to the correction table. The default is
+14.0.
+.TP
+.B \-\-reference\-exposure=\fIexposure\fP
+.br
+Sets the reference camera exposure time, in microseconds, to which all image
+intensities are normalized before being added to the correction table. The
+default is 8000.0.
+.TP
+.B \-\-platform\-file=\fIplatform.plf\fP
+.br
+Sets the filename of an MB-System platform definition file describing the
+geometric offsets between the vehicle's navigation, attitude, and camera
+sensors. The platform model is (re)loaded the first time an image is
+processed after this option takes effect.
+.TP
+.B \-\-camera\-sensor=\fIcamera_sensor_id\fP
+.br
+Sets the platform sensor id number of the stereo camera used to look up the
+camera's position and orientation offsets within the platform model.
+.TP
+.B \-\-nav\-sensor=\fInav_sensor_id\fP
+.br
+Overrides the platform model's navigation (position) source sensor id number.
+.TP
+.B \-\-sensordepth\-sensor=\fIsensordepth_sensor_id\fP
+.br
+Overrides the platform model's pressure/depth source sensor id number.
+.TP
+.B \-\-heading\-sensor=\fIheading_sensor_id\fP
+.br
+Overrides the platform model's heading source sensor id number.
+.TP
+.B \-\-altitude\-sensor=\fIaltitude_sensor_id\fP
+.br
+Sets the platform sensor id number used as the altitude source. This value is
+parsed but is not applied to the platform model by the current implementation.
+.TP
+.B \-\-attitude\-sensor=\fIattitude_sensor_id\fP
+.br
+Overrides the platform model's roll/pitch and heave source sensor id number.
+.TP
+.B \-\-use\-left\-camera
+.br
+Process only the left image of each stereo pair (or single images acquired by
+the left camera).
+.TP
+.B \-\-use\-right\-camera
+.br
+Process only the right image of each stereo pair (or single images acquired
+by the right camera).
+.TP
+.B \-\-use\-both\-cameras
+.br
+Process both the left and right images of each stereo pair. This is the
+default camera usage mode.
+.TP
+.B \-\-calibration\-file=\fIstereocalibration.yaml\fP
+.br
+Sets the filename of an OpenCV YAML file containing the intrinsic and
+extrinsic stereo camera calibration parameters (camera matrices, distortion
+coefficients, and the rotation/translation between the two cameras) used to
+undistort images that are not already rectified.
+.TP
+.B \-\-navigation\-file=\fIfile\fP
+.br
+Sets the filename of an ASCII navigation file used in place of, or to
+supplement, navigation carried in the imagelist file.
+.TP
+.B \-\-tide\-file=\fIfile\fP
+.br
+Sets the filename of an ASCII tide file (time and tide height pairs) used to
+apply a tidal correction to the water depth used in the photogrammetric
+projection.
+.TP
+.B \-\-image\-quality\-file=\fIfile\fP
+.br
+Sets the filename of an ASCII file of time-stamped image quality values used
+to filter out low quality images.
+.TP
+.B \-\-image\-quality\-threshold=\fIvalue\fP
+.br
+Sets the minimum image quality value (in the range 0 to 1) required for an
+image to be used in the correction table.
+.TP
+.B \-\-image\-quality\-filter\-length=\fIvalue\fP
+.br
+Sets a time filter length, in seconds, applied when interpolating image
+quality values from the image quality file.
+.TP
+.B \-\-topography\-grid=\fIfile\fP
+.br
+Sets the filename of a bathymetric grid (in a format read by
+\fBmbgrid\fP/GMT) used to intersect each pixel's line of sight with the actual
+seafloor topography rather than an assumed flat seafloor at a nominal
+standoff. Specifying this option enables use of the topography grid.
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbphotomosaic\fP(1), \fBmbphotogrammetry\fP(1),
+\fBmbimagelist\fP(1), \fBmbm_makeimagelist\fP(1), \fBmbgrid\fP(1)
+
+.SH BUGS
+Maybe. Maybe not.

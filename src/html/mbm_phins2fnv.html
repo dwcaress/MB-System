@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbm_phins2fnv</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbm_phins2fnv</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  7 September 2026 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbm_phins2fnv</B> - Macro to translate processed Phins INS navigation data
+to an fnv file for use in MB-System processing.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbm_phins2fnv</B> <B>-i</B><I>inputfile</I> <B>-o</B><I>outputfile</I>
+[<B>-v</B> <B>-h</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbm_phins2fnv</B> is a macro intended to translate processed navigation
+data from an iXblue Phins inertial navigation system (INS) into an &quot;fnv&quot;
+format navigation file of the kind used elsewhere in <B>MB-System</B>
+processing (see, e.g., the <B>-N</B> option of <B>mbnavlist</B> and the
+merge-navigation options of <B>mbprocess</B>).
+<P>
+In the current version of this macro, the input file (specified with
+<B>-i</B>/<B>--input</B>) is read using whitespace as a field delimiter, with
+lines beginning with a &quot;#&quot; character treated as comments, and the
+resulting table of columns is printed to the shell. The subsequent step
+of selecting the columns needed for an fnv file and writing the file named
+with <B>-o</B>/<B>--output</B> has not yet been implemented in this version of the
+macro; running it currently reports the parsed input data rather than
+producing an fnv output file.
+<P>
+Both an input and an output filename must be supplied on the command line;
+if either is missing the macro prints a diagnostic message and exits
+without processing.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-h</B>, <B>--help</B>
+
+<DD>
+This &quot;help&quot; flag causes the macro to print out a description
+of its command line options and then exit immediately.
+<DT><B>-i</B><I>inputfile</I>, <B>--input=</B><I>inputfile</I>
+
+<DD>
+<BR>
+
+Sets the pathname of the input file containing processed Phins INS data.
+This is a required argument; if it is not supplied the macro prints a
+message and exits without doing anything further.
+<DT><B>-o</B><I>outputfile</I>, <B>--output=</B><I>outputfile</I>
+
+<DD>
+<BR>
+
+Sets the pathname of the output fnv navigation file. This is a required
+argument; if it is not supplied the macro prints a message and exits
+without doing anything further. (As noted above, the current version of
+the macro does not yet write this file.)
+<DT><B>-v</B>, <B>--verbose</B>
+
+<DD>
+Sets a verbose flag. In the current implementation this flag is parsed
+and stored but does not change the macro's output.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbnavlist.html">mbnavlist</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1)
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>BUGS</H2>
+
+Maybe. Maybe not.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">SEE ALSO</A><DD>
+<DT><A HREF="#lbAI">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 7 September 2026</P></CENTER>
+
+<HR>
+<center>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>

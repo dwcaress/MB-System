@@ -5633,7 +5633,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
               section->depthmin = bath[i];
             else
               section->depthmin = MIN(section->depthmin, bath[i]);
-            if (section->depthmin == 0.0)
+            if (section->depthmax == 0.0)
               section->depthmax = bath[i];
             else
               section->depthmax = MAX(section->depthmax, bath[i]);
