@@ -13,6 +13,7 @@ set(tests
     mbdumpesf_test
     mbextractsegy_test
     mbfilter_test
+    mbfnv2navlab_test
     mbformat_test
     mbgetesf_test
     mbgpstide_test
@@ -21,9 +22,12 @@ set(tests
     mbinfo_test
     mblevitus_test
     mblist_test
+    mbmakedatalist_test
     mbmakeplatform_test
+    mbmapscale_test
     mbminirovnav_test
     mbmosaic_test
+    mbnavlab2fnv_test
     mbnavlist_test
     mbpreprocess_test
     mbprocess_test
@@ -37,7 +41,9 @@ set(tests
     mbsslayout_test
     mbsvplist_test
     mbsvpselect_test
+    mbswath2las_test
     mbtime_test
+    mbusbl2fnv_test
     mbvoxelclean_test)
 
 foreach(test ${tests})

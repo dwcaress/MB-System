@@ -47,6 +47,9 @@ check_SCRIPTS += mbextractsegy_test.py
 TESTS += mbfilter_test.py
 check_SCRIPTS += mbfilter_test.py
 
+TESTS += mbfnv2navlab_test.py
+check_SCRIPTS += mbfnv2navlab_test.py
+
 TESTS += mbformat_test.py
 check_SCRIPTS += mbformat_test.py
 
@@ -71,14 +74,23 @@ check_SCRIPTS += mblevitus_test.py
 TESTS += mblist_test.py
 check_SCRIPTS += mblist_test.py
 
+TESTS += mbmakedatalist_test.py
+check_SCRIPTS += mbmakedatalist_test.py
+
 TESTS += mbmakeplatform_test.py
 check_SCRIPTS += mbmakeplatform_test.py
+
+TESTS += mbmapscale_test.py
+check_SCRIPTS += mbmapscale_test.py
 
 TESTS += mbminirovnav_test.py
 check_SCRIPTS += mbminirovnav_test.py
 
 TESTS += mbmosaic_test.py
 check_SCRIPTS += mbmosaic_test.py
+
+TESTS += mbnavlab2fnv_test.py
+check_SCRIPTS += mbnavlab2fnv_test.py
 
 TESTS += mbnavlist_test.py
 check_SCRIPTS += mbnavlist_test.py
@@ -121,6 +133,9 @@ TESTS += mbsvpselect_test.py
 check_SCRIPTS += mbsvpselect_test.py
 endif
 
+TESTS += mbswath2las_test.py
+check_SCRIPTS += mbswath2las_test.py
+
 TESTS += mbtime_test.py
 check_SCRIPTS += mbtime_test.py
 
@@ -128,6 +143,9 @@ if BUILD_MBTRN
 # TESTS += mbtrnpp_test.py
 # check_SCRIPTS += mbtrnpp_test.py
 endif
+
+TESTS += mbusbl2fnv_test.py
+check_SCRIPTS += mbusbl2fnv_test.py
 
 TESTS += mbvoxelclean_test.py
 check_SCRIPTS += mbvoxelclean_test.py

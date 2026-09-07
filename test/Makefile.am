@@ -4,7 +4,6 @@ XBUILD_SUB_DEPRECATED = deprecated
 endif
 
 SUBDIRS =
-SUBDIRS += mbio
 SUBDIRS += utilities
 SUBDIRS += $(XBUILD_SUB_DEPRECATED)
 

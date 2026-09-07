@@ -65,4 +65,26 @@ if(buildTests)
     ${CMAKE_SOURCE_DIR}/src/mbgrd2gltf)
   target_link_libraries(mbmesh_test_settings PRIVATE mbio)
   add_test(NAME mbmesh_settings COMMAND mbmesh_test_settings)
+
+  add_executable(mbmesh_test_marching_cubes
+    tests/test_marching_cubes.cpp
+    src/algorithms/marching_cubes.cpp
+    src/io/glb_writer.cpp)
+  target_compile_features(mbmesh_test_marching_cubes PRIVATE cxx_std_17)
+  target_include_directories(mbmesh_test_marching_cubes PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/src/mbgrd2gltf)
+  add_test(NAME mbmesh_marching_cubes COMMAND mbmesh_test_marching_cubes)
+
+  add_executable(mbmesh_test_normal_estimation
+    tests/test_normal_estimation.cpp
+    src/algorithms/normal_estimation.cpp
+    src/io/glb_writer.cpp)
+  target_compile_features(mbmesh_test_normal_estimation PRIVATE cxx_std_17)
+  target_include_directories(mbmesh_test_normal_estimation PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/src/mbgrd2gltf)
+  add_test(NAME mbmesh_normal_estimation COMMAND mbmesh_test_normal_estimation)
+
+  add_test(NAME mbmesh_test COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/tests/mbmesh_test.py")
 endif()
