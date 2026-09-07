@@ -30,9 +30,10 @@ Version 5.0
 
 <B>mbhysweeppreprocess</B>
 [<B>-A</B><I>offsettype/x/y/z/t</I> <B>-B</B><I>rollbias/pitchbias/headingbias</I>
-<B>-D</B><I>sonardepthfile</I> <B>-I</B><I>datalist</I>
-<B>-J</B><I>projection</I>  <B>-L</B>
-<B>-M</B><I>navformat</I> <B>-N</B><I>navfile</I>
+<B>-D</B><I>sonardepthfile</I> <B>-F</B><I>format</I> <B>-G</B><I>platformfile</I>
+<B>-I</B><I>datalist</I>
+<B>-J</B><I>projection</I> <B>-K</B><I>klugemode</I> <B>-L</B>
+<B>-M</B><I>navformat</I> <B>-N</B><I>navfile</I> <B>-O</B><I>outfile</I>
 <B>-T</B><I>timelag</I>
 <B>-H</B> <B>-V</B>]
 <P>
@@ -124,6 +125,16 @@ Sets the format of the input file specified with the <B>-I</B> option. This is n
 the input filename does not conform to the <B>MB-System</B> file naming conventions. For this
 program, the only relevant options are <I>format</I> = 201 for an HSX format file, or
 <I>format</I>= -1 for a datalist referencing multiple format 201 files.
+<DT><B>-G</B>
+
+<DD>
+<I>platformfile</I>
+<BR>
+
+This option specifies a platform offset file, in the format read by
+<B>mb_platform_read</B>, defining the geometric relationships among the sonar,
+motion sensor, and navigation sensor. If specified, this platform definition
+is used in place of any offsets set with the <B>-A</B> and <B>-B</B> options.
 <DT><B>-H</B>
 
 <DD>
@@ -172,6 +183,18 @@ used worldwide and assigned number id's to each; one can also specify the northe
 UTM zone 12 projection using its EPSG designation, or -Jepsg32612. The complete list
 of projected coordinate systems supported by <B>MB-System</B> is given in the <B>mbgrid</B>
 manual page.
+<DT><B>-K</B>
+
+<DD>
+<I>klugemode</I>
+<BR>
+
+This option enables one of two &quot;kluge&quot; modes that correct problems with the
+way attitude data are applied to the raw beam angles. If <I>klugemode</I> = 1,
+roll and pitch attitude compensation of the beam angles is forced even when
+the raw multibeam (RMB) data records indicate that the sonar has already
+applied that compensation. If <I>klugemode</I> = 2, the sign of the roll and
+pitch values in the attitude (HCP) data records is reversed before use.
 <DT><B>-L</B>
 
 <DD>
@@ -211,6 +234,15 @@ in the output format 201 data. Any pre-existing navigation data records will
 remain unchanged in the data stream. However, the HSX file header will be altered
 to show the newly merged data as &quot;enabled&quot; and the original, asynchronous data
 as not enabled.
+<DT><B>-O</B>
+
+<DD>
+<I>outfile</I>
+<BR>
+
+This option is intended to set the path of the output data file, but
+currently has no effect: <B>mbhysweeppreprocess</B> always constructs the
+output file name automatically from the input file name.
 <DT><B>-T</B>
 
 <DD>

@@ -1,0 +1,131 @@
+.TH mbm_makeimagelist 1 "7 September 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbm_makeimagelist\fP \- Generate an MB-System stereo imagelist file from a MBARI Low Altitude Survey System (LASS) camera data directory.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+mbm_makeimagelist [\fB\-\-help\fP \fB\-\-check\-bayer\fP \fB\-\-imdir=\fP\fIpath2images\fP
+\fB\-\-imformat=\fP\fIimage_format\fP \fB\-\-outfile=\fP\fIoutfname\fP
+\fB\-\-gpsfile=\fP\fIgpsfname\fP \fB\-\-nogpsfile\fP \fB\-\-nogains\fP]
+
+.SH DESCRIPTION
+\fBMbm_makeimagelist\fP is a Python macro that generates an MB-System stereo
+imagelist file from the directory structure and filenames used by the MBARI
+Low Altitude Survey System (LASS) stereo seafloor photography system. It
+expects to find left camera images in a subdirectory named \fIPROSILICA_L\fP and
+right camera images in a subdirectory named \fIPROSILICA_R\fP of the input image
+directory, with each image file's basename being an integer image
+acquisition timestamp expressed in microseconds since the Unix epoch.
+.P
+The left and right image time lists are matched into stereo pairs. By
+default this matching also uses a separate GPS trigger time log (a CSV file
+whose first column is a microsecond epoch trigger time for each stereo
+capture, by default named \fIlogfile_gpstime_cam_sync.csv\fP one directory above
+the image directory); each left and right image is paired with the closest
+GPS trigger time, and left or right images with no corresponding trigger
+within a fixed time tolerance are recorded as unmatched. If \fB\-\-nogpsfile\fP is
+given, the left and right image time lists are instead matched directly
+against each other using the same time tolerance, without reference to any
+GPS trigger log.
+.P
+Unless \fB\-\-nogains\fP is given, \fBmbm_makeimagelist\fP also opens every input
+image with the Python Imaging Library and reads its embedded TIFF
+\fIImageDescription\fP tag (tag 270), extracting the first two numeric values
+found in that tag's text as the camera's gain and exposure settings at the
+time the image was captured. If \fB\-\-check\-bayer\fP is given, the word "color"
+in each image's filename is first replaced with "bayer" before the file is
+opened to read this tag, on the premise that the original raw Bayer-pattern
+image (rather than a subsequently color-processed copy) is more likely to
+carry the camera gain/exposure metadata; this substitution only affects
+which file is opened to read the gain and exposure values; it does not
+change which image files are listed in the output imagelist.
+.P
+The result is written as a single MB-System imagelist file in the \fI.mb\-2\fP
+format, with one line per stereo pair (or single, unmatched image) giving
+the left image path (or \fBNULL\fP if there is no left image), the right image
+path (or \fBNULL\fP), the paired time (twice), and the left and right camera
+gain and exposure values (zero if \fB\-\-nogains\fP was used or no metadata could
+be read). The first five lines of the data are additionally prefixed with a
+"##" comment marker in the output file.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian do Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-h, \-\-help
+This "help" flag causes the program to print out a description
+of its command line options and then exit immediately.
+.TP
+.B \-b, \-\-check\-bayer
+.br
+Reads camera gain and exposure settings from the corresponding raw Bayer
+pattern image file rather than from the (possibly color-processed) image file
+actually being listed, by substituting "bayer" for "color" in the filename
+used only for that metadata lookup. Has no effect if \fB\-\-nogains\fP is also
+given.
+.TP
+.B \-d, \-\-imdir=\fIpath2images\fP
+.br
+Sets the path to the directory containing the \fIPROSILICA_L\fP and
+\fIPROSILICA_R\fP image subdirectories to be listed. The default is the current
+directory (\fI./\fP).
+.TP
+.B \-f, \-\-imformat=\fIimage_format\fP
+.br
+Intended to set the image file suffix (for example \fItif\fP) searched for in
+the \fIPROSILICA_L\fP and \fIPROSILICA_R\fP subdirectories. In the current
+implementation this option instead mistakenly overwrites the image directory
+path (\fB\-\-imdir\fP) with the supplied value and has no effect on the image
+format searched for, which always remains the default, \fItif\fP.
+.TP
+.B \-o, \-\-outfile=\fIoutfname\fP
+.br
+Sets the name of the output imagelist file to be written, without the
+\fI.mb\-2\fP suffix, which is appended automatically. If \fIoutfname\fP includes a
+directory path, the output file is written to that directory; otherwise it
+is written to the image directory set by \fB\-\-imdir\fP. The default output
+filename is \fIimagelist\fP, producing \fIimagelist.mb\-2\fP.
+.TP
+.B \-g, \-\-gpsfile=\fIgpsfname\fP
+.br
+Sets the filename of the GPS trigger time CSV log used to match left and
+right images into stereo pairs. The default is
+\fI./../logfile_gpstime_cam_sync.csv\fP relative to the image directory (that
+is, one directory above \fB\-\-imdir\fP). Has no effect if \fB\-\-nogpsfile\fP is
+given.
+.TP
+.B \-x, \-\-nogpsfile
+.br
+Matches left and right camera images into stereo pairs directly by comparing
+their timestamps, without reading or requiring a GPS trigger time log file.
+.TP
+.B \-y, \-\-nogains
+.br
+Skips opening the image files to read embedded camera gain and exposure
+metadata; the gain and exposure values written to the output imagelist are
+all zero. This significantly speeds up processing of large image sets when
+gain/exposure correction is not needed.
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbimagelist\fP(1), \fBmbgetphotocorrection\fP(1),
+\fBmbphotomosaic\fP(1), \fBmbphotogrammetry\fP(1)
+
+.SH BUGS
+Maybe. Maybe not.

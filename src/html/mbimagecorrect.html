@@ -1,0 +1,191 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbimagecorrect</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbimagecorrect</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  7 September 2026 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbimagecorrect</B> - Apply brightness and contrast corrections to a single image using OpenCV algorithms.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+mbimagecorrect [<B>--verbose</B> <B>--help</B>
+<B>--input=</B><I>imagefile</I> <B>--output=</B><I>imagefile</I>
+<B>--histogram-equalization</B> <B>--gamma-correction=</B><I>gamma</I>
+<B>--clahe-correction</B> <B>--lightness-correction=</B><I>factor</I>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>Mbimagecorrect</B> applies simple brightness and contrast corrections to a single
+image using standard <B>OpenCV</B> algorithms. Four correction modes are available:
+histogram equalization, gamma correction, contrast limited adaptive histogram
+equalization (CLAHE), and a simple multiplicative lightness scaling. Only one
+correction mode is applied per run; if no correction mode is specified on the
+command line, CLAHE correction is used by default.
+
+Histogram equalization converts the image from BGR to YCrCb color space,
+equalizes the histogram of the Y (luminance) channel only, and converts the
+result back to BGR. Gamma correction builds a 256 entry lookup table using the
+supplied gamma exponent and applies it independently to all three BGR channels
+of every pixel. CLAHE correction converts the image to the Lab color space,
+applies OpenCV's CLAHE algorithm (with a fixed clip limit of 4) to the L
+(lightness) channel, and converts the result back to BGR. Lightness correction
+converts the image to YCrCb color space and multiplies the Y channel of every
+pixel by a constant factor, leaving the Cr and Cb (color) channels unchanged.
+
+The corrected image is written to the specified output file. <B>Mbimagecorrect</B>
+also opens two windows displaying the original and corrected images and waits
+for a keypress before exiting; this program is not currently useful in a
+non-interactive, headless batch processing context. Although the built in
+usage message mentions supplying an imagelist as input, the current
+implementation only reads a single image file named by <B>--input</B>; it does not
+read or iterate over an MB-System imagelist.
+
+Note that OpenCV enforces default maximum image dimensions when reading
+images (2^20 pixels per side, 2^30 pixels total). To work with larger images,
+set the environment variable <B>OPENCV_IO_MAX_IMAGE_PIXELS</B> before running the
+program.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>--help</B>
+
+<DD>
+This &quot;help&quot; flag causes the program to print out a description
+of its operation and then exit immediately.
+<DT><B>--verbose</B>
+
+<DD>
+The <B>--verbose</B> option causes <B>mbimagecorrect</B> to print out status messages.
+<DT><B>--input=</B><I>imagefile</I>
+
+<DD>
+<BR>
+
+Sets the filename of the input image to be corrected.
+<DT><B>--output=</B><I>imagefile</I>
+
+<DD>
+<BR>
+
+Sets the filename of the output, corrected image.
+<DT><B>--histogram-equalization</B>
+
+<DD>
+<BR>
+
+Selects the histogram equalization correction mode: the Y (luminance) channel
+of the image (converted to YCrCb color space) is histogram equalized, and the
+result is converted back to BGR.
+<DT><B>--gamma-correction=</B><I>gamma</I>
+
+<DD>
+<BR>
+
+Selects the gamma correction mode and sets the gamma exponent used to build the
+correction lookup table applied to each of the BGR channels. The default gamma
+value is 0.5.
+<DT><B>--clahe-correction</B>
+
+<DD>
+<BR>
+
+Selects the CLAHE (Contrast Limited Adaptive Histogram Equalization)
+correction mode: the image is converted to Lab color space, CLAHE is applied
+to the L (lightness) channel with a clip limit of 4, and the result is
+converted back to BGR. This is the default correction mode if no other
+correction mode option is specified.
+<DT><B>--lightness-correction=</B><I>factor</I>
+
+<DD>
+<BR>
+
+Selects the simple lightness correction mode and sets the multiplicative
+<I>factor</I> applied to the Y (luminance) channel of the image (converted to
+YCrCb color space) before converting back to BGR. The default factor is 1.0.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbtiff2png.html">mbtiff2png</A></B>(1), <B><A HREF="mbphotomosaic.html">mbphotomosaic</A></B>(1),
+<B><A HREF="mbgetphotocorrection.html">mbgetphotocorrection</A></B>(1)
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>BUGS</H2>
+
+Maybe. Maybe not.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">SEE ALSO</A><DD>
+<DT><A HREF="#lbAI">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 7 September 2026</P></CENTER>
+
+<HR>
+<center>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>

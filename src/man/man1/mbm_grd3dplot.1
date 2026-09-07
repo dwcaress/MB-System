@@ -9,6 +9,7 @@ Version 5.0
 .SH SYNOPSIS
 \fBmbm_grd3dplot\fP \fB\-I\fP\fIfile\fP
 [\fB\-A\fP[\fImagnitude\fP[\fI/azimuth/elevation\fP]
+\fB\-C\fP[\fIcontour_control\fP]
 \fB\-D\fP[\fIflipcolor/flipshade\fP]
 \fB\-E\fP[\fIview_az/view_el\fP] \fB\-F\fP\fIexaggeration\fP
 \fB\-G\fP\fIcolor_mode\fP \fB\-H\fP \fB\-K\fP\fIintensity_file \fP
@@ -22,7 +23,7 @@ Additional Options:
 [\fB\-B\fP\fItickinfo\fP
 \fB\-J\fP\fIprojection\fP[\fI/scale | width\fP]
 \fB\-L\fP\fItitle\fP[\fI:scale_label\fP] \fB\-M\fP\fImisc\fP
-\fB\-Q\fP \fB\-R\fP\fIw/e/s/n\fP \fB\-X\fP \fB\-Y\fP
+\fB\-Q\fP \fB\-R\fP\fIw/e/s/n\fP \fB\-T\fP \fB\-X\fP \fB\-Y\fP
 \fB\-Z\fP\fImin/max\fP ]
 
 Miscellaneous Options:
@@ -33,6 +34,10 @@ Miscellaneous Options:
 \fB\-MGT\fP\fIx/y/size/angle/font/just/text\fP
 \fB\-MGU\fP\fP[\fI/dx/dy/\fP][\fIlabel\fP]
 \fB\-MIE\fP\fIresolution\fP \fB\-MIT\fItype\fP
+\fB\-MTC\fP\fIfill\fP \fB\-MTD\fP\fIresolution\fP
+\fB\-MTG\fP\fIfill\fP \fB\-MTI\fP\fIriver\fP
+\fB\-MTN\fP\fIborder\fP \fB\-MTS\fP\fIfill\fP
+\fB\-MTW\fP\fIpen\fP
 \fB\-MVM\fP\fImesh_pen\fP \fB\-MVN\fP[\fInull[/r/g/b]\fP] ]
 
 .SH DESCRIPTION
@@ -62,7 +67,7 @@ If a Postscript viewer is not explicitly defined by either method, then the user
 default program for viewing Postscript is invoked.
 Invoking the plot generation shellscript with
 a \fB-N\fP command line argument suppresses the screen
-display of the plot. The \fB\-MIE\fP and \fB\-MIP\fP arguments cause the
+display of the plot. The \fB\-MIE\fP and \fB\-MIT\fP arguments cause the
 plot generation shellscript to render the Postscript map onto an image in the
 specified format.
 
@@ -103,6 +108,15 @@ The value \fIelevation\fP is the elevation of the illumination
 in degrees from horizontal.
 Defaults: \fImagnitude\fP = 0.2; \fIazimuth\fP = 0.0;
 \fIelevation\fP = 30.0;
+.TP
+.B \-C
+\fI[contour_control]\fP
+.br
+Turns on contour mode; if neither \fB\-C\fP nor \fB\-G\fP is specified, \fBmbm_grd3dplot\fP
+defaults to color fill mode (equivalent to \fB\-G\fP\fI1\fP). If \fIcontour_control\fP is
+not supplied, a default contour interval is calculated from the range of the gridded
+data; this value is reported when the \fB\-V\fP option is used. To have actual contour
+lines drawn on a mesh plot, use \fB\-G\fP\fI7\fP (3D mesh plot with contours).
 .TP
 .B \-D
 \fI[flipcolor/flipshade]\fP
@@ -273,16 +287,19 @@ color scheme will be used for the plot
 .SH COMPLETE DESCRIPTION OF OPTIONS
 .TP
 .B \-A
-\fImagnitude[/azimuth]\fP
+\fImagnitude[/azimuth/elevation]\fP
 .br
 Sets the parameters which control the
 synthetic illumination of the gridded data (shaded relief).
 The value \fImagnitude\fP
 is an effective vertical exaggeration which modulates the intensity of
-the shading; typical values are in the 0.1 to 0.5 range.
+the shading; typical values are in the 0.1 to 10 range.
 The value \fIazimuth\fP
-is the azimuth from which the data is illuminated.
+is the azimuth in degrees from north from which the data is illuminated.
+The value \fIelevation\fP is the elevation of the illumination
+in degrees from horizontal.
 Defaults: \fImagnitude\fP = 0.2; \fIazimuth\fP = 0.0;
+\fIelevation\fP = 30.0;
 .TP
 .B \-B
 \fItickinfo\fP
@@ -290,6 +307,15 @@ Defaults: \fImagnitude\fP = 0.2; \fIazimuth\fP = 0.0;
 Sets map boundary tickmark intervals. See the \fBpsbasemap\fP
 manual page for details. By default the program chooses
 basemap annotations based on the map boundaries.
+.TP
+.B \-C
+\fI[contour_control]\fP
+.br
+Turns on contour mode; if neither \fB\-C\fP nor \fB\-G\fP is specified, \fBmbm_grd3dplot\fP
+defaults to color fill mode (equivalent to \fB\-G\fP\fI1\fP). If \fIcontour_control\fP is
+not supplied, a default contour interval is calculated from the range of the gridded
+data; this value is reported when the \fB\-V\fP option is used. To have actual contour
+lines drawn on a mesh plot, use \fB\-G\fP\fI7\fP (3D mesh plot with contours).
 .TP
 .B \-D
 \fI[flipcolor/flipshade]\fP
@@ -458,9 +484,12 @@ label use \fB\-L\fP" : ".
 A series of "miscellaneous" options are provided which are
 given as \fB\-M\fP followed by a two character identifier, followed
 by any other parameters associated with that option.
-The \fB\-M\fP options may be strung together separated by
-colons, e.g. "-MGQ100:GU", which is equivalent to
-"-MGQ \-MGU".
+The \fB\-M\fP option may be repeated as many times as needed on the
+command line, e.g. "\-MGQ100 \-MGU", and the resulting suboptions are
+concatenated internally. A single colon does not serve as a
+suboption separator within one \fB\-M\fP argument (colons are
+reserved for use within suboption values, e.g. Windows drive-letter
+paths such as "C:\\").
 .TP
 .B \-N
 \fIdrape_file\fP
@@ -584,6 +613,79 @@ multi-page PDF (\fB\-MIT\fP\fIF\fP), JPEG (\fB\-MIT\fP\fIj\fP),
 PNG (\fB\-MIT\fP\fIg\fP), transparent PNG (\fB\-MIT\fP\fIG\fP),
 PPM (\fB\-MIT\fP\fIm\fP,  SVG (\fB\-MIT\fP\fIs\fP, or TIFF (\fB\-MIT\fP\fIt\fP.
 The default image format is JPEG.
+.TP
+.B \-MTC
+\fIfill\fP
+.br
+Coastline plotting option.
+Set the shade (0-255), color (r/g/b), or pattern
+(p|Pdpi/pattern; see \fB\-MTG\fP) for lakes  [Default is the
+fill chosen for "wet" areas (\fB\-MTS\fP)].
+.TP
+.B \-MTD
+\fIresolution\fP
+.br
+Coastline plotting option.
+Selects the resolution of the coastline data set to use ((f)ull,
+(h)igh, (i)ntermediate, (l)ow, and (c)rude). [Default is l].
+.TP
+.B \-MTG
+\fIfill\fP
+.br
+Coastline plotting option.
+Select painting of "dry" areas. Specify the
+shade (0-255) or color (r/g/b), or \fB\-MTG\fP\fIpdpi/pattern\fP,
+where \fIpattern\fP gives the number of the built-in pattern
+(1-90) OR the name of an icon-format file. \fIdpi\fP sets the
+resolution of the image.
+.TP
+.B \-MTI
+\fIriver\fP
+.br
+Coastline plotting option.
+Draws rivers. Specify the type of rivers to be drawn. Choose
+from the list of river types below.
+     1 = Permanent major rivers
+     2 = Additional major rivers
+     3 = Additional rivers
+     4 = Minor rivers
+     5 = Intermittent rivers \- major
+     6 = Intermittent rivers \- additional
+     7 = Intermittent rivers \- minor
+     8 = Major canals
+     9 = Minor canals
+     10 = Irrigation canals
+     a = All rivers and canals (1-10)
+     r = All permanent rivers (1-4)
+     i = All intermittent rivers (5-7)
+     c = All canals (8-10)
+.TP
+.B \-MTN
+\fIborder\fP
+.br
+Coastline plotting option.
+Draws political boundaries. Specify the type of
+boundary to be drawn. Choose from the list of boundaries below.
+This option may be given repeatedly to draw more than one type
+of boundary.
+     1 = National boundaries
+     2 = State boundaries within the Americas
+     3 = Marine boundaries
+     a = All boundaries (1-3)
+.TP
+.B \-MTS
+\fIfill\fP
+.br
+Coastline plotting option.
+Select painting of "wet" areas. Specify the
+shade (0-255), color (r/g/b), or pattern (see \fB\-MTG\fP).
+.TP
+.B \-MTW
+\fIpen\fP
+.br
+Coastline plotting option.
+Sets the pen attributes used to draw the coastline.
+[Defaults: width = 1, color = 0/0/0, texture = solid].
 .TP
 .B \-MVM
 \fImesh_pen\fP
@@ -723,6 +825,15 @@ or using an intensity file (\fB\-K\fP and \fB\-G\fP\fI3\fP options), then
 setting \fIshade\fP = 1 will cause the shading to be equalized.
 Using \fB\-S\fP\fI0/1\fP will equalize the shading without
 equalizing the color table.
+.TP
+.B \-T
+If \fB\-T\fP is given, it causes a coastline to be drawn
+on the map. The default is to draw the coastline as the thinnest possible
+line. To exercise greater control of
+the coastline plotting, including color fill of "dry" areas and
+display of lakes, rivers, and political boundaries, use the
+\fB\-MTC\fP, \fB\-MTD\fP, \fB\-MTG\fP, \fB\-MTI\fP,
+\fB\-MTN\fP, \fB\-MTS\fP, and \fB\-MTW\fP options described above.
 .TP
 .B \-U
 \fIorientation\fP

@@ -1,0 +1,183 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbgrd2octree</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbgrd2octree</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  7 September 2026 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbgrd2octree</B> - Translates a topography grid to a TRN octree topography model
+for use with the MB-System TRN (terrain relative navigation) tools.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+mbgrd2octree <B>--input=</B><I>inputGridFile</I> <B>--output=</B><I>outputOctreeFile</I>
+[<B>--bounds=</B><I>val1/val2/val3/val4</I>
+<B>--verbose</B> <B>--help</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>Mbgrd2octree</B> converts a topography grid into a TRN (terrain relative
+navigation) octree topography model file for use with the <B>MB-System</B> TRN
+tools (e.g. <B>mbtrnpp</B>). The input grid is expected to be a GMT/netCDF grid
+in a cartesian projected coordinate system such as UTM, with dimension
+variables named &quot;x&quot; and &quot;y&quot; (or, failing that, &quot;lon&quot; and &quot;lat&quot;) and a
+data variable named &quot;z&quot;, each carrying an &quot;actual_range&quot; attribute from
+which the grid node coordinates are reconstructed. <B>Mbgrd2octree</B> derives
+from <B>grdOctreeMaker</B>, a program contained within the <B>terrain-nav</B>
+codebase developed over many years by Steve Rock's Precision Navigation
+project at Stanford.
+<P>
+The program reads the input grid, reconstructs the north (or latitude) and
+east (or longitude) coordinate vectors from the &quot;actual_range&quot; attributes,
+and treats each node's grid value as a positive-down depth in a NED (north,
+east, down) coordinate frame, consistent with the octree format's historical
+convention. Grid nodes whose value equals the no-data sentinel 99999, or
+that are NaN, are skipped. Only nodes with a depth between 1 and 3500 meters
+are accepted; these depth limits, and the base horizontal/vertical octree
+resolution (1 in the grid's native units), are presently fixed at compile
+time and are not exposed as command line options.
+<P>
+<B>Mbgrd2octree</B> automatically determines the horizontal extent of the
+octree from the range of accepted grid nodes, and automatically derives
+the octree resolution from the coordinate spacing between the first two
+grid nodes on each axis. An octree object is constructed with dimensions
+that are a power-of-two multiple of this resolution and that enclose the
+full point cloud. Each accepted surface point is added to the octree, and
+then two additional voxels beneath each surface point are filled (using
+the octree's actual/effective vertical resolution) so that steep slopes do
+not present holes when the resulting model is viewed obliquely. The octree
+is then compressed (collapsed) and written to the output file.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>--help</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>--input=</B><I>inputGridFile</I>
+
+<DD>
+<BR>
+
+Sets the filename of the input topography grid. This must be readable
+as a netCDF grid with &quot;x&quot;/&quot;y&quot; (or &quot;lon&quot;/&quot;lat&quot;) dimension variables and a
+&quot;z&quot; data variable. If the supplied name does not already end in &quot;.grd&quot;,
+the suffix &quot;.grd&quot; is appended to it. This option (or the equivalent short
+option <B>-I</B>) must be specified.
+<DT><B>--output=</B><I>outputOctreeFile</I>
+
+<DD>
+<BR>
+
+Sets the filename of the output TRN octree file. If the supplied name does
+not already end in &quot;.bo&quot;, the suffix &quot;.bo&quot; is appended to it. This option
+(or the equivalent short option <B>-O</B>) must be specified.
+<DT><B>--bounds=</B><I>val1/val2/val3/val4</I>, <B>-R</B><I>val1/val2/val3/val4</I>
+
+<DD>
+<BR>
+
+Sets an optional bounding filter on the grid nodes used to build the
+octree, given as four slash-separated numeric values that must satisfy
+<I>val1</I> &lt; <I>val2</I> and <I>val3</I> &lt; <I>val4</I>. Grid nodes are excluded whenever
+their north coordinate is less than <I>val3</I> or greater than <I>val4</I>, or
+whenever their east coordinate is greater than <I>val1</I> or less than
+<I>val2</I>. Setting <I>val1</I> or <I>val2</I> to -1 disables that particular east/west
+test. Because <I>val1</I> must be less than <I>val2</I>, supplying two finite
+(non--1) values for both normally causes every node to be excluded on the
+east/west axis, so in practice at most one of the two east/west values
+should be set to something other than -1. If <B>--bounds</B>/<B>-R</B> is omitted
+altogether, no additional bounding filter is applied beyond the fixed
+depth-range and no-data checks described above.
+<DT><B>--verbose</B>
+
+<DD>
+The <B>--verbose</B> option causes <B>mbgrd2octree</B> to print out status and
+debug messages; repeating it (e.g. as <B>-V</B> <B>-V</B>) redirects this output
+to stderr and increases the level of detail reported.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbgrdtilemaker.html">mbgrdtilemaker</A></B>(1), <B><A HREF="mbtrnpp.html">mbtrnpp</A></B>(1), <B><A HREF="mbgrid.html">mbgrid</A></B>(1)
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>BUGS</H2>
+
+Maybe. Maybe not.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">SEE ALSO</A><DD>
+<DT><A HREF="#lbAI">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 7 September 2026</P></CENTER>
+
+<HR>
+<center>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>

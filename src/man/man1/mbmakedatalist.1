@@ -73,12 +73,14 @@ time order. However, Kongsberg multibeam data filenames usually start with a sur
 file number that restarts at 0001 whenever datalogging is stopped and restarted.
 Consequently, when data from multiple instances of logging are present in a
 single directory, the simple listing of files will not in general be in time
-order. If the file suffix is declared to be ".all", ".ALL", ".kmall", or ".KMALL"
+order. If the file suffix is declared to be ".all", ".ALL", ".kmall", ".KMALL",
+".mb56", ".mb57", ".mb58", ".mb59", or ".mb261"
 using the \fB\-S\fP (or \fB\-\-suffix\fP) option, then \fBmbmakedatalist\fP will
 attempt to sort the swath files into time order before generating the final
 datalist. This behavior can be disabled by specifying the \fB\-T\fP
 (or \fB\-\-no\-time\-sort\fP) option. Kongsberg dataloggers often create junk data
-files with names such as "9999.all" or "9999.ALL"; these filenames are ignored.
+files with names such as "9999.all", "9999.ALL", "9999.kmall", or "9999.KMALL";
+these filenames are ignored.
 
 .SH MB-SYSTEM AUTHORSHIP
 David W. Caress
@@ -141,9 +143,10 @@ conventions.
 If the file suffix declared with this option corresponds to one of the formats
 associated with Kongsberg multibeam sonar data, then \fBmbmakedatalist\fP will
 attempt to sort the swath files into time order before generating the final
-datalist. This behavior applies to files with the ".all" or ".ALL" suffix used
-for raw logged Kongsberg files, and also to files with suffixes following the
-\fBMB-System\fP convention (e.g. ".mb56", ".mb57", ".mb58", ".mb59" suffixes).
+datalist. This behavior applies to files with the ".all", ".ALL", ".kmall", or
+".KMALL" suffix used for raw logged Kongsberg files, and also to files with
+suffixes following the \fBMB-System\fP convention (".mb56", ".mb57", ".mb58",
+".mb59", or ".mb261").
 This behavior is disabled by the \fB\-T\fP (\fB\-\-no\-time\-sort\fP) option.
 .TP
 .BR \-T ", " \-\-no\-time\-sort

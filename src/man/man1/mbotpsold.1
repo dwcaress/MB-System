@@ -366,7 +366,7 @@ data file should be followed by a data format identifier, e.g.:
 This program uses the \fBMBIO\fP library and will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
-is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
+is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "datalist.mb-1".
 .TP
 .B \-\-format=\fIformat_id\fP
 .br
@@ -401,16 +401,10 @@ calculated.
 .TP
 .B \-\-tide-format=\fIformat_id\fP
 .br
-This option sets the format of the tide station data in the file specified using
-the \fB-N\fP\fItidestationfile\fP option. The tide station data may be in one of
-four ASCII, space delimited, table formats:
-  \fItidestationformat\fP=1: format is <time_d tide>
-  \fItidestationformat\fP=2: format is <yr mon day hour min sec tide>
-  \fItidestationformat\fP=3: format is <yr jday hour min sec tide>
-  \fItidestationformat\fP=4: format is <yr jday daymin sec tide>
-.br
-Note that in format 1 the value time_d = decimal seconds since 1/1/1970 and that
-format 4 the value daymin = decimal minutes since the start of day.
+This option sets the format of the output tide model file(s). If \fIformat_id\fP = 2,
+each output line has the form <yr mon day hour min sec tide>; otherwise each output
+line has the form <time_d tide>, where time_d is decimal seconds since 1/1/1970.
+Default: \fIformat_id\fP = 2.
 .TP
 .B \-\-interval\fP=\fIinterval\fP
 .br

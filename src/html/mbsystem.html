@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbsystem</H1>
-Section:  MB-System 5.8  (1)<BR>Updated:  22 January 2024 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.8  (1)<BR>Updated:  6 September 2026 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -177,6 +177,9 @@ The MB-System source code and any associated documentation does not come with an
 <P>
 Compiled programs:
 <P>
+<B><A HREF="mb7k2jstar.html">mb7k2jstar</A></B>(1): Extracts subbottom profiler and/or sidescan sonar data from Reson 7k format data files into Edgetech Jstar format data files.
+<BR>
+
 <B><A HREF="mbabsorption.html">mbabsorption</A></B>(1): Calculates water sound absorption as a function of water properties.
 <BR>
 
@@ -184,9 +187,6 @@ Compiled programs:
 <BR>
 
 <B><A HREF="mbauvloglist.html">mbauvloglist</A></B>(1): Generate arbitrary text lists of values from MBARI AUV mission log files.
-<BR>
-
-<B><A HREF="mbauvnavusbl.html">mbauvnavusbl</A></B>(1): Merge inertial and surface tracking navigation for submerged sonar platforms (e.g. ROVs and AUVs).
 <BR>
 
 <B><A HREF="mbbackangle.html">mbbackangle</A></B>(1): Generates corrections for sidescan and/or amplitude data by calculating average amplitudes as a function of the seafloor grazing angle.
@@ -225,13 +225,28 @@ Compiled programs:
 <B><A HREF="mbfilter.html">mbfilter</A></B>(1): Apply one or more simple filters to sidescan and/or beam amplitude data.
 <BR>
 
+<B><A HREF="mbfnv2navlab.html">mbfnv2navlab</A></B>(1): Converts an MB-System fast navigation (fnv) text file to a Kongsberg Navlab smoothed navigation binary file.
+<BR>
+
 <B><A HREF="mbformat.html">mbformat</A></B>(1): List information about swath sonar data formats supported by the MBIO library.
 <BR>
 
 <B><A HREF="mbgetesf.html">mbgetesf</A></B>(1): Extract bathymetry edits in edit save file format.
 <BR>
 
+<B><A HREF="mbgetphotocorrection.html">mbgetphotocorrection</A></B>(1): Generates a 3D table of image correction values as a function of lateral position and standoff distance from a camera.
+<BR>
+
 <B><A HREF="mbgpstide.html">mbgpstide</A></B>(1): Generate tide files from the height above ellipsoid data in the 'h' datagrams of Kongsberg multibeam data files
+<BR>
+
+<B><A HREF="mbgrd2gltf.html">mbgrd2gltf</A></B>(1): Convert bathymetric grid data to GLTF format with optional settings, including Draco compression.
+<BR>
+
+<B><A HREF="mbgrd2octree.html">mbgrd2octree</A></B>(1): Translates a topography grid to a TRN octree topography model for use with the MB-System TRN (terrain relative navigation) tools.
+<BR>
+
+<B><A HREF="mbgrdtilemaker.html">mbgrdtilemaker</A></B>(1): Creates a set of overlapping square grids (tiles) from an original topography grid.
 <BR>
 
 <B><A HREF="mbgrdviz.html">mbgrdviz</A></B>(1): Vizualize GMT grids.
@@ -243,6 +258,12 @@ Compiled programs:
 <B><A HREF="mbhistogram.html">mbhistogram</A></B>(1): Obtain histogram of bathymetry, amplitude, or sidescan data from swath sonar data files.
 <BR>
 
+<B><A HREF="mbimagecorrect.html">mbimagecorrect</A></B>(1): Applies brightness and contrast corrections to images using OpenCV algorithms.
+<BR>
+
+<B><A HREF="mbimagelist.html">mbimagelist</A></B>(1): Parses recursive imagelist structures, performing one or more tasks on the image files referenced in the imagelist(s).
+<BR>
+
 <B><A HREF="mbinfo.html">mbinfo</A></B>(1): Output some basic statistics of swath sonar data files.
 <BR>
 
@@ -252,7 +273,19 @@ Compiled programs:
 <B><A HREF="mblist.html">mblist</A></B>(1): List data in swath sonar data files.
 <BR>
 
+<B><A HREF="mbmakedatalist.html">mbmakedatalist</A></B>(1): Generate a datalist of the swath files in a specified directory.
+<BR>
+
 <B><A HREF="mbmakeplatform.html">mbmakeplatform</A></B>(1): Create or modify an MB-System platform file, which represents a survey system as a set of sensors with positional and angular offsets.
+<BR>
+
+<B><A HREF="mbmapscale.html">mbmapscale</A></B>(1): Outputs the local scaling between geographic coordinates and meters east and north at a specified latitude.
+<BR>
+
+<B><A HREF="mbmesh.html">mbmesh</A></B>(1): Process swath bathymetry data and generate 3D point clouds and GLB models.
+<BR>
+
+<B><A HREF="mbminirovnav.html">mbminirovnav</A></B>(1): Merges MBARI MiniROV data logs and outputs the ROV navigation in the format used for other ROV navigation at MBARI (format 165, MBF_MBARIROV).
 <BR>
 
 <B><A HREF="mbmosaic.html">mbmosaic</A></B>(1): Mosaic sidescan and amplitude data.
@@ -261,10 +294,13 @@ Compiled programs:
 <B><A HREF="mbnavadjust.html">mbnavadjust</A></B>(1): Package that solves for optimal navigation by matching bathymetry of overlapping swathes.
 <BR>
 
-<B><A HREF="mbnavadjustmerge.html">mbnavadjustmerge</A></B>(1): Merge two mbnavadjust projects.
+<B><A HREF="mbnavadjustmerge.html">mbnavadjustmerge</A></B>(1): Command line tool to create and modify MBnavadjust projects, including creating new projects, importing swath data, merging projects, and managing global and crossing navigation ties.
 <BR>
 
 <B><A HREF="mbnavedit.html">mbnavedit</A></B>(1): Interactive editor used to fix problems with navigation in swath sonar data files.
+<BR>
+
+<B><A HREF="mbnavlab2fnv.html">mbnavlab2fnv</A></B>(1): Converts a Kongsberg Navlab smoothed navigation binary file to an MB-System fast navigation (fnv) text file.
 <BR>
 
 <B><A HREF="mbnavlist.html">mbnavlist</A></B>(1): List navigation data in swath sonar data files.
@@ -273,13 +309,16 @@ Compiled programs:
 <B><A HREF="mbotps.html">mbotps</A></B>(1): Generate open ocean tidal model for specified time and location using the Oregon State Tidal Prediction Software (OTPS) package.
 <BR>
 
+<B><A HREF="mbphotogrammetry.html">mbphotogrammetry</A></B>(1): Generates bathymetry from stereo pair photographs taken from a submerged survey platform.
+<BR>
+
+<B><A HREF="mbphotomosaic.html">mbphotomosaic</A></B>(1): Makes a mosaic of navigated downlooking photographs.
+<BR>
+
 <B><A HREF="mbpreprocess.html">mbpreprocess</A></B>(1): Perform preprocessing of the logged data comprising a survey, including applying lever arm corrections (if necessary) and setting up the MB-System processing environment.
 <BR>
 
 <B><A HREF="mbprocess.html">mbprocess</A></B>(1): Process swath sonar data files, including merging navigation, applying bathymetry edits, recalculating bathymetry by raytracing, and applying a variety of other corrections.
-<BR>
-
-<B><A HREF="mbrollbias.html">mbrollbias</A></B>(1): Evaluate the roll bias of a swath sonar system using two pieces of coincident bathymetry data collected with opposing ship headings.
 <BR>
 
 <B><A HREF="mbrolltimelag.html">mbrolltimelag</A></B>(1): Estimate attitude time lag by cross correlation of apparent bottom slope with the roll time series:
@@ -297,7 +336,7 @@ Compiled programs:
 <B><A HREF="mbsegylist.html">mbsegylist</A></B>(1): List selected header values in segy seismic data files.
 <BR>
 
-<B><A HREF="mbsegypsd.html">mbsegypsd</A></B>(1): Calculates the power spectral density function of each trace in a segy data file, outputting the results as a GMT grid file..
+<B><A HREF="mbsegypsd.html">mbsegypsd</A></B>(1): Calculates the power spectral density function of each trace in a segy data file, outputting the results as a GMT grid file.
 <BR>
 
 <B><A HREF="mbset.html">mbset</A></B>(1): Create and modify parameter files used to control mbprocess.
@@ -306,22 +345,31 @@ Compiled programs:
 <B><A HREF="mbsslayout.html">mbsslayout</A></B>(1): Translate time-based sidescan sonar data into backscatter laid out into a regular array of pixels on the seafloor by projecting onto a topographic model.
 <BR>
 
-<B><A HREF="mbstripnan.html">mbstripnan</A></B>(1): Filter to remove NaN nodes.
-<BR>
-
 <B><A HREF="mbsvplist.html">mbsvplist</A></B>(1): Extract water sound velocity profiles (SVPs) from swath data files.
 <BR>
 
 <B><A HREF="mbsvpselect.html">mbsvpselect</A></B>(1): Select the best available sound speed model for each swath file in a survey according to user specified criteria.
 <BR>
 
+<B><A HREF="mbswath2las.html">mbswath2las</A></B>(1): Exports swath bathymetry soundings to LAS 1.4 point cloud files.
+<BR>
+
+<B><A HREF="mbtiff2png.html">mbtiff2png</A></B>(1): Convert GeoTiff images to PNG format images setting no data regions to be transparent.
+<BR>
+
 <B><A HREF="mbtime.html">mbtime</A></B>(1): Converts between calendar time and unix time.
+<BR>
+
+<B><A HREF="mbtrnpp.html">mbtrnpp</A></B>(1): Real-time preprocessor that reads multibeam sonar data, applies automated cleaning and downsampling, and passes the resulting bathymetry to a terrain relative navigation (TRN) process.
+<BR>
+
+<B><A HREF="mbusbl2fnv.html">mbusbl2fnv</A></B>(1): Converts a USBL (ultra-short baseline) ROV tracking CSV file to an MB-System fast navigation (fnv) text file.
 <BR>
 
 <B><A HREF="mbvelocitytool.html">mbvelocitytool</A></B>(1): Interactive program for modeling the affect of the water velocity profile on swath sonar bathymetry calculations.
 <BR>
 
-<B><A HREF="mbvoxelclean.html">mbvoxelclean</A></B>(1): mbvoxelclean identifies and flags artifacts in swath bathymetry data using a 3D density filter. .
+<B><A HREF="mbvoxelclean.html">mbvoxelclean</A></B>(1): mbvoxelclean identifies and flags artifacts in swath bathymetry data using a 3D density filter.
 <P>
 Alphabetical List of GMT Modules:
 <BR>
@@ -333,13 +381,13 @@ MB-system also includes four plug-in modules for the GMT software package that a
 <B><A HREF="mbcontour.html">mbcontour</A></B>(1): GMT plug-in that generates GMT Postscript color contour plots of swath bathymetry.
 <BR>
 
+<B><A HREF="mbgrd2obj.html">mbgrd2obj</A></B>(1): GMT plug-in that translates a topography grid to an OBJ format 3D model file for visualization and 3D printing
+<BR>
+
 <B><A HREF="mbgrdtiff.html">mbgrdtiff</A></B>(1): GMT plug-in that generates a GeoTIFF image from gridded data.
 <BR>
 
 <B><A HREF="mbswath.html">mbswath</A></B>(1): GMT plug-in that generates GMT compatible Postscript color and color shaded relief plots of swath bathymetry and backscatter data.
-<BR>
-
-<B><A HREF="mbgrd2obj.html">mbgrd2obj</A></B>(1): GMT plug-in that translates a topography grid to an OBJ format 3D model file for visualization and 3D printing
 <P>
 Alphabetical List of Macros:
 <BR>
@@ -349,13 +397,10 @@ Macros are executable shellscripts which make use of programs from the MB-System
 <B><A HREF="mbm_arc2grd.html">mbm_arc2grd</A></B>(1): Convert an ArcView ASCII grid file to a GMT grid file.
 <BR>
 
-<B><A HREF="mbm_copy.html">mbm_copy</A></B>(1): Translate groups of swath data files between formats
-<BR>
-
 <B><A HREF="mbm_bpr.html">mbm_bpr</A></B>(1): Process data from a Seabird SBE53 pressure sensor into a tidal model for use by mbprocess.
 <BR>
 
-<B><A HREF="mbm_fmtvel.html">mbm_fmtvel</A></B>(1): Scans a Hydrosweep swath sonar data file using the program mbhsdump and generates a list in columnar format with time, date, latitude, longitude, C-mean, and C-keel entrys.
+<B><A HREF="mbm_copy.html">mbm_copy</A></B>(1): Translate groups of swath data files between formats.
 <BR>
 
 <B><A HREF="mbm_grd2arc.html">mbm_grd2arc</A></B>(1): Convert a GMT grid file to an ArcView ASCII grid file.
@@ -379,6 +424,12 @@ Macros are executable shellscripts which make use of programs from the MB-System
 <B><A HREF="mbm_histplot.html">mbm_histplot</A></B>(1): Create an executable shellscript which will generate a GMT histogram plot of a dataset.
 <BR>
 
+<B><A HREF="mbm_makedatalist.html">mbm_makedatalist</A></B>(1): Macro to generate a datalist of the swath files in a specified directory.
+<BR>
+
+<B><A HREF="mbm_makeimagelist.html">mbm_makeimagelist</A></B>(1): Generates MB-System imagelist files within MBARI Low Altitude Survey System (LASS) stereo seafloor photography data directories.
+<BR>
+
 <B><A HREF="mbm_makesvp.html">mbm_makesvp</A></B>(1): Generate a sound velocity profile model from sound speed and depth values in swath files.
 <BR>
 
@@ -391,13 +442,25 @@ Macros are executable shellscripts which make use of programs from the MB-System
 <B><A HREF="mbm_multiprocess.html">mbm_multiprocess</A></B>(1): Apply specified processing tasks to a swath data file using parallel processes.
 <BR>
 
+<B><A HREF="mbm_phins2fnv.html">mbm_phins2fnv</A></B>(1): Translate processed Phins INS data to an fnv file for use in MB-System processing.
+<BR>
+
 <B><A HREF="mbm_plot.html">mbm_plot</A></B>(1): Reads a swath sonar data file and writes a shellscript which will generate a swath and/or contour plot of the data.
+<BR>
+
+<B><A HREF="mbm_rollerror.html">mbm_rollerror</A></B>(1): Reads a multibeam bathymetry file, calculates the noise in the vertical reference used by the sonar, and generates a file of roll corrections for use by mbprocess.
 <BR>
 
 <B><A HREF="mbm_route2mission.html">mbm_route2mission</A></B>(1): Translate an mbgrdviz survey route file into an MBARI AUV mission script.
 <BR>
 
 <B><A HREF="mbm_stat.html">mbm_stat</A></B>(1): Runs mbinfo on a swath sonar data file and extracts beam statistics from the output of mbinfo.
+<BR>
+
+<B><A HREF="mbm_tmap.html">mbm_tmap</A></B>(1): Macro to convert XYZ point clouds to 3D Tiles and generate a Cesium viewer.
+<BR>
+
+<B><A HREF="mbm_trnplot.html">mbm_trnplot</A></B>(1): Plot map views of an mbtrnpp session.
 <BR>
 
 <B><A HREF="mbm_utm.html">mbm_utm</A></B>(1): Performs forward and inverse UTM projections of ASCII data triples.
@@ -408,15 +471,27 @@ Macros are executable shellscripts which make use of programs from the MB-System
 
 <B><A HREF="mbm_xyplot.html">mbm_xyplot</A></B>(1): Reads one or more xy data files and writes a shellscript which will generate GMT plot of the data.
 <P>
-Deprecated Programs and Macros: 
+Deprecated Programs and Macros:
 <BR>
 
 These are programs and macros that are no longer used, and are not built by default when MB-System is installed. If required, these can be built and installed with a special argument to the CMake build system.
 <P>
+<B><A HREF="mb7k2ss.html">mb7k2ss</A></B>(1): mb7k2ss extracts Edgetech sidescan sonar data from Reson 7k format data, bins and lays the sidescan onto the seafloor, and outputs files in the MBF_MBLDEOIH formst (MBIO format id 71).
+<BR>
+
+<B><A HREF="mb7kpreprocess.html">mb7kpreprocess</A></B>(1): Preprocess Reson 7k data (format 88), including applying time lag and biases to attitude and navigation data.
+<BR>
+
+<B><A HREF="mbauvnavusbl.html">mbauvnavusbl</A></B>(1): Merge inertial and surface tracking navigation for submerged sonar platforms (e.g. ROVs and AUVs).
+<BR>
+
 <B><A HREF="mbhsdump.html">mbhsdump</A></B>(1): List raw information contained in Hydrosweep DS data files (formats 21 and 24).
 <BR>
 
 <B><A HREF="mbhysweeppreprocess.html">mbhysweeppreprocess</A></B>(1): Preprocess Hysweep HSX data (format 201), including applying time lag and biases to attitude and navigation data.
+<BR>
+
+<B><A HREF="mbinsreprocess.html">mbinsreprocess</A></B>(1): Reprocesses INS navigation data (e.g. from a Kearfott SeaDevil) by removing navigation tears from free-inertial periods via linear interpolation.
 <BR>
 
 <B><A HREF="mbkongsbergpreprocess.html">mbkongsbergpreprocess</A></B>(1): performs preprocessing of data from third generation Kongsberg multibeam sonars (e.g. EM122, EM302, EM710).
@@ -425,19 +500,22 @@ These are programs and macros that are no longer used, and are not built by defa
 <B><A HREF="mbneptune2esf.html">mbneptune2esf</A></B>(1): Extract bathymetry edits from Simrad Neptune software into edit save file format.
 <BR>
 
-<B><A HREF="mbps.html">mbps</A></B>(1): Simple perspective views of swath bathymetry in Postscript.
+<B><A HREF="mbotpsold.html">mbotpsold</A></B>(1): Predicts tides using the OSU Tidal Prediction Software (OTPS) distribution.
+<BR>
+
+<B><A HREF="mbrollbias.html">mbrollbias</A></B>(1): Evaluate the roll bias of a swath sonar system using two pieces of coincident bathymetry data collected with opposing ship headings.
+<BR>
+
+<B><A HREF="mbrphsbias.html">mbrphsbias</A></B>(1): Solves for roll-bias, pitch-bias, heading-bias, and array-water-sound-speed-bias parameters by a brute force multi-dimensional search minimizing the variance of unflagged bathymetry soundings.
+<BR>
+
+<B><A HREF="mbstripnan.html">mbstripnan</A></B>(1): Filter to remove NaN nodes.
 <BR>
 
 <B><A HREF="mbswplspreprocess.html">mbswplspreprocess</A></B>(1): Preprocess SwathPlus SXP data (format 222), including applying time lag and biases to attitude and navigation data.
 <BR>
 
-<B><A HREF="mb7k2jstar.html">mb7k2jstar</A></B>(1): Extract Jstar format (format 132) sidescan and subbottom data from Reson 7k (format 88) data files.
-<BR>
-
-<B><A HREF="mb7k2ss.html">mb7k2ss</A></B>(1): mb7k2ss extracts Edgetech sidescan sonar data from Reson 7k format data, bins and lays the sidescan onto the seafloor, and outputs files in the MBF_MBLDEOIH formst (MBIO format id 71).
-<BR>
-
-<B><A HREF="mb7kpreprocess.html">mb7kpreprocess</A></B>(1): Preprocess Reson 7k data (format 88), including applying time lag and biases to attitude and navigation data.
+<B><A HREF="mbm_fmtvel.html">mbm_fmtvel</A></B>(1): Scans a Hydrosweep swath sonar data file using the program mbhsdump and generates a list in columnar format with time, date, latitude, longitude, C-mean, and C-keel entrys.
 <BR>
 
 <B><A HREF="mbm_grd2geovrml.html">mbm_grd2geovrml</A></B>(1): Create and execute commands which generate a TerraVision tileset and GeoVRML set of files that can be combined with other data and viewed in a web browser.
@@ -472,7 +550,7 @@ breaks.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 22 January 2024</P></CENTER>
+Last Updated: 6 September 2026</P></CENTER>
 
 <HR>
 <center>

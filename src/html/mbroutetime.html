@@ -28,8 +28,12 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbroutetime</B> <B>-Rroutefile [-F</B><I>format</I> <B>-I</B><I>file</I>
-<B>-O</B><I>waypointtimefile</I> <B>-U</B><I>rangethreshold</I> <B>-H -V</B>]
+<B>mbroutetime</B> <B>--route-file</B>=<I>routefile</I> {<B>-R</B><I>routefile</I>}
+[<B>--format</B>=<I>format</I> {<B>-F</B><I>format</I>}]
+[<B>--input</B>=<I>file</I> {<B>-I</B><I>file</I>}]
+[<B>--output</B>=<I>waypointtimefile</I> {<B>-O</B><I>waypointtimefile</I>}]
+[<B>--range-threshold</B>=<I>rangethreshold</I> {<B>-U</B><I>rangethreshold</I>}]
+[<B>--verbose</B> {<B>-V</B>}] [<B>--help</B> {<B>-H</B>}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -66,10 +70,9 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-F</B>
+<DT><B>--format=</B><I>format</I> {<B>-F</B><I>format</I>}
 
 <DD>
-<I>format</I>
 <BR>
 
 Sets the format for the input swath data using
@@ -78,15 +81,14 @@ This program uses the <B>MBIO</B> library and will read any swath
 format supported by <B>MBIO</B>. A list of the swath data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page. Default: <I>format</I> = 0.
-<DT><B>-H</B>
+<DT><B>--help {-H</B>}
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-I</B>
+<DT><B>--input=</B><I>filename</I> {<B>-I</B><I>filename</I>}
 
 <DD>
-<I>filename</I>
 <BR>
 
 Sets the input filename. If <I>format</I> &gt; 0 (set with the
@@ -106,10 +108,9 @@ format supported by <B>MBIO</B>. A list of the swath data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page.
 Default: <I>infile</I> = &quot;datalist.mb-1&quot;.
-<DT><B>-O</B>
+<DT><B>--output=</B><I>waypointtimefile</I> {<B>-O</B><I>waypointtimefile</I>}
 
 <DD>
-<I>waypointtimefile</I>
 <BR>
 
 Sets the name of the output file listing, for each route waypoint
@@ -117,25 +118,23 @@ reached, the longitude, latitude, and time (in decimal epoch seconds)
 at which the survey passed that waypoint.
 Default: <I>waypointtimefile</I> is the input file or datalist name
 (set with the <B>-I</B> option) with the suffix &quot;_wpttime_d.txt&quot; appended.
-<DT><B>-R</B>
+<DT><B>--route-file=</B><I>routefile</I> {<B>-R</B><I>routefile</I>}
 
 <DD>
-<I>routefile</I>
 <BR>
 
 Sets the name of the input <B>MBgrdviz</B> route file containing the
 planned survey waypoints against which the survey data are checked.
 This option is required.
-<DT><B>-U</B>
+<DT><B>--range-threshold=</B><I>rangethreshold</I> {<B>-U</B><I>rangethreshold</I>}
 
 <DD>
-<I>rangethreshold</I>
 <BR>
 
 Sets the distance in meters that the survey navigation must come within
 a route waypoint for that waypoint to be considered reached.
 Default: <I>rangethreshold</I> = 25.0.
-<DT><B>-V</B>
+<DT><B>--verbose {-V</B>}
 
 <DD>
 The <B>-V</B> option causes <B>mbroutetime</B> to print out status messages.

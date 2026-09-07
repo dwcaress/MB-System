@@ -27,7 +27,7 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>MBgrdviz</B> [-I<I>gridfile</I> <B>-T -V -H</B>]
+<B>MBgrdviz</B> [-I<I>gridfile</I> <B>-J</B><I>gridfile</I> <B>-T -V -H</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -175,6 +175,15 @@ of its operation and then exit immediately.
 Sets a GMT grid file to be read and displayed at startup.
 This option is usually used only when <B>MBgrdviz</B> is started
 automatically from some other process.
+<DT><B>-J</B>
+
+<DD>
+<I>gridfile</I>
+<BR>
+
+Sets a GMT grid file to be read and displayed as an overlay at startup.
+This option has no effect unless the <B>-I</B> option is also used to
+specify a primary grid file.
 <DT><B>-T</B>
 
 <DD>

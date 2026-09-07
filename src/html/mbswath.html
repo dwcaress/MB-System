@@ -32,12 +32,11 @@ Version 5.0
 <B>-R</B><I>west/east/south/north</I> [<B>-A</B><I>factor/mode/depth</I>
 <B>-B</B><I>tickinfo</I> <B>-b</B><I>yr/mo/da/hr/mn/sc</I>
 <B>-c</B><I>copies</I> <B>-D</B><I>mode/scale/min/max</I>
-<B>-E</B><I>yr/mo/da/hr/mn/sc</I>
-<B>-f</B><I>format</I> <B>-F</B><I>red/green/blue</I>
+<B>-e</B><I>yr/mo/da/hr/mn/sc</I> <B>-E</B><I>i</I><B>|</B><I>dpi</I>
+<B>-F</B><I>format</I>
 <B>-G</B><I>magnitude/azimuth</I> <B>-I</B><I>datalist</I> <B>-K</B>
-<B>-N</B><I>cptfile</I> <B>-O</B> <B>-P</B> <B>-p</B><I>pings </I><B>-Q</B><I>dpi</I> <B>-S</B><I>speed</I>
+<B>-N</B><I>cptfile</I> <B>-O</B> <B>-P</B> <B>-p</B><I>pings</I> <B>-S</B><I>speed</I>
 <B>-T</B><I>timegap</I> <B>-U</B> <B>-W</B> <B>-X</B><I>x-shift</I> <B>-Y</B><I>y-shift</I> <B>-Z</B><I>mode[F]</I>
-<B>-0 -1 -2</B>
 <B>-V -H</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
@@ -193,7 +192,7 @@ will be clipped to <I>min</I> if it is smaller than <I>min</I> or <I>max</I>
 if it is greater than <I>max</I>; this clipping happens prior to the
 multiplication by <I>scale</I>. Default: <I>mode</I> = 1, <I>scale</I> = 1.0,
 <I>min</I> = 0.0, <I>max</I> = 1.0.
-<DT><B>-E</B>
+<DT><B>-e</B>
 
 <DD>
 <I>yr/mo/da/hr/mn/sc</I>
@@ -202,14 +201,17 @@ multiplication by <I>scale</I>. Default: <I>mode</I> = 1, <I>scale</I> = 1.0,
 Sets the ending time for data allowed in the input data; pings
 with times after the ending time will be ignored.
 Default: <I>yr/mo/da/hr/mn/sc</I> = 2062/2/21/10/30/0.
-<DT><B>-F</B>
+<DT><B>-E</B>
 
 <DD>
-<I>red/green/blue</I>
+<I>i</I><B>|</B><I>dpi</I>
 <BR>
 
-Sets the color used for Frame and annotation. [Default is black]
-<DT><B>-f</B>
+Sets the resolution in pixels per inch of the color image output by
+<B>mbswath</B> (used when <B>-Jx</B> or <B>-Jm</B> is not selected). If
+<I>i</I> is given instead of a numerical <I>dpi</I> value, the image is
+interpolated in <I>PostScript</I> at the output device's own resolution.
+<DT><B>-F -f</B>
 
 <DD>
 <I>format</I>
@@ -223,6 +225,7 @@ and will read or write any swath sonar
 format supported by <B>MBIO</B>. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page. Default: <I>format</I> = -1.
+<B>-F</B> and <B>-f</B> are equivalent.
 <DT><B>-G</B>
 
 <DD>
@@ -401,7 +404,7 @@ then the longitude values will be in
 the range from -180 to 180 degrees. If <I>lonflip</I>=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
-Default: <I>lonflip</I> = 0.
+Default: <I>lonflip</I> is set by <B><A HREF="mbdefaults.html">mbdefaults</A></B>(1).
 <DT><B>-N</B>
 
 <DD>
@@ -434,15 +437,6 @@ ping.  If <I>pings</I> = 0, then the ping averaging will automatically
 be done so that the along-track ping spacing is equal to the across-track
 beam spacing.
 Default: <I>pings</I> = 1 (no ping averaging).
-<DT><B>-Q</B>
-
-<DD>
-<I>dpi</I>
-<BR>
-
-Sets the resolution of the color image output by <B>mbswath</B>
-in pixels per inch (except when the <B>-1</B> option is used to force individual
-polygon color fills). Default: <I>dpi</I> = 100.
 <DT><B>-R</B>
 
 <DD>
@@ -512,20 +506,6 @@ data are stored in ancillary files ending with &quot;.ffa&quot;, and filtered
 sidescan files end in &quot;.ffs&quot;. Filtering of bathymetry data is not supported,
 and so appending &quot;F&quot; to <I>mode</I> values of 1 or 2 will have no effect.
 Default: <I>mode</I> = 1;
-<DT><B>-0</B>
-
-<DD>
-Create the image using the Adobe <I>PostScript</I> colorimage operator.
-This is the default.
-<DT><B>-1</B>
-
-<DD>
-Create the image by plotting individual color polygons.
-<DT><B>-2</B>
-
-<DD>
-Create the image by color separation using three calls to image for later
-processing by <B>psto24</B>.
 </DL>
 <A NAME="lbAH">&nbsp;</A>
 <H2>EXAMPLES</H2>

@@ -9,9 +9,10 @@ Version 5.0
 .SH SYNOPSIS
 \fBmbhysweeppreprocess\fP
 [\fB\-A\fP\fIoffsettype/x/y/z/t\fP \fB\-B\fP\fIrollbias/pitchbias/headingbias\fP
-\fB\-D\fP\fIsonardepthfile\fP \fB\-I\fP\fIdatalist\fP
-\fB\-J\fP\fIprojection\fP  \fB\-L\fP
-\fB\-M\fP\fInavformat\fP \fB\-N\fP\fInavfile\fP
+\fB\-D\fP\fIsonardepthfile\fP \fB\-F\fP\fIformat\fP \fB\-G\fP\fIplatformfile\fP
+\fB\-I\fP\fIdatalist\fP
+\fB\-J\fP\fIprojection\fP \fB\-K\fP\fIklugemode\fP \fB\-L\fP
+\fB\-M\fP\fInavformat\fP \fB\-N\fP\fInavfile\fP \fB\-O\fP\fIoutfile\fP
 \fB\-T\fP\fItimelag\fP
 \fB\-H\fP \fB\-V\fP]
 
@@ -81,6 +82,14 @@ the input filename does not conform to the \fBMB-System\fP file naming conventio
 program, the only relevant options are \fIformat\fP = 201 for an HSX format file, or
 \fIformat\fP= \-1 for a datalist referencing multiple format 201 files.
 .TP
+.B \-G
+\fIplatformfile\fP
+.br
+This option specifies a platform offset file, in the format read by
+\fBmb_platform_read\fP, defining the geometric relationships among the sonar,
+motion sensor, and navigation sensor. If specified, this platform definition
+is used in place of any offsets set with the \fB\-A\fP and \fB\-B\fP options.
+.TP
 .B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
@@ -123,6 +132,16 @@ UTM zone 12 projection using its EPSG designation, or \-Jepsg32612. The complete
 of projected coordinate systems supported by \fBMB-System\fP is given in the \fBmbgrid\fP
 manual page.
 .TP
+.B \-K
+\fIklugemode\fP
+.br
+This option enables one of two "kluge" modes that correct problems with the
+way attitude data are applied to the raw beam angles. If \fIklugemode\fP = 1,
+roll and pitch attitude compensation of the beam angles is forced even when
+the raw multibeam (RMB) data records indicate that the sonar has already
+applied that compensation. If \fIklugemode\fP = 2, the sign of the roll and
+pitch values in the attitude (HCP) data records is reversed before use.
+.TP
 .B \-L
 .br
 This option causes the program to list the timetags of bathymetry,
@@ -154,6 +173,13 @@ in the output format 201 data. Any pre-existing navigation data records will
 remain unchanged in the data stream. However, the HSX file header will be altered
 to show the newly merged data as "enabled" and the original, asynchronous data
 as not enabled.
+.TP
+.B \-O
+\fIoutfile\fP
+.br
+This option is intended to set the path of the output data file, but
+currently has no effect: \fBmbhysweeppreprocess\fP always constructs the
+output file name automatically from the input file name.
 .TP
 .B \-T
 \fItimelag\fP

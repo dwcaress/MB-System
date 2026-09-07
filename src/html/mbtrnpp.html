@@ -44,7 +44,7 @@ Version 5.0
 --log-directory=path
 <BR>
 
---input=datalist|file|socket_definition
+--input=datalist|file|socket_definition|serial_definition
 <BR>
 
 --output=file|socket
@@ -321,20 +321,23 @@ instance log directory). The directory is created if it does not already
 exist. The default is the current working directory (<B>.</B>). A symbolic
 link named <B>mbtrnpp-latest</B> pointing at this directory is created (or
 replaced) each time <B>mbtrnpp</B> starts.
-<DT><B>--input=datalist|file|socket_definition</B>
+<DT><B>--input=datalist|file|socket_definition|serial_definition</B>
 
 <DD>
 This option specifies the source of input bathymetry data, exactly as the
 <B>--input</B> (<B>-I</B>) option does in other <B>MB-System</B> utilities,
-with the addition of live socket input. If the value does not begin with
-<I>socket:</I>, it is read as an <B>MB-System</B> recursive datalist (in which
-case <B>--format</B> is not required, since each listed file names its own
-format) or as a single swath data file (in which case <B>--format</B> must
-also be given). If the value begins <I>socket:</I>, the remainder is a
-socket definition string (e.g. identifying a Reson/Teledyne sonar or 7k
-Center host and port) used to read multibeam pings from a live network
-connection instead of a file; <B>--format</B> must be set to the format ID
-appropriate for the socket data stream. The default input is <B>stdin</B>.
+with the addition of live socket and serial input. If the value does not
+begin with <I>socket:</I> or <I>serial:</I>, it is read as an <B>MB-System</B>
+recursive datalist (in which case <B>--format</B> is not required, since each
+listed file names its own format) or as a single swath data file (in which
+case <B>--format</B> must also be given). If the value begins <I>socket:</I>,
+the remainder is a socket definition string (e.g. identifying a
+Reson/Teledyne sonar or 7k Center host and port) used to read multibeam
+pings from a live network connection instead of a file. If the value begins
+<I>serial:</I>, the remainder is a serial port definition string used to read
+multibeam pings from a live serial connection instead of a file. In either
+live case, <B>--format</B> must be set to the format ID appropriate for the
+data stream. The default input is <B>stdin</B>.
 <DT><B>--output=file|socket</B>
 
 <DD>
@@ -381,6 +384,7 @@ the input bathymetry, following the same tide model file format used by
 This option sets the width of the sonar swath, in decimal degrees measured
 from nadir, that is retained from each ping; soundings outside this swath
 are excluded from output. The default is 90.0 (the full swath).
+<B>--swath</B> is accepted as an equivalent, shorter alias for this option.
 <DT><B>--soundings=value</B>
 
 <DD>

@@ -203,7 +203,7 @@ is given in the <B>MBIO</B> manual page. Default: <I>infile</I> = &quot;datalist
 <DT><B>-M</B>
 
 <DD>
-<I>threshold</I>[<I>/nmin</I>]
+<I>threshold</I>[<I>/nmin</I>[<I>/nmax</I>]]
 <BR>
 
 Turns on use of a median filter test for the soundings. If no other test is
@@ -212,8 +212,12 @@ median depth by a value greater than <I>threshold</I> times the sonar
 altitude will be considered &quot;bad&quot;. So, if <I>threshold</I> = 0.05, then
 any sounding that is 5% greater or less than the median depth will be
 considered bad. The <I>nmin</I> parameter sets the minimum number of
-soundings required to use the median filter, The default values are
-<I>threshold</I> = 0.25 and <I>nmin</I> = 10.
+soundings required to use the median filter. The <I>nmax</I> parameter
+sets the maximum number of soundings allowed within a cell; if the number
+of initially good beams in a cell exceeds <I>nmax</I>, then only the <I>nmax</I>
+soundings nearest the median value remain unflagged, and the rest are
+flagged even if they meet the threshold test. The default values are
+<I>threshold</I> = 0.25, <I>nmin</I> = 10, and <I>nmax</I> = infinite.
 <DT><B>-N</B>
 
 <DD>
@@ -279,6 +283,8 @@ use the specified bottom detection algorithm.
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;-&nbsp;unknown&nbsp;algorithm
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;-&nbsp;amplitude&nbsp;detection
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;-&nbsp;phase&nbsp;detection
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;-&nbsp;lidar&nbsp;detection
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;-&nbsp;photogrammetry&nbsp;detection
 <DT><B>-V</B>
 
 <DD>

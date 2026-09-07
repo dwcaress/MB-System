@@ -56,6 +56,7 @@ Miscellaneous Options:
 [<B>-MGD</B><I>gmtdef/value</I>  <B>-MGF</B><I>scale_loc</I>
 <B>-MGL</B><I>scalebar</I>
 <B>-MGL</B><I>F</I>
+<B>-MGO</B><I>xorigin/yorigin</I>
 <B>-MGQ</B><I>dpi</I> <B>-MGS</B><I>scalefactor</I>
 <B>-MGT</B><I>x/y/size/angle/font/just/text</I>
 <B>-MGU</B>[<I>/dx/dy/</I>][<I>label</I>]
@@ -67,6 +68,7 @@ Miscellaneous Options:
 <B>-MNF</B><I>format</I> <B>-MNI</B><I>swathdata</I>
 <B>-MNN</B>[<I>ttick/tannot/dannot/tlen</I>[<I>/nhgt</I>] | <I>F</I> | <I>FP</I>]
 <B>-MNP</B>[<I>pingnumber_tick/pingnumber_annot/pingnumber_tick_len</I>]
+<B>-MNW</B><I>pen</I>
 <B>-MTC</B><I>fill</I> <B>-MTD</B><I>resolution</I>
 <B>-MTG</B><I>fill</I> <B>-MTI</B><I>river[/pen]</I>
 <B>-MTN</B><I>border[/pen]</I> <B>-MTS</B><I>fill</I>
@@ -109,7 +111,7 @@ If a Postscript viewer is not explicitly defined by either method, then the user
 default program for viewing Postscript is invoked.
 Invoking the plot generation shellscript with
 a <B>-N</B> command line argument suppresses the screen
-display of the plot. The <B>-MIE</B> and <B>-MIP</B> arguments cause the
+display of the plot. The <B>-MIE</B> and <B>-MIT</B> arguments cause the
 plot generation shellscript to render the Postscript map onto an image in the
 specified format.
 <P>
@@ -162,7 +164,7 @@ The value <I>azimuth</I>
 is the azimuth in degrees from north from which the data is illuminated.
 The value <I>elevation</I> is the elevation of the illumination
 in degrees from horizontal.
-Defaults: <I>magnitude</I> = 0.2; <I>azimuth</I> = 0.0;
+Defaults: <I>magnitude</I> = 1.0; <I>azimuth</I> = 0.0;
 <I>elevation</I> = 30.0;
 <DT><B>-C</B>
 
@@ -362,17 +364,20 @@ color scheme will be used for the plot
 <DT><B>-A</B>
 
 <DD>
-<I>magnitude[/azimuth]</I>
+<I>magnitude[/azimuth/elevation]</I>
 <BR>
 
 Sets the parameters which control the
 synthetic illumination of the gridded data (shaded relief).
 The value <I>magnitude</I>
 is an effective vertical exaggeration which modulates the intensity of
-the shading; typical values are in the 0.1 to 0.5 range.
+the shading; typical values are in the 0.1 to 10 range.
 The value <I>azimuth</I>
-is the azimuth from which the data is illuminated.
-Defaults: <I>magnitude</I> = 0.2; <I>azimuth</I> = 0.0;
+is the azimuth in degrees from north from which the data is illuminated.
+The value <I>elevation</I> is the elevation of the illumination
+in degrees from horizontal.
+Defaults: <I>magnitude</I> = 1.0; <I>azimuth</I> = 0.0;
+<I>elevation</I> = 30.0;
 <DT><B>-B</B>
 
 <DD>
@@ -720,6 +725,14 @@ MAP_TICK_PEN_PRIMARY.
 If <B>-MGL</B><I>F</I> is given in conjunction with <B>-MGL</B><I>scalebar</I>
 then the map scale will be surrounded by a white filled, black bounded box on
 top of the map.
+<DT><B>-MGO</B>
+
+<DD>
+<I>xorigin/yorigin</I>
+<BR>
+
+Sets the plot origin offset in inches on the page, overriding the automatic
+centering of the plot on the page.
 <DT><B>-MGQ</B>
 
 <DD>
@@ -943,6 +956,14 @@ inches long.
 Defaults: Pingnumber annotation off. If the <B>-MNP</B> option is given without
 specifying the controlling parameters, then <I>pingnumber_tick</I> = 50,
 <I>pingnumber_annot</I> = 100, and <I>pingnumber_tick_len</I> = 0.1.
+<DT><B>-MNW</B>
+
+<DD>
+<I>pen</I>
+<BR>
+
+Sets the pen attributes used to draw the navigation track plotted with the
+<B>-MNI</B> option.
 <DT><B>-MTC</B>
 
 <DD>
@@ -1346,7 +1367,7 @@ If <I>color_style</I> = 1 [default], then
 the color scheme used will be a continuous grading
 of colors. If <I>color_style</I> = 2, the color scheme
 will be a set of discrete color intervals. The color
-palette used is set using <I>palette</I>. Seven palettes
+palette used is set using <I>palette</I>. Ten palettes
 are available:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>palette</I>&nbsp;=&nbsp;1:<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>Haxby&nbsp;colors&nbsp;[default]<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>palette</I>&nbsp;=&nbsp;2:<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>high&nbsp;Intensity&nbsp;colors<BR>
@@ -1357,6 +1378,7 @@ are available:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>palette</I>&nbsp;=&nbsp;7:<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>uniform&nbsp;white<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>palette</I>&nbsp;=&nbsp;8:<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>sealevel&nbsp;1<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>palette</I>&nbsp;=&nbsp;9:<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT>sealevel&nbsp;2<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>palette</I>&nbsp;=&nbsp;10:<TT>&nbsp;&nbsp;&nbsp;</TT>seismic<BR>
 <P>
 The RGB definitions of the color palettes are:
 <P>

@@ -1,0 +1,464 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbphotogrammetry</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbphotogrammetry</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  7 September 2026 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbphotogrammetry</B> - Generate bathymetry soundings from navigated stereo pairs of downlooking seafloor photographs.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+mbphotogrammetry [<B>--verbose</B> <B>--help</B> <B>--threads=</B><I>nthreads</I>
+<B>--show-images</B> <B>--input=</B><I>imagelist</I> <B>--fov-fudgefactor=</B><I>factor</I>
+<B>--navigation-file=</B><I>file</I> <B>--survey-line-file=</B><I>file</I>
+<B>--tide-file=</B><I>file</I> <B>--image-quality-file=</B><I>file</I>
+<B>--image-quality-threshold=</B><I>value</I>
+<B>--image-quality-filter-length=</B><I>value</I>
+<B>--output=</B><I>fileroot</I> <B>--output-number-pairs=</B><I>value</I>
+<B>--camera-calibration-file=</B><I>file</I> | <B>--calibration-file=</B><I>file</I>
+<B>--platform-file=</B><I>platform.plf</I> <B>--camera-sensor=</B><I>id</I>
+<B>--nav-sensor=</B><I>id</I> <B>--sensordepth-sensor=</B><I>id</I>
+<B>--heading-sensor=</B><I>id</I> <B>--altitude-sensor=</B><I>id</I>
+<B>--attitude-sensor=</B><I>id</I>
+<B>--altitude-min=</B><I>value</I> <B>--altitude-max=</B><I>value</I>
+<B>--trim=</B><I>value</I> <B>--bin-size=</B><I>value</I> <B>--bin-filter=</B><I>value</I>
+<B>--downsample=</B><I>value</I> <B>--algorithm=</B><I>algorithm</I>
+<B>--algorithm-pre-filter-cap=</B><I>value</I>
+<B>--algorithm-sad-window-size=</B><I>value</I>
+<B>--algorithm-smoothing-penalty-1=</B><I>value</I>
+<B>--algorithm-smoothing-penalty-2=</B><I>value</I>
+<B>--algorithm-min-disparity=</B><I>value</I>
+<B>--algorithm-number-disparities=</B><I>value</I>
+<B>--algorithm-uniqueness-ratio=</B><I>value</I>
+<B>--algorithm-speckle-window-size=</B><I>value</I>
+<B>--algorithm-speckle-range=</B><I>value</I>
+<B>--algorithm-disp-12-max-diff=</B><I>value</I>
+<B>--algorithm-texture-threshold=</B><I>value</I>
+<B>--good-fraction-threshold=</B><I>value</I>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>Mbphotogrammetry</B> generates bathymetry soundings from navigated stereo
+pairs of downlooking photographs taken from a submerged survey platform. For
+each stereo pair listed in an input MB-System imagelist file, the program
+computes a dense disparity map between the (optionally undistorted and
+rectified) left and right images using one of OpenCV's block matching stereo
+correspondence algorithms, then converts the resulting disparities into 3D
+points using the stereo camera's calibrated geometry. These 3D points are
+combined with the platform's navigation, heading, and attitude at the time
+each stereo pair was taken (derived directly from the imagelist and,
+optionally, an MB-System platform offset model and separate navigation and
+tide files) to compute georeferenced soundings, which are binned and written
+out as MB-System multibeam-format soundings (format 251, <I>mb251</I>,
+associated with the <I>mbsys_stereopair</I> data structure).
+
+Three OpenCV stereo correspondence algorithms are supported: block matching
+(<B>bm</B>), semi-global block matching (<B>sgbm</B>, the default), and its more
+exhaustive variant (<B>hh</B>). Numerous options tune the chosen algorithm's
+matching window, disparity range, smoothing penalties, and validity checks;
+these correspond directly to the parameters of OpenCV's <B>StereoBM</B> and
+<B>StereoSGBM</B> classes. Soundings whose stereo-derived altitude falls outside
+the range set by <B>--altitude-min</B> and <B>--altitude-max</B> are rejected. Output
+soundings can optionally be binned spatially, with each bin's disparity
+resolved either by taking the mean or the median of the pixels falling in
+that bin.
+
+Input images can be filtered by an externally computed per-image quality
+metric (<B>--image-quality-file</B> together with <B>--image-quality-threshold</B>),
+and processing can be parallelized across multiple stereo pairs at once with
+<B>--threads</B>. Output soundings are normally written to a single file named
+from <B>--output</B> with the suffix <I>.mb251</I>, but can instead be split into a
+new output file every <B>--output-number-pairs</B> stereo pairs, or split at the
+waypoints of a survey line file supplied with <B>--survey-line-file</B>.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>--help</B>
+
+<DD>
+This &quot;help&quot; flag causes the program to print out a description
+of its operation and then exit immediately.
+<DT><B>--verbose</B>
+
+<DD>
+The <B>--verbose</B> option causes <B>mbphotogrammetry</B> to print out status and
+debug messages. Using it more than once increases the verbosity level.
+<DT><B>--threads=</B><I>nthreads</I>
+
+<DD>
+<BR>
+
+Sets the number of processing threads used to work through the stereo pairs
+in the image list. The requested number of threads is limited to the number
+of hardware threads available and to the MB-System maximum thread count. The
+default is 1 thread.
+<DT><B>--show-images</B>
+
+<DD>
+<BR>
+
+Enables display of the images being processed (via OpenCV's image display
+windows) as the program runs.
+<DT><B>--input=</B><I>imagelist</I>
+
+<DD>
+<BR>
+
+Sets the filename of the input MB-System imagelist file listing the stereo
+image pairs, and their navigation, attitude, and camera settings, to be
+processed. The default input filename is <I>imagelist.mb-1</I>.
+<DT><B>--fov-fudgefactor=</B><I>factor</I>
+
+<DD>
+<BR>
+
+Sets a multiplicative fudge factor applied to the camera field of view
+angles. The default value is 1.0 (no adjustment).
+<DT><B>--navigation-file=</B><I>file</I>
+
+<DD>
+<BR>
+
+Sets the filename of an ASCII navigation file used in place of, or to
+supplement, navigation carried in the imagelist file.
+<DT><B>--survey-line-file=</B><I>file</I>
+
+<DD>
+<BR>
+
+Sets the filename of a survey line/route file whose waypoint times are used
+to split the output soundings into a separate <I>.mb251</I> output file at each
+waypoint crossed.
+<DT><B>--tide-file=</B><I>file</I>
+
+<DD>
+<BR>
+
+Sets the filename of an ASCII tide file (time and tide height pairs) used to
+apply a tidal correction to the computed soundings.
+<DT><B>--image-quality-file=</B><I>file</I>
+
+<DD>
+<BR>
+
+Sets the filename of an ASCII file of time-stamped image quality values used
+to filter out low quality stereo pairs.
+<DT><B>--image-quality-threshold=</B><I>value</I>
+
+<DD>
+<BR>
+
+Sets the minimum image quality value (in the range 0 to 1) required for a
+stereo pair to be processed.
+<DT><B>--image-quality-filter-length=</B><I>value</I>
+
+<DD>
+<BR>
+
+Sets a time filter length, in seconds, applied when interpolating image
+quality values from the image quality file.
+<DT><B>--output=</B><I>fileroot</I>
+
+<DD>
+<BR>
+
+Sets the root name used to construct the output sounding file name(s). Unless
+<B>--survey-line-file</B> or <B>--output-number-pairs</B> is used to split the output
+into multiple files, all soundings are written to a single file named
+<I>fileroot</I><B>.mb251</B>.
+<DT><B>--output-number-pairs=</B><I>value</I>
+
+<DD>
+<BR>
+
+Splits the output soundings into a new file, named
+<I>fileroot</I><B>_</B><I>nnn</I><B>.mb251</B>, every time <I>value</I> stereo pairs have been
+written to the current output file. This option is ignored if
+<B>--survey-line-file</B> is also used.
+<DT><B>--camera-calibration-file=</B><I>file</I>
+
+<DD>
+<BR>
+
+<DT><B>--calibration-file=</B><I>file</I>
+
+<DD>
+<BR>
+
+These two equivalent options set the filename of an OpenCV YAML file
+containing the intrinsic and extrinsic stereo camera calibration parameters
+(camera matrices, distortion coefficients, and the rotation/translation
+between the two cameras) used to undistort and rectify stereo pairs that are
+not already rectified, and to convert stereo disparities into 3D coordinates.
+<DT><B>--platform-file=</B><I>platform.plf</I>
+
+<DD>
+<BR>
+
+Sets the filename of an MB-System platform definition file describing the
+geometric offsets between the vehicle's navigation, attitude, and camera
+sensors.
+<DT><B>--camera-sensor=</B><I>camera_sensor_id</I>
+
+<DD>
+<BR>
+
+Sets the platform sensor id number of the stereo camera used to look up the
+camera's position and orientation offsets within the platform model.
+<DT><B>--nav-sensor=</B><I>nav_sensor_id</I>
+
+<DD>
+<BR>
+
+Overrides the platform model's navigation (position) source sensor id number.
+<DT><B>--sensordepth-sensor=</B><I>sensordepth_sensor_id</I>
+
+<DD>
+<BR>
+
+Overrides the platform model's pressure/depth source sensor id number.
+<DT><B>--heading-sensor=</B><I>heading_sensor_id</I>
+
+<DD>
+<BR>
+
+Overrides the platform model's heading source sensor id number.
+<DT><B>--altitude-sensor=</B><I>altitude_sensor_id</I>
+
+<DD>
+<BR>
+
+Sets the platform sensor id number used as the altitude source.
+<DT><B>--attitude-sensor=</B><I>attitude_sensor_id</I>
+
+<DD>
+<BR>
+
+Overrides the platform model's roll/pitch and heave source sensor id number.
+<DT><B>--altitude-min=</B><I>value</I>
+
+<DD>
+<BR>
+
+Sets the minimum acceptable stereo-derived altitude, in meters, for a
+sounding to be retained. The default is 1.0 meter.
+<DT><B>--altitude-max=</B><I>value</I>
+
+<DD>
+<BR>
+
+Sets the maximum acceptable stereo-derived altitude, in meters, for a
+sounding to be retained. The default is 5.0 meters.
+<DT><B>--trim=</B><I>value</I>
+
+<DD>
+<BR>
+
+Sets a pixel trim margin excluded around the edges of each stereo image before
+computing disparity. The default is 0.0 (no trim).
+<DT><B>--bin-size=</B><I>value</I>
+
+<DD>
+<BR>
+
+Sets the size, in pixels, of the spatial bins used to combine disparity
+values before generating output soundings. The default is 1 (no binning).
+<DT><B>--bin-filter=</B><I>value</I>
+
+<DD>
+<BR>
+
+Selects how disparity values are combined within each spatial bin: <B>mean</B>
+(or <B>0</B>) averages the values in the bin, while <B>median</B> (or <B>1</B>) takes
+the median value. The default is <B>mean</B>.
+<DT><B>--downsample=</B><I>value</I>
+
+<DD>
+<BR>
+
+Sets a downsampling factor applied to the stereo images before disparity
+matching. The default is 1 (no downsampling).
+<DT><B>--algorithm=</B><I>algorithm</I>
+
+<DD>
+<BR>
+
+Selects the OpenCV stereo correspondence algorithm used to compute
+disparities. Valid values are <B>bm</B> (block matching), <B>sgbm</B> (semi-global
+block matching, the default), and <B>hh</B> (a more exhaustive variant of
+semi-global block matching).
+<DT><B>--algorithm-pre-filter-cap=</B><I>value</I>
+
+<DD>
+<BR>
+
+Sets the truncation value for prefiltered image pixels used by the stereo
+correspondence algorithm. The default is 4.
+<DT><B>--algorithm-sad-window-size=</B><I>value</I>
+
+<DD>
+<BR>
+
+Sets the matched block (sum of absolute differences window) size used by the
+stereo correspondence algorithm. The default is 5.
+<DT><B>--algorithm-smoothing-penalty-1=</B><I>value</I>
+
+<DD>
+<BR>
+
+Sets the first smoothness penalty parameter (P1) controlling disparity
+change of one pixel between neighboring pixels, used by the semi-global block
+matching algorithms. The default is 600.
+<DT><B>--algorithm-smoothing-penalty-2=</B><I>value</I>
+
+<DD>
+<BR>
+
+Sets the second smoothness penalty parameter (P2) controlling larger
+disparity changes between neighboring pixels, used by the semi-global block
+matching algorithms. The default is 2400.
+<DT><B>--algorithm-min-disparity=</B><I>value</I>
+
+<DD>
+<BR>
+
+Sets the minimum possible disparity value used by the stereo correspondence
+algorithm. The default is -64.
+<DT><B>--algorithm-number-disparities=</B><I>value</I>
+
+<DD>
+<BR>
+
+Sets the number of disparity values searched by the stereo correspondence
+algorithm (the disparity search range). The default is 192.
+<DT><B>--algorithm-uniqueness-ratio=</B><I>value</I>
+
+<DD>
+<BR>
+
+Sets the margin, in percent, by which the best matching disparity cost must
+beat the next best value for a match to be considered valid. The default is 1.
+<DT><B>--algorithm-speckle-window-size=</B><I>value</I>
+
+<DD>
+<BR>
+
+Sets the maximum size of smooth disparity regions considered noise speckles
+and invalidated by the stereo correspondence algorithm's postfiltering. The
+default is 150.
+<DT><B>--algorithm-speckle-range=</B><I>value</I>
+
+<DD>
+<BR>
+
+Sets the maximum disparity variation within a connected component considered
+during speckle postfiltering. The default is 2.
+<DT><B>--algorithm-disp-12-max-diff=</B><I>value</I>
+
+<DD>
+<BR>
+
+Sets the maximum allowed difference, in integer pixel units, between the
+left-to-right and right-to-left disparity checks. The default is 10.
+<DT><B>--algorithm-texture-threshold=</B><I>value</I>
+
+<DD>
+<BR>
+
+Sets a texture threshold value used to reject matches in low-texture image
+regions. The default is 10.
+<DT><B>--good-fraction-threshold=</B><I>value</I>
+
+<DD>
+<BR>
+
+This option is accepted on the command line but currently has no effect: the
+option is declared but not read anywhere in the program's option-processing
+logic.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbgetphotocorrection.html">mbgetphotocorrection</A></B>(1), <B><A HREF="mbphotomosaic.html">mbphotomosaic</A></B>(1),
+<B><A HREF="mbimagelist.html">mbimagelist</A></B>(1), <B><A HREF="mbm_makeimagelist.html">mbm_makeimagelist</A></B>(1), <B><A HREF="mbgrid.html">mbgrid</A></B>(1)
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>BUGS</H2>
+
+Maybe. Maybe not.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">SEE ALSO</A><DD>
+<DT><A HREF="#lbAI">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 7 September 2026</P></CENTER>
+
+<HR>
+<center>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>

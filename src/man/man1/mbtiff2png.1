@@ -61,12 +61,17 @@ world file with suffix *.tfw
 .TP
 .B \-\-world=\fIinputWorldFile\fP
 .br
-Sets the filename of the input world file. Image world files have the form
+Sets the filename of the input world file. If this option is not used, the
+input world filename is derived from the input GeoTiff filename by replacing
+its ".tif" or ".tiff" suffix with ".tfw".
 .TP
 .B \-\-output=\fIoutputPNGFile\fP
 .br
-Sets the filename of the input GeoTiff file. This file must have a valid parallel
-world file with suffix *.tfw
+Sets the filename of the output PNG image file. If this option is not used,
+the output filename is derived from the input GeoTiff filename by replacing
+its ".tif" or ".tiff" suffix with ".png". The output world file is generated
+by copying the input world file to a file with the output image's basename
+and the suffix ".pgw".
 .TP
 .B \-\-transparency-white
 .br

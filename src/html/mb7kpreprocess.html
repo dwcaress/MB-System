@@ -29,11 +29,11 @@ Version 5.0
 <H2>SYNOPSIS</H2>
 
 <B>mb7kpreprocess</B> [<B>-A</B> <B>-B</B> <B>-C</B><I>rollbias/pitchbias</I>
-<B>-D</B><I>offx/offy[/offdepth]</I> <B>-F</B><I>format</I>
+<B>-D</B><I>offx/offy[/offdepth]</I> <B>-F</B><I>format</I> <B>-G</B><I>platformfile</I>
 <B>-I</B><I>file </I><B>-K</B><I>klugemode</I> <B>-L</B> <B>-M</B><I>rockfile</I> <B>-N</B><I>insfile</I> <B>-O</B><I>outfile</I>
 <B>-P</B><I>sonardepthfile</I> <B>-PF</B><I>filterlength/filterdepth</I>
-<B>-S</B><I>datatype/source</I>
-<B>-T</B><I>timelag</I> <B>-W</B><I>dslfile</I> <B>-H -V</B>]
+<B>-R</B><I>beamstart/beamend/rangeoffset</I> <B>-S</B><I>datatype/source</I>
+<B>-T</B><I>timelag</I> <B>-W</B><I>dslfile</I> <B>-Z</B><I>keyword=value/...</I> <B>-H -V</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -126,6 +126,15 @@ or from a file. If <I>format</I> &lt; 0, then the input file specified
 with the <B>-I</B> option will actually contain a list of input swath sonar
 data files. This program only reads Reson 7k format data files (<B>MBIO</B>
 format 88).
+<DT><B>-G</B>
+
+<DD>
+<I>platformfile</I>
+<BR>
+
+Causes <B>mb7kpreprocess</B> to input and utilize an <B>MB-System</B> platform file,
+which provides a complete description of the relative geometry of sensors on a
+survey platform. Platform files can be constructed using the program <B>mbmakeplatform</B>.
 <DT><B>-H</B>
 
 <DD>
@@ -161,8 +170,18 @@ This option causes the program to implement one of the available
 processing &quot;kluge&quot; fixes. This are unusual steps required to fix
 data with particular, unusual problems. Kluge 1 forces <B>mb7kpreprocess</B>
 to replace the sonar depth value with values from vertical
-depth data records. Kuge 2 forces <B>mb7kpreprocess</B> to zero the initial
-beam alongtrack distance values.
+depth data records. Kluge 2 forces <B>mb7kpreprocess</B> to zero the initial
+beam alongtrack distance values. Kluge 3 zeroes the attitude correction
+applied to bathymetry. Kluge 4 filters Kearfott ROV navigation noise.
+Kluge 5, specified as <I>klugemode</I>/<I>factor</I>, multiplies the beam
+receive angles used to calculate bathymetry by <I>factor</I>. Kluge 6,
+specified as <I>klugemode</I>/<I>interval</I>[/<I>threshold</I>], forces ping
+timestamps that jump by more than <I>threshold</I> (default: <I>interval</I>/4)
+to be reset using the specified <I>interval</I>. Kluge 7 additionally adjusts
+associated beam edits when kluge 6 fixes a time jump. Kluge 8 disables
+recalculation of bathymetry from travel times and angles. Kluge 9,
+specified as <I>klugemode</I>/<I>factor</I>, applies a Snell's law style
+tweak to the beam receive angles by <I>factor</I>.
 <DT><B>-L</B>
 
 <DD>
@@ -301,6 +320,16 @@ starboard time series derived from beams formed with a large acrosstrack
 beamwidth, and the &quot;snippet&quot; records contain short sections of beamformed
 time series centered on the bottom return times in each of the valid bathymetry
 beams.
+<DT><B>-R</B>
+
+<DD>
+<I>beamstart/beamend/rangeoffset</I>
+<BR>
+
+This option applies a static <I>rangeoffset</I> value (in the same units as the
+recorded travel times) to the ranges of beams numbered <I>beamstart</I> through
+<I>beamend</I>, inclusive, prior to calculating bathymetry. Up to three <B>-R</B>
+options may be specified, each affecting a different range of beams.
 <DT><B>-T</B>
 
 <DD>
@@ -341,6 +370,31 @@ where:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>pitch&nbsp;-&nbsp;decimal&nbsp;degrees<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>roll&nbsp;-&nbsp;decimal&nbsp;degrees<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>id&nbsp;-&nbsp;seems&nbsp;to&nbsp;be&nbsp;1.00<BR>
+<DT><B>-Z</B>
+
+<DD>
+<I>keyword=value/value/...</I>
+<BR>
+
+This option sets sensor offset values using <I>keyword</I>=<I>value</I> syntax,
+as an alternative to the older <B>-C</B>, <B>-D</B>, and undocumented offset
+arguments. Recognized forms are:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>multibeam_offsets=tx/ty/tz/theading/troll/tpitch<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbtransmit_offsets=tx/ty/tz/theading/troll/tpitch<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbreceive_offsets=rx/ry/rz/rheading/rroll/rpitch<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>position_offsets=x/y/z<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>depth_offsets=x/y/z<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>heading_offsets=heading/roll/pitch<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>rollpitch_offsets=heading/roll/pitch<BR>
+<BR>
+
+The <I>multibeam_offsets</I> form sets both the transmit and receive array
+position and angular offsets to the same values. The <I>mbtransmit_offsets</I>
+and <I>mbreceive_offsets</I> forms set the transmit and receive array offsets
+separately. The <I>position_offsets</I> and <I>depth_offsets</I> forms set the
+positional offsets of the position and depth sensors, respectively. The
+<I>heading_offsets</I> and <I>rollpitch_offsets</I> forms set the angular
+offsets of the heading and roll-pitch sensors, respectively.
 <P>
 </DL>
 <A NAME="lbAH">&nbsp;</A>

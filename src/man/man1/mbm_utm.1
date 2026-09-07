@@ -8,7 +8,7 @@ Version 5.0
 
 .SH SYNOPSIS
 mbm_utm \fB\-I\fP\fIinfile\fP \fB\-O\fP\fIoutfile\fP
-\fB\-Z\fP\fIzone\fP \fB\-E\fP\fIellipsoid\fP [\fB\-F \-Q \-H \-V\fP]
+\fB\-Z\fP\fIzone\fP \fB\-E\fP\fIellipsoid\fP [\fB\-F \-L\fP\fIlonflip\fP \fB\-Q \-H \-V\fP]
 
 .SH DESCRIPTION
 \fBmbm_utm\fP is a macro to perform forward and inverse UTM projections
@@ -65,6 +65,13 @@ transformation) or easting and northing values
 (for projected to geographic transformation).
 Any additional columns of data are passed unaltered to the output.
 .TP
+\fB\-L\fP\fIlonflip\fP
+Sets the range used to normalize output longitude values produced by
+an inverse (\fB\-Q\fP) projection. A \fIlonflip\fP of \-1 forces longitudes
+into the range \-360 to 0, a \fIlonflip\fP of 0 forces the range \-180 to
+180, and a \fIlonflip\fP of 1 forces the range 0 to 360. Default:
+\fIlonflip\fP = 0.
+.TP
 \fB\-O\fP\fIoutfile\fP
 Sets the name of the output data file to be generated.
 The first two columns of the ASCII output
@@ -82,7 +89,7 @@ The default is to transform from geographic to
 projected coordinates.
 .TP
 \fB\-Z\fP\fIzone\fP
-Sets the UTM zone.
+Sets the UTM zone. Default: \fIzone\fP = 10.
 
 .SH EXAMPLES
 Suppose we have a file containing longitude, latitude,

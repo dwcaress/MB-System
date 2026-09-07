@@ -1,0 +1,108 @@
+.TH mbgrd2octree 1 "7 September 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbgrd2octree\fP \- Translates a topography grid to a TRN octree topography model
+for use with the MB-System TRN (terrain relative navigation) tools.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+mbgrd2octree \fB\-\-input=\fP\fIinputGridFile\fP \fB\-\-output=\fP\fIoutputOctreeFile\fP
+[\fB\-\-bounds=\fP\fIval1/val2/val3/val4\fP
+\fB\-\-verbose\fP \fB\-\-help\fP]
+
+.SH DESCRIPTION
+\fBMbgrd2octree\fP converts a topography grid into a TRN (terrain relative
+navigation) octree topography model file for use with the \fBMB-System\fP TRN
+tools (e.g. \fBmbtrnpp\fP). The input grid is expected to be a GMT/netCDF grid
+in a cartesian projected coordinate system such as UTM, with dimension
+variables named "x" and "y" (or, failing that, "lon" and "lat") and a
+data variable named "z", each carrying an "actual_range" attribute from
+which the grid node coordinates are reconstructed. \fBMbgrd2octree\fP derives
+from \fBgrdOctreeMaker\fP, a program contained within the \fBterrain-nav\fP
+codebase developed over many years by Steve Rock's Precision Navigation
+project at Stanford.
+
+The program reads the input grid, reconstructs the north (or latitude) and
+east (or longitude) coordinate vectors from the "actual_range" attributes,
+and treats each node's grid value as a positive-down depth in a NED (north,
+east, down) coordinate frame, consistent with the octree format's historical
+convention. Grid nodes whose value equals the no-data sentinel 99999, or
+that are NaN, are skipped. Only nodes with a depth between 1 and 3500 meters
+are accepted; these depth limits, and the base horizontal/vertical octree
+resolution (1 in the grid's native units), are presently fixed at compile
+time and are not exposed as command line options.
+
+\fBMbgrd2octree\fP automatically determines the horizontal extent of the
+octree from the range of accepted grid nodes, and automatically derives
+the octree resolution from the coordinate spacing between the first two
+grid nodes on each axis. An octree object is constructed with dimensions
+that are a power-of-two multiple of this resolution and that enclose the
+full point cloud. Each accepted surface point is added to the octree, and
+then two additional voxels beneath each surface point are filled (using
+the octree's actual/effective vertical resolution) so that steep slopes do
+not present holes when the resulting model is viewed obliquely. The octree
+is then compressed (collapsed) and written to the output file.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian do Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-\-help
+This "help" flag cause the program to print out a description
+of its operation and then exit immediately.
+.TP
+.B \-\-input=\fIinputGridFile\fP
+.br
+Sets the filename of the input topography grid. This must be readable
+as a netCDF grid with "x"/"y" (or "lon"/"lat") dimension variables and a
+"z" data variable. If the supplied name does not already end in ".grd",
+the suffix ".grd" is appended to it. This option (or the equivalent short
+option \fB\-I\fP) must be specified.
+.TP
+.B \-\-output=\fIoutputOctreeFile\fP
+.br
+Sets the filename of the output TRN octree file. If the supplied name does
+not already end in ".bo", the suffix ".bo" is appended to it. This option
+(or the equivalent short option \fB\-O\fP) must be specified.
+.TP
+.B \-\-bounds=\fIval1/val2/val3/val4\fP, \fB\-R\fP\fIval1/val2/val3/val4\fP
+.br
+Sets an optional bounding filter on the grid nodes used to build the
+octree, given as four slash\-separated numeric values that must satisfy
+\fIval1\fP < \fIval2\fP and \fIval3\fP < \fIval4\fP. Grid nodes are excluded whenever
+their north coordinate is less than \fIval3\fP or greater than \fIval4\fP, or
+whenever their east coordinate is greater than \fIval1\fP or less than
+\fIval2\fP. Setting \fIval1\fP or \fIval2\fP to \-1 disables that particular east/west
+test. Because \fIval1\fP must be less than \fIval2\fP, supplying two finite
+(non\-\-1) values for both normally causes every node to be excluded on the
+east/west axis, so in practice at most one of the two east/west values
+should be set to something other than \-1. If \fB\-\-bounds\fP/\fB\-R\fP is omitted
+altogether, no additional bounding filter is applied beyond the fixed
+depth\-range and no\-data checks described above.
+.TP
+.B \-\-verbose
+The \fB\-\-verbose\fP option causes \fBmbgrd2octree\fP to print out status and
+debug messages; repeating it (e.g. as \fB\-V\fP \fB\-V\fP) redirects this output
+to stderr and increases the level of detail reported.
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbgrdtilemaker\fP(1), \fBmbtrnpp\fP(1), \fBmbgrid\fP(1)
+
+.SH BUGS
+Maybe. Maybe not.

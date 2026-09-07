@@ -19,7 +19,7 @@ Additional Options:
 [\fB\-B\fP\fItickinfo\fP \fP
 \fB\-J\fP\fIprojection\fP[\fI/scale | width\fP]
 \fB\-L\fP\fItitle\fP[\fI:xlabel:ylabel\fP] \fB\-M\fP\fImisc\fP
-\fB\-Q\fP \fB\-R\fP\fIw/e/s/n\fP \fB\-X\fP \fB\-Z\fP]
+\fB\-N\fP \fB\-Q\fP \fB\-R\fP\fIw/e/s/n\fP \fB\-T\fP \fB\-X\fP \fB\-Z\fP]
 
 Miscellaneous Options:
 .br
@@ -27,7 +27,11 @@ Miscellaneous Options:
 \fB\-MGL\fP\fIscalebar\fP
 \fB\-MGT\fP\fIx/y/size/angle/font/just/text\fP
 \fB\-MGU\fP\fP[\fI/dx/dy/\fP][\fIlabel\fP]
-\fB\-MIE\fP\fIresolution\fP \fB\-MIT\fItype\fP ]
+\fB\-MIE\fP\fIresolution\fP \fB\-MIT\fItype\fP
+\fB\-MTC\fP\fIfill\fP \fB\-MTD\fP\fIresolution\fP
+\fB\-MTG\fP\fIfill\fP \fB\-MTI\fP\fIriver\fP
+\fB\-MTN\fP\fIborder\fP \fB\-MTS\fP\fIfill\fP
+\fB\-MTW\fP\fIpen\fP ]
 
 .SH DESCRIPTION
 \fBmbm_xyplot\fP is a macro to generate a shellscript of GMT commands which,
@@ -81,7 +85,7 @@ If a Postscript viewer is not explicitly defined by either method, then the user
 default program for viewing Postscript is invoked.
 Invoking the plot generation shellscript with
 a \fB-N\fP command line argument suppresses the screen
-display of the plot. The \fB\-MIE\fP and \fB\-MIP\fP arguments cause the
+display of the plot. The \fB\-MIE\fP and \fB\-MIT\fP arguments cause the
 plot generation shellscript to render the Postscript map onto an image in the
 specified format.
 
@@ -423,9 +427,9 @@ alone, no x or y-axis labels will be provided.
 A series of "miscellaneous" options are provided which are
 given as \fB\-M\fP followed by a two character identifier, followed
 by any other parameters associated with that option.
-The \fB\-M\fP options may be strung together separated by
-colons, e.g. "-MGQ100:GU:CA200/10", which is equivalent to
-"-MGQ \-MGU \-MCA200/10".
+Multiple miscellaneous options are specified by repeating the
+\fB\-M\fP flag once for each one, e.g. "\-MGD ANOT_FONT/Courier \-MTC200
+\-MTW1p".
 .TP
 .B \-MGD
 \fIgmtdef/value\fP
@@ -514,6 +518,71 @@ multi-page PDF (\fB\-MIT\fP\fIF\fP), JPEG (\fB\-MIT\fP\fIj\fP),
 PNG (\fB\-MIT\fP\fIg\fP), transparent PNG (\fB\-MIT\fP\fIG\fP),
 PPM (\fB\-MIT\fP\fIm\fP,  SVG (\fB\-MIT\fP\fIs\fP, or TIFF (\fB\-MIT\fP\fIt\fP.
 The default image format is JPEG.
+.TP
+.B \-MTC
+\fIfill\fP
+.br
+Coastline plotting option.
+Set the shade (0-255) or color (r/g/b) used to fill lakes [Default is
+the fill chosen for "wet" areas (\fB\-MTS\fP)]. Setting this option also
+turns on coastline plotting as if \fB\-T\fP had been given.
+.TP
+.B \-MTD
+\fIresolution\fP
+.br
+Coastline plotting option.
+Selects the resolution of the coastline data set to use ((f)ull,
+(h)igh, (i)ntermediate, (l)ow, and (c)rude). [Default is f].
+.TP
+.B \-MTG
+\fIfill\fP
+.br
+Coastline plotting option.
+Set the shade (0-255) or color (r/g/b) used to fill "dry" (land) areas
+[Default is 200 if \fB\-T\fP is given but no other coastline options are
+specified]. Setting this option also turns on coastline plotting as if
+\fB\-T\fP had been given.
+.TP
+.B \-MTI
+\fIriver\fP
+.br
+Coastline plotting option.
+Draw rivers. Specify the type of rivers to be drawn using the codes
+accepted by the \fBpscoast\fP \fB\-I\fP option. Setting this option also
+turns on coastline plotting as if \fB\-T\fP had been given.
+.TP
+.B \-MTN
+\fIborder\fP
+.br
+Coastline plotting option.
+Draw political boundaries. Specify the type of boundary using the codes
+accepted by the \fBpscoast\fP \fB\-N\fP option. This option may be given
+repeatedly to draw more than one type of boundary. Setting this option
+also turns on coastline plotting as if \fB\-T\fP had been given.
+.TP
+.B \-MTS
+\fIfill\fP
+.br
+Coastline plotting option.
+Set the shade (0-255) or color (r/g/b) used to fill "wet" (water) areas.
+Setting this option also turns on coastline plotting as if \fB\-T\fP had
+been given.
+.TP
+.B \-MTW
+\fIpen\fP
+.br
+Coastline plotting option.
+Sets the pen used to draw the coastline itself [Default is 1p if
+\fB\-T\fP is given but no other coastline options are specified].
+Setting this option also turns on coastline plotting as if \fB\-T\fP had
+been given.
+.TP
+.B \-N
+Sets the default value of the \fBM\fP (multiple data segments) file
+parameter (see \fB\-I\fP above) to "on" for all input files. This is
+equivalent to appending the \fBM\fP parameter to every \fB\-I\fP file
+argument, so that lines containing a lone ">" in an input file are
+treated as a break between plotted data segments.
 .TP
 .B \-O
 \fIroot\fP
@@ -679,6 +748,15 @@ unchanged.)
 .TP
 .B \-Sx
 cross.  Give length in inch.
+.TP
+.B \-T
+If \fB\-T\fP is given, it causes a coastline to be drawn on the map using
+the \fBGMT\fP module \fBpscoast\fP. The default is to draw the coastline
+as the thinnest possible line. To exercise greater control of the
+coastline plotting, including color fill of "wet" and "dry" areas and
+display of lakes, rivers, and political boundaries, use the
+\fB\-MTC\fP, \fB\-MTD\fP, \fB\-MTG\fP, \fB\-MTI\fP,
+\fB\-MTN\fP, \fB\-MTS\fP, and \fB\-MTW\fP options described above.
 .TP
 .B \-U
 \fIorientation\fP

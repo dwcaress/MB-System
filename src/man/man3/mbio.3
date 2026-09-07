@@ -1,10 +1,10 @@
-.TH mbio 3 "22 January 2024" "MB-System 5.0" "MB-System 5.0"
+.TH mbio 3 "6 September 2026" "MB-System 5.8" "MB-System 5.8"
 
 .SH NAME
 \fBmbio\fP \- Format independent input/output library for swath mapping sonar data.
 
 .SH VERSION
-Version 5.0
+Version 5.8
 
 .SH DESCRIPTION
 \fBMBIO\fP (\fBM\fPulti\fBB\fPeam \fBI\fPnput/\fBO\fPutput) is a library
@@ -131,7 +131,7 @@ sonar data, \fBMBIO\fP has three levels of i/o functionality:
  			\fBmb_buffer_close()\fP
  			\fBmb_buffer_load()\fP
  			\fBmb_buffer_dump()\fP
- 			\fBmb_buffer_info()\fP
+ 			\fBmb_buffer_get_kind()\fP
  			\fBmb_buffer_get_next_data()\fP
  			\fBmb_buffer_extract()\fP
  			\fBmb_buffer_insert()\fP
@@ -380,7 +380,7 @@ The following swath mapping sonar data formats are supported in this version of
 
     MBIO Data Format ID:  58
     Format name:          MBF_EM710RAW
-    Informal Description: Kongsberg current multibeam vendor format
+    Informal Description: Kongsberg 3rd generation multibeam vendor format
     Attributes:           Kongsberg EM122, EM302, EM710,
                           bathymetry, amplitude, and sidescan,
                           up to 400 beams, variable pixels, binary, Kongsberg.
@@ -539,7 +539,7 @@ The following swath mapping sonar data formats are supported in this version of
 
     MBIO Data Format ID:  121
     Format name:          MBF_GSFGENMB
-    Informal Description: Leidos Generic Sensor Format (GSF) version GSF-v03.09
+    Informal Description: Leidos Generic Sensor Format (GSF) version GSF-v03.11
     Attributes:           variable beams,  bathymetry and amplitude,
                           binary, single files, Leidos (formerly SAIC).
 
@@ -667,6 +667,16 @@ The following swath mapping sonar data formats are supported in this version of
     Attributes:           single beam bathymetry, nav, magnetics, gravity,
                           122 byte ascii records with CRLF line breaks, NOAA NGDC
 
+    MBIO Data Format ID:  175
+    Format name:          MBF_SOIUSBLN
+    Informal Description: SOI USBL navigation format
+    Attributes:           SOI navigation, ascii, Schmidt Ocean Institute
+
+    MBIO Data Format ID:  176
+    Format name:          MBF_SOIROVNV
+    Informal Description: SOI ROV navigation format(s)
+    Attributes:           SOI navigation, ascii, Schmidt Ocean Institute
+
     MBIO Data Format ID:  181
     Format name:          MBF_SAMESURF
     Informal Description: SAM Electronics SURF format.
@@ -750,6 +760,12 @@ The following swath mapping sonar data formats are supported in this version of
                Attributes: 3D at Depth lidar, variable pulses, bathymetry and amplitude,
                           binary, MBARI.
 
+    MBIO Data Format ID:  234
+    Format name:          MBF_3DWISSL2
+    Informal Description: 3D at Depth Second Generation Wide Swath Subsea Lidar (WiSSL2) SRIAT format
+               Attributes: 3D at Depth lidar, variable pulses, bathymetry and amplitude,
+                          binary, MBARI.
+
     MBIO Data Format ID:  241
     Format name:          MBF_WASSPENL
     Informal Description: WASSP Multibeam Vendor Format
@@ -759,10 +775,9 @@ The following swath mapping sonar data formats are supported in this version of
 
     MBIO Data Format ID:  251
     Format name:          MBF_PHOTGRAM
-    Informal Description: Example format
-    Attributes:           Name the relevant sensor(s),
-                          what data types are supported
-                          how many beams and pixels, file type (ascii, binary, netCDF), Organization that defined this format.
+    Informal Description: Stereo Photogrammetry format
+    Attributes:           Stereo camera rigs, bathymetry, variable
+                          soundings, binary, MBARI.
 
     MBIO Data Format ID:  261
     Format name:          MBF_KEMKMALL
@@ -873,7 +888,7 @@ int \fBmb_read_init\fP(
  		int \fIetime_i[7]\fP,
  		double \fIspeedmin\fP,
  		double \fItimegap\fP,
- 		char \fI**mbio_ptr\fP,
+ 		void \fI**mbio_ptr\fP,
  		double \fI*btime_d\fP,
  		double \fI*etime_d\fP,
  		int \fI*beams_bath\fP,
@@ -1020,11 +1035,113 @@ argument passes more detailed information about initialization failures.
 
 \---------------------------------------------------------
 .br
+int \fBmb_read_init_altnav\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*file\fP,
+ 		int \fIformat\fP,
+ 		int \fIpings\fP,
+ 		int \fIlonflip\fP,
+ 		double \fIbounds[4]\fP,
+ 		int \fIbtime_i[7]\fP,
+ 		int \fIetime_i[7]\fP,
+ 		double \fIspeedmin\fP,
+ 		double \fItimegap\fP,
+ 		int \fIastatus\fP,
+ 		char \fI*apath\fP,
+ 		void \fI**mbio_ptr\fP,
+ 		double \fI*btime_d\fP,
+ 		double \fI*etime_d\fP,
+ 		int \fI*beams_bath\fP,
+ 		int \fI*beams_amp\fP,
+ 		int \fI*pixels_ss\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_read_init_altnav\fP initializes a data file for
+reading in exactly the same manner as \fBmb_read_init\fP, except
+that it also arranges for navigation to be drawn from an
+alternative navigation file \fIapath\fP rather than (or in addition
+to) the navigation embedded in \fIfile\fP itself, where
+\fIastatus\fP (\fBMB_ALTNAV_USE\fP or \fBMB_ALTNAV_NONE\fP)
+indicates whether the alternative navigation should be used (see
+\fBmb_datalist_read3\fP, which supplies these values when reading
+a datalist).
+
+\---------------------------------------------------------
+.br
+int \fBmb_input_init\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*socket_definition\fP,
+ 		int \fIformat\fP,
+ 		int \fIpings\fP,
+ 		int \fIlonflip\fP,
+ 		double \fIbounds[4]\fP,
+ 		int \fIbtime_i[7]\fP,
+ 		int \fIetime_i[7]\fP,
+ 		double \fIspeedmin\fP,
+ 		double \fItimegap\fP,
+ 		void \fI**mbio_ptr\fP,
+ 		double \fI*btime_d\fP,
+ 		double \fI*etime_d\fP,
+ 		int \fI*beams_bath\fP,
+ 		int \fI*beams_amp\fP,
+ 		int \fI*pixels_ss\fP,
+ 		int \fI(*input_open)(int verbose, void *mbio_ptr, char *definition, int *error)\fP,
+ 		int \fI(*input_read)(int verbose, void *mbio_ptr, size_t *size, char *buffer, int *error)\fP,
+ 		int \fI(*input_close)(int verbose, void *mbio_ptr, int *error)\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_input_init\fP initializes an \fBMBIO\fP
+descriptor for reading in the same manner as \fBmb_read_init\fP,
+except that the data source is a socket, pipe, or other streamed
+input identified by \fIsocket_definition\fP rather than an
+ordinary file, and the calling program supplies its own
+\fIinput_open\fP, \fIinput_read\fP, and \fIinput_close\fP
+callback functions to open, read raw bytes from, and close that
+input source. This allows \fBMBIO\fP to read swath data streamed
+in real time (e.g. \fBmbtrnpp\fP) using the same
+\fBmb_read\fP/\fBmb_get_all\fP/\fBmb_extract\fP interface used for
+ordinary files.
+
+\---------------------------------------------------------
+.br
+int \fBmb_set_debug_records\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		bool \fIenable_debug_record_type_listing\fP,
+ 		int \fInum_debug_record_identifiers\fP,
+ 		mb_name \fI*debug_record_identifiers\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_set_debug_records\fP configures the \fBMBIO\fP
+descriptor pointed to by \fImbio_ptr\fP to print a debug listing
+of selected data record types as they are read. If
+\fIenable_debug_record_type_listing\fP is true, the
+\fInum_debug_record_identifiers\fP record type names in the array
+\fIdebug_record_identifiers\fP are the ones listed; this is a
+debugging aid for programs (e.g. \fBmbtrnpp\fP) that process
+streamed input.
+
+\---------------------------------------------------------
+.br
+int \fBmb_set_platform\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*mbplatform_ptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_set_platform\fP attaches a previously
+initialized sensor platform model (see \fBmb_platform_init\fP)
+pointed to by \fImbplatform_ptr\fP to the \fBMBIO\fP descriptor
+pointed to by \fImbio_ptr\fP, so that subsequent reads through
+that descriptor can make use of the platform's sensor offsets.
+
+\---------------------------------------------------------
+.br
 int \fBmb_write_init\fP(
  		int \fIverbose\fP,
  		char \fI*file\fP,
  		int \fIformat\fP,
- 		char \fI**mbio_ptr\fP,
+ 		void \fI**mbio_ptr\fP,
  		int \fI*beams_bath\fP,
  		int \fI*beams_amp\fP,
  		int \fI*pixels_ss\fP,
@@ -1083,9 +1200,9 @@ int \fBmb_register_array\fP(
  		int \fIverbose\fP,
  		void *\fImbio_ptr\fP,
  		int \fItype\fP,
- 		int \fIsize\fP,
+ 		size_t \fIsize\fP,
  		void **\fIhandle\fP,
- 		int \fI*error\fP)
+ 		int \fI*error\fP);
 
 Registers an array pointer *\fIhandle\fP so that the size of
 the allocated array can be managed dynamically by \fBMBIO\fP.
@@ -1107,23 +1224,101 @@ called for this particular \fImbio_ptr\fP.
 .br
 int \fBmb_close\fP(
  		int \fIverbose\fP,
- 		char *\fImbio_ptr\fP,
- 		int \fI*error\fP)
+ 		void \fI**mbio_ptr\fP,
+ 		int \fI*error\fP);
 
 Closes the data file listed in the \fBMBIO\fP descriptor pointed to
-by \fImbio_ptr\fP and releases all specially allocated memory,
-including all application arrays registered using \fBmb_register_array\fP..
+by \fI*mbio_ptr\fP and releases all specially allocated memory,
+including all application arrays registered using \fBmb_register_array\fP.
+The pointer \fI*mbio_ptr\fP is deallocated and set to NULL.
 The \fIverbose\fP value controls the standard error output verbosity
 of the function. A status value indicating success or failure is
 returned; an error value argument passes more detailed information
 about failures.
+
+\---------------------------------------------------------
+.br
+int \fBmb_fileio_open\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_fileio_open\fP initializes low level byte
+input/output for a single regular file associated with the
+\fBMBIO\fP descriptor pointed to by \fImbio_ptr\fP, and is called
+internally by \fBmb_read_init\fP and \fBmb_write_init\fP.
+Depending on the platform and data format, the underlying
+implementation may use buffered \fIfread\fP()/\fIfwrite\fP(),
+local buffering, or \fImmap\fP().
+
+\---------------------------------------------------------
+.br
+int \fBmb_fileio_close\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_fileio_close\fP releases the resources
+allocated by \fBmb_fileio_open\fP for the \fBMBIO\fP descriptor
+pointed to by \fImbio_ptr\fP, and is called internally by
+\fBmb_close\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_fileio_get\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		char \fI*buffer\fP,
+ 		size_t \fI*size\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_fileio_get\fP reads \fI*size\fP bytes from the
+input file associated with the \fBMBIO\fP descriptor pointed to by
+\fImbio_ptr\fP into \fIbuffer\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_fileio_put\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		char \fI*buffer\fP,
+ 		size_t \fI*size\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_fileio_put\fP writes \fI*size\fP bytes from
+\fIbuffer\fP to the output file associated with the \fBMBIO\fP
+descriptor pointed to by \fImbio_ptr\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_copyfile\fP(
+ 		int \fIverbose\fP,
+ 		const char \fI*src\fP,
+ 		const char \fI*dst\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_copyfile\fP copies the file \fIsrc\fP to the
+file \fIdst\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_catfiles\fP(
+ 		int \fIverbose\fP,
+ 		const char \fI*src1\fP,
+ 		const char \fI*src2\fP,
+ 		const char \fI*dst\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_catfiles\fP concatenates the files \fIsrc1\fP
+and \fIsrc2\fP, in that order, into the file \fIdst\fP.
+
 .SH LEVEL 1 FUNCTIONS
 
 \---------------------------------------------------------
 .br
 int \fBmb_read\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
  		int \fI*kind\fP,
  		int \fI*pings\fP,
  		int \fItime_i[7]\fP,
@@ -1212,7 +1407,7 @@ read failures.
 .br
 int \fBmb_get\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
  		int \fI*kind\fP,
  		int \fI*pings\fP,
  		int \fItime_i[7]\fP,
@@ -1302,8 +1497,8 @@ read failures.
 
 int \fBmb_read_ping\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
- 		char \fI*store_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
  		int \fI*kind\fP,
  		int \fI*error\fP);
 
@@ -1358,8 +1553,8 @@ read failures.
 .br
 int \fBmb_write_ping\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
- 		char \fI*store_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
  		int \fI*error\fP);
 
 The function \fBmb_write_ping\fP writes sonar data to the file listed
@@ -1383,8 +1578,8 @@ write failures.
 .br
 int \fBmb_get_store\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
- 		char \fI**store_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI**store_ptr\fP,
  		int \fI*error\fP);
 
 The function \fBmb_get_store()\fP returns a pointer \fI*store_ptr\fP
@@ -1408,10 +1603,104 @@ argument \fIerror\fP passes more detailed information about failures.
 
 \---------------------------------------------------------
 .br
+int \fBmb_dimensions\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
+ 		int \fI*kind\fP,
+ 		int \fI*nbath\fP,
+ 		int \fI*namp\fP,
+ 		int \fI*nss\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_dimensions\fP returns the kind of the current
+data record along with the numbers of bathymetry, amplitude, and
+sidescan values contained in it, without extracting the values
+themselves. This is useful for sizing arrays before calling
+\fBmb_extract\fP or similar functions.
+
+\---------------------------------------------------------
+.br
+int \fBmb_pingnumber\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		unsigned int \fI*pingnumber\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_pingnumber\fP returns a ping number for the
+survey data record most recently read, taken directly from the
+data if the format records one, or otherwise set to the count of
+survey records read so far by this \fBMBIO\fP descriptor.
+
+\---------------------------------------------------------
+.br
+int \fBmb_segynumber\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		unsigned int \fI*line\fP,
+ 		unsigned int \fI*shot\fP,
+ 		unsigned int \fI*cdp\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_segynumber\fP returns the seismic reflection
+line number, shot number, and common depth point (cdp) number
+associated with the current data record, for data formats that
+carry subbottom or seismic reflection data that can be represented
+in \fBSEGY\fP form (see \fBmb_extract_segy\fP below). For formats
+that do not provide these values, \fI*shot\fP is set to the count
+of survey records read so far and \fI*line\fP and \fI*cdp\fP are
+set to zero.
+
+\---------------------------------------------------------
+.br
+int \fBmb_beamwidths\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		double \fI*beamwidth_xtrack\fP,
+ 		double \fI*beamwidth_ltrack\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_beamwidths\fP returns the nominal athwartships
+and alongtrack sonar beam widths in degrees, as stored in the
+\fBMBIO\fP descriptor pointed to by \fImbio_ptr\fP when the file
+was opened (see \fBmb_format_beamwidth\fP).
+
+\---------------------------------------------------------
+.br
+int \fBmb_sonartype\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
+ 		int \fI*sonartype\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_sonartype\fP returns a code (one of the
+\fBMB_TOPOGRAPHY_TYPE\fP values, e.g. multibeam, sidescan,
+interferometric, or unknown) indicating the general type of sonar
+that produced the current data record, where the data format and
+system can distinguish this.
+
+\---------------------------------------------------------
+.br
+int \fBmb_sidescantype\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
+ 		int \fI*ss_type\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_sidescantype\fP returns a code (one of the
+\fBMB_SIDESCAN_TYPE\fP values) indicating whether the sidescan
+imagery associated with the current data record is referenced to
+a linear (uncorrected) or logarithmic (corrected) intensity scale,
+where the data format and system can distinguish this.
+
+\---------------------------------------------------------
+.br
 int \fBmb_get_all\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
- 		char \fI**store_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI**store_ptr\fP,
  		int \fI*kind\fP,
  		int \fItime_i[7]\fP,
  		double \fI*time_d\fP,
@@ -1525,8 +1814,8 @@ read failures.
 .br
 int \fBmb_put_all\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
- 		char \fI*store_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
  		int \fIusevalues\fP,
  		int \fIkind\fP,
  		int \fItime_i[7]\fP,
@@ -1642,7 +1931,7 @@ write failures.
 .br
 int \fBmb_put_comment\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
  		char \fI*comment\fP,
  		int \fI*error\fP);
 
@@ -1666,10 +1955,84 @@ write failures.
 
 \---------------------------------------------------------
 .br
+int \fBmb_extract_platform\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
+ 		int \fI*kind\fP,
+ 		void \fI**platform_ptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_extract_platform\fP extracts sensor platform
+information (the sonar and auxiliary sensor positions and
+orientation offsets) embedded in the current data record, where
+the data format supports this, and returns it as a newly
+allocated platform structure pointed to by \fI*platform_ptr\fP
+(see \fBmb_platform_init\fP below). This is used by
+\fBmb_preprocess\fP when a per-file or per-record platform
+definition is available directly from the raw data rather than
+from a separately supplied platform file.
+
+\---------------------------------------------------------
+.br
+int \fBmb_sensorhead\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
+ 		int \fI*sensorhead\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_sensorhead\fP returns the index of the sensor
+head (transducer) that produced the current data record, for
+multi-head sonar systems (e.g. the Kraken/RESON WISSL laser
+system) where the data format distinguishes among heads.
+
+\---------------------------------------------------------
+.br
+int \fBmb_preprocess\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
+ 		void \fI*platform_ptr\fP,
+ 		void \fI*preprocess_pars_ptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_preprocess\fP applies sensor offset, timing,
+and navigation/attitude merging corrections to the current data
+record read by \fImbio_ptr\fP, using the platform model pointed
+to by \fIplatform_ptr\fP (see \fBmb_platform_init\fP) and the
+options and merge navigation/attitude time series pointed to by
+\fIpreprocess_pars_ptr\fP (a \fIstruct mb_preprocess_struct\fP,
+filled in by the calling program, typically \fBmbpreprocess\fP).
+If the data format has registered its own preprocessing routine,
+that routine is called; otherwise \fBmb_preprocess_generic\fP is
+called so that platform-based preprocessing is available for
+every supported data format.
+
+\---------------------------------------------------------
+.br
+int \fBmb_preprocess_generic\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
+ 		void \fI*platform_ptr\fP,
+ 		void \fI*preprocess_pars_ptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_preprocess_generic\fP implements the
+format-independent (generic) version of the preprocessing
+corrections applied by \fBmb_preprocess\fP, operating solely
+through the standard \fBMBIO\fP \fBmb_extract\fP/\fBmb_insert\fP
+family of functions. It is used automatically by
+\fBmb_preprocess\fP for any data format that has not registered a
+format-specific preprocessing routine of its own.
+
+\---------------------------------------------------------
+.br
 int \fBmb_extract\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
- 		char \fI*store_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
  		int \fI*kind\fP,
  		int \fItime_i[7]\fP,
  		double \fI*time_d\fP,
@@ -1755,8 +2118,8 @@ extract failures.
 .br
 int \fBmb_extract_lonlat\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
- 		char \fI*store_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
  		int \fI*kind\fP,
  		int \fItime_i[7]\fP,
  		double \fI*time_d\fP,
@@ -1841,8 +2204,8 @@ extract failures.
 .br
 int \fBmb_insert\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
- 		char \fI*store_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
  		int \fIkind\fP,
  		int \fItime_i[7]\fP,
  		double \fItime_d\fP,
@@ -1929,8 +2292,8 @@ insert failures.
 .br
 int \fBmb_extract_nav\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
- 		char \fI*store_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
  		int \fI*kind\fP,
  		int \fItime_i[7]\fP,
  		double \fI*time_d\fP,
@@ -1986,10 +2349,43 @@ extract failures.
 
 \---------------------------------------------------------
 .br
+int \fBmb_extract_nnav\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
+ 		int \fInmax\fP,
+ 		int \fI*kind\fP,
+ 		int \fI*n\fP,
+ 		int \fI*time_i\fP,
+ 		double \fI*time_d\fP,
+ 		double \fI*navlon\fP,
+ 		double \fI*navlat\fP,
+ 		double \fI*speed\fP,
+ 		double \fI*heading\fP,
+ 		double \fI*draft\fP,
+ 		double \fI*roll\fP,
+ 		double \fI*pitch\fP,
+ 		double \fI*heave\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_extract_nnav\fP extracts navigation in the same
+manner as \fBmb_extract_nav\fP, except that it returns as many as
+\fInmax\fP navigation fixes associated with the current data
+record (some data formats, and the internally buffered
+asynchronous navigation used by \fBmb_navint_add\fP and related
+functions, can associate more than one navigation fix with a
+single survey ping). The number of fixes actually returned is
+placed in \fI*n\fP, and the arrays \fItime_i\fP, \fItime_d\fP,
+\fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP, \fIdraft\fP,
+\fIroll\fP, \fIpitch\fP, and \fIheave\fP must each be allocated by
+the calling program to hold at least \fInmax\fP values.
+
+\---------------------------------------------------------
+.br
 int \fBmb_insert_nav\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
- 		char \fI*store_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
  		int \fItime_i[7]\fP,
  		double \fItime_d\fP,
  		double \fInavlon\fP,
@@ -2045,8 +2441,8 @@ insert failures.
 .br
 int \fBmb_extract_altitude\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
- 		char \fI*store_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
  		int \fI*kind\fP,
  		double \fI*transducer_depth\fP,
   		double \fI*altitude\fP,
@@ -2086,8 +2482,8 @@ data extraction failures.
 .br
 int \fBmb_insert_altitude\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
- 		char \fI*store_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
  		double \fItransducer_depth\fP,
  		double \fIaltitude\fP,
  		int \fI*error\fP);
@@ -2119,8 +2515,8 @@ insert failures.
 .br
 int \fBmb_extract_svp\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
- 		char \fI*store_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
  		int \fI*kind\fP,
  		int \fI*nsvp\fP,
  		double \fI*depth\fP,
@@ -2159,8 +2555,8 @@ data extraction failures.
 .br
 int \fBmb_insert_svp\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
- 		char \fI*store_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
  		int \fInsvp\fP,
  		double \fI*depth\fP,
  		double \fI*velocity\fP,
@@ -2195,8 +2591,8 @@ data insertion failures.
 .br
 int \fBmb_ttimes\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
- 		char \fI*store_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
  		int \fI*kind\fP,
  		int \fI*nbeams\fP,
  		double \fI*ttimes\fP,
@@ -2339,52 +2735,262 @@ MB_ERROR_BAD_SYSTEM (14).
 
 \---------------------------------------------------------
 .br
-int \fBmb_extract_rawss\fP(
+int \fBmb_pulses\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
- 		char \fI*store_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
  		int \fI*kind\fP,
- 		int \fI*nrawss\fP,
- 		double \fI*rawss\fP,
- 		double \fI*rawssacrosstrack\fP,
- 		double \fI*rawssalongtrack\fP,
+ 		int \fI*nbeams\fP,
+ 		int \fI*pulses\fP,
  		int \fI*error\fP);
 
-This function has not yet been implemented for any data format.
-The notion is that since some formats carry both "raw" and
-"processed" sidescan imagery, there should be functions to
-extract and insert the "raw" sidescan. Given that the meaning of "raw"
-sidescan varies greatly among sonars, the processing one might apply to
-the data will depend on the sonar source. The definition of
-\fBmb_extract_rawss\fP may well change when we actually implement it.
+The function \fBmb_pulses\fP extracts, for each of the
+\fI*nbeams\fP beams of the current data record, a code indicating
+the type of transmit pulse (e.g. CW or FM chirp) used to obtain
+that beam, where the data format and sonar system record this
+information.
+
+\---------------------------------------------------------
+.br
+int \fBmb_sonarsettings\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
+ 		int \fI*kind\fP,
+ 		double \fI*frequency\fP,
+ 		double \fI*sample_rate\fP,
+ 		double \fI*tx_pulse_width\fP,
+ 		double \fI*power_selection\fP,
+ 		double \fI*gain_selection\fP,
+ 		double \fI*absorption\fP,
+ 		double \fI*spreading\fP,
+ 		double \fI*sound_velocity\fP,
+ 		double \fI*beamwidth_tx\fP,
+ 		double \fI*beamwidth_rx\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_sonarsettings\fP extracts the sonar transmit
+and receive settings (operating frequency, sample rate, transmit
+pulse width, power and gain selections, assumed absorption and
+spreading coefficients, assumed sound velocity, and transmit and
+receive beam widths) in effect for the current data record. This
+functionality is available for only a subset of the supported
+sonars; if the corresponding low level routine is undefined,
+\fI*error\fP will be set to MB_ERROR_BAD_SYSTEM (14).
+
+\---------------------------------------------------------
+.br
+int \fBmb_makess\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
+ 		int \fIpixel_size_set\fP,
+ 		double \fI*pixel_size\fP,
+ 		int \fIswath_width_set\fP,
+ 		double \fI*swath_width\fP,
+ 		int \fIpixel_int\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_makess\fP constructs a processed sidescan swath
+(uniformly spaced in acrosstrack distance) from the raw sidescan
+and/or bathymetry of the current data record. If
+\fIpixel_size_set\fP is nonzero, \fI*pixel_size\fP is used as
+supplied; otherwise a pixel size is calculated automatically and
+returned in \fI*pixel_size\fP. Likewise, if \fIswath_width_set\fP
+is nonzero \fI*swath_width\fP is used as supplied, and otherwise a
+swath width is calculated and returned. If \fIpixel_int\fP is
+nonzero, pixels with no assigned sidescan value are interpolated
+from neighboring pixels. The resulting processed sidescan values
+are stored back into the sonar-specific structure pointed to by
+\fIstore_ptr\fP for later extraction by \fBmb_extract\fP or
+\fBmb_get_all\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_extract_rawssdimensions\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
+ 		int \fI*kind\fP,
+ 		double \fI*sample_interval\fP,
+ 		int \fI*num_samples_port\fP,
+ 		int \fI*num_samples_stbd\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_extract_rawssdimensions\fP returns the sample
+interval and the numbers of port and starboard side raw sidescan
+samples available in the current data record, without extracting
+the raw sidescan sample values themselves. This allows a program to
+size arrays appropriately before calling \fBmb_extract_rawss\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_extract_rawss\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
+ 		int \fI*kind\fP,
+ 		int \fI*sidescan_type\fP,
+ 		double \fI*sample_interval\fP,
+ 		double \fI*beamwidth_xtrack\fP,
+ 		double \fI*beamwidth_ltrack\fP,
+ 		int \fI*num_samples_port\fP,
+ 		double \fI*rawss_port\fP,
+ 		int \fI*num_samples_stbd\fP,
+ 		double \fI*rawss_stbd\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_extract_rawss\fP extracts the "raw" (as opposed
+to slant-range-corrected or otherwise processed) sidescan sample
+arrays for the port and starboard sides of the current data record,
+where the data format supports this. Since the meaning of "raw"
+sidescan and the way it is stored varies greatly among sonars, the
+values of \fI*sidescan_type\fP, \fI*sample_interval\fP,
+\fI*beamwidth_xtrack\fP, and \fI*beamwidth_ltrack\fP allow the
+calling program to interpret the returned sample arrays
+\fI*rawss_port\fP and \fI*rawss_stbd\fP (of length
+\fI*num_samples_port\fP and \fI*num_samples_stbd\fP respectively)
+correctly. This function is not implemented for all data formats.
 
 \---------------------------------------------------------
 .br
 int \fBmb_insert_rawss\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
- 		char \fI*store_ptr\fP,
- 		int \fInrawss\fP,
- 		double \fI*rawss\fP,
- 		double \fI*rawssacrosstrack\fP,
- 		double \fI*rawssalongtrack\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
+ 		int \fIkind\fP,
+ 		int \fIsidescan_type\fP,
+ 		double \fIsample_interval\fP,
+ 		double \fIbeamwidth_xtrack\fP,
+ 		double \fIbeamwidth_ltrack\fP,
+ 		int \fInum_samples_port\fP,
+ 		double \fI*rawss_port\fP,
+ 		int \fInum_samples_stbd\fP,
+ 		double \fI*rawss_stbd\fP,
  		int \fI*error\fP);
 
-This function has not yet been implemented for any data format.
-The notion is that since some formats carry both "raw" and
-"processed" sidescan imagery, there should be functions to
-extract and insert the "raw" sidescan. Given that the meaning of "raw"
-sidescan varies greatly among sonars, the processing one might apply to
-the data will depend on the sonar source. The definition of
-\fBmb_insert_rawss\fP may well change when we actually implement it.
+The function \fBmb_insert_rawss\fP inserts "raw" port and starboard
+sidescan sample arrays into the data record pointed to by
+\fIstore_ptr\fP, where the data format supports this. The
+parameters have the same meaning as the corresponding return
+values of \fBmb_extract_rawss\fP. This function is not implemented
+for all data formats.
+
+\---------------------------------------------------------
+.br
+int \fBmb_extract_segytraceheader\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
+ 		int \fI*kind\fP,
+ 		void \fI*segytraceheader_ptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_extract_segytraceheader\fP extracts a
+\fBSEGY\fP trace header (a \fIstruct mb_segytraceheader_struct\fP,
+supplied by the calling program and filled in by this function)
+describing the current data record, for data formats that carry
+subbottom profiler or other seismic reflection data that can be
+represented in \fBSEGY\fP form (see the \fBmbsegylist\fP and
+\fBmbsegygrid\fP manual pages).
+
+\---------------------------------------------------------
+.br
+int \fBmb_extract_segy\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
+ 		int \fI*sampleformat\fP,
+ 		int \fI*kind\fP,
+ 		void \fI*segytraceheader_ptr\fP,
+ 		float \fI*segydata\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_extract_segy\fP extracts both the \fBSEGY\fP
+trace header (as does \fBmb_extract_segytraceheader\fP) and the
+associated trace sample data for the current data record, placing
+the samples in the array \fI*segydata\fP (allocated by the calling
+program to hold at least \fInsamp\fP values as specified in the
+trace header). The value \fI*sampleformat\fP indicates how the
+trace samples are to be interpreted (e.g.
+\fBMB_SEGY_SAMPLEFORMAT_TRACE\fP, \fBMB_SEGY_SAMPLEFORMAT_ENVELOPE\fP,
+or \fBMB_SEGY_SAMPLEFORMAT_ANALYTIC\fP).
+
+\---------------------------------------------------------
+.br
+int \fBmb_insert_segy\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
+ 		int \fIkind\fP,
+ 		void \fI*segytraceheader_ptr\fP,
+ 		float \fI*segydata\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_insert_segy\fP inserts a \fBSEGY\fP trace header
+and its associated trace sample data into the data record pointed
+to by \fIstore_ptr\fP, where the data format supports this. The
+parameters have the same meaning as the corresponding arguments of
+\fBmb_extract_segy\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_ctd\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
+ 		int \fI*kind\fP,
+ 		int \fI*nctd\fP,
+ 		double \fI*time_d\fP,
+ 		double \fI*conductivity\fP,
+ 		double \fI*temperature\fP,
+ 		double \fI*depth\fP,
+ 		double \fI*salinity\fP,
+ 		double \fI*soundspeed\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_ctd\fP extracts a set of \fI*nctd\fP CTD
+(conductivity-temperature-depth) measurements associated with the
+current data record, where the data format carries CTD data (e.g.
+some AUV data formats). The arrays \fItime_d\fP, \fIconductivity\fP,
+\fItemperature\fP, \fIdepth\fP, \fIsalinity\fP, and \fIsoundspeed\fP
+must each be allocated by the calling program to hold at least
+\fBMB_CTD_MAX\fP values.
+
+\---------------------------------------------------------
+.br
+int \fBmb_ancilliarysensor\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
+ 		int \fI*kind\fP,
+ 		int \fI*nsensor\fP,
+ 		double \fI*time_d\fP,
+ 		double \fI*sensor1\fP,
+ 		double \fI*sensor2\fP,
+ 		double \fI*sensor3\fP,
+ 		double \fI*sensor4\fP,
+ 		double \fI*sensor5\fP,
+ 		double \fI*sensor6\fP,
+ 		double \fI*sensor7\fP,
+ 		double \fI*sensor8\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_ancilliarysensor\fP extracts a set of
+\fI*nsensor\fP time-stamped samples from up to eight generic
+auxiliary sensor channels associated with the current data record,
+where the data format carries such data (e.g. some AUV data
+formats). The arrays \fItime_d\fP, \fIsensor1\fP through
+\fIsensor8\fP must each be allocated by the calling program to
+hold at least \fBMB_CTD_MAX\fP values.
 
 \---------------------------------------------------------
 .br
 int \fBmb_copyrecord\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
- 		char \fI*store_ptr\fP,
- 		char \fI*copy_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
+ 		void \fI*copy_ptr\fP,
  		int \fI*error\fP);
 
 The function \fBmb_copyrecord\fP copies the sonar-specific
@@ -2399,11 +3005,62 @@ A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
 data copy failures.
 
+\---------------------------------------------------------
+.br
+int \fBmb_indextable\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		int \fI*num_indextable\fP,
+ 		void \fI**indextable_ptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_indextable\fP returns the number of entries
+\fI*num_indextable\fP and a pointer \fI*indextable_ptr\fP to an
+index table built by \fBMBIO\fP while reading the file associated
+with \fImbio_ptr\fP. Each entry of the index table records the
+byte offset, kind, and time of a data record already read,
+allowing an application (e.g. \fBmbindex\fP or \fBmbnavadjust\fP)
+to later seek directly to particular records without a further
+sequential read.
+
+\---------------------------------------------------------
+.br
+int \fBmb_indextablefix\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		int \fInum_indextable\fP,
+ 		void \fI*indextable_ptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_indextablefix\fP passes an index table of
+\fInum_indextable\fP entries (typically obtained from
+\fBmb_indextable\fP and possibly edited by the calling program) to
+the format-specific fixing routine registered for the file
+associated with \fImbio_ptr\fP, where the data format supports
+this. This is used to make in-place corrections to records
+identified by the index table.
+
+\---------------------------------------------------------
+.br
+int \fBmb_indextableapply\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		int \fInum_indextable\fP,
+ 		void \fI*indextable_ptr\fP,
+ 		int \fIn_file\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_indextableapply\fP applies an index table of
+\fInum_indextable\fP entries to the \fIn_file\fPth parallel data
+file (see \fBmb_format_info\fP) associated with \fImbio_ptr\fP,
+using the format-specific apply routine registered for that
+format, where the data format supports this.
+
 .SH LEVEL 3 FUNCTIONS
 
 int \fBmb_buffer_init\fP(
  		int \fIverbose\fP,
- 		char \fI**buff_ptr\fP,
+ 		void \fI**buff_ptr\fP,
  		int \fI*error\fP);
 
 The function \fBmb_buffer_init\fP initializes the data structures
@@ -2424,8 +3081,8 @@ buffer initialization failures.
 .br
 int \fBmb_buffer_close\fP(
  		int \fIverbose\fP,
- 		char \fI**buff_ptr\fP,
- 		char \fI*mbio_ptr\fP,
+ 		void \fI**buff_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
  		int \fI*error\fP);
 
 The function \fBmb_buffer_close\fP releases all memory allocated
@@ -2444,7 +3101,8 @@ buffer deallocation failures.
 .br
 int \fBmb_buffer_load\fP(
  		int \fIverbose\fP,
- 		char \fI*buff_ptr\fP,char \fI*mbio_ptr\fP,
+ 		void \fI*buff_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
  		int \fInwant\fP,
  		int \fI*nload\fP,
  		int \fI*nbuff\fP,
@@ -2481,9 +3139,9 @@ buffer deallocation failures.
 .br
 int \fBmb_buffer_dump\fP(
  		int \fIverbose\fP,
- 		char \fI*buff_ptr\fP,
- 		char \fI*mbio_ptr\fP,
- 		char \fI*ombio_ptr\fP,
+ 		void \fI*buff_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*ombio_ptr\fP,
  		int \fInhold\fP,
  		int \fI*ndump\fP,
  		int \fI*nbuff\fP,
@@ -2523,8 +3181,8 @@ buffer deallocation failures.
 .br
 int \fBmb_buffer_clear\fP(
  		int \fIverbose\fP,
- 		char \fI*buff_ptr\fP,
- 		char \fI*mbio_ptr\fP,
+ 		void \fI*buff_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
  		int \fInhold\fP,
  		int \fI*ndump\fP,
  		int \fI*nbuff\fP,
@@ -2539,11 +3197,11 @@ The \fIverbose\fP
 value controls the standard error output verbosity of the function.
 
 The input control parameters have the following significance:
- 	\fInwant\fP:		The number of data records desired to be held
+ 	\fInhold\fP:		The number of data records desired to be held
  				in the buffer.
 
 The returned values are:
- 	\fInload\fP:		The number of data records cleared from the buffer.
+ 	\fIndump\fP:		The number of data records cleared from the buffer.
  	\fInbuff\fP:		The total number of data records in the buffer after dumping.
  	\fIerror\fP:		error value
 
@@ -2561,50 +3219,40 @@ buffer deallocation failures.
 
 \---------------------------------------------------------
 .br
-int \fBmb_buffer_info\fP(
+int \fBmb_buffer_get_kind\fP(
  		int \fIverbose\fP,
- 		char \fI*buff_ptr\fP,
- 		char \fI*mbio_ptr\fP,
+ 		void \fI*buff_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
  		int \fIid\fP,
- 		int \fI*system\fP,
  		int \fI*kind\fP,
  		int \fI*error\fP);
 
-The function \fBmb_buffer_clear\fP removes data from the buffer pointed
-to by *\fIbuff_ptr\fP without writing those data records to an
-output file. An \fBMBIO\fP descriptor pointed to by \fImbio_ptr\fP
+The function \fBmb_buffer_get_kind\fP returns the data record kind
+\fI*kind\fP (e.g. survey data, comment, navigation) of the buffer
+entry numbered \fIid\fP in the buffer pointed to by \fI*buff_ptr\fP.
+An \fBMBIO\fP descriptor pointed to by \fImbio_ptr\fP
 is still required, and generally represents the \fBMBIO\fP descriptor
 used to read and load the data originally.
 The \fIverbose\fP
 value controls the standard error output verbosity of the function.
 
 The input control parameters have the following significance:
- 	\fInwant\fP:		The number of data records desired to be held
- 				in the buffer.
+ 	\fIid\fP:		id number of the data record of interest
 
 The returned values are:
- 	\fInload\fP:		The number of data records cleared from the buffer.
- 	\fInbuff\fP:		The total number of data records in the buffer after dumping.
+ 	\fIkind\fP:		kind of data record found
  	\fIerror\fP:		error value
 
-If the number of loaded records is more than
-\fInhold\fP, the function will attempt to clear out records
-from the beginning of the buffer until \fInhold\fP records
-are left in the buffer. The \fIndump\fP
-value is the number of data records cleared during the current
-function call, and the \fInbuff\fP value is the number of data
-records in the buffer at the completion of the \fBmb_buffer_dump\fP
-call.
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about
-buffer deallocation failures.
+failures.
 
 \---------------------------------------------------------
 .br
 int \fBmb_buffer_get_next_data\fP(
  		int \fIverbose\fP,
- 		char \fI*buff_ptr\fP,
- 		char \fI*mbio_ptr\fP,
+ 		void \fI*buff_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
  		int \fIstart\fP,
  		int \fI*id\fP,
  		int \fItime_i[7]\fP,
@@ -2686,8 +3334,8 @@ records remain to be found in the buffer; in this case,
 .br
 int \fBmb_buffer_extract\fP(
  		int \fIverbose\fP,
- 		char \fI*buff_ptr\fP,
- 		char \fI*mbio_ptr\fP,
+ 		void \fI*buff_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
  		int \fIid\fP,
  		int \fI*kind\fP,
  		int \fItime_i[7]\fP,
@@ -2769,8 +3417,8 @@ extract failures.
 .br
 int \fBmb_buffer_insert\fP(
  		int \fIverbose\fP,
- 		char \fI*buff_ptr\fP,
- 		char \fI*mbio_ptr\fP,
+ 		void \fI*buff_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
  		int \fIid\fP,
  		int \fItime_i[7]\fP,
  		double \fItime_d\fP,
@@ -2853,8 +3501,8 @@ insert failures.
 .br
 int \fBmb_buffer_get_next_nav\fP(
  		int \fIverbose\fP,
- 		char \fI*buff_ptr\fP,
- 		char \fI*mbio_ptr\fP,
+ 		void \fI*buff_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
  		int \fIstart\fP,
  		int \fI*id\fP,
  		int \fItime_i[7]\fP,
@@ -2915,8 +3563,8 @@ records remain to be found in the buffer; in this case,
 .br
 int \fBmb_buffer_extract_nav\fP(
  		int \fIverbose\fP,
- 		char \fI*buff_ptr\fP,
- 		char \fI*mbio_ptr\fP,
+ 		void \fI*buff_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
  		int \fIid\fP,
  		int \fI*kind\fP,
  		int \fItime_i[7]\fP,
@@ -2975,8 +3623,8 @@ extract failures.
 .br
 int \fBmb_buffer_insert_nav\fP(
  		int \fIverbose\fP,
- 		char \fI*buff_ptr\fP,
- 		char \fI*mbio_ptr\fP,
+ 		void \fI*buff_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
  		int \fIid\fP,
  		int \fItime_i[7]\fP,
  		double \fItime_d\fP,
@@ -3034,10 +3682,10 @@ insert failures.
 .br
 int \fBmb_buffer_get_ptr\fP(
  		int \fIverbose\fP,
- 		char \fI*buff_ptr\fP,
- 		char \fI*mbio_ptr\fP,
+ 		void \fI*buff_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
  		int \fIid\fP,
- 		char \fI**store_ptr\fP,
+ 		void \fI**store_ptr\fP,
  		int \fI*error\fP);
 
 The function \fBmb_buffer_get_ptr\fP returns
@@ -3063,6 +3711,58 @@ buffer failures.
 
 .SH MISCELLANEOUS FUNCTIONS
 
+int \fBmb_version\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*version_string\fP,
+ 		int \fI*version_id\fP,
+ 		int \fI*version_major\fP,
+ 		int \fI*version_minor\fP,
+ 		int \fI*version_archive\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_version\fP returns the \fBMB-System\fP release
+version as both a string \fI*version_string\fP (e.g. "5.8.0") and,
+parsed from that string, the major, minor, and archive version
+numbers and a single combined numeric \fI*version_id\fP (e.g.
+version 5.8.2303 becomes 50802303) suitable for numeric
+comparisons.
+
+\---------------------------------------------------------
+.br
+int \fBmb_user_host_date\fP(
+ 		int \fIverbose\fP,
+ 		char \fIuser[256]\fP,
+ 		char \fIhost[256]\fP,
+ 		char \fIdate[32]\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_user_host_date\fP returns the current user
+name \fIuser\fP (from the \fBUSER\fP or \fBLOGNAME\fP environment
+variable), host name \fIhost\fP, and current date and time
+\fIdate\fP as strings. This is used by many \fBMB-System\fP
+programs to record who processed a file, on what machine, and
+when, typically in a processing comment record.
+
+\---------------------------------------------------------
+.br
+int \fBmb_default_defaults\fP(
+ 		int \fIverbose\fP,
+ 		int \fI*format\fP,
+ 		int \fI*pings\fP,
+ 		int \fI*lonflip\fP,
+ 		double \fIbounds[4]\fP,
+ 		int \fI*btime_i\fP,
+ 		int \fI*etime_i\fP,
+ 		double \fI*speedmin\fP,
+ 		double \fI*timegap\fP);
+
+The function \fBmb_default_defaults\fP sets the hardwired
+\fBMBIO\fP default control parameter values in the same manner as
+\fBmb_defaults\fP below, but without consulting a possible
+\fI.mbio_defaults\fP file in the user's home directory.
+
+\---------------------------------------------------------
+.br
 int \fBmb_defaults\fP(
  		int \fIverbose\fP,
  		int \fI*format\fP,
@@ -3115,6 +3815,78 @@ indicate success or failure.
 
 \---------------------------------------------------------
 .br
+int \fBmb_lonflip\fP(
+ 		int \fIverbose\fP,
+ 		int \fI*lonflip\fP);
+
+The function \fBmb_lonflip\fP returns just the default
+\fI*lonflip\fP value described above under \fBmb_defaults\fP,
+reading it from a \fI.mbio_defaults\fP file in the user's home
+directory if one exists (otherwise 0).
+
+\---------------------------------------------------------
+.br
+int \fBmb_fbtversion\fP(
+ 		int \fIverbose\fP,
+ 		int \fI*fbtversion\fP);
+
+The function \fBmb_fbtversion\fP returns the version number of the
+fast bathymetry (\fI.fbt\fP) file format to be generated by
+\fBmb_make_info\fP and related functions, reading it from a
+\fI.mbio_defaults\fP file in the user's home directory if one
+exists (otherwise 3, the current \fI.fbt\fP format version).
+
+\---------------------------------------------------------
+.br
+int \fBmb_uselockfiles\fP(
+ 		int \fIverbose\fP,
+ 		bool \fI*uselockfiles\fP);
+
+The function \fBmb_uselockfiles\fP returns true if \fBMBIO\fP
+should create lock files to prevent simultaneous editing of swath
+data files by multiple programs (e.g. \fBmbedit\fP), reading this
+setting from a \fI.mbio_defaults\fP file in the user's home
+directory if one exists (otherwise true). On Windows,
+\fI*uselockfiles\fP is always returned false because lock file
+creation is not supported there.
+
+\---------------------------------------------------------
+.br
+int \fBmb_fileiobuffer\fP(
+ 		int \fIverbose\fP,
+ 		int \fI*fileiobuffer\fP);
+
+The function \fBmb_fileiobuffer\fP returns the size (in some
+implementation-defined unit) of the buffer to be used for low
+level file input/output by \fBmb_fileio_open\fP, reading this
+setting from a \fI.mbio_defaults\fP file in the user's home
+directory if one exists (otherwise 0, meaning the system default
+buffering is used).
+
+\---------------------------------------------------------
+.br
+int \fBmb_mbview_defaults\fP(
+ 		int \fIverbose\fP,
+ 		int \fI*primary_colortable\fP,
+ 		int \fI*primary_colortable_mode\fP,
+ 		int \fI*primary_shade_mode\fP,
+ 		int \fI*slope_colortable\fP,
+ 		int \fI*slope_colortable_mode\fP,
+ 		int \fI*secondary_colortable\fP,
+ 		int \fI*secondary_colortable_mode\fP,
+ 		double \fI*illuminate_magnitude\fP,
+ 		double \fI*illuminate_elevation\fP,
+ 		double \fI*illuminate_azimuth\fP,
+ 		double \fI*slope_magnitude\fP);
+
+The function \fBmb_mbview_defaults\fP returns default color table,
+shading mode, and illumination parameter values used by the
+\fBmbview\fP 3D visualization widget, reading them from a
+\fI.mbio_defaults\fP file in the user's home directory if one
+exists.
+
+\---------------------------------------------------------
+.br
 int \fBmb_env\fP(
  		int \fIverbose\fP,
  		char \fI*psdisplay\fP,
@@ -3162,7 +3934,7 @@ argument \fIerror\fP passes more detailed information about failures.
 int \fBmb_format_register\fP(
  		int \fIverbose\fP,
  		int \fI*format\fP,
- 		char \fI*mbio_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
  		int \fI*error\fP);
 
 The function \fBmb_format_register\fP is called by \fBmb_read_init\fP
@@ -3198,12 +3970,15 @@ int \fBmb_format_info\fP(
  		char \fI*format_description\fP,
  		int \fI*numfile\fP,
  		int \fI*filetype\fP,
- 		int \fI*variable_beams\fP,
- 		int \fI*traveltime\fP,
- 		int \fI*beam_flagging\fP,
+ 		bool \fI*variable_beams\fP,
+ 		bool \fI*traveltime\fP,
+ 		bool \fI*beam_flagging\fP,
+ 		int \fI*platform_source\fP,
  		int \fI*nav_source\fP,
+ 		int \fI*sensordepth_source\fP,
  		int \fI*heading_source\fP,
- 		int \fI*vru_source\fP,
+ 		int \fI*attitude_source\fP,
+ 		int \fI*svp_source\fP,
  		double \fI*beamwidth_xtrack\fP,
  		double \fI*beamwidth_ltrack\fP,
  		int \fI*error\fP);
@@ -3231,11 +4006,18 @@ The return values are:
  	\fI*variable_beams\fP:	number of beams can vary [boolean]
  	\fI*traveltime\fP:	travel time data available [boolean]
  	\fI*beam_flagging\fP:	beam flagging supported [boolean]
+ 	\fI*platform_source\fP:	kind of data records containing
+ 				sensor platform (mounting/offset)
+ 				information
  	\fI*nav_source\fP:	kind of data records containing navigation
+ 	\fI*sensordepth_source\fP:	kind of data records containing
+ 				sensor (transducer) depth
  	\fI*heading_source\fP:	kind of data records containing
  				heading
- 	\fI*vru_source\fP:	kind of data records containing
- 				attitude
+ 	\fI*attitude_source\fP:	kind of data records containing
+ 				attitude (roll, pitch, heave)
+ 	\fI*svp_source\fP:	kind of data records containing
+ 				sound velocity profiles
  	\fI*beamwidth_xtrack\fP:	typical athwartships beam
  					width [degrees]
  	\fI*beamwidth_ltrack\fP:	typical alongtrack beam
@@ -3325,9 +4107,9 @@ argument \fIerror\fP passes more detailed information about failures.
 int \fBmb_format_flags\fP(
  		int \fIverbose\fP,
  		int \fI*format\fP,
- 		int \fI*variable_beams\fP,
- 		int \fI*traveltime\fP,
- 		int \fI*beam_flagging\fP,
+ 		bool \fI*variable_beams\fP,
+ 		bool \fI*traveltime\fP,
+ 		bool \fI*beam_flagging\fP,
  		int \fI*error\fP);
 
 The function \fBmb_format_flags\fP returns
@@ -3353,14 +4135,18 @@ argument \fIerror\fP passes more detailed information about failures.
 int \fBmb_format_source\fP(
  		int \fIverbose\fP,
  		int \fI*format\fP,
+ 		int \fI*platform_source\fP,
  		int \fI*nav_source\fP,
+ 		int \fI*sensordepth_source\fP,
  		int \fI*heading_source\fP,
- 		int \fI*vru_source\fP,
+ 		int \fI*attitude_source\fP,
+ 		int \fI*svp_source\fP,
  		int \fI*error\fP);
 
 The function \fBmb_format_source\fP returns
 flags indicating what kinds of data records contain
-navigation, heading, and attitude values in the
+platform, navigation, sensor depth, heading, attitude, and
+sound velocity profile values in the
 specified data format. The format id
 \fI*format\fP is first checked for validity. In some cases,
 formerly valid but now obsolete format id values are mapped
@@ -3369,12 +4155,18 @@ to current values. The input values are:
 .br
 The return values are:
  	\fI*format\fP:		\fBMBIO\fP format id
+ 	\fI*platform_source\fP:	kind of data records containing
+ 				sensor platform information
  	\fI*nav_source\fP:	kind of data records containing
  				navigation
+ 	\fI*sensordepth_source\fP:	kind of data records containing
+ 				sensor (transducer) depth
  	\fI*heading_source\fP:	kind of data records containing
  				heading
- 	\fI*vru_source\fP:	kind of data records containing
+ 	\fI*attitude_source\fP:	kind of data records containing
  				attitude
+ 	\fI*svp_source\fP:	kind of data records containing
+ 				sound velocity profiles
    	\fIerror\fP:		error value
 .br
 A status value indicating success or failure is returned; the error value
@@ -3410,9 +4202,87 @@ argument \fIerror\fP passes more detailed information about failures.
 
 \---------------------------------------------------------
 .br
+int \fBmb_get_format\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*filename\fP,
+ 		char \fI*fileroot\fP,
+ 		int \fI*format\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_get_format\fP attempts to determine the
+\fBMBIO\fP format id \fI*format\fP of \fIfilename\fP from a
+recognized filename suffix convention (e.g. \fI.mbXXX\fP,
+\fI.mb1\fP, or \fI.nve\fP), and if successful returns in
+\fI*fileroot\fP the part of \fIfilename\fP preceding that suffix.
+If no recognized suffix is found, \fI*format\fP is returned as 0.
+
+\---------------------------------------------------------
+.br
+int \fBmb_get_relative_path\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*path\fP,
+ 		char \fI*pwd\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_get_relative_path\fP rewrites \fI*path\fP in
+place, replacing it with the equivalent path relative to the
+working directory \fIpwd\fP, if \fIpath\fP lies within (or below)
+\fIpwd\fP. This is used, for instance, by \fBmbdatalist\fP so that
+datalist files can reference data files with relative rather than
+absolute paths.
+
+\---------------------------------------------------------
+.br
+int \fBmb_get_absolute_path\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*path\fP,
+ 		char \fI*pwd\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_get_absolute_path\fP rewrites \fI*path\fP in
+place, replacing a relative path with the equivalent absolute path
+obtained by prepending the working directory \fIpwd\fP, if
+\fIpath\fP is not already absolute.
+
+\---------------------------------------------------------
+.br
+int \fBmb_get_shortest_path\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*path\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_get_shortest_path\fP rewrites \fI*path\fP in
+place with the shortest equivalent path, removing redundant
+\fI./\fP and \fI../\fP path components.
+
+\---------------------------------------------------------
+.br
+int \fBmb_get_basename\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*path\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_get_basename\fP rewrites \fI*path\fP in place,
+replacing it with just its final path component (the part
+following the last "/").
+
+\---------------------------------------------------------
+.br
+int \fBmb_cvt_to_nix_path\fP(
+ 		char \fI*path\fP);
+
+The function \fBmb_cvt_to_nix_path\fP, available only when
+\fBMB-System\fP is built for Windows, rewrites \fIpath\fP in place,
+converting a Windows-style path (using "\\e" separators and a
+drive letter) into the equivalent Unix-style path (using "/"
+separators, with any drive letter removed) used internally by
+\fBMBIO\fP.
+
+\---------------------------------------------------------
+.br
 int \fBmb_datalist_open\fP(
  		int \fIverbose\fP,
- 		char \fI**datalist\fP,
+ 		void \fI**datalist_ptr\fP,
  		char \fI*path\fP,
  		int \fIlook_processed\fP,
  		int \fI*error\fP);
@@ -3431,7 +4301,7 @@ The input values are:
  					2 : return processed files
 .br
 The return values are:
- 	\fI**datalist\fP:	pointer to datalist
+ 	\fI**datalist_ptr\fP:	pointer to datalist
  				structure
    	\fIerror\fP:		error value
 .br
@@ -3442,8 +4312,9 @@ argument \fIerror\fP passes more detailed information about failures.
 .br
 int \fBmb_datalist_read\fP(
  		int \fIverbose\fP,
- 		char \fI*datalist\fP,
+ 		void \fI*datalist_ptr\fP,
  		char \fI*path\fP,
+ 		char \fI*dpath\fP,
  		int \fI*format\fP,
  		double \fI*weight\fP,
  		int \fI*error\fP);
@@ -3453,32 +4324,119 @@ from a datalist tree, attempting to return the path
 to the next valid swath data file, the corresponding data
 format id, and a gridding weight
 (see the \fBmbprocess\fP and \fBmbdatalist\fP manual pages).
-Information about the
+If a processed version of the data file exists and processed
+files are to be used, \fI*path\fP is returned as the path to the
+processed file. Information about the
 datalist tree is embedded in a data structure pointed to
-by \fI*datalist\fP. The input values are:
- 	\fI*datalist\fP:	pointer to datalist
+by \fI*datalist_ptr\fP. The input values are:
+ 	\fI*datalist_ptr\fP:	pointer to datalist
  				structure
 .br
 The return values are:
- 	\fI*path\fP:		swath data file
+ 	\fI*path\fP:		swath data file (or its processed
+ 				equivalent, if used)
+ 	\fI*dpath\fP:		path of the datalist file referencing
+ 				\fI*path\fP
  	\fI*format\fP:		\fBMBIO\fP format id
  	\fI*weight\fP:		\fBmbgrid\fP gridding weight
    	\fIerror\fP:		error value
 .br
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about failures.
+This function is implemented as a call to \fBmb_datalist_read3\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_datalist_readorg\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*datalist_ptr\fP,
+ 		char \fI*path\fP,
+ 		int \fI*format\fP,
+ 		double \fI*weight\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_datalist_readorg\fP reads
+from a datalist tree exactly as \fBmb_datalist_read\fP does, except
+that the original (unprocessed) file path is always returned in
+\fI*path\fP, even when a processed version of the file exists.
+
+\---------------------------------------------------------
+.br
+int \fBmb_datalist_read2\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*datalist_ptr\fP,
+ 		int \fI*pstatus\fP,
+ 		char \fI*path\fP,
+ 		char \fI*ppath\fP,
+ 		char \fI*dpath\fP,
+ 		int \fI*format\fP,
+ 		double \fI*weight\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_datalist_read2\fP reads
+from a datalist tree, returning both the original file path
+\fI*path\fP and, separately, the path \fI*ppath\fP of the
+processed version of that file (if one exists). The value
+\fI*pstatus\fP indicates whether a processed file exists
+(\fBMB_PROCESSED_EXIST\fP) and if so whether it should be used
+(\fBMB_PROCESSED_USE\fP) or not (\fBMB_PROCESSED_NONE\fP).
+\fI*dpath\fP is returned as the path of the datalist file
+that references \fI*path\fP.
+\fBmb_datalist_read\fP is implemented as a call to
+\fBmb_datalist_read3\fP, which is in turn implemented as a call
+to \fBmb_datalist_read2\fP with the addition of alternative
+navigation file handling.
+
+\---------------------------------------------------------
+.br
+int \fBmb_datalist_read3\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*datalist_ptr\fP,
+ 		int \fI*pstatus\fP,
+ 		char \fI*path\fP,
+ 		char \fI*ppath\fP,
+ 		int \fI*astatus\fP,
+ 		char \fI*apath\fP,
+ 		char \fI*dpath\fP,
+ 		int \fI*format\fP,
+ 		double \fI*weight\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_datalist_read3\fP reads
+from a datalist tree exactly as \fBmb_datalist_read2\fP does, and in
+addition returns the path \fI*apath\fP to an alternative navigation
+file associated with the data file, if one is specified in the
+datalist. The value \fI*astatus\fP indicates whether an alternative
+navigation file was found (\fBMB_ALTNAV_USE\fP) or not
+(\fBMB_ALTNAV_NONE\fP).
+
+\---------------------------------------------------------
+.br
+int \fBmb_datalist_recursion\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*datalist_ptr\fP,
+ 		bool \fIprint\fP,
+ 		int \fI*recursion\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_datalist_recursion\fP returns the current
+recursion depth of the datalist tree rooted at \fI*datalist_ptr\fP
+(datalist files may reference other datalist files, and this value
+tracks how deeply nested the currently open file is). If
+\fIprint\fP is true, a summary of the recursive datalist structure
+is printed to standard error.
 
 \---------------------------------------------------------
 .br
 int \fBmb_datalist_close\fP(
  		int \fIverbose\fP,
- 		char \fI**datalist\fP,
+ 		void \fI**datalist_ptr\fP,
  		int \fI*error\fP);
 
 The function \fBmb_datalist_close\fP closes an
 open datalist tree, and deallocates the data structure pointed to
-by \fI*datalist\fP. The input values are:
- 	\fI*datalist\fP:	pointer to datalist
+by \fI*datalist_ptr\fP. The input values are:
+ 	\fI*datalist_ptr\fP:	pointer to datalist
  				structure
 .br
 The return values are:
@@ -3489,10 +4447,312 @@ argument \fIerror\fP passes more detailed information about failures.
 
 \---------------------------------------------------------
 .br
+int \fBmb_imagelist_open\fP(
+ 		int \fIverbose\fP,
+ 		void \fI**imagelist_ptr\fP,
+ 		char \fI*path\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_imagelist_open\fP initializes reading
+from an imagelist tree in the same manner that
+\fBmb_datalist_open\fP does for a datalist tree. An imagelist
+references still or video camera image files (and, for stereo
+cameras, pairs of image files) associated with a survey, along
+with per-image navigation and timing metadata used when
+merging images with swath data
+(see the \fBmbphotomosaic\fP manual page). The string \fI*path\fP
+is the path to the top level imagelist file to be opened.
+The return values are:
+ 	\fI**imagelist_ptr\fP:	pointer to imagelist
+ 				structure
+   	\fIerror\fP:		error value
+.br
+A status value indicating success or failure is returned; the error value
+argument \fIerror\fP passes more detailed information about failures.
+
+\---------------------------------------------------------
+.br
+int \fBmb_imagelist_read\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*imagelist_ptr\fP,
+ 		int \fI*imagestatus\fP,
+ 		bool \fI*rectified\fP,
+ 		char \fI*path0\fP,
+ 		char \fI*path1\fP,
+ 		char \fI*dpath\fP,
+ 		double \fI*time_d0\fP,
+ 		double \fI*time_d1\fP,
+ 		double \fI*gain0\fP,
+ 		double \fI*gain1\fP,
+ 		double \fI*exposure0\fP,
+ 		double \fI*exposure1\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_imagelist_read\fP reads
+from an imagelist tree, attempting to return the path (or, for a
+stereo pair, paths) to the next image file along with its
+timestamp(s), camera gain(s), and exposure time(s). The value
+\fI*imagestatus\fP indicates the kind of image record obtained
+(e.g. single image or stereo pair), and \fI*rectified\fP indicates
+whether the image(s) have already been rectified. The return
+values are:
+ 	\fI*path0\fP:		path of the (first) image file
+ 	\fI*path1\fP:		path of the second image file of a
+ 				stereo pair, if any
+ 	\fI*dpath\fP:		path of the imagelist file referencing
+ 				\fI*path0\fP and \fI*path1\fP
+ 	\fI*time_d0\fP:		time stamp of first image
+ 	\fI*time_d1\fP:		time stamp of second image, if any
+ 	\fI*gain0\fP:		camera gain for first image
+ 	\fI*gain1\fP:		camera gain for second image, if any
+ 	\fI*exposure0\fP:	exposure time for first image
+ 	\fI*exposure1\fP:	exposure time for second image, if any
+   	\fIerror\fP:		error value
+.br
+A status value indicating success or failure is returned; the error value
+argument \fIerror\fP passes more detailed information about failures.
+
+\---------------------------------------------------------
+.br
+int \fBmb_imagelist_recursion\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*imagelist_ptr\fP,
+ 		bool \fIprint\fP,
+ 		int \fI*recursion\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_imagelist_recursion\fP returns the current
+recursion depth of the imagelist tree rooted at
+\fI*imagelist_ptr\fP, in the same manner that
+\fBmb_datalist_recursion\fP does for a datalist tree. If
+\fIprint\fP is true, a summary of the recursive imagelist
+structure is printed to standard error.
+
+\---------------------------------------------------------
+.br
+int \fBmb_imagelist_close\fP(
+ 		int \fIverbose\fP,
+ 		void \fI**imagelist_ptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_imagelist_close\fP closes an
+open imagelist tree, and deallocates the data structure pointed
+to by \fI*imagelist_ptr\fP.
+A status value indicating success or failure is returned; the error value
+argument \fIerror\fP passes more detailed information about failures.
+
+\---------------------------------------------------------
+.br
+int \fBmb_check_info\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*file\fP,
+ 		int \fIlonflip\fP,
+ 		double \fIbounds[4]\fP,
+ 		bool \fI*file_in_bounds\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_check_info\fP checks whether the swath data
+file \fIfile\fP has any data within the region specified by
+\fIlonflip\fP and \fIbounds\fP, without opening or reading the
+data file itself. This is done by reading the \fBmbinfo\fP summary
+statistics from the associated \fI.inf\fP file (see the
+\fBmbinfo\fP and \fBmbdatalist\fP manual pages), which lists the
+geographic bounds of the data. If \fIfile\fP is "stdin" or no
+\fI.inf\fP file exists, \fI*file_in_bounds\fP is simply set true.
+This function is used by \fBmbdatalist\fP and other programs
+to quickly exclude files with no data in a region of interest
+without opening every file in a large datalist.
+
+\---------------------------------------------------------
+.br
+bool \fBmb_should_make_fbt\fP(
+ 		int \fIverbose\fP,
+ 		int \fIformat\fP);
+
+The function \fBmb_should_make_fbt\fP returns true if swath data
+files of the given \fBMBIO\fP \fIformat\fP benefit from having an
+associated fast bathymetry file (\fI.fbt\fP suffix; see
+\fBmb_get_fbt\fP below) generated for them, and false for formats
+(e.g. navigation-only or ASCII formats) for which a \fI.fbt\fP
+file is not useful.
+
+\---------------------------------------------------------
+.br
+bool \fBmb_should_make_fnv\fP(
+ 		int \fIverbose\fP,
+ 		int \fIformat\fP);
+
+The function \fBmb_should_make_fnv\fP returns true if swath data
+files of the given \fBMBIO\fP \fIformat\fP benefit from having an
+associated fast navigation file (\fI.fnv\fP suffix; see
+\fBmb_get_fnv\fP below) generated for them, and false otherwise.
+
+\---------------------------------------------------------
+.br
+int \fBmb_make_info\fP(
+ 		int \fIverbose\fP,
+ 		bool \fIforce\fP,
+ 		char \fI*file\fP,
+ 		int \fIformat\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_make_info\fP checks the modification times of
+the \fI.inf\fP, \fI.fbt\fP, and \fI.fnv\fP ancillary files
+associated with the swath data file \fIfile\fP against the
+modification time of \fIfile\fP itself, and regenerates any that
+are missing or out of date by invoking \fBmbinfo\fP (for the
+\fI.inf\fP file) and \fBmbcopy\fP (for the \fI.fbt\fP and
+\fI.fnv\fP files) as subprocesses. If \fIforce\fP is true, the
+ancillary files are regenerated unconditionally.
+
+\---------------------------------------------------------
+.br
+int \fBmb_make_info_datalist\fP(
+ 		int \fIverbose\fP,
+ 		bool \fIforce\fP,
+ 		char \fI*read_file\fP,
+ 		int \fI*format\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_make_info_datalist\fP calls \fBmb_make_info\fP
+for every swath data file referenced (directly or recursively) by
+the datalist or single swath file named \fIread_file\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_get_fbt\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*file\fP,
+ 		int \fI*format\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_get_fbt\fP checks whether a fast bathymetry
+file (\fIfile\fP with a \fI.fbt\fP suffix appended) exists and is
+present; if so \fI*file\fP is replaced with the path of the
+\fI.fbt\fP file and \fI*format\fP is set to the fast bathymetry
+format id (71). If no \fI.fbt\fP file exists, \fI*file\fP and
+\fI*format\fP are left unchanged. This allows an application such
+as \fBmbgrid\fP to transparently read the much smaller and faster
+\fI.fbt\fP file in place of the original data file when one is
+available.
+
+\---------------------------------------------------------
+.br
+int \fBmb_get_fnv\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*file\fP,
+ 		int \fI*format\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_get_fnv\fP behaves exactly as \fBmb_get_fbt\fP
+does, except that it looks for a fast navigation file (a
+\fI.fnv\fP suffix) and, if found, sets \fI*format\fP to the fast
+navigation format id (166).
+
+\---------------------------------------------------------
+.br
+int \fBmb_get_ffa\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*file\fP,
+ 		int \fI*format\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_get_ffa\fP behaves exactly as \fBmb_get_fbt\fP
+does, except that it looks for a fast amplitude file (a
+\fI.ffa\fP suffix) and, if found, sets \fI*format\fP to the fast
+bathymetry/amplitude format id (71).
+
+\---------------------------------------------------------
+.br
+int \fBmb_get_ffs\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*file\fP,
+ 		int \fI*format\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_get_ffs\fP behaves exactly as \fBmb_get_fbt\fP
+does, except that it looks for a fast sidescan file (a
+\fI.ffs\fP suffix) and, if found, sets \fI*format\fP to the fast
+bathymetry/sidescan format id (71).
+
+\---------------------------------------------------------
+.br
+int \fBmb_swathbounds\fP(
+ 		int \fIverbose\fP,
+ 		int \fIcheckgood\fP,
+ 		int \fInbath\fP,
+ 		int \fInss\fP,
+ 		char \fI*beamflag\fP,
+ 		double \fI*bathacrosstrack\fP,
+ 		double \fI*ss\fP,
+ 		double \fI*ssacrosstrack\fP,
+ 		int \fI*ibeamport\fP,
+ 		int \fI*ibeamcntr\fP,
+ 		int \fI*ibeamstbd\fP,
+ 		int \fI*ipixelport\fP,
+ 		int \fI*ipixelcntr\fP,
+ 		int \fI*ipixelstbd\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_swathbounds\fP examines the bathymetry and
+sidescan acrosstrack distance arrays of a ping (of \fInbath\fP
+beams and \fInss\fP pixels) and returns the port-most, center, and
+starboard-most beam and pixel indices. If \fIcheckgood\fP is set,
+beams and pixels flagged bad are excluded from consideration. This
+is used by plotting and processing programs (e.g. \fBmbedit\fP and
+\fBmbeditviz\fP) to quickly determine the acrosstrack extent of a
+ping's good data.
+
+\---------------------------------------------------------
+.br
+int \fBmb_info_init\fP(
+ 		int \fIverbose\fP,
+ 		struct mb_info_struct \fI*mb_info\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_info_init\fP initializes (zeroes) the fields
+of the \fIstruct mb_info_struct\fP pointed to by \fImb_info\fP, the
+data structure used by \fBmb_get_info\fP to hold the summary
+statistics parsed from an \fI.inf\fP file.
+
+\---------------------------------------------------------
+.br
+int \fBmb_get_info\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*file\fP,
+ 		struct mb_info_struct \fI*mb_info\fP,
+ 		int \fIlonflip\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_get_info\fP reads the \fBmbinfo\fP summary
+statistics for the swath data file \fIfile\fP from its associated
+\fI.inf\fP file (generating that file first with \fBmb_make_info\fP
+if necessary) and returns them in the \fIstruct mb_info_struct\fP
+pointed to by \fImb_info\fP. The \fIlonflip\fP value controls how
+longitude values are wrapped when read from the \fI.inf\fP file.
+
+\---------------------------------------------------------
+.br
+int \fBmb_get_info_datalist\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*read_file\fP,
+ 		int \fI*format\fP,
+ 		struct mb_info_struct \fI*mb_info\fP,
+ 		int \fIlonflip\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_get_info_datalist\fP behaves as
+\fBmb_get_info\fP does, but accepts a datalist as well as a single
+swath file for \fIread_file\fP; when given a datalist, the summary
+statistics returned in \fImb_info\fP are accumulated over every
+swath file referenced by the datalist.
+
+\---------------------------------------------------------
+.br
 int \fBmb_alloc\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
- 		char \fI**store_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI**store_ptr\fP,
  		int \fI*error\fP);
 
 The function \fBmb_alloc\fP allocates a data structure
@@ -3515,8 +4775,8 @@ argument \fIerror\fP passes more detailed information about failures.
 .br
 int \fBmb_deall\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
- 		char \fI**store_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI**store_ptr\fP,
  		int \fI*error\fP);
 
 The function \fBmb_deall\fP deallocates a format specific
@@ -3534,24 +4794,409 @@ argument \fIerror\fP passes more detailed information about failures.
 
 \---------------------------------------------------------
 .br
+int \fBmb_malloc\fP(
+ 		int \fIverbose\fP,
+ 		size_t \fIsize\fP,
+ 		void \fI**ptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_malloc\fP allocates \fIsize\fP bytes of memory,
+returning the new pointer in \fI*ptr\fP, in the same manner as the
+standard C \fImalloc\fP() function, but also optionally tracking
+the allocation (see \fBmb_mem_list_enable\fP) and printing debug
+messages when \fIverbose\fP is high enough or debugging has been
+turned on with \fBmb_mem_debug_on\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_realloc\fP(
+ 		int \fIverbose\fP,
+ 		size_t \fIsize\fP,
+ 		void \fI**ptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_realloc\fP resizes the memory block pointed to
+by \fI*ptr\fP (allocated by \fBmb_malloc\fP or \fBmb_realloc\fP) to
+\fIsize\fP bytes, in the same manner as the standard C
+\fIrealloc\fP() function, updating \fI*ptr\fP and any memory
+tracking as \fBmb_malloc\fP does.
+
+\---------------------------------------------------------
+.br
+int \fBmb_free\fP(
+ 		int \fIverbose\fP,
+ 		void \fI**ptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_free\fP frees the memory pointed to by
+\fI*ptr\fP (allocated by \fBmb_malloc\fP or \fBmb_realloc\fP), sets
+\fI*ptr\fP to NULL, and updates any memory tracking as
+\fBmb_malloc\fP does.
+
+\---------------------------------------------------------
+.br
+int \fBmb_mallocd\fP(
+ 		int \fIverbose\fP,
+ 		const char \fI*sourcefile\fP,
+ 		int \fIsourceline\fP,
+ 		size_t \fIsize\fP,
+ 		void \fI**ptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_mallocd\fP behaves exactly as \fBmb_malloc\fP
+does, but also records the \fIsourcefile\fP name and \fIsourceline\fP
+number of the call site in the memory tracking list (when
+enabled), to aid in locating memory leaks. \fBMB-System\fP source
+code normally invokes this indirectly via the \fBmb_mallocd\fP
+macro, which supplies \fB__FILE__\fP and \fB__LINE__\fP
+automatically.
+
+\---------------------------------------------------------
+.br
+int \fBmb_reallocd\fP(
+ 		int \fIverbose\fP,
+ 		const char \fI*sourcefile\fP,
+ 		int \fIsourceline\fP,
+ 		size_t \fIsize\fP,
+ 		void \fI**ptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_reallocd\fP behaves exactly as \fBmb_realloc\fP
+does, but also records the \fIsourcefile\fP name and \fIsourceline\fP
+number of the call site, in the same manner as \fBmb_mallocd\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_freed\fP(
+ 		int \fIverbose\fP,
+ 		const char \fI*sourcefile\fP,
+ 		int \fIsourceline\fP,
+ 		void \fI**ptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_freed\fP behaves exactly as \fBmb_free\fP does,
+but also records the \fIsourcefile\fP name and \fIsourceline\fP
+number of the call site, in the same manner as \fBmb_mallocd\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_mem_list_enable\fP(
+ 		int \fIverbose\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_mem_list_enable\fP turns on internal tracking,
+by \fBmb_malloc\fP/\fBmb_realloc\fP/\fBmb_free\fP and related
+functions, of a list of all currently allocated memory blocks,
+enabling the use of \fBmb_memory_status\fP and \fBmb_memory_list\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_mem_list_disable\fP(
+ 		int \fIverbose\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_mem_list_disable\fP turns off the memory
+allocation tracking enabled by \fBmb_mem_list_enable\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_mem_debug_on\fP(
+ 		int \fIverbose\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_mem_debug_on\fP turns on printing of debug
+messages by the memory allocation functions above regardless of
+the \fIverbose\fP level passed to them.
+
+\---------------------------------------------------------
+.br
+int \fBmb_mem_debug_off\fP(
+ 		int \fIverbose\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_mem_debug_off\fP turns off the unconditional
+debug message printing enabled by \fBmb_mem_debug_on\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_memory_clear\fP(
+ 		int \fIverbose\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_memory_clear\fP frees every memory block
+currently in the allocation list maintained when memory tracking
+is enabled (see \fBmb_mem_list_enable\fP), and empties the list.
+
+\---------------------------------------------------------
+.br
+int \fBmb_memory_status\fP(
+ 		int \fIverbose\fP,
+ 		int \fI*nalloc\fP,
+ 		int \fI*nallocmax\fP,
+ 		int \fI*overflow\fP,
+ 		size_t \fI*allocsize\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_memory_status\fP returns, when memory tracking
+is enabled (see \fBmb_mem_list_enable\fP), the number of memory
+blocks currently allocated (\fI*nalloc\fP), the maximum number of
+blocks the tracking list can hold (\fI*nallocmax\fP), a flag
+(\fI*overflow\fP) indicating whether that maximum has been
+exceeded (in which case tracking becomes incomplete), and the
+total number of bytes currently allocated (\fI*allocsize\fP).
+
+\---------------------------------------------------------
+.br
+int \fBmb_memory_list\fP(
+ 		int \fIverbose\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_memory_list\fP prints to standard error a
+listing of every memory block currently in the allocation
+tracking list (see \fBmb_mem_list_enable\fP), including the
+source file and line number recorded by \fBmb_mallocd\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_update_arrays\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		int \fInbath\fP,
+ 		int \fInamp\fP,
+ 		int \fInss\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_update_arrays\fP resizes every array registered
+with \fBmb_register_array\fP for the \fBMBIO\fP descriptor pointed
+to by \fImbio_ptr\fP to match new maximum numbers of bathymetry
+beams \fInbath\fP, amplitude beams \fInamp\fP, and sidescan pixels
+\fInss\fP. It is called internally as necessary while reading data
+whose numbers of beams or pixels can vary from ping to ping.
+
+\---------------------------------------------------------
+.br
+int \fBmb_update_arrayptr\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI**handle\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_update_arrayptr\fP updates the stored copy of
+one registered array pointer \fI*handle\fP for the \fBMBIO\fP
+descriptor pointed to by \fImbio_ptr\fP, for use after the calling
+program has reallocated that array itself.
+
+\---------------------------------------------------------
+.br
+int \fBmb_list_arrays\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_list_arrays\fP prints to standard error a
+listing of every array registered with \fBmb_register_array\fP for
+the \fBMBIO\fP descriptor pointed to by \fImbio_ptr\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_deall_ioarrays\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_deall_ioarrays\fP frees every array registered
+with \fBmb_register_array\fP for the \fBMBIO\fP descriptor pointed
+to by \fImbio_ptr\fP. It is called internally by \fBmb_close\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_get_time\fP(
+ 		int \fIverbose\fP,
+ 		int \fItime_i[7]\fP,
+ 		double \fI*time_d\fP);
+
+The function \fBmb_get_time\fP converts the seven-element time
+array \fItime_i\fP (year, month, day, hour, minute, second,
+microsecond) into \fI*time_d\fP, the number of seconds since
+January 1, 1970 (with no time zone correction applied -
+\fBMB-System\fP always works in whatever time standard was used
+when the data were logged). Leap days are accounted for; leap
+seconds are not.
+
+\---------------------------------------------------------
+.br
+int \fBmb_get_date\fP(
+ 		int \fIverbose\fP,
+ 		double \fItime_d\fP,
+ 		int \fItime_i[7]\fP);
+
+The function \fBmb_get_date\fP is the inverse of \fBmb_get_time\fP,
+converting \fItime_d\fP seconds since January 1, 1970 into the
+seven-element time array \fItime_i\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_get_date_string\fP(
+ 		int \fIverbose\fP,
+ 		double \fItime_d\fP,
+ 		char \fI*string\fP);
+
+The function \fBmb_get_date_string\fP converts \fItime_d\fP
+seconds since January 1, 1970 into a human-readable date and time
+\fIstring\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_get_jtime\fP(
+ 		int \fIverbose\fP,
+ 		int \fItime_i[7]\fP,
+ 		int \fItime_j[5]\fP);
+
+The function \fBmb_get_jtime\fP converts the seven-element time
+array \fItime_i\fP into the five-element Julian day time array
+\fItime_j\fP (year, Julian day of year, hour, minute, second - with
+\fItime_j\fP[4] tracking the residual microseconds), the alternate
+time representation used internally by some sonar systems and data
+formats.
+
+\---------------------------------------------------------
+.br
+int \fBmb_get_itime\fP(
+ 		int \fIverbose\fP,
+ 		int \fItime_j[5]\fP,
+ 		int \fItime_i[7]\fP);
+
+The function \fBmb_get_itime\fP is the inverse of
+\fBmb_get_jtime\fP, converting the five-element Julian day time
+array \fItime_j\fP into the seven-element time array \fItime_i\fP.
+
+\---------------------------------------------------------
+.br
+char \fB*mb_day_name\fP(
+ 		int \fIverbose\fP,
+ 		int \fIday\fP);
+
+The function \fBmb_day_name\fP returns a pointer to a static
+string naming the day of the week numbered 1 (Sunday) through 7
+(Saturday) by \fIday\fP; any other value returns "Unknown".
+
+\---------------------------------------------------------
+.br
+char \fB*mb_month_name\fP(
+ 		int \fIverbose\fP,
+ 		int \fImonth\fP);
+
+The function \fBmb_month_name\fP returns a pointer to a static
+string naming the month numbered 1 (January) through 12 (December)
+by \fImonth\fP; any other value returns "Unknown".
+
+\---------------------------------------------------------
+.br
+int \fBmb_fix_y2k\fP(
+ 		int \fIverbose\fP,
+ 		int \fIyear_short\fP,
+ 		int \fI*year_long\fP);
+
+The function \fBmb_fix_y2k\fP converts a two digit year value
+\fIyear_short\fP into a four digit year \fI*year_long\fP, adding
+1900 if \fIyear_short\fP is 62 or greater and 2000 otherwise (no
+digital swath sonar data predates 1962, when multibeam sonars were
+first patented and built).
+
+\---------------------------------------------------------
+.br
+int \fBmb_unfix_y2k\fP(
+ 		int \fIverbose\fP,
+ 		int \fIyear_long\fP,
+ 		int \fI*year_short\fP);
+
+The function \fBmb_unfix_y2k\fP is the inverse of \fBmb_fix_y2k\fP,
+converting a four digit year \fIyear_long\fP into a two digit year
+\fI*year_short\fP.
+
+\---------------------------------------------------------
+.br
 int \fBmb_error\fP(
- 		int \fIerror\fP,
+ 		int \fIverbose\fP,
  		int \fIerror\fP,
  		char \fI**message\fP);
 
-Given the error value \fIerror\fP, \fBmb_format_inf\fP returns a
+Given the error value \fIerror\fP, \fBmb_error\fP returns a
 short error message in the string **\fImessage\fP. The \fIverbose\fP
 value controls the standard error output verbosity of the function.  The return
-status value signals success if \fIformat\fP is valid and failure otherwise.
+status value signals success if \fIerror\fP is a recognized \fBMBIO\fP
+error value and failure otherwise.
+
+\---------------------------------------------------------
+.br
+int \fBmb_notice_log_datatype\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		int \fIdata_id\fP);
+
+The function \fBmb_notice_log_datatype\fP increments the count, in
+the notice list maintained in the \fBMBIO\fP descriptor pointed to
+by \fImbio_ptr\fP, of data records of kind \fIdata_id\fP that have
+been read or written. This supports the end-of-run notice summary
+printed by many \fBMB-System\fP programs.
+
+\---------------------------------------------------------
+.br
+int \fBmb_notice_log_error\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		int \fIerror_id\fP);
+
+The function \fBmb_notice_log_error\fP behaves as
+\fBmb_notice_log_datatype\fP does, but increments the count of
+occurrences of the (nonfatal) error condition \fIerror_id\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_notice_log_problem\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		int \fIproblem_id\fP);
+
+The function \fBmb_notice_log_problem\fP behaves as
+\fBmb_notice_log_datatype\fP does, but increments the count of
+occurrences of the data problem condition \fIproblem_id\fP (e.g. a
+recognized but questionable value encountered while reading).
+
+\---------------------------------------------------------
+.br
+int \fBmb_notice_get_list\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		int \fI*notice_list\fP);
+
+The function \fBmb_notice_get_list\fP copies the notice list
+maintained in the \fBMBIO\fP descriptor pointed to by \fImbio_ptr\fP
+(as tallied by \fBmb_notice_log_datatype\fP,
+\fBmb_notice_log_error\fP, and \fBmb_notice_log_problem\fP) into
+the array \fInotice_list\fP, which must be allocated by the
+calling program to hold \fBMB_NOTICE_MAX\fP values.
+
+\---------------------------------------------------------
+.br
+int \fBmb_notice_message\fP(
+ 		int \fIverbose\fP,
+ 		int \fInotice\fP,
+ 		char \fI**message\fP);
+
+The function \fBmb_notice_message\fP returns, in the string
+\fI**message\fP, a short description of the notice list entry
+\fInotice\fP (one of the data record, error, or problem
+identifiers logged by the \fBmb_notice_log_*\fP functions above).
 
 \---------------------------------------------------------
 .br
 int \fBmb_navint_add\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
  		double \fItime_d\fP,
- 		double \fIlon\fP,
- 		double \fIlat\fP,
+ 		double \fIlon_easting\fP,
+ 		double \fIlat_northing\fP,
  		int \fI*error\fP);
 
 The function \fBmb_navint_add\fP adds a navigation fix
@@ -3564,8 +5209,14 @@ The input values are:
  	\fI*mbio_ptr\fP:	pointer to \fBMBIO\fP structure
  	\fItime_d\fP:		time of navigation fix in seconds
  			since 1/1/70 00:00:00
- 	\fIlon\fP:		longitude (degrees)
- 	\fIlat\fP:		latitude (degrees)
+ 	\fIlon_easting\fP:	longitude (degrees), or projected
+ 				easting if the \fBMBIO\fP structure
+ 				has been set to use a projected
+ 				coordinate system
+ 	\fIlat_northing\fP:	latitude (degrees), or projected
+ 				northing if the \fBMBIO\fP structure
+ 				has been set to use a projected
+ 				coordinate system
 .br
 The return values are:
    	\fIerror\fP:		error value
@@ -3577,7 +5228,7 @@ argument \fIerror\fP passes more detailed information about failures.
 .br
 int \fBmb_navint_interp\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
  		double \fItime_d\fP,
  		double \fIheading\fP,
  		double \fIrawspeed\fP,
@@ -3612,9 +5263,29 @@ argument \fIerror\fP passes more detailed information about failures.
 
 \---------------------------------------------------------
 .br
+int \fBmb_navint_prjinterp\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		double \fItime_d\fP,
+ 		double \fIheading\fP,
+ 		double \fIrawspeed\fP,
+ 		double \fI*easting\fP,
+ 		double \fI*northing\fP,
+ 		double \fI*speed\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_navint_prjinterp\fP behaves exactly as
+\fBmb_navint_interp\fP does, except that it interpolates and
+returns projected easting and northing values (\fI*easting\fP,
+\fI*northing\fP) rather than longitude and latitude, for use when
+the \fBMBIO\fP structure has been set to work in a projected
+coordinate system.
+
+\---------------------------------------------------------
+.br
 int \fBmb_attint_add\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
  		double \fItime_d\fP,
  		double \fIheave\fP,
  		double \fIroll\fP,
@@ -3644,9 +5315,28 @@ argument \fIerror\fP passes more detailed information about failures.
 
 \---------------------------------------------------------
 .br
+int \fBmb_attint_nadd\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		int \fInsamples\fP,
+ 		double \fI*time_d\fP,
+ 		double \fI*heave\fP,
+ 		double \fI*roll\fP,
+ 		double \fI*pitch\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_attint_nadd\fP adds \fInsamples\fP attitude
+(heave, roll, pitch) data points at once to the circular buffer
+described under \fBmb_attint_add\fP above, which is more efficient
+than calling \fBmb_attint_add\fP repeatedly when a block of
+attitude samples is available at once (e.g. when merging
+externally logged attitude data).
+
+\---------------------------------------------------------
+.br
 int \fBmb_attint_interp\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
  		double \fItime_d\fP,
  		double \fI*heave\fP,
  		double \fI*roll\fP,
@@ -3677,9 +5367,65 @@ argument \fIerror\fP passes more detailed information about failures.
 
 \---------------------------------------------------------
 .br
+int \fBmb_depint_add\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		double \fItime_d\fP,
+ 		double \fIsensordepth\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_depint_add\fP adds a sensor (transducer) depth
+value to a circular buffer of sensor depth values maintained in
+the \fBMBIO\fP data structure pointed to by \fB*mbio_ptr\fP, in
+the same manner that \fBmb_hedint_add\fP does for heading.
+
+\---------------------------------------------------------
+.br
+int \fBmb_depint_interp\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		double \fItime_d\fP,
+ 		double \fI*sensordepth\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_depint_interp\fP interpolates sensor depth to
+the time \fItime_d\fP using the circular buffer maintained by
+\fBmb_depint_add\fP, in the same manner that \fBmb_hedint_interp\fP
+does for heading.
+
+\---------------------------------------------------------
+.br
+int \fBmb_altint_add\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		double \fItime_d\fP,
+ 		double \fIaltitude\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_altint_add\fP adds an altitude value to a
+circular buffer of altitude values maintained in the \fBMBIO\fP
+data structure pointed to by \fB*mbio_ptr\fP, in the same manner
+that \fBmb_hedint_add\fP does for heading.
+
+\---------------------------------------------------------
+.br
+int \fBmb_altint_interp\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		double \fItime_d\fP,
+ 		double \fI*altitude\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_altint_interp\fP interpolates altitude to the
+time \fItime_d\fP using the circular buffer maintained by
+\fBmb_altint_add\fP, in the same manner that \fBmb_hedint_interp\fP
+does for heading.
+
+\---------------------------------------------------------
+.br
 int \fBmb_hedint_add\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
  		double \fItime_d\fP,
  		double \fIheading\fP,
  		int \fI*error\fP);
@@ -3704,9 +5450,25 @@ argument \fIerror\fP passes more detailed information about failures.
 
 \---------------------------------------------------------
 .br
+int \fBmb_hedint_nadd\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		int \fInsamples\fP,
+ 		double \fI*time_d\fP,
+ 		double \fI*heading\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_hedint_nadd\fP adds \fInsamples\fP heading
+values at once to the circular buffer described under
+\fBmb_hedint_add\fP above, which is more efficient than calling
+\fBmb_hedint_add\fP repeatedly when a block of heading samples is
+available at once.
+
+\---------------------------------------------------------
+.br
 int \fBmb_hedint_interp\fP(
  		int \fIverbose\fP,
- 		char \fI*mbio_ptr\fP,
+ 		void \fI*mbio_ptr\fP,
  		double \fItime_d\fP,
  		double \fI*heading\fP,
  		int \fI*error\fP);
@@ -3729,6 +5491,172 @@ The return values are:
 .br
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about failures.
+
+\---------------------------------------------------------
+.br
+int \fBmb_loadnavdata\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*merge_nav_file\fP,
+ 		int \fImerge_nav_format\fP,
+ 		int \fImerge_nav_lonflip\fP,
+ 		int \fI*merge_nav_num\fP,
+ 		int \fI*merge_nav_alloc\fP,
+ 		double \fI**merge_nav_time_d\fP,
+ 		double \fI**merge_nav_lon\fP,
+ 		double \fI**merge_nav_lat\fP,
+ 		double \fI**merge_nav_speed\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_loadnavdata\fP reads an entire external
+navigation file \fImerge_nav_file\fP (of \fBMBIO\fP format
+\fImerge_nav_format\fP, applying \fImerge_nav_lonflip\fP) into
+time, longitude, latitude, and speed arrays that are allocated (or
+reallocated, tracked by \fI*merge_nav_alloc\fP) and returned as
+\fI*merge_nav_time_d\fP, \fI*merge_nav_lon\fP, \fI*merge_nav_lat\fP,
+and \fI*merge_nav_speed\fP, with \fI*merge_nav_num\fP set to the
+number of values read. This is used by programs such as
+\fBmbprocess\fP to merge externally logged navigation into swath
+data using \fBmb_linear_interp\fP or \fBmb_linear_interp_longitude\fP
+and \fBmb_linear_interp_latitude\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_loadsensordepthdata\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*merge_sensordepth_file\fP,
+ 		int \fImerge_sensordepth_format\fP,
+ 		int \fI*merge_sensordepth_num\fP,
+ 		int \fI*merge_sensordepth_alloc\fP,
+ 		double \fI**merge_sensordepth_time_d\fP,
+ 		double \fI**merge_sensordepth_sensordepth\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_loadsensordepthdata\fP behaves as
+\fBmb_loadnavdata\fP does, but reads an external sensor depth time
+series into time and sensor depth arrays.
+
+\---------------------------------------------------------
+.br
+int \fBmb_loadaltitudedata\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*merge_altitude_file\fP,
+ 		int \fImerge_altitude_format\fP,
+ 		int \fI*merge_altitude_num\fP,
+ 		int \fI*merge_altitude_alloc\fP,
+ 		double \fI**merge_altitude_time_d\fP,
+ 		double \fI**merge_altitude_altitude\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_loadaltitudedata\fP behaves as
+\fBmb_loadnavdata\fP does, but reads an external altitude time
+series into time and altitude arrays.
+
+\---------------------------------------------------------
+.br
+int \fBmb_loadheadingdata\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*merge_heading_file\fP,
+ 		int \fImerge_heading_format\fP,
+ 		int \fI*merge_heading_num\fP,
+ 		int \fI*merge_heading_alloc\fP,
+ 		double \fI**merge_heading_time_d\fP,
+ 		double \fI**merge_heading_heading\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_loadheadingdata\fP behaves as
+\fBmb_loadnavdata\fP does, but reads an external heading time
+series into time and heading arrays.
+
+\---------------------------------------------------------
+.br
+int \fBmb_loadattitudedata\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*merge_attitude_file\fP,
+ 		int \fImerge_attitude_format\fP,
+ 		int \fI*merge_attitude_num\fP,
+ 		int \fI*merge_attitude_alloc\fP,
+ 		double \fI**merge_attitude_time_d\fP,
+ 		double \fI**merge_attitude_roll\fP,
+ 		double \fI**merge_attitude_pitch\fP,
+ 		double \fI**merge_attitude_heave\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_loadattitudedata\fP behaves as
+\fBmb_loadnavdata\fP does, but reads an external attitude time
+series into time, roll, pitch, and heave arrays.
+
+\---------------------------------------------------------
+.br
+int \fBmb_loadsoundspeeddata\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*merge_soundspeed_file\fP,
+ 		int \fImerge_soundspeed_format\fP,
+ 		int \fI*merge_soundspeed_num\fP,
+ 		int \fI*merge_soundspeed_alloc\fP,
+ 		double \fI**merge_soundspeed_time_d\fP,
+ 		double \fI**merge_soundspeed_soundspeed\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_loadsoundspeeddata\fP behaves as
+\fBmb_loadnavdata\fP does, but reads an external near-surface
+sound speed time series into time and sound speed arrays.
+
+\---------------------------------------------------------
+.br
+int \fBmb_loadtimeshiftdata\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*merge_timeshift_file\fP,
+ 		int \fImerge_timeshift_format\fP,
+ 		int \fI*merge_timeshift_num\fP,
+ 		int \fI*merge_timeshift_alloc\fP,
+ 		double \fI**merge_timeshift_time_d\fP,
+ 		double \fI**merge_timeshift_timeshift\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_loadtimeshiftdata\fP behaves as
+\fBmb_loadnavdata\fP does, but reads an external clock time-shift
+correction time series into time and timeshift arrays.
+
+\---------------------------------------------------------
+.br
+int \fBmb_apply_time_latency\fP(
+ 		int \fIverbose\fP,
+ 		int \fIdata_num\fP,
+ 		double \fI*data_time_d\fP,
+ 		int \fItime_latency_mode\fP,
+ 		double \fItime_latency_static\fP,
+ 		int \fItime_latency_num\fP,
+ 		double \fI*time_latency_time_d\fP,
+ 		double \fI*time_latency_value\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_apply_time_latency\fP corrects, in place, the
+\fIdata_num\fP timestamps in \fIdata_time_d\fP for sensor time
+latency (clock lag). If \fItime_latency_mode\fP is
+\fBMB_SENSOR_TIME_LATENCY_STATIC\fP, a constant
+\fItime_latency_static\fP offset (seconds) is subtracted from
+every timestamp. If \fItime_latency_mode\fP is
+\fBMB_SENSOR_TIME_LATENCY_MODEL\fP, a time-varying latency is
+instead interpolated from the \fItime_latency_num\fP-point model
+given by \fItime_latency_time_d\fP and \fItime_latency_value\fP
+and subtracted from each timestamp.
+
+\---------------------------------------------------------
+.br
+int \fBmb_apply_time_filter\fP(
+ 		int \fIverbose\fP,
+ 		int \fIdata_num\fP,
+ 		double \fI*data_time_d\fP,
+ 		double \fI*data_value\fP,
+ 		double \fIfilter_length\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_apply_time_filter\fP replaces, in place, the
+\fIdata_num\fP values in \fIdata_value\fP (timestamped by
+\fIdata_time_d\fP) with a running-mean smoothed version computed
+over a time window of length \fIfilter_length\fP seconds. This is
+used, for example, to smooth noisy externally logged sensor time
+series before merging them with swath data.
 
 \---------------------------------------------------------
 .br
@@ -3757,98 +5685,165 @@ this value as a int in \fI*value\fP.
 \---------------------------------------------------------
 .br
 int \fBmb_get_binary_short\fP(
- 		int \fIswapped\fP,
+ 		bool \fIswapped\fP,
  		void \fI*buffer\fP,
- 		short \fI*value\fP);
+ 		const void \fI*ptr\fP);
 
 The function \fBmb_get_binary_short\fP extracts
 a short int value from the first two bytes pointed to
-by \fI*buffer\fP. If the boolean \fIswapped\fP is true,
-the byte order of \fI*value\fP is swapped.
+by \fI*buffer\fP, copying the (possibly byte-swapped) result into
+the location pointed to by \fI*ptr\fP (cast internally to \fIshort *\fP).
+If \fIswapped\fP is true,
+the byte order of the extracted value is swapped.
 
 \---------------------------------------------------------
 .br
 int \fBmb_get_binary_int\fP(
- 		int \fIswapped\fP,
+ 		bool \fIswapped\fP,
  		void \fI*buffer\fP,
- 		int \fI*value\fP);
+ 		const void \fI*ptr\fP);
 
 The function \fBmb_get_binary_int\fP extracts
 an int value from the first four bytes pointed to
-by \fI*buffer\fP. If the boolean \fIswapped\fP is true,
-the byte order of \fI*value\fP is swapped.
+by \fI*buffer\fP, copying the (possibly byte-swapped) result into
+the location pointed to by \fI*ptr\fP (cast internally to \fIint *\fP).
+If \fIswapped\fP is true,
+the byte order of the extracted value is swapped.
 
 \---------------------------------------------------------
 .br
 int \fBmb_get_binary_float\fP(
- 		int \fIswapped\fP,
+ 		bool \fIswapped\fP,
  		void \fI*buffer\fP,
- 		float *value\fP);
+ 		const void \fI*ptr\fP);
 
 The function \fBmb_get_binary_float\fP extracts
 a float value from the first four bytes pointed to
-by \fI*buffer\fP. If the boolean \fIswapped\fP is true,
-the byte order of \fI*value\fP is swapped.
+by \fI*buffer\fP, copying the (possibly byte-swapped) result into
+the location pointed to by \fI*ptr\fP (cast internally to \fIfloat *\fP).
+If \fIswapped\fP is true,
+the byte order of the extracted value is swapped.
 
 \---------------------------------------------------------
 .br
 int \fBmb_get_binary_double\fP(
- 		int \fIswapped\fP,
+ 		bool \fIswapped\fP,
  		void \fI*buffer\fP,
- 		double \fI*value\fP);
+ 		const void \fI*ptr\fP);
 
 The function \fBmb_get_binary_double\fP extracts
 a double value from the first eight bytes pointed to
-by \fI*buffer\fP. If the boolean \fIswapped\fP is true,
-the byte order of \fI*value\fP is swapped.
+by \fI*buffer\fP, copying the (possibly byte-swapped) result into
+the location pointed to by \fI*ptr\fP (cast internally to \fIdouble *\fP).
+If \fIswapped\fP is true,
+the byte order of the extracted value is swapped.
+
+\---------------------------------------------------------
+.br
+int \fBmb_get_binary_long\fP(
+ 		bool \fIswapped\fP,
+ 		void \fI*buffer\fP,
+ 		const void \fI*ptr\fP);
+
+The function \fBmb_get_binary_long\fP extracts
+a 64 bit long integer value from the first eight bytes pointed to
+by \fI*buffer\fP, copying the (possibly byte-swapped) result into
+the location pointed to by \fI*ptr\fP (cast internally to \fImb_s_long *\fP).
+If \fIswapped\fP is true,
+the byte order of the extracted value is swapped.
 
 \---------------------------------------------------------
 .br
 int \fBmb_put_binary_short\fP(
- 		int \fIswapped\fP,
- 		short value\fP,
+ 		bool \fIswapped\fP,
+ 		short \fIvalue\fP,
  		void \fI*buffer\fP);
 
 The function \fBmb_put_binary_short\fP inserts
 a short int value into the first two bytes pointed to
-by \fI*buffer\fP. If the boolean \fIswapped\fP is true,
+by \fI*buffer\fP. If \fIswapped\fP is true,
 the byte order of \fIvalue\fP is swapped.
 
 \---------------------------------------------------------
 .br
 int \fBmb_put_binary_int\fP(
- 		int \fIswapped\fP,
+ 		bool \fIswapped\fP,
  		int \fIvalue\fP,
  		void \fI*buffer\fP);
 
 The function \fBmb_put_binary_int\fP inserts
 an int value into the first four bytes pointed to
-by \fI*buffer\fP. If the boolean \fIswapped\fP is true,
+by \fI*buffer\fP. If \fIswapped\fP is true,
 the byte order of \fIvalue\fP is swapped.
 
 \---------------------------------------------------------
 .br
 int \fBmb_put_binary_float\fP(
- 		int \fIswapped\fP,
- 		float value\fP,
+ 		bool \fIswapped\fP,
+ 		float \fIvalue\fP,
  		void \fI*buffer\fP);
 
 The function \fBmb_put_binary_float\fP inserts
 a float value into the first four bytes pointed to
-by \fI*buffer\fP. If the boolean \fIswapped\fP is true,
+by \fI*buffer\fP. If \fIswapped\fP is true,
 the byte order of \fIvalue\fP is swapped.
 
 \---------------------------------------------------------
 .br
 int \fBmb_put_binary_double\fP(
- 		int \fIswapped\fP,
+ 		bool \fIswapped\fP,
  		double \fIvalue\fP,
  		void \fI*buffer\fP);
 
 The function \fBmb_put_binary_double\fP inserts
 a double value into the first eight bytes pointed to
-by \fI*buffer\fP. If the boolean \fIswapped\fP is true,
+by \fI*buffer\fP. If \fIswapped\fP is true,
 the byte order of \fIvalue\fP is swapped.
+
+\---------------------------------------------------------
+.br
+int \fBmb_put_binary_long\fP(
+ 		bool \fIswapped\fP,
+ 		mb_s_long \fIvalue\fP,
+ 		void \fI*buffer\fP);
+
+The function \fBmb_put_binary_long\fP inserts
+a 64 bit long integer value into the first eight bytes pointed to
+by \fI*buffer\fP. If \fIswapped\fP is true,
+the byte order of \fIvalue\fP is swapped.
+
+\---------------------------------------------------------
+.br
+int \fBmb_swap_check\fP(void);
+
+The function \fBmb_swap_check\fP returns true if the current
+machine is little-endian (byte-swapped relative to the big-endian
+byte order used to store most \fBMBIO\fP binary data formats) and
+false if it is big-endian.
+
+\---------------------------------------------------------
+.br
+int \fBmb_swap_float\fP(
+ 		float \fI*a\fP);
+
+The function \fBmb_swap_float\fP reverses the byte order of the
+float pointed to by \fIa\fP, in place.
+
+\---------------------------------------------------------
+.br
+int \fBmb_swap_double\fP(
+ 		double \fI*a\fP);
+
+The function \fBmb_swap_double\fP reverses the byte order of the
+double pointed to by \fIa\fP, in place.
+
+\---------------------------------------------------------
+.br
+int \fBmb_swap_long\fP(
+ 		mb_s_long \fI*a\fP);
+
+The function \fBmb_swap_long\fP reverses the byte order of the 64
+bit long integer pointed to by \fIa\fP, in place.
 
 \---------------------------------------------------------
 .br
@@ -3877,6 +5872,221 @@ The function \fBmb_ddmmss_to_degree\fP parses the string
 \fI*text\fP and extracts a decimal longitude or latitude
 value from a "dd:mm:ss" (dd=degrees, mm=minutes, ss=seconds)
 value.
+
+\---------------------------------------------------------
+.br
+int \fBmb_apply_lonflip\fP(
+ 		int \fIverbose\fP,
+ 		int \fIlonflip\fP,
+ 		double \fI*longitude\fP);
+
+The function \fBmb_apply_lonflip\fP rewrites \fI*longitude\fP in
+place so that it falls in the range required by \fIlonflip\fP: if
+\fIlonflip\fP is negative, \fI*longitude\fP is wrapped into
+[\-360,0]; if zero, into [\-180,180]; if positive, into [0,360].
+See \fBmb_read_init\fP for the general meaning of \fIlonflip\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_coor_scale\fP(
+ 		int \fIverbose\fP,
+ 		double \fIlatitude\fP,
+ 		double \fI*mtodeglon\fP,
+ 		double \fI*mtodeglat\fP);
+
+The function \fBmb_coor_scale\fP returns the scaling factors
+\fI*mtodeglon\fP and \fI*mtodeglat\fP that convert distances in
+meters to longitude and latitude differences in degrees at the
+given \fIlatitude\fP, using a standard ellipsoidal earth model.
+These scale factors are used throughout \fBMB-System\fP to convert
+between geographic coordinates and local distances (for example, in
+computing sensor lever arm offsets).
+
+\---------------------------------------------------------
+.br
+int \fBmb_alvinxy_scale\fP(
+ 		int \fIverbose\fP,
+ 		double \fIlatitude\fP,
+ 		double \fI*mtodeglon\fP,
+ 		double \fI*mtodeglat\fP);
+
+The function \fBmb_alvinxy_scale\fP returns scaling factors
+\fI*mtodeglon\fP and \fI*mtodeglat\fP in the same sense as
+\fBmb_coor_scale\fP, but computed using the Clark 1866 spheroid
+coefficients used by the WHOI Alvin group's "AlvinXY" local
+rectilinear navigation coordinate frame convention (Murphy and
+Singh, 2010).
+
+\---------------------------------------------------------
+.br
+int \fBmb_proj_init\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*projection\fP,
+ 		void \fI**pjptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_proj_init\fP initializes, using the
+\fBlibproj\fP cartographic projections library, a map projection
+described by \fIprojection\fP (a \fBPROJ\fP/\fBEPSG\fP projection
+specification string, as also accepted by the \fB\-J\fP options of
+many \fBMB-System\fP and \fBGMT\fP programs) and returns a pointer
+to the initialized projection in \fI*pjptr\fP for use by
+\fBmb_proj_forward\fP and \fBmb_proj_inverse\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_proj_free\fP(
+ 		int \fIverbose\fP,
+ 		void \fI**pjptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_proj_free\fP deallocates a projection
+previously initialized by \fBmb_proj_init\fP and pointed to by
+\fI*pjptr\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_proj_forward\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*pjptr\fP,
+ 		double \fIlon\fP,
+ 		double \fIlat\fP,
+ 		double \fI*easting\fP,
+ 		double \fI*northing\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_proj_forward\fP applies the forward map
+projection \fIpjptr\fP (initialized by \fBmb_proj_init\fP) to
+convert geographic longitude \fIlon\fP and latitude \fIlat\fP
+(degrees) into projected \fI*easting\fP and \fI*northing\fP
+(meters).
+
+\---------------------------------------------------------
+.br
+int \fBmb_proj_inverse\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*pjptr\fP,
+ 		double \fIeasting\fP,
+ 		double \fInorthing\fP,
+ 		double \fI*lon\fP,
+ 		double \fI*lat\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_proj_inverse\fP applies the inverse of the map
+projection \fIpjptr\fP (initialized by \fBmb_proj_init\fP) to
+convert projected \fIeasting\fP and \fInorthing\fP (meters) back
+into geographic \fI*lon\fP and \fI*lat\fP (degrees).
+
+\---------------------------------------------------------
+.br
+int \fBmb_spline_init\fP(
+ 		int \fIverbose\fP,
+ 		const double \fI*x\fP,
+ 		const double \fI*y\fP,
+ 		int \fIn\fP,
+ 		double \fIyp1\fP,
+ 		double \fIypn\fP,
+ 		double \fI*y2\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_spline_init\fP computes the second-derivative
+array \fI*y2\fP of a natural cubic spline through the \fIn\fP data
+points (\fIx\fP[i], \fIy\fP[i]), given the first-derivative
+boundary conditions \fIyp1\fP and \fIypn\fP at the two endpoints
+(following Press et al., \fINumerical Recipes in C\fP). The array
+\fI*y2\fP is then passed to \fBmb_spline_interp\fP to evaluate the
+spline at arbitrary points.
+
+\---------------------------------------------------------
+.br
+int \fBmb_spline_interp\fP(
+ 		int \fIverbose\fP,
+ 		const double \fI*xa\fP,
+ 		const double \fI*ya\fP,
+ 		double \fI*y2a\fP,
+ 		int \fIn\fP,
+ 		double \fIx\fP,
+ 		double \fI*y\fP,
+ 		int \fI*i\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_spline_interp\fP evaluates, at the point
+\fIx\fP, the cubic spline defined by the \fIn\fP data points
+(\fIxa\fP[i], \fIya\fP[i]) and the second-derivative array
+\fIy2a\fP computed by \fBmb_spline_init\fP, returning the
+interpolated value in \fI*y\fP. The index \fI*i\fP should be
+initialized to zero before the first call and is thereafter
+maintained across successive calls to speed up the table lookup
+when \fIx\fP values are supplied in increasing order.
+
+\---------------------------------------------------------
+.br
+int \fBmb_linear_interp\fP(
+ 		int \fIverbose\fP,
+ 		const double \fI*xa\fP,
+ 		const double \fI*ya\fP,
+ 		int \fIn\fP,
+ 		double \fIx\fP,
+ 		double \fI*y\fP,
+ 		int \fI*i\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_linear_interp\fP evaluates, at the point
+\fIx\fP, simple linear interpolation (or, outside the data range,
+extrapolation using the nearest endpoint) through the \fIn\fP data
+points (\fIxa\fP[i], \fIya\fP[i]), returning the interpolated value
+in \fI*y\fP. The index \fI*i\fP is used in the same way as in
+\fBmb_spline_interp\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_linear_interp_longitude\fP(
+ 		int \fIverbose\fP,
+ 		const double \fI*xa\fP,
+ 		const double \fI*ya\fP,
+ 		int \fIn\fP,
+ 		double \fIx\fP,
+ 		double \fI*y\fP,
+ 		int \fI*i\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_linear_interp_longitude\fP behaves as
+\fBmb_linear_interp\fP does, but treats the \fIya\fP values as
+longitudes, so that interpolation is done correctly across the
++/\-180 degree dateline discontinuity.
+
+\---------------------------------------------------------
+.br
+int \fBmb_linear_interp_latitude\fP(
+ 		int \fIverbose\fP,
+ 		const double \fI*xa\fP,
+ 		const double \fI*ya\fP,
+ 		int \fIn\fP,
+ 		double \fIx\fP,
+ 		double \fI*y\fP,
+ 		int \fI*i\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_linear_interp_latitude\fP behaves as
+\fBmb_linear_interp\fP does, but treats the \fIya\fP values as
+latitudes, without extrapolating beyond +/\-90 degrees.
+
+\---------------------------------------------------------
+.br
+int \fBmb_linear_interp_heading\fP(
+ 		int \fIverbose\fP,
+ 		const double \fI*xa\fP,
+ 		const double \fI*ya\fP,
+ 		int \fIn\fP,
+ 		double \fIx\fP,
+ 		double \fI*y\fP,
+ 		int \fI*i\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_linear_interp_heading\fP behaves as
+\fBmb_linear_interp\fP does, but treats the \fIya\fP values as
+headings, so that interpolation is done correctly across the
+0/360 degree discontinuity.
 
 \---------------------------------------------------------
 .br
@@ -3910,22 +6120,956 @@ See the discussion of coordinate systems below.
 
 \---------------------------------------------------------
 .br
-int \fBmb_double_compare\fP(double \fI*a\fP,
- 		double \fI*b\fP);
+int \fBmb_xyz_to_takeoff\fP(
+ 		int \fIverbose\fP,
+ 		double \fIx\fP,
+ 		double \fIy\fP,
+ 		double \fIz\fP,
+ 		double \fI*theta\fP,
+ 		double \fI*phi\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_xyz_to_takeoff\fP converts a Cartesian beam
+direction vector (\fIx\fP, \fIy\fP, \fIz\fP) into the "takeoff"
+coordinate system angles \fI*theta\fP (from vertical) and
+\fI*phi\fP (from the alongtrack direction). See the discussion of
+coordinate systems below.
+
+\---------------------------------------------------------
+.br
+int \fBmb_lever\fP(
+ 		int \fIverbose\fP,
+ 		double \fIsonar_offset_x\fP,
+ 		double \fIsonar_offset_y\fP,
+ 		double \fIsonar_offset_z\fP,
+ 		double \fInav_offset_x\fP,
+ 		double \fInav_offset_y\fP,
+ 		double \fInav_offset_z\fP,
+ 		double \fIvru_offset_x\fP,
+ 		double \fIvru_offset_y\fP,
+ 		double \fIvru_offset_z\fP,
+ 		double \fIvru_pitch\fP,
+ 		double \fIvru_roll\fP,
+ 		double \fI*lever_x\fP,
+ 		double \fI*lever_y\fP,
+ 		double \fI*lever_z\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_lever\fP computes the effective lever arm
+correction (\fI*lever_x\fP, \fI*lever_y\fP, \fI*lever_z\fP) that
+must be applied to sonar position because of the relative offsets
+between the sonar, the navigation antenna, and the attitude
+(VRU) sensor, given the current \fIvru_pitch\fP and \fIvru_roll\fP.
+This older, simpler lever arm calculation has largely been
+superseded by the fuller sensor platform model implemented by
+\fBmb_platform_lever\fP below, but remains available for formats
+and programs that use it directly.
+
+\---------------------------------------------------------
+.br
+int \fBmb_beaudoin\fP(
+ 		int \fIverbose\fP,
+ 		mb_3D_orientation \fItx_align\fP,
+ 		mb_3D_orientation \fItx_orientation\fP,
+ 		double \fItx_steer\fP,
+ 		mb_3D_orientation \fIrx_align\fP,
+ 		mb_3D_orientation \fIrx_orientation\fP,
+ 		double \fIrx_steer\fP,
+ 		double \fIreference_heading\fP,
+ 		double \fI*beamAzimuth\fP,
+ 		double \fI*beamDepression\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_beaudoin\fP implements the algorithm of
+Beaudoin et al. for computing the true beam azimuth
+\fI*beamAzimuth\fP and depression angle \fI*beamDepression\fP of a
+multibeam sonar beam given the transmit and receive array
+mounting alignments (\fItx_align\fP, \fIrx_align\fP), the vessel
+orientations at ping and receive time (\fItx_orientation\fP,
+\fIrx_orientation\fP), the transmit and receive beam steering
+angles (\fItx_steer\fP, \fIrx_steer\fP), and a \fIreference_heading\fP.
+This properly accounts for the different vessel attitudes at
+transmit and receive time on a moving platform.
+
+\---------------------------------------------------------
+.br
+int \fBmb_beaudoin_unrotate\fP(
+ 		int \fIverbose\fP,
+ 		mb_3D_vector \fIorig\fP,
+ 		mb_3D_orientation \fIrotate\fP,
+ 		mb_3D_vector \fI*final\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_beaudoin_unrotate\fP rotates the vector
+\fIorig\fP by the inverse of the roll, pitch, and heading
+orientation \fIrotate\fP, returning the result in \fI*final\fP.
+This is a supporting calculation used by \fBmb_beaudoin\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_init\fP(
+ 		int \fIverbose\fP,
+ 		void \fI**platform_ptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_platform_init\fP allocates and initializes an
+empty sensor platform model, returning a pointer to it in
+\fI*platform_ptr\fP. A platform model records the survey platform
+(ship, ROV, or AUV) identity together with a list of sensors, each
+with its position and attitude offsets relative to the platform's
+reference point, and is used throughout \fBMBIO\fP (see
+\fBmb_set_platform\fP, \fBmb_extract_platform\fP, and
+\fBmb_preprocess\fP) to convert raw sensor readings and geometry
+into properly located and oriented bathymetry, in place of the
+older, simpler \fBmb_lever\fP calculation. See also the
+\fBmbmakeplatform\fP manual page and the platform file format
+description therein.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_setinfo\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*platform_ptr\fP,
+ 		int \fItype\fP,
+ 		char \fI*name\fP,
+ 		char \fI*organization\fP,
+ 		char \fI*documentation_url\fP,
+ 		double \fIstart_time_d\fP,
+ 		double \fIend_time_d\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_platform_setinfo\fP sets the identifying
+information of the platform pointed to by \fIplatform_ptr\fP: its
+\fItype\fP (e.g. surface ship, ROV, AUV), \fIname\fP,
+\fIorganization\fP, a \fIdocumentation_url\fP, and the time
+interval (\fIstart_time_d\fP to \fIend_time_d\fP) over which this
+platform definition applies.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_add_sensor\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*platform_ptr\fP,
+ 		int \fItype\fP,
+ 		mb_longname \fImodel\fP,
+ 		mb_longname \fImanufacturer\fP,
+ 		mb_longname \fIserialnumber\fP,
+ 		int \fIcapability1\fP,
+ 		int \fIcapability2\fP,
+ 		int \fInum_offsets\fP,
+ 		int \fInum_time_latency\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_platform_add_sensor\fP appends a new sensor
+record to the platform pointed to by \fIplatform_ptr\fP, of the
+given \fItype\fP (e.g. sonar, INS, GPS), identified by \fImodel\fP,
+\fImanufacturer\fP, and \fIserialnumber\fP, with capability flags
+\fIcapability1\fP and \fIcapability2\fP describing what the sensor
+measures, and space allocated for \fInum_offsets\fP position/attitude
+offset records (see \fBmb_platform_set_sensor_offset\fP) and
+\fInum_time_latency\fP time latency model samples (see
+\fBmb_platform_set_sensor_timelatency\fP). Sensors are indexed in
+the order added, starting from zero.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_set_sensor_offset\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*platform_ptr\fP,
+ 		int \fIisensor\fP,
+ 		int \fIioffset\fP,
+ 		double \fIposition_offset_x\fP,
+ 		double \fIposition_offset_y\fP,
+ 		double \fIposition_offset_z\fP,
+ 		double \fIattitude_offset_azimuth\fP,
+ 		double \fIattitude_offset_roll\fP,
+ 		double \fIattitude_offset_pitch\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_platform_set_sensor_offset\fP sets the
+\fIioffset\fPth position offset (\fIposition_offset_x\fP,
+\fIposition_offset_y\fP, \fIposition_offset_z\fP, in the platform's
+forward/starboard/down reference frame, meters) and attitude
+offset (\fIattitude_offset_azimuth\fP, \fIattitude_offset_roll\fP,
+\fIattitude_offset_pitch\fP, degrees) of sensor number \fIisensor\fP
+of the platform pointed to by \fIplatform_ptr\fP, relative to the
+platform reference point.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_set_sensor_timelatency\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*platform_ptr\fP,
+ 		int \fIisensor\fP,
+ 		int \fItime_latency_mode\fP,
+ 		double \fItime_latency_static\fP,
+ 		int \fInum_time_latency\fP,
+ 		double \fI*time_latency_time_d\fP,
+ 		double \fI*time_latency_value\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_platform_set_sensor_timelatency\fP sets the
+time latency model for sensor number \fIisensor\fP of the platform
+pointed to by \fIplatform_ptr\fP, in the same sense as
+\fBmb_apply_time_latency\fP: if \fItime_latency_mode\fP is
+\fBMB_SENSOR_TIME_LATENCY_STATIC\fP a constant
+\fItime_latency_static\fP offset is used, and if
+\fBMB_SENSOR_TIME_LATENCY_MODEL\fP the \fInum_time_latency\fP-point
+model given by \fItime_latency_time_d\fP and \fItime_latency_value\fP
+is used instead.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_set_sensor_flipsign_heading\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*platform_ptr\fP,
+ 		int \fIisensor\fP,
+ 		int \fI*error\fP);
+.br
+int \fBmb_platform_set_sensor_flipsign_roll\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*platform_ptr\fP,
+ 		int \fIisensor\fP,
+ 		int \fI*error\fP);
+.br
+int \fBmb_platform_set_sensor_flipsign_pitch\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*platform_ptr\fP,
+ 		int \fIisensor\fP,
+ 		int \fI*error\fP);
+
+The functions \fBmb_platform_set_sensor_flipsign_heading\fP,
+\fBmb_platform_set_sensor_flipsign_roll\fP, and
+\fBmb_platform_set_sensor_flipsign_pitch\fP each mark sensor number
+\fIisensor\fP of the platform pointed to by \fIplatform_ptr\fP as
+having its heading, roll, or pitch sign convention reversed
+relative to the \fBMB-System\fP standard, so that
+\fBmb_platform_apply_flipsign_heading\fP and
+\fBmb_platform_apply_flipsign_attitude\fP will correct it.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_set_source_sensor\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*platform_ptr\fP,
+ 		int \fIsource_type\fP,
+ 		int \fIsensor\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_platform_set_source_sensor\fP designates sensor
+number \fIsensor\fP of the platform pointed to by \fIplatform_ptr\fP
+as the source of a particular kind of data (\fIsource_type\fP -
+e.g. navigation, heading, roll/pitch, heave, or sonar depth), so
+that functions such as \fBmb_platform_orientation\fP know which
+sensor's offsets to apply.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_deall\fP(
+ 		int \fIverbose\fP,
+ 		void \fI**platform_ptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_platform_deall\fP deallocates a platform model
+previously allocated by \fBmb_platform_init\fP or
+\fBmb_platform_read\fP and pointed to by \fI*platform_ptr\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_read\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*platform_file\fP,
+ 		void \fI**platform_ptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_platform_read\fP reads a platform definition
+from the file \fIplatform_file\fP (as written by
+\fBmb_platform_write\fP or the \fBmbmakeplatform\fP program) and
+returns a newly allocated platform model in \fI*platform_ptr\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_write\fP(
+ 		int \fIverbose\fP,
+ 		char \fI*platform_file\fP,
+ 		void \fI*platform_ptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_platform_write\fP writes the platform model
+pointed to by \fIplatform_ptr\fP to the file \fIplatform_file\fP,
+in the format read by \fBmb_platform_read\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_lever\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*platform_ptr\fP,
+ 		int \fItargetsensor\fP,
+ 		int \fItargetsensoroffset\fP,
+ 		double \fIheading\fP,
+ 		double \fIroll\fP,
+ 		double \fIpitch\fP,
+ 		double \fI*lever_x\fP,
+ 		double \fI*lever_y\fP,
+ 		double \fI*lever_z\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_platform_lever\fP computes the lever arm
+correction (\fI*lever_x\fP, \fI*lever_y\fP, \fI*lever_z\fP, in the
+platform reference frame) between the platform's navigation
+reference point and offset number \fItargetsensoroffset\fP of
+sensor number \fItargetsensor\fP of the platform pointed to by
+\fIplatform_ptr\fP, given the platform's current \fIheading\fP,
+\fIroll\fP, and \fIpitch\fP. This generalizes the older
+\fBmb_lever\fP calculation to the full multi-sensor platform model.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_position\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*platform_ptr\fP,
+ 		int \fItargetsensor\fP,
+ 		int \fItargetsensoroffset\fP,
+ 		double \fInavlon\fP,
+ 		double \fInavlat\fP,
+ 		double \fIsensordepth\fP,
+ 		double \fIheading\fP,
+ 		double \fIroll\fP,
+ 		double \fIpitch\fP,
+ 		double \fI*targetlon\fP,
+ 		double \fI*targetlat\fP,
+ 		double \fI*targetz\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_platform_position\fP translates a navigation fix
+(\fInavlon\fP, \fInavlat\fP, \fIsensordepth\fP) obtained at the
+platform's navigation reference point, together with the current
+\fIheading\fP, \fIroll\fP, and \fIpitch\fP, into the corresponding
+position (\fI*targetlon\fP, \fI*targetlat\fP, \fI*targetz\fP) of
+offset number \fItargetsensoroffset\fP of sensor number
+\fItargetsensor\fP of the platform pointed to by \fIplatform_ptr\fP,
+applying the lever arm computed by \fBmb_platform_lever\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_position_offset\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*platform_ptr\fP,
+ 		int \fItargetsensor\fP,
+ 		int \fItargetsensoroffset\fP,
+ 		double \fI*target_x_offset\fP,
+ 		double \fI*target_y_offset\fP,
+ 		double \fI*target_z_offset\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_platform_position_offset\fP returns just the
+position offset (\fI*target_x_offset\fP, \fI*target_y_offset\fP,
+\fI*target_z_offset\fP, in the platform reference frame) of offset
+number \fItargetsensoroffset\fP of sensor number \fItargetsensor\fP
+of the platform pointed to by \fIplatform_ptr\fP, without applying
+any attitude rotation.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_apply_flipsign_attitude\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*platform_ptr\fP,
+ 		double \fI*roll\fP,
+ 		double \fI*pitch\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_platform_apply_flipsign_attitude\fP negates
+\fI*roll\fP and/or \fI*pitch\fP in place if the corresponding
+attitude source sensor of the platform pointed to by
+\fIplatform_ptr\fP has been marked with
+\fBmb_platform_set_sensor_flipsign_roll\fP or
+\fBmb_platform_set_sensor_flipsign_pitch\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_apply_flipsign_heading\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*platform_ptr\fP,
+ 		double \fI*heading\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_platform_apply_flipsign_heading\fP corrects
+\fI*heading\fP in place if the heading source sensor of the
+platform pointed to by \fIplatform_ptr\fP has been marked with
+\fBmb_platform_set_sensor_flipsign_heading\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_orientation\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*platform_ptr\fP,
+ 		double \fIheading\fP,
+ 		double \fIroll\fP,
+ 		double \fIpitch\fP,
+ 		double \fI*platform_heading\fP,
+ 		double \fI*platform_roll\fP,
+ 		double \fI*platform_pitch\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_platform_orientation\fP converts a raw
+\fIheading\fP, \fIroll\fP, and \fIpitch\fP reading from the
+platform's designated attitude and heading source sensors (see
+\fBmb_platform_set_source_sensor\fP) into the equivalent platform
+reference frame orientation (\fI*platform_heading\fP,
+\fI*platform_roll\fP, \fI*platform_pitch\fP), correcting for that
+sensor's mounting angle offsets.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_orientation_offset\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*platform_ptr\fP,
+ 		int \fItargetsensor\fP,
+ 		int \fItargetsensoroffset\fP,
+ 		double \fI*target_hdg_offset\fP,
+ 		double \fI*target_roll_offset\fP,
+ 		double \fI*target_pitch_offset\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_platform_orientation_offset\fP returns just the
+mounting angle offsets (\fI*target_hdg_offset\fP,
+\fI*target_roll_offset\fP, \fI*target_pitch_offset\fP) of offset
+number \fItargetsensoroffset\fP of sensor number \fItargetsensor\fP
+of the platform pointed to by \fIplatform_ptr\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_orientation_target\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*platform_ptr\fP,
+ 		int \fItargetsensor\fP,
+ 		int \fItargetsensoroffset\fP,
+ 		double \fIheading\fP,
+ 		double \fIroll\fP,
+ 		double \fIpitch\fP,
+ 		double \fI*target_heading\fP,
+ 		double \fI*target_roll\fP,
+ 		double \fI*target_pitch\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_platform_orientation_target\fP converts the
+platform reference frame orientation (\fIheading\fP, \fIroll\fP,
+\fIpitch\fP) into the corresponding orientation
+(\fI*target_heading\fP, \fI*target_roll\fP, \fI*target_pitch\fP) of
+offset number \fItargetsensoroffset\fP of sensor number
+\fItargetsensor\fP of the platform pointed to by \fIplatform_ptr\fP,
+applying that offset's mounting angles. This is the inverse sense
+of \fBmb_platform_orientation\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_copy\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*platform_ptr\fP,
+ 		void \fI*platform_copy_ptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_platform_copy\fP copies the platform model
+pointed to by \fIplatform_ptr\fP into the already-allocated
+platform structure pointed to by \fIplatform_copy_ptr\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_print\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*platform_ptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_platform_print\fP prints, to standard error, a
+human-readable listing of the platform model pointed to by
+\fIplatform_ptr\fP, including every sensor and its offsets. This
+is invoked automatically by many of the \fBmb_platform_*\fP
+functions above when \fIverbose\fP is 2 or greater.
+
+\---------------------------------------------------------
+.br
+void \fBmb_platform_math_matrix_times_vector_3x1\fP(
+ 		double \fI*A\fP,
+ 		double \fI*b\fP,
+ 		double \fI*Ab\fP);
+.br
+void \fBmb_platform_math_matrix_times_matrix_3x3\fP(
+ 		double \fI*A\fP,
+ 		double \fI*B\fP,
+ 		double \fI*AB\fP);
+.br
+void \fBmb_platform_math_matrix_transpose_3x3\fP(
+ 		double \fI*R\fP,
+ 		double \fI*R_T\fP);
+
+The functions \fBmb_platform_math_matrix_times_vector_3x1\fP,
+\fBmb_platform_math_matrix_times_matrix_3x3\fP, and
+\fBmb_platform_math_matrix_transpose_3x3\fP are basic 3x3 matrix
+and 3-vector arithmetic helpers (matrix-vector product
+\fI*Ab\fP = \fI*A\fP times \fI*b\fP, matrix product
+\fI*AB\fP = \fI*A\fP times \fI*B\fP, and transpose \fI*R_T\fP of
+\fI*R\fP) used by the platform orientation calculations below.
+
+\---------------------------------------------------------
+.br
+void \fBmb_platform_math_rph2rot\fP(
+ 		double \fI*rph\fP,
+ 		double \fI*R\fP);
+.br
+void \fBmb_platform_math_rot2rph\fP(
+ 		double \fI*R\fP,
+ 		double \fI*rph\fP);
+
+The function \fBmb_platform_math_rph2rot\fP converts a
+roll/pitch/heading triple \fIrph\fP into the equivalent 3x3
+rotation matrix \fIR\fP; \fBmb_platform_math_rot2rph\fP performs
+the inverse conversion.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_math_attitude_offset\fP(
+ 		int \fIverbose\fP,
+ 		double \fItarget_offset_roll\fP,
+ 		double \fItarget_offset_pitch\fP,
+ 		double \fItarget_offset_heading\fP,
+ 		double \fIsource_offset_roll\fP,
+ 		double \fIsource_offset_pitch\fP,
+ 		double \fIsource_offset_heading\fP,
+ 		double \fI*target2source_offset_roll\fP,
+ 		double \fI*target2source_offset_pitch\fP,
+ 		double \fI*target2source_offset_heading\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_platform_math_attitude_offset\fP computes the
+relative mounting angle offset
+(\fI*target2source_offset_roll\fP, \fI*target2source_offset_pitch\fP,
+\fI*target2source_offset_heading\fP) between a target sensor
+mounted with offset (\fItarget_offset_roll\fP,
+\fItarget_offset_pitch\fP, \fItarget_offset_heading\fP) and a
+source sensor mounted with offset (\fIsource_offset_roll\fP,
+\fIsource_offset_pitch\fP, \fIsource_offset_heading\fP), both
+relative to the platform frame. This is a supporting calculation
+used by \fBmb_platform_orientation_offset\fP and related functions.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_math_attitude_platform\fP(
+ 		int \fIverbose\fP,
+ 		double \fInav_attitude_roll\fP,
+ 		double \fInav_attitude_pitch\fP,
+ 		double \fInav_attitude_heading\fP,
+ 		double \fIattitude_offset_roll\fP,
+ 		double \fIattitude_offset_pitch\fP,
+ 		double \fIattitude_offset_heading\fP,
+ 		double \fI*platform_roll\fP,
+ 		double \fI*platform_pitch\fP,
+ 		double \fI*platform_heading\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_platform_math_attitude_platform\fP converts an
+attitude reading (\fInav_attitude_roll\fP, \fInav_attitude_pitch\fP,
+\fInav_attitude_heading\fP) made by a sensor mounted with offset
+(\fIattitude_offset_roll\fP, \fIattitude_offset_pitch\fP,
+\fIattitude_offset_heading\fP) into the platform frame attitude
+(\fI*platform_roll\fP, \fI*platform_pitch\fP, \fI*platform_heading\fP).
+This is a supporting calculation used by \fBmb_platform_orientation\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_math_attitude_target\fP(
+ 		int \fIverbose\fP,
+ 		double \fIsource_attitude_roll\fP,
+ 		double \fIsource_attitude_pitch\fP,
+ 		double \fIsource_attitude_heading\fP,
+ 		double \fItarget_offset_to_source_roll\fP,
+ 		double \fItarget_offset_to_source_pitch\fP,
+ 		double \fItarget_offset_to_source_heading\fP,
+ 		double \fI*target_roll\fP,
+ 		double \fI*target_pitch\fP,
+ 		double \fI*target_heading\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_platform_math_attitude_target\fP converts an
+attitude (\fIsource_attitude_roll\fP, \fIsource_attitude_pitch\fP,
+\fIsource_attitude_heading\fP) known in the source sensor's frame
+into the corresponding attitude (\fI*target_roll\fP,
+\fI*target_pitch\fP, \fI*target_heading\fP) in the target sensor's
+frame, given the mounting offset of the target relative to the
+source (\fItarget_offset_to_source_roll\fP,
+\fItarget_offset_to_source_pitch\fP,
+\fItarget_offset_to_source_heading\fP). This is a supporting
+calculation used by \fBmb_platform_orientation_target\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_math_attitude_offset_corrected_by_nav\fP(
+ 		int \fIverbose\fP,
+ 		double \fIprev_attitude_roll\fP,
+ 		double \fIprev_attitude_pitch\fP,
+ 		double \fIprev_attitude_heading\fP,
+ 		double \fItarget_offset_to_source_roll\fP,
+ 		double \fItarget_offset_to_source_pitch\fP,
+ 		double \fItarget_offset_to_source_heading\fP,
+ 		double \fInew_attitude_roll\fP,
+ 		double \fInew_attitude_pitch\fP,
+ 		double \fInew_attitude_heading\fP,
+ 		double \fI*corrected_offset_roll\fP,
+ 		double \fI*corrected_offset_pitch\fP,
+ 		double \fI*corrected_offset_heading\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_platform_math_attitude_offset_corrected_by_nav\fP
+refines a previously estimated mounting angle offset
+(\fItarget_offset_to_source_roll\fP,
+\fItarget_offset_to_source_pitch\fP,
+\fItarget_offset_to_source_heading\fP) using a change in navigation
+attitude from (\fIprev_attitude_roll\fP, \fIprev_attitude_pitch\fP,
+\fIprev_attitude_heading\fP) to (\fInew_attitude_roll\fP,
+\fInew_attitude_pitch\fP, \fInew_attitude_heading\fP), returning the
+corrected offset in (\fI*corrected_offset_roll\fP,
+\fI*corrected_offset_pitch\fP, \fI*corrected_offset_heading\fP).
+This is a supporting calculation used by patch-test style sensor
+alignment calibration tools.
+
+\---------------------------------------------------------
+.br
+int \fBmb_platform_math_attitude_rotate_beam\fP(
+ 		int \fIverbose\fP,
+ 		double \fIbeam_acrosstrack\fP,
+ 		double \fIbeam_alongtrack\fP,
+ 		double \fIbeam_bath\fP,
+ 		double \fIattitude_roll\fP,
+ 		double \fIattitude_pitch\fP,
+ 		double \fIattitude_heading\fP,
+ 		double \fI*newbeam_easting\fP,
+ 		double \fI*newbeam_northing\fP,
+ 		double \fI*newbeam_bath\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_platform_math_attitude_rotate_beam\fP rotates a
+single bathymetry beam position (\fIbeam_acrosstrack\fP,
+\fIbeam_alongtrack\fP, \fIbeam_bath\fP) by the attitude
+(\fIattitude_roll\fP, \fIattitude_pitch\fP, \fIattitude_heading\fP)
+into georeferenced easting, northing, and depth
+(\fI*newbeam_easting\fP, \fI*newbeam_northing\fP, \fI*newbeam_bath\fP).
+
+\---------------------------------------------------------
+.br
+int \fBmb_double_compare\fP(
+ 		const void \fI*a\fP,
+ 		const void \fI*b\fP);
 
 The function \fBmb_double_compare\fP
-is used with the \fBqsort\fP function.
+is used with the \fBqsort\fP function to sort arrays of
+\fIdouble\fP values.
 This function returns 1 if a > b and \-1 if a <= b.
 
 \---------------------------------------------------------
 .br
 int \fBmb_int_compare\fP(
- 		int \fI*a\fP,
- 		int \fI*b\fP);
+ 		const void \fI*a\fP,
+ 		const void \fI*b\fP);
 
 The function \fBmb_int_compare\fP
-is used with the \fBqsort\fP function.
+is used with the \fBqsort\fP function to sort arrays of
+\fIint\fP values.
 This function returns 1 if a > b and \-1 if a <= b.
+
+\---------------------------------------------------------
+.br
+int \fBmb_edit_compare\fP(
+ 		const void \fI*a\fP,
+ 		const void \fI*b\fP);
+
+The function \fBmb_edit_compare\fP
+is used with the \fBqsort\fP function to sort arrays of
+\fIstruct mb_edit_struct\fP beam edit event records (as used in
+edit save files - see the \fBmbedit\fP and \fBmbclean\fP manual pages)
+by time and beam number. Two edit events whose times differ by
+less than a small tolerance are considered simultaneous and are
+then ordered by beam number.
+
+\---------------------------------------------------------
+.br
+int \fBmb_edit_compare_coarse\fP(
+ 		const void \fI*a\fP,
+ 		const void \fI*b\fP);
+
+The function \fBmb_edit_compare_coarse\fP
+is used with the \fBqsort\fP function to sort arrays of
+\fIstruct mb_edit_struct\fP beam edit event records in the same
+manner as \fBmb_edit_compare\fP, except that a coarser (larger)
+time tolerance is used in judging two edit events to be
+simultaneous.
+
+\---------------------------------------------------------
+.br
+int \fBmb_absorption\fP(
+ 		int \fIverbose\fP,
+ 		double \fIfrequency\fP,
+ 		double \fItemperature\fP,
+ 		double \fIsalinity\fP,
+ 		double \fIdepth\fP,
+ 		double \fIph\fP,
+ 		double \fIsoundspeed\fP,
+ 		double \fI*absorption\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_absorption\fP calculates the sound absorption
+coefficient \fI*absorption\fP (dB/km) of sea water for a sonar
+signal of \fIfrequency\fP (kHz) given the water \fItemperature\fP
+(degrees C), \fIsalinity\fP (per mil), \fIdepth\fP (meters),
+\fIph\fP, and \fIsoundspeed\fP (m/sec), following the standard
+Francois-Garrison absorption model. This is used, for example, by
+\fBmbbackangle\fP and \fBmbsvpselect\fP when correcting backscatter
+for water column transmission losses.
+
+\---------------------------------------------------------
+.br
+int \fBmb_potential_temperature\fP(
+ 		int \fIverbose\fP,
+ 		double \fItemperature\fP,
+ 		double \fIsalinity\fP,
+ 		double \fIpressure\fP,
+ 		double \fI*potential_temperature\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_potential_temperature\fP calculates the
+potential temperature \fI*potential_temperature\fP (degrees C) of
+sea water given its in-situ \fItemperature\fP (degrees C),
+\fIsalinity\fP (per mil), and \fIpressure\fP (dbar).
+
+\---------------------------------------------------------
+.br
+int \fBmb_seabird_density\fP(
+ 		int \fIverbose\fP,
+ 		double \fIsalinity\fP,
+ 		double \fItemperature\fP,
+ 		double \fIpressure\fP,
+ 		double \fI*density\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_seabird_density\fP calculates the density
+\fI*density\fP (kg/m^3) of sea water given its \fIsalinity\fP (per
+mil), \fItemperature\fP (degrees C), and \fIpressure\fP (dbar),
+following the algorithms used by Sea-Bird Electronics CTD
+processing software.
+
+\---------------------------------------------------------
+.br
+int \fBmb_seabird_depth\fP(
+ 		int \fIverbose\fP,
+ 		double \fIpressure\fP,
+ 		double \fIlatitude\fP,
+ 		double \fI*depth\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_seabird_depth\fP calculates the depth
+\fI*depth\fP (meters) below the sea surface corresponding to a CTD
+\fIpressure\fP (dbar) reading at the given \fIlatitude\fP,
+following the algorithms used by Sea-Bird Electronics CTD
+processing software.
+
+\---------------------------------------------------------
+.br
+int \fBmb_seabird_salinity\fP(
+ 		int \fIverbose\fP,
+ 		double \fIconductivity\fP,
+ 		double \fItemperature\fP,
+ 		double \fIpressure\fP,
+ 		double \fI*salinity\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_seabird_salinity\fP calculates the salinity
+\fI*salinity\fP (per mil) of sea water given its \fIconductivity\fP,
+\fItemperature\fP (degrees C), and \fIpressure\fP (dbar), following
+the algorithms used by Sea-Bird Electronics CTD processing
+software.
+
+\---------------------------------------------------------
+.br
+int \fBmb_seabird_soundspeed\fP(
+ 		int \fIverbose\fP,
+ 		int \fIalgorithm\fP,
+ 		double \fIsalinity\fP,
+ 		double \fItemperature\fP,
+ 		double \fIpressure\fP,
+ 		double \fI*soundspeed\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_seabird_soundspeed\fP calculates the sound
+speed \fI*soundspeed\fP (m/sec) of sea water given its
+\fIsalinity\fP (per mil), \fItemperature\fP (degrees C), and
+\fIpressure\fP (dbar), using the sound speed formula selected by
+\fIalgorithm\fP, following the algorithms used by Sea-Bird
+Electronics CTD processing software.
+
+\---------------------------------------------------------
+.br
+int \fBmb_rt_init\fP(
+ 		int \fIverbose\fP,
+ 		int \fInumber_node\fP,
+ 		double \fI*depth\fP,
+ 		double \fI*velocity\fP,
+ 		void \fI**modelptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_rt_init\fP initializes a layered water sound
+velocity model for ray tracing, given \fInumber_node\fP
+depth/velocity pairs in the arrays \fIdepth\fP and \fIvelocity\fP,
+and returns a pointer to the model in \fI*modelptr\fP for use by
+\fBmb_rt\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_rt_deall\fP(
+ 		int \fIverbose\fP,
+ 		void \fI**modelptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_rt_deall\fP deallocates a velocity model
+previously initialized by \fBmb_rt_init\fP and pointed to by
+\fI*modelptr\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_rt\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*modelptr\fP,
+ 		double \fIsource_depth\fP,
+ 		double \fIsource_angle\fP,
+ 		double \fIend_time\fP,
+ 		int \fIssv_mode\fP,
+ 		double \fIsurface_vel\fP,
+ 		double \fInull_angle\fP,
+ 		int \fInplot_max\fP,
+ 		int \fI*nplot\fP,
+ 		double \fI*xplot\fP,
+ 		double \fI*zplot\fP,
+ 		double \fI*tplot\fP,
+ 		double \fI*x\fP,
+ 		double \fI*z\fP,
+ 		double \fI*travel_time\fP,
+ 		int \fI*ray_stat\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_rt\fP traces a single ray, launched from
+\fIsource_depth\fP at takeoff angle \fIsource_angle\fP, through
+the layered velocity model \fImodelptr\fP (initialized by
+\fBmb_rt_init\fP) until either the elapsed travel time reaches
+\fIend_time\fP or the ray exits the model (surfacing, in which case
+\fIssv_mode\fP and \fIsurface_vel\fP control how the ray reflects
+off the sea surface, and rays arriving within \fInull_angle\fP of
+vertical are treated specially). The ray path is returned as up to
+\fInplot_max\fP plotting points in \fIxplot\fP/\fIzplot\fP/\fItplot\fP
+(with the actual number of points returned in \fI*nplot\fP), and
+the ray's final horizontal range \fI*x\fP, depth \fI*z\fP, and
+elapsed \fI*travel_time\fP are returned along with a
+\fI*ray_stat\fP code describing how the ray terminated. Internally
+\fBmb_rt\fP calls \fBmb_rt_get_depth\fP and the family of
+\fBmb_rt_quad1\fP, \fBmb_rt_quad2\fP, \fBmb_rt_quad3\fP,
+\fBmb_rt_quad4\fP, \fBmb_rt_circular\fP, \fBmb_rt_plot_circular\fP,
+\fBmb_rt_line\fP, and \fBmb_rt_vertical\fP functions below to trace
+the ray through each layer of the model according to the local
+velocity gradient and ray geometry; these are implementation
+details of the ray tracing algorithm and are not normally called
+directly by application programs.
+
+\---------------------------------------------------------
+.br
+int \fBmb_rt_get_depth\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*modelptr\fP,
+ 		double \fIbeta\fP,
+ 		int \fIdir_sign\fP,
+ 		int \fIturn_sign\fP,
+ 		double \fI*depth\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_rt_get_depth\fP returns the depth \fI*depth\fP
+in the current layer of the velocity model \fImodelptr\fP
+corresponding to ray parameter \fIbeta\fP, given the ray's current
+vertical travel direction \fIdir_sign\fP and turning state
+\fIturn_sign\fP. This is a supporting calculation used by
+\fBmb_rt\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_rt_quad1\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*modelptr\fP,
+ 		int \fI*error\fP);
+.br
+int \fBmb_rt_quad2\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*modelptr\fP,
+ 		int \fI*error\fP);
+.br
+int \fBmb_rt_quad3\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*modelptr\fP,
+ 		int \fI*error\fP);
+.br
+int \fBmb_rt_quad4\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*modelptr\fP,
+ 		int \fI*error\fP);
+
+The functions \fBmb_rt_quad1\fP, \fBmb_rt_quad2\fP,
+\fBmb_rt_quad3\fP, and \fBmb_rt_quad4\fP each advance the ray being
+traced through the velocity model \fImodelptr\fP across one
+quadrant of curvature, handling the four combinations of upward or
+downward ray travel with increasing or decreasing velocity
+gradient. These are supporting calculations used internally by
+\fBmb_rt\fP and are not normally called directly.
+
+\---------------------------------------------------------
+.br
+int \fBmb_rt_circular\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*modelptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_rt_circular\fP advances the ray being traced
+through the velocity model \fImodelptr\fP along a circular arc
+appropriate to a layer of constant velocity gradient. This is a
+supporting calculation used internally by \fBmb_rt\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_rt_plot_circular\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*modelptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_rt_plot_circular\fP generates the plotting
+points recording the circular ray path segment computed by
+\fBmb_rt_circular\fP. This is a supporting calculation used
+internally by \fBmb_rt\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_rt_line\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*modelptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_rt_line\fP advances the ray being traced
+through the velocity model \fImodelptr\fP along a straight line
+segment appropriate to a layer of constant velocity. This is a
+supporting calculation used internally by \fBmb_rt\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_rt_vertical\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*modelptr\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_rt_vertical\fP advances the ray being traced
+through the velocity model \fImodelptr\fP for the special case of
+a vertically traveling ray. This is a supporting calculation used
+internally by \fBmb_rt\fP.
 
 .SH COORDINATE SYSTEMS USED IN MB-SYSTEM
 I. Introduction
@@ -4091,10 +7235,17 @@ Flagging modes:
   00000001 => Flagged because no detection was made by the sonar.
   xxxxx101 => Flagged by manual editing.
   xxxx1x01 => Flagged by automatic filter.
-  xxx1xx01 => Flagged because uncertainty exceeds 1 X IHO standard.
-  xx1xxx01 => Flagged because uncertainty exceeds 2 X IHO standard.
-  x1xxxx01 => Flagged because footprint is too large
-  1xxxxx01 => Flagged by sonar as unreliable.
+  xxx1xx01 => Flagged by automatic filter in the current program.
+  xx1xxx01 => Flagged because this is a secondary bottom pick.
+  x1xxxx01 => Flagged because this is an interpolated rather than
+              observed sounding.
+  1xxxxx01 => Flagged as unreliable using original quality values
+              from sonar.
+.br
+(The bits at xxx1xx01, xx1xxx01, and x1xxxx01 originally meant,
+respectively, that the uncertainty exceeded 1 X or 2 X the IHO
+standard, or that the footprint was too large; those original
+meanings are deprecated.)
 
 Selection modes:
   00000010 => Selected, no reason specified.

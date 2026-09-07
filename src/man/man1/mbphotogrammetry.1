@@ -1,0 +1,315 @@
+.TH mbphotogrammetry 1 "7 September 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbphotogrammetry\fP \- Generate bathymetry soundings from navigated stereo pairs of downlooking seafloor photographs.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+mbphotogrammetry [\fB\-\-verbose\fP \fB\-\-help\fP \fB\-\-threads=\fP\fInthreads\fP
+\fB\-\-show\-images\fP \fB\-\-input=\fP\fIimagelist\fP \fB\-\-fov\-fudgefactor=\fP\fIfactor\fP
+\fB\-\-navigation\-file=\fP\fIfile\fP \fB\-\-survey\-line\-file=\fP\fIfile\fP
+\fB\-\-tide\-file=\fP\fIfile\fP \fB\-\-image\-quality\-file=\fP\fIfile\fP
+\fB\-\-image\-quality\-threshold=\fP\fIvalue\fP
+\fB\-\-image\-quality\-filter\-length=\fP\fIvalue\fP
+\fB\-\-output=\fP\fIfileroot\fP \fB\-\-output\-number\-pairs=\fP\fIvalue\fP
+\fB\-\-camera\-calibration\-file=\fP\fIfile\fP | \fB\-\-calibration\-file=\fP\fIfile\fP
+\fB\-\-platform\-file=\fP\fIplatform.plf\fP \fB\-\-camera\-sensor=\fP\fIid\fP
+\fB\-\-nav\-sensor=\fP\fIid\fP \fB\-\-sensordepth\-sensor=\fP\fIid\fP
+\fB\-\-heading\-sensor=\fP\fIid\fP \fB\-\-altitude\-sensor=\fP\fIid\fP
+\fB\-\-attitude\-sensor=\fP\fIid\fP
+\fB\-\-altitude\-min=\fP\fIvalue\fP \fB\-\-altitude\-max=\fP\fIvalue\fP
+\fB\-\-trim=\fP\fIvalue\fP \fB\-\-bin\-size=\fP\fIvalue\fP \fB\-\-bin\-filter=\fP\fIvalue\fP
+\fB\-\-downsample=\fP\fIvalue\fP \fB\-\-algorithm=\fP\fIalgorithm\fP
+\fB\-\-algorithm\-pre\-filter\-cap=\fP\fIvalue\fP
+\fB\-\-algorithm\-sad\-window\-size=\fP\fIvalue\fP
+\fB\-\-algorithm\-smoothing\-penalty\-1=\fP\fIvalue\fP
+\fB\-\-algorithm\-smoothing\-penalty\-2=\fP\fIvalue\fP
+\fB\-\-algorithm\-min\-disparity=\fP\fIvalue\fP
+\fB\-\-algorithm\-number\-disparities=\fP\fIvalue\fP
+\fB\-\-algorithm\-uniqueness\-ratio=\fP\fIvalue\fP
+\fB\-\-algorithm\-speckle\-window\-size=\fP\fIvalue\fP
+\fB\-\-algorithm\-speckle\-range=\fP\fIvalue\fP
+\fB\-\-algorithm\-disp\-12\-max\-diff=\fP\fIvalue\fP
+\fB\-\-algorithm\-texture\-threshold=\fP\fIvalue\fP
+\fB\-\-good\-fraction\-threshold=\fP\fIvalue\fP]
+
+.SH DESCRIPTION
+\fBMbphotogrammetry\fP generates bathymetry soundings from navigated stereo
+pairs of downlooking photographs taken from a submerged survey platform. For
+each stereo pair listed in an input MB-System imagelist file, the program
+computes a dense disparity map between the (optionally undistorted and
+rectified) left and right images using one of OpenCV's block matching stereo
+correspondence algorithms, then converts the resulting disparities into 3D
+points using the stereo camera's calibrated geometry. These 3D points are
+combined with the platform's navigation, heading, and attitude at the time
+each stereo pair was taken (derived directly from the imagelist and,
+optionally, an MB-System platform offset model and separate navigation and
+tide files) to compute georeferenced soundings, which are binned and written
+out as MB-System multibeam-format soundings (format 251, \fImb251\fP,
+associated with the \fImbsys_stereopair\fP data structure).
+.P
+Three OpenCV stereo correspondence algorithms are supported: block matching
+(\fBbm\fP), semi-global block matching (\fBsgbm\fP, the default), and its more
+exhaustive variant (\fBhh\fP). Numerous options tune the chosen algorithm's
+matching window, disparity range, smoothing penalties, and validity checks;
+these correspond directly to the parameters of OpenCV's \fBStereoBM\fP and
+\fBStereoSGBM\fP classes. Soundings whose stereo-derived altitude falls outside
+the range set by \fB\-\-altitude\-min\fP and \fB\-\-altitude\-max\fP are rejected. Output
+soundings can optionally be binned spatially, with each bin's disparity
+resolved either by taking the mean or the median of the pixels falling in
+that bin.
+.P
+Input images can be filtered by an externally computed per-image quality
+metric (\fB\-\-image\-quality\-file\fP together with \fB\-\-image\-quality\-threshold\fP),
+and processing can be parallelized across multiple stereo pairs at once with
+\fB\-\-threads\fP. Output soundings are normally written to a single file named
+from \fB\-\-output\fP with the suffix \fI.mb251\fP, but can instead be split into a
+new output file every \fB\-\-output\-number\-pairs\fP stereo pairs, or split at the
+waypoints of a survey line file supplied with \fB\-\-survey\-line\-file\fP.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian do Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-\-help
+This "help" flag causes the program to print out a description
+of its operation and then exit immediately.
+.TP
+.B \-\-verbose
+The \fB\-\-verbose\fP option causes \fBmbphotogrammetry\fP to print out status and
+debug messages. Using it more than once increases the verbosity level.
+.TP
+.B \-\-threads=\fInthreads\fP
+.br
+Sets the number of processing threads used to work through the stereo pairs
+in the image list. The requested number of threads is limited to the number
+of hardware threads available and to the MB-System maximum thread count. The
+default is 1 thread.
+.TP
+.B \-\-show\-images
+.br
+Enables display of the images being processed (via OpenCV's image display
+windows) as the program runs.
+.TP
+.B \-\-input=\fIimagelist\fP
+.br
+Sets the filename of the input MB-System imagelist file listing the stereo
+image pairs, and their navigation, attitude, and camera settings, to be
+processed. The default input filename is \fIimagelist.mb\-1\fP.
+.TP
+.B \-\-fov\-fudgefactor=\fIfactor\fP
+.br
+Sets a multiplicative fudge factor applied to the camera field of view
+angles. The default value is 1.0 (no adjustment).
+.TP
+.B \-\-navigation\-file=\fIfile\fP
+.br
+Sets the filename of an ASCII navigation file used in place of, or to
+supplement, navigation carried in the imagelist file.
+.TP
+.B \-\-survey\-line\-file=\fIfile\fP
+.br
+Sets the filename of a survey line/route file whose waypoint times are used
+to split the output soundings into a separate \fI.mb251\fP output file at each
+waypoint crossed.
+.TP
+.B \-\-tide\-file=\fIfile\fP
+.br
+Sets the filename of an ASCII tide file (time and tide height pairs) used to
+apply a tidal correction to the computed soundings.
+.TP
+.B \-\-image\-quality\-file=\fIfile\fP
+.br
+Sets the filename of an ASCII file of time-stamped image quality values used
+to filter out low quality stereo pairs.
+.TP
+.B \-\-image\-quality\-threshold=\fIvalue\fP
+.br
+Sets the minimum image quality value (in the range 0 to 1) required for a
+stereo pair to be processed.
+.TP
+.B \-\-image\-quality\-filter\-length=\fIvalue\fP
+.br
+Sets a time filter length, in seconds, applied when interpolating image
+quality values from the image quality file.
+.TP
+.B \-\-output=\fIfileroot\fP
+.br
+Sets the root name used to construct the output sounding file name(s). Unless
+\fB\-\-survey\-line\-file\fP or \fB\-\-output\-number\-pairs\fP is used to split the output
+into multiple files, all soundings are written to a single file named
+\fIfileroot\fP\fB.mb251\fP.
+.TP
+.B \-\-output\-number\-pairs=\fIvalue\fP
+.br
+Splits the output soundings into a new file, named
+\fIfileroot\fP\fB_\fP\fInnn\fP\fB.mb251\fP, every time \fIvalue\fP stereo pairs have been
+written to the current output file. This option is ignored if
+\fB\-\-survey\-line\-file\fP is also used.
+.TP
+.B \-\-camera\-calibration\-file=\fIfile\fP
+.br
+.TP
+.B \-\-calibration\-file=\fIfile\fP
+.br
+These two equivalent options set the filename of an OpenCV YAML file
+containing the intrinsic and extrinsic stereo camera calibration parameters
+(camera matrices, distortion coefficients, and the rotation/translation
+between the two cameras) used to undistort and rectify stereo pairs that are
+not already rectified, and to convert stereo disparities into 3D coordinates.
+.TP
+.B \-\-platform\-file=\fIplatform.plf\fP
+.br
+Sets the filename of an MB-System platform definition file describing the
+geometric offsets between the vehicle's navigation, attitude, and camera
+sensors.
+.TP
+.B \-\-camera\-sensor=\fIcamera_sensor_id\fP
+.br
+Sets the platform sensor id number of the stereo camera used to look up the
+camera's position and orientation offsets within the platform model.
+.TP
+.B \-\-nav\-sensor=\fInav_sensor_id\fP
+.br
+Overrides the platform model's navigation (position) source sensor id number.
+.TP
+.B \-\-sensordepth\-sensor=\fIsensordepth_sensor_id\fP
+.br
+Overrides the platform model's pressure/depth source sensor id number.
+.TP
+.B \-\-heading\-sensor=\fIheading_sensor_id\fP
+.br
+Overrides the platform model's heading source sensor id number.
+.TP
+.B \-\-altitude\-sensor=\fIaltitude_sensor_id\fP
+.br
+Sets the platform sensor id number used as the altitude source.
+.TP
+.B \-\-attitude\-sensor=\fIattitude_sensor_id\fP
+.br
+Overrides the platform model's roll/pitch and heave source sensor id number.
+.TP
+.B \-\-altitude\-min=\fIvalue\fP
+.br
+Sets the minimum acceptable stereo-derived altitude, in meters, for a
+sounding to be retained. The default is 1.0 meter.
+.TP
+.B \-\-altitude\-max=\fIvalue\fP
+.br
+Sets the maximum acceptable stereo-derived altitude, in meters, for a
+sounding to be retained. The default is 5.0 meters.
+.TP
+.B \-\-trim=\fIvalue\fP
+.br
+Sets a pixel trim margin excluded around the edges of each stereo image before
+computing disparity. The default is 0.0 (no trim).
+.TP
+.B \-\-bin\-size=\fIvalue\fP
+.br
+Sets the size, in pixels, of the spatial bins used to combine disparity
+values before generating output soundings. The default is 1 (no binning).
+.TP
+.B \-\-bin\-filter=\fIvalue\fP
+.br
+Selects how disparity values are combined within each spatial bin: \fBmean\fP
+(or \fB0\fP) averages the values in the bin, while \fBmedian\fP (or \fB1\fP) takes
+the median value. The default is \fBmean\fP.
+.TP
+.B \-\-downsample=\fIvalue\fP
+.br
+Sets a downsampling factor applied to the stereo images before disparity
+matching. The default is 1 (no downsampling).
+.TP
+.B \-\-algorithm=\fIalgorithm\fP
+.br
+Selects the OpenCV stereo correspondence algorithm used to compute
+disparities. Valid values are \fBbm\fP (block matching), \fBsgbm\fP (semi-global
+block matching, the default), and \fBhh\fP (a more exhaustive variant of
+semi-global block matching).
+.TP
+.B \-\-algorithm\-pre\-filter\-cap=\fIvalue\fP
+.br
+Sets the truncation value for prefiltered image pixels used by the stereo
+correspondence algorithm. The default is 4.
+.TP
+.B \-\-algorithm\-sad\-window\-size=\fIvalue\fP
+.br
+Sets the matched block (sum of absolute differences window) size used by the
+stereo correspondence algorithm. The default is 5.
+.TP
+.B \-\-algorithm\-smoothing\-penalty\-1=\fIvalue\fP
+.br
+Sets the first smoothness penalty parameter (P1) controlling disparity
+change of one pixel between neighboring pixels, used by the semi-global block
+matching algorithms. The default is 600.
+.TP
+.B \-\-algorithm\-smoothing\-penalty\-2=\fIvalue\fP
+.br
+Sets the second smoothness penalty parameter (P2) controlling larger
+disparity changes between neighboring pixels, used by the semi-global block
+matching algorithms. The default is 2400.
+.TP
+.B \-\-algorithm\-min\-disparity=\fIvalue\fP
+.br
+Sets the minimum possible disparity value used by the stereo correspondence
+algorithm. The default is -64.
+.TP
+.B \-\-algorithm\-number\-disparities=\fIvalue\fP
+.br
+Sets the number of disparity values searched by the stereo correspondence
+algorithm (the disparity search range). The default is 192.
+.TP
+.B \-\-algorithm\-uniqueness\-ratio=\fIvalue\fP
+.br
+Sets the margin, in percent, by which the best matching disparity cost must
+beat the next best value for a match to be considered valid. The default is 1.
+.TP
+.B \-\-algorithm\-speckle\-window\-size=\fIvalue\fP
+.br
+Sets the maximum size of smooth disparity regions considered noise speckles
+and invalidated by the stereo correspondence algorithm's postfiltering. The
+default is 150.
+.TP
+.B \-\-algorithm\-speckle\-range=\fIvalue\fP
+.br
+Sets the maximum disparity variation within a connected component considered
+during speckle postfiltering. The default is 2.
+.TP
+.B \-\-algorithm\-disp\-12\-max\-diff=\fIvalue\fP
+.br
+Sets the maximum allowed difference, in integer pixel units, between the
+left-to-right and right-to-left disparity checks. The default is 10.
+.TP
+.B \-\-algorithm\-texture\-threshold=\fIvalue\fP
+.br
+Sets a texture threshold value used to reject matches in low-texture image
+regions. The default is 10.
+.TP
+.B \-\-good\-fraction\-threshold=\fIvalue\fP
+.br
+This option is accepted on the command line but currently has no effect: the
+option is declared but not read anywhere in the program's option-processing
+logic.
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbgetphotocorrection\fP(1), \fBmbphotomosaic\fP(1),
+\fBmbimagelist\fP(1), \fBmbm_makeimagelist\fP(1), \fBmbgrid\fP(1)
+
+.SH BUGS
+Maybe. Maybe not.

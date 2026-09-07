@@ -11,12 +11,12 @@ Version 5.0
 mbm_grid \fB\-I\fP\fIfile\fP
 \fB\-F\fP\fIformat\fP \fB\-O\fP\fIroot\fP
 \fB\-R\fP\fIwest/east/south/north\fP
-[\fB\-A\fP\fIdatatype\fP \fB\-B\fP\fIborder\fP \fB\-C\fP\fIclip\fP
+[\fB\-A\fP\fIdatatype\fP \fB\-B\fP\fIborder\fP \fB\-C\fP\fIclip[/mode]\fP
 \fB\-D\fP\fIxdim/ydim\fP \fB\-E\fP\fIdx/dy/units\fP
 {\fB\-f\fP\fIpriority_range\fP | \fB\-f\fP\fImode\fP}
 \fB\-G\fP\fIgridkind\fP \fB\-H\fP
 \fB\-J\fP\fIprojection\fP \fB\-K\fIbackground\fP
-\fB\-L\fP\fIlonflip\fP \fB\-M\fP \fB\-N\fP \fB\-P\fP\fIpings\fP
+\fB\-L\fP\fIlonflip\fP \fB\-M\fP \fB\-P\fP\fIpings\fP
 \fB\-S\fP\fIspeed\fP \fB\-T\fP\fItension\fP
 \fB\-U\fP\fI{azimuth/factor | time}\fP
 \fB\-V\fP \fB\-W\fP\fIscale\fP \fB\-X\fP\fIextend\fP
@@ -91,22 +91,19 @@ wherever no data exist, provided \fIborder\fP > 0.0.
 Default: \fIborder\fP = 0.0
 .TP
 .B \-C
-\fIclip\fP
+\fIclip[/mode]\fP
 .br
-Sets the clipping dimension for the spline interpolation. If \fIclip\fP=0
-no spline interpolation will be done.  If \fIclip\fP>0
-.TP
-.B \-K
-\fIbackground\fP
-.br
-Enables filling in all undefined grid cells with bathymetry or topography
-from a global or regional database accessed with the \fBGMT\fP program
-\fBgrdraster\fP. The \fIbackground\fP specifies which locally defined
-database is accessed with \fBgrdraster\fP.
- then the spline
-interpolation will fill data gaps to a distance of \fIclip\fP times
-the grid spacing.
-Default: \fIclip\fP = 0.
+Controls the use of spline interpolation to fill grid cells not
+filled by swath data. The \fIclip\fP value sets the distance from
+swath data (in grid cells) that the spline interpolation may be
+applied. If \fIclip\fP=0 no spline interpolation will be done.
+If \fImode\fP=1 (the default), then the interpolation will fill
+data gaps up to two times \fIclip\fP grid cells in size. If \fImode\fP=2
+then the spline interpolation will fill all undefined cells within
+a distance of \fIclip\fP cells from data. If \fImode\fP = 3 or \fIclip\fP is
+set to a value greater than both dimensions of the output grid, then
+all grid cells not set by swath data will be filled by interpolation.
+Default: \fIclip\fP = 0 and \fImode\fP = 1.
 .TP
 .B \-D
 \fIxdim/ydim\fP
@@ -244,7 +241,7 @@ zone by using \fB\-J\fP\fIU\fP. In this case, the
 UTM zone will be inferred from the midpoint of the
 specified longitude and latitude bounds, and then the
 longitude and latitude bounds given with the
-\fB\-fR\fP option are translated to UTM eastings and northings.
+\fB\-R\fP option are translated to UTM eastings and northings.
 
 All grids and mosaics produced by \fBMB-System\fP
 programs contain identifiers that are recognized
@@ -293,12 +290,7 @@ Causes two additional grids to be output. One is a grid containing
 the standard deviation of the data within each grid cell relative
 to the grid value, the other contains the number of data
 points in each grid cell. This option is ignored when the minimum
-or maximum filter gridding algorithms are used (see the \fP-F\fP option).
-.TP
-.B \-N
-Causes grid cells with no data and no interpolation to be set to a
-value of NaN instead of the default value of 99999.9.  The NaN value
-is expected by \fBGMT\fP programs such \fBgrdview\fP.
+or maximum filter gridding algorithms are used (see the \fP-f\fP option).
 .TP
 .B \-O
 \fIroot\fP
@@ -323,11 +315,6 @@ that number of input pings will be averaged to produce one output
 ping.  If \fIpings\fP = 0, then the ping averaging will automatically
 be done so that the along-track ping spacing is equal to the across-track
 beam spacing. Default: \fIpings\fP = 1.
-.TP
-.B \-Q
-Normally, bathymetry or topography data is gridded in meters. If
-this option is used, bathymetry or topography data is gridded
-in feet.
 .TP
 .B \-R
 \fIwest/east/south/north\fP
@@ -448,7 +435,7 @@ further explanation of the use of \fIpriority_file\fP.
 .br
 Sets the default depth used for calculating grazing angles for
 amplitude or sidescan values where depths are not available.
-Default: \fIscale\fP = 1000.0
+Default: \fIbath_default\fP = 1000.0
 
 .SH EXAMPLES
 Suppose we have obtained a swath sonar data file called

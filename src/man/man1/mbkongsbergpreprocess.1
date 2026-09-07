@@ -8,12 +8,12 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbkongsbergpreprocess\fP [\fB\-C\fP \fB\-D\fP\fIoutputdirectory\fP
-\fB\-E\fP\fIoffx/offy[/offdepth]\fP
+\fB\-E\fP\fIoffx/offy/offz[/offdepth]\fP
 \fB\-F\fP\fIformat\fP
 \fB\-I\fIfile \fB\-O\fP\fIoutfile\fP \
-\fB\-P\fP\fIsonardepthfile\fP \fB\-PF\fP\fIfilterlength/filterdepth\fP
+\fB\-P\fP\fIsonardepthfile\fP \fB\-PF\fP\fIfilterlength/filterdepth\fP \fB\-PM\fP\fIfilterlength/filterdepth\fP \fB\-PU\fP\fImode\fP
 \fB\-S\fP\fIdatatype/source\fP
-\fB\-T\fP\fItimelag\fP \fB\-W \-H \-V\fP]
+\fB\-T\fP\fItimelag\fP \fB\-H \-V\fP]
 
 .SH DESCRIPTION
 \fBmbkongsbergpreprocess\fP reads data from a third generation
@@ -55,8 +55,8 @@ suffixes:
     synchronous attitude (roll and pitch):	*.sta
     
 By default, \fBmbkongsbergpreprocess\fP ignores water column records and does
-not pass these large records into the output format 59 files. The \fB-W\fP\fI1\fP
-option causes the water column records to be written in the output files.
+not pass these large records into the output format 59 files. There is
+currently no command line option to change this behavior.
 
 .SH MB-SYSTEM AUTHORSHIP
 David W. Caress
@@ -90,14 +90,18 @@ This option causes all format 59 output files to be placed in the specified dire
 \fIoutputdirectory\fP rather than parallel to the original "raw" files.
 .TP
 .B \-E
-\fIoffx/offz[/offdepth]\fP
+\fIoffx/offy/offz[/offdepth]\fP
 .br
 This option is for data from submerged platforms such as ROVs or AUVs.
-This sets horizontal and vertical.distance offsets between the vehicle's
-depth sensor and the multibeam receive head. If specified, these values are used
+This sets the along-track (\fIoffx\fP), across-track (\fIoffy\fP), and vertical
+(\fIoffz\fP) distance offsets between the vehicle's depth sensor and the
+multibeam receive head, plus an optional constant depth offset (\fIoffdepth\fP).
+If specified, the \fIoffx/offy/offz\fP values are used
 in a lever-arm calculation to determine the sonar depth change associated with
 vehicle pitch. The \fIoffdepth\fP value, if specified, is a static depth offset to be
-applied to the vehicle depth data.
+applied to the vehicle depth data. If fewer than four slash-separated values
+are given, \fIoffx\fP is taken to be zero and the values supplied are assigned
+to \fIoffy\fP, \fIoffz\fP, and (if present) \fIoffdepth\fP.
 .TP
 .B \-F
 \fIformat\fP
@@ -167,6 +171,24 @@ case, a longer period \fIfilterlength\fP (e.g. 10 seconds) and a shallower
 \fIfilterdepth\fP (e.g. 50 meters) may be used to lessen the artifacts due to
 surface swell.
 .TP
+.B \-PM
+\fIfilterlength/filterdepth\fP
+This option is identical to \fB\-PF\fP\fIfilterlength/filterdepth\fP except
+that a median filter is applied to the sonar depth data instead of a
+Gaussian tapered mean filter.
+.TP
+.B \-PU
+\fImode\fP
+This option sets how the sonar depth used in output processing is
+derived from the recorded heave and sensor (pressure) depth values.
+If \fImode\fP = 1, only heave is used to track high frequency vertical
+motion (appropriate for a surface vessel where sensor depth is
+essentially zero). If \fImode\fP = 2, only the sensor depth is used
+(appropriate for a submerged platform such as an ROV or AUV whose
+pressure sensor already captures all vertical motion). If \fImode\fP = 3,
+both sensor depth and heave are used together. If this option is not
+specified, the mode is inferred automatically from the data.
+.TP
 .B \-S
 \fIdatatype/source\fP
 .br
@@ -206,13 +228,6 @@ to the navigation and attitude data prior to it being merged with the
 bathymetry. If \fItimelag\fP is a valid path to a file containing time
 stamp and time lag pairs, then these data will be read and the time lag
 applied to particular records will be interpolated by time.
-.TP
-.B \-W
-\fImode\fP
-.br
-By default, \fBmbkongsbergpreprocess\fP ignores water column records and does
-not pass these large records into the output format 59 files. If \fB-W\fP\fI1\fP
-is specified, then the water column records will be written to the output files.
 
 .SH EXAMPLES
 Suppose that one has collected a set of three Kongsberg EM122 data files named:
