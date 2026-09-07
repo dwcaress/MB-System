@@ -1,0 +1,112 @@
+.TH mbgrdtilemaker 1 "7 September 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbgrdtilemaker\fP \- Creates a set of overlapping square grids (tiles) from an
+original topography grid.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+mbgrdtilemaker \fB\-\-input=\fP\fIinputGridFile\fP \fB\-\-output=\fP\fIoutputRoot\fP
+[\fB\-\-tile\-dimension=\fP\fItileDimension\fP \fB\-\-tile\-spacing=\fP\fItileSpacing\fP
+\fB\-\-mode=\fP\fImode\fP \fB\-\-verbose\fP \fB\-\-help\fP]
+
+.SH DESCRIPTION
+\fBMbgrdtilemaker\fP reads an input GMT/netCDF topography grid and breaks it
+up into a set of overlapping square grid tiles. Each tile has 50% overlap
+in both the x and y directions with its neighboring tiles, tiled outward
+from the southwest corner of the input grid. This tiling scheme is used to
+prepare topography for the MB-System TRN (terrain relative navigation)
+tools, which query the reference model tile by tile.
+
+The size of each tile can be set either as a number of grid nodes per side
+(\fB\-\-tile\-dimension\fP) or as a desired tile half\-width in grid coordinate
+units, typically meters (\fB\-\-tile\-spacing\fP); if \fB\-\-tile\-spacing\fP is given
+it takes precedence and is used, together with the input grid's node
+spacing, to derive an equivalent tile dimension. If neither option is
+given, a default tile dimension of 2001 nodes per side is used. Given the
+tile dimension (and hence the tile width), \fBmbgrdtilemaker\fP computes the
+number of tiles needed in each direction to cover the full input grid at
+50% overlap, and for each tile position extracts the corresponding subgrid
+of node values from the input grid (filling any nodes that fall outside
+the input grid with the input grid's no-data value).
+
+Each tile is written as its own GMT grid file (named
+\fIoutputRoot\fP_\fInnnn\fP.grd inside the \fIoutputRoot\fP output directory,
+which is created if it does not already exist), and a catalog file named
+"tiles.csv" is written into that same directory listing, for each tile, its
+future octree filename and the easting and northing of its center. The
+original input grid is also copied into the output directory as
+"source_grid.grd". Finally, \fBmbgrdtilemaker\fP invokes \fBmbgrd2octree\fP once
+for each generated tile grid to produce a matching TRN octree (".bo") file,
+so \fBmbgrd2octree\fP must be available in the execution search path.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian do Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-\-help
+This "help" flag cause the program to print out a description
+of its operation and then exit immediately.
+.TP
+.B \-\-input=\fIinputGridFile\fP
+.br
+Sets the filename of the input topography grid to be tiled. This must be
+a GMT/netCDF grid readable by the \fBMBIO\fP grid I/O routines. This option
+(or the equivalent short option \fB\-I\fP) must be specified.
+.TP
+.B \-\-output=\fIoutputRoot\fP
+.br
+Sets the root name used both for the output directory that is created to
+hold the tile grids, octree files, and "tiles.csv" catalog, and for the
+basenames of the individual tile files written into that directory. This
+option (or the equivalent short option \fB\-O\fP) must be specified.
+.TP
+.B \-\-tile\-dimension=\fItileDimension\fP, \fB\-D\fP\fItileDimension\fP
+.br
+Sets the number of grid nodes along each side of a (square) output tile.
+If neither this option nor \fB\-\-tile\-spacing\fP is given, \fItileDimension\fP
+defaults to 2001. If \fB\-\-tile\-spacing\fP is also given, \fB\-\-tile\-spacing\fP
+takes precedence and \fItileDimension\fP is instead derived from it.
+.TP
+.B \-\-tile\-spacing=\fItileSpacing\fP, \fB\-S\fP\fItileSpacing\fP
+.br
+Sets the desired tile half\-width in the input grid's horizontal coordinate
+units (typically meters). When given, the tile dimension (number of nodes
+per side) is calculated from \fItileSpacing\fP and the input grid's node
+spacing, overriding any value set with \fB\-\-tile\-dimension\fP.
+.TP
+.B \-\-mode=\fImode\fP, \fB\-M\fP\fImode\fP
+.br
+Sets a tiling mode value. In the current implementation this value is
+parsed and stored but does not otherwise change the behavior of the
+program.
+.TP
+.B \-\-verbose
+The \fB\-\-verbose\fP option causes \fBmbgrdtilemaker\fP to print out additional
+status and debug messages; repeating it redirects this output to stderr
+and increases the level of detail reported. Note that \fBmbgrdtilemaker\fP
+prints a substantial amount of progress information (input grid
+parameters, output tileset parameters, and a line per tile and per
+\fBmbgrd2octree\fP invocation) to stdout regardless of this setting.
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbgrd2octree\fP(1), \fBmbtrnpp\fP(1), \fBmbgrid\fP(1)
+
+.SH BUGS
+Maybe. Maybe not.

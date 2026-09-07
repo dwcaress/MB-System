@@ -639,6 +639,12 @@ and z (vertical positive up) offset values in meters. If the snav id (navigation
 is not specified, it is assumed to be 0, the first navigation point in the
 specified section. If the uncertainties in the global tie (xsigma, ysigma, zsigma)
 are not specified, then xsigma = ysigma = 10 m and zsigma = 0.5 m are assumed.
+<DT><B>--set-global-tie-relative=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]</B>
+
+<DD>
+This option sets a global tie in the same manner as <B>--set-global-tie</B>, except
+that the offset values are relative to the navigation of the current inversion
+model rather than to the original navigation.
 <DT><B>--set-global-tie-xyz=file:section[:snav]</B>
 
 <DD>
@@ -686,6 +692,20 @@ for an optimal navigation model.
 <DD>
 This option unsets (deletes) the specified global tie in the
 <B>MBnavadjust</B> project.
+<DT><B>--unset-all-global-ties</B>
+
+<DD>
+This option unsets (deletes) all global ties in the <B>MBnavadjust</B> project.
+<DT><B>--shift-global-tie=file:section/shiftx/shifty/shiftz</B>
+
+<DD>
+This option shifts the offset values of the specified global tie in the
+<B>MBnavadjust</B> project by the specified x, y, and z amounts in meters.
+<DT><B>--shift-all-global-ties=shiftx/shifty/shiftz</B>
+
+<DD>
+This option shifts the offset values of all global ties in the
+<B>MBnavadjust</B> project by the specified x, y, and z amounts in meters.
 <DT><B>--add-crossing=file1:section1/file2:section2</B>
 
 <DD>
@@ -877,6 +897,12 @@ command --unset-all-ties is also accepted.
 This option sets all unset crossings in the input projects to be
 skipped. This does not apply to any new crossings between the two
 merged projects.
+<DT><B>--unset-skipped-crossings</B>
+
+<DD>
+This option sets all skipped crossings in the <B>MBnavadjust</B> project
+to be unset (back to &quot;unanalyzed&quot; status). This does not apply to any
+new crossings between the two merged projects.
 <DT><B>--unset-skipped-crossings-by-block=survey1/survey2</B>
 
 <DD>
@@ -979,6 +1005,17 @@ navigation track length less than <I>min_length</I>.
 This option sets all crossings for which one or both data sections have a
 navigation track length less than <I>min_length</I> to &quot;skipped&quot; mode. Any ties
 associated with these crossings are deleted.
+<DT><B>--remove-short-sections=min_length</B>
+
+<DD>
+This option merges all data sections with a navigation track length less
+than <I>min_length</I> into the immediately prior section in the same file.
+<DT><B>--remove-file=file</B>
+
+<DD>
+This option removes the specified file (identified by its numerical id in
+the project) from the <B>MBnavadjust</B> project, along with all of its
+sections, crossings, and ties.
 <DT><B>--remake-mb166-files</B>
 
 <DD>

@@ -7,7 +7,10 @@ supported by the \fBMBIO\fP library.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbformat\fP [\fB \-F\fP\fIformat\fP \fB\-I\fP\fIfile\fP \fB\-L \-K \-V \-W \-H\fP]
+\fBmbformat\fP [\fB\-\-format\fP=\fIformat_id\fP {\fB\-F\fP\fIformat_id\fP}]
+[\fB\-\-input\fP=\fIfile\fP {\fB\-I\fP\fIfile\fP}] [\fB\-\-list-ids\fP {\fB\-L\fP}]
+[\fB\-\-list-root\fP {\fB\-K\fP}] [\fB\-\-verbose\fP {\fB\-V\fP}]
+[\fB\-\-html\fP {\fB\-W\fP}] [\fB\-\-help\fP {\fB\-H\fP}]
 
 .SH DESCRIPTION
 \fBmbformat\fP is a utility which identifies the swath sonar data formats
@@ -48,38 +51,36 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B \-F
-\fIformat\fP
+.B \-\-format=\fIformat_id\fP {\fB\-F\fP\fIformat_id\fP}
 .br
-Sets the format id to be listed.  If no format is given, all of the 
+Sets the format id to be listed.  If no format is given, all of the
 currently supported formats will be listed. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 .TP
-.B \-H
+.B \-\-help {\fB\-H\fP}
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \-I
-\fIfile\fP
+.B \-\-input=\fIfile\fP {\fB\-I\fP\fIfile\fP}
 .br
 Sets the filename to be tested against known filename prefix and
 suffix conventions in order to identify the format id.
 .TP
-.B \-K
+.B \-\-list-root {\fB\-K\fP}
 Causes the fileroot and the format id to be output. The fileroot
 is the filename with any format specific suffix removed.
 .TP
-.B \-L
-Causes the format descriptions to be omitted 
+.B \-\-list-ids {\fB\-L\fP}
+Causes the format descriptions to be omitted
 so that only the \fBMBIO\fP format id numbers are listed.
 .TP
-.B \-V
+.B \-\-verbose {\fB\-V\fP}
 Normally, \fBmbformat\fP only prints out format descriptions.  If the
 \fB\-V\fP flag is given, then \fBmbformat\fP works in a "verbose" mode and
 also outputs the program version being used.
 .TP
-.B \-W
+.B \-\-html {\fB\-W\fP}
 Output the list of formats as HTML.
 
 .SH EXAMPLES

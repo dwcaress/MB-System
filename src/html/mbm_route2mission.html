@@ -30,14 +30,14 @@ Version 5.0
 
 <B>mbm_route2mission</B> <B>-I</B><I>routefile</I>
 [<B>-A</B><I>altmin/altabort[/altdesired[/altdesired2[/altdesired3]]]</I>
-<B>-B</B><I>behavior</I> <B>-C</B><I>missiontime</I>
+<B>-B</B><I>behavior1[/behavior2[/behavior3[/behavior4[/behavior5]]]]</I> <B>-C</B><I>missiontime</I>
 <B>-D</B><I>depthconstant[/depthconstant2]</I> <B>-E</B><I>starttime</I>
 <B>-F</B><I>forwarddistance</I> <B>-G</B><I>surfacewaypoint</I>
-<B>-J</B><I>depthprofilefile</I> <B>-L</B><I>approachdepth</I>
-<B>-M</B><I>[sensorlist]</I> <B>-N</B>[<I>spiraldescentaltitude</I>] <B>-O</B><I>missionfile</I>
+<B>-J</B><I>depthprofilefile</I> <B>-K</B><I>insmode</I> <B>-L</B><I>approachdepth</I>
+<B>-M</B><I>[sensorlist]</I> <B>-N</B>[<I>spiraldescentaltitude</I>[<I>/mode</I>]] <B>-O</B><I>missionfile</I>
 <B>-P</B><I>[startlon/startlat | startdistance]</I>
-<B>-R</B><I>transmitpower/receivegain[/rangeminfraction[/pulsewidth]]</I>
-<B>-S</B><I>speed</I> <B>-T</B> <B>-U</B><I>maxclimbrate</I>
+<B>-R</B><I>transmitpower/receivegain[/rangeminfraction[/rangemaxfraction[/pulsewidth]]]</I>
+<B>-S</B><I>surveyspeed[/ascentdescentspeed[/transitspeed]]</I> <B>-T</B> <B>-U</B><I>maxclimbrate</I>
 <B>-W</B><I>waypointspacing</I> <B>-Z</B> <B>-V</B> <B>-H</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
@@ -182,15 +182,22 @@ and END3, respectively, as defined in
 <DT><B>-B</B>
 
 <DD>
-<I>behavior</I>
+<I>behavior1[/behavior2[/behavior3[/behavior4[/behavior5]]]]</I>
 <BR>
 
-Sets the AUV behavior used to fly the mission. If <I>behavior</I> = 0, then
-the AUV uses the WayPoint behavior in which a single vehicle depth is specified
-for the approach to each waypoint. If <I>behavior</I> = 1, then the AUV uses
-the WayPointDepth behavior in which each mission segment has both a starting
-and an ending depth specified, and the vehicle is commanded to fly a depth
-profile that is a linear ramp between the two depths. Default: <I>behavior</I> = 1;
+Sets the AUV behavior used to fly each type of survey line, where <I>behavior1</I>
+applies to lines of type STARTLINE/ENDLINE, <I>behavior2</I> to
+STARTLINE2/ENDLINE2, <I>behavior3</I> to STARTLINE3/ENDLINE3, <I>behavior4</I> to
+STARTLINE4/ENDLINE4, and <I>behavior5</I> to STARTLINE5/ENDLINE5 (waypoint types
+as defined in <B>MBgrdviz</B> routes). If fewer than five values are given, the
+last value specified is used for the remaining line types. Each <I>behaviorN</I>
+value may be 0 (WayPoint, in which a single vehicle depth is specified
+for the approach to each waypoint), 1 (WayPointDepth, in which each mission
+segment has both a starting and an ending depth specified, and the vehicle is
+commanded to fly a depth profile that is a linear ramp between the two
+depths), 2 (WayPointWall), or 3 (WayPointBottom); any other value is treated
+as 1 (WayPointDepth). Default: <I>behavior1</I> = <I>behavior2</I> = <I>behavior3</I>
+= <I>behavior4</I> = <I>behavior5</I> = 1.
 <DT><B>-C</B>
 
 <DD>
@@ -219,8 +226,8 @@ AUV is commanded to the specified constant depth value.
 
 This sets the expected time required for the AUV to reach the first waypoint
 in the survey mission. If neither
-the <B>-P</B> or <B>-E</B> options are specified, a distance of 500 meters
-to the first waypoint is assumed.
+the <B>-P</B> or <B>-E</B> options are specified, a default transit time of
+2000 seconds (with a floor of 600 seconds) is assumed.
 <DT><B>-F</B>
 
 <DD>
@@ -280,6 +287,16 @@ also includes the depth profiles along those lines.
 Sets the filename of an input desired depth profile file. This is the depth
 profile that the vehicle should follow when flying the mission (as opposed to
 following the bottom at a particular altitude).
+<DT><B>-K</B>
+
+<DD>
+<I>insmode</I>
+<BR>
+
+Sets the type of inertial navigation system (INS) carried by the vehicle,
+which affects the behaviors written into the mission script. Use
+<I>insmode</I> = 0 for a Kearfott SeaDevil INS, or <I>insmode</I> = 1 for a
+Phins-Tasman INS. Default: <I>insmode</I> = 0 (Kearfott SeaDevil).
 <DT><B>-L</B>
 
 <DD>
@@ -306,6 +323,7 @@ made up of one or more of the following characters:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>H<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>high&nbsp;frequency&nbsp;sidescan&nbsp;(and&nbsp;multibeam)<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>B<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>multibeam&nbsp;beam&nbsp;(water&nbsp;column)&nbsp;data<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>C<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>benthic&nbsp;imaging&nbsp;camera&nbsp;and&nbsp;strobes<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>I<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Edgetech&nbsp;DeltaT&nbsp;bathymetric&nbsp;sonar<BR>
 <BR>
 
 Thus, <B>-M</B><I>SL</I> will cause the multibeam, the subbottom profiler, and
@@ -314,11 +332,16 @@ sidescan off.
 <DT><B>-N</B>
 
 <DD>
-<I>spiraldescentaltitude</I>
+<I>spiraldescentaltitude</I>[<I>/mode</I>]
 Sets the mission to include a shallow transit to the first waypoint followed by a
 spiral descent to depth to start the survey. The descent is terminated at the
 altitude <I>spiraldescentaltitude</I> if specified here. Otherwise, the descent is
-terminated at the altitude <I>altdesired</I> from the <B>-A</B> option.
+terminated at the altitude <I>altdesired</I> from the <B>-A</B> option. The optional
+<I>mode</I> value controls the StartSurvey and magnetometer calibration behaviors
+executed before the spiral descent: <I>mode</I> = 0 disables both, <I>mode</I> = 1
+(the default whenever <B>-N</B> is used) enables the StartSurvey behavior only,
+and <I>mode</I> = 2 enables both the StartSurvey and magnetometer calibration
+behaviors.
 <DT><B>-O</B>
 
 <DD>
@@ -335,12 +358,12 @@ Sets the filename of the output MBARI AUV mission script.
 This sets the expected starting position (<I>lon</I> longitude
 and <I>lat</I> latitude) of the Mapping AUV so that the
 expected time to run to the first waypoint can be estimated. If neither
-the <B>-P</B> or <B>-T</B> options are specified, a distance of 500 meters
-to the first waypoint is assumed.
+the <B>-P</B> or <B>-E</B> options are specified, a default transit time of
+2000 seconds (with a floor of 600 seconds) is assumed.
 <DT><B>-R</B>
 
 <DD>
-<I>transmitpower/receivegain[/rangeminfraction[/pulsewidth]]</I>
+<I>transmitpower/receivegain[/rangeminfraction[/rangemaxfraction[/pulsewidth]]]</I>
 <BR>
 
 This sets the key multibeam sonar parameters. Here <I>transmitpower</I> is
@@ -350,16 +373,24 @@ sets the minimum range at which the multibeam will make bottom picks; this
 prevents the multibeam from picking on nearfield arrivals usually reflecting
 interference from other sonars. If the sonar is operating with an altitude of
 50 m and <I>rangeminfraction</I> = 0.2, then the range gating minimum range will be
-0.2 * 50 m = 10 m. The <I>pulsewidth</I> variable sets the multibeam sonar
-transmit pulse width in microseconds. Default: <I>transmitpower</I> = 220, <I>receivegain</I> = 220,
-<I>rangeminfraction</I> = 0.2, <I>pulsewidth</I> = 60.
+0.2 * 50 m = 10 m. The <I>rangemaxfraction</I> variable similarly sets the maximum
+sonar range as a fraction of the vehicle altitude (e.g. <I>rangemaxfraction</I> = 3.5
+allows for a swath of about 150 degrees on a flat bottom). The <I>pulsewidth</I>
+variable sets the multibeam sonar transmit pulse width in microseconds.
+Default: <I>transmitpower</I> = 220, <I>receivegain</I> = 75,
+<I>rangeminfraction</I> = 0.2, <I>rangemaxfraction</I> = 3.5, <I>pulsewidth</I> = 60.
 <DT><B>-S</B>
 
 <DD>
-<I>speed</I>
+<I>surveyspeed[/ascentdescentspeed[/transitspeed]]</I>
 <BR>
 
-This sets the commanded AUV speed in meters/second. Default: <I>speed</I> = 1.5 m/s.
+This sets the commanded AUV speed(s) in meters/second. <I>surveyspeed</I> is used
+while running survey lines, <I>ascentdescentspeed</I> is used during ascent and
+descent (and to estimate the time to reach the first waypoint when <B>-P</B> is
+used), and <I>transitspeed</I> is used while transiting between survey lines. If
+only <I>surveyspeed</I> is given, it is also used for the other two speeds.
+Default: <I>surveyspeed</I> = <I>ascentdescentspeed</I> = <I>transitspeed</I> = 1.5 m/s.
 <DT><B>-T</B>
 
 <DD>
@@ -390,6 +421,7 @@ The <B>-V</B> option causes <B>mbm_route2mission</B> to print out status message
 <BR>
 
 Sets the spacing in meters of the waypoints output to the mission script.
+Default: <I>waypointspacing</I> = 200 m.
 <DT><B>-Z</B>
 
 <DD>

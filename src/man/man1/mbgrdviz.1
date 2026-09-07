@@ -6,7 +6,7 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBMBgrdviz\fP [-I\fIgridfile\fP \fB\-T \-V \-H\fP]
+\fBMBgrdviz\fP [-I\fIgridfile\fP \fB\-J\fP\fIgridfile\fP \fB\-T \-V \-H\fP]
 
 .SH DESCRIPTION
 
@@ -137,6 +137,13 @@ of its operation and then exit immediately.
 Sets a GMT grid file to be read and displayed at startup.
 This option is usually used only when \fBMBgrdviz\fP is started
 automatically from some other process.
+.TP
+.B \-J
+\fIgridfile\fP
+.br
+Sets a GMT grid file to be read and displayed as an overlay at startup.
+This option has no effect unless the \fB\-I\fP option is also used to
+specify a primary grid file.
 .TP
 .B \-T
 Sets a test grid to be calculated and displayed at startup.This

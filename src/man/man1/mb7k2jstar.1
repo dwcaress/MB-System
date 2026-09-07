@@ -7,12 +7,13 @@ data from Reson 7k format data files into Edgetech Jstar format data files.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmb7k2jstar\fP [\fB\-I\fIfile \fB\-A\fItype\fP
-\fB\-B\fIbottompickmode/bottompickthreshold\fP \fB\-C\fP
-\fB\-F\fIformat\fP \fB\-G\fIgainmode/gainfactor\fP
-\fB\-L\fP\fIstartline/lineroot\fP
-\fB\-M \-O\fIoutfile\fP \fB\-R\fIroutefile\fP \fB\-S\fIsmooth\fP
-\fB\-T\fItimeshift\fP \fB\-X \-H \-V\fP]
+\fBmb7k2jstar\fP [\fB\-\-input=\fIfile\fP \fB\-\-extract-mode=\fItype\fP
+\fB\-\-bottom-pick=\fIbottompickmode/bottompickthreshold\fP \fB\-\-comments\fP
+\fB\-\-format=\fIformat\fP \fB\-\-gain=\fIgainmode/gainfactor\fP
+\fB\-\-line-root=\fIstartline/lineroot\fP
+\fB\-\-check-route-bearing\fP \fB\-\-output=\fIoutfile\fP \fB\-\-route-file=\fIroutefile\fP
+\fB\-\-smooth=\fIsmooth\fP
+\fB\-\-time-shift=\fItimeshift\fP \fB\-\-flip-sidescan\fP \fB\-\-help\fP \fB\-\-verbose\fP]
 
 .SH DESCRIPTION
 \fBMB7k2jstar\fP is a utility that extracts Edgetech subbottom
@@ -68,8 +69,7 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B \-A
-\fImode\fP
+.B \-\-extract-mode=\fImode\fP \fB\-A\fP\fImode\fP
 .br
 This option sets the types of data to be extracted and output.
 If \fB\-A\fP\fI1\fP is given, then any low frequency sidescan
@@ -79,8 +79,7 @@ The \fB\-A\fP\fI3\fP option causes subbottom profiler records to
 be extracted. Default: All Edgetech sidescan and subbottom
 profiler records are extracted.
 .TP
-.B \-B
-\fIbottompickmode/bottompickthreshold\fP
+.B \-\-bottom-pick=\fIbottompickmode/bottompickthreshold\fP \fB\-B\fP\fIbottompickmode/bottompickthreshold\fP
 .br
 This option sets the source of the sonar first arrival time embedded into
 the Jstar format trace headers. This value can be used for
@@ -94,13 +93,12 @@ for the first sample with an amplitude > \fIbottompickthreshold\fP times the
 maximum amplitude in the trace.
 Default: \fIbottompickmode\fP = 2.
 .TP
-.B \-C
+.B \-\-comments \fB\-C\fP
 .br
 This option causes \fBmb7k2jstar\fP to print out any comment records
 encountered in the input Reson 7k data.
 .TP
-.B \-F
-\fIformat\fP
+.B \-\-format=\fIformat\fP \fB\-F\fP\fIformat\fP
 .br
 Sets the data format used if the input is read from stdin
 or from a file. If \fIformat\fP < 0, then the input file specified
@@ -108,8 +106,7 @@ with the \fB\-I\fP option will actually contain a list of input swath sonar
 data files. This program only reads Reson 7k format data files (\fBMBIO\fP
 format 88).
 .TP
-.B \-G
-\fIgainmode/gainfactor\fP
+.B \-\-gain=\fIgainmode/gainfactor\fP \fB\-G\fP\fIgainmode/gainfactor\fP
 .br
 This option applies a gain correction to the extracted sidescan data.
 If \fIgainmode\fP = 0, no gain correction is applied. If \fIgainmode\fP = 1,
@@ -117,12 +114,11 @@ a time-varying gain (proportional to range squared beyond the bottom
 return) scaled by \fIgainfactor\fP is applied to the sidescan samples.
 Default: \fIgainmode\fP = 0; \fIgainfactor\fP = 1.0.
 .TP
-.B \-H
+.B \-\-help \fB\-H\fP
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \-I
-\fIinfile\fP
+.B \-\-input=\fIinfile\fP \fB\-I\fP\fIinfile\fP
 .br
 Sets the input file path. If \fIformat\fP > 0 (set with the
 \fB\-f\fP option or \fBmbdefaults\fP) then the swath sonar data contained in \fIinfile\fP
@@ -138,21 +134,20 @@ data file should be followed by a data format identifier, e.g.:
 This program only reads Reson 7k format data files (\fBMBIO\fP
 format 88).
 .TP
-.B \-L
-\fIstartline/lineroot\fP
+.B \-\-line-root=\fIstartline/lineroot\fP \fB\-L\fP\fIstartline/lineroot\fP
 .br
 This option sets the starting line number and the output filename root
 used when \fB\-R\fP is specified so that data are output according
 to planned survey lines. Default: \fIstartline\fP = 1; \fIlineroot\fP = "jstar".
 .TP
-.B \-M
+.B \-\-check-route-bearing \fB\-M\fP
 .br
 This option causes \fBmb7k2jstar\fP to omit data during turns when
 extracting into line files according to a specified set of waypoints
 (\fB\-R\fP option). The traces will not be output until the heading is
 within 15 degrees of the next survey line's bearing.
 .TP
-.B \-O
+.B \-\-output=\fIoutfile\fP \fB\-O\fP\fIoutfile\fP
 .br
 This option sets the output Edgetech Jstar (\fBMBIO\fP format 132/133) format file path.
 If \fB\-O\fP is not invoked,
@@ -163,8 +158,7 @@ to the output, ".mb132" is used when the low frequency sidescan records are extr
 and ".mb133" is used when the high frequency sidescan records are extracted. The record
 types to be extracted are set using the \fB\-A\fP option.
 .TP
-.B \-R
-\fIroutefile\fP
+.B \-\-route-file=\fIroutefile\fP \fB\-R\fP\fIroutefile\fP
 .br
 This option specifies an \fBmbgrdviz\fP route file containing the intended
 waypoints of the survey. If \fIroutefile\fP is specified, \fBmb7k2jstar\fP
@@ -177,8 +171,7 @@ be the input swath filename with an appropriate suffix appended (".jsf" for
 mixed Jstar files, ".mb132" for low frequency sidescan only files, and ".mb133"
 for high frequency sidescan only files).
 .TP
-.B \-S
-\fIsmooth\fP
+.B \-\-smooth=\fIsmooth\fP \fB\-S\fP\fIsmooth\fP
 .br
 This option applies smoothing to the extracted sidescan trace samples.
 If \fIsmooth\fP is positive, each sample is replaced by the boxcar
@@ -187,17 +180,16 @@ If \fIsmooth\fP is negative, each sample is replaced by the RMS value
 of the samples within \fI|smooth|\fP samples on either side. Default:
 \fIsmooth\fP = 0 (no smoothing).
 .TP
-.B \-T
-\fItimeshift\fP
+.B \-\-time-shift=\fItimeshift\fP \fB\-T\fP\fItimeshift\fP
 .br
 This option shifts the timestamps of the extracted data by \fItimeshift\fP
 seconds. Default: \fItimeshift\fP = 0.0.
 .TP
-.B \-V
+.B \-\-verbose \fB\-V\fP
 This option increases the verbosity of \fBmb7k2jstar\fP, causing it
 to print out messages regarding its progress to stdout.
 .TP
-.B \-X
+.B \-\-flip-sidescan \fB\-X\fP
 This option switches port and starboard sidescan channels.
 
 .SH EXAMPLES

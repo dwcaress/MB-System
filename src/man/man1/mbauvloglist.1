@@ -401,6 +401,7 @@ log file being parsed, plus the following:
      calcDensity
      calcKTime
      calcKSpeed
+     calcPSpeed
 .br
 The timeTag value corresponds to the
 record time tag reformatted as specified with \fB-F\fP\fItime_i\fP as:
@@ -425,7 +426,9 @@ when the input file is kearfott.log, which contains the output of the Kearfott
 inertial navigation system. The calcKtime value is a timestamp calculated by adding
 the Kearfott second-of-day value (utcTime) to the start of day (in seconds) from the
 overall timestamp (time). The calcKspeed is the lateral (x-y) speed calculated from
-the x and y rate values (mVbodyxK and mVbodyyK) in the kearfott.log file.
+the x and y rate values (mVbodyxK and mVbodyyK) in the kearfott.log file. The calcPSpeed
+value is the analogous lateral (x-y) speed calculated from the phins_vnorth and
+phins_veast velocity components found in a Phins inertial navigation log file.
 .TP
 .B \-P
 .br

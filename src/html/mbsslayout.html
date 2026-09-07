@@ -475,6 +475,15 @@ the full three dimensional survey geometry. If a topography model is not specifi
 with this option, then the sidescan will be laid out using a flat bottom assumption
 and an altitude value derived either from the survey navigation or by picking the
 initial bottom return in the time series sidescan data.
+<DT><B>--altitude-altitude</B>
+
+<DD>
+<BR>
+
+Specifies obtaining the altitude value from the survey navigation (the sonar
+altitude above the seafloor as recorded with the input data or merged navigation).
+This is the default altitude source used for the flat bottom layout assumption
+when neither <B>--altitude-bottompick</B> nor <B>--topo-grid-file</B> is specified.
 <DT><B>--altitude-bottompick</B>
 
 <DD>
@@ -500,6 +509,15 @@ the blanking interval in seconds that will be ignored in looking for the first
 bottom return. This option turns the bottompick
 altitude mode on, so it is unnecessary to also specify the <B>--altitude-bottompick</B>
 option.
+<DT><B>--altitude-topo-grid</B>
+
+<DD>
+<BR>
+
+Turns on the topographic model altitude mode explicitly. This is normally set
+automatically by specifying the <B>--topo-grid-file</B> option, so it is
+unnecessary to also specify this option unless a topography grid file has
+already been set by other means.
 <DT><B>--channel-swap</B>
 
 <DD>

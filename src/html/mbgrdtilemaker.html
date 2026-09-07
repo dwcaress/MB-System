@@ -1,0 +1,191 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbgrdtilemaker</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbgrdtilemaker</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  7 September 2026 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbgrdtilemaker</B> - Creates a set of overlapping square grids (tiles) from an
+original topography grid.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+mbgrdtilemaker <B>--input=</B><I>inputGridFile</I> <B>--output=</B><I>outputRoot</I>
+[<B>--tile-dimension=</B><I>tileDimension</I> <B>--tile-spacing=</B><I>tileSpacing</I>
+<B>--mode=</B><I>mode</I> <B>--verbose</B> <B>--help</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>Mbgrdtilemaker</B> reads an input GMT/netCDF topography grid and breaks it
+up into a set of overlapping square grid tiles. Each tile has 50% overlap
+in both the x and y directions with its neighboring tiles, tiled outward
+from the southwest corner of the input grid. This tiling scheme is used to
+prepare topography for the MB-System TRN (terrain relative navigation)
+tools, which query the reference model tile by tile.
+<P>
+The size of each tile can be set either as a number of grid nodes per side
+(<B>--tile-dimension</B>) or as a desired tile half-width in grid coordinate
+units, typically meters (<B>--tile-spacing</B>); if <B>--tile-spacing</B> is given
+it takes precedence and is used, together with the input grid's node
+spacing, to derive an equivalent tile dimension. If neither option is
+given, a default tile dimension of 2001 nodes per side is used. Given the
+tile dimension (and hence the tile width), <B>mbgrdtilemaker</B> computes the
+number of tiles needed in each direction to cover the full input grid at
+50% overlap, and for each tile position extracts the corresponding subgrid
+of node values from the input grid (filling any nodes that fall outside
+the input grid with the input grid's no-data value).
+<P>
+Each tile is written as its own GMT grid file (named
+<I>outputRoot</I>_<I>nnnn</I>.grd inside the <I>outputRoot</I> output directory,
+which is created if it does not already exist), and a catalog file named
+&quot;tiles.csv&quot; is written into that same directory listing, for each tile, its
+future octree filename and the easting and northing of its center. The
+original input grid is also copied into the output directory as
+&quot;source_grid.grd&quot;. Finally, <B>mbgrdtilemaker</B> invokes <B>mbgrd2octree</B> once
+for each generated tile grid to produce a matching TRN octree (&quot;.bo&quot;) file,
+so <B>mbgrd2octree</B> must be available in the execution search path.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>--help</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>--input=</B><I>inputGridFile</I>
+
+<DD>
+<BR>
+
+Sets the filename of the input topography grid to be tiled. This must be
+a GMT/netCDF grid readable by the <B>MBIO</B> grid I/O routines. This option
+(or the equivalent short option <B>-I</B>) must be specified.
+<DT><B>--output=</B><I>outputRoot</I>
+
+<DD>
+<BR>
+
+Sets the root name used both for the output directory that is created to
+hold the tile grids, octree files, and &quot;tiles.csv&quot; catalog, and for the
+basenames of the individual tile files written into that directory. This
+option (or the equivalent short option <B>-O</B>) must be specified.
+<DT><B>--tile-dimension=</B><I>tileDimension</I>, <B>-D</B><I>tileDimension</I>
+
+<DD>
+<BR>
+
+Sets the number of grid nodes along each side of a (square) output tile.
+If neither this option nor <B>--tile-spacing</B> is given, <I>tileDimension</I>
+defaults to 2001. If <B>--tile-spacing</B> is also given, <B>--tile-spacing</B>
+takes precedence and <I>tileDimension</I> is instead derived from it.
+<DT><B>--tile-spacing=</B><I>tileSpacing</I>, <B>-S</B><I>tileSpacing</I>
+
+<DD>
+<BR>
+
+Sets the desired tile half-width in the input grid's horizontal coordinate
+units (typically meters). When given, the tile dimension (number of nodes
+per side) is calculated from <I>tileSpacing</I> and the input grid's node
+spacing, overriding any value set with <B>--tile-dimension</B>.
+<DT><B>--mode=</B><I>mode</I>, <B>-M</B><I>mode</I>
+
+<DD>
+<BR>
+
+Sets a tiling mode value. In the current implementation this value is
+parsed and stored but does not otherwise change the behavior of the
+program.
+<DT><B>--verbose</B>
+
+<DD>
+The <B>--verbose</B> option causes <B>mbgrdtilemaker</B> to print out additional
+status and debug messages; repeating it redirects this output to stderr
+and increases the level of detail reported. Note that <B>mbgrdtilemaker</B>
+prints a substantial amount of progress information (input grid
+parameters, output tileset parameters, and a line per tile and per
+<B>mbgrd2octree</B> invocation) to stdout regardless of this setting.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbgrd2octree.html">mbgrd2octree</A></B>(1), <B><A HREF="mbtrnpp.html">mbtrnpp</A></B>(1), <B><A HREF="mbgrid.html">mbgrid</A></B>(1)
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>BUGS</H2>
+
+Maybe. Maybe not.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">SEE ALSO</A><DD>
+<DT><A HREF="#lbAI">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 7 September 2026</P></CENTER>
+
+<HR>
+<center>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>

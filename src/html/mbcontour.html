@@ -33,8 +33,8 @@ Version 5.0
 <B>-B</B><I>tickinfo</I> <B>-b</B><I>yr/mo/da/hr/mn/sc</I>
 <B>-C</B><I>contourfile</I> <B>-c</B><I>copies</I>
 <B>-D</B><I>time_tick/time_annot/date_annot/time_tick_len</I>
-<B>-E</B><I>yr/mo/da/hr/mn/sc</I>
-<B>-f</B><I>format</I> <B>-F</B><I>red/green/blue</I> <B>-G</B><I>name_hgt[/name_perp]</I>
+<B>-e</B><I>yr/mo/da/hr/mn/sc</I>
+<B>-f</B><I>format</I> <B>-F</B><I>format</I> <B>-G</B><I>name_hgt[/name_perp]</I>
 <B>-I</B><I>infile</I> <B>-K</B> <B>-L</B><I>lonflip</I>
 <B>-M</B><I>pingnumber_tick/pingnumber_annot/pingnumber_tick_len</I>
 <B>-N</B><I>nplot</I> <B>-O</B> <B>-P</B> <B>-p</B><I>pings</I>
@@ -148,8 +148,8 @@ if <I>lab_spacing</I> = 0.0 then the spacing will be defined by
 <I>lab_hgt</I>. If fewer than seven parameters are specified, the
 default values are used for the missing parameters.
 Defaults: <I>cont_int</I> = 25; <I>col_int</I> = 100;
-<I>tic_int</I> = 100; <I>lab_int</I> = 100; <I>tic_int</I> = 0.1;
-<I>lab_hgt</I> = 0.05; <I>lab_spacing</I> = 0.0.
+<I>tic_int</I> = 100; <I>lab_int</I> = 100; <I>tic_len</I> = 0.05;
+<I>lab_hgt</I> = 0.1; <I>lab_spacing</I> = 0.0.
 <DT><B>-B</B>
 
 <DD>
@@ -207,7 +207,7 @@ annotated date ticks are given in hours by
 <I>time_tick</I>, <I>time_annot</I>, and <I>date_annot</I>, respectively.
 Defaults: <I>time_tick</I> = 0.25; <I>time_annot</I> = 1.0;
 <I>date_annot</I> = 4.0; <I>time_tick_len</I> = 0.1.
-<DT><B>-E</B>
+<DT><B>-e</B>
 
 <DD>
 <I>yr/mo/da/hr/mn/sc</I>
@@ -233,10 +233,11 @@ is given in the <B>MBIO</B> manual page. Default: <I>format</I> = -1.
 <DT><B>-F</B>
 
 <DD>
-<I>red/green/blue</I>
+<I>format</I>
 <BR>
 
-Sets the color used for Frame and annotation. [Default is black]
+A synonym for <B>-f</B><I>format</I>; sets the data format exactly as
+described above for the <B>-f</B> option.
 <DT><B>-G</B>
 
 <DD>

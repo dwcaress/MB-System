@@ -32,12 +32,12 @@ Version 5.0
 mbm_grid <B>-I</B><I>file</I>
 <B>-F</B><I>format</I> <B>-O</B><I>root</I>
 <B>-R</B><I>west/east/south/north</I>
-[<B>-A</B><I>datatype</I> <B>-B</B><I>border</I> <B>-C</B><I>clip</I>
+[<B>-A</B><I>datatype</I> <B>-B</B><I>border</I> <B>-C</B><I>clip[/mode]</I>
 <B>-D</B><I>xdim/ydim</I> <B>-E</B><I>dx/dy/units</I>
 {<B>-f</B><I>priority_range</I> | <B>-f</B><I>mode</I>}
 <B>-G</B><I>gridkind</I> <B>-H</B>
 <B>-J</B><I>projection</I> <B>-K</B><I>background</I>
-<B>-L</B><I>lonflip</I> <B>-M</B> <B>-N</B> <B>-P</B><I>pings</I>
+<B>-L</B><I>lonflip</I> <B>-M</B> <B>-P</B><I>pings</I>
 <B>-S</B><I>speed</I> <B>-T</B><I>tension</I>
 <B>-U</B><I>{azimuth/factor | time}</I>
 <B>-V</B> <B>-W</B><I>scale</I> <B>-X</B><I>extend</I>
@@ -131,25 +131,20 @@ Default: <I>border</I> = 0.0
 <DT><B>-C</B>
 
 <DD>
-<I>clip</I>
+<I>clip[/mode]</I>
 <BR>
 
-Sets the clipping dimension for the spline interpolation. If <I>clip</I>=0
-no spline interpolation will be done.  If <I>clip</I>&gt;0
-<DT><B>-K</B>
-
-<DD>
-<I>background</I>
-<BR>
-
-Enables filling in all undefined grid cells with bathymetry or topography
-from a global or regional database accessed with the <B>GMT</B> program
-<B>grdraster</B>. The <I>background</I> specifies which locally defined
-database is accessed with <B>grdraster</B>.
-<BR>&nbsp;then&nbsp;the&nbsp;spline
-interpolation will fill data gaps to a distance of <I>clip</I> times
-the grid spacing.
-Default: <I>clip</I> = 0.
+Controls the use of spline interpolation to fill grid cells not
+filled by swath data. The <I>clip</I> value sets the distance from
+swath data (in grid cells) that the spline interpolation may be
+applied. If <I>clip</I>=0 no spline interpolation will be done.
+If <I>mode</I>=1 (the default), then the interpolation will fill
+data gaps up to two times <I>clip</I> grid cells in size. If <I>mode</I>=2
+then the spline interpolation will fill all undefined cells within
+a distance of <I>clip</I> cells from data. If <I>mode</I> = 3 or <I>clip</I> is
+set to a value greater than both dimensions of the output grid, then
+all grid cells not set by swath data will be filled by interpolation.
+Default: <I>clip</I> = 0 and <I>mode</I> = 1.
 <DT><B>-D</B>
 
 <DD>
@@ -305,7 +300,7 @@ zone by using <B>-J</B><I>U</I>. In this case, the
 UTM zone will be inferred from the midpoint of the
 specified longitude and latitude bounds, and then the
 longitude and latitude bounds given with the
-<B>-fR</B> option are translated to UTM eastings and northings.
+<B>-R</B> option are translated to UTM eastings and northings.
 <P>
 All grids and mosaics produced by <B>MB-System</B>
 programs contain identifiers that are recognized
@@ -359,13 +354,7 @@ Causes two additional grids to be output. One is a grid containing
 the standard deviation of the data within each grid cell relative
 to the grid value, the other contains the number of data
 points in each grid cell. This option is ignored when the minimum
-or maximum filter gridding algorithms are used (see the -F option).
-<DT><B>-N</B>
-
-<DD>
-Causes grid cells with no data and no interpolation to be set to a
-value of NaN instead of the default value of 99999.9.  The NaN value
-is expected by <B>GMT</B> programs such <B>grdview</B>.
+or maximum filter gridding algorithms are used (see the -f option).
 <DT><B>-O</B>
 
 <DD>
@@ -393,12 +382,6 @@ that number of input pings will be averaged to produce one output
 ping.  If <I>pings</I> = 0, then the ping averaging will automatically
 be done so that the along-track ping spacing is equal to the across-track
 beam spacing. Default: <I>pings</I> = 1.
-<DT><B>-Q</B>
-
-<DD>
-Normally, bathymetry or topography data is gridded in meters. If
-this option is used, bathymetry or topography data is gridded
-in feet.
 <DT><B>-R</B>
 
 <DD>
@@ -540,7 +523,7 @@ further explanation of the use of <I>priority_file</I>.
 
 Sets the default depth used for calculating grazing angles for
 amplitude or sidescan values where depths are not available.
-Default: <I>scale</I> = 1000.0
+Default: <I>bath_default</I> = 1000.0
 <P>
 </DL>
 <A NAME="lbAH">&nbsp;</A>

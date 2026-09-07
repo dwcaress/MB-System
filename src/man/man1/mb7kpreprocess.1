@@ -8,11 +8,11 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmb7kpreprocess\fP [\fB\-A\fP \fB\-B\fP \fB\-C\fP\fIrollbias/pitchbias\fP
-\fB\-D\fP\fIoffx/offy[/offdepth]\fP \fB\-F\fP\fIformat\fP
+\fB\-D\fP\fIoffx/offy[/offdepth]\fP \fB\-F\fP\fIformat\fP \fB\-G\fP\fIplatformfile\fP
 \fB\-I\fIfile \fB\-K\fP\fIklugemode\fP \fB\-L\fP \fB\-M\fP\fIrockfile\fP \fB\-N\fP\fIinsfile\fP \fB\-O\fP\fIoutfile\fP
 \fB\-P\fP\fIsonardepthfile\fP \fB\-PF\fP\fIfilterlength/filterdepth\fP
-\fB\-S\fP\fIdatatype/source\fP
-\fB\-T\fP\fItimelag\fP \fB\-W\fP\fIdslfile\fP \fB\-H \-V\fP]
+\fB\-R\fP\fIbeamstart/beamend/rangeoffset\fP \fB\-S\fP\fIdatatype/source\fP
+\fB\-T\fP\fItimelag\fP \fB\-W\fP\fIdslfile\fP \fB\-Z\fP\fIkeyword=value/...\fP \fB\-H \-V\fP]
 
 .SH DESCRIPTION
 \fBmb7kpreprocess\fP reads a Reson 7k (format 88) file, interpolates the
@@ -82,6 +82,13 @@ with the \fB\-I\fP option will actually contain a list of input swath sonar
 data files. This program only reads Reson 7k format data files (\fBMBIO\fP
 format 88).
 .TP
+.B \-G
+\fIplatformfile\fP
+.br
+Causes \fBmb7kpreprocess\fP to input and utilize an \fBMB-System\fP platform file,
+which provides a complete description of the relative geometry of sensors on a
+survey platform. Platform files can be constructed using the program \fBmbmakeplatform\fP.
+.TP
 .B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
@@ -110,8 +117,18 @@ This option causes the program to implement one of the available
 processing "kluge" fixes. This are unusual steps required to fix
 data with particular, unusual problems. Kluge 1 forces \fBmb7kpreprocess\fP
 to replace the sonar depth value with values from vertical
-depth data records. Kuge 2 forces \fBmb7kpreprocess\fP to zero the initial
-beam alongtrack distance values.
+depth data records. Kluge 2 forces \fBmb7kpreprocess\fP to zero the initial
+beam alongtrack distance values. Kluge 3 zeroes the attitude correction
+applied to bathymetry. Kluge 4 filters Kearfott ROV navigation noise.
+Kluge 5, specified as \fIklugemode\fP/\fIfactor\fP, multiplies the beam
+receive angles used to calculate bathymetry by \fIfactor\fP. Kluge 6,
+specified as \fIklugemode\fP/\fIinterval\fP[/\fIthreshold\fP], forces ping
+timestamps that jump by more than \fIthreshold\fP (default: \fIinterval\fP/4)
+to be reset using the specified \fIinterval\fP. Kluge 7 additionally adjusts
+associated beam edits when kluge 6 fixes a time jump. Kluge 8 disables
+recalculation of bathymetry from travel times and angles. Kluge 9,
+specified as \fIklugemode\fP/\fIfactor\fP, applies a Snell's law style
+tweak to the beam receive angles by \fIfactor\fP.
 .TP
 .B \-L
 .br
@@ -231,6 +248,14 @@ beamwidth, and the "snippet" records contain short sections of beamformed
 time series centered on the bottom return times in each of the valid bathymetry
 beams.
 .TP
+.B \-R
+\fIbeamstart/beamend/rangeoffset\fP
+.br
+This option applies a static \fIrangeoffset\fP value (in the same units as the
+recorded travel times) to the ranges of beams numbered \fIbeamstart\fP through
+\fIbeamend\fP, inclusive, prior to calculating bathymetry. Up to three \fB\-R\fP
+options may be specified, each affecting a different range of beams.
+.TP
 .B \-T
 \fItimelag\fP
 .br
@@ -265,6 +290,28 @@ where:
  	pitch \- decimal degrees
  	roll \- decimal degrees
  	id \- seems to be 1.00
+.TP
+.B \-Z
+\fIkeyword=value/value/...\fP
+.br
+This option sets sensor offset values using \fIkeyword\fP=\fIvalue\fP syntax,
+as an alternative to the older \fB\-C\fP, \fB\-D\fP, and undocumented offset
+arguments. Recognized forms are:
+ 	multibeam_offsets=tx/ty/tz/theading/troll/tpitch
+ 	mbtransmit_offsets=tx/ty/tz/theading/troll/tpitch
+ 	mbreceive_offsets=rx/ry/rz/rheading/rroll/rpitch
+ 	position_offsets=x/y/z
+ 	depth_offsets=x/y/z
+ 	heading_offsets=heading/roll/pitch
+ 	rollpitch_offsets=heading/roll/pitch
+.br
+The \fImultibeam_offsets\fP form sets both the transmit and receive array
+position and angular offsets to the same values. The \fImbtransmit_offsets\fP
+and \fImbreceive_offsets\fP forms set the transmit and receive array offsets
+separately. The \fIposition_offsets\fP and \fIdepth_offsets\fP forms set the
+positional offsets of the position and depth sensors, respectively. The
+\fIheading_offsets\fP and \fIrollpitch_offsets\fP forms set the angular
+offsets of the heading and roll-pitch sensors, respectively.
 
 .SH EXAMPLES
 Suppose that one has collected a Reson 7k datafile incorporating

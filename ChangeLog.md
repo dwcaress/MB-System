@@ -21,7 +21,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
-- Version 5.8.3beta17    September 2, 2026
+- Version 5.8.3beta17    September 7, 2026
 - Version 5.8.3beta16    July 26, 2026
 - Version 5.8.3beta15    July 26, 2026
 - Version 5.8.3beta14    July 6, 2026
@@ -74,7 +74,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
-#### 5.8.3beta17 (September 2, 2026)
+#### 5.8.3beta17 (September 7, 2026)
 
 Program mbotps: Replaced this program's dependency on a separately installed and built
 copy of the OSU Tidal Prediction Software (OTPS) Fortran program predict_tide with a
@@ -277,6 +277,50 @@ push`/`ignored` and the matching `#pragma GCC diagnostic pop` with
 compiler it is meant for, with no warning generated on Clang. This work was done with the
 assistance of the AI coding assistant Claude Sonnet 5 (Anthropic, model claude-sonnet-5),
 operating as Claude Code under developer supervision and review.
+
+Program mbgpstide: Fixed an inconsistency between the long and short forms of the
+--tideformat/-A option introduced by the getopt_long conversion (5.8.3beta15/16): the
+long-option handler unconditionally clamped any parsed value other than 2 down to 1,
+while the equivalent short-option handler simply stored whatever value was parsed. This
+meant `--tideformat=5` (the documented CARIS output format, also reachable as `-A5` and
+checked explicitly elsewhere in the program) was silently turned into tideformat=1 when
+given as a long option, while `-A5` worked correctly. Removed the clamp from the
+long-option branch so both option forms behave identically. This bug was found and fixed
+with the assistance of the AI coding assistant Claude Sonnet 5 (Anthropic, model
+claude-sonnet-5), operating as Claude Code under developer supervision and review.
+
+Program mbtiff2png: Fixed a getopt_long table bug in which the no-argument flags
+--transparency-white and --transparency-black were declared with required_argument
+instead of no_argument, meaning either flag would silently consume the next command-line
+token as an ignored argument instead of taking effect as a bare switch (the man page and
+the program's own usage text had always correctly described both as argument-free). This
+bug was found and fixed with the assistance of the AI coding assistant Claude Sonnet 5
+(Anthropic, model claude-sonnet-5), operating as Claude Code under developer supervision
+and review.
+
+Man pages: Completed a full accuracy pass over every MB-System man page. Rewrote
+src/man/man3/mbio.3 to document roughly 185 previously-undocumented mb_* library
+functions, remove one that no longer exists (mb_buffer_info, replaced by
+mb_buffer_get_kind), fix roughly 50 stale function signatures, add 3 missing entries to
+the SUPPORTED FORMATS table, and correct stale beam-flag bit meanings. Updated
+src/man/man1/mbsystem.1's program/macro/GMT-module inventory to match the actual current
+build (about 20 additions, several deprecated-list corrections, mbps removed as dead).
+Audited the OPTIONS/SYNOPSIS sections of all 97 other existing man pages against their
+current option-parsing code, fixing 59 of them: undocumented options, options no longer
+in the code, stale defaults, and swapped or otherwise wrong descriptions (notably
+mbimagelist.1, which had been largely copy-pasted from mbdatalist.1, and
+mbvelocitytool.1 and mbswath.1, which were missing or misdescribing several real
+options). Wrote 10 new man pages from scratch, with html/pdf renderings, for
+actively-built programs and macros that previously had no documentation at all
+(mbgetphotocorrection, mbimagecorrect, mbphotogrammetry, mbphotomosaic,
+mbm_makeimagelist, mbgrd2octree, mbgrdtilemaker, mbm_phins2fnv, mbm_rollerror,
+mbm_trnplot), each cross-checked against its actual getopt/argv-parsing code rather than
+assumed behavior. Also brought src/html/mbsystem_man_list.html up to date with links to
+every current man page, fixing a broken mbio pdf link, moving several deprecated
+programs (mbauvnavusbl, mbrollbias, mbstripnan, mbm_fmtvel) out of active-program
+sections into the deprecated list, and removing the dead mbps entry. This work was done
+with the assistance of the AI coding assistant Claude Sonnet 5 (Anthropic, model
+claude-sonnet-5), operating as Claude Code under developer supervision and review.
 
 #### 5.8.3beta16 (July 26, 2026)
 

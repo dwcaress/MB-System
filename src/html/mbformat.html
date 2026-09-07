@@ -28,7 +28,10 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbformat</B> [<B> -F</B><I>format</I> <B>-I</B><I>file</I> <B>-L -K -V -W -H</B>]
+<B>mbformat</B> [<B>--format</B>=<I>format_id</I> {<B>-F</B><I>format_id</I>}]
+[<B>--input</B>=<I>file</I> {<B>-I</B><I>file</I>}] [<B>--list-ids</B> {<B>-L</B>}]
+[<B>--list-root</B> {<B>-K</B>}] [<B>--verbose</B> {<B>-V</B>}]
+[<B>--html</B> {<B>-W</B>}] [<B>--help</B> {<B>-H</B>}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -82,46 +85,44 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-F</B>
+<DT><B>--format=</B><I>format_id</I> {<B>-F</B><I>format_id</I>}
 
 <DD>
-<I>format</I>
 <BR>
 
-Sets the format id to be listed.  If no format is given, all of the 
+Sets the format id to be listed.  If no format is given, all of the
 currently supported formats will be listed. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page.
-<DT><B>-H</B>
+<DT><B>--help {-H</B>}
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-I</B>
+<DT><B>--input=</B><I>file</I> {<B>-I</B><I>file</I>}
 
 <DD>
-<I>file</I>
 <BR>
 
 Sets the filename to be tested against known filename prefix and
 suffix conventions in order to identify the format id.
-<DT><B>-K</B>
+<DT><B>--list-root {-K</B>}
 
 <DD>
 Causes the fileroot and the format id to be output. The fileroot
 is the filename with any format specific suffix removed.
-<DT><B>-L</B>
+<DT><B>--list-ids {-L</B>}
 
 <DD>
-Causes the format descriptions to be omitted 
+Causes the format descriptions to be omitted
 so that only the <B>MBIO</B> format id numbers are listed.
-<DT><B>-V</B>
+<DT><B>--verbose {-V</B>}
 
 <DD>
 Normally, <B>mbformat</B> only prints out format descriptions.  If the
 <B>-V</B> flag is given, then <B>mbformat</B> works in a &quot;verbose&quot; mode and
 also outputs the program version being used.
-<DT><B>-W</B>
+<DT><B>--html {-W</B>}
 
 <DD>
 Output the list of formats as HTML.

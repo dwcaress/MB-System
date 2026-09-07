@@ -495,6 +495,11 @@ is not specified, it is assumed to be 0, the first navigation point in the
 specified section. If the uncertainties in the global tie (xsigma, ysigma, zsigma)
 are not specified, then xsigma = ysigma = 10 m and zsigma = 0.5 m are assumed.
 .TP
+.B \--set-global-tie-relative=file:section[:snav]/xoffset/yoffset/zoffset[/xsigma/ysigma/zsigma]
+This option sets a global tie in the same manner as \fB\--set-global-tie\fP, except
+that the offset values are relative to the navigation of the current inversion
+model rather than to the original navigation.
+.TP
 .B \--set-global-tie-xyz=file:section[:snav]
 This option sets the mode of the existing specified global tie in the
 \fBMBnavadjust\fP project to be "XYZ". This means all three
@@ -534,6 +539,17 @@ for an optimal navigation model.
 .B \--unset-global-tie=file:section
 This option unsets (deletes) the specified global tie in the
 \fBMBnavadjust\fP project.
+.TP
+.B \--unset-all-global-ties
+This option unsets (deletes) all global ties in the \fBMBnavadjust\fP project.
+.TP
+.B \--shift-global-tie=file:section/shiftx/shifty/shiftz
+This option shifts the offset values of the specified global tie in the
+\fBMBnavadjust\fP project by the specified x, y, and z amounts in meters.
+.TP
+.B \--shift-all-global-ties=shiftx/shifty/shiftz
+This option shifts the offset values of all global ties in the
+\fBMBnavadjust\fP project by the specified x, y, and z amounts in meters.
 .TP
 .B \--add-crossing=file1:section1/file2:section2
 This option adds the specified crossing to the \fBMBnavadjust\fP project.
@@ -696,6 +712,11 @@ This option sets all unset crossings in the input projects to be
 skipped. This does not apply to any new crossings between the two
 merged projects.
 .TP
+.B \--unset-skipped-crossings
+This option sets all skipped crossings in the \fBMBnavadjust\fP project
+to be unset (back to "unanalyzed" status). This does not apply to any
+new crossings between the two merged projects.
+.TP
 .B \--unset-skipped-crossings-by-block=survey1/survey2
 This option sets all skipped crossings in the specified
 two surveys to be unset.
@@ -781,6 +802,15 @@ navigation track length less than \fImin_length\fP.
 This option sets all crossings for which one or both data sections have a
 navigation track length less than \fImin_length\fP to "skipped" mode. Any ties
 associated with these crossings are deleted.
+.TP
+.B \--remove-short-sections=min_length
+This option merges all data sections with a navigation track length less
+than \fImin_length\fP into the immediately prior section in the same file.
+.TP
+.B \--remove-file=file
+This option removes the specified file (identified by its numerical id in
+the project) from the \fBMBnavadjust\fP project, along with all of its
+sections, crossings, and ties.
 .TP
 .B \--remake-mb166-files
 This option causes \fBmbnavadjustmerge\fP to remake the navigation files inside

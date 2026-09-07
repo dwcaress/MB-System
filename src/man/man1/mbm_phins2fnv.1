@@ -1,0 +1,77 @@
+.TH mbm_phins2fnv 1 "7 September 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbm_phins2fnv\fP \- Macro to translate processed Phins INS navigation data
+to an fnv file for use in MB-System processing.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbm_phins2fnv\fP \fB\-i\fP\fIinputfile\fP \fB\-o\fP\fIoutputfile\fP
+[\fB\-v\fP \fB\-h\fP]
+
+.SH DESCRIPTION
+\fBmbm_phins2fnv\fP is a macro intended to translate processed navigation
+data from an iXblue Phins inertial navigation system (INS) into an "fnv"
+format navigation file of the kind used elsewhere in \fBMB-System\fP
+processing (see, e.g., the \fB\-N\fP option of \fBmbnavlist\fP and the
+merge-navigation options of \fBmbprocess\fP).
+
+In the current version of this macro, the input file (specified with
+\fB\-i\fP/\fB\-\-input\fP) is read using whitespace as a field delimiter, with
+lines beginning with a "#" character treated as comments, and the
+resulting table of columns is printed to the shell. The subsequent step
+of selecting the columns needed for an fnv file and writing the file named
+with \fB\-o\fP/\fB\-\-output\fP has not yet been implemented in this version of the
+macro; running it currently reports the parsed input data rather than
+producing an fnv output file.
+
+Both an input and an output filename must be supplied on the command line;
+if either is missing the macro prints a diagnostic message and exits
+without processing.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian do Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-h\fP, \fB\-\-help
+This "help" flag causes the macro to print out a description
+of its command line options and then exit immediately.
+.TP
+.B \-i\fP\fIinputfile\fP, \fB\-\-input=\fIinputfile\fP
+.br
+Sets the pathname of the input file containing processed Phins INS data.
+This is a required argument; if it is not supplied the macro prints a
+message and exits without doing anything further.
+.TP
+.B \-o\fP\fIoutputfile\fP, \fB\-\-output=\fIoutputfile\fP
+.br
+Sets the pathname of the output fnv navigation file. This is a required
+argument; if it is not supplied the macro prints a message and exits
+without doing anything further. (As noted above, the current version of
+the macro does not yet write this file.)
+.TP
+.B \-v\fP, \fB\-\-verbose
+Sets a verbose flag. In the current implementation this flag is parsed
+and stored but does not change the macro's output.
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbnavlist\fP(1), \fBmbprocess\fP(1)
+
+.SH BUGS
+Maybe. Maybe not.

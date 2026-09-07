@@ -121,9 +121,9 @@ int main(int argc, char** argv)
         {"input",                       required_argument,      NULL,         0},
         {"world",                       required_argument,      NULL,         0},
         {"output",                      required_argument,      NULL,         0},
-        {"transparency-white",          required_argument,      NULL,         0},
+        {"transparency-white",          no_argument,            NULL,         0},
         {"transparency-light",          required_argument,      NULL,         0},
-        {"transparency-black",          required_argument,      NULL,         0},
+        {"transparency-black",          no_argument,            NULL,         0},
         {"transparency-dark",           required_argument,      NULL,         0},
         {NULL,                          0,                      NULL,         0}
         };

@@ -43,7 +43,7 @@ with data from any other swath sonar system or with data in a Hydrosweep
 format that does not include water velocity records. Currently, the two formats
 which can be used are the raw Hydrosweep DS format (\fBMBIO\fP id 21)
 and the L-DEO in-house binary Hydrosweep format (\fBMBIO\fP id 24).
-Default: \fIformat\fP = 5.
+Default: \fIformat\fP = 21.
 .TP
 .B \-H
 This "help" flag causes the program to print out a description
@@ -63,11 +63,11 @@ Sets the kind of data record which will be listed, where the choices
 for kind include:
  	1:	Survey data record
  	2:	Comment record
- 	3:	Calibrate data record
- 	4:	Mean velocity data record
- 	5:	Velocity profile data record
- 	6:	Standby data record
- 	7:	Navigation source data record
+ 	4:	Calibrate data record
+ 	5:	Mean velocity data record
+ 	6:	Velocity profile data record
+ 	7:	Standby data record
+ 	8:	Navigation source data record
 .br
 This option can be given multiple times to set more than one
 kind of data record for listing.

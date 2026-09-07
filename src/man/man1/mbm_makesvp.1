@@ -7,9 +7,9 @@ and generate a sound velocity profile model from averages of the sound speed val
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbm_makesvp\fP \fB\-I\fP\fIinputfile\fP 
-[\fB\-A\fP \fB\-D\fP\fIdepthinterval\fP \fB\-H\fP \fB\-M\fP\fImode\fP
-\fB\-O\fP\fIoutputfile\fP \fB\-V\fP]
+\fBmbm_makesvp\fP \fB\-I\fP\fIinputfile\fP
+[\fB\-A\fP \fB\-D\fP\fIdepthinterval\fP \fB\-F\fP\fIformat\fP \fB\-H\fP \fB\-M\fP\fImode\fP
+\fB\-O\fP\fIoutputfile\fP \fB\-T\fP\fIfactor\fP \fB\-V\fP]
 
 .SH DESCRIPTION
 \fBmbm_makesvp\fP is a macro to extract sound speed and depth data from a datalist of swath files, 
@@ -70,7 +70,8 @@ data files. This program uses the \fBMBIO\fP library
 and will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
-is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = \-1.
+is given in the \fBMBIO\fP manual page. By default (no \fB\-F\fP option given), the
+format is determined automatically by running \fBmbformat\fP on the input file.
 .TP
 .B \-H
 This "help" flag cause the program to print out a description
@@ -114,6 +115,12 @@ Default: \fImode\fP=0.
 .br
 Sets the name of the output file for the sound speed versus depth model. By default,
 the model is output to the stdout stream.
+.TP
+.B \-T
+\fIfactor\fP
+.br
+Sets a multiplicative factor applied to each sound speed value before the
+model is calculated and output. Default: \fIfactor\fP = 1.0.
 .TP
 .B \-V
 The \fB\-V\fP option causes \fBmbm_makesvp\fP to print out status messages.

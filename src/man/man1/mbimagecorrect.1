@@ -1,0 +1,110 @@
+.TH mbimagecorrect 1 "7 September 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbimagecorrect\fP \- Apply brightness and contrast corrections to a single image using OpenCV algorithms.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+mbimagecorrect [\fB\-\-verbose\fP \fB\-\-help\fP
+\fB\-\-input=\fP\fIimagefile\fP \fB\-\-output=\fP\fIimagefile\fP
+\fB\-\-histogram\-equalization\fP \fB\-\-gamma\-correction=\fP\fIgamma\fP
+\fB\-\-clahe\-correction\fP \fB\-\-lightness\-correction=\fP\fIfactor\fP]
+
+.SH DESCRIPTION
+\fBMbimagecorrect\fP applies simple brightness and contrast corrections to a single
+image using standard \fBOpenCV\fP algorithms. Four correction modes are available:
+histogram equalization, gamma correction, contrast limited adaptive histogram
+equalization (CLAHE), and a simple multiplicative lightness scaling. Only one
+correction mode is applied per run; if no correction mode is specified on the
+command line, CLAHE correction is used by default.
+.P
+Histogram equalization converts the image from BGR to YCrCb color space,
+equalizes the histogram of the Y (luminance) channel only, and converts the
+result back to BGR. Gamma correction builds a 256 entry lookup table using the
+supplied gamma exponent and applies it independently to all three BGR channels
+of every pixel. CLAHE correction converts the image to the Lab color space,
+applies OpenCV's CLAHE algorithm (with a fixed clip limit of 4) to the L
+(lightness) channel, and converts the result back to BGR. Lightness correction
+converts the image to YCrCb color space and multiplies the Y channel of every
+pixel by a constant factor, leaving the Cr and Cb (color) channels unchanged.
+.P
+The corrected image is written to the specified output file. \fBMbimagecorrect\fP
+also opens two windows displaying the original and corrected images and waits
+for a keypress before exiting; this program is not currently useful in a
+non-interactive, headless batch processing context. Although the built in
+usage message mentions supplying an imagelist as input, the current
+implementation only reads a single image file named by \fB\-\-input\fP; it does not
+read or iterate over an MB-System imagelist.
+.P
+Note that OpenCV enforces default maximum image dimensions when reading
+images (2^20 pixels per side, 2^30 pixels total). To work with larger images,
+set the environment variable \fBOPENCV_IO_MAX_IMAGE_PIXELS\fP before running the
+program.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian do Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-\-help
+This "help" flag causes the program to print out a description
+of its operation and then exit immediately.
+.TP
+.B \-\-verbose
+The \fB\-\-verbose\fP option causes \fBmbimagecorrect\fP to print out status messages.
+.TP
+.B \-\-input=\fIimagefile\fP
+.br
+Sets the filename of the input image to be corrected.
+.TP
+.B \-\-output=\fIimagefile\fP
+.br
+Sets the filename of the output, corrected image.
+.TP
+.B \-\-histogram\-equalization
+.br
+Selects the histogram equalization correction mode: the Y (luminance) channel
+of the image (converted to YCrCb color space) is histogram equalized, and the
+result is converted back to BGR.
+.TP
+.B \-\-gamma\-correction=\fIgamma\fP
+.br
+Selects the gamma correction mode and sets the gamma exponent used to build the
+correction lookup table applied to each of the BGR channels. The default gamma
+value is 0.5.
+.TP
+.B \-\-clahe\-correction
+.br
+Selects the CLAHE (Contrast Limited Adaptive Histogram Equalization)
+correction mode: the image is converted to Lab color space, CLAHE is applied
+to the L (lightness) channel with a clip limit of 4, and the result is
+converted back to BGR. This is the default correction mode if no other
+correction mode option is specified.
+.TP
+.B \-\-lightness\-correction=\fIfactor\fP
+.br
+Selects the simple lightness correction mode and sets the multiplicative
+\fIfactor\fP applied to the Y (luminance) channel of the image (converted to
+YCrCb color space) before converting back to BGR. The default factor is 1.0.
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbtiff2png\fP(1), \fBmbphotomosaic\fP(1),
+\fBmbgetphotocorrection\fP(1)
+
+.SH BUGS
+Maybe. Maybe not.

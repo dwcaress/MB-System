@@ -28,9 +28,9 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbm_makesvp</B> <B>-I</B><I>inputfile</I> 
-[<B>-A</B> <B>-D</B><I>depthinterval</I> <B>-H</B> <B>-M</B><I>mode</I>
-<B>-O</B><I>outputfile</I> <B>-V</B>]
+<B>mbm_makesvp</B> <B>-I</B><I>inputfile</I>
+[<B>-A</B> <B>-D</B><I>depthinterval</I> <B>-F</B><I>format</I> <B>-H</B> <B>-M</B><I>mode</I>
+<B>-O</B><I>outputfile</I> <B>-T</B><I>factor</I> <B>-V</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -110,7 +110,8 @@ data files. This program uses the <B>MBIO</B> library
 and will read or write any swath sonar
 format supported by <B>MBIO</B>. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
-is given in the <B>MBIO</B> manual page. Default: <I>format</I> = -1.
+is given in the <B>MBIO</B> manual page. By default (no <B>-F</B> option given), the
+format is determined automatically by running <B>mbformat</B> on the input file.
 <DT><B>-H</B>
 
 <DD>
@@ -162,6 +163,14 @@ Default: <I>mode</I>=0.
 
 Sets the name of the output file for the sound speed versus depth model. By default,
 the model is output to the stdout stream.
+<DT><B>-T</B>
+
+<DD>
+<I>factor</I>
+<BR>
+
+Sets a multiplicative factor applied to each sound speed value before the
+model is calculated and output. Default: <I>factor</I> = 1.0.
 <DT><B>-V</B>
 
 <DD>

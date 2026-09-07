@@ -29,11 +29,11 @@ Version 5.0
 <H2>SYNOPSIS</H2>
 
 <B>mbkongsbergpreprocess</B> [<B>-C</B> <B>-D</B><I>outputdirectory</I>
-<B>-E</B><I>offx/offy[/offdepth]</I>
+<B>-E</B><I>offx/offy/offz[/offdepth]</I>
 <B>-F</B><I>format</I>
-<B>-I</B><I>file </I><B>-O</B><I>outfile</I> <B>-P</B><I>sonardepthfile</I> <B>-PF</B><I>filterlength/filterdepth</I>
+<B>-I</B><I>file </I><B>-O</B><I>outfile</I> <B>-P</B><I>sonardepthfile</I> <B>-PF</B><I>filterlength/filterdepth</I> <B>-PM</B><I>filterlength/filterdepth</I> <B>-PU</B><I>mode</I>
 <B>-S</B><I>datatype/source</I>
-<B>-T</B><I>timelag</I> <B>-W -H -V</B>]
+<B>-T</B><I>timelag</I> <B>-H -V</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -77,8 +77,8 @@ suffixes:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;synchronous&nbsp;attitude&nbsp;(roll&nbsp;and&nbsp;pitch):<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>*.sta<BR>
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;
 By default, <B>mbkongsbergpreprocess</B> ignores water column records and does
-not pass these large records into the output format 59 files. The <B>-W</B><I>1</I>
-option causes the water column records to be written in the output files.
+not pass these large records into the output format 59 files. There is
+currently no command line option to change this behavior.
 <P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>MB-SYSTEM AUTHORSHIP</H2>
@@ -129,15 +129,19 @@ This option causes all format 59 output files to be placed in the specified dire
 <DT><B>-E</B>
 
 <DD>
-<I>offx/offz[/offdepth]</I>
+<I>offx/offy/offz[/offdepth]</I>
 <BR>
 
 This option is for data from submerged platforms such as ROVs or AUVs.
-This sets horizontal and vertical.distance offsets between the vehicle's
-depth sensor and the multibeam receive head. If specified, these values are used
+This sets the along-track (<I>offx</I>), across-track (<I>offy</I>), and vertical
+(<I>offz</I>) distance offsets between the vehicle's depth sensor and the
+multibeam receive head, plus an optional constant depth offset (<I>offdepth</I>).
+If specified, the <I>offx/offy/offz</I> values are used
 in a lever-arm calculation to determine the sonar depth change associated with
 vehicle pitch. The <I>offdepth</I> value, if specified, is a static depth offset to be
-applied to the vehicle depth data.
+applied to the vehicle depth data. If fewer than four slash-separated values
+are given, <I>offx</I> is taken to be zero and the values supplied are assigned
+to <I>offy</I>, <I>offz</I>, and (if present) <I>offdepth</I>.
 <DT><B>-F</B>
 
 <DD>
@@ -218,6 +222,26 @@ values used to determine depth are affected by waves at the sea surface. In this
 case, a longer period <I>filterlength</I> (e.g. 10 seconds) and a shallower
 <I>filterdepth</I> (e.g. 50 meters) may be used to lessen the artifacts due to
 surface swell.
+<DT><B>-PM</B>
+
+<DD>
+<I>filterlength/filterdepth</I>
+This option is identical to <B>-PF</B><I>filterlength/filterdepth</I> except
+that a median filter is applied to the sonar depth data instead of a
+Gaussian tapered mean filter.
+<DT><B>-PU</B>
+
+<DD>
+<I>mode</I>
+This option sets how the sonar depth used in output processing is
+derived from the recorded heave and sensor (pressure) depth values.
+If <I>mode</I> = 1, only heave is used to track high frequency vertical
+motion (appropriate for a surface vessel where sensor depth is
+essentially zero). If <I>mode</I> = 2, only the sensor depth is used
+(appropriate for a submerged platform such as an ROV or AUV whose
+pressure sensor already captures all vertical motion). If <I>mode</I> = 3,
+both sensor depth and heave are used together. If this option is not
+specified, the mode is inferred automatically from the data.
 <DT><B>-S</B>
 
 <DD>
@@ -265,15 +289,6 @@ to the navigation and attitude data prior to it being merged with the
 bathymetry. If <I>timelag</I> is a valid path to a file containing time
 stamp and time lag pairs, then these data will be read and the time lag
 applied to particular records will be interpolated by time.
-<DT><B>-W</B>
-
-<DD>
-<I>mode</I>
-<BR>
-
-By default, <B>mbkongsbergpreprocess</B> ignores water column records and does
-not pass these large records into the output format 59 files. If <B>-W</B><I>1</I>
-is specified, then the water column records will be written to the output files.
 <P>
 </DL>
 <A NAME="lbAH">&nbsp;</A>
