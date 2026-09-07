@@ -1,4 +1,4 @@
-.TH mbmesh 1 "3 August 2026"
+.TH mbmesh 1 "7 September 2026"
 .SH NAME
 mbmesh \- reconstruct triangle meshes from swath bathymetry data
 .SH SYNOPSIS
@@ -76,11 +76,15 @@ Enable progress and diagnostic logging.
 .B \-H, \-h, \--help
 Display help message and exit.
 .SH OUTPUT OPTIONS
+.LP
+Every long option in this section also accepts a legacy single-dash form
+(e.g. \fB-html\fR, \fB-diagnostics\fR, \fB-all-outputs\fR) for backward
+compatibility.
 .TP
 .B \--html
 Also write \fBmesh.html\fR, an X3DOM viewer page that references
 \fBmesh.glb\fR, launch a local Python HTTP server, and open the viewer in the
-default web browser. The legacy single-dash form \fB-html\fR is also accepted.
+default web browser.
 .TP
 .B \--xyz
 Also write both local and ECEF XYZ point cloud files.
