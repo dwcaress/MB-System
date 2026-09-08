@@ -455,6 +455,33 @@ The changes described above were done with the assistance of the AI coding assis
 Claude Sonnet 5 (Anthropic, model claude-sonnet-5), operating as Claude Code under
 developer supervision and review.
 
+Format 261 (MBF_KEMKMALL): Fixed two further defects identified in a bug report from
+Christian Ferreira reviewing the same kmall attitude/heave handling as the fixes above.
+First, in src/mbio/mbr_kemkmall.c, the code that feeds the generic MBIO nav/attitude
+buffer (mb_attint_add(), used by the low-level, automatic preprocessing that
+mbr_kemkmall_rd_data() applies to every not-yet-preprocessed ping, and consulted by any
+program - such as mbtrnpp - that reads kmall attitude via the standard
+mb_attint_interp()/mb_get_all() path rather than through mbpreprocess's own explicit
+extraction) negated the SKM datagram's heave_m field in both places it is populated (the
+MB_DATA_NAV1 and MB_DATA_NAV2 handling blocks), even though every other reader of this
+field elsewhere in mbsys_kmbes.c, and every other format's own call to mb_attint_add(),
+passes heave through unmodified, matching Kongsberg's own "positive downwards"
+convention for heave_m. Confirmed directly: reading the same ping's heave with mblist,
+once from the raw, never-preprocessed .kmall file and once from the same ping after
+mbpreprocess, gave an exact sign flip (+1.1527 m vs. -1.1527 m) before this fix and
+identical values after it; this did not affect bathymetry already produced through the
+mbpreprocess/mbprocess pipeline, which extracts attitude through a separate, correctly-
+signed path, but would have affected any program reading kmall attitude through the
+generic buffer directly, as for the reson7k3 bug described above. Second, in
+src/mbio/mbsys_kmbes.c's mbsys_kmbes_preprocess(), the per-beam sensordepth-at-receive-
+time fallback (taken when no separate sensordepth ancillary stream is available, the
+normal case for kmall) assigned its result to the ping-level sensordepth variable rather
+than to receive_sensordepth as intended; harmless in practice for standard kmall data,
+since the two already held the same value at that point, but corrected for clarity and
+to avoid the same mistake mattering under some future change to this code. This work was
+done with the assistance of the AI coding assistant Claude Sonnet 5 (Anthropic, model
+claude-sonnet-5), operating as Claude Code under developer supervision and review.
+
 #### 5.8.3beta16 (July 26, 2026)
 
 Program mbusbl2fnv: New program that converts a USBL (ultra-short baseline) ROV
