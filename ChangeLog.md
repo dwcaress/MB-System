@@ -21,7 +21,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
-- Version 5.8.3beta17    September 7, 2026
+- Version 5.8.3beta17    September 8, 2026
 - Version 5.8.3beta16    July 26, 2026
 - Version 5.8.3beta15    July 26, 2026
 - Version 5.8.3beta14    July 6, 2026
@@ -74,7 +74,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
-#### 5.8.3beta17 (September 7, 2026)
+#### 5.8.3beta17 (September 8, 2026)
 
 Program mbotps: Replaced this program's dependency on a separately installed and built
 copy of the OSU Tidal Prediction Software (OTPS) Fortran program predict_tide with a
@@ -386,6 +386,70 @@ under .github/workflows/; a leftover "GitHub Actions Demo" placeholder workflow
 GitHub generates when Actions is first enabled; two empty, untracked top-level
 directories (config/ and maps/) with no evident purpose; and a stray configure~ backup
 file left behind by a local autoreconf run. No functional code changed.
+
+The changes described above were done with the assistance of the AI coding assistant
+Claude Sonnet 5 (Anthropic, model claude-sonnet-5), operating as Claude Code under
+developer supervision and review.
+
+Format 261 (MBF_KEMKMALL): Fixed three related bugs in mbsys_kmbes_preprocess()
+(src/mbio/mbsys_kmbes.c) that caused noticeably noisy bathymetry after SVP-based
+recalculation (mbprocess with SVPMODE 1) for Kongsberg kmall data logged with multiple
+transmit sectors per ping, including dual-swath surveys. First, the transmit-side
+roll/pitch/heading fed to mb_beaudoin() for every sounding in a ping was interpolated
+once at the ping's own header time, ignoring each sounding's own transmit sector's
+sectorTransmitDelay_sec offset from that header time, so every sector after the first
+used attitude sampled slightly too early. Second, the receive-side roll/pitch/heading
+was interpolated at the ping header time plus the beam's own two-way travel time only,
+again omitting sectorTransmitDelay_sec, even though the correct formula (header time
+plus sectorTransmitDelay_sec plus travel time) was already used a few lines later, for a
+different purpose (interpolating sensordepth at the beam's true receive time). Third,
+that same later block's heave interpolation itself used only the ping header time
+rather than the beam's true receive time it had just computed, so the per-beam heave
+correction term was always exactly zero regardless of travel time. All three were found
+and fixed by comparing sonar-computed ("raw") and mbprocess-recalculated bathymetry beam
+by beam and ping by ping for a Maria S. Merian EM124 test survey, which showed a
+systematic, sign-flipping port/starboard tilt of up to several meters per ping that
+tracked beam angle rather than ship position; after the fix, the same comparison's
+port/starboard mean bias dropped from as much as +/-15 m to roughly +/-1 m, and its
+standard deviation dropped by 5-15x, across the eleven pings checked in detail.
+
+Format 261 (MBF_KEMKMALL): Fixed a related bug, found while validating the fix above, in
+which the very first ping(s) of a kmall file - or, more generally, any ping whose
+timestamp precedes the first asynchronous navigation/heading/attitude datagram in the
+data (confirmed to occur, by 4.4 seconds, for the same Merian EM124 survey) - had their
+roll, pitch, heave, heading, and navigation left uninitialized rather than falling back
+to a defined value, because the ping-level interpolation calls were skipped outright
+rather than substituting a sensible default. mbsys_kmbes_preprocess() now initializes
+roll/pitch/heave from the ping's own embedded attitude sample (already extracted for the
+ping-level XMT record) before the file-wide interpolation is attempted, and initializes
+navigation and heading from the ping's own logged position and heading, so these values
+are always defined; if neither the file-wide table nor the ping's own embedded sample
+has any attitude data at all, roll/pitch/heave are explicitly set to 0.0 and a warning
+naming the affected ping's time is printed, rather than silently leaving them
+uninitialized. Confirmed, using both a synthetic split of the same test file and ten
+sequential production kmall files spanning 8.3 hours, that this uninitialized-data
+condition and its fix are confined to a survey's true first ping(s), if any, and are not
+retriggered at subsequent file boundaries within a multi-file datalist, because
+mbpreprocess accumulates its ancillary interpolation tables across the entire datalist
+before any ping is processed.
+
+Program mbpreprocess, Format 261 (MBF_KEMKMALL): Fixed a related warning message added
+by the previous fix that fired far more often than intended for multi-file datalists.
+src/mbio/mbr_kemkmall.c's own low-level record reader automatically invokes
+mbsys_kmbes_preprocess() the first time any not-yet-preprocessed ping is read, using a
+preprocess_pars struct embedded in the MBIO file handle (mb_io_ptr->preprocess_pars) and
+populated only from whatever asynchronous data that same read pass has buffered so far
+in the current file; because mbpreprocess opens and reads each raw file more than once
+internally, this automatic, non-authoritative call transiently saw no attitude data at
+the start of every file in a multi-file datalist, not just the survey's true first file,
+even though its result is unconditionally superseded before anything is written by
+mbpreprocess's own later, explicit call, which uses a separate table already spanning
+the entire datalist. The new warning is now printed only for that later, explicit call
+(identified by comparing the preprocess_pars pointer against
+&mb_io_ptr->preprocess_pars), where a lack of attitude data is not superseded by any
+subsequent call and so is actually worth reporting. Confirmed against a ten-file,
+8.3-hour production survey that the warning count dropped from 18 to 0 with no change to
+any written bathymetry, roll, pitch, or heave value.
 
 The changes described above were done with the assistance of the AI coding assistant
 Claude Sonnet 5 (Anthropic, model claude-sonnet-5), operating as Claude Code under

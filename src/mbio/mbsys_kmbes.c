@@ -361,6 +361,22 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
   /* get preprocessing parameters */
   struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
+  /* mbr_kemkmall_rd_data() calls this function automatically on the first read of
+      any not-yet-preprocessed ping, passing &mb_io_ptr->preprocess_pars - a struct
+      it fills in from its own per-file-handle nav/attitude buffer, which only holds
+      whatever asynchronous data this same read pass has encountered so far in the
+      current file. That is necessarily incomplete for the first several pings of a
+      file (and, when a program such as mbpreprocess reads the same raw file more than
+      once - once per its own pass, once per file in a multi-file datalist - transiently
+      incomplete every time), even though a later, explicitly-driven call (e.g. from
+      mbpreprocess's own second pass, using its own file-spanning tables) may have
+      complete data and will overwrite this preliminary result before anything is
+      written out. Silently missing attitude here is expected and, for that automatic
+      call, non-final, so the "no attitude data" warning below is limited to calls
+      using a caller-supplied preprocess_pars struct, where a lack of data is not
+      superseded by any later call and so is worth reporting. */
+  const bool pars_is_mbio_internal = (pars == &mb_io_ptr->preprocess_pars);
+
   /* data structure pointers */
   struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
@@ -572,6 +588,16 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
       xmt->xmtPingInfo.latitude = mrz->pingInfo.latitude_deg;
       xmt->xmtPingInfo.heading = mrz->pingInfo.headingVessel_deg;
 
+      /* Establish baseline navigation and heading for this ping from the ping's own
+          logged values, so that navlon/navlat/heading are always defined even before
+          any external navigation/heading data has been received (e.g. for the first
+          ping(s) of a file whose timestamps can precede the first asynchronous
+          navigation/heading datagram). These baselines are overridden below by the
+          file-wide interpolated values whenever those are available. */
+      navlon = mrz->pingInfo.longitude_deg;
+      navlat = mrz->pingInfo.latitude_deg;
+      heading = mrz->pingInfo.headingVessel_deg;
+
       xmt->xmtPingInfo.speed = 0.0;
       if (spo->sensorData.speedOverGround_mPerSec > 0.0)
         xmt->xmtPingInfo.speed = spo->sensorData.speedOverGround_mPerSec;
@@ -580,14 +606,25 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 
       xmt->xmtPingInfo.sensordepth = mrz->pingInfo.txTransducerDepth_m;
 
+      /* Establish a baseline roll/pitch/heave for this ping from the ping's own embedded
+          attitude sample, so that these are always defined even before any external
+          navigation/attitude data has been received (e.g. for the first ping(s) of a file
+          whose timestamps can precede the first asynchronous navigation/attitude datagram).
+          This baseline is overridden below by the file-wide interpolated attitude whenever
+          that is available. */
       if (skm->infoPart.numSamplesArray > 0) {
-        xmt->xmtPingInfo.roll = skm->sample[skm->infoPart.numSamplesArray-1].KMdefault.roll_deg;
-        xmt->xmtPingInfo.pitch = skm->sample[skm->infoPart.numSamplesArray-1].KMdefault.pitch_deg;
-        if (kluge_auvsentrysensordepth)
-          xmt->xmtPingInfo.heave = 0.0;
-        else
-          xmt->xmtPingInfo.heave = skm->sample[skm->infoPart.numSamplesArray-1].KMdefault.heave_m;
+        roll = skm->sample[skm->infoPart.numSamplesArray-1].KMdefault.roll_deg;
+        pitch = skm->sample[skm->infoPart.numSamplesArray-1].KMdefault.pitch_deg;
+        heave = kluge_auvsentrysensordepth ? 0.0 : skm->sample[skm->infoPart.numSamplesArray-1].KMdefault.heave_m;
       }
+      else {
+        roll = 0.0;
+        pitch = 0.0;
+        heave = 0.0;
+      }
+      xmt->xmtPingInfo.roll = roll;
+      xmt->xmtPingInfo.pitch = pitch;
+      xmt->xmtPingInfo.heave = heave;
 
       /* interpolate nav */
       if (pars->n_nav > 0) {
@@ -690,6 +727,11 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
         else
           xmt->xmtPingInfo.heave = heave;
       }
+      else if (skm->infoPart.numSamplesArray == 0 && !pars_is_mbio_internal && verbose >= 1) {
+        fprintf(stderr, "Warning: mbsys_kmbes_preprocess: no attitude data (external or embedded "
+                "in this ping) available for ping at time %.6f - roll/pitch/heave defaulted to 0.0.\n",
+                time_d);
+      }
 
       /* interpolate soundspeed */
       soundspeed = mrz->pingInfo.soundSpeedAtTxDepth_mPerSec;
@@ -766,6 +808,7 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
         double reference_heading;
         double beamAzimuth;
         double beamDepression;
+        double txroll, txpitch, txheading;
         double beamroll, beampitch, beamheading;
         // double theta, phi;
         // double mtodeglon, mtodeglat;
@@ -774,19 +817,56 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
         double ttime = mrz->sounding[i].twoWayTravelTime_sec
                                   + mrz->sounding[i].twoWayTravelTimeCorrection_sec;
 
+        /* Each sounding's transmit sector fires at its own time relative to the ping
+            header time (sectorTransmitDelay_sec), and its bottom return arrives
+            ttime later still. Both the transmit and receive orientations used
+            below must be interpolated at these sounding-specific times, not at
+            the ping header time time_d, so that multi-sector (including dual
+            swath) pings get the correct attitude per sector/beam. */
+        const double sector_transmit_delay =
+            mrz->sectorInfo[mrz->sounding[i].txSectorNumb].sectorTransmitDelay_sec;
+        const double transmit_time_d = time_d + sector_transmit_delay;
+        const double receive_time_delay = sector_transmit_delay + ttime;
+        const double receive_time_d = time_d + receive_time_delay;
+
+        /* get roll, pitch, heading at the time this sounding's sector actually transmitted */
+        txroll = roll;
+        txpitch = pitch;
+        txheading = heading;
+        if (pars->n_attitude > 0) {
+          /* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1,
+                                pars->attitude_roll - 1, pars->n_attitude,
+                                transmit_time_d, &txroll, &jattitude, error);
+          /* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1,
+                                pars->attitude_pitch - 1, pars->n_attitude,
+                                transmit_time_d, &txpitch, &jattitude, error);
+        }
+        if (pars->n_heading > 0) {
+          /* interp_status = */ mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
+                                                   pars->n_heading, transmit_time_d, &txheading,
+                                                   &jheading, error);
+        }
+        if (platform != NULL) {
+          /* apply the same lever arm orientation correction used for the ping-level
+              attitude, but evaluated at this sounding's own transmit time */
+          status = mb_platform_orientation_target(verbose, (void *)platform, pars->target_sensor, 0,
+                                                  txheading, txroll, txpitch,
+                                                  &txheading, &txroll, &txpitch, error);
+        }
+
         /* get roll at bottom return time for this beam */
         /* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1,
                               pars->attitude_roll - 1, pars->n_attitude,
-                              time_d + ttime, &beamroll, &jattitude, error);
+                              receive_time_d, &beamroll, &jattitude, error);
 
         /* get pitch at bottom return time for this beam */
         /* interp_status = */
             mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
-                             time_d + ttime, &beampitch, &jattitude, error);
+                             receive_time_d, &beampitch, &jattitude, error);
 
         /* get heading at bottom return time for this beam */
         /* interp_status = */ mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
-                                                 pars->n_heading, time_d + ttime, &beamheading,
+                                                 pars->n_heading, receive_time_d, &beamheading,
                                                  &jheading, error);
 
         /* change the sound speed recorded for the current ping and
@@ -812,14 +892,14 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
                 (reverse TX means flip sign of TX steer, reverse RX
                 means flip sign of RX steer) */
         tx_steer = tx_sign * mrz->sectorInfo[mrz->sounding[i].txSectorNumb].tiltAngleReTx_deg;
-        tx_orientation.roll = roll;
-        tx_orientation.pitch = pitch;
-        tx_orientation.heading = heading;
+        tx_orientation.roll = txroll;
+        tx_orientation.pitch = txpitch;
+        tx_orientation.heading = txheading;
         rx_steer = rx_sign * (mrz->sounding[i].beamAngleReRx_deg - mrz->sounding[i].beamAngleCorrection_deg);
         rx_orientation.roll = beamroll;
         rx_orientation.pitch = beampitch;
         rx_orientation.heading = beamheading;
-        reference_heading = heading;
+        reference_heading = txheading;
 //fprintf(stderr, "%s:%d:%s: beam %d: beamAngleReRx_deg:%f beamAngleCorrection_deg:%f roll:%f %f rx_steer:%f  tx_steer:%f tx att: %f %f %f\n",
 //__FILE__, __LINE__, __func__, i, mrz->sounding[i].beamAngleReRx_deg, mrz->sounding[i].beamAngleCorrection_deg,
 //roll, beamroll, rx_steer, tx_steer, roll, pitch, heading);
@@ -838,9 +918,6 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
         // mrz->sounding[i].y_reRefPoint_m = xx * cos(DTR * phi);
         // mrz->sounding[i].x_reRefPoint_m = xx * sin(DTR * phi);
         // mrz->sounding[i].z_reRefPoint_m = zz;
-        double receive_time_delay = ttime +
-            mrz->sectorInfo[mrz->sounding[i].txSectorNumb].sectorTransmitDelay_sec;
-        double receive_time_d = time_d + receive_time_delay;
         double receive_sensordepth = sensordepth;
         double receive_heave = heave;
         if (pars->n_sensordepth > 0) {
@@ -855,7 +932,7 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
         }
         if (pars->n_attitude > 0) {
           /* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude,
-                                           time_d, &receive_heave, &jattitude, &interp_error);
+                                           receive_time_d, &receive_heave, &jattitude, &interp_error);
         }
 
         xmt->xmtSounding[i].soundingIndex = mrz->sounding[i].soundingIndex;
