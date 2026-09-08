@@ -928,7 +928,7 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
           receive_sensordepth = -mrz->pingInfo.ellipsoidHeightReRefPoint_m;
         }
         else {
-          sensordepth = mrz->pingInfo.txTransducerDepth_m;
+          receive_sensordepth = mrz->pingInfo.txTransducerDepth_m;
         }
         if (pars->n_attitude > 0) {
           /* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude,

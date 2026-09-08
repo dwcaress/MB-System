@@ -5140,7 +5140,7 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
         for (int i=0; i<skm->infoPart.numSamplesArray; i++) {
           skm_time_d = skm->sample[i].KMdefault.time_sec + 0.000000001 * skm->sample[i].KMdefault.time_nanosec;
           if (!(skm->sample[i].KMdefault.status & 0x00000008)) {
-            skm_heave = -skm->sample[i].KMdefault.heave_m;
+            skm_heave = skm->sample[i].KMdefault.heave_m;
           } else {
             skm_heave = 0.0;
           }
@@ -5199,7 +5199,7 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		  for (int i=0; i<skm->infoPart.numSamplesArray; i++) {
 			skm_time_d = skm->sample[i].KMdefault.time_sec + 0.000000001 * skm->sample[i].KMdefault.time_nanosec;
 			if (!(skm->sample[i].KMdefault.status & 0x00000008)) {
-			  skm_heave = -skm->sample[i].KMdefault.heave_m;
+			  skm_heave = skm->sample[i].KMdefault.heave_m;
 			} else {
 			  skm_heave = 0.0;
 			}
