@@ -177,6 +177,62 @@ if(APPLE)
 	if(MACOS_USE_MACPORTS)
 		message("MacOS: using packages installed with MacPorts")
 	endif()
+
+	option(macosUseMbMesa "MacOS+Homebrew: use the private mb-mesa/mb-mesa-glu kegs (a pinned Mesa version) for OpenGL instead of the standard Homebrew mesa/mesa-glu formulae" OFF)
+	# MBMESA_PREFIX/MBMESAGLU_PREFIX can be passed directly (eg. by the
+	# mbsystem-beta Homebrew formula, via Formula["mb-mesa"].opt_prefix in
+	# Ruby) - this must work without shelling out to `brew`, because the
+	# `brew` command itself is NOT on PATH inside a Homebrew build sandbox.
+	# Falling back to `brew --prefix` below is only for interactive/manual
+	# builds run from a normal shell, where `brew` is reachable.
+	if(macosUseMbMesa)
+		if(NOT DEFINED MBMESA_PREFIX)
+			execute_process(
+				COMMAND brew --prefix mb-mesa
+				OUTPUT_VARIABLE MBMESA_PREFIX
+				OUTPUT_STRIP_TRAILING_WHITESPACE
+				RESULT_VARIABLE MBMESA_PREFIX_RESULT
+				ERROR_QUIET
+			)
+			if(NOT MBMESA_PREFIX_RESULT EQUAL 0)
+				message(FATAL_ERROR "macosUseMbMesa is ON but MBMESA_PREFIX was not set and "
+					"'brew --prefix mb-mesa' failed - either pass -DMBMESA_PREFIX=<path> "
+					"directly, or install dwcaress/mbsystem/mb-mesa")
+			endif()
+		endif()
+		if(NOT EXISTS "${MBMESA_PREFIX}")
+			message(FATAL_ERROR "macosUseMbMesa is ON but MBMESA_PREFIX ('${MBMESA_PREFIX}') "
+				"does not exist")
+		endif()
+		message("MacOS: using private mb-mesa keg at ${MBMESA_PREFIX} for OpenGL "
+			"(remove this option once the standard mesa formula is fixed upstream)")
+
+		# mb-mesa-glu is built against mb-mesa's own libGL. Using it here is not
+		# optional: linking mbview against mb-mesa's libGL while pulling GLU from
+		# the standard mesa-glu (built against the standard mesa) loads two
+		# separate libGL images in the same process, so GLU calls (eg.
+		# gluPerspective) silently no-op against an unbound GL context - this is
+		# what caused mbgrdviz's 3D perspective view to render blank.
+		if(NOT DEFINED MBMESAGLU_PREFIX)
+			execute_process(
+				COMMAND brew --prefix mb-mesa-glu
+				OUTPUT_VARIABLE MBMESAGLU_PREFIX
+				OUTPUT_STRIP_TRAILING_WHITESPACE
+				RESULT_VARIABLE MBMESAGLU_PREFIX_RESULT
+				ERROR_QUIET
+			)
+			if(NOT MBMESAGLU_PREFIX_RESULT EQUAL 0)
+				message(FATAL_ERROR "macosUseMbMesa is ON but MBMESAGLU_PREFIX was not set and "
+					"'brew --prefix mb-mesa-glu' failed - either pass -DMBMESAGLU_PREFIX=<path> "
+					"directly, or install dwcaress/mbsystem/mb-mesa-glu")
+			endif()
+		endif()
+		if(NOT EXISTS "${MBMESAGLU_PREFIX}")
+			message(FATAL_ERROR "macosUseMbMesa is ON but MBMESAGLU_PREFIX "
+				"('${MBMESAGLU_PREFIX}') does not exist")
+		endif()
+		message("MacOS: using private mb-mesa-glu keg at ${MBMESAGLU_PREFIX} for GLU")
+	endif()
 	message("----------------------------------------------------------")
 
 endif()

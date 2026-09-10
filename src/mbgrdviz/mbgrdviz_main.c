@@ -142,6 +142,16 @@ int flag = 0;
 // Change this line via the Output Application Names Dialog.
 #define BX_APP_CLASS "MB-System"
 
+/* Suppress the one-time "locale not supported by Xlib" / "X locale
+ * modifiers not supported" messages that Xt's default language
+ * procedure prints via XtWarning() during XtVaOpenApplication() on
+ * macOS (whose system Xlib has no locale database at all). The
+ * underlying XSupportsLocale()/XSetLocaleModifiers() calls still run
+ * normally; only the warning text is discarded. */
+static void mb_discard_xt_warning(String message) {
+	(void)message;
+}
+
 int main(int argc, char **argv) {
 	Widget parent;
 	XtAppContext app;
@@ -250,7 +260,16 @@ int main(int argc, char **argv) {
 	 * Initialize Xt.
 	 */
 
-	// XtSetLanguageProc(NULL, (XtLanguageProc) NULL, NULL);
+	/* macOS's system Xlib only ships locale data for "C". If the
+	 * environment requests a UTF-8 locale, Xt/Motif end up with libc
+	 * and Xlib in a mismatched locale state, and Motif repeatedly
+	 * warns "Locale not supported for XmbTextListToTextProperty" /
+	 * "Cannot convert XmString to compound text" on every dialog.
+	 * Forcing the environment to "C" before Xt reads it lets Xt's own
+	 * (harmless, one-time) locale fallback complete cleanly instead. */
+	setenv("LC_ALL", "C", 1);
+	setenv("LANG", "C", 1);
+	XtSetLanguageProc(NULL, (XtLanguageProc) NULL, NULL);
 
 	/*
 	 * The applicationShell is created as an unrealized
@@ -260,7 +279,9 @@ int main(int argc, char **argv) {
 	 * _X_Window_System_Toolkit_ p. 677.
 	 */
 
+	XtSetWarningHandler(mb_discard_xt_warning);
 	parent = XtVaOpenApplication(&app, BX_APP_CLASS, NULL, 0, &argc, argv, NULL, sessionShellWidgetClass, NULL);
+	XtSetWarningHandler((XtErrorHandler)NULL);
 
 	RegisterBxConverters(app);
 	XmRepTypeInstallTearOffModelConverter();

@@ -21,6 +21,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.3beta18    September 9, 2026
 - Version 5.8.3beta17    September 8, 2026
 - Version 5.8.3beta16    July 26, 2026
 - Version 5.8.3beta15    July 26, 2026
@@ -71,6 +72,150 @@ or beta, are equally accessible as tarballs through the Github interface.
 - Version 5.8.1beta02    February 7, 2024
 - Version 5.8.1beta01    February 1, 2024
 - **Version 5.8.0          January 22, 2024**
+
+---
+
+#### 5.8.3beta18 (September 9, 2026)
+
+Programs mbedit, mbnavedit, mbnavadjust, mbvelocitytool, mbgrdviz, mbeditviz: Fixed
+these Motif GUI programs printing spurious locale-related warnings to stderr on macOS,
+of the form "Warning: Locale not supported for XmbTextListToTextProperty" and "Warning:
+Cannot convert XmString to compound text", repeated once for every dialog or window
+created during a session. The root cause is that macOS's system Xlib ships locale data
+only for the "C" locale; when a program's environment requests a UTF-8 locale (the
+default in a normal macOS Terminal session), Xt's language procedure leaves libc and
+Xlib in a mismatched locale state, and Motif's XmString-to-compound-text conversion
+routines fail on every dialog as a result. Fixed by forcing the process environment
+(LC_ALL and LANG) to "C" before XtSetLanguageProc()/XtVaOpenApplication() read it, so
+Xt's own locale fallback completes in a consistent state instead. Three of the six
+programs (mbnavadjust, mbvelocitytool, mbgrdviz) already had a call to
+XtSetLanguageProc() present but commented out; the other three (mbedit, mbnavedit,
+mbeditviz) had no locale handling at all. This still left two harmless, one-time
+warnings at startup ("locale not supported by Xlib, locale set to C" and "X locale
+modifiers not supported, using default"), printed by Xt's own default language
+procedure via XtWarning(); these were eliminated as well by installing a temporary,
+silent XtWarningHandler for the duration of the XtVaOpenApplication() call in each
+program (the underlying XSupportsLocale()/XSetLocaleModifiers() calls still run
+normally, and the default warning handler is restored immediately afterward so any
+other, genuine Xt warning later in the program's life remains visible). All six
+programs were confirmed to launch a real GUI session, with dialogs, completely silent
+under both a UTF-8 locale and an unset one.
+
+Library mbview (affecting programs mbgrdviz, mbnavadjust, and mbeditviz, which share
+this 3-D visualization library): Changed the "MBVIEW GEOMETRY" diagnostic messages,
+which report the OpenGL drawing area's size as tracked internally versus what X11 and
+GLX/Mesa actually report (used to help localize a rendered-image/mouse-pick coordinate
+offset seen with some Mesa versions on macOS), to only print when running with
+verbose output enabled (-V or higher), rather than unconditionally. This affected an
+unconditional fprintf() in the OpenGL drawing area's resize callback
+(do_mbview_glwda_resize() in src/mbview/mbview_callbacks.c) and the several
+unconditional fprintf() calls inside the mbview_debug_glgeometry() diagnostic function
+in src/mbview/mbview_plot.c (currently invoked only from commented-out call sites, kept
+available for future debugging).
+
+Programs mbgrdviz and mbeditviz: Fixed a hang when using mbgrdviz's feature (available
+after loading navigation and selecting one or more files in an mbview 3-D display) to
+open the selected survey files in a new mbeditviz session: the new mbeditviz window
+would appear but never finish loading data and never become responsive. The immediate
+cause was a recent hardening change to how mbgrdviz creates the temporary datalist file
+it hands to mbeditviz: the old, predictable filename ("tmp_datalist_<pid>.mb-1",
+fopen()'ed for write in the current directory) was replaced with a securely created
+mkstemp() file in the process's temp directory, which incidentally carries no
+recognizable format-identifying suffix at all. mbgrdviz launches mbeditviz as a fully
+separate process (double-fork/exec) passing only "-I<datalist file> -R", with no
+explicit format flag, relying on MB-System's ".mb<format>" filename-suffix convention
+for mbeditviz to identify the file as a datalist (format -1); with that suffix gone,
+mbeditviz's own format auto-detection silently left the format at 0. In turn,
+mbeditviz_open_data() in src/mbeditviz/mbeditviz_prog.c contained a loop whose only two
+branches, for a recognized positive format and for format -1 (datalist), each set a
+"done" flag before returning; an unrecognized format of 0 matched neither branch, so
+the loop spun forever inside main() before mbeditviz ever reached its own Xt event
+loop, which is what made the window appear yet stay permanently unresponsive. Fixed by
+having mbgrdviz pass an explicit "-F-1" datalist format flag alongside "-I" and "-R"
+(src/mbgrdviz/mbgrdviz_callbacks.c), so format identification no longer depends on the
+temporary file's name, and by hardening mbeditviz_open_data() itself
+(src/mbeditviz/mbeditviz_prog.c) to fall through to an error return instead of looping
+when given an unrecognized format or when it fails to open a datalist file. Verified by
+launching mbeditviz directly against a synthetic mkstemp()-style, suffix-less datalist
+file referencing real Kongsberg kmall/mb261 survey data, confirming it now reaches its
+main event loop and reports the "Please Wait..." loading dialog closed rather than
+spinning forever.
+
+Homebrew formula mb-mesa (private tap dwcaress/homebrew-mbsystem, used only for
+building and testing MB-System's macOS/Homebrew distribution): Homebrew's own "mesa"
+formula moved to Mesa 26.2.2, which introduced a regression affecting mbgrdviz,
+mbnavadjust, and mbeditviz on macOS: gridded surface data displayed in the 2-D map view
+appeared vertically shifted relative to its correct position. Added a private formula
+that builds Mesa 26.1.4 (the last version confirmed not to exhibit this regression)
+from source, resolving three problems specific to building an older Mesa release
+against Homebrew's current toolchain. First, Mesa 26.1.4's own meson.build looks for an
+OpenCL "libclc" pkg-config module by that literal name, but the "mesa-libclc" resource
+it must be paired with (a fork Mesa itself recommends, needed because upstream libclc
+built against LLVM 23+ no longer provides a required SPIR-V target) installs its
+pkg-config file as "mesa-libclc.pc"; later Mesa releases added a fallback that checks
+for "mesa-libclc" first, but 26.1.4 predates that fix, so the built mesa-libclc.pc is
+now also installed under the name libclc.pc to satisfy the older lookup. Second, rather
+than force the whole build to configure against the "llvm@22" dependency (needed only
+to work around a separate rust-bindgen/LLVM-23 incompatibility), the formula isolates
+llvm@22 to just that purpose - exposing it only via CLANG_PATH and stripping it back
+out of CMAKE_PREFIX_PATH/PKG_CONFIG_PATH/PATH before configuring Mesa itself - matching
+how Homebrew's own current mesa formula handles the same llvm@22 dependency; this
+avoids Meson picking llvm@22 as the LLVM to build against and then requiring an
+"LLVMSPIRVLib" version that only matches llvm@22, which the regular, already-installed
+spirv-llvm-translator package (built against the newer default "llvm") cannot satisfy.
+Third, the formula is marked keg-only, since it installs the same file paths (e.g.
+bin/glsl_compiler, include/EGL/egl.h) as the standard mesa formula and must not be
+linked into the shared Homebrew prefix alongside it.
+
+Homebrew formula mb-mesa-glu (private tap dwcaress/homebrew-mbsystem): Added a
+companion formula building the Mesa GLU utility library against mb-mesa specifically,
+rather than the standard mesa formula that Homebrew's own mesa-glu package depends on.
+This is required, not merely preferable: mesa does not build GLU itself, and if a
+program links against mb-mesa's libGL while its GLU functions come from a libGLU built
+against the standard mesa, two independent libGL library images end up loaded in the
+same process, each with its own OpenGL context state. The GL context actually gets
+created and made current through whichever libGL the program itself links directly;
+GLU's internal calls (e.g. inside gluPerspective) are resolved against the other,
+contextless libGL image and are therefore silently no-ops per the OpenGL specification.
+This was the root cause of a separate bug introduced by switching mbview-based programs
+(mbgrdviz, mbnavadjust, mbeditviz) to the private mb-mesa build: the 3-D perspective
+view of a gridded surface stopped appearing at all (2-D map view, which uses glOrtho()
+rather than GLU, was unaffected), because gluPerspective()'s no-op left the projection
+matrix as an untouched identity matrix, clipping the entire scene out of view; forcing
+Mesa's software (llvmpipe) or Vulkan-based (zink) rendering backend via the
+GALLIUM_DRIVER environment variable made no difference, confirming the bug was
+independent of which Gallium driver either Mesa build used. Confirmed via otool -L
+library-dependency inspection that mb-mesa-glu's libGLU links against mb-mesa's libGL,
+matching what mbview itself links against. Like mb-mesa, this formula is keg-only.
+
+Build system (CMakeLists.txt, build-utils/FindOpenGL.cmake): Added a macosUseMbMesa
+CMake option (default OFF) that, when enabled on macOS with Homebrew, points OpenGL/GLU
+discovery at the private mb-mesa/mb-mesa-glu kegs described above instead of the
+standard Homebrew mesa/mesa-glu formulas; FindOpenGL.cmake's Homebrew-detection
+branches were extended accordingly, while ordinary configurations (option left OFF) are
+unaffected. The mb-mesa/mb-mesa-glu install locations can be supplied directly via new
+MBMESA_PREFIX/MBMESAGLU_PREFIX cache variables (as the mbsystem-beta Homebrew formula
+below now does) or, if left unset, are resolved automatically by invoking
+`brew --prefix`, which is convenient for an interactive, manually invoked cmake
+configuration but was confirmed (with a throwaway diagnostic Homebrew formula) not to
+work from inside a real Homebrew build: the `brew` command itself is deliberately
+excluded from the PATH Homebrew constructs for a formula's own sandboxed build step.
+
+Homebrew formula mbsystem-beta (private tap dwcaress/homebrew-mbsystem): This formula,
+which builds and installs MB-System itself for beta distribution testing via Homebrew,
+now depends on mb-mesa and mb-mesa-glu and configures with -DmacosUseMbMesa=ON, passing
+MBMESA_PREFIX/MBMESAGLU_PREFIX directly (computed in Ruby via Formula[...].opt_prefix)
+rather than relying on cmake shelling out to `brew`, per the build-system change above.
+Its `brew test` block was extended to inspect the installed libmbview library with
+otool -L and confirm it is actually linked against the private mb-mesa/mb-mesa-glu kegs
+and not the standard mesa/mesa-glu formulas, so that a future accidental regression back
+to Homebrew's current, buggy Mesa version is caught by `brew test` rather than only
+discovered by a user seeing incorrect 2-D or 3-D rendering.
+
+The changes described above in this 5.8.3beta18 distribution were found, diagnosed,
+and/or made with the assistance of the AI coding assistant Claude Sonnet 5 (Anthropic,
+model claude-sonnet-5), operating as Claude Code under developer supervision and
+review.
 
 ---
 

@@ -419,6 +419,17 @@ int mbeditviz_open_data(char *path, int format) {
           }
         }
       }
+      else {
+        /* could not open the datalist - do not loop forever retrying */
+        done = true;
+      }
+    }
+    else {
+      /* format unrecognized (e.g. 0, or any other value not handled
+          above) - bail out instead of spinning forever */
+      mbev_status = MB_FAILURE;
+      mbev_error = MB_ERROR_BAD_FORMAT;
+      done = true;
     }
   }
   (*hideMessage)();

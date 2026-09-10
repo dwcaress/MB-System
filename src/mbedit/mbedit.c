@@ -28,6 +28,7 @@
 #endif
 
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include <X11/StringDefs.h>
 #include <Xm/DialogS.h>
@@ -39,6 +40,16 @@
 #include "mbedit_creation.h"
 
 #define BX_APP_CLASS "mbedit"
+
+/* Suppress the one-time "locale not supported by Xlib" / "X locale
+ * modifiers not supported" messages that Xt's default language
+ * procedure prints via XtWarning() during XtVaOpenApplication() on
+ * macOS (whose system Xlib has no locale database at all). The
+ * underlying XSupportsLocale()/XSetLocaleModifiers() calls still run
+ * normally; only the warning text is discarded. */
+static void mb_discard_xt_warning(String message) {
+	(void)message;
+}
 
 int main(int argc, char **argv) {
 	/* make sure that the argc that goes to XtVaAppInitialize
@@ -54,8 +65,21 @@ int main(int argc, char **argv) {
 	 * This is a recommendation of Paul Asente & Ralph Swick in
 	 * _X_Window_System_Toolkit_ p. 677.
 	 */
+	/* macOS's system Xlib only ships locale data for "C". If the
+	 * environment requests a UTF-8 locale, Xt/Motif end up with libc
+	 * and Xlib in a mismatched locale state, and Motif repeatedly
+	 * warns "Locale not supported for XmbTextListToTextProperty" /
+	 * "Cannot convert XmString to compound text" on every dialog.
+	 * Forcing the environment to "C" before Xt reads it lets Xt's own
+	 * (harmless, one-time) locale fallback complete cleanly instead. */
+	setenv("LC_ALL", "C", 1);
+	setenv("LANG", "C", 1);
+	XtSetLanguageProc(NULL, (XtLanguageProc) NULL, NULL);
+
 	XtAppContext app;
+	XtSetWarningHandler(mb_discard_xt_warning);
 	Widget parent = XtVaOpenApplication(&app, BX_APP_CLASS, NULL, 0, &argc, argv, NULL, sessionShellWidgetClass, NULL);
+	XtSetWarningHandler((XtErrorHandler)NULL);
 
 	RegisterBxConverters(app);
 	XmRepTypeInstallTearOffModelConverter();

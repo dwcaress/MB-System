@@ -23,11 +23,13 @@
  *--------------------------------------------------------------------*/
 
 #include <ctype.h>
+#include <errno.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
 #ifdef USE_UUID
@@ -6114,6 +6116,38 @@ void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_dat
 }
 /*---------------------------------------------------------------------------------------*/
 
+/* Launch argv[0] with the given (NULL-terminated) argument list in the
+    background, without ever passing user- or file-derived strings through
+    a shell. A double fork detaches the new program so that it is not left
+    as a zombie or child of this process, mimicking the effect of the
+    "program args &" shell commands this replaces. */
+static void mbgrdviz_launch_background(char *const argv[]) {
+  const pid_t pid = fork();
+  if (pid < 0) {
+    fprintf(stderr, "Unable to fork to launch %s: %s\n", argv[0], strerror(errno));
+    return;
+  }
+  if (pid == 0) {
+    /* first child: fork again and exit immediately so the grandchild is
+        reparented to init and never becomes a zombie */
+    const pid_t pid2 = fork();
+    if (pid2 == 0) {
+      setsid();
+      execvp(argv[0], argv);
+      fprintf(stderr, "Unable to exec %s: %s\n", argv[0], strerror(errno));
+      _exit(127);
+    }
+    else if (pid2 < 0) {
+      fprintf(stderr, "Unable to fork to launch %s: %s\n", argv[0], strerror(errno));
+    }
+    _exit(0);
+  }
+
+  /* parent: reap the short-lived first child right away */
+  int wstatus;
+  waitpid(pid, &wstatus, 0);
+}
+
 void do_mbgrdviz_open_mbedit(Widget w, XtPointer client_data, XtPointer call_data) {
   int status = MB_SUCCESS;
 
@@ -6122,8 +6156,6 @@ void do_mbgrdviz_open_mbedit(Widget w, XtPointer client_data, XtPointer call_dat
   struct mbview_struct *data;
   struct mbview_shareddata_struct *shareddata;
   struct mbview_nav_struct *nav;
-  char mbedit_cmd[1030];
-  char filearg[1050];
   int nselected;
 
   /* get source mbview instance */
@@ -6148,26 +6180,44 @@ void do_mbgrdviz_open_mbedit(Widget w, XtPointer client_data, XtPointer call_dat
 
   /* check if any nav is selected */
   nselected = 0;
-  sprintf(mbedit_cmd, "mbedit");
   if (status == MB_SUCCESS && shareddata->nnav > 0) {
     for (int i = 0; i < shareddata->nnav; i++) {
       nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
       fprintf(stderr, "Nav %d name:%s path:%s format:%d nselected:%d\n", i, nav->name, nav->pathraw, nav->format,
               nav->nselected);
       if (nav->nselected > 0) {
-        sprintf(filearg, " -F%d -I%s", nav->format, nav->pathraw);
-        strncat(mbedit_cmd, filearg, MB_PATH_MAXLINE - 3);
         nselected += nav->nselected;
-        fprintf(stderr, "nselected: %d %d    Adding filearg:%s\n", nav->nselected, nselected, filearg);
       }
     }
   }
 
   /* open all data files with selected nav into mbedit */
   if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0) {
-    strncat(mbedit_cmd, " &", MB_PATH_MAXLINE);
-    fprintf(stderr, "Calling mbedit: %s\n", mbedit_cmd);
-    /* const int shellstatus = */ system(mbedit_cmd);
+    /* build an argv array directly - no shell, no fixed-size string
+        concatenation - so neither an overlong path nor shell metacharacters
+        in a path can overflow a buffer or be interpreted as commands */
+    char **argv = (char **)malloc((size_t)(1 + 2 * shareddata->nnav + 1) * sizeof(char *));
+    int argc = 0;
+    argv[argc++] = strdup("mbedit");
+    for (int i = 0; i < shareddata->nnav; i++) {
+      nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
+      if (nav->nselected > 0) {
+        char formatarg[32];
+        char patharg[MB_PATH_MAXLINE + 4];
+        snprintf(formatarg, sizeof(formatarg), "-F%d", nav->format);
+        snprintf(patharg, sizeof(patharg), "-I%s", nav->pathraw);
+        argv[argc++] = strdup(formatarg);
+        argv[argc++] = strdup(patharg);
+      }
+    }
+    argv[argc] = NULL;
+
+    fprintf(stderr, "Calling mbedit with %d arguments\n", argc);
+    mbgrdviz_launch_background(argv);
+
+    for (int i = 0; i < argc; i++)
+      free(argv[i]);
+    free(argv);
   }
 
   /* update widgets of all mbview windows */
@@ -6187,7 +6237,6 @@ void do_mbgrdviz_open_mbeditviz(Widget w, XtPointer client_data, XtPointer call_
   struct mbview_struct *data;
   struct mbview_shareddata_struct *shareddata;
   struct mbview_nav_struct *nav;
-  char mbeditviz_cmd[1050];
   mb_path datalist_file;
   FILE *dfp;
   int nselected;
@@ -6214,15 +6263,27 @@ void do_mbgrdviz_open_mbeditviz(Widget w, XtPointer client_data, XtPointer call_
 
   /* check if any nav is selected */
   nselected = 0;
-  sprintf(mbeditviz_cmd, "mbeditviz");
   if (status == MB_SUCCESS && shareddata->nnav > 0) {
     for (int i = 0; i < shareddata->nnav; i++) {
       nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
       nselected += nav->nselected;
     }
     if(nselected > 0) {
-      sprintf(datalist_file,"tmp_datalist_%d.mb-1", getpid());
-      dfp = fopen(datalist_file, "w");
+      /* create the temporary datalist file securely: a random,
+          non-predictable name created atomically (O_EXCL) by mkstemp() in
+          the system temp directory, rather than a guessable
+          "tmp_datalist_<pid>" name fopen()'ed for write in the current
+          directory - the old approach let anyone who could predict or
+          watch for the pid pre-create (e.g. as a symlink) the target path
+          and have this process write through it */
+      const char *tmpdir = getenv("TMPDIR");
+      if (tmpdir == NULL || tmpdir[0] == '\0')
+        tmpdir = "/tmp";
+      snprintf(datalist_file, sizeof(mb_path), "%s/mbgrdviz_datalist_XXXXXX", tmpdir);
+      const int dfd = mkstemp(datalist_file);
+      dfp = dfd == -1 ? NULL : fdopen(dfd, "w");
+      if (dfp == NULL && dfd != -1)
+        close(dfd);
       if (dfp != NULL) {
         for (int i = 0; i < shareddata->nnav; i++) {
           nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
@@ -6233,9 +6294,24 @@ void do_mbgrdviz_open_mbeditviz(Widget w, XtPointer client_data, XtPointer call_
           }
         }
         fclose(dfp);
-        sprintf(mbeditviz_cmd, "mbeditviz -I%s -R &", datalist_file);
-        fprintf(stderr, "Calling mbeditviz: %s\n", mbeditviz_cmd);
-        /* const int shellstatus = */ system(mbeditviz_cmd);
+
+        char patharg[MB_PATH_MAXLINE + 4];
+        snprintf(patharg, sizeof(patharg), "-I%s", datalist_file);
+        char *argv[5];
+        argv[0] = strdup("mbeditviz");
+        argv[1] = strdup(patharg);
+        /* explicit datalist format (-1) since the mkstemp() generated
+            datalist_file name no longer carries a recognizable ".mb-1"
+            suffix for mb_get_format() to auto-detect */
+        argv[2] = strdup("-F-1");
+        argv[3] = strdup("-R");
+        argv[4] = NULL;
+
+        fprintf(stderr, "Calling mbeditviz -I%s -F-1 -R\n", datalist_file);
+        mbgrdviz_launch_background(argv);
+
+        for (int i = 0; i < 4; i++)
+          free(argv[i]);
       }
     }
   }
@@ -6257,8 +6333,6 @@ void do_mbgrdviz_open_mbnavedit(Widget w, XtPointer client_data, XtPointer call_
   struct mbview_struct *data;
   struct mbview_shareddata_struct *shareddata;
   struct mbview_nav_struct *nav;
-  char mbnavedit_cmd[1050];
-  char filearg[1050];
   int nselected;
 
   /* get source mbview instance */
@@ -6283,26 +6357,41 @@ void do_mbgrdviz_open_mbnavedit(Widget w, XtPointer client_data, XtPointer call_
 
   /* check if any nav is selected */
   nselected = 0;
-  sprintf(mbnavedit_cmd, "mbnavedit");
   if (status == MB_SUCCESS && shareddata->nnav > 0) {
     for (int i = 0; i < shareddata->nnav; i++) {
       nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
       fprintf(stderr, "Nav %d name:%s path:%s format:%d nselected:%d\n", i, nav->name, nav->pathraw, nav->format,
               nav->nselected);
       if (nav->nselected > 0) {
-        sprintf(filearg, " -F%d -I%s", nav->format, nav->pathraw);
-        strncat(mbnavedit_cmd, filearg, MB_PATH_MAXLINE - 3);
         nselected += nav->nselected;
-        fprintf(stderr, "nselected: %d %d    Adding filearg:%s\n", nav->nselected, nselected, filearg);
       }
     }
   }
 
   /* open all data files with selected nav into mbnavedit */
   if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0) {
-    strncat(mbnavedit_cmd, " &", MB_PATH_MAXLINE);
-    fprintf(stderr, "Calling mbnavedit: %s\n", mbnavedit_cmd);
-    /* const int shellstatus = */ system(mbnavedit_cmd);
+    char **argv = (char **)malloc((size_t)(1 + 2 * shareddata->nnav + 1) * sizeof(char *));
+    int argc = 0;
+    argv[argc++] = strdup("mbnavedit");
+    for (int i = 0; i < shareddata->nnav; i++) {
+      nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
+      if (nav->nselected > 0) {
+        char formatarg[32];
+        char patharg[MB_PATH_MAXLINE + 4];
+        snprintf(formatarg, sizeof(formatarg), "-F%d", nav->format);
+        snprintf(patharg, sizeof(patharg), "-I%s", nav->pathraw);
+        argv[argc++] = strdup(formatarg);
+        argv[argc++] = strdup(patharg);
+      }
+    }
+    argv[argc] = NULL;
+
+    fprintf(stderr, "Calling mbnavedit with %d arguments\n", argc);
+    mbgrdviz_launch_background(argv);
+
+    for (int i = 0; i < argc; i++)
+      free(argv[i]);
+    free(argv);
   }
 
   /* update widgets of all mbview windows */
@@ -6322,8 +6411,6 @@ void do_mbgrdviz_open_mbvelocitytool(Widget w, XtPointer client_data, XtPointer 
   struct mbview_struct *data;
   struct mbview_shareddata_struct *shareddata;
   struct mbview_nav_struct *nav;
-  char mbvelocitytool_cmd[1050];
-  char filearg[1050];
   int nselected;
 
   /* get source mbview instance */
@@ -6348,26 +6435,41 @@ void do_mbgrdviz_open_mbvelocitytool(Widget w, XtPointer client_data, XtPointer 
 
   /* check if any nav is selected */
   nselected = 0;
-  sprintf(mbvelocitytool_cmd, "mbvelocitytool");
   if (status == MB_SUCCESS && shareddata->nnav > 0) {
     for (int i = 0; i < shareddata->nnav; i++) {
       nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
       fprintf(stderr, "Nav %d name:%s path:%s format:%d nselected:%d\n", i, nav->name, nav->pathraw, nav->format,
               nav->nselected);
       if (nav->nselected > 0) {
-        sprintf(filearg, " -F%d -I%s", nav->format, nav->pathraw);
-        strncat(mbvelocitytool_cmd, filearg, MB_PATH_MAXLINE - 3);
         nselected += nav->nselected;
-        fprintf(stderr, "nselected: %d %d    Adding filearg:%s\n", nav->nselected, nselected, filearg);
       }
     }
   }
 
   /* open all data files with selected nav into mbvelocitytool */
   if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0) {
-    strncat(mbvelocitytool_cmd, " &", MB_PATH_MAXLINE);
-    fprintf(stderr, "Calling mbvelocitytool: %s\n", mbvelocitytool_cmd);
-    /* const int shellstatus = */ system(mbvelocitytool_cmd);
+    char **argv = (char **)malloc((size_t)(1 + 2 * shareddata->nnav + 1) * sizeof(char *));
+    int argc = 0;
+    argv[argc++] = strdup("mbvelocitytool");
+    for (int i = 0; i < shareddata->nnav; i++) {
+      nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
+      if (nav->nselected > 0) {
+        char formatarg[32];
+        char patharg[MB_PATH_MAXLINE + 4];
+        snprintf(formatarg, sizeof(formatarg), "-F%d", nav->format);
+        snprintf(patharg, sizeof(patharg), "-I%s", nav->pathraw);
+        argv[argc++] = strdup(formatarg);
+        argv[argc++] = strdup(patharg);
+      }
+    }
+    argv[argc] = NULL;
+
+    fprintf(stderr, "Calling mbvelocitytool with %d arguments\n", argc);
+    mbgrdviz_launch_background(argv);
+
+    for (int i = 0; i < argc; i++)
+      free(argv[i]);
+    free(argv);
   }
 
   /* update widgets of all mbview windows */
