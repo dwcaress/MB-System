@@ -1114,7 +1114,7 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel, bool *found, doubl
 		/* look for point at low resolution */
 		*found = false;
 		bool foundsave = false;
-		int ijbounds[4] = {0, data->primary_n_columns, 0, data->primary_n_rows};
+		int ijbounds[4] = {0, data->primary_n_columns - 1, 0, data->primary_n_rows - 1};
 		{
 			const int rez = MBV_REZ_LOW;
 			mbview_findpointrez(
@@ -2579,11 +2579,11 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 		iend = data->primary_n_columns - 1;
 	if (jstart < 0)
 		jstart = 0;
-	if (jstart >= data->primary_n_columns)
+	if (jstart >= data->primary_n_rows)
 		jstart = data->primary_n_rows - 1;
 	if (jend < 0)
 		jend = 0;
-	if (jend >= data->primary_n_columns)
+	if (jend >= data->primary_n_rows)
 		jend = data->primary_n_rows - 1;
 
 	int iadd;
