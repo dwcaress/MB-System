@@ -829,8 +829,10 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
   						}
             }
 					}
+				}
 
-					/* set pick location */
+				/* set pick location, but only if an active nav point was actually found nearby */
+				if (found && shared.shareddata.nav_selected[0] != MBV_SELECT_NONE) {
 					data->pickinfo_mode = MBV_PICK_NAV;
 					shared.shareddata.navpick_type = MBV_PICK_ONEPOINT;
 					shared.shareddata.navpick.endpoints[0].xgrid[instance] =
@@ -870,7 +872,8 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 					mbview_navpicksize(instance);
 				}
 				else {
-					/* unselect nav pick */
+					/* unselect nav pick - either no grid point found under the cursor,
+					    or no active nav point exists near the found grid point */
 					data->pickinfo_mode = data->pick_type;
 					shared.shareddata.navpick_type = MBV_PICK_NONE;
 					shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
@@ -914,8 +917,10 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
   						}
             }
 					}
+				}
 
-					/* set pick location */
+				/* set pick location, but only if an active nav point was actually found nearby */
+				if (found && shared.shareddata.nav_selected[1] != MBV_SELECT_NONE) {
 					data->pickinfo_mode = MBV_PICK_NAV;
 					shared.shareddata.navpick_type = MBV_PICK_TWOPOINT;
 					shared.shareddata.navpick.endpoints[1].xgrid[instance] =
@@ -1101,8 +1106,10 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
   						}
             }
 					}
+				}
 
-					/* set pick location */
+				/* set pick location, but only if an active nav point was actually found nearby */
+				if (found && shared.shareddata.nav_selected[0] != MBV_SELECT_NONE) {
 					data->pickinfo_mode = MBV_PICK_NAV;
 					shared.shareddata.navpick_type = MBV_PICK_ONEPOINT;
 					shared.shareddata.navpick.endpoints[0].xgrid[instance] =
@@ -1142,7 +1149,8 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 					mbview_navpicksize(instance);
 				}
 				else {
-					/* unselect nav pick */
+					/* unselect nav pick - either no grid point found under the cursor,
+					    or no active nav point exists near the found grid point */
 					data->pickinfo_mode = data->pick_type;
 					shared.shareddata.navpick_type = MBV_PICK_NONE;
 					shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
@@ -1186,8 +1194,10 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
   						}
             }
 					}
+				}
 
-					/* set pick location */
+				/* set pick location, but only if an active nav point was actually found nearby */
+				if (found && shared.shareddata.nav_selected[1] != MBV_SELECT_NONE) {
 					data->pickinfo_mode = MBV_PICK_NAV;
 					shared.shareddata.navpick_type = MBV_PICK_TWOPOINT;
 					shared.shareddata.navpick.endpoints[1].xgrid[instance] =

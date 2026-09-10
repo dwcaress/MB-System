@@ -332,6 +332,7 @@ accessible as tarballs through the Github interface.</p>
 Version 5.8 Releases and Release Notes:</h3>
 <hr />
 <ul>
+<li>Version 5.8.3beta19 September 10, 2026</li>
 <li>Version 5.8.3beta18 September 9, 2026</li>
 <li>Version 5.8.3beta17 September 8, 2026</li>
 <li>Version 5.8.3beta16 July 26, 2026</li>
@@ -384,6 +385,103 @@ Version 5.8 Releases and Release Notes:</h3>
 <li>Version 5.8.1beta01 February 1, 2024</li>
 <li><strong>Version 5.8.0 January 22, 2024</strong></li>
 </ul>
+<hr />
+<h4 id="583beta19-september-10-2026">5.8.3beta19 (September 10,
+2026)</h4>
+<p>Library mbview (affecting programs mbgrdviz, mbnavadjust, and
+mbeditviz, which share this 3-D visualization library): Fixed a
+segmentation fault reported by a user running mbgrdviz on macOS
+(Homebrew private tap dwcaress/mbsystem, formula mbsystem-beta): after
+loading a bathymetry grid and a large set of navigation files, the very
+first attempt to interactively pick navigation in the 3-D/2-D view
+crashed the program. A debug session using lldb pinned the crash to a
+heap out-of-bounds read inside mbview_findpointrez(), called from
+mbview_findpoint(), called from mbview_pick_nav_select() - i.e., in the
+generic terrain-point-picking routine used by every pick mode (site,
+route, navigation, vector), not something specific to navigation; the
+user&#39;s report happened to be the first pick attempted in that session.
+The root cause was an off-by-one error in mbview_findpoint()
+(src/mbview/mbview_plot.c): the initial pick search bounds were set to
+<code>{0, primary_n_columns, 0, primary_n_rows}</code>, but every other
+use of these bounds inside mbview_findpointrez() (including its own
+narrowing of the search window between successive
+low/high/full-resolution passes) treats the upper bounds as an inclusive
+last valid grid index, i.e. <code>primary_n_columns - 1</code> and
+<code>primary_n_rows - 1</code>. With the too-large initial bounds, the
+triangle-rasterization loop used to render the OpenGL selection buffer
+could, once the scan reached the rightmost column or bottom row of the
+grid, compute a vertex index of the form
+<code>(i + stride) * primary_n_rows + j</code> equal to
+<code>primary_n_columns * primary_n_rows + j</code> - one full row-block
+past the end of the primary_data/primary_x/ primary_y/primary_z arrays
+(each allocated with exactly primary_n_columns * primary_n_rows
+elements, src/mbview/mbview_primary.c) - and read that heap memory
+directly, crashing whenever the grid&#39;s column or row count divided
+evenly by the resolution&#39;s pick stride. Fixed by initializing ijbounds
+in mbview_findpoint() as
+<code>{0, primary_n_columns - 1, 0, primary_n_rows - 1}</code>, matching
+the inclusive-index convention used throughout the rest of the picking
+code.</p>
+<p>Library mbview: While investigating the crash above, a broader review
+of the navigation-picking code in src/mbview/mbview_nav.c and
+src/mbview/mbview_plot.c turned up two further latent bugs, neither of
+which caused the reported crash but both of which could cause a similar
+segmentation fault under other circumstances. First, in
+mbview_pick_nav_select(), all four places that search for the nearest
+active navigation point to a pick location (first-point and
+second-point/move handling, in both ordinary MBV_NAV_VIEW mode and
+mbnavadjust&#39;s MBV_NAV_MBNAVADJUST mode) recorded the winning navigation
+file/point indices into shared.shareddata.nav_selected[]/
+nav_point_selected[], initialized to the sentinel MBV_SELECT_NONE (-1),
+but then unconditionally used those indices to dereference
+shared.shareddata.navs[...] .navpts[...] afterward - if every loaded
+navigation file happened to be deactivated (deactivating a nav via the
+Nav List dialog is normal usage) or an active file had zero points, the
+search loop never assigned a valid index and the code dereferenced
+navs[-1], an out-of-bounds/undefined access. Fixed by restructuring each
+of the four call sites so the pick-location/pick-marker code only runs
+once a valid navigation point has actually been found, otherwise falling
+through to the existing &quot;unselect nav pick&quot; handling. Second, in
+mbview_drapesegmentw_grid() (used to drape navigation pick-marker
+geometry onto the terrain), the row-index bounds jstart/jend were being
+clamped against data-&gt;primary_n_columns instead of
+data-&gt;primary_n_rows; for any non-square grid (the normal case for
+real bathymetry data), a computed row index that exceeded primary_n_rows
+but not primary_n_columns escaped clamping entirely. Fixed both
+comparisons to clamp against primary_n_rows.</p>
+<p>The mbview changes described above were found, diagnosed, and made
+with the assistance of the AI coding assistant Claude Sonnet 5
+(Anthropic, model claude-sonnet-5), operating as Claude Code under
+developer supervision and review.</p>
+<p>Library mbio: Fixed a latent memory-corruption bug in
+mb_update_arrayptr() (src/mbio/mb_mem.c). This function is called by
+mb_read(), mb_get(), and mb_get_all() to rebind a caller&#39;s local
+array-pointer variables (beamflag, bath, bathacrosstrack,
+bathalongtrack, amp, ss, ssacrosstrack, ssalongtrack) whenever the
+preceding mb_read_ping() call has grown MBIO&#39;s internal arrays and moved
+them to a new allocation. It identified which caller pointer to rebind
+by comparing its <em>value</em> against a list of pre-reallocation
+(&quot;old&quot;) array addresses recorded by mb_update_arrays(), but never
+cleared an old-address entry once it had been consumed. A stale entry
+could therefore persist indefinitely, and if the heap allocator later
+handed that same address to an unrelated allocation - a foreseeable
+occurrence given that mb_update_arrays() reallocates several same-sized
+arrays back to back - the next call to mb_update_arrayptr() could
+silently repoint an unrelated pointer at the wrong array, corrupting it.
+Fixed by having mb_update_arrays() clear all recorded old-address
+entries at the start of every call and having mb_update_arrayptr() clear
+an entry as soon as it is consumed, and by adding a more robust primary
+match against the registered pointer variable&#39;s own stable address
+before falling back to the value-based comparison. A new regression test
+(test/mbio/mb_mem_test.cc) reproducing the false-match scenario, which
+was confirmed to cause a heap double-free and crash under the prior
+code, was added along with the fix. Diagnosed and fixed by Danny Neville
+of Spatialnetics, with involvement by Vicki Ferrini and Lindsay Gee, and
+merged as pull request #1615; the fix and test were independently
+reviewed and verified, including reproducing the prior code&#39;s crash and
+confirming the fix resolves it, with the assistance of the AI coding
+assistant Claude Sonnet 5 (Anthropic, model claude-sonnet-5), operating
+as Claude Code under developer supervision and review.</p>
 <hr />
 <h4 id="583beta18-september-9-2026">5.8.3beta18 (September 9, 2026)</h4>
 <p>Programs mbedit, mbnavedit, mbnavadjust, mbvelocitytool, mbgrdviz,
