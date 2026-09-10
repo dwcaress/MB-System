@@ -3419,6 +3419,8 @@ void do_mbview_glwda_expose(Widget w, XtPointer client_data, XtPointer call_data
 	ac++;
 	XtGetValues(w, args, ac);
 
+	// mbview_debug_glgeometry(instance, "do_mbview_glwda_expose (before draw)");
+
 	/* draw */
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_glwda_expose\n");
@@ -3428,8 +3430,7 @@ void do_mbview_glwda_expose(Widget w, XtPointer client_data, XtPointer call_data
 
 void do_mbview_glwda_resize(Widget w, XtPointer client_data, XtPointer call_data) {
 	(void)client_data;  // Unused parameter
-	(void)call_data;  // Unused parameter
-	// mbGLwDrawingAreaCallbackStruct *acs = (mbGLwDrawingAreaCallbackStruct *)call_data;
+	mbGLwDrawingAreaCallbackStruct *acs = (mbGLwDrawingAreaCallbackStruct *)call_data;
 	size_t instance;
 
 	Arg args[256];
@@ -3437,6 +3438,45 @@ void do_mbview_glwda_resize(Widget w, XtPointer client_data, XtPointer call_data
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
 	XtGetValues(w, args, ac);
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	if (mbv_verbose > 0)
+		fprintf(stderr, "MBVIEW GEOMETRY [do_mbview_glwda_resize] callback reports w:%d h:%d  (data->width:%d data->height:%d)\n",
+		        acs->width, acs->height, data->width, data->height);
+
+	/* The glwmda widget's actual realized geometry can end up different from
+	    what MB-System believes (data->width/height) without the enclosing
+	    shell ever getting a ConfigureNotify - for instance, some GLX/Mesa
+	    versions settle the GL drawable to a slightly different size than
+	    requested. When that happens the OpenGL viewport (set from
+	    data->width/height in mbview_reset_glx) and the mouse-pick coordinate
+	    math (which also uses data->height to flip X11's top-down y into
+	    OpenGL's bottom-up y) go out of sync with the real window, showing up
+	    as the rendered image and picks both being offset by the same amount.
+	    Resync data->width/height with the widget's true size and rebuild the
+	    viewport, exactly as mbview_resize() does for shell-level resizes. */
+	if (view->init != MBV_WINDOW_NULL && (data->width != acs->width || data->height != acs->height)) {
+		data->width = acs->width;
+		data->height = acs->height;
+
+		/* update the gl drawing context */
+		mbview_reset_glx(instance);
+
+		/* reset if mouse radiobox controls are visible or not */
+		if (data->height > MBV_WINDOW_HEIGHT_THRESHOLD) {
+			XtManageChild(view->mb3dview.mbview_radioBox_mouse);
+		}
+		else {
+			XtUnmanageChild(view->mb3dview.mbview_radioBox_mouse);
+		}
+
+		/* draw */
+		if (mbv_verbose >= 2)
+			fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_glwda_resize\n");
+		mbview_plotlowhigh(instance);
+	}
 }
 /*------------------------------------------------------------------------------*/
 

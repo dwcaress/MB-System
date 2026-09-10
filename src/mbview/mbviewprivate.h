@@ -612,6 +612,7 @@ int mbview_getzdata(size_t instance, double xgrid, double ygrid, bool *found, do
 
 /* mbview_plot.c function prototypes */
 int mbview_reset_glx(size_t instance);
+void mbview_debug_glgeometry(size_t instance, const char *tag);
 int mbview_drawdata(size_t instance, int rez);
 int mbview_plotlowall(size_t instance);
 int mbview_plotlowhighall(size_t instance);

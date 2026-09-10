@@ -80,6 +80,80 @@
 // #define MBV_DEBUG_TIMING
 
 /*------------------------------------------------------------------------------*/
+/* Diagnostic: report - unconditionally, to stderr - what MB-System believes
+    the OpenGL drawing area's size is (data->width/height) versus what X11
+    and GLX/Mesa actually report for the glwmda window and its parent
+    drawingArea widget: their sizes, their positions relative to their
+    parent, their absolute on-screen positions, the GLX drawable size Mesa
+    itself reports, and the OpenGL viewport currently in effect. Used to
+    localize a rendered-image/pick offset (such as the one seen with some
+    Mesa versions on macOS) to a specific layer: Xt/Motif widget geometry,
+    the X11 window tree, the GLX drawable, or the GL viewport state. */
+void mbview_debug_glgeometry(size_t instance, const char *tag) {
+	if (mbv_verbose <= 0)
+		return;
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	fprintf(stderr, "MBVIEW GEOMETRY [%s] instance:%zu data->width:%d data->height:%d\n", tag, instance, data->width,
+	        data->height);
+
+	if (!view->glx_init || !XtIsRealized(view->glwmda)) {
+		fprintf(stderr, "MBVIEW GEOMETRY [%s] glwmda not realized/initialized yet\n", tag);
+		return;
+	}
+
+	Window root;
+	int x, y;
+	unsigned int uwidth, uheight, border, depth;
+	Window child;
+
+	if (XGetGeometry(view->dpy, XtWindow(view->glwmda), &root, &x, &y, &uwidth, &uheight, &border, &depth)) {
+		int abs_x = 0, abs_y = 0;
+		XTranslateCoordinates(view->dpy, XtWindow(view->glwmda), root, 0, 0, &abs_x, &abs_y, &child);
+		fprintf(stderr,
+		        "MBVIEW GEOMETRY [%s] glwmda X window: local-to-parent x:%d y:%d  w:%u h:%u border:%u depth:%u  "
+		        "screen-absolute x:%d y:%d\n",
+		        tag, x, y, uwidth, uheight, border, depth, abs_x, abs_y);
+	}
+	else {
+		fprintf(stderr, "MBVIEW GEOMETRY [%s] XGetGeometry failed for glwmda window\n", tag);
+	}
+
+	if (XGetGeometry(view->dpy, XtWindow(view->mb3dview.mbview_drawingArea_mbview), &root, &x, &y, &uwidth, &uheight, &border,
+	                  &depth)) {
+		int abs_x = 0, abs_y = 0;
+		XTranslateCoordinates(view->dpy, XtWindow(view->mb3dview.mbview_drawingArea_mbview), root, 0, 0, &abs_x, &abs_y,
+		                       &child);
+		fprintf(stderr,
+		        "MBVIEW GEOMETRY [%s] drawingArea X window: local-to-parent x:%d y:%d  w:%u h:%u border:%u depth:%u  "
+		        "screen-absolute x:%d y:%d\n",
+		        tag, x, y, uwidth, uheight, border, depth, abs_x, abs_y);
+	}
+	else {
+		fprintf(stderr, "MBVIEW GEOMETRY [%s] XGetGeometry failed for drawingArea window\n", tag);
+	}
+
+#if defined(GLX_VERSION_1_3)
+	{
+		unsigned int glxwidth = 0, glxheight = 0;
+		glXQueryDrawable(view->dpy, XtWindow(view->glwmda), GLX_WIDTH, &glxwidth);
+		glXQueryDrawable(view->dpy, XtWindow(view->glwmda), GLX_HEIGHT, &glxheight);
+		fprintf(stderr, "MBVIEW GEOMETRY [%s] GLX drawable (Mesa's own idea of the render-target size): w:%u h:%u\n", tag,
+		        glxwidth, glxheight);
+	}
+#endif
+
+	{
+		GLint viewport[4] = {-1, -1, -1, -1};
+		glGetIntegerv(GL_VIEWPORT, viewport);
+		fprintf(stderr, "MBVIEW GEOMETRY [%s] current GL_VIEWPORT: x:%d y:%d w:%d h:%d\n", tag, viewport[0], viewport[1],
+		        viewport[2], viewport[3]);
+	}
+}
+
+/*------------------------------------------------------------------------------*/
 int mbview_reset_glx(size_t instance) {
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", (char *) __FUNCTION__);
@@ -139,6 +213,8 @@ int mbview_reset_glx(size_t instance) {
 	view->contourlorez = false;
 	view->contourhirez = false;
 	view->contourfullrez = false;
+
+	// mbview_debug_glgeometry(instance, "mbview_reset_glx");
 
 #ifdef MBV_GET_GLX_ERRORS
 	mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);

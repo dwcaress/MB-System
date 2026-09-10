@@ -241,10 +241,19 @@ elseif (APPLE)
 		# Set OpenGL include directory and libraries directly when installed via Homebrew
 		elseif(MACOS_USE_HOMEBREW)
 			# message("FindOpenGL: MacOS: Homebrew detected")
-			set(OPENGL_gl_LIBRARY /opt/homebrew/lib/libGL.dylib)
-			set(OPENGL_glu_LIBRARY /opt/homebrew/lib/libGLU.dylib)
-			set(OPENGL_INCLUDE_DIR /opt/homebrew/include)
-	
+			if(macosUseMbMesa)
+				# Use the private mb-mesa/mb-mesa-glu kegs (pinned Mesa version) - GL and
+				# GLU must be taken from this same pair, since mb-mesa-glu's libGLU is
+				# built against mb-mesa's libGL specifically (see CMakeLists.txt).
+				set(OPENGL_gl_LIBRARY ${MBMESA_PREFIX}/lib/libGL.dylib)
+				set(OPENGL_INCLUDE_DIR ${MBMESA_PREFIX}/include)
+				set(OPENGL_glu_LIBRARY ${MBMESAGLU_PREFIX}/lib/libGLU.dylib)
+			else()
+				set(OPENGL_gl_LIBRARY /opt/homebrew/lib/libGL.dylib)
+				set(OPENGL_INCLUDE_DIR /opt/homebrew/include)
+				set(OPENGL_glu_LIBRARY /opt/homebrew/lib/libGLU.dylib)
+			endif()
+
 		# Else try the default, but it probably will not work
 		else()
 			# message("FindOpenGL: MacOS: Neither MacPorts nor Homebrew installed, trying the default method...")
@@ -255,13 +264,22 @@ elseif (APPLE)
 
 	# If MacOs version is Tahoe or later prefer Homebrew
 	else()
-	
+
 		# Set OpenGL include directory and libraries directly when installed via Homebrew
 		if(MACOS_USE_HOMEBREW)
 			# message("FindOpenGL: MacOS: Homebrew detected")
-			set(OPENGL_gl_LIBRARY /opt/homebrew/lib/libGL.dylib)
-			set(OPENGL_glu_LIBRARY /opt/homebrew/lib/libGLU.dylib)
-			set(OPENGL_INCLUDE_DIR /opt/homebrew/include)
+			if(macosUseMbMesa)
+				# Use the private mb-mesa/mb-mesa-glu kegs (pinned Mesa version) - GL and
+				# GLU must be taken from this same pair, since mb-mesa-glu's libGLU is
+				# built against mb-mesa's libGL specifically (see CMakeLists.txt).
+				set(OPENGL_gl_LIBRARY ${MBMESA_PREFIX}/lib/libGL.dylib)
+				set(OPENGL_INCLUDE_DIR ${MBMESA_PREFIX}/include)
+				set(OPENGL_glu_LIBRARY ${MBMESAGLU_PREFIX}/lib/libGLU.dylib)
+			else()
+				set(OPENGL_gl_LIBRARY /opt/homebrew/lib/libGL.dylib)
+				set(OPENGL_INCLUDE_DIR /opt/homebrew/include)
+				set(OPENGL_glu_LIBRARY /opt/homebrew/lib/libGLU.dylib)
+			endif()
 
 		# Set OpenGL include directory and libraries directly when installed via MacPorts
 		elseif(MACOS_USE_MACPORTS)
