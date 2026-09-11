@@ -24,6 +24,7 @@ mbgrdviz_LDADD =
 mbgrdviz_LDADD += ${top_builddir}/src/mbio/libmbio.la
 mbgrdviz_LDADD += ${top_builddir}/src/mbaux/libmbaux.la
 mbgrdviz_LDADD += ${top_builddir}/src/mbaux/libmbxgr.la
+mbgrdviz_LDADD += ${top_builddir}/src/mbaux/libmbxmutil.la
 mbgrdviz_LDADD += ${top_builddir}/src/mbview/libmbview.la
 mbgrdviz_LDADD += ${libgmt_LIBS}
 mbgrdviz_LDADD += ${libnetcdf_LIBS}

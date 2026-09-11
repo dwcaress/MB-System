@@ -27,6 +27,7 @@ LIBS =
 LIBS += ${top_builddir}/src/mbio/libmbio.la
 LIBS += ${top_builddir}/src/mbaux/libmbaux.la
 LIBS += ${top_builddir}/src/mbaux/libmbxgr.la
+LIBS += ${top_builddir}/src/mbaux/libmbxmutil.la
 LIBS += ${top_builddir}/src/mbview/libmbview.la
 LIBS += ${libgmt_LIBS}
 LIBS += ${libnetcdf_LIBS}

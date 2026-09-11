@@ -303,7 +303,7 @@ int mbnavadjust_init(int argc, char **argv) {
         mbna_color_background = MB_COLOR_BLACK;
       }
       else if (strcmp("input", options[option_index].name) == 0) {
-        sscanf(optarg, "%s", ifile);
+        sscanf(optarg, "%1023s", ifile);
         fileflag = true;
       }
       else if (strcmp("reset-crossings", options[option_index].name) == 0) {
@@ -326,7 +326,7 @@ int mbnavadjust_init(int argc, char **argv) {
       break;
     case 'I':
     case 'i':
-      sscanf(optarg, "%s", ifile);
+      sscanf(optarg, "%1023s", ifile);
       // flag = true;
       fileflag = true;
       break;
@@ -496,7 +496,14 @@ int mbnavadjust_file_new(char *projectname) {
       nameptr[strlen(nameptr) - 4] = '\0';
     if (strlen(nameptr) > 0) {
       strcpy(project.name, nameptr);
-      strncpy(project.path, projectname, strlen(projectname) - strlen(nameptr));
+      if (slashptr != NULL) {
+        strncpy(project.path, projectname, strlen(projectname) - strlen(nameptr));
+      }
+      else {
+        char *getcwd_result = getcwd(project.path, MB_PATH_MAXLINE);
+        assert(getcwd_result != NULL && strlen(project.path) > 0);
+        strcat(project.path, "/");
+      }
       strcpy(project.home, project.path);
       strcat(project.home, project.name);
       strcat(project.home, ".nvh");
@@ -720,9 +727,9 @@ int mbnavadjust_file_open(char *projectname) {
             for (int j = 0; j < file->num_sections; j++) {
               struct mbna_section *section = &file->sections[j];
               for (int k = 0; k < section->num_snav; k++) {
-                section->snav_lon_offset[section->num_snav] = 0.0;
-                section->snav_lat_offset[section->num_snav] = 0.0;
-                section->snav_z_offset[section->num_snav] = 0.0;
+                section->snav_lon_offset[k] = 0.0;
+                section->snav_lat_offset[k] = 0.0;
+                section->snav_z_offset[k] = 0.0;
               }
             }
           }
@@ -2854,16 +2861,7 @@ int mbnavadjust_deletetie(int icrossing, int jtie, int delete_status) {
 
       /* delete tie and set number */
       for (int i = jtie; i < crossing->num_ties - 1; i++) {
-        crossing->ties[i].status = crossing->ties[i + 1].status;
-        crossing->ties[i].snav_1 = crossing->ties[i + 1].snav_1;
-        crossing->ties[i].snav_1_time_d = crossing->ties[i + 1].snav_1_time_d;
-        crossing->ties[i].snav_2 = crossing->ties[i + 1].snav_2;
-        crossing->ties[i].snav_2_time_d = crossing->ties[i + 1].snav_2_time_d;
-        crossing->ties[i].offset_x = crossing->ties[i + 1].offset_x;
-        crossing->ties[i].offset_y = crossing->ties[i + 1].offset_y;
-        crossing->ties[i].offset_x_m = crossing->ties[i + 1].offset_x_m;
-        crossing->ties[i].offset_y_m = crossing->ties[i + 1].offset_y_m;
-        crossing->ties[i].offset_z_m = crossing->ties[i + 1].offset_z_m;
+        crossing->ties[i] = crossing->ties[i + 1];
       }
       crossing->num_ties--;
       project.num_ties--;
@@ -3644,11 +3642,13 @@ int mbnavadjust_referencegrid_unload() {
 /*--------------------------------------------------------------------*/
 void mbnavadjust_plot(double xx, double yy, int ipen) {
   if (mbna_contour->nvector >= mbna_contour->nvector_alloc) {
-    mbna_contour->nvector_alloc += MBNA_VECTOR_ALLOC_INC;
-    mbna_contour->vector = (struct mbna_plot_vector *)realloc(mbna_contour->vector, sizeof(struct mbna_plot_vector) *
-                                                                                        (mbna_contour->nvector_alloc));
-    if (mbna_contour->vector == NULL)
-      mbna_contour->nvector_alloc = 0;
+    const int nvector_alloc_new = mbna_contour->nvector_alloc + MBNA_VECTOR_ALLOC_INC;
+    struct mbna_plot_vector *vector_tmp = (struct mbna_plot_vector *)realloc(
+        mbna_contour->vector, sizeof(struct mbna_plot_vector) * nvector_alloc_new);
+    if (vector_tmp != NULL) {
+      mbna_contour->vector = vector_tmp;
+      mbna_contour->nvector_alloc = nvector_alloc_new;
+    }
   }
 
   struct mbna_plot_vector *v;
@@ -3689,11 +3689,13 @@ void mbnavadjust_plot(double xx, double yy, int ipen) {
 /*--------------------------------------------------------------------*/
 void mbnavadjust_newpen(int icolor) {
   if (mbna_contour->nvector >= mbna_contour->nvector_alloc) {
-    mbna_contour->nvector_alloc += MBNA_VECTOR_ALLOC_INC;
-    mbna_contour->vector = (struct mbna_plot_vector *)realloc(
-        mbna_contour->vector, sizeof(struct mbna_plot_vector) * (mbna_contour->nvector_alloc + MBNA_VECTOR_ALLOC_INC));
-    if (mbna_contour->vector == NULL)
-      mbna_contour->nvector_alloc = 0;
+    const int nvector_alloc_new = mbna_contour->nvector_alloc + MBNA_VECTOR_ALLOC_INC;
+    struct mbna_plot_vector *vector_tmp = (struct mbna_plot_vector *)realloc(
+        mbna_contour->vector, sizeof(struct mbna_plot_vector) * nvector_alloc_new);
+    if (vector_tmp != NULL) {
+      mbna_contour->vector = vector_tmp;
+      mbna_contour->nvector_alloc = nvector_alloc_new;
+    }
   }
 
   if (mbna_contour->nvector_alloc > mbna_contour->nvector) {
@@ -4703,7 +4705,8 @@ int mbnavadjust_autosetsvsvertical() {
 
     /* allocate nav time and continuity arrays */
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(bool), (void **)&x_continuity, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&x_time_d, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&x_time_d, &error);
     if (status != MB_SUCCESS) {
       strcpy(error1, "Unable to invert navigation!");
       strcpy(error2, "Failed to allocate memory for navigation control point arrays.");
@@ -4803,17 +4806,28 @@ int mbnavadjust_autosetsvsvertical() {
 
       /* allocate block average offset arrays */
       status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * (nblock + 1) / 2 * sizeof(int), (void **)&nbxy, &error);
-      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * (nblock + 1) / 2 * sizeof(int), (void **)&nbz, &error);
-      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * (nblock + 1) / 2 * sizeof(double), (void **)&bxavg, &error);
-      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * (nblock + 1) / 2 * sizeof(double), (void **)&byavg, &error);
-      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * (nblock + 1) / 2 * sizeof(double), (void **)&bzavg, &error);
-      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(bool), (void **)&bpoornav, &error);
-      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(int), (void **)&bxfixstatus, &error);
-      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(int), (void **)&byfixstatus, &error);
-      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(int), (void **)&bzfixstatus, &error);
-      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(double), (void **)&bxfix, &error);
-      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(double), (void **)&byfix, &error);
-      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(double), (void **)&bzfix, &error);
+      if (status == MB_SUCCESS)
+        status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * (nblock + 1) / 2 * sizeof(int), (void **)&nbz, &error);
+      if (status == MB_SUCCESS)
+        status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * (nblock + 1) / 2 * sizeof(double), (void **)&bxavg, &error);
+      if (status == MB_SUCCESS)
+        status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * (nblock + 1) / 2 * sizeof(double), (void **)&byavg, &error);
+      if (status == MB_SUCCESS)
+        status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * (nblock + 1) / 2 * sizeof(double), (void **)&bzavg, &error);
+      if (status == MB_SUCCESS)
+        status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(bool), (void **)&bpoornav, &error);
+      if (status == MB_SUCCESS)
+        status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(int), (void **)&bxfixstatus, &error);
+      if (status == MB_SUCCESS)
+        status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(int), (void **)&byfixstatus, &error);
+      if (status == MB_SUCCESS)
+        status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(int), (void **)&bzfixstatus, &error);
+      if (status == MB_SUCCESS)
+        status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(double), (void **)&bxfix, &error);
+      if (status == MB_SUCCESS)
+        status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(double), (void **)&byfix, &error);
+      if (status == MB_SUCCESS)
+        status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(double), (void **)&bzfix, &error);
       if (status != MB_SUCCESS) {
         strcpy(error1, "Unable to invert navigation!");
         strcpy(error2, "Failed to allocate memory for block-average arrays.");
@@ -4992,19 +5006,27 @@ int mbnavadjust_autosetsvsvertical() {
     matrix.ia = NULL;
     matrix.a = NULL;
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows_alloc * sizeof(double), (void **)&u, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols_alloc * sizeof(double), (void **)&v, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols_alloc * sizeof(double), (void **)&w, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols_alloc * sizeof(double), (void **)&x, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols_alloc * sizeof(double), (void **)&se, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows_alloc * sizeof(double), (void **)&b, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols_alloc * sizeof(double), (void **)&v, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols_alloc * sizeof(double), (void **)&w, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols_alloc * sizeof(double), (void **)&x, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols_alloc * sizeof(double), (void **)&se, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows_alloc * sizeof(double), (void **)&b, &error);
     /* matrix.ia/matrix.a are indexed by mb_aprod() as [matrix.ia_dim * row + col],
         and ia_dim is set below to ncols_ba (3 * nblock) for the preliminary
         block-offset solution - which can exceed 6 whenever nblock > 2 - so the
         allocation must cover ia_dim per row, not a fixed 6 */
     const int ia_dim_alloc = MAX(6, ncols_alloc);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows_alloc * sizeof(int), (void **)&matrix.nia, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, (size_t)ia_dim_alloc * (size_t)nrows_alloc * sizeof(int), (void **)&matrix.ia, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, (size_t)ia_dim_alloc * (size_t)nrows_alloc * sizeof(double), (void **)&matrix.a, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows_alloc * sizeof(int), (void **)&matrix.nia, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, (size_t)ia_dim_alloc * (size_t)nrows_alloc * sizeof(int), (void **)&matrix.ia, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, (size_t)ia_dim_alloc * (size_t)nrows_alloc * sizeof(double), (void **)&matrix.a, &error);
     if (status != MB_SUCCESS) {
       strcpy(error1, "Unable to invert navigation!");
       strcpy(error2, "Failed to allocate memory for the sparse least-squares matrix.");
@@ -6022,11 +6044,11 @@ int mbnavadjust_modelplot_pick_timeseries_crossingties(int x, int y) {
   struct mbna_tie *tie;
   int range;
   int rangemin;
-  int pick_crossing;
-  int pick_tie;
-  int pick_file;
-  int pick_section;
-  int pick_snav;
+  int pick_crossing = MBNA_SELECT_NONE;
+  int pick_tie = MBNA_SELECT_NONE;
+  int pick_file = MBNA_SELECT_NONE;
+  int pick_section = MBNA_SELECT_NONE;
+  int pick_snav = MBNA_SELECT_NONE;
   int ntieselect;
   int ix, iy, iping;
 
@@ -6227,9 +6249,9 @@ int mbnavadjust_modelplot_pick_timeseries_globalties(int x, int y) {
     struct mbna_file *file;
     struct mbna_section *section;
     int range;
-    int pick_file;
-    int pick_section;
-    int pick_snav;
+    int pick_file = MBNA_SELECT_NONE;
+    int pick_section = MBNA_SELECT_NONE;
+    int pick_snav = MBNA_SELECT_NONE;
     int ix, iy;
     int rangemin = 10000000;
     for (int ifile = 0; ifile < project.num_files; ifile++) {
@@ -6330,11 +6352,11 @@ int mbnavadjust_modelplot_pick_perturbation_crossingties(int x, int y) {
   struct mbna_tie *tie;
   int range;
   int rangemin;
-  int pick_crossing;
-  int pick_tie;
-  int pick_file;
-  int pick_section;
-  int pick_snav;
+  int pick_crossing = MBNA_SELECT_NONE;
+  int pick_tie = MBNA_SELECT_NONE;
+  int pick_file = MBNA_SELECT_NONE;
+  int pick_section = MBNA_SELECT_NONE;
+  int pick_snav = MBNA_SELECT_NONE;
   int ntieselect;
   int ix, iy, iping;
 
@@ -6533,9 +6555,9 @@ int mbnavadjust_modelplot_pick_perturbation_globalties(int x, int y) {
     struct mbna_file *file;
     struct mbna_section *section;
     int range;
-    int pick_file;
-    int pick_section;
-    int pick_snav;
+    int pick_file = MBNA_SELECT_NONE;
+    int pick_section = MBNA_SELECT_NONE;
+    int pick_snav = MBNA_SELECT_NONE;
     int ix, iy;
     int rangemin = 10000000;
     for (int ifile = 0; ifile < project.num_files; ifile++) {
@@ -6634,8 +6656,8 @@ int mbnavadjust_modelplot_pick_tieoffsets(int x, int y) {
   struct mbna_tie *tie;
   int range;
   int rangemin;
-  int pick_crossing;
-  int pick_tie;
+  int pick_crossing = MBNA_SELECT_NONE;
+  int pick_tie = MBNA_SELECT_NONE;
   int ix, iy;
 
   /* find nearest snav pt with tie */
@@ -6778,8 +6800,8 @@ int mbnavadjust_modelplot_middlepick_timeseries_crossingties(int x, int y) {
   struct mbna_tie *tie;
   int range;
   int rangemin;
-  int pick_crossing;
-  int pick_tie;
+  int pick_crossing = MBNA_SELECT_NONE;
+  int pick_tie = MBNA_SELECT_NONE;
   // int pick_file;
   // int pick_section;
   // int pick_snav;
@@ -7086,9 +7108,9 @@ int mbnavadjust_modelplot_middlepick_timeseries_globalties(int x, int y) {
     struct mbna_file *file;
     struct mbna_section *section;
     int range;
-    int pick_file;
-    int pick_section;
-    int pick_snav;
+    int pick_file = MBNA_SELECT_NONE;
+    int pick_section = MBNA_SELECT_NONE;
+    int pick_snav = MBNA_SELECT_NONE;
     int ix, iy;
     int rangemin = 10000000;
     for (int ifile = 0; ifile < project.num_files; ifile++) {
@@ -7189,8 +7211,8 @@ int mbnavadjust_modelplot_middlepick_perturbation_crossingties(int x, int y) {
   struct mbna_tie *tie;
   int range;
   int rangemin;
-  int pick_crossing;
-  int pick_tie;
+  int pick_crossing = MBNA_SELECT_NONE;
+  int pick_tie = MBNA_SELECT_NONE;
   // int pick_file;
   // int pick_section;
   // int pick_snav;
@@ -7510,9 +7532,9 @@ int mbnavadjust_modelplot_middlepick_perturbation_globalties(int x, int y) {
     struct mbna_file *file;
     struct mbna_section *section;
     int range;
-    int pick_file;
-    int pick_section;
-    int pick_snav;
+    int pick_file = MBNA_SELECT_NONE;
+    int pick_section = MBNA_SELECT_NONE;
+    int pick_snav = MBNA_SELECT_NONE;
     int ix, iy;
     int rangemin = 10000000;
     for (int ifile = 0; ifile < project.num_files; ifile++) {
@@ -7611,8 +7633,8 @@ int mbnavadjust_modelplot_middlepick_tieoffsets(int x, int y) {
   struct mbna_tie *tie;
   int range;
   int rangemin;
-  int pick_crossing;
-  int pick_tie;
+  int pick_crossing = MBNA_SELECT_NONE;
+  int pick_tie = MBNA_SELECT_NONE;
   int ix, iy;
 
   /* find nearest snav pt with tie */

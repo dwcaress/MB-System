@@ -389,7 +389,7 @@ int mbnavedit_init(int argc, char **argv, int *startup_file) {
 				gui_mode = true;
 			}
 			else if (strcmp("input", options[option_index].name) == 0) {
-				sscanf(optarg, "%s", ifile);
+				sscanf(optarg, "%1023s", ifile);
 				do_parse_datalist(ifile, format);
 				fileflag++;
 			}
@@ -435,7 +435,7 @@ int mbnavedit_init(int argc, char **argv, int *startup_file) {
 			break;
 		case 'I':
 		case 'i':
-			sscanf(optarg, "%s", ifile);
+			sscanf(optarg, "%1023s", ifile);
 			do_parse_datalist(ifile, format);
 			fileflag++;
 			break;

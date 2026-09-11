@@ -254,7 +254,7 @@ int mbeditviz_init(int argc, char **argv,
         sscanf(optarg, "%d", &mbdef_format);
       }
       else if (strcmp("input", options[option_index].name) == 0) {
-        sscanf(optarg, "%s", ifile);
+        sscanf(optarg, "%1023s", ifile);
         input_file_set = true;
       }
       else if (strcmp("simple-mean-grid", options[option_index].name) == 0) {
@@ -279,7 +279,7 @@ int mbeditviz_init(int argc, char **argv,
       break;
     case 'I':
     case 'i':
-      sscanf(optarg, "%s", ifile);
+      sscanf(optarg, "%1023s", ifile);
       input_file_set = true;
       break;
     case 'R':
@@ -503,8 +503,8 @@ int mbeditviz_import_file(char *path, int format) {
     file->load_status_shown = false;
     file->locked = false;
     file->esf_exists = false;
-    strcpy(file->path, path);
-    strcpy(file->name, root);
+    snprintf(file->path, sizeof(file->path), "%s", path);
+    snprintf(file->name, sizeof(file->name), "%s", root);
     file->format = format;
     file->raw_info_loaded = false;
     file->esf_open = false;
@@ -1261,8 +1261,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
     /* load asynchronous data if available */
     if (mbev_status == MB_SUCCESS) {
       /* try to load asynchronous heading data from .bah file */
-      strcpy(asyncfile, file->path);
-      strcat(asyncfile, ".bah");
+      snprintf(asyncfile, sizeof(asyncfile), "%s%s", file->path, ".bah");
       if (stat(asyncfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR &&
           file_status.st_size > 0) {
         /* allocate space for asynchronous heading */
@@ -1300,8 +1299,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
 
       /* if necessary try to load heading data from ath file */
       if (file->n_async_heading <= 0) {
-        strcpy(asyncfile, file->path);
-        strcat(asyncfile, ".ath");
+        snprintf(asyncfile, sizeof(asyncfile), "%s%s", file->path, ".ath");
         if (stat(asyncfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
           /* count the asynchronous heading data */
           file->n_async_heading = 0;
@@ -1369,8 +1367,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
       }
 
       /* try to load asynchronous sensordepth data from .bas file */
-      strcpy(asyncfile, file->path);
-      strcat(asyncfile, ".bas");
+      snprintf(asyncfile, sizeof(asyncfile), "%s%s", file->path, ".bas");
       if (stat(asyncfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR &&
           file_status.st_size > 0) {
         /* allocate space for asynchronous sensordepth */
@@ -1408,13 +1405,24 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
       }
 
       /* if necessary try to load sensordepth data from ats file */
-      if (file->n_async_heading <= 0) {
-        strcpy(asyncfile, file->path);
-        strcat(asyncfile, ".ats");
+      if (file->n_async_sensordepth <= 0) {
+        snprintf(asyncfile, sizeof(asyncfile), "%s%s", file->path, ".ats");
         if (stat(asyncfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
           /* count the asynchronous sensordepth data */
           file->n_async_sensordepth = 0;
           file->n_async_sensordepth_alloc = 0;
+          /* free any sensordepth arrays allocated by an earlier attempt
+              (e.g. a partially successful .bas load above) before this
+              block reassigns the pointers via malloc() below, so that
+              attempt's buffer is not leaked */
+          if (file->async_sensordepth_time_d != NULL) {
+            free(file->async_sensordepth_time_d);
+            file->async_sensordepth_time_d = NULL;
+          }
+          if (file->async_sensordepth_sensordepth != NULL) {
+            free(file->async_sensordepth_sensordepth);
+            file->async_sensordepth_sensordepth = NULL;
+          }
           if ((afp = fopen(asyncfile, "r")) != NULL) {
             while ((result = fgets(buffer, MBP_FILENAMESIZE, afp)) == buffer)
               if (buffer[0] != '#')
@@ -1480,8 +1488,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
       }
 
       /* try to load asynchronous attitude data from .baa file */
-      strcpy(asyncfile, file->path);
-      strcat(asyncfile, ".baa");
+      snprintf(asyncfile, sizeof(asyncfile), "%s%s", file->path, ".baa");
       if (stat(asyncfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR &&
           file_status.st_size > 0) {
         /* allocate space for asynchronous attitude */
@@ -1532,8 +1539,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
 
       /* if necessary try to load asynchronous attitude data from ata file */
       if (file->n_async_attitude <= 0) {
-        strcpy(asyncfile, file->path);
-        strcat(asyncfile, ".ata");
+        snprintf(asyncfile, sizeof(asyncfile), "%s%s", file->path, ".ata");
         if (stat(asyncfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
           /* count the asynchronous attitude data */
           file->n_async_attitude = 0;
@@ -1628,8 +1634,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
       }
 
       /* try to load synchronous attitude data from .bsa file */
-      strcpy(asyncfile, file->path);
-      strcat(asyncfile, ".bsa");
+      snprintf(asyncfile, sizeof(asyncfile), "%s%s", file->path, ".bsa");
       if (stat(asyncfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR &&
           file_status.st_size > 0) {
         /* allocate space for synchronous attitude */
@@ -1678,8 +1683,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
 
       /* if necessary try to load synchronous attitude data from sta file */
       if (file->n_sync_attitude <= 0) {
-        strcpy(asyncfile, file->path);
-        strcat(asyncfile, ".sta");
+        snprintf(asyncfile, sizeof(asyncfile), "%s%s", file->path, ".sta");
         if (stat(asyncfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
           /* count the synchronous attitude data */
           file->n_sync_attitude = 0;
@@ -3475,6 +3479,7 @@ int mbeditviz_selectregion(size_t instance) {
     mbev_selected.num_soundings = 0;
     mbev_selected.num_soundings_unflagged = 0;
     mbev_selected.num_soundings_flagged = 0;
+    bool soundings_alloc_failed = false;
 
     /* loop over all files */
     for (int ifile = 0; ifile < mbev_num_files; ifile++) {
@@ -3498,10 +3503,29 @@ int mbeditviz_selectregion(size_t instance) {
                   ping->bathy[ibeam] <= ymax) {
                 /* allocate memory if needed */
                 if (mbev_selected.num_soundings >= mbev_selected.num_soundings_alloc) {
-                  mbev_selected.num_soundings_alloc += MBEV_ALLOCK_NUM;
-                  mbev_selected.soundings =
-                      realloc(mbev_selected.soundings,
-                              mbev_selected.num_soundings_alloc * sizeof(struct mb3dsoundings_sounding_struct));
+                  if (soundings_alloc_failed)
+                    continue;
+                  const int num_soundings_alloc_new = mbev_selected.num_soundings_alloc + MBEV_ALLOCK_NUM;
+                  void *tmp_soundings = realloc(mbev_selected.soundings,
+                              num_soundings_alloc_new * sizeof(struct mb3dsoundings_sounding_struct));
+                  if (tmp_soundings != NULL) {
+                    mbev_selected.soundings = tmp_soundings;
+                    mbev_selected.num_soundings_alloc = num_soundings_alloc_new;
+                  }
+                  else {
+                    /* realloc() failure leaves the previous block (if any)
+                        untouched and still owned by mbev_selected.soundings;
+                        report the failure once and stop growing the
+                        selection rather than write through a NULL pointer
+                        or silently retry the same failing allocation for
+                        every remaining beam */
+                    soundings_alloc_failed = true;
+                    fprintf(stderr, "\nUnable to allocate memory for selected soundings - selection truncated at %d soundings\n",
+                            mbev_selected.num_soundings);
+                    (*showErrorDialog)("Unable to allocate memory", "for the selected soundings -",
+                                       "selection has been truncated.");
+                    continue;
+                  }
                 }
 
                 /* same beam ids */
@@ -3643,6 +3667,7 @@ int mbeditviz_selectarea(size_t instance) {
     mbev_selected.num_soundings = 0;
     mbev_selected.num_soundings_unflagged = 0;
     mbev_selected.num_soundings_flagged = 0;
+    bool soundings_alloc_failed = false;
 
     double zmin;
     double zmax;
@@ -3675,10 +3700,29 @@ int mbeditviz_selectarea(size_t instance) {
                   yy <= mbev_selected.ymax) {
                 /* allocate memory if needed */
                 if (mbev_selected.num_soundings >= mbev_selected.num_soundings_alloc) {
-                  mbev_selected.num_soundings_alloc += MBEV_ALLOCK_NUM;
-                  mbev_selected.soundings =
-                      realloc(mbev_selected.soundings,
-                              mbev_selected.num_soundings_alloc * sizeof(struct mb3dsoundings_sounding_struct));
+                  if (soundings_alloc_failed)
+                    continue;
+                  const int num_soundings_alloc_new = mbev_selected.num_soundings_alloc + MBEV_ALLOCK_NUM;
+                  void *tmp_soundings = realloc(mbev_selected.soundings,
+                              num_soundings_alloc_new * sizeof(struct mb3dsoundings_sounding_struct));
+                  if (tmp_soundings != NULL) {
+                    mbev_selected.soundings = tmp_soundings;
+                    mbev_selected.num_soundings_alloc = num_soundings_alloc_new;
+                  }
+                  else {
+                    /* realloc() failure leaves the previous block (if any)
+                        untouched and still owned by mbev_selected.soundings;
+                        report the failure once and stop growing the
+                        selection rather than write through a NULL pointer
+                        or silently retry the same failing allocation for
+                        every remaining beam */
+                    soundings_alloc_failed = true;
+                    fprintf(stderr, "\nUnable to allocate memory for selected soundings - selection truncated at %d soundings\n",
+                            mbev_selected.num_soundings);
+                    (*showErrorDialog)("Unable to allocate memory", "for the selected soundings -",
+                                       "selection has been truncated.");
+                    continue;
+                  }
                 }
 
                 /* same beam ids */
@@ -3798,6 +3842,7 @@ int mbeditviz_selectnav(size_t instance) {
     mbev_selected.num_soundings = 0;
     mbev_selected.num_soundings_unflagged = 0;
     mbev_selected.num_soundings_flagged = 0;
+    bool soundings_alloc_failed = false;
 
     /* get sounding bearing */
     mbev_selected.bearing = 90.0;
@@ -3840,10 +3885,29 @@ int mbeditviz_selectnav(size_t instance) {
 								|| (mbviewdata->state21 && mb_beam_check_flag_multipick(ping->beamflag[ibeam]))) {
 								/* allocate memory if needed */
 								if (mbev_selected.num_soundings >= mbev_selected.num_soundings_alloc) {
-									mbev_selected.num_soundings_alloc += MBEV_ALLOCK_NUM;
-									mbev_selected.soundings =
-											realloc(mbev_selected.soundings,
-															mbev_selected.num_soundings_alloc * sizeof(struct mb3dsoundings_sounding_struct));
+									if (soundings_alloc_failed)
+										continue;
+									const int num_soundings_alloc_new = mbev_selected.num_soundings_alloc + MBEV_ALLOCK_NUM;
+									void *tmp_soundings = realloc(mbev_selected.soundings,
+											num_soundings_alloc_new * sizeof(struct mb3dsoundings_sounding_struct));
+									if (tmp_soundings != NULL) {
+										mbev_selected.soundings = tmp_soundings;
+										mbev_selected.num_soundings_alloc = num_soundings_alloc_new;
+									}
+									else {
+										/* realloc() failure leaves the previous block (if any)
+										    untouched and still owned by mbev_selected.soundings;
+										    report the failure once and stop growing the
+										    selection rather than write through a NULL pointer
+										    or silently retry the same failing allocation for
+										    every remaining beam */
+										soundings_alloc_failed = true;
+										fprintf(stderr, "\nUnable to allocate memory for selected soundings - selection truncated at %d soundings\n",
+												mbev_selected.num_soundings);
+										(*showErrorDialog)("Unable to allocate memory", "for the selected soundings -",
+															"selection has been truncated.");
+										continue;
+									}
 								}
 	
 								/* same beam ids */
@@ -5301,13 +5365,33 @@ void mbeditviz_mb3dsoundings_optimizebiasvalues(int mode, double *rollbias_best,
   double *local_grid_first = NULL;
   mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, size_double, (void **)&local_grid_first, &mbev_error);
   double *local_grid_sum = NULL;
-  mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, size_double, (void **)&local_grid_sum, &mbev_error);
+  if (mbev_status == MB_SUCCESS)
+    mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, size_double, (void **)&local_grid_sum, &mbev_error);
   double *local_grid_sum2 = NULL;
-  mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, size_double, (void **)&local_grid_sum2, &mbev_error);
+  if (mbev_status == MB_SUCCESS)
+    mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, size_double, (void **)&local_grid_sum2, &mbev_error);
   double *local_grid_variance = NULL;
-  mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, size_double, (void **)&local_grid_variance, &mbev_error);
+  if (mbev_status == MB_SUCCESS)
+    mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, size_double, (void **)&local_grid_variance, &mbev_error);
   int *local_grid_num = NULL;
-  mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, size_int, (void **)&local_grid_num, &mbev_error);
+  if (mbev_status == MB_SUCCESS)
+    mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, size_int, (void **)&local_grid_num, &mbev_error);
+
+  /* if any of the five allocations above failed, free whatever did
+      succeed and abort the optimization rather than run the
+      roll/pitch/heading/timelag/snell search loops (which memset() and
+      write into these buffers via mbeditviz_mb3dsoundings_getbiasvariance)
+      against partially-allocated or NULL buffers */
+  if (mbev_status != MB_SUCCESS) {
+    mb_freed(mbev_verbose, __FILE__, __LINE__, (void **)&local_grid_first, &mbev_error);
+    mb_freed(mbev_verbose, __FILE__, __LINE__, (void **)&local_grid_sum, &mbev_error);
+    mb_freed(mbev_verbose, __FILE__, __LINE__, (void **)&local_grid_sum2, &mbev_error);
+    mb_freed(mbev_verbose, __FILE__, __LINE__, (void **)&local_grid_variance, &mbev_error);
+    mb_freed(mbev_verbose, __FILE__, __LINE__, (void **)&local_grid_num, &mbev_error);
+    fprintf(stderr, "\nUnable to allocate memory for bias optimization grids - optimization aborted\n");
+    (*showErrorDialog)("Unable to allocate memory", "for bias optimization grids -", "optimization aborted.");
+    return;
+  }
 
   /* now loop over all different values of bias parameters looking for the
    * combination that minimizes the overall variance

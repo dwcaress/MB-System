@@ -61,7 +61,7 @@ if(buildGUIs)
                   mbnavadjust_prog.c
                   mbnavadjust_util.c)
 
-  target_link_libraries(mbnavadjust PRIVATE mbnavadjust_core mbview mbaux mbxgr
+  target_link_libraries(mbnavadjust PRIVATE mbnavadjust_core mbview mbaux mbxgr mbxmutil
 		 	${MOTIF_LIBRARIES}
 			${X11_LIBRARIES}
 			${X11_Xt_LIB})

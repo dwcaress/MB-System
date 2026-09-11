@@ -623,9 +623,9 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
           || project.files[global_ties_xy_files[igtie]].status == MBNA_FILE_FIXEDXYNAV) {
         fprintf(stdout, "MBnavadjust warning: An xy global tie has been defined for a file with xy navigation fixed.\n");
         fprintf(stdout, "  File: %2.2d:%5.5d %s   Section: %d  Offset: %f m east  %f m north  %f m vertical\n",
-                project.files[global_ties_xy_sections[igtie]].survey,
+                project.files[global_ties_xy_files[igtie]].survey,
                 global_ties_xy_files[igtie],
-                project.files[global_ties_xy_sections[igtie]].file,
+                project.files[global_ties_xy_files[igtie]].file,
                 global_ties_xy_sections[igtie],
                 project.files[global_ties_xy_files[igtie]].sections[global_ties_xy_sections[igtie]].globaltie.offset_x_m,
                 project.files[global_ties_xy_files[igtie]].sections[global_ties_xy_sections[igtie]].globaltie.offset_y_m,
@@ -781,9 +781,9 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
           || project.files[global_ties_z_files[igtie]].status == MBNA_FILE_FIXEDZNAV) {
         fprintf(stdout, "MBnavadjust warning: A z global tie has been defined for a file with z navigation fixed.\n");
         fprintf(stdout, "  File: %2.2d:%5.5d %s   Section: %d  Offset: %f m east  %f m north  %f m vertical\n",
-                project.files[global_ties_z_sections[igtie]].survey,
+                project.files[global_ties_z_files[igtie]].survey,
                 global_ties_z_files[igtie],
-                project.files[global_ties_z_sections[igtie]].file,
+                project.files[global_ties_z_files[igtie]].file,
                 global_ties_z_sections[igtie],
                 project.files[global_ties_z_files[igtie]].sections[global_ties_z_sections[igtie]].globaltie.offset_x_m,
                 project.files[global_ties_z_files[igtie]].sections[global_ties_z_sections[igtie]].globaltie.offset_y_m,
@@ -792,9 +792,9 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
       }
 
       /* deal with this global or fixed tie (global takes precedence if both exist) */
-      int iblock_gtie = project.files[global_ties_xy_files[igtie]].survey;
-      int ifile_gtie = global_ties_xy_files[igtie];
-      int isection_gtie = global_ties_xy_sections[igtie];
+      int iblock_gtie = project.files[global_ties_z_files[igtie]].survey;
+      int ifile_gtie = global_ties_z_files[igtie];
+      int isection_gtie = global_ties_z_sections[igtie];
       int isnav_gtie = -1;
       double global_offset_time_d = 0.0;
       double global_offset_z_m = 0.0;
@@ -890,7 +890,7 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
 
       /* if this is the last global tie in a survey/block then set all following nav
           in this block to the same offsets */
-      if (igtie == nglobaltiexy - 1 || iblock_gtie != iblock_gtie1) {
+      if (igtie == nglobaltiez - 1 || iblock_gtie != iblock_gtie1) {
         /* loop over all files and sections following this point - any in the same block
             will have the offsets set */
         int ifilemax = project.num_files - 1;
@@ -1274,11 +1274,17 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols_alloc * sizeof(int), (void **)&nx, &error);
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols_alloc * sizeof(double), (void **)&se, &error);
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows_alloc * sizeof(double), (void **)&b, &error);
-    /* matrix.ia/matrix.a are indexed by mb_aprod() as [matrix.ia_dim * row + col],
-        and ia_dim is set below to ncols_ba (3 * nblock) for the preliminary
-        block-offset solution - which can exceed 6 whenever nblock > 2 - so the
-        allocation must cover ia_dim per row, not a fixed 6 */
-    const int ia_dim_alloc = MAX(6, ncols_alloc);
+    /* matrix.ia/matrix.a are indexed by mb_aprod() as [matrix.ia_dim * row + col].
+        matrix.ia_dim is only ever assigned two values in this function: ncols_ba
+        (3 * nblock) for the preliminary block-offset solution (set at line ~1312,
+        just below), and a fixed 6 for the smoothed/full inversion passes (set at
+        line ~2358, where matrix.nia[] is also never set above 6 - see the row-fill
+        loops around lines 2518/2583/2651). The true maximum per-row stride ever
+        used is therefore MAX(6, ncols_ba), not MAX(6, ncols_alloc): ncols_alloc is
+        derived from 3 * nnav (total navigation-point unknowns), which for a
+        realistic project with many nav points and few survey blocks
+        (nnav >> nblock) would over-allocate this array enormously for no benefit. */
+    const int ia_dim_alloc = MAX(6, ncols_ba);
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows_alloc * sizeof(int), (void **)&matrix.nia, &error);
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, (size_t)ia_dim_alloc * (size_t)nrows_alloc * sizeof(int), (void **)&matrix.ia, &error);
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, (size_t)ia_dim_alloc * (size_t)nrows_alloc * sizeof(double), (void **)&matrix.a, &error);
@@ -2316,15 +2322,21 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
           }
         }
 
-        /* count first derivative smoothing points */
-        for (int inav = inavstart; inav < inavend - 1; inav++) {
+        /* count first derivative smoothing points
+         * - must match the E1 first derivative smoothing row-generation loop
+         *   (for (inav = inavstart; inav < inavend; inav++)) below, or rows
+         *   will be undercounted and silently dropped */
+        for (int inav = inavstart; inav < inavend; inav++) {
           if (x_continuity[inav + 1]) {
             nsmooth_surveyonly += 3;
           }
         }
 
-        /* count second derivative smoothing points */
-        for (int inav = inavstart; inav < inavend - 2; inav++) {
+        /* count second derivative smoothing points
+         * - must match the E1 second derivative smoothing row-generation loop
+         *   (for (inav = inavstart; inav < inavend - 1; inav++)) below, or rows
+         *   will be undercounted and silently dropped */
+        for (int inav = inavstart; inav < inavend - 1; inav++) {
             if (x_continuity[inav + 1] && x_continuity[inav + 2]) {
                 nsmooth_surveyonly += 3;
             }
@@ -3141,9 +3153,7 @@ offset_x, offset_y, offset_z); */
     if (mbna_verbose > 0)
       fprintf(stderr, "%s\n", message);
     mb_path tie_file;
-    strcpy(tie_file, project.path);
-    strcat(tie_file, project.name);
-    strcat(tie_file, "_tiesoln.txt");
+    snprintf(tie_file, sizeof(tie_file), "%s%s_tiesoln.txt", project.path, project.name);
     FILE *ofp = fopen(tie_file, "w");
     for (int icrossing = 0; icrossing < project.num_crossings; icrossing++) {
       crossing = &project.crossings[icrossing];
@@ -3792,10 +3802,10 @@ int mbnavadjust_applynav(int verbose, struct mbna_project *project_ptr) {
       else {
         status = mb_pr_get_output(mbna_verbose, &file->format, file->path, ppath, &error);
         if (project.use_mode == MBNA_USE_MODE_SECONDARY) {
-          snprintf(opath, sizeof(ppath), "%s.na%d", ppath, 1);
+          snprintf(opath, sizeof(opath), "%s.na%d", ppath, 1);
         }
         else {
-          snprintf(opath, sizeof(ppath), "%s.na%d", ppath, 2);
+          snprintf(opath, sizeof(opath), "%s.na%d", ppath, 2);
         }
       }
       if ((nfp = fopen(npath, "r")) == NULL) {

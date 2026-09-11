@@ -854,6 +854,7 @@ int mbnavadjust_get_misfit() {
       }
       else {
         free(grid1);
+        grid1 = NULL;
         status = MB_FAILURE;
       }
     }
@@ -865,6 +866,7 @@ int mbnavadjust_get_misfit() {
       }
       else {
         free(grid2);
+        grid2 = NULL;
         status = MB_FAILURE;
       }
     }
@@ -876,6 +878,7 @@ int mbnavadjust_get_misfit() {
       }
       else {
         free(gridm);
+        gridm = NULL;
         status = MB_FAILURE;
       }
     }
@@ -887,6 +890,7 @@ int mbnavadjust_get_misfit() {
       }
       else {
         free(gridmeq);
+        gridmeq = NULL;
         status = MB_FAILURE;
       }
     }
@@ -898,6 +902,7 @@ int mbnavadjust_get_misfit() {
       }
       else {
         free(gridn1);
+        gridn1 = NULL;
         status = MB_FAILURE;
       }
     }
@@ -909,6 +914,7 @@ int mbnavadjust_get_misfit() {
       }
       else {
         free(gridn2);
+        gridn2 = NULL;
         status = MB_FAILURE;
       }
     }
@@ -920,9 +926,16 @@ int mbnavadjust_get_misfit() {
       }
       else {
         free(gridnm);
+        gridnm = NULL;
         status = MB_FAILURE;
       }
     }
+
+    /* Only bin soundings and compute the misfit grid if every grid buffer
+        above was successfully (re)allocated - otherwise one or more of
+        grid1/grid2/gridm/gridmeq/gridn1/gridn2/gridnm is NULL (or stale)
+        and must not be dereferenced. */
+    if (status == MB_SUCCESS) {
 
     /* loop over all beams */
     for (int i = 0; i < swath1->npings; i++) {
@@ -1223,6 +1236,7 @@ int mbnavadjust_get_misfit() {
       mbna_minmisfit_sx3[2] = 1.0;
       mbna_minmisfit_sr3 = 100.0;
     }
+    } /* end if (status == MB_SUCCESS) grid-buffer-allocation guard */
   }
 
   if (mbna_verbose >= 2) {

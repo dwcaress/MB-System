@@ -21,6 +21,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.3beta20    September 10, 2026
 - Version 5.8.3beta19    September 10, 2026
 - Version 5.8.3beta18    September 9, 2026
 - Version 5.8.3beta17    September 8, 2026
@@ -73,6 +74,255 @@ or beta, are equally accessible as tarballs through the Github interface.
 - Version 5.8.1beta02    February 7, 2024
 - Version 5.8.1beta01    February 1, 2024
 - **Version 5.8.0          January 22, 2024**
+
+---
+
+#### 5.8.3beta20 (September 10, 2026)
+
+Programs mbedit, mbnavedit, mbvelocitytool, mbgrdviz, mbeditviz, and mbnavadjust (all
+of the interactive Motif-based bathymetry/navigation editors and 3-D viewers, plus the
+mbnavadjustmerge command-line tool that shares mbnavadjust's project file I/O code):
+a follow-on memory-management and array-bounds audit, extending the mbedit/mbnavedit/
+mbvelocitytool review from 5.8.3beta19's release notes to the three remaining
+interactive programs that had not yet been covered. Many real, independently
+confirmed bugs were found and fixed; the most significant are summarized below by
+program. As with the earlier audit, each finding was verified against the actual code
+before being fixed rather than assumed from a pattern match, and every affected
+program was rebuilt and smoke-tested afterward.
+
+A new shared helper function, mb_get_text_string() (src/mbaux/mb_xmutil.c/.h, built as
+the new library libmbxmutil), replaces five independent implementations of the same
+"read a Motif text widget's contents into a fixed-size buffer" helper that had
+accumulated across mbedit, mbnavedit, mbvelocitytool, mbeditviz, and mbnavadjust as
+each program's GUI code evolved separately over the years. All five were doing an
+unbounded strcpy() of the widget's text (none of the underlying text widgets set
+XmNmaxLength) into destination buffers as small as 40 bytes, an easy stack overflow
+for anyone able to type or paste into the affected dialog field. mbedit, mbnavedit,
+and mbvelocitytool had already had this specific bug fixed in place as part of the
+5.8.3beta19 audit, but each program's copy remained a separate piece of code; this
+release consolidates all five onto the one bounded, NULL-safe shared implementation
+and deletes the local copies (mbgrdviz did not have a named helper of its own but had
+the identical unguarded pattern at one call site, which was converted to use the new
+shared function as well).
+
+Program mbgrdviz: fixed a NULL-pointer-check written in the wrong order in
+do_mbgrdviz_openfile() - `strlen(file_ptr) <= 0 && file_ptr != NULL` evaluates
+strlen() on file_ptr before confirming it is non-NULL, so a NULL return from
+XmStringUnparse() would crash before the guard intended to catch it ever ran; fixed
+by testing file_ptr for NULL first. Fixed an unbounded strcpy() from the Area/Route
+name text field into a static 1024-byte buffer, reachable on every keystroke while
+typing a survey/route name (now uses the new shared mb_get_text_string() helper).
+Fixed four unbounded sscanf(optarg, "%s", ...) command-line option parsers (both the
+--grid-file/--overlay-file long-option handlers and their -I/-J short-option
+equivalents) that could overflow the destination path buffers given an
+implausibly long argument; all four now use a field-width-limited "%1023s" instead.
+Fixed a size_t underflow parsing a route file whose "## ROUTENAME" header line has no
+name after it - `routename[strlen(routename) - 1]` wrapped to SIZE_MAX when the
+string was empty, producing an out-of-bounds access; now guarded against the
+zero-length case. Fixed a strcpy()/strcat() pair building a status message that could
+overflow its destination buffer by roughly 20 bytes given a near-maximum-length swath
+file path, by replacing it with a single bounds-checked snprintf(). Fixed a missing
+`if (status == MB_SUCCESS)` guard in the interactive survey-line generator that would
+write through a NULL pointer following a failed memory allocation, and a related
+sequence of chained reallocations reading navigation data that could similarly write
+through a NULL array pointer after a failed reallocation partway through the chain.
+Added missing NULL checks after malloc()/strdup() calls building the argument list
+used to launch mbedit, mbnavedit, mbvelocitytool, and mbeditviz as background
+subprocesses from mbgrdviz's swath-file and navigation-file context menus - all four
+of these near-identical "launch a companion tool" functions now report an error and
+decline to launch rather than crashing if memory could not be allocated for the
+subprocess's argument vector. Fixed a version-string-detection comparison in the site
+file reader that compared only the first two characters of the file's header line
+("##") rather than the full 21-character label, which made the branch match any
+comment line rather than specifically the version header.
+
+Program mbeditviz: fixed a heap buffer overflow copying a GUI-selected swath file's
+path into a fixed 1024-byte struct field with an unbounded strcpy(), reachable simply
+by selecting or typing a sufficiently long path in the Open Swath Data file-selection
+dialog; and a matching stack overflow in the --input/-I command-line option parser
+using the same unbounded sscanf() pattern noted above for mbgrdviz - both replaced
+with bounds-checked copies. Fixed three unchecked realloc() calls, all in the
+interactive 3-D point-cloud selection code (selecting soundings by region, by area,
+and by navigation point), where a failed reallocation both leaked the previous,
+still-valid buffer and was then written through as if it had succeeded; all three now
+realloc into a temporary pointer, verify it before committing, and cleanly abandon the
+append on failure instead. Fixed five unchecked mb_mallocd() calls in the interactive
+sensor-bias optimization routine (used by the "Optimize" button in the 3-D soundings
+editor's bias-parameter dialog), where a single failed allocation partway through the
+chain could be masked by a later successful one and ultimately memset() through a NULL
+pointer; the chain is now correctly short-circuited on the first failure. Fixed eight
+sites building per-file auxiliary-sensor-data filenames via strcpy()+strcat() with no
+headroom for the appended suffix, all replaced with a single bounds-checked snprintf()
+each. Fixed a copy-paste variable-name error in the sensordepth-data fallback loader,
+which checked whether heading data was missing (file->n_async_heading) instead of
+whether sensordepth data was missing (file->n_async_sensordepth) before attempting to
+load sensordepth from an alternate file format - this both skipped the fallback when
+it was actually needed and, when it ran under the wrong trigger condition, could
+overwrite a previously loaded sensordepth array without freeing it first, leaking
+memory; both the wrong condition and the missing free were fixed. Also fixed an
+unchecked malloc() building the file-list display's array of Motif string objects.
+
+Programs mbnavadjust and mbnavadjustmerge: this was the most extensive part of the
+audit, reflecting mbnavadjust's status as the largest and most complex of the
+programs reviewed. In mbnavadjust_io.c (the project file reader/writer shared by
+both programs): fixed a missing upper-bound check on the reference-grid count
+(NUMREFERENCEGRIDS) read directly from a project (.nvh) file header, which was later
+used unchecked as a loop bound writing into fixed 25-element arrays - a corrupted or
+hand-edited project file naming more than 25 reference grids would overrun those
+arrays on load; the count is now clamped to the array capacity, with a warning,
+immediately after being read. Fixed a navigation-tie snav index (snav_1/snav_2) read
+from a project file that was checked only against its upper bound, not for being
+negative, so a negative value in a malformed file would be used directly as a
+negative array index into several fixed per-section arrays; the same "fixup" already
+applied to out-of-range-high values is now also applied to negative values, and the
+fixup's own internal division was additionally guarded against a zero divisor. Fixed
+three separate sites where a crossing or section array was grown with realloc() and
+then used or reported as successful without checking whether the reallocation itself
+had failed (in mbnavadjust_findcrossingsfile(), mbnavadjust_addcrossing(), and -
+originally left as a flagged follow-up during the main audit pass and completed
+immediately afterward in a dedicated follow-up review - mbnavadjust_import_file()'s
+per-section array, whose fix required tracing roughly 700 lines of ping-by-ping
+import logic to identify a safe place to abort the import cleanly on allocation
+failure); all three, plus a fourth occurrence found independently during the audit's
+own verification pass in mbnavadjust_remove_short_sections(), now realloc into a
+temporary pointer, verify it, and only commit the new pointer and proceed to use the
+array once success is confirmed, matching the safe pattern already used correctly
+elsewhere in the same file. Fixed a chain of mb_mallocd()/mb_reallocd() calls loading
+section ping data that reused a single status variable in a way that let a later
+successful call mask an earlier failure, then proceeded to copy data into the
+resulting (possibly still-NULL) buffers. Fixed an inconsistency where a global tie
+could be marked as set (a non-"none" status) while its associated navigation-point
+index was left at the "unset" sentinel value of -1, which would then be used as a
+negative array index in three separate places; the inconsistency is now resolved once,
+at load time. Fixed a use of project->logfp (the project's open log-file handle)
+that was not guarded against being NULL if a previous attempt to reopen the log file
+for the current session had failed; both the root cause (the project being left
+marked "open" despite the failed log reopen) and the unguarded use were fixed. Fixed
+a negative array index reached when merging a too-short section into a preceding
+section that itself has zero navigation points. Fixed two functions that built
+project.path/project.home/project.datadir from an externally supplied path via
+unbounded strcpy()/strcat() chains with no check that the result would fit the
+1024-byte destination fields.
+
+In mbnavadjust_prog.c: fixed the same unbounded sscanf(optarg, "%s", ...) pattern
+noted above for the -I/--input option. Fixed three chained-mb_mallocd() sites in the
+navigation-inversion setup code with the same status-masking hazard described above
+for mbnavadjust_io.c. Fixed a concrete, easily reachable array-corruption bug in the
+--reset-crossings/-R option's handling: a loop meant to zero each navigation point's
+offset arrays used its own loop variable to compute values but never actually used
+that variable as the array index, instead repeatedly writing to a single fixed index
+(the section's total navigation-point count) every iteration - for any section with a
+full set of navigation points (the ordinary case), this silently corrupted adjacent
+struct fields on every project processed with --reset-crossings; the loop now
+correctly indexes by its own loop variable. Fixed an incomplete field copy when
+deleting a navigation tie from the middle of a crossing's tie list, which copied only
+a handful of the tie structure's roughly two dozen fields during the compacting shift,
+leaving sigma, inversion-result, and block-association fields stale after any
+non-last tie was deleted; the partial field-by-field copy was replaced with a single
+whole-structure assignment that is guaranteed to copy every field. Fixed nine
+model-plot mouse-pick handler functions that read uninitialized local variables when
+no navigation point happened to be visible in the plot at the time of the click; all
+nine locals are now initialized to the project's own "nothing selected" sentinel value
+at declaration. Fixed a realloc() of the contour-plotting vector buffer that lost the
+previous, still-valid buffer on failure, and a related double-counted size increment
+in the same buffer's growth logic. Fixed a stale project.path left over from a
+previous project when creating a new project by a bare filename with no directory
+component, by adding the same current-working-directory fallback already used
+correctly in the sibling project-opening function.
+
+In mbnavadjust_callbacks.c: replaced this file's own independent, unbounded copy of
+the get_text_string() helper described above with the new shared implementation,
+fixing the same stack-overflow-prone pattern at its three call sites (the worst being
+a 40-byte destination buffer reachable from the Import Data dialog's format field).
+Fixed three GUI menu actions ("Show Selected File," "Show With Selected File," "Show
+With Selected Section") that changed the project's view mode unconditionally, without
+checking that a file or section had actually been selected first, which could lead a
+later status-display routine to read project.files[-1]; all three now check for a
+valid selection first. Fixed two sites using the C library's free() instead of
+Motif's XtFree() to release memory returned by XmListGetSelectedPos(), an allocator
+mismatch that is usually harmless on this codebase's current Linux/macOS Xt
+implementations but is a real portability hazard for the ongoing Windows port effort.
+Fixed two strncpy() calls that did not reserve room for an explicit null terminator,
+unlike the already-correct pattern used a few lines earlier in the same file. Fixed
+four sites checking only the lower bound of a reference-grid index before using it,
+adding the missing upper-bound check against the project's actual reference-grid
+count. Added missing NULL checks after all twenty-three malloc() calls building the
+Motif string-list arrays used to populate mbnavadjust's various list-view displays.
+
+In mbnavadjust_invertnav.c (the navigation-inversion/least-squares solver): fixed a
+copy-paste bug in the z-only global-tie handling that read from the parallel xy-tie
+index arrays instead of the z-tie index arrays, both mis-indexing a smaller array (an
+out-of-bounds read) and computing the wrong file/section for a diagnostic warning
+message - and, while tracing this bug, found and fixed the same file/section index
+confusion in the analogous xy-tie warning code as well. Fixed the sparse inversion
+matrix's per-row storage stride, which had been sized from the total number of
+navigation-point unknowns across the whole project rather than the true maximum
+per-row width actually used by the matrix-filling code (the number of survey blocks);
+for a realistic project with many navigation points and comparatively few survey
+blocks this could allocate a dramatically larger matrix than necessary. Fixed a
+smoothing-constraint row-count formula that undercounted relative to the loop that
+actually generates those rows, silently dropping smoothing rows from the per-survey
+inversion pass in a way that degraded but did not crash the solution. Fixed an
+unbounded strcpy()/strcat() chain building a tie-solution output filename, and a
+copy-paste sizeof() argument that measured the wrong (but coincidentally smaller and
+therefore non-overflowing) buffer in an snprintf() call.
+
+In mbnavadjust_autopick.c (automatic crossing/tie detection): fixed a misfit-grid
+realloc() chain whose individual reallocations were each checked, but whose
+subsequent binning and misfit-calculation loops did not confirm that the whole chain
+had succeeded before using the resulting buffers, and whose failure-cleanup path
+freed buffers without clearing the now-dangling pointers, risking a double-free on a
+subsequent call.
+
+In mbnavadjustmerge.c (the command-line project-merging tool): fixed a
+non-positive-value check missing from the --zoffsetwidth option, whose value is used
+as a divisor in the automatic-tie misfit calculation - a value of zero produced a
+division by zero and a wild array index; the option is now validated at parse time.
+Fixed three CLI actions (--set-tie, --triangulate-section, --remove-file) that used
+file/section indices taken directly from the command line to index the project's
+file and section arrays with no bounds check, unlike the already-hardened
+--add-crossing action in the same file; all three now use the same bounds-checking
+pattern. Fixed unbounded %s conversions parsing a --import-tie-list file's TIE and
+GLOBALTIE lines into fixed-size path buffers, and six sites dereferencing the result
+of strrchr(path, '/') + 1 without checking for NULL, which would crash given a bare
+filename with no directory separator. Fixed the same incomplete-tie-field-copy
+pattern described above for mbnavadjust_prog.c, here occurring during tie
+deduplication while importing a tie list. Fixed a file-section cross-reference
+(file_id) that was not being remapped to the merged project's own file numbering
+when files were copied in during a project merge.
+
+In mbnavadjust_fine.cc and mbnavadjust_icp.cc (the optional PCL-based fine ICP
+registration tool, mbnavadjustfine, built only when PCL is available): fixed an
+unbounded strcpy() for the --input option's project path. Fixed a --threads option
+whose value was clamped to an upper bound of 8 but not to a lower bound of 1, so
+--threads=0 produced a division by zero. Fixed two call sites that used a crossing's
+loaded swath data without checking whether the load had actually succeeded. Fixed a
+--try-all code path that read a crossing's first tie unconditionally even when the
+crossing had zero ties, using uninitialized offset values as the registration's
+initial alignment guess; a zero-offset default is now used in that case instead.
+Fixed a debug/PLY-export color-scaling divide-by-zero when every point correspondence
+happens to have the same distance, and added a missing check for the "no
+correspondence found" sentinel index before using it to index a point cloud, mirroring
+an equivalent guard that already existed in the corresponding header-only function.
+
+The mbedit/mbnavedit/mbvelocitytool/mbgrdviz/mbeditviz/mbnavadjust/mbnavadjustmerge
+changes described above were found, diagnosed, and made with the assistance of the AI
+coding assistant Claude Sonnet 5 (Anthropic, model claude-sonnet-5), operating as
+Claude Code under developer supervision and review; all affected programs were
+rebuilt from source and smoke-tested after the changes were applied. The two
+mbnavadjustfine/mbnavadjust_icp.cc source files could not be compiled in the
+development environment used for this pass, since the optional PCL (Point Cloud
+Library) dependency they require was not installed there; those two files' changes
+were reviewed by hand (including a targeted check for the specific comment-syntax
+error described immediately below) but should be verified with a real PCL-enabled
+build before this release is finalized.
+
+One of the fixes described above (in mbnavadjustmerge.c) was initially written with a
+C-style block comment whose text happened to contain the two-character sequence "*/",
+which closed the comment early and broke compilation; this was caught during a final
+full-project rebuild performed specifically to verify every change in this release,
+and is noted here as a reminder that even a change confirmed correct by an
+independent read-through and a brace-balance check still needs to actually compile.
 
 ---
 

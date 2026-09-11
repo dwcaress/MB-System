@@ -207,7 +207,6 @@ void do_fileselection_list(Widget w, XtPointer client, XtPointer call);
 int do_wait_until_viewed(XtAppContext app);
 void set_label_string(Widget w, String str);
 void set_label_multiline_string(Widget w, String str);
-void get_text_string(Widget w, String str);
 int do_info_add(char *info, int timetag);
 
 void do_naverr_setoffset(Widget w, XtPointer client_data, XtPointer call_data);

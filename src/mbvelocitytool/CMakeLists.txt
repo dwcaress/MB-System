@@ -31,7 +31,7 @@ add_executable(
   mbvelocitytool mbvelocity.c mbvelocity_bxutils.c mbvelocity_callbacks.c
                  mbvelocity_creation.c mbvelocity_prog.c)
 
-target_link_libraries(mbvelocitytool PRIVATE mbaux mbxgr 
+target_link_libraries(mbvelocitytool PRIVATE mbaux mbxgr mbxmutil 
                       ${MOTIF_LIBRARIES}
 		      ${X11_LIBRARIES}
 		      ${X11_Xt_LIB})
