@@ -69,6 +69,7 @@
 #include "mb_define.h"
 #include "mb_status.h"
 #include "mb_xgraphics.h"
+#include "mb_xmutil.h"
 #include "mbnavadjust.h"
 #include "mbnavadjust_creation.h"
 #include "mbnavadjust_extrawidgets.h"
@@ -745,19 +746,21 @@ void do_update_status() {
       fprintf(stderr, "%s\n", string);
     if (project.num_refgrids > 0) {
       XmString *xstr = (XmString *)malloc((project.num_refgrids + 1) * sizeof(XmString));
-      xstr[0] = XmStringCreateLocalized("<Previously Selected Grid>");
-      if (mbna_verbose > 0)
-        fprintf(stderr, "<Previously Selected Grid>\n");
-      for (int i = 0; i < project.num_refgrids; i++) {
-        xstr[i+1] = XmStringCreateLocalized(project.refgrid_names[i]);
+      if (xstr != NULL) {
+        xstr[0] = XmStringCreateLocalized("<Previously Selected Grid>");
         if (mbna_verbose > 0)
-          fprintf(stderr, "%s\n", project.refgrid_names[i]);
+          fprintf(stderr, "<Previously Selected Grid>\n");
+        for (int i = 0; i < project.num_refgrids; i++) {
+          xstr[i+1] = XmStringCreateLocalized(project.refgrid_names[i]);
+          if (mbna_verbose > 0)
+            fprintf(stderr, "%s\n", project.refgrid_names[i]);
+        }
+        XmListAddItems(list_data, xstr, project.num_refgrids + 1, 0);
+        for (int i = 0; i < project.num_refgrids + 1; i++) {
+          XmStringFree(xstr[i]);
+        }
+        free(xstr);
       }
-      XmListAddItems(list_data, xstr, project.num_refgrids + 1, 0);
-      for (int i = 0; i < project.num_refgrids + 1; i++) {
-        XmStringFree(xstr[i]);
-      }
-      free(xstr);
     }
     XmListSelectPos(list_data, project.refgrid_select + 2, 0);
     XmListSetPos(list_data, MAX(project.refgrid_select + 2 - 5, 1));
@@ -769,6 +772,7 @@ void do_update_status() {
       fprintf(stderr, "%s\n", string);
     if (project.num_surveys > 0 && project.num_files > 0) {
       XmString *xstr = (XmString *)malloc(project.num_surveys * sizeof(XmString));
+      if (xstr != NULL) {
     	for (int isurvey = 0; isurvey < project.num_surveys; isurvey++) {
     		int num_files_survey = 0;
     		int num_global_ties_survey = 0;
@@ -823,6 +827,7 @@ void do_update_status() {
         XmStringFree(xstr[i]);
       }
       free(xstr);
+      }
     }
     if (mbna_survey_select != MBNA_SELECT_NONE) {
       XmListSelectPos(list_data, mbna_survey_select + 1, 0);
@@ -845,6 +850,17 @@ void do_update_status() {
       int *n_25crossing = (int *)malloc(num_blocks * sizeof(int));
       int *n_allcrossing = (int *)malloc(num_blocks * sizeof(int));
       int *n_tie = (int *)malloc(num_blocks * sizeof(int));
+      if (xstr == NULL || survey1 == NULL || survey2 == NULL || n_tcrossing == NULL
+          || n_50crossing == NULL || n_25crossing == NULL || n_allcrossing == NULL || n_tie == NULL) {
+        free(xstr);
+        free(survey1);
+        free(survey2);
+        free(n_tcrossing);
+        free(n_50crossing);
+        free(n_25crossing);
+        free(n_allcrossing);
+        free(n_tie);
+      } else {
       memset(survey1, 0, (num_blocks * sizeof(int)));
       memset(survey2, 0, (num_blocks * sizeof(int)));
       memset(n_tcrossing, 0, (num_blocks * sizeof(int)));
@@ -928,6 +944,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
         XmListSetPos(list_data, MAX(iblocklist_select + 1 - 5, 1));
       }
 fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
+      }
     }
 fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
   }
@@ -965,6 +982,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
           num_files++;
       }
       XmString *xstr = (XmString *)malloc(num_files * sizeof(XmString));
+      if (xstr != NULL) {
 
       /* generate list */
       num_files = 0;
@@ -1011,6 +1029,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
         XmStringFree(xstr[i]);
       }
       free(xstr);
+      }
     }
     if (iselect != MBNA_SELECT_NONE) {
       XmListSelectPos(list_data, iselect + 1, 0);
@@ -1055,6 +1074,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
         }
       }
       XmString *xstr = (XmString *)malloc(num_sections * sizeof(XmString));
+      if (xstr != NULL) {
 
       /* generate list */
       num_sections = 0;
@@ -1105,7 +1125,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
 							if (section->globaltie.refgrid_id >= 0 && project.refgrid_select < 0) {
 								refgrid_id = section->globaltie.refgrid_id;
 							}
-							if (refgrid_id >= 0) {
+							if (refgrid_id >= 0 && refgrid_id < project.num_refgrids) {
 								strncpy(refgrid_name, project.refgrid_names[refgrid_id], sizeof(refgrid_name));
 							}
               if (section->globaltie.inversion_status == MBNA_INVERSION_CURRENT)
@@ -1160,6 +1180,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
         XmStringFree(xstr[i]);
       }
       free(xstr);
+      }
     }
     if (iselect != MBNA_SELECT_NONE) {
       XmListSelectPos(list_data, iselect + 1, 0);
@@ -1194,6 +1215,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
           num_crossings++;
       }
       XmString *xstr = (XmString *)malloc(num_crossings * sizeof(XmString));
+      if (xstr != NULL) {
 
       /* generate list */
       num_crossings = 0;
@@ -1230,6 +1252,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
         XmStringFree(xstr[i]);
       }
       free(xstr);
+      }
     }
     if (iselect != MBNA_SELECT_NONE) {
       XmListSelectPos(list_data, iselect + 1, 0);
@@ -1265,6 +1288,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
           num_crossings++;
       }
       XmString *xstr = (XmString *)malloc(num_crossings * sizeof(XmString));
+      if (xstr != NULL) {
 
       /* generate list */
       num_crossings = 0;
@@ -1301,6 +1325,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
         XmStringFree(xstr[i]);
       }
       free(xstr);
+      }
     }
     if (iselect != MBNA_SELECT_NONE) {
       XmListSelectPos(list_data, iselect + 1, 0);
@@ -1336,6 +1361,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
           num_crossings++;
       }
       XmString *xstr = (XmString *)malloc(num_crossings * sizeof(XmString));
+      if (xstr != NULL) {
 
       /* generate list */
       num_crossings = 0;
@@ -1372,6 +1398,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
         XmStringFree(xstr[i]);
       }
       free(xstr);
+      }
     }
     if (iselect != MBNA_SELECT_NONE) {
       XmListSelectPos(list_data, iselect + 1, 0);
@@ -1407,6 +1434,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
           num_crossings++;
       }
       XmString *xstr = (XmString *)malloc(num_crossings * sizeof(XmString));
+      if (xstr != NULL) {
 
       /* generate list */
       num_crossings = 0;
@@ -1443,6 +1471,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
         XmStringFree(xstr[i]);
       }
       free(xstr);
+      }
     }
     if (iselect != MBNA_SELECT_NONE) {
       XmListSelectPos(list_data, iselect + 1, 0);
@@ -1477,6 +1506,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
           num_crossings++;
       }
       XmString *xstr = (XmString *)malloc(num_crossings * sizeof(XmString));
+      if (xstr != NULL) {
 
       /* generate list */
       num_crossings = 0;
@@ -1513,6 +1543,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
         XmStringFree(xstr[i]);
       }
       free(xstr);
+      }
     }
     if (iselect != MBNA_SELECT_NONE) {
       XmListSelectPos(list_data, iselect + 1, 0);
@@ -1554,6 +1585,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
 
       /* allocate strings for list */
       XmString *xstr = (XmString *)malloc(num_ties * sizeof(XmString));
+      if (xstr != NULL) {
 
       /* generate list */
       num_ties = 0;
@@ -1625,6 +1657,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
         XmStringFree(xstr[k]);
       }
       free(xstr);
+      }
     }
     if (iselect != MBNA_SELECT_NONE) {
       XmListSelectPos(list_data, iselect + 1, 0);
@@ -1671,6 +1704,11 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
       /* allocate array of tie pointers for list to be sorted */
       struct mbna_tie **tie_ptr_list = NULL;
       tie_ptr_list = (struct mbna_tie **) malloc(num_ties * sizeof(struct mbna_tie *));
+
+      if (xstr == NULL || tie_ptr_list == NULL) {
+        free(xstr);
+        free(tie_ptr_list);
+      } else {
 
       /* get list of ties */
       num_ties = 0;
@@ -1770,6 +1808,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
       free(xstr);
 
       free(tie_ptr_list);
+      }
     }
     if (iselect != MBNA_SELECT_NONE) {
       XmListSelectPos(list_data, iselect + 1, 0);
@@ -1819,6 +1858,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
 
       /* allocate strings for list */
       XmString *xstr = (XmString *)malloc(num_globalties * sizeof(XmString));
+      if (xstr != NULL) {
 
       /* generate list */
       num_globalties = 0;
@@ -1854,13 +1894,13 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
 						if (section->globaltie.refgrid_id >= 0 && project.refgrid_select < 0) {
 							refgrid_id = section->globaltie.refgrid_id;
 						}
-						if (refgrid_id >= 0) {
+						if (refgrid_id >= 0 && refgrid_id < project.num_refgrids) {
 							strncpy(refgrid_name, project.refgrid_names[refgrid_id], sizeof(refgrid_name));
 						}
             if (section->globaltie.inversion_status == MBNA_INVERSION_CURRENT)
               sprintf(string,
                 "%2.2d:%4.4d:%3.3d:%2.2d %s %2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %6.3f | %s",
-                project.files[i].survey, i, j, section->globaltie.snav, tiestatus, section->globaltie.refgrid_id, 
+                project.files[i].survey, i, j, section->globaltie.snav, tiestatus, section->globaltie.refgrid_id,
                 section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
                 section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3,
                 section->globaltie.dx_m, section->globaltie.dy_m, section->globaltie.dz_m,
@@ -1894,6 +1934,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
         XmStringFree(xstr[k]);
       }
       free(xstr);
+      }
     }
     if (iselect != MBNA_SELECT_NONE) {
       XmListSelectPos(list_data, iselect + 1, 0);
@@ -1947,6 +1988,11 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
       struct mbna_section **section_ptr_list = NULL;
       section_ptr_list = (struct mbna_section **) malloc(num_globalties * sizeof(struct mbna_section *));
 
+      if (xstr == NULL || section_ptr_list == NULL) {
+        free(xstr);
+        free(section_ptr_list);
+      } else {
+
       /* get list of global ties */
       num_globalties = 0;
       for (int i = 0; i < project.num_files; i++) {
@@ -1992,7 +2038,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
 				if (section->globaltie.refgrid_id >= 0 && project.refgrid_select < 0) {
 					refgrid_id = section->globaltie.refgrid_id;
 				}
-				if (refgrid_id >= 0) {
+				if (refgrid_id >= 0 && refgrid_id < project.num_refgrids) {
 					strncpy(refgrid_name, project.refgrid_names[refgrid_id], sizeof(refgrid_name));
 				}
         if (section->globaltie.inversion_status == MBNA_INVERSION_CURRENT)
@@ -2038,6 +2084,7 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
       free(xstr);
 
       free(section_ptr_list);
+      }
     }
     if (iselect != MBNA_SELECT_NONE) {
       XmListSelectPos(list_data, iselect + 1, 0);
@@ -2831,7 +2878,7 @@ void do_naverr_update() {
     if (globaltie->refgrid_id >= 0 && project.refgrid_select < 0) {
       refgrid_id = globaltie->refgrid_id;
     }
-    if (refgrid_id >= 0) {
+    if (refgrid_id >= 0 && refgrid_id < project.num_refgrids) {
     	strncpy(refgrid_name, project.refgrid_names[refgrid_id], sizeof(refgrid_name));
     }
 
@@ -3180,7 +3227,8 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
     			tmp = (char *)XmStringUnparse(acs->selected_items[0], NULL, XmCHARSET_TEXT, XmCHARSET_TEXT, NULL, 0, XmOUTPUT_ALL);
     		}
     		if (tmp != NULL) {
-        	strncpy(selected_item, tmp, sizeof(selected_item));
+        	strncpy(selected_item, tmp, sizeof(selected_item) - 1);
+        	selected_item[sizeof(selected_item) - 1] = '\0';
         	XtFree(tmp);
         	tmp = NULL;
 					int i;
@@ -3220,7 +3268,8 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
     			tmp = (char *)XmStringUnparse(acs->selected_items[0], NULL, XmCHARSET_TEXT, XmCHARSET_TEXT, NULL, 0, XmOUTPUT_ALL);
     		}
     		if (tmp != NULL) {
-        	strncpy(selected_item, tmp, sizeof(selected_item));
+        	strncpy(selected_item, tmp, sizeof(selected_item) - 1);
+        	selected_item[sizeof(selected_item) - 1] = '\0';
         	XtFree(tmp);
         	tmp = NULL;
 					int isurvey, ifile, jsection, ksnav;
@@ -3251,7 +3300,7 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
       }
     }
 
-    free(position_list);
+    XtFree((char *)position_list);
   }
 
   /* else user selected same list item, deselecting it  - don't change anything
@@ -5015,7 +5064,7 @@ void do_fileselection_ok(Widget w, XtPointer client_data, XtPointer call_data) {
 
   /* get input filename */
   mb_path ifile;
-  get_text_string(fileSelectionBox_text, ifile);
+  mb_get_text_string(fileSelectionBox_text, ifile, sizeof(ifile));
 
   /* desl with selection */
   int error = MB_ERROR_NO_ERROR;
@@ -5036,7 +5085,7 @@ void do_fileselection_ok(Widget w, XtPointer client_data, XtPointer call_data) {
   }
   else if (file_mode == FILE_MODE_IMPORTDATA || file_mode == FILE_MODE_IMPORTSURVEY) {
     char format_text[40];
-    get_text_string(textField_format, format_text);
+    mb_get_text_string(textField_format, format_text, sizeof(format_text));
     sscanf(format_text, "%d", &format);
     bool import_single_survey = false;
     if (file_mode == FILE_MODE_IMPORTSURVEY) {
@@ -5171,6 +5220,10 @@ void do_view_showselectedfile(Widget w, XtPointer client_data, XtPointer call_da
 
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
+  /* no file is selected - nothing to view */
+  if (mbna_file_select == MBNA_SELECT_NONE)
+    return;
+
   if (mbna_view_mode != MBNA_VIEW_MODE_FILE) {
     project.modelplot_uptodate = false;
   }
@@ -5219,6 +5272,10 @@ void do_view_showwithselectedfile(Widget w, XtPointer client_data, XtPointer cal
 
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
+  /* no file is selected - nothing to view */
+  if (mbna_file_select == MBNA_SELECT_NONE)
+    return;
+
   if (mbna_view_mode != MBNA_VIEW_MODE_WITHFILE) {
     project.modelplot_uptodate = false;
   }
@@ -5242,6 +5299,10 @@ void do_view_showselectedsection(Widget w, XtPointer client_data, XtPointer call
   (void)call_data; // Unused parameter
 
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+
+  /* no file/section is selected - nothing to view */
+  if (mbna_file_select == MBNA_SELECT_NONE || mbna_section_select == MBNA_SELECT_NONE)
+    return;
 
   if (mbna_view_mode != MBNA_VIEW_MODE_WITHSECTION) {
     project.modelplot_uptodate = false;
@@ -6753,7 +6814,7 @@ void do_fileselection_list(Widget w, XtPointer client, XtPointer call) {
 
   /* get selected text */
   mb_path string = "";
-  get_text_string(fileSelectionBox_text, string);
+  mb_get_text_string(fileSelectionBox_text, string, sizeof(string));
 
   /* get output file */
   if ((int)strlen(string) > 0) {
@@ -6945,14 +7006,4 @@ void set_label_multiline_string(Widget w, String str) {
 
   XmStringFree(xstr);
 }
-/*--------------------------------------------------------------------*/
-/* Get text item string cleanly, no memory leak */
-/*--------------------------------------------------------------------*/
-
-void get_text_string(Widget w, String str) {
-  char *str_tmp = (char *)XmTextGetString(w);
-  strcpy(str, str_tmp);
-  XtFree(str_tmp);
-}
-
 /*--------------------------------------------------------------------*/

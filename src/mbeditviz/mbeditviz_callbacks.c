@@ -52,6 +52,7 @@
 #include "mb_format.h"
 #include "mb_status.h"
 #include "mbsys_singlebeam.h"
+#include "mb_xmutil.h"
 
 #include <Xm/Xm.h>
 
@@ -301,7 +302,7 @@ void do_mbeditviz_openfile(Widget w, XtPointer client_data, XtPointer call_data)
   fprintf(stderr, "do_mbeditviz_openfile\n");
 #endif
   /* read the mbio format number */
-  get_text_string(text_format, value_text);
+  mb_get_text_string(text_format, value_text, sizeof(value_text));
   int format;
   sscanf(value_text, "%d", &format);
 
@@ -341,7 +342,7 @@ void do_mbeditviz_fileselection_list(Widget w, XtPointer client_data, XtPointer 
   static char selection_text[MB_PATH_MAXLINE];
 
   /* get selected text */
-  get_text_string(fileSelectionText, (String)selection_text);
+  mb_get_text_string(fileSelectionText, selection_text, sizeof(selection_text));
 
   /* get output file */
   if ((int)strlen(selection_text) > 0) {
@@ -909,7 +910,7 @@ extern void do_mbeditviz_gridalgorithm_change(Widget w, XtPointer client_data, X
   }
 
   /* get interpolation scale */
-  get_text_string(text_interpolation, value_text);
+  mb_get_text_string(text_interpolation, value_text, sizeof(value_text));
   sscanf(value_text, "%d", &mbev_grid_interpolation);
 
   do_mbeditviz_set_label_implied();
@@ -931,7 +932,7 @@ extern void do_mbeditviz_gridinterpolation_change(Widget w, XtPointer client_dat
 #endif
 
   /* get interpolation scale */
-  get_text_string(text_interpolation, value_text);
+  mb_get_text_string(text_interpolation, value_text, sizeof(value_text));
   sscanf(value_text, "%d", &mbev_grid_interpolation);
 
   do_mbeditviz_set_label_implied();
@@ -1616,42 +1617,49 @@ void do_mbeditviz_update_filelist() {
     /* build available file list */
     if (mbev_num_files > 0) {
       xstr = (XmString *)malloc(mbev_num_files * sizeof(XmString));
-      char *esfstrptr;
-      for (int i = 0; i < mbev_num_files; i++) {
-        file = &(mbev_files[i]);
+      if (xstr == NULL) {
+        /* out of memory - report it and leave the list empty rather than
+            writing through a NULL pointer below */
+        do_error_dialog("Unable to update the file list", "due to a memory", "allocation error!");
+      }
+      else {
+        char *esfstrptr;
+        for (int i = 0; i < mbev_num_files; i++) {
+          file = &(mbev_files[i]);
 
-        /* set label strings */
-        if (file->load_status)
-          lockstrptr = (char *) loadedstr;
-        else if (file->locked)
-          lockstrptr = (char *) lockedstr;
-        else
-          lockstrptr = (char *) unlockedstr;
-        if (file->esf_exists)
-          esfstrptr = (char *) esfyesstr;
-        else
-          esfstrptr = (char *) esfnostr;
-        if (file->n_async_heading > 0)
-          athchar = 'H';
-        else
-          athchar = ' ';
-        if (file->n_async_sensordepth > 0)
-          atschar = 'S';
-        else
-          atschar = ' ';
-        if (file->n_async_attitude > 0)
-          atachar = 'A';
-        else
-          atachar = ' ';
-        snprintf(string, sizeof(string), "%s %s %c%c%c %s %d", lockstrptr, esfstrptr, athchar, atschar, atachar, mbev_files[i].name,
-                mbev_files[i].format);
-        xstr[i] = XmStringCreateLocalized(string);
+          /* set label strings */
+          if (file->load_status)
+            lockstrptr = (char *) loadedstr;
+          else if (file->locked)
+            lockstrptr = (char *) lockedstr;
+          else
+            lockstrptr = (char *) unlockedstr;
+          if (file->esf_exists)
+            esfstrptr = (char *) esfyesstr;
+          else
+            esfstrptr = (char *) esfnostr;
+          if (file->n_async_heading > 0)
+            athchar = 'H';
+          else
+            athchar = ' ';
+          if (file->n_async_sensordepth > 0)
+            atschar = 'S';
+          else
+            atschar = ' ';
+          if (file->n_async_attitude > 0)
+            atachar = 'A';
+          else
+            atachar = ' ';
+          snprintf(string, sizeof(string), "%s %s %c%c%c %s %d", lockstrptr, esfstrptr, athchar, atschar, atachar, mbev_files[i].name,
+                  mbev_files[i].format);
+          xstr[i] = XmStringCreateLocalized(string);
+        }
+        XmListAddItems(list_filelist, xstr, mbev_num_files, 0);
+        for (int i = 0; i < mbev_num_files; i++) {
+          XmStringFree(xstr[i]);
+        }
+        free(xstr);
       }
-      XmListAddItems(list_filelist, xstr, mbev_num_files, 0);
-      for (int i = 0; i < mbev_num_files; i++) {
-        XmStringFree(xstr[i]);
-      }
-      free(xstr);
 
       /* reinstate selection if the number of items is the same as before */
       if (item_count == mbev_num_files && position_count > 0) {
@@ -1998,16 +2006,6 @@ void set_label_multiline_string(Widget w, String str) {
 
   XmStringFree(xstr);
 }
-/*--------------------------------------------------------------------*/
-/* Get text item string cleanly, no memory leak */
-/*--------------------------------------------------------------------*/
-
-void get_text_string(Widget w, String str) {
-  char *str_tmp = (char *)XmTextGetString(w);
-  strcpy(str, str_tmp);
-  XtFree(str_tmp);
-}
-
 /*--------------------------------------------------------------------*/
 
 int do_wait_until_viewed() {

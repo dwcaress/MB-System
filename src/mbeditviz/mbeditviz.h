@@ -313,7 +313,6 @@ int do_mbeditviz_message_off(void);
 int do_error_dialog(char *s1, char *s2, char *s3);
 void set_label_string(Widget w, String str);
 void set_label_multiline_string(Widget w, String str);
-void get_text_string(Widget w, String str);
 int do_wait_until_viewed(void);
 int do_mbeditviz_settimer(void);
 int do_mbeditviz_workfunction(XtPointer client_data);

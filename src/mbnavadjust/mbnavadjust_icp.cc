@@ -530,8 +530,27 @@ int mbsystem::perform_icp(const int verbose, struct mbna_section* targetSection,
             }
 
             for(auto c : *cList) {
-                uint8_t pos = static_cast<uint8_t>(map(c.distance, 0, maxDist, 0, 255));
-                uint8_t inv = static_cast<uint8_t>(map(c.distance, 0, maxDist, 255, 0));
+                // index_match/index_query are -1 when PCL found no correspondence for
+                // that point - the header's getFitnessScore_transform_correspondence()
+                // guards the same data the same way, so mirror that guard here rather
+                // than calling PointCloud::at() (which throws) with a -1 index
+                if (c.index_match < 0 || c.index_query < 0) {
+                    continue;
+                }
+
+                // when every correspondence distance is equal (including the common
+                // case of all distances being 0), maxDist - 0 == 0 and map()'s
+                // division would be a divide-by-zero - fall back to a fixed neutral
+                // color (best-fit green) instead of calling map() in that case
+                uint8_t pos, inv;
+                if (maxDist > 0.0f) {
+                    pos = static_cast<uint8_t>(map(c.distance, 0, maxDist, 0, 255));
+                    inv = static_cast<uint8_t>(map(c.distance, 0, maxDist, 255, 0));
+                }
+                else {
+                    pos = 0;
+                    inv = 255;
+                }
 
                 target->at(static_cast<size_t>(c.index_match)).r = inv;
                 target->at(static_cast<size_t>(c.index_match)).g = pos;

@@ -64,6 +64,15 @@ if(buildGUIs)
   target_link_libraries(mbxgr GMT::GMT GDAL::GDAL mbio ${X11_LIBRARIES})
 
   install(TARGETS mbxgr DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+  find_package(Motif REQUIRED)
+  add_library(mbxmutil mb_xmutil.c)
+  set_target_properties(mbxmutil PROPERTIES VERSION "0" SOVERSION "0")
+  target_include_directories(mbxmutil PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${MOTIF_INCLUDE_DIR})
+  target_link_libraries(mbxmutil ${MOTIF_LIBRARIES} ${X11_LIBRARIES} ${X11_Xt_LIB})
+
+  install(TARGETS mbxmutil DESTINATION ${CMAKE_INSTALL_LIBDIR})
+  install(FILES mb_xmutil.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 endif()
 
 # Windows lacks SunRPC/XDR or TIRPC/XDR, so provide an alternative library to support data formats

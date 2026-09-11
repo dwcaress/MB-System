@@ -28,6 +28,7 @@ mbeditviz_LDADD =
 mbeditviz_LDADD += ${top_builddir}/src/mbio/libmbio.la
 mbeditviz_LDADD += ${top_builddir}/src/mbaux/libmbaux.la
 mbeditviz_LDADD += ${top_builddir}/src/mbaux/libmbxgr.la
+mbeditviz_LDADD += ${top_builddir}/src/mbaux/libmbxmutil.la
 mbeditviz_LDADD += ${top_builddir}/src/mbview/libmbview.la
 mbeditviz_LDADD += ${libgmt_LIBS}
 mbeditviz_LDADD += ${libnetcdf_LIBS}

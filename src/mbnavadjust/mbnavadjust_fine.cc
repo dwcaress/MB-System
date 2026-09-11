@@ -169,35 +169,51 @@ int main(int argc, char **argv) {
             // load the crossing data into swath1 and swath2
             status = load_crossing(params.verbose, project, crossing, section1, section2, swath1, swath2);
 
-            // set the rough alignment and overlap estimation from the tie, or ignore if we are ignoring ties
-            if(!params.ignoreTies) {
-                params.icpSettings.overlap = static_cast<unsigned int>(crossing->overlap);
-                params.icpSettings.xEst   = crossing->ties[0].offset_x_m;
-                params.icpSettings.yEst   = crossing->ties[0].offset_y_m;
-                params.icpSettings.zEst   = crossing->ties[0].offset_z_m;
+            if (status != MB_SUCCESS) {
+                std::cerr << "\nERROR: Failed to load crossing " << crossing->file_id_1 << ":" << crossing->section_1
+                          << "/" << crossing->file_id_2 << ":" << crossing->section_2
+                          << " - skipping ICP for this crossing\n";
             }
+            else {
+                // set the rough alignment and overlap estimation from the tie, or ignore if we are ignoring ties
+                // - crossing->ties[0] is only valid when the crossing actually has a tie (reachable with 0 ties
+                //   via --try-all), so fall back to a zero seed offset when there is none
+                if(!params.ignoreTies) {
+                    params.icpSettings.overlap = static_cast<unsigned int>(crossing->overlap);
+                    if (crossing->num_ties > 0) {
+                        params.icpSettings.xEst = crossing->ties[0].offset_x_m;
+                        params.icpSettings.yEst = crossing->ties[0].offset_y_m;
+                        params.icpSettings.zEst = crossing->ties[0].offset_z_m;
+                    }
+                    else {
+                        params.icpSettings.xEst = 0.0;
+                        params.icpSettings.yEst = 0.0;
+                        params.icpSettings.zEst = 0.0;
+                    }
+                }
 
-            // pre-add the file/crossing to results so ICP can see it for debug output. Move to parameters if we keep this long term.
-            result.tgtFile    = crossing->file_id_1;
-            result.srcFile    = crossing->file_id_2;
-            result.tgtSection = crossing->section_1;
-            result.srcSection = crossing->section_2;
+                // pre-add the file/crossing to results so ICP can see it for debug output. Move to parameters if we keep this long term.
+                result.tgtFile    = crossing->file_id_1;
+                result.srcFile    = crossing->file_id_2;
+                result.tgtSection = crossing->section_1;
+                result.srcSection = crossing->section_2;
 
-            auto t1 = std::chrono::system_clock::now();
+                auto t1 = std::chrono::system_clock::now();
 
-            perform_icp(params.verbose, section1, section2, swath1, swath2, result, params.icpSettings, params.verbose);
+                perform_icp(params.verbose, section1, section2, swath1, swath2, result, params.icpSettings, params.verbose);
 
-            auto t2 = std::chrono::system_clock::now();
-            result.milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+                auto t2 = std::chrono::system_clock::now();
+                result.milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
-            mbsystem::Log(std::cout) << result;
+                mbsystem::Log(std::cout) << result;
 
-            // print the results in a verbose way if desired
-            if(params.verbose) {
-                mbsystem::Log errOut;
-                errOut << "Alignment complete on crossing "
-                       << crossing->file_id_1 << ":" << crossing->section_1 << "/"
-                       << crossing->file_id_2 << ":" << crossing->section_2 << " in " << result.milliseconds << " milliSeconds\n";
+                // print the results in a verbose way if desired
+                if(params.verbose) {
+                    mbsystem::Log errOut;
+                    errOut << "Alignment complete on crossing "
+                           << crossing->file_id_1 << ":" << crossing->section_1 << "/"
+                           << crossing->file_id_2 << ":" << crossing->section_2 << " in " << result.milliseconds << " milliSeconds\n";
+                }
             }
 
         }
@@ -374,7 +390,7 @@ int mbnavadjust_align_arguments(int argc, char** argv, mbnavadjust_align_params 
     while ((c = getopt_long(argc, argv, short_args, long_args, nullptr)) != -1) {
         switch(c) {
             case 'I' :  if(optarg != nullptr) {
-                            strcpy(params.project_path, optarg);
+                            snprintf(params.project_path, sizeof(params.project_path), "%s", optarg);
                         }
                         break;
             case 'c' :  error = sscanf(optarg, "%d:%d/%d:%d", &params.iFile1, &params.iSection1, &params.iFile2, &params.iSection2);
@@ -451,7 +467,11 @@ int mbnavadjust_align_arguments(int argc, char** argv, mbnavadjust_align_params 
             case 'n' :  params.icpSettings.one2many = true;
                         break;
             case 'j' :  if(optarg != nullptr && optarg[0] != '-') {
-                            params.numThreads = std::min(static_cast<unsigned int>(strtoul(optarg, nullptr, 0)), 8u);
+                            /* clamp to [1,8] here (not just <= 8) so every use of
+                                numThreads, including the crossings.size() / numThreads
+                                division in get_divided_crossings(), is protected from
+                                a --threads=0 divide-by-zero */
+                            params.numThreads = std::max(1u, std::min(static_cast<unsigned int>(strtoul(optarg, nullptr, 0)), 8u));
                         }
                         else {
                             std::cerr << argv[0] << ": option requires an argument -- 'o'\n";
@@ -528,12 +548,32 @@ void do_icp_thread(const int verbose, mbna_project project, const vector<mbna_cr
     for (auto &cross : crossings) {
         status = load_crossing(verbose, project, cross, tgtSection, srcSection, tgtSwath, srcSwath);
 
+        if (status != MB_SUCCESS) {
+            /* Do NOT call mb_contour_deall()/mb_freed() here: on a load_crossing()
+               failure tgtSwath/srcSwath may be left NULL (or only partially set up),
+               and mb_contour_deall() dereferences its argument unconditionally
+               (data->npings_max) with no NULL check, so calling it on a NULL swath
+               pointer would itself crash. Just skip this crossing. */
+            errOut << "ERROR: Failed to load crossing " << cross->file_id_1 << ":" << cross->section_1
+                   << "/" << cross->file_id_2 << ":" << cross->section_2 << " - skipping ICP for this crossing\n";
+            continue;
+        }
+
         // load parameters and change the tie specifc ones
+        // - cross->ties[0] is only valid when the crossing actually has a tie (reachable with
+        //   0 ties via --try-all), so fall back to a zero seed offset when there is none
         icp_param params = parameters;
         params.overlap = static_cast<unsigned int>(cross->overlap);
-        params.xEst    = cross->ties[0].offset_x_m;
-        params.yEst    = cross->ties[0].offset_y_m;
-        params.zEst    = cross->ties[0].offset_z_m;
+        if (cross->num_ties > 0) {
+            params.xEst = cross->ties[0].offset_x_m;
+            params.yEst = cross->ties[0].offset_y_m;
+            params.zEst = cross->ties[0].offset_z_m;
+        }
+        else {
+            params.xEst = 0.0;
+            params.yEst = 0.0;
+            params.zEst = 0.0;
+        }
 
         // if ignore rough alignment option is on, clear the rough alignment
         if(ignoreTies) {

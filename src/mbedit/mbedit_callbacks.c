@@ -66,6 +66,7 @@
 #include "mb_xgraphics.h"
 #include "mbedit.h"
 #include "mbedit_creation.h"
+#include "mb_xmutil.h"
 
 #ifndef FIXED
 #define FIXED "fixed"
@@ -1168,7 +1169,7 @@ void do_fileselection_list(Widget w, XtPointer client_data, XtPointer call_data)
 
 	/* get selected text */
 	static char selection_text[MB_PATH_MAXLINE];
-	get_text_string(fileSelectionText, selection_text, sizeof(selection_text));
+	mb_get_text_string(fileSelectionText, selection_text, sizeof(selection_text));
 
 	/* get output file */
 	if ((int)strlen(selection_text) > 0) {
@@ -1459,7 +1460,7 @@ void do_load_check(Widget w, XtPointer client_data, XtPointer call_data) {
 
 		/* read the mbio format number from the dialog */
 		static char format_text[40];
-		get_text_string(textfield_format, format_text, sizeof(format_text));
+		mb_get_text_string(textfield_format, format_text, sizeof(format_text));
 		int format;
 		sscanf(format_text, "%d", &format);
 
@@ -2567,22 +2568,22 @@ void do_goto_apply(Widget w, XtPointer client_data, XtPointer call_data) {
 
 	char value_text[MB_PATH_MAXLINE];
 
-	get_text_string(textfield_year, value_text, sizeof(value_text));
+	mb_get_text_string(textfield_year, value_text, sizeof(value_text));
 	sscanf(value_text, "%d", &ttime_i[0]);
 
-	get_text_string(textfield_month, value_text, sizeof(value_text));
+	mb_get_text_string(textfield_month, value_text, sizeof(value_text));
 	sscanf(value_text, "%d", &ttime_i[1]);
 
-	get_text_string(textfield_day, value_text, sizeof(value_text));
+	mb_get_text_string(textfield_day, value_text, sizeof(value_text));
 	sscanf(value_text, "%d", &ttime_i[2]);
 
-	get_text_string(textfield_hour, value_text, sizeof(value_text));
+	mb_get_text_string(textfield_hour, value_text, sizeof(value_text));
 	sscanf(value_text, "%d", &ttime_i[3]);
 
-	get_text_string(textfield_minute, value_text, sizeof(value_text));
+	mb_get_text_string(textfield_minute, value_text, sizeof(value_text));
 	sscanf(value_text, "%d", &ttime_i[4]);
 
-	get_text_string(textfield_second, value_text, sizeof(value_text));
+	mb_get_text_string(textfield_second, value_text, sizeof(value_text));
 	sscanf(value_text, "%d", &ttime_i[5]);
 
 	ttime_i[6] = 0;
@@ -2822,16 +2823,6 @@ void set_label_multiline_string(Widget w, String str) {
 		XtWarning("Failed to update labelString");
 
 	XmStringFree(xstr);
-}
-/*--------------------------------------------------------------------*/
-/* Get text item string cleanly, no memory leak */
-/*--------------------------------------------------------------------*/
-
-void get_text_string(Widget w, String str, size_t len) {
-	char *str_tmp = (char *)XmTextGetString(w);
-	strncpy(str, str_tmp, len - 1);
-	str[len - 1] = '\0';
-	XtFree(str_tmp);
 }
 
 /*--------------------------------------------------------------------*/

@@ -40,6 +40,7 @@
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_status.h"
+#include "mb_xmutil.h"
 #include "mbsys_singlebeam.h"
 
 /* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
@@ -1478,7 +1479,7 @@ void do_mbgrdviz_openfile(Widget w, XtPointer client_data, XtPointer call_data) 
 
   /* read the input file name */
   file_ptr = (char *)XmStringUnparse(acs->value, NULL, XmCHARSET_TEXT, XmCHARSET_TEXT, NULL, 0, XmOUTPUT_ALL);
-  if (strlen(file_ptr) <= 0 && file_ptr != NULL) {
+  if (file_ptr != NULL && strlen(file_ptr) <= 0) {
     XtFree(file_ptr);
     file_ptr = NULL;
   }
@@ -2210,7 +2211,7 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
         site_ok = false;
 
         /* deal with site in form: lon lat topo color size name */
-        if (strncmp(buffer, "## Site File Version", 2) == 0) {
+        if (strncmp(buffer, "## Site File Version", strlen("## Site File Version")) == 0) {
           nget = sscanf(buffer, "## Site File Version %d.%d", &site_version_major, &site_version_minor);
         }
         else if (buffer[0] != '#') {
@@ -2473,10 +2474,13 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr) {
           }
           else if (strncmp(buffer, "## ROUTENAME", 12) == 0) {
             strcpy(routename, &buffer[13]);
-            if (routename[strlen(routename) - 1] == '\n')
-              routename[strlen(routename) - 1] = '\0';
-            if (routename[strlen(routename) - 1] == '\r')
-              routename[strlen(routename) - 1] = '\0';
+            size_t routename_len = strlen(routename);
+            if (routename_len > 0 && routename[routename_len - 1] == '\n') {
+              routename[routename_len - 1] = '\0';
+              routename_len--;
+            }
+            if (routename_len > 0 && routename[routename_len - 1] == '\r')
+              routename[routename_len - 1] = '\0';
           }
           else if (strncmp(buffer, "## ROUTECOLOR", 13) == 0) {
             sscanf(buffer, "## ROUTECOLOR %d", &routecolor);
@@ -5334,15 +5338,12 @@ int do_mbgrdviz_opennav(size_t instance, bool swathbounds, char *input_file_ptr)
               /* read the swath or nav data using mbio calls */
 
               /* update message */
-              if (!swathbounds)
-                strcpy(messagestr, "Reading navigation: ");
-              else
-                strcpy(messagestr, "Reading swath data: ");
               lastslash = strrchr(swathfile, '/');
-              if ((lastslash = strrchr(swathfile, '/')) != NULL)
-                strcat(messagestr, &(lastslash[1]));
+              const char *swathfile_base = (lastslash != NULL) ? &(lastslash[1]) : swathfile;
+              if (!swathbounds)
+                snprintf(messagestr, sizeof(messagestr), "Reading navigation: %s", swathfile_base);
               else
-                strcat(messagestr, swathfile);
+                snprintf(messagestr, sizeof(messagestr), "Reading swath data: %s", swathfile_base);
               do_mbview_message_on(messagestr, instance);
               fprintf(stderr, "%s\n", messagestr);
 
@@ -5636,73 +5637,78 @@ int do_mbgrdviz_readnav(size_t instance, char *swathfile, int pathstatus, char *
           }
         }
 
-        /* get swathbounds */
-        if (format == MBF_MBPRONAV) {
-          status = mbsys_singlebeam_swathbounds(verbose, mbio_ptr, store_ptr, &kind, &navportlon[npoint],
-                                                &navportlat[npoint], &navstbdlon[npoint], &navstbdlat[npoint], error);
-          if (navportlon[npoint] != navstbdlon[npoint] || navportlat[npoint] != navstbdlat[npoint])
-            swathbounds = true;
-        }
+        /* only use the nav arrays below if they are actually allocated -
+            if the reallocation above failed, status != MB_SUCCESS and
+            navtime_d/navlon/navlat/etc may be NULL */
+        if (status == MB_SUCCESS) {
+          /* get swathbounds */
+          if (format == MBF_MBPRONAV) {
+            status = mbsys_singlebeam_swathbounds(verbose, mbio_ptr, store_ptr, &kind, &navportlon[npoint],
+                                                  &navportlat[npoint], &navstbdlon[npoint], &navstbdlat[npoint], error);
+            if (navportlon[npoint] != navstbdlon[npoint] || navportlat[npoint] != navstbdlat[npoint])
+              swathbounds = true;
+          }
 
-        else {
-          /* find centermost beam */
-          icenter = -1;
-          iport = -1;
-          istbd = -1;
-          centerdistance = 0.0;
-          portdistance = 0.0;
-          stbddistance = 0.0;
-          for (i = 0; i < beams_bath; i++) {
-            if (mb_beam_ok(beamflag[i])) {
-              if (icenter == -1 || fabs(bathacrosstrack[i]) < centerdistance) {
-                icenter = i;
-                centerdistance = bathacrosstrack[i];
+          else {
+            /* find centermost beam */
+            icenter = -1;
+            iport = -1;
+            istbd = -1;
+            centerdistance = 0.0;
+            portdistance = 0.0;
+            stbddistance = 0.0;
+            for (i = 0; i < beams_bath; i++) {
+              if (mb_beam_ok(beamflag[i])) {
+                if (icenter == -1 || fabs(bathacrosstrack[i]) < centerdistance) {
+                  icenter = i;
+                  centerdistance = bathacrosstrack[i];
+                }
+                if (iport == -1 || bathacrosstrack[i] < portdistance) {
+                  iport = i;
+                  portdistance = bathacrosstrack[i];
+                }
+                if (istbd == -1 || bathacrosstrack[i] > stbddistance) {
+                  istbd = i;
+                  stbddistance = bathacrosstrack[i];
+                }
               }
-              if (iport == -1 || bathacrosstrack[i] < portdistance) {
-                iport = i;
-                portdistance = bathacrosstrack[i];
-              }
-              if (istbd == -1 || bathacrosstrack[i] > stbddistance) {
-                istbd = i;
-                stbddistance = bathacrosstrack[i];
-              }
+            }
+
+            mb_coor_scale(verbose, lat, &mtodeglon, &mtodeglat);
+            headingx = sin(heading * DTR);
+            headingy = cos(heading * DTR);
+            if (icenter >= 0) {
+              navportlon[npoint] =
+                  lon + headingy * mtodeglon * bathacrosstrack[iport] + headingx * mtodeglon * bathalongtrack[iport];
+              navportlat[npoint] =
+                  lat - headingx * mtodeglat * bathacrosstrack[iport] + headingy * mtodeglat * bathalongtrack[iport];
+              navstbdlon[npoint] =
+                  lon + headingy * mtodeglon * bathacrosstrack[istbd] + headingx * mtodeglon * bathalongtrack[istbd];
+              navstbdlat[npoint] =
+                  lat - headingx * mtodeglat * bathacrosstrack[istbd] + headingy * mtodeglat * bathalongtrack[istbd];
+            }
+            else {
+              navportlon[npoint] = lon;
+              navportlat[npoint] = lat;
+              navstbdlon[npoint] = lon;
+              navstbdlat[npoint] = lat;
             }
           }
 
-          mb_coor_scale(verbose, lat, &mtodeglon, &mtodeglat);
-          headingx = sin(heading * DTR);
-          headingy = cos(heading * DTR);
-          if (icenter >= 0) {
-            navportlon[npoint] =
-                lon + headingy * mtodeglon * bathacrosstrack[iport] + headingx * mtodeglon * bathalongtrack[iport];
-            navportlat[npoint] =
-                lat - headingx * mtodeglat * bathacrosstrack[iport] + headingy * mtodeglat * bathalongtrack[iport];
-            navstbdlon[npoint] =
-                lon + headingy * mtodeglon * bathacrosstrack[istbd] + headingx * mtodeglon * bathalongtrack[istbd];
-            navstbdlat[npoint] =
-                lat - headingx * mtodeglat * bathacrosstrack[istbd] + headingy * mtodeglat * bathalongtrack[istbd];
-          }
-          else {
-            navportlon[npoint] = lon;
-            navportlat[npoint] = lat;
-            navstbdlon[npoint] = lon;
-            navstbdlat[npoint] = lat;
-          }
+          /* store the navigation values */
+          navtime_d[npoint] = time_d;
+          navlon[npoint] = lon;
+          navlat[npoint] = lat;
+          navz[npoint] = -sensordepth;
+          navheading[npoint] = heading;
+          navspeed[npoint] = speed;
+
+          mb_segynumber(verbose, mbio_ptr, &(navline[npoint]), &(navshot[npoint]), &(navcdp[npoint]), error);
+
+          /* increment npoint */
+          npoint++;
+          npointread++;
         }
-
-        /* store the navigation values */
-        navtime_d[npoint] = time_d;
-        navlon[npoint] = lon;
-        navlat[npoint] = lat;
-        navz[npoint] = -sensordepth;
-        navheading[npoint] = heading;
-        navspeed[npoint] = speed;
-
-        mb_segynumber(verbose, mbio_ptr, &(navline[npoint]), &(navshot[npoint]), &(navcdp[npoint]), error);
-
-        /* increment npoint */
-        npoint++;
-        npointread++;
       }
     }
 
@@ -6197,27 +6203,54 @@ void do_mbgrdviz_open_mbedit(Widget w, XtPointer client_data, XtPointer call_dat
         concatenation - so neither an overlong path nor shell metacharacters
         in a path can overflow a buffer or be interpreted as commands */
     char **argv = (char **)malloc((size_t)(1 + 2 * shareddata->nnav + 1) * sizeof(char *));
-    int argc = 0;
-    argv[argc++] = strdup("mbedit");
-    for (int i = 0; i < shareddata->nnav; i++) {
-      nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
-      if (nav->nselected > 0) {
-        char formatarg[32];
-        char patharg[MB_PATH_MAXLINE + 4];
-        snprintf(formatarg, sizeof(formatarg), "-F%d", nav->format);
-        snprintf(patharg, sizeof(patharg), "-I%s", nav->pathraw);
-        argv[argc++] = strdup(formatarg);
-        argv[argc++] = strdup(patharg);
-      }
+    if (argv == NULL) {
+      fprintf(stderr, "\nUnable to allocate memory for mbedit argument list\n");
+      XBell((Display *)XtDisplay(mainWindow), 100);
     }
-    argv[argc] = NULL;
+    else {
+      int argc = 0;
+      bool alloc_ok = true;
+      argv[argc] = strdup("mbedit");
+      if (argv[argc] == NULL)
+        alloc_ok = false;
+      else
+        argc++;
+      for (int i = 0; alloc_ok && i < shareddata->nnav; i++) {
+        nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
+        if (nav->nselected > 0) {
+          char formatarg[32];
+          char patharg[MB_PATH_MAXLINE + 4];
+          snprintf(formatarg, sizeof(formatarg), "-F%d", nav->format);
+          snprintf(patharg, sizeof(patharg), "-I%s", nav->pathraw);
+          argv[argc] = strdup(formatarg);
+          if (argv[argc] == NULL) {
+            alloc_ok = false;
+            break;
+          }
+          argc++;
+          argv[argc] = strdup(patharg);
+          if (argv[argc] == NULL) {
+            alloc_ok = false;
+            break;
+          }
+          argc++;
+        }
+      }
 
-    fprintf(stderr, "Calling mbedit with %d arguments\n", argc);
-    mbgrdviz_launch_background(argv);
+      if (alloc_ok) {
+        argv[argc] = NULL;
+        fprintf(stderr, "Calling mbedit with %d arguments\n", argc);
+        mbgrdviz_launch_background(argv);
+      }
+      else {
+        fprintf(stderr, "\nUnable to allocate memory for mbedit arguments\n");
+        XBell((Display *)XtDisplay(mainWindow), 100);
+      }
 
-    for (int i = 0; i < argc; i++)
-      free(argv[i]);
-    free(argv);
+      for (int i = 0; i < argc; i++)
+        free(argv[i]);
+      free(argv);
+    }
   }
 
   /* update widgets of all mbview windows */
@@ -6298,19 +6331,49 @@ void do_mbgrdviz_open_mbeditviz(Widget w, XtPointer client_data, XtPointer call_
         char patharg[MB_PATH_MAXLINE + 4];
         snprintf(patharg, sizeof(patharg), "-I%s", datalist_file);
         char *argv[5];
-        argv[0] = strdup("mbeditviz");
-        argv[1] = strdup(patharg);
+        int argc = 0;
+        bool alloc_ok = true;
+        argv[argc] = strdup("mbeditviz");
+        if (argv[argc] == NULL)
+          alloc_ok = false;
+        else
+          argc++;
+        if (alloc_ok) {
+          argv[argc] = strdup(patharg);
+          if (argv[argc] == NULL)
+            alloc_ok = false;
+          else
+            argc++;
+        }
         /* explicit datalist format (-1) since the mkstemp() generated
             datalist_file name no longer carries a recognizable ".mb-1"
             suffix for mb_get_format() to auto-detect */
-        argv[2] = strdup("-F-1");
-        argv[3] = strdup("-R");
-        argv[4] = NULL;
+        if (alloc_ok) {
+          argv[argc] = strdup("-F-1");
+          if (argv[argc] == NULL)
+            alloc_ok = false;
+          else
+            argc++;
+        }
+        if (alloc_ok) {
+          argv[argc] = strdup("-R");
+          if (argv[argc] == NULL)
+            alloc_ok = false;
+          else
+            argc++;
+        }
 
-        fprintf(stderr, "Calling mbeditviz -I%s -F-1 -R\n", datalist_file);
-        mbgrdviz_launch_background(argv);
+        if (alloc_ok) {
+          argv[argc] = NULL;
+          fprintf(stderr, "Calling mbeditviz -I%s -F-1 -R\n", datalist_file);
+          mbgrdviz_launch_background(argv);
+        }
+        else {
+          fprintf(stderr, "\nUnable to allocate memory for mbeditviz arguments\n");
+          XBell((Display *)XtDisplay(mainWindow), 100);
+        }
 
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < argc; i++)
           free(argv[i]);
       }
     }
@@ -6371,27 +6434,54 @@ void do_mbgrdviz_open_mbnavedit(Widget w, XtPointer client_data, XtPointer call_
   /* open all data files with selected nav into mbnavedit */
   if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0) {
     char **argv = (char **)malloc((size_t)(1 + 2 * shareddata->nnav + 1) * sizeof(char *));
-    int argc = 0;
-    argv[argc++] = strdup("mbnavedit");
-    for (int i = 0; i < shareddata->nnav; i++) {
-      nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
-      if (nav->nselected > 0) {
-        char formatarg[32];
-        char patharg[MB_PATH_MAXLINE + 4];
-        snprintf(formatarg, sizeof(formatarg), "-F%d", nav->format);
-        snprintf(patharg, sizeof(patharg), "-I%s", nav->pathraw);
-        argv[argc++] = strdup(formatarg);
-        argv[argc++] = strdup(patharg);
-      }
+    if (argv == NULL) {
+      fprintf(stderr, "\nUnable to allocate memory for mbnavedit argument list\n");
+      XBell((Display *)XtDisplay(mainWindow), 100);
     }
-    argv[argc] = NULL;
+    else {
+      int argc = 0;
+      bool alloc_ok = true;
+      argv[argc] = strdup("mbnavedit");
+      if (argv[argc] == NULL)
+        alloc_ok = false;
+      else
+        argc++;
+      for (int i = 0; alloc_ok && i < shareddata->nnav; i++) {
+        nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
+        if (nav->nselected > 0) {
+          char formatarg[32];
+          char patharg[MB_PATH_MAXLINE + 4];
+          snprintf(formatarg, sizeof(formatarg), "-F%d", nav->format);
+          snprintf(patharg, sizeof(patharg), "-I%s", nav->pathraw);
+          argv[argc] = strdup(formatarg);
+          if (argv[argc] == NULL) {
+            alloc_ok = false;
+            break;
+          }
+          argc++;
+          argv[argc] = strdup(patharg);
+          if (argv[argc] == NULL) {
+            alloc_ok = false;
+            break;
+          }
+          argc++;
+        }
+      }
 
-    fprintf(stderr, "Calling mbnavedit with %d arguments\n", argc);
-    mbgrdviz_launch_background(argv);
+      if (alloc_ok) {
+        argv[argc] = NULL;
+        fprintf(stderr, "Calling mbnavedit with %d arguments\n", argc);
+        mbgrdviz_launch_background(argv);
+      }
+      else {
+        fprintf(stderr, "\nUnable to allocate memory for mbnavedit arguments\n");
+        XBell((Display *)XtDisplay(mainWindow), 100);
+      }
 
-    for (int i = 0; i < argc; i++)
-      free(argv[i]);
-    free(argv);
+      for (int i = 0; i < argc; i++)
+        free(argv[i]);
+      free(argv);
+    }
   }
 
   /* update widgets of all mbview windows */
@@ -6449,27 +6539,54 @@ void do_mbgrdviz_open_mbvelocitytool(Widget w, XtPointer client_data, XtPointer 
   /* open all data files with selected nav into mbvelocitytool */
   if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0) {
     char **argv = (char **)malloc((size_t)(1 + 2 * shareddata->nnav + 1) * sizeof(char *));
-    int argc = 0;
-    argv[argc++] = strdup("mbvelocitytool");
-    for (int i = 0; i < shareddata->nnav; i++) {
-      nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
-      if (nav->nselected > 0) {
-        char formatarg[32];
-        char patharg[MB_PATH_MAXLINE + 4];
-        snprintf(formatarg, sizeof(formatarg), "-F%d", nav->format);
-        snprintf(patharg, sizeof(patharg), "-I%s", nav->pathraw);
-        argv[argc++] = strdup(formatarg);
-        argv[argc++] = strdup(patharg);
-      }
+    if (argv == NULL) {
+      fprintf(stderr, "\nUnable to allocate memory for mbvelocitytool argument list\n");
+      XBell((Display *)XtDisplay(mainWindow), 100);
     }
-    argv[argc] = NULL;
+    else {
+      int argc = 0;
+      bool alloc_ok = true;
+      argv[argc] = strdup("mbvelocitytool");
+      if (argv[argc] == NULL)
+        alloc_ok = false;
+      else
+        argc++;
+      for (int i = 0; alloc_ok && i < shareddata->nnav; i++) {
+        nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
+        if (nav->nselected > 0) {
+          char formatarg[32];
+          char patharg[MB_PATH_MAXLINE + 4];
+          snprintf(formatarg, sizeof(formatarg), "-F%d", nav->format);
+          snprintf(patharg, sizeof(patharg), "-I%s", nav->pathraw);
+          argv[argc] = strdup(formatarg);
+          if (argv[argc] == NULL) {
+            alloc_ok = false;
+            break;
+          }
+          argc++;
+          argv[argc] = strdup(patharg);
+          if (argv[argc] == NULL) {
+            alloc_ok = false;
+            break;
+          }
+          argc++;
+        }
+      }
 
-    fprintf(stderr, "Calling mbvelocitytool with %d arguments\n", argc);
-    mbgrdviz_launch_background(argv);
+      if (alloc_ok) {
+        argv[argc] = NULL;
+        fprintf(stderr, "Calling mbvelocitytool with %d arguments\n", argc);
+        mbgrdviz_launch_background(argv);
+      }
+      else {
+        fprintf(stderr, "\nUnable to allocate memory for mbvelocitytool arguments\n");
+        XBell((Display *)XtDisplay(mainWindow), 100);
+      }
 
-    for (int i = 0; i < argc; i++)
-      free(argv[i]);
-    free(argv);
+      for (int i = 0; i < argc; i++)
+        free(argv[i]);
+      free(argv);
+    }
   }
 
   /* update widgets of all mbview windows */
@@ -6843,67 +6960,71 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
       /* start on the port side of the survey */
       /* find range of altitude along each line and calculate the swath width
           from the smallest altitude */
-      xx[0] = -dsign * 0.5 * r;
       nlines = 1;
       segment.nls = 0;
       segment.nls_alloc = 0;
       segment.lspoints = NULL;
 
-      while (nlines == 1 || fabs(xx[nlines - 1] + dsign * 0.5 * line_spacing_use) < 0.5 * r) {
-        /* allocate more space for xx if needed */
-        if (nlines_alloc <= nlines) {
-          nlines_alloc += 100;
-          status = mb_reallocd(verbose, __FILE__, __LINE__, nlines_alloc * sizeof(double), (void **)&xx, &error);
-          if (status != MB_SUCCESS) {
-            nlines_alloc = 0;
-            mb_error(verbose, error, &error_message);
-            fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
+      if (status == MB_SUCCESS) {
+        xx[0] = -dsign * 0.5 * r;
+
+        while (nlines == 1 || fabs(xx[nlines - 1] + dsign * 0.5 * line_spacing_use) < 0.5 * r) {
+          /* allocate more space for xx if needed */
+          if (nlines_alloc <= nlines) {
+            nlines_alloc += 100;
+            status = mb_reallocd(verbose, __FILE__, __LINE__, nlines_alloc * sizeof(double), (void **)&xx, &error);
+            if (status != MB_SUCCESS) {
+              nlines_alloc = 0;
+              mb_error(verbose, error, &error_message);
+              fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
+              break;
+            }
           }
-        }
-        /* get offset from last xx */
-        dxuse = dx * xx[nlines - 1];
-        dyuse = dy * xx[nlines - 1];
+          /* get offset from last xx */
+          dxuse = dx * xx[nlines - 1];
+          dyuse = dy * xx[nlines - 1];
 
-        /* get first point */
-        segment.endpoints[0].xdisplay = data->area.endpoints[0].xdisplay + dxuse;
-        segment.endpoints[0].ydisplay = data->area.endpoints[0].ydisplay + dyuse;
-        segment.endpoints[0].zdisplay = data->area.endpoints[0].zdisplay;
-        mbview_projectinverse(instance, true, segment.endpoints[0].xdisplay, segment.endpoints[0].ydisplay,
-                              segment.endpoints[0].zdisplay, &segment.endpoints[0].xlon, &segment.endpoints[0].ylat,
-                              &segment.endpoints[0].xgrid, &segment.endpoints[0].ygrid);
-        mbview_getzdata(instance, segment.endpoints[0].xgrid, segment.endpoints[0].ygrid, &ok,
-                        &segment.endpoints[0].zdata);
+          /* get first point */
+          segment.endpoints[0].xdisplay = data->area.endpoints[0].xdisplay + dxuse;
+          segment.endpoints[0].ydisplay = data->area.endpoints[0].ydisplay + dyuse;
+          segment.endpoints[0].zdisplay = data->area.endpoints[0].zdisplay;
+          mbview_projectinverse(instance, true, segment.endpoints[0].xdisplay, segment.endpoints[0].ydisplay,
+                                segment.endpoints[0].zdisplay, &segment.endpoints[0].xlon, &segment.endpoints[0].ylat,
+                                &segment.endpoints[0].xgrid, &segment.endpoints[0].ygrid);
+          mbview_getzdata(instance, segment.endpoints[0].xgrid, segment.endpoints[0].ygrid, &ok,
+                          &segment.endpoints[0].zdata);
 
-        /* get second point */
-        segment.endpoints[1].xdisplay = data->area.endpoints[1].xdisplay + dxuse;
-        segment.endpoints[1].ydisplay = data->area.endpoints[1].ydisplay + dyuse;
-        segment.endpoints[1].zdisplay = data->area.endpoints[1].zdisplay;
-        mbview_projectinverse(instance, true, segment.endpoints[1].xdisplay, segment.endpoints[1].ydisplay,
-                              segment.endpoints[1].zdisplay, &segment.endpoints[1].xlon, &segment.endpoints[1].ylat,
-                              &segment.endpoints[1].xgrid, &segment.endpoints[1].ygrid);
-        mbview_getzdata(instance, segment.endpoints[1].xgrid, segment.endpoints[1].ygrid, &ok,
-                        &segment.endpoints[1].zdata);
+          /* get second point */
+          segment.endpoints[1].xdisplay = data->area.endpoints[1].xdisplay + dxuse;
+          segment.endpoints[1].ydisplay = data->area.endpoints[1].ydisplay + dyuse;
+          segment.endpoints[1].zdisplay = data->area.endpoints[1].zdisplay;
+          mbview_projectinverse(instance, true, segment.endpoints[1].xdisplay, segment.endpoints[1].ydisplay,
+                                segment.endpoints[1].zdisplay, &segment.endpoints[1].xlon, &segment.endpoints[1].ylat,
+                                &segment.endpoints[1].xgrid, &segment.endpoints[1].ygrid);
+          mbview_getzdata(instance, segment.endpoints[1].xgrid, segment.endpoints[1].ygrid, &ok,
+                          &segment.endpoints[1].zdata);
 
-        /* drape line and get max topo */
-        mbview_drapesegment(instance, &(segment));
-        maxtopo = -9999999.9;
-        if (segment.endpoints[0].zdata < -sonar_depth) {
-          maxtopo = segment.endpoints[0].zdata;
-        }
-        if (segment.endpoints[1].zdata < -sonar_depth && segment.endpoints[1].zdata > maxtopo) {
-          maxtopo = segment.endpoints[1].zdata;
-        }
-        for (int i = 0; i < segment.nls; i++) {
-          if (segment.lspoints[i].zdata < -sonar_depth)
-            maxtopo = MAX(maxtopo, segment.lspoints[i].zdata);
-        }
+          /* drape line and get max topo */
+          mbview_drapesegment(instance, &(segment));
+          maxtopo = -9999999.9;
+          if (segment.endpoints[0].zdata < -sonar_depth) {
+            maxtopo = segment.endpoints[0].zdata;
+          }
+          if (segment.endpoints[1].zdata < -sonar_depth && segment.endpoints[1].zdata > maxtopo) {
+            maxtopo = segment.endpoints[1].zdata;
+          }
+          for (int i = 0; i < segment.nls; i++) {
+            if (segment.lspoints[i].zdata < -sonar_depth)
+              maxtopo = MAX(maxtopo, segment.lspoints[i].zdata);
+          }
 
-        /* figure minimum swath width and location of next line */
-        sonar_altitude = -maxtopo - sonar_depth;
-        line_spacing = sonar_altitude * 2.0 * tan(DTR * 0.5 * (double)survey_swathwidth);
-        line_spacing_use = line_spacing * r / data->area.width;
-        xx[nlines] = xx[nlines - 1] + dsign * line_spacing_use;
-        nlines++;
+          /* figure minimum swath width and location of next line */
+          sonar_altitude = -maxtopo - sonar_depth;
+          line_spacing = sonar_altitude * 2.0 * tan(DTR * 0.5 * (double)survey_swathwidth);
+          line_spacing_use = line_spacing * r / data->area.width;
+          xx[nlines] = xx[nlines - 1] + dsign * line_spacing_use;
+          nlines++;
+        }
       }
 
       /* deallocate segment points */
@@ -7354,16 +7475,11 @@ void do_mbgrdviz_arearoute_parameterchange(Widget w, XtPointer client_data, XtPo
     ac++;
     XtGetValues(spinText_arearoute_depth, args, ac);
 
-    char *tmp = XmTextGetString(textField_arearoute_name);
-    if (tmp != NULL && strlen(tmp) > 0)
-      strcpy(survey_name, tmp);
-    else {
-      if (strlen(survey_name) <= 0)
-        sprintf(survey_name, "Survey");
+    mb_get_text_string(textField_arearoute_name, survey_name, sizeof(survey_name));
+    if (strlen(survey_name) <= 0) {
+      sprintf(survey_name, "Survey");
       XmTextSetString(textField_arearoute_name, survey_name);
     }
-    if (tmp != NULL)
-      XtFree(tmp);
 
     fprintf(stderr, "\nIn do_mbgrdviz_arearoute_parameterchange:\n");
     fprintf(stderr, "  survey_mode:                %d\n", survey_mode);
