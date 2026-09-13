@@ -9,7 +9,7 @@ Version 5.0
 .SH SYNOPSIS
 mbgrdtilemaker \fB\-\-input=\fP\fIinputGridFile\fP \fB\-\-output=\fP\fIoutputRoot\fP
 [\fB\-\-tile\-dimension=\fP\fItileDimension\fP \fB\-\-tile\-spacing=\fP\fItileSpacing\fP
-\fB\-\-mode=\fP\fImode\fP \fB\-\-verbose\fP \fB\-\-help\fP]
+\fB\-\-verbose\fP \fB\-\-help\fP]
 
 .SH DESCRIPTION
 \fBMbgrdtilemaker\fP reads an input GMT/netCDF topography grid and breaks it
@@ -91,19 +91,16 @@ units (typically meters). When given, the tile dimension (number of nodes
 per side) is calculated from \fItileSpacing\fP and the input grid's node
 spacing, overriding any value set with \fB\-\-tile\-dimension\fP.
 .TP
-.B \-\-mode=\fImode\fP, \fB\-M\fP\fImode\fP
-.br
-Sets a tiling mode value. In the current implementation this value is
-parsed and stored but does not otherwise change the behavior of the
-program.
-.TP
 .B \-\-verbose
-The \fB\-\-verbose\fP option causes \fBmbgrdtilemaker\fP to print out additional
-status and debug messages; repeating it redirects this output to stderr
-and increases the level of detail reported. Note that \fBmbgrdtilemaker\fP
-prints a substantial amount of progress information (input grid
-parameters, output tileset parameters, and a line per tile and per
-\fBmbgrd2octree\fP invocation) to stdout regardless of this setting.
+By default (\fB\-\-verbose\fP not given) \fBmbgrdtilemaker\fP prints only a modest
+summary: a line identifying the input grid and, at the end of the run, a
+line giving the number of tiles generated and the output location. Giving
+\fB\-\-verbose\fP (or \fB\-V\fP) at least once raises the level of detail reported,
+causing \fBmbgrdtilemaker\fP to also print the full input grid parameters,
+the full output tileset parameters, and a line per tile and per
+\fBmbgrd2octree\fP invocation as the tiles are generated. Repeating
+\fB\-\-verbose\fP a second time additionally redirects all of this output to
+stderr instead of stdout and adds a further level of debug detail.
 
 .SH SEE ALSO
 \fBmbsystem\fP(1), \fBmbgrd2octree\fP(1), \fBmbtrnpp\fP(1), \fBmbgrid\fP(1)

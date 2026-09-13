@@ -15,7 +15,7 @@ mbgetphotocorrection [\fB\-\-verbose\fP \fB\-\-help\fP \fB\-\-threads=\fP\fInthr
 \fB\-\-reference\-gain=\fP\fIgain\fP \fB\-\-reference\-exposure=\fP\fIexposure\fP
 \fB\-\-platform\-file=\fP\fIplatform.plf\fP \fB\-\-camera\-sensor=\fP\fIid\fP
 \fB\-\-nav\-sensor=\fP\fIid\fP \fB\-\-sensordepth\-sensor=\fP\fIid\fP
-\fB\-\-heading\-sensor=\fP\fIid\fP \fB\-\-altitude\-sensor=\fP\fIid\fP
+\fB\-\-heading\-sensor=\fP\fIid\fP
 \fB\-\-attitude\-sensor=\fP\fIid\fP
 \fB\-\-use\-left\-camera\fP | \fB\-\-use\-right\-camera\fP | \fB\-\-use\-both\-cameras\fP
 \fB\-\-calibration\-file=\fP\fIstereocalibration.yaml\fP
@@ -187,11 +187,6 @@ Overrides the platform model's pressure/depth source sensor id number.
 .B \-\-heading\-sensor=\fIheading_sensor_id\fP
 .br
 Overrides the platform model's heading source sensor id number.
-.TP
-.B \-\-altitude\-sensor=\fIaltitude_sensor_id\fP
-.br
-Sets the platform sensor id number used as the altitude source. This value is
-parsed but is not applied to the platform model by the current implementation.
 .TP
 .B \-\-attitude\-sensor=\fIattitude_sensor_id\fP
 .br

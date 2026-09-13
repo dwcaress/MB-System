@@ -297,8 +297,7 @@ int main(int argc, char **argv) {
 		bool errflg = false;
 		bool help = false;
 		int c;
-		bool ofile_set = false;  // TODO(schwehr): Is this used for anything?
-		while ((c = getopt(argc, argv, "A:a:B:b:D:d:F:f:G:g:I:i:J:j:K:k:LlM:m:N:n:O:o:T:t:VvHh")) != -1)
+		while ((c = getopt(argc, argv, "A:a:B:b:D:d:F:f:G:g:I:i:J:j:K:k:LlM:m:N:n:T:t:VvHh")) != -1)
 		{
 			switch (c) {
 			case 'H':
@@ -403,11 +402,6 @@ int main(int argc, char **argv) {
 				}
 				break;
 			}
-			case 'O':
-			case 'o':
-				sscanf(optarg, "%1023s", ofile);
-				ofile_set = true;
-				break;
 			case 'T':
 			case 't':
 			{
@@ -469,8 +463,6 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "dbg2       read_file:             %s\n", read_file);
 			fprintf(stderr, "dbg2       use_platform_file:     %d\n", use_platform_file);
 			fprintf(stderr, "dbg2       platform_file:         %s\n", platform_file);
-			fprintf(stderr, "dbg2       ofile:                 %s\n", ofile);
-			fprintf(stderr, "dbg2       ofile_set:             %d\n", ofile_set);
 			fprintf(stderr, "dbg2       projection_set:        %d\n", projection_set);
 			fprintf(stderr, "dbg2       proj4command:          %s\n", proj4command);
 			fprintf(stderr, "dbg2       navfile:               %s\n", navfile);
@@ -739,12 +731,12 @@ int main(int argc, char **argv) {
 			                                MB_SENSOR_CAPABILITY2_TOPOGRAPHY_MULTIBEAM, 2, 0, &error);
     }
 		if (status == MB_SUCCESS)
-			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 0, 0, offset_sonar_mode, offset_sonar_x,
-			                                       offset_sonar_y, offset_sonar_z, offset_sonar_mode, offset_sonar_heading,
+			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 0, 0, offset_sonar_x,
+			                                       offset_sonar_y, offset_sonar_z, offset_sonar_heading,
 			                                       offset_sonar_roll, offset_sonar_pitch, &error);
 		if (status == MB_SUCCESS)
-			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 0, 1, offset_sonar_mode, offset_sonar_x,
-			                                       offset_sonar_y, offset_sonar_z, offset_sonar_mode, offset_sonar_heading,
+			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 0, 1, offset_sonar_x,
+			                                       offset_sonar_y, offset_sonar_z, offset_sonar_heading,
 			                                       offset_sonar_roll, offset_sonar_pitch, &error);
 
 		/* set sensor 1 (position sensor) */
@@ -752,8 +744,8 @@ int main(int argc, char **argv) {
 			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_POSITION, nullptr, nullptr, nullptr, 0, 0, 1,
 			                                ntimelag, &error);
 		if (status == MB_SUCCESS)
-			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 1, 0, offset_nav_mode, offset_nav_x, offset_nav_y,
-			                                       offset_nav_z, false, 0.0, 0.0, 0.0, &error);
+			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 1, 0, offset_nav_x, offset_nav_y,
+			                                       offset_nav_z, 0.0, 0.0, 0.0, &error);
 		if (status == MB_SUCCESS && ntimelag > 0)
 			status = mb_platform_set_sensor_timelatency(verbose, (void *)platform, 1, timelagmode, timelagconstant, ntimelag,
 			                                            timelag_time_d, timelag_model, &error);
@@ -763,8 +755,8 @@ int main(int argc, char **argv) {
 			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_COMPASS, nullptr, nullptr, nullptr, 0, 0, 1,
 			                                ntimelag, &error);
 		if (status == MB_SUCCESS)
-			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 2, 0, offset_mru_mode, offset_mru_x, offset_mru_y,
-			                                       offset_mru_z, false, 0.0, 0.0, 0.0, &error);
+			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 2, 0, offset_mru_x, offset_mru_y,
+			                                       offset_mru_z, 0.0, 0.0, 0.0, &error);
 		if (status == MB_SUCCESS && ntimelag > 0)
 			status = mb_platform_set_sensor_timelatency(verbose, (void *)platform, 2, timelagmode, timelagconstant, ntimelag,
 			                                            timelag_time_d, timelag_model, &error);
@@ -774,8 +766,8 @@ int main(int argc, char **argv) {
 			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_VRU, nullptr, nullptr, nullptr, 0, 0, 1, ntimelag,
 			                                &error);
 		if (status == MB_SUCCESS)
-			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 3, 0, offset_mru_mode, offset_mru_x, offset_mru_y,
-			                                       offset_mru_z, false, 0.0, 0.0, 0.0, &error);
+			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 3, 0, offset_mru_x, offset_mru_y,
+			                                       offset_mru_z, 0.0, 0.0, 0.0, &error);
 		if (status == MB_SUCCESS && ntimelag > 0)
 			status = mb_platform_set_sensor_timelatency(verbose, (void *)platform, 3, timelagmode, timelagconstant, ntimelag,
 			                                            timelag_time_d, timelag_model, &error);

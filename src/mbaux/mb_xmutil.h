@@ -32,6 +32,13 @@ extern "C" {
  * string XmTextGetString() returns. */
 void mb_get_text_string(Widget w, String str, size_t len);
 
+/* Diagnose why opening path failed (or would fail) and fill in three
+ * caller-owned line buffers, each of at least linesize bytes, with a
+ * user-facing error message that distinguishes "file does not exist" from
+ * "permission denied" from "path too long" from other causes - rather than
+ * asserting one fixed (and often wrong) explanation for every failure. */
+void mb_file_open_error_message(const char *path, char *line1, char *line2, char *line3, size_t linesize);
+
 #ifdef __cplusplus
 }
 #endif

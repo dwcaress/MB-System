@@ -1,0 +1,298 @@
+.TH mbpy_xyplot 1 "13 September 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbpy_xyplot\fP \- Create an executable shellscript which will generate
+a GMT modern-mode plot of xy data from one or more data files.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbpy_xyplot\fP \fB\-I\fP\fIfile\fP[\fB:\fP\fIkey=value...\fP]
+[\fB-I\fP\fIfile\fP[\fB:\fP\fIkey=value...\fP] ...]
+[\fB\-O\fP\fIroot\fP]
+[\fB\-\-format\fP\fIfmt\fP]
+[\fB\-\-title\fP\fItext\fP]
+[\fB\-\-xlabel\fP\fItext\fP]
+[\fB\-\-ylabel\fP\fItext\fP]
+[\fB\-\-dpi\fP\fIdpi\fP]
+[\fB\-X\fP] [\fB\-V\fP]
+.br
+[\fB\-R\fP\fIxmin/xmax/ymin/ymax\fP[\fIr\fP]]
+[\fB\-J\fP\fIspec\fP]
+[\fB\-P\fP\fIpagesize\fP]
+[\fB\-\-portrait\fP | \fB\-\-landscape\fP]
+[\fB\-B\fP\fIspec\fP]
+[\fB\-\-length\-scale\fP\fIspec\fP]
+.br
+[\fB\-S\fP\fIsymbol\fP]
+[\fB\-G\fP\fIcolor\fP]
+[\fB\-W\fP\fIpen\fP]
+.br
+[\fB\-\-coast\fP]
+[\fB\-\-coast\-resolution\fP\fI{f,h,i,l,c}\fP]
+[\fB\-\-coast\-dry\-fill\fP\fIcolor\fP]
+[\fB\-\-coast\-wet\-fill\fP\fIcolor\fP]
+[\fB\-\-coast\-lake\-fill\fP\fIcolor\fP]
+[\fB\-\-coast\-river\fP\fIcolor\fP]
+[\fB\-\-coast\-boundary\fP\fIspec\fP]
+[\fB\-\-coast\-pen\fP\fIpen\fP]
+.br
+[\fB\-\-text\fP\fIlon/lat/size/angle/font/justify/text\fP]
+.br
+[\fB\-\-gmt\-default\fP\fIparam/value\fP]
+
+.SH DESCRIPTION
+\fBmbpy_xyplot\fP is a Python/PyGMT-era replacement for the Perl macro
+\fBmbm_xyplot\fP. It reads one or more xy data files and generates an
+executable shellscript of \fBGMT\fP \fBmodern mode\fP commands (\fBgmt
+begin\fP / \fBgmt end\fP) which, when run, plots them as lines,
+symbols, or both, optionally overlaid with a coastline and/or text
+labels. Axes may be an auto-fit linear (Cartesian) scale or any GMT map
+projection.
+
+The plot is scaled to fit the specified page size using the same
+page-layout, projection-fitting, and tick-interval heuristics as
+\fBmbm_histplot\fP -- confirmed by direct comparison of the two Perl
+macros' own sources to be identical (aside from whitespace), and
+distinct from \fBmbm_grdplot\fP's own versions of the same
+computations (see \fBmbpy_histplot\fP(1)). In particular, when no
+\fB\-\-projection\fP is given, \fBmbpy_xyplot\fP computes two
+\fIindependent\fP x and y scales that each separately stretch to fill
+the page (unlike \fBmbpy_grdplot\fP/\fBmbpy_grd3dplot\fP's single
+aspect-ratio-preserving scale, which would be wrong here since an xy
+plot's x and y axes routinely have unrelated units and ranges -- e.g. a
+time-series plot).
+
+Unlike \fBmbm_xyplot\fP's single-letter \fB\-M\fP\fIsub\fP\fB:\fP\fIsub\fP\fB:\fP...
+grammar for coastline/text-label/length-scale tuning, \fBmbpy_xyplot\fP
+exposes each of those as its own descriptive long option (see OPTIONS
+below).
+
+\fBmbpy_xyplot\fP never writes a persistent temporary file, unlike
+\fBmbm_xyplot\fP itself: for every input file, \fBmbm_xyplot\fP
+preprocesses (delimiter-splits and, if requested, applies a column-
+selection/math expression to) the data into a file named
+\fI<input><n>.<pid>\fP left behind in the current directory after every
+run, whether or not the plot script is ever executed. \fBmbpy_xyplot\fP
+instead performs the equivalent column-selection/math once in memory,
+in Python, to determine the auto-fit plot bounds, and at plot time
+pipes each input file through a small \fBawk\fP(1) program straight
+into \fBgmt plot\fP's standard input -- a live, ephemeral pipe, with
+nothing written to disk.
+
+Each \fB\-\-input\fP file may carry its own colon-separated overrides,
+in \fIkey\fP\fB=\fP\fIvalue\fP form:
+\fBsymbol=\fP, \fBfill=\fP, \fBpen=\fP (styling, defaulting from
+\fB\-S\fP/\fB\-G\fP/\fB\-W\fP), \fBdelimiter=\fP (default: whitespace),
+and \fBxexpr=\fP/\fByexpr=\fP (column-selection/math expressions using
+\fBmbm_xyplot\fP's own \fBc[\fP\fIN\fP\fB]\fP field-selection and
+\fB#\fP line-number mini-language, e.g. \fBc[3]\fP or \fBc[3]*2+1\fP;
+default \fBxexpr=c[1]\fP, \fByexpr=c[2]\fP). A line beginning with
+\fB>\fP is always passed through unchanged as a multi-segment marker,
+matching \fBmbm_xyplot\fP's (and \fBgmt plot\fP's) own convention.
+
+A genuine bug was found and fixed while validating this port against
+real-world data: \fBmbm_xyplot\fP's own per-line numeric-result check
+is unintentionally a no-op (its validation regex is satisfied by the
+empty string), so an ordinary text header line at the top of a data
+file passes through into the plotted file unfiltered -- and because
+\fBgmt plot\fP infers each column's data type from the \fIfirst\fP
+record it reads, a single such non-numeric first line makes it silently
+discard every subsequent, perfectly valid row instead of just that one
+line. \fBmbpy_xyplot\fP validates each computed x/y pair with a real
+numeric check instead, skipping (with a warning) only the genuinely
+bad lines.
+
+A related, deliberate addition with no equivalent in \fBmbm_xyplot\fP
+at all: a data column that is exactly constant (e.g. a real "heave"
+trace logged as 0.0 for an entire survey) collapses to a zero-width
+axis that neither classic nor modern GMT can project. \fBmbpy_xyplot\fP
+pads such a degenerate axis by a small margin so it still plots as a
+visible flat line instead of aborting.
+
+\fBmbpy_xyplot\fP requires \fBGMT\fP 6 or later (modern mode), a POSIX
+\fBawk\fP(1), and a Python 3 interpreter. It depends on
+\fBmbpy_layout.py\fP and \fBbaseline_gmt_defaults()\fP from
+\fBmbpy_grdplot_script.py\fP (shared with \fBmbpy_grdplot\fP/
+\fBmbpy_grd3dplot\fP), and reuses the page-size/tick-interval helper
+functions from \fBmbpy_histplot_script.py\fP, plus its own
+\fBmbpy_xyplot_script.py\fP, all installed alongside it.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian do Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-I\fP, \fB\-\-input\fP \fIfile\fP[\fB:\fP\fIkey=value...\fP]
+An xy data file to plot, with optional colon-separated overrides
+\fBsymbol=\fP, \fBfill=\fP, \fBpen=\fP, \fBdelimiter=\fP, \fBxexpr=\fP,
+\fByexpr=\fP (see DESCRIPTION). Repeatable; required at least once.
+.TP
+.B \-O\fP, \fB\-\-output\fP \fIroot\fP
+Output root name. Default: the first \fB\-\-input\fP file's basename
+with its extension removed.
+.TP
+.B \-\-format \fIfmt\fP
+Output format passed to \fBgmt figure\fP: \fBpdf\fP, \fBpng\fP,
+\fBps\fP, \fBjpg\fP, \fBtif\fP, \fBeps\fP, ... Default \fBpdf\fP.
+.TP
+.B \-\-title \fItext\fP
+Plot title, placed above the frame.
+.TP
+.B \-\-xlabel \fItext\fP, \fB\-\-ylabel \fItext\fP
+Axis labels. Only used for a linear/Cartesian projection (an auto-fit
+default, or an explicit \fB\-Jx\fP/\fB\-JX\fP); a geographic or other
+map projection has no per-axis label, matching \fBmbm_xyplot\fP.
+.TP
+.B \-\-dpi \fIdpi\fP
+The final raster's resolution (via \fBgmt figure\fP).
+.TP
+.B \-X\fP, \fB\-\-execute
+Run the generated script immediately after writing it.
+.TP
+.B \-V\fP, \fB\-\-verbose
+Print the generated script's path and a one-line summary.
+.TP
+.B \-R\fP, \fB\-\-region \fIxmin/xmax/ymin/ymax\fP[\fIr\fP]
+Plot region. Fields may be given as \fIdd:mm:ss\fP. A trailing \fBr\fP
+means the four values are two corner points (southwest, northeast)
+rather than a w/e/s/n range; a bare \fBr\fP reformats the
+auto-computed data bounds into that corner-point form. Default: computed
+from the data itself.
+.TP
+.B \-J\fP, \fB\-\-projection \fIspec\fP
+GMT map scale/projection spec, e.g. \fBx0.02\fP (linear, 0.02 inch/unit),
+\fBm1.0\fP (Mercator, 1 inch/degree). Default: an auto-fit linear
+projection with independent x and y scales (see DESCRIPTION), chosen to
+fill the page.
+.TP
+.B \-P\fP, \fB\-\-pagesize \fIsize\fP
+Page size code: \fBa\fP\-\fBf\fP, \fBe1\fP (US sizes), \fBa0\fP\-\fBa10\fP,
+\fBb0\fP\-\fBb10\fP, \fBc0\fP\-\fBc7\fP (ISO/architectural), or \fBm1\fP\-\fBm6\fP
+(large-format). Default \fBa\fP.
+.TP
+.B \-\-portrait\fP, \fB\-\-landscape
+Force the page orientation instead of choosing automatically; when
+neither is given, this auto-fit independent-scale mode defaults to
+landscape, matching \fBmbm_xyplot\fP/\fBmbm_histplot\fP.
+.TP
+.B \-B\fP, \fB\-\-tick\-info \fIspec\fP
+Raw \fB\-B\fP basemap tick-interval spec, overriding the automatically
+computed one.
+.TP
+.B \-\-length\-scale \fIspec\fP
+A GMT distance (map) scale bar spec, passed as \fB\-L\fP\fIspec\fP on
+\fBgmt basemap\fP, e.g. \fBfx10/2/32.70/5.0+lkm\fP (\fBmbm_xyplot\fP's
+\fB\-MGL\fP). The literal word \fBcenter\fP appearing between two
+slashes is replaced with the plot's own data center (e.g.
+\fBfxcenter/5.0+lkm\fP), matching \fBmbm_xyplot\fP's own substitution.
+.TP
+.B \-S\fP, \fB\-\-symbol \fIsymbol\fP
+Default GMT symbol code and size for every \fB\-\-input\fP file that
+does not set its own \fBsymbol=\fP, e.g. \fBc0.1\fP (circle, 0.1 inch).
+Default: none (points are connected with a line instead).
+.TP
+.B \-G\fP, \fB\-\-fill \fIcolor\fP
+Default symbol/polygon fill color for every \fB\-\-input\fP file that
+does not set its own \fBfill=\fP. Default: none.
+.TP
+.B \-W\fP, \fB\-\-pen \fIpen\fP
+Default line pen for every \fB\-\-input\fP file that does not set its
+own \fBpen=\fP, e.g. \fB1p,black\fP. Default: none.
+.TP
+.B \-\-coast
+Enable a coastline overlay (\fBgmt coast\fP), drawn \fIafter\fP the xy
+data plots and \fIbefore\fP text labels and the basemap frame, matching
+\fBmbm_xyplot\fP's own layer order exactly (data points that fall on a
+solid land fill are covered by it, just as in the classic macro).
+.TP
+.B \-\-coast\-resolution \fI{f,h,i,l,c}\fP
+Coastline database resolution: full, high, intermediate, low, crude.
+Default \fBf\fP when \fB\-\-coast\fP is enabled with no other coastline
+option given.
+.TP
+.B \-\-coast\-dry\-fill\fP, \fB\-\-coast\-wet\-fill\fP, \fB\-\-coast\-lake\-fill \fIcolor\fP
+Fill colors for land, water, and lakes. \fB\-\-coast\-dry\-fill\fP
+defaults to \fB200\fP (a mid-gray) when \fB\-\-coast\fP is enabled with
+no fill, pen, river, or boundary option given at all -- an
+\fBmbm_xyplot\fP-specific default with no equivalent in
+\fBmbm_grdplot\fP/\fBmbpy_grdplot\fP.
+.TP
+.B \-\-coast\-river \fIcolor\fP
+Draw rivers in the given color.
+.TP
+.B \-\-coast\-boundary \fIspec\fP
+Draw a national boundary; repeatable.
+.TP
+.B \-\-coast\-pen \fIpen\fP
+Pen for the coastline itself. Defaults to \fB1p\fP together with the
+\fB\-\-coast\-dry\-fill\fP default described above.
+.TP
+.B \-\-text \fIlon/lat/size/angle/font/justify/text\fP
+Place a text label (\fBgmt text\fP), e.g.
+\fB\-122.2/36.6/12/0/1/LB/Monterey Bay\fP. Repeatable.
+.TP
+.B \-\-gmt\-default \fIparam/value\fP
+Override a GMT default parameter for this plot (e.g.
+\fBMAP_FRAME_TYPE/plain\fP); repeatable.
+
+.SH EXAMPLES
+Plot a single time series of sensor depth values as a thin connecting
+line, rendered directly to a PNG:
+
+.br
+ mbpy_xyplot \-I "depth_vs_time.txt:pen=0.5p,blue" \-O depth_ts \\
+.br
+     \-\-title "Sensor Depth vs Time" \-\-xlabel "Time (s)" \\
+.br
+     \-\-ylabel "Sensor Depth (m)" \\
+.br
+     \-\-pagesize b \-\-landscape \-\-format png \-\-dpi 150 \-\-execute \-V
+
+Plot navigation fixes from a comma-delimited file (selecting the
+longitude and latitude columns explicitly) as symbols, with a
+coastline underlay:
+
+.br
+ mbpy_xyplot \-I "fixes.csv:delimiter=,:xexpr=c[2]:yexpr=c[3]:symbol=c0.05:fill=red" \\
+.br
+     \-O fixes_plot \-\-title "Vehicle Fixes" \\
+.br
+     \-\-coast \-\-coast\-resolution i \\
+.br
+     \-\-format png \-\-execute \-V
+
+Plot two data files together, one as a line and one as symbols, over a
+user-specified region:
+
+.br
+ mbpy_xyplot \-I "reference.xy:pen=1p,black" \\
+.br
+     \-I "observed.xy:symbol=c0.08:fill=red" \\
+.br
+     \-O comparison \-R "\-10/110/\-5/55" \\
+.br
+     \-\-title "Reference vs Observed" \-\-format pdf \-V
+
+.SH SEE ALSO
+\fBmbm_xyplot\fP(1), \fBmbpy_grdplot\fP(1), \fBmbpy_grd3dplot\fP(1),
+\fBmbpy_histplot\fP(1), \fBawk\fP(1), \fBmbdefaults\fP(1),
+\fBmbsystem\fP(1)
+
+.SH BUGS
+Please report any bugs to the MB-System project on GitHub
+(https://github.com/dwcaress/MB-System).

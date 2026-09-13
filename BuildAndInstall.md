@@ -122,6 +122,35 @@ both Intel and ARM (Apple Silicon) architecture computers.
         sudo port -v selfupdate    
         sudo port install gmt6 fftw-3 mesa libGLU openmotif opencv4  
 
+  MacPorts occasionally publishes a broken `mesa` release (for example, 26.2.2). If 
+  MB-System's graphical utilities fail to build or run after a `mesa` update, you can 
+  force MacPorts to stay on (or revert to) a working version:
+
+        # If an older mesa is still installed but inactive, just reactivate it:
+        port installed mesa
+        sudo port activate mesa @<old-version>_<revision>
+
+        # Otherwise, pull an older Portfile and serve it from a local port repository
+        # that takes precedence over the default MacPorts source, then reinstall:
+        git clone --depth 1 https://github.com/macports/macports-ports.git /tmp/macports-ports-old
+        cd /tmp/macports-ports-old
+        git log --oneline -- graphics/mesa/Portfile   # find a commit before the broken bump
+        git checkout <good-commit> -- graphics/mesa/Portfile
+        sudo mkdir -p /opt/local/var/macports/local_ports/graphics/mesa
+        sudo cp graphics/mesa/Portfile /opt/local/var/macports/local_ports/graphics/mesa/
+        cd /opt/local/var/macports/local_ports && sudo portindex
+        # Add "file:///opt/local/var/macports/local_ports" above the rsync line in
+        # /opt/local/etc/macports/sources.conf, then:
+        sudo port -f uninstall mesa
+        sudo port install mesa
+
+  Either way, pin the version so a later `sudo port upgrade outdated` does not pull the 
+  broken release back in:
+
+        sudo port pin mesa
+
+  Run `sudo port unpin mesa` once a fixed `mesa` release is available upstream.
+
 * Also make sure that a current version of Python3 is available. First list  
   the available Python3 versions, install the most recent, and then set port  
   to link that version to python3:  

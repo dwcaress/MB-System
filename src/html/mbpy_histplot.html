@@ -1,0 +1,285 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbpy_histplot</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbpy_histplot</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  12 September 2026 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbpy_histplot</B> - Create an executable shellscript which will generate
+a GMT modern-mode frequency histogram plot of a set of data values.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbpy_histplot</B> <B>-I</B><I>file</I> [<B>-O</B><I>root</I>]
+[<B>--format</B><I>fmt</I>]
+[<B>--title</B><I>text</I>]
+[<B>--xlabel</B><I>text</I>]
+[<B>--ylabel</B><I>text</I>]
+[<B>--dpi</B><I>dpi</I>]
+[<B>-X</B>] [<B>-V</B>]
+<BR>
+
+[<B>-C</B>[<I>xmin/xmax/</I>]<I>width</I>]
+[<B>-G</B><I>color</I>]
+[<B>-W</B><I>pen</I>]
+<BR>
+
+[<B>-R</B><I>xmin/xmax/ymin/ymax</I>]
+[<B>-J</B><I>spec</I>]
+[<B>-P</B><I>pagesize</I>]
+[<B>--portrait</B> | <B>--landscape</B>]
+[<B>--tick-info</B><I>spec</I>]
+<BR>
+
+[<B>--gmt-default</B><I>param/value</I>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbpy_histplot</B> is a Python/PyGMT-era replacement for the Perl
+macro <B>mbm_histplot</B>. It reads a file containing one data value per
+line and generates an executable shellscript of <B>GMT</B> <B>modern
+mode</B> commands, built around <B>gmt histogram</B> (the modern-mode
+name for classic <B>pshistogram</B>), which produces a frequency
+histogram of those values when run: the bars show what percentage of
+the data falls in each value bin, and mean / [+-]1 standard deviation /
+[+-]2 standard deviation normal-distribution curves are always overlaid
+(in black, red, and green respectively) for reference.
+<P>
+<B>mbpy_histplot</B> shares its page-layout and projection-fitting
+conventions with <B>mbpy_grdplot</B> and <B>mbpy_grd3dplot</B> (and, in
+fact, the underlying <B>mbpy_layout.py</B> module), except that its
+default projection is a plain linear/Cartesian one (matching
+<B>mbm_histplot</B>'s own default of <B>-Jx</B>, rather than the
+Mercator/auto-fit default the grid-plotting macros use) -- appropriate
+since a histogram's axes are ordinary numeric value/percentage scales,
+not geographic coordinates.
+<P>
+Unlike <B>mbm_histplot</B>'s <B>-L</B><I>title</I><B>:</B><I>xlabel</I><B>:</B><I>ylabel</I>
+colon-joined label option, <B>mbpy_histplot</B> exposes
+<B>--title</B>/<B>--xlabel</B>/<B>--ylabel</B> as separate options.
+<P>
+<B>mbpy_histplot</B> does not expose a data-rescaling, xy-overlay, or
+custom CPT-file option: <B>mbm_histplot</B> itself refers to variables
+for all of these ($data_scale, @xyfiles, $file_cpt) that are never
+actually assigned from any command-line option in its own source --
+they are leftover, unreachable copy-paste from the <B>mbm_grdplot</B>
+template <B>mbm_histplot</B> was originally cloned from, not real
+functionality.
+<P>
+<B>Note:</B> classic <B>pshistogram</B>'s outline-pen option was
+<B>-L</B><I>pen</I>; the current <B>gmt histogram</B> module (checked
+directly against its own built-in help) has no <B>-L</B> option at all
+and uses <B>-W</B><I>pen</I> instead, like nearly every other GMT
+plotting module's pen option. <B>mbpy_histplot</B>'s own <B>-W</B>/
+<B>--pen</B> option is written out to the generated script using the
+current <B>-W</B> syntax, not the classic <B>-L</B> mbm_histplot's own
+Perl source still emits (which is simply not accepted by a current GMT
+installation).
+<P>
+<B>mbpy_histplot</B> requires <B>GMT</B> 6 or later (modern mode) and a
+Python 3 interpreter. It depends on <B>mbpy_layout.py</B> (shared with
+<B>mbpy_grdplot</B>/<B>mbpy_grd3dplot</B>) and its own
+<B>mbpy_histplot_script.py</B>, installed alongside it.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-I</B>, <B>--input</B> <I>file</I>
+
+<DD>
+Input data file, one numeric value per line. Required.
+<DT><B>-O</B>, <B>--output</B> <I>root</I>
+
+<DD>
+Output root name. Default: the input file's own basename.
+<DT><B>--format </B><I>fmt</I>
+
+<DD>
+Output format passed to <B>gmt figure</B>. Default <B>pdf</B>.
+<DT><B>--title </B><I>text</I>
+
+<DD>
+Plot title. Default: &quot;Frequency Histogram of <I>file</I>&quot;.
+<DT><B>--xlabel </B><I>text</I>
+
+<DD>
+X-axis (value) label. Default: none.
+<DT><B>--ylabel </B><I>text</I>
+
+<DD>
+Y-axis (frequency) label. Default: &quot;Frequency %&quot;.
+<DT><B>--dpi </B><I>dpi</I>
+
+<DD>
+The final raster's resolution (via <B>gmt figure</B>).
+<DT><B>-X</B>, <B>--execute</B>
+
+<DD>
+Run the generated script immediately after writing it.
+<DT><B>-V</B>, <B>--verbose</B>
+
+<DD>
+Print the generated script's path and a one-line summary.
+<DT><B>-C</B>, <B>--cell-width </B><I>[xmin/xmax/]width</I>
+
+<DD>
+Histogram bin width. If given as three slash-separated values, also
+overrides the data's own detected x (value) bounds. Default width:
+(xmax-xmin)/10.
+<DT><B>-G</B>, <B>--fill </B><I>color</I>
+
+<DD>
+Bar fill color, or <B>N</B> for unfilled (outline-only) bars. Default
+<B>gray</B>.
+<DT><B>-W</B>, <B>--pen </B><I>pen</I>
+
+<DD>
+Bar outline pen. Default <B>1p</B>.
+<DT><B>-R</B>, <B>--region </B><I>xmin/xmax/ymin/ymax</I>
+
+<DD>
+Plot region. Default: the data's own value range for x; a y
+(frequency-percent) range computed from a pre-scan of the data, with a
+10% margin above the tallest bin.
+<DT><B>-J</B>, <B>--projection </B><I>spec</I>
+
+<DD>
+GMT projection/scale spec, e.g. <B>x0.02</B> (linear, 0.02 inch/unit).
+Default: an auto-fit linear (Cartesian) projection chosen to fill the
+page.
+<DT><B>-P</B>, <B>--pagesize </B><I>size</I>
+
+<DD>
+Page size code. Default <B>a</B>.
+<DT><B>--portrait</B>, <B>--landscape</B>
+
+<DD>
+Force the page orientation instead of choosing automatically.
+<DT><B>--tick-info </B><I>spec</I>
+
+<DD>
+Raw <B>-B</B> basemap tick-interval spec, overriding the automatically
+computed one.
+<DT><B>--gmt-default </B><I>param/value</I>
+
+<DD>
+Override a GMT default parameter for this plot; repeatable.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+A histogram of a column of survey depth values, with custom bin width,
+fill color, and labels, rendered directly to a PNG:
+<P>
+<BR>
+
+<BR>&nbsp;mbpy_histplot&nbsp;-I&nbsp;depths.txt&nbsp;-O&nbsp;depth_hist&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--cell-width&nbsp;2.5&nbsp;--fill&nbsp;orange&nbsp;--pen&nbsp;&quot;1p,black&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--title&nbsp;&quot;Depth&nbsp;Distribution&quot;&nbsp;--xlabel&nbsp;&quot;Depth&nbsp;(m)&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--format&nbsp;png&nbsp;--execute&nbsp;-V
+<P>
+An outline-only (unfilled) histogram with an explicit bin range:
+<P>
+<BR>
+
+<BR>&nbsp;mbpy_histplot&nbsp;-I&nbsp;values.txt&nbsp;-O&nbsp;values_hist&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--cell-width&nbsp;&quot;0/100/5&quot;&nbsp;--fill&nbsp;N&nbsp;--pen&nbsp;&quot;2p,blue&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--format&nbsp;pdf&nbsp;-V
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbm_histplot.html">mbm_histplot</A></B>(1), <B><A HREF="mbpy_grdplot.html">mbpy_grdplot</A></B>(1), <B><A HREF="mbpy_grd3dplot.html">mbpy_grd3dplot</A></B>(1),
+<B><A HREF="mbpy_xyplot.html">mbpy_xyplot</A></B>(1), <B><A HREF="mbhistogram.html">mbhistogram</A></B>(1), <B><A HREF="mbdefaults.html">mbdefaults</A></B>(1),
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Please report any bugs to the MB-System project on GitHub
+(<A HREF="https://github.com/dwcaress/MB-System).">https://github.com/dwcaress/MB-System).</A>
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 12 September 2026</P></CENTER>
+
+<HR>
+<center>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>

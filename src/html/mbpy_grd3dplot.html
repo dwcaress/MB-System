@@ -1,0 +1,437 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbpy_grd3dplot</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbpy_grd3dplot</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  12 September 2026 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbpy_grd3dplot</B> - Create an executable shellscript which will generate
+a GMT modern-mode 3D perspective plot of gridded data.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbpy_grd3dplot</B> <B>-I</B><I>grid</I> [<B>-O</B><I>root</I>]
+[<B>--format</B><I>fmt</I>]
+[<B>--title</B><I>text</I>]
+[<B>--colorbar-label</B><I>text</I>]
+[<B>--dpi</B><I>dpi</I>]
+[<B>-X</B>] [<B>-V</B>]
+<BR>
+
+[<B>-R</B><I>xmin/xmax/ymin/ymax</I>]
+[<B>-J</B><I>spec</I>]
+[<B>-P</B><I>pagesize</I>]
+[<B>--portrait</B> | <B>--landscape</B>]
+[<B>--scale-location</B><I>{l,r,t,b}</I>]
+[<B>--tick-info</B><I>spec</I>]
+[<B>--length-scale</B><I>spec</I>]
+<BR>
+
+[<B>-E</B><I>azimuth/elevation</I>]
+[<B>-F</B><I>exaggeration</I>]
+[<B>--zscale</B><I>val</I>]
+<BR>
+
+[<B>--color-mode</B><I>{1-7}</I>]
+[<B>-W</B><I>spec</I>]
+[<B>-D</B>]
+[<B>-Y</B>]
+[<B>--stretch-color</B>]
+[<B>-Z</B><I>zmin/zmax</I>]
+[<B>--data-scale</B><I>factor</I>]
+<BR>
+
+[<B>--magnitude</B><I>val</I>]
+[<B>--azimuth</B><I>deg</I>]
+[<B>--elevation</B><I>deg</I>]
+[<B>--shade-flip</B>]
+[<B>--intensity-file</B><I>grid</I>]
+[<B>--stretch-shade</B>]
+<BR>
+
+[<B>--mesh-contour-pen</B><I>pen</I>]
+[<B>--drape-file</B><I>grid</I>]
+[<B>--mesh-null</B>[<I>level/r/g/b</I>]]
+[<B>--mesh-zlevel</B><I>val</I>]
+<BR>
+
+[<B>--coast</B>]
+[<B>--coast-resolution</B><I>{f,h,i,l,c}</I>]
+[<B>--coast-dry-fill</B><I>color</I>]
+[<B>--coast-wet-fill</B><I>color</I>]
+[<B>--coast-lake-fill</B><I>color</I>]
+[<B>--coast-river</B><I>color</I>]
+[<B>--coast-boundary</B><I>spec</I>]
+[<B>--coast-pen</B><I>pen</I>]
+<BR>
+
+[<B>--text</B><I>lon/lat/size/angle/font/justify/text</I>]
+[<B>--gmt-default</B><I>param/value</I>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbpy_grd3dplot</B> is a Python/PyGMT-era replacement for the Perl
+macro <B>mbm_grd3dplot</B>. It reads a grid and generates an executable
+shellscript of <B>GMT</B> <B>modern mode</B> commands, built around
+<B>gmt grdview</B>, which produces a 3D perspective view of that grid
+when run. Several styles of view can be generated: color fill,
+color fill shaded by synthetic illumination, color fill shaded by a
+supplied intensity grid, color fill of slope magnitude, color fill
+shaded by slope magnitude, a plain wireframe mesh, and a wireframe mesh
+with contour lines.
+<P>
+<B>mbpy_grd3dplot</B> shares its page-layout, projection-fitting, and
+color-palette conventions with <B>mbpy_grdplot</B> (and, in fact, its
+underlying Python modules <B>mbpy_layout.py</B>/<B>mbpy_color.py</B>/
+<B>mbpy_misc.py</B>), so a plot's color scheme and overall sizing behave
+the same way across both tools. What is specific to a 3D view is the
+viewpoint (<B>--view</B>, azimuth/elevation of the observer) and the
+vertical exaggeration/z-scale (<B>--exaggeration</B> or
+<B>--zscale</B>): the effective footprint of the plot on the page is
+corrected for the chosen viewing azimuth, and only two of the four
+possible vertical frame walls (whichever face the viewer) are
+annotated.
+<P>
+Unlike <B>mbm_grd3dplot</B>'s single-letter <B>-M</B><I>sub</I><B>:</B><I>sub</I><B>:</B>...
+grammar, <B>mbpy_grd3dplot</B> exposes each concept as its own
+descriptive long option (see OPTIONS below).
+<P>
+<B>mbpy_grd3dplot</B> does not expose a <B>--contour</B> option:
+<B>mbm_grd3dplot</B> itself defines a <B>-C</B><I>contour_control</I>
+option, but that value is never actually passed to any GMT plotting
+command in the original macro -- it is a no-op. The one real contour
+capability <B>mbm_grd3dplot</B> has is drawing contour lines directly on
+a mesh plot via <B>--color-mode</B> 7's <B>--mesh-contour-pen</B>.
+<P>
+<B>Note:</B> on at least GMT 6.7.0, <B>--color-mode</B> 7 (mesh with
+contour lines) can trigger a segmentation fault inside <B>gmt grdview</B>
+itself when a 3D perspective and <B>-Jz</B> vertical scaling are both
+active together with a contour pen (<B>-Qm -W</B><I>pen</I>) -- this
+reproduces regardless of the pen syntax used, and appears to be an
+upstream GMT bug rather than anything <B>mbpy_grd3dplot</B> can control
+or work around. Plain mesh plots (<B>--color-mode</B> 6, no contour
+pen) are unaffected.
+<P>
+<B>mbpy_grd3dplot</B> requires <B>GMT</B> 6 or later (modern mode) and a
+Python 3 interpreter. It depends on the same sibling support modules as
+<B>mbpy_grdplot</B> (<B>mbpy_layout.py</B>, <B>mbpy_color.py</B>,
+<B>mbpy_misc.py</B>) plus its own <B>mbpy_grd3dplot_script.py</B>,
+installed alongside it.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-I</B>, <B>--input</B> <I>grid</I>
+
+<DD>
+Input grid file. Required.
+<DT><B>-O</B>, <B>--output</B> <I>root</I>
+
+<DD>
+Output root name. Default: the input grid's basename with its
+extension removed.
+<DT><B>--format </B><I>fmt</I>
+
+<DD>
+Output format passed to <B>gmt figure</B>. Default <B>pdf</B>.
+<DT><B>--title </B><I>text</I>
+
+<DD>
+Plot title.
+<DT><B>--colorbar-label </B><I>text</I>
+
+<DD>
+Label for the color scale bar. Default <B>z</B>.
+<DT><B>--dpi </B><I>dpi</I>
+
+<DD>
+Rendering resolution: both <B>grdview</B>'s own <B>-Qi</B><I>dpi</I>
+(<B>--color-mode</B> 1-5 only) and the final raster's resolution.
+<DT><B>-X</B>, <B>--execute</B>
+
+<DD>
+Run the generated script immediately after writing it.
+<DT><B>-V</B>, <B>--verbose</B>
+
+<DD>
+Print the generated script's path and a one-line summary.
+<DT><B>-R</B>, <B>--region </B><I>xmin/xmax/ymin/ymax</I>
+
+<DD>
+Plot region. Default: the grid's own bounds.
+<DT><B>-J</B>, <B>--projection </B><I>spec</I>
+
+<DD>
+GMT map projection/scale spec. Default: an auto-fit Mercator
+(geographic grids) or linear (all others) projection chosen to fill
+the page, adjusted for the chosen <B>--view</B> azimuth's apparent
+footprint.
+<DT><B>-P</B>, <B>--pagesize </B><I>size</I>
+
+<DD>
+Page size code. Default <B>a</B>.
+<DT><B>--portrait</B>, <B>--landscape</B>
+
+<DD>
+Force the page orientation instead of choosing automatically.
+<DT><B>--scale-location </B><I>{l,r,t,b}</I>
+
+<DD>
+Color scale bar placement. Default <B>b</B>.
+<DT><B>--tick-info </B><I>spec</I>
+
+<DD>
+Raw <B>-B</B> basemap tick-interval spec (covering x, y, and z axes
+together), overriding the automatically computed one.
+<DT><B>--length-scale </B><I>spec</I>
+
+<DD>
+A GMT distance (map) scale bar spec, passed as <B>-L</B><I>spec</I> on
+<B>gmt basemap</B>.
+<DT><B>-E</B>, <B>--view </B><I>azimuth/elevation</I>
+
+<DD>
+Viewpoint azimuth/elevation of the 3D perspective, e.g. <B>150/15</B>.
+Default <B>240/30</B>. Also determines which two of the four vertical
+frame walls are drawn/annotated.
+<DT><B>-F</B>, <B>--exaggeration </B><I>factor</I>
+
+<DD>
+Vertical exaggeration. If neither this nor <B>--zscale</B> is given,
+the map z-scale defaults to <B>2.0/(zmax-zmin)</B>.
+<DT><B>--zscale </B><I>val</I>
+
+<DD>
+Explicit map z-scale (<B>-Jz</B><I>val</I>), overriding
+<B>--exaggeration</B>.
+<DT><B>--color-mode </B><I>{1-7}</I>
+
+<DD>
+1 plain color fill; 2 color shaded relief; 3 color shaded by a supplied
+intensity grid; 4 color fill of slope magnitude; 5 color shaded by
+slope magnitude; 6 wireframe mesh plot (no color fill); 7 wireframe
+mesh plot with contour lines (see the GMT-bug note above). Default 1.
+<DT><B>-W</B>, <B>--color-control </B><I>spec</I>
+
+<DD>
+Either <I>style</I>[<B>/</B><I>palette</I>[<B>/</B><I>ncolors</I>]], or the
+path to an existing <B>.cpt</B> file to use as-is.
+<DT><B>-D</B>, <B>--color-flip</B>
+
+<DD>
+Reverse the color palette.
+<DT><B>-Y</B>, <B>--no-nice-interval</B>
+
+<DD>
+Use a direct linear color stretch instead of a rounded interval.
+<DT><B>--stretch-color</B>
+
+<DD>
+Histogram-equalize the color stretch (<B>--color-mode</B> 1 only).
+<DT><B>-Z</B>, <B>--zbounds </B><I>zmin/zmax</I>
+
+<DD>
+Override the grid's own detected z-range, affecting the color stretch,
+the vertical axis, and the z-scale/exaggeration calculation.
+<DT><B>--data-scale </B><I>factor</I>
+
+<DD>
+Rescale grid values by <I>factor</I> before colorizing/shading.
+<DT><B>--magnitude </B><I>val</I>, <B>--azimuth </B><I>deg</I>, <B>--elevation </B><I>deg</I>
+
+<DD>
+Illumination/slope-shading parameters for <B>--color-mode</B> 2-5
+(the sun's azimuth/elevation for synthetic illumination, distinct from
+<B>--view</B>'s viewpoint azimuth/elevation).
+<DT><B>--shade-flip</B>
+
+<DD>
+Reverse the shading direction (negates the effective magnitude).
+<DT><B>--intensity-file </B><I>grid</I>
+
+<DD>
+Intensity grid for <B>--color-mode</B> 3.
+<DT><B>--stretch-shade</B>
+
+<DD>
+Histogram-equalize the intensity file first (<B>--color-mode</B> 3 only).
+<DT><B>--mesh-contour-pen </B><I>pen</I>
+
+<DD>
+Draw contour lines directly on the mesh (<B>--color-mode</B> 7 only).
+See the GMT-bug note above.
+<DT><B>--drape-file </B><I>grid</I>
+
+<DD>
+A grid to drape on the relief (<B>grdview</B>'s <B>-G</B>) instead of
+coloring the surface directly from the CPT.
+<DT><B>--mesh-null </B><I>[level/r/g/b]</I>
+
+<DD>
+Null-plane level/color for undefined (NaN) nodes (<B>grdview</B>'s
+<B>-N</B>). If given with no value, defaults to
+<I>&lt;zmin&gt;</I><B>/200/200/200</B>.
+<DT><B>--mesh-zlevel </B><I>val</I>
+
+<DD>
+Z level for the base plane and frame (<B>grdview</B>'s and
+<B>gmt basemap</B>'s <B>-Z</B>).
+<DT><B>--coast</B>
+
+<DD>
+Enable a coastline overlay (<B>gmt coast</B>), projected into the same
+3D perspective.
+<DT><B>--coast-resolution </B><I>{f,h,i,l,c}</I>
+
+<DD>
+Coastline database resolution: full, high, intermediate, low, crude.
+<DT><B>--coast-dry-fill</B>, <B>--coast-wet-fill</B>, <B>--coast-lake-fill </B><I>color</I>
+
+<DD>
+Fill colors for land, water, and lakes.
+<DT><B>--coast-river </B><I>color</I>
+
+<DD>
+Draw rivers in the given color.
+<DT><B>--coast-boundary </B><I>spec</I>
+
+<DD>
+Draw a national boundary; repeatable.
+<DT><B>--coast-pen </B><I>pen</I>
+
+<DD>
+Pen for the coastline itself.
+<DT><B>--text </B><I>lon/lat/size/angle/font/justify/text</I>
+
+<DD>
+Place a text label (<B>gmt text</B>), projected into the 3D view.
+Repeatable.
+<DT><B>--gmt-default </B><I>param/value</I>
+
+<DD>
+Override a GMT default parameter for this plot; repeatable.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+A shaded-relief 3D perspective view, viewed from azimuth 150, elevation
+15 degrees, rendered directly to a 300 dpi PNG:
+<P>
+<BR>
+
+<BR>&nbsp;mbpy_grd3dplot&nbsp;-I&nbsp;topo.grd&nbsp;-O&nbsp;topo3d&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--color-mode&nbsp;2&nbsp;--magnitude&nbsp;0.2&nbsp;--azimuth&nbsp;90&nbsp;--elevation&nbsp;5&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--view&nbsp;150/15&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--title&nbsp;&quot;Survey&nbsp;Area&quot;&nbsp;--colorbar-label&nbsp;&quot;Topography&nbsp;(meters)&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--length-scale&nbsp;&quot;fx10/2/32.70/5.0+lkm&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--pagesize&nbsp;c&nbsp;--dpi&nbsp;300&nbsp;--format&nbsp;png&nbsp;--execute&nbsp;-V
+<P>
+A plain wireframe mesh view:
+<P>
+<BR>
+
+<BR>&nbsp;mbpy_grd3dplot&nbsp;-I&nbsp;topo.grd&nbsp;-O&nbsp;topomesh&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--color-mode&nbsp;6&nbsp;--view&nbsp;210/25&nbsp;--title&nbsp;&quot;Survey&nbsp;Area&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--format&nbsp;png&nbsp;--execute&nbsp;-V
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbm_grd3dplot.html">mbm_grd3dplot</A></B>(1), <B><A HREF="mbpy_grdplot.html">mbpy_grdplot</A></B>(1), <B><A HREF="mbpy_histplot.html">mbpy_histplot</A></B>(1),
+<B><A HREF="mbpy_xyplot.html">mbpy_xyplot</A></B>(1), <B>grdview</B>(1), <B><A HREF="mbdefaults.html">mbdefaults</A></B>(1),
+<B><A HREF="mbgrid.html">mbgrid</A></B>(1), <B><A HREF="mbsystem.html">mbsystem</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Please report any bugs to the MB-System project on GitHub
+(<A HREF="https://github.com/dwcaress/MB-System).">https://github.com/dwcaress/MB-System).</A>
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 12 September 2026</P></CENTER>
+
+<HR>
+<center>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>

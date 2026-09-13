@@ -64,6 +64,7 @@
 
 #include <X11/Intrinsic.h>
 #include "mb_xgraphics.h"
+#include "mb_xmutil.h"
 #include "mbvelocity.h"
 
 static char program_name[] = "MBVELOCITYTOOL";
@@ -2010,8 +2011,11 @@ int mbvt_open_swath_file(char *file, int form, int *numload) {
 		fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 		fprintf(stderr, "\nSwath Sonar File <%s> not initialized for reading\n", swathfile);
 		status = MB_FAILURE;
-		do_error_dialog("Unable to open input swath file.", "File may not exist or you may not have",
-		                "read permission in this directory!");
+		char error1[MB_PATH_MAXLINE];
+		char error2[MB_PATH_MAXLINE];
+		char error3[MB_PATH_MAXLINE];
+		mb_file_open_error_message(swathfile, error1, error2, error3, sizeof(error1));
+		do_error_dialog(error1, error2, error3);
 		return (status);
 	}
 

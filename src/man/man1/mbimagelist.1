@@ -1,10 +1,11 @@
-.TH mbimagelist 1 "7 September 2026" "MB-System 5.0" "MB-System 5.0"
+.TH mbimagelist 1 "11 September 2026" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbimagelist\fP \- parses recursive imagelist structures, performing one or more
 tasks on the image files referenced in the imagelist(s). The default action is to
 print out out the complete list of image file paths; other
-possible tasks include also printing out associated timestamps and camera settings, and
-printing out processing parameter values embedded in the imagelist structure.
+possible tasks include also printing out associated timestamps and camera settings,
+printing out the full imagelist row format, and printing out processing parameter
+values embedded in the imagelist structure.
 
 .SH VERSION
 Version 5.0
@@ -20,9 +21,13 @@ Version 5.0
 .br
 \fB--copyhere\fP
 .br
+\fB--end\fP=\fIyyyy/mm/dd/hh/mm/ss.ssssss\fP
+.br
 \fB--files\fP   {\fB-F\fP}
 .br
 \fB--help\fP   {\fB-H\fP}
+.br
+\fB--imagelist\fP
 .br
 \fB--input\fP=\fIfile\fP   {\fB-I\fP\fIfile\fP}
 .br
@@ -36,6 +41,8 @@ Version 5.0
 .br
 \fB--single\fP
 .br
+\fB--start\fP=\fIyyyy/mm/dd/hh/mm/ss.ssssss\fP
+.br
 \fB--verbose\fP   {\fB-V\fP}
 .br
 ]
@@ -48,14 +55,25 @@ seafloor photography. These lists may contain references
 to other imagelists, making them recursive. 
 By default, the program \fBmbimagelist\fP outputs each
 image filename encountered as it parses through the input imagelist tree. The output
-paths can be relative to the current working directory or absolute. 
+paths can be relative to the current working directory or absolute. Instead of the
+plain file path listing, the \fB\-\-settings\fP option can be used to also output the
+image timestamp, gain, and exposure, or the \fB\-\-imagelist\fP option can be used to
+reproduce the full eight-column imagelist row format (left and right image paths,
+left and right timestamps, left and right gains, and left and right exposures) for
+each image or stereo pair. The \fB\-\-start\fP and \fB\-\-end\fP options can be used
+to restrict the image listings that are output to those falling within a specified
+time period; by default all image listings encountered are output.
 
-Imagelist files can also contain processing parameters associated with the images, including 
+Imagelist files can also contain processing parameters associated with the images, including
 specifying a file containing the calibration parameters for the camera rig, specifying
 a file containing the trajectory (navigation and attitude) of the camera rig as images
 were collected, specifying a file with an image correction lookup table, and several other
-parameters. All of these parameters correspond to command line options for \fBmbphotomosaic\fP 
-that can also be specified.
+parameters. All of these parameters correspond to command line options for \fBmbphotomosaic\fP
+that can also be specified. When \fB\-\-parameters\fP is used together with
+\fB\-\-imagelist\fP, these processing parameter entries are printed in the same form
+in which they appear in an imagelist file (e.g.
+"#PARAMETER --calibration-file=20250325_LASSCameraCalibration.yml"); otherwise they
+are printed as a human-readable summary line.
 
 This program
 can be used in shellscripts to read imagelists in the same fashion
@@ -100,15 +118,41 @@ Causes each image file listed in the output to also be copied
 Equivalent to \fB\-\-copy\fP, except that the destination directory is
 the current working directory rather than one specified by the user.
 .TP
+.B \-\-end=\fIyyyy/mm/dd/hh/mm/ss.ssssss\fP
+.br
+Sets the end of the time period for which image listings are output.
+Any image (or, for a stereo pair, any record whose left image time is
+used) with a timestamp later than this time is skipped. The time is
+specified as year/month/day/hour/minute/second, with the seconds field
+allowed to include a fractional part. Default: no end time is applied,
+so image listings are output through the end of the imagelist.
+.TP
 .B \-\-files   {\fB\-F\fP}
 .br
 Requests that the plain image file paths be listed, one per line. This
-is the default output mode when neither \fB\-\-parameters\fP nor
-\fB\-\-settings\fP is specified.
+is the default output mode when none of \fB\-\-parameters\fP,
+\fB\-\-settings\fP, or \fB\-\-imagelist\fP is specified.
 .TP
 .B \-\-help   {\fB\-H\fP}
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
+.TP
+.B \-\-imagelist
+.br
+Requests that image listings be output in the same eight-column form
+used by imagelist files themselves:
+.br
+	left-image-path right-image-path left-time_d right-time_d left-gain right-gain left-exposure right-exposure
+.br
+Image paths are output relative to the current working directory
+(unless \fB\-\-absolutepaths\fP is also given). If an entry has no
+left or no right image (a single-camera image, or a stereo pair
+missing one side), "NULL" is printed in place of the missing path and
+0.0 is printed for its associated time, gain, and exposure values.
+This option is an alternative to \fB\-\-files\fP (the default) and
+\fB\-\-settings\fP; if \fB\-\-imagelist\fP is given it takes precedence
+over \fB\-\-files\fP and \fB\-\-settings\fP regardless of the order in
+which they are given on the command line. See also \fB\-\-parameters\fP.
 .TP
 .B \-\-input=\fIfile\fP   {\fB\-I\fP\fIfile\fP}
 .br
@@ -118,37 +162,76 @@ image files. Default: \fIfile\fP = "imagelist.mb-2".
 .TP
 .B \-\-left   {\fB\-L\fP}
 .br
-Sets the image selection to left-camera images. This option is
-reserved for future use; the current release of \fBmbimagelist\fP
-lists every image referenced in the imagelist regardless of this
-setting.
+Restricts the listing to images from the left camera: stereo pairs
+(only the left-side path/time/gain/exposure values are listed; the
+right side is omitted, or written as \fBNULL\fP in \fB\-\-imagelist\fP
+output) and left-only entries. Single-camera (non-stereo) images are
+excluded. The end-of-run left/right/single/total image counts, and any
+file copying requested with \fB\-\-copy\fP, are likewise restricted to
+what is actually listed. Default: every image is listed.
 .TP
 .B \-\-parameters   {\fB\-P\fP}
 .br
 Causes a line to be printed for each processing parameter entry
 encountered while parsing the imagelist, in addition to (or instead
 of, if \fB\-\-files\fP and \fB\-\-settings\fP are not also given) the
-image file listing. Default: parameter entries are not reported.
+image file listing. If \fB\-\-imagelist\fP is also in use, each
+parameter line is printed in the same form found in imagelist files,
+for example:
+.br
+	#PARAMETER --calibration-file=20250325_LASSCameraCalibration.yml
+.br
+Otherwise the parameter line is printed as a human-readable summary.
+
+For those parameter options whose value is a file path (including but
+not limited to \fB\-\-platform-file\fP, \fB\-\-calibration-file\fP,
+\fB\-\-navigation-file\fP, \fB\-\-tide-file\fP,
+\fB\-\-image-quality-file\fP, and \fB\-\-correction-file\fP), a relative
+path value is rewritten to be prefixed by the directory containing the
+imagelist file in which the \fB#PARAMETER\fP entry was found, so that
+the path output is valid relative to the current working directory.
+This rewriting is applied regardless of which of \fB\-\-files\fP,
+\fB\-\-settings\fP, or \fB\-\-imagelist\fP is in effect, and follows the
+same convention used by \fBmbphotomosaic\fP when it reads these
+entries. A path value that is already absolute (beginning with '/') is
+left unmodified. Default: parameter entries are not reported.
 .TP
 .B \-\-right   {\fB\-R\fP}
 .br
-Sets the image selection to right-camera images. This option is
-reserved for future use; the current release of \fBmbimagelist\fP
-lists every image referenced in the imagelist regardless of this
-setting.
+Restricts the listing to images from the right camera: stereo pairs
+(only the right-side path/time/gain/exposure values are listed; the
+left side is omitted, or written as \fBNULL\fP in \fB\-\-imagelist\fP
+output) and right-only entries. Single-camera (non-stereo) images are
+excluded. The end-of-run left/right/single/total image counts, and any
+file copying requested with \fB\-\-copy\fP, are likewise restricted to
+what is actually listed. Default: every image is listed.
 .TP
 .B \-\-settings   {\fB\-S\fP}
 .br
 Causes each image line in the output to include the image timestamp,
 gain, and exposure values, in addition to the file path. Default:
-only the file path is printed.
+only the file path is printed. This option is an alternative to
+\fB\-\-files\fP (the default); see \fB\-\-imagelist\fP for a further
+alternative output form.
 .TP
 .B \-\-single
 .br
-Sets the image selection to single-camera (non-stereo) images. This
-option is reserved for future use; the current release of
-\fBmbimagelist\fP lists every image referenced in the imagelist
-regardless of this setting. There is no short option equivalent.
+Restricts the listing to single-camera (non-stereo) images, excluding
+stereo pairs and left-only or right-only entries. The end-of-run
+left/right/single/total image counts, and any file copying requested
+with \fB\-\-copy\fP, are likewise restricted to what is actually
+listed. Default: every image is listed. There is no short option
+equivalent.
+.TP
+.B \-\-start=\fIyyyy/mm/dd/hh/mm/ss.ssssss\fP
+.br
+Sets the start of the time period for which image listings are output.
+Any image (or, for a stereo pair, any record whose left image time is
+used) with a timestamp earlier than this time is skipped. The time is
+specified as year/month/day/hour/minute/second, with the seconds field
+allowed to include a fractional part. Default: no start time is
+applied, so image listings are output starting from the beginning of
+the imagelist.
 .TP
 .B \-\-verbose   {\fB\-V\fP}
 .br
@@ -157,74 +240,90 @@ times. If used at all, a summary of the numbers of left, right,
 single, and total images listed is printed at the end of execution.
 
 .SH EXAMPLES
-Suppose we have two swath data files from an EM3000 multibeam
-and another two from an Hydrosweep MD multibeam. We might
-construct two imagelist files. For the EM3000 we might
-have a file imagelist_em3000.mb-1 containing:
- 	0004_20010705_165004_raw.mb57 57
- 	0005_20010705_172010_raw.mb57 57
+Suppose we have a directory of images collected by a stereo camera
+rig, and that a file named imagelist.mb-2 has been constructed
+referencing the corresponding left and right image files along with
+their timestamps, gains, and exposures, together with the name of the
+calibration file used to process them. The tag \fB#STEREOCAMERA\fP
+indicates that unpaired image entries further down in the file should
+be treated as one-sided stereo pairs rather than single-camera images.
+The contents of imagelist.mb-2 might be:
+ 	#STEREOCAMERA
+ 	#PARAMETER --calibration-file=20250325_LASSCameraCalibration.yml
+ 	PROSILICA_L/0001.tif PROSILICA_R/0001.tif 1700000000.123456 1700000000.223456 10.0 11.0 4000.0 4100.0
+ 	PROSILICA_L/0002.tif PROSILICA_R/0002.tif 1700003600.123456 1700003600.223456 12.0 13.0 4200.0 4300.0
+ 	PROSILICA_L/0003.tif 1700007200.123456
 .br
-For the Hydrosweep MD data we might have a file imagelist_hsmd.mb-1
-containing:
- 	al10107051649.mb102 102
- 	al10107051719.mb102 102
-
-Further suppose that we have found it necessary to edit
-the bathymetry in 0005_20010705_172010_raw.mb57 and
-al10107051719.mb102 using \fBmbedit\fP, and that \fBmbprocess\fP
-has been run on both files to generate processed files
-called 0005_20010705_172010_rawp.mb57 and
-al10107051719p.mb102.
+The last line above is a single left-camera image with no right-camera
+counterpart.
 
 If we run:
- 	mbimagelist --input=imagelist_em3000.mb-1
+ 	mbimagelist --input=imagelist.mb-2
 .br
-the output is:
- 	0004_20010705_165004_raw.mb57 57 1.000000
- 	0005_20010705_172010_raw.mb57 57 1.000000
-.br
-Here the file name is followed by the format and then
-by a third column containing the default file weight of 1.0.
+the default \fB--files\fP output lists just the image paths encountered,
+one per line:
+ 	PROSILICA_L/0001.tif
+ 	PROSILICA_R/0001.tif
+ 	PROSILICA_L/0002.tif
+ 	PROSILICA_R/0002.tif
+ 	PROSILICA_L/0003.tif
 
-Similarly, if we run:
- 	mbimagelist --input=imagelist_hsmd.mb-1
+If we run:
+ 	mbimagelist --input=imagelist.mb-2 --settings
 .br
-the output is:
- 	al10107051649.mb102 102 1.000000
- 	al10107051719.mb102 102 1.000000
+each image path is followed by its timestamp, gain, and exposure:
+ 	PROSILICA_L/0001.tif 1700000000.123456 10.000000 4000.000000
+ 	PROSILICA_R/0001.tif 1700000000.223456 11.000000 4100.000000
+ 	PROSILICA_L/0002.tif 1700003600.123456 12.000000 4200.000000
+ 	PROSILICA_R/0002.tif 1700003600.223456 13.000000 4300.000000
+ 	PROSILICA_L/0003.tif 1700007200.123456 15.000000 4000.000000
+.br
+The single left-camera image is reported with the default gain (15.0)
+and exposure (4000.0) values, since none were given in the imagelist.
 
-If we insert a line
- 	$PROCESSED
+If we run:
+ 	mbimagelist --input=imagelist.mb-2 --imagelist --parameters
 .br
-at the top of both imagelist_hsmd.mb-1 and imagelist_em3000.mb-1,
-then the output of \fBmbimagelist\fP changes so that:
- 	mbimagelist --input=imagelist_em3000.mb-1
+the output reproduces the imagelist file's own eight-column row format
+and also reports the processing parameter entry in the same form used
+in imagelist files:
+ 	#PARAMETER --calibration-file=20250325_LASSCameraCalibration.yml
+ 	PROSILICA_L/0001.tif PROSILICA_R/0001.tif 1700000000.123456 1700000000.223456 10.000000 11.000000 4000.000000 4100.000000
+ 	PROSILICA_L/0002.tif PROSILICA_R/0002.tif 1700003600.123456 1700003600.223456 12.000000 13.000000 4200.000000 4300.000000
+ 	PROSILICA_L/0003.tif NULL 1700007200.123456 0.000000 15.000000 0.000000 4000.000000 0.000000
 .br
-yields:
- 	0004_20010705_165004_raw.mb57 57 1.000000
- 	0005_20010705_172010_rawp.mb57 57 1.000000
-and:
- 	mbimagelist --input=imagelist_hsmd.mb-1
-.br
-yields:
- 	al10107051649.mb102 102 1.000000
- 	al10107051719p.mb102 102 1.000000
+Since the third entry has no right-camera image, "NULL" is printed for
+the missing path, and 0.0 is printed for the associated time, gain,
+and exposure values.
 
-Now suppose we create a imagelist file called imagelist_all.mb-1
-that refers to the two imagelists shown above (without the
-$PROCESSED tags). If the contents of imagelist_all.mb-1 are:
- 	imagelist_em3000.mb-1 \-1 100.0
- 	imagelist_hsmd.mb-1   \-1   1.0
+If instead the imagelist file were located in a subdirectory, for
+example survey1/imagelist.mb-2, and also contained a navigation file
+parameter given as an absolute path:
+ 	#PARAMETER --calibration-file=20250325_LASSCameraCalibration.yml
+ 	#PARAMETER --navigation-file=/data/survey1/nav.txt
 .br
-where we have specified different file weights for the
-two imagelists, then:
- 	mbimagelist --input=imagelist_all.mb-1
+then running any of \fB--files --parameters\fP, \fB--settings\fP
+\fB--parameters\fP, or \fB--imagelist --parameters\fP against
+survey1/imagelist.mb-2 outputs:
+ 	#PARAMETER --calibration-file=survey1/20250325_LASSCameraCalibration.yml
+ 	#PARAMETER --navigation-file=/data/survey1/nav.txt
 .br
-yields:
- 	0004_20010705_165004_raw.mb57 57 100.000000
- 	0005_20010705_172010_raw.mb57 57 100.000000
- 	al10107051649.mb102 102 1.000000
- 	al10107051719.mb102 102 1.000000
+The relative calibration file path is rewritten to be prefixed with the
+imagelist file's own directory, so that it remains valid relative to
+the current working directory, while the absolute navigation file path
+is left unmodified. This directory-prefixing is applied to the value
+of any \fB#PARAMETER\fP option that takes a file path, in all three of
+the \fB--files\fP, \fB--settings\fP, and \fB--imagelist\fP output modes.
+
+The timestamps in the first two entries correspond to
+2023/11/14 22:13:20 and 2023/11/14 23:13:20 respectively. If we only
+want image listings collected between 23:00 and 23:30 on that date, we
+can run:
+ 	mbimagelist --input=imagelist.mb-2 --imagelist \\
+ 		--start=2023/11/14/23/00/00 --end=2023/11/14/23/30/00
+.br
+which yields only the second stereo pair:
+ 	PROSILICA_L/0002.tif PROSILICA_R/0002.tif 1700003600.123456 1700003600.223456 12.000000 13.000000 4200.000000 4300.000000
 
 
 .SH SEE ALSO

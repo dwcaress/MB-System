@@ -205,61 +205,50 @@ def main (args, opts={}):
     ymax = ymax + 0.1 * (ymax - ymin)
     print("x: "+str(xmin)+" "+str(xmax)+"  y: "+str(ymin)+" "+str(ymax))
 
-    # Create and execute an mbm_grdplot command to generate a map of the
-    # TRN performance over the reference bathymetry
+    # Create and execute an mbpy_grdplot command to generate a map of the
+    # TRN performance over the reference bathymetry. mbpy_grdplot's modern-
+    # mode generated script never has a "display on screen" step at all
+    # (unlike mbm_grdplot's classic-mode one, which the display/-N logic
+    # below used to suppress), so --execute always just renders straight
+    # to the final raster with no separate .cmd-execution or psconvert
+    # step needed.
     if missionset :
-        title = "\""+mission+" - Terrain Relative Navigation over Reference Bathymetry\":\"Topography (meters)\""
+        title = mission+" - Terrain Relative Navigation over Reference Bathymetry"
     else :
-        title = "\""+sessionname+" - Terrain Relative Navigation over Reference Bathymetry\":\"Topography (meters)\""
-    command = "cd "+inputdir+" ; mbm_grdplot -I "+gridfile+" -O "+sessionname+"-trn-plot"
+        title = sessionname+" - Terrain Relative Navigation over Reference Bathymetry"
+    command = "cd "+inputdir+" ; mbpy_grdplot -I "+gridfile+" -O "+sessionname+"-trn-plot"
     command = command+" -R"+str(xmin)+"/"+str(xmax)+"/"+str(ymin)+"/"+str(ymax)
-    command = command+" -G5 -D0/1 -A1.0 -L"+title
-    command = command+" -MXW1p -MXI"+sessionname+"_trn_Nxy.txt"
-    command = command+" -MXW1p,purple -MXI"+sessionname+"_trn_Txy.txt"
-    command = command+" -MXW2p,purple -MXSc2p -MXI"+sessionname+"_trn_TxyC.txt"
-    command = command+" -MXW2p,red -MXSc2p -MXI"+sessionname+"_trn_TxyU.txt"
-    command = command+" -MXW1,black -MXSC0.2 -MXI"+sessionname+"_trn_TxyR.txt"
-    command = command+" -Pc -V ; cd .."
-    print("Command: "+command+"\n")
-    subprocess.run(command, shell=True)
-    if display :
-      command = "cd "+inputdir+" ; ./"+sessionname+"-trn-plot.cmd ; cd .."
-    else :
-      command = "cd "+inputdir+" ; ./"+sessionname+"-trn-plot.cmd -N ; cd .."
-    print("Command: "+command+"\n")
-    subprocess.run(command, shell=True)
-    command = "cd "+inputdir+" ; gmt psconvert "+sessionname+"-trn-plot.ps -Tj -E300 -A -P ; cd .."
+    command = command+" --color-mode 5 --shade-flip --magnitude 1.0"
+    command = command+" --title \""+title+"\" --colorbar-label \"Topography (meters)\""
+    command = command+" --xy-overlay \""+sessionname+"_trn_Nxy.txt:pen=1p\""
+    command = command+" --xy-overlay \""+sessionname+"_trn_Txy.txt:pen=1p,purple\""
+    command = command+" --xy-overlay \""+sessionname+"_trn_TxyC.txt:pen=2p,purple:symbol=c2p\""
+    command = command+" --xy-overlay \""+sessionname+"_trn_TxyU.txt:pen=2p,red:symbol=c2p\""
+    command = command+" --xy-overlay \""+sessionname+"_trn_TxyR.txt:pen=1,black:symbol=C0.2\""
+    command = command+" --pagesize c --format jpg --dpi 300 --execute -V ; cd .."
     print("Command: "+command+"\n")
     subprocess.run(command, shell=True)
 
-    # Create and execute an mbgrid and mbm_grdplot command to generate a map of the TRN performance over MB1 bathymetry
+    # Create and execute an mbgrid and mbpy_grdplot command to generate a map of the TRN performance over MB1 bathymetry
     command = "cd "+inputdir+" ; mbm_makedatalist -S.mb1 -F72 -Odatalist_mb1.mb-1 ; mbdatalist -Idatalist_mb1.mb-1 -O ; cd .."
     subprocess.run(command, shell=True)
     command = "cd "+inputdir+" ; mbgrid -Idatalist_mb1.mb-1 -A2 -N -F5 -J"+refcrs+" -C5 -V -O TopoMB1 ; cd .."
     print("Command: "+command+"\n")
     subprocess.run(command, shell=True)
     if missionset :
-        title = "\""+mission+" - Terrain Relative Navigation over MB1 Bathymetry\":\"Topography (meters)\""
+        title = mission+" - Terrain Relative Navigation over MB1 Bathymetry"
     else :
-        title = "\""+sessionname+" - Terrain Relative Navigation over MB1 Bathymetry\":\"Topography (meters)\""
-    command = "cd "+inputdir+" ; mbm_grdplot -I TopoMB1.grd -O "+sessionname+"-mb1-plot"
+        title = sessionname+" - Terrain Relative Navigation over MB1 Bathymetry"
+    command = "cd "+inputdir+" ; mbpy_grdplot -I TopoMB1.grd -O "+sessionname+"-mb1-plot"
     command = command+" -R"+str(xmin)+"/"+str(xmax)+"/"+str(ymin)+"/"+str(ymax)
-    command = command+" -G5 -D0/1 -A1.0 -L"+title
-    command = command+" -MXW1p -MXI"+sessionname+"_trn_Nxy.txt"
-    command = command+" -MXW1p,purple -MXI"+sessionname+"_trn_Txy.txt"
-    command = command+" -MXW2p,purple -MXSc2p -MXI"+sessionname+"_trn_TxyC.txt"
-    command = command+" -MXW2p,red -MXSc2p -MXI"+sessionname+"_trn_TxyU.txt"
-    command = command+" -MXW1,black -MXSC0.2 -MXI"+sessionname+"_trn_TxyR.txt"
-    command = command+" -Pc -V ; cd .."
-    print("Command: "+command+"\n")
-    subprocess.run(command, shell=True)
-    if display :
-      command = "cd "+inputdir+" ; ./"+sessionname+"-mb1-plot.cmd ; cd .."
-    else :
-      command = "cd "+inputdir+" ; ./"+sessionname+"-mb1-plot.cmd -N ; cd .."
-    print("Command: "+command+"\n")
-    subprocess.run(command, shell=True)
-    command = "cd "+inputdir+" ; gmt psconvert "+sessionname+"-mb1-plot.ps -Tj -E300 -A -P ; cd .."
+    command = command+" --color-mode 5 --shade-flip --magnitude 1.0"
+    command = command+" --title \""+title+"\" --colorbar-label \"Topography (meters)\""
+    command = command+" --xy-overlay \""+sessionname+"_trn_Nxy.txt:pen=1p\""
+    command = command+" --xy-overlay \""+sessionname+"_trn_Txy.txt:pen=1p,purple\""
+    command = command+" --xy-overlay \""+sessionname+"_trn_TxyC.txt:pen=2p,purple:symbol=c2p\""
+    command = command+" --xy-overlay \""+sessionname+"_trn_TxyU.txt:pen=2p,red:symbol=c2p\""
+    command = command+" --xy-overlay \""+sessionname+"_trn_TxyR.txt:pen=1,black:symbol=C0.2\""
+    command = command+" --pagesize c --format jpg --dpi 300 --execute -V ; cd .."
     print("Command: "+command+"\n")
     subprocess.run(command, shell=True)
 

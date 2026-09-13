@@ -11,118 +11,180 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbmesh</H1>
-Section: User Commands  (1)<BR>Updated:  6 March 2026 <BR><A HREF="#index">Index</A>
+Section: User Commands  (1)<BR>Updated:  7 September 2026 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
 <H2>NAME</H2>
 
-mbmesh - Process swath bathymetry data and generate 3D point clouds and GLB models
+mbmesh - reconstruct triangle meshes from swath bathymetry data
 <A NAME="lbAC">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbmesh</B> [<B>-I</B><I> datalist</I>] [<B>-O</B><I> outputdir</I>] [<B>-R</B><I> west/east/south/north</I>]
-[<B>-html</B> <B>--html</B>] [<B>-V</B> [<B>-V</B>]] [<B>-H</B>]
+<B>mbmesh</B> <B>-I</B><I> datalist</I> [<B>-O</B><I> outputdir</I>]
+[<B>-R</B><I> west/east/south/north</I>] [<B>-L</B><I> meters</I>]
+[<B>--metadata</B>] [<I>output options</I>] [<B>-V</B>] [<B>-H</B>]
 <A NAME="lbAD">&nbsp;</A>
 <H2>DESCRIPTION</H2>
 
 <P>
 
-<B>mbmesh</B> reads swath sonar data files and processes bathymetric soundings 
-to generate 3D point cloud data in multiple formats. The primary use is to 
-extract multibeam echosounder (MBES) data and convert it to point clouds 
-suitable for 3D visualization and analysis.
+<B>mbmesh</B> reads swath sonar data through the MB-System datalist
+processing framework and reconstructs a triangle mesh from accepted
+bathymetry soundings. The program estimates local point spacing, derives
+default reconstruction settings, estimates oriented normals, reconstructs a
+signed scalar field with screened Poisson, extracts a surface with marching
+cubes, trims unsupported mesh regions, and writes the result as a binary glTF
+mesh.
 <P>
-<B>mbmesh</B> reads a datalist file containing references to swath data files
-in MB-System supported formats. It extracts all valid bathymetry soundings,
-applies optional geographic filtering, and outputs the data in multiple formats:
+
+The output mesh vertices are positioned in the same local Cartesian coordinate
+frame used for reconstruction, with units in meters. This is an east-north-up
+frame initialized from the first accepted ping's sensor position: X is positive
+east, Y is positive north, and Z is positive up relative to that origin.
+Longitude and latitude are converted to local meters using an equirectangular
+approximation based on the origin latitude.
+<P>
+
+This local frame is not the Earth-Centered, Earth-Fixed (ECEF) frame used by
+<B>mbgrd2gltf</B> by default, and it is not the ECEF-offset frame produced by
+<B>mbgrd2gltf --geoorigin</B>. The <B>--geoorigin</B> option in
+<B>mbgrd2gltf</B> allows vertices to be expressed as offsets from a local origin
+point rather than from Earth's center in order to reduce coordinate magnitudes
+and improve rendering precision. <B>mbmesh</B> currently uses its own local
+projected frame instead. When combining <B>mbmesh</B> GLB output with
+<B>mbgrd2gltf</B> output, transform both products into the same coordinate
+frame first; otherwise their vertices can appear offset or fail to line up.
+<P>
+
+The default output is:
 <DL COMPACT><DT><DD>
 <DL COMPACT>
-<DT><B>adjustedPointcloud.xyz</B>
+<DT><B>mesh.glb</B>
 
 <DD>
-Point cloud in local projected coordinates (meters) relative to data centroid
-<DT><B>ecefPointcloud.xyz</B>
-
-<DD>
-Point cloud in WGS84 Earth-Centered Earth-Fixed (ECEF) coordinates
-<DT><B>adjustedPointcloud.glb</B>
-
-<DD>
-Binary GLB (glTF) format suitable for 3D viewer applications
-<DT><B>adjustedPointcloud.html</B>
-
-<DD>
-Optional HTML viewer for interactive 3D visualization
+Final triangle mesh in binary glTF format using the <B>mbmesh</B> local
+Cartesian coordinate frame.
 </DL></DL>
 
 <P>
+
+Point cloud, diagnostic, and HTML viewer files are written only when requested
+with command-line output options.
 <A NAME="lbAE">&nbsp;</A>
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-I</B><I> datalist</I>
+<DT><B>-I</B><I> datalist</I>, <B>--input</B> <I>datalist</I>
 
 <DD>
-<BR>
-
-Input datalist file containing list of swath data files. This is a required
-option. Each line in the datalist file should contain: path format [processed_path]
-following MB-System datalist format conventions.
-The default datalist file is <I>datalist.mb-1</I> if not specified.
-<DT><B>-O</B><I> outputdir</I>
+Input MB-System datalist file. This option is required unless the datalist path
+is supplied as the first non-option argument.
+<DT><B>-O</B><I> outputdir</I>, <B>--output</B> <I>outputdir</I>
 
 <DD>
-<BR>
-
-Output directory for all generated files. The directory will be created if it
-does not exist. Default is <I>./tileset</I>.
-<DT><B>-R</B><I> west/east/south/north</I>
+Output directory for generated files. The directory is created if needed.
+The default is <I>mbmesh_output</I>.
+<DT><B>-R</B><I> west/east/south/north</I>, <B>--bounds</B> <I>west/east/south/north</I>
 
 <DD>
-<BR>
-
-Specify geographic bounds for filtering soundings. Only soundings within the
-specified rectangle (in degrees longitude/latitude) will be included in the
-output. The format is west/east/south/north where west and south are typically
-negative. If not specified, all soundings are included.
-<DT><B>-html</B>
+Restrict accepted soundings to a geographic bounding box in degrees longitude
+and latitude.
+<DT><B>-L</B><I> meters</I>, <B>--lod</B> <I>meters</I>, <B>--level-of-detail</B> <I>meters</I>
 
 <DD>
-<BR>
-
-Also generate an HTML viewer file (adjustedPointcloud.html) for interactive
-3D visualization of the point cloud. When this option is used, mbmesh will
-attempt to launch an HTTP server and open the viewer in the default web browser.
-<DT><B>-V</B>
-
-<DD>
-<BR>
-
-Increase verbosity level. By default, only essential information is printed.
-Can be specified multiple times (<B>-V -V</B>) to increase debugging output.
-Higher verbosity levels provide detailed progress information, data statistics,
-and sample soundings from the dataset.
-<DT><B>-H</B>
+Requested smallest feature size in local meters. If omitted, <B>mbmesh</B>
+derives level of detail from estimated point spacing. The implementation clamps
+the resolved value to a supported range and uses it to derive default
+normal-estimation, Poisson, and trimming parameters.
+<DT><B>--decimate </B><I>meters</I>
 
 <DD>
-<BR>
+Enable voxel-grid point decimation with the specified cell size in local meters.
+The legacy single-dash form <B>-decimate</B> is also accepted.
+<DT><B>--metadata, --info</B>
 
+<DD>
+Print dataset metadata and exit before mesh reconstruction. The metadata
+includes input counts, geodetic bounds, and estimated point spacing.
+<DT><B>-V, --verbose</B>
+
+<DD>
+Enable progress and diagnostic logging.
+<DT><B>-H, -h, --help</B>
+
+<DD>
 Display help message and exit.
-<DT><B>-h</B>
-
-<DD>
-<BR>
-
-Display help message and exit (alternative to <B>-H</B>).
-<P>
 </DL>
 <A NAME="lbAF">&nbsp;</A>
+<H2>OUTPUT OPTIONS</H2>
+
+<P>
+
+Every long option in this section also accepts a legacy single-dash form
+(e.g. <B>-html</B>, <B>-diagnostics</B>, <B>-all-outputs</B>) for backward
+compatibility.
+<DL COMPACT>
+<DT><B>--html</B>
+
+<DD>
+Also write <B>mesh.html</B>, an X3DOM viewer page that references
+<B>mesh.glb</B>, launch a local Python HTTP server, and open the viewer in the
+default web browser.
+<DT><B>--xyz</B>
+
+<DD>
+Also write both local and ECEF XYZ point cloud files.
+<DT><B>--local-xyz</B>
+
+<DD>
+Also write <B>pointcloud-local.xyz</B>, containing accepted and decimated
+soundings in the local Cartesian coordinate frame used for reconstruction.
+This is the same coordinate frame used by <B>mesh.glb</B>.
+<DT><B>--ecef-xyz</B>
+
+<DD>
+Also write <B>pointcloud-ecef.xyz</B>, containing accepted and decimated
+soundings in WGS84 Earth-Centered, Earth-Fixed coordinates.
+<DT><B>--oriented-ply</B>
+
+<DD>
+Also write <B>oriented-pointcloud-ecef.ply</B>, an oriented point cloud suitable
+for inspection.
+<DT><B>--pointcloud-glb</B>
+
+<DD>
+Also write <B>pointcloud.glb</B>, a diagnostic GLB point cloud for smaller
+datasets.
+<DT><B>--normal-glb</B>
+
+<DD>
+Also write <B>normals.glb</B>, diagnostic normal vectors for smaller datasets.
+<DT><B>--origin-glb</B>
+
+<DD>
+Also write <B>origins.glb</B>, diagnostic sensor-origin rays for smaller
+datasets.
+<DT><B>--raw-mesh-glb</B>
+
+<DD>
+Also write <B>raw_mesh.glb</B>, the untrimmed triangle mesh produced by marching
+cubes before support trimming.
+<DT><B>--diagnostics</B>
+
+<DD>
+Also write <B>pointcloud.glb</B>, <B>normals.glb</B>, and <B>origins.glb</B>.
+<DT><B>--all-outputs</B>
+
+<DD>
+Write all optional output files.
+</DL>
+<A NAME="lbAG">&nbsp;</A>
 <H2>EXAMPLES</H2>
 
 <P>
 
-Process all files in a datalist and output to default directory:
+Reconstruct a mesh and write the default <B>mesh.glb</B>:
 <DL COMPACT><DT><DD>
 <B>mbmesh -Idatalist.mb-1</B>
 
@@ -130,148 +192,128 @@ Process all files in a datalist and output to default directory:
 
 <P>
 
-Process files in a specific geographic region:
+Write the mesh, X3DOM viewer, and local/ECEF XYZ point clouds:
 <DL COMPACT><DT><DD>
-<B>mbmesh -Idatalist.mb-1 -R-122.5/-121.8/36.5/37.2 -V</B>
+<B>mbmesh -Idatalist.mb-1 -O output/mbmesh_run --html --xyz -V</B>
 
 </DL>
 
 <P>
 
-Process files with custom output directory and HTML viewer:
+Restrict processing to a geographic region and request a coarser level of
+detail:
 <DL COMPACT><DT><DD>
-<B>mbmesh -Idatalist.mb-1 -O./my_output -html -V</B>
+<B>mbmesh -Idatalist.mb-1 -R-122.5/-121.8/36.5/37.2 -L 0.5 -V</B>
 
 </DL>
 
 <P>
 
-Process files with increased verbosity for detailed debugging:
+Print dataset metadata without reconstructing a mesh:
 <DL COMPACT><DT><DD>
-<B>mbmesh -Idatalist.mb-1 -V -V</B>
+<B>mbmesh -Idatalist.mb-1 --metadata</B>
 
 </DL>
 
-<P>
-<A NAME="lbAG">&nbsp;</A>
+<A NAME="lbAH">&nbsp;</A>
 <H2>OUTPUT FILES</H2>
 
 <P>
 
-<B>mbmesh</B> generates the following output files in the specified output directory:
-<P>
+<B>mbmesh</B> always writes <B>mesh.glb</B>. Optional files are written only when
+their corresponding output options are supplied.
 <DL COMPACT>
-<DT><B>adjustedPointcloud.xyz</B>
+<DT><B>mesh.glb</B>
 
 <DD>
-Standard XYZ point cloud in local projected coordinates where longitude/latitude
-are converted to meters relative to the data centroid and depth is centered
-around the mean depth. This format is suitable for visualization in standard
-3D point cloud viewers. Format: X(meters) Y(meters) Z(meters)
-<DT><B>ecefPointcloud.xyz</B>
+Final trimmed triangle mesh in binary glTF format. Vertex positions are in the
+<B>mbmesh</B> local Cartesian coordinate frame.
+<DT><B>raw_mesh.glb</B>
 
 <DD>
-Point cloud in WGS84 ECEF coordinates with GeoOrigin offset applied. This format
-preserves accurate Earth-centered coordinates suitable for analysis requiring
-geodetic precision. Format: X(meters) Y(meters) Z(meters)
-<DT><B>adjustedPointcloud.glb</B>
+Optional untrimmed triangle mesh before support trimming.
+<DT><B>mesh.html</B>
 
 <DD>
-Binary GLB (GL Transmission Format) file containing the point cloud as a 3D model.
-This format is widely supported by web-based 3D viewers and applications.
-Can be directly embedded in web pages or used with tools like Cesium.js or
-Three.js for interactive visualization.
-<DT><B>adjustedPointcloud.html</B>
+Optional X3DOM preview page referencing <B>mesh.glb</B>. When <B>--html</B> is
+used, <B>mbmesh</B> attempts to serve this page from the output directory and
+open it in the default web browser.
+<DT><B>pointcloud-local.xyz</B>
 
 <DD>
-Optional HTML file generated when <B>-html</B> option is used. This file provides
-an interactive web-based viewer for the GLB model. When generated, mbmesh attempts
-to launch a local HTTP server and open the viewer in the default web browser.
-<P>
+Optional XYZ point cloud in the same local Cartesian coordinate frame as
+<B>mesh.glb</B>.
+<DT><B>pointcloud-ecef.xyz</B>
+
+<DD>
+Optional WGS84 Earth-Centered, Earth-Fixed XYZ point cloud.
+<DT><B>oriented-pointcloud-ecef.ply</B>
+
+<DD>
+Optional oriented ECEF point cloud.
+<DT><B>pointcloud.glb</B>
+
+<DD>
+Optional diagnostic point cloud GLB.
+<DT><B>normals.glb</B>
+
+<DD>
+Optional diagnostic normal-vector GLB.
+<DT><B>origins.glb</B>
+
+<DD>
+Optional diagnostic sensor-origin-ray GLB.
 </DL>
-<A NAME="lbAH">&nbsp;</A>
-<H2>DATA STATISTICS</H2>
-
-<P>
-
-Upon completion, <B>mbmesh</B> prints detailed statistics including:
-<DL COMPACT><DT><DD>
-<DL COMPACT>
-<DT>Number of datalist files processed and successfully read<DD>
-<DT>Total pings processed from all files<DD>
-<DT>Total beams encountered vs. valid beams (acceptance rate)<DD>
-<DT>Geographic bounds of the processed data<DD>
-<DT>Sample soundings (first 10) with coordinates and quality flags<DD>
-</DL></DL>
-
-<P>
 <A NAME="lbAI">&nbsp;</A>
 <H2>PROCESSING NOTES</H2>
 
 <P>
 
-<B>Beam Quality Filtering</B>
+<B>Sounding filtering</B>
 
 <BR>
 
-<B>mbmesh</B> automatically filters out beams flagged as bad or suspect using
-MB-System's standard beam quality flags. Only beams marked as good are included
-in the output point clouds. The percentage of valid beams vs. total beams
-is reported in the statistics.
+<B>mbmesh</B> uses MB-System datalist processing and accepts valid bathymetry
+soundings. Geographic filtering is applied when <B>-R</B> is specified.
 <P>
-<B>Geographic Filtering</B>
+
+<B>Coordinate frame</B>
 
 <BR>
 
-When <B>-R</B> is specified, soundings outside the geographic bounding box are
-excluded from output. This is useful for processing large datasets or focusing
-on areas of interest.
+<B>mbmesh</B> initializes its local Cartesian frame from the first accepted
+ping's sensor position. Sounding elevation is stored as negative bathymetry,
+and sensor elevation is stored as negative sensor depth. The local-to-geodetic
+conversion used for optional ECEF point-cloud outputs reverses this
+equirectangular approximation before converting to WGS84 ECEF coordinates.
 <P>
-<B>Coordinate Transformations</B>
+
+<B>Automatic settings</B>
 
 <BR>
 
-The adjusted point cloud uses a local projected coordinate system relative to
-the data centroid for better numerical stability in 3D applications. The ECEF
-point cloud preserves absolute WGS84 coordinates. Both formats include reference
-information in file headers for reproducibility.
+The program estimates point spacing from accepted soundings and derives
+default normal-estimation, screened-Poisson, marching-cubes, and support
+trimming settings from the data and requested level of detail.
 <P>
-<B>Memory Usage</B>
+
+<B>Support trimming</B>
 
 <BR>
 
-<B>mbmesh</B> stores all soundings in memory during processing. For very large datasets,
-this may require significant RAM. The program reports total soundings collected
-upon completion.
+Unsupported mesh regions are removed after marching cubes. If trimming removes
+the entire mesh, <B>mbmesh</B> exits with an error rather than writing an empty
+surface.
 <P>
+
 <A NAME="lbAJ">&nbsp;</A>
 <H2>MB-SYSTEM INTEGRATION</H2>
 
 <P>
 
-<B>mbmesh</B> integrates with the MB-System datalist processing framework,
-allowing it to process multiple files in any MB-System supported format.
-File format is determined automatically or can be specified via the datalist
-file. Processed files (if available) are preferred over raw files unless
-the datalist indicates otherwise.
-<P>
+<B>mbmesh</B> integrates with the MB-System datalist processing framework and can
+read swath files in MB-System supported formats.
 <A NAME="lbAK">&nbsp;</A>
-<H2>FUTURE DEVELOPMENT</H2>
-
-<P>
-
-Planned enhancements to <B>mbmesh</B> include:
-<DL COMPACT><DT><DD>
-<DL COMPACT>
-<DT>Triangle mesh generation from point cloud with seafloor feature preservation<DD>
-<DT>Py3dtiles integration and evaluation of alternative 3D Tiles libraries<DD>
-<DT>Draco compression support for efficient GLB file transmission<DD>
-<DT>Improved X3DOM visualization and viewer enhancements<DD>
-<DT>Refinement of GeoOrigin handling and direct ECEF coordinate output<DD>
-</DL></DL>
-
-<P>
-<A NAME="lbAL">&nbsp;</A>
 <H2>AUTHOR</H2>
 
 <P>
@@ -282,9 +324,8 @@ David W. Caress and Dale N. Chayes
 Monterey Bay Aquarium Research Institute
 <BR>
 
-Original implementation: CSUMB Capstone - Spring 2026
-<P>
-<A NAME="lbAM">&nbsp;</A>
+Initial mbmesh implementation: CSUMB Capstone - Spring 2026
+<A NAME="lbAL">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
 <B><A HREF="mb-system.html">mb-system</A></B>(1),
@@ -304,20 +345,19 @@ Original implementation: CSUMB Capstone - Spring 2026
 <DT><A HREF="#lbAC">SYNOPSIS</A><DD>
 <DT><A HREF="#lbAD">DESCRIPTION</A><DD>
 <DT><A HREF="#lbAE">OPTIONS</A><DD>
-<DT><A HREF="#lbAF">EXAMPLES</A><DD>
-<DT><A HREF="#lbAG">OUTPUT FILES</A><DD>
-<DT><A HREF="#lbAH">DATA STATISTICS</A><DD>
+<DT><A HREF="#lbAF">OUTPUT OPTIONS</A><DD>
+<DT><A HREF="#lbAG">EXAMPLES</A><DD>
+<DT><A HREF="#lbAH">OUTPUT FILES</A><DD>
 <DT><A HREF="#lbAI">PROCESSING NOTES</A><DD>
 <DT><A HREF="#lbAJ">MB-SYSTEM INTEGRATION</A><DD>
-<DT><A HREF="#lbAK">FUTURE DEVELOPMENT</A><DD>
-<DT><A HREF="#lbAL">AUTHOR</A><DD>
-<DT><A HREF="#lbAM">SEE ALSO</A><DD>
+<DT><A HREF="#lbAK">AUTHOR</A><DD>
+<DT><A HREF="#lbAL">SEE ALSO</A><DD>
 </DL>
 <HR>
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 6 March 2026</P></CENTER>
+Last Updated: 7 September 2026</P></CENTER>
 
 <HR>
 <center>

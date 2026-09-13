@@ -210,11 +210,11 @@ is 0.
 .TP
 .B \-\-section\-length\-max=\fIvalue\fP
 .br
-Intended to set a maximum section length. Although this option is accepted
-on the command line, the current implementation's argument parsing
-incorrectly re-tests for the \fB\-\-section\fP option name rather than
-\fB\-\-section\-length\-max\fP, so this option has no effect; the internal default
-value of 0.5 is always used.
+Sets the maximum allowed length, in output grid cells, of the longest
+diagonal of an image section's projected quadrilateral in the output mosaic.
+Sections that project to a longer diagonal than this (for example due to
+an oblique viewing angle near the edge of an image) are excluded from the
+mosaic. The default is 0.5.
 .TP
 .B \-\-rangemax=\fIrange_max\fP
 .br

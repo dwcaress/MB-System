@@ -1,0 +1,274 @@
+#!/usr/bin/env python3
+#--------------------------------------------------------------------
+#    The MB-system:  mbpy_grd3dplot
+#
+#    Copyright (c) 2026 by
+#    David W. Caress (caress@mbari.org)
+#      Monterey Bay Aquarium Research Institute
+#      Moss Landing, California, USA
+#
+#    See README.md file for copying and redistribution conditions.
+#--------------------------------------------------------------------
+#
+# Purpose:
+#   Python/PyGMT-era replacement for the Perl macro mbm_grd3dplot: reads
+#   a grid and generates a GMT **modern mode** shellscript that plots a
+#   3D perspective view of it (via `gmt grdview`), following the same
+#   page-layout, projection-fitting, and color-palette conventions as
+#   mbm_grd3dplot itself. See src/macros/python/mbpy_{layout,color,misc,
+#   grd3dplot_script}.py for the underlying port of that logic; layout/
+#   color/misc are shared with mbpy_grdplot and mbpy_histplot.
+#
+#   Unlike mbm_grd3dplot's single-letter "-M<sub>:<sub>:..." grammar for
+#   coastline/grdview tuning, this tool exposes each of those as its own
+#   descriptive long option -- see the --help text.
+#
+# Usage:
+#   mbpy_grd3dplot -I data.grd -O plot [options...]
+#   mbpy_grd3dplot --input data.grd --output plot --title "My Plot" \
+#       --color-mode 2 --view 150/15 --exaggeration 2
+#
+import argparse
+import dataclasses
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+# Locate the sibling mbpy_{layout,color,misc,grd3dplot_script} modules:
+# see mbpy_grdplot's own copy of this comment for the installed-vs-
+# source-tree rationale.
+_here = os.path.dirname(os.path.realpath(__file__))
+for _candidate in (_here, os.path.join(_here, "python")):
+    if _candidate not in sys.path:
+        sys.path.insert(0, _candidate)
+
+import mbpy_layout as layout
+import mbpy_color as color
+import mbpy_misc as misc
+import mbpy_grd3dplot_script as script
+
+
+def build_arg_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(
+        prog="mbpy_grd3dplot",
+        description="Generate a GMT modern-mode 3D perspective plotting script for a grid "
+                    "(Python/PyGMT-era replacement for mbm_grd3dplot).",
+    )
+
+    g = p.add_argument_group("input/output")
+    g.add_argument("-I", "--input", required=True, metavar="GRID", help="input grid file")
+    g.add_argument("-O", "--output", metavar="ROOT", help="output root name [default: input's basename without extension]")
+    g.add_argument("--format", default="pdf", metavar="FMT", help="output format: pdf, png, ps, jpg, tif, eps, ... [pdf]")
+    g.add_argument("--title", metavar="TEXT", help="plot title")
+    g.add_argument("--colorbar-label", metavar="TEXT", help="color scale bar label [z]")
+    g.add_argument("--dpi", type=int, metavar="DPI", help="rendering resolution: grdview's own -Qi<dpi>, and the final raster's resolution")
+    g.add_argument("-X", "--execute", action="store_true", help="run the generated script immediately")
+    g.add_argument("-V", "--verbose", action="store_true", help="print the generated script path and a brief summary")
+
+    g = p.add_argument_group("region / projection / page")
+    g.add_argument("-R", "--region", metavar="XMIN/XMAX/YMIN/YMAX", help="plot region [default: the grid's own bounds]")
+    g.add_argument("-J", "--projection", metavar="SPEC", help='GMT map scale/projection spec, e.g. "m1.0", "x0.02" [default: auto-fit Mercator or linear]')
+    g.add_argument("-P", "--pagesize", default="a", metavar="SIZE", help="page size code (a, b, c, ... a4, ...) [a]")
+    orient = p.add_mutually_exclusive_group()
+    orient.add_argument("--portrait", action="store_const", dest="orientation", const=1, help="force portrait orientation")
+    orient.add_argument("--landscape", action="store_const", dest="orientation", const=2, help="force landscape orientation")
+    g.add_argument("--scale-location", default="b", choices=["l", "r", "t", "b"], help="color scale bar placement [b]")
+    g.add_argument("--tick-info", metavar="SPEC", help="raw -B basemap tick spec override (x/y/z combined)")
+    g.add_argument("--length-scale", metavar="SPEC", help='GMT distance scale bar spec for -L on the basemap (mbm_grd3dplot\'s -MGL)')
+
+    g = p.add_argument_group("3D view")
+    g.add_argument("-E", "--view", default="240/30", metavar="AZIMUTH/ELEVATION", help='viewpoint azimuth/elevation, e.g. "150/15" [240/30]')
+    g.add_argument("-F", "--exaggeration", type=float, metavar="FACTOR", help="vertical exaggeration [default: chosen from --zscale, or 2.0/(zmax-zmin) if neither given]")
+    g.add_argument("--zscale", type=float, dest="zscale", metavar="VAL", help="explicit map z-scale (-Jz<val>), overriding --exaggeration")
+
+    g = p.add_argument_group("color")
+    g.add_argument("--color-mode", type=int, default=1, choices=range(1, 8), metavar="{1-7}",
+                   help="1 color fill, 2 shaded relief, 3 shade by intensity file, 4 slope-magnitude fill, "
+                        "5 shade by slope magnitude, 6 mesh plot, 7 mesh plot with contours [1]")
+    g.add_argument("-W", "--color-control", metavar="SPEC", help='"style/palette/ncolors" (e.g. "1/2/11"), or a path to an existing .cpt file')
+    g.add_argument("-D", "--color-flip", action="store_true", help="reverse the color palette")
+    g.add_argument("-Y", "--no-nice-interval", action="store_true", help="use a direct linear color stretch instead of rounded intervals")
+    g.add_argument("--stretch-color", action="store_true", help="histogram-equalize the color stretch (color_mode 1)")
+    g.add_argument("-Z", "--zbounds", metavar="ZMIN/ZMAX", help="override the grid's own z-range used for the color stretch")
+    g.add_argument("--data-scale", type=float, metavar="FACTOR", help="rescale grid values before colorizing/shading")
+
+    g = p.add_argument_group("shading (color_mode 2/3/4/5)")
+    g.add_argument("--magnitude", type=float, metavar="VAL")
+    g.add_argument("--azimuth", type=float, metavar="DEG")
+    g.add_argument("--elevation", type=float, metavar="DEG")
+    g.add_argument("--shade-flip", action="store_true", help="reverse the shading direction (negates magnitude)")
+    g.add_argument("--intensity-file", metavar="GRID", help="intensity grid for color_mode 3")
+    g.add_argument("--stretch-shade", action="store_true", help="histogram-equalize the intensity file (color_mode 3)")
+
+    g = p.add_argument_group("mesh (color_mode 6/7)")
+    g.add_argument("--mesh-contour-pen", metavar="PEN", help="contour-line pen drawn on the mesh (color_mode 7 only; mbm_grd3dplot's -MVW)")
+
+    g = p.add_argument_group("grdview")
+    g.add_argument("--drape-file", metavar="GRID", help="grid to drape on the relief instead of coloring it directly (mbm_grd3dplot's -N)")
+    g.add_argument("--mesh-null", nargs="?", const=True, default=False, metavar="LEVEL/R/G/B",
+                   help='null-plane level/color for undefined nodes (mbm_grd3dplot\'s -MVN) '
+                        '[default level: "<zmin>/200/200/200" if given with no value]')
+    g.add_argument("--mesh-zlevel", metavar="VAL", help="z level for the base plane/frame (mbm_grd3dplot's -MVZ)")
+
+    g = p.add_argument_group("coastline")
+    g.add_argument("--coast", action="store_true", help="enable a coastline overlay")
+    g.add_argument("--coast-resolution", choices=["f", "h", "i", "l", "c"], metavar="{f,h,i,l,c}")
+    g.add_argument("--coast-dry-fill", metavar="COLOR")
+    g.add_argument("--coast-wet-fill", metavar="COLOR")
+    g.add_argument("--coast-lake-fill", metavar="COLOR")
+    g.add_argument("--coast-river", metavar="COLOR")
+    g.add_argument("--coast-boundary", action="append", default=[], metavar="SPEC", help="national boundary spec (repeatable)")
+    g.add_argument("--coast-pen", metavar="PEN")
+
+    g = p.add_argument_group("text labels")
+    g.add_argument(
+        "--text", action="append", default=[], metavar="LON/LAT/SIZE/ANGLE/FONT/JUSTIFY/TEXT",
+        help='a text label to place, e.g. "-122.2/36.6/12/0/1/LB/Monterey Bay" (repeatable)',
+    )
+
+    g = p.add_argument_group("GMT defaults")
+    g.add_argument("--gmt-default", action="append", default=[], metavar="PARAM/VALUE", help="override a GMT default (repeatable)")
+
+    return p
+
+
+def build_cpt(args, grid_info: layout.GridInfo, contour_int: float):
+    """Resolve --color-control/--stretch-color/etc into either
+    (cpt_lines, None) or (None, cpt_file). Mirrors mbpy_grdplot's own
+    build_cpt() (same underlying color-mode/palette math, ported once
+    in mbpy_color.py and shared by both CLIs)."""
+    cc = color.resolve_color_control(args.color_control)
+    if cc.file_cpt:
+        return None, cc.file_cpt
+
+    dzz = grid_info.zmax - grid_info.zmin
+    ncolors_use = color.get_ncolors_use(cc.ncolors, cc.color_style)
+    is_sealevel = cc.color_palette in color.SEALEVEL_PALETTES
+
+    if args.color_mode == 4:
+        magnitude = args.magnitude if args.magnitude is not None else 1.0
+        boundaries = color.build_slope_boundaries(magnitude, ncolors_use, cc.color_style)
+        colors = color.interpolate_palette(cc.color_palette, ncolors_use)
+        if cc.color_style == 1:
+            return color.build_cpt_continuous_from_boundaries(colors, boundaries, args.color_flip), None
+        return color.build_cpt_discrete_from_boundaries(colors, cc.ncolors, boundaries, args.color_flip), None
+
+    if args.stretch_color:
+        rows = color.run_grdhisteq(args.input, cc.ncolors)
+        hb = color.build_histogram_boundaries(
+            rows, cc.ncolors, grid_info.zmin, grid_info.zmax, dzz, color_style=cc.color_style
+        )
+        nsamples = hb.ncolors if cc.color_style == 1 else hb.ncolors + 1
+        colors = color.interpolate_palette(cc.color_palette, nsamples)
+        if cc.color_style == 1:
+            return color.build_cpt_continuous_from_boundaries(colors, hb.hist, args.color_flip), None
+        return color.build_cpt_discrete_from_boundaries(colors, hb.ncolors, hb.hist, args.color_flip), None
+
+    interval = color.compute_color_interval(
+        dzz, grid_info.zmin, grid_info.zmax, ncolors_use, contour_int, args.no_nice_interval
+    )
+    if is_sealevel:
+        izero = color.compute_sealevel_izero(
+            ncolors_use, interval.color_int, interval.color_start, interval.color_end, args.color_flip
+        )
+        cptub, cptue = color.interpolate_palette_sealevel(cc.color_palette, ncolors_use, izero)
+        if cc.color_style == 1:
+            cpt_lines = color.build_cpt_continuous_sealevel(cptub, cptue, interval.color_start, interval.color_int, args.color_flip)
+        else:
+            cpt_lines = color.build_cpt_discrete_sealevel(cptub, cptue, cc.ncolors, interval.color_start, interval.color_int, args.color_flip)
+    else:
+        colors = color.interpolate_palette(cc.color_palette, ncolors_use)
+        if cc.color_style == 1:
+            cpt_lines = color.build_cpt_continuous(colors, interval.color_start, interval.color_int, args.color_flip)
+        else:
+            cpt_lines = color.build_cpt_discrete(colors, cc.ncolors, interval.color_start, interval.color_int, args.color_flip)
+    return cpt_lines, None
+
+
+def main(argv=None) -> int:
+    args = build_arg_parser().parse_args(argv)
+
+    root = args.output or re.sub(r"\.[A-Za-z0-9]+$", "", os.path.basename(args.input))
+
+    grid_info = layout.run_grdinfo(args.input)
+    if args.zbounds:
+        zmin_s, zmax_s = args.zbounds.split("/")
+        grid_info = dataclasses.replace(grid_info, zmin=float(zmin_s), zmax=float(zmax_s))
+
+    lay = script.compute_layout_3d(
+        grid_info, view_control=args.view, pagesize=args.pagesize, scale_loc=args.scale_location,
+        map_scale=args.projection, orientation=args.orientation or 0, region=args.region,
+        exaggeration=args.exaggeration, map_zscale=args.zscale,
+    )
+    # compute_layout_3d() may have resolved gridprojected differently
+    # than run_grdinfo() alone did (see mbpy_layout.compute_layout()'s
+    # docstring on the out-of-bounds fallback); propagate that back so
+    # the shading commands below (which read grid_info.gridprojected to
+    # decide grdgradient's -fg flag) agree with it.
+    if lay.gridprojected != grid_info.gridprojected:
+        grid_info = dataclasses.replace(grid_info, gridprojected=lay.gridprojected)
+
+    mesh = args.color_mode in (6, 7)
+    cc = color.resolve_color_control(args.color_control)
+    color_palette = cc.color_palette
+    cpt_lines, cpt_file = build_cpt(args, grid_info, lay.contour_int)
+
+    # Mesh modes (6/7) never take grdview shading/intensity (-I) --
+    # only color_mode 2-5 do (mbm_grd3dplot lines ~2001-2008).
+    shade = None
+    if not mesh and args.color_mode != 1:
+        shade = script.ShadeOptions(
+            color_mode=args.color_mode,
+            magnitude=args.magnitude, azimuth=args.azimuth, elevation=args.elevation,
+            shade_flip=args.shade_flip,
+            file_intensity=args.intensity_file, stretch_shade=args.stretch_shade,
+        )
+
+    mesh_null = None
+    if args.mesh_null is True:
+        mesh_null = f"{grid_info.zmin:.10g}/200/200/200"
+    elif isinstance(args.mesh_null, str):
+        mesh_null = args.mesh_null
+
+    coast = None
+    if args.coast or args.coast_resolution or args.coast_dry_fill or args.coast_wet_fill \
+            or args.coast_lake_fill or args.coast_river or args.coast_boundary or args.coast_pen:
+        coast = misc.CoastOptions(
+            coast_control=True,
+            coast_resolution=args.coast_resolution,
+            coast_dryfill=args.coast_dry_fill,
+            coast_wetfill=args.coast_wet_fill,
+            coast_lakefill=args.coast_lake_fill,
+            coast_river=args.coast_river,
+            coast_boundaries=list(args.coast_boundary),
+            coast_pen=args.coast_pen,
+        )
+
+    opts = script.ScriptOptions3D(
+        grid=args.input, root=root, layout=lay, grid_info=grid_info,
+        output_format=args.format, title=args.title, tick_info=args.tick_info,
+        colorbar_label=args.colorbar_label, length_scale=args.length_scale, dpi=args.dpi,
+        shade=shade, mesh=mesh, mesh_contour_pen=args.mesh_contour_pen,
+        color_palette=color_palette, color_flip=args.color_flip,
+        data_scale=args.data_scale, cpt_lines=cpt_lines, cpt_file=cpt_file,
+        drape_file=args.drape_file, mesh_null=mesh_null, mesh_zlevel=args.mesh_zlevel,
+        coast=coast, text_labels=list(args.text),
+        gmt_defs=list(args.gmt_default),
+    )
+
+    script_path = f"{root}.sh"
+    script.generate_and_write_3d(opts, script_path)
+
+    if args.verbose:
+        print(f"Generated {script_path} (output: {root}.{args.format})")
+
+    if args.execute:
+        subprocess.run(["bash", script_path], check=True)
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

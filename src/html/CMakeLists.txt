@@ -105,6 +105,10 @@ set(HTML
     mbotps.html
     mbpreprocess.html
     mbprocess.html
+    mbpy_grd3dplot.html
+    mbpy_grdplot.html
+    mbpy_histplot.html
+    mbpy_xyplot.html
     mbrollbias.html
     mbrolltimelag.html
     mbroutetime.html
@@ -198,6 +202,10 @@ set(PDF
     mbotps.pdf
     mbpreprocess.pdf
     mbprocess.pdf
+    mbpy_grd3dplot.pdf
+    mbpy_grdplot.pdf
+    mbpy_histplot.pdf
+    mbpy_xyplot.pdf
     mbrollbias.pdf
     mbrolltimelag.pdf
     mbroutetime.pdf

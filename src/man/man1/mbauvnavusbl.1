@@ -8,7 +8,7 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbauvnavusbl\fP \fB\-I\fP\fIinavfile\fP \fB\-O\fP\fIonavfile\fP \fB\-U\fP\fIusblfile\fP
-[\fB\-A\fP \fB\-F\fP\fInavformat\fP \fB\-L\fP\fIlonflip\fP \fB\-M\fP\fIusblformat\fP \fB\-V \-H\fP ]
+[\fB\-A\fP \fB\-L\fP\fIlonflip\fP \fB\-V \-H\fP ]
 
 .SH DESCRIPTION
 MBauvnavusbl reads a primary navigation file (usually from a submerged platform
@@ -46,13 +46,6 @@ Causes \fBmbauvnavusbl\fP to use the average calculated position offset over
 the whole dataset, rather than interpolating a time-varying offset, when
 adjusting the primary navigation.
 .TP
-.B \-F
-\fInavformat\fP
-.br
-Accepted but currently unused: the input primary navigation file is always
-parsed as whitespace-delimited ASCII text regardless of this value.
-Default: \fInavformat\fP = 9.
-.TP
 .B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
@@ -75,13 +68,6 @@ then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fBmbauvnavusbl\fP uses the user default \fIlonflip\fP set using
 \fBmbdefaults\fP.
-.TP
-.B \-M
-\fIusblformat\fP
-.br
-Accepted but currently unused: the input USBL navigation file is always
-parsed as whitespace-delimited ASCII text regardless of this value.
-Default: \fIusblformat\fP = 165.
 .TP
 .B \-O
 \fIonavfile\fP

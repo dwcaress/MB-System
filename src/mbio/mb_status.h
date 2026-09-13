@@ -213,13 +213,20 @@
 #define MB_ALTNAV_NONE 0
 #define MB_ALTNAV_USE 1
 
-/* image status values returned by mb_imagelist_read() */
+/* image status values returned by mb_imagelist_read().
+   MB_IMAGESTATUS_LEFT and MB_IMAGESTATUS_RIGHT are single bits that combine
+   (bitwise OR) to form MB_IMAGESTATUS_STEREO when both sides of a pair are
+   present. MB_IMAGESTATUS_SINGLE is a distinct, non-stereo category (a
+   mono-camera image with no paired side); it keeps the LEFT bit set because
+   a single image is carried in the same path0/left-side fields as a LEFT
+   entry, but its value must not equal MB_IMAGESTATUS_LEFT or callers cannot
+   tell a genuine single-camera image apart from the left half of a pair. */
 #define MB_IMAGESTATUS_NONE             0x00
-#define MB_IMAGESTATUS_SINGLE           0x01
 #define MB_IMAGESTATUS_LEFT             0x01
 #define MB_IMAGESTATUS_RIGHT            0x02
 #define MB_IMAGESTATUS_STEREO           0x03
 #define MB_IMAGESTATUS_IMAGELIST        0x04
+#define MB_IMAGESTATUS_SINGLE           0x05
 #define MB_IMAGESTATUS_PARAMETER        0x09
 #define mb_image_check_none(S) ((int)(S == MB_IMAGESTATUS_NONE))
 #define mb_image_check_single(S) ((int)(S == MB_IMAGESTATUS_SINGLE))

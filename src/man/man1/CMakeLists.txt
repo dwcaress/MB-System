@@ -51,10 +51,13 @@ set(manpages
     mbm_multicopy.1
     mbm_multidatalist.1
     mbm_multiprocess.1
+    mbm_phins2fnv.1
     mbm_plot.1
+    mbm_rollerror.1
     mbm_route2mission.1
     mbm_stat.1
     mbm_tmap.1
+    mbm_trnplot.1
     mbm_utm.1
     mbm_xbt.1
     mbm_xyplot.1
@@ -71,6 +74,10 @@ set(manpages
     mbotps.1
     mbpreprocess.1
     mbprocess.1
+    mbpy_grd3dplot.1
+    mbpy_grdplot.1
+    mbpy_histplot.1
+    mbpy_xyplot.1
     mbrolltimelag.1
     mbroutetime.1
     mbsegygrid.1
@@ -107,10 +114,21 @@ endif()
 
 if(buildTRN)
     set(trn
+        mbgrd2octree.1
+        mbgrdtilemaker.1
         mbtrnpp.1)
 endif()
 
-install(FILES ${manpages} ${deprecated} ${trn} DESTINATION ${CMAKE_INSTALL_MANPAGES}/man1)
+if(buildOpenCV)
+    set(photo
+        mbgetphotocorrection.1
+        mbimagecorrect.1
+        mbm_makeimagelist.1
+        mbphotogrammetry.1
+        mbphotomosaic.1)
+endif()
+
+install(FILES ${manpages} ${deprecated} ${trn} ${photo} DESTINATION ${CMAKE_INSTALL_MANPAGES}/man1)
 
 message(STATUS "Installed man pages to ${CMAKE_INSTALL_MANPAGES}/man1")
 
