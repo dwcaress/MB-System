@@ -52,8 +52,7 @@ mbphotogrammetry [<B>--verbose</B> <B>--help</B> <B>--threads=</B><I>nthreads</I
 <B>--algorithm-speckle-window-size=</B><I>value</I>
 <B>--algorithm-speckle-range=</B><I>value</I>
 <B>--algorithm-disp-12-max-diff=</B><I>value</I>
-<B>--algorithm-texture-threshold=</B><I>value</I>
-<B>--good-fraction-threshold=</B><I>value</I>]
+<B>--algorithm-texture-threshold=</B><I>value</I>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -415,14 +414,6 @@ left-to-right and right-to-left disparity checks. The default is 10.
 
 Sets a texture threshold value used to reject matches in low-texture image
 regions. The default is 10.
-<DT><B>--good-fraction-threshold=</B><I>value</I>
-
-<DD>
-<BR>
-
-This option is accepted on the command line but currently has no effect: the
-option is declared but not read anywhere in the program's option-processing
-logic.
 <P>
 </DL>
 <A NAME="lbAH">&nbsp;</A>

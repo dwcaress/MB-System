@@ -64,7 +64,6 @@ constexpr char usage_message[] =
     "\t--input=input_grid\n"
     "\t--output=output_root\n\n"
     "\t--tile-dimension=tile_dimension\n"
-    "\t--tile-mode=mode\n\n"
     "\t--tile-spacing=tile_spacing\n\n";
 
 /*--------------------------------------------------------------------*/
@@ -79,12 +78,10 @@ int main( int argc, char **argv )
   int tile_dimension_spacing = ((tile_dimension - 1) / 2) + 1;
   double tile_width = 0.0;
   double tile_spacing = 0.0;
-  int tile_mode = 0;
 
   static struct option options[] = {{"verbose", no_argument, nullptr, 0},
                                     {"help", no_argument, nullptr, 0},
                                     {"input", required_argument, nullptr, 0},
-                                    {"mode", required_argument, nullptr, 0},
                                     {"output", required_argument, nullptr, 0},
                                     {"tile-dimension", required_argument, nullptr, 0},
                                     {"tile-spacing", required_argument, nullptr, 0}};
@@ -93,7 +90,7 @@ int main( int argc, char **argv )
   bool errflg = false;
   int c;
   bool help = false;
-  while ((c = getopt_long(argc, argv, "D:d:HhI:i:M:m:O:o:S:s:Vv", options, &option_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "D:d:HhI:i:O:o:S:s:Vv", options, &option_index)) != -1) {
     switch (c) {
     /*-------------------------------------------------------*/
     /* long options all return c=0 */
@@ -130,14 +127,6 @@ int main( int argc, char **argv )
           exit(MB_ERROR_BAD_PARAMETER);
         }
       }
-      else if (strcmp("tile-mode", options[option_index].name) == 0) {
-        const int n = sscanf(optarg, "%d", &tile_mode);
-        if (n != 1 || tile_mode < 0) {
-          fprintf(stderr, "Failed to parse argument: %s=%s\nProgram %s terminated\n",
-                  options[option_index].name, optarg, program_name);
-          exit(MB_ERROR_BAD_PARAMETER);
-        }
-      }
       else if (strcmp("tile-spacing", options[option_index].name) == 0) {
         const int n = sscanf(optarg, "%lf", &tile_spacing);
         if (n != 1 || tile_spacing <= 0.0) {
@@ -160,10 +149,6 @@ int main( int argc, char **argv )
     case 'I':
     case 'i':
       sscanf(optarg, "%1023s", input_grid);
-      break;
-    case 'M':
-    case 'm':
-      sscanf(optarg, "%d", &tile_mode);
       break;
     case 'O':
     case 'o':
@@ -203,7 +188,6 @@ int main( int argc, char **argv )
     fprintf(outfp, "dbg2       help:                 %d\n", help);
     fprintf(outfp, "dbg2       input_grid:           %s\n", input_grid);
     fprintf(outfp, "dbg2       output_root:          %s\n", output_root);
-    fprintf(outfp, "dbg2       tile_mode:            %d\n", tile_mode);
     fprintf(outfp, "dbg2       tile_dimension:       %d\n", tile_dimension);
     fprintf(outfp, "dbg2       tile_spacing:         %f\n", tile_spacing);
   }
@@ -248,21 +232,25 @@ int main( int argc, char **argv )
     exit(error);
   }
 
-  fprintf(stdout, "\nInput grid:           %s\n", input_grid);
-  fprintf(stdout, "  Projection mode:    %d\n", grid_projection_mode);
-  fprintf(stdout, "  Projection id:      %s\n", grid_projection_id);
-  fprintf(stdout, "  No data value:      %f\n", grid_nodatavalue);
-  fprintf(stdout, "  grid_nxy:           %d\n", grid_nxy);
-  fprintf(stdout, "  grid_n_columns:     %d\n", grid_n_columns);
-  fprintf(stdout, "  grid_n_rows:        %d\n", grid_n_rows);
-  fprintf(stdout, "  grid_min:           %f\n", grid_min);
-  fprintf(stdout, "  grid_max:           %f\n", grid_max);
-  fprintf(stdout, "  grid_xmin:          %f\n", grid_xmin);
-  fprintf(stdout, "  grid_xmax:          %f\n", grid_xmax);
-  fprintf(stdout, "  grid_ymin:          %f\n", grid_ymin);
-  fprintf(stdout, "  grid_ymax:          %f\n", grid_ymax);
-  fprintf(stdout, "  grid_dx:            %f\n", grid_dx);
-  fprintf(stdout, "  grid_dy:            %f\n", grid_dy);
+  if (verbose >= 1) {
+    fprintf(outfp, "\nInput grid:           %s\n", input_grid);
+    fprintf(outfp, "  Projection mode:    %d\n", grid_projection_mode);
+    fprintf(outfp, "  Projection id:      %s\n", grid_projection_id);
+    fprintf(outfp, "  No data value:      %f\n", grid_nodatavalue);
+    fprintf(outfp, "  grid_nxy:           %d\n", grid_nxy);
+    fprintf(outfp, "  grid_n_columns:     %d\n", grid_n_columns);
+    fprintf(outfp, "  grid_n_rows:        %d\n", grid_n_rows);
+    fprintf(outfp, "  grid_min:           %f\n", grid_min);
+    fprintf(outfp, "  grid_max:           %f\n", grid_max);
+    fprintf(outfp, "  grid_xmin:          %f\n", grid_xmin);
+    fprintf(outfp, "  grid_xmax:          %f\n", grid_xmax);
+    fprintf(outfp, "  grid_ymin:          %f\n", grid_ymin);
+    fprintf(outfp, "  grid_ymax:          %f\n", grid_ymax);
+    fprintf(outfp, "  grid_dx:            %f\n", grid_dx);
+    fprintf(outfp, "  grid_dy:            %f\n", grid_dy);
+  } else {
+    fprintf(outfp, "Input grid: %s\n", input_grid);
+  }
 
   // Set up output tile scheme
   // Each grid tile will have 50% overlap with surrounding tiles
@@ -305,20 +293,22 @@ int main( int argc, char **argv )
   strcpy(tile_ylabel, "Northing (meters)");
   strcpy(tile_zlabel, "Topography (meters)");
 
-  fprintf(stdout, "\nOutput tileset:       %s\n", output_root);
-  fprintf(stdout, "  tile_width_x:       %f\n", tile_width_x);
-  fprintf(stdout, "  tile_width_y:       %f\n", tile_width_y);
-  fprintf(stdout, "  tileset_origin_x:   %f\n", tileset_origin_x);
-  fprintf(stdout, "  tileset_origin_y:   %f\n", tileset_origin_x);
-  fprintf(stdout, "  tileset_max_x:      %f\n", tileset_max_x);
-  fprintf(stdout, "  tileset_max_y:      %f\n", tileset_max_y);
-  fprintf(stdout, "  num_tiles_x:        %d\n", num_tiles_x);
-  fprintf(stdout, "  num_tiles_y:        %d\n", num_tiles_y);
-  fprintf(stdout, "  num_tiles:          %d\n", num_tiles);
-  fprintf(stdout, "  tile_xlabel:        %s\n", tile_xlabel);
-  fprintf(stdout, "  tile_ylabel:        %s\n", tile_ylabel);
-  fprintf(stdout, "  tile_zlabel:        %s\n", tile_zlabel);
-  fprintf(stdout, "  tile_title:         %s\n", tile_title);
+  if (verbose >= 1) {
+    fprintf(outfp, "\nOutput tileset:       %s\n", output_root);
+    fprintf(outfp, "  tile_width_x:       %f\n", tile_width_x);
+    fprintf(outfp, "  tile_width_y:       %f\n", tile_width_y);
+    fprintf(outfp, "  tileset_origin_x:   %f\n", tileset_origin_x);
+    fprintf(outfp, "  tileset_origin_y:   %f\n", tileset_origin_x);
+    fprintf(outfp, "  tileset_max_x:      %f\n", tileset_max_x);
+    fprintf(outfp, "  tileset_max_y:      %f\n", tileset_max_y);
+    fprintf(outfp, "  num_tiles_x:        %d\n", num_tiles_x);
+    fprintf(outfp, "  num_tiles_y:        %d\n", num_tiles_y);
+    fprintf(outfp, "  num_tiles:          %d\n", num_tiles);
+    fprintf(outfp, "  tile_xlabel:        %s\n", tile_xlabel);
+    fprintf(outfp, "  tile_ylabel:        %s\n", tile_ylabel);
+    fprintf(outfp, "  tile_zlabel:        %s\n", tile_zlabel);
+    fprintf(outfp, "  tile_title:         %s\n", tile_title);
+  }
 
   mkdir(output_root, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
   mb_pathplus csv_file;
@@ -396,7 +386,8 @@ int main( int argc, char **argv )
         }
       }
 
-    fprintf(outfp, "\nTile %d %d: %s\n", i, j, tile_name);
+    if (verbose >= 1)
+      fprintf(outfp, "\nTile %d %d: %s\n", i, j, tile_name);
     status = mb_write_gmt_grd(verbose, tile_grid, tile_data, tile_nodatavalue,
                               tile_dimension, tile_dimension,
                               tile_xmin, tile_xmax, tile_ymin, tile_ymax,
@@ -416,7 +407,8 @@ int main( int argc, char **argv )
   // Copy source grid to tiles directory
   mb_command command;
   snprintf(command, sizeof(command), "cp %s %s/source_grid.grd", input_grid, output_root);
-  fprintf(outfp, "\n-----------------------------------------------------------\nExecuting: %s\n", command);
+  if (verbose >= 1)
+    fprintf(outfp, "\n-----------------------------------------------------------\nExecuting: %s\n", command);
   system(command);
 
   // Generate octree files from the grids
@@ -427,9 +419,13 @@ int main( int argc, char **argv )
     snprintf(tile_pathlet, sizeof(tile_pathlet), "%s/%s", output_root, tile_name);
     snprintf(command, sizeof(command), "mbgrd2octree --input=%s.grd --output=%s.bo",
                       tile_pathlet, tile_pathlet);
-    fprintf(outfp, "\n-----------------------------------------------------------\nExecuting: %s\n", command);
+    if (verbose >= 1)
+      fprintf(outfp, "\n-----------------------------------------------------------\nExecuting: %s\n", command);
     system(command);
   }
+
+  if (verbose == 0)
+    fprintf(outfp, "Generated %d tiles in %s\n", num_tiles, output_root);
 
   /* check memory */
   if ((status = mb_memory_list(verbose, &error)) == MB_FAILURE) {

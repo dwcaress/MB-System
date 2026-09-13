@@ -64,6 +64,7 @@
 #include "mb_process.h"
 #include "mb_status.h"
 #include "mb_xgraphics.h"
+#include "mb_xmutil.h"
 
 #include "mbnavedit.h"
 
@@ -730,7 +731,8 @@ int mbnavedit_open_file(int useprevious) {
 			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 			fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", ifile);
 			status = MB_FAILURE;
-			do_error_dialog("Unable to open input file.", "You may not have read", "permission in this directory!");
+			mb_file_open_error_message(ifile_use, error1, error2, error3, sizeof(error1));
+			do_error_dialog(error1, error2, error3);
 			return (status);
 		}
 

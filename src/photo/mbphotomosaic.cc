@@ -3022,7 +3022,7 @@ int main(int argc, char** argv)
                 }
 
             /* section-length-max */
-            else if (strcmp("section", options[option_index].name) == 0)
+            else if (strcmp("section-length-max", options[option_index].name) == 0)
                 {
                 const int n = sscanf (optarg,"%lf", &control.sectionLengthMax);
                 }

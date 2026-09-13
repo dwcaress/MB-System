@@ -6,7 +6,7 @@
 #    David W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, California, USA
-#    Dale N. Chayes 
+#    Dale N. Chayes
 #      Center for Coastal and Ocean Mapping
 #      University of New Hampshire
 #      Durham, New Hampshire, USA
@@ -14,7 +14,7 @@
 #      MARUM
 #      University of Bremen
 #      Bremen Germany
-#      
+#
 #    MB-System was created by Caress and Chayes in 1992 at the
 #      Lamont-Doherty Earth Observatory
 #      Columbia University
@@ -29,8 +29,9 @@
 #------------------------------------------------------------------------------
 
 import sys
+import os
 import getopt
-import pandas as pd
+from datetime import datetime
 
 shortOpts = "hi:o:v"
 longOpts = ["help", "input=", "output=", "verbose"]
@@ -45,6 +46,16 @@ def usage():
   -v --verbose                 Verbose output to shell
   """ )
   sys.exit()
+
+# Each line of processed Phins data is whitespace-separated with the date and
+# time as a single tab-joined token (e.g. "2024/06/15\t10:23:45.123456"),
+# followed by space-separated longitude (deg), latitude (deg), heading (deg),
+# draft (m), roll (deg), and pitch (deg). Speed and heave are not present in
+# the Phins data and are always written as 0 in the fnv output.
+FNV_HEADER = ("## <yyyy mm dd hh mm ss.ssssss> <epoch seconds> <longitude (deg)> "
+              "<latitude (deg)> <heading (deg)> <speed (km/hr)> <draft (m)> "
+              "<roll (deg)> <pitch (deg)> <heave (m)> <portlon (deg)> "
+              "<portlat (deg)> <stbdlon (deg)> <stbdlat (deg)>\n")
 
 def main (args, opts={}):
 
@@ -78,12 +89,52 @@ def main (args, opts={}):
     print ("Output file not set\nMacro mbm_phins2fnv exiting...")
     sys.exit()
 
-  # Read the input data
-  data = pd.read_csv(inputfile , sep='\\s+', comment='#')
-  print(data)
-  
-  # loop over all rows outputting the desired columns
-  
+  if verbose:
+    print("mbm_phins2fnv: reading Phins data from %s" % inputfile)
+    print("mbm_phins2fnv: writing fnv data to %s" % outputfile)
+
+  nlines_read = 0
+  nlines_written = 0
+  nlines_skipped = 0
+
+  with open(inputfile, 'r') as phins_file, open(outputfile, 'w') as fnv_file:
+    fnv_file.write(FNV_HEADER)
+    for row in phins_file:
+      nlines_read += 1
+
+      # Skip comment lines and the column header line (identified by the
+      # word "date" rather than a leading data value)
+      if '#' in row or 'date' in row:
+        nlines_skipped += 1
+        continue
+
+      row = row.replace('\n', '')
+      fields = row.split(' ')
+
+      try:
+        date_str = fields[0]
+        epoch = datetime.strptime(date_str, "%Y/%m/%d\t%H:%M:%S.%f").timestamp()
+        longitude = fields[1]
+        latitude = fields[2]
+        heading = fields[3]
+        draft = fields[4]
+        roll = fields[5]
+        pitch = fields[6]
+      except (IndexError, ValueError) as e:
+        nlines_skipped += 1
+        if verbose:
+          print("mbm_phins2fnv: skipping unparseable line %d: %s" % (nlines_read, row))
+        continue
+
+      date_str = date_str.replace("/", "\t").replace(":", "\t")
+      fnv_file.write("%s\t%s\t%s\t%s\t%s\t0\t%s\t%s\t%s\t0\t0\t0\t0\t0\n"
+                     % (date_str, epoch, longitude, latitude, heading, draft, roll, pitch))
+      nlines_written += 1
+
+  if verbose:
+    print("mbm_phins2fnv: %d lines read, %d lines written, %d lines skipped"
+          % (nlines_read, nlines_written, nlines_skipped))
+
 
 if __name__ == "__main__":
   # Parse command line arguments
@@ -96,4 +147,3 @@ if __name__ == "__main__":
 
   # Run main script
   main (args,opts)
-

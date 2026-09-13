@@ -1,0 +1,241 @@
+#!/usr/bin/env python3
+#--------------------------------------------------------------------
+#    The MB-system:  mbpy_xyplot
+#
+#    Copyright (c) 2026 by
+#    David W. Caress (caress@mbari.org)
+#      Monterey Bay Aquarium Research Institute
+#      Moss Landing, California, USA
+#
+#    See README.md file for copying and redistribution conditions.
+#--------------------------------------------------------------------
+#
+# Purpose:
+#   Python/PyGMT-era replacement for the Perl macro mbm_xyplot: reads one
+#   or more xy data files and generates a GMT **modern mode** shellscript
+#   that plots them, following the same page-layout and projection-fitting
+#   conventions as mbm_xyplot itself (shared, in fact, with mbm_histplot's
+#   own copies of the same subs -- see mbpy_xyplot_script.py's top
+#   docstring). See src/macros/python/mbpy_{layout,misc,xyplot_script}.py
+#   for the underlying logic.
+#
+#   Unlike mbm_xyplot's own single-letter "-M<sub>:<sub>:..." grammar for
+#   coastline/text-label/length-scale tuning, this tool exposes each of
+#   those as its own descriptive long option -- see the --help text.
+#
+#   Unlike mbm_xyplot itself, this tool never writes a persistent
+#   temporary file: mbm_xyplot preprocesses every input file (delimiter-
+#   splitting, per-file column-selection math) into a file named
+#   "<input><n>.<pid>" left behind in the current directory after every
+#   run. Here, the equivalent column-selection/math is done once in
+#   memory (to find the auto-fit plot bounds) and, at plot time, through
+#   a live `awk | gmt plot` pipe with nothing written to disk -- see
+#   mbpy_xyplot_script.py's top docstring.
+#
+# Usage:
+#   mbpy_xyplot -I data.xy -O plot [options...]
+#   mbpy_xyplot --input "data.xy:symbol=c0.1:fill=red" --output plot \
+#       --title "My Plot" --coast --coast-resolution i
+#
+import argparse
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+# Locate the sibling mbpy_{layout,misc,xyplot_script} modules: they sit
+# alongside this script once installed (flat bindir, matching how
+# src/macros installs its Perl macros), but in the source tree they live
+# one level down in src/macros/python/ -- try both so this also runs
+# directly from a checkout without installing first.
+_here = os.path.dirname(os.path.realpath(__file__))
+for _candidate in (_here, os.path.join(_here, "python")):
+    if _candidate not in sys.path:
+        sys.path.insert(0, _candidate)
+
+import mbpy_misc as misc
+import mbpy_xyplot_script as script
+
+
+def build_arg_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(
+        prog="mbpy_xyplot",
+        description="Generate a GMT modern-mode plotting script for one or more xy data "
+                    "files (Python/PyGMT-era replacement for mbm_xyplot).",
+    )
+
+    g = p.add_argument_group("input/output")
+    g.add_argument(
+        "-I", "--input", action="append", default=[], required=True, metavar="FILE[:key=val...]",
+        help='an xy data file to plot, with optional colon-separated overrides: '
+             'symbol=, fill=, pen= (styling, default from --symbol/--fill/--pen), '
+             'delimiter= (default: whitespace), xexpr=/yexpr= (column-selection/math '
+             'expressions, e.g. "c[3]", "c[3]*2+1" -- "c[N]" selects field N (1-indexed), '
+             '"#" is the input line number; default xexpr=c[1], yexpr=c[2]). Repeatable.',
+    )
+    g.add_argument("-O", "--output", metavar="ROOT", help="output root name [default: first --input file's basename without extension]")
+    g.add_argument("--format", default="pdf", metavar="FMT", help="output format: pdf, png, ps, jpg, tif, eps, ... [pdf]")
+    g.add_argument("--title", metavar="TEXT", help="plot title")
+    g.add_argument("--xlabel", default=" ", metavar="TEXT", help="x axis label (linear/Cartesian projections only)")
+    g.add_argument("--ylabel", default=" ", metavar="TEXT", help="y axis label (linear/Cartesian projections only)")
+    g.add_argument("--dpi", type=int, metavar="DPI", help="final raster's resolution")
+    g.add_argument("-X", "--execute", action="store_true", help="run the generated script immediately")
+    g.add_argument("-V", "--verbose", action="store_true", help="print the generated script path and a brief summary")
+
+    g = p.add_argument_group("region / projection / page")
+    g.add_argument(
+        "-R", "--region", metavar="XMIN/XMAX/YMIN/YMAX[r]",
+        help='plot region [default: auto-computed from the data]; fields may be dd:mm:ss; '
+             'a trailing "r" means the four values are two corner points (SW, NE) rather '
+             'than a w/e/s/n range; a bare "r" reformats the auto-computed data bounds into '
+             "that corner-point form",
+    )
+    g.add_argument("-J", "--projection", metavar="SPEC", help='GMT map scale/projection spec, e.g. "m1.0", "x0.02", "Xd6i" [default: auto-fit linear]')
+    g.add_argument("-P", "--pagesize", default="a", metavar="SIZE", help="page size code (a, b, c, ... a4, ...) [a]")
+    orient = p.add_mutually_exclusive_group()
+    orient.add_argument("--portrait", action="store_const", dest="orientation", const=1, help="force portrait orientation")
+    orient.add_argument("--landscape", action="store_const", dest="orientation", const=2, help="force landscape orientation")
+    p.set_defaults(orientation=0)
+    g.add_argument("-B", "--tick-info", metavar="SPEC", help="raw -B basemap tick spec override")
+    g.add_argument("--length-scale", metavar="SPEC", help='GMT distance scale bar spec for -L on the basemap, e.g. "fx10/2/32.70/5.0+lkm"; the literal word '
+                                                           '"center" between two slashes is replaced with the plot\'s own data center')
+
+    g = p.add_argument_group("xy styling defaults (per-file overrides: see --input)")
+    g.add_argument("-S", "--symbol", default="N", metavar="SYMBOL", help='e.g. "c0.1" (GMT symbol code + size) [none: connect with a line]')
+    g.add_argument("-G", "--fill", default="N", metavar="COLOR", help="symbol/polygon fill color [none]")
+    g.add_argument("-W", "--pen", default="N", metavar="PEN", help='line pen, e.g. "1p,black" [none]')
+
+    g = p.add_argument_group("coastline")
+    g.add_argument("--coast", action="store_true", help="enable a coastline overlay")
+    g.add_argument("--coast-resolution", choices=["f", "h", "i", "l", "c"], metavar="{f,h,i,l,c}", help="[f]")
+    g.add_argument("--coast-dry-fill", metavar="COLOR", help="[200]")
+    g.add_argument("--coast-wet-fill", metavar="COLOR")
+    g.add_argument("--coast-lake-fill", metavar="COLOR")
+    g.add_argument("--coast-river", metavar="COLOR")
+    g.add_argument("--coast-boundary", action="append", default=[], metavar="SPEC", help="national boundary spec (repeatable)")
+    g.add_argument("--coast-pen", metavar="PEN", help="[1p]")
+
+    g = p.add_argument_group("text labels")
+    g.add_argument(
+        "--text", action="append", default=[], metavar="LON/LAT/SIZE/ANGLE/FONT/JUSTIFY/TEXT",
+        help='a text label to place, e.g. "-122.2/36.6/12/0/1/LB/Monterey Bay" (repeatable)',
+    )
+
+    g = p.add_argument_group("GMT defaults")
+    g.add_argument("--gmt-default", action="append", default=[], metavar="PARAM/VALUE", help="override a GMT default (repeatable)")
+
+    return p
+
+
+def parse_xy_file(spec: str, default_symbol: str, default_fill: str, default_pen: str) -> script.XYFileEntry:
+    parts = spec.split(":")
+    file = parts[0]
+    symbol, fill, pen = default_symbol, default_fill, default_pen
+    delimiter = None
+    xexpr, yexpr = "c[1]", "c[2]"
+    for part in parts[1:]:
+        key, sep, value = part.partition("=")
+        if not sep:
+            raise ValueError(f"malformed --input style {part!r} in {spec!r} (expected key=value)")
+        if key == "symbol":
+            symbol = value
+        elif key == "fill":
+            fill = value
+        elif key == "pen":
+            pen = value
+        elif key == "delimiter":
+            delimiter = value
+        elif key == "xexpr":
+            xexpr = value
+        elif key == "yexpr":
+            yexpr = value
+        else:
+            raise ValueError(f"unknown --input style {key!r} in {spec!r} "
+                              f"(expected symbol/fill/pen/delimiter/xexpr/yexpr)")
+    return script.XYFileEntry(file=file, xexpr=xexpr, yexpr=yexpr, delimiter=delimiter,
+                               symbol=symbol, fill=fill, pen=pen)
+
+
+def main(argv=None) -> int:
+    args = build_arg_parser().parse_args(argv)
+
+    entries = [parse_xy_file(spec, args.symbol, args.fill, args.pen) for spec in args.input]
+    if not entries:
+        print("\a\nNo input file specified!\nmbpy_xyplot aborted\n", file=sys.stderr)
+        return 1
+    for entry in entries:
+        if not Path(entry.file).is_file():
+            print(f"\a\nInput file {entry.file} cannot be opened!\nmbpy_xyplot aborted\n", file=sys.stderr)
+            return 1
+
+    root = args.output or re.sub(r"\.[A-Za-z0-9]+$", "", os.path.basename(entries[0].file))
+
+    if args.region:
+        data_xmin = data_xmax = data_ymin = data_ymax = 0.0
+    else:
+        data_xmin, data_xmax, data_ymin, data_ymax = script.scan_xy_bounds(entries)
+
+    length_scale = args.length_scale
+    if length_scale:
+        # Port of mbm_xyplot lines ~1087-1096: substitute the literal word
+        # "center" for the plot's own data center, so e.g.
+        # "-MGLfx122.2center32.70/5.0+lkm" becomes a real -L spec.
+        m = re.match(r"^(\S+)center(\S+)$", length_scale)
+        if m:
+            xmin_r, xmax_r, ymin_r, ymax_r, _ = script._resolve_bounds(
+                data_xmin, data_xmax, data_ymin, data_ymax, args.region
+            )
+            xcen, ycen = 0.5 * (xmin_r + xmax_r), 0.5 * (ymin_r + ymax_r)
+            length_scale = f"{m.group(1)}{xcen:.8g}/{ycen:.8g}{m.group(2)}"
+
+    coast = None
+    if args.coast or args.coast_resolution or args.coast_dry_fill or args.coast_wet_fill \
+            or args.coast_lake_fill or args.coast_river or args.coast_boundary or args.coast_pen:
+        # Port of mbm_xyplot lines ~1071-1085: these two defaults are
+        # specific to mbm_xyplot's own coastline handling -- confirmed
+        # via direct diff that mbm_grdplot's coastline setup has no
+        # equivalent fallback at all.
+        coast_dryfill = args.coast_dry_fill
+        coast_pen = args.coast_pen
+        if not (coast_dryfill or args.coast_wet_fill or coast_pen or args.coast_boundary or args.coast_river):
+            coast_dryfill = coast_dryfill or "200"
+            coast_pen = coast_pen or "1p"
+        coast_resolution = args.coast_resolution or "f"
+        coast = misc.CoastOptions(
+            coast_control=True,
+            coast_resolution=coast_resolution,
+            coast_dryfill=coast_dryfill,
+            coast_wetfill=args.coast_wet_fill,
+            coast_lakefill=args.coast_lake_fill,
+            coast_river=args.coast_river,
+            coast_boundaries=list(args.coast_boundary),
+            coast_pen=coast_pen,
+        )
+
+    lay = script.compute_layout_xy(
+        data_xmin, data_xmax, data_ymin, data_ymax,
+        pagesize=args.pagesize, map_scale=args.projection, orientation=args.orientation,
+        region=args.region, tick_info=args.tick_info, xlabel=args.xlabel, ylabel=args.ylabel,
+    )
+
+    opts = script.ScriptOptionsXY(
+        entries=entries, root=root, layout=lay, output_format=args.format,
+        title=args.title, dpi=args.dpi, length_scale=length_scale, coast=coast,
+        text_labels=list(args.text), gmt_defs=list(args.gmt_default),
+    )
+
+    script_path = f"{root}.sh"
+    script.generate_and_write_xy(opts, script_path)
+
+    if args.verbose:
+        print(f"Generated {script_path} (output: {root}.{args.format})")
+
+    if args.execute:
+        subprocess.run(["bash", script_path], check=True)
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

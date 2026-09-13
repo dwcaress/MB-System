@@ -30,7 +30,7 @@ Version 5.0
 
 mbgrdtilemaker <B>--input=</B><I>inputGridFile</I> <B>--output=</B><I>outputRoot</I>
 [<B>--tile-dimension=</B><I>tileDimension</I> <B>--tile-spacing=</B><I>tileSpacing</I>
-<B>--mode=</B><I>mode</I> <B>--verbose</B> <B>--help</B>]
+<B>--verbose</B> <B>--help</B>]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -134,23 +134,18 @@ Sets the desired tile half-width in the input grid's horizontal coordinate
 units (typically meters). When given, the tile dimension (number of nodes
 per side) is calculated from <I>tileSpacing</I> and the input grid's node
 spacing, overriding any value set with <B>--tile-dimension</B>.
-<DT><B>--mode=</B><I>mode</I>, <B>-M</B><I>mode</I>
-
-<DD>
-<BR>
-
-Sets a tiling mode value. In the current implementation this value is
-parsed and stored but does not otherwise change the behavior of the
-program.
 <DT><B>--verbose</B>
 
 <DD>
-The <B>--verbose</B> option causes <B>mbgrdtilemaker</B> to print out additional
-status and debug messages; repeating it redirects this output to stderr
-and increases the level of detail reported. Note that <B>mbgrdtilemaker</B>
-prints a substantial amount of progress information (input grid
-parameters, output tileset parameters, and a line per tile and per
-<B>mbgrd2octree</B> invocation) to stdout regardless of this setting.
+By default (<B>--verbose</B> not given) <B>mbgrdtilemaker</B> prints only a modest
+summary: a line identifying the input grid and, at the end of the run, a
+line giving the number of tiles generated and the output location. Giving
+<B>--verbose</B> (or <B>-V</B>) at least once raises the level of detail reported,
+causing <B>mbgrdtilemaker</B> to also print the full input grid parameters,
+the full output tileset parameters, and a line per tile and per
+<B>mbgrd2octree</B> invocation as the tiles are generated. Repeating
+<B>--verbose</B> a second time additionally redirects all of this output to
+stderr instead of stdout and adds a further level of debug detail.
 <P>
 </DL>
 <A NAME="lbAH">&nbsp;</A>

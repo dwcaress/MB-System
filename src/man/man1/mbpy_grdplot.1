@@ -1,0 +1,344 @@
+.TH mbpy_grdplot 1 "12 September 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbpy_grdplot\fP \- Create an executable shellscript which will generate
+a GMT modern-mode map of gridded data in a GMT grid file or image data in
+a georeferenced image file.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbpy_grdplot\fP \fB\-I\fP\fIgrid\fP [\fB\-O\fP\fIroot\fP]
+[\fB\-\-format\fP\fIfmt\fP]
+[\fB\-\-title\fP\fItext\fP]
+[\fB\-\-colorbar\-label\fP\fItext\fP]
+[\fB\-\-dpi\fP\fIdpi\fP]
+[\fB\-X\fP] [\fB\-V\fP]
+.br
+[\fB\-R\fP\fIxmin/xmax/ymin/ymax\fP]
+[\fB\-J\fP\fIspec\fP]
+[\fB\-P\fP\fIpagesize\fP]
+[\fB\-\-portrait\fP | \fB\-\-landscape\fP]
+[\fB\-\-scale\-location\fP\fI{l,r,t,b}\fP]
+[\fB\-\-tick\-info\fP\fIspec\fP]
+[\fB\-\-length\-scale\fP\fIspec\fP]
+.br
+[\fB\-\-color\-mode\fP\fI{1-7}\fP]
+[\fB\-\-no\-color\-fill\fP]
+[\fB\-W\fP\fIspec\fP]
+[\fB\-D\fP]
+[\fB\-Y\fP]
+[\fB\-\-stretch\-color\fP]
+[\fB\-Z\fP\fIzmin/zmax\fP]
+[\fB\-\-data\-scale\fP\fIfactor\fP]
+.br
+[\fB\-\-magnitude\fP\fIval\fP]
+[\fB\-\-azimuth\fP\fIdeg\fP]
+[\fB\-\-elevation\fP\fIdeg\fP]
+[\fB\-\-shade\-flip\fP]
+[\fB\-\-intensity\-file\fP\fIgrid\fP]
+[\fB\-\-stretch\-shade\fP]
+.br
+[\fB\-C\fP[\fIinterval\fP]]
+[\fB\-\-contour\-file\fP\fIgrid\fP]
+[\fB\-\-contour\-annotation\fP\fIinterval\fP]
+[\fB\-\-contour\-pen\fP\fIpen\fP]
+[\fB\-\-contour\-gap\fP\fIspec\fP]
+[\fB\-\-contour\-cut\fP\fIval\fP]
+[\fB\-\-contour\-tick\fP[\fIspacing\fP]]
+.br
+[\fB\-\-coast\fP]
+[\fB\-\-coast\-resolution\fP\fI{f,h,i,l,c}\fP]
+[\fB\-\-coast\-dry\-fill\fP\fIcolor\fP]
+[\fB\-\-coast\-wet\-fill\fP\fIcolor\fP]
+[\fB\-\-coast\-lake\-fill\fP\fIcolor\fP]
+[\fB\-\-coast\-river\fP\fIcolor\fP]
+[\fB\-\-coast\-boundary\fP\fIspec\fP]
+[\fB\-\-coast\-pen\fP\fIpen\fP]
+.br
+[\fB\-\-xy\-overlay\fP\fIfile\fP[\fI:fill=..\fP][\fI:symbol=..\fP][\fI:pen=..\fP]]
+[\fB\-\-text\fP\fIlon/lat/size/angle/font/justify/text\fP]
+.br
+[\fB\-\-nav\-file\fP\fIdatalist\fP]
+[\fB\-\-nav\-format\fP\fIfmt\fP]
+[\fB\-\-nav\-ticks\fP\fIspec\fP]
+[\fB\-\-ping\-ticks\fP\fItick/annot/len\fP]
+[\fB\-\-nav\-pen\fP\fIpen\fP]
+.br
+[\fB\-\-gmt\-default\fP\fIparam/value\fP]
+
+.SH DESCRIPTION
+\fBmbpy_grdplot\fP is a Python/PyGMT-era replacement for the Perl macro
+\fBmbm_grdplot\fP. It reads a grid (or, in \fB\-\-color\-mode\fP 6/7, a
+georeferenced or plain image file) and generates an executable
+shellscript of \fBGMT\fP \fBmodern mode\fP commands (\fBgmt begin\fP /
+\fBgmt end\fP, without classic mode's manual \fB\-K\fP/\fB\-O\fP
+bookkeeping) which, when run, produces a map of that data. Several
+styles of plots can be generated, including color fill maps, contour
+maps, color fill maps overlaid with contours, shaded relief color maps,
+slope magnitude maps, coastline overlays, swath navigation/ping-number
+overlays, text labels, and xy data in lines or symbols.
+
+The plot is scaled to fit the specified page size using the same
+page-layout, projection-fitting, and color-palette heuristics as
+\fBmbm_grdplot\fP, so the two macros produce visually equivalent maps.
+Unlike \fBmbm_grdplot\fP's single-letter \fB\-M\fP\fIsub\fP\fB:\fP\fIsub\fP\fB:\fP...
+grammar for coastline/navigation/contour/xy tuning, \fBmbpy_grdplot\fP
+exposes each of those as its own descriptive long option (see OPTIONS
+below); most options are also available as classic \fBmbm_grdplot\fP-style
+single-letter flags where a natural equivalent exists.
+
+\fBmbpy_grdplot\fP requires \fBGMT\fP 6 or later (modern mode) and a
+Python 3 interpreter. It depends on four sibling support modules
+(\fBmbpy_layout.py\fP, \fBmbpy_color.py\fP, \fBmbpy_misc.py\fP,
+\fBmbpy_grdplot_script.py\fP) installed alongside it; the first three
+are shared with the companion macros \fBmbpy_grd3dplot\fP and
+\fBmbpy_histplot\fP.
+
+Unlike \fBmbm_grdplot\fP, the generated script does not include any
+step to display the plot on screen, and does not need a separate
+\fBgmt psconvert\fP step to rasterize the output -- GMT modern mode's
+own \fBgmt figure\fP/\fBgmt end\fP machinery renders directly to the
+format requested with \fB\-\-format\fP.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian do Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-I\fP, \fB\-\-input\fP \fIgrid\fP
+Input grid file (or image file, for \fB\-\-color\-mode\fP 6/7). Required.
+.TP
+.B \-O\fP, \fB\-\-output\fP \fIroot\fP
+Output root name; the generated script is \fIroot\fP\fB.sh\fP, the plot
+is \fIroot\fP\fB.\fP\fIfmt\fP, and (unless \fB\-W\fP names an existing
+\&.cpt file) the color palette is \fIroot\fP\fB.cpt\fP. Default: the
+input grid's basename with its extension removed.
+.TP
+.B \-\-format \fIfmt\fP
+Output format passed to \fBgmt figure\fP: \fBpdf\fP, \fBpng\fP,
+\fBps\fP, \fBjpg\fP, \fBtif\fP, \fBeps\fP, ... Default \fBpdf\fP.
+.TP
+.B \-\-title \fItext\fP
+Plot title, placed above the map frame.
+.TP
+.B \-\-colorbar\-label \fItext\fP
+Label for the color scale bar (the second half of \fBmbm_grdplot\fP's
+\fB\-L\fP\fItitle\fP\fB:\fP\fIlabel\fP). Default \fBz\fP.
+.TP
+.B \-\-dpi \fIdpi\fP
+Rendering resolution: both \fBgrdimage\fP's own \fB\-E\fP\fIdpi\fP and
+the final raster's resolution (via \fBgmt figure\fP).
+.TP
+.B \-X\fP, \fB\-\-execute\fP
+Run the generated script immediately after writing it.
+.TP
+.B \-V\fP, \fB\-\-verbose\fP
+Print the generated script's path and a one-line summary.
+.TP
+.B \-R\fP, \fB\-\-region \fIxmin/xmax/ymin/ymax\fP
+Plot region. Default: the grid's own bounds.
+.TP
+.B \-J\fP, \fB\-\-projection \fIspec\fP
+GMT map projection/scale spec, e.g. \fBm1.0\fP (Mercator, 1 inch/degree),
+\fBx0.02\fP (linear, 0.02 inch/unit), \fBXd6i\fP (linear, 6 inch width).
+Default: an auto-fit Mercator (geographic grids) or linear (all others)
+projection chosen to fill the page.
+.TP
+.B \-P\fP, \fB\-\-pagesize \fIsize\fP
+Page size code: \fBa\fP\-\fBf\fP, \fBe1\fP (US sizes), \fBa0\fP\-\fBa10\fP,
+\fBb0\fP\-\fBb10\fP, \fBc0\fP\-\fBc7\fP (ISO/architectural), or \fBm1\fP\-\fBm6\fP
+(large-format). Default \fBa\fP.
+.TP
+.B \-\-portrait\fP, \fB\-\-landscape
+Force the page orientation instead of choosing automatically based on
+the plot's aspect ratio.
+.TP
+.B \-\-scale\-location \fI{l,r,t,b}\fP
+Color scale bar placement: left, right, top, or bottom. Default \fBb\fP.
+.TP
+.B \-\-tick\-info \fIspec\fP
+Raw \fB\-B\fP basemap tick-interval spec, overriding the automatically
+computed one.
+.TP
+.B \-\-length\-scale \fIspec\fP
+A GMT distance (map) scale bar spec, passed as \fB\-L\fP\fIspec\fP on
+\fBgmt basemap\fP, e.g. \fBfx10/2/32.70/5.0+lkm\fP (\fBmbm_grdplot\fP's
+\fB\-MGL\fP).
+.TP
+.B \-\-color\-mode \fI{1-7}\fP
+1 plain color fill; 2 color shaded relief (synthetic illumination); 3
+color shaded by a supplied intensity grid; 4 color fill of slope
+magnitude; 5 color shaded by slope magnitude; 6 image plot using an
+image's own embedded georeferencing; 7 image plot placed using
+\fB\-\-region\fP bounds (no georeferencing of its own). Default 1.
+.TP
+.B \-\-no\-color\-fill
+Disable color fill entirely, for a contour-only plot.
+.TP
+.B \-W\fP, \fB\-\-color\-control \fIspec\fP
+Either \fIstyle\fP[\fB/\fP\fIpalette\fP[\fB/\fP\fIncolors\fP]] (e.g.
+\fB1/2/11\fP: continuous style, palette 2, 11 colors), or the path to an
+existing \fB.cpt\fP file to use as-is.
+.TP
+.B \-D\fP, \fB\-\-color\-flip
+Reverse the color palette.
+.TP
+.B \-Y\fP, \fB\-\-no\-nice\-interval
+Use a direct linear color stretch across the data range instead of a
+rounded ("nice") interval.
+.TP
+.B \-\-stretch\-color
+Histogram-equalize the color stretch (\fB\-\-color\-mode\fP 1 only).
+.TP
+.B \-Z\fP, \fB\-\-zbounds \fIzmin/zmax\fP
+Override the grid's own detected z-range for every z-dependent
+computation (color interval, contour interval, ...).
+.TP
+.B \-\-data\-scale \fIfactor\fP
+Rescale grid values by \fIfactor\fP before colorizing/shading.
+.TP
+.B \-\-magnitude \fIval\fP, \fB\-\-azimuth \fIdeg\fP, \fB\-\-elevation \fIdeg\fP
+Illumination/slope-shading parameters for \fB\-\-color\-mode\fP 2-5.
+Defaults depend on the mode (see \fBmbm_grdplot\fP's \fB\-A\fP).
+.TP
+.B \-\-shade\-flip
+Reverse the shading direction (negates the effective magnitude).
+.TP
+.B \-\-intensity\-file \fIgrid\fP
+Intensity grid for \fB\-\-color\-mode\fP 3.
+.TP
+.B \-\-stretch\-shade
+Histogram-equalize the intensity file first (\fB\-\-color\-mode\fP 3 only).
+.TP
+.B \-C\fP, \fB\-\-contour \fI[interval]\fP
+Enable a \fBgrdcontour\fP overlay, at the given interval/spec/\fB.cpt\fP
+path if supplied, otherwise at \fBmbm_grdplot\fP's own auto-computed
+"reasonable" interval for the data range.
+.TP
+.B \-\-contour\-file \fIgrid\fP
+Grid to contour, if different from \fB\-\-input\fP.
+.TP
+.B \-\-contour\-annotation \fIinterval\fP
+Contour annotation interval (\fBmbm_grdplot\fP's \fB\-MCA\fP).
+.TP
+.B \-\-contour\-pen \fIpen\fP
+Contour line pen (\fB\-MCW\fP). Default \fBc1p\fP (the regular, i.e.
+non-annotated, contour pen at 1 point).
+.TP
+.B \-\-contour\-gap \fIspec\fP
+Contour line gap spec (\fB\-MCG\fP).
+.TP
+.B \-\-contour\-cut \fIval\fP
+Omit contour segments shorter than \fIval\fP (\fB\-MCQ\fP).
+.TP
+.B \-\-contour\-tick \fI[spacing]\fP
+Add downhill-direction ticks to closed contours, optionally at the
+given tick spacing (\fB\-MCT\fP).
+.TP
+.B \-\-coast
+Enable a coastline overlay (\fBgmt coast\fP).
+.TP
+.B \-\-coast\-resolution \fI{f,h,i,l,c}\fP
+Coastline database resolution: full, high, intermediate, low, crude.
+.TP
+.B \-\-coast\-dry\-fill\fP, \fB\-\-coast\-wet\-fill\fP, \fB\-\-coast\-lake\-fill \fIcolor\fP
+Fill colors for land, water, and lakes.
+.TP
+.B \-\-coast\-river \fIcolor\fP
+Draw rivers in the given color.
+.TP
+.B \-\-coast\-boundary \fIspec\fP
+Draw a national boundary; repeatable.
+.TP
+.B \-\-coast\-pen \fIpen\fP
+Pen for the coastline itself.
+.TP
+.B \-\-xy\-overlay \fIfile\fP[\fB:fill=\fP\fIfill\fP][\fB:symbol=\fP\fIsymbol\fP][\fB:pen=\fP\fIpen\fP]
+Overlay an xy data file (\fBgmt plot\fP), with optional colon-separated
+styling, e.g. \fBpoints.xy:fill=red:symbol=c0.1:pen=1p,blue\fP.
+Repeatable.
+.TP
+.B \-\-text \fIlon/lat/size/angle/font/justify/text\fP
+Place a text label (\fBgmt text\fP), e.g.
+\fB\-122.2/36.6/12/0/1/LB/Monterey Bay\fP. Repeatable.
+.TP
+.B \-\-nav\-file \fIdatalist\fP
+MB-System swath datalist to plot navigation from, via MB-System's own
+\fBgmt mbcontour\fP GMT supplement module.
+.TP
+.B \-\-nav\-format \fIfmt\fP
+Datalist format code. Default: auto-detected via \fBmbformat\fP.
+.TP
+.B \-\-nav\-ticks \fIspec\fP
+Tick/annotation spec, e.g. \fB0.25/1/4/0.15\fP, or \fBF\fP/\fBFP\fP to
+annotate with the swath file name (perpendicular, for \fBFP\fP).
+.TP
+.B \-\-ping\-ticks \fItick/annot/len\fP
+Ping-number annotation spec along the navigation track, e.g.
+\fB50/100/0.1\fP.
+.TP
+.B \-\-nav\-pen \fIpen\fP
+Pen for the navigation track line.
+.TP
+.B \-\-gmt\-default \fIparam/value\fP
+Override a GMT default parameter for this plot (e.g.
+\fBMAP_FRAME_TYPE/plain\fP); repeatable.
+
+.SH EXAMPLES
+Suppose one wants to generate a shaded-by-slope-magnitude topography
+map with a swath navigation overlay, a distance scale bar, and a color
+scale bar labeled in meters, rendered directly to a 300 dpi PNG:
+
+.br
+ mbpy_grdplot \-I topo.grd \-O topoplot \\
+.br
+     \-\-color\-mode 5 \-\-shade\-flip \-\-magnitude 1 \\
+.br
+     \-\-title "Survey Area" \-\-colorbar\-label "Topography (meters)" \\
+.br
+     \-\-length\-scale "fx10/2/32.70/5.0+lkm" \\
+.br
+     \-\-nav\-file datalist.mb\-1 \\
+.br
+     \-\-pagesize c \-\-dpi 300 \-\-format png \-\-execute \-V
+
+This produces \fBtopoplot.sh\fP (the generated GMT modern-mode
+shellscript), \fBtopoplot.cpt\fP (the color palette), and, because
+\fB\-\-execute\fP was given, runs the script immediately to produce
+\fBtopoplot.png\fP.
+
+A plain color-fill map with a 100-meter contour overlay, written to a
+script for later inspection/execution rather than run immediately:
+
+.br
+ mbpy_grdplot \-I topo.grd \-O topocont \\
+.br
+     \-\-color\-mode 1 \-\-contour 100 \-\-contour\-pen "0.5p,black" \\
+.br
+     \-\-title "Survey Area" \-\-colorbar\-label "Topography (meters)" \\
+.br
+     \-\-format pdf \-V
+
+.SH SEE ALSO
+\fBmbm_grdplot\fP(1), \fBmbpy_grd3dplot\fP(1), \fBmbpy_histplot\fP(1),
+\fBmbpy_xyplot\fP(1), \fBgrdimage\fP(1), \fBgrdcontour\fP(1),
+\fBmbdefaults\fP(1), \fBmbgrid\fP(1), \fBmbsystem\fP(1), \fBmbformat\fP(1)
+
+.SH BUGS
+Please report any bugs to the MB-System project on GitHub
+(https://github.com/dwcaress/MB-System).

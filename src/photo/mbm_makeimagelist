@@ -216,7 +216,7 @@ def main (args, opts={}):
     elif o in ("-d", "--imdir"):
       imdir = a
     elif o in ("-f", "--imformat"):
-      imdir = a
+      imformat = a
     elif o in ("-o", "--outfile"):
       outFname = a
     elif o in ("-g", "--gpsfile"):

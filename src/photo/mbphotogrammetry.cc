@@ -122,8 +122,7 @@ char usage_message[] = "mbphotogrammetry \n"
                         "\t--algorithm-speckle-window-size=value\n"
                         "\t--algorithm-speckle-range=value\n"
                         "\t--algorithm-disp-12-max-diff=value\n"
-                        "\t--algorithm-texture-threshold=value\n"
-                        "\t--good-fraction-threshold=value\n";
+                        "\t--algorithm-texture-threshold=value\n";
 
 /*--------------------------------------------------------------------*/
 
@@ -1211,7 +1210,6 @@ int main(int argc, char** argv)
      *         --algorithm-speckle-range=value
      *         --algorithm-disp-12-max-diff=value
      *         --algorithm-texture-threshold=value
-     *         --good-fraction-threshold=value
      */
     static struct option options[] =
         {
@@ -1256,7 +1254,6 @@ int main(int argc, char** argv)
         {"algorithm-speckle-range",         required_argument,    NULL, 0},
         {"algorithm-disp-12-max-diff",      required_argument,    NULL, 0},
         {"algorithm-texture-threshold",     required_argument,    NULL, 0},
-        {"good-fraction-threshold",         required_argument,    NULL, 0},
         { NULL,                             0,                    NULL, 0}
         };
 

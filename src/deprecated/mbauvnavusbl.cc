@@ -59,7 +59,7 @@ constexpr char help_message[] =
     "linearly interpolates and applies this adjustment vector for each\n"
     "primary navigation position. The adjusted navigation is output.";
 constexpr char usage_message[] =
-    "mbauvnavusbl -Inavfile -Ooutfile -Uusblfile [-Fnavformat -Llonflip -Musblformat -V -H ]";
+    "mbauvnavusbl -Inavfile -Ooutfile -Uusblfile [-Llonflip -V -H ]";
 
 int main(int argc, char **argv) {
 	int verbose = 0;
@@ -83,8 +83,6 @@ int main(int argc, char **argv) {
 	char ifile[MB_PATH_MAXLINE] = "stdin";
 	char ofile[MB_PATH_MAXLINE] = "stdout";
 	char ufile[MB_PATH_MAXLINE] = "";
-	int navformat = 9;
-	int usblformat = 165;
 
 	bool useaverage = false;
 	int error = MB_ERROR_NO_ERROR;
@@ -94,7 +92,7 @@ int main(int argc, char **argv) {
 		bool errflg = false;
 		int c;
 		bool help = false;
-		while ((c = getopt(argc, argv, "VvHhAaF:f:L:l:I:i:O:o:M:m:U:u:")) != -1)
+		while ((c = getopt(argc, argv, "VvHhAaL:l:I:i:O:o:U:u:")) != -1)
 		{
 			switch (c) {
 			case 'H':
@@ -109,10 +107,6 @@ int main(int argc, char **argv) {
 			case 'a':
 				useaverage = true;
 				break;
-			case 'F':
-			case 'f':
-				sscanf(optarg, "%d", &navformat);
-				break;
 			case 'L':
 			case 'l':
 				sscanf(optarg, "%d", &lonflip);
@@ -124,10 +118,6 @@ int main(int argc, char **argv) {
 			case 'O':
 			case 'o':
 				sscanf(optarg, "%1023s", ofile);
-				break;
-			case 'M':
-			case 'm':
-				sscanf(optarg, "%d", &usblformat);
 				break;
 			case 'U':
 			case 'u':
@@ -159,8 +149,6 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "dbg2       input file:      %s\n", ifile);
 			fprintf(stderr, "dbg2       output file:     %s\n", ofile);
 			fprintf(stderr, "dbg2       usbl file:       %s\n", ufile);
-			fprintf(stderr, "dbg2       nav format:      %d\n", navformat);
-			fprintf(stderr, "dbg2       usbl format:     %d\n", usblformat);
 			fprintf(stderr, "dbg2       useaverage:      %d\n", useaverage);
 		}
 

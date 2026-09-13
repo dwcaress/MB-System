@@ -1,0 +1,152 @@
+#!/usr/bin/env python3
+#--------------------------------------------------------------------
+#    The MB-system:  mbpy_histplot
+#
+#    Copyright (c) 2026 by
+#    David W. Caress (caress@mbari.org)
+#      Monterey Bay Aquarium Research Institute
+#      Moss Landing, California, USA
+#
+#    See README.md file for copying and redistribution conditions.
+#--------------------------------------------------------------------
+#
+# Purpose:
+#   Python/PyGMT-era replacement for the Perl macro mbm_histplot: reads
+#   a one-column data file and generates a GMT **modern mode**
+#   shellscript that plots a frequency histogram of it (via `gmt
+#   histogram`), following the same page-layout and projection-fitting
+#   conventions as mbm_histplot itself. See src/macros/python/mbpy_
+#   {layout,histplot_script}.py for the underlying port of that logic;
+#   mbpy_layout is shared with mbpy_grdplot and mbpy_grd3dplot.
+#
+# Usage:
+#   mbpy_histplot -I data.txt -O plot [options...]
+#   mbpy_histplot --input data.txt --output plot --title "My Histogram" \
+#       --cell-width 0.5 --fill orange
+#
+import os
+import re
+import subprocess
+import sys
+from argparse import ArgumentParser
+
+_here = os.path.dirname(os.path.realpath(__file__))
+for _candidate in (_here, os.path.join(_here, "python")):
+    if _candidate not in sys.path:
+        sys.path.insert(0, _candidate)
+
+import mbpy_layout as layout
+import mbpy_histplot_script as script
+
+
+def build_arg_parser() -> ArgumentParser:
+    p = ArgumentParser(
+        prog="mbpy_histplot",
+        description="Generate a GMT modern-mode frequency-histogram plotting script for a "
+                    "one-column data file (Python/PyGMT-era replacement for mbm_histplot).",
+    )
+
+    g = p.add_argument_group("input/output")
+    g.add_argument("-I", "--input", required=True, metavar="FILE", help="input data file, one value per line")
+    g.add_argument("-O", "--output", metavar="ROOT", help="output root name [default: the input file's own name]")
+    g.add_argument("--format", default="pdf", metavar="FMT", help="output format: pdf, png, ps, jpg, tif, eps, ... [pdf]")
+    g.add_argument("--title", metavar="TEXT", help='plot title [default: "Frequency Histogram of <input>"]')
+    g.add_argument("--xlabel", default=" ", metavar="TEXT", help="x-axis label [none]")
+    g.add_argument("--ylabel", default="Frequency %", metavar="TEXT", help='y-axis label ["Frequency %%"]')
+    g.add_argument("--dpi", type=int, metavar="DPI", help="final raster's resolution")
+    g.add_argument("-X", "--execute", action="store_true", help="run the generated script immediately")
+    g.add_argument("-V", "--verbose", action="store_true", help="print the generated script path and a brief summary")
+
+    g = p.add_argument_group("histogram")
+    g.add_argument("-C", "--cell-width", metavar="[XMIN/XMAX/]WIDTH",
+                   help="bin width, or \"xmin/xmax/width\" to also override the data's own x bounds "
+                        "[default width: (xmax-xmin)/10]")
+    g.add_argument("-G", "--fill", default="gray", metavar="COLOR", help='bar fill color, or "N" for no fill [gray]')
+    g.add_argument("-W", "--pen", default="1p", metavar="PEN", help="bar outline pen [1p]")
+
+    g = p.add_argument_group("region / projection / page")
+    g.add_argument("-R", "--region", metavar="XMIN/XMAX/YMIN/YMAX", help="plot region [default: data x range, computed y range]")
+    g.add_argument("-J", "--projection", metavar="SPEC", help='GMT projection/scale spec, e.g. "x0.02" [default: auto-fit linear]')
+    g.add_argument("-P", "--pagesize", default="a", metavar="SIZE", help="page size code (a, b, c, ... a4, ...) [a]")
+    orient = p.add_mutually_exclusive_group()
+    orient.add_argument("--portrait", action="store_const", dest="orientation", const=1, help="force portrait orientation")
+    orient.add_argument("--landscape", action="store_const", dest="orientation", const=2, help="force landscape orientation")
+    g.add_argument("--tick-info", metavar="SPEC", help="raw -B basemap tick spec override")
+
+    g = p.add_argument_group("GMT defaults")
+    g.add_argument("--gmt-default", action="append", default=[], metavar="PARAM/VALUE", help="override a GMT default (repeatable)")
+
+    return p
+
+
+def main(argv=None) -> int:
+    args = build_arg_parser().parse_args(argv)
+
+    root = args.output or re.sub(r"\.[A-Za-z0-9]+$", "", os.path.basename(args.input))
+
+    xmind, xmaxd, count = script.scan_data_bounds(args.input)
+
+    xmin, xmax = xmind, xmaxd
+    ymin = ymax = None
+    if args.region:
+        parts = args.region.split("/")
+        if len(parts) == 4:
+            xmin, xmax, ymin, ymax = (float(v) for v in parts)
+
+    cellwidth = None
+    if args.cell_width:
+        parts = args.cell_width.split("/")
+        if len(parts) == 3:
+            xmin, xmax, cellwidth = float(parts[0]), float(parts[1]), float(parts[2])
+        else:
+            cellwidth = float(parts[0])
+    if cellwidth is None:
+        cellwidth = (xmax - xmin) / 10.0
+
+    # port of mbm_histplot lines ~322-330: pad the cell grid by 5 extra
+    # cells and align it to a cellwidth-aligned origin below xmin.
+    #
+    # NOTE: mbm_histplot applies this padding to xmin/xmax unconditionally
+    # (even when a full 4-field -R was given), but only lets it affect the
+    # plot's own -R when -R was *not* given -- when -R was given, the plot
+    # region keeps the user's raw xmin/xmax while the -T bin spec silently
+    # uses the padded ones instead, so the two can disagree. This port
+    # applies the padding consistently to both the plot region and the
+    # bin spec instead of reproducing that inconsistency.
+    import math
+    ncell = math.floor((xmax - xmin) / cellwidth) + 5
+    nxmin = math.floor(xmin / cellwidth) - 1
+    xmin = (nxmin - 0.5) * cellwidth
+    xmax = xmin + cellwidth * ncell
+
+    if ymin is None or ymax is None:
+        ymin = 0.0
+        ymax = script.compute_histogram_yrange(args.input, xmin, cellwidth, ncell, count)
+
+    lay = script.compute_layout_hist(
+        xmin, xmax, ymin, ymax, pagesize=args.pagesize, map_scale=args.projection,
+        orientation=args.orientation or 0, xlabel=args.xlabel, ylabel=args.ylabel,
+        tick_info=args.tick_info,
+    )
+
+    opts = script.ScriptOptionsHist(
+        file_data=args.input, root=root, layout=lay,
+        xmin=xmin, xmax=xmax, cellwidth=cellwidth,
+        output_format=args.format, title=args.title, dpi=args.dpi,
+        fill=args.fill, pen=args.pen, gmt_defs=list(args.gmt_default),
+    )
+
+    script_path = f"{root}.sh"
+    script.generate_and_write_hist(opts, script_path)
+
+    if args.verbose:
+        print(f"Generated {script_path} (output: {root}.{args.format})")
+
+    if args.execute:
+        subprocess.run(["bash", script_path], check=True)
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

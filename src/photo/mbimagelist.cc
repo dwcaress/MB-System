@@ -46,14 +46,66 @@
 constexpr char program_name[] = "mbimagelist";
 constexpr char help_message[] =
     "mbimagelist parses recursive imagelist files and outputs the\n"
-    "complete list of images and camera settings. The results are dumped to stdout.";
+    "complete list of images and camera settings. The results are dumped to stdout.\n"
+    "The --files option (the default) outputs one image path per line.\n"
+    "The --settings option outputs \"path time_d gain exposure\" per image.\n"
+    "The --imagelist option outputs the full imagelist row format:\n"
+    "  left-image-path right-image-path left-time_d right-time_d "
+    "left-gain right-gain left-exposure right-exposure\n"
+    "with a missing side represented by \"NULL\". With --imagelist in use,\n"
+    "--parameters outputs processing parameter lines in the imagelist file\n"
+    "form (e.g. \"#PARAMETER --calibration-file=20250325_LASSCameraCalibration.yml\").\n"
+    "The --start and --end options restrict the image listings output to\n"
+    "those with timestamps within the specified time period; the default\n"
+    "is to output all image listings.";
 constexpr char usage_message[] =
-    "mbimagelist [--input=file --parameters --settings --verbose --help]";
+    "mbimagelist [--input=file --files --settings --imagelist --parameters\n"
+    "\t--start=yyyy/mm/dd/hh/mm/ss.ssssss --end=yyyy/mm/dd/hh/mm/ss.ssssss --verbose --help]";
     
 #define MBIMAGELIST_FILECHOICE_ALL 0
 #define MBIMAGELIST_FILECHOICE_LEFT 1
 #define MBIMAGELIST_FILECHOICE_RIGHT 2
 #define MBIMAGELIST_FILECHOICE_SINGLE 3
+
+/* processing parameter options taking a file path argument - these are
+   the same options recognized by mbphotomosaic.cc when it reads
+   imagelist #PARAMETER entries (e.g. src/photo/mbphotomosaic.cc:3956) */
+static const char *mbimagelist_pathopts[] = {
+    "--correction-file=",
+    "--platform-file=",
+    "--calibration-file=",
+    "--navigation-file=",
+    "--tide-file=",
+    "--image-quality-file=",
+    nullptr};
+
+/*--------------------------------------------------------------------*/
+/* If the processing parameter string in parameter is a recognized
+   file-path option, and directory is not empty, rewrite the file path
+   value to be prefixed by directory - the directory of the imagelist
+   file in which the #PARAMETER entry was found. This follows the same
+   convention used by mbphotomosaic.cc to resolve file paths given in
+   #PARAMETER entries relative to the imagelist file's location rather
+   than the current working directory. An already-absolute file path
+   (starting with '/') is left unmodified. */
+void mbimagelist_resolve_parameter_path(const char *directory, mb_path parameter) {
+	if (strlen(directory) == 0)
+		return;
+
+	for (int i = 0; mbimagelist_pathopts[i] != nullptr; i++) {
+		const char *opt = mbimagelist_pathopts[i];
+		const size_t optlen = strlen(opt);
+		if (strncmp(parameter, opt, optlen) == 0) {
+			mb_path tmp;
+			if (sscanf(parameter + optlen, "%s", tmp) == 1 && tmp[0] != '/') {
+				mb_path newparameter;
+				snprintf(newparameter, sizeof(newparameter), "%s%s/%s", opt, directory, tmp);
+				strcpy(parameter, newparameter);
+			}
+			return;
+		}
+	}
+}
 
 /*--------------------------------------------------------------------*/
 
@@ -76,7 +128,12 @@ int main(int argc, char **argv) {
 	mb_path read_file = "imagelist.mb-2";
 	bool parameters = false;
 	bool settings = false;
-	bool imagechoice = MBIMAGELIST_FILECHOICE_ALL; 
+	bool output_imagelist = false;
+	int imagechoice = MBIMAGELIST_FILECHOICE_ALL;
+	bool use_start_time = false;
+	bool use_end_time = false;
+	double start_time_d = 0.0;
+	double end_time_d = 0.0;
 	
 	FILE *output = stdout;
 
@@ -87,9 +144,11 @@ int main(int argc, char **argv) {
 	            	{"absolutepaths", no_argument, nullptr, 0},
 	        		{"copy", required_argument, nullptr, 0},
 	            	{"copyhere", no_argument, nullptr, 0},
+	            	{"end", required_argument, nullptr, 0},
 	            	{"file", no_argument, nullptr, 0},
 	            	{"files", no_argument, nullptr, 0},
 	            	{"help", no_argument, nullptr, 0},
+	            	{"imagelist", no_argument, nullptr, 0},
 	        		{"input", required_argument, nullptr, 0},
 					{"left", no_argument, nullptr, 0},
 					{"parameter", no_argument, nullptr, 0},
@@ -98,6 +157,7 @@ int main(int argc, char **argv) {
 					{"setting", no_argument, nullptr, 0},
 					{"settings", no_argument, nullptr, 0},
 					{"single", no_argument, nullptr, 0},
+					{"start", required_argument, nullptr, 0},
 					{"verbose", no_argument, nullptr, 0},
 	                {nullptr, 0, nullptr, 0}};
 
@@ -122,11 +182,24 @@ int main(int argc, char **argv) {
 					if (t != nullptr)
 						copyfiles = true;
 				}
+				else if (strcmp("end", options[option_index].name) == 0) {
+					int time_i[7] = {0, 0, 0, 0, 0, 0, 0};
+					double seconds = 0.0;
+					sscanf(optarg, "%d/%d/%d/%d/%d/%lf", &time_i[0], &time_i[1], &time_i[2],
+									&time_i[3], &time_i[4], &seconds);
+					time_i[5] = (int)seconds;
+					time_i[6] = (int)(1000000 * (seconds - time_i[5]));
+					mb_get_time(verbose, time_i, &end_time_d);
+					use_end_time = true;
+				}
 				else if (strcmp("file", options[option_index].name) == 0 || strcmp("files", options[option_index].name) == 0) {
 					files = true;
 				}
 				else if (strcmp("help", options[option_index].name) == 0) {
 					help = true;
+				}
+				else if (strcmp("imagelist", options[option_index].name) == 0) {
+					output_imagelist = true;
 				}
 				else if (strcmp("input", options[option_index].name) == 0) {
 					sscanf(optarg, "%1023s", read_file);
@@ -145,6 +218,16 @@ int main(int argc, char **argv) {
 				}
 				else if (strcmp("single", options[option_index].name) == 0 ) {
 					imagechoice = MBIMAGELIST_FILECHOICE_SINGLE;
+				}
+				else if (strcmp("start", options[option_index].name) == 0) {
+					int time_i[7] = {0, 0, 0, 0, 0, 0, 0};
+					double seconds = 0.0;
+					sscanf(optarg, "%d/%d/%d/%d/%d/%lf", &time_i[0], &time_i[1], &time_i[2],
+									&time_i[3], &time_i[4], &seconds);
+					time_i[5] = (int)seconds;
+					time_i[6] = (int)(1000000 * (seconds - time_i[5]));
+					mb_get_time(verbose, time_i, &start_time_d);
+					use_start_time = true;
 				}
 				else if (strcmp("verbose", options[option_index].name) == 0) {
 					verbose++;
@@ -200,8 +283,10 @@ int main(int argc, char **argv) {
 			}
 		}
 		
-		if (!files && !parameters && !settings)
+		if (!files && !parameters && !settings && !output_imagelist)
 			files = true;
+		if (output_imagelist)
+			files = settings = false;
 		else if (files && settings)
 			files = false;
 
@@ -257,6 +342,11 @@ int main(int argc, char **argv) {
 			fprintf(output, "dbg2       imagechoice:         %d\n", imagechoice);
 			fprintf(output, "dbg2       parameters:          %d\n", parameters);
 			fprintf(output, "dbg2       settings:            %d\n", settings);
+			fprintf(output, "dbg2       output_imagelist:    %d\n", output_imagelist);
+			fprintf(output, "dbg2       use_start_time:      %d\n", use_start_time);
+			fprintf(output, "dbg2       start_time_d:        %f\n", start_time_d);
+			fprintf(output, "dbg2       use_end_time:        %d\n", use_end_time);
+			fprintf(output, "dbg2       end_time_d:          %f\n", end_time_d);
 		}
 
 		if (help) {
@@ -300,23 +390,80 @@ int main(int argc, char **argv) {
                                 &left_gain, &right_gain,
                                 &left_exposure, &right_exposure, &error)) == MB_SUCCESS) {
         if (imageStatus == MB_IMAGESTATUS_PARAMETER) {
-        	if (parameters)
-            	fprintf(output, "  ->Processing parameter: %s\n",imageLeftFile);
+        	if (parameters) {
+        		mbimagelist_resolve_parameter_path(imageRightFile, imageLeftFile);
+        		if (output_imagelist)
+        			fprintf(output, "#PARAMETER %s\n", imageLeftFile);
+        		else
+            		fprintf(output, "  ->Processing parameter: %s\n",imageLeftFile);
+        	}
         }
         else if (imageStatus != MB_IMAGESTATUS_NONE) {
-			if (imageStatus == MB_IMAGESTATUS_STEREO 
-						|| imageStatus == MB_IMAGESTATUS_LEFT 
-						|| imageStatus == MB_IMAGESTATUS_SINGLE) {
-				if (absolutepaths) {
+			const bool has_left = (imageStatus == MB_IMAGESTATUS_STEREO
+						|| imageStatus == MB_IMAGESTATUS_LEFT
+						|| imageStatus == MB_IMAGESTATUS_SINGLE);
+			const bool has_right = (imageStatus == MB_IMAGESTATUS_STEREO
+						|| imageStatus == MB_IMAGESTATUS_RIGHT);
+
+			/* skip entries not matching the requested --left/--right/--single selection */
+			if ((imagechoice == MBIMAGELIST_FILECHOICE_LEFT
+						&& imageStatus != MB_IMAGESTATUS_STEREO && imageStatus != MB_IMAGESTATUS_LEFT)
+					|| (imagechoice == MBIMAGELIST_FILECHOICE_RIGHT
+						&& imageStatus != MB_IMAGESTATUS_STEREO && imageStatus != MB_IMAGESTATUS_RIGHT)
+					|| (imagechoice == MBIMAGELIST_FILECHOICE_SINGLE
+						&& imageStatus != MB_IMAGESTATUS_SINGLE)) {
+				continue;
+			}
+			/* suppress the non-selected side of a stereo pair when --left or --right is in effect */
+			const bool emit_left = has_left && (imagechoice != MBIMAGELIST_FILECHOICE_RIGHT);
+			const bool emit_right = has_right && (imagechoice != MBIMAGELIST_FILECHOICE_LEFT);
+
+			const double record_time_d = has_left ? left_time_d : right_time_d;
+			if ((use_start_time && record_time_d < start_time_d)
+						|| (use_end_time && record_time_d > end_time_d)) {
+				continue;
+			}
+
+			if (absolutepaths) {
+				if (emit_left)
 					mb_get_absolute_path(verbose, imageLeftFile, pwd, &error);
+				if (emit_right)
+					mb_get_absolute_path(verbose, imageRightFile, pwd, &error);
+			}
+
+			if (output_imagelist) {
+				fprintf(output, "%s %s %.6f %.6f %f %f %f %f\n",
+								emit_left ? imageLeftFile : "NULL",
+								emit_right ? imageRightFile : "NULL",
+								emit_left ? left_time_d : 0.0,
+								emit_right ? right_time_d : 0.0,
+								emit_left ? left_gain : 0.0,
+								emit_right ? right_gain : 0.0,
+								emit_left ? left_exposure : 0.0,
+								emit_right ? right_exposure : 0.0);
+			}
+			else {
+				if (emit_left) {
+					if (settings) {
+						fprintf(output, "%s %.6f %f %f\n",
+										imageLeftFile, left_time_d, left_gain, left_exposure);
+					}
+					else {
+						fprintf(output, "%s\n", imageLeftFile);
+					}
 				}
-				if (settings) {
-					fprintf(output, "%s %.6f %f %f\n", 
-									imageLeftFile, left_time_d, left_gain, left_exposure);
+				if (emit_right) {
+					if (settings) {
+						fprintf(output, "%s %.6f %f %f\n",
+										imageRightFile, right_time_d, right_gain, right_exposure);
+					}
+					else {
+						fprintf(output, "%s\n", imageRightFile);
+					}
 				}
-				else {
-					fprintf(output, "%s\n", imageLeftFile);
-				}
+			}
+
+			if (emit_left) {
 				if (imageStatus == MB_IMAGESTATUS_SINGLE)
 					num_single_images++;
 				else
@@ -329,18 +476,7 @@ int main(int argc, char **argv) {
 						fprintf(output, "Executed: %s\n", command);
 				}
 			}
-			if (imageStatus == MB_IMAGESTATUS_STEREO 
-						|| imageStatus == MB_IMAGESTATUS_RIGHT) {
-				if (absolutepaths) {
-					mb_get_absolute_path(verbose, imageRightFile, pwd, &error);
-				}
-				if (settings) {
-					fprintf(output, "%s %.6f %f %f\n", 
-									imageRightFile, right_time_d, right_gain, right_exposure);
-				}
-				else {
-					fprintf(output, "%s\n", imageRightFile);
-				}
+			if (emit_right) {
 				num_right_images++;
 				if (copyfiles) {
 					mb_path command;

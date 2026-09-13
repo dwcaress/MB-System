@@ -31,8 +31,7 @@ mbphotogrammetry [\fB\-\-verbose\fP \fB\-\-help\fP \fB\-\-threads=\fP\fInthreads
 \fB\-\-algorithm\-speckle\-window\-size=\fP\fIvalue\fP
 \fB\-\-algorithm\-speckle\-range=\fP\fIvalue\fP
 \fB\-\-algorithm\-disp\-12\-max\-diff=\fP\fIvalue\fP
-\fB\-\-algorithm\-texture\-threshold=\fP\fIvalue\fP
-\fB\-\-good\-fraction\-threshold=\fP\fIvalue\fP]
+\fB\-\-algorithm\-texture\-threshold=\fP\fIvalue\fP]
 
 .SH DESCRIPTION
 \fBMbphotogrammetry\fP generates bathymetry soundings from navigated stereo
@@ -300,12 +299,6 @@ left-to-right and right-to-left disparity checks. The default is 10.
 .br
 Sets a texture threshold value used to reject matches in low-texture image
 regions. The default is 10.
-.TP
-.B \-\-good\-fraction\-threshold=\fIvalue\fP
-.br
-This option is accepted on the command line but currently has no effect: the
-option is declared but not read anywhere in the program's option-processing
-logic.
 
 .SH SEE ALSO
 \fBmbsystem\fP(1), \fBmbgetphotocorrection\fP(1), \fBmbphotomosaic\fP(1),

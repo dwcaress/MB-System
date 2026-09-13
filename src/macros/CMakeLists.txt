@@ -49,6 +49,29 @@ set(scripts
     mbm_trnplot
     mbm_utm
     mbm_xbt
-    mbm_xyplot)
+    mbm_xyplot
+    mbpy_grdplot
+    mbpy_grd3dplot
+    mbpy_histplot
+    mbpy_xyplot)
 
 install(PROGRAMS ${scripts} DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+# The mbpy_* macros (Python/PyGMT-era ports of mbm_grdplot, mbm_grd3dplot,
+# and mbm_histplot) share a common set of support modules (page-layout,
+# projection, and color-palette logic; misc-option modeling) plus one
+# script-generator module per tool -- see src/macros/python/*.py.
+# Installed as plain files (not executables) alongside the mbpy_*
+# scripts themselves, matching the flat, no-packaging layout the Perl
+# scripts above already use; each mbpy_* tool locates its sibling
+# modules at runtime relative to its own installed location.
+set(mbpy_modules
+    python/mbpy_layout.py
+    python/mbpy_color.py
+    python/mbpy_misc.py
+    python/mbpy_grdplot_script.py
+    python/mbpy_grd3dplot_script.py
+    python/mbpy_histplot_script.py
+    python/mbpy_xyplot_script.py)
+
+install(FILES ${mbpy_modules} DESTINATION ${CMAKE_INSTALL_BINDIR})

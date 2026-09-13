@@ -100,7 +100,6 @@ char usage_message[] = "mbgetphotocorrection \n"
                             "\t--nav-sensor=nav_sensor_id\n"
                             "\t--sensordepth-sensor=sensordepth_sensor_id\n"
                             "\t--heading-sensor=heading_sensor_id\n"
-                            "\t--altitude-sensor=altitude_sensor_id\n"
                             "\t--attitude-sensor=attitude_sensor_id\n"
                             "\t--use-left-camera\n"
                             "\t--use-right-camera\n"
@@ -981,7 +980,6 @@ int main(int argc, char** argv)
     int nav_sensor = -1;
     int sensordepth_sensor = -1;
     int heading_sensor = -1;
-    int altitude_sensor = -1;
     int attitude_sensor = -1;
     struct mb_platform_struct *platform = NULL;
     struct mb_sensor_struct *sensor_bathymetry = NULL;
@@ -1112,7 +1110,6 @@ int main(int argc, char** argv)
      *    --nav-sensor=nav_sensor_id
      *    --sensordepth-sensor=sensordepth_sensor_id
      *    --heading-sensor=heading_sensor_id
-     *    --altitude-sensor=altitude_sensor_id
      *    --attitude-sensor=attitude_sensor_id
      *    --use-left-camera
      *    --use-right-camera
@@ -1147,7 +1144,6 @@ int main(int argc, char** argv)
         {"nav-sensor",                  required_argument,      NULL,         0},
         {"sensordepth-sensor",          required_argument,      NULL,         0},
         {"heading-sensor",              required_argument,      NULL,         0},
-        {"altitude-sensor",             required_argument,      NULL,         0},
         {"attitude-sensor",             required_argument,      NULL,         0},
         {"use-left-camera",             no_argument,            NULL,         0},
         {"use-right-camera",            no_argument,            NULL,         0},
@@ -1306,12 +1302,6 @@ int main(int argc, char** argv)
                 sscanf(optarg, "%d", &heading_sensor);
                 }
 
-            /* altitude-sensor */
-            else if (strcmp("altitude-sensor", options[option_index].name) == 0)
-                {
-                sscanf(optarg, "%d", &altitude_sensor);
-                }
-
             /* attitude-sensor */
             else if (strcmp("attitude-sensor", options[option_index].name) == 0)
                 {
@@ -1449,7 +1439,6 @@ int main(int argc, char** argv)
         fprintf(stream,"%s     nav_sensor:                       %d\n", first, nav_sensor);
         fprintf(stream,"%s     sensordepth_sensor:               %d\n", first, sensordepth_sensor);
         fprintf(stream,"%s     heading_sensor:                   %d\n", first, heading_sensor);
-        fprintf(stream,"%s     altitude_sensor:                  %d\n", first, altitude_sensor);
         fprintf(stream,"%s     attitude_sensor:                  %d\n", first, attitude_sensor);
         fprintf(stream,"%s     use_camera_mode:                  %d\n", first, use_camera_mode);
         fprintf(stream,"%s     control.calibration_set:          %d\n", first, control.calibration_set);
@@ -1666,17 +1655,6 @@ int main(int argc, char** argv)
                 } else {
                     if (verbose > 0)
                         fprintf(stream, "\nFailure to reset parameters: heading_sensor:%d\n", heading_sensor);
-                }
-            }
-
-            /* altitude-sensor */
-            else if (strncmp(imageLeftFile, "--altitude-sensor=", 16) == 0) {
-                if (sscanf(imageLeftFile,"--altitude-sensor=%d", &altitude_sensor) == 1 ) {
-                    if (verbose > 0)
-                        fprintf(stream, "    Parameters reset: altitude_sensor:%d\n", altitude_sensor);
-                } else {
-                    if (verbose > 0)
-                        fprintf(stream, "\nFailure to reset parameters: altitude_sensor:%d\n", altitude_sensor);
                 }
             }
 

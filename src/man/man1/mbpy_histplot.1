@@ -1,0 +1,187 @@
+.TH mbpy_histplot 1 "12 September 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbpy_histplot\fP \- Create an executable shellscript which will generate
+a GMT modern-mode frequency histogram plot of a set of data values.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbpy_histplot\fP \fB\-I\fP\fIfile\fP [\fB\-O\fP\fIroot\fP]
+[\fB\-\-format\fP\fIfmt\fP]
+[\fB\-\-title\fP\fItext\fP]
+[\fB\-\-xlabel\fP\fItext\fP]
+[\fB\-\-ylabel\fP\fItext\fP]
+[\fB\-\-dpi\fP\fIdpi\fP]
+[\fB\-X\fP] [\fB\-V\fP]
+.br
+[\fB\-C\fP[\fIxmin/xmax/\fP]\fIwidth\fP]
+[\fB\-G\fP\fIcolor\fP]
+[\fB\-W\fP\fIpen\fP]
+.br
+[\fB\-R\fP\fIxmin/xmax/ymin/ymax\fP]
+[\fB\-J\fP\fIspec\fP]
+[\fB\-P\fP\fIpagesize\fP]
+[\fB\-\-portrait\fP | \fB\-\-landscape\fP]
+[\fB\-\-tick\-info\fP\fIspec\fP]
+.br
+[\fB\-\-gmt\-default\fP\fIparam/value\fP]
+
+.SH DESCRIPTION
+\fBmbpy_histplot\fP is a Python/PyGMT-era replacement for the Perl
+macro \fBmbm_histplot\fP. It reads a file containing one data value per
+line and generates an executable shellscript of \fBGMT\fP \fBmodern
+mode\fP commands, built around \fBgmt histogram\fP (the modern-mode
+name for classic \fBpshistogram\fP), which produces a frequency
+histogram of those values when run: the bars show what percentage of
+the data falls in each value bin, and mean / \[+-]1 standard deviation /
+\[+-]2 standard deviation normal-distribution curves are always overlaid
+(in black, red, and green respectively) for reference.
+
+\fBmbpy_histplot\fP shares its page-layout and projection-fitting
+conventions with \fBmbpy_grdplot\fP and \fBmbpy_grd3dplot\fP (and, in
+fact, the underlying \fBmbpy_layout.py\fP module), except that its
+default projection is a plain linear/Cartesian one (matching
+\fBmbm_histplot\fP's own default of \fB\-Jx\fP, rather than the
+Mercator/auto-fit default the grid-plotting macros use) -- appropriate
+since a histogram's axes are ordinary numeric value/percentage scales,
+not geographic coordinates.
+
+Unlike \fBmbm_histplot\fP's \fB\-L\fP\fItitle\fP\fB:\fP\fIxlabel\fP\fB:\fP\fIylabel\fP
+colon-joined label option, \fBmbpy_histplot\fP exposes
+\fB\-\-title\fP/\fB\-\-xlabel\fP/\fB\-\-ylabel\fP as separate options.
+
+\fBmbpy_histplot\fP does not expose a data-rescaling, xy-overlay, or
+custom CPT-file option: \fBmbm_histplot\fP itself refers to variables
+for all of these ($data_scale, @xyfiles, $file_cpt) that are never
+actually assigned from any command-line option in its own source --
+they are leftover, unreachable copy-paste from the \fBmbm_grdplot\fP
+template \fBmbm_histplot\fP was originally cloned from, not real
+functionality.
+
+\fBNote:\fP classic \fBpshistogram\fP's outline-pen option was
+\fB\-L\fP\fIpen\fP; the current \fBgmt histogram\fP module (checked
+directly against its own built-in help) has no \fB\-L\fP option at all
+and uses \fB\-W\fP\fIpen\fP instead, like nearly every other GMT
+plotting module's pen option. \fBmbpy_histplot\fP's own \fB\-W\fP/
+\fB\-\-pen\fP option is written out to the generated script using the
+current \fB\-W\fP syntax, not the classic \fB\-L\fP mbm_histplot's own
+Perl source still emits (which is simply not accepted by a current GMT
+installation).
+
+\fBmbpy_histplot\fP requires \fBGMT\fP 6 or later (modern mode) and a
+Python 3 interpreter. It depends on \fBmbpy_layout.py\fP (shared with
+\fBmbpy_grdplot\fP/\fBmbpy_grd3dplot\fP) and its own
+\fBmbpy_histplot_script.py\fP, installed alongside it.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian do Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-I\fP, \fB\-\-input\fP \fIfile\fP
+Input data file, one numeric value per line. Required.
+.TP
+.B \-O\fP, \fB\-\-output\fP \fIroot\fP
+Output root name. Default: the input file's own basename.
+.TP
+.B \-\-format \fIfmt\fP
+Output format passed to \fBgmt figure\fP. Default \fBpdf\fP.
+.TP
+.B \-\-title \fItext\fP
+Plot title. Default: "Frequency Histogram of \fIfile\fP".
+.TP
+.B \-\-xlabel \fItext\fP
+X-axis (value) label. Default: none.
+.TP
+.B \-\-ylabel \fItext\fP
+Y-axis (frequency) label. Default: "Frequency %".
+.TP
+.B \-\-dpi \fIdpi\fP
+The final raster's resolution (via \fBgmt figure\fP).
+.TP
+.B \-X\fP, \fB\-\-execute
+Run the generated script immediately after writing it.
+.TP
+.B \-V\fP, \fB\-\-verbose
+Print the generated script's path and a one-line summary.
+.TP
+.B \-C\fP, \fB\-\-cell\-width \fI[xmin/xmax/]width\fP
+Histogram bin width. If given as three slash-separated values, also
+overrides the data's own detected x (value) bounds. Default width:
+(xmax\-xmin)/10.
+.TP
+.B \-G\fP, \fB\-\-fill \fIcolor\fP
+Bar fill color, or \fBN\fP for unfilled (outline-only) bars. Default
+\fBgray\fP.
+.TP
+.B \-W\fP, \fB\-\-pen \fIpen\fP
+Bar outline pen. Default \fB1p\fP.
+.TP
+.B \-R\fP, \fB\-\-region \fIxmin/xmax/ymin/ymax\fP
+Plot region. Default: the data's own value range for x; a y
+(frequency-percent) range computed from a pre-scan of the data, with a
+10% margin above the tallest bin.
+.TP
+.B \-J\fP, \fB\-\-projection \fIspec\fP
+GMT projection/scale spec, e.g. \fBx0.02\fP (linear, 0.02 inch/unit).
+Default: an auto-fit linear (Cartesian) projection chosen to fill the
+page.
+.TP
+.B \-P\fP, \fB\-\-pagesize \fIsize\fP
+Page size code. Default \fBa\fP.
+.TP
+.B \-\-portrait\fP, \fB\-\-landscape
+Force the page orientation instead of choosing automatically.
+.TP
+.B \-\-tick\-info \fIspec\fP
+Raw \fB\-B\fP basemap tick-interval spec, overriding the automatically
+computed one.
+.TP
+.B \-\-gmt\-default \fIparam/value\fP
+Override a GMT default parameter for this plot; repeatable.
+
+.SH EXAMPLES
+A histogram of a column of survey depth values, with custom bin width,
+fill color, and labels, rendered directly to a PNG:
+
+.br
+ mbpy_histplot \-I depths.txt \-O depth_hist \\
+.br
+     \-\-cell\-width 2.5 \-\-fill orange \-\-pen "1p,black" \\
+.br
+     \-\-title "Depth Distribution" \-\-xlabel "Depth (m)" \\
+.br
+     \-\-format png \-\-execute \-V
+
+An outline-only (unfilled) histogram with an explicit bin range:
+
+.br
+ mbpy_histplot \-I values.txt \-O values_hist \\
+.br
+     \-\-cell\-width "0/100/5" \-\-fill N \-\-pen "2p,blue" \\
+.br
+     \-\-format pdf \-V
+
+.SH SEE ALSO
+\fBmbm_histplot\fP(1), \fBmbpy_grdplot\fP(1), \fBmbpy_grd3dplot\fP(1),
+\fBmbpy_xyplot\fP(1), \fBmbhistogram\fP(1), \fBmbdefaults\fP(1),
+\fBmbsystem\fP(1)
+
+.SH BUGS
+Please report any bugs to the MB-System project on GitHub
+(https://github.com/dwcaress/MB-System).

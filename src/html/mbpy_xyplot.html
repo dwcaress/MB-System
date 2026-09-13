@@ -1,0 +1,410 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbpy_xyplot</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbpy_xyplot</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  13 September 2026 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbpy_xyplot</B> - Create an executable shellscript which will generate
+a GMT modern-mode plot of xy data from one or more data files.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbpy_xyplot</B> <B>-I</B><I>file</I>[<B>:</B><I>key=value...</I>]
+[<B>-I</B><I>file</I>[<B>:</B><I>key=value...</I>] ...]
+[<B>-O</B><I>root</I>]
+[<B>--format</B><I>fmt</I>]
+[<B>--title</B><I>text</I>]
+[<B>--xlabel</B><I>text</I>]
+[<B>--ylabel</B><I>text</I>]
+[<B>--dpi</B><I>dpi</I>]
+[<B>-X</B>] [<B>-V</B>]
+<BR>
+
+[<B>-R</B><I>xmin/xmax/ymin/ymax</I>[<I>r</I>]]
+[<B>-J</B><I>spec</I>]
+[<B>-P</B><I>pagesize</I>]
+[<B>--portrait</B> | <B>--landscape</B>]
+[<B>-B</B><I>spec</I>]
+[<B>--length-scale</B><I>spec</I>]
+<BR>
+
+[<B>-S</B><I>symbol</I>]
+[<B>-G</B><I>color</I>]
+[<B>-W</B><I>pen</I>]
+<BR>
+
+[<B>--coast</B>]
+[<B>--coast-resolution</B><I>{f,h,i,l,c}</I>]
+[<B>--coast-dry-fill</B><I>color</I>]
+[<B>--coast-wet-fill</B><I>color</I>]
+[<B>--coast-lake-fill</B><I>color</I>]
+[<B>--coast-river</B><I>color</I>]
+[<B>--coast-boundary</B><I>spec</I>]
+[<B>--coast-pen</B><I>pen</I>]
+<BR>
+
+[<B>--text</B><I>lon/lat/size/angle/font/justify/text</I>]
+<BR>
+
+[<B>--gmt-default</B><I>param/value</I>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbpy_xyplot</B> is a Python/PyGMT-era replacement for the Perl macro
+<B>mbm_xyplot</B>. It reads one or more xy data files and generates an
+executable shellscript of <B>GMT</B> <B>modern mode</B> commands (<B>gmt
+begin</B> / <B>gmt end</B>) which, when run, plots them as lines,
+symbols, or both, optionally overlaid with a coastline and/or text
+labels. Axes may be an auto-fit linear (Cartesian) scale or any GMT map
+projection.
+<P>
+The plot is scaled to fit the specified page size using the same
+page-layout, projection-fitting, and tick-interval heuristics as
+<B>mbm_histplot</B> -- confirmed by direct comparison of the two Perl
+macros' own sources to be identical (aside from whitespace), and
+distinct from <B>mbm_grdplot</B>'s own versions of the same
+computations (see <B><A HREF="mbpy_histplot.html">mbpy_histplot</A></B>(1)). In particular, when no
+<B>--projection</B> is given, <B>mbpy_xyplot</B> computes two
+<I>independent</I> x and y scales that each separately stretch to fill
+the page (unlike <B>mbpy_grdplot</B>/<B>mbpy_grd3dplot</B>'s single
+aspect-ratio-preserving scale, which would be wrong here since an xy
+plot's x and y axes routinely have unrelated units and ranges -- e.g. a
+time-series plot).
+<P>
+Unlike <B>mbm_xyplot</B>'s single-letter <B>-M</B><I>sub</I><B>:</B><I>sub</I><B>:</B>...
+grammar for coastline/text-label/length-scale tuning, <B>mbpy_xyplot</B>
+exposes each of those as its own descriptive long option (see OPTIONS
+below).
+<P>
+<B>mbpy_xyplot</B> never writes a persistent temporary file, unlike
+<B>mbm_xyplot</B> itself: for every input file, <B>mbm_xyplot</B>
+preprocesses (delimiter-splits and, if requested, applies a column-
+selection/math expression to) the data into a file named
+<I>&lt;input&gt;&lt;n&gt;.&lt;pid&gt;</I> left behind in the current directory after every
+run, whether or not the plot script is ever executed. <B>mbpy_xyplot</B>
+instead performs the equivalent column-selection/math once in memory,
+in Python, to determine the auto-fit plot bounds, and at plot time
+pipes each input file through a small <B>awk</B>(1) program straight
+into <B>gmt plot</B>'s standard input -- a live, ephemeral pipe, with
+nothing written to disk.
+<P>
+Each <B>--input</B> file may carry its own colon-separated overrides,
+in <I>key</I><B>=</B><I>value</I> form:
+<B>symbol=</B>, <B>fill=</B>, <B>pen=</B> (styling, defaulting from
+<B>-S</B>/<B>-G</B>/<B>-W</B>), <B>delimiter=</B> (default: whitespace),
+and <B>xexpr=</B>/<B>yexpr=</B> (column-selection/math expressions using
+<B>mbm_xyplot</B>'s own <B>c[</B><I>N</I><B>]</B> field-selection and
+<B>#</B> line-number mini-language, e.g. <B>c[3]</B> or <B>c[3]*2+1</B>;
+default <B>xexpr=c[1]</B>, <B>yexpr=c[2]</B>). A line beginning with
+<B>&gt;</B> is always passed through unchanged as a multi-segment marker,
+matching <B>mbm_xyplot</B>'s (and <B>gmt plot</B>'s) own convention.
+<P>
+A genuine bug was found and fixed while validating this port against
+real-world data: <B>mbm_xyplot</B>'s own per-line numeric-result check
+is unintentionally a no-op (its validation regex is satisfied by the
+empty string), so an ordinary text header line at the top of a data
+file passes through into the plotted file unfiltered -- and because
+<B>gmt plot</B> infers each column's data type from the <I>first</I>
+record it reads, a single such non-numeric first line makes it silently
+discard every subsequent, perfectly valid row instead of just that one
+line. <B>mbpy_xyplot</B> validates each computed x/y pair with a real
+numeric check instead, skipping (with a warning) only the genuinely
+bad lines.
+<P>
+A related, deliberate addition with no equivalent in <B>mbm_xyplot</B>
+at all: a data column that is exactly constant (e.g. a real &quot;heave&quot;
+trace logged as 0.0 for an entire survey) collapses to a zero-width
+axis that neither classic nor modern GMT can project. <B>mbpy_xyplot</B>
+pads such a degenerate axis by a small margin so it still plots as a
+visible flat line instead of aborting.
+<P>
+<B>mbpy_xyplot</B> requires <B>GMT</B> 6 or later (modern mode), a POSIX
+<B>awk</B>(1), and a Python 3 interpreter. It depends on
+<B>mbpy_layout.py</B> and <B>baseline_gmt_defaults()</B> from
+<B>mbpy_grdplot_script.py</B> (shared with <B>mbpy_grdplot</B>/
+<B>mbpy_grd3dplot</B>), and reuses the page-size/tick-interval helper
+functions from <B>mbpy_histplot_script.py</B>, plus its own
+<B>mbpy_xyplot_script.py</B>, all installed alongside it.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-I</B>, <B>--input</B> <I>file</I>[<B>:</B><I>key=value...</I>]
+
+<DD>
+An xy data file to plot, with optional colon-separated overrides
+<B>symbol=</B>, <B>fill=</B>, <B>pen=</B>, <B>delimiter=</B>, <B>xexpr=</B>,
+<B>yexpr=</B> (see DESCRIPTION). Repeatable; required at least once.
+<DT><B>-O</B>, <B>--output</B> <I>root</I>
+
+<DD>
+Output root name. Default: the first <B>--input</B> file's basename
+with its extension removed.
+<DT><B>--format </B><I>fmt</I>
+
+<DD>
+Output format passed to <B>gmt figure</B>: <B>pdf</B>, <B>png</B>,
+<B>ps</B>, <B>jpg</B>, <B>tif</B>, <B>eps</B>, ... Default <B>pdf</B>.
+<DT><B>--title </B><I>text</I>
+
+<DD>
+Plot title, placed above the frame.
+<DT><B>--xlabel </B><I>text</I>, <B>--ylabel </B><I>text</I>
+
+<DD>
+Axis labels. Only used for a linear/Cartesian projection (an auto-fit
+default, or an explicit <B>-Jx</B>/<B>-JX</B>); a geographic or other
+map projection has no per-axis label, matching <B>mbm_xyplot</B>.
+<DT><B>--dpi </B><I>dpi</I>
+
+<DD>
+The final raster's resolution (via <B>gmt figure</B>).
+<DT><B>-X</B>, <B>--execute</B>
+
+<DD>
+Run the generated script immediately after writing it.
+<DT><B>-V</B>, <B>--verbose</B>
+
+<DD>
+Print the generated script's path and a one-line summary.
+<DT><B>-R</B>, <B>--region </B><I>xmin/xmax/ymin/ymax</I>[<I>r</I>]
+
+<DD>
+Plot region. Fields may be given as <I>dd:mm:ss</I>. A trailing <B>r</B>
+means the four values are two corner points (southwest, northeast)
+rather than a w/e/s/n range; a bare <B>r</B> reformats the
+auto-computed data bounds into that corner-point form. Default: computed
+from the data itself.
+<DT><B>-J</B>, <B>--projection </B><I>spec</I>
+
+<DD>
+GMT map scale/projection spec, e.g. <B>x0.02</B> (linear, 0.02 inch/unit),
+<B>m1.0</B> (Mercator, 1 inch/degree). Default: an auto-fit linear
+projection with independent x and y scales (see DESCRIPTION), chosen to
+fill the page.
+<DT><B>-P</B>, <B>--pagesize </B><I>size</I>
+
+<DD>
+Page size code: <B>a</B>-<B>f</B>, <B>e1</B> (US sizes), <B>a0</B>-<B>a10</B>,
+<B>b0</B>-<B>b10</B>, <B>c0</B>-<B>c7</B> (ISO/architectural), or <B>m1</B>-<B>m6</B>
+(large-format). Default <B>a</B>.
+<DT><B>--portrait</B>, <B>--landscape</B>
+
+<DD>
+Force the page orientation instead of choosing automatically; when
+neither is given, this auto-fit independent-scale mode defaults to
+landscape, matching <B>mbm_xyplot</B>/<B>mbm_histplot</B>.
+<DT><B>-B</B>, <B>--tick-info </B><I>spec</I>
+
+<DD>
+Raw <B>-B</B> basemap tick-interval spec, overriding the automatically
+computed one.
+<DT><B>--length-scale </B><I>spec</I>
+
+<DD>
+A GMT distance (map) scale bar spec, passed as <B>-L</B><I>spec</I> on
+<B>gmt basemap</B>, e.g. <B>fx10/2/32.70/5.0+lkm</B> (<B>mbm_xyplot</B>'s
+<B>-MGL</B>). The literal word <B>center</B> appearing between two
+slashes is replaced with the plot's own data center (e.g.
+<B>fxcenter/5.0+lkm</B>), matching <B>mbm_xyplot</B>'s own substitution.
+<DT><B>-S</B>, <B>--symbol </B><I>symbol</I>
+
+<DD>
+Default GMT symbol code and size for every <B>--input</B> file that
+does not set its own <B>symbol=</B>, e.g. <B>c0.1</B> (circle, 0.1 inch).
+Default: none (points are connected with a line instead).
+<DT><B>-G</B>, <B>--fill </B><I>color</I>
+
+<DD>
+Default symbol/polygon fill color for every <B>--input</B> file that
+does not set its own <B>fill=</B>. Default: none.
+<DT><B>-W</B>, <B>--pen </B><I>pen</I>
+
+<DD>
+Default line pen for every <B>--input</B> file that does not set its
+own <B>pen=</B>, e.g. <B>1p,black</B>. Default: none.
+<DT><B>--coast</B>
+
+<DD>
+Enable a coastline overlay (<B>gmt coast</B>), drawn <I>after</I> the xy
+data plots and <I>before</I> text labels and the basemap frame, matching
+<B>mbm_xyplot</B>'s own layer order exactly (data points that fall on a
+solid land fill are covered by it, just as in the classic macro).
+<DT><B>--coast-resolution </B><I>{f,h,i,l,c}</I>
+
+<DD>
+Coastline database resolution: full, high, intermediate, low, crude.
+Default <B>f</B> when <B>--coast</B> is enabled with no other coastline
+option given.
+<DT><B>--coast-dry-fill</B>, <B>--coast-wet-fill</B>, <B>--coast-lake-fill </B><I>color</I>
+
+<DD>
+Fill colors for land, water, and lakes. <B>--coast-dry-fill</B>
+defaults to <B>200</B> (a mid-gray) when <B>--coast</B> is enabled with
+no fill, pen, river, or boundary option given at all -- an
+<B>mbm_xyplot</B>-specific default with no equivalent in
+<B>mbm_grdplot</B>/<B>mbpy_grdplot</B>.
+<DT><B>--coast-river </B><I>color</I>
+
+<DD>
+Draw rivers in the given color.
+<DT><B>--coast-boundary </B><I>spec</I>
+
+<DD>
+Draw a national boundary; repeatable.
+<DT><B>--coast-pen </B><I>pen</I>
+
+<DD>
+Pen for the coastline itself. Defaults to <B>1p</B> together with the
+<B>--coast-dry-fill</B> default described above.
+<DT><B>--text </B><I>lon/lat/size/angle/font/justify/text</I>
+
+<DD>
+Place a text label (<B>gmt text</B>), e.g.
+<B>-122.2/36.6/12/0/1/LB/Monterey Bay</B>. Repeatable.
+<DT><B>--gmt-default </B><I>param/value</I>
+
+<DD>
+Override a GMT default parameter for this plot (e.g.
+<B>MAP_FRAME_TYPE/plain</B>); repeatable.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Plot a single time series of sensor depth values as a thin connecting
+line, rendered directly to a PNG:
+<P>
+<BR>
+
+<BR>&nbsp;mbpy_xyplot&nbsp;-I&nbsp;&quot;depth_vs_time.txt:pen=0.5p,blue&quot;&nbsp;-O&nbsp;depth_ts&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--title&nbsp;&quot;Sensor&nbsp;Depth&nbsp;vs&nbsp;Time&quot;&nbsp;--xlabel&nbsp;&quot;Time&nbsp;(s)&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--ylabel&nbsp;&quot;Sensor&nbsp;Depth&nbsp;(m)&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--pagesize&nbsp;b&nbsp;--landscape&nbsp;--format&nbsp;png&nbsp;--dpi&nbsp;150&nbsp;--execute&nbsp;-V
+<P>
+Plot navigation fixes from a comma-delimited file (selecting the
+longitude and latitude columns explicitly) as symbols, with a
+coastline underlay:
+<P>
+<BR>
+
+<BR>&nbsp;mbpy_xyplot&nbsp;-I&nbsp;&quot;fixes.csv:delimiter=,:xexpr=c[2]:yexpr=c[3]:symbol=c0.05:fill=red&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-O&nbsp;fixes_plot&nbsp;--title&nbsp;&quot;Vehicle&nbsp;Fixes&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--coast&nbsp;--coast-resolution&nbsp;i&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--format&nbsp;png&nbsp;--execute&nbsp;-V
+<P>
+Plot two data files together, one as a line and one as symbols, over a
+user-specified region:
+<P>
+<BR>
+
+<BR>&nbsp;mbpy_xyplot&nbsp;-I&nbsp;&quot;reference.xy:pen=1p,black&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-I&nbsp;&quot;observed.xy:symbol=c0.08:fill=red&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-O&nbsp;comparison&nbsp;-R&nbsp;&quot;-10/110/-5/55&quot;&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--title&nbsp;&quot;Reference&nbsp;vs&nbsp;Observed&quot;&nbsp;--format&nbsp;pdf&nbsp;-V
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbm_xyplot.html">mbm_xyplot</A></B>(1), <B><A HREF="mbpy_grdplot.html">mbpy_grdplot</A></B>(1), <B><A HREF="mbpy_grd3dplot.html">mbpy_grd3dplot</A></B>(1),
+<B><A HREF="mbpy_histplot.html">mbpy_histplot</A></B>(1), <B>awk</B>(1), <B><A HREF="mbdefaults.html">mbdefaults</A></B>(1),
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Please report any bugs to the MB-System project on GitHub
+(<A HREF="https://github.com/dwcaress/MB-System).">https://github.com/dwcaress/MB-System).</A>
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 13 September 2026</P></CENTER>
+
+<HR>
+<center>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>

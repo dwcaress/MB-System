@@ -4051,7 +4051,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr,
                   all work as well. */
               if (strncmp(buffer, "$SINGLE", 7) == 0
                   || strncmp(buffer, "#SINGLE", 7) == 0) {
-                  imagelist->leftrightstereo = MB_IMAGESTATUS_LEFT;
+                  imagelist->leftrightstereo = MB_IMAGESTATUS_SINGLE;
               }
               else if (strncmp(buffer, "$LEFT", 5) == 0
                   || strncmp(buffer, "#LEFT", 5) == 0) {

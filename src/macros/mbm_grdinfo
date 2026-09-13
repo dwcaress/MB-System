@@ -222,7 +222,16 @@ if ($bounds)
 
 		# cut out desired file
 		$pid = getppid();
-		$file_grd = "$file_input" ."_grdcut_$pid";
+		if ($file_input =~ /^(.*)\.(png|tif|tiff|jpg|jpeg|gif|bmp)$/i)
+			{
+			# preserve recognized image extensions so that GMT/GDAL
+			# can still identify the output image format
+			$file_grd = "$1" ."_grdcut_$pid" .".$2";
+			}
+		else
+			{
+			$file_grd = "$file_input" ."_grdcut_$pid";
+			}
 		if ($verbose > 0)
 			{
 			print "\nRunning mbm_grdcut...\n";

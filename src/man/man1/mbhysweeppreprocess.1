@@ -12,7 +12,7 @@ Version 5.0
 \fB\-D\fP\fIsonardepthfile\fP \fB\-F\fP\fIformat\fP \fB\-G\fP\fIplatformfile\fP
 \fB\-I\fP\fIdatalist\fP
 \fB\-J\fP\fIprojection\fP \fB\-K\fP\fIklugemode\fP \fB\-L\fP
-\fB\-M\fP\fInavformat\fP \fB\-N\fP\fInavfile\fP \fB\-O\fP\fIoutfile\fP
+\fB\-M\fP\fInavformat\fP \fB\-N\fP\fInavfile\fP
 \fB\-T\fP\fItimelag\fP
 \fB\-H\fP \fB\-V\fP]
 
@@ -173,13 +173,6 @@ in the output format 201 data. Any pre-existing navigation data records will
 remain unchanged in the data stream. However, the HSX file header will be altered
 to show the newly merged data as "enabled" and the original, asynchronous data
 as not enabled.
-.TP
-.B \-O
-\fIoutfile\fP
-.br
-This option is intended to set the path of the output data file, but
-currently has no effect: \fBmbhysweeppreprocess\fP always constructs the
-output file name automatically from the input file name.
 .TP
 .B \-T
 \fItimelag\fP

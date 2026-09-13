@@ -1510,7 +1510,17 @@ elsif ($use_scale)
 
   # construct plot scale parameters
   ($projection_pars) = $map_scale =~ /^$projection(\S+)/;
-  $projection_pars = sprintf ("$projection_pars$separator%1.5g", $plot_scale);
+  if ($use_ratio)
+    {
+    # $plot_scale is the "1:NNNN" string set above; sprintf's %g would
+    # numify it down to just "1" (Perl stops at the first non-numeric
+    # character), so append it as a plain string instead
+    $projection_pars = "$projection_pars" . "$separator" . "$plot_scale";
+    }
+  else
+    {
+    $projection_pars = sprintf ("$projection_pars$separator%1.5g", $plot_scale);
+    }
 
   # handle special case for linear projections
   if ($linear && $gridprojected == 0)
@@ -1729,9 +1739,18 @@ if ($color_mode)
     eval "\@cptbb = \@cptbb$color_palette;";
 
     # interpolate colors
-    for ($i = 0; $i < $ncolors; $i++)
+    # NOTE: this must sample $ncolors_use points (not $ncolors) --
+    # discrete-style CPTs (color_style != 1) index one more segment
+    # than the continuous style does ($ncolors_use == $ncolors + 1),
+    # and previously ran off the end of @cptubr/@cptuer for that
+    # extra segment; Perl silently returned undef there, which
+    # printed as 0 and rendered one extreme color segment solid
+    # black. Using $ncolors_use here (equal to $ncolors for the
+    # continuous style, so no change in that case) makes every
+    # segment a real interpolated color.
+    for ($i = 0; $i < $ncolors_use; $i++)
       {
-      $xx = ($ncpt - 1) * $i / ($ncolors - 1);
+      $xx = ($ncpt - 1) * $i / ($ncolors_use - 1);
       $i1 = int($xx);
       $i2 = $i1 + 1;
       $red = $cptbr[$i1]
@@ -1743,7 +1762,7 @@ if ($color_mode)
       $blue = $cptbb[$i1]
         + ($cptbb[$i2] - $cptbb[$i1])
         * ($xx - $i1) / ($i2 - $i1);
-      if ($i < $ncolors - 1)
+      if ($i < $ncolors_use - 1)
           {
           push (@cptubr, $red);
           push (@cptubg, $green);
@@ -1768,13 +1787,19 @@ if ($color_mode)
     eval "\@cptbg = \@cptbg$color_palette;";
     eval "\@cptbb = \@cptbb$color_palette;";
 
+    # NOTE: uses $ncolors_use (not $ncolors) for the same reason the
+    # single-colormap branch above does -- see the comment there. This
+    # mirrors that fix for the sealevel dual-colormap case, which had
+    # the identical ncolors/ncolors_use mixup (confirmed against real
+    # mbm_grdplot -W2/8 output: one extreme discrete segment rendered
+    # solid black before this fix).
     if ($color_flip)
         {
-        $izero = $ncolors - int($color_end / $color_int);
+        $izero = $ncolors_use - int($color_end / $color_int);
         }
     else
         {
-        $izero = $ncolors - int(-$color_start / $color_int);
+        $izero = $ncolors_use - int(-$color_start / $color_int);
         }
     if ($iszero < 0)
         {
@@ -1811,9 +1836,9 @@ if ($color_mode)
       }
 
     # interpolate haxby colors below sealevel
-    for ($i = $izero - 1; $i < $ncolors; $i++)
+    for ($i = $izero - 1; $i < $ncolors_use; $i++)
       {
-      $xx = ($ncpt - 2) * ($i - $izero + 1) / ($ncolors - $izero) + 1;
+      $xx = ($ncpt - 2) * ($i - $izero + 1) / ($ncolors_use - $izero) + 1;
       $i1 = int($xx);
       $i2 = $i1 + 1;
       $red = $cptbr1[$i1]
@@ -1825,7 +1850,7 @@ if ($color_mode)
       $blue = $cptbb1[$i1]
         + ($cptbb1[$i2] - $cptbb1[$i1])
         * ($xx - $i1) / ($i2 - $i1);
-      if ($i < $ncolors - 1)
+      if ($i < $ncolors_use - 1)
           {
           push (@cptubr, $red);
           push (@cptubg, $green);
@@ -2212,6 +2237,22 @@ if ($color_mode && $color_mode < 6 && !$file_cpt)
     $hist[0] = $hist[0] - 0.01*$dzz;
     $hist[$ncolors] =
       $hist[$ncolors] + 0.01*$dzz;
+
+    # For a continuous-style CPT (color_style == 1) only $ncolors of
+    # these $ncolors + 1 boundaries are ever consumed below (one
+    # initial shift plus $ncolors - 1 more, one per segment), so the
+    # last entry -- the true (padded) data maximum computed just
+    # above -- used to be silently dropped, leaving the final CPT
+    # segment short of the actual data range. Fold it into the last
+    # slot that IS consumed instead, merging what would have been the
+    # last two histogram-equalized bins into one final segment.
+    # Discrete-style CPTs (color_style != 1) consume all $ncolors + 1
+    # entries already, so they are unaffected.
+    if ($color_style == 1)
+      {
+      $hist[$ncolors - 1] = $hist[$ncolors];
+      pop(@hist);
+      }
     }
 
   # generate cpt file
@@ -2580,7 +2621,12 @@ if ($color_mode)
         }
     elsif ($color_mode == 6)
         {
-        printf FCMD "-D \\\n\t";
+        # No -D option is emitted here: GMT's grdimage auto-detects an
+        # image's embedded georeferencing on its own. Explicitly passing
+        # -D causes GMT (as of 6.7.0) to zero the image's padding before
+        # it knows whether reprojection is needed, which then aborts with
+        # "gmt_img_project: Input image does not have sufficient (2)
+        # padding" for any non-Cartesian projection (e.g. -Jm).
         }
     elsif ($color_mode == 7)
         {
