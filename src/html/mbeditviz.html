@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>MBeditviz</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  7 September 2026 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  14 September 2026 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -124,7 +124,48 @@ using the middle and right mouse buttons in either rotation mode or zoom/exagger
 <P>
 You can edit the soundings in the point cloud context using the left mouse button. The
 editing mouse modes work just like MBedit. The View menu in the
-point cloud display lets you show, or not show, the flagged soundings (which are displayed in red).
+point cloud display lets you show, or not show, the flagged soundings (which are displayed in red)
+using the &quot;Show Flagged Soundings&quot; toggle.
+<P>
+<I>Coloring the Sounding Cloud</I>
+<P>
+The View menu in the 3D Soundings window also includes four mutually exclusive toggle
+buttons that control how the soundings in the point cloud are colored:
+<DL COMPACT>
+<DT><B>Color by Flag State</B>
+
+<DD>
+Unflagged soundings are colored according to their currently assigned sounding color
+(see <I>Changing Sounding Colors</I> below), and flagged soundings, if shown, are
+colored according to the type of flag applied (manual = red, filter = blue, sonar = green,
+multipick = cyan).
+<DT><B>Color by Topography</B>
+
+<DD>
+Soundings are colored by depth (topography) using the same color table and the same
+minimum and maximum topography values as the associated MBeditviz Survey Viewer (the
+2D/3D display of the gridded bathymetry). Because the color stretch is fixed to the
+Survey Viewer's grid-wide range, the colors of a given sounding cloud do not change as
+different regions or areas are picked, or as the &quot;Show Flagged Soundings&quot; toggle is
+changed.
+<DT><B>Color by Soundings</B>
+
+<DD>
+Soundings are colored by depth (topography) just as with &quot;Color by Topography&quot;, but the
+color stretch is instead scaled to the minimum and maximum depth values found among the
+soundings currently displayed in the 3D Soundings window. If &quot;Show Flagged Soundings&quot; is
+on, the minimum and maximum are calculated over all of the displayed soundings regardless
+of beamflag state; if &quot;Show Flagged Soundings&quot; is off, only the unflagged (valid)
+soundings are used to calculate the minimum and maximum. This means the color stretch is
+recalculated every time a new region, area, or navigation segment is picked, and whenever
+the &quot;Show Flagged Soundings&quot; toggle is changed, so that the full color range is always
+used to differentiate the currently viewed soundings.
+<DT><B>Color by Amplitude</B>
+
+<DD>
+Soundings are colored by backscatter amplitude, with the color stretch scaled to the
+minimum and maximum amplitude values among the soundings currently displayed (subject to
+the same &quot;Show Flagged Soundings&quot; behavior as &quot;Color by Soundings&quot;).
 <P>
 <I>Changing Sounding Colors</I>
 <P>
@@ -151,6 +192,7 @@ for the input file by specifying the edit save file and setting the <B>mbprocess
 apply the edits when generating a processed swath output file. If no parameter file exists,
 <B>mbeditviz</B> creates one.
 <P>
+</DL>
 <A NAME="lbAF">&nbsp;</A>
 <H2>MB-SYSTEM AUTHORSHIP</H2>
 
@@ -263,7 +305,7 @@ This program is not done, nor is it adequately documented.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 7 September 2026</P></CENTER>
+Last Updated: 14 September 2026</P></CENTER>
 
 <HR>
 <center>
