@@ -28,7 +28,25 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-mbsvpselect -N -V -Idatalist -Ssvplist -Pmode[/criteria[/submode]]
+<B>mbsvpselect</B>
+<BR>
+
+--check-zero-position {-N}
+<BR>
+
+--verbose {-V}
+<BR>
+
+--input=datalist {-Idatalist}
+<BR>
+
+--svplist=svplist {-Ssvplist}
+<BR>
+
+--method=mode[/period_or_range[/seasonal]] {-Pmode[/period_or_range[/seasonal]]}
+<BR>
+
+--help {-H}
 <P>
 [-P0, -P1, -P2/period, -P3/range, -P3/range/1]
 <P>
@@ -189,17 +207,14 @@ Christian do Santos Ferreira (<A HREF="mailto:cferreira@marum.de">cferreira@maru
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-H</B>
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-I</B>
+<DT><B>--input=datalist -Idatalist</B>
 
 <DD>
-<I>datalist</I>
-<BR>
-
 Sets the input datalist file, where <I>datalist</I>
 is an ascii file containing a list of the input swath sonar
 data files to be processed and their formats.  The program will read
@@ -214,7 +229,7 @@ This program uses the <B>MBIO</B> library and will operate on any swath sonar
 format supported by <B>MBIO</B>. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page. Default: <I>file</I> = &quot;datalist.mb-1&quot;.
-<DT><B>-N</B>
+<DT><B>--check-zero-position -N</B>
 
 <DD>
 <BR>
@@ -222,7 +237,7 @@ is given in the <B>MBIO</B> manual page. Default: <I>file</I> = &quot;datalist.m
 Causes the program to check for survey profile (swath file) positions, as read
 from the <I>.inf</I> files, that have erroneous zero longitude and zero latitude
 values. This does not affect handling of the SVP position values.
-<DT><B>-P</B>
+<DT><B>--method=mode[/period_or_range[/seasonal]] -Pmode[/period_or_range[/seasonal]]</B>
 
 <DD>
 <BR>
@@ -241,12 +256,9 @@ sound speed model to be used for each swath file.
 
 The times are specified in hours and the ranges in meters. 
 The default time period is 10 hours and the default range is 10000 meters.
-<DT><B>-S</B>
+<DT><B>--svplist=svplist -Ssvplist</B>
 
 <DD>
-<I>svplist</I>
-<BR>
-
 Sets the input svplist file, where <I>svplist</I>
 is an ascii file containing a list of the input sound speed model
 or SVP files.  The program will read
@@ -259,7 +271,7 @@ SVP file should be on a separate line, e.g.:
 <BR>
 
 Default: <I>file</I> = &quot;svplist.mb-1&quot;.
-<DT><B>-V</B>
+<DT><B>--verbose -V</B>
 
 <DD>
 Normally, <B>mbsvpselect</B> works &quot;silently&quot; without outputting

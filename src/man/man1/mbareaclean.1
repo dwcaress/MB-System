@@ -7,10 +7,33 @@ sonar bathymetry data within a specified area.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbareaclean\fP  \fB\-R\fP\fIwest/east/south/north\fP  \fB\-S\fP\fIbinsize\fP
-[\fB\-D\fP\fIthreshold\fP \fB\-F\fP\fIformat\fP \fB\-I\fP\fIinfile\fP
-\fB\-B \-G \-H \-M\fP\fIthreshold\fP[\fI/nmin\fP[\fI/nmax\fP]]
-\fB\-N\fP[-]\fImin_beam\fP[\fI/maxbeam\fP] \fB\-P\fP\fIarg\fP \fB\-T\fP\fItype\fP \-V\fP]
+\fBmbareaclean\fP
+.br
+--bounds=west/east/south/north {-Rwest/east/south/north}
+.br
+--bin-size=binsize {-Sbinsize}
+.br
+[--flag-bad {-B}
+.br
+--std-dev-filter=threshold[/nmin] {-Dthreshold[/nmin]}
+.br
+--format=format {-Fformat}
+.br
+--unflag-good {-G}
+.br
+--help {-H}
+.br
+--input=infile {-Iinfile}
+.br
+--median-filter=threshold[/nmin[/nmax]] {-Mthreshold[/nmin[/nmax]]}
+.br
+--beam-range=[-]minbeam[/maxbeam] {-N[-]minbeam[/maxbeam]}
+.br
+--plane-fit=arg {-Parg}
+.br
+--detection-type=type {-Ttype}
+.br
+--verbose {-V}]
 
 .SH DESCRIPTION
 \fBmbareaclean\fP identifies and flags artifacts in swath sonar
@@ -95,15 +118,13 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B \-B
+.B \-\-flag\-bad \-B
 .br
 This option causes \fBmbareaclean\fP to flag as bad any previously unflagged
 soundings that fail one of the specified statistical tests. If neither \fB\-B\fP
 or \fB\-G\fP are specified, then the program will by default use this option.
 .TP
-.B \-D
-\fIthreshold\fP[\fI/nmin\fP]
-.br
+.B \-\-std\-dev\-filter=threshold[/nmin] \-Dthreshold[/nmin]
 Turns on use of a standard deviation filter test for the soundings.
 Soundings that differ from the
 mean depth by a value greater than \fIthreshold\fP times the standard deviation
@@ -113,9 +134,7 @@ considered bad. The \fInmin\fP parameter sets the minimum number of
 soundings required to use the standard deviation filter. The default values are
 \fIthreshold\fP = 2.0 and \fInmin\fP = 10.
 .TP
-.B \-F
-\fIformat\fP
-.br
+.B \-\-format=format \-Fformat
 Sets the data format used to read \fIinfile\fP.
 If \fIformat\fP < 0, then the input file specified
 with the \fB\-I\fP option will actually contain a list of input swath sonar
@@ -125,19 +144,17 @@ format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
 .TP
-.B \-G
+.B \-\-unflag\-good \-G
 This option cause \fBmbarealcean\fP to unflag (set good) any previously flagged
 soundings that pass all of the specified statistical tests. If neither \fB\-B\fP
 or \fB\-G\fP are specified, then the program will by default apply the  \fB\-B\fP
 option.
 .TP
-.B \-H
+.B \-\-help \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \-I
-\fIinfile\fP
-.br
+.B \-\-input=infile \-Iinfile
 Sets the input filename. If \fIformat\fP > 0 (set with the
 \fB\-F\fP option) then the swath sonar data contained in \fIinfile\fP
 is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
@@ -155,9 +172,7 @@ format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "datalist.mb-1".
 .TP
-.B \-M
-\fIthreshold\fP[\fI/nmin\fP[\fI/nmax\fP]]
-.br
+.B \-\-median\-filter=threshold[/nmin[/nmax]] \-Mthreshold[/nmin[/nmax]]
 Turns on use of a median filter test for the soundings. If no other test is
 specified, the median filter test is used by default. Soundings that differ from the
 median depth by a value greater than \fIthreshold\fP times the sonar
@@ -171,9 +186,7 @@ soundings nearest the median value remain unflagged, and the rest are
 flagged even if they meet the threshold test. The default values are
 \fIthreshold\fP = 0.25, \fInmin\fP = 10, and \fInmax\fP = infinite.
 .TP
-.B \-N
-[-]\fImin_beam\fP[\fI/max_beam\fP]
-.br
+.B \-\-beam\-range=[-]minbeam[/maxbeam] \-N[-]minbeam[/maxbeam]
 Limits the beams to which flagging will be applied.
 Only soundings for beams from \fImin_beam\fP to \fImax_beam\fP, inclusive, will have flags applied.
 If \fImin_beam\fP is preceded by a \fB\-\fP then only beams outside the range will be flagged.
@@ -183,9 +196,7 @@ beam numbers 1 to 29 and 82 to 111.
 All good soundings, regardless of beam, will be included in the calculations of median, mean
 and standard deviation for the bin.
 .TP
-.B \-P
-\fIarg\fP
-.br
+.B \-\-plane\-fit=arg \-Parg
 Turns on use of a plane-fit test for the soundings in each bin, as an
 alternative to the \fB\-M\fP and \fB\-D\fP tests. An argument value is
 required by the command line parser but its contents are not currently
@@ -194,9 +205,7 @@ the median filter (\fB\-M\fP) when no test option is given, so if
 \fB\-P\fP is used by itself, no median or standard deviation filtering
 will be applied to the data.
 .TP
-.B \-R
-\fIwest/east/south/north\fP
-.br
+.B \-\-bounds=west/east/south/north \-Rwest/east/south/north
 Sets the longitude and latitude bounds within which swath sonar
 data will be read, binned, and tested. Soundings lying outside these
 bounds will be ignored.
@@ -204,9 +213,7 @@ bounds will be ignored.
 Default: The program will determine and use a square area encompassing
 all of the data contained in the input files.
 .TP
-.B \-S
-\fIbinsize\fP
-.br
+.B \-\-bin\-size=binsize \-Sbinsize
 Sets the size of the bins to be used in meters. The area specified
 with the \fB\-R\fP option will be broken into a grid with cells that
 are roughly \fIbinsize\fP meters east-west and north-south.
@@ -214,9 +221,7 @@ are roughly \fIbinsize\fP meters east-west and north-south.
 Default: A binsize equal to 0.2 times the maximum sonar altitude
 will be used.
 .TP
-.B \-T
-\fIdetect_type\fP
-.br
+.B \-\-detection\-type=type \-Ttype
 Limits the soundings to which flagging will be applied to only those which
 use the specified bottom detection algorithm.
 \fIdetect_type\fP must be one of:
@@ -226,7 +231,7 @@ use the specified bottom detection algorithm.
       3 \- lidar detection
       4 \- photogrammetry detection
 .TP
-.B \-V
+.B \-\-verbose \-V
 Normally, \fBmbareaclean\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB\-V\fP flag is given, then \fBmbareaclean\fP works in a "verbose" mode and

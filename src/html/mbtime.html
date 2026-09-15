@@ -27,7 +27,14 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbtime</B> [<B>-M</B><I>time_d</I> <B>-T</B><I>year/month/day/hour/minute/second</I> <B>-V -H</B>]
+<PRE>
+<B>mbtime</B>
+[--calendar-time=year/month/day/hour/minute/second {-Tyear/month/day/hour/minute/second}
+--epoch-time=time_d {-Mtime_d}
+--help {-H}
+--verbose {-V}]
+</PRE>
+
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -71,34 +78,28 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-H</B>
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-M</B>
+<DT><B>--epoch-time=time_d -Mtime_d</B>
 
 <DD>
-<I>time_d</I>
-<BR>
-
 Sets the input time to be <I>time_d</I> in unix time, which
 is defined as seconds since 00:00:00.000000 01 January 1970. If <B>-M</B> is
 specified, this time will be converted to calendar time and output
 to stdout in the form
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>yyyy/mm/dd/hh/mm/ss.ssssss<BR>
-<DT><B>-T</B>
+<DT><B>--calendar-time=year/month/day/hour/minute/second -Tyear/month/day/hour/minute/second</B>
 
 <DD>
-<I>year/month/day/hour/minute/second</I>
-<BR>
-
 Sets the input time to be <I>year/month/day/hour/minute/second</I>.
 If <B>-T</B> is specified, this time will be converted to
 <I>time_d</I> in epoch (Unix) seconds, which
 are seconds since 00:00:00.000000 01 January 1970.
 The <I>time_d</I> value will be output to stdout.
-<DT><B>-V</B>
+<DT><B>--verbose -V</B>
 
 <DD>
 Normally, <B>mbtime</B> only prints out the converted time.  If the

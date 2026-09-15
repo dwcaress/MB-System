@@ -16,8 +16,25 @@ and applying bathymetry edits from edit save files.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbprocess\fP \fB\-I\fP\fIinfile\fP [\fB\-C\fP\fIthreads\fP \fB\-F\fP\fIformat\fP
-\fB\-N\fP \fB\-O\fP\fIoutfile\fP \fB\-P \-S \-T \-V \-H\fP]
+\fBmbprocess\fP --input=infile {-Iinfile}
+.br
+[--threads=value {-Cvalue}
+.br
+--format=value {-Fvalue}
+.br
+--strip-comments {-N}
+.br
+--output=file {-Ofile}
+.br
+--force {-P}
+.br
+--print-status {-S}
+.br
+--test {-T}
+.br
+--verbose {-V}
+.br
+--help {-H}]
 
 .SH DESCRIPTION
 The program \fBmbprocess\fP is a tool for
@@ -832,16 +849,12 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B \-C
-\fIthreads\fP
-.br
+.B \-\-threads=value \-Cvalue
 Sets the number of separate threads launched to process swath files in parallel.
 The default is 1; the maximum is system dependent as it is set to the number
 of CPU cores available on the relevant computer.
 .TP
-.B \-F
-\fIformat\fP
-.br
+.B \-\-format=value \-Fvalue
 Sets the \fBMBIO\fP integer format identifier
 for the input file specified with the
 \fB\-I\fP option. By default, \fBmbprocess\fP
@@ -850,13 +863,11 @@ associated with the input file (\fB\-I\fP option) or, if necessary,
 infers the format from the "*.mbXX" \fBMB\-System\fP suffix
 convention.
 .TP
-.B \-H
+.B \-\-help \-H
 This "help" flag causes the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \-I
-\fIinfile\fP
-.br
+.B \-\-input=file \-Ifile
 Swath data file from which the input data will be read, or
 a datalist file containing a list of input swath data files
 and/or other datalist files. If \fIinfile\fP is a
@@ -864,7 +875,7 @@ datalist file, then \fBmbprocess\fP will attempt to
 process all data files identified by recursively reading
 \fIinfile\fP.
 .TP
-.B \-N
+.B \-\-strip\-comments \-N
 .br
 By default, \fBmbprocess\fP passes any comment records
 it encounters in the input data to the output data file
@@ -873,9 +884,7 @@ processing parameters used by \fBmbprocess\fP.
 This option causes \fBmbprocess\fP to not pass new or old
 comment records to the output data file.
 .TP
-.B \-O
-\fIoutfile\fP
-.br
+.B \-\-output=file \-Ofile
 Data file to which the output data will be written. If
 no output file is specified, the output filename is
 set automatically. If an input swath data file
@@ -887,7 +896,7 @@ If the input file does not follow the *.mbXX naming convention,
 then the output filename will just consist of the input name
 with "p.mbXX" added as a suffix.
 .TP
-.B \-P
+.B \-\-force \-P
 .br
 By default, \fBmbprocess\fP will only process a swath data
 file if the processed output file is either missing or out
@@ -897,21 +906,21 @@ the parameter file (e.g. navigation files, edit save files,
 svp files). If the \fB\-P\fP option is specified, \fBmbprocess\fP
 will process every file, whether it needs it or not.
 .TP
-.B \-T
+.B \-\-test \-T
 .br
 This option puts \fBmbprocess\fP into a test mode. The program
 will report whether or not it would process a file, but it
 will not actually process the data or produce an output
 processed file.
 .TP
-.B \-S
+.B \-\-print\-status \-S
 .br
 This option causes \fBmbprocess\fP to print out the status of
 each file (e.g. up to date, out of date, locked, unlocked) along
 with the file modification times used to determine if the output
 file is out of date.
 .TP
-.B \-V
+.B \-\-verbose \-V
 Normally, \fBmbprocess\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB\-V\fP flag is given, then \fBmbprocess\fP works in a "verbose" mode and

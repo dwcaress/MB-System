@@ -27,20 +27,85 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mblist</B> [<B>-A</B> <B>-B</B><I>yr/mo/da/hr/mn/sc</I>
-<B>-C</B>
-<B>-D</B><I>dumpmode</I>
-<B>-E</B><I>yr/mo/da/hr/mn/sc</I> <B>-F</B><I>format</I> <B>-G</B><I>delimiter</I>
-<B>-H</B> <B>-I</B><I>infilename</I> <B>-J</B><I>projection</I> <B>-K</B><I>decimate</I>
-<B>-L</B><I>lonflip</I> <B>-M</B>[<I>start_beam/end_beam</I> | <B>A</B> | <B>X</B><I>percentage</I>]
-<B>-N</B><I>start_pixel/end_pixel</I>
-<B>-O</B><I>output_format</I> <B>-P</B><I>pings</I> <B>-Q</B>
-<B>-R</B><I>west/east/south/north</I>
-<B>-S</B><I>speed</I> <B>-T</B><I>timegap</I>
-<B>-U</B><I>check</I> <B>-V</B> <B>-W</B>
-<B>-X</B><I>outfile</I>
-<B>-Y</B><I>secondaryfile</I>
-<B>-Z</B><I>segment</I>]
+<B>mblist</B>
+<BR>
+
+[--binary {-A}
+<BR>
+
+--begin-time=yr/mo/da/hr/mn/sc {-Byr/mo/da/hr/mn/sc}
+<BR>
+
+--netcdf {-C}
+<BR>
+
+--dump-mode=dumpmode {-Ddumpmode}
+<BR>
+
+--end-time=yr/mo/da/hr/mn/sc {-Eyr/mo/da/hr/mn/sc}
+<BR>
+
+--format=format {-Fformat}
+<BR>
+
+--delimiter=delimiter {-Gdelimiter}
+<BR>
+
+--help {-H}
+<BR>
+
+--input=file {-Ifile}
+<BR>
+
+--projection=projection {-Jprojection}
+<BR>
+
+--decimate=decimate {-Kdecimate}
+<BR>
+
+--longitude-domain=lonflip {-Llonflip}
+<BR>
+
+--beam-range=beam_start/beam_end|A|Xexcludepercent {-Mbeam_start/beam_end}
+<BR>
+
+--pixel-range=pixel_start/pixel_end|A {-Npixel_start/pixel_end}
+<BR>
+
+--output-format=output_format {-Ooutput_format}
+<BR>
+
+--ping-average=pings {-Ppings}
+<BR>
+
+--no-value-check {-Q}
+<BR>
+
+--bounds=west/east/south/north {-Rwest/east/south/north}
+<BR>
+
+--speed-minimum=speed {-Sspeed}
+<BR>
+
+--time-gap=timegap {-Ttimegap}
+<BR>
+
+--check-mode=check {-Ucheck}
+<BR>
+
+--verbose {-V}
+<BR>
+
+--use-feet {-W}
+<BR>
+
+--output-file=outfile {-Xoutfile}
+<BR>
+
+--secondary-file=secondaryfile {-Ysecondaryfile}
+<BR>
+
+--segment=segment {-Zsegment}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -133,7 +198,7 @@ Alberto Malinverno
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-A</B>
+<DT><B>--binary -A</B>
 
 <DD>
 <BR>
@@ -146,12 +211,9 @@ and minutes. These values are output as multiple fields as
 appropriate.
 Default: ASCII output with fields separated by tabs, or by another
 delimiter specified with the <B>-G</B> option.
-<DT><B>-B</B>
+<DT><B>--begin-time=yr/mo/da/hr/mn/sc -Byr/mo/da/hr/mn/sc</B>
 
 <DD>
-<I>yr/mo/da/hr/mn/sc</I>
-<BR>
-
 This option sets the starting time for data allowed in the input data.
 The <B>-E</B> option sets the ending time for data. If the
 starting time is before the ending time, then any data
@@ -161,7 +223,7 @@ after the ending time, then any data between the ending
 and starting time will be ignored. This scheme allows time
 windowing both inside and outside a specified interval.
 Default: <I>yr/mo/da/hr/mn/sc</I> = 1962/2/21/10/30/0.
-<DT><B>-C</B>
+<DT><B>--netcdf -C</B>
 
 <DD>
 <BR>
@@ -170,12 +232,9 @@ Causes netCDF CDL format output to be generated (see <B>ncgen</B>).
 When the <B>-A</B> (binary) option is also set <B>mblist</B> will call <B>ncgen</B> to
 convert the CDL file to a binary netCDF file (default name is <I>mblist.nc</I>),
 if successful the CDL file will be removed.
-<DT><B>-D</B>
+<DT><B>--dump-mode=dumpmode -Ddumpmode</B>
 
 <DD>
-<I>dumpmode</I>
-<BR>
-
 Normally, the output format is controlled by the <B>-O</B> option and
 the number of beams or pixels which are output is controlled by
 the <B>-M</B> and <B>-N</B> options.  The <B>-D</B> option provides
@@ -202,12 +261,9 @@ The <I>dumpmode</I> options are:
 Use of the <B>-D</B> option supercedes the <B>-O</B>, <B>-M</B>,
 and <B>-N</B> options.
 Default: <I>mode</I> = 1.
-<DT><B>-E</B>
+<DT><B>--end-time=yr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc</B>
 
 <DD>
-<I>yr/mo/da/hr/mn/sc</I>
-<BR>
-
 This option sets the ending time for data allowed in the input data.
 The <B>-B</B> option sets the starting time for data. If the
 starting time is before the ending time, then any data
@@ -217,37 +273,28 @@ after the ending time, then any data between the ending
 and starting time will be ignored. This scheme allows time
 windowing both inside and outside a specified interval.
 Default: <I>yr/mo/da/hr/mn/sc</I> = 2062/2/21/10/30/0.
-<DT><B>-F</B>
+<DT><B>--format=format -Fformat</B>
 
 <DD>
-<I>format</I>
-<BR>
-
 Sets the format for the input swath data using
 <B>MBIO</B> integer format identifiers.
 This program uses the <B>MBIO</B> library and will read any swath
 format supported by <B>MBIO</B>. A list of the swath data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page. Default: <I>format</I> = 11.
-<DT><B>-G</B>
+<DT><B>--delimiter=delimiter -Gdelimiter</B>
 
 <DD>
-<I>delimiter</I>
-<BR>
-
 Sets the character(s) used to separate output fields when ascii
 columns are output. Default: tabs are used as delimiters.
-<DT><B>-H</B>
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-I</B>
+<DT><B>--input=file -Ifile</B>
 
 <DD>
-<I>filename</I>
-<BR>
-
 Sets the input filename. If <I>format</I> &gt; 0 (set with the
 <B>-F</B> option) then the swath data contained in <I>infile</I>
 is read and processed. If <I>format</I> &lt; 0, then <I>infile</I>
@@ -265,12 +312,9 @@ format supported by <B>MBIO</B>. A list of the swath data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page.
 Default: <I>infile</I> = &quot;datalist.mb-1&quot;.
-<DT><B>-J</B>
+<DT><B>--projection=projection -Jprojection</B>
 
 <DD>
-<I>projection</I>
-<BR>
-
 Including the 'X' and 'Y' characters in the <B>-O</B><I>output_format</I> string
 causes longitude and latitude position values, respectively, to be output.
 These longitude and latitude values represent position in geographic coordinates,
@@ -316,21 +360,15 @@ the <I>output_format</I> string without specifying a particular PCS using the
 <B>-J</B> option, then <B>mblist</B>
 will use a UTM projection with the zone specified according to the position
 of the first data point.
-<DT><B>-K</B>
+<DT><B>--decimate=decimate -Kdecimate</B>
 
 <DD>
-<I>decimate</I>
-<BR>
-
 Sets the decimation of the output data. By default (i.e. <I>decimate</I>=1),
 every available data record is output. If <I>decimate</I>&gt;1, then only
 every &quot;<I>decimate</I>&quot;th record will be output. Default: <I>decimate</I>=1.
-<DT><B>-L</B>
+<DT><B>--longitude-domain=lonflip -Llonflip</B>
 
 <DD>
-<I>lonflip</I>
-<BR>
-
 Sets the range of the longitude values returned.
 If <I>lonflip</I>=-1 then the longitude values will be in
 the range from -360 to 0 degrees. If <I>lonflip</I>=0
@@ -339,12 +377,9 @@ the range from -180 to 180 degrees. If <I>lonflip</I>=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: <I>lonflip</I> = 0.
-<DT><B>-M</B>
+<DT><B>--beam-range=beam_start/beam_end|A|Xexcludepercent -Mbeam_start/beam_end</B>
 
 <DD>
-<I>start_beam/end_beam</I> or <B>A</B> or <B>X</B><I>excludepercent</I>
-<BR>
-
 Determines the range of bathymetry beams for which records will be output.
 If this option is used, then any longitude and latitude values output
 will reflect the positions of individual beams on the seafloor.
@@ -361,12 +396,9 @@ the sonar navigation, the depth,
 topography, and amplitude values reflect the valid beam
 nearest to vertical, and the sidescan value reflects the pixel
 nearest to vertical.
-<DT><B>-N</B>
+<DT><B>--pixel-range=pixel_start/pixel_end|A -Npixel_start/pixel_end</B>
 
 <DD>
-<I>start_pixel/end_pixel</I> or <I>A</I>
-<BR>
-
 Determines the range of sidescan pixels for which records will be output.
 If <I>start_pixel/end_pixel</I>
 is specified, then records will be output only for pixels in this
@@ -379,12 +411,9 @@ topography, and amplitude values reflect the valid beam
 nearest to vertical, and the sidescan value reflects the pixel
 nearest to vertical. If <B>-N</B><I>A</I> is given, then a record
 will be output for all sidescan pixels.
-<DT><B>-O</B>
+<DT><B>--output-format=output_format -Ooutput_format</B>
 
 <DD>
-<I>output_format</I>
-<BR>
-
 Determines the form of the output. <I>Output_format</I> is a string composed
 of one or more of the following characters:
 <DT><DD>
@@ -673,12 +702,9 @@ for example<B> .30p</B> will give the first 30 sidescan pixels of each beam.
 
 Default <I>output_format</I> = <B>TXYHSLZ</B> (time string, longitude, latitude,
 heading, speed, cumulative along-track distance, and topography).
-<DT><B>-P</B>
+<DT><B>--ping-average=pings -Ppings</B>
 
 <DD>
-<I>pings</I>
-<BR>
-
 Sets the ping averaging of the input data. If <I>pings</I> = 1, then
 no ping averaging is performed. If <I>pings</I> &gt; 0, then
 that number of input pings will be averaged to produce one output
@@ -686,7 +712,7 @@ ping.  If <I>pings</I> = 0, then the ping averaging will automatically
 be done so that the along-track ping spacing is equal to the across-track
 beam spacing.
 Default: <I>pings</I> = 1 (no ping averaging).
-<DT><B>-Q</B>
+<DT><B>--no-value-check -Q</B>
 
 <DD>
 Disables value checking for validity (only positive bathymetry,
@@ -694,39 +720,27 @@ amplitude, and sidescan values are valid).  This allows dumps
 of all of the data, including null or flagged beams and pixels.
 The flagged values are output without change. Null values are
 output as zero. This option is equivalent to <B>-U</B><I>2</I>.
-<DT><B>-R</B>
+<DT><B>--bounds=west/east/south/north -Rwest/east/south/north</B>
 
 <DD>
-<I>west/east/south/north</I>
-<BR>
-
 Sets the longitude and latitude bounds within which swath
 data will be read. Only the data which lies within these bounds will
 be read.
 Default: <I>west</I>=-360, east<I>=360</I>, <I>south</I>=-90, <I>north</I>=90.
-<DT><B>-S</B>
+<DT><B>--speed-minimum=speed -Sspeed</B>
 
 <DD>
-<I>speed</I>
-<BR>
-
 Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in
 the input data; pings associated with a smaller ship speed will not be
 copied. Default: <I>speed</I> = 0.
-<DT><B>-T</B>
+<DT><B>--time-gap=timegap -Ttimegap</B>
 
 <DD>
-<I>timegap</I>
-<BR>
-
 Sets the maximum time gap in minutes between adjacent pings allowed before
 the data is considered to have a gap. Default: <I>timegap</I> = 1.
-<DT><B>-U</B>
+<DT><B>--check-mode=check -Ucheck</B>
 
 <DD>
-<I>check</I>
-<BR>
-
 Sets the manner in which <B>mblist</B> handles flagged and null
 bathymetry, amplitude, and sidescan values. By default, <B>mblist</B>
 omits lines of output if they contain flagged or null values. This
@@ -740,47 +754,38 @@ If <I>check</I> = 3, then flagged values will be output unchanged
 and null values will be output as &quot;NaN&quot;.
 If <I>check</I> = 4, then flagged values and null values
 will be output as &quot;NaN&quot;.
-<DT><B>-V</B>
+<DT><B>--verbose -V</B>
 
 <DD>
 Normally, <B>mblist</B> works &quot;silently&quot; without outputting
 anything to the stderr stream.  If the
 <B>-V</B> flag is given, then <B>mblist</B> works in a &quot;verbose&quot; mode and
 outputs the program version being used and all error status messages.
-<DT><B>-W</B>
+<DT><B>--use-feet -W</B>
 
 <DD>
 Normally, <B>mblist</B> outputs bathymetry and across and along
 track distances in meters.  If the
 <B>-W</B> flag is given, then <B>mblist</B> outputs these values
 in feet.
-<DT><B>-X</B>
+<DT><B>--output-file=outfile -Xoutfile</B>
 
 <DD>
-<I>outfile</I>
-<BR>
-
 Normally, <B>mblist</B> outputs to stdout.
 If the <B>-X</B> flag is given, then <B>mblist</B> creates a new file
 <I>outfile</I> and outputs to it.
 An output file must be specified if a netCDF file (<B>-C -A</B>) is required.
-<DT><B>-Y</B>
+<DT><B>--secondary-file=secondaryfile -Ysecondaryfile</B>
 
 <DD>
-<I>secondaryfile</I>
-<BR>
-
 This option specifies a secondary data file consiting of text columns in
 which the first column is epoch time (unix seconds == seconds since 1/1/1970)
 and up to 19 additional columns contain data collected during the survey. 
 If a secondary data file is specified, then values from the secondary file can
 be included in the <B>mblist</B> output 
-<DT><B>-Z</B>
+<DT><B>--segment=segment -Zsegment</B>
 
 <DD>
-<I>segment</I>
-<BR>
-
 Causes the ascii output of different input swath files
 (e.g. when a datalist is specified with the <B>-I</B> option)
 to be separated by lines with <I>segment</I>. If <I>segment</I>

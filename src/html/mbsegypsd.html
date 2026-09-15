@@ -29,11 +29,43 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbsegypsd</B> <B>-I</B><I>file</I> <B>-O</B><I>root
-[</I><B>-A</B><I>shotscale/frequencyscale</I> <B>-D</B><I>decimatex</I>
-<B>-N</B><I>nfft</I>
-<B>-S</B><I>mode[/start/end[/schan/echan]]</I> <B>-T</B><I>sweep[/delay]</I>
-<B>-W</B><I>mode/start/end</I> <B>-H</B> <B>-L</B> <B>-V</B>]&quot;;
+<B>mbsegypsd</B>
+<BR>
+
+--input=file {-Ifile}
+<BR>
+
+--output=root {-Oroot}
+<BR>
+
+[--shot-scale=shotscale[/frequencyscale] {-Ashotscale[/frequencyscale]}
+<BR>
+
+--decimate=decimatex {-Ddecimatex}
+<BR>
+
+--fft-length=nfft {-Nnfft}
+<BR>
+
+--trace-range=mode[/start/end[/schan/echan]]
+<BR>
+
+{-Smode[/start/end[/schan/echan]]}
+<BR>
+
+--time-sweep=sweep[/delay] {-Tsweep[/delay]}
+<BR>
+
+--window=mode/start/end {-Wmode/start/end}
+<BR>
+
+--help {-H}
+<BR>
+
+--log-scale {-L}
+<BR>
+
+--verbose {-V}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -102,65 +134,47 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-A</B>
+<DT><B>--shot-scale=shotscale[/frequencyscale] -Ashotscale[/frequencyscale]</B>
 
 <DD>
-<I>shotscale/frequencyscale</I>
-<BR>
-
 This option causes the x-axis to be rescaled from shot number to distance in meters.
 The <I>shotscale</I> value represents the shot spacing in meters, and the
 <I>frequencyscale</I> value is also recorded as a scaling factor. Both values must
 be supplied together, separated by a slash. Default: <I>shotscale</I> = 1.0,
 <I>frequencyscale</I> = 1.0 (no rescaling).
-<DT><B>-D</B>
+<DT><B>--decimate=decimatex -Ddecimatex</B>
 
 <DD>
-<I>decimatex</I>
-<BR>
-
 Sets the decimation of traces (<I>decimatex</I>) used in generating the output grid.
-<DT><B>-H</B>
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-I</B>
+<DT><B>--input=file -Ifile</B>
 
 <DD>
-<I>segyfile</I>
-<BR>
-
 Sets the filename of the input segy seismic data file to be gridded.
-<DT><B>-L</B>
+<DT><B>--log-scale -L</B>
 
 <DD>
 <BR>
 
 Sets the PSD grid output to be in dB/Hz.
-<DT><B>-N</B>
+<DT><B>--fft-length=nfft -Nnfft</B>
 
 <DD>
-<I>nfft</I>
-<BR>
-
 Sets the FFT length (<I>nfft</I>) used to calculate the PSD estimate for
 each trace by ensemble averaging; the trace is broken into segments of
 length <I>nfft</I> samples.
 Default: <I>nfft</I> = 1024.
-<DT><B>-O</B>
+<DT><B>--output=root -Oroot</B>
 
 <DD>
-<I>root</I>
-<BR>
-
 Sets the filename root for the output GMT netCDF format grid.
-<DT><B>-S</B>
+<DT><B>--trace-range=mode[/start/end[/schan/echan]] -Smode[/start/end[/schan/echan]]</B>
 
 <DD>
-<I>mode[/start/end[/schan/echan]]</I>
-<BR>
-
 This option sets the range of traces that are gridded, and thus determines
 the x-dimension of the output grid (also impacted by any decimation
 specified with <B>-D</B>). If <I>mode</I> = 0, then <I>start</I> and <I>end</I>
@@ -172,27 +186,21 @@ seismic reflection or seismic refraction in either shot or CMP gathers, the
 start and end of the channels selected for gridding is set using the optional <I>schan</I>
 and <I>echan</I>, respectively. The x-dimension of the output grid is determined by
 (<I>end</I> - <I>start</I> + 1) * (<I>echan</I> - <I>schan</I> + 1) / <I>decimatex</I>.
-<DT><B>-T</B>
+<DT><B>--time-sweep=sweep[/delay] -Tsweep[/delay]</B>
 
 <DD>
-<I>sweep[/delay]</I>
-<BR>
-
 The <I>sweep</I> value sets the time range of seismic data to be processed in seconds.
 The optional <I>delay</I> value sets the sweep start time, again in seconds.
-<DT><B>-V</B>
+<DT><B>--verbose -V</B>
 
 <DD>
 Normally, <B>mbsegypsd</B> prints out information regarding its
 controlling parameters during execution; the
 <B>-V</B> option causes the program to also print out statements
 indicating its progress.
-<DT><B>-W</B>
+<DT><B>--window=mode/start/end -Wmode/start/end</B>
 
 <DD>
-<I>mode/start/end</I>
-<BR>
-
 This option can be used to limit the data being processed to a particular time
 window in various ways. This option does not impact the definition of the overall
 grid bounds, but does restrict the data processed to samples within particular times

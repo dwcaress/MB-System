@@ -6,9 +6,37 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbauvloglist\fP \fB\-I\fP\fIfile\fP [\fB\-A\fP\fIaltitudefile\fP \fB-C\fP \fB\-D\fP\fIdecimate\fP
-\fB\-F\fP\fIprintformat\fP \fB\-L\fP\fIlonflip\fP
-\fB\-M\fP\fImode\fP \fB\-N\fP\fInavfile\fP \fB\-O\fP\fIlist\fP \fB\-P\fP \fB\-R\fP\fIid\fP \fB-S\fP \fB-X\fp\fIscale\fP \fB\-V \-H\fP ]
+\fBmbauvloglist\fP
+.br
+--input=file {-Ifile}
+.br
+[--altitude-file=file {-Afile}
+.br
+--help {-H}
+.br
+--clip-to-nav {-C}
+.br
+--decimate=value {-Dvalue}
+.br
+--print-format=format {-Fformat}
+.br
+--lonflip=lonflip {-Llonflip}
+.br
+--output-mode=mode {-Mmode}
+.br
+--nav-file=file {-Nfile}
+.br
+--output-field=name {-Oname}
+.br
+--print-header {-P}
+.br
+--recalculate-ctd=id {-Rid}
+.br
+--angles-degrees {-S}
+.br
+--scale=value {-Xvalue}
+.br
+--verbose {-V}]
 
 .SH DESCRIPTION
 MBauvloglist reads an MBARI AUV mission log file and lists specified
@@ -288,19 +316,17 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B \-A
-\fIaltitudefile\fP
-.br
+.B \-\-altitude\-file=file \-Afile
 Specifies an ascii altitude file containing time and altitude values
 (one "time altitude" pair per line, in seconds and meters) to be merged
 (interpolated) with the primary log file data. The merged altitude values
 can be output using the \fBmergeAltitude\fP valuename in the \fB\-O\fP option.
 .TP
-.B \-H
+.B \-\-help \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \-C
+.B \-\-clip\-to\-nav \-C
 .br
 If merging with external navigation has been specified with the \fB-N\fP option,
 then the \fB-C\fP option causes input records with times before the beginning or
@@ -308,31 +334,23 @@ after the end of the external navigation to not be output by \fBmbauvloglist\fP.
 The default behavior is to output all records, and for the values merged from the
 external navigation to be zero when outside the navigation time bounds.
 .TP
-.B \-D
-\fIdecimate\fP
-.br
+.B \-\-decimate=value \-Dvalue
 Sets a decimation factor for the output records. If \fIdecimate\fP is
 greater than 1, then only every \fIdecimate\fPth input record is output;
 the intervening records are skipped. Default: \fIdecimate\fP = 1 (no
 decimation, all records output).
 .TP
-.B \-F
-\fIprintformat\fP
-.br
+.B \-\-print\-format=format \-Fformat
 Sets the printing format (in fprintf() style) of the next value specified using
 the \fB\-O\fP option. By default, \fBmbauvloglist\fP uses the print format specified
 in the log file header. If the \fB-F\fP option has been used, using it again with
 \fIprintformat\fP equal to "default" will reset the print format to that specified
 in the log file header.
 .TP
-.B \-I
-\fIifile\fP
-.br
+.B \-\-input=file \-Ifile
 Sets the input MBARI AUV mission log filename.
 .TP
-.B \-L
-\fIlonflip\fP
-.br
+.B \-\-lonflip=lonflip \-Llonflip
 Sets the range of the longitude values output.
 If \fIlonflip\fP=\-1 then the longitude values will be in
 the range from \-360 to 0 degrees. If \fIlonflip\fP=0
@@ -343,18 +361,14 @@ the range from 0 to 360 degrees.
 Default: \fBmbauvloglist\fP uses the user default \fIlonflip\fP set using
 \fBmbdefaults\fP.
 .TP
-.B \-M
-\fImode\fP
-.br
+.B \-\-output\-mode=mode \-Mmode
 Specifies the output mode. If \fImode\fP = 0, then the output is
 ASCII text with tab delimiters between fields. If \fImode\fP = 1,
 then the output is ASCII text with comma delimiters between fields.
 If \fImode\fP = 2, then the output is binary with no values or breaks
 between fields. Default: ASCII text with tab delimiters.
 .TP
-.B \-N
-\fInavfile\fP
-.br
+.B \-\-nav\-file=file \-Nfile
 Specifies a navigation file in the "fnv" format that contains position,
 heading, sensor depth, and attitude data. Values merged (interpolated)
 from these data can be specified for output using the
@@ -373,9 +387,7 @@ output data timestamp is from before the beginning or after the end of the navig
 data. The \fB-C\fP option can be used to suppress output of records with timestamps
 outside the start and end bounds of the navigation.
 .TP
-.B \-O
-\fIvaluename\fP
-.br
+.B \-\-output\-field=name \-Oname
 Causes \fBmbauvloglist\fP to output the specified value. This option can be
 given multiple times, and the values will be output in the order specified.
 The valid valuename strings consist of those defined in the header of the
@@ -430,13 +442,11 @@ the x and y rate values (mVbodyxK and mVbodyyK) in the kearfott.log file. The ca
 value is the analogous lateral (x-y) speed calculated from the phins_vnorth and
 phins_veast velocity components found in a Phins inertial navigation log file.
 .TP
-.B \-P
+.B \-\-print\-header \-P
 .br
 Prints out the log file header.
 .TP
-.B \-R
-\fIid\fP
-.br
+.B \-\-recalculate\-ctd=id \-Rid
 This option is meaningful only when the input file is fastcatlog.log, which
 contains both raw conductivity, temperature, and pressure values from a
 SeaBird SBE49 Fastcat CTD and temperature, pressure, and salinity values
@@ -447,19 +457,17 @@ referenced by the \fIid\fP value. As of July 2017, the only calibration
 coefficients defined are referenced by \fIid\fP=1, for the SeaBird SBE49 Fastcat
 CTD used on MBARI Mapping AUV 1 during 2016 and 2017.
 .TP
-.B \-S
+.B \-\-angles\-degrees \-S
 .br
 Scales angular values to be in degrees instead of radians.
 .TP
-.B \-X
-\fIscale\fP
-.br
+.B \-\-scale=value \-Xvalue
 Sets the output scaling factor multiplied by any following floating point values specified
 using the \fB-O\fP option. Initially this value is 1.0 so that by default no scaling occurs.
 If the \fB-X\fP option has been used, using it again with \fIscale\fP equal to 1.0 will 
 restore no scaling for any following \fB-O\fP invocations. Default: \fIscale\fP=1.0
 .TP
-.B \-V
+.B \-\-verbose \-V
 The \fB\-V\fP option causes the program to be verbose.
 .SH EXAMPLE
 To extract a list of pressure and water sound speed from the CTD log of an

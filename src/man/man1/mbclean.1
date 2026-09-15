@@ -6,15 +6,55 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbclean\fP [\fB\-A\fImax\fP \fB\-B\fIlow/high\fP \fB\-C\fIslope/units\fP
-\fB\-D\fImin/max\fP \fB\-E\fImax\fP \fB\-F\fIformat\fP
-\fB\-G\fIfraction_low/fraction_high\fP
-\fB\-I\fIinfile\fP \fB\-K\fIrange_min\fP \fB\-L\fIlonflip\fP
-\fB\-M\fImode\fP \fB\-N\fItolerance\fP
-\fB\-P\fImin_speed/max_speed\fP \fB\-Q\fIbackup\fP
-\fB\-R\fImaxheadingrate\fP \fB\-S\fIslope/mode/units\fP
-\fB\-T\fItolerance\fP \fB\-U\fInmin\fP \fB\-W\fIwest/east/south/north\fP \fB\-X\fIbeamsleft/beamsright\fP
-\fB\-Y\fIdistanceleft/distanceright[/mode]\fP \fB\-Z \-V \-H\fP]
+\fBmbclean\fP
+.br
+[--deviation-max=max {-Amax}
+.br
+--depth-range=low/high {-Blow/high}
+.br
+--max-slope=slope/unit {-Cslope/unit}
+.br
+--distance-range=min/max {-Dmin/max}
+.br
+--max-acrosstrack=max_acrosstrack {-Emax_acrosstrack}
+.br
+--format=format {-Fformat}
+.br
+--fraction-range=fraction_low/fraction_high {-Gfraction_low/fraction_high}
+.br
+--input=infile {-Iinfile}
+.br
+--range-min=range_min {-Krange_min}
+.br
+--lonflip=lonflip {-Llonflip}
+.br
+--mode=mode {-Mmode}
+.br
+--ping-deviation-tolerance=tolerance {-Ntolerance}
+.br
+--speed-range=min_speed/max_speed {-Pmin_speed/max_speed}
+.br
+--zap-rails=backup_dist {-Qbackup_dist}
+.br
+--max-heading-rate=maxheadingrate {-Rmaxheadingrate}
+.br
+--spike-max=spike_slope/mode/format {-Sspike_slope/mode/format}
+.br
+--timestamp-tolerance=tolerance {-Ttolerance}
+.br
+--min-good-beams=num_good_min {-Unum_good_min}
+.br
+--bounds=west/east/south/north {-Wwest/east/south/north}
+.br
+--zap-beams=beamsleft/beamsright {-Xbeamsleft/beamsright}
+.br
+--flag-distance-angle=distanceleft/distanceright[/mode] {-Ydistanceleft/distanceright[/mode]}
+.br
+--zero-position {-Z}
+.br
+--verbose {-V}
+.br
+--help {-H}]
 
 .SH DESCRIPTION
 \fBmbclean\fP identifies and flags artifacts in swath sonar bathymetry data.
@@ -113,9 +153,7 @@ Dana Yoerger
 
 .SH OPTIONS
 .TP
-.B \-A
-\fImax\fP
-.br
+.B \-\-deviation\-max=max \-Amax
 This option sets the range of acceptable depth values relative to
 the local median depth. The median depth is obtained from the
 current ping and the pings immediately before and after that
@@ -125,17 +163,13 @@ will be flagged. No deviation from the median depth checking is
 done if the \fB\-A\fP option
 is not used.
 .TP
-.B \-B
-\fIlow/high\fP
-.br
+.B \-\-depth\-range=low/high \-Blow/high
 This option sets the range of acceptable depth values.  If a depth
 value is less than \fIlow\fP or more than \fIhigh\fP then it
 will be flagged. No depth range checking is done if the \fB\-B\fP option
 is not used.
 .TP
-.B \-C
-\fIslope/unit\fP
-.br
+.B \-\-max\-slope=slope/unit \-Cslope/unit
 The value \fIslope\fP is the maximum acceptable slope. Beams associated
 with excessive slopes will be flagged or removed according to the
 operational mode specified using the \fB\-M\fP option. This method will
@@ -146,9 +180,7 @@ specified but \fB\-C\fP is not used then no slope checking will occur.
 2 slope is in degrees.
 Default: \fIslope\fP = 1.0
 .TP
-.B \-D
-\fImin/max\fP
-.br
+.B \-\-distance\-range=min/max \-Dmin/max
 Sets the minimum and maximum allowed distances between beams used for
 some of the flagging algorithms.  Both values are expressed in terms
 of fractions of the local median depth. Thus, \fB\-D\fP\fI0.01/0.25\fP
@@ -168,18 +200,14 @@ maximum distance are used to calculate the local median depth, and only
 beams within the maximum distance are used to check for excessive slopes.
 Default: \fImin/max\fP = 0.01/0.25.
 .TP
-.B \-E
-\fImax\fP
-.br
+.B \-\-max\-acrosstrack=max_acrosstrack \-Emax_acrosstrack
 This option sets the maximum acceptable acrosstrack distance for a
 sounding. If the absolute value of a beam's acrosstrack distance
 exceeds \fImax\fP, then it will be flagged. No acrosstrack distance
 checking is done if the \fB\-E\fP option is not used.
 Default: \fImax\fP = 120.0 meters.
 .TP
-.B \-F
-\fIformat\fP
-.br
+.B \-\-format=format \-Fformat
 Sets the data format used if the input is read from stdin
 or from a file. If \fIformat\fP < 0, then the input file specified
 with the \fB\-I\fP option will actually contain a list of input swath sonar
@@ -189,9 +217,7 @@ format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
 .TP
-.B \-G
-\fIfraction_low/fraction_high\fP
-.br
+.B \-\-fraction\-range=fraction_low/fraction_high \-Gfraction_low/fraction_high
 This option sets the range of acceptable depth values relative to
 low and high fractions of the local median depth.
 The median depth is obtained from the
@@ -204,13 +230,11 @@ will be flagged. No fractional depth range checking is
 done if the \fB\-G\fP option
 is not used.
 .TP
-.B \-H
+.B \-\-help \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \-I
-\fIinfile\fP
-.br
+.B \-\-input=infile \-Iinfile
 Sets the input filename. If \fIformat\fP > 0 (set with the
 \fB\-F\fP option) then the swath sonar data contained in \fIinfile\fP
 is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
@@ -228,16 +252,12 @@ format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "datalist.mb-1".
 .TP
-.B \-K
-\fIrange_min\fP
-.br
+.B \-\-range\-min=range_min \-Krange_min
 This option causes all unflagged beams with ranges less than
 \fIrange_min\fP to be flagged as bad. The value \fIrange_min\fP
 is specified in meters.
 .TP
-.B \-L
-\fIlonflip\fP
-.br
+.B \-\-lonflip=lonflip \-Llonflip
 Sets the range of the longitude values used.
 If \fIlonflip\fP=\-1 then the longitude values will be in
 the range from \-360 to 0 degrees. If \fIlonflip\fP=0
@@ -247,9 +267,7 @@ then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
 .TP
-.B \-M
-\fImode\fP
-.br
+.B \-\-mode=mode \-Mmode
 Sets the manner in which bad beams identified by excessive slope
 are handled.
  	\fImode\fP = 1:	Flags one beam associated with each outlier slope.
@@ -258,26 +276,20 @@ are handled.
  	\fImode\fP = 2:	Flags both beams associated with each outlier slope.
 Default: \fImode\fP = 1.
 .TP
-.B \-N
-\fIthreshold\fP
-.br
+.B \-\-ping\-deviation\-tolerance=tolerance \-Ntolerance
 When specified \fBmbclean\fP calculates the rms deviation between each ping and
 the pings before and after. When the rms deviation exceeds the specified threshold,
 then all unflagged valid soundings in that ping are flagged as bad. This option is
 generally used to detect and remove data pings affected by interference from other
 active sonars.
 .TP
-.B \-P
-\fIspeed_low/speed_high\fP
-.br
+.B \-\-speed\-range=min_speed/max_speed \-Pmin_speed/max_speed
 This option causes \fBmbclean\fP to flag as bad all beams in pings
 associated with platform speed outside the acceptable range from
 \fIspeed_low\fP to \fIspeed_high\fP. The speed values are specified
 in km/hour.
 .TP
-.B \-Q
-\fIbackup\fP
-.br
+.B \-\-zap\-rails=backup_dist \-Qbackup_dist
 This flag causes \fBmbclean\fP to search for bad "rails" in the
 swath sonar swath; the "rails" refer to groups of outer beams which
 have crosstrack distances (and depths) much less than they should
@@ -285,16 +297,12 @@ have.  These are identified when one or more outer beams lies
 more than \fIbackup\fP meters inboard of a more inner beam; all beams
 meeting this criteria are flagged.
 .TP
-.B \-R
-\fImaxheadingrate\fP
-.br
+.B \-\-max\-heading\-rate=maxheadingrate \-Rmaxheadingrate
 The value \fImaxheadingrate\fP is the maximum acceptable rate of change in
 heading in degrees/second. All soundings associated with pings for which the
 heading was changing at a greater rate will be flagged.
 .TP
-.B \-S
-\fIslope/mode/unit\fP
-.br
+.B \-\-spike\-max=spike_slope/mode/format \-Sspike_slope/mode/format
 The value \fIslope\fP is the maximum acceptable spike slope.
 If the slope from the preceding beam to this beam exceeds this value,
 and the slope from this beam to subsequent beam exceeds this value but
@@ -319,9 +327,7 @@ A beam is not considered a spike if either the preceding or subsequent beam
 has already been flagged.
 Default: \fIslope\fP = 1.0
 .TP
-.B \-T
-\fItolerance\fP
-.br
+.B \-\-timestamp\-tolerance=tolerance \-Ttolerance
 If requested this option will reset the timestamps of edit events from an
 existing esf file to exactly match the timestamps of the survey pings. The
 \fItolerance\fP value sets how close timestamps must be in seconds to be
@@ -330,37 +336,29 @@ processed using non-\fBMB-System\fP software and a user is extracting the
 edits from one set of files with \fBmbgetesf\fP and then applying them to
 another using \fBmbprocess\fP.
 .TP
-.B \-U
-\fInmin\fP
-.br
+.B \-\-min\-good\-beams=num_good_min \-Unum_good_min
 This flag causes \fBmbclean\fP to search for port or starboard
 halves of pings which contain fewer than \fInmin\fP good bathymetry
 values. All bathymetry values in the affected half-pings are
 flagged.
 .TP
-.B \-V
+.B \-\-verbose \-V
 Normally, \fBmbclean\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB\-V\fP flag is given, then \fBmbclean\fP works in a "verbose" mode and
 outputs the program version being used, all error status messages,
 and the number of beams flagged as bad.
 .TP
-.B \-W
-\fIwest/east/south/north\fP
-.br
+.B \-\-bounds=west/east/south/north \-Wwest/east/south/north
 This option causes \fBmbclean\fP to flag as bad all beams in pings
 with navigation outside the specified acceptable bounds.
 .TP
-.B \-X
-\fIzap_beams\fP
-.br
+.B \-\-zap\-beams=beamsleft/beamsright \-Xbeamsleft/beamsright
 If this option is used, the outermost \fIzap_beams\fP at both ends
 of the swath are flagged as bad; this is useful if the outer beams
 are known to be unreliable. Default: \fIzap_beams\fP = 0.
 .TP
-.B \-Y
-\fIdistanceleft/distanceright[/mode]\fP
-.br
+.B \-\-flag\-distance\-angle=distanceleft/distanceright[/mode] \-Ydistanceleft/distanceright[/mode]
 This option causes \fBmbclean\fP to flag and/or unflag beams according to
 acrosstrack distance. If \fImode\fP=1 or is not specified, then all beams
 outside the specified range (acrosstrack distances more to port/left than \fIdistanceleft\fP
@@ -383,8 +381,7 @@ For \fImode\fP=3 and \fImode\fP=4, \fIdistanceleft\fP and
 acrosstrack distances in meters, with angles to port of vertical
 negative.
 .TP
-.B \-Z
-.br
+.B \-\-zero\-position \-Z
 This option causes \fBmbclean\fP to flag as bad all beams in pings
 with zero longitude and latitude values.
 

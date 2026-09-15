@@ -27,12 +27,43 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbsegygrid</B> <B>-I</B><I>segyfile</I> <B>-O</B><I>gridfile</I>
-[<B>-A</B><I>shotscale/timescale</I> <B>-B</B><I>maxvalue/window</I> <B>-C</B><I>mode</I>
-<B>-D</B><I>decimatex/decimatey</I> <B>-F</B><I>mode/window</I>
-<B>-G</B><I>mode/gain[/window]</I> <B>-R</B><I>cellsize/startlon/endlon/startlat/endlat</I>
-<B>-S</B><I>mode[/start/end[/schan/echan]]</I> <B>-T</B><I>sweep[/delay]</I>
-<B>-W</B><I>mode/start/end</I> <B>-H -V</B>]
+<B>mbsegygrid</B> --input=file {-Ifile} --output=fileroot {-Ofileroot}
+<BR>
+
+[--scale-to-distance=shotscale/timescale {-Ashotscale/timescale}
+<BR>
+
+--agc=agcmaxvalue/agcwindow {-Bagcmaxvalue/agcwindow}
+<BR>
+
+--geometry=geometrymode {-Cgeometrymode}
+<BR>
+
+--decimation=decimatex/decimatey {-Ddecimatex/decimatey}
+<BR>
+
+--filter=filtermode/filterwindow {-Ffiltermode/filterwindow}
+<BR>
+
+--gain=gainmode/gain[/gainwindow[/gaindelay]] {-Ggainmode/gain[/gainwindow[/gaindelay]]}
+<BR>
+
+--distance-plot=distancebin/startlon/endlon/startlat/endlat {-Rdistancebin/startlon/endlon/startlat/endlat}
+<BR>
+
+--trace-mode=tracemode[/tracestart/traceend[/chanstart/chanend]] {-Stracemode[/tracestart/traceend[/chanstart/chanend]]}
+<BR>
+
+--time-sweep=timesweep[/timedelay] {-Ttimesweep[/timedelay]}
+<BR>
+
+--window=windowmode/windowstart/windowend {-Wwindowmode/windowstart/windowend}
+<BR>
+
+--help {-H}
+<BR>
+
+--verbose {-V}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -100,23 +131,17 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-A</B>
+<DT><B>--scale-to-distance=shotscale/timescale -Ashotscale/timescale</B>
 
 <DD>
-<I>shotscale/timescale</I>
-<BR>
-
 This option causes the x-axis to be rescaled from shot number to distance in meters
 and the y-axis to be rescaled from time in seconds to depth in meters.
 The <I>shotscale</I> value represents the shot spacing in meters and the
 <I>timescale</I> value is the scaling from time to depth (typically 750 m/s
 for the water column).
-<DT><B>-B</B>
+<DT><B>--agc=agcmaxvalue/agcwindow -Bagcmaxvalue/agcwindow</B>
 
 <DD>
-<I>maxvalue[/window]</I>
-<BR>
-
 This option causes the application of automatic gain control (AGC). At each sample, a time interval
 <I>window</I> seconds long centered on the sample is considered. The sample value is multiplied
 by a scaling factor calculated as <I>maxvalue</I> divided by the maximum original value in the
@@ -124,42 +149,30 @@ time interval. This approach can emphasize coherent arrivals regardless of ampli
 <I>window</I> is not specified, then the <I>window is taken to be the trace length in time so that
 the entire trace is normalized using the same scale factor, and all traces has the same maximum
 value of maxvalue</I>.
-<DT><B>-C</B>
+<DT><B>--geometry=geometrymode -Cgeometrymode</B>
 
 <DD>
-<I>mode</I>
-<BR>
-
 Sets the geometry mode used to locate trace samples in the output grid.
 If <I>mode</I> = 0 (the default), a simple vertical geometry is used
 in which each sample is placed directly below its trace location. If
 <I>mode</I> = 1, the trace's recorded pitch angle is used to correct the
 vertical (y-axis) location of each sample, projecting the samples along
 the pitched ray path rather than straight down.
-<DT><B>-D</B>
+<DT><B>--decimation=decimatex/decimatey -Ddecimatex/decimatey</B>
 
 <DD>
-<I>decimatex/decimatey</I>
-<BR>
-
 Sets the decimation of traces (<I>decimatex</I>) and samples (<I>decimatey</I>) used in
 generating the output grid. The downsampling of the data is actually accomplished by averaging
 the values within each grid bin rather than omitting traces or samples.
-<DT><B>-F</B>
+<DT><B>--filter=filtermode/filterwindow -Ffiltermode/filterwindow</B>
 
 <DD>
-<I>mode/window</I>
-<BR>
-
 Sets the application of low-pass filtering to the trace data. The filtering is applied
 by convolving a filter function of length <I>window</I> seconds with the trace. Currently the only
 available filter is a cosine taper, set using <I>mode</I> = 1.
-<DT><B>-G</B>
+<DT><B>--gain=gainmode/gain[/gainwindow[/gaindelay]] -Ggainmode/gain[/gainwindow[/gaindelay]]</B>
 
 <DD>
-<I>mode/gain[/window]</I>
-<BR>
-
 Sets the application of gain to the trace data. The <I>mode</I> value determines how
 the gain is applied. If <I>mode</I> = 0, no gain is applied.If <I>mode</I> = 1,
 the gain is applied starting from the beginning of the trace. If  <I>mode</I> = 2,
@@ -170,31 +183,22 @@ gain application, then each sample is multiplied by a factor of (1 + (G * t)).
 The parameter <I>window</I>, if given, sets the length of the time interval
 in seconds that gain is applied. When the gain is windowed, trace values after
 the end of the gain window are zeroed.
-<DT><B>-H</B>
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-I</B>
+<DT><B>--input=file -Ifile</B>
 
 <DD>
-<I>segyfile</I>
-<BR>
-
 Sets the filename of the input segy seismic data file to be gridded.
-<DT><B>-O</B>
+<DT><B>--output=fileroot -Ofileroot</B>
 
 <DD>
-<I>gridfile</I>
-<BR>
-
 Sets the filename for the output GMT netCDF format grid.
-<DT><B>-R</B>
+<DT><B>--distance-plot=distancebin/startlon/endlon/startlat/endlat -Rdistancebin/startlon/endlon/startlat/endlat</B>
 
 <DD>
-<I>cellsize/startlon/endlon/startlat/endlat</I>
-<BR>
-
 If the <B>-R</B> option is used, then the profile will represent a line between
 start and end positions specified using longitude and latitude values in
 decimal degrees. This line segment is divided into binning cells according to
@@ -203,12 +207,9 @@ line (in meters) divided by the cell size and any decimation specified with
 option <B>-D</B>. Effectively, the location of each trace will be projected onto the line
 segment and the segment added to the appropriate cell. Where cells have multiple traces,
 the traces will be averaged.
-<DT><B>-S</B>
+<DT><B>--trace-mode=tracemode[/tracestart/traceend[/chanstart/chanend]] -Stracemode[/tracestart/traceend[/chanstart/chanend]]</B>
 
 <DD>
-<I>mode[/start/end[/schan/echan]]</I>
-<BR>
-
 This option sets the range of traces that are gridded, and thus determines
 the x-dimension of the output grid (also impacted by any decimation
 specified with <B>-D</B>). If <I>mode</I> = 0, then <I>start</I> and <I>end</I>
@@ -223,12 +224,9 @@ and <I>echan</I>, respectively. The x-dimension of the output grid is determined
 If <I>mode</I>=2, then  <I>start</I> and <I>end</I> refer to shot numbers and
 all traces within that range of shot numbers are plotted. Effectively the channel
 numbers are ignored by setting all trace channels to 0 and plotting channel 0.
-<DT><B>-T</B>
+<DT><B>--time-sweep=timesweep[/timedelay] -Ttimesweep[/timedelay]</B>
 
 <DD>
-<I>sweep[/delay]</I>
-<BR>
-
 Sets the time range of seismic data to be gridded. The <I>sweep</I> specifies
 the number of seconds of data comprising the y-axis of the grid. The number of
 samples follows from the sample interval of the data, and any decimation
@@ -237,19 +235,16 @@ start time, again in seconds.
 The y-dimension of the output grid is determined by
 <I>sweep</I> / sampleinterval / <I>decimatey</I>, where the sampleinterval is
 a parameter read with the seismic data.
-<DT><B>-V</B>
+<DT><B>--verbose -V</B>
 
 <DD>
 Normally, <B>mbsegygrid</B> prints out information regarding its
 controlling parameters during execution; the
 <B>-V</B> option causes the program to also print out statements
 indicating its progress.
-<DT><B>-W</B>
+<DT><B>--window=windowmode/windowstart/windowend -Wwindowmode/windowstart/windowend</B>
 
 <DD>
-<I>mode/start/end</I>
-<BR>
-
 This option can be used to limit the data being gridded to a particular time
 window in various ways. This option does not impact the definition of the overall
 grid bounds, but does restrict the data gridded to samples within particular times

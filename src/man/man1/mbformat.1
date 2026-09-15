@@ -7,10 +7,21 @@ supported by the \fBMBIO\fP library.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbformat\fP [\fB\-\-format\fP=\fIformat_id\fP {\fB\-F\fP\fIformat_id\fP}]
-[\fB\-\-input\fP=\fIfile\fP {\fB\-I\fP\fIfile\fP}] [\fB\-\-list-ids\fP {\fB\-L\fP}]
-[\fB\-\-list-root\fP {\fB\-K\fP}] [\fB\-\-verbose\fP {\fB\-V\fP}]
-[\fB\-\-html\fP {\fB\-W\fP}] [\fB\-\-help\fP {\fB\-H\fP}]
+\fBmbformat\fP
+.br
+[--format=format_id {-Fformat_id}
+.br
+--input=file {-Ifile}
+.br
+--list-ids {-L}
+.br
+--list-root {-K}
+.br
+--verbose {-V}
+.br
+--html {-W}
+.br
+--help {-H}]
 
 .SH DESCRIPTION
 \fBmbformat\fP is a utility which identifies the swath sonar data formats
@@ -51,36 +62,36 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B \-\-format=\fIformat_id\fP {\fB\-F\fP\fIformat_id\fP}
+.B \-\-format=format_id \-Fformat_id
 .br
 Sets the format id to be listed.  If no format is given, all of the
 currently supported formats will be listed. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 .TP
-.B \-\-help {\fB\-H\fP}
+.B \-\-help \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \-\-input=\fIfile\fP {\fB\-I\fP\fIfile\fP}
+.B \-\-input=file \-Ifile
 .br
 Sets the filename to be tested against known filename prefix and
 suffix conventions in order to identify the format id.
 .TP
-.B \-\-list-root {\fB\-K\fP}
+.B \-\-list\-root \-K
 Causes the fileroot and the format id to be output. The fileroot
 is the filename with any format specific suffix removed.
 .TP
-.B \-\-list-ids {\fB\-L\fP}
+.B \-\-list\-ids \-L
 Causes the format descriptions to be omitted
 so that only the \fBMBIO\fP format id numbers are listed.
 .TP
-.B \-\-verbose {\fB\-V\fP}
+.B \-\-verbose \-V
 Normally, \fBmbformat\fP only prints out format descriptions.  If the
 \fB\-V\fP flag is given, then \fBmbformat\fP works in a "verbose" mode and
 also outputs the program version being used.
 .TP
-.B \-\-html {\fB\-W\fP}
+.B \-\-html \-W
 Output the list of formats as HTML.
 
 .SH EXAMPLES

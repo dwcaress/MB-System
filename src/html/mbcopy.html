@@ -27,12 +27,58 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbcopy</B> [<B>-B</B><I>yr/mo/da/hr/mn/sc</I> <B>-C</B><I>commentfile</I> <B>-D</B>
-<B>-E</B><I>yr/mo/da/hr/mn/sc</I> <B>-F</B><I>informat[/outformat[/mergeformat]]</I> 
-<B>-H</B> <B>-I</B><I>infilename</I> 
-<B>-L</B><I>lonflip</I> <B>-M</B><I>mergefilename</I> <B>-N</B> <B>-O</B><I>outfilename</I> 
-<B>-P</B><I>pings</I> <B>-Q</B><I>sleep_factor</I> <B>-R</B><I>west/east/south/north</I> 
-<B>-S</B><I>speed</I> <B>-V</B>]
+<B>mbcopy</B>
+<BR>
+
+[--begin-time=yr/mo/da/hr/mn/sc {-Byr/mo/da/hr/mn/sc}
+<BR>
+
+--comment-file=commentfile {-Ccommentfile}
+<BR>
+
+--bathymetry-only {-D}
+<BR>
+
+--end-time=yr/mo/da/hr/mn/sc {-Eyr/mo/da/hr/mn/sc}
+<BR>
+
+--format=iformat/oformat/mformat {-Fiformat/oformat/mformat}
+<BR>
+
+--help {-H}
+<BR>
+
+--input=infile {-Iinfile}
+<BR>
+
+--lonflip=lonflip {-Llonflip}
+<BR>
+
+--merge-file=mergefile {-Mmergefile}
+<BR>
+
+--strip-comments {-N}
+<BR>
+
+--output=outfile {-Ooutfile}
+<BR>
+
+--ping-average=pings {-Ppings}
+<BR>
+
+--sleep-factor=sleep_factor {-Qsleep_factor}
+<BR>
+
+--bounds=west/east/south/north {-Rwest/east/south/north}
+<BR>
+
+--speed-minimum=speed {-Sspeed}
+<BR>
+
+--time-gap=timegap {-Ttimegap}
+<BR>
+
+--verbose {-V}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -72,12 +118,9 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-B</B>
+<DT><B>--begin-time=yr/mo/da/hr/mn/sc -Byr/mo/da/hr/mn/sc</B>
 
 <DD>
-<I>yr/mo/da/hr/mn/sc</I>
-<BR>
-
 This option sets the starting time for data allowed in the input data.
 The <B>-E</B> option sets the ending time for data. If the 
 starting time is before the ending time, then any data
@@ -87,17 +130,14 @@ after the ending time, then any data between the ending
 and starting time will be ignored. This scheme allows time
 windowing both inside and outside a specified interval.
 Default: <I>yr/mo/da/hr/mn/sc</I> = 1962/2/21/10/30/0.
-<DT><B>-C</B>
+<DT><B>--comment-file=commentfile -Ccommentfile</B>
 
 <DD>
-<I>commentfile</I>
-<BR>
-
 Text file containing comments which are inserted into the
 beginning of the output data stream.  This option is typically
 used to insert a data pedigree statement at the beginning of
 data processing.
-<DT><B>-D</B>
+<DT><B>--bathymetry-only -D</B>
 
 <DD>
 This option only works when the output format is MBLDEOIH (format 71).
@@ -106,12 +146,9 @@ data (any amplitude and sidescan data found in the input are ignored).
 The <B>MB-System</B> program <B>mbdatalist</B> uses this option to 
 generate &quot;fast bathymetry&quot; or &quot;fbt&quot; files. See the <B>MB-System</B>
 manual page for information on the use and utility of &quot;fbt&quot; files.
-<DT><B>-E</B>
+<DT><B>--end-time=yr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc</B>
 
 <DD>
-<I>yr/mo/da/hr/mn/sc</I>
-<BR>
-
 This option sets the ending time for data allowed in the input data.
 The <B>-B</B> option sets the starting time for data. If the 
 starting time is before the ending time, then any data
@@ -121,12 +158,9 @@ after the ending time, then any data between the ending
 and starting time will be ignored. This scheme allows time
 windowing both inside and outside a specified interval.
 Default: <I>yr/mo/da/hr/mn/sc</I> = 2062/2/21/10/30/0.
-<DT><B>-F</B>
+<DT><B>--format=iformat/oformat/mformat -Fiformat/oformat/mformat</B>
 
 <DD>
-<I>informat[/outformat[/mergeformat]]</I>
-<BR>
-
 Sets the format for the input and output swath sonar data using 
 <B>MBIO</B> integer format identifiers. If only <I>informat</I> is specified,
 then <I>outformat</I> is assumed to be the same. If bathymetry merging is
@@ -145,26 +179,20 @@ be copied.  The use of ping averaging also causes a partial data stream
 to be passed, even when compatible or identical input and output formats
 are specified (see the <B>-P</B> option).
 Default: <I>informat</I> = 11; <I>outformat</I> = 11.
-<DT><B>-H</B>
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-I</B>
+<DT><B>--input=infile -Iinfile</B>
 
 <DD>
-<I>infilename</I>
-<BR>
-
 Data file from which the input data will be read. If
 no input file is specified, the input will be read
 from stdin. Default: <I>infilename</I> = stdin.
-<DT><B>-L</B>
+<DT><B>--lonflip=lonflip -Llonflip</B>
 
 <DD>
-<I>lonflip</I>
-<BR>
-
 Sets the range of the longitude values returned.
 If <I>lonflip</I>=-1 then the longitude values will be in
 the range from -360 to 0 degrees. If <I>lonflip</I>=0 
@@ -173,19 +201,16 @@ the range from -180 to 180 degrees. If <I>lonflip</I>=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: <I>lonflip</I> = 0.
-<DT><B>-M</B>
+<DT><B>--merge-file=mergefile -Mmergefile</B>
 
 <DD>
-<I>mergefilename</I>
-<BR>
-
 If a merge file is specified then the bathymetry data and flags
 from the merge file will be written to the output file along with 
 the remaining data from the input file.
 This can be used to merge two processing streams, one for bathymetry
 data and the other for other data sets. The input file and merge file 
 must both be based on the same raw data.
-<DT><B>-N</B>
+<DT><B>--strip-comments -N</B>
 
 <DD>
 Normally, <B>mbcopy</B> generates a set of comment records at
@@ -203,21 +228,15 @@ passed through to the output stream (supported for formats that
 distinguish these record types, e.g. Reson 7k formats). Specifying
 <B>-N</B> more than twice is an error and causes <B>mbcopy</B> to
 exit immediately.
-<DT><B>-O</B>
+<DT><B>--output=outfile -Ooutfile</B>
 
 <DD>
-<I>outfilename</I>
-<BR>
-
 Data file to which the output data will be written. If
 no output file is specified, the output will be written to
 stdout. Default: <I>outfilename</I> = stdout.
-<DT><B>-P</B>
+<DT><B>--ping-average=pings -Ppings</B>
 
 <DD>
-<I>pings</I>
-<BR>
-
 Sets the ping averaging of the input data. If <I>pings</I> = 1, then
 no ping averaging is performed. If <I>pings</I> &gt; 0, then
 that number of input pings will be averaged to produce one output
@@ -226,44 +245,32 @@ be done so that the along-track ping spacing is equal to the across-track
 beam spacing. If ping averaging is used (<I>pings</I> != 1), then
 only a partial data stream can be copied (see the <B>-F</B> option).
 Default: <I>pings</I> = 1 (no ping averaging).
-<DT><B>-Q</B>
+<DT><B>--sleep-factor=sleep_factor -Qsleep_factor</B>
 
 <DD>
-<I>sleep_factor</I>
-<BR>
-
 Causes the program to sleep before writing each data record, thus simulating
 a simple data logger. The amount of time slept is the time between the
 previous and current pings times the value <I>sleep_factor</I>.
 Default: <I>sleep_factor</I> = 1.0
-<DT><B>-R</B>
+<DT><B>--bounds=west/east/south/north -Rwest/east/south/north</B>
 
 <DD>
-<I>west/east/south/north</I>
-<BR>
-
 Sets the longitude and latitude bounds within which swath sonar 
 data will be read. Only the data which lies within these bounds will
 be copied. 
 Default: <I>west</I>=-360, east<I>=360</I>, <I>south</I>=-90, <I>north</I>=90.
-<DT><B>-S</B>
+<DT><B>--speed-minimum=speed -Sspeed</B>
 
 <DD>
-<I>speed</I>
-<BR>
-
 Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
 the input data; pings associated with a smaller ship speed will not be
 copied. Default: <I>speed</I> = 0.
-<DT><B>-T</B>
+<DT><B>--time-gap=timegap -Ttimegap</B>
 
 <DD>
-<I>timegap</I>
-<BR>
-
 Sets the maximum time gap in minutes between adjacent pings allowed before
 the data is considered to have a gap. Default: <I>timegap</I> = 1.
-<DT><B>-V</B>
+<DT><B>--verbose -V</B>
 
 <DD>
 Normally, <B>mbcopy</B> works &quot;silently&quot; without outputting

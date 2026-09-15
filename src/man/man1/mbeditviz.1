@@ -6,7 +6,19 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBMBeditviz\fP [\fB\-F\fP\fIformat_id\fP \fB\-G \-H \-I\fP\fIdatalist\fP \fB\-R \-V\fP]
+\fBMBeditviz\fP
+.br
+[--delete-input-file {-R}
+.br
+--format=format_id {-Fformat_id}
+.br
+--help {-H}
+.br
+--input=file {-Ifile}
+.br
+--simple-mean-grid {-G}
+.br
+--verbose {-V}]
 
 .SH DESCRIPTION
 
@@ -129,36 +141,32 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B \-F
-\fIformat_id\fP
-.br
+.B \-\-format=format_id \-Fformat_id
 Sets the format id for the file specified with the \fB\-I\fP option using
 \fBMBIO\fP integer format identifiers. By default the \fIformat\fP id
 value is inferred using the \fBMB-System\fP convention of an ".mbXX" suffix
 (the XX corresponds to the \fBMBIO\fP format id).
 .TP
-.B \-G
+.B \-\-simple\-mean\-grid \-G
 This flag causes \fBMBeditviz\fP to grid the input swath bathymetry soundings
 using the simple mean algorithm rather than the default footprint-based
 gridding algorithm.
 .TP
-.B \-H
+.B \-\-help \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \-I
-\fIdatalist\fP
-.br
+.B \-\-input=file \-Ifile
 Sets an \fBMB-System\fP datalist file to be parsed on input for swath data files
 to list as available for editing.
 This option is usually used when \fBMBeditviz\fP is started
 automatically from some other process, such as \fBMBgrdviz\fP.
 .TP
-.B \-R
+.B \-\-delete\-input\-file \-R
 This flag causes the file specified with the \fB\-I\fP option to be deleted
 (via a shell "rm" command) after it has been opened and its soundings loaded.
 .TP
-.B \-V
+.B \-\-verbose \-V
 Normally, \fBMBeditviz\fP outputs limited information to the stderr stream.
 If the \fB\-V\fP flag is given, then \fBMBeditviz\fP works in a "verbose" mode and
 outputs the program version being used, all error status messages,

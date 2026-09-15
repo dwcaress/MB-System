@@ -27,7 +27,22 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbsegyinfo</B> [<B>-I</B><I>filename</I> <B>-L</B><I>lonflip</I> <B>-O</B> <B>-H -V</B>]
+<B>mbsegyinfo</B>
+<BR>
+
+[--input=file {-Ifile}
+<BR>
+
+--longitude-domain=lonflip {-Llonflip}
+<BR>
+
+--output-file {-O}
+<BR>
+
+--help {-H}
+<BR>
+
+--verbose {-V}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -77,24 +92,18 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-H</B>
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-I</B>
+<DT><B>--input=file -Ifile</B>
 
 <DD>
-<I>filename</I>
-<BR>
-
 Sets the input segy seismic data filename. Default: <I>infile</I> = &quot;stdin&quot;.
-<DT><B>-L</B>
+<DT><B>--longitude-domain=lonflip -Llonflip</B>
 
 <DD>
-<I>lonflip</I>
-<BR>
-
 Sets the range of the longitude values returned.
 If <I>lonflip</I>=-1 then the longitude values will be in
 the range from -360 to 0 degrees. If <I>lonflip</I>=0
@@ -103,7 +112,7 @@ the range from -180 to 180 degrees. If <I>lonflip</I>=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: <I>lonflip</I> = 0 (as set by <B>mbdefaults</B>).
-<DT><B>-O</B>
+<DT><B>--output-file -O</B>
 
 <DD>
 <BR>
@@ -111,7 +120,7 @@ Default: <I>lonflip</I> = 0 (as set by <B>mbdefaults</B>).
 This option causes the program output to be directed to
 &quot;.sinf&quot; files rather than to stdout. Each &quot;.sinf&quot; file is named
 using the original data file path with an &quot;.sinf&quot; suffix appended.
-<DT><B>-V</B>
+<DT><B>--verbose -V</B>
 
 <DD>
 Normally, <B>mbsegyinfo</B> only prints out the statistics obtained

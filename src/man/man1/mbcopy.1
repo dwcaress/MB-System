@@ -6,12 +6,41 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbcopy\fP [\fB\-B\fIyr/mo/da/hr/mn/sc\fP \fB\-C\fIcommentfile\fP \fB\-D\fP
-\fB\-E\fIyr/mo/da/hr/mn/sc\fP \fB\-F\fIinformat[/outformat[/mergeformat]]\fP 
-\fB\-H\fP \fB\-I\fIinfilename\fP 
-\fB\-L\fIlonflip\fP \fB\-M\fImergefilename\fP \fB\-N\fP \fB\-O\fIoutfilename\fP 
-\fB\-P\fIpings\fP \fB\-Q\fIsleep_factor\fP \fB\-R\fIwest/east/south/north\fP 
-\fB\-S\fIspeed\fP \fB\-V\fP]
+\fBmbcopy\fP
+.br
+[--begin-time=yr/mo/da/hr/mn/sc {-Byr/mo/da/hr/mn/sc}
+.br
+--comment-file=commentfile {-Ccommentfile}
+.br
+--bathymetry-only {-D}
+.br
+--end-time=yr/mo/da/hr/mn/sc {-Eyr/mo/da/hr/mn/sc}
+.br
+--format=iformat/oformat/mformat {-Fiformat/oformat/mformat}
+.br
+--help {-H}
+.br
+--input=infile {-Iinfile}
+.br
+--lonflip=lonflip {-Llonflip}
+.br
+--merge-file=mergefile {-Mmergefile}
+.br
+--strip-comments {-N}
+.br
+--output=outfile {-Ooutfile}
+.br
+--ping-average=pings {-Ppings}
+.br
+--sleep-factor=sleep_factor {-Qsleep_factor}
+.br
+--bounds=west/east/south/north {-Rwest/east/south/north}
+.br
+--speed-minimum=speed {-Sspeed}
+.br
+--time-gap=timegap {-Ttimegap}
+.br
+--verbose {-V}]
 
 .SH DESCRIPTION
 \fBmbcopy\fP is a utility for copying swath sonar data files which
@@ -38,9 +67,7 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B \-B
-\fIyr/mo/da/hr/mn/sc\fP
-.br
+.B \-\-begin\-time=yr/mo/da/hr/mn/sc \-Byr/mo/da/hr/mn/sc
 This option sets the starting time for data allowed in the input data.
 The \fB\-E\fP option sets the ending time for data. If the 
 starting time is before the ending time, then any data
@@ -51,15 +78,13 @@ and starting time will be ignored. This scheme allows time
 windowing both inside and outside a specified interval.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
-.B \-C
-\fIcommentfile\fP
-.br
+.B \-\-comment\-file=commentfile \-Ccommentfile
 Text file containing comments which are inserted into the
 beginning of the output data stream.  This option is typically
 used to insert a data pedigree statement at the beginning of
 data processing.
 .TP
-.B \-D
+.B \-\-bathymetry\-only \-D
 This option only works when the output format is MBLDEOIH (format 71).
 When \fB\-D\fP is invoked, \fBmbcopy\fP only outputs swath bathymetry
 data (any amplitude and sidescan data found in the input are ignored).
@@ -67,9 +92,7 @@ The \fBMB-System\fP program \fBmbdatalist\fP uses this option to
 generate "fast bathymetry" or "fbt" files. See the \fBMB-System\fP
 manual page for information on the use and utility of "fbt" files.
 .TP
-.B \-E
-\fIyr/mo/da/hr/mn/sc\fP
-.br
+.B \-\-end\-time=yr/mo/da/hr/mn/sc \-Eyr/mo/da/hr/mn/sc
 This option sets the ending time for data allowed in the input data.
 The \fB\-B\fP option sets the starting time for data. If the 
 starting time is before the ending time, then any data
@@ -80,9 +103,7 @@ and starting time will be ignored. This scheme allows time
 windowing both inside and outside a specified interval.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
-.B \-F
-\fIinformat[/outformat[/mergeformat]]\fP
-.br
+.B \-\-format=iformat/oformat/mformat \-Fiformat/oformat/mformat
 Sets the format for the input and output swath sonar data using 
 \fBMBIO\fP integer format identifiers. If only \fIinformat\fP is specified,
 then \fIoutformat\fP is assumed to be the same. If bathymetry merging is
@@ -102,20 +123,16 @@ to be passed, even when compatible or identical input and output formats
 are specified (see the \fB\-P\fP option).
 Default: \fIinformat\fP = 11; \fIoutformat\fP = 11.
 .TP
-.B \-H
+.B \-\-help \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \-I
-\fIinfilename\fP
-.br
+.B \-\-input=infile \-Iinfile
 Data file from which the input data will be read. If
 no input file is specified, the input will be read
 from stdin. Default: \fIinfilename\fP = stdin.
 .TP
-.B \-L
-\fIlonflip\fP
-.br
+.B \-\-lonflip=lonflip \-Llonflip
 Sets the range of the longitude values returned.
 If \fIlonflip\fP=\-1 then the longitude values will be in
 the range from \-360 to 0 degrees. If \fIlonflip\fP=0 
@@ -125,9 +142,7 @@ then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
 .TP
-.B \-M
-\fImergefilename\fP
-.br
+.B \-\-merge\-file=mergefile \-Mmergefile
 If a merge file is specified then the bathymetry data and flags
 from the merge file will be written to the output file along with 
 the remaining data from the input file.
@@ -135,7 +150,7 @@ This can be used to merge two processing streams, one for bathymetry
 data and the other for other data sets. The input file and merge file 
 must both be based on the same raw data.
 .TP
-.B \-N
+.B \-\-strip\-comments \-N
 Normally, \fBmbcopy\fP generates a set of comment records at
 the beginning of the output stream which record when, how,
 and by whom \fBmbcopy\fP was run.  If the
@@ -152,16 +167,12 @@ distinguish these record types, e.g. Reson 7k formats). Specifying
 \fB\-N\fP more than twice is an error and causes \fBmbcopy\fP to
 exit immediately.
 .TP
-.B \-O
-\fIoutfilename\fP
-.br
+.B \-\-output=outfile \-Ooutfile
 Data file to which the output data will be written. If
 no output file is specified, the output will be written to
 stdout. Default: \fIoutfilename\fP = stdout.
 .TP
-.B \-P
-\fIpings\fP
-.br
+.B \-\-ping\-average=pings \-Ppings
 Sets the ping averaging of the input data. If \fIpings\fP = 1, then
 no ping averaging is performed. If \fIpings\fP > 0, then
 that number of input pings will be averaged to produce one output
@@ -171,36 +182,28 @@ beam spacing. If ping averaging is used (\fIpings\fP != 1), then
 only a partial data stream can be copied (see the \fB\-F\fP option).
 Default: \fIpings\fP = 1 (no ping averaging).
 .TP
-.B \-Q
-\fIsleep_factor\fP
-.br
+.B \-\-sleep\-factor=sleep_factor \-Qsleep_factor
 Causes the program to sleep before writing each data record, thus simulating
 a simple data logger. The amount of time slept is the time between the
 previous and current pings times the value \fIsleep_factor\fP.
 Default: \fIsleep_factor\fP = 1.0
 .TP
-.B \-R
-\fIwest/east/south/north\fP
-.br
+.B \-\-bounds=west/east/south/north \-Rwest/east/south/north
 Sets the longitude and latitude bounds within which swath sonar 
 data will be read. Only the data which lies within these bounds will
 be copied. 
 Default: \fIwest\fP=\-360, east\fI=360\fP, \fIsouth\fP=\-90, \fInorth\fP=90.
 .TP
-.B \-S
-\fIspeed\fP
-.br
+.B \-\-speed\-minimum=speed \-Sspeed
 Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
 the input data; pings associated with a smaller ship speed will not be
 copied. Default: \fIspeed\fP = 0.
 .TP
-.B \-T
-\fItimegap\fP
-.br
+.B \-\-time\-gap=timegap \-Ttimegap
 Sets the maximum time gap in minutes between adjacent pings allowed before
 the data is considered to have a gap. Default: \fItimegap\fP = 1.
 .TP
-.B \-V
+.B \-\-verbose \-V
 Normally, \fBmbcopy\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB\-V\fP flag is given, then \fBmbcopy\fP works in a "verbose" mode and

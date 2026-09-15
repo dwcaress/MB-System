@@ -27,7 +27,22 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>MBgrdviz</B> [-I<I>gridfile</I> <B>-J</B><I>gridfile</I> <B>-T -V -H</B>]
+<B>MBgrdviz</B>
+<BR>
+
+[--grid-file=grdfile {-Igrdfile}
+<BR>
+
+--help {-H}
+<BR>
+
+--overlay-file=grdfile {-Jgrdfile}
+<BR>
+
+--test {-T}
+<BR>
+
+--verbose {-V}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -161,36 +176,30 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-H</B>
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-I</B>
+<DT><B>--grid-file=grdfile -Igrdfile</B>
 
 <DD>
-<I>gridfile</I>
-<BR>
-
 Sets a GMT grid file to be read and displayed at startup.
 This option is usually used only when <B>MBgrdviz</B> is started
 automatically from some other process.
-<DT><B>-J</B>
+<DT><B>--overlay-file=grdfile -Jgrdfile</B>
 
 <DD>
-<I>gridfile</I>
-<BR>
-
 Sets a GMT grid file to be read and displayed as an overlay at startup.
 This option has no effect unless the <B>-I</B> option is also used to
 specify a primary grid file.
-<DT><B>-T</B>
+<DT><B>--test -T</B>
 
 <DD>
 Sets a test grid to be calculated and displayed at startup.This
 allows the program to be tested even when a grid file is
 unavailable.
-<DT><B>-V</B>
+<DT><B>--verbose -V</B>
 
 <DD>
 Normally, <B>MBgrdviz</B> outputs limited information to the stderr stream.

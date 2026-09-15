@@ -9,31 +9,27 @@ Version 5.0
 .SH SYNOPSIS
 \fBmbdefaults\fP
 .br
-[
+[--file-io-buffer=fileiobuffer {-Bfileiobuffer}
 .br
-\fB\-\-file-io-buffer\fP=\fIfileiobuffer\fP {\fB\-B\fP\fIfileiobuffer\fP}
+--ps-display=psdisplay {-Dpsdisplay}
 .br
-\fB\-\-ps-display\fP=\fIpsdisplay\fP {\fB\-D\fP\fIpsdisplay\fP}
+--fbt-version=fbtversion {-Ffbtversion}
 .br
-\fB\-\-fbt-version\fP=\fIfbtversion\fP {\fB\-F\fP\fIfbtversion\fP}
+--help {-H}
 .br
-\fB\-\-help\fP {\fB\-H\fP}
+--image-display=imagedisplay {-Iimagedisplay}
 .br
-\fB\-\-image-display\fP=\fIimagedisplay\fP {\fB\-I\fP\fIimagedisplay\fP}
+--lonflip=lonflip {-Llonflip}
 .br
-\fB\-\-lonflip\fP=\fIlonflip\fP {\fB\-L\fP\fIlonflip\fP}
+--mbview-settings=mbviewsettings {-Mmbviewsettings}
 .br
-\fB\-\-mbview-settings\fP=\fImbviewsettings\fP {\fB\-M\fP\fImbviewsettings\fP}
+--time-gap=timegap {-Ttimegap}
 .br
-\fB\-\-time-gap\fP=\fItimegap\fP {\fB\-T\fP\fItimegap\fP}
+--use-lock-files=yes|no {-Uyes|no}
 .br
-\fB\-\-use-lock-files\fP=\fIuselockfiles\fP {\fB\-U\fP\fIuselockfiles\fP}
+--verbose {-V}
 .br
-\fB\-\-verbose\fP {\fB\-V\fP}
-.br
-\fB\-\-project\fP=\fIproject\fP {\fB\-W\fP\fIproject\fP}
-.br
-]
+--project=mbproject {-Wmbproject}]
 
 .SH DESCRIPTION
 \fBmbdefaults\fP is a utility for setting or listing the default read
@@ -75,8 +71,7 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B \-\-file-io-buffer=\fIfileiobuffer\fP \fB\-B\fP\fIfileiobuffer\fP
-.br
+.B \-\-file\-io\-buffer=fileiobuffer \-Bfileiobuffer
 Sets the file i/o block buffer size for certain formats (currently formats 88 and 58).
 The \fIfileiobuffer\fP value is in kilobytes, so \fIfileiobuffer\fP = 1000 corresponds
 roughly to a one megabyte buffer.
@@ -89,8 +84,7 @@ a gigabit ethernet network, setting \fIfileiobuffer\fP = 10000 achieves an 8% ru
 for \fBmbprocess\fP. Default: \fIfileiobuffer\fP = 0, which corresponds to the system
 default.
 .TP
-.B \-\-ps-display=\fIpsdisplay\fP \fB\-D\fP\fIpsdisplay\fP
-.br
+.B \-\-ps\-display=psdisplay \-Dpsdisplay
 Sets the program used for displaying Postscript graphics files
 on a screen; this facility is used by shellscripts created through
 macros like \fBmbm_plot\fP. The default Postscript display
@@ -98,8 +92,7 @@ utility is \fBgv\fP. Another common Postscript display utilities
 is \fBghostview\fP; past postscript viewers included \fBpageview\fP
 (for Sun workstations) and \fBxpsview\fP (for Silicon Graphics workstations).
 .TP
-.B \-\-fbt-version=\fIfbtversion\fP \fB\-F\fP\fIfbtversion\fP
-.br
+.B \-\-fbt\-version=fbtversion \-Ffbtversion
 Set the version of fbt files created by \fBmbdatalist\fP and \fBmbprocess\fP.
 If \fIfbtversion\fP = 2, "old", or "OLD", then the pre-5.3.1897 version of
 format 71 will be used to write the "fast bathymetry" or "*.fbt" files.
@@ -107,20 +100,18 @@ If \fIfbtversion\fP = 3, "new", or "NEW", then the new, 5.3.1897-or-later versio
 format 71 will be used to write the "fast bathymetry" or "*.fbt" files.
 
 .TP
-.B \-\-help {\fB\-H\fP}
+.B \-\-help \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \-\-image-display=\fIimagedisplay\fP \fB\-I\fP\fIimagedisplay\fP
-.br
+.B \-\-image\-display=imagedisplay \-Iimagedisplay
 Sets the program used for displaying Tiff image files
 on a screen; this facility is used by shellscripts created through
 macros like \fBmbm_grdtiff\fP. The default image display
 utility is \fBxv\fP. Other common image display utilities
 are \fBgimp\fP (GNU image processing) and \fBgqview\fP.
 .TP
-.B \-\-lonflip=\fIlonflip\fP \fB\-L\fP\fIlonflip\fP
-.br
+.B \-\-lonflip=lonflip \-Llonflip
 Sets the range of the longitude values returned.
 If \fIlonflip\fP=\-1 then the longitude values will be in
 the range from \-360 to 0 degrees. If \fIlonflip\fP=0
@@ -130,8 +121,7 @@ then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
 .TP
-.B \-\-mbview-settings=\fIPcolortable/colortable_mode/shade_mode\fP \fB\-MP\fP\fIcolortable/colortable_mode/shade_mode\fP
-.br
+.B \-\-mbview\-settings=Pcolortable/colortable_mode/shade_mode \-MPcolortable/colortable_mode/shade_mode
 Sets the default colortable, colortable mode, and shading mode for
 the programs \fBMBgrdviz\fP and \fBMBeditviz\fP. The \fIcolortable\fP identifiers are
 similar to those used for \fBmbm_grdplot\fP:
@@ -153,38 +143,32 @@ The \fIshade_mode\fP value determines whether shading is off
 or done using slope magnitude (\fIshade_mode\fP = 2). Shading by overlay
 cannot be a default because overlay data are not always defined.
 .TP
-.B \-\-mbview-settings=\fIGslope_colortable/slope_colortable_mode\fP \fB\-MG\fP\fIslope_colortable/slope_colortable_mode\fP
-.br
+.B \-\-mbview\-settings=Gslope_colortable/slope_colortable_mode \-MGslope_colortable/slope_colortable_mode
 Sets the default colortable and colortable mode for displays of slope
 using the programs \fBMBgrdviz\fP and \fBMBeditviz\fP.
 The colortable and colortable mode identifiers are the same as given
 above for \fB-MP\fP.
 .TP
-.B \-\-mbview-settings=\fIOsecondary_colortable/secondary_colortable_mode\fP \fB\-MO\fP\fIsecondary_colortable/secondary_colortable_mode\fP
-.br
-Sets the default colortable and colortable mode for displays of 
+.B \-\-mbview\-settings=Osecondary_colortable/secondary_colortable_mode \-MOsecondary_colortable/secondary_colortable_mode
+Sets the default colortable and colortable mode for displays of
 overlay data using the programs \fBMBgrdviz\fP and \fBMBeditviz\fP.
 The colortable and colortable mode identifiers are the same as given
 above for \fB-MP\fP.
 .TP
-.B \-\-mbview-settings=\fIImagnitude/elevation/azimuth\fP \fB\-MI\fP\fImagnitude/elevation/azimuth\fP
-.br
+.B \-\-mbview\-settings=Imagnitude/elevation/azimuth \-MImagnitude/elevation/azimuth
 Sets the default parameters for shading by illumination using the
 programs \fBMBgrdviz\fP and \fBMBeditviz\fP.
 The \fIelevation\fP and \fIazimuth\fP values are in degrees.
 .TP
-.B \-\-mbview-settings=\fISmagnitude\fP \fB\-MS\fP\fImagnitude\fP
-.br
+.B \-\-mbview\-settings=Smagnitude \-MSmagnitude
 Sets the default parameter for shading by slope magnitude using the
 programs \fBMBgrdviz\fP and \fBMBeditviz\fP.
 .TP
-.B \-\-time-gap=\fItimegap\fP \fB\-T\fP\fItimegap\fP
-.br
+.B \-\-time\-gap=timegap \-Ttimegap
 Sets the maximum time gap in minutes between adjacent pings allowed before
 the data is considered to have a gap. Default: \fItimegap\fP = 1.
 .TP
-.B \-\-use-lock-files=\fIuselockfiles\fP \fB\-U\fP\fIuselockfiles\fP
-.br
+.B \-\-use\-lock\-files=yes|no \-Uyes|no
 Sets whether \fBMB-System\fP uses the file locking mechanism to insure that
 a swath file is only processed or edited by a single program at a time.
 To revert to pre-lockfile behavior for \fBmbedit\fP, \fBmbeditviz\fP,
@@ -192,14 +176,13 @@ To revert to pre-lockfile behavior for \fBmbedit\fP, \fBmbeditviz\fP,
 use \fB\-U\fP\fI0\fP or  \fB\-U\fP\fIno\fP. To reinstate use of lock files,
 use \fB\-U\fP\fI1\fP or  \fB\-U\fP\fIyes\fP.
 .TP
-.B \-\-verbose {\fB\-V\fP}
+.B \-\-verbose \-V
 Normally, \fBmbdefaults\fP outputs only a list of the default values
 to the stdout stream.  If the
 \fB\-V\fP flag is given, then \fBmbdefaults\fP works in a "verbose" mode and
 also outputs the program version being used.
 .TP
-.B \-\-project=\fIproject\fP \fB\-W\fP\fIproject\fP
-.br
+.B \-\-project=mbproject \-Wmbproject
 Sets the name of the default project. This will be used by
 MB-System database management utilities yet to be created.
 Default: \fIproject\fP = "none".

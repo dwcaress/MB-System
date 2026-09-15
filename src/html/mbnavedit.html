@@ -27,9 +27,40 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbnavedit</B> [<B>-B</B><I>yr/mo/da/hr/mn/sc</I>
-<B>-D</B> <B>-E</B><I>yr/mo/da/hr/mn/sc</I>
-<B>-F</B><I>format </I><B>-G</B> <B>-I</B><I>infile </I><B>-N -P -X -V -H</B>]
+<B>mbnavedit</B>
+<BR>
+
+[--begin-time=yr/mo/da/hr/mn/sc {-Byr/mo/da/hr/mn/sc}
+<BR>
+
+--browse {-D}
+<BR>
+
+--end-time=yr/mo/da/hr/mn/sc {-Eyr/mo/da/hr/mn/sc}
+<BR>
+
+--format=format_id {-Fformat_id}
+<BR>
+
+--gui-mode {-G}
+<BR>
+
+--help {-H}
+<BR>
+
+--input=file {-Ifile}
+<BR>
+
+--strip-comments {-N}
+<BR>
+
+--use-ping-data {-P}
+<BR>
+
+--run-mbprocess {-X}
+<BR>
+
+--verbose {-V}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -186,37 +217,29 @@ Christian do Santos Ferreira
 <A NAME="lbAI">&nbsp;</A>
 <H2>OPTIONS</H2>
 
-<B>-B</B>
+<DL COMPACT>
+<DT><B>--begin-time=yr/mo/da/hr/mn/sc -Byr/mo/da/hr/mn/sc</B>
 
-<I>yr/mo/da/hr/mn/sc</I>
-<BR>
-
+<DD>
 Sets the starting time for data allowed in the input data; pings
 with times before the starting time will be ignored.
 Default: <I>yr/mo/da/hr/mn/sc</I> = 1962/2/21/10/30/0.
-<DL COMPACT>
-<DT><B>-D</B>
+<DT><B>--browse -D</B>
 
 <DD>
 Starts up the program in &quot;browse&quot; mode. If a file is opened
 in browse mode (either at startup or later), none
 of the edited data will be output to a file. The default
 is to output the edited data to a file.
-<DT><B>-E</B>
+<DT><B>--end-time=yr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc</B>
 
 <DD>
-<I>yr/mo/da/hr/mn/sc</I>
-<BR>
-
 Sets the ending time for data allowed in the input data; pings
 with times after the ending time will be ignored.
 Default: <I>yr/mo/da/hr/mn/sc</I> = 2062/2/21/10/30/0.
-<DT><B>-F</B>
+<DT><B>--format=format_id -Fformat_id</B>
 
 <DD>
-<I>format</I>
-<BR>
-
 Sets the format at startup for the input and output swath sonar data using
 <B>MBIO</B> integer format identifiers. This value can also be set
 interactively when specifying the input file.
@@ -226,27 +249,24 @@ currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page.
 By default the <I>format</I> id value is inferred using the <B>MB-System</B>
 convention of an &quot;.mbXX&quot; suffix (the XX corresponds to the <B>MBIO</B> format id).
-<DT><B>-G</B>
+<DT><B>--gui-mode -G</B>
 
 <DD>
 This flag causes <B>MBnavedit</B> to treat the <B>Done</B> button as
 equivalent to the <B>Quit</B> button. This option is used when
 <B>MBnavedit</B> is started automatically by some other process and
 only a single file is to edited.
-<DT><B>-H</B>
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-I</B>
+<DT><B>--input=file -Ifile</B>
 
 <DD>
-<I>infile</I>
-<BR>
-
 Sets the data file from which the input data will be read at startup.
 This value can also be set interactively.
-<DT><B>-N</B>
+<DT><B>--strip-comments -N</B>
 
 <DD>
 Normally, all <B>MB-System</B> processing
@@ -257,7 +277,7 @@ causes <B>MBnavedit</B> to invoke <B>mbprocess</B> with it's
 <B>-N</B> option. In turn, this causes <B>mbprocess</B> to
 generate an output, processed swath data file without any
 comment records.
-<DT><B>-P</B>
+<DT><B>--use-ping-data -P</B>
 
 <DD>
 Causes <B>MBnavedit</B> to load and work with navigation from
@@ -265,7 +285,7 @@ survey data records even if the data format uses asynchronous
 navigation records. In this case, the only edits which will
 actually be applied to the output data are changes to the
 time stamps of the survey records.
-<DT><B>-V</B>
+<DT><B>--verbose -V</B>
 
 <DD>
 Normally, <B>MBnavedit</B> outputs information to the stderr stream
@@ -274,7 +294,7 @@ regarding the number of records loaded and dumped.  If the
 outputs the program version being used, all error status messages,
 and a large amount of other information including all of the
 beams flagged or zeroed.
-<DT><B>-X</B>
+<DT><B>--run-mbprocess -X</B>
 
 <DD>
 This option causes <B>mbprocess</B> to run automatically

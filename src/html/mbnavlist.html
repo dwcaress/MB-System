@@ -27,13 +27,61 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbnavlist</B> [<B>-A</B> <B>-B</B><I>yr/mo/da/hr/mn/sc</I> <B>-D</B><I>decimate</I>
-<B>-E</B><I>yr/mo/da/hr/mn/sc</I> <B>-F</B><I>format</I>
-<B>-G</B><I>delimeter</I> <B>-H</B> <B>-I</B><I>file</I>
-<B>-J</B><I>projection</I> <B>-K</B><I>kind</I>
-<B>-L</B><I>lonflip</I> <B>-N</B><I>navchannel</I>
-<B>-O</B><I>output_format</I> <B>-R</B><I>west/east/south/north</I>
-<B>-S</B><I>speed</I> <B>-T</B><I>timegap</I> <B>-V</B> <B>-Z</B><I>segment</I>]
+<B>mbnavlist</B>
+<BR>
+
+[--binary {-A}
+<BR>
+
+--begin-time=yr/mo/da/hr/mn/sc {-Byr/mo/da/hr/mn/sc}
+<BR>
+
+--decimate=decimate {-Ddecimate}
+<BR>
+
+--end-time=yr/mo/da/hr/mn/sc {-Eyr/mo/da/hr/mn/sc}
+<BR>
+
+--format=format {-Fformat}
+<BR>
+
+--delimiter=delimiter {-Gdelimiter}
+<BR>
+
+--help {-H}
+<BR>
+
+--input=file {-Ifile}
+<BR>
+
+--projection=projection {-Jprojection}
+<BR>
+
+--data-kind=kind {-Kkind}
+<BR>
+
+--longitude-domain=lonflip {-Llonflip}
+<BR>
+
+--nav-channel=navchannel {-Nnavchannel}
+<BR>
+
+--output-format=output_format {-Ooutput_format}
+<BR>
+
+--bounds=west/east/south/north {-Rwest/east/south/north}
+<BR>
+
+--speed-minimum=speed {-Sspeed}
+<BR>
+
+--time-gap=timegap {-Ttimegap}
+<BR>
+
+--verbose {-V}
+<BR>
+
+--segment=segment {-Zsegment}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -127,7 +175,7 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-A</B>
+<DT><B>--binary -A</B>
 
 <DD>
 <BR>
@@ -139,12 +187,9 @@ time strings and longitude or latitude broken into degrees
 and minutes. These values are output as multiple fields as
 appropriate.
 Default: ASCII output with fields separated by tabs.
-<DT><B>-B</B>
+<DT><B>--begin-time=yr/mo/da/hr/mn/sc -Byr/mo/da/hr/mn/sc</B>
 
 <DD>
-<I>yr/mo/da/hr/mn/sc</I>
-<BR>
-
 This option sets the starting time for data allowed in the input data.
 The <B>-E</B> option sets the ending time for data. If the
 starting time is before the ending time, then any data
@@ -154,21 +199,15 @@ after the ending time, then any data between the ending
 and starting time will be ignored. This scheme allows time
 windowing both inside and outside a specified interval.
 Default: <I>yr/mo/da/hr/mn/sc</I> = 1962/2/21/10/30/0.
-<DT><B>-D</B>
+<DT><B>--decimate=decimate -Ddecimate</B>
 
 <DD>
-<I>decimate</I>
-<BR>
-
 Sets the decimation of the output data. By default (i.e. <I>decimate</I>=1),
 every available data record is output. If <I>decimate</I>&gt;1, then only
 every &quot;<I>decimate</I>&quot;th record will be output. Default: <I>decimate</I>=1.
-<DT><B>-E</B>
+<DT><B>--end-time=yr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc</B>
 
 <DD>
-<I>yr/mo/da/hr/mn/sc</I>
-<BR>
-
 This option sets the ending time for data allowed in the input data.
 The <B>-B</B> option sets the starting time for data. If the
 starting time is before the ending time, then any data
@@ -178,37 +217,28 @@ after the ending time, then any data between the ending
 and starting time will be ignored. This scheme allows time
 windowing both inside and outside a specified interval.
 Default: <I>yr/mo/da/hr/mn/sc</I> = 2062/2/21/10/30/0.
-<DT><B>-F</B>
+<DT><B>--format=format -Fformat</B>
 
 <DD>
-<I>format</I>
-<BR>
-
 Sets the format for the input swath sonar data using
 <B>MBIO</B> integer format identifiers.
 This program uses the <B>MBIO</B> library and will read any swath sonar
 format supported by <B>MBIO</B>. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page. Default: <I>format</I> = 11.
-<DT><B>-G</B>
+<DT><B>--delimiter=delimiter -Gdelimiter</B>
 
 <DD>
-<I>delimiter</I>
-<BR>
-
 Sets the character(s) used to separate output fields when ascii
 columns are output. Default: tabs are used as delimiters.
-<DT><B>-H</B>
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-I</B>
+<DT><B>--input=file -Ifile</B>
 
 <DD>
-<I>file</I>
-<BR>
-
 Sets the input filename. If <I>format</I> &gt; 0 (set with the
 <B>-F</B> option) then the swath sonar data contained in <I>file</I>
 is read and processed. If <I>format</I> &lt; 0, then <I>file</I>
@@ -226,12 +256,9 @@ format supported by <B>MBIO</B>. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page.
 Default: <I>file</I> = &quot;datalist.mb-1&quot;.
-<DT><B>-J</B>
+<DT><B>--projection=projection -Jprojection</B>
 
 <DD>
-<I>projection</I>
-<BR>
-
 Including the 'X' and 'Y' characters in the <B>-O</B><I>output_format</I> string
 causes longitude and latitude position values, respectively, to be output.
 These longitude and latitude values represent position in geographic coordinates,
@@ -277,12 +304,9 @@ the <I>output_format</I> string without specifying a particular PCS using the
 <B>-J</B> option, then <B>mblist</B>
 will use a UTM projection with the zone specified according to the position
 of the first data point.
-<DT><B>-K</B>
+<DT><B>--data-kind=kind -Kkind</B>
 
 <DD>
-<I>kind</I>
-<BR>
-
 This option sets the type of data record used as the trigger for
 output. By default, data are output when the record type listed as
 the &quot;navigation source&quot; for a particular data format is encountered.
@@ -321,12 +345,9 @@ any roll, pitch, or heave values specified with the <B>-O</B> option will
 be output without modification, whereas other values (e.g. position) will
 be interpolated onto the time of the attitude record.
 This option supercedes the <B>-N</B> option.
-<DT><B>-L</B>
+<DT><B>--longitude-domain=lonflip -Llonflip</B>
 
 <DD>
-<I>lonflip</I>
-<BR>
-
 Sets the range of the longitude values returned.
 If <I>lonflip</I>=-1 then the longitude values will be in
 the range from -360 to 0 degrees. If <I>lonflip</I>=0
@@ -335,12 +356,9 @@ the range from -180 to 180 degrees. If <I>lonflip</I>=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: <I>lonflip</I> = 0.
-<DT><B>-N</B>
+<DT><B>--nav-channel=navchannel -Nnavchannel</B>
 
 <DD>
-<I>navchannel</I>
-<BR>
-
 Sets <B>mbnavlist</B> to look for navigation in navigation records rather
 than the record type listed as the &quot;navigation source&quot; for a particular
 data format. Swath data formats may contain synchronous navigation
@@ -363,12 +381,9 @@ determine if a datafile contains asynchronous navigation and/or auxiliary
 navigation, run <B>mbinfo</B> using its <B>-N</B> option to get counts
 of all data record types in the file. This option is superceded by the
 <B>-K</B> option.
-<DT><B>-O</B>
+<DT><B>--output-format=output_format -Ooutput_format</B>
 
 <DD>
-<I>output_format</I>
-<BR>
-
 Determines the form of the output. <I>Output_format</I> is a string composed
 of one or more of the following characters:
 <DT><DD>
@@ -468,46 +483,34 @@ for time in decimal seconds since first record
 
 Default <I>output_format</I> = <B>tMXYHs</B> (time, unix time, latitude,
 longitude, heading, speed).
-<DT><B>-R</B>
+<DT><B>--bounds=west/east/south/north -Rwest/east/south/north</B>
 
 <DD>
-<I>west/east/south/north</I>
-<BR>
-
 Sets the longitude and latitude bounds within which swath sonar
 data will be read. Only the data which lies within these bounds will
 be read.
 Default: <I>west</I>=-360, east<I>=360</I>, <I>south</I>=-90, <I>north</I>=90.
-<DT><B>-S</B>
+<DT><B>--speed-minimum=speed -Sspeed</B>
 
 <DD>
-<I>speed</I>
-<BR>
-
 Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in
 the input data; pings associated with a smaller ship speed will not be
 copied. Default: <I>speed</I> = 0.
-<DT><B>-T</B>
+<DT><B>--time-gap=timegap -Ttimegap</B>
 
 <DD>
-<I>timegap</I>
-<BR>
-
 Sets the maximum time gap in minutes between adjacent pings allowed before
 the data is considered to have a gap. Default: <I>timegap</I> = 1.
-<DT><B>-V</B>
+<DT><B>--verbose -V</B>
 
 <DD>
 Normally, <B>mbnavlist</B> works &quot;silently&quot; without outputting
 anything to the stderr stream.  If the
 <B>-V</B> flag is given, then <B>mbnavlist</B> works in a &quot;verbose&quot; mode and
 outputs the program version being used and all error status messages.
-<DT><B>-Z</B>
+<DT><B>--segment=segment -Zsegment</B>
 
 <DD>
-<I>segment</I>
-<BR>
-
 Causes the ascii output of different input swath files
 (e.g. when a datalist is specified with the <B>-I</B> option)
 to be separated by lines with <I>segment</I>. If <I>segment</I>

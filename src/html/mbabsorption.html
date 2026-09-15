@@ -29,8 +29,31 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbabsorption</B> [<B>-C</B><I>soundspeed</I> <B>-D</B><I>depth</I> 
-<B>-F</B><I>frequency</I> <B>-P</B><I>ph</I> <B>-S</B><I>salinity</I> <B>-T</B><I>temperature</I> <B>-V -H</B>]
+<B>mbabsorption</B>
+<BR>
+
+[--help {-H}
+<BR>
+
+--sound-speed=soundspeed {-Csoundspeed}
+<BR>
+
+--depth=depth {-Ddepth}
+<BR>
+
+--frequency=frequency {-Ffrequency}
+<BR>
+
+--ph=ph {-Pph}
+<BR>
+
+--salinity=salinity {-Ssalinity}
+<BR>
+
+--temperature=temperature {-Ttemperature}
+<BR>
+
+--verbose {-V}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -147,64 +170,46 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-H</B>
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-C</B>
+<DT><B>--sound-speed=soundspeed -Csoundspeed</B>
 
 <DD>
-<I>soundspeed</I>
-<BR>
-
 Specifies the water sound speed in m/sec. If the option is
 not used, the water sound speed will be calculated from the
-temperature, salinity, and depth. 
-<DT><B>-D</B>
+temperature, salinity, and depth.
+<DT><B>--depth=depth -Ddepth</B>
 
 <DD>
-<I>depth</I>
-<BR>
-
 Sets the depth in meters at which the sound absorption should be calculated.
 Default: <I>depth</I> = 0.0 m (i.e. the sea surface).
-<DT><B>-F</B>
+<DT><B>--frequency=frequency -Ffrequency</B>
 
 <DD>
-<I>frequency</I>
-<BR>
-
 Sets the sound frequency in kHz at which the sound absorption should be calculated.
 Default: <I>frequency</I> = 200 kHz.
-<DT><B>-P</B>
+<DT><B>--ph=ph -Pph</B>
 
 <DD>
-<I>ph</I>
-<BR>
-
 Sets the pH value at which the sound absorption should be calculated.
 Default: <I>ph</I> = 8.
-<DT><B>-S</B>
+<DT><B>--salinity=salinity -Ssalinity</B>
 
 <DD>
-<I>salinity</I>
-<BR>
-
 Sets the salinity in per mil at which the sound absorption should be calculated.
 Default: <I>salinity</I> = 35 per mil.
-<DT><B>-T</B>
+<DT><B>--temperature=temperature -Ttemperature</B>
 
 <DD>
-<I>temperature</I>
-<BR>
-
 Sets the temperature in degrees C at which the sound absorption should be calculated.
 Default: <I>temperature</I> = 10.0 degrees C.
-<DT><B>-V</B>
+<DT><B>--verbose -V</B>
 
 <DD>
-Normally, <B>mbabsorption</B> outputs only a single absorption value 
+Normally, <B>mbabsorption</B> outputs only a single absorption value
 to the stdout stream.  If the
 <B>-V</B> flag is given, then <B>mbabsorption</B> works in a &quot;verbose&quot; mode and
 also outputs the parameters used to calculate the absorption.

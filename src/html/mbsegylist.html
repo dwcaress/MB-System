@@ -27,10 +27,37 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbsegylist</B> [<B>-A</B> <B>-D</B><I>decimate</I>
-<B>-H</B> <B>-G</B><I>delimeter</I> <B>-I</B><I>infilename</I>
-<B>-L</B><I>lonflip</I> <B>-O</B><I>output_format</I>
-<B>-V</B> <B>-W</B> <B>-Z</B><I>segment</I>]
+<B>mbsegylist</B>
+<BR>
+
+[--binary-output {-A}
+<BR>
+
+--decimate=value {-Dvalue}
+<BR>
+
+--help {-H}
+<BR>
+
+--delimiter=character {-Gcharacter}
+<BR>
+
+--input=file {-Ifile}
+<BR>
+
+--longitude-domain=lonflip {-Llonflip}
+<BR>
+
+--output-format=list {-Olist}
+<BR>
+
+--verbose {-V}
+<BR>
+
+--use-feet {-W}
+<BR>
+
+--segment-tag=tag {-Ztag}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -74,7 +101,7 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-A</B>
+<DT><B>--binary-output -A</B>
 
 <DD>
 <BR>
@@ -86,41 +113,29 @@ time strings and longitude or latitude broken into degrees
 and minutes. These values are output as multiple fields as
 appropriate.
 Default: ASCII output with fields separated by tabs.
-<DT><B>-D</B>
+<DT><B>--decimate=value -Dvalue</B>
 
 <DD>
-<I>decimate</I>
-<BR>
-
 Sets the decimation of the output data. By default (i.e. <I>decimate</I>=1),
 every available data record is output. If <I>decimate</I>&gt;1, then only
 every &quot;<I>decimate</I>&quot;th record will be output. Default: <I>decimate</I>=1.
-<DT><B>-G</B>
+<DT><B>--delimiter=character -Gcharacter</B>
 
 <DD>
-<I>delimiter</I>
-<BR>
-
 Sets the character(s) used to separate output fields when ascii
 columns are output. Default: tabs are used as delimiters.
-<DT><B>-H</B>
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-I</B>
+<DT><B>--input=file -Ifile</B>
 
 <DD>
-<I>filename</I>
-<BR>
-
 Sets the filename of the input segy seismic data file.
-<DT><B>-L</B>
+<DT><B>--longitude-domain=lonflip -Llonflip</B>
 
 <DD>
-<I>lonflip</I>
-<BR>
-
 Sets the range of the longitude values returned.
 If <I>lonflip</I>=-1 then the longitude values will be in
 the range from -360 to 0 degrees. If <I>lonflip</I>=0
@@ -129,12 +144,9 @@ the range from -180 to 180 degrees. If <I>lonflip</I>=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: <I>lonflip</I> = 0.
-<DT><B>-O</B>
+<DT><B>--output-format=list -Olist</B>
 
 <DD>
-<I>output_format</I>
-<BR>
-
 Determines the form of the output; <I>output_format</I> is a string composed
 of one or more of the following characters:
 <DT><DD>
@@ -230,26 +242,23 @@ for trace counter (starts from 0)
 Default <I>output_format</I> = <B>TiXYSsCcDINL</B>
 (time, time interval, lon, lat, shot, shot trace #, cmp, cmp trace #,
 delay, sample length, number samples, trace length)
-<DT><B>-V</B>
+<DT><B>--verbose -V</B>
 
 <DD>
 Normally, <B>mbsegylist</B> works &quot;silently&quot; without outputting
 anything to the stderr stream.  If the
 <B>-V</B> flag is given, then <B>mbsegylist</B> works in a &quot;verbose&quot; mode and
 outputs the program version being used and all error status messages.
-<DT><B>-W</B>
+<DT><B>--use-feet -W</B>
 
 <DD>
 Normally, <B>mbsegylist</B> outputs the sonar depth (<B>Z</B>) and water
 depth (<B>z</B>) values in meters.  If the
 <B>-W</B> flag is given, then <B>mbsegylist</B> outputs these values
 in feet.
-<DT><B>-Z</B>
+<DT><B>--segment-tag=tag -Ztag</B>
 
 <DD>
-<I>segment</I>
-<BR>
-
 Causes the ascii output of different input segy files
 (e.g. when a datalist is specified with the <B>-I</B> option)
 to be separated by lines with <I>segment</I>. If <I>segment</I>

@@ -28,10 +28,28 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbformat</B> [<B>--format</B>=<I>format_id</I> {<B>-F</B><I>format_id</I>}]
-[<B>--input</B>=<I>file</I> {<B>-I</B><I>file</I>}] [<B>--list-ids</B> {<B>-L</B>}]
-[<B>--list-root</B> {<B>-K</B>}] [<B>--verbose</B> {<B>-V</B>}]
-[<B>--html</B> {<B>-W</B>}] [<B>--help</B> {<B>-H</B>}]
+<B>mbformat</B>
+<BR>
+
+[--format=format_id {-Fformat_id}
+<BR>
+
+--input=file {-Ifile}
+<BR>
+
+--list-ids {-L}
+<BR>
+
+--list-root {-K}
+<BR>
+
+--verbose {-V}
+<BR>
+
+--html {-W}
+<BR>
+
+--help {-H}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -85,7 +103,7 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>--format=</B><I>format_id</I> {<B>-F</B><I>format_id</I>}
+<DT><B>--format=format_id -Fformat_id</B>
 
 <DD>
 <BR>
@@ -94,35 +112,35 @@ Sets the format id to be listed.  If no format is given, all of the
 currently supported formats will be listed. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page.
-<DT><B>--help {-H</B>}
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>--input=</B><I>file</I> {<B>-I</B><I>file</I>}
+<DT><B>--input=file -Ifile</B>
 
 <DD>
 <BR>
 
 Sets the filename to be tested against known filename prefix and
 suffix conventions in order to identify the format id.
-<DT><B>--list-root {-K</B>}
+<DT><B>--list-root -K</B>
 
 <DD>
 Causes the fileroot and the format id to be output. The fileroot
 is the filename with any format specific suffix removed.
-<DT><B>--list-ids {-L</B>}
+<DT><B>--list-ids -L</B>
 
 <DD>
 Causes the format descriptions to be omitted
 so that only the <B>MBIO</B> format id numbers are listed.
-<DT><B>--verbose {-V</B>}
+<DT><B>--verbose -V</B>
 
 <DD>
 Normally, <B>mbformat</B> only prints out format descriptions.  If the
 <B>-V</B> flag is given, then <B>mbformat</B> works in a &quot;verbose&quot; mode and
 also outputs the program version being used.
-<DT><B>--html {-W</B>}
+<DT><B>--html -W</B>
 
 <DD>
 Output the list of formats as HTML.

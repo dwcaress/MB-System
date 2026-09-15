@@ -27,7 +27,25 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>MBeditviz</B> [<B>-F</B><I>format_id</I> <B>-G -H -I</B><I>datalist</I> <B>-R -V</B>]
+<B>MBeditviz</B>
+<BR>
+
+[--delete-input-file {-R}
+<BR>
+
+--format=format_id {-Fformat_id}
+<BR>
+
+--help {-H}
+<BR>
+
+--input=file {-Ifile}
+<BR>
+
+--simple-mean-grid {-G}
+<BR>
+
+--verbose {-V}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -163,43 +181,37 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-F</B>
+<DT><B>--format=format_id -Fformat_id</B>
 
 <DD>
-<I>format_id</I>
-<BR>
-
 Sets the format id for the file specified with the <B>-I</B> option using
 <B>MBIO</B> integer format identifiers. By default the <I>format</I> id
 value is inferred using the <B>MB-System</B> convention of an &quot;.mbXX&quot; suffix
 (the XX corresponds to the <B>MBIO</B> format id).
-<DT><B>-G</B>
+<DT><B>--simple-mean-grid -G</B>
 
 <DD>
 This flag causes <B>MBeditviz</B> to grid the input swath bathymetry soundings
 using the simple mean algorithm rather than the default footprint-based
 gridding algorithm.
-<DT><B>-H</B>
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-I</B>
+<DT><B>--input=file -Ifile</B>
 
 <DD>
-<I>datalist</I>
-<BR>
-
 Sets an <B>MB-System</B> datalist file to be parsed on input for swath data files
 to list as available for editing.
 This option is usually used when <B>MBeditviz</B> is started
 automatically from some other process, such as <B>MBgrdviz</B>.
-<DT><B>-R</B>
+<DT><B>--delete-input-file -R</B>
 
 <DD>
 This flag causes the file specified with the <B>-I</B> option to be deleted
 (via a shell &quot;rm&quot; command) after it has been opened and its soundings loaded.
-<DT><B>-V</B>
+<DT><B>--verbose -V</B>
 
 <DD>
 Normally, <B>MBeditviz</B> outputs limited information to the stderr stream.

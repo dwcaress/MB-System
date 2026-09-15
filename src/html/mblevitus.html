@@ -29,7 +29,19 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mblevitus</B> [<B>-R</B><I>lon/lat </I><B>-O</B><I>outfile </I><B>-V -H</B>]
+<B>mblevitus</B>
+<BR>
+
+[--location=lon/lat {-Rlon/lat}
+<BR>
+
+--output-file=file {-Ooutfile}
+<BR>
+
+--verbose {-V}
+<BR>
+
+--help {-H}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -100,33 +112,27 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-H</B>
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-O</B>
+<DT><B>--output-file=file -Ooutfile</B>
 
 <DD>
-<I>outfile</I>
-<BR>
-
-Sets the output file for the water velocity profile. 
+Sets the output file for the water velocity profile.
 Default: <I>outfile</I> = &quot;velocity&quot;.
-<DT><B>-R</B>
+<DT><B>--location=lon/lat -Rlon/lat</B>
 
 <DD>
-<I>lon/lat</I>
-<BR>
-
 Sets the longitude and latitude of the location of the water
 velocity profile.  Whole degrees should be used, as the database
 has a 1 degree by 1 degree resolution.
 Default: <I>lon</I>=0, <I>lat</I>=0.
-<DT><B>-V</B>
+<DT><B>--verbose -V</B>
 
 <DD>
-Normally, <B>mblevitus</B> outputs only a minor bit of information 
+Normally, <B>mblevitus</B> outputs only a minor bit of information
 to the stdout stream.  If the
 <B>-V</B> flag is given, then <B>mblevitus</B> works in a &quot;verbose&quot; mode and
 also outputs the program version being used and the complete
