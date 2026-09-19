@@ -28,15 +28,62 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbgrid</B> <B>-I</B><I>filelist</I> <B>-O</B><I>root</I>
-[<B>-A</B><I>datatype</I>
-<B>-B</B><I>border</I> -C<I>clip</I>[<I>/mode</I>] <B>-D</B><I>xdim/ydim</I>
-<B>-E</B><I>dx/dy/units[!]</I> <B>-F</B><I>mode[/threshold]</I>
-<B>-G</B><I>gridkind</I> <B>-J</B><I>projection</I> <B>-K</B><I>background</I>
-<B>-L</B><I>lonflip</I> <B>-M -N -P</B><I>pings</I> <B>-Q</B>
-<B>-R</B><I>west/east/south/north</I> <B>-R</B><I>factor</I>
-<B>-S</B><I>speed</I> <B>-T</B><I>tension</I> <B>-U</B><I>time</I>
-<B>-V</B> -W<I>scale</I> <B>-X</B><I>extend</I> <B>-Y</B><I>shiftx/shifty[/mode]</I>]
+<PRE>
+<B>mbgrid</B>
+<BR>
+--input=filelist {-Ifilelist}
+<BR>
+--output=root {-Oroot}
+<BR>
+[--data-type=datatype {-Adatatype}
+<BR>
+--border=border {-Bborder}
+<BR>
+--clip=clip[/mode] {-Cclip[/mode]}
+<BR>
+--dimensions=xdim/ydim {-Dxdim/ydim}
+<BR>
+--spacing=dx/dy/units[!] {-Edx/dy/units[!]}
+<BR>
+--algorithm=mode[/threshold] {-Fmode[/threshold]}
+<BR>
+--output-format=gridkind {-Ggridkind}
+<BR>
+--help {-H}
+<BR>
+--projection=projection {-Jprojection}
+<BR>
+--background-data=background {-Kbackground}
+<BR>
+--longitude-domain=lonflip {-Llonflip}
+<BR>
+--extra-grids {-M}
+<BR>
+--use-nan {-N}
+<BR>
+--pings=pings {-Ppings}
+<BR>
+--use-feet {-Q}
+<BR>
+--bounds=west/east/south/north {-Rwest/east/south/north}
+<BR>
+--bounds=factor {-Rfactor}
+<BR>
+--speed-minimum=speed {-Sspeed}
+<BR>
+--tension=tension {-Ttension}
+<BR>
+--time-difference=time {-Utime}
+<BR>
+--verbose {-V}
+<BR>
+--gaussian-scale=scale {-Wscale}
+<BR>
+--extend=extend {-Xextend}
+<BR>
+--shift=shiftx/shifty[/mode] {-Yshiftx/shifty[/mode]}]
+</PRE>
+
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -336,33 +383,24 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-A</B>
+<DT><B>--data-type=datatype -Adatatype</B>
 
 <DD>
-<I>datatype</I>
-<BR>
-
 Sets the type of data to be read and gridded. If <I>datatype</I> = 1,
 bathymetry data will be gridded (positive downwards). If <I>datatype</I> = 2,
 bathymetry data will be gridded as topography (positive upwards).
 If <I>datatype</I> = 3,
 amplitude data will be gridded.  If <I>datatype</I> = 4,
 sidescan data will be gridded. Default: <I>datatype</I> = 1 (bathymetry).
-<DT><B>-B</B>
+<DT><B>--border=border -Bborder</B>
 
 <DD>
-<I>border</I>
-<BR>
-
 Sets the border of a smoothly interpolated grid to the value <I>border</I>
 wherever no data exist, provided <I>border</I> &gt; 0.0.
 Default: <I>border</I> = 0.0
-<DT><B>-C</B>
+<DT><B>--clip=clip[/mode] -Cclip[/mode]</B>
 
 <DD>
-<I>clip[/mode]</I>
-<BR>
-
 Controls the use of spline interpolation to fill grid cells not
 filled by swath data. The <I>clip</I> value sets the distance from
 swath data (in grid cells) that the spline interpolation may be
@@ -374,21 +412,15 @@ a distance of <I>clip</I> cells from data. If <I>mode</I> = 3 or <I>clip</I> is
 set to a value greater than both dimensions of the output grid, then
 all grid cells not set by swath data will be filled by interpolation.
 Default: <I>clip</I> = 0 and <I>mode</I> = 1.
-<DT><B>-D</B>
+<DT><B>--dimensions=xdim/ydim -Dxdim/ydim</B>
 
 <DD>
-<I>xdim/ydim</I>
-<BR>
-
 Sets the dimensions of the output grid.  This option is superceded
 if the user specifies the grid spacing with the <B>-E</B> option.
 Default:  <I>xdim</I> = <I>ydim</I> = 101.
-<DT><B>-E</B>
+<DT><B>--spacing=dx/dy/units[!] -Edx/dy/units[!]</B>
 
 <DD>
-<I>dx/dy/units[!]</I>
-<BR>
-
 Sets the grid cell spacing to <I>dx</I> in longitude and <I>dy</I>
 in latitude. If <I>units</I> is not specified, the <I>dx</I>
 and <I>dy</I> values are assumed to be in meters. Valid values
@@ -411,12 +443,9 @@ grid bounds.
 Default: If neither the <B>-E</B> or <B>-D</B> options are specified,
 the program sets the grid cell spacing to be 0.02 times the maximum
 sonar altitude in the input files.
-<DT><B>-F</B>
+<DT><B>--algorithm=mode[/threshold] -Fmode[/threshold]</B>
 
 <DD>
-<I>mode[/threshold]</I>
-<BR>
-
 Sets the gridding algorithm to be used.
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;1:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Gaussian&nbsp;Weighted&nbsp;Mean<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;2:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Median&nbsp;Filter<BR>
@@ -430,12 +459,9 @@ Sets the gridding algorithm to be used.
 
 When used, the <I>threshold</I> value is defined in meters. The default gridding
 algorithm is <I>mode</I> = 1 (Gaussian Weighted Mean).
-<DT><B>-G</B>
+<DT><B>--output-format=gridkind -Ggridkind</B>
 
 <DD>
-<I>gridkind</I>
-<BR>
-
 This option sets the format of the output grid file.
 The default is to output a current generation GMT COARDS-compliant netCDF 4-byte
 float grid.  To output a different grid format, specify a two-letter <B>GMT</B> grid
@@ -546,17 +572,14 @@ used, the <B>-E</B> option must also be used in a way which
 ensures equal grid cell spacings (see the <B>-E</B> documentation
 above).
 Default: <I>gridkind</I> = &quot;=nf&quot;.
-<DT><B>-H</B>
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-I</B>
+<DT><B>--input=filelist -Ifilelist</B>
 
 <DD>
-<I>datalist</I>
-<BR>
-
 Sets the filename of the file containing a list of the input swath sonar
 data files and their formats.  In the <I>datalist</I> file, each
 data file should be followed by a data format identifier, e.g.:
@@ -580,10 +603,9 @@ data filename. In the
 event that a bathymetry or topography grid is being generated, <B>mbgrid</B>
 will attempt to read an &quot;fbt&quot; file in lieu of the original data.
 Default: <I>datalist</I> = datalist.mb-1
-<DT><B>-J</B>
+<DT><B>--projection=projection -Jprojection</B>
 
 <DD>
-<I>projection</I>
 By default, <B>mbgrid</B> generates grids in Geographic coordinates,
 meaning that position is defined in longitude and latitude using
 the WGS84 geographic coordinate system.
@@ -635,12 +657,9 @@ the GeoTIFF images it generates. As a result, images generated by
 <B>mbgrdtiff</B> will be properly georeferenced when they are imported
 into GIS software.
 <P>
-<DT><B>-K</B>
+<DT><B>--background-data=background -Kbackground</B>
 
 <DD>
-<I>background</I>
-<BR>
-
 Enables filling in all undefined grid cells with bathymetry or topography
 from a global or regional database. If raster data have been locally made
 available through the <B>GMT</B> program <B>grdraster</B>, these can be
@@ -651,12 +670,9 @@ Users can also use data in GMT grids as a background (including grids
 generated by <B>mbgrid</B>) by specifying <I>background</I> as the file path
 to the desired grid (e.g. <B>-K</B><I>/usr/local/share/globaltopo.grd</I>).
 <P>
-<DT><B>-L</B>
+<DT><B>--longitude-domain=lonflip -Llonflip</B>
 
 <DD>
-<I>lonflip</I>
-<BR>
-
 Sets the range of the longitude values returned.
 If <I>lonflip</I>=-1 then the longitude values will be in
 the range from -360 to 0 degrees. If <I>lonflip</I>=0
@@ -665,7 +681,7 @@ the range from -180 to 180 degrees. If <I>lonflip</I>=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: <I>lonflip</I> = 0.
-<DT><B>-M</B>
+<DT><B>--extra-grids -M</B>
 
 <DD>
 Causes two additional grids to be output. One is a grid containing
@@ -673,18 +689,15 @@ the standard deviation of the data within each grid cell relative
 to the grid value, the other contains the number of data
 points in each grid cell. This option is ignored when the minimum
 or maximum filter gridding algorithms are used (see the -F option).
-<DT><B>-N</B>
+<DT><B>--use-nan -N</B>
 
 <DD>
 Causes grid cells with no data and no interpolation to be set to a
 value of NaN instead of the default value of 99999.9.  The NaN value
 is expected by <B>GMT</B> programs such <B>grdview</B>.
-<DT><B>-O</B>
+<DT><B>--output=root -Oroot</B>
 
 <DD>
-<I>root</I>
-<BR>
-
 Sets the character string to be used as the root of the
 output filenames. For example, if the grid is output as a <B>GMT</B>
 version 2 GRD format (netCDF) file (the default),
@@ -697,29 +710,24 @@ output grid filename will be &quot;root.grd1&quot;. If the output grid is
 in the <B>GMT</B> version 2 GRD format, a shellscript
 which will allow the contents of the grid to viewed using <B>GMT</B> programs
 is also output with the filename &quot;root.grd.cmd&quot;.
-<DT><B>-P</B>
+<DT><B>--pings=pings -Ppings</B>
 
 <DD>
-<I>pings</I>
 Sets the ping averaging of the input data. If <I>pings</I> &gt; 0, then
 that number of input pings will be averaged to produce one output
 ping.  If <I>pings</I> = 0, then the ping averaging will automatically
 be done so that the along-track ping spacing is equal to the across-track
 beam spacing. Default: <I>pings</I> = 1.
-<DT><B>-Q</B>
+<DT><B>--use-feet -Q</B>
 
 <DD>
 Normally, bathymetry or topography data is gridded in meters. If
 this option is used, bathymetry or topography data is gridded
 in feet.
-<DT><B>-R</B>
+<DT><B>--bounds=west/east/south/north -Rwest/east/south/north</B>
 
 <DD>
-<I>west/east/south/north</I>
-<BR>
-
-<I>factor</I>
-<BR>
+<B>--bounds=factor -Rfactor</B>
 
 The first form sets the longitude and latitude bounds of the output grid.
 By default (if the <B>-R</B><I>west/east/south/north</I>
@@ -740,21 +748,15 @@ Default: If the <B>-R</B><I>west/east/south/north</I>
 option is not specified, the program will set
 the grid bounds to be the area encompassing all of the data in the
 input files.
-<DT><B>-S</B>
+<DT><B>--speed-minimum=speed -Sspeed</B>
 
 <DD>
-<I>speed</I>
-<BR>
-
 Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in
 the input data; pings associated with a smaller ship speed will not be
 output. Default: <I>speed</I> = 0.
-<DT><B>-T</B>
+<DT><B>--tension=tension -Ttension</B>
 
 <DD>
-<I>tension</I>
-<BR>
-
 Sets the <I>tension</I> value used in the thin plate spline interpolation.
 <P>
 A <I>tension</I> of 0 gives a minimum curvature surface with free edges;
@@ -764,12 +766,9 @@ the interpolation toward the edges; a <I>tension</I> of infinity
 yields a pure thin plate spline solution. The <I>tension</I> must be zero or
 greater.
 Default: <I>tension</I> = 0.0 (minimum curvature solution).
-<DT><B>-U</B>
+<DT><B>--time-difference=time -Utime</B>
 
 <DD>
-<I>time</I>
-<BR>
-
 Forces <B>mbgrid</B> to avoid averaging overlapping swaths by
 ignoring the data from later swaths. &quot;Later&quot; data is identified
 using the <I>time</I> value. The time of the first data point
@@ -778,29 +777,23 @@ are more than <I>time</I> minutes before or after the initial
 data point in the relevant bin are ignored. If <I>time</I> is
 negative, the last data in a bin (within the time lag criterea)
 will be saved and used instead of the first data.
-<DT><B>-V-</B>
+<DT><B>--verbose -V</B>
 
 <DD>
 Normally, <B>mbgrid</B> prints out information regarding its
 controlling parameters during execution; the
 <B>-V</B> option causes the program to also print out statements
 indicating its progress.
-<DT><B>-W</B>
+<DT><B>--gaussian-scale=scale -Wscale</B>
 
 <DD>
-<I>scale</I>
-<BR>
-
 Sets the width of the gaussian weighting function in terms of
 the grid spacing.  The distance to the 1/e point of the weighting
 function is given by half of the grid spacing times <I>scale</I>.
 Default: <I>scale</I> = 1.0
-<DT><B>-X</B>
+<DT><B>--extend=extend -Xextend</B>
 
 <DD>
-<I>extend</I>
-<BR>
-
 Extends the size of the internal grid so that the output grid is a
 subset from the center of a larger grid.   This allows data outside
 the output grid to guide the spline interpolation of data gaps which
@@ -809,12 +802,9 @@ extension is <I>extend</I> times the grid width/height to each side.
 Thus, if <I>extend</I>=1.0, then the internal grid will have dimensions
 three times the output grid.
 Default: <I>extend</I> = 0.0
-<DT><B>-Y</B>
+<DT><B>--shift=shiftx/shifty[/mode] -Yshiftx/shifty[/mode]</B>
 
 <DD>
-<I>shiftx/shifty[/mode]</I>
-<BR>
-
 This option applies lateral shifts in two modes. If <I>mode</I> = 1 or is unspecified
 then the location of the output grid bounds is shifted by <I>shiftx</I>
 meters east and <I>shifty</I> meters north. If <I>mode</I> = 2 then the locations

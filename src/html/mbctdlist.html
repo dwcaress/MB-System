@@ -27,9 +27,37 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbctdlist</B> [<B>-A</B> <B>-D</B><I>decimate</I> <B>-F</B><I>format</I>
-<B>-G</B><I>delimeter</I> <B>-H</B> <B>-I</B><I>file </I> <B>-L</B><I>lonflip</I>
-<B>-O</B><I>output_format</I> <B>-V</B> <B>-Z</B><I>segment</I>]
+<B>mbctdlist</B>
+<BR>
+
+[--binary {-A}
+<BR>
+
+--decimate=decimate {-Ddecimate}
+<BR>
+
+--format=format {-Fformat}
+<BR>
+
+--delimiter=delimiter {-Gdelimeter}
+<BR>
+
+--help {-H}
+<BR>
+
+--input=file {-Ifile}
+<BR>
+
+--longitude-domain=lonflip {-Llonflip}
+<BR>
+
+--output-format=output_format {-Ooutput_format}
+<BR>
+
+--verbose {-V}
+<BR>
+
+--segment=segment {-Zsegment}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -83,11 +111,9 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-A</B>
+<DT><B>--binary -A</B>
 
 <DD>
-<BR>
-
 Causes the output to be binary (native double precision floating
 point) rather than ASCII. Some
 output options cannot be represented as single binary floats (e.g.
@@ -95,46 +121,34 @@ time strings and longitude or latitude broken into degrees
 and minutes. These values are output as multiple fields as
 appropriate.
 Default: ASCII output with fields separated by tabs.
-<DT><B>-D</B>
+<DT><B>--decimate=decimate -Ddecimate</B>
 
 <DD>
-<I>decimate</I>
-<BR>
-
 Sets the decimation of the output data. By default (i.e. <I>decimate</I>=1),
 every available data record is output. If <I>decimate</I>&gt;1, then only
 every &quot;<I>decimate</I>&quot;th record will be output. Default: <I>decimate</I>=1.
-<DT><B>-F</B>
+<DT><B>--format=format -Fformat</B>
 
 <DD>
-<I>format</I>
-<BR>
-
 Sets the format for the input swath sonar data using
 <B>MBIO</B> integer format identifiers.
 This program uses the <B>MBIO</B> library and will read any swath sonar
 format supported by <B>MBIO</B>. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page. Default: <I>format</I> = 11.
-<DT><B>-G</B>
+<DT><B>--delimiter=delimiter -Gdelimeter</B>
 
 <DD>
-<I>delimiter</I>
-<BR>
-
 Sets the character(s) used to separate output fields when ascii
 columns are output. Default: tabs are used as delimiters.
-<DT><B>-H</B>
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-I</B>
+<DT><B>--input=file -Ifile</B>
 
 <DD>
-<I>file</I>
-<BR>
-
 Sets the input filename. If <I>format</I> &gt; 0 (set with the
 <B>-F</B> option) then the swath sonar data contained in <I>file</I>
 is read and processed. If <I>format</I> &lt; 0, then <I>file</I>
@@ -154,12 +168,9 @@ A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page.
 Default: <I>file</I> = &quot;datalist.mb-1&quot;.
-<DT><B>-L</B>
+<DT><B>--longitude-domain=lonflip -Llonflip</B>
 
 <DD>
-<I>lonflip</I>
-<BR>
-
 Sets the range of the longitude values returned.
 If <I>lonflip</I>=-1 then the longitude values will be in
 the range from -360 to 0 degrees. If <I>lonflip</I>=0
@@ -168,12 +179,9 @@ the range from -180 to 180 degrees. If <I>lonflip</I>=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: <I>lonflip</I> = 0.
-<DT><B>-O</B>
+<DT><B>--output-format=output_format -Ooutput_format</B>
 
 <DD>
-<I>output_format</I>
-<BR>
-
 Determines the form of the output. <I>Output_format</I> is a string composed
 of one or more of the following characters:
 <P>
@@ -219,19 +227,16 @@ of one or more of the following characters:
 <P>
 Default <I>output_format</I> = <B>TXYHCc^cSs</B> (Time, lon, lat, heading,
 conductivity, temperature, depth, salinity, sound speed).
-<DT><B>-V</B>
+<DT><B>--verbose -V</B>
 
 <DD>
 Normally, <B>mbctdlist</B> works &quot;silently&quot; without outputting
 anything to the stderr stream.  If the
 <B>-V</B> flag is given, then <B>mbctdlist</B> works in a &quot;verbose&quot; mode and
 outputs the program version being used and all error status messages.
-<DT><B>-Z</B>
+<DT><B>--segment=segment -Zsegment</B>
 
 <DD>
-<I>segment</I>
-<BR>
-
 Causes the ascii output of different input swath files
 (e.g. when a datalist is specified with the <B>-I</B> option)
 to be separated by lines with <I>segment</I>. If <I>segment</I>

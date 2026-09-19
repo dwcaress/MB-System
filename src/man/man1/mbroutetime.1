@@ -7,12 +7,19 @@ of a planned survey route.
 Version 5.0\fP
 
 .SH SYNOPSIS
-\fBmbroutetime\fP \fB\-\-route-file\fP=\fIroutefile\fP {\fB\-R\fP\fIroutefile\fP}
-[\fB\-\-format\fP=\fIformat\fP {\fB\-F\fP\fIformat\fP}]
-[\fB\-\-input\fP=\fIfile\fP {\fB\-I\fP\fIfile\fP}]
-[\fB\-\-output\fP=\fIwaypointtimefile\fP {\fB\-O\fP\fIwaypointtimefile\fP}]
-[\fB\-\-range-threshold\fP=\fIrangethreshold\fP {\fB\-U\fP\fIrangethreshold\fP}]
-[\fB\-\-verbose\fP {\fB\-V\fP}] [\fB\-\-help\fP {\fB\-H\fP}]
+\fBmbroutetime\fP --route-file=routefile {-Rroutefile}
+.br
+[--format=format_id {-Fformat_id}
+.br
+--input=file {-Ifile}
+.br
+--output=waypointtimefile {-Owaypointtimefile}
+.br
+--range-threshold=rangethreshold {-Urangethreshold}
+.br
+--verbose {-V}
+.br
+--help {-H}]
 
 .SH DESCRIPTION
 \fBmbroutetime\fP \-
@@ -36,7 +43,7 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B \-\-format=\fIformat\fP {\fB\-F\fP\fIformat\fP}
+.B \-\-format=format_id \-Fformat_id
 .br
 Sets the format for the input swath data using
 \fBMBIO\fP integer format identifiers.
@@ -45,11 +52,11 @@ format supported by \fBMBIO\fP. A list of the swath data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 0.
 .TP
-.B \-\-help {\fB\-H\fP}
+.B \-\-help \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \-\-input=\fIfilename\fP {\fB\-I\fP\fIfilename\fP}
+.B \-\-input=file \-Ifile
 .br
 Sets the input filename. If \fIformat\fP > 0 (set with the
 \fB\-F\fP option) then the swath data contained in \fIinfile\fP
@@ -68,7 +75,7 @@ currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIinfile\fP = "datalist.mb-1".
 .TP
-.B \-\-output=\fIwaypointtimefile\fP {\fB\-O\fP\fIwaypointtimefile\fP}
+.B \-\-output=waypointtimefile \-Owaypointtimefile
 .br
 Sets the name of the output file listing, for each route waypoint
 reached, the longitude, latitude, and time (in decimal epoch seconds)
@@ -76,19 +83,19 @@ at which the survey passed that waypoint.
 Default: \fIwaypointtimefile\fP is the input file or datalist name
 (set with the \fB\-I\fP option) with the suffix "_wpttime_d.txt" appended.
 .TP
-.B \-\-route-file=\fIroutefile\fP {\fB\-R\fP\fIroutefile\fP}
+.B \-\-route\-file=routefile \-Rroutefile
 .br
 Sets the name of the input \fBMBgrdviz\fP route file containing the
 planned survey waypoints against which the survey data are checked.
 This option is required.
 .TP
-.B \-\-range-threshold=\fIrangethreshold\fP {\fB\-U\fP\fIrangethreshold\fP}
+.B \-\-range\-threshold=rangethreshold \-Urangethreshold
 .br
 Sets the distance in meters that the survey navigation must come within
 a route waypoint for that waypoint to be considered reached.
 Default: \fIrangethreshold\fP = 25.0.
 .TP
-.B \-\-verbose {\fB\-V\fP}
+.B \-\-verbose \-V
 The \fB\-V\fP option causes \fBmbroutetime\fP to print out status messages.
 
 .SH EXAMPLES

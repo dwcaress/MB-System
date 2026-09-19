@@ -6,13 +6,43 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbnavlist\fP [\fB\-A\fP \fB\-B\fP\fIyr/mo/da/hr/mn/sc\fP \fB\-D\fP\fIdecimate\fP
-\fB\-E\fP\fIyr/mo/da/hr/mn/sc\fP \fB\-F\fP\fIformat\fP
-\fB\-G\fP\fIdelimeter\fP \fB\-H\fP \fB\-I\fP\fIfile\fP
-\fB\-J\fP\fIprojection\fP \fB\-K\fP\fIkind\fP
-\fB\-L\fP\fIlonflip\fP \fB\-N\fP\fInavchannel\fP
-\fB\-O\fP\fIoutput_format\fP \fB\-R\fP\fIwest/east/south/north\fP
-\fB\-S\fP\fIspeed\fP \fB\-T\fP\fItimegap\fP \fB\-V\fP \fB\-Z\fP\fIsegment\fP]
+\fBmbnavlist\fP
+.br
+[--binary {-A}
+.br
+--begin-time=yr/mo/da/hr/mn/sc {-Byr/mo/da/hr/mn/sc}
+.br
+--decimate=decimate {-Ddecimate}
+.br
+--end-time=yr/mo/da/hr/mn/sc {-Eyr/mo/da/hr/mn/sc}
+.br
+--format=format {-Fformat}
+.br
+--delimiter=delimiter {-Gdelimiter}
+.br
+--help {-H}
+.br
+--input=file {-Ifile}
+.br
+--projection=projection {-Jprojection}
+.br
+--data-kind=kind {-Kkind}
+.br
+--longitude-domain=lonflip {-Llonflip}
+.br
+--nav-channel=navchannel {-Nnavchannel}
+.br
+--output-format=output_format {-Ooutput_format}
+.br
+--bounds=west/east/south/north {-Rwest/east/south/north}
+.br
+--speed-minimum=speed {-Sspeed}
+.br
+--time-gap=timegap {-Ttimegap}
+.br
+--verbose {-V}
+.br
+--segment=segment {-Zsegment}]
 
 .SH DESCRIPTION
 \fBmbnavlist\fP prints the specified contents of navigation records
@@ -93,7 +123,7 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B \-A
+.B \-\-binary \-A
 .br
 Causes the output to be binary (native double precision floating
 point) rather than ASCII. Some
@@ -103,9 +133,7 @@ and minutes. These values are output as multiple fields as
 appropriate.
 Default: ASCII output with fields separated by tabs.
 .TP
-.B \-B
-\fIyr/mo/da/hr/mn/sc\fP
-.br
+.B \-\-begin\-time=yr/mo/da/hr/mn/sc \-Byr/mo/da/hr/mn/sc
 This option sets the starting time for data allowed in the input data.
 The \fB\-E\fP option sets the ending time for data. If the
 starting time is before the ending time, then any data
@@ -116,16 +144,12 @@ and starting time will be ignored. This scheme allows time
 windowing both inside and outside a specified interval.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
-.B \-D
-\fIdecimate\fP
-.br
+.B \-\-decimate=decimate \-Ddecimate
 Sets the decimation of the output data. By default (i.e. \fIdecimate\fP=1),
 every available data record is output. If \fIdecimate\fP>1, then only
 every "\fIdecimate\fP"th record will be output. Default: \fIdecimate\fP=1.
 .TP
-.B \-E
-\fIyr/mo/da/hr/mn/sc\fP
-.br
+.B \-\-end\-time=yr/mo/da/hr/mn/sc \-Eyr/mo/da/hr/mn/sc
 This option sets the ending time for data allowed in the input data.
 The \fB\-B\fP option sets the starting time for data. If the
 starting time is before the ending time, then any data
@@ -136,9 +160,7 @@ and starting time will be ignored. This scheme allows time
 windowing both inside and outside a specified interval.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
-.B \-F
-\fIformat\fP
-.br
+.B \-\-format=format \-Fformat
 Sets the format for the input swath sonar data using
 \fBMBIO\fP integer format identifiers.
 This program uses the \fBMBIO\fP library and will read any swath sonar
@@ -146,19 +168,15 @@ format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
 .TP
-.B \-G
-\fIdelimiter\fP
-.br
+.B \-\-delimiter=delimiter \-Gdelimiter
 Sets the character(s) used to separate output fields when ascii
 columns are output. Default: tabs are used as delimiters.
 .TP
-.B \-H
+.B \-\-help \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \-I
-\fIfile\fP
-.br
+.B \-\-input=file \-Ifile
 Sets the input filename. If \fIformat\fP > 0 (set with the
 \fB\-F\fP option) then the swath sonar data contained in \fIfile\fP
 is read and processed. If \fIformat\fP < 0, then \fIfile\fP
@@ -176,9 +194,7 @@ currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIfile\fP = "datalist.mb-1".
 .TP
-.B \-J
-\fIprojection\fP
-.br
+.B \-\-projection=projection \-Jprojection
 Including the 'X' and 'Y' characters in the \fB-O\fP\fIoutput_format\fP string
 causes longitude and latitude position values, respectively, to be output.
 These longitude and latitude values represent position in geographic coordinates,
@@ -225,9 +241,7 @@ the \fIoutput_format\fP string without specifying a particular PCS using the
 will use a UTM projection with the zone specified according to the position
 of the first data point.
 .TP
-.B \-K
-\fIkind\fP
-.br
+.B \-\-data\-kind=kind \-Kkind
 This option sets the type of data record used as the trigger for
 output. By default, data are output when the record type listed as
 the "navigation source" for a particular data format is encountered.
@@ -266,9 +280,7 @@ be output without modification, whereas other values (e.g. position) will
 be interpolated onto the time of the attitude record.
 This option supercedes the \fB\-N\fP option.
 .TP
-.B \-L
-\fIlonflip\fP
-.br
+.B \-\-longitude\-domain=lonflip \-Llonflip
 Sets the range of the longitude values returned.
 If \fIlonflip\fP=\-1 then the longitude values will be in
 the range from \-360 to 0 degrees. If \fIlonflip\fP=0
@@ -278,9 +290,7 @@ then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
 .TP
-.B \-N
-\fInavchannel\fP
-.br
+.B \-\-nav\-channel=navchannel \-Nnavchannel
 Sets \fBmbnavlist\fP to look for navigation in navigation records rather
 than the record type listed as the "navigation source" for a particular
 data format. Swath data formats may contain synchronous navigation
@@ -304,9 +314,7 @@ navigation, run \fBmbinfo\fP using its \fB\-N\fP option to get counts
 of all data record types in the file. This option is superceded by the
 \fB\-K\fP option.
 .TP
-.B \-O
-\fIoutput_format\fP
-.br
+.B \-\-output\-format=output_format \-Ooutput_format
 Determines the form of the output. \fIOutput_format\fP is a string composed
 of one or more of the following characters:
 .IP
@@ -406,36 +414,28 @@ for time in decimal seconds since first record
 Default \fIoutput_format\fP = \fBtMXYHs\fP (time, unix time, latitude,
 longitude, heading, speed).
 .TP
-.B \-R
-\fIwest/east/south/north\fP
-.br
+.B \-\-bounds=west/east/south/north \-Rwest/east/south/north
 Sets the longitude and latitude bounds within which swath sonar
 data will be read. Only the data which lies within these bounds will
 be read.
 Default: \fIwest\fP=\-360, east\fI=360\fP, \fIsouth\fP=\-90, \fInorth\fP=90.
 .TP
-.B \-S
-\fIspeed\fP
-.br
+.B \-\-speed\-minimum=speed \-Sspeed
 Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in
 the input data; pings associated with a smaller ship speed will not be
 copied. Default: \fIspeed\fP = 0.
 .TP
-.B \-T
-\fItimegap\fP
-.br
+.B \-\-time\-gap=timegap \-Ttimegap
 Sets the maximum time gap in minutes between adjacent pings allowed before
 the data is considered to have a gap. Default: \fItimegap\fP = 1.
 .TP
-.B \-V
+.B \-\-verbose \-V
 Normally, \fBmbnavlist\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB\-V\fP flag is given, then \fBmbnavlist\fP works in a "verbose" mode and
 outputs the program version being used and all error status messages.
 .TP
-.B \-Z
-\fIsegment\fP
-.br
+.B \-\-segment=segment \-Zsegment
 Causes the ascii output of different input swath files
 (e.g. when a datalist is specified with the \fB\-I\fP option)
 to be separated by lines with \fIsegment\fP. If \fIsegment\fP

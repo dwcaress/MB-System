@@ -6,10 +6,27 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbsegylist\fP [\fB\-A\fP \fB\-D\fP\fIdecimate\fP
-\fB\-H\fP \fB\-G\fP\fIdelimeter\fP \fB\-I\fP\fIinfilename\fP
-\fB\-L\fP\fIlonflip\fP \fB\-O\fP\fIoutput_format\fP
-\fB\-V\fP \fB\-W\fP \fB\-Z\fP\fIsegment\fP]
+\fBmbsegylist\fP
+.br
+[--binary-output {-A}
+.br
+--decimate=value {-Dvalue}
+.br
+--help {-H}
+.br
+--delimiter=character {-Gcharacter}
+.br
+--input=file {-Ifile}
+.br
+--longitude-domain=lonflip {-Llonflip}
+.br
+--output-format=list {-Olist}
+.br
+--verbose {-V}
+.br
+--use-feet {-W}
+.br
+--segment-tag=tag {-Ztag}]
 
 .SH DESCRIPTION
 \fBMBsegylist\fP is a utility to output specified header values
@@ -40,7 +57,7 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B \-A
+.B \-\-binary\-output \-A
 .br
 Causes the output to be binary (native double precision floating
 point) rather than ASCII. Some
@@ -50,31 +67,23 @@ and minutes. These values are output as multiple fields as
 appropriate.
 Default: ASCII output with fields separated by tabs.
 .TP
-.B \-D
-\fIdecimate\fP
-.br
+.B \-\-decimate=value \-Dvalue
 Sets the decimation of the output data. By default (i.e. \fIdecimate\fP=1),
 every available data record is output. If \fIdecimate\fP>1, then only
 every "\fIdecimate\fP"th record will be output. Default: \fIdecimate\fP=1.
 .TP
-.B \-G
-\fIdelimiter\fP
-.br
+.B \-\-delimiter=character \-Gcharacter
 Sets the character(s) used to separate output fields when ascii
 columns are output. Default: tabs are used as delimiters.
 .TP
-.B \-H
+.B \-\-help \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \-I
-\fIfilename\fP
-.br
+.B \-\-input=file \-Ifile
 Sets the filename of the input segy seismic data file.
 .TP
-.B \-L
-\fIlonflip\fP
-.br
+.B \-\-longitude\-domain=lonflip \-Llonflip
 Sets the range of the longitude values returned.
 If \fIlonflip\fP=\-1 then the longitude values will be in
 the range from \-360 to 0 degrees. If \fIlonflip\fP=0
@@ -84,9 +93,7 @@ then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
 .TP
-.B \-O
-\fIoutput_format\fP
-.br
+.B \-\-output\-format=list \-Olist
 Determines the form of the output; \fIoutput_format\fP is a string composed
 of one or more of the following characters:
 .IP
@@ -182,21 +189,19 @@ Default \fIoutput_format\fP = \fBTiXYSsCcDINL\fP
 (time, time interval, lon, lat, shot, shot trace #, cmp, cmp trace #,
 delay, sample length, number samples, trace length)
 .TP
-.B \-V
+.B \-\-verbose \-V
 Normally, \fBmbsegylist\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB\-V\fP flag is given, then \fBmbsegylist\fP works in a "verbose" mode and
 outputs the program version being used and all error status messages.
 .TP
-.B \-W
+.B \-\-use\-feet \-W
 Normally, \fBmbsegylist\fP outputs the sonar depth (\fBZ\fP) and water
 depth (\fBz\fP) values in meters.  If the
 \fB\-W\fP flag is given, then \fBmbsegylist\fP outputs these values
 in feet.
 .TP
-.B \-Z
-\fIsegment\fP
-.br
+.B \-\-segment\-tag=tag \-Ztag
 Causes the ascii output of different input segy files
 (e.g. when a datalist is specified with the \fB\-I\fP option)
 to be separated by lines with \fIsegment\fP. If \fIsegment\fP

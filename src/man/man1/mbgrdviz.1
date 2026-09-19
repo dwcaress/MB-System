@@ -6,7 +6,17 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBMBgrdviz\fP [-I\fIgridfile\fP \fB\-J\fP\fIgridfile\fP \fB\-T \-V \-H\fP]
+\fBMBgrdviz\fP
+.br
+[--grid-file=grdfile {-Igrdfile}
+.br
+--help {-H}
+.br
+--overlay-file=grdfile {-Jgrdfile}
+.br
+--test {-T}
+.br
+--verbose {-V}]
 
 .SH DESCRIPTION
 
@@ -127,30 +137,26 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B \-H
+.B \-\-help \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \-I
-\fIgridfile\fP
-.br
+.B \-\-grid\-file=grdfile \-Igrdfile
 Sets a GMT grid file to be read and displayed at startup.
 This option is usually used only when \fBMBgrdviz\fP is started
 automatically from some other process.
 .TP
-.B \-J
-\fIgridfile\fP
-.br
+.B \-\-overlay\-file=grdfile \-Jgrdfile
 Sets a GMT grid file to be read and displayed as an overlay at startup.
 This option has no effect unless the \fB\-I\fP option is also used to
 specify a primary grid file.
 .TP
-.B \-T
+.B \-\-test \-T
 Sets a test grid to be calculated and displayed at startup.This
 allows the program to be tested even when a grid file is
 unavailable.
 .TP
-.B \-V
+.B \-\-verbose \-V
 Normally, \fBMBgrdviz\fP outputs limited information to the stderr stream.
 If the \fB\-V\fP flag is given, then \fBMBgrdviz\fP works in a "verbose" mode and
 outputs the program version being used, all error status messages,

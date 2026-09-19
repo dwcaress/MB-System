@@ -6,8 +6,37 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbsvplist\fP [\fB\-A\fIsource\fP \fB\-C \-D \-F\fIformat\fP \fB\-H \-I\fIfile\fP \fB\-M\fImode\fP
-\fB\-N\fImin_num_pairs\fP \fB\-O \-P\fP \fB\-R\fIwest/east/south/north\fP \fB\-S \-T \-V \-Z\fP]
+\fBmbsvplist\fP
+.br
+[--source=source {-Asource}
+.br
+--counts {-C}
+.br
+--duplicates {-D}
+.br
+--format=format_id {-Fformat_id}
+.br
+--help {-H}
+.br
+--input=file {-Ifile}
+.br
+--mode=mode {-Mmode}
+.br
+--min-num-pairs=min_num_pairs {-Nmin_num_pairs}
+.br
+--output {-O}
+.br
+--process {-P}
+.br
+--bounds=west/east/south/north {-Rwest/east/south/north}
+.br
+--ssv {-S}
+.br
+--table {-T}
+.br
+--verbose {-V}
+.br
+--zero-depth {-Z}]
 
 .SH DESCRIPTION
 This program, \fBmbsvplist\fP, lists all water
@@ -64,26 +93,22 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B \-A
-\fIsource\fP
-.br
+.B \-\-source=source \-Asource
 Sets the source data record type for the SVPs to be output. By default,
 \fBmbsvplist\fP uses MB_DATA_VELOCITY_PROFILE type records as the source for the SVPs. For
 some data formats, CTD profile records may also be a source of SVP models, and
 these are typically identified as MB_DATA_CTD type records. Use \fB\-A\fP\fIS\fP
 to specify use of SVP records, and \fB\-A\fP\fIC\fP to specify use of CTD records.
 .TP
-.B \-C
+.B \-\-counts \-C
 .br
 Causes \fBmbsvplist\fP to output the number of unique SVPs in each file to the shell (standard out).
 .TP
-.B \-D
+.B \-\-duplicates \-D
 .br
 Causes \fBmbsvplist\fP to output duplicate SVPs. This is equivalent to \fB\-M\fP\fI2\fP.
 .TP
-.B \-F
-\fIformat\fP
-.br
+.B \-\-format=format_id \-Fformat_id
 Sets the format for the input swath sonar data using
 \fBMBIO\fP integer format identifiers.
 If \fIformat\fP < 0, then the input
@@ -95,13 +120,11 @@ format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 .TP
-.B \-H
+.B \-\-help \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \-I
-\fIfile\fP
-.br
+.B \-\-input=file \-Ifile
 Sets the input filename. If \fIformat\fP > 0 (set with the
 \fB\-F\fP option) then the swath sonar data contained in \fIfile\fP
 is read and processed. If \fIformat\fP < 0, then \fIfile\fP
@@ -118,25 +141,21 @@ format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIfile\fP = "datalist.mb-1".
 .TP
-.B \-M
-\fImode\fP
-.br
+.B \-\-mode=mode \-Mmode
 Sets the SVP output mode. If \fImode\fP=0 (the default), then the first SVP of
 each file will be output, plus any SVP that is different from the previous SVP.
 If \fImode\fP=1, then only the first instance of each unique SVP will be output, even
 through multiple files referenced through a datalist structure. If \fImode\fP=2,
 then all SVPs will be output even if they are duplicates (equivalent to the \fB\-D\fP option).
 .TP
-.B \-N
-\fImin_num_pairs\fP
-.br
+.B \-\-min\-num\-pairs=min_num_pairs \-Nmin_num_pairs
 Sets the minimum number of depth-velocity pairs an SVP must contain in order
 to be listed or output. SVPs with fewer than \fImin_num_pairs\fP pairs are
 ignored. This is particularly useful for data formats (e.g. Isis/.xse data)
 in which a single sound speed value may be recorded as a one-point "SVP".
 Default: \fImin_num_pairs\fP = 0 (no minimum, all SVPs are considered).
 .TP
-.B \-O
+.B \-\-output \-O
 .br
 By default, \fBmbsvplist\fP writes the SVP records to
 stdout. This option causes the program to instead write
@@ -144,21 +163,19 @@ the SVPs to individual files with names FILE_XXX.svp,
 where FILE is the source swath data filename and XXX is the
 SVP count within the file.
 .TP
-.B \-P
+.B \-\-process \-P
 .br
 This option implies the output option \fB\-O\fP. Additionally,
 this option sets the first SVP output for each swathfile to be used for
 recalculating the bathymetry in that swathfile by \fBmbprocess\fP
 by modifying the associated parameter file.
 .TP
-.B \-R
-\fIwest/east/south/north\fP
-.br
+.B \-\-bounds=west/east/south/north \-Rwest/east/south/north
 When the \fB\-S\fP option has been specified, this option sets the longitude
 and latitude bounds within which SSV values will be output. Default: all SSV
 values are output.
 .TP
-.B \-S
+.B \-\-ssv \-S
 .br
 This option causes \fBmbsvplist\fP to output the sound velocity values
 used for beamforming by the sonar (often called surface sound velocity, or SSV)
@@ -166,19 +183,19 @@ instead of SVP profiles. Each SSV value will be paired with the
 corresponding sonar depth, and in general one depth-SSV pair will be output
 for each survey ping.
 .TP
-.B \-T
+.B \-\-table \-T
 .br
 Causes \fBmbsvplist\fP to output a CSV table to stdout listing, for each SVP,
 the SVP count number, time, longitude, latitude, and number of depth-velocity
 pairs, rather than outputting the full SVP profile listing.
 .TP
-.B \-V
+.B \-\-verbose \-V
 Normally, \fBmbsvplist\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB\-V\fP flag is given, then \fBmblist\fP works in a "verbose" mode and
 outputs the program version being used and all error status messages.
 .TP
-.B \-Z
+.B \-\-zero\-depth \-Z
 Normally, \fBmbsvplist\fP faithfully outputs the SVP data just
 as it is stored in the swath files. Rarely, sonars may store SVP
 data with a nonzero depth for the first sound speed value, a

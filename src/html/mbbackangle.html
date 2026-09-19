@@ -29,13 +29,55 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbbackangle</B> [<B>-A</B><I>kind</I>
-<B>-B</B><I>mode</I>[<I>/ssbeamwidth</I>[<I>/ssdepression</I>]]
-<B>-C</B> <B>-D</B> <B>-F</B><I>format</I>
-<B>-G</B><I>kind/angle/min/max/nx/ny</I>
-<B>-I</B><I>file</I>
-<B>-N</B><I>nangle/anglemax</I> <B>-P</B><I>pings</I> <B>-Q</B>
-<B>-R</B><I>refangle</I> <B>-S</B> <B>-T</B><I>topogridfile</I> <B>-Z</B><I>altitude</I> <B>-V -H</B>]
+<B>mbbackangle</B>
+<BR>
+
+[--data-kind=kind {-Akind}
+<BR>
+
+--beam-pattern-mode=mode[/beamwidth/depression] {-Bmode[/beamwidth/depression]}
+<BR>
+
+--symmetric-correction {-C}
+<BR>
+
+--dump-output {-D}
+<BR>
+
+--format=format {-Fformat}
+<BR>
+
+--output-grid=gridmode/angle/min/max/n_columns/n_rows {-Ggridmode/angle/min/max/n_columns/n_rows}
+<BR>
+
+--help {-H}
+<BR>
+
+--input=file {-Ifile}
+<BR>
+
+--angle-bins=nangles/angle_max {-Nnangles/angle_max}
+<BR>
+
+--pings-average=pings {-Ppings}
+<BR>
+
+--slope-correction {-Q}
+<BR>
+
+--reference-angle=refangle {-Rrefangle}
+<BR>
+
+--skip-existing {-S}
+<BR>
+
+--topography-grid=topogridfile {-Ttopogridfile}
+<BR>
+
+--verbose {-V}
+<BR>
+
+--altitude=altitude {-Zaltitude}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -133,21 +175,15 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-A</B>
+<DT><B>--data-kind=kind -Akind</B>
 
 <DD>
-<I>kind</I>
-<BR>
-
 Determines if beam amplitude (<I>kind</I> = 1)
 and/or sidescan (<I>kind</I> = 2) data will be processed.
 Default: both amplitude and sidescan data are processed.
-<DT><B>-B</B>
+<DT><B>--beam-pattern-mode=mode[/beamwidth/depression] -Bmode[/beamwidth/depression]</B>
 
 <DD>
-<I>mode</I>[<I>/ssbeamwidth</I>[<I>/ssdepression</I>]]
-<BR>
-
 Sets the algorithm used to represent the sonar's beam pattern when
 generating the amplitude and/or sidescan versus grazing angle tables.
 If <I>mode</I> = 0, an empirical correction is used: the table is defined
@@ -158,7 +194,7 @@ instead; in this case <I>ssbeamwidth</I> sets the effective angular beam
 width in degrees of the sidescan sonar, and <I>ssdepression</I> sets the
 sonar's depression angle from the horizontal in degrees.
 Default: <I>mode</I> = 0; <I>ssbeamwidth</I> = 50.0; <I>ssdepression</I> = 20.0.
-<DT><B>-C</B>
+<DT><B>--symmetric-correction -C</B>
 
 <DD>
 Normally, <B>mbbackangle</B> produces a table of amplitude vs
@@ -168,28 +204,22 @@ vs grazing angle function will be forced to be symmetric.
 Generally, it is better to not use this option in <B>mbbackangle</B>,
 and to instead use <B>mbset</B> to set symmetric or asymmetric
 sidescan correction in the <B>mbprocess</B> parameter file.
-<DT><B>-D</B>
+<DT><B>--dump-output -D</B>
 
 <DD>
 This option causes <B>mbbackangle</B> to dump the output to
 stdout rather than to &quot;.sga&quot; or &quot;.aga&quot; files..
-<DT><B>-F</B>
+<DT><B>--format=format -Fformat</B>
 
 <DD>
-<I>format</I>
-<BR>
-
 Sets the <B>MBIO</B> integer format identifier
 for the input file specified with the
 <B>-I</B> option. By default, <B>mbbackangle</B>
 infers the format from the &quot;*.mbXX&quot; <B>MB-System</B> suffix
 convention.
-<DT><B>-G</B>
+<DT><B>--output-grid=gridmode/angle/min/max/n_columns/n_rows -Ggridmode/angle/min/max/n_columns/n_rows</B>
 
 <DD>
-<I>kind/angle/min/max/nx/ny</I>
-<BR>
-
 This option causes <B>mbbackangle</B> to output gridded histograms
 of the amplitude versus grazing angle data for each swath file
 processed. The program also generates a shellscript to produce a
@@ -203,17 +233,14 @@ consists of <I>nx</I> bins extending from -<I>angle</I> to +<I>angle</I> degrees
 x-dimension, and <I>ny</I> bins of backscatter value extending from <I>min</I> to <I>max</I> in the
 y-dimension. The values of the histogram are normalized so that they sum
 to 1000.0 within each angle bin.
-<DT><B>-H</B>
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag causes the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-I</B>
+<DT><B>--input=file -Ifile</B>
 
 <DD>
-<I>filename</I>
-<BR>
-
 Sets the input filename. If <I>format</I> &gt; 0 (set with the
 <B>-F</B> option) then the swath sonar data contained in <I>infile</I>
 is read and processed. If <I>format</I> &lt; 0, then <I>infile</I>
@@ -231,12 +258,9 @@ This program uses the <B>MBIO</B> library and will read any swath sonar
 format supported by <B>MBIO</B>. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page. Default: <I>infile</I> = &quot;datalist.mb-1&quot;.
-<DT><B>-N</B>
+<DT><B>--angle-bins=nangles/angle_max -Nnangles/angle_max</B>
 
 <DD>
-<I>nangle/angle</I>
-<BR>
-
 The amplitude vs grazing angle table is calculated by binning the
 amplitude values according to their grazing angles and averaging
 the amplitudes within each bin. This option sets the number of
@@ -246,12 +270,9 @@ grazing angle bins (<I>nangle</I>) and the maximum angle considered
 +<I>angle</I>. The <I>nangle</I> value should be an odd integer
 so that the middle bin is centered on the angle 0.0.
 Default: <I>nangle</I> = 81, <I>angle</I> = 80.0.
-<DT><B>-P</B>
+<DT><B>--pings-average=pings -Ppings</B>
 
 <DD>
-<I>pings</I>
-<BR>
-
 Sets the number of pings to be read and averaged for each
 amplitude vs grazing angle table. The output &quot;*.sga&quot; or &quot;.aga&quot; files
 will generally contain many tables, each with a timestamp
@@ -259,7 +280,7 @@ corresponding to the average of the ping times used for
 each table. A table may be output averaged over a lesser number
 of beams if a time gap is encountered in the data, and also at
 the end of the file. Default: <I>pings</I> = 50.
-<DT><B>-Q</B>
+<DT><B>--slope-correction -Q</B>
 
 <DD>
 By default, <B>mbbackangle</B> does not use seafloor slopes in
@@ -267,41 +288,36 @@ calculating the grazing angles for each amplitude beam and sidescan
 pixel. This option causes the program to calculate acrosstrack slopes
 from swath bathymetry, if available, and to factor these slopes
 into the grazing angle calculation for each data point.
-<DT><B>-R</B>
+<DT><B>--reference-angle=refangle -Rrefangle</B>
 
 <DD>
-<I>refangle</I>
 Sets the reference angle that will be used by <B>mbprocess</B> in
 applying the amplitude and/or sidescan correction tables generated
 by <B>mbbackangle</B>. Default: <I>refangle</I> = 30.0 degrees.
-<DT><B>-S</B>
+<DT><B>--skip-existing -S</B>
 
 <DD>
 This option causes <B>mbbackangle</B> to skip processing of input raw swath files that have 
 previously processed and are up to date, as evidenced by the existence of amplitude 
 and/or sidescan correction table files older than the raw files and beam edits.
-<DT><B>-T</B>
+<DT><B>--topography-grid=topogridfile -Ttopogridfile</B>
 
 <DD>
-<I>topogridfile</I>
 By default, <B>mbbackangle</B> does not use seafloor slopes in
 calculating the grazing angles for each amplitude beam and sidescan
 pixel. This option causes the program to calculate acrosstrack slopes
 using the topography grid <I>topogridfile</I>, and to factor these slopes
 into the grazing angle calculation for each data point.
-<DT><B>-V</B>
+<DT><B>--verbose -V</B>
 
 <DD>
 Normally, <B>mbbackangle</B> works &quot;silently&quot; without outputting
 anything to the stderr stream.  If the
 <B>-V</B> flag is given, then <B>mbmask</B> works in a &quot;verbose&quot; mode and
 outputs the program version being used and all error status messages.
-<DT><B>-Z</B>
+<DT><B>--altitude=altitude -Zaltitude</B>
 
 <DD>
-<I>depth</I>
-<BR>
-
 This option specifies a default sonar altitude value in meters to be
 used whenever bathymetry values are unavailable. A flat seafloor
 (zero slope) will be assumed wherever the default depth needs

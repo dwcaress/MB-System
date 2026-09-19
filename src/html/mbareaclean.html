@@ -28,10 +28,46 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbareaclean</B>  <B>-R</B><I>west/east/south/north</I>  <B>-S</B><I>binsize</I>
-[<B>-D</B><I>threshold</I> <B>-F</B><I>format</I> <B>-I</B><I>infile</I>
-<B>-B -G -H -M</B><I>threshold</I>[<I>/nmin</I>[<I>/nmax</I>]]
-<B>-N</B>[-]<I>min_beam</I>[<I>/maxbeam</I>] <B>-P</B><I>arg</I> <B>-T</B><I>type</I> -V]
+<B>mbareaclean</B>
+<BR>
+
+--bounds=west/east/south/north {-Rwest/east/south/north}
+<BR>
+
+--bin-size=binsize {-Sbinsize}
+<BR>
+
+[--flag-bad {-B}
+<BR>
+
+--std-dev-filter=threshold[/nmin] {-Dthreshold[/nmin]}
+<BR>
+
+--format=format {-Fformat}
+<BR>
+
+--unflag-good {-G}
+<BR>
+
+--help {-H}
+<BR>
+
+--input=infile {-Iinfile}
+<BR>
+
+--median-filter=threshold[/nmin[/nmax]] {-Mthreshold[/nmin[/nmax]]}
+<BR>
+
+--beam-range=[-]minbeam[/maxbeam] {-N[-]minbeam[/maxbeam]}
+<BR>
+
+--plane-fit=arg {-Parg}
+<BR>
+
+--detection-type=type {-Ttype}
+<BR>
+
+--verbose {-V}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -129,7 +165,7 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-B</B>
+<DT><B>--flag-bad -B</B>
 
 <DD>
 <BR>
@@ -137,12 +173,9 @@ Christian do Santos Ferreira
 This option causes <B>mbareaclean</B> to flag as bad any previously unflagged
 soundings that fail one of the specified statistical tests. If neither <B>-B</B>
 or <B>-G</B> are specified, then the program will by default use this option.
-<DT><B>-D</B>
+<DT><B>--std-dev-filter=threshold[/nmin] -Dthreshold[/nmin]</B>
 
 <DD>
-<I>threshold</I>[<I>/nmin</I>]
-<BR>
-
 Turns on use of a standard deviation filter test for the soundings.
 Soundings that differ from the
 mean depth by a value greater than <I>threshold</I> times the standard deviation
@@ -151,12 +184,9 @@ any sounding that is twice the standard deviation from the mean depth will be
 considered bad. The <I>nmin</I> parameter sets the minimum number of
 soundings required to use the standard deviation filter. The default values are
 <I>threshold</I> = 2.0 and <I>nmin</I> = 10.
-<DT><B>-F</B>
+<DT><B>--format=format -Fformat</B>
 
 <DD>
-<I>format</I>
-<BR>
-
 Sets the data format used to read <I>infile</I>.
 If <I>format</I> &lt; 0, then the input file specified
 with the <B>-I</B> option will actually contain a list of input swath sonar
@@ -165,24 +195,21 @@ and will read or write any swath sonar
 format supported by <B>MBIO</B>. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page. Default: <I>format</I> = 11.
-<DT><B>-G</B>
+<DT><B>--unflag-good -G</B>
 
 <DD>
 This option cause <B>mbarealcean</B> to unflag (set good) any previously flagged
 soundings that pass all of the specified statistical tests. If neither <B>-B</B>
 or <B>-G</B> are specified, then the program will by default apply the  <B>-B</B>
 option.
-<DT><B>-H</B>
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-I</B>
+<DT><B>--input=infile -Iinfile</B>
 
 <DD>
-<I>infile</I>
-<BR>
-
 Sets the input filename. If <I>format</I> &gt; 0 (set with the
 <B>-F</B> option) then the swath sonar data contained in <I>infile</I>
 is read and processed. If <I>format</I> &lt; 0, then <I>infile</I>
@@ -200,12 +227,9 @@ This program uses the <B>MBIO</B> library and will read or write any swath sonar
 format supported by <B>MBIO</B>. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page. Default: <I>infile</I> = &quot;datalist.mb-1&quot;.
-<DT><B>-M</B>
+<DT><B>--median-filter=threshold[/nmin[/nmax]] -Mthreshold[/nmin[/nmax]]</B>
 
 <DD>
-<I>threshold</I>[<I>/nmin</I>[<I>/nmax</I>]]
-<BR>
-
 Turns on use of a median filter test for the soundings. If no other test is
 specified, the median filter test is used by default. Soundings that differ from the
 median depth by a value greater than <I>threshold</I> times the sonar
@@ -218,12 +242,9 @@ of initially good beams in a cell exceeds <I>nmax</I>, then only the <I>nmax</I>
 soundings nearest the median value remain unflagged, and the rest are
 flagged even if they meet the threshold test. The default values are
 <I>threshold</I> = 0.25, <I>nmin</I> = 10, and <I>nmax</I> = infinite.
-<DT><B>-N</B>
+<DT><B>--beam-range=[-]minbeam[/maxbeam] -N[-]minbeam[/maxbeam]</B>
 
 <DD>
-[-]<I>min_beam</I>[<I>/max_beam</I>]
-<BR>
-
 Limits the beams to which flagging will be applied.
 Only soundings for beams from <I>min_beam</I> to <I>max_beam</I>, inclusive, will have flags applied.
 If <I>min_beam</I> is preceded by a <B>-</B> then only beams outside the range will be flagged.
@@ -232,12 +253,9 @@ lay below <I>min_beam</I>. So for a Simrad EM1002 sounder with 111 beams <B>-N-3
 beam numbers 1 to 29 and 82 to 111.
 All good soundings, regardless of beam, will be included in the calculations of median, mean
 and standard deviation for the bin.
-<DT><B>-P</B>
+<DT><B>--plane-fit=arg -Parg</B>
 
 <DD>
-<I>arg</I>
-<BR>
-
 Turns on use of a plane-fit test for the soundings in each bin, as an
 alternative to the <B>-M</B> and <B>-D</B> tests. An argument value is
 required by the command line parser but its contents are not currently
@@ -245,12 +263,9 @@ used. Specifying <B>-P</B> suppresses the default behavior of enabling
 the median filter (<B>-M</B>) when no test option is given, so if
 <B>-P</B> is used by itself, no median or standard deviation filtering
 will be applied to the data.
-<DT><B>-R</B>
+<DT><B>--bounds=west/east/south/north -Rwest/east/south/north</B>
 
 <DD>
-<I>west/east/south/north</I>
-<BR>
-
 Sets the longitude and latitude bounds within which swath sonar
 data will be read, binned, and tested. Soundings lying outside these
 bounds will be ignored.
@@ -258,12 +273,9 @@ bounds will be ignored.
 
 Default: The program will determine and use a square area encompassing
 all of the data contained in the input files.
-<DT><B>-S</B>
+<DT><B>--bin-size=binsize -Sbinsize</B>
 
 <DD>
-<I>binsize</I>
-<BR>
-
 Sets the size of the bins to be used in meters. The area specified
 with the <B>-R</B> option will be broken into a grid with cells that
 are roughly <I>binsize</I> meters east-west and north-south.
@@ -271,12 +283,9 @@ are roughly <I>binsize</I> meters east-west and north-south.
 
 Default: A binsize equal to 0.2 times the maximum sonar altitude
 will be used.
-<DT><B>-T</B>
+<DT><B>--detection-type=type -Ttype</B>
 
 <DD>
-<I>detect_type</I>
-<BR>
-
 Limits the soundings to which flagging will be applied to only those which
 use the specified bottom detection algorithm.
 <I>detect_type</I> must be one of:
@@ -285,7 +294,7 @@ use the specified bottom detection algorithm.
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;-&nbsp;phase&nbsp;detection
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;-&nbsp;lidar&nbsp;detection
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;-&nbsp;photogrammetry&nbsp;detection
-<DT><B>-V</B>
+<DT><B>--verbose -V</B>
 
 <DD>
 Normally, <B>mbareaclean</B> works &quot;silently&quot; without outputting

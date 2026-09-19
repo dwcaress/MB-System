@@ -6,7 +6,17 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbsegyinfo\fP [\fB\-I\fIfilename\fP \fB\-L\fIlonflip\fP \fB\-O\fP \fB\-H \-V\fP]
+\fBmbsegyinfo\fP
+.br
+[--input=file {-Ifile}
+.br
+--longitude-domain=lonflip {-Llonflip}
+.br
+--output-file {-O}
+.br
+--help {-H}
+.br
+--verbose {-V}]
 
 .SH DESCRIPTION
 \fBMBsegyinfo\fP is a utility for reading a segy format seismic data file
@@ -43,18 +53,14 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B \-H
+.B \-\-help \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \-I
-\fIfilename\fP
-.br
+.B \-\-input=file \-Ifile
 Sets the input segy seismic data filename. Default: \fIinfile\fP = "stdin".
 .TP
-.B \-L
-\fIlonflip\fP
-.br
+.B \-\-longitude\-domain=lonflip \-Llonflip
 Sets the range of the longitude values returned.
 If \fIlonflip\fP=\-1 then the longitude values will be in
 the range from \-360 to 0 degrees. If \fIlonflip\fP=0
@@ -64,13 +70,13 @@ then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0 (as set by \fBmbdefaults\fP).
 .TP
-.B \-O
+.B \-\-output\-file \-O
 .br
 This option causes the program output to be directed to
 ".sinf" files rather than to stdout. Each ".sinf" file is named
 using the original data file path with an ".sinf" suffix appended.
 .TP
-.B \-V
+.B \-\-verbose \-V
 Normally, \fBmbsegyinfo\fP only prints out the statistics obtained
 by reading all of the data.  If the
 \fB\-V\fP flag is given, then \fBmbsegyinfo\fP works in a "verbose" mode and

@@ -6,15 +6,23 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbvelocitytool\fP [\fB\-B\fIyr/mo/da/hr/mn/sc\fP
-\fB\-E\fIyr/mo/da/hr/mn/sc\fP
-\fB\-F\fIformat \fB\-I\fIfile \fB\-S\fIsvpfile \fB\-W\fIsvpfile \fB\-V \-H\fP]
+\fBmbvelocitytool\fP
 .br
-\fBmbvelocitytool\fP [\fB\-\-begin-time\fP=\fIyr/mo/da/hr/mn/sc\fP]
-[\fB\-\-end-time\fP=\fIyr/mo/da/hr/mn/sc\fP]
-[\fB\-\-format\fP=\fIformat\fP] [\fB\-\-input\fP=\fIfile\fP]
-[\fB\-\-display-svp-file\fP=\fIsvpfile\fP] [\fB\-\-edit-svp-file\fP=\fIsvpfile\fP]
-[\fB\-\-verbose\fP] [\fB\-\-help\fP]
+[--begin-time=yr/mo/da/hr/mn/sc {-Byr/mo/da/hr/mn/sc}
+.br
+--display-svp-file=svpfile {-Ssvpfile}
+.br
+--edit-svp-file=svpfile {-Wsvpfile}
+.br
+--end-time=yr/mo/da/hr/mn/sc {-Eyr/mo/da/hr/mn/sc}
+.br
+--format=format_id {-Fformat_id}
+.br
+--help {-H}
+.br
+--input=file {-Ifile}
+.br
+--verbose {-V}]
 
 .SH DESCRIPTION
 \fBMBvelocitytool\fP is an interactive water sound velocity profile
@@ -132,20 +140,17 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B \-\-begin-time\fP=\fIyr/mo/da/hr/mn/sc\fP \fB\-B\fP\fIyr/mo/da/hr/mn/sc\fP
-.br
+.B \-\-begin\-time=yr/mo/da/hr/mn/sc \-Byr/mo/da/hr/mn/sc
 Sets the starting time for data allowed in the input data; pings
 with times before the starting time will be ignored.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
-.B \-\-end-time\fP=\fIyr/mo/da/hr/mn/sc\fP \fB\-E\fP\fIyr/mo/da/hr/mn/sc\fP
-.br
+.B \-\-end\-time=yr/mo/da/hr/mn/sc \-Eyr/mo/da/hr/mn/sc
 Sets the ending time for data allowed in the input data; pings
 with times after the ending time will be ignored.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
-.B \-\-format\fP=\fIformat\fP \fB\-F\fP\fIformat\fP
-.br
+.B \-\-format=format_id \-Fformat_id
 Sets the format at startup for the input and output swath sonar data using
 \fBMBIO\fP integer format identifiers. This value can also be set
 interactively when specifying the input file.
@@ -155,28 +160,25 @@ currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIformat\fP = 0 (format is inferred from the input filename suffix, or must be set interactively).
 .TP
-.B \-\-help \fB\-H\fP
+.B \-\-help \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \-\-input\fP=\fIfile\fP \fB\-I\fP\fIfile\fP
-.br
+.B \-\-input=file \-Ifile
 Sets the data file from which the input swath data will be read at startup.
 This value can also be set interactively. See below.
 .TP
-.B \-\-display-svp-file\fP=\fIsvpfile\fP \fB\-S\fP\fIsvpfile\fP
-.br
+.B \-\-display\-svp\-file=svpfile \-Ssvpfile
 Sets the data file from which an input display sound velocity
 profile will be read at startup. See below.
 This value can also be set interactively.
 .TP
-.B \-\-edit-svp-file\fP=\fIsvpfile\fP \fB\-W\fP\fIsvpfile\fP
-.br
+.B \-\-edit\-svp\-file=svpfile \-Wsvpfile
 Sets the data file from which an input editable sound velocity
 profile will be read at startup.
 This value can also be set interactively. See below.
 .TP
-.B \-\-verbose \fB\-V\fP
+.B \-\-verbose \-V
 Normally, \fBmbvelocitytool\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB\-V\fP flag is given, then \fBmbvelocitytool\fP works in a "verbose" mode and

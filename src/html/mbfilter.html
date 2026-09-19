@@ -28,15 +28,36 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbfilter</B> [<B>-A</B><I>kind</I>
-<B>-B</B><I>yr/mo/da/hr/mn/sc
-</I><B>-C</B><I>mode/xdim/ldim/iteration</I>
-<B>-D</B><I>mode/xdim/ldim/iteration[/offset]</I>
-<B>-E</B><I>yr/mo/da/hr/mn/sc
-</I><B>-F</B><I>format</I> <B>-I</B><I>infile</I> <B>-N</B><I>buffersize</I>
-<B>-R</B><I>west/east/south/north</I>
-<B>-S</B><I>mode/xdim/ldim/iteration[/threshold_lo/threshold_hi]</I>
-<B>-V -H</B>]
+<PRE>
+<B>mbfilter</B>
+<BR>
+[--data-kind=kind {-Akind}
+<BR>
+--begin-time=yr/mo/da/hr/mn/sc {-Byr/mo/da/hr/mn/sc}
+<BR>
+--contrast-filter=mode/xdim/ldim/iteration {-Cmode/xdim/ldim/iteration}
+<BR>
+--hipass-filter=mode/xdim/ldim/iteration/offset {-Dmode/xdim/ldim/iteration/offset}
+<BR>
+--end-time=yr/mo/da/hr/mn/sc {-Eyr/mo/da/hr/mn/sc}
+<BR>
+--format=format {-Fformat}
+<BR>
+--input=infile {-Iinfile}
+<BR>
+--buffer-size=buffersize {-Nbuffersize}
+<BR>
+--bounds=west/east/south/north {-Rwest/east/south/north}
+<BR>
+--smooth-filter=mode/xdim/ldim/iteration/threshold_lo/threshold_hi {-Smode/xdim/ldim/iteration/threshold_lo/threshold_hi}
+<BR>
+--threshold=threshold_lo/threshold_hi {-Tthreshold_lo/threshold_hi}
+<BR>
+--verbose {-V}
+<BR>
+--help {-H}]
+</PRE>
+
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -172,21 +193,15 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-A</B>
+<DT><B>--data-kind=kind -Akind</B>
 
 <DD>
-<I>kind</I>
-<BR>
-
 Determines whether beam amplitude (<I>kind</I> = 1),
 or sidescan (<I>kind</I> = 2) data will be processed.
 Default: <I>kind</I> = 2.
-<DT><B>-B</B>
+<DT><B>--begin-time=yr/mo/da/hr/mn/sc -Byr/mo/da/hr/mn/sc</B>
 
 <DD>
-<I>yr/mo/da/hr/mn/sc</I>
-<BR>
-
 This option sets the starting time for data allowed in the input data.
 The <B>-E</B> option sets the ending time for data. If the
 starting time is before the ending time, then any data
@@ -196,12 +211,9 @@ after the ending time, then any data between the ending
 and starting time will be ignored. This scheme allows time
 windowing both inside and outside a specified interval.
 Default: <I>yr/mo/da/hr/mn/sc</I> = 1962/2/21/10/30/0.
-<DT><B>-C</B>
+<DT><B>--contrast-filter=mode/xdim/ldim/iteration -Cmode/xdim/ldim/iteration</B>
 
 <DD>
-<I>mode/xdim/ldim/iteration</I>
-<BR>
-
 <BR>
 
 Turns on contrast enhancement filtering and sets the
@@ -220,12 +232,9 @@ the number of times the filter is applied; there is no limit to
 this value.
 Default: contrast enhancement off, <I>xdim</I> = 5, <I>ldim</I> = 5,
 <I>iteration</I> = 1.
-<DT><B>-D</B>
+<DT><B>--hipass-filter=mode/xdim/ldim/iteration/offset -Dmode/xdim/ldim/iteration/offset</B>
 
 <DD>
-<I>mode/xdim/ldim/iteration/offset</I>
-<BR>
-
 Turns on high-pass filtering and sets the filter parameters to be
 used. Here <I>mode</I> specifies the filter type:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;1&nbsp;:&nbsp;Boxcar&nbsp;Mean&nbsp;Subtraction&nbsp;Filter<BR>
@@ -247,12 +256,9 @@ sidescan as represented in format 41, the sidescan values
 can range from 1 to 65535, so an <I>offset</I> = 1000 is appropriate).
 Default: high-pass filtering off, <I>xdim</I> = 10, <I>ldim</I> = 3,
 <I>iteration</I> = 1, <I>offset</I> = 1000.
-<DT><B>-E</B>
+<DT><B>--end-time=yr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc</B>
 
 <DD>
-<I>yr/mo/da/hr/mn/sc</I>
-<BR>
-
 This option sets the ending time for data allowed in the input data.
 The <B>-B</B> option sets the starting time for data. If the
 starting time is before the ending time, then any data
@@ -262,38 +268,29 @@ after the ending time, then any data between the ending
 and starting time will be ignored. This scheme allows time
 windowing both inside and outside a specified interval.
 Default: <I>yr/mo/da/hr/mn/sc</I> = 2062/2/21/10/30/0.
-<DT><B>-F</B>
+<DT><B>--format=format -Fformat</B>
 
 <DD>
-<I>format</I>
-<BR>
-
 Sets the MBIO integer format identifier for the input file specified with
 the  -I option. By default, mbfilter derives the format id from the mbpro-
 cess parameter file associated with the input file (-I option) or, if nec-
 essary, infers the format from the &quot;*.mbXX&quot; MB-System suffix convention.
-<DT><B>-H</B>
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag causes the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-I</B>
+<DT><B>--input=infile -Iinfile</B>
 
 <DD>
-<I>infile</I>
-<BR>
-
 Swath data file from which the input data will be read, or a datalist file
 containing a list of input swath data files and/or other datalist files. If
 infile is a datalist file, then mbprocess will attempt to process all data
 files identified by recursively reading infile.
 Default: <I>infile</I> = &quot;datalist.mb-1&quot;
-<DT><B>-N</B>
+<DT><B>--buffer-size=buffersize -Nbuffersize</B>
 
 <DD>
-<I>buffersize</I>
-<BR>
-
 Sets the maximum number of data records which can be
 read into the buffer. In general, data records may be
 of several different types (e.g. parameter, position,
@@ -307,22 +304,16 @@ The default value of <I>buffersize</I> = 5000 is appropriate
 for most cases, but users can set the buffer size as required.
 The absolute maximum buffer size is 5000.
 Default: <I>buffersize</I> = 5000.
-<DT><B>-R</B>
+<DT><B>--bounds=west/east/south/north -Rwest/east/south/north</B>
 
 <DD>
-<I>west/east/south/north</I>
-<BR>
-
 Sets the longitude and latitude bounds within which swath sonar
 data will be read. Only the data which lies within these bounds will
 be copied.
 Default: <I>west</I>=-360, east<I>=360</I>, <I>south</I>=-90, <I>north</I>=90.
-<DT><B>-S</B>
+<DT><B>--smooth-filter=mode/xdim/ldim/iteration/threshold_lo/threshold_hi -Smode/xdim/ldim/iteration/threshold_lo/threshold_hi</B>
 
 <DD>
-<I>mode/xdim/ldim/iteration</I>
-<BR>
-
 Turns on low-pass smoothing filtering and sets the filter
 parameters to be used to
 smooth the data. Here <I>mode</I> specifies the filter type:
@@ -340,12 +331,9 @@ the number of times the filter is applied; there is no limit to
 this value.
 Default: <I>mode</I> = 1, <I>xdim</I> = 3, <I>ldim</I> = 3,
 <I>iteration</I> = 1.
-<DT><B>-T</B>
+<DT><B>--threshold=threshold_lo/threshold_hi -Tthreshold_lo/threshold_hi</B>
 
 <DD>
-<I>threshold_lo/threshold_hi</I>
-<BR>
-
 This option causes the boxcar median smoothing filter to
 operate with low and high
 ratio thresholds (the value is changed only if the original
@@ -356,7 +344,7 @@ approach is useful for suppressing &quot;stripes&quot; or &quot;bad&quot;
 pings which have amplitude or sidescan values differing significantly
 from surrounding pings. This option only works with the median
 smoothing filter.
-<DT><B>-V</B>
+<DT><B>--verbose -V</B>
 
 <DD>
 Normally, <B>mbfilter</B> works &quot;silently&quot; without outputting

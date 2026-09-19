@@ -27,9 +27,52 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbauvloglist</B> <B>-I</B><I>file</I> [<B>-A</B><I>altitudefile</I> <B>-C</B> <B>-D</B><I>decimate</I>
-<B>-F</B><I>printformat</I> <B>-L</B><I>lonflip</I>
-<B>-M</B><I>mode</I> <B>-N</B><I>navfile</I> <B>-O</B><I>list</I> <B>-P</B> <B>-R</B><I>id</I> <B>-S</B> <B>-X</B><I>scale</I> <B>-V -H</B> ]
+<B>mbauvloglist</B>
+<BR>
+
+--input=file {-Ifile}
+<BR>
+
+[--altitude-file=file {-Afile}
+<BR>
+
+--help {-H}
+<BR>
+
+--clip-to-nav {-C}
+<BR>
+
+--decimate=value {-Dvalue}
+<BR>
+
+--print-format=format {-Fformat}
+<BR>
+
+--lonflip=lonflip {-Llonflip}
+<BR>
+
+--output-mode=mode {-Mmode}
+<BR>
+
+--nav-file=file {-Nfile}
+<BR>
+
+--output-field=name {-Oname}
+<BR>
+
+--print-header {-P}
+<BR>
+
+--recalculate-ctd=id {-Rid}
+<BR>
+
+--angles-degrees {-S}
+<BR>
+
+--scale=value {-Xvalue}
+<BR>
+
+--verbose {-V}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -333,22 +376,19 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-A</B>
+<DT><B>--altitude-file=file -Afile</B>
 
 <DD>
-<I>altitudefile</I>
-<BR>
-
 Specifies an ascii altitude file containing time and altitude values
 (one &quot;time altitude&quot; pair per line, in seconds and meters) to be merged
 (interpolated) with the primary log file data. The merged altitude values
 can be output using the <B>mergeAltitude</B> valuename in the <B>-O</B> option.
-<DT><B>-H</B>
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-C</B>
+<DT><B>--clip-to-nav -C</B>
 
 <DD>
 <BR>
@@ -358,40 +398,28 @@ then the <B>-C</B> option causes input records with times before the beginning o
 after the end of the external navigation to not be output by <B>mbauvloglist</B>.
 The default behavior is to output all records, and for the values merged from the
 external navigation to be zero when outside the navigation time bounds.
-<DT><B>-D</B>
+<DT><B>--decimate=value -Dvalue</B>
 
 <DD>
-<I>decimate</I>
-<BR>
-
 Sets a decimation factor for the output records. If <I>decimate</I> is
 greater than 1, then only every <I>decimate</I>th input record is output;
 the intervening records are skipped. Default: <I>decimate</I> = 1 (no
 decimation, all records output).
-<DT><B>-F</B>
+<DT><B>--print-format=format -Fformat</B>
 
 <DD>
-<I>printformat</I>
-<BR>
-
 Sets the printing format (in fprintf() style) of the next value specified using
 the <B>-O</B> option. By default, <B>mbauvloglist</B> uses the print format specified
 in the log file header. If the <B>-F</B> option has been used, using it again with
 <I>printformat</I> equal to &quot;default&quot; will reset the print format to that specified
 in the log file header.
-<DT><B>-I</B>
+<DT><B>--input=file -Ifile</B>
 
 <DD>
-<I>ifile</I>
-<BR>
-
 Sets the input MBARI AUV mission log filename.
-<DT><B>-L</B>
+<DT><B>--lonflip=lonflip -Llonflip</B>
 
 <DD>
-<I>lonflip</I>
-<BR>
-
 Sets the range of the longitude values output.
 If <I>lonflip</I>=-1 then the longitude values will be in
 the range from -360 to 0 degrees. If <I>lonflip</I>=0
@@ -401,23 +429,17 @@ then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: <B>mbauvloglist</B> uses the user default <I>lonflip</I> set using
 <B>mbdefaults</B>.
-<DT><B>-M</B>
+<DT><B>--output-mode=mode -Mmode</B>
 
 <DD>
-<I>mode</I>
-<BR>
-
 Specifies the output mode. If <I>mode</I> = 0, then the output is
 ASCII text with tab delimiters between fields. If <I>mode</I> = 1,
 then the output is ASCII text with comma delimiters between fields.
 If <I>mode</I> = 2, then the output is binary with no values or breaks
 between fields. Default: ASCII text with tab delimiters.
-<DT><B>-N</B>
+<DT><B>--nav-file=file -Nfile</B>
 
 <DD>
-<I>navfile</I>
-<BR>
-
 Specifies a navigation file in the &quot;fnv&quot; format that contains position,
 heading, sensor depth, and attitude data. Values merged (interpolated)
 from these data can be specified for output using the
@@ -436,12 +458,9 @@ valuenames in the <B>-O</B> option. The merged values will be zero when the prim
 output data timestamp is from before the beginning or after the end of the navigation
 data. The <B>-C</B> option can be used to suppress output of records with timestamps
 outside the start and end bounds of the navigation.
-<DT><B>-O</B>
+<DT><B>--output-field=name -Oname</B>
 
 <DD>
-<I>valuename</I>
-<BR>
-
 Causes <B>mbauvloglist</B> to output the specified value. This option can be
 given multiple times, and the values will be output in the order specified.
 The valid valuename strings consist of those defined in the header of the
@@ -500,18 +519,15 @@ overall timestamp (time). The calcKspeed is the lateral (x-y) speed calculated f
 the x and y rate values (mVbodyxK and mVbodyyK) in the kearfott.log file. The calcPSpeed
 value is the analogous lateral (x-y) speed calculated from the phins_vnorth and
 phins_veast velocity components found in a Phins inertial navigation log file.
-<DT><B>-P</B>
+<DT><B>--print-header -P</B>
 
 <DD>
 <BR>
 
 Prints out the log file header.
-<DT><B>-R</B>
+<DT><B>--recalculate-ctd=id -Rid</B>
 
 <DD>
-<I>id</I>
-<BR>
-
 This option is meaningful only when the input file is fastcatlog.log, which
 contains both raw conductivity, temperature, and pressure values from a
 SeaBird SBE49 Fastcat CTD and temperature, pressure, and salinity values
@@ -521,23 +537,20 @@ and pressure values will be recalculated using the calibration coefficients
 referenced by the <I>id</I> value. As of July 2017, the only calibration
 coefficients defined are referenced by <I>id</I>=1, for the SeaBird SBE49 Fastcat
 CTD used on MBARI Mapping AUV 1 during 2016 and 2017.
-<DT><B>-S</B>
+<DT><B>--angles-degrees -S</B>
 
 <DD>
 <BR>
 
 Scales angular values to be in degrees instead of radians.
-<DT><B>-X</B>
+<DT><B>--scale=value -Xvalue</B>
 
 <DD>
-<I>scale</I>
-<BR>
-
 Sets the output scaling factor multiplied by any following floating point values specified
 using the <B>-O</B> option. Initially this value is 1.0 so that by default no scaling occurs.
 If the <B>-X</B> option has been used, using it again with <I>scale</I> equal to 1.0 will 
 restore no scaling for any following <B>-O</B> invocations. Default: <I>scale</I>=1.0
-<DT><B>-V</B>
+<DT><B>--verbose -V</B>
 
 <DD>
 The <B>-V</B> option causes the program to be verbose.

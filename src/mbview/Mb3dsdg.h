@@ -53,6 +53,7 @@ typedef struct _Mb3dsdgData {
 	Widget separator3;
 	Widget toggleButton_view_colorbyflag;
 	Widget toggleButton_view_colorbytopo;
+	Widget toggleButton_view_colorbysounding;
 	Widget toggleButton_view_colorbyamp;
 	Widget cascadeButton_mouse;
 	Widget pulldownMenu_mouse;

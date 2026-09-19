@@ -8,11 +8,31 @@ the x axis and frequency along the y axis.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbsegypsd\fP \fB\-I\fIfile\fP \fB\-O\fIroot
-[\fB\-A\fIshotscale/frequencyscale\fP \fB\-D\fIdecimatex\fP
-\fB\-N\fInfft\fP
-\fB\-S\fImode[/start/end[/schan/echan]]\fP \fB\-T\fIsweep[/delay]\fP
-\fB\-W\fImode/start/end\fP \fB\-H\fP \fB\-L\fP \fB\-V\fP]";
+\fBmbsegypsd\fP
+.br
+--input=file {-Ifile}
+.br
+--output=root {-Oroot}
+.br
+[--shot-scale=shotscale[/frequencyscale] {-Ashotscale[/frequencyscale]}
+.br
+--decimate=decimatex {-Ddecimatex}
+.br
+--fft-length=nfft {-Nnfft}
+.br
+--trace-range=mode[/start/end[/schan/echan]]
+.br
+{-Smode[/start/end[/schan/echan]]}
+.br
+--time-sweep=sweep[/delay] {-Tsweep[/delay]}
+.br
+--window=mode/start/end {-Wmode/start/end}
+.br
+--help {-H}
+.br
+--log-scale {-L}
+.br
+--verbose {-V}]
 
 .SH DESCRIPTION
 \fBmbsegypsd\fP calculates the power spectral densisty function (PSD) of each
@@ -68,49 +88,37 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B \-A
-\fIshotscale/frequencyscale\fP
-.br
+.B \-\-shot\-scale=shotscale[/frequencyscale] \-Ashotscale[/frequencyscale]
 This option causes the x-axis to be rescaled from shot number to distance in meters.
 The \fIshotscale\fP value represents the shot spacing in meters, and the
 \fIfrequencyscale\fP value is also recorded as a scaling factor. Both values must
 be supplied together, separated by a slash. Default: \fIshotscale\fP = 1.0,
 \fIfrequencyscale\fP = 1.0 (no rescaling).
 .TP
-.B \-D
-\fIdecimatex\fP
-.br
+.B \-\-decimate=decimatex \-Ddecimatex
 Sets the decimation of traces (\fIdecimatex\fP) used in generating the output grid.
 .TP
-.B \-H
+.B \-\-help \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \-I
-\fIsegyfile\fP
-.br
+.B \-\-input=file \-Ifile
 Sets the filename of the input segy seismic data file to be gridded.
 .TP
-.B \-L
+.B \-\-log\-scale \-L
 .br
 Sets the PSD grid output to be in dB/Hz.
 .TP
-.B \-N
-\fInfft\fP
-.br
+.B \-\-fft\-length=nfft \-Nnfft
 Sets the FFT length (\fInfft\fP) used to calculate the PSD estimate for
 each trace by ensemble averaging; the trace is broken into segments of
 length \fInfft\fP samples.
 Default: \fInfft\fP = 1024.
 .TP
-.B \-O
-\fIroot\fP
-.br
+.B \-\-output=root \-Oroot
 Sets the filename root for the output GMT netCDF format grid.
 .TP
-.B \-S
-\fImode[/start/end[/schan/echan]]\fP
-.br
+.B \-\-trace\-range=mode[/start/end[/schan/echan]] \-Smode[/start/end[/schan/echan]]
 This option sets the range of traces that are gridded, and thus determines
 the x-dimension of the output grid (also impacted by any decimation
 specified with \fB\-D\fP). If \fImode\fP = 0, then \fIstart\fP and \fIend\fP
@@ -123,21 +131,17 @@ start and end of the channels selected for gridding is set using the optional \f
 and \fIechan\fP, respectively. The x-dimension of the output grid is determined by
 (\fIend\fP \- \fIstart\fP + 1) * (\fIechan\fP \- \fIschan\fP + 1) / \fIdecimatex\fP.
 .TP
-.B \-T
-\fIsweep[/delay]\fP
-.br
+.B \-\-time\-sweep=sweep[/delay] \-Tsweep[/delay]
 The \fIsweep\fP value sets the time range of seismic data to be processed in seconds.
 The optional \fIdelay\fP value sets the sweep start time, again in seconds.
 .TP
-.B \-V
+.B \-\-verbose \-V
 Normally, \fBmbsegypsd\fP prints out information regarding its
 controlling parameters during execution; the
 \fB\-V\fP option causes the program to also print out statements
 indicating its progress.
 .TP
-.B \-W
-\fImode/start/end\fP
-.br
+.B \-\-window=mode/start/end \-Wmode/start/end
 This option can be used to limit the data being processed to a particular time
 window in various ways. This option does not impact the definition of the overall
 grid bounds, but does restrict the data processed to samples within particular times

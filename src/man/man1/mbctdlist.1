@@ -6,9 +6,27 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbctdlist\fP [\fB\-A\fP \fB\-D\fP\fIdecimate\fP \fB\-F\fP\fIformat\fP
-\fB\-G\fP\fIdelimeter\fP \fB\-H\fP \fB\-I\fP\fIfile \fP \fB\-L\fP\fIlonflip\fP
-\fB\-O\fP\fIoutput_format\fP \fB\-V\fP \fB\-Z\fP\fIsegment\fP]
+\fBmbctdlist\fP
+.br
+[--binary {-A}
+.br
+--decimate=decimate {-Ddecimate}
+.br
+--format=format {-Fformat}
+.br
+--delimiter=delimiter {-Gdelimeter}
+.br
+--help {-H}
+.br
+--input=file {-Ifile}
+.br
+--longitude-domain=lonflip {-Llonflip}
+.br
+--output-format=output_format {-Ooutput_format}
+.br
+--verbose {-V}
+.br
+--segment=segment {-Zsegment}]
 
 .SH DESCRIPTION
 \fBMBctdlist\fP prints the specified contents of CTD records
@@ -49,8 +67,7 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B \-A
-.br
+.B \-\-binary \-A
 Causes the output to be binary (native double precision floating
 point) rather than ASCII. Some
 output options cannot be represented as single binary floats (e.g.
@@ -59,16 +76,12 @@ and minutes. These values are output as multiple fields as
 appropriate.
 Default: ASCII output with fields separated by tabs.
 .TP
-.B \-D
-\fIdecimate\fP
-.br
+.B \-\-decimate=decimate \-Ddecimate
 Sets the decimation of the output data. By default (i.e. \fIdecimate\fP=1),
 every available data record is output. If \fIdecimate\fP>1, then only
 every "\fIdecimate\fP"th record will be output. Default: \fIdecimate\fP=1.
 .TP
-.B \-F
-\fIformat\fP
-.br
+.B \-\-format=format \-Fformat
 Sets the format for the input swath sonar data using
 \fBMBIO\fP integer format identifiers.
 This program uses the \fBMBIO\fP library and will read any swath sonar
@@ -76,19 +89,15 @@ format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
 .TP
-.B \-G
-\fIdelimiter\fP
-.br
+.B \-\-delimiter=delimiter \-Gdelimeter
 Sets the character(s) used to separate output fields when ascii
 columns are output. Default: tabs are used as delimiters.
 .TP
-.B \-H
+.B \-\-help \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \-I
-\fIfile\fP
-.br
+.B \-\-input=file \-Ifile
 Sets the input filename. If \fIformat\fP > 0 (set with the
 \fB\-F\fP option) then the swath sonar data contained in \fIfile\fP
 is read and processed. If \fIformat\fP < 0, then \fIfile\fP
@@ -108,9 +117,7 @@ currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIfile\fP = "datalist.mb-1".
 .TP
-.B \-L
-\fIlonflip\fP
-.br
+.B \-\-longitude\-domain=lonflip \-Llonflip
 Sets the range of the longitude values returned.
 If \fIlonflip\fP=\-1 then the longitude values will be in
 the range from \-360 to 0 degrees. If \fIlonflip\fP=0
@@ -120,9 +127,7 @@ then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
 .TP
-.B \-O
-\fIoutput_format\fP
-.br
+.B \-\-output\-format=output_format \-Ooutput_format
 Determines the form of the output. \fIOutput_format\fP is a string composed
 of one or more of the following characters:
 
@@ -169,15 +174,13 @@ of one or more of the following characters:
 Default \fIoutput_format\fP = \fBTXYHCc^cSs\fP (Time, lon, lat, heading,
 conductivity, temperature, depth, salinity, sound speed).
 .TP
-.B \-V
+.B \-\-verbose \-V
 Normally, \fBmbctdlist\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB\-V\fP flag is given, then \fBmbctdlist\fP works in a "verbose" mode and
 outputs the program version being used and all error status messages.
 .TP
-.B \-Z
-\fIsegment\fP
-.br
+.B \-\-segment=segment \-Zsegment
 Causes the ascii output of different input swath files
 (e.g. when a datalist is specified with the \fB\-I\fP option)
 to be separated by lines with \fIsegment\fP. If \fIsegment\fP

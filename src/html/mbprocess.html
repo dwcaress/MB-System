@@ -37,8 +37,34 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbprocess</B> <B>-I</B><I>infile</I> [<B>-C</B><I>threads</I> <B>-F</B><I>format</I>
-<B>-N</B> <B>-O</B><I>outfile</I> <B>-P -S -T -V -H</B>]
+<B>mbprocess</B> --input=infile {-Iinfile}
+<BR>
+
+[--threads=value {-Cvalue}
+<BR>
+
+--format=value {-Fvalue}
+<BR>
+
+--strip-comments {-N}
+<BR>
+
+--output=file {-Ofile}
+<BR>
+
+--force {-P}
+<BR>
+
+--print-status {-S}
+<BR>
+
+--test {-T}
+<BR>
+
+--verbose {-V}
+<BR>
+
+--help {-H}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -872,21 +898,15 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-C</B>
+<DT><B>--threads=value -Cvalue</B>
 
 <DD>
-<I>threads</I>
-<BR>
-
 Sets the number of separate threads launched to process swath files in parallel.
 The default is 1; the maximum is system dependent as it is set to the number
 of CPU cores available on the relevant computer.
-<DT><B>-F</B>
+<DT><B>--format=value -Fvalue</B>
 
 <DD>
-<I>format</I>
-<BR>
-
 Sets the <B>MBIO</B> integer format identifier
 for the input file specified with the
 <B>-I</B> option. By default, <B>mbprocess</B>
@@ -894,24 +914,21 @@ derives the format id from the <B>mbprocess</B> parameter file
 associated with the input file (<B>-I</B> option) or, if necessary,
 infers the format from the &quot;*.mbXX&quot; <B>MB-System</B> suffix
 convention.
-<DT><B>-H</B>
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag causes the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-I</B>
+<DT><B>--input=file -Ifile</B>
 
 <DD>
-<I>infile</I>
-<BR>
-
 Swath data file from which the input data will be read, or
 a datalist file containing a list of input swath data files
 and/or other datalist files. If <I>infile</I> is a
 datalist file, then <B>mbprocess</B> will attempt to
 process all data files identified by recursively reading
 <I>infile</I>.
-<DT><B>-N</B>
+<DT><B>--strip-comments -N</B>
 
 <DD>
 <BR>
@@ -922,12 +939,9 @@ and additionally embeds new comment records detailing the
 processing parameters used by <B>mbprocess</B>.
 This option causes <B>mbprocess</B> to not pass new or old
 comment records to the output data file.
-<DT><B>-O</B>
+<DT><B>--output=file -Ofile</B>
 
 <DD>
-<I>outfile</I>
-<BR>
-
 Data file to which the output data will be written. If
 no output file is specified, the output filename is
 set automatically. If an input swath data file
@@ -938,7 +952,7 @@ file has been created by <B>mbprocess</B>.
 If the input file does not follow the *.mbXX naming convention,
 then the output filename will just consist of the input name
 with &quot;p.mbXX&quot; added as a suffix.
-<DT><B>-P</B>
+<DT><B>--force -P</B>
 
 <DD>
 <BR>
@@ -950,7 +964,7 @@ file, or any of the ancillary data files referred to in
 the parameter file (e.g. navigation files, edit save files,
 svp files). If the <B>-P</B> option is specified, <B>mbprocess</B>
 will process every file, whether it needs it or not.
-<DT><B>-T</B>
+<DT><B>--test -T</B>
 
 <DD>
 <BR>
@@ -959,7 +973,7 @@ This option puts <B>mbprocess</B> into a test mode. The program
 will report whether or not it would process a file, but it
 will not actually process the data or produce an output
 processed file.
-<DT><B>-S</B>
+<DT><B>--print-status -S</B>
 
 <DD>
 <BR>
@@ -968,7 +982,7 @@ This option causes <B>mbprocess</B> to print out the status of
 each file (e.g. up to date, out of date, locked, unlocked) along
 with the file modification times used to determine if the output
 file is out of date.
-<DT><B>-V</B>
+<DT><B>--verbose -V</B>
 
 <DD>
 Normally, <B>mbprocess</B> works &quot;silently&quot; without outputting

@@ -6,12 +6,31 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbsegygrid\fP \fB\-I\fIsegyfile\fP \fB\-O\fIgridfile\fP
-[\fB\-A\fIshotscale/timescale\fP \fB\-B\fImaxvalue/window\fP \fB\-C\fImode\fP
-\fB\-D\fIdecimatex/decimatey\fP \fB\-F\fImode/window\fP
-\fB\-G\fImode/gain[/window]\fP \fB\-R\fIcellsize/startlon/endlon/startlat/endlat\fP
-\fB\-S\fImode[/start/end[/schan/echan]]\fP \fB\-T\fIsweep[/delay]\fP
-\fB\-W\fImode/start/end\fP \fB\-H \fB\-V\fP]
+\fBmbsegygrid\fP --input=file {-Ifile} --output=fileroot {-Ofileroot}
+.br
+[--scale-to-distance=shotscale/timescale {-Ashotscale/timescale}
+.br
+--agc=agcmaxvalue/agcwindow {-Bagcmaxvalue/agcwindow}
+.br
+--geometry=geometrymode {-Cgeometrymode}
+.br
+--decimation=decimatex/decimatey {-Ddecimatex/decimatey}
+.br
+--filter=filtermode/filterwindow {-Ffiltermode/filterwindow}
+.br
+--gain=gainmode/gain[/gainwindow[/gaindelay]] {-Ggainmode/gain[/gainwindow[/gaindelay]]}
+.br
+--distance-plot=distancebin/startlon/endlon/startlat/endlat {-Rdistancebin/startlon/endlon/startlat/endlat}
+.br
+--trace-mode=tracemode[/tracestart/traceend[/chanstart/chanend]] {-Stracemode[/tracestart/traceend[/chanstart/chanend]]}
+.br
+--time-sweep=timesweep[/timedelay] {-Ttimesweep[/timedelay]}
+.br
+--window=windowmode/windowstart/windowend {-Wwindowmode/windowstart/windowend}
+.br
+--help {-H}
+.br
+--verbose {-V}]
 
 .SH DESCRIPTION
 \fBMBsegygrid\fP generates grids of seismic data from segy files.
@@ -66,18 +85,14 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B \-A
-\fIshotscale/timescale\fP
-.br
+.B \-\-scale\-to\-distance=shotscale/timescale \-Ashotscale/timescale
 This option causes the x-axis to be rescaled from shot number to distance in meters
 and the y-axis to be rescaled from time in seconds to depth in meters.
 The \fIshotscale\fP value represents the shot spacing in meters and the
 \fItimescale\fP value is the scaling from time to depth (typically 750 m/s
 for the water column).
 .TP
-.B \-B
-\fImaxvalue[/window]\fP
-.br
+.B \-\-agc=agcmaxvalue/agcwindow \-Bagcmaxvalue/agcwindow
 This option causes the application of automatic gain control (AGC). At each sample, a time interval
 \fIwindow\fP seconds long centered on the sample is considered. The sample value is multiplied
 by a scaling factor calculated as \fImaxvalue\fP divided by the maximum original value in the
@@ -86,9 +101,7 @@ time interval. This approach can emphasize coherent arrivals regardless of ampli
 the entire trace is normalized using the same scale factor, and all traces has the same maximum
 value of \fImaxvalue\fP.
 .TP
-.B \-C
-\fImode\fP
-.br
+.B \-\-geometry=geometrymode \-Cgeometrymode
 Sets the geometry mode used to locate trace samples in the output grid.
 If \fImode\fP = 0 (the default), a simple vertical geometry is used
 in which each sample is placed directly below its trace location. If
@@ -96,23 +109,17 @@ in which each sample is placed directly below its trace location. If
 vertical (y-axis) location of each sample, projecting the samples along
 the pitched ray path rather than straight down.
 .TP
-.B \-D
-\fIdecimatex/decimatey\fP
-.br
+.B \-\-decimation=decimatex/decimatey \-Ddecimatex/decimatey
 Sets the decimation of traces (\fIdecimatex\fP) and samples (\fIdecimatey\fP) used in
 generating the output grid. The downsampling of the data is actually accomplished by averaging
 the values within each grid bin rather than omitting traces or samples.
 .TP
-.B \-F
-\fImode/window\fP
-.br
+.B \-\-filter=filtermode/filterwindow \-Ffiltermode/filterwindow
 Sets the application of low-pass filtering to the trace data. The filtering is applied
 by convolving a filter function of length \fIwindow\fP seconds with the trace. Currently the only
 available filter is a cosine taper, set using \fImode\fP = 1.
 .TP
-.B \-G
-\fImode/gain[/window]\fP
-.br
+.B \-\-gain=gainmode/gain[/gainwindow[/gaindelay]] \-Ggainmode/gain[/gainwindow[/gaindelay]]
 Sets the application of gain to the trace data. The \fImode\fP value determines how
 the gain is applied. If \fImode\fP = 0, no gain is applied.If \fImode\fP = 1,
 the gain is applied starting from the beginning of the trace. If  \fImode\fP = 2,
@@ -124,23 +131,17 @@ The parameter \fIwindow\fP, if given, sets the length of the time interval
 in seconds that gain is applied. When the gain is windowed, trace values after
 the end of the gain window are zeroed.
 .TP
-.B \-H
+.B \-\-help \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \-I
-\fIsegyfile\fP
-.br
+.B \-\-input=file \-Ifile
 Sets the filename of the input segy seismic data file to be gridded.
 .TP
-.B \-O
-\fIgridfile\fP
-.br
+.B \-\-output=fileroot \-Ofileroot
 Sets the filename for the output GMT netCDF format grid.
 .TP
-.B \-R
-\fIcellsize/startlon/endlon/startlat/endlat\fP
-.br
+.B \-\-distance\-plot=distancebin/startlon/endlon/startlat/endlat \-Rdistancebin/startlon/endlon/startlat/endlat
 If the \fB\-R\fP option is used, then the profile will represent a line between
 start and end positions specified using longitude and latitude values in
 decimal degrees. This line segment is divided into binning cells according to
@@ -150,9 +151,7 @@ option \fB\-D\fP. Effectively, the location of each trace will be projected onto
 segment and the segment added to the appropriate cell. Where cells have multiple traces,
 the traces will be averaged.
 .TP
-.B \-S
-\fImode[/start/end[/schan/echan]]\fP
-.br
+.B \-\-trace\-mode=tracemode[/tracestart/traceend[/chanstart/chanend]] \-Stracemode[/tracestart/traceend[/chanstart/chanend]]
 This option sets the range of traces that are gridded, and thus determines
 the x-dimension of the output grid (also impacted by any decimation
 specified with \fB\-D\fP). If \fImode\fP = 0, then \fIstart\fP and \fIend\fP
@@ -168,9 +167,7 @@ If \fImode\fP=2, then  \fIstart\fP and \fIend\fP refer to shot numbers and
 all traces within that range of shot numbers are plotted. Effectively the channel
 numbers are ignored by setting all trace channels to 0 and plotting channel 0.
 .TP
-.B \-T
-\fIsweep[/delay]\fP
-.br
+.B \-\-time\-sweep=timesweep[/timedelay] \-Ttimesweep[/timedelay]
 Sets the time range of seismic data to be gridded. The \fIsweep\fP specifies
 the number of seconds of data comprising the y-axis of the grid. The number of
 samples follows from the sample interval of the data, and any decimation
@@ -180,15 +177,13 @@ The y-dimension of the output grid is determined by
 \fIsweep\fP / sampleinterval / \fIdecimatey\fP, where the sampleinterval is
 a parameter read with the seismic data.
 .TP
-.B \-V
+.B \-\-verbose \-V
 Normally, \fBmbsegygrid\fP prints out information regarding its
 controlling parameters during execution; the
 \fB\-V\fP option causes the program to also print out statements
 indicating its progress.
 .TP
-.B \-W
-\fImode/start/end\fP
-.br
+.B \-\-window=windowmode/windowstart/windowend \-Wwindowmode/windowstart/windowend
 This option can be used to limit the data being gridded to a particular time
 window in various ways. This option does not impact the definition of the overall
 grid bounds, but does restrict the data gridded to samples within particular times

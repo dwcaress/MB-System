@@ -28,13 +28,52 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mb7k2jstar</B> [<B>--input=</B><I>file</I> <B>--extract-mode=</B><I>type</I>
-<B>--bottom-pick=</B><I>bottompickmode/bottompickthreshold</I> <B>--comments</B>
-<B>--format=</B><I>format</I> <B>--gain=</B><I>gainmode/gainfactor</I>
-<B>--line-root=</B><I>startline/lineroot</I>
-<B>--check-route-bearing</B> <B>--output=</B><I>outfile</I> <B>--route-file=</B><I>routefile</I>
-<B>--smooth=</B><I>smooth</I>
-<B>--time-shift=</B><I>timeshift</I> <B>--flip-sidescan</B> <B>--help</B> <B>--verbose</B>]
+<B>mb7k2jstar</B>
+<BR>
+
+[--extract-mode=type {-Atype}
+<BR>
+
+--bottom-pick=mode[/threshold] {-Bmode[/threshold]}
+<BR>
+
+--comments {-C}
+<BR>
+
+--format=format {-Fformat}
+<BR>
+
+--gain=mode[/factor] {-Gmode[/factor]}
+<BR>
+
+--help {-H}
+<BR>
+
+--input=file {-Ifile}
+<BR>
+
+--line-root=startline/lineroot {-Lstartline/lineroot}
+<BR>
+
+--check-route-bearing {-M}
+<BR>
+
+--output=file {-Ofile}
+<BR>
+
+--route-file=file {-Rfile}
+<BR>
+
+--smooth=value {-Svalue}
+<BR>
+
+--time-shift=timeshift {-Ttimeshift}
+<BR>
+
+--verbose {-V}
+<BR>
+
+--flip-sidescan {-X}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -103,7 +142,7 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>--extract-mode=</B><I>mode</I> <B>-A</B><I>mode</I>
+<DT><B>--extract-mode=type -Atype</B>
 
 <DD>
 <BR>
@@ -115,7 +154,7 @@ is given, then any high frequency sidescan records are extracted.
 The <B>-A</B><I>3</I> option causes subbottom profiler records to
 be extracted. Default: All Edgetech sidescan and subbottom
 profiler records are extracted.
-<DT><B>--bottom-pick=</B><I>bottompickmode/bottompickthreshold</I> <B>-B</B><I>bottompickmode/bottompickthreshold</I>
+<DT><B>--bottom-pick=mode[/threshold] -Bmode[/threshold]</B>
 
 <DD>
 <BR>
@@ -138,7 +177,7 @@ Default: <I>bottompickmode</I> = 2.
 
 This option causes <B>mb7k2jstar</B> to print out any comment records
 encountered in the input Reson 7k data.
-<DT><B>--format=</B><I>format</I> <B>-F</B><I>format</I>
+<DT><B>--format=format -Fformat</B>
 
 <DD>
 <BR>
@@ -148,7 +187,7 @@ or from a file. If <I>format</I> &lt; 0, then the input file specified
 with the <B>-I</B> option will actually contain a list of input swath sonar
 data files. This program only reads Reson 7k format data files (<B>MBIO</B>
 format 88).
-<DT><B>--gain=</B><I>gainmode/gainfactor</I> <B>-G</B><I>gainmode/gainfactor</I>
+<DT><B>--gain=mode[/factor] -Gmode[/factor]</B>
 
 <DD>
 <BR>
@@ -163,7 +202,7 @@ Default: <I>gainmode</I> = 0; <I>gainfactor</I> = 1.0.
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>--input=</B><I>infile</I> <B>-I</B><I>infile</I>
+<DT><B>--input=file -Ifile</B>
 
 <DD>
 <BR>
@@ -182,7 +221,7 @@ data file should be followed by a data format identifier, e.g.:
 
 This program only reads Reson 7k format data files (<B>MBIO</B>
 format 88).
-<DT><B>--line-root=</B><I>startline/lineroot</I> <B>-L</B><I>startline/lineroot</I>
+<DT><B>--line-root=startline/lineroot -Lstartline/lineroot</B>
 
 <DD>
 <BR>
@@ -199,7 +238,7 @@ This option causes <B>mb7k2jstar</B> to omit data during turns when
 extracting into line files according to a specified set of waypoints
 (<B>-R</B> option). The traces will not be output until the heading is
 within 15 degrees of the next survey line's bearing.
-<DT><B>--output=</B><I>outfile</I> <B>-O</B><I>outfile</I>
+<DT><B>--output=file -Ofile</B>
 
 <DD>
 <BR>
@@ -212,7 +251,7 @@ An &quot;.jsf&quot; suffix is used when all Edgetech record types are extracted
 to the output, &quot;.mb132&quot; is used when the low frequency sidescan records are extracted,
 and &quot;.mb133&quot; is used when the high frequency sidescan records are extracted. The record
 types to be extracted are set using the <B>-A</B> option.
-<DT><B>--route-file=</B><I>routefile</I> <B>-R</B><I>routefile</I>
+<DT><B>--route-file=file -Rfile</B>
 
 <DD>
 <BR>
@@ -227,7 +266,7 @@ the output Jstar filename (or files if a datalist is being processed) will
 be the input swath filename with an appropriate suffix appended (&quot;.jsf&quot; for
 mixed Jstar files, &quot;.mb132&quot; for low frequency sidescan only files, and &quot;.mb133&quot;
 for high frequency sidescan only files).
-<DT><B>--smooth=</B><I>smooth</I> <B>-S</B><I>smooth</I>
+<DT><B>--smooth=value -Svalue</B>
 
 <DD>
 <BR>
@@ -238,7 +277,7 @@ average of the samples within <I>smooth</I> samples on either side.
 If <I>smooth</I> is negative, each sample is replaced by the RMS value
 of the samples within <I>|smooth|</I> samples on either side. Default:
 <I>smooth</I> = 0 (no smoothing).
-<DT><B>--time-shift=</B><I>timeshift</I> <B>-T</B><I>timeshift</I>
+<DT><B>--time-shift=timeshift -Ttimeshift</B>
 
 <DD>
 <BR>

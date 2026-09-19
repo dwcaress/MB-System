@@ -30,40 +30,34 @@ Version 5.0
 <B>mbedit</B>
 <BR>
 
-[
+[--begin-time=yr/mo/da/hr/mn/sc {-Byr/mo/da/hr/mn/sc}
 <BR>
 
-<B>--begin-time</B>=<I>yr/mo/da/hr/mn/sc</I> {<B>-B</B><I>yr/mo/da/hr/mn/sc</I>}
+--browse {-D}
 <BR>
 
-<B>--browse</B> {<B>-D</B>}
+--end-time=yr/mo/da/hr/mn/sc {-Eyr/mo/da/hr/mn/sc}
 <BR>
 
-<B>--end-time</B>=<I>yr/mo/da/hr/mn/sc</I> {<B>-E</B><I>yr/mo/da/hr/mn/sc</I>}
+--format=format_id {-Fformat_id}
 <BR>
 
-<B>--format</B>=<I>format_id</I> {<B>-F</B><I>format_id</I>}
+--gui-mode {-G}
 <BR>
 
-<B>--gui-mode</B> {<B>-G</B>}
+--help {-H}
 <BR>
 
-<B>--help</B> {<B>-H</B>}
+--input=file {-Ifile}
 <BR>
 
-<B>--input</B>=<I>file</I> {<B>-I</B><I>file</I>}
+--run-mbprocess {-X}
 <BR>
 
-<B>--run-mbprocess</B> {<B>-X</B>}
+--use-edit-save {-S}
 <BR>
 
-<B>--use-edit-save</B> {<B>-S</B>}
-<BR>
-
-<B>--verbose</B> {<B>-V</B>}
-<BR>
-
-]
+--verbose {-V}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -263,34 +257,28 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>--begin-time=</B><I>yr/mo/da/hr/mn/sc</I> {<B>-B</B><I>yr/mo/da/hr/mn/sc</I>}
+<DT><B>--begin-time=yr/mo/da/hr/mn/sc -Byr/mo/da/hr/mn/sc</B>
 
 <DD>
-<BR>
-
 Sets the starting time for data allowed in the input data; pings
 with times before the starting time will be ignored.
 Default: <I>yr/mo/da/hr/mn/sc</I> = 1962/2/21/10/30/0.
-<DT><B>--browse {-D</B>}
+<DT><B>--browse -D</B>
 
 <DD>
 Starts up the program in &quot;browse&quot; mode. If a file is opened
 in browse mode (either at startup or later), none
 of the edited data will be output to a file. The default
 is to output the edited data to a file.
-<DT><B>--end-time=</B><I>yr/mo/da/hr/mn/sc</I> {<B>-E</B><I>yr/mo/da/hr/mn/sc</I>}
+<DT><B>--end-time=yr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc</B>
 
 <DD>
-<BR>
-
 Sets the ending time for data allowed in the input data; pings
 with times after the ending time will be ignored.
 Default: <I>yr/mo/da/hr/mn/sc</I> = 2062/2/21/10/30/0.
-<DT><B>--format=</B><I>format_id</I> {<B>-F</B><I>format_id</I>}
+<DT><B>--format=format_id -Fformat_id</B>
 
 <DD>
-<BR>
-
 Sets the format at startup for the input and output swath sonar data using
 <B>MBIO</B> integer format identifiers. This value can also be set
 interactively when specifying the input file.
@@ -300,23 +288,21 @@ currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page.
 By default the <I>format</I> id value is inferred using the <B>MB-System</B>
 convention of an &quot;.mbXX&quot; suffix (the XX corresponds to the <B>MBIO</B> format id).
-<DT><B>--gui-mode {-G</B>}
+<DT><B>--gui-mode -G</B>
 
 <DD>
 This flag causes the program to treat the <B>Done</B> button as
 equivalent to the <B>Quit</B> button. This option is used when
 <B>MBedit</B> is started automatically by some other process and
 only a single file is to edited.
-<DT><B>--help {-H</B>}
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>--input=</B><I>file</I> {<B>-I</B><I>file</I>}
+<DT><B>--input=file -Ifile</B>
 
 <DD>
-<BR>
-
 Sets the data file from which the input data will be read at startup.
 This option is usually used only when <B>MBedit</B> is started
 automatically from some other process. The <B>--format</B> option can
@@ -325,7 +311,7 @@ be used to set the data format id if the filename does not conform to the
 <B>MBIO</B> format id). If the <B>--browse</B> option is
 not used to specify browse mode, then the edit save output file is
 automatically set as <I>infile</I> with &quot;.esf&quot; appended.
-<DT><B>--run-mbprocess {-X</B>}
+<DT><B>--run-mbprocess -X</B>
 
 <DD>
 This option causes <B>mbprocess</B> to run automatically
@@ -334,7 +320,7 @@ is completed. This option effectively means that the
 corresponding processed swath data is generated or updated immediately.
 The program <B>mbprocess</B> will not be invoked if the
 editing session is in the browse mode.
-<DT><B>--use-edit-save {-S</B>}
+<DT><B>--use-edit-save -S</B>
 
 <DD>
 This option is usually used only when <B>MBedit</B> is started
@@ -346,7 +332,7 @@ this dialog is skipped and any existing edit save file for that input
 file is used automatically, exactly as if the user had answered &quot;yes.&quot;
 This option has no effect if no edit save file exists for the input
 file specified with <B>--input</B>.
-<DT><B>--verbose {-V</B>}
+<DT><B>--verbose -V</B>
 
 <DD>
 Normally, <B>MBedit</B> outputs information to the stderr stream

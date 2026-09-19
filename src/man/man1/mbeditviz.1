@@ -1,4 +1,4 @@
-.TH MBeditviz 1 "7 September 2026" "MB-System 5.0" "MB-System 5.0"
+.TH MBeditviz 1 "14 September 2026" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBMBeditviz\fP \- 3D visualization-based editing of swath bathymetry soundings.
 
@@ -6,7 +6,19 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBMBeditviz\fP [\fB\-F\fP\fIformat_id\fP \fB\-G \-H \-I\fP\fIdatalist\fP \fB\-R \-V\fP]
+\fBMBeditviz\fP
+.br
+[--delete-input-file {-R}
+.br
+--format=format_id {-Fformat_id}
+.br
+--help {-H}
+.br
+--input=file {-Ifile}
+.br
+--simple-mean-grid {-G}
+.br
+--verbose {-V}]
 
 .SH DESCRIPTION
 
@@ -83,7 +95,43 @@ using the middle and right mouse buttons in either rotation mode or zoom/exagger
 
 You can edit the soundings in the point cloud context using the left mouse button. The
 editing mouse modes work just like MBedit. The View menu in the
-point cloud display lets you show, or not show, the flagged soundings (which are displayed in red).
+point cloud display lets you show, or not show, the flagged soundings (which are displayed in red)
+using the "Show Flagged Soundings" toggle.
+
+\fIColoring the Sounding Cloud\fP
+
+The View menu in the 3D Soundings window also includes four mutually exclusive toggle
+buttons that control how the soundings in the point cloud are colored:
+.TP
+.B Color by Flag State
+Unflagged soundings are colored according to their currently assigned sounding color
+(see \fIChanging Sounding Colors\fP below), and flagged soundings, if shown, are
+colored according to the type of flag applied (manual = red, filter = blue, sonar = green,
+multipick = cyan).
+.TP
+.B Color by Topography
+Soundings are colored by depth (topography) using the same color table and the same
+minimum and maximum topography values as the associated MBeditviz Survey Viewer (the
+2D/3D display of the gridded bathymetry). Because the color stretch is fixed to the
+Survey Viewer's grid-wide range, the colors of a given sounding cloud do not change as
+different regions or areas are picked, or as the "Show Flagged Soundings" toggle is
+changed.
+.TP
+.B Color by Soundings
+Soundings are colored by depth (topography) just as with "Color by Topography", but the
+color stretch is instead scaled to the minimum and maximum depth values found among the
+soundings currently displayed in the 3D Soundings window. If "Show Flagged Soundings" is
+on, the minimum and maximum are calculated over all of the displayed soundings regardless
+of beamflag state; if "Show Flagged Soundings" is off, only the unflagged (valid)
+soundings are used to calculate the minimum and maximum. This means the color stretch is
+recalculated every time a new region, area, or navigation segment is picked, and whenever
+the "Show Flagged Soundings" toggle is changed, so that the full color range is always
+used to differentiate the currently viewed soundings.
+.TP
+.B Color by Amplitude
+Soundings are colored by backscatter amplitude, with the color stretch scaled to the
+minimum and maximum amplitude values among the soundings currently displayed (subject to
+the same "Show Flagged Soundings" behavior as "Color by Soundings").
 
 \fIChanging Sounding Colors\fP
 
@@ -129,36 +177,32 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B \-F
-\fIformat_id\fP
-.br
+.B \-\-format=format_id \-Fformat_id
 Sets the format id for the file specified with the \fB\-I\fP option using
 \fBMBIO\fP integer format identifiers. By default the \fIformat\fP id
 value is inferred using the \fBMB-System\fP convention of an ".mbXX" suffix
 (the XX corresponds to the \fBMBIO\fP format id).
 .TP
-.B \-G
+.B \-\-simple\-mean\-grid \-G
 This flag causes \fBMBeditviz\fP to grid the input swath bathymetry soundings
 using the simple mean algorithm rather than the default footprint-based
 gridding algorithm.
 .TP
-.B \-H
+.B \-\-help \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \-I
-\fIdatalist\fP
-.br
+.B \-\-input=file \-Ifile
 Sets an \fBMB-System\fP datalist file to be parsed on input for swath data files
 to list as available for editing.
 This option is usually used when \fBMBeditviz\fP is started
 automatically from some other process, such as \fBMBgrdviz\fP.
 .TP
-.B \-R
+.B \-\-delete\-input\-file \-R
 This flag causes the file specified with the \fB\-I\fP option to be deleted
 (via a shell "rm" command) after it has been opened and its soundings loaded.
 .TP
-.B \-V
+.B \-\-verbose \-V
 Normally, \fBMBeditviz\fP outputs limited information to the stderr stream.
 If the \fB\-V\fP flag is given, then \fBMBeditviz\fP works in a "verbose" mode and
 outputs the program version being used, all error status messages,

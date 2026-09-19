@@ -9,13 +9,39 @@ the grazing angle with the seafloor.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbbackangle\fP [\fB\-A\fIkind\fP
-\fB\-B\fImode\fP[\fI/ssbeamwidth\fP[\fI/ssdepression\fP]]
-\fB\-C\fP \fB\-D\fP \fB\-F\fIformat\fP
-\fB\-G\fIkind/angle/min/max/nx/ny\fP
-\fB\-I\fIfile\fP
-\fB\-N\fInangle/anglemax\fP \fB\-P\fIpings\fP \fB\-Q\fP
-\fB\-R\fIrefangle\fP \fB-S\fP \fB\-T\fItopogridfile\fP \fB\-Z\fIaltitude\fP \fB\-V \-H\fP]
+\fBmbbackangle\fP
+.br
+[--data-kind=kind {-Akind}
+.br
+--beam-pattern-mode=mode[/beamwidth/depression] {-Bmode[/beamwidth/depression]}
+.br
+--symmetric-correction {-C}
+.br
+--dump-output {-D}
+.br
+--format=format {-Fformat}
+.br
+--output-grid=gridmode/angle/min/max/n_columns/n_rows {-Ggridmode/angle/min/max/n_columns/n_rows}
+.br
+--help {-H}
+.br
+--input=file {-Ifile}
+.br
+--angle-bins=nangles/angle_max {-Nnangles/angle_max}
+.br
+--pings-average=pings {-Ppings}
+.br
+--slope-correction {-Q}
+.br
+--reference-angle=refangle {-Rrefangle}
+.br
+--skip-existing {-S}
+.br
+--topography-grid=topogridfile {-Ttopogridfile}
+.br
+--verbose {-V}
+.br
+--altitude=altitude {-Zaltitude}]
 
 .SH DESCRIPTION
 The program \fBmbbackangle\fP reads a swath sonar data file
@@ -100,16 +126,12 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B \-A
-\fIkind\fP
-.br
+.B \-\-data\-kind=kind \-Akind
 Determines if beam amplitude (\fIkind\fP = 1)
 and/or sidescan (\fIkind\fP = 2) data will be processed.
 Default: both amplitude and sidescan data are processed.
 .TP
-.B \-B
-\fImode\fP[\fI/ssbeamwidth\fP[\fI/ssdepression\fP]]
-.br
+.B \-\-beam\-pattern\-mode=mode[/beamwidth/depression] \-Bmode[/beamwidth/depression]
 Sets the algorithm used to represent the sonar's beam pattern when
 generating the amplitude and/or sidescan versus grazing angle tables.
 If \fImode\fP = 0, an empirical correction is used: the table is defined
@@ -121,7 +143,7 @@ width in degrees of the sidescan sonar, and \fIssdepression\fP sets the
 sonar's depression angle from the horizontal in degrees.
 Default: \fImode\fP = 0; \fIssbeamwidth\fP = 50.0; \fIssdepression\fP = 20.0.
 .TP
-.B \-C
+.B \-\-symmetric\-correction \-C
 Normally, \fBmbbackangle\fP produces a table of amplitude vs
 grazing angle values which is asymmetric about the vertical
 (zero angle) axis. If \fB\-C\fP is specified, the amplitude
@@ -130,22 +152,18 @@ Generally, it is better to not use this option in \fBmbbackangle\fP,
 and to instead use \fBmbset\fP to set symmetric or asymmetric
 sidescan correction in the \fBmbprocess\fP parameter file.
 .TP
-.B \-D
+.B \-\-dump\-output \-D
 This option causes \fBmbbackangle\fP to dump the output to
 stdout rather than to ".sga" or ".aga" files..
 .TP
-.B \-F
-\fIformat\fP
-.br
+.B \-\-format=format \-Fformat
 Sets the \fBMBIO\fP integer format identifier
 for the input file specified with the
 \fB\-I\fP option. By default, \fBmbbackangle\fP
 infers the format from the "*.mbXX" \fBMB-System\fP suffix
 convention.
 .TP
-.B \-G
-\fIkind/angle/min/max/nx/ny\fP
-.br
+.B \-\-output\-grid=gridmode/angle/min/max/n_columns/n_rows \-Ggridmode/angle/min/max/n_columns/n_rows
 This option causes \fBmbbackangle\fP to output gridded histograms
 of the amplitude versus grazing angle data for each swath file
 processed. The program also generates a shellscript to produce a
@@ -160,13 +178,11 @@ x-dimension, and \fIny\fP bins of backscatter value extending from \fImin\fP to 
 y-dimension. The values of the histogram are normalized so that they sum
 to 1000.0 within each angle bin.
 .TP
-.B \-H
+.B \-\-help \-H
 This "help" flag causes the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \-I
-\fIfilename\fP
-.br
+.B \-\-input=file \-Ifile
 Sets the input filename. If \fIformat\fP > 0 (set with the
 \fB\-F\fP option) then the swath sonar data contained in \fIinfile\fP
 is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
@@ -184,9 +200,7 @@ format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "datalist.mb-1".
 .TP
-.B \-N
-\fInangle/angle\fP
-.br
+.B \-\-angle\-bins=nangles/angle_max \-Nnangles/angle_max
 The amplitude vs grazing angle table is calculated by binning the
 amplitude values according to their grazing angles and averaging
 the amplitudes within each bin. This option sets the number of
@@ -197,9 +211,7 @@ grazing angle bins (\fInangle\fP) and the maximum angle considered
 so that the middle bin is centered on the angle 0.0.
 Default: \fInangle\fP = 81, \fIangle\fP = 80.0.
 .TP
-.B \-P
-\fIpings\fP
-.br
+.B \-\-pings\-average=pings \-Ppings
 Sets the number of pings to be read and averaged for each
 amplitude vs grazing angle table. The output "*.sga" or ".aga" files
 will generally contain many tables, each with a timestamp
@@ -208,41 +220,37 @@ each table. A table may be output averaged over a lesser number
 of beams if a time gap is encountered in the data, and also at
 the end of the file. Default: \fIpings\fP = 50.
 .TP
-.B \-Q
+.B \-\-slope\-correction \-Q
 By default, \fBmbbackangle\fP does not use seafloor slopes in
 calculating the grazing angles for each amplitude beam and sidescan
 pixel. This option causes the program to calculate acrosstrack slopes
 from swath bathymetry, if available, and to factor these slopes
 into the grazing angle calculation for each data point.
 .TP
-.B \-R
-\fIrefangle\fP
+.B \-\-reference\-angle=refangle \-Rrefangle
 Sets the reference angle that will be used by \fBmbprocess\fP in
 applying the amplitude and/or sidescan correction tables generated
 by \fBmbbackangle\fP. Default: \fIrefangle\fP = 30.0 degrees.
 .TP
-.B \-S
+.B \-\-skip\-existing \-S
 This option causes \fBmbbackangle\fP to skip processing of input raw swath files that have 
 previously processed and are up to date, as evidenced by the existence of amplitude 
 and/or sidescan correction table files older than the raw files and beam edits.
 .TP
-.B \-T
-\fItopogridfile\fP
+.B \-\-topography\-grid=topogridfile \-Ttopogridfile
 By default, \fBmbbackangle\fP does not use seafloor slopes in
 calculating the grazing angles for each amplitude beam and sidescan
 pixel. This option causes the program to calculate acrosstrack slopes
 using the topography grid \fItopogridfile\fP, and to factor these slopes
 into the grazing angle calculation for each data point.
 .TP
-.B \-V
+.B \-\-verbose \-V
 Normally, \fBmbbackangle\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB\-V\fP flag is given, then \fBmbmask\fP works in a "verbose" mode and
 outputs the program version being used and all error status messages.
 .TP
-.B \-Z
-\fIdepth\fP
-.br
+.B \-\-altitude=altitude \-Zaltitude
 This option specifies a default sonar altitude value in meters to be
 used whenever bathymetry values are unavailable. A flat seafloor
 (zero slope) will be assumed wherever the default depth needs

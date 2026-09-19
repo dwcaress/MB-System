@@ -28,16 +28,82 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbmosaic</B> <B>-I</B><I>filelist</I> <B>-O</B><I>root</I>
-[<B>-A</B><I>datatype[F]</I>
-<B>-B</B><I>border</I> -C<I>clip/mode/tension</I> <B>-D</B><I>xdim/ydim</I>
-<B>-E</B><I>dx/dy/units[!]</I> <B>-F</B><I>priority_range[/weight]</I>
-<B>-G</B><I>gridkind</I>  <B>-J</B><I>projection</I>
-<B>-H -L</B><I>lonflip</I> <B>-M -N -P</B><I>pings</I>
-<B>-R</B><I>west/east/south/north</I> <B>-R</B><I>factor</I>
-<B>-S</B><I>speed</I> <B>-T</B><I>topogridfile</I> <B>-U</B><I>bearing/factor[/mode]</I>
-<B>-V</B> -W<I>scale</I> <B>-X</B><I>extend</I>
-<B>-Y</B><I>priority_source</I> <B>-Z</B><I>bath_default</I>]
+<B>mbmosaic</B>
+<BR>
+
+--input=filelist {-Ifilelist}
+<BR>
+
+--output=root {-Oroot}
+<BR>
+
+[--data-type=datatype {-Adatatype}
+<BR>
+
+--border=border {-Bborder}
+<BR>
+
+--spline-interpolation=clip/mode/tension {-Cclip/mode/tension}
+<BR>
+
+--grid-dimensions=xdim/ydim {-Dxdim/ydim}
+<BR>
+
+--grid-spacing=dx/dy/units {-Edx/dy/units}
+<BR>
+
+--priority-range=priority_range[/weight] {-Fpriority_range[/weight]}
+<BR>
+
+--grid-format=gridkind {-Ggridkind}
+<BR>
+
+--projection=projection {-Jprojection}
+<BR>
+
+--help {-H}
+<BR>
+
+--longitude-domain=lonflip {-Llonflip}
+<BR>
+
+--extra-grids {-M}
+<BR>
+
+--use-nan {-N}
+<BR>
+
+--pings=pings {-Ppings}
+<BR>
+
+--bounds=west/east/south/north {-Rwest/east/south/north}
+<BR>
+
+--bounds=factor {-Rfactor}
+<BR>
+
+--speed-minimum=speed {-Sspeed}
+<BR>
+
+--topography-grid=topogridfile {-Ttopogridfile}
+<BR>
+
+--directional-priority=bearing/factor[/mode] {-Ubearing/factor[/mode]}
+<BR>
+
+--verbose {-V}
+<BR>
+
+--weighting-scale=scale {-Wscale}
+<BR>
+
+--extend=extend {-Xextend}
+<BR>
+
+--priority-source=priority_source {-Ypriority_source}
+<BR>
+
+--altitude-default=bathdef {-Zbathdef}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -284,12 +350,9 @@ Christian do Santos Ferreira
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-A</B>
+<DT><B>--data-type=datatype -Adatatype</B>
 
 <DD>
-<I>datatype</I>
-<BR>
-
 Sets the type of data to be read and mosaiced.
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>datatype</I>&nbsp;=&nbsp;3,&nbsp;amplitude&nbsp;data&nbsp;will&nbsp;be&nbsp;mosaiced.<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>datatype</I>&nbsp;=&nbsp;4,&nbsp;sidescan&nbsp;data&nbsp;will&nbsp;be&nbsp;mosaiced.<BR>
@@ -308,21 +371,15 @@ If the desired filtered data files do not exist, data input will fail and
 data are stored in ancillary files ending with &quot;.ffa&quot;, and filtered
 sidescan files end in &quot;.ffs&quot;. Appending &quot;F&quot; to <I>mode</I> values of 5-7 will have no effect.
 Default: <I>datatype</I> = 4 (sidescan).
-<DT><B>-B</B>
+<DT><B>--border=border -Bborder</B>
 
 <DD>
-<I>border</I>
-<BR>
-
 Sets the border of a smoothly interpolated grid to the value <I>border</I>
 wherever no data exist, provided <I>border</I> &gt; 0.0.
 Default: <I>border</I> = 0.0
-<DT><B>-C</B>
+<DT><B>--spline-interpolation=clip/mode/tension -Cclip/mode/tension</B>
 
 <DD>
-<I>clip/mode/tension</I>
-<BR>
-
 Controls the use of spline interpolation to fill grid cells not
 filled by swath data, and sets the tension used in that interpolation.
 The <I>clip</I> value sets the distance from
@@ -343,21 +400,15 @@ the interpolation toward the edges; a <I>tension</I> of infinity
 yields a pure spline solution. The <I>tension</I> must be zero or
 greater.
 Default: <I>clip</I> = 0, <I>mode</I> = 0, <I>tension</I> = 0.0.
-<DT><B>-D</B>
+<DT><B>--grid-dimensions=xdim/ydim -Dxdim/ydim</B>
 
 <DD>
-<I>xdim/ydim</I>
-<BR>
-
 Sets the dimensions of the output grid.  This option is superceded
 if the user specifies the grid spacing with the <B>-E</B> option.
 Default:  <I>xdim</I> = <I>ydim</I> = 101.
-<DT><B>-E</B>
+<DT><B>--grid-spacing=dx/dy/units -Edx/dy/units</B>
 
 <DD>
-<I>dx/dy/units[!]</I>
-<BR>
-
 Sets the grid cell spacing to <I>dx</I> in longitude and <I>dy</I>
 in latitude. If <I>units</I> is not specified, the <I>dx</I>
 and <I>dy</I> values are assumed to be in meters. Valid values
@@ -380,12 +431,9 @@ grid bounds.
 Default: If neither the <B>-E</B> or <B>-D</B> options are specified,
 the program sets the grid cell spacing to be 0.02 times the maximum
 sonar altitude in the input files.
-<DT><B>-F</B>
+<DT><B>--priority-range=priority_range[/weight] -Fpriority_range[/weight]</B>
 
 <DD>
-<I>priority_range[/weight]</I>
-<BR>
-
 Turns on Gaussian weighted mean mosaicing. The
 <I>priority_range</I> value determines which data points are
 used in the mosaicing. The minimum priority threshold for
@@ -402,12 +450,9 @@ indicates the Gaussian weight of each value is
 multiplied by its priority to get the value weight. A <I>weight</I> of 2
 indicates the Gaussian weight of each value is multiplied by the square of
 its priority to get the value weight.
-<DT><B>-G</B>
+<DT><B>--grid-format=gridkind -Ggridkind</B>
 
 <DD>
-<I>gridkind</I>
-<BR>
-
 This option sets the format of the output grid file.
 The default is to output a current generation GMT COARDS-compliant netCDF 4-byte
 float grid.  To output a different grid format, specify a two-letter <B>GMT</B> grid
@@ -518,17 +563,14 @@ used, the <B>-E</B> option must also be used in a way which
 ensures equal grid cell spacings (see the <B>-E</B> documentation
 above).
 Default: <I>gridkind</I> = &quot;=nf&quot;.
-<DT><B>-H</B>
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-I</B>
+<DT><B>--input=filelist -Ifilelist</B>
 
 <DD>
-<I>datalist</I>
-<BR>
-
 Sets the filename of the file containing a list of the input swath sonar
 data files and their formats.  In the <I>datalist</I> file, each
 data file should be followed by a data format identifier, e.g.:
@@ -541,10 +583,9 @@ format supported by <B>MBIO</B>. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page.
 Default: <I>datalist</I> = datalist.mb-1
-<DT><B>-J</B>
+<DT><B>--projection=projection -Jprojection</B>
 
 <DD>
-<I>projection</I>
 By default, <B>mbmosaic</B> generates grids in Geographic coordinates,
 meaning that position is defined in longitude and latitude using
 the WGS84 geographic coordinate system.
@@ -595,12 +636,9 @@ automatically inserts the appropriate projection information into
 the GeoTIFF images it generates. As a result, images generated by
 <B>mbgrdtiff</B> will be properly georeferenced when they are imported
 into GIS software.
-<DT><B>-L</B>
+<DT><B>--longitude-domain=lonflip -Llonflip</B>
 
 <DD>
-<I>lonflip</I>
-<BR>
-
 Sets the range of the longitude values returned.
 If <I>lonflip</I>=-1 then the longitude values will be in
 the range from -360 to 0 degrees. If <I>lonflip</I>=0
@@ -609,7 +647,7 @@ the range from -180 to 180 degrees. If <I>lonflip</I>=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: <I>lonflip</I> = 0.
-<DT><B>-M</B>
+<DT><B>--extra-grids -M</B>
 
 <DD>
 Causes two additional grids to be output. One is a grid containing
@@ -617,18 +655,15 @@ the standard deviation of the data within each grid cell relative
 to the grid value, the other contains the number of data
 points in each grid cell. This option is ignored unless the
 Gaussian weighted mean mosaicing is enabled with the -F option.
-<DT><B>-N</B>
+<DT><B>--use-nan -N</B>
 
 <DD>
 Causes grid cells with no data and no interpolation to be set to a
 value of NaN instead of the default value of 99999.9.  The NaN value
 is expected by <B>GMT</B> programs such <B>grdview</B>.
-<DT><B>-O</B>
+<DT><B>--output=root -Oroot</B>
 
 <DD>
-<I>root</I>
-<BR>
-
 Sets the character string to be used as the root of the
 output filenames. For example, if the grid is output as a <B>GMT</B>
 version 2 GRD format (netCDF) file (the default),
@@ -641,24 +676,20 @@ output grid filename will be &quot;root.grd1&quot;. If the output grid is
 in the <B>GMT</B> version 2 GRD format, a shellscript
 which will allow the contents of the grid to viewed using <B>GMT</B> programs
 is also output with the filename &quot;root.grd.cmd&quot;.
-<DT><B>-P</B>
+<DT><B>--pings=pings -Ppings</B>
 
 <DD>
-<I>pings</I>
-<BR>
-
 Sets the ping averaging of the input data. If <I>pings</I> &gt; 0, then
 that number of input pings will be averaged to produce one output
 ping.  If <I>pings</I> = 0, then the ping averaging will automatically
 be done so that the along-track ping spacing is equal to the across-track
 beam spacing. Default: <I>pings</I> = 1.
-<DT><B>-R</B>
+<DT><B>--bounds=west/east/south/north -Rwest/east/south/north</B>
 
 <DD>
-<I>west/east/south/north</I>
 <BR>
 
-<I>factor</I>
+--bounds=factor -Rfactor
 <BR>
 
 The first form sets the longitude and latitude bounds of the output grid.
@@ -680,33 +711,24 @@ Default: If the <B>-R</B><I>west/east/south/north</I>
 option is not specified, the program will set
 the grid bounds to be the area encompassing all of the data in the
 input files.
-<DT><B>-S</B>
+<DT><B>--speed-minimum=speed -Sspeed</B>
 
 <DD>
-<I>speed</I>
-<BR>
-
 Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in
 the input data; pings associated with a smaller ship speed will not be
 output. Default: <I>speed</I> = 0.
-<DT><B>-T</B>
+<DT><B>--topography-grid=topogridfile -Ttopogridfile</B>
 
 <DD>
-<I>topogridfile</I>
-<BR>
-
 Sets <I>topogridfile</I> as a topography grid to be used when calculating
 the footprint of each amplitude or sidescan value on the seafloor. If
 this option is used, the acrosstrack distance versus grazing angle table
 used to position and size the beam or pixel footprints is derived from
 the specified topography grid rather than from a flat bottom assumption.
 By default, no topography grid is used.
-<DT><B>-U</B>
+<DT><B>--directional-priority=bearing/factor[/mode] -Ubearing/factor[/mode]</B>
 
 <DD>
-<I>bearing/factor[/mode]</I>
-<BR>
-
 Enables prioritizing data points according to their look azimuth
 or to the platform heading at ping time.
 <P>
@@ -761,29 +783,23 @@ nonzero priorities will be restricted to headings within
 range of nonzero priorities will expand (e.g. if <I>factor</I> = 0.5, only
 headings 180 degrees away from <I>bearing</I>
 will have a zero priority).
-<DT><B>-V</B>
+<DT><B>--verbose -V</B>
 
 <DD>
 Normally, <B>mbmosaic</B> prints out information regarding its
 controlling parameters during execution; the
 <B>-V</B> option causes the program to also print out statements
 indicating its progress.
-<DT><B>-W</B>
+<DT><B>--weighting-scale=scale -Wscale</B>
 
 <DD>
-<I>scale</I>
-<BR>
-
 Sets the width of the gaussian weighting function in terms of
 the grid spacing.  The distance to the 1/e point of the weighting
 function is given by half of the grid spacing times <I>scale</I>.
 Default: <I>scale</I> = 1.0
-<DT><B>-X</B>
+<DT><B>--extend=extend -Xextend</B>
 
 <DD>
-<I>extend</I>
-<BR>
-
 Extends the size of the internal grid so that the output grid is a
 subset from the center of a larger grid.   This allows data outside
 the output grid to guide the spline interpolation of data gaps which
@@ -792,12 +808,9 @@ extension is <I>extend</I> times the grid width/height to each side.
 Thus, if <I>extend</I>=1.0, then the internal grid will have dimensions
 three times the output grid.
 Default: <I>extend</I> = 0.0
-<DT><B>-Y</B>
+<DT><B>--priority-source=priority_source -Ypriority_source</B>
 
 <DD>
-<I>priority_source</I>
-<BR>
-
 Enables priortization of data points based on their apparent
 grazing angle (this angle is arctan(x/z) where x is acrosstrack distance
 and z is sonar altitude, so
@@ -901,12 +914,9 @@ The highest priority assigned should be one, and the lowest zero.
 Priorities for grazing angles less than the minimum or greater
 than the maximum will be zero. See the examples below for a
 further explanation of the use of <I>priority_source</I>.
-<DT><B>-Z</B>
+<DT><B>--altitude-default=bathdef -Zbathdef</B>
 
 <DD>
-<I>bath_default</I>
-<BR>
-
 Sets the default depth used for calculating grazing angles for
 amplitude or sidescan values where depths are not available.
 Default: <I>bath_default</I> = 1000.0

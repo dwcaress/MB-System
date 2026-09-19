@@ -2624,22 +2624,41 @@ int mbeditviz_setup_grid() {
 
   /* allocate memory for grid */
   if (mbev_status == MB_SUCCESS) {
-    if ((mbev_grid.sum = (float *)malloc(mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float))) == NULL)
+    /* Guard against bogus bounds (e.g. from a nav outlier in one of the
+       loaded files) or a too-small cell size producing a grid whose
+       column*row cell count overflows a 32-bit int. Left unchecked, that
+       overflow previously wrapped to a small positive number, so the
+       mallocs below "succeeded" with an undersized buffer while the
+       (correct, huge) n_columns/n_rows were still used to index into it,
+       causing out-of-bounds writes and a crash instead of a clean failure. */
+    const size_t ncells = (size_t)mbev_grid.n_columns * (size_t)mbev_grid.n_rows;
+    if (mbev_grid.n_columns <= 0 || mbev_grid.n_rows <= 0 || ncells > MBEV_GRID_MAX_CELLS) {
+      fprintf(stderr, "\nMBeditviz: Requested grid is too large (%d columns x %d rows = %zu cells, max %d).\n"
+                      "This is usually caused by a bad navigation fix in the loaded data producing\n"
+                      "unreasonable grid bounds, or by too small a grid cell size. Aborting the grid.\n",
+              mbev_grid.n_columns, mbev_grid.n_rows, ncells, MBEV_GRID_MAX_CELLS);
       mbev_error = MB_ERROR_MEMORY_FAIL;
-    if ((mbev_grid.wgt = (float *)malloc(mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float))) == NULL)
-      mbev_error = MB_ERROR_MEMORY_FAIL;
-    if ((mbev_grid.val = (float *)malloc(mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float))) == NULL)
-      mbev_error = MB_ERROR_MEMORY_FAIL;
-    if ((mbev_grid.sgm = (float *)malloc(mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float))) == NULL)
-      mbev_error = MB_ERROR_MEMORY_FAIL;
-    if (mbev_error == MB_ERROR_NO_ERROR) {
-      memset(mbev_grid.sum, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
-      memset(mbev_grid.wgt, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
-      memset(mbev_grid.val, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
-      memset(mbev_grid.sgm, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
-    }
-    else
       mbev_status = MB_FAILURE;
+    }
+    else {
+      const size_t gridbytes = ncells * sizeof(float);
+      if ((mbev_grid.sum = (float *)malloc(gridbytes)) == NULL)
+        mbev_error = MB_ERROR_MEMORY_FAIL;
+      if ((mbev_grid.wgt = (float *)malloc(gridbytes)) == NULL)
+        mbev_error = MB_ERROR_MEMORY_FAIL;
+      if ((mbev_grid.val = (float *)malloc(gridbytes)) == NULL)
+        mbev_error = MB_ERROR_MEMORY_FAIL;
+      if ((mbev_grid.sgm = (float *)malloc(gridbytes)) == NULL)
+        mbev_error = MB_ERROR_MEMORY_FAIL;
+      if (mbev_error == MB_ERROR_NO_ERROR) {
+        memset(mbev_grid.sum, 0, gridbytes);
+        memset(mbev_grid.wgt, 0, gridbytes);
+        memset(mbev_grid.val, 0, gridbytes);
+        memset(mbev_grid.sgm, 0, gridbytes);
+      }
+      else
+        mbev_status = MB_FAILURE;
+    }
   }
 
   if (mbev_verbose >= 2) {
@@ -2720,11 +2739,22 @@ int mbeditviz_make_grid() {
     fprintf(stderr, "Algorithm: Shoal Bias\n");
   fprintf(stderr, "Interpolation: %d\n\n", mbev_grid_interpolation);
 
+  /* if the preceding mbeditviz_setup_grid() call failed (e.g. it refused
+     to allocate an unreasonably large grid), the grid arrays are NULL or
+     stale - bail out here instead of using them */
+  if (mbev_status != MB_SUCCESS || mbev_grid.sum == NULL || mbev_grid.wgt == NULL ||
+      mbev_grid.val == NULL || mbev_grid.sgm == NULL) {
+    fprintf(stderr, "\nMBeditviz: Grid arrays not available - skipping grid generation.\n");
+    mbev_status = MB_FAILURE;
+    return (mbev_status);
+  }
+
   /* zero the grid arrays */
-  memset(mbev_grid.sum, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
-  memset(mbev_grid.wgt, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
-  /* memset(mbev_grid.val, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));*/
-  memset(mbev_grid.sgm, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
+  const size_t gridbytes = (size_t)mbev_grid.n_columns * (size_t)mbev_grid.n_rows * sizeof(float);
+  memset(mbev_grid.sum, 0, gridbytes);
+  memset(mbev_grid.wgt, 0, gridbytes);
+  /* memset(mbev_grid.val, 0, gridbytes);*/
+  memset(mbev_grid.sgm, 0, gridbytes);
 
   /* loop over loaded files */
   int filecount = 0;
@@ -2748,7 +2778,7 @@ int mbeditviz_make_grid() {
   bool first = true;
   for (int i = 0; i < mbev_grid.n_columns; i++)
     for (int j = 0; j < mbev_grid.n_rows; j++) {
-      const int k = i * mbev_grid.n_rows + j;
+      const size_t k = (size_t)i * (size_t)mbev_grid.n_rows + (size_t)j;
       if (mbev_grid.wgt[k] > 0.0) {
         mbev_grid.val[k] = mbev_grid.sum[k] / mbev_grid.wgt[k];
         mbev_grid.sgm[k] = sqrt(fabs(mbev_grid.sgm[k] / mbev_grid.wgt[k] - mbev_grid.val[k] * mbev_grid.val[k]));
@@ -2816,7 +2846,7 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
     /* shoal bias gridding mode */
     if (mbev_grid_algorithm == MBEV_GRID_ALGORITHM_SHOALBIAS) {
       /* get location in grid arrays */
-      const int kk = i * mbev_grid.n_rows + j;
+      const size_t kk = (size_t)i * (size_t)mbev_grid.n_rows + (size_t)j;
 
       if (isnan(ping->bathcorr[ibeam])) {
         fprintf(stderr, "\nFunction mbeditviz_grid_beam(): Encountered NaN value in swath data from file: %s\n",
@@ -2859,7 +2889,7 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
     /* simple gridding mode */
     else if (file->topo_type != MB_TOPOGRAPHY_TYPE_MULTIBEAM || mbev_grid_algorithm == MBEV_GRID_ALGORITHM_SIMPLEMEAN) {
       /* get location in grid arrays */
-      const int kk = i * mbev_grid.n_rows + j;
+      const size_t kk = (size_t)i * (size_t)mbev_grid.n_rows + (size_t)j;
 
       if (isnan(ping->bathcorr[ibeam])) {
         fprintf(stderr, "\nFunction mbeditviz_grid_beam(): Encountered NaN value in swath data from file: %s\n",
@@ -2983,7 +3013,7 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
           /* if beam affects cell apply using weight */
           if (use_weight == MBEV_USE_YES) {
             /* get location in grid arrays */
-            const int kk = ii * mbev_grid.n_rows + jj;
+            const size_t kk = (size_t)ii * (size_t)mbev_grid.n_rows + (size_t)jj;
 
             /* add to weights and sums */
             if (beam_ok) {
@@ -3189,22 +3219,38 @@ int mbeditviz_make_grid_simple() {
 
   /* allocate memory for grid */
   if (mbev_status == MB_SUCCESS) {
-    if ((mbev_grid.sum = (float *)malloc(mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float))) == NULL)
+    /* see mbeditviz_setup_grid() for why this check is needed: an
+       unreasonable bounds/cell-size combination can produce a cell count
+       that overflows a 32-bit int, silently undersizing these mallocs
+       while indexing still uses the full (correct) n_columns/n_rows. */
+    const size_t ncells = (size_t)mbev_grid.n_columns * (size_t)mbev_grid.n_rows;
+    if (mbev_grid.n_columns <= 0 || mbev_grid.n_rows <= 0 || ncells > MBEV_GRID_MAX_CELLS) {
+      fprintf(stderr, "\nMBeditviz: Requested grid is too large (%d columns x %d rows = %zu cells, max %d).\n"
+                      "This is usually caused by a bad navigation fix in the loaded data producing\n"
+                      "unreasonable grid bounds, or by too small a grid cell size. Aborting the grid.\n",
+              mbev_grid.n_columns, mbev_grid.n_rows, ncells, MBEV_GRID_MAX_CELLS);
       mbev_error = MB_ERROR_MEMORY_FAIL;
-    if ((mbev_grid.wgt = (float *)malloc(mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float))) == NULL)
-      mbev_error = MB_ERROR_MEMORY_FAIL;
-    if ((mbev_grid.val = (float *)malloc(mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float))) == NULL)
-      mbev_error = MB_ERROR_MEMORY_FAIL;
-    if ((mbev_grid.sgm = (float *)malloc(mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float))) == NULL)
-      mbev_error = MB_ERROR_MEMORY_FAIL;
-    if (mbev_error == MB_ERROR_NO_ERROR) {
-      memset(mbev_grid.sum, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
-      memset(mbev_grid.wgt, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
-      memset(mbev_grid.val, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
-      memset(mbev_grid.sgm, 0, mbev_grid.n_columns * mbev_grid.n_rows * sizeof(float));
-    }
-    else
       mbev_status = MB_FAILURE;
+    }
+    else {
+      const size_t gridbytes = ncells * sizeof(float);
+      if ((mbev_grid.sum = (float *)malloc(gridbytes)) == NULL)
+        mbev_error = MB_ERROR_MEMORY_FAIL;
+      if ((mbev_grid.wgt = (float *)malloc(gridbytes)) == NULL)
+        mbev_error = MB_ERROR_MEMORY_FAIL;
+      if ((mbev_grid.val = (float *)malloc(gridbytes)) == NULL)
+        mbev_error = MB_ERROR_MEMORY_FAIL;
+      if ((mbev_grid.sgm = (float *)malloc(gridbytes)) == NULL)
+        mbev_error = MB_ERROR_MEMORY_FAIL;
+      if (mbev_error == MB_ERROR_NO_ERROR) {
+        memset(mbev_grid.sum, 0, gridbytes);
+        memset(mbev_grid.wgt, 0, gridbytes);
+        memset(mbev_grid.val, 0, gridbytes);
+        memset(mbev_grid.sgm, 0, gridbytes);
+      }
+      else
+        mbev_status = MB_FAILURE;
+    }
   }
 
   /* make grid */
@@ -3227,7 +3273,7 @@ int mbeditviz_make_grid_simple() {
             if (mb_beam_ok(ping->beamflag[ibeam])) {
               const int i = (ping->bathx[ibeam] - mbev_grid.boundsutm[0] + 0.5 * mbev_grid.dx) / mbev_grid.dx;
               const int j = (ping->bathy[ibeam] - mbev_grid.boundsutm[2] + 0.5 * mbev_grid.dy) / mbev_grid.dy;
-              const int k = i * mbev_grid.n_rows + j;
+              const size_t k = (size_t)i * (size_t)mbev_grid.n_rows + (size_t)j;
               mbev_grid.sum[k] += (-ping->bathcorr[ibeam]);
               mbev_grid.wgt[k] += 1.0;
               mbev_grid.sgm[k] += ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
@@ -3240,7 +3286,7 @@ int mbeditviz_make_grid_simple() {
     first = true;
     for (int i = 0; i < mbev_grid.n_columns; i++)
       for (int j = 0; j < mbev_grid.n_rows; j++) {
-        const int k = i * mbev_grid.n_rows + j;
+        const size_t k = (size_t)i * (size_t)mbev_grid.n_rows + (size_t)j;
         if (mbev_grid.wgt[k] > 0.0) {
           mbev_grid.val[k] = mbev_grid.sum[k] / mbev_grid.wgt[k];
           mbev_grid.sgm[k] = sqrt(fabs(mbev_grid.sgm[k] / mbev_grid.wgt[k] - mbev_grid.val[k] * mbev_grid.val[k]));

@@ -27,15 +27,79 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbclean</B> [<B>-A</B><I>max</I> <B>-B</B><I>low/high</I> <B>-C</B><I>slope/units</I>
-<B>-D</B><I>min/max</I> <B>-E</B><I>max</I> <B>-F</B><I>format</I>
-<B>-G</B><I>fraction_low/fraction_high</I>
-<B>-I</B><I>infile</I> <B>-K</B><I>range_min</I> <B>-L</B><I>lonflip</I>
-<B>-M</B><I>mode</I> <B>-N</B><I>tolerance</I>
-<B>-P</B><I>min_speed/max_speed</I> <B>-Q</B><I>backup</I>
-<B>-R</B><I>maxheadingrate</I> <B>-S</B><I>slope/mode/units</I>
-<B>-T</B><I>tolerance</I> <B>-U</B><I>nmin</I> <B>-W</B><I>west/east/south/north</I> <B>-X</B><I>beamsleft/beamsright</I>
-<B>-Y</B><I>distanceleft/distanceright[/mode]</I> <B>-Z -V -H</B>]
+<B>mbclean</B>
+<BR>
+
+[--deviation-max=max {-Amax}
+<BR>
+
+--depth-range=low/high {-Blow/high}
+<BR>
+
+--max-slope=slope/unit {-Cslope/unit}
+<BR>
+
+--distance-range=min/max {-Dmin/max}
+<BR>
+
+--max-acrosstrack=max_acrosstrack {-Emax_acrosstrack}
+<BR>
+
+--format=format {-Fformat}
+<BR>
+
+--fraction-range=fraction_low/fraction_high {-Gfraction_low/fraction_high}
+<BR>
+
+--input=infile {-Iinfile}
+<BR>
+
+--range-min=range_min {-Krange_min}
+<BR>
+
+--lonflip=lonflip {-Llonflip}
+<BR>
+
+--mode=mode {-Mmode}
+<BR>
+
+--ping-deviation-tolerance=tolerance {-Ntolerance}
+<BR>
+
+--speed-range=min_speed/max_speed {-Pmin_speed/max_speed}
+<BR>
+
+--zap-rails=backup_dist {-Qbackup_dist}
+<BR>
+
+--max-heading-rate=maxheadingrate {-Rmaxheadingrate}
+<BR>
+
+--spike-max=spike_slope/mode/format {-Sspike_slope/mode/format}
+<BR>
+
+--timestamp-tolerance=tolerance {-Ttolerance}
+<BR>
+
+--min-good-beams=num_good_min {-Unum_good_min}
+<BR>
+
+--bounds=west/east/south/north {-Wwest/east/south/north}
+<BR>
+
+--zap-beams=beamsleft/beamsright {-Xbeamsleft/beamsright}
+<BR>
+
+--flag-distance-angle=distanceleft/distanceright[/mode] {-Ydistanceleft/distanceright[/mode]}
+<BR>
+
+--zero-position {-Z}
+<BR>
+
+--verbose {-V}
+<BR>
+
+--help {-H}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -153,12 +217,9 @@ Dana Yoerger
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
-<DT><B>-A</B>
+<DT><B>--deviation-max=max -Amax</B>
 
 <DD>
-<I>max</I>
-<BR>
-
 This option sets the range of acceptable depth values relative to
 the local median depth. The median depth is obtained from the
 current ping and the pings immediately before and after that
@@ -167,22 +228,16 @@ than <I>max</I>, then it
 will be flagged. No deviation from the median depth checking is
 done if the <B>-A</B> option
 is not used.
-<DT><B>-B</B>
+<DT><B>--depth-range=low/high -Blow/high</B>
 
 <DD>
-<I>low/high</I>
-<BR>
-
 This option sets the range of acceptable depth values.  If a depth
 value is less than <I>low</I> or more than <I>high</I> then it
 will be flagged. No depth range checking is done if the <B>-B</B> option
 is not used.
-<DT><B>-C</B>
+<DT><B>--max-slope=slope/unit -Cslope/unit</B>
 
 <DD>
-<I>slope/unit</I>
-<BR>
-
 The value <I>slope</I> is the maximum acceptable slope. Beams associated
 with excessive slopes will be flagged or removed according to the
 operational mode specified using the <B>-M</B> option. This method will
@@ -192,12 +247,9 @@ specified but <B>-C</B> is not used then no slope checking will occur.
 0 (default) indicates the slope is in tangents, 1 slope is in radians,
 2 slope is in degrees.
 Default: <I>slope</I> = 1.0
-<DT><B>-D</B>
+<DT><B>--distance-range=min/max -Dmin/max</B>
 
 <DD>
-<I>min/max</I>
-<BR>
-
 Sets the minimum and maximum allowed distances between beams used for
 some of the flagging algorithms.  Both values are expressed in terms
 of fractions of the local median depth. Thus, <B>-D</B><I>0.01/0.25</I>
@@ -216,23 +268,17 @@ in evaluating the current beam. For instance, only beams within the
 maximum distance are used to calculate the local median depth, and only
 beams within the maximum distance are used to check for excessive slopes.
 Default: <I>min/max</I> = 0.01/0.25.
-<DT><B>-E</B>
+<DT><B>--max-acrosstrack=max_acrosstrack -Emax_acrosstrack</B>
 
 <DD>
-<I>max</I>
-<BR>
-
 This option sets the maximum acceptable acrosstrack distance for a
 sounding. If the absolute value of a beam's acrosstrack distance
 exceeds <I>max</I>, then it will be flagged. No acrosstrack distance
 checking is done if the <B>-E</B> option is not used.
 Default: <I>max</I> = 120.0 meters.
-<DT><B>-F</B>
+<DT><B>--format=format -Fformat</B>
 
 <DD>
-<I>format</I>
-<BR>
-
 Sets the data format used if the input is read from stdin
 or from a file. If <I>format</I> &lt; 0, then the input file specified
 with the <B>-I</B> option will actually contain a list of input swath sonar
@@ -241,12 +287,9 @@ and will read or write any swath sonar
 format supported by <B>MBIO</B>. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page. Default: <I>format</I> = 11.
-<DT><B>-G</B>
+<DT><B>--fraction-range=fraction_low/fraction_high -Gfraction_low/fraction_high</B>
 
 <DD>
-<I>fraction_low/fraction_high</I>
-<BR>
-
 This option sets the range of acceptable depth values relative to
 low and high fractions of the local median depth.
 The median depth is obtained from the
@@ -258,17 +301,14 @@ depth) or more than <I>fraction_high</I> times the median depth then it
 will be flagged. No fractional depth range checking is
 done if the <B>-G</B> option
 is not used.
-<DT><B>-H</B>
+<DT><B>--help -H</B>
 
 <DD>
 This &quot;help&quot; flag cause the program to print out a description
 of its operation and then exit immediately.
-<DT><B>-I</B>
+<DT><B>--input=infile -Iinfile</B>
 
 <DD>
-<I>infile</I>
-<BR>
-
 Sets the input filename. If <I>format</I> &gt; 0 (set with the
 <B>-F</B> option) then the swath sonar data contained in <I>infile</I>
 is read and processed. If <I>format</I> &lt; 0, then <I>infile</I>
@@ -286,21 +326,15 @@ This program uses the <B>MBIO</B> library and will read or write any swath sonar
 format supported by <B>MBIO</B>. A list of the swath sonar data formats
 currently supported by <B>MBIO</B> and their identifier values
 is given in the <B>MBIO</B> manual page. Default: <I>infile</I> = &quot;datalist.mb-1&quot;.
-<DT><B>-K</B>
+<DT><B>--range-min=range_min -Krange_min</B>
 
 <DD>
-<I>range_min</I>
-<BR>
-
 This option causes all unflagged beams with ranges less than
 <I>range_min</I> to be flagged as bad. The value <I>range_min</I>
 is specified in meters.
-<DT><B>-L</B>
+<DT><B>--lonflip=lonflip -Llonflip</B>
 
 <DD>
-<I>lonflip</I>
-<BR>
-
 Sets the range of the longitude values used.
 If <I>lonflip</I>=-1 then the longitude values will be in
 the range from -360 to 0 degrees. If <I>lonflip</I>=0
@@ -309,12 +343,9 @@ the range from -180 to 180 degrees. If <I>lonflip</I>=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: <I>lonflip</I> = 0.
-<DT><B>-M</B>
+<DT><B>--mode=mode -Mmode</B>
 
 <DD>
-<I>mode</I>
-<BR>
-
 Sets the manner in which bad beams identified by excessive slope
 are handled.
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;1:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Flags&nbsp;one&nbsp;beam&nbsp;associated&nbsp;with&nbsp;each&nbsp;outlier&nbsp;slope.<BR>
@@ -322,54 +353,39 @@ are handled.
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>median&nbsp;depth.<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;2:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Flags&nbsp;both&nbsp;beams&nbsp;associated&nbsp;with&nbsp;each&nbsp;outlier&nbsp;slope.<BR>
 Default: <I>mode</I> = 1.
-<DT><B>-N</B>
+<DT><B>--ping-deviation-tolerance=tolerance -Ntolerance</B>
 
 <DD>
-<I>threshold</I>
-<BR>
-
 When specified <B>mbclean</B> calculates the rms deviation between each ping and
 the pings before and after. When the rms deviation exceeds the specified threshold,
 then all unflagged valid soundings in that ping are flagged as bad. This option is
 generally used to detect and remove data pings affected by interference from other
 active sonars.
-<DT><B>-P</B>
+<DT><B>--speed-range=min_speed/max_speed -Pmin_speed/max_speed</B>
 
 <DD>
-<I>speed_low/speed_high</I>
-<BR>
-
 This option causes <B>mbclean</B> to flag as bad all beams in pings
 associated with platform speed outside the acceptable range from
 <I>speed_low</I> to <I>speed_high</I>. The speed values are specified
 in km/hour.
-<DT><B>-Q</B>
+<DT><B>--zap-rails=backup_dist -Qbackup_dist</B>
 
 <DD>
-<I>backup</I>
-<BR>
-
 This flag causes <B>mbclean</B> to search for bad &quot;rails&quot; in the
 swath sonar swath; the &quot;rails&quot; refer to groups of outer beams which
 have crosstrack distances (and depths) much less than they should
 have.  These are identified when one or more outer beams lies
 more than <I>backup</I> meters inboard of a more inner beam; all beams
 meeting this criteria are flagged.
-<DT><B>-R</B>
+<DT><B>--max-heading-rate=maxheadingrate -Rmaxheadingrate</B>
 
 <DD>
-<I>maxheadingrate</I>
-<BR>
-
 The value <I>maxheadingrate</I> is the maximum acceptable rate of change in
 heading in degrees/second. All soundings associated with pings for which the
 heading was changing at a greater rate will be flagged.
-<DT><B>-S</B>
+<DT><B>--spike-max=spike_slope/mode/format -Sspike_slope/mode/format</B>
 
 <DD>
-<I>slope/mode/unit</I>
-<BR>
-
 The value <I>slope</I> is the maximum acceptable spike slope.
 If the slope from the preceding beam to this beam exceeds this value,
 and the slope from this beam to subsequent beam exceeds this value but
@@ -393,12 +409,9 @@ If <I>mode</I> is 3 both along track and across track slopes are checked.
 A beam is not considered a spike if either the preceding or subsequent beam
 has already been flagged.
 Default: <I>slope</I> = 1.0
-<DT><B>-T</B>
+<DT><B>--timestamp-tolerance=tolerance -Ttolerance</B>
 
 <DD>
-<I>tolerance</I>
-<BR>
-
 If requested this option will reset the timestamps of edit events from an
 existing esf file to exactly match the timestamps of the survey pings. The
 <I>tolerance</I> value sets how close timestamps must be in seconds to be
@@ -406,17 +419,14 @@ considered a match. This option handles the case where survey data have been
 processed using non-<B>MB-System</B> software and a user is extracting the
 edits from one set of files with <B>mbgetesf</B> and then applying them to
 another using <B>mbprocess</B>.
-<DT><B>-U</B>
+<DT><B>--min-good-beams=num_good_min -Unum_good_min</B>
 
 <DD>
-<I>nmin</I>
-<BR>
-
 This flag causes <B>mbclean</B> to search for port or starboard
 halves of pings which contain fewer than <I>nmin</I> good bathymetry
 values. All bathymetry values in the affected half-pings are
 flagged.
-<DT><B>-V</B>
+<DT><B>--verbose -V</B>
 
 <DD>
 Normally, <B>mbclean</B> works &quot;silently&quot; without outputting
@@ -424,29 +434,20 @@ anything to the stderr stream.  If the
 <B>-V</B> flag is given, then <B>mbclean</B> works in a &quot;verbose&quot; mode and
 outputs the program version being used, all error status messages,
 and the number of beams flagged as bad.
-<DT><B>-W</B>
+<DT><B>--bounds=west/east/south/north -Wwest/east/south/north</B>
 
 <DD>
-<I>west/east/south/north</I>
-<BR>
-
 This option causes <B>mbclean</B> to flag as bad all beams in pings
 with navigation outside the specified acceptable bounds.
-<DT><B>-X</B>
+<DT><B>--zap-beams=beamsleft/beamsright -Xbeamsleft/beamsright</B>
 
 <DD>
-<I>zap_beams</I>
-<BR>
-
 If this option is used, the outermost <I>zap_beams</I> at both ends
 of the swath are flagged as bad; this is useful if the outer beams
 are known to be unreliable. Default: <I>zap_beams</I> = 0.
-<DT><B>-Y</B>
+<DT><B>--flag-distance-angle=distanceleft/distanceright[/mode] -Ydistanceleft/distanceright[/mode]</B>
 
 <DD>
-<I>distanceleft/distanceright[/mode]</I>
-<BR>
-
 This option causes <B>mbclean</B> to flag and/or unflag beams according to
 acrosstrack distance. If <I>mode</I>=1 or is not specified, then all beams
 outside the specified range (acrosstrack distances more to port/left than <I>distanceleft</I>
@@ -468,11 +469,9 @@ For <I>mode</I>=3 and <I>mode</I>=4, <I>distanceleft</I> and
 <I>distanceright</I> are beam angles expressed in degrees rather than
 acrosstrack distances in meters, with angles to port of vertical
 negative.
-<DT><B>-Z</B>
+<DT><B>--zero-position -Z</B>
 
 <DD>
-<BR>
-
 This option causes <B>mbclean</B> to flag as bad all beams in pings
 with zero longitude and latitude values.
 <P>

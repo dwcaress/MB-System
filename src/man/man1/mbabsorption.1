@@ -8,8 +8,23 @@ as a function of frequency, temperature, salinity, sound speed, and depth.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbabsorption\fP [\fB\-C\fP\fIsoundspeed\fP \fB\-D\fP\fIdepth\fP 
-\fB\-F\fP\fIfrequency\fP \fB\-P\fP\fIph\fP \fB\-S\fP\fIsalinity\fP \fB\-T\fP\fItemperature\fP \fB\-V \-H\fP]
+\fBmbabsorption\fP
+.br
+[--help {-H}
+.br
+--sound-speed=soundspeed {-Csoundspeed}
+.br
+--depth=depth {-Ddepth}
+.br
+--frequency=frequency {-Ffrequency}
+.br
+--ph=ph {-Pph}
+.br
+--salinity=salinity {-Ssalinity}
+.br
+--temperature=temperature {-Ttemperature}
+.br
+--verbose {-V}]
 
 .SH DESCRIPTION
 \fBmbabsorption\fP \- calculates the absorption of sound in sea water in dB/km
@@ -106,49 +121,37 @@ Christian do Santos Ferreira
 
 .SH OPTIONS
 .TP
-.B \-H
+.B \-\-help \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \-C
-\fIsoundspeed\fP
-.br
+.B \-\-sound\-speed=soundspeed \-Csoundspeed
 Specifies the water sound speed in m/sec. If the option is
 not used, the water sound speed will be calculated from the
-temperature, salinity, and depth. 
+temperature, salinity, and depth.
 .TP
-.B \-D
-\fIdepth\fP
-.br
+.B \-\-depth=depth \-Ddepth
 Sets the depth in meters at which the sound absorption should be calculated.
 Default: \fIdepth\fP = 0.0 m (i.e. the sea surface).
 .TP
-.B \-F
-\fIfrequency\fP
-.br
+.B \-\-frequency=frequency \-Ffrequency
 Sets the sound frequency in kHz at which the sound absorption should be calculated.
 Default: \fIfrequency\fP = 200 kHz.
 .TP
-.B \-P
-\fIph\fP
-.br
+.B \-\-ph=ph \-Pph
 Sets the pH value at which the sound absorption should be calculated.
 Default: \fIph\fP = 8.
 .TP
-.B \-S
-\fIsalinity\fP
-.br
+.B \-\-salinity=salinity \-Ssalinity
 Sets the salinity in per mil at which the sound absorption should be calculated.
 Default: \fIsalinity\fP = 35 per mil.
 .TP
-.B \-T
-\fItemperature\fP
-.br
+.B \-\-temperature=temperature \-Ttemperature
 Sets the temperature in degrees C at which the sound absorption should be calculated.
 Default: \fItemperature\fP = 10.0 degrees C.
 .TP
-.B \-V
-Normally, \fBmbabsorption\fP outputs only a single absorption value 
+.B \-\-verbose \-V
+Normally, \fBmbabsorption\fP outputs only a single absorption value
 to the stdout stream.  If the
 \fB\-V\fP flag is given, then \fBmbabsorption\fP works in a "verbose" mode and
 also outputs the parameters used to calculate the absorption.
