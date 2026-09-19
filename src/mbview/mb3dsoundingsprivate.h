@@ -82,6 +82,7 @@
 #define MBS_VIEW_COLOR_FLAG 0
 #define MBS_VIEW_COLOR_TOPO 1
 #define MBS_VIEW_COLOR_AMP 2
+#define MBS_VIEW_COLOR_SOUNDING 3
 
 /* structure to hold instances of mb3dsoundings windows */
 struct mb3dsoundings_world_struct {
@@ -306,6 +307,7 @@ void do_mb3dsdg_view_boundingbox(Widget w, XtPointer client_data, XtPointer call
 void do_mb3dsdg_view_scalewithflagged(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_colorbyflag(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_colorbytopo(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_view_colorbysounding(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_colorbyamp(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_reset(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_mouse_panzoom(Widget w, XtPointer client_data, XtPointer call_data);

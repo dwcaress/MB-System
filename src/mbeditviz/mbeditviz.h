@@ -72,6 +72,13 @@
 #define MBEV_GRID_ALGORITH_SIMPLE 0
 #define MBEV_GRID_ALGORITH_FOOTPRINT 1
 #define MBEV_GRID_WEIGHT_TINY 0.0000001
+
+/* sanity limit on the number of cells in a grid (four float arrays are
+   allocated at this size); guards against bogus navigation or bounds
+   producing a grid so large that the column*row cell count computation
+   overflows a 32-bit int, which previously caused undersized allocations
+   and out-of-bounds writes (crashes) rather than a clean allocation failure */
+#define MBEV_GRID_MAX_CELLS 100000000
 #define MBEV_ALLOC_NUM 24
 #define MBEV_ALLOCK_NUM 1024
 #define MBEV_NODATA -10000000.0

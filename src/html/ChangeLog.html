@@ -22,6 +22,7 @@ accessible as tarballs through the Github interface.</p>
 Version 5.8 Releases and Release Notes:</h3>
 <hr />
 <ul>
+<li>Version 5.8.3beta22 September 19, 2026</li>
 <li>Version 5.8.3beta21 September 13, 2026</li>
 <li>Version 5.8.3beta20 September 10, 2026</li>
 <li>Version 5.8.3beta19 September 10, 2026</li>
@@ -78,6 +79,83 @@ Version 5.8 Releases and Release Notes:</h3>
 <li><strong>Version 5.8.0 January 22, 2024</strong></li>
 </ul>
 <hr />
+<h4 id="583beta22-september-19-2026">5.8.3beta22 (September 19,
+2026)</h4>
+<p>Program mbeditviz: added a new "Color by Soundings" option to the
+View menu of the 3D Soundings window, alongside the existing "Color by
+Flag State," "Color by Topography," and "Color by Amplitude" toggles.
+The pre-existing "Color by Topography" option (unchanged) colors
+soundings by depth using the same color table and the same minimum and
+maximum topography values as the associated MBeditviz Survey Viewer, so
+its color stretch is fixed to the whole gridded bathymetry's range and
+does not change as different soundings are picked. The new "Color by
+Soundings" option instead colors soundings by depth with the color
+stretch scaled to the minimum and maximum depth values found only among
+the soundings currently displayed in the 3D Soundings window: when "Show
+Flagged Soundings" is on, the minimum and maximum are calculated over
+all of the displayed soundings regardless of beamflag state, and when it
+is off, only the unflagged (valid) soundings are used, so the full color
+range is always available to differentiate whatever subset of soundings
+is currently being examined. The new mode is implemented in
+mb3dsoundings_plot() (src/mbview/mb3dsoundings_callbacks.c), recomputing
+the local depth range and sounding colors on every redraw rather than
+baking colors in at selection time as "Color by Topography" does. The
+mbeditviz manual page was updated to document all four View-menu
+coloring modes.</p>
+<p>This feature was added with the assistance of the AI coding assistant
+Claude Sonnet 5 (Anthropic, model claude-sonnet-5), operating as Claude
+Code under developer supervision and review; the mbview and mbeditviz
+libraries/programs were rebuilt and the new option was verified to
+compile cleanly alongside the pre-existing coloring modes.</p>
+<p>Program mbeditviz: fixed a bus-fault crash while gridding survey data
+whose navigation contains a bad fix far outside the actual survey area.
+The bogus fix inflated the computed grid bounds enormously, so the
+grid's column-count times row-count cell total overflowed the 32-bit int
+used to size the grid arrays; the resulting malloc() calls silently
+"succeeded" with a wrapped, far-too-small buffer size while the true
+(huge) column/row counts were still used to index into it, producing
+out-of-bounds writes and a crash. mbeditviz_setup_grid() and
+mbeditviz_make_grid_simple() (src/mbeditviz/mbeditviz_prog.c) now
+compute the requested cell count in a size_t and refuse to allocate a
+grid larger than a sane cap (MBEV_GRID_MAX_CELLS, defined in
+mbeditviz.h), reporting the likely cause (bad navigation or too small a
+grid cell size) and aborting the grid cleanly instead of crashing;
+mbeditviz_make_grid() was also changed to check that the grid arrays
+were actually allocated before using them, and all of the grid cell
+index computations (in mbeditviz_make_grid, mbeditviz_grid_beam, and
+mbeditviz_make_grid_simple) were widened from int to size_t as a further
+guard against index overflow on large grids.</p>
+<p>This fix was made with the assistance of the AI coding assistant
+Claude Sonnet 5 (Anthropic, model claude-sonnet-5), operating as Claude
+Code under developer supervision and review, which used lldb output
+identifying the faulting instruction and out-of-range array index to
+trace the crash to the grid-size integer overflow described above;
+mbeditviz was rebuilt and verified to compile cleanly with the fix in
+place.</p>
+<p>Macro mbm_grd3dplot: fixed a malformed GMT <code>-B</code> (basemap
+axes) option in the generated plotting shellscript that caused 3D
+perspective plots to fail. The macro builds the axes annotation string
+(tick intervals, visible-face selection, and title) into a Perl
+variable, <code>$axes</code>, that already includes its own leading
+<code>-B</code> flags (e.g. <code>-Bxy1m -Bz13.62 -BSEZ+t"..."</code>),
+but the <code>psbasemap</code> call in the generated <code>.cmd</code>
+script prepended yet another <code>-B</code> to that variable, producing
+a doubled option such as <code>-B-Bxy1m -Bz13.62 -BSEZ+t"..."</code>
+that GMT's <code>psbasemap</code> could not parse ("Bad interval in -B
+option... gave interval = 0"). Because <code>psbasemap</code> then
+failed, the PostScript file was left unfinalized, causing a second,
+downstream <code>psconvert</code> failure ("file is not finalized") that
+obscured the real problem. The extraneous <code>-B</code> was removed
+from the <code>psbasemap</code> command construction in
+src/macros/mbm_grd3dplot so the axes string is emitted as built.</p>
+<p>This fix was made with the assistance of the AI coding assistant
+Claude Sonnet 5 (Anthropic, model claude-sonnet-5), operating as Claude
+Code under developer supervision and review, which traced both reported
+errors to the single duplicated <code>-B</code> option and verified the
+fix by regenerating and running the plotting shellscript against a
+user-supplied grid, confirming that <code>psbasemap</code> and the
+subsequent <code>psconvert</code> rendering step both completed
+successfully.</p>
 <h4 id="583beta21-september-13-2026">5.8.3beta21 (September 13,
 2026)</h4>
 <p>Programs mbedit, mbnavedit, and mbvelocitytool: fixed a misleading

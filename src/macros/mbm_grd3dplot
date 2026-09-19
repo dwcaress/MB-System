@@ -2136,7 +2136,7 @@ printf FCMD "echo Running gmt module psbasemap...\n";
 printf FCMD "gmt psbasemap -J\$MAP_PROJECTION\$MAP_SCALE -Jz\$MAP_ZSCALE \\\n\t";
 	printf FCMD "-E$view_control \\\n\t";
 printf FCMD "-R\$MAP_REGION \\\n\t";
-printf FCMD "-B$axes \\\n\t";
+printf FCMD "$axes \\\n\t";
 if ($grdview_zlevel)
 	{
 	printf FCMD "-Z$grdview_zlevel \\\n\t";

@@ -242,17 +242,26 @@ int mb3dsoundings_updategui() {
   if (mb3dsoundings.view_color == MBS_VIEW_COLOR_FLAG) {
     XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbyflag, True, False);
     XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbytopo, False, False);
+    XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbysounding, False, False);
     XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbyamp, False, False);
   }
   else if (mb3dsoundings.view_color == MBS_VIEW_COLOR_TOPO) {
-    XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbyflag, True, False);
+    XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbyflag, False, False);
+    XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbytopo, True, False);
+    XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbysounding, False, False);
+    XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbyamp, False, False);
+  }
+  else if (mb3dsoundings.view_color == MBS_VIEW_COLOR_SOUNDING) {
+    XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbyflag, False, False);
     XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbytopo, False, False);
+    XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbysounding, True, False);
     XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbyamp, False, False);
   }
   else /* if (mb3dsoundings.view_color == MBS_VIEW_COLOR_AMP) */ {
-    XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbyflag, True, False);
+    XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbyflag, False, False);
     XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbytopo, False, False);
-    XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbyamp, False, False);
+    XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbysounding, False, False);
+    XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbyamp, True, False);
   }
 
   if (mb3dsoundings.view_profiles == MBS_VIEW_PROFILES_NONE) {
@@ -2695,6 +2704,58 @@ soundingdata->num_soundings); */
     glEnd();
   }
 
+  /* Color by soundings - stretch the topography color scale over the
+     range of soundings currently displayed in the 3D Soundings view
+     rather than the associated Survey Viewer's min/max */
+  else if (mb3dsoundings.view_color == MBS_VIEW_COLOR_SOUNDING) {
+
+    /* get the topography min max over the soundings currently viewed,
+       regardless of beamflag state if flagged soundings are being shown,
+       else over the unflagged soundings only */
+    double zmin = 0.0;
+    double zmax = 0.0;
+    bool first = true;
+    for (int i = 0; i < soundingdata->num_soundings; i++) {
+      struct mb3dsoundings_sounding_struct *sounding =
+        (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+      if (mb3dsoundings.view_flagged || mb_beam_ok(sounding->beamflag)) {
+        if (first) {
+          first = false;
+          zmin = sounding->z;
+          zmax = sounding->z;
+        } else {
+          zmin = MIN(zmin, sounding->z);
+          zmax = MAX(zmax, sounding->z);
+        }
+      }
+    }
+
+    glPointSize(3.0);
+    glBegin(GL_POINTS);
+    for (int i = 0; i < soundingdata->num_soundings; i++) {
+      struct mb3dsoundings_sounding_struct *sounding =
+        (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+
+      /* plot sounding */
+      if (mb_beam_ok(sounding->beamflag)
+          || (mb3dsoundings.view_flagged
+              && !mb_beam_check_flag_null(sounding->beamflag)
+              && (!mb_beam_check_flag_multipick(sounding->beamflag
+                  || mb3dsoundings.view_secondary)))) {
+        float r, g, b;
+        mbview_getcolor(sounding->z, zmin, zmax, MBV_COLORTABLE_NORMAL,
+                        colortable_haxby_red[0], colortable_haxby_green[0], colortable_haxby_blue[0],
+                        colortable_haxby_red[MBV_NUM_COLORS - 1], colortable_haxby_green[MBV_NUM_COLORS - 1],
+                        colortable_haxby_blue[MBV_NUM_COLORS - 1],
+                        colortable_haxby_red, colortable_haxby_green, colortable_haxby_blue,
+                        &r, &g, &b);
+        glColor3f(r, g, b);
+        glVertex3f(sounding->glx, sounding->gly, sounding->glz);
+      }
+    }
+    glEnd();
+  }
+
   /* Color by amplitude */
   else if (mb3dsoundings.view_color == MBS_VIEW_COLOR_AMP) {
 
@@ -3255,6 +3316,7 @@ void do_mb3dsdg_view_colorbyflag(Widget w, XtPointer client_data, XtPointer call
 
   XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbyflag, True, False);
   XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbytopo, False, False);
+  XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbysounding, False, False);
   XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbyamp, False, False);
 
   /* replot the data */
@@ -3274,6 +3336,27 @@ void do_mb3dsdg_view_colorbytopo(Widget w, XtPointer client_data, XtPointer call
 
   XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbyflag, False, False);
   XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbytopo, True, False);
+  XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbysounding, False, False);
+  XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbyamp, False, False);
+
+  /* replot the data */
+  mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+/*---------------------------------------------------------------------------------------*/
+
+void do_mb3dsdg_view_colorbysounding(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+
+  // fprintf(stderr,"Called do_mb3dsdg_view_colorbysounding\n");
+
+  mb3dsoundings.view_color = MBS_VIEW_COLOR_SOUNDING;
+
+  XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbyflag, False, False);
+  XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbytopo, False, False);
+  XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbysounding, True, False);
   XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbyamp, False, False);
 
   /* replot the data */
@@ -3293,6 +3376,7 @@ void do_mb3dsdg_view_colorbyamp(Widget w, XtPointer client_data, XtPointer call_
 
   XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbyflag, False, False);
   XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbytopo, False, False);
+  XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbysounding, False, False);
   XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_colorbyamp, True, False);
 
   /* replot the data */
