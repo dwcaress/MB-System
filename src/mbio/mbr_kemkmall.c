@@ -80,7 +80,7 @@ int mbr_info_kemkmall(int verbose, int *system, int *beams_bath_max, int *beams_
   *variable_beams = true;
   *traveltime = true;
   *beam_flagging = true;
-  *platform_source = MB_DATA_NONE;
+  *platform_source = MB_DATA_INSTALLATION;
   *nav_source = MB_DATA_DATA;
   *sensordepth_source = MB_DATA_DATA;
   *heading_source = MB_DATA_DATA;
@@ -3108,6 +3108,12 @@ int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header
   memcpy(&iip->install_txt, &buffer[index], numBytesRawSensorData);
 //fprintf(stderr, "\niip->install_txt:\n%s\n", iip->install_txt);
 
+  /* populate store->active_attitude_system (MB_DATA_NAV1, MB_DATA_NAV2, or -1)
+      from the ATTI_<n> U=ACTIVE/PASSIVE flags just read above - see
+      mbsys_kmbes_active_attitude_system() - purely informational, does not
+      itself affect which of MB_DATA_NAV1/MB_DATA_NAV2 mbpreprocess merges */
+  mbsys_kmbes_active_attitude_system(store);
+
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", iip->header.numBytesDgm);
@@ -3855,8 +3861,19 @@ int mbr_kemkmall_rd_xmt(int verbose, char *buffer, void *store_ptr, void *header
   index += 4;
   mb_get_binary_float(true, &buffer[index], &(xmt->xmtPingInfo.heave));
   index += 4;
-  mb_get_binary_float(true, &buffer[index], &(xmt->xmtPingInfo.numSoundings));
+  mb_get_binary_int(true, &buffer[index], &(xmt->xmtPingInfo.numSoundings));
   index += 4;
+
+  /* the sonar lever arm was added in version 1 - older datagrams (numBytesInfoData == 60)
+      do not have it and so it is zero, which means no lever arm correction */
+  xmt->xmtPingInfo.lever_acrosstrack = 0.0;
+  xmt->xmtPingInfo.lever_alongtrack = 0.0;
+  if (xmt->xmtPingInfo.numBytesInfoData >= MBSYS_KMBES_XMT_PINGINFO_DATALENGTH) {
+    mb_get_binary_float(true, &buffer[index], &(xmt->xmtPingInfo.lever_acrosstrack));
+    index += 4;
+    mb_get_binary_float(true, &buffer[index], &(xmt->xmtPingInfo.lever_alongtrack));
+    index += 4;
+  }
 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
@@ -3900,6 +3917,15 @@ int mbr_kemkmall_rd_xmt(int verbose, char *buffer, void *store_ptr, void *header
     mb_get_binary_float(true, &buffer[index], &(xmt->xmtSounding[i].alongtrack_offset));
     index += 4;
 
+    /* Version 0 #XMT datagrams were written with an alongtrack_offset equal to the vessel
+        advance between the ping reference time and the beam receive time, i.e.
+        (sector transmit delay + two way travel time) * speed. The travel time part is
+        already contained in the soundings and must not be added again, so remove it to leave
+        the advance up to the sector transmit time that version 1 datagrams contain
+        (the XMT twtt is exactly the two way travel time used in that calculation). */
+    if (header->dgmVersion == 0)
+      xmt->xmtSounding[i].alongtrack_offset -= xmt->xmtSounding[i].twtt * xmt->xmtPingInfo.speed;
+
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       soundingIndex:                   %d\n", xmt->xmtSounding[i].soundingIndex);
@@ -3911,6 +3937,9 @@ int mbr_kemkmall_rd_xmt(int verbose, char *buffer, void *store_ptr, void *header
       fprintf(stderr, "dbg5       alongtrack_offset:               %f\n", xmt->xmtSounding[i].alongtrack_offset);
     }
   }
+
+  /* the alongtrack offsets have now been converted to the current definition */
+  xmt->header.dgmVersion = MBSYS_KMBES_XMT_VERSION;
 
   int status = MB_SUCCESS;
 
@@ -5294,15 +5323,17 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   if (status == MB_SUCCESS && store->kind == MB_DATA_DATA
       && !store->xmb.mbsystem_extensions) {
 
-    /* if a platform model has been supplied (e.g. via mb_set_platform()), use it
-       to apply lever arm and attitude corrections below - kmall data has no
-       embedded installation parameters to auto-extract a platform from, so
-       unlike reson7k3 there is no fallback extraction here */
-    struct mb_platform_struct *platform_for_pars = (struct mb_platform_struct *)mb_io_ptr->platformptr;
-
-    /* set preprocess parameters */
+    /* The first time a ping is read the XMT and XMS datagrams are constructed from the
+       values logged in the MRZ datagram, with no platform model. The MRZ has no roll,
+       pitch, heave or speed, so those come from the asynchronous data accumulated in
+       the mb_io_struct: the attitude arrays and the navigation arrays, where the
+       navigation arrays are only used by mbsys_kmbes_preprocess() to calculate speed
+       when it is called with these mb_io_struct preprocess parameters. No navigation,
+       sensordepth or heading replacement arrays are defined, so the MRZ values of
+       those are left unchanged. Replacement of the MRZ values by interpolated values,
+       with lever arm corrections from a platform model, is done by mbpreprocess. */
     struct mb_preprocess_struct *preprocess_pars_ptr = &mb_io_ptr->preprocess_pars;
-    preprocess_pars_ptr->target_sensor = (platform_for_pars != NULL) ? platform_for_pars->source_bathymetry : 0;
+    preprocess_pars_ptr->target_sensor = 0;
     preprocess_pars_ptr->timestamp_changed = false;
     preprocess_pars_ptr->time_d = 0.0;
     preprocess_pars_ptr->n_nav = mb_io_ptr->nfix;
@@ -5310,12 +5341,12 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     preprocess_pars_ptr->nav_lon = mb_io_ptr->fix_lon;
     preprocess_pars_ptr->nav_lat = mb_io_ptr->fix_lat;
     preprocess_pars_ptr->nav_speed = NULL;
-    preprocess_pars_ptr->n_sensordepth = mb_io_ptr->nsensordepth;
-    preprocess_pars_ptr->sensordepth_time_d = mb_io_ptr->sensordepth_time_d;
-    preprocess_pars_ptr->sensordepth_sensordepth = mb_io_ptr->sensordepth_sensordepth;
-    preprocess_pars_ptr->n_heading = mb_io_ptr->nheading;
-    preprocess_pars_ptr->heading_time_d = mb_io_ptr->heading_time_d;
-    preprocess_pars_ptr->heading_heading = mb_io_ptr->heading_heading;
+    preprocess_pars_ptr->n_sensordepth = 0;
+    preprocess_pars_ptr->sensordepth_time_d = NULL;
+    preprocess_pars_ptr->sensordepth_sensordepth = NULL;
+    preprocess_pars_ptr->n_heading = 0;
+    preprocess_pars_ptr->heading_time_d = NULL;
+    preprocess_pars_ptr->heading_heading = NULL;
     preprocess_pars_ptr->n_altitude = mb_io_ptr->naltitude;
     preprocess_pars_ptr->altitude_time_d = mb_io_ptr->altitude_time_d;
     preprocess_pars_ptr->altitude_altitude = mb_io_ptr->altitude_altitude;
@@ -5352,14 +5383,8 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     preprocess_pars_ptr->head2_offsets_pitch = 0.0;
     preprocess_pars_ptr->n_kluge = 0;
 
-    // call the preprocess routine
-    //  - this fills in information for the xmt record and generates pseudosidescan,
-    //    and - when a platform model is available - applies the lever arm and
-    //    attitude-driven beam angle recalculation (mb_platform_position(),
-    //    mb_platform_orientation_target(), mb_beaudoin()) already implemented
-    //    in mbsys_kmbes_preprocess() below
-    status = mbsys_kmbes_preprocess(verbose, mbio_ptr, store_ptr, (void *)platform_for_pars,
-                                    preprocess_pars_ptr, error);
+    // call the preprocess routine - this fills in the XMT record and generates pseudosidescan
+    status = mbsys_kmbes_preprocess(verbose, mbio_ptr, store_ptr, NULL, preprocess_pars_ptr, error);
   }
 
   /* set error and kind in mb_io_ptr */
@@ -8973,6 +8998,10 @@ int mbr_kemkmall_wr_xmt(int verbose, size_t *bufferalloc, char **bufferptr, void
     index += 4;
     mb_put_binary_int(true, xmt->xmtPingInfo.numSoundings, &buffer[index]);
     index += 4;
+    mb_put_binary_float(true, xmt->xmtPingInfo.lever_acrosstrack, &buffer[index]);
+    index += 4;
+    mb_put_binary_float(true, xmt->xmtPingInfo.lever_alongtrack, &buffer[index]);
+    index += 4;
 
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
@@ -9511,6 +9540,7 @@ int mbr_register_kemkmall(int verbose, void *mbio_ptr, int *error) {
   mb_io_ptr->mb_io_sonartype = &mbsys_kmbes_sonartype;
   mb_io_ptr->mb_io_sidescantype =&mbsys_kmbes_sidescantype;
   mb_io_ptr->mb_io_preprocess = &mbsys_kmbes_preprocess;
+  mb_io_ptr->mb_io_extract_platform = &mbsys_kmbes_extract_platform;
   mb_io_ptr->mb_io_extract = &mbsys_kmbes_extract;
   mb_io_ptr->mb_io_insert = &mbsys_kmbes_insert;
   mb_io_ptr->mb_io_extract_nav = &mbsys_kmbes_extract_nav;

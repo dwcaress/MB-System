@@ -233,19 +233,48 @@ which provides a complete description of the relative geometry of sensors on a
 survey platform. Platform files can be constructed using the program \fBmbmakeplatform\fP.
 Most datasets do not require the use of a platform file, and only a few data formats
 are supported with preprocessing functionality utilizing platform files (e.g. the
-Reson 7k format 88, the Teledyne 7k3 format 89, the 3D at Depth lidar formats
+Kongsberg kmall format 261, the Reson 7k format 88, the Teledyne 7k3 format 89, the 3D at Depth lidar formats
 232 and 233). Platform files are needed only when survey data have been collected
 without integrating the asynchronous navigation and attitude data and when the
 positional and angular offsets between the survey sensor (e.g. multibeam sonar,
 lidar, stereo camera rig) have not been specified in the data stream. Most often
 this situation is associated with survey systems on submerged platforms like
 autonomous underwater vehicles (AUVs) or remotely operated vehicles (ROVs).
+.br
+For Kongsberg kmall data (format 261), the installation parameters are logged in the
+#IIP datagram at the start of each file. If no platform file is specified,
+\fBmbpreprocess\fP extracts a platform model from the #IIP datagram of the first input
+file and uses it exactly as if it had been read from a platform file, including the
+\fB--nav-sensor\fP, \fB--sensordepth-sensor\fP, \fB--heading-sensor\fP,
+\fB--attitude-sensor\fP and \fB--platform-target-sensor\fP options. A platform file
+specified with \fB--platform-file\fP always takes precedence.
+.br
+For kmall data the origin of the platform model is the vessel reference point, which is the
+point to which the navigation and soundings logged in the MRZ datagrams refer. The navigation
+and distances reported by \fBMB-System\fP for any data format are those of the mapping
+sensor, so for kmall data they are converted to the sonar reference point, which is at the
+alongtrack position of the transmit array and the acrosstrack position of the receive array.
+The platform model is used in three ways. First, merged navigation is moved from the location of the
+navigation sensor to the vessel reference point before it replaces the position logged in the
+MRZ datagrams. Second, heading, roll, and pitch measured by the heading and attitude sensors
+are converted to the vessel frame. The installation angles that Kongsberg reports for
+these sensors (the ATTI lines of the installation datagram) are corrections that are added
+to the measured angles, and are handled accordingly. Third, the horizontal displacement of the
+sonar reference point from the vessel reference point (the lever arm), together with the array
+mounting angles, is used to construct the #XMT datagrams that \fBmbprocess\fP uses to recalculate
+bathymetry by raytracing. The lever arm is stored in the #XMT datagram, whose navigation is the
+position of the sonar reference point, while the MRZ datagrams keep the position of the vessel
+reference point. Without a platform model the lever arm is zero, and the navigation reported
+is that of the vessel reference point. The datagrams written by \fBmbpreprocess\fP
+are version 1 #XMT datagrams; version 0 datagrams written by earlier versions of
+\fBMB-System\fP are still read and used, but do not contain the sonar lever arm.
 In cases where the sonar control and data logging software have a full platform
 description and apply that to fully correct the survey data in real time, no
 platform file is needed for the preprocessing stage in \fBMB-System\fP. Specifically,
-all datasets collected using Kongsberg multibeam sonars do not require use of a
-platform file (the only exception to this would be if the positional offsets between
-sensors were incorrectly specified in the multibeam configuration).
+datasets collected using Kongsberg multibeam sonars do not require that a
+platform file be specified (the only exception to this would be if the positional offsets between
+sensors were incorrectly specified in the multibeam configuration); kmall data use the
+platform model extracted from the file itself, as described above.
 .TP
 .B --platform-target-sensor=\fISENSORID\fP
 If a platform file has been specified, this option defines the id of the sensor
@@ -393,6 +422,21 @@ What types of data records are present is format-dependent, as is the default
 choice of which record type is used as the navigation source. The
 program \fBmbinfo\fP can be used with the \fB-N\fP option to determine the numbers
 of different record types present in a data file.
+.br
+For Kongsberg kmall data (format 261), navigation, heading, and attitude are all
+carried together in #SKM datagrams, which can be logged from up to two
+independent sensor systems (MB_DATA_NAV1 and MB_DATA_NAV2); the sonar's own
+real-time processing uses only one of these, as recorded in the file's own #IIP
+installation datagram. If \fB\-\-nav-async\fP is not specified for kmall data,
+\fBmbpreprocess\fP automatically determines from that installation record whether
+MB_DATA_NAV1 or MB_DATA_NAV2 is the active sensor system and uses it as the
+navigation source, falling back to MB_DATA_NAV1 if the installation record does
+not unambiguously mark one sensor system as active. Specifying \fB\-\-nav-async\fP
+explicitly always overrides this automatic selection. The merged navigation replaces the
+longitude and latitude logged in the MRZ datagrams, which are the position of the vessel
+reference point rather than of the sonar; the navigation reported by \fBMB-System\fP is the position
+of the sonar reference point derived from it. Reading kmall data without \fBmbpreprocess\fP
+leaves the logged MRZ navigation, heading, and sensor depth unchanged.
 .TP
 .B --nav-sensor=\fISENSORID\fP
 If a platform file has been specified, this option defines the id of the sensor
@@ -555,6 +599,14 @@ What types of data records are present is format-dependent, as is the default
 choice of which record type is used as the heading source. The
 program \fBmbinfo\fP can be used with the \fB-N\fP option to determine the numbers
 of different record types present in a data file.
+.br
+For Kongsberg kmall data (format 261), if \fB\-\-heading-async\fP is not specified,
+\fBmbpreprocess\fP automatically determines from the file's own #IIP installation
+datagram whether MB_DATA_NAV1 or MB_DATA_NAV2 is the active attitude/heading
+sensor system (see \fB\-\-nav-async\fP above) and uses it as the heading source,
+falling back to MB_DATA_NAV1 if the installation record does not unambiguously
+mark one sensor system as active. Specifying \fB\-\-heading-async\fP explicitly
+always overrides this automatic selection.
 .TP
 .B --heading-sensor=\fISENSORID\fP
 If a platform file has been specified, this option defines the id of the sensor
@@ -692,6 +744,14 @@ What types of data records are present is format-dependent, as is the default
 choice of which record type is used as the attitude source. The
 program \fBmbinfo\fP can be used with the \fB-N\fP option to determine the numbers
 of different record types present in a data file.
+.br
+For Kongsberg kmall data (format 261), if \fB\-\-attitude-async\fP is not specified,
+\fBmbpreprocess\fP automatically determines from the file's own #IIP installation
+datagram whether MB_DATA_NAV1 or MB_DATA_NAV2 is the active attitude/heading
+sensor system (see \fB\-\-nav-async\fP above) and uses it as the attitude source,
+falling back to MB_DATA_NAV1 if the installation record does not unambiguously
+mark one sensor system as active. Specifying \fB\-\-attitude-async\fP explicitly
+always overrides this automatic selection.
 .TP
 .B --attitude-sensor=\fISENSORID\fP
 If a platform file has been specified, this option defines the id of the sensor
@@ -942,6 +1002,14 @@ This option pertains only to Reson 7125 200 kHz multibeam data collected on the 
 MBARI Mapping AUV from 2006 through 2009. Invoking this kluge triggers \fBmbpreprocess\fP
 to modify the beam quality factors to be consistent with the later (>2009) standard for
 the original bathymetry records in Reson s7k format data.
+.TP
+\fB--kluge-auv-sentry-sensordepth\fP
+For Kongsberg kmall data (format 261) from platforms such as the AUV Sentry, for which
+the transducer depth logged in the MRZ datagrams does not give the depth of the vehicle,
+this option replaces the sensor depth with the negative of the ellipsoid height of the
+vessel reference point (-ellipsoidHeightReRefPoint_m) logged in the MRZ datagrams and sets
+the heave to zero. Sensor depth data merged with
+\fB--sensordepth-file\fP or \fB--sensordepth-async\fP take precedence over this replacement.
 .TP
 \fB--kluge-flipsign-roll\fP
 This option multiplies the roll values to merged by -1, flipping the sign.

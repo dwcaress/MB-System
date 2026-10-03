@@ -36,8 +36,8 @@
 #include <stdint.h>
 
 /* Define version and date for this release */
-#define MB_VERSION "5.8.3beta22"
-#define MB_VERSION_DATE "15 September 2026"
+#define MB_VERSION "5.8.3beta23"
+#define MB_VERSION_DATE "3 October 2026"
 
 /* CMake supports current OS's and so there is only one form of RPC and XDR and no mb_config.h file */
 #ifdef CMAKE_BUILD_SYSTEM
@@ -658,6 +658,15 @@ int mb_platform_set_sensor_offset(int verbose, void *platform_ptr, int isensor, 
                                   double position_offset_z,
                                   double attitude_offset_azimuth, double attitude_offset_roll,
                                   double attitude_offset_pitch, int *error);
+void mb_platform_displacement_to_lonlat(double lat, double heading, double acrosstrack, double alongtrack, double *dlon,
+                                        double *dlat);
+void mb_platform_lever_rotate(double xx, double yy, double zz, double heading, double roll, double pitch, double *lever_x,
+                              double *lever_y, double *lever_z);
+int mb_platform_lever_origin(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset, double heading,
+                             double roll, double pitch, double *lever_x, double *lever_y, double *lever_z, int *error);
+int mb_platform_position_platform(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset, double navlon,
+                                  double navlat, double sensordepth, double heading, double roll, double pitch,
+                                  double *targetlon, double *targetlat, double *targetdepth, int *error);
 int mb_platform_set_sensor_timelatency(int verbose, void *platform_ptr, int isensor, int time_latency_mode,
                                        double time_latency_static, int num_time_latency, double *time_latency_time_d,
                                        double *time_latency_value, int *error);

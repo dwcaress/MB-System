@@ -5954,8 +5954,10 @@ int mbr_em710raw_wr_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 	buff_len = strlen(buff);
 	sprintf(&buff[buff_len], "DSF=%.6f,", store->par_dsf);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "DSH=%c%c,", store->par_dsh[0], store->par_dsh[1]);
-	buff_len = strlen(buff);
+	if (store->par_dsh[0] != '\0' && store->par_dsh[1] != '\0') {
+		sprintf(&buff[buff_len], "DSH=%c%c,", store->par_dsh[0], store->par_dsh[1]);
+		buff_len = strlen(buff);
+	}
 	sprintf(&buff[buff_len], "APS=%d,", store->par_aps);
 	buff_len = strlen(buff);
 
@@ -6022,8 +6024,10 @@ int mbr_em710raw_wr_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 	buff_len = strlen(buff);
 	sprintf(&buff[buff_len], "MSY=%.3f,", store->par_msy);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "MRP=%c%c,", store->par_mrp[0], store->par_mrp[1]);
-	buff_len = strlen(buff);
+	if (store->par_mrp[0] != '\0' && store->par_mrp[1] != '\0') {
+		sprintf(&buff[buff_len], "MRP=%c%c,", store->par_mrp[0], store->par_mrp[1]);
+		buff_len = strlen(buff);
+	}
 	sprintf(&buff[buff_len], "MSD=%.3f,", store->par_msd);
 	buff_len = strlen(buff);
 	sprintf(&buff[buff_len], "MSR=%.3f,", store->par_msr);
@@ -6038,8 +6042,10 @@ int mbr_em710raw_wr_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 	buff_len = strlen(buff);
 	sprintf(&buff[buff_len], "NSY=%.3f,", store->par_nsy);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "NRP=%c%c,", store->par_nrp[0], store->par_nrp[1]);
-	buff_len = strlen(buff);
+	if (store->par_nrp[0] != '\0' && store->par_nrp[1] != '\0') {
+		sprintf(&buff[buff_len], "NRP=%c%c,", store->par_nrp[0], store->par_nrp[1]);
+		buff_len = strlen(buff);
+	}
 	sprintf(&buff[buff_len], "NSD=%.3f,", store->par_nsd);
 	buff_len = strlen(buff);
 	sprintf(&buff[buff_len], "NSR=%.3f,", store->par_nsr);

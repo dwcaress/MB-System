@@ -209,7 +209,8 @@
 #define MBSYS_KMBES_CPO_VAR_OFFSET 72
 #define MBSYS_KMBES_IIP_VAR_OFFSET 30
 #define MBSYS_KMBES_IOP_VAR_OFFSET 30
-#define MBSYS_KMBES_XMT_PINGINFO_DATALENGTH 60
+#define MBSYS_KMBES_XMT_PINGINFO_DATALENGTH 68
+#define MBSYS_KMBES_XMT_PINGINFO_DATALENGTH_V0 60
 #define MBSYS_KMBES_XMT_SOUNDING_DATALENGTH 24
 
 /*---------------------------------------------------------------*/
@@ -1554,8 +1555,11 @@ struct mbsys_kmbes_xmt_ping_info {
     unsigned short numBytesInfoData;     /* Number of bytes in current struct (60). */
     unsigned short numBytesPerSounding;  /* Number of bytes per sounding entry (16) */
     int padding0;                        /* padding field */
-    double longitude;                   /* Sonar longtitude (degrees) */
-    double latitude;                     /* Sonar latitude (degrees) */
+    double longitude;                   /* Sonar longitude (degrees) - the position of the sonar reference point,
+                                            which is the reference point displaced from the position in the #MRZ
+                                            datagram (the vessel reference point) by lever_acrosstrack and
+                                            lever_alongtrack. This is the navigation reported by MB-System. */
+    double latitude;                     /* Sonar latitude (degrees) - see longitude */
     double sensordepth;                  /* Sonar depth (meters) */
     double heading;                       /* Sonar heading (degrees) */
     float speed;                         /* Sonar speed (m/s) */
@@ -1563,6 +1567,16 @@ struct mbsys_kmbes_xmt_ping_info {
     float pitch;                         /* Sonar pitch (degrees) */
     float heave;                         /* Sonar heave (meters) */
     int numSoundings;                    /* number of soundings */
+    /* Fields below were added in version 1 of the #XMT datagram. Version 0 datagrams have
+       numBytesInfoData == 60 and do not contain them - they are read as zero. */
+    float lever_acrosstrack;             /* Acrosstrack displacement (meters, positive starboard) of the sonar
+                                            reference point from the vessel reference point, in the surface
+                                            coordinate system. This is the acrosstrack position of the receive
+                                            array, which sets the acrosstrack position of the soundings. */
+    float lever_alongtrack;              /* Alongtrack displacement (meters, positive forward) of the sonar
+                                            reference point from the vessel reference point, in the surface
+                                            coordinate system. This is the alongtrack position of the transmit
+                                            array, which sets the alongtrack position of the soundings. */
 };
 
 struct mbsys_kmbes_xmt_sounding {
@@ -1594,7 +1608,7 @@ struct mbsys_kmbes_xmt {
     struct mbsys_kmbes_xmt_sounding xmtSounding[MBSYS_KMBES_MAX_NUM_BEAMS+MBSYS_KMBES_MAX_EXTRA_DET];
 };
 
- #define MBSYS_KMBES_XMT_VERSION 0
+ #define MBSYS_KMBES_XMT_VERSION 1
 
 /************************************
 
@@ -1673,25 +1687,33 @@ struct mbsys_kmbes_struct {
     /* Type of most recently read data record */
     /* Translation of kind values:
         MB_DATA_DATA              =  1: Set of MRZ datagrams associated with a single ping
-        MB_DATA_COMMENT           =  2:
+        MB_DATA_COMMENT           =  2: #XMC datagram
         MB_DATA_NAV               = 12: #SPO datagram
-        MB_DATA_ATTITUDE          = 18: #SKM datagram
+        MB_DATA_NAVIGATION_ERROR  = 26: #SPE datagram
+        MB_DATA_DATUM             = 75: #SPD datagram
+        MB_DATA_NAV1              = 29: #SKM datagram
+        MB_DATA_NAV2              = 30: #SKM datagram
         MB_DATA_VELOCITY_PROFILE  =  6: #SVP datagram
         MB_DATA_SSV               = 19: #SVT datagram
         MB_DATA_CLOCK             = 14: #SCL datagram
         MB_DATA_SENSORDEPTH       = 59: #SDE datagram
         MB_DATA_HEIGHT            = 16: #SHI datagram
         MB_DATA_HEADING           = 17: #SHA datagram
-        MB_DATA_DATA              = 12: #MRZ datagram
+        MB_DATA_DATA              = 1:  #MRZ datagram
         MB_DATA_WATER_COLUMN      = 46: #MWC datagram
-        MB_DATA_NAV1              = 29: #CPO datagram
+        MB_DATA_DATA              = 1:  #MSC datagram
+        MB_DATA_NAV3              = 31: #CPO datagram
         MB_DATA_HEAVE             = 64: #CHE datagram
         MB_DATA_INSTALLATION      = 45: #IIP datagram
         MB_DATA_RUN_PARAMETER     = 13: #IOP datagram
         MB_DATA_BIST              = 65: #IBE datagram
         MB_DATA_BIST1             = 66: #IBR datagram
-        MB_DATA_BIST2             = 67: #IBS datagram */
-
+        MB_DATA_BIST2             = 67: #IBS datagram
+        MB_DATA_BSCALIBRATIONFILE = 69: #FCF datagram
+        MB_DATA_MBSYSTEM          = 68: #XMB datagram
+        MB_DATA_DATA              = 1:  #XMT datagram
+        MB_DATA_DATA              = 1:  #XMS datagram */
+        
     int kind; /* MB-System record ID */
 
     /* MB-System time stamp of most recently read record */
@@ -1764,6 +1786,17 @@ struct mbsys_kmbes_struct {
     /* #IIP - Info Installation PU */
     struct mbsys_kmbes_iip iip;
 
+    /* Indicates whether MB_DATA_NAV1 (#SKM sensorSystem 0) or MB_DATA_NAV2
+        (#SKM sensorSystem 1) is the attitude/heading sensor marked
+        "U=ACTIVE" in iip.install_txt's ATTI_<n> line, cached the first time
+        it is parsed. -1 means not yet parsed (or install_txt not yet read,
+        or no line unambiguously marked active). This is purely
+        informational - it does not itself select which of MB_DATA_NAV1/
+        MB_DATA_NAV2 mbpreprocess merges; that is controlled by the
+        --nav-async, --heading-async, and --attitude-async options. See
+        mbsys_kmbes_active_attitude_system(). */
+    int active_attitude_system;
+
     /* #IOP -  Runtime datagram */
     struct mbsys_kmbes_iop iop;
 
@@ -1816,10 +1849,11 @@ int mbsys_kmbes_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 int mbsys_kmbes_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error);
 int mbsys_kmbes_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error);
 int mbsys_kmbes_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error);
+int mbsys_kmbes_active_attitude_system(void *store_ptr);
 int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
                             void *platform_ptr, void *preprocess_pars_ptr, int *error);
-// int mbsys_kmbes_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
-//		int *kind, void **platform_ptr, int *error);
+int mbsys_kmbes_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
+                                   int *kind, void **platform_ptr, int *error);
 int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                                  double *navlon, double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss,
                                  char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,

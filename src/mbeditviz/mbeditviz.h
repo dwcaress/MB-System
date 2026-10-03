@@ -121,11 +121,9 @@ struct mbev_ping_struct {
 	double distance;
 	double altitude;
 	double sensordepth;
-	double draft;
 	double roll;
 	double pitch;
 	double heave;
-	double ssv;
 	int beams_bath;
 	char *beamflag;
 	char *beamflagorg;
@@ -139,12 +137,6 @@ struct mbev_ping_struct {
 	double *bathlat;
 	double *bathx;
 	double *bathy;
-	double *angles;
-	double *angles_forward;
-	double *angles_null;
-	double *ttimes;
-	double *bheave;
-	double *alongtrack_offset;
 };
 struct mbev_file_struct {
 	int load_status;

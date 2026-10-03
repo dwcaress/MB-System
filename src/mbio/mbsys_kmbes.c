@@ -104,6 +104,9 @@ int mbsys_kmbes_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
   /* initialize data record kind */
   store->kind = MB_DATA_NONE;
 
+  /* -1 means "not yet parsed from iip.install_txt" - see mbsys_kmbes_active_attitude_system() */
+  store->active_attitude_system = -1;
+
   /* initialize data struct pointers to NULL */
   for (int i = 0; i < MBSYS_KMBES_MAX_NUM_MWC_DGMS; i++)
     store->mwc[i].beamData_p = NULL;
@@ -180,6 +183,324 @@ int mbsys_kmbes_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
   }
 
   /* return status */
+  return (status);
+}
+
+/*--------------------------------------------------------------------*/
+/* A Kongsberg installation can log #SKM (attitude/heading) samples from more
+    than one physical sensor system - mbr_kemkmall_rd_skm() always assigns
+    sensorSystem 0 to kind MB_DATA_NAV1 and sensorSystem 1 to kind
+    MB_DATA_NAV2, with no guarantee that NAV1 is the one actually used by the
+    sonar's own real-time processing. The #IIP installation datagram's
+    free-text install_txt separately documents, per sensor, an ATTI_<n> line
+    (1-based n) ending in "U=ACTIVE" or "U=PASSIVE" (or "U=NOT_SET"); ATTI_1
+    corresponds to MB_DATA_NAV1 (sensorSystem 0) and ATTI_2 to MB_DATA_NAV2
+    (sensorSystem 1). This parses install_txt once (caching the result in
+    store->active_attitude_system) and returns MB_DATA_NAV1 or MB_DATA_NAV2
+    according to whichever ATTI_<n> line is marked active, or -1 if
+    install_txt has not been read yet or no line is unambiguously marked
+    active. It is purely informational - mbpreprocess's --nav-async,
+    --heading-async, and --attitude-async options are what actually select
+    which of MB_DATA_NAV1/MB_DATA_NAV2 is merged, since only the user knows
+    (e.g. from this value, or from reading install_txt directly) whether a
+    given installation's #IIP tagging can be trusted. */
+int mbsys_kmbes_active_attitude_system(void *store_ptr) {
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+
+  if (store->active_attitude_system != -1 || store->iip.install_txt[0] == '\0') {
+    return store->active_attitude_system;
+  }
+
+  const char *line = (const char *)store->iip.install_txt;
+  const char *const txt_end = line + sizeof(store->iip.install_txt);
+  int active_kind = -1;
+  while (line < txt_end && *line != '\0') {
+    const char *comma = memchr(line, ',', (size_t)(txt_end - line));
+    const char *lineend = comma != NULL ? comma : (const char *)memchr(line, '\0', (size_t)(txt_end - line));
+    if (lineend == NULL)
+      lineend = txt_end;
+    int atti_num = 0;
+    if (lineend - line > 5 && strncmp(line, "ATTI_", 5) == 0 && sscanf(line + 5, "%d", &atti_num) == 1) {
+      for (const char *p = line; p < lineend - 2; p++) {
+        if (strncmp(p, ";U=", 3) == 0) {
+          if (strncmp(p + 3, "ACTIVE", 6) == 0) {
+            if (atti_num == 1)
+              active_kind = MB_DATA_NAV1;
+            else if (atti_num == 2)
+              active_kind = MB_DATA_NAV2;
+          }
+          break;
+        }
+      }
+    }
+    line = comma != NULL ? comma + 1 : txt_end;
+  }
+
+  store->active_attitude_system = active_kind;
+  return active_kind;
+}
+
+/*--------------------------------------------------------------------*/
+/* Helper functions for parsing the #IIP datagram's free-text install_txt,
+    used by mbsys_kmbes_extract_platform() below. install_txt is a series of
+    comma-delimited segments; most have the form "PREFIX:key1=val1;key2=
+    val2;..." (e.g. "TRAI_TX1:N=0;X=4.221;Y=0.914;Z=6.225;R=0.060;P=-0.070;
+    H=0.120;S=1.0") but a few are bare "KEY=value" (e.g. "SN=10055") or
+    "PREFIX:freetext" with no key=value structure (e.g. "SYSTEM:EM 124"). A
+    single '\n' may follow any comma as cosmetic formatting and is skipped
+    when looking for the next segment's prefix. */
+
+/* Finds the first install_txt segment beginning with the exact string
+    prefix (e.g. "TRAI_TX1:" or "SN=") and returns the segment's remaining
+    text (after prefix) in [*value_start, *value_end). Returns false if no
+    such segment is found or install_txt has not been read yet. */
+static bool mbsys_kmbes_iip_segment(void *store_ptr, const char *prefix, const char **value_start, const char **value_end) {
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  const size_t prefixlen = strlen(prefix);
+  const char *p = (const char *)store->iip.install_txt;
+  const char *const txt_end = p + sizeof(store->iip.install_txt);
+  while (p < txt_end && *p != '\0') {
+    const char *comma = memchr(p, ',', (size_t)(txt_end - p));
+    const char *segend = comma != NULL ? comma : (const char *)memchr(p, '\0', (size_t)(txt_end - p));
+    if (segend == NULL)
+      segend = txt_end;
+    if ((size_t)(segend - p) >= prefixlen && strncmp(p, prefix, prefixlen) == 0) {
+      *value_start = p + prefixlen;
+      *value_end = segend;
+      return true;
+    }
+    p = comma != NULL ? comma + 1 : txt_end;
+    if (p < txt_end && *p == '\n')
+      p++;
+  }
+  return false;
+}
+
+/* Within a single install_txt segment's value range [start, end) (as
+    returned by mbsys_kmbes_iip_segment()), locates the value of a ';'
+    delimited "key=value" field. Returns false if the field is not present. */
+static bool mbsys_kmbes_iip_field(const char *start, const char *end, const char *key, const char **value_start,
+                                   size_t *value_len) {
+  const size_t keylen = strlen(key);
+  const char *p = start;
+  while (p < end) {
+    const char *semi = memchr(p, ';', (size_t)(end - p));
+    const char *fieldend = semi != NULL ? semi : end;
+    if ((size_t)(fieldend - p) > keylen && strncmp(p, key, keylen) == 0 && p[keylen] == '=') {
+      *value_start = p + keylen + 1;
+      *value_len = (size_t)(fieldend - *value_start);
+      return true;
+    }
+    p = semi != NULL ? semi + 1 : end;
+  }
+  return false;
+}
+
+/* Parses a ';'-delimited "key=value" field within [start, end) as a double.
+    Returns false if the field is absent or not parseable as a number. */
+static bool mbsys_kmbes_iip_double(const char *start, const char *end, const char *key, double *value) {
+  const char *value_start;
+  size_t value_len;
+  if (!mbsys_kmbes_iip_field(start, end, key, &value_start, &value_len) || value_len == 0)
+    return false;
+  char buffer[32];
+  if (value_len >= sizeof(buffer))
+    value_len = sizeof(buffer) - 1;
+  memcpy(buffer, value_start, value_len);
+  buffer[value_len] = '\0';
+  return sscanf(buffer, "%lf", value) == 1;
+}
+
+/* Returns true if the ';'-delimited "U=" field within [start, end) is
+    present and set to "ACTIVE" (as opposed to "PASSIVE" or "NOT_SET"). */
+static bool mbsys_kmbes_iip_active(const char *start, const char *end) {
+  const char *value_start;
+  size_t value_len;
+  return mbsys_kmbes_iip_field(start, end, "U", &value_start, &value_len) && value_len == 6 &&
+         strncmp(value_start, "ACTIVE", 6) == 0;
+}
+
+/*--------------------------------------------------------------------*/
+/* Constructs a platform model from the #IIP installation datagram's
+    install_txt free text, following the pattern of
+    mbsys_simrad3_extract_platform(). The multibeam sensor's two offsets come
+    from the TRAI_TX1/TRAI_RX1 lines (transmit/receive transducer; model name
+    from the SYSTEM line); up to three position sensors come from the
+    POSI_1/POSI_2/POSI_3 lines; up to two motion (attitude) sensors come from
+    the ATTI_1/ATTI_2 lines. Whichever POSI_n/ATTI_n line is marked
+    "U=ACTIVE" selects the platform's primary source of
+    position/heading/rollpitch/heave. install_txt reports offsets in
+    Kongsberg's own SCS convention (X=forward, Y=starboard, Z=down); as in
+    mbsys_simrad3_extract_platform(), these are swapped/negated to match
+    MB-System's platform convention. */
+int mbsys_kmbes_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void **platform_ptr, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:       %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:      %p\n", (void *)store_ptr);
+    fprintf(stderr, "dbg2       platform_ptr:   %p\n", (void *)platform_ptr);
+    fprintf(stderr, "dbg2       *platform_ptr:  %p\n", (void *)*platform_ptr);
+  }
+
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+
+  int status = MB_SUCCESS;
+
+  /* if needed allocate a new platform structure */
+  if (*platform_ptr == NULL) {
+    status = mb_platform_init(verbose, (void **)platform_ptr, error);
+  }
+
+  if (*platform_ptr != NULL && store->iip.install_txt[0] != '\0') {
+    struct mb_platform_struct *platform = (struct mb_platform_struct *)(*platform_ptr);
+
+    const char *value_start;
+    const char *value_end;
+
+    /* look for multibeam sensor, add it if necessary */
+    int sensor_multibeam = -1;
+    for (int isensor = 0; isensor < platform->num_sensors && sensor_multibeam < 0; isensor++) {
+      if (platform->sensors[isensor].type == MB_SENSOR_TYPE_SONAR_MULTIBEAM) {
+        sensor_multibeam = isensor;
+      }
+    }
+    if (sensor_multibeam < 0) {
+      mb_longname multibeam_model;
+      strcpy(multibeam_model, "Unknown");
+      if (mbsys_kmbes_iip_segment(store, "SYSTEM:", &value_start, &value_end)) {
+        size_t len = (size_t)(value_end - value_start);
+        if (len >= sizeof(multibeam_model))
+          len = sizeof(multibeam_model) - 1;
+        memcpy(multibeam_model, value_start, len);
+        multibeam_model[len] = '\0';
+      }
+      const int capability1 = MB_SENSOR_CAPABILITY1_NONE;
+      const int capability2 = MB_SENSOR_CAPABILITY2_TOPOGRAPHY_MULTIBEAM + MB_SENSOR_CAPABILITY2_BACKSCATTER_MULTIBEAM;
+      const int num_offsets = 2;
+      const int num_time_latency = 0;
+      status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_SONAR_MULTIBEAM, multibeam_model, "Kongsberg",
+                                      NULL, capability1, capability2, num_offsets, num_time_latency, error);
+      if (status == MB_SUCCESS) {
+        sensor_multibeam = platform->num_sensors - 1;
+      }
+    }
+    if (sensor_multibeam >= 0 && status == MB_SUCCESS) {
+      platform->source_bathymetry = sensor_multibeam;
+      platform->source_backscatter = sensor_multibeam;
+
+      if (platform->sensors[sensor_multibeam].num_offsets > 0 &&
+          mbsys_kmbes_iip_segment(store, "TRAI_TX1:", &value_start, &value_end)) {
+        double x = 0.0, y = 0.0, z = 0.0, r = 0.0, p = 0.0, h = 0.0;
+        mbsys_kmbes_iip_double(value_start, value_end, "X", &x);
+        mbsys_kmbes_iip_double(value_start, value_end, "Y", &y);
+        mbsys_kmbes_iip_double(value_start, value_end, "Z", &z);
+        mbsys_kmbes_iip_double(value_start, value_end, "R", &r);
+        mbsys_kmbes_iip_double(value_start, value_end, "P", &p);
+        mbsys_kmbes_iip_double(value_start, value_end, "H", &h);
+        status = mb_platform_set_sensor_offset(verbose, (void *)platform, sensor_multibeam, 0, y, x, -z, h, r, p, error);
+      }
+      if (status == MB_SUCCESS && platform->sensors[sensor_multibeam].num_offsets > 1 &&
+          mbsys_kmbes_iip_segment(store, "TRAI_RX1:", &value_start, &value_end)) {
+        double x = 0.0, y = 0.0, z = 0.0, r = 0.0, p = 0.0, h = 0.0;
+        mbsys_kmbes_iip_double(value_start, value_end, "X", &x);
+        mbsys_kmbes_iip_double(value_start, value_end, "Y", &y);
+        mbsys_kmbes_iip_double(value_start, value_end, "Z", &z);
+        mbsys_kmbes_iip_double(value_start, value_end, "R", &r);
+        mbsys_kmbes_iip_double(value_start, value_end, "P", &p);
+        mbsys_kmbes_iip_double(value_start, value_end, "H", &h);
+        status = mb_platform_set_sensor_offset(verbose, (void *)platform, sensor_multibeam, 1, y, x, -z, h, r, p, error);
+      }
+    }
+
+    /* position sensors POSI_1/POSI_2/POSI_3 -> source_position1/2/3 */
+    const char *const posi_prefix[3] = {"POSI_1:", "POSI_2:", "POSI_3:"};
+    int *const source_position_n[3] = {&platform->source_position1, &platform->source_position2,
+                                        &platform->source_position3};
+    for (int i = 0; i < 3 && status == MB_SUCCESS; i++) {
+      if (!mbsys_kmbes_iip_segment(store, posi_prefix[i], &value_start, &value_end))
+        continue;
+      if (*source_position_n[i] < 0) {
+        const int capability1 = MB_SENSOR_CAPABILITY1_POSITION;
+        const int capability2 = MB_SENSOR_CAPABILITY2_NONE;
+        status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_POSITION, NULL, NULL, NULL, capability1,
+                                        capability2, 1, 0, error);
+        if (status == MB_SUCCESS)
+          *source_position_n[i] = platform->num_sensors - 1;
+      }
+      if (status == MB_SUCCESS && *source_position_n[i] >= 0 &&
+          platform->sensors[*source_position_n[i]].num_offsets == 1) {
+        double x = 0.0, y = 0.0, z = 0.0;
+        mbsys_kmbes_iip_double(value_start, value_end, "X", &x);
+        mbsys_kmbes_iip_double(value_start, value_end, "Y", &y);
+        mbsys_kmbes_iip_double(value_start, value_end, "Z", &z);
+        status = mb_platform_set_sensor_offset(verbose, (void *)platform, *source_position_n[i], 0, y, x, -z, 0.0, 0.0, 0.0,
+                                               error);
+      }
+      if (status == MB_SUCCESS && mbsys_kmbes_iip_active(value_start, value_end)) {
+        platform->source_position = *source_position_n[i];
+      }
+    }
+
+    /* motion/attitude sensors ATTI_1/ATTI_2 -> source_rollpitch1/2 */
+    const char *const atti_prefix[2] = {"ATTI_1:", "ATTI_2:"};
+    int *const source_rollpitch_n[2] = {&platform->source_rollpitch1, &platform->source_rollpitch2};
+    for (int i = 0; i < 2 && status == MB_SUCCESS; i++) {
+      if (!mbsys_kmbes_iip_segment(store, atti_prefix[i], &value_start, &value_end))
+        continue;
+      if (*source_rollpitch_n[i] < 0) {
+        const int capability1 = MB_SENSOR_CAPABILITY1_ROLLPITCH + MB_SENSOR_CAPABILITY1_HEADING + MB_SENSOR_CAPABILITY1_HEAVE;
+        const int capability2 = MB_SENSOR_CAPABILITY2_NONE;
+        status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_VRU, NULL, NULL, NULL, capability1,
+                                        capability2, 1, 0, error);
+        if (status == MB_SUCCESS)
+          *source_rollpitch_n[i] = platform->num_sensors - 1;
+      }
+      if (status == MB_SUCCESS && *source_rollpitch_n[i] >= 0 &&
+          platform->sensors[*source_rollpitch_n[i]].num_offsets == 1) {
+        double x = 0.0, y = 0.0, z = 0.0, r = 0.0, p = 0.0, h = 0.0;
+        mbsys_kmbes_iip_double(value_start, value_end, "X", &x);
+        mbsys_kmbes_iip_double(value_start, value_end, "Y", &y);
+        mbsys_kmbes_iip_double(value_start, value_end, "Z", &z);
+        mbsys_kmbes_iip_double(value_start, value_end, "R", &r);
+        mbsys_kmbes_iip_double(value_start, value_end, "P", &p);
+        mbsys_kmbes_iip_double(value_start, value_end, "H", &h);
+        /* The R, H and P of an ATTI_n line are corrections that Kongsberg adds to the angles the
+            sensor measures to get vessel angles (checked against #SKM data and GSF roll, pitch
+            and heading). The platform model instead gives the orientation of the sensor
+            relative to the platform, which is subtracted, so the angles are negated here. */
+        status = mb_platform_set_sensor_offset(verbose, (void *)platform, *source_rollpitch_n[i], 0, y, x, -z, -h, -r, -p, error);
+      }
+      if (status == MB_SUCCESS && mbsys_kmbes_iip_active(value_start, value_end)) {
+        platform->source_rollpitch = *source_rollpitch_n[i];
+        platform->source_heading = *source_rollpitch_n[i];
+        platform->source_heave = *source_rollpitch_n[i];
+      }
+    }
+
+    /* print platform */
+    if (verbose >= 2) {
+      status = mb_platform_print(verbose, (void *)platform, error);
+    }
+  }
+  else if (*platform_ptr == NULL) {
+    *error = MB_ERROR_OPEN_FAIL;
+    status = MB_FAILURE;
+    fprintf(stderr, "\nUnable to initialize platform offset structure\n");
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       kind:           %d\n", *kind);
+    fprintf(stderr, "dbg2       platform_ptr:   %p\n", (void *)platform_ptr);
+    fprintf(stderr, "dbg2       *platform_ptr:  %p\n", (void *)*platform_ptr);
+    fprintf(stderr, "dbg2       error:          %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:         %d\n", status);
+  }
+
   return (status);
 }
 
@@ -335,6 +656,33 @@ int mbsys_kmbes_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *
   return (status);
 }
 /*--------------------------------------------------------------------*/
+/* Convert a heading, roll and pitch measured by the platform's heading and
+    attitude sensors into the platform (vessel) frame using the platform model.
+    The roll and pitch are always converted. The heading is only converted if
+    convert_heading is true, since a heading taken from the MRZ datagram is already
+    the vessel heading. If platform is NULL, or the conversion fails, the values
+    are returned unchanged. */
+static void mbsys_kmbes_platform_orientation(int verbose, struct mb_platform_struct *platform, bool convert_heading,
+                                              double heading, double roll, double pitch, double *platform_heading,
+                                              double *platform_roll, double *platform_pitch) {
+  *platform_heading = heading;
+  *platform_roll = roll;
+  *platform_pitch = pitch;
+  if (platform != NULL) {
+    double h;
+    double r;
+    double p;
+    int orientation_error = MB_ERROR_NO_ERROR;
+    if (mb_platform_orientation(verbose, (void *)platform, heading, roll, pitch, &h, &r, &p, &orientation_error)
+        == MB_SUCCESS) {
+      *platform_roll = r;
+      *platform_pitch = p;
+      if (convert_heading)
+        *platform_heading = h;
+    }
+  }
+}
+
 int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
                              void *platform_ptr, void *preprocess_pars_ptr,
                              int *error) {
@@ -361,20 +709,23 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
   /* get preprocessing parameters */
   struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
-  /* mbr_kemkmall_rd_data() calls this function automatically on the first read of
-      any not-yet-preprocessed ping, passing &mb_io_ptr->preprocess_pars - a struct
-      it fills in from its own per-file-handle nav/attitude buffer, which only holds
-      whatever asynchronous data this same read pass has encountered so far in the
-      current file. That is necessarily incomplete for the first several pings of a
-      file (and, when a program such as mbpreprocess reads the same raw file more than
-      once - once per its own pass, once per file in a multi-file datalist - transiently
-      incomplete every time), even though a later, explicitly-driven call (e.g. from
-      mbpreprocess's own second pass, using its own file-spanning tables) may have
-      complete data and will overwrite this preliminary result before anything is
-      written out. Silently missing attitude here is expected and, for that automatic
-      call, non-final, so the "no attitude data" warning below is limited to calls
-      using a caller-supplied preprocess_pars struct, where a lack of data is not
-      superseded by any later call and so is worth reporting. */
+  /* This function calculates MB-System extensions to the original data including
+  		beam angles and travel times set for raytracing and pseudosidescan. The bathymetry
+  		(seafloor depths, acrosstrack and alongtrack distances) are not recalculated.
+  		Function mbr_rt_kemkmall() calls this function automatically on the first read of
+      any not-yet-preprocessed ping (e.g. including XMT and XMS datagrams), passing 
+      &mb_io_ptr->preprocess_pars - a struct it fills in from its own per-file-handle 
+      nav/attitude buffer, which only holds whatever asynchronous data this same read 
+      pass has encountered so far in the current file. That is necessarily incomplete for 
+      the first several pings of a file (and, when a program such as mbpreprocess reads 
+      the same raw file more than once - once per its own pass, once per file in a 
+      multi-file datalist - transiently incomplete every time), even though a later, 
+      explicitly-driven call (e.g. from mbpreprocess's own second pass, using its own 
+      file-spanning tables) may have complete data and will overwrite this preliminary 
+      result before anything is written out. Silently missing attitude here is expected 
+      and, for that automatic call, non-final, so the "no attitude data" warning below is 
+      limited to calls using a caller-supplied preprocess_pars struct, where a lack of 
+      data is not superseded by any later call and so is worth reporting. */
   const bool pars_is_mbio_internal = (pars == &mb_io_ptr->preprocess_pars);
 
   /* data structure pointers */
@@ -460,9 +811,9 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
     fprintf(stderr, "dbg5       n_nav:                         %d\n", pars->n_nav);
     for (int i = 0; i < pars->n_nav; i++) {
       mb_get_date(0, pars->nav_time_d[i], time_i);
-      fprintf(stderr, "dbg5         %d %4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %15.6f %14.10f %14.10f %6.3f\n", 
+      fprintf(stderr, "dbg5         %d %4.4d/%2.2d/%2.2d-%2.2d:%2.2d:%2.2d.%6.6d %15.6f %14.10f %14.10f %6.3f\n",
     				i, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
-    				pars->nav_time_d[i], pars->nav_lon[i], pars->nav_lat[i], pars->nav_speed[i]);
+    				pars->nav_time_d[i], pars->nav_lon[i], pars->nav_lat[i], pars->nav_speed != NULL ? pars->nav_speed[i] : 0.0);
     }
     fprintf(stderr, "dbg2       n_sensordepth:                 %d\n", pars->n_sensordepth);
     for (int i = 0; i < pars->n_sensordepth; i++) {
@@ -598,6 +949,8 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
       navlat = mrz->pingInfo.latitude_deg;
       heading = mrz->pingInfo.headingVessel_deg;
 
+      xmt->xmtPingInfo.lever_acrosstrack = 0.0;
+      xmt->xmtPingInfo.lever_alongtrack = 0.0;
       xmt->xmtPingInfo.speed = 0.0;
       if (spo->sensorData.speedOverGround_mPerSec > 0.0)
         xmt->xmtPingInfo.speed = spo->sensorData.speedOverGround_mPerSec;
@@ -626,6 +979,55 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
       xmt->xmtPingInfo.pitch = pitch;
       xmt->xmtPingInfo.heave = heave;
 
+      /* Interpolate heading. The heading logged in the MRZ is only replaced when
+          a heading array is defined. */
+      bool heading_from_array = false;
+      if (pars->n_heading > 0) {
+        /* interp_status = */ mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
+                                                 pars->n_heading, time_d, &heading, &jheading, &interp_error);
+        heading_from_array = true;
+      }
+
+      /* interpolate altitude */
+      //if (pars->n_altitude > 0) {
+      //  interp_status = mb_linear_interp(verbose, pars->altitude_time_d - 1, pars->altitude_altitude - 1, pars->n_altitude,
+      //                                    time_d, &altitude, &jaltitude, &interp_error);
+      //}
+
+      /* interpolate attitude - the MRZ has no roll, pitch or heave, so these always
+          come from the attitude arrays when they are defined */
+      if (pars->n_attitude > 0) {
+        /* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
+                                         time_d, &roll, &jattitude, &interp_error);
+        /* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
+                                         time_d, &pitch, &jattitude, &interp_error);
+        /* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude,
+                                         time_d, &heave, &jattitude, &interp_error);
+      }
+      else if (skm->infoPart.numSamplesArray == 0 && !pars_is_mbio_internal && verbose >= 1) {
+        fprintf(stderr, "Warning: mbsys_kmbes_preprocess: no attitude data (external or embedded "
+                "in this ping) available for ping at time %.6f - roll/pitch/heave defaulted to 0.0.\n",
+                time_d);
+      }
+
+      /* Heading, roll and pitch interpolated from sensor arrays are in the frame of
+          the sensors that measured them. Keep those values for the per-sounding
+          interpolation below, and convert the ping values to the platform frame
+          when a platform model is defined. A heading taken from the MRZ is already
+          the vessel heading and is not converted. */
+      const double sensor_heading = heading;
+      const double sensor_roll = roll;
+      const double sensor_pitch = pitch;
+      mbsys_kmbes_platform_orientation(verbose, platform, heading_from_array, sensor_heading, sensor_roll, sensor_pitch,
+                                       &heading, &roll, &pitch);
+      if (heading_from_array) {
+        mrz->pingInfo.headingVessel_deg = heading;
+        xmt->xmtPingInfo.heading = heading;
+      }
+      xmt->xmtPingInfo.roll = roll;
+      xmt->xmtPingInfo.pitch = pitch;
+      xmt->xmtPingInfo.heave = kluge_auvsentrysensordepth ? 0.0 : heave;
+
       /* interpolate nav */
       if (pars->n_nav > 0) {
         int interp_status = mb_linear_interp_longitude(verbose, pars->nav_time_d - 1,
@@ -634,10 +1036,29 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
         interp_status &= mb_linear_interp_latitude(verbose, pars->nav_time_d - 1,
                                                     pars->nav_lat - 1, pars->n_nav,
                                                     time_d, &navlat, &jnav, &interp_error);
-        mrz->pingInfo.longitude_deg = navlon;
-        mrz->pingInfo.latitude_deg = navlat;
-        xmt->xmtPingInfo.longitude = navlon;
-        xmt->xmtPingInfo.latitude = navlat;
+
+        /* The MRZ navigation is the position of the vessel reference point, which is
+            the origin of the platform model. The interpolated navigation is the position
+            of the navigation sensor, so move it to the vessel reference point when a
+            platform model is defined. The navigation arrays that mbr_rt_kemkmall()
+            passes (pars_is_mbio_internal) are only used for the ping speed, and leave the
+            logged MRZ navigation unchanged. */
+        if (!pars_is_mbio_internal) {
+          double origin_lon = navlon;
+          double origin_lat = navlat;
+          double origin_depth;
+          int lever_error = MB_ERROR_NO_ERROR;
+          if (platform == NULL
+              || mb_platform_position_platform(verbose, (void *)platform, -1, 0, navlon, navlat, 0.0, heading, roll,
+                                               pitch, &origin_lon, &origin_lat, &origin_depth, &lever_error) != MB_SUCCESS) {
+            origin_lon = navlon;
+            origin_lat = navlat;
+          }
+          mrz->pingInfo.longitude_deg = origin_lon;
+          mrz->pingInfo.latitude_deg = origin_lat;
+          xmt->xmtPingInfo.longitude = origin_lon;
+          xmt->xmtPingInfo.latitude = origin_lat;
+        }
 
         /* calculate speed from position */
         double mtodeglon, mtodeglat;
@@ -671,66 +1092,38 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
         xmt->xmtPingInfo.speed = speed;
       }
 
-      /* interpolate sensordepth */
-      if (kluge_auvsentrysensordepth) {
-        if (pars->n_sensordepth > 0) {
-          /* interp_status = */ mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
-                                          pars->n_sensordepth, time_d, &sensordepth, &jsensordepth, &interp_error);
-          mrz->pingInfo.txTransducerDepth_m = sensordepth;
-          xmt->xmtPingInfo.sensordepth = sensordepth;
+      /* Interpolate sensordepth. The sensordepth array takes precedence over the
+          Sentry kluge, which takes precedence over the transducer depth logged in
+          the MRZ. A sensordepth taken from an array is the depth at the depth sensor,
+          so move it to the transducer when a platform model is defined. */
+      double sensordepth_lever = 0.0;
+      if (pars->n_sensordepth > 0) {
+        /* interp_status = */ mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
+                                        pars->n_sensordepth, time_d, &sensordepth, &jsensordepth, &interp_error);
+        if (platform != NULL) {
+          double target_lon;
+          double target_lat;
+          double target_depth;
+          int lever_error = MB_ERROR_NO_ERROR;
+          if (mb_platform_position_platform(verbose, (void *)platform, pars->target_sensor, 0,
+                                            mrz->pingInfo.longitude_deg, mrz->pingInfo.latitude_deg, sensordepth,
+                                            heading, roll, pitch, &target_lon, &target_lat, &target_depth,
+                                            &lever_error) == MB_SUCCESS) {
+            sensordepth_lever = target_depth - sensordepth;
+            sensordepth = target_depth;
+          }
         }
-        else {
-          sensordepth = -mrz->pingInfo.ellipsoidHeightReRefPoint_m;
-          mrz->pingInfo.txTransducerDepth_m = sensordepth;
-          xmt->xmtPingInfo.sensordepth = sensordepth;
-        }
+        mrz->pingInfo.txTransducerDepth_m = sensordepth;
+        xmt->xmtPingInfo.sensordepth = sensordepth;
+      }
+      else if (kluge_auvsentrysensordepth) {
+        sensordepth = -mrz->pingInfo.ellipsoidHeightReRefPoint_m;
+        mrz->pingInfo.txTransducerDepth_m = sensordepth;
+        xmt->xmtPingInfo.sensordepth = sensordepth;
       }
       else {
-        if (pars->n_sensordepth > 0) {
-          /* interp_status = */ mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
-                                          pars->n_sensordepth, time_d, &sensordepth, &jsensordepth, &interp_error);
-          mrz->pingInfo.txTransducerDepth_m = sensordepth;
-          xmt->xmtPingInfo.sensordepth = sensordepth;
-        }
-        else {
-          sensordepth = mrz->pingInfo.txTransducerDepth_m;
-          xmt->xmtPingInfo.sensordepth = sensordepth;
-        }
-      }
-
-      /* interpolate heading */
-      if (pars->n_heading > 0) {
-        /* interp_status = */ mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
-                                                 pars->n_heading, time_d, &heading, &jheading, &interp_error);
-        mrz->pingInfo.headingVessel_deg = heading;
-        xmt->xmtPingInfo.heading = heading;
-      }
-
-      /* interpolate altitude */
-      //if (pars->n_altitude > 0) {
-      //  interp_status = mb_linear_interp(verbose, pars->altitude_time_d - 1, pars->altitude_altitude - 1, pars->n_altitude,
-      //                                    time_d, &altitude, &jaltitude, &interp_error);
-      //}
-
-      /* interpolate Attitude */
-      if (pars->n_attitude > 0) {
-        /* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
-                                         time_d, &roll, &jattitude, &interp_error);
-        /* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
-                                         time_d, &pitch, &jattitude, &interp_error);
-        /* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude,
-                                         time_d, &heave, &jattitude, &interp_error);
-        xmt->xmtPingInfo.roll = roll;
-        xmt->xmtPingInfo.pitch = pitch;
-        if (kluge_auvsentrysensordepth)
-          xmt->xmtPingInfo.heave = 0.0;
-        else
-          xmt->xmtPingInfo.heave = heave;
-      }
-      else if (skm->infoPart.numSamplesArray == 0 && !pars_is_mbio_internal && verbose >= 1) {
-        fprintf(stderr, "Warning: mbsys_kmbes_preprocess: no attitude data (external or embedded "
-                "in this ping) available for ping at time %.6f - roll/pitch/heave defaulted to 0.0.\n",
-                time_d);
+        sensordepth = mrz->pingInfo.txTransducerDepth_m;
+        xmt->xmtPingInfo.sensordepth = sensordepth;
       }
 
       /* interpolate soundspeed */
@@ -743,52 +1136,73 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
         mrz->pingInfo.soundSpeedAtTxDepth_mPerSec = soundspeednew;
       }
 
-			/* do lever arm correction */
-			if (platform != NULL) {
-				/* calculate sonar Position */
-				status = mb_platform_position(verbose, (void *)platform, pars->target_sensor, 0, navlon, navlat, sensordepth,
-																			heading, roll, pitch, &navlon, &navlat, &sensordepth, error);
-	
-				/* calculate sonar Attitude */
-				status = mb_platform_orientation_target(verbose, (void *)platform, pars->target_sensor, 0, heading, roll, pitch,
-																								&heading, &roll, &pitch, error);
-			}
-
-      /* get transducer angular offsets */
-			mb_3D_orientation tx_align = {0.0, 0.0, 0.0};
-			mb_3D_orientation tx_orientation;
-			double tx_steer;
-			mb_3D_orientation rx_align = {0.0, 0.0, 0.0};
-			mb_3D_orientation rx_orientation;
-			double rx_steer;
+      /* Get the transducer array mounting angles. The orientation of the platform is
+          known at this point, so these are the mounting offsets of the target sensor
+          relative to the platform, with the TX array first and the RX array second. */
+      mb_3D_orientation tx_align = {0.0, 0.0, 0.0};
+      mb_3D_orientation tx_orientation;
+      double tx_steer;
+      mb_3D_orientation rx_align = {0.0, 0.0, 0.0};
+      mb_3D_orientation rx_orientation;
+      double rx_steer;
       int tx_sign = 1.0;
       int rx_sign = 1.0;
-      if (platform != NULL) {
-        status = mb_platform_orientation_offset(verbose, (void *)platform, pars->target_sensor, 0,
-                                                &(tx_align.heading), &(tx_align.roll), &(tx_align.pitch), error);
+      if (platform != NULL && pars->target_sensor >= 0 && pars->target_sensor < platform->num_sensors
+          && platform->sensors[pars->target_sensor].num_offsets > 0) {
+        const struct mb_sensor_struct *sensor_target = &platform->sensors[pars->target_sensor];
+        tx_align.heading = sensor_target->offsets[0].attitude_offset_heading;
+        tx_align.roll = sensor_target->offsets[0].attitude_offset_roll;
+        tx_align.pitch = sensor_target->offsets[0].attitude_offset_pitch;
+        const int rx_offset = (sensor_target->num_offsets > 1) ? 1 : 0;
+        rx_align.heading = sensor_target->offsets[rx_offset].attitude_offset_heading;
+        rx_align.roll = sensor_target->offsets[rx_offset].attitude_offset_roll;
+        rx_align.pitch = sensor_target->offsets[rx_offset].attitude_offset_pitch;
 
         // handle reverse mounting of transmit array */
         if (tx_align.heading > 100.0 || tx_align.heading < -100.0) {
           tx_align.heading -= 180.0;
           if (tx_align.heading < 0.0)
             tx_align.heading += 360.0;
-          //tx_align.heading *= -1;
-          //tx_align.roll *= -1;
-          //tx_align.pitch *= -1;
           tx_sign = -1.0;
         }
 
-        status = mb_platform_orientation_offset(verbose, (void *)platform, pars->target_sensor, 1,
-                                                &(rx_align.heading), &(rx_align.roll), &(rx_align.pitch), error);
+        // handle reverse mounting of receive array */
         if (rx_align.heading > 100.0 || rx_align.heading < -100.0) {
           rx_align.heading -= 180.0;
           if (rx_align.heading < 0.0)
             rx_align.heading += 360.0;
-          //rx_align.heading *= -1;
-          //rx_align.roll *= -1;
-          //rx_align.pitch *= -1;
           rx_sign = -1.0;
         }
+
+        /* The MRZ navigation and the soundings x/y_reRefPoint_m are relative to the vessel
+            reference point (the platform origin), but the navigation reported by MB-System is
+            that of the sonar, and so are bathymetry raytraced from the XMT travel times and
+            angles. The alongtrack position of a sounding is set by the transmit array and the
+            acrosstrack position by the receive array, so the sonar reference point is taken to
+            be at the alongtrack position of the transmit array and the acrosstrack position of
+            the receive array. Save its horizontal displacement from the vessel reference point,
+            in the heading-aligned surface coordinate system, as the lever arm. */
+        double lever_x;
+        double lever_y;
+        double lever_z;
+        int lever_error = MB_ERROR_NO_ERROR;
+        if (mb_platform_lever_origin(verbose, (void *)platform, pars->target_sensor, 0, 0.0, roll, pitch,
+                                     &lever_x, &lever_y, &lever_z, &lever_error) == MB_SUCCESS)
+          xmt->xmtPingInfo.lever_alongtrack = lever_y;
+        if (mb_platform_lever_origin(verbose, (void *)platform, pars->target_sensor,
+                                     (sensor_target->num_offsets > 1) ? 1 : 0, 0.0, roll, pitch,
+                                     &lever_x, &lever_y, &lever_z, &lever_error) == MB_SUCCESS)
+          xmt->xmtPingInfo.lever_acrosstrack = lever_x;
+
+        /* The #XMT navigation is the position of the sonar reference point, which is what
+            MB-System reports as the navigation: the vessel reference point position of the
+            #MRZ datagram displaced by the lever arm */
+        double dlon;
+        double dlat;
+        mb_platform_displacement_to_lonlat(mrz->pingInfo.latitude_deg, heading, xmt->xmtPingInfo.lever_acrosstrack,
+                                           xmt->xmtPingInfo.lever_alongtrack, &dlon, &dlat);
+        xmt->xmtPingInfo.longitude = mrz->pingInfo.longitude_deg + dlon;
+        xmt->xmtPingInfo.latitude = mrz->pingInfo.latitude_deg + dlat;
       }
 
       /* if requested apply kluge scaling of sound speed - which means
@@ -829,45 +1243,48 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
         const double receive_time_delay = sector_transmit_delay + ttime;
         const double receive_time_d = time_d + receive_time_delay;
 
-        /* get roll, pitch, heading at the time this sounding's sector actually transmitted */
-        txroll = roll;
-        txpitch = pitch;
-        txheading = heading;
+        /* Get the roll, pitch and heading at the time this sounding's sector actually
+            transmitted and at the time its bottom return was received. The interpolated
+            sensor values are converted to the platform frame when a platform model is
+            defined; the mounting offsets of the transducer arrays are then applied by
+            mb_beaudoin() as tx_align and rx_align. */
+        double s_roll = sensor_roll;
+        double s_pitch = sensor_pitch;
+        double s_heading = sensor_heading;
         if (pars->n_attitude > 0) {
           /* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1,
                                 pars->attitude_roll - 1, pars->n_attitude,
-                                transmit_time_d, &txroll, &jattitude, error);
+                                transmit_time_d, &s_roll, &jattitude, &interp_error);
           /* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1,
                                 pars->attitude_pitch - 1, pars->n_attitude,
-                                transmit_time_d, &txpitch, &jattitude, error);
+                                transmit_time_d, &s_pitch, &jattitude, &interp_error);
         }
         if (pars->n_heading > 0) {
           /* interp_status = */ mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
-                                                   pars->n_heading, transmit_time_d, &txheading,
-                                                   &jheading, error);
+                                                   pars->n_heading, transmit_time_d, &s_heading,
+                                                   &jheading, &interp_error);
         }
-        if (platform != NULL) {
-          /* apply the same lever arm orientation correction used for the ping-level
-              attitude, but evaluated at this sounding's own transmit time */
-          status = mb_platform_orientation_target(verbose, (void *)platform, pars->target_sensor, 0,
-                                                  txheading, txroll, txpitch,
-                                                  &txheading, &txroll, &txpitch, error);
+        mbsys_kmbes_platform_orientation(verbose, platform, heading_from_array, s_heading, s_roll, s_pitch,
+                                         &txheading, &txroll, &txpitch);
+
+        s_roll = sensor_roll;
+        s_pitch = sensor_pitch;
+        s_heading = sensor_heading;
+        if (pars->n_attitude > 0) {
+          /* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1,
+                                pars->attitude_roll - 1, pars->n_attitude,
+                                receive_time_d, &s_roll, &jattitude, &interp_error);
+          /* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1,
+                                pars->attitude_pitch - 1, pars->n_attitude,
+                                receive_time_d, &s_pitch, &jattitude, &interp_error);
         }
-
-        /* get roll at bottom return time for this beam */
-        /* interp_status = */ mb_linear_interp(verbose, pars->attitude_time_d - 1,
-                              pars->attitude_roll - 1, pars->n_attitude,
-                              receive_time_d, &beamroll, &jattitude, error);
-
-        /* get pitch at bottom return time for this beam */
-        /* interp_status = */
-            mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
-                             receive_time_d, &beampitch, &jattitude, error);
-
-        /* get heading at bottom return time for this beam */
-        /* interp_status = */ mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
-                                                 pars->n_heading, receive_time_d, &beamheading,
-                                                 &jheading, error);
+        if (pars->n_heading > 0) {
+          /* interp_status = */ mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
+                                                   pars->n_heading, receive_time_d, &s_heading,
+                                                   &jheading, &interp_error);
+        }
+        mbsys_kmbes_platform_orientation(verbose, platform, heading_from_array, s_heading, s_roll, s_pitch,
+                                         &beamheading, &beamroll, &beampitch);
 
         /* change the sound speed recorded for the current ping and
          * then use it to alter the beam angles and recalculate the Bathymetry */
@@ -923,6 +1340,7 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
         if (pars->n_sensordepth > 0) {
           /* interp_status = */ mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
                                           pars->n_sensordepth, receive_time_d, &receive_sensordepth, &jsensordepth, &interp_error);
+          receive_sensordepth += sensordepth_lever;
         }
         else if (kluge_auvsentrysensordepth) {
           receive_sensordepth = -mrz->pingInfo.ellipsoidHeightReRefPoint_m;
@@ -941,7 +1359,12 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
         xmt->xmtSounding[i].angle_vertical = theta;
         xmt->xmtSounding[i].angle_azimuthal = phi;
         xmt->xmtSounding[i].beam_heave = (receive_sensordepth - sensordepth) + (receive_heave - heave);
-        xmt->xmtSounding[i].alongtrack_offset = receive_time_delay * xmt->xmtPingInfo.speed;
+        /* The alongtrack position of a sounding is fixed by its transmit sector, so the only
+            vessel advance to include is that between the ping reference time and the time this
+            sector transmitted - not the advance during the two-way travel time, which is
+            already contained in Kongsberg's solution and would add speed * ttime (tens of
+            meters at survey speeds) of spurious alongtrack offset */
+        xmt->xmtSounding[i].alongtrack_offset = sector_transmit_delay * xmt->xmtPingInfo.speed;
 //fprintf(stderr, "receive_time_delay:%f xmt->xmtPingInfo.speed:%f\n", receive_time_delay, xmt->xmtPingInfo.speed);
 //fprintf(stderr, "preprocess: imrz:%d beam %d %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f\n",
 //imrz, i, xmt->xmtSounding[i].soundingIndex, xmt->xmtSounding[i].twtt, xmt->xmtSounding[i].angle_vertical, xmt->xmtSounding[i].angle_azimuthal, 
@@ -973,6 +1396,41 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
 
   return (status);
 
+}
+/*--------------------------------------------------------------------*/
+/* Kongsberg's per-sounding x_reRefPoint_m/y_reRefPoint_m (ship-frame along/across-track
+    offsets) are relative to the navigation and heading logged for that sounding's own
+    MRZ sub-ping (pingInfo.longitude_deg/latitude_deg/headingVessel_deg), which in
+    dual-swath (or any other multi-sub-ping-per-cycle) kmall data can differ measurably
+    from the single reference sub-ping (imrz==0) whose navigation/heading is the only
+    one reported for the whole merged MB-System ping. This reprojects a beam's
+    along/across-track offsets from the frame of its own sub-ping's navigation/heading
+    into the equivalent offsets in the reference sub-ping's frame - via absolute lon/lat
+    - using the same rotation and meters-to-degrees convention as mb_extract_lonlat()
+    and mb_read() (src/mbio/mb_access.c, src/mbio/mb_read.c) - so that every beam ends
+    up correctly georeferenced once the caller applies the single reported reference
+    navigation/heading to bathacrosstrack/bathalongtrack. */
+static void mbsys_kmbes_reproject_beam_to_reference(double navlon_sounding, double navlat_sounding, double heading_sounding,
+                                                     double navlon_ref, double navlat_ref, double heading_ref,
+                                                     double acrosstrack_sounding, double alongtrack_sounding,
+                                                     double *acrosstrack_ref, double *alongtrack_ref) {
+  double mtodeglon_sounding, mtodeglat_sounding;
+  mb_coor_scale(0, navlat_sounding, &mtodeglon_sounding, &mtodeglat_sounding);
+  const double headingx_sounding = sin(DTR * heading_sounding);
+  const double headingy_sounding = cos(DTR * heading_sounding);
+  const double lon = navlon_sounding + headingy_sounding * mtodeglon_sounding * acrosstrack_sounding
+                                      + headingx_sounding * mtodeglon_sounding * alongtrack_sounding;
+  const double lat = navlat_sounding - headingx_sounding * mtodeglat_sounding * acrosstrack_sounding
+                                      + headingy_sounding * mtodeglat_sounding * alongtrack_sounding;
+
+  double mtodeglon_ref, mtodeglat_ref;
+  mb_coor_scale(0, navlat_ref, &mtodeglon_ref, &mtodeglat_ref);
+  const double dE = (lon - navlon_ref) / mtodeglon_ref;
+  const double dN = (lat - navlat_ref) / mtodeglat_ref;
+  const double headingx_ref = sin(DTR * heading_ref);
+  const double headingy_ref = cos(DTR * heading_ref);
+  *acrosstrack_ref = headingy_ref * dE - headingx_ref * dN;
+  *alongtrack_ref = headingx_ref * dE + headingy_ref * dN;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
@@ -1037,6 +1495,22 @@ if (verbose >= 2) {
     for (int imrz = 0; imrz < store->n_mrz_read; imrz++) {
       mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
 
+      /* Beams from any sub-ping other than the reference (imrz==0) were logged with
+          their own navigation/heading (dual-swath sub-pings can be a fraction of a
+          second, and a measurable vessel motion, apart) - reproject them into the
+          reference sub-ping's frame so they end up correctly positioned once *navlon,
+          *navlat, *heading (always the reference sub-ping's values) are applied. */
+      /* The soundings of each sub-ping are relative to the vessel reference point, whereas the
+          navigation reported is that of the sonar reference point, which is displaced from it by
+          the sub-ping's lever arm. Remove the lever arm to make the soundings relative to the
+          sub-ping's sonar reference point, which is the sub-ping's #XMT navigation. */
+      const struct mbsys_kmbes_xmt *xmt_i = (struct mbsys_kmbes_xmt *)&store->xmt[imrz];
+      const double lever_across = xmt_i->xmtPingInfo.lever_acrosstrack;
+      const double lever_along = xmt_i->xmtPingInfo.lever_alongtrack;
+      const bool reproject_beams = (imrz != 0)
+              && (xmt_i->xmtPingInfo.longitude != *navlon || xmt_i->xmtPingInfo.latitude != *navlat
+                  || mrz->pingInfo.headingVessel_deg != *heading);
+
       for (int i = 0;
             i < (mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections);
             i++) {
@@ -1044,8 +1518,17 @@ if (verbose >= 2) {
         if (!mb_beam_check_flag_null(mrz->sounding[i].beamflag) && mrz->sounding[i].twoWayTravelTime_sec > 0.0) {
           bath[numSoundings] = mrz->sounding[i].z_reRefPoint_m
                                 - mrz->pingInfo.z_waterLevelReRefPoint_m;
-          bathacrosstrack[numSoundings] = mrz->sounding[i].y_reRefPoint_m;
-          bathalongtrack[numSoundings] = mrz->sounding[i].x_reRefPoint_m;
+          const double across_sonar = mrz->sounding[i].y_reRefPoint_m - lever_across;
+          const double along_sonar = mrz->sounding[i].x_reRefPoint_m - lever_along;
+          if (reproject_beams) {
+            mbsys_kmbes_reproject_beam_to_reference(xmt_i->xmtPingInfo.longitude, xmt_i->xmtPingInfo.latitude,
+                                                     mrz->pingInfo.headingVessel_deg, *navlon, *navlat, *heading,
+                                                     across_sonar, along_sonar,
+                                                     &bathacrosstrack[numSoundings], &bathalongtrack[numSoundings]);
+          } else {
+            bathacrosstrack[numSoundings] = across_sonar;
+            bathalongtrack[numSoundings] = along_sonar;
+          }
           amp[numSoundings] = mrz->sounding[i].reflectivity1_dB;
         } else {
           bath[numSoundings] = 0.0;
@@ -1073,15 +1556,22 @@ if (verbose >= 2) {
 		for (int iswath = 0; iswath < xms->num_swaths; iswath++) {
 				int pixel_offset = iswath * pixels_per_swath;
 				int center_pixel = pixel_offset + pixels_per_swath / 2;
+
+				/* the pseudosidescan pixel positions are relative to the vessel reference point, so
+				    make them relative to the sonar reference point by removing the lever arm */
+				const struct mbsys_kmbes_xmt *xmt_swath =
+						(struct mbsys_kmbes_xmt *)&store->xmt[MIN(iswath, MAX(store->n_mrz_read - 1, 0))];
+				const double ss_lever_across = xmt_swath->xmtPingInfo.lever_acrosstrack;
+				const double ss_lever_along = xmt_swath->xmtPingInfo.lever_alongtrack;
 				for (int i = pixel_offset; i < pixel_offset + pixels_per_swath; i++) {
-						ssacrosstrack[i] = pixel_size * (i - center_pixel);
+						ssacrosstrack[i] = pixel_size * (i - center_pixel) - ss_lever_across;
 						if (xms->ss[i] == MBSYS_KMBES_INVALID_SS
 								|| (xms->ss[i] == MBSYS_KMBES_INVALID_AMP && xms->ss_alongtrack[i] == 0.0)) {
 								ss[i] = MB_SIDESCAN_NULL;
 								ssalongtrack[i] = 0.0;
 						} else {
 								ss[i] = xms->ss[i];
-								ssalongtrack[i] = xms->ss_alongtrack[i];
+								ssalongtrack[i] = xms->ss_alongtrack[i] - ss_lever_along;
 						}
 				}
 		}
@@ -1592,13 +2082,46 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
         mrz->header.time_nanosec = time_nanosec;
       }
 
-      xmt->xmtPingInfo.longitude = navlon;
-      xmt->xmtPingInfo.latitude = navlat;
-      xmt->xmtPingInfo.heading = heading;
-      xmt->xmtPingInfo.speed = speed /  3.6;
-      mrz->pingInfo.longitude_deg = navlon;
-      mrz->pingInfo.latitude_deg = navlat;
-      mrz->pingInfo.headingVessel_deg = heading;
+      /* The navigation passed in is that of the sonar reference point, and the distances are
+          relative to it, as returned by mbsys_kmbes_extract(). The #MRZ navigation and soundings
+          are relative to the vessel reference point, which is displaced from the sonar reference
+          point by the lever arm held in the #XMT datagram. The #XMT datagram holds the sonar
+          navigation. */
+      const struct mbsys_kmbes_xmt *xmt_i = (struct mbsys_kmbes_xmt *)&store->xmt[imrz];
+      const double lever_across = xmt_i->xmtPingInfo.lever_acrosstrack;
+      const double lever_along = xmt_i->xmtPingInfo.lever_alongtrack;
+
+      /* Only the reference sub-ping (imrz==0) is represented by the single
+          navlon/navlat/heading passed into this function - other sub-pings
+          (dual swath etc.) keep their own distinct logged navigation/heading,
+          the same way mbsys_kmbes_extract() treats them (see
+          mbsys_kmbes_reproject_beam_to_reference() above). So bathacrosstrack/
+          bathalongtrack, which extract() reprojected out of each sub-ping's own
+          frame into the reference frame, must be reprojected back into that
+          sub-ping's own (preserved) frame here - the same function run with the
+          reference and sub-ping frames swapped is its own exact inverse -
+          rather than overwriting the sub-ping's pingInfo with the reference
+          ping's values and losing the distinction entirely. */
+      const bool reproject_beams = (imrz != 0)
+              && (xmt_i->xmtPingInfo.longitude != navlon || xmt_i->xmtPingInfo.latitude != navlat
+                  || mrz->pingInfo.headingVessel_deg != heading);
+      if (imrz == 0) {
+        /* leave the vessel reference point navigation as logged if the navigation and heading
+            are unchanged, so that data passed through unmodified are not altered at all */
+        if (xmt->xmtPingInfo.longitude != navlon || xmt->xmtPingInfo.latitude != navlat
+            || mrz->pingInfo.headingVessel_deg != heading) {
+          double dlon;
+          double dlat;
+          mb_platform_displacement_to_lonlat(navlat, heading, lever_across, lever_along, &dlon, &dlat);
+          mrz->pingInfo.longitude_deg = navlon - dlon;
+          mrz->pingInfo.latitude_deg = navlat - dlat;
+        }
+        mrz->pingInfo.headingVessel_deg = heading;
+        xmt->xmtPingInfo.longitude = navlon;
+        xmt->xmtPingInfo.latitude = navlat;
+        xmt->xmtPingInfo.heading = heading;
+        xmt->xmtPingInfo.speed = speed /  3.6;
+      }
 
       for (int i = 0;
             i < (mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections);
@@ -1608,8 +2131,19 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 //        mrz->sounding[i].z_reRefPoint_m = bath[numSoundings]
 //                                - mrz->pingInfo.txTransducerDepth_m;
         mrz->sounding[i].beamflag = beamflag[numSoundings];
-        mrz->sounding[i].x_reRefPoint_m = bathalongtrack[numSoundings];
-        mrz->sounding[i].y_reRefPoint_m = bathacrosstrack[numSoundings];
+        if (reproject_beams) {
+          double acrosstrack_subping, alongtrack_subping;
+          mbsys_kmbes_reproject_beam_to_reference(navlon, navlat, heading,
+                                                   xmt_i->xmtPingInfo.longitude, xmt_i->xmtPingInfo.latitude,
+                                                   mrz->pingInfo.headingVessel_deg,
+                                                   bathacrosstrack[numSoundings], bathalongtrack[numSoundings],
+                                                   &acrosstrack_subping, &alongtrack_subping);
+          mrz->sounding[i].y_reRefPoint_m = acrosstrack_subping + lever_across;
+          mrz->sounding[i].x_reRefPoint_m = alongtrack_subping + lever_along;
+        } else {
+          mrz->sounding[i].x_reRefPoint_m = bathalongtrack[numSoundings] + lever_along;
+          mrz->sounding[i].y_reRefPoint_m = bathacrosstrack[numSoundings] + lever_across;
+        }
         mrz->sounding[i].reflectivity1_dB = amp[numSoundings];
 
         numSoundings++;
@@ -1618,13 +2152,17 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 
     /* insert the sidescan */
     xms->pixels_ss = nss;
+    const int pixels_per_swath = MBSYS_KMBES_MAX_PIXELS / MAX(xms->num_swaths, 1);
     for (int i = 0; i < MBSYS_KMBES_MAX_PIXELS; i++) {
       if (ss[i] == MB_SIDESCAN_NULL) {
         xms->ss[i] = MBSYS_KMBES_INVALID_SS;
         xms->ss_alongtrack[i] = 0.0;
       } else {
+        /* the stored pseudosidescan alongtrack distances are relative to the vessel reference point */
+        const struct mbsys_kmbes_xmt *xmt_swath =
+            (struct mbsys_kmbes_xmt *)&store->xmt[MIN(i / pixels_per_swath, MAX(store->n_mrz_read - 1, 0))];
         xms->ss[i] = ss[i];
-        xms->ss_alongtrack[i] = ssalongtrack[i];
+        xms->ss_alongtrack[i] = ssalongtrack[i] + xmt_swath->xmtPingInfo.lever_alongtrack;
       }
     }
 
@@ -2165,7 +2703,10 @@ int mbsys_kmbes_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
     /* get transducer depth and altitude */
     *transducer_depth = mrz->pingInfo.txTransducerDepth_m;
 
-    /* get altitude using valid depth closest to nadir */
+    /* get altitude using valid depth closest to nadir - the sounding z_reRefPoint_m
+        is measured down from the vessel reference point, so the altitude of the
+        transducer above the seafloor is the depth below the waterline
+        (z_reRefPoint_m - z_waterLevelReRefPoint_m) minus the transducer depth */
     *altitudev = 0.0;
     double xtrackmin = 999999.9;
     for (int imrz = 0; imrz < store->n_mrz_read; imrz++) {
@@ -2177,7 +2718,8 @@ int mbsys_kmbes_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
         if (mb_beam_ok(mrz->sounding[i].beamflag)) {
           if (fabs(mrz->sounding[i].y_reRefPoint_m) < xtrackmin) {
             xtrackmin = fabs(mrz->sounding[i].y_reRefPoint_m);
-            *altitudev = mrz->sounding[i].z_reRefPoint_m;
+            *altitudev = mrz->sounding[i].z_reRefPoint_m - mrz->pingInfo.z_waterLevelReRefPoint_m
+                          - mrz->pingInfo.txTransducerDepth_m;
           }
         }
       }
@@ -2664,7 +3206,7 @@ int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int n
 	  else {
 		heading[i] = xmt->xmtPingInfo.heading;
 	  }
-  
+
 	  /* get navigation */
 	  if ((skm->infoPart.sensorDataContents & 0x00000001) && skm->infoPart.numSamplesArray > 0) {
 		navlon[i] = skm->sample[i].KMdefault.longitude_deg;
@@ -2682,16 +3224,16 @@ int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int n
 		navlat[i] = xmt->xmtPingInfo.latitude;
 		speed[i] = 3.6 * xmt->xmtPingInfo.speed;
 	  }
-  
+
 	  /* get draft  */
 	  if (mb_io_ptr->nsensordepth > 0) {
 		mb_depint_interp(verbose, mbio_ptr, time_d[i], &draft[i], error);
 		heave[i] = 0.0;
-	  } 
+	  }
 	  else {
 		draft[i] = xmt->xmtPingInfo.sensordepth;
 	  }
-  
+
 	  /* get attitude  */
 	  if ((skm->infoPart.sensorDataContents & 0x00000002) && skm->infoPart.numSamplesArray > 0) {
 		roll[i] = skm->sample[i].KMdefault.roll_deg;
@@ -2729,7 +3271,7 @@ int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int n
 	  else {
 		heading[i] = xmt->xmtPingInfo.heading;
 	  }
-  
+
 	  /* get navigation */
 	  if ((skm->infoPart.sensorDataContents & 0x00000001) && skm->infoPart.numSamplesArray > 0) {
 		navlon[i] = skm->sample[i].KMdefault.longitude_deg;
@@ -2747,16 +3289,16 @@ int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int n
 		navlat[i] = xmt->xmtPingInfo.latitude;
 		speed[i] = 3.6 * xmt->xmtPingInfo.speed;
 	  }
-  
+
 	  /* get draft  */
 	  if (mb_io_ptr->nsensordepth > 0) {
 		mb_depint_interp(verbose, mbio_ptr, time_d[i], &draft[i], error);
 		heave[i] = 0.0;
-	  } 
+	  }
 	  else {
 		draft[i] = xmt->xmtPingInfo.sensordepth;
 	  }
-  
+
 	  /* get attitude  */
 	  if ((skm->infoPart.sensorDataContents & 0x00000002) && skm->infoPart.numSamplesArray > 0) {
 		roll[i] = skm->sample[i].KMdefault.roll_deg;
@@ -2913,9 +3455,21 @@ int mbsys_kmbes_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
         xmt->header.time_sec = time_sec;
         xmt->header.time_nanosec = time_nanosec;
       }
-      mrz->pingInfo.longitude_deg = navlon;
-      mrz->pingInfo.latitude_deg = navlat;
+      /* the navigation passed in is that of the sonar reference point, so the vessel reference
+          point navigation of the #MRZ datagram is displaced from it by the lever arm */
+      if (xmt->xmtPingInfo.longitude != navlon || xmt->xmtPingInfo.latitude != navlat
+          || mrz->pingInfo.headingVessel_deg != heading) {
+        double dlon;
+        double dlat;
+        mb_platform_displacement_to_lonlat(navlat, heading, xmt->xmtPingInfo.lever_acrosstrack,
+                                           xmt->xmtPingInfo.lever_alongtrack, &dlon, &dlat);
+        mrz->pingInfo.longitude_deg = navlon - dlon;
+        mrz->pingInfo.latitude_deg = navlat - dlat;
+      }
       mrz->pingInfo.headingVessel_deg = heading;
+      xmt->xmtPingInfo.longitude = navlon;
+      xmt->xmtPingInfo.latitude = navlat;
+      xmt->xmtPingInfo.heading = heading;
       xmt->xmtPingInfo.speed = speed /  3.6;
       mrz->pingInfo.txTransducerDepth_m = draft - heave;
       xmt->xmtPingInfo.sensordepth = draft - heave;

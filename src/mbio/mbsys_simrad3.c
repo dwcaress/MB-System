@@ -714,6 +714,128 @@ int mbsys_simrad3_zero_ss(int verbose, void *store_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* For the third generation Kongsberg formats the navigation datagrams, and so the
+    navigation of the survey pings, are the position of the active position sensor, and the
+    acrosstrack and alongtrack distances of the soundings are relative to that position, whereas
+    the navigation that MB-System reports is the position of the mapping sensor. The sonar
+    reference point is taken to be at the alongtrack position of the transmit array and the
+    acrosstrack position of the receive array, because those set the alongtrack and acrosstrack
+    positions of the soundings. This calculates its horizontal displacement from the position
+    sensor, in the heading-aligned frame (acrosstrack positive starboard, alongtrack positive
+    forward), from the installation parameters and the roll and pitch of the ping. The
+    displacement is zero if the installation parameters have not been read.
+    The position sensor is the active one, located by its installation offsets whether or not
+    its data are flagged as motion compensated, as the logged soundings are referenced to the
+    offset position. The transmit and receive
+    arrays are selected as in mbsys_simrad3_preprocess(). */
+static void mbsys_simrad3_sonar_lever(int verbose, struct mbsys_simrad3_struct *store,
+                                      struct mbsys_simrad3_ping_struct *ping, double *lever_across, double *lever_along) {
+  /* transmit and receive array offsets embedded in file - default to a single head at system 1 */
+  double tx_x = store->par_s1x, tx_y = store->par_s1y, tx_z = store->par_s1z;
+  double rx_x = store->par_s1x, rx_y = store->par_s1y, rx_z = store->par_s1z;
+  if (store->sonar == MBSYS_SIMRAD3_M3 || store->par_stc == 1 ||
+      (store->par_stc == 2 && ping->png_serial == store->par_serial_1)) {
+    /* system 1 for both arrays */
+  }
+  else if (store->par_stc == 0 || (store->par_stc == 3 && ping->png_serial == store->par_serial_1)) {
+    rx_x = store->par_s2x;
+    rx_y = store->par_s2y;
+    rx_z = store->par_s2z;
+  }
+  else if (store->par_stc == 2 && ping->png_serial == store->par_serial_2) {
+    tx_x = rx_x = store->par_s2x;
+    tx_y = rx_y = store->par_s2y;
+    tx_z = rx_z = store->par_s2z;
+  }
+  else if (store->par_stc == 3 && ping->png_serial == store->par_serial_2) {
+    rx_x = store->par_s3x;
+    rx_y = store->par_s3y;
+    rx_z = store->par_s3z;
+  }
+  else if (store->par_stc == 4 && ping->png_serial == store->par_serial_1) {
+    tx_x = store->par_s0x;
+    tx_y = store->par_s0y;
+    tx_z = store->par_s0z;
+    rx_x = store->par_s2x;
+    rx_y = store->par_s2y;
+    rx_z = store->par_s2z;
+  }
+  else if (store->par_stc == 4 && ping->png_serial == store->par_serial_2) {
+    rx_x = store->par_s3x;
+    rx_y = store->par_s3y;
+    rx_z = store->par_s3z;
+  }
+
+  /* active position sensor */
+  double pos_x = store->par_p1x, pos_y = store->par_p1y, pos_z = store->par_p1z;
+  if (store->par_aps == 1) {
+    pos_x = store->par_p2x;
+    pos_y = store->par_p2y;
+    pos_z = store->par_p2z;
+  }
+  else if (store->par_aps == 2) {
+    pos_x = store->par_p3x;
+    pos_y = store->par_p3y;
+    pos_z = store->par_p3z;
+  }
+
+  /* displacements from the position sensor to the arrays in the platform frame (starboard,
+      forward, up), rotated by the roll and pitch of the ping */
+  const double roll = 0.01 * ping->png_roll;
+  const double pitch = 0.01 * ping->png_pitch;
+  double lever_x, lever_y, lever_z;
+  mb_platform_lever_rotate(tx_y - pos_y, tx_x - pos_x, -(tx_z - pos_z), 0.0, roll, pitch, &lever_x, &lever_y, &lever_z);
+  *lever_along = lever_y;
+  mb_platform_lever_rotate(rx_y - pos_y, rx_x - pos_x, -(rx_z - pos_z), 0.0, roll, pitch, &lever_x, &lever_y, &lever_z);
+  *lever_across = lever_x;
+  if (verbose >= 5)
+    fprintf(stderr, "dbg5       sonar lever arm: across:%f along:%f\n", *lever_across, *lever_along);
+}
+
+/* The navigation of a ping as MB-System reports it, which is that of the sonar reference point,
+    the position sensor position stored in the ping displaced by the lever arm. The same function
+    is used on extraction and insertion so that data passed through unchanged are not altered. */
+static void mbsys_simrad3_sonar_nav(struct mbsys_simrad3_ping_struct *ping, double lever_across, double lever_along,
+                                    double *navlon, double *navlat) {
+  if (ping->png_longitude != EM3_INVALID_INT)
+    *navlon = 0.0000001 * ping->png_longitude;
+  else
+    *navlon = 0.0;
+  if (ping->png_latitude != EM3_INVALID_INT)
+    *navlat = 0.00000005 * ping->png_latitude;
+  else
+    *navlat = 0.0;
+  if (ping->png_longitude != EM3_INVALID_INT && ping->png_latitude != EM3_INVALID_INT) {
+    double dlon, dlat;
+    mb_platform_displacement_to_lonlat(*navlat, 0.01 * ping->png_heading, lever_across, lever_along, &dlon, &dlat);
+    *navlon += dlon;
+    *navlat += dlat;
+  }
+}
+
+/* Store the navigation of the sonar reference point passed in as the position sensor position of the
+    ping, unless it is what extraction would return from the navigation already stored. The heading
+    is the heading to be stored. */
+static void mbsys_simrad3_insert_sonar_nav(struct mbsys_simrad3_ping_struct *ping, double lever_across, double lever_along,
+                                           double navlon, double navlat, double heading) {
+  double current_lon, current_lat;
+  mbsys_simrad3_sonar_nav(ping, lever_across, lever_along, &current_lon, &current_lat);
+  if (navlon != current_lon || navlat != current_lat || (int)rint(heading * 100) != ping->png_heading) {
+    double dlon, dlat;
+    mb_platform_displacement_to_lonlat(navlat, heading, lever_across, lever_along, &dlon, &dlat);
+    double poslon = navlon - dlon;
+    const double poslat = navlat - dlat;
+    if (poslon < -180.0)
+      poslon += 360.0;
+    else if (poslon > 180.0)
+      poslon -= 360.0;
+    ping->png_longitude = 10000000 * poslon;
+    ping->png_latitude = 20000000 * poslat;
+  }
+}
+
+/*--------------------------------------------------------------------*/
 int mbsys_simrad3_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                              int *error) {
 	if (verbose >= 2) {
@@ -2228,15 +2350,11 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		time_i[6] = (ping->png_msec % 1000) * 1000;
 		mb_get_time(verbose, time_i, time_d);
 
-		/* get navigation */
-		if (ping->png_longitude != EM3_INVALID_INT)
-			*navlon = 0.0000001 * ping->png_longitude;
-		else
-			*navlon = 0.0;
-		if (ping->png_latitude != EM3_INVALID_INT)
-			*navlat = 0.00000005 * ping->png_latitude;
-		else
-			*navlat = 0.0;
+		/* get navigation - the position of the sonar reference point, not the position sensor */
+		double lever_across;
+		double lever_along;
+		mbsys_simrad3_sonar_lever(verbose, store, ping, &lever_across, &lever_along);
+		mbsys_simrad3_sonar_nav(ping, lever_across, lever_along, navlon, navlat);
 
 		/* get heading */
 		*heading = 0.01 * ping->png_heading;
@@ -2263,8 +2381,16 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		for (int i = 0; i < ping->png_nbeams; i++) {
 			bath[i] = ping->png_depth[i] + ping->png_xducer_depth;
 			beamflag[i] = ping->png_beamflag[i];
-			bathacrosstrack[i] = ping->png_acrosstrack[i];
-			bathalongtrack[i] = ping->png_alongtrack[i];
+			/* the stored distances are relative to the position sensor, so make them relative to the
+			    sonar reference point */
+			if (!mb_beam_check_flag_null(ping->png_beamflag[i])) {
+				bathacrosstrack[i] = ping->png_acrosstrack[i] - lever_across;
+				bathalongtrack[i] = ping->png_alongtrack[i] - lever_along;
+			}
+			else {
+				bathacrosstrack[i] = ping->png_acrosstrack[i];
+				bathalongtrack[i] = ping->png_alongtrack[i];
+			}
 			amp[i] = reflscale * ping->png_amp[i];
 		}
 		*nbath = ping->png_nbeams;
@@ -2275,13 +2401,13 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 			for (int i = 0; i < MBSYS_SIMRAD3_MAXPIXELS; i++) {
 				if (ping->png_ss[i] == EM3_INVALID_SS || (ping->png_ss[i] == EM3_INVALID_AMP && ping->png_ssalongtrack[i] == 0)) {
 					ss[i] = MB_SIDESCAN_NULL;
-					ssacrosstrack[i] = pixel_size * (i - MBSYS_SIMRAD3_MAXPIXELS / 2);
+					ssacrosstrack[i] = pixel_size * (i - MBSYS_SIMRAD3_MAXPIXELS / 2) - lever_across;
 					ssalongtrack[i] = 0.0;
 				}
 				else {
 					ss[i] = 0.01 * ping->png_ss[i];
-					ssacrosstrack[i] = pixel_size * (i - MBSYS_SIMRAD3_MAXPIXELS / 2);
-					ssalongtrack[i] = 0.01 * ping->png_ssalongtrack[i];
+					ssacrosstrack[i] = pixel_size * (i - MBSYS_SIMRAD3_MAXPIXELS / 2) - lever_across;
+					ssalongtrack[i] = 0.01 * ping->png_ssalongtrack[i] - lever_along;
 				}
 			}
 		}
@@ -2510,19 +2636,18 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 		store->date = ping->png_date;
 		store->msec = ping->png_msec;
 
-		/* get navigation */
-		if (navlon < -180.0)
-			navlon += 360.0;
-		else if (navlon > 180.0)
-			navlon -= 360.0;
-		ping->png_longitude = 10000000 * navlon;
-		ping->png_latitude = 20000000 * navlat;
-
 		/* get heading */
 		if (heading < 0.0)
 			heading += 360.0;
 		else if (heading >= 360.0)
 			heading -= 360.0;
+
+		/* get navigation - the navigation passed in is the position of the sonar reference point, and
+		    the position sensor position is stored */
+		double lever_across;
+		double lever_along;
+		mbsys_simrad3_sonar_lever(verbose, store, ping, &lever_across, &lever_along);
+		mbsys_simrad3_insert_sonar_nav(ping, lever_across, lever_along, navlon, navlat, heading);
 		ping->png_heading = (int)rint(heading * 100);
 
 		/* get speed  */
@@ -2536,8 +2661,8 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 				if (beamflag[i] != MB_FLAG_NULL) {
 					ping->png_depth[i] = bath[i] - ping->png_xducer_depth;
 					ping->png_beamflag[i] = beamflag[i];
-					ping->png_acrosstrack[i] = bathacrosstrack[i];
-					ping->png_alongtrack[i] = bathalongtrack[i];
+					ping->png_acrosstrack[i] = bathacrosstrack[i] + lever_across;
+					ping->png_alongtrack[i] = bathalongtrack[i] + lever_along;
 					ping->png_amp[i] = (int)rint(amp[i] / reflscale);
 					ping->png_nbeams++;
 					ping->png_nbeams_valid++;
@@ -2557,8 +2682,14 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 			for (int i = 0; i < ping->png_nbeams; i++) {
 				ping->png_depth[i] = bath[i] - ping->png_xducer_depth;
 				ping->png_beamflag[i] = beamflag[i];
-				ping->png_acrosstrack[i] = bathacrosstrack[i];
-				ping->png_alongtrack[i] = bathalongtrack[i];
+				if (!mb_beam_check_flag_null(beamflag[i])) {
+					ping->png_acrosstrack[i] = bathacrosstrack[i] + lever_across;
+					ping->png_alongtrack[i] = bathalongtrack[i] + lever_along;
+				}
+				else {
+					ping->png_acrosstrack[i] = bathacrosstrack[i];
+					ping->png_alongtrack[i] = bathalongtrack[i];
+				}
 				ping->png_amp[i] = (int)rint(amp[i] / reflscale);
 			}
 		}
@@ -2566,7 +2697,7 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 			for (int i = 0; i < nss; i++) {
 				if (ss[i] > MB_SIDESCAN_NULL) {
 					ping->png_ss[i] = (short)rint(100 * ss[i]);
-					ping->png_ssalongtrack[i] = (short)rint(100 * ssalongtrack[i]);
+					ping->png_ssalongtrack[i] = (short)rint(100 * (ssalongtrack[i] + lever_along));
 				}
 				else {
 					ping->png_ss[i] = EM3_INVALID_SS;
@@ -2681,40 +2812,10 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		double ptime_d;
 		mb_get_time(verbose, time_i, &ptime_d);
 
-		/* obtain lever arm offset for sonar relative to the position sensor */
-		// mb_lever(verbose, store->par_s1y, store->par_s1x, store->par_s1z - store->par_wlz,
-		//		store->par_p1y, store->par_p1x, store->par_p1z,
-		//		store->par_msy, store->par_msx, store->par_msz,
-		//		-0.01 * ping->png_pitch + store->par_msp, -0.01 * ping->png_roll + store->par_msr,
-		//		&lever_x, &lever_y, &lever_z, error);
-
-		/* obtain position offset for beam */
-		// offset_x = store->par_s1y - store->par_p1y + lever_x;
-		// offset_y = store->par_s1x - store->par_p1x + lever_y;
-		// offset_z = lever_z;
-
-		/* get alongtrack position offset */
-		double offset_y;
-		if (store->par_aps == 0) {
-			offset_y = store->par_p1x;
-		}
-		else if (store->par_aps == 1) {
-			offset_y = store->par_p2x;
-		}
-		else if (store->par_aps == 2) {
-			offset_y = store->par_p3x;
-		}
-		else {
-			offset_y = store->par_p1x;
-		}
-
-		/* special case when par_aps value is wrong */
-		if (offset_y == 0.0 && store->par_p1x != 0.0)
-			offset_y = store->par_p1x;
-		else if (offset_y == 0.0 && store->par_p2x != 0.0)
-			offset_y = store->par_p2x;
-		else if (offset_y == 0.0 && store->par_p3x != 0.0)
-			offset_y = store->par_p3x;
+		/* The alongtrack offset is only the distance the vessel moves between the ping time and the
+		    time the transmit sector fired. The navigation is that of the sonar reference point (see
+		    mbsys_simrad3_sonar_lever()), so the distances raytraced from the travel times and angles,
+		    which are relative to the transmit and receive arrays, need no lever arm correction. */
 
 		/* get sonar depth */
 		*ssv = 0.1 * ping->png_ssv;
@@ -2732,7 +2833,7 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 			angles_null[i] = 0.0;
 			heave[i] = ping->png_bheave[i] + 0.01 * ping->png_heave;
 			alongtrack_offset[i] =
-			    (0.01 * ((double)ping->png_speed)) * ((double)ping->png_raw_txoffset[ping->png_raw_rxsector[i]]) + offset_y;
+			    (0.01 * ((double)ping->png_speed)) * ((double)ping->png_raw_txoffset[ping->png_raw_rxsector[i]]);
 		}
 
 		/* set status */
@@ -3141,15 +3242,11 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 		time_i[6] = (ping->png_msec % 1000) * 1000;
 		mb_get_time(verbose, time_i, time_d);
 
-		/* get navigation */
-		if (ping->png_longitude != EM3_INVALID_INT)
-			*navlon = 0.0000001 * ping->png_longitude;
-		else
-			*navlon = 0.0;
-		if (ping->png_latitude != EM3_INVALID_INT)
-			*navlat = 0.00000005 * ping->png_latitude;
-		else
-			*navlat = 0.0;
+		/* get navigation - the position of the sonar reference point, not the position sensor */
+		double lever_across;
+		double lever_along;
+		mbsys_simrad3_sonar_lever(verbose, store, ping, &lever_across, &lever_along);
+		mbsys_simrad3_sonar_nav(ping, lever_across, lever_along, navlon, navlat);
 
 		/* get heading */
 		*heading = 0.01 * ping->png_heading;
@@ -3404,15 +3501,11 @@ int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 		time_i[6] = (ping->png_msec % 1000) * 1000;
 		mb_get_time(verbose, time_i, time_d);
 
-		/* get navigation */
-		if (ping->png_longitude != EM3_INVALID_INT)
-			*navlon = 0.0000001 * ping->png_longitude;
-		else
-			*navlon = 0.0;
-		if (ping->png_latitude != EM3_INVALID_INT)
-			*navlat = 0.00000005 * ping->png_latitude;
-		else
-			*navlat = 0.0;
+		/* get navigation - the position of the sonar reference point, not the position sensor */
+		double lever_across;
+		double lever_along;
+		mbsys_simrad3_sonar_lever(verbose, store, ping, &lever_across, &lever_along);
+		mbsys_simrad3_sonar_nav(ping, lever_across, lever_along, navlon, navlat);
 
 		/* get heading */
 		*heading = 0.01 * ping->png_heading;
@@ -3575,19 +3668,18 @@ int mbsys_simrad3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 		store->msec = ping->png_msec;
 		store->date = ping->png_date;
 
-		/* get navigation */
-		if (navlon < -180.0)
-			navlon += 360.0;
-		else if (navlon > 180.0)
-			navlon -= 360.0;
-		ping->png_longitude = 10000000 * navlon;
-		ping->png_latitude = 20000000 * navlat;
-
 		/* get heading */
 		if (heading < 0.0)
 			heading += 360.0;
 		else if (heading >= 360.0)
 			heading -= 360.0;
+
+		/* get navigation - the navigation passed in is the position of the sonar reference point, and
+		    the position sensor position is stored */
+		double lever_across;
+		double lever_along;
+		mbsys_simrad3_sonar_lever(verbose, store, ping, &lever_across, &lever_along);
+		mbsys_simrad3_insert_sonar_nav(ping, lever_across, lever_along, navlon, navlat, heading);
 		ping->png_heading = (int)rint(heading * 100);
 
 		/* get speed  */

@@ -782,7 +782,6 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
     void *istore_ptr = NULL;
     int kind;
     double draft;
-    int nbeams;
     char comment[MB_COMMENT_MAXLINE];
 
     int rawmodtime = 0;
@@ -873,18 +872,6 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
             mbev_error = MB_ERROR_MEMORY_FAIL;
           if ((ping->bathy = (double *)malloc(sizeof(double) * (ping->beams_bath))) == NULL)
             mbev_error = MB_ERROR_MEMORY_FAIL;
-          if ((ping->angles = (double *)malloc(sizeof(double) * (ping->beams_bath))) == NULL)
-            mbev_error = MB_ERROR_MEMORY_FAIL;
-          if ((ping->angles_forward = (double *)malloc(sizeof(double) * (ping->beams_bath))) == NULL)
-            mbev_error = MB_ERROR_MEMORY_FAIL;
-          if ((ping->angles_null = (double *)malloc(sizeof(double) * (ping->beams_bath))) == NULL)
-            mbev_error = MB_ERROR_MEMORY_FAIL;
-          if ((ping->ttimes = (double *)malloc(sizeof(double) * (ping->beams_bath))) == NULL)
-            mbev_error = MB_ERROR_MEMORY_FAIL;
-          if ((ping->bheave = (double *)malloc(sizeof(double) * (ping->beams_bath))) == NULL)
-            mbev_error = MB_ERROR_MEMORY_FAIL;
-          if ((ping->alongtrack_offset = (double *)malloc(sizeof(double) * (ping->beams_bath))) == NULL)
-            mbev_error = MB_ERROR_MEMORY_FAIL;
           if (mbev_error == MB_ERROR_MEMORY_FAIL) {
             fprintf(stderr, "MEMORY FAILURE in mbeditviz_load_file\n");
             mbev_status = MB_FAILURE;
@@ -935,30 +922,6 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
             if (ping->bathy != NULL) {
               free(ping->bathy);
               ping->bathy = NULL;
-            }
-            if (ping->angles != NULL) {
-              free(ping->angles);
-              ping->angles = NULL;
-            }
-            if (ping->angles_forward != NULL) {
-              free(ping->angles_forward);
-              ping->angles_forward = NULL;
-            }
-            if (ping->angles_null != NULL) {
-              free(ping->angles_null);
-              ping->angles_null = NULL;
-            }
-            if (ping->ttimes != NULL) {
-              free(ping->ttimes);
-              ping->ttimes = NULL;
-            }
-            if (ping->bheave != NULL) {
-              free(ping->bheave);
-              ping->bheave = NULL;
-            }
-            if (ping->alongtrack_offset != NULL) {
-              free(ping->alongtrack_offset);
-              ping->alongtrack_offset = NULL;
             }
           }
         }
@@ -1064,13 +1027,6 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
           mbev_status = mb_extract_nav(mbev_verbose, imbio_ptr, istore_ptr, &kind, ping->time_i, &ping->time_d,
                                        &ping->navlon, &ping->navlat, &ping->speed, &ping->heading, &draft, &ping->roll,
                                        &ping->pitch, &ping->heave, &mbev_error);
-        }
-
-        /* extract some more values */
-        if (mbev_error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
-          mbev_status = mb_ttimes(mbev_verbose, imbio_ptr, istore_ptr, &kind, &nbeams, ping->ttimes, ping->angles,
-                                  ping->angles_forward, ping->angles_null, ping->bheave, ping->alongtrack_offset,
-                                  &ping->draft, &ping->ssv, &mbev_error);
         }
 
         /* get swathbounds */
@@ -2112,30 +2068,6 @@ int mbeditviz_unload_file(int ifile, bool assertUnlock) {
         if (ping->bathy != NULL) {
           free(ping->bathy);
           ping->bathy = NULL;
-        }
-        if (ping->angles != NULL) {
-          free(ping->angles);
-          ping->angles = NULL;
-        }
-        if (ping->angles_forward != NULL) {
-          free(ping->angles_forward);
-          ping->angles_forward = NULL;
-        }
-        if (ping->angles_null != NULL) {
-          free(ping->angles_null);
-          ping->angles_null = NULL;
-        }
-        if (ping->ttimes != NULL) {
-          free(ping->ttimes);
-          ping->ttimes = NULL;
-        }
-        if (ping->bheave != NULL) {
-          free(ping->bheave);
-          ping->bheave = NULL;
-        }
-        if (ping->alongtrack_offset != NULL) {
-          free(ping->alongtrack_offset);
-          ping->alongtrack_offset = NULL;
         }
       }
       free(file->pings);

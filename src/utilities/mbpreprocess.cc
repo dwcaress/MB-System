@@ -48,6 +48,7 @@
 #include "mb_io.h"
 #include "mb_process.h"
 #include "mb_status.h"
+#include "mbsys_kmbes.h"
 #include "mbsys_ldeoih.h"
 
 constexpr int MBPREPROCESS_ALLOC_CHUNK = 1000;
@@ -256,6 +257,19 @@ int main(int argc, char **argv) {
   int attitude_file_format = 0;
   int attitude_async = MB_DATA_DATA;
   int attitude_sensor = -1;
+  /* Kongsberg kmall (format 261) data can carry #SKM attitude/heading/navigation
+      samples from two sensor systems (kinds MB_DATA_NAV1 and MB_DATA_NAV2), only
+      one of which the sonar's own real-time processing actually uses - see
+      mbsys_kmbes_active_attitude_system(). When the user has not explicitly
+      chosen a kind via --nav-async/--heading-async/--attitude-async (or a
+      --nav-file/--heading-file/--attitude-file), these flags mark that
+      nav_async/heading_async/attitude_async should each be resolved dynamically,
+      once the file's own #IIP installation record has been read, to whichever
+      of MB_DATA_NAV1/MB_DATA_NAV2 it marks active - falling back to
+      MB_DATA_NAV1 if that is never determined. */
+  bool nav_async_kmall_auto = false;
+  bool heading_async_kmall_auto = false;
+  bool attitude_async_kmall_auto = false;
   bool zero_heave = false;
   merge_t soundspeed_mode = MBPREPROCESS_MERGE_OFF;
   int soundspeed_file_format = 0;
@@ -1167,16 +1181,8 @@ int main(int argc, char **argv) {
   struct mb_sensor_struct *sensor_rollpitch = nullptr;
   struct mb_sensor_struct *sensor_target = nullptr;
 
-  /*-------------------------------------------------------------------*/
-  /* load platform definition if specified */
-  if (use_platform_file) {
-    status = mb_platform_read(verbose, platform_file, (void **)&platform, &error);
-    if (status == MB_FAILURE) {
-      fprintf(stderr, "\nUnable to open and parse platform file: %s\n", platform_file);
-      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(MB_ERROR_OPEN_FAIL);
-    }
-
+  /* apply the command line sensor choices to a platform model, and get its sensor structures */
+  auto apply_platform_sources = [&]() {
     /* reset data sources according to commands */
     if (nav_sensor >= 0)
       platform->source_position = nav_sensor;
@@ -1208,6 +1214,18 @@ int main(int argc, char **argv) {
       target_sensor = platform->source_bathymetry;
     if (target_sensor >= 0)
       sensor_target = &(platform->sensors[target_sensor]);
+  };
+
+  /*-------------------------------------------------------------------*/
+  /* load platform definition if specified */
+  if (use_platform_file) {
+    status = mb_platform_read(verbose, platform_file, (void **)&platform, &error);
+    if (status == MB_FAILURE) {
+      fprintf(stderr, "\nUnable to open and parse platform file: %s\n", platform_file);
+      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      exit(MB_ERROR_OPEN_FAIL);
+    }
+    apply_platform_sources();
   }
 
   /* asynchronous navigation, heading, altitude, attitude, soundspeed data */
@@ -1620,6 +1638,7 @@ int main(int argc, char **argv) {
 				else if (iformat == MBF_KEMKMALL) {
 					nav_mode = MBPREPROCESS_MERGE_ASYNC;
 					nav_async = MB_DATA_NAV1;
+					nav_async_kmall_auto = true;
 				}
 				else if (iformat == MBF_RESON7KR) {
 					nav_mode = MBPREPROCESS_MERGE_ASYNC;
@@ -1656,6 +1675,7 @@ int main(int argc, char **argv) {
 				else if (iformat == MBF_KEMKMALL) {
 					heading_mode = MBPREPROCESS_MERGE_ASYNC;
 					heading_async = MB_DATA_NAV1;
+					heading_async_kmall_auto = true;
 				}
 				else if (iformat == MBF_RESON7KR) {
 					heading_mode = MBPREPROCESS_MERGE_ASYNC;
@@ -1674,6 +1694,7 @@ int main(int argc, char **argv) {
 				else if (iformat == MBF_KEMKMALL) {
 					attitude_mode = MBPREPROCESS_MERGE_ASYNC;
 					attitude_async = MB_DATA_NAV1;
+					attitude_async_kmall_auto = true;
 				}
 				else if (iformat == MBF_RESON7KR) {
 					attitude_mode = MBPREPROCESS_MERGE_ASYNC;
@@ -1771,6 +1792,24 @@ int main(int argc, char **argv) {
 					error = MB_ERROR_NO_ERROR;
 					status = MB_SUCCESS;
 				}
+
+				/* If no platform file was specified, kmall data carry the installation parameters
+				   in the #IIP datagram that starts each file, so extract the platform model from
+				   the first file's installation datagram. */
+				if (status == MB_SUCCESS && kind == MB_DATA_INSTALLATION && platform == nullptr && !use_platform_file
+						&& iformat == MBF_KEMKMALL) {
+					int platform_kind = kind;
+					int platform_error = MB_ERROR_NO_ERROR;
+					if (mb_extract_platform(verbose, imbio_ptr, istore_ptr, &platform_kind, (void **)&platform,
+																	&platform_error) == MB_SUCCESS && platform != nullptr) {
+						apply_platform_sources();
+						fprintf(stderr, "Platform model extracted from the installation datagram of %s\n", ifile);
+					}
+					else if (platform != nullptr) {
+						mb_platform_deall(verbose, (void **)&platform, &platform_error);
+						platform = nullptr;
+					}
+				}
 	
 				if (verbose >= 2) {
 					fprintf(stderr, "\ndbg2  Data record read in program <%s>\n", program_name);
@@ -1822,6 +1861,11 @@ int main(int argc, char **argv) {
 				}
 	
 				/* look for nav if not externally defined */
+				if (nav_async_kmall_auto) {
+					const int active_system = mbsys_kmbes_active_attitude_system(istore_ptr);
+					if (active_system > 0)
+						nav_async = active_system;
+				}
 				if (status == MB_SUCCESS && nav_mode == MBPREPROCESS_MERGE_ASYNC && kind == nav_async) {
 					/* extract nav data */
 					int extract_status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr, nanavmax, &kind, &nanav, atime_i, atime_d, alon, alat,
@@ -1894,6 +1938,11 @@ int main(int argc, char **argv) {
 				}
 	
 				/* look for heading if not externally defined */
+				if (heading_async_kmall_auto) {
+					const int active_system = mbsys_kmbes_active_attitude_system(istore_ptr);
+					if (active_system > 0)
+						heading_async = active_system;
+				}
 				if (status == MB_SUCCESS && heading_mode == MBPREPROCESS_MERGE_ASYNC && kind == heading_async) {
 					/* extract heading data */
 					int extract_status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr, nanavmax, &kind, &nanav, atime_i, atime_d, alon, alat,
@@ -1959,6 +2008,11 @@ int main(int argc, char **argv) {
 				}
 	
 				/* look for attitude if not externally defined */
+				if (attitude_async_kmall_auto) {
+					const int active_system = mbsys_kmbes_active_attitude_system(istore_ptr);
+					if (active_system > 0)
+						attitude_async = active_system;
+				}
 				if (status == MB_SUCCESS && attitude_mode == MBPREPROCESS_MERGE_ASYNC && kind == attitude_async) {
 					/* extract attitude data */
 					int extract_status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr, nanavmax, &kind, &nanav, atime_i, atime_d, alon, alat,

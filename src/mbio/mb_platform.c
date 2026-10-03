@@ -1912,6 +1912,210 @@ int mb_platform_position(int verbose, void *platform_ptr, int targetsensor, int 
   return (status);
 }
 /*--------------------------------------------------------------------*/
+/* Convert a horizontal displacement, given as an acrosstrack distance (positive starboard) and
+   an alongtrack distance (positive forward) in the frame of a platform heading (degrees), into
+   the equivalent longitude and latitude differences (degrees) at the given latitude. This uses
+   the same rotation and meters-to-degrees convention as mb_extract_lonlat() and mb_read(). */
+void mb_platform_displacement_to_lonlat(double lat, double heading, double acrosstrack, double alongtrack, double *dlon,
+                                        double *dlat) {
+  double mtodeglon, mtodeglat;
+  mb_coor_scale(0, lat, &mtodeglon, &mtodeglat);
+  const double headingx = sin(DTR * heading);
+  const double headingy = cos(DTR * heading);
+  *dlon = mtodeglon * (headingy * acrosstrack + headingx * alongtrack);
+  *dlat = mtodeglat * (-headingx * acrosstrack + headingy * alongtrack);
+}
+/*--------------------------------------------------------------------*/
+/* Rotate a displacement vector given in the platform frame (x starboard, y forward, z up, in
+   meters) into the horizontal frame defined by the heading, by the platform roll and pitch
+   (degrees). The components returned are x starboard (east for a heading of north), y forward
+   (north for a heading of north) and z up. This is the rotation used by mb_platform_lever()
+   and mb_platform_position() for the lever arm to a sensor. */
+void mb_platform_lever_rotate(double xx, double yy, double zz, double heading, double roll, double pitch, double *lever_x,
+                              double *lever_y, double *lever_z) {
+  const double croll = cos(DTR * roll);
+  const double sroll = sin(DTR * roll);
+  const double cpitch = cos(DTR * pitch);
+  const double spitch = sin(DTR * pitch);
+  const double cheading = cos(DTR * heading);
+  const double sheading = sin(DTR * heading);
+  *lever_x = cpitch * sheading * yy + (cheading * croll + sheading * spitch * sroll) * xx -
+             (croll * sheading * spitch - cheading * sroll) * zz;
+  *lever_y = cheading * cpitch * yy + (cheading * spitch * sroll - croll * sheading) * xx -
+             (sheading * sroll + cheading * croll * spitch) * zz;
+  *lever_z = spitch * yy - cpitch * sroll * xx + cpitch * croll * zz;
+}
+/*--------------------------------------------------------------------*/
+/* Calculate the displacement of a sensor from the platform origin (the vessel
+   reference point in the case of kmall data) in the horizontal frame defined by the
+   heading passed in, given the platform-frame heading, roll and pitch (see
+   mb_platform_orientation()). The lever components are x starboard (east for a
+   heading of north), y forward (north for a heading of north) and z up. Pass a heading
+   of 0.0 to get the displacement in the surface coordinate system aligned with the
+   platform heading. */
+int mb_platform_lever_origin(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset, double heading,
+                             double roll, double pitch, double *lever_x, double *lever_y, double *lever_z, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:             %d\n", verbose);
+    fprintf(stderr, "dbg2       platform_ptr:        %p\n", platform_ptr);
+    fprintf(stderr, "dbg2       targetsensor:        %d\n", targetsensor);
+    fprintf(stderr, "dbg2       targetsensoroffset:  %d\n", targetsensoroffset);
+    fprintf(stderr, "dbg2       heading:             %f\n", heading);
+    fprintf(stderr, "dbg2       roll:                %f\n", roll);
+    fprintf(stderr, "dbg2       pitch:               %f\n", pitch);
+  }
+
+  int status = MB_SUCCESS;
+  *error = MB_ERROR_NO_ERROR;
+  *lever_x = 0.0;
+  *lever_y = 0.0;
+  *lever_z = 0.0;
+
+  if (platform_ptr != NULL) {
+    struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
+    if (targetsensor < 0 || targetsensor >= platform->num_sensors || targetsensoroffset < 0 ||
+        targetsensoroffset >= platform->sensors[targetsensor].num_offsets) {
+      status = MB_FAILURE;
+      *error = MB_ERROR_BAD_PARAMETER;
+    }
+    else {
+      const struct mb_sensor_offset_struct *offset = &platform->sensors[targetsensor].offsets[targetsensoroffset];
+      mb_platform_lever_rotate(offset->position_offset_x, offset->position_offset_y, offset->position_offset_z, heading, roll,
+                               pitch, lever_x, lever_y, lever_z);
+    }
+  }
+  else {
+    status = MB_FAILURE;
+    *error = MB_ERROR_BAD_DESCRIPTOR;
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       lever_x:      %f\n", *lever_x);
+    fprintf(stderr, "dbg2       lever_y:      %f\n", *lever_y);
+    fprintf(stderr, "dbg2       lever_z:      %f\n", *lever_z);
+    fprintf(stderr, "dbg2       error:        %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:       %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+/* Calculate the position of a target sensor, or of the platform origin when
+   targetsensor < 0 (the vessel reference point in the case of kmall data), from
+   the position measured at the platform's position sensor and the depth measured
+   at its depth sensor.
+   Unlike mb_platform_position(), the heading, roll and pitch passed in must already
+   be in the platform frame (see mb_platform_orientation()), and a platform that has
+   no depth sensor is accepted - the depth is then passed through unchanged. On
+   failure the target position and depth are returned equal to the inputs. */
+int mb_platform_position_platform(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset, double navlon,
+                                  double navlat, double sensordepth, double heading, double roll, double pitch,
+                                  double *targetlon, double *targetlat, double *targetdepth, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:             %d\n", verbose);
+    fprintf(stderr, "dbg2       platform_ptr:        %p\n", platform_ptr);
+    fprintf(stderr, "dbg2       targetsensor:        %d\n", targetsensor);
+    fprintf(stderr, "dbg2       targetsensoroffset:  %d\n", targetsensoroffset);
+    fprintf(stderr, "dbg2       navlon:              %f\n", navlon);
+    fprintf(stderr, "dbg2       navlat:              %f\n", navlat);
+    fprintf(stderr, "dbg2       sensordepth:         %f\n", sensordepth);
+    fprintf(stderr, "dbg2       heading:             %f\n", heading);
+    fprintf(stderr, "dbg2       roll:                %f\n", roll);
+    fprintf(stderr, "dbg2       pitch:               %f\n", pitch);
+  }
+
+  int status = MB_SUCCESS;
+  *error = MB_ERROR_NO_ERROR;
+  *targetlon = navlon;
+  *targetlat = navlat;
+  *targetdepth = sensordepth;
+
+  if (platform_ptr != NULL) {
+    struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
+
+    if (platform->source_position < 0 || platform->source_position >= platform->num_sensors ||
+        platform->sensors[platform->source_position].num_offsets < 1 || targetsensor >= platform->num_sensors ||
+        (targetsensor >= 0 &&
+         (targetsensoroffset < 0 || targetsensoroffset >= platform->sensors[targetsensor].num_offsets))) {
+      status = MB_FAILURE;
+      *error = MB_ERROR_BAD_PARAMETER;
+    }
+    else {
+      const struct mb_sensor_struct *sensor_position = &platform->sensors[platform->source_position];
+      const struct mb_sensor_struct *sensor_depth = NULL;
+      if (platform->source_depth >= 0 && platform->source_depth < platform->num_sensors &&
+          platform->sensors[platform->source_depth].num_offsets >= 1)
+        sensor_depth = &platform->sensors[platform->source_depth];
+
+      /* the target is the platform origin unless a target sensor is specified */
+      double target_x = 0.0;
+      double target_y = 0.0;
+      double target_z = 0.0;
+      if (targetsensor >= 0) {
+        target_x = platform->sensors[targetsensor].offsets[targetsensoroffset].position_offset_x;
+        target_y = platform->sensors[targetsensor].offsets[targetsensoroffset].position_offset_y;
+        target_z = platform->sensors[targetsensor].offsets[targetsensoroffset].position_offset_z;
+      }
+
+      const double croll = cos(DTR * roll);
+      const double sroll = sin(DTR * roll);
+      const double cpitch = cos(DTR * pitch);
+      const double spitch = sin(DTR * pitch);
+      const double cheading = cos(DTR * heading);
+      const double sheading = sin(DTR * heading);
+
+      /* horizontal offset between the position sensor and the target (X starboard, Y forward) */
+      double xx = target_x - sensor_position->offsets[0].position_offset_x;
+      double yy = target_y - sensor_position->offsets[0].position_offset_y;
+      double zz = target_z - sensor_position->offsets[0].position_offset_z;
+      const double lever_x = cpitch * sheading * yy + (cheading * croll + sheading * spitch * sroll) * xx -
+                             (croll * sheading * spitch - cheading * sroll) * zz;
+      const double lever_y = cheading * cpitch * yy + (cheading * spitch * sroll - croll * sheading) * xx -
+                             (sheading * sroll + cheading * croll * spitch) * zz;
+
+      /* vertical offset between the depth sensor and the target (Z up) */
+      double lever_z = 0.0;
+      if (sensor_depth != NULL) {
+        xx = target_x - sensor_depth->offsets[0].position_offset_x;
+        yy = target_y - sensor_depth->offsets[0].position_offset_y;
+        zz = target_z - sensor_depth->offsets[0].position_offset_z;
+        lever_z = spitch * yy - cpitch * sroll * xx + cpitch * croll * zz;
+      }
+
+      double mtodeglon;
+      double mtodeglat;
+      mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
+      *targetlon = navlon + lever_x * mtodeglon;
+      *targetlat = navlat + lever_y * mtodeglat;
+      *targetdepth = sensordepth - lever_z;
+    }
+  }
+  else {
+    status = MB_FAILURE;
+    *error = MB_ERROR_BAD_DESCRIPTOR;
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       targetlon:    %f\n", *targetlon);
+    fprintf(stderr, "dbg2       targetlat:    %f\n", *targetlat);
+    fprintf(stderr, "dbg2       targetdepth:  %f\n", *targetdepth);
+    fprintf(stderr, "dbg2       error:        %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:       %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
 int mb_platform_position_offset(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset,
                                    double *target_x_offset, double *target_y_offset, double *target_z_offset,
                                    int *error) {
