@@ -21,6 +21,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.3beta23    October 3, 2026
 - Version 5.8.3beta22    September 19, 2026
 - Version 5.8.3beta21    September 13, 2026
 - Version 5.8.3beta20    September 10, 2026
@@ -76,6 +77,264 @@ or beta, are equally accessible as tarballs through the Github interface.
 - Version 5.8.1beta02    February 7, 2024
 - Version 5.8.1beta01    February 1, 2024
 - **Version 5.8.0          January 22, 2024**
+
+---
+
+#### 5.8.3beta23 (October 3, 2026)
+
+Format 261 (MBF\_KEMKMALL): fixed a georeferencing bug affecting Kongsberg kmall
+data logged in dual-swath (or any other multi-sub-ping-per-cycle) mode, where a
+single transmit/receive cycle produces two or more MRZ sub-pings a fraction of a
+second apart, each with its own navigation and heading. mbsys\_kmbes\_extract()
+(src/mbio/mbsys\_kmbes.c) merges all of a cycle's sub-pings into one MB-System
+ping, but reported only the first sub-ping's navigation and heading for the whole
+merged ping while leaving every other sub-ping's soundings in their own,
+uncorrected ship-frame offsets - so any navigation or heading difference between
+sub-pings (heading in particular, which can differ from the reference sub-ping by
+a measurable fraction of a degree even during ordinary transit, and by tens of
+degrees elsewhere in a survey) was silently applied to the wrong beams, most
+visibly as a systematic swath-to-swath position error over sloped terrain. A new
+function, mbsys\_kmbes\_reproject\_beam\_to\_reference() (src/mbio/mbsys\_kmbes.c),
+reprojects each non-reference sub-ping's beams from its own navigation/heading
+frame into the reference sub-ping's frame - via absolute longitude/latitude,
+using the same rotation and meters-to-degrees convention already used throughout
+MB-System by mb\_extract\_lonlat() and mb\_read() (src/mbio/mb\_access.c,
+src/mbio/mb\_read.c) - so every beam ends up correctly positioned once the single
+reported reference navigation and heading are applied downstream. Verified
+against a Kongsberg kmall dual-swath test dataset by comparing beam-by-beam
+output before and after the fix: soundings from the reference sub-ping of each
+cycle were unchanged, while soundings from the other sub-ping(s) shifted by
+amounts consistent with the sub-pings' actual navigation/heading differences.
+
+This fix was made with the assistance of the AI coding assistant Claude Sonnet 5
+(Anthropic, model claude-sonnet-5), operating as Claude Code under developer
+supervision and review, which diagnosed the bug by comparing MB-System's kmall
+processing of an R/V Thomas G. Thompson EM304 survey against the same data
+processed through Qimera and exported as GSF, tracing the discrepancy to the
+merged-ping single-navigation behavior described above and confirming the fix
+beam by beam.
+
+Format 261 (MBF\_KEMKMALL) and program mbpreprocess: fixed a second, larger
+source of navigation/heading error found during the same investigation,
+affecting Kongsberg installations that log #SKM attitude/heading/navigation
+samples from two independent sensor systems (kinds MB\_DATA\_NAV1 and
+MB\_DATA\_NAV2, corresponding to #SKM sensorSystem 0 and 1 respectively).
+mbpreprocess previously defaulted, for kmall data, to merging MB\_DATA\_NAV1
+unconditionally whenever \-\-nav-async, \-\-heading-async, and \-\-attitude-async
+were not specified - but MB\_DATA\_NAV1 is not always the sensor system the
+sonar's own real-time processing actually uses: on the R/V Thompson test data,
+the #IIP installation datagram's own ATTI\_1/ATTI\_2 tags marked sensor system 0
+(MB\_DATA\_NAV1) as the passive standby and sensor system 1 (MB\_DATA\_NAV2) as
+active, so the previous hardcoded default was silently merging in the wrong (and
+substantially different, by up to about 20 degrees of heading) sensor's data. A
+new function, mbsys\_kmbes\_active\_attitude\_system() (src/mbio/mbsys\_kmbes.c),
+parses the #IIP record's free-text install\_txt for the ATTI\_<n> line marked
+"U=ACTIVE" and caches the corresponding kind (MB\_DATA\_NAV1 or MB\_DATA\_NAV2) in
+a new mbsys\_kmbes\_struct field, active\_attitude\_system, populated automatically
+as soon as #IIP is read (mbr\_kemkmall\_rd\_iip(), src/mbio/mbr\_kemkmall.c).
+mbpreprocess (src/utilities/mbpreprocess.cc) now uses this value to resolve its
+nav\_async/heading\_async/attitude\_async defaults for kmall data dynamically, per
+file, falling back to MB\_DATA\_NAV1 only if the installation record does not
+unambiguously mark one sensor system active; explicitly specifying
+\-\-nav-async, \-\-heading-async, or \-\-attitude-async continues to override this
+(or any other) default exactly as before. The #SKM reader itself
+(mbr\_kemkmall\_rd\_skm(), src/mbio/mbr\_kemkmall.c) always assigns sensor system 0
+to MB\_DATA\_NAV1 and sensor system 1 to MB\_DATA\_NAV2, unconditionally - only the
+choice of which kind mbpreprocess merges by default has changed. The
+mbpreprocess manual page was updated to document this kmall-specific
+default-resolution behavior under \-\-nav-async, \-\-heading-async, and
+\-\-attitude-async. Verified against the same R/V Thompson test dataset: the
+default (no options given) now reproduces the same heading (and downstream
+bathymetry) as explicitly specifying \-\-nav-async=30 \-\-heading-async=30
+\-\-attitude-async=30, while explicitly specifying =29 continues to force the
+previous (passive-sensor) behavior.
+
+This fix was made with the assistance of the AI coding assistant Claude Sonnet 5
+(Anthropic, model claude-sonnet-5), operating as Claude Code under developer
+supervision and review, which traced the heading discrepancy to the #SKM
+sensor-system selection by directly parsing the raw kmall file's #IIP, #SKM, and #SPO 
+datagrams and cross-referencing the ATTI\_1/ATTI\_2 active/passive tags
+against both the sonar's own per-ping heading and the corresponding
+Qimera-derived GSF export, and verified the fix by comparing mbpreprocess output
+beam by beam and heading by heading with and without the fix and with explicit
+\-\-nav-async/\-\-heading-async/\-\-attitude-async overrides in both directions.
+
+Formats 56, 57, 58, and 59 (MBF\_EM300RAW, MBF\_EM300MBA, MBF\_EM710RAW,
+MBF\_EM710MBA): fixed a bug, reported in Github issue #1620, in which writing a
+Kongsberg Installation Parameter datagram with an unset two-character DSH, MRP,
+or NRP field corrupted every field written after it in the same datagram.
+mbr\_em300raw.c, mbr\_em300mba.c, mbr\_em710raw.c, and mbr\_em710mba.c each
+serialize this datagram into a growing ASCII buffer with repeated calls of the
+form `sprintf(&buff[buff_len], "DSH=%c%c,", store->par\_dsh[0],
+store->par\_dsh[1]); buff\_len = strlen(buff);`; when a field's stored value is
+still at its zero-initialized default (both characters NUL, e.g. because the
+source data never carried a value for it), the embedded NUL bytes terminate the
+following `strlen(buff)` call early, so `buff\_len` stops advancing past them
+and the next field's `sprintf` overwrites the unset field in place - observed,
+for example, as `DSH=APS=0` in place of the intended `DSH=xx,APS=0`. All ten
+call sites across the four files (DSH, MRP, and NRP in the two EM710 readers;
+DSH and MRP only in the two EM300 readers, which have no NRP field) now write
+the field only when both characters are non-NUL, omitting it entirely
+otherwise, matching the existing convention already used for other optional
+string fields in the same functions (e.g. par\_dds, par\_osv). Verified using a
+real EM712 format-59 file: converting it unmodified via `mbcopy -F59/58`
+reproduces well-formed output before and after the fix; after zeroing the
+DSH/MRP/NRP byte pairs of all 45 Installation Parameter datagrams in a copy of
+that file (135 fields in total) to simulate unset values, the pre-fix code
+reproduced the exact reported corruption (`DSH=APS=0`) while the fixed code
+produced clean output with the unset fields simply omitted.
+
+This fix was made with the assistance of the AI coding assistant Claude Sonnet 5
+(Anthropic, model claude-sonnet-5), operating as Claude Code under developer
+supervision and review, which located every instance of the vulnerable
+`sprintf`/`strlen`-based serialization pattern across the Kongsberg format
+readers (rather than only the single call site named in the issue report),
+confirmed the corruption mechanism by temporarily reverting the fix and
+comparing `mbcopy` output on a deliberately corrupted real-data file before and
+after, and confirmed normal (all fields set) conversions are unaffected by
+comparing output before and after the fix on the unmodified source file.
+
+Format 261 (MBF\_KEMKMALL) and programs mbpreprocess, mbprocess, and mbmakeplatform:
+redefined and extended the preprocessing of Kongsberg kmall data. Preprocessing
+is required the first time kmall data are read, in order to construct an #XMT and
+an #XMS datagram for each #MRZ datagram. The #XMT datagram holds the navigation,
+heading, sensor depth, and attitude for the ping together with the beam travel
+times and angles used by mbprocess to recalculate bathymetry by raytracing, and the #XMS 
+datagram holds pseudosidescan derived from the snippet backscatter. When
+mbr\_rt\_kemkmall() (src/mbio/mbr\_kemkmall.c) constructs these on reading, it now
+calls mbsys\_kmbes\_preprocess() with no platform model and with only roll, pitch,
+heave, and speed interpolation arrays, so the navigation, heading, and sensor depth
+logged in the #MRZ datagram are left unchanged and copied into the #XMT datagram.
+Previously the heading logged in the #MRZ datagram was replaced with heading
+interpolated from the asynchronous #SKM data, which differed from the logged vessel
+heading (and from the heading in the GSF files exported by Qimera) by amounts
+varying between 0.2 and 0.8 degrees; reading raw kmall data now reproduces the
+GSF heading to within 0.006 degrees. When mbpreprocess supplies interpolation arrays
+the logged values are replaced only by those that are supplied, for each #MRZ
+sub-ping at its own time, and the sensor depth precedence is: a sensor depth
+array, then \-\-kluge-auv-sentry-sensordepth, then the logged value. The #MRZ
+navigation and the soundings x\_reRefPoint\_m, y\_reRefPoint\_m, and z\_reRefPoint\_m
+are relative to the vessel reference point, not the sonar, and with a platform model
+the merged navigation is now moved from the navigation sensor to the vessel
+reference point (the origin of the platform model) using the new library functions
+mb\_platform\_position\_platform() and mb\_platform\_lever\_origin()
+(src/mbio/mb\_platform.c). The extraction of bathymetry by mbsys\_kmbes\_extract()
+was checked against the format specification, and mbsys\_kmbes\_extract\_altitude()
+returned the depth below the reference point rather than the height of the
+transducer above the seafloor; it now subtracts the waterline offset and the
+transducer depth.
+
+For MB-System as a whole, the navigation and sensor depth passed by the format i/o
+functions (mb\_read(), mb\_get\_all(), mb\_extract(), mb\_insert(), mb\_extract\_nav(),
+mb\_insert\_nav(), and the related write and put functions) are to be those of the
+mapping sensor rather than of the platform reference point, with the acrosstrack and
+alongtrack distances relative to that point; this had not previously been defined
+clearly, and some formats may need to change to follow it. Format 261 now follows
+this rule while the #MRZ datagrams on disk keep Kongsberg's definition, with the
+position and soundings relative to the vessel reference point. The sonar reference
+point is the alongtrack position of the transmit array and the acrosstrack position of
+the receive array, because those set the alongtrack and acrosstrack positions of the
+soundings. mbsys\_kmbes\_extract(), mbsys\_kmbes\_extract\_nav(), mbsys\_kmbes\_insert(),
+and mbsys\_kmbes\_insert\_nav() (src/mbio/mbsys\_kmbes.c) convert between the two, using
+the lever arm held in the #XMT datagram, which gives the reported navigation as the
+position of the sonar reference point and the soundings and pseudosidescan
+relative to it. Absolute sounding positions are unchanged by this: they were identical,
+to 1.2 mm or better, in a test that preprocessed the same data with the real platform
+and with a platform with zero sonar offsets, while the reported navigation and
+distances shifted by the lever arm. Data passed through unmodified (for example by
+mbcopy) leave the #MRZ datagrams byte for byte unchanged, and a navigation shift
+applied by mbprocess moves every sounding by exactly the shift.
+
+A new function, mbsys\_kmbes\_extract\_platform() (src/mbio/mbsys\_kmbes.c), builds a
+platform model from the free-text installation parameters in the #IIP datagram at
+the start of every kmall file: the multibeam sensor with its transmit and receive
+array offsets, up to three position sensors, and up to two attitude sensors, with the
+sensors marked "U=ACTIVE" selected as the data sources. This makes
+\-\-swath=swathfile work with mbmakeplatform for format 261, and mbpreprocess now
+extracts the platform from the first kmall file's #IIP datagram automatically when no
+\-\-platform-file is specified (a platform file always takes precedence). The
+installation angles reported for the attitude sensors are corrections that
+Kongsberg adds to the measured angles - verified by reproducing the roll, pitch, and
+heading in the GSF files and the #MRZ datagrams from the raw #SKM samples of both
+sensor systems - and are therefore stored negated in the platform model.
+
+The #XMT datagram is now version 1. Its ping information grew from 60 to 68 bytes with
+the new fields lever\_acrosstrack and lever\_alongtrack, the displacement of the sonar
+reference point from the vessel reference point, and its navigation is now the position
+of the sonar reference point. Bathymetry raytraced by mbprocess from the #XMT travel
+times and angles is relative to the sonar, so with navigation at the sonar reference
+point mbprocess needs no lever arm handling of its own. The new fields follow
+numSoundings, and the reader steps by the numBytesInfoData and numBytesPerSounding
+values in the datagram, so version 0 datagrams are read as before with the new fields
+set to zero, which places the sonar reference point at the vessel reference point.
+Raytracing the #XMT angles also
+exposed an error in the alongtrack offset, which had been the vessel advance between
+ping time and beam receive time ((sector transmit delay + two way travel time) times
+speed) rather than only the advance to the sector transmit time, adding about 30 m
+at transit speed; it is now sector\_transmit\_delay times speed, and version 0
+datagrams have the travel time part (twtt times speed) removed when they are read.
+Verified for a single swath Sentry EM2040 dataset and a dual swath R/V Thompson EM124
+dataset by running mbpreprocess (with the platform extracted automatically), mbsvplist,
+and mbprocess and comparing the raytraced soundings to Kongsberg's own #MRZ soundings,
+with no lever arm correction in mbprocess: the rms differences in acrosstrack distance,
+alongtrack distance, and depth are 0.018, 0.002, and 0.011 m for the Sentry data and
+0.99, 2.1, and 1.3 m for the Thompson data. A version 0 file converted to its older
+form was read, processed, and copied with mbcopy without error or repeated correction.
+The mbpreprocess and mbprocess manual pages were updated, including adding the
+previously missing description of \-\-kluge-auv-sentry-sensordepth.
+
+Format 261 (MBF\_KEMKMALL): mbsys\_kmbes\_insert() previously overwrote the navigation
+and heading of every #MRZ sub-ping with the single reference sub-ping values while
+copying the acrosstrack and alongtrack distances straight into the soundings, which
+destroyed the logged navigation and heading of the other sub-pings of a dual swath
+ping whenever data were rewritten (for example by mbcopy or mbprocess). It now keeps
+each non-reference sub-ping's own navigation and heading and reprojects the
+distances back into that sub-ping's frame, as the inverse of the reprojection done on
+extraction; a dual swath file copied with mbcopy is unchanged beam for beam and a
+single swath file is unaffected. Also fixed a segmentation fault in
+mbsys\_kmbes\_preprocess() when running programs such as mbinfo with a verbose level of
+5 or more, where the debug output dereferenced the optional navigation speed array,
+which is not defined when the data are first read.
+
+Formats 56 and 57 (MBF\_EM300RAW, MBF\_EM300MBA, handled by mbsys\_simrad2.c) and 58 and
+59 (MBF\_EM710RAW, MBF\_EM710MBA, handled by mbsys\_simrad3.c) now follow the same rule that
+the navigation and sensor depth are those of the mapping sensor. In these formats the
+navigation datagrams, and so the navigation of the pings, are the location of the active
+position sensor, and the acrosstrack and alongtrack distances of the soundings are
+relative to that location, so the extract, extract\_nav, extract\_nnav, insert, and
+insert\_nav functions of both modules (and the sidescan extraction) now convert to and
+from the sonar reference point using the lever arm computed from the installation
+parameters (the sonar offsets, the active position sensor offsets, and the roll and pitch of
+the ping), while the data on disk keep Kongsberg's definition. The conversion is applied
+identically on extraction and insertion, so data passed through unmodified are not
+altered. The alongtrack offset returned by mbsys\_simrad3\_ttimes() is now only the advance of the
+platform to the transmit time of the beam's sector, without the position sensor offset that
+had been added to it, because that offset is now part of the reported navigation.
+Validated for
+format 58 on EM712 data and for formats 56 and 57 on EM120 and EM122 data that have
+nonzero installation offsets by running mbpreprocess, mbsvplist, and mbprocess and
+comparing the raytraced soundings to the logged soundings: the alongtrack differences, which
+had been the offset of the transmit array from the position sensor (11.7 m for one of the
+datasets), are now within a few centimeters at all angles, and a navigation shift applied
+by mbprocess and a copy by mbcopy were checked to behave as for format 261. For the
+formats 56 and 57 the logged alongtrack and acrosstrack distances were found to be
+referenced to the transmit array location, so that is the sonar reference point there,
+and for both modules the position sensor offsets are used even when the sensor is flagged
+as motion compensated. Limitations: the lever arm is a single value per ping, so for
+dual head sonars (EM3002 and similar, whose heads are merged into one ping by
+mbsys\_simrad2) the second head's acrosstrack offset from the first head cannot be
+represented and only its alongtrack difference is carried by mbsys\_simrad2\_ttimes(); this was
+not tested because no dual head data were available. The heuristic that
+mbsys\_simrad3\_ttimes() previously used to guess a position sensor when par\_aps was wrong and
+the active sensor had a zero x offset is no longer applied. The older Kongsberg and Simrad formats (for example
+51 and 54) have not been changed and still return the logged position.
+
+This work was done with the assistance of the AI coding assistant Claude Sonnet 5
+(Anthropic, model claude-sonnet-5), operating as Claude Code under developer
+supervision and review, which compared the kmall bathymetry, heading, roll, and pitch
+with the Qimera GSF exports and with the raw #IIP, #SKM, and #MRZ datagrams to
+establish the conventions described above, implemented the changes, and checked them
+against a dual swath and a single swath dataset.
 
 ---
 

@@ -58,6 +58,19 @@ including:
      \- Apply tides to bathymetry.
      \- Insert metadata.
 
+For Kongsberg kmall data (format 261), bathymetry is recalculated from the travel
+times and beam angles stored in the #XMT datagrams that \fBmbpreprocess\fP
+constructs for each ping, so the data must have been preprocessed. The recalculated
+acrosstrack and alongtrack distances are relative to the sonar, as is the navigation
+\fBMB-System\fP reports for kmall data (the position of the sonar reference point, derived
+from the vessel reference point position logged in the MRZ datagrams using the lever arm
+that \fBmbpreprocess\fP calculates from the platform model and stores in the #XMT datagrams),
+so no lever arm handling is needed in \fBmbprocess\fP. The platform model is extracted by
+\fBmbpreprocess\fP from the file's installation datagram if no platform file is specified.
+Files containing version 0 #XMT datagrams, written by earlier versions of \fBMB-System\fP,
+are still processed but contain no lever arm, so their reported navigation is that of the
+vessel reference point; preprocess the original data again with \fBmbpreprocess\fP to include it.
+
 The actions of \fBmbprocess\fP are controlled by text
 parameter files. Each \fBmbprocess\fP parameter file
 contains single line commands that set

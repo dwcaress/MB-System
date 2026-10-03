@@ -4529,8 +4529,10 @@ int mbr_em300raw_wr_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 	buff_len = strlen(buff);
 	sprintf(&buff[buff_len], "DSF=%.6f,", store->par_dsf);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "DSH=%c%c,", store->par_dsh[0], store->par_dsh[1]);
-	buff_len = strlen(buff);
+	if (store->par_dsh[0] != '\0' && store->par_dsh[1] != '\0') {
+		sprintf(&buff[buff_len], "DSH=%c%c,", store->par_dsh[0], store->par_dsh[1]);
+		buff_len = strlen(buff);
+	}
 	sprintf(&buff[buff_len], "APS=%d,", store->par_aps);
 	buff_len = strlen(buff);
 	sprintf(&buff[buff_len], "P1M=%d,", store->par_p1m);
@@ -4581,8 +4583,10 @@ int mbr_em300raw_wr_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 	buff_len = strlen(buff);
 	sprintf(&buff[buff_len], "MSY=%.2f,", store->par_msy);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "MRP=%c%c,", store->par_mrp[0], store->par_mrp[1]);
-	buff_len = strlen(buff);
+	if (store->par_mrp[0] != '\0' && store->par_mrp[1] != '\0') {
+		sprintf(&buff[buff_len], "MRP=%c%c,", store->par_mrp[0], store->par_mrp[1]);
+		buff_len = strlen(buff);
+	}
 	sprintf(&buff[buff_len], "MSD=%.2f,", store->par_msd);
 	buff_len = strlen(buff);
 	sprintf(&buff[buff_len], "MSR=%.2f,", store->par_msr);
