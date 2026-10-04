@@ -21,6 +21,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.3beta24    October 4, 2026
 - Version 5.8.3beta23    October 3, 2026
 - Version 5.8.3beta22    September 19, 2026
 - Version 5.8.3beta21    September 13, 2026
@@ -77,6 +78,31 @@ or beta, are equally accessible as tarballs through the Github interface.
 - Version 5.8.1beta02    February 7, 2024
 - Version 5.8.1beta01    February 1, 2024
 - **Version 5.8.0          January 22, 2024**
+
+---
+
+#### 5.8.3beta24 (October 4, 2026)
+
+Build system (MacOS, Homebrew): fixed a build failure when building with the
+private mb-mesa and mb-mesa-glu kegs (cmake -DmacosUseMbMesa=ON), in which
+compiling mbview failed with "fatal error: 'GL/glu.h' file not found". The local
+FindOpenGL module (build-utils/FindOpenGL.cmake) took libGL and the OpenGL headers
+from the mb-mesa keg and libGLU from the mb-mesa-glu keg, but set the OpenGL include
+directory only to the mb-mesa include directory, while GL/glu.h is installed only
+in the mb-mesa-glu keg. Because both kegs are keg-only, their headers are not linked
+into /opt/homebrew/include, so nothing placed glu.h on the compiler's include path.
+Builds made through the mbsystem-beta Homebrew formula were not affected because
+Homebrew's build environment adds the include directories of keg-only dependencies
+automatically; the failure appeared in manual builds run from a shell. The OpenGL
+include directory now includes both ${MBMESA\_PREFIX}/include and
+${MBMESAGLU\_PREFIX}/include, in both the pre-Tahoe and the Tahoe-or-later MacOS
+Homebrew branches. Verified by a full build with -DmacosUseMbMesa=ON, confirming
+that libmbview links against mb-mesa's libGL and mb-mesa-glu's libGLU.
+
+This work was done with the assistance of the AI coding assistant Claude Opus 5.5
+(Anthropic, model claude-opus-5-5), operating as Claude Code under developer
+supervision and review, which traced the missing header to the include directories
+set by the FindOpenGL module, implemented the fix, and verified the build.
 
 ---
 
