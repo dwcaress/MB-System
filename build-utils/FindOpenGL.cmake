@@ -246,7 +246,9 @@ elseif (APPLE)
 				# GLU must be taken from this same pair, since mb-mesa-glu's libGLU is
 				# built against mb-mesa's libGL specifically (see CMakeLists.txt).
 				set(OPENGL_gl_LIBRARY ${MBMESA_PREFIX}/lib/libGL.dylib)
-				set(OPENGL_INCLUDE_DIR ${MBMESA_PREFIX}/include)
+				# mb-mesa and mb-mesa-glu are keg-only, so glu.h is not linked into
+				# /opt/homebrew/include - add the GLU keg include directory explicitly.
+				set(OPENGL_INCLUDE_DIR ${MBMESA_PREFIX}/include ${MBMESAGLU_PREFIX}/include)
 				set(OPENGL_glu_LIBRARY ${MBMESAGLU_PREFIX}/lib/libGLU.dylib)
 			else()
 				set(OPENGL_gl_LIBRARY /opt/homebrew/lib/libGL.dylib)
@@ -273,7 +275,9 @@ elseif (APPLE)
 				# GLU must be taken from this same pair, since mb-mesa-glu's libGLU is
 				# built against mb-mesa's libGL specifically (see CMakeLists.txt).
 				set(OPENGL_gl_LIBRARY ${MBMESA_PREFIX}/lib/libGL.dylib)
-				set(OPENGL_INCLUDE_DIR ${MBMESA_PREFIX}/include)
+				# mb-mesa and mb-mesa-glu are keg-only, so glu.h is not linked into
+				# /opt/homebrew/include - add the GLU keg include directory explicitly.
+				set(OPENGL_INCLUDE_DIR ${MBMESA_PREFIX}/include ${MBMESAGLU_PREFIX}/include)
 				set(OPENGL_glu_LIBRARY ${MBMESAGLU_PREFIX}/lib/libGLU.dylib)
 			else()
 				set(OPENGL_gl_LIBRARY /opt/homebrew/lib/libGL.dylib)
