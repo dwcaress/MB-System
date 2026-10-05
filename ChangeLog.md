@@ -21,7 +21,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
-- Version 5.8.3beta24    October 4, 2026
+- Version 5.8.3beta24    October 5, 2026
 - Version 5.8.3beta23    October 3, 2026
 - Version 5.8.3beta22    September 19, 2026
 - Version 5.8.3beta21    September 13, 2026
@@ -81,7 +81,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
-#### 5.8.3beta24 (October 4, 2026)
+#### 5.8.3beta24 (October 5, 2026)
 
 Build system (MacOS, Homebrew): fixed a build failure when building with the
 private mb-mesa and mb-mesa-glu kegs (cmake -DmacosUseMbMesa=ON), in which
