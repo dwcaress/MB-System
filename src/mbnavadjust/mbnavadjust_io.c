@@ -224,11 +224,11 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
 
       /* create data directory */
 #ifdef _WIN32
-      if (mkdir(project->datadir) != 0) {
+      const int mode = mkdir(project->datadir);
 #else
-	  int mode = mkdir(project->datadir, 00775);
-      if (mode != 0) {
+      const int mode = mkdir(project->datadir, 00775);
 #endif
+      if (mode != 0) {
         fprintf(stderr, "Error creating data directory %s\nmode:%d errno:%d\nError: %s\n", 
         					project->datadir, mode, errno, strerror(errno));
         *error = MB_ERROR_INIT_FAIL;

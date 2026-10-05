@@ -43,7 +43,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "mb_aux.h"
 #include "mb_define.h"
@@ -3600,7 +3599,6 @@ int mbnavadjust_updategrid(int verbose, struct mbna_project *project_ptr) {
           /* write file header */
           char user[256], host[256], date[32];
           status = mb_user_host_date(mbna_verbose, user, host, date, &error);
-          gethostname(host, 256);
           snprintf(ostring, sizeof(ostring), "# Adjusted navigation generated using MBnavadjust\n");
           fprintf(afp, "%s", ostring);
           snprintf(ostring, sizeof(ostring), "# MB-System version:        %s\n", MB_VERSION);

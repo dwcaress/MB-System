@@ -37,7 +37,7 @@ set(executables
 foreach(executable ${executables})
   add_executable(${executable} ${executable}.cc)
   target_compile_features(${executable} PRIVATE cxx_std_17)
-  target_link_libraries(${executable} PRIVATE mbio mbaux pthread OpenCV::OpenCV)
+  target_link_libraries(${executable} PRIVATE mbio mbaux ${MB_SYSLIBS} OpenCV::OpenCV)
 endforeach()
 
 set(scripts mbm_makeimagelist)

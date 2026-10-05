@@ -75,14 +75,14 @@ set(executables
 
 foreach(executable ${executables})
   add_executable(${executable} ${executable}.cc)
-  target_link_libraries(${executable} PRIVATE mbio mbbsio mbaux mbsapi mbgsf pthread)
+  target_link_libraries(${executable} PRIVATE mbio mbbsio mbaux mbsapi mbgsf ${MB_SYSLIBS})
 endforeach()
 
 add_executable(mblevitus mblevitus.cc levitus.h)
-target_link_libraries(mblevitus PRIVATE mbio mbbsio mbaux mbsapi mbgsf pthread)
+target_link_libraries(mblevitus PRIVATE mbio mbbsio mbaux mbsapi mbgsf ${MB_SYSLIBS})
 
 add_executable(mbconfig mbconfig.cc levitus.h)
-target_link_libraries(mbconfig PRIVATE mbio mbbsio mbaux mbsapi mbgsf pthread)
+target_link_libraries(mbconfig PRIVATE mbio mbbsio mbaux mbsapi mbgsf ${MB_SYSLIBS})
 
 # Escape backslashes (e.g. from a Windows path like C:\otps) so that
 # embedding these paths in generated C string literals and compiler
