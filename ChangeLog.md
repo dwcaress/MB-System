@@ -99,10 +99,56 @@ ${MBMESAGLU\_PREFIX}/include, in both the pre-Tahoe and the Tahoe-or-later MacOS
 Homebrew branches. Verified by a full build with -DmacosUseMbMesa=ON, confirming
 that libmbview links against mb-mesa's libGL and mb-mesa-glu's libGLU.
 
+Build system (Windows): incorporated the platform-independent parts of pull
+request #1603 (Joaquim Luis, MSVC build fixes) without merging the pull request
+itself. The remaining, MSVC-specific parts of #1603 were not adopted because
+they used \_WIN32 guards that also apply to MinGW-w64 builds and, when
+cross-compiled with MinGW-w64, broke them. The changes adopted are:
+
+- GSF library: src/gsf/gsf\_enc.c had CR-only (classic Mac) line endings, which
+  caused the MSVC preprocessor to silently drop every gsfEncode\* function and the
+  mbgsf DLL link to fail. The file has been converted to LF line endings; the
+  code itself is unchanged.
+- Program mbnavadjust (src/mbnavadjust/mbnavadjust\_io.c): in
+  mbnavadjust\_new\_project(), the variable mode holding the result of mkdir() was
+  declared only in the non-Windows branch but used unconditionally in the
+  following error message, so the file did not compile on Windows. It is now
+  declared in both branches.
+- Program mbnavadjust (src/mbnavadjust/mbnavadjust\_invertnav.c): removed a
+  redundant gethostname() call made just after mb\_user\_host\_date() had already
+  filled in the host name (including mb\_user\_host\_date()'s Windows fallback to
+  the USERDOMAIN environment variable), together with the \<unistd.h\> include it
+  required. The undeclared gethostname() was a compile error under MinGW-w64; the
+  output file header is unchanged on other platforms.
+- CMake: added a top-level MB\_SYSLIBS variable listing the system libraries
+  (m and pthread) linked by MB-System libraries and programs, and used it in
+  place of the hardcoded m and pthread link libraries for mbio, dump\_gsf, the
+  src/utilities programs, and the src/photo programs. MB\_SYSLIBS is empty when
+  building with MSVC, which has the math functions built into its C runtime and
+  provides no libm or libpthread; it is unchanged for MinGW-w64, Linux, and
+  MacOS builds.
+- MBIO library (src/mbio/mb\_io.h): the global arrays mb\_sensor\_type\_id\[\] and
+  mb\_sensor\_type\_string\[\] are now declared extern "C", so that C++ programs
+  link to them correctly under MSVC, which (unlike gcc and clang) mangles the
+  names of C++ global variables. They are also marked with a new
+  MB\_SENSOR\_TYPE\_API macro that expands to \_\_declspec(dllexport/dllimport) only
+  for MSVC DLL builds; MSVC does not export data from a DLL automatically. The
+  macro deliberately does nothing for MinGW-w64, because a single dllexport in a
+  MinGW DLL turns off its automatic export of all other symbols. For static MSVC
+  builds, src/mbio/CMakeLists.txt defines MBIO\_STATIC to suppress the markers.
+
+Verified by a full MacOS build with all 73 ctest tests passing, and by
+MinGW-w64 (GCC 16) cross-compilation of all non-GUI sources, together with a
+MinGW-w64 link of the mbgsf DLL confirming that the library's automatic symbol
+export is preserved. MSVC builds were not tested.
+
 This work was done with the assistance of the AI coding assistant Claude Opus 5.5
 (Anthropic, model claude-opus-5-5), operating as Claude Code under developer
 supervision and review, which traced the missing header to the include directories
-set by the FindOpenGL module, implemented the fix, and verified the build.
+set by the FindOpenGL module, implemented the fix, and verified the build, and
+which evaluated pull request #1603 (including MinGW-w64 cross-compilation and DLL
+export testing of the pull request), implemented the Windows build changes
+listed above, and verified them.
 
 ---
 

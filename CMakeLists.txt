@@ -102,6 +102,17 @@ if (${srcdir} STREQUAL ${bindir})
 endif (${srcdir} STREQUAL ${bindir})
 
 add_compile_definitions(CMAKE_BUILD_SYSTEM=1)
+
+# Platform system libraries linked by MB-System libraries and programs.
+# libm and pthreads are separate libraries on POSIX systems and on MinGW,
+# but MSVC has the math functions built into its C runtime and has no
+# libm or libpthread to link against.
+if(MSVC)
+  set(MB_SYSLIBS "")
+else()
+  set(MB_SYSLIBS m pthread)
+endif()
+
 if (CMAKE_C_BYTE_ORDER STREQUAL "LITTLE_ENDIAN")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DBYTESWAPPED")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBYTESWAPPED")
