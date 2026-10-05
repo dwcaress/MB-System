@@ -1,2 +1,2 @@
 MB-System Version:  "5.8.3beta24"
-MB-System Release Date:  "4 October 2026"
+MB-System Release Date:  "5 October 2026"
