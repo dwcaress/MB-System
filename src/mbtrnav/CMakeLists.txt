@@ -737,7 +737,7 @@ add_executable(trn-client
 )
 
 # specify include paths and libraries
-target_link_libraries(trn-client PRIVATE tnav newmat qnx NetCDF::NetCDF)
+target_link_libraries(trn-client PRIVATE tnav newmat qnx NetCDF::NetCDF pthread)
 
 target_include_directories(trn-client PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
