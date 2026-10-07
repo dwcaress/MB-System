@@ -21,6 +21,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.3beta25    October 6, 2026
 - Version 5.8.3beta24    October 5, 2026
 - Version 5.8.3beta23    October 3, 2026
 - Version 5.8.3beta22    September 19, 2026
@@ -78,6 +79,28 @@ or beta, are equally accessible as tarballs through the Github interface.
 - Version 5.8.1beta02    February 7, 2024
 - Version 5.8.1beta01    February 1, 2024
 - **Version 5.8.0          January 22, 2024**
+
+---
+
+#### 5.8.3beta25 (October 6, 2026)
+
+Build system (Linux): fixed a link failure of the TRN utility trn-client
+reported in issue #1627, in which linking failed with "undefined reference to
+symbol 'sem\_close@@GLIBC\_2.2.5'" and "libpthread.so.0: error adding symbols: DSO
+missing from command line". The program src/mbtrnav/utils/trn-client.cpp, added
+in 5.8.3beta10, calls the POSIX semaphore functions sem\_open() and sem\_close(),
+but its target in src/mbtrnav/CMakeLists.txt did not link the pthread library.
+With glibc 2.34 and later (e.g. stock Ubuntu 22.04 with glibc 2.35) these
+functions are part of libc and the omission is harmless, but with older glibc
+versions they reside only in libpthread, which was reaching the link only as an
+indirect dependency of another library, and modern linkers do not resolve
+symbols through such indirect dependencies. The trn-client target now links
+pthread explicitly, as the trnw library target already did.
+
+This work was done with the assistance of the AI coding assistant Claude Opus 5.5
+(Anthropic, model claude-opus-5-5), operating as Claude Code under developer
+supervision and review, which diagnosed the cause of the link failure reported in
+issue #1627, implemented the fix, and verified the build.
 
 ---
 
