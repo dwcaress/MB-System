@@ -50,6 +50,7 @@
 #include "mb_status.h"
 #include "mbsys_kmbes.h"
 #include "mbsys_ldeoih.h"
+#include "mbsys_simrad2.h"
 
 constexpr int MBPREPROCESS_ALLOC_CHUNK = 1000;
 
@@ -1724,8 +1725,8 @@ int main(int argc, char **argv) {
 			/* call preprocess function with pars settings before reading any data
 					- for some formats this can set special read behavior
 					- passing store_ptr == NULL indicates this is the pre-reading call
-					- if a preprocess function does not exist for this format then
-						standard preprocessing will be done - reset the error */
+					- if this format has no preprocess function of its own then this
+						call does nothing - reset the error on any failure */
 			if (mb_preprocess(verbose, imbio_ptr, NULL, NULL, (void *)&preprocess_pars, &error) == MB_FAILURE) {
 				status = MB_SUCCESS;
 				error = MB_ERROR_NO_ERROR;
@@ -2691,6 +2692,15 @@ int main(int argc, char **argv) {
   int n_rf_att3 = 0;
   int n_rf_dup_timestamp = 0;
   n_rt_data = 0;
+  n_rt_comment = 0;
+  n_rt_nav = 0;
+  n_rt_nav1 = 0;
+  n_rt_nav2 = 0;
+  n_rt_nav3 = 0;
+  n_rt_att = 0;
+  n_rt_att1 = 0;
+  n_rt_att2 = 0;
+  n_rt_att3 = 0;
   n_rt_files = 0;
   n_rt_dup_timestamp = 0;
 
@@ -2850,8 +2860,8 @@ int main(int argc, char **argv) {
       /* call preprocess function with pars settings before reading any data
           - for some formats this can set special read behavior
           - passing store_ptr == NULL indicates this is the pre-reading call
-          - if a preprocess function does not exist for this format then
-            standard preprocessing will be done - reset the error */
+          - if this format has no preprocess function of its own then this
+            call does nothing - reset the error on any failure */
       if (mb_preprocess(verbose, imbio_ptr, NULL, NULL, (void *)&preprocess_pars, &error) == MB_FAILURE) {
         status = MB_SUCCESS;
         error = MB_ERROR_NO_ERROR;
@@ -2871,6 +2881,13 @@ int main(int argc, char **argv) {
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
         exit(error);
       }
+
+      /* data from the old Simrad formats (51, 52, 53: mbsys_simrad) are written
+         in format 57 (MBF_EM300MBA: mbsys_simrad2), so each record must be
+         translated into the output store before writing */
+      struct mb_io_struct *omb_io_ptr = (struct mb_io_struct *)ombio_ptr;
+      const bool translate_simrad_to_simrad2 =
+        ((struct mb_io_struct *)imbio_ptr)->system == MB_SYS_SIMRAD && omb_io_ptr->system == MB_SYS_SIMRAD2;
 
       /* initialize writing the output fast bathymetry *fbt file */
       bool make_fbt = false;
@@ -2951,6 +2968,12 @@ int main(int argc, char **argv) {
         status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
       if (error == MB_ERROR_NO_ERROR)
         status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
+
+      /* these arrays are also used to extract records from the output file
+         (e.g. format 57 with up to 256 beams written from format 51 with
+         121 beams), so make sure they are large enough for the output format */
+      if (error == MB_ERROR_NO_ERROR)
+        status = mb_update_arrays(verbose, imbio_ptr, obeams_bath, obeams_amp, opixels_ss, &error);
 
       /* if error initializing memory then quit */
       if (error != MB_ERROR_NO_ERROR) {
@@ -3335,9 +3358,17 @@ int main(int argc, char **argv) {
         if (kind == MB_DATA_DATA)
         	time_prior_d = time_d;
 
+        /* translate the record into the output data structure if needed */
+        void *ostore_ptr = istore_ptr;
+        if (translate_simrad_to_simrad2 && error == MB_ERROR_NO_ERROR && output_ok) {
+          ostore_ptr = omb_io_ptr->store_data;
+          status = mbsys_simrad2_from_simrad(verbose, static_cast<mbsys_simrad_struct *>(istore_ptr),
+                                             static_cast<mbsys_simrad2_struct *>(ostore_ptr), &error);
+        }
+
         /* write some data */
         if (error == MB_ERROR_NO_ERROR && output_ok) {
-          status = mb_put_all(verbose, ombio_ptr, istore_ptr, false, kind, time_i, time_d, navlon, navlat, speed, heading,
+          status = mb_put_all(verbose, ombio_ptr, ostore_ptr, false, kind, time_i, time_d, navlon, navlat, speed, heading,
                     obeams_bath, obeams_amp, opixels_ss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss,
                     ssacrosstrack, ssalongtrack, comment, &error);
           if (status != MB_SUCCESS) {
@@ -3353,15 +3384,15 @@ int main(int argc, char **argv) {
           // output ancilliary files
           if (kind == MB_DATA_DATA) {
 
-            status = mb_extract(verbose, ombio_ptr, istore_ptr, &kind, time_i, &time_d,
+            status = mb_extract(verbose, ombio_ptr, ostore_ptr, &kind, time_i, &time_d,
                                 &navlon, &navlat, &speed, &heading,
                                 &obeams_bath, &obeams_amp, &opixels_ss,
                                 beamflag, bath, amp, bathacrosstrack, bathalongtrack,
                                 ss, ssacrosstrack, ssalongtrack, comment, &error);
-            status = mb_extract_nav(verbose, ombio_ptr, istore_ptr, &kind, time_i, &time_d,
+            status = mb_extract_nav(verbose, ombio_ptr, ostore_ptr, &kind, time_i, &time_d,
                                 &navlon, &navlat, &speed, &heading, &draft,
                                 &roll, &pitch, &heave, &error);
-            status = mb_extract_altitude(verbose, ombio_ptr, istore_ptr, &kind,
+            status = mb_extract_altitude(verbose, ombio_ptr, ostore_ptr, &kind,
                                 &sensordepth, &altitude, &error);
 
 

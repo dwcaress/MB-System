@@ -49,6 +49,7 @@
 #include "mb_process.h"
 #include "mb_status.h"
 #include "mbsys_simrad2.h"
+#include "mbsys_simrad.h"
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
@@ -5161,5 +5162,698 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 	}
 
 	return (status);
+}
+/*--------------------------------------------------------------------*/
+static int mbsys_simrad2_simrad_time_convert(int verbose, int year, int month, int day, int hour, int minute, int second, int centisecond,
+                                               int *date, int *msec, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       year:       %d\n", year);
+    fprintf(stderr, "dbg2       month:      %d\n", month);
+    fprintf(stderr, "dbg2       day:        %d\n", day);
+    fprintf(stderr, "dbg2       hour:       %d\n", hour);
+    fprintf(stderr, "dbg2       minute:     %d\n", minute);
+    fprintf(stderr, "dbg2       second:     %d\n", second);
+    fprintf(stderr, "dbg2       centisecond:%d\n", centisecond);
+  }
+
+  /* get time */
+  int time_i[7];
+  mb_fix_y2k(verbose, year, &time_i[0]);
+  time_i[1] = month;
+  time_i[2] = day;
+  time_i[3] = hour;
+  time_i[4] = minute;
+  time_i[5] = second;
+  time_i[6] = 10000 * centisecond;
+  *date = 10000 * time_i[0] + 100 * time_i[1] + time_i[2];
+  *msec = 3600000 * time_i[3] + 60000 * time_i[4] + 1000 * time_i[5] + 0.001 * time_i[6];
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       date:       %d\n", *date);
+    fprintf(stderr, "dbg2       msec:       %d\n", *msec);
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+/* Translate a record stored in the old Simrad (mbsys_simrad: EM12S, EM12D,
+   EM121, EM1000) data structure into the newer mbsys_simrad2 data structure
+   so that it can be written in format 57 (MBF_EM300MBA). Used by both
+   mbcopy and mbpreprocess. */
+int mbsys_simrad2_from_simrad(int verbose, struct mbsys_simrad_struct *istore, struct mbsys_simrad2_struct *ostore, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       istore:     %p\n", (void *)istore);
+    fprintf(stderr, "dbg2       ostore:     %p\n", (void *)ostore);
+    fprintf(stderr, "dbg2       kind:       %d\n", istore->kind);
+  }
+
+  int status = MB_SUCCESS;
+  struct mbsys_simrad_survey_struct *iping;
+  struct mbsys_simrad2_ping_struct *oping;
+  double *angles_simrad;
+  double bath_offset;
+  double alpha, beta, theta, phi;
+  int istep = 0;
+
+  /* copy the data  */
+  if (istore != NULL && ostore != NULL && (void *)istore != (void *)ostore) {
+    /* type of data record */
+    ostore->kind = istore->kind;
+    ostore->type = EM2_NONE;
+    if (istore->kind == MB_DATA_DATA)
+      ostore->type = EM2_BATH;
+    else if (istore->kind == MB_DATA_COMMENT)
+      ostore->type = EM2_START;
+    else if (istore->kind == MB_DATA_START)
+      ostore->type = EM2_START;
+    else if (istore->kind == MB_DATA_STOP)
+      ostore->type = EM2_STOP2;
+    else if (istore->kind == MB_DATA_NAV)
+      ostore->type = EM2_POS;
+    else if (istore->kind == MB_DATA_VELOCITY_PROFILE)
+      ostore->type = EM2_SVP;
+    if (istore->sonar == MBSYS_SIMRAD_EM12S)
+      ostore->sonar = MBSYS_SIMRAD2_EM12S;
+    else if (istore->sonar == MBSYS_SIMRAD_EM12D)
+      ostore->sonar = MBSYS_SIMRAD2_EM12D;
+    else if (istore->sonar == MBSYS_SIMRAD_EM1000)
+      ostore->sonar = MBSYS_SIMRAD2_EM1000;
+    else if (istore->sonar == MBSYS_SIMRAD_EM121)
+      ostore->sonar = MBSYS_SIMRAD2_EM121;
+
+    /* time stamp */
+    mbsys_simrad2_simrad_time_convert(verbose, istore->year, istore->month, istore->day, istore->hour, istore->minute,
+                               istore->second, istore->centisecond, &ostore->date, &ostore->msec, error);
+
+    /* installation parameter values */
+    ostore->par_date = 0; /* installation parameter date = year*10000 + month*100 + day
+                  Feb 26, 1995 = 19950226 */
+    ostore->par_msec = 0; /* installation parameter time since midnight in msec
+                  08:12:51.234 = 29570234 */
+    mbsys_simrad2_simrad_time_convert(verbose, istore->par_year, istore->par_month, istore->par_day, istore->par_hour,
+                               istore->par_minute, istore->par_second, istore->par_centisecond, &ostore->par_date,
+                               &ostore->par_msec, error);
+    ostore->par_line_num = istore->survey_line; /* survey line number */
+    ostore->par_serial_1 = 0;                   /* system 1 serial number */
+    ostore->par_serial_2 = 0;                   /* system 2 serial number */
+    ostore->par_wlz = 0.0;                      /* water line vertical location (m) */
+    ostore->par_smh = 0;                        /* system main head serial number */
+    if (istore->sonar == MBSYS_SIMRAD_EM100) {
+      ostore->par_s1z = istore->em100_td; /* transducer 1 vertical location (m) */
+      ostore->par_s1x = istore->em100_tx; /* transducer 1 along location (m) */
+      ostore->par_s1y = istore->em100_ty; /* transducer 1 athwart location (m) */
+    }
+    else if (istore->sonar == MBSYS_SIMRAD_EM1000) {
+      ostore->par_s1z = istore->em1000_td; /* transducer 1 vertical location (m) */
+      ostore->par_s1x = istore->em1000_tx; /* transducer 1 along location (m) */
+      ostore->par_s1y = istore->em1000_ty; /* transducer 1 athwart location (m) */
+    }
+    else {
+      ostore->par_s1z = istore->em12_td; /* transducer 1 vertical location (m) */
+      ostore->par_s1x = istore->em12_tx; /* transducer 1 along location (m) */
+      ostore->par_s1y = istore->em12_ty; /* transducer 1 athwart location (m) */
+    }
+    ostore->par_s1h = istore->heading_offset; /* transducer 1 heading (deg) */
+    ostore->par_s1r = istore->roll_offset;    /* transducer 1 roll (m) */
+    ostore->par_s1p = istore->pitch_offset;   /* transducer 1 pitch (m) */
+    ostore->par_s1n = 0;                      /* transducer 1 number of modules */
+    ostore->par_s2z = 0.0;                    /* transducer 2 vertical location (m) */
+    ostore->par_s2x = 0.0;                    /* transducer 2 along location (m) */
+    ostore->par_s2y = 0.0;                    /* transducer 2 athwart location (m) */
+    ostore->par_s2h = 0.0;                    /* transducer 2 heading (deg) */
+    ostore->par_s2r = 0.0;                    /* transducer 2 roll (m) */
+    ostore->par_s2p = 0.0;                    /* transducer 2 pitch (m) */
+    ostore->par_s2n = 0;                      /* transducer 2 number of modules */
+    ostore->par_go1 = 0.0;                    /* system (sonar head 1) gain offset */
+    ostore->par_go2 = 0.0;                    /* sonar head 2 gain offset */
+    for (int i = 0; i < 16; i++) {
+      ostore->par_tsv[i] = '\0'; /* transmitter (sonar head 1) software version */
+      ostore->par_rsv[i] = '\0'; /* receiver (sonar head 2) software version */
+      ostore->par_bsv[i] = '\0'; /* beamformer software version */
+      ostore->par_psv[i] = '\0'; /* processing unit software version */
+      ostore->par_osv[i] = '\0'; /* operator station software version */
+    }
+    ostore->par_dsd = 0.0;    /* depth sensor time delay (msec) */
+    ostore->par_dso = 0.0;    /* depth sensor offset */
+    ostore->par_dsf = 0.0;    /* depth sensor scale factor */
+    ostore->par_dsh[0] = 'I'; /* depth sensor heave (IN or NI) */
+    ostore->par_dsh[1] = 'N'; /* depth sensor heave (IN or NI) */
+    ostore->par_aps = 0;      /* active position system number */
+    ostore->par_p1m = 0;      /* position system 1 motion compensation (boolean) */
+    ostore->par_p1t = 0;   /* position system 1 time stamp used
+                   (0=system time, 1=position input time) */
+    ostore->par_p1z = 0.0; /* position system 1 vertical location (m) */
+    ostore->par_p1x = 0.0; /* position system 1 along location (m) */
+    ostore->par_p1y = 0.0; /* position system 1 athwart location (m) */
+    ostore->par_p1d = istore->pos_delay; /* position system 1 time delay (sec) */
+    for (int i = 0; i < 16; i++) {
+      ostore->par_p1g[i] = '\0'; /* position system 1 geodetic datum */
+    }
+    ostore->par_p2m = 0;   /* position system 2 motion compensation (boolean) */
+    ostore->par_p2t = 0;   /* position system 2 time stamp used
+                   (0=system time, 1=position input time) */
+    ostore->par_p2z = 0.0; /* position system 2 vertical location (m) */
+    ostore->par_p2x = 0.0; /* position system 2 along location (m) */
+    ostore->par_p2y = 0.0; /* position system 2 athwart location (m) */
+    ostore->par_p2d = 0.0; /* position system 2 time delay (sec) */
+    for (int i = 0; i < 16; i++) {
+      ostore->par_p2g[i] = '\0'; /* position system 2 geodetic datum */
+    }
+    ostore->par_p3m = 0;   /* position system 3 motion compensation (boolean) */
+    ostore->par_p3t = 0;   /* position system 3 time stamp used
+                   (0=system time, 1=position input time) */
+    ostore->par_p3z = 0.0; /* position system 3 vertical location (m) */
+    ostore->par_p3x = 0.0; /* position system 3 along location (m) */
+    ostore->par_p3y = 0.0; /* position system 3 athwart location (m) */
+    ostore->par_p3d = 0.0; /* position system 3 time delay (sec) */
+    for (int i = 0; i < 16; i++) {
+      ostore->par_p3g[i] = '\0'; /* position system 3 geodetic datum */
+    }
+    ostore->par_msz = 0.0;    /* motion sensor vertical location (m) */
+    ostore->par_msx = 0.0;    /* motion sensor along location (m) */
+    ostore->par_msy = 0.0;    /* motion sensor athwart location (m) */
+    ostore->par_mrp[0] = 'H'; /* motion sensor roll reference plane (HO or RP) */
+    ostore->par_mrp[1] = 'O'; /* motion sensor roll reference plane (HO or RP) */
+    ostore->par_msd = 0.0;    /* motion sensor time delay (sec) */
+    ostore->par_msr = 0.0;    /* motion sensor roll offset (deg) */
+    ostore->par_msp = 0.0;    /* motion sensor pitch offset (deg) */
+    ostore->par_msg = 0.0;    /* motion sensor heading offset (deg) */
+    ostore->par_gcg = 0.0;    /* gyro compass heading offset (deg) */
+    for (int i = 0; i < 4; i++) {
+      ostore->par_cpr[i] = '\0'; /* cartographic projection */
+    }
+    for (int i = 0; i < MBSYS_SIMRAD2_COMMENT_LENGTH; i++) {
+      ostore->par_rop[i] = '\0'; /* responsible operator */
+      ostore->par_sid[i] = '\0'; /* survey identifier */
+      ostore->par_pll[i] = '\0'; /* survey line identifier (planned line number) */
+      ostore->par_com[i] = '\0'; /* comment */
+    }
+
+    /* runtime parameter values */
+    ostore->run_date = 0; /* runtime parameter date = year*10000 + month*100 + day
+              Feb 26, 1995 = 19950226 */
+    ostore->run_msec = 0; /* runtime parameter time since midnight in msec
+              08:12:51.234 = 29570234 */
+    ostore->run_ping_count = 0; /* ping counter */
+    ostore->run_serial = 0;     /* system 1 or 2 serial number */
+    ostore->run_status = 0;     /* system status */
+    ostore->run_mode = 0;       /* system mode:
+                    0 : nearfield (EM3000) or very shallow (EM300)
+                    1 :  normal (EM3000) or shallow (EM300)
+                    2 : medium (EM300)
+                    3 : deep (EM300)
+                    4 : very deep (EM300) */
+    ostore->run_filter_id = 0;  /* filter identifier - the two lowest bits
+                    indicate spike filter strength:
+                    00 : off
+                    01 : weak
+                    10 : medium
+                    11 : strong
+                    bit 2 is set if the slope filter is on
+                    bit 3 is set if the sidelobe filter is on
+                    bit 4 is set if the range windows are expanded
+                    bit 5 is set if the smoothing filter is on
+                    bit  6 is set if the interference filter is on */
+    ostore->run_min_depth = 0;  /* minimum depth (m) */
+    ostore->run_max_depth = 0;  /* maximum depth (m) */
+    ostore->run_absorption = 0; /* absorption coefficient (0.01 dB/km) */
+
+    ostore->run_tran_pulse = 0; /* transmit pulse length (usec) */
+    if (istore->sonar == MBSYS_SIMRAD_EM12S || istore->sonar == MBSYS_SIMRAD_EM12D)
+      ostore->run_tran_beam = 17; /* transmit beamwidth (0.1 deg) */
+    else if (istore->sonar == MBSYS_SIMRAD_EM1000)
+      ostore->run_tran_beam = 33; /* transmit beamwidth (0.1 deg) */
+    else if (istore->sonar == MBSYS_SIMRAD_EM121)
+      ostore->run_tran_beam = 10; /* transmit beamwidth (0.1 deg) */
+    ostore->run_tran_pow = 0;       /* transmit power reduction (dB) */
+    if (istore->sonar == MBSYS_SIMRAD_EM12S || istore->sonar == MBSYS_SIMRAD_EM12D)
+      ostore->run_rec_beam = 35; /* receiver beamwidth (0.1 deg) */
+    else if (istore->sonar == MBSYS_SIMRAD_EM1000)
+      ostore->run_rec_beam = 33; /* receiver beamwidth (0.1 deg) */
+    else if (istore->sonar == MBSYS_SIMRAD_EM121)
+      ostore->run_rec_beam = 10; /* transmit beamwidth (0.1 deg) */
+    ostore->run_rec_band = 0;      /* receiver bandwidth (50 hz) */
+    ostore->run_rec_gain = 0;      /* receiver fixed gain (dB) */
+    ostore->run_tvg_cross = 0;     /* TVG law crossover angle (deg) */
+    ostore->run_ssv_source = 0;    /* source of sound speed at transducer:
+                       0 : from sensor
+                       1 : manual
+                       2 : from profile */
+    ostore->run_max_swath = 0;     /* maximum swath width (m) */
+    ostore->run_beam_space = 0;    /* beam spacing:
+                       0 : determined by beamwidth (EM3000)
+                       1 : equidistant
+                       2 : equiangle */
+    ostore->run_swath_angle = 0;   /* coverage sector of swath (deg) */
+    ostore->run_stab_mode = 0;     /* yaw and pitch stabilization mode:
+                       The upper bit (bit 7) is set if pitch
+                       stabilization is on.
+                       The two lower bits are used to show yaw
+                       stabilization mode as follows:
+                       00 : none
+                       01 : to survey line heading
+                       10 : to mean vessel heading
+                       11 : to manually entered heading */
+    for (int i = 0; i < 4; i++) {
+      ostore->run_spare[i] = '\0';
+    }
+
+    /* sound velocity profile */
+    ostore->svp_use_date = 0; /* date at start of use
+                  date = year*10000 + month*100 + day
+                  Feb 26, 1995 = 19950226 */
+    ostore->svp_use_msec = 0; /* time at start of use since midnight in msec
+                  08:12:51.234 = 29570234 */
+    mbsys_simrad2_simrad_time_convert(verbose, istore->svp_year, istore->svp_month, istore->svp_day, istore->svp_hour,
+                               istore->svp_minute, istore->svp_second, istore->svp_centisecond, &ostore->svp_use_date,
+                               &ostore->svp_use_msec, error);
+    ostore->svp_count = 0;  /* sequential counter or input identifier */
+    ostore->svp_serial = 0; /* system 1 serial number */
+    ostore->svp_origin_date = 0; /* date at svp origin
+                 date = year*10000 + month*100 + day
+                 Feb 26, 1995 = 19950226 */
+    ostore->svp_origin_msec = 0; /* time at svp origin since midnight in msec
+                 08:12:51.234 = 29570234 */
+    ostore->svp_num = istore->svp_num; /* number of svp entries */
+    ostore->svp_depth_res = 100;       /* depth resolution (cm) */
+    for (int i = 0; i < MBSYS_SIMRAD_MAXSVP; i++) {
+      ostore->svp_depth[i] = istore->svp_depth[i]; /* depth of svp entries (according to svp_depth_res) */
+      ostore->svp_vel[i] = istore->svp_vel[i];     /* sound speed of svp entries (0.1 m/sec) */
+    }
+
+    /* position */
+    ostore->pos_date = 0; /* position date = year*10000 + month*100 + day
+              Feb 26, 1995 = 19950226 */
+    ostore->pos_msec = 0; /* position time since midnight in msec
+              08:12:51.234 = 29570234 */
+    mbsys_simrad2_simrad_time_convert(verbose, istore->pos_year, istore->pos_month, istore->pos_day, istore->pos_hour,
+                               istore->pos_minute, istore->pos_second, istore->pos_centisecond, &ostore->pos_date,
+                               &ostore->pos_msec, error);
+    ostore->pos_count = 0;  /* sequential counter */
+    ostore->pos_serial = 0; /* system 1 serial number */
+    ostore->pos_latitude = 20000000 * istore->pos_latitude;
+    /* latitude in decimal degrees * 20000000
+        (negative in southern hemisphere)
+        if valid, invalid = 0x7FFFFFFF */
+    ostore->pos_longitude = 10000000 * istore->pos_longitude;
+    /* longitude in decimal degrees * 10000000
+        (negative in western hemisphere)
+        if valid, invalid = 0x7FFFFFFF */
+    ostore->pos_quality = 0; /* measure of position fix quality (cm) */
+    ostore->pos_speed = (int)(istore->speed / 0.036);
+    /* speed over ground (cm/sec) if valid,
+        invalid = 0xFFFF */
+    ostore->pos_course = 0xFFFF; /* course over ground (0.01 deg) if valid,
+                 invalid = 0xFFFF */
+    ostore->pos_heading = (int)(istore->line_heading * 100);
+    ;
+    /* heading (0.01 deg) if valid,
+    invalid = 0xFFFF */
+    ostore->pos_system = 129; // don't use istore->pos_type;
+    /* position system number, type, and realtime use
+        - position system number given by two lowest bits
+        - fifth bit set means position must be derived
+        from input Simrad 90 datagram
+        - sixth bit set means valid time is that of
+        input datagram
+        - setting pos_system = 129 makes nav system1 the active sensor */
+    ostore->pos_input_size = 0; /* number of bytes in input position datagram */
+    for (int i = 0; i < 256; i++) {
+      ostore->pos_input[i] = 0; /* position input datagram as received, minus
+                header and tail (such as NMEA 0183 $ and CRLF) */
+    }
+
+    /* height */
+    ostore->hgt_date = 0;   /* height date = year*10000 + month*100 + day
+                Feb 26, 1995 = 19950226 */
+    ostore->hgt_msec = 0;   /* height time since midnight in msec
+                08:12:51.234 = 29570234 */
+    ostore->hgt_count = 0;  /* sequential counter */
+    ostore->hgt_serial = 0; /* system 1 serial number */
+    ostore->hgt_height = 0; /* height (0.01 m) */
+    ostore->hgt_type = 0;   /* height type as given in input datagram or if
+                zero the height is derived from the GGK datagram
+                and is the height of the water level re the
+                vertical datum */
+
+    /* tide */
+    ostore->tid_date = 0;        /* tide date = year*10000 + month*100 + day
+                     Feb 26, 1995 = 19950226 */
+    ostore->tid_msec = 0;        /* tide time since midnight in msec
+                     08:12:51.234 = 29570234 */
+    ostore->tid_count = 0;       /* sequential counter */
+    ostore->tid_serial = 0;      /* system 1 serial number */
+    ostore->tid_origin_date = 0; /* tide input date = year*10000 + month*100 + day
+                 Feb 26, 1995 = 19950226 */
+    ostore->tid_origin_msec = 0; /* tide input time since midnight in msec
+                 08:12:51.234 = 29570234 */
+    ostore->tid_tide = 0;        /* tide offset (0.01 m) */
+
+    /* clock */
+    ostore->clk_date = 0;   /* system date = year*10000 + month*100 + day
+                Feb 26, 1995 = 19950226 */
+    ostore->clk_msec = 0;   /* system time since midnight in msec
+                08:12:51.234 = 29570234 */
+    ostore->clk_count = 0;  /* sequential counter */
+    ostore->clk_serial = 0; /* system 1 serial number */
+    ostore->clk_origin_date = 0; /* external clock date = year*10000 + month*100 + day
+                 Feb 26, 1995 = 19950226 */
+    ostore->clk_origin_msec = 0; /* external clock time since midnight in msec
+                 08:12:51.234 = 29570234 */
+    ostore->clk_1_pps_use = 0; /* if 1 then the internal clock is synchronized
+                   to an external 1 PPS signal, if 0 then not */
+
+    /* allocate memory for data structure if needed */
+    if (istore->kind == MB_DATA_DATA && ostore->ping == NULL)
+      status = mbsys_simrad2_survey_alloc(verbose, NULL, (void *)ostore, error);
+
+    if (istore->kind == MB_DATA_DATA && istore->ping != NULL && ostore->ping != NULL) {
+      /* get data structure pointer */
+      iping = (struct mbsys_simrad_survey_struct *)istore->ping;
+      oping = (struct mbsys_simrad2_ping_struct *)ostore->ping;
+
+      /* set beam widths for EM121 */
+      if (istore->sonar == MBSYS_SIMRAD_EM121) {
+        if (iping->bath_mode == 3) {
+          ostore->run_tran_beam = 40; /* transmit beamwidth (0.1 deg) */
+          ostore->run_rec_beam = 40;  /* transmit beamwidth (0.1 deg) */
+        }
+        else if (iping->bath_mode == 2) {
+          ostore->run_tran_beam = 20; /* transmit beamwidth (0.1 deg) */
+          ostore->run_rec_beam = 20;  /* transmit beamwidth (0.1 deg) */
+        }
+        else {
+          ostore->run_tran_beam = 10; /* transmit beamwidth (0.1 deg) */
+          ostore->run_rec_beam = 10;  /* transmit beamwidth (0.1 deg) */
+        }
+      }
+
+      /* initialize everything */
+      oping->png_date = ostore->date;
+      /* date = year*10000 + month*100 + day
+          Feb 26, 1995 = 19950226 */
+      oping->png_msec = ostore->msec;
+      /* time since midnight in msec
+          08:12:51.234 = 29570234 */
+      oping->png_count = iping->ping_number;
+      /* sequential counter or input identifier */
+      oping->png_serial = iping->swath_id;
+      /* system 1 or system 2 serial number */
+      oping->png_latitude = 20000000 * iping->latitude;
+      /* latitude in decimal degrees * 20000000
+          (negative in southern hemisphere)
+          if valid, invalid = 0x7FFFFFFF */
+      oping->png_longitude = 10000000 * iping->longitude;
+      /* longitude in decimal degrees * 10000000
+          (negative in western hemisphere)
+          if valid, invalid = 0x7FFFFFFF */
+      oping->png_speed = 0xFFFF;
+      /* speed over ground (cm/sec) if valid,
+          invalid = 0xFFFF */
+      if (ostore->sonar == MBSYS_SIMRAD2_EM121)
+        oping->png_heading = iping->heading; /* heading (0.01 deg) */
+      else
+        oping->png_heading = 10 * iping->heading; /* heading (0.01 deg) */
+      oping->png_ssv = iping->sound_vel;
+      /* sound speed at transducer (0.1 m/sec) */
+      oping->png_xducer_depth = iping->ping_heave + (int)(100 * ostore->par_s1z);
+      bath_offset = 0.01 * oping->png_xducer_depth;
+      /* transmit transducer depth (0.01 m)
+          - The transmit transducer depth plus the
+          depth offset multiplier times 65536 cm
+          should be added to the beam depths to
+          derive the depths re the water line.
+          The depth offset multiplier will usually
+          be zero, except when the EM3000 sonar
+          head is on an underwater vehicle at a
+          depth greater than about 650 m. Note that
+          the offset multiplier will be negative
+          (-1) if the actual heave is large enough
+          to bring the transmit transducer above
+          the water line. This may represent a valid
+          situation,  but may also be due to an
+          erroneously set installation depth of
+          the either transducer or the water line. */
+      if (oping->png_xducer_depth > 0)
+        oping->png_offset_multiplier = 0;
+      /* transmit transducer depth offset multiplier */
+      else {
+        oping->png_offset_multiplier = -1;
+        oping->png_xducer_depth = oping->png_xducer_depth + 65536;
+        /* transmit transducer depth offset multiplier */
+      }
+
+      /* beam data */
+      oping->png_nbeams_max = iping->beams_bath;
+      /* maximum number of beams possible */
+      oping->png_nbeams = iping->beams_bath;
+      /* number of valid beams */
+      if ((ostore->sonar == MBSYS_SIMRAD2_EM12S || ostore->sonar == MBSYS_SIMRAD2_EM12D) && iping->bath_res == 1) {
+        oping->png_depth_res = 10;
+        /* depth resolution (0.1 m) */
+        oping->png_distance_res = 20;
+        /* x and y resolution (0.2 m) */
+        oping->png_sample_rate = 5000;
+        /* sampling rate (Hz) */
+      }
+      else if ((ostore->sonar == MBSYS_SIMRAD2_EM12S || ostore->sonar == MBSYS_SIMRAD2_EM12D) && iping->bath_res == 2) {
+        oping->png_depth_res = 20;
+        /* depth resolution (0.2 m) */
+        oping->png_distance_res = 50;
+        /* x and y resolution (0.5 m) */
+        oping->png_sample_rate = 1250;
+        /* sampling rate (Hz) */
+      }
+      else if (ostore->sonar == MBSYS_SIMRAD2_EM1000) {
+        oping->png_depth_res = 2;
+        /* depth resolution (0.02 m) */
+        oping->png_distance_res = 10;
+        /* x and y resolution (0.1 m) */
+        oping->png_sample_rate = 20000;
+        /* sampling rate (Hz) */
+      }
+      else if (ostore->sonar == MBSYS_SIMRAD2_EM121) {
+        oping->png_depth_res = iping->depth_res;
+        /* depth resolution (0.01 m) */
+        oping->png_distance_res = iping->across_res;
+        /* x and y resolution (0.01 m) */
+        oping->png_sample_rate = (int)(1.0 / (0.0001 * iping->range_res));
+        /* sampling rate (Hz) */
+      }
+
+      /* get predefined table of beam angles using sonar type and operational mode */
+      bool interleave = false;
+      int nbeams = 0;
+      mbsys_simrad_beamangles(verbose, (void *)istore,
+      		                    &interleave, &nbeams, &angles_simrad, error);
+
+      if (*error == MB_ERROR_NO_ERROR && nbeams > 0 && angles_simrad != NULL) {
+        /* if interleaved get center beam */
+        if (interleave) {
+          if (iping->bath_mode == 12 && abs(iping->bath_acrosstrack[28]) < abs(iping->bath_acrosstrack[29]))
+            istep = 1;
+          else if (iping->bath_mode == 13 && abs(iping->bath_acrosstrack[31]) < abs(iping->bath_acrosstrack[30]))
+            istep = 1;
+          else if (abs(iping->bath_acrosstrack[oping->png_nbeams / 2 - 1]) <
+                   abs(iping->bath_acrosstrack[oping->png_nbeams / 2]))
+            istep = 1;
+          else
+            istep = 0;
+        }
+
+        /* set beam values */
+        for (int i = 0; i < oping->png_nbeams; i++) {
+          oping->png_depth[i] = (int)((unsigned short)iping->bath[i]);
+          /* depths in depth resolution units */
+          bool above_xducer = false;
+          if (oping->png_depth[i] != 0) {
+            oping->png_depth[i] -= (int)(bath_offset / (0.01 * oping->png_depth_res));
+            /* soundings at or above the transducer cannot be stored as unsigned
+               depths relative to the transducer (they would wrap to ~1300 m for
+               the EM1000) and are not physically possible - set the depth to
+               zero and flag the beam */
+            if (oping->png_depth[i] <= 0) {
+              oping->png_depth[i] = 0;
+              above_xducer = true;
+            }
+          }
+          oping->png_acrosstrack[i] = iping->bath_acrosstrack[i];
+          /* acrosstrack distances in distance resolution units */
+          oping->png_alongtrack[i] = iping->bath_alongtrack[i];
+          /* alongtrack distances in distance resolution units */
+
+          alpha = 0.01 * iping->pitch;
+          if (istore->sonar == MBSYS_SIMRAD_EM1000 && iping->bath_mode == 13) {
+            beta = 90.0 - angles_simrad[oping->png_nbeams - 1 - (2 * i + istep)];
+          }
+          else if (istore->sonar == MBSYS_SIMRAD_EM1000 && interleave) {
+            beta = 90.0 + angles_simrad[2 * i + istep];
+          }
+          else if (istore->sonar == MBSYS_SIMRAD_EM1000) {
+            beta = 90.0 + angles_simrad[i];
+          }
+          else {
+            beta = 90.0 + angles_simrad[i];
+          }
+          mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
+          oping->png_depression[i] = (int)(100 * (90.0 - theta));
+          /* Beam depression angles
+              in 0.01 degree. These are the takeoff angles used
+              in raytracing calculations. */
+          oping->png_azimuth[i] = (int)(100 * (90.0 - phi));
+          if (oping->png_azimuth[i] < 0)
+            oping->png_azimuth[i] += 36000;
+          /* Beam azimuth angles
+              in 0.01 degree. These values used to rotate sounding
+              position relative to the sonar after raytracing. */
+          oping->png_range[i] = iping->tt[i];
+          /* Ranges as one way
+              travel times in time units defined as half
+              the inverse sampling rate. */
+          oping->png_quality[i] = iping->quality[i];
+          /* 0-254 */
+          oping->png_window[i] = 0;
+          /* samples/4 */
+          oping->png_amp[i] = iping->amp[i];
+          /* 0.5 dB */
+          oping->png_beam_num[i] = i + 1;
+          /* beam 128 is first beam on
+              second head of EM3000D */
+          if (above_xducer)
+            oping->png_beamflag[i] = (char)(MB_FLAG_FLAG | MB_FLAG_SONAR);
+          else if (iping->bath[i] > 0)
+            oping->png_beamflag[i] = MB_FLAG_NONE;
+          else
+            oping->png_beamflag[i] = MB_FLAG_NULL;
+        }
+
+        /* raw travel time and angle data */
+        oping->png_raw1_read = false; /* flag indicating actual reading of rawbeam1 record */
+        oping->png_raw2_read = false; /* flag indicating actual reading of rawbeam2 record */
+        oping->png_raw_nbeams = 0; /* number of raw travel times and angles
+               - nonzero only if raw beam record read */
+                                   /* number of valid beams */
+
+        /* get raw pixel size to be stored in oping->png_max_range */
+        if (iping->pixels_ssraw > 0)
+          oping->png_ss_read = true; /* flag indicating actual reading of sidescan record */
+        else
+          oping->png_ss_read = false;       /* flag indicating actual reading of sidescan record */
+        oping->png_ss_date = oping->png_date; /* date = year*10000 + month*100 + day
+              Feb 26, 1995 = 19950226 */
+        oping->png_ss_msec = oping->png_msec; /* time since midnight in msec
+              08:12:51.234 = 29570234 */
+        if (istore->sonar == MBSYS_SIMRAD_EM12D || istore->sonar == MBSYS_SIMRAD_EM12S ||
+            istore->sonar == MBSYS_SIMRAD_EM121) {
+          if (iping->ss_mode == 1)
+            oping->png_max_range = 60;
+          else if (iping->ss_mode == 2)
+            oping->png_max_range = 240;
+          else if (iping->bath_mode == 1 || iping->bath_mode == 3)
+            oping->png_max_range = 60;
+          else
+            oping->png_max_range = 240;
+        }
+        else if (istore->sonar == MBSYS_SIMRAD_EM1000) {
+          if (iping->ss_mode == 3)
+            oping->png_max_range = 30;
+          else if (iping->ss_mode == 4)
+            oping->png_max_range = 30;
+          else if (iping->ss_mode == 5)
+            oping->png_max_range = 15;
+          else
+            oping->png_max_range = 15;
+        }
+
+        /* sidescan */
+        oping->png_r_zero = 0;
+        /* range to normal incidence used in TVG
+            (R0 predicted) in samples */
+        oping->png_r_zero_corr = 0;
+        /* range to normal incidence used to correct
+            sample amplitudes in number of samples */
+        oping->png_tvg_start = 0;
+        /* start sample of TVG ramp if not enough
+            dynamic range (0 otherwise) */
+        oping->png_tvg_stop = 0; /* stop sample of TVG ramp if not enough
+                                     dynamic range (0 otherwise) */
+        oping->png_bsn = 0;
+        /* normal incidence backscatter (BSN) in dB */
+        oping->png_bso = 0;
+        /* oblique incidence backscatter (BSO) in dB */
+        if (ostore->sonar == MBSYS_SIMRAD2_EM121)
+          oping->png_tx = 10 * iping->beam_width;
+        else if (ostore->sonar == MBSYS_SIMRAD2_EM12S || ostore->sonar == MBSYS_SIMRAD2_EM12D)
+          oping->png_tx = 17;
+        else if (ostore->sonar == MBSYS_SIMRAD2_EM1000)
+          oping->png_tx = 33;
+        /* Tx beamwidth in 0.1 degree */
+        oping->png_tvg_crossover = 0;
+        /* TVG law crossover angle in degrees */
+        oping->png_nbeams_ss = oping->png_nbeams;
+        /* number of beams with sidescan */
+        oping->png_npixels = iping->pixels_ssraw;
+        for (int i = 0; i < oping->png_nbeams_ss; i++) {
+          oping->png_beam_index[i] = i;
+          /* beam index number */
+          oping->png_sort_direction[i] = 0;
+          /* sorting direction - first sample in beam has lowest
+              range if 1, highest if -1. */
+          oping->png_beam_samples[i] = iping->beam_samples[i];
+          /* number of sidescan samples derived from
+              each beam */
+          oping->png_start_sample[i] = iping->beam_start_sample[i];
+          /* start sample number */
+          oping->png_center_sample[i] = iping->beam_center_sample[i];
+          /* center sample number */
+        }
+        for (int i = 0; i < oping->png_npixels; i++) {
+          oping->png_ssraw[i] = iping->ssraw[i];
+          /* the raw sidescan ordered port to starboard */
+        }
+        oping->png_pixel_size = iping->pixel_size;
+        oping->png_pixels_ss = iping->pixels_ss;
+        for (int i = 0; i < oping->png_pixels_ss; i++) {
+          if (iping->ss[i] != 0) {
+            oping->png_ss[i] = iping->ss[i];
+            /* the processed sidescan ordered port to starboard */
+            oping->png_ssalongtrack[i] = iping->ssalongtrack[i];
+            /* the processed sidescan alongtrack distances
+                in distance resolution units */
+          }
+          else {
+            oping->png_ss[i] = EM2_INVALID_AMP;
+            /* the processed sidescan ordered port to starboard */
+            oping->png_ssalongtrack[i] = EM2_INVALID_AMP;
+            /* the processed sidescan alongtrack distances
+                in distance resolution units */
+          }
+        }
+      }
+    }
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 /*--------------------------------------------------------------------*/

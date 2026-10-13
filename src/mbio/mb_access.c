@@ -415,13 +415,17 @@ int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_p
    * generic (format-independent) preprocessing implementation if this
    * format has not registered its own - this makes platform-based
    * preprocessing available for every format, not just those with a
-   * dedicated mb_io_preprocess function */
+   * dedicated mb_io_preprocess function
+   * - a NULL store_ptr indicates the pre-reading call used by some formats
+   *   to set special read behavior; there is nothing for the generic
+   *   implementation to do in that case */
   int status = MB_SUCCESS;
+  *error = MB_ERROR_NO_ERROR;
   if (mb_io_ptr->mb_io_preprocess != NULL) {
     status = (*mb_io_ptr->mb_io_preprocess)(verbose, mbio_ptr, store_ptr, platform_ptr, preprocess_pars_ptr, error);
   }
 
-  else {
+  else if (store_ptr != NULL) {
     status = mb_preprocess_generic(verbose, mbio_ptr, store_ptr, platform_ptr, preprocess_pars_ptr, error);
   }
 
@@ -458,7 +462,6 @@ int mb_preprocess_generic(int verbose, void *mbio_ptr, void *store_ptr, void *pl
   }
 
   assert(mbio_ptr != NULL);
-  assert(store_ptr != NULL);
   assert(preprocess_pars_ptr != NULL);
 
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
@@ -466,6 +469,16 @@ int mb_preprocess_generic(int verbose, void *mbio_ptr, void *store_ptr, void *pl
 
   *error = MB_ERROR_NO_ERROR;
   int status = MB_SUCCESS;
+
+  /* a NULL store_ptr indicates the pre-reading call - there is no
+     stored record to recalculate, so do nothing */
+  if (store_ptr == NULL) {
+    if (verbose >= 2) {
+      fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+      fprintf(stderr, "dbg2       status:        %d\n", status);
+    }
+    return status;
+  }
 
   /* make sure the scratch arrays used to extract/reinsert bathymetry are large enough */
   status &= mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char),

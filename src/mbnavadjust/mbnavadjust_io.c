@@ -5532,6 +5532,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
         if (output_open) {
           /* close the swath file */
           status = mb_close(verbose, &ombio_ptr, error);
+          status = mb_make_info(verbose, true, opath, MBF_MBLDEOIH, error);
           output_open = false;
         }
 
@@ -5821,6 +5822,7 @@ int mbnavadjust_import_file(int verbose, struct mbna_project *project,
       status = mb_freed(verbose, __FILE__, __LINE__, (void **)&ostore->bath_acrosstrack, error);
       status = mb_freed(verbose, __FILE__, __LINE__, (void **)&ostore->bath_alongtrack, error);
       status = mb_close(verbose, &ombio_ptr, error);
+      status = mb_make_info(verbose, true, opath, MBF_MBLDEOIH, error);
     }
 
     /* deallocate bin arrays if needed */
