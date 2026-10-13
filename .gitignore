@@ -250,3 +250,11 @@ includes.txt
 cppcheck.txt
 WINDOWS_PORTING_SESSION.md
 *.history
+
+# Claude Code: personal / runtime files (shared .claude/settings.json,
+# .claude/commands/, .claude/agents/, .claude/skills/ may be committed)
+CLAUDE.local.md
+.claude/settings.local.json
+.claude/worktrees/
+.claude/checkpoints/
+.claude/scheduled_tasks.*
