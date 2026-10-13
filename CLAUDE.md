@@ -136,8 +136,10 @@ MB-System_Claude_Code_Guide.md). Directory-level CLAUDE.md files may add rules.
   the pull request description instead of editing ChangeLog.md.
 - When updating ChangeLog.md:
   - Version id = latest beta tag published on GitHub + 1:
-      git ls-remote --tags origin | grep -o '5\.[0-9.]*beta[0-9]*$' | sort -V | tail -1
-    Do not trust the local ChangeLog heading; it may name an unreleased beta.
+      git ls-remote --tags origin | grep -oE '[0-9]+\.[0-9]+\.[0-9]+beta[0-9]+$' | sort -V | tail -1
+    (Requires three version components: old tags such as 5.79beta45 would
+    otherwise sort above 5.8.3betaNN.) Do not trust the local ChangeLog
+    heading; it may name an unreleased beta.
   - Date = today, moved forward on every edit even if the id is unchanged.
   - Put the same id/date in: the version list near the top, the release's
     "#### <id> (<Month D, YYYY>)" heading, and MB_VERSION / MB_VERSION_DATE

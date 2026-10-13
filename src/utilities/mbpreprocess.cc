@@ -2882,7 +2882,7 @@ int main(int argc, char **argv) {
         exit(error);
       }
 
-      /* data from the old Simrad formats (51, 52, 53: mbsys_simrad) are written
+      /* data from the old Simrad formats (51, 53, 54: mbsys_simrad) are written
          in format 57 (MBF_EM300MBA: mbsys_simrad2), so each record must be
          translated into the output store before writing */
       struct mb_io_struct *omb_io_ptr = (struct mb_io_struct *)ombio_ptr;
