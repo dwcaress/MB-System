@@ -21,7 +21,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
-- Version 5.8.3beta25    October 6, 2026
+- Version 5.8.3beta25    October 13, 2026
 - Version 5.8.3beta24    October 5, 2026
 - Version 5.8.3beta23    October 3, 2026
 - Version 5.8.3beta22    September 19, 2026
@@ -82,7 +82,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
-#### 5.8.3beta25 (October 6, 2026)
+#### 5.8.3beta25 (October 13, 2026)
 
 Build system (Linux): fixed a link failure of the TRN utility trn-client
 reported in issue #1627, in which linking failed with "undefined reference to
@@ -97,10 +97,63 @@ indirect dependency of another library, and modern linkers do not resolve
 symbols through such indirect dependencies. The trn-client target now links
 pthread explicitly, as the trnw library target already did.
 
+MBIO library: fixed a segmentation fault in mbpreprocess for every format that
+does not have its own format-specific preprocess function (e.g. format 51 for
+old Simrad EM1000 data). In 5.8.3beta17 mb\_preprocess() was changed to fall back
+on the new generic preprocessing function mb\_preprocess\_generic() for such
+formats, but this fallback was also invoked by the "pre-read" call that
+mbpreprocess makes before reading any data, in which the data storage pointer is
+NULL, so the generic function dereferenced a NULL pointer. The generic fallback
+is now used only when there is a data record to process, and
+mb\_preprocess\_generic() itself now returns immediately if passed a NULL store.
+
+Program mbpreprocess: fixed processing of data from the old Simrad multibeam
+formats 51, 52, and 53 (MBF\_EMOLDRAW, MBF\_EM12IFRM, MBF\_EM12DARW), which use the
+mbsys\_simrad data structure but are output by mbpreprocess in format 57
+(MBF\_EM300MBA), which uses the mbsys\_simrad2 data structure. Previously
+mbpreprocess passed the old structure directly to the format 57 writer, causing
+a segmentation fault. The translation function previously found only in mbcopy
+has been moved into the MBIO library as mbsys\_simrad2\_from\_simrad() (in
+mbsys\_simrad2.c), and is now used by both mbcopy and mbpreprocess. Also fixed a
+heap overflow in mbpreprocess in which the arrays used to extract records from
+the output file were sized for the input format (121 beams for format 51) rather
+than the output format (up to 256 beams for format 57); these arrays are now
+sized for the larger of the two. Also fixed the mbpreprocess summary of records
+read in pass 2, which included the comment, navigation, and attitude records
+counted in pass 1.
+
+Programs mbcopy and mbpreprocess: when translating old Simrad (format 51, 52, 53)
+data to format 57, soundings that lie at or above the transducer depth (which
+are not physically possible) previously wrapped around in the unsigned depth
+values stored in format 57, producing spurious depths of about 1313 m for the
+EM1000. Such soundings now have their depth set to zero and are flagged as
+sonar-flagged rather than appearing as good, deep soundings.
+
+Programs mbnavadjust and mbnavadjustmerge: when swath data are imported into an
+mbnavadjust project, the ancillary files (\*.inf, \*.fnv) are now created for
+each of the section files written by mbnavadjust\_import\_file() in
+src/mbnavadjust/mbnavadjust\_io.c, by calling mb\_make\_info() after each section
+file is closed.
+
+Program mbeditviz: fixed the regeneration of missing or out of date reverse edit
+save files (\*.resf) when loading processed swath files. When a \*.resf file was
+needed, mbeditviz ran "mbprocess -P" on the file after it had already locked the
+file for editing, so mbprocess always declined to process the locked file and the
+\*.resf file was never created. The \*.resf file is now checked, and mbprocess run
+if necessary, before mbeditviz locks the file, so the processed file then read by
+mbeditviz is the one the \*.resf file corresponds to. The \*.resf file is now also
+regenerated if it is older than the processed file, the path passed to mbprocess
+is quoted, and a warning is printed if the \*.resf file still could not be
+generated, in which case the beam flags of the processed file are treated as the
+original states.
+
 This work was done with the assistance of the AI coding assistant Claude Opus 5.5
 (Anthropic, model claude-opus-5-5), operating as Claude Code under developer
 supervision and review, which diagnosed the cause of the link failure reported in
-issue #1627, implemented the fix, and verified the build.
+issue #1627, diagnosed the mbpreprocess segmentation faults and the format 57
+depth wraparound encountered with old Simrad EM1000 data, diagnosed the mbeditviz
+\*.resf file locking conflict, implemented the fixes, and verified the builds and
+results.
 
 ---
 
