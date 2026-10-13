@@ -147,13 +147,31 @@ is quoted, and a warning is printed if the \*.resf file still could not be
 generated, in which case the beam flags of the processed file are treated as the
 original states.
 
+Development documentation: added two files to the top level of the source
+distribution for developers using the AI coding assistant Claude Code. CLAUDE.md
+holds the shared project instructions that Claude Code reads at the start of every
+session, including the MBIO architecture and coding conventions, the requirement
+that both the CMake and Autotools builds be maintained, the test suite policy,
+portability rules for Linux and Windows MinGW-w64 builds, the rule that code synced
+from other projects (TRN, GSF, and vendored third party code) is not edited without
+asking, the ChangeLog and version numbering procedures, the commit message style,
+and the requirement that AI assistance be disclosed in the ChangeLog and in commit
+messages. MB-System\_Claude\_Code\_Guide.md explains how to set up and use Claude
+Code for MB-System development, including an example macOS and Homebrew build
+setup, use of the Claude desktop app and Remote Control, worktrees, the
+investigate, build, test, and document working loop, and permission settings. The
+guide is based on drafts by Christian Ferreira. Personal settings for each developer
+go in a CLAUDE.local.md file, which, together with the personal and runtime files
+Claude Code writes under .claude/, is now excluded by .gitignore.
+
 This work was done with the assistance of the AI coding assistant Claude Opus 5.5
 (Anthropic, model claude-opus-5-5), operating as Claude Code under developer
 supervision and review, which diagnosed the cause of the link failure reported in
 issue #1627, diagnosed the mbpreprocess segmentation faults and the format 57
 depth wraparound encountered with old Simrad EM1000 data, diagnosed the mbeditviz
 \*.resf file locking conflict, implemented the fixes, and verified the builds and
-results.
+results, and which reviewed the draft Claude Code instructions and guide against
+project practice and revised them.
 
 ---
 
