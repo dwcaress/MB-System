@@ -419,23 +419,42 @@ fallback is now used only when there is a data record to process, and
 mb_preprocess_generic() itself now returns immediately if passed a NULL
 store.</p>
 <p>Program mbpreprocess: fixed processing of data from the old Simrad
-multibeam formats 51, 52, and 53 (MBF_EMOLDRAW, MBF_EM12IFRM,
-MBF_EM12DARW), which use the mbsys_simrad data structure but are output
-by mbpreprocess in format 57 (MBF_EM300MBA), which uses the
-mbsys_simrad2 data structure. Previously mbpreprocess passed the old
-structure directly to the format 57 writer, causing a segmentation
-fault. The translation function previously found only in mbcopy has been
-moved into the MBIO library as mbsys_simrad2_from_simrad() (in
-mbsys_simrad2.c), and is now used by both mbcopy and mbpreprocess. Also
-fixed a heap overflow in mbpreprocess in which the arrays used to
-extract records from the output file were sized for the input format
-(121 beams for format 51) rather than the output format (up to 256 beams
-for format 57); these arrays are now sized for the larger of the two.
-Also fixed the mbpreprocess summary of records read in pass 2, which
-included the comment, navigation, and attitude records counted in pass
-1.</p>
+multibeam formats 51, 53, and 54 (MBF_EMOLDRAW, MBF_EM12IFRM,
+MBF_EM12DARW), reported in issue #1626. These formats use the
+mbsys_simrad data structure but are output by mbpreprocess in format 57
+(MBF_EM300MBA), which uses the mbsys_simrad2 data structure. Previously
+mbpreprocess passed the old structure directly to the format 57 writer,
+causing a segmentation fault. The translation function previously found
+only in mbcopy has been moved into the MBIO library as
+mbsys_simrad2_from_simrad() (in mbsys_simrad2.c), and is now used by
+both mbcopy and mbpreprocess. Also fixed a heap overflow in mbpreprocess
+in which the arrays used to extract records from the output file were
+sized for the input format (121 beams for format 51) rather than the
+output format (up to 256 beams for format 57); these arrays are now
+sized for the larger of the two. Also fixed the mbpreprocess summary of
+records read in pass 2, which included the comment, navigation, and
+attitude records counted in pass 1. Tests of mbpreprocess on the format
+51 and format 54 test data files, checking that the format 57 output
+reads back completely, have been added to
+test/utilities/mbpreprocess_test.py.</p>
+<p>MBIO library, format 57 (MBF_EM300MBA, src/mbio/mbr_em300mba.c):
+fixed reading of format 57 files converted from old Simrad data (EM12S,
+EM12D, EM121, EM100, EM1000), also reported in issue #1626. The reader
+determines the byte order of the data from the sonar model in the first
+datagram, but the list of models used for this test in
+mbr_em300mba_chk_label() included only the newer sonars, so a converted
+file that did not begin with a record from one of those models (e.g.
+mbcopy -F51/57 -N output, or mbpreprocess output beginning with a
+position record) read back as containing no records. The old Simrad
+models have been added to the byte order test.</p>
+<p>MBIO library, format 71 (MBF_MBLDEOIH, src/mbio/mbsys_ldeoih.c):
+mbsys_ldeoih_insert() now sets the amplitude of null beams to zero, as
+it already did for their bathymetry. Previously these values were left
+unset, so in a long running process (a library caller, or a program
+processing several files) stale memory contents could be written to
+*.fbt files and format 71 output. Reported in issue #1626.</p>
 <p>Programs mbcopy and mbpreprocess: when translating old Simrad (format
-51, 52, 53) data to format 57, soundings that lie at or above the
+51, 53, 54) data to format 57, soundings that lie at or above the
 transducer depth (which are not physically possible) previously wrapped
 around in the unsigned depth values stored in format 57, producing
 spurious depths of about 1313 m for the EM1000. Such soundings now have
@@ -482,10 +501,11 @@ Claude Opus 5.5 (Anthropic, model claude-opus-5-5), operating as Claude
 Code under developer supervision and review, which diagnosed the cause
 of the link failure reported in issue #1627, diagnosed the mbpreprocess
 segmentation faults and the format 57 depth wraparound encountered with
-old Simrad EM1000 data, diagnosed the mbeditviz *.resf file locking
-conflict, implemented the fixes, and verified the builds and results,
-and which reviewed the draft Claude Code instructions and guide against
-project practice and revised them.</p>
+old Simrad EM1000 data, checked the remaining problems reported in issue
+#1626 against the code and test data, diagnosed the mbeditviz *.resf
+file locking conflict, implemented the fixes, and verified the builds
+and results, and which reviewed the draft Claude Code instructions and
+guide against project practice and revised them.</p>
 <hr />
 <h4 id="583beta24-october-5-2026">5.8.3beta24 (October 5, 2026)</h4>
 <p>Build system (MacOS, Homebrew): fixed a build failure when building

@@ -108,7 +108,8 @@ is now used only when there is a data record to process, and
 mb\_preprocess\_generic() itself now returns immediately if passed a NULL store.
 
 Program mbpreprocess: fixed processing of data from the old Simrad multibeam
-formats 51, 52, and 53 (MBF\_EMOLDRAW, MBF\_EM12IFRM, MBF\_EM12DARW), which use the
+formats 51, 53, and 54 (MBF\_EMOLDRAW, MBF\_EM12IFRM, MBF\_EM12DARW), reported
+in issue #1626. These formats use the
 mbsys\_simrad data structure but are output by mbpreprocess in format 57
 (MBF\_EM300MBA), which uses the mbsys\_simrad2 data structure. Previously
 mbpreprocess passed the old structure directly to the format 57 writer, causing
@@ -120,9 +121,28 @@ the output file were sized for the input format (121 beams for format 51) rather
 than the output format (up to 256 beams for format 57); these arrays are now
 sized for the larger of the two. Also fixed the mbpreprocess summary of records
 read in pass 2, which included the comment, navigation, and attitude records
-counted in pass 1.
+counted in pass 1. Tests of mbpreprocess on the format 51 and format 54 test data
+files, checking that the format 57 output reads back completely, have been added
+to test/utilities/mbpreprocess\_test.py.
 
-Programs mbcopy and mbpreprocess: when translating old Simrad (format 51, 52, 53)
+MBIO library, format 57 (MBF\_EM300MBA, src/mbio/mbr\_em300mba.c): fixed reading
+of format 57 files converted from old Simrad data (EM12S, EM12D, EM121, EM100,
+EM1000), also reported in issue #1626. The reader determines the byte order of
+the data from the sonar model in the first datagram, but the list of models used
+for this test in mbr\_em300mba\_chk\_label() included only the newer sonars, so a
+converted file that did not begin with a record from one of those models (e.g.
+mbcopy -F51/57 -N output, or mbpreprocess output beginning with a position
+record) read back as containing no records. The old Simrad models have been
+added to the byte order test.
+
+MBIO library, format 71 (MBF\_MBLDEOIH, src/mbio/mbsys\_ldeoih.c):
+mbsys\_ldeoih\_insert() now sets the amplitude of null beams to zero, as it already
+did for their bathymetry. Previously these values were left unset, so in a long
+running process (a library caller, or a program processing several files) stale
+memory contents could be written to \*.fbt files and format 71 output. Reported
+in issue #1626.
+
+Programs mbcopy and mbpreprocess: when translating old Simrad (format 51, 53, 54)
 data to format 57, soundings that lie at or above the transducer depth (which
 are not physically possible) previously wrapped around in the unsigned depth
 values stored in format 57, producing spurious depths of about 1313 m for the
@@ -168,7 +188,8 @@ This work was done with the assistance of the AI coding assistant Claude Opus 5.
 (Anthropic, model claude-opus-5-5), operating as Claude Code under developer
 supervision and review, which diagnosed the cause of the link failure reported in
 issue #1627, diagnosed the mbpreprocess segmentation faults and the format 57
-depth wraparound encountered with old Simrad EM1000 data, diagnosed the mbeditviz
+depth wraparound encountered with old Simrad EM1000 data, checked the remaining
+problems reported in issue #1626 against the code and test data, diagnosed the mbeditviz
 \*.resf file locking conflict, implemented the fixes, and verified the builds and
 results, and which reviewed the draft Claude Code instructions and guide against
 project practice and revised them.
