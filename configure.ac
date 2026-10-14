@@ -25,7 +25,7 @@ dnl-----------------------------------------------------------------------------
 dnl--------------------------------------------------------------------
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.8.2],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.8.3beta25],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])
@@ -97,8 +97,6 @@ AS_ECHO(["        --with-opengl-include - location of OpenGL headers (optional)"
 AS_ECHO(["        --with-otps-dir       - location of OTPS installation (optional)"])
 AS_ECHO(["        --with-opencv-lib     - location of OpenCV libs (optional)"])
 AS_ECHO(["        --with-opencv-include - location of OpenCV headers (optional)"])
-AS_ECHO(["        --with-vtk-include    - location of VTK8.2+ headers (required if qt enabled, not functional yet)"])
-AS_ECHO(["        --with-vtk-lib        - location of VTK8.2+ libraries (required if qt enabled, not functional yet)"])
 AS_ECHO(["        --enable-opencv       - enable building tools using OpenCV (optional)"])
 AS_ECHO(["        --enable-mbtrn        - enable building terrain relative navigation (TRN) tools (optional)"])
 AS_ECHO(["        --enable-mbtnav       - enable building terrain relative navigation (TRN) tools (optional)"])
@@ -107,7 +105,6 @@ AS_ECHO(["        --enable-deprecated   - enable building deprecated programs (o
 AS_ECHO(["        --disable-mbtools     - disable building graphical tools (use with --enable-mbtrn and --enable-mbtnav)"])
 AS_ECHO(["        --enable-hardening    - Enable compiler and linker options to frustrate memory corruption exploits  (e.g. -fPIE and -pie) (optional)"])
 AS_ECHO(["        --enable-test         - Enable building the Python CLI smoke tests in test/ (the GoogleTest-based test/mbio suite is CMake-only)"])
-AS_ECHO(["        --enable-qt           - Enable building graphical tools using the Qt5 framework (Not functional yet)"])
 AS_ECHO(["        --with-debug          - Set compiler flags to allow full debugging"])
 AS_ECHO([" "])
 AS_ECHO(["    After configure you can run the make utility in the usual fashion"])
@@ -150,6 +147,13 @@ define([AC_CACHE_SAVE], )
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
+
+dnl Autoconf 2.72+ AC_PROG_CC adds -std=gnu23 when the compiler supports
+dnl it, but C23 rejects the K&R-style function definitions still used in
+dnl some vendored C code (e.g. src/mbtrnav/gctp). Skip the C23 probe so the
+dnl C11 (or compiler default) mode is used, as in the CMake build. A user
+dnl can still override this with ac_cv_prog_cc_c23=-std=gnu23.
+: ${ac_cv_prog_cc_c23=no}
 
 dnl Require c++11
 AX_CXX_COMPILE_STDCXX(11)
@@ -396,6 +400,13 @@ else
     dnl Look for pkg-config PROJ package...
     AS_ECHO(["Look for pkg-config PROJ package..."])
     PKG_CHECK_MODULES([libproj], [proj], [FOUND_PROJ_PKG=yes], [FOUND_PROJ_PKG=no])
+    dnl Use the pkg-config library flags for the library checks, since the
+    dnl package may not be in the default search path (e.g. Homebrew in
+    dnl /opt/homebrew on Apple Silicon)
+    save_LDFLAGS=$LDFLAGS
+    if test "$FOUND_PROJ_PKG" = "yes"; then
+        LDFLAGS="$LDFLAGS $libproj_LIBS"
+    fi
     AC_CHECK_LIB([proj], [proj_normalize_for_visualization], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
     if test "$FOUND_PROJ_LIB" = "yes"; then
         FOUND_PROJ6=yes
@@ -426,7 +437,13 @@ else
             AC_MSG_ERROR([Did not find PROJ library pkg-config package...])
         fi
     fi
-    libproj_LIBS="-lproj"
+    LDFLAGS="$save_LDFLAGS"
+    if test "$FOUND_PROJ_PKG" = "yes"; then
+        dnl Keep the pkg-config flags (libproj_LIBS is set by PKG_CHECK_MODULES)
+        libproj_CPPFLAGS=$libproj_CFLAGS
+    else
+        libproj_LIBS="-lproj"
+    fi
     libproj_LDFLAGS=""
 fi
 if test "$FOUND_PROJ_LIB" = "no" ; then
@@ -700,7 +717,14 @@ else
     dnl Look for pkg-config FFTW package...
     AS_ECHO(["Look for pkg-config FFTW package..."])
     PKG_CHECK_MODULES([libfftw3], [fftw3], [GOT_FFTW=yes], [GOT_FFTW=no])
-    libfftw_LIBS="-lfftw3"
+    if test "$GOT_FFTW" = "yes" ; then
+        dnl Use the pkg-config flags, since the package may not be in the
+        dnl default search path (e.g. Homebrew in /opt/homebrew on Apple Silicon)
+        libfftw_LIBS=$libfftw3_LIBS
+        libfftw_CPPFLAGS=$libfftw3_CFLAGS
+    else
+        libfftw_LIBS="-lfftw3"
+    fi
     libfftw_LDFLAGS=""
 fi
 if test "$GOT_FFTW" = "no" ; then
@@ -742,7 +766,10 @@ if test "$GOT_FFTW" = "yes" ; then
 else
     dnl Looking for FFTW headers in the usual places...
     AS_ECHO(["Looking for FFTW headers in the usual places..."])
+    save_CPPFLAGS=$CPPFLAGS
+    CPPFLAGS="$CPPFLAGS $libfftw_CPPFLAGS"
     AC_CHECK_HEADER(fftw3.h, [FFTW_SETTING=yes], [FFTW_SETTING=no])
+    CPPFLAGS=$save_CPPFLAGS
     if test "$FFTW_SETTING" = "yes" ; then
         GOT_FFTW=yes
         AS_ECHO(["Using pre-installed FFTW headers..."])
@@ -788,6 +815,58 @@ dnl Set default lack of X11, Motif, OpenGL
 GOT_X11=no
 GOT_MOTIF=no
 GOT_OPENGL=no
+
+dnl MacOS + Homebrew: Homebrew (/opt/homebrew on Apple Silicon) is not in the
+dnl compiler's default search path, and X11/Motif have no usable pkg-config
+dnl entries, so default any X11, Motif and OpenGL locations not given on the
+dnl command line to the Homebrew installation. For OpenGL, use the pinned
+dnl Mesa kegs mb-mesa and mb-mesa-glu from the dwcaress/mbsystem tap, and
+dnl only when both are installed (as CMake does with -DmacosUseMbMesa=ON);
+dnl never mix mb-mesa with the standard Homebrew mesa-glu.
+mb_glu_libdir=
+mb_glu_includedir=
+if test "$build_mbtools" = "yes" ; then
+  case "${host_os}" in
+    darwin*)
+      if command -v brew > /dev/null 2>&1 ; then
+        mb_brew_prefix=`brew --prefix 2> /dev/null`
+        if test -n "$mb_brew_prefix" ; then
+          AS_ECHO(["MacOS: Homebrew found at $mb_brew_prefix"])
+          if test -z "${with_x11_lib+set}" && test -z "${with_x11_include+set}" \
+              && ls "$mb_brew_prefix"/lib/libXt.* > /dev/null 2>&1 \
+              && test -f "$mb_brew_prefix/include/X11/Intrinsic.h" ; then
+            AS_ECHO(["MacOS: using Homebrew X11 in $mb_brew_prefix"])
+            with_x11_lib="$mb_brew_prefix/lib"
+            with_x11_include="$mb_brew_prefix/include"
+          fi
+          if test -z "${with_motif_lib+set}" && test -z "${with_motif_include+set}" \
+              && ls "$mb_brew_prefix"/lib/libXm.* > /dev/null 2>&1 \
+              && test -f "$mb_brew_prefix/include/Xm/Xm.h" ; then
+            AS_ECHO(["MacOS: using Homebrew Motif in $mb_brew_prefix"])
+            with_motif_lib="$mb_brew_prefix/lib"
+            with_motif_include="$mb_brew_prefix/include"
+          fi
+          if test -z "${with_opengl_lib+set}" && test -z "${with_opengl_include+set}" ; then
+            mb_mesa_prefix="$mb_brew_prefix/opt/mb-mesa"
+            mb_mesaglu_prefix="$mb_brew_prefix/opt/mb-mesa-glu"
+            if ls "$mb_mesa_prefix"/lib/libGL.* > /dev/null 2>&1 \
+                && test -f "$mb_mesa_prefix/include/GL/gl.h" \
+                && ls "$mb_mesaglu_prefix"/lib/libGLU.* > /dev/null 2>&1 \
+                && test -f "$mb_mesaglu_prefix/include/GL/glu.h" ; then
+              AS_ECHO(["MacOS: using Homebrew mb-mesa and mb-mesa-glu for OpenGL"])
+              with_opengl_lib="$mb_mesa_prefix/lib"
+              with_opengl_include="$mb_mesa_prefix/include"
+              mb_glu_libdir="$mb_mesaglu_prefix/lib"
+              mb_glu_includedir="$mb_mesaglu_prefix/include"
+            else
+              AS_ECHO(["MacOS: mb-mesa and mb-mesa-glu not both installed (brew install dwcaress/mbsystem/mb-mesa dwcaress/mbsystem/mb-mesa-glu)"])
+            fi
+          fi
+        fi
+      fi
+      ;;
+  esac
+fi
 
 dnl Only look for X11 and Motif if graphical tools should be built
 if test "$build_mbtools" = "yes" ; then
@@ -975,7 +1054,7 @@ if test "$build_mbtools" = "yes" ; then
         dnl OpenGL library location specified: $opengl_libdir - check if libGLU libGL is there...
         AS_ECHO(["OpenGL library location specified: $opengl_libdir - check if libGL libGLU are there..."])
         save_LDFLAGS=$LDFLAGS
-        LDFLAGS="$LDFLAGS -L$opengl_libdir"
+        LDFLAGS="$LDFLAGS -L$opengl_libdir${mb_glu_libdir:+ -L$mb_glu_libdir}"
         AC_CHECK_LIB([GL], [glBegin], [OPENGL_SETTING=yes], [OPENGL_SETTING=no], )
         if test "$OPENGL_SETTING" = "yes"; then
             AC_CHECK_LIB([GLU], [gluScaleImage], [OPENGL_SETTING=yes], [OPENGL_SETTING=no], )
@@ -984,8 +1063,8 @@ if test "$build_mbtools" = "yes" ; then
         if test "$OPENGL_SETTING" = "no"; then
             AC_MSG_ERROR([Did not find libGLU libGL according to --with-opengl-lib - check the installation!])
         fi
-        libopengl_LIBS="-L$opengl_libdir -lGL -lGLU"
-        libopengl_LDFLAGS="-L$opengl_libdir"
+        libopengl_LIBS="-L$opengl_libdir${mb_glu_libdir:+ -L$mb_glu_libdir} -lGL -lGLU"
+        libopengl_LDFLAGS="-L$opengl_libdir${mb_glu_libdir:+ -L$mb_glu_libdir}"
     else
         dnl Look for pkg-config OpenGL package...
         AS_ECHO(["Look for pkg-config OpenGL package..."])
@@ -1021,7 +1100,7 @@ if test "$build_mbtools" = "yes" ; then
         AC_ARG_WITH(opengl-include, [  --with-opengl-include=DIR    Location of OpenGL headers],
                 [libopengl_INCLUDEDIR="${withval}"] [GOT_OPENGL=yes], [GOT_OPENGL=no])
         if test "$GOT_OPENGL" = "yes" ; then
-            libopengl_CPPFLAGS="-I$libopengl_INCLUDEDIR"
+            libopengl_CPPFLAGS="-I$libopengl_INCLUDEDIR${mb_glu_includedir:+ -I$mb_glu_includedir}"
             dnl OpenGL header location specified: $libopengl_CPPFLAGS - check if GL/gl.h is there...
             AS_ECHO(["OpenGL header location specified: $libopengl_CPPFLAGS - check if GL/gl.h is there..."])
             save_CPPFLAGS=$CPPFLAGS
@@ -1069,6 +1148,25 @@ dnl--------------------------------------------------------------------
 dnl OpenCV4 Section
 dnl--------------------------------------------------------------------
 
+dnl MB_CHECK_OPENCV_CORE([action-if-found], [action-if-not-found])
+dnl   Link test for libopencv_core using the C++ API. The OpenCV C API
+dnl   (e.g. cvCopy) was removed in OpenCV 5, so AC_CHECK_LIB cannot be
+dnl   used; cv::getNumThreads() exists in OpenCV 3, 4 and 5.
+AC_DEFUN([MB_CHECK_OPENCV_CORE], [
+    AC_MSG_CHECKING([for cv::getNumThreads in -lopencv_core])
+    AC_LANG_PUSH([C++])
+    mb_save_LIBS=$LIBS
+    LIBS="-lopencv_core $LIBS"
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[namespace cv { int getNumThreads(); }]],
+                                    [[return cv::getNumThreads();]])],
+                   [AC_MSG_RESULT([yes])
+                    $1],
+                   [AC_MSG_RESULT([no])
+                    $2])
+    LIBS=$mb_save_LIBS
+    AC_LANG_POP([C++])
+])
+
 dnl Check if OpenCV4 based tools should be built
 AS_ECHO(["Check if OpenCV4 based tools should be built"])
 AC_ARG_ENABLE([opencv],
@@ -1092,17 +1190,29 @@ if test "$build_opencvtools" = "yes" ; then
         AS_ECHO(["OpenCV4 library location specified: $opencv4_libdir - check if libopencv_core is there..."])
         save_LDFLAGS=$LDFLAGS
         LDFLAGS="$LDFLAGS -L$opencv4_libdir"
-        AC_CHECK_LIB([opencv_core], [cvCopy], [OPENCV4_SETTING=yes], [OPENCV4_SETTING=no],)
+        MB_CHECK_OPENCV_CORE([OPENCV4_SETTING=yes], [OPENCV4_SETTING=no])
         LDFLAGS="$save_LDFLAGS"
         if test "$OPENCV4_SETTING" = "no"; then
             AC_MSG_ERROR([Did not find libopencv_core according to --with-opencv-lib - check the installation!])
         fi
-        opencv4_LIBS="-L$opencv4_libdir -R $opencv4_libdir -lopencv_core -lopencv_highgui -lopencv_calib3d -lopencv_imgcodecs -lopencv_imgproc"
+        opencv4_LIBS="-L$opencv4_libdir -R $opencv4_libdir -lopencv_core -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc"
+        dnl OpenCV <= 4 provides libopencv_calib3d; OpenCV 5 split it into
+        dnl libopencv_calib, libopencv_geometry, libopencv_stereo, ...
+        for opencv_module in calib3d calib geometry stereo ; do
+            if ls "$opencv4_libdir"/libopencv_$opencv_module.* > /dev/null 2>&1 ; then
+                opencv4_LIBS="$opencv4_LIBS -lopencv_$opencv_module"
+            fi
+        done
         opencv4_LDFLAGS="-L$opencv4_libdir"
     else
         dnl Look for pkg-config OpenCV4 package...
         AS_ECHO(["Look for pkg-config OpenCV4 package..."])
         PKG_CHECK_MODULES([OPENCV4], [opencv4], [GOT_OPENCV4=yes], [GOT_OPENCV4=no])
+        if test "$GOT_OPENCV4" = "no" ; then
+            PKG_CHECK_MODULES([OPENCV5], [opencv5], [GOT_OPENCV4=yes], [GOT_OPENCV4=no])
+            OPENCV4_LIBS=$OPENCV5_LIBS
+            OPENCV4_CFLAGS=$OPENCV5_CFLAGS
+        fi
         AS_ECHO(["Result: $GOT_OPENCV4"])
         opencv4_LIBS=$OPENCV4_LIBS
         opencv4_LDFLAGS=$OPENCV4_LIBS
@@ -1111,7 +1221,7 @@ if test "$build_opencvtools" = "yes" ; then
     if test "$GOT_OPENCV4" = "no" ; then
         dnl Did not find OpenCV4 library pkg-config package, looking in the usual places...
         AS_ECHO(["Did not find OpenCV4 library pkg-config package, looking in the usual places..."])
-        AC_CHECK_LIB([opencv_core], [cvCopy], [OPENCV4_SETTING=yes], [OPENCV4_SETTING=no],)
+        MB_CHECK_OPENCV_CORE([OPENCV4_SETTING=yes], [OPENCV4_SETTING=no])
         if test "$OPENCV4_SETTING" = "yes" ; then
             GOT_OPENCV4=yes
             AS_ECHO(["Using pre-installed OpenCV4 libraries..."])
@@ -1150,7 +1260,13 @@ if test "$build_opencvtools" = "yes" ; then
         else
             dnl Looking for OpenCV headers in the usual places...
             AS_ECHO(["Looking for OpenCV headers in the usual places..."])
+            dnl Include any pkg-config flags (e.g. -I/opt/homebrew/include/opencv5)
+            save_CPPFLAGS=$CPPFLAGS
+            CPPFLAGS="$CPPFLAGS $opencv4_CPPFLAGS"
+            AC_LANG_PUSH([C++])
             AC_CHECK_HEADER(opencv2/opencv.hpp, [OPENCV4_SETTING=yes], [OPENCV4_SETTING=no])
+            AC_LANG_POP([C++])
+            CPPFLAGS=$save_CPPFLAGS
             if test "$OPENCV4_SETTING" = "yes" ; then
                 GOT_OPENCV4=yes
                 AS_ECHO(["Using pre-installed OpenCV headers..."])
@@ -1168,7 +1284,7 @@ if test "$build_opencvtools" = "yes" ; then
         AC_SUBST([opencv4_CPPFLAGS], [$opencv4_CPPFLAGS])
     else
         dnl Disable building OpenCV based tools
-        $build_opencvtools=no
+        build_opencvtools=no
     fi
 
     dnl End check for OpenCV library and headers
@@ -1185,130 +1301,10 @@ else
 fi
 
 dnl--------------------------------------------------------------------
-dnl Qt5 Section
-dnl   - Use macro ax_have_qt() from
-dnl         https://www.gnu.org/software/autoconf-archive/ax_have_qt.html
-dnl         http://git.savannah.gnu.org/gitweb/?p=autoconf-archive.git;a=blob_plain;f=m4/ax_have_qt.m4
-dnl   - Usage of this macro described at:
-dnl         https://stackoverflow.com/questions/37758622/how-to-use-gnu-autotool-to-build-a-qt-project
+dnl Qt Section
+dnl   - The Qt-based prototype graphical tools (src/qt-*) are built only
+dnl     by CMake (-DbuildQt=ON); the Autotools build does not build them.
 dnl--------------------------------------------------------------------
-
-dnl Check if Qt5 based graphical tools should be built
-AS_ECHO(["Check if Qt5 based graphical tools should be built"])
-AC_ARG_ENABLE([qt],
-  [AS_HELP_STRING([--enable-qt], [build Qt5 based graphical tools])],
-  [build_qttools=yes],
-  [build_qttools=no])
-AS_ECHO(["build_qttools: $build_qttools"])
-if test "$build_qttools" = "yes" ; then
-  AX_HAVE_QT_MB()
-  if test "$have_qt" = "yes" ; then
-    AS_ECHO(["Qt5 installation found"])
-    AC_SUBST([qt_DIR], [$QT_DIR])
-    AC_SUBST([qt_LIBS], [$QT_LIBS])
-    AC_SUBST([qt_CPPFLAGS], [$QT_CXXFLAGS])
-    AC_SUBST([qt_MOC], [$QT_MOC])
-
-    # Find VTK headers and libraries too
-    vtkLocSpecified=no
-    vtkFound=no
-
-    # Required major and minor version for VTK
-    vtkMinMajor=8
-    vtkMinMinor=2
-    AS_ECHO(["Check for VTK8.2 libraries"])
-
-    AC_ARG_WITH(vtk-lib, [  --with-vtk-lib=DIR    Location of VTK library],
-            [vtk_libdir="${withval}"] [vtkLocSpecified=yes], [vtkLocSpecified=no])
-
-    if test "$vtkLocSpecified" = "yes" ; then
-       dnl VTK library location specified
-       AS_ECHO(["VTK8.2 library location specified; check for directory existence..."])
-       AC_CHECK_FILE([$vtk_libdir], [vtkFound=yes], [vtkFound=no])
-       if test "$vtkFound" = "no" ; then
-          AC_MSG_ERROR([Did not find specified VTK8.2 library location $vtk_libdir - check installation])
-       fi
-       # Save LDFLAGS...
-       save_LDFLAGS=$LDFLAGS
-       # Look for extern C function GetVTKVersion in vtkCommonCore library
-       LDFLAGS="$LDFLAGS -L$vtk_libdir"
-       AC_CHECK_LIB([vtkCommonCore-8.2], [GetVTKVersion], [vtkFound=yes], [vtkFound=no])
-       # Restore LDFLAGS
-       LDFLAGS="$save_LDFLAGS"
-       if test "$vtkFound" = "no"; then
-         AC_MSG_ERROR([Did not find VTK libraries - check installation])
-       else
-         AS_ECHO(["Found VTK libraries"])
-       fi
-    else
-         AC_MSG_ERROR([Must specify VTK8.2 library location with --with-vtk-lib=DIR])
-    fi
-    AS_ECHO(["Check for VTK headers"])
-
-    AC_ARG_WITH(vtk-include, [  --with-vtk-include=DIR    Location of VTK headers],
-            [vtk_includedir="${withval}"] [vtkLocSpecified=yes], [vtkLocSpecified=no])
-
-    if test "$vtkLocSpecified" = "yes" ; then
-       # Check for VTK header in specified location
-       AS_ECHO(["Look for $vtk_includedir/vtkActor.h..."])
-       AC_CHECK_FILE([$vtk_includedir/vtkActor.h], [vtkFound=yes], [vtkFound=no])
-       if test "$vtkFound" = "no" ; then
-          AC_MSG_ERROR([Did not find VTK headers in $vtk_includedir - check installation])
-       else
-          AS_ECHO(["Verify that VTK meets minimum version requirement"])
-          vers=`$AWK -f build-utils/vtkVersionCheck.awk $vtkMinMajor $vtkMinMinor $vtk_includedir/vtkVersionMacros.h`
-          if [[ $? -eq 1 ]]
-          then
-            AC_MSG_ERROR([VTK does not meet minimum version requirement: $vers])
-          else
-            AS_ECHO(["VTK meets minimum version requirement"])
-          fi
-          vers=`echo $vers | cut -d ' ' -f 1`
-          echo "vers: $vers"
-       fi
-    else
-       # VTK header location not specified - this is currently an errro
-       AC_MSG_ERROR([Must specify VTK include location with --with-vtk-include=DIR])
-    fi
-
-    # Set environment variables for qmake
-    export OPENGL_INCLUDEDIR=$libopengl_INCLUDEDIR
-    export OPENGL_LIBS=$libopengl_LIBS
-
-    export GMT_INCLUDEDIR=$libgmt_INCLUDEDIR
-    export GMT_LIBS=$libgmt_LIBS
-
-    export VTK_INCLUDEDIR=$vtk_includedir
-    export VTK_LIBS="-L$vtk_libdir -lvtkGUISupportQt-$vers -lvtkCommonColor-$vers -lvtkRenderingFreeType-$vers -lvtkRenderingAnnotation-$vers -lvtkCommonTransforms-$vers -lvtkCommonCore-$vers -lvtkCommonDataModel-$vers -lvtkCommonExecutionModel-$vers -lvtkInteractionWidgets-$vers -lvtkInteractionStyle-$vers -lvtkRenderingCore-$vers -lvtkFiltersSources-$vers -lvtkGeovisCore-$vers -lvtkRenderingOpenGL2-$vers -lvtkFiltersHybrid-$vers -lvtkIOGeometry-$vers -lvtkIOCore-$vers -lvtkIOLegacy-$vers -lvtkRenderingVolumeOpenGL2-$vers -lvtkFiltersCore-$vers -lvtkFiltersGeneral-$vers -lvtksys-$vers"
-
-    export MB_INSTALLDIR=$prefix/lib
-
-    AS_ECHO(["Constructing Qt project file MBGui.pro in src/qt-guilib..."])
-    `cd src/qt-guilib ; qmake -makefile -o Makefile.qmake ; cd ../..`
-
-    AS_ECHO(["Running qmake in src/qt-mbgrdviz to generate src/qt-mbgrdviz/Makefile.qmake..."])
-    `cd src/qt-mbgrdviz ; qmake -makefile -o Makefile.qmake ; cd ../..`
-
-    AS_ECHO(["Running qmake in src/qt-mbgrdviz-2 to generate src/qt-mbgrdviz-2/Makefile.qmake..."])
-    `cd src/qt-mbgrdviz-2 ; qmake -makefile -o Makefile.qmake ; cd ../..`
-
-    AS_ECHO(["Running qmake in src/qt-mbgrdviz-3 to generate src/qt-mbgrdviz-3/Makefile.qmake..."])
-    `cd src/qt-mbgrdviz-3 ; qmake -makefile -o Makefile.qmake ; cd ../..`
-
-  else
-    AS_ECHO(["Qt5 installation not found"])
-    build_qttools=no
-  fi
-fi
-AM_CONDITIONAL([BUILD_QTTOOLS], [test $build_qttools = yes])
-if test "$build_qttools" = "yes" ; then
-    dnl Build tools using QT
-    AS_ECHO(["Building Qt5-based graphical tools"])
-    AC_DEFINE(QTTOOLS_ENABLED, 1, [Build tools using Qt5])
-else
-    dnl Not building tools using Qt5
-    AS_ECHO(["Not building Qt5-based graphical tools"])
-fi
 
 dnl--------------------------------------------------------------------
 dnl MBTRN Section - optionally build terrain relative navigation (TRN) tools
@@ -1509,6 +1505,8 @@ AC_CONFIG_FILES([\
     src/macros/Makefile \
     src/otps/Makefile \
     src/mbgrd2gltf/Makefile \
+    src/mbmesh/Makefile \
+    src/mbnavadjust/Makefile \
     src/man/Makefile \
     src/man/man1/Makefile \
     src/man/man3/Makefile \
@@ -1537,7 +1535,6 @@ if test "$build_mbtools" = "yes" ; then
                 src/mbview/Makefile \
                 src/mbgrdviz/Makefile \
                 src/mbeditviz/Makefile  \
-                src/mbnavadjust/Makefile \
                 ])
         fi
     fi
@@ -1565,14 +1562,6 @@ fi
 if test "$build_opencvtools" = "yes" ; then
     AC_CONFIG_FILES([\
           src/photo/Makefile \
-          ])
-fi
-if test "$build_qttools" = "yes" ; then
-    AC_CONFIG_FILES([\
-          src/qt-guilib/Makefile \
-          src/qt-mbgrdviz/Makefile \
-          src/qt-mbgrdviz-2/Makefile \
-          src/qt-mbgrdviz-3/Makefile \
           ])
 fi
 dnl if test "$build_pcltools" = "yes" ; then
@@ -1698,11 +1687,6 @@ if test "$GOT_OPENCV4" = "yes" ; then
 	AS_ECHO(["Build OpenCV4 tools: Enabled"])
 else
 	AS_ECHO(["Build OpenCV4 tools: Disabled"])
-fi
-if test "$build_qttools" = "yes" ; then
-	AS_ECHO(["Build Qt tools: Enabled"])
-else
-	AS_ECHO(["Build Qt tools: Disabled"])
 fi
 if test "$build_pcltools" = "yes" ; then
     AS_ECHO(["Build PCL tools: Enabled"])

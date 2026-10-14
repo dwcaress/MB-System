@@ -1,0 +1,7 @@
+/* Print overrides applied after ChangeLog_style.css when generating
+   BuildAndInstall.pdf (cmake --build . --target buildandinstall):
+   use the full page width and wrap long command lines in code blocks
+   instead of clipping them at the page edge. */
+@page { size: letter; margin: 0.75in; }
+html, body { max-width: none !important; width: auto !important; margin: 0 !important; padding: 0 !important; }
+pre, pre code { white-space: pre-wrap !important; overflow-wrap: anywhere; }
