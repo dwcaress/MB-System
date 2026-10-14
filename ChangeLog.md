@@ -286,6 +286,32 @@ generated from BuildAndInstall.md by a new optional CMake target, buildandinstal
 way as the changelog target, with the print style overrides in
 src/htmlsrc/BuildAndInstall\_print.css.
 
+MBIO library, formats 261 (MBF\_KEMKMALL), 58 and 59 (MBF\_EM710RAW,
+MBF\_EM710MBA), 89 (MBF\_RESON7K3), and 191 and 192 (MBF\_IMAGE83P,
+MBF\_IMAGEMBA) (src/mbio/mbsys\_kmbes.c, src/mbio/mbsys\_simrad3.c,
+src/mbio/mbsys\_reson7k3.c, src/mbio/mbsys\_image83p.c): fixed the test for
+reverse mounted transmit and receive arrays in the preprocess functions used by
+mbpreprocess, which caused processed bathymetry to have depths of zero for
+Kongsberg EM124 kmall data from the R/V Maria S. Merian. The preprocess functions
+treat an array as reverse mounted (rotated 180 degrees) if its mount heading is
+more than 100 degrees from zero, but the test did not allow for headings
+reported in the range 0 to 360 degrees, so a forward mounted array with a
+heading of 359.83 degrees, as for the Merian's EM124 transmit array, was treated
+as reverse mounted. Its heading was then rotated by 180 degrees and its steering
+angles reversed in sign, so that for kmall data mbpreprocess wrote beam takeoff
+angles of about 120 degrees from vertical into the MB-System XMT datagrams.
+When mbprocess recalculated the bathymetry by raytracing, these upward directed
+rays reached the sea surface, producing depths of zero and acrosstrack distances
+about one thousandth of the correct values. Because the processed files then
+had a maximum altitude of zero, mbgrid also failed to grid them when no grid cell
+size was specified, since its default cell size is derived from the altitude.
+The mount headings are now mapped to the range -180 to 180 degrees before the
+test. Data preprocessed with earlier versions in which an array mount heading
+is between 260 and 360 degrees must be preprocessed again. For the Merian data,
+the bathymetry recalculated by raytracing now agrees with the Kongsberg realtime
+soundings to within a mean of -3 to -6 m and an rms of 9 to 12 m in water depths
+of about 4600 m.
+
 This work was done with the assistance of the AI coding assistant Claude Opus 5.5
 (Anthropic, model claude-opus-5-5), operating as Claude Code under developer
 supervision and review, which diagnosed the cause of the link failure reported in
@@ -297,7 +323,9 @@ buffer overflow reported in issue #1631 and found the related dual head EM3002
 overflow, confirmed the cause of the format 181 SURF crash reported in issue #1630
 and found the related silent beam angle and sound velocity profile errors and
 sidescan off-by-one errors, diagnosed the strict C99 compile failure in the GSF
-library reported in issue #1605, diagnosed and repaired the failures of the Autotools build, implemented
+library reported in issue #1605, diagnosed and repaired the failures of the Autotools build,
+diagnosed the misidentified reverse mounted transducer arrays that caused zero
+depths in processed EM124 kmall data, implemented
 the fixes, and verified the builds and results, and which
 reviewed the draft Claude Code instructions and guide against project practice and
 revised them and updated BuildAndInstall.md to match the web site.
