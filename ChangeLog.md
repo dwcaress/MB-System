@@ -149,6 +149,25 @@ values stored in format 57, producing spurious depths of about 1313 m for the
 EM1000. Such soundings now have their depth set to zero and are flagged as
 sonar-flagged rather than appearing as good, deep soundings.
 
+MBIO library, formats 56 and 57 (MBF\_EM300RAW, MBF\_EM300MBA,
+src/mbio/mbr\_em300raw.c, src/mbio/mbr\_em300mba.c, src/mbio/mbsys\_simrad2.c):
+fixed a heap buffer overflow in mbsys\_simrad2\_extract(), reported in issue #1631,
+that caused programs such as mblist to abort with "double free or corruption" on
+Linux when reading EM120, EM300, EM1002, EM2000, and EM3000 data. In 5.8.3beta13
+the maximum number of beams in the mbsys\_simrad2 data structure
+(MBSYS\_SIMRAD2\_MAXBEAMS) was increased from 254 to 256, but the format info
+functions mbr\_info\_em300raw() and mbr\_info\_em300mba() still declared a maximum
+of 254 beams, so the bathymetry and amplitude arrays allocated by programs held
+254 values while mbsys\_simrad2\_extract() cleared 256 values for every ping. The
+info functions now declare MBSYS\_SIMRAD2\_MAXBEAMS beams, as proposed in the
+issue, and the format descriptions now give up to 256 beams. A related overflow
+for dual head EM3002 data was also fixed: mbsys\_simrad2\_extract() cleared the
+beams of the second head up to twice the maximum number of beams (512) regardless
+of the array size, which is set from the sum of the beam counts of the two heads
+reported by mbsys\_simrad2\_dimensions(); it now clears only the second head's
+beams. The output for the file from the issue (PANGAEA dataset 965070) is
+unchanged, and it now reads without memory errors.
+
 Programs mbnavadjust and mbnavadjustmerge: when swath data are imported into an
 mbnavadjust project, the ancillary files (\*.inf, \*.fnv) are now created for
 each of the section files written by mbnavadjust\_import\_file() in
@@ -232,8 +251,10 @@ supervision and review, which diagnosed the cause of the link failure reported i
 issue #1627, diagnosed the mbpreprocess segmentation faults and the format 57
 depth wraparound encountered with old Simrad EM1000 data, checked the remaining
 problems reported in issue #1626 against the code and test data, diagnosed the mbeditviz
-\*.resf file locking conflict, diagnosed and repaired the failures of the Autotools
-build, implemented the fixes, and verified the builds and results, and which
+\*.resf file locking conflict, confirmed and reproduced the format 56 and 57 heap
+buffer overflow reported in issue #1631 and found the related dual head EM3002
+overflow, diagnosed and repaired the failures of the Autotools build, implemented
+the fixes, and verified the builds and results, and which
 reviewed the draft Claude Code instructions and guide against project practice and
 revised them and updated BuildAndInstall.md to match the web site.
 

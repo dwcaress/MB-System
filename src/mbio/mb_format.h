@@ -206,13 +206,13 @@ binary, centered, Oxford University */
 
 #define MBF_EM300RAW 56
 /* Simrad EM300/EM3000 multibeam vendor format, \
-up to 254 beam bathymetry and \
+up to 256 beam bathymetry and \
 amplitude, variable pixel sidescan, \
 ascii + binary, Simrad */
 
 #define MBF_EM300MBA 57
 /* Simrad EM300/EM3000 multibeam processing format, \
-up to 254 beam bathymetry and \
+up to 256 beam bathymetry and \
 amplitude, variable pixel sidescan, \
 ascii + binary, MBARI */
 

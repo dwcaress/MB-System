@@ -2641,7 +2641,9 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 			dacrscale = 0.01 * ping->png_distance_res;
 			daloscale = 0.01 * ping->png_distance_res;
 			reflscale = 0.5;
-			for (int j = *nbath; j < 2 * MBSYS_SIMRAD2_MAXBEAMS; j++) {
+			/* clear only the beams of the second head - the arrays are sized by
+			    mbsys_simrad2_dimensions() to the sum of the two heads' beam counts */
+			for (int j = *nbath; j < *nbath + ping->png_nbeams_max; j++) {
 				bath[j] = 0.0;
 				beamflag[j] = MB_FLAG_NULL;
 				amp[j] = 0.0;
