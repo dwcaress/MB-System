@@ -38,18 +38,18 @@
       --enable-shared \
       --enable-hardening \
       --enable-test \
-      --with-proj-lib=/opt/local/lib/proj9/lib \
-      --with-proj-include=/opt/local/lib/proj9/include \
-      --with-gmt-config=/opt/local/lib/gmt6/bin \
-      --with-fftw-lib=/opt/local/lib \
-      --with-fftw-include=/opt/local/include \
-      --with-x11-lib=/opt/local/lib \
-      --with-x11-include=/opt/local/include \
-      --with-motif-lib=/opt/local/lib \
-      --with-motif-include=/opt/local/include \
-      --with-opengl-include=/opt/local/include \
-      --with-opengl-lib=/opt/local/lib \
-      --with-otps-dir=/usr/local/src/otps
+      --with-proj-lib=/opt/homebrew/lib/lib \
+      --with-proj-include=/opt/homebrew/lib/include \
+      --with-gmt-config=/opt/homebrew/lib/bin \
+      --with-fftw-lib=/opt/homebrew/lib \
+      --with-fftw-include=/opt/homebrew/include \
+      --with-x11-lib=/opt/homebrew/lib \
+      --with-x11-include=/opt/homebrew/include \
+      --with-motif-lib=/opt/homebrew/lib \
+      --with-motif-include=/opt/homebrew/include \
+      --with-opengl-include=/opt/homebrew/include \
+      --with-opengl-lib=/opt/homebrew/lib \
+      --with-otps-dir=/usr/homebrew/src/otps
 
 # These options disabled because they do not work on all operating systems
 #      --enable-mbtrn \

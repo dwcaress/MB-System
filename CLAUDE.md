@@ -35,6 +35,8 @@ MB-System_Claude_Code_Guide.md). Directory-level CLAUDE.md files may add rules.
   the directory's CMakeLists.txt and Makefile.am (and configure.ac when a
   new directory or library is added). Do not regenerate configure,
   Makefile.in, aclocal.m4 etc. unless asked; the maintainer does that.
+  Exception: the Qt prototype programs (src/qt-*, src/pointCloudEditor)
+  are CMake-only (-DbuildQt=ON); never add them to the Autotools build.
 - CMake forbids in-source builds. Typical:
     mkdir -p build && cd build && cmake .. [options] && make -j8
   macOS/Homebrew GUIs: add -DmacosUseMbMesa=ON (uses the dwcaress/mbsystem
@@ -56,6 +58,7 @@ MB-System_Claude_Code_Guide.md). Directory-level CLAUDE.md files may add rules.
   was not compiled (MSVC is normally not tested).
 - Docs targets (need pandoc + weasyprint; htmldocs also groff, perl):
     cmake --build . --target changelog   -> ChangeLog.html/.pdf
+    cmake --build . --target buildandinstall -> BuildAndInstall.pdf
     cmake --build . --target htmldocs    -> src/html/*.html/.pdf
 - Formatting config is `_clang-format`, but most files predate it: match the
   surrounding code and never reformat code you are not changing.
@@ -129,8 +132,9 @@ MB-System_Claude_Code_Guide.md). Directory-level CLAUDE.md files may add rules.
 ## E. Documentation and release notes
 - Man pages: src/man/man1/*.1 (programs), src/man/man3 (library). Keep
   SYNOPSIS/OPTIONS/EXAMPLES consistent with the code and -H text.
-- Generated files, never hand-edit: ChangeLog.html/.pdf, src/html/*,
-  configure, Makefile.in and other Autotools output.
+- Generated files, never hand-edit: ChangeLog.html/.pdf,
+  BuildAndInstall.pdf, src/html/*, configure, Makefile.in and other
+  Autotools output.
 - ChangeLog.md and the version number are normally updated by the
   maintainer. Other contributors: unless asked, put ChangeLog-style text in
   the pull request description instead of editing ChangeLog.md.
@@ -143,7 +147,8 @@ MB-System_Claude_Code_Guide.md). Directory-level CLAUDE.md files may add rules.
   - Date = today, moved forward on every edit even if the id is unchanged.
   - Put the same id/date in: the version list near the top, the release's
     "#### <id> (<Month D, YYYY>)" heading, and MB_VERSION / MB_VERSION_DATE
-    ("D Month YYYY") in src/mbio/mb_define.h.
+    ("D Month YYYY") in src/mbio/mb_define.h; put the same id (no date) in
+    the AC_INIT version in configure.ac.
   - Entries are prose paragraphs per component, following recent entries:
     "Program mbcopy (src/utilities/mbcopy.cc): <what changed and why>."
   - AI disclosure: a release entry containing Claude-assisted work ends with

@@ -32,8 +32,8 @@
 #
 #------------------------------------------------------------------------------
 #
-# Two optional documentation targets are not part of the default build (the
-# "all" target) and must be built explicitly. Both require Homebrew (or
+# Three optional documentation targets are not part of the default build (the
+# "all" target) and must be built explicitly. All require Homebrew (or
 # equivalent) installs of pandoc and weasyprint; htmldocs additionally
 # requires groff and perl. If any required tool is missing, CMake prints a
 # status message at configure time and the target is simply unavailable.
@@ -45,6 +45,13 @@
 #   manual MacDown export workflow.
 #
 #     cmake --build . --target changelog
+#
+# - buildandinstall: regenerates the top-level BuildAndInstall.pdf from
+#   BuildAndInstall.md (via pandoc + weasyprint, using ChangeLog_style.css plus
+#   the print overrides in src/htmlsrc/BuildAndInstall_print.css), replacing
+#   the previously manual MacDown export workflow.
+#
+#     cmake --build . --target buildandinstall
 #
 # - htmldocs: regenerates src/html/*.html and src/html/*.pdf from the man
 #   pages in src/man/ plus ChangeLog.md/COPYING.md/GPL.md (via man2html,
@@ -391,9 +398,37 @@ if(PANDOC_EXECUTABLE AND WEASYPRINT_EXECUTABLE)
     VERBATIM)
   add_custom_target(changelog
     DEPENDS ${CMAKE_SOURCE_DIR}/ChangeLog.html ${CMAKE_SOURCE_DIR}/ChangeLog.pdf)
+
+  # BuildAndInstall.pdf: only the PDF is kept in the repository, so the
+  # intermediate HTML is written to the build directory.
+  add_custom_command(
+    OUTPUT ${CMAKE_BINARY_DIR}/BuildAndInstall.html
+    COMMAND ${PANDOC_EXECUTABLE} ${CMAKE_SOURCE_DIR}/BuildAndInstall.md
+            -f gfm -t html5 --standalone
+            "--metadata=pagetitle:How to Download, Build, and Install MB-System"
+            --css=${CMAKE_SOURCE_DIR}/src/htmlsrc/ChangeLog_style.css
+            --css=${CMAKE_SOURCE_DIR}/src/htmlsrc/BuildAndInstall_print.css
+            --embed-resources
+            -o ${CMAKE_BINARY_DIR}/BuildAndInstall.html
+    DEPENDS ${CMAKE_SOURCE_DIR}/BuildAndInstall.md
+            ${CMAKE_SOURCE_DIR}/src/htmlsrc/ChangeLog_style.css
+            ${CMAKE_SOURCE_DIR}/src/htmlsrc/BuildAndInstall_print.css
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Generating BuildAndInstall.html from BuildAndInstall.md via pandoc"
+    VERBATIM)
+  add_custom_command(
+    OUTPUT ${CMAKE_SOURCE_DIR}/BuildAndInstall.pdf
+    COMMAND ${WEASYPRINT_EXECUTABLE} ${CMAKE_BINARY_DIR}/BuildAndInstall.html ${CMAKE_SOURCE_DIR}/BuildAndInstall.pdf
+    DEPENDS ${CMAKE_BINARY_DIR}/BuildAndInstall.html
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Generating BuildAndInstall.pdf from BuildAndInstall.html via weasyprint"
+    VERBATIM)
+  add_custom_target(buildandinstall
+    DEPENDS ${CMAKE_SOURCE_DIR}/BuildAndInstall.pdf)
 else()
-  message(STATUS "pandoc and/or weasyprint not found - 'changelog' build target "
-                  "unavailable (install via: brew install pandoc weasyprint)")
+  message(STATUS "pandoc and/or weasyprint not found - 'changelog' and "
+                  "'buildandinstall' build targets unavailable "
+                  "(install via: brew install pandoc weasyprint)")
 endif()
 
 message("----------------------------------------------------------")

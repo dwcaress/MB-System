@@ -21,7 +21,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
-- Version 5.8.3beta25    October 13, 2026
+- Version 5.8.3beta25    October 14, 2026
 - Version 5.8.3beta24    October 5, 2026
 - Version 5.8.3beta23    October 3, 2026
 - Version 5.8.3beta22    September 19, 2026
@@ -82,7 +82,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
-#### 5.8.3beta25 (October 13, 2026)
+#### 5.8.3beta25 (October 14, 2026)
 
 Build system (Linux): fixed a link failure of the TRN utility trn-client
 reported in issue #1627, in which linking failed with "undefined reference to
@@ -184,15 +184,58 @@ guide is based on drafts by Christian Ferreira. Personal settings for each devel
 go in a CLAUDE.local.md file, which, together with the personal and runtime files
 Claude Code writes under .claude/, is now excluded by .gitignore.
 
+Build system (Autotools): repaired the Autotools build, which had fallen out of
+step with the CMake build and failed at several stages. The Qt based prototype
+programs (src/qt-\*) are no longer referenced by configure.ac or src/Makefile.am;
+these are built only by CMake (-DbuildQt=ON), and the stale reference to the
+removed directory src/qt-mbgrdviz-2 caused automake to fail. Because Autoconf 2.72
+and later compile in C23 mode when possible, which rejects the K&R style function
+definitions in the GCTP code in src/mbtrnav/gctp, configure now skips the C23
+check so that the compiler's default C mode is used, as in the CMake build. The
+OpenCV checks now work with OpenCV 5, which removed the C API function cvCopy()
+that configure tested for and split the calib3d library into calib, geometry, and
+stereo; the opencv5 pkg-config package is also recognized. When PROJ, FFTW, or
+OpenCV are found through pkg-config, the compiler and linker flags it reports are
+now used, which is necessary when these packages are not in the default search
+path (e.g. Homebrew in /opt/homebrew on Apple Silicon). On MacOS with Homebrew,
+configure now finds X11, Motif, and OpenGL without location options, using the
+mb-mesa and mb-mesa-glu formulae from the dwcaress/mbsystem tap for OpenGL when
+both are installed (as with -DmacosUseMbMesa=ON in CMake); locations given with
+--with-... options still take precedence. The Makefile.am files have been brought
+up to date with the CMake build: src/mbnavadjust now builds the
+libmbnavadjust\_core library and always builds mbnavadjustmerge, building the
+mbnavadjust GUI only when Motif and OpenGL are available; the programs
+mbfnv2navlab, mbnavlab2fnv, mbusbl2fnv, and mbmapscale are now built, and the
+mbmakedatalist source is now found; mbgrd2gltf no longer references the removed
+compression.cpp and now compiles the bundled Draco encoder sources with C++17;
+src/mbmesh is now configured, and its unit tests (now four, as in CMake) link;
+the TRN Makefile.am files in src/mbtrnav use the renamed source files of the TRN
+client and test programs and include TrnAttr.cpp in libtrncli; and src/mbtrn
+refers to the TRN libraries in the build tree rather than the source tree. On
+MacOS 26 Tahoe with Homebrew, ./configure with the TRN, OpenCV, and test options,
+followed by make, make check, and make install, now succeeds.
+
+Documentation: BuildAndInstall.md has been updated to match the installation
+instructions on the MB-System web site
+(https://www.mbari.org/technology/mb-system/installation/), including MacOS
+installation with Homebrew (now recommended) or MacPorts, Ubuntu 24.04, Debian 13,
+the OTPS tidal model setup, and the list of installed files, and it now describes
+building with the Autotools on MacOS with Homebrew. BuildAndInstall.pdf is now
+generated from BuildAndInstall.md by a new optional CMake target, buildandinstall
+(cmake --build . --target buildandinstall), using pandoc and weasyprint in the same
+way as the changelog target, with the print style overrides in
+src/htmlsrc/BuildAndInstall\_print.css.
+
 This work was done with the assistance of the AI coding assistant Claude Opus 5.5
 (Anthropic, model claude-opus-5-5), operating as Claude Code under developer
 supervision and review, which diagnosed the cause of the link failure reported in
 issue #1627, diagnosed the mbpreprocess segmentation faults and the format 57
 depth wraparound encountered with old Simrad EM1000 data, checked the remaining
 problems reported in issue #1626 against the code and test data, diagnosed the mbeditviz
-\*.resf file locking conflict, implemented the fixes, and verified the builds and
-results, and which reviewed the draft Claude Code instructions and guide against
-project practice and revised them.
+\*.resf file locking conflict, diagnosed and repaired the failures of the Autotools
+build, implemented the fixes, and verified the builds and results, and which
+reviewed the draft Claude Code instructions and guide against project practice and
+revised them and updated BuildAndInstall.md to match the web site.
 
 ---
 
