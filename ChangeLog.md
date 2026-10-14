@@ -264,6 +264,17 @@ refers to the TRN libraries in the build tree rather than the source tree. On
 MacOS 26 Tahoe with Homebrew, ./configure with the TRN, OpenCV, and test options,
 followed by make, make check, and make install, now succeeds.
 
+GSF library (src/gsf/gsf\_indx.c): fixed a compile failure reported in issue
+\#1605, in which building on Linux with the compiler in strict ISO C mode (e.g.
+CC=c99 or -std=c99) failed with "'S\_IFDIR' undeclared" in the function
+is\_path(). In strict mode the glibc header sys/stat.h does not define the file
+type constant S\_IFDIR, but it always defines the POSIX macro S\_ISDIR(); builds
+in the compiler's default GNU C mode, as used by the CMake and Autotools builds,
+were not affected. The directory test now uses S\_ISDIR(), which is also correct
+for sockets and block devices, whose file type bits include those of S\_IFDIR. This
+is a local change to the Leidos GSF library code, and must be reapplied when the
+source from a future GSF release is imported.
+
 Documentation: BuildAndInstall.md has been updated to match the installation
 instructions on the MB-System web site
 (https://www.mbari.org/technology/mb-system/installation/), including MacOS
@@ -285,7 +296,8 @@ problems reported in issue #1626 against the code and test data, diagnosed the m
 buffer overflow reported in issue #1631 and found the related dual head EM3002
 overflow, confirmed the cause of the format 181 SURF crash reported in issue #1630
 and found the related silent beam angle and sound velocity profile errors and
-sidescan off-by-one errors, diagnosed and repaired the failures of the Autotools build, implemented
+sidescan off-by-one errors, diagnosed the strict C99 compile failure in the GSF
+library reported in issue #1605, diagnosed and repaired the failures of the Autotools build, implemented
 the fixes, and verified the builds and results, and which
 reviewed the draft Claude Code instructions and guide against project practice and
 revised them and updated BuildAndInstall.md to match the web site.
