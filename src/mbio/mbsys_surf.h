@@ -104,10 +104,16 @@ struct mbsys_surf_struct {
 	SurfPositionAnySensor PositionSensor[MBSYS_SURF_MAXCPOS];
 	SurfSoundingData SoundingData;
 	SurfTransducerParameterTable ActualTransducerTable;
+	/* The SURF structures with variable length arrays (beamAngle, values,
+	   rxSets, txSets, ssData) are declared in mb_sapi.h with a dimension
+	   of 1. Only element [0] of those arrays may be used here; the full
+	   arrays are copied into the separate, properly dimensioned arrays
+	   below (indexing past a [1] array is undefined behavior, and gcc
+	   optimizes loops doing so into incorrect code). */
 	SurfMultiBeamAngleTable ActualAngleTable;
-	float reserved1[MBSYS_SURF_MAXBEAMS - 1];
+	float beamAngle[MBSYS_SURF_MAXBEAMS];
 	SurfCProfileTable ActualCProfileTable;
-	CProfileValues reserved2[MBSYS_SURF_MAXCVALUES - 1];
+	CProfileValues cProfileValues[MBSYS_SURF_MAXCVALUES];
 	SurfCenterPosition CenterPosition[MBSYS_SURF_MAXCPOS];
 	SurfSingleBeamDepth SingleBeamDepth;
 	SurfMultiBeamDepth MultiBeamDepth[MBSYS_SURF_MAXBEAMS];
@@ -116,11 +122,11 @@ struct mbsys_surf_struct {
 	SurfAmplitudes MultibeamBeamAmplitudes[MBSYS_SURF_MAXBEAMS];
 	SurfExtendedAmplitudes MultibeamExtendedBeamAmplitudes[MBSYS_SURF_MAXBEAMS];
 	SurfSignalParameter MultibeamSignalParameters;
-	TvgRxSets reserved3[MBSYS_SURF_MAXRXSETS - 1];
+	TvgRxSets rxSets[MBSYS_SURF_MAXRXSETS];
 	SurfTxParameter MultibeamTransmitterParameters;
-	TxSets reserved4[MBSYS_SURF_MAXTXSETS - 1];
+	TxSets txSets[MBSYS_SURF_MAXTXSETS];
 	SurfSidescanData SidescanData;
-	u_char reserved5[MBSYS_SURF_MAXPIXELS - 1];
+	u_char ssData[MBSYS_SURF_MAXPIXELS]; /* port pixels first, then starboard */
 };
 
 /* system specific function prototypes */

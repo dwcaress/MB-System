@@ -37,6 +37,7 @@
  */
 
 #include <math.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -296,17 +297,19 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		ActualAngleTablePtr = SAPI_getActualAngleTable();
 		if (ActualAngleTablePtr != NULL) {
 			store->ActualAngleTable = *ActualAngleTablePtr;
-			for (int i = 1; i < MIN(MBSYS_SURF_MAXBEAMS, ActualAngleTablePtr->actualNumberOfBeams); i++) {
-				store->ActualAngleTable.beamAngle[i] = ActualAngleTablePtr->beamAngle[i];
-			}
+			const int nangles = MIN(MBSYS_SURF_MAXBEAMS, ActualAngleTablePtr->actualNumberOfBeams);
+			if (nangles > 0)
+				memcpy(store->beamAngle, (const char *)ActualAngleTablePtr + offsetof(SurfMultiBeamAngleTable, beamAngle),
+				       nangles * sizeof(float));
 		}
 
 		ActualCProfileTablePtr = SAPI_getActualCProfileTable();
 		if (ActualCProfileTablePtr != NULL) {
 			store->ActualCProfileTable = *ActualCProfileTablePtr;
-			for (int i = 1; i < MIN(MBSYS_SURF_MAXCVALUES, ActualCProfileTablePtr->numberOfActualValues); i++) {
-				store->ActualCProfileTable.values[i] = ActualCProfileTablePtr->values[i];
-			}
+			const int nvalues = MIN(MBSYS_SURF_MAXCVALUES, ActualCProfileTablePtr->numberOfActualValues);
+			if (nvalues > 0)
+				memcpy(store->cProfileValues, (const char *)ActualCProfileTablePtr + offsetof(SurfCProfileTable, values),
+				       nvalues * sizeof(CProfileValues));
 		}
 
 		for (int i = 0; i < MIN(MBSYS_SURF_MAXCPOS, store->NrPositionsensors); i++) {
@@ -367,9 +370,10 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		MultibeamSignalParametersPtr = SAPI_getMultibeamSignalParameters();
 		if (MultibeamSignalParametersPtr != NULL) {
 			store->MultibeamSignalParameters = *MultibeamSignalParametersPtr;
-			for (int i = 1; i < MIN(MBSYS_SURF_MAXRXSETS, MultibeamSignalParametersPtr->nrActualGainSets); i++) {
-				store->MultibeamSignalParameters.rxSets[i] = MultibeamSignalParametersPtr->rxSets[i];
-			}
+			const int nrxsets = MIN(MBSYS_SURF_MAXRXSETS, MultibeamSignalParametersPtr->nrActualGainSets);
+			if (nrxsets > 0)
+				memcpy(store->rxSets, (const char *)MultibeamSignalParametersPtr + offsetof(SurfSignalParameter, rxSets),
+				       nrxsets * sizeof(TvgRxSets));
 		}
 
 		store->NrTxSets = 0;
@@ -377,9 +381,9 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		if (MultibeamTransmitterParametersPtr != NULL) {
 			store->NrTxSets = MIN(MBSYS_SURF_MAXTXSETS, store->NrTxSets);
 			store->MultibeamTransmitterParameters = *MultibeamTransmitterParametersPtr;
-			for (int i = 1; i < store->NrTxSets; i++) {
-				store->MultibeamTransmitterParameters.txSets[i] = MultibeamTransmitterParametersPtr->txSets[i];
-			}
+			if (store->NrTxSets > 0)
+				memcpy(store->txSets, (const char *)MultibeamTransmitterParametersPtr + offsetof(SurfTxParameter, txSets),
+				       store->NrTxSets * sizeof(TxSets));
 		}
 
 		store->NrSidescan = 0;
@@ -388,9 +392,9 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->SidescanData = *SidescanDataPtr;
 			store->NrSidescan =
 			    MIN(MBSYS_SURF_MAXPIXELS, SidescanDataPtr->actualNrOfSsDataPort + SidescanDataPtr->actualNrOfSsDataStb);
-			for (int i = 1; i < store->NrSidescan; i++) {
-				store->SidescanData.ssData[i] = SidescanDataPtr->ssData[i];
-			}
+			if (store->NrSidescan > 0)
+				memcpy(store->ssData, (const char *)SidescanDataPtr + offsetof(SurfSidescanData, ssData),
+				       store->NrSidescan * sizeof(u_char));
 		}
 	}
 
@@ -555,7 +559,7 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg4       ActualAngleTable.label:                 %s\n", store->ActualAngleTable.label);
 		fprintf(stderr, "dbg4       ActualAngleTable.actualNumberOfBeams:   %d\n", store->ActualAngleTable.actualNumberOfBeams);
 		for (int i = 0; i < MIN(MBSYS_SURF_MAXBEAMS, store->ActualAngleTable.actualNumberOfBeams); i++)
-			fprintf(stderr, "dbg4       ActualAngleTable.beamAngle[%3d]:        %f\n", i, store->ActualAngleTable.beamAngle[i]);
+			fprintf(stderr, "dbg4       ActualAngleTable.beamAngle[%3d]:        %f\n", i, store->beamAngle[i]);
 
 		fprintf(stderr, "dbg4       ActualCProfileTable.label:                     %s\n", store->ActualCProfileTable.label);
 		fprintf(stderr, "dbg4       ActualCProfileTable.relTime:                   %f\n", store->ActualCProfileTable.relTime);
@@ -563,7 +567,7 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		        store->ActualCProfileTable.numberOfActualValues);
 		for (int i = 0; i < MIN(MBSYS_SURF_MAXCVALUES, store->ActualCProfileTable.numberOfActualValues); i++)
 			fprintf(stderr, "dbg4       ActualCProfileTable.values[%3d]:               %f %f\n", i,
-			        store->ActualCProfileTable.values[i].depth, store->ActualCProfileTable.values[i].cValue);
+			        store->cProfileValues[i].depth, store->cProfileValues[i].cValue);
 
 		for (int i = 0; i < MIN(MBSYS_SURF_MAXCPOS, store->NrPositionsensors); i++) {
 			fprintf(stderr, "dbg4       CenterPosition[%2d].positionFlag:            %d\n", i,
@@ -616,7 +620,7 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg4       MultibeamSignalParameters.ar:                  %f\n", store->MultibeamSignalParameters.ar);
 		for (int i = 0; i < MIN(MBSYS_SURF_MAXRXSETS, store->MultibeamSignalParameters.nrActualGainSets); i++)
 			fprintf(stderr, "dbg4       MultibeamSignalParameters.rxSets[%3d]:               %f %f\n", i,
-			        store->MultibeamSignalParameters.rxSets[i].time, store->MultibeamSignalParameters.rxSets[i].gain);
+			        store->rxSets[i].time, store->rxSets[i].gain);
 
 		fprintf(stderr, "dbg4       MultibeamTransmitterParameters.txSets[0].txBeamIndex: %d\n",
 		        store->MultibeamTransmitterParameters.txSets[0].txBeamIndex);
@@ -634,10 +638,8 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg4       SidescanData.minSsTimeStb:              %f\n", store->SidescanData.minSsTimeStb);
 		fprintf(stderr, "dbg4       SidescanData.maxSsTimePort:             %f\n", store->SidescanData.maxSsTimePort);
 		fprintf(stderr, "dbg4       SidescanData.maxSsTimeStb:              %f\n", store->SidescanData.maxSsTimeStb);
-		for (int i = 0;
-		     i < MIN(MBSYS_SURF_MAXPIXELS, store->SidescanData.actualNrOfSsDataPort + store->SidescanData.actualNrOfSsDataPort);
-		     i++)
-			fprintf(stderr, "dbg4       SidescanData.ssData[%d]:        %d\n", i, store->SidescanData.ssData[i]);
+		for (int i = 0; i < store->NrSidescan; i++)
+			fprintf(stderr, "dbg4       SidescanData.ssData[%d]:        %d\n", i, store->ssData[i]);
 	}
 
 	if (verbose >= 2) {

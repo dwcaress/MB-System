@@ -319,17 +319,20 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 			z0 -= tlz;
 			const double t0 = z0 / v0;
 			const double t2 = t0 * t0;
-			/* read portside scan */
+			/* port pixels may have been truncated to MBSYS_SURF_MAXPIXELS on reading */
+			const int nport = MIN(store->SidescanData.actualNrOfSsDataPort, store->NrSidescan);
+			/* read portside scan - nearest pixel first, stored in reverse order */
 			if (store->SidescanData.actualNrOfSsDataPort > 1) {
 				/* initialise */
 				tn = store->SidescanData.minSsTimePort / 2;
 				dt = (store->SidescanData.maxSsTimePort / 2 - tn) / (store->SidescanData.actualNrOfSsDataPort - 1);
 				/* start reading: */
-				for (int i = 0, j = store->SidescanData.actualNrOfSsDataPort; 0 < --j; i++) {
+				for (int i = 0; i < nport; i++) {
+					const int j = nport - 1 - i;
 					y = (tn > t0 ? v0 * sqrt(tn * tn - t2) : 0.0);
 					ssalongtrack[j] = tlx;
 					ssacrosstrack[j] = tly - y;
-					ss[j] = store->SidescanData.ssData[i];
+					ss[j] = store->ssData[i];
 					tn += dt;
 				}
 			}
@@ -338,11 +341,11 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 				/* initialise */
 				tn = store->SidescanData.minSsTimeStb / 2;
 				dt = (store->SidescanData.maxSsTimeStb / 2 - tn) / (store->SidescanData.actualNrOfSsDataStb - 1);
-				for (int j = store->SidescanData.actualNrOfSsDataPort; j < store->NrSidescan; j++) {
+				for (int j = nport; j < store->NrSidescan; j++) {
 					y = (tn > t0 ? v0 * sqrt(tn * tn - t2) : 0.0);
 					ssalongtrack[j] = tlx;
 					ssacrosstrack[j] = tly + y;
-					ss[j] = store->SidescanData.ssData[j];
+					ss[j] = store->ssData[j];
 					tn += dt;
 				}
 			}
@@ -552,12 +555,13 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 			store->MultibeamBeamAmplitudes[i].beamAmplitude = (unsigned short)amp[i];
 		}
 
-		if (nss == store->SidescanData.actualNrOfSsDataPort + store->SidescanData.actualNrOfSsDataStb) {
+		if (nss == store->SidescanData.actualNrOfSsDataPort + store->SidescanData.actualNrOfSsDataStb
+		    && nss <= MBSYS_SURF_MAXPIXELS) {
 			for (int i = 0; i < store->SidescanData.actualNrOfSsDataPort; i++) {
-				store->SidescanData.ssData[i] = ss[store->SidescanData.actualNrOfSsDataPort - i - 1];
+				store->ssData[i] = ss[store->SidescanData.actualNrOfSsDataPort - i - 1];
 			}
-			for (int i = store->SidescanData.actualNrOfSsDataStb; i < nss; i++) {
-				store->SidescanData.ssData[i] = ss[i];
+			for (int i = store->SidescanData.actualNrOfSsDataPort; i < nss; i++) {
+				store->ssData[i] = ss[i];
 			}
 		}
 	}
@@ -633,7 +637,7 @@ int mbsys_surf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 			}
 			for (int i = 0; i < store->NrBeams; i++) {
 				ttimes[i] = 2 * store->MultiBeamTraveltime[i].travelTimeOfRay;
-				const double angle = 90. - RTD * store->ActualAngleTable.beamAngle[i];
+				const double angle = 90. - RTD * store->beamAngle[i];
 				mb_rollpitch_to_takeoff(verbose, pitch, angle, &angles[i], &angles_forward[i], error);
 				heave[i] =
 				    -0.5 * (store->SoundingData.heaveWhileTransmitting + store->MultiBeamReceiveParams[i].heaveWhileReceiving);
@@ -1070,12 +1074,12 @@ int mbsys_surf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA && store->ActualCProfileTable.numberOfActualValues > 0) {
 		/* get number of depth-velocity pairs */
-		*nsvp = store->ActualCProfileTable.numberOfActualValues;
+		*nsvp = MIN(store->ActualCProfileTable.numberOfActualValues, MBSYS_SURF_MAXCVALUES);
 
 		/* get profile */
 		for (int i = 0; i < *nsvp; i++) {
-			depth[i] = store->ActualCProfileTable.values[i].depth;
-			velocity[i] = store->ActualCProfileTable.values[i].cValue;
+			depth[i] = store->cProfileValues[i].depth;
+			velocity[i] = store->cProfileValues[i].cValue;
 		}
 
 		/* done translating values */
@@ -1140,8 +1144,8 @@ int mbsys_surf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp
 
 		/* set profile */
 		for (int i = 0; i < store->ActualCProfileTable.numberOfActualValues; i++) {
-			store->ActualCProfileTable.values[i].depth = depth[i];
-			store->ActualCProfileTable.values[i].cValue = velocity[i];
+			store->cProfileValues[i].depth = depth[i];
+			store->cProfileValues[i].cValue = velocity[i];
 		}
 	}
 
