@@ -1345,6 +1345,17 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 			status = mb_platform_orientation_offset(verbose, (void *)platform, pars->target_sensor, 1,
 													&(rx_h_p), &(rx_r_p), &(rx_p_p), error);
 	
+			// map mount headings to [-180, 180] so that a forward mount such as
+			// 359.83 degrees is not mistaken for a reverse mount */
+			if (tx_h_p > 180.0)
+				tx_h_p -= 360.0;
+			else if (tx_h_p < -180.0)
+				tx_h_p += 360.0;
+			if (rx_h_p > 180.0)
+				rx_h_p -= 360.0;
+			else if (rx_h_p < -180.0)
+				rx_h_p += 360.0;
+
 			// handle reverse mounting of transmit and receive arrays */
 			if (tx_h_p > 100.0 || tx_h_p < -100.0) {
 				tx_h_p -= 180.0;

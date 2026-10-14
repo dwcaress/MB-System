@@ -1158,6 +1158,17 @@ int mbsys_kmbes_preprocess(int verbose, void *mbio_ptr, void *store_ptr,
         rx_align.roll = sensor_target->offsets[rx_offset].attitude_offset_roll;
         rx_align.pitch = sensor_target->offsets[rx_offset].attitude_offset_pitch;
 
+        // map mount headings to [-180, 180] so that a forward mount such as
+        // 359.83 degrees is not mistaken for a reverse mount */
+        if (tx_align.heading > 180.0)
+          tx_align.heading -= 360.0;
+        else if (tx_align.heading < -180.0)
+          tx_align.heading += 360.0;
+        if (rx_align.heading > 180.0)
+          rx_align.heading -= 360.0;
+        else if (rx_align.heading < -180.0)
+          rx_align.heading += 360.0;
+
         // handle reverse mounting of transmit array */
         if (tx_align.heading > 100.0 || tx_align.heading < -100.0) {
           tx_align.heading -= 180.0;

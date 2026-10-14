@@ -548,6 +548,13 @@ int mbsys_image83p_preprocess(int verbose,     /* in: verbosity level set on com
         status = mb_platform_orientation_offset(verbose, (void *)platform, pars->target_sensor, 0,
                                                 &(tx_align.heading), &(tx_align.roll), &(tx_align.pitch), error);
 
+        // map mount headings to [-180, 180] so that a forward mount such as
+        // 359.83 degrees is not mistaken for a reverse mount */
+        if (tx_align.heading > 180.0)
+          tx_align.heading -= 360.0;
+        else if (tx_align.heading < -180.0)
+          tx_align.heading += 360.0;
+
         // handle reverse mounting of transmit array */
         if (tx_align.heading > 100.0 || tx_align.heading < -100.0) {
           tx_align.heading -= 180.0;
@@ -558,6 +565,10 @@ int mbsys_image83p_preprocess(int verbose,     /* in: verbosity level set on com
 
         status = mb_platform_orientation_offset(verbose, (void *)platform, pars->target_sensor, 1,
                                                 &(rx_align.heading), &(rx_align.roll), &(rx_align.pitch), error);
+        if (rx_align.heading > 180.0)
+          rx_align.heading -= 360.0;
+        else if (rx_align.heading < -180.0)
+          rx_align.heading += 360.0;
         if (rx_align.heading > 100.0 || rx_align.heading < -100.0) {
           rx_align.heading -= 180.0;
           if (rx_align.heading < 0.0)
