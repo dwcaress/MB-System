@@ -186,9 +186,6 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	SurfSignalParameter *MultibeamSignalParametersPtr;
 	SurfTxParameter *MultibeamTransmitterParametersPtr;
 	SurfSidescanData *SidescanDataPtr;
-	int utm_zone;
-	char projection[MB_NAME_LENGTH];
-	double easting, northing, lon, lat;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -201,8 +198,6 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* get pointer to mbio descriptor and data structure */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr;
-	double *refeasting = &(mb_io_ptr->saved1);
-	double *refnorthing = &(mb_io_ptr->saved2);
 
 	/* set sapi verbosity */
         // TODO(schwehr): What?
@@ -235,37 +230,48 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->PositionSensor[i] = *(SAPI_getPositionSensor(i));
 		}
 
-		/* initialize UTM projection if required */
-		if (store->GlobalData.presentationOfPosition == 'X' && !mb_io_ptr->projection_initialized) {
-			/* initialize UTM projection */
-			utm_zone = (int)(((RTD * store->GlobalData.referenceMeridian + 183.0) / 6.0) + 0.5);
-			sprintf(projection, "UTM%2.2dN", utm_zone);
-			mb_proj_init(verbose, projection, &(mb_io_ptr->pjptr), error);
-			store->GlobalData.presentationOfPosition = 'E';
-			mb_io_ptr->projection_initialized = true;
+		/* If the positions are projected easting and northing in meters, set up
+		    the projection. The SURF records are left in projected coordinates;
+		    mbsys_surf_extract() returns eastings and northings and MBIO
+		    (mb_extract, mb_insert, etc.) converts to and from longitude
+		    and latitude because projection_initialized is set.
+		    SURF does not record the projection parameters completely:
+		    the projection name is "GK" (Gauss-Krueger) or "UTM", the
+		    falseEasting is often zero even when the eastings include a
+		    500 km offset (plus a zone prefix for Gauss-Krueger), and no
+		    datum shift is given, so only the ellipsoid is used. */
+		if (store->GlobalData.presentationOfPosition == X_Y && !mb_io_ptr->projection_initialized) {
+			const double lon_0 = RTD * store->GlobalData.referenceMeridian;
+			double x_0 = store->GlobalData.falseEasting;
+			if (x_0 == 0.0)
+				x_0 = 1.0e6 * floor(store->GlobalData.referenceOfPositionX / 1.0e6) + 500000.0;
+			const double k_0 = (strncmp(store->GlobalData.projection, "UTM", 3) == 0 ? 0.9996 : 1.0);
+			char ellipsoid[MB_PATH_MAXLINE];
+			if (store->GlobalData.semiMajorAxis > 0.0 && store->GlobalData.flattening > 0.0)
+				snprintf(ellipsoid, sizeof(ellipsoid), "+a=%.4f +rf=%.9f", store->GlobalData.semiMajorAxis,
+				         1.0 / store->GlobalData.flattening);
+			else
+				snprintf(ellipsoid, sizeof(ellipsoid), "+ellps=WGS84");
+			char projection[MB_PATH_MAXLINE];
+			snprintf(projection, sizeof(projection),
+			         "+proj=tmerc +lat_0=0 +lon_0=%.9f +k=%.6f +x_0=%.3f +y_0=%.3f %s +units=m +no_defs",
+			         lon_0, k_0, x_0, store->GlobalData.falseNorthing, ellipsoid);
+			int proj_status = mb_proj_init(verbose, projection, &(mb_io_ptr->pjptr), error);
 
-			/* Set reference longitude and latitude */
-			easting = store->GlobalData.referenceOfPositionX;
-			northing = store->GlobalData.referenceOfPositionY;
-			mb_proj_inverse(verbose, mb_io_ptr->pjptr, easting, northing, &lon, &lat, error);
-			store->GlobalData.referenceOfPositionX = DTR * lon;
-			store->GlobalData.referenceOfPositionY = DTR * lat;
-			*refeasting = easting;
-			*refnorthing = northing;
-
-			/* Set min longitude and latitude */
-			easting = store->Statistics.minEasting;
-			northing = store->Statistics.minNorthing;
-			mb_proj_inverse(verbose, mb_io_ptr->pjptr, easting, northing, &lon, &lat, error);
-			store->Statistics.minEasting = DTR * lon;
-			store->Statistics.minNorthing = DTR * lat;
-
-			/* Set max longitude and latitude */
-			easting = store->Statistics.maxEasting;
-			northing = store->Statistics.maxNorthing;
-			mb_proj_inverse(verbose, mb_io_ptr->pjptr, easting, northing, &lon, &lat, error);
-			store->Statistics.maxEasting = DTR * lon;
-			store->Statistics.maxNorthing = DTR * lat;
+			/* fall back to a UTM zone if the projection string is not accepted
+			    (e.g. built with the PROJ 4 API) */
+			if (proj_status != MB_SUCCESS) {
+				const int utm_zone = (int)(((lon_0 + 183.0) / 6.0) + 0.5);
+				snprintf(projection, sizeof(projection), "UTM%2.2dN", utm_zone);
+				proj_status = mb_proj_init(verbose, projection, &(mb_io_ptr->pjptr), error);
+			}
+			if (proj_status == MB_SUCCESS) {
+				mb_io_ptr->projection_initialized = true;
+			}
+			else {
+				status = MB_FAILURE;
+				*error = MB_ERROR_BAD_PROJECTION;
+			}
 		}
 
 		store->initialized = true;
@@ -316,16 +322,6 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			CenterPositionPtr = SAPI_getCenterPosition(i);
 			if (CenterPositionPtr != NULL) {
 				store->CenterPosition[i] = *CenterPositionPtr;
-
-				/* convert position from UTM easting and northing
-				    to lon lat if necessary */
-				if (mb_io_ptr->projection_initialized) {
-					easting = store->CenterPosition[i].centerPositionX + *refeasting;
-					northing = store->CenterPosition[i].centerPositionY + *refnorthing;
-					mb_proj_inverse(verbose, mb_io_ptr->pjptr, easting, northing, &lon, &lat, error);
-					store->CenterPosition[i].centerPositionX = (float)(DTR * lon - store->GlobalData.referenceOfPositionX);
-					store->CenterPosition[i].centerPositionY = (float)(DTR * lat - store->GlobalData.referenceOfPositionY);
-				}
 			}
 		}
 
