@@ -633,6 +633,18 @@ array mount heading is between 260 and 360 degrees must be preprocessed
 again. For the Merian data, the bathymetry recalculated by raytracing
 now agrees with the Kongsberg realtime soundings to within a mean of -3
 to -6 m and an rms of 9 to 12 m in water depths of about 4600 m.</p>
+<p>Python plotting macros mbpy_grdplot, mbpy_grd3dplot, mbpy_histplot,
+and mbpy_xyplot (src/macros/mbpy_*, src/macros/python/mbpy_misc.py):
+option values beginning with a minus sign that are not plain negative
+numbers, such as --zbounds &quot;-30/0&quot; for an amplitude mosaic in dB or
+--region -125/-120/30/35 for a region with negative longitudes, are now
+accepted. Previously the Python argparse module treated such a value as
+another option, so the command failed with &quot;argument -Z/--zbounds:
+expected one argument&quot;. A new function join_dash_values() in
+mbpy_misc.py now attaches such a value to the option that takes it (e.g.
+--zbounds=-30/0 or -Z-30/0) before the command line is parsed; a
+following argument that is itself one of the program&#39;s options is still
+treated as an option.</p>
 <p>This work was done with the assistance of the AI coding assistant
 Claude Opus 5.5 (Anthropic, model claude-opus-5-5), operating as Claude
 Code under developer supervision and review, which diagnosed the cause
@@ -648,10 +660,12 @@ sound velocity profile errors and sidescan off-by-one errors, diagnosed
 the strict C99 compile failure in the GSF library reported in issue
 #1605, diagnosed and repaired the failures of the Autotools build,
 diagnosed the misidentified reverse mounted transducer arrays that
-caused zero depths in processed EM124 kmall data, implemented the fixes,
-and verified the builds and results, and which reviewed the draft Claude
-Code instructions and guide against project practice and revised them
-and updated BuildAndInstall.md to match the web site.</p>
+caused zero depths in processed EM124 kmall data, diagnosed the
+rejection of option values beginning with a minus sign by the mbpy_*
+plotting macros, implemented the fixes, and verified the builds and
+results, and which reviewed the draft Claude Code instructions and guide
+against project practice and revised them and updated BuildAndInstall.md
+to match the web site.</p>
 <hr />
 <h4 id="583beta24-october-5-2026">5.8.3beta24 (October 5, 2026)</h4>
 <p>Build system (MacOS, Homebrew): fixed a build failure when building

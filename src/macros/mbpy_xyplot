@@ -158,7 +158,8 @@ def parse_xy_file(spec: str, default_symbol: str, default_fill: str, default_pen
 
 
 def main(argv=None) -> int:
-    args = build_arg_parser().parse_args(argv)
+    parser = build_arg_parser()
+    args = parser.parse_args(misc.join_dash_values(parser, argv))
 
     entries = [parse_xy_file(spec, args.symbol, args.fill, args.pen) for spec in args.input]
     if not entries:

@@ -312,6 +312,18 @@ the bathymetry recalculated by raytracing now agrees with the Kongsberg realtime
 soundings to within a mean of -3 to -6 m and an rms of 9 to 12 m in water depths
 of about 4600 m.
 
+Python plotting macros mbpy\_grdplot, mbpy\_grd3dplot, mbpy\_histplot, and
+mbpy\_xyplot (src/macros/mbpy\_\*, src/macros/python/mbpy\_misc.py): option values
+beginning with a minus sign that are not plain negative numbers, such as
+--zbounds "-30/0" for an amplitude mosaic in dB or --region -125/-120/30/35 for
+a region with negative longitudes, are now accepted. Previously the Python
+argparse module treated such a value as another option, so the command failed
+with "argument -Z/--zbounds: expected one argument". A new function
+join\_dash\_values() in mbpy\_misc.py now attaches such a value to the option that
+takes it (e.g. --zbounds=-30/0 or -Z-30/0) before the command line is parsed; a
+following argument that is itself one of the program's options is still treated
+as an option.
+
 This work was done with the assistance of the AI coding assistant Claude Opus 5.5
 (Anthropic, model claude-opus-5-5), operating as Claude Code under developer
 supervision and review, which diagnosed the cause of the link failure reported in
@@ -325,7 +337,8 @@ and found the related silent beam angle and sound velocity profile errors and
 sidescan off-by-one errors, diagnosed the strict C99 compile failure in the GSF
 library reported in issue #1605, diagnosed and repaired the failures of the Autotools build,
 diagnosed the misidentified reverse mounted transducer arrays that caused zero
-depths in processed EM124 kmall data, implemented
+depths in processed EM124 kmall data, diagnosed the rejection of option values
+beginning with a minus sign by the mbpy\_\* plotting macros, implemented
 the fixes, and verified the builds and results, and which
 reviewed the draft Claude Code instructions and guide against project practice and
 revised them and updated BuildAndInstall.md to match the web site.
