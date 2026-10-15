@@ -25,7 +25,7 @@ dnl-----------------------------------------------------------------------------
 dnl--------------------------------------------------------------------
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.8.3beta25],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.8.3beta26],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AS_ECHO([" "])
 AS_ECHO(["------------------------------------------------------------------------------"])

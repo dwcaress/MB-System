@@ -21,6 +21,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.3beta26    October 15, 2026
 - Version 5.8.3beta25    October 14, 2026
 - Version 5.8.3beta24    October 5, 2026
 - Version 5.8.3beta23    October 3, 2026
@@ -79,6 +80,47 @@ or beta, are equally accessible as tarballs through the Github interface.
 - Version 5.8.1beta02    February 7, 2024
 - Version 5.8.1beta01    February 1, 2024
 - **Version 5.8.0          January 22, 2024**
+
+---
+
+#### 5.8.3beta26 (October 15, 2026)
+
+MBIO library, format 181 (MBF\_SAMESURF, src/mbio/mbr\_samesurf.c,
+src/mbio/mbsys\_surf.c): fixed three errors in reading SAM Electronics (Atlas)
+SURF files, found while testing the example data distributed with the Atlas SURF
+API. First, SURF files that store positions as projected eastings and northings
+in meters (e.g. Gauss-Krueger coordinates in the Fansweep 20 example) had their
+navigation inverse projected twice, once by the format 181 reader and again by the
+MBIO library, so that the data were placed near 4.5E 0.0N instead of near 8.9E
+53.0N. The reader now leaves the SURF positions in meters and sets up the
+projection so that the MBIO library alone converts the navigation to and from
+longitude and latitude, as is done for other formats with projected
+coordinates. The SURF header data are no longer modified in place.
+The projection is now a transverse Mercator projection defined
+from the SURF header (reference meridian, ellipsoid, a scale factor of 1.0 for
+Gauss-Krueger or 0.9996 for UTM, and false easting), rather than a WGS84 UTM zone.
+SURF files do not specify a datum shift, so no datum
+transformation is applied. Second, pings were discarded when the altitude
+could not be calculated, which happened for every ping of single beam (vertical
+sounder) SURF files, so that none of their data could be read, and for multibeam
+pings without valid beams near nadir. The altitude is now taken from the single
+beam depth, or from the unflagged beam nearest nadir when the near nadir depth fit
+fails, and pings without a valid depth are kept with zero altitude. A division by zero
+in the near nadir depth fit has also been fixed. Third, beams marked as deleted in
+the SURF data were returned as null beams, which cannot be unflagged in
+the editors, and beams of soundings marked as deleted were not flagged at all.
+Both are now returned as manually flagged beams. The two Atlas example files now
+read completely (141 of 141 and 403 of 403 pings, previously 123 and 0), and the
+beam positions agree with those reported by the original Atlas SURF API example
+program.
+
+This work was done with the assistance of the AI coding assistant Claude Opus 5.5
+(Anthropic, model claude-opus-5-5), operating as Claude Code under developer
+supervision and review, which scoped the effort required for full read and write
+support of the SURF format, built the original Atlas SURF API as an independent
+reference reader, diagnosed the double projection of SURF navigation, the
+discarded pings, and the deleted beam and sounding flag handling, implemented the
+fixes, and verified the results.
 
 ---
 
