@@ -21,7 +21,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
-- Version 5.8.3beta26    October 15, 2026
+- Version 5.8.3beta26    October 16, 2026
 - Version 5.8.3beta25    October 14, 2026
 - Version 5.8.3beta24    October 5, 2026
 - Version 5.8.3beta23    October 3, 2026
@@ -83,7 +83,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
-#### 5.8.3beta26 (October 15, 2026)
+#### 5.8.3beta26 (October 16, 2026)
 
 MBIO library, format 181 (MBF\_SAMESURF, src/mbio/mbr\_samesurf.c,
 src/mbio/mbsys\_surf.c): fixed three errors in reading SAM Electronics (Atlas)
@@ -114,13 +114,61 @@ read completely (141 of 141 and 403 of 403 pings, previously 123 and 0), and the
 beam positions agree with those reported by the original Atlas SURF API example
 program.
 
+MBIO library (src/mbio/mb\_status.h, src/mbio/mb\_error.c): fixed the count of
+data record types (MB\_DATA\_KINDS), which was 74 although the highest record type
+is MB\_DATA\_DATUM (75), the Kongsberg #SPD sensor position datum record from
+format 261 (MBF\_KEMKMALL) files. Because of this, #SPD records were never counted
+in the data record notices reported by mbinfo and had no notice message. The
+count is now 75, a notice message for MB\_DATA\_DATUM has been added, and the
+notice slots for nonfatal errors and data problems move up by one accordingly.
+All programs must be rebuilt against the new library. Bug reported by
+Christian Ferreira.
+
+MBIO library platform files (src/mbio/mb\_platform.c): fixed the reading of
+platform files by mb\_platform\_read(), which silently ignored the subbottom
+and camera data source lines. The SOURCE\_SUBBOTTOM keywords were compared using
+lengths two characters longer than the keywords, so that they never matched, and
+the reader looked for SOURCE\_SUBCAMERA keywords while the writer and the platform
+file template use SOURCE\_CAMERA. As a result these sources were lost when
+platform files were read, and when mbmakeplatform modified an existing platform
+file. SOURCE\_CAMERA is now the defined keyword; the SOURCE\_SUBCAMERA spelling
+is still accepted when reading. Also, the platform name, organization and
+documentation URL and the sensor model, manufacturer and serial number are now
+read in full including embedded spaces (previously only the first word was kept),
+are limited to the size of their fields (previously long values could overflow
+them), and empty values are read as empty strings rather than as uninitialized
+memory. A read before the start of the line buffer for one character lines has also
+been fixed. Bug reported by Christian Ferreira.
+
+Program mbtrnpp (src/mbtrnutils/mbtrnpp.c): added a bounds check before counting
+the data record types read, which wrote past the end of two arrays for record types
+beyond MB\_DATA\_KINDS (such as the #SPD records in kmall data), and the periodic
+summary of non-survey records now includes the last record type. The same change
+has been provided as a patch to the TRN developers.
+
+Documentation (src/man/man1/mbnavlist.1, mbkongsbergpreprocess.1, mbrolltimelag.1,
+mbpreprocess.1, src/mbtrn/tools/README-test.md): updated the data record type
+tables and examples to the current record type identifiers. The identifiers in the
+mbnavlist and mbkongsbergpreprocess manual pages did not account for
+MB\_DATA\_SINGLE\_BEAM\_PING (27), so that all of those from 27 upward
+were one too small, including the mbkongsbergpreprocess examples for using the
+secondary navigation (now -S1/31 -S2/31) and the second attitude system (now
+-S3/57). The mbnavlist table now lists all record types up to MB\_DATA\_DATUM (75).
+MB\_DATA\_SONARDEPTH has been corrected to MB\_DATA\_SENSORDEPTH.
+
+
 This work was done with the assistance of the AI coding assistant Claude Opus 5.5
 (Anthropic, model claude-opus-5-5), operating as Claude Code under developer
 supervision and review, which scoped the effort required for full read and write
 support of the SURF format, built the original Atlas SURF API as an independent
 reference reader, diagnosed the double projection of SURF navigation, the
 discarded pings, and the deleted beam and sounding flag handling, implemented the
-fixes, and verified the results.
+fixes, and verified the results. Claude also evaluated the bug reports on the
+record type count and on reading platform files, confirmed both in the source code
+and the platform file problems by reproducing them, implemented the fixes and the
+documentation corrections, and verified them with builds, the test suite,
+platform file round trips through mbmakeplatform, and a check of the notice
+messages, with the MBIO library sources also compiled for Windows with MinGW-w64.
 
 ---
 
