@@ -588,6 +588,10 @@ int mbview_pick_text(size_t instance) {
 	int time_i[7];
 	char londstr0[24], londstr1[24], lonmstr0[24], lonmstr1[24];
 	char latdstr0[24], latdstr1[24], latmstr0[24], latmstr1[24];
+	char londstrc0[24], londstrc1[24], londstrc2[24], londstrc3[24];
+	char latdstrc0[24], latdstrc1[24], latdstrc2[24], latdstrc3[24];
+	char lonmstrc0[24], lonmstrc1[24], lonmstrc2[24], lonmstrc3[24];
+	char latmstrc0[24], latmstrc1[24], latmstrc2[24], latmstrc3[24];
 	char date0[24], date1[24];
 	char shot0[48], shot1[48];
 	double lonmin, lonmax, latmin, latmax;
@@ -638,8 +642,41 @@ int mbview_pick_text(size_t instance) {
 	else if (data->pickinfo_mode == MBV_PICK_AREA) {
 		snprintf(value_text, sizeof(value_text), ":::t\"Area Info:\":t\" Length: %.3f m\":t\" Width: %.3f m\":t\" Bearing: %.1f deg\"",
 		        data->area.length, data->area.width, data->area.bearing);
-		snprintf(value_list, sizeof(value_list), "Area Info: Length: %.3f m Width: %.3f m Bearing: %.1f deg\n", data->area.length, data->area.width,
-		        data->area.bearing);
+		mbview_setlonlatstrings(data->area.endpoints[0].xlon, data->area.endpoints[0].ylat, londstr0, latdstr0, lonmstr0, latmstr0);
+		mbview_setlonlatstrings(data->area.endpoints[1].xlon, data->area.endpoints[1].ylat, londstr1, latdstr1, lonmstr1, latmstr1);
+		mbview_setlonlatstrings(data->area.cornerpoints[0].xlon, data->area.cornerpoints[0].ylat, londstrc0, latdstrc0, lonmstrc0, latmstrc0);
+		mbview_setlonlatstrings(data->area.cornerpoints[1].xlon, data->area.cornerpoints[1].ylat, londstrc1, latdstrc1, lonmstrc1, latmstrc1);
+		mbview_setlonlatstrings(data->area.cornerpoints[2].xlon, data->area.cornerpoints[2].ylat, londstrc2, latdstrc2, lonmstrc2, latmstrc2);
+		mbview_setlonlatstrings(data->area.cornerpoints[3].xlon, data->area.cornerpoints[3].ylat, londstrc3, latdstrc3, lonmstrc3, latmstrc3);
+		snprintf(value_list, sizeof(value_list), 
+					"\nArea Info: \n    Length: %.3f m Width: %.3f m Bearing: %.1f deg \n"
+					"    Decimal Degrees: \n"
+					"        End Points:    1: Lon: %s Lat: %s Depth: %.3f m \n"
+					"                       2: Lon: %s Lat: %s Depth: %.3f m \n"
+					"        Corner Points: 1: Lon: %s Lat: %s Depth: %.3f m \n"
+					"                       2: Lon: %s Lat: %s Depth: %.3f m \n"
+					"                       3: Lon: %s Lat: %s Depth: %.3f m \n"
+					"                       4: Lon: %s Lat: %s Depth: %.3f m \n"
+					"    Degrees and decimal minutes: \n"
+					"        End Points:    1: Lon: %s Lat: %s Depth: %.3f m \n"
+					"                       2: Lon: %s Lat: %s Depth: %.3f m \n"
+					"        Corner Points: 1: Lon: %s Lat: %s Depth: %.3f m \n"
+					"                       2: Lon: %s Lat: %s Depth: %.3f m \n"
+					"                       3: Lon: %s Lat: %s Depth: %.3f m \n"
+					"                       4: Lon: %s Lat: %s Depth: %.3f m \n",
+					data->area.length, data->area.width, data->area.bearing, 
+					londstr0, latdstr0, data->area.endpoints[0].zdata, 
+					londstr1, latdstr1, data->area.endpoints[1].zdata, 
+					londstrc0, latdstrc0, data->area.cornerpoints[0].zdata, 
+					londstrc1, latdstrc1, data->area.cornerpoints[1].zdata, 
+					londstrc2, latdstrc2, data->area.cornerpoints[2].zdata, 
+					londstrc3, latdstrc3, data->area.cornerpoints[3].zdata,
+					lonmstr0, latmstr0, data->area.endpoints[0].zdata, 
+					lonmstr1, latmstr1, data->area.endpoints[1].zdata, 
+					lonmstrc0, latmstrc0, data->area.cornerpoints[0].zdata, 
+					lonmstrc1, latmstrc1, data->area.cornerpoints[1].zdata, 
+					lonmstrc2, latmstrc2, data->area.cornerpoints[2].zdata, 
+					lonmstrc3, latmstrc3, data->area.cornerpoints[3].zdata);
 	}
 	else if (data->pickinfo_mode == MBV_PICK_REGION) {
 		lonmin = data->region.cornerpoints[0].xlon;
@@ -692,7 +729,7 @@ int mbview_pick_text(size_t instance) {
 			snprintf(value_text, sizeof(value_text),
 			    ":::t\"Region Info:\":t\" W: %s\":t\" E: %s\":t\" S: %s\":t\" N: %s\":t\" Width: %.3f m\":t\" Height: %.3f m\"",
 			    lonmstr0, lonmstr1, latmstr0, latmstr1, data->region.width, data->region.height);
-		snprintf(value_list, sizeof(value_list),
+			snprintf(value_list, sizeof(value_list),
 		        "Region Info: Bounds: %s/%s/%s/%s\n"
 		        "             Bounds: %s/%s/%s/%s\n"
 		        "             Width: %.3f m Height: %.3f m\n",
@@ -1648,7 +1685,6 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 			const double dy = data->area.endpoints[1].ydisplay - data->area.endpoints[0].ydisplay;
 			const double dxuse = 0.5 * view->areaaspect * dy;
 			const double dyuse = 0.5 * view->areaaspect * dx;
-
 			data->area.cornerpoints[0].xdisplay = data->area.endpoints[0].xdisplay - dxuse;
 			data->area.cornerpoints[0].ydisplay = data->area.endpoints[0].ydisplay + dyuse;
 			data->area.cornerpoints[1].xdisplay = data->area.endpoints[0].xdisplay + dxuse;
@@ -1657,6 +1693,15 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 			data->area.cornerpoints[2].ydisplay = data->area.endpoints[1].ydisplay - dyuse;
 			data->area.cornerpoints[3].xdisplay = data->area.endpoints[1].xdisplay - dxuse;
 			data->area.cornerpoints[3].ydisplay = data->area.endpoints[1].ydisplay + dyuse;
+			for (int i=0; i<4; i++) {
+				status = mbview_projectdisplay2ll(instance, data->area.cornerpoints[i].xdisplay, 
+										data->area.cornerpoints[i].ydisplay, data->area.cornerpoints[i].zdisplay, 
+										&data->area.cornerpoints[i].xlon, &data->area.cornerpoints[i].ylat);
+				status = mbview_projectll2xyzgrid(instance, 
+										data->area.cornerpoints[i].xlon, data->area.cornerpoints[i].ylat,
+										&(data->area.cornerpoints[i].xgrid), &(data->area.cornerpoints[i].ygrid),
+										&(data->area.cornerpoints[i].zdata));
+			}
 
 			/* calculate width and length */
 			data->area.length = sqrt(dx * dx + dy * dy) / view->scale;
@@ -1724,7 +1769,7 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 			mbview_greatcircle_endposition(instance, data->area.endpoints[0].xlon, data->area.endpoints[0].ylat, bearing,
 			                               (0.5 * data->area.width), &(data->area.cornerpoints[0].xlon),
 			                               &(data->area.cornerpoints[0].ylat)),
-			    status = mbview_projectll2xyzgrid(instance, data->area.cornerpoints[0].xlon, data->area.cornerpoints[0].ylat,
+			status = mbview_projectll2xyzgrid(instance, data->area.cornerpoints[0].xlon, data->area.cornerpoints[0].ylat,
 			                                      &(data->area.cornerpoints[0].xgrid), &(data->area.cornerpoints[0].ygrid),
 			                                      &(data->area.cornerpoints[0].zdata));
 			status = mbview_projectll2display(instance, data->area.cornerpoints[0].xlon, data->area.cornerpoints[0].ylat,
@@ -1739,7 +1784,7 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 			mbview_greatcircle_endposition(instance, data->area.endpoints[0].xlon, data->area.endpoints[0].ylat, bearing,
 			                               (0.5 * data->area.width), &(data->area.cornerpoints[1].xlon),
 			                               &(data->area.cornerpoints[1].ylat)),
-			    status = mbview_projectll2xyzgrid(instance, data->area.cornerpoints[1].xlon, data->area.cornerpoints[1].ylat,
+			status = mbview_projectll2xyzgrid(instance, data->area.cornerpoints[1].xlon, data->area.cornerpoints[1].ylat,
 			                                      &(data->area.cornerpoints[1].xgrid), &(data->area.cornerpoints[1].ygrid),
 			                                      &(data->area.cornerpoints[1].zdata));
 			status = mbview_projectll2display(instance, data->area.cornerpoints[1].xlon, data->area.cornerpoints[1].ylat,
@@ -1754,7 +1799,7 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 			mbview_greatcircle_endposition(instance, data->area.endpoints[1].xlon, data->area.endpoints[1].ylat, bearing,
 			                               (0.5 * data->area.width), &(data->area.cornerpoints[2].xlon),
 			                               &(data->area.cornerpoints[2].ylat)),
-			    status = mbview_projectll2xyzgrid(instance, data->area.cornerpoints[2].xlon, data->area.cornerpoints[2].ylat,
+			status = mbview_projectll2xyzgrid(instance, data->area.cornerpoints[2].xlon, data->area.cornerpoints[2].ylat,
 			                                      &(data->area.cornerpoints[2].xgrid), &(data->area.cornerpoints[2].ygrid),
 			                                      &(data->area.cornerpoints[2].zdata));
 			status = mbview_projectll2display(instance, data->area.cornerpoints[2].xlon, data->area.cornerpoints[2].ylat,
@@ -1769,7 +1814,7 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 			mbview_greatcircle_endposition(instance, data->area.endpoints[1].xlon, data->area.endpoints[1].ylat, bearing,
 			                               (0.5 * data->area.width), &(data->area.cornerpoints[3].xlon),
 			                               &(data->area.cornerpoints[3].ylat)),
-			    status = mbview_projectll2xyzgrid(instance, data->area.cornerpoints[3].xlon, data->area.cornerpoints[3].ylat,
+			status = mbview_projectll2xyzgrid(instance, data->area.cornerpoints[3].xlon, data->area.cornerpoints[3].ylat,
 			                                      &(data->area.cornerpoints[3].xgrid), &(data->area.cornerpoints[3].ygrid),
 			                                      &(data->area.cornerpoints[3].zdata));
 			status = mbview_projectll2display(instance, data->area.cornerpoints[3].xlon, data->area.cornerpoints[3].ylat,

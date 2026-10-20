@@ -151,11 +151,13 @@ MB-System_Claude_Code_Guide.md). Directory-level CLAUDE.md files may add rules.
     the AC_INIT version in configure.ac.
   - Entries are prose paragraphs per component, following recent entries:
     "Program mbcopy (src/utilities/mbcopy.cc): <what changed and why>."
-  - AI disclosure: a release entry containing Claude-assisted work ends with
-    ONE paragraph (before the `---` separator) in the existing form: "This
-    work was done with the assistance of the AI coding assistant <model
-    name> (Anthropic, model <model-id>), operating as Claude Code under
-    developer supervision and review, ..." using the model actually used.
+  - AI disclosure: a release entry containing Claude-assisted work has ONE
+    statement, after its Claude-assisted paragraphs, exactly in this form
+    (using the model actually used): "The above work was done with the
+    assistance of the AI coding assistant <model name> (Anthropic, model
+    <model-id>), operating as Claude Code under developer supervision and
+    review." Notes for work done without Claude go below it, before the
+    `---` separator; add new Claude-assisted paragraphs above it.
   - Then regenerate ChangeLog.html/.pdf (changelog target) and commit them
     together with ChangeLog.md.
 - src/html (htmldocs target) rewrites many large files: ask before
@@ -168,7 +170,7 @@ MB-System_Claude_Code_Guide.md). Directory-level CLAUDE.md files may add rules.
 - Message: short plain subject line (e.g. "Build system fix for glibc older
   than 2.34"). Body: per-component prose paragraphs like the ChangeLog
   entry; then how it was verified and what was not tested; then the AI
-  disclosure paragraph for Claude-assisted work; then the Co-Authored-By
+  disclosure statement for Claude-assisted work; then the Co-Authored-By
   trailer for the Claude model.
 - Show the message and `git diff --cached --stat` and wait for approval
   before committing. Pushing, opening or commenting on pull requests and

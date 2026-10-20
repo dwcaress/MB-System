@@ -93,7 +93,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     g.add_argument("-W", "--color-control", metavar="SPEC", help='"style/palette/ncolors" (e.g. "1/2/11"), or a path to an existing .cpt file')
     g.add_argument("-D", "--color-flip", action="store_true", help="reverse the color palette")
     g.add_argument("-Y", "--no-nice-interval", action="store_true", help="use a direct linear color stretch instead of rounded intervals")
-    g.add_argument("--stretch-color", action="store_true", help="histogram-equalize the color stretch (color_mode 1)")
+    g.add_argument("--stretch-color", action="store_true", help="histogram-equalize the color stretch (color_mode 1); with sealevel palette 8 or 9, equalize below and above 0 m separately with a color break at 0")
     g.add_argument("-Z", "--zbounds", metavar="ZMIN/ZMAX", help="override the grid's own z-range used for the color stretch")
     g.add_argument("--data-scale", type=float, metavar="FACTOR", help="rescale grid values before colorizing/shading")
 
@@ -186,6 +186,18 @@ def build_cpt(args, grid_info: layout.GridInfo, lay: layout.Layout):
         if cc.color_style == 1:
             return color.build_cpt_continuous_from_boundaries(colors, boundaries, args.color_flip), None
         return color.build_cpt_discrete_from_boundaries(colors, cc.ncolors, boundaries, args.color_flip), None
+
+    if args.stretch_color and is_sealevel:
+        # equalize below and above sea level separately, with a CPT
+        # boundary exactly at 0 (see mbpy_color.run_grdhisteq_sealevel())
+        nbins = ncolors_use - 1 if cc.color_style == 1 else cc.ncolors
+        rows_below, rows_above = color.run_grdhisteq_sealevel(
+            args.input, nbins, grid_info.zmin, grid_info.zmax
+        )
+        below, above = color.build_sealevel_histogram_boundaries(
+            rows_below, rows_above, grid_info.zmin, grid_info.zmax, dzz
+        )
+        return color.build_cpt_sealevel_from_boundaries(cc.color_palette, below, above, args.color_flip), None
 
     if args.stretch_color:
         rows = color.run_grdhisteq(args.input, cc.ncolors)

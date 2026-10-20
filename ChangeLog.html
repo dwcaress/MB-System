@@ -332,7 +332,7 @@ accessible as tarballs through the Github interface.</p>
 Version 5.8 Releases and Release Notes:</h3>
 <hr />
 <ul>
-<li>Version 5.8.3beta26 October 16, 2026</li>
+<li>Version 5.8.3beta26 October 19, 2026</li>
 <li>Version 5.8.3beta25 October 14, 2026</li>
 <li>Version 5.8.3beta24 October 5, 2026</li>
 <li>Version 5.8.3beta23 October 3, 2026</li>
@@ -393,7 +393,7 @@ Version 5.8 Releases and Release Notes:</h3>
 <li><strong>Version 5.8.0 January 22, 2024</strong></li>
 </ul>
 <hr />
-<h4 id="583beta26-october-16-2026">5.8.3beta26 (October 16, 2026)</h4>
+<h4 id="583beta26-october-19-2026">5.8.3beta26 (October 19, 2026)</h4>
 <p>MBIO library, format 181 (MBF_SAMESURF, src/mbio/mbr_samesurf.c,
 src/mbio/mbsys_surf.c): fixed three errors in reading SAM Electronics
 (Atlas) SURF files, found while testing the example data distributed
@@ -469,20 +469,18 @@ the secondary navigation (now -S1/31 -S2/31) and the second attitude
 system (now -S3/57). The mbnavlist table now lists all record types up
 to MB_DATA_DATUM (75). MB_DATA_SONARDEPTH has been corrected to
 MB_DATA_SENSORDEPTH.</p>
-<p>This work was done with the assistance of the AI coding assistant
-Claude Opus 5.5 (Anthropic, model claude-opus-5-5), operating as Claude
-Code under developer supervision and review, which scoped the effort
-required for full read and write support of the SURF format, built the
-original Atlas SURF API as an independent reference reader, diagnosed
-the double projection of SURF navigation, the discarded pings, and the
-deleted beam and sounding flag handling, implemented the fixes, and
-verified the results. Claude also evaluated the bug reports on the
-record type count and on reading platform files, confirmed both in the
-source code and the platform file problems by reproducing them,
-implemented the fixes and the documentation corrections, and verified
-them with builds, the test suite, platform file round trips through
-mbmakeplatform, and a check of the notice messages, with the MBIO
-library sources also compiled for Windows with MinGW-w64.</p>
+<p>Macro mbpy_grdplot (src/macros/mbpy_grdplot,
+src/macros/python/mbpy_color.py): the --stretch-color histogram
+equalization now works with the sealevel palettes (8 and 9), which
+previously failed. The bathymetry and topography are equalized
+separately, with a color boundary at 0 m, Haxby colors below sea level
+and browns above. Large grids are decimated before equalization to limit
+memory use.</p>
+<p>The above work was done with the assistance of the AI coding
+assistant Claude Opus 5.5 (Anthropic, model claude-opus-5-5), operating
+as Claude Code under developer supervision and review.</p>
+<p>Program mbgrdviz: Augmented shell text output from Area picks to
+include the longitude, latitude and depth of the four corner points.</p>
 <hr />
 <h4 id="583beta25-october-14-2026">5.8.3beta25 (October 14, 2026)</h4>
 <p>Build system (Linux): fixed a link failure of the TRN utility
