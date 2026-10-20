@@ -21,7 +21,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
-- Version 5.8.3beta26    October 16, 2026
+- Version 5.8.3beta26    October 19, 2026
 - Version 5.8.3beta25    October 14, 2026
 - Version 5.8.3beta24    October 5, 2026
 - Version 5.8.3beta23    October 3, 2026
@@ -83,7 +83,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
-#### 5.8.3beta26 (October 16, 2026)
+#### 5.8.3beta26 (October 19, 2026)
 
 MBIO library, format 181 (MBF\_SAMESURF, src/mbio/mbr\_samesurf.c,
 src/mbio/mbsys\_surf.c): fixed three errors in reading SAM Electronics (Atlas)
@@ -156,19 +156,18 @@ secondary navigation (now -S1/31 -S2/31) and the second attitude system (now
 -S3/57). The mbnavlist table now lists all record types up to MB\_DATA\_DATUM (75).
 MB\_DATA\_SONARDEPTH has been corrected to MB\_DATA\_SENSORDEPTH.
 
+Macro mbpy\_grdplot (src/macros/mbpy\_grdplot, src/macros/python/mbpy\_color.py):
+the --stretch-color histogram equalization now works with the sealevel palettes
+(8 and 9), which previously failed. The bathymetry and topography are equalized
+separately, with a color boundary at 0 m, Haxby colors below sea level and
+browns above. Large grids are decimated before equalization to limit memory use.
 
-This work was done with the assistance of the AI coding assistant Claude Opus 5.5
+The above work was done with the assistance of the AI coding assistant Claude Opus 5.5
 (Anthropic, model claude-opus-5-5), operating as Claude Code under developer
-supervision and review, which scoped the effort required for full read and write
-support of the SURF format, built the original Atlas SURF API as an independent
-reference reader, diagnosed the double projection of SURF navigation, the
-discarded pings, and the deleted beam and sounding flag handling, implemented the
-fixes, and verified the results. Claude also evaluated the bug reports on the
-record type count and on reading platform files, confirmed both in the source code
-and the platform file problems by reproducing them, implemented the fixes and the
-documentation corrections, and verified them with builds, the test suite,
-platform file round trips through mbmakeplatform, and a check of the notice
-messages, with the MBIO library sources also compiled for Windows with MinGW-w64.
+supervision and review.
+
+Program mbgrdviz: Augmented shell text output from Area picks to include the longitude,
+latitude and depth of the four corner points.
 
 ---
 

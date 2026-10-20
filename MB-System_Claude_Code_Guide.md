@@ -326,11 +326,13 @@ tree (the location goes in `CLAUDE.local.md`).
 - `src/html` is regenerated with the `htmldocs` target, which rewrites many large
   files. Do it only on purpose.
 - **Disclosure.** Claude-assisted work is disclosed in two places:
-  - the ChangeLog: one closing paragraph per release entry, for example *"This work
-    was done with the assistance of the AI coding assistant Claude Opus 5.5
-    (Anthropic, model claude-opus-5-5), operating as Claude Code under developer
-    supervision and review, ..."*, naming the model actually used;
-  - the commit message: the same paragraph, plus the `Co-Authored-By:` trailer that
+  - the ChangeLog: one short statement per release entry, after the
+    Claude-assisted paragraphs, for example *"The above work was done with the
+    assistance of the AI coding assistant Claude Opus 5.5 (Anthropic, model
+    claude-opus-5-5), operating as Claude Code under developer supervision and
+    review."*, naming the model actually used. Notes for work done without Claude
+    go below it;
+  - the commit message: the same statement, plus the `Co-Authored-By:` trailer that
     Claude Code adds.
 
 ## 9. Commits and pull requests
