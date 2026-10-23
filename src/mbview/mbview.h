@@ -380,6 +380,7 @@ struct mbview_region_struct {
 	double height;
 	struct mbview_point_struct cornerpoints[4];
 	struct mbview_linesegment_struct segments[4];
+	struct mbview_point_struct centerpoint;
 };
 
 struct mbview_area_struct {
@@ -390,6 +391,7 @@ struct mbview_area_struct {
 	struct mbview_linesegment_struct segment;
 	struct mbview_point_struct cornerpoints[4];
 	struct mbview_linesegment_struct segments[4];
+	struct mbview_point_struct centerpoint;
 };
 
 struct mbview_site_struct {
