@@ -300,6 +300,26 @@ int mbview_reset_shared(bool mode) {
 	shared.shareddata.vector_point_selected = MBV_SELECT_NONE;
 	shared.shareddata.vectors = NULL;
 
+	/* GIS layer, polyline, polygon, and point data */
+	shared.shareddata.ngislayer = 0;
+	shared.shareddata.ngislayer_alloc = 0;
+	shared.shareddata.gislayers = NULL;
+	shared.shareddata.polyline_mode = MBV_POLYLINE_OFF;
+	shared.shareddata.npolyline = 0;
+	shared.shareddata.npolyline_alloc = 0;
+	shared.shareddata.polyline_selected = MBV_SELECT_NONE;
+	shared.shareddata.polylines = NULL;
+	shared.shareddata.polygon_mode = MBV_POLYGON_OFF;
+	shared.shareddata.npolygon = 0;
+	shared.shareddata.npolygon_alloc = 0;
+	shared.shareddata.polygon_selected = MBV_SELECT_NONE;
+	shared.shareddata.polygons = NULL;
+	shared.shareddata.gispoint_mode = MBV_GISPOINT_OFF;
+	shared.shareddata.ngispoint = 0;
+	shared.shareddata.ngispoint_alloc = 0;
+	shared.shareddata.gispoint_selected = MBV_SELECT_NONE;
+	shared.shareddata.gispoints = NULL;
+
 	const int status = MB_SUCCESS;
 
 	if (mbv_verbose >= 2) {
@@ -573,13 +593,15 @@ int mbview_reset(size_t instance) {
 		/* vector data */
 		data->vector_view_mode = MBV_VIEW_OFF;
 
+		/* GIS polyline, polygon, and point data */
+		data->polyline_view_mode = MBV_VIEW_OFF;
+		data->polygon_view_mode = MBV_VIEW_OFF;
+		data->gispoint_view_mode = MBV_VIEW_OFF;
+
 		/* profile data */
 		data->profile_view_mode = MBV_VIEW_OFF;
 
     /* general use state variables to turn action button sensitivity on and off */
-    data->state13 = MBV_VIEW_OFF;
-    data->state14 = MBV_VIEW_OFF;
-    data->state15 = MBV_VIEW_OFF;
     data->state16 = MBV_VIEW_OFF;
     data->state17 = MBV_VIEW_OFF;
     data->state18 = MBV_VIEW_OFF;
@@ -1001,6 +1023,16 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 		fprintf(stderr, "dbg2       nvector_alloc:             %d\n", shared.shareddata.nvector_alloc);
 		fprintf(stderr, "dbg2       vector_selected:           %d\n", shared.shareddata.vector_selected);
 		fprintf(stderr, "dbg2       vector_point_selected:     %d\n", shared.shareddata.vector_point_selected);
+		fprintf(stderr, "dbg2       polyline_view_mode:        %d\n", data->polyline_view_mode);
+		fprintf(stderr, "dbg2       polygon_view_mode:         %d\n", data->polygon_view_mode);
+		fprintf(stderr, "dbg2       gispoint_view_mode:        %d\n", data->gispoint_view_mode);
+		fprintf(stderr, "dbg2       ngislayer:                 %d\n", shared.shareddata.ngislayer);
+		fprintf(stderr, "dbg2       polyline_mode:             %d\n", shared.shareddata.polyline_mode);
+		fprintf(stderr, "dbg2       npolyline:                 %d\n", shared.shareddata.npolyline);
+		fprintf(stderr, "dbg2       polygon_mode:              %d\n", shared.shareddata.polygon_mode);
+		fprintf(stderr, "dbg2       npolygon:                  %d\n", shared.shareddata.npolygon);
+		fprintf(stderr, "dbg2       gispoint_mode:             %d\n", shared.shareddata.gispoint_mode);
+		fprintf(stderr, "dbg2       ngispoint:                 %d\n", shared.shareddata.ngispoint);
 		for (int i = 0; i < shared.shareddata.nvector; i++) {
 			fprintf(stderr, "dbg2       vector %d color:         %d\n", i, shared.shareddata.vectors[i].color);
 			fprintf(stderr, "dbg2       vector %d size:          %d\n", i, shared.shareddata.vectors[i].size);
@@ -1009,7 +1041,7 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 			fprintf(stderr, "dbg2       vector %d npoints:       %d\n", i, shared.shareddata.vectors[i].npoints);
 			fprintf(stderr, "dbg2       vector %d npoints_alloc: %d\n", i, shared.shareddata.vectors[i].npoints_alloc);
 			fprintf(stderr, "dbg2       vector %d nselected:     %d\n", i, shared.shareddata.vectors[i].nselected);
-			for (int j = 0; j < shared.shareddata.navs[i].npoints; j++) {
+			for (int j = 0; j < shared.shareddata.vectors[i].npoints; j++) {
 				fprintf(stderr, "dbg2       vector %d %d xgrid:    %f\n", i, j,
 				        shared.shareddata.vectors[i].vectorpts[j].point.xgrid[0]);
 				fprintf(stderr, "dbg2       vector %d %d ygrid:    %f\n", i, j,
@@ -1216,6 +1248,13 @@ int mbview_getsharedptr(int verbose, struct mbview_shareddata_struct **sharedhan
 		fprintf(stderr, "dbg2       nvector_alloc:             %d\n", shared.shareddata.nvector_alloc);
 		fprintf(stderr, "dbg2       vector_selected:           %d\n", shared.shareddata.vector_selected);
 		fprintf(stderr, "dbg2       vector_point_selected:     %d\n", shared.shareddata.vector_point_selected);
+		fprintf(stderr, "dbg2       ngislayer:                 %d\n", shared.shareddata.ngislayer);
+		fprintf(stderr, "dbg2       polyline_mode:             %d\n", shared.shareddata.polyline_mode);
+		fprintf(stderr, "dbg2       npolyline:                 %d\n", shared.shareddata.npolyline);
+		fprintf(stderr, "dbg2       polygon_mode:              %d\n", shared.shareddata.polygon_mode);
+		fprintf(stderr, "dbg2       npolygon:                  %d\n", shared.shareddata.npolygon);
+		fprintf(stderr, "dbg2       gispoint_mode:             %d\n", shared.shareddata.gispoint_mode);
+		fprintf(stderr, "dbg2       ngispoint:                 %d\n", shared.shareddata.ngispoint);
 		for (int i = 0; i < shared.shareddata.nvector; i++) {
 			fprintf(stderr, "dbg2       vector %d color:         %d\n", i, shared.shareddata.vectors[i].color);
 			fprintf(stderr, "dbg2       vector %d size:          %d\n", i, shared.shareddata.vectors[i].size);
@@ -1224,7 +1263,7 @@ int mbview_getsharedptr(int verbose, struct mbview_shareddata_struct **sharedhan
 			fprintf(stderr, "dbg2       vector %d npoints:       %d\n", i, shared.shareddata.vectors[i].npoints);
 			fprintf(stderr, "dbg2       vector %d npoints_alloc: %d\n", i, shared.shareddata.vectors[i].npoints_alloc);
 			fprintf(stderr, "dbg2       vector %d nselected:     %d\n", i, shared.shareddata.vectors[i].nselected);
-			for (int j = 0; j < shared.shareddata.navs[i].npoints; j++) {
+			for (int j = 0; j < shared.shareddata.vectors[i].npoints; j++) {
 				fprintf(stderr, "dbg2       vector %d %d xgrid:    %f\n", i, j,
 				        shared.shareddata.vectors[i].vectorpts[j].point.xgrid[0]);
 				fprintf(stderr, "dbg2       vector %d %d ygrid:    %f\n", i, j,
@@ -2459,16 +2498,16 @@ int mbview_action_sensitivity(size_t instance) {
 			else if (view->actionsensitive[i] & MBV_EXISTMASK_ROUTE && shared.shareddata.nroute > 0) {
 				XtSetArg(args[ac], XmNsensitive, True);
 			}
+			else if (view->actionsensitive[i] & MBV_EXISTMASK_POLYLINE && shared.shareddata.npolyline > 0) {
+				XtSetArg(args[ac], XmNsensitive, True);
+			}
+			else if (view->actionsensitive[i] & MBV_EXISTMASK_POLYGON && shared.shareddata.npolygon > 0) {
+				XtSetArg(args[ac], XmNsensitive, True);
+			}
+			else if (view->actionsensitive[i] & MBV_EXISTMASK_GISPOINT && shared.shareddata.ngispoint > 0) {
+				XtSetArg(args[ac], XmNsensitive, True);
+			}
 			if (view->actionsensitive[i] & MBV_PICKMASK_NEWINSTANCE && mbview_allactive) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			if (view->actionsensitive[i] & MBV_STATEMASK_13 && data->state13) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			if (view->actionsensitive[i] & MBV_STATEMASK_14 && data->state14) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			if (view->actionsensitive[i] & MBV_STATEMASK_15 && data->state15) {
 				XtSetArg(args[ac], XmNsensitive, True);
 			}
 			if (view->actionsensitive[i] & MBV_STATEMASK_16 && data->state16) {
@@ -2693,12 +2732,6 @@ int mbview_setstate(int verbose, size_t instance, int mask, int value, int *erro
 	struct mbview_struct *data = &(view->data);
 
   /* set state value */
-  if (mask & MBV_STATEMASK_13)
-    data->state13 = value;
-  if (mask & MBV_STATEMASK_14)
-    data->state14 = value;
-  if (mask & MBV_STATEMASK_15)
-    data->state15 = value;
   if (mask & MBV_STATEMASK_16)
     data->state16 = value;
   if (mask & MBV_STATEMASK_17)
@@ -4885,6 +4918,26 @@ int mbview_destroy(int verbose, size_t instance, bool destroywidgets, int *error
 				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.navs), error);
 				shared.shareddata.nnav_alloc = 0;
 				shared.shareddata.navs = NULL;
+			}
+			if (status == MB_SUCCESS && shared.shareddata.polylines != NULL) {
+				status = mbview_deleteallpolylines(mbv_verbose, instance, error);
+				mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.polylines), error);
+				shared.shareddata.npolyline_alloc = 0;
+			}
+			if (status == MB_SUCCESS && shared.shareddata.polygons != NULL) {
+				status = mbview_deleteallpolygons(mbv_verbose, instance, error);
+				mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.polygons), error);
+				shared.shareddata.npolygon_alloc = 0;
+			}
+			if (status == MB_SUCCESS && shared.shareddata.gispoints != NULL) {
+				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.gispoints), error);
+				shared.shareddata.ngispoint = 0;
+				shared.shareddata.ngispoint_alloc = 0;
+			}
+			if (status == MB_SUCCESS && shared.shareddata.gislayers != NULL) {
+				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.gislayers), error);
+				shared.shareddata.ngislayer = 0;
+				shared.shareddata.ngislayer_alloc = 0;
 			}
 		}
 

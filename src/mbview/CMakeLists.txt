@@ -50,7 +50,10 @@ add_library(
   mbview_site.c
   mb_glwdrawa.c
   mbview_plot.c
-  mbview_vector.c)
+  mbview_vector.c
+  mbview_polyline.c
+  mbview_polygon.c
+  mbview_gispoint.c)
 
 set_target_properties(mbview PROPERTIES VERSION "0" SOVERSION "0")
 target_include_directories(mbview PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

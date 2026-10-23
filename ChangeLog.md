@@ -170,6 +170,23 @@ directly with GMT. Shapefile import converts projected coordinates to longitude
 and latitude and can keep only the features overlapping a grid. A unit test has
 been added (test/mbaux).
 
+MBview library (src/mbview/mbview\_polyline.c, mbview\_polygon.c,
+mbview\_gispoint.c): added display of GIS polylines, polygons and points, grouped
+in layers and shared by all mbview windows like sites and routes, as the second
+step toward displaying GIS data in mbgrdviz. Lines and polygon outlines are draped
+on the topography; parts lying off the grid are drawn at the top of the grid's
+depth range. Polylines can be converted to routes and routes to polylines. The
+data are displayed but not edited, and mbnavadjust and mbeditviz are unaffected.
+
+MBview library (src/mbview/mbview\_process.c, mbview\_route.c,
+mbviewprivate.h): fixed three bugs. Reprojecting vector data, as happens when a
+second window is opened, used the navigation arrays instead of the vector arrays,
+which could crash when vectors were loaded without navigation. When adding a route,
+points following a point rejected as far outside the view were inserted past the
+end of the route, and a route with every point rejected still had its color and
+name written to unallocated memory. The OpenGL display list for site symbols
+shared its ID with a grid display list of the tenth mbview window.
+
 The above work was done with the assistance of the AI coding assistant Claude Opus 5.5
 (Anthropic, model claude-opus-5-5), operating as Claude Code under developer
 supervision and review.

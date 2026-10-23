@@ -642,9 +642,9 @@ int mbview_projectglobaldata(size_t instance) {
 					                             &(pointw->ygrid[instance]), &(pointw->xdisplay[instance]),
 					                             &(pointw->ydisplay[instance]), &(pointw->zdisplay[instance]));
 				}
-				for (j = 0; j < shared.shareddata.navs[i].npoints - 1; j++) {
-					for (k = 0; k < shared.shareddata.navs[i].segments[j].nls; k++) {
-						pointw = &(shared.shareddata.navs[i].segments[j].lspoints[k]);
+				for (j = 0; j < shared.shareddata.vectors[i].npoints - 1; j++) {
+					for (k = 0; k < shared.shareddata.vectors[i].segments[j].nls; k++) {
+						pointw = &(shared.shareddata.vectors[i].segments[j].lspoints[k]);
 						status = mbview_projectfromlonlat(instance, pointw->xlon, pointw->ylat, pointw->zdata,
 						                                  &(pointw->xgrid[instance]), &(pointw->ygrid[instance]),
 						                                  &(pointw->xdisplay[instance]), &(pointw->ydisplay[instance]),
@@ -652,6 +652,50 @@ int mbview_projectglobaldata(size_t instance) {
 					}
 				}
 			}
+		}
+
+		/* handle GIS polylines */
+		for (i = 0; i < shared.shareddata.npolyline; i++) {
+			struct mbview_polyline_struct *polyline = &(shared.shareddata.polylines[i]);
+			for (j = 0; j < polyline->npoints; j++) {
+				pointw = &(polyline->points[j]);
+				status = mbview_projectfromlonlat(instance, pointw->xlon, pointw->ylat, pointw->zdata, &(pointw->xgrid[instance]),
+				                                  &(pointw->ygrid[instance]), &(pointw->xdisplay[instance]),
+				                                  &(pointw->ydisplay[instance]), &(pointw->zdisplay[instance]));
+				for (k = 0; k < polyline->segments[j].nls; k++) {
+					pointw = &(polyline->segments[j].lspoints[k]);
+					status = mbview_projectfromlonlat(instance, pointw->xlon, pointw->ylat, pointw->zdata,
+					                                  &(pointw->xgrid[instance]), &(pointw->ygrid[instance]),
+					                                  &(pointw->xdisplay[instance]), &(pointw->ydisplay[instance]),
+					                                  &(pointw->zdisplay[instance]));
+				}
+			}
+		}
+
+		/* handle GIS polygons */
+		for (i = 0; i < shared.shareddata.npolygon; i++) {
+			struct mbview_polygon_struct *polygon = &(shared.shareddata.polygons[i]);
+			for (j = 0; j < polygon->npoints; j++) {
+				pointw = &(polygon->points[j]);
+				status = mbview_projectfromlonlat(instance, pointw->xlon, pointw->ylat, pointw->zdata, &(pointw->xgrid[instance]),
+				                                  &(pointw->ygrid[instance]), &(pointw->xdisplay[instance]),
+				                                  &(pointw->ydisplay[instance]), &(pointw->zdisplay[instance]));
+				for (k = 0; k < polygon->segments[j].nls; k++) {
+					pointw = &(polygon->segments[j].lspoints[k]);
+					status = mbview_projectfromlonlat(instance, pointw->xlon, pointw->ylat, pointw->zdata,
+					                                  &(pointw->xgrid[instance]), &(pointw->ygrid[instance]),
+					                                  &(pointw->xdisplay[instance]), &(pointw->ydisplay[instance]),
+					                                  &(pointw->zdisplay[instance]));
+				}
+			}
+		}
+
+		/* handle GIS points */
+		for (i = 0; i < shared.shareddata.ngispoint; i++) {
+			pointw = &(shared.shareddata.gispoints[i].point);
+			status = mbview_projectfromlonlat(instance, pointw->xlon, pointw->ylat, pointw->zdata, &(pointw->xgrid[instance]),
+			                                  &(pointw->ygrid[instance]), &(pointw->xdisplay[instance]),
+			                                  &(pointw->ydisplay[instance]), &(pointw->zdisplay[instance]));
 		}
 
 		/* set globalprojected flag */
@@ -1061,6 +1105,33 @@ int mbview_zscale(size_t instance) {
 				}
 			}
 		}
+	}
+
+	/* handle GIS polylines */
+	for (i = 0; i < shared.shareddata.npolyline; i++) {
+		struct mbview_polyline_struct *polyline = &(shared.shareddata.polylines[i]);
+		for (j = 0; j < polyline->npoints; j++) {
+			mbview_zscalepointw(instance, globalview, offset_factor, &(polyline->points[j]));
+			for (k = 0; k < polyline->segments[j].nls; k++) {
+				mbview_zscalepointw(instance, globalview, offset_factor, &(polyline->segments[j].lspoints[k]));
+			}
+		}
+	}
+
+	/* handle GIS polygons */
+	for (i = 0; i < shared.shareddata.npolygon; i++) {
+		struct mbview_polygon_struct *polygon = &(shared.shareddata.polygons[i]);
+		for (j = 0; j < polygon->npoints; j++) {
+			mbview_zscalepointw(instance, globalview, offset_factor, &(polygon->points[j]));
+			for (k = 0; k < polygon->segments[j].nls; k++) {
+				mbview_zscalepointw(instance, globalview, offset_factor, &(polygon->segments[j].lspoints[k]));
+			}
+		}
+	}
+
+	/* handle GIS points */
+	for (i = 0; i < shared.shareddata.ngispoint; i++) {
+		mbview_zscalepointw(instance, globalview, offset_factor, &(shared.shareddata.gispoints[i].point));
 	}
 
 	/* set rez flags only if plotting not done */

@@ -463,7 +463,9 @@ int mbview_addroute(int verbose, size_t instance, int npoint, double *routelon, 
 	/* set route id so that new route is created */
 	*iroute = shared.shareddata.nroute;
 
-	/* loop over the points in the new route */
+	/* loop over the points in the new route, counting the points added so
+	    that points following a rejected point are inserted at the right place */
+	int nadded = 0;
 	for (i = 0; i < npoint; i++) {
 		/* check waypoint flag correct */
 		if (waypoint[i] <= MBV_ROUTE_WAYPOINT_NONE || waypoint[i] > MBV_ROUTE_WAYPOINT_ENDLINE5)
@@ -485,8 +487,9 @@ int mbview_addroute(int verbose, size_t instance, int npoint, double *routelon, 
 		if (fabs(xdisplay) < 1000.0 && fabs(ydisplay) < 1000.0 && fabs(zdisplay) < 1000.0) {
 
 			/* add the route point */
-			mbview_route_add(mbv_verbose, instance, *iroute, i, waypoint[i], xgrid, ygrid, routelon[i], routelat[i], zdata,
-			                 xdisplay, ydisplay, zdisplay);
+			if (mbview_route_add(mbv_verbose, instance, *iroute, nadded, waypoint[i], xgrid, ygrid, routelon[i], routelat[i],
+			                     zdata, xdisplay, ydisplay, zdisplay) == MB_SUCCESS)
+				nadded++;
 		}
 
 		/* report failure due to unreasonable coordinates */
@@ -500,9 +503,10 @@ int mbview_addroute(int verbose, size_t instance, int npoint, double *routelon, 
 	}
 
 	/* set color size and name for new route - only if a route was actually
-	    created above by mbview_route_add(); with npoint <= 0 that loop never
-	    ran, so routes[*iroute] was never allocated and must not be touched */
-	if (npoint > 0) {
+	    created above by mbview_route_add(); if npoint <= 0 or every point was
+	    rejected, routes[*iroute] may never have been allocated and must not
+	    be touched */
+	if (nadded > 0 && *iroute < shared.shareddata.nroute) {
 		shared.shareddata.routes[*iroute].color = routecolor;
 		shared.shareddata.routes[*iroute].size = routesize;
 		shared.shareddata.routes[*iroute].editmode = routeeditmode;

@@ -186,6 +186,24 @@
 #define MBV_VECTOR_OFF 0
 #define MBV_VECTOR_VIEW 1
 
+/* GIS polyline, polygon, and point defines - the layer types and part
+    types have the same values as MB_GIS_POLYLINE etc. and MB_GIS_PART_LINE
+    etc. in mb_aux.h */
+#define MBV_POLYLINE_OFF 0
+#define MBV_POLYLINE_VIEW 1
+#define MBV_POLYGON_OFF 0
+#define MBV_POLYGON_VIEW 1
+#define MBV_GISPOINT_OFF 0
+#define MBV_GISPOINT_VIEW 1
+#define MBV_GISLAYER_POLYLINE 1
+#define MBV_GISLAYER_POLYGON 2
+#define MBV_GISLAYER_GISPOINT 3
+#define MBV_GISPART_LINE 0
+#define MBV_GISPART_OUTER 1
+#define MBV_GISPART_HOLE 2
+#define MBV_GISCOLOR_NONE -1
+#define MBV_GISLAYER_FROMROUTES "Converted from routes"
+
 /* stat masks */
 #define MBV_STATMASK0 0x01
 #define MBV_STATMASK1 0x02
@@ -211,9 +229,9 @@
 #define MBV_EXISTMASK_SITE 0x400
 #define MBV_EXISTMASK_ROUTE 0x800
 #define MBV_EXISTMASK_NAV 0x1000
-#define MBV_STATEMASK_13 0x2000
-#define MBV_STATEMASK_14 0x4000
-#define MBV_STATEMASK_15 0x8000
+#define MBV_EXISTMASK_POLYLINE 0x2000
+#define MBV_EXISTMASK_POLYGON 0x4000
+#define MBV_EXISTMASK_GISPOINT 0x8000
 #define MBV_STATEMASK_16 0x10000
 #define MBV_STATEMASK_17 0x20000
 #define MBV_STATEMASK_18 0x40000
@@ -456,6 +474,59 @@ struct mbview_vector_struct {
 	struct mbview_linesegmentw_struct *segments;
 };
 
+/* one layer per polyline, polygon, or point file loaded or imported */
+struct mbview_gislayer_struct {
+	bool active;
+	int type;
+	bool hasz;
+	mb_path name;
+};
+
+/* polylines may have several parts; segment j joins points j and j+1 and
+    is not drawn where point j+1 starts a new part */
+struct mbview_polyline_struct {
+	bool active;
+	int color;
+	int size;
+	int layer;
+	mb_path name;
+	int npart;
+	int *partstart;
+	int npoints;
+	int npoints_alloc;
+	double *zsource;
+	struct mbview_pointw_struct *points;
+	struct mbview_linesegmentw_struct *segments;
+};
+
+/* polygons have closed rings, each an outer boundary or a hole */
+struct mbview_polygon_struct {
+	bool active;
+	int color;
+	int size;
+	int fillcolor;
+	int layer;
+	mb_path name;
+	int npart;
+	int *partstart;
+	int *parttype;
+	int npoints;
+	int npoints_alloc;
+	double *zsource;
+	struct mbview_pointw_struct *points;
+	struct mbview_linesegmentw_struct *segments;
+};
+
+struct mbview_gispoint_struct {
+	bool active;
+	struct mbview_pointw_struct point;
+	double zsource;
+	int color;
+	int size;
+	int layer;
+	mb_path name;
+};
+
 struct mbview_profile_struct {
 	int source;
 	mb_path source_name;
@@ -503,6 +574,32 @@ struct mbview_shareddata_struct {
 	int vector_selected;
 	int vector_point_selected;
 	struct mbview_vector_struct *vectors;
+
+	/* GIS layer data */
+	int ngislayer;
+	int ngislayer_alloc;
+	struct mbview_gislayer_struct *gislayers;
+
+	/* GIS polyline data */
+	int polyline_mode;
+	int npolyline;
+	int npolyline_alloc;
+	int polyline_selected;
+	struct mbview_polyline_struct *polylines;
+
+	/* GIS polygon data */
+	int polygon_mode;
+	int npolygon;
+	int npolygon_alloc;
+	int polygon_selected;
+	struct mbview_polygon_struct *polygons;
+
+	/* GIS point data */
+	int gispoint_mode;
+	int ngispoint;
+	int ngispoint_alloc;
+	int gispoint_selected;
+	struct mbview_gispoint_struct *gispoints;
 };
 
 struct mbview_struct {
@@ -667,12 +764,12 @@ struct mbview_struct {
 	int navswathbounds_view_mode;
 	int navdrape_view_mode;
 	int vector_view_mode;
+	int polyline_view_mode;
+	int polygon_view_mode;
+	int gispoint_view_mode;
 	int profile_view_mode;
 
   /* general use state variables to turn action button sensitivity on and off */
-  int state13;
-  int state14;
-  int state15;
   int state16;
   int state17;
   int state18;
@@ -875,6 +972,56 @@ int mbview_pick_vector_select(size_t instance, int select, int which, int xpixel
 int mbview_vector_delete(size_t instance, int ivec);
 int mbview_drawvectorpick(size_t instance);
 int mbview_drawvector(size_t instance, int rez);
+
+/* mbview_polyline.c function prototypes (GIS layers and polylines) */
+int mbview_addgislayer(int verbose, size_t instance, int type, bool hasz, const char *name, int *ilayer, int *error);
+int mbview_getgislayercount(int verbose, size_t instance, int *nlayer, int *error);
+int mbview_getgislayer(int verbose, size_t instance, int ilayer, int *type, bool *hasz, bool *active, mb_path name, int *error);
+int mbview_setgislayeractive(int verbose, size_t instance, int ilayer, bool active, int *error);
+int mbview_getpolylinecount(int verbose, size_t instance, int *npolyline, int *error);
+int mbview_getpolylinepointcount(int verbose, size_t instance, int ipolyline, int *npart, int *npoint, int *error);
+int mbview_allocpolylinearrays(int verbose, int npart, int npoint, int **partstart, double **lon, double **lat, double **z,
+                               int *error);
+int mbview_freepolylinearrays(int verbose, int **partstart, double **lon, double **lat, double **z, int *error);
+int mbview_addpolyline(int verbose, size_t instance, int npart, int *partstart, int npoint, double *lon, double *lat, double *z,
+                       int color, int size, const char *name, int layer, int *ipolyline, int *error);
+int mbview_getpolyline(int verbose, size_t instance, int ipolyline, int *npart, int *partstart, int *npoint, double *lon,
+                       double *lat, double *z, int *color, int *size, mb_path name, int *layer, int *error);
+int mbview_deletepolyline(int verbose, size_t instance, int ipolyline, int *error);
+int mbview_deleteallpolylines(int verbose, size_t instance, int *error);
+int mbview_enableviewpolylines(int verbose, size_t instance, int *error);
+int mbview_polylinetoroutes(int verbose, size_t instance, int ipolyline, int *nroute, int *ndropped, int *error);
+int mbview_routetopolyline(int verbose, size_t instance, int iroute, int layer, int *ipolyline, int *error);
+
+/* mbview_polygon.c function prototypes */
+int mbview_getpolygoncount(int verbose, size_t instance, int *npolygon, int *error);
+int mbview_getpolygonpointcount(int verbose, size_t instance, int ipolygon, int *npart, int *npoint, int *error);
+int mbview_allocpolygonarrays(int verbose, int npart, int npoint, int **partstart, int **parttype, double **lon, double **lat,
+                              double **z, int *error);
+int mbview_freepolygonarrays(int verbose, int **partstart, int **parttype, double **lon, double **lat, double **z, int *error);
+int mbview_addpolygon(int verbose, size_t instance, int npart, int *partstart, int *parttype, int npoint, double *lon,
+                      double *lat, double *z, int color, int size, int fillcolor, const char *name, int layer, int *ipolygon,
+                      int *error);
+int mbview_getpolygon(int verbose, size_t instance, int ipolygon, int *npart, int *partstart, int *parttype, int *npoint,
+                      double *lon, double *lat, double *z, int *color, int *size, int *fillcolor, mb_path name, int *layer,
+                      int *error);
+int mbview_deletepolygon(int verbose, size_t instance, int ipolygon, int *error);
+int mbview_deleteallpolygons(int verbose, size_t instance, int *error);
+int mbview_enableviewpolygons(int verbose, size_t instance, int *error);
+
+/* mbview_gispoint.c function prototypes */
+int mbview_getgispointcount(int verbose, size_t instance, int *ngispoint, int *error);
+int mbview_allocgispointarrays(int verbose, int npoint, double **lon, double **lat, double **z, int **color, int **size,
+                               int **layer, mb_path **name, int *error);
+int mbview_freegispointarrays(int verbose, double **lon, double **lat, double **z, int **color, int **size, int **layer,
+                              mb_path **name, int *error);
+int mbview_addgispoints(int verbose, size_t instance, int npoint, double *lon, double *lat, double *z, int *color, int *size,
+                        int *layer, mb_path *name, int *error);
+int mbview_getgispoints(int verbose, size_t instance, int *npoint, double *lon, double *lat, double *z, int *color, int *size,
+                        int *layer, mb_path *name, int *error);
+int mbview_deletegispoint(int verbose, size_t instance, int igispoint, int *error);
+int mbview_deleteallgispoints(int verbose, size_t instance, int *error);
+int mbview_enableviewgispoints(int verbose, size_t instance, int *error);
 
 /* mbview_route.c function prototypes */
 int mbview_getroutecount(int verbose, size_t instance, int *nroute, int *error);

@@ -46,12 +46,15 @@
 #define MBV_OPENGL_ZPROFILE1 -100.0
 #define MBV_OPENGL_ZPROFILE2 -200.0
 
-/* OpenGL list IDs */
-#define MBV_GLLIST_SITESMALL (3 * MBV_MAX_WINDOWS + 0)
-#define MBV_GLLIST_SITELARGE (3 * MBV_MAX_WINDOWS + 1)
-#define MBV_GLLIST_ROUTESMALL (3 * MBV_MAX_WINDOWS + 2)
-#define MBV_GLLIST_ROUTELARGE (3 * MBV_MAX_WINDOWS + 3)
-#define MBV_GLLIST_VECTORBALL (3 * MBV_MAX_WINDOWS + 4)
+/* OpenGL list IDs - the grid lists of each instance use 3 * instance + 1
+    to 3 * instance + 3, i.e. up to 3 * MBV_MAX_WINDOWS, so these start above */
+#define MBV_GLLIST_SITESMALL (3 * MBV_MAX_WINDOWS + 1)
+#define MBV_GLLIST_SITELARGE (3 * MBV_MAX_WINDOWS + 2)
+#define MBV_GLLIST_ROUTESMALL (3 * MBV_MAX_WINDOWS + 3)
+#define MBV_GLLIST_ROUTELARGE (3 * MBV_MAX_WINDOWS + 4)
+#define MBV_GLLIST_VECTORBALL (3 * MBV_MAX_WINDOWS + 5)
+#define MBV_GLLIST_GISPOINTSMALL (3 * MBV_MAX_WINDOWS + 6)
+#define MBV_GLLIST_GISPOINTLARGE (3 * MBV_MAX_WINDOWS + 7)
 
 #define MBV_REZ_NONE 0
 #define MBV_REZ_LOW 1
@@ -700,6 +703,19 @@ int mbview_route_delete(size_t instance, int iroute, int ipoint);
 int mbview_route_setdistance(size_t instance, int working_route);
 int mbview_drawroute(size_t instance, int rez);
 int mbview_updateroutelist(void);
+
+/* mbview_polyline.c, mbview_polygon.c, and mbview_gispoint.c function prototypes */
+int mbview_gis_checkparts(int npart, const int *partstart, int npoint, int minpartpoints);
+void mbview_gis_setpointw(size_t instance, double lon, double lat, struct mbview_pointw_struct *pointw);
+int mbview_gis_drapesegments(size_t instance, int npart, const int *partstart, int npoints, struct mbview_pointw_struct *points,
+                             struct mbview_linesegmentw_struct *segments);
+void mbview_gis_freesegments(int nsegments, struct mbview_linesegmentw_struct *segments);
+void mbview_gis_drawlines(size_t instance, int rez, int npart, const int *partstart, int npoints,
+                          struct mbview_pointw_struct *points, struct mbview_linesegmentw_struct *segments, int icolor,
+                          int size);
+int mbview_drawpolyline(size_t instance, int rez);
+int mbview_drawpolygon(size_t instance, int rez);
+int mbview_drawgispoint(size_t instance, int rez);
 
 /* mbview_site.c function prototypes */
 int mbview_getsitecount(int verbose, size_t instance, int *nsite, int *error);
