@@ -1874,6 +1874,7 @@ int mbview_open(int verbose, size_t instance, int *error) {
 		XtSetValues(view->mb3dview.mbview_toggleButton_nav, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_navswathbounds, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_navdrape, args, ac);
+		XtSetValues(view->mb3dview.mbview_toggleButton_vector, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_polyline, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_polygon, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_gispoint, args, ac);
@@ -7605,8 +7606,10 @@ void do_mbview_sitelistselect(Widget w, XtPointer client_data, XtPointer call_da
 		shared.shareddata.site_selected = position_list[0] - 1;
 	}
 
-	/* change site color if clicked more than once */
-	if (site_selected_old == shared.shareddata.site_selected) {
+	/* change site color if clicked more than once - only if a valid site
+	    is selected; with no single selection both values are MBV_SELECT_NONE */
+	if (site_selected_old == shared.shareddata.site_selected && shared.shareddata.site_selected >= 0 &&
+	    shared.shareddata.site_selected < shared.shareddata.nsite) {
 		const int isite = shared.shareddata.site_selected;
 
 		/* increment color */

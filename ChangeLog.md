@@ -198,6 +198,12 @@ routes. The Route List can convert selected routes to polylines. These controls
 are inactive in programs that do not display GIS data, such as mbnavadjust and
 mbeditviz.
 
+MBview library (src/mbview/mbview\_callbacks.c): fixed two bugs. The View menu
+Vector toggle of a second or later mbview window turned the vector display of the
+first window on or off instead of its own. In the Site List, a selection event
+with no site selected changed the color of a nonexistent site, writing outside the
+site data.
+
 The above work was done with the assistance of the AI coding assistant Claude Opus 5.5
 (Anthropic, model claude-opus-5-5), operating as Claude Code under developer
 supervision and review.
