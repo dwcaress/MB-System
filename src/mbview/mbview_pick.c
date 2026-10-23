@@ -586,8 +586,10 @@ int mbview_pick_text(size_t instance) {
   	char value_list[5*MB_PATH_MAXLINE];
 
 	int time_i[7];
-	char londstr0[24], londstr1[24], lonmstr0[24], lonmstr1[24];
-	char latdstr0[24], latdstr1[24], latmstr0[24], latmstr1[24];
+	char londstr0[24], londstr1[24], londstr2[24];
+	char latdstr0[24], latdstr1[24], latdstr2[24];
+	char lonmstr0[24], lonmstr1[24], lonmstr2[24];
+	char latmstr0[24], latmstr1[24], latmstr2[24];
 	char londstrc0[24], londstrc1[24], londstrc2[24], londstrc3[24];
 	char latdstrc0[24], latdstrc1[24], latdstrc2[24], latdstrc3[24];
 	char lonmstrc0[24], lonmstrc1[24], lonmstrc2[24], lonmstrc3[24];
@@ -643,7 +645,8 @@ int mbview_pick_text(size_t instance) {
 		snprintf(value_text, sizeof(value_text), ":::t\"Area Info:\":t\" Length: %.3f m\":t\" Width: %.3f m\":t\" Bearing: %.1f deg\"",
 		        data->area.length, data->area.width, data->area.bearing);
 		mbview_setlonlatstrings(data->area.endpoints[0].xlon, data->area.endpoints[0].ylat, londstr0, latdstr0, lonmstr0, latmstr0);
-		mbview_setlonlatstrings(data->area.endpoints[1].xlon, data->area.endpoints[1].ylat, londstr1, latdstr1, lonmstr1, latmstr1);
+		mbview_setlonlatstrings(data->area.centerpoint.xlon, data->area.centerpoint.ylat, londstr1, latdstr1, lonmstr1, latmstr1);
+		mbview_setlonlatstrings(data->area.endpoints[1].xlon, data->area.endpoints[1].ylat, londstr2, latdstr2, lonmstr2, latmstr2);
 		mbview_setlonlatstrings(data->area.cornerpoints[0].xlon, data->area.cornerpoints[0].ylat, londstrc0, latdstrc0, lonmstrc0, latmstrc0);
 		mbview_setlonlatstrings(data->area.cornerpoints[1].xlon, data->area.cornerpoints[1].ylat, londstrc1, latdstrc1, lonmstrc1, latmstrc1);
 		mbview_setlonlatstrings(data->area.cornerpoints[2].xlon, data->area.cornerpoints[2].ylat, londstrc2, latdstrc2, lonmstrc2, latmstrc2);
@@ -651,28 +654,32 @@ int mbview_pick_text(size_t instance) {
 		snprintf(value_list, sizeof(value_list), 
 					"\nArea Info: \n    Length: %.3f m Width: %.3f m Bearing: %.1f deg \n"
 					"    Decimal Degrees: \n"
-					"        End Points:    1: Lon: %s Lat: %s Depth: %.3f m \n"
-					"                       2: Lon: %s Lat: %s Depth: %.3f m \n"
+					"        Center Line: beg: Lon: %s Lat: %s Depth: %.3f m \n"
+					"                    cntr: Lon: %s Lat: %s Depth: %.3f m \n"
+					"                     end: Lon: %s Lat: %s Depth: %.3f m \n"
 					"        Corner Points: 1: Lon: %s Lat: %s Depth: %.3f m \n"
 					"                       2: Lon: %s Lat: %s Depth: %.3f m \n"
 					"                       3: Lon: %s Lat: %s Depth: %.3f m \n"
 					"                       4: Lon: %s Lat: %s Depth: %.3f m \n"
 					"    Degrees and decimal minutes: \n"
-					"        End Points:    1: Lon: %s Lat: %s Depth: %.3f m \n"
-					"                       2: Lon: %s Lat: %s Depth: %.3f m \n"
+					"        Center Line: beg: Lon: %s Lat: %s Depth: %.3f m \n"
+					"                    cntr: Lon: %s Lat: %s Depth: %.3f m \n"
+					"                     end: Lon: %s Lat: %s Depth: %.3f m \n"
 					"        Corner Points: 1: Lon: %s Lat: %s Depth: %.3f m \n"
 					"                       2: Lon: %s Lat: %s Depth: %.3f m \n"
 					"                       3: Lon: %s Lat: %s Depth: %.3f m \n"
 					"                       4: Lon: %s Lat: %s Depth: %.3f m \n",
 					data->area.length, data->area.width, data->area.bearing, 
 					londstr0, latdstr0, data->area.endpoints[0].zdata, 
-					londstr1, latdstr1, data->area.endpoints[1].zdata, 
+					londstr1, latdstr1, data->area.centerpoint.zdata, 
+					londstr2, latdstr2, data->area.endpoints[1].zdata, 
 					londstrc0, latdstrc0, data->area.cornerpoints[0].zdata, 
 					londstrc1, latdstrc1, data->area.cornerpoints[1].zdata, 
 					londstrc2, latdstrc2, data->area.cornerpoints[2].zdata, 
 					londstrc3, latdstrc3, data->area.cornerpoints[3].zdata,
 					lonmstr0, latmstr0, data->area.endpoints[0].zdata, 
-					lonmstr1, latmstr1, data->area.endpoints[1].zdata, 
+					lonmstr1, latmstr1, data->area.centerpoint.zdata, 
+					lonmstr2, latmstr2, data->area.endpoints[1].zdata, 
 					lonmstrc0, latmstrc0, data->area.cornerpoints[0].zdata, 
 					lonmstrc1, latmstrc1, data->area.cornerpoints[1].zdata, 
 					lonmstrc2, latmstrc2, data->area.cornerpoints[2].zdata, 
@@ -1680,6 +1687,18 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 	if (data->area_type == MBV_AREA_QUAD && which != MBV_AREALENGTH_UP && which != MBV_AREAASPECT_UP) {
 		/* deal with non-spheroid case */
 		if (data->display_projection_mode != MBV_PROJECTION_SPHEROID) {
+		
+			/* define the center point */
+			data->area.centerpoint.xdisplay = 0.5 * (data->area.endpoints[0].xdisplay + data->area.endpoints[1].xdisplay);
+			data->area.centerpoint.ydisplay = 0.5 * (data->area.endpoints[0].ydisplay + data->area.endpoints[1].ydisplay);
+			status = mbview_projectdisplay2ll(instance, data->area.centerpoint.xdisplay, 
+									data->area.centerpoint.ydisplay, data->area.centerpoint.zdisplay, 
+									&data->area.centerpoint.xlon, &data->area.centerpoint.ylat);
+			status = mbview_projectll2xyzgrid(instance, 
+									data->area.centerpoint.xlon, data->area.centerpoint.ylat,
+									&(data->area.centerpoint.xgrid), &(data->area.centerpoint.ygrid),
+									&(data->area.centerpoint.zdata));
+		
 			/* now define the quad corners in display coordinates */
 			const double dx = data->area.endpoints[1].xdisplay - data->area.endpoints[0].xdisplay;
 			const double dy = data->area.endpoints[1].ydisplay - data->area.endpoints[0].ydisplay;
@@ -1757,6 +1776,17 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 			                               data->area.endpoints[1].xlon, data->area.endpoints[1].ylat, &data->area.bearing,
 			                               &data->area.length);
 			data->area.width = view->areaaspect * data->area.length;
+			
+			/* get center point along the center line */
+			mbview_greatcircle_endposition(instance, data->area.endpoints[0].xlon, data->area.endpoints[0].ylat, data->area.bearing,
+			                               (0.5 * data->area.length), &(data->area.centerpoint.xlon),
+			                               &(data->area.centerpoint.ylat)),
+			status = mbview_projectll2xyzgrid(instance, data->area.centerpoint.xlon, data->area.centerpoint.ylat,
+			                                      &(data->area.centerpoint.xgrid), &(data->area.centerpoint.ygrid),
+			                                      &(data->area.centerpoint.zdata));
+			status = mbview_projectll2display(instance, data->area.centerpoint.xlon, data->area.centerpoint.ylat,
+			                                  data->area.centerpoint.zdata, &data->area.centerpoint.xdisplay,
+			                                  &data->area.centerpoint.ydisplay, &data->area.centerpoint.zdisplay);
 
 			/* the corners of the area are defined by great
 			    circle arcs perpendicular to the center line */

@@ -21,7 +21,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
-- Version 5.8.3beta26    October 19, 2026
+- Version 5.8.3beta26    October 22, 2026
 - Version 5.8.3beta25    October 14, 2026
 - Version 5.8.3beta24    October 5, 2026
 - Version 5.8.3beta23    October 3, 2026
@@ -167,7 +167,7 @@ The above work was done with the assistance of the AI coding assistant Claude Op
 supervision and review.
 
 Program mbgrdviz: Augmented shell text output from Area picks to include the longitude,
-latitude and depth of the four corner points.
+latitude and depth of the four corner points and the center point.
 
 ---
 
