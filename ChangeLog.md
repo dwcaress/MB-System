@@ -21,7 +21,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
-- Version 5.8.3beta26    October 22, 2026
+- Version 5.8.3beta26    October 23, 2026
 - Version 5.8.3beta25    October 14, 2026
 - Version 5.8.3beta24    October 5, 2026
 - Version 5.8.3beta23    October 3, 2026
@@ -83,7 +83,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
-#### 5.8.3beta26 (October 19, 2026)
+#### 5.8.3beta26 (October 23, 2026)
 
 MBIO library, format 181 (MBF\_SAMESURF, src/mbio/mbr\_samesurf.c,
 src/mbio/mbsys\_surf.c): fixed three errors in reading SAM Electronics (Atlas)
@@ -161,6 +161,14 @@ the --stretch-color histogram equalization now works with the sealevel palettes
 (8 and 9), which previously failed. The bathymetry and topography are equalized
 separately, with a color boundary at 0 m, Haxby colors below sea level and
 browns above. Large grids are decimated before equalization to limit memory use.
+
+MBaux library (src/mbaux/mb\_gisfile.c): added reading and writing of new
+MB-System polyline, polygon and point files, and import from and export to ESRI
+shapefiles (using GDAL), as the first step toward displaying GIS data in mbgrdviz.
+The text formats are similar to route and site files and can also be plotted
+directly with GMT. Shapefile import converts projected coordinates to longitude
+and latitude and can keep only the features overlapping a grid. A unit test has
+been added (test/mbaux).
 
 The above work was done with the assistance of the AI coding assistant Claude Opus 5.5
 (Anthropic, model claude-opus-5-5), operating as Claude Code under developer
