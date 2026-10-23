@@ -53,6 +53,7 @@ void RegisterBxConverters(XtAppContext);
 XtPointer BX_CONVERT(Widget, char *, char *, int, Boolean *);
 
 void do_mbview_routelist_delete(Widget, XtPointer, XtPointer);
+void do_mbview_routelist_topolylines(Widget, XtPointer, XtPointer);
 void do_mbview_routelist_popdown(Widget, XtPointer, XtPointer);
 void do_mbview_routelistselect(Widget, XtPointer, XtPointer);
 
@@ -182,6 +183,33 @@ MB3DRouteListDataPtr MB3DRouteListCreate(MB3DRouteListDataPtr class_in, Widget p
 
 	XtAddCallback(class_in->mbview_pushButton_routelist_delete, XmNactivateCallback, do_mbview_routelist_delete, (XtPointer)0);
 
+	/* created unmanaged - only shown by programs that display GIS polylines */
+	ac = 0;
+	{
+		XmString tmp0 =
+		    (XmString)BX_CONVERT(class_in->MB3DRouteList, (char *)"Convert Selected to Polylines", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNheight, 30);
+		ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->MB3DRouteList, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0,
+		                    &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_routelist_topolylines =
+		    XmCreatePushButton(class_in->MB3DRouteList, (char *)"mbview_pushButton_routelist_topolylines", args, ac);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_routelist_topolylines, XmNactivateCallback, do_mbview_routelist_topolylines,
+	              (XtPointer)0);
+
 	ac = 0;
 	{
 		XmString tmp0 = (XmString)BX_CONVERT(class_in->MB3DRouteList, (char *)"Dismiss", XmRXmString, 0, &argok);
@@ -271,6 +299,21 @@ MB3DRouteListDataPtr MB3DRouteListCreate(MB3DRouteListDataPtr class_in, Widget p
 	XtSetArg(args[ac], XmNleftOffset, 10);
 	ac++;
 	XtSetValues(class_in->mbview_pushButton_routelist_delete, args, ac);
+
+	ac = 0;
+	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_NONE);
+	ac++;
+	XtSetArg(args[ac], XmNleftAttachment, XmATTACH_WIDGET);
+	ac++;
+	XtSetArg(args[ac], XmNleftWidget, class_in->mbview_pushButton_routelist_delete);
+	ac++;
+	XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_FORM);
+	ac++;
+	XtSetArg(args[ac], XmNbottomOffset, 9);
+	ac++;
+	XtSetArg(args[ac], XmNleftOffset, 10);
+	ac++;
+	XtSetValues(class_in->mbview_pushButton_routelist_topolylines, args, ac);
 
 	ac = 0;
 	XtSetArg(args[ac], XmNtopAttachment, XmATTACH_NONE);

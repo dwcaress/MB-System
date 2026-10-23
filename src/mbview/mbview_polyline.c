@@ -577,6 +577,7 @@ int mbview_addpolyline(int verbose, size_t instance, int npart, int *partstart, 
 
 		/* make polylines viewable in this instance */
 		mbviews[instance].data.polyline_view_mode = MBV_VIEW_ON;
+		set_mbview_polyline_view_mode(instance, MBV_VIEW_ON);
 	}
 
 	if (verbose >= 2) {
@@ -736,6 +737,9 @@ int mbview_enableviewpolylines(int verbose, size_t instance, int *error) {
 
 	/* set values */
 	shared.shareddata.polyline_mode = MBV_POLYLINE_VIEW;
+
+	/* the route list can now convert routes to polylines */
+	mbview_gis_routelistbutton();
 
 	/* set widget sensitivity on all active instances */
 	for (size_t i = 0; i < MBV_MAX_WINDOWS; i++) {

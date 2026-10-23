@@ -350,6 +350,7 @@ int mbview_addpolygon(int verbose, size_t instance, int npart, int *partstart, i
 
 		/* make polygons viewable in this instance */
 		mbviews[instance].data.polygon_view_mode = MBV_VIEW_ON;
+		set_mbview_polygon_view_mode(instance, MBV_VIEW_ON);
 	}
 
 	if (verbose >= 2) {

@@ -993,6 +993,9 @@ int mbview_enableviewpolylines(int verbose, size_t instance, int *error);
 int mbview_polylinetoroutes(int verbose, size_t instance, int ipolyline, int *nroute, int *ndropped, int *error);
 int mbview_routetopolyline(int verbose, size_t instance, int iroute, int layer, int *ipolyline, int *error);
 
+/* mbview_gislist.c function prototypes */
+int mbview_updategislist(int type);
+
 /* mbview_polygon.c function prototypes */
 int mbview_getpolygoncount(int verbose, size_t instance, int *npolygon, int *error);
 int mbview_getpolygonpointcount(int verbose, size_t instance, int ipolygon, int *npart, int *npoint, int *error);

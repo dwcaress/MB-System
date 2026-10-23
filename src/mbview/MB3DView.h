@@ -66,6 +66,9 @@ typedef struct _MB3DViewData {
 	Widget mbview_toggleButton_navswathbounds;
 	Widget mbview_toggleButton_navdrape;
 	Widget mbview_toggleButton_vector;
+	Widget mbview_toggleButton_polyline;
+	Widget mbview_toggleButton_polygon;
+	Widget mbview_toggleButton_gispoint;
 	Widget mbview_separator8;
 	Widget mbview_toggleButton_colortable_haxby;
 	Widget mbview_toggleButton_colortable_bright;
@@ -87,6 +90,9 @@ typedef struct _MB3DViewData {
 	Widget mbview_pushButton_sitelist;
 	Widget mbview_pushButton_routelist;
 	Widget mbview_pushButton_navlist;
+	Widget mbview_pushButton_polylinelist;
+	Widget mbview_pushButton_polygonlist;
+	Widget mbview_pushButton_gispointlist;
 	Widget mbview_cascadeButton_mouse;
 	Widget mbview_pulldownMenu_mouse;
 	Widget mbview_toggleButton_mode_move;

@@ -29,6 +29,8 @@
 #ifndef MBVIEW_MBVIEWPRIVATE_H_
 #define MBVIEW_MBVIEWPRIVATE_H_
 
+#include "MB3DGisList.h"
+
 /* OpenGL Error checking */
 /* #define MBV_GET_GLX_ERRORS	1 */
 /* #define MBV_DEBUG_GLX		1 */
@@ -104,6 +106,7 @@ struct mbview_shared_struct {
 	int init_sitelist;
 	int init_routelist;
 	int init_navlist;
+	int init_gislist[MBV_GISLAYER_GISPOINT + 1]; /* indexed by MBV_GISLAYER_* */
 
 	/* global lon lat print style */
 	int lonlatstyle;
@@ -121,6 +124,9 @@ struct mbview_shared_struct {
 	Widget topLevelShell_navlist;
 	Widget mainWindow_navlist;
 	MB3DNavListData mb3d_navlist;
+	Widget topLevelShell_gislist[MBV_GISLAYER_GISPOINT + 1];
+	Widget mainWindow_gislist[MBV_GISLAYER_GISPOINT + 1];
+	MB3DGisListData mb3d_gislist[MBV_GISLAYER_GISPOINT + 1];
 };
 
 /* structure to hold instances of mbview windows */
@@ -460,6 +466,9 @@ void do_mbview_route(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_nav(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_navdrape(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_vector(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbview_polyline(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbview_polygon(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbview_gispoint(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_colortable_haxby(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_colortable_bright(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_colortable_muted(Widget w, XtPointer client_data, XtPointer call_data);
@@ -480,6 +489,9 @@ void set_mbview_nav_view_mode(size_t instance, int mode);
 void set_mbview_navswathbounds_view_mode(size_t instance, int mode);
 void set_mbview_navdrape_view_mode(size_t instance, int mode);
 void set_mbview_vector_view_mode(size_t instance, int mode);
+void set_mbview_polyline_view_mode(size_t instance, int mode);
+void set_mbview_polygon_view_mode(size_t instance, int mode);
+void set_mbview_gispoint_view_mode(size_t instance, int mode);
 void set_mbview_display_mode(size_t instance, int mode);
 void set_mbview_colortable(size_t instance, int mode);
 void set_mbview_colortable_mode(size_t instance, int mode);
@@ -514,6 +526,20 @@ void do_mbview_navlist_delete(Widget w, XtPointer client_data, XtPointer call_da
 void do_mbview_sitelist_popdown(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_routelist_popdown(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_navlist_popdown(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbview_routelist_topolylines(Widget w, XtPointer client_data, XtPointer call_data);
+
+/* mbview_gislist.c function prototypes */
+int mbview_gislist_create(void);
+void mbview_gislist_reset(bool mode);
+void mbview_gislist_popdownall(void);
+void mbview_gis_routelistbutton(void);
+void mbview_gis_setviewmode(int type, int mode);
+void do_mbview_gislistpopup(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbview_gislistselect(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbview_gislist_showhide(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbview_gislist_delete(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbview_gislist_toroutes(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbview_gislist_popdown(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_full_render(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_reset_view(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_clearpicks(Widget w, XtPointer client_data, XtPointer call_data);

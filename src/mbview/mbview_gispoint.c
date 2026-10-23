@@ -257,8 +257,10 @@ int mbview_addgispoints(int verbose, size_t instance, int npoint, double *lon, d
 		}
 
 		/* make points viewable in this instance */
-		if (npoint > 0)
+		if (npoint > 0) {
 			mbviews[instance].data.gispoint_view_mode = MBV_VIEW_ON;
+			set_mbview_gispoint_view_mode(instance, MBV_VIEW_ON);
+		}
 	}
 
 	if (verbose >= 2) {

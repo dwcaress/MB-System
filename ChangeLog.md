@@ -187,6 +187,17 @@ end of the route, and a route with every point rejected still had its color and
 name written to unallocated memory. The OpenGL display list for site symbols
 shared its ID with a grid display list of the tenth mbview window.
 
+MBview library (src/mbview/mbview\_gislist.c, MB3DGisList.c, MB3DView.c,
+MB3DRouteList.c): added the controls for GIS polylines, polygons and points as
+the third step toward displaying GIS data in mbgrdviz. The View menu has
+Polylines, Polygons and GIS Points toggles, and the Controls menu has a list
+window for each type showing its layers and features. In these lists clicking
+an item twice changes its color (for a layer, all its features), and the
+selected items can be shown or hidden, deleted, or for polylines converted to
+routes. The Route List can convert selected routes to polylines. These controls
+are inactive in programs that do not display GIS data, such as mbnavadjust and
+mbeditviz.
+
 The above work was done with the assistance of the AI coding assistant Claude Opus 5.5
 (Anthropic, model claude-opus-5-5), operating as Claude Code under developer
 supervision and review.

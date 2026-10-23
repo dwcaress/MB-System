@@ -190,6 +190,9 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error) {
 	XtSetValues(shared.mb3d_navlist.mbview_navlist_label, args, ac);
 	XtManageChild(shared.mb3d_navlist.MB3DNavList);
 
+	/* create and manage GIS polyline, polygon, and point list windows */
+	mbview_gislist_create();
+
 	/* set timer function */
 	do_mbview_settimer();
 
@@ -225,6 +228,7 @@ int mbview_reset_shared(bool mode) {
 		shared.topLevelShell_navlist = NULL;
 		shared.mainWindow_navlist = NULL;
 	}
+	mbview_gislist_reset(mode);
 
 	/* global lon lat print style */
 	shared.lonlatstyle = MBV_LONLAT_DEGREESMINUTES;
@@ -1870,6 +1874,9 @@ int mbview_open(int verbose, size_t instance, int *error) {
 		XtSetValues(view->mb3dview.mbview_toggleButton_nav, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_navswathbounds, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_navdrape, args, ac);
+		XtSetValues(view->mb3dview.mbview_toggleButton_polyline, args, ac);
+		XtSetValues(view->mb3dview.mbview_toggleButton_polygon, args, ac);
+		XtSetValues(view->mb3dview.mbview_toggleButton_gispoint, args, ac);
 		XtSetValues(view->mb3dview.mbview_separator8, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_colortable_haxby, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_colortable_bright, args, ac);
@@ -1891,6 +1898,9 @@ int mbview_open(int verbose, size_t instance, int *error) {
 		XtSetValues(view->mb3dview.mbview_pushButton_sitelist, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_routelist, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_navlist, args, ac);
+		XtSetValues(view->mb3dview.mbview_pushButton_polylinelist, args, ac);
+		XtSetValues(view->mb3dview.mbview_pushButton_polygonlist, args, ac);
+		XtSetValues(view->mb3dview.mbview_pushButton_gispointlist, args, ac);
 		XtSetValues(view->mb3dview.mbview_cascadeButton_mouse, args, ac);
 		XtSetValues(view->mb3dview.mbview_pulldownMenu_mouse, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_mode_move, args, ac);
@@ -2382,6 +2392,14 @@ int mbview_update_sensitivity(int verbose, size_t instance, int *error) {
 	}
 	XtSetValues(view->mb3dview.mbview_toggleButton_vector, args, ac);
 
+	/* GIS display toggles and lists are only available when enabled */
+	XtSetSensitive(view->mb3dview.mbview_toggleButton_polyline, shared.shareddata.polyline_mode != MBV_POLYLINE_OFF);
+	XtSetSensitive(view->mb3dview.mbview_pushButton_polylinelist, shared.shareddata.polyline_mode != MBV_POLYLINE_OFF);
+	XtSetSensitive(view->mb3dview.mbview_toggleButton_polygon, shared.shareddata.polygon_mode != MBV_POLYGON_OFF);
+	XtSetSensitive(view->mb3dview.mbview_pushButton_polygonlist, shared.shareddata.polygon_mode != MBV_POLYGON_OFF);
+	XtSetSensitive(view->mb3dview.mbview_toggleButton_gispoint, shared.shareddata.gispoint_mode != MBV_GISPOINT_OFF);
+	XtSetSensitive(view->mb3dview.mbview_pushButton_gispointlist, shared.shareddata.gispoint_mode != MBV_GISPOINT_OFF);
+
 	/* now set action buttons according to current pick states */
 	mbview_action_sensitivity(instance);
 
@@ -2618,6 +2636,9 @@ int mbview_set_widgets(int verbose, size_t instance, int *error) {
 	set_mbview_navswathbounds_view_mode(instance, data->navswathbounds_view_mode);
 	set_mbview_navdrape_view_mode(instance, data->navdrape_view_mode);
 	set_mbview_vector_view_mode(instance, data->vector_view_mode);
+	set_mbview_polyline_view_mode(instance, data->polyline_view_mode);
+	set_mbview_polygon_view_mode(instance, data->polygon_view_mode);
+	set_mbview_gispoint_view_mode(instance, data->gispoint_view_mode);
 	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
 		set_mbview_colortable(instance, data->primary_colortable);
 		set_mbview_colortable_mode(instance, data->primary_colortable_mode);
@@ -4877,6 +4898,8 @@ int mbview_destroy(int verbose, size_t instance, bool destroywidgets, int *error
 			XmListDeleteAllItems(shared.mb3d_navlist.mbview_list_navlist);
 			XtPopdown(XtParent(shared.mainWindow_navlist));
 
+			mbview_gislist_popdownall();
+
 			if (status == MB_SUCCESS && shared.shareddata.navpick.segment.nls_alloc != 0 &&
 			    shared.shareddata.navpick.segment.lspoints != NULL) {
 				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&shared.shareddata.navpick.segment.lspoints, error);
@@ -5700,6 +5723,78 @@ void do_mbview_vector(Widget w, XtPointer client_data, XtPointer call_data) {
 		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_vector\n");
 	mbview_plotlowhigh(instance);
 }
+/*------------------------------------------------------------------------------*/
+
+void do_mbview_polyline(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+
+	Arg args[256];
+	Cardinal ac = 0;
+	size_t instance;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
+	ac++;
+	XtGetValues(w, args, ac);
+
+	struct mbview_struct *data = &(mbviews[instance].data);
+
+	/* get mode value */
+	data->polyline_view_mode = XmToggleButtonGetState(w) ? MBV_VIEW_ON : MBV_VIEW_OFF;
+
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "do_mbview_polyline instance:%zu mode:%d\n", instance, data->polyline_view_mode);
+
+	/* draw */
+	mbview_plotlowhigh(instance);
+}
+/*------------------------------------------------------------------------------*/
+
+void do_mbview_polygon(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+
+	Arg args[256];
+	Cardinal ac = 0;
+	size_t instance;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
+	ac++;
+	XtGetValues(w, args, ac);
+
+	struct mbview_struct *data = &(mbviews[instance].data);
+
+	/* get mode value */
+	data->polygon_view_mode = XmToggleButtonGetState(w) ? MBV_VIEW_ON : MBV_VIEW_OFF;
+
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "do_mbview_polygon instance:%zu mode:%d\n", instance, data->polygon_view_mode);
+
+	/* draw */
+	mbview_plotlowhigh(instance);
+}
+/*------------------------------------------------------------------------------*/
+
+void do_mbview_gispoint(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
+	(void)call_data;  // Unused parameter
+
+	Arg args[256];
+	Cardinal ac = 0;
+	size_t instance;
+	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
+	ac++;
+	XtGetValues(w, args, ac);
+
+	struct mbview_struct *data = &(mbviews[instance].data);
+
+	/* get mode value */
+	data->gispoint_view_mode = XmToggleButtonGetState(w) ? MBV_VIEW_ON : MBV_VIEW_OFF;
+
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "do_mbview_gispoint instance:%zu mode:%d\n", instance, data->gispoint_view_mode);
+
+	/* draw */
+	mbview_plotlowhigh(instance);
+}
 
 /*------------------------------------------------------------------------------*/
 
@@ -6498,6 +6593,42 @@ void set_mbview_vector_view_mode(size_t instance, int mode) {
 	MB3DViewData *mb3dviewptr = &(view->mb3dview);
 	const Boolean value = mode == MBV_VIEW_ON;
 	XmToggleButtonSetState(mb3dviewptr->mbview_toggleButton_vector, value, False);
+}
+
+/*------------------------------------------------------------------------------*/
+void set_mbview_polyline_view_mode(size_t instance, int mode) {
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "set_mbview_polyline_view_mode: instance:%zu mode:%d\n", instance, mode);
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+
+	/* the widgets exist once the window has been opened */
+	if (view->init != MBV_WINDOW_NULL)
+		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_polyline, mode == MBV_VIEW_ON, False);
+}
+
+/*------------------------------------------------------------------------------*/
+void set_mbview_polygon_view_mode(size_t instance, int mode) {
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "set_mbview_polygon_view_mode: instance:%zu mode:%d\n", instance, mode);
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+
+	/* the widgets exist once the window has been opened */
+	if (view->init != MBV_WINDOW_NULL)
+		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_polygon, mode == MBV_VIEW_ON, False);
+}
+
+/*------------------------------------------------------------------------------*/
+void set_mbview_gispoint_view_mode(size_t instance, int mode) {
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "set_mbview_gispoint_view_mode: instance:%zu mode:%d\n", instance, mode);
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+
+	/* the widgets exist once the window has been opened */
+	if (view->init != MBV_WINDOW_NULL)
+		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_gispoint, mode == MBV_VIEW_ON, False);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -7428,6 +7559,7 @@ void do_mbview_routelistpopup(Widget w, XtPointer client_data, XtPointer call_da
 
 	XtPopup(XtParent(shared.mainWindow_routelist), XtGrabNone);
 	shared.init_routelist = MBV_WINDOW_VISIBLE;
+	mbview_gis_routelistbutton();
 	mbview_updateroutelist();
 }
 /*------------------------------------------------------------------------------*/
