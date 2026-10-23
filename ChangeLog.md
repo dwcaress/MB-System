@@ -204,6 +204,16 @@ first window on or off instead of its own. In the Site List, a selection event
 with no site selected changed the color of a nonexistent site, writing outside the
 site data.
 
+Program mbgrdviz (src/mbgrdviz/mbgrdviz\_callbacks.c): added the display of GIS
+polylines, polygons and points. The Action menu of each window can open MB-System
+polyline (.pln), polygon (.plg) and point (.pts) files, import an ESRI shapefile,
+save each type to an MB-System file and export each type as a shapefile; the main
+window File menu can also open the three file types. A shapefile import keeps only
+the features overlapping the grid of the window it was started from, and features
+without color and size attributes are drawn in a default color for each type.
+Windows opened with "Open Region as New View" show the GIS data as their source
+window does.
+
 The above work was done with the assistance of the AI coding assistant Claude Opus 5.5
 (Anthropic, model claude-opus-5-5), operating as Claude Code under developer
 supervision and review.
