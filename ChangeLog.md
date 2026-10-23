@@ -214,6 +214,15 @@ without color and size attributes are drawn in a default color for each type.
 Windows opened with "Open Region as New View" show the GIS data as their source
 window does.
 
+Documentation (src/man/man1/mbgrdviz.1): described the display of GIS polylines,
+polygons and points, the new menu items and list windows, the conversions between
+polylines and routes, the MB-System polyline, polygon and point file formats, and
+the import and export of shapefiles. Also completed the rest of the manual page,
+which described many controls only by name: every menu item, button and dialog
+of the main and display windows is now described, along with the mouse and
+keyboard actions, the survey route generation dialog, and the route, site,
+vector and profile file formats. Outdated entries were corrected.
+
 The above work was done with the assistance of the AI coding assistant Claude Opus 5.5
 (Anthropic, model claude-opus-5-5), operating as Claude Code under developer
 supervision and review.
