@@ -1126,6 +1126,10 @@ MB3DViewDataPtr MB3DViewCreate(MB3DViewDataPtr class_in, Widget parent, String n
 	XtAddCallback(class_in->mbview_toggleButton_route, XmNvalueChangedCallback, do_mbview_route, (XtPointer)0);
 
 	ac = 0;
+	class_in->mbview_separator22 = XmCreateSeparator(class_in->mbview_pulldownMenu_view, (char *)"mbview_separator22", args, ac);
+	XtManageChild(class_in->mbview_separator22);
+
+	ac = 0;
 	{
 		XmString tmp0;
 
@@ -1279,7 +1283,7 @@ MB3DViewDataPtr MB3DViewCreate(MB3DViewDataPtr class_in, Widget parent, String n
 	{
 		XmString tmp0;
 
-		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"GIS Points", XmRXmString, 0, &argok);
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Points", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;
@@ -1846,7 +1850,7 @@ MB3DViewDataPtr MB3DViewCreate(MB3DViewDataPtr class_in, Widget parent, String n
 	{
 		XmString tmp0;
 
-		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"GIS Point List", XmRXmString, 0, &argok);
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"Point List", XmRXmString, 0, &argok);
 		XtSetArg(args[ac], XmNlabelString, tmp0);
 		if (argok)
 			ac++;

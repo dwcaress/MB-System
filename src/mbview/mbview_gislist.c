@@ -89,7 +89,7 @@ static int gislist_nrow_alloc[MBV_GISLAYER_GISPOINT + 1];
 /* last single selected row, so that a second click cycles the color */
 static int gislist_lastrow[MBV_GISLAYER_GISPOINT + 1] = {-1, -1, -1, -1};
 
-static const char *gislist_title[MBV_GISLAYER_GISPOINT + 1] = {"", "Polyline List", "Polygon List", "GIS Point List"};
+static const char *gislist_title[MBV_GISLAYER_GISPOINT + 1] = {"", "Polyline List", "Polygon List", "Point List"};
 static const char *gislist_header[MBV_GISLAYER_GISPOINT + 1] = {
     "", "Layer or Polyline | Display | Color | Points | Name", "Layer or Polygon | Display | Color | Points | Name",
     "Layer or Point | Display | Color | Lon | Lat | Z | Name"};

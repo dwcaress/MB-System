@@ -554,7 +554,7 @@ int mbview_drawpolygon(size_t instance, int rez) {
 			struct mbview_polygon_struct *polygon = &(shared.shareddata.polygons[i]);
 			if (polygon->active && shared.shareddata.gislayers[polygon->layer].active) {
 				const int icolor = i == shared.shareddata.polygon_selected ? MBV_COLOR_RED : polygon->color;
-				mbview_gis_drawlines(instance, rez, polygon->npart, polygon->partstart, polygon->npoints, polygon->points,
+				mbview_gis_drawlines(instance, polygon->npart, polygon->partstart, polygon->npoints, polygon->points,
 				                     polygon->segments, icolor, polygon->size);
 			}
 		}

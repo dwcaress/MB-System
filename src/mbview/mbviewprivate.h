@@ -431,6 +431,7 @@ int mbview_action_sensitivity(size_t instance);
 int mbview_set_widgets(int verbose, size_t instance, int *error);
 int mbview_addaction(int verbose, size_t instance, void(mbview_action_notify)(Widget, XtPointer, XtPointer), char *label,
                      int sensitive, int *error);
+int mbview_addactionseparator(int verbose, size_t instance, int *error);
 int mbview_setstate(int verbose, size_t instance, int mask, int value, int *error);
 int mbview_addpicknotify(int verbose, size_t instance, int picktype, void(mbview_pick_notify)(size_t), int *error);
 int mbview_setsensitivitynotify(int verbose, size_t instance, void(mbview_sensitivity_notify)(), int *error);
@@ -736,7 +737,7 @@ void mbview_gis_setpointw(size_t instance, double lon, double lat, struct mbview
 int mbview_gis_drapesegments(size_t instance, int npart, const int *partstart, int npoints, struct mbview_pointw_struct *points,
                              struct mbview_linesegmentw_struct *segments);
 void mbview_gis_freesegments(int nsegments, struct mbview_linesegmentw_struct *segments);
-void mbview_gis_drawlines(size_t instance, int rez, int npart, const int *partstart, int npoints,
+void mbview_gis_drawlines(size_t instance, int npart, const int *partstart, int npoints,
                           struct mbview_pointw_struct *points, struct mbview_linesegmentw_struct *segments, int icolor,
                           int size);
 int mbview_drawpolyline(size_t instance, int rez);

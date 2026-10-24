@@ -1871,6 +1871,7 @@ int mbview_open(int verbose, size_t instance, int *error) {
 		XtSetValues(view->mb3dview.mbview_toggleButton_overlay_contour, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_site, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_route, args, ac);
+		XtSetValues(view->mb3dview.mbview_separator22, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_nav, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_navswathbounds, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_navdrape, args, ac);
@@ -2393,13 +2394,11 @@ int mbview_update_sensitivity(int verbose, size_t instance, int *error) {
 	}
 	XtSetValues(view->mb3dview.mbview_toggleButton_vector, args, ac);
 
-	/* GIS display toggles and lists are only available when enabled */
+	/* GIS display toggles are only available when enabled; like the navigation
+	    list, the GIS lists can always be brought up */
 	XtSetSensitive(view->mb3dview.mbview_toggleButton_polyline, shared.shareddata.polyline_mode != MBV_POLYLINE_OFF);
-	XtSetSensitive(view->mb3dview.mbview_pushButton_polylinelist, shared.shareddata.polyline_mode != MBV_POLYLINE_OFF);
 	XtSetSensitive(view->mb3dview.mbview_toggleButton_polygon, shared.shareddata.polygon_mode != MBV_POLYGON_OFF);
-	XtSetSensitive(view->mb3dview.mbview_pushButton_polygonlist, shared.shareddata.polygon_mode != MBV_POLYGON_OFF);
 	XtSetSensitive(view->mb3dview.mbview_toggleButton_gispoint, shared.shareddata.gispoint_mode != MBV_GISPOINT_OFF);
-	XtSetSensitive(view->mb3dview.mbview_pushButton_gispointlist, shared.shareddata.gispoint_mode != MBV_GISPOINT_OFF);
 
 	/* now set action buttons according to current pick states */
 	mbview_action_sensitivity(instance);
@@ -2726,6 +2725,38 @@ int mbview_addaction(int verbose, size_t instance, void(mbview_action_notify)(Wi
 
 	/* now set action buttons according to current pick states */
 	mbview_action_sensitivity(instance);
+
+	const int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:        %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_addactionseparator(int verbose, size_t instance, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
+		fprintf(stderr, "dbg2       instance:             %zu\n", instance);
+	}
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+
+	/* add separator to action menu - it has no sensitivity so it does not use
+	    an action slot */
+	Arg args[256];
+	Cardinal ac = 0;
+	Widget separator = XmCreateSeparator(view->mb3dview.mbview_pulldownMenu_action, (char *)"mbview_separator_action", args, ac);
+	XtManageChild(separator);
 
 	const int status = MB_SUCCESS;
 

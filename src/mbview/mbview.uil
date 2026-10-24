@@ -4384,6 +4384,20 @@ object mB3DView_mbview_toggleButton_route : XmToggleButton widget {
 !(BX)    };
 };
 
+object mB3DView_mbview_separator22 : XmSeparator widget {
+    arguments {
+        arguments Style_use;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object mB3DView_mbview_toggleButton_nav : XmToggleButton widget {
     arguments {
         arguments Style_use;
@@ -4483,7 +4497,7 @@ object mB3DView_mbview_toggleButton_polygon : XmToggleButton widget {
 object mB3DView_mbview_toggleButton_gispoint : XmToggleButton widget {
     arguments {
         arguments Style_use;
-        XmNlabelString = compound_string("GIS Points");
+        XmNlabelString = compound_string("Points");
     };
     controls {
     };
@@ -4673,6 +4687,7 @@ object mbview_pulldownMenu_view : XmPulldownMenu widget {
          managed XmToggleButton mbview_toggleButton_overlay_contour;
          managed XmToggleButton mB3DView_mbview_toggleButton_site;
          managed XmToggleButton mB3DView_mbview_toggleButton_route;
+         managed XmSeparator mB3DView_mbview_separator22;
          managed XmToggleButton mB3DView_mbview_toggleButton_nav;
          managed XmToggleButton mB3DView_mbview_toggleButton_navdrape;
          managed XmToggleButton mB3DView_mbview_toggleButton_vector;
@@ -4899,7 +4914,7 @@ object mB3DView_mbview_pushButton_polygonlist : XmPushButton widget {
 object mB3DView_mbview_pushButton_gispointlist : XmPushButton widget {
     arguments {
         arguments Style_use;
-        XmNlabelString = compound_string("GIS Point List");
+        XmNlabelString = compound_string("Point List");
     };
     controls {
     };

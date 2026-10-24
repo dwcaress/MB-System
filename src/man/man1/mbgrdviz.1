@@ -190,8 +190,8 @@ outlines are draped on the topography; parts lying off the grid are drawn
 at the top of the grid's depth range. Points are drawn as triangles. The
 GIS data are shared by all \fBMBview\fP windows like sites and routes, and
 are displayed or hidden in each window with the <View->Polylines>,
-<View->Polygons>, and <View->GIS Points> toggles. The <Controls->Polyline
-List>, <Controls->Polygon List>, and <Controls->GIS Point List> windows list
+<View->Polygons>, and <View->Points> toggles. The <Controls->Polyline
+List>, <Controls->Polygon List>, and <Controls->Point List> windows list
 the layers and features; there features and whole layers can be recolored,
 shown or hidden, and deleted. Polylines can be converted to routes (which
 can then be edited and saved as route files), and routes can be converted
@@ -381,7 +381,7 @@ it is active once vector data have been read.
 .TP
 .B [MBview]:<View->Polygons>
 .TP
-.B [MBview]:<View->GIS Points>
+.B [MBview]:<View->Points>
 These toggles display or hide the GIS polylines, polygons, and points in this
 window. They are active once data of the type have been read or imported, and
 are turned on when data are first read into the window.
@@ -438,10 +438,11 @@ These items open the windows listing the sites, routes, and navigation files
 .TP
 .B [MBview]:<Controls->Polygon List>
 .TP
-.B [MBview]:<Controls->GIS Point List>
+.B [MBview]:<Controls->Point List>
 These menu buttons bring up windows listing the GIS polylines, polygons, or
-points (see the Polyline List, Polygon List, and GIS Point List windows below).
-They are active once data of the type have been read or imported.
+points (see the Polyline List, Polygon List, and Point List windows below).
+Like <Controls->Navigation List>, they are always active, even before any
+data of the type have been read or imported.
 .TP
 .B [MBview]:<Mouse->Pan & Zoom>
 This mouse mode (the default) uses the left button to pick, the middle
@@ -790,8 +791,8 @@ resolution dimension is no larger than the medium one).
 .TP
 .B [Rendering Resolution]:{Nav Rendering Decimation}==Low Resolution Decimation==
 These set the decimation (every nth point) of the navigation and vector data
-drawn at medium and low resolution; the low resolution decimation is also
-used for GIS polylines and polygons.
+drawn at medium and low resolution. Like routes, GIS polylines and polygons
+are always drawn at full resolution.
 .TP
 .B [Rendering Resolution]:<Dismiss>
 This button closes the dialog.
@@ -940,13 +941,13 @@ are run before or after the survey lines.
 .B [Survey Route]:<Dismiss>
 These buttons generate the route and close the dialog.
 
-.SH INTERACTIVE CONTROLS: MBview Polyline, Polygon, and GIS Point List Windows
+.SH INTERACTIVE CONTROLS: MBview Polyline, Polygon, and Point List Windows
 .TP
 .B [Polyline List]:|Polyline List|
 .TP
 .B [Polygon List]:|Polygon List|
 .TP
-.B [GIS Point List]:|GIS Point List|
+.B [Point List]:|Point List|
 These lists show each layer of the type, followed by its features. A layer
 item shows whether the layer is shown or hidden, the number of features, and
 the layer name; a feature item shows whether it is shown or hidden, its color,
@@ -960,7 +961,7 @@ its features. Several items can be selected with the shift and control keys.
 .TP
 .B [Polygon List]:<Show/Hide Selected>
 .TP
-.B [GIS Point List]:<Show/Hide Selected>
+.B [Point List]:<Show/Hide Selected>
 This button hides the selected features and layers if they are shown, or shows
 them if they are hidden. Hidden features are still saved and exported.
 .TP
@@ -968,7 +969,7 @@ them if they are hidden. Hidden features are still saved and exported.
 .TP
 .B [Polygon List]:<Delete Selected>
 .TP
-.B [GIS Point List]:<Delete Selected>
+.B [Point List]:<Delete Selected>
 This button deletes the selected features; selecting a layer selects all of its
 features.
 .TP
@@ -983,7 +984,7 @@ their number is printed to the terminal. The polylines are kept.
 .TP
 .B [Polygon List]:<Dismiss>
 .TP
-.B [GIS Point List]:<Dismiss>
+.B [Point List]:<Dismiss>
 This button closes the list window.
 
 .SH MOUSE ACTIONS

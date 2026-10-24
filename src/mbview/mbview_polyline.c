@@ -146,42 +146,31 @@ void mbview_gis_freesegments(int nsegments, struct mbview_linesegmentw_struct *s
 }
 
 /*------------------------------------------------------------------------------*/
-/* Draw each part as a line strip: draped segments at high resolution, the
-    decimated vertices alone at low resolution. */
-void mbview_gis_drawlines(size_t instance, int rez, int npart, const int *partstart, int npoints,
+/* Draw each part as a line strip of draped segments; as with routes, this is
+    done at every rendering resolution so the lines are not degraded while the
+    topography is redrawn at low resolution during interaction. */
+void mbview_gis_drawlines(size_t instance, int npart, const int *partstart, int npoints,
                           struct mbview_pointw_struct *points, struct mbview_linesegmentw_struct *segments, int icolor,
                           int size) {
-	struct mbview_struct *data = &(mbviews[instance].data);
-	const int stride = rez == MBV_REZ_LOW ? MAX(data->lorez_navdecimate, 1) : 1;
-
 	glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
 	glLineWidth((float)size);
 	for (int i = 0; i < npart; i++) {
 		const int start = partstart[i];
 		const int end = i < npart - 1 ? partstart[i + 1] : npoints;
 		glBegin(GL_LINE_STRIP);
-		if (rez == MBV_REZ_LOW) {
-			for (int j = start; j < end; j += stride)
+		for (int j = start; j < end - 1; j++) {
+			/* segments within one grid cell are not draped */
+			if (segments[j].nls > 0) {
+				for (int k = 0; k < segments[j].nls; k++)
+					glVertex3f((float)(segments[j].lspoints[k].xdisplay[instance]),
+					           (float)(segments[j].lspoints[k].ydisplay[instance]),
+					           (float)(segments[j].lspoints[k].zdisplay[instance]));
+			}
+			else {
 				glVertex3f((float)(points[j].xdisplay[instance]), (float)(points[j].ydisplay[instance]),
 				           (float)(points[j].zdisplay[instance]));
-			glVertex3f((float)(points[end - 1].xdisplay[instance]), (float)(points[end - 1].ydisplay[instance]),
-			           (float)(points[end - 1].zdisplay[instance]));
-		}
-		else {
-			for (int j = start; j < end - 1; j++) {
-				/* segments within one grid cell are not draped */
-				if (segments[j].nls > 0) {
-					for (int k = 0; k < segments[j].nls; k++)
-						glVertex3f((float)(segments[j].lspoints[k].xdisplay[instance]),
-						           (float)(segments[j].lspoints[k].ydisplay[instance]),
-						           (float)(segments[j].lspoints[k].zdisplay[instance]));
-				}
-				else {
-					glVertex3f((float)(points[j].xdisplay[instance]), (float)(points[j].ydisplay[instance]),
-					           (float)(points[j].zdisplay[instance]));
-					glVertex3f((float)(points[j + 1].xdisplay[instance]), (float)(points[j + 1].ydisplay[instance]),
-					           (float)(points[j + 1].zdisplay[instance]));
-				}
+				glVertex3f((float)(points[j + 1].xdisplay[instance]), (float)(points[j + 1].ydisplay[instance]),
+				           (float)(points[j + 1].zdisplay[instance]));
 			}
 		}
 		glEnd();
@@ -941,7 +930,7 @@ int mbview_drawpolyline(size_t instance, int rez) {
 			struct mbview_polyline_struct *polyline = &(shared.shareddata.polylines[i]);
 			if (polyline->active && shared.shareddata.gislayers[polyline->layer].active) {
 				const int icolor = i == shared.shareddata.polyline_selected ? MBV_COLOR_RED : polyline->color;
-				mbview_gis_drawlines(instance, rez, polyline->npart, polyline->partstart, polyline->npoints, polyline->points,
+				mbview_gis_drawlines(instance, polyline->npart, polyline->partstart, polyline->npoints, polyline->points,
 				                     polyline->segments, icolor, polyline->size);
 			}
 		}

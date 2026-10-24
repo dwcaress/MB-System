@@ -866,6 +866,7 @@ int mbview_update(int verbose, size_t instance, int *error);
 int mbview_set_widgets(int verbose, size_t instance, int *error);
 int mbview_addaction(int verbose, size_t instance, void(mbview_action_notify)(Widget, XtPointer, XtPointer), char *label,
                      int sensitive, int *error);
+int mbview_addactionseparator(int verbose, size_t instance, int *error);
 int mbview_setstate(int verbose, size_t instance, int mask, int value, int *error);
 int mbview_addpicknotify(int verbose, size_t instance, int picktype, void(mbview_pick_notify)(size_t), int *error);
 int mbview_setsensitivitynotify(int verbose, size_t instance, void(mbview_sensitivity_notify)(), int *error);

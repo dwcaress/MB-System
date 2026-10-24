@@ -2075,6 +2075,7 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
                           MBV_EXISTMASK_ROUTE, &error);
         mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_saveprofile, "Save Profile File",
                          MBV_PICKMASK_TWOPOINT + MBV_PICKMASK_ROUTE + MBV_PICKMASK_NAVTWOPOINT, &error);
+        mbview_addactionseparator(verbose, instance, &error);
 
         mbview_addaction(verbose, instance, do_mbgrdviz_open_mbedit, "Open Selected Nav in MBedit", MBV_PICKMASK_NAVANY,
                          &error);
@@ -2087,6 +2088,7 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
 
         mbview_addaction(verbose, instance, do_mbgrdviz_open_region, "Open Region as New View",
                          MBV_PICKMASK_REGION + MBV_PICKMASK_NEWINSTANCE, &error);
+        mbview_addactionseparator(verbose, instance, &error);
         mbview_addaction(verbose, instance, do_mbgrdviz_make_survey, "Generate Survey Route from Area", MBV_PICKMASK_AREA,
                          &error);
       }
@@ -6093,13 +6095,13 @@ void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_dat
                          &error);
         mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openroute, "Open Route File", MBV_PICKMASK_NONE,
                          &error);
-        mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openvector, "Open Vector File",
-                         MBV_PICKMASK_NONE, &error);
-        do_mbgrdviz_addgisactions(instance);
         mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_opennav, "Open Navigation", MBV_PICKMASK_NONE,
                          &error);
         mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openswath, "Open Swath Data", MBV_PICKMASK_NONE,
                          &error);
+        mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openvector, "Open Vector File",
+                         MBV_PICKMASK_NONE, &error);
+        do_mbgrdviz_addgisactions(instance);
         mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savesite, "Save Site File", MBV_EXISTMASK_SITE,
                          &error);
         mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_saveroute, "Save Route File",
@@ -6114,6 +6116,7 @@ void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_dat
                          MBV_EXISTMASK_ROUTE, &error);
         mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_saveprofile, "Save Profile File",
                          MBV_PICKMASK_TWOPOINT + MBV_PICKMASK_ROUTE + MBV_PICKMASK_NAVTWOPOINT, &error);
+        mbview_addactionseparator(verbose, instance, &error);
 
         mbview_addaction(verbose, instance, do_mbgrdviz_open_mbedit, "Open Selected Nav in MBedit", MBV_PICKMASK_NAVANY,
                          &error);
@@ -6126,6 +6129,7 @@ void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_dat
 
         mbview_addaction(verbose, instance, do_mbgrdviz_open_region, "Open Region as New View",
                          MBV_PICKMASK_REGION + MBV_PICKMASK_NEWINSTANCE, &error);
+        mbview_addactionseparator(verbose, instance, &error);
         mbview_addaction(verbose, instance, do_mbgrdviz_make_survey, "Generate Survey Route from Area", MBV_PICKMASK_AREA,
                          &error);
       }
@@ -8039,8 +8043,10 @@ void do_mbgrdviz_addgisactions(size_t instance) {
                    &error);
   mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_opengispoint, "Open Point File", MBV_PICKMASK_NONE,
                    &error);
+  mbview_addactionseparator(verbose, instance, &error);
   mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_importshapefile, "Import Shapefile", MBV_PICKMASK_NONE,
                    &error);
+  mbview_addactionseparator(verbose, instance, &error);
   mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savepolyline, "Save Polyline File",
                    MBV_EXISTMASK_POLYLINE, &error);
   mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savepolygon, "Save Polygon File", MBV_EXISTMASK_POLYGON,

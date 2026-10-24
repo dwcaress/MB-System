@@ -62,6 +62,7 @@ typedef struct _MB3DViewData {
 	Widget mbview_toggleButton_overlay_contour;
 	Widget mbview_toggleButton_site;
 	Widget mbview_toggleButton_route;
+	Widget mbview_separator22;
 	Widget mbview_toggleButton_nav;
 	Widget mbview_toggleButton_navswathbounds;
 	Widget mbview_toggleButton_navdrape;
