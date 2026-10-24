@@ -22,6 +22,10 @@ accessible as tarballs through the Github interface.</p>
 Version 5.8 Releases and Release Notes:</h3>
 <hr />
 <ul>
+<li>Version 5.8.3beta26 October 23, 2026</li>
+<li>Version 5.8.3beta25 October 14, 2026</li>
+<li>Version 5.8.3beta24 October 5, 2026</li>
+<li>Version 5.8.3beta23 October 3, 2026</li>
 <li>Version 5.8.3beta22 September 19, 2026</li>
 <li>Version 5.8.3beta21 September 13, 2026</li>
 <li>Version 5.8.3beta20 September 10, 2026</li>
@@ -78,6 +82,824 @@ Version 5.8 Releases and Release Notes:</h3>
 <li>Version 5.8.1beta01 February 1, 2024</li>
 <li><strong>Version 5.8.0 January 22, 2024</strong></li>
 </ul>
+<hr />
+<h4 id="583beta26-october-23-2026">5.8.3beta26 (October 23, 2026)</h4>
+<p>MBIO library, format 181 (MBF_SAMESURF, src/mbio/mbr_samesurf.c,
+src/mbio/mbsys_surf.c): fixed three errors in reading SAM Electronics
+(Atlas) SURF files, found while testing the example data distributed
+with the Atlas SURF API. First, SURF files that store positions as
+projected eastings and northings in meters (e.g. Gauss-Krueger
+coordinates in the Fansweep 20 example) had their navigation inverse
+projected twice, once by the format 181 reader and again by the MBIO
+library, so that the data were placed near 4.5E 0.0N instead of near
+8.9E 53.0N. The reader now leaves the SURF positions in meters and sets
+up the projection so that the MBIO library alone converts the navigation
+to and from longitude and latitude, as is done for other formats with
+projected coordinates. The SURF header data are no longer modified in
+place. The projection is now a transverse Mercator projection defined
+from the SURF header (reference meridian, ellipsoid, a scale factor of
+1.0 for Gauss-Krueger or 0.9996 for UTM, and false easting), rather than
+a WGS84 UTM zone. SURF files do not specify a datum shift, so no datum
+transformation is applied. Second, pings were discarded when the
+altitude could not be calculated, which happened for every ping of
+single beam (vertical sounder) SURF files, so that none of their data
+could be read, and for multibeam pings without valid beams near nadir.
+The altitude is now taken from the single beam depth, or from the
+unflagged beam nearest nadir when the near nadir depth fit fails, and
+pings without a valid depth are kept with zero altitude. A division by
+zero in the near nadir depth fit has also been fixed. Third, beams
+marked as deleted in the SURF data were returned as null beams, which
+cannot be unflagged in the editors, and beams of soundings marked as
+deleted were not flagged at all. Both are now returned as manually
+flagged beams. The two Atlas example files now read completely (141 of
+141 and 403 of 403 pings, previously 123 and 0), and the beam positions
+agree with those reported by the original Atlas SURF API example
+program.</p>
+<p>MBIO library (src/mbio/mb_status.h, src/mbio/mb_error.c): fixed the
+count of data record types (MB_DATA_KINDS), which was 74 although the
+highest record type is MB_DATA_DATUM (75), the Kongsberg #SPD sensor
+position datum record from format 261 (MBF_KEMKMALL) files. Because of
+this, #SPD records were never counted in the data record notices
+reported by mbinfo and had no notice message. The count is now 75, a
+notice message for MB_DATA_DATUM has been added, and the notice slots
+for nonfatal errors and data problems move up by one accordingly. All
+programs must be rebuilt against the new library. Bug reported by
+Christian Ferreira.</p>
+<p>MBIO library platform files (src/mbio/mb_platform.c): fixed the
+reading of platform files by mb_platform_read(), which silently ignored
+the subbottom and camera data source lines. The SOURCE_SUBBOTTOM
+keywords were compared using lengths two characters longer than the
+keywords, so that they never matched, and the reader looked for
+SOURCE_SUBCAMERA keywords while the writer and the platform file
+template use SOURCE_CAMERA. As a result these sources were lost when
+platform files were read, and when mbmakeplatform modified an existing
+platform file. SOURCE_CAMERA is now the defined keyword; the
+SOURCE_SUBCAMERA spelling is still accepted when reading. Also, the
+platform name, organization and documentation URL and the sensor model,
+manufacturer and serial number are now read in full including embedded
+spaces (previously only the first word was kept), are limited to the
+size of their fields (previously long values could overflow them), and
+empty values are read as empty strings rather than as uninitialized
+memory. A read before the start of the line buffer for one character
+lines has also been fixed. Bug reported by Christian Ferreira.</p>
+<p>Program mbtrnpp (src/mbtrnutils/mbtrnpp.c): added a bounds check
+before counting the data record types read, which wrote past the end of
+two arrays for record types beyond MB_DATA_KINDS (such as the #SPD
+records in kmall data), and the periodic summary of non-survey records
+now includes the last record type. The same change has been provided as
+a patch to the TRN developers.</p>
+<p>Documentation (src/man/man1/mbnavlist.1, mbkongsbergpreprocess.1,
+mbrolltimelag.1, mbpreprocess.1, src/mbtrn/tools/README-test.md):
+updated the data record type tables and examples to the current record
+type identifiers. The identifiers in the mbnavlist and
+mbkongsbergpreprocess manual pages did not account for
+MB_DATA_SINGLE_BEAM_PING (27), so that all of those from 27 upward were
+one too small, including the mbkongsbergpreprocess examples for using
+the secondary navigation (now -S1/31 -S2/31) and the second attitude
+system (now -S3/57). The mbnavlist table now lists all record types up
+to MB_DATA_DATUM (75). MB_DATA_SONARDEPTH has been corrected to
+MB_DATA_SENSORDEPTH.</p>
+<p>Macro mbpy_grdplot (src/macros/mbpy_grdplot,
+src/macros/python/mbpy_color.py): the --stretch-color histogram
+equalization now works with the sealevel palettes (8 and 9), which
+previously failed. The bathymetry and topography are equalized
+separately, with a color boundary at 0 m, Haxby colors below sea level
+and browns above. Large grids are decimated before equalization to limit
+memory use.</p>
+<p>MBaux library (src/mbaux/mb_gisfile.c): added reading and writing of
+new MB-System polyline, polygon and point files, and import from and
+export to ESRI shapefiles (using GDAL), as the first step toward
+displaying GIS data in mbgrdviz. The text formats are similar to route
+and site files and can also be plotted directly with GMT. Shapefile
+import converts projected coordinates to longitude and latitude and can
+keep only the features overlapping a grid. A unit test has been added
+(test/mbaux).</p>
+<p>MBview library (src/mbview/mbview_polyline.c, mbview_polygon.c,
+mbview_gispoint.c): added display of GIS polylines, polygons and points,
+grouped in layers and shared by all mbview windows like sites and
+routes, as the second step toward displaying GIS data in mbgrdviz. Lines
+and polygon outlines are draped on the topography; parts lying off the
+grid are drawn at the top of the grid's depth range. Polylines can be
+converted to routes and routes to polylines. The data are displayed but
+not edited, and mbnavadjust and mbeditviz are unaffected.</p>
+<p>MBview library (src/mbview/mbview_process.c, mbview_route.c,
+mbviewprivate.h): fixed three bugs. Reprojecting vector data, as happens
+when a second window is opened, used the navigation arrays instead of
+the vector arrays, which could crash when vectors were loaded without
+navigation. When adding a route, points following a point rejected as
+far outside the view were inserted past the end of the route, and a
+route with every point rejected still had its color and name written to
+unallocated memory. The OpenGL display list for site symbols shared its
+ID with a grid display list of the tenth mbview window.</p>
+<p>MBview library (src/mbview/mbview_gislist.c, MB3DGisList.c,
+MB3DView.c, MB3DRouteList.c): added the controls for GIS polylines,
+polygons and points as the third step toward displaying GIS data in
+mbgrdviz. The View menu has Polylines, Polygons and Points toggles, and
+the Controls menu has a list window for each type showing its layers and
+features. In these lists clicking an item twice changes its color (for a
+layer, all its features), and the selected items can be shown or hidden,
+deleted, or for polylines converted to routes. The Route List can
+convert selected routes to polylines. These controls are inactive in
+programs that do not display GIS data, such as mbnavadjust and
+mbeditviz.</p>
+<p>MBview library (src/mbview/mbview_callbacks.c): fixed two bugs. The
+View menu Vector toggle of a second or later mbview window turned the
+vector display of the first window on or off instead of its own. In the
+Site List, a selection event with no site selected changed the color of
+a nonexistent site, writing outside the site data.</p>
+<p>Program mbgrdviz (src/mbgrdviz/mbgrdviz_callbacks.c): added the
+display of GIS polylines, polygons and points. The Action menu of each
+window can open MB-System polyline (.pln), polygon (.plg) and point
+(.pts) files, import an ESRI shapefile, save each type to an MB-System
+file and export each type as a shapefile; the main window File menu can
+also open the three file types. A shapefile import keeps only the
+features overlapping the grid of the window it was started from, and
+features without color and size attributes are drawn in a default color
+for each type. Windows opened with "Open Region as New View" show the
+GIS data as their source window does.</p>
+<p>Documentation (src/man/man1/mbgrdviz.1): described the display of GIS
+polylines, polygons and points, the new menu items and list windows, the
+conversions between polylines and routes, the MB-System polyline,
+polygon and point file formats, and the import and export of shapefiles.
+Also completed the rest of the manual page, which described many
+controls only by name: every menu item, button and dialog of the main
+and display windows is now described, along with the mouse and keyboard
+actions, the survey route generation dialog, and the route, site, vector
+and profile file formats. Outdated entries were corrected.</p>
+<p>MBview library (src/mbview/mbview_callbacks.c): fixed two more bugs.
+In the Route List, clicking a route name twice also wrote a waypoint
+type outside the route data. Actions that open a new window, such as
+"Open Region as New View", were made active when all mbview windows were
+in use instead of inactive.</p>
+<p>Program mbgrdviz (src/mbgrdviz/mbgrdviz_callbacks.c): fixed two bugs.
+The "## VECTORCOLOR" line of vector files was ignored. Opening a
+navigation or swath datalist that cannot be read put mbgrdviz into an
+endless loop; it now reports the error.</p>
+<p>MBview library (src/mbview/mbview_process.c): fixed the slope
+calculation along the top row of the grid, which used the cells of the
+next column and, for the last grid cell, read past the end of the
+grid.</p>
+<p>Program mbgrdviz (src/mbgrdviz/mbgrdviz_callbacks.c,
+src/man/man1/mbgrdviz.1): fixed the Risi 2 script exports. The "move
+bearing" commands now give the range then the bearing, every command
+ends its line, and the leg bearings are computed from the waypoints. The
+static heading script, previously identical to the variable heading one,
+now keeps the heading of the first leg.</p>
+<p>Program mbgrdviz (src/mbgrdviz/mbgrdviz_callbacks.c): fixed more
+bugs. Saving two or more routes reversed or as Risi scripts lost every
+route after the first. A site whose latitude in degrees and minutes
+could not be read was added with an unset latitude. The survey route
+dialog read its area from the first window instead of the window it was
+opened from. The Risi script projection was not set for a route starting
+at exactly 84 degrees N.</p>
+<p>MBview library (src/mbview/mbview_callbacks.c,
+src/mbview/mbview_nav.c): fixed more bugs. Each Apply in the Shading
+dialog reversed the overlay shading direction. The Projections dialog
+showed no projection selected in Spheroid mode. Unchecking View &gt;
+Profile did not close the profile window. With inactive navigation
+present, the Navigation List could highlight the wrong item.</p>
+<p>The above work was done with the assistance of the AI coding
+assistant Claude Opus 5.5 (Anthropic, model claude-opus-5-5), operating
+as Claude Code under developer supervision and review.</p>
+<p>Program mbgrdviz: Augmented shell text output from Area picks to
+include the longitude, latitude and depth of the four corner points and
+the center point.</p>
+<hr />
+<h4 id="583beta25-october-14-2026">5.8.3beta25 (October 14, 2026)</h4>
+<p>Build system (Linux): fixed a link failure of the TRN utility
+trn-client reported in issue #1627, in which linking failed with
+"undefined reference to symbol 'sem_close@@GLIBC_2.2.5'" and
+"libpthread.so.0: error adding symbols: DSO missing from command line".
+The program src/mbtrnav/utils/trn-client.cpp, added in 5.8.3beta10,
+calls the POSIX semaphore functions sem_open() and sem_close(), but its
+target in src/mbtrnav/CMakeLists.txt did not link the pthread library.
+With glibc 2.34 and later (e.g. stock Ubuntu 22.04 with glibc 2.35)
+these functions are part of libc and the omission is harmless, but with
+older glibc versions they reside only in libpthread, which was reaching
+the link only as an indirect dependency of another library, and modern
+linkers do not resolve symbols through such indirect dependencies. The
+trn-client target now links pthread explicitly, as the trnw library
+target already did.</p>
+<p>MBIO library: fixed a segmentation fault in mbpreprocess for every
+format that does not have its own format-specific preprocess function
+(e.g. format 51 for old Simrad EM1000 data). In 5.8.3beta17
+mb_preprocess() was changed to fall back on the new generic
+preprocessing function mb_preprocess_generic() for such formats, but
+this fallback was also invoked by the "pre-read" call that mbpreprocess
+makes before reading any data, in which the data storage pointer is
+NULL, so the generic function dereferenced a NULL pointer. The generic
+fallback is now used only when there is a data record to process, and
+mb_preprocess_generic() itself now returns immediately if passed a NULL
+store.</p>
+<p>Program mbpreprocess: fixed processing of data from the old Simrad
+multibeam formats 51, 53, and 54 (MBF_EMOLDRAW, MBF_EM12IFRM,
+MBF_EM12DARW), reported in issue #1626. These formats use the
+mbsys_simrad data structure but are output by mbpreprocess in format 57
+(MBF_EM300MBA), which uses the mbsys_simrad2 data structure. Previously
+mbpreprocess passed the old structure directly to the format 57 writer,
+causing a segmentation fault. The translation function previously found
+only in mbcopy has been moved into the MBIO library as
+mbsys_simrad2_from_simrad() (in mbsys_simrad2.c), and is now used by
+both mbcopy and mbpreprocess. Also fixed a heap overflow in mbpreprocess
+in which the arrays used to extract records from the output file were
+sized for the input format (121 beams for format 51) rather than the
+output format (up to 256 beams for format 57); these arrays are now
+sized for the larger of the two. Also fixed the mbpreprocess summary of
+records read in pass 2, which included the comment, navigation, and
+attitude records counted in pass 1. Tests of mbpreprocess on the format
+51 and format 54 test data files, checking that the format 57 output
+reads back completely, have been added to
+test/utilities/mbpreprocess_test.py.</p>
+<p>MBIO library, format 57 (MBF_EM300MBA, src/mbio/mbr_em300mba.c):
+fixed reading of format 57 files converted from old Simrad data (EM12S,
+EM12D, EM121, EM100, EM1000), also reported in issue #1626. The reader
+determines the byte order of the data from the sonar model in the first
+datagram, but the list of models used for this test in
+mbr_em300mba_chk_label() included only the newer sonars, so a converted
+file that did not begin with a record from one of those models (e.g.
+mbcopy -F51/57 -N output, or mbpreprocess output beginning with a
+position record) read back as containing no records. The old Simrad
+models have been added to the byte order test.</p>
+<p>MBIO library, format 71 (MBF_MBLDEOIH, src/mbio/mbsys_ldeoih.c):
+mbsys_ldeoih_insert() now sets the amplitude of null beams to zero, as
+it already did for their bathymetry. Previously these values were left
+unset, so in a long running process (a library caller, or a program
+processing several files) stale memory contents could be written to
+*.fbt files and format 71 output. Reported in issue #1626.</p>
+<p>Programs mbcopy and mbpreprocess: when translating old Simrad (format
+51, 53, 54) data to format 57, soundings that lie at or above the
+transducer depth (which are not physically possible) previously wrapped
+around in the unsigned depth values stored in format 57, producing
+spurious depths of about 1313 m for the EM1000. Such soundings now have
+their depth set to zero and are flagged as sonar-flagged rather than
+appearing as good, deep soundings.</p>
+<p>MBIO library, formats 56 and 57 (MBF_EM300RAW, MBF_EM300MBA,
+src/mbio/mbr_em300raw.c, src/mbio/mbr_em300mba.c,
+src/mbio/mbsys_simrad2.c): fixed a heap buffer overflow in
+mbsys_simrad2_extract(), reported in issue #1631, that caused programs
+such as mblist to abort with "double free or corruption" on Linux when
+reading EM120, EM300, EM1002, EM2000, and EM3000 data. In 5.8.3beta13
+the maximum number of beams in the mbsys_simrad2 data structure
+(MBSYS_SIMRAD2_MAXBEAMS) was increased from 254 to 256, but the format
+info functions mbr_info_em300raw() and mbr_info_em300mba() still
+declared a maximum of 254 beams, so the bathymetry and amplitude arrays
+allocated by programs held 254 values while mbsys_simrad2_extract()
+cleared 256 values for every ping. The info functions now declare
+MBSYS_SIMRAD2_MAXBEAMS beams, as proposed in the issue, and the format
+descriptions now give up to 256 beams. A related overflow for dual head
+EM3002 data was also fixed: mbsys_simrad2_extract() cleared the beams of
+the second head up to twice the maximum number of beams (512) regardless
+of the array size, which is set from the sum of the beam counts of the
+two heads reported by mbsys_simrad2_dimensions(); it now clears only the
+second head's beams. The output for the file from the issue (PANGAEA
+dataset 965070) is unchanged, and it now reads without memory
+errors.</p>
+<p>MBIO library, format 181 (MBF_SAMESURF, src/mbio/mbsys_surf.h,
+src/mbio/mbsys_surf.c, src/mbio/mbr_samesurf.c): fixed a segmentation
+fault in mbinfo, mblist, and other programs reading SAM Electronics SURF
+files containing sidescan data, reported in issue #1630 for Hydrosweep
+DS-2 data from PANGAEA. The SURF library header src/surf/mb_sapi.h
+declares the variable length arrays of the SURF records (beam angles,
+sound velocity profile values, receive and transmit parameter sets, and
+sidescan samples) with a dimension of one, and the mbsys_surf_struct
+data structure followed each of these records with a reserved array to
+hold the remaining values, which were then accessed by indexing past the
+declared dimension. This is undefined behavior in C, and GCC at the -O3
+optimization level of Release builds uses the declared dimension to
+shorten the loops making these accesses: the port sidescan loop in
+mbsys_surf_extract() ran past the end of the output arrays, causing the
+crash reported in the issue, and the beam angle and sound velocity
+profile loops in mbsys_surf_ttimes() and mbsys_surf_extract_svp() were
+reduced to their first value only, so that travel time and angle data
+used by mbprocess raytracing were silently wrong (the Clang builds used
+on MacOS were not affected). The reserved arrays have been replaced by
+properly dimensioned arrays in mbsys_surf_struct, into which
+mbr_rt_samesurf() now copies the variable length data, and all uses of
+these values now refer to these arrays. Also fixed: the port sidescan
+loop in mbsys_surf_extract() omitted one sample, leaving the outermost
+port pixel of every ping zero; mbsys_surf_insert() wrote the starboard
+sidescan starting at the starboard sample count rather than after the
+port samples; the number of port samples and of sound velocity profile
+values is now limited to the array dimensions; and the verbose debug
+output listed the wrong number of sidescan samples. The issue's pointer
+based patch was not used, since it relied on the same undefined
+behavior. For the file from the issue, bathymetry output is unchanged
+and the only change in the sidescan output is that the outermost port
+pixel of each of the 892 pings now has its recorded value instead of
+zero.</p>
+<p>Programs mbnavadjust and mbnavadjustmerge: when swath data are
+imported into an mbnavadjust project, the ancillary files (*.inf, *.fnv)
+are now created for each of the section files written by
+mbnavadjust_import_file() in src/mbnavadjust/mbnavadjust_io.c, by
+calling mb_make_info() after each section file is closed.</p>
+<p>Program mbeditviz: fixed the regeneration of missing or out of date
+reverse edit save files (*.resf) when loading processed swath files.
+When a *.resf file was needed, mbeditviz ran "mbprocess -P" on the file
+after it had already locked the file for editing, so mbprocess always
+declined to process the locked file and the *.resf file was never
+created. The *.resf file is now checked, and mbprocess run if necessary,
+before mbeditviz locks the file, so the processed file then read by
+mbeditviz is the one the *.resf file corresponds to. The *.resf file is
+now also regenerated if it is older than the processed file, the path
+passed to mbprocess is quoted, and a warning is printed if the *.resf
+file still could not be generated, in which case the beam flags of the
+processed file are treated as the original states.</p>
+<p>Development documentation: added two files to the top level of the
+source distribution for developers using the AI coding assistant Claude
+Code. CLAUDE.md holds the shared project instructions that Claude Code
+reads at the start of every session, including the MBIO architecture and
+coding conventions, the requirement that both the CMake and Autotools
+builds be maintained, the test suite policy, portability rules for Linux
+and Windows MinGW-w64 builds, the rule that code synced from other
+projects (TRN, GSF, and vendored third party code) is not edited without
+asking, the ChangeLog and version numbering procedures, the commit
+message style, and the requirement that AI assistance be disclosed in
+the ChangeLog and in commit messages. MB-System_Claude_Code_Guide.md
+explains how to set up and use Claude Code for MB-System development,
+including an example macOS and Homebrew build setup, use of the Claude
+desktop app and Remote Control, worktrees, the investigate, build, test,
+and document working loop, and permission settings. The guide is based
+on drafts by Christian Ferreira. Personal settings for each developer go
+in a CLAUDE.local.md file, which, together with the personal and runtime
+files Claude Code writes under .claude/, is now excluded by
+.gitignore.</p>
+<p>Build system (Autotools): repaired the Autotools build, which had
+fallen out of step with the CMake build and failed at several stages.
+The Qt based prototype programs (src/qt-*) are no longer referenced by
+configure.ac or src/Makefile.am; these are built only by CMake
+(-DbuildQt=ON), and the stale reference to the removed directory
+src/qt-mbgrdviz-2 caused automake to fail. Because Autoconf 2.72 and
+later compile in C23 mode when possible, which rejects the K&amp;R style
+function definitions in the GCTP code in src/mbtrnav/gctp, configure now
+skips the C23 check so that the compiler's default C mode is used, as in
+the CMake build. The OpenCV checks now work with OpenCV 5, which removed
+the C API function cvCopy() that configure tested for and split the
+calib3d library into calib, geometry, and stereo; the opencv5 pkg-config
+package is also recognized. When PROJ, FFTW, or OpenCV are found through
+pkg-config, the compiler and linker flags it reports are now used, which
+is necessary when these packages are not in the default search path
+(e.g. Homebrew in /opt/homebrew on Apple Silicon). On MacOS with
+Homebrew, configure now finds X11, Motif, and OpenGL without location
+options, using the mb-mesa and mb-mesa-glu formulae from the
+dwcaress/mbsystem tap for OpenGL when both are installed (as with
+-DmacosUseMbMesa=ON in CMake); locations given with --with-... options
+still take precedence. The Makefile.am files have been brought up to
+date with the CMake build: src/mbnavadjust now builds the
+libmbnavadjust_core library and always builds mbnavadjustmerge, building
+the mbnavadjust GUI only when Motif and OpenGL are available; the
+programs mbfnv2navlab, mbnavlab2fnv, mbusbl2fnv, and mbmapscale are now
+built, and the mbmakedatalist source is now found; mbgrd2gltf no longer
+references the removed compression.cpp and now compiles the bundled
+Draco encoder sources with C++17; src/mbmesh is now configured, and its
+unit tests (now four, as in CMake) link; the TRN Makefile.am files in
+src/mbtrnav use the renamed source files of the TRN client and test
+programs and include TrnAttr.cpp in libtrncli; and src/mbtrn refers to
+the TRN libraries in the build tree rather than the source tree. On
+MacOS 26 Tahoe with Homebrew, ./configure with the TRN, OpenCV, and test
+options, followed by make, make check, and make install, now
+succeeds.</p>
+<p>GSF library (src/gsf/gsf_indx.c): fixed a compile failure reported in
+issue #1605, in which building on Linux with the compiler in strict ISO
+C mode (e.g. CC=c99 or -std=c99) failed with "'S_IFDIR' undeclared" in
+the function is_path(). In strict mode the glibc header sys/stat.h does
+not define the file type constant S_IFDIR, but it always defines the
+POSIX macro S_ISDIR(); builds in the compiler's default GNU C mode, as
+used by the CMake and Autotools builds, were not affected. The directory
+test now uses S_ISDIR(), which is also correct for sockets and block
+devices, whose file type bits include those of S_IFDIR. This is a local
+change to the Leidos GSF library code, and must be reapplied when the
+source from a future GSF release is imported.</p>
+<p>Documentation: BuildAndInstall.md has been updated to match the
+installation instructions on the MB-System web site (<a
+href="https://www.mbari.org/technology/mb-system/installation/">https://www.mbari.org/technology/mb-system/installation/</a>),
+including MacOS installation with Homebrew (now recommended) or
+MacPorts, Ubuntu 24.04, Debian 13, the OTPS tidal model setup, and the
+list of installed files, and it now describes building with the
+Autotools on MacOS with Homebrew. BuildAndInstall.pdf is now generated
+from BuildAndInstall.md by a new optional CMake target, buildandinstall
+(cmake --build . --target buildandinstall), using pandoc and weasyprint
+in the same way as the changelog target, with the print style overrides
+in src/htmlsrc/BuildAndInstall_print.css.</p>
+<p>MBIO library, formats 261 (MBF_KEMKMALL), 58 and 59 (MBF_EM710RAW,
+MBF_EM710MBA), 89 (MBF_RESON7K3), and 191 and 192 (MBF_IMAGE83P,
+MBF_IMAGEMBA) (src/mbio/mbsys_kmbes.c, src/mbio/mbsys_simrad3.c,
+src/mbio/mbsys_reson7k3.c, src/mbio/mbsys_image83p.c): fixed the test
+for reverse mounted transmit and receive arrays in the preprocess
+functions used by mbpreprocess, which caused processed bathymetry to
+have depths of zero for Kongsberg EM124 kmall data from the R/V Maria S.
+Merian. The preprocess functions treat an array as reverse mounted
+(rotated 180 degrees) if its mount heading is more than 100 degrees from
+zero, but the test did not allow for headings reported in the range 0 to
+360 degrees, so a forward mounted array with a heading of 359.83
+degrees, as for the Merian's EM124 transmit array, was treated as
+reverse mounted. Its heading was then rotated by 180 degrees and its
+steering angles reversed in sign, so that for kmall data mbpreprocess
+wrote beam takeoff angles of about 120 degrees from vertical into the
+MB-System XMT datagrams. When mbprocess recalculated the bathymetry by
+raytracing, these upward directed rays reached the sea surface,
+producing depths of zero and acrosstrack distances about one thousandth
+of the correct values. Because the processed files then had a maximum
+altitude of zero, mbgrid also failed to grid them when no grid cell size
+was specified, since its default cell size is derived from the altitude.
+The mount headings are now mapped to the range -180 to 180 degrees
+before the test. Data preprocessed with earlier versions in which an
+array mount heading is between 260 and 360 degrees must be preprocessed
+again. For the Merian data, the bathymetry recalculated by raytracing
+now agrees with the Kongsberg realtime soundings to within a mean of -3
+to -6 m and an rms of 9 to 12 m in water depths of about 4600 m.</p>
+<p>Python plotting macros mbpy_grdplot, mbpy_grd3dplot, mbpy_histplot,
+and mbpy_xyplot (src/macros/mbpy_*, src/macros/python/mbpy_misc.py):
+option values beginning with a minus sign that are not plain negative
+numbers, such as --zbounds "-30/0" for an amplitude mosaic in dB or
+--region -125/-120/30/35 for a region with negative longitudes, are now
+accepted. Previously the Python argparse module treated such a value as
+another option, so the command failed with "argument -Z/--zbounds:
+expected one argument". A new function join_dash_values() in
+mbpy_misc.py now attaches such a value to the option that takes it (e.g.
+--zbounds=-30/0 or -Z-30/0) before the command line is parsed; a
+following argument that is itself one of the program's options is still
+treated as an option.</p>
+<p>This work was done with the assistance of the AI coding assistant
+Claude Opus 5.5 (Anthropic, model claude-opus-5-5), operating as Claude
+Code under developer supervision and review, which diagnosed the cause
+of the link failure reported in issue #1627, diagnosed the mbpreprocess
+segmentation faults and the format 57 depth wraparound encountered with
+old Simrad EM1000 data, checked the remaining problems reported in issue
+#1626 against the code and test data, diagnosed the mbeditviz *.resf
+file locking conflict, confirmed and reproduced the format 56 and 57
+heap buffer overflow reported in issue #1631 and found the related dual
+head EM3002 overflow, confirmed the cause of the format 181 SURF crash
+reported in issue #1630 and found the related silent beam angle and
+sound velocity profile errors and sidescan off-by-one errors, diagnosed
+the strict C99 compile failure in the GSF library reported in issue
+#1605, diagnosed and repaired the failures of the Autotools build,
+diagnosed the misidentified reverse mounted transducer arrays that
+caused zero depths in processed EM124 kmall data, diagnosed the
+rejection of option values beginning with a minus sign by the mbpy_*
+plotting macros, implemented the fixes, and verified the builds and
+results, and which reviewed the draft Claude Code instructions and guide
+against project practice and revised them and updated BuildAndInstall.md
+to match the web site.</p>
+<hr />
+<h4 id="583beta24-october-5-2026">5.8.3beta24 (October 5, 2026)</h4>
+<p>Build system (MacOS, Homebrew): fixed a build failure when building
+with the private mb-mesa and mb-mesa-glu kegs (cmake
+-DmacosUseMbMesa=ON), in which compiling mbview failed with "fatal
+error: 'GL/glu.h' file not found". The local FindOpenGL module
+(build-utils/FindOpenGL.cmake) took libGL and the OpenGL headers from
+the mb-mesa keg and libGLU from the mb-mesa-glu keg, but set the OpenGL
+include directory only to the mb-mesa include directory, while GL/glu.h
+is installed only in the mb-mesa-glu keg. Because both kegs are
+keg-only, their headers are not linked into /opt/homebrew/include, so
+nothing placed glu.h on the compiler's include path. Builds made through
+the mbsystem-beta Homebrew formula were not affected because Homebrew's
+build environment adds the include directories of keg-only dependencies
+automatically; the failure appeared in manual builds run from a shell.
+The OpenGL include directory now includes both ${MBMESA_PREFIX}/include
+and ${MBMESAGLU_PREFIX}/include, in both the pre-Tahoe and the
+Tahoe-or-later MacOS Homebrew branches. Verified by a full build with
+-DmacosUseMbMesa=ON, confirming that libmbview links against mb-mesa's
+libGL and mb-mesa-glu's libGLU.</p>
+<p>Build system (Windows): incorporated the platform-independent parts
+of pull request #1603 (Joaquim Luis, MSVC build fixes) without merging
+the pull request itself. The remaining, MSVC-specific parts of #1603
+were not adopted because they used _WIN32 guards that also apply to
+MinGW-w64 builds and, when cross-compiled with MinGW-w64, broke them.
+The changes adopted are:</p>
+<ul>
+<li>GSF library: src/gsf/gsf_enc.c had CR-only (classic Mac) line
+endings, which caused the MSVC preprocessor to silently drop every
+gsfEncode* function and the mbgsf DLL link to fail. The file has been
+converted to LF line endings; the code itself is unchanged.</li>
+<li>Program mbnavadjust (src/mbnavadjust/mbnavadjust_io.c): in
+mbnavadjust_new_project(), the variable mode holding the result of
+mkdir() was declared only in the non-Windows branch but used
+unconditionally in the following error message, so the file did not
+compile on Windows. It is now declared in both branches.</li>
+<li>Program mbnavadjust (src/mbnavadjust/mbnavadjust_invertnav.c):
+removed a redundant gethostname() call made just after
+mb_user_host_date() had already filled in the host name (including
+mb_user_host_date()'s Windows fallback to the USERDOMAIN environment
+variable), together with the &lt;unistd.h&gt; include it required. The
+undeclared gethostname() was a compile error under MinGW-w64; the output
+file header is unchanged on other platforms.</li>
+<li>CMake: added a top-level MB_SYSLIBS variable listing the system
+libraries (m and pthread) linked by MB-System libraries and programs,
+and used it in place of the hardcoded m and pthread link libraries for
+mbio, dump_gsf, the src/utilities programs, and the src/photo programs.
+MB_SYSLIBS is empty when building with MSVC, which has the math
+functions built into its C runtime and provides no libm or libpthread;
+it is unchanged for MinGW-w64, Linux, and MacOS builds.</li>
+<li>MBIO library (src/mbio/mb_io.h): the global arrays
+mb_sensor_type_id[] and mb_sensor_type_string[] are now declared extern
+"C", so that C++ programs link to them correctly under MSVC, which
+(unlike gcc and clang) mangles the names of C++ global variables. They
+are also marked with a new MB_SENSOR_TYPE_API macro that expands to
+__declspec(dllexport/dllimport) only for MSVC DLL builds; MSVC does not
+export data from a DLL automatically. The macro deliberately does
+nothing for MinGW-w64, because a single dllexport in a MinGW DLL turns
+off its automatic export of all other symbols. For static MSVC builds,
+src/mbio/CMakeLists.txt defines MBIO_STATIC to suppress the
+markers.</li>
+</ul>
+<p>Verified by a full MacOS build with all 73 ctest tests passing, and
+by MinGW-w64 (GCC 16) cross-compilation of all non-GUI sources, together
+with a MinGW-w64 link of the mbgsf DLL confirming that the library's
+automatic symbol export is preserved. MSVC builds were not tested.</p>
+<p>This work was done with the assistance of the AI coding assistant
+Claude Opus 5.5 (Anthropic, model claude-opus-5-5), operating as Claude
+Code under developer supervision and review, which traced the missing
+header to the include directories set by the FindOpenGL module,
+implemented the fix, and verified the build, and which evaluated pull
+request #1603 (including MinGW-w64 cross-compilation and DLL export
+testing of the pull request), implemented the Windows build changes
+listed above, and verified them.</p>
+<hr />
+<h4 id="583beta23-october-3-2026">5.8.3beta23 (October 3, 2026)</h4>
+<p>Format 261 (MBF_KEMKMALL): fixed a georeferencing bug affecting
+Kongsberg kmall data logged in dual-swath (or any other
+multi-sub-ping-per-cycle) mode, where a single transmit/receive cycle
+produces two or more MRZ sub-pings a fraction of a second apart, each
+with its own navigation and heading. mbsys_kmbes_extract()
+(src/mbio/mbsys_kmbes.c) merges all of a cycle's sub-pings into one
+MB-System ping, but reported only the first sub-ping's navigation and
+heading for the whole merged ping while leaving every other sub-ping's
+soundings in their own, uncorrected ship-frame offsets - so any
+navigation or heading difference between sub-pings (heading in
+particular, which can differ from the reference sub-ping by a measurable
+fraction of a degree even during ordinary transit, and by tens of
+degrees elsewhere in a survey) was silently applied to the wrong beams,
+most visibly as a systematic swath-to-swath position error over sloped
+terrain. A new function, mbsys_kmbes_reproject_beam_to_reference()
+(src/mbio/mbsys_kmbes.c), reprojects each non-reference sub-ping's beams
+from its own navigation/heading frame into the reference sub-ping's
+frame - via absolute longitude/latitude, using the same rotation and
+meters-to-degrees convention already used throughout MB-System by
+mb_extract_lonlat() and mb_read() (src/mbio/mb_access.c,
+src/mbio/mb_read.c) - so every beam ends up correctly positioned once
+the single reported reference navigation and heading are applied
+downstream. Verified against a Kongsberg kmall dual-swath test dataset
+by comparing beam-by-beam output before and after the fix: soundings
+from the reference sub-ping of each cycle were unchanged, while
+soundings from the other sub-ping(s) shifted by amounts consistent with
+the sub-pings' actual navigation/heading differences.</p>
+<p>This fix was made with the assistance of the AI coding assistant
+Claude Sonnet 5 (Anthropic, model claude-sonnet-5), operating as Claude
+Code under developer supervision and review, which diagnosed the bug by
+comparing MB-System's kmall processing of an R/V Thomas G. Thompson
+EM304 survey against the same data processed through Qimera and exported
+as GSF, tracing the discrepancy to the merged-ping single-navigation
+behavior described above and confirming the fix beam by beam.</p>
+<p>Format 261 (MBF_KEMKMALL) and program mbpreprocess: fixed a second,
+larger source of navigation/heading error found during the same
+investigation, affecting Kongsberg installations that log #SKM
+attitude/heading/navigation samples from two independent sensor systems
+(kinds MB_DATA_NAV1 and MB_DATA_NAV2, corresponding to #SKM sensorSystem
+0 and 1 respectively). mbpreprocess previously defaulted, for kmall
+data, to merging MB_DATA_NAV1 unconditionally whenever --nav-async,
+--heading-async, and --attitude-async were not specified - but
+MB_DATA_NAV1 is not always the sensor system the sonar's own real-time
+processing actually uses: on the R/V Thompson test data, the #IIP
+installation datagram's own ATTI_1/ATTI_2 tags marked sensor system 0
+(MB_DATA_NAV1) as the passive standby and sensor system 1 (MB_DATA_NAV2)
+as active, so the previous hardcoded default was silently merging in the
+wrong (and substantially different, by up to about 20 degrees of
+heading) sensor's data. A new function,
+mbsys_kmbes_active_attitude_system() (src/mbio/mbsys_kmbes.c), parses
+the #IIP record's free-text install_txt for the ATTI_<n> line marked
+"U=ACTIVE" and caches the corresponding kind (MB_DATA_NAV1 or
+MB_DATA_NAV2) in a new mbsys_kmbes_struct field, active_attitude_system,
+populated automatically as soon as #IIP is read (mbr_kemkmall_rd_iip(),
+src/mbio/mbr_kemkmall.c). mbpreprocess (src/utilities/mbpreprocess.cc)
+now uses this value to resolve its
+nav_async/heading_async/attitude_async defaults for kmall data
+dynamically, per file, falling back to MB_DATA_NAV1 only if the
+installation record does not unambiguously mark one sensor system
+active; explicitly specifying --nav-async, --heading-async, or
+--attitude-async continues to override this (or any other) default
+exactly as before. The #SKM reader itself (mbr_kemkmall_rd_skm(),
+src/mbio/mbr_kemkmall.c) always assigns sensor system 0 to MB_DATA_NAV1
+and sensor system 1 to MB_DATA_NAV2, unconditionally - only the choice
+of which kind mbpreprocess merges by default has changed. The
+mbpreprocess manual page was updated to document this kmall-specific
+default-resolution behavior under --nav-async, --heading-async, and
+--attitude-async. Verified against the same R/V Thompson test dataset:
+the default (no options given) now reproduces the same heading (and
+downstream bathymetry) as explicitly specifying --nav-async=30
+--heading-async=30 --attitude-async=30, while explicitly specifying =29
+continues to force the previous (passive-sensor) behavior.</p>
+<p>This fix was made with the assistance of the AI coding assistant
+Claude Sonnet 5 (Anthropic, model claude-sonnet-5), operating as Claude
+Code under developer supervision and review, which traced the heading
+discrepancy to the #SKM sensor-system selection by directly parsing the
+raw kmall file's #IIP, #SKM, and #SPO datagrams and cross-referencing
+the ATTI_1/ATTI_2 active/passive tags against both the sonar's own
+per-ping heading and the corresponding Qimera-derived GSF export, and
+verified the fix by comparing mbpreprocess output beam by beam and
+heading by heading with and without the fix and with explicit
+--nav-async/--heading-async/--attitude-async overrides in both
+directions.</p>
+<p>Formats 56, 57, 58, and 59 (MBF_EM300RAW, MBF_EM300MBA, MBF_EM710RAW,
+MBF_EM710MBA): fixed a bug, reported in Github issue #1620, in which
+writing a Kongsberg Installation Parameter datagram with an unset
+two-character DSH, MRP, or NRP field corrupted every field written after
+it in the same datagram. mbr_em300raw.c, mbr_em300mba.c, mbr_em710raw.c,
+and mbr_em710mba.c each serialize this datagram into a growing ASCII
+buffer with repeated calls of the form
+<code>sprintf(&amp;buff[buff_len], "DSH=%c%c,", store-&gt;par\_dsh[0], store-&gt;par\_dsh[1]); buff\_len = strlen(buff);</code>;
+when a field's stored value is still at its zero-initialized default
+(both characters NUL, e.g. because the source data never carried a value
+for it), the embedded NUL bytes terminate the following
+<code>strlen(buff)</code> call early, so <code>buff\_len</code> stops
+advancing past them and the next field's <code>sprintf</code> overwrites
+the unset field in place - observed, for example, as
+<code>DSH=APS=0</code> in place of the intended
+<code>DSH=xx,APS=0</code>. All ten call sites across the four files
+(DSH, MRP, and NRP in the two EM710 readers; DSH and MRP only in the two
+EM300 readers, which have no NRP field) now write the field only when
+both characters are non-NUL, omitting it entirely otherwise, matching
+the existing convention already used for other optional string fields in
+the same functions (e.g. par_dds, par_osv). Verified using a real EM712
+format-59 file: converting it unmodified via <code>mbcopy -F59/58</code>
+reproduces well-formed output before and after the fix; after zeroing
+the DSH/MRP/NRP byte pairs of all 45 Installation Parameter datagrams in
+a copy of that file (135 fields in total) to simulate unset values, the
+pre-fix code reproduced the exact reported corruption
+(<code>DSH=APS=0</code>) while the fixed code produced clean output with
+the unset fields simply omitted.</p>
+<p>This fix was made with the assistance of the AI coding assistant
+Claude Sonnet 5 (Anthropic, model claude-sonnet-5), operating as Claude
+Code under developer supervision and review, which located every
+instance of the vulnerable
+<code>sprintf</code>/<code>strlen</code>-based serialization pattern
+across the Kongsberg format readers (rather than only the single call
+site named in the issue report), confirmed the corruption mechanism by
+temporarily reverting the fix and comparing <code>mbcopy</code> output
+on a deliberately corrupted real-data file before and after, and
+confirmed normal (all fields set) conversions are unaffected by
+comparing output before and after the fix on the unmodified source
+file.</p>
+<p>Format 261 (MBF_KEMKMALL) and programs mbpreprocess, mbprocess, and
+mbmakeplatform: redefined and extended the preprocessing of Kongsberg
+kmall data. Preprocessing is required the first time kmall data are
+read, in order to construct an #XMT and an #XMS datagram for each #MRZ
+datagram. The #XMT datagram holds the navigation, heading, sensor depth,
+and attitude for the ping together with the beam travel times and angles
+used by mbprocess to recalculate bathymetry by raytracing, and the #XMS
+datagram holds pseudosidescan derived from the snippet backscatter. When
+mbr_rt_kemkmall() (src/mbio/mbr_kemkmall.c) constructs these on reading,
+it now calls mbsys_kmbes_preprocess() with no platform model and with
+only roll, pitch, heave, and speed interpolation arrays, so the
+navigation, heading, and sensor depth logged in the #MRZ datagram are
+left unchanged and copied into the #XMT datagram. Previously the heading
+logged in the #MRZ datagram was replaced with heading interpolated from
+the asynchronous #SKM data, which differed from the logged vessel
+heading (and from the heading in the GSF files exported by Qimera) by
+amounts varying between 0.2 and 0.8 degrees; reading raw kmall data now
+reproduces the GSF heading to within 0.006 degrees. When mbpreprocess
+supplies interpolation arrays the logged values are replaced only by
+those that are supplied, for each #MRZ sub-ping at its own time, and the
+sensor depth precedence is: a sensor depth array, then
+--kluge-auv-sentry-sensordepth, then the logged value. The #MRZ
+navigation and the soundings x_reRefPoint_m, y_reRefPoint_m, and
+z_reRefPoint_m are relative to the vessel reference point, not the
+sonar, and with a platform model the merged navigation is now moved from
+the navigation sensor to the vessel reference point (the origin of the
+platform model) using the new library functions
+mb_platform_position_platform() and mb_platform_lever_origin()
+(src/mbio/mb_platform.c). The extraction of bathymetry by
+mbsys_kmbes_extract() was checked against the format specification, and
+mbsys_kmbes_extract_altitude() returned the depth below the reference
+point rather than the height of the transducer above the seafloor; it
+now subtracts the waterline offset and the transducer depth.</p>
+<p>For MB-System as a whole, the navigation and sensor depth passed by
+the format i/o functions (mb_read(), mb_get_all(), mb_extract(),
+mb_insert(), mb_extract_nav(), mb_insert_nav(), and the related write
+and put functions) are to be those of the mapping sensor rather than of
+the platform reference point, with the acrosstrack and alongtrack
+distances relative to that point; this had not previously been defined
+clearly, and some formats may need to change to follow it. Format 261
+now follows this rule while the #MRZ datagrams on disk keep Kongsberg's
+definition, with the position and soundings relative to the vessel
+reference point. The sonar reference point is the alongtrack position of
+the transmit array and the acrosstrack position of the receive array,
+because those set the alongtrack and acrosstrack positions of the
+soundings. mbsys_kmbes_extract(), mbsys_kmbes_extract_nav(),
+mbsys_kmbes_insert(), and mbsys_kmbes_insert_nav()
+(src/mbio/mbsys_kmbes.c) convert between the two, using the lever arm
+held in the #XMT datagram, which gives the reported navigation as the
+position of the sonar reference point and the soundings and
+pseudosidescan relative to it. Absolute sounding positions are unchanged
+by this: they were identical, to 1.2 mm or better, in a test that
+preprocessed the same data with the real platform and with a platform
+with zero sonar offsets, while the reported navigation and distances
+shifted by the lever arm. Data passed through unmodified (for example by
+mbcopy) leave the #MRZ datagrams byte for byte unchanged, and a
+navigation shift applied by mbprocess moves every sounding by exactly
+the shift.</p>
+<p>A new function, mbsys_kmbes_extract_platform()
+(src/mbio/mbsys_kmbes.c), builds a platform model from the free-text
+installation parameters in the #IIP datagram at the start of every kmall
+file: the multibeam sensor with its transmit and receive array offsets,
+up to three position sensors, and up to two attitude sensors, with the
+sensors marked "U=ACTIVE" selected as the data sources. This makes
+--swath=swathfile work with mbmakeplatform for format 261, and
+mbpreprocess now extracts the platform from the first kmall file's #IIP
+datagram automatically when no --platform-file is specified (a platform
+file always takes precedence). The installation angles reported for the
+attitude sensors are corrections that Kongsberg adds to the measured
+angles - verified by reproducing the roll, pitch, and heading in the GSF
+files and the #MRZ datagrams from the raw #SKM samples of both sensor
+systems - and are therefore stored negated in the platform model.</p>
+<p>The #XMT datagram is now version 1. Its ping information grew from 60
+to 68 bytes with the new fields lever_acrosstrack and lever_alongtrack,
+the displacement of the sonar reference point from the vessel reference
+point, and its navigation is now the position of the sonar reference
+point. Bathymetry raytraced by mbprocess from the #XMT travel times and
+angles is relative to the sonar, so with navigation at the sonar
+reference point mbprocess needs no lever arm handling of its own. The
+new fields follow numSoundings, and the reader steps by the
+numBytesInfoData and numBytesPerSounding values in the datagram, so
+version 0 datagrams are read as before with the new fields set to zero,
+which places the sonar reference point at the vessel reference point.
+Raytracing the #XMT angles also exposed an error in the alongtrack
+offset, which had been the vessel advance between ping time and beam
+receive time ((sector transmit delay + two way travel time) times speed)
+rather than only the advance to the sector transmit time, adding about
+30 m at transit speed; it is now sector_transmit_delay times speed, and
+version 0 datagrams have the travel time part (twtt times speed) removed
+when they are read. Verified for a single swath Sentry EM2040 dataset
+and a dual swath R/V Thompson EM124 dataset by running mbpreprocess
+(with the platform extracted automatically), mbsvplist, and mbprocess
+and comparing the raytraced soundings to Kongsberg's own #MRZ soundings,
+with no lever arm correction in mbprocess: the rms differences in
+acrosstrack distance, alongtrack distance, and depth are 0.018, 0.002,
+and 0.011 m for the Sentry data and 0.99, 2.1, and 1.3 m for the
+Thompson data. A version 0 file converted to its older form was read,
+processed, and copied with mbcopy without error or repeated correction.
+The mbpreprocess and mbprocess manual pages were updated, including
+adding the previously missing description of
+--kluge-auv-sentry-sensordepth.</p>
+<p>Format 261 (MBF_KEMKMALL): mbsys_kmbes_insert() previously overwrote
+the navigation and heading of every #MRZ sub-ping with the single
+reference sub-ping values while copying the acrosstrack and alongtrack
+distances straight into the soundings, which destroyed the logged
+navigation and heading of the other sub-pings of a dual swath ping
+whenever data were rewritten (for example by mbcopy or mbprocess). It
+now keeps each non-reference sub-ping's own navigation and heading and
+reprojects the distances back into that sub-ping's frame, as the inverse
+of the reprojection done on extraction; a dual swath file copied with
+mbcopy is unchanged beam for beam and a single swath file is unaffected.
+Also fixed a segmentation fault in mbsys_kmbes_preprocess() when running
+programs such as mbinfo with a verbose level of 5 or more, where the
+debug output dereferenced the optional navigation speed array, which is
+not defined when the data are first read.</p>
+<p>Formats 56 and 57 (MBF_EM300RAW, MBF_EM300MBA, handled by
+mbsys_simrad2.c) and 58 and 59 (MBF_EM710RAW, MBF_EM710MBA, handled by
+mbsys_simrad3.c) now follow the same rule that the navigation and sensor
+depth are those of the mapping sensor. In these formats the navigation
+datagrams, and so the navigation of the pings, are the location of the
+active position sensor, and the acrosstrack and alongtrack distances of
+the soundings are relative to that location, so the extract,
+extract_nav, extract_nnav, insert, and insert_nav functions of both
+modules (and the sidescan extraction) now convert to and from the sonar
+reference point using the lever arm computed from the installation
+parameters (the sonar offsets, the active position sensor offsets, and
+the roll and pitch of the ping), while the data on disk keep Kongsberg's
+definition. The conversion is applied identically on extraction and
+insertion, so data passed through unmodified are not altered. The
+alongtrack offset returned by mbsys_simrad3_ttimes() is now only the
+advance of the platform to the transmit time of the beam's sector,
+without the position sensor offset that had been added to it, because
+that offset is now part of the reported navigation. Validated for format
+58 on EM712 data and for formats 56 and 57 on EM120 and EM122 data that
+have nonzero installation offsets by running mbpreprocess, mbsvplist,
+and mbprocess and comparing the raytraced soundings to the logged
+soundings: the alongtrack differences, which had been the offset of the
+transmit array from the position sensor (11.7 m for one of the
+datasets), are now within a few centimeters at all angles, and a
+navigation shift applied by mbprocess and a copy by mbcopy were checked
+to behave as for format 261. For the formats 56 and 57 the logged
+alongtrack and acrosstrack distances were found to be referenced to the
+transmit array location, so that is the sonar reference point there, and
+for both modules the position sensor offsets are used even when the
+sensor is flagged as motion compensated. Limitations: the lever arm is a
+single value per ping, so for dual head sonars (EM3002 and similar,
+whose heads are merged into one ping by mbsys_simrad2) the second head's
+acrosstrack offset from the first head cannot be represented and only
+its alongtrack difference is carried by mbsys_simrad2_ttimes(); this was
+not tested because no dual head data were available. The heuristic that
+mbsys_simrad3_ttimes() previously used to guess a position sensor when
+par_aps was wrong and the active sensor had a zero x offset is no longer
+applied. The older Kongsberg and Simrad formats (for example 51 and 54)
+have not been changed and still return the logged position.</p>
+<p>This work was done with the assistance of the AI coding assistant
+Claude Sonnet 5 (Anthropic, model claude-sonnet-5), operating as Claude
+Code under developer supervision and review, which compared the kmall
+bathymetry, heading, roll, and pitch with the Qimera GSF exports and
+with the raw #IIP, #SKM, and #MRZ datagrams to establish the conventions
+described above, implemented the changes, and checked them against a
+dual swath and a single swath dataset.</p>
 <hr />
 <h4 id="583beta22-september-19-2026">5.8.3beta22 (September 19,
 2026)</h4>
