@@ -28,6 +28,7 @@ libmbaux_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmbaux_la_SOURCES =
 libmbaux_la_SOURCES += mb_cheb.c
 libmbaux_la_SOURCES += mb_delaun.c
+libmbaux_la_SOURCES += mb_gisfile.c
 libmbaux_la_SOURCES += mb_intersectgrid.c
 libmbaux_la_SOURCES += mb_readwritegrd.c
 libmbaux_la_SOURCES += mb_surface.c

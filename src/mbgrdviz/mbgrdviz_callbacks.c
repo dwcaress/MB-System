@@ -93,6 +93,23 @@
 #define MBGRDVIZ_SAVESITE 20
 #define MBGRDVIZ_SAVEPROFILE 21
 #define MBGRDVIZ_REALTIME 22
+#define MBGRDVIZ_OPENPOLYLINE 23
+#define MBGRDVIZ_OPENPOLYGON 24
+#define MBGRDVIZ_OPENGISPOINT 25
+#define MBGRDVIZ_IMPORTSHAPEFILE 26
+#define MBGRDVIZ_SAVEPOLYLINE 27
+#define MBGRDVIZ_SAVEPOLYGON 28
+#define MBGRDVIZ_SAVEGISPOINT 29
+#define MBGRDVIZ_EXPORTPOLYLINE 30
+#define MBGRDVIZ_EXPORTPOLYGON 31
+#define MBGRDVIZ_EXPORTGISPOINT 32
+
+/* colors and sizes for imported shapefile features without COLOR and SIZE attributes */
+#define MBGRDVIZ_GIS_POLYLINE_COLOR MBV_COLOR_BLUEGREEN
+#define MBGRDVIZ_GIS_POLYGON_COLOR MBV_COLOR_YELLOW
+#define MBGRDVIZ_GIS_GISPOINT_COLOR MBV_COLOR_GREEN
+#define MBGRDVIZ_GIS_LINE_SIZE 2
+#define MBGRDVIZ_GIS_GISPOINT_SIZE 1
 
 /* Projection defines */
 #define ModelTypeProjected 1
@@ -185,6 +202,20 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr);
 int do_mbgrdviz_opennav(size_t instance, bool swathbounds, char *input_file_ptr);
 int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr);
 int do_mbgrdviz_openvector(size_t instance, char *input_file_ptr);
+void do_mbgrdviz_fileSelectionBox_openpolyline(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_openpolygon(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_opengispoint(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_importshapefile(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_savepolyline(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_savepolygon(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_savegispoint(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_exportpolyline(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_exportpolygon(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_exportgispoint(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_addgisactions(size_t instance);
+int do_mbgrdviz_opengis(size_t instance, int type, char *input_file_ptr);
+int do_mbgrdviz_importshapefile(size_t instance, char *input_file_ptr);
+int do_mbgrdviz_savegis(size_t instance, int type, bool shapefile, char *output_file_ptr);
 int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_savesitewpt(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr);
@@ -609,6 +640,9 @@ void do_mbgrdviz_sensitivity() {
   XtSetValues(pushButton_opennav, args, ac);
   XtSetValues(pushButton_openswath, args, ac);
   XtSetValues(pushButton_openvector, args, ac);
+  XtSetValues(pushButton_openpolyline, args, ac);
+  XtSetValues(pushButton_openpolygon, args, ac);
+  XtSetValues(pushButton_opengispoint, args, ac);
 
   int nsite;
   mbview_getsitecount(verbose, instance, &nsite, &error);
@@ -1669,6 +1703,29 @@ void do_mbgrdviz_openfile(Widget w, XtPointer client_data, XtPointer call_data) 
     /* status = */ do_mbgrdviz_saveprofile(instance, file_ptr);
   }
 
+  /* else open GIS polyline, polygon, or point data */
+  else if (mode == MBGRDVIZ_OPENPOLYLINE || mode == MBGRDVIZ_OPENPOLYGON || mode == MBGRDVIZ_OPENGISPOINT) {
+    do_mbview_message_on("Reading GIS data...", instance);
+    const int type = mode == MBGRDVIZ_OPENPOLYLINE ? MBV_GISLAYER_POLYLINE
+                         : (mode == MBGRDVIZ_OPENPOLYGON ? MBV_GISLAYER_POLYGON : MBV_GISLAYER_GISPOINT);
+    /* status = */ do_mbgrdviz_opengis(instance, type, file_ptr);
+  }
+
+  /* else import a shapefile */
+  else if (mode == MBGRDVIZ_IMPORTSHAPEFILE) {
+    do_mbview_message_on("Importing shapefile...", instance);
+    /* status = */ do_mbgrdviz_importshapefile(instance, file_ptr);
+  }
+
+  /* else save GIS polyline, polygon, or point data as an MB-System file or a shapefile */
+  else if (mode >= MBGRDVIZ_SAVEPOLYLINE && mode <= MBGRDVIZ_EXPORTGISPOINT) {
+    const bool shapefile = mode >= MBGRDVIZ_EXPORTPOLYLINE;
+    do_mbview_message_on(shapefile ? "Exporting shapefile..." : "Saving GIS data...", instance);
+    const size_t offset = shapefile ? mode - MBGRDVIZ_EXPORTPOLYLINE : mode - MBGRDVIZ_SAVEPOLYLINE;
+    const int type = offset == 0 ? MBV_GISLAYER_POLYLINE : (offset == 1 ? MBV_GISLAYER_POLYGON : MBV_GISLAYER_GISPOINT);
+    /* status = */ do_mbgrdviz_savegis(instance, type, shapefile, file_ptr);
+  }
+
   /* else set realtime data source */
   else if (mode == MBGRDVIZ_REALTIME) {
     /* Set realtime source path */
@@ -1987,6 +2044,7 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
                          &error);
         mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openvector, "Open Vector File",
                          MBV_PICKMASK_NONE, &error);
+        do_mbgrdviz_addgisactions(instance);
         mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savesite, "Save Site File", MBV_EXISTMASK_SITE,
                          &error);
         mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_saveroute, "Save Route File",
@@ -2017,6 +2075,7 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
                           MBV_EXISTMASK_ROUTE, &error);
         mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_saveprofile, "Save Profile File",
                          MBV_PICKMASK_TWOPOINT + MBV_PICKMASK_ROUTE + MBV_PICKMASK_NAVTWOPOINT, &error);
+        mbview_addactionseparator(verbose, instance, &error);
 
         mbview_addaction(verbose, instance, do_mbgrdviz_open_mbedit, "Open Selected Nav in MBedit", MBV_PICKMASK_NAVANY,
                          &error);
@@ -2029,6 +2088,7 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
 
         mbview_addaction(verbose, instance, do_mbgrdviz_open_region, "Open Region as New View",
                          MBV_PICKMASK_REGION + MBV_PICKMASK_NEWINSTANCE, &error);
+        mbview_addactionseparator(verbose, instance, &error);
         mbview_addaction(verbose, instance, do_mbgrdviz_make_survey, "Generate Survey Route from Area", MBV_PICKMASK_AREA,
                          &error);
       }
@@ -2240,6 +2300,8 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
               if (strchr(latstring, ':') != NULL) {
                 if (sscanf(latstring, "%lf:%lf", &latdeg,&latmin) == 2) {
                   sitelat[nsite] = copysign((fabs(latdeg) + fabs(latmin) / 60.0), latdeg);
+                } else {
+                  site_ok = false;
                 }
               } else if (sscanf(latstring, "%lf", &sitelat[nsite]) == 1) {
               } else {
@@ -2983,6 +3045,7 @@ int do_mbgrdviz_saveroutereversed(size_t instance, char *output_file_ptr) {
         if (npointalloc > 0) {
           status = mbview_freeroutearrays(verbose, &routelon, &routelat, &routewaypoint, &routetopo, &routebearing,
                                           &distlateral, &distovertopo, &slope, &error);
+          npointalloc = 0;
         }
       }
 
@@ -3149,14 +3212,14 @@ int do_mbgrdviz_saverisiscriptheading(size_t instance, char *output_file_ptr) {
 
             /* else if more northerly than 84 deg N then use
                     North Universal Polar Stereographic Projection */
-            else if (reference_lat > 84.0) {
+            else if (reference_lat >= 84.0) {
               int projectionid = 32661;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
 
             /* else if more southerly than 80 deg S then use
                     South Universal Polar Stereographic Projection */
-            else if (reference_lat < 80.0) {
+            else if (reference_lat <= -80.0) {
               int projectionid = 32761;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
@@ -3245,6 +3308,7 @@ int do_mbgrdviz_saverisiscriptheading(size_t instance, char *output_file_ptr) {
           if (npointalloc > 0) {
             status = mbview_freeroutearrays(verbose, &routelon, &routelat, &routewaypoint, &routetopo, &routebearing,
                                             &distlateral, &distovertopo, &slope, &error);
+            npointalloc = 0;
           }
         }
       }
@@ -3399,14 +3463,14 @@ int do_mbgrdviz_saverisiscriptnoheading(size_t instance, char *output_file_ptr) 
 
             /* else if more northerly than 84 deg N then use
                     North Universal Polar Stereographic Projection */
-            else if (reference_lat > 84.0) {
+            else if (reference_lat >= 84.0) {
               int projectionid = 32661;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
 
             /* else if more southerly than 80 deg S then use
                     South Universal Polar Stereographic Projection */
-            else if (reference_lat < 80.0) {
+            else if (reference_lat <= -80.0) {
               int projectionid = 32761;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
@@ -3495,6 +3559,7 @@ int do_mbgrdviz_saverisiscriptnoheading(size_t instance, char *output_file_ptr) 
           if (npointalloc > 0) {
             status = mbview_freeroutearrays(verbose, &routelon, &routelat, &routewaypoint, &routetopo, &routebearing,
                                             &distlateral, &distovertopo, &slope, &error);
+            npointalloc = 0;
           }
         }
       }
@@ -3581,7 +3646,7 @@ int do_mbgrdviz_saverisi2scriptheading(size_t instance, char *output_file_ptr) {
         fprintf(sfp, "##   heading rate <rate (deg/sec)>\r\n");
         fprintf(sfp, "##   heading abs <+/-heading (deg)>, <turn direction +/-1>\r\n");
         fprintf(sfp, "##   heading rel <+/-heading (deg)>\r\n");
-        fprintf(sfp, "##   move bearing, <range (m)>, <bearing (deg)>\r\n");
+        fprintf(sfp, "##   move bearing <range (m)>, <bearing relative to heading (deg)>\r\n");
         fprintf(sfp, "##\r\n");
         fprintf(sfp, "## This script assumes the survey platform starts at the origin with heading 0.0\r\n");
         fprintf(sfp, "##\r\n");
@@ -3651,14 +3716,14 @@ int do_mbgrdviz_saverisi2scriptheading(size_t instance, char *output_file_ptr) {
 
             /* else if more northerly than 84 deg N then use
                     North Universal Polar Stereographic Projection */
-            else if (reference_lat > 84.0) {
+            else if (reference_lat >= 84.0) {
               int projectionid = 32661;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
 
             /* else if more southerly than 80 deg S then use
                     South Universal Polar Stereographic Projection */
-            else if (reference_lat < 80.0) {
+            else if (reference_lat <= -80.0) {
               int projectionid = 32761;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
@@ -3686,40 +3751,35 @@ int do_mbgrdviz_saverisi2scriptheading(size_t instance, char *output_file_ptr) {
 
             /* write the route points */
             fprintf(sfp, "## altitude, %.3f\r\n", altitude);
-            fprintf(sfp, "##\n");
+            fprintf(sfp, "##\r\n");
             fprintf(sfp, "## heading abs 0.0\r\n");
-            double xx0, yy0, xx1, yy1;
-            double heading0, heading1, dheading;
+            double xx0 = 0.0;
+            double yy0 = 0.0;
+            double heading = 0.0;
+            bool first = true;
             for (j = 0; j < npointtotal; j++) {
-              double xxxx, yyyy;
-              double range;
-              double bearing, heading0, heading1;
               if (routewaypoint[j] > MBV_ROUTE_WAYPOINT_NONE) {
-                mb_proj_forward(verbose, pjptr, routelon[j], routelat[j], &xxxx, &yyyy, &error);
-                xxxx = xxxx - origin_x;
-                yyyy = yyyy - origin_y;
-                if (j == 0) {
-                  xx0 = xxxx;
-                  yy0 = yyyy;
-                  heading0 = routebearing[j];
-                }
-                else {
-                  xx1 = xxxx;
-                  yy1 = yyyy;
-                  range = sqrt((xx1 - xx0) * (xx1 - xx0) + (yy1 - yy0) * (yy1 - yy0));
-                  heading1 = routebearing[j];
-                  dheading = heading1 - heading0;
+                double xx1, yy1;
+                mb_proj_forward(verbose, pjptr, routelon[j], routelat[j], &xx1, &yy1, &error);
+                xx1 = xx1 - origin_x;
+                yy1 = yy1 - origin_y;
+                if (!first) {
+                  /* turn to the bearing of this leg, then move straight ahead */
+                  const double range = sqrt((xx1 - xx0) * (xx1 - xx0) + (yy1 - yy0) * (yy1 - yy0));
+                  const double bearing = RTD * atan2(xx1 - xx0, yy1 - yy0);
+                  double dheading = bearing - heading;
                   if (dheading > 180.0) {
                     dheading -= 360.0;
                   } else if (dheading < -180.0) {
                     dheading += 360.0;
                   }
-                  fprintf(sfp, "move bearing 0.0, %.2f", range);
-                  fprintf(sfp, "heading rel %.2f", dheading);
-                  xx0 = xx1;
-                  yy0 = yy1;
-                  heading0 = heading1;
+                  fprintf(sfp, "heading rel %.2f\r\n", dheading);
+                  fprintf(sfp, "move bearing %.2f, 0.00\r\n", range);
+                  heading = bearing;
                 }
+                xx0 = xx1;
+                yy0 = yy1;
+                first = false;
               }
             }
 
@@ -3731,6 +3791,7 @@ int do_mbgrdviz_saverisi2scriptheading(size_t instance, char *output_file_ptr) {
           if (npointalloc > 0) {
             status = mbview_freeroutearrays(verbose, &routelon, &routelat, &routewaypoint, &routetopo, &routebearing,
                                             &distlateral, &distovertopo, &slope, &error);
+            npointalloc = 0;
           }
         }
       }
@@ -3817,7 +3878,7 @@ int do_mbgrdviz_saverisi2scriptnoheading(size_t instance, char *output_file_ptr)
         fprintf(sfp, "##   heading rate <rate (deg/sec)>\r\n");
         fprintf(sfp, "##   heading abs <+/-heading (deg)>, <turn direction +/-1>\r\n");
         fprintf(sfp, "##   heading rel <+/-heading (deg)>\r\n");
-        fprintf(sfp, "##   move bearing, <range (m)>, <bearing (deg)>\r\n");
+        fprintf(sfp, "##   move bearing <range (m)>, <bearing relative to heading (deg)>\r\n");
         fprintf(sfp, "##\r\n");
         fprintf(sfp, "## This script assumes the survey platform starts at the origin with heading 0.0\r\n");
         fprintf(sfp, "##\r\n");
@@ -3887,14 +3948,14 @@ int do_mbgrdviz_saverisi2scriptnoheading(size_t instance, char *output_file_ptr)
 
             /* else if more northerly than 84 deg N then use
                     North Universal Polar Stereographic Projection */
-            else if (reference_lat > 84.0) {
+            else if (reference_lat >= 84.0) {
               int projectionid = 32661;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
 
             /* else if more southerly than 80 deg S then use
                     South Universal Polar Stereographic Projection */
-            else if (reference_lat < 80.0) {
+            else if (reference_lat <= -80.0) {
               int projectionid = 32761;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
@@ -3922,42 +3983,46 @@ int do_mbgrdviz_saverisi2scriptnoheading(size_t instance, char *output_file_ptr)
 
             /* write the route points */
             fprintf(sfp, "## altitude, %.3f\r\n", altitude);
-            fprintf(sfp, "##\n");
+            fprintf(sfp, "##\r\n");
             fprintf(sfp, "## heading abs 0.0\r\n");
-            double xx0, yy0, xx1, yy1;
-            double heading0, heading1, dheading;
+            double xx0 = 0.0;
+            double yy0 = 0.0;
+            double heading = 0.0;
+            bool first = true;
+            int nleg = 0;
             for (j = 0; j < npointtotal; j++) {
-              double xxxx, yyyy;
-              double range;
-              double bearing, heading0, heading1;
               if (routewaypoint[j] > MBV_ROUTE_WAYPOINT_NONE) {
-                mb_proj_forward(verbose, pjptr, routelon[j], routelat[j], &xxxx, &yyyy, &error);
-                xxxx = xxxx - origin_x;
-                yyyy = yyyy - origin_y;
-                if (j == 0) {
-                  xx0 = xxxx;
-                  yy0 = yyyy;
-                  heading0 = routebearing[j];
-                }
-                else {
-                  xx1 = xxxx;
-                  yy1 = yyyy;
-                  range = sqrt((xx1 - xx0) * (xx1 - xx0) + (yy1 - yy0) * (yy1 - yy0));
-                  heading1 = routebearing[j];
-                  dheading = heading1 - heading0;
-                  if (dheading > 180.0) {
-                    dheading -= 360.0;
-                  } else if (dheading < -180.0) {
-                    dheading += 360.0;
+                double xx1, yy1;
+                mb_proj_forward(verbose, pjptr, routelon[j], routelat[j], &xx1, &yy1, &error);
+                xx1 = xx1 - origin_x;
+                yy1 = yy1 - origin_y;
+                if (!first) {
+                  /* turn to the bearing of the first leg, then move on each
+                     leg at a bearing relative to that fixed heading */
+                  const double range = sqrt((xx1 - xx0) * (xx1 - xx0) + (yy1 - yy0) * (yy1 - yy0));
+                  const double bearing = RTD * atan2(xx1 - xx0, yy1 - yy0);
+                  if (nleg == 0) {
+                    heading = bearing;
+                    fprintf(sfp, "heading rel %.2f\r\n", heading);
                   }
-                  fprintf(sfp, "move bearing 0.0, %.2f", range);
-                  fprintf(sfp, "heading rel %.2f", dheading);
-                  xx0 = xx1;
-                  yy0 = yy1;
-                  heading0 = heading1;
+                  double dbearing = bearing - heading;
+                  if (dbearing > 180.0) {
+                    dbearing -= 360.0;
+                  } else if (dbearing < -180.0) {
+                    dbearing += 360.0;
+                  }
+                  fprintf(sfp, "move bearing %.2f, %.2f\r\n", range, dbearing);
+                  nleg++;
                 }
+                xx0 = xx1;
+                yy0 = yy1;
+                first = false;
               }
             }
+
+            /* return to the starting heading */
+            if (nleg > 0)
+              fprintf(sfp, "heading rel %.2f\r\n", -heading);
 
             /* write the route end */
             fprintf(sfp, "## End\r\n");
@@ -3967,6 +4032,7 @@ int do_mbgrdviz_saverisi2scriptnoheading(size_t instance, char *output_file_ptr)
           if (npointalloc > 0) {
             status = mbview_freeroutearrays(verbose, &routelon, &routelat, &routewaypoint, &routetopo, &routebearing,
                                             &distlateral, &distovertopo, &slope, &error);
+            npointalloc = 0;
           }
         }
       }
@@ -5070,7 +5136,7 @@ int do_mbgrdviz_openvector(size_t instance, char *input_file_ptr) {
             sscanf(buffer, "## VECTORNAME %s", vectorname);
           }
           else if (strncmp(buffer, "## VECTORCOLOR", 13) == 0) {
-            sscanf(buffer, "## ROUTECOLOR %d", &vectorcolor);
+            sscanf(buffer, "## VECTORCOLOR %d", &vectorcolor);
           }
           else if (strncmp(buffer, "## ROUTESIZE", 12) == 0) {
             sscanf(buffer, "## ROUTESIZE %d", &vectorsize);
@@ -5360,6 +5426,11 @@ int do_mbgrdviz_opennav(size_t instance, bool swathbounds, char *input_file_ptr)
             done = true;
           }
         }
+      }
+      else {
+        fprintf(stderr, "\nUnable to open datalist <%s>\n", input_file_ptr);
+        XBell((Display *)XtDisplay(mainWindow), 100);
+        done = true;
       }
     }
     fprintf(stderr, "Attempted to load %d files, actually read %d files\n", nfiledatalist, nfileread);
@@ -5997,6 +6068,15 @@ void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_dat
     if (status == MB_SUCCESS)
       status = mbview_enableeditroutes(verbose, instance, &error);
 
+    /* show GIS polylines, polygons, and points as in the source window */
+    if (status == MB_SUCCESS) {
+      struct mbview_struct *data_new = NULL;
+      mbview_getdataptr(verbose, instance, &data_new, &error);
+      data_new->polyline_view_mode = data_source->polyline_view_mode;
+      data_new->polygon_view_mode = data_source->polygon_view_mode;
+      data_new->gispoint_view_mode = data_source->gispoint_view_mode;
+    }
+
     /* open up mbview window */
     if (status == MB_SUCCESS) {
       /*fprintf(stderr,"about to open mbview instance:%zu\n",instance);*/
@@ -6015,12 +6095,13 @@ void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_dat
                          &error);
         mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openroute, "Open Route File", MBV_PICKMASK_NONE,
                          &error);
-        mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openvector, "Open Vector File",
-                         MBV_PICKMASK_NONE, &error);
         mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_opennav, "Open Navigation", MBV_PICKMASK_NONE,
                          &error);
         mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openswath, "Open Swath Data", MBV_PICKMASK_NONE,
                          &error);
+        mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openvector, "Open Vector File",
+                         MBV_PICKMASK_NONE, &error);
+        do_mbgrdviz_addgisactions(instance);
         mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savesite, "Save Site File", MBV_EXISTMASK_SITE,
                          &error);
         mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_saveroute, "Save Route File",
@@ -6035,6 +6116,7 @@ void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_dat
                          MBV_EXISTMASK_ROUTE, &error);
         mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_saveprofile, "Save Profile File",
                          MBV_PICKMASK_TWOPOINT + MBV_PICKMASK_ROUTE + MBV_PICKMASK_NAVTWOPOINT, &error);
+        mbview_addactionseparator(verbose, instance, &error);
 
         mbview_addaction(verbose, instance, do_mbgrdviz_open_mbedit, "Open Selected Nav in MBedit", MBV_PICKMASK_NAVANY,
                          &error);
@@ -6047,6 +6129,7 @@ void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_dat
 
         mbview_addaction(verbose, instance, do_mbgrdviz_open_region, "Open Region as New View",
                          MBV_PICKMASK_REGION + MBV_PICKMASK_NEWINSTANCE, &error);
+        mbview_addactionseparator(verbose, instance, &error);
         mbview_addaction(verbose, instance, do_mbgrdviz_make_survey, "Generate Survey Route from Area", MBV_PICKMASK_AREA,
                          &error);
       }
@@ -7404,8 +7487,9 @@ void do_mbgrdviz_arearoute_parameterchange(Widget w, XtPointer client_data, XtPo
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get source mbview instance */
-  const size_t instance = (size_t)client_data;
+  /* get source mbview instance - the callbacks are registered with
+      client_data 0, so use survey_instance as the other survey callbacks do */
+  const size_t instance = survey_instance;
 
   /* check data source for area to bounding desired survey */
   struct mbview_struct *data;
@@ -7892,3 +7976,446 @@ void do_mbgrdviz_realtimesetup_pathmode(Widget w, XtPointer client_data, XtPoint
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 }
+/*---------------------------------------------------------------------------------------*/
+/* GIS polylines, polygons, and points: MB-System polyline (.pln), polygon (.plg),
+    and point (.pts) files and ESRI shapefiles, read and written with mb_gisfile.c
+    in the mbaux library and displayed (not edited) by mbview */
+/*---------------------------------------------------------------------------------------*/
+static void do_mbgrdviz_gisdialog(Widget w, size_t instance, char *title, char *pattern, size_t mode,
+                                  XtPointer call_data) {
+  /* set title to file dialog  */
+  Cardinal ac = 0;
+  Arg args[256];
+  XtSetArg(args[ac], XmNtitle, title);
+  ac++;
+  XtSetValues(dialogShell_open, args, ac);
+  BxManageCB(w, (XtPointer) "fileSelectionBox", call_data);
+
+  /* set fileSelectionBox parameters */
+  ac = 0;
+  Boolean argok;
+  XmString tmp0 = (XmString)BX_CONVERT(dialogShell_open, pattern, XmRXmString, 0, &argok);
+  XtSetArg(args[ac], XmNpattern, tmp0);
+  ac++;
+  const size_t actionid = mode * MBV_MAX_WINDOWS + instance;
+  XtSetArg(args[ac], XmNuserData, (XtPointer)actionid);
+  ac++;
+  XtSetValues(fileSelectionBox, args, ac);
+  XmStringFree((XmString)tmp0);
+}
+/*---------------------------------------------------------------------------------------*/
+void do_mbgrdviz_fileSelectionBox_openpolyline(Widget w, XtPointer client_data, XtPointer call_data) {
+  do_mbgrdviz_gisdialog(w, (size_t)client_data, "Open Polyline File", "*.pln", MBGRDVIZ_OPENPOLYLINE, call_data);
+}
+void do_mbgrdviz_fileSelectionBox_openpolygon(Widget w, XtPointer client_data, XtPointer call_data) {
+  do_mbgrdviz_gisdialog(w, (size_t)client_data, "Open Polygon File", "*.plg", MBGRDVIZ_OPENPOLYGON, call_data);
+}
+void do_mbgrdviz_fileSelectionBox_opengispoint(Widget w, XtPointer client_data, XtPointer call_data) {
+  do_mbgrdviz_gisdialog(w, (size_t)client_data, "Open Point File", "*.pts", MBGRDVIZ_OPENGISPOINT, call_data);
+}
+void do_mbgrdviz_fileSelectionBox_importshapefile(Widget w, XtPointer client_data, XtPointer call_data) {
+  do_mbgrdviz_gisdialog(w, (size_t)client_data, "Import Shapefile", "*.shp", MBGRDVIZ_IMPORTSHAPEFILE, call_data);
+}
+void do_mbgrdviz_fileSelectionBox_savepolyline(Widget w, XtPointer client_data, XtPointer call_data) {
+  do_mbgrdviz_gisdialog(w, (size_t)client_data, "Save Polyline File", "*.pln", MBGRDVIZ_SAVEPOLYLINE, call_data);
+}
+void do_mbgrdviz_fileSelectionBox_savepolygon(Widget w, XtPointer client_data, XtPointer call_data) {
+  do_mbgrdviz_gisdialog(w, (size_t)client_data, "Save Polygon File", "*.plg", MBGRDVIZ_SAVEPOLYGON, call_data);
+}
+void do_mbgrdviz_fileSelectionBox_savegispoint(Widget w, XtPointer client_data, XtPointer call_data) {
+  do_mbgrdviz_gisdialog(w, (size_t)client_data, "Save Point File", "*.pts", MBGRDVIZ_SAVEGISPOINT, call_data);
+}
+void do_mbgrdviz_fileSelectionBox_exportpolyline(Widget w, XtPointer client_data, XtPointer call_data) {
+  do_mbgrdviz_gisdialog(w, (size_t)client_data, "Export Polylines as Shapefile", "*.shp", MBGRDVIZ_EXPORTPOLYLINE, call_data);
+}
+void do_mbgrdviz_fileSelectionBox_exportpolygon(Widget w, XtPointer client_data, XtPointer call_data) {
+  do_mbgrdviz_gisdialog(w, (size_t)client_data, "Export Polygons as Shapefile", "*.shp", MBGRDVIZ_EXPORTPOLYGON, call_data);
+}
+void do_mbgrdviz_fileSelectionBox_exportgispoint(Widget w, XtPointer client_data, XtPointer call_data) {
+  do_mbgrdviz_gisdialog(w, (size_t)client_data, "Export Points as Shapefile", "*.shp", MBGRDVIZ_EXPORTGISPOINT, call_data);
+}
+/*---------------------------------------------------------------------------------------*/
+/* add the GIS actions to the action menu of an mbview window */
+void do_mbgrdviz_addgisactions(size_t instance) {
+  mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openpolyline, "Open Polyline File", MBV_PICKMASK_NONE,
+                   &error);
+  mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openpolygon, "Open Polygon File", MBV_PICKMASK_NONE,
+                   &error);
+  mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_opengispoint, "Open Point File", MBV_PICKMASK_NONE,
+                   &error);
+  mbview_addactionseparator(verbose, instance, &error);
+  mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_importshapefile, "Import Shapefile", MBV_PICKMASK_NONE,
+                   &error);
+  mbview_addactionseparator(verbose, instance, &error);
+  mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savepolyline, "Save Polyline File",
+                   MBV_EXISTMASK_POLYLINE, &error);
+  mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savepolygon, "Save Polygon File", MBV_EXISTMASK_POLYGON,
+                   &error);
+  mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savegispoint, "Save Point File", MBV_EXISTMASK_GISPOINT,
+                   &error);
+  mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_exportpolyline, "Export Polylines as Shapefile",
+                   MBV_EXISTMASK_POLYLINE, &error);
+  mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_exportpolygon, "Export Polygons as Shapefile",
+                   MBV_EXISTMASK_POLYGON, &error);
+  mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_exportgispoint, "Export Points as Shapefile",
+                   MBV_EXISTMASK_GISPOINT, &error);
+}
+/*---------------------------------------------------------------------------------------*/
+/* add GIS data read from a file to mbview: each layer of the file becomes an
+    mbview layer, then the display of the type is turned on */
+static int do_mbgrdviz_addgisdata(size_t instance, struct mb_gisdata_struct *gis, int *nadded, int *nfailed) {
+  int status = MB_SUCCESS;
+  *nadded = 0;
+  *nfailed = 0;
+
+  /* mbview layer for each file layer */
+  int *layermap = NULL;
+  if (gis->nlayer > 0)
+    status = mb_mallocd(verbose, __FILE__, __LINE__, gis->nlayer * sizeof(int), (void **)&layermap, &error);
+  for (int i = 0; status == MB_SUCCESS && i < gis->nlayer; i++)
+    status = mbview_addgislayer(verbose, instance, gis->type, gis->hasz, gis->layers[i].name, &layermap[i], &error);
+
+  /* features */
+  if (status == MB_SUCCESS && gis->type == MB_GIS_POINT) {
+    double *lon = NULL, *lat = NULL, *z = NULL;
+    int *color = NULL, *size = NULL, *layer = NULL;
+    mb_path *name = NULL;
+    if (gis->nfeature > 0)
+      status = mbview_allocgispointarrays(verbose, gis->nfeature, &lon, &lat, &z, &color, &size, &layer, &name, &error);
+    if (status == MB_SUCCESS && gis->nfeature > 0) {
+      for (int i = 0; i < gis->nfeature; i++) {
+        const struct mb_gisfeature_struct *feature = &gis->features[i];
+        lon[i] = feature->lon[0];
+        lat[i] = feature->lat[0];
+        z[i] = feature->z[0];
+        color[i] = feature->color;
+        size[i] = feature->size;
+        layer[i] = layermap[feature->layer];
+        snprintf(name[i], sizeof(mb_path), "%s", feature->name);
+      }
+      if (mbview_addgispoints(verbose, instance, gis->nfeature, lon, lat, z, color, size, layer, name, &error) == MB_SUCCESS)
+        *nadded = gis->nfeature;
+      else
+        *nfailed = gis->nfeature;
+      mbview_freegispointarrays(verbose, &lon, &lat, &z, &color, &size, &layer, &name, &error);
+    }
+  }
+  else if (status == MB_SUCCESS) {
+    for (int i = 0; i < gis->nfeature; i++) {
+      struct mb_gisfeature_struct *feature = &gis->features[i];
+      int index;
+      int status_add;
+      if (gis->type == MB_GIS_POLYLINE)
+        status_add = mbview_addpolyline(verbose, instance, feature->npart, feature->partstart, feature->npoint, feature->lon,
+                                        feature->lat, feature->z, feature->color, feature->size, feature->name,
+                                        layermap[feature->layer], &index, &error);
+      else
+        status_add = mbview_addpolygon(verbose, instance, feature->npart, feature->partstart, feature->parttype,
+                                       feature->npoint, feature->lon, feature->lat, feature->z, feature->color, feature->size,
+                                       feature->fillcolor, feature->name, layermap[feature->layer], &index, &error);
+      if (status_add == MB_SUCCESS)
+        (*nadded)++;
+      else
+        (*nfailed)++;
+    }
+  }
+  int error_free = MB_ERROR_NO_ERROR;
+  mb_freed(verbose, __FILE__, __LINE__, (void **)&layermap, &error_free);
+
+  /* turn on the display and update the list and the window */
+  if (*nadded > 0) {
+    if (gis->type == MB_GIS_POLYLINE)
+      mbview_enableviewpolylines(verbose, instance, &error);
+    else if (gis->type == MB_GIS_POLYGON)
+      mbview_enableviewpolygons(verbose, instance, &error);
+    else
+      mbview_enableviewgispoints(verbose, instance, &error);
+    mbview_updategislist(gis->type);
+    mbview_update(verbose, instance, &error);
+  }
+
+  return (status);
+}
+/*---------------------------------------------------------------------------------------*/
+/* name of a GIS type for messages */
+static const char *do_mbgrdviz_gisname(int type) {
+  if (type == MB_GIS_POLYLINE)
+    return ("polylines");
+  else if (type == MB_GIS_POLYGON)
+    return ("polygons");
+  return ("points");
+}
+/*---------------------------------------------------------------------------------------*/
+/* read an MB-System polyline, polygon, or point file */
+int do_mbgrdviz_opengis(size_t instance, int type, char *input_file_ptr) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       instance:        %zu\n", instance);
+    fprintf(stderr, "dbg2       type:            %d\n", type);
+    fprintf(stderr, "dbg2       input_file_ptr:  %s\n", input_file_ptr);
+  }
+
+  int status = MB_SUCCESS;
+  if (instance == MBV_NO_WINDOW || input_file_ptr == NULL)
+    return (MB_FAILURE);
+
+  struct mb_gisdata_struct *gis = NULL;
+  status = mb_gis_init(verbose, type, &gis, &error);
+  if (status == MB_SUCCESS)
+    status = mb_gis_read(verbose, input_file_ptr, gis, &error);
+  if (status == MB_SUCCESS) {
+    int nadded, nfailed;
+    status = do_mbgrdviz_addgisdata(instance, gis, &nadded, &nfailed);
+    fprintf(stderr, "Read %d %s in %d layers from <%s>\n", nadded, do_mbgrdviz_gisname(type), gis->nlayer, input_file_ptr);
+    if (nfailed > 0)
+      fprintf(stderr, "Unable to display %d %s from <%s>\n", nfailed, do_mbgrdviz_gisname(type), input_file_ptr);
+  }
+  else {
+    fprintf(stderr, "\nUnable to read %s file <%s>\n", type == MB_GIS_POLYLINE ? "polyline" : (type == MB_GIS_POLYGON ? "polygon" : "point"),
+            input_file_ptr);
+    XBell((Display *)XtDisplay(mainWindow), 100);
+  }
+  int error_free = MB_ERROR_NO_ERROR;
+  mb_gis_deall(verbose, &gis, &error_free);
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:  %d\n", status);
+  }
+
+  return (status);
+}
+/*---------------------------------------------------------------------------------------*/
+/* import the polylines, polygons, or points of a shapefile that overlap the grid
+    displayed in this mbview window */
+int do_mbgrdviz_importshapefile(size_t instance, char *input_file_ptr) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       instance:        %zu\n", instance);
+    fprintf(stderr, "dbg2       input_file_ptr:  %s\n", input_file_ptr);
+  }
+
+  int status = MB_SUCCESS;
+  if (instance == MBV_NO_WINDOW || input_file_ptr == NULL)
+    return (MB_FAILURE);
+
+  /* get the type of the shapefile */
+  int type = MB_GIS_NONE;
+  status = mb_gis_shapefile_type(verbose, input_file_ptr, &type, &error);
+  if (status == MB_FAILURE) {
+    fprintf(stderr, "\nUnable to read polylines, polygons, or points from shapefile <%s>\n", input_file_ptr);
+    XBell((Display *)XtDisplay(mainWindow), 100);
+    return (status);
+  }
+
+  /* get the longitude and latitude bounds of the grid in this window,
+      sampling the edges of a projected grid */
+  struct mbview_struct *data = NULL;
+  mbview_getdataptr(verbose, instance, &data, &error);
+  double bounds[4];
+  if (data->primary_grid_projection_mode == MBV_PROJECTION_GEOGRAPHIC) {
+    bounds[0] = data->primary_xmin;
+    bounds[1] = data->primary_xmax;
+    bounds[2] = data->primary_ymin;
+    bounds[3] = data->primary_ymax;
+  }
+  else {
+    const int nsample = 50;
+    bool first = true;
+    for (int i = 0; i <= nsample; i++) {
+      const double fraction = (double)i / nsample;
+      const double xedge[4] = {data->primary_xmin + fraction * (data->primary_xmax - data->primary_xmin),
+                               data->primary_xmin + fraction * (data->primary_xmax - data->primary_xmin), data->primary_xmin,
+                               data->primary_xmax};
+      const double yedge[4] = {data->primary_ymin, data->primary_ymax,
+                               data->primary_ymin + fraction * (data->primary_ymax - data->primary_ymin),
+                               data->primary_ymin + fraction * (data->primary_ymax - data->primary_ymin)};
+      for (int k = 0; k < 4; k++) {
+        double lon, lat;
+        mbview_projectgrid2ll(instance, xedge[k], yedge[k], &lon, &lat);
+        if (first) {
+          bounds[0] = bounds[1] = lon;
+          bounds[2] = bounds[3] = lat;
+          first = false;
+        }
+        bounds[0] = MIN(bounds[0], lon);
+        bounds[1] = MAX(bounds[1], lon);
+        bounds[2] = MIN(bounds[2], lat);
+        bounds[3] = MAX(bounds[3], lat);
+      }
+    }
+  }
+
+  /* import the features overlapping the grid */
+  struct mb_gisdata_struct *gis = NULL;
+  int nimport = 0, nskip = 0;
+  const int color = type == MB_GIS_POLYLINE ? MBGRDVIZ_GIS_POLYLINE_COLOR
+                        : (type == MB_GIS_POLYGON ? MBGRDVIZ_GIS_POLYGON_COLOR : MBGRDVIZ_GIS_GISPOINT_COLOR);
+  const int size = type == MB_GIS_POINT ? MBGRDVIZ_GIS_GISPOINT_SIZE : MBGRDVIZ_GIS_LINE_SIZE;
+  status = mb_gis_init(verbose, type, &gis, &error);
+  if (status == MB_SUCCESS)
+    status = mb_gis_import_shapefile(verbose, input_file_ptr, bounds, color, size, MB_GIS_COLOR_NONE, gis, &nimport, &nskip,
+                                     &error);
+  if (status == MB_SUCCESS && nimport > 0) {
+    int nadded, nfailed;
+    status = do_mbgrdviz_addgisdata(instance, gis, &nadded, &nfailed);
+    fprintf(stderr, "Imported %d %s from shapefile <%s>, skipped %d outside the grid or not usable\n", nadded,
+            do_mbgrdviz_gisname(type), input_file_ptr, nskip + nfailed);
+  }
+  else if (status == MB_SUCCESS) {
+    fprintf(stderr, "\nNo %s in shapefile <%s> overlap the grid (%.6f %.6f %.6f %.6f)\n", do_mbgrdviz_gisname(type),
+            input_file_ptr, bounds[0], bounds[1], bounds[2], bounds[3]);
+    XBell((Display *)XtDisplay(mainWindow), 100);
+  }
+  else {
+    fprintf(stderr, "\nUnable to import shapefile <%s>\n", input_file_ptr);
+    XBell((Display *)XtDisplay(mainWindow), 100);
+  }
+  int error_free = MB_ERROR_NO_ERROR;
+  mb_gis_deall(verbose, &gis, &error_free);
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:  %d\n", status);
+  }
+
+  return (status);
+}
+/*---------------------------------------------------------------------------------------*/
+/* write all polylines, polygons, or points (shown or hidden) to an MB-System
+    file or a shapefile; z values are those read or imported, and are written
+    if any layer of the type had them */
+int do_mbgrdviz_savegis(size_t instance, int type, bool shapefile, char *output_file_ptr) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       instance:        %zu\n", instance);
+    fprintf(stderr, "dbg2       type:            %d\n", type);
+    fprintf(stderr, "dbg2       shapefile:       %d\n", shapefile);
+    fprintf(stderr, "dbg2       output_file_ptr: %s\n", output_file_ptr);
+  }
+
+  int status = MB_SUCCESS;
+  if (instance == MBV_NO_WINDOW || output_file_ptr == NULL)
+    return (MB_FAILURE);
+
+  int nfeature = 0;
+  if (type == MB_GIS_POLYLINE)
+    mbview_getpolylinecount(verbose, instance, &nfeature, &error);
+  else if (type == MB_GIS_POLYGON)
+    mbview_getpolygoncount(verbose, instance, &nfeature, &error);
+  else
+    mbview_getgispointcount(verbose, instance, &nfeature, &error);
+  if (nfeature <= 0) {
+    fprintf(stderr, "\nNo %s to save\n", do_mbgrdviz_gisname(type));
+    XBell((Display *)XtDisplay(mainWindow), 100);
+    return (MB_FAILURE);
+  }
+
+  /* mbview layers become file layers in order of use */
+  int nlayer = 0;
+  mbview_getgislayercount(verbose, instance, &nlayer, &error);
+  int *layermap = NULL;
+  struct mb_gisdata_struct *gis = NULL;
+  status = mb_mallocd(verbose, __FILE__, __LINE__, MAX(nlayer, 1) * sizeof(int), (void **)&layermap, &error);
+  if (status == MB_SUCCESS)
+    status = mb_gis_init(verbose, type, &gis, &error);
+  for (int i = 0; status == MB_SUCCESS && i < nlayer; i++)
+    layermap[i] = -1;
+
+  /* points: all at once */
+  if (status == MB_SUCCESS && type == MB_GIS_POINT) {
+    double *lon = NULL, *lat = NULL, *z = NULL;
+    int *color = NULL, *size = NULL, *layer = NULL;
+    mb_path *name = NULL;
+    int npoint = 0;
+    status = mbview_allocgispointarrays(verbose, nfeature, &lon, &lat, &z, &color, &size, &layer, &name, &error);
+    if (status == MB_SUCCESS)
+      status = mbview_getgispoints(verbose, instance, &npoint, lon, lat, z, color, size, layer, name, &error);
+    for (int i = 0; status == MB_SUCCESS && i < npoint; i++) {
+      if (layermap[layer[i]] < 0) {
+        int ltype;
+        bool hasz, active;
+        mb_path layername;
+        mbview_getgislayer(verbose, instance, layer[i], &ltype, &hasz, &active, layername, &error);
+        status = mb_gis_addlayer(verbose, gis, layername, &layermap[layer[i]], &error);
+        gis->hasz = gis->hasz || hasz;
+      }
+      if (status == MB_SUCCESS)
+        status = mb_gis_addfeature(verbose, gis, layermap[layer[i]], color[i], size[i], MB_GIS_COLOR_NONE, name[i], 1, NULL,
+                                   NULL, 1, &lon[i], &lat[i], &z[i], &error);
+    }
+    int error_free = MB_ERROR_NO_ERROR;
+    mbview_freegispointarrays(verbose, &lon, &lat, &z, &color, &size, &layer, &name, &error_free);
+  }
+
+  /* polylines and polygons: one at a time */
+  for (int i = 0; status == MB_SUCCESS && type != MB_GIS_POINT && i < nfeature; i++) {
+    int npart = 0, npoint = 0, color, size, fillcolor = MB_GIS_COLOR_NONE, layer;
+    int *partstart = NULL, *parttype = NULL;
+    double *lon = NULL, *lat = NULL, *z = NULL;
+    mb_path name;
+    if (type == MB_GIS_POLYLINE) {
+      mbview_getpolylinepointcount(verbose, instance, i, &npart, &npoint, &error);
+      status = mbview_allocpolylinearrays(verbose, npart, npoint, &partstart, &lon, &lat, &z, &error);
+      if (status == MB_SUCCESS)
+        status = mbview_getpolyline(verbose, instance, i, &npart, partstart, &npoint, lon, lat, z, &color, &size, name, &layer,
+                                    &error);
+    }
+    else {
+      mbview_getpolygonpointcount(verbose, instance, i, &npart, &npoint, &error);
+      status = mbview_allocpolygonarrays(verbose, npart, npoint, &partstart, &parttype, &lon, &lat, &z, &error);
+      if (status == MB_SUCCESS)
+        status = mbview_getpolygon(verbose, instance, i, &npart, partstart, parttype, &npoint, lon, lat, z, &color, &size,
+                                   &fillcolor, name, &layer, &error);
+    }
+    if (status == MB_SUCCESS && layermap[layer] < 0) {
+      int ltype;
+      bool hasz, active;
+      mb_path layername;
+      mbview_getgislayer(verbose, instance, layer, &ltype, &hasz, &active, layername, &error);
+      status = mb_gis_addlayer(verbose, gis, layername, &layermap[layer], &error);
+      gis->hasz = gis->hasz || hasz;
+    }
+    if (status == MB_SUCCESS)
+      status = mb_gis_addfeature(verbose, gis, layermap[layer], color, size, fillcolor, name, npart, partstart, parttype, npoint,
+                                 lon, lat, z, &error);
+    int error_free = MB_ERROR_NO_ERROR;
+    if (type == MB_GIS_POLYLINE)
+      mbview_freepolylinearrays(verbose, &partstart, &lon, &lat, &z, &error_free);
+    else
+      mbview_freepolygonarrays(verbose, &partstart, &parttype, &lon, &lat, &z, &error_free);
+  }
+
+  /* write the file */
+  if (status == MB_SUCCESS) {
+    if (shapefile)
+      status = mb_gis_export_shapefile(verbose, output_file_ptr, gis, &error);
+    else
+      status = mb_gis_write(verbose, output_file_ptr, program_name, gis, &error);
+  }
+  if (status == MB_SUCCESS) {
+    fprintf(stderr, "Wrote %d %s in %d layers to %s <%s>\n", gis->nfeature, do_mbgrdviz_gisname(type), gis->nlayer,
+            shapefile ? "shapefile" : "file", output_file_ptr);
+  }
+  else {
+    fprintf(stderr, "\nUnable to write %s to <%s>\n", do_mbgrdviz_gisname(type), output_file_ptr);
+    XBell((Display *)XtDisplay(mainWindow), 100);
+  }
+  int error_free = MB_ERROR_NO_ERROR;
+  mb_gis_deall(verbose, &gis, &error_free);
+  mb_freed(verbose, __FILE__, __LINE__, (void **)&layermap, &error_free);
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:  %d\n", status);
+  }
+
+  return (status);
+}
+/*---------------------------------------------------------------------------------------*/

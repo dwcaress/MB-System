@@ -2384,10 +2384,13 @@ int mbview_updatenavlist() {
   			free(xstr);
 
   			/* check for completely selected navs */
+  			/* (the list holds only active navs, so count list positions) */
   			int inavselect = MBV_SELECT_NONE;
-  			for (int inav = 0; inav < shared.shareddata.nnav; inav++) {
+  			int iitem = 0;
+  			for (int inav = 0; inav < shared.shareddata.nnav && inavselect == MBV_SELECT_NONE; inav++) {
           if (shared.shareddata.navs[inav].active) {
-    				if (inavselect == MBV_SELECT_NONE && shared.shareddata.navs[inav].npoints > 1 &&
+    				iitem++;
+    				if (shared.shareddata.navs[inav].npoints > 1 &&
     				    shared.shareddata.navs[inav].nselected == shared.shareddata.navs[inav].npoints) {
     					inavselect = inav;
     				}
@@ -2396,7 +2399,6 @@ int mbview_updatenavlist() {
 
   			/* select first item with fully selected nav */
   			if (inavselect != MBV_SELECT_NONE) {
-  				const int iitem = inavselect + 1;
   				XmListSelectPos(shared.mb3d_navlist.mbview_list_navlist, iitem, 0);
   				XmListSetPos(shared.mb3d_navlist.mbview_list_navlist, MAX(iitem - 5, 1));
   			}

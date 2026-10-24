@@ -611,6 +611,11 @@ int mbview_drawdata(size_t instance, int rez) {
 	/* draw current navpick */
 	mbview_drawnavpick(instance);
 
+	/* draw GIS polygons, polylines, and points beneath sites and routes */
+	mbview_drawpolygon(instance, rez);
+	mbview_drawpolyline(instance, rez);
+	mbview_drawgispoint(instance, rez);
+
 	/* draw sites */
 	mbview_drawsite(instance, rez);
 

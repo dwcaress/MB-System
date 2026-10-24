@@ -21,7 +21,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
-- Version 5.8.3beta26    October 22, 2026
+- Version 5.8.3beta26    October 23, 2026
 - Version 5.8.3beta25    October 14, 2026
 - Version 5.8.3beta24    October 5, 2026
 - Version 5.8.3beta23    October 3, 2026
@@ -83,7 +83,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
-#### 5.8.3beta26 (October 19, 2026)
+#### 5.8.3beta26 (October 23, 2026)
 
 MBIO library, format 181 (MBF\_SAMESURF, src/mbio/mbr\_samesurf.c,
 src/mbio/mbsys\_surf.c): fixed three errors in reading SAM Electronics (Atlas)
@@ -161,6 +161,100 @@ the --stretch-color histogram equalization now works with the sealevel palettes
 (8 and 9), which previously failed. The bathymetry and topography are equalized
 separately, with a color boundary at 0 m, Haxby colors below sea level and
 browns above. Large grids are decimated before equalization to limit memory use.
+
+MBaux library (src/mbaux/mb\_gisfile.c): added reading and writing of new
+MB-System polyline, polygon and point files, and import from and export to ESRI
+shapefiles (using GDAL), as the first step toward displaying GIS data in mbgrdviz.
+The text formats are similar to route and site files and can also be plotted
+directly with GMT. Shapefile import converts projected coordinates to longitude
+and latitude and can keep only the features overlapping a grid. A unit test has
+been added (test/mbaux).
+
+MBview library (src/mbview/mbview\_polyline.c, mbview\_polygon.c,
+mbview\_gispoint.c): added display of GIS polylines, polygons and points, grouped
+in layers and shared by all mbview windows like sites and routes, as the second
+step toward displaying GIS data in mbgrdviz. Lines and polygon outlines are draped
+on the topography; parts lying off the grid are drawn at the top of the grid's
+depth range. Polylines can be converted to routes and routes to polylines. The
+data are displayed but not edited, and mbnavadjust and mbeditviz are unaffected.
+
+MBview library (src/mbview/mbview\_process.c, mbview\_route.c,
+mbviewprivate.h): fixed three bugs. Reprojecting vector data, as happens when a
+second window is opened, used the navigation arrays instead of the vector arrays,
+which could crash when vectors were loaded without navigation. When adding a route,
+points following a point rejected as far outside the view were inserted past the
+end of the route, and a route with every point rejected still had its color and
+name written to unallocated memory. The OpenGL display list for site symbols
+shared its ID with a grid display list of the tenth mbview window.
+
+MBview library (src/mbview/mbview\_gislist.c, MB3DGisList.c, MB3DView.c,
+MB3DRouteList.c): added the controls for GIS polylines, polygons and points as
+the third step toward displaying GIS data in mbgrdviz. The View menu has
+Polylines, Polygons and Points toggles, and the Controls menu has a list
+window for each type showing its layers and features. In these lists clicking
+an item twice changes its color (for a layer, all its features), and the
+selected items can be shown or hidden, deleted, or for polylines converted to
+routes. The Route List can convert selected routes to polylines. These controls
+are inactive in programs that do not display GIS data, such as mbnavadjust and
+mbeditviz.
+
+MBview library (src/mbview/mbview\_callbacks.c): fixed two bugs. The View menu
+Vector toggle of a second or later mbview window turned the vector display of the
+first window on or off instead of its own. In the Site List, a selection event
+with no site selected changed the color of a nonexistent site, writing outside the
+site data.
+
+Program mbgrdviz (src/mbgrdviz/mbgrdviz\_callbacks.c): added the display of GIS
+polylines, polygons and points. The Action menu of each window can open MB-System
+polyline (.pln), polygon (.plg) and point (.pts) files, import an ESRI shapefile,
+save each type to an MB-System file and export each type as a shapefile; the main
+window File menu can also open the three file types. A shapefile import keeps only
+the features overlapping the grid of the window it was started from, and features
+without color and size attributes are drawn in a default color for each type.
+Windows opened with "Open Region as New View" show the GIS data as their source
+window does.
+
+Documentation (src/man/man1/mbgrdviz.1): described the display of GIS polylines,
+polygons and points, the new menu items and list windows, the conversions between
+polylines and routes, the MB-System polyline, polygon and point file formats, and
+the import and export of shapefiles. Also completed the rest of the manual page,
+which described many controls only by name: every menu item, button and dialog
+of the main and display windows is now described, along with the mouse and
+keyboard actions, the survey route generation dialog, and the route, site,
+vector and profile file formats. Outdated entries were corrected.
+
+MBview library (src/mbview/mbview\_callbacks.c): fixed two more bugs. In the
+Route List, clicking a route name twice also wrote a waypoint type outside the
+route data. Actions that open a new window, such as "Open Region as New View",
+were made active when all mbview windows were in use instead of inactive.
+
+Program mbgrdviz (src/mbgrdviz/mbgrdviz\_callbacks.c): fixed two bugs. The
+"## VECTORCOLOR" line of vector files was ignored. Opening a navigation or swath
+datalist that cannot be read put mbgrdviz into an endless loop; it now reports
+the error.
+
+MBview library (src/mbview/mbview\_process.c): fixed the slope calculation along
+the top row of the grid, which used the cells of the next column and, for the
+last grid cell, read past the end of the grid.
+
+Program mbgrdviz (src/mbgrdviz/mbgrdviz\_callbacks.c, src/man/man1/mbgrdviz.1):
+fixed the Risi 2 script exports. The "move bearing" commands now give the range
+then the bearing, every command ends its line, and the leg bearings are computed
+from the waypoints. The static heading script, previously identical to the
+variable heading one, now keeps the heading of the first leg.
+
+Program mbgrdviz (src/mbgrdviz/mbgrdviz\_callbacks.c): fixed more bugs. Saving
+two or more routes reversed or as Risi scripts lost every route after the first.
+A site whose latitude in degrees and minutes could not be read was added with an
+unset latitude. The survey route dialog read its area from the first window
+instead of the window it was opened from. The Risi script projection was not set
+for a route starting at exactly 84 degrees N.
+
+MBview library (src/mbview/mbview\_callbacks.c, src/mbview/mbview\_nav.c): fixed
+more bugs. Each Apply in the Shading dialog reversed the overlay shading
+direction. The Projections dialog showed no projection selected in Spheroid mode.
+Unchecking View > Profile did not close the profile window. With inactive
+navigation present, the Navigation List could highlight the wrong item.
 
 The above work was done with the assistance of the AI coding assistant Claude Opus 5.5
 (Anthropic, model claude-opus-5-5), operating as Claude Code under developer

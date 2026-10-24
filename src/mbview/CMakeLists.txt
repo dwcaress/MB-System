@@ -31,6 +31,7 @@ find_package(OpenGL REQUIRED)
 add_library(
   mbview
   MB3DNavList.c
+  MB3DGisList.c
   MBpedit.c
   mbview_primary.c
   MB3DRouteList.c
@@ -50,7 +51,11 @@ add_library(
   mbview_site.c
   mb_glwdrawa.c
   mbview_plot.c
-  mbview_vector.c)
+  mbview_vector.c
+  mbview_polyline.c
+  mbview_polygon.c
+  mbview_gispoint.c
+  mbview_gislist.c)
 
 set_target_properties(mbview PROPERTIES VERSION "0" SOVERSION "0")
 target_include_directories(mbview PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

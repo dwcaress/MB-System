@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbgrdviz</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  7 September 2026 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  23 October 2026 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -64,7 +64,9 @@ of ships or underwater vehicles can be read and displayed; if associated with
 swath data the extent of mapping coverage can be displayed. Site data (individual
 point locations) can be read, displayed, interactively created and modified, and
 saved. Route data (collections of waypoints) can also be read, displayed,
-interactively created and modified, and saved.
+interactively created and modified, and saved. GIS polylines, polygons, and
+points can be read from MB-System files or imported from ESRI shapefiles,
+displayed, and saved or exported, but not edited.
 <P>
 The topography data can be shown using a number of colortables. The colortables can
 be linearly stretched between minimum and maximum values, or applied using
@@ -146,6 +148,84 @@ menu item). The left button can be used to pick topography, the middle button wi
 when clicked and dragged, and the right button will change the vertical exaggeration when
 clicked and moved up (more exaggeration) or down (less exaggeration).
 <P>
+<I>Sites and Routes</I>
+<P>
+Sites are individual named locations; routes are named sequences of waypoints,
+such as survey lines or vehicle missions. Both can be read from files,
+created and edited interactively, and saved (see the site and route file
+formats below). To edit sites, select the &lt;Mouse-&gt;Edit Sites&gt; mouse mode;
+the middle button adds a site, the left button selects and drags a site, and
+the right button deletes the selected site. To edit routes, select the
+&lt;Mouse-&gt;Edit Routes&gt; mouse mode; with no route selected the middle button
+starts a new route, with a waypoint selected the middle button adds a new
+waypoint after it, the left button selects and drags waypoints, and the right
+button deletes the selected waypoint. Route segments are draped on the
+topography, and the route lengths both in plan view and along the
+topography are shown in the Route List. Routes can be saved in the
+MB-System route format or exported in several formats used by survey and
+vehicle control software.
+<P>
+<I>Navigation and Swath Data</I>
+<P>
+The navigation of swath (or other) data files can be displayed by opening an
+<B>MB-System</B> datalist with &lt;Action-&gt;Open Navigation&gt; or
+&lt;Action-&gt;Open Swath Data&gt;. The navigation is plotted for the parts of the
+files lying within the grid; &lt;Action-&gt;Open Swath Data&gt; also gives the
+outline of the swath coverage. Where the ancillary navigation (&quot;.fnv&quot;) or
+bathymetry (&quot;.fbt&quot;) files made by <B>mbdatalist</B> or <B>mbprocess</B> exist,
+they are read
+instead of the full data files. Using the &lt;Mouse-&gt;Select Nav&gt; or
+&lt;Mouse-&gt;Select Nav File&gt; mouse modes, sections of navigation or whole files
+can be selected and then opened in the editing and analysis programs
+listed in the &lt;Action&gt; menu.
+<P>
+<I>Profiles</I>
+<P>
+The &lt;View-&gt;Profile&gt; item opens a window showing the topographic profile
+along the current two point pick, the selected route, or the selected
+navigation, whichever was picked most recently. The profile can be saved
+with &lt;Action-&gt;Save Profile File&gt;.
+<P>
+<I>Regions and Survey Planning</I>
+<P>
+Using the &lt;Mouse-&gt;Pick Area&gt; mouse mode, the left button drags out a
+rectangular region with north-south and east-west boundaries, and the middle
+button drags out the centerline of an arbitrarily oriented rectangular area
+whose width is changed with the right button. A region can be opened as a new
+display with &lt;Action-&gt;Open Region as New View&gt;. An area can be used to
+generate a survey route with &lt;Action-&gt;Generate Survey Route from Area&gt;.
+<P>
+<I>GIS Polylines, Polygons, and Points</I>
+<P>
+<B>MBgrdviz</B> can display GIS polylines (lines with one or more parts),
+polygons (one or more closed rings, each an outer boundary or a hole), and
+points, such as survey areas, cable routes, or mooring locations. These are
+read from MB-System polyline, polygon, and point files (see below) using
+the &lt;Action-&gt;Open Polyline File&gt;, &lt;Action-&gt;Open Polygon File&gt;, and
+&lt;Action-&gt;Open Point File&gt; menu items, or imported from ESRI shapefiles using
+&lt;Action-&gt;Import Shapefile&gt;. A shapefile import reads polylines, polygons, or
+points according to the geometry of the shapefile, transforms coordinates in
+any projection given by the shapefile's &quot;.prj&quot; file to longitude and
+latitude, and keeps only the features that overlap the grid displayed in the
+window from which the import was started; features crossing the edge of the
+grid are kept whole. Feature names are taken from a NAME, LABEL, or TITLE
+attribute, else from an ID attribute (as &quot;layer id&quot;), else from the first
+text attribute. Features without COLOR and SIZE attributes are displayed
+blue-green (polylines), yellow (polygons), or green (points).
+<P>
+Each file read or imported becomes a layer. The polylines and the polygon
+outlines are draped on the topography; parts lying off the grid are drawn
+at the top of the grid's depth range. Points are drawn as triangles. The
+GIS data are shared by all <B>MBview</B> windows like sites and routes, and
+are displayed or hidden in each window with the &lt;View-&gt;Polylines&gt;,
+&lt;View-&gt;Polygons&gt;, and &lt;View-&gt;Points&gt; toggles. The &lt;Controls-&gt;Polyline
+List&gt;, &lt;Controls-&gt;Polygon List&gt;, and &lt;Controls-&gt;Point List&gt; windows list
+the layers and features; there features and whole layers can be recolored,
+shown or hidden, and deleted. Polylines can be converted to routes (which
+can then be edited and saved as route files), and routes can be converted
+to polylines. The GIS data are not otherwise edited. All features of each
+type can be saved to MB-System files or exported as shapefiles.
+<P>
 <A NAME="lbAF">&nbsp;</A>
 <H2>MB-SYSTEM AUTHORSHIP</H2>
 
@@ -219,34 +299,85 @@ beams flagged or zeroed.
 This menu button pops up a file browser that allows the user to
 select an input <B>GMT</B> grid file. If the OK button is clicked, <B>MBgrdviz</B> will
 attempt to read a topography grid from the specified file. If successful,
-a new <B>MBview</B> window will appear displaying the topography.
+a new <B>MBview</B> window will appear displaying the topography. This item
+is active until all ten <B>MBview</B> windows are in use.
 <DT><B>[MBgrdviz]:&lt;File-&gt;Open Site&gt;</B>
 
 <DD>
 This menu button pops up a file browser that allows the user to
-select an input site file. A site file specifies one or more
-individual locations that can be displayed and interactively moved.
-Site files are text with each line delineating a single site with
-white space delimited columns
+select an input site file (see the site file format below). A site file
+specifies one or more individual locations that can be displayed and
+interactively moved. Sites are shared by all <B>MBview</B> windows. This
+item, like the other file items below, is active once an <B>MBview</B> window
+is open, and acts on the first <B>MBview</B> window; the &lt;Action&gt; menu of each
+<B>MBview</B> window has the same items acting on that window.
 <DT><B>[MBgrdviz]:&lt;File-&gt;Open Route&gt;</B>
 
 <DD>
+This menu button pops up a file browser that allows the user to
+select an input route file (see the route file format below).
 <DT><B>[MBgrdviz]:&lt;File-&gt;Open Navigation&gt;</B>
 
 <DD>
+This menu button pops up a file browser that allows the user to select an
+<B>MB-System</B> datalist of data files whose navigation is to be displayed
+(see &lt;Action-&gt;Open Navigation&gt;).
 <DT><B>[MBgrdviz]:&lt;File-&gt;Open Swath&gt;</B>
 
 <DD>
+This menu button pops up a file browser that allows the user to select an
+<B>MB-System</B> datalist of swath data files whose navigation and swath
+coverage are to be displayed (see &lt;Action-&gt;Open Swath Data&gt;).
+<DT><B>[MBgrdviz]:&lt;File-&gt;Open Vector&gt;</B>
+
+<DD>
+This menu button pops up a file browser that allows the user to select a
+vector file (see the vector file format below).
+<DT><B>[MBgrdviz]:&lt;File-&gt;Open Polyline&gt;</B>
+
+<DD>
+<DT><B>[MBgrdviz]:&lt;File-&gt;Open Polygon&gt;</B>
+
+<DD>
+<DT><B>[MBgrdviz]:&lt;File-&gt;Open Point&gt;</B>
+
+<DD>
+These menu buttons pop up a file browser that allows the user to select an
+MB-System polyline (&quot;.pln&quot;), polygon (&quot;.plg&quot;), or point (&quot;.pts&quot;) file to be
+read and displayed in the first <B>MBview</B> window, as with the
+corresponding items of the <B>MBview</B> &lt;Action&gt; menu.
 <DT><B>[MBgrdviz]:&lt;File-&gt;Save Site&gt;</B>
 
 <DD>
+This menu button pops up a file browser that allows the user to specify an
+output site file to which all sites are written. It is active when sites exist.
 <DT><B>[MBgrdviz]:&lt;File-&gt;Save Route&gt;</B>
 
 <DD>
+This menu button pops up a file browser that allows the user to specify an
+output route file to which the selected routes, or all routes if none are
+selected, are written. It is active when routes exist.
 <DT><B>[MBgrdviz]:&lt;File-&gt;Quit&gt;</B>
 
 <DD>
 This button causes the program to exit (mostly) gracefully.
+<DT><B>[MBgrdviz]:&lt;Realtime-&gt;Setup&gt;</B>
+
+<DD>
+<DT><B>[MBgrdviz]:&lt;Realtime-&gt;Start&gt;</B>
+
+<DD>
+<DT><B>[MBgrdviz]:&lt;Realtime-&gt;Stop&gt;</B>
+
+<DD>
+<DT><B>[MBgrdviz]:&lt;Realtime-&gt;Pause&gt;</B>
+
+<DD>
+<DT><B>[MBgrdviz]:&lt;Realtime-&gt;Resume&gt;</B>
+
+<DD>
+The <B>Realtime</B> menu and its setup dialog are intended for the display of
+realtime navigation, which is not yet implemented; the menu is inactive.
 <DT><B>[MBgrdviz]:&lt;Help-&gt;About&gt;</B>
 
 <DD>
@@ -264,6 +395,9 @@ program's name, version, and authors.
 <DT><B>[MBview]:&lt;View-&gt;3D Display&gt;</B>
 
 <DD>
+These items select a 2D map view or a 3D perspective view. The map display is
+not available with the spheroid display projection, which is always shown in
+3D.
 <DT><B>[MBview]:&lt;View-&gt;Topography&gt;</B>
 
 <DD>
@@ -273,6 +407,16 @@ program's name, version, and authors.
 <DT><B>[MBview]:&lt;View-&gt;Overlay&gt;</B>
 
 <DD>
+These items select the grid that is colored: the primary topography, the
+magnitude of the topographic slope, or the overlay grid (available once an
+overlay grid has been read with &lt;Action-&gt;Open Overlay Grid&gt;). Each has its own
+colortable, color bounds, histogram equalization, and shading settings, which
+are restored when it is selected again.
+<DT><B>[MBview]:&lt;View-&gt;Histogram Equalization&gt;</B>
+
+<DD>
+This toggle colors the current grid using histogram equalization instead of
+a linear stretch between the color bounds.
 <DT><B>[MBview]:&lt;View-&gt;No Shading&gt;</B>
 
 <DD>
@@ -285,21 +429,53 @@ program's name, version, and authors.
 <DT><B>[MBview]:&lt;View-&gt;Shading by Overlay&gt;</B>
 
 <DD>
+These items select the shading of the current grid: none, illumination by a
+light source, the slope magnitude, or the values of the overlay grid
+(available once an overlay grid has been read). The shading parameters are
+set in the &lt;Controls-&gt;Shading&gt; dialog or with the &lt;Mouse-&gt;Shading&gt; mouse mode.
 <DT><B>[MBview]:&lt;View-&gt;Topography Contours&gt;</B>
 
 <DD>
+This toggle displays topographic contours at the interval set in the
+&lt;Controls-&gt;Colors &amp; Contours&gt; dialog.
 <DT><B>[MBview]:&lt;View-&gt;Sites&gt;</B>
 
 <DD>
 <DT><B>[MBview]:&lt;View-&gt;Routes&gt;</B>
 
 <DD>
+These toggles display or hide the sites and routes. They are active once
+site or route display is enabled. Hiding sites or routes also leaves the
+corresponding editing mouse mode.
 <DT><B>[MBview]:&lt;View-&gt;Navigation&gt;</B>
+
+<DD>
+<DT><B>[MBview]:&lt;View-&gt;Navigation Swath Bounds&gt;</B>
 
 <DD>
 <DT><B>[MBview]:&lt;View-&gt;Draped Navigation&gt;</B>
 
 <DD>
+These toggles display the navigation tracks, the outlines of the swath
+coverage, and the navigation draped on the topography. They are active once
+navigation has been read.
+<DT><B>[MBview]:&lt;View-&gt;Vector&gt;</B>
+
+<DD>
+This toggle displays the vector data, shown as colored balls at each point;
+it is active once vector data have been read.
+<DT><B>[MBview]:&lt;View-&gt;Polylines&gt;</B>
+
+<DD>
+<DT><B>[MBview]:&lt;View-&gt;Polygons&gt;</B>
+
+<DD>
+<DT><B>[MBview]:&lt;View-&gt;Points&gt;</B>
+
+<DD>
+These toggles display or hide the GIS polylines, polygons, and points in this
+window. They are active once data of the type have been read or imported, and
+are turned on when data are first read into the window.
 <DT><B>[MBview]:&lt;View-&gt;Haxby Colortable&gt;</B>
 
 <DD>
@@ -315,27 +491,45 @@ program's name, version, and authors.
 <DT><B>[MBview]:&lt;View-&gt;Flat Gray Colortable&gt;</B>
 
 <DD>
-<DT><B>[MBview]:&lt;View-&gt;Sealevel Colortable&gt;</B>
+These items select the colortable for the current grid. The flat gray
+colortable is a single shade of gray, useful with shading.
+<DT><B>[MBview]:&lt;View-&gt;Sealevel1 Colortable&gt;</B>
 
 <DD>
-<DT><B>[MBview]:&lt;Controls-&gt;Colors and Contours&gt;</B>
+<DT><B>[MBview]:&lt;View-&gt;Sealevel2 Colortable&gt;</B>
 
 <DD>
+These colortables color values below zero (sea level) with the Haxby colors
+and values above zero with land colors: pale yellow to brown for Sealevel1,
+and pale yellow through browns to green for Sealevel2.
+<DT><B>[MBview]:&lt;View-&gt;Profile&gt;</B>
+
+<DD>
+This item opens or closes the profile window (see the Profile window below).
+<DT><B>[MBview]:&lt;Controls-&gt;Colors &amp; Contours&gt;</B>
+
+<DD>
+This item opens the Colors and Contours dialog (see below).
 <DT><B>[MBview]:&lt;Controls-&gt;2D Controls&gt;</B>
 
 <DD>
+This item opens the 2D Parameters dialog (see below).
 <DT><B>[MBview]:&lt;Controls-&gt;3D Controls&gt;</B>
 
 <DD>
+This item opens the 3D Parameters dialog (see below).
 <DT><B>[MBview]:&lt;Controls-&gt;Shading&gt;</B>
 
 <DD>
+This item opens the Shading Parameters dialog (see below).
 <DT><B>[MBview]:&lt;Controls-&gt;Resolution&gt;</B>
 
 <DD>
+This item opens the Rendering Resolution dialog (see below).
 <DT><B>[MBview]:&lt;Controls-&gt;Projections&gt;</B>
 
 <DD>
+This item opens the Projections dialog (see below).
 <DT><B>[MBview]:&lt;Controls-&gt;Site List&gt;</B>
 
 <DD>
@@ -345,103 +539,277 @@ program's name, version, and authors.
 <DT><B>[MBview]:&lt;Controls-&gt;Navigation List&gt;</B>
 
 <DD>
-<DT><B>[MBview]:&lt;Mouse-&gt;Full&gt;</B>
+These items open the windows listing the sites, routes, and navigation files
+(see below). The lists are shared by all <B>MBview</B> windows.
+<DT><B>[MBview]:&lt;Controls-&gt;Polyline List&gt;</B>
 
 <DD>
-<DT><B>[MBview]:&lt;Mouse-&gt;Reset&gt;</B>
+<DT><B>[MBview]:&lt;Controls-&gt;Polygon List&gt;</B>
 
 <DD>
-<DT><B>[MBview]:&lt;Mouse-&gt;Clear&gt;</B>
+<DT><B>[MBview]:&lt;Controls-&gt;Point List&gt;</B>
 
 <DD>
-<DT><B>[MBview]:&lt;Mouse-&gt;Pan and Zoom&gt;</B>
+These menu buttons bring up windows listing the GIS polylines, polygons, or
+points (see the Polyline List, Polygon List, and Point List windows below).
+Like &lt;Controls-&gt;Navigation List&gt;, they are always active, even before any
+data of the type have been read or imported.
+<DT><B>[MBview]:&lt;Mouse-&gt;Pan &amp; Zoom&gt;</B>
 
 <DD>
+This mouse mode (the default) uses the left button to pick, the middle
+button to pan, and the right button to zoom (see MOUSE ACTIONS below).
 <DT><B>[MBview]:&lt;Mouse-&gt;Rotate Model&gt;</B>
 
 <DD>
+This mouse mode, available in the 3D display, uses the middle button to
+rotate the topography model and the right button to change the vertical
+exaggeration.
 <DT><B>[MBview]:&lt;Mouse-&gt;Rotate View&gt;</B>
 
 <DD>
+This mouse mode, available in the 3D display, uses the middle button to
+rotate the viewpoint and the right button to zoom.
 <DT><B>[MBview]:&lt;Mouse-&gt;Shading&gt;</B>
 
 <DD>
+This mouse mode uses the middle button to move the light source (for shading
+by illumination) and the right button to change the shading magnitude.
 <DT><B>[MBview]:&lt;Mouse-&gt;Pick Area&gt;</B>
 
 <DD>
+This mouse mode uses the left button to define a region, the middle button
+to define an area, and the right button to change the width of the area.
 <DT><B>[MBview]:&lt;Mouse-&gt;Edit Sites&gt;</B>
 
 <DD>
+This mouse mode, active once site display is enabled, is used to select,
+move, add, and delete sites. It turns on the display of sites.
 <DT><B>[MBview]:&lt;Mouse-&gt;Edit Routes&gt;</B>
 
 <DD>
-<DT><B>[MBview]:&lt;Mouse-&gt;Pick Nav&gt;</B>
+This mouse mode, active once route display is enabled, is used to select
+routes and to add, move, and delete waypoints. It turns on the display of
+routes.
+<DT><B>[MBview]:&lt;Mouse-&gt;Select Nav&gt;</B>
 
 <DD>
+<DT><B>[MBview]:&lt;Mouse-&gt;Select Nav File&gt;</B>
+
+<DD>
+These mouse modes, active once navigation has been read, select sections of
+navigation or whole navigation files with the middle button and deselect them
+with the right button.
 <DT><B>[MBview]:&lt;Action-&gt;About MBview...&gt;</B>
 
 <DD>
+This item brings up a dialog showing information about <B>MBview</B>.
 <DT><B>[MBview]:&lt;Action-&gt;Open Overlay Grid&gt;</B>
 
 <DD>
+This item pops up a file browser that allows the user to select a <B>GMT</B>
+grid to be displayed as an overlay on the topography, either colored in place
+of the topography (&lt;View-&gt;Overlay&gt;) or used for shading
+(&lt;View-&gt;Shading by Overlay&gt;).
 <DT><B>[MBview]:&lt;Action-&gt;Open Site File&gt;</B>
 
 <DD>
 <DT><B>[MBview]:&lt;Action-&gt;Open Route File&gt;</B>
 
 <DD>
+These items pop up a file browser that allows the user to select a site file
+(&quot;.ste&quot;) or route file (&quot;.rte&quot;) to be read and displayed.
 <DT><B>[MBview]:&lt;Action-&gt;Open Navigation&gt;</B>
 
 <DD>
-<DT><B>[MBview]:&lt;Action-&gt;Open Swath File&gt;</B>
+<DT><B>[MBview]:&lt;Action-&gt;Open Swath Data&gt;</B>
 
 <DD>
+These items pop up a file browser that allows the user to select an
+<B>MB-System</B> datalist (&quot;.mb-1&quot;). The navigation of each data file in the
+datalist, within the bounds of the grid, is read and displayed as a track
+named for the file; processed files are used where the datalist calls for
+them, and ASCII xyz files are skipped. &lt;Action-&gt;Open Navigation&gt; reads the
+&quot;.fnv&quot; navigation files where they exist; &lt;Action-&gt;Open Swath Data&gt; reads
+the &quot;.fbt&quot; bathymetry files where they exist and also gives the outline of
+the swath coverage. The navigation is decimated according to the grid
+spacing.
+<DT><B>[MBview]:&lt;Action-&gt;Open Vector File&gt;</B>
+
+<DD>
+This item pops up a file browser that allows the user to select a vector file
+(see the vector file format below), which is displayed as colored balls
+along its tracks.
+<DT><B>[MBview]:&lt;Action-&gt;Open Polyline File&gt;</B>
+
+<DD>
+<DT><B>[MBview]:&lt;Action-&gt;Open Polygon File&gt;</B>
+
+<DD>
+<DT><B>[MBview]:&lt;Action-&gt;Open Point File&gt;</B>
+
+<DD>
+These menu buttons pop up a file browser that allows the user to select an
+MB-System polyline (&quot;.pln&quot;), polygon (&quot;.plg&quot;), or point (&quot;.pts&quot;) file. All of
+the features in the file are read and displayed, whether or not they overlap
+the grid, with each layer of the file becoming a layer in <B>MBgrdviz</B>.
+<DT><B>[MBview]:&lt;Action-&gt;Import Shapefile&gt;</B>
+
+<DD>
+This menu button pops up a file browser that allows the user to select an ESRI
+shapefile (&quot;.shp&quot;). The polylines, polygons, or points of the shapefile that
+overlap the grid displayed in this window are imported and displayed as a new
+layer; the number imported and skipped is printed to the terminal.
+<DT><B>[MBview]:&lt;Action-&gt;Save Polyline File&gt;</B>
+
+<DD>
+<DT><B>[MBview]:&lt;Action-&gt;Save Polygon File&gt;</B>
+
+<DD>
+<DT><B>[MBview]:&lt;Action-&gt;Save Point File&gt;</B>
+
+<DD>
+These menu buttons pop up a file browser that allows the user to specify an
+output file to which all of the polylines, polygons, or points, whether shown
+or hidden, are written in the MB-System format, keeping their layers, names,
+colors, and sizes.
+<DT><B>[MBview]:&lt;Action-&gt;Export Polylines as Shapefile&gt;</B>
+
+<DD>
+<DT><B>[MBview]:&lt;Action-&gt;Export Polygons as Shapefile&gt;</B>
+
+<DD>
+<DT><B>[MBview]:&lt;Action-&gt;Export Points as Shapefile&gt;</B>
+
+<DD>
+These menu buttons pop up a file browser that allows the user to specify an
+output ESRI shapefile (&quot;.shp&quot; is added if missing). All of the polylines,
+polygons, or points are written in WGS84 longitude and latitude with NAME,
+COLOR, and SIZE attributes (and FILLCOLOR for polygons); an existing shapefile
+of the same name is replaced.
 <DT><B>[MBview]:&lt;Action-&gt;Save Site File&gt;</B>
 
 <DD>
+This item pops up a file browser that allows the user to specify an output
+site file to which all sites are written. It is active when sites exist.
 <DT><B>[MBview]:&lt;Action-&gt;Save Route File&gt;</B>
 
 <DD>
-<DT><B>[MBview]:&lt;Action-&gt;Save Route as Winfrog PTS File&gt;</B>
+This item pops up a file browser that allows the user to specify an output
+route file to which the selected routes, or all routes if none are selected,
+are written. It is active when routes exist, as are the other route export
+items below.
+<DT><B>[MBview]:&lt;Action-&gt;Save Route File Reversed&gt;</B>
 
 <DD>
-<DT><B>[MBview]:&lt;Action-&gt;Save Route as Winfrog WPT File&gt;</B>
+This item writes the selected routes, or all routes, as a route file with the
+points of each route in reverse order.
+<DT><B>[MBview]:&lt;Action-&gt;Save Risi Script File (variable heading)&gt;</B>
 
 <DD>
+<DT><B>[MBview]:&lt;Action-&gt;Save Risi Script File (static heading)&gt;</B>
+
+<DD>
+<DT><B>[MBview]:&lt;Action-&gt;Save Risi 2 Script File (variable heading)&gt;</B>
+
+<DD>
+<DT><B>[MBview]:&lt;Action-&gt;Save Risi 2 Script File (static heading)&gt;</B>
+
+<DD>
+These items write the selected routes, or all routes, as mission scripts for
+the Risi vehicle controller, with the waypoints given in meters relative to the
+first waypoint. The Risi 2 scripts give each leg as a relative turn
+(&quot;heading rel&quot;) and a move (&quot;move bearing range, bearing&quot;, with the bearing
+relative to the vehicle heading), assuming that the vehicle starts at the first
+waypoint with heading 0. With variable heading the vehicle turns to face along
+each leg; with static heading it turns once to the bearing of the first leg,
+keeps that heading on all legs, and turns back to heading 0 at the end.
 <DT><B>[MBview]:&lt;Action-&gt;Save Route as Degrees + Decimal Minutes File&gt;</B>
 
 <DD>
+This item writes the waypoints of all routes as latitude and longitude in
+degrees and decimal minutes.
 <DT><B>[MBview]:&lt;Action-&gt;Save Route as Hypack LNW File&gt;</B>
 
 <DD>
+This item writes all routes as a Hypack line (&quot;.lnw&quot;) file, with the
+waypoints in UTM eastings and northings.
+<DT><B>[MBview]:&lt;Action-&gt;Save Route as Greensea YML File&gt;</B>
+
+<DD>
+This item writes the selected route (exactly one route must be selected, or
+exist) as a Greensea mission YAML file.
+<DT><B>[MBview]:&lt;Action-&gt;Save Route as TECDIS LST File&gt;</B>
+
+<DD>
+This item writes the waypoints of all routes as a TECDIS route list file.
+<DT><B>[MBview]:&lt;Action-&gt;Save Route as Kongsberg DP waypoint File&gt;</B>
+
+<DD>
+This item writes all routes as a Kongsberg dynamic positioning waypoint file.
+<DT><B>[MBview]:&lt;Action-&gt;Save Route as SIS ASCIIPlan line File&gt;</B>
+
+<DD>
+<DT><B>[MBview]:&lt;Action-&gt;Save Route as SIS ASCIIPlan route File&gt;</B>
+
+<DD>
+These items write all routes as Kongsberg SIS ASCII survey plan files, either
+as separate lines between consecutive waypoints or as one line per route.
 <DT><B>[MBview]:&lt;Action-&gt;Save Profile File&gt;</B>
 
 <DD>
+This item writes the current profile (see the profile file format below). It
+is active when there is a two point pick, a selected route, or selected
+navigation.
 <DT><B>[MBview]:&lt;Action-&gt;Open Selected Nav in MBedit&gt;</B>
 
 <DD>
-<DT>B [MBview]:&lt;Action-&gt;Open Selected Nav in MBeditviz&gt;<DD>
-<DT>B [MBview]:&lt;Action-&gt;Open Selected Nav in MBnavedit&gt;<DD>
-<DT>B [MBview]:&lt;Action-&gt;Open Selected Nav in MBvelocitytool&gt;<DD>
+<DT><B>[MBview]:&lt;Action-&gt;Open Selected Nav in MBnavedit&gt;</B>
+
+<DD>
+<DT><B>[MBview]:&lt;Action-&gt;Open Selected Nav in MBvelocitytool&gt;</B>
+
+<DD>
+These items start <B>MBedit</B>, <B>MBnavedit</B>, or <B>MBvelocitytool</B> on the
+data files containing the selected navigation. They are active when
+navigation has been selected.
+<DT><B>[MBview]:&lt;Action-&gt;Open Selected Nav in MBeditviz&gt;</B>
+
+<DD>
+This item writes a temporary datalist of the data files containing the
+selected navigation and starts <B>MBeditviz</B> on it.
 <DT><B>[MBview]:&lt;Action-&gt;Open Region as New View&gt;</B>
 
 <DD>
+This item opens a new <B>MBview</B> window displaying the part of the
+topography (and of any overlay grid) within the current region, with the
+same display settings. It is active when a region has been picked.
 <DT><B>[MBview]:&lt;Action-&gt;Generate Survey Route from Area&gt;</B>
 
 <DD>
-<DT><B>[MBview]:&lt;Dismiss-&gt;Dismiss&gt;</B>
+This item opens the survey route dialog (see below), which generates a
+survey route covering the current area. It is active when an area has been
+picked.
+<DT><B>[MBview]:&lt;Dismiss&gt;</B>
 
 <DD>
+This button closes the <B>MBview</B> window.
 <DT><B>[MBview]:&lt;Full&gt;</B>
 
 <DD>
+This button redraws the display at full resolution.
 <DT><B>[MBview]:&lt;Reset&gt;</B>
 
 <DD>
+This button resets the view to the default: map or plan view of the whole
+grid with no rotation and a vertical exaggeration of 1. Typing &quot;r&quot; in the
+display does the same.
 <DT><B>[MBview]:&lt;Clear&gt;</B>
 
 <DD>
-<DT><B>[MBview]:&lt;Pan and Zoom&gt;</B>
+This button clears the current picks, region, area, profile, and the
+selections of navigation, sites, and routes.
+<DT><B>[MBview]:&lt;Pan &amp; Zoom&gt;</B>
 
 <DD>
 <DT><B>[MBview]:&lt;Rotate Model&gt;</B>
@@ -465,11 +833,17 @@ program's name, version, and authors.
 <DT><B>[MBview]:&lt;Pick Nav&gt;</B>
 
 <DD>
+<DT><B>[MBview]:&lt;Pick Nav File&gt;</B>
+
+<DD>
+When the <B>MBview</B> window is taller than 700 pixels, these buttons on its
+left side select the same mouse modes as the items of the &lt;Mouse&gt; menu.
 <P>
 </DL>
 <A NAME="lbAJ">&nbsp;</A>
 <H2>INTERACTIVE CONTROLS: MBview Colors and Contours Window</H2>
 
+Changes take effect when the <B>Apply</B> button is pressed.
 <DL COMPACT>
 <DT><B>[Colors and Contours]:{Data Color Bounds}Minimum</B>
 
@@ -480,9 +854,12 @@ program's name, version, and authors.
 <DT><B>[Colors and Contours]:{Data Color Bounds}&lt;&lt;Cold-to-Hot&gt;&lt;Hot-to-Cold&gt;&gt;</B>
 
 <DD>
-<DT><B>[Colors and Contours]:Data Contour Interval</B>
+These set the range of topography values spanned by the colortable, and
+whether the colortable runs from cold to hot or from hot to cold colors.
+<DT><B>[Colors and Contours]:Data Contour Interval (meters)</B>
 
 <DD>
+This sets the interval of the topographic contours.
 <DT><B>[Colors and Contours]:{Data Slope Color Bounds}Minimum</B>
 
 <DD>
@@ -492,6 +869,7 @@ program's name, version, and authors.
 <DT><B>[Colors and Contours]:{Data Slope Color Bounds}&lt;&lt;Cold-to-Hot&gt;&lt;Hot-to-Cold&gt;&gt;</B>
 
 <DD>
+These set the color bounds and direction for the topographic slope display.
 <DT><B>[Colors and Contours]:{Overlay Color Bounds}Minimum</B>
 
 <DD>
@@ -501,89 +879,107 @@ program's name, version, and authors.
 <DT><B>[Colors and Contours]:{Overlay Color Bounds}&lt;&lt;Cold-to-Hot&gt;&lt;Hot-to-Cold&gt;&gt;</B>
 
 <DD>
+These set the color bounds and direction for the overlay grid display.
 <DT><B>[Colors and Contours]:&lt;Apply&gt;</B>
 
 <DD>
+This button applies the values and redraws the display.
 <DT><B>[Colors and Contours]:&lt;Dismiss&gt;</B>
 
 <DD>
+This button closes the dialog.
 <P>
 </DL>
 <A NAME="lbAK">&nbsp;</A>
-<H2>INTERACTIVE CONTROLS: MBview Colors and Contours Window</H2>
+<H2>INTERACTIVE CONTROLS: MBview 2D Parameters Window</H2>
 
+Changes take effect when the <B>Apply</B> button is pressed.
 <DL COMPACT>
+<DT><B>[2D Parameters]:Zoom</B>
+
+<DD>
+This sets the size of the 2D view; larger values zoom in.
 <DT><B>[2D Parameters]:{View Offset}X</B>
 
 <DD>
 <DT><B>[2D Parameters]:{View Offset}Y</B>
 
 <DD>
-<DT><B>[2D Parameters]:{View Offset}Zoom</B>
-
-<DD>
+These set the horizontal offset of the 2D view.
 <DT><B>[2D Parameters]:&lt;Apply&gt;</B>
 
 <DD>
 <DT><B>[2D Parameters]:&lt;Dismiss&gt;</B>
 
 <DD>
+These buttons apply the values and close the dialog.
 <P>
 </DL>
 <A NAME="lbAL">&nbsp;</A>
-<H2>INTERACTIVE CONTROLS: MBview Colors and Contours Window</H2>
+<H2>INTERACTIVE CONTROLS: MBview 3D Parameters Window</H2>
 
+Changes take effect when the <B>Apply</B> button is pressed.
 <DL COMPACT>
-<DT><B>[3D Parameters]:{Model Orientation &amp; Zoom}Azimuth</B>
+<DT><B>[3D Parameters]:{Model Orientation &amp; Zoom}Azimuth (degrees)</B>
 
 <DD>
-<DT><B>[3D Parameters]:{Model Orientation &amp; Zoom}Elevation</B>
+<DT><B>[3D Parameters]:{Model Orientation &amp; Zoom}Elevation (degrees)</B>
 
 <DD>
 <DT><B>[3D Parameters]:{Model Orientation &amp; Zoom}Zoom</B>
 
 <DD>
-<DT><B>[3D Parameters]:{View Orientation &amp; Zoom}Azimuth</B>
+These set the orientation and zoom of the topography model.
+<DT><B>[3D Parameters]:{View Orientation &amp; Zoom}Azimuth (degrees)</B>
 
 <DD>
-<DT><B>[3D Parameters]:{View Orientation &amp; Zoom}Elevation</B>
+<DT><B>[3D Parameters]:{View Orientation &amp; Zoom}Elevation (degrees)</B>
 
 <DD>
-<B>[3D Parameters]:{View Orientation &amp; Zoom}Zoom</B>
-
-<DT><B>[3D Parameters]:Vertical Exageration</B>
+<DT><B>[3D Parameters]:{View Orientation &amp; Zoom}Zoom</B>
 
 <DD>
+These set the orientation and zoom of the viewpoint.
 <DT><B>[3D Parameters]:{Pan}X</B>
 
 <DD>
 <DT><B>[3D Parameters]:{Pan}Y</B>
 
 <DD>
+These set the horizontal offset of the 3D view.
+<DT><B>[3D Parameters]:Vertical exaggeration</B>
+
+<DD>
+This sets the vertical exaggeration of the 3D display.
 <DT><B>[3D Parameters]:&lt;Apply&gt;</B>
 
 <DD>
-<DT><B>[2D Parameters]:&lt;Dismiss&gt;</B>
+<DT><B>[3D Parameters]:&lt;Dismiss&gt;</B>
 
 <DD>
+These buttons apply the values and close the dialog.
 <P>
 </DL>
 <A NAME="lbAM">&nbsp;</A>
-<H2>INTERACTIVE CONTROLS: MBview Colors and Contours Window</H2>
+<H2>INTERACTIVE CONTROLS: MBview Shading Parameters Window</H2>
 
+Changes take effect when the <B>Apply</B> button is pressed.
 <DL COMPACT>
 <DT><B>[Shading Parameters]:{Shading by Illumination}Amplitude</B>
 
 <DD>
-<DT><B>[Shading Parameters]:{Shading by Illumination}Azimuth</B>
+<DT><B>[Shading Parameters]:{Shading by Illumination}Azimuth (degrees)</B>
 
 <DD>
-<DT><B>[Shading Parameters]:{Shading by Illumination}Elevation</B>
+<DT><B>[Shading Parameters]:{Shading by Illumination}Elevation (degrees)</B>
 
 <DD>
+These set the strength of the illumination shading and the direction of the
+light source.
 <DT><B>[Shading Parameters]:{Shading by Slope}Amplitude</B>
 
 <DD>
+This sets the strength of the slope shading.
 <DT><B>[Shading Parameters]:{Shading by Overlay}Amplitude</B>
 
 <DD>
@@ -593,117 +989,598 @@ program's name, version, and authors.
 <DT><B>[Shading Parameters]:{Shading by Overlay}&lt;&lt;Cold-to-Hot&gt;&lt;Hot-to-Cold&gt;&gt;</B>
 
 <DD>
+These set the strength of the shading by the overlay grid, the overlay value
+giving no shading, and the direction of the shading.
 <DT><B>[Shading Parameters]:&lt;Apply&gt;</B>
 
 <DD>
 <DT><B>[Shading Parameters]:&lt;Dismiss&gt;</B>
 
 <DD>
+These buttons apply the values and close the dialog.
 <P>
 </DL>
 <A NAME="lbAN">&nbsp;</A>
-<H2>INTERACTIVE CONTROLS: MBview Colors and Contours Window</H2>
+<H2>INTERACTIVE CONTROLS: MBview Rendering Resolution Window</H2>
 
+The sliders take effect when released. While the display is being moved,
+it is drawn at low resolution, then at medium resolution when the mouse
+button is released; &lt;Full&gt; draws it at full resolution.
 <DL COMPACT>
+<DT><B>[Rendering Resolution]:{Grid Rendering Resolution}==Medium Resolution Dimension==</B>
+
+<DD>
+<DT><B>[Rendering Resolution]:{Grid Rendering Resolution}==Low Resolution Dimension==</B>
+
+<DD>
+These set the largest number of grid cells drawn along each side of the
+grid at medium and low resolution (rounded to multiples of 25; the low
+resolution dimension is no larger than the medium one).
+<DT><B>[Rendering Resolution]:{Nav Rendering Decimation}==Medium Resolution Decimation==</B>
+
+<DD>
+<DT><B>[Rendering Resolution]:{Nav Rendering Decimation}==Low Resolution Decimation==</B>
+
+<DD>
+These set the decimation (every nth point) of the navigation and vector data
+drawn at medium and low resolution. Like routes, GIS polylines and polygons
+are always drawn at full resolution.
 <DT><B>[Rendering Resolution]:&lt;Dismiss&gt;</B>
 
 <DD>
-<DT><B>[Rendering Resolution]:==Low Resolution Dimension==</B>
-
-<DD>
-<DT><B>[Rendering Resolution]:==High Resolution Dimension==</B>
-
-<DD>
-<DT><B>[Rendering Resolution]:&lt;Dismiss&gt;</B>
-
-<DD>
-<DT><B>[Rendering Resolution]:&lt;Dismiss&gt;</B>
-
-<DD>
+This button closes the dialog.
 <P>
 </DL>
 <A NAME="lbAO">&nbsp;</A>
-<H2>INTERACTIVE CONTROLS: MBview Colors and Contours Window</H2>
+<H2>INTERACTIVE CONTROLS: MBview Projections Window</H2>
 
+The toggles take effect immediately.
 <DL COMPACT>
 <DT><B>[Projections]:{Display Projection}&lt;&lt;Geographic&gt;&lt;UTM&gt;&lt;Spheroid&gt;&gt;</B>
 
 <DD>
+These select the projection of the display: geographic coordinates, the UTM
+zone of the grid center, or a spheroidal (globe) view, which is always
+displayed in 3D.
+<DT><B>[Projections]:{Annotation Style}&lt;&lt;Degrees + Minutes&gt;&lt;Decimal Degrees&gt;&gt;</B>
+
+<DD>
+These select how longitudes and latitudes are shown in the pick information
+and in the lists.
+<DT><B>[Projections]:Primary Grid Projection</B>
+
+<DD>
+This shows the projection of the primary grid.
 <DT><B>[Projections]:&lt;Dismiss&gt;</B>
 
 <DD>
+This button closes the dialog.
 <P>
 </DL>
 <A NAME="lbAP">&nbsp;</A>
-<H2>INTERACTIVE CONTROLS: MBview Colors and Contours Window</H2>
+<H2>INTERACTIVE CONTROLS: MBview Site List Window</H2>
 
 <DL COMPACT>
 <DT><B>[Site List]:|Site List|</B>
 
 <DD>
+This list shows each site with its number, longitude, latitude, depth,
+color, size, and name. Selecting a site highlights it in the displays;
+clicking the selected site a second time changes its color to the next color
+(skipping red, which marks the selection). Several sites can be selected with
+the shift and control keys.
 <DT><B>[Site List]:&lt;Delete Selected Sites&gt;</B>
 
 <DD>
+This button deletes the selected sites.
 <DT><B>[Site List]:&lt;Dismiss&gt;</B>
 
 <DD>
+This button closes the list window.
 <P>
 </DL>
 <A NAME="lbAQ">&nbsp;</A>
-<H2>INTERACTIVE CONTROLS: MBview Colors and Contours Window</H2>
+<H2>INTERACTIVE CONTROLS: MBview Route List Window</H2>
 
 <DL COMPACT>
 <DT><B>[Route List]:|Route List|</B>
 
 <DD>
+This list shows each route, with its number, editability, number of
+waypoints, length in plan view and along the topography, color, and name,
+followed by its waypoints with their longitude, latitude, depth, distances
+along the route, and waypoint type. Selecting a route or waypoint highlights
+it in the displays. Clicking a selected route a second time changes its
+color; clicking a selected waypoint a second time changes its waypoint type
+(simple, transit, or start or end of a survey line of types 1 to 5).
 <DT><B>[Route List]:&lt;Delete Selected Routes&gt;</B>
 
 <DD>
+This button deletes the selected routes and waypoints.
+<DT><B>[Route List]:&lt;Convert Selected to Polylines&gt;</B>
+
+<DD>
+This button, present only when GIS polylines are displayed, converts each
+selected route (selecting a route or any of its waypoints selects the route)
+to a polyline through its waypoints, with the route's color, size, and name
+and the topography at the waypoints. The polylines are placed in a layer named
+&quot;Converted from routes&quot;; the routes are kept.
 <DT><B>[Route List]:&lt;Dismiss&gt;</B>
 
 <DD>
+This button closes the list window.
 <P>
 </DL>
 <A NAME="lbAR">&nbsp;</A>
-<H2>INTERACTIVE CONTROLS: MBview Colors and Contours Window</H2>
+<H2>INTERACTIVE CONTROLS: MBview Navigation List Window</H2>
 
 <DL COMPACT>
 <DT><B>[Navigation List]:|Navigation List|</B>
 
 <DD>
+This list shows each navigation file with its number, number of points,
+color, size, and name. Selecting files selects all of their navigation, as
+with the &lt;Mouse-&gt;Select Nav File&gt; mouse mode, and the profile follows the
+selected navigation.
 <DT><B>[Navigation List]:&lt;Delete Selected Navigation&gt;</B>
 
 <DD>
+This button deletes the selected navigation files from the display.
 <DT><B>[Navigation List]:&lt;Dismiss&gt;</B>
 
 <DD>
+This button closes the list window.
 <P>
 </DL>
 <A NAME="lbAS">&nbsp;</A>
+<H2>INTERACTIVE CONTROLS: MBview Profile Window</H2>
+
+<DL COMPACT>
+<DT><B>[Profile]:|Profile|</B>
+
+<DD>
+The profile window shows the topography along the current two point pick,
+selected route, or selected navigation, with the source, length, and depth
+range above the plot. Segments steeper than the slope threshold are drawn in
+red, and the boundaries between route or pick segments in green.
+<DT><B>[Profile]:==Display Width Multiple==</B>
+
+<DD>
+This sets the width of the plot as a multiple (1 to 5) of the window width.
+<DT><B>[Profile]:==Slope Threshold==</B>
+
+<DD>
+This sets the slope (from 0.01 to 2.00) above which segments are drawn in red.
+<DT><B>[Profile]:==Vertical exaggeration==</B>
+
+<DD>
+This sets the vertical exaggeration of the profile.
+<DT><B>[Profile]:&lt;Dismiss&gt;</B>
+
+<DD>
+This button closes the profile window.
+<P>
+</DL>
+<A NAME="lbAT">&nbsp;</A>
+<H2>INTERACTIVE CONTROLS: Generate Survey Route Window</H2>
+
+This dialog, opened with &lt;Action-&gt;Generate Survey Route from Area&gt;, generates
+a route of parallel survey lines covering the current area, run back and
+forth along the length of the area, optionally with crosslines. Each line end
+is a waypoint of type &quot;start line&quot;. The route is generated when
+<B>Generate Route</B> is pressed; pressing it again with the same route name
+replaces the route. The &quot;Current Area Info&quot; shows the area dimensions and the
+resulting route.
+<DL COMPACT>
+<DT><B>[Survey Route]:Route Name</B>
+
+<DD>
+<DT><B>[Survey Route]:Route Color</B>
+
+<DD>
+These set the name (default &quot;Survey&quot;) and color of the route.
+<DT><B>[Survey Route]:Line Spacing Mode</B>
+
+<DD>
+This selects uniform line spacing or line spacing varying with the swath width
+of the sonar.
+<DT><B>[Survey Route]:Line Spacing (m)</B>
+
+<DD>
+This sets the spacing of the lines in the uniform mode.
+<DT><B>[Survey Route]:Platform Type</B>
+
+<DD>
+<DT><B>[Survey Route]:Swath Width (degrees)</B>
+
+<DD>
+<DT><B>[Survey Route]:Sonar Depth (m)</B>
+
+<DD>
+<DT><B>[Survey Route]:Sonar Altitude (m)</B>
+
+<DD>
+In the variable mode these set whether the sonar is on a surface vessel, a
+submerged vehicle at constant altitude, or a submerged vehicle at constant
+depth, the sonar swath width, and the sonar depth or altitude. For constant
+altitude the line spacing follows from the altitude and swath width; otherwise
+each line spacing is calculated from the shallowest topography along the
+previous line.
+<DT><B>[Survey Route]:Start Corner</B>
+
+<DD>
+This sets the corner of the area (SW, SE, NW, or NE) where the survey starts.
+<DT><B>[Survey Route]:Interleaving</B>
+
+<DD>
+This sets the number of passes over the area; with values greater than 1 the
+lines are run in interleaved passes.
+<DT><B>[Survey Route]:Cross Lines</B>
+
+<DD>
+<DT><B>[Survey Route]:Crosslines Before/After Survey</B>
+
+<DD>
+These set the number of crosslines across the survey lines and whether they
+are run before or after the survey lines.
+<DT><B>[Survey Route]:&lt;Generate Route&gt;</B>
+
+<DD>
+<DT><B>[Survey Route]:&lt;Dismiss&gt;</B>
+
+<DD>
+These buttons generate the route and close the dialog.
+<P>
+</DL>
+<A NAME="lbAU">&nbsp;</A>
+<H2>INTERACTIVE CONTROLS: MBview Polyline, Polygon, and Point List Windows</H2>
+
+<DL COMPACT>
+<DT><B>[Polyline List]:|Polyline List|</B>
+
+<DD>
+<DT><B>[Polygon List]:|Polygon List|</B>
+
+<DD>
+<DT><B>[Point List]:|Point List|</B>
+
+<DD>
+These lists show each layer of the type, followed by its features. A layer
+item shows whether the layer is shown or hidden, the number of features, and
+the layer name; a feature item shows whether it is shown or hidden, its color,
+its number of points and parts or rings (or for points the position and z
+value), and its name. Selecting a single feature highlights it in red in the
+displays. Clicking an item a second time changes its color to the next color
+(skipping red); clicking a layer item a second time changes the color of all of
+its features. Several items can be selected with the shift and control keys.
+<DT><B>[Polyline List]:&lt;Show/Hide Selected&gt;</B>
+
+<DD>
+<DT><B>[Polygon List]:&lt;Show/Hide Selected&gt;</B>
+
+<DD>
+<DT><B>[Point List]:&lt;Show/Hide Selected&gt;</B>
+
+<DD>
+This button hides the selected features and layers if they are shown, or shows
+them if they are hidden. Hidden features are still saved and exported.
+<DT><B>[Polyline List]:&lt;Delete Selected&gt;</B>
+
+<DD>
+<DT><B>[Polygon List]:&lt;Delete Selected&gt;</B>
+
+<DD>
+<DT><B>[Point List]:&lt;Delete Selected&gt;</B>
+
+<DD>
+This button deletes the selected features; selecting a layer selects all of its
+features.
+<DT><B>[Polyline List]:&lt;Convert Selected to Routes&gt;</B>
+
+<DD>
+This button converts each part of each selected polyline (or of all polylines of
+a selected layer) to an editable route with a waypoint at each vertex, keeping
+the polyline's color, size, and name (with &quot; part n&quot; added for polylines with
+several parts). Vertices that cannot be placed in the display are not used, and
+their number is printed to the terminal. The polylines are kept.
+<DT><B>[Polyline List]:&lt;Dismiss&gt;</B>
+
+<DD>
+<DT><B>[Polygon List]:&lt;Dismiss&gt;</B>
+
+<DD>
+<DT><B>[Point List]:&lt;Dismiss&gt;</B>
+
+<DD>
+This button closes the list window.
+<P>
+</DL>
+<A NAME="lbAV">&nbsp;</A>
 <H2>MOUSE ACTIONS</H2>
 
+The actions of the mouse buttons in the display depend on the mouse mode, set
+with the &lt;Mouse&gt; menu; the current actions are listed in the &quot;Mouse Mode&quot; box
+on the left side of the window. On release of a button the display is redrawn
+at medium resolution.
+<DL COMPACT>
+<DT><B>Left Mouse Button</B>
+
+<DD>
+In the Pan &amp; Zoom, Rotate Model, Rotate View, Shading, Select Nav, and Select
+Nav File modes, clicking picks a point on the topography, marked with a red X
+and described in the &quot;Pick Info&quot; box; dragging picks two points and reports
+the range and bearing between them, and gives the profile between them. In
+the Pick Area mode, dragging defines a region with north-south and east-west
+boundaries; dragging from near a corner of an existing region moves that
+corner. In the Edit Sites mode, clicking selects the nearest site and
+dragging moves it. In the Edit Routes mode, clicking selects the nearest
+waypoint (and its route) and dragging moves it; clicking off the grid clears
+the selection.
+<DT><B>Middle Mouse Button</B>
+
+<DD>
+In the Pan &amp; Zoom mode, dragging pans the view. In the Rotate Model and
+Rotate View modes, dragging rotates the model or the viewpoint in azimuth
+(left and right) and elevation (up and down). In the Shading mode with
+shading by illumination, dragging moves the light source. In the Pick Area
+mode, dragging defines the centerline of an area; dragging from near an end
+of an existing area moves that end. In the Edit Sites mode, clicking adds a
+new site after the selected site and dragging moves it. In the Edit Routes
+mode, clicking with no route selected starts a new route; with a waypoint
+selected, clicking adds a new waypoint after it (after the last waypoint to
+extend a route, or between waypoints to insert one), and dragging moves the
+new waypoint. In the Select Nav mode, dragging selects the navigation between
+the two picked points; in the Select Nav File mode, it selects all of the
+navigation files from the first to the second picked file.
+<DT><B>Right Mouse Button</B>
+
+<DD>
+In the Pan &amp; Zoom and Rotate View modes, dragging up zooms in and dragging
+down zooms out. In the Rotate Model mode, dragging up or down increases or
+decreases the vertical exaggeration. In the Shading mode, dragging up or down
+increases or decreases the shading magnitude. In the Pick Area mode, dragging
+up or down widens or narrows the area. In the Edit Sites and Edit Routes
+modes, clicking on the selected site or waypoint deletes it; deleting the
+last waypoint of a route deletes the route. In the Select Nav and Select Nav
+File modes, the right button deselects navigation as the middle button
+selects it.
 <P>
-<A NAME="lbAT">&nbsp;</A>
+</DL>
+<A NAME="lbAW">&nbsp;</A>
 <H2>KEYBOARD ACTIONS</H2>
 
+<DL COMPACT>
+<DT><B>r or R</B>
+
+<DD>
+Typing &quot;r&quot; or &quot;R&quot; in the display resets the view, as with the <B>Reset</B>
+button.
 <P>
-<A NAME="lbAU">&nbsp;</A>
+</DL>
+<A NAME="lbAX">&nbsp;</A>
 <H2>MBGRDVIZ ROUTE FILES</H2>
 
+MB-System route files (suffix &quot;.rte&quot;) are text files beginning with a header
+line &quot;## Route File Version 2.00&quot; and further comment lines beginning with
+&quot;##&quot; that describe the format. Each route begins with a line
+&quot;&gt; ## STARTROUTE np,color,size,editmode,name&quot;, where np is the number of
+points, color is a color number as for the GIS files (0 = black to
+7 = purple), size is the line width, editmode is 1 if the route can be
+edited, and the name is the rest of the line, and ends with a line
+&quot;&gt; ## ENDROUTE&quot;.
+Between these lines are the points of the route, one per line, with the comma
+separated values:
+<BR>
+
+<PRE>
+longitude (deg), latitude (deg), topography (m), waypoint type,
+bearing (deg), lateral distance (m), distance along topography (m),
+slope (m/m)
+</PRE>
+
+The waypoint type is 0 for points that only give the topography between
+waypoints, 1 for a simple waypoint, 2 for a transit waypoint, and 3 to 12 for
+the start and end of survey lines of types 1 to 5 (3 = start line, 4 = end
+line, 5 = start line 2, and so on); waypoints are followed by a comment such
+as &quot;## WAYPOINT STARTLINE&quot;. When a route file is read, only the longitude,
+latitude, and waypoint type of the waypoints (type 1 or greater) are used; the
+topography points are recalculated from the grid. Lines beginning with &quot;&gt;&quot;
+end the current route.
 <P>
-<A NAME="lbAV">&nbsp;</A>
+Files without the version header are also read: each line gives at least the
+longitude and latitude of a waypoint, separated by commas or white space,
+optionally followed by the topography and the waypoint type, and routes are
+separated by lines beginning with &quot;&gt;&quot;. In such files the comment lines
+&quot;## ROUTENAME name&quot;, &quot;## ROUTECOLOR color&quot;, &quot;## ROUTESIZE size&quot;, and
+&quot;## ROUTEEDITMODE mode&quot; set the route properties. For example, a file
+giving a route of two survey lines and a route of one survey line:
+<BR>
+
+<PRE>
+## ROUTENAME Lines A
+## ROUTECOLOR 1
+-121.12 34.00 0 3
+-121.02 34.06 0 4
+-121.02 34.07 0 3
+-121.12 34.01 0 4
+&gt;
+## ROUTENAME Lines B
+-121.12 33.98 0 3
+-121.02 34.04 0 4
+</PRE>
+
+<P>
+The route export formats of the &lt;Action&gt; menu are written for particular
+survey and vehicle control systems and are not read by <B>MBgrdviz</B>.
+<P>
+<A NAME="lbAY">&nbsp;</A>
 <H2>MBGRDVIZ SITE FILES</H2>
 
+MB-System site files (suffix &quot;.ste&quot;) are text files beginning with a header
+line &quot;## Site File Version 2.00&quot; and further comment lines beginning with
+&quot;#&quot;. Each other line gives one site, with the comma separated values:
+<BR>
+
+<PRE>
+longitude (deg), latitude (deg), topography (m), color, size, name
+</PRE>
+
+where the color is a color number as for the GIS files (0 = black to
+7 = purple), and the name is the rest of the line. Only the longitude and
+latitude are required. Longitudes and latitudes may also be given as degrees
+and decimal minutes separated by a colon (e.g. -121:04.2). Files with version
+1 headers, or without a header and without commas, are read with white space
+separated values. For example:
+<BR>
+
+<PRE>
+## Site File Version 2.00
+-121.0800000,  34.0200000, -1650.000, 4, 1,M1
+-121.0500000,  34.0500000, -2010.000, 7, 1,M2 deep mooring
+</PRE>
+
 <P>
-<A NAME="lbAW">&nbsp;</A>
+<A NAME="lbAZ">&nbsp;</A>
+<H2>MBGRDVIZ VECTOR FILES</H2>
+
+Vector files are text files giving tracks of points with data values to be
+displayed as colored balls. Each line gives the white space separated
+longitude (deg), latitude (deg), z (m), and data value of one point; lines
+beginning with &quot;&gt;&quot; separate tracks, and lines beginning with &quot;#&quot; are
+comments, except that &quot;## VECTORNAME name&quot; sets the name (a single word)
+of the track and &quot;## MIN value&quot; and &quot;## MAX value&quot; set the range of data values
+spanned by the colors (by default the range of the data).
+<P>
+<A NAME="lbBA">&nbsp;</A>
+<H2>MBGRDVIZ PROFILE FILES</H2>
+
+Profile files written with &lt;Action-&gt;Save Profile File&gt; are text files with a
+header of comment lines beginning with &quot;##&quot;, including the profile source,
+length, and depth range, followed by one line per profile point with the
+white space separated values: distance along the profile (m), topography (m),
+segment boundary flag, longitude (deg), latitude (deg), distance along the
+topography (m), bearing (deg), and slope (m/m).
+<P>
+<A NAME="lbBB">&nbsp;</A>
+<H2>MBGRDVIZ POLYLINE FILES</H2>
+
+MB-System polyline files (suffix &quot;.pln&quot;) are text files. The file begins with
+a header line identifying the file type and version,
+followed by comment lines beginning with &quot;##&quot;. A &quot;## Z values: present&quot; or
+&quot;## Z values: absent&quot; line records whether the z values are meaningful, and
+lines of the form
+<PRE>
+## LAYER l,layer name
+</PRE>
+
+give the names of the layers. Colors are given as integers:
+0 = black, 1 = white, 2 = red, 3 = yellow, 4 = green, 5 = blue-green, 6 = blue,
+and 7 = purple (red is used to highlight selected features). Sizes are line
+widths in pixels for polylines and polygons, and larger symbols for points with
+sizes above 1. Positions are longitude and latitude in decimal degrees (WGS84)
+and z values are in meters, positive up.
+Each polyline begins with a
+line &quot;&gt; ## STARTPOLYLINE npart,npoint,color,size,layer,name&quot;, each of its parts
+begins with a line &quot;&gt; ## PART ipart,npoint&quot; followed by the comma separated
+longitude, latitude, and z values of its points, and the polyline ends with a
+line &quot;&gt; ## ENDPOLYLINE&quot;. The name is the rest of the line and may contain spaces
+and commas. Because the &quot;##&quot; lines are comments and the &quot;&gt;&quot; lines are segment
+headers for <B>GMT</B>, the files can also be plotted directly with <B>GMT</B>.
+For example:
+<BR>
+
+<PRE>
+## Polyline File Version 1.00
+## Z values: absent
+## LAYER 0,survey lines
+&gt; ## STARTPOLYLINE 2,5,1,3,0,Line A
+&gt; ## PART 0,3
+-121.120000000,34.000000000,0.000
+-121.070000000,34.030000000,0.000
+-121.020000000,34.060000000,0.000
+&gt; ## PART 1,2
+-121.120000000,34.060000000,0.000
+-121.020000000,34.000000000,0.000
+&gt; ## ENDPOLYLINE
+</PRE>
+
+<P>
+<A NAME="lbBC">&nbsp;</A>
+<H2>MBGRDVIZ POLYGON FILES</H2>
+
+MB-System polygon files (suffix &quot;.plg&quot;) have the same form as polyline files,
+with polygons beginning with a line
+&quot;&gt; ## STARTPOLYGON nring,npoint,color,size,fillcolor,layer,name&quot;
+(the fill color is -1 for no fill; filled display is not yet supported), rings
+beginning with a line &quot;&gt; ## RING iring,npoint,OUTER&quot; for outer boundaries or
+&quot;&gt; -Ph ## RING iring,npoint,HOLE&quot; for holes (the -Ph marks a hole for
+<B>GMT</B>), and polygons ending with a line &quot;&gt; ## ENDPOLYGON&quot;. Each ring is
+closed, its last point repeating its first point. For example:
+<BR>
+
+<PRE>
+## Polygon File Version 1.00
+## Z values: absent
+## LAYER 0,study areas
+&gt; ## STARTPOLYGON 2,10,3,2,-1,0,Closure with hole
+&gt; ## RING 0,5,OUTER
+-122.000000000,36.000000000,0.000
+-121.000000000,36.000000000,0.000
+-121.000000000,37.000000000,0.000
+-122.000000000,37.000000000,0.000
+-122.000000000,36.000000000,0.000
+&gt; -Ph ## RING 1,5,HOLE
+-121.800000000,36.200000000,0.000
+-121.800000000,36.800000000,0.000
+-121.200000000,36.800000000,0.000
+-121.200000000,36.200000000,0.000
+-121.800000000,36.200000000,0.000
+&gt; ## ENDPOLYGON
+</PRE>
+
+<P>
+<A NAME="lbBD">&nbsp;</A>
+<H2>MBGRDVIZ POINT FILES</H2>
+
+MB-System point files (suffix &quot;.pts&quot;) have the same header and layer lines as
+polyline files, followed by one line per point giving the comma separated
+longitude, latitude, z, color, size, layer, and name. For example:
+<BR>
+
+<PRE>
+## Point File Version 1.00
+## Z values: absent
+## LAYER 0,moorings
+-121.080000000,34.020000000,0.000,4,2,0,M1
+-121.050000000,34.050000000,0.000,7,1,0,M2
+</PRE>
+
+<P>
+<A NAME="lbBE">&nbsp;</A>
+<H2>SHAPEFILES</H2>
+
+<B>MBgrdviz</B> imports and exports ESRI shapefiles using the <B>GDAL</B> library.
+Imported shapefiles may contain points, multipoints (each point becomes a
+separate feature), lines, multilines, polygons, or multipolygons, with or
+without z values,
+in any coordinate system given by a &quot;.prj&quot; file (without a &quot;.prj&quot; file the
+coordinates are taken to be longitude and latitude). Exported shapefiles use
+WGS84 longitude and latitude, are encoded in UTF-8, and have NAME, COLOR, and
+SIZE attributes (and FILLCOLOR for polygons), so that they can be imported again
+with the same names, colors, and sizes. Shapefile attribute text is limited to
+254 bytes, so longer names are shortened on export.
+<P>
+<A NAME="lbBF">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
-<B><A HREF="mbsystem.html">mbsystem</A></B>(1)
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbdatalist.html">mbdatalist</A></B>(1), <B><A HREF="mbedit.html">mbedit</A></B>(1), <B><A HREF="mbeditviz.html">mbeditviz</A></B>(1),
+<B><A HREF="mbnavedit.html">mbnavedit</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1), <B><A HREF="mbvelocitytool.html">mbvelocitytool</A></B>(1)
 <P>
-<A NAME="lbAX">&nbsp;</A>
+<A NAME="lbBG">&nbsp;</A>
 <H2>BUGS</H2>
 
-This program is not done, nor is it adequately documented.
+The <B>Realtime</B> menu is not yet implemented. Polygons are displayed as
+outlines only; filled polygons are not yet supported.
 <P>
 <P>
 
@@ -719,26 +1596,35 @@ This program is not done, nor is it adequately documented.
 <DT><A HREF="#lbAH">INTERACTIVE CONTROLS: MBgrdviz Startup Window</A><DD>
 <DT><A HREF="#lbAI">INTERACTIVE CONTROLS: MBview Main Window</A><DD>
 <DT><A HREF="#lbAJ">INTERACTIVE CONTROLS: MBview Colors and Contours Window</A><DD>
-<DT><A HREF="#lbAK">INTERACTIVE CONTROLS: MBview Colors and Contours Window</A><DD>
-<DT><A HREF="#lbAL">INTERACTIVE CONTROLS: MBview Colors and Contours Window</A><DD>
-<DT><A HREF="#lbAM">INTERACTIVE CONTROLS: MBview Colors and Contours Window</A><DD>
-<DT><A HREF="#lbAN">INTERACTIVE CONTROLS: MBview Colors and Contours Window</A><DD>
-<DT><A HREF="#lbAO">INTERACTIVE CONTROLS: MBview Colors and Contours Window</A><DD>
-<DT><A HREF="#lbAP">INTERACTIVE CONTROLS: MBview Colors and Contours Window</A><DD>
-<DT><A HREF="#lbAQ">INTERACTIVE CONTROLS: MBview Colors and Contours Window</A><DD>
-<DT><A HREF="#lbAR">INTERACTIVE CONTROLS: MBview Colors and Contours Window</A><DD>
-<DT><A HREF="#lbAS">MOUSE ACTIONS</A><DD>
-<DT><A HREF="#lbAT">KEYBOARD ACTIONS</A><DD>
-<DT><A HREF="#lbAU">MBGRDVIZ ROUTE FILES</A><DD>
-<DT><A HREF="#lbAV">MBGRDVIZ SITE FILES</A><DD>
-<DT><A HREF="#lbAW">SEE ALSO</A><DD>
-<DT><A HREF="#lbAX">BUGS</A><DD>
+<DT><A HREF="#lbAK">INTERACTIVE CONTROLS: MBview 2D Parameters Window</A><DD>
+<DT><A HREF="#lbAL">INTERACTIVE CONTROLS: MBview 3D Parameters Window</A><DD>
+<DT><A HREF="#lbAM">INTERACTIVE CONTROLS: MBview Shading Parameters Window</A><DD>
+<DT><A HREF="#lbAN">INTERACTIVE CONTROLS: MBview Rendering Resolution Window</A><DD>
+<DT><A HREF="#lbAO">INTERACTIVE CONTROLS: MBview Projections Window</A><DD>
+<DT><A HREF="#lbAP">INTERACTIVE CONTROLS: MBview Site List Window</A><DD>
+<DT><A HREF="#lbAQ">INTERACTIVE CONTROLS: MBview Route List Window</A><DD>
+<DT><A HREF="#lbAR">INTERACTIVE CONTROLS: MBview Navigation List Window</A><DD>
+<DT><A HREF="#lbAS">INTERACTIVE CONTROLS: MBview Profile Window</A><DD>
+<DT><A HREF="#lbAT">INTERACTIVE CONTROLS: Generate Survey Route Window</A><DD>
+<DT><A HREF="#lbAU">INTERACTIVE CONTROLS: MBview Polyline, Polygon, and Point List Windows</A><DD>
+<DT><A HREF="#lbAV">MOUSE ACTIONS</A><DD>
+<DT><A HREF="#lbAW">KEYBOARD ACTIONS</A><DD>
+<DT><A HREF="#lbAX">MBGRDVIZ ROUTE FILES</A><DD>
+<DT><A HREF="#lbAY">MBGRDVIZ SITE FILES</A><DD>
+<DT><A HREF="#lbAZ">MBGRDVIZ VECTOR FILES</A><DD>
+<DT><A HREF="#lbBA">MBGRDVIZ PROFILE FILES</A><DD>
+<DT><A HREF="#lbBB">MBGRDVIZ POLYLINE FILES</A><DD>
+<DT><A HREF="#lbBC">MBGRDVIZ POLYGON FILES</A><DD>
+<DT><A HREF="#lbBD">MBGRDVIZ POINT FILES</A><DD>
+<DT><A HREF="#lbBE">SHAPEFILES</A><DD>
+<DT><A HREF="#lbBF">SEE ALSO</A><DD>
+<DT><A HREF="#lbBG">BUGS</A><DD>
 </DL>
 <HR>
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 7 September 2026</P></CENTER>
+Last Updated: 23 October 2026</P></CENTER>
 
 <HR>
 <center>
