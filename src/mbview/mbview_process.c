@@ -445,7 +445,7 @@ int mbview_derivative(size_t instance, int i, int j) {
 		if (data->primary_data[k1] != data->primary_nodatavalue && data->primary_data[k2] != data->primary_nodatavalue)
 			derivative_ok = true;
 	}
-	else if (i == data->primary_n_rows - 1) {
+	else if (j == data->primary_n_rows - 1) {
 		k1 = i * data->primary_n_rows + (j - 1);
 		k2 = i * data->primary_n_rows + j;
 		if (data->primary_data[k1] != data->primary_nodatavalue && data->primary_data[k2] != data->primary_nodatavalue)

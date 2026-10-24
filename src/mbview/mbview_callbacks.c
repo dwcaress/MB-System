@@ -2526,9 +2526,6 @@ int mbview_action_sensitivity(size_t instance) {
 			else if (view->actionsensitive[i] & MBV_EXISTMASK_GISPOINT && shared.shareddata.ngispoint > 0) {
 				XtSetArg(args[ac], XmNsensitive, True);
 			}
-			if (view->actionsensitive[i] & MBV_PICKMASK_NEWINSTANCE && mbview_allactive) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
 			if (view->actionsensitive[i] & MBV_STATEMASK_16 && data->state16) {
 				XtSetArg(args[ac], XmNsensitive, True);
 			}
@@ -2576,6 +2573,11 @@ int mbview_action_sensitivity(size_t instance) {
 			}
 			if (view->actionsensitive[i] & MBV_STATEMASK_31 && data->state31) {
 				XtSetArg(args[ac], XmNsensitive, True);
+			}
+
+			/* actions that open a new window need a free window */
+			if (view->actionsensitive[i] & MBV_PICKMASK_NEWINSTANCE && mbview_allactive) {
+				XtSetArg(args[ac], XmNsensitive, False);
 			}
 
 			ac++;
@@ -3010,9 +3012,9 @@ void do_mbview_projection_popup(Widget w, XtPointer client_data, XtPointer call_
 		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_spheroid, FALSE, FALSE);
 	}
 	else if (data->display_projection_mode == MBV_PROJECTION_SPHEROID) {
-		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_spheroid, TRUE, FALSE);
+		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_geographic, FALSE, FALSE);
 		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_utm, FALSE, FALSE);
-		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_spheroid, FALSE, FALSE);
+		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_spheroid, TRUE, FALSE);
 	}
 	if (shared.lonlatstyle == MBV_LONLAT_DEGREESMINUTES) {
 		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_annotation_degreesminutes, TRUE, FALSE);
@@ -7073,7 +7075,7 @@ void do_mbview_shadeparmsapply(Widget w, XtPointer client_data, XtPointer call_d
 			change = true;
 	}
 
-	int ivalue = XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_overlay_shade_ctoh);
+	int ivalue = XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_overlay_shade_htoc);
 	if (ivalue != data->overlay_shade_mode) {
 		data->overlay_shade_mode = ivalue;
 		if (shade_mode == MBV_SHADE_VIEW_OVERLAY)
@@ -7706,8 +7708,9 @@ void do_mbview_routelistselect(Widget w, XtPointer client_data, XtPointer call_d
 			mbview_updateroutelist();
 		}
 
-		/* change waypoint type if waypoint clicked more than once */
-		if (route_selected_old == shared.shareddata.route_selected &&
+		/* change waypoint type if a waypoint (not a whole route) is clicked more than once */
+		if (shared.shareddata.route_selected >= 0 && shared.shareddata.route_point_selected >= 0 &&
+		    route_selected_old == shared.shareddata.route_selected &&
 		    route_point_selected_old == shared.shareddata.route_point_selected) {
 			const int iroute = shared.shareddata.route_selected;
 			const int iwaypoint = shared.shareddata.route_point_selected;
@@ -8339,6 +8342,14 @@ void do_mbview_view_profile(Widget w, XtPointer client_data, XtPointer call_data
 
 		/* draw the profile */
 		mbview_plotprofile(instance);
+	}
+	else {
+		/* destroy opengl context */
+		mbview_destroy_prglx(instance);
+
+		/* turn off profile viewing */
+		XtUnmanageChild(view->mb3dview.mbview_form_profile);
+		data->profile_view_mode = MBV_VIEW_OFF;
 	}
 
 	/* reset the togglebutton */

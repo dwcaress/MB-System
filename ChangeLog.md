@@ -223,6 +223,39 @@ of the main and display windows is now described, along with the mouse and
 keyboard actions, the survey route generation dialog, and the route, site,
 vector and profile file formats. Outdated entries were corrected.
 
+MBview library (src/mbview/mbview\_callbacks.c): fixed two more bugs. In the
+Route List, clicking a route name twice also wrote a waypoint type outside the
+route data. Actions that open a new window, such as "Open Region as New View",
+were made active when all mbview windows were in use instead of inactive.
+
+Program mbgrdviz (src/mbgrdviz/mbgrdviz\_callbacks.c): fixed two bugs. The
+"## VECTORCOLOR" line of vector files was ignored. Opening a navigation or swath
+datalist that cannot be read put mbgrdviz into an endless loop; it now reports
+the error.
+
+MBview library (src/mbview/mbview\_process.c): fixed the slope calculation along
+the top row of the grid, which used the cells of the next column and, for the
+last grid cell, read past the end of the grid.
+
+Program mbgrdviz (src/mbgrdviz/mbgrdviz\_callbacks.c, src/man/man1/mbgrdviz.1):
+fixed the Risi 2 script exports. The "move bearing" commands now give the range
+then the bearing, every command ends its line, and the leg bearings are computed
+from the waypoints. The static heading script, previously identical to the
+variable heading one, now keeps the heading of the first leg.
+
+Program mbgrdviz (src/mbgrdviz/mbgrdviz\_callbacks.c): fixed more bugs. Saving
+two or more routes reversed or as Risi scripts lost every route after the first.
+A site whose latitude in degrees and minutes could not be read was added with an
+unset latitude. The survey route dialog read its area from the first window
+instead of the window it was opened from. The Risi script projection was not set
+for a route starting at exactly 84 degrees N.
+
+MBview library (src/mbview/mbview\_callbacks.c, src/mbview/mbview\_nav.c): fixed
+more bugs. Each Apply in the Shading dialog reversed the overlay shading
+direction. The Projections dialog showed no projection selected in Spheroid mode.
+Unchecking View > Profile did not close the profile window. With inactive
+navigation present, the Navigation List could highlight the wrong item.
+
 The above work was done with the assistance of the AI coding assistant Claude Opus 5.5
 (Anthropic, model claude-opus-5-5), operating as Claude Code under developer
 supervision and review.

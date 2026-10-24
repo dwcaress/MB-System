@@ -2298,6 +2298,8 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
               if (strchr(latstring, ':') != NULL) {
                 if (sscanf(latstring, "%lf:%lf", &latdeg,&latmin) == 2) {
                   sitelat[nsite] = copysign((fabs(latdeg) + fabs(latmin) / 60.0), latdeg);
+                } else {
+                  site_ok = false;
                 }
               } else if (sscanf(latstring, "%lf", &sitelat[nsite]) == 1) {
               } else {
@@ -3041,6 +3043,7 @@ int do_mbgrdviz_saveroutereversed(size_t instance, char *output_file_ptr) {
         if (npointalloc > 0) {
           status = mbview_freeroutearrays(verbose, &routelon, &routelat, &routewaypoint, &routetopo, &routebearing,
                                           &distlateral, &distovertopo, &slope, &error);
+          npointalloc = 0;
         }
       }
 
@@ -3207,14 +3210,14 @@ int do_mbgrdviz_saverisiscriptheading(size_t instance, char *output_file_ptr) {
 
             /* else if more northerly than 84 deg N then use
                     North Universal Polar Stereographic Projection */
-            else if (reference_lat > 84.0) {
+            else if (reference_lat >= 84.0) {
               int projectionid = 32661;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
 
             /* else if more southerly than 80 deg S then use
                     South Universal Polar Stereographic Projection */
-            else if (reference_lat < 80.0) {
+            else if (reference_lat <= -80.0) {
               int projectionid = 32761;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
@@ -3303,6 +3306,7 @@ int do_mbgrdviz_saverisiscriptheading(size_t instance, char *output_file_ptr) {
           if (npointalloc > 0) {
             status = mbview_freeroutearrays(verbose, &routelon, &routelat, &routewaypoint, &routetopo, &routebearing,
                                             &distlateral, &distovertopo, &slope, &error);
+            npointalloc = 0;
           }
         }
       }
@@ -3457,14 +3461,14 @@ int do_mbgrdviz_saverisiscriptnoheading(size_t instance, char *output_file_ptr) 
 
             /* else if more northerly than 84 deg N then use
                     North Universal Polar Stereographic Projection */
-            else if (reference_lat > 84.0) {
+            else if (reference_lat >= 84.0) {
               int projectionid = 32661;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
 
             /* else if more southerly than 80 deg S then use
                     South Universal Polar Stereographic Projection */
-            else if (reference_lat < 80.0) {
+            else if (reference_lat <= -80.0) {
               int projectionid = 32761;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
@@ -3553,6 +3557,7 @@ int do_mbgrdviz_saverisiscriptnoheading(size_t instance, char *output_file_ptr) 
           if (npointalloc > 0) {
             status = mbview_freeroutearrays(verbose, &routelon, &routelat, &routewaypoint, &routetopo, &routebearing,
                                             &distlateral, &distovertopo, &slope, &error);
+            npointalloc = 0;
           }
         }
       }
@@ -3639,7 +3644,7 @@ int do_mbgrdviz_saverisi2scriptheading(size_t instance, char *output_file_ptr) {
         fprintf(sfp, "##   heading rate <rate (deg/sec)>\r\n");
         fprintf(sfp, "##   heading abs <+/-heading (deg)>, <turn direction +/-1>\r\n");
         fprintf(sfp, "##   heading rel <+/-heading (deg)>\r\n");
-        fprintf(sfp, "##   move bearing, <range (m)>, <bearing (deg)>\r\n");
+        fprintf(sfp, "##   move bearing <range (m)>, <bearing relative to heading (deg)>\r\n");
         fprintf(sfp, "##\r\n");
         fprintf(sfp, "## This script assumes the survey platform starts at the origin with heading 0.0\r\n");
         fprintf(sfp, "##\r\n");
@@ -3709,14 +3714,14 @@ int do_mbgrdviz_saverisi2scriptheading(size_t instance, char *output_file_ptr) {
 
             /* else if more northerly than 84 deg N then use
                     North Universal Polar Stereographic Projection */
-            else if (reference_lat > 84.0) {
+            else if (reference_lat >= 84.0) {
               int projectionid = 32661;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
 
             /* else if more southerly than 80 deg S then use
                     South Universal Polar Stereographic Projection */
-            else if (reference_lat < 80.0) {
+            else if (reference_lat <= -80.0) {
               int projectionid = 32761;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
@@ -3744,40 +3749,35 @@ int do_mbgrdviz_saverisi2scriptheading(size_t instance, char *output_file_ptr) {
 
             /* write the route points */
             fprintf(sfp, "## altitude, %.3f\r\n", altitude);
-            fprintf(sfp, "##\n");
+            fprintf(sfp, "##\r\n");
             fprintf(sfp, "## heading abs 0.0\r\n");
-            double xx0, yy0, xx1, yy1;
-            double heading0, heading1, dheading;
+            double xx0 = 0.0;
+            double yy0 = 0.0;
+            double heading = 0.0;
+            bool first = true;
             for (j = 0; j < npointtotal; j++) {
-              double xxxx, yyyy;
-              double range;
-              double bearing, heading0, heading1;
               if (routewaypoint[j] > MBV_ROUTE_WAYPOINT_NONE) {
-                mb_proj_forward(verbose, pjptr, routelon[j], routelat[j], &xxxx, &yyyy, &error);
-                xxxx = xxxx - origin_x;
-                yyyy = yyyy - origin_y;
-                if (j == 0) {
-                  xx0 = xxxx;
-                  yy0 = yyyy;
-                  heading0 = routebearing[j];
-                }
-                else {
-                  xx1 = xxxx;
-                  yy1 = yyyy;
-                  range = sqrt((xx1 - xx0) * (xx1 - xx0) + (yy1 - yy0) * (yy1 - yy0));
-                  heading1 = routebearing[j];
-                  dheading = heading1 - heading0;
+                double xx1, yy1;
+                mb_proj_forward(verbose, pjptr, routelon[j], routelat[j], &xx1, &yy1, &error);
+                xx1 = xx1 - origin_x;
+                yy1 = yy1 - origin_y;
+                if (!first) {
+                  /* turn to the bearing of this leg, then move straight ahead */
+                  const double range = sqrt((xx1 - xx0) * (xx1 - xx0) + (yy1 - yy0) * (yy1 - yy0));
+                  const double bearing = RTD * atan2(xx1 - xx0, yy1 - yy0);
+                  double dheading = bearing - heading;
                   if (dheading > 180.0) {
                     dheading -= 360.0;
                   } else if (dheading < -180.0) {
                     dheading += 360.0;
                   }
-                  fprintf(sfp, "move bearing 0.0, %.2f", range);
-                  fprintf(sfp, "heading rel %.2f", dheading);
-                  xx0 = xx1;
-                  yy0 = yy1;
-                  heading0 = heading1;
+                  fprintf(sfp, "heading rel %.2f\r\n", dheading);
+                  fprintf(sfp, "move bearing %.2f, 0.00\r\n", range);
+                  heading = bearing;
                 }
+                xx0 = xx1;
+                yy0 = yy1;
+                first = false;
               }
             }
 
@@ -3789,6 +3789,7 @@ int do_mbgrdviz_saverisi2scriptheading(size_t instance, char *output_file_ptr) {
           if (npointalloc > 0) {
             status = mbview_freeroutearrays(verbose, &routelon, &routelat, &routewaypoint, &routetopo, &routebearing,
                                             &distlateral, &distovertopo, &slope, &error);
+            npointalloc = 0;
           }
         }
       }
@@ -3875,7 +3876,7 @@ int do_mbgrdviz_saverisi2scriptnoheading(size_t instance, char *output_file_ptr)
         fprintf(sfp, "##   heading rate <rate (deg/sec)>\r\n");
         fprintf(sfp, "##   heading abs <+/-heading (deg)>, <turn direction +/-1>\r\n");
         fprintf(sfp, "##   heading rel <+/-heading (deg)>\r\n");
-        fprintf(sfp, "##   move bearing, <range (m)>, <bearing (deg)>\r\n");
+        fprintf(sfp, "##   move bearing <range (m)>, <bearing relative to heading (deg)>\r\n");
         fprintf(sfp, "##\r\n");
         fprintf(sfp, "## This script assumes the survey platform starts at the origin with heading 0.0\r\n");
         fprintf(sfp, "##\r\n");
@@ -3945,14 +3946,14 @@ int do_mbgrdviz_saverisi2scriptnoheading(size_t instance, char *output_file_ptr)
 
             /* else if more northerly than 84 deg N then use
                     North Universal Polar Stereographic Projection */
-            else if (reference_lat > 84.0) {
+            else if (reference_lat >= 84.0) {
               int projectionid = 32661;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
 
             /* else if more southerly than 80 deg S then use
                     South Universal Polar Stereographic Projection */
-            else if (reference_lat < 80.0) {
+            else if (reference_lat <= -80.0) {
               int projectionid = 32761;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
@@ -3980,42 +3981,46 @@ int do_mbgrdviz_saverisi2scriptnoheading(size_t instance, char *output_file_ptr)
 
             /* write the route points */
             fprintf(sfp, "## altitude, %.3f\r\n", altitude);
-            fprintf(sfp, "##\n");
+            fprintf(sfp, "##\r\n");
             fprintf(sfp, "## heading abs 0.0\r\n");
-            double xx0, yy0, xx1, yy1;
-            double heading0, heading1, dheading;
+            double xx0 = 0.0;
+            double yy0 = 0.0;
+            double heading = 0.0;
+            bool first = true;
+            int nleg = 0;
             for (j = 0; j < npointtotal; j++) {
-              double xxxx, yyyy;
-              double range;
-              double bearing, heading0, heading1;
               if (routewaypoint[j] > MBV_ROUTE_WAYPOINT_NONE) {
-                mb_proj_forward(verbose, pjptr, routelon[j], routelat[j], &xxxx, &yyyy, &error);
-                xxxx = xxxx - origin_x;
-                yyyy = yyyy - origin_y;
-                if (j == 0) {
-                  xx0 = xxxx;
-                  yy0 = yyyy;
-                  heading0 = routebearing[j];
-                }
-                else {
-                  xx1 = xxxx;
-                  yy1 = yyyy;
-                  range = sqrt((xx1 - xx0) * (xx1 - xx0) + (yy1 - yy0) * (yy1 - yy0));
-                  heading1 = routebearing[j];
-                  dheading = heading1 - heading0;
-                  if (dheading > 180.0) {
-                    dheading -= 360.0;
-                  } else if (dheading < -180.0) {
-                    dheading += 360.0;
+                double xx1, yy1;
+                mb_proj_forward(verbose, pjptr, routelon[j], routelat[j], &xx1, &yy1, &error);
+                xx1 = xx1 - origin_x;
+                yy1 = yy1 - origin_y;
+                if (!first) {
+                  /* turn to the bearing of the first leg, then move on each
+                     leg at a bearing relative to that fixed heading */
+                  const double range = sqrt((xx1 - xx0) * (xx1 - xx0) + (yy1 - yy0) * (yy1 - yy0));
+                  const double bearing = RTD * atan2(xx1 - xx0, yy1 - yy0);
+                  if (nleg == 0) {
+                    heading = bearing;
+                    fprintf(sfp, "heading rel %.2f\r\n", heading);
                   }
-                  fprintf(sfp, "move bearing 0.0, %.2f", range);
-                  fprintf(sfp, "heading rel %.2f", dheading);
-                  xx0 = xx1;
-                  yy0 = yy1;
-                  heading0 = heading1;
+                  double dbearing = bearing - heading;
+                  if (dbearing > 180.0) {
+                    dbearing -= 360.0;
+                  } else if (dbearing < -180.0) {
+                    dbearing += 360.0;
+                  }
+                  fprintf(sfp, "move bearing %.2f, %.2f\r\n", range, dbearing);
+                  nleg++;
                 }
+                xx0 = xx1;
+                yy0 = yy1;
+                first = false;
               }
             }
+
+            /* return to the starting heading */
+            if (nleg > 0)
+              fprintf(sfp, "heading rel %.2f\r\n", -heading);
 
             /* write the route end */
             fprintf(sfp, "## End\r\n");
@@ -4025,6 +4030,7 @@ int do_mbgrdviz_saverisi2scriptnoheading(size_t instance, char *output_file_ptr)
           if (npointalloc > 0) {
             status = mbview_freeroutearrays(verbose, &routelon, &routelat, &routewaypoint, &routetopo, &routebearing,
                                             &distlateral, &distovertopo, &slope, &error);
+            npointalloc = 0;
           }
         }
       }
@@ -5128,7 +5134,7 @@ int do_mbgrdviz_openvector(size_t instance, char *input_file_ptr) {
             sscanf(buffer, "## VECTORNAME %s", vectorname);
           }
           else if (strncmp(buffer, "## VECTORCOLOR", 13) == 0) {
-            sscanf(buffer, "## ROUTECOLOR %d", &vectorcolor);
+            sscanf(buffer, "## VECTORCOLOR %d", &vectorcolor);
           }
           else if (strncmp(buffer, "## ROUTESIZE", 12) == 0) {
             sscanf(buffer, "## ROUTESIZE %d", &vectorsize);
@@ -5418,6 +5424,11 @@ int do_mbgrdviz_opennav(size_t instance, bool swathbounds, char *input_file_ptr)
             done = true;
           }
         }
+      }
+      else {
+        fprintf(stderr, "\nUnable to open datalist <%s>\n", input_file_ptr);
+        XBell((Display *)XtDisplay(mainWindow), 100);
+        done = true;
       }
     }
     fprintf(stderr, "Attempted to load %d files, actually read %d files\n", nfiledatalist, nfileread);
@@ -7472,8 +7483,9 @@ void do_mbgrdviz_arearoute_parameterchange(Widget w, XtPointer client_data, XtPo
     fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
   }
 
-  /* get source mbview instance */
-  const size_t instance = (size_t)client_data;
+  /* get source mbview instance - the callbacks are registered with
+      client_data 0, so use survey_instance as the other survey callbacks do */
+  const size_t instance = survey_instance;
 
   /* check data source for area to bounding desired survey */
   struct mbview_struct *data;

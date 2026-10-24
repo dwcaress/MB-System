@@ -406,7 +406,7 @@ and values above zero with land colors: pale yellow to brown for Sealevel1,
 and pale yellow through browns to green for Sealevel2.
 .TP
 .B [MBview]:<View->Profile>
-This item opens the profile window (see the Profile window below).
+This item opens or closes the profile window (see the Profile window below).
 .TP
 .B [MBview]:<Controls->Colors & Contours>
 This item opens the Colors and Contours dialog (see below).
@@ -573,7 +573,12 @@ points of each route in reverse order.
 .B [MBview]:<Action->Save Risi 2 Script File (static heading)>
 These items write the selected routes, or all routes, as mission scripts for
 the Risi vehicle controller, with the waypoints given in meters relative to the
-first waypoint.
+first waypoint. The Risi 2 scripts give each leg as a relative turn
+("heading rel") and a move ("move bearing range, bearing", with the bearing
+relative to the vehicle heading), assuming that the vehicle starts at the first
+waypoint with heading 0. With variable heading the vehicle turns to face along
+each leg; with static heading it turns once to the bearing of the first leg,
+keeps that heading on all legs, and turns back to heading 0 at the end.
 .TP
 .B [MBview]:<Action->Save Route as Degrees + Decimal Minutes File>
 This item writes the waypoints of all routes as latitude and longitude in
