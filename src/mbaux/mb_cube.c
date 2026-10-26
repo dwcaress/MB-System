@@ -73,6 +73,7 @@
 
 #define MB_CUBE_CONF_95PC 1.96            /* unit normal scale for a 95% confidence interval */
 #define MB_CUBE_CONF_99PC 2.56            /* unit normal scale for a 99% confidence interval */
+#define MB_CUBE_INFLUENCE_SCALE 2.95      /* default horizontal error scalar of the influence radius */
 #define MB_CUBE_MAX_HYPOTHESIS_RATIO 5.0  /* ceiling of the hypothesis strength */
 #define MB_CUBE_ALLOC_MIN 1024            /* minimum number of pool entries allocated */
 #define MB_CUBE_NONE -1                   /* no queue or hypothesis */
@@ -197,6 +198,7 @@ int mb_cube_default_param(int verbose, int iho_order, struct mb_cube_param_struc
     param->runlength_t = 5;
     param->dist_exp = 2.0;
     param->horiz_scale = MB_CUBE_CONF_95PC;
+    param->influence_scale = MB_CUBE_INFLUENCE_SCALE;
     param->capture_scale = 0.05;
     param->capture_min = 0.5;
     param->min_context = 5.0;
@@ -230,6 +232,7 @@ int mb_cube_check_param(int verbose, const struct mb_cube_param_struct *param, i
     fprintf(stderr, "dbg2       runlength_t:      %d\n", param->runlength_t);
     fprintf(stderr, "dbg2       dist_exp:         %f\n", param->dist_exp);
     fprintf(stderr, "dbg2       horiz_scale:      %f\n", param->horiz_scale);
+    fprintf(stderr, "dbg2       influence_scale:  %f\n", param->influence_scale);
     fprintf(stderr, "dbg2       capture_scale:    %f\n", param->capture_scale);
     fprintf(stderr, "dbg2       capture_min:      %f\n", param->capture_min);
     fprintf(stderr, "dbg2       min_context:      %f\n", param->min_context);
@@ -250,6 +253,7 @@ int mb_cube_check_param(int verbose, const struct mb_cube_param_struct *param, i
     && (param->runlength_t >= 1 && param->runlength_t <= 10)
     && (param->dist_exp >= 1.0 && param->dist_exp <= 10.0)
     && (param->horiz_scale >= 0.0 && param->horiz_scale <= 10.0)
+    && (param->influence_scale >= 0.0 && param->influence_scale <= 10.0)
     && (param->capture_scale >= 0.01 && param->capture_scale <= 1.0)
     && (param->capture_min >= 0.0 && param->capture_min <= 100.0)
     && (param->min_context >= 0.0 && param->min_context <= 1000.0)
@@ -629,14 +633,15 @@ int mb_cube_insert(int verbose, void *cube_ptr, double x, double y, double depth
     const double h = fabs(depth_sonar);
 
     /* influence radius: soundings much better than the allowed TVU spread
-       further, but never beyond the 99% bound of their horizontal
-       uncertainty or below the node spacing */
+       further, but never beyond influence_scale (2.95 by default, as in the
+       reference grid code and the manual) times their horizontal sigma, and
+       never less than the node spacing */
     const double max_var = (param->tvu_a * param->tvu_a + param->tvu_b * param->tvu_b * h * h)
                            / (MB_CUBE_CONF_95PC * MB_CUBE_CONF_95PC);
     double ratio = max_var / var_depth;
     if (ratio <= 2.0)
       ratio = 2.0;
-    const double max_radius = MB_CUBE_CONF_99PC * sqrt(var_horiz);
+    const double max_radius = param->influence_scale * sqrt(var_horiz);
     double radius = cube->dist_scale * pow(ratio - 1.0, 1.0 / param->dist_exp) - max_radius;
     if (radius < 0.0)
       radius = cube->dist_scale;
@@ -759,13 +764,15 @@ static double mb_cube_hyp_variance(const struct mb_cube_param_struct *param, con
   return (hyp->var_estimate);
 }
 /*--------------------------------------------------------------------------*/
-/* Hypothesis with the most samples (the newest on ties) and the strength
-   5 - n_best / n_second, at least 0. */
+/* Hypothesis with the most samples and the strength 5 - n_best / n_second,
+   at least 0. On ties the oldest hypothesis wins: the first one proposed is
+   usually the right one (the reference code leaves ties to qsort, which
+   chose the oldest in our comparison). */
 static const struct mb_cube_hyp *mb_cube_select_prior(const struct mb_cube_struct *cube, const struct mb_cube_node *node,
                                                       double *strength) {
   const struct mb_cube_hyp *best = NULL;
   for (int ihyp = node->hyp; ihyp != MB_CUBE_NONE; ihyp = cube->hyps[ihyp].next)
-    if (best == NULL || cube->hyps[ihyp].num_samples > best->num_samples)
+    if (best == NULL || cube->hyps[ihyp].num_samples >= best->num_samples)
       best = &cube->hyps[ihyp];
   int n_second = 0;
   for (int ihyp = node->hyp; ihyp != MB_CUBE_NONE; ihyp = cube->hyps[ihyp].next)

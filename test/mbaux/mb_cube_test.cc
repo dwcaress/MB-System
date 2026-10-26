@@ -106,6 +106,8 @@ TEST(MbCubeParam, DefaultsAndChecks) {
   EXPECT_EQ(5, param.runlength_t);
   EXPECT_DOUBLE_EQ(0.05, param.capture_scale);
   EXPECT_DOUBLE_EQ(0.5, param.capture_min);
+  EXPECT_DOUBLE_EQ(1.96, param.horiz_scale);
+  EXPECT_DOUBLE_EQ(2.95, param.influence_scale);
   EXPECT_EQ(MB_SUCCESS, mb_cube_check_param(verbose, &param, &error));
 
   struct mb_cube_param_struct bad = param;
@@ -235,7 +237,7 @@ TEST_F(MbCube, VarianceGrowsWithDistanceFromNode) {
 
 TEST_F(MbCube, CaptureDistanceUsesDepthBelowSonar) {
   Init(2, 1, 1.0, 1.0);
-  // horizontal sigma of 1 m gives an influence radius of 2.56 m; node 1 is
+  // horizontal sigma of 1 m gives an influence radius of 2.95 m; node 1 is
   // 0.7 m away. Capture distance is max(0.05 * h, 0.5 m).
   EXPECT_EQ(1, Insert(0.3, 0.0, 3000.0, 0.01, 1.0, 10.0));  // AUV 10 m above the seafloor
   EXPECT_EQ(2, Insert(0.3, 0.0, 3000.0, 0.01, 1.0, 100.0));
@@ -246,8 +248,15 @@ TEST_F(MbCube, InfluenceRadiusLimitedByHorizontalUncertainty) {
   // with no horizontal uncertainty only nodes closer than the node spacing
   // receive the sounding
   EXPECT_EQ(1, Insert(2.0, 0.0, 100.0, 0.0001, 0.0));
-  // with a horizontal sigma of 0.5 m the radius is 2.56 * 0.5 = 1.28 m
+  // with a horizontal sigma of 0.5 m the radius is 2.95 * 0.5 = 1.475 m
   EXPECT_EQ(3, Insert(2.0, 0.0, 100.0, 0.0001, 0.25));
+}
+
+TEST_F(MbCube, InfluenceRadiusReachesDiagonalNodes) {
+  Init(5, 5, 2.0, 2.0);
+  // horizontal sigma 1 m: radius 2.95 m reaches the 4 nodes at 2 m and the
+  // 4 diagonal nodes at 2.83 m (found by the reference comparison)
+  EXPECT_EQ(9, Insert(4.0, 4.0, 100.0, 0.0001, 1.0));
 }
 
 TEST_F(MbCube, FlatNoisySurface) {
@@ -339,6 +348,26 @@ TEST_F(MbCube, QuotientTestRemovesLoneOutlier) {
   ASSERT_EQ(1, nhyp);
   EXPECT_EQ(4, n[0]);
   EXPECT_NEAR(100.015, d[0], 1.0e-4);
+}
+
+TEST_F(MbCube, PriorTieGoesToOldestHypothesis) {
+  Init(1, 1, 1.0, 1.0);
+  for (int k = 0; k < 20; k++)
+    Insert(0.0, 0.0, 100.0, 0.01, 0.0);
+  for (int k = 0; k < 21; k++)
+    Insert(0.0, 0.0, 110.0, 0.01, 0.0);
+  Flush();
+  Extract();
+  // the first deep sample is removed by the quotient test, leaving 20 and 20
+  int error = MB_ERROR_NO_ERROR;
+  int nhyp = 0;
+  double d[2], u[2];
+  int n[2];
+  ASSERT_EQ(MB_SUCCESS, mb_cube_node_hypotheses(verbose, cube_, 0, 0, 2, &nhyp, d, u, n, &error));
+  ASSERT_EQ(2, nhyp);
+  ASSERT_EQ(n[0], n[1]);
+  EXPECT_FLOAT_EQ(100.0f, depth_[0]);
+  EXPECT_NEAR(4.0, strength_[0], 1.0e-5);
 }
 
 TEST_F(MbCube, SlowDriftStartsNewHypothesis) {

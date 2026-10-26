@@ -68,6 +68,7 @@ struct mb_cube_param_struct {
   int runlength_t;       /* run length threshold for an intervention, 1 - 10 */
   double dist_exp;       /* exponent on distance for variance scaling, 1 - 10 */
   double horiz_scale;    /* scale of horizontal sigma added to the distance, 0 - 10 */
+  double influence_scale; /* scale of horizontal sigma limiting the influence radius, 0 - 10 */
   double capture_scale;  /* capture distance as a fraction of depth, 0.01 - 1 */
   double capture_min;    /* minimum capture distance (m), 0 - 100 */
   double min_context;    /* minimum search distance for a guide node (m) */
