@@ -1,4 +1,4 @@
-.TH mbgrid 1 "25 April 2026" "MB-System 5.0" "MB-System 5.0"
+.TH mbgrid 1 "26 October 2026" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbgrid\fP \- Grid bathymetry, amplitude, or sidescan data
 from swath sonar data files.
@@ -60,19 +60,64 @@ Version 5.0
 .br
 --extend=extend {-Xextend}
 .br
---shift=shiftx/shifty[/mode] {-Yshiftx/shifty[/mode]}]
+--shift=shiftx/shifty[/mode] {-Yshiftx/shifty[/mode]}
+.br
+--cube-bayes-factor=threshold
+.br
+--cube-capture-min=distance
+.br
+--cube-capture-scale=fraction
+.br
+--cube-context=min/max
+.br
+--cube-depth-reference=sonar|surface
+.br
+--cube-dist-exp=exponent
+.br
+--cube-est-offset=offset
+.br
+--cube-extractor=prior|likelihood|posterior
+.br
+--cube-horiz-scale=scale
+.br
+--cube-influence-scale=scale
+.br
+--cube-median-length=length
+.br
+--cube-memory-limit=gigabytes
+.br
+--cube-model=iho|constant|depth
+.br
+--cube-model-a=sigma
+.br
+--cube-model-b=fraction
+.br
+--cube-order=exclusive|special|1a|1b|2
+.br
+--cube-quotient-limit=limit
+.br
+--cube-runlength=count
+.br
+--cube-sigma-h=sigma
+.br
+--cube-sigma-v=sigma
+.br
+--cube-uncertainty=sample|posterior|max
+.br
+--cube-uncertainty-scale=scale]
 .fi
 
 .SH DESCRIPTION
 \fBmbgrid\fP is a utility used to grid bathymetry, amplitude, or sidescan
 data contained in a set of swath sonar data files. This program uses
-one of eight algorithms to grid regions covered by swath sonar
+one of nine algorithms to grid regions covered by swath sonar
 swaths and then can fill in gaps between the swaths (to the degree
 specified by the user) using a thin plate spline interpolation.
 The gridding algorithms include gaussian weighted mean,
 median filter, minimum filter, maximum filter, beam footprint considering local
-slope, beam footprint ignoring local slope, weighted mean near the minimum, and
-weighted mean near the maximum. The specifics of these algorithms are explained
+slope, beam footprint ignoring local slope, weighted mean near the minimum,
+weighted mean near the maximum, and CUBE (Combined Uncertainty and
+Bathymetric Estimator). The specifics of these algorithms are explained
 below.
 
 The user must specify a file containing a list of the data files to
@@ -152,9 +197,10 @@ The available gridding algorithms specified with the \fB-F\fP option are:
      6. Beam footprint
      7. Minimum weighted mean
      8. Maximum weighted mean
+     9. CUBE (Combined Uncertainty and Bathymetric Estimator)
 .br
-Algorithms 5 and 6 can only be used to grid bathymetry data, and are
-not available for gridding amplitude or sidescan data.
+Algorithms 5, 6 and 9 can only be used to grid bathymetry (or topography)
+data, and are not available for gridding amplitude or sidescan data.
 
 If the default weighted average gridding scheme (\fB\-F\fP\fI1\fP)
 is being used, each data point's contribution to a Gaussian weighted
@@ -234,6 +280,81 @@ weighted mean value is calculated using only the valid soundings that are within
 allows for sensible gridding when the soundings include three dimensional features
 such as overhangs or vertical walls, and the desired result is to represent the
 maximum or deepest surface.
+
+The \fB\-F\fP\fI9\fP option grids bathymetry (or topography) with CUBE
+(Combined Uncertainty and Bathymetric Estimator; Calder and Mayer, 2003).
+Each grid node is an estimation point. Every sounding is offered to the
+nodes within an influence radius set by its horizontal uncertainty, and
+at each node its vertical uncertainty is increased with the distance
+from the sounding to the node. At each node the soundings pass through a
+median pre-filter queue and update the closest of the node's depth
+hypotheses with a Kalman filter step. When a sounding is not consistent
+with any existing hypothesis (Bayes factor monitoring), it starts a new
+hypothesis instead. After all data have been read, one hypothesis is
+selected at each node (see \fB\-\-cube\-extractor\fP). CUBE thus keeps
+outliers, fish and other mid-water returns, and data from systematically
+offset swaths in separate hypotheses instead of averaging them into the
+surface. The output grid holds the depth of the selected hypothesis. With
+\fB\-M\fP, four more grids are written: \fIroot\fP_num with the number of
+soundings in the selected hypothesis, \fIroot\fP_sd with the CUBE
+uncertainty (by default a 95% confidence interval, 1.96 sigma, unlike the
+1 sigma standard deviation written by the other algorithms),
+\fIroot\fP_nhyp with the number of hypotheses, and \fIroot\fP_strength with
+the hypothesis strength, from 0 (no competing hypothesis) to 5 (the
+selected hypothesis has little more support than its competitor).
+Nodes with more than one hypothesis, and nodes with a high strength value,
+are the places to inspect when editing.
+
+CUBE needs the vertical and horizontal uncertainty of each sounding. MBIO
+does not provide per-beam uncertainties, so they are computed from a
+model (see \fB\-\-cube\-model\fP). The default model takes the maximum
+allowed total vertical and horizontal uncertainties (TVU and THU) of an
+IHO S-44 (Edition 6.1.0) survey order as 95% limits:
+TVU = sqrt(a^2 + (b * d)^2) and THU = fixed + fraction * d, where d is
+the depth. The default order is Order 2 (a = 1.0 m, b = 0.023,
+THU = 20 m + 10% of depth), meant for surface vessel surveys in water
+deeper than 200 m. Suggested orders (\fB\-\-cube\-order\fP) are:
+.br
+     deep water from a surface vessel (> 200 m): 2 (default)
+     shelf and coastal surveys (< 200 m): 1b (1a to detect features)
+     harbours and critical shallow areas: special or exclusive
+     AUV and ROV surveys near the seafloor: special
+.br
+The IHO limits are envelopes rather than the actual performance of a
+survey system. Where the sonar and navigation performance is known, the
+constant or depth models with realistic sigmas give better results; for
+AUV data with adjusted navigation a horizontal sigma of 1 to 2 m is
+typical. Overly large horizontal uncertainties inflate the propagated
+vertical uncertainties so much that outliers are no longer recognized.
+
+By default the depth d used by the uncertainty models, the capture
+distance and the influence radius is the depth below the sonar (the
+sounding depth minus the sonar depth), not the depth below the sea
+surface. For surface vessels the two differ only by the transducer
+depth; for AUVs and ROVs flying near the seafloor in deep water the
+depth below the sea surface would give uncertainties, capture distances
+and influence radii that smooth away the detail the vehicle collected.
+\fB\-\-cube\-depth\-reference\fP=\fIsurface\fP gives the behaviour of
+the reference CUBE implementation. Lon, lat, value triples (format 0)
+have no sonar depth; their values are used as depths below the sonar.
+
+CUBE results depend on the order in which soundings arrive, which is the
+order of the files in the datalist and of the pings in the files.
+Datalist weights are not used by CUBE, and the \fB\-U\fP option cannot be
+combined with it. Gaps can be filled with the \fB\-C\fP interpolation as
+for the other algorithms; interpolated nodes have no hypotheses. The whole
+CUBE grid is held in memory (about 200 bytes per node with data); the
+program stops if its estimate exceeds \fB\-\-cube\-memory\-limit\fP. For
+geographic grids, CUBE distances use the longitude scale of the grid
+center; a projected grid (\fB\-J\fP) is recommended for large areas.
+The algorithm parameters follow the CUBE User's Manual (Calder and Wells,
+2007) and the reference implementation of the Center for Coastal and Ocean
+Mapping and NOAA/UNH Joint Hydrographic Center (CCOM/JHC). The implementation
+in \fBMB-System\fP is independent and was checked against the reference;
+it differs in using the depth below the sonar, in computing the outlier test
+of the median queue in double precision, and in the variance of the guide
+node used by the likelihood and posterior selection rules. The predicted
+(initialization) surface of the reference implementation is not supported.
 
 Normally, all of the data which falls into the region of interest
 is used to construct the gridded data set. This means that the
@@ -410,6 +531,7 @@ Sets the gridding algorithm to be used.
  	\fImode\fP = 6:               Weighted Sonar Footprint
  	\fImode\fP = 3 + \fIthreshold\fP: Minimum Weighted Mean
  	\fImode\fP = 4 + \fIthreshold\fP: Maximum Weighted Mean
+ 	\fImode\fP = 9:               CUBE
 .br
 When used, the \fIthreshold\fP value is defined in meters. The default gridding
 algorithm is \fImode\fP = 1 (Gaussian Weighted Mean).
@@ -619,6 +741,9 @@ the standard deviation of the data within each grid cell relative
 to the grid value, the other contains the number of data
 points in each grid cell. This option is ignored when the minimum
 or maximum filter gridding algorithms are used (see the \fP-F\fP option).
+With CUBE gridding (\fB\-F\fP\fI9\fP) four grids are output: the number
+of soundings in the selected hypothesis (_num), the CUBE uncertainty (_sd),
+the number of hypotheses (_nhyp) and the hypothesis strength (_strength).
 .TP
 .B \-\-use\-nan \-N
 Causes grid cells with no data and no interpolation to be set to a
@@ -698,6 +823,7 @@ are more than \fItime\fP minutes before or after the initial
 data point in the relevant bin are ignored. If \fItime\fP is
 negative, the last data in a bin (within the time lag criterea)
 will be saved and used instead of the first data.
+This option cannot be used with CUBE gridding (\fB\-F\fP\fI9\fP).
 .TP
 .B \-\-verbose \-V
 Normally, \fBmbgrid\fP prints out information regarding its
@@ -727,6 +853,112 @@ then the location of the output grid bounds is shifted by \fIshiftx\fP
 meters east and \fIshifty\fP meters north. If \fImode\fP = 2 then the locations
 of all input data are shifted by \fIshiftx\fP meters east and \fIshifty\fP meters north. 
 Default: \fIshiftx\fP = \fIshifty\fP = 0.0
+.TP
+.B \-\-cube\-bayes\-factor=threshold
+CUBE: Bayes factor threshold (0.001 to 1) below which a sounding, or a
+sequence of soundings, is taken as evidence for a new hypothesis.
+Default: 0.135.
+.TP
+.B \-\-cube\-capture\-min=distance
+CUBE: minimum capture distance in meters (0 to 100), the largest distance
+from a node to a sounding it accepts. Default: 0.5.
+.TP
+.B \-\-cube\-capture\-scale=fraction
+CUBE: capture distance as a fraction of the depth (0.01 to 1); the capture
+distance is the larger of this and \fB\-\-cube\-capture\-min\fP.
+Default: 0.05 (5% of depth).
+.TP
+.B \-\-cube\-context=min/max
+CUBE: minimum and maximum distances in meters searched for a guide node with
+a single hypothesis by the likelihood and posterior selection rules.
+Default: 5/10.
+.TP
+.B \-\-cube\-depth\-reference=sonar|surface
+CUBE: depth used by the uncertainty models, the capture distance and the
+influence radius: the depth below the sonar (\fIsonar\fP) or below the sea
+surface (\fIsurface\fP, as the reference CUBE implementation).
+Default: sonar.
+.TP
+.B \-\-cube\-dist\-exp=exponent
+CUBE: exponent (1 to 10) of the growth of a sounding's vertical variance with
+its distance to the node. Default: 2.
+.TP
+.B \-\-cube\-est\-offset=offset
+CUBE: offset (0.1 to 10, in units of the forecast standard deviation)
+considered a significant change of depth by the Bayes factor monitoring.
+Default: 4.
+.TP
+.B \-\-cube\-extractor=prior|likelihood|posterior
+CUBE: rule selecting the hypothesis reported at nodes with more than one.
+\fIprior\fP takes the hypothesis with the most soundings (the oldest one on
+ties); \fIlikelihood\fP takes the hypothesis closest to the depth of the
+nearest node with a single hypothesis (see \fB\-\-cube\-context\fP);
+\fIposterior\fP combines the two. Without a guide node the likelihood and
+posterior rules fall back to the prior rule. Default: prior.
+.TP
+.B \-\-cube\-horiz\-scale=scale
+CUBE: multiple (0 to 10) of a sounding's horizontal sigma added to its
+distance to the node when its vertical variance is propagated. Default: 1.96.
+.TP
+.B \-\-cube\-influence\-scale=scale
+CUBE: multiple (0 to 10) of a sounding's horizontal sigma limiting its
+radius of influence (the CUBE Horizontal Error Scalar). The radius is never
+smaller than the node spacing. Default: 2.95.
+.TP
+.B \-\-cube\-median\-length=length
+CUBE: length of the median pre-filter queue of each node, an odd number
+from 3 to 101. Default: 11.
+.TP
+.B \-\-cube\-memory\-limit=gigabytes
+CUBE: largest memory estimate in gigabytes for which the program runs.
+Default: 8.
+.TP
+.B \-\-cube\-model=iho|constant|depth
+CUBE: model of the sounding uncertainties. \fIiho\fP uses the IHO S-44
+limits of \fB\-\-cube\-order\fP as 95% values; \fIconstant\fP uses the
+vertical and horizontal sigmas \fB\-\-cube\-sigma\-v\fP and
+\fB\-\-cube\-sigma\-h\fP; \fIdepth\fP uses a vertical sigma
+sqrt(a^2 + (b * d)^2) from \fB\-\-cube\-model\-a\fP and
+\fB\-\-cube\-model\-b\fP and the horizontal sigma \fB\-\-cube\-sigma\-h\fP.
+Default: iho.
+.TP
+.B \-\-cube\-model\-a=sigma
+CUBE: fixed vertical sigma in meters of the depth model. Default: 0.25.
+.TP
+.B \-\-cube\-model\-b=fraction
+CUBE: depth dependent vertical sigma of the depth model, as a fraction of
+the depth. Default: 0.0066.
+.TP
+.B \-\-cube\-order=exclusive|special|1a|1b|2
+CUBE: IHO S-44 survey order used by the iho uncertainty model and to bound
+the influence radius of soundings (see the DESCRIPTION section for suggested
+orders). Default: 2.
+.TP
+.B \-\-cube\-quotient\-limit=limit
+CUBE: outlier quotient limit (0.1 to 255) of the median pre-filter queue;
+higher values remove fewer soundings. Default: 30.
+.TP
+.B \-\-cube\-runlength=count
+CUBE: number of consecutive soundings (1 to 10) favouring a change of depth
+after which a new hypothesis is started. Default: 5.
+.TP
+.B \-\-cube\-sigma\-h=sigma
+CUBE: horizontal sigma in meters of the constant and depth models.
+Default: 1.0.
+.TP
+.B \-\-cube\-sigma\-v=sigma
+CUBE: vertical sigma in meters of the constant model. Default: 0.25.
+.TP
+.B \-\-cube\-uncertainty=sample|posterior|max
+CUBE: variance reported as the uncertainty of the selected hypothesis: the
+variance of its soundings (\fIsample\fP, as the reference CUBE
+implementation), the posterior variance of its depth estimate
+(\fIposterior\fP), or the larger of the two (\fImax\fP). The sample variance
+of a hypothesis with a single sounding is zero. Default: sample.
+.TP
+.B \-\-cube\-uncertainty\-scale=scale
+CUBE: multiple (up to 10) of the sigma written to the _sd grid; 1.96 gives
+a 95% confidence interval and 1 the standard deviation. Default: 1.96.
 .SH EXAMPLES
 Suppose you want to grid some Hydrosweep data in six data files over
 a region with longitude bounds of 139.9W to 139.65W and latitude bounds
@@ -893,8 +1125,31 @@ standard deviation values. The following will suffice:
  		-L1 \-C251 \-N \\
  		-Idatalist \-Ourville_int \-F2 \-M \-V
 
+To grid the same data with CUBE, using the default IHO Order 2
+uncertainty model for deep water, and to output the uncertainty, number
+of hypotheses and hypothesis strength grids:
+ 	mbgrid \-R220.1/220.35/-9.7/-9.45 \-D251/251 \\
+ 		-Idatalist \-Ourville_cube \-F9 \-M \-V
+
+For an AUV survey with adjusted navigation, gridded at 1 m in UTM
+coordinates with constant uncertainties of 0.1 m vertical and 1 m
+horizontal:
+ 	mbgrid \-Idatalist \-Oauv_cube \-JU \-E1/1/meters \-F9 \-M \\
+ 		--cube-model=constant --cube-sigma-v=0.1 --cube-sigma-h=1
+
 .SH SEE ALSO
 \fBmbsystem\fP(1), \fBmbmosaic\fP(1), \fBmbm_grid\fP(1), \fBmbm_grd2arc\fP(1)
+
+Calder, B. R., and L. A. Mayer, 2003, Automatic processing of high-rate,
+high-density multibeam echosounder data, Geochem. Geophys. Geosyst., 4(6),
+1048, doi:10.1029/2002GC000486.
+
+Calder, B. R., and D. Wells, 2007, CUBE User's Manual, version 1.13,
+Center for Coastal and Ocean Mapping & NOAA/UNH Joint Hydrographic Center,
+University of New Hampshire.
+
+International Hydrographic Organization, 2022, IHO Standards for
+Hydrographic Surveys, S-44 Edition 6.1.0.
 
 .SH BUGS
 The options for this program have grown a bit complicated.

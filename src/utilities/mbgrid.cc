@@ -56,6 +56,7 @@
 #include <unistd.h>
 
 #include "mb_aux.h"
+#include "mb_cube.h"
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
@@ -72,7 +73,28 @@ typedef enum {
     MBGRID_WEIGHTED_FOOTPRINT = 6,
     MBGRID_MINIMUM_WEIGHTED_MEAN = 7,
     MBGRID_MAXIMUM_WEIGHTED_MEAN = 8,
+    MBGRID_CUBE = 9,
 } grid_alg_t;
+
+/* sounding uncertainty models for CUBE gridding */
+typedef enum {
+    MBGRID_CUBE_MODEL_IHO = 0,
+    MBGRID_CUBE_MODEL_CONSTANT = 1,
+    MBGRID_CUBE_MODEL_DEPTH = 2,
+} cube_model_t;
+
+/* CUBE gridding options */
+struct mbgrid_cube_options {
+  struct mb_cube_param_struct param; /* algorithm parameters, see mb_cube.h */
+  int iho_order;                     /* IHO S-44 order of the iho model and influence radius */
+  cube_model_t model;                /* sounding uncertainty model */
+  double sigma_v;                    /* constant model vertical sigma (m) */
+  double sigma_h;                    /* constant and depth models horizontal sigma (m) */
+  double model_a;                    /* depth model fixed vertical sigma (m) */
+  double model_b;                    /* depth model vertical sigma fraction of depth */
+  bool depth_below_sonar;            /* depth below the sonar (true) or the sea surface */
+  double memory_limit;               /* maximum memory for the CUBE grid (GB) */
+};
 
 /* grid format definitions */
 typedef enum {
@@ -151,7 +173,9 @@ constexpr char help_message[] =
     "median filter, minimum filter, maximum filter) to grid regions\n"
     "covered swaths and then fills in gaps between\n"
     "the swaths (to the degree specified by the user) using a minimum\n"
-    "curvature algorithm.";
+    "curvature algorithm. Bathymetry and topography can also be gridded\n"
+    "with the CUBE (Combined Uncertainty and Bathymetric Estimator)\n"
+    "algorithm (-F9).";
 constexpr char usage_message[] =
     "mbgrid\n"
     "\t--algorithm=mode[/threshold] {-Fmode[/threshold]}\n"
@@ -160,6 +184,28 @@ constexpr char usage_message[] =
     "\t--bounds=west/east/south/north {-Rwest/east/south/north}\n"
     "\t--bounds=factor {-Rfactor}\n"
     "\t--clip=clip[/mode] {-Cclip[/mode]}\n"
+    "\t--cube-bayes-factor=threshold\n"
+    "\t--cube-capture-min=distance\n"
+    "\t--cube-capture-scale=fraction\n"
+    "\t--cube-context=min/max\n"
+    "\t--cube-depth-reference=sonar|surface\n"
+    "\t--cube-dist-exp=exponent\n"
+    "\t--cube-est-offset=offset\n"
+    "\t--cube-extractor=prior|likelihood|posterior\n"
+    "\t--cube-horiz-scale=scale\n"
+    "\t--cube-influence-scale=scale\n"
+    "\t--cube-median-length=length\n"
+    "\t--cube-memory-limit=gigabytes\n"
+    "\t--cube-model=iho|constant|depth\n"
+    "\t--cube-model-a=sigma\n"
+    "\t--cube-model-b=fraction\n"
+    "\t--cube-order=exclusive|special|1a|1b|2\n"
+    "\t--cube-quotient-limit=limit\n"
+    "\t--cube-runlength=count\n"
+    "\t--cube-sigma-h=sigma\n"
+    "\t--cube-sigma-v=sigma\n"
+    "\t--cube-uncertainty=sample|posterior|max\n"
+    "\t--cube-uncertainty-scale=scale\n"
     "\t--data-type=datatype {-Adatatype}\n"
     "\t--dimensions=xdim/ydim {-Dxdim/ydim}\n"
     "\t--extend=extend {-Xextend}\n"
@@ -459,6 +505,125 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b, double pcx, double 
 }
 
 /*--------------------------------------------------------------------*/
+/*
+ * function mbgrid_cube_option parses one of the --cube-* long options,
+ * returning false if the option or its value is not valid
+ */
+bool mbgrid_cube_option(int verbose, const char *name, const char *value, struct mbgrid_cube_options *cube) {
+  int error = MB_ERROR_NO_ERROR;
+  double thu_fixed, thu_fraction;
+  int n = 0;
+  char extra;
+  if (strcmp(name, "cube-order") == 0) {
+    int order = -1;
+    if (strcmp(value, "exclusive") == 0)
+      order = MB_CUBE_IHO_EXCLUSIVE;
+    else if (strcmp(value, "special") == 0)
+      order = MB_CUBE_IHO_SPECIAL;
+    else if (strcmp(value, "1a") == 0)
+      order = MB_CUBE_IHO_ORDER_1A;
+    else if (strcmp(value, "1b") == 0)
+      order = MB_CUBE_IHO_ORDER_1B;
+    else if (strcmp(value, "2") == 0)
+      order = MB_CUBE_IHO_ORDER_2;
+    if (order < 0)
+      return false;
+    cube->iho_order = order;
+    mb_cube_iho_limits(verbose, order, &cube->param.tvu_a, &cube->param.tvu_b, &thu_fixed, &thu_fraction, &error);
+    return true;
+  }
+  else if (strcmp(name, "cube-model") == 0) {
+    if (strcmp(value, "iho") == 0)
+      cube->model = MBGRID_CUBE_MODEL_IHO;
+    else if (strcmp(value, "constant") == 0)
+      cube->model = MBGRID_CUBE_MODEL_CONSTANT;
+    else if (strcmp(value, "depth") == 0)
+      cube->model = MBGRID_CUBE_MODEL_DEPTH;
+    else
+      return false;
+    return true;
+  }
+  else if (strcmp(name, "cube-extractor") == 0) {
+    if (strcmp(value, "prior") == 0)
+      cube->param.extractor = MB_CUBE_EXTRACT_PRIOR;
+    else if (strcmp(value, "likelihood") == 0)
+      cube->param.extractor = MB_CUBE_EXTRACT_LIKELIHOOD;
+    else if (strcmp(value, "posterior") == 0)
+      cube->param.extractor = MB_CUBE_EXTRACT_POSTERIOR;
+    else
+      return false;
+    return true;
+  }
+  else if (strcmp(name, "cube-uncertainty") == 0) {
+    if (strcmp(value, "sample") == 0)
+      cube->param.uncertainty_mode = MB_CUBE_UNCT_SAMPLE;
+    else if (strcmp(value, "posterior") == 0)
+      cube->param.uncertainty_mode = MB_CUBE_UNCT_POSTERIOR;
+    else if (strcmp(value, "max") == 0)
+      cube->param.uncertainty_mode = MB_CUBE_UNCT_MAX;
+    else
+      return false;
+    return true;
+  }
+  else if (strcmp(name, "cube-depth-reference") == 0) {
+    if (strcmp(value, "sonar") == 0)
+      cube->depth_below_sonar = true;
+    else if (strcmp(value, "surface") == 0)
+      cube->depth_below_sonar = false;
+    else
+      return false;
+    return true;
+  }
+  else if (strcmp(name, "cube-context") == 0) {
+    n = sscanf(value, "%lf/%lf%c", &cube->param.min_context, &cube->param.max_context, &extra);
+    return n == 2;
+  }
+  else if (strcmp(name, "cube-median-length") == 0) {
+    n = sscanf(value, "%d%c", &cube->param.median_length, &extra);
+    return n == 1;
+  }
+  else if (strcmp(name, "cube-runlength") == 0) {
+    n = sscanf(value, "%d%c", &cube->param.runlength_t, &extra);
+    return n == 1;
+  }
+
+  /* options with one real value */
+  double *target = nullptr;
+  if (strcmp(name, "cube-bayes-factor") == 0)
+    target = &cube->param.bayes_fac_t;
+  else if (strcmp(name, "cube-capture-min") == 0)
+    target = &cube->param.capture_min;
+  else if (strcmp(name, "cube-capture-scale") == 0)
+    target = &cube->param.capture_scale;
+  else if (strcmp(name, "cube-dist-exp") == 0)
+    target = &cube->param.dist_exp;
+  else if (strcmp(name, "cube-est-offset") == 0)
+    target = &cube->param.est_offset;
+  else if (strcmp(name, "cube-horiz-scale") == 0)
+    target = &cube->param.horiz_scale;
+  else if (strcmp(name, "cube-influence-scale") == 0)
+    target = &cube->param.influence_scale;
+  else if (strcmp(name, "cube-memory-limit") == 0)
+    target = &cube->memory_limit;
+  else if (strcmp(name, "cube-model-a") == 0)
+    target = &cube->model_a;
+  else if (strcmp(name, "cube-model-b") == 0)
+    target = &cube->model_b;
+  else if (strcmp(name, "cube-quotient-limit") == 0)
+    target = &cube->param.quotient_limit;
+  else if (strcmp(name, "cube-sigma-h") == 0)
+    target = &cube->sigma_h;
+  else if (strcmp(name, "cube-sigma-v") == 0)
+    target = &cube->sigma_v;
+  else if (strcmp(name, "cube-uncertainty-scale") == 0)
+    target = &cube->param.sd2conf;
+  if (target == nullptr)
+    return false;
+  n = sscanf(value, "%lf%c", target, &extra);
+  return n == 1;
+}
+
+/*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
   int verbose = 0;
@@ -518,6 +683,19 @@ int main(int argc, char **argv) {
   bool spacing_priority = false;
   bool set_dimensions = false;
   grid_interp_t clipmode = MBGRID_INTERP_NONE;
+  struct mbgrid_cube_options cube;
+  {
+    int cube_error = MB_ERROR_NO_ERROR;
+    mb_cube_default_param(verbose, MB_CUBE_IHO_ORDER_2, &cube.param, &cube_error);
+  }
+  cube.iho_order = MB_CUBE_IHO_ORDER_2;
+  cube.model = MBGRID_CUBE_MODEL_IHO;
+  cube.sigma_v = 0.25;
+  cube.sigma_h = 1.0;
+  cube.model_a = 0.25;
+  cube.model_b = 0.0066;
+  cube.depth_below_sonar = true;
+  cube.memory_limit = 8.0;
 
   {
     static struct option options[] = {{"data-type", required_argument, nullptr, 0},
@@ -545,6 +723,28 @@ int main(int argc, char **argv) {
                                       {"gaussian-scale", required_argument, nullptr, 0},
                                       {"extend", required_argument, nullptr, 0},
                                       {"shift", required_argument, nullptr, 0},
+                                      {"cube-bayes-factor", required_argument, nullptr, 0},
+                                      {"cube-capture-min", required_argument, nullptr, 0},
+                                      {"cube-capture-scale", required_argument, nullptr, 0},
+                                      {"cube-context", required_argument, nullptr, 0},
+                                      {"cube-depth-reference", required_argument, nullptr, 0},
+                                      {"cube-dist-exp", required_argument, nullptr, 0},
+                                      {"cube-est-offset", required_argument, nullptr, 0},
+                                      {"cube-extractor", required_argument, nullptr, 0},
+                                      {"cube-horiz-scale", required_argument, nullptr, 0},
+                                      {"cube-influence-scale", required_argument, nullptr, 0},
+                                      {"cube-median-length", required_argument, nullptr, 0},
+                                      {"cube-memory-limit", required_argument, nullptr, 0},
+                                      {"cube-model", required_argument, nullptr, 0},
+                                      {"cube-model-a", required_argument, nullptr, 0},
+                                      {"cube-model-b", required_argument, nullptr, 0},
+                                      {"cube-order", required_argument, nullptr, 0},
+                                      {"cube-quotient-limit", required_argument, nullptr, 0},
+                                      {"cube-runlength", required_argument, nullptr, 0},
+                                      {"cube-sigma-h", required_argument, nullptr, 0},
+                                      {"cube-sigma-v", required_argument, nullptr, 0},
+                                      {"cube-uncertainty", required_argument, nullptr, 0},
+                                      {"cube-uncertainty-scale", required_argument, nullptr, 0},
                                       {nullptr, 0, nullptr, 0}};
 
     int option_index;
@@ -713,6 +913,12 @@ int main(int argc, char **argv) {
           const int n = sscanf(optarg, "%lf/%lf/%d", &shift_x, &shift_y, &shift_mode);
           if (n == 2) {
             shift_mode = MBGRID_SHIFT_BOUNDS;
+          }
+        }
+        else if (strncmp("cube-", options[option_index].name, 5) == 0) {
+          if (!mbgrid_cube_option(verbose, options[option_index].name, optarg, &cube)) {
+            fprintf(stdout, "Invalid CUBE option: --%s=%s\n\n", options[option_index].name, optarg);
+            errflg = true;
           }
         }
 
@@ -986,6 +1192,32 @@ int main(int argc, char **argv) {
       fprintf(outfp, "dbg2       projection_pars_f:    %d\n", projection_pars_f);
       fprintf(outfp, "dbg2       projection_id:        %s\n", projection_id);
       fprintf(outfp, "dbg2       minormax_weighted_mean_threshold: %f\n", minormax_weighted_mean_threshold);
+      fprintf(outfp, "dbg2       cube.iho_order:       %d\n", cube.iho_order);
+      fprintf(outfp, "dbg2       cube.model:           %d\n", cube.model);
+      fprintf(outfp, "dbg2       cube.sigma_v:         %f\n", cube.sigma_v);
+      fprintf(outfp, "dbg2       cube.sigma_h:         %f\n", cube.sigma_h);
+      fprintf(outfp, "dbg2       cube.model_a:         %f\n", cube.model_a);
+      fprintf(outfp, "dbg2       cube.model_b:         %f\n", cube.model_b);
+      fprintf(outfp, "dbg2       cube.depth_below_sonar: %d\n", cube.depth_below_sonar);
+      fprintf(outfp, "dbg2       cube.memory_limit:    %f\n", cube.memory_limit);
+      fprintf(outfp, "dbg2       cube.extractor:       %d\n", cube.param.extractor);
+      fprintf(outfp, "dbg2       cube.uncertainty_mode: %d\n", cube.param.uncertainty_mode);
+      fprintf(outfp, "dbg2       cube.median_length:   %d\n", cube.param.median_length);
+      fprintf(outfp, "dbg2       cube.quotient_limit:  %f\n", cube.param.quotient_limit);
+      fprintf(outfp, "dbg2       cube.discount:        %f\n", cube.param.discount);
+      fprintf(outfp, "dbg2       cube.est_offset:      %f\n", cube.param.est_offset);
+      fprintf(outfp, "dbg2       cube.bayes_fac_t:     %f\n", cube.param.bayes_fac_t);
+      fprintf(outfp, "dbg2       cube.runlength_t:     %d\n", cube.param.runlength_t);
+      fprintf(outfp, "dbg2       cube.dist_exp:        %f\n", cube.param.dist_exp);
+      fprintf(outfp, "dbg2       cube.horiz_scale:     %f\n", cube.param.horiz_scale);
+      fprintf(outfp, "dbg2       cube.influence_scale: %f\n", cube.param.influence_scale);
+      fprintf(outfp, "dbg2       cube.capture_scale:   %f\n", cube.param.capture_scale);
+      fprintf(outfp, "dbg2       cube.capture_min:     %f\n", cube.param.capture_min);
+      fprintf(outfp, "dbg2       cube.min_context:     %f\n", cube.param.min_context);
+      fprintf(outfp, "dbg2       cube.max_context:     %f\n", cube.param.max_context);
+      fprintf(outfp, "dbg2       cube.tvu_a:           %f\n", cube.param.tvu_a);
+      fprintf(outfp, "dbg2       cube.tvu_b:           %f\n", cube.param.tvu_b);
+      fprintf(outfp, "dbg2       cube.sd2conf:         %f\n", cube.param.sd2conf);
 
     }
 
@@ -1465,6 +1697,69 @@ int main(int argc, char **argv) {
     exit(MB_ERROR_BAD_PARAMETER);
   }
 
+  /* check and set up CUBE gridding */
+  double cube_dx = 0.0;
+  double cube_dy = 0.0;
+  double cube_tvu_a = 0.0;
+  double cube_tvu_b = 0.0;
+  double cube_thu_fixed = 0.0;
+  double cube_thu_fraction = 0.0;
+  double cube_memory = 0.0;
+  if (grid_mode == MBGRID_CUBE) {
+    bool cube_ok = true;
+    int cube_error = MB_ERROR_NO_ERROR;
+    if (datatype != MBGRID_DATA_BATHYMETRY && datatype != MBGRID_DATA_TOPOGRAPHY) {
+      fprintf(outfp, "\nCUBE gridding (-F9) is only available for bathymetry and topography (-A1 or -A2)\n");
+      cube_ok = false;
+    }
+    if (check_time) {
+      fprintf(outfp, "\nThe swath overlap time option (-U) cannot be used with CUBE gridding (-F9)\n");
+      cube_ok = false;
+    }
+    if (mb_cube_check_param(verbose, &cube.param, &cube_error) != MB_SUCCESS) {
+      fprintf(outfp, "\nCUBE algorithm parameters out of range, see the mbgrid manual page\n");
+      cube_ok = false;
+    }
+    if (!(cube.sigma_v > 0.0) || !(cube.sigma_h >= 0.0) || !(cube.model_a > 0.0) || !(cube.model_b >= 0.0)
+        || !(cube.memory_limit > 0.0)) {
+      fprintf(outfp, "\nCUBE uncertainty model parameters and memory limit must be positive\n");
+      cube_ok = false;
+    }
+
+    /* node spacing in meters */
+    if (use_projection) {
+      cube_dx = dx;
+      cube_dy = dy;
+    }
+    else {
+      cube_dx = dx / mtodeglon;
+      cube_dy = dy / mtodeglat;
+
+      /* CUBE distances use the longitude scale of the grid center */
+      double mtodeglon_south, mtodeglon_north, mtodeglat_tmp;
+      mb_coor_scale(verbose, wbnd[2], &mtodeglon_south, &mtodeglat_tmp);
+      mb_coor_scale(verbose, wbnd[3], &mtodeglon_north, &mtodeglat_tmp);
+      if (fabs(mtodeglon_south - mtodeglon) > 0.01 * mtodeglon || fabs(mtodeglon_north - mtodeglon) > 0.01 * mtodeglon)
+        fprintf(outfp, "\nWarning: CUBE distances in this geographic grid are in error by more than 1%%\n"
+                       "at its northern or southern edge; a projected grid (-J) is recommended\n");
+    }
+
+    mb_cube_estimate_memory(verbose, &cube.param, gxdim, gydim, &cube_memory, &cube_error);
+    if (cube_memory > cube.memory_limit * 1.0e9) {
+      fprintf(outfp, "\nThe CUBE grid of %d x %d nodes may need %.1f GB of memory, more than the limit of %.1f GB\n",
+              gxdim, gydim, cube_memory / 1.0e9, cube.memory_limit);
+      fprintf(outfp, "set by --cube-memory-limit; use a larger grid spacing or a smaller area\n");
+      cube_ok = false;
+    }
+
+    if (!cube_ok) {
+      fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+      mb_memory_clear(verbose, &memclear_error);
+      exit(MB_ERROR_BAD_PARAMETER);
+    }
+    mb_cube_iho_limits(verbose, cube.iho_order, &cube_tvu_a, &cube_tvu_b, &cube_thu_fixed, &cube_thu_fraction, &cube_error);
+  }
+
   /* get data input bounds in lon lat */
   if (!use_projection) {
     bounds[0] = wbnd[0];
@@ -1589,6 +1884,13 @@ int main(int argc, char **argv) {
     strcpy(sdlabel, "Sidescan Standard Deviation (m)");
     strcpy(title, "Sidescan Grid");
   }
+  if (grid_mode == MBGRID_CUBE) {
+    strcpy(nlabel, "Number of Soundings in Selected CUBE Hypothesis");
+    if (fabs(cube.param.sd2conf - 1.96) < MBGRID_TINY)
+      snprintf(sdlabel, sizeof(sdlabel), "CUBE Uncertainty, 95%% Confidence (%s)", bathy_in_feet ? "ft" : "m");
+    else
+      snprintf(sdlabel, sizeof(sdlabel), "CUBE Uncertainty, %g Sigma (%s)", cube.param.sd2conf, bathy_in_feet ? "ft" : "m");
+  }
 
   /* output info */
   if (verbose >= 0) {
@@ -1627,6 +1929,8 @@ int main(int argc, char **argv) {
       fprintf(outfp, "Minimum Gaussian Weighted Mean\n");
     else if (grid_mode == MBGRID_MAXIMUM_WEIGHTED_MEAN)
       fprintf(outfp, "Maximum Gaussian Weighted Mean\n");
+    else if (grid_mode == MBGRID_CUBE)
+      fprintf(outfp, "CUBE (Combined Uncertainty and Bathymetric Estimator)\n");
     else
       fprintf(outfp, "Gaussian Weighted Mean\n");
     fprintf(outfp, "Grid projection: %s\n", projection_id);
@@ -1694,6 +1998,34 @@ int main(int argc, char **argv) {
       fprintf(outfp, "Footprint 1/e distance: %f times footprint\n", scale);
     if (grid_mode == MBGRID_MINIMUM_WEIGHTED_MEAN)
       fprintf(outfp, "Minimum filter threshold for Minimum Weighted Mean: %f\n", minormax_weighted_mean_threshold);
+    if (grid_mode == MBGRID_CUBE) {
+      const char *order_name[] = {"Exclusive", "Special", "1a", "1b", "2"};
+      const char *extractor_name[] = {"prior (most soundings)", "likelihood (nearby single hypothesis)",
+                                      "posterior (likelihood and number of soundings)"};
+      const char *uncertainty_name[] = {"sample variance", "posterior variance", "larger of sample and posterior variance"};
+      fprintf(outfp, "CUBE parameters:\n");
+      if (cube.model == MBGRID_CUBE_MODEL_IHO)
+        fprintf(outfp, "  Sounding uncertainty:   IHO S-44 Order %s (TVU a %.3f m, b %.4f; THU %.1f m + %.0f%% of depth)\n",
+                order_name[cube.iho_order], cube_tvu_a, cube_tvu_b, cube_thu_fixed, 100.0 * cube_thu_fraction);
+      else if (cube.model == MBGRID_CUBE_MODEL_CONSTANT)
+        fprintf(outfp, "  Sounding uncertainty:   constant, vertical sigma %f m, horizontal sigma %f m\n", cube.sigma_v,
+                cube.sigma_h);
+      else
+        fprintf(outfp, "  Sounding uncertainty:   vertical sigma sqrt(%f^2 + (%f * depth)^2) m, horizontal sigma %f m\n",
+                cube.model_a, cube.model_b, cube.sigma_h);
+      fprintf(outfp, "  Influence radius limit: IHO S-44 Order %s TVU, %.2f horizontal sigma\n", order_name[cube.iho_order],
+              cube.param.influence_scale);
+      fprintf(outfp, "  Depth used in models:   %s\n",
+              cube.depth_below_sonar ? "depth below the sonar" : "depth below the sea surface");
+      fprintf(outfp, "  Capture distance:       max(%.3f * depth, %.3f m)\n", cube.param.capture_scale, cube.param.capture_min);
+      fprintf(outfp, "  Node spacing:           %f m x %f m\n", cube_dx, cube_dy);
+      fprintf(outfp, "  Median queue length:    %d\n", cube.param.median_length);
+      fprintf(outfp, "  Hypothesis selection:   %s\n", extractor_name[cube.param.extractor]);
+      fprintf(outfp, "  Reported uncertainty:   %.3f x sigma from the %s\n", cube.param.sd2conf,
+              uncertainty_name[cube.param.uncertainty_mode]);
+      fprintf(outfp, "  Memory estimate:        %.2f GB (limit %.2f GB)\n", cube_memory / 1.0e9, cube.memory_limit);
+      fprintf(outfp, "  Datalist weights are not used by CUBE\n");
+    }
     if (check_time && !first_in_stays)
       fprintf(outfp, "Swath overlap handling:       Last data used\n");
     if (check_time && first_in_stays)
@@ -1739,7 +2071,9 @@ int main(int argc, char **argv) {
       fprintf(outfp, "NaN values used to flag regions with no data\n");
     else
       fprintf(outfp, "Real value of %f used to flag regions with no data\n", outclipvalue);
-    if (more)
+    if (more && grid_mode == MBGRID_CUBE)
+      fprintf(outfp, "Sounding count, uncertainty, hypothesis count and hypothesis strength grids also created\n");
+    else if (more)
       fprintf(outfp, "Data density and sigma grids also created\n");
     fprintf(outfp, "MBIO parameters:\n");
     fprintf(outfp, "  Ping averaging:       %d\n", pings);
@@ -1996,6 +2330,8 @@ int main(int argc, char **argv) {
   bool time_ok;  // TODO(schwehr): Probably can localize many variables.
   bool region_ok;
   bool footprint_ok;
+  float *cube_nhyp = nullptr;
+  float *cube_strength = nullptr;
 
   /***** do weighted footprint slope gridding *****/
   if (grid_mode == MBGRID_WEIGHTED_FOOTPRINT_SLOPE) {
@@ -3847,6 +4183,386 @@ int main(int argc, char **argv) {
       }
 
     /***** end of median filter gridding *****/
+  }
+/* -------------------------------------------------------------------------- */
+
+  /***** do CUBE gridding *****/
+  else if (grid_mode == MBGRID_CUBE) {
+
+    /* initialize the CUBE grid and allocate memory for its output */
+    void *cube_ptr = nullptr;
+    float *cube_depth = nullptr;
+    float *cube_unct = nullptr;
+    status = mb_cube_init(verbose, &cube.param, gxdim, gydim, cube_dx, cube_dy, &cube_ptr, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(verbose, __FILE__, __LINE__, gxdim * gydim * sizeof(float), (void **)&cube_depth, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(verbose, __FILE__, __LINE__, gxdim * gydim * sizeof(float), (void **)&cube_unct, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(verbose, __FILE__, __LINE__, gxdim * gydim * sizeof(float), (void **)&cube_nhyp, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(verbose, __FILE__, __LINE__, gxdim * gydim * sizeof(float), (void **)&cube_strength, &error);
+
+    /* if error initializing memory then quit */
+    if (error != MB_ERROR_NO_ERROR) {
+      char *message = nullptr;
+      mb_error(verbose, error, &message);
+      fprintf(outfp, "\nMBIO Error allocating CUBE grid:\n%s\n", message);
+      fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+      mb_memory_clear(verbose, &memclear_error);
+      exit(error);
+    }
+
+    /* insert one sounding, with position (x, y) in meters from the grid
+       origin, depth positive down and h the depth below the sonar or the
+       sea surface used by the uncertainty model */
+    auto cube_insert = [&](double x, double y, double depth, double h, int *nused) -> int {
+      h = fabs(h);
+      double sigma_v;
+      double sigma_h;
+      if (cube.model == MBGRID_CUBE_MODEL_IHO) {
+        /* IHO S-44 limits are 95% values */
+        sigma_v = sqrt(cube_tvu_a * cube_tvu_a + cube_tvu_b * cube_tvu_b * h * h) / 1.96;
+        sigma_h = (cube_thu_fixed + cube_thu_fraction * h) / 1.96;
+      }
+      else if (cube.model == MBGRID_CUBE_MODEL_CONSTANT) {
+        sigma_v = cube.sigma_v;
+        sigma_h = cube.sigma_h;
+      }
+      else {
+        sigma_v = sqrt(cube.model_a * cube.model_a + cube.model_b * cube.model_b * h * h);
+        sigma_h = cube.sigma_h;
+      }
+      return mb_cube_insert(verbose, cube_ptr, x, y, depth, h, sigma_v * sigma_v, sigma_h * sigma_h, nused, &error);
+    };
+
+    /* read in data */
+    ndata = 0;
+    bool weight_notice = false;
+    const int look_processed = MB_DATALIST_LOOK_UNSET;
+    if (mb_datalist_open(verbose, &datalist, filelist, look_processed, &error) != MB_SUCCESS) {
+      error = MB_ERROR_OPEN_FAIL;
+      fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
+      fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+      mb_memory_clear(verbose, &memclear_error);
+      exit(error);
+    }
+    while (mb_datalist_read3(verbose, datalist, &pstatus, path, ppath, &astatus, apath, dpath, &format, &file_weight, &error) ==
+           MB_SUCCESS) {
+      ndatafile = 0;
+      if (file_weight != 1.0 && !weight_notice && path[0] != '#') {
+        fprintf(outfp, "\nNote: datalist weights are not used by CUBE gridding\n");
+        weight_notice = true;
+      }
+
+      /* if format > 0 then input is swath sonar file */
+      if (format > 0 && path[0] != '#') {
+        /* apply pstatus */
+        if (pstatus == MB_PROCESSED_USE)
+          strcpy(file, ppath);
+        else
+          strcpy(file, path);
+
+        /* check for mbinfo file - get file bounds if possible */
+        rformat = format;
+        strcpy(rfile, file);
+        status = mb_check_info(verbose, file, lonflip, bounds, &file_in_bounds, &error);
+        if (status == MB_FAILURE) {
+          file_in_bounds = true;
+          status = MB_SUCCESS;
+          error = MB_ERROR_NO_ERROR;
+        }
+
+        /* initialize the swath sonar file */
+        bool first = true;
+        double dmin = 0.0;
+        double dmax = 0.0;
+        if (file_in_bounds) {
+          /* check for "fast bathymetry" or "fbt" file */
+          mb_get_fbt(verbose, rfile, &rformat, &error);
+
+          /* call mb_read_init_altnav() */
+          if (mb_read_init_altnav(verbose, rfile, rformat, pings, lonflip, bounds, btime_i, etime_i, speedmin,
+                                     timegap, astatus, apath, &mbio_ptr, &btime_d, &etime_d,
+                                     &beams_bath, &beams_amp, &pixels_ss,
+                                     &error) != MB_SUCCESS) {
+            char *message = nullptr;
+            mb_error(verbose, error, &message);
+            fprintf(outfp, "\nMBIO Error returned from function <mb_read_init_altnav>:\n%s\n", message);
+            fprintf(outfp, "\nMultibeam File <%s> not initialized for reading\n", rfile);
+            fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+            mb_memory_clear(verbose, &memclear_error);
+            exit(error);
+          }
+
+          /* allocate memory for reading data arrays */
+          if (error == MB_ERROR_NO_ERROR)
+            status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag,
+                                       &error);
+          if (error == MB_ERROR_NO_ERROR)
+            status =
+                mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, &error);
+          if (error == MB_ERROR_NO_ERROR)
+            status =
+                mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, &error);
+          if (error == MB_ERROR_NO_ERROR)
+            status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathlon,
+                                       &error);
+          if (error == MB_ERROR_NO_ERROR)
+            status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathlat,
+                                       &error);
+          if (error == MB_ERROR_NO_ERROR)
+            status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, &error);
+          if (error == MB_ERROR_NO_ERROR)
+            status =
+                mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&sslon, &error);
+          if (error == MB_ERROR_NO_ERROR)
+            status =
+                mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&sslat, &error);
+
+          /* if error initializing memory then quit */
+          if (error != MB_ERROR_NO_ERROR) {
+            char *message = nullptr;
+            mb_error(verbose, error, &message);
+            fprintf(outfp, "\nMBIO Error allocating data arrays:\n%s\n", message);
+            fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+            mb_memory_clear(verbose, &memclear_error);
+            exit(error);
+          }
+
+          /* loop over reading */
+          while (error <= MB_ERROR_NO_ERROR) {
+            status = mb_read(verbose, mbio_ptr, &kind, &rpings, time_i, &time_d, &navlon, &navlat, &speed, &heading,
+                             &distance, &altitude, &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath,
+                             amp, bathlon, bathlat, ss, sslon, sslat, comment, &error);
+
+            /* time gaps are not a problem here */
+            if (error == MB_ERROR_TIME_GAP) {
+              error = MB_ERROR_NO_ERROR;
+              status = MB_SUCCESS;
+            }
+
+            if (verbose >= 2) {
+              fprintf(outfp, "\ndbg2  Ping read in program <%s>\n", program_name);
+              fprintf(outfp, "dbg2       kind:           %d\n", kind);
+              fprintf(outfp, "dbg2       beams_bath:     %d\n", beams_bath);
+              fprintf(outfp, "dbg2       sensordepth:    %f\n", sensordepth);
+              fprintf(outfp, "dbg2       error:          %d\n", error);
+              fprintf(outfp, "dbg2       status:         %d\n", status);
+            }
+
+            /* apply position shift if specified */
+            if (shift_mode == MBGRID_SHIFT_DATA) {
+              navlon += shift_lon;
+              navlat += shift_lat;
+              for (ib = 0; ib < beams_bath; ib++) {
+                if (mb_beam_ok(beamflag[ib])) {
+                  bathlon[ib] += shift_lon;
+                  bathlat[ib] += shift_lat;
+                }
+              }
+            }
+
+            if (error == MB_ERROR_NO_ERROR) {
+
+              /* reproject beam positions if necessary */
+              if (use_projection) {
+                for (ib = 0; ib < beams_bath; ib++)
+                  if (mb_beam_ok(beamflag[ib]))
+                    mb_proj_forward(verbose, pjptr, bathlon[ib], bathlat[ib], &bathlon[ib], &bathlat[ib],
+                                    &error);
+              }
+
+              /* offer the soundings to the CUBE grid in ping order */
+              for (ib = 0; ib < beams_bath; ib++)
+                if (mb_beam_ok(beamflag[ib])) {
+                  if (use_projection) {
+                    xx = bathlon[ib] - wbnd[0];
+                    yy = bathlat[ib] - wbnd[2];
+                  }
+                  else {
+                    xx = (bathlon[ib] - wbnd[0]) / mtodeglon;
+                    yy = (bathlat[ib] - wbnd[2]) / mtodeglat;
+                  }
+                  const double depth_reference = cube.depth_below_sonar ? bath[ib] - sensordepth : bath[ib];
+                  int nused = 0;
+                  if (cube_insert(xx, yy, bath[ib], depth_reference, &nused) != MB_SUCCESS) {
+                    if (error == MB_ERROR_MEMORY_FAIL) {
+                      char *message = nullptr;
+                      mb_error(verbose, error, &message);
+                      fprintf(outfp, "\nMBIO Error inserting data into the CUBE grid:\n%s\n", message);
+                      fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+                      mb_memory_clear(verbose, &memclear_error);
+                      exit(error);
+                    }
+                    /* soundings with invalid values are skipped */
+                    error = MB_ERROR_NO_ERROR;
+                    status = MB_SUCCESS;
+                  }
+                  else if (nused > 0) {
+                    ndata++;
+                    ndatafile++;
+                    if (first) {
+                      first = false;
+                      dmin = topofactor * bath[ib];
+                      dmax = topofactor * bath[ib];
+                    } else {
+                      dmin = std::min(topofactor * bath[ib], dmin);
+                      dmax = std::max(topofactor * bath[ib], dmax);
+                    }
+                  }
+                }
+            }
+          }
+          mb_close(verbose, &mbio_ptr, &error);
+          status = MB_SUCCESS;
+          error = MB_ERROR_NO_ERROR;
+        }
+        if (verbose >= 2)
+          fprintf(outfp, "\n");
+        if (verbose > 0 || file_in_bounds) {
+          if (astatus == MB_ALTNAV_USE)
+            fprintf(outfp, "%d data points processed in %s (minmax: %f %f) using nav from %s\n", ndatafile, rfile, dmin, dmax, apath);
+          else
+            fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, rfile, dmin, dmax);
+        }
+
+        /* add to datalist if data actually contributed */
+        if (ndatafile > 0 && dfp != nullptr) {
+          if (pstatus == MB_PROCESSED_USE && astatus == MB_ALTNAV_USE)
+            fprintf(dfp, "A:%s %d %f %s\n", path, format, file_weight, apath);
+          else if (pstatus == MB_PROCESSED_USE)
+            fprintf(dfp, "P:%s %d %f\n", path, format, file_weight);
+          else
+            fprintf(dfp, "R:%s %d %f\n", path, format, file_weight);
+          fflush(dfp);
+        }
+      } /* end if (format > 0) */
+
+      /* if format == 0 then input is lon,lat,values triples file;
+         the values are depths below the sea surface */
+      else if (format == 0 && path[0] != '#') {
+
+        /* open data file */
+        if ((rfp = fopen(path, "r")) == nullptr) {
+          error = MB_ERROR_OPEN_FAIL;
+          fprintf(outfp, "\nUnable to open lon,lat,value triples data path: %s\n", path);
+          fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+          mb_memory_clear(verbose, &memclear_error);
+          exit(error);
+        }
+
+        /* loop over reading */
+        bool first = true;
+        double dmin = 0.0;
+        double dmax = 0.0;
+        while (fscanf(rfp, "%lf %lf %lf", &tlon, &tlat, &tvalue) == 3) {
+
+          /* apply position shift if specified */
+          if (shift_mode == MBGRID_SHIFT_DATA) {
+            tlon += shift_lon;
+            tlat += shift_lat;
+          }
+
+          /* reproject data positions if necessary */
+          if (use_projection) {
+            mb_proj_forward(verbose, pjptr, tlon, tlat, &tlon, &tlat, &error);
+            xx = tlon - wbnd[0];
+            yy = tlat - wbnd[2];
+          }
+          else {
+            xx = (tlon - wbnd[0]) / mtodeglon;
+            yy = (tlat - wbnd[2]) / mtodeglat;
+          }
+
+          int nused = 0;
+          if (cube_insert(xx, yy, tvalue, tvalue, &nused) != MB_SUCCESS) {
+            if (error == MB_ERROR_MEMORY_FAIL) {
+              char *message = nullptr;
+              mb_error(verbose, error, &message);
+              fprintf(outfp, "\nMBIO Error inserting data into the CUBE grid:\n%s\n", message);
+              fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+              mb_memory_clear(verbose, &memclear_error);
+              exit(error);
+            }
+            error = MB_ERROR_NO_ERROR;
+          }
+          else if (nused > 0) {
+            ndata++;
+            ndatafile++;
+            if (first) {
+              first = false;
+              dmin = topofactor * tvalue;
+              dmax = topofactor * tvalue;
+            } else {
+              dmin = std::min(topofactor * tvalue, dmin);
+              dmax = std::max(topofactor * tvalue, dmax);
+            }
+          }
+        }
+        fclose(rfp);
+        status = MB_SUCCESS;
+        error = MB_ERROR_NO_ERROR;
+        if (verbose >= 2)
+          fprintf(outfp, "\n");
+        fprintf(outfp, "%d data points processed in %s (minmax: %f %f)\n", ndatafile, path, dmin, dmax);
+
+        /* add to datalist if data actually contributed */
+        if (ndatafile > 0 && dfp != nullptr) {
+          fprintf(dfp, "R:%s %d %f\n", path, format, file_weight);
+          fflush(dfp);
+        }
+      } /* end if (format == 0) */
+    }
+    if (datalist != nullptr)
+      mb_datalist_close(verbose, &datalist, &error);
+    fprintf(outfp, "\n%d total data points processed\n", ndata);
+
+    /* close datalist if necessary */
+    if (dfp != nullptr) {
+      fclose(dfp);
+      dfp = nullptr;
+    }
+
+    /* feed the queued soundings to the estimators and select one
+       hypothesis per node */
+    if (verbose >= 1)
+      fprintf(outfp, "\nMaking raw grid...\n");
+    status = mb_cube_flush(verbose, cube_ptr, &error);
+    if (status == MB_SUCCESS)
+      status = mb_cube_extract(verbose, cube_ptr, (float)clipvalue, cube_depth, cube_unct, cube_nhyp, cube_strength, cnt,
+                               &error);
+    if (status != MB_SUCCESS) {
+      char *message = nullptr;
+      mb_error(verbose, error, &message);
+      fprintf(outfp, "\nMBIO Error extracting the CUBE grid:\n%s\n", message);
+      fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+      mb_memory_clear(verbose, &memclear_error);
+      exit(error);
+    }
+    mb_cube_deall(verbose, &cube_ptr, &error);
+
+    nbinset = 0;
+    nbinzero = 0;
+    nbinspline = 0;
+    nbinbackground = 0;
+    for (int i = 0; i < gxdim; i++)
+      for (int j = 0; j < gydim; j++) {
+        kgrid = i * gydim + j;
+        if (cnt[kgrid] > 0) {
+          grid[kgrid] = topofactor * cube_depth[kgrid];
+          sigma[kgrid] = fabs(topofactor) * cube_unct[kgrid];
+          nbinset++;
+        }
+        else {
+          grid[kgrid] = clipvalue;
+          sigma[kgrid] = 0.0;
+        }
+      }
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&cube_depth, &error);
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&cube_unct, &error);
+
+    /***** end of CUBE gridding *****/
   }
 /* -------------------------------------------------------------------------- */
 
@@ -6109,6 +6825,70 @@ int main(int argc, char **argv) {
       mb_memory_clear(verbose, &memclear_error);
       exit(error);
     }
+
+    /* write the CUBE number of hypotheses and hypothesis strength grids */
+    if (grid_mode == MBGRID_CUBE) {
+      const float *cube_values[2] = {cube_nhyp, cube_strength};
+      const char *cube_suffix[2] = {"_nhyp", "_strength"};
+      const char *cube_zlabel[2] = {"Number of CUBE Hypotheses", "CUBE Hypothesis Strength"};
+      for (int igrid = 0; igrid < 2; igrid++) {
+        double cmin = 0.0;
+        double cmax = 0.0;
+        bool cfirst = true;
+        for (int i = 0; i < xdim; i++)
+          for (int j = 0; j < ydim; j++) {
+            kgrid = (i + offx) * gydim + (j + offy);
+            kout = i * ydim + j;
+            if (cnt[kgrid] > 0) {
+              output[kout] = cube_values[igrid][kgrid];
+              if (cfirst) {
+                cfirst = false;
+                cmin = output[kout];
+                cmax = output[kout];
+              }
+              cmin = std::min(cmin, (double)output[kout]);
+              cmax = std::max(cmax, (double)output[kout]);
+            }
+            else if (gridkind != MBGRID_ASCII && gridkind != MBGRID_ARCASCII)
+              output[kout] = outclipvalue;
+            else
+              output[kout] = 0.0;
+          }
+        if (gridkind == MBGRID_ASCII) {
+          snprintf(ofile, sizeof(ofile), "%s%s.asc", fileroot, cube_suffix[igrid]);
+          status = write_ascii(verbose, ofile, output, xdim, ydim, gbnd[0], gbnd[1], gbnd[2], gbnd[3], dx, dy, &error);
+        }
+        else if (gridkind == MBGRID_ARCASCII) {
+          snprintf(ofile, sizeof(ofile), "%s%s.asc", fileroot, cube_suffix[igrid]);
+          status = write_arcascii(verbose, ofile, output, xdim, ydim, gbnd[0], gbnd[1], gbnd[2], gbnd[3], dx, dy, outclipvalue,
+                                  &error);
+        }
+        else if (gridkind == MBGRID_OLDGRD) {
+          snprintf(ofile, sizeof(ofile), "%s%s.grd1", fileroot, cube_suffix[igrid]);
+          status = write_oldgrd(verbose, ofile, output, xdim, ydim, gbnd[0], gbnd[1], gbnd[2], gbnd[3], dx, dy, &error);
+        }
+        else if (gridkind == MBGRID_CDFGRD) {
+          snprintf(ofile, sizeof(ofile), "%s%s.grd", fileroot, cube_suffix[igrid]);
+          status = mb_write_gmt_grd(verbose, ofile, output, outclipvalue, xdim, ydim, gbnd[0], gbnd[1], gbnd[2], gbnd[3], cmin,
+                                    cmax, dx, dy, xlabel, ylabel, cube_zlabel[igrid], title, projection_id, argc, argv,
+                                    &error);
+        }
+        else if (gridkind == MBGRID_GMTGRD) {
+          snprintf(ofile, sizeof(ofile), "%s%s.grd%s", fileroot, cube_suffix[igrid], gridkindstring);
+          status = mb_write_gmt_grd(verbose, ofile, output, outclipvalue, xdim, ydim, gbnd[0], gbnd[1], gbnd[2], gbnd[3], cmin,
+                                    cmax, dx, dy, xlabel, ylabel, cube_zlabel[igrid], title, projection_id, argc, argv,
+                                    &error);
+        }
+        if (status != MB_SUCCESS) {
+          char *message = nullptr;
+          mb_error(verbose, error, &message);
+          fprintf(outfp, "\nError writing output file: %s\n%s\n", ofile, message);
+          fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+          mb_memory_clear(verbose, &memclear_error);
+          exit(error);
+        }
+      }
+    }
   }
 
   /* deallocate arrays */
@@ -6120,6 +6900,8 @@ int main(int argc, char **argv) {
   mb_freed(verbose, __FILE__, __LINE__, (void **)&firsttime, &error);
   mb_freed(verbose, __FILE__, __LINE__, (void **)&output, &error);
   mb_freed(verbose, __FILE__, __LINE__, (void **)&minormax, &error);
+  mb_freed(verbose, __FILE__, __LINE__, (void **)&cube_nhyp, &error);
+  mb_freed(verbose, __FILE__, __LINE__, (void **)&cube_strength, &error);
 
   /* deallocate projection */
   if (use_projection)
@@ -6168,6 +6950,28 @@ int main(int argc, char **argv) {
     plot_status = system(plot_cmd);
     if (plot_status == -1) {
       fprintf(outfp, "\nError executing mbm_grdplot on output file grd_%s\n", fileroot);
+    }
+
+    /* execute mbm_grdplot for the CUBE hypothesis grids */
+    if (grid_mode == MBGRID_CUBE) {
+      snprintf(plot_cmd, sizeof(plot_cmd), "mbm_grdplot -I%s_nhyp.grd%s -G1 -W1/2 -V -L\"File %s_nhyp.grd - %s:%s\"",
+               fileroot, gridkindstring, fileroot, title, "Number of CUBE Hypotheses");
+      if (verbose) {
+        fprintf(outfp, "\nexecuting mbm_grdplot...\n%s\n", plot_cmd);
+      }
+      plot_status = system(plot_cmd);
+      if (plot_status == -1) {
+        fprintf(outfp, "\nError executing mbm_grdplot on output file %s_nhyp.grd\n", fileroot);
+      }
+      snprintf(plot_cmd, sizeof(plot_cmd), "mbm_grdplot -I%s_strength.grd%s -G1 -W1/2 -V -L\"File %s_strength.grd - %s:%s\"",
+               fileroot, gridkindstring, fileroot, title, "CUBE Hypothesis Strength");
+      if (verbose) {
+        fprintf(outfp, "\nexecuting mbm_grdplot...\n%s\n", plot_cmd);
+      }
+      plot_status = system(plot_cmd);
+      if (plot_status == -1) {
+        fprintf(outfp, "\nError executing mbm_grdplot on output file %s_strength.grd\n", fileroot);
+      }
     }
   }
 
