@@ -39,6 +39,7 @@ endif (NOT GMT_FOUND)
 add_library(
   mbaux
   mb_cheb.c
+  mb_cube.c
   mb_delaun.c
   mb_gisfile.c
   mb_intersectgrid.c
@@ -49,7 +50,8 @@ add_library(
   mb_zgrid.c)
 
 set(HEADERS 
-    mb_aux.h)
+    mb_aux.h
+    mb_cube.h)
 
 set_target_properties(mbaux PROPERTIES VERSION "0" SOVERSION "0")
 target_include_directories(mbaux PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

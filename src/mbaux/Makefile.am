@@ -1,5 +1,5 @@
 lib_LTLIBRARIES = libmbaux.la ${XGRLIB} ${XMUTILLIB}
-include_HEADERS = mb_aux.h ${XGRINC} ${XMUTILINC}
+include_HEADERS = mb_aux.h mb_cube.h ${XGRINC} ${XMUTILINC}
 
 if BUILD_MOTIF
   XGRLIB = libmbxgr.la
@@ -27,6 +27,7 @@ libmbaux_la_LDFLAGS = -no-undefined -version-info 0:0:0
 
 libmbaux_la_SOURCES =
 libmbaux_la_SOURCES += mb_cheb.c
+libmbaux_la_SOURCES += mb_cube.c
 libmbaux_la_SOURCES += mb_delaun.c
 libmbaux_la_SOURCES += mb_gisfile.c
 libmbaux_la_SOURCES += mb_intersectgrid.c

@@ -1,0 +1,105 @@
+/*--------------------------------------------------------------------
+ *    The MB-system:  mb_cube.h  10/26/2026
+ *
+ *    Copyright (c); 2026 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *
+ *    MB-System was created by Caress and Chayes in 1992 at the
+ *      Lamont-Doherty Earth Observatory
+ *      Columbia University
+ *      Palisades, NY 10964
+ *
+ *    See README.md file for copying and redistribution conditions.
+ *--------------------------------------------------------------------*/
+/*
+ * mb_cube.h defines the parameters and functions of the CUBE (Combined
+ * Uncertainty and Bathymetric Estimator) gridding algorithm implemented
+ * in mb_cube.c.
+ *
+ * Conventions: depths are positive down and in meters, variances are
+ * one sigma and in square meters, and node positions are in meters
+ * from node (0,0) with x positive east and y positive north. Node (i,j)
+ * is located at (i * dx, j * dy) and is stored at index i * ny + j, the
+ * same layout as the grids of mbgrid.
+ *
+ * Author:  C. dos Santos Ferreira
+ * Date:  October 26, 2026
+ */
+
+#ifndef MB_CUBE_H_
+#define MB_CUBE_H_
+
+/* hypothesis selection (disambiguation) rules */
+#define MB_CUBE_EXTRACT_PRIOR 0      /* hypothesis with the most samples */
+#define MB_CUBE_EXTRACT_LIKELIHOOD 1 /* closest to a nearby single hypothesis node */
+#define MB_CUBE_EXTRACT_POSTERIOR 2  /* likelihood weighted by number of samples */
+
+/* variance reported as the uncertainty of a hypothesis */
+#define MB_CUBE_UNCT_SAMPLE 0    /* running variance of the assimilated samples */
+#define MB_CUBE_UNCT_POSTERIOR 1 /* posterior variance of the estimate */
+#define MB_CUBE_UNCT_MAX 2       /* larger of the two */
+
+/* IHO S-44 (Edition 6.1.0, Table 1) survey orders */
+#define MB_CUBE_IHO_EXCLUSIVE 0
+#define MB_CUBE_IHO_SPECIAL 1
+#define MB_CUBE_IHO_ORDER_1A 2
+#define MB_CUBE_IHO_ORDER_1B 3
+#define MB_CUBE_IHO_ORDER_2 4
+
+/* CUBE algorithm parameters */
+struct mb_cube_param_struct {
+  int extractor;         /* MB_CUBE_EXTRACT_PRIOR (default), _LIKELIHOOD or _POSTERIOR */
+  int uncertainty_mode;  /* MB_CUBE_UNCT_SAMPLE (default), _POSTERIOR or _MAX */
+  int median_length;     /* length of median pre-filter queue, odd, 3 - 101 */
+  double quotient_limit; /* outlier quotient limit of the queue, 0.1 - 255 */
+  double discount;       /* discount factor for evolution noise variance, 0.8 - 1 */
+  double est_offset;     /* significant offset of the estimate (normalized), 0.1 - 10 */
+  double bayes_fac_t;    /* Bayes factor threshold for an intervention, 0.001 - 1 */
+  int runlength_t;       /* run length threshold for an intervention, 1 - 10 */
+  double dist_exp;       /* exponent on distance for variance scaling, 1 - 10 */
+  double horiz_scale;    /* scale of horizontal sigma added to the distance, 0 - 10 */
+  double capture_scale;  /* capture distance as a fraction of depth, 0.01 - 1 */
+  double capture_min;    /* minimum capture distance (m), 0 - 100 */
+  double min_context;    /* minimum search distance for a guide node (m) */
+  double max_context;    /* maximum search distance for a guide node (m) */
+  double tvu_a;          /* 95% TVU fixed term (m) bounding the influence radius */
+  double tvu_b;          /* 95% TVU depth fraction bounding the influence radius */
+  double sd2conf;        /* scale applied to reported sigma (1.96 = 95%) */
+};
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int mb_cube_iho_limits(int verbose, int iho_order, double *tvu_a, double *tvu_b, double *thu_fixed, double *thu_fraction,
+                       int *error);
+int mb_cube_default_param(int verbose, int iho_order, struct mb_cube_param_struct *param, int *error);
+int mb_cube_check_param(int verbose, const struct mb_cube_param_struct *param, int *error);
+int mb_cube_estimate_memory(int verbose, const struct mb_cube_param_struct *param, int nx, int ny, double *bytes,
+                            int *error);
+int mb_cube_init(int verbose, const struct mb_cube_param_struct *param, int nx, int ny, double dx, double dy,
+                 void **cube_ptr, int *error);
+int mb_cube_insert(int verbose, void *cube_ptr, double x, double y, double depth, double depth_sonar, double var_depth,
+                   double var_horiz, int *nused, int *error);
+int mb_cube_flush(int verbose, void *cube_ptr, int *error);
+int mb_cube_extract(int verbose, void *cube_ptr, float nodata, float *depth, float *uncertainty, float *nhyp,
+                    float *strength, int *nsamples, int *error);
+int mb_cube_node_hypotheses(int verbose, void *cube_ptr, int i, int j, int nhyp_max, int *nhyp, double *depth,
+                            double *uncertainty, int *nsamples, int *error);
+int mb_cube_deall(int verbose, void **cube_ptr, int *error);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
+#endif /* MB_CUBE_H_ */
