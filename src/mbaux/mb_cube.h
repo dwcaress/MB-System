@@ -43,6 +43,7 @@
 #define MB_CUBE_EXTRACT_PRIOR 0      /* hypothesis with the most samples */
 #define MB_CUBE_EXTRACT_LIKELIHOOD 1 /* closest to a nearby single hypothesis node */
 #define MB_CUBE_EXTRACT_POSTERIOR 2  /* likelihood weighted by number of samples */
+#define MB_CUBE_EXTRACT_PREDICTED 3  /* closest to the predicted surface */
 
 /* variance reported as the uncertainty of a hypothesis */
 #define MB_CUBE_UNCT_SAMPLE 0    /* running variance of the assimilated samples */
@@ -58,7 +59,7 @@
 
 /* CUBE algorithm parameters */
 struct mb_cube_param_struct {
-  int extractor;         /* MB_CUBE_EXTRACT_PRIOR (default), _LIKELIHOOD or _POSTERIOR */
+  int extractor;         /* MB_CUBE_EXTRACT_PRIOR (default), _LIKELIHOOD, _POSTERIOR or _PREDICTED */
   int uncertainty_mode;  /* MB_CUBE_UNCT_SAMPLE (default), _POSTERIOR or _MAX */
   int median_length;     /* length of median pre-filter queue, odd, 3 - 101 */
   double quotient_limit; /* outlier quotient limit of the queue, 0.1 - 255 */
@@ -69,13 +70,17 @@ struct mb_cube_param_struct {
   double dist_exp;       /* exponent on distance for variance scaling, 1 - 10 */
   double horiz_scale;    /* scale of horizontal sigma added to the distance, 0 - 10 */
   double influence_scale; /* scale of horizontal sigma limiting the influence radius, 0 - 10 */
-  double capture_scale;  /* capture distance as a fraction of depth, 0.01 - 1 */
+  double capture_scale;  /* capture distance as a fraction of depth, 0 - 1 */
   double capture_min;    /* minimum capture distance (m), 0 - 100 */
   double min_context;    /* minimum search distance for a guide node (m) */
   double max_context;    /* maximum search distance for a guide node (m) */
   double tvu_a;          /* 95% TVU fixed term (m) bounding the influence radius */
   double tvu_b;          /* 95% TVU depth fraction bounding the influence radius */
   double sd2conf;        /* scale applied to reported sigma (1.96 = 95%) */
+  int blunder;             /* reject deep blunders below a predicted surface (0 or 1) */
+  double blunder_min;      /* minimum blunder margin below the predicted depth (m), 1 - 1000 */
+  double blunder_fraction; /* blunder margin as a fraction of depth, 0 - 1 */
+  double blunder_scalar;   /* blunder margin in predicted surface sigmas, 0 - 10 */
 };
 
 #ifdef __cplusplus
@@ -90,6 +95,8 @@ int mb_cube_estimate_memory(int verbose, const struct mb_cube_param_struct *para
                             int *error);
 int mb_cube_init(int verbose, const struct mb_cube_param_struct *param, int nx, int ny, double dx, double dy,
                  void **cube_ptr, int *error);
+int mb_cube_set_prediction(int verbose, void *cube_ptr, const float *depth, const float *variance, float nodata,
+                           double sonar_fraction, int initial_hypotheses, int *error);
 int mb_cube_insert(int verbose, void *cube_ptr, double x, double y, double depth, double depth_sonar, double var_depth,
                    double var_horiz, int *nused, int *error);
 int mb_cube_flush(int verbose, void *cube_ptr, int *error);

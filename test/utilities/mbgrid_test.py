@@ -56,6 +56,8 @@ class MbGridTest(unittest.TestCase):
     self.assertIn('CUBE', output)
     self.assertIn('--cube-order=exclusive|special|1a|1b|2', output)
     self.assertIn('--cube-depth-reference=sonar|surface', output)
+    self.assertIn('--cube-model-c=fraction', output)
+    self.assertIn('--cube-prediction=median[/factor]|gridfile', output)
 
   def testHelpVerbose2(self):
     cmd = [self.cmd, '-h', '-V', '-V']
@@ -137,6 +139,28 @@ class MbGridTest(unittest.TestCase):
       # 99th percentile of the node errors
       self.assertLess(cube_errors[int(0.99 * len(cube_errors))], 0.3)
       self.assertGreater(median_errors[int(0.99 * len(median_errors))], 1.0)
+
+  def testCubePredictedRuleNeedsPrediction(self):
+    cmd = [self.cmd, '-F9', '--cube-extractor=predicted', '-R-124.51/-124.49/40.79/40.81', '-E10/10/meters']
+    result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    output = result.stdout.decode()
+    self.assertNotEqual(0, result.returncode)
+    self.assertIn('needs a predicted surface', output)
+
+  def testCubeMedianPrediction(self):
+    if not os.path.exists(self.synthetic):
+      self.skipTest('mbcube_synthetic not built')
+    with tempfile.TemporaryDirectory() as tmp:
+      # sparse data (a few soundings per 2 m node): the median is taken on a
+      # grid four times coarser, so single spikes do not become predictions
+      output = self.runCube(tmp, 'spikes', 100, 0, 'pred',
+                            ['-F9', '-E2/2/meters', '--cube-prediction=median/4', '--cube-extractor=predicted'])
+      self.assertIn('Predicted surface:      median of the soundings nearest to each node', output)
+      self.assertIn('4 times the node spacing', output)
+      self.assertIn('data points used for the median predicted surface', output)
+      self.assertIn('Predicted surface set at', output)
+      errors, _ = depth_errors(os.path.join(tmp, 'pred.asc'), 100.0)
+      self.assertLess(errors[int(0.99 * len(errors))], 0.3)
 
   def testCubeDepthBelowSonar(self):
     if not os.path.exists(self.synthetic):

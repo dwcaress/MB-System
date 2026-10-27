@@ -64,6 +64,8 @@ Version 5.0
 .br
 --cube-bayes-factor=threshold
 .br
+--cube-blunder=min/fraction/scalar|off
+.br
 --cube-capture-min=distance
 .br
 --cube-capture-scale=fraction
@@ -76,7 +78,7 @@ Version 5.0
 .br
 --cube-est-offset=offset
 .br
---cube-extractor=prior|likelihood|posterior
+--cube-extractor=prior|likelihood|posterior|predicted
 .br
 --cube-horiz-scale=scale
 .br
@@ -92,7 +94,15 @@ Version 5.0
 .br
 --cube-model-b=fraction
 .br
+--cube-model-c=fraction
+.br
 --cube-order=exclusive|special|1a|1b|2
+.br
+--cube-prediction=median[/factor]|gridfile
+.br
+--cube-prediction-hypotheses=on|off
+.br
+--cube-prediction-uncertainty=percent
 .br
 --cube-quotient-limit=limit
 .br
@@ -353,8 +363,23 @@ Mapping and NOAA/UNH Joint Hydrographic Center (CCOM/JHC). The implementation
 in \fBMB-System\fP is independent and was checked against the reference;
 it differs in using the depth below the sonar, in computing the outlier test
 of the median queue in double precision, and in the variance of the guide
-node used by the likelihood and posterior selection rules. The predicted
-(initialization) surface of the reference implementation is not supported.
+node used by the likelihood and posterior selection rules.
+
+A predicted (initialization) surface (\fB\-\-cube\-prediction\fP) gives
+every node a predicted depth with an uncertainty (by default 5% of depth at
+95% confidence, as in the reference CUBE workflow, with the depth measured
+below the sonar like the sounding uncertainties). As in the reference
+implementation, each node then starts with a hypothesis at the predicted
+depth that acts as a prior, the capture distance is computed from the
+predicted depth, soundings much deeper than predicted are rejected as
+blunders (\fB\-\-cube\-blunder\fP), soundings are moved to each node along
+the predicted surface (slope correction), and the predicted selection rule
+reports the hypothesis closest to the predicted depth. The surface is either
+an external GMT grid (for example from an earlier survey or a lower
+resolution grid) or the median of the soundings nearest to each node,
+computed in a first pass over the data as the reference median gridding
+does. A median surface made from the same data counts the soundings twice,
+once in the initial hypotheses and once as data, as the reference does.
 
 Normally, all of the data which falls into the region of interest
 is used to construct the gridded data set. This means that the
@@ -854,6 +879,13 @@ meters east and \fIshifty\fP meters north. If \fImode\fP = 2 then the locations
 of all input data are shifted by \fIshiftx\fP meters east and \fIshifty\fP meters north. 
 Default: \fIshiftx\fP = \fIshifty\fP = 0.0
 .TP
+.B \-\-cube\-blunder=min/fraction/scalar|off
+CUBE: blunder test of soundings at nodes with a predicted depth: a sounding is
+rejected if it is deeper than the predicted depth by more than the largest of
+\fImin\fP meters, \fIfraction\fP times the depth, and \fIscalar\fP times the
+predicted surface sigma. Shallow soundings are never rejected.
+Default: 10/0.25/3 (on).
+.TP
 .B \-\-cube\-bayes\-factor=threshold
 CUBE: Bayes factor threshold (0.001 to 1) below which a sounding, or a
 sequence of soundings, is taken as evidence for a new hypothesis.
@@ -864,8 +896,9 @@ CUBE: minimum capture distance in meters (0 to 100), the largest distance
 from a node to a sounding it accepts. Default: 0.5.
 .TP
 .B \-\-cube\-capture\-scale=fraction
-CUBE: capture distance as a fraction of the depth (0.01 to 1); the capture
-distance is the larger of this and \fB\-\-cube\-capture\-min\fP.
+CUBE: capture distance as a fraction of the depth (0 to 1); the capture
+distance is the larger of this and \fB\-\-cube\-capture\-min\fP, so a
+fraction of 0 gives a fixed capture distance.
 Default: 0.05 (5% of depth).
 .TP
 .B \-\-cube\-context=min/max
@@ -893,8 +926,10 @@ CUBE: rule selecting the hypothesis reported at nodes with more than one.
 \fIprior\fP takes the hypothesis with the most soundings (the oldest one on
 ties); \fIlikelihood\fP takes the hypothesis closest to the depth of the
 nearest node with a single hypothesis (see \fB\-\-cube\-context\fP);
-\fIposterior\fP combines the two. Without a guide node the likelihood and
-posterior rules fall back to the prior rule. Default: prior.
+\fIposterior\fP combines the two; \fIpredicted\fP takes the hypothesis
+closest to the predicted surface (see \fB\-\-cube\-prediction\fP). Without a
+guide node or a prediction the other rules fall back to the prior rule.
+Default: prior.
 .TP
 .B \-\-cube\-horiz\-scale=scale
 CUBE: multiple (0 to 10) of a sounding's horizontal sigma added to its
@@ -910,8 +945,9 @@ CUBE: length of the median pre-filter queue of each node, an odd number
 from 3 to 101. Default: 11.
 .TP
 .B \-\-cube\-memory\-limit=gigabytes
-CUBE: largest memory estimate in gigabytes for which the program runs.
-Default: 8.
+CUBE: largest memory estimate in gigabytes for which the program runs; it
+includes the median predicted surface (8 bytes per sounding), which is
+checked while the data are read. Default: 16.
 .TP
 .B \-\-cube\-model=iho|constant|depth
 CUBE: model of the sounding uncertainties. \fIiho\fP uses the IHO S-44
@@ -919,7 +955,9 @@ limits of \fB\-\-cube\-order\fP as 95% values; \fIconstant\fP uses the
 vertical and horizontal sigmas \fB\-\-cube\-sigma\-v\fP and
 \fB\-\-cube\-sigma\-h\fP; \fIdepth\fP uses a vertical sigma
 sqrt(a^2 + (b * d)^2) from \fB\-\-cube\-model\-a\fP and
-\fB\-\-cube\-model\-b\fP and the horizontal sigma \fB\-\-cube\-sigma\-h\fP.
+\fB\-\-cube\-model\-b\fP and a horizontal sigma
+sqrt(sigma_h^2 + (c * d)^2) from \fB\-\-cube\-sigma\-h\fP and
+\fB\-\-cube\-model\-c\fP.
 Default: iho.
 .TP
 .B \-\-cube\-model\-a=sigma
@@ -929,10 +967,41 @@ CUBE: fixed vertical sigma in meters of the depth model. Default: 0.25.
 CUBE: depth dependent vertical sigma of the depth model, as a fraction of
 the depth. Default: 0.0066.
 .TP
+.B \-\-cube\-model\-c=fraction
+CUBE: depth dependent horizontal sigma of the depth model, as a fraction of
+the depth; the horizontal sigma is sqrt(sigma_h^2 + (c * d)^2) with sigma_h
+from \fB\-\-cube\-sigma\-h\fP. Default: 0.
+.TP
 .B \-\-cube\-order=exclusive|special|1a|1b|2
 CUBE: IHO S-44 survey order used by the iho uncertainty model and to bound
 the influence radius of soundings (see the DESCRIPTION section for suggested
 orders). Default: 2.
+.TP
+.B \-\-cube\-prediction=median[/factor]|gridfile
+CUBE: predicted (initialization) surface. \fImedian\fP computes it in a first
+pass over the data as the median of the soundings nearest to each node of a
+grid \fIfactor\fP times coarser than the output grid (default 1), interpolated
+bilinearly to the nodes (nodes without surrounding medians get no
+prediction). With dense data (many soundings per node) the default works
+well; with sparse data the median of one or two soundings is not robust, and
+a single outlier would become the prediction for its node and, through the
+slope correction, its neighbours: use a factor of 2 to 4 there. Otherwise the argument is a GMT
+grid in the same coordinates as the output grid (geographic, or projected with
+\fB\-J\fP; a warning is printed if the projection names differ), gridline
+or pixel registered, sampled bilinearly at the nodes; its values are depths in meters,
+positive down (topography with \fB\-A\fP\fI2\fP). Default: no prediction.
+.TP
+.B \-\-cube\-prediction\-hypotheses=on|off
+CUBE: whether each node with a prediction starts with a hypothesis at the
+predicted depth. Default: on, as in the reference implementation.
+.TP
+.B \-\-cube\-prediction\-uncertainty=percent
+CUBE: uncertainty of the predicted surface as a percentage of depth at 95%
+confidence. With the default depth reference the depth is the predicted depth
+below the sonar of the first sounding that reaches each node, so that AUV and
+ROV surveys get realistic initial hypotheses and blunder margins; with
+\fB\-\-cube\-depth\-reference\fP=\fIsurface\fP it is the predicted depth
+itself, as in the reference implementation. Default: 5.
 .TP
 .B \-\-cube\-quotient\-limit=limit
 CUBE: outlier quotient limit (0.1 to 255) of the median pre-filter queue;

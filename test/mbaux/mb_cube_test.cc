@@ -382,6 +382,224 @@ TEST_F(MbCube, SlowDriftStartsNewHypothesis) {
   EXPECT_GE(nhyp_[0], 2.0f);
 }
 
+// Predicted surface on a small grid: depth 100 m plus 1 m per meter east
+class MbCubePredicted : public MbCube {
+ protected:
+  void Predict(double variance, int initial_hypotheses, float nodata_node = -1.0f) {
+    std::vector<float> pd(static_cast<size_t>(nx_) * ny_), pv(pd.size());
+    for (int i = 0; i < nx_; i++)
+      for (int j = 0; j < ny_; j++) {
+        pd[K(i, j)] = 100.0f + i;
+        pv[K(i, j)] = static_cast<float>(variance);
+      }
+    if (nodata_node >= 0.0f)
+      pd[static_cast<size_t>(nodata_node)] = kNoData;
+    int error = MB_ERROR_NO_ERROR;
+    ASSERT_EQ(MB_SUCCESS, mb_cube_set_prediction(verbose, cube_, pd.data(), pv.data(), kNoData, 0.0, initial_hypotheses, &error));
+  }
+};
+
+TEST_F(MbCubePredicted, InitialHypothesesAloneAreNotReported) {
+  Init(2, 2, 1.0, 1.0);
+  Predict(1.0, 1);
+  Flush();
+  Extract();
+  for (size_t k = 0; k < depth_.size(); k++) {
+    EXPECT_EQ(kNoData, depth_[k]);
+    EXPECT_EQ(0.0f, nhyp_[k]);
+  }
+}
+
+TEST_F(MbCubePredicted, InitialHypothesisActsAsPrior) {
+  param_.uncertainty_mode = MB_CUBE_UNCT_SAMPLE;
+  Init(1, 1, 1.0, 1.0);
+  Predict(0.01, 1);
+  Insert(0.0, 0.0, 100.2, 0.01, 0.0);
+  Flush();
+  Extract();
+  // equal variances: the estimate is halfway between prediction and sounding,
+  // and the sample variance of the first sounding is 0 (not NaN as in the
+  // reference)
+  EXPECT_NEAR(100.1, depth_[0], 1.0e-4);
+  EXPECT_EQ(1.0f, nhyp_[0]);
+  EXPECT_EQ(1, nsamples_[0]);
+  EXPECT_EQ(0.0f, unct_[0]);
+}
+
+TEST_F(MbCubePredicted, BlunderTestRejectsOnlyDeepSoundings) {
+  Init(1, 1, 1.0, 1.0);
+  Predict(0.01, 0);
+  for (int k = 0; k < 5; k++)
+    Insert(0.0, 0.0, 100.0, 0.01, 0.0);
+  // pairs, so that the queue outlier test does not remove them first
+  for (int k = 0; k < 2; k++) {
+    Insert(0.0, 0.0, 130.0, 0.01, 0.0);  // deeper than 100 + max(10, 25, 0.3) m
+    Insert(0.0, 0.0, 70.0, 0.01, 0.0);   // shallow soundings are never blunders
+  }
+  Flush();
+  int error = MB_ERROR_NO_ERROR;
+  int nhyp = 0;
+  double d[4], u[4];
+  int n[4];
+  ASSERT_EQ(MB_SUCCESS, mb_cube_node_hypotheses(verbose, cube_, 0, 0, 4, &nhyp, d, u, n, &error));
+  ASSERT_EQ(2, nhyp);
+  EXPECT_EQ(7, n[0] + n[1]);
+  for (int h = 0; h < nhyp; h++)
+    EXPECT_LT(d[h], 120.0);
+}
+
+TEST_F(MbCubePredicted, BlunderTestCanBeSwitchedOff) {
+  param_.blunder = 0;
+  Init(1, 1, 1.0, 1.0);
+  Predict(0.01, 0);
+  for (int k = 0; k < 5; k++)
+    Insert(0.0, 0.0, 100.0, 0.01, 0.0);
+  Insert(0.0, 0.0, 130.0, 0.01, 0.0);
+  Insert(0.0, 0.0, 130.0, 0.01, 0.0);
+  Flush();
+  Extract();
+  EXPECT_EQ(2.0f, nhyp_[0]);
+}
+
+TEST_F(MbCubePredicted, SlopeCorrection) {
+  Init(2, 2, 1.0, 1.0);
+  Predict(0.01, 0);
+  // the predicted surface is 100.5 m at (0.5, 0.5); each node receives the
+  // sounding moved by its predicted depth difference
+  EXPECT_EQ(4, Insert(0.5, 0.5, 100.5, 0.01, 0.25));
+  Flush();
+  Extract();
+  EXPECT_NEAR(100.0, depth_[K(0, 0)], 1.0e-4);
+  EXPECT_NEAR(101.0, depth_[K(1, 0)], 1.0e-4);
+  EXPECT_NEAR(100.0, depth_[K(0, 1)], 1.0e-4);
+  EXPECT_NEAR(101.0, depth_[K(1, 1)], 1.0e-4);
+}
+
+TEST_F(MbCubePredicted, NoSlopeCorrectionOnSouthernEdgeOrWithoutFullCell) {
+  Init(2, 2, 1.0, 1.0);
+  Predict(0.01, 0, 3.0f);  // node (1,1) has no prediction
+  // inside a cell with a missing prediction: no correction at any node
+  Insert(0.5, 0.5, 100.5, 0.01, 0.25);
+  Flush();
+  Extract();
+  EXPECT_NEAR(100.5, depth_[K(0, 0)], 1.0e-4);
+  EXPECT_NEAR(100.5, depth_[K(1, 0)], 1.0e-4);
+}
+
+TEST_F(MbCubePredicted, PredictedRuleChoosesHypothesisClosestToSurface) {
+  for (int extractor : {MB_CUBE_EXTRACT_PRIOR, MB_CUBE_EXTRACT_PREDICTED}) {
+    param_.extractor = extractor;
+    Init(1, 1, 1.0, 1.0);
+    Predict(1.0, 0);
+    for (int k = 0; k < 10; k++)
+      Insert(0.0, 0.0, 80.0, 0.01, 0.0);
+    for (int k = 0; k < 5; k++)
+      Insert(0.0, 0.0, 100.0, 0.01, 0.0);
+    Flush();
+    Extract();
+    ASSERT_EQ(2.0f, nhyp_[0]);
+    if (extractor == MB_CUBE_EXTRACT_PRIOR) {
+      EXPECT_FLOAT_EQ(80.0f, depth_[0]);
+    }
+    else {
+      EXPECT_FLOAT_EQ(100.0f, depth_[0]);
+      EXPECT_NEAR(5.0 - 5.0 / 10.0, strength_[0], 1.0e-5);
+    }
+    int error = MB_ERROR_NO_ERROR;
+    mb_cube_deall(verbose, &cube_, &error);
+  }
+}
+
+// AUV 50 m above a seafloor predicted at 3000 m: 5% of the depth below the
+// sonar is 2.5 m (95%), 5% of the depth below the sea surface is 150 m
+class MbCubeAuvPrediction : public MbCube {
+ protected:
+  void Predict(bool below_sonar) {
+    float pd = 3000.0f;
+    int error = MB_ERROR_NO_ERROR;
+    if (below_sonar) {
+      ASSERT_EQ(MB_SUCCESS, mb_cube_set_prediction(verbose, cube_, &pd, nullptr, kNoData, 0.05, 1, &error));
+    }
+    else {
+      const double sd = 0.05 * 3000.0 / 1.96;
+      float pv = static_cast<float>(sd * sd);
+      ASSERT_EQ(MB_SUCCESS, mb_cube_set_prediction(verbose, cube_, &pd, &pv, kNoData, 0.0, 1, &error));
+    }
+  }
+  // sounding from a sonar 2950 m deep
+  void InsertAuv(double depth, double var_depth) { Insert(0.0, 0.0, depth, var_depth, 0.0, depth - 2950.0); }
+};
+
+TEST_F(MbCubeAuvPrediction, VarianceFromDepthBelowSonar) {
+  // the initial hypothesis has the variance of the sounding (sigma 0.05 *
+  // 50 m / 1.96, from the predicted depth below the sonar), so the estimate
+  // is halfway between prediction and sounding
+  const double sd = 0.05 * 50.0 / 1.96;
+  for (bool below_sonar : {true, false}) {
+    Init(1, 1, 1.0, 1.0);
+    Predict(below_sonar);
+    InsertAuv(3000.4, sd * sd);
+    Flush();
+    Extract();
+    if (below_sonar)
+      EXPECT_NEAR(3000.2, depth_[0], 1.0e-3);
+    else
+      EXPECT_NEAR(3000.4, depth_[0], 1.0e-3);
+    int error = MB_ERROR_NO_ERROR;
+    mb_cube_deall(verbose, &cube_, &error);
+  }
+}
+
+TEST_F(MbCubeAuvPrediction, BlunderMarginFromDepthBelowSonar) {
+  // margin max(10 m, 0.25 * 50 m, 3 sigma): 12.5 m below the sonar, but 3 *
+  // 76.5 m with the variance from the depth below the sea surface
+  for (bool below_sonar : {true, false}) {
+    Init(1, 1, 1.0, 1.0);
+    Predict(below_sonar);
+    for (int k = 0; k < 5; k++)
+      InsertAuv(3000.0, 0.01);
+    InsertAuv(3015.0, 0.01);
+    InsertAuv(3015.0, 0.01);
+    Flush();
+    Extract();
+    EXPECT_EQ(below_sonar ? 1.0f : 2.0f, nhyp_[0]);
+    int error = MB_ERROR_NO_ERROR;
+    mb_cube_deall(verbose, &cube_, &error);
+  }
+}
+
+TEST_F(MbCubePredicted, PendingPredictionGivesSlopeCorrection) {
+  Init(2, 2, 1.0, 1.0);
+  std::vector<float> pd(4);
+  for (int i = 0; i < 2; i++)
+    for (int j = 0; j < 2; j++)
+      pd[K(i, j)] = 100.0f + i;
+  int error = MB_ERROR_NO_ERROR;
+  ASSERT_EQ(MB_SUCCESS, mb_cube_set_prediction(verbose, cube_, pd.data(), nullptr, kNoData, 0.05, 0, &error));
+  EXPECT_EQ(4, Insert(0.5, 0.5, 100.5, 0.01, 0.25));
+  Flush();
+  Extract();
+  EXPECT_NEAR(100.0, depth_[K(0, 0)], 1.0e-4);
+  EXPECT_NEAR(101.0, depth_[K(1, 1)], 1.0e-4);
+}
+
+TEST_F(MbCubePredicted, SonarFractionMustBeValid) {
+  Init(1, 1, 1.0, 1.0);
+  float pd = 100.0f;
+  int error = MB_ERROR_NO_ERROR;
+  EXPECT_EQ(MB_FAILURE, mb_cube_set_prediction(verbose, cube_, &pd, nullptr, kNoData, 0.0, 1, &error));
+  EXPECT_EQ(MB_ERROR_BAD_PARAMETER, error);
+}
+
+TEST_F(MbCubePredicted, PredictionOnlyBeforeData) {
+  Init(1, 1, 1.0, 1.0);
+  Insert(0.0, 0.0, 100.0, 0.01, 0.0);
+  float pd = 100.0f, pv = 1.0f;
+  int error = MB_ERROR_NO_ERROR;
+  EXPECT_EQ(MB_FAILURE, mb_cube_set_prediction(verbose, cube_, &pd, &pv, kNoData, 0.0, 1, &error));
+  EXPECT_EQ(MB_ERROR_BAD_PARAMETER, error);
+}
+
 // Five nodes in a row with 5 seabed samples each; the middle node also has
 // a burst of 10 samples from a layer 20 m shallower.
 class MbCubeBurst : public MbCube {
