@@ -68,6 +68,7 @@ class MbCleanTest(unittest.TestCase):
     self.assertIn('--cube-flag=hypothesis|outlier|both', output)
     self.assertIn('--cube-iho-edition=4|5|6', output)
     self.assertIn('--cube-prediction=median[/factor]|gridfile', output)
+    self.assertIn('--cube-prediction-topography', output)
 
   def testCubeCannotBeCombined(self):
     cmd = [self.cmd, '--cube-spacing=2', '-C3']
@@ -81,6 +82,19 @@ class MbCleanTest(unittest.TestCase):
       result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
       self.assertEqual(9, result.returncode, option)
       self.assertIn('Invalid CUBE option: ' + option, result.stdout.decode())
+
+  def testCubeBayesFactorTooLarge(self):
+    # from exp(h^2 / 2) on every sounding is an outlier (threshold below zero)
+    cmd = [self.cmd, '--cube-spacing=2', '--cube-est-offset=1', '--cube-bayes-factor=2']
+    result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    self.assertEqual(12, result.returncode)  # MB_ERROR_BAD_PARAMETER
+    self.assertIn('(--cube-bayes-factor) must be below exp(h^2 / 2)', result.stdout.decode())
+
+  def testCubePredictionTopographyNeedsGrid(self):
+    cmd = [self.cmd, '--cube-spacing=2', '--cube-prediction-topography']
+    result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    self.assertEqual(12, result.returncode)
+    self.assertIn('needs a predicted surface grid', result.stdout.decode())
 
   def runCubeSpikes(self, tmp, options):
     """Flags synthetic spikes (2% of the soundings, 5 to 20 m off a flat
@@ -182,6 +196,43 @@ class MbCleanTest(unittest.TestCase):
                   if line.endswith('total soundings rejected by the blunder test')]
       self.assertEqual(1, len(blunders))
       self.assertGreater(blunders[0], 0)
+
+  def testCubePredictionGridSign(self):
+    if not os.path.exists(self.synthetic) or not os.path.exists(self.mbgrid):
+      self.skipTest('mbcube_synthetic or mbgrid not built')
+    with tempfile.TemporaryDirectory() as tmp:
+      # the 100 m seafloor of the spike data as a grid of depths (-A1) and
+      # as a grid of heights (-A2)
+      flat = os.path.join(tmp, 'flat.mb71')
+      subprocess.check_output([self.synthetic, flat, 'flat', '100', '0'])
+      flat_list = os.path.join(tmp, 'flat.mb-1')
+      with open(flat_list, 'w') as f:
+        f.write(flat + ' 71\n')
+      for name, datatype in (('depth', '-A1'), ('height', '-A2')):
+        subprocess.check_output([self.mbgrid, '-I' + flat_list, '-O' + os.path.join(tmp, name), datatype, '-F2',
+                                 '-E4/4/meters'], stderr=subprocess.STDOUT, cwd=tmp)
+      edits = {}
+      for name, options in (('depth', []), ('height', ['--cube-prediction-topography'])):
+        swath = os.path.join(tmp, 'spikes_' + name + '.mb71')
+        subprocess.check_output([self.synthetic, swath, 'spikes', '100', '0'])
+        cmd = [os.path.abspath(self.cmd), '-I' + swath, '--cube-spacing=2', '--cube-order=special',
+               '--cube-prediction=' + os.path.join(tmp, name + '.grd')]
+        if name == 'height':
+          # read as depths, the heights are opposite to the soundings:
+          # stopped after the first read, before anything is flagged
+          result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=tmp)
+          self.assertEqual(12, result.returncode)
+          self.assertIn('has the opposite sign to', result.stdout.decode())
+          self.assertFalse(os.path.exists(swath + '.esf'))
+        output = subprocess.check_output(cmd + options, stderr=subprocess.STDOUT, cwd=tmp).decode()
+        if name == 'height':
+          self.assertIn('(heights, positive up)', output)
+        edits[name] = read_esf_filter_edits(swath + '.esf')
+      # the -A1 and -A2 median grids differ by up to a few decimeters
+      # (mbgrid takes one of the two middle values of an even count)
+      self.assertGreater(len(edits['depth']), 1200)
+      self.assertGreater(len(edits['depth'] & edits['height']), 0.98 * len(edits['depth']))
+      self.assertLess(abs(len(edits['height']) - len(edits['depth'])), 0.02 * len(edits['depth']))
 
 
 if __name__ == '__main__':

@@ -148,6 +148,7 @@ int mb_cube_set_prediction(int verbose, void *cube_ptr, const float *depth, cons
                            double sonar_fraction, int initial_hypotheses, int *error);
 int mb_cube_insert(int verbose, void *cube_ptr, double x, double y, double depth, double depth_sonar, double var_depth,
                    double var_horiz, int *nused, int *error);
+int mb_cube_prediction_sign(int verbose, void *cube_ptr, double *nsame, double *nopposite, int *error);
 int mb_cube_flush(int verbose, void *cube_ptr, int *error);
 int mb_cube_extract(int verbose, void *cube_ptr, float nodata, float *depth, float *uncertainty, float *nhyp,
                     float *strength, int *nsamples, int *error);

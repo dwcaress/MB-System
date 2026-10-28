@@ -4123,7 +4123,7 @@ int main(int argc, char **argv) {
        depth given as a 95% value, as in the reference initsheet -p: of the
        depth below the sonar of the first sounding reaching each node, or of
        the predicted depth itself with --cube-depth-reference=surface */
-    auto cube_predict = [&](float *pred_depth) {
+    auto cube_predict = [&](float *pred_depth) -> int {
       int npred = 0;
       status = mb_cube_apply_prediction(verbose, cube_ptr, &cube, gxdim, gydim, pred_depth, (float)NO_DATA_FLAG, &npred,
                                         &error);
@@ -4136,6 +4136,7 @@ int main(int argc, char **argv) {
         exit(error);
       }
       fprintf(outfp, "\nPredicted surface set at %d of %d nodes\n", npred, gxdim * gydim);
+      return npred;
     };
 
     /* predicted surface from a grid file, sampled bilinearly at the nodes;
@@ -4210,7 +4211,8 @@ int main(int argc, char **argv) {
       mb_cube_sample_grid(verbose, pgrid, pgrid_nx, pgrid_ny, pgrid_x0, pgrid_y0, pgrid_dx, pgrid_dy, pgrid_nodata, sign,
                           gxdim, gydim, wbnd[0], wbnd[2], dx, dy, (float)NO_DATA_FLAG, pred_depth, &error);
       mb_freed(verbose, __FILE__, __LINE__, (void **)&pgrid, &error);
-      cube_predict(pred_depth);
+      if (cube_predict(pred_depth) == 0)
+        fprintf(outfp, "Warning: the predicted surface %s covers no node of the grid\n", cube.prediction_file);
       mb_freed(verbose, __FILE__, __LINE__, (void **)&pred_depth, &error);
     }
 
@@ -4582,6 +4584,21 @@ int main(int argc, char **argv) {
     if (dfp != nullptr) {
       fclose(dfp);
       dfp = nullptr;
+    }
+
+    /* a predicted surface grid of the wrong sign for -A makes most soundings
+       blunders and reverses the slope correction */
+    double pred_nsame = 0.0;
+    double pred_nopposite = 0.0;
+    if (cube.prediction == MB_CUBE_PREDICTION_FILE
+        && mb_cube_prediction_sign(verbose, cube_ptr, &pred_nsame, &pred_nopposite, &error) != MB_SUCCESS) {
+      fprintf(outfp, "\nThe predicted surface %s has the opposite sign to %.0f of the %.0f soundings compared with it:\n"
+                     "with -A%d its values must be %s\n",
+              cube.prediction_file, pred_nopposite, pred_nsame + pred_nopposite, (int)datatype,
+              datatype == MBGRID_DATA_TOPOGRAPHY ? "heights (positive up)" : "depths (positive down)");
+      fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+      mb_memory_clear(verbose, &memclear_error);
+      exit(MB_ERROR_BAD_PARAMETER);
     }
 
     /* feed the queued soundings to the estimators and select one

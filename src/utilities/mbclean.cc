@@ -138,6 +138,7 @@ struct mbclean_cube_struct {
   bool threshold_set;                    /* outlier threshold given with --cube-flag-threshold */
   double threshold;                      /* outlier threshold (normalized error) */
   double strength_max;                   /* largest node strength where the hypothesis criterion applies */
+  bool prediction_topography;            /* the predicted surface grid holds heights (positive up) */
 };
 
 /* bad beam identifier structure definition */
@@ -183,6 +184,7 @@ constexpr char usage_message[] =
     "\t--cube-order=exclusive|special|1a|1b|2 (edition 5: special|1a|1b|2, edition 4 and ccom: special|1|2|3)\n"
     "\t--cube-prediction=median[/factor]|gridfile\n"
     "\t--cube-prediction-hypotheses=on|off\n"
+    "\t--cube-prediction-topography\n"
     "\t--cube-prediction-uncertainty=percent\n"
     "\t--cube-quotient-limit=limit\n"
     "\t--cube-runlength=count\n"
@@ -296,6 +298,10 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
   }
   if (cube->threshold_set && !(cube->threshold > 0.0)) {
     fprintf(stderr, "\nThe CUBE outlier threshold (--cube-flag-threshold) must be positive\n");
+    ok = false;
+  }
+  if (cube->prediction_topography && options->prediction != MB_CUBE_PREDICTION_FILE) {
+    fprintf(stderr, "\nThe option --cube-prediction-topography needs a predicted surface grid (--cube-prediction=gridfile)\n");
     ok = false;
   }
   if (!ok) {
@@ -425,7 +431,8 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
       fprintf(stderr, "  Predicted surface:      median of the soundings, %d times the node spacing\n",
               options->prediction_factor);
     else if (options->prediction == MB_CUBE_PREDICTION_FILE)
-      fprintf(stderr, "  Predicted surface:      grid %s\n", options->prediction_file);
+      fprintf(stderr, "  Predicted surface:      grid %s%s\n", options->prediction_file,
+              cube->prediction_topography ? " (heights, positive up)" : "");
     if (cube->flag & MBCLEAN_CUBE_FLAG_HYPOTHESIS)
       fprintf(stderr, "  Flag:                   soundings not belonging to the selected hypothesis%s\n",
               cube->strength_max < 5.0 ? " (at nodes of strength up to the limit)" : "");
@@ -478,13 +485,17 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
       return (MB_ERROR_BAD_PARAMETER);
     }
     mb_cube_sample_grid(verbose, pgrid, pgrid_nx, pgrid_ny, pgrid_xmin + 0.5 * pgrid_reg_x * pgrid_dx,
-                        pgrid_ymin + 0.5 * pgrid_reg_y * pgrid_dy, pgrid_dx, pgrid_dy, pgrid_nodata, 1.0, nx, ny,
-                        gbnd[0], gbnd[2], dlon, dlat, MBCLEAN_CUBE_NODATA, pred_depth, &error);
+                        pgrid_ymin + 0.5 * pgrid_reg_y * pgrid_dy, pgrid_dx, pgrid_dy, pgrid_nodata,
+                        cube->prediction_topography ? -1.0 : 1.0, nx, ny, gbnd[0], gbnd[2], dlon, dlat,
+                        MBCLEAN_CUBE_NODATA, pred_depth, &error);
     mb_freed(verbose, __FILE__, __LINE__, (void **)&pgrid, &error);
     int npred = 0;
     status = mb_cube_apply_prediction(verbose, cube_ptr, options, nx, ny, pred_depth, MBCLEAN_CUBE_NODATA, &npred, &error);
-    if (status == MB_SUCCESS)
+    if (status == MB_SUCCESS) {
       fprintf(stderr, "\nPredicted surface set at %d of %d nodes\n", npred, nx * ny);
+      if (npred == 0)
+        fprintf(stderr, "Warning: the predicted surface %s covers no node of the CUBE grid\n", options->prediction_file);
+    }
   }
   void *median_ptr = nullptr;
   if (status == MB_SUCCESS && options->prediction == MB_CUBE_PREDICTION_MEDIAN)
@@ -859,6 +870,20 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
     }
     if (status == MB_SUCCESS && pass == 1) {
       fprintf(stderr, "%d soundings inserted into the CUBE grid\n", ninserttot);
+
+      /* a predicted surface grid of the wrong sign makes most soundings
+         blunders and reverses the slope correction */
+      double nsame = 0.0;
+      double nopposite = 0.0;
+      if (options->prediction == MB_CUBE_PREDICTION_FILE
+          && mb_cube_prediction_sign(verbose, cube_ptr, &nsame, &nopposite, &error) != MB_SUCCESS) {
+        fprintf(stderr, "\nThe predicted surface %s has the opposite sign to %.0f of the %.0f soundings compared with it:\n"
+                        "a grid of heights (positive up) needs --cube-prediction-topography, a grid of depths (positive\n"
+                        "down) must be used without it\n",
+                options->prediction_file, nopposite, nsame + nopposite);
+        fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+        return (MB_ERROR_BAD_PARAMETER);
+      }
       status = mb_cube_flush(verbose, cube_ptr, &error);
     }
     if (status != MB_SUCCESS) {
@@ -1007,6 +1032,7 @@ int main(int argc, char **argv) {
   cube.threshold_set = false;
   cube.threshold = 0.0;
   cube.strength_max = 5.0;
+  cube.prediction_topography = false;
 
   {
     static struct option options[] = {{"verbose", no_argument, nullptr, 0},
@@ -1060,6 +1086,7 @@ int main(int argc, char **argv) {
                                       {"cube-order", required_argument, nullptr, 0},
                                       {"cube-prediction", required_argument, nullptr, 0},
                                       {"cube-prediction-hypotheses", required_argument, nullptr, 0},
+                                      {"cube-prediction-topography", no_argument, nullptr, 0},
                                       {"cube-prediction-uncertainty", required_argument, nullptr, 0},
                                       {"cube-quotient-limit", required_argument, nullptr, 0},
                                       {"cube-runlength", required_argument, nullptr, 0},
@@ -1260,6 +1287,9 @@ int main(int argc, char **argv) {
             fprintf(stderr, "Invalid CUBE option: --%s=%s\n\n", options[option_index].name, optarg);
             errflg = true;
           }
+        }
+        else if (strcmp("cube-prediction-topography", options[option_index].name) == 0) {
+          cube.prediction_topography = true;
         }
         else if (strncmp("cube-", options[option_index].name, 5) == 0) {
           int cube_error = MB_ERROR_NO_ERROR;

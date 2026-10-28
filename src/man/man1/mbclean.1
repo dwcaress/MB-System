@@ -66,6 +66,8 @@ Version 5.0
 .br
 --cube-flag-strength-max=strength
 .br
+--cube-prediction-topography
+.br
 --cube-* options of \fBmbgrid\fP \-F9 (see below)
 .br
 --format=format {-Fformat} --lonflip=lonflip {-Llonflip} --verbose {-V}]
@@ -513,6 +515,11 @@ strength (0 for a certain node, up to 5 for an ambiguous one) is at most
 \fIstrength\fP, leaving soundings at ambiguous nodes for inspection, for
 example in \fBmbeditviz\fP. Default: 5 (no limit).
 .TP
+.B \-\-cube\-prediction\-topography
+The predicted surface grid file (\-\-cube\-prediction=\fIgridfile\fP)
+holds heights (positive up), as a grid made with \fBmbgrid\fP \-A2 or a
+global relief model, instead of depths (positive down).
+.TP
 .B \-\-cube\-*
 The CUBE algorithm, uncertainty model and predicted surface options of
 \fBmbgrid\fP \-F9 are accepted with the same meanings and defaults:
@@ -527,7 +534,10 @@ The CUBE algorithm, uncertainty model and predicted surface options of
 \-\-cube\-runlength, \-\-cube\-sigma\-h and \-\-cube\-sigma\-v.
 See the \fBmbgrid\fP manual page. A predicted surface grid file
 (\-\-cube\-prediction=\fIgridfile\fP) must be a geographic grid of
-depths (positive down).
+depths (positive down), or of heights (positive up) with
+\fB\-\-cube\-prediction\-topography\fP. If more of the soundings
+compared with it have the opposite sign than the same sign, \fBmbclean\fP
+stops after the first read of the data without flagging anything.
 
 .SH EXAMPLES
 Suppose one wishes to do a first pass edit of

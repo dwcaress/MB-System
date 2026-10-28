@@ -912,6 +912,60 @@ TEST_F(MbCubePredicted, ClassifyReportsBlunders) {
   EXPECT_EQ(1, is_selected);
 }
 
+TEST_F(MbCubePredicted, ZeroVarianceGuideSelectsClosestHypothesis) {
+  // predictions of zero variance: the single sample at node 0 joins its
+  // initial hypothesis, which keeps zero variance and guides node 2, where
+  // a burst at 80 m holds more samples than the seabed at 100 m
+  for (int extractor : {MB_CUBE_EXTRACT_LIKELIHOOD, MB_CUBE_EXTRACT_POSTERIOR}) {
+    SCOPED_TRACE(extractor);
+    param_.extractor = extractor;
+    param_.min_context = 1.0;
+    param_.max_context = 2.0;
+    Init(3, 1, 1.0, 1.0);
+    Predict(0.0, 1);
+    Insert(0.0, 0.0, 100.0, 0.01, 0.0);
+    for (int k = 0; k < 10; k++)
+      Insert(2.0, 0.0, 80.0, 0.01, 0.0);
+    for (int k = 0; k < 5; k++)
+      Insert(2.0, 0.0, 100.0, 0.01, 0.0);
+    Flush();
+    Extract();
+    ASSERT_EQ(1.0f, nhyp_[K(0, 0)]);
+    ASSERT_EQ(2.0f, nhyp_[K(2, 0)]);
+    EXPECT_FLOAT_EQ(100.0f, depth_[K(2, 0)]);  // closest to the guide, not the prior rule's 80 m
+    EXPECT_NEAR(5.0 - 5.0 / 10.0, strength_[K(2, 0)], 1.0e-5);
+    int node, nhyp, is_selected, is_blunder;
+    double error_selected, strength;
+    int error = MB_ERROR_NO_ERROR;
+    ASSERT_EQ(MB_SUCCESS, mb_cube_classify(verbose, cube_, 2.0, 0.0, 100.0, 100.0, 0.01, 0.0, &node, &nhyp,
+                                           &is_selected, &is_blunder, &error_selected, &strength, &error));
+    EXPECT_EQ(2, node);
+    EXPECT_EQ(1, is_selected);
+    EXPECT_EQ(MB_SUCCESS, mb_cube_deall(verbose, &cube_, &error));
+  }
+}
+
+TEST_F(MbCubePredicted, PredictionSignCountsSoundings) {
+  Init(3, 3, 1.0, 1.0);
+  Predict(0.01, 0);  // depths from 100 m, positive down
+  double nsame = 0.0;
+  double nopposite = 0.0;
+  int error = MB_ERROR_NO_ERROR;
+  for (int k = 0; k < 3; k++)
+    Insert(0.5, 0.5, 100.0, 0.01, 0.0);
+  Insert(0.5, 0.5, -100.0, 0.01, 0.0);
+  Insert(0.5, 0.0, -100.0, 0.01, 0.0);  // southern edge: no surface at the sounding, not counted
+  EXPECT_EQ(MB_SUCCESS, mb_cube_prediction_sign(verbose, cube_, &nsame, &nopposite, &error));
+  EXPECT_EQ(3.0, nsame);
+  EXPECT_EQ(1.0, nopposite);
+  for (int k = 0; k < 3; k++)
+    Insert(1.5, 1.5, -100.0, 0.01, 0.0);
+  EXPECT_EQ(MB_FAILURE, mb_cube_prediction_sign(verbose, cube_, &nsame, &nopposite, &error));
+  EXPECT_EQ(MB_ERROR_BAD_PARAMETER, error);
+  EXPECT_EQ(3.0, nsame);
+  EXPECT_EQ(4.0, nopposite);
+}
+
 TEST(MbCubeOptions, DefaultsParseAndResolve) {
   int error = MB_ERROR_NO_ERROR;
   struct mb_cube_options_struct options;
@@ -956,6 +1010,22 @@ TEST(MbCubeOptions, DefaultsParseAndResolve) {
   EXPECT_EQ(MB_FAILURE, mb_cube_check_options(verbose, "mbclean", &options, message, sizeof(message), &error));
   EXPECT_THAT(message, ::testing::HasSubstr("see the mbclean manual page"));
   EXPECT_THAT(message, ::testing::HasSubstr("must be positive"));
+}
+
+TEST(MbCubeOptions, BayesFactorBelowLargestSingleSampleFactor) {
+  int error = MB_ERROR_NO_ERROR;
+  struct mb_cube_options_struct options;
+  char message[1024];
+  ASSERT_EQ(MB_SUCCESS, mb_cube_default_options(verbose, &options, &error));
+  // with an estimate offset of 1 a single sample reaches at most exp(0.5)
+  ASSERT_EQ(MB_SUCCESS, mb_cube_parse_option(verbose, "cube-est-offset", "1", &options, &error));
+  ASSERT_EQ(MB_SUCCESS, mb_cube_parse_option(verbose, "cube-bayes-factor", "1.6", &options, &error));
+  EXPECT_EQ(MB_SUCCESS, mb_cube_check_options(verbose, "mbgrid", &options, message, sizeof(message), &error));
+  ASSERT_EQ(MB_SUCCESS, mb_cube_parse_option(verbose, "cube-bayes-factor", "2", &options, &error));
+  EXPECT_EQ(MB_FAILURE, mb_cube_check_options(verbose, "mbgrid", &options, message, sizeof(message), &error));
+  EXPECT_EQ(MB_ERROR_BAD_PARAMETER, error);
+  EXPECT_THAT(message, ::testing::HasSubstr("--cube-bayes-factor"));
+  EXPECT_THAT(message, ::testing::Not(::testing::HasSubstr("out of range")));
 }
 
 TEST(MbCubeOptions, SoundingVariance) {

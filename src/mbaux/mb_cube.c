@@ -41,8 +41,9 @@
  *     vessels but not for AUVs and ROVs,
  *   - the minimum capture distance is a parameter,
  *   - a guide node in the likelihood and posterior rules contributes the
- *     larger of its sample and posterior variances, so the comparison never
- *     divides by zero,
+ *     larger of its sample and posterior variances, so the comparison does
+ *     not divide by zero, and a guide with neither (started at a predicted
+ *     depth of zero variance) selects the closest hypothesis,
  *   - the outlier quotient of the median queue is computed in double
  *     precision about the mean,
  *   - ties between hypotheses with equal numbers of samples go to the
@@ -144,6 +145,8 @@ struct mb_cube_struct {
   float *pred_var;   /* predicted depth variance (m^2), or MB_CUBE_PRED_NONE or _PENDING */
   double pred_fraction; /* 95% uncertainty of a pending prediction as a fraction of depth below the sonar */
   int pred_initial;     /* initial hypotheses at the predicted depths */
+  double pred_nsame;     /* soundings inserted with the sign of the prediction at their position */
+  double pred_nopposite; /* soundings inserted with the opposite sign */
 };
 
 /*--------------------------------------------------------------------------*/
@@ -926,6 +929,15 @@ int mb_cube_insert(int verbose, void *cube_ptr, double x, double y, double depth
       }
     }
 
+    /* sign agreement of the sounding and the prediction, which shows a
+       surface given with the wrong sign (mb_cube_prediction_sign) */
+    if (snd_pred_ok) {
+      if (depth * snd_pred > 0.0)
+        cube->pred_nsame++;
+      else if (depth * snd_pred < 0.0)
+        cube->pred_nopposite++;
+    }
+
     /* nodes within the radius, clipped to the grid */
     const double fimin = ceil((x - radius) / cube->dx);
     const double fimax = floor((x + radius) / cube->dx);
@@ -992,6 +1004,43 @@ int mb_cube_insert(int verbose, void *cube_ptr, double x, double y, double depth
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       nused:      %d\n", *nused);
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------------*/
+/* Numbers of the soundings inserted so far whose depth has the same sign as
+   the predicted surface interpolated at their position, and the opposite
+   sign (soundings where the surface cannot be interpolated are not
+   counted). Fails with MB_ERROR_BAD_PARAMETER if more soundings have the
+   opposite sign: the surface was then given with the wrong sign convention,
+   heights instead of depths or the reverse. */
+int mb_cube_prediction_sign(int verbose, void *cube_ptr, double *nsame, double *nopposite, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       cube_ptr:   %p\n", cube_ptr);
+  }
+
+  const struct mb_cube_struct *cube = (const struct mb_cube_struct *)cube_ptr;
+  *nsame = cube->pred_nsame;
+  *nopposite = cube->pred_nopposite;
+  int status = MB_SUCCESS;
+  *error = MB_ERROR_NO_ERROR;
+  if (cube->pred_nopposite > cube->pred_nsame) {
+    status = MB_FAILURE;
+    *error = MB_ERROR_BAD_PARAMETER;
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       nsame:      %.0f\n", *nsame);
+    fprintf(stderr, "dbg2       nopposite:  %.0f\n", *nopposite);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:     %d\n", status);
@@ -1169,11 +1218,16 @@ static const struct mb_cube_hyp *mb_cube_select_node(const struct mb_cube_struct
           continue;
         const double diff = hyp->cur_estimate - guide_depth;
         double score;
-        if (param->extractor == MB_CUBE_EXTRACT_POSTERIOR)
+        if (!(guide_var > 0.0))
+          /* a guide without variance (a hypothesis started at a predicted
+             depth of zero variance): the closest hypothesis, the limit of
+             both rules */
+          score = -fabs(diff);
+        else if (param->extractor == MB_CUBE_EXTRACT_POSTERIOR)
           score = -diff * diff / (2.0 * guide_var) + log((double)hyp->num_samples);
         else
           score = -fabs(diff) / sqrt(guide_var);
-        if (score > best_score) {
+        if (selected == NULL || score > best_score) {
           best_score = score;
           selected = hyp;
         }

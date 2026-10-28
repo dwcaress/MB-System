@@ -220,6 +220,30 @@ class MbGridTest(unittest.TestCase):
       self.assertLess(sonar_errors[-1], 0.3)
       self.assertGreater(surface_errors[-1], 1.0)
 
+  def testCubePredictionGridSign(self):
+    if not os.path.exists(self.synthetic):
+      self.skipTest('mbcube_synthetic not built')
+    with tempfile.TemporaryDirectory() as tmp:
+      # a grid of heights (-A2) is the predicted surface of a topography
+      # grid, but not of a bathymetry grid (-A1)
+      swath = os.path.join(tmp, 'flat.mb71')
+      datalist = os.path.join(tmp, 'flat_datalist.mb-1')
+      subprocess.check_output([self.synthetic, swath, 'flat', '100', '0'])
+      with open(datalist, 'w') as f:
+        f.write(swath + ' 71\n')
+      cmd = [os.path.abspath(self.cmd), '-I' + datalist]
+      subprocess.check_output(cmd + ['-O' + os.path.join(tmp, 'height'), '-A2', '-F2', '-E4/4/meters'],
+                              stderr=subprocess.STDOUT, cwd=tmp)
+      cube = cmd + ['-F9', '-E2/2/meters', '-G1', '--cube-prediction=' + os.path.join(tmp, 'height.grd')]
+      result = subprocess.run(cube + ['-A1', '-O' + os.path.join(tmp, 'bathymetry')], stdout=subprocess.PIPE,
+                              stderr=subprocess.STDOUT, cwd=tmp)
+      self.assertEqual(12, result.returncode)  # MB_ERROR_BAD_PARAMETER
+      self.assertIn('with -A1 its values must be depths (positive down)', result.stdout.decode())
+      result = subprocess.run(cube + ['-A2', '-O' + os.path.join(tmp, 'topography')], stdout=subprocess.PIPE,
+                              stderr=subprocess.STDOUT, cwd=tmp)
+      self.assertEqual(0, result.returncode)
+      self.assertIn('Predicted surface set at', result.stdout.decode())
+
 
 if __name__ == '__main__':
   unittest.main()

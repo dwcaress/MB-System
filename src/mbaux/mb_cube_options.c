@@ -36,6 +36,7 @@
  * Date:  October 28, 2026
  */
 
+#include <limits.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -416,6 +417,14 @@ int mb_cube_check_options(int verbose, const char *program_name, const struct mb
   if (mb_cube_check_param(verbose, &options->param, &param_error) != MB_SUCCESS && len < size)
     len += snprintf(message + len, (size_t)(size - len),
                     "\nCUBE algorithm parameters out of range, see the %s manual page\n", program_name);
+  /* the largest Bayes factor of a single sample, at zero error, is
+     exp(h^2 / 2): from there on the monitor rejects every sample */
+  const double bayes_factor_max = exp(0.5 * options->param.est_offset * options->param.est_offset);
+  if (!(options->param.bayes_fac_t < bayes_factor_max) && len < size)
+    len += snprintf(message + len, (size_t)(size - len),
+                    "\nThe Bayes factor threshold (--cube-bayes-factor) must be below exp(h^2 / 2) = %g for the\n"
+                    "estimate offset h = %g (--cube-est-offset); otherwise every sounding is an outlier\n",
+                    bayes_factor_max, options->param.est_offset);
   if (options->param.extractor == MB_CUBE_EXTRACT_PREDICTED && options->prediction == MB_CUBE_PREDICTION_NONE && len < size)
     len += snprintf(message + len, (size_t)(size - len),
                     "\nThe predicted hypothesis selection rule needs a predicted surface (--cube-prediction)\n");
@@ -670,8 +679,9 @@ int mb_cube_median_init(int verbose, int nx, int ny, double dx, double dy, int f
 /*--------------------------------------------------------------------------*/
 /* Bin one sounding, at (x, y) in meters from node (0,0), to its nearest
    median grid node; soundings outside the grid are ignored. If the memory
-   of the bins would exceed the limit, or cannot be allocated, MB_FAILURE
-   and MB_ERROR_MEMORY_FAIL are returned with the memory wanted in bytes. */
+   of the bins would exceed the limit, or cannot be allocated, or more than
+   INT_MAX soundings would be binned, MB_FAILURE and MB_ERROR_MEMORY_FAIL
+   are returned with the memory wanted in bytes. */
 int mb_cube_median_add(int verbose, void *median_ptr, double x, double y, double depth, double *bytes, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -691,17 +701,21 @@ int mb_cube_median_add(int verbose, void *median_ptr, double x, double y, double
   const int j = (int)floor(y / (median->factor * median->dy) + 0.5);
   if (i >= 0 && i < median->mxdim && j >= 0 && j < median->mydim) {
     if (median->nbins == median->nbins_alloc) {
-      const int nbins_alloc = MAX(MB_CUBE_MEDIAN_ALLOC_MIN, 2 * median->nbins_alloc);
+      /* double the bins, in size_t so that the count cannot overflow, up to
+         the INT_MAX bins an int can index */
+      size_t nbins_alloc = MAX((size_t)MB_CUBE_MEDIAN_ALLOC_MIN, 2 * (size_t)median->nbins_alloc);
+      if (nbins_alloc > INT_MAX)
+        nbins_alloc = INT_MAX;
       *bytes = (double)nbins_alloc * sizeof(struct mb_cube_median_bin);
-      if (*bytes > median->max_bytes) {
+      if (median->nbins == INT_MAX || *bytes > median->max_bytes) {
         status = MB_FAILURE;
         *error = MB_ERROR_MEMORY_FAIL;
       }
       else {
-        status = mb_reallocd(verbose, __FILE__, __LINE__, (size_t)nbins_alloc * sizeof(struct mb_cube_median_bin),
+        status = mb_reallocd(verbose, __FILE__, __LINE__, nbins_alloc * sizeof(struct mb_cube_median_bin),
                              (void **)&median->bins, error);
         if (status == MB_SUCCESS)
-          median->nbins_alloc = nbins_alloc;
+          median->nbins_alloc = (int)nbins_alloc;
         else {
           median->nbins = 0;
           median->nbins_alloc = 0;
