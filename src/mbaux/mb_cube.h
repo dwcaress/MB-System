@@ -57,6 +57,14 @@
 #define MB_CUBE_IHO_ORDER_1B 3
 #define MB_CUBE_IHO_ORDER_2 4
 
+/* IHO S-44 editions for mb_cube_iho_edition_limits(), whose survey orders
+   are given by name: edition 4 special|1|2|3, edition 5 special|1a|1b|2,
+   edition 6 exclusive|special|1a|1b|2, CCOM special|1|2|3 */
+#define MB_CUBE_IHO_CCOM 0      /* table of the CCOM/JHC CUBE errmod_iho */
+#define MB_CUBE_IHO_EDITION_4 4 /* 4th edition, April 1998 */
+#define MB_CUBE_IHO_EDITION_5 5 /* 5th edition, February 2008 */
+#define MB_CUBE_IHO_EDITION_6 6 /* Editions 6.0.0 (2020) and 6.1.0 (2022) */
+
 /* CUBE algorithm parameters */
 struct mb_cube_param_struct {
   int extractor;         /* MB_CUBE_EXTRACT_PRIOR (default), _LIKELIHOOD, _POSTERIOR or _PREDICTED */
@@ -89,6 +97,9 @@ extern "C" {
 
 int mb_cube_iho_limits(int verbose, int iho_order, double *tvu_a, double *tvu_b, double *thu_fixed, double *thu_fraction,
                        int *error);
+int mb_cube_iho_edition_limits(int verbose, int edition, const char *order, double *tvu_a, double *tvu_b,
+                               double *thu_fixed, double *thu_fraction, int *error);
+int mb_cube_iho_edition_orders(int verbose, int edition, char *orders, int size, int *error);
 int mb_cube_default_param(int verbose, int iho_order, struct mb_cube_param_struct *param, int *error);
 int mb_cube_check_param(int verbose, const struct mb_cube_param_struct *param, int *error);
 int mb_cube_estimate_memory(int verbose, const struct mb_cube_param_struct *param, int nx, int ny, double *bytes,

@@ -7,6 +7,7 @@
 """Tests for mbgrid command line app."""
 
 import os
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -74,11 +75,42 @@ class MbGridTest(unittest.TestCase):
     self.assertIn('minormax_weighted_mean_threshold:', output)
 
   def testCubeInvalidOption(self):
-    cmd = [self.cmd, '-F9', '--cube-order=3']
+    cmd = [self.cmd, '-F9', '--cube-order=4']
     result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     output = result.stdout.decode()
     self.assertNotEqual(0, result.returncode)
-    self.assertIn('Invalid CUBE option: --cube-order=3', output)
+    self.assertIn('Invalid CUBE option: --cube-order=4', output)
+
+  def testCubeOrderOfOtherEdition(self):
+    # Order 3 exists only in edition 4 (and the CCOM table), Order 1a only
+    # in editions 5 and 6, Exclusive Order only in edition 6
+    bounds = ['-R-124.51/-124.49/40.79/40.81', '-E10/10/meters']
+    for options, message in ((['--cube-order=3'], 'IHO S-44 edition 6 has no order 3'),
+                             (['--cube-iho-edition=4', '--cube-order=1a'], 'IHO S-44 edition 4 has no order 1a'),
+                             (['--cube-iho-edition=5', '--cube-order=exclusive'], 'IHO S-44 edition 5 has no order exclusive'),
+                             (['--cube-iho-ccom', '--cube-order=1b'], 'errmod_iho table (--cube-iho-ccom) has no order 1b'),
+                             (['--cube-iho-ccom', '--cube-iho-edition=4'], 'cannot be combined'),
+                             (['--cube-iho-edition=3'], 'Invalid CUBE option: --cube-iho-edition=3')):
+      cmd = [self.cmd, '-F9'] + options + bounds
+      result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+      output = result.stdout.decode()
+      self.assertNotEqual(0, result.returncode, options)
+      self.assertIn(message, output)
+
+  def testCubeIhoEdition(self):
+    # the selected edition and order are reported before the data are read
+    bounds = ['-R-124.51/-124.49/40.79/40.81', '-E10/10/meters']
+    for options, message in ((['--cube-iho-edition=4', '--cube-order=3'],
+                              'IHO S-44 Ed. 4 Order 3 (TVU a 1.000 m, b 0.0230; THU 150.0 m + 5% of depth)'),
+                             (['--cube-iho-edition=5', '--cube-order=2'],
+                              'IHO S-44 Ed. 5 Order 2 (TVU a 1.000 m, b 0.0230; THU 20.0 m + 10% of depth)'),
+                             (['--cube-order=2', '--cube-iho-edition=4'],
+                              'IHO S-44 Ed. 4 Order 2 (TVU a 1.000 m, b 0.0230; THU 20.0 m + 5% of depth)'),
+                             (['--cube-iho-ccom', '--cube-order=special'],
+                              'CCOM errmod_iho Special Order (TVU a 0.200 m, b 0.0075; THU 2.0 m + 0% of depth)')):
+      cmd = [self.cmd, '-F9'] + options + bounds
+      result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+      self.assertIn('Sounding uncertainty:   ' + message, result.stdout.decode())
 
   def testCubeRejectsAmplitude(self):
     cmd = [self.cmd, '-F9', '-A3', '-R-124.51/-124.49/40.79/40.81', '-E10/10/meters']
@@ -113,7 +145,7 @@ class MbGridTest(unittest.TestCase):
     with tempfile.TemporaryDirectory() as tmp:
       output = self.runCube(tmp, 'flat', 100, 0, 'flat', ['-F9', '-E2/2/meters', '-M'])
       self.assertIn('CUBE (Combined Uncertainty and Bathymetric Estimator)', output)
-      self.assertIn('Sounding uncertainty:   IHO S-44 Order 2', output)
+      self.assertIn('Sounding uncertainty:   IHO S-44 Ed. 6 Order 2', output)
       errors, nnodes = depth_errors(os.path.join(tmp, 'flat.asc'), 100.0)
       self.assertGreater(len(errors), 0.85 * nnodes)
       self.assertLess(errors[-1], 0.25)
@@ -161,6 +193,17 @@ class MbGridTest(unittest.TestCase):
       self.assertIn('Predicted surface set at', output)
       errors, _ = depth_errors(os.path.join(tmp, 'pred.asc'), 100.0)
       self.assertLess(errors[int(0.99 * len(errors))], 0.3)
+
+  def testCubeGridTitle(self):
+    if not os.path.exists(self.synthetic):
+      self.skipTest('mbcube_synthetic not built')
+    if shutil.which('gmt') is None:
+      self.skipTest('gmt not found')
+    with tempfile.TemporaryDirectory() as tmp:
+      self.runCube(tmp, 'flat', 100, 0, 'title', ['-F9', '-E4/4/meters', '-G3', '--cube-iho-edition=5',
+                                                  '--cube-order=1a'])
+      info = subprocess.check_output(['gmt', 'grdinfo', os.path.join(tmp, 'title.grd')]).decode()
+      self.assertIn('Bathymetry Grid (CUBE, IHO S-44 Ed. 5 Order 1a)', info)
 
   def testCubeDepthBelowSonar(self):
     if not os.path.exists(self.synthetic):

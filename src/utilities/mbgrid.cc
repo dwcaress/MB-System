@@ -86,7 +86,10 @@ typedef enum {
 /* CUBE gridding options */
 struct mbgrid_cube_options {
   struct mb_cube_param_struct param; /* algorithm parameters, see mb_cube.h */
-  int iho_order;                     /* IHO S-44 order of the iho model and influence radius */
+  int iho_edition;                   /* IHO S-44 edition (MB_CUBE_IHO_EDITION_*) of the order limits */
+  bool iho_edition_set;              /* edition given with --cube-iho-edition */
+  bool iho_ccom;                     /* CCOM/JHC errmod_iho limits instead of an edition */
+  char iho_order[16];                /* IHO S-44 order of the iho model and influence radius */
   cube_model_t model;                /* sounding uncertainty model */
   double sigma_v;                    /* constant model vertical sigma (m) */
   double sigma_h;                    /* constant and depth models horizontal sigma (m) */
@@ -200,6 +203,8 @@ constexpr char usage_message[] =
     "\t--cube-est-offset=offset\n"
     "\t--cube-extractor=prior|likelihood|posterior|predicted\n"
     "\t--cube-horiz-scale=scale\n"
+    "\t--cube-iho-ccom\n"
+    "\t--cube-iho-edition=4|5|6\n"
     "\t--cube-influence-scale=scale\n"
     "\t--cube-median-length=length\n"
     "\t--cube-memory-limit=gigabytes\n"
@@ -207,7 +212,7 @@ constexpr char usage_message[] =
     "\t--cube-model-a=sigma\n"
     "\t--cube-model-b=fraction\n"
     "\t--cube-model-c=fraction\n"
-    "\t--cube-order=exclusive|special|1a|1b|2\n"
+    "\t--cube-order=exclusive|special|1a|1b|2 (edition 5: special|1a|1b|2, edition 4 and ccom: special|1|2|3)\n"
     "\t--cube-prediction=median[/factor]|gridfile\n"
     "\t--cube-prediction-hypotheses=on|off\n"
     "\t--cube-prediction-uncertainty=percent\n"
@@ -522,25 +527,33 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b, double pcx, double 
  */
 bool mbgrid_cube_option(int verbose, const char *name, const char *value, struct mbgrid_cube_options *cube) {
   int error = MB_ERROR_NO_ERROR;
-  double thu_fixed, thu_fraction;
+  double tvu_a, tvu_b, thu_fixed, thu_fraction;
   int n = 0;
   char extra;
   if (strcmp(name, "cube-order") == 0) {
-    int order = -1;
-    if (strcmp(value, "exclusive") == 0)
-      order = MB_CUBE_IHO_EXCLUSIVE;
-    else if (strcmp(value, "special") == 0)
-      order = MB_CUBE_IHO_SPECIAL;
-    else if (strcmp(value, "1a") == 0)
-      order = MB_CUBE_IHO_ORDER_1A;
-    else if (strcmp(value, "1b") == 0)
-      order = MB_CUBE_IHO_ORDER_1B;
-    else if (strcmp(value, "2") == 0)
-      order = MB_CUBE_IHO_ORDER_2;
-    if (order < 0)
+    /* any order name of a known edition; checked against the selected
+       edition once all options are read */
+    const int editions[] = {MB_CUBE_IHO_EDITION_4, MB_CUBE_IHO_EDITION_5, MB_CUBE_IHO_EDITION_6, MB_CUBE_IHO_CCOM};
+    bool known = false;
+    for (int k = 0; k < 4 && !known; k++)
+      known = mb_cube_iho_edition_limits(verbose, editions[k], value, &tvu_a, &tvu_b, &thu_fixed, &thu_fraction,
+                                         &error) == MB_SUCCESS;
+    if (!known)
       return false;
-    cube->iho_order = order;
-    mb_cube_iho_limits(verbose, order, &cube->param.tvu_a, &cube->param.tvu_b, &thu_fixed, &thu_fraction, &error);
+    snprintf(cube->iho_order, sizeof(cube->iho_order), "%s", value);
+    return true;
+  }
+  else if (strcmp(name, "cube-iho-edition") == 0) {
+    int edition = 0;
+    n = sscanf(value, "%d%c", &edition, &extra);
+    if (n != 1 || (edition != MB_CUBE_IHO_EDITION_4 && edition != MB_CUBE_IHO_EDITION_5 && edition != MB_CUBE_IHO_EDITION_6))
+      return false;
+    cube->iho_edition = edition;
+    cube->iho_edition_set = true;
+    return true;
+  }
+  else if (strcmp(name, "cube-iho-ccom") == 0) {
+    cube->iho_ccom = true;
     return true;
   }
   else if (strcmp(name, "cube-model") == 0) {
@@ -740,7 +753,10 @@ int main(int argc, char **argv) {
     int cube_error = MB_ERROR_NO_ERROR;
     mb_cube_default_param(verbose, MB_CUBE_IHO_ORDER_2, &cube.param, &cube_error);
   }
-  cube.iho_order = MB_CUBE_IHO_ORDER_2;
+  cube.iho_edition = MB_CUBE_IHO_EDITION_6;
+  cube.iho_edition_set = false;
+  cube.iho_ccom = false;
+  snprintf(cube.iho_order, sizeof(cube.iho_order), "2");
   cube.model = MBGRID_CUBE_MODEL_IHO;
   cube.sigma_v = 0.25;
   cube.sigma_h = 1.0;
@@ -791,6 +807,8 @@ int main(int argc, char **argv) {
                                       {"cube-est-offset", required_argument, nullptr, 0},
                                       {"cube-extractor", required_argument, nullptr, 0},
                                       {"cube-horiz-scale", required_argument, nullptr, 0},
+                                      {"cube-iho-ccom", no_argument, nullptr, 0},
+                                      {"cube-iho-edition", required_argument, nullptr, 0},
                                       {"cube-influence-scale", required_argument, nullptr, 0},
                                       {"cube-median-length", required_argument, nullptr, 0},
                                       {"cube-memory-limit", required_argument, nullptr, 0},
@@ -980,7 +998,10 @@ int main(int argc, char **argv) {
         }
         else if (strncmp("cube-", options[option_index].name, 5) == 0) {
           if (!mbgrid_cube_option(verbose, options[option_index].name, optarg, &cube)) {
-            fprintf(stdout, "Invalid CUBE option: --%s=%s\n\n", options[option_index].name, optarg);
+            if (optarg != nullptr)
+              fprintf(stdout, "Invalid CUBE option: --%s=%s\n\n", options[option_index].name, optarg);
+            else
+              fprintf(stdout, "Invalid CUBE option: --%s\n\n", options[option_index].name);
             errflg = true;
           }
         }
@@ -1255,7 +1276,10 @@ int main(int argc, char **argv) {
       fprintf(outfp, "dbg2       projection_pars_f:    %d\n", projection_pars_f);
       fprintf(outfp, "dbg2       projection_id:        %s\n", projection_id);
       fprintf(outfp, "dbg2       minormax_weighted_mean_threshold: %f\n", minormax_weighted_mean_threshold);
-      fprintf(outfp, "dbg2       cube.iho_order:       %d\n", cube.iho_order);
+      fprintf(outfp, "dbg2       cube.iho_edition:     %d\n", cube.iho_edition);
+      fprintf(outfp, "dbg2       cube.iho_edition_set: %d\n", cube.iho_edition_set);
+      fprintf(outfp, "dbg2       cube.iho_ccom:        %d\n", cube.iho_ccom);
+      fprintf(outfp, "dbg2       cube.iho_order:       %s\n", cube.iho_order);
       fprintf(outfp, "dbg2       cube.model:           %d\n", cube.model);
       fprintf(outfp, "dbg2       cube.sigma_v:         %f\n", cube.sigma_v);
       fprintf(outfp, "dbg2       cube.sigma_h:         %f\n", cube.sigma_h);
@@ -1777,9 +1801,46 @@ int main(int argc, char **argv) {
   double cube_thu_fixed = 0.0;
   double cube_thu_fraction = 0.0;
   double cube_memory = 0.0;
+  char cube_iho_label[64] = "";
   if (grid_mode == MBGRID_CUBE) {
     bool cube_ok = true;
     int cube_error = MB_ERROR_NO_ERROR;
+
+    /* IHO S-44 limits of the selected edition (or the CCOM errmod_iho table)
+       and order: sounding uncertainties of the iho model and the TVU bound
+       of the influence radius */
+    const int cube_edition = cube.iho_ccom ? MB_CUBE_IHO_CCOM : cube.iho_edition;
+    if (cube.iho_ccom && cube.iho_edition_set) {
+      fprintf(outfp, "\nThe options --cube-iho-ccom and --cube-iho-edition cannot be combined\n");
+      cube_ok = false;
+    }
+    else if (mb_cube_iho_edition_limits(verbose, cube_edition, cube.iho_order, &cube_tvu_a, &cube_tvu_b, &cube_thu_fixed,
+                                        &cube_thu_fraction, &cube_error) != MB_SUCCESS) {
+      char orders[MB_PATH_MAXLINE];
+      mb_cube_iho_edition_orders(verbose, cube_edition, orders, sizeof(orders), &cube_error);
+      if (cube.iho_ccom)
+        fprintf(outfp, "\nThe CCOM errmod_iho table (--cube-iho-ccom) has no order %s; its orders are %s\n",
+                cube.iho_order, orders);
+      else
+        fprintf(outfp, "\nIHO S-44 edition %d has no order %s; its orders are %s\n", cube_edition, cube.iho_order, orders);
+      cube_ok = false;
+    }
+    else {
+      cube.param.tvu_a = cube_tvu_a;
+      cube.param.tvu_b = cube_tvu_b;
+      char order_label[32];
+      if (strcmp(cube.iho_order, "special") == 0)
+        snprintf(order_label, sizeof(order_label), "Special Order");
+      else if (strcmp(cube.iho_order, "exclusive") == 0)
+        snprintf(order_label, sizeof(order_label), "Exclusive Order");
+      else
+        snprintf(order_label, sizeof(order_label), "Order %s", cube.iho_order);
+      if (cube.iho_ccom)
+        snprintf(cube_iho_label, sizeof(cube_iho_label), "CCOM errmod_iho %s", order_label);
+      else
+        snprintf(cube_iho_label, sizeof(cube_iho_label), "IHO S-44 Ed. %d %s", cube_edition, order_label);
+    }
+
     if (datatype != MBGRID_DATA_BATHYMETRY && datatype != MBGRID_DATA_TOPOGRAPHY) {
       fprintf(outfp, "\nCUBE gridding (-F9) is only available for bathymetry and topography (-A1 or -A2)\n");
       cube_ok = false;
@@ -1838,7 +1899,6 @@ int main(int argc, char **argv) {
       mb_memory_clear(verbose, &memclear_error);
       exit(MB_ERROR_BAD_PARAMETER);
     }
-    mb_cube_iho_limits(verbose, cube.iho_order, &cube_tvu_a, &cube_tvu_b, &cube_thu_fixed, &cube_thu_fraction, &cube_error);
   }
 
   /* get data input bounds in lon lat */
@@ -1966,6 +2026,12 @@ int main(int argc, char **argv) {
     strcpy(title, "Sidescan Grid");
   }
   if (grid_mode == MBGRID_CUBE) {
+    /* the IHO limits that set the sounding uncertainties */
+    if (cube.model == MBGRID_CUBE_MODEL_IHO) {
+      char base_title[MB_PATH_MAXLINE];
+      snprintf(base_title, sizeof(base_title), "%s", title);
+      snprintf(title, sizeof(title), "%s (CUBE, %s)", base_title, cube_iho_label);
+    }
     strcpy(nlabel, "Number of Soundings in Selected CUBE Hypothesis");
     if (fabs(cube.param.sd2conf - 1.96) < MBGRID_TINY)
       snprintf(sdlabel, sizeof(sdlabel), "CUBE Uncertainty, 95%% Confidence (%s)", bathy_in_feet ? "ft" : "m");
@@ -2080,15 +2146,14 @@ int main(int argc, char **argv) {
     if (grid_mode == MBGRID_MINIMUM_WEIGHTED_MEAN)
       fprintf(outfp, "Minimum filter threshold for Minimum Weighted Mean: %f\n", minormax_weighted_mean_threshold);
     if (grid_mode == MBGRID_CUBE) {
-      const char *order_name[] = {"Exclusive", "Special", "1a", "1b", "2"};
       const char *extractor_name[] = {"prior (most soundings)", "likelihood (nearby single hypothesis)",
                                       "posterior (likelihood and number of soundings)",
                                       "predicted (closest to the predicted surface)"};
       const char *uncertainty_name[] = {"sample variance", "posterior variance", "larger of sample and posterior variance"};
       fprintf(outfp, "CUBE parameters:\n");
       if (cube.model == MBGRID_CUBE_MODEL_IHO)
-        fprintf(outfp, "  Sounding uncertainty:   IHO S-44 Order %s (TVU a %.3f m, b %.4f; THU %.1f m + %.0f%% of depth)\n",
-                order_name[cube.iho_order], cube_tvu_a, cube_tvu_b, cube_thu_fixed, 100.0 * cube_thu_fraction);
+        fprintf(outfp, "  Sounding uncertainty:   %s (TVU a %.3f m, b %.4f; THU %.1f m + %.0f%% of depth)\n",
+                cube_iho_label, cube_tvu_a, cube_tvu_b, cube_thu_fixed, 100.0 * cube_thu_fraction);
       else if (cube.model == MBGRID_CUBE_MODEL_CONSTANT)
         fprintf(outfp, "  Sounding uncertainty:   constant, vertical sigma %f m, horizontal sigma %f m\n", cube.sigma_v,
                 cube.sigma_h);
@@ -2096,7 +2161,7 @@ int main(int argc, char **argv) {
         fprintf(outfp, "  Sounding uncertainty:   vertical sigma sqrt(%f^2 + (%f * depth)^2) m,\n"
                        "                          horizontal sigma sqrt(%f^2 + (%f * depth)^2) m\n",
                 cube.model_a, cube.model_b, cube.sigma_h, cube.model_c);
-      fprintf(outfp, "  Influence radius limit: IHO S-44 Order %s TVU, %.2f horizontal sigma\n", order_name[cube.iho_order],
+      fprintf(outfp, "  Influence radius limit: %s TVU, %.2f horizontal sigma\n", cube_iho_label,
               cube.param.influence_scale);
       fprintf(outfp, "  Depth used in models:   %s\n",
               cube.depth_below_sonar ? "depth below the sonar" : "depth below the sea surface");

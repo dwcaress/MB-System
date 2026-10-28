@@ -188,6 +188,121 @@ int mb_cube_iho_limits(int verbose, int iho_order, double *tvu_a, double *tvu_b,
   return (status);
 }
 /*--------------------------------------------------------------------------*/
+/* IHO S-44 survey order limits of each edition (Table 1, 95% confidence):
+   maximum allowable TVU sqrt(a^2 + (b * d)^2) and THU fixed + fraction * d.
+   MB_CUBE_IHO_CCOM is the table of the CCOM/JHC CUBE errmod_iho
+   (errmod_get_iho_limits in errmod.c): the 4th edition orders, but with
+   a = 0.2 m for Special Order and without the depth term of the THU. */
+struct mb_cube_iho_row {
+  int edition;
+  const char *order;
+  double tvu_a;
+  double tvu_b;
+  double thu_fixed;
+  double thu_fraction;
+};
+static const struct mb_cube_iho_row mb_cube_iho_table[] = {
+    {MB_CUBE_IHO_EDITION_4, "special", 0.25, 0.0075, 2.0, 0.0},
+    {MB_CUBE_IHO_EDITION_4, "1", 0.5, 0.013, 5.0, 0.05},
+    {MB_CUBE_IHO_EDITION_4, "2", 1.0, 0.023, 20.0, 0.05},
+    {MB_CUBE_IHO_EDITION_4, "3", 1.0, 0.023, 150.0, 0.05},
+    {MB_CUBE_IHO_EDITION_5, "special", 0.25, 0.0075, 2.0, 0.0},
+    {MB_CUBE_IHO_EDITION_5, "1a", 0.5, 0.013, 5.0, 0.05},
+    {MB_CUBE_IHO_EDITION_5, "1b", 0.5, 0.013, 5.0, 0.05},
+    {MB_CUBE_IHO_EDITION_5, "2", 1.0, 0.023, 20.0, 0.10},
+    {MB_CUBE_IHO_EDITION_6, "exclusive", 0.15, 0.0075, 1.0, 0.0},
+    {MB_CUBE_IHO_EDITION_6, "special", 0.25, 0.0075, 2.0, 0.0},
+    {MB_CUBE_IHO_EDITION_6, "1a", 0.5, 0.013, 5.0, 0.05},
+    {MB_CUBE_IHO_EDITION_6, "1b", 0.5, 0.013, 5.0, 0.05},
+    {MB_CUBE_IHO_EDITION_6, "2", 1.0, 0.023, 20.0, 0.10},
+    {MB_CUBE_IHO_CCOM, "special", 0.2, 0.0075, 2.0, 0.0},
+    {MB_CUBE_IHO_CCOM, "1", 0.5, 0.013, 5.0, 0.0},
+    {MB_CUBE_IHO_CCOM, "2", 1.0, 0.023, 20.0, 0.0},
+    {MB_CUBE_IHO_CCOM, "3", 1.0, 0.023, 150.0, 0.0}};
+static const int mb_cube_iho_rows = (int)(sizeof(mb_cube_iho_table) / sizeof(mb_cube_iho_table[0]));
+/*--------------------------------------------------------------------------*/
+int mb_cube_iho_edition_limits(int verbose, int edition, const char *order, double *tvu_a, double *tvu_b,
+                               double *thu_fixed, double *thu_fraction, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
+    fprintf(stderr, "dbg2       edition:      %d\n", edition);
+    fprintf(stderr, "dbg2       order:        %s\n", order != NULL ? order : "(null)");
+  }
+
+  int status = MB_FAILURE;
+  *error = MB_ERROR_BAD_PARAMETER;
+  for (int k = 0; order != NULL && k < mb_cube_iho_rows; k++) {
+    if (mb_cube_iho_table[k].edition == edition && strcmp(mb_cube_iho_table[k].order, order) == 0) {
+      *tvu_a = mb_cube_iho_table[k].tvu_a;
+      *tvu_b = mb_cube_iho_table[k].tvu_b;
+      *thu_fixed = mb_cube_iho_table[k].thu_fixed;
+      *thu_fraction = mb_cube_iho_table[k].thu_fraction;
+      status = MB_SUCCESS;
+      *error = MB_ERROR_NO_ERROR;
+      break;
+    }
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    if (status == MB_SUCCESS) {
+      fprintf(stderr, "dbg2       tvu_a:        %f\n", *tvu_a);
+      fprintf(stderr, "dbg2       tvu_b:        %f\n", *tvu_b);
+      fprintf(stderr, "dbg2       thu_fixed:    %f\n", *thu_fixed);
+      fprintf(stderr, "dbg2       thu_fraction: %f\n", *thu_fraction);
+    }
+    fprintf(stderr, "dbg2       error:        %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:       %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------------*/
+/* writes the order names of an edition as "name|name|...", or fails for an
+   unknown edition */
+int mb_cube_iho_edition_orders(int verbose, int edition, char *orders, int size, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
+    fprintf(stderr, "dbg2       edition:      %d\n", edition);
+    fprintf(stderr, "dbg2       size:         %d\n", size);
+  }
+
+  int status = MB_FAILURE;
+  *error = MB_ERROR_BAD_PARAMETER;
+  if (size > 0) {
+    orders[0] = '\0';
+    int len = 0;
+    for (int k = 0; k < mb_cube_iho_rows; k++) {
+      if (mb_cube_iho_table[k].edition == edition && len < size) {
+        len += snprintf(orders + len, (size_t)(size - len), "%s%s", len > 0 ? "|" : "", mb_cube_iho_table[k].order);
+        status = MB_SUCCESS;
+      }
+    }
+    if (len >= size)
+      status = MB_FAILURE;
+    if (status == MB_SUCCESS)
+      *error = MB_ERROR_NO_ERROR;
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    if (status == MB_SUCCESS)
+      fprintf(stderr, "dbg2       orders:       %s\n", orders);
+    fprintf(stderr, "dbg2       error:        %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:       %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------------*/
 int mb_cube_default_param(int verbose, int iho_order, struct mb_cube_param_struct *param, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);

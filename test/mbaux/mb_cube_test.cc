@@ -94,6 +94,102 @@ TEST(MbCubeParam, IhoLimitsS44Edition6) {
   EXPECT_EQ(MB_ERROR_BAD_PARAMETER, error);
 }
 
+// Table 1 of S-44 4th edition (1998), 5th edition (2008) and 6.0.0/6.1.0
+// (2020/2022), and the CCOM/JHC errmod.c table
+TEST(MbCubeParam, IhoEditionLimits) {
+  struct Row {
+    int edition;
+    const char *order;
+    double a, b, thu, thu_fraction;
+  };
+  const Row rows[] = {{MB_CUBE_IHO_EDITION_4, "special", 0.25, 0.0075, 2.0, 0.0},
+                      {MB_CUBE_IHO_EDITION_4, "1", 0.5, 0.013, 5.0, 0.05},
+                      {MB_CUBE_IHO_EDITION_4, "2", 1.0, 0.023, 20.0, 0.05},
+                      {MB_CUBE_IHO_EDITION_4, "3", 1.0, 0.023, 150.0, 0.05},
+                      {MB_CUBE_IHO_EDITION_5, "special", 0.25, 0.0075, 2.0, 0.0},
+                      {MB_CUBE_IHO_EDITION_5, "1a", 0.5, 0.013, 5.0, 0.05},
+                      {MB_CUBE_IHO_EDITION_5, "1b", 0.5, 0.013, 5.0, 0.05},
+                      {MB_CUBE_IHO_EDITION_5, "2", 1.0, 0.023, 20.0, 0.10},
+                      {MB_CUBE_IHO_EDITION_6, "exclusive", 0.15, 0.0075, 1.0, 0.0},
+                      {MB_CUBE_IHO_EDITION_6, "special", 0.25, 0.0075, 2.0, 0.0},
+                      {MB_CUBE_IHO_EDITION_6, "1a", 0.5, 0.013, 5.0, 0.05},
+                      {MB_CUBE_IHO_EDITION_6, "1b", 0.5, 0.013, 5.0, 0.05},
+                      {MB_CUBE_IHO_EDITION_6, "2", 1.0, 0.023, 20.0, 0.10},
+                      {MB_CUBE_IHO_CCOM, "special", 0.2, 0.0075, 2.0, 0.0},
+                      {MB_CUBE_IHO_CCOM, "1", 0.5, 0.013, 5.0, 0.0},
+                      {MB_CUBE_IHO_CCOM, "2", 1.0, 0.023, 20.0, 0.0},
+                      {MB_CUBE_IHO_CCOM, "3", 1.0, 0.023, 150.0, 0.0}};
+  for (const Row &r : rows) {
+    int error = MB_ERROR_NO_ERROR;
+    double a, b, thu, thu_fraction;
+    ASSERT_EQ(MB_SUCCESS, mb_cube_iho_edition_limits(verbose, r.edition, r.order, &a, &b, &thu, &thu_fraction, &error))
+        << "edition " << r.edition << " order " << r.order;
+    EXPECT_EQ(MB_ERROR_NO_ERROR, error);
+    EXPECT_DOUBLE_EQ(r.a, a) << "edition " << r.edition << " order " << r.order;
+    EXPECT_DOUBLE_EQ(r.b, b) << "edition " << r.edition << " order " << r.order;
+    EXPECT_DOUBLE_EQ(r.thu, thu) << "edition " << r.edition << " order " << r.order;
+    EXPECT_DOUBLE_EQ(r.thu_fraction, thu_fraction) << "edition " << r.edition << " order " << r.order;
+  }
+}
+
+TEST(MbCubeParam, IhoEditionRejectsOrdersOfOtherEditions) {
+  struct Bad {
+    int edition;
+    const char *order;
+  };
+  const Bad bad[] = {{MB_CUBE_IHO_EDITION_4, "1a"}, {MB_CUBE_IHO_EDITION_4, "exclusive"}, {MB_CUBE_IHO_EDITION_5, "1"},
+                     {MB_CUBE_IHO_EDITION_5, "3"},  {MB_CUBE_IHO_EDITION_5, "exclusive"}, {MB_CUBE_IHO_EDITION_6, "1"},
+                     {MB_CUBE_IHO_EDITION_6, "3"},  {MB_CUBE_IHO_CCOM, "1a"},             {MB_CUBE_IHO_CCOM, "exclusive"},
+                     {MB_CUBE_IHO_CCOM, "4"},       {3, "2"},                             {7, "2"},
+                     {MB_CUBE_IHO_EDITION_6, ""}};
+  for (const Bad &x : bad) {
+    int error = MB_ERROR_NO_ERROR;
+    double a = -1.0, b = -1.0, thu = -1.0, thu_fraction = -1.0;
+    EXPECT_EQ(MB_FAILURE, mb_cube_iho_edition_limits(verbose, x.edition, x.order, &a, &b, &thu, &thu_fraction, &error))
+        << "edition " << x.edition << " order " << x.order;
+    EXPECT_EQ(MB_ERROR_BAD_PARAMETER, error);
+    EXPECT_DOUBLE_EQ(-1.0, a);
+  }
+  int error = MB_ERROR_NO_ERROR;
+  double a, b, thu, thu_fraction;
+  EXPECT_EQ(MB_FAILURE, mb_cube_iho_edition_limits(verbose, MB_CUBE_IHO_EDITION_6, nullptr, &a, &b, &thu, &thu_fraction,
+                                                   &error));
+}
+
+TEST(MbCubeParam, IhoEditionOrders) {
+  int error = MB_ERROR_NO_ERROR;
+  char orders[64];
+  ASSERT_EQ(MB_SUCCESS, mb_cube_iho_edition_orders(verbose, MB_CUBE_IHO_EDITION_4, orders, sizeof(orders), &error));
+  EXPECT_STREQ("special|1|2|3", orders);
+  ASSERT_EQ(MB_SUCCESS, mb_cube_iho_edition_orders(verbose, MB_CUBE_IHO_EDITION_5, orders, sizeof(orders), &error));
+  EXPECT_STREQ("special|1a|1b|2", orders);
+  ASSERT_EQ(MB_SUCCESS, mb_cube_iho_edition_orders(verbose, MB_CUBE_IHO_EDITION_6, orders, sizeof(orders), &error));
+  EXPECT_STREQ("exclusive|special|1a|1b|2", orders);
+  ASSERT_EQ(MB_SUCCESS, mb_cube_iho_edition_orders(verbose, MB_CUBE_IHO_CCOM, orders, sizeof(orders), &error));
+  EXPECT_STREQ("special|1|2|3", orders);
+  EXPECT_EQ(MB_FAILURE, mb_cube_iho_edition_orders(verbose, 3, orders, sizeof(orders), &error));
+  EXPECT_EQ(MB_ERROR_BAD_PARAMETER, error);
+  char small[8];
+  EXPECT_EQ(MB_FAILURE, mb_cube_iho_edition_orders(verbose, MB_CUBE_IHO_EDITION_6, small, sizeof(small), &error));
+}
+
+// edition 6 by name gives the same limits as mb_cube_iho_limits() by number
+TEST(MbCubeParam, IhoEdition6MatchesIhoLimits) {
+  const int numbers[] = {MB_CUBE_IHO_EXCLUSIVE, MB_CUBE_IHO_SPECIAL, MB_CUBE_IHO_ORDER_1A, MB_CUBE_IHO_ORDER_1B,
+                         MB_CUBE_IHO_ORDER_2};
+  const char *names[] = {"exclusive", "special", "1a", "1b", "2"};
+  for (int k = 0; k < 5; k++) {
+    int error = MB_ERROR_NO_ERROR;
+    double a1, b1, t1, f1, a2, b2, t2, f2;
+    ASSERT_EQ(MB_SUCCESS, mb_cube_iho_limits(verbose, numbers[k], &a1, &b1, &t1, &f1, &error));
+    ASSERT_EQ(MB_SUCCESS, mb_cube_iho_edition_limits(verbose, MB_CUBE_IHO_EDITION_6, names[k], &a2, &b2, &t2, &f2, &error));
+    EXPECT_DOUBLE_EQ(a1, a2);
+    EXPECT_DOUBLE_EQ(b1, b2);
+    EXPECT_DOUBLE_EQ(t1, t2);
+    EXPECT_DOUBLE_EQ(f1, f2);
+  }
+}
+
 TEST(MbCubeParam, DefaultsAndChecks) {
   int error = MB_ERROR_NO_ERROR;
   struct mb_cube_param_struct param;
