@@ -40,6 +40,7 @@ add_library(
   mbaux
   mb_cheb.c
   mb_cube.c
+  mb_cube_options.c
   mb_delaun.c
   mb_gisfile.c
   mb_intersectgrid.c

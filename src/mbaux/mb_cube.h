@@ -91,6 +91,44 @@ struct mb_cube_param_struct {
   double blunder_scalar;   /* blunder margin in predicted surface sigmas, 0 - 10 */
 };
 
+/* sounding uncertainty models of the programs using CUBE */
+#define MB_CUBE_MODEL_IHO 0      /* TVU and THU of the selected IHO S-44 edition and order */
+#define MB_CUBE_MODEL_CONSTANT 1 /* constant vertical and horizontal sigmas */
+#define MB_CUBE_MODEL_DEPTH 2    /* sigmas growing with depth */
+
+/* predicted surfaces */
+#define MB_CUBE_PREDICTION_NONE 0   /* no predicted surface */
+#define MB_CUBE_PREDICTION_MEDIAN 1 /* median of the soundings nearest to each node */
+#define MB_CUBE_PREDICTION_FILE 2   /* grid file */
+
+#define MB_CUBE_PATH_MAXLINE 1024
+
+/* options shared by the programs using CUBE (mbgrid -F9, mbclean), set by
+   the --cube-* command line options; see mb_cube_options.c */
+struct mb_cube_options_struct {
+  struct mb_cube_param_struct param; /* algorithm parameters */
+  int iho_edition;                   /* IHO S-44 edition (MB_CUBE_IHO_EDITION_*) of the order limits */
+  int iho_edition_set;               /* edition given with --cube-iho-edition */
+  int iho_ccom;                      /* CCOM/JHC errmod_iho limits instead of an edition */
+  char iho_order[16];                /* IHO S-44 order of the iho model and influence radius */
+  int model;                         /* sounding uncertainty model (MB_CUBE_MODEL_*) */
+  double sigma_v;                    /* constant model vertical sigma (m) */
+  double sigma_h;                    /* constant and depth models horizontal sigma (m) */
+  double model_a;                    /* depth model fixed vertical sigma (m) */
+  double model_b;                    /* depth model vertical sigma fraction of depth */
+  double model_c;                    /* depth model horizontal sigma fraction of depth */
+  int depth_below_sonar;             /* depth below the sonar (1) or the sea surface (0) */
+  int prediction;                    /* predicted surface (MB_CUBE_PREDICTION_*) */
+  int prediction_factor;             /* median surface spacing in node spacings */
+  char prediction_file[MB_CUBE_PATH_MAXLINE]; /* predicted surface grid file */
+  double prediction_pct;             /* predicted surface 95% uncertainty, percent of depth */
+  int prediction_hypotheses;         /* initial hypotheses at the predicted depths */
+  double memory_limit;               /* maximum memory for the CUBE grid (GB) */
+  double thu_fixed;                  /* IHO THU fixed term (m), set by mb_cube_resolve_options */
+  double thu_fraction;               /* IHO THU depth fraction, set by mb_cube_resolve_options */
+  char iho_label[64];                /* IHO limits description, set by mb_cube_resolve_options */
+};
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -115,7 +153,30 @@ int mb_cube_extract(int verbose, void *cube_ptr, float nodata, float *depth, flo
                     float *strength, int *nsamples, int *error);
 int mb_cube_node_hypotheses(int verbose, void *cube_ptr, int i, int j, int nhyp_max, int *nhyp, double *depth,
                             double *uncertainty, int *nsamples, int *error);
+int mb_cube_classify(int verbose, void *cube_ptr, double x, double y, double depth, double depth_sonar,
+                     double var_depth, double var_horiz, int *node, int *nhyp, int *is_selected, int *is_blunder,
+                     double *error_selected, double *strength, int *error);
 int mb_cube_deall(int verbose, void **cube_ptr, int *error);
+
+/* mb_cube_options.c */
+int mb_cube_default_options(int verbose, struct mb_cube_options_struct *options, int *error);
+int mb_cube_parse_option(int verbose, const char *name, const char *value, struct mb_cube_options_struct *options,
+                         int *error);
+int mb_cube_resolve_options(int verbose, struct mb_cube_options_struct *options, char *message, int size, int *error);
+int mb_cube_check_options(int verbose, const char *program_name, const struct mb_cube_options_struct *options,
+                          char *message, int size, int *error);
+int mb_cube_sounding_variance(int verbose, const struct mb_cube_options_struct *options, double h, double *var_depth,
+                              double *var_horiz, int *error);
+int mb_cube_sample_grid(int verbose, const float *grid, int grid_nx, int grid_ny, double grid_x0, double grid_y0,
+                        double grid_dx, double grid_dy, float grid_nodata, double sign, int nx, int ny, double x0,
+                        double y0, double dx, double dy, float nodata, float *depth, int *error);
+int mb_cube_apply_prediction(int verbose, void *cube_ptr, const struct mb_cube_options_struct *options, int nx, int ny,
+                             const float *depth, float nodata, int *npred, int *error);
+int mb_cube_median_init(int verbose, int nx, int ny, double dx, double dy, int factor, double max_bytes,
+                        void **median_ptr, int *error);
+int mb_cube_median_add(int verbose, void *median_ptr, double x, double y, double depth, double *bytes, int *error);
+int mb_cube_median_surface(int verbose, void *median_ptr, float nodata, float *depth, int *nused, int *error);
+int mb_cube_median_deall(int verbose, void **median_ptr, int *error);
 
 #ifdef __cplusplus
 } /* extern "C" */

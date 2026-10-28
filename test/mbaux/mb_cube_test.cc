@@ -773,4 +773,265 @@ TEST_F(MbCubeBurst, LikelihoodWithoutGuideFallsBackToPrior) {
   EXPECT_FLOAT_EQ(80.0f, depth_[K(2, 0)]);
 }
 
+// Classification of soundings against the flushed grid
+class MbCubeClassify : public MbCube {
+ protected:
+  struct Result {
+    int status;
+    int error;
+    int node;
+    int nhyp;
+    int is_selected;
+    int is_blunder;
+    double error_selected;
+    double strength;
+  };
+  Result Classify(double x, double y, double depth, double var_depth, double var_horiz, double depth_sonar = -1.0) {
+    Result r;
+    r.error = MB_ERROR_NO_ERROR;
+    r.status = mb_cube_classify(verbose, cube_, x, y, depth, depth_sonar < 0.0 ? depth : depth_sonar, var_depth,
+                                var_horiz, &r.node, &r.nhyp, &r.is_selected, &r.is_blunder, &r.error_selected,
+                                &r.strength, &r.error);
+    return r;
+  }
+};
+
+TEST_F(MbCubeClassify, NeedsFlushedGrid) {
+  Init(1, 1, 1.0, 1.0);
+  for (int k = 0; k < 20; k++)
+    Insert(0.0, 0.0, 100.0, 0.01, 0.0);
+  Result r = Classify(0.0, 0.0, 100.0, 0.01, 0.0);
+  EXPECT_EQ(MB_FAILURE, r.status);
+  EXPECT_EQ(MB_ERROR_BAD_PARAMETER, r.error);
+  Flush();
+  r = Classify(0.0, 0.0, 100.0, 0.01, 0.0);
+  EXPECT_EQ(MB_SUCCESS, r.status);
+  EXPECT_EQ(0, r.node);
+  // more data after the flush needs another flush
+  Insert(0.0, 0.0, 100.0, 0.01, 0.0);
+  EXPECT_EQ(MB_FAILURE, Classify(0.0, 0.0, 100.0, 0.01, 0.0).status);
+}
+
+TEST_F(MbCubeClassify, StepSoundingsBelongToTheirHypotheses) {
+  Init(1, 1, 1.0, 1.0);
+  for (int k = 0; k < 25; k++)
+    Insert(0.0, 0.0, 100.0, 0.01, 0.0);
+  for (int k = 0; k < 15; k++)
+    Insert(0.0, 0.0, 110.0, 0.01, 0.0);
+  Flush();
+  Result shallow = Classify(0.0, 0.0, 100.05, 0.01, 0.0);
+  ASSERT_EQ(MB_SUCCESS, shallow.status);
+  EXPECT_EQ(0, shallow.node);
+  EXPECT_EQ(2, shallow.nhyp);
+  EXPECT_EQ(1, shallow.is_selected);
+  EXPECT_EQ(0, shallow.is_blunder);
+  EXPECT_LT(std::fabs(shallow.error_selected), 1.0);
+  EXPECT_NEAR(5.0 - 25.0 / 14.0, shallow.strength, 1.0e-5);
+  Result deep = Classify(0.0, 0.0, 110.0, 0.01, 0.0);
+  EXPECT_EQ(0, deep.is_selected);
+  EXPECT_GT(deep.error_selected, 50.0);
+}
+
+TEST_F(MbCubeClassify, SpikeIsFarFromSingleHypothesis) {
+  Init(1, 1, 1.0, 1.0);
+  std::mt19937 rng(54321);
+  std::normal_distribution<double> noise(0.0, 0.02);
+  for (int k = 0; k < 30; k++)
+    Insert(0.0, 0.0, 100.0 + noise(rng), 0.02 * 0.02, 0.0);
+  Flush();
+  Result good = Classify(0.0, 0.0, 100.01, 0.02 * 0.02, 0.0);
+  EXPECT_EQ(1, good.nhyp);
+  EXPECT_EQ(1, good.is_selected);
+  EXPECT_LT(std::fabs(good.error_selected), 2.5);
+  Result spike = Classify(0.0, 0.0, 101.0, 0.02 * 0.02, 0.0);
+  EXPECT_EQ(1, spike.is_selected);  // the only hypothesis
+  EXPECT_GT(spike.error_selected, 2.5);
+  Result shoal = Classify(0.0, 0.0, 99.0, 0.02 * 0.02, 0.0);
+  EXPECT_LT(shoal.error_selected, -2.5);
+}
+
+TEST_F(MbCubeClassify, NearestNodeHoldingSamplesDecides) {
+  Init(3, 1, 1.0, 1.0);
+  // node 0 at 100 m, node 2 at 120 m, node 1 empty
+  for (int k = 0; k < 20; k++) {
+    Insert(0.0, 0.0, 100.0, 0.01, 0.0);
+    Insert(2.0, 0.0, 120.0, 0.01, 0.0);
+  }
+  Flush();
+  // radius is at least the node spacing and the capture distance 5% of
+  // depth: the sounding at x = 1.4 reaches nodes 1 and 2 only
+  Result r = Classify(1.4, 0.0, 120.0, 0.01, 0.0);
+  EXPECT_EQ(2, r.node);
+  EXPECT_EQ(1, r.is_selected);
+  r = Classify(0.6, 0.0, 120.0, 0.01, 0.0);
+  EXPECT_EQ(0, r.node);
+  EXPECT_GT(r.error_selected, 2.5);
+  // outside the grid, and beyond the capture distance of every node
+  EXPECT_EQ(-1, Classify(10.0, 0.0, 100.0, 0.01, 0.0).node);
+  EXPECT_EQ(-1, Classify(1.0, 0.0, 4.0, 0.01, 0.0, 4.0).node);
+}
+
+TEST_F(MbCubeClassify, DoesNotChangeTheGrid) {
+  Init(4, 4, 1.0, 1.0);
+  std::mt19937 rng(777);
+  std::normal_distribution<double> noise(0.0, 0.05);
+  std::uniform_real_distribution<double> pos(0.0, 3.0);
+  for (int k = 0; k < 2000; k++)
+    Insert(pos(rng), pos(rng), (k % 50 == 0 ? 105.0 : 100.0) + noise(rng), 0.0025, 0.01);
+  Flush();
+  Extract();
+  const std::vector<float> depth0 = depth_, unct0 = unct_, nhyp0 = nhyp_, strength0 = strength_;
+  const std::vector<int> nsamples0 = nsamples_;
+  for (int k = 0; k < 500; k++)
+    Classify(pos(rng), pos(rng), 100.0 + 10.0 * noise(rng), 0.0025, 0.01);
+  Extract();
+  EXPECT_EQ(depth0, depth_);
+  EXPECT_EQ(unct0, unct_);
+  EXPECT_EQ(nhyp0, nhyp_);
+  EXPECT_EQ(strength0, strength_);
+  EXPECT_EQ(nsamples0, nsamples_);
+}
+
+TEST_F(MbCubePredicted, ClassifyReportsBlunders) {
+  Init(1, 1, 1.0, 1.0);
+  Predict(0.01, 0);
+  for (int k = 0; k < 10; k++)
+    Insert(0.0, 0.0, 100.0, 0.01, 0.0);
+  Flush();
+  int node, nhyp, is_selected, is_blunder;
+  double error_selected, strength;
+  int error = MB_ERROR_NO_ERROR;
+  ASSERT_EQ(MB_SUCCESS, mb_cube_classify(verbose, cube_, 0.0, 0.0, 130.0, 130.0, 0.01, 0.0, &node, &nhyp, &is_selected,
+                                         &is_blunder, &error_selected, &strength, &error));
+  EXPECT_EQ(0, node);
+  EXPECT_EQ(1, is_blunder);
+  EXPECT_EQ(0, is_selected);
+  ASSERT_EQ(MB_SUCCESS, mb_cube_classify(verbose, cube_, 0.0, 0.0, 100.0, 100.0, 0.01, 0.0, &node, &nhyp, &is_selected,
+                                         &is_blunder, &error_selected, &strength, &error));
+  EXPECT_EQ(0, is_blunder);
+  EXPECT_EQ(1, is_selected);
+}
+
+TEST(MbCubeOptions, DefaultsParseAndResolve) {
+  int error = MB_ERROR_NO_ERROR;
+  struct mb_cube_options_struct options;
+  ASSERT_EQ(MB_SUCCESS, mb_cube_default_options(verbose, &options, &error));
+  EXPECT_EQ(MB_CUBE_MODEL_IHO, options.model);
+  EXPECT_STREQ("2", options.iho_order);
+  EXPECT_EQ(MB_CUBE_IHO_EDITION_6, options.iho_edition);
+  EXPECT_EQ(1, options.depth_below_sonar);
+  EXPECT_EQ(MB_CUBE_PREDICTION_NONE, options.prediction);
+  EXPECT_DOUBLE_EQ(16.0, options.memory_limit);
+
+  EXPECT_EQ(MB_SUCCESS, mb_cube_parse_option(verbose, "cube-order", "special", &options, &error));
+  EXPECT_EQ(MB_SUCCESS, mb_cube_parse_option(verbose, "cube-iho-ccom", nullptr, &options, &error));
+  EXPECT_EQ(MB_SUCCESS, mb_cube_parse_option(verbose, "cube-prediction", "median/4", &options, &error));
+  EXPECT_EQ(MB_CUBE_PREDICTION_MEDIAN, options.prediction);
+  EXPECT_EQ(4, options.prediction_factor);
+  EXPECT_EQ(MB_SUCCESS, mb_cube_parse_option(verbose, "cube-est-offset", "3.5", &options, &error));
+  EXPECT_DOUBLE_EQ(3.5, options.param.est_offset);
+  EXPECT_EQ(MB_FAILURE, mb_cube_parse_option(verbose, "cube-est-offset", "3.5x", &options, &error));
+  EXPECT_EQ(MB_ERROR_BAD_PARAMETER, error);
+  EXPECT_EQ(MB_FAILURE, mb_cube_parse_option(verbose, "cube-order", "4", &options, &error));
+  EXPECT_EQ(MB_FAILURE, mb_cube_parse_option(verbose, "cube-unknown", "1", &options, &error));
+  EXPECT_EQ(MB_FAILURE, mb_cube_parse_option(verbose, "cube-model", nullptr, &options, &error));
+
+  char message[1024];
+  ASSERT_EQ(MB_SUCCESS, mb_cube_resolve_options(verbose, &options, message, sizeof(message), &error));
+  EXPECT_STREQ("CCOM errmod_iho Special Order", options.iho_label);
+  double a, b, thu, thu_fraction;
+  ASSERT_EQ(MB_SUCCESS, mb_cube_iho_edition_limits(verbose, MB_CUBE_IHO_CCOM, "special", &a, &b, &thu, &thu_fraction, &error));
+  EXPECT_DOUBLE_EQ(a, options.param.tvu_a);
+  EXPECT_DOUBLE_EQ(b, options.param.tvu_b);
+  EXPECT_DOUBLE_EQ(thu, options.thu_fixed);
+  EXPECT_DOUBLE_EQ(thu_fraction, options.thu_fraction);
+  EXPECT_EQ(MB_SUCCESS, mb_cube_check_options(verbose, "mbclean", &options, message, sizeof(message), &error));
+
+  EXPECT_EQ(MB_SUCCESS, mb_cube_parse_option(verbose, "cube-iho-edition", "5", &options, &error));
+  EXPECT_EQ(MB_FAILURE, mb_cube_resolve_options(verbose, &options, message, sizeof(message), &error));
+  EXPECT_THAT(message, ::testing::HasSubstr("cannot be combined"));
+
+  EXPECT_EQ(MB_SUCCESS, mb_cube_parse_option(verbose, "cube-sigma-v", "-1", &options, &error));
+  EXPECT_EQ(MB_SUCCESS, mb_cube_parse_option(verbose, "cube-median-length", "2", &options, &error));
+  EXPECT_EQ(MB_FAILURE, mb_cube_check_options(verbose, "mbclean", &options, message, sizeof(message), &error));
+  EXPECT_THAT(message, ::testing::HasSubstr("see the mbclean manual page"));
+  EXPECT_THAT(message, ::testing::HasSubstr("must be positive"));
+}
+
+TEST(MbCubeOptions, SoundingVariance) {
+  int error = MB_ERROR_NO_ERROR;
+  struct mb_cube_options_struct options;
+  char message[1024];
+  ASSERT_EQ(MB_SUCCESS, mb_cube_default_options(verbose, &options, &error));
+  ASSERT_EQ(MB_SUCCESS, mb_cube_resolve_options(verbose, &options, message, sizeof(message), &error));
+  double vz, vh;
+  // edition 6 order 2 at 100 m: TVU sqrt(1 + 2.3^2), THU 20 + 10 m, 95%
+  ASSERT_EQ(MB_SUCCESS, mb_cube_sounding_variance(verbose, &options, -100.0, &vz, &vh, &error));
+  EXPECT_NEAR((1.0 + 2.3 * 2.3) / (1.96 * 1.96), vz, 1.0e-12);
+  EXPECT_NEAR(30.0 * 30.0 / (1.96 * 1.96), vh, 1.0e-9);
+  options.model = MB_CUBE_MODEL_DEPTH;
+  options.model_a = 0.3;
+  options.model_b = 0.01;
+  options.sigma_h = 2.0;
+  options.model_c = 0.02;
+  ASSERT_EQ(MB_SUCCESS, mb_cube_sounding_variance(verbose, &options, 100.0, &vz, &vh, &error));
+  EXPECT_NEAR(0.09 + 1.0, vz, 1.0e-12);
+  EXPECT_NEAR(4.0 + 4.0, vh, 1.0e-12);
+  options.model = MB_CUBE_MODEL_CONSTANT;
+  ASSERT_EQ(MB_SUCCESS, mb_cube_sounding_variance(verbose, &options, 100.0, &vz, &vh, &error));
+  EXPECT_NEAR(options.sigma_v * options.sigma_v, vz, 1.0e-12);
+  EXPECT_NEAR(4.0, vh, 1.0e-12);
+}
+
+TEST(MbCubeOptions, MedianSurface) {
+  int error = MB_ERROR_NO_ERROR;
+  void *median = nullptr;
+  // 5 x 3 nodes 1 m apart, median grid of factor 2: 3 x 2 nodes
+  ASSERT_EQ(MB_SUCCESS, mb_cube_median_init(verbose, 5, 3, 1.0, 1.0, 2, 1.0e9, &median, &error));
+  double bytes = 0.0;
+  const double d[] = {10.0, 12.0, 11.0, 13.0};  // lower median 11
+  for (int a = 0; a < 2; a++)
+    for (int b = 0; b < 2; b++)
+      for (int c = 0; c < 4; c++) {
+        // median nodes (a, b) at (2a, 2b) m: depth 10 + a + 2b + d - 10
+        ASSERT_EQ(MB_SUCCESS, mb_cube_median_add(verbose, median, 2.0 * a + 0.3, 2.0 * b - 0.3, d[c] + a + 2.0 * b, &bytes, &error));
+      }
+  ASSERT_EQ(MB_SUCCESS, mb_cube_median_add(verbose, median, 100.0, 0.0, 1.0, &bytes, &error));  // outside, ignored
+  std::vector<float> depth(15);
+  int nused = 0;
+  ASSERT_EQ(MB_SUCCESS, mb_cube_median_surface(verbose, median, kNoData, depth.data(), &nused, &error));
+  EXPECT_EQ(16, nused);
+  EXPECT_FLOAT_EQ(11.0f, depth[0 * 3 + 0]);
+  EXPECT_FLOAT_EQ(11.5f, depth[1 * 3 + 0]);    // halfway between 11 and 12
+  EXPECT_FLOAT_EQ(13.0f, depth[0 * 3 + 2]);
+  EXPECT_FLOAT_EQ(12.5f, depth[1 * 3 + 1]);    // centre of the cell
+  EXPECT_EQ(kNoData, depth[3 * 3 + 0]);         // median node (2, 0) holds no soundings
+  EXPECT_EQ(MB_SUCCESS, mb_cube_median_deall(verbose, &median, &error));
+  EXPECT_EQ(nullptr, median);
+
+  // memory limit
+  ASSERT_EQ(MB_SUCCESS, mb_cube_median_init(verbose, 5, 3, 1.0, 1.0, 1, 1000.0, &median, &error));
+  EXPECT_EQ(MB_FAILURE, mb_cube_median_add(verbose, median, 0.0, 0.0, 1.0, &bytes, &error));
+  EXPECT_EQ(MB_ERROR_MEMORY_FAIL, error);
+  EXPECT_GT(bytes, 1000.0);
+  EXPECT_EQ(MB_SUCCESS, mb_cube_median_deall(verbose, &median, &error));
+}
+
+TEST(MbCubeOptions, SampleGrid) {
+  int error = MB_ERROR_NO_ERROR;
+  // 3 x 2 grid with origin (10, 20) and spacing 2: z = x + 10 y, one hole
+  std::vector<float> grid(6);
+  for (int i = 0; i < 3; i++)
+    for (int j = 0; j < 2; j++)
+      grid[i * 2 + j] = static_cast<float>(10.0 + 2.0 * i + 10.0 * (20.0 + 2.0 * j));
+  grid[2 * 2 + 1] = -1.0f;
+  std::vector<float> depth(4);
+  ASSERT_EQ(MB_SUCCESS, mb_cube_sample_grid(verbose, grid.data(), 3, 2, 10.0, 20.0, 2.0, 2.0, -1.0f, -1.0, 2, 2, 11.0,
+                                            21.0, 2.0, 0.5, kNoData, depth.data(), &error));
+  EXPECT_FLOAT_EQ(-(11.0f + 210.0f), depth[0]);
+  EXPECT_FLOAT_EQ(-(11.0f + 215.0f), depth[1]);
+  EXPECT_EQ(kNoData, depth[2]);  // a corner of its cell is missing
+  EXPECT_EQ(kNoData, depth[3]);
+}
+
 }  // namespace

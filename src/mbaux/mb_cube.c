@@ -56,6 +56,12 @@
  *     first sounding reaching each node.
  * User nomination of hypotheses and frozen nodes are not implemented.
  *
+ * mb_cube_classify() compares a sounding with the flushed grid, for the
+ * flagging of soundings that do not belong to the CUBE surface described
+ * in the CUBE User's Manual (the reference code has no such routine): it
+ * uses the reference geometry of the insertion and the hypothesis rule of
+ * the estimator update without changing the grid.
+ *
  * Each sounding is offered to the nodes within an influence radius. At
  * each node it passes through a median pre-filter queue and then updates
  * the closest of the node's depth hypotheses with a Kalman (dynamic linear
@@ -125,6 +131,7 @@ struct mb_cube_struct {
   int min_context;   /* guide search range (nodes) */
   int max_context;
   bool failed; /* a pool allocation failed, the grid is unusable */
+  bool flushed; /* all queued samples have reached the estimators */
   struct mb_cube_node *nodes;
   struct mb_cube_queue_entry *queues; /* pool of queue slots of median_length entries */
   int *queue_free;                    /* stack of free queue slots */
@@ -489,6 +496,7 @@ int mb_cube_init(int verbose, const struct mb_cube_param_struct *param, int nx, 
     cube->min_context = (int)(param->min_context / cube->dist_scale);
     cube->max_context = (int)(param->max_context / cube->dist_scale);
     cube->failed = false;
+    cube->flushed = false;
     status = mb_mallocd(verbose, __FILE__, __LINE__, (size_t)nx * (size_t)ny * sizeof(struct mb_cube_node),
                         (void **)&cube->nodes, error);
     if (status == MB_SUCCESS) {
@@ -971,8 +979,10 @@ int mb_cube_insert(int verbose, void *cube_ptr, double x, double y, double depth
           dist += param->horiz_scale * sqrt(var_horiz);
           const double variance = var_depth * (1.0 + cube->var_scale * pow(dist, param->dist_exp));
           status = mb_cube_queue_add(verbose, cube, &cube->nodes[k], node_depth, (float)variance, error);
-          if (status == MB_SUCCESS)
+          if (status == MB_SUCCESS) {
             (*nused)++;
+            cube->flushed = false;
+          }
         }
       }
     }
@@ -1036,6 +1046,8 @@ int mb_cube_flush(int verbose, void *cube_ptr, int *error) {
     node->queue = MB_CUBE_NONE;
     node->n_queued = 0;
   }
+  if (status == MB_SUCCESS)
+    cube->flushed = true;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -1110,6 +1122,71 @@ static const struct mb_cube_hyp *mb_cube_find_guide(const struct mb_cube_struct 
   return (guide);
 }
 /*--------------------------------------------------------------------------*/
+/* Hypothesis selected at node (i,j) by the disambiguation rule in force,
+   or NULL if the node has none holding samples, with its strength. */
+static const struct mb_cube_hyp *mb_cube_select_node(const struct mb_cube_struct *cube, int i, int j,
+                                                     double *strength) {
+  const struct mb_cube_param_struct *param = &cube->param;
+  const size_t k = (size_t)i * cube->ny + j;
+  const struct mb_cube_node *node = &cube->nodes[k];
+  const struct mb_cube_hyp *selected = NULL;
+  *strength = 0.0;
+
+  if (node->nhyp == 1) {
+    /* the only hypothesis holding samples */
+    for (int ihyp = node->hyp; ihyp != MB_CUBE_NONE && selected == NULL; ihyp = cube->hyps[ihyp].next)
+      if (cube->hyps[ihyp].num_samples > 0)
+        selected = &cube->hyps[ihyp];
+  }
+  else if (node->nhyp > 1) {
+    const bool predicted = param->extractor == MB_CUBE_EXTRACT_PREDICTED && cube->pred_depth != NULL
+                           && cube->pred_var[k] != MB_CUBE_PRED_NONE;
+    const struct mb_cube_hyp *guide = NULL;
+    if (param->extractor == MB_CUBE_EXTRACT_LIKELIHOOD || param->extractor == MB_CUBE_EXTRACT_POSTERIOR)
+      guide = mb_cube_find_guide(cube, i, j);
+    if (guide == NULL && !predicted) {
+      selected = mb_cube_select_prior(cube, node, strength);
+    }
+    else {
+      /* closest hypothesis to the guide depth or the predicted depth,
+         weighted by the number of samples for the posterior rule; the
+         newest wins ties */
+      double guide_depth;
+      double guide_var;
+      if (predicted) {
+        guide_depth = cube->pred_depth[k];
+        guide_var = cube->pred_var[k] > 0.0f ? cube->pred_var[k] : 1.0;
+      }
+      else {
+        guide_depth = guide->cur_estimate;
+        guide_var = MAX(guide->var_estimate, guide->cur_variance);
+      }
+      double best_score = -DBL_MAX;
+      int n_total = 0;
+      for (int ihyp = node->hyp; ihyp != MB_CUBE_NONE; ihyp = cube->hyps[ihyp].next) {
+        const struct mb_cube_hyp *hyp = &cube->hyps[ihyp];
+        if (hyp->num_samples == 0)
+          continue;
+        const double diff = hyp->cur_estimate - guide_depth;
+        double score;
+        if (param->extractor == MB_CUBE_EXTRACT_POSTERIOR)
+          score = -diff * diff / (2.0 * guide_var) + log((double)hyp->num_samples);
+        else
+          score = -fabs(diff) / sqrt(guide_var);
+        if (score > best_score) {
+          best_score = score;
+          selected = hyp;
+        }
+        n_total += hyp->num_samples;
+      }
+      *strength = MAX(0.0, MB_CUBE_MAX_HYPOTHESIS_RATIO
+                              - (double)selected->num_samples / (n_total - selected->num_samples));
+    }
+  }
+
+  return (selected);
+}
+/*--------------------------------------------------------------------------*/
 int mb_cube_extract(int verbose, void *cube_ptr, float nodata, float *depth, float *uncertainty, float *nhyp,
                     float *strength, int *nsamples, int *error) {
   if (verbose >= 2) {
@@ -1138,60 +1215,8 @@ int mb_cube_extract(int verbose, void *cube_ptr, float nodata, float *depth, flo
     for (int j = 0; j < cube->ny; j++) {
       const size_t k = (size_t)i * cube->ny + j;
       const struct mb_cube_node *node = &cube->nodes[k];
-      const struct mb_cube_hyp *selected = NULL;
       double strength_k = 0.0;
-
-      if (node->nhyp == 1) {
-        /* the only hypothesis holding samples */
-        for (int ihyp = node->hyp; ihyp != MB_CUBE_NONE && selected == NULL; ihyp = cube->hyps[ihyp].next)
-          if (cube->hyps[ihyp].num_samples > 0)
-            selected = &cube->hyps[ihyp];
-      }
-      else if (node->nhyp > 1) {
-        const bool predicted = param->extractor == MB_CUBE_EXTRACT_PREDICTED && cube->pred_depth != NULL
-                               && cube->pred_var[k] != MB_CUBE_PRED_NONE;
-        const struct mb_cube_hyp *guide = NULL;
-        if (param->extractor == MB_CUBE_EXTRACT_LIKELIHOOD || param->extractor == MB_CUBE_EXTRACT_POSTERIOR)
-          guide = mb_cube_find_guide(cube, i, j);
-        if (guide == NULL && !predicted) {
-          selected = mb_cube_select_prior(cube, node, &strength_k);
-        }
-        else {
-          /* closest hypothesis to the guide depth or the predicted depth,
-             weighted by the number of samples for the posterior rule; the
-             newest wins ties */
-          double guide_depth;
-          double guide_var;
-          if (predicted) {
-            guide_depth = cube->pred_depth[k];
-            guide_var = cube->pred_var[k] > 0.0f ? cube->pred_var[k] : 1.0;
-          }
-          else {
-            guide_depth = guide->cur_estimate;
-            guide_var = MAX(guide->var_estimate, guide->cur_variance);
-          }
-          double best_score = -DBL_MAX;
-          int n_total = 0;
-          for (int ihyp = node->hyp; ihyp != MB_CUBE_NONE; ihyp = cube->hyps[ihyp].next) {
-            const struct mb_cube_hyp *hyp = &cube->hyps[ihyp];
-            if (hyp->num_samples == 0)
-              continue;
-            const double diff = hyp->cur_estimate - guide_depth;
-            double score;
-            if (param->extractor == MB_CUBE_EXTRACT_POSTERIOR)
-              score = -diff * diff / (2.0 * guide_var) + log((double)hyp->num_samples);
-            else
-              score = -fabs(diff) / sqrt(guide_var);
-            if (score > best_score) {
-              best_score = score;
-              selected = hyp;
-            }
-            n_total += hyp->num_samples;
-          }
-          strength_k = MAX(0.0, MB_CUBE_MAX_HYPOTHESIS_RATIO
-                                     - (double)selected->num_samples / (n_total - selected->num_samples));
-        }
-      }
+      const struct mb_cube_hyp *selected = mb_cube_select_node(cube, i, j, &strength_k);
 
       if (selected != NULL) {
         if (depth != NULL)
@@ -1280,6 +1305,209 @@ int mb_cube_node_hypotheses(int verbose, void *cube_ptr, int i, int j, int nhyp_
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------------*/
+/* Compare a sounding with the flushed grid without changing it. The
+   sounding is offered to the nodes as mb_cube_insert() would offer it
+   (influence radius, capture distance, blunder test and slope correction
+   with a predicted surface); the nearest of those nodes holding samples
+   decides, on ties the first in the reference scan order (rows from the
+   north, each from west to east). There, as in the
+   estimator update, the hypothesis with the smallest normalized forecast
+   error |z - prediction| / sqrt(prediction variance + v) is the one the
+   sounding belongs to (the newest on ties), where v is the sounding's
+   variance propagated to the node. Returns node = -1 if no node holding
+   samples is reached; otherwise the node index (i * ny + j), its number
+   of hypotheses, whether the sounding belongs to the selected hypothesis,
+   whether the blunder test of a predicted surface rejects it at that node
+   (mb_cube_insert() would not have offered it there), its signed
+   normalized error from the selected hypothesis, and the hypothesis
+   strength of the node. */
+int mb_cube_classify(int verbose, void *cube_ptr, double x, double y, double depth, double depth_sonar,
+                     double var_depth, double var_horiz, int *node, int *nhyp, int *is_selected, int *is_blunder,
+                     double *error_selected, double *strength, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       cube_ptr:   %p\n", cube_ptr);
+    fprintf(stderr, "dbg2       x:          %f\n", x);
+    fprintf(stderr, "dbg2       y:          %f\n", y);
+    fprintf(stderr, "dbg2       depth:      %f\n", depth);
+    fprintf(stderr, "dbg2       depth_sonar:%f\n", depth_sonar);
+    fprintf(stderr, "dbg2       var_depth:  %f\n", var_depth);
+    fprintf(stderr, "dbg2       var_horiz:  %f\n", var_horiz);
+  }
+
+  const struct mb_cube_struct *cube = (const struct mb_cube_struct *)cube_ptr;
+  const struct mb_cube_param_struct *param = &cube->param;
+  int status = MB_SUCCESS;
+  *error = MB_ERROR_NO_ERROR;
+  *node = -1;
+  *nhyp = 0;
+  *is_selected = 0;
+  *is_blunder = 0;
+  *error_selected = 0.0;
+  *strength = 0.0;
+
+  if (cube->failed) {
+    status = MB_FAILURE;
+    *error = MB_ERROR_MEMORY_FAIL;
+  }
+  else if (!cube->flushed || !isfinite(x) || !isfinite(y) || !isfinite(depth) || !isfinite(depth_sonar)
+           || !(var_depth > 0.0) || !isfinite(var_depth) || !(var_horiz >= 0.0) || !isfinite(var_horiz)) {
+    status = MB_FAILURE;
+    *error = MB_ERROR_BAD_PARAMETER;
+  }
+
+  if (status == MB_SUCCESS) {
+    const double h = fabs(depth_sonar);
+
+    /* influence radius and capture distance as in mb_cube_insert() */
+    const double max_var = (param->tvu_a * param->tvu_a + param->tvu_b * param->tvu_b * h * h)
+                           / (MB_CUBE_CONF_95PC * MB_CUBE_CONF_95PC);
+    double ratio = max_var / var_depth;
+    if (ratio <= 2.0)
+      ratio = 2.0;
+    const double max_radius = param->influence_scale * sqrt(var_horiz);
+    double radius = cube->dist_scale * pow(ratio - 1.0, 1.0 / param->dist_exp) - max_radius;
+    if (radius < 0.0)
+      radius = cube->dist_scale;
+    if (radius > max_radius)
+      radius = max_radius;
+    if (radius < cube->dist_scale)
+      radius = cube->dist_scale;
+    const double radius_sq = radius * radius;
+    const double capture = MAX(param->capture_scale * h, param->capture_min);
+
+    /* predicted surface at the sounding for the slope correction, as in
+       mb_cube_insert() */
+    const double sonar_depth = depth - depth_sonar;
+    bool snd_pred_ok = false;
+    float snd_pred = 0.0f;
+    if (cube->pred_depth != NULL) {
+      const double y_north = (cube->ny - 1) * cube->dy - y;
+      const double fi = floor(x / cube->dx);
+      const double fr = floor(y_north / cube->dy);
+      if (fi >= 0.0 && fi < cube->nx - 1 && fr >= 0.0 && fr < cube->ny - 1) {
+        const int i0 = (int)fi;
+        const int row = (int)fr;
+        const size_t kn0 = (size_t)i0 * cube->ny + (cube->ny - 1 - row);
+        const size_t kn1 = kn0 + cube->ny;
+        const size_t ks0 = kn0 - 1;
+        const size_t ks1 = kn1 - 1;
+        if (cube->pred_var[kn0] != MB_CUBE_PRED_NONE && cube->pred_var[kn1] != MB_CUBE_PRED_NONE
+            && cube->pred_var[ks0] != MB_CUBE_PRED_NONE && cube->pred_var[ks1] != MB_CUBE_PRED_NONE) {
+          const double fx = (x - i0 * cube->dx) / cube->dx;
+          const double fn = (cube->dy * (row + 1) - y_north) / cube->dy;
+          snd_pred = (float)(cube->pred_depth[kn0] * (1.0 - fx) * fn + cube->pred_depth[kn1] * fx * fn
+                             + cube->pred_depth[ks0] * (1.0 - fx) * (1.0 - fn) + cube->pred_depth[ks1] * fx * (1.0 - fn));
+          snd_pred_ok = true;
+        }
+      }
+    }
+
+    /* nearest reached node holding samples */
+    double best_dist_sq = DBL_MAX;
+    int best_i = -1;
+    int best_j = -1;
+    size_t best_k = 0;
+    float best_depth = 0.0f;
+    bool best_blunder = false;
+    const double fimin = ceil((x - radius) / cube->dx);
+    const double fimax = floor((x + radius) / cube->dx);
+    const double fjmin = ceil((y - radius) / cube->dy);
+    const double fjmax = floor((y + radius) / cube->dy);
+    if (fimax >= 0.0 && fimin <= cube->nx - 1 && fjmax >= 0.0 && fjmin <= cube->ny - 1) {
+      const int imin = (int)MAX(fimin, 0.0);
+      const int imax = (int)MIN(fimax, cube->nx - 1.0);
+      const int jmin = (int)MAX(fjmin, 0.0);
+      const int jmax = (int)MIN(fjmax, cube->ny - 1.0);
+      for (int i = imin; i <= imax; i++) {
+        for (int j = jmin; j <= jmax; j++) {
+          const double ddx = i * cube->dx - x;
+          const double ddy = j * cube->dy - y;
+          const double dist_sq = ddx * ddx + ddy * ddy;
+          if (dist_sq >= radius_sq || dist_sq > best_dist_sq
+              || (dist_sq == best_dist_sq && (j < best_j || (j == best_j && i > best_i))))
+            continue;
+          const size_t k = (size_t)i * cube->ny + j;
+          if (cube->nodes[k].nhyp == 0)
+            continue;
+          const double dist = sqrt(dist_sq);
+          float node_depth = (float)depth;
+          bool blunder = false;
+          if (cube->pred_depth != NULL && cube->pred_var[k] != MB_CUBE_PRED_NONE) {
+            /* a node holding samples has its predicted variance set; a
+               blunder is a verdict on the sounding, not a reason to look
+               at another node */
+            const float pred = cube->pred_depth[k];
+            const double h_pred = fabs(pred - sonar_depth);
+            if (dist > MAX(param->capture_scale * h_pred, param->capture_min))
+              continue;
+            if (param->blunder) {
+              const double margin = MAX(MAX(param->blunder_min, param->blunder_fraction * h_pred),
+                                        param->blunder_scalar * sqrt(cube->pred_var[k]));
+              blunder = depth > pred + margin;
+            }
+            if (snd_pred_ok)
+              node_depth += (float)(pred - snd_pred);
+          }
+          else if (dist > capture)
+            continue;
+          best_dist_sq = dist_sq;
+          best_i = i;
+          best_j = j;
+          best_k = k;
+          best_depth = node_depth;
+          best_blunder = blunder;
+        }
+      }
+    }
+
+    if (best_dist_sq < DBL_MAX) {
+      const struct mb_cube_node *best_node = &cube->nodes[best_k];
+      const int i = (int)(best_k / cube->ny);
+      const int j = (int)(best_k % cube->ny);
+      const struct mb_cube_hyp *selected = mb_cube_select_node(cube, i, j, strength);
+
+      /* propagated variance and the hypothesis the sounding belongs to, as
+         in the estimator update (single precision inputs as there) */
+      const double dist = sqrt(best_dist_sq) + param->horiz_scale * sqrt(var_horiz);
+      const float var = (float)(var_depth * (1.0 + cube->var_scale * pow(dist, param->dist_exp)));
+      const struct mb_cube_hyp *best = NULL;
+      double min_error = FLT_MAX;
+      for (int ihyp = best_node->hyp; ihyp != MB_CUBE_NONE; ihyp = cube->hyps[ihyp].next) {
+        const struct mb_cube_hyp *hyp = &cube->hyps[ihyp];
+        const double error_n = fabs((best_depth - hyp->pred_estimate) / sqrt(hyp->pred_variance + var));
+        if (error_n < min_error) {
+          min_error = error_n;
+          best = hyp;
+        }
+      }
+      *node = (int)best_k;
+      *nhyp = best_node->nhyp;
+      *is_selected = !best_blunder && best == selected ? 1 : 0;
+      *is_blunder = best_blunder ? 1 : 0;
+      *error_selected = (best_depth - selected->pred_estimate) / sqrt(selected->pred_variance + var);
+    }
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       node:           %d\n", *node);
+    fprintf(stderr, "dbg2       nhyp:           %d\n", *nhyp);
+    fprintf(stderr, "dbg2       is_selected:    %d\n", *is_selected);
+    fprintf(stderr, "dbg2       is_blunder:     %d\n", *is_blunder);
+    fprintf(stderr, "dbg2       error_selected: %f\n", *error_selected);
+    fprintf(stderr, "dbg2       strength:       %f\n", *strength);
+    fprintf(stderr, "dbg2       error:          %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:         %d\n", status);
   }
 
   return (status);

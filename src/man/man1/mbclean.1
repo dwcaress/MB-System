@@ -55,6 +55,20 @@ Version 5.0
 --verbose {-V}
 .br
 --help {-H}]
+.br
+\fBmbclean\fP \-\-input=infile \-\-cube\-spacing=dx[/dy]
+.br
+[--cube-region=west/east/south/north
+.br
+--cube-flag=hypothesis|outlier|both
+.br
+--cube-flag-threshold=threshold
+.br
+--cube-flag-strength-max=strength
+.br
+--cube-* options of \fBmbgrid\fP \-F9 (see below)
+.br
+--format=format {-Fformat} --lonflip=lonflip {-Llonflip} --verbose {-V}]
 
 .SH DESCRIPTION
 \fBmbclean\fP identifies and flags artifacts in swath sonar bathymetry data.
@@ -68,6 +82,9 @@ If desired, \fBmbclean\fP will also flag beams
 associated with "rails" where
 outer beams have smaller acrosstrack distances
 than more inner beams (\fB\-Q\fP option).
+Soundings can also be compared with a CUBE surface built from all of
+the input data, as in \fBmbgrid\fP \-F9 (\fB\-\-cube\-spacing\fP
+option, see CUBE FLAGGING below).
 Low and high bounds on acceptable depth values can be set; depth values
 outside the acceptable range will be flagged. The acceptable depth
 ranges can either be absolute (\fB\-B\fP option), relative to
@@ -124,6 +141,86 @@ outputs a processed swath data file.
 The \fBmbprocess\fP program is also used to merge
 edited navigation, recalculate bathymetry, and apply
 other corrections to swath bathymetry data.
+
+.SH CUBE FLAGGING
+With the \fB\-\-cube\-spacing\fP option \fBmbclean\fP builds a CUBE
+(Combined Uncertainty and Bathymetric Estimator; Calder and Mayer, 2003)
+surface from all of the input data and flags the soundings that do not
+belong to it. This is the "data cleaning" use of CUBE described in the
+CUBE User's Manual (Calder and Wells, 2007): soundings that do not belong
+to the depth hypotheses selected by CUBE are flagged. The CUBE flagging
+cannot be combined with the other tests of \fBmbclean\fP in one run;
+run \fBmbclean\fP once with the other tests and once with CUBE flagging.
+
+The CUBE grid is the one \fBmbgrid\fP \-F9 builds with the same
+region (\fB\-\-cube\-region\fP, \fBmbgrid\fP \-R), the same node spacing
+in meters (\fB\-\-cube\-spacing\fP, \fBmbgrid\fP \-E\fIdx/dy\fP/meters)
+and the same \fB\-\-cube\-*\fP options on a geographic grid (no \fB\-J\fP),
+so the surface the soundings are judged against can be seen by running
+\fBmbgrid\fP. The data are read as \fBmbgrid\fP reads them: processed
+files where the datalist asks for them (\fB$PROCESSED\fP), raw files
+otherwise, and alternative navigation where the datalist gives it. In
+addition the current edits of each raw file (its edit save file) are
+applied, so soundings already flagged are left out. If a processed file
+is older than its raw file, parameter file or edit save file, a warning
+asks for \fBmbprocess\fP to be run first.
+
+The data are read twice: the first time to build the CUBE grid, the
+second time to compare every unflagged sounding with it. A median
+predicted surface (\fB\-\-cube\-prediction=median\fP) adds one more read.
+Only the CUBE grid is kept in memory. Each sounding is offered to the
+nodes as during the insertion into the grid (influence radius, capture
+distance, and the blunder test and slope correction of a predicted
+surface); the nearest of these nodes holding data decides. There the
+following criteria are applied (by default only \fBoutlier\fP and
+\fBblunder\fP, see \fB\-\-cube\-flag\fP):
+.TP
+.B hypothesis
+The sounding is flagged if the depth hypothesis it belongs to is not the
+one selected for the node. As in the CUBE estimator, a sounding belongs
+to the hypothesis with the smallest normalized error
+|z \- d| / sqrt(v_d + v), where d and v_d are the predicted depth and
+variance of the hypothesis and v the variance of the sounding propagated
+to the node. This criterion never flags soundings at nodes with a single
+hypothesis.
+.TP
+.B outlier
+The sounding is flagged if its normalized error from the selected
+hypothesis exceeds a threshold. By default the threshold is the one at
+which the CUBE monitor rejects a single sample,
+(h^2 \- 2 ln B) / (2 h) with h from \fB\-\-cube\-est\-offset\fP and B from
+\fB\-\-cube\-bayes\-factor\fP: 2.50 with the defaults.
+.TP
+.B blunder
+With a predicted surface and the blunder test on, soundings that the
+blunder test rejects at the deciding node are always flagged.
+.PP
+Soundings that reach no node holding data (for example near the edges of
+the grid) are not tested and are counted as such. Only flags are added;
+nothing is unflagged. The flags are appended to the edit save file of
+the raw file as filter flags, as for the other \fBmbclean\fP tests; they
+cannot be told apart from other filter flags once \fBmbprocess\fP has
+applied them.
+
+The test depends on the sounding uncertainties as much as the CUBE
+surface does. The propagated variance v grows with the horizontal
+uncertainty of the sounding relative to the node spacing, so with the
+default IHO S-44 Order 2 model, whose horizontal uncertainty is 20 m plus
+10% of the depth, soundings in shallow water or on a fine grid are
+rarely flagged. Choose \fB\-\-cube\-order\fP or the \fBconstant\fP or
+\fBdepth\fP models (\fB\-\-cube\-model\fP) to match the survey, as
+described in the \fBmbgrid\fP manual page.
+
+The node spacing must resolve the terrain. Each sounding is compared with
+the estimate at a node that can be up to 0.7 node spacings away, and the
+slope between them is not part of CUBE's variance propagation: with tight
+vertical uncertainties and a coarse grid over rough or sloping seafloor,
+many valid soundings exceed the outlier threshold. In a test on a deep
+water EM122 survey (1400 to 5300 m), the default model at 200 m flagged
+0.004% of the soundings, most of them gross blunders, whereas a vertical
+uncertainty of 0.14% of depth flagged 28% at 200 m and 4.7% at 50 m.
+Check the number of flagged soundings, and look at them in
+\fBmbeditviz\fP, before applying the edits with \fBmbprocess\fP.
 
 .SH MB-SYSTEM AUTHORSHIP
 David W. Caress
@@ -384,6 +481,53 @@ negative.
 .B \-\-zero\-position \-Z
 This option causes \fBmbclean\fP to flag as bad all beams in pings
 with zero longitude and latitude values.
+.TP
+.B \-\-cube\-spacing=dx[/dy]
+Turns on CUBE flagging (see CUBE FLAGGING) with a CUBE grid of node
+spacing \fIdx\fP meters east and \fIdy\fP meters north (default
+\fIdy\fP = \fIdx\fP). CUBE flagging cannot be combined with the other
+tests.
+.TP
+.B \-\-cube\-region=west/east/south/north
+Sets the bounds of the CUBE grid in degrees. By default the bounds of
+the input data are used (from the ".inf" files, which are created if
+needed), as in \fBmbgrid\fP.
+.TP
+.B \-\-cube\-flag=hypothesis|outlier|both
+Selects the CUBE flagging criteria (see CUBE FLAGGING). Default: outlier.
+The \fBhypothesis\fP criterion, the literal rule of the CUBE User's
+Manual, also flags valid soundings where CUBE has split a sloping or
+rough seafloor into several hypotheses at a node; use it only with a node
+spacing that resolves the terrain, and preferably with
+\fB\-\-cube\-flag\-strength\-max\fP.
+.TP
+.B \-\-cube\-flag\-threshold=threshold
+Sets the normalized error from the selected hypothesis above which the
+\fBoutlier\fP criterion flags a sounding. Default: the single sample
+outlier threshold of the CUBE monitor, 2.50 with the default
+\fB\-\-cube\-est\-offset\fP and \fB\-\-cube\-bayes\-factor\fP.
+.TP
+.B \-\-cube\-flag\-strength\-max=strength
+Applies the \fBhypothesis\fP criterion only at nodes whose hypothesis
+strength (0 for a certain node, up to 5 for an ambiguous one) is at most
+\fIstrength\fP, leaving soundings at ambiguous nodes for inspection, for
+example in \fBmbeditviz\fP. Default: 5 (no limit).
+.TP
+.B \-\-cube\-*
+The CUBE algorithm, uncertainty model and predicted surface options of
+\fBmbgrid\fP \-F9 are accepted with the same meanings and defaults:
+\-\-cube\-bayes\-factor, \-\-cube\-blunder, \-\-cube\-capture\-min,
+\-\-cube\-capture\-scale, \-\-cube\-context, \-\-cube\-depth\-reference,
+\-\-cube\-dist\-exp, \-\-cube\-est\-offset, \-\-cube\-extractor,
+\-\-cube\-horiz\-scale, \-\-cube\-iho\-ccom, \-\-cube\-iho\-edition,
+\-\-cube\-influence\-scale, \-\-cube\-median\-length, \-\-cube\-memory\-limit,
+\-\-cube\-model, \-\-cube\-model\-a, \-\-cube\-model\-b, \-\-cube\-model\-c,
+\-\-cube\-order, \-\-cube\-prediction, \-\-cube\-prediction\-hypotheses,
+\-\-cube\-prediction\-uncertainty, \-\-cube\-quotient\-limit,
+\-\-cube\-runlength, \-\-cube\-sigma\-h and \-\-cube\-sigma\-v.
+See the \fBmbgrid\fP manual page. A predicted surface grid file
+(\-\-cube\-prediction=\fIgridfile\fP) must be a geographic grid of
+depths (positive down).
 
 .SH EXAMPLES
 Suppose one wishes to do a first pass edit of
@@ -507,9 +651,44 @@ is flagged. Here is an example of the nonverbose output:
  	2702 total beams flagged
  	0 total beams unflagged
 
+To flag the soundings of the same data that do not belong to a CUBE
+surface with 50 m node spacing, for a deep water survey from a surface
+vessel (IHO S-44 Order 2, the default):
+
+ 	mbclean \-Idatalist.mb-1 \-\-cube\-spacing=50
+
+and to see the surface the soundings were compared with:
+
+ 	mbgrid \-Idatalist.mb-1 \-Ocube \-F9 \-E50/50/meters \-A1 \-M
+
+Here \fBmbgrid\fP must use the same region as \fBmbclean\fP, which by
+default is the bounds of the data for both programs. If the processed
+files are out of date, run \fBmbprocess\fP first.
+
+In deep water the horizontal uncertainties of the IHO S-44 orders (Order 2:
+20 m plus 10% of the depth; Orders 1a and 1b: 5 m plus 5%) leave only gross
+blunders flagged. To flag more, describe the sounding uncertainties with
+the \fBdepth\fP model instead, here one standard deviation of 0.3% of the
+depth vertically and 1 m horizontally, and raise the outlier threshold
+(\fB\-\-cube\-order=special\fP then only sets the TVU bound of the
+influence radius):
+
+ 	mbclean \-Idatalist.mb-1 \-\-cube\-spacing=50 \-\-cube\-order=special \\
+ 	    \-\-cube\-model=depth \-\-cube\-model\-a=0.13 \-\-cube\-model\-b=0.003 \\
+ 	    \-\-cube\-sigma\-h=1 \-\-cube\-model\-c=0 \-\-cube\-flag\-threshold=3.5
+
+On the EM122 survey described under CUBE FLAGGING this flagged 0.76% of
+the soundings. Compared with a manual cleaning of the same survey in
+\fBmbeditviz\fP, 34% of these flags agreed with manual flags and they
+covered 30% of the manual flags; most of the manual flags not found were
+small offsets near nadir. A 100 m node spacing flagged more valid soundings
+on steep slopes. Tune the vertical uncertainty and the threshold together
+(their product, here about 1% of the depth, sets the cutoff) and inspect
+the result in \fBmbeditviz\fP before running \fBmbprocess\fP.
+
 .SH SEE ALSO
 \fBmbsystem\fP(1), \fBmbedit\fP(1),
-\fBmbinfo\fP(1) \fBmbprocess\fP(1),
+\fBmbinfo\fP(1) \fBmbprocess\fP(1), \fBmbgrid\fP(1),
 
 .SH BUGS
 The algorithms implemented in \fBmbclean\fP simply
