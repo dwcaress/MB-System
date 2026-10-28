@@ -45,11 +45,13 @@
  *     divides by zero,
  *   - the outlier quotient of the median queue is computed in double
  *     precision about the mean,
- *   - ties are broken in a fixed, documented order,
+ *   - ties between hypotheses with equal numbers of samples go to the
+ *     oldest one (the reference leaves them to qsort),
  *   - with a predicted surface: the sample variance of an initial
  *     hypothesis starts at zero (the reference divides by zero), the
  *     predicted rule falls back to the prior rule at nodes without a
- *     prediction (the reference compares with its no-data value), and the
+ *     prediction (the reference compares with its no-data value and
+ *     reports no data at nodes with several hypotheses), and the
  *     predicted variance can be set from the depth below the sonar of the
  *     first sounding reaching each node.
  * User nomination of hypotheses and frozen nodes are not implemented.
@@ -268,7 +270,7 @@ int mb_cube_check_param(int verbose, const struct mb_cube_param_struct *param, i
     && (param->quotient_limit >= 0.1 && param->quotient_limit <= 255.0)
     && (param->discount >= 0.8 && param->discount <= 1.0)
     && (param->est_offset >= 0.1 && param->est_offset <= 10.0)
-    && (param->bayes_fac_t >= 0.001 && param->bayes_fac_t <= 1.0)
+    && (param->bayes_fac_t >= 0.001 && param->bayes_fac_t <= 10.0)
     && (param->runlength_t >= 1 && param->runlength_t <= 10)
     && (param->dist_exp >= 1.0 && param->dist_exp <= 10.0)
     && (param->horiz_scale >= 0.0 && param->horiz_scale <= 10.0)
@@ -707,9 +709,11 @@ static int mb_cube_queue_add(int verbose, struct mb_cube_struct *cube, struct mb
   }
 
   /* if the 99% bounds of the shallowest and deepest samples do not overlap,
-     there may be outliers in the queue */
-  if (queue[length - 1].depth - queue[0].depth
-      >= MB_CUBE_CONF_99PC * (sqrt(queue[0].var) + sqrt(queue[length - 1].var)))
+     there may be outliers in the queue (bounds in heights, computed as in
+     the reference) */
+  const double lo_water = -(double)queue[0].depth - MB_CUBE_CONF_99PC * sqrt(queue[0].var);
+  const double hi_water = -(double)queue[length - 1].depth + MB_CUBE_CONF_99PC * sqrt(queue[length - 1].var);
+  if (lo_water >= hi_water)
     mb_cube_queue_truncate(&cube->param, queue, &node->n_queued);
 
   return (mb_cube_update_node(verbose, cube, node, median.depth, median.var, error));
@@ -958,29 +962,29 @@ static const struct mb_cube_hyp *mb_cube_select_prior(const struct mb_cube_struc
   return (best);
 }
 /*--------------------------------------------------------------------------*/
-/* Nearest node with exactly one hypothesis in the square rings from
-   min_context to max_context nodes around node (i,j); on equal distance
-   the last one found in the scan wins. Returns NULL if there is none. */
+/* Guide for the likelihood and posterior rules: the hypothesis of a node
+   with exactly one hypothesis in the square rings from min_context to
+   max_context nodes around node (i,j). Each ring is scanned as in the
+   reference: the northern and the southern row from west to east, then the
+   western and the eastern column from north to south; the last such node
+   found in the first ring that has one is used. Returns NULL if there is
+   none. */
 static const struct mb_cube_hyp *mb_cube_find_guide(const struct mb_cube_struct *cube, int i, int j) {
   const struct mb_cube_hyp *guide = NULL;
   for (int offset = cube->min_context; offset <= cube->max_context && guide == NULL; offset++) {
-    double dist_min = DBL_MAX;
-    for (int ii = i - offset; ii <= i + offset; ii++) {
-      if (ii < 0 || ii >= cube->nx)
-        continue;
-      /* rows j +/- offset in full, columns i +/- offset between them */
-      const int jstep = (ii == i - offset || ii == i + offset) ? 1 : MAX(1, 2 * offset);
-      for (int jj = j - offset; jj <= j + offset; jj += jstep) {
-        if (jj < 0 || jj >= cube->ny)
-          continue;
-        const struct mb_cube_node *node = &cube->nodes[(size_t)ii * cube->ny + jj];
-        if (node->nhyp != 1)
-          continue;
-        const double ddx = (ii - i) * cube->dx;
-        const double ddy = (jj - j) * cube->dy;
-        const double dist = ddx * ddx + ddy * ddy;
-        if (dist <= dist_min) {
-          dist_min = dist;
+    for (int side = 0; side < 4; side++) {
+      const bool row = side < 2;
+      const int ii0 = row ? i - offset : (side == 2 ? i - offset : i + offset);
+      const int ii1 = row ? i + offset : ii0;
+      const int jj0 = row ? (side == 0 ? j + offset : j - offset) : j + offset - 1;
+      const int jj1 = row ? jj0 : j - offset + 1;
+      for (int ii = ii0; ii <= ii1; ii++) {
+        for (int jj = jj0; jj >= jj1; jj--) {
+          if (ii < 0 || ii >= cube->nx || jj < 0 || jj >= cube->ny)
+            continue;
+          const struct mb_cube_node *node = &cube->nodes[(size_t)ii * cube->ny + jj];
+          if (node->nhyp != 1)
+            continue;
           for (int ihyp = node->hyp; ihyp != MB_CUBE_NONE; ihyp = cube->hyps[ihyp].next)
             if (cube->hyps[ihyp].num_samples > 0)
               guide = &cube->hyps[ihyp];

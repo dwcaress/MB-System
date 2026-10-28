@@ -65,7 +65,7 @@ struct mb_cube_param_struct {
   double quotient_limit; /* outlier quotient limit of the queue, 0.1 - 255 */
   double discount;       /* discount factor for evolution noise variance, 0.8 - 1 */
   double est_offset;     /* significant offset of the estimate (normalized), 0.1 - 10 */
-  double bayes_fac_t;    /* Bayes factor threshold for an intervention, 0.001 - 1 */
+  double bayes_fac_t;    /* Bayes factor threshold for an intervention, 0.001 - 10 */
   int runlength_t;       /* run length threshold for an intervention, 1 - 10 */
   double dist_exp;       /* exponent on distance for variance scaling, 1 - 10 */
   double horiz_scale;    /* scale of horizontal sigma added to the distance, 0 - 10 */

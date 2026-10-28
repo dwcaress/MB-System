@@ -887,7 +887,8 @@ predicted surface sigma. Shallow soundings are never rejected.
 Default: 10/0.25/3 (on).
 .TP
 .B \-\-cube\-bayes\-factor=threshold
-CUBE: Bayes factor threshold (0.001 to 1) below which a sounding, or a
+CUBE: Bayes factor threshold (0.001 to 10 as in the reference implementation;
+the CUBE manual recommends values below 1) below which a sounding, or a
 sequence of soundings, is taken as evidence for a new hypothesis.
 Default: 0.135.
 .TP

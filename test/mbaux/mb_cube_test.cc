@@ -641,6 +641,28 @@ TEST_F(MbCubeBurst, PosteriorFollowsTheNeighbours) {
   EXPECT_FLOAT_EQ(100.0f, depth_[K(2, 0)]);
 }
 
+TEST_F(MbCube, LikelihoodGuideFollowsReferenceScanOrder) {
+  // ring of 2 nodes around (2,2): the guide at (2,4) in the northern row is
+  // nearer than the one at (4,3) in the eastern column, but the reference
+  // scans the columns last and uses the last guide found. Neither the prior
+  // rule (100 m has more samples) nor the nearest guide would give 80 m.
+  param_.extractor = MB_CUBE_EXTRACT_LIKELIHOOD;
+  param_.min_context = 2.0;
+  param_.max_context = 2.0;
+  Init(5, 5, 1.0, 1.0);
+  for (int k = 0; k < 10; k++)
+    Insert(2.0, 2.0, 100.0, 0.01, 0.0);
+  for (int k = 0; k < 5; k++) {
+    Insert(2.0, 2.0, 80.0, 0.01, 0.0);
+    Insert(2.0, 4.0, 100.0, 0.01, 0.0);
+    Insert(4.0, 3.0, 80.0, 0.01, 0.0);
+  }
+  Flush();
+  Extract();
+  ASSERT_EQ(2.0f, nhyp_[K(2, 2)]);
+  EXPECT_FLOAT_EQ(80.0f, depth_[K(2, 2)]);
+}
+
 TEST_F(MbCubeBurst, LikelihoodWithoutGuideFallsBackToPrior) {
   param_.extractor = MB_CUBE_EXTRACT_LIKELIHOOD;
   param_.min_context = 0.0;
