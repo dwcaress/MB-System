@@ -927,6 +927,14 @@ Default: 0.05 (5% of depth).
 .B \-\-cube\-context=min/max
 CUBE: minimum and maximum distances in meters searched for a guide node with
 a single hypothesis by the likelihood and posterior selection rules.
+As in the reference CUBE implementation, the distances are divided by the
+node spacing and truncated to whole square rings of nodes, ring 0 being the
+node itself. The defaults suit grids of about a meter: when the maximum is
+shorter than the node spacing no neighbouring node is searched, the
+likelihood and posterior rules fall back to the prior rule, and a warning
+is printed. For deep water grids give the distances as multiples of the
+node spacing, for example \-\-cube\-context=50/250 (1 to 5 nodes) with
+\-E50/50/meters.
 Default: 5/10.
 .TP
 .B \-\-cube\-depth\-reference=sonar|surface

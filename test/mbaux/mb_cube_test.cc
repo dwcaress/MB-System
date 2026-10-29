@@ -225,6 +225,36 @@ TEST(MbCubeParam, DefaultsAndChecks) {
   EXPECT_EQ(nullptr, cube);
 }
 
+TEST(MbCubeParam, ContextNodes) {
+  struct mb_cube_param_struct param;
+  int error = MB_ERROR_NO_ERROR;
+  ASSERT_EQ(MB_SUCCESS, mb_cube_default_param(verbose, MB_CUBE_IHO_ORDER_2, &param, &error));
+  int min_nodes = -1;
+  int max_nodes = -1;
+
+  // the 5/10 m defaults: 2 to 5 rings on a 2 m grid, none beyond the node on a 50 m grid
+  EXPECT_EQ(MB_SUCCESS, mb_cube_context_nodes(verbose, &param, 2.0, 2.0, &min_nodes, &max_nodes, &error));
+  EXPECT_EQ(MB_ERROR_NO_ERROR, error);
+  EXPECT_EQ(2, min_nodes);
+  EXPECT_EQ(5, max_nodes);
+  EXPECT_EQ(MB_SUCCESS, mb_cube_context_nodes(verbose, &param, 50.0, 50.0, &min_nodes, &max_nodes, &error));
+  EXPECT_EQ(0, min_nodes);
+  EXPECT_EQ(0, max_nodes);
+
+  // truncated, and scaled by the smaller spacing
+  param.min_context = 50.0;
+  param.max_context = 299.0;
+  EXPECT_EQ(MB_SUCCESS, mb_cube_context_nodes(verbose, &param, 50.0, 50.0, &min_nodes, &max_nodes, &error));
+  EXPECT_EQ(1, min_nodes);
+  EXPECT_EQ(5, max_nodes);
+  EXPECT_EQ(MB_SUCCESS, mb_cube_context_nodes(verbose, &param, 100.0, 25.0, &min_nodes, &max_nodes, &error));
+  EXPECT_EQ(2, min_nodes);
+  EXPECT_EQ(11, max_nodes);
+
+  EXPECT_EQ(MB_FAILURE, mb_cube_context_nodes(verbose, &param, 0.0, 50.0, &min_nodes, &max_nodes, &error));
+  EXPECT_EQ(MB_ERROR_BAD_PARAMETER, error);
+}
+
 TEST_F(MbCube, InsertRejectsBadValues) {
   Init(3, 3, 1.0, 1.0);
   int error = MB_ERROR_NO_ERROR;
@@ -757,6 +787,40 @@ TEST_F(MbCube, LikelihoodGuideFollowsReferenceScanOrder) {
   Extract();
   ASSERT_EQ(2.0f, nhyp_[K(2, 2)]);
   EXPECT_FLOAT_EQ(80.0f, depth_[K(2, 2)]);
+}
+
+// The burst of MbCubeBurst on a 50 m grid: the default 5/10 m context does
+// not reach the neighbours, so the likelihood rule acts as the prior rule;
+// a context of one to two node spacings finds them.
+class MbCubeCoarseContext : public MbCube {
+ protected:
+  void Run(double min_context, double max_context) {
+    param_.extractor = MB_CUBE_EXTRACT_LIKELIHOOD;
+    param_.min_context = min_context;
+    param_.max_context = max_context;
+    Init(5, 1, 50.0, 50.0);
+    for (int k = 0; k < 10; k++)
+      Insert(100.0, 0.0, 80.0, 0.01, 0.0);
+    for (int i = 0; i < 5; i++)
+      for (int k = 0; k < 5; k++)
+        Insert(50.0 * i, 0.0, 100.0, 0.01, 0.0);
+    Flush();
+    Extract();
+    ASSERT_EQ(2.0f, nhyp_[K(2, 0)]);
+    for (int i = 0; i < 5; i++)
+      if (i != 2)
+        ASSERT_EQ(1.0f, nhyp_[K(i, 0)]);
+  }
+};
+
+TEST_F(MbCubeCoarseContext, DefaultContextFallsBackToPrior) {
+  Run(5.0, 10.0);
+  EXPECT_FLOAT_EQ(80.0f, depth_[K(2, 0)]);
+}
+
+TEST_F(MbCubeCoarseContext, NodeSpacingContextFollowsTheNeighbours) {
+  Run(50.0, 100.0);
+  EXPECT_FLOAT_EQ(100.0f, depth_[K(2, 0)]);
 }
 
 TEST_F(MbCubeBurst, LikelihoodWithoutGuideFallsBackToPrior) {

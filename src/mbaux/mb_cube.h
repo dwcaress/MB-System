@@ -142,6 +142,8 @@ int mb_cube_default_param(int verbose, int iho_order, struct mb_cube_param_struc
 int mb_cube_check_param(int verbose, const struct mb_cube_param_struct *param, int *error);
 int mb_cube_estimate_memory(int verbose, const struct mb_cube_param_struct *param, int nx, int ny, double *bytes,
                             int *error);
+int mb_cube_context_nodes(int verbose, const struct mb_cube_param_struct *param, double dx, double dy, int *min_nodes,
+                          int *max_nodes, int *error);
 int mb_cube_init(int verbose, const struct mb_cube_param_struct *param, int nx, int ny, double dx, double dy,
                  void **cube_ptr, int *error);
 int mb_cube_set_prediction(int verbose, void *cube_ptr, const float *depth, const float *variance, float nodata,

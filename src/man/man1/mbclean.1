@@ -542,6 +542,10 @@ depths (positive down), or of heights (positive up) with
 \fB\-\-cube\-prediction\-topography\fP. If more of the soundings
 compared with it have the opposite sign than the same sign, \fBmbclean\fP
 stops after the first read of the data without flagging anything.
+With the likelihood and posterior selection rules, the
+\-\-cube\-context distances must reach at least one node spacing
+(\-\-cube\-spacing); otherwise the rules fall back to the prior rule and a
+warning is printed.
 
 .SH EXAMPLES
 Suppose one wishes to do a first pass edit of

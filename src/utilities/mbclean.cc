@@ -427,6 +427,21 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
     fprintf(stderr, "  Depth used in models:   %s\n",
             options->depth_below_sonar ? "depth below the sonar" : "depth below the sea surface");
     fprintf(stderr, "  Hypothesis selection:   %s\n", extractor_name[options->param.extractor]);
+    if (options->param.extractor == MB_CUBE_EXTRACT_LIKELIHOOD || options->param.extractor == MB_CUBE_EXTRACT_POSTERIOR) {
+      int context_min = 0;
+      int context_max = 0;
+      int context_error = MB_ERROR_NO_ERROR;
+      mb_cube_context_nodes(verbose, &options->param, cube_dx, cube_dy, &context_min, &context_max, &context_error);
+      fprintf(stderr, "  Guide search:           %.1f to %.1f m (%d to %d nodes)\n", options->param.min_context,
+              options->param.max_context, context_min, context_max);
+      if (context_max < 1) {
+        const double spacing = std::min(cube_dx, cube_dy);
+        fprintf(stderr, "  Warning: --cube-context=%g/%g is shorter than the node spacing (%.1f m); no neighbouring\n"
+                        "           node is searched and the selection falls back to the prior rule.\n"
+                        "           For this grid try --cube-context=%g/%g (1 to 5 nodes).\n",
+                options->param.min_context, options->param.max_context, spacing, spacing, 5.0 * spacing);
+      }
+    }
     if (options->prediction == MB_CUBE_PREDICTION_MEDIAN)
       fprintf(stderr, "  Predicted surface:      median of the soundings, %d times the node spacing\n",
               options->prediction_factor);

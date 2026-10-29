@@ -463,6 +463,50 @@ int mb_cube_estimate_memory(int verbose, const struct mb_cube_param_struct *para
   return (status);
 }
 /*--------------------------------------------------------------------------*/
+/* Square rings of nodes searched for a guide node by the likelihood and
+   posterior rules: as in the reference, min_context and max_context (m) are
+   divided by the smaller node spacing and truncated. Ring 0 is the node
+   itself, so with max_nodes < 1 no guide can be found and these rules fall
+   back to the prior rule. */
+int mb_cube_context_nodes(int verbose, const struct mb_cube_param_struct *param, double dx, double dy, int *min_nodes,
+                          int *max_nodes, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:     %d\n", verbose);
+    fprintf(stderr, "dbg2       min_context: %f\n", param->min_context);
+    fprintf(stderr, "dbg2       max_context: %f\n", param->max_context);
+    fprintf(stderr, "dbg2       dx:          %f\n", dx);
+    fprintf(stderr, "dbg2       dy:          %f\n", dy);
+  }
+
+  int status = MB_SUCCESS;
+  *min_nodes = 0;
+  *max_nodes = 0;
+  if (!(dx > 0.0) || !(dy > 0.0)) {
+    status = MB_FAILURE;
+    *error = MB_ERROR_BAD_PARAMETER;
+  }
+  else {
+    const double dist_scale = MIN(dx, dy);
+    *min_nodes = (int)(param->min_context / dist_scale);
+    *max_nodes = (int)(param->max_context / dist_scale);
+    *error = MB_ERROR_NO_ERROR;
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       min_nodes:  %d\n", *min_nodes);
+    fprintf(stderr, "dbg2       max_nodes:  %d\n", *max_nodes);
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------------*/
 int mb_cube_init(int verbose, const struct mb_cube_param_struct *param, int nx, int ny, double dx, double dy,
                  void **cube_ptr, int *error) {
   if (verbose >= 2) {
@@ -496,8 +540,7 @@ int mb_cube_init(int verbose, const struct mb_cube_param_struct *param, int nx, 
     cube->dy = dy;
     cube->dist_scale = MIN(dx, dy);
     cube->var_scale = pow(cube->dist_scale, -param->dist_exp);
-    cube->min_context = (int)(param->min_context / cube->dist_scale);
-    cube->max_context = (int)(param->max_context / cube->dist_scale);
+    mb_cube_context_nodes(verbose, param, dx, dy, &cube->min_context, &cube->max_context, error);
     cube->failed = false;
     cube->flushed = false;
     status = mb_mallocd(verbose, __FILE__, __LINE__, (size_t)nx * (size_t)ny * sizeof(struct mb_cube_node),

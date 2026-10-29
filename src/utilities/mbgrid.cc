@@ -1911,6 +1911,21 @@ int main(int argc, char **argv) {
       fprintf(outfp, "  Node spacing:           %f m x %f m\n", cube_dx, cube_dy);
       fprintf(outfp, "  Median queue length:    %d\n", cube.param.median_length);
       fprintf(outfp, "  Hypothesis selection:   %s\n", extractor_name[cube.param.extractor]);
+      if (cube.param.extractor == MB_CUBE_EXTRACT_LIKELIHOOD || cube.param.extractor == MB_CUBE_EXTRACT_POSTERIOR) {
+        int context_min = 0;
+        int context_max = 0;
+        int context_error = MB_ERROR_NO_ERROR;
+        mb_cube_context_nodes(verbose, &cube.param, cube_dx, cube_dy, &context_min, &context_max, &context_error);
+        fprintf(outfp, "  Guide search:           %.1f to %.1f m (%d to %d nodes)\n", cube.param.min_context,
+                cube.param.max_context, context_min, context_max);
+        if (context_max < 1) {
+          const double spacing = std::min(cube_dx, cube_dy);
+          fprintf(outfp, "  Warning: --cube-context=%g/%g is shorter than the node spacing (%.1f m); no neighbouring\n"
+                         "           node is searched and the selection falls back to the prior rule.\n"
+                         "           For this grid try --cube-context=%g/%g (1 to 5 nodes).\n",
+                  cube.param.min_context, cube.param.max_context, spacing, spacing, 5.0 * spacing);
+        }
+      }
       if (cube.prediction != MB_CUBE_PREDICTION_NONE) {
         if (cube.prediction == MB_CUBE_PREDICTION_MEDIAN)
           fprintf(outfp, "  Predicted surface:      median of the soundings nearest to each node of a grid with\n"
