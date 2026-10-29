@@ -444,8 +444,20 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
     fprintf(stderr, "  Memory estimate:        %.2f GB (limit %.2f GB)\n", cube_memory / 1.0e9, options->memory_limit);
   }
 
-  /* initialize the CUBE grid */
+  /* initialize the CUBE grid; release_cube frees it and the predicted
+     surface on every way out */
   void *cube_ptr = nullptr;
+  float *pred_depth = nullptr;
+  void *median_ptr = nullptr;
+  auto release_cube = [&]() {
+    int release_error = MB_ERROR_NO_ERROR;
+    if (median_ptr != nullptr)
+      mb_cube_median_deall(verbose, &median_ptr, &release_error);
+    if (pred_depth != nullptr)
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&pred_depth, &release_error);
+    if (cube_ptr != nullptr)
+      mb_cube_deall(verbose, &cube_ptr, &release_error);
+  };
   status = mb_cube_init(verbose, &options->param, nx, ny, cube_dx, cube_dy, &cube_ptr, &error);
   if (status != MB_SUCCESS) {
     char *mbmessage = nullptr;
@@ -456,7 +468,6 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
   }
 
   /* predicted surface from a geographic grid file of depths */
-  float *pred_depth = nullptr;
   if (options->prediction != MB_CUBE_PREDICTION_NONE)
     status = mb_mallocd(verbose, __FILE__, __LINE__, (size_t)nx * ny * sizeof(float), (void **)&pred_depth, &error);
   if (status == MB_SUCCESS && options->prediction == MB_CUBE_PREDICTION_FILE) {
@@ -474,6 +485,7 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
       mb_error(verbose, error, &mbmessage);
       fprintf(stderr, "\nMBIO Error reading the CUBE predicted surface %s:\n%s\n", options->prediction_file, mbmessage);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      release_cube();
       return (error);
     }
     const long pgrid_reg_x = lrint((pgrid_xmax - pgrid_xmin) / pgrid_dx) + 1 - pgrid_nx;
@@ -482,6 +494,8 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
       fprintf(stderr, "\nThe predicted surface %s must be a geographic grid with gridline or pixel registration\n",
               options->prediction_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&pgrid, &error);
+      release_cube();
       return (MB_ERROR_BAD_PARAMETER);
     }
     mb_cube_sample_grid(verbose, pgrid, pgrid_nx, pgrid_ny, pgrid_xmin + 0.5 * pgrid_reg_x * pgrid_dx,
@@ -497,7 +511,6 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
         fprintf(stderr, "Warning: the predicted surface %s covers no node of the CUBE grid\n", options->prediction_file);
     }
   }
-  void *median_ptr = nullptr;
   if (status == MB_SUCCESS && options->prediction == MB_CUBE_PREDICTION_MEDIAN)
     status = mb_cube_median_init(verbose, nx, ny, cube_dx, cube_dy, options->prediction_factor,
                                  options->memory_limit * 1.0e9 - cube_memory, &median_ptr, &error);
@@ -506,18 +519,19 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
     mb_error(verbose, error, &mbmessage);
     fprintf(stderr, "\nMBIO Error allocating the CUBE predicted surface:\n%s\n", mbmessage);
     fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+    release_cube();
     return (error);
   }
 
-  /* counters */
+  /* counters, 64 bit for the totals of large surveys */
   int nfiletot = 0;
-  int ninserttot = 0;
-  int ntestedtot = 0;
-  int nuntestedtot = 0;
-  int nhypothesistot = 0;
-  int noutliertot = 0;
-  int nblundertot = 0;
-  int nflagtot = 0;
+  long long ninserttot = 0;
+  long long ntestedtot = 0;
+  long long nuntestedtot = 0;
+  long long nhypothesistot = 0;
+  long long noutliertot = 0;
+  long long nblundertot = 0;
+  long long nflagtot = 0;
 
   /* read all of the data: pass 0 bins the soundings for a median predicted
      surface, pass 1 builds the CUBE grid, pass 2 flags the soundings */
@@ -535,6 +549,7 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
     if (read_datalist && mb_datalist_open(verbose, &datalist, read_file, MB_DATALIST_LOOK_UNSET, &error) != MB_SUCCESS) {
       fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      release_cube();
       return (MB_ERROR_OPEN_FAIL);
     }
     int pstatus = MB_PROCESSED_NONE;
@@ -613,18 +628,24 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
           error = MB_ERROR_NO_ERROR;
         }
 
-        /* on a fatal read error, close the edit save file and unlock the
-           raw file before giving up */
+        /* on a fatal error, close the swath file and the edit save file,
+           unlock the raw file and release everything before giving up */
+        void *mbio_ptr = nullptr;
         auto release_file = [&]() {
           int release_error = MB_ERROR_NO_ERROR;
+          if (mbio_ptr != nullptr)
+            mb_close(verbose, &mbio_ptr, &release_error);
           if (esf_loaded)
             mb_esf_close(verbose, &esf, &release_error);
           if (pass == 2 && uselockfiles)
             mb_pr_unlockswathfile(verbose, path, MBP_LOCK_EDITBATHY, program_name, &release_error);
+          if (datalist != nullptr)
+            mb_datalist_close(verbose, &datalist, &release_error);
+          release_cube();
         };
 
         /* read the file */
-        void *mbio_ptr = nullptr;
+        int nflagfile = 0;
         if (oktoprocess) {
           char rfile[MB_PATH_MAXLINE];
           snprintf(rfile, sizeof(rfile), "%s", file);
@@ -643,6 +664,7 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
             fprintf(stderr, "\nMBIO Error returned from function <mb_read_init_altnav>:\n%s\n", mbmessage);
             fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", rfile);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+            mbio_ptr = nullptr; /* not a handle to close */
             release_file();
             return (error);
           }
@@ -740,6 +762,7 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
                                   "allocated\n",
                           (cube_memory + bins_memory) / 1.0e9, options->memory_limit);
                   fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+                  release_file();
                   return (MB_ERROR_MEMORY_FAIL);
                 }
                 continue;
@@ -758,6 +781,7 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
                     mb_error(verbose, error, &mbmessage);
                     fprintf(stderr, "\nMBIO Error inserting data into the CUBE grid:\n%s\n", mbmessage);
                     fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+                    release_file();
                     return (error);
                   }
                   /* soundings with invalid values are skipped */
@@ -799,8 +823,13 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
                           time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], ib, bath[ib], reason, nhyp,
                           error_selected, strength);
                 beamflag[ib] = mb_beam_set_flag_filter(beamflag[ib]);
-                mb_esf_save(verbose, &esf, time_d, ib + multiplicity * MB_ESF_MULTIPLICITY_FACTOR, MBP_EDIT_FILTER,
-                            &error);
+                if (mb_esf_save(verbose, &esf, time_d, ib + multiplicity * MB_ESF_MULTIPLICITY_FACTOR, MBP_EDIT_FILTER,
+                                &error) != MB_SUCCESS) {
+                  fprintf(stderr, "\nUnable to write the edit save file %s\n", esffile);
+                  fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+                  release_file();
+                  return (MB_ERROR_WRITE_FAIL);
+                }
                 nflag++;
               }
             }
@@ -817,6 +846,7 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
             noutliertot += noutlier;
             nblundertot += nblunder;
             nflagtot += nflag;
+            nflagfile = nflag;
             if (verbose >= 0) {
               fprintf(stderr, "%d bathymetry data records processed\n", ndata);
               fprintf(stderr, "%d soundings compared with the CUBE surface\n", ntested);
@@ -830,12 +860,22 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
           }
         }
 
-        /* close the edit save file, register it and unlock the raw file */
+        /* close the edit save file once its edits are on disk, register it if
+           edits were added (an unchanged parameter file keeps processed files
+           up to date), and unlock the raw file */
+        if (esf_loaded && pass == 2 && esf.esffp != nullptr && (fflush(esf.esffp) != 0 || ferror(esf.esffp) != 0)) {
+          fprintf(stderr, "\nUnable to write the edit save file %s\n", esffile);
+          fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+          release_file();
+          return (MB_ERROR_WRITE_FAIL);
+        }
         if (esf_loaded)
           mb_esf_close(verbose, &esf, &error);
         if (oktoprocess && pass == 2) {
-          mb_pr_update_format(verbose, path, true, fformat, &error);
-          mb_pr_update_edit(verbose, path, MBP_EDIT_ON, esffile, &error);
+          if (nflagfile > 0) {
+            mb_pr_update_format(verbose, path, true, fformat, &error);
+            mb_pr_update_edit(verbose, path, MBP_EDIT_ON, esffile, &error);
+          }
           if (uselockfiles)
             mb_pr_unlockswathfile(verbose, path, MBP_LOCK_EDITBATHY, program_name, &error);
         }
@@ -869,7 +909,7 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
         fprintf(stderr, "Predicted surface set at %d of %d nodes\n", npred, nx * ny);
     }
     if (status == MB_SUCCESS && pass == 1) {
-      fprintf(stderr, "%d soundings inserted into the CUBE grid\n", ninserttot);
+      fprintf(stderr, "%lld soundings inserted into the CUBE grid\n", ninserttot);
 
       /* a predicted surface grid of the wrong sign makes most soundings
          blunders and reverses the slope correction */
@@ -882,6 +922,7 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
                         "down) must be used without it\n",
                 options->prediction_file, nopposite, nsame + nopposite);
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+        release_cube();
         return (MB_ERROR_BAD_PARAMETER);
       }
       status = mb_cube_flush(verbose, cube_ptr, &error);
@@ -891,27 +932,26 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
       mb_error(verbose, error, &mbmessage);
       fprintf(stderr, "\nMBIO Error building the CUBE surface:\n%s\n", mbmessage);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      release_cube();
       return (error);
     }
   }
 
-  mb_cube_deall(verbose, &cube_ptr, &error);
-  if (pred_depth != nullptr)
-    mb_freed(verbose, __FILE__, __LINE__, (void **)&pred_depth, &error);
+  release_cube();
 
   /* give the total statistics */
   if (verbose >= 0) {
     fprintf(stderr, "\nMBclean CUBE Processing Totals:\n");
     fprintf(stderr, "-------------------------------\n");
     fprintf(stderr, "%d total swath data files processed\n", nfiletot);
-    fprintf(stderr, "%d total soundings inserted into the CUBE grid\n", ninserttot);
-    fprintf(stderr, "%d total soundings compared with the CUBE surface\n", ntestedtot);
-    fprintf(stderr, "%d total soundings reaching no CUBE node with data (not tested)\n", nuntestedtot);
-    fprintf(stderr, "%d total soundings belonging to a hypothesis not selected\n", nhypothesistot);
-    fprintf(stderr, "%d total soundings exceeding the outlier threshold\n", noutliertot);
+    fprintf(stderr, "%lld total soundings inserted into the CUBE grid\n", ninserttot);
+    fprintf(stderr, "%lld total soundings compared with the CUBE surface\n", ntestedtot);
+    fprintf(stderr, "%lld total soundings reaching no CUBE node with data (not tested)\n", nuntestedtot);
+    fprintf(stderr, "%lld total soundings belonging to a hypothesis not selected\n", nhypothesistot);
+    fprintf(stderr, "%lld total soundings exceeding the outlier threshold\n", noutliertot);
     if (options->param.blunder && options->prediction != MB_CUBE_PREDICTION_NONE)
-      fprintf(stderr, "%d total soundings rejected by the blunder test\n", nblundertot);
-    fprintf(stderr, "%d total beams flagged\n", nflagtot);
+      fprintf(stderr, "%lld total soundings rejected by the blunder test\n", nblundertot);
+    fprintf(stderr, "%lld total beams flagged\n", nflagtot);
   }
 
   return (MB_ERROR_NO_ERROR);

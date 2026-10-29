@@ -49,6 +49,7 @@
 
 #define MB_CUBE_CONF_95PC 1.96 /* unit normal scale for a 95% confidence interval */
 #define MB_CUBE_MEDIAN_ALLOC_MIN (1024 * 1024) /* minimum number of median bins allocated */
+#define MB_CUBE_GRID_EDGE 1.0e-6               /* rounding tolerance at grid edges (grid cells) */
 
 /* sounding binned to its nearest node of a median predicted surface */
 struct mb_cube_median_bin {
@@ -537,8 +538,18 @@ int mb_cube_sample_grid(int verbose, const float *grid, int grid_nx, int grid_ny
       depth[k] = nodata;
       const double gx = (x0 + i * dx - grid_x0) / grid_dx;
       const double gy = (y0 + j * dy - grid_y0) / grid_dy;
-      const int gi = (int)floor(gx);
-      const int gj = (int)floor(gy);
+      int gi = (int)floor(gx);
+      int gj = (int)floor(gy);
+      /* nodes on the first or last column or row of the grid, within
+         rounding, use the cell next to them */
+      if (gi == -1 && gx > -MB_CUBE_GRID_EDGE)
+        gi = 0;
+      else if (gi == grid_nx - 1 && gx - gi < MB_CUBE_GRID_EDGE)
+        gi = grid_nx - 2;
+      if (gj == -1 && gy > -MB_CUBE_GRID_EDGE)
+        gj = 0;
+      else if (gj == grid_ny - 1 && gy - gj < MB_CUBE_GRID_EDGE)
+        gj = grid_ny - 2;
       if (gi < 0 || gi >= grid_nx - 1 || gj < 0 || gj >= grid_ny - 1)
         continue;
       const float z00 = grid[gi * grid_ny + gj];
@@ -697,8 +708,14 @@ int mb_cube_median_add(int verbose, void *median_ptr, double x, double y, double
   int status = MB_SUCCESS;
   *error = MB_ERROR_NO_ERROR;
   *bytes = (double)median->nbins_alloc * sizeof(struct mb_cube_median_bin);
-  const int i = (int)floor(x / (median->factor * median->dx) + 0.5);
-  const int j = (int)floor(y / (median->factor * median->dy) + 0.5);
+  int i = (int)floor(x / (median->factor * median->dx) + 0.5);
+  int j = (int)floor(y / (median->factor * median->dy) + 0.5);
+  /* soundings of the CUBE grid beyond the last node of a coarser median
+     grid go to that node */
+  if (i == median->mxdim && x <= (median->nx - 1) * median->dx)
+    i = median->mxdim - 1;
+  if (j == median->mydim && y <= (median->ny - 1) * median->dy)
+    j = median->mydim - 1;
   if (i >= 0 && i < median->mxdim && j >= 0 && j < median->mydim) {
     if (median->nbins == median->nbins_alloc) {
       /* double the bins, in size_t so that the count cannot overflow, up to
@@ -754,7 +771,8 @@ static int mb_cube_median_compare(const void *a, const void *b) {
    heights in the reference (nodes without soundings get no prediction),
    and a coarser median grid interpolated bilinearly to the nodes, as the
    reference interpolates its initialisation grid (nodes need valid median
-   values at the corners of their cell). nused returns the number of
+   values at the corners of their cell; nodes beyond the last median node
+   take its values). nused returns the number of
    soundings used; the soundings are released. */
 int mb_cube_median_surface(int verbose, void *median_ptr, float nodata, float *depth, int *nused, int *error) {
   if (verbose >= 2) {
@@ -795,12 +813,19 @@ int mb_cube_median_surface(int verbose, void *median_ptr, float nodata, float *d
           depth[k] = nodata;
           const int mi = i / mf;
           const int mj = j / mf;
-          const double fx = (double)(i - mi * mf) / mf;
-          const double fy = (double)(j - mj * mf) / mf;
-          const int mi1 = fx > 0.0 ? mi + 1 : mi;
-          const int mj1 = fy > 0.0 ? mj + 1 : mj;
-          if (mi1 >= mxdim || mj1 >= mydim)
-            continue;
+          double fx = (double)(i - mi * mf) / mf;
+          double fy = (double)(j - mj * mf) / mf;
+          int mi1 = fx > 0.0 ? mi + 1 : mi;
+          int mj1 = fy > 0.0 ? mj + 1 : mj;
+          /* nodes beyond the last median node take its values */
+          if (mi1 >= mxdim) {
+            mi1 = mi;
+            fx = 0.0;
+          }
+          if (mj1 >= mydim) {
+            mj1 = mj;
+            fy = 0.0;
+          }
           const float z00 = mgrid[mi * mydim + mj];
           const float z10 = mgrid[mi1 * mydim + mj];
           const float z01 = mgrid[mi * mydim + mj1];

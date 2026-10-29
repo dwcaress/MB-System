@@ -1104,4 +1104,45 @@ TEST(MbCubeOptions, SampleGrid) {
   EXPECT_EQ(kNoData, depth[3]);
 }
 
+TEST(MbCubeOptions, SampleGridEdges) {
+  int error = MB_ERROR_NO_ERROR;
+  // a 3 x 2 grid sampled at its own nodes, within rounding, keeps every
+  // value including the last column and row
+  std::vector<float> grid(6);
+  for (int k = 0; k < 6; k++)
+    grid[k] = static_cast<float>(100 + k);
+  std::vector<float> depth(6);
+  ASSERT_EQ(MB_SUCCESS, mb_cube_sample_grid(verbose, grid.data(), 3, 2, 10.0, 20.0, 2.0, 2.0, -1.0f, 1.0, 3, 2,
+                                            10.0 - 1.0e-9, 20.0 + 1.0e-9, 2.0, 2.0, kNoData, depth.data(), &error));
+  for (int k = 0; k < 6; k++)
+    EXPECT_FLOAT_EQ(grid[k], depth[k]) << k;
+  // shifted one cell west: nodes a cell outside the grid get no value, node
+  // (1,0) takes the value of grid node (0,0)
+  ASSERT_EQ(MB_SUCCESS, mb_cube_sample_grid(verbose, grid.data(), 3, 2, 10.0, 20.0, 2.0, 2.0, -1.0f, 1.0, 3, 2, 8.0,
+                                            20.0, 2.0, 2.0, kNoData, depth.data(), &error));
+  EXPECT_EQ(kNoData, depth[0]);
+  EXPECT_FLOAT_EQ(grid[0], depth[2]);
+}
+
+TEST(MbCubeOptions, MedianSurfaceEdgeStrip) {
+  int error = MB_ERROR_NO_ERROR;
+  void *median = nullptr;
+  // 6 nodes 1 m apart, median grid of factor 2 with nodes at 0, 2 and 4 m:
+  // the node at 5 m lies beyond the last median node
+  ASSERT_EQ(MB_SUCCESS, mb_cube_median_init(verbose, 6, 1, 1.0, 1.0, 2, 1.0e9, &median, &error));
+  double bytes = 0.0;
+  ASSERT_EQ(MB_SUCCESS, mb_cube_median_add(verbose, median, 0.0, 0.0, 10.0, &bytes, &error));
+  ASSERT_EQ(MB_SUCCESS, mb_cube_median_add(verbose, median, 2.0, 0.0, 12.0, &bytes, &error));
+  ASSERT_EQ(MB_SUCCESS, mb_cube_median_add(verbose, median, 4.0, 0.0, 14.0, &bytes, &error));
+  ASSERT_EQ(MB_SUCCESS, mb_cube_median_add(verbose, median, 5.0, 0.0, 30.0, &bytes, &error));  // to the node at 4 m
+  std::vector<float> depth(6);
+  int nused = 0;
+  ASSERT_EQ(MB_SUCCESS, mb_cube_median_surface(verbose, median, kNoData, depth.data(), &nused, &error));
+  EXPECT_EQ(4, nused);
+  EXPECT_FLOAT_EQ(13.0f, depth[3]);
+  EXPECT_FLOAT_EQ(14.0f, depth[4]);  // lower median of 14 and 30
+  EXPECT_FLOAT_EQ(14.0f, depth[5]);  // value of the last median node
+  EXPECT_EQ(MB_SUCCESS, mb_cube_median_deall(verbose, &median, &error));
+}
+
 }  // namespace

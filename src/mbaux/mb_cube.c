@@ -617,14 +617,29 @@ int mb_cube_set_prediction(int verbose, void *cube_ptr, const float *depth, cons
   return (status);
 }
 /*--------------------------------------------------------------------------*/
+/* Next size of a pool of nalloc entries grown by doubling, at least
+   MB_CUBE_ALLOC_MIN and at most the INT_MAX entries an int can index, or 0
+   if the pool holds INT_MAX entries already. */
+static int mb_cube_pool_grow(int nalloc) {
+  if (nalloc == INT_MAX)
+    return (0);
+  const size_t size = MAX((size_t)MB_CUBE_ALLOC_MIN, 2 * (size_t)nalloc);
+  return (size > INT_MAX ? INT_MAX : (int)size);
+}
+/*--------------------------------------------------------------------------*/
 /* Get a free queue slot, growing the pool if needed. */
 static int mb_cube_queue_alloc(int verbose, struct mb_cube_struct *cube, int *slot, int *error) {
   int status = MB_SUCCESS;
   if (cube->nqueue_free == 0) {
-    const int nalloc = MAX(MB_CUBE_ALLOC_MIN, 2 * cube->nqueue_alloc);
-    status = mb_reallocd(verbose, __FILE__, __LINE__,
-                         (size_t)nalloc * (size_t)cube->param.median_length * sizeof(struct mb_cube_queue_entry),
-                         (void **)&cube->queues, error);
+    const int nalloc = mb_cube_pool_grow(cube->nqueue_alloc);
+    if (nalloc == 0) {
+      status = MB_FAILURE;
+      *error = MB_ERROR_MEMORY_FAIL;
+    }
+    else
+      status = mb_reallocd(verbose, __FILE__, __LINE__,
+                           (size_t)nalloc * (size_t)cube->param.median_length * sizeof(struct mb_cube_queue_entry),
+                           (void **)&cube->queues, error);
     if (status == MB_SUCCESS)
       status = mb_reallocd(verbose, __FILE__, __LINE__, (size_t)nalloc * sizeof(int), (void **)&cube->queue_free, error);
     if (status != MB_SUCCESS) {
@@ -645,9 +660,14 @@ static int mb_cube_new_hyp(int verbose, struct mb_cube_struct *cube, struct mb_c
                            int num_samples, int *error) {
   int status = MB_SUCCESS;
   if (cube->nhyp_used == cube->nhyp_alloc) {
-    const int nalloc = MAX(MB_CUBE_ALLOC_MIN, 2 * cube->nhyp_alloc);
-    status = mb_reallocd(verbose, __FILE__, __LINE__, (size_t)nalloc * sizeof(struct mb_cube_hyp), (void **)&cube->hyps,
-                         error);
+    const int nalloc = mb_cube_pool_grow(cube->nhyp_alloc);
+    if (nalloc == 0) {
+      status = MB_FAILURE;
+      *error = MB_ERROR_MEMORY_FAIL;
+    }
+    else
+      status = mb_reallocd(verbose, __FILE__, __LINE__, (size_t)nalloc * sizeof(struct mb_cube_hyp),
+                           (void **)&cube->hyps, error);
     if (status != MB_SUCCESS) {
       cube->failed = true;
       return (status);
@@ -845,6 +865,59 @@ static int mb_cube_queue_add(int verbose, struct mb_cube_struct *cube, struct mb
   return (mb_cube_update_node(verbose, cube, node, median.depth, median.var, error));
 }
 /*--------------------------------------------------------------------------*/
+/* Influence radius and capture distance (m) of a sounding at depth h below
+   the sonar: soundings much better than the allowed TVU spread further, but
+   never beyond influence_scale (2.95 by default, as in the reference grid
+   code and the manual) times their horizontal sigma, and never less than
+   the node spacing. */
+static void mb_cube_reach(const struct mb_cube_struct *cube, double h, double var_depth, double var_horiz,
+                          double *radius, double *capture) {
+  const struct mb_cube_param_struct *param = &cube->param;
+  const double max_var = (param->tvu_a * param->tvu_a + param->tvu_b * param->tvu_b * h * h)
+                         / (MB_CUBE_CONF_95PC * MB_CUBE_CONF_95PC);
+  double ratio = max_var / var_depth;
+  if (ratio <= 2.0)
+    ratio = 2.0;
+  const double max_radius = param->influence_scale * sqrt(var_horiz);
+  *radius = cube->dist_scale * pow(ratio - 1.0, 1.0 / param->dist_exp) - max_radius;
+  if (*radius < 0.0)
+    *radius = cube->dist_scale;
+  if (*radius > max_radius)
+    *radius = max_radius;
+  if (*radius < cube->dist_scale)
+    *radius = cube->dist_scale;
+  *capture = MAX(param->capture_scale * h, param->capture_min);
+}
+/*--------------------------------------------------------------------------*/
+/* The predicted surface interpolated bilinearly at (x, y) for the slope
+   correction, only where the four surrounding nodes have a prediction. As
+   in the reference, the cell is found counting rows from the northern edge,
+   so a sounding on the southern edge gets none. Returns false where there
+   is none. */
+static bool mb_cube_surface_at(const struct mb_cube_struct *cube, double x, double y, float *snd_pred) {
+  if (cube->pred_depth == NULL)
+    return (false);
+  const double y_north = (cube->ny - 1) * cube->dy - y;
+  const double fi = floor(x / cube->dx);
+  const double fr = floor(y_north / cube->dy);
+  if (!(fi >= 0.0 && fi < cube->nx - 1 && fr >= 0.0 && fr < cube->ny - 1))
+    return (false);
+  const int i0 = (int)fi;
+  const int row = (int)fr;
+  const size_t kn0 = (size_t)i0 * cube->ny + (cube->ny - 1 - row); /* north-west */
+  const size_t kn1 = kn0 + cube->ny;                              /* north-east */
+  const size_t ks0 = kn0 - 1;                                     /* south-west */
+  const size_t ks1 = kn1 - 1;                                     /* south-east */
+  if (cube->pred_var[kn0] == MB_CUBE_PRED_NONE || cube->pred_var[kn1] == MB_CUBE_PRED_NONE
+      || cube->pred_var[ks0] == MB_CUBE_PRED_NONE || cube->pred_var[ks1] == MB_CUBE_PRED_NONE)
+    return (false);
+  const double fx = (x - i0 * cube->dx) / cube->dx;
+  const double fn = (cube->dy * (row + 1) - y_north) / cube->dy; /* weight of the northern nodes */
+  *snd_pred = (float)(cube->pred_depth[kn0] * (1.0 - fx) * fn + cube->pred_depth[kn1] * fx * fn
+                      + cube->pred_depth[ks0] * (1.0 - fx) * (1.0 - fn) + cube->pred_depth[ks1] * fx * (1.0 - fn));
+  return (true);
+}
+/*--------------------------------------------------------------------------*/
 int mb_cube_insert(int verbose, void *cube_ptr, double x, double y, double depth, double depth_sonar, double var_depth,
                    double var_horiz, int *nused, int *error) {
   if (verbose >= 2) {
@@ -879,55 +952,15 @@ int mb_cube_insert(int verbose, void *cube_ptr, double x, double y, double depth
   if (status == MB_SUCCESS) {
     const double h = fabs(depth_sonar);
 
-    /* influence radius: soundings much better than the allowed TVU spread
-       further, but never beyond influence_scale (2.95 by default, as in the
-       reference grid code and the manual) times their horizontal sigma, and
-       never less than the node spacing */
-    const double max_var = (param->tvu_a * param->tvu_a + param->tvu_b * param->tvu_b * h * h)
-                           / (MB_CUBE_CONF_95PC * MB_CUBE_CONF_95PC);
-    double ratio = max_var / var_depth;
-    if (ratio <= 2.0)
-      ratio = 2.0;
-    const double max_radius = param->influence_scale * sqrt(var_horiz);
-    double radius = cube->dist_scale * pow(ratio - 1.0, 1.0 / param->dist_exp) - max_radius;
-    if (radius < 0.0)
-      radius = cube->dist_scale;
-    if (radius > max_radius)
-      radius = max_radius;
-    if (radius < cube->dist_scale)
-      radius = cube->dist_scale;
+    /* influence radius and capture distance; with a predicted surface the
+       sonar depth, and the surface at the sounding for the slope correction */
+    double radius;
+    double capture;
+    mb_cube_reach(cube, h, var_depth, var_horiz, &radius, &capture);
     const double radius_sq = radius * radius;
-    const double capture = MAX(param->capture_scale * h, param->capture_min);
-
-    /* with a predicted surface: the sonar depth, and the surface interpolated
-       bilinearly at the sounding for the slope correction (only where the
-       four surrounding nodes have a prediction). As in the reference, the
-       cell is found counting rows from the northern edge, so a sounding on
-       the southern edge gets no slope correction. */
     const double sonar_depth = depth - depth_sonar;
-    bool snd_pred_ok = false;
     float snd_pred = 0.0f;
-    if (cube->pred_depth != NULL) {
-      const double y_north = (cube->ny - 1) * cube->dy - y;
-      const double fi = floor(x / cube->dx);
-      const double fr = floor(y_north / cube->dy);
-      if (fi >= 0.0 && fi < cube->nx - 1 && fr >= 0.0 && fr < cube->ny - 1) {
-        const int i0 = (int)fi;
-        const int row = (int)fr;
-        const size_t kn0 = (size_t)i0 * cube->ny + (cube->ny - 1 - row); /* north-west */
-        const size_t kn1 = kn0 + cube->ny;                              /* north-east */
-        const size_t ks0 = kn0 - 1;                                     /* south-west */
-        const size_t ks1 = kn1 - 1;                                     /* south-east */
-        if (cube->pred_var[kn0] != MB_CUBE_PRED_NONE && cube->pred_var[kn1] != MB_CUBE_PRED_NONE
-            && cube->pred_var[ks0] != MB_CUBE_PRED_NONE && cube->pred_var[ks1] != MB_CUBE_PRED_NONE) {
-          const double fx = (x - i0 * cube->dx) / cube->dx;
-          const double fn = (cube->dy * (row + 1) - y_north) / cube->dy; /* weight of the northern nodes */
-          snd_pred = (float)(cube->pred_depth[kn0] * (1.0 - fx) * fn + cube->pred_depth[kn1] * fx * fn
-                             + cube->pred_depth[ks0] * (1.0 - fx) * (1.0 - fn) + cube->pred_depth[ks1] * fx * (1.0 - fn));
-          snd_pred_ok = true;
-        }
-      }
-    }
+    const bool snd_pred_ok = mb_cube_surface_at(cube, x, y, &snd_pred);
 
     /* sign agreement of the sounding and the prediction, which shows a
        surface given with the wrong sign (mb_cube_prediction_sign) */
@@ -1420,49 +1453,15 @@ int mb_cube_classify(int verbose, void *cube_ptr, double x, double y, double dep
   if (status == MB_SUCCESS) {
     const double h = fabs(depth_sonar);
 
-    /* influence radius and capture distance as in mb_cube_insert() */
-    const double max_var = (param->tvu_a * param->tvu_a + param->tvu_b * param->tvu_b * h * h)
-                           / (MB_CUBE_CONF_95PC * MB_CUBE_CONF_95PC);
-    double ratio = max_var / var_depth;
-    if (ratio <= 2.0)
-      ratio = 2.0;
-    const double max_radius = param->influence_scale * sqrt(var_horiz);
-    double radius = cube->dist_scale * pow(ratio - 1.0, 1.0 / param->dist_exp) - max_radius;
-    if (radius < 0.0)
-      radius = cube->dist_scale;
-    if (radius > max_radius)
-      radius = max_radius;
-    if (radius < cube->dist_scale)
-      radius = cube->dist_scale;
+    /* influence radius, capture distance and the predicted surface at the
+       sounding for the slope correction, as in mb_cube_insert() */
+    double radius;
+    double capture;
+    mb_cube_reach(cube, h, var_depth, var_horiz, &radius, &capture);
     const double radius_sq = radius * radius;
-    const double capture = MAX(param->capture_scale * h, param->capture_min);
-
-    /* predicted surface at the sounding for the slope correction, as in
-       mb_cube_insert() */
     const double sonar_depth = depth - depth_sonar;
-    bool snd_pred_ok = false;
     float snd_pred = 0.0f;
-    if (cube->pred_depth != NULL) {
-      const double y_north = (cube->ny - 1) * cube->dy - y;
-      const double fi = floor(x / cube->dx);
-      const double fr = floor(y_north / cube->dy);
-      if (fi >= 0.0 && fi < cube->nx - 1 && fr >= 0.0 && fr < cube->ny - 1) {
-        const int i0 = (int)fi;
-        const int row = (int)fr;
-        const size_t kn0 = (size_t)i0 * cube->ny + (cube->ny - 1 - row);
-        const size_t kn1 = kn0 + cube->ny;
-        const size_t ks0 = kn0 - 1;
-        const size_t ks1 = kn1 - 1;
-        if (cube->pred_var[kn0] != MB_CUBE_PRED_NONE && cube->pred_var[kn1] != MB_CUBE_PRED_NONE
-            && cube->pred_var[ks0] != MB_CUBE_PRED_NONE && cube->pred_var[ks1] != MB_CUBE_PRED_NONE) {
-          const double fx = (x - i0 * cube->dx) / cube->dx;
-          const double fn = (cube->dy * (row + 1) - y_north) / cube->dy;
-          snd_pred = (float)(cube->pred_depth[kn0] * (1.0 - fx) * fn + cube->pred_depth[kn1] * fx * fn
-                             + cube->pred_depth[ks0] * (1.0 - fx) * (1.0 - fn) + cube->pred_depth[ks1] * fx * (1.0 - fn));
-          snd_pred_ok = true;
-        }
-      }
-    }
+    const bool snd_pred_ok = mb_cube_surface_at(cube, x, y, &snd_pred);
 
     /* nearest reached node holding samples */
     double best_dist_sq = DBL_MAX;

@@ -165,7 +165,11 @@ otherwise, and alternative navigation where the datalist gives it. In
 addition the current edits of each raw file (its edit save file) are
 applied, so soundings already flagged are left out. If a processed file
 is older than its raw file, parameter file or edit save file, a warning
-asks for \fBmbprocess\fP to be run first.
+asks for \fBmbprocess\fP to be run first. \fBmbgrid\fP sees these edits
+only in processed files: for edited files without processed versions, run
+\fBmbprocess\fP before comparing with \fBmbgrid\fP. The edit save file is
+registered in the parameter file only when edits are added, so a run
+that flags nothing leaves the processed files up to date.
 
 The data are read twice: the first time to build the CUBE grid, the
 second time to compare every unflagged sounding with it. A median

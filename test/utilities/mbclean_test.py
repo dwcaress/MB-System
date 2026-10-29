@@ -131,11 +131,15 @@ class MbCleanTest(unittest.TestCase):
       self.assertIn('2.501 normalized errors', output)
       self.assertGreater(detected, 0.98)
       self.assertLess(false, 0.001)
-      with open(os.path.join(tmp, 'spikes.mb71.par')) as f:
+      par = os.path.join(tmp, 'spikes.mb71.par')
+      with open(par) as f:
         self.assertIn('EDITSAVEFILE', f.read())
-      # a second run finds the flagged soundings already flagged
+      par_mtime = os.stat(par).st_mtime_ns
+      # a second run finds the flagged soundings already flagged, and leaves
+      # the parameter file as it is
       output, detected_again, false_again = self.runCubeSpikes(tmp, ['--cube-order=special'])
       self.assertIn('\n0 total beams flagged', output)
+      self.assertEqual(par_mtime, os.stat(par).st_mtime_ns)
       self.assertEqual(detected, detected_again)
       self.assertEqual(false, false_again)
 
