@@ -69,6 +69,7 @@ class MbCleanTest(unittest.TestCase):
     self.assertIn('--cube-iho-edition=4|5|6', output)
     self.assertIn('--cube-prediction=median[/factor]|gridfile', output)
     self.assertIn('--cube-prediction-topography', output)
+    self.assertIn('--cube-flag-nadir=angle/threshold[/shallow|both]', output)
 
   def testCubeCannotBeCombined(self):
     cmd = [self.cmd, '--cube-spacing=2', '-C3']
@@ -77,7 +78,8 @@ class MbCleanTest(unittest.TestCase):
     self.assertIn('cannot be combined', result.stdout.decode())
 
   def testCubeInvalidOptions(self):
-    for option in ('--cube-order=4', '--cube-flag=all', '--cube-spacing=2/x'):
+    for option in ('--cube-order=4', '--cube-flag=all', '--cube-spacing=2/x', '--cube-flag-nadir=10',
+                   '--cube-flag-nadir=10/1.5/deep', '--cube-flag-nadir=10/1.5x', '--cube-flag-nadir=10/1.5/'):
       cmd = [self.cmd, '--cube-spacing=2', option]
       result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
       self.assertEqual(9, result.returncode, option)
@@ -89,6 +91,15 @@ class MbCleanTest(unittest.TestCase):
     result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     self.assertEqual(12, result.returncode)  # MB_ERROR_BAD_PARAMETER
     self.assertIn('(--cube-bayes-factor) must be below exp(h^2 / 2)', result.stdout.decode())
+
+  def testCubeNadirBadParameters(self):
+    for options, message in ((['--cube-flag-nadir=0/1.5'], 'needs an angle between 0 and 90 degrees'),
+                             (['--cube-flag-nadir=10/0'], 'needs an angle between 0 and 90 degrees'),
+                             (['--cube-flag-nadir=10/1.5', '--cube-flag=hypothesis'], 'needs the outlier criterion')):
+      cmd = [self.cmd, '--cube-spacing=2'] + options
+      result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+      self.assertEqual(12, result.returncode, options)  # MB_ERROR_BAD_PARAMETER
+      self.assertIn(message, result.stdout.decode())
 
   def testCubePredictionTopographyNeedsGrid(self):
     cmd = [self.cmd, '--cube-spacing=2', '--cube-prediction-topography']
@@ -120,6 +131,82 @@ class MbCleanTest(unittest.TestCase):
     flagged = read_esf_filter_edits(swath + '.esf')
     self.assertGreater(len(spikes), 1000)
     return output, len(flagged & spikes) / len(spikes), len(flagged & good) / len(good)
+
+  def runCubeNadir(self, tmp, options):
+    """Flags a flat seafloor at 100 m whose nadir soundings (within 7.5
+    degrees) are 1 m shallower (20%) or deeper (5%), with 2% of the other
+    soundings 1 m off either way. Returns the output and the flagged
+    fractions of the shallow and deep nadir soundings, of the other offset
+    soundings and of the good soundings."""
+    swath = os.path.join(tmp, 'nadir.mb71')
+    if os.path.exists(swath + '.esf'):
+      os.remove(swath + '.esf')
+    if not os.path.exists(swath):
+      subprocess.check_output([self.synthetic, swath, 'nadir', '100', '0'])
+    cmd = [os.path.abspath(self.cmd), '-I' + swath, '-V', '--cube-spacing=2', '--cube-model=constant',
+           '--cube-sigma-v=0.05', '--cube-sigma-h=0.5'] + options
+    output = subprocess.check_output(cmd, stderr=subprocess.STDOUT, cwd=tmp).decode()
+    listing = subprocess.check_output([self.mblist, '-I' + swath, '-F71', '-MA', '-OM#z'], cwd=tmp).decode()
+    groups = {'shallow': set(), 'deep': set(), 'other': set(), 'good': set()}
+    for line in listing.splitlines():
+      time_d, beam, depth = line.split()
+      key = (round(float(time_d), 6), int(beam))
+      nadir = abs(-60.0 + 1.2 * int(beam)) < 7.5  # 101 beams over +/-60 degrees
+      offset = float(depth) - 100.0
+      if abs(offset) < 0.5:
+        groups['good'].add(key)
+      elif nadir:
+        groups['shallow' if offset < 0.0 else 'deep'].add(key)
+      else:
+        groups['other'].add(key)
+    for name in ('shallow', 'deep', 'other'):
+      self.assertGreater(len(groups[name]), 100, name)
+    flagged = read_esf_filter_edits(swath + '.esf') if os.path.exists(swath + '.esf') else set()
+    return output, {name: len(flagged & keys) / len(keys) for name, keys in groups.items()}
+
+  def testCubeNadirShallow(self):
+    if not os.path.exists(self.synthetic) or not os.path.exists(self.mblist):
+      self.skipTest('mbcube_synthetic or mblist not built')
+    with tempfile.TemporaryDirectory() as tmp:
+      output, flagged = self.runCubeNadir(tmp, ['--cube-flag-nadir=8/5', '--cube-flag-threshold=50'])
+      self.assertIn('Nadir sector:           beam angle < 8.0 deg: soundings more than 5.000 normalized errors '
+                    'shallower than the selected hypothesis', output)
+      # at a few nodes the shallow soundings outnumber the others and form
+      # the selected hypothesis, so not all of them are flagged
+      self.assertGreater(flagged['shallow'], 0.9)
+      self.assertLess(flagged['deep'], 0.01)
+      self.assertLess(flagged['other'], 0.01)
+      self.assertLess(flagged['good'], 0.001)
+      # -V lists the flagged soundings with their beam angle (here below 8 degrees)
+      angles = [float(line.split()[-1]) for line in output.splitlines() if line.startswith('c: ')]
+      self.assertGreater(len(angles), 100)
+      self.assertLess(max(angles), 8.0)
+
+  def testCubeNadirBoth(self):
+    if not os.path.exists(self.synthetic) or not os.path.exists(self.mblist):
+      self.skipTest('mbcube_synthetic or mblist not built')
+    with tempfile.TemporaryDirectory() as tmp:
+      output, flagged = self.runCubeNadir(tmp, ['--cube-flag-nadir=8/5/both', '--cube-flag-threshold=50'])
+      self.assertIn('normalized errors from the selected hypothesis', output)
+      self.assertGreater(flagged['shallow'], 0.9)
+      self.assertGreater(flagged['deep'], 0.95)
+      self.assertLess(flagged['other'], 0.01)
+      # good soundings at the nodes where the shallow ones form the selected
+      # hypothesis are 1 m deeper than it
+      self.assertLess(flagged['good'], 0.005)
+
+  def testCubeNadirOff(self):
+    if not os.path.exists(self.synthetic) or not os.path.exists(self.mblist):
+      self.skipTest('mbcube_synthetic or mblist not built')
+    with tempfile.TemporaryDirectory() as tmp:
+      # without the option one threshold applies to all soundings, and the
+      # -V lines keep their columns
+      output, flagged = self.runCubeNadir(tmp, ['--cube-flag-threshold=5'])
+      self.assertNotIn('Nadir sector', output)
+      for name in ('shallow', 'deep', 'other'):
+        self.assertGreater(flagged[name], 0.9, name)
+      self.assertLess(flagged['good'], 0.005)
+      self.assertTrue(all(len(line.split()) == 11 for line in output.splitlines() if line.startswith('c: ')))
 
   def testCubeFlagsSpikes(self):
     if not os.path.exists(self.synthetic) or not os.path.exists(self.mblist):

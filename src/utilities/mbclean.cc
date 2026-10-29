@@ -139,6 +139,10 @@ struct mbclean_cube_struct {
   double threshold;                      /* outlier threshold (normalized error) */
   double strength_max;                   /* largest node strength where the hypothesis criterion applies */
   bool prediction_topography;            /* the predicted surface grid holds heights (positive up) */
+  bool nadir_set;                        /* nadir sector given with --cube-flag-nadir */
+  double nadir_angle;                    /* half-width of the nadir sector (degrees from vertical) */
+  double nadir_threshold;                /* outlier threshold in the nadir sector (normalized error) */
+  bool nadir_both;                       /* nadir test two-sided; default only soundings shallower than the hypothesis */
 };
 
 /* bad beam identifier structure definition */
@@ -160,6 +164,7 @@ constexpr char usage_message[] =
     "\t--cube-spacing=dx[/dy] (CUBE flagging, see the manual page; it cannot be combined with other tests)\n"
     "\t--cube-region=west/east/south/north\n"
     "\t--cube-flag=hypothesis|outlier|both\n"
+    "\t--cube-flag-nadir=angle/threshold[/shallow|both]\n"
     "\t--cube-flag-strength-max=strength\n"
     "\t--cube-flag-threshold=threshold\n"
     "\t--cube-bayes-factor=threshold\n"
@@ -298,6 +303,15 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
   }
   if (cube->threshold_set && !(cube->threshold > 0.0)) {
     fprintf(stderr, "\nThe CUBE outlier threshold (--cube-flag-threshold) must be positive\n");
+    ok = false;
+  }
+  if (cube->nadir_set && (!(cube->nadir_angle > 0.0) || !(cube->nadir_angle < 90.0) || !(cube->nadir_threshold > 0.0))) {
+    fprintf(stderr, "\nThe CUBE nadir sector (--cube-flag-nadir) needs an angle between 0 and 90 degrees and a positive "
+                    "threshold\n");
+    ok = false;
+  }
+  if (cube->nadir_set && !(cube->flag & MBCLEAN_CUBE_FLAG_OUTLIER)) {
+    fprintf(stderr, "\nThe CUBE nadir sector (--cube-flag-nadir) needs the outlier criterion (--cube-flag=outlier|both)\n");
     ok = false;
   }
   if (cube->prediction_topography && options->prediction != MB_CUBE_PREDICTION_FILE) {
@@ -454,6 +468,10 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
     if (cube->flag & MBCLEAN_CUBE_FLAG_OUTLIER)
       fprintf(stderr, "  Flag:                   soundings more than %.3f normalized errors from the selected hypothesis\n",
               cube->threshold);
+    if (cube->nadir_set)
+      fprintf(stderr, "  Nadir sector:           beam angle < %.1f deg: soundings more than %.3f normalized errors %s\n",
+              cube->nadir_angle, cube->nadir_threshold,
+              cube->nadir_both ? "from the selected hypothesis" : "shallower than the selected hypothesis");
     if (cube->flag & MBCLEAN_CUBE_FLAG_HYPOTHESIS && cube->strength_max < 5.0)
       fprintf(stderr, "  Strength limit:         %f\n", cube->strength_max);
     fprintf(stderr, "  Memory estimate:        %.2f GB (limit %.2f GB)\n", cube_memory / 1.0e9, options->memory_limit);
@@ -764,6 +782,12 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
             if (esf_loaded)
               mb_esf_apply(verbose, &esf, time_d, multiplicity, beams_bath, beamflag, &error);
 
+            /* meters to degrees at the sonar, for the beam angles of the nadir sector */
+            double ping_mtodeglon = 0.0;
+            double ping_mtodeglat = 0.0;
+            if (pass == 2 && cube->nadir_set)
+              mb_coor_scale(verbose, navlat, &ping_mtodeglon, &ping_mtodeglat);
+
             for (int ib = 0; ib < beams_bath; ib++) {
               if (!mb_beam_ok(beamflag[ib]))
                 continue;
@@ -819,6 +843,18 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
                 continue;
               }
               ntested++;
+
+              /* beam angle from vertical, from the horizontal distance of the
+                 sounding to the sonar and its depth below the sonar */
+              double beam_angle = 90.0;
+              if (cube->nadir_set) {
+                const double dx = (bathlon[ib] - navlon) / ping_mtodeglon;
+                const double dy = (bathlat[ib] - navlat) / ping_mtodeglat;
+                const double dz = bath[ib] - sensordepth;
+                if (dz > 0.0)
+                  beam_angle = RTD * atan2(sqrt(dx * dx + dy * dy), dz);
+              }
+
               const char *reason = nullptr;
               if (is_blunder) {
                 reason = "blunder";
@@ -828,12 +864,26 @@ int mbclean_cube(int verbose, char *read_file, int format, int lonflip, int ping
                 reason = "hypothesis";
                 nhypothesis++;
               }
-              else if ((cube->flag & MBCLEAN_CUBE_FLAG_OUTLIER) && fabs(error_selected) > cube->threshold) {
-                reason = "outlier";
-                noutlier++;
+              else if (cube->flag & MBCLEAN_CUBE_FLAG_OUTLIER) {
+                const bool nadir = cube->nadir_set && beam_angle < cube->nadir_angle;
+                bool outlier;
+                if (nadir && cube->nadir_both)
+                  outlier = fabs(error_selected) > cube->nadir_threshold;
+                else if (nadir)
+                  outlier = error_selected < -cube->nadir_threshold;
+                else
+                  outlier = fabs(error_selected) > cube->threshold;
+                if (outlier) {
+                  reason = "outlier";
+                  noutlier++;
+                }
               }
               if (reason != nullptr) {
-                if (verbose >= 1)
+                if (verbose >= 1 && cube->nadir_set)
+                  fprintf(stderr, "c: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f %s %d %.3f %.2f %.1f\n", time_i[0],
+                          time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], ib, bath[ib], reason, nhyp,
+                          error_selected, strength, beam_angle);
+                else if (verbose >= 1)
                   fprintf(stderr, "c: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f %s %d %.3f %.2f\n", time_i[0],
                           time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], ib, bath[ib], reason, nhyp,
                           error_selected, strength);
@@ -1088,6 +1138,10 @@ int main(int argc, char **argv) {
   cube.threshold = 0.0;
   cube.strength_max = 5.0;
   cube.prediction_topography = false;
+  cube.nadir_set = false;
+  cube.nadir_angle = 0.0;
+  cube.nadir_threshold = 0.0;
+  cube.nadir_both = false;
 
   {
     static struct option options[] = {{"verbose", no_argument, nullptr, 0},
@@ -1117,6 +1171,7 @@ int main(int argc, char **argv) {
                                       {"cube-spacing", required_argument, nullptr, 0},
                                       {"cube-region", required_argument, nullptr, 0},
                                       {"cube-flag", required_argument, nullptr, 0},
+                                      {"cube-flag-nadir", required_argument, nullptr, 0},
                                       {"cube-flag-threshold", required_argument, nullptr, 0},
                                       {"cube-flag-strength-max", required_argument, nullptr, 0},
                                       {"cube-bayes-factor", required_argument, nullptr, 0},
@@ -1327,6 +1382,24 @@ int main(int argc, char **argv) {
             fprintf(stderr, "Invalid CUBE option: --%s=%s\n\n", options[option_index].name, optarg);
             errflg = true;
           }
+        }
+        else if (strcmp("cube-flag-nadir", options[option_index].name) == 0) {
+          char separator = '\0';
+          char mode[16] = "";
+          char extra;
+          const int n = sscanf(optarg, "%lf/%lf%c%15[a-z]%c", &cube.nadir_angle, &cube.nadir_threshold, &separator, mode,
+                               &extra);
+          if (n == 2)
+            cube.nadir_both = false;
+          else if (n == 4 && separator == '/' && strcmp(mode, "shallow") == 0)
+            cube.nadir_both = false;
+          else if (n == 4 && separator == '/' && strcmp(mode, "both") == 0)
+            cube.nadir_both = true;
+          else {
+            fprintf(stderr, "Invalid CUBE option: --%s=%s\n\n", options[option_index].name, optarg);
+            errflg = true;
+          }
+          cube.nadir_set = true;
         }
         else if (strcmp("cube-flag-threshold", options[option_index].name) == 0) {
           char extra;

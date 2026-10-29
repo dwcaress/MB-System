@@ -2,8 +2,10 @@
 // known seafloor, for tests of CUBE gridding in mbgrid (mbgrid_test.py).
 //
 // Usage: mbcube_synthetic output_file seafloor depth sensordepth [seed]
-//   seafloor:    flat, step (0.5 m deeper east of the first line) or spikes
-//                (2% of the soundings 5 to 20 m off the seafloor)
+//   seafloor:    flat, step (0.5 m deeper east of the first line), spikes
+//                (2% of the soundings 5 to 20 m off the seafloor) or nadir
+//                (flat; within 7.5 degrees of nadir 20% of the soundings 1 m
+//                shallower and 5% 1 m deeper, elsewhere 2% 1 m off either way)
 //   depth:       seafloor depth (m, positive down)
 //   sensordepth: sonar depth (m, positive down), e.g. 0 for a surface
 //                vessel or depth - 50 for an AUV
@@ -60,14 +62,14 @@ double rng_normal() {
 
 int main(int argc, char **argv) {
   if (argc < 5) {
-    fprintf(stderr, "usage: %s output_file flat|step|spikes depth sensordepth [seed]\n", argv[0]);
+    fprintf(stderr, "usage: %s output_file flat|step|spikes|nadir depth sensordepth [seed]\n", argv[0]);
     return 2;
   }
   const std::string seafloor = argv[2];
   const double depth0 = atof(argv[3]);
   const double sensordepth = atof(argv[4]);
   const unsigned int seed = argc > 5 ? (unsigned int)atoi(argv[5]) : 1;
-  if (seafloor != "flat" && seafloor != "step" && seafloor != "spikes") {
+  if (seafloor != "flat" && seafloor != "step" && seafloor != "spikes" && seafloor != "nadir") {
     fprintf(stderr, "unknown seafloor %s\n", seafloor.c_str());
     return 2;
   }
@@ -111,6 +113,13 @@ int main(int argc, char **argv) {
         depth += kNoise * rng_normal();
         if (seafloor == "spikes" && rng_uniform() < 0.02)
           depth += (rng_uniform() < 0.5 ? -1.0 : 1.0) * (5.0 + 15.0 * rng_uniform());
+        if (seafloor == "nadir") {
+          const double u = rng_uniform();
+          if (fabs(angle) < 7.5 * M_PI / 180.0)
+            depth += u < 0.2 ? -1.0 : (u < 0.25 ? 1.0 : 0.0);
+          else
+            depth += u < 0.01 ? -1.0 : (u < 0.02 ? 1.0 : 0.0);
+        }
         bath[ib] = depth;
         nsoundings++;
       }

@@ -64,6 +64,8 @@ Version 5.0
 .br
 --cube-flag-threshold=threshold
 .br
+--cube-flag-nadir=angle/threshold[/shallow|both]
+.br
 --cube-flag-strength-max=strength
 .br
 --cube-prediction-topography
@@ -195,7 +197,10 @@ The sounding is flagged if its normalized error from the selected
 hypothesis exceeds a threshold. By default the threshold is the one at
 which the CUBE monitor rejects a single sample,
 (h^2 \- 2 ln B) / (2 h) with h from \fB\-\-cube\-est\-offset\fP and B from
-\fB\-\-cube\-bayes\-factor\fP: 2.50 with the defaults.
+\fB\-\-cube\-bayes\-factor\fP: 2.50 with the defaults. With
+\fB\-\-cube\-flag\-nadir\fP, soundings in the nadir sector have their own
+threshold and, by default, are flagged only when they are shallower than
+the hypothesis (see below).
 .TP
 .B blunder
 With a predicted surface and the blunder test on, soundings that the
@@ -207,6 +212,20 @@ nothing is unflagged. The flags are appended to the edit save file of
 the raw file as filter flags, as for the other \fBmbclean\fP tests; they
 cannot be told apart from other filter flags once \fBmbprocess\fP has
 applied them.
+
+Deep water multibeam data can show a centre-beam artefact: near nadir,
+bottom detections that are too shallow, by a fraction of a percent to a
+few percent of the depth, often over several adjacent beams. These soundings are one-sided (almost
+all shallower than the seafloor) and many are small, so a symmetric
+threshold that catches them also flags many valid soundings in the outer
+beams and on slopes. \fB\-\-cube\-flag\-nadir\fP gives the soundings in a
+sector around nadir their own outlier threshold, applied by default only to
+soundings shallower than the selected hypothesis; the soundings outside the
+sector keep the threshold of \fB\-\-cube\-flag\-threshold\fP. The beam
+angle is the angle from the vertical between the sonar and the sounding,
+from the horizontal distance between the sonar position and the sounding
+and the depth of the sounding below the sonar. The CUBE surface itself is
+the same with and without this option.
 
 The test depends on the sounding uncertainties as much as the CUBE
 surface does. The propagated variance v grows with the horizontal
@@ -513,6 +532,18 @@ Sets the normalized error from the selected hypothesis above which the
 outlier threshold of the CUBE monitor, 2.50 with the default
 \fB\-\-cube\-est\-offset\fP and \fB\-\-cube\-bayes\-factor\fP.
 .TP
+.B \-\-cube\-flag\-nadir=angle/threshold[/shallow|both]
+Gives the soundings whose beam angle from the vertical is less than
+\fIangle\fP degrees on either side of nadir their own \fBoutlier\fP
+threshold \fIthreshold\fP (a normalized error, see CUBE FLAGGING). With
+\fBshallow\fP (the default) only soundings shallower than the selected
+hypothesis by more than \fIthreshold\fP are flagged there; with
+\fBboth\fP, soundings deeper by more than \fIthreshold\fP are flagged
+too. Soundings outside the sector keep the threshold of
+\fB\-\-cube\-flag\-threshold\fP. Needs the \fBoutlier\fP criterion. With
+\fB\-V\fP the beam angle is added at the end of the lines listing the
+flagged soundings. Default: off.
+.TP
 .B \-\-cube\-flag\-strength\-max=strength
 Applies the \fBhypothesis\fP criterion only at nodes whose hypothesis
 strength (0 for a certain node, up to 5 for an ambiguous one) is at most
@@ -703,6 +734,21 @@ small offsets near nadir. A 100 m node spacing flagged more valid soundings
 on steep slopes. Tune the vertical uncertainty and the threshold together
 (their product, here about 1% of the depth, sets the cutoff) and inspect
 the result in \fBmbeditviz\fP before running \fBmbprocess\fP.
+
+To aim at the centre-beam artefact instead, flag soundings within 10
+degrees of nadir that are more than 1.5 normalized errors shallower than
+the CUBE surface, and elsewhere only those more than 5 normalized errors
+away:
+
+ 	mbclean \-Idatalist.mb-1 \-\-cube\-spacing=50 \-\-cube\-order=special \\
+ 	    \-\-cube\-flag\-nadir=10/1.5 \-\-cube\-flag\-threshold=5
+
+On the same EM122 survey, preprocessed and corrected for sound speed, this
+flagged 10,231 soundings (0.44%), of which 54% agreed with manual flags,
+covering 27% of the manual flags; a single threshold of 2.5 with the same
+grid and model flagged 19,759 soundings for 29% agreement and 29% coverage.
+The sector and the thresholds were chosen on this survey; check them on
+other systems and depths.
 
 .SH SEE ALSO
 \fBmbsystem\fP(1), \fBmbedit\fP(1),
