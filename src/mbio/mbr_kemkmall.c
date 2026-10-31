@@ -263,6 +263,7 @@ int mbr_kemkmall_create_dgm_index_table(int verbose, void *mbio_ptr, void *store
 
   if (status == MB_SUCCESS) {
     dgm_index_table->dgm_count = 0;
+    dgm_index_table->num_mrz = 0;
 
     /* allocate the datagram index table array */
     size_bytes = MBSYS_KMBES_INDEX_TABLE_BLOCK_SIZE * sizeof(struct mbsys_kmbes_index);
@@ -2478,6 +2479,58 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
 
 /*--------------------------------------------------------------------*/
 
+/* Check that the counts and size fields of an #MWC datagram locate all of its data
+   inside the datagram, whose last 4 bytes repeat the datagram size */
+static bool mbr_kemkmall_mwc_valid(char *buffer, unsigned int numBytesDgm) {
+  unsigned short numBytesCmnPart, numBytesTxInfo, numTxSectors, numBytesPerTxSector;
+  unsigned short numBytesRxInfo, numBeams, numSampleData;
+  const size_t index_end = (numBytesDgm >= 4) ? (size_t)numBytesDgm - 4 : 0;
+
+  /* EMdgmMbody follows the header and the 2 shorts of EMdgmMpartition */
+  size_t index = MBSYS_KMBES_HEADER_SIZE + 4;
+  if (index + 2 > index_end)
+    return false;
+  mb_get_binary_short(true, &buffer[index], &numBytesCmnPart);
+  if (numBytesCmnPart < 12)
+    return false;
+
+  /* EMdgmMWCtxInfo and EMdgmMWCtxSectorData */
+  index += numBytesCmnPart;
+  if (index + 12 > index_end)
+    return false;
+  mb_get_binary_short(true, &buffer[index], &numBytesTxInfo);
+  mb_get_binary_short(true, &buffer[index + 2], &numTxSectors);
+  mb_get_binary_short(true, &buffer[index + 4], &numBytesPerTxSector);
+  if (numBytesTxInfo < 12 || numTxSectors > MBSYS_KMBES_MAX_NUM_TX_PULSES || numBytesPerTxSector < 16)
+    return false;
+  index += numBytesTxInfo + (size_t)numTxSectors * numBytesPerTxSector;
+
+  /* EMdgmMWCrxInfo */
+  if (index + 16 > index_end)
+    return false;
+  mb_get_binary_short(true, &buffer[index], &numBytesRxInfo);
+  mb_get_binary_short(true, &buffer[index + 2], &numBeams);
+  const mb_u_char numBytesPerBeamEntry = buffer[index + 4];
+  const mb_u_char phaseFlag = buffer[index + 5];
+  if (numBytesRxInfo < 16 || numBytesPerBeamEntry < 12 || phaseFlag > 2)
+    return false;
+  index += numBytesRxInfo;
+
+  /* EMdgmMWCrxBeamData followed by the amplitude and optional phase samples of each beam */
+  const size_t bytes_per_sample = (phaseFlag == 0) ? 1 : ((phaseFlag == 1) ? 2 : 3);
+  for (int i = 0; i < numBeams; i++) {
+    if (index + numBytesPerBeamEntry > index_end)
+      return false;
+    mb_get_binary_short(true, &buffer[index + 10], &numSampleData);
+    index += numBytesPerBeamEntry + (size_t)numSampleData * bytes_per_sample;
+    if (index > index_end)
+      return false;
+  }
+
+  return true;
+}
+/*--------------------------------------------------------------------*/
+
 int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *imwc, int *error) {
   struct mbsys_kmbes_mwc *mwc = NULL;
   struct mbsys_kmbes_m_partition partition;
@@ -2497,6 +2550,21 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
   struct mbsys_kmbes_header *header = (struct mbsys_kmbes_header *)header_ptr;
 
+  /* skip a datagram whose counts and size fields do not fit inside it */
+  *imwc = 0;
+  if (!mbr_kemkmall_mwc_valid(buffer, header->numBytesDgm)) {
+    store->kind = MB_DATA_NONE;
+    *error = MB_ERROR_UNINTELLIGIBLE;
+    if (verbose >= 2) {
+      fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+      fprintf(stderr, "dbg2  Return values:\n");
+      fprintf(stderr, "dbg2       error:      %d\n", *error);
+      fprintf(stderr, "dbg2  Return status:\n");
+      fprintf(stderr, "dbg2       status:  %d\n", MB_FAILURE);
+    }
+    return (MB_FAILURE);
+  }
+
   /* get the data */
   int index = MBSYS_KMBES_HEADER_SIZE;
 
@@ -2513,6 +2581,7 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* EMdgmMbody - information of transmitter and receiver used to find data in datagram */
+  const int index_EMdgmMbody = index;
   mb_get_binary_short(true, &buffer[index], &(cmnPart.numBytesCmnPart));
   index += 2;
   mb_get_binary_short(true, &buffer[index], &(cmnPart.pingCnt));
@@ -2556,7 +2625,11 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   mwc->partition = partition;
   mwc->cmnPart = cmnPart;
 
-  /* EMdgmMWCtxInfo - transmit sectors, general info for all sectors */
+  /* EMdgmMWCtxInfo - transmit sectors, general info for all sectors - the structures
+     are located using their size fields so that fields added in later datagram
+     versions are skipped */
+  index = index_EMdgmMbody + cmnPart.numBytesCmnPart;
+  const int index_txInfo = index;
   mb_get_binary_short(true, &buffer[index], &(mwc->txInfo.numBytesTxInfo));
   index += 2;
   mb_get_binary_short(true, &buffer[index], &(mwc->txInfo.numTxSectors));
@@ -2578,7 +2651,9 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* EMdgmMWCtxSectorData - transmit sector data, loop for all i = numTxSectors */
+  const int index_sectorData = index_txInfo + mwc->txInfo.numBytesTxInfo;
   for (int i=0; i<(mwc->txInfo.numTxSectors); i++) {
+    index = index_sectorData + i * mwc->txInfo.numBytesPerTxSector;
     mb_get_binary_float(true, &buffer[index], &(mwc->sectorData[i].tiltAngleReTx_deg));
     index += 4;
     mb_get_binary_float(true, &buffer[index], &(mwc->sectorData[i].centreFreq_Hz));
@@ -2602,6 +2677,8 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* EMdgmMWCrxInfo - receiver, general info */
+  index = index_sectorData + mwc->txInfo.numTxSectors * mwc->txInfo.numBytesPerTxSector;
+  const int index_rxInfo = index;
   mb_get_binary_short(true, &buffer[index], &(mwc->rxInfo.numBytesRxInfo));
   index += 2;
   mb_get_binary_short(true, &buffer[index], &(mwc->rxInfo.numBeams));
@@ -2634,12 +2711,14 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   int status = MB_SUCCESS;
 
   /* EMdgmMWCrxBeamData - receiver, specific info for each beam */
+  index = index_rxInfo + mwc->rxInfo.numBytesRxInfo;
   alloc_size = (size_t)(mwc->rxInfo.numBeams * sizeof(struct mbsys_kmbes_mwc_rx_beam_data));
   if (mwc->beamData_p_alloc_size < alloc_size) {
     status = mb_reallocd(verbose, __FILE__, __LINE__, alloc_size, (void **)&(mwc->beamData_p), error);
     if (status == MB_SUCCESS) {
+      /* zero only the newly allocated bytes, keeping the sample arrays of existing beams */
+      memset((char *)mwc->beamData_p + mwc->beamData_p_alloc_size, 0, alloc_size - mwc->beamData_p_alloc_size);
       mwc->beamData_p_alloc_size = alloc_size;
-      memset(mwc->beamData_p, 0, alloc_size);
     } else {
       mwc->beamData_p_alloc_size = 0;
     }
@@ -2647,6 +2726,7 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
 
   if (status == MB_SUCCESS) {
     for (int i=0; i<(mwc->rxInfo.numBeams) && status == MB_SUCCESS; i++) {
+      const int index_beamData = index;
       mb_get_binary_float(true, &buffer[index], &(mwc->beamData_p[i].beamPointAngReVertical_deg));
       index += 4;
       mb_get_binary_short(true, &buffer[index], &(mwc->beamData_p[i].startRangeSampleNum));
@@ -2657,12 +2737,13 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
       index += 2;
       mb_get_binary_short(true, &buffer[index], &(mwc->beamData_p[i].numSampleData));
       index += 2;
-      if (mwc->header.dgmVersion >= 1) {
+      if (mwc->header.dgmVersion >= 1 && mwc->rxInfo.numBytesPerBeamEntry >= 16) {
         mb_get_binary_float(true, &buffer[index], &(mwc->beamData_p[i].detectedRangeInSamplesHighResolution));
         index += 4;
       } else {
         mwc->beamData_p[i].detectedRangeInSamplesHighResolution = mwc->beamData_p[i].detectedRangeInSamples;
       }
+      index = index_beamData + mwc->rxInfo.numBytesPerBeamEntry;
 
       /* Allocate sample amplitude array. Sample amplitudes are in 0.5 dB resolution */
       alloc_size = (size_t)(mwc->beamData_p[i].numSampleData);
@@ -4153,6 +4234,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   /* now get the index table from the mbio descriptor field saveptr1 */
   dgm_index_table = (struct mbsys_kmbes_index_table *)mb_io_ptr->saveptr1;
   dgm_index_table->dgm_count = 0;
+  dgm_index_table->num_mrz = 0;
   dgm_id = (int *)&mb_io_ptr->save1;
   *dgm_id = 0;
   file_indexed = (int *)&mb_io_ptr->save2;
@@ -4307,6 +4389,8 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 #endif
 
               status = mbr_kemkmall_add_dgm_to_dgm_index_table(verbose, dgm_index_table, &dgm_index, error);
+              if (status == MB_SUCCESS && emdgm_type == MRZ)
+                dgm_index_table->num_mrz++;
             }
 
             if (status == MB_SUCCESS) {
@@ -4537,10 +4621,12 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
     qsort((void *)dgm_index_table->indextable, dgm_index_table->dgm_count,
         sizeof(struct mbsys_kmbes_index), (void *)mbr_kemkmall_indextable_compare);
 
-  	/* set timestamps of secondary ping datagrams to the save value as the first MRZ */
+  	/* set timestamps of secondary ping datagrams to the save value as the first MRZ,
+  	   or as the first MWC in a water column only file (e.g. *.kmwcd) */
   	for (unsigned int i=0; i<dgm_index_table->dgm_count; i++) {
   	  struct mbsys_kmbes_index *aa = &(dgm_index_table->indextable[i]);
-  	  if (aa->emdgm_type == MRZ && aa->rx_index == 0) {
+  	  if ((aa->emdgm_type == MRZ || (dgm_index_table->num_mrz == 0 && aa->emdgm_type == MWC))
+  	      && aa->rx_index == 0) {
   	  	bool done = false;
   		for (unsigned int j=i+1; j<dgm_index_table->dgm_count && !done; j++) {
   	  	  struct mbsys_kmbes_index *bb = &(dgm_index_table->indextable[j]);
@@ -4930,6 +5016,48 @@ numOfDgms, dgmNum, header.numBytesDgm, dgm_index->index_org, dgm_index->ping_num
           /* if MWC set flag indicating water column records are present */
           if (status == MB_SUCCESS) {
             store->xmb.watercolumn = 1;
+            store->mwc_pingCnt = store->mwc[jmwc].cmnPart.pingCnt;
+          }
+
+          /* water column only file (e.g. *.kmwcd, no #MRZ in the index): return each ping
+             as a water column record once all of its MWC datagrams have been read, or when
+             the next MWC datagram in the index belongs to another ping (a ping cut at the
+             start or end of the file) */
+          if (mb_io_ptr->mbfp != NULL && dgm_index_table->num_mrz == 0) {
+            /* an unreadable MWC datagram is dropped - the ping is finished with the
+               MWC datagrams already read if the next MWC belongs to another ping */
+            if (status != MB_SUCCESS) {
+              fprintf(stderr, "Dropping unreadable MWC datagram size:%12d cnt:%d ping:%10d time_d:%.9f\n",
+                      header.numBytesDgm, dgm_index->index_org, dgm_index->ping_num,
+                      ((double)header.time_sec + MBSYS_KMBES_NANO * header.time_nanosec));
+              status = MB_SUCCESS;
+              *error = MB_ERROR_NO_ERROR;
+              if (store->n_mwc_read == 0 || dgm_index->ping_num != store->mwc_pingCnt) {
+                done = false;
+                break;
+              }
+            }
+            store->n_mwc_read = 0;
+            store->n_mwc_needed = dgm_index->rx_per_ping;
+            for (int imwc = 0; imwc < store->n_mwc_needed; imwc++) {
+              if (store->mwc[imwc].cmnPart.rxFansPerPing > 0
+                  && store->mwc[imwc].cmnPart.pingCnt == store->mwc_pingCnt)
+                store->n_mwc_read++;
+            }
+            done = (store->n_mwc_read >= store->n_mwc_needed);
+            if (!done) {
+              done = true;
+              for (unsigned int idgm = *dgm_id + 1; idgm < dgm_index_table->dgm_count; idgm++) {
+                if (dgm_index_table->indextable[idgm].emdgm_type == MWC) {
+                  if (dgm_index_table->indextable[idgm].ping_num == dgm_index->ping_num)
+                    done = false;
+                  break;
+                }
+              }
+            }
+            if (done)
+              store->kind = MB_DATA_WATER_COLUMN;
+            break;
           }
 
           /* check to see if done - first check if mrz datagrams have all been read */
@@ -5067,8 +5195,8 @@ numOfDgms, dgmNum, header.numBytesDgm, dgm_index->index_org, dgm_index->ping_num
       status = MB_FAILURE;
     }
     
-    /* if done and survey data then set flag */
-    if (status == MB_SUCCESS && done && store->kind == MB_DATA_DATA) {
+    /* if done and survey or water column data then set flag */
+    if (status == MB_SUCCESS && done && (store->kind == MB_DATA_DATA || store->kind == MB_DATA_WATER_COLUMN)) {
       store->ping_returned = true;
     }
 
@@ -9397,8 +9525,12 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
       break;
 
     case MB_DATA_WATER_COLUMN:
-      /* #MWC - multibeam water column datagram */
-      for (int imwc=0;imwc< store->n_mwc_read;imwc++) {
+      /* #MWC - multibeam water column datagram - write only the datagrams of the current
+         ping (a fan may be missing at the start or end of a file) */
+      for (int imwc=0;imwc< store->n_mwc_needed;imwc++) {
+        if (store->mwc[imwc].cmnPart.rxFansPerPing == 0
+            || store->mwc[imwc].cmnPart.pingCnt != store->mwc_pingCnt)
+          continue;
         status = mbr_kemkmall_wr_mwc(verbose, bufferalloc, bufferptr, store_ptr, imwc, &size, error);
         if (status == MB_SUCCESS)
           status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
@@ -9558,6 +9690,8 @@ int mbr_register_kemkmall(int verbose, void *mbio_ptr, int *error) {
   mb_io_ptr->mb_io_makess = &mbsys_kmbes_makess;
   mb_io_ptr->mb_io_extract_rawss = NULL;
   mb_io_ptr->mb_io_insert_rawss = NULL;
+  mb_io_ptr->mb_io_extract_wcdimensions = &mbsys_kmbes_extract_wcdimensions;
+  mb_io_ptr->mb_io_extract_wc = &mbsys_kmbes_extract_wc;
   mb_io_ptr->mb_io_extract_segytraceheader = NULL;
   mb_io_ptr->mb_io_extract_segy = NULL;
   mb_io_ptr->mb_io_insert_segy = NULL;
@@ -9606,6 +9740,8 @@ int mbr_register_kemkmall(int verbose, void *mbio_ptr, int *error) {
     fprintf(stderr, "dbg2       makess:             %p\n", (void *)mb_io_ptr->mb_io_makess);
     fprintf(stderr, "dbg2       extract_rawss:      %p\n", (void *)mb_io_ptr->mb_io_extract_rawss);
     fprintf(stderr, "dbg2       insert_rawss:       %p\n", (void *)mb_io_ptr->mb_io_insert_rawss);
+    fprintf(stderr, "dbg2       extract_wcdimensions: %p\n", (void *)mb_io_ptr->mb_io_extract_wcdimensions);
+    fprintf(stderr, "dbg2       extract_wc:         %p\n", (void *)mb_io_ptr->mb_io_extract_wc);
     fprintf(stderr, "dbg2       extract_segytraceheader: %p\n", (void *)mb_io_ptr->mb_io_extract_segytraceheader);
     fprintf(stderr, "dbg2       extract_segy:       %p\n", (void *)mb_io_ptr->mb_io_extract_segy);
     fprintf(stderr, "dbg2       insert_segy:        %p\n", (void *)mb_io_ptr->mb_io_insert_segy);

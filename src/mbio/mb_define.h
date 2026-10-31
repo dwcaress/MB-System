@@ -632,6 +632,12 @@ int mb_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 int mb_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr, int kind, int sidescan_type, double sample_interval,
                     double beamwidth_xtrack, double beamwidth_ltrack, int num_samples_port, double *rawss_port,
                     int num_samples_stbd, double *rawss_stbd, int *error);
+int mb_extract_wcdimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *nsamples_max,
+                            int *error);
+int mb_extract_wc(int verbose, void *mbio_ptr, void *store_ptr, int nbeams_alloc, int nsamples_alloc, int *kind,
+                  int time_i[7], double *time_d, int *nbeams, int *nsamples_max, int *swath, double *angle_across,
+                  double *angle_along, double *sample_interval, double *soundspeed, int *start_sample, int *nsamples,
+                  double *detect_sample, float *amplitude, int *error);
 int mb_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void *segytraceheader_ptr, int *error);
 int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *sampleformat, int *kind, void *segyheader_ptr,
                     float *segydata, int *error);
