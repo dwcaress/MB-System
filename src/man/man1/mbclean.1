@@ -750,6 +750,51 @@ grid and model flagged 19,759 soundings for 29% agreement and 29% coverage.
 The sector and the thresholds were chosen on this survey; check them on
 other systems and depths.
 
+Surveys that combine steep slopes and flat plains may need more than one
+set of parameters. On the EM122 survey above, the centre-beam artefact was
+1 to 2% of the depth on the slopes but only about 0.2% (around 10 m at
+5000 m) on the abyssal plain, inside the scatter of the valid soundings
+there. A nadir threshold low enough for the plain flagged many valid
+soundings on the slopes, and one suited to the slopes left the plain
+almost untouched. Such a survey can be cleaned in two runs. The first run
+covers the whole survey; besides the slope and centre-beam settings it
+tightens the blunder test, because the nadir sector flags only shallow
+soundings by default and the default blunder test rejects only soundings
+more than 25% of the depth deeper than the predicted surface:
+
+ 	mbclean \-Idatalist.mb-1 \-\-cube\-spacing=50 \-\-cube\-order=special \\
+ 	    \-\-cube\-model=depth \-\-cube\-model\-a=0.13 \-\-cube\-model\-b=0.003 \\
+ 	    \-\-cube\-sigma\-h=1 \-\-cube\-model\-c=0 \\
+ 	    \-\-cube\-prediction=median/4 \-\-cube\-extractor=predicted \\
+ 	    \-\-cube\-flag=outlier \-\-cube\-flag\-threshold=5 \\
+ 	    \-\-cube\-flag\-nadir=10/2 \-\-cube\-blunder=10/0.05/3
+
+The second run is limited to the flat area with \fB\-\-cube\-region\fP,
+switches the general outlier test off with a very high threshold, and only
+removes the crest of shallow soundings at nadir with a low nadir
+threshold:
+
+ 	mbclean \-Idatalist.mb-1 \-\-cube\-spacing=50 \-\-cube\-order=special \\
+ 	    \-\-cube\-model=depth \-\-cube\-model\-a=0.13 \-\-cube\-model\-b=0.003 \\
+ 	    \-\-cube\-sigma\-h=1 \-\-cube\-model\-c=0 \\
+ 	    \-\-cube\-prediction=median/4 \-\-cube\-extractor=predicted \\
+ 	    \-\-cube\-region=\-11.81/\-11.50/36.86/37.14 \\
+ 	    \-\-cube\-flag=outlier \-\-cube\-flag\-threshold=1000 \\
+ 	    \-\-cube\-flag\-nadir=5/0.1
+
+The second run applies the edits of the first, so its CUBE surface is built
+without the soundings already flagged, and its flags are appended to the
+same edit save files. Run each step once: running the second step again
+adds more flags. On this survey the two runs flagged 17,953 soundings
+(0.78%), of which 43% agreed with the manual cleaning, covering 38% of the
+manual flags; the second run's threshold was chosen by inspecting the result
+in \fBmbeditviz\fP. The region, the sectors and the thresholds belong to
+this survey. The beam angle is measured from the sonar position of the
+ping; on this survey the nadir soundings lay several degrees from it along
+track, so a sector of 5 degrees covered about 3 degrees on either side of
+nadir. With \fB\-V\fP the beam angle of each flagged sounding is listed,
+which shows how the sector falls on other data.
+
 .SH SEE ALSO
 \fBmbsystem\fP(1), \fBmbedit\fP(1),
 \fBmbinfo\fP(1) \fBmbprocess\fP(1), \fBmbgrid\fP(1),
