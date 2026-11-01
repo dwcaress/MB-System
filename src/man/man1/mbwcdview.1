@@ -1,0 +1,182 @@
+.TH mbwcdview 1 "1 November 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbwcdview\fP \- Display water column data, one swath at a time.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbwcdview\fP
+.br
+[
+.br
+\fB\-\-input\fP=\fIfile\fP {\fB\-I\fP\fIfile\fP}
+.br
+\fB\-\-format\fP=\fIformat_id\fP {\fB\-F\fP\fIformat_id\fP}
+.br
+\fB\-\-ping\fP=\fIindex\fP {\fB\-P\fP\fIindex\fP}
+.br
+\fB\-\-swath\fP=\fIindex\fP {\fB\-S\fP\fIindex\fP}
+.br
+\fB\-\-bottom\fP
+.br
+\fB\-\-wc-bottom\fP
+.br
+\fB\-\-straight\fP
+.br
+\fB\-\-export\fP=\fIimage.png\fP
+.br
+\fB\-\-size\fP=\fIwidth\fPx\fIheight\fP
+.br
+\fB\-\-dump\fP
+.br
+\fB\-\-verbose\fP {\fB\-V\fP}
+.br
+\fB\-\-help\fP {\fB\-H\fP}
+.br
+]
+
+.SH DESCRIPTION
+\fBmbwcdview\fP is a Qt6 program that displays the water column data of swath
+sonar files, read through the MBIO library, as an image of the beamformed
+amplitudes against across track distance and depth, one swath at a time. Water
+column data are available for the Kongsberg kmall format (format 261), either
+in the separate *.kmwcd files (water column only) or in the *.kmall files. The
+original files are read; no preprocessing is needed.
+
+When a Kongsberg *.kmwcd or *.kmall file is opened, \fBmbwcdview\fP looks for the
+other file of the same survey line in the same directory: the same line number
+(the first four characters of the file name) and the nearest time in the file
+name. Kongsberg SIS names each file after the time of its first datagram, so the
+two names may differ by seconds. The water column pings are matched with the
+survey pings of the *.kmall by ping number and time. The *.kmall supplies the
+navigation, the vessel heading, the transducer depth and the soundings; the
+*.kmwcd supplies the water column. Any of these may be missing: without a *.kmall
+the navigation is taken from the position records of the *.kmwcd, if present,
+and depths are given below the transducer.
+
+The water column samples are ray traced through the sound velocity profile
+logged with the data (\fBmb_rt\fP(3), as \fBmbprocess\fP traces soundings), from
+the transducer depth and with the beam angles and the sound speed at the
+transducer logged with the water column. The soundings then lie on the seafloor
+echo. With the \fBRay trace (SVP)\fP check box off (or \fB\-\-straight\fP) the
+samples are placed along straight rays with the sound speed at the transducer;
+in deep water with a fast surface layer this puts the seafloor echo noticeably
+deeper than the soundings and the outer beams tens of metres off. No motion
+during the ping (heave, pitch, roll) is applied.
+
+The amplitudes are shown in dB. For Kongsberg data these are the logged values
+(0.5 dB steps) minus the gain offset (TVGoffset_dB), the display value defined by
+Kongsberg. The lowest logged value (\-128, i.e. \-94 dB with a 30 dB offset) is a
+fill value, for example for near field samples, and is drawn as no data.
+
+The window has controls for the depth range, the amplitude range of the colour
+scale, a fixed across track scale, the display of the soundings of the matching
+*.kmall ping (\fBBottom\fP: red amplitude, dark blue phase detections, filled good,
+hollow flagged) and of the bottom detections recorded in the water column itself
+(\fBWC bottom\fP, orange line), a slider (also mouse wheel and the left and right
+arrow keys, one swath per step), a replay at a given rate, saving the image at
+twice the screen resolution with the file name and ping information, and
+picking positions in the image (\fBPick\fP) into a table that can be saved as text.
+The image is drawn with OpenGL, so stepping through the pings is fast.
+
+Without a window, \fB\-\-dump\fP prints a summary of a survey line and
+\fB\-\-export\fP writes an image of one swath.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian dos Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-\-input\fP=\fIfile\fP {\fB\-I\fP\fIfile\fP}
+.br
+The swath file to open. For Kongsberg data either the *.kmwcd or the *.kmall
+of a survey line; the other file is found as described above. The file name may
+also be given as the last argument.
+.TP
+.B \-\-format\fP=\fIformat_id\fP {\fB\-F\fP\fIformat_id\fP}
+.br
+The MBIO format of the input file. By default it is taken from the file name;
+*.kmwcd files are read as format 261.
+.TP
+.B \-\-ping\fP=\fIindex\fP {\fB\-P\fP\fIindex\fP}
+.br
+The water column ping (counted from 0) shown first, exported or summarized.
+Default: 0.
+.TP
+.B \-\-swath\fP=\fIindex\fP {\fB\-S\fP\fIindex\fP}
+.br
+With \fB\-\-export\fP, the swath of the ping (0 is the aftmost swath in multiple
+swath modes). Default: the first swath.
+.TP
+.B \-\-bottom
+With \fB\-\-export\fP, draw the soundings of the matching *.kmall ping.
+.TP
+.B \-\-wc-bottom
+With \fB\-\-export\fP, draw the bottom detections recorded in the water column.
+.TP
+.B \-\-straight
+With \fB\-\-export\fP, use straight rays instead of ray tracing.
+.TP
+.B \-\-export\fP=\fIimage.png\fP
+.br
+Write an image of one swath (PNG or JPEG by the file name) and exit without
+opening a window.
+.TP
+.B \-\-size\fP=\fIwidth\fPx\fIheight\fP
+.br
+The size in pixels of the exported image. Default: 1400x900.
+.TP
+.B \-\-dump
+Print a summary of the survey line and exit: the files found, the numbers of
+pings, matched pings and position records, the amplitude range and fill value,
+the position, speed, course and heading at the ping given by \fB\-\-ping\fP, and the
+depth ratio and across track difference between the bottom detections of the
+water column and the soundings, for straight and for ray traced geometry.
+.TP
+.B \-\-verbose {\fB\-V\fP}
+Print the program name and version, and with \fB\-\-export\fP what was written.
+.TP
+.B \-\-help {\fB\-H\fP}
+Print the usage message and exit.
+
+.SH EXAMPLES
+To view a Kongsberg survey line, open either of its files:
+.br
+	mbwcdview 0080_20250618_223434.kmwcd
+.br
+
+To write an image of ping 100 with the soundings and the water column bottom
+detections:
+.br
+	mbwcdview \-I 0030_20250208_100905.kmall \-\-ping=100 \-\-bottom \-\-wc-bottom \-\-export=ping100.png
+.br
+
+To check the pairing of the files and the ray tracing of a line:
+.br
+	mbwcdview \-\-dump \-I 0030_20250208_100905.kmall
+.br
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbinfo\fP(1), \fBmbprocess\fP(1), \fBmbio\fP(3)
+
+.SH BUGS
+The soundings of a ping are assigned to the swaths by splitting them into equal
+blocks, which is right for dual swath data with one receiver; when the receive
+fans have different numbers of soundings all soundings of the ping are drawn on
+each swath. Water column data stored inside *.kmall files and dual head systems
+have not been tested.
