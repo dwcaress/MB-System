@@ -135,6 +135,7 @@
 #define MBGRDVIZ_SURVEY_DIRECTION_SE 1
 #define MBGRDVIZ_SURVEY_DIRECTION_NW 2
 #define MBGRDVIZ_SURVEY_DIRECTION_NE 3
+#define MBGRDVIZ_SURVEY_MAXLINES 1000
 #define MBGRDVIZ_REALTIME_ICON_SHIP 0
 #define MBGRDVIZ_REALTIME_ICON_ROV 1
 #define MBGRDVIZ_REALTIME_ICON_AUV 2
@@ -575,6 +576,7 @@ int do_mbgrdviz_init(int argc, char **argv, int verbosity) {
   XtSetValues(spinText_realtimesetup_icon, args, ac);
   XmStringFree(str_list[0]);
   XmStringFree(str_list[1]);
+  XmStringFree(str_list[2]);
   XtFree((XtPointer)str_list);
 
   /* initialize mbview_id list */
@@ -1549,6 +1551,26 @@ void do_mbgrdviz_openfile(Widget w, XtPointer client_data, XtPointer call_data) 
     fprintf(stderr, "dbg4       mode:                %zu\n", mode);
   }
 
+  /* the main window file menu items pass instance 0; if that mbview window
+     is not open use the first open one (as do_mbgrdviz_sensitivity() does) */
+  if (mode > MBGRDVIZ_OPENGRID && mode != MBGRDVIZ_REALTIME
+      && (instance >= MBV_MAX_WINDOWS || !mbview_id[instance])) {
+    instance = MBV_NO_WINDOW;
+    for (size_t i = 0; i < MBV_MAX_WINDOWS && instance == MBV_NO_WINDOW; i++) {
+      if (mbview_id[i])
+        instance = i;
+    }
+  }
+
+  /* every file operation other than opening a primary grid needs a file name,
+     and all but setting the realtime source need an open mbview window */
+  if (mode > MBGRDVIZ_OPENGRID && (file_ptr == NULL || (mode != MBGRDVIZ_REALTIME && instance == MBV_NO_WINDOW))) {
+    XBell((Display *)XtDisplay(mainWindow), 100);
+    if (file_ptr != NULL)
+      XtFree(file_ptr);
+    return;
+  }
+
   /* open primary grid */
   // int status = MB_SUCCESS;
   if (mode <= MBGRDVIZ_OPENGRID) {
@@ -2197,6 +2219,7 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
   mb_path buffer;
   mb_path lonstring, latstring;
   int nsite;
+  int nsitealloc = 0;
   double *sitelon;
   double *sitelat;
   double *sitetopo;
@@ -2250,11 +2273,12 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
 
       /* if error initializing memory then cancel dealing with sites */
       if (status == MB_FAILURE) {
-        nsite = 0;
+        mbview_freesitearrays(verbose, &sitelon, &sitelat, &sitetopo, &sitecolor, &sitesize, &sitename, &error);
         fprintf(stderr, "\nUnable to allocate arrays for %d sites\n", nsite);
         XBell((Display *)XtDisplay(mainWindow), 100);
         return (status);
       }
+      nsitealloc = nsite;
     }
 
     /* read the sites from the input file */
@@ -2265,9 +2289,10 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
         status = MB_FAILURE;
         fprintf(stderr, "\nUnable to open site file <%s> for reading\n", input_file_ptr);
         XBell((Display *)XtDisplay(mainWindow), 100);
+        mbview_freesitearrays(verbose, &sitelon, &sitelat, &sitetopo, &sitecolor, &sitesize, &sitename, &error);
         return (status);
       }
-      while ((result = fgets(buffer, MB_PATH_MAXLINE, sfp)) == buffer) {
+      while (nsite < nsitealloc && (result = fgets(buffer, MB_PATH_MAXLINE, sfp)) == buffer) {
         site_ok = false;
 
         /* deal with site in form: lon lat topo color size name */
@@ -2351,7 +2376,7 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
     }
 
     /* deallocate memory */
-    if (nsite > 0) {
+    if (nsitealloc > 0) {
       status = mbview_freesitearrays(verbose, &sitelon, &sitelat, &sitetopo, &sitecolor, &sitesize, &sitename, &error);
     }
   }
@@ -2408,10 +2433,11 @@ int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr) {
 
       /* if error initializing memory then cancel dealing with sites */
       if (status == MB_FAILURE) {
-        nsite = 0;
         fprintf(stderr, "Unable to write site file...\nArray allocation for %d sites failed for instance %zu!\n", nsite,
                 instance);
         XBell((Display *)XtDisplay(mainWindow), 100);
+        mbview_freesitearrays(verbose, &sitelon, &sitelat, &sitetopo, &sitecolor, &sitesize, &sitename, &error);
+        nsite = 0;
       }
     }
 
@@ -2535,7 +2561,7 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr) {
                     &route_version_major, &route_version_minor);
           }
           else if (strncmp(buffer, "## ROUTENAME", 12) == 0) {
-            strcpy(routename, &buffer[13]);
+            snprintf(routename, sizeof(routename), "%s", (strlen(buffer) > 13) ? &buffer[13] : "");
             size_t routename_len = strlen(routename);
             if (routename_len > 0 && routename[routename_len - 1] == '\n') {
               routename[routename_len - 1] = '\0';
@@ -2573,7 +2599,9 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr) {
 
         /* deal with data */
         else {
-          /* read the data from the buffer */
+          /* read the data from the buffer, points without a waypoint
+             type column (2 or 3 columns) are simple waypoints */
+          waypoint = MBV_ROUTE_WAYPOINT_SIMPLE;
           if (route_version_major > 1) {
             nget = sscanf(buffer, "%lf,%lf,%lf,%d", &lon, &lat, &topo, &waypoint);
           } else if (route_version_major == 1) {
@@ -2596,7 +2624,13 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr) {
             status = mbview_allocroutearrays(verbose, npointalloc, &routelon, &routelat, &routewaypoint, NULL, NULL,
                                              NULL, NULL, NULL, &error);
             if (status != MB_SUCCESS) {
+              /* allocation failed: discard the partial route and stop reading */
+              mbview_freeroutearrays(verbose, &routelon, &routelat, &routewaypoint, NULL, NULL, NULL, NULL, NULL, &error);
               npointalloc = 0;
+              npoint = 0;
+              fprintf(stderr, "\nUnable to allocate memory to read route file <%s>\n", input_file_ptr);
+              XBell((Display *)XtDisplay(mainWindow), 100);
+              break;
             }
           }
 
@@ -3004,34 +3038,53 @@ int do_mbgrdviz_saveroutereversed(size_t instance, char *output_file_ptr) {
 
           /* write the route points */
           for (j = npointtotal - 1; j >= 0; j-- ) {
-            double bearing = *routebearing - 180.0;
-            if (bearing < 0.0)
-              bearing += 360.0;
-            fprintf(sfp, "%f,%f,%f,%d,%f,%f,%f,%f", routelon[j], routelat[j], routetopo[j], routewaypoint[j],
-                    routebearing[j], distlateral[j], distovertopo[j], slope[j]);
-            if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_SIMPLE)
+            /* reversed bearing of the leg from point j to point j-1; the forward
+               bearing of that leg is stored at point j-1. The last point written
+               (j = 0) uses the bearing of the previous point written. */
+            double bearing = routebearing[(j > 0) ? j - 1 : 0] + 180.0;
+            if (bearing >= 360.0)
+              bearing -= 360.0;
+
+            /* distances measured from the new start (the old end), slope sign
+               reversed with the direction of travel */
+            const double distlateral_reversed = distlateral[npointtotal - 1] - distlateral[j];
+            const double distovertopo_reversed = distovertopo[npointtotal - 1] - distovertopo[j];
+            const double slope_reversed = (slope[j] != 0.0) ? -slope[j] : 0.0;
+
+            /* start line and end line waypoints swap roles */
+            int waypoint_reversed = routewaypoint[j];
+            if (waypoint_reversed >= MBV_ROUTE_WAYPOINT_STARTLINE && waypoint_reversed <= MBV_ROUTE_WAYPOINT_ENDLINE5) {
+              if ((waypoint_reversed - MBV_ROUTE_WAYPOINT_STARTLINE) % 2 == 0)
+                waypoint_reversed++;
+              else
+                waypoint_reversed--;
+            }
+
+            fprintf(sfp, "%f,%f,%f,%d,%f,%f,%f,%f", routelon[j], routelat[j], routetopo[j], waypoint_reversed,
+                    bearing, distlateral_reversed, distovertopo_reversed, slope_reversed);
+            if (waypoint_reversed == MBV_ROUTE_WAYPOINT_SIMPLE)
               fprintf(sfp, " ## WAYPOINT\n");
-            else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_TRANSIT)
+            else if (waypoint_reversed == MBV_ROUTE_WAYPOINT_TRANSIT)
               fprintf(sfp, " ## WAYPOINT TRANSIT\n");
-            else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_STARTLINE)
+            else if (waypoint_reversed == MBV_ROUTE_WAYPOINT_STARTLINE)
               fprintf(sfp, " ## WAYPOINT STARTLINE\n");
-            else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_ENDLINE)
+            else if (waypoint_reversed == MBV_ROUTE_WAYPOINT_ENDLINE)
               fprintf(sfp, " ## WAYPOINT ENDLINE\n");
-            else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_STARTLINE2)
+            else if (waypoint_reversed == MBV_ROUTE_WAYPOINT_STARTLINE2)
               fprintf(sfp, " ## WAYPOINT STARTLINE2\n");
-            else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_ENDLINE2)
+            else if (waypoint_reversed == MBV_ROUTE_WAYPOINT_ENDLINE2)
               fprintf(sfp, " ## WAYPOINT ENDLINE2\n");
-            else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_STARTLINE3)
+            else if (waypoint_reversed == MBV_ROUTE_WAYPOINT_STARTLINE3)
               fprintf(sfp, " ## WAYPOINT STARTLINE3\n");
-            else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_ENDLINE3)
+            else if (waypoint_reversed == MBV_ROUTE_WAYPOINT_ENDLINE3)
               fprintf(sfp, " ## WAYPOINT ENDLINE3\n");
-            else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_STARTLINE4)
+            else if (waypoint_reversed == MBV_ROUTE_WAYPOINT_STARTLINE4)
               fprintf(sfp, " ## WAYPOINT STARTLINE4\n");
-            else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_ENDLINE4)
+            else if (waypoint_reversed == MBV_ROUTE_WAYPOINT_ENDLINE4)
               fprintf(sfp, " ## WAYPOINT ENDLINE4\n");
-            else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_STARTLINE5)
+            else if (waypoint_reversed == MBV_ROUTE_WAYPOINT_STARTLINE5)
               fprintf(sfp, " ## WAYPOINT STARTLINE5\n");
-            else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_ENDLINE5)
+            else if (waypoint_reversed == MBV_ROUTE_WAYPOINT_ENDLINE5)
               fprintf(sfp, " ## WAYPOINT ENDLINE5\n");
             else
               fprintf(sfp, "\n");
@@ -3089,7 +3142,7 @@ int do_mbgrdviz_saverisiscriptheading(size_t instance, char *output_file_ptr) {
   double altitude = 3.0;
   int turndirection = 1;
 
-  if (verbose >= 0) {
+  if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:        %zu\n", instance);
@@ -3223,17 +3276,18 @@ int do_mbgrdviz_saverisiscriptheading(size_t instance, char *output_file_ptr) {
               int projectionid = 32761;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
-            fprintf(stderr, "Reference longitude: %.9f latitude:%.9f Projection ID: %s\n",
-                    reference_lon, reference_lat, projection_id);
+            if (verbose >= 2)
+              fprintf(stderr, "Reference longitude: %.9f latitude:%.9f Projection ID: %s\n",
+                      reference_lon, reference_lat, projection_id);
 
             /* initialize projection */
             if (mb_proj_init(verbose, projection_id, &(pjptr), &error) != MB_SUCCESS) {
               char *error_message = NULL;
               mb_error(verbose, error, &error_message);
               fprintf(stderr, "\nMBIO Error initializing projection:\n%s\n", error_message);
-              fprintf(stderr, "\nProgram terminated in <%s>\n", __func__);
-              mb_memory_clear(verbose, &error);
-              exit(error);
+              fprintf(stderr, "\nUnable to write route file <%s>\n", output_file_ptr);
+              XBell((Display *)XtDisplay(mainWindow), 100);
+              pjptr = NULL;
             }
             mb_proj_forward(verbose, pjptr, reference_lon, reference_lat, &origin_x, &origin_y, &error);
           }
@@ -3291,7 +3345,8 @@ int do_mbgrdviz_saverisiscriptheading(size_t instance, char *output_file_ptr) {
                 fprintf(sfp, "HDG, %.3f, %d, 6, %.3f\r\n", heading, turndirection, settlingtime);
                 turns += dheading / 360.0;
                 headinglast = heading;
-                fprintf(stderr, "j:%d turns: %f\n", j, turns);
+                if (verbose >= 2)
+                  fprintf(stderr, "j:%d turns: %f\n", j, turns);
               }
             }
             if (turns < 0.0)
@@ -3310,11 +3365,22 @@ int do_mbgrdviz_saverisiscriptheading(size_t instance, char *output_file_ptr) {
                                             &distlateral, &distovertopo, &slope, &error);
             npointalloc = 0;
           }
+
+          /* stop if the projection could not be initialized */
+          if (pjptr == NULL && npointtotal > 0) {
+            error = MB_ERROR_BAD_PROJECTION;
+            status = MB_FAILURE;
+            break;
+          }
         }
       }
 
       /* close the output file */
       fclose(sfp);
+
+      /* free the projection */
+      if (pjptr != NULL)
+        mb_proj_free(verbose, &pjptr, &error);
     }
   }
 
@@ -3353,7 +3419,7 @@ int do_mbgrdviz_saverisiscriptnoheading(size_t instance, char *output_file_ptr) 
   double altitude = 3.0;
   int turndirection = 1;
 
-  if (verbose >= 0) {
+  if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:        %zu\n", instance);
@@ -3474,17 +3540,18 @@ int do_mbgrdviz_saverisiscriptnoheading(size_t instance, char *output_file_ptr) 
               int projectionid = 32761;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
-            fprintf(stderr, "Reference longitude: %.9f latitude:%.9f Projection ID: %s\n",
-                    reference_lon, reference_lat, projection_id);
+            if (verbose >= 2)
+              fprintf(stderr, "Reference longitude: %.9f latitude:%.9f Projection ID: %s\n",
+                      reference_lon, reference_lat, projection_id);
 
             /* initialize projection */
             if (mb_proj_init(verbose, projection_id, &(pjptr), &error) != MB_SUCCESS) {
               char *error_message = NULL;
               mb_error(verbose, error, &error_message);
               fprintf(stderr, "\nMBIO Error initializing projection:\n%s\n", error_message);
-              fprintf(stderr, "\nProgram terminated in <%s>\n", __func__);
-              mb_memory_clear(verbose, &error);
-              exit(error);
+              fprintf(stderr, "\nUnable to write route file <%s>\n", output_file_ptr);
+              XBell((Display *)XtDisplay(mainWindow), 100);
+              pjptr = NULL;
             }
             mb_proj_forward(verbose, pjptr, reference_lon, reference_lat, &origin_x, &origin_y, &error);
           }
@@ -3542,7 +3609,8 @@ int do_mbgrdviz_saverisiscriptnoheading(size_t instance, char *output_file_ptr) 
                 //fprintf(sfp, "HDG, %.3f, %d, 6, %.3f\r\n", heading, turndirection, settlingtime);
                 turns += dheading / 360.0;
                 headinglast = heading;
-                fprintf(stderr, "j:%d turns: %f\n", j, turns);
+                if (verbose >= 2)
+                  fprintf(stderr, "j:%d turns: %f\n", j, turns);
               }
             }
             if (turns < 0.0)
@@ -3561,11 +3629,22 @@ int do_mbgrdviz_saverisiscriptnoheading(size_t instance, char *output_file_ptr) 
                                             &distlateral, &distovertopo, &slope, &error);
             npointalloc = 0;
           }
+
+          /* stop if the projection could not be initialized */
+          if (pjptr == NULL && npointtotal > 0) {
+            error = MB_ERROR_BAD_PROJECTION;
+            status = MB_FAILURE;
+            break;
+          }
         }
       }
 
       /* close the output file */
       fclose(sfp);
+
+      /* free the projection */
+      if (pjptr != NULL)
+        mb_proj_free(verbose, &pjptr, &error);
     }
   }
 
@@ -3604,7 +3683,7 @@ int do_mbgrdviz_saverisi2scriptheading(size_t instance, char *output_file_ptr) {
   double altitude = 3.0;
   int turndirection = 1;
 
-  if (verbose >= 0) {
+  if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:        %zu\n", instance);
@@ -3727,17 +3806,18 @@ int do_mbgrdviz_saverisi2scriptheading(size_t instance, char *output_file_ptr) {
               int projectionid = 32761;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
-            fprintf(stderr, "Reference longitude: %.9f latitude:%.9f Projection ID: %s\n",
-                    reference_lon, reference_lat, projection_id);
+            if (verbose >= 2)
+              fprintf(stderr, "Reference longitude: %.9f latitude:%.9f Projection ID: %s\n",
+                      reference_lon, reference_lat, projection_id);
 
             /* initialize projection */
             if (mb_proj_init(verbose, projection_id, &(pjptr), &error) != MB_SUCCESS) {
               char *error_message = NULL;
               mb_error(verbose, error, &error_message);
               fprintf(stderr, "\nMBIO Error initializing projection:\n%s\n", error_message);
-              fprintf(stderr, "\nProgram terminated in <%s>\n", __func__);
-              mb_memory_clear(verbose, &error);
-              exit(error);
+              fprintf(stderr, "\nUnable to write route file <%s>\n", output_file_ptr);
+              XBell((Display *)XtDisplay(mainWindow), 100);
+              pjptr = NULL;
             }
             mb_proj_forward(verbose, pjptr, reference_lon, reference_lat, &origin_x, &origin_y, &error);
           }
@@ -3793,11 +3873,22 @@ int do_mbgrdviz_saverisi2scriptheading(size_t instance, char *output_file_ptr) {
                                             &distlateral, &distovertopo, &slope, &error);
             npointalloc = 0;
           }
+
+          /* stop if the projection could not be initialized */
+          if (pjptr == NULL && npointtotal > 0) {
+            error = MB_ERROR_BAD_PROJECTION;
+            status = MB_FAILURE;
+            break;
+          }
         }
       }
 
       /* close the output file */
       fclose(sfp);
+
+      /* free the projection */
+      if (pjptr != NULL)
+        mb_proj_free(verbose, &pjptr, &error);
     }
   }
 
@@ -3836,7 +3927,7 @@ int do_mbgrdviz_saverisi2scriptnoheading(size_t instance, char *output_file_ptr)
   double altitude = 3.0;
   int turndirection = 1;
 
-  if (verbose >= 0) {
+  if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:        %zu\n", instance);
@@ -3959,17 +4050,18 @@ int do_mbgrdviz_saverisi2scriptnoheading(size_t instance, char *output_file_ptr)
               int projectionid = 32761;
               sprintf(projection_id, "EPSG:%d", projectionid);
             }
-            fprintf(stderr, "Reference longitude: %.9f latitude:%.9f Projection ID: %s\n",
-                    reference_lon, reference_lat, projection_id);
+            if (verbose >= 2)
+              fprintf(stderr, "Reference longitude: %.9f latitude:%.9f Projection ID: %s\n",
+                      reference_lon, reference_lat, projection_id);
 
             /* initialize projection */
             if (mb_proj_init(verbose, projection_id, &(pjptr), &error) != MB_SUCCESS) {
               char *error_message = NULL;
               mb_error(verbose, error, &error_message);
               fprintf(stderr, "\nMBIO Error initializing projection:\n%s\n", error_message);
-              fprintf(stderr, "\nProgram terminated in <%s>\n", __func__);
-              mb_memory_clear(verbose, &error);
-              exit(error);
+              fprintf(stderr, "\nUnable to write route file <%s>\n", output_file_ptr);
+              XBell((Display *)XtDisplay(mainWindow), 100);
+              pjptr = NULL;
             }
             mb_proj_forward(verbose, pjptr, reference_lon, reference_lat, &origin_x, &origin_y, &error);
           }
@@ -4034,11 +4126,22 @@ int do_mbgrdviz_saverisi2scriptnoheading(size_t instance, char *output_file_ptr)
                                             &distlateral, &distovertopo, &slope, &error);
             npointalloc = 0;
           }
+
+          /* stop if the projection could not be initialized */
+          if (pjptr == NULL && npointtotal > 0) {
+            error = MB_ERROR_BAD_PROJECTION;
+            status = MB_FAILURE;
+            break;
+          }
         }
       }
 
       /* close the output file */
       fclose(sfp);
+
+      /* free the projection */
+      if (pjptr != NULL)
+        mb_proj_free(verbose, &pjptr, &error);
     }
   }
 
@@ -4153,12 +4256,20 @@ int do_mbgrdviz_savedegdecmin(size_t instance, char *output_file_ptr) {
               latNS = 'S';
             latDeg = (int)(floor(fabs(routelat[j])));
             latMin = (fabs(routelat[j]) - (double)latDeg) * 60.0;
+            if (latMin >= 59.9999995) { /* carry minutes that would print as 60.000000 */
+              latMin = 0.0;
+              latDeg++;
+            }
             if (routelon[j] >= 0.0)
               lonEW = 'E';
             else
               lonEW = 'W';
             lonDeg = (int)(floor(fabs(routelon[j])));
             lonMin = (fabs(routelon[j]) - (double)lonDeg) * 60.0;
+            if (lonMin >= 59.9999995) { /* carry minutes that would print as 60.000000 */
+              lonMin = 0.0;
+              lonDeg++;
+            }
 
             fprintf(sfp, "%c %3d %9.6f   %c %3d %9.6f \r\n", latNS, latDeg, latMin, lonEW, lonDeg, lonMin);
           }
@@ -4300,13 +4411,15 @@ int do_mbgrdviz_savelnw(size_t instance, char *output_file_ptr) {
           /* initialize appropriate UTM projection */
           proj_status = mb_proj_init(verbose, projection_id, &(pjptr), &error);
 
-          /* quit if projection fails */
+          /* stop writing if projection fails */
           if (proj_status != MB_SUCCESS) {
             mb_error(verbose, error, &error_message);
             fprintf(stderr, "\nMBIO Error initializing projection:\n%s\n", error_message);
-            fprintf(stderr, "\nProgram terminated in <%s>\n", __func__);
-            mb_memory_clear(verbose, &error);
-            exit(error);
+            fprintf(stderr, "\nUnable to write route file <%s>\n", output_file_ptr);
+            XBell((Display *)XtDisplay(mainWindow), 100);
+            pjptr = NULL;
+            status = MB_FAILURE;
+            break;
           }
         }
 
@@ -4637,18 +4750,26 @@ int do_mbgrdviz_savetecdislst(size_t instance, char *output_file_ptr) {
               latNS = 'S';
             latDeg = (int)(floor(fabs(routelat[j])));
             latMin = (fabs(routelat[j]) - (double)latDeg) * 60.0;
+            if (latMin >= 59.9999995) { /* carry minutes that would print as 60.000000 */
+              latMin = 0.0;
+              latDeg++;
+            }
             if (routelon[j] >= 0.0)
               lonEW = 'E';
             else
               lonEW = 'W';
             lonDeg = (int)(floor(fabs(routelon[j])));
             lonMin = (fabs(routelon[j]) - (double)lonDeg) * 60.0;
+            if (lonMin >= 59.9999995) { /* carry minutes that would print as 60.000000 */
+              lonMin = 0.0;
+              lonDeg++;
+            }
 
 			if (j == 0) {
               fprintf(sfp, "$PTLKR,0,0,%s\r\n", output_file_ptr);
-              fprintf(sfp, "$PTLKP,8,%2.2d%9.6f,%c,%3.3d%9.6f,%c\r\n", latDeg, latMin, latNS, lonDeg, lonMin, lonEW);
+              fprintf(sfp, "$PTLKP,8,%2.2d%09.6f,%c,%3.3d%09.6f,%c\r\n", latDeg, latMin, latNS, lonDeg, lonMin, lonEW);
 			}
-            fprintf(sfp, "$PTLKP,9,%2.2d%9.6f,%c,%3.3d%9.6f,%c\r\n", latDeg, latMin, latNS, lonDeg, lonMin, lonEW);
+            fprintf(sfp, "$PTLKP,9,%2.2d%09.6f,%c,%3.3d%09.6f,%c\r\n", latDeg, latMin, latNS, lonDeg, lonMin, lonEW);
           }
         }
       }
@@ -4787,12 +4908,20 @@ int do_mbgrdviz_savekongsbergdp(size_t instance, char *output_file_ptr) {
               latNS = 'S';
             latDeg = (int)(floor(fabs(routelat[j])));
             latMin = (fabs(routelat[j]) - (double)latDeg) * 60.0;
+            if (latMin >= 59.9999995) { /* carry minutes that would print as 60.000000 */
+              latMin = 0.0;
+              latDeg++;
+            }
             if (routelon[j] >= 0.0)
               lonEW = 'E';
             else
               lonEW = 'W';
             lonDeg = (int)(floor(fabs(routelon[j])));
             lonMin = (fabs(routelon[j]) - (double)lonDeg) * 60.0;
+            if (lonMin >= 59.9999995) { /* carry minutes that would print as 60.000000 */
+              lonMin = 0.0;
+              lonDeg++;
+            }
 
             fprintf(sfp, "WP,%d,%c,%2.2d,%09.6f,%c,%3.3d,%09.6f,0,  0.000,5.0000,350.00\r\n", 
             				noutputwaypoints,latNS, latDeg, latMin, lonEW, lonDeg, lonMin);
@@ -5419,7 +5548,8 @@ int do_mbgrdviz_opennav(size_t instance, bool swathbounds, char *input_file_ptr)
                                   formatorg, weight, &error);
             }
             else
-              fprintf(stderr, "Skipped xyz data: %s\n", swathfile);
+              fprintf(stderr, "Skipped xyz data: %s\n",
+                      (swathfilestatus == MB_PROCESSED_USE) ? swathfileprocessed : swathfileraw);
           }
           else {
             mb_datalist_close(verbose, &datalist, &error);
@@ -5619,6 +5749,18 @@ int do_mbgrdviz_readnav(size_t instance, char *swathfile, int pathstatus, char *
     if (*error != MB_ERROR_NO_ERROR) {
       mb_error(verbose, *error, &error_message);
       fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
+
+      /* release any arrays allocated and close the swath file */
+      int close_error = MB_ERROR_NO_ERROR;
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, &close_error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, &close_error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&bathacrosstrack, &close_error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&bathalongtrack, &close_error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&amp, &close_error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&ss, &close_error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&ssacrosstrack, &close_error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&ssalongtrack, &close_error);
+      mb_close(verbose, &mbio_ptr, &close_error);
     }
   }
 
@@ -5703,6 +5845,7 @@ int do_mbgrdviz_readnav(size_t instance, char *swathfile, int pathstatus, char *
           /* if error initializing memory then don't read the file */
           if (*error != MB_ERROR_NO_ERROR) {
             npointalloc = 0;
+            npoint = 0;
             mb_error(verbose, *error, &error_message);
             fprintf(stderr, "\nMBIO Error allocating navigation data arrays:\n%s\n", error_message);
           }
@@ -5895,7 +6038,7 @@ void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_dat
   char button_name_source[MB_PATH_MAXLINE];
 
   /* new mbview instance */
-  size_t instance;
+  size_t instance = MBV_NO_WINDOW;
   char button_name[MB_PATH_MAXLINE+12];
 
   /* mbview parameters */
@@ -6017,7 +6160,7 @@ void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_dat
     status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * mbv_primary_nxy, (void **)&mbv_primary_data, &error);
     mbv_primary_min = data_source->primary_nodatavalue;
     mbv_primary_max = data_source->primary_nodatavalue;
-    for (i = 0; i < mbv_primary_n_columns; i++) {
+    for (i = 0; status == MB_SUCCESS && i < mbv_primary_n_columns; i++) {
       for (j = 0; j < mbv_primary_n_rows; j++) {
         k = i * mbv_primary_n_rows + j;
         ksource = (i + ixmin) * data_source->primary_n_rows + (j + jymin);
@@ -6162,7 +6305,7 @@ void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_dat
           mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * mbv_secondary_nxy, (void **)&mbv_secondary_data, &error);
       mbv_secondary_min = data_source->secondary_nodatavalue;
       mbv_secondary_max = data_source->secondary_nodatavalue;
-      for (i = 0; i < mbv_secondary_n_columns; i++) {
+      for (i = 0; status == MB_SUCCESS && i < mbv_secondary_n_columns; i++) {
         for (j = 0; j < mbv_secondary_n_rows; j++) {
           k = i * mbv_secondary_n_rows + j;
           ksource = (i + ixmin) * data_source->secondary_n_rows + (j + jymin);
@@ -6198,7 +6341,8 @@ void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_dat
   }
 
   /* update widgets */
-  status = mbview_update(verbose, instance, &error);
+  if (instance != MBV_NO_WINDOW && instance < MBV_MAX_WINDOWS && mbview_id[instance])
+    status = mbview_update(verbose, instance, &error);
 
   /* set sensitivity of widgets that require an mbview instance to be active */
   do_mbgrdviz_sensitivity();
@@ -6832,7 +6976,6 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
   int color;
   double line_spacing;
   double line_spacing_use;
-  double crossline_spacing;
   double sonar_depth;
   double sonar_altitude;
   double maxtopo;
@@ -7049,6 +7192,7 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
       segment.lspoints = NULL;
 
       if (status == MB_SUCCESS) {
+        bool line_spacing_limited = false;
         xx[0] = -dsign * 0.5 * r;
 
         while (nlines == 1 || fabs(xx[nlines - 1] + dsign * 0.5 * line_spacing_use) < 0.5 * r) {
@@ -7105,6 +7249,19 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
           sonar_altitude = -maxtopo - sonar_depth;
           line_spacing = sonar_altitude * 2.0 * tan(DTR * 0.5 * (double)survey_swathwidth);
           line_spacing_use = line_spacing * r / data->area.width;
+
+          /* keep the number of lines finite when the altitude (and thus the
+             swath width) is near zero */
+          if (!(line_spacing_use >= r / MBGRDVIZ_SURVEY_MAXLINES)) {
+            line_spacing_use = r / MBGRDVIZ_SURVEY_MAXLINES;
+            line_spacing = line_spacing_use * data->area.width / r;
+            if (!line_spacing_limited) {
+              fprintf(stderr, "Survey line spacing limited to %.3f m (at most %d lines) because the altitude is near zero\n",
+                      line_spacing, MBGRDVIZ_SURVEY_MAXLINES);
+              line_spacing_limited = true;
+            }
+          }
+
           xx[nlines] = xx[nlines - 1] + dsign * line_spacing_use;
           nlines++;
         }
@@ -7171,9 +7328,6 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
       r = sqrt(dx * dx + dy * dy);
       dxd = dx / r;
       dyd = dy / r;
-
-      /* get crossline spacing */
-      crossline_spacing = (data->area.length / (survey_crosslines + 1)) * (r / data->area.width);
 
       /* generate cross lines */
       jstart = startcorner;
@@ -7373,9 +7527,6 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
       r = sqrt(dx * dx + dy * dy);
       dxd = dx / r;
       dyd = dy / r;
-
-      /* get crossline spacing */
-      crossline_spacing = (data->area.length / (crossline_spacing + 1)) * (r / data->area.width);
 
       /* generate cross lines */
       jstart = endcorner;
@@ -7718,13 +7869,13 @@ void do_mbgrdviz_arearoute_info(size_t instance) {
   /* set widgets */
   if (status == MB_SUCCESS) {
     if (working_route >= 0) {
-      int nroutewaypoint;
-      int nroutpoint;
-      char routename[MB_PATH_MAXLINE];
+      int nroutewaypoint = 0;
+      int nroutpoint = 0;
+      char routename[MB_PATH_MAXLINE] = "";
       int routecolor;
       int routesize;
-      double routedistancelateral;
-      double routedistancetopo;
+      double routedistancelateral = 0.0;
+      double routedistancetopo = 0.0;
 
       /* get info for working route */
       status = mbview_getrouteinfo(verbose, instance, working_route, &nroutewaypoint, &nroutpoint, routename, &routecolor,
@@ -8236,6 +8387,15 @@ int do_mbgrdviz_importshapefile(size_t instance, char *input_file_ptr) {
       for (int k = 0; k < 4; k++) {
         double lon, lat;
         mbview_projectgrid2ll(instance, xedge[k], yedge[k], &lon, &lat);
+        /* keep longitudes continuous with the bounds found so far so a grid
+           crossing 180 degrees does not give bounds spanning the globe */
+        if (!first) {
+          const double lonref = 0.5 * (bounds[0] + bounds[1]);
+          if (lon - lonref > 180.0)
+            lon -= 360.0;
+          else if (lon - lonref < -180.0)
+            lon += 360.0;
+        }
         if (first) {
           bounds[0] = bounds[1] = lon;
           bounds[2] = bounds[3] = lat;

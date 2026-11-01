@@ -55,12 +55,15 @@ int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip, void **top
 
 	/* allocate memory for topogrid structure */
 	int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mb_topogrid_struct), (void **)topogrid_ptr, error);
+	if (status == MB_FAILURE)
+		return (status);
 
 	/* get pointer to topogrid structure */
 	struct mb_topogrid_struct *topogrid = (struct mb_topogrid_struct *)*topogrid_ptr;
+	memset(topogrid, 0, sizeof(struct mb_topogrid_struct));
 
 	/* read in the data */
-	strcpy(topogrid->file, topogridfile);
+	snprintf(topogrid->file, sizeof(topogrid->file), "%s", topogridfile);
 	topogrid->data = NULL;
 	status = mb_read_gmt_grd(verbose, topogrid->file, &topogrid->projection_mode, topogrid->projection_id, &topogrid->nodatavalue,
 	                         &topogrid->nxy, &topogrid->n_columns, &topogrid->n_rows, &topogrid->min, &topogrid->max, &topogrid->xmin,
@@ -405,7 +408,7 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double
 				if (dtopo < 0.0)
 					rmax = MIN(rmax, r);
 				else if (dtopo > 0.0)
-					rmin = MIN(rmin, r);
+					rmin = MAX(rmin, r);
 
 				/* estimate distance to crossing point */
 				dr = dtopo / vz;
@@ -489,7 +492,9 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, doubl
 	double mtodeglon;
 	double mtodeglat;
 	mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
-	double dangle = (angle_max - angle_min) / (nangle - 1);
+	double dangle = 0.0;
+	if (nangle > 1)
+		dangle = (angle_max - angle_min) / (nangle - 1);
 	double alpha = pitch;
 	int nset = 0;
 	for (int i = 0; i < nangle; i++) {
@@ -505,9 +510,10 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, doubl
 		double vx = sin(DTR * theta) * cos(DTR * phi);
 		double vy = sin(DTR * theta) * sin(DTR * phi);
 
-		/* rotate unit vector by vehicle heading */
-		vx = vx * cos(DTR * heading) + vy * sin(DTR * heading);
-		vy = -vx * sin(DTR * heading) + vy * cos(DTR * heading);
+		/* rotate unit vector by vehicle heading (using the unrotated vx for vy) */
+		const double vx0 = vx;
+		vx = vx0 * cos(DTR * heading) + vy * sin(DTR * heading);
+		vy = -vx0 * sin(DTR * heading) + vy * cos(DTR * heading);
 
 		double lon;
 		double lat;
@@ -570,7 +576,7 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, doubl
 						table_altitude[i] = 0.5 * (table_altitude[first] + table_altitude[last]);
 					}
 
-					table_range[i] = table_altitude[first] / cos(DTR * theta);
+					table_range[i] = table_altitude[i] / cos(DTR * theta);
 					const double xx = table_range[i] * sin(DTR * theta);
 					table_xtrack[i] = xx * cos(DTR * phi);
 					table_ltrack[i] = xx * sin(DTR * phi);

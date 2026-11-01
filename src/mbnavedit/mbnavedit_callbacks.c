@@ -612,20 +612,14 @@ void do_editlistselection(Widget w, XtPointer client_data, XtPointer call_data) 
 	/* turn off expose plots */
 	expose_plot_ok = false;
 
-	/* get the current selection, if any, from the list */
-	Cardinal ac = 0;
-	Arg args[256];
+	/* get the current selection, if any, from the list
+	   (XmListGetSelectedPos returns a copy that must be freed with XtFree) */
 	int position_count = 0;
-	XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer)&position_count);
-	ac++;
 	int *position_list = NULL;
-	XtSetArg(args[ac], XmNselectedPositions, (XtPointer)&position_list);
-	ac++;
-	XtGetValues(list_filelist, args, ac);
-
-	fprintf(stderr, "position_count:%d\n", position_count);
-	for (int i = 0; i < position_count; i++)
-		fprintf(stderr, "  %d %d\n", i, position_list[i]);
+	if (!XmListGetSelectedPos(list_filelist, &position_list, &position_count)) {
+		position_list = NULL;
+		position_count = 0;
+	}
 
 	/* if the selected file is different than what's already loaded, unload the old file and load the new one */
 	if (position_count > 0 && currentfile != position_list[0] - 1) {
@@ -661,16 +655,14 @@ void do_filelist_remove(Widget w, XtPointer client_data, XtPointer call_data) {
 	/* turn off expose plots */
 	expose_plot_ok = false;
 
-	/* get the current selection, if any, from the list */
-	Cardinal ac = 0;
-	Arg args[256];
+	/* get the current selection, if any, from the list
+	   (XmListGetSelectedPos returns a copy that must be freed with XtFree) */
 	int position_count = 0;
-	XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer)&position_count);
-	ac++;
 	int *position_list = NULL;
-	XtSetArg(args[ac], XmNselectedPositions, (XtPointer)&position_list);
-	ac++;
-	XtGetValues(list_filelist, args, ac);
+	if (!XmListGetSelectedPos(list_filelist, &position_list, &position_count)) {
+		position_list = NULL;
+		position_count = 0;
+	}
 
 	/* if the selected file is different than what's already loaded, remove it from the list */
 	if (position_count > 0 && currentfile != position_list[0] - 1) {
@@ -1016,20 +1008,22 @@ void do_build_filelist() {
 		ac = 0;
 		XtSetArg(args[ac], XmNitemCount, (XtPointer)&item_count);
 		ac++;
-		XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer)&position_count);
-		ac++;
-		XtSetArg(args[ac], XmNselectedPositions, (XtPointer)&position_list);
-		ac++;
 		XtGetValues(list_filelist, args, ac);
+		if (!XmListGetSelectedPos(list_filelist, &position_list, &position_count)) {
+			position_list = NULL;
+			position_count = 0;
+		}
 		if (position_count > 0)
 			selection = position_list[0];
 
 		/* build available file list */
 		XmListDeleteAllItems(list_filelist);
-		if (numfiles > 0) {
 
-			/* allocate array of x strings */
+		/* allocate array of x strings */
+		xstr = NULL;
+		if (numfiles > 0)
 			xstr = (XmString *)malloc(numfiles * sizeof(XmString));
+		if (numfiles > 0 && xstr != NULL) {
 			for (int i = 0; i < numfiles; i++) {
 				/* check for locks */
 				if (currentfile == i)

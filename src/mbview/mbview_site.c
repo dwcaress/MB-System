@@ -251,6 +251,7 @@ int mbview_addsites(int verbose, size_t instance, int nsite, double *sitelon, do
 		status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, shared.shareddata.nsite_alloc * sizeof(struct mbview_site_struct),
 		                     (void **)&(shared.shareddata.sites), error);
 		if (status == MB_FAILURE) {
+			shared.shareddata.nsite = 0;
 			shared.shareddata.nsite_alloc = 0;
 		}
 		else {
@@ -263,9 +264,9 @@ int mbview_addsites(int verbose, size_t instance, int nsite, double *sitelon, do
 		}
 	}
 
-	/* loop over the sites */
+	/* loop over the sites (none can be added if the allocation failed) */
 	int nadded = 0;
-	for (int i = 0; i < nsite; i++) {
+	for (int i = 0; i < nsite && shared.shareddata.nsite < shared.shareddata.nsite_alloc; i++) {
 		/* get site positions in grid coordinates */
 		double xgrid, ygrid, zdata;
 		status = mbview_projectll2xyzgrid(instance, sitelon[i], sitelat[i], &xgrid, &ygrid, &zdata);
@@ -284,7 +285,10 @@ int mbview_addsites(int verbose, size_t instance, int nsite, double *sitelon, do
 
 			/* add the new site */
 			shared.shareddata.sites[shared.shareddata.nsite].active = true;
-			shared.shareddata.sites[shared.shareddata.nsite].color = sitecolor[i];
+			if (sitecolor[i] >= MBV_COLOR_BLACK && sitecolor[i] <= MBV_COLOR_PURPLE)
+				shared.shareddata.sites[shared.shareddata.nsite].color = sitecolor[i];
+			else
+				shared.shareddata.sites[shared.shareddata.nsite].color = MBV_COLOR_GREEN;
 			shared.shareddata.sites[shared.shareddata.nsite].size = sitesize[i];
 			strcpy(shared.shareddata.sites[shared.shareddata.nsite].name, sitename[i]);
 			shared.shareddata.sites[shared.shareddata.nsite].point.xgrid[instance] = xgrid;
@@ -418,6 +422,7 @@ int mbview_getsites(int verbose, size_t instance, int *nsite, double *sitelon, d
 	else {
 		/* loop over the sites */
     int j = 0;
+    *nsite = 0;
 		for (int i = 0; i < shared.shareddata.nsite; i++) {
       if (shared.shareddata.sites[i].active) {
   			sitelon[j] = shared.shareddata.sites[i].point.xlon;
@@ -716,7 +721,9 @@ int mbview_pick_site_add(size_t instance, int which, int xpixel, int ypixel) {
 				                     shared.shareddata.nsite_alloc * sizeof(struct mbview_site_struct),
 				                     (void **)&(shared.shareddata.sites), &error);
 				if (status == MB_FAILURE) {
+					shared.shareddata.nsite = 0;
 					shared.shareddata.nsite_alloc = 0;
+					inew = 0;
 				}
 				else {
 					for (int i = shared.shareddata.nsite; i < shared.shareddata.nsite_alloc; i++) {
@@ -728,33 +735,39 @@ int mbview_pick_site_add(size_t instance, int which, int xpixel, int ypixel) {
 				}
 			}
 
-			/* move old sites if necessary */
-			for (int i = shared.shareddata.nsite; i > inew; i--) {
-				shared.shareddata.sites[i] = shared.shareddata.sites[i - 1];
+			/* cannot add a site if the allocation failed */
+			if (shared.shareddata.nsite_alloc < shared.shareddata.nsite + 1) {
+				XBell(view->dpy, 100);
 			}
+			else {
+				/* move old sites if necessary */
+				for (int i = shared.shareddata.nsite; i > inew; i--) {
+					shared.shareddata.sites[i] = shared.shareddata.sites[i - 1];
+				}
 
-			/* add the new site */
-			shared.shareddata.sites[inew].active = true;
-			shared.shareddata.sites[inew].color = MBV_COLOR_GREEN;
-			shared.shareddata.sites[inew].size = 1;
-			sprintf(shared.shareddata.sites[inew].name, "Site %d", shared.shareddata.nsite);
-			shared.shareddata.sites[inew].point.xgrid[instance] = xgrid;
-			shared.shareddata.sites[inew].point.ygrid[instance] = ygrid;
-			shared.shareddata.sites[inew].point.xlon = xlon;
-			shared.shareddata.sites[inew].point.ylat = ylat;
-			shared.shareddata.sites[inew].point.zdata = zdata;
-			shared.shareddata.sites[inew].point.xdisplay[instance] = xdisplay;
-			shared.shareddata.sites[inew].point.ydisplay[instance] = ydisplay;
-			shared.shareddata.sites[inew].point.zdisplay[instance] = zdisplay;
+				/* add the new site */
+				shared.shareddata.sites[inew].active = true;
+				shared.shareddata.sites[inew].color = MBV_COLOR_GREEN;
+				shared.shareddata.sites[inew].size = 1;
+				sprintf(shared.shareddata.sites[inew].name, "Site %d", shared.shareddata.nsite);
+				shared.shareddata.sites[inew].point.xgrid[instance] = xgrid;
+				shared.shareddata.sites[inew].point.ygrid[instance] = ygrid;
+				shared.shareddata.sites[inew].point.xlon = xlon;
+				shared.shareddata.sites[inew].point.ylat = ylat;
+				shared.shareddata.sites[inew].point.zdata = zdata;
+				shared.shareddata.sites[inew].point.xdisplay[instance] = xdisplay;
+				shared.shareddata.sites[inew].point.ydisplay[instance] = ydisplay;
+				shared.shareddata.sites[inew].point.zdisplay[instance] = zdisplay;
 
-			/* set grid and display coordinates for all instances */
-			mbview_updatepointw(instance, &(shared.shareddata.sites[inew].point));
+				/* set grid and display coordinates for all instances */
+				mbview_updatepointw(instance, &(shared.shareddata.sites[inew].point));
 
-			/* set nsite */
-			shared.shareddata.nsite++;
+				/* set nsite */
+				shared.shareddata.nsite++;
 
-			/* select the new site */
-			shared.shareddata.site_selected = inew;
+				/* select the new site */
+				shared.shareddata.site_selected = inew;
+			}
 		}
 		else if (shared.shareddata.site_selected == MBV_SELECT_NONE) {
 			XBell(view->dpy, 100);
@@ -1154,6 +1167,8 @@ int mbview_updatesitelist() {
 			/* allocate array of label XmStrings, sized to only the active sites
 			    actually being added, so every slot gets initialized below */
 			XmString *xstr = (XmString *)malloc(nitems * sizeof(XmString));
+			if (xstr == NULL)
+				return (MB_FAILURE);
 
 			/* loop over the sites */
 			nitems = 0;

@@ -884,7 +884,7 @@ void do_open_commandline(char *wfile, char *sfile, char *file, int format) {
 
 		/* reset status message */
 		if (status == 1) {
-			snprintf(message_str, MB_DESCRIPTION_LENGTH, "Loaded display SVP from: %s", wfile);
+			snprintf(message_str, MB_DESCRIPTION_LENGTH, "Loaded display SVP from: %s", sfile);
 			set_label_string(label_status_display, message_str);
 		}
 	}

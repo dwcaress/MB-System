@@ -507,7 +507,10 @@ int mbview_addroute(int verbose, size_t instance, int npoint, double *routelon, 
 	    rejected, routes[*iroute] may never have been allocated and must not
 	    be touched */
 	if (nadded > 0 && *iroute < shared.shareddata.nroute) {
-		shared.shareddata.routes[*iroute].color = routecolor;
+		if (routecolor >= MBV_COLOR_BLACK && routecolor <= MBV_COLOR_PURPLE)
+			shared.shareddata.routes[*iroute].color = routecolor;
+		else
+			shared.shareddata.routes[*iroute].color = MBV_COLOR_BLACK;
 		shared.shareddata.routes[*iroute].size = routesize;
 		shared.shareddata.routes[*iroute].editmode = routeeditmode;
 		strcpy(shared.shareddata.routes[*iroute].name, routename);
@@ -556,10 +559,18 @@ int mbview_deleteroute(int verbose, size_t instance, int iroute, int *error) {
 	// struct mbview_world_struct *view = &(mbviews[instance]);
 	// struct mbview_struct *data = &(view->data);
 
+	/* check that the route id is valid */
+	if (iroute < 0 || iroute >= shared.shareddata.nroute) {
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_PARAMETER;
+	}
+
 	/* delete the points in the route backwards */
-	for (jpoint = shared.shareddata.routes[iroute].npoints - 1; jpoint >= 0; jpoint--) {
-		/* delete the route point */
-		mbview_route_delete(instance, iroute, jpoint);
+	else {
+		for (jpoint = shared.shareddata.routes[iroute].npoints - 1; jpoint >= 0; jpoint--) {
+			/* delete the route point */
+			mbview_route_delete(instance, iroute, jpoint);
+		}
 	}
 
 	/* set pick annotation */
@@ -709,7 +720,8 @@ int mbview_getroute(int verbose, size_t instance, int route, int *npointtotal, d
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	double dx, dy, range, bearing;
+	double dx, dy, range;
+	double bearing = 0.0;
 	double xx1, yy1, xx2, yy2;
 	int i, j;
 
@@ -743,9 +755,15 @@ int mbview_getroute(int verbose, size_t instance, int route, int *npointtotal, d
 	/* zero the points returned */
 	*npointtotal = 0;
 
+	/* check that the route id is valid */
+	if (route < 0 || route >= shared.shareddata.nroute) {
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_PARAMETER;
+	}
+
 	/* check that the array pointers are not NULL */
-	if (routelon == NULL || routelat == NULL || waypoint == NULL || routetopo == NULL || distlateral == NULL ||
-	    distovertopo == NULL || slope == NULL) {
+	else if (routelon == NULL || routelat == NULL || waypoint == NULL || routetopo == NULL || routebearing == NULL ||
+	    distlateral == NULL || distovertopo == NULL || slope == NULL) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_DATA_NOT_INSERTED;
 	}
@@ -824,24 +842,32 @@ int mbview_getroute(int verbose, size_t instance, int route, int *npointtotal, d
 			}
 		}
 
-		/* add last point */
+		/* add last point (the only point of a 1-point route) */
 		j = shared.shareddata.routes[route].npoints - 1;
-		routelon[*npointtotal] = shared.shareddata.routes[route].points[j].xlon;
-		if (routelon[*npointtotal] < -180.0)
-			routelon[*npointtotal] += 360.0;
-		else if (routelon[*npointtotal] > 180.0)
-			routelon[*npointtotal] -= 360.0;
-		routelat[*npointtotal] = shared.shareddata.routes[route].points[j].ylat;
-		waypoint[*npointtotal] = shared.shareddata.routes[route].waypoint[j];
-		;
-		routetopo[*npointtotal] = shared.shareddata.routes[route].points[j].zdata;
-		routebearing[*npointtotal] = bearing;
-		mbview_projectdistance(instance, routelon[*npointtotal - 1], routelat[*npointtotal - 1], routetopo[*npointtotal - 1],
-		                       routelon[*npointtotal], routelat[*npointtotal], routetopo[*npointtotal],
-		                       &distlateral[*npointtotal], &distovertopo[*npointtotal], &slope[*npointtotal]);
-		distlateral[*npointtotal] += distlateral[*npointtotal - 1];
-		distovertopo[*npointtotal] += distovertopo[*npointtotal - 1];
-		(*npointtotal)++;
+		if (j >= 0) {
+			routelon[*npointtotal] = shared.shareddata.routes[route].points[j].xlon;
+			if (routelon[*npointtotal] < -180.0)
+				routelon[*npointtotal] += 360.0;
+			else if (routelon[*npointtotal] > 180.0)
+				routelon[*npointtotal] -= 360.0;
+			routelat[*npointtotal] = shared.shareddata.routes[route].points[j].ylat;
+			waypoint[*npointtotal] = shared.shareddata.routes[route].waypoint[j];
+			routetopo[*npointtotal] = shared.shareddata.routes[route].points[j].zdata;
+			routebearing[*npointtotal] = bearing;
+			if (*npointtotal == 0) {
+				distlateral[*npointtotal] = 0.0;
+				distovertopo[*npointtotal] = 0.0;
+				slope[*npointtotal] = 0.0;
+			}
+			else {
+				mbview_projectdistance(instance, routelon[*npointtotal - 1], routelat[*npointtotal - 1], routetopo[*npointtotal - 1],
+				                       routelon[*npointtotal], routelat[*npointtotal], routetopo[*npointtotal],
+				                       &distlateral[*npointtotal], &distovertopo[*npointtotal], &slope[*npointtotal]);
+				distlateral[*npointtotal] += distlateral[*npointtotal - 1];
+				distovertopo[*npointtotal] += distovertopo[*npointtotal - 1];
+			}
+			(*npointtotal)++;
+		}
 
 		/* get color size and name */
 		*routecolor = shared.shareddata.routes[route].color;
@@ -1493,13 +1519,16 @@ int mbview_pick_route_add(int verbose, size_t instance, int which, int xpixel, i
 			inew = shared.shareddata.nroute;
 			jnew = 0;
 
-			/* add the route point */
-			mbview_route_add(mbv_verbose, instance, inew, jnew, MBV_ROUTE_WAYPOINT_SIMPLE, xgrid, ygrid, xlon, ylat, zdata,
-			                 xdisplay, ydisplay, zdisplay);
-
-			/* select the new route */
-			shared.shareddata.route_selected = inew;
-			shared.shareddata.route_point_selected = jnew;
+			/* add the route point and select the new route if that succeeds */
+			if (mbview_route_add(mbv_verbose, instance, inew, jnew, MBV_ROUTE_WAYPOINT_SIMPLE, xgrid, ygrid, xlon, ylat, zdata,
+			                     xdisplay, ydisplay, zdisplay) == MB_SUCCESS) {
+				shared.shareddata.route_selected = inew;
+				shared.shareddata.route_point_selected = jnew;
+			}
+			else {
+				shared.shareddata.route_selected = MBV_SELECT_NONE;
+				shared.shareddata.route_point_selected = MBV_SELECT_NONE;
+			}
 		}
 
 		/* else just add point to currently selected route and point */
@@ -1507,15 +1536,21 @@ int mbview_pick_route_add(int verbose, size_t instance, int which, int xpixel, i
 		         shared.shareddata.routes[shared.shareddata.route_selected].editmode) {
 			/* add route point after currently selected route point if any */
 			inew = shared.shareddata.route_selected;
-			jnew = shared.shareddata.route_point_selected + 1;
+			if (shared.shareddata.route_point_selected >= 0)
+				jnew = shared.shareddata.route_point_selected + 1;
+			else
+				jnew = shared.shareddata.routes[inew].npoints;
 
-			/* add the route point */
-			mbview_route_add(mbv_verbose, instance, inew, jnew, MBV_ROUTE_WAYPOINT_SIMPLE, xgrid, ygrid, xlon, ylat, zdata,
-			                 xdisplay, ydisplay, zdisplay);
-
-			/* select the new route */
-			shared.shareddata.route_selected = inew;
-			shared.shareddata.route_point_selected = jnew;
+			/* add the route point and select the new route if that succeeds */
+			if (mbview_route_add(mbv_verbose, instance, inew, jnew, MBV_ROUTE_WAYPOINT_SIMPLE, xgrid, ygrid, xlon, ylat, zdata,
+			                     xdisplay, ydisplay, zdisplay) == MB_SUCCESS) {
+				shared.shareddata.route_selected = inew;
+				shared.shareddata.route_point_selected = jnew;
+			}
+			else {
+				shared.shareddata.route_selected = MBV_SELECT_NONE;
+				shared.shareddata.route_point_selected = MBV_SELECT_NONE;
+			}
 		}
 
 		/* if selected route not editable then complain */
@@ -1794,8 +1829,17 @@ int mbview_route_add(int verbose, size_t instance, int inew, int jnew, int waypo
 	view = &(mbviews[instance]);
 	data = &(view->data);
 
+	/* check that the route and point indices are valid: inew may be an
+	    existing route or nroute (new route), and jnew may range from 0 to
+	    npoints (append after the last point) */
+	if (inew < 0 || inew > shared.shareddata.nroute
+	    || jnew < 0 || jnew > (inew == shared.shareddata.nroute ? 0 : shared.shareddata.routes[inew].npoints)) {
+		status = MB_FAILURE;
+		error = MB_ERROR_BAD_PARAMETER;
+	}
+
 	/* add route if required */
-	if (inew == shared.shareddata.nroute) {
+	if (status == MB_SUCCESS && inew == shared.shareddata.nroute) {
 		/* allocate memory for a new route if required */
 		if (shared.shareddata.nroute_alloc < shared.shareddata.nroute + 1) {
 			shared.shareddata.nroute_alloc += MBV_ALLOC_NUM;
@@ -1803,12 +1847,13 @@ int mbview_route_add(int verbose, size_t instance, int inew, int jnew, int waypo
 			    mb_reallocd(mbv_verbose, __FILE__, __LINE__, shared.shareddata.nroute_alloc * sizeof(struct mbview_route_struct),
 			                (void **)&(shared.shareddata.routes), &error);
 			if (status == MB_FAILURE) {
+				shared.shareddata.nroute = 0;
 				shared.shareddata.nroute_alloc = 0;
 			}
 			else {
 				memset((void *)&shared.shareddata.routes[shared.shareddata.nroute], 0,
 				       MBV_ALLOC_NUM * sizeof(struct mbview_route_struct));
-				for (i = shared.shareddata.nroute; i < shared.shareddata.nroute_alloc; i++) {
+				for (i = shared.shareddata.nroute; i < shared.shareddata.nroute_alloc && status == MB_SUCCESS; i++) {
 					shared.shareddata.routes[i].color = false;
 					shared.shareddata.routes[i].color = MBV_COLOR_RED;
 					shared.shareddata.routes[i].size = 1;
@@ -1823,16 +1868,24 @@ int mbview_route_add(int verbose, size_t instance, int inew, int jnew, int waypo
 					shared.shareddata.routes[i].segments = NULL;
 					status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, shared.shareddata.routes[i].npoints_alloc * sizeof(int),
 					                     (void **)&(shared.shareddata.routes[i].waypoint), &error);
-					status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, shared.shareddata.routes[i].npoints_alloc * sizeof(double),
-					                (void **)&(shared.shareddata.routes[i].distlateral), &error);
-					status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, shared.shareddata.routes[i].npoints_alloc * sizeof(double),
-					                (void **)&(shared.shareddata.routes[i].disttopo), &error);
-					status = mb_reallocd(mbv_verbose, __FILE__, __LINE__,
-					                     shared.shareddata.routes[i].npoints_alloc * sizeof(struct mbview_pointw_struct),
-					                     (void **)&(shared.shareddata.routes[i].points), &error);
-					status = mb_reallocd(mbv_verbose, __FILE__, __LINE__,
-					                     shared.shareddata.routes[i].npoints_alloc * sizeof(struct mbview_linesegmentw_struct),
-					                     (void **)&(shared.shareddata.routes[i].segments), &error);
+					if (status == MB_SUCCESS)
+						status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, shared.shareddata.routes[i].npoints_alloc * sizeof(double),
+						                (void **)&(shared.shareddata.routes[i].distlateral), &error);
+					if (status == MB_SUCCESS)
+						status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, shared.shareddata.routes[i].npoints_alloc * sizeof(double),
+						                (void **)&(shared.shareddata.routes[i].disttopo), &error);
+					if (status == MB_SUCCESS)
+						status = mb_reallocd(mbv_verbose, __FILE__, __LINE__,
+						                     shared.shareddata.routes[i].npoints_alloc * sizeof(struct mbview_pointw_struct),
+						                     (void **)&(shared.shareddata.routes[i].points), &error);
+					if (status == MB_SUCCESS)
+						status = mb_reallocd(mbv_verbose, __FILE__, __LINE__,
+						                     shared.shareddata.routes[i].npoints_alloc * sizeof(struct mbview_linesegmentw_struct),
+						                     (void **)&(shared.shareddata.routes[i].segments), &error);
+					if (status == MB_FAILURE) {
+						shared.shareddata.routes[i].npoints_alloc = 0;
+						break;
+					}
 					memset((void *)shared.shareddata.routes[i].waypoint, 0,
 					       shared.shareddata.routes[i].npoints_alloc * sizeof(int));
 					memset((void *)shared.shareddata.routes[i].distlateral, 0,
@@ -1847,15 +1900,20 @@ int mbview_route_add(int verbose, size_t instance, int inew, int jnew, int waypo
 			}
 		}
 
-		/* set nroute */
-		shared.shareddata.nroute++;
+		/* set nroute and add the new route unless the allocation failed */
+		if (status == MB_SUCCESS && inew == shared.shareddata.nroute) {
+			shared.shareddata.nroute++;
 
-		/* add the new route */
-		shared.shareddata.routes[inew].active = true;
-		shared.shareddata.routes[inew].color = MBV_COLOR_BLACK;
-		shared.shareddata.routes[inew].size = 1;
-		shared.shareddata.routes[inew].editmode = true;
-		sprintf(shared.shareddata.routes[inew].name, "Route:%d", shared.shareddata.nroute);
+			/* add the new route */
+			shared.shareddata.routes[inew].active = true;
+			shared.shareddata.routes[inew].color = MBV_COLOR_BLACK;
+			shared.shareddata.routes[inew].size = 1;
+			shared.shareddata.routes[inew].editmode = true;
+			sprintf(shared.shareddata.routes[inew].name, "Route:%d", shared.shareddata.nroute);
+		}
+		else {
+			status = MB_FAILURE;
+		}
 	}
 
 	/* allocate memory for point if required */
@@ -1869,22 +1927,26 @@ int mbview_route_add(int verbose, size_t instance, int inew, int jnew, int waypo
 			npoints_alloc = shared.shareddata.routes[inew].npoints_alloc + MBV_ALLOC_NUM;
 		status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, npoints_alloc * sizeof(int),
 		                     (void **)&(shared.shareddata.routes[inew].waypoint), &error);
-		status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, npoints_alloc * sizeof(double),
-		                     (void **)&(shared.shareddata.routes[inew].distlateral), &error);
-		status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, npoints_alloc * sizeof(double),
-		                     (void **)&(shared.shareddata.routes[inew].disttopo), &error);
-		status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, npoints_alloc * sizeof(struct mbview_pointw_struct),
-		                     (void **)&(shared.shareddata.routes[inew].points), &error);
-		status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, npoints_alloc * sizeof(struct mbview_linesegmentw_struct),
-		                     (void **)&(shared.shareddata.routes[inew].segments), &error);
-		npoints_diff = npoints_alloc - npoints;
-		memset((void *)&shared.shareddata.routes[inew].waypoint[npoints], 0, npoints_diff * sizeof(int));
-		memset((void *)&shared.shareddata.routes[inew].distlateral[npoints], 0, npoints_diff * sizeof(double));
-		memset((void *)&shared.shareddata.routes[inew].disttopo[npoints], 0, npoints_diff * sizeof(double));
-		memset((void *)&shared.shareddata.routes[inew].points[npoints], 0, npoints_diff * sizeof(struct mbview_pointw_struct));
-		memset((void *)&shared.shareddata.routes[inew].segments[npoints], 0,
-		       npoints_diff * sizeof(struct mbview_linesegmentw_struct));
+		if (status == MB_SUCCESS)
+			status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, npoints_alloc * sizeof(double),
+			                     (void **)&(shared.shareddata.routes[inew].distlateral), &error);
+		if (status == MB_SUCCESS)
+			status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, npoints_alloc * sizeof(double),
+			                     (void **)&(shared.shareddata.routes[inew].disttopo), &error);
+		if (status == MB_SUCCESS)
+			status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, npoints_alloc * sizeof(struct mbview_pointw_struct),
+			                     (void **)&(shared.shareddata.routes[inew].points), &error);
+		if (status == MB_SUCCESS)
+			status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, npoints_alloc * sizeof(struct mbview_linesegmentw_struct),
+			                     (void **)&(shared.shareddata.routes[inew].segments), &error);
 		if (status == MB_SUCCESS) {
+			npoints_diff = npoints_alloc - npoints;
+			memset((void *)&shared.shareddata.routes[inew].waypoint[npoints], 0, npoints_diff * sizeof(int));
+			memset((void *)&shared.shareddata.routes[inew].distlateral[npoints], 0, npoints_diff * sizeof(double));
+			memset((void *)&shared.shareddata.routes[inew].disttopo[npoints], 0, npoints_diff * sizeof(double));
+			memset((void *)&shared.shareddata.routes[inew].points[npoints], 0, npoints_diff * sizeof(struct mbview_pointw_struct));
+			memset((void *)&shared.shareddata.routes[inew].segments[npoints], 0,
+			       npoints_diff * sizeof(struct mbview_linesegmentw_struct));
 			shared.shareddata.routes[inew].npoints_alloc = npoints_alloc;
 		}
 		else {
@@ -2064,8 +2126,9 @@ int mbview_route_delete(size_t instance, int iroute, int ipoint) {
 	view = &(mbviews[instance]);
 	data = &(view->data);
 
-	fprintf(stderr, "mbview_route_delete: iroute:%d ipoint:%d editmode:%d\n", iroute, ipoint,
-	        shared.shareddata.routes[iroute].editmode);
+	if (mbv_verbose >= 1 && iroute >= 0 && iroute < shared.shareddata.nroute)
+		fprintf(stderr, "mbview_route_delete: iroute:%d ipoint:%d editmode:%d\n", iroute, ipoint,
+		        shared.shareddata.routes[iroute].editmode);
 	/* delete route point if its valid */
 	if (iroute >= 0 && iroute < shared.shareddata.nroute && ipoint >= 0 && ipoint < shared.shareddata.routes[iroute].npoints &&
 	    shared.shareddata.routes[iroute].editmode) {
@@ -2545,6 +2608,8 @@ int mbview_updateroutelist() {
       if (nitems > 0) {
   			/* allocate array of label XmStrings */
   			xstr = (XmString *)malloc(nitems * sizeof(XmString));
+  			if (xstr == NULL)
+  				return (MB_FAILURE);
 
   			/* loop over the routes */
   			nitems = 0;
