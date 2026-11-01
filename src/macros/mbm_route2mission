@@ -106,6 +106,7 @@ $batterylife = 79200; # 22 hours
 #$batterylife = 68400; # 19 hours
 $safetymargin = 900;
 $timetofirstwaypoint = 2000;
+$timebacktostartsurvey = 600;
 
 # set defaults
 
@@ -1300,6 +1301,7 @@ if (!$outputoff)
 	printf MFILE "# Define Mission parameters:\r\n";
 	printf MFILE "#define MISSION_TIMEOUT            %d\r\n", $aborttime;
 	printf MFILE "#define MISSION_DISTANCE           %f\r\n", $distancelastmpoint;
+	printf MFILE "#define INITIAL_HEADING            %f\r\n", $initialheading;
 	printf MFILE "#define DESCENT_DEPTH              %f\r\n", $descentdepth;
 	printf MFILE "#define SPIRAL_DESCENT_DEPTH       %f\r\n", $spiraldescentdepth;
 	printf MFILE "#define SPIRAL_DESCENT_DEPTH_HALF  %f\r\n", 0.5 * $spiraldescentdepth;
@@ -1862,7 +1864,7 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$i];
 			$behavior_count = $behavior_descend + 1;
 			print MFILE "id     = $behavior_id; \r\n";
 			print MFILE "horizontalMode = heading; \r\n";
-			printf MFILE "horizontal      = %f; \r\n", $mbearings[$i];
+			printf MFILE "horizontal      = INITIAL_HEADING; \r\n";
 			print MFILE "pitch           = DESCENDPITCH; \r\n";
 			print MFILE "speed           = ASCENTDESCENT_SPEED; \r\n";
 			print MFILE "maxDepth        = DESCENT_DEPTH; \r\n";
@@ -1878,7 +1880,7 @@ print "Behavior: descend\r\n";
 			$behavior_count = $behavior_count + 1;
 			print MFILE "id     = $behavior_id; \r\n";
 			print MFILE "duration        = SETPOINT_DURATION; \r\n";
-			printf MFILE "heading         = %f; \r\n", $mbearings[$i];
+			printf MFILE "heading         = INITIAL_HEADING; \r\n";
 			print MFILE "speed           = ASCENTDESCENT_SPEED; \r\n";
 			print MFILE "verticalMode    = pitch; \r\n";
 			print MFILE "pitch           = 0; \r\n";
@@ -2147,7 +2149,7 @@ print "Behavior: reson (reset, Log_Mode = 0, line  = $iwaypoint, waypoint($i) ty
 			print MFILE "id     = $behavior_id; \r\n";
 			printf MFILE "latitude     = %f; \r\n", $mlats[$i];
 			printf MFILE "longitude    = %f; \r\n", $mlons[$i];
-			printf MFILE "duration     = TIME_TO_FIRST_WAYPOINT; \r\n";
+			printf MFILE "duration     = $timebacktostartsurvey; \r\n";
 			printf MFILE "depth        = %f; \r\n", $mmissiondepths[$i];
 			print MFILE "speed        = ASCENTDESCENT_SPEED; \r\n";
 			print MFILE "} \r\n";
@@ -2223,7 +2225,7 @@ print "Behavior: reson (reset, Log_Mode = 0, line  = $iwaypoint, waypoint($i) ty
 				print MFILE "id     = $behavior_id; \r\n";
 				printf MFILE "latitude     = %f; \r\n", $mlats[$i];
 				printf MFILE "longitude    = %f; \r\n", $mlons[$i];
-				printf MFILE "duration     = TIME_TO_FIRST_WAYPOINT; \r\n";
+				printf MFILE "duration     = $timebacktostartsurvey; \r\n";
 				printf MFILE "depth        = %f; \r\n", $mmissiondepths[$i];
 				print MFILE "speed        = ASCENTDESCENT_SPEED; \r\n";
 				print MFILE "} \r\n";
@@ -2378,7 +2380,7 @@ print "Behavior: phins (disable DVL aiding, disable GNSS aiding)\n";
 			print MFILE "id     = $behavior_id; \r\n";
 			printf MFILE "latitude     = %f; \r\n", $mlats[$i];
 			printf MFILE "longitude    = %f; \r\n", $mlons[$i];
-			printf MFILE "duration     = 120; \r\n";
+			printf MFILE "duration     = 600; \r\n";
 			printf MFILE "depth        = %f; \r\n", $approachdepth;
 			print MFILE "speed        = ASCENTDESCENT_SPEED; \r\n";
 			print MFILE "} \r\n";
@@ -2955,7 +2957,7 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$i-1];
 	$behavior_count = $behavior_count + 1;
 	print MFILE "id     = $behavior_id; \r\n";
 	print MFILE "horizontalMode   = heading; \r\n";
-	printf MFILE "horizontal   = %f; \r\n", $mbearings[0];
+	printf MFILE "horizontal   = INITIAL_HEADING; \r\n";
 	print MFILE "pitch        = DESCENDPITCH; \r\n";
 	print MFILE "speed        = ASCENTDESCENT_SPEED; \r\n";
 	print MFILE "maxDepth     = DESCENT_DEPTH; \r\n";
@@ -2971,7 +2973,7 @@ print "Behavior: descend\r\n";
 	$behavior_count = $behavior_count + 1;
 	print MFILE "id     = $behavior_id; \r\n";
 	print MFILE "duration     = SETPOINT_DURATION; \r\n";
-	printf MFILE "heading      = %f; \r\n", $mbearings[0];
+	printf MFILE "heading      = INITIAL_HEADING; \r\n";
 	print MFILE "speed        = ASCENTDESCENT_SPEED; \r\n";
 	print MFILE "verticalMode = pitch; \r\n";
 	print MFILE "pitch        = 0; \r\n";

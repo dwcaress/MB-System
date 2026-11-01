@@ -61,6 +61,9 @@
 #define MBEDITVIZ_DECLARE_GLOBALS
 #include "mbeditviz.h"
 
+/* maximum iterations of each bias optimization search loop */
+#define MBEV_BIAS_ITERATION_MAX 100
+
 /* No isinf() os VS, so make one */
 #ifdef _MSC_VER
 #  define isinf(x) (!_finite(x))
@@ -336,9 +339,8 @@ int mbeditviz_init(int argc, char **argv,
   if (input_file_set) {
     mbev_status = mbeditviz_open_data(ifile, mbdef_format);
     if (delete_input_file) {
-      mb_pathplus shell_command;
-      snprintf(shell_command, sizeof(shell_command), "rm %s &", ifile);
-      system(shell_command);
+      if (remove(ifile) != 0)
+        fprintf(stderr, "Unable to delete input file %s\n", ifile);
     }
   }
 
@@ -607,6 +609,18 @@ static void mbeditviz_check_resf(struct mbev_file_struct *file) {
     fprintf(stderr, "WARNING: Unable to generate an up to date reverse edit save file:\n\t%s\n", resffile);
     fprintf(stderr, "\tThe original beam flag states of %s cannot be recreated;\n", file->path);
     fprintf(stderr, "\tthe beam flags of the processed file will be treated as the original states.\n");
+  }
+}
+/*--------------------------------------------------------------------*/
+/* free up to three asynchronous data arrays (any may be NULL) so that a
+ * fallback source can allocate them anew without leaking */
+static void mbeditviz_free_async_arrays(double **array1, double **array2, double **array3) {
+  double **arrays[3] = {array1, array2, array3};
+  for (int i = 0; i < 3; i++) {
+    if (arrays[i] != NULL && *arrays[i] != NULL) {
+      free(*arrays[i]);
+      *arrays[i] = NULL;
+    }
   }
 }
 /*--------------------------------------------------------------------*/
@@ -1262,19 +1276,21 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
             file->async_heading_time_d = NULL;
           }
         }
-        file->n_async_heading = file->n_async_heading_alloc;
+        file->n_async_heading = 0;
 
         /* read the asynchronous heading data */
-        if ((afp = fopen(asyncfile, "r")) != NULL) {
+        if ((afp = fopen(asyncfile, "rb")) != NULL) {
           read_size = sizeof(double) + sizeof(float);
-          for (int i = 0; i < file->n_async_heading; i++) {
-            fread(buffer, read_size, 1, afp);
+          for (int i = 0; i < file->n_async_heading_alloc; i++) {
+            if (fread(buffer, read_size, 1, afp) != 1)
+              break;
             index = 0;
             mb_get_binary_double(true, &buffer[index], &file->async_heading_time_d[i]);
             index += 8;
             mb_get_binary_float(true, &buffer[index], &value_float);
             // index += 4;
             file->async_heading_heading[i] = value_float;
+            file->n_async_heading++;
           }
           fclose(afp);
         }
@@ -1284,6 +1300,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
 
       /* if necessary try to load heading data from ath file */
       if (file->n_async_heading <= 0) {
+        mbeditviz_free_async_arrays(&file->async_heading_time_d, &file->async_heading_heading, NULL);
         snprintf(asyncfile, sizeof(asyncfile), "%s%s", file->path, ".ath");
         if (stat(asyncfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
           /* count the asynchronous heading data */
@@ -1313,7 +1330,8 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
           /* read the asynchronous heading data */
           file->n_async_heading = 0;
           if ((afp = fopen(asyncfile, "r")) != NULL) {
-            while ((result = fgets(buffer, MBP_FILENAMESIZE, afp)) == buffer) {
+            while (file->n_async_heading < file->n_async_heading_alloc
+                   && (result = fgets(buffer, sizeof(buffer), afp)) == buffer) {
               if (buffer[0] != '#') {
                 nread = sscanf(buffer, "%lf %lf", &(file->async_heading_time_d[file->n_async_heading]),
                                &(file->async_heading_heading[file->n_async_heading]));
@@ -1330,6 +1348,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
 
       /* if heading data not loaded from file extract from ping data */
       if (file->n_async_heading <= 0) {
+        mbeditviz_free_async_arrays(&file->async_heading_time_d, &file->async_heading_heading, NULL);
         if (file->num_pings > 0) {
           if ((file->async_heading_time_d = (double *)malloc(sizeof(double) * (file->num_pings))) != NULL) {
             if ((file->async_heading_heading = (double *)malloc(sizeof(double) * (file->num_pings))) != NULL) {
@@ -1341,7 +1360,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
               file->async_heading_time_d = NULL;
             }
           }
-          for (iping = 0; iping < file->num_pings; iping++) {
+          for (iping = 0; iping < file->n_async_heading; iping++) {
             ping = &(file->pings[iping]);
             file->async_heading_time_d[iping] = ping->time_d;
             file->async_heading_heading[iping] = ping->heading;
@@ -1369,19 +1388,21 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
             file->async_sensordepth_time_d = NULL;
           }
         }
-        file->n_async_sensordepth = file->n_async_sensordepth_alloc;
+        file->n_async_sensordepth = 0;
 
         /* read the asynchronous sensordepth data */
         if ((afp = fopen(asyncfile, "rb")) != NULL) {
           read_size = sizeof(double) + sizeof(float);
-          for (int i = 0; i < file->n_async_sensordepth; i++) {
-            fread(buffer, read_size, 1, afp);
+          for (int i = 0; i < file->n_async_sensordepth_alloc; i++) {
+            if (fread(buffer, read_size, 1, afp) != 1)
+              break;
             index = 0;
             mb_get_binary_double(true, &buffer[index], &file->async_sensordepth_time_d[i]);
             index += 8;
             mb_get_binary_float(true, &buffer[index], &value_float);
             // index += 4;
             file->async_sensordepth_sensordepth[i] = value_float;
+            file->n_async_sensordepth++;
           }
           fclose(afp);
         }
@@ -1391,6 +1412,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
 
       /* if necessary try to load sensordepth data from ats file */
       if (file->n_async_sensordepth <= 0) {
+        mbeditviz_free_async_arrays(&file->async_sensordepth_time_d, &file->async_sensordepth_sensordepth, NULL);
         snprintf(asyncfile, sizeof(asyncfile), "%s%s", file->path, ".ats");
         if (stat(asyncfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
           /* count the asynchronous sensordepth data */
@@ -1433,7 +1455,8 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
           /* read the asynchronous sensordepth data */
           file->n_async_sensordepth = 0;
           if ((afp = fopen(asyncfile, "r")) != NULL) {
-            while ((result = fgets(buffer, MBP_FILENAMESIZE, afp)) == buffer) {
+            while (file->n_async_sensordepth < file->n_async_sensordepth_alloc
+                   && (result = fgets(buffer, sizeof(buffer), afp)) == buffer) {
               if (buffer[0] != '#') {
                 nread = sscanf(buffer, "%lf %lf", &(file->async_sensordepth_time_d[file->n_async_sensordepth]),
                                &(file->async_sensordepth_sensordepth[file->n_async_sensordepth]));
@@ -1450,6 +1473,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
 
       /* if sensordepth data not loaded from file extract from ping data */
       if (file->n_async_sensordepth <= 0) {
+        mbeditviz_free_async_arrays(&file->async_sensordepth_time_d, &file->async_sensordepth_sensordepth, NULL);
         if (file->num_pings > 0) {
           if ((file->async_sensordepth_time_d = (double *)malloc(sizeof(double) * (file->num_pings))) != NULL) {
             if ((file->async_sensordepth_sensordepth = (double *)malloc(sizeof(double) * (file->num_pings))) != NULL) {
@@ -1461,7 +1485,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
               file->async_sensordepth_time_d = NULL;
             }
           }
-          for (iping = 0; iping < file->num_pings; iping++) {
+          for (iping = 0; iping < file->n_async_sensordepth; iping++) {
             ping = &(file->pings[iping]);
             file->async_sensordepth_time_d[iping] = ping->time_d;
             file->async_sensordepth_sensordepth[iping] = ping->sensordepth;
@@ -1496,13 +1520,15 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
             }
           }
         }
-        file->n_async_attitude = file->n_async_attitude_alloc;
+        file->n_async_attitude = 0;
 
         /* read the asynchronous attitude data */
         if ((afp = fopen(asyncfile, "rb")) != NULL) {
           read_size = sizeof(double) + 2 * sizeof(float);
-          for (int i = 0; i < file->n_async_attitude; i++) {
-            if (fread(buffer, read_size, 1, afp) == 1) {
+          for (int i = 0; i < file->n_async_attitude_alloc; i++) {
+            if (fread(buffer, read_size, 1, afp) != 1)
+              break;
+            {
               index = 0;
               mb_get_binary_double(true, &buffer[index], &file->async_attitude_time_d[i]);
               index += 8;
@@ -1512,6 +1538,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
               mb_get_binary_float(true, &buffer[index], &value_float);
               // index += 4;
               file->async_attitude_pitch[i] = value_float;
+              file->n_async_attitude++;
             }
             // fprintf(stderr,"Attitude: %d  %.6f %.3f
             // %.3f\n",i,file->async_attitude_time_d[i],file->async_attitude_roll[i],file->async_attitude_pitch[i]);
@@ -1524,6 +1551,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
 
       /* if necessary try to load asynchronous attitude data from ata file */
       if (file->n_async_attitude <= 0) {
+        mbeditviz_free_async_arrays(&file->async_attitude_time_d, &file->async_attitude_roll, &file->async_attitude_pitch);
         snprintf(asyncfile, sizeof(asyncfile), "%s%s", file->path, ".ata");
         if (stat(asyncfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
           /* count the asynchronous attitude data */
@@ -1566,7 +1594,8 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
           /* read the asynchronous attitude data */
           file->n_async_attitude = 0;
           if ((afp = fopen(asyncfile, "r")) != NULL) {
-            while ((result = fgets(buffer, MBP_FILENAMESIZE, afp)) == buffer) {
+            while (file->n_async_attitude < file->n_async_attitude_alloc
+                   && (result = fgets(buffer, sizeof(buffer), afp)) == buffer) {
               if (buffer[0] != '#') {
                 nread = sscanf(buffer, "%lf %lf %lf", &(file->async_attitude_time_d[file->n_async_attitude]),
                                &(file->async_attitude_roll[file->n_async_attitude]),
@@ -1584,6 +1613,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
 
       /* if attitude data not loaded from file extract from ping data */
       if (file->n_async_attitude <= 0) {
+        mbeditviz_free_async_arrays(&file->async_attitude_time_d, &file->async_attitude_roll, &file->async_attitude_pitch);
         if (file->num_pings > 0) {
           if ((file->async_attitude_time_d = (double *)malloc(sizeof(double) * (file->num_pings))) != NULL) {
             if ((file->async_attitude_roll = (double *)malloc(sizeof(double) * (file->num_pings))) != NULL) {
@@ -1607,7 +1637,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
               file->async_attitude_time_d = NULL;
             }
           }
-          for (iping = 0; iping < file->num_pings; iping++) {
+          for (iping = 0; iping < file->n_async_attitude; iping++) {
             ping = &(file->pings[iping]);
             file->async_attitude_time_d[iping] = ping->time_d;
             file->async_attitude_roll[iping] = ping->roll;
@@ -1642,13 +1672,15 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
             }
           }
         }
-        file->n_sync_attitude = file->n_sync_attitude_alloc;
+        file->n_sync_attitude = 0;
 
         /* read the synchronous attitude data */
         if ((afp = fopen(asyncfile, "rb")) != NULL) {
           read_size = sizeof(double) + 2 * sizeof(float);
-          for (int i = 0; i < file->n_sync_attitude; i++) {
-            if (fread(buffer, read_size, 1, afp) == 1) {
+          for (int i = 0; i < file->n_sync_attitude_alloc; i++) {
+            if (fread(buffer, read_size, 1, afp) != 1)
+              break;
+            {
               index = 0;
               mb_get_binary_double(true, &buffer[index], &file->sync_attitude_time_d[i]);
               index += 8;
@@ -1658,6 +1690,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
               mb_get_binary_float(true, &buffer[index], &value_float);
               // index += 4;
               file->sync_attitude_pitch[i] = value_float;
+              file->n_sync_attitude++;
             }
           }
           fclose(afp);
@@ -1668,6 +1701,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
 
       /* if necessary try to load synchronous attitude data from sta file */
       if (file->n_sync_attitude <= 0) {
+        mbeditviz_free_async_arrays(&file->sync_attitude_time_d, &file->sync_attitude_roll, &file->sync_attitude_pitch);
         snprintf(asyncfile, sizeof(asyncfile), "%s%s", file->path, ".sta");
         if (stat(asyncfile, &file_status) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
           /* count the synchronous attitude data */
@@ -1709,7 +1743,8 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
           /* read the synchronous attitude data */
           file->n_sync_attitude = 0;
           if ((afp = fopen(asyncfile, "r")) != NULL) {
-            while ((result = fgets(buffer, MBP_FILENAMESIZE, afp)) == buffer) {
+            while (file->n_sync_attitude < file->n_sync_attitude_alloc
+                   && (result = fgets(buffer, sizeof(buffer), afp)) == buffer) {
               if (buffer[0] != '#') {
                 nread = sscanf(buffer, "%lf %lf %lf", &(file->sync_attitude_time_d[file->n_sync_attitude]),
                                &(file->sync_attitude_roll[file->n_sync_attitude]),
@@ -1727,6 +1762,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
 
       /* if attitude data not loaded from file extract from ping data */
       if (file->n_sync_attitude <= 0) {
+        mbeditviz_free_async_arrays(&file->sync_attitude_time_d, &file->sync_attitude_roll, &file->sync_attitude_pitch);
         if (file->num_pings > 0) {
           if ((file->sync_attitude_time_d = (double *)malloc(sizeof(double) * (file->num_pings))) != NULL) {
             if ((file->sync_attitude_roll = (double *)malloc(sizeof(double) * (file->num_pings))) != NULL) {
@@ -1750,7 +1786,7 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
               file->sync_attitude_time_d = NULL;
             }
           }
-          for (iping = 0; iping < file->num_pings; iping++) {
+          for (iping = 0; iping < file->n_sync_attitude; iping++) {
             ping = &(file->pings[iping]);
             file->sync_attitude_time_d[iping] = ping->time_d;
             file->sync_attitude_roll[iping] = ping->roll;
@@ -1772,6 +1808,13 @@ int mbeditviz_load_file(int ifile, bool assertLock) {
     if (mbev_status == MB_SUCCESS) {
       file->load_status = true;
       mbev_num_files_loaded++;
+    }
+
+    /* release the memory (and any lock) of a file that failed to load */
+    else {
+      file->load_status = true;
+      mbev_num_files_loaded++;
+      mbeditviz_unload_file(ifile, assertLock);
     }
   }
 
@@ -2427,7 +2470,7 @@ int mbeditviz_get_grid_bounds() {
     mbev_grid_boundsutm[0] = MIN(mbev_grid_boundsutm[0], xx);
     mbev_grid_boundsutm[1] = MAX(mbev_grid_boundsutm[1], xx);
     mbev_grid_boundsutm[2] = MIN(mbev_grid_boundsutm[2], yy);
-    mbev_grid_boundsutm[3] = MAX(mbev_grid.boundsutm[3], yy);
+    mbev_grid_boundsutm[3] = MAX(mbev_grid_boundsutm[3], yy);
     // fprintf(stderr,"Grid bounds: %f %f %f %f    %f %f %f %f\n",
     // mbev_grid_bounds[0],mbev_grid_bounds[1],mbev_grid_bounds[2],mbev_grid_bounds[3],
     // mbev_grid_boundsutm[0],mbev_grid_boundsutm[1],mbev_grid_boundsutm[2],mbev_grid_boundsutm[3]);
@@ -3234,10 +3277,12 @@ int mbeditviz_make_grid_simple() {
             if (mb_beam_ok(ping->beamflag[ibeam])) {
               const int i = (ping->bathx[ibeam] - mbev_grid.boundsutm[0] + 0.5 * mbev_grid.dx) / mbev_grid.dx;
               const int j = (ping->bathy[ibeam] - mbev_grid.boundsutm[2] + 0.5 * mbev_grid.dy) / mbev_grid.dy;
-              const size_t k = (size_t)i * (size_t)mbev_grid.n_rows + (size_t)j;
-              mbev_grid.sum[k] += (-ping->bathcorr[ibeam]);
-              mbev_grid.wgt[k] += 1.0;
-              mbev_grid.sgm[k] += ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
+              if (i >= 0 && i < mbev_grid.n_columns && j >= 0 && j < mbev_grid.n_rows) {
+                const size_t k = (size_t)i * (size_t)mbev_grid.n_rows + (size_t)j;
+                mbev_grid.sum[k] += (-ping->bathcorr[ibeam]);
+                mbev_grid.wgt[k] += 1.0;
+                mbev_grid.sgm[k] += ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
+              }
             }
           }
         }
@@ -3305,7 +3350,10 @@ int mbeditviz_destroy_grid() {
       fprintf(stderr, "ifile:%d load_status:%d esf_open:%d esf_changed:%d\n",
               ifile, file->load_status, file->esf_open, file->esf_changed);
     if (file->load_status) {
-      for (iping = 0; iping < file->num_pings; iping++) {
+      /* Browse Only mode is read-only: save edits only in edit mode (as the
+       * live edit path does); an esf left open from an earlier edit mode
+       * session is still closed below */
+      for (iping = 0; iping < file->num_pings && mbev_mode_output == MBEV_OUTPUT_MODE_EDIT; iping++) {
         ping = &(file->pings[iping]);
         for (ibeam = 0; ibeam < ping->beams_bath; ibeam++) {
           if (ping->beamflag[ibeam] != ping->beamflagorg[ibeam]) {
@@ -3482,7 +3530,8 @@ int mbeditviz_selectregion(size_t instance) {
     mbev_selected.bearing = 90.0;
     mbev_selected.sinbearing = sin(DTR * mbev_selected.bearing);
     mbev_selected.cosbearing = cos(DTR * mbev_selected.bearing);
-    mbev_selected.scale = 2.0 / sqrt((xmax - xmin) * (xmax - xmin) + (ymax - ymin) * (ymax - ymin));
+    const double dxy = sqrt((xmax - xmin) * (xmax - xmin) + (ymax - ymin) * (ymax - ymin));
+    mbev_selected.scale = dxy > 0.0 ? 2.0 / dxy : 1.0;
     mbev_selected.num_soundings = 0;
     mbev_selected.num_soundings_unflagged = 0;
     mbev_selected.num_soundings_flagged = 0;
@@ -3670,14 +3719,16 @@ int mbeditviz_selectarea(size_t instance) {
     mbev_selected.bearing = area->bearing;
     mbev_selected.sinbearing = sin(DTR * mbev_selected.bearing);
     mbev_selected.cosbearing = cos(DTR * mbev_selected.bearing);
-    mbev_selected.scale = 2.0 / sqrt(area->length * area->length + area->width * area->width);
+    const double dxy = sqrt(area->length * area->length + area->width * area->width);
+    mbev_selected.scale = dxy > 0.0 ? 2.0 / dxy : 1.0;
     mbev_selected.num_soundings = 0;
     mbev_selected.num_soundings_unflagged = 0;
     mbev_selected.num_soundings_flagged = 0;
     bool soundings_alloc_failed = false;
 
-    double zmin;
-    double zmax;
+    /* z bounds default to the area center if no soundings are selected */
+    double zmin = mbev_selected.zorigin;
+    double zmax = mbev_selected.zorigin;
     // double heading, sensordepth;
     // double rolldelta, pitchdelta;
 
@@ -3862,20 +3913,22 @@ int mbeditviz_selectnav(size_t instance) {
               mbev_pitchbias, mbev_headingbias, mbev_timelag, mbev_snell);
     int inavcount = 0;
     struct mbview_navpointw_struct *navpts;
-    double xmin;
-    double xmax;
-    double ymin;
-    double ymax;
-    double zmin;
-    double zmax;
+    double xmin = 0.0;
+    double xmax = 0.0;
+    double ymin = 0.0;
+    double ymax = 0.0;
+    double zmin = 0.0;
+    double zmax = 0.0;
     // double heading, sensordepth;
     // double rolldelta, pitchdelta;
 
     for (int ifile = 0; ifile < mbev_num_files; ifile++) {
       struct mbev_file_struct *file = &mbev_files[ifile];
-      if (file->load_status) {
+      /* mbview nav is only added for loaded files with pings */
+      if (file->load_status && file->num_pings > 0 && inavcount < mbviewshared->nnav) {
         navpts = (struct mbview_navpointw_struct *)mbviewshared->navs[inavcount].navpts;
-        for (int iping = 0; iping < file->num_pings; iping++) {
+        const int npings = MIN(file->num_pings, mbviewshared->navs[inavcount].npoints);
+        for (int iping = 0; iping < npings; iping++) {
           if (navpts[iping].selected) {
             struct mbev_ping_struct *ping = &(file->pings[iping]);
             double heading;
@@ -4005,7 +4058,8 @@ int mbeditviz_selectnav(size_t instance) {
     mbev_selected.xorigin = 0.5 * (xmin + xmax);
     mbev_selected.yorigin = 0.5 * (ymin + ymax);
     mbev_selected.zorigin = 0.5 * (zmin + zmax);
-    mbev_selected.scale = 2.0 / sqrt(dy * dy + dx * dx);
+    const double dxy = sqrt(dy * dy + dx * dx);
+    mbev_selected.scale = dxy > 0.0 ? 2.0 / dxy : 1.0;
     mbev_selected.zscale = mbev_selected.scale;
     mbev_selected.xmin = -0.5 * dx;
     mbev_selected.xmax = 0.5 * dx;
@@ -4295,8 +4349,9 @@ void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double head
   mbev_selected.zorigin = 0.5 * (zmin + zmax);
   mbev_selected.zmin = -0.5 * dz;
   mbev_selected.zmax = 0.5 * dz;
-  for (int i = 0; i < mbev_selected.num_soundings; i++)
-    mbev_selected.soundings[i].z = mbev_selected.soundings[i].z - mbev_selected.zorigin;
+  /* sounding z values stay absolute (relative to zorigin only in the
+   * display), as set by the select functions, so recoloring by topography
+   * and the sparse voxel filter keep working after a bias change */
 
   if (mbev_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -4449,13 +4504,15 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
       MB_SUCCESS)
     memset(ncoarsevoxels, 0, alloc_size);
   int *ncoarsevoxels_alloc = NULL;
-  if ((mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, alloc_size, (void **)&ncoarsevoxels_alloc, &mbev_error)) ==
+  if (mbev_status == MB_SUCCESS
+      && (mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, alloc_size, (void **)&ncoarsevoxels_alloc, &mbev_error)) ==
       MB_SUCCESS)
     memset(ncoarsevoxels_alloc, 0, alloc_size);
   alloc_size = cn_columns * cn_rows * cnz * sizeof(int *);
   // fprintf(stderr," %zu\n", alloc_size);
   int **coarsevoxels = NULL;
-  if ((mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, alloc_size, (void **)&coarsevoxels, &mbev_error)) ==
+  if (mbev_status == MB_SUCCESS
+      && (mbev_status = mb_mallocd(mbev_verbose, __FILE__, __LINE__, alloc_size, (void **)&coarsevoxels, &mbev_error)) ==
       MB_SUCCESS)
     memset(coarsevoxels, 0, alloc_size);
   const int voxel_size = (mbev_nsoundingthreshold + 5);
@@ -4464,7 +4521,7 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
 
   /* loop over all soundings setting occupied voxels as needed */
   if (mbev_status == MB_SUCCESS) {
-    for (int isounding = 0; isounding < mbev_selected.num_soundings; isounding++) {
+    for (int isounding = 0; isounding < mbev_selected.num_soundings && mbev_status == MB_SUCCESS; isounding++) {
       struct mb3dsoundings_sounding_struct *sounding = &mbev_selected.soundings[isounding];
       if (mb_beam_ok(sounding->beamflag)) {
         const int i = (sounding->x - mbev_selected.xmin) / dx;
@@ -4480,16 +4537,16 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
         const int j1 = MIN(j + 1, n_rows - 1);
         const int k0 = MAX(k - 1, 0);
         const int k1 = MIN(k + 1, nz - 1);
-        for (int iii = i0; iii <= i1; iii++) {
-          for (int jjj = j0; jjj <= j1; jjj++) {
-            for (int kkk = k0; kkk <= k1; kkk++) {
+        for (int iii = i0; iii <= i1 && mbev_status == MB_SUCCESS; iii++) {
+          for (int jjj = j0; jjj <= j1 && mbev_status == MB_SUCCESS; jjj++) {
+            for (int kkk = k0; kkk <= k1 && mbev_status == MB_SUCCESS; kkk++) {
               /* is this the occupied voxel or a neighbor */
               bool occupied_voxel = i == iii && j == jjj && k == kkk;
 
-              /* get coarse voxel */
-              const int ii = i / 10;
-              const int jj = j / 10;
-              const int kk = k / 10;
+              /* get coarse voxel of this (occupied or neighbor) voxel */
+              const int ii = iii / 10;
+              const int jj = jjj / 10;
+              const int kk = kkk / 10;
               const int ll = ii + jj * cn_columns + kk * cn_columns * cn_rows;
 
               /* look for voxel already set in the appropriate coarse voxel */
@@ -4638,8 +4695,10 @@ void mbeditviz_mb3dsoundings_flagsparsevoxels(int sizemultiplier, int nsoundingt
   }
 
   /* deallocate arrays */
-  for (int ll = 0; ll < cn_columns * cn_rows * cnz; ll++)
-    mbev_status = mb_freed(mbev_verbose, __FILE__, __LINE__, (void **)&coarsevoxels[ll], &mbev_error);
+  if (coarsevoxels != NULL) {
+    for (int ll = 0; ll < cn_columns * cn_rows * cnz; ll++)
+      mbev_status = mb_freed(mbev_verbose, __FILE__, __LINE__, (void **)&coarsevoxels[ll], &mbev_error);
+  }
   mbev_status = mb_freed(mbev_verbose, __FILE__, __LINE__, (void **)&ncoarsevoxels, &mbev_error);
   mbev_status = mb_freed(mbev_verbose, __FILE__, __LINE__, (void **)&ncoarsevoxels_alloc, &mbev_error);
   mbev_status = mb_freed(mbev_verbose, __FILE__, __LINE__, (void **)&coarsevoxels, &mbev_error);
@@ -5495,6 +5554,7 @@ if (mode == MB3DSDG_OPTIMIZEBIASVALUES_R)
 	(*showMessage)(message_string);
 
     if (variance_num > 0) {
+      int niter = 0;
       if (variance_a > variance_b && variance_b < variance_c) {
       	done = true;
       }
@@ -5548,10 +5608,19 @@ if (mode == MB3DSDG_OPTIMIZEBIASVALUES_R)
         if (variance_a > variance_b && variance_b < variance_c) {
       	  done = true;
         }
+
+        /* give up expanding if there is no valid variance or no minimum can be
+         * bracketed (e.g. constant or zero variance) */
+        niter++;
+        if (variance_num <= 0 || (variance_a == variance_b && variance_b == variance_c)
+            || niter >= MBEV_BIAS_ITERATION_MAX) {
+          done = true;
+        }
       }
 
 	  /* Now iterate on reducing the bracket size */
-	  done = false;
+	  done = (variance_num <= 0);
+	  niter = 0;
 	  while (!done) {
 	  	if (variance_a > variance_c) {
 	  	  rollbias = rollbias_a + GOLDEN_MEAN_LARGE * (rollbias_b - rollbias_a);
@@ -5608,7 +5677,8 @@ if (mode == MB3DSDG_OPTIMIZEBIASVALUES_R)
 		snprintf(message_string, sizeof(message_string), "Optimizing Roll Bias:%.2f StdDev: %.3f %.3f", 
 		  			rollbias, sqrt(variance), sqrt(variance_best));
 		(*showMessage)(message_string);
-	  	if (rollbias_c - rollbias_a < target_width) {
+	  	niter++;
+	  	if (rollbias_c - rollbias_a < target_width || variance_num <= 0 || niter >= MBEV_BIAS_ITERATION_MAX) {
 	  	  done = true;
 	  	}
 	  }
@@ -5685,6 +5755,7 @@ if (mode == MB3DSDG_OPTIMIZEBIASVALUES_R)
 	(*showMessage)(message_string);
 
     if (variance_num > 0) {
+      int niter = 0;
       if (variance_a > variance_b && variance_b < variance_c) {
       	done = true;
       }
@@ -5738,10 +5809,19 @@ if (mode == MB3DSDG_OPTIMIZEBIASVALUES_R)
         if (variance_a > variance_b && variance_b < variance_c) {
       	  done = true;
         }
+
+        /* give up expanding if there is no valid variance or no minimum can be
+         * bracketed (e.g. constant or zero variance) */
+        niter++;
+        if (variance_num <= 0 || (variance_a == variance_b && variance_b == variance_c)
+            || niter >= MBEV_BIAS_ITERATION_MAX) {
+          done = true;
+        }
       }
 
 	  /* Now iterate on reducing the bracket size */
-	  done = false;
+	  done = (variance_num <= 0);
+	  niter = 0;
 	  while (!done) {
 	  	if (variance_a > variance_c) {
 	  	  pitchbias = pitchbias_a + GOLDEN_MEAN_LARGE * (pitchbias_b - pitchbias_a);
@@ -5798,7 +5878,8 @@ if (mode == MB3DSDG_OPTIMIZEBIASVALUES_R)
 		snprintf(message_string, sizeof(message_string), "Optimizing Pitch Bias:%.2f StdDev: %.3f %.3f", 
 		  			pitchbias, sqrt(variance), sqrt(variance_best));
 		(*showMessage)(message_string);
-	  	if (pitchbias_c - pitchbias_a < target_width) {
+	  	niter++;
+	  	if (pitchbias_c - pitchbias_a < target_width || variance_num <= 0 || niter >= MBEV_BIAS_ITERATION_MAX) {
 	  	  done = true;
 	  	}
 	  }
@@ -5875,6 +5956,7 @@ if (mode == MB3DSDG_OPTIMIZEBIASVALUES_R)
 	(*showMessage)(message_string);
 
     if (variance_num > 0) {
+      int niter = 0;
       if (variance_a > variance_b && variance_b < variance_c) {
       	done = true;
       }
@@ -5928,10 +6010,19 @@ if (mode == MB3DSDG_OPTIMIZEBIASVALUES_R)
         if (variance_a > variance_b && variance_b < variance_c) {
       	  done = true;
         }
+
+        /* give up expanding if there is no valid variance or no minimum can be
+         * bracketed (e.g. constant or zero variance) */
+        niter++;
+        if (variance_num <= 0 || (variance_a == variance_b && variance_b == variance_c)
+            || niter >= MBEV_BIAS_ITERATION_MAX) {
+          done = true;
+        }
       }
 
 	  /* Now iterate on reducing the bracket size */
-	  done = false;
+	  done = (variance_num <= 0);
+	  niter = 0;
 	  while (!done) {
 	  	if (variance_a > variance_c) {
 	  	  headingbias = headingbias_a + GOLDEN_MEAN_LARGE * (headingbias_b - headingbias_a);
@@ -5988,7 +6079,8 @@ if (mode == MB3DSDG_OPTIMIZEBIASVALUES_R)
 		snprintf(message_string, sizeof(message_string), "Optimizing Heading Bias:%.2f StdDev: %.3f %.3f", 
 		  			headingbias, sqrt(variance), sqrt(variance_best));
 		(*showMessage)(message_string);
-	  	if (headingbias_c - headingbias_a < target_width) {
+	  	niter++;
+	  	if (headingbias_c - headingbias_a < target_width || variance_num <= 0 || niter >= MBEV_BIAS_ITERATION_MAX) {
 	  	  done = true;
 	  	}
 	  }
@@ -6064,6 +6156,7 @@ if (mode == MB3DSDG_OPTIMIZEBIASVALUES_R)
 	(*showMessage)(message_string);
 
     if (variance_num > 0) {
+      int niter = 0;
       if (variance_a > variance_b && variance_b < variance_c) {
       	done = true;
       }
@@ -6117,10 +6210,19 @@ if (mode == MB3DSDG_OPTIMIZEBIASVALUES_R)
         if (variance_a > variance_b && variance_b < variance_c) {
       	  done = true;
         }
+
+        /* give up expanding if there is no valid variance or no minimum can be
+         * bracketed (e.g. constant or zero variance) */
+        niter++;
+        if (variance_num <= 0 || (variance_a == variance_b && variance_b == variance_c)
+            || niter >= MBEV_BIAS_ITERATION_MAX) {
+          done = true;
+        }
       }
 
 	  /* Now iterate on reducing the bracket size */
-	  done = false;
+	  done = (variance_num <= 0);
+	  niter = 0;
 	  while (!done) {
 	  	if (variance_a > variance_c) {
 	  	  timelag = timelag_a + GOLDEN_MEAN_LARGE * (timelag_b - timelag_a);
@@ -6177,7 +6279,8 @@ if (mode == MB3DSDG_OPTIMIZEBIASVALUES_R)
 		snprintf(message_string, sizeof(message_string), "Optimizing Time Lag:%.2f StdDev: %.3f %.3f", 
 		  			timelag, sqrt(variance), sqrt(variance_best));
 		(*showMessage)(message_string);
-	  	if (timelag_c - timelag_a < target_width) {
+	  	niter++;
+	  	if (timelag_c - timelag_a < target_width || variance_num <= 0 || niter >= MBEV_BIAS_ITERATION_MAX) {
 	  	  done = true;
 	  	}
 	  }
@@ -6254,6 +6357,7 @@ if (mode == MB3DSDG_OPTIMIZEBIASVALUES_R)
 	(*showMessage)(message_string);
 
     if (variance_num > 0) {
+      int niter = 0;
       if (variance_a > variance_b && variance_b < variance_c) {
       	done = true;
       }
@@ -6307,10 +6411,19 @@ if (mode == MB3DSDG_OPTIMIZEBIASVALUES_R)
         if (variance_a > variance_b && variance_b < variance_c) {
       	  done = true;
         }
+
+        /* give up expanding if there is no valid variance or no minimum can be
+         * bracketed (e.g. constant or zero variance) */
+        niter++;
+        if (variance_num <= 0 || (variance_a == variance_b && variance_b == variance_c)
+            || niter >= MBEV_BIAS_ITERATION_MAX) {
+          done = true;
+        }
       }
 
 	  /* Now iterate on reducing the bracket size */
-	  done = false;
+	  done = (variance_num <= 0);
+	  niter = 0;
 	  while (!done) {
 	  	if (variance_a > variance_c) {
 	  	  snell = snell_a + GOLDEN_MEAN_LARGE * (snell_b - snell_a);
@@ -6367,7 +6480,8 @@ if (mode == MB3DSDG_OPTIMIZEBIASVALUES_R)
 		snprintf(message_string, sizeof(message_string), "Optimizing Snell Factor:%.2f StdDev: %.3f %.3f", 
 		  			snell, sqrt(variance), sqrt(variance_best));
 		(*showMessage)(message_string);
-	  	if (snell_c - snell_a < target_width) {
+	  	niter++;
+	  	if (snell_c - snell_a < target_width || variance_num <= 0 || niter >= MBEV_BIAS_ITERATION_MAX) {
 	  	  done = true;
 	  	}
 	  }

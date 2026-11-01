@@ -64,11 +64,11 @@ int mb_esf_check(int verbose, char *swathfile, char *esffile, int *found, int *e
 	int status = mb_pr_get_edit(verbose, swathfile, &mbp_edit_mode, mbp_editfile, error);
 	if (mbp_edit_mode == MBP_EDIT_ON) {
 		*found = true;
-		strcpy(esffile, mbp_editfile);
+		snprintf(esffile, MB_PATH_MAXLINE, "%s", mbp_editfile);
 	}
 	else {
 		*found = false;
-		sprintf(esffile, "%s.esf", swathfile);
+		snprintf(esffile, MB_PATH_MAXLINE, "%s.esf", swathfile);
 	}
 
 	/* assume success */
@@ -154,6 +154,36 @@ int mb_esf_load(int verbose, const char *program_name, char *swathfile, bool loa
 }
 
 /*--------------------------------------------------------------------*/
+/* 	static function mb_esf_copyfile copies the file srcfile to dstfile
+        in binary mode without invoking a shell, so that it works with
+        paths containing spaces and on Windows. Returns 0 on success. */
+static int mb_esf_copyfile(const char *srcfile, const char *dstfile) {
+	FILE *srcfp = fopen(srcfile, "rb");
+	if (srcfp == NULL)
+		return (-1);
+	FILE *dstfp = fopen(dstfile, "wb");
+	if (dstfp == NULL) {
+		fclose(srcfp);
+		return (-1);
+	}
+	int result = 0;
+	char buffer[16384];
+	size_t nread;
+	while ((nread = fread(buffer, 1, sizeof(buffer), srcfp)) > 0) {
+		if (fwrite(buffer, 1, nread, dstfp) != nread) {
+			result = -1;
+			break;
+		}
+	}
+	if (ferror(srcfp))
+		result = -1;
+	fclose(srcfp);
+	if (fclose(dstfp) != 0)
+		result = -1;
+	return (result);
+}
+
+/*--------------------------------------------------------------------*/
 /* 	function mb_esf_open starts handling of an edit save file.
         The load flag indicates whether an existing esf file
             should be loaded.
@@ -178,7 +208,7 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, bool load,
 	}
 
 	int status = MB_SUCCESS;
-	char command[MB_PATH_MAXLINE];
+	mb_pathplus backupfile;
 	FILE *esffp;
 	struct stat file_status;
 	int fstat;
@@ -186,8 +216,8 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, bool load,
 	mb_path esf_header;
 
 	/* initialize the esf structure */
-	strcpy(esf->esffile, esffile);
-	sprintf(esf->esstream, "%s.stream", esffile);
+	snprintf(esf->esffile, sizeof(esf->esffile), "%s", esffile);
+	snprintf(esf->esstream, sizeof(esf->esstream), "%s.stream", esffile);
 	esf->byteswapped = mb_swap_check();
 	esf->version = 3;
 	esf->mode = MB_ESF_MODE_EXPLICIT;
@@ -203,7 +233,7 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, bool load,
 		fstat = stat(esffile, &file_status);
 		if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 			/* save filename in structure */
-			strcpy(esf->esffile, esffile);
+			snprintf(esf->esffile, sizeof(esf->esffile), "%s", esffile);
 
 			/* get number of old edits */
 			esf->nedit = file_status.st_size / (sizeof(double) + 2 * sizeof(int));
@@ -325,14 +355,15 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, bool load,
 		bool header = true;
 		fstat = stat(esffile, &file_status);
 		if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-			/* copy old edit save file to tmp file */
+			/* copy old edit save file to tmp file - if the backup copy
+			    fails do not open (and so truncate) the existing esf file */
 			if (load) {
-				sprintf(command, "cp %s %s.tmp\n", esffile, esffile);
-				if (system(command) != 0) {
-    			status = MB_FAILURE;
-    			*error = MB_ERROR_OPEN_FAIL;
-    			fprintf(stderr,"Failed to copy existing esffile %s\n",esf->esffile);
-        }
+				snprintf(backupfile, sizeof(backupfile), "%s.tmp", esffile);
+				if (mb_esf_copyfile(esffile, backupfile) != 0) {
+					status = MB_FAILURE;
+					*error = MB_ERROR_OPEN_FAIL;
+					fprintf(stderr, "Failed to copy existing esffile %s to backup %s\n", esf->esffile, backupfile);
+				}
 			}
 			if (output == MBP_ESF_APPEND)
 				header = false;
@@ -345,7 +376,10 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, bool load,
 		else if (output == MBP_ESF_APPEND) {
 			strcpy(fmode, "ab");
 		}
-		if ((esf->esffp = fopen(esf->esffile, fmode)) == NULL) {
+		if (status != MB_SUCCESS) {
+			/* backup failed - leave the existing esf file untouched */
+		}
+		else if ((esf->esffp = fopen(esf->esffile, fmode)) == NULL) {
 			status = MB_FAILURE;
 			*error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr,"Failed to open esffile %s with file mode %s\n", esf->esffile, fmode);
@@ -359,6 +393,8 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, bool load,
 				status = MB_FAILURE;
 				*error = MB_ERROR_OPEN_FAIL;
 				fprintf(stderr,"Failed to open esstream %s with file mode %s\n", esf->esstream, fmode);
+				fclose(esf->esffp);
+				esf->esffp = NULL;
 			}
 			//else
 			//	fprintf(stderr,"esstream %s opened with file mode %s\n", esf->esstream, fmode);
@@ -617,9 +653,11 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 			if (!apply) {
 				if (esf->mode == MB_ESF_MODE_IMPLICIT_NULL) {
 					beamflag[i] = MB_FLAG_NULL;
+					action = MBP_EDIT_ZERO;
 				}
 				else if (esf->mode == MB_ESF_MODE_IMPLICIT_GOOD) {
 					beamflag[i] = MB_FLAG_NONE;
+					action = MBP_EDIT_UNFLAG;
 				}
 				if (beamflag[i] != beamflagorg)
 					apply = true;
@@ -645,7 +683,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 		fprintf(stderr, "dbg2       pingmultiplicity: %d\n", pingmultiplicity);
 		fprintf(stderr, "dbg2       nbath:            %d\n", nbath);
 		for (int i = 0; i < nbath; i++)
-			fprintf(stderr, "dbg2       beamflag:    %d %d %d\n", i, ibeam, beamflag[i]);
+			fprintf(stderr, "dbg2       beamflag:    %d %d %d\n", i, i + beamoffset, beamflag[i]);
 		fprintf(stderr, "dbg2       error:  %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);

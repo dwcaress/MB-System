@@ -124,6 +124,11 @@ int main(int argc, char **argv) {
         // reserve memory in the vectors, prevents re-sizing mid algorithm
         threads.reserve(params.numThreads);
 
+        // the mb_mallocd() allocation list is not thread safe, so turn it off
+        // before the worker threads start allocating
+        if (params.numThreads > 1)
+            mb_mem_list_disable(params.verbose, &error);
+
         auto t1 = std::chrono::system_clock::now();
         for(auto &cross : thread_crossings) {
             threads.push_back( std::thread(do_icp_thread, params.verbose, std::ref(project), std::cref(cross), std::cref(params.icpSettings), params.ignoreTies) );
@@ -164,7 +169,8 @@ int main(int argc, char **argv) {
 
         // process the crossing if it was found
         if(crossFound) {
-            mbsystem::icp_results result;   // algorithm results
+            mbsystem::icp_results result{}; // algorithm results (zeroed so a failed ICP prints defined values)
+            result.transform.setIdentity();
 
             // load the crossing data into swath1 and swath2
             status = load_crossing(params.verbose, project, crossing, section1, section2, swath1, swath2);
@@ -438,7 +444,7 @@ int mbnavadjust_align_arguments(int argc, char** argv, mbnavadjust_align_params 
                         }
                         break;
             case 'd' :  if(optarg != nullptr && optarg[0] != '-') {
-                            params.icpSettings.maxDistance = strtol(optarg, nullptr, 10);
+                            params.icpSettings.maxDistance = strtod(optarg, nullptr);
                         }
                         else {
                             std::cerr << argv[0] << ": option requires an argument -- 'o'\n";
@@ -518,7 +524,7 @@ int mbnavadjust_align_arguments(int argc, char** argv, mbnavadjust_align_params 
         fprintf(stderr, "     isection1:            %d\n",  params.iSection1);
         fprintf(stderr, "     ifile2:               %d\n",  params.iFile2);
         fprintf(stderr, "     isection2:            %d\n",  params.iSection2);
-        fprintf(stderr, "     minimum Overlap:      %d%\n", params.minOverlap);
+        fprintf(stderr, "     minimum Overlap:      %d%%\n", params.minOverlap);
         fprintf(stderr, "     Ignore Ties:          %d\n",  params.ignoreTies);
         fprintf(stderr, "     Try All:              %d\n",  params.tryAll);
         fprintf(stderr, "     Max Iterations:       %d\n",  params.icpSettings.maxIterations);
@@ -582,7 +588,8 @@ void do_icp_thread(const int verbose, mbna_project project, const vector<mbna_cr
             params.zEst = 0.0;
         }
 
-        icp_results result; // variable for holding the results
+        icp_results result{}; // variable for holding the results (zeroed so a failed ICP prints defined values)
+        result.transform.setIdentity();
 
         // pre-add the file/crossing to results so ICP can see it for debug output. Move to parameters if we keep this long term.
         result.tgtFile    = cross->file_id_1;

@@ -332,7 +332,7 @@ accessible as tarballs through the Github interface.</p>
 Version 5.8 Releases and Release Notes:</h3>
 <hr />
 <ul>
-<li>Version 5.8.3beta26 October 23, 2026</li>
+<li>Version 5.8.3beta26 October 31, 2026</li>
 <li>Version 5.8.3beta25 October 14, 2026</li>
 <li>Version 5.8.3beta24 October 5, 2026</li>
 <li>Version 5.8.3beta23 October 3, 2026</li>
@@ -393,7 +393,7 @@ Version 5.8 Releases and Release Notes:</h3>
 <li><strong>Version 5.8.0 January 22, 2024</strong></li>
 </ul>
 <hr />
-<h4 id="583beta26-october-23-2026">5.8.3beta26 (October 23, 2026)</h4>
+<h4 id="583beta26-october-31-2026">5.8.3beta26 (October 31, 2026)</h4>
 <p>MBIO library, format 181 (MBF_SAMESURF, src/mbio/mbr_samesurf.c,
 src/mbio/mbsys_surf.c): fixed three errors in reading SAM Electronics
 (Atlas) SURF files, found while testing the example data distributed
@@ -452,6 +452,19 @@ size of their fields (previously long values could overflow them), and
 empty values are read as empty strings rather than as uninitialized
 memory. A read before the start of the line buffer for one character
 lines has also been fixed. Bug reported by Christian Ferreira.</p>
+<p>MBIO library, format 89 (MBF_RESON7K3, src/mbio/mbr_reson7k3.c,
+src/mbio/mbsys_reson7k3.c, src/mbio/mbsys_reson7k3.h): completed the
+support of Teledyne 7k records that were incomplete relative to the 7k
+Data Format Definition version 3.12. Records 7052, 7053, 7500, 7501 and
+7502 are now fully read and written, and records 7041 and 1022 are
+passed through unchanged; previously these records were dropped when
+files were rewritten, and a 1022 record caused writing to fail. Records
+7014, 7019 and 7029 are now written with their pings instead of being
+dropped, and errors in reading them that could corrupt memory or crash
+programs are fixed. Also fixed a one byte offset that corrupted 7054
+records, the loss of the temperature and pressure values of 7610
+records, the decoding of two 7504 flags added in DFD 3.11, and an
+overrun when printing 16 bit 7028 snippet samples in verbose output.</p>
 <p>Program mbtrnpp (src/mbtrnutils/mbtrnpp.c): added a bounds check
 before counting the data record types read, which wrote past the end of
 two arrays for record types beyond MB_DATA_KINDS (such as the #SPD

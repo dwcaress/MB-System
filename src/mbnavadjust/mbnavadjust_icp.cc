@@ -181,7 +181,8 @@ void mbsystem::haxby_colormap(const double value, const double min, const double
     }
 
     // calculate the color based on the factor, taking into account out of range values
-    if (factor <= 0.0) {
+    // (written as !(factor > 0.0) so a NaN factor from max == min is also treated as low)
+    if (!(factor > 0.0)) {
         // out of range low
         red   = haxby_red[0];
         green = haxby_green[0];
@@ -271,43 +272,90 @@ std::ostream& mbsystem::operator<< (std::ostream &out, const mbsystem::icp_resul
     return out;
 }
 
+// free a raw swath structure loaded by mbnavadjust_section_load(), including its per-ping arrays
+static void free_swathraw(const int verbose, struct mbna_swathraw* &swathraw)
+{
+    int error = MB_ERROR_NO_ERROR;
+    if (swathraw != nullptr && swathraw->pingraws != nullptr) {
+        for (int i = 0; i < swathraw->npings_max; i++) {
+            struct mbna_pingraw* pingraw = &swathraw->pingraws[i];
+            mb_freed(verbose, __FILE__, __LINE__, (void **)&pingraw->beamflag, &error);
+            mb_freed(verbose, __FILE__, __LINE__, (void **)&pingraw->bath, &error);
+            mb_freed(verbose, __FILE__, __LINE__, (void **)&pingraw->bathacrosstrack, &error);
+            mb_freed(verbose, __FILE__, __LINE__, (void **)&pingraw->bathalongtrack, &error);
+        }
+        mb_freed(verbose, __FILE__, __LINE__, (void **)&swathraw->pingraws, &error);
+    }
+    if (swathraw != nullptr)
+        mb_freed(verbose, __FILE__, __LINE__, (void **)&swathraw, &error);
+    swathraw = nullptr;
+}
+
 int mbsystem::load_crossing(const int verbose, mbna_project &project, mbna_crossing* crossing,
                             mbna_section* &tgtSection, mbna_section* &srcSection,
                             swath* &tgtSwath, swath* &srcSwath)
 {
-    int               error     = MB_SUCCESS;
-    int               status    = MB_FAILURE;
-    struct swathraw*  swathraw1 = nullptr;
-    struct swathraw*  swathraw2 = nullptr;
-    struct mbna_file* file1     = static_cast<struct mbna_file*>(&project.files[crossing->file_id_1]);
-    struct mbna_file* file2     = static_cast<struct mbna_file*>(&project.files[crossing->file_id_2]);
+    int                   error     = MB_ERROR_NO_ERROR;
+    int                   status    = MB_FAILURE;
+    struct mbna_swathraw* swathraw1 = nullptr;
+    struct mbna_swathraw* swathraw2 = nullptr;
+    struct mbna_file*     file1     = static_cast<struct mbna_file*>(&project.files[crossing->file_id_1]);
+    struct mbna_file*     file2     = static_cast<struct mbna_file*>(&project.files[crossing->file_id_2]);
 
     // load the section pointers
     // TODO: keep these local?
     tgtSection = static_cast<struct mbna_section*>(&file1->sections[crossing->section_1]);
     srcSection = static_cast<struct mbna_section*>(&file2->sections[crossing->section_2]);
+    tgtSwath = nullptr;
+    srcSwath = nullptr;
 
-    /* load sections */
+    /* load sections - a nonfatal problem such as failing to cache the
+       triangle file can return MB_FAILURE with a usable swath, so success
+       is judged by whether both sections were actually loaded */
     if(verbose) { fprintf(stderr, "Loading section 1 of crossing %d:%d/%d:%d...\n", crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2); }
-    status = mbnavadjust_section_load(verbose, &project, crossing->file_id_1, crossing->section_1,
-                                      (void **)&swathraw1, (void **)&tgtSwath, &error);
+    mbnavadjust_section_load(verbose, &project, crossing->file_id_1, crossing->section_1,
+                             (void **)&swathraw1, (void **)&tgtSwath, &error);
 
     if(verbose) { fprintf(stderr, "Loading section 2 of crossing %d:%d/%d:%d...\n", crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2); }
-    status = mbnavadjust_section_load(verbose, &project, crossing->file_id_2, crossing->section_2,
-                                      (void **)&swathraw2, (void **)&srcSwath, &error);
+    mbnavadjust_section_load(verbose, &project, crossing->file_id_2, crossing->section_2,
+                             (void **)&swathraw2, (void **)&srcSwath, &error);
+
+    if (swathraw1 != nullptr && swathraw2 != nullptr && tgtSwath != nullptr && srcSwath != nullptr)
+        status = MB_SUCCESS;
+    else
+        status = MB_FAILURE;
 
     /* get lon lat positions for soundings */
-    if(verbose) { fprintf(stderr, "Transforming section 1 of crossing %d:%d/%d:%d...\n", crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2); }
-    status = mbnavadjust_section_translate(verbose, &project, crossing->file_id_1, swathraw1, tgtSwath, 0.0, &error);
+    if (status == MB_SUCCESS) {
+        if(verbose) { fprintf(stderr, "Transforming section 1 of crossing %d:%d/%d:%d...\n", crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2); }
+        status = mbnavadjust_section_translate(verbose, &project, crossing->file_id_1, swathraw1, tgtSwath, 0.0, &error);
+    }
 
-    if(verbose) { fprintf(stderr, "Transforming section 2 of crossing %d:%d/%d:%d...\n", crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2); }
-    status = mbnavadjust_section_translate(verbose, &project, crossing->file_id_2, swathraw2, srcSwath, 0.0, &error);
+    if (status == MB_SUCCESS) {
+        if(verbose) { fprintf(stderr, "Transforming section 2 of crossing %d:%d/%d:%d...\n", crossing->file_id_1, crossing->section_1, crossing->file_id_2, crossing->section_2); }
+        status = mbnavadjust_section_translate(verbose, &project, crossing->file_id_2, swathraw2, srcSwath, 0.0, &error);
+    }
 
-    // TODO: memory leak?
-    // int mb_freed(int verbose, const char *sourcefile, int sourceline, void **ptr, int *error);
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&swathraw1, &error);
-    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&swathraw2, &error);
+    // the raw swath data are only needed to translate the soundings
+    free_swathraw(verbose, swathraw1);
+    free_swathraw(verbose, swathraw2);
 
+    // on failure release any swath that was loaded, so callers never see a
+    // partially set up swath (callers do not free the swaths after a failure)
+    if (status != MB_SUCCESS) {
+        int error2 = MB_ERROR_NO_ERROR;
+        if (tgtSwath != nullptr) {
+            mb_contour_deall(verbose, tgtSwath, &error2);
+            mb_freed(verbose, __FILE__, __LINE__, (void **)&tgtSwath, &error2);
+        }
+        if (srcSwath != nullptr) {
+            mb_contour_deall(verbose, srcSwath, &error2);
+            mb_freed(verbose, __FILE__, __LINE__, (void **)&srcSwath, &error2);
+        }
+        tgtSwath = nullptr;
+        srcSwath = nullptr;
+        status = MB_FAILURE;
+    }
 
     return status;
 }

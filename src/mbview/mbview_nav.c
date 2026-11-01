@@ -385,7 +385,9 @@ int mbview_addnav(int verbose, size_t instance, int npoint, double *time_d, doub
 		status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, shared.shareddata.nnav_alloc * sizeof(struct mbview_nav_struct),
 		                     (void **)&(shared.shareddata.navs), error);
 		if (status == MB_FAILURE) {
+			shared.shareddata.nnav = 0;
 			shared.shareddata.nnav_alloc = 0;
+			inav = 0;
 		}
 		else {
 			for (int i = shared.shareddata.nnav; i < shared.shareddata.nnav_alloc; i++) {
@@ -412,16 +414,28 @@ int mbview_addnav(int verbose, size_t instance, int npoint, double *time_d, doub
 	}
 
 	/* allocate memory to for nav arrays */
-	if (shared.shareddata.navs[inav].npoints_alloc < npoint) {
+	if (status == MB_SUCCESS && shared.shareddata.navs[inav].npoints_alloc < npoint) {
+		/* release any draped segment points before the segments are cleared */
+		if (shared.shareddata.navs[inav].segments != NULL) {
+			for (int j = 0; j < shared.shareddata.navs[inav].npoints_alloc; j++) {
+				if (shared.shareddata.navs[inav].segments[j].lspoints != NULL)
+					mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.navs[inav].segments[j].lspoints), error);
+				shared.shareddata.navs[inav].segments[j].nls_alloc = 0;
+			}
+		}
 		shared.shareddata.navs[inav].npoints_alloc = npoint;
 		status = mb_reallocd(mbv_verbose, __FILE__, __LINE__,
 		                     shared.shareddata.navs[inav].npoints_alloc * sizeof(struct mbview_navpointw_struct),
 		                     (void **)&(shared.shareddata.navs[inav].navpts), error);
-		status = mb_reallocd(mbv_verbose, __FILE__, __LINE__,
-		                     shared.shareddata.navs[inav].npoints_alloc * sizeof(struct mbview_linesegmentw_struct),
-		                     (void **)&(shared.shareddata.navs[inav].segments), error);
-    memset((void *)shared.shareddata.navs[inav].segments, 0,
-            (size_t)shared.shareddata.navs[inav].npoints_alloc * sizeof(struct mbview_linesegmentw_struct));
+		if (status == MB_SUCCESS)
+			status = mb_reallocd(mbv_verbose, __FILE__, __LINE__,
+			                     shared.shareddata.navs[inav].npoints_alloc * sizeof(struct mbview_linesegmentw_struct),
+			                     (void **)&(shared.shareddata.navs[inav].segments), error);
+		if (status == MB_SUCCESS)
+			memset((void *)shared.shareddata.navs[inav].segments, 0,
+			       (size_t)shared.shareddata.navs[inav].npoints_alloc * sizeof(struct mbview_linesegmentw_struct));
+		else
+			shared.shareddata.navs[inav].npoints_alloc = 0;
 	}
 
 	/* add the new nav */
@@ -431,7 +445,10 @@ int mbview_addnav(int verbose, size_t instance, int npoint, double *time_d, doub
 
 		/* set color size and name for new nav */
 		shared.shareddata.navs[inav].active = true;
-		shared.shareddata.navs[inav].color = navcolor;
+		if (navcolor >= MBV_COLOR_BLACK && navcolor <= MBV_COLOR_PURPLE)
+			shared.shareddata.navs[inav].color = navcolor;
+		else
+			shared.shareddata.navs[inav].color = MBV_COLOR_RED;
 		shared.shareddata.navs[inav].size = navsize;
 		strcpy(shared.shareddata.navs[inav].name, navname);
 		shared.shareddata.navs[inav].pathstatus = navpathstatus;
@@ -989,16 +1006,20 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 
 						/* loop over the affected nav */
 						for (int inav = inav0; inav <= inav1; inav++) {
+							/* skip inactive nav and nav without points */
+							if (!shared.shareddata.navs[inav].active || shared.shareddata.navs[inav].npoints <= 0
+							    || shared.shareddata.navs[inav].navpts == NULL)
+								continue;
 							int jj0;
 							if (inav == inav0)
-								jj0 = MIN(jpt0, shared.shareddata.navs[inav].npoints - 1);
+								jj0 = MAX(MIN(jpt0, shared.shareddata.navs[inav].npoints - 1), 0);
 							else
 								jj0 = 0;
 							int jj1;
 							if (inav == inav1)
-								jj1 = MAX(jpt1, 0);
+								jj1 = MIN(MAX(jpt1, 0), shared.shareddata.navs[inav].npoints - 1);
 							else
-								jj1 = shared.shareddata.navs[inav].npoints;
+								jj1 = shared.shareddata.navs[inav].npoints - 1;
 							for (int jpt = jj0; jpt <= jj1; jpt++) {
 								shared.shareddata.navs[inav].navpts[jpt].selected = select;
 							}
@@ -1042,6 +1063,9 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 
 						/* loop over the affected nav */
 						for (int inav = inav0; inav <= inav1; inav++) {
+							/* skip inactive nav */
+							if (!shared.shareddata.navs[inav].active)
+								continue;
 							for (int jpt = 0; jpt < shared.shareddata.navs[inav].npoints; jpt++) {
 								shared.shareddata.navs[inav].navpts[jpt].selected = select;
 							}
@@ -2360,6 +2384,8 @@ int mbview_updatenavlist() {
 
   			/* allocate array of label XmStrings */
   			XmString *xstr = (XmString *)malloc(nitems * sizeof(XmString));
+  			if (xstr == NULL)
+  				return (MB_FAILURE);
 
   			/* loop over the navs */
   			nitems = 0;

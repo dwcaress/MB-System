@@ -152,6 +152,11 @@ void xg_init(Display *display, Window can_xid, int *can_bounds, char *fontname, 
  **********************************************************************/
 void xg_free(void *xgid) {
 	struct xg_graphic *graphic = (struct xg_graphic *)xgid;
+	if (graphic == NULL)
+		return;
+	XFreeGC(graphic->dpy, graphic->gc_solid);
+	XFreeGC(graphic->dpy, graphic->gc_dash);
+	XFreeFont(graphic->dpy, graphic->font_info);
 	free(graphic);
 }
 /**********************************************************************
