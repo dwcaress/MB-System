@@ -21,7 +21,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
-- Version 5.8.3beta26    October 23, 2026
+- Version 5.8.3beta26    October 31, 2026
 - Version 5.8.3beta25    October 14, 2026
 - Version 5.8.3beta24    October 5, 2026
 - Version 5.8.3beta23    October 3, 2026
@@ -83,7 +83,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
-#### 5.8.3beta26 (October 23, 2026)
+#### 5.8.3beta26 (October 31, 2026)
 
 MBIO library, format 181 (MBF\_SAMESURF, src/mbio/mbr\_samesurf.c,
 src/mbio/mbsys\_surf.c): fixed three errors in reading SAM Electronics (Atlas)
@@ -139,6 +139,19 @@ are limited to the size of their fields (previously long values could overflow
 them), and empty values are read as empty strings rather than as uninitialized
 memory. A read before the start of the line buffer for one character lines has also
 been fixed. Bug reported by Christian Ferreira.
+
+MBIO library, format 89 (MBF\_RESON7K3, src/mbio/mbr\_reson7k3.c,
+src/mbio/mbsys\_reson7k3.c, src/mbio/mbsys\_reson7k3.h): completed the support of
+Teledyne 7k records that were incomplete relative to the 7k Data Format Definition
+version 3.12. Records 7052, 7053, 7500, 7501 and 7502 are now fully read and
+written, and records 7041 and 1022 are passed through unchanged; previously these
+records were dropped when files were rewritten, and a 1022 record caused writing
+to fail. Records 7014, 7019 and 7029 are now written with their pings instead of
+being dropped, and errors in reading them that could corrupt memory or crash
+programs are fixed. Also fixed a one byte offset that corrupted 7054 records, the
+loss of the temperature and pressure values of 7610 records, the decoding of two
+7504 flags added in DFD 3.11, and an overrun when printing 16 bit 7028 snippet
+samples in verbose output.
 
 Program mbtrnpp (src/mbtrnutils/mbtrnpp.c): added a bounds check before counting
 the data record types read, which wrote past the end of two arrays for record types
