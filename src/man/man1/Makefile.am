@@ -91,6 +91,7 @@ man_MANS =  \
 	mbotps.1 \
 	mbpreprocess.1 \
 	mbprocess.1 \
+	mbpy_wcdview.1 \
 	mbrolltimelag.1 \
 	mbroutetime.1 \
 	mbsegygrid.1 \

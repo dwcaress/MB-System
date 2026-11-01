@@ -1,0 +1,102 @@
+.TH mbpy_wcdview 1 "1 November 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbpy_wcdview\fP \- Python water column viewer, an example of the mbio_py Python API.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbpy_wcdview\fP
+.br
+[
+.br
+\fB\-\-input\fP=\fIfile\fP {\fB\-I\fP\fIfile\fP}
+.br
+\fIfile\fP
+.br
+\fB\-\-help\fP {\fB\-H\fP}
+.br
+]
+
+.SH DESCRIPTION
+\fBmbpy_wcdview\fP displays water column data, one swath at a time, read through
+the MBIO library with \fBmbio_py\fP, the Python API to MBIO installed with
+MB-System in \fI<prefix>/share/mbsystem/python\fP. It is written in Python with
+PySide6 (Qt6 for Python) and matplotlib, and serves as an example application of
+the API; \fBmbwcdview\fP(1) is the faster C++/Qt6 program for the same task.
+
+Opening a Kongsberg *.kmwcd or *.kmall file finds the other file of the survey
+line in the same directory (same line number, nearest file name time) and
+matches the pings by ping number and time. The *.kmall supplies the soundings,
+navigation, heading and transducer depth; the *.kmwcd the water column. Either
+may be missing: without a *.kmall the navigation comes from the position records
+of the *.kmwcd and depths are given below the transducer.
+
+The window has an Open button, Save Image (twice the screen resolution, with the
+file name and ping information), check boxes \fBBottom\fP (soundings of the
+matching *.kmall ping: red amplitude and dark blue phase detections, filled good,
+hollow flagged), \fBWC bottom\fP (the bottom detections recorded in the water
+column), \fBRay trace (SVP)\fP (samples traced through the logged sound velocity
+profile; on when a profile is found) and \fBPick\fP (positions clicked in the
+image go into a table that can be saved as text), the depth and amplitude ranges,
+a fixed across track scale, a replay rate, and a slider that steps one swath at a
+time (also the mouse wheel and the left and right arrow keys). Amplitudes are in
+dB; the Kongsberg fill value is drawn as no data.
+
+\fBmbpy_wcdview\fP needs Python >= 3.11, numpy, matplotlib and PySide6, and an
+MB-System libmbio with \fBmb_extract_wc\fP(3). The README in
+\fI<prefix>/share/mbsystem/python\fP explains the installation of these packages
+and the use of the API.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian dos Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-\-input\fP=\fIfile\fP {\fB\-I\fP\fIfile\fP}
+.br
+The *.kmwcd or *.kmall to open; it may also be given as the last argument.
+.TP
+.B \-\-help {\fB\-H\fP}
+Print the usage message and exit.
+
+.SH ENVIRONMENT
+.TP
+.B MBSYSTEM_LIBMBIO
+Full path of the libmbio to use instead of the one of the installation.
+.TP
+.B MBIO_PY_PATH
+Directory containing mbio_py, instead of the installation's.
+
+.SH EXAMPLES
+To view a Kongsberg survey line:
+.br
+	mbpy_wcdview 0080_20250618_223434.kmwcd
+.br
+
+To run it with numpy, matplotlib and PySide6 from a virtual environment:
+.br
+	~/mbpy/bin/python $(which mbpy_wcdview) 0080_20250618_223434.kmall
+.br
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbwcdview\fP(1), \fBmbio\fP(3)
+
+.SH BUGS
+Stepping through the pings is slow compared with \fBmbwcdview\fP, as matplotlib
+redraws every cell of a swath. All water column pings of a file are kept in
+memory (about two bytes per sample).

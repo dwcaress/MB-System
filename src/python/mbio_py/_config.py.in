@@ -1,0 +1,4 @@
+# Written at build time (CMake configure_file / Autotools sed): where this
+# MB-System installation keeps libmbio. LIBMBIO is the full path when known.
+LIBMBIO = "@LIBMBIO_PATH@"
+LIBDIR = "@LIBMBIO_DIR@"

@@ -75,6 +75,7 @@ set(manpages
     mbotps.1
     mbpreprocess.1
     mbprocess.1
+    mbpy_wcdview.1
     mbpy_grd3dplot.1
     mbpy_grdplot.1
     mbpy_histplot.1
