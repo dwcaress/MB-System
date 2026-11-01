@@ -161,7 +161,8 @@ class WaterColumnFile:
     Amplitudes are kept as float16 (exact for 0.5 dB steps) without padding;
     ping(i) returns a full WaterColumnPing (float32).
     fill_value: the lowest amplitude if it is a fill value (more than 0.1 % of the samples
-    and the next 0.5 dB step practically absent, as the logged -128 of Kongsberg data),
+    and the next 0.5 dB step practically absent, as the logged -128 of Kongsberg kmall data; in
+    *.all and *.wcd data it is a valid level, weak samples clipped to it),
     else None. amp_min/amp_max exclude the fill value.
     nav_time_d/nav_lon/nav_lat: the file's own position records (may be empty).
     """
@@ -210,7 +211,7 @@ class WaterColumnFile:
             present = (counts > 0) & np.isfinite(values)
             order = np.argsort(values[present])
             v, c = values[present][order], counts[present][order]
-            if len(v) > 1 and c[0] > 0.001 * self._amp.size and c[1] < 0.01 * c[0]:
+            if self.format == K.MBF_KEMKMALL and len(v) > 1 and c[0] > 0.001 * self._amp.size and c[1] < 0.01 * c[0]:
                 self.fill_value = float(v[0])
                 v = v[1:]
             if len(v):

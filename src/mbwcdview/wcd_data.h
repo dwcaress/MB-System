@@ -24,7 +24,8 @@
 /*
  * Data layer of mbwcdview (no Qt): reads water column and survey data through
  * MBIO, keeps all water column pings of a file in memory and pairs a Kongsberg
- * *.kmall (navigation, attitude, bathymetry) with its *.kmwcd (water column).
+ * *.kmall or *.all (navigation, attitude, bathymetry) with its *.kmwcd or *.wcd
+ * (water column).
  *
  * Conventions as in MBIO: time_d seconds since 1970, depths positive down,
  * acrosstrack positive to starboard, angles in degrees.
@@ -96,7 +97,7 @@ class WaterColumnFile {
   void amplitudes(size_t i, int s, std::vector<int> &beams, int &nsamples_max, std::vector<float> &out) const;
 };
 
-/* The survey pings of a *.kmall */
+/* The survey pings of a *.kmall or *.all */
 struct SurveyPings {
   std::vector<double> time_d, navlon, navlat, speed, heading, sensordepth;
   std::vector<unsigned int> ping_number;
@@ -110,13 +111,15 @@ struct SurveyPings {
 
 bool load_survey(const std::string &path, int format, SurveyPings &survey, std::string *message);
 
-/* MBIO format of a file name (0 if unknown); *.kmwcd gives 261 */
+/* MBIO format of a file name (0 if unknown); *.kmwcd gives 261, *.wcd 58 */
 int get_format(const std::string &path);
 
-/* The *.kmwcd of a *.kmall or the reverse: same line number, nearest file name time */
+/* The *.kmwcd of a *.kmall, the *.wcd of a *.all or the reverse: same line number,
+   nearest file name time */
 std::string find_companion(const std::string &path, double max_offset_s = 600.0);
 
-/* A *.kmall and its *.kmwcd, either may be missing */
+/* A *.kmall and its *.kmwcd or a *.all and its *.wcd, either may be missing; kmall and
+   kmwcd name the survey and water column files of either kind */
 class Line {
  public:
   /* path: either file of a line; format 0 = from the file name (applies to path only) */
@@ -127,7 +130,7 @@ class Line {
   WaterColumnFile wc;
   SurveyPings survey;
 
-  int survey_index(size_t i) const;      // matching *.kmall ping of water column ping i, or -1
+  int survey_index(size_t i) const;      // matching survey ping of water column ping i, or -1
   int matched() const;
   /* lon, lat, speed over ground (knots), course over ground (deg); NaN if unavailable */
   void nav_at(double time_d, double &lon, double &lat, double &sog_kn, double &cog) const;

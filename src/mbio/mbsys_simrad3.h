@@ -234,6 +234,7 @@
 #define MBSYS_SIMRAD3_MAXPIXELS 2048
 #define MBSYS_SIMRAD3_MAXRAWPIXELS 65535
 #define MBSYS_SIMRAD3_MAXTX 19
+#define MBSYS_SIMRAD3_MAXWCDATAGRAMS 128
 #define MBSYS_SIMRAD3_MAXQUALITYPARAMETERS 3
 #define MBSYS_SIMRAD3_MAXSVP 1024
 #define MBSYS_SIMRAD3_MAXATTITUDE 256
@@ -796,36 +797,53 @@ struct mbsys_simrad3_wcbeam_struct {
 	int wtc_start_sample; /* start sample number */
 	int wtc_beam_samples; /* number of water column samples derived from
 	                  each beam */
-	int wtc_beam_spare;   /* unknown */
+	int wtc_detected_range; /* detected range in samples, 0 = no detection */
 	int wtc_sector;       /* transmit sector identifier */
 	int wtc_beam;         /* beam 128 is first beam on
 	                      second head of EM3000D */
 	mb_s_char wtc_amp[MBSYS_SIMRAD3_MAXRAWPIXELS]; /* water column amplitude (dB) */
 };
 
-/* internal data structure for water column data */
+/* one water column datagram read for the ping, needed to write the ping again */
+struct mbsys_simrad3_wcdatagram_struct {
+	int wtc_date;     /* date of this datagram */
+	int wtc_msec;     /* time of this datagram, can differ by 1 msec inside a ping */
+	int wtc_datagram; /* number of this datagram */
+	int wtc_nbeam;    /* number of beams in this datagram */
+};
+
+/* internal data structure for water column data - holds one ping, assembled from
+   all of its datagrams; a datagram holds up to 64 kB, up to 32 datagrams per ping */
 struct mbsys_simrad3_watercolumn_struct {
 	int wtc_date;       /* date = year*10000 + month*100 + day
-	                    Feb 26, 1995 = 19950226 */
+	                    Feb 26, 1995 = 19950226 - first datagram of the ping */
 	int wtc_msec;       /* time since midnight in msec
-	                    08:12:51.234 = 29570234 */
+	                    08:12:51.234 = 29570234 - first datagram of the ping */
 	int wtc_count;      /* sequential counter or input identifier */
 	int wtc_serial;     /* system 1 or system 2 serial number */
 	int wtc_ndatagrams; /* number of datagrams used to represent
 	                    the water column for this ping */
-	int wtc_datagram;   /* number this datagram */
+	int wtc_datagram;   /* number of the last datagram read for this ping */
 	int wtc_ntx;        /* number of transmit sectors */
 	int wtc_nrx;        /* number of receive beams */
-	int wtc_nbeam;      /* number of beams in this datagram */
+	int wtc_nbeam;      /* number of beams read for this ping */
 	int wtc_ssv;        /* sound speed at transducer (0.1 m/sec) */
 	int wtc_sfreq;      /* sampling frequency (0.01 Hz) */
 	int wtc_heave;      /* tx time heave at transducer (0.01 m) */
+	int wtc_tvg_function;  /* TVG function X, in X log R + 2 alpha R + OFS + C */
+	int wtc_tvg_offset;    /* TVG offset C (dB), included in the amplitudes */
+	int wtc_scanning_info; /* scanning info */
 	int wtc_spare1;     /* spare */
 	int wtc_spare2;     /* spare */
 	int wtc_spare3;     /* spare */
 	int wtc_txtiltangle[MBSYS_SIMRAD3_MAXTX]; /* tilt angle (0.01 deg) */
-	int wtc_txcenter[MBSYS_SIMRAD3_MAXTX];    /* center frequency (Hz) */
+	int wtc_txcenter[MBSYS_SIMRAD3_MAXTX];    /* center frequency (10 Hz) */
 	int wtc_txsector[MBSYS_SIMRAD3_MAXTX];    /* transmit sector number (0-19) */
+	int wtc_nread;      /* number of datagrams read for this ping */
+	struct mbsys_simrad3_wcdatagram_struct wtc_read[MBSYS_SIMRAD3_MAXWCDATAGRAMS];
+	bool wtc_in_progress;  /* datagrams of a ping have been read, more may follow */
+	bool wtc_header_saved; /* wtc_header holds the header of the next datagram */
+	char wtc_header[EM3_WC_HEADER_SIZE];
 	struct mbsys_simrad3_wcbeam_struct beam[MBSYS_SIMRAD3_MAXBEAMS];
 };
 
@@ -1549,6 +1567,12 @@ int mbsys_simrad3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 int mbsys_simrad3_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
                               int *error);
 int mbsys_simrad3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error);
+int mbsys_simrad3_extract_wcdimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *nsamples_max,
+                                       int *error);
+int mbsys_simrad3_extract_wc(int verbose, void *mbio_ptr, void *store_ptr, int nbeams_alloc, int nsamples_alloc, int *kind,
+                             int time_i[7], double *time_d, int *nbeams, int *nsamples_max, int *swath, double *angle_across,
+                             double *angle_along, double *sample_interval, double *soundspeed, int *start_sample, int *nsamples,
+                             double *detect_sample, float *amplitude, int *error);
 int mbsys_simrad3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error);

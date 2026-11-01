@@ -18,7 +18,7 @@
 #    See README.md file for copying and redistribution conditions.
 #--------------------------------------------------------------------
 """mbwcdview (C++/Qt6) without a window: usage, --dump and --export on a synthetic
-*.kmall/*.kmwcd pair. Run only when built with -DbuildWCDView=ON."""
+*.kmall/*.kmwcd pair and *.wcd file. Run only when built with -DbuildWCDView=ON."""
 
 import os
 import re
@@ -28,6 +28,7 @@ import tempfile
 import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import synth_all as A  # noqa: E402
 import synth_kmall as S  # noqa: E402
 
 
@@ -68,6 +69,16 @@ class MbwcdviewTest(unittest.TestCase):
                     "--size=800x600"], check=True)
     with open(image, "rb") as f:
       self.assertEqual(f.read(8), b"\x89PNG\r\n\x1a\n")
+
+  def test_dump_wcd(self):
+    wcd = A.write(os.path.join(self.tmp.name, A.WCD_NAME))
+    out = subprocess.run([self.program, "--dump", "-I", wcd, "--ping=2"], capture_output=True, text=True,
+                         check=True).stdout
+    self.assertIn("water column pings %d, matched 0" % len(A.PINGS), out)
+    self.assertIn("amplitude %.1f .. " % (0.5 * -128 - A.TVG_OFFSET), out)
+    self.assertIn("fill value none", out)
+    self.assertIn("ping number %d" % A.PINGS[2], out)
+    self.assertIn("beams %d," % (A.nbeams_read(2) + 2), out)  # two empty beams mark the lost datagram
 
 
 if __name__ == "__main__":

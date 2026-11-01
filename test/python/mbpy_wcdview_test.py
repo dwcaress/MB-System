@@ -28,6 +28,7 @@ import tempfile
 import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import synth_all as A  # noqa: E402
 import synth_kmall as S  # noqa: E402
 
 SOURCE = os.environ["MB_SOURCE_DIR"]
@@ -60,13 +61,21 @@ class MbpyWcdviewTest(unittest.TestCase):
       w.chk_wcbottom.setChecked(True)
       w.slider.setValue(2)
       self.assertIn("Ping %d swath 0" % (S.PING0 + 2), w.meta_label.text())
-      self.assertIn("kmall soundings", w.statusBar().currentMessage())
+      self.assertIn("soundings", w.statusBar().currentMessage())
       row = w.pick(0.0, S.DRAFT + 0.5 * S.BOTTOM_BELOW_TX)
       self.assertIsNotNone(row)
       self.assertEqual(row[-1], "Heading")
       image = os.path.join(tmp, "ping.png")
       w.save_image(image)
       self.assertTrue(os.path.getsize(image) > 0)
+      w.close()
+      # a *.wcd without its *.all, with a ping that lost a datagram
+      w = wcd_viewer.MainWindow()
+      w.open_file(A.write(os.path.join(tmp, A.WCD_NAME)))
+      self.assertEqual(len(w.steps), len(A.PINGS))
+      self.assertIsNone(w.line.survey)
+      w.slider.setValue(2)
+      self.assertIn("Ping %d swath 0" % A.PINGS[2], w.meta_label.text())
       w.close()
     del app
 

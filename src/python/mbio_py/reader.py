@@ -33,11 +33,11 @@ from .watercolumn import WaterColumnPing, _WCBuffers
 _SVP_ALLOC = 10000
 
 # file suffixes that mb_get_format() does not recognise on purpose
-_SUFFIX_FORMATS = {".kmwcd": K.MBF_KEMKMALL}
+_SUFFIX_FORMATS = {".kmwcd": K.MBF_KEMKMALL, ".wcd": K.MBF_EM710RAW}
 
 
 def get_format(path):
-    """Return the MBIO format id of a file name (0 if unknown); *.kmwcd gives 261."""
+    """Return the MBIO format id of a file name (0 if unknown); *.kmwcd gives 261, *.wcd 58."""
     suffix = os.path.splitext(path)[1].lower()
     if suffix in _SUFFIX_FORMATS:
         return _SUFFIX_FORMATS[suffix]
@@ -98,7 +98,7 @@ class Reader:
         for rec in r:
             if rec.water_column is not None: ...
 
-    format 0 means: from the file name (mb_get_format; *.kmwcd -> 261).
+    format 0 means: from the file name (mb_get_format; *.kmwcd -> 261, *.wcd -> 58).
     Fatal errors raise MBIOError; non-fatal ones are returned in Record.error.
     Survey and water column records carry ping_number; survey records carry
     detects (MB_DETECT_*); water column data is extracted when present.
@@ -207,7 +207,8 @@ class Reader:
                                   C.byref(err)) == K.MB_SUCCESS and 0 < nsvp.value <= _SVP_ALLOC:
                 rec.svp_depth, rec.svp_velocity = depth[:nsvp.value].copy(), velocity[:nsvp.value].copy()
 
-        if status == K.MB_SUCCESS and rec.kind in (K.MB_DATA_DATA, K.MB_DATA_WATER_COLUMN):
+        # mb_get_all() reports water column records of some formats as "not a data record"
+        if rec.kind == K.MB_DATA_WATER_COLUMN or (status == K.MB_SUCCESS and rec.kind == K.MB_DATA_DATA):
             ping = C.c_uint()
             lib.mb_pingnumber(self.verbose, self._mbio, C.byref(ping), C.byref(err))
             rec.ping_number = ping.value
@@ -220,5 +221,6 @@ class Reader:
             rec.water_column = self._wc.extract(self.verbose, self._mbio, self._store)
             if rec.water_column is not None:
                 rec.water_column.ping_number = rec.ping_number
+                rec.error = 0
                 self.wc_samples_read += int(rec.water_column.nsamples.sum())
         return rec

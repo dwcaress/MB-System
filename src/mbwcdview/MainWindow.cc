@@ -163,7 +163,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
   /* header */
   auto *header = new QHBoxLayout;
-  auto *open = new QPushButton("Open .kmwcd/.kmall");
+  auto *open = new QPushButton("Open .kmwcd/.kmall/.wcd/.all");
   connect(open, &QPushButton::clicked, this, &MainWindow::openDialog);
   header->addWidget(open);
   file_name_ = new QLabel("No file loaded");
@@ -247,7 +247,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
 /*--------------------------------------------------------------------*/
 void MainWindow::openDialog() {
-  const QString path = QFileDialog::getOpenFileName(this, "Open .kmwcd/.kmall", "", "*.kmwcd *.kmall");
+  const QString path = QFileDialog::getOpenFileName(this, "Open .kmwcd/.kmall/.wcd/.all", "", "*.kmwcd *.kmall *.wcd *.all");
   if (!path.isEmpty())
     openFile(path);
 }
@@ -256,7 +256,7 @@ bool MainWindow::openFile(const QString &path) {
   replay_->setChecked(false);
   file_label_ = QFileInfo(path).fileName();
   file_name_->setText(file_label_);
-  statusBar()->showMessage("Reading .kmall (navigation, bathymetry)...");
+  statusBar()->showMessage("Reading survey file (navigation, bathymetry)...");
   QApplication::processEvents();
   int last = -1;
   auto progress = [&](int npings, double fraction) {
@@ -278,7 +278,7 @@ bool MainWindow::openFile(const QString &path) {
     view_->update();
     return false;
   }
-  fprintf(stderr, "[diag] kmall=%s kmwcd=%s\n", line_.kmall.c_str(), line_.kmwcd.c_str());
+  fprintf(stderr, "[diag] survey=%s water column=%s\n", line_.kmall.c_str(), line_.kmwcd.c_str());
   for (size_t i = 0; i < line_.wc.size(); i++)
     for (const int s : line_.wc.swaths(i))
       steps_.emplace_back((int)i, s);
@@ -318,10 +318,10 @@ bool MainWindow::openFile(const QString &path) {
   redraw();
 
   const QString summary =
-      QString("Nav summary: kmall pings=%1, position records=%2%3, WC pings=%4, matched=%5, fill value=%6")
+      QString("Nav summary: survey pings=%1, position records=%2%3, WC pings=%4, matched=%5, fill value=%6")
           .arg(line_.has_survey ? (int)line_.survey.size() : 0)
           .arg(line_.has_survey ? (int)line_.survey.nav.size() : (int)wc.nav.size())
-          .arg(line_.has_survey ? "" : " (from .kmwcd)")
+          .arg(line_.has_survey ? "" : " (from water column file)")
           .arg((int)wc.size())
           .arg(line_.matched())
           .arg(wc.has_fill ? QString::number(wc.fill_value, 'f', 1) : QString("none"));

@@ -82,12 +82,12 @@ bool build_scene(const Line &line, size_t i, int swath, const SceneOptions &opti
   if (info.traced)
     data.ylabel += info.has_draft ? " - ray traced" : " - ray traced, draft 0";
 
-  /* soundings of the matched *.kmall ping; MBIO keeps the receive fans of a ping in
+  /* soundings of the matched survey ping; MBIO keeps the receive fans of a ping in
      order, so with equal fans the soundings of swath k are the k-th block (dual swath) */
   if (options.bottom) {
     const int j = line.survey_index(i);
     if (j < 0) {
-      info.status = "no .kmall ping for this water column ping";
+      info.status = "no survey ping for this water column ping";
     }
     else {
       const std::vector<double> &bx = line.survey.bathacrosstrack[j];
@@ -111,7 +111,7 @@ bool build_scene(const Line &line, size_t i, int swath, const SceneOptions &opti
         data.soundings.push_back({bx[b], bz[b], color, mb_beam_ok(bf[b]) != 0});
       }
       info.soundings = (int)data.soundings.size();
-      info.status = QString("kmall soundings: %1").arg(info.soundings);
+      info.status = QString("soundings: %1").arg(info.soundings);
     }
   }
   return true;

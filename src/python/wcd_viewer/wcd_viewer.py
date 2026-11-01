@@ -27,7 +27,7 @@ print(f"[WCD Viewer] BUILD_ID={BUILD_ID}")
  *--------------------------------------------------------------------*/
 
 Water column viewer reading the data through MB-System's MBIO library (mbio_py),
-successor of kmwcd_viewer.py (which used KMALL.py). Opens a *.kmwcd or *.kmall and
+successor of kmwcd_viewer.py (which used KMALL.py). Opens a *.kmwcd, *.kmall, *.wcd or *.all and
 finds the other file of the line; any of the records may be missing.
 """
 import math
@@ -95,7 +95,7 @@ class MainWindow(QMainWindow):
 
         # header
         hh = QHBoxLayout()
-        btn_open = QPushButton("Open .kmwcd/.kmall")
+        btn_open = QPushButton("Open .kmwcd/.kmall/.wcd/.all")
         btn_open.clicked.connect(self.open_dialog)
         hh.addWidget(btn_open)
         self.lbl_file = QLabel("No file loaded")
@@ -203,7 +203,7 @@ class MainWindow(QMainWindow):
 
     # ------------------------------------------------------------------ loading
     def open_dialog(self):
-        fname, _ = QFileDialog.getOpenFileName(self, "Open .kmwcd/.kmall", "", "*.kmwcd *.kmall")
+        fname, _ = QFileDialog.getOpenFileName(self, "Open .kmwcd/.kmall/.wcd/.all", "", "*.kmwcd *.kmall *.wcd *.all")
         if fname:
             self.open_file(fname)
 
@@ -213,7 +213,7 @@ class MainWindow(QMainWindow):
         self.btn_replay.setChecked(False)
         self.lbl_file.setText(os.path.basename(fname))
         print("[diag] open_file:", fname)
-        self.statusBar().showMessage("Reading .kmall (navigation, bathymetry)...")
+        self.statusBar().showMessage("Reading survey file (navigation, bathymetry)...")
         QApplication.processEvents()
         last = [-1]
 
@@ -233,7 +233,7 @@ class MainWindow(QMainWindow):
             self.redraw()
             return
         line = self.line
-        print(f"[diag] kmall={line.kmall} kmwcd={line.kmwcd}")
+        print(f"[diag] survey={line.kmall} water column={line.kmwcd}")
         self._ping_cache = (None, None)
         self._geom_cache = (None, None)
         has_svp = line.svp(0.0) is not None
@@ -285,9 +285,9 @@ class MainWindow(QMainWindow):
         self.redraw()
 
         s = line.survey
-        summary = (f"Nav summary: kmall pings={len(s) if s is not None else 0}, "
+        summary = (f"Nav summary: survey pings={len(s) if s is not None else 0}, "
                    f"position records={len(s.nav_time_d) if s is not None else len(wcf.nav_time_d)}"
-                   f"{'' if s is not None else ' (from .kmwcd)'}, WC pings={len(wcf)}, matched={line.matched}, "
+                   f"{'' if s is not None else ' (from water column file)'}, WC pings={len(wcf)}, matched={line.matched}, "
                    f"fill value={wcf.fill_value}")
         print("[diag]", summary)
         QTimer.singleShot(900, lambda: self.statusBar().showMessage(summary, 6000))
@@ -336,7 +336,7 @@ class MainWindow(QMainWindow):
         return i, swath, wc, wc.select(wc.swath == swath)
 
     def _soundings(self, i, swath, wc):
-        """Soundings of the matched .kmall ping for this swath: (across, depth, flag, detects, j) or None."""
+        """Soundings of the matched survey ping for this swath: (across, depth, flag, detects, j) or None."""
         j = self.line.survey_index(i)
         if j is None:
             return None
@@ -409,7 +409,7 @@ class MainWindow(QMainWindow):
         if self.chk_bottom.isChecked():
             snd = self._soundings(i, swath, wc_all)
             if snd is None:
-                status.append("no .kmall ping for this water column ping")
+                status.append("no survey ping for this water column ping")
             else:
                 sx, sz, sf, sd, _ = snd
                 shown = 0
@@ -421,7 +421,7 @@ class MainWindow(QMainWindow):
                     self.ax.scatter(sx[flagged], sz[flagged], s=12, marker="o", facecolors="none",
                                     edgecolors=colour, linewidths=0.8)
                     shown += int(good.sum() + flagged.sum())
-                status.append(f"kmall soundings: {shown}")
+                status.append(f"soundings: {shown}")
         if self.chk_wcbottom.isChecked():
             self.ax.plot(det_x, det_depth, "-", color="orange", lw=0.8)
 

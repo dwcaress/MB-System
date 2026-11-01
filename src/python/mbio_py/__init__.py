@@ -21,7 +21,7 @@
 Reader            record by record reading of any MBIO format
 WaterColumnPing   water column of one ping (mb_extract_wc)
 WaterColumnFile   all water column pings of a file in memory
-KongsbergLine     a *.kmall + *.kmwcd pair of one survey line
+KongsbergLine     a *.kmall + *.kmwcd or *.all + *.wcd pair of one survey line
 """
 from . import constants
 from ._lib import lib_path

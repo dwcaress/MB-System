@@ -23,9 +23,9 @@
  *--------------------------------------------------------------------*/
 /*
  * MBWCDVIEW displays water column data, one swath at a time, read through MBIO.
- * Opening a Kongsberg *.kmwcd or *.kmall finds the other file of the line, so the
- * soundings, navigation and transducer depth of the *.kmall can be shown with the
- * water column of the *.kmwcd. The samples are ray traced through the logged sound
+ * Opening a Kongsberg *.kmwcd, *.kmall, *.wcd or *.all finds the other file of the line,
+ * so the soundings, navigation and transducer depth of the *.kmall or *.all can be shown
+ * with the water column of the *.kmwcd or *.wcd. The samples are ray traced through the logged sound
  * velocity profile. Without a window, --dump prints a summary of a line and
  * --export writes an image of one swath.
  *
@@ -57,8 +57,8 @@
 constexpr char program_name[] = "MBWCDVIEW";
 constexpr char help_message[] =
     "MBWCDVIEW displays water column data, one swath at a time, read through MBIO.\n"
-    "Opening a Kongsberg *.kmwcd or *.kmall finds the other file of the survey line,\n"
-    "so that the soundings and navigation of the *.kmall are shown with the water column.\n"
+    "Opening a Kongsberg *.kmwcd, *.kmall, *.wcd or *.all finds the other file of the survey\n"
+    "line, so that its soundings and navigation are shown with the water column.\n"
     "--dump prints a summary of the line and --export writes an image of one swath,\n"
     "both without opening a window.";
 constexpr char usage_message[] =

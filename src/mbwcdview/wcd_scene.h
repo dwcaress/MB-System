@@ -24,7 +24,7 @@
 /*
  * What is drawn for one swath of one water column ping: amplitudes (fill value
  * removed), cell positions (ray traced or straight), the water column bottom
- * detections and the soundings of the matched *.kmall ping.
+ * detections and the soundings of the matched survey ping.
  */
 
 #ifndef MBWCDVIEW_WCD_SCENE_H
@@ -39,7 +39,7 @@ namespace wcd {
 
 struct SceneOptions {
   bool raytrace = true;   // trace through the sound velocity profile when one exists
-  bool bottom = false;    // soundings of the matched *.kmall ping
+  bool bottom = false;    // soundings of the matched survey ping
   bool wc_bottom = false; // water column bottom detections
 };
 
