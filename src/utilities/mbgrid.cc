@@ -1326,7 +1326,7 @@ int main(int argc, char **argv) {
     }
 
     /* get local scaling of lon lat */
-    mb_coor_scale(2, 0.5 * (obnd[2] + obnd[3]), &mtodeglon, &mtodeglat);
+    mb_coor_scale(verbose, 0.5 * (obnd[2] + obnd[3]), &mtodeglon, &mtodeglat);
     deglontokm = 0.001 / mtodeglon;
     deglattokm = 0.001 / mtodeglat;
     if (shift_mode != MBGRID_SHIFT_NONE) {
