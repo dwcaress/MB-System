@@ -37,6 +37,10 @@ MB-System_Claude_Code_Guide.md). Directory-level CLAUDE.md files may add rules.
   Makefile.in, aclocal.m4 etc. unless asked; the maintainer does that.
   Exception: the Qt prototype programs (src/qt-*, src/pointCloudEditor)
   are CMake-only (-DbuildQt=ON); never add them to the Autotools build.
+  Header install lists differ today: src/mbio/Makefile.am installs the
+  per-format headers (mbf_*.h, mbsys_*.h) via include_HEADERS, while the
+  CMake HEADERS list holds only the core mb_*.h headers. Follow each build
+  system's existing convention; do not change either without asking.
 - CMake forbids in-source builds. Typical:
     mkdir -p build && cd build && cmake .. [options] && make -j8
   macOS/Homebrew GUIs: add -DmacosUseMbMesa=ON (uses the dwcaress/mbsystem
@@ -64,8 +68,10 @@ MB-System_Claude_Code_Guide.md). Directory-level CLAUDE.md files may add rules.
   surrounding code and never reformat code you are not changing.
 
 ## C. Code conventions
-- C99-compatible C and C++11 (CMAKE_CXX_STANDARD 11). Match the surrounding
-  file's style, naming, comment density and idiom. Minimal diffs.
+- C99-compatible C and C++11 (CMAKE_CXX_STANDARD 11). Some targets set
+  C++17 for themselves (src/mbgrd2gltf, src/mbmesh, src/photo and the
+  GoogleTest tests in test/mbio); follow the target's own setting. Match the
+  surrounding file's style, naming, comment density and idiom. Minimal diffs.
 - MBIO API pattern (see src/mbio/mb_define.h, mb_status.h): functions take
   `int verbose, ..., int *error`, return `int status` (MB_SUCCESS /
   MB_FAILURE), set *error to MB_ERROR_* codes, and keep the verbose
@@ -79,10 +85,71 @@ MB-System_Claude_Code_Guide.md). Directory-level CLAUDE.md files may add rules.
   fixed buffers. Check getenv() and strstr() results for NULL.
 - Data read from files: validate beam/sample/record counts against the
   destination array sizes before copying.
-- Format drivers: copy the closest sibling module; register the format in
-  the format tables (grep an existing format id to find every place); never
-  assume host endianness or struct packing (use the existing swap helpers).
-  Do not change mbsys_* struct layouts without checking every reader/writer.
+- Format drivers: copy the closest sibling module; never assume struct
+  packing; do not change mbsys_* struct layouts without checking every
+  reader/writer. A new format touches, in src/mbio: mb_format.h (MBF_ id;
+  MB_SYS_ id if it is a new system; MB_FORMATS must equal the number of
+  registered formats), mb_format.c (a branch in BOTH mb_format_register()
+  and mb_format_info(); mb_get_format() only if the format has a
+  distinctive filename prefix/suffix), the new mbr_*.c / mbsys_*.c and
+  headers, CMakeLists.txt (SRC) and Makefile.am (libmbio_la_SOURCES and
+  include_HEADERS), and the format list in the MBIO man page
+  (src/man/man3/mbio.3). Some MBF_ ids (MBF_NONE, MBF_RESONS8K,
+  MBF_SB2000RW, MBF_SBATPROC) are defined but intentionally unregistered;
+  the pseudo-formats MBF_DATALIST and MBF_IMAGELIST are handled only in
+  mb_format_info().
+- Endianness: legacy drivers swap inside `#ifdef BYTESWAPPED` using
+  mb_swap_short/mb_swap_int (macros, mb_swap.h) and mb_swap_float/double/
+  long (functions). CMake defines BYTESWAPPED when CMAKE_C_BYTE_ORDER is
+  LITTLE_ENDIAN. Newer drivers use mb_get_binary_*/mb_put_binary_* with an
+  explicit bool `swapped` argument. Follow the closest sibling driver and
+  never assume host byte order.
+- Record kinds, errors, notices (src/mbio/mb_status.h): record kinds are
+  MB_DATA_* (MB_DATA_NONE = 0, real kinds start at 1). MB_SUCCESS = 1,
+  MB_FAILURE = 0. Fatal MB_ERROR_* codes are positive, non-fatal ones are
+  negative (reading and writing can continue). The notice_list[] layout in
+  mb_io_struct is: kind k at slot k, non-fatal error e at
+  MB_DATA_KINDS - e, problem p at MB_DATA_KINDS - MB_ERROR_MIN + p, size
+  MB_NOTICE_MAX; notice_msg[] must have one entry per slot. When adding a
+  record kind, update MB_DATA_KINDS, notice_msg[] and anything sized from
+  them (e.g. per-kind counter arrays) together.
+- Beam flags: always use the mb_beam_* macros from mb_status.h, never raw
+  bit tests. Bit 0 (0x01) = flagged, bit 1 (0x02) = selected; they are
+  exclusive. A null beam (no detection) is exactly 0x01 (MB_FLAG_NULL ==
+  MB_FLAG_FLAG). Higher bits record the reason (manual 0x04, filter 0x08,
+  filter2 0x10, multipick 0x20, interpolate 0x40, sonar 0x80); the original
+  meanings of 0x10/0x20 (IHO uncertainty) and 0x40 (footprint too large)
+  are deprecated. The "usable" macros exclude null beams and flagged
+  interpolated beams; "usable2" also excludes flagged multipick beams.
+- Time: time_i[7] = year, month, day, hour, minute, second, microsecond
+  (mb_get_time() accepts years 1930-3000; no leap-second handling).
+  time_d = decimal seconds since 1970-01-01 00:00:00.
+- Longitude range: lonflip -1 = -360..0, 0 = -180..180, 1 = 0..360
+  (mb_apply_lonflip). bounds[4] = lon min, lon max, lat min, lat max.
+- User defaults: mb_defaults() sets the built-in defaults (format 0,
+  pings 1, lonflip 0, speedmin 0.0, timegap 1.0), then reads only the
+  "lonflip:" and "timegap:" lines of ~/.mbio_defaults (the keys written by
+  mbdefaults); other values are not read from that file. Do not hard-code
+  personal settings.
+- Sign conventions (documented in mb_process.h): athwartship offsets are
+  positive to starboard, fore-aft positive forward, vertical and
+  sensordepth positive down; roll positive starboard up, pitch positive
+  forward up (degrees), heave positive up (meters). The man page does not
+  state the acrosstrack sign: do not assume one, check the code.
+- Platform model (mb_define.h mb_platform_*, mb_io.h mb_platform_struct):
+  sensor offsets (position x/y/z, attitude heading/roll/pitch), time
+  latency and per-sensor flip-signs (field names: heading_flipsign_heading,
+  attitude_flipsign_roll, attitude_flipsign_pitch - copy names from the
+  header) live in the platform model, read from a platform file by
+  mb_platform_read() and created by mbmakeplatform. mbpreprocess loads it
+  with --platform-file (KMALL data without one: the model is taken from the
+  installation datagram). mb_preprocess() calls the format's own
+  mb_io_preprocess, or mb_preprocess_generic() (lever-arm repositioning and
+  attitude rotation) if none is registered. Lever-arm logic belongs here,
+  not in generic read/write APIs.
+- Keyword matching: when using strncmp() to match a keyword, pass the
+  keyword's exact length, and keep reader and writer keyword names
+  identical (e.g. platform file keywords in mb_platform_read/write).
 - Navigation rule: lon/lat and sensordepth passed through mb_read/mb_write/
   mb_get*/mb_put*/mb_extract*/mb_insert* are those of the MAPPING SENSOR
   (sonar, lidar, camera), with acrosstrack/alongtrack relative to it - not
@@ -140,10 +207,11 @@ MB-System_Claude_Code_Guide.md). Directory-level CLAUDE.md files may add rules.
   the pull request description instead of editing ChangeLog.md.
 - When updating ChangeLog.md:
   - Version id = latest beta tag published on GitHub + 1:
-      git ls-remote --tags origin | grep -oE '[0-9]+\.[0-9]+\.[0-9]+beta[0-9]+$' | sort -V | tail -1
-    (Requires three version components: old tags such as 5.79beta45 would
-    otherwise sort above 5.8.3betaNN.) Do not trust the local ChangeLog
-    heading; it may name an unreleased beta.
+      git ls-remote --tags https://github.com/dwcaress/MB-System.git | grep -oE '[0-9]+\.[0-9]+\.[0-9]+beta[0-9]+$' | sort -V | tail -1
+    (The full URL works whatever the remotes are called, e.g. in a fork
+    where origin has no tags. Requires three version components: old tags
+    such as 5.79beta45 would otherwise sort above 5.8.3betaNN.) Do not
+    trust the local ChangeLog heading; it may name an unreleased beta.
   - Date = today, moved forward on every edit even if the id is unchanged.
   - Put the same id/date in: the version list near the top, the release's
     "#### <id> (<Month D, YYYY>)" heading, and MB_VERSION / MB_VERSION_DATE
