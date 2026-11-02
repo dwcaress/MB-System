@@ -300,6 +300,7 @@ int mbview_reset_shared(bool mode) {
 	/* vector data */
 	shared.shareddata.vector_mode = MBV_VECTOR_OFF;
 	shared.shareddata.nvector = 0;
+	shared.shareddata.nvector_alloc = 0;
 	shared.shareddata.vector_selected = MBV_SELECT_NONE;
 	shared.shareddata.vector_point_selected = MBV_SELECT_NONE;
 	shared.shareddata.vectors = NULL;
@@ -2088,7 +2089,8 @@ int mbview_open(int verbose, size_t instance, int *error) {
 	if (data->primary_colortable_max <= data->primary_colortable_min) {
 		data->primary_colortable_min = data->primary_min - 0.01 * (data->primary_max - data->primary_min);
 		data->primary_colortable_max = data->primary_max + 0.01 * (data->primary_max - data->primary_min);
-		data->contour_interval = pow(10.0, floor(log10(data->primary_max - data->primary_min)) - 1.0);
+		if (data->primary_max > data->primary_min)
+			data->contour_interval = pow(10.0, floor(log10(data->primary_max - data->primary_min)) - 1.0);
 	}
 
 	/* set about version label */
@@ -2153,7 +2155,8 @@ int mbview_update(int verbose, size_t instance, int *error) {
 	if (data->primary_nxy > 0 && data->primary_colortable_max <= data->primary_colortable_min) {
 		data->primary_colortable_min = data->primary_min - 0.01 * (data->primary_max - data->primary_min);
 		data->primary_colortable_max = data->primary_max + 0.01 * (data->primary_max - data->primary_min);
-		data->contour_interval = pow(10.0, floor(log10(data->primary_max - data->primary_min)) - 1.0);
+		if (data->primary_max > data->primary_min)
+			data->contour_interval = pow(10.0, floor(log10(data->primary_max - data->primary_min)) - 1.0);
 	}
 	if (data->secondary_nxy > 0 && data->secondary_colortable_max <= data->secondary_colortable_min) {
 		data->secondary_colortable_min = data->secondary_min - 0.01 * (data->secondary_max - data->secondary_min);
@@ -3066,126 +3069,126 @@ void do_mbview_set_projection_label(size_t instance) {
 	struct mbview_struct *data = &(view->data);
 
 	/* set projection label */
-  mb_path value_text;
+  char value_text[4 * MB_PATH_MAXLINE];
 	snprintf(value_text, sizeof(value_text), ":::t\"Primary Grid Projection:\"");
 	if (data->primary_grid_projection_mode == MBV_PROJECTION_GEOGRAPHIC) {
-		strcat(value_text, ":t\"  Geographic\"");
+		strncat(value_text, ":t\"  Geographic\"", sizeof(value_text) - strlen(value_text) - 1);
 	}
 	else if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED ||
 	         data->primary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED) {
 		int projectionid;
 		char tmptext[MB_PATH_MAXLINE*2];
 		if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1 && projectionid == 32661) {
-			sprintf(tmptext, ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->secondary_grid_projection_id);
-			strcat(value_text, tmptext);
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->primary_grid_projection_id);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 		}
 		else if (sscanf(data->primary_grid_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid == 32661) {
-			sprintf(tmptext, ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->secondary_grid_projection_id);
-			strcat(value_text, tmptext);
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->primary_grid_projection_id);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 		}
 		else if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1 && projectionid == 32761) {
-			sprintf(tmptext, ":t\"  Projected: %s\":t\"    South Polar Steographic\"", data->secondary_grid_projection_id);
-			strcat(value_text, tmptext);
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    South Polar Steographic\"", data->primary_grid_projection_id);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 		}
 		else if (sscanf(data->primary_grid_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid == 32761) {
-			sprintf(tmptext, ":t\"  Projected: %s\":t\"    South Polar Steographic\"", data->secondary_grid_projection_id);
-			strcat(value_text, tmptext);
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    South Polar Steographic\"", data->primary_grid_projection_id);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 		}
 		else if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1 && projectionid >= 32600 &&
 		         projectionid < 32700) {
-			sprintf(tmptext, ":t\"  Projected: %s\":t\"    UTM Zone %d N\"", data->primary_grid_projection_id,
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    UTM Zone %d N\"", data->primary_grid_projection_id,
 			        projectionid - 32600);
-			strcat(value_text, tmptext);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 		}
 		else if (sscanf(data->primary_grid_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid >= 32600 &&
 		         projectionid < 32700) {
-			sprintf(tmptext, ":t\"  Projected: %s\":t\"    UTM Zone %d N\"", data->primary_grid_projection_id,
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    UTM Zone %d N\"", data->primary_grid_projection_id,
 			        projectionid - 32600);
-			strcat(value_text, tmptext);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 		}
 		else if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1 && projectionid >= 32700 &&
 		         projectionid < 32800) {
-			sprintf(tmptext, ":t\"  Projected: %s\":t\"    UTM Zone %d S\"", data->primary_grid_projection_id,
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    UTM Zone %d S\"", data->primary_grid_projection_id,
 			        projectionid - 32700);
-			strcat(value_text, tmptext);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 		}
 		else if (sscanf(data->primary_grid_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid >= 32700 &&
 		         projectionid < 32800) {
-			sprintf(tmptext, ":t\"  Projected: %s\":t\"    UTM Zone %d S\"", data->primary_grid_projection_id,
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    UTM Zone %d S\"", data->primary_grid_projection_id,
 			        projectionid - 32700);
-			strcat(value_text, tmptext);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 		}
 		else {
-			sprintf(tmptext, ":t\"  Projected: %s\"", data->primary_grid_projection_id);
-			strcat(value_text, tmptext);
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\"", data->primary_grid_projection_id);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 		}
 	}
 	else if (data->primary_grid_projection_mode == MBV_PROJECTION_SPHEROID) {
-		strcat(value_text, ":t\"  Spheroid\"");
+		strncat(value_text, ":t\"  Spheroid\"", sizeof(value_text) - strlen(value_text) - 1);
 	}
 
 	if (data->secondary_nxy > 0) {
-		strcat(value_text, ":t\"Secondary Grid Projection:\"");
+		strncat(value_text, ":t\"Secondary Grid Projection:\"", sizeof(value_text) - strlen(value_text) - 1);
 		if (data->secondary_grid_projection_mode == MBV_PROJECTION_GEOGRAPHIC) {
-			strcat(value_text, ":t\"  Geographic\"");
+			strncat(value_text, ":t\"  Geographic\"", sizeof(value_text) - strlen(value_text) - 1);
 		}
 		else if (data->secondary_grid_projection_mode == MBV_PROJECTION_PROJECTED ||
 		         data->secondary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED) {
 			int projectionid;
 			char tmptext[MB_PATH_MAXLINE*2];
 			if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1 && projectionid == 32661) {
-				sprintf(tmptext, ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->secondary_grid_projection_id);
-				strcat(value_text, tmptext);
+				snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->secondary_grid_projection_id);
+				strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 			}
 			else if (sscanf(data->secondary_grid_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid == 32661) {
-				sprintf(tmptext, ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->secondary_grid_projection_id);
-				strcat(value_text, tmptext);
+				snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->secondary_grid_projection_id);
+				strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 			}
 			else if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1 && projectionid == 32761) {
-				sprintf(tmptext, ":t\"  Projected: %s\":t\"    South Polar Steographic\"", data->secondary_grid_projection_id);
-				strcat(value_text, tmptext);
+				snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    South Polar Steographic\"", data->secondary_grid_projection_id);
+				strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 			}
 			else if (sscanf(data->secondary_grid_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid == 32761) {
-				sprintf(tmptext, ":t\"  Projected: %s\":t\"    South Polar Steographic\"", data->secondary_grid_projection_id);
-				strcat(value_text, tmptext);
+				snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    South Polar Steographic\"", data->secondary_grid_projection_id);
+				strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 			}
 			else if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1 && projectionid >= 32600 &&
 			         projectionid < 32700) {
-				sprintf(tmptext, ":t\"  Projected: %s\":t\"    UTM Zone %d N\"", data->secondary_grid_projection_id,
+				snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    UTM Zone %d N\"", data->secondary_grid_projection_id,
 				        projectionid - 32600);
-				strcat(value_text, tmptext);
+				strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 			}
 			else if (sscanf(data->secondary_grid_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid >= 32600 &&
 			         projectionid < 32700) {
-				sprintf(tmptext, ":t\"  Projected: %s\":t\"    UTM Zone %d N\"", data->secondary_grid_projection_id,
+				snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    UTM Zone %d N\"", data->secondary_grid_projection_id,
 				        projectionid - 32600);
-				strcat(value_text, tmptext);
+				strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 			}
 			else if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1 && projectionid >= 32700 &&
 			         projectionid < 32800) {
-				sprintf(tmptext, ":t\"  Projected: %s\":t\"    UTM Zone %d S\"", data->secondary_grid_projection_id,
+				snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    UTM Zone %d S\"", data->secondary_grid_projection_id,
 				        projectionid - 32700);
-				strcat(value_text, tmptext);
+				strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 			}
 			else if (sscanf(data->secondary_grid_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid >= 32700 &&
 			         projectionid < 32800) {
-				sprintf(tmptext, ":t\"  Projected: %s\":t\"    UTM Zone %d S\"", data->secondary_grid_projection_id,
+				snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    UTM Zone %d S\"", data->secondary_grid_projection_id,
 				        projectionid - 32700);
-				strcat(value_text, tmptext);
+				strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 			}
 			else {
-				sprintf(tmptext, ":t\"  Projected: %s\"", data->secondary_grid_projection_id);
-				strcat(value_text, tmptext);
+				snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\"", data->secondary_grid_projection_id);
+				strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 			}
 		}
 		else if (data->secondary_grid_projection_mode == MBV_PROJECTION_SPHEROID) {
-			strcat(value_text, ":t\"  Spheroid\"");
+			strncat(value_text, ":t\"  Spheroid\"", sizeof(value_text) - strlen(value_text) - 1);
 		}
 	}
 
-	strcat(value_text, ":t\"Display Grid Projection:\"");
+	strncat(value_text, ":t\"Display Grid Projection:\"", sizeof(value_text) - strlen(value_text) - 1);
 	if (data->display_projection_mode == MBV_PROJECTION_GEOGRAPHIC) {
-		strcat(value_text, ":t\"  Geographic\"");
+		strncat(value_text, ":t\"  Geographic\"", sizeof(value_text) - strlen(value_text) - 1);
 	}
 	else if (data->display_projection_mode == MBV_PROJECTION_PROJECTED ||
 	         data->display_projection_mode == MBV_PROJECTION_ALREADYPROJECTED) {
@@ -3194,53 +3197,53 @@ void do_mbview_set_projection_label(size_t instance) {
 		double lat_origin;
 		char tmptext[MB_PATH_MAXLINE*2];
 		if (sscanf(data->display_projection_id, "LTM%lf/%lf", &lon_origin, &lat_origin) == 2) {
-			sprintf(tmptext, ":t\"  Projected: %s\":t\"    Local Transverse Mercator with origin %.5f %.5f\"", 
-								data->secondary_grid_projection_id, lon_origin, lat_origin);
-			strcat(value_text, tmptext);
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    Local Transverse Mercator with origin %.5f %.5f\"", 
+								data->display_projection_id, lon_origin, lat_origin);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 		}
 		else if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1 && projectionid == 32661) {
-			sprintf(tmptext, ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->secondary_grid_projection_id);
-			strcat(value_text, tmptext);
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->display_projection_id);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 		}
 		else if (sscanf(data->display_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid == 32661) {
-			sprintf(tmptext, ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->secondary_grid_projection_id);
-			strcat(value_text, tmptext);
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->display_projection_id);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 		}
 		else if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1 && projectionid == 32761) {
-			sprintf(tmptext, ":t\"  Projected: %s\":t\"    South Polar Steographic\"", data->secondary_grid_projection_id);
-			strcat(value_text, tmptext);
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    South Polar Steographic\"", data->display_projection_id);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 		}
 		else if (sscanf(data->display_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid == 32761) {
-			sprintf(tmptext, ":t\"  Projected: %s\":t\"    South Polar Steographic\"", data->secondary_grid_projection_id);
-			strcat(value_text, tmptext);
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    South Polar Steographic\"", data->display_projection_id);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 		}
 		else if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1 && projectionid >= 32600 &&
 		         projectionid < 32700) {
-			sprintf(tmptext, ":t\"  Projected: %s\":t\"    UTM Zone %d N", data->display_projection_id, projectionid - 32600);
-			strcat(value_text, tmptext);
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    UTM Zone %d N\"", data->display_projection_id, projectionid - 32600);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 		}
 		else if (sscanf(data->display_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid >= 32600 &&
 		         projectionid < 32700) {
-			sprintf(tmptext, ":t\"  Projected: %s\":t\"    UTM Zone %d N", data->display_projection_id, projectionid - 32600);
-			strcat(value_text, tmptext);
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    UTM Zone %d N\"", data->display_projection_id, projectionid - 32600);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 		}
 		else if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1 && projectionid >= 32700 &&
 		         projectionid < 32800) {
-			sprintf(tmptext, ":t\"  Projected: %s\":t\"    UTM Zone %d S\"", data->display_projection_id, projectionid - 32700);
-			strcat(value_text, tmptext);
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    UTM Zone %d S\"", data->display_projection_id, projectionid - 32700);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 		}
 		else if (sscanf(data->display_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid >= 32700 &&
 		         projectionid < 32800) {
-			sprintf(tmptext, ":t\"  Projected: %s\":t\"    UTM Zone %d S\"", data->display_projection_id, projectionid - 32700);
-			strcat(value_text, tmptext);
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    UTM Zone %d S\"", data->display_projection_id, projectionid - 32700);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 		}
 		else {
-			sprintf(tmptext, ":t\"  Projected: %s\"", data->display_projection_id);
-			strcat(value_text, tmptext);
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\"", data->display_projection_id);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
 		}
 	}
 	else if (data->display_projection_mode == MBV_PROJECTION_SPHEROID) {
-		strcat(value_text, ":t\"  Spheroid\"");
+		strncat(value_text, ":t\"  Spheroid\"", sizeof(value_text) - strlen(value_text) - 1);
 	}
 	set_mbview_label_multiline_string(view->mb3dview.mbview_label_projection, value_text);
 }
@@ -3257,7 +3260,7 @@ void do_mbview_projection_popdown(Widget w, XtPointer client_data, XtPointer cal
 	ac++;
 	XtGetValues(w, args, ac);
 
-	if (mbv_verbose >= 0)
+	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_projection_popdown: instance:%zu\n", instance);
 
 	struct mbview_world_struct *view = &(mbviews[instance]);
@@ -4972,9 +4975,39 @@ int mbview_destroy(int verbose, size_t instance, bool destroywidgets, int *error
 				shared.shareddata.routes = NULL;
 			}
 			if (status == MB_SUCCESS && shared.shareddata.nnav_alloc != 0 && shared.shareddata.navs != NULL) {
+				for (int i = 0; i < shared.shareddata.nnav_alloc; i++) {
+					if (shared.shareddata.navs[i].segments != NULL) {
+						for (int j = 0; j < shared.shareddata.navs[i].npoints_alloc; j++) {
+							if (shared.shareddata.navs[i].segments[j].lspoints != NULL)
+								mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.navs[i].segments[j].lspoints),
+								         error);
+						}
+						mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.navs[i].segments), error);
+					}
+					if (shared.shareddata.navs[i].navpts != NULL)
+						mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.navs[i].navpts), error);
+				}
 				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.navs), error);
 				shared.shareddata.nnav_alloc = 0;
 				shared.shareddata.navs = NULL;
+			}
+			if (status == MB_SUCCESS && shared.shareddata.nvector_alloc != 0 && shared.shareddata.vectors != NULL) {
+				for (int i = 0; i < shared.shareddata.nvector_alloc; i++) {
+					if (shared.shareddata.vectors[i].segments != NULL) {
+						for (int j = 0; j < shared.shareddata.vectors[i].npoints_alloc; j++) {
+							if (shared.shareddata.vectors[i].segments[j].lspoints != NULL)
+								mb_freed(mbv_verbose, __FILE__, __LINE__,
+								         (void **)&(shared.shareddata.vectors[i].segments[j].lspoints), error);
+						}
+						mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.vectors[i].segments), error);
+					}
+					if (shared.shareddata.vectors[i].vectorpts != NULL)
+						mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.vectors[i].vectorpts), error);
+				}
+				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.vectors), error);
+				shared.shareddata.nvector = 0;
+				shared.shareddata.nvector_alloc = 0;
+				shared.shareddata.vectors = NULL;
 			}
 			if (status == MB_SUCCESS && shared.shareddata.polylines != NULL) {
 				status = mbview_deleteallpolylines(mbv_verbose, instance, error);
@@ -6862,24 +6895,23 @@ void do_mbview_colorboundsapply(Widget w, XtPointer client_data, XtPointer call_
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_datamin, value_text);
 	double dvalue;
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != data->primary_colortable_min) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue != data->primary_colortable_min) {
 		data->primary_colortable_min = dvalue;
+		view->primary_histogram_set = false;
 		if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
 			change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_datamax, value_text);
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != data->primary_colortable_max) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue != data->primary_colortable_max) {
 		data->primary_colortable_max = dvalue;
+		view->primary_histogram_set = false;
 		if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
 			change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_contours, value_text);
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != data->contour_interval) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue > 0.0 && dvalue != data->contour_interval) {
 		data->contour_interval = dvalue;
 		view->contourlorez = false;
 		view->contourhirez = false;
@@ -6899,17 +6931,17 @@ void do_mbview_colorboundsapply(Widget w, XtPointer client_data, XtPointer call_
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_slopemin, value_text);
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != data->slope_colortable_min) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue != data->slope_colortable_min) {
 		data->slope_colortable_min = dvalue;
+		view->primaryslope_histogram_set = false;
 		if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
 			change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_slopemax, value_text);
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != data->slope_colortable_max) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue != data->slope_colortable_max) {
 		data->slope_colortable_max = dvalue;
+		view->primaryslope_histogram_set = false;
 		if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
 			change = true;
 	}
@@ -6922,17 +6954,17 @@ void do_mbview_colorboundsapply(Widget w, XtPointer client_data, XtPointer call_
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_overlaymin, value_text);
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != data->secondary_colortable_min) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue != data->secondary_colortable_min) {
 		data->secondary_colortable_min = dvalue;
+		view->secondary_histogram_set = false;
 		if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
 			change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_overlaymax, value_text);
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != data->secondary_colortable_max) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue != data->secondary_colortable_max) {
 		data->secondary_colortable_max = dvalue;
+		view->secondary_histogram_set = false;
 		if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
 			change = true;
 	}
@@ -6973,7 +7005,7 @@ void do_mbview_shadeparmspopup(Widget w, XtPointer client_data, XtPointer call_d
 	ac++;
 	XtGetValues(w, args, ac);
 
-	if (mbv_verbose >= 0)
+	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_shadeparmspopup: instance:%zu\n", instance);
 
 	struct mbview_world_struct *view = &(mbviews[instance]);
@@ -7059,48 +7091,42 @@ void do_mbview_shadeparmsapply(Widget w, XtPointer client_data, XtPointer call_d
 	mb_path value_text;
 	get_mbview_text_string(view->mb3dview.mbview_textField_illum_amp, value_text);
 	double dvalue;
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != data->illuminate_magnitude) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue != data->illuminate_magnitude) {
 		data->illuminate_magnitude = dvalue;
 		if (shade_mode == MBV_SHADE_VIEW_ILLUMINATION)
 			change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_illum_azi, value_text);
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != data->illuminate_azimuth) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue != data->illuminate_azimuth) {
 		data->illuminate_azimuth = dvalue;
 		if (shade_mode == MBV_SHADE_VIEW_ILLUMINATION)
 			change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_illum_elev, value_text);
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != data->illuminate_elevation) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue != data->illuminate_elevation) {
 		data->illuminate_elevation = dvalue;
 		if (shade_mode == MBV_SHADE_VIEW_ILLUMINATION)
 			change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_slope_amp, value_text);
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != data->slope_magnitude) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue != data->slope_magnitude) {
 		data->slope_magnitude = dvalue;
 		if (shade_mode == MBV_SHADE_VIEW_SLOPE)
 			change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_overlay_amp, value_text);
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != data->overlay_shade_magnitude) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue != data->overlay_shade_magnitude) {
 		data->overlay_shade_magnitude = dvalue;
 		if (shade_mode == MBV_SHADE_VIEW_OVERLAY)
 			change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_overlay_center, value_text);
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != data->overlay_shade_center) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue != data->overlay_shade_center) {
 		data->overlay_shade_center = dvalue;
 		if (shade_mode == MBV_SHADE_VIEW_OVERLAY)
 			change = true;
@@ -7231,36 +7257,31 @@ void do_mbview_3dparmsapply(Widget w, XtPointer client_data, XtPointer call_data
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_model_azimuth, value_text);
 	double dvalue;
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != data->modelazimuth3d) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue != data->modelazimuth3d) {
 		data->modelazimuth3d = dvalue;
 		change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_model_elevation, value_text);
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != data->modelelevation3d) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue != data->modelelevation3d) {
 		data->modelelevation3d = dvalue;
 		change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_view_azimuth, value_text);
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != data->viewazimuth3d) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue != data->viewazimuth3d) {
 		data->viewazimuth3d = dvalue;
 		change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_view_elevation, value_text);
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != data->viewelevation3d) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue != data->viewelevation3d) {
 		data->viewelevation3d = dvalue;
 		change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_exaggeration, value_text);
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != data->exaggeration) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue != data->exaggeration) {
 		data->exaggeration = dvalue;
 		if (data->display_projection_mode != MBV_PROJECTION_SPHEROID) {
 			view->zorigin = data->exaggeration * 0.5 * (data->primary_min + data->primary_max);
@@ -7280,29 +7301,25 @@ void do_mbview_3dparmsapply(Widget w, XtPointer client_data, XtPointer call_data
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_view_3doffsetx, value_text);
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != view->offset3d_x) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue != view->offset3d_x) {
 		view->offset3d_x = dvalue;
 		change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_view_3doffsety, value_text);
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != view->offset3d_y) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue != view->offset3d_y) {
 		view->offset3d_y = dvalue;
 		change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_model_3dzoom, value_text);
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != view->offset3d_z) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue != view->offset3d_z) {
 		view->offset3d_z = dvalue;
 		change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_view_3dzoom, value_text);
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != view->viewoffset3d_z) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue != view->viewoffset3d_z) {
 		view->viewoffset3d_z = dvalue;
 		change = true;
 	}
@@ -7415,22 +7432,19 @@ void do_mbview_2dparmsapply(Widget w, XtPointer client_data, XtPointer call_data
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_view_2doffsetx, value_text);
 	double dvalue;
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != view->offset2d_x) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue != view->offset2d_x) {
 		view->offset2d_x = dvalue;
 		change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_view_2doffsety, value_text);
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != view->offset2d_y) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue != view->offset2d_y) {
 		view->offset2d_y = dvalue;
 		change = true;
 	}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_view_2dzoom, value_text);
-	sscanf(value_text, "%lf", &dvalue);
-	if (dvalue != view->size2d) {
+	if (sscanf(value_text, "%lf", &dvalue) == 1 && dvalue != view->size2d) {
 		view->size2d = dvalue;
 		change = true;
 	}
@@ -8144,7 +8158,7 @@ void do_mbview_sitelist_popdown(Widget w, XtPointer client_data, XtPointer call_
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	if (mbv_verbose >= 0)
+	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_sitelist_popdown:\n");
 
 	shared.init_sitelist = MBV_WINDOW_NULL;
@@ -8158,7 +8172,7 @@ void do_mbview_routelist_popdown(Widget w, XtPointer client_data, XtPointer call
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	if (mbv_verbose >= 0)
+	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_routelist_popdown:\n");
 
 	shared.init_routelist = MBV_WINDOW_NULL;
@@ -8172,7 +8186,7 @@ void do_mbview_navlist_popdown(Widget w, XtPointer client_data, XtPointer call_d
 	(void)client_data;  // Unused parameter
 	(void)call_data;  // Unused parameter
 
-	if (mbv_verbose >= 0)
+	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_navlist_popdown:\n");
 
 	shared.init_navlist = MBV_WINDOW_NULL;
@@ -8296,7 +8310,7 @@ void do_mbview_profile_dismiss(Widget w, XtPointer client_data, XtPointer call_d
 	ac++;
 	XtGetValues(w, args, ac);
 
-	if (mbv_verbose >= 0)
+	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_profile_dismiss: instance:%zu\n", instance);
 
 	struct mbview_world_struct *view = &(mbviews[instance]);
@@ -8401,7 +8415,7 @@ void do_mbview_profile_resize(Widget w, XtPointer client_data, XEvent *event, Bo
 	(void)unused;  // Unused parameter
 	const size_t instance = (size_t)client_data;
 
-	if (mbv_verbose >= 0)
+	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_profile_resize: instance:%zu\n", instance);
 
 	XConfigureEvent *cevent = (XConfigureEvent *)event;
@@ -8771,7 +8785,7 @@ int do_mbview_workfunction(XtPointer client_data) {
 			int ncalc = 0;
 			for (int k = view->colordonecount; k < data->primary_nxy && ncalc < MBV_NUMBACKGROUNDCALC; k++) {
 				if (!(data->primary_stat_color[k / 8] & statmask[k % 8])) {
-					const int i = k / data->primary_n_columns;
+					const int i = k / data->primary_n_rows;
 					const int j = k % data->primary_n_rows;
 					mbview_colorpoint(view, data, histogram, i, j, k);
 					ncalc++;

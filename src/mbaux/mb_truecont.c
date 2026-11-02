@@ -102,6 +102,8 @@ int mb_contour_init(int verbose, struct swath **data, int npings_max, int beams_
 
   /* allocate memory for swath structure */
   int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct swath), (void **)data, error);
+  if (status == MB_FAILURE)
+    return (status);
   memset(*data, 0, sizeof(struct swath));
 
   /* set variables and allocate memory for bathymetry data */
@@ -110,6 +112,11 @@ int mb_contour_init(int verbose, struct swath **data, int npings_max, int beams_
   dataptr->npings_max = npings_max;
   dataptr->beams_bath = beams_bath;
   status &= mb_mallocd(verbose, __FILE__, __LINE__, npings_max * sizeof(struct ping), (void **)&(dataptr->pings), error);
+  if (status == MB_FAILURE) {
+    mb_freed(verbose, __FILE__, __LINE__, (void **)data, error);
+    *error = MB_ERROR_MEMORY_FAIL;
+    return (status);
+  }
   memset(dataptr->pings, 0, npings_max * sizeof(struct ping));
   for (int i = 0; i < npings_max; i++) {
     struct ping *ping = &dataptr->pings[i];
@@ -167,7 +174,7 @@ int mb_contour_init(int verbose, struct swath **data, int npings_max, int beams_
     status &= mb_mallocd(verbose, __FILE__, __LINE__, nlevel * sizeof(int), (void **)&(dataptr->label_list), error);
     status &= mb_mallocd(verbose, __FILE__, __LINE__, nlevel * sizeof(int), (void **)&(dataptr->tick_list), error);
     status &= mb_mallocd(verbose, __FILE__, __LINE__, nlevel * sizeof(int), (void **)&(dataptr->color_list), error);
-    for (int i = 0; i < nlevel; i++) {
+    for (int i = 0; status == MB_SUCCESS && i < nlevel; i++) {
       dataptr->level_list[i] = level_list[i];
       dataptr->label_list[i] = label_list[i];
       dataptr->tick_list[i] = tick_list[i];
@@ -274,6 +281,10 @@ int mb_contour_init(int verbose, struct swath **data, int npings_max, int beams_
   dataptr->contour_justify_string = contour_justify_string;
   dataptr->contour_plot_string = contour_plot_string;
 
+  /* successful allocations reset *error, so set it from the combined status */
+  if (status == MB_FAILURE)
+    *error = MB_ERROR_MEMORY_FAIL;
+
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -282,7 +293,7 @@ int mb_contour_init(int verbose, struct swath **data, int npings_max, int beams_
     fprintf(stderr, "dbg2       status:     %d\n", status);
   }
 
-  return (MB_SUCCESS);
+  return (status);
 }
 
 /*--------------------------------------------------------------------------*/
@@ -672,14 +683,22 @@ int mb_triangulate(int verbose, struct swath *data, int *error) {
   // allocate memory as needed
   int status = MB_SUCCESS;
   const int ntri_cnt = 3 * npt_cnt + 1;
-  if (npt_cnt > data->npts_alloc) {
-    data->npts_alloc = npt_cnt;
+  // mb_delaun() stores its three bounding-triangle vertices at x[npts..npts+2]
+  if (npt_cnt + 3 > data->npts_alloc) {
+    data->npts_alloc = npt_cnt + 3;
     status &= mb_reallocd(verbose, __FILE__, __LINE__, data->npts_alloc * sizeof(int), (void **)&data->edge, error);
     status &= mb_reallocd(verbose, __FILE__, __LINE__, data->npts_alloc * sizeof(int), (void **)&data->pingid, error);
     status &= mb_reallocd(verbose, __FILE__, __LINE__, data->npts_alloc * sizeof(int), (void **)&data->beamid, error);
     status &= mb_reallocd(verbose, __FILE__, __LINE__, data->npts_alloc * sizeof(double), (void **)&data->x, error);
     status &= mb_reallocd(verbose, __FILE__, __LINE__, data->npts_alloc * sizeof(double), (void **)&data->y, error);
     status &= mb_reallocd(verbose, __FILE__, __LINE__, data->npts_alloc * sizeof(double), (void **)&data->z, error);
+    if (status == MB_FAILURE) {
+      data->npts_alloc = 0;
+      data->npts = 0;
+      data->ntri = 0;
+      *error = MB_ERROR_MEMORY_FAIL;
+      return (MB_FAILURE);
+    }
     memset(data->edge, 0, data->npts_alloc * sizeof(int));
     memset(data->pingid, 0, data->npts_alloc * sizeof(int));
     memset(data->beamid, 0, data->npts_alloc * sizeof(int));
@@ -695,29 +714,51 @@ int mb_triangulate(int verbose, struct swath *data, int *error) {
       status &= mb_reallocd(verbose, __FILE__, __LINE__, ntri_cnt * sizeof(int), (void **)&(data->cs[i]), error);
       status &= mb_reallocd(verbose, __FILE__, __LINE__, ntri_cnt * sizeof(int), (void **)&(data->ed[i]), error);
       status &= mb_reallocd(verbose, __FILE__, __LINE__, ntri_cnt * sizeof(int), (void **)&(data->flag[i]), error);
+      if (status == MB_FAILURE)
+        break;
       memset(data->iv[i], 0, ntri_cnt * sizeof(int));
       memset(data->ct[i], 0, ntri_cnt * sizeof(int));
       memset(data->cs[i], 0, ntri_cnt * sizeof(int));
       memset(data->ed[i], 0, ntri_cnt * sizeof(int));
       memset(data->flag[i], 0, ntri_cnt * sizeof(int));
     }
+    data->nsave_alloc = (4 * ntri_cnt + 1);
+    status &= mb_reallocd(verbose, __FILE__, __LINE__, data->nsave_alloc * sizeof(double), (void **)&(data->xsave), error);
+    status &= mb_reallocd(verbose, __FILE__, __LINE__, data->nsave_alloc * sizeof(double), (void **)&(data->ysave), error);
+    if (status == MB_FAILURE) {
+      // force reallocation on the next call while keeping ntri_alloc > 0
+      // so that mb_contour_deall() still frees the surviving arrays
+      data->ntri_alloc = 1;
+      data->nsave_alloc = 0;
+      data->ntri = 0;
+      *error = MB_ERROR_MEMORY_FAIL;
+      return (MB_FAILURE);
+    }
+    memset(data->xsave, 0, data->nsave_alloc * sizeof(double));
+    memset(data->ysave, 0, data->nsave_alloc * sizeof(double));
+  }
+  // the mb_delaun() work arrays are not allocated by mb_contour_init(),
+  // so track them separately with ndelaun_alloc
+  if (ntri_cnt > data->ndelaun_alloc) {
+    data->ndelaun_alloc = ntri_cnt;
     status &= mb_reallocd(verbose, __FILE__, __LINE__, ntri_cnt * sizeof(double), (void **)&(data->v1), error);
     status &= mb_reallocd(verbose, __FILE__, __LINE__, ntri_cnt * sizeof(double), (void **)&(data->v2), error);
     status &= mb_reallocd(verbose, __FILE__, __LINE__, ntri_cnt * sizeof(double), (void **)&(data->v3), error);
     status &= mb_reallocd(verbose, __FILE__, __LINE__, ntri_cnt * sizeof(int), (void **)&(data->istack), error);
     status &= mb_reallocd(verbose, __FILE__, __LINE__, 3 * ntri_cnt * sizeof(int), (void **)&(data->kv1), error);
     status &= mb_reallocd(verbose, __FILE__, __LINE__, 3 * ntri_cnt * sizeof(int), (void **)&(data->kv2), error);
-    data->nsave_alloc = (4 * ntri_cnt + 1);
-    status &= mb_reallocd(verbose, __FILE__, __LINE__, data->nsave_alloc * sizeof(double), (void **)&(data->xsave), error);
-    status &= mb_reallocd(verbose, __FILE__, __LINE__, data->nsave_alloc * sizeof(double), (void **)&(data->ysave), error);
+    if (status == MB_FAILURE) {
+      data->ndelaun_alloc = 1;
+      data->ntri = 0;
+      *error = MB_ERROR_MEMORY_FAIL;
+      return (MB_FAILURE);
+    }
     memset(data->v1, 0, ntri_cnt * sizeof(double));
     memset(data->v2, 0, ntri_cnt * sizeof(double));
     memset(data->v3, 0, ntri_cnt * sizeof(double));
     memset(data->istack, 0, ntri_cnt * sizeof(int));
     memset(data->kv1, 0, 3 * ntri_cnt * sizeof(int));
     memset(data->kv2, 0, 3 * ntri_cnt * sizeof(int));
-    memset(data->xsave, 0, data->nsave_alloc * sizeof(double));
-    memset(data->ysave, 0, data->nsave_alloc * sizeof(double));
   }
 
   /* construct list of good soundings */
@@ -984,19 +1025,28 @@ int mb_tcontour(int verbose, struct swath *data, int *error) {
       mb_freed(verbose, __FILE__, __LINE__, (void **)&data->label_list, error);
       mb_freed(verbose, __FILE__, __LINE__, (void **)&data->tick_list, error);
     }
-    const int nci = data->bath_min / data->contour_int + 1;
-    const int ncf = data->bath_max / data->contour_int + 1;
+    const int nci = (int)floor(data->bath_min / data->contour_int) + 1;
+    const int ncf = (int)floor(data->bath_max / data->contour_int) + 1;
     data->nlevel = ncf - nci;
     status &= mb_mallocd(verbose, __FILE__, __LINE__, data->nlevel * sizeof(double), (void **)&(data->level_list), error);
     status &= mb_mallocd(verbose, __FILE__, __LINE__, data->nlevel * sizeof(int), (void **)&(data->color_list), error);
     status &= mb_mallocd(verbose, __FILE__, __LINE__, data->nlevel * sizeof(int), (void **)&(data->label_list), error);
     status &= mb_mallocd(verbose, __FILE__, __LINE__, data->nlevel * sizeof(int), (void **)&(data->tick_list), error);
-    if (*error != MB_ERROR_NO_ERROR)
+    if (status == MB_FAILURE) {
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&data->level_list, error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&data->color_list, error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&data->label_list, error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&data->tick_list, error);
+      data->nlevel = 0;
+      *error = MB_ERROR_MEMORY_FAIL;
       return (status);
+    }
     for (int i = 0; i < data->nlevel; i++) {
       const int k = nci + i;
       data->level_list[i] = k * data->contour_int;
-      data->color_list[i] = (int)(data->level_list[i] / data->color_int) % data->ncolor;
+      data->color_list[i] = (int)floor(data->level_list[i] / data->color_int) % data->ncolor;
+      if (data->color_list[i] < 0)
+        data->color_list[i] += data->ncolor;
       if (data->tick_int <= 0.0)
         data->tick_list[i] = 0;
 
@@ -1550,19 +1600,28 @@ int mb_ocontour(int verbose, struct swath *data, int *error) {
       mb_freed(verbose, __FILE__, __LINE__, (void **)&data->label_list, error);
       mb_freed(verbose, __FILE__, __LINE__, (void **)&data->tick_list, error);
     }
-    const int nci = bath_min / data->contour_int + 1;
-    const int ncf = bath_max / data->contour_int + 1;
+    const int nci = (int)floor(bath_min / data->contour_int) + 1;
+    const int ncf = (int)floor(bath_max / data->contour_int) + 1;
     data->nlevel = ncf - nci;
     status &= mb_mallocd(verbose, __FILE__, __LINE__, data->nlevel * sizeof(double), (void **)&(data->level_list), error);
     status &= mb_mallocd(verbose, __FILE__, __LINE__, data->nlevel * sizeof(int), (void **)&(data->color_list), error);
     status &= mb_mallocd(verbose, __FILE__, __LINE__, data->nlevel * sizeof(int), (void **)&(data->label_list), error);
     status &= mb_mallocd(verbose, __FILE__, __LINE__, data->nlevel * sizeof(int), (void **)&(data->tick_list), error);
-    if (*error != MB_ERROR_NO_ERROR)
+    if (status == MB_FAILURE) {
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&data->level_list, error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&data->color_list, error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&data->label_list, error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&data->tick_list, error);
+      data->nlevel = 0;
+      *error = MB_ERROR_MEMORY_FAIL;
       return (status);
+    }
     for (int i = 0; i < data->nlevel; i++) {
       const int k = nci + i;
       data->level_list[i] = k * data->contour_int;
-      data->color_list[i] = (int)(data->level_list[i] / data->color_int) % data->ncolor;
+      data->color_list[i] = (int)floor(data->level_list[i] / data->color_int) % data->ncolor;
+      if (data->color_list[i] < 0)
+        data->color_list[i] += data->ncolor;
       if (data->tick_int <= 0.0)
         data->tick_list[i] = 0;
       else {

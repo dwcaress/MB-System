@@ -286,6 +286,7 @@ int mbview_updategislist(int type) {
 	Widget list = shared.mb3d_gislist[type].mbview_list_gislist;
 	XmListDeleteAllItems(list);
 	gislist_nrow[type] = 0;
+	gislist_lastrow[type] = -1;
 
 	/* allocate the row map: at most every layer and every feature */
 	const int count = gislist_count(type);
@@ -488,6 +489,7 @@ void do_mbview_gislistselect(Widget w, XtPointer client_data, XtPointer call_dat
 	if (recolored) {
 		mbview_updategislist(type);
 		XmListSelectPos(list, row + 1, False);
+		gislist_lastrow[type] = row;
 	}
 
 	gislist_redraw();

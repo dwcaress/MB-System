@@ -219,7 +219,7 @@ int mbview_freevectorarrays(int verbose, double **veclon, double **veclat, doubl
 /*------------------------------------------------------------------------------*/
 int mbview_addvector(int verbose, size_t instance, int npoint, double *veclon, double *veclat, double *vecz, double *vecdata,
                      int veccolor, int vecsize, mb_path vecname, double vecdatamin, double vecdatamax, int *error) {
-	if (verbose >= 0) {
+	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -256,6 +256,7 @@ int mbview_addvector(int verbose, size_t instance, int npoint, double *veclon, d
 		                (void **)&(shared.shareddata.vectors), error);
 		if (status == MB_FAILURE) {
 			shared.shareddata.nvector_alloc = 0;
+			shared.shareddata.nvector = 0;
 		} else {
 			for (int i = shared.shareddata.nvector; i < shared.shareddata.nvector_alloc; i++) {
 				shared.shareddata.vectors[i].active = false;
@@ -272,18 +273,29 @@ int mbview_addvector(int verbose, size_t instance, int npoint, double *veclon, d
 	}
 
 	/* allocate memory to for vec arrays */
-	if (shared.shareddata.vectors[ivec].npoints_alloc < npoint) {
+	if (status == MB_SUCCESS && shared.shareddata.vectors[ivec].npoints_alloc < npoint) {
 		shared.shareddata.vectors[ivec].npoints_alloc = npoint;
 		status = mb_reallocd(mbv_verbose, __FILE__, __LINE__,
 		                     shared.shareddata.vectors[ivec].npoints_alloc * sizeof(struct mbview_vectorpointw_struct),
 		                     (void **)&(shared.shareddata.vectors[ivec].vectorpts), error);
-		status = mb_reallocd(mbv_verbose, __FILE__, __LINE__,
-		                     shared.shareddata.vectors[ivec].npoints_alloc * sizeof(struct mbview_linesegmentw_struct),
-		                     (void **)&(shared.shareddata.vectors[ivec].segments), error);
-		for (int j = 0; j < shared.shareddata.vectors[ivec].npoints_alloc - 1; j++) {
-			shared.shareddata.vectors[ivec].segments[j].nls = 0;
-			shared.shareddata.vectors[ivec].segments[j].nls_alloc = 0;
-			shared.shareddata.vectors[ivec].segments[j].lspoints = NULL;
+		if (status == MB_SUCCESS)
+			status = mb_reallocd(mbv_verbose, __FILE__, __LINE__,
+			                     shared.shareddata.vectors[ivec].npoints_alloc * sizeof(struct mbview_linesegmentw_struct),
+			                     (void **)&(shared.shareddata.vectors[ivec].segments), error);
+		if (status == MB_SUCCESS) {
+			for (int j = 0; j < shared.shareddata.vectors[ivec].npoints_alloc; j++) {
+				shared.shareddata.vectors[ivec].segments[j].nls = 0;
+				shared.shareddata.vectors[ivec].segments[j].nls_alloc = 0;
+				shared.shareddata.vectors[ivec].segments[j].lspoints = NULL;
+			}
+		}
+		else {
+			int error2 = MB_ERROR_NO_ERROR;
+			if (shared.shareddata.vectors[ivec].vectorpts != NULL)
+				mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.vectors[ivec].vectorpts), &error2);
+			if (shared.shareddata.vectors[ivec].segments != NULL)
+				mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.vectors[ivec].segments), &error2);
+			shared.shareddata.vectors[ivec].npoints_alloc = 0;
 		}
 	}
 

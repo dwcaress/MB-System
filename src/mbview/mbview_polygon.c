@@ -273,16 +273,15 @@ int mbview_addpolygon(int verbose, size_t instance, int npart, int *partstart, i
 	/* allocate memory for a new polygon if required */
 	if (status == MB_SUCCESS && shared.shareddata.npolygon_alloc < shared.shareddata.npolygon + 1) {
 		const int nalloc = shared.shareddata.npolygon_alloc + MBV_ALLOC_NUM;
-		status = mb_reallocd(verbose, __FILE__, __LINE__, nalloc * sizeof(struct mbview_polygon_struct),
-		                     (void **)&(shared.shareddata.polygons), error);
+		/* reallocate through a copy of the pointer so that on failure the
+		    existing features are kept rather than lost */
+		void *ptr = shared.shareddata.polygons;
+		status = mb_reallocd(verbose, __FILE__, __LINE__, nalloc * sizeof(struct mbview_polygon_struct), &ptr, error);
 		if (status == MB_SUCCESS) {
+			shared.shareddata.polygons = (struct mbview_polygon_struct *)ptr;
 			memset(&(shared.shareddata.polygons[shared.shareddata.npolygon_alloc]), 0,
 			       (nalloc - shared.shareddata.npolygon_alloc) * sizeof(struct mbview_polygon_struct));
 			shared.shareddata.npolygon_alloc = nalloc;
-		}
-		else {
-			shared.shareddata.npolygon = 0;
-			shared.shareddata.npolygon_alloc = 0;
 		}
 	}
 

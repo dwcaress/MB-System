@@ -201,14 +201,13 @@ int mbview_addgislayer(int verbose, size_t instance, int type, bool hasz, const 
 	/* allocate memory for a new layer if required */
 	if (status == MB_SUCCESS && shared.shareddata.ngislayer_alloc < shared.shareddata.ngislayer + 1) {
 		const int nalloc = shared.shareddata.ngislayer_alloc + MBV_ALLOC_NUM;
-		status = mb_reallocd(verbose, __FILE__, __LINE__, nalloc * sizeof(struct mbview_gislayer_struct),
-		                     (void **)&(shared.shareddata.gislayers), error);
+		/* reallocate through a copy of the pointer so that on failure the
+		    existing features are kept rather than lost */
+		void *ptr = shared.shareddata.gislayers;
+		status = mb_reallocd(verbose, __FILE__, __LINE__, nalloc * sizeof(struct mbview_gislayer_struct), &ptr, error);
 		if (status == MB_SUCCESS) {
+			shared.shareddata.gislayers = (struct mbview_gislayer_struct *)ptr;
 			shared.shareddata.ngislayer_alloc = nalloc;
-		}
-		else {
-			shared.shareddata.ngislayer = 0;
-			shared.shareddata.ngislayer_alloc = 0;
 		}
 	}
 
@@ -505,16 +504,15 @@ int mbview_addpolyline(int verbose, size_t instance, int npart, int *partstart, 
 	/* allocate memory for a new polyline if required */
 	if (status == MB_SUCCESS && shared.shareddata.npolyline_alloc < shared.shareddata.npolyline + 1) {
 		const int nalloc = shared.shareddata.npolyline_alloc + MBV_ALLOC_NUM;
-		status = mb_reallocd(verbose, __FILE__, __LINE__, nalloc * sizeof(struct mbview_polyline_struct),
-		                     (void **)&(shared.shareddata.polylines), error);
+		/* reallocate through a copy of the pointer so that on failure the
+		    existing features are kept rather than lost */
+		void *ptr = shared.shareddata.polylines;
+		status = mb_reallocd(verbose, __FILE__, __LINE__, nalloc * sizeof(struct mbview_polyline_struct), &ptr, error);
 		if (status == MB_SUCCESS) {
+			shared.shareddata.polylines = (struct mbview_polyline_struct *)ptr;
 			memset(&(shared.shareddata.polylines[shared.shareddata.npolyline_alloc]), 0,
 			       (nalloc - shared.shareddata.npolyline_alloc) * sizeof(struct mbview_polyline_struct));
 			shared.shareddata.npolyline_alloc = nalloc;
-		}
-		else {
-			shared.shareddata.npolyline = 0;
-			shared.shareddata.npolyline_alloc = 0;
 		}
 	}
 

@@ -303,8 +303,9 @@ void do_mbeditviz_openfile(Widget w, XtPointer client_data, XtPointer call_data)
 #endif
   /* read the mbio format number */
   mb_get_text_string(text_format, value_text, sizeof(value_text));
-  int format;
-  sscanf(value_text, "%d", &format);
+  int format = 0;
+  if (sscanf(value_text, "%d", &format) != 1)
+    format = 0;
 
   XmFileSelectionBoxCallbackStruct *acs = (XmFileSelectionBoxCallbackStruct *)call_data;
 
@@ -312,13 +313,17 @@ void do_mbeditviz_openfile(Widget w, XtPointer client_data, XtPointer call_data)
   // char *file_ptr;
   // XmStringGetLtoR(acs->value, XmSTRING_DEFAULT_CHARSET, &file_ptr);
 	char *file_ptr = (char *)XmStringUnparse(acs->value, NULL, XmCHARSET_TEXT, XmCHARSET_TEXT, NULL, 0, XmOUTPUT_ALL);
-  if (strlen(file_ptr) <= 0 && file_ptr != NULL) {
+  if (file_ptr != NULL && strlen(file_ptr) == 0) {
     XtFree(file_ptr);
     file_ptr = NULL;
   }
 
   /* open data */
-  mbev_status = do_mbeditviz_opendata(file_ptr, format);
+  if (file_ptr != NULL) {
+    mbev_status = do_mbeditviz_opendata(file_ptr, format);
+    XtFree(file_ptr);
+    file_ptr = NULL;
+  }
 
 #ifdef MBEDITVIZ_GUI_DEBUG
   fprintf(stderr, "return do_mbeditviz_openfile status:%d\n", mbev_status);
@@ -788,11 +793,12 @@ void do_mbeditviz_changecellsize(Widget w, XtPointer client_data, XtPointer call
   XtSetArg(args[ac], XmNmaximum, &iscalemax);
   ac++;
   XtGetValues(scale_cellsize, args, ac);
-  mbev_grid_cellsize = 0.001 * icellsize;
+  /* a zero cell size would make the grid dimensions infinite */
+  mbev_grid_cellsize = 0.001 * MAX(icellsize, 1);
 
-  /* reset the scale maximum */
-  if (icellsize <= 1) {
-    iscalemax /= 2;
+  /* reset the scale maximum, keeping it above the scale minimum (0) */
+  if (icellsize <= 1 && iscalemax > 2) {
+    iscalemax = MAX(iscalemax / 2, 2);
     ac = 0;
     XtSetArg(args[ac], XmNmaximum, iscalemax);
     ac++;
@@ -845,7 +851,7 @@ void do_mbeditviz_gridparameters(Widget w, XtPointer client_data, XtPointer call
   int icellsize = (int)(1000 * mbev_grid_cellsize);
   XtSetArg(args[ac], XmNvalue, icellsize);
   ac++;
-  XtSetArg(args[ac], XmNmaximum, 5 * icellsize);
+  XtSetArg(args[ac], XmNmaximum, MAX(5 * icellsize, 2));
   ac++;
   XtSetValues(scale_cellsize, args, ac);
 

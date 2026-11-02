@@ -86,9 +86,10 @@ int mb_check_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char
   }
 
   struct GMT_GRID_HEADER *header; /* GMT grid header structure pointer */
+  struct GMT_GRID_HEADER header_save; /* copy of the header, still valid after GMT_Destroy_Session() */
   mb_path projectionname = "";
-  int epsgid;
-  enum ModelType modeltype;
+  int epsgid = 0;
+  enum ModelType modeltype = ModelTypeGeographic;
 
   /* if file exists proceed */
   if (status == MB_SUCCESS) {
@@ -101,41 +102,43 @@ int mb_check_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char
     if (API == NULL) {
       fprintf(stderr, "\nUnable to initialize a GMT session with GMT_Create_Session() in function %s\n", __func__);
       fprintf(stderr, "Unable to read GMT grid file %s\n",grdfile);
-      fprintf(stderr, "Program terminated\n");
-      exit(EXIT_FAILURE);
+      *error = MB_ERROR_OPEN_FAIL;
+      status = MB_FAILURE;
     }
 
-    /* read in the grid */
-    const int MAX_GRID_READ_ATTEMPTS = 1000;
+    /* read in the grid, retrying a few times in case the file is still being written */
+    const int MAX_GRID_READ_ATTEMPTS = 10;
     int num_tries = 0;
     struct GMT_GRID *G = NULL;      /* GMT grid structure pointer */
-    while (G == NULL && num_tries < MAX_GRID_READ_ATTEMPTS) {
+    while (status == MB_SUCCESS && G == NULL && num_tries < MAX_GRID_READ_ATTEMPTS) {
       if ((G = GMT_Read_Data(API, GMT_IS_GRID, GMT_IS_FILE, GMT_IS_SURFACE, GMT_CONTAINER_ONLY, NULL, grdfile, NULL)) == NULL) {
         num_tries++;
+        fprintf(stderr,"!!-- Failed to read grid <%s> - Number of attempts: %d out of %d possible\n",
+                grdfile, num_tries, MAX_GRID_READ_ATTEMPTS);
+        if (num_tries < MAX_GRID_READ_ATTEMPTS) {
 #ifdef _WIN32
-        Sleep(1);    /* 25 milisec */
+          Sleep(100);    /* 100 millisec */
 #else
-        usleep(25000);
+          usleep(100000);  /* 100 millisec */
 #endif
-        if (num_tries > 0)
-          fprintf(stderr,"!!-- Failed to read grid <%s> - Number of attempts: %d out of %d possible\n",
-                  grdfile, num_tries, MAX_GRID_READ_ATTEMPTS);
+        }
       }
       else if (num_tries > 0) {
         fprintf(stderr, "!!-- Succeeded reading grid <%s> on attempt %d\n", grdfile, num_tries+1);
       }
     }
-    if (G == NULL) {
+    if (status == MB_SUCCESS && G == NULL) {
       fprintf(stderr, "\nUnable to read GMT grid file %s with GMT_Read_Data() after %d tries in function %s\n",
           grdfile, num_tries, __func__);
-      fprintf(stderr, "Program terminated\n");
-      exit(EXIT_FAILURE);
+      *error = MB_ERROR_OPEN_FAIL;
+      status = MB_FAILURE;
     }
 
     /* proceed if ok */
     if (status == MB_SUCCESS) {
       /* try to get projection from the grd file remark */
-      header = G->header;
+      header_save = *(G->header);
+      header = &header_save;
       if (strncmp(&(header->remark[2]), "Projection: ", 12) == 0) {
         int nscan;
         int utmzone;
@@ -201,11 +204,11 @@ int mb_check_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char
     }
 
     /* Destroy GMT session */
-    if (GMT_Destroy_Session(API) != 0) {
+    if (API != NULL && GMT_Destroy_Session(API) != 0) {
       fprintf(stderr, "\nUnable to destroy a GMT session with GMT_Destroy_Session() in function %s\n", __func__);
       fprintf(stderr, "Unable to read GMT grid file %s\n",grdfile);
-      fprintf(stderr, "Program terminated\n");
-      exit(EXIT_FAILURE);
+      *error = MB_ERROR_OPEN_FAIL;
+      status = MB_FAILURE;
     }
   }
 
@@ -310,9 +313,10 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
   }
 
   struct GMT_GRID_HEADER *header; /* GMT grid header structure pointer */
+  struct GMT_GRID_HEADER header_save; /* copy of the header, still valid after GMT_Destroy_Session() */
   mb_path projectionname = "";
-  int epsgid;
-  enum ModelType modeltype;
+  int epsgid = 0;
+  enum ModelType modeltype = ModelTypeGeographic;
 
   /* if file exists proceed */
   if (status == MB_SUCCESS) {
@@ -327,41 +331,43 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
     if (API == NULL) {
       fprintf(stderr, "\nUnable to initialize a GMT session with GMT_Create_Session() in function %s\n", __func__);
       fprintf(stderr, "Unable to read GMT grid file %s\n",grdfile);
-      fprintf(stderr, "Program terminated\n");
-      exit(EXIT_FAILURE);
+      *error = MB_ERROR_OPEN_FAIL;
+      status = MB_FAILURE;
     }
 
-    /* read in the grid */
-    const int MAX_GRID_READ_ATTEMPTS = 1000;
+    /* read in the grid, retrying a few times in case the file is still being written */
+    const int MAX_GRID_READ_ATTEMPTS = 10;
     int num_tries = 0;
     struct GMT_GRID *G = NULL;      /* GMT grid structure pointer */
-    while (G == NULL && num_tries < MAX_GRID_READ_ATTEMPTS) {
+    while (status == MB_SUCCESS && G == NULL && num_tries < MAX_GRID_READ_ATTEMPTS) {
       if ((G = GMT_Read_Data(API, GMT_IS_GRID, GMT_IS_FILE, GMT_IS_SURFACE, GMT_CONTAINER_AND_DATA, NULL, grdfile, NULL)) == NULL) {
         num_tries++;
+        fprintf(stderr,"!!-- Failed to read grid <%s> - Number of attempts: %d out of %d possible\n",
+                grdfile, num_tries, MAX_GRID_READ_ATTEMPTS);
+        if (num_tries < MAX_GRID_READ_ATTEMPTS) {
 #ifdef _WIN32
-        Sleep(1);    /* 25 milisec */
+          Sleep(100);    /* 100 millisec */
 #else
-        usleep(25000);
+          usleep(100000);  /* 100 millisec */
 #endif
-        if (num_tries > 0)
-          fprintf(stderr,"!!-- Failed to read grid <%s> - Number of attempts: %d out of %d possible\n",
-                  grdfile, num_tries, MAX_GRID_READ_ATTEMPTS);
+        }
       }
       else if (num_tries > 0) {
         fprintf(stderr, "!!-- Succeeded reading grid <%s> on attempt %d\n", grdfile, num_tries+1);
       }
     }
-    if (G == NULL) {
+    if (status == MB_SUCCESS && G == NULL) {
       fprintf(stderr, "\nUnable to read GMT grid file %s with GMT_Read_Data() after %d tries in function %s\n",
           grdfile, num_tries, __func__);
-      fprintf(stderr, "Program terminated\n");
-      exit(EXIT_FAILURE);
+      *error = MB_ERROR_OPEN_FAIL;
+      status = MB_FAILURE;
     }
 
     /* proceed if ok */
     if (status == MB_SUCCESS) {
       /* try to get projection from the grd file remark */
-      header = G->header;
+      header_save = *(G->header);
+      header = &header_save;
       if (strncmp(&(header->remark[2]), "Projection: ", 12) == 0) {
         int nscan;
         int utmzone;
@@ -463,7 +469,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
         double mtodeglat;
         mb_coor_scale(verbose, 0.5 * (*ymin + *ymax), &mtodeglon, &mtodeglat);
         ddx /= mtodeglon;
-        ddy /= mtodeglon;
+        ddy /= mtodeglat;
       }
       for (int i = 0; i < *n_columns; i++)
         for (int j = 0; j < *n_rows; j++) {
@@ -490,7 +496,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 
           int ky0;
           if (j > 0) {
-            ky0 = i * (*n_rows) + j + 1;
+            ky0 = i * (*n_rows) + j - 1;
             jj++;
           } else {
             ky0 = k;
@@ -498,7 +504,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 
           int ky2;
           if (j < *n_rows - 1) {
-            ky2 = i * (*n_rows) + j - 1;
+            ky2 = i * (*n_rows) + j + 1;
             jj++;
           } else {
             ky2 = k;
@@ -512,11 +518,18 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
     }
 
     /* Destroy GMT session */
-    if (GMT_Destroy_Session(API) != 0) {
+    if (API != NULL && GMT_Destroy_Session(API) != 0) {
       fprintf(stderr, "\nUnable to destroy a GMT session with GMT_Destroy_Session() in function %s\n", __func__);
       fprintf(stderr, "Unable to read GMT grid file %s\n",grdfile);
-      fprintf(stderr, "Program terminated\n");
-      exit(EXIT_FAILURE);
+      if (status == MB_SUCCESS) {
+        mb_freed(verbose, __FILE__, __LINE__, (void **)data, error);
+        if (data_dzdx != NULL)
+          mb_freed(verbose, __FILE__, __LINE__, (void **)data_dzdx, error);
+        if (data_dzdy != NULL)
+          mb_freed(verbose, __FILE__, __LINE__, (void **)data_dzdy, error);
+      }
+      *error = MB_ERROR_OPEN_FAIL;
+      status = MB_FAILURE;
     }
   }
 
@@ -678,8 +691,22 @@ int mb_write_gmt_grd(int verbose, const char *grdfile, float *grid,
   /* create structure for the grid */
   struct GMT_GRID *G = GMT_Create_Data(API, GMT_IS_GRID, GMT_IS_SURFACE, GMT_GRID_ALL, NULL, wesn, inc, registration, pad, NULL);
   if (G == NULL) {
+    fprintf(stderr, "\nUnable to create a GMT grid with GMT_Create_Data() in function %s\n", __func__);
+    fprintf(stderr, "Unable to write GMT grid file %s\n",grdfile);
+    GMT_Destroy_Session(API);
     status = MB_FAILURE;
     *error = MB_ERROR_MEMORY_FAIL;
+    return (status);
+  }
+
+  /* make sure the GMT grid can hold the n_columns x n_rows values copied into it */
+  if ((size_t)n_columns * (size_t)n_rows > G->header->nm) {
+    fprintf(stderr, "\nGMT grid dimensions %u x %u from the bounds and increments are smaller than the %d x %d grid in function %s\n",
+            G->header->n_columns, G->header->n_rows, n_columns, n_rows, __func__);
+    fprintf(stderr, "Unable to write GMT grid file %s\n",grdfile);
+    GMT_Destroy_Session(API);
+    status = MB_FAILURE;
+    *error = MB_ERROR_BAD_PARAMETER;
     return (status);
   }
 

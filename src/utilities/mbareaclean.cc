@@ -1231,8 +1231,10 @@ int main(int argc, char **argv) {
 
 	/* loop over files checking for changed soundings */
 	for (int i = 0; i < nfile; i++) {
-		/* open esf file */
-		status = mb_esf_load(verbose, (char *)program_name, files[i].filelist, false, true, esffile, &esf, &error);
+		/* open esf file for appending, so that the existing edits are kept;
+		    rewriting it would drop the edits of all soundings that are not
+		    stored in the grid (e.g. outside the area bounds) */
+		status = mb_esf_load(verbose, (char *)program_name, files[i].filelist, false, MBP_ESF_APPEND, esffile, &esf, &error);
 		bool esffile_open = false;
 		if (status == MB_SUCCESS && esf.esffp != nullptr)
 			esffile_open = true;
@@ -1242,10 +1244,11 @@ int main(int argc, char **argv) {
 		}
 		// TODO(schwehr): What about status == MB_FAILURE && error != MB_ERROR_OPEN_FAIL?
 
-		/* loop over all of the soundings */
+		/* loop over all of the soundings, saving only the flags changed by
+		    this program (relative to the state after applying the old edits) */
 		for (int j = 0; j < files[i].nsndg; j++) {
 			sndg = &(files[i].sndg[j]);
-			if (sndg->sndg_beamflag != sndg->sndg_beamflag_org) {
+			if (sndg->sndg_beamflag != sndg->sndg_beamflag_esf) {
 				int action = 0;
 				if (mb_beam_ok(sndg->sndg_beamflag)) {
 					action = MBP_EDIT_UNFLAG;
