@@ -1373,12 +1373,65 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 			}
 		}
 
+		/* the logged bathymetry and heading already include the array and motion
+		    sensor offsets of the installation datagram, so only the difference
+		    between the platform file and these embedded offsets is applied below -
+		    the embedded offsets are taken relative to the motion sensor in the same
+		    way as the platform offsets, and an unchanged platform file (for example
+		    one written by mbmakeplatform from the same data) changes nothing */
+		double d_tx_h_p = 0.0, d_tx_r_p = 0.0, d_tx_p_p = 0.0;
+		double d_rx_h_p = 0.0, d_rx_r_p = 0.0, d_rx_p_p = 0.0;
+		if (platform != NULL) {
+			double tx_h_e = 0.0, tx_r_e = 0.0, tx_p_e = 0.0;
+			double rx_h_e = 0.0, rx_r_e = 0.0, rx_p_e = 0.0;
+			void *platform_e = NULL;
+			int kind_e = store->kind;
+			int error_e = MB_ERROR_NO_ERROR;
+			if (mbsys_simrad3_extract_platform(verbose, mbio_ptr, store_ptr, &kind_e, &platform_e, &error_e) == MB_SUCCESS
+			    && platform_e != NULL) {
+				const int target_e = ((struct mb_platform_struct *)platform_e)->source_bathymetry;
+				mb_platform_orientation_offset(verbose, platform_e, target_e, 0, &tx_h_e, &tx_r_e, &tx_p_e, &error_e);
+				mb_platform_orientation_offset(verbose, platform_e, target_e, 1, &rx_h_e, &rx_r_e, &rx_p_e, &error_e);
+			}
+			if (platform_e != NULL)
+				mb_platform_deall(verbose, &platform_e, &error_e);
+
+			/* treat the embedded mount headings like tx_h_p and rx_h_p above */
+			if (tx_h_e > 180.0)
+				tx_h_e -= 360.0;
+			else if (tx_h_e < -180.0)
+				tx_h_e += 360.0;
+			if (tx_h_e > 100.0 || tx_h_e < -100.0)
+				tx_h_e -= 180.0;
+			if (rx_h_e > 180.0)
+				rx_h_e -= 360.0;
+			else if (rx_h_e < -180.0)
+				rx_h_e += 360.0;
+			if (rx_h_e > 100.0 || rx_h_e < -100.0)
+				rx_h_e -= 180.0;
+
+			d_tx_h_p = tx_h_p - tx_h_e;
+			if (d_tx_h_p > 180.0)
+				d_tx_h_p -= 360.0;
+			else if (d_tx_h_p < -180.0)
+				d_tx_h_p += 360.0;
+			d_rx_h_p = rx_h_p - rx_h_e;
+			if (d_rx_h_p > 180.0)
+				d_rx_h_p -= 360.0;
+			else if (d_rx_h_p < -180.0)
+				d_rx_h_p += 360.0;
+			d_tx_r_p = tx_r_p - tx_r_e;
+			d_tx_p_p = tx_p_p - tx_p_e;
+			d_rx_r_p = rx_r_p - rx_r_e;
+			d_rx_p_p = rx_p_p - rx_p_e;
+		}
+
 		/* insert navigation */
 		ping->png_longitude = 10000000 * navlon;
 		ping->png_latitude = 20000000 * navlat;
 
 		/* insert heading */
-		heading += tx_h_p;
+		heading += d_tx_h_p;
 		if (heading < 0.0)
 			heading += 360.0;
 		else if (heading > 360.0)
@@ -1386,8 +1439,8 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		ping->png_heading = (int)rint(heading * 100);
 
 		/* insert roll pitch and heave */
-		roll += rx_r_p;
-		pitch += rx_p_p;
+		roll += d_rx_r_p;
+		pitch += d_rx_p_p;
 		ping->png_roll = (int)rint(roll / 0.01);
 		ping->png_pitch = (int)rint(pitch / 0.01);
 		ping->png_heave = (int)rint(heave / 0.01);
@@ -1529,18 +1582,17 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 			/* else use platform file alignment to calculate beam takeoff
 			   angles and also apply rotations to calculated bathymetry */
 			else {
-				tx_align.roll = tx_r_p;
-				tx_align.pitch = tx_p_p;
-				tx_align.heading = tx_h_p;
+				/* embedded array alignment changed by the difference between the
+				   platform file and the embedded offsets, as for the bathymetry,
+				   with the mount direction taken from the platform file */
+				tx_align.roll = tx_sign_p * (tx_r + d_tx_r_p);
+				tx_align.pitch = tx_sign_p * (tx_p + d_tx_p_p);
+				tx_align.heading = (tx_sign_p < 0 ? tx_h - 180.0 : tx_h) + d_tx_h_p;
 				tx_steer = tx_sign_p * 0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]];
-				rx_align.roll = rx_r;
-				rx_align.pitch = rx_p;
-				rx_align.heading = rx_h;
-				rx_steer = tx_sign_p * 0.01 * (double)ping->png_raw_rxpointangle[i];
-				
-				/* implied beam rotations */
-				double d_tx_r_p = tx_r_p - tx_r;
-				double d_tx_p_p = tx_p_p - tx_p;
+				rx_align.roll = rx_sign_p * (rx_r + d_rx_r_p);
+				rx_align.pitch = rx_sign_p * (rx_p + d_rx_p_p);
+				rx_align.heading = (rx_sign_p < 0 ? rx_h - 180.0 : rx_h) + d_rx_h_p;
+				rx_steer = rx_sign_p * 0.01 * (double)ping->png_raw_rxpointangle[i];
 
 				/* get range and angles in
 					roll-pitch frame */
