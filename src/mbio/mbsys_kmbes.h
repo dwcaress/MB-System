@@ -1672,6 +1672,8 @@ struct mbsys_kmbes_index
 struct mbsys_kmbes_index_table {
     size_t dgm_count;                       // count of indexed datagrams (dgmID)
     size_t num_alloc;                       // allocated capacity
+    size_t num_mrz;                         // count of indexed #MRZ datagrams (0 for a water column
+                                            // only file, e.g. *.kmwcd)
     struct mbsys_kmbes_index *indextable;   // points to index table array head
 };
 
@@ -1771,6 +1773,8 @@ struct mbsys_kmbes_struct {
     /* #MWC - Multibeam Water Column data */
     int n_mwc_read;
     int n_mwc_needed;  // Number of MWC datagrams for the current ping = mrz[mrz.cmnPart.rxFanIndex].cmnPart.rxFansPerPing
+    unsigned short mwc_pingCnt; // Ping counter of the most recently read MWC datagram (the current ping) -
+                                // mwc[] slots with another pingCnt (or rxFansPerPing == 0) are not part of it
     struct mbsys_kmbes_mwc mwc[MBSYS_KMBES_MAX_NUM_MWC_DGMS];
     
     /* #MSC = Multibeam MSC unknown datagram */
@@ -1930,6 +1934,13 @@ int mbsys_kmbes_gains(int verbose, void *mbio_ptr, void *store_ptr,
 //			double *sensor1, double *sensor2, double *sensor3,
 //			double *sensor4, double *sensor5, double *sensor6,
 //			double *sensor7, double *sensor8, int *error);
+int mbsys_kmbes_extract_wcdimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams,
+                                     int *nsamples_max, int *error);
+int mbsys_kmbes_extract_wc(int verbose, void *mbio_ptr, void *store_ptr, int nbeams_alloc, int nsamples_alloc,
+                           int *kind, int time_i[7], double *time_d, int *nbeams, int *nsamples_max,
+                           int *swath, double *angle_across, double *angle_along, double *sample_interval,
+                           double *soundspeed, int *start_sample, int *nsamples, double *detect_sample,
+                           float *amplitude, int *error);
 int mbsys_kmbes_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error);
