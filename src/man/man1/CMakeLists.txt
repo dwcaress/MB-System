@@ -129,7 +129,12 @@ if(buildOpenCV)
         mbphotomosaic.1)
 endif()
 
-install(FILES ${manpages} ${deprecated} ${trn} ${photo} DESTINATION ${CMAKE_INSTALL_MANPAGES}/man1)
+if(buildVelocityToolQt)
+    set(velocitytoolqt
+        mbvelocitytool-qt.1)
+endif()
+
+install(FILES ${manpages} ${deprecated} ${trn} ${photo} ${velocitytoolqt} DESTINATION ${CMAKE_INSTALL_MANPAGES}/man1)
 
 message(STATUS "Installed man pages to ${CMAKE_INSTALL_MANPAGES}/man1")
 
