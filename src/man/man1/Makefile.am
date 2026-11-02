@@ -48,6 +48,7 @@ man_MANS =  \
 	mbgrdviz.1 \
 	mbgrid.1 \
 	mbhistogram.1 \
+	mbhistory.1 \
 	mbinfo.1 \
 	mblevitus.1 \
 	mblist.1 \

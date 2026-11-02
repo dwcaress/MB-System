@@ -19,6 +19,7 @@ set(tests
     mbgpstide_test
     mbgrid_test
     mbhistogram_test
+    mbhistory_test
     mbinfo_test
     mblevitus_test
     mblist_test
