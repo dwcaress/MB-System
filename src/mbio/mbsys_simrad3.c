@@ -1328,11 +1328,13 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 			rx_p = store->par_s3p;
 		}
 		
-		/* transmit and receive array offsets from platform file */
-		double tx_x_p, tx_y_p, tx_z_p;
-		double tx_h_p, tx_r_p, tx_p_p;
-		double rx_x_p, rx_y_p, rx_z_p;
-		double rx_h_p, rx_r_p, rx_p_p;
+		/* transmit and receive array offsets from platform file - zero if there
+		    is no platform model, because the heading, roll and pitch below are
+		    corrected by these offsets whether or not a platform is given */
+		double tx_x_p = 0.0, tx_y_p = 0.0, tx_z_p = 0.0;
+		double tx_h_p = 0.0, tx_r_p = 0.0, tx_p_p = 0.0;
+		double rx_x_p = 0.0, rx_y_p = 0.0, rx_z_p = 0.0;
+		double rx_h_p = 0.0, rx_r_p = 0.0, rx_p_p = 0.0;
 		int tx_sign_p = 1.0;
 		int rx_sign_p = 1.0;
 		if (platform != NULL) {
