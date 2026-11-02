@@ -24,6 +24,7 @@ mbgetesf(1)              - Extract swath bathymetry data flags into an edit save
 mbgrdtiff(1)             - generates a geographically located TIFF image from a GMT grid file
 mbgrid(1)                - Grid bathymetry, amplitude, or sidescan data from swath sonar data files
 mbhistogram(1)           - Generate a histogram of bathymetry, amplitude, or sidescan values from swath sonar data files
+mbhistory(1)             - List, compare, tag, prune and restore versions of edit save files
 mbhysweeppreprocess(1)   - performs preprocessing of multibeam data in the Hysweep HSX format (MBIO format 201)
 mbinfo(1)                - Output some basic statistics of swath sonar data files
 mbio(3)                  - Format independent input/output library for swath mapping sonar data

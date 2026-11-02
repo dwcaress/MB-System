@@ -6,7 +6,7 @@ if (NOT GDAL_FOUND)
   find_package(GDAL REQUIRED)
 endif (NOT GDAL_FOUND)
 
-set(tests mb_gisfile_test)
+set(tests mb_cube_test mb_gisfile_test)
 
 foreach(test ${tests})
   add_executable(${test} ${test}.cc)

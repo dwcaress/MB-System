@@ -1,0 +1,194 @@
+.TH mbhistory 1 "25 October 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbhistory\fP \- List, compare, tag, prune and restore the versions of edit save files.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbhistory\fP \fB\-\-input=\fP\fIfile\fP {\fB\-I\fP\fIfile\fP}
+[\fB\-\-list\fP \fB\-\-show=\fP\fIversion\fP \fB\-\-diff=\fP\fIversion\fP[\fB:\fP\fIversion\fP]
+\fB\-\-restore=\fP\fIversion\fP \fB\-\-restore\-tag=\fP\fIname\fP
+\fB\-\-restore\-date=\fP\fIyyyy\-mm\-dd\fP[\fBT\fP\fIhh:mm\fP[\fB:\fP\fIss\fP]]
+\fB\-\-tag=\fP\fIname\fP \fB\-\-prune\fP \fB\-\-keep=\fP\fInumber\fP \fB\-\-older\-than=\fP\fIdays\fP
+\fB\-\-dry\-run\fP \fB\-\-yes\fP \fB\-\-force\fP \fB\-\-process\fP
+\fB\-\-verbose\fP \fB\-\-help\fP]
+
+.SH DESCRIPTION
+In \fBMB-System\fP, bathymetry edits made with \fBmbedit\fP, \fBmbeditviz\fP,
+\fBmbclean\fP, \fBmbareaclean\fP and other programs are stored in binary
+"edit save files" (file suffix ".esf"). Before any of these programs rewrites
+or appends to an existing esf file, the MBIO library saves a copy of it
+(a snapshot) in a directory named \fBmbhistory\fP in the same directory as
+the esf file (normally the directory of the swath file). The program \fBmbhistory\fP lists these versions, compares
+them, labels them with tags, removes old ones, and restores an earlier
+version, so that edits can be reverted to a previous state of a single
+file or of a whole survey.
+
+Each snapshot is named after the esf file, followed by a version number and
+the UTC date and time at which it was saved:
+.br
+ 	mbhistory/0001_20261020.mb88.esf.v0003_20261021T091530
+.br
+Each esf file also has a text manifest (for example
+mbhistory/0001_20261020.mb88.esf.manifest) with one line per version giving
+the version number, date, the program that was about to modify the file,
+user, host, size, CRC-32 checksum, snapshot name and an optional note.
+Tags are stored in mbhistory/tags.txt. A snapshot holds the state of the
+edits at the time it was saved, just before the named program changed them.
+The current esf file is always the newest state and is called \fBnow\fP.
+A program run that reopens the same esf file several times saves at most one
+snapshot of it, and no snapshot is saved if the file is unchanged since the
+newest one. Every rewrite of an esf file updates the program, user, cpu and
+date lines of its header, so a rewrite that leaves the edits and the ESF mode
+unchanged also counts as unchanged.
+
+When a program creates a new esf file, the empty file (no edits) is saved as
+the first version with the note "created", so the history also shows when
+editing of the swath file began. Esf files created before this was done have
+no such version; their history starts with the first rewrite.
+
+Restoring never deletes versions. Before a version is restored, the current
+esf file is saved as a new version with the note "restore (vN \-> vM)", where
+vN is that new version and vM the restored one, so a restore can itself be
+undone. Only \fB\-\-prune\fP removes versions, and it keeps tagged versions
+unless \fB\-\-force\fP is given. After a restore the processed swath file is
+out of date: run \fBmbprocess\fP, or use \fB\-\-process\fP.
+
+The input may be a single swath file or a datalist. With a datalist each
+command is applied to every swath file in it; for example
+\fB\-\-restore\-date\fP returns every file to the state it had at that
+time, and files that were not changed since are left alone.
+
+Snapshots are not saved if the environment variable \fBMB_HISTORY\fP is set
+to "off" or "0".
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian dos Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH MBHISTORY OPTIONS
+.TP
+\fB\-\-input=\fP\fIfile\fP \fB\-I\fP\fIfile\fP
+Swath file or datalist whose edit save file versions are handled. The esf
+file of a swath file is the one named in its mbprocess parameter file, or
+otherwise the swath file name followed by ".esf".
+.TP
+\fB\-\-list\fP
+Lists the versions with their date, the program that was about to modify
+the file, the user, the number of edit events, tags and notes, followed by
+the current file. This is the default.
+.TP
+\fB\-\-show=\fP\fIversion\fP
+Shows the details of one version (a number, or \fBnow\fP for the current
+file), including the counts of each edit action and the header stored in the
+esf file.
+.TP
+\fB\-\-diff=\fP\fIversion\fP[\fB:\fP\fIversion\fP]
+Compares the final edit of every beam between two versions (the second one
+defaults to \fBnow\fP) and reports how many beams are now flagged, now
+unflagged, have a different flag type or no longer have an edit, and the
+pings affected. With \fB\-\-verbose\fP every changed beam is listed.
+.TP
+\fB\-\-restore=\fP\fIversion\fP
+Restores the given version as the current esf file.
+.TP
+\fB\-\-restore\-tag=\fP\fIname\fP
+Restores the version that carries the tag \fIname\fP.
+.TP
+\fB\-\-restore\-date=\fP\fIyyyy\-mm\-dd\fP[\fBT\fP\fIhh:mm\fP[\fB:\fP\fIss\fP]]
+Restores the edits as they were at the given UTC date and time, which is the
+first version saved at or after that time; if no version was saved since,
+the current file is already in that state and nothing is changed. A date
+without a time means the end of that day. A date before the "created"
+version restores an esf file with no edits. If the oldest version of a file
+is not a "created" version and the date is before it, the edits made before
+that version were not recorded: the oldest version is restored and a warning
+is printed.
+.TP
+\fB\-\-tag=\fP\fIname\fP
+Labels the current state with the one-word tag \fIname\fP. A snapshot is
+saved if the current file differs from the newest version. An existing tag
+of the same name is moved only with \fB\-\-force\fP.
+.TP
+\fB\-\-prune\fP
+Removes old versions selected with \fB\-\-keep\fP and/or
+\fB\-\-older\-than\fP (a version is removed only if all given conditions
+select it). Tagged versions are kept unless \fB\-\-force\fP is given.
+.TP
+\fB\-\-keep=\fP\fInumber\fP
+With \fB\-\-prune\fP, keeps the newest \fInumber\fP versions.
+.TP
+\fB\-\-older\-than=\fP\fIdays\fP
+With \fB\-\-prune\fP, removes only versions older than \fIdays\fP days.
+.TP
+\fB\-\-dry\-run\fP
+Shows what a restore or prune would do without changing anything.
+.TP
+\fB\-\-yes\fP
+Restores and prunes change files only when \fB\-\-yes\fP is given;
+without it they run as a dry run.
+.TP
+\fB\-\-force\fP
+Allows \fB\-\-prune\fP to remove tagged versions and \fB\-\-tag\fP to
+move an existing tag.
+.TP
+\fB\-\-process\fP
+Runs \fBmbprocess\fP \fB\-\-force\fP on each restored swath file, so that
+the processed file is regenerated even if its time stamp looks up to date.
+.TP
+\fB\-\-verbose\fP \fB\-V\fP
+Increases the amount of output; with \fB\-\-diff\fP and restores, every
+changed beam is listed.
+.TP
+\fB\-\-help\fP \fB\-H\fP
+This "help" flag causes the program to print out a description
+of its operation and then exit immediately.
+
+.SH EXAMPLES
+To list the versions of the edits of one swath file:
+.br
+ 	mbhistory \-I 0001_20261020.mb88
+.br
+To see what changed between version 2 and the current edits:
+.br
+ 	mbhistory \-I 0001_20261020.mb88 \-\-diff=2
+.br
+To return every file of a survey to the state of 21 October 2026 at
+12:00 UTC, first as a dry run and then for real, reprocessing the files:
+.br
+ 	mbhistory \-I datalist.mb\-1 \-\-restore\-date=2026\-10\-21T12:00
+.br
+ 	mbhistory \-I datalist.mb\-1 \-\-restore\-date=2026\-10\-21T12:00 \-\-yes \-\-process
+.br
+To tag the current edits of a survey before a risky operation, and to
+return to them later:
+.br
+ 	mbhistory \-I datalist.mb\-1 \-\-tag=before\-areaclean
+.br
+ 	mbhistory \-I datalist.mb\-1 \-\-restore\-tag=before\-areaclean \-\-yes
+.br
+To keep only the 20 newest versions of each file:
+.br
+ 	mbhistory \-I datalist.mb\-1 \-\-prune \-\-keep=20 \-\-yes
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbedit\fP(1), \fBmbeditviz\fP(1), \fBmbclean\fP(1),
+\fBmbareaclean\fP(1), \fBmbprocess\fP(1), \fBmbdumpesf\fP(1)
+
+.SH BUGS
+Versions are matched to swath files by file name, so renaming a swath file
+detaches it from its history.

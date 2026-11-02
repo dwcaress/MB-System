@@ -47,6 +47,7 @@ set(executables
     mbgpstide
     mbgrid
     mbhistogram
+    mbhistory
     mbinfo
     mblist
     mbnavlab2fnv

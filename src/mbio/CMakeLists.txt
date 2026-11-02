@@ -50,6 +50,7 @@ set(SRC
     mb_get.c
     mb_get_all.c
     mb_get_value.c
+    mb_history.c
     mb_mem.c
     mb_navint.c
     mb_platform.c

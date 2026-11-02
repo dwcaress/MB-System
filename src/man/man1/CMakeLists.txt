@@ -28,6 +28,7 @@ set(manpages
     mbgrdviz.1
     mbgrid.1
     mbhistogram.1
+    mbhistory.1
     mbimagelist.1
     mbinfo.1
     mbnavlab2fnv.1

@@ -65,6 +65,9 @@ check_SCRIPTS += mbgrid_test.py
 TESTS += mbhistogram_test.py
 check_SCRIPTS += mbhistogram_test.py
 
+TESTS += mbhistory_test.py
+check_SCRIPTS += mbhistory_test.py
+
 TESTS += mbinfo_test.py
 check_SCRIPTS += mbinfo_test.py
 

@@ -354,9 +354,29 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, bool load,
 		/* check if esf file exists */
 		bool header = true;
 		fstat = stat(esffile, &file_status);
-		if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-			/* copy old edit save file to tmp file - if the backup copy
-			    fails do not open (and so truncate) the existing esf file */
+		const bool esf_exists = (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR);
+
+		/* history snapshots are made unless the environment variable
+		    MB_HISTORY is set to "off" or "0" (see mb_history.c) */
+		const char *history_env = getenv(MB_HISTORY_ENV);
+		const bool history_on = (history_env == NULL || (strcmp(history_env, "off") != 0 && strcmp(history_env, "0") != 0));
+
+		if (esf_exists) {
+			/* save a snapshot of the existing edit save file in its history
+			    directory before it is rewritten or appended to */
+			if (history_on) {
+				int history_version = 0;
+				int history_error = MB_ERROR_NO_ERROR;
+				if (mb_history_snapshot(verbose, esffile, program_name, NULL, MB_HISTORY_MODE_ONCE, &history_version,
+				                        &history_error) != MB_SUCCESS) {
+					fprintf(stderr, "\nWarning: unable to save a history snapshot of edit save file %s\n", esffile);
+				}
+				else if (verbose > 0 && history_version > 0) {
+					fprintf(stderr, "Edit save file %s is kept as history version %d\n", esffile, history_version);
+				}
+			}
+
+			/* copy old edit save file to tmp file */
 			if (load) {
 				snprintf(backupfile, sizeof(backupfile), "%s.tmp", esffile);
 				if (mb_esf_copyfile(esffile, backupfile) != 0) {
@@ -415,6 +435,21 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, bool load,
 			else if (fwrite(esf_header, MB_PATH_MAXLINE, 1, esf->essfp) != 1) {
 				status = MB_FAILURE;
 				*error = MB_ERROR_WRITE_FAIL;
+			}
+		}
+
+		/* a new edit save file holds no edits yet: save it as the first history
+		    version so that the history also records when the file was created */
+		if (status == MB_SUCCESS && !esf_exists && history_on) {
+			fflush(esf->esffp);
+			int history_version = 0;
+			int history_error = MB_ERROR_NO_ERROR;
+			if (mb_history_snapshot(verbose, esffile, program_name, MB_HISTORY_NOTE_CREATED, MB_HISTORY_MODE_ONCE,
+			                        &history_version, &history_error) != MB_SUCCESS) {
+				fprintf(stderr, "\nWarning: unable to save a history snapshot of edit save file %s\n", esffile);
+			}
+			else if (verbose > 0 && history_version > 0) {
+				fprintf(stderr, "Edit save file %s is new and kept as history version %d\n", esffile, history_version);
 			}
 		}
 	}

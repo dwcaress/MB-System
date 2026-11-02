@@ -775,11 +775,20 @@ int mb_write_gmt_grd(int verbose, const char *grdfile, float *grid,
   mb_path program_name = "";
   if (argc > 0)
     snprintf(program_name, sizeof(program_name), "%s", argv[0]);
+
+  /* use only the program basename in the remark so it fits in GMT_GRID_REMARK_LEN160 */
+  const char *program_basename = strrchr(program_name, '/');
+#ifdef _WIN32
+  const char *program_basename_bs = strrchr(program_name, '\\');
+  if (program_basename_bs != NULL && (program_basename == NULL || program_basename_bs > program_basename))
+    program_basename = program_basename_bs;
+#endif
+  program_basename = (program_basename != NULL) ? program_basename + 1 : program_name;
   char user[256], host[256], date[32];
   status = mb_user_host_date(verbose, user, host, date, error);
   char remark[2048];
   snprintf(remark, sizeof(remark), "\n\tProjection: %s\n\tGrid created by %s\n\tMB-system Version %s\n\tRun by <%s> on <%s> at <%s>", projection,
-          program_name, MB_VERSION, user, host, date);
+          program_basename, MB_VERSION, user, host, date);
 
   /* set grid labels and remark */
   snprintf(header->command, sizeof(header->command), "%s", program_name); /* name of generating command */
