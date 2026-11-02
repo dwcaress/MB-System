@@ -74,9 +74,10 @@ The number of pings displayed,
 and the width, vertical exaggeration, and annotation of the plot
 are all set by the user. Unflagged bathymetry points
 are shown as small filled black squares, and flagged bathymtetry points
-are shown as small unfilled red or blue squares. Soundings
-flagged manually are shown in red, and those flagged by filter
-algorithms are shown in green. When a sounding is selected in the
+are shown as small unfilled red, blue or green squares. Soundings
+flagged manually are shown in red, those flagged by filter
+algorithms are shown in blue, and those flagged by the sonar are
+shown in green. When a sounding is selected in the
 info mode, it is displayed as a large, filled, blue square.
 The unflagged or good bathymetry
 points are connected by black line segments to show the acrosstrack
@@ -136,8 +137,8 @@ extreme bathymetric slopes or the use of high vertical exaggerations
 may cause good depth values to lie outside the plotting box for
 the first and last pings in view.
 
-The middle and right mouse buttons allow the user to step forward
-and backward, respectively, through the data file. The \fBForward\fP
+The middle and right mouse buttons allow the user to step backward
+and forward, respectively, through the data file. The \fBForward\fP
 and \fBReverse\fP buttons provide a duplicate stepping capability.
 Left-handed users may reverse the right and left mouse button functions by pulling down
 the \fBReverse Mouse Buttons\fP menu item from the \fBControls\fP button.
@@ -185,9 +186,10 @@ given an option to apply the saved edits to the data as it is loaded.
 If the user chooses not to apply the saved edits, those edits will
 be lost as a new edit save file is created.
 If (as is usually the case) the saved edits are to be
-applied, \fBMBedit\fP copies the edit
-save file to a file named "mbedit_tmp.esf" and reads the saved
-edits from that second file. In this way, the use of
+applied, \fBMBedit\fP reads the saved
+edits into memory, copies the edit save file to a file named by
+appending ".tmp" to its name ("ifile.esf.tmp"), and writes a new
+edit save file that includes the saved edits. In this way, the use of
 edit save files and \fBmbprocess\fP allows users
 to edit a swath data file multiple times without generating
 multiple output files. Subsequent editing sessions serve to
@@ -390,7 +392,7 @@ This toggle allows the user to specify whether only the unflagged
 or "good" bathymetry soundings are displayed (toggle set to "Off")
 or whether the display also includes the flagged or "bad"
 bathymetry soundings (toggle set to "On"). In the latter case, the
-flagged soundings are shown as red.
+flagged soundings are shown as unfilled squares.
 .TP
 .B View->Show Flagged Profile
 This toggle allows the user to specify whether the acrosstrack
@@ -408,8 +410,8 @@ soundings are colored in the bathymetry profile plots.
 .br
 When \fBShow Flag States\fP is on (the default), each sounding is
 colored according to its flagging status: unflagged beams are
-black, manually flagged beams are red, and filter flagged beams
-are green.
+black, manually flagged beams are red, filter flagged beams
+are blue, and beams flagged by the sonar are green.
 .br
 When \fBShow Bottom Detect Algorithms\fP is on, each sounding is
 colored according to the bottom detect algorithm used by the sonar:
@@ -469,7 +471,7 @@ speed associated with each ping.
 .B View->Plot Center Beam Depth
 This toggle, when set, causes \fBmbedit\fP to display an
 automatically scaled vertical time series plot of the
-speed associated with each ping.
+center beam depth associated with each ping.
  This plot appears to the left of the bathymetry profiles.
 .TP
 .B View->Plot Sonar Depth
@@ -747,13 +749,13 @@ has been written out, then the input and output files are closed.
 .B Done | Next File
 When the last file in the list of files available for editing has been loaded,
 this button shows as "Done". Otherwise, it shows as "Next File". In either
-case, this button causes the program to write out all of the edited navigation
-data and then close the current file. If the current file is not the last
+case, this button causes the program to write out all of the edits
+to the edit save file and then close the current file. If the current file is not the last
 one in the available list, then the next unlocked file will be loaded for editing.
 .TP
 .B Quit
 This button causes the program to exit gracefully.  If a data file
-has been loaded, all of the edited navigation will be written to the output file
+has been loaded, all of the edits will be written to the edit save file
 before exiting.
 .TP
 .B About
@@ -831,8 +833,8 @@ or \fBReverse\fP buttons are pushed.
 .TP
 .B Left Mouse Button
 The left mouse button is used to pick beams.  Good beams are
-shown as filled black squares and bad (flagged) beams as unfilled red
-or green squares.  The
+shown as filled black squares and bad (flagged) beams as unfilled red,
+blue or green squares.  The
 result of picking a particular beam depends on the current edit mode,
 as set by the \fBMode\fP button or keyboard macros defined below. The
 last picked beam (and ping) is remembered for use with
