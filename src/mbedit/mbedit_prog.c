@@ -1484,15 +1484,17 @@ int mbedit_action_mouse_toggle(int x_loc, int y_loc, int plwd, int exgr, int xnt
 		*icurrent = current_id;
 
 		/* replot the affected beam and ping */
-		status = mbedit_plot_ping(iping);
-		status = mbedit_plot_beam(iping, jbeam - 1);
-		status = mbedit_plot_beam(iping, jbeam);
-		status = mbedit_plot_beam(iping, jbeam + 1);
+		if (found) {
+			status = mbedit_plot_ping(iping);
+			status = mbedit_plot_beam(iping, jbeam - 1);
+			status = mbedit_plot_beam(iping, jbeam);
+			status = mbedit_plot_beam(iping, jbeam + 1);
 
-		/* if beam out of bounds replot label */
-		if (ping[iping].bath_x[jbeam] < xmin || ping[iping].bath_x[jbeam] > xmax || ping[iping].bath_y[jbeam] < ymin ||
-		    ping[iping].bath_y[jbeam] > ymax)
-			status = mbedit_plot_ping_label(iping, false);
+			/* if beam out of bounds replot label */
+			if (ping[iping].bath_x[jbeam] < xmin || ping[iping].bath_x[jbeam] > xmax || ping[iping].bath_y[jbeam] < ymin ||
+			    ping[iping].bath_y[jbeam] > ymax)
+				status = mbedit_plot_ping_label(iping, false);
+		}
 	} else if (!file_open) {
 		// if no file open set failure status
 		status = MB_FAILURE;
@@ -1630,15 +1632,17 @@ int mbedit_action_mouse_pick(int x_loc, int y_loc, int plwd, int exgr, int xntrv
 		*icurrent = current_id;
 
 		/* replot the affected beam and ping */
-		status = mbedit_plot_ping(iping);
-		status = mbedit_plot_beam(iping, jbeam - 1);
-		status = mbedit_plot_beam(iping, jbeam);
-		status = mbedit_plot_beam(iping, jbeam + 1);
+		if (found) {
+			status = mbedit_plot_ping(iping);
+			status = mbedit_plot_beam(iping, jbeam - 1);
+			status = mbedit_plot_beam(iping, jbeam);
+			status = mbedit_plot_beam(iping, jbeam + 1);
 
-		/* if beam out of bounds replot label */
-		if (ping[iping].bath_x[jbeam] < xmin || ping[iping].bath_x[jbeam] > xmax || ping[iping].bath_y[jbeam] < ymin ||
-		    ping[iping].bath_y[jbeam] > ymax)
-			status = mbedit_plot_ping_label(iping, false);
+			/* if beam out of bounds replot label */
+			if (ping[iping].bath_x[jbeam] < xmin || ping[iping].bath_x[jbeam] > xmax || ping[iping].bath_y[jbeam] < ymin ||
+			    ping[iping].bath_y[jbeam] > ymax)
+				status = mbedit_plot_ping_label(iping, false);
+		}
 	} else if (!file_open) {
 		// if no file open set failure status
 		status = MB_FAILURE;
@@ -2271,8 +2275,12 @@ int mbedit_action_mouse_info(int x_loc, int y_loc, int plwd, int exgr, int xntrv
 			info_bathacrosstrack = ping[iping].bathacrosstrack[jbeam];
 			info_bathalongtrack = ping[iping].bathalongtrack[jbeam];
 			info_detect = ping[iping].detect[jbeam];
+			if (info_detect < MB_DETECT_UNKNOWN || info_detect > MB_DETECT_PHOTOGRAMMETRY)
+				info_detect = MB_DETECT_UNKNOWN;
 			info_priority = ping[iping].priority[jbeam];
 			info_pulse = ping[iping].pulses[jbeam];
+			if (info_pulse < MB_PULSE_UNKNOWN || info_pulse > MB_PULSE_LIDAR)
+				info_pulse = MB_PULSE_UNKNOWN;
 			/*			fprintf(stderr,"\nping: %d beam:%d depth:%10.3f \n",
 			                iping,jbeam,ping[iping].bath[jbeam]);*/
 
@@ -3155,7 +3163,6 @@ int mbedit_action_unflag_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt
 /*--------------------------------------------------------------------*/
 int mbedit_action_filter_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
                              int *nbuffer, int *ngood, int *icurrent, int *nplt) {
-	fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3285,8 +3292,11 @@ int mbedit_filter_ping(int iping) {
 					if (mb_beam_ok(ping[iping].beamflag[jbeam])) {
 						int nbathlist = 0;
 						double bathmedian = 0.0;
-						const int istart = MAX(iping - filter_medianspike_ltrack / 2, 0);
-						const int iend = MIN(iping + filter_medianspike_ltrack / 2, nbuff - 1);
+						/* bathlist holds MBEDIT_MAX_PINGS pings of beams, so limit
+						    the alongtrack window to that many pings */
+						const int ltrack_half = MIN(filter_medianspike_ltrack / 2, (MBEDIT_MAX_PINGS - 1) / 2);
+						const int istart = MAX(iping - ltrack_half, 0);
+						const int iend = MIN(iping + ltrack_half, nbuff - 1);
 						for (int i = istart; i <= iend; i++) {
 							const int jstart = MAX(jbeam - filter_medianspike_xtrack / 2, 0);
 							const int jend = MIN(jbeam + filter_medianspike_xtrack / 2, ping[i].beams_bath - 1);
@@ -3301,7 +3311,8 @@ int mbedit_filter_ping(int iping) {
 							qsort(bathlist, nbathlist, sizeof(double), mb_double_compare);
 							bathmedian = bathlist[nbathlist / 2];
 						}
-						if (100 * fabs(ping[iping].bath[jbeam] - bathmedian) / ping[iping].altitude >
+						if (ping[iping].altitude > 0.0
+						    && 100 * fabs(ping[iping].bath[jbeam] - bathmedian) / ping[iping].altitude >
 						    filter_medianspike_threshold) {
 							/* write edit to save file */
 							if (esffile_open)
@@ -3376,7 +3387,7 @@ int mbedit_filter_ping(int iping) {
 				if (filter_cutbeam_begin <= filter_cutbeam_end) {
 					const int start = MAX(filter_cutbeam_begin, 0);
 					const int end = MIN(filter_cutbeam_end, ping[iping].beams_bath - 1);
-					for (int j = start; j < end; j++) {
+					for (int j = start; j <= end; j++) {
 						if (mb_beam_ok(ping[iping].beamflag[j])) {
 							/* write edit to save file */
 							if (esffile_open)
@@ -3667,6 +3678,10 @@ int mbedit_open_file(char *file, int form, bool savemode) {
 			status = MB_FAILURE;
 			mb_file_open_error_message(ifile, error1, error2, error3, sizeof(error1));
 			do_error_dialog(error1, error2, error3);
+			if (uselockfiles) {
+				int unlock_error = MB_ERROR_NO_ERROR;
+				mb_pr_unlockswathfile(verbose, ifile, MBP_LOCK_EDITBATHY, program_name, &unlock_error);
+			}
 			return (status);
 		}
 
@@ -3700,6 +3715,7 @@ int mbedit_open_file(char *file, int form, bool savemode) {
 		for (int i = 0; i < MBEDIT_BUFFER_SIZE; i++) {
 			ping[i].allocated = 0;
 			ping[i].beamflag = NULL;
+			ping[i].beamflagorg = NULL;
 			ping[i].bath = NULL;
 			ping[i].amp = NULL;
 			ping[i].bathacrosstrack = NULL;
@@ -3735,6 +3751,13 @@ int mbedit_open_file(char *file, int form, bool savemode) {
     const int outputmode = ((output_mode == MBEDIT_OUTPUT_BROWSE) ? MBP_ESF_NOWRITE : MBP_ESF_WRITE);
 		if (savemode || (outputmode == MBP_ESF_WRITE)) {
 			status = mb_esf_load(verbose, program_name, ifile, savemode, outputmode, esffile, &esf, &error);
+
+			/* no existing edits to load (browse mode) is not an error */
+			if (status == MB_FAILURE && error == MB_ERROR_NO_DATA_LOADED) {
+				status = MB_SUCCESS;
+				error = MB_ERROR_NO_ERROR;
+			}
+
 			if (output_mode != MBEDIT_OUTPUT_BROWSE && status == MB_SUCCESS && esf.esffp != NULL)
 				esffile_open = true;
 			if (status == MB_FAILURE && error == MB_ERROR_OPEN_FAIL) {
@@ -3746,6 +3769,21 @@ int mbedit_open_file(char *file, int form, bool savemode) {
 				esffile_open = false;
 				fprintf(stderr, "\nUnable to allocate memory for edits in esf file %s\n", esf.esffile);
 				do_error_dialog("Unable to allocate memory for.", "edits in existing edit", "save file!");
+			}
+			else if (status == MB_FAILURE) {
+				esffile_open = false;
+				fprintf(stderr, "\nUnable to initialize edit save file %s\n", esf.esffile);
+				do_error_dialog("Unable to initialize", "the edit save file", "for this swath file!");
+			}
+
+			/* on failure close the swath file, release any edits and the lock */
+			if (status == MB_FAILURE) {
+				int close_error = MB_ERROR_NO_ERROR;
+				mb_close(verbose, &imbio_ptr, &close_error);
+				if (esf.edit != NULL || esf.esffp != NULL || esf.essfp != NULL)
+					mb_esf_close(verbose, &esf, &close_error);
+				if (uselockfiles)
+					mb_pr_unlockswathfile(verbose, ifile, MBP_LOCK_EDITBATHY, program_name, &close_error);
 			}
 		}
 	}
@@ -3794,6 +3832,7 @@ int mbedit_close_file() {
 		if (ping[i].allocated > 0) {
 			ping[i].allocated = 0;
 			free(ping[i].beamflag);
+			free(ping[i].beamflagorg);
 			free(ping[i].bath);
 			free(ping[i].amp);
 			free(ping[i].bathacrosstrack);
@@ -3803,6 +3842,17 @@ int mbedit_close_file() {
 			free(ping[i].pulses);
 			free(ping[i].bath_x);
 			free(ping[i].bath_y);
+			ping[i].beamflag = NULL;
+			ping[i].beamflagorg = NULL;
+			ping[i].bath = NULL;
+			ping[i].amp = NULL;
+			ping[i].bathacrosstrack = NULL;
+			ping[i].bathalongtrack = NULL;
+			ping[i].detect = NULL;
+			ping[i].priority = NULL;
+			ping[i].pulses = NULL;
+			ping[i].bath_x = NULL;
+			ping[i].bath_y = NULL;
 
 			/* reset message */
 			if (i % 250 == 0) {
@@ -3883,6 +3933,12 @@ int mbedit_dump_data(int hold_size, int *ndumped, int *nbuffer) {
 
 	int status = MB_SUCCESS;
 
+	/* cannot hold more pings than are in the buffer */
+	if (hold_size > nbuff)
+		hold_size = nbuff;
+	if (hold_size < 0)
+		hold_size = 0;
+
 	/* dump or clear data from the buffer */
 	ndump = 0;
 	if (nbuff > 0) {
@@ -3931,6 +3987,23 @@ int mbedit_dump_data(int hold_size, int *ndumped, int *nbuffer) {
 		/* copy data to be held */
 		for (int iping = 0; iping < hold_size; iping++) {
 			ping[iping] = ping[iping + nbuff - hold_size];
+		}
+
+		/* the vacated slots no longer own any arrays - those arrays were
+		    either freed above or now belong to the held pings */
+		for (int iping = hold_size; iping < nbuff; iping++) {
+			ping[iping].allocated = 0;
+			ping[iping].beamflag = NULL;
+			ping[iping].beamflagorg = NULL;
+			ping[iping].bath = NULL;
+			ping[iping].amp = NULL;
+			ping[iping].bathacrosstrack = NULL;
+			ping[iping].bathalongtrack = NULL;
+			ping[iping].detect = NULL;
+			ping[iping].priority = NULL;
+			ping[iping].pulses = NULL;
+			ping[iping].bath_x = NULL;
+			ping[iping].bath_y = NULL;
 		}
 		ndump = nbuff - hold_size;
 		nbuff = hold_size;
@@ -4477,7 +4550,7 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
 		for (int i = current_id; i < current_id + nplot; i++) {
 			fprintf(stderr, "dbg2       %4d %4d %4d  %d/%d/%d %2.2d:%2.2d:%2.2d.%6.6d  %10.3f\n", i, ping[i].id, ping[i].record,
 			        ping[i].time_i[1], ping[i].time_i[2], ping[i].time_i[0], ping[i].time_i[3], ping[i].time_i[4],
-			        ping[i].time_i[5], ping[i].time_i[6], ping[i].bath[ping[i].beams_bath / 2]);
+			        ping[i].time_i[5], ping[i].time_i[6], (ping[i].beams_bath > 0 ? ping[i].bath[ping[i].beams_bath / 2] : 0.0));
 		}
 	}
 
@@ -5245,6 +5318,9 @@ int mbedit_action_goto(int ttime_i[7], int hold_size, int buffer_size, int plwd,
 	/* get time_d value */
 	mb_get_time(verbose, ttime_i, &ttime_d);
 
+	/* reset info - the buffer may be reloaded below */
+	info_set = false;
+
 	int status = MB_SUCCESS;
 
 	/* check if a file has been opened */
@@ -5484,7 +5560,7 @@ int mbedit_tsvalue(int iping, int data_id, double *value) {
 			*value = ping[iping].speed;
 			break;
 		case MBEDIT_PLOT_DEPTH:
-			*value = ping[iping].bath[ping[iping].beams_bath / 2];
+			*value = (ping[iping].beams_bath > 0 ? ping[iping].bath[ping[iping].beams_bath / 2] : 0.0);
 			break;
 		case MBEDIT_PLOT_ALTITUDE:
 			*value = ping[iping].altitude;
@@ -5674,12 +5750,13 @@ int mbedit_xtrackslope(int iping, double *slope) {
 		}
 
 		/* get linear fit to ping */
-		if (ns > 0) {
+		if (ns > 1) {
 			const double delta = ns * sxx - sx * sx;
-			/* a = (sxx*sy - sx*sxy)/delta; */
-			const double b = (ns * sxy - sx * sy) / delta;
-			*slope = -RTD * atan(b);
-			;
+			if (delta != 0.0) {
+				/* a = (sxx*sy - sx*sxy)/delta; */
+				const double b = (ns * sxy - sx * sy) / delta;
+				*slope = -RTD * atan(b);
+			}
 		}
 	}
 

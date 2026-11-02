@@ -276,7 +276,15 @@ int mbsys_reson7k3_deall(int verbose, void *mbio_ptr, void **store_ptr, int *err
   PingMotion->nalloc = 0;
 
   /* Reson 7k Adaptive Gate (record 7014) */
-
+  s7k3_AdaptiveGate *AdaptiveGate = &store->AdaptiveGate;
+  if (AdaptiveGate->angle != NULL)
+    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(AdaptiveGate->angle), error);
+  if (AdaptiveGate->min_limit != NULL)
+    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(AdaptiveGate->min_limit), error);
+  if (AdaptiveGate->max_limit != NULL)
+    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(AdaptiveGate->max_limit), error);
+  AdaptiveGate->n = 0;
+  AdaptiveGate->nalloc = 0;
 
   /* Reson 7k Beamformed magnitude and phase data (record 7018) */
   s7k3_Beamformed *Beamformed = &store->Beamformed;
@@ -291,7 +299,25 @@ int mbsys_reson7k3_deall(int verbose, void *mbio_ptr, void **store_ptr, int *err
   }
 
   /* Reson 7k Vernier Processing Data Raw (record 7019) */
-
+  s7k3_VernierProcessingDataRaw *VernierProcessingDataRaw = &store->VernierProcessingDataRaw;
+  for (int i = 0; i < MBSYS_RESON7K_MAX_BEAMS; i++) {
+    s7k3_anglemagnitude *anglemagnitude = &(VernierProcessingDataRaw->anglemagnitude[i]);
+    if (anglemagnitude->angle != NULL)
+      status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(anglemagnitude->angle), error);
+    if (anglemagnitude->magnitude != NULL)
+      status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(anglemagnitude->magnitude), error);
+    if (anglemagnitude->coherence != NULL)
+      status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(anglemagnitude->coherence), error);
+    if (anglemagnitude->cross_power != NULL)
+      status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(anglemagnitude->cross_power), error);
+    if (anglemagnitude->quality_factor != NULL)
+      status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(anglemagnitude->quality_factor), error);
+    if (anglemagnitude->reserved != NULL)
+      status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(anglemagnitude->reserved), error);
+  }
+  VernierProcessingDataRaw->beam_number = 0;
+  VernierProcessingDataRaw->decimated_samples = 0;
+  VernierProcessingDataRaw->nalloc = 0;
 
   /* Reson 7k BITE (record 7021) */
   s7k3_BITE *BITE = &store->BITE;
@@ -315,6 +341,11 @@ int mbsys_reson7k3_deall(int verbose, void *mbio_ptr, void **store_ptr, int *err
   }
 
   /* Reson 7k Compressed Beamformed Magnitude Data (Record 7041) */
+  s7k3_CompressedBeamformedMagnitude *CompressedBeamformedMagnitude = &store->CompressedBeamformedMagnitude;
+  if (CompressedBeamformedMagnitude->data != NULL)
+    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(CompressedBeamformedMagnitude->data), error);
+  CompressedBeamformedMagnitude->data_size = 0;
+  CompressedBeamformedMagnitude->data_alloc = 0;
 
   /* Reson 7k Compressed Water Column Data (Record 7042) */
   s7k3_CompressedWaterColumn *CompressedWaterColumn = &(store->CompressedWaterColumn);
@@ -345,6 +376,26 @@ int mbsys_reson7k3_deall(int verbose, void *mbio_ptr, void **store_ptr, int *err
     status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(SystemEventMessage->message), error);
 
   /* Reson 7k RDR Recording Status (Record 7052) */
+  s7k3_rdrrecordingstatusdata *rdrrecordingstatusdata = &(store->RDRRecordingStatus.rdrrecordingstatusdata);
+  if (rdrrecordingstatusdata->threshold_value_array != NULL)
+    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(rdrrecordingstatusdata->threshold_value_array), error);
+  if (rdrrecordingstatusdata->included_records_array != NULL)
+    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(rdrrecordingstatusdata->included_records_array), error);
+  if (rdrrecordingstatusdata->excluded_records_array != NULL)
+    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(rdrrecordingstatusdata->excluded_records_array), error);
+  if (rdrrecordingstatusdata->included_devices_array != NULL)
+    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(rdrrecordingstatusdata->included_devices_array), error);
+  if (rdrrecordingstatusdata->excluded_devices_array != NULL)
+    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(rdrrecordingstatusdata->excluded_devices_array), error);
+  memset(rdrrecordingstatusdata, 0, sizeof(s7k3_rdrrecordingstatusdata));
+
+  /* Reson 7k Subscriptions (Record 7053) */
+  s7k3_Subscriptions *Subscriptions = &store->Subscriptions;
+  if (Subscriptions->subscriptionsdata != NULL)
+    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(Subscriptions->subscriptionsdata), error);
+  Subscriptions->n_subscriptions = 0;
+  Subscriptions->nalloc = 0;
+
   /* Reson 7k Calibrated SideScan Data (record 7057) */
   /* Reson 7k File Catalog (part of Record 7300) */
 
@@ -383,6 +434,13 @@ int mbsys_reson7k3_deall(int verbose, void *mbio_ptr, void **store_ptr, int *err
   }
 
   /* Reson 7k Time Message (Record 7400) */
+  /* Reson 7k Remote Control (Record 7500) */
+  s7k3_RemoteControl *RemoteControl = &store->RemoteControl;
+  if (RemoteControl->data != NULL)
+    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(RemoteControl->data), error);
+  RemoteControl->data_size = 0;
+  RemoteControl->data_alloc = 0;
+
   /* Reson 7k Remote Control Acknowledge (Record 7501) */
   /* Reson 7k Remote Control Not Acknowledge (Record 7502) */
   /* Reson 7k Remote Control Sonar Settings (record 7503) */
@@ -2768,14 +2826,14 @@ int mbsys_reson7k3_print_Snippet(int verbose, s7k3_Snippet *Snippet, int *error)
             snippetdata->begin_sample, snippetdata->detect_sample, snippetdata->end_sample,
             snippetdata->nalloc);
     const int nsample = snippetdata->end_sample - snippetdata->begin_sample + 1;
-    // u16 *u16_ptr = (u16 *)snippetdata->amplitude;
+    u16 *u16_ptr = (u16 *)snippetdata->amplitude;
     u32 *u32_ptr = (u32 *)snippetdata->amplitude;
     fprintf(stderr, "%s     ", first);
     for (int j = 0; j < nsample; j++) {
       if ((Snippet->flags & 0x01) != 0) {
-        fprintf(stderr, "%9d ", u32_ptr[j]);
+        fprintf(stderr, "%9u ", u32_ptr[j]);
       } else {
-        fprintf(stderr, "%9d ", u32_ptr[j]);
+        fprintf(stderr, "%9u ", u16_ptr[j]);
       }
       if (j == nsample - 1)
         fprintf(stderr, "\n");
@@ -2978,14 +3036,46 @@ int mbsys_reson7k3_print_BITESummary(int verbose, s7k3_BITESummary *BITESummary,
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_CompressedBeamformedMagnitude(int verbose, s7k3_CompressedBeamformedMagnitude *CompressedBeamformedMagnitude, int *error) {
-  (void) verbose;  // Unused arg
-  (void) CompressedBeamformedMagnitude;  // Unused arg
-  (void) error;  // Unused arg
-  // Notdone
-  // Not implemented because documentation is vague about the actual sample size
-  // and because this record is deprecated and unlikely to be part of a 7k3
-  // data stream
-  return (MB_SUCCESS);
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+    fprintf(stderr, "dbg2       CompressedBeamformedMagnitude:      %p\n", (void *)CompressedBeamformedMagnitude);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &CompressedBeamformedMagnitude->header, error);
+
+  /* print Reson 7k Compressed Beamformed Magnitude Data (Record 7041) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     serial_number:              %llu\n", first, (long long unsigned) CompressedBeamformedMagnitude->serial_number);
+  fprintf(stderr, "%s     ping_number:                %u\n", first, CompressedBeamformedMagnitude->ping_number);
+  fprintf(stderr, "%s     multi_ping:                 %u\n", first, CompressedBeamformedMagnitude->multi_ping);
+  fprintf(stderr, "%s     number_beams:               %u\n", first, CompressedBeamformedMagnitude->number_beams);
+  fprintf(stderr, "%s     flags:                      %u\n", first, CompressedBeamformedMagnitude->flags);
+  fprintf(stderr, "%s     sample_rate:                %f\n", first, CompressedBeamformedMagnitude->sample_rate);
+  for (int i = 0; i < 4; i++)
+    fprintf(stderr, "%s     reserved[%d]:                %u\n", first, i, CompressedBeamformedMagnitude->reserved[i]);
+  fprintf(stderr, "%s     data_size:                  %u (beam data kept as raw bytes)\n", first, CompressedBeamformedMagnitude->data_size);
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
@@ -3349,20 +3439,121 @@ int mbsys_reson7k3_print_SystemEventMessage(int verbose, s7k3_SystemEventMessage
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_RDRRecordingStatus(int verbose, s7k3_RDRRecordingStatus *RDRRecordingStatus, int *error) {
-  (void) verbose;  // Unused arg
-  (void) RDRRecordingStatus;  // Unused arg
-  (void) error;  // Unused arg
-  // Notdone
-  return (MB_SUCCESS);
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+    fprintf(stderr, "dbg2       RDRRecordingStatus:      %p\n", (void *)RDRRecordingStatus);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &RDRRecordingStatus->header, error);
+
+  /* print Reson 7k RDR Recording Status (Record 7052) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     position:                   %u\n", first, RDRRecordingStatus->position);
+  fprintf(stderr, "%s     disk_free:                  %u\n", first, RDRRecordingStatus->disk_free);
+  fprintf(stderr, "%s     mode:                       %u\n", first, RDRRecordingStatus->mode);
+  fprintf(stderr, "%s     filerecords:                %u\n", first, RDRRecordingStatus->filerecords);
+  fprintf(stderr, "%s     filesize:                   %llu\n", first, (long long unsigned) RDRRecordingStatus->filesize);
+  fprintf(stderr, "%s     first_time:                ", first);
+  for (int i = 0; i < 10; i++)
+    fprintf(stderr, " %2.2X", RDRRecordingStatus->first_time[i]);
+  fprintf(stderr, "\n");
+  fprintf(stderr, "%s     last_time:                 ", first);
+  for (int i = 0; i < 10; i++)
+    fprintf(stderr, " %2.2X", RDRRecordingStatus->last_time[i]);
+  fprintf(stderr, "\n");
+  fprintf(stderr, "%s     totaltime:                  %u\n", first, RDRRecordingStatus->totaltime);
+  fprintf(stderr, "%s     directory_name:             %s\n", first, RDRRecordingStatus->directory_name);
+  fprintf(stderr, "%s     filename:                   %s\n", first, RDRRecordingStatus->filename);
+  fprintf(stderr, "%s     error:                      %u\n", first, RDRRecordingStatus->error);
+  fprintf(stderr, "%s     flags:                      %u\n", first, RDRRecordingStatus->flags);
+  fprintf(stderr, "%s     logger_address:             %u\n", first, RDRRecordingStatus->logger_address);
+  fprintf(stderr, "%s     file_number:                %u\n", first, RDRRecordingStatus->file_number);
+  fprintf(stderr, "%s     ping_data:                  %u\n", first, RDRRecordingStatus->ping_data);
+  fprintf(stderr, "%s     reserved:                   %u\n", first, RDRRecordingStatus->reserved);
+  for (int i = 0; i < 4; i++)
+    fprintf(stderr, "%s     reserved2[%d]:               %u\n", first, i, RDRRecordingStatus->reserved2[i]);
+  s7k3_rdrrecordingstatusdata *rdrrecordingstatusdata = &(RDRRecordingStatus->rdrrecordingstatusdata);
+  fprintf(stderr, "%s     threshold_length:           %u\n", first, rdrrecordingstatusdata->threshold_length);
+  for (u32 i = 0; i < rdrrecordingstatusdata->threshold_length; i++)
+    fprintf(stderr, "%s     threshold_value_array[%u]:   %u\n", first, i, rdrrecordingstatusdata->threshold_value_array[i]);
+  fprintf(stderr, "%s     included_records:           %u\n", first, rdrrecordingstatusdata->included_records);
+  for (u32 i = 0; i < rdrrecordingstatusdata->included_records; i++)
+    fprintf(stderr, "%s     included_records_array[%u]:  %u\n", first, i, rdrrecordingstatusdata->included_records_array[i]);
+  fprintf(stderr, "%s     excluded_records:           %u\n", first, rdrrecordingstatusdata->excluded_records);
+  for (u32 i = 0; i < rdrrecordingstatusdata->excluded_records; i++)
+    fprintf(stderr, "%s     excluded_records_array[%u]:  %u\n", first, i, rdrrecordingstatusdata->excluded_records_array[i]);
+  fprintf(stderr, "%s     included_devices:           %u\n", first, rdrrecordingstatusdata->included_devices);
+  for (u32 i = 0; i < rdrrecordingstatusdata->included_devices; i++)
+    fprintf(stderr, "%s     included_devices_array[%u]:  %u\n", first, i, rdrrecordingstatusdata->included_devices_array[i]);
+  fprintf(stderr, "%s     excluded_devices:           %u\n", first, rdrrecordingstatusdata->excluded_devices);
+  for (u32 i = 0; i < rdrrecordingstatusdata->excluded_devices; i++)
+    fprintf(stderr, "%s     excluded_devices_array[%u]:  %u\n", first, i, rdrrecordingstatusdata->excluded_devices_array[i]);
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_Subscriptions(int verbose, s7k3_Subscriptions *Subscriptions, int *error) {
-  (void) verbose;  // Unused arg
-  (void) Subscriptions;  // Unused arg
-  (void) error;  // Unused arg
-  // Notdone
-  return (MB_SUCCESS);
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+    fprintf(stderr, "dbg2       Subscriptions:     %p\n", (void *)Subscriptions);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &Subscriptions->header, error);
+
+  /* print Reson 7k Subscriptions (Record 7053) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     n_subscriptions:            %d\n", first, Subscriptions->n_subscriptions);
+  fprintf(stderr, "%s     nalloc:                     %u\n", first, Subscriptions->nalloc);
+  for (int j = 0; j < Subscriptions->n_subscriptions; j++) {
+    s7k3_subscriptionsdata *subscriptionsdata = &(Subscriptions->subscriptionsdata[j]);
+    fprintf(stderr, "%s     subscription %d: address:%u port:%u type:%u records_number:%u\n", first, j,
+            subscriptionsdata->address, subscriptionsdata->port, subscriptionsdata->type, subscriptionsdata->records_number);
+    for (u32 i = 0; i < subscriptionsdata->records_number && i < 64; i++)
+      fprintf(stderr, "%s         record_list[%u]:         %u\n", first, i, subscriptionsdata->record_list[i]);
+  }
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
@@ -3377,7 +3568,7 @@ int mbsys_reson7k3_print_RDRStorageRecording(int verbose, s7k3_RDRStorageRecordi
   /* print Reson 7k data record header information */
   mbsys_reson7k3_print_header(verbose, &RDRStorageRecording->header, error);
 
-  /* print Reson 7k Snippet Backscattering Strength (Record 7058) */
+  /* print Reson 7k RDR Storage Recording (Record 7054) */
   const char *first;
   if (verbose >= 2)
     first = debug_str;
@@ -4222,29 +4413,123 @@ int mbsys_reson7k3_print_TimeMessage(int verbose, s7k3_TimeMessage *TimeMessage,
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_RemoteControl(int verbose, s7k3_RemoteControl *RemoteControl, int *error) {
-  // Notdone
-  (void) verbose;  // Unused arg
-  (void) RemoteControl;  // Unused arg
-  (void) error;  // Unused arg
-  return (MB_SUCCESS);
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+    fprintf(stderr, "dbg2       RemoteControl:      %p\n", (void *)RemoteControl);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &RemoteControl->header, error);
+
+  /* print Reson 7k RemoteControl (Record 7500) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     remote_id:                  %u\n", first, RemoteControl->remote_id);
+  fprintf(stderr, "%s     ticket:                     %u\n", first, RemoteControl->ticket);
+  for (int i = 0; i < 2; i++)
+    fprintf(stderr, "%s     tracking_n[%d]:              %llu\n", first, i, (long long unsigned) RemoteControl->tracking_n[i]);
+  fprintf(stderr, "%s     data_size:                  %u\n", first, RemoteControl->data_size);
+  fprintf(stderr, "%s     data:                      ", first);
+  for (u32 i = 0; i < RemoteControl->data_size; i++)
+    fprintf(stderr, " %2.2X", RemoteControl->data[i]);
+  fprintf(stderr, "\n");
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_RemoteControlAcknowledge(int verbose, s7k3_RemoteControlAcknowledge *RemoteControlAcknowledge, int *error) {
-  (void) verbose;  // Unused arg
-  (void) RemoteControlAcknowledge;  // Unused arg
-  (void) error;  // Unused arg
-  // Notdone
-  return (MB_SUCCESS);
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+    fprintf(stderr, "dbg2       RemoteControlAcknowledge:      %p\n", (void *)RemoteControlAcknowledge);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &RemoteControlAcknowledge->header, error);
+
+  /* print Reson 7k RemoteControlAcknowledge (Record 7501) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     ticket:                     %u\n", first, RemoteControlAcknowledge->ticket);
+  for (int i = 0; i < 2; i++)
+    fprintf(stderr, "%s     tracking_n[%d]:              %llu\n", first, i, (long long unsigned) RemoteControlAcknowledge->tracking_n[i]);
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_RemoteControlNotAcknowledge(int verbose, s7k3_RemoteControlNotAcknowledge *RemoteControlNotAcknowledge, int *error) {
-  (void) verbose;  // Unused arg
-  (void) RemoteControlNotAcknowledge;  // Unused arg
-  (void) error;  // Unused arg
-  // Notdone
-  return (MB_SUCCESS);
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+    fprintf(stderr, "dbg2       RemoteControlNotAcknowledge:      %p\n", (void *)RemoteControlNotAcknowledge);
+  }
+
+  /* print Reson 7k data record header information */
+  mbsys_reson7k3_print_header(verbose, &RemoteControlNotAcknowledge->header, error);
+
+  /* print Reson 7k RemoteControlNotAcknowledge (Record 7502) */
+  const char *first;
+  if (verbose >= 2)
+    first = debug_str;
+  else {
+    first = nodebug_str;
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
+  }
+  fprintf(stderr, "%sStructure Contents:\n", first);
+  fprintf(stderr, "%s     ticket:                     %u\n", first, RemoteControlNotAcknowledge->ticket);
+  for (int i = 0; i < 2; i++)
+    fprintf(stderr, "%s     tracking_n[%d]:              %llu\n", first, i, (long long unsigned) RemoteControlNotAcknowledge->tracking_n[i]);
+  fprintf(stderr, "%s     error_code:                 %u\n", first, RemoteControlNotAcknowledge->error_code);
+
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
 }
 
 /*--------------------------------------------------------------------*/
@@ -4419,7 +4704,9 @@ int mbsys_reson7k3_print_CommonSystemSettings(int verbose, s7k3_CommonSystemSett
   fprintf(stderr, "%s     restore_power:              %u\n", first, CommonSystemSettings->restore_power);
   fprintf(stderr, "%s     sv_interlock:               %u\n", first, CommonSystemSettings->sv_interlock);
   fprintf(stderr, "%s     ignorepps_errors:           %u\n", first, CommonSystemSettings->ignorepps_errors);
-  for (int i = 0;i<15;i++){
+  fprintf(stderr, "%s     restore_recording:          %u\n", first, CommonSystemSettings->restore_recording);
+  fprintf(stderr, "%s     restore_tracker:            %u\n", first, CommonSystemSettings->restore_tracker);
+  for (int i = 0;i<13;i++){
     fprintf(stderr, "%s     reserved1[%d]:              %u\n", first, i, CommonSystemSettings->reserved1[i]);
   }
   fprintf(stderr, "%s     compressed_wcflags:         %u\n", first, CommonSystemSettings->compressed_wcflags);
@@ -4558,6 +4845,9 @@ int mbsys_reson7k3_print_SoundVelocity(int verbose, s7k3_SoundVelocity *SoundVel
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     SoundVelocity:              %f\n", first, SoundVelocity->soundvelocity);
+  fprintf(stderr, "%s     optionaldata:               %d\n", first, SoundVelocity->optionaldata);
+  fprintf(stderr, "%s     temperature:                %f\n", first, SoundVelocity->temperature);
+  fprintf(stderr, "%s     pressure:                   %f\n", first, SoundVelocity->pressure);
 
   /* Optional data */
 
@@ -5467,6 +5757,8 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
         store->Image.header.s7kTime = s7kTime;
       if (store->read_PingMotion)
         store->PingMotion.header.s7kTime = s7kTime;
+      if (store->read_AdaptiveGate)
+        store->AdaptiveGate.header.s7kTime = s7kTime;
       if (store->read_Beamformed)
         store->Beamformed.header.s7kTime = s7kTime;
       if (store->read_VernierProcessingDataRaw)
@@ -8561,6 +8853,7 @@ int mbsys_reson7k3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy
   copy->read_TVG = store->read_TVG;
   copy->read_Image = store->read_Image;
   copy->read_PingMotion = store->read_PingMotion;
+  copy->read_AdaptiveGate = store->read_AdaptiveGate;
   copy->read_DetectionDataSetup = store->read_DetectionDataSetup;
   copy->read_Beamformed = store->read_Beamformed;
   copy->read_VernierProcessingDataRaw = store->read_VernierProcessingDataRaw;
@@ -9043,7 +9336,7 @@ int mbsys_reson7k3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy
   copy->TimeMessage = store->TimeMessage;
 
   /* Reson 7k Remote Control (Record 7500) */
-  copy->RemoteControl = store->RemoteControl;
+  //copy->RemoteControl = store->RemoteControl;
 
   /* Reson 7k Remote Control Acknowledge (Record 7501) */
   copy->RemoteControlAcknowledge = store->RemoteControlAcknowledge;

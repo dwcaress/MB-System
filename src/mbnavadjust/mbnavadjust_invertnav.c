@@ -151,7 +151,7 @@ int mbnavadjust_invertnav(int verbose, struct mbna_project *project_ptr) {
   double *byfix = NULL;
   double *bzfix = NULL;
   double matrix_scale = 1000.0;
-  double rms_solution, rms_solution_total, rms_misfit_initial, rms_misfit_previous, rms_misfit_current;
+  double rms_solution = 0.0, rms_solution_total = 0.0, rms_misfit_initial = 0.0, rms_misfit_previous = 0.0, rms_misfit_current = 0.0;
   int nrms;
 
   int nnav = 0;
@@ -225,6 +225,26 @@ int mbnavadjust_invertnav(int verbose, struct mbna_project *project_ptr) {
                     tie->snav_2, tie->offset_x_m, tie->offset_y_m, tie->offset_z_m, tie->sigmar1, tie->sigmar2,
                     tie->sigmar3);
           }
+        }
+      }
+    }
+
+    /* check that all non-fixed global tie uncertainty magnitudes are nonzero
+        (fixed global ties use a small fixed uncertainty in the inversion) */
+    for (int ifile = 0; ifile < project.num_files; ifile++) {
+      file = &project.files[ifile];
+      for (int isection = 0; isection < file->num_sections; isection++) {
+        section = &file->sections[isection];
+        if (((section->globaltie.status == MBNA_TIE_XY || section->globaltie.status == MBNA_TIE_XYZ)
+              && (section->globaltie.sigmar1 <= 0.0 || section->globaltie.sigmar2 <= 0.0))
+            || ((section->globaltie.status == MBNA_TIE_Z || section->globaltie.status == MBNA_TIE_XYZ)
+              && section->globaltie.sigmar3 <= 0.0)) {
+          ok_to_invert = false;
+          fprintf(stderr,
+                  "PROBLEM WITH GLOBAL TIE: %2.2d:%4.4d:%3.3d:%2.2d status:%d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f\n",
+                  file->survey, ifile, isection, section->globaltie.snav, section->globaltie.status,
+                  section->globaltie.offset_x_m, section->globaltie.offset_y_m, section->globaltie.offset_z_m,
+                  section->globaltie.sigmar1, section->globaltie.sigmar2, section->globaltie.sigmar3);
         }
       }
     }
@@ -331,8 +351,10 @@ int mbnavadjust_invertnav(int verbose, struct mbna_project *project_ptr) {
           section2->fixedtie.rsigma_m = tie->rsigma_m;
           section2->fixedtie.isurveyplotindex  = tie->isurveyplotindex;
         }
-        else if ((file2->status == MBNA_FILE_FIXEDNAV || file2->status == MBNA_FILE_FIXEDXYNAV)
-            && (file1->status != MBNA_FILE_FIXEDNAV && file1->status != MBNA_FILE_FIXEDXYNAV)) {
+        else if (((file2->status == MBNA_FILE_FIXEDNAV || file2->status == MBNA_FILE_FIXEDXYNAV)
+            && (file1->status != MBNA_FILE_FIXEDNAV && file1->status != MBNA_FILE_FIXEDXYNAV))
+            || (file2->status == MBNA_FILE_FIXEDZNAV
+            && (file1->status == MBNA_FILE_POORNAV || file1->status == MBNA_FILE_GOODNAV))) {
           section1 = &file1->sections[crossing->section_1];
           if (file2->status == MBNA_FILE_FIXEDNAV)
             section1->fixedtie.status = MBNA_TIE_XYZ_FIXED;
@@ -423,19 +445,32 @@ int mbnavadjust_invertnav(int verbose, struct mbna_project *project_ptr) {
 
     /* allocate nav time and continuity arrays */
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(bool), (void **)&x_continuity, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(int), (void **)&x_quality, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(int), (void **)&x_num_ties, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(int), (void **)&x_chunk, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&x_time_d, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(int), (void **)&chunk_center, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(bool), (void **)&chunk_continuity, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&snav_lon_offset_best, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&snav_lat_offset_best, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&snav_z_offset_best, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nglobaltiexy * sizeof(int), (void **)&global_ties_xy_files, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nglobaltiexy * sizeof(int), (void **)&global_ties_xy_sections, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nglobaltiez * sizeof(int), (void **)&global_ties_z_files, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nglobaltiez * sizeof(int), (void **)&global_ties_z_sections, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(int), (void **)&x_quality, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(int), (void **)&x_num_ties, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(int), (void **)&x_chunk, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&x_time_d, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(int), (void **)&chunk_center, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(bool), (void **)&chunk_continuity, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&snav_lon_offset_best, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&snav_lat_offset_best, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&snav_z_offset_best, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nglobaltiexy * sizeof(int), (void **)&global_ties_xy_files, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nglobaltiexy * sizeof(int), (void **)&global_ties_xy_sections, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nglobaltiez * sizeof(int), (void **)&global_ties_z_files, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nglobaltiez * sizeof(int), (void **)&global_ties_z_sections, &error);
     if (status != MB_SUCCESS) {
       strcpy(error1, "Unable to invert navigation!");
       strcpy(error2, "Failed to allocate memory for navigation control point arrays.");
@@ -536,6 +571,8 @@ int mbnavadjust_invertnav(int verbose, struct mbna_project *project_ptr) {
         }
       }
     }
+    if (inav > 0)
+      chunk_center[nchunk] = (nchunk_start + inav - 1) / 2;
     nchunk++;
 
     /* count first derivative smoothing points */
@@ -633,7 +670,7 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
       }
 
       /* deal with this global or fixed tie (global takes precedence if both exist) */
-      int iblock_gtie = project.files[global_ties_xy_files[igtie]].survey;
+      int iblock_gtie = project.files[global_ties_xy_files[igtie]].block;
       int ifile_gtie = global_ties_xy_files[igtie];
       int isection_gtie = global_ties_xy_sections[igtie];
       int isnav_gtie;
@@ -677,13 +714,13 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
         }
       }
       if (igtie < nglobaltiexy - 1) {
-        iblock_gtie1 = project.files[global_ties_xy_files[igtie+1]].survey;
+        iblock_gtie1 = project.files[global_ties_xy_files[igtie+1]].block;
         ifile_gtie1 = global_ties_xy_files[igtie+1];
       }
 
       /* if this is the first global tie in a survey/block then set all previous nav
           in this block to the same offsets */
-      if (igtie == 0 || project.files[global_ties_xy_files[igtie-1]].survey != iblock_gtie) {
+      if (igtie == 0 || project.files[global_ties_xy_files[igtie-1]].block != iblock_gtie) {
         /* loop over all files and sections up to this point - any in the same block
             will have the offsets set */
         for (int ifile = 0; ifile <= ifile_gtie; ifile++) {
@@ -791,7 +828,7 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
       }
 
       /* deal with this global or fixed tie (global takes precedence if both exist) */
-      int iblock_gtie = project.files[global_ties_z_files[igtie]].survey;
+      int iblock_gtie = project.files[global_ties_z_files[igtie]].block;
       int ifile_gtie = global_ties_z_files[igtie];
       int isection_gtie = global_ties_z_sections[igtie];
       int isnav_gtie = -1;
@@ -829,13 +866,13 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
         }
       }
       if (igtie < nglobaltiez - 1) {
-        iblock_gtie1 = project.files[global_ties_z_files[igtie+1]].survey;
+        iblock_gtie1 = project.files[global_ties_z_files[igtie+1]].block;
         ifile_gtie1 = global_ties_z_files[igtie+1];
       }
 
       /* if this is the first global tie in a survey/block then set all previous nav
           in this block to the same offsets */
-      if (igtie == 0 || project.files[global_ties_z_files[igtie-1]].survey != iblock_gtie) {
+      if (igtie == 0 || project.files[global_ties_z_files[igtie-1]].block != iblock_gtie) {
         /* loop over all files and sections up to this point - any in the same block
             will have the offsets set */
         for (int ifile = 0; ifile <= ifile_gtie; ifile++) {
@@ -1052,7 +1089,7 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
       }
     }
     if (nrms > 0) {
-      rms_misfit_initial /= nrms;
+      rms_misfit_initial = sqrt(rms_misfit_initial / nrms);
       rms_misfit_previous = rms_misfit_initial;
       rms_misfit_current = rms_misfit_initial;
     }
@@ -1062,17 +1099,28 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
 
       /* allocate block average offset arrays */
       status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * (nblock + 1) / 2 * sizeof(int), (void **)&nbxy, &error);
-      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * (nblock + 1) / 2 * sizeof(int), (void **)&nbz, &error);
-      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * (nblock + 1) / 2 * sizeof(double), (void **)&bxavg, &error);
-      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * (nblock + 1) / 2 * sizeof(double), (void **)&byavg, &error);
-      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * (nblock + 1) / 2 * sizeof(double), (void **)&bzavg, &error);
-      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(bool), (void **)&bpoornav, &error);
-      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(int), (void **)&bxfixstatus, &error);
-      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(int), (void **)&byfixstatus, &error);
-      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(int), (void **)&bzfixstatus, &error);
-      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(double), (void **)&bxfix, &error);
-      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(double), (void **)&byfix, &error);
-      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(double), (void **)&bzfix, &error);
+      if (status == MB_SUCCESS)
+        status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * (nblock + 1) / 2 * sizeof(int), (void **)&nbz, &error);
+      if (status == MB_SUCCESS)
+        status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * (nblock + 1) / 2 * sizeof(double), (void **)&bxavg, &error);
+      if (status == MB_SUCCESS)
+        status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * (nblock + 1) / 2 * sizeof(double), (void **)&byavg, &error);
+      if (status == MB_SUCCESS)
+        status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * (nblock + 1) / 2 * sizeof(double), (void **)&bzavg, &error);
+      if (status == MB_SUCCESS)
+        status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(bool), (void **)&bpoornav, &error);
+      if (status == MB_SUCCESS)
+        status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(int), (void **)&bxfixstatus, &error);
+      if (status == MB_SUCCESS)
+        status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(int), (void **)&byfixstatus, &error);
+      if (status == MB_SUCCESS)
+        status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(int), (void **)&bzfixstatus, &error);
+      if (status == MB_SUCCESS)
+        status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(double), (void **)&bxfix, &error);
+      if (status == MB_SUCCESS)
+        status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(double), (void **)&byfix, &error);
+      if (status == MB_SUCCESS)
+        status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nblock * sizeof(double), (void **)&bzfix, &error);
       if (status != MB_SUCCESS) {
         strcpy(error1, "Unable to invert navigation!");
         strcpy(error2, "Failed to allocate memory for block-average arrays.");
@@ -1112,14 +1160,14 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
             tie = (struct mbna_tie *)&crossing->ties[itie];
 
             /* if blocks differ get id for block vs block */
-            if (project.files[crossing->file_id_1].survey != project.files[crossing->file_id_2].survey) {
-              if (project.files[crossing->file_id_2].survey > project.files[crossing->file_id_1].survey) {
-                jbvb1 = project.files[crossing->file_id_1].survey;
-                jbvb2 = project.files[crossing->file_id_2].survey;
+            if (project.files[crossing->file_id_1].block != project.files[crossing->file_id_2].block) {
+              if (project.files[crossing->file_id_2].block > project.files[crossing->file_id_1].block) {
+                jbvb1 = project.files[crossing->file_id_1].block;
+                jbvb2 = project.files[crossing->file_id_2].block;
               }
               else {
-                jbvb1 = project.files[crossing->file_id_2].survey;
-                jbvb2 = project.files[crossing->file_id_1].survey;
+                jbvb1 = project.files[crossing->file_id_2].block;
+                jbvb2 = project.files[crossing->file_id_1].block;
               }
               jbvb = (jbvb2) * (jbvb2 + 1) / 2 + jbvb1;
 
@@ -1267,12 +1315,18 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
     matrix.ia = NULL;
     matrix.a = NULL;
     status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows_alloc * sizeof(double), (void **)&u, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols_alloc * sizeof(double), (void **)&v, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols_alloc * sizeof(double), (void **)&w, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols_alloc * sizeof(double), (void **)&x, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols_alloc * sizeof(int), (void **)&nx, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols_alloc * sizeof(double), (void **)&se, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows_alloc * sizeof(double), (void **)&b, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols_alloc * sizeof(double), (void **)&v, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols_alloc * sizeof(double), (void **)&w, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols_alloc * sizeof(double), (void **)&x, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols_alloc * sizeof(int), (void **)&nx, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols_alloc * sizeof(double), (void **)&se, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows_alloc * sizeof(double), (void **)&b, &error);
     /* matrix.ia/matrix.a are indexed by mb_aprod() as [matrix.ia_dim * row + col].
         matrix.ia_dim is only ever assigned two values in this function: ncols_ba
         (3 * nblock) for the preliminary block-offset solution (set at line ~1312,
@@ -1284,9 +1338,12 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
         realistic project with many nav points and few survey blocks
         (nnav >> nblock) would over-allocate this array enormously for no benefit. */
     const int ia_dim_alloc = MAX(6, ncols_ba);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows_alloc * sizeof(int), (void **)&matrix.nia, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, (size_t)ia_dim_alloc * (size_t)nrows_alloc * sizeof(int), (void **)&matrix.ia, &error);
-    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, (size_t)ia_dim_alloc * (size_t)nrows_alloc * sizeof(double), (void **)&matrix.a, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows_alloc * sizeof(int), (void **)&matrix.nia, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, (size_t)ia_dim_alloc * (size_t)nrows_alloc * sizeof(int), (void **)&matrix.ia, &error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, (size_t)ia_dim_alloc * (size_t)nrows_alloc * sizeof(double), (void **)&matrix.a, &error);
     if (status != MB_SUCCESS) {
       strcpy(error1, "Unable to invert navigation!");
       strcpy(error2, "Failed to allocate memory for the sparse least-squares matrix.");
@@ -1579,6 +1636,8 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
           file = &project.files[ifile];
           for (int isection = 0; isection < file->num_sections; isection++) {
               section = &file->sections[isection];
+              if (section->globaltie.status == MBNA_TIE_NONE)
+                  continue;
               if (section->globaltie.status != MBNA_TIE_Z && section->globaltie.status != MBNA_TIE_Z_FIXED) {
                   offset_x =
                       section->globaltie.offset_x_m - section->snav_lon_offset[section->globaltie.snav] / project.mtodeglon;
@@ -1587,7 +1646,7 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
                   rms_misfit_current += offset_x * offset_x + offset_y * offset_y;
                   nrms += 2;
               }
-              if (section->globaltie.status != MBNA_TIE_XY && section->globaltie.status == MBNA_TIE_XY_FIXED) {
+              if (section->globaltie.status != MBNA_TIE_XY && section->globaltie.status != MBNA_TIE_XY_FIXED) {
                   offset_z = section->globaltie.offset_z_m - section->snav_z_offset[section->globaltie.snav];
                   rms_misfit_current += offset_z * offset_z;
                   nrms += 1;
@@ -1595,7 +1654,7 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
           }
       }
       if (nrms > 0) {
-          rms_misfit_current = sqrt(rms_misfit_current) / nrms;
+          rms_misfit_current = sqrt(rms_misfit_current / nrms);
       }
 
       fprintf(stderr, "\nBlock inversion:\n > Solution size:        %12g\n"
@@ -1676,7 +1735,7 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
            self-correcting: if the relaxation ever diverges instead of converging, the
            model is rolled back to the best state found rather than left however the
            runaway happened to leave it */
-        double rms_misfit_best = rms_misfit_initial;
+        double rms_misfit_best = rms_misfit_current;
         int n_no_improvement = 0;
         const int n_no_improvement_limit = 10;
         for (int ifile = 0; ifile < project.num_files; ifile++) {
@@ -2050,7 +2109,8 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
             }
 
             /* get previous misfit measure */
-            rms_misfit_previous = sqrt(rms_misfit_previous) / nrms;
+            if (nrms > 0)
+                rms_misfit_previous = sqrt(rms_misfit_previous / nrms);
 
             /* add average offsets back into the model */
             rms_solution = 0.0;
@@ -2160,6 +2220,8 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
                 file = &project.files[ifile];
                 for (int isection = 0; isection < file->num_sections; isection++) {
                     section = &file->sections[isection];
+                    if (section->globaltie.status == MBNA_TIE_NONE)
+                        continue;
                     if (section->globaltie.status != MBNA_TIE_Z && section->globaltie.status != MBNA_TIE_Z_FIXED) {
                         offset_x =
                             section->globaltie.offset_x_m - section->snav_lon_offset[section->globaltie.snav] / project.mtodeglon;
@@ -2176,8 +2238,11 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
                 }
             }
             if (nrms > 0) {
-                rms_misfit_current = sqrt(rms_misfit_current) / nrms;
-                convergence = fabs(rms_misfit_previous - rms_misfit_current) / rms_misfit_previous;
+                rms_misfit_current = sqrt(rms_misfit_current / nrms);
+                if (rms_misfit_previous > 0.0)
+                    convergence = fabs(rms_misfit_previous - rms_misfit_current) / rms_misfit_previous;
+                else
+                    convergence = 0.0;
             }
 
             fprintf(stderr, " > Solution size:        %12g\n"
@@ -2252,7 +2317,7 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
     /* the whole project using all ties to fit the remmaining misfit.          */
     /*-------------------------------------------------------------------------*/
 
-    for (int isurvey = -1; isurvey <= project.num_surveys; isurvey++) {
+    for (int isurvey = -1; isurvey <= nblock; isurvey++) {
       matrix_scale = 1000.0;
       convergence = 1000.0;
       smooth_exp = project.smoothing;
@@ -2261,7 +2326,7 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
       bool full_inversion = false;
       int inavstart = 0;
       int inavend = nnav - 1;
-      if (isurvey == -1 || isurvey == project.num_surveys) {
+      if (isurvey == -1 || isurvey == nblock) {
         full_inversion = true;
         matrix.m = nrows;
         matrix.n = ncols;
@@ -2299,13 +2364,10 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
               if (section->globaltie.status != MBNA_TIE_NONE) {
                 if (section->globaltie.status == MBNA_TIE_XY || section->globaltie.status == MBNA_TIE_XYZ
                     || section->globaltie.status == MBNA_TIE_XY_FIXED || section->globaltie.status == MBNA_TIE_XYZ_FIXED) {
-                  rms_misfit_initial += (section->globaltie.offset_x_m * section->globaltie.offset_x_m)
-                                          + (section->globaltie.offset_y_m * section->globaltie.offset_y_m);
                   nglobal_surveyonly += 2;
                 }
                 if (section->globaltie.status == MBNA_TIE_Z || section->globaltie.status == MBNA_TIE_XYZ
                     || section->globaltie.status == MBNA_TIE_Z_FIXED || section->globaltie.status == MBNA_TIE_XYZ_FIXED) {
-                  rms_misfit_initial += (section->globaltie.offset_z_m * section->globaltie.offset_z_m);
                   nglobal_surveyonly += 1;
                 }
               }
@@ -2344,8 +2406,8 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
         for (int icrossing = 0; icrossing < project.num_crossings; icrossing++) {
           crossing = &project.crossings[icrossing];
           if (crossing->status == MBNA_CROSSING_STATUS_SET
-            && project.files[crossing->file_id_1].survey == isurvey
-            && project.files[crossing->file_id_2].survey == isurvey) {
+            && project.files[crossing->file_id_1].block == isurvey
+            && project.files[crossing->file_id_2].block == isurvey) {
             for (int itie = 0; itie < crossing->num_ties; itie++) {
               ntie_surveyonly += 3;
             }
@@ -2388,8 +2450,8 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
 
           /* use only set crossings */
           if (crossing->status == MBNA_CROSSING_STATUS_SET
-              && (full_inversion || (project.files[crossing->file_id_1].survey == isurvey
-                  && project.files[crossing->file_id_2].survey == isurvey)))
+              && (full_inversion || (project.files[crossing->file_id_1].block == isurvey
+                  && project.files[crossing->file_id_2].block == isurvey)))
               for (int itie = 0; itie < crossing->num_ties; itie++) {
                   /* A: get tie */
                   tie = (struct mbna_tie *)&crossing->ties[itie];
@@ -2746,7 +2808,8 @@ fprintf(stderr, "\nGlobal ties Z %d:\n", nglobaltiez);
                   }
               }
           }
-          rms_misfit_previous = sqrt(rms_misfit_previous) / nrms;
+          if (nrms > 0)
+              rms_misfit_previous = sqrt(rms_misfit_previous / nrms);
 
           /* D1: loop over all files applying ties for any fixed files */
           weight = 1000.0;
@@ -3111,7 +3174,7 @@ offset_x, offset_y, offset_z); */
                     rms_misfit_current += offset_x * offset_x + offset_y * offset_y;
                     nrms += 2;
                 }
-                if (globaltie->status != MBNA_TIE_XY || globaltie->status != MBNA_TIE_XY_FIXED) {
+                if (globaltie->status != MBNA_TIE_XY && globaltie->status != MBNA_TIE_XY_FIXED) {
                     offset_z = globaltie->offset_z_m - section->snav_z_offset[globaltie->snav];
                     rms_misfit_current += offset_z * offset_z;
                     nrms += 1;
@@ -3120,8 +3183,9 @@ offset_x, offset_y, offset_z); */
         }
     }
     if (nrms > 0) {
-        rms_misfit_current = sqrt(rms_misfit_current) / nrms;
-        convergence = (rms_misfit_previous - rms_misfit_current) / rms_misfit_previous;
+        rms_misfit_current = sqrt(rms_misfit_current / nrms);
+        if (rms_misfit_previous > 0.0)
+            convergence = (rms_misfit_previous - rms_misfit_current) / rms_misfit_previous;
     }
 
     fprintf(stderr, "\nInversion %d:\n > Solution size:        %12g\n"
@@ -3154,6 +3218,8 @@ offset_x, offset_y, offset_z); */
     mb_path tie_file;
     snprintf(tie_file, sizeof(tie_file), "%s%s_tiesoln.txt", project.path, project.name);
     FILE *ofp = fopen(tie_file, "w");
+    if (ofp == NULL)
+      fprintf(stderr, "MBnavadjust warning: unable to open tie solution file %s for writing\n", tie_file);
     for (int icrossing = 0; icrossing < project.num_crossings; icrossing++) {
       crossing = &project.crossings[icrossing];
 
@@ -3226,6 +3292,7 @@ offset_x, offset_y, offset_z); */
                                       + project.files[crossing->file_id_2].sections[crossing->section_2].snav_lon[tie->snav_2]);
           double avg_tie_lat = 0.5 * (project.files[crossing->file_id_1].sections[crossing->section_1].snav_lat[tie->snav_1]
                                       + project.files[crossing->file_id_2].sections[crossing->section_2].snav_lat[tie->snav_2]);
+          if (ofp != NULL)
           fprintf(ofp,  "%2.2d:%4.4d:%3.3d:%2.2d %4.4d %2.2d %2.2d %2.2d:%2.2d:%2.2d.%6.6d  %.6f "
                         "%2.2d:%4.4d:%3.3d:%2.2d %4.4d %2.2d %2.2d %2.2d:%2.2d:%2.2d.%6.6d  %.6f "
                         "%14.9f %14.9f "
@@ -3243,7 +3310,8 @@ offset_x, offset_y, offset_z); */
         }
       }
     }
-    fclose(ofp);
+    if (ofp != NULL)
+      fclose(ofp);
 
     /* get global tie results */
     snprintf(message, sizeof(message), " > Global Tie Offsets (m):  id  observed  solution  error\n");
@@ -3286,9 +3354,9 @@ offset_x, offset_y, offset_z); */
                         globaltie->dy_m = globaltie->offset_y_m - globaltie->inversion_offset_y_m;
                         globaltie->dz_m = globaltie->offset_z_m - globaltie->inversion_offset_z_m;
                         globaltie->sigma_m = sqrt(globaltie->dx_m * globaltie->dx_m + globaltie->dy_m * globaltie->dy_m + globaltie->dz_m * globaltie->dz_m);
-                        globaltie->dr1_m = globaltie->inversion_offset_x_m / globaltie->sigmar1;
-                        globaltie->dr2_m = globaltie->inversion_offset_y_m / globaltie->sigmar2;
-                        globaltie->dr3_m = globaltie->inversion_offset_z_m / globaltie->sigmar3;
+                        globaltie->dr1_m = globaltie->sigmar1 > 0.0 ? globaltie->inversion_offset_x_m / globaltie->sigmar1 : 0.0;
+                        globaltie->dr2_m = globaltie->sigmar2 > 0.0 ? globaltie->inversion_offset_y_m / globaltie->sigmar2 : 0.0;
+                        globaltie->dr3_m = globaltie->sigmar3 > 0.0 ? globaltie->inversion_offset_z_m / globaltie->sigmar3 : 0.0;
                         globaltie->rsigma_m = sqrt(globaltie->dr1_m * globaltie->dr1_m + globaltie->dr2_m * globaltie->dr2_m + globaltie->dr3_m * globaltie->dr3_m);
           }
           snprintf(message, sizeof(message), 
@@ -3321,6 +3389,10 @@ offset_x, offset_y, offset_z); */
     status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&snav_lon_offset_best, &error);
     status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&snav_lat_offset_best, &error);
     status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&snav_z_offset_best, &error);
+    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&global_ties_xy_files, &error);
+    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&global_ties_xy_sections, &error);
+    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&global_ties_z_files, &error);
+    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&global_ties_z_sections, &error);
     status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&u, &error);
     status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&v, &error);
     status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&w, &error);

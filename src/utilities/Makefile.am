@@ -87,6 +87,7 @@ mbauvloglist_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbauvloglist_SOURCES = mbauvloglist.cc
 mbbackangle_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbbackangle_SOURCES = mbbackangle.cc
+mbclean_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbclean_SOURCES = mbclean.cc
 if BUILD_GSF
 mbcopy_LDADD = ${top_builddir}/src/gsf/libmbgsf.la

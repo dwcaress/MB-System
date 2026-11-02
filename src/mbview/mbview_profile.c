@@ -355,7 +355,7 @@ int mbview_getprofile(int verbose, size_t instance, mb_path source_name, double 
 		strcpy(source_name, data->profile.source_name);
 		*length = data->profile.length;
 		*zmin = data->profile.zmin;
-		*zmax = data->profile.npoints;
+		*zmax = data->profile.zmax;
 		*npoints = data->profile.npoints;
 		for (i = 0; i < data->profile.npoints; i++) {
 			distance[i] = data->profile.points[i].distance;

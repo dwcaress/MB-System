@@ -250,6 +250,84 @@ static char usage_message[] =
     "\t--verbose --help]\n";
 
 /*--------------------------------------------------------------------*/
+/* Floor the uncertainty magnitudes of an active global tie in the same
+   way mbnavadjust does when it reads a project or picks a global tie, so
+   that a zero sigma cannot produce an infinite inversion weight. */
+static void mbnavadjustmerge_floor_globaltie_sigmas(struct mbna_globaltie *globaltie) {
+  if (globaltie->status == MBNA_TIE_NONE)
+    return;
+  if (globaltie->sigmar1 < MBNA_SMALL) {
+    globaltie->sigmar1 = MBNA_SMALL;
+    globaltie->sigmax1[0] = 1.0;
+    globaltie->sigmax1[1] = 0.0;
+    globaltie->sigmax1[2] = 0.0;
+  }
+  if (globaltie->sigmar2 < MBNA_SMALL) {
+    globaltie->sigmar2 = MBNA_SMALL;
+    globaltie->sigmax2[0] = 0.0;
+    globaltie->sigmax2[1] = 1.0;
+    globaltie->sigmax2[2] = 0.0;
+  }
+  if (globaltie->sigmar3 < MBNA_ZSMALL) {
+    globaltie->sigmar3 = MBNA_ZSMALL;
+    globaltie->sigmax3[0] = 0.0;
+    globaltie->sigmax3[1] = 0.0;
+    globaltie->sigmax3[2] = 1.0;
+  }
+}
+
+/*--------------------------------------------------------------------*/
+/* Give a global tie whose mode is set without offsets or uncertainties
+   (--set-global-tie-xyz/-xyonly/-zonly on a section with no previous
+   global tie) the same default uncertainties as --set-global-tie. */
+static void mbnavadjustmerge_default_globaltie_sigmas(struct mbna_globaltie *globaltie) {
+  if (globaltie->sigmar1 <= 0.0) {
+    globaltie->sigmar1 = 10.0;
+    globaltie->sigmax1[0] = 1.0;
+    globaltie->sigmax1[1] = 0.0;
+    globaltie->sigmax1[2] = 0.0;
+  }
+  if (globaltie->sigmar2 <= 0.0) {
+    globaltie->sigmar2 = 10.0;
+    globaltie->sigmax2[0] = 0.0;
+    globaltie->sigmax2[1] = 1.0;
+    globaltie->sigmax2[2] = 0.0;
+  }
+  if (globaltie->sigmar3 <= 0.0) {
+    globaltie->sigmar3 = 0.5;
+    globaltie->sigmax3[0] = 0.0;
+    globaltie->sigmax3[1] = 0.0;
+    globaltie->sigmax3[2] = 1.0;
+  }
+}
+
+/*--------------------------------------------------------------------*/
+/* Unset all ties of a crossing, keeping the project tie and analyzed
+   crossing counters and the per-snav tie counts consistent. */
+static void mbnavadjustmerge_unset_crossing_ties(struct mbna_project *project, struct mbna_crossing *crossing) {
+  if (crossing->num_ties > 0) {
+    struct mbna_section *section1 = &project->files[crossing->file_id_1].sections[crossing->section_1];
+    struct mbna_section *section2 = &project->files[crossing->file_id_2].sections[crossing->section_2];
+    for (int itie = 0; itie < crossing->num_ties; itie++) {
+      struct mbna_tie *tie = &crossing->ties[itie];
+      if (tie->snav_1 >= 0 && tie->snav_1 < section1->num_snav && section1->snav_num_ties[tie->snav_1] > 0)
+        section1->snav_num_ties[tie->snav_1]--;
+      if (tie->snav_2 >= 0 && tie->snav_2 < section2->num_snav && section2->snav_num_ties[tie->snav_2] > 0)
+        section2->snav_num_ties[tie->snav_2]--;
+    }
+    project->num_ties = MAX(project->num_ties - crossing->num_ties, 0);
+  }
+  if (crossing->status != MBNA_CROSSING_STATUS_NONE) {
+    if (project->num_crossings_analyzed > 0)
+      project->num_crossings_analyzed--;
+    if (crossing->truecrossing && project->num_truecrossings_analyzed > 0)
+      project->num_truecrossings_analyzed--;
+  }
+  crossing->status = MBNA_CROSSING_STATUS_NONE;
+  crossing->num_ties = 0;
+}
+
+/*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
   int verbose = 0;
@@ -2300,6 +2378,36 @@ int main(int argc, char **argv) {
     int num_tri_copied = 0;
     int num_sections_copied = 0;
 
+    /* map the reference grids of the input add project onto those of the
+        output project, reusing a grid of the same name and never exceeding
+        the fixed MBNA_REFGRID_NUM_MAX reference grid arrays */
+    int refgrid_add_map[MBNA_REFGRID_NUM_MAX];
+    const int num_refgrids_base = project_output.num_refgrids;
+    int num_refgrids_output = project_output.num_refgrids;
+    const int num_refgrids_add = MIN(project_inputadd.num_refgrids, MBNA_REFGRID_NUM_MAX);
+    for (int irefgrid = 0; irefgrid < num_refgrids_add; irefgrid++) {
+      refgrid_add_map[irefgrid] = -1;
+      for (int jrefgrid = 0; jrefgrid < num_refgrids_output && refgrid_add_map[irefgrid] < 0; jrefgrid++) {
+        if (strncmp(project_output.refgrid_names[jrefgrid], project_inputadd.refgrid_names[irefgrid], sizeof(mb_path)) == 0)
+          refgrid_add_map[irefgrid] = jrefgrid;
+      }
+      if (refgrid_add_map[irefgrid] < 0) {
+        if (num_refgrids_output < MBNA_REFGRID_NUM_MAX) {
+          refgrid_add_map[irefgrid] = num_refgrids_output;
+          strncpy(project_output.refgrid_names[num_refgrids_output], project_inputadd.refgrid_names[irefgrid], sizeof(mb_path));
+          project_output.refgrid_bounds[0][num_refgrids_output] = project_inputadd.refgrid_bounds[0][irefgrid];
+          project_output.refgrid_bounds[1][num_refgrids_output] = project_inputadd.refgrid_bounds[1][irefgrid];
+          project_output.refgrid_bounds[2][num_refgrids_output] = project_inputadd.refgrid_bounds[2][irefgrid];
+          project_output.refgrid_bounds[3][num_refgrids_output] = project_inputadd.refgrid_bounds[3][irefgrid];
+          num_refgrids_output++;
+        }
+        else {
+          fprintf(stderr, "Warning: maximum number of reference grids (%d) exceeded - reference grid %s not added\n",
+                  MBNA_REFGRID_NUM_MAX, project_inputadd.refgrid_names[irefgrid]);
+        }
+      }
+    }
+
     /* copy the sections in the files */
     for (int i = 0; i < project_inputadd.num_files && status == MB_SUCCESS; i++) {
       const int j = project_output.num_files + i;
@@ -2333,7 +2441,9 @@ int main(int argc, char **argv) {
         project_output.files[j].sections[k].global_start_ping += project_output.num_pings;
         project_output.files[j].sections[k].global_start_snav += project_output.num_snavs;
         if (project_output.files[j].sections[k].globaltie.refgrid_id >= 0) {
-          project_output.files[j].sections[k].globaltie.refgrid_id += project_output.num_refgrids;
+          const int refgrid_id = project_output.files[j].sections[k].globaltie.refgrid_id;
+          project_output.files[j].sections[k].globaltie.refgrid_id =
+              (refgrid_id < num_refgrids_add) ? refgrid_add_map[refgrid_id] : -1;
         }
       }
     }
@@ -2432,19 +2542,15 @@ int main(int argc, char **argv) {
     }
 
     /* copy the actual reference grid files from the input project to the new output project */
-    for (int irefgrid = 0; irefgrid < project_inputadd.num_refgrids; irefgrid++) {
-      /* copy the ref_grid file */
+    for (int irefgrid = 0; irefgrid < num_refgrids_add; irefgrid++) {
+      /* copy the ref_grid file only if it was added to the output project above */
+      if (refgrid_add_map[irefgrid] < num_refgrids_base)
+        continue;
       mb_command srcfile = "";
       mb_command dstfile = "";
       sprintf(srcfile, "%s/%s", project_inputadd.datadir, project_inputadd.refgrid_names[irefgrid]);
       sprintf(dstfile, "%s/%s", project_output.datadir, project_inputadd.refgrid_names[irefgrid]);
       mb_copyfile(verbose, srcfile, dstfile, &error);
-      strncpy(project_output.refgrid_names[project_output.num_refgrids + irefgrid], 
-              project_inputadd.refgrid_names[irefgrid], sizeof(mb_path));
-      project_output.refgrid_bounds[0][project_output.num_refgrids + irefgrid] = project_inputadd.refgrid_bounds[0][irefgrid];
-      project_output.refgrid_bounds[1][project_output.num_refgrids + irefgrid] = project_inputadd.refgrid_bounds[1][irefgrid];
-      project_output.refgrid_bounds[2][project_output.num_refgrids + irefgrid] = project_inputadd.refgrid_bounds[2][irefgrid];
-      project_output.refgrid_bounds[3][project_output.num_refgrids + irefgrid] = project_inputadd.refgrid_bounds[3][irefgrid];
     }
 
     fprintf(stderr, "\nCopied input add project to output project:\n\t%s\n", project_output_path);
@@ -2467,7 +2573,7 @@ int main(int argc, char **argv) {
     project_output.num_ties += project_inputadd.num_ties;
     project_output.num_globalties += project_inputadd.num_globalties;
     project_output.num_globalties_analyzed += project_inputadd.num_globalties_analyzed;
-    project_output.num_refgrids += project_inputadd.num_refgrids;
+    project_output.num_refgrids = num_refgrids_output;
 
     /* finally, check for any redundant reference grids, removing extras from the project */
     if (project_output.num_refgrids > 1) {
@@ -2607,6 +2713,7 @@ int main(int argc, char **argv) {
             section1->globaltie.sigmax3[0] = 0.0;
             section1->globaltie.sigmax3[1] = 0.0;
             section1->globaltie.sigmax3[2] = 1.0;
+            mbnavadjustmerge_floor_globaltie_sigmas(&section1->globaltie);
           }
           else {
             section1->globaltie.status = MBNA_TIE_NONE;
@@ -2682,6 +2789,7 @@ int main(int argc, char **argv) {
             section1->globaltie.sigmax3[0] = 0.0;
             section1->globaltie.sigmax3[1] = 0.0;
             section1->globaltie.sigmax3[2] = 1.0;
+            mbnavadjustmerge_floor_globaltie_sigmas(&section1->globaltie);
           }
           else {
             section1->globaltie.status = MBNA_TIE_NONE;
@@ -2736,6 +2844,7 @@ int main(int argc, char **argv) {
           if (mods[imod].snav1 >= 0 && mods[imod].snav1 < section1->num_snav) {
             section1->globaltie.status = MBNA_TIE_XYZ;
             section1->globaltie.snav = mods[imod].snav1;
+            mbnavadjustmerge_default_globaltie_sigmas(&section1->globaltie);
           }
           else {
             section1->globaltie.status = MBNA_TIE_NONE;
@@ -2759,6 +2868,7 @@ int main(int argc, char **argv) {
           if (mods[imod].snav1 >= 0 && mods[imod].snav1 < section1->num_snav) {
             section1->globaltie.status = MBNA_TIE_XY;
             section1->globaltie.snav = mods[imod].snav1;
+            mbnavadjustmerge_default_globaltie_sigmas(&section1->globaltie);
           }
           else {
             section1->globaltie.status = MBNA_TIE_NONE;
@@ -2782,6 +2892,7 @@ int main(int argc, char **argv) {
           if (mods[imod].snav1 >= 0 && mods[imod].snav1 < section1->num_snav) {
             section1->globaltie.status = MBNA_TIE_Z;
             section1->globaltie.snav = mods[imod].snav1;
+            mbnavadjustmerge_default_globaltie_sigmas(&section1->globaltie);
           }
           else {
             section1->globaltie.status = MBNA_TIE_NONE;
@@ -2999,19 +3110,23 @@ int main(int argc, char **argv) {
             mods[imod].section1 >= 0 && mods[imod].section1 < project_output.files[mods[imod].file1].num_sections &&
             mods[imod].section2 >= 0 && mods[imod].section2 < project_output.files[mods[imod].file2].num_sections) {
           /* allocate mbna_crossing array if needed */
+          bool alloc_ok = true;
           if (project_output.num_crossings_alloc <= project_output.num_crossings) {
-            project_output.crossings = (struct mbna_crossing *)realloc(
+            struct mbna_crossing *crossings_tmp = (struct mbna_crossing *)realloc(
                 project_output.crossings,
                 sizeof(struct mbna_crossing) * (project_output.num_crossings_alloc + ALLOC_NUM));
-            if (project_output.crossings != NULL)
+            if (crossings_tmp != NULL) {
+              project_output.crossings = crossings_tmp;
               project_output.num_crossings_alloc += ALLOC_NUM;
+            }
             else {
+              alloc_ok = false;
               status = MB_FAILURE;
               error = MB_ERROR_MEMORY_FAIL;
             }
           }
 
-          if (status == MB_SUCCESS) {
+          if (alloc_ok) {
             /* add crossing to list */
             crossing = (struct mbna_crossing *)&project_output.crossings[project_output.num_crossings];
             crossing->status = MBNA_CROSSING_STATUS_NONE;
@@ -3138,15 +3253,20 @@ int main(int argc, char **argv) {
       }
 
       /* if the crossing does not exist, create it */
+      bool crossing_ok = found_crossing;
       if (!found_crossing) {
         /* allocate mbna_crossing array if needed */
+        bool alloc_ok = true;
         if (project_output.num_crossings_alloc <= project_output.num_crossings) {
-          project_output.crossings = (struct mbna_crossing *)realloc(
+          struct mbna_crossing *crossings_tmp = (struct mbna_crossing *)realloc(
               project_output.crossings,
               sizeof(struct mbna_crossing) * (project_output.num_crossings_alloc + ALLOC_NUM));
-          if (project_output.crossings != NULL)
+          if (crossings_tmp != NULL) {
+            project_output.crossings = crossings_tmp;
             project_output.num_crossings_alloc += ALLOC_NUM;
+          }
           else {
+            alloc_ok = false;
             status = MB_FAILURE;
             error = MB_ERROR_MEMORY_FAIL;
           }
@@ -3154,7 +3274,7 @@ int main(int argc, char **argv) {
 
         /* add crossing to list - but only if the array growth above (if
             any was needed) actually succeeded */
-        if (status == MB_SUCCESS) {
+        if (alloc_ok) {
           current_crossing = project_output.num_crossings;
           crossing = (struct mbna_crossing *)&project_output.crossings[current_crossing];
           crossing->status = MBNA_CROSSING_STATUS_NONE;
@@ -3167,6 +3287,7 @@ int main(int argc, char **argv) {
           crossing->num_ties = 0;
           current_crossing = project_output.num_crossings;
           project_output.num_crossings++;
+          crossing_ok = true;
 
           /* only look up file1/file2 (for the block numbers in the message
               below) after crossing->file_id_1/2 have actually been assigned */
@@ -3180,7 +3301,7 @@ int main(int argc, char **argv) {
       /* if the tie does not exist, create it - guard against a prior
           allocation failure above having left crossing unset/stale */
       bool existing_tie = true;
-      if (status == MB_SUCCESS && crossing->num_ties == 0) {
+      if (crossing_ok && crossing->num_ties == 0) {
 
         existing_tie = false;
 
@@ -3210,7 +3331,7 @@ int main(int argc, char **argv) {
       }
 
       /* set the tie parameters */
-      for (int itie = 0; itie < crossing->num_ties; itie++) {
+      for (int itie = 0; crossing_ok && itie < crossing->num_ties; itie++) {
         file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
         file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
         section1 = (struct mbna_section *)&file1->sections[crossing->section_1];
@@ -3253,9 +3374,11 @@ int main(int argc, char **argv) {
           project_output.inversion_status = MBNA_INVERSION_OLD;
         project_output.grid_status = MBNA_GRID_OLD;
 
-        /* reset tie counts for snavs */
-        section1->snav_num_ties[tie->snav_1]++;
-        section2->snav_num_ties[tie->snav_2]++;
+        /* augment tie counts for snavs only for a newly added tie */
+        if (!existing_tie) {
+          section1->snav_num_ties[tie->snav_1]++;
+          section2->snav_num_ties[tie->snav_2]++;
+        }
 
         fprintf(stderr,
                 "Set tie offsets:       %d:%d  %2.2d:%4.4d:%4.4d:%2.2d   %2.2d:%4.4d:%4.4d:%2.2d  %.3f %.3f %.3f\n",
@@ -3837,8 +3960,7 @@ int main(int argc, char **argv) {
 
       /* unset the ties associated with this crossing */
       if (found_crossing && crossing->num_ties > 0) {
-        crossing->status = MBNA_CROSSING_STATUS_NONE;
-        crossing->num_ties = 0;
+        mbnavadjustmerge_unset_crossing_ties(&project_output, crossing);
 
         fprintf(stderr, "Unset tie:   %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", current_crossing, file1->block,
                 crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2, crossing->section_2);
@@ -3857,8 +3979,7 @@ int main(int argc, char **argv) {
           file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
           fprintf(stderr, "Unset tie(s) of crossing:   %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", current_crossing, file1->block,
                   crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2, crossing->section_2);
-          crossing->status = MBNA_CROSSING_STATUS_NONE;
-          crossing->num_ties = 0;
+          mbnavadjustmerge_unset_crossing_ties(&project_output, crossing);
         }
       }
       break;
@@ -3875,8 +3996,7 @@ int main(int argc, char **argv) {
           file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
           fprintf(stderr, "Unset tie(s) of crossing:   %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", current_crossing, file1->block,
                   crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2, crossing->section_2);
-          crossing->status = MBNA_CROSSING_STATUS_NONE;
-          crossing->num_ties = 0;
+          mbnavadjustmerge_unset_crossing_ties(&project_output, crossing);
         }
       }
       break;
@@ -3893,8 +4013,7 @@ int main(int argc, char **argv) {
           file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
           fprintf(stderr, "Unset tie(s) of crossing:   %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", current_crossing, file1->block,
                   crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2, crossing->section_2);
-          crossing->status = MBNA_CROSSING_STATUS_NONE;
-          crossing->num_ties = 0;
+          mbnavadjustmerge_unset_crossing_ties(&project_output, crossing);
         }
       }
       break;
@@ -3913,8 +4032,7 @@ int main(int argc, char **argv) {
           file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
           fprintf(stderr, "Unset tie(s) of crossing:   %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", current_crossing, file1->block,
                   crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2, crossing->section_2);
-          crossing->status = MBNA_CROSSING_STATUS_NONE;
-          crossing->num_ties = 0;
+          mbnavadjustmerge_unset_crossing_ties(&project_output, crossing);
         }
       }
       break;
@@ -3933,8 +4051,7 @@ int main(int argc, char **argv) {
                   crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2, crossing->section_2);
 	  	  	num_crossings_unset ++;
 	  	  	num_ties_unset += crossing->num_ties;
-          crossing->status = MBNA_CROSSING_STATUS_NONE;
-        	crossing->num_ties = 0;
+          mbnavadjustmerge_unset_crossing_ties(&project_output, crossing);
         }
       }
       fprintf(stderr, "  %d crossings unset\n", num_crossings_unset);
@@ -4526,6 +4643,7 @@ int main(int argc, char **argv) {
           section->globaltie.sigmar1 = import_globaltie_offset_xsigma;
           section->globaltie.sigmar2 = import_globaltie_offset_ysigma;
           section->globaltie.sigmar3 = import_globaltie_offset_zsigma;
+          mbnavadjustmerge_floor_globaltie_sigmas(&section->globaltie);
           mb_coor_scale(verbose, 0.5 * (section->latmin + section->latmax), &mtodeglon, &mtodeglat);
           section->globaltie.offset_x = section->globaltie.offset_x_m * mtodeglon;
           section->globaltie.offset_y = section->globaltie.offset_y_m * mtodeglat;
@@ -4697,20 +4815,27 @@ int main(int argc, char **argv) {
           }
 
           /* if the crossing does not exist, create it */
+          bool crossing_ok = found;
           if (found) {
+            file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
+            file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
             fprintf(stderr, "Found existing crossing: %d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", current_crossing,
                     file1->block, crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2,
                     crossing->section_2);
           }
           else if (!found) {
             /* allocate mbna_crossing array if needed */
+            bool alloc_ok = true;
             if (project_output.num_crossings_alloc <= project_output.num_crossings) {
-              project_output.crossings = (struct mbna_crossing *)realloc(
+              struct mbna_crossing *crossings_tmp = (struct mbna_crossing *)realloc(
                   project_output.crossings,
                   sizeof(struct mbna_crossing) * (project_output.num_crossings_alloc + ALLOC_NUM));
-              if (project_output.crossings != NULL)
+              if (crossings_tmp != NULL) {
+                project_output.crossings = crossings_tmp;
                 project_output.num_crossings_alloc += ALLOC_NUM;
+              }
               else {
+                alloc_ok = false;
                 status = MB_FAILURE;
                 error = MB_ERROR_MEMORY_FAIL;
               }
@@ -4718,7 +4843,7 @@ int main(int argc, char **argv) {
 
             /* add crossing to list - but only if the array growth above
                 (if any was needed) actually succeeded */
-            if (status == MB_SUCCESS) {
+            if (alloc_ok) {
               current_crossing = project_output.num_crossings;
               crossing = (struct mbna_crossing *)&project_output.crossings[current_crossing];
               crossing->status = MBNA_CROSSING_STATUS_NONE;
@@ -4731,6 +4856,7 @@ int main(int argc, char **argv) {
               crossing->num_ties = 0;
               current_crossing = project_output.num_crossings;
               project_output.num_crossings++;
+              crossing_ok = true;
 
               /* only look up file1/file2 (for the block numbers in the
                   message below) after crossing->file_id_1/2 have actually
@@ -4746,7 +4872,7 @@ int main(int argc, char **argv) {
           /* check if this tie already exists */
           found = false;
           int itie = 0; // Used after for
-          if (status == MB_SUCCESS && crossing->num_ties > 0) {
+          if (crossing_ok && crossing->num_ties > 0) {
             for (; itie < crossing->num_ties; itie++) {
               tie = &crossing->ties[itie];
               if (tie->snav_1 == import_tie_snav_1 && tie->snav_2 == import_tie_snav_2) {
@@ -4756,8 +4882,21 @@ int main(int argc, char **argv) {
             }
           }
 
+          /* get the files and sections of this crossing */
+          if (crossing_ok) {
+            file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
+            file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
+            section1 = (struct mbna_section *)&file1->sections[crossing->section_1];
+            section2 = (struct mbna_section *)&file2->sections[crossing->section_2];
+          }
+
+          /* skip this tie if the crossing could not be found or created */
+          if (!crossing_ok) {
+            fprintf(stderr, "Unable to add crossing for imported tie - tie ignored\n");
+          }
+
           /* if the tie exists change it */
-          if (found) {
+          else if (found) {
             /* set nav points */
             tie = &crossing->ties[itie_set];
             tie->snav_1 = import_tie_snav_1;
@@ -4767,13 +4906,16 @@ int main(int argc, char **argv) {
                     file2->block, crossing->file_id_2, crossing->section_2, tie->snav_2);
           }
 
+          /* do not exceed the maximum number of ties per crossing */
+          else if (crossing->num_ties >= MBNA_SNAV_NUM) {
+            fprintf(stderr, "Crossing %d already has the maximum %d ties - imported tie ignored\n",
+                    current_crossing, MBNA_SNAV_NUM);
+            crossing_ok = false;
+          }
+
           /* if the tie does not exist, create it */
           else {
             /* add tie and set number */
-            file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
-            file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
-            section1 = (struct mbna_section *)&file1->sections[crossing->section_1];
-            section2 = (struct mbna_section *)&file2->sections[crossing->section_2];
             itie_set = crossing->num_ties;
             crossing->num_ties++;
             project_output.num_ties++;
@@ -4800,45 +4942,47 @@ int main(int argc, char **argv) {
           }
 
           /* set the tie parameters */
-          tie = &crossing->ties[itie_set];
+          if (crossing_ok) {
+            tie = &crossing->ties[itie_set];
 
-          tie->status = -import_tie_status;
-          tie->snav_1_time_d = section1->snav_time_d[tie->snav_1];
-          tie->snav_2_time_d = section2->snav_time_d[tie->snav_2];
-          mb_coor_scale(verbose, 0.25 * (section1->latmin + section1->latmax + section2->latmin + section2->latmax),
-                        &mtodeglon, &mtodeglat);
-          tie->offset_x = import_tie_offset_x_m * mtodeglon;
-          tie->offset_y = import_tie_offset_y_m * mtodeglat;
-          tie->offset_x_m = import_tie_offset_x_m;
-          tie->offset_y_m = import_tie_offset_y_m;
-          tie->offset_z_m = import_tie_offset_z_m;
-          tie->sigmar1 = import_tie_sigmar1;
-          tie->sigmax1[0] = import_tie_sigmax1[0];
-          tie->sigmax1[1] = import_tie_sigmax1[1];
-          tie->sigmax1[2] = import_tie_sigmax1[2];
-          tie->sigmar2 = import_tie_sigmar2;
-          tie->sigmax2[0] = import_tie_sigmax2[0];
-          tie->sigmax2[1] = import_tie_sigmax2[1];
-          tie->sigmax2[2] = import_tie_sigmax2[2];
-          tie->sigmar3 = import_tie_sigmar3;
-          tie->sigmax3[0] = import_tie_sigmax3[0];
-          tie->sigmax3[1] = import_tie_sigmax3[1];
-          tie->sigmax3[2] = import_tie_sigmax3[2];
-          tie->inversion_offset_x = section2->snav_lon_offset[tie->snav_2] - section1->snav_lon_offset[tie->snav_1];
-          tie->inversion_offset_y = section2->snav_lat_offset[tie->snav_2] - section1->snav_lat_offset[tie->snav_1];
-          tie->inversion_offset_x_m = tie->inversion_offset_x / mtodeglon;
-          tie->inversion_offset_y_m = tie->inversion_offset_y / mtodeglat;
-          tie->inversion_offset_z_m = section2->snav_z_offset[tie->snav_2] - section1->snav_z_offset[tie->snav_1];
-          tie->inversion_status = MBNA_INVERSION_NONE;
-          if (project_output.inversion_status == MBNA_INVERSION_CURRENT)
-            project_output.inversion_status = MBNA_INVERSION_OLD;
-          project_output.grid_status = MBNA_GRID_OLD;
+            tie->status = -import_tie_status;
+            tie->snav_1_time_d = section1->snav_time_d[tie->snav_1];
+            tie->snav_2_time_d = section2->snav_time_d[tie->snav_2];
+            mb_coor_scale(verbose, 0.25 * (section1->latmin + section1->latmax + section2->latmin + section2->latmax),
+                          &mtodeglon, &mtodeglat);
+            tie->offset_x = import_tie_offset_x_m * mtodeglon;
+            tie->offset_y = import_tie_offset_y_m * mtodeglat;
+            tie->offset_x_m = import_tie_offset_x_m;
+            tie->offset_y_m = import_tie_offset_y_m;
+            tie->offset_z_m = import_tie_offset_z_m;
+            tie->sigmar1 = import_tie_sigmar1;
+            tie->sigmax1[0] = import_tie_sigmax1[0];
+            tie->sigmax1[1] = import_tie_sigmax1[1];
+            tie->sigmax1[2] = import_tie_sigmax1[2];
+            tie->sigmar2 = import_tie_sigmar2;
+            tie->sigmax2[0] = import_tie_sigmax2[0];
+            tie->sigmax2[1] = import_tie_sigmax2[1];
+            tie->sigmax2[2] = import_tie_sigmax2[2];
+            tie->sigmar3 = import_tie_sigmar3;
+            tie->sigmax3[0] = import_tie_sigmax3[0];
+            tie->sigmax3[1] = import_tie_sigmax3[1];
+            tie->sigmax3[2] = import_tie_sigmax3[2];
+            tie->inversion_offset_x = section2->snav_lon_offset[tie->snav_2] - section1->snav_lon_offset[tie->snav_1];
+            tie->inversion_offset_y = section2->snav_lat_offset[tie->snav_2] - section1->snav_lat_offset[tie->snav_1];
+            tie->inversion_offset_x_m = tie->inversion_offset_x / mtodeglon;
+            tie->inversion_offset_y_m = tie->inversion_offset_y / mtodeglat;
+            tie->inversion_offset_z_m = section2->snav_z_offset[tie->snav_2] - section1->snav_z_offset[tie->snav_1];
+            tie->inversion_status = MBNA_INVERSION_NONE;
+            if (project_output.inversion_status == MBNA_INVERSION_CURRENT)
+              project_output.inversion_status = MBNA_INVERSION_OLD;
+            project_output.grid_status = MBNA_GRID_OLD;
 
-          fprintf(stderr,
-                  "Set tie offsets:       %d:%d  %2.2d:%4.4d:%4.4d:%2.2d   %2.2d:%4.4d:%4.4d:%2.2d  %.3f %.3f %.3f\n",
-                  current_crossing, itie, file1->block, crossing->file_id_1, crossing->section_1, tie->snav_1,
-                  file2->block, crossing->file_id_2, crossing->section_2, tie->snav_2, tie->offset_x_m, tie->offset_y_m,
-                  tie->offset_z_m);
+            fprintf(stderr,
+                    "Set tie offsets:       %d:%d  %2.2d:%4.4d:%4.4d:%2.2d   %2.2d:%4.4d:%4.4d:%2.2d  %.3f %.3f %.3f\n",
+                    current_crossing, itie, file1->block, crossing->file_id_1, crossing->section_1, tie->snav_1,
+                    file2->block, crossing->file_id_2, crossing->section_2, tie->snav_2, tie->offset_x_m, tie->offset_y_m,
+                    tie->offset_z_m);
+          }
         }
       }
     }

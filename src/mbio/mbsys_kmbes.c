@@ -140,7 +140,9 @@ int mbsys_kmbes_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
   /* deallocate any arrays or structures contained within the store data structure */
   for (int i = 0; i < MBSYS_KMBES_MAX_NUM_MWC_DGMS; i++) {
     if (store->mwc[i].beamData_p != NULL && store->mwc[i].beamData_p_alloc_size > 0) {
-      for (int k = 0; k < store->mwc[i].rxInfo.numBeams; k++) {
+      /* free the sample arrays of all allocated beams, not only those of the last datagram read */
+      const int num_beams_alloc = (int)(store->mwc[i].beamData_p_alloc_size / sizeof(struct mbsys_kmbes_mwc_rx_beam_data));
+      for (int k = 0; k < num_beams_alloc; k++) {
         if (store->mwc[i].beamData_p[k].sampleAmplitude05dB_p != NULL
           && store->mwc[i].beamData_p[k].sampleAmplitude05dB_p_alloc_size > 0) {
           status = mb_freed(verbose, __FILE__, __LINE__,
@@ -573,6 +575,9 @@ int mbsys_kmbes_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber
   /* extract data from structure */
   if (store->kind == MB_DATA_DATA) {
     *pingnumber = store->mrz[0].cmnPart.pingCnt;
+  }
+  else if (store->kind == MB_DATA_WATER_COLUMN) {
+    *pingnumber = store->mwc_pingCnt;
   }
 
   const int status = MB_SUCCESS;
@@ -2743,6 +2748,15 @@ int mbsys_kmbes_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
     /* done translating values */
   }
 
+  /* water column records (e.g. from *.kmwcd files) carry no transducer depth or
+     bottom detections - the transducer depth is in the survey ping of the *.kmall */
+  else if (*kind == MB_DATA_WATER_COLUMN) {
+    *transducer_depth = 0.0;
+    *altitudev = 0.0;
+    *error = MB_ERROR_NO_ERROR;
+    status = MB_SUCCESS;
+  }
+
   /* deal with comment */
   else if (*kind == MB_DATA_COMMENT) {
     /* set status */
@@ -3697,6 +3711,185 @@ int mbsys_kmbes_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsv
   return (status);
 }
 /*--------------------------------------------------------------------*/
+/* Count the beams and the largest number of samples per beam in the #MWC datagrams of the
+    current ping - mwc[] slots left over from an earlier ping (a fan missing at the start or
+    end of a file) are skipped. Returns false if the record has no water column data. */
+static bool mbsys_kmbes_wc_size(const struct mbsys_kmbes_struct *store, int *nbeams, int *nsamples_max) {
+  *nbeams = 0;
+  *nsamples_max = 0;
+  if ((store->kind != MB_DATA_WATER_COLUMN && store->kind != MB_DATA_DATA) || store->n_mwc_read <= 0)
+    return false;
+  for (int imwc = 0; imwc < store->n_mwc_needed && imwc < MBSYS_KMBES_MAX_NUM_MWC_DGMS; imwc++) {
+    const struct mbsys_kmbes_mwc *mwc = &store->mwc[imwc];
+    if (mwc->cmnPart.rxFansPerPing == 0 || mwc->cmnPart.pingCnt != store->mwc_pingCnt)
+      continue;
+    *nbeams += mwc->rxInfo.numBeams;
+    for (int i = 0; i < mwc->rxInfo.numBeams; i++) {
+      *nsamples_max = MAX(*nsamples_max, mwc->beamData_p[i].numSampleData);
+    }
+  }
+  return (*nbeams > 0);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_kmbes_extract_wcdimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams,
+                                     int *nsamples_max, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+  }
+
+  /* get data structure pointer */
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+
+  /* get data kind */
+  *kind = store->kind;
+
+  int status = MB_SUCCESS;
+
+  /* get the dimensions of the water column data of the current ping */
+  if (mbsys_kmbes_wc_size(store, nbeams, nsamples_max)) {
+    *error = MB_ERROR_NO_ERROR;
+  }
+  else if (*kind == MB_DATA_COMMENT) {
+    status = MB_FAILURE;
+    *error = MB_ERROR_COMMENT;
+  }
+  else {
+    status = MB_FAILURE;
+    *error = MB_ERROR_OTHER;
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       kind:         %d\n", *kind);
+    fprintf(stderr, "dbg2       nbeams:       %d\n", *nbeams);
+    fprintf(stderr, "dbg2       nsamples_max: %d\n", *nsamples_max);
+    fprintf(stderr, "dbg2       error:        %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:       %d\n", status);
+  }
+
+  /* return status */
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_kmbes_extract_wc(int verbose, void *mbio_ptr, void *store_ptr, int nbeams_alloc, int nsamples_alloc,
+                           int *kind, int time_i[7], double *time_d, int *nbeams, int *nsamples_max,
+                           int *swath, double *angle_across, double *angle_along, double *sample_interval,
+                           double *soundspeed, int *start_sample, int *nsamples, double *detect_sample,
+                           float *amplitude, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
+    fprintf(stderr, "dbg2       mb_ptr:         %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:      %p\n", (void *)store_ptr);
+    fprintf(stderr, "dbg2       nbeams_alloc:   %d\n", nbeams_alloc);
+    fprintf(stderr, "dbg2       nsamples_alloc: %d\n", nsamples_alloc);
+  }
+
+  /* get data structure pointer */
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+
+  /* get data kind */
+  *kind = store->kind;
+
+  int status = MB_SUCCESS;
+
+  /* extract the water column data of the current ping */
+  if (mbsys_kmbes_wc_size(store, nbeams, nsamples_max)) {
+    /* get time */
+    for (int i = 0; i < 7; i++)
+      time_i[i] = store->time_i[i];
+    *time_d = store->time_d;
+
+    /* the caller's arrays must be large enough */
+    if (*nbeams > nbeams_alloc || *nsamples_max > nsamples_alloc) {
+      status = MB_FAILURE;
+      *error = MB_ERROR_BAD_PARAMETER;
+    }
+    else {
+      int ibeam = 0;
+      for (int imwc = 0; imwc < store->n_mwc_needed && imwc < MBSYS_KMBES_MAX_NUM_MWC_DGMS; imwc++) {
+        const struct mbsys_kmbes_mwc *mwc = &store->mwc[imwc];
+        if (mwc->cmnPart.rxFansPerPing == 0 || mwc->cmnPart.pingCnt != store->mwc_pingCnt)
+          continue;
+        const double interval = (mwc->rxInfo.sampleFreq_Hz > 0.0) ? 1.0 / mwc->rxInfo.sampleFreq_Hz : 0.0;
+        for (int i = 0; i < mwc->rxInfo.numBeams; i++) {
+          const struct mbsys_kmbes_mwc_rx_beam_data *beam = &mwc->beamData_p[i];
+
+          /* the along track steering angle is that of the beam's transmit sector */
+          double tilt = 0.0;
+          bool sector_found = false;
+          for (int isector = 0; isector < mwc->txInfo.numTxSectors && !sector_found; isector++) {
+            if (mwc->sectorData[isector].txSectorNum == beam->beamTxSectorNum) {
+              tilt = mwc->sectorData[isector].tiltAngleReTx_deg;
+              sector_found = true;
+            }
+          }
+          if (!sector_found && beam->beamTxSectorNum < mwc->txInfo.numTxSectors)
+            tilt = mwc->sectorData[beam->beamTxSectorNum].tiltAngleReTx_deg;
+
+          swath[ibeam] = mwc->cmnPart.swathAlongPosition;
+          /* Kongsberg beam pointing angles are positive to port, MB-System acrosstrack is
+             positive to starboard */
+          angle_across[ibeam] = -beam->beamPointAngReVertical_deg;
+          angle_along[ibeam] = tilt;
+          sample_interval[ibeam] = interval;
+          soundspeed[ibeam] = mwc->rxInfo.soundVelocity_mPerSec;
+          start_sample[ibeam] = beam->startRangeSampleNum;
+          nsamples[ibeam] = beam->numSampleData;
+          detect_sample[ibeam] = beam->detectedRangeInSamplesHighResolution;
+
+          /* amplitudes in 0.5 dB steps include the gain offset (TVGoffset_dB) - return the
+             display value without it, in dB */
+          float *beam_amplitude = &amplitude[(size_t)ibeam * (size_t)nsamples_alloc];
+          for (int k = 0; k < beam->numSampleData; k++) {
+            beam_amplitude[k] = (float)(0.5 * beam->sampleAmplitude05dB_p[k] - mwc->rxInfo.TVGoffset_dB);
+          }
+          ibeam++;
+        }
+      }
+      *error = MB_ERROR_NO_ERROR;
+    }
+  }
+  else if (*kind == MB_DATA_COMMENT) {
+    status = MB_FAILURE;
+    *error = MB_ERROR_COMMENT;
+  }
+  else {
+    status = MB_FAILURE;
+    *error = MB_ERROR_OTHER;
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       kind:         %d\n", *kind);
+    fprintf(stderr, "dbg2       nbeams:       %d\n", *nbeams);
+    fprintf(stderr, "dbg2       nsamples_max: %d\n", *nsamples_max);
+  }
+  if (verbose >= 2 && status == MB_SUCCESS) {
+    fprintf(stderr, "dbg2       time_d:       %f\n", *time_d);
+    for (int i = 0; i < *nbeams; i++)
+      fprintf(stderr, "dbg2       beam:%d swath:%d angle_across:%f angle_along:%f sample_interval:%g soundspeed:%f "
+              "start_sample:%d nsamples:%d detect_sample:%f\n", i, swath[i], angle_across[i], angle_along[i],
+              sample_interval[i], soundspeed[i], start_sample[i], nsamples[i], detect_sample[i]);
+  }
+  if (verbose >= 2) {
+    fprintf(stderr, "dbg2       error:        %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:       %d\n", status);
+  }
+
+  /* return status */
+  return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbsys_kmbes_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -3741,6 +3934,7 @@ int mbsys_kmbes_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
   copy->xms = store->xms;
   copy->n_mwc_read = store->n_mwc_read;
   copy->n_mwc_needed = store->n_mwc_needed;
+  copy->mwc_pingCnt = store->mwc_pingCnt;
 
   int status = MB_SUCCESS;
 
@@ -3762,7 +3956,8 @@ int mbsys_kmbes_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
       status = mb_reallocd(verbose, __FILE__, __LINE__, alloc_size,
                             (void **)&(copy_mwc->beamData_p), error);
       if (status == MB_SUCCESS) {
-        memset(&copy_mwc->beamData_p[copy_mwc->beamData_p_alloc_size],
+        /* zero only the newly allocated bytes, keeping the sample arrays of existing beams */
+        memset((char *)copy_mwc->beamData_p + copy_mwc->beamData_p_alloc_size,
                 0, alloc_size - copy_mwc->beamData_p_alloc_size);
         copy_mwc->beamData_p_alloc_size = alloc_size;
       } else {

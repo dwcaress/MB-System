@@ -2878,6 +2878,77 @@ for all data formats.
 
 \---------------------------------------------------------
 .br
+int \fBmb_extract_wcdimensions\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
+ 		int \fI*kind\fP,
+ 		int \fI*nbeams\fP,
+ 		int \fI*nsamples_max\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_extract_wcdimensions\fP returns the number of
+water column beams in the current data record and the largest number
+of samples of any of these beams, without extracting the water column
+data. This allows a program to size arrays appropriately before
+calling \fBmb_extract_wc\fP. If the record has no water column data the
+function returns \fBMB_FAILURE\fP with \fI*error\fP set to
+\fBMB_ERROR_OTHER\fP; formats without water column support return
+\fBMB_ERROR_BAD_SYSTEM\fP.
+
+\---------------------------------------------------------
+.br
+int \fBmb_extract_wc\fP(
+ 		int \fIverbose\fP,
+ 		void \fI*mbio_ptr\fP,
+ 		void \fI*store_ptr\fP,
+ 		int \fInbeams_alloc\fP,
+ 		int \fInsamples_alloc\fP,
+ 		int \fI*kind\fP,
+ 		int \fItime_i[7]\fP,
+ 		double \fI*time_d\fP,
+ 		int \fI*nbeams\fP,
+ 		int \fI*nsamples_max\fP,
+ 		int \fI*swath\fP,
+ 		double \fI*angle_across\fP,
+ 		double \fI*angle_along\fP,
+ 		double \fI*sample_interval\fP,
+ 		double \fI*soundspeed\fP,
+ 		int \fI*start_sample\fP,
+ 		int \fI*nsamples\fP,
+ 		double \fI*detect_sample\fP,
+ 		float \fI*amplitude\fP,
+ 		int \fI*error\fP);
+
+The function \fBmb_extract_wc\fP extracts the water column
+(beamformed amplitude time series) data of the current data record,
+where the data format supports this. A record holds one ping with all
+of its receive fans. The calling program passes per beam arrays of at
+least \fInbeams_alloc\fP values and an \fIamplitude\fP array of
+\fInbeams_alloc\fP x \fInsamples_alloc\fP values; if the record needs
+more, the function returns \fBMB_FAILURE\fP with \fI*error\fP set to
+\fBMB_ERROR_BAD_PARAMETER\fP and the needed \fI*nbeams\fP and
+\fI*nsamples_max\fP. For each beam \fIi\fP the function returns
+\fIswath[i]\fP, the index of the swath along track (0 is the aftmost
+swath, beams of several receive fans of one swath share an index),
+\fIangle_across[i]\fP, the beam pointing angle from vertical in
+degrees, positive to starboard, \fIangle_along[i]\fP, the along track
+steering angle of the beam's transmit sector in degrees, positive
+forward, \fIsample_interval[i]\fP in seconds, \fIsoundspeed[i]\fP at
+the transducer in m/s, and \fIdetect_sample[i]\fP, the two-way range of
+the bottom detection in samples (0 if there is none). The amplitude of
+sample \fIk\fP (0 <= \fIk\fP < \fInsamples[i]\fP) of beam \fIi\fP is
+\fIamplitude[i * nsamples_alloc + k]\fP in dB, at sample number
+\fIstart_sample[i] + k\fP: its two-way travel time is that sample number
+times \fIsample_interval[i]\fP and its slant range is half the travel time
+times \fIsoundspeed[i]\fP. Values beyond \fInsamples[i]\fP are not set.
+For Kongsberg kmall data (format 261, including *.kmwcd files read as
+format 261) the amplitudes are the logged 0.5 dB values minus the gain
+offset TVGoffset_dB, which is the display value defined by Kongsberg.
+This function is not implemented for all data formats.
+
+\---------------------------------------------------------
+.br
 int \fBmb_extract_segytraceheader\fP(
  		int \fIverbose\fP,
  		void \fI*mbio_ptr\fP,

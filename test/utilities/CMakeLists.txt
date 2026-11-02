@@ -50,3 +50,8 @@ set(tests
 foreach(test ${tests})
   add_test(NAME ${test} COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/${test}.py")
 endforeach()
+
+# synthetic swath data writer used by the CUBE tests in mbgrid_test.py
+add_executable(mbcube_synthetic mbcube_synthetic.cc)
+target_include_directories(mbcube_synthetic PUBLIC ../../src/mbio)
+target_link_libraries(mbcube_synthetic PRIVATE mbio)

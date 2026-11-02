@@ -228,16 +228,15 @@ int mbview_addgispoints(int verbose, size_t instance, int npoint, double *lon, d
 	/* allocate memory for the new points if required */
 	if (status == MB_SUCCESS && shared.shareddata.ngispoint_alloc < shared.shareddata.ngispoint + npoint) {
 		const int nalloc = shared.shareddata.ngispoint + npoint + MBV_ALLOC_NUM;
-		status = mb_reallocd(verbose, __FILE__, __LINE__, nalloc * sizeof(struct mbview_gispoint_struct),
-		                     (void **)&(shared.shareddata.gispoints), error);
+		/* reallocate through a copy of the pointer so that on failure the
+		    existing features are kept rather than lost */
+		void *ptr = shared.shareddata.gispoints;
+		status = mb_reallocd(verbose, __FILE__, __LINE__, nalloc * sizeof(struct mbview_gispoint_struct), &ptr, error);
 		if (status == MB_SUCCESS) {
+			shared.shareddata.gispoints = (struct mbview_gispoint_struct *)ptr;
 			memset(&(shared.shareddata.gispoints[shared.shareddata.ngispoint_alloc]), 0,
 			       (nalloc - shared.shareddata.ngispoint_alloc) * sizeof(struct mbview_gispoint_struct));
 			shared.shareddata.ngispoint_alloc = nalloc;
-		}
-		else {
-			shared.shareddata.ngispoint = 0;
-			shared.shareddata.ngispoint_alloc = 0;
 		}
 	}
 

@@ -73,6 +73,47 @@ class MbpreprocessTest(unittest.TestCase):
   def testOldSimradFormat54(self):
     self.CheckOldSimradToFormat57('mb54', 'TN136HS.309.snipped.mb54', 54, 2, 115)
 
+  def testKongsbergHeadingWithoutPlatform(self):
+    # Kongsberg EM122 .all data (format 58) preprocessed without a platform
+    # file must keep the recorded heading in the format 59 output and in the
+    # .fbt file. mbsys_simrad3_preprocess() used to add uninitialized platform
+    # mount offsets, giving heading 0.000 in the .mb59 file and -21474836 in
+    # the .fbt file instead of about 8.3 degrees. The test data are two pings
+    # of a Sea Acceptance Test line of RV METEOR, 19 December 2011.
+    # Uninitialized stack values change with the stack layout, and the old
+    # code gave the correct heading by chance in some runs, so mbpreprocess
+    # is run with a range of environment sizes, each of which must pass.
+    cmd_dir = os.path.dirname(os.path.abspath(self.cmd))
+    testdata = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'testdata', 'mb58')
+    src_name = '0008_20111219_210356_METEOR_EM122.snipped.all'
+    env = dict(os.environ)
+    env['PATH'] = cmd_dir + os.pathsep + env.get('PATH', '')
+
+    def headings(tmpdir, filename, iformat):
+      cmd = [os.path.join(cmd_dir, 'mblist'), '-I' + filename, '-F%d' % iformat, '-Q', '-OH']
+      output = subprocess.check_output(cmd, stderr=subprocess.DEVNULL, cwd=tmpdir, env=env).decode()
+      return [float(value) for value in output.split()]
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+      shutil.copy(os.path.join(testdata, src_name), tmpdir)
+      ofile = os.path.splitext(src_name)[0] + '.mb59'
+      raw = headings(tmpdir, src_name, 58)
+      self.assertEqual(2, len(raw))
+      for value in raw:
+        self.assertAlmostEqual(8.27, value, delta=0.05)
+
+      cmd = [os.path.abspath(self.cmd), '--input=' + src_name, '--format=58']
+      for pad in range(0, 256, 8):
+        run_env = dict(env)
+        run_env['MB_TEST_STACK_PAD'] = 'x' * pad
+        subprocess.check_output(cmd, stderr=subprocess.STDOUT, cwd=tmpdir, env=run_env)
+        for filename, iformat in ((ofile, 59), (ofile + '.fbt', 71)):
+          preprocessed = headings(tmpdir, filename, iformat)
+          self.assertEqual(len(raw), len(preprocessed), filename)
+          for raw_value, value in zip(raw, preprocessed):
+            self.assertAlmostEqual(raw_value, value, delta=0.1,
+                                   msg='%s (environment padding %d)' % (filename, pad))
+
 
 if __name__ == '__main__':
   unittest.main()

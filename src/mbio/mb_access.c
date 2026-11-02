@@ -2135,6 +2135,96 @@ int mb_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr, int kind, int 
   return (status);
 }
 /*--------------------------------------------------------------------*/
+int mb_extract_wcdimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *nsamples_max,
+                            int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+  }
+
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+  /* call the appropriate mbsys_ extraction routine */
+  int status = MB_SUCCESS;
+  if (mb_io_ptr->mb_io_extract_wcdimensions != NULL) {
+    status = (*mb_io_ptr->mb_io_extract_wcdimensions)(verbose, mbio_ptr, store_ptr, kind, nbeams, nsamples_max, error);
+  }
+  else {
+    *nbeams = 0;
+    *nsamples_max = 0;
+    status = MB_FAILURE;
+    *error = MB_ERROR_BAD_SYSTEM;
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       kind:              %d\n", *kind);
+    fprintf(stderr, "dbg2       nbeams:            %d\n", *nbeams);
+    fprintf(stderr, "dbg2       nsamples_max:      %d\n", *nsamples_max);
+    fprintf(stderr, "dbg2       error:             %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:            %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+int mb_extract_wc(int verbose, void *mbio_ptr, void *store_ptr, int nbeams_alloc, int nsamples_alloc, int *kind,
+                  int time_i[7], double *time_d, int *nbeams, int *nsamples_max, int *swath, double *angle_across,
+                  double *angle_along, double *sample_interval, double *soundspeed, int *start_sample, int *nsamples,
+                  double *detect_sample, float *amplitude, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
+    fprintf(stderr, "dbg2       mb_ptr:         %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:      %p\n", (void *)store_ptr);
+    fprintf(stderr, "dbg2       nbeams_alloc:   %d\n", nbeams_alloc);
+    fprintf(stderr, "dbg2       nsamples_alloc: %d\n", nsamples_alloc);
+  }
+
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+  /* call the appropriate mbsys_ extraction routine */
+  int status = MB_SUCCESS;
+  if (mb_io_ptr->mb_io_extract_wc != NULL) {
+    status = (*mb_io_ptr->mb_io_extract_wc)(verbose, mbio_ptr, store_ptr, nbeams_alloc, nsamples_alloc, kind, time_i,
+                                            time_d, nbeams, nsamples_max, swath, angle_across, angle_along,
+                                            sample_interval, soundspeed, start_sample, nsamples, detect_sample,
+                                            amplitude, error);
+  }
+  else {
+    *nbeams = 0;
+    *nsamples_max = 0;
+    status = MB_FAILURE;
+    *error = MB_ERROR_BAD_SYSTEM;
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       kind:              %d\n", *kind);
+    fprintf(stderr, "dbg2       nbeams:            %d\n", *nbeams);
+    fprintf(stderr, "dbg2       nsamples_max:      %d\n", *nsamples_max);
+    if (status == MB_SUCCESS) {
+      fprintf(stderr, "dbg2       time_d:            %f\n", *time_d);
+      for (int i = 0; i < *nbeams; i++)
+        fprintf(stderr, "dbg2       beam:%d swath:%d angle_across:%f angle_along:%f sample_interval:%g soundspeed:%f "
+                "start_sample:%d nsamples:%d detect_sample:%f\n", i, swath[i], angle_across[i], angle_along[i],
+                sample_interval[i], soundspeed[i], start_sample[i], nsamples[i], detect_sample[i]);
+    }
+    fprintf(stderr, "dbg2       error:             %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:            %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
 int mb_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void *segytraceheader_ptr, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
