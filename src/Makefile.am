@@ -45,6 +45,7 @@ SUBDIRS += otps
 SUBDIRS += mbgrd2gltf
 SUBDIRS += mbmesh
 SUBDIRS += macros
+SUBDIRS += python
 SUBDIRS += share
 SUBDIRS += man
 SUBDIRS += html
