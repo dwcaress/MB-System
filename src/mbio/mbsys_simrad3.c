@@ -194,19 +194,22 @@ int mbsys_simrad3_wc_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *er
 		wc->wtc_serial = 0;     /* system 1 or system 2 serial number */
 		wc->wtc_ndatagrams = 0; /* number of datagrams used to represent
 		                the water column for this ping */
-		wc->wtc_datagram = 0;   /* number this datagram */
+		wc->wtc_datagram = 0;   /* number of the last datagram read for this ping */
 		wc->wtc_ntx = 0;        /* number of transmit sectors */
 		wc->wtc_nrx = 0;        /* number of receive beams */
-		wc->wtc_nbeam = 0;      /* number of beams in this datagram */
+		wc->wtc_nbeam = 0;      /* number of beams read for this ping */
 		wc->wtc_ssv = 0;        /* sound speed at transducer (0.1 m/sec) */
 		wc->wtc_sfreq = 0;      /* sampling frequency (0.01 Hz) */
 		wc->wtc_heave = 0;      /* tx time heave at transducer (0.01 m) */
+		wc->wtc_tvg_function = 0;  /* TVG function X */
+		wc->wtc_tvg_offset = 0;    /* TVG offset C (dB) */
+		wc->wtc_scanning_info = 0; /* scanning info */
 		wc->wtc_spare1 = 0;     /* spare */
 		wc->wtc_spare2 = 0;     /* spare */
 		wc->wtc_spare3 = 0;     /* spare */
 		for (int i = 0; i < MBSYS_SIMRAD3_MAXTX; i++) {
 			wc->wtc_txtiltangle[i] = 0; /* tilt angle (0.01 deg) */
-			wc->wtc_txcenter[i] = 0;    /* center frequency (Hz) */
+			wc->wtc_txcenter[i] = 0;    /* center frequency (10 Hz) */
 			wc->wtc_txsector[i] = 0;    /* transmit sector number (0-19) */
 		}
 		for (int i = 0; i < MBSYS_SIMRAD3_MAXBEAMS; i++) {
@@ -215,6 +218,7 @@ int mbsys_simrad3_wc_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *er
 			wc->beam[i].wtc_start_sample = 0; /* start sample number */
 			wc->beam[i].wtc_beam_samples = 0; /* number of water column samples derived from
 			                      each beam */
+			wc->beam[i].wtc_detected_range = 0; /* detected range in samples, 0 = no detection */
 			wc->beam[i].wtc_sector = 0; /* transmit sector identifier */
 			wc->beam[i].wtc_beam = 0;   /* beam 128 is first beam on
 			                    second head of EM3000D */
@@ -903,7 +907,10 @@ int mbsys_simrad3_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumb
 
 	/* extract data from structure */
 	struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
-	*pingnumber = ping->png_count;
+	if (store->kind == MB_DATA_WATER_COLUMN && store->wc != NULL)
+		*pingnumber = store->wc->wtc_count;
+	else
+		*pingnumber = ping->png_count;
 
 	int status = MB_SUCCESS;
 
@@ -3922,6 +3929,224 @@ int mbsys_simrad3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+/* the size of the water column data of the current ping, with two empty beams where
+   datagrams were lost inside the swath - returns false if there is no such data */
+static bool mbsys_simrad3_wc_size(const struct mbsys_simrad3_struct *store, int *nbeams, int *nsamples_max) {
+	*nbeams = 0;
+	*nsamples_max = 0;
+	if (store->kind != MB_DATA_WATER_COLUMN || store->wc == NULL || store->wc->wtc_nbeam <= 0)
+		return (false);
+	const struct mbsys_simrad3_watercolumn_struct *wc = store->wc;
+	*nbeams = wc->wtc_nbeam;
+	int last = -1;
+	for (int i = 0; i < wc->wtc_nread; i++) {
+		if (wc->wtc_read[i].wtc_nbeam > 0) {
+			if (last >= 0 && wc->wtc_read[i].wtc_datagram - last > 1)
+				*nbeams += 2;
+			last = wc->wtc_read[i].wtc_datagram;
+		}
+	}
+	for (int i = 0; i < wc->wtc_nbeam; i++) {
+		if (wc->beam[i].wtc_beam_samples > *nsamples_max)
+			*nsamples_max = wc->beam[i].wtc_beam_samples;
+	}
+	return (true);
+}
+/*--------------------------------------------------------------------*/
+/* the along track steering angle (degrees) of a transmit sector */
+static double mbsys_simrad3_wc_tilt(const struct mbsys_simrad3_watercolumn_struct *wc, int sector) {
+	for (int i = 0; i < wc->wtc_ntx && i < MBSYS_SIMRAD3_MAXTX; i++) {
+		if (wc->wtc_txsector[i] == sector)
+			return (0.01 * wc->wtc_txtiltangle[i]);
+	}
+	if (sector >= 0 && sector < wc->wtc_ntx && sector < MBSYS_SIMRAD3_MAXTX)
+		return (0.01 * wc->wtc_txtiltangle[sector]);
+	return (0.0);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_simrad3_extract_wcdimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *nsamples_max,
+                                       int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get data structure pointer */
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
+
+	/* get data kind */
+	*kind = store->kind;
+
+	int status = MB_SUCCESS;
+
+	/* get the dimensions of the water column data of the current ping */
+	if (mbsys_simrad3_wc_size(store, nbeams, nsamples_max)) {
+		*error = MB_ERROR_NO_ERROR;
+	}
+	else if (*kind == MB_DATA_COMMENT) {
+		status = MB_FAILURE;
+		*error = MB_ERROR_COMMENT;
+	}
+	else {
+		status = MB_FAILURE;
+		*error = MB_ERROR_OTHER;
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       kind:         %d\n", *kind);
+		fprintf(stderr, "dbg2       nbeams:       %d\n", *nbeams);
+		fprintf(stderr, "dbg2       nsamples_max: %d\n", *nsamples_max);
+		fprintf(stderr, "dbg2       error:        %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:       %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_simrad3_extract_wc(int verbose, void *mbio_ptr, void *store_ptr, int nbeams_alloc, int nsamples_alloc, int *kind,
+                             int time_i[7], double *time_d, int *nbeams, int *nsamples_max, int *swath, double *angle_across,
+                             double *angle_along, double *sample_interval, double *soundspeed, int *start_sample, int *nsamples,
+                             double *detect_sample, float *amplitude, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
+		fprintf(stderr, "dbg2       mb_ptr:         %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:      %p\n", (void *)store_ptr);
+		fprintf(stderr, "dbg2       nbeams_alloc:   %d\n", nbeams_alloc);
+		fprintf(stderr, "dbg2       nsamples_alloc: %d\n", nsamples_alloc);
+	}
+
+	/* get data structure pointer */
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
+
+	/* get data kind */
+	*kind = store->kind;
+
+	int status = MB_SUCCESS;
+
+	/* extract the water column data of the current ping */
+	if (mbsys_simrad3_wc_size(store, nbeams, nsamples_max)) {
+		const struct mbsys_simrad3_watercolumn_struct *wc = store->wc;
+
+		/* get time, of the first datagram of the ping */
+		time_i[0] = wc->wtc_date / 10000;
+		time_i[1] = (wc->wtc_date % 10000) / 100;
+		time_i[2] = wc->wtc_date % 100;
+		time_i[3] = wc->wtc_msec / 3600000;
+		time_i[4] = (wc->wtc_msec % 3600000) / 60000;
+		time_i[5] = (wc->wtc_msec % 60000) / 1000;
+		time_i[6] = (wc->wtc_msec % 1000) * 1000;
+		mb_get_time(verbose, time_i, time_d);
+
+		/* the caller's arrays must be large enough */
+		if (*nbeams > nbeams_alloc || *nsamples_max > nsamples_alloc) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_BAD_PARAMETER;
+		}
+		else {
+			const double interval = (wc->wtc_sfreq > 0) ? 1.0 / (0.01 * wc->wtc_sfreq) : 0.0;
+			const double sound_speed = 0.1 * wc->wtc_ssv;
+			int ibeam = 0;
+			int first = 0;
+			int last_datagram = -1;
+			for (int idatagram = 0; idatagram < wc->wtc_nread; idatagram++) {
+				const int nbeam = wc->wtc_read[idatagram].wtc_nbeam;
+				if (nbeam <= 0)
+					continue;
+
+				/* where datagrams were lost two empty beams, one angle step inside the gap,
+				   so that the gap stays blank instead of the neighbours stretching across it */
+				if (last_datagram >= 0 && wc->wtc_read[idatagram].wtc_datagram - last_datagram > 1) {
+					const int angle0 = wc->beam[first - 1].wtc_rxpointangle;
+					const int angle1 = wc->beam[first].wtc_rxpointangle;
+					double step = 0.0;
+					if (first >= 2)
+						step = fabs((double)angle0 - wc->beam[first - 2].wtc_rxpointangle);
+					else if (nbeam >= 2)
+						step = fabs((double)wc->beam[first + 1].wtc_rxpointangle - angle1);
+					step = MIN(step, fabs((double)angle1 - angle0) / 3.0);
+					if (angle1 < angle0)
+						step = -step;
+					for (int i = 0; i < 2; i++) {
+						const struct mbsys_simrad3_wcbeam_struct *beam = &wc->beam[first - 1 + i];
+						swath[ibeam] = 0;
+						angle_across[ibeam] = -0.01 * (i == 0 ? angle0 + step : angle1 - step);
+						angle_along[ibeam] = mbsys_simrad3_wc_tilt(wc, beam->wtc_sector);
+						sample_interval[ibeam] = interval;
+						soundspeed[ibeam] = sound_speed;
+						start_sample[ibeam] = 0;
+						nsamples[ibeam] = 0;
+						detect_sample[ibeam] = 0.0;
+						ibeam++;
+					}
+				}
+				last_datagram = wc->wtc_read[idatagram].wtc_datagram;
+
+				for (int i = first; i < first + nbeam; i++) {
+					const struct mbsys_simrad3_wcbeam_struct *beam = &wc->beam[i];
+					swath[ibeam] = 0;
+					/* Kongsberg beam pointing angles are positive to port, MB-System acrosstrack is
+					   positive to starboard */
+					angle_across[ibeam] = -0.01 * beam->wtc_rxpointangle;
+					angle_along[ibeam] = mbsys_simrad3_wc_tilt(wc, beam->wtc_sector);
+					sample_interval[ibeam] = interval;
+					soundspeed[ibeam] = sound_speed;
+					start_sample[ibeam] = beam->wtc_start_sample;
+					nsamples[ibeam] = beam->wtc_beam_samples;
+					detect_sample[ibeam] = beam->wtc_detected_range;
+
+					/* amplitudes in 0.5 dB steps include the TVG offset - return the display
+					   value without it, in dB */
+					float *beam_amplitude = &amplitude[(size_t)ibeam * (size_t)nsamples_alloc];
+					for (int k = 0; k < beam->wtc_beam_samples; k++) {
+						beam_amplitude[k] = (float)(0.5 * beam->wtc_amp[k] - wc->wtc_tvg_offset);
+					}
+					ibeam++;
+				}
+				first += nbeam;
+			}
+			*error = MB_ERROR_NO_ERROR;
+		}
+	}
+	else if (*kind == MB_DATA_COMMENT) {
+		status = MB_FAILURE;
+		*error = MB_ERROR_COMMENT;
+	}
+	else {
+		status = MB_FAILURE;
+		*error = MB_ERROR_OTHER;
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       kind:         %d\n", *kind);
+		fprintf(stderr, "dbg2       nbeams:       %d\n", *nbeams);
+		fprintf(stderr, "dbg2       nsamples_max: %d\n", *nsamples_max);
+	}
+	if (verbose >= 2 && status == MB_SUCCESS) {
+		fprintf(stderr, "dbg2       time_d:       %f\n", *time_d);
+		for (int i = 0; i < *nbeams; i++)
+			fprintf(stderr, "dbg2       beam:%d swath:%d angle_across:%f angle_along:%f sample_interval:%g soundspeed:%f "
+			        "start_sample:%d nsamples:%d detect_sample:%f\n", i, swath[i], angle_across[i], angle_along[i],
+			        sample_interval[i], soundspeed[i], start_sample[i], nsamples[i], detect_sample[i]);
+	}
+	if (verbose >= 2) {
+		fprintf(stderr, "dbg2       error:        %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:       %d\n", status);
 	}
 
 	return (status);

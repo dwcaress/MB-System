@@ -576,19 +576,27 @@ int mb_rt_plot_circular(int verbose, void *modelptr, int *error) {
 		/* get angle range */
 		const double ai = atan2((model->xx - model->xc), (model->zz - model->zc));
 		const double af = atan2((model->xf - model->xc), (model->zf - model->zc));
-		const double dang = (af - ai) / MB_RT_NUMBER_SEGMENTS;
+		/* take the short way around the circle: a ray turning back down above the
+		    circle's centre crosses the atan2 branch cut */
+		double dtotal = af - ai;
+		if (dtotal > M_PI)
+			dtotal -= 2.0 * M_PI;
+		else if (dtotal < -M_PI)
+			dtotal += 2.0 * M_PI;
+		const double dang = dtotal / MB_RT_NUMBER_SEGMENTS;
 
 		/* add points to plotting arrays */
     double tt = model->tt;
 		for (int i = 0; i < MB_RT_NUMBER_SEGMENTS; i++) {
 			const double angle = ai + (i + 1) * dang;
-      const double uz0 = cos(angle - dang); // starting z component of unit direction vector
-      const double uz1 = cos(angle); // ending z component of unit direction vector
+      const double uz0 = sin(angle - dang); // starting z component of unit direction vector
+      const double uz1 = sin(angle); // ending z component of unit direction vector
 			if (model->number_plot < model->number_plot_max) {
 				model->xx_plot[model->number_plot] = model->sign_x * (model->xc + model->radius * sin(angle));
 				model->zz_plot[model->number_plot] = model->zc + model->radius * cos(angle);
-        tt += 0.5 * log(((1.0 + uz1)/(1.0 - uz1)) * ((1.0 - uz0)/(1.0 + uz0)))
-              / model->layer_gradient[model->layer];
+        // |gradient| = 1 / (pp * radius); model->layer has already moved on if the ray left the layer
+        tt += fabs(0.5 * log(((1.0 + uz1)/(1.0 - uz1)) * ((1.0 - uz0)/(1.0 + uz0))))
+              * model->pp * model->radius;
         model->tt_plot[model->number_plot] = tt;
 				model->number_plot++;
 			}

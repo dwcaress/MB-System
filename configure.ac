@@ -1503,6 +1503,7 @@ AC_CONFIG_FILES([\
     src/utilities/Makefile \
     src/gmt/Makefile \
     src/macros/Makefile \
+    src/python/Makefile \
     src/otps/Makefile \
     src/mbgrd2gltf/Makefile \
     src/mbmesh/Makefile \
