@@ -21,6 +21,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.3beta27    November 3, 2026
 - Version 5.8.3beta26    November 1, 2026
 - Version 5.8.3beta25    October 14, 2026
 - Version 5.8.3beta24    October 5, 2026
@@ -80,6 +81,53 @@ or beta, are equally accessible as tarballs through the Github interface.
 - Version 5.8.1beta02    February 7, 2024
 - Version 5.8.1beta01    February 1, 2024
 - **Version 5.8.0          January 22, 2024**
+
+---
+
+#### 5.8.3beta27 (November 3, 2026)
+
+Macro mbpy\_plot (src/macros/mbpy\_plot, src/macros/python/mbpy\_plot\_script.py):
+new Python replacement for mbm\_plot. It writes a GMT modern mode script that maps
+swath data with mbswath and mbcontour (bathymetry color fill or shaded relief,
+amplitude shading, amplitude or sidescan fill, contours and annotated navigation),
+with the same page layout, colors and defaults as mbm\_plot. The -M options of
+mbm\_plot are replaced by long options. A manual page has been added.
+
+Macro mbpy\_grdtiff (src/macros/mbpy\_grdtiff, src/macros/python/mbpy\_grdtiff\_script.py):
+new Python replacement for mbm\_grdtiff. It writes a GMT modern mode script that
+makes a GeoTIFF image and world file of a grid with mbgrdtiff, using the color
+fill and shading styles of mbm\_grdtiff and the color palettes of mbpy\_grdplot.
+A manual page has been added.
+
+Macros mbpy\_xyplot and mbpy\_histplot (src/macros/python/mbpy\_layout.py,
+mbpy\_xyplot\_script.py, mbpy\_histplot\_script.py): fixed user -J linear
+projections. Any "x" or "X" projection was treated as geographic, so a spec
+with separate x and y scales such as x3.0/-0.05 (used to plot depth downward)
+failed in GMT, and other specs lost their axis labels. These now behave as in
+mbm\_xyplot and mbm\_histplot.
+
+Macro mbm\_plot (src/macros/mbm\_plot): fixed several errors. Bathymetry shaded by
+amplitude (-G3) without -A always used a shading of 1/191, which made the plot
+nearly black; the default now comes from the amplitude range. A single value
+given to -A is now used as the magnitude, the shading reversal of -D for -G2
+now also works without -A, a six value -C keeps its label height, the "center"
+keyword of -MGL works, -MGQ now sets the resolution of mbswath (with -E rather
+than the unsupported -Q), and reversed discrete palettes no longer lose their
+first color.
+
+Macro mbm\_grdtiff (src/macros/mbm\_grdtiff): fixed data rescaling (-MGS) and
+equalized intensity shading (-G3 -S../1), which failed because they used a
+grdmath operator not accepted by GMT 6. -MGW no longer passes an option that
+mbgrdtiff rejects; the world file is always written. When -I gives a list of
+grids, each grid now makes its own image instead of all writing the same file.
+
+Library mbaux (src/mbaux/mb_gisfile.c): fixed a build failure on Linux introduced
+in 5.8.3beta26. The shapefile export used a GDAL file status type that is not
+available to C code with glibc; it now uses the standard stat() function.
+
+The above work was done with the assistance of the AI coding assistant Claude Opus 5.5
+(Anthropic, model claude-opus-5-5), operating as Claude Code under developer
+supervision and review.
 
 ---
 

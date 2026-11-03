@@ -1,0 +1,237 @@
+.TH mbpy_grdtiff 1 "3 November 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbpy_grdtiff\fP \- Create an executable shellscript which will generate
+a georeferenced TIFF image of gridded data using GMT modern mode.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbpy_grdtiff\fP \fB\-I\fP\fIgrid\fP [\fB\-O\fP\fIroot\fP]
+[\fB\-X\fP] [\fB\-V\fP]
+.br
+[\fB\-R\fP\fIwest/east/south/north\fP]
+[\fB\-N\fP\fIdx/dy\fP]
+.br
+[\fB\-G\fP\fIcolor_mode\fP]
+[\fB\-W\fP\fIcolor_style/palette\fP[\fI/ncolors\fP] | \fIcptfile\fP]
+[\fB\-D\fP] [\fB\-Y\fP] [\fB\-S\fP]
+[\fB\-Z\fP\fIzmin/zmax\fP[\fI/mode\fP]]
+[\fB\-\-data\-scale\fP \fIfactor\fP]
+.br
+[\fB\-A\fP\fImagnitude\fP[\fI/azimuth\fP[\fI/elevation\fP]]]
+[\fB\-\-magnitude\fP \fIval\fP]
+[\fB\-\-azimuth\fP \fIdeg\fP]
+[\fB\-\-elevation\fP \fIdeg\fP]
+[\fB\-\-shade\-flip\fP]
+[\fB\-K\fP\fIintensity_grid\fP]
+[\fB\-\-stretch\-shade\fP]
+.br
+[\fB\-\-gmt\-default\fP \fIparam/value\fP]
+
+.SH DESCRIPTION
+\fBmbpy_grdtiff\fP is a Python/PyGMT-era replacement for the Perl macro
+\fBmbm_grdtiff\fP. It reads a grid (for instance one made by
+\fBmbgrid\fP or \fBmbmosaic\fP) and generates an executable shellscript
+of \fBGMT\fP \fBmodern mode\fP commands which, when run, makes a
+georeferenced TIFF image of the grid with the \fBMB-System\fP GMT
+module \fBmbgrdtiff\fP. The image is a GeoTIFF with the grid's
+coordinate system embedded, plus a parallel ".tfw" world file for
+software that does not read the GeoTIFF tags. Geographic grids and
+grids in projected coordinate systems (e.g. UTM) are both handled. Such
+images can be loaded into GIS packages such as QGIS and ArcGIS as
+geographically located coverages.
+
+The image may be a color fill of the gridded values, color shaded
+relief, a color fill shaded by a separate intensity grid, a color fill
+of the slope magnitude, or a color fill shaded by the slope magnitude
+(see \fB\-G\fP). The color palettes, color intervals and shading
+methods are the same as those of \fBmbpy_grdplot\fP, so a GeoTIFF and a
+map of the same grid made with the same options look the same.
+
+The generated script is named \fIroot\fP_tiff.sh and creates
+\fIroot\fP.tif and \fIroot\fP.tfw. A generated color palette is
+written to \fIroot\fP.cpt by \fBmbpy_grdtiff\fP itself. Because
+\fBmbgrdtiff\fP writes its image file directly, the script opens a GMT
+modern-mode session without a figure (\fBgmt begin\fP ... \fBgmt end\fP)
+only so that its temporary GMT defaults stay inside the session; no
+gmt.conf file is created or deleted in the current directory.
+
+Differences from \fBmbm_grdtiff\fP: a file listing several grids is not
+accepted by \fB\-I\fP (use one \fBmbpy_grdtiff\fP command per grid);
+the \fB\-MGW\fP option is not needed because \fBmbgrdtiff\fP always
+writes the world file; the \fB\-MGS\fP option is \fB\-\-data\-scale\fP;
+the sealevel palettes 8 and 9 of \fBmbpy_grdplot\fP are available;
+discrete palettes and the histogram-equalized color stretch follow
+\fBmbm_grdplot\fP and \fBmbpy_grdplot\fP; and the image is not
+displayed after it is made.
+
+\fBmbpy_grdtiff\fP requires \fBGMT\fP 6 or later with the
+\fBMB-System\fP GMT modules, and a Python 3 interpreter. It uses the
+modules \fBmbpy_layout.py\fP, \fBmbpy_color.py\fP, \fBmbpy_misc.py\fP,
+\fBmbpy_grdplot_script.py\fP and \fBmbpy_grdtiff_script.py\fP,
+installed alongside it.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian do Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-I\fP, \fB\-\-input\fP \fIgrid\fP
+Input grid file. Required.
+.TP
+.B \-O\fP, \fB\-\-output\fP \fIroot\fP
+Output root name: the script is \fIroot\fP_tiff.sh, the image
+\fIroot\fP.tif and the world file \fIroot\fP.tfw. Default: the input
+grid's basename without its extension.
+.TP
+.B \-X\fP, \fB\-\-execute
+Run the generated script immediately after writing it.
+.TP
+.B \-V\fP, \fB\-\-verbose
+Print the generated script's path and a summary of the image style,
+region, z range and file names.
+.TP
+.B \-R\fP, \fB\-\-region\fP \fIwest/east/south/north\fP
+Bounds of the image, in the grid's own coordinates. When given, the
+color stretch spans the z range of the grid inside these bounds.
+Default: the grid's own bounds.
+.TP
+.B \-N\fP, \fB\-\-nudge\fP \fIdx/dy\fP
+Shift the location of the image by \fIdx\fP meters east and \fIdy\fP
+meters north (\fBmbgrdtiff \-N\fP).
+.TP
+.B \-G\fP, \fB\-\-color\-mode\fP \fIcolor_mode\fP
+Image style:
+.br
+  \fIcolor_mode\fP = 1: Color fill.
+.br
+  \fIcolor_mode\fP = 2: Color shaded relief, using an illumination
+model built from \fB\-\-magnitude\fP, \fB\-\-azimuth\fP and
+\fB\-\-elevation\fP.
+.br
+  \fIcolor_mode\fP = 3: Color fill shaded by the intensity grid given
+with \fB\-K\fP.
+.br
+  \fIcolor_mode\fP = 4: Color fill of the slope magnitude.
+.br
+  \fIcolor_mode\fP = 5: Color fill shaded by the slope magnitude.
+.br
+Default: 1, or 3 when \fB\-K\fP is given.
+.TP
+.B \-W\fP, \fB\-\-color\-control\fP \fIcolor_style/palette\fP[\fI/ncolors\fP] | \fIcptfile\fP
+Color palette. \fIcolor_style\fP 1 gives a continuous palette, 2 a
+discrete one. \fIpalette\fP is one of:
+.br
+  1: Haxby colors [default]
+.br
+  2: high intensity colors
+.br
+  3: low intensity colors
+.br
+  4: grayscale
+.br
+  5: uniform gray
+.br
+  6: uniform black
+.br
+  7: uniform white
+.br
+  8, 9: sealevel palettes, with a color break at zero (see
+\fBmbpy_grdplot\fP)
+.br
+\fIncolors\fP is the number of colors [11]. If the argument names an
+existing file, that file is used as the color palette table.
+.TP
+.B \-D\fP, \fB\-\-color\-flip
+Reverse the color palette.
+.TP
+.B \-Y\fP, \fB\-\-no\-nice\-interval
+Stretch the colors linearly between the minimum and maximum values
+instead of using rounded color intervals.
+.TP
+.B \-S\fP, \fB\-\-stretch\-color
+Use histogram equalization of the grid (\fBgmt grdhisteq\fP) to set
+the color boundaries. With palette 8 or 9 the values below and above
+zero are equalized separately.
+.TP
+.B \-Z\fP, \fB\-\-zbounds\fP \fIzmin/zmax\fP[\fI/mode\fP]
+Use \fIzmin\fP and \fIzmax\fP instead of the grid's own z range for the
+color stretch. If \fImode\fP is 1, the first and last colors are
+extended to the grid's own minimum and maximum, so that every value is
+colored.
+.TP
+.B \-\-data\-scale\fP \fIfactor\fP
+Multiply the grid values by \fIfactor\fP before coloring and shading,
+for instance \-1 to plot depths as topography (\fBmbm_grdtiff
+\-MGS\fP).
+.TP
+.B \-A\fP, \fB\-\-shade\fP \fImagnitude\fP[\fI/azimuth\fP[\fI/elevation\fP]]
+Shading parameters in one argument, as in \fBmbm_grdtiff \-A\fP. The
+separate options below take precedence.
+.TP
+.B \-\-magnitude\fP \fIval\fP
+Shading magnitude. Defaults: 1.0 for modes 2, 4 and 5; \-0.4 for
+mode 3.
+.TP
+.B \-\-azimuth\fP \fIdeg\fP
+Illumination azimuth for mode 2, degrees clockwise from north [0].
+.TP
+.B \-\-elevation\fP \fIdeg\fP
+Illumination elevation for mode 2, degrees above the horizon [30].
+.TP
+.B \-\-shade\-flip
+Reverse the sense of the shading (negates the magnitude).
+.TP
+.B \-K\fP, \fB\-\-intensity\-file\fP \fIintensity_grid\fP
+Intensity grid used to shade the image in mode 3; it must cover the
+same area as the input grid.
+.TP
+.B \-\-stretch\-shade
+Histogram-equalize the intensity grid before shading (mode 3).
+.TP
+.B \-\-gmt\-default\fP \fIparam/value\fP
+Override a GMT default parameter in the generated script; repeatable.
+
+.SH EXAMPLES
+A color shaded relief GeoTIFF of a bathymetry grid, illuminated from
+the northeast, made at once:
+
+.br
+ mbpy_grdtiff \-I ZTopo.grd \-G2 \-\-azimuth 45 \-X \-V
+
+A grayscale amplitude mosaic shaded by a separate intensity grid:
+
+.br
+ mbpy_grdtiff \-I ZAmp.grd \-O ZAmp_shaded \-K ZTopoInt.grd \\
+.br
+     \-W 1/4 \-\-stretch\-shade
+
+A topography image of a depth grid (positive down), with the colors
+clipped to 1000 to 4000 m depth but every value still colored:
+
+.br
+ mbpy_grdtiff \-I depths.grd \-\-data\-scale \-1 \-Z \-4000/\-1000/1
+
+.SH SEE ALSO
+\fBmbm_grdtiff\fP(1), \fBmbgrdtiff\fP(1), \fBmbpy_grdplot\fP(1),
+\fBmbpy_plot\fP(1), \fBmbgrid\fP(1), \fBmbmosaic\fP(1),
+\fBmbsystem\fP(1)
+
+.SH BUGS
+Please report any bugs to the MB-System project on GitHub
+(https://github.com/dwcaress/MB-System).

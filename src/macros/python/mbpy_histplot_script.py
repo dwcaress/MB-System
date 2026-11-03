@@ -238,13 +238,17 @@ def compute_layout_hist(
     projection = projection_pars = None
 
     if map_scale:
-        spec = layout.get_projection(map_scale)
+        spec = layout.get_projection_xy(map_scale)
         projection = spec.projection
         projection_pars = spec.projection_pars
         use_scale, use_width = spec.use_scale, spec.use_width
         use_ratio, linear = spec.use_ratio, spec.linear
         separator, trial_value = spec.separator, spec.trial_value
         plot_scale, plot_width = spec.plot_scale, spec.plot_width
+        # GetProjection chop()s the "d" off a bare "xd"/"Xd" in the
+        # global $map_scale, so the later projection_pars rebuild sees "x"
+        if map_scale in ("xd", "Xd"):
+            map_scale = map_scale[:-1]
 
         # This trial-value append (for the mapproject probe just below)
         # only applies to a partially-parsed *user* map_scale (e.g. a

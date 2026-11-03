@@ -62,6 +62,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include "mb_aux.h"
 #include "mb_define.h"
@@ -71,7 +72,6 @@
 #include "gdal_version.h"
 #include "ogr_api.h"
 #include "ogr_srs_api.h"
-#include "cpl_vsi.h"
 
 /* number of array elements to allocate at a time */
 #define MB_GIS_ALLOC_NUM 64
@@ -1310,9 +1310,10 @@ int mb_gis_export_shapefile(int verbose, const char *file, struct mb_gisdata_str
 		return (MB_FAILURE);
 	}
 
-	/* replace an existing shapefile */
-	VSIStatBufL statbuf;
-	if (VSIStatL(shpfile, &statbuf) == 0)
+	/* replace an existing shapefile (plain stat(): GDAL's VSIStatBufL is
+	   struct stat64 on glibc, which C code cannot see without _LARGEFILE64_SOURCE) */
+	struct stat file_status;
+	if (stat(shpfile, &file_status) == 0)
 		GDALDeleteDataset(driver, shpfile);
 
 	GDALDatasetH dataset = GDALCreate(driver, shpfile, 0, 0, 0, GDT_Unknown, NULL);

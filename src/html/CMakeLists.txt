@@ -107,7 +107,9 @@ set(HTML
     mbprocess.html
     mbpy_grd3dplot.html
     mbpy_grdplot.html
+    mbpy_grdtiff.html
     mbpy_histplot.html
+    mbpy_plot.html
     mbpy_xyplot.html
     mbrollbias.html
     mbrolltimelag.html
@@ -204,7 +206,9 @@ set(PDF
     mbprocess.pdf
     mbpy_grd3dplot.pdf
     mbpy_grdplot.pdf
+    mbpy_grdtiff.pdf
     mbpy_histplot.pdf
+    mbpy_plot.pdf
     mbpy_xyplot.pdf
     mbrollbias.pdf
     mbrolltimelag.pdf

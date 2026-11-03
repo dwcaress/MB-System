@@ -32,7 +32,7 @@ import math
 import re
 import subprocess
 import tempfile
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Optional
 
@@ -384,6 +384,25 @@ def get_projection(map_scale: str) -> ProjectionSpec:
         plot_scale=plot_scale,
         plot_width=plot_width,
     )
+
+
+def get_projection_xy(map_scale: str) -> ProjectionSpec:
+    """Port of mbm_xyplot's and mbm_histplot's own sub GetProjection,
+    which differs from mbm_grdplot's for "x"/"X": only the bare "xd"/"Xd"
+    flag means a geographic (degree) axis ($geographic there, `linear`
+    here), and any other remainder -- including an "xscale/yscale" or
+    "width/height" pair such as "x3.0/-0.05" or "X6/-8", or a unit
+    suffix such as "X6i" -- is a complete user scale/width, used as
+    given.
+    """
+    spec = get_projection(map_scale)
+    if spec.projection not in ("x", "X") or map_scale in ("xd", "Xd"):
+        return spec
+    mm = re.match(r"^([\d.eE+-]+)", spec.projection_pars)
+    value = float(mm.group(1)) if mm else None
+    if spec.projection == "x":
+        return replace(spec, linear=False, plot_scale=value)
+    return replace(spec, linear=False, plot_width=value)
 
 
 # ---------------------------------------------------------------------------
