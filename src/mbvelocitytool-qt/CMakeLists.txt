@@ -23,7 +23,7 @@
 #------------------------------------------------------------------------------
 
 # mbvelocitytool-qt: Qt6 port of mbvelocitytool (CMake only, built with
-# -DbuildVelocityToolQt=ON). Needs only Qt6 Widgets (in qtbase) and libmbio.
+# -DbuildQt6Tools=ON). Needs only Qt6 Widgets (in qtbase) and libmbio.
 
 # On macOS Qt uses the system OpenGL framework. build-utils/FindOpenGL.cmake finds
 # the X11 Mesa libGL of the Motif programs, so in this directory let Qt's

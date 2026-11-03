@@ -18,7 +18,7 @@
 #    See README.md file for copying and redistribution conditions.
 #--------------------------------------------------------------------
 """mbwcdview (C++/Qt6) without a window: usage, --dump and --export on a synthetic
-*.kmall/*.kmwcd pair and *.wcd file. Run only when built with -DbuildWCDView=ON."""
+*.kmall/*.kmwcd pair and *.wcd file. Run only when built with -DbuildQt6Tools=ON."""
 
 import os
 import re
