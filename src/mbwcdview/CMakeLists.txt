@@ -22,7 +22,7 @@
 #    See README.md file for copying and redistribution conditions.
 #------------------------------------------------------------------------------
 
-# mbwcdview: Qt6 water column viewer (CMake only, built with -DbuildWCDView=ON).
+# mbwcdview: Qt6 water column viewer (CMake only, built with -DbuildQt6Tools=ON).
 # Needs only Qt6 Widgets, OpenGL and OpenGLWidgets (all in qtbase) and libmbio.
 
 # On macOS Qt uses the system OpenGL framework. build-utils/FindOpenGL.cmake finds

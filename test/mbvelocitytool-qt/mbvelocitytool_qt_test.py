@@ -18,7 +18,7 @@
 #    See README.md file for copying and redistribution conditions.
 #--------------------------------------------------------------------
 """mbvelocitytool-qt without a window: usage, --dump, the --save options and --export on a synthetic
-*.kmall file with a flat seafloor. Run only when built with -DbuildVelocityToolQt=ON."""
+*.kmall file with a flat seafloor. Run only when built with -DbuildQt6Tools=ON."""
 
 import os
 import math

@@ -59,7 +59,7 @@ if(mbio_py_tests_ok)
     set_tests_properties(${test} PROPERTIES ENVIRONMENT "${test_environment}")
   endforeach()
 
-  if(buildWCDView)
+  if(buildQt6Tools)
     add_test(NAME mbwcdview_test COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mbwcdview_test.py")
     set_tests_properties(mbwcdview_test PROPERTIES ENVIRONMENT
                          "${test_environment};MBWCDVIEW=$<TARGET_FILE:mbwcdview>")
