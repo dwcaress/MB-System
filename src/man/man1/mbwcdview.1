@@ -40,20 +40,24 @@ Version 5.0
 \fBmbwcdview\fP is a Qt6 program that displays the water column data of swath
 sonar files, read through the MBIO library, as an image of the beamformed
 amplitudes against across track distance and depth, one swath at a time. Water
-column data are available for the Kongsberg kmall format (format 261), either
-in the separate *.kmwcd files (water column only) or in the *.kmall files. The
-original files are read; no preprocessing is needed.
+column data are available for the Kongsberg kmall format (format 261), in the
+separate *.kmwcd files (water column only), and for the third generation Kongsberg
+multibeams (EM 122, 302, 710, 712, 2040 ...; formats 58 and 59), in the separate
+*.wcd files or in the *.all files. The original files are read; no preprocessing is
+needed. The formats 56 and 57 (for instance EM 3002) are not supported.
 
-When a Kongsberg *.kmwcd or *.kmall file is opened, \fBmbwcdview\fP looks for the
-other file of the same survey line in the same directory: the same line number
+When a Kongsberg *.kmwcd, *.kmall, *.wcd or *.all file is opened, \fBmbwcdview\fP
+looks for the other file of the same survey line in the same directory: the same line number
 (the first four characters of the file name) and the nearest time in the file
 name. Kongsberg SIS names each file after the time of its first datagram, so the
 two names may differ by seconds. The water column pings are matched with the
-survey pings of the *.kmall by ping number and time. The *.kmall supplies the
-navigation, the vessel heading, the transducer depth and the soundings; the
-*.kmwcd supplies the water column. Any of these may be missing: without a *.kmall
-the navigation is taken from the position records of the *.kmwcd, if present,
-and depths are given below the transducer.
+survey pings of the *.kmall or *.all by ping number and time. The *.kmall or *.all
+supplies the navigation, the vessel heading, the transducer depth and the soundings;
+the *.kmwcd or *.wcd supplies the water column. A *.all without a *.wcd supplies the
+water column too, if it holds any. Any of these may be missing: without a *.kmall or
+*.all the navigation is taken from the position records of the *.kmwcd or *.wcd, if
+present, and depths are given below the transducer. Where water column datagrams
+were lost in a ping (*.wcd, *.all) the part of the swath they held stays blank.
 
 The water column samples are ray traced through the sound velocity profile
 logged with the data (\fBmb_rt\fP(3), as \fBmbprocess\fP traces soundings), from
@@ -67,12 +71,14 @@ during the ping (heave, pitch, roll) is applied.
 
 The amplitudes are shown in dB. For Kongsberg data these are the logged values
 (0.5 dB steps) minus the gain offset (TVGoffset_dB), the display value defined by
-Kongsberg. The lowest logged value (\-128, i.e. \-94 dB with a 30 dB offset) is a
-fill value, for example for near field samples, and is drawn as no data.
+Kongsberg. In kmall data the lowest logged value (\-128, i.e. \-94 dB with a 30 dB
+offset) is a fill value when the next values are practically absent, and is then drawn
+as no data. In *.wcd and *.all data the amplitudes are the logged values minus the TVG
+offset C, and the lowest value is a valid level, weak samples clipped to it.
 
 The window has controls for the depth range, the amplitude range of the colour
 scale, a fixed across track scale, the display of the soundings of the matching
-*.kmall ping (\fBBottom\fP: red amplitude, dark blue phase detections, filled good,
+survey ping (\fBBottom\fP: red amplitude, dark blue phase detections, filled good,
 hollow flagged) and of the bottom detections recorded in the water column itself
 (\fBWC bottom\fP, orange line), a slider (also mouse wheel and the left and right
 arrow keys, one swath per step), a replay at a given rate, saving the image at
@@ -104,14 +110,14 @@ Christian dos Santos Ferreira
 .TP
 .B \-\-input\fP=\fIfile\fP {\fB\-I\fP\fIfile\fP}
 .br
-The swath file to open. For Kongsberg data either the *.kmwcd or the *.kmall
-of a survey line; the other file is found as described above. The file name may
+The swath file to open. For Kongsberg data either the *.kmwcd or the *.kmall,
+or the *.wcd or the *.all, of a survey line; the other file is found as described above. The file name may
 also be given as the last argument.
 .TP
 .B \-\-format\fP=\fIformat_id\fP {\fB\-F\fP\fIformat_id\fP}
 .br
 The MBIO format of the input file. By default it is taken from the file name;
-*.kmwcd files are read as format 261.
+*.kmwcd files are read as format 261 and *.wcd files as format 58.
 .TP
 .B \-\-ping\fP=\fIindex\fP {\fB\-P\fP\fIindex\fP}
 .br
@@ -124,7 +130,7 @@ With \fB\-\-export\fP, the swath of the ping (0 is the aftmost swath in multiple
 swath modes). Default: the first swath.
 .TP
 .B \-\-bottom
-With \fB\-\-export\fP, draw the soundings of the matching *.kmall ping.
+With \fB\-\-export\fP, draw the soundings of the matching survey ping.
 .TP
 .B \-\-wc-bottom
 With \fB\-\-export\fP, draw the bottom detections recorded in the water column.
@@ -178,5 +184,6 @@ To check the pairing of the files and the ray tracing of a line:
 The soundings of a ping are assigned to the swaths by splitting them into equal
 blocks, which is right for dual swath data with one receiver; when the receive
 fans have different numbers of soundings all soundings of the ping are drawn on
-each swath. Water column data stored inside *.kmall files and dual head systems
-have not been tested.
+each swath. Water column data stored inside *.kmall files are not read. Dual head
+and dual receiver systems, and water column data of EM 2040 scanning mode, have not
+been tested.

@@ -24,7 +24,7 @@
 /*
  * mbwcdview --dump: summary of a line without the GUI - pings, pairing, navigation,
  * fill value, and the water column bottom detections against the soundings of the
- * *.kmall, with straight and ray traced geometry.
+ * *.kmall or *.all, with straight and ray traced geometry.
  */
 
 #include "wcd_dump.h"
@@ -60,7 +60,7 @@ int dump(const std::string &path, int format, int ping_index) {
     fprintf(stderr, "mbwcdview: %s\n", message.c_str());
     return 1;
   }
-  printf("kmall: %s\nkmwcd: %s\n", line.kmall.empty() ? "-" : line.kmall.c_str(),
+  printf("survey file: %s\nwater column file: %s\n", line.kmall.empty() ? "-" : line.kmall.c_str(),
          line.kmwcd.empty() ? "-" : line.kmwcd.c_str());
   printf("survey pings %zu, position records %zu, profiles %zu\n", line.has_survey ? line.survey.size() : 0,
          line.has_survey ? line.survey.nav.size() : 0, line.has_survey ? line.survey.svps.size() : 0);

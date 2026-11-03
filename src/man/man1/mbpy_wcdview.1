@@ -25,23 +25,25 @@ MB-System in \fI<prefix>/share/mbsystem/python\fP. It is written in Python with
 PySide6 (Qt6 for Python) and matplotlib, and serves as an example application of
 the API; \fBmbwcdview\fP(1) is the faster C++/Qt6 program for the same task.
 
-Opening a Kongsberg *.kmwcd or *.kmall file finds the other file of the survey
-line in the same directory (same line number, nearest file name time) and
-matches the pings by ping number and time. The *.kmall supplies the soundings,
-navigation, heading and transducer depth; the *.kmwcd the water column. Either
-may be missing: without a *.kmall the navigation comes from the position records
-of the *.kmwcd and depths are given below the transducer.
+Opening a Kongsberg *.kmwcd, *.kmall, *.wcd or *.all file finds the other file of
+the survey line in the same directory (same line number, nearest file name time) and
+matches the pings by ping number and time. The *.kmall or *.all supplies the
+soundings, navigation, heading and transducer depth; the *.kmwcd or *.wcd the water
+column. A *.all without a *.wcd supplies the water column too, if it holds any.
+Either may be missing: without a *.kmall or *.all the navigation comes from the
+position records of the *.kmwcd or *.wcd and depths are given below the transducer.
 
 The window has an Open button, Save Image (twice the screen resolution, with the
 file name and ping information), check boxes \fBBottom\fP (soundings of the
-matching *.kmall ping: red amplitude and dark blue phase detections, filled good,
+matching survey ping: red amplitude and dark blue phase detections, filled good,
 hollow flagged), \fBWC bottom\fP (the bottom detections recorded in the water
 column), \fBRay trace (SVP)\fP (samples traced through the logged sound velocity
 profile; on when a profile is found) and \fBPick\fP (positions clicked in the
 image go into a table that can be saved as text), the depth and amplitude ranges,
 a fixed across track scale, a replay rate, and a slider that steps one swath at a
 time (also the mouse wheel and the left and right arrow keys). Amplitudes are in
-dB; the Kongsberg fill value is drawn as no data.
+dB; the fill value of Kongsberg kmall data is drawn as no data. In *.wcd and *.all data
+the lowest value is a valid level and is drawn with the lowest color.
 
 \fBmbpy_wcdview\fP needs Python >= 3.11, numpy, matplotlib and PySide6, and an
 MB-System libmbio with \fBmb_extract_wc\fP(3). The README in
@@ -69,7 +71,7 @@ Christian dos Santos Ferreira
 .TP
 .B \-\-input\fP=\fIfile\fP {\fB\-I\fP\fIfile\fP}
 .br
-The *.kmwcd or *.kmall to open; it may also be given as the last argument.
+The *.kmwcd, *.kmall, *.wcd or *.all to open; it may also be given as the last argument.
 .TP
 .B \-\-help {\fB\-H\fP}
 Print the usage message and exit.

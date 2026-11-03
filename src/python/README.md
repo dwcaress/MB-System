@@ -4,7 +4,8 @@
 with Python's `ctypes` and `numpy`. Nothing is compiled: the package calls the
 `libmbio` of the MB-System installation it belongs to. It reads every format
 MBIO reads, and gives access to water column data (`mb_extract_wc()`, at present
-for Kongsberg kmall data: *.kmall and *.kmwcd files, format 261).
+for Kongsberg data: *.kmwcd files, format 261, and *.wcd and *.all files, formats 58
+and 59).
 
 It is meant for prototypes and small tools in Python. Two examples come with it:
 the scripts in `examples/` and the water column viewer `mbpy_wcdview`
@@ -86,7 +87,7 @@ or in the script:
 
 Fatal MBIO errors raise `mb.MBIOError` (with MB-System's message); non-fatal
 ones are in `rec.error` and reading continues. `mb.get_format(path)` gives the
-format of a file name (*.kmwcd: 261).
+format of a file name (*.kmwcd: 261, *.wcd: 58).
 
 ### WaterColumnPing: one ping of water column
 
@@ -105,7 +106,11 @@ positive starboard), `angle_along` (degrees, positive forward),
 of beam `i` is sample number `start_sample[i] + k`. For kmall data the
 amplitude is the logged value (0.5 dB steps) minus the gain offset
 (TVGoffset_dB), the display value defined by Kongsberg; the lowest logged
-value (-128, i.e. -94 dB with a 30 dB offset) is a fill value.
+value (-128, i.e. -94 dB with a 30 dB offset) is a fill value. For *.wcd and *.all
+data a record is one ping assembled from its datagrams, the amplitude is the logged
+value minus the TVG offset C, the lowest value is a valid level (weak samples clipped
+to it, no fill value), `swath` is 0, and two empty beams (`nsamples` 0) inside
+the gap mark datagrams lost inside the swath.
 `range_m()`, `detect_range_m()`, `xyz()` and `detect_xyz()` give positions
 along straight rays with the sound speed at the transducer.
 
@@ -119,11 +124,11 @@ Amplitudes are kept as float16 (exact for 0.5 dB steps), about 2 bytes per
 sample. Also: the file's own position records (`nav_time_d`, `nav_lon`,
 `nav_lat`) and sound velocity profiles (`svps`).
 
-### KongsbergLine: a *.kmall and its *.kmwcd
+### KongsbergLine: a *.kmall and its *.kmwcd, or a *.all and its *.wcd
 
     line = mb.KongsbergLine("0080_20250618_223434.kmwcd")   # or the .kmall
     wc = line.wc.ping(10)
-    j = line.survey_index(10)                 # matching .kmall ping, or None
+    j = line.survey_index(10)                 # matching survey ping, or None
     soundings = line.survey.bath[j], line.survey.bathacrosstrack[j]
     lon, lat, sog_kn, cog = line.nav_at(wc.time_d)
     heading = line.heading_at(wc.time_d)
@@ -133,8 +138,10 @@ sample. Also: the file's own position records (`nav_time_d`, `nav_lon`,
 SIS names each file after its first datagram's time, so the two files of a line
 may differ by seconds: the companion is found by line number and nearest file
 name time (`mb.find_companion`), then pings are matched by ping number and time.
-Either file may be missing; `nav_at` falls back to the .kmall ping positions and
-then to the .kmwcd position records.
+Either file may be missing; `nav_at` falls back to the survey ping positions and
+then to the position records of the water column file. `line.kmall` and `line.kmwcd`
+name the survey and water column files of either kind; a *.all without a *.wcd is
+both, and `line.wc` is None if it holds no water column.
 
 ### raytrace: samples through a sound velocity profile
 
@@ -173,18 +180,18 @@ Run them with the installed copy, for example
 
     mbpy_wcdview 0080_20250618_223434.kmwcd
 
-Opens a *.kmwcd or *.kmall (or use the Open button) and finds the other file of
+Opens a *.kmwcd, *.kmall, *.wcd or *.all (or use the Open button) and finds the other file of
 the line. Controls: depth and amplitude ranges, fixed across track scale,
-`Bottom` (soundings of the matching .kmall ping: red amplitude, dark blue phase,
+`Bottom` (soundings of the matching survey ping: red amplitude, dark blue phase,
 filled good, hollow flagged), `WC bottom` (the water column's own bottom
 detections), `Ray trace (SVP)` (on when a profile is found), a slider stepping
 one swath at a time (also mouse wheel and arrow keys), replay, `Pick` (positions
 into a table saved as text), `Save Image` (twice the screen resolution, with the
-file name and ping information). Without a .kmall: no soundings, depth below the
-transducer, navigation from the .kmwcd position records, picks use the course
+file name and ping information). Without a survey file: no soundings, depth below the
+transducer, navigation from the position records of the water column file, picks use the course
 over ground. See also `man mbpy_wcdview`.
 
 ## Tests
 `test/python` in the source tree (`ctest -R "mbio_py|wcdview"`), run with the
-library of the build; they write a small synthetic .kmall/.kmwcd pair and need
+library of the build; they write small synthetic .kmall/.kmwcd and .wcd files and need
 python3 with numpy (PySide6 and matplotlib for the viewer test).

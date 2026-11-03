@@ -77,6 +77,7 @@ class ReaderTest(unittest.TestCase):
   def test_format_from_name(self):
     self.assertEqual(mb.get_format("0080_20250618_223434.kmwcd"), K.MBF_KEMKMALL)
     self.assertEqual(mb.get_format("0080_20250618_223434.kmall"), K.MBF_KEMKMALL)
+    self.assertEqual(mb.get_format("0002_20100908_034926.wcd"), K.MBF_EM710RAW)
     self.assertEqual(mb.get_format("TN136HS.309.snipped.mb21"), 21)
 
 

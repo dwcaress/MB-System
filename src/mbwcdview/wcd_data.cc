@@ -239,6 +239,8 @@ int WcPing::nsamples_max() const {
 int get_format(const std::string &path) {
   if (lower_extension(path) == ".kmwcd")
     return MBF_KEMKMALL;  // not recognised by mb_get_format() on purpose (datalists)
+  if (lower_extension(path) == ".wcd")
+    return MBF_EM710RAW;  // the same
   std::vector<char> file(path.begin(), path.end());
   file.push_back('\0');
   std::vector<char> root(MB_PATH_MAXLINE, '\0');
@@ -253,7 +255,8 @@ std::string find_companion(const std::string &path, double max_offset_s) {
   double time_d;
   if (!name_time(path, line, time_d))
     return std::string();
-  const std::string other = lower_extension(path) == ".kmall" ? ".kmwcd" : ".kmall";
+  const std::string ext = lower_extension(path);
+  const std::string other = ext == ".kmall" ? ".kmwcd" : ext == ".kmwcd" ? ".kmall" : ext == ".all" ? ".wcd" : ".all";
   std::filesystem::path dir = std::filesystem::absolute(std::filesystem::path(path)).parent_path();
   std::string best;
   double best_dt = max_offset_s;
@@ -293,8 +296,10 @@ bool WaterColumnFile::load(const std::string &file, int fmt, const Progress &pro
   std::vector<float> amplitude;
   int nsamples_alloc = 0;
   size_t samples_read = 0;
+  amp.reserve((size_t)file_size);  // no more samples than bytes; untouched memory costs nothing
   while (reader.next(message)) {
-    if (!reader.ok())
+    /* mb_get_all() reports water column records of some formats as "not a data record" */
+    if (!reader.ok() && reader.kind != MB_DATA_WATER_COLUMN)
       continue;
     if (reader.kind == MB_DATA_NAV && (reader.navlon != 0.0 || reader.navlat != 0.0)) {
       nav.time_d.push_back(reader.time_d);
@@ -330,7 +335,8 @@ bool WaterColumnFile::load(const std::string &file, int fmt, const Progress &pro
       progress((int)pings.size(), std::min(1.0, samples_read / file_size));
   }
 
-  /* amplitude range and fill value from a histogram of the stored values */
+  /* amplitude range and fill value from a histogram of the stored values; in *.all and
+     *.wcd data the lowest value is a valid level, weak samples clipped to it */
   has_fill = false;
   if (!amp.empty()) {
     std::vector<size_t> counts(65536, 0);
@@ -341,7 +347,7 @@ bool WaterColumnFile::load(const std::string &file, int fmt, const Progress &pro
       if (counts[v] > 0)
         present.push_back(v);
     size_t first = 0;
-    if (present.size() > 1 && counts[present[0]] > 0.001 * amp.size() &&
+    if (format == MBF_KEMKMALL && present.size() > 1 && counts[present[0]] > 0.001 * amp.size() &&
         counts[present[1]] < 0.01 * counts[present[0]]) {
       has_fill = true;
       fill_value = 0.1 * (present[0] - 32768);
@@ -427,9 +433,12 @@ bool load_survey(const std::string &path, int format, SurveyPings &survey, std::
 
 /*--------------------------------------------------------------------*/
 bool Line::load(const std::string &path, const Progress &progress, std::string *message, int format) {
-  const bool is_kmwcd = lower_extension(path) == ".kmwcd";
-  const bool is_kmall = lower_extension(path) == ".kmall";
+  const std::string ext = lower_extension(path);
+  const bool is_kmwcd = ext == ".kmwcd" || ext == ".wcd";
+  const bool is_kmall = ext == ".kmall" || ext == ".all";
   kmwcd = is_kmwcd ? path : (is_kmall ? find_companion(path) : path);
+  if (ext == ".all" && kmwcd.empty())
+    kmwcd = path;  // a *.all without a *.wcd may hold the water column itself
   kmall = is_kmall ? path : (is_kmwcd ? find_companion(path) : std::string());
   has_survey = !kmall.empty() && load_survey(kmall, kmall == path ? format : 0, survey, message);
   has_wc = !kmwcd.empty() && wc.load(kmwcd, kmwcd == path ? format : 0, progress, message) && wc.size() > 0;
@@ -449,6 +458,8 @@ bool Line::load(const std::string &path, const Progress &progress, std::string *
       }
     }
   }
+  if (!has_wc && !has_survey && message != nullptr && message->empty())
+    *message = "no water column or survey data in " + path;
   return has_wc || has_survey;
 }
 
@@ -464,9 +475,14 @@ void Line::nav_at(double time_d, double &lon, double &lat, double &sog_kn, doubl
   lon = lat = sog_kn = cog = NaN;
   NavSeries pings_nav;
   if (has_survey) {
-    pings_nav.time_d = survey.time_d;
-    pings_nav.lon = survey.navlon;
-    pings_nav.lat = survey.navlat;
+    /* no position before the first position record */
+    for (size_t j = 0; j < survey.size(); j++) {
+      if (survey.navlon[j] != 0.0 || survey.navlat[j] != 0.0) {
+        pings_nav.time_d.push_back(survey.time_d[j]);
+        pings_nav.lon.push_back(survey.navlon[j]);
+        pings_nav.lat.push_back(survey.navlat[j]);
+      }
+    }
   }
   const NavSeries *sources[3] = {has_survey ? &survey.nav : nullptr, has_survey ? &pings_nav : nullptr,
                                  has_wc ? &wc.nav : nullptr};

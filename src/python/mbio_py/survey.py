@@ -16,7 +16,8 @@
 #
 #    See README.md file for copying and redistribution conditions.
 #--------------------------------------------------------------------
-"""Pairing of a Kongsberg survey line: *.kmall (nav, attitude, bathymetry) + *.kmwcd (water column).
+"""Pairing of a Kongsberg survey line: *.kmall or *.all (nav, attitude, bathymetry) + *.kmwcd or *.wcd
+(water column).
 
 SIS names each file nnnn_YYYYMMDD_HHMMSS after the time of its first datagram, so the
 two files of one line can differ by seconds: they are paired by line number nnnn and
@@ -35,6 +36,7 @@ from .reader import Reader
 from .watercolumn import WaterColumnFile
 
 _NAME = re.compile(r"^(\d{4})_(\d{8})_(\d{6})")
+_COMPANION = {".kmall": ".kmwcd", ".kmwcd": ".kmall", ".all": ".wcd", ".wcd": ".all"}
 
 
 def _name_time(path):
@@ -46,11 +48,13 @@ def _name_time(path):
 
 
 def find_companion(path, max_offset_s=600.0):
-    """Return the *.kmwcd of a *.kmall (or the reverse) in the same directory, or None."""
+    """Return the *.kmwcd of a *.kmall or the *.wcd of a *.all (or the reverse) in the same directory, or None."""
     line, t = _name_time(path)
     if line is None:
         return None
-    other = ".kmwcd" if path.lower().endswith(".kmall") else ".kmall"
+    other = _COMPANION.get(os.path.splitext(path)[1].lower())
+    if other is None:
+        return None
     best, best_dt = None, max_offset_s
     for cand in glob.glob(os.path.join(os.path.dirname(os.path.abspath(path)), line + "_*")):
         if not cand.lower().endswith(other):
@@ -112,7 +116,10 @@ def load_survey(path, format=0):
 
 
 class KongsbergLine:
-    """A *.kmall and its *.kmwcd, either of which may be missing.
+    """A *.kmall and its *.kmwcd, or a *.all and its *.wcd, either of which may be missing.
+
+    The attributes kmall and kmwcd name the survey file and the water column file of either
+    kind. A *.all without a *.wcd is both, as it may hold the water column itself.
 
     line = KongsbergLine("0080_20250618_223434.kmwcd")
     wc = line.wc.ping(i)                 # water column (WaterColumnFile)
@@ -121,11 +128,15 @@ class KongsbergLine:
     """
 
     def __init__(self, path, progress=None, max_dt_s=1.0):
-        low = path.lower()
-        self.kmwcd = path if low.endswith(".kmwcd") else find_companion(path)
-        self.kmall = path if low.endswith(".kmall") else find_companion(path)
+        suffix = os.path.splitext(path)[1].lower()
+        self.kmwcd = path if suffix in (".kmwcd", ".wcd") else find_companion(path)
+        self.kmall = path if suffix in (".kmall", ".all") else find_companion(path)
+        if suffix == ".all" and self.kmwcd is None:
+            self.kmwcd = path
         self.survey = load_survey(self.kmall) if self.kmall else None
         self.wc = WaterColumnFile(self.kmwcd, progress=progress) if self.kmwcd else None
+        if self.wc is not None and len(self.wc) == 0:
+            self.wc = None
         self._match = {}
         if self.survey is not None and self.wc is not None:
             by_ping = {}
@@ -157,7 +168,9 @@ class KongsbergLine:
         if s is not None and s.nav_time_d is not None and len(s.nav_time_d) > 1:
             sources.append((s.nav_time_d, s.nav_lon, s.nav_lat))
         if s is not None and len(s) > 1:
-            sources.append((s.time_d, s.navlon, s.navlat))
+            known = (s.navlon != 0.0) | (s.navlat != 0.0)  # no position before the first position record
+            if np.count_nonzero(known) > 1:
+                sources.append((s.time_d[known], s.navlon[known], s.navlat[known]))
         if self.wc is not None and len(self.wc.nav_time_d) > 1:
             sources.append((self.wc.nav_time_d, self.wc.nav_lon, self.wc.nav_lat))
         for t, lon, lat in sources:
