@@ -78,7 +78,9 @@ set(manpages
     mbpy_wcdview.1
     mbpy_grd3dplot.1
     mbpy_grdplot.1
+    mbpy_grdtiff.1
     mbpy_histplot.1
+    mbpy_plot.1
     mbpy_xyplot.1
     mbrolltimelag.1
     mbroutetime.1
