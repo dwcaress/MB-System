@@ -1,0 +1,351 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbpy_grdtiff</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbpy_grdtiff</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 November 2026 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbpy_grdtiff</B> - Create an executable shellscript which will generate
+a georeferenced TIFF image of gridded data using GMT modern mode.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbpy_grdtiff</B> <B>-I</B><I>grid</I> [<B>-O</B><I>root</I>]
+[<B>-X</B>] [<B>-V</B>]
+<BR>
+
+[<B>-R</B><I>west/east/south/north</I>]
+[<B>-N</B><I>dx/dy</I>]
+<BR>
+
+[<B>-G</B><I>color_mode</I>]
+[<B>-W</B><I>color_style/palette</I>[<I>/ncolors</I>] | <I>cptfile</I>]
+[<B>-D</B>] [<B>-Y</B>] [<B>-S</B>]
+[<B>-Z</B><I>zmin/zmax</I>[<I>/mode</I>]]
+[<B>--data-scale</B> <I>factor</I>]
+<BR>
+
+[<B>-A</B><I>magnitude</I>[<I>/azimuth</I>[<I>/elevation</I>]]]
+[<B>--magnitude</B> <I>val</I>]
+[<B>--azimuth</B> <I>deg</I>]
+[<B>--elevation</B> <I>deg</I>]
+[<B>--shade-flip</B>]
+[<B>-K</B><I>intensity_grid</I>]
+[<B>--stretch-shade</B>]
+<BR>
+
+[<B>--gmt-default</B> <I>param/value</I>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbpy_grdtiff</B> is a Python/PyGMT-era replacement for the Perl macro
+<B>mbm_grdtiff</B>. It reads a grid (for instance one made by
+<B>mbgrid</B> or <B>mbmosaic</B>) and generates an executable shellscript
+of <B>GMT</B> <B>modern mode</B> commands which, when run, makes a
+georeferenced TIFF image of the grid with the <B>MB-System</B> GMT
+module <B>mbgrdtiff</B>. The image is a GeoTIFF with the grid's
+coordinate system embedded, plus a parallel &quot;.tfw&quot; world file for
+software that does not read the GeoTIFF tags. Geographic grids and
+grids in projected coordinate systems (e.g. UTM) are both handled. Such
+images can be loaded into GIS packages such as QGIS and ArcGIS as
+geographically located coverages.
+<P>
+The image may be a color fill of the gridded values, color shaded
+relief, a color fill shaded by a separate intensity grid, a color fill
+of the slope magnitude, or a color fill shaded by the slope magnitude
+(see <B>-G</B>). The color palettes, color intervals and shading
+methods are the same as those of <B>mbpy_grdplot</B>, so a GeoTIFF and a
+map of the same grid made with the same options look the same.
+<P>
+The generated script is named <I>root</I>_tiff.sh and creates
+<I>root</I>.tif and <I>root</I>.tfw. A generated color palette is
+written to <I>root</I>.cpt by <B>mbpy_grdtiff</B> itself. Because
+<B>mbgrdtiff</B> writes its image file directly, the script opens a GMT
+modern-mode session without a figure (<B>gmt begin</B> ... <B>gmt end</B>)
+only so that its temporary GMT defaults stay inside the session; no
+gmt.conf file is created or deleted in the current directory.
+<P>
+Differences from <B>mbm_grdtiff</B>: a file listing several grids is not
+accepted by <B>-I</B> (use one <B>mbpy_grdtiff</B> command per grid);
+the <B>-MGW</B> option is not needed because <B>mbgrdtiff</B> always
+writes the world file; the <B>-MGS</B> option is <B>--data-scale</B>;
+the sealevel palettes 8 and 9 of <B>mbpy_grdplot</B> are available;
+discrete palettes and the histogram-equalized color stretch follow
+<B>mbm_grdplot</B> and <B>mbpy_grdplot</B>; and the image is not
+displayed after it is made.
+<P>
+<B>mbpy_grdtiff</B> requires <B>GMT</B> 6 or later with the
+<B>MB-System</B> GMT modules, and a Python 3 interpreter. It uses the
+modules <B>mbpy_layout.py</B>, <B>mbpy_color.py</B>, <B>mbpy_misc.py</B>,
+<B>mbpy_grdplot_script.py</B> and <B>mbpy_grdtiff_script.py</B>,
+installed alongside it.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-I</B>, <B>--input</B> <I>grid</I>
+
+<DD>
+Input grid file. Required.
+<DT><B>-O</B>, <B>--output</B> <I>root</I>
+
+<DD>
+Output root name: the script is <I>root</I>_tiff.sh, the image
+<I>root</I>.tif and the world file <I>root</I>.tfw. Default: the input
+grid's basename without its extension.
+<DT><B>-X</B>, <B>--execute</B>
+
+<DD>
+Run the generated script immediately after writing it.
+<DT><B>-V</B>, <B>--verbose</B>
+
+<DD>
+Print the generated script's path and a summary of the image style,
+region, z range and file names.
+<DT><B>-R</B>, <B>--region</B> <I>west/east/south/north</I>
+
+<DD>
+Bounds of the image, in the grid's own coordinates. When given, the
+color stretch spans the z range of the grid inside these bounds.
+Default: the grid's own bounds.
+<DT><B>-N</B>, <B>--nudge</B> <I>dx/dy</I>
+
+<DD>
+Shift the location of the image by <I>dx</I> meters east and <I>dy</I>
+meters north (<B>mbgrdtiff -N</B>).
+<DT><B>-G</B>, <B>--color-mode</B> <I>color_mode</I>
+
+<DD>
+Image style:
+<BR>
+
+<BR>&nbsp;&nbsp;<I>color_mode</I>&nbsp;=&nbsp;1:&nbsp;Color&nbsp;fill.
+<BR>
+
+<BR>&nbsp;&nbsp;<I>color_mode</I>&nbsp;=&nbsp;2:&nbsp;Color&nbsp;shaded&nbsp;relief,&nbsp;using&nbsp;an&nbsp;illumination
+model built from <B>--magnitude</B>, <B>--azimuth</B> and
+<B>--elevation</B>.
+<BR>
+
+<BR>&nbsp;&nbsp;<I>color_mode</I>&nbsp;=&nbsp;3:&nbsp;Color&nbsp;fill&nbsp;shaded&nbsp;by&nbsp;the&nbsp;intensity&nbsp;grid&nbsp;given
+with <B>-K</B>.
+<BR>
+
+<BR>&nbsp;&nbsp;<I>color_mode</I>&nbsp;=&nbsp;4:&nbsp;Color&nbsp;fill&nbsp;of&nbsp;the&nbsp;slope&nbsp;magnitude.
+<BR>
+
+<BR>&nbsp;&nbsp;<I>color_mode</I>&nbsp;=&nbsp;5:&nbsp;Color&nbsp;fill&nbsp;shaded&nbsp;by&nbsp;the&nbsp;slope&nbsp;magnitude.
+<BR>
+
+Default: 1, or 3 when <B>-K</B> is given.
+<DT><B>-W</B>, <B>--color-control</B> <I>color_style/palette</I>[<I>/ncolors</I>] | <I>cptfile</I>
+
+<DD>
+Color palette. <I>color_style</I> 1 gives a continuous palette, 2 a
+discrete one. <I>palette</I> is one of:
+<BR>
+
+<BR>&nbsp;&nbsp;1:&nbsp;Haxby&nbsp;colors&nbsp;[default]
+<BR>
+
+<BR>&nbsp;&nbsp;2:&nbsp;high&nbsp;intensity&nbsp;colors
+<BR>
+
+<BR>&nbsp;&nbsp;3:&nbsp;low&nbsp;intensity&nbsp;colors
+<BR>
+
+<BR>&nbsp;&nbsp;4:&nbsp;grayscale
+<BR>
+
+<BR>&nbsp;&nbsp;5:&nbsp;uniform&nbsp;gray
+<BR>
+
+<BR>&nbsp;&nbsp;6:&nbsp;uniform&nbsp;black
+<BR>
+
+<BR>&nbsp;&nbsp;7:&nbsp;uniform&nbsp;white
+<BR>
+
+<BR>&nbsp;&nbsp;8,&nbsp;9:&nbsp;sealevel&nbsp;palettes,&nbsp;with&nbsp;a&nbsp;color&nbsp;break&nbsp;at&nbsp;zero&nbsp;(see
+<B>mbpy_grdplot</B>)
+<BR>
+
+<I>ncolors</I> is the number of colors [11]. If the argument names an
+existing file, that file is used as the color palette table.
+<DT><B>-D</B>, <B>--color-flip</B>
+
+<DD>
+Reverse the color palette.
+<DT><B>-Y</B>, <B>--no-nice-interval</B>
+
+<DD>
+Stretch the colors linearly between the minimum and maximum values
+instead of using rounded color intervals.
+<DT><B>-S</B>, <B>--stretch-color</B>
+
+<DD>
+Use histogram equalization of the grid (<B>gmt grdhisteq</B>) to set
+the color boundaries. With palette 8 or 9 the values below and above
+zero are equalized separately.
+<DT><B>-Z</B>, <B>--zbounds</B> <I>zmin/zmax</I>[<I>/mode</I>]
+
+<DD>
+Use <I>zmin</I> and <I>zmax</I> instead of the grid's own z range for the
+color stretch. If <I>mode</I> is 1, the first and last colors are
+extended to the grid's own minimum and maximum, so that every value is
+colored.
+<DT><B>--data-scale</B> <I>factor</I>
+
+<DD>
+Multiply the grid values by <I>factor</I> before coloring and shading,
+for instance -1 to plot depths as topography (<B>mbm_grdtiff
+-MGS</B>).
+<DT><B>-A</B>, <B>--shade</B> <I>magnitude</I>[<I>/azimuth</I>[<I>/elevation</I>]]
+
+<DD>
+Shading parameters in one argument, as in <B>mbm_grdtiff -A</B>. The
+separate options below take precedence.
+<DT><B>--magnitude</B> <I>val</I>
+
+<DD>
+Shading magnitude. Defaults: 1.0 for modes 2, 4 and 5; -0.4 for
+mode 3.
+<DT><B>--azimuth</B> <I>deg</I>
+
+<DD>
+Illumination azimuth for mode 2, degrees clockwise from north [0].
+<DT><B>--elevation</B> <I>deg</I>
+
+<DD>
+Illumination elevation for mode 2, degrees above the horizon [30].
+<DT><B>--shade-flip</B>
+
+<DD>
+Reverse the sense of the shading (negates the magnitude).
+<DT><B>-K</B>, <B>--intensity-file</B> <I>intensity_grid</I>
+
+<DD>
+Intensity grid used to shade the image in mode 3; it must cover the
+same area as the input grid.
+<DT><B>--stretch-shade</B>
+
+<DD>
+Histogram-equalize the intensity grid before shading (mode 3).
+<DT><B>--gmt-default</B> <I>param/value</I>
+
+<DD>
+Override a GMT default parameter in the generated script; repeatable.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+A color shaded relief GeoTIFF of a bathymetry grid, illuminated from
+the northeast, made at once:
+<P>
+<BR>
+
+<BR>&nbsp;mbpy_grdtiff&nbsp;-I&nbsp;ZTopo.grd&nbsp;-G2&nbsp;--azimuth&nbsp;45&nbsp;-X&nbsp;-V
+<P>
+A grayscale amplitude mosaic shaded by a separate intensity grid:
+<P>
+<BR>
+
+<BR>&nbsp;mbpy_grdtiff&nbsp;-I&nbsp;ZAmp.grd&nbsp;-O&nbsp;ZAmp_shaded&nbsp;-K&nbsp;ZTopoInt.grd&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-W&nbsp;1/4&nbsp;--stretch-shade
+<P>
+A topography image of a depth grid (positive down), with the colors
+clipped to 1000 to 4000 m depth but every value still colored:
+<P>
+<BR>
+
+<BR>&nbsp;mbpy_grdtiff&nbsp;-I&nbsp;depths.grd&nbsp;--data-scale&nbsp;-1&nbsp;-Z&nbsp;-4000/-1000/1
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbm_grdtiff.html">mbm_grdtiff</A></B>(1), <B><A HREF="mbgrdtiff.html">mbgrdtiff</A></B>(1), <B><A HREF="mbpy_grdplot.html">mbpy_grdplot</A></B>(1),
+<B><A HREF="mbpy_plot.html">mbpy_plot</A></B>(1), <B><A HREF="mbgrid.html">mbgrid</A></B>(1), <B><A HREF="mbmosaic.html">mbmosaic</A></B>(1),
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Please report any bugs to the MB-System project on GitHub
+(<A HREF="https://github.com/dwcaress/MB-System).">https://github.com/dwcaress/MB-System).</A>
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 3 November 2026</P></CENTER>
+
+<HR>
+<center>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>
