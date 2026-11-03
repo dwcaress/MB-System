@@ -1,0 +1,297 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbwcdview</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbwcdview</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  1 November 2026 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbwcdview</B> - Display water column data, one swath at a time.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbwcdview</B>
+<BR>
+
+[
+<BR>
+
+<B>--input</B>=<I>file</I> {<B>-I</B><I>file</I>}
+<BR>
+
+<B>--format</B>=<I>format_id</I> {<B>-F</B><I>format_id</I>}
+<BR>
+
+<B>--ping</B>=<I>index</I> {<B>-P</B><I>index</I>}
+<BR>
+
+<B>--swath</B>=<I>index</I> {<B>-S</B><I>index</I>}
+<BR>
+
+<B>--bottom</B>
+<BR>
+
+<B>--wc-bottom</B>
+<BR>
+
+<B>--straight</B>
+<BR>
+
+<B>--export</B>=<I>image.png</I>
+<BR>
+
+<B>--size</B>=<I>width</I>x<I>height</I>
+<BR>
+
+<B>--dump</B>
+<BR>
+
+<B>--verbose</B> {<B>-V</B>}
+<BR>
+
+<B>--help</B> {<B>-H</B>}
+<BR>
+
+]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbwcdview</B> is a Qt6 program that displays the water column data of swath
+sonar files, read through the MBIO library, as an image of the beamformed
+amplitudes against across track distance and depth, one swath at a time. Water
+column data are available for the Kongsberg kmall format (format 261), in the
+separate *.kmwcd files (water column only), and for the third generation Kongsberg
+multibeams (EM 122, 302, 710, 712, 2040 ...; formats 58 and 59), in the separate
+*.wcd files or in the *.all files. The original files are read; no preprocessing is
+needed. The formats 56 and 57 (for instance EM 3002) are not supported.
+<P>
+When a Kongsberg *.kmwcd, *.kmall, *.wcd or *.all file is opened, <B>mbwcdview</B>
+looks for the other file of the same survey line in the same directory: the same line number
+(the first four characters of the file name) and the nearest time in the file
+name. Kongsberg SIS names each file after the time of its first datagram, so the
+two names may differ by seconds. The water column pings are matched with the
+survey pings of the *.kmall or *.all by ping number and time. The *.kmall or *.all
+supplies the navigation, the vessel heading, the transducer depth and the soundings;
+the *.kmwcd or *.wcd supplies the water column. A *.all without a *.wcd supplies the
+water column too, if it holds any. Any of these may be missing: without a *.kmall or
+*.all the navigation is taken from the position records of the *.kmwcd or *.wcd, if
+present, and depths are given below the transducer. Where water column datagrams
+were lost in a ping (*.wcd, *.all) the part of the swath they held stays blank.
+<P>
+The water column samples are ray traced through the sound velocity profile
+logged with the data (<B><A HREF="mb_rt.html">mb_rt</A></B>(3), as <B>mbprocess</B> traces soundings), from
+the transducer depth and with the beam angles and the sound speed at the
+transducer logged with the water column. The soundings then lie on the seafloor
+echo. With the <B>Ray trace (SVP)</B> check box off (or <B>--straight</B>) the
+samples are placed along straight rays with the sound speed at the transducer;
+in deep water with a fast surface layer this puts the seafloor echo noticeably
+deeper than the soundings and the outer beams tens of metres off. No motion
+during the ping (heave, pitch, roll) is applied.
+<P>
+The amplitudes are shown in dB. For Kongsberg data these are the logged values
+(0.5 dB steps) minus the gain offset (TVGoffset_dB), the display value defined by
+Kongsberg. In kmall data the lowest logged value (-128, i.e. -94 dB with a 30 dB
+offset) is a fill value when the next values are practically absent, and is then drawn
+as no data. In *.wcd and *.all data the amplitudes are the logged values minus the TVG
+offset C, and the lowest value is a valid level, weak samples clipped to it.
+<P>
+The window has controls for the depth range, the amplitude range of the colour
+scale, a fixed across track scale, the display of the soundings of the matching
+survey ping (<B>Bottom</B>: red amplitude, dark blue phase detections, filled good,
+hollow flagged) and of the bottom detections recorded in the water column itself
+(<B>WC bottom</B>, orange line), a slider (also mouse wheel and the left and right
+arrow keys, one swath per step), a replay at a given rate, saving the image at
+twice the screen resolution with the file name and ping information, and
+picking positions in the image (<B>Pick</B>) into a table that can be saved as text.
+The image is drawn with OpenGL, so stepping through the pings is fast.
+<P>
+Without a window, <B>--dump</B> prints a summary of a survey line and
+<B>--export</B> writes an image of one swath.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian dos Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>--input</B>=<I>file</I> {<B>-I</B><I>file</I>}
+
+<DD>
+<BR>
+
+The swath file to open. For Kongsberg data either the *.kmwcd or the *.kmall,
+or the *.wcd or the *.all, of a survey line; the other file is found as described above. The file name may
+also be given as the last argument.
+<DT><B>--format</B>=<I>format_id</I> {<B>-F</B><I>format_id</I>}
+
+<DD>
+<BR>
+
+The MBIO format of the input file. By default it is taken from the file name;
+*.kmwcd files are read as format 261 and *.wcd files as format 58.
+<DT><B>--ping</B>=<I>index</I> {<B>-P</B><I>index</I>}
+
+<DD>
+<BR>
+
+The water column ping (counted from 0) shown first, exported or summarized.
+Default: 0.
+<DT><B>--swath</B>=<I>index</I> {<B>-S</B><I>index</I>}
+
+<DD>
+<BR>
+
+With <B>--export</B>, the swath of the ping (0 is the aftmost swath in multiple
+swath modes). Default: the first swath.
+<DT><B>--bottom</B>
+
+<DD>
+With <B>--export</B>, draw the soundings of the matching survey ping.
+<DT><B>--wc-bottom</B>
+
+<DD>
+With <B>--export</B>, draw the bottom detections recorded in the water column.
+<DT><B>--straight</B>
+
+<DD>
+With <B>--export</B>, use straight rays instead of ray tracing.
+<DT><B>--export</B>=<I>image.png</I>
+
+<DD>
+<BR>
+
+Write an image of one swath (PNG or JPEG by the file name) and exit without
+opening a window.
+<DT><B>--size</B>=<I>width</I>x<I>height</I>
+
+<DD>
+<BR>
+
+The size in pixels of the exported image. Default: 1400x900.
+<DT><B>--dump</B>
+
+<DD>
+Print a summary of the survey line and exit: the files found, the numbers of
+pings, matched pings and position records, the amplitude range and fill value,
+the position, speed, course and heading at the ping given by <B>--ping</B>, and the
+depth ratio and across track difference between the bottom detections of the
+water column and the soundings, for straight and for ray traced geometry.
+<DT><B>--verbose {-V</B>}
+
+<DD>
+Print the program name and version, and with <B>--export</B> what was written.
+<DT><B>--help {-H</B>}
+
+<DD>
+Print the usage message and exit.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+To view a Kongsberg survey line, open either of its files:
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbwcdview 0080_20250618_223434.kmwcd<BR>
+<BR>
+
+<P>
+To write an image of ping 100 with the soundings and the water column bottom
+detections:
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbwcdview -I 0030_20250208_100905.kmall --ping=100 --bottom --wc-bottom --export=ping100.png<BR>
+<BR>
+
+<P>
+To check the pairing of the files and the ray tracing of a line:
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbwcdview --dump -I 0030_20250208_100905.kmall<BR>
+<BR>
+
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbinfo.html">mbinfo</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1), <B><A HREF="mbio.html">mbio</A></B>(3)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+The soundings of a ping are assigned to the swaths by splitting them into equal
+blocks, which is right for dual swath data with one receiver; when the receive
+fans have different numbers of soundings all soundings of the ping are drawn on
+each swath. Water column data stored inside *.kmall files are not read. Dual head
+and dual receiver systems, and water column data of EM 2040 scanning mode, have not
+been tested.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 1 November 2026</P></CENTER>
+
+<HR>
+<center>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>

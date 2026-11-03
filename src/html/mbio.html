@@ -2982,6 +2982,91 @@ for all data formats.
 ---------------------------------------------------------
 <BR>
 
+int <B>mb_extract_wcdimensions</B>(
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>int&nbsp;<I>verbose</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>void&nbsp;<I>*mbio_ptr</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>void&nbsp;<I>*store_ptr</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>int&nbsp;<I>*kind</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>int&nbsp;<I>*nbeams</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>int&nbsp;<I>*nsamples_max</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>int&nbsp;<I>*error</I>);<BR>
+<P>
+The function <B>mb_extract_wcdimensions</B> returns the number of
+water column beams in the current data record and the largest number
+of samples of any of these beams, without extracting the water column
+data. This allows a program to size arrays appropriately before
+calling <B>mb_extract_wc</B>. If the record has no water column data the
+function returns <B>MB_FAILURE</B> with <I>*error</I> set to
+<B>MB_ERROR_OTHER</B>; formats without water column support return
+<B>MB_ERROR_BAD_SYSTEM</B>.
+<P>
+---------------------------------------------------------
+<BR>
+
+int <B>mb_extract_wc</B>(
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>int&nbsp;<I>verbose</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>void&nbsp;<I>*mbio_ptr</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>void&nbsp;<I>*store_ptr</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>int&nbsp;<I>nbeams_alloc</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>int&nbsp;<I>nsamples_alloc</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>int&nbsp;<I>*kind</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>int&nbsp;<I>time_i[7]</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>double&nbsp;<I>*time_d</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>int&nbsp;<I>*nbeams</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>int&nbsp;<I>*nsamples_max</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>int&nbsp;<I>*swath</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>double&nbsp;<I>*angle_across</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>double&nbsp;<I>*angle_along</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>double&nbsp;<I>*sample_interval</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>double&nbsp;<I>*soundspeed</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>int&nbsp;<I>*start_sample</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>int&nbsp;<I>*nsamples</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>double&nbsp;<I>*detect_sample</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>float&nbsp;<I>*amplitude</I>,<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>int&nbsp;<I>*error</I>);<BR>
+<P>
+The function <B>mb_extract_wc</B> extracts the water column
+(beamformed amplitude time series) data of the current data record,
+where the data format supports this. A record holds one ping with all
+of its receive fans. The calling program passes per beam arrays of at
+least <I>nbeams_alloc</I> values and an <I>amplitude</I> array of
+<I>nbeams_alloc</I> x <I>nsamples_alloc</I> values; if the record needs
+more, the function returns <B>MB_FAILURE</B> with <I>*error</I> set to
+<B>MB_ERROR_BAD_PARAMETER</B> and the needed <I>*nbeams</I> and
+<I>*nsamples_max</I>. For each beam <I>i</I> the function returns
+<I>swath[i]</I>, the index of the swath along track (0 is the aftmost
+swath, beams of several receive fans of one swath share an index),
+<I>angle_across[i]</I>, the beam pointing angle from vertical in
+degrees, positive to starboard, <I>angle_along[i]</I>, the along track
+steering angle of the beam's transmit sector in degrees, positive
+forward, <I>sample_interval[i]</I> in seconds, <I>soundspeed[i]</I> at
+the transducer in m/s, and <I>detect_sample[i]</I>, the two-way range of
+the bottom detection in samples (0 if there is none). The amplitude of
+sample <I>k</I> (0 &lt;= <I>k</I> &lt; <I>nsamples[i]</I>) of beam <I>i</I> is
+<I>amplitude[i * nsamples_alloc + k]</I> in dB, at sample number
+<I>start_sample[i] + k</I>: its two-way travel time is that sample number
+times <I>sample_interval[i]</I> and its slant range is half the travel time
+times <I>soundspeed[i]</I>. Values beyond <I>nsamples[i]</I> are not set.
+For Kongsberg kmall data (format 261, including *.kmwcd files read as
+format 261) the amplitudes are the logged 0.5 dB values minus the gain
+offset TVGoffset_dB, which is the display value defined by Kongsberg.
+For Kongsberg third generation multibeam data (formats 58 and 59, including
+*.wcd files read as format 58) a water column record holds one ping, assembled
+from the ping's water column datagrams, of which one or more may have been lost.
+The amplitudes are the logged 0.5 dB values minus the TVG offset C of the datagram,
+<I>swath</I> is 0 and the time is that of the ping's first datagram. Where datagrams
+were lost inside the swath two empty beams (<I>nsamples</I> 0), inside the gap in
+angle, mark the gap, so that a program drawing the swath leaves it blank. For these
+formats <B>mb_get_all</B> returns <B>MB_FAILURE</B> with <I>*error</I> set to
+<B>MB_ERROR_OTHER</B> for water column records, so programs that write only records
+without an error do not copy them; test <I>kind</I> for <B>MB_DATA_WATER_COLUMN</B>
+before calling <B>mb_extract_wc</B>. <B>mb_pingnumber</B> gives the ping number of
+the water column record.
+This function is not implemented for all data formats.
+<P>
+---------------------------------------------------------
+<BR>
+
 int <B>mb_extract_segytraceheader</B>(
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>int&nbsp;<I>verbose</I>,<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>void&nbsp;<I>*mbio_ptr</I>,<BR>

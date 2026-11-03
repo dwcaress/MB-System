@@ -30,6 +30,7 @@ dist_mbsystemhtml_DATA = \
     mbeditviz.html \
     mbextractsegy.html \
     mbfilter.html \
+    mbfnv2navlab.html \
     mbformat.html \
     mbgetesf.html \
     mbgpstide.html \
@@ -38,6 +39,7 @@ dist_mbsystemhtml_DATA = \
     mbgrdviz.html \
     mbgrid.html \
     mbhistogram.html \
+    mbhistory.html \
     mbhsdump.html \
     mbhysweeppreprocess.html \
     mbinfo.html \
@@ -58,6 +60,8 @@ dist_mbsystemhtml_DATA = \
     mbm_grid.html \
     mbm_histplot.html \
     mbm_makedatalist.html \
+    mbm_tmap.html \
+    mbmakedatalist.html \
     mbmakeplatform.html \
     mbm_makesvp.html \
     mbm_multicopy.html \
@@ -69,13 +73,18 @@ dist_mbsystemhtml_DATA = \
     mbm_utm.html \
     mbm_xbt.html \
     mbm_xyplot.html \
+    mbmapscale.html \
+    mbmesh.html \
+    mbminirovnav.html \
     mbmosaic.html \
     mbnavadjust.html \
     mbnavadjustmerge.html \
     mbnavedit.html \
+    mbnavlab2fnv.html \
     mbnavlist.html \
     mbneptune2esf.html \
     mbotps.html \
+    mbotpsold.html \
     mbpreprocess.html \
     mbprocess.html \
     mbrollbias.html \
@@ -91,8 +100,12 @@ dist_mbsystemhtml_DATA = \
     mbsvplist.html \
     mbsvpselect.html \
     mbswath.html \
+    mbswath2las.html \
     mbswplspreprocess.html \
+    mbtiff2png.html \
     mbtime.html \
+    mbtrnpp.html \
+    mbusbl2fnv.html \
     mbvelocitytool.html \
     mbvoxelclean.html \
     ChangeLog.pdf \
@@ -120,6 +133,7 @@ dist_mbsystemhtml_DATA = \
     mbeditviz.pdf \
     mbextractsegy.pdf \
     mbfilter.pdf \
+    mbfnv2navlab.pdf \
     mbformat.pdf \
     mbgetesf.pdf \
     mbgpstide.pdf \
@@ -128,12 +142,15 @@ dist_mbsystemhtml_DATA = \
     mbgrdviz.pdf \
     mbgrid.pdf \
     mbhistogram.pdf \
+    mbhistory.pdf \
     mbhsdump.pdf \
     mbhysweeppreprocess.pdf \
     mbinfo.pdf \
     mbkongsbergpreprocess.pdf \
     mblevitus.pdf \
     mblist.pdf \
+    mbm_tmap.pdf \
+    mbmakedatalist.pdf \
     mbmakeplatform.pdf \
     mbm_arc2grd.pdf \
     mbm_bpr.pdf \
@@ -159,13 +176,18 @@ dist_mbsystemhtml_DATA = \
     mbm_utm.pdf \
     mbm_xbt.pdf \
     mbm_xyplot.pdf \
+    mbmapscale.pdf \
+    mbmesh.pdf \
+    mbminirovnav.pdf \
     mbmosaic.pdf \
     mbnavadjust.pdf \
     mbnavadjustmerge.pdf \
     mbnavedit.pdf \
+    mbnavlab2fnv.pdf \
     mbnavlist.pdf \
     mbneptune2esf.pdf \
     mbotps.pdf \
+    mbotpsold.pdf \
     mbpreprocess.pdf \
     mbprocess.pdf \
     mbrollbias.pdf \
@@ -181,8 +203,12 @@ dist_mbsystemhtml_DATA = \
     mbsvplist.pdf \
     mbsvpselect.pdf \
     mbswath.pdf \
+    mbswath2las.pdf \
     mbswplspreprocess.pdf \
+    mbtiff2png.pdf \
     mbtime.pdf \
+    mbtrnpp.pdf \
+    mbusbl2fnv.pdf \
     mbvelocitytool.pdf \
     mbvoxelclean.pdf
 

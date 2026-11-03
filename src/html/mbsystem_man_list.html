@@ -37,8 +37,10 @@
   <li>mbclean (<a href="mbclean.html">html</a>)(<a href="mbclean.pdf">pdf</a>): Identifies and flags bad beams in swath sonar bathymetry data.</li>
   <li>mbdumpesf (<a href="mbdumpesf.html">html</a>)(<a href="mbdumpesf.pdf">pdf</a>): mbdumpesf reads an MB-System edit save file and dumps the contents as an ascii table to stdout.</li>
   <li>mbedit (<a href="mbedit.html">html</a>)(<a href="mbedit.pdf">pdf</a>): Interactive editor used to flag bad beams in swath sonar bathymetry data.</li>
+  <li>mbedit-qt (<a href="mbedit-qt.html">html</a>)(<a href="mbedit-qt.pdf">pdf</a>): Interactive editor used to flag bad bathymetry values in swath sonar bathymetry data (Qt6 version).</li>
   <li>mbeditviz (<a href="mbeditviz.html">html</a>)(<a href="mbeditviz.pdf">pdf</a>): Interactive 3D visualization bathymetry editing and attitude bias patch test.</li>
   <li>mbgetesf (<a href="mbgetesf.html">html</a>)(<a href="mbgetesf.pdf">pdf</a>): Extract bathymetry edits in edit save file format.</li>
+  <li>mbhistory (<a href="mbhistory.html">html</a>)(<a href="mbhistory.pdf">pdf</a>): List, compare, tag, prune and restore the versions of edit save files.</li>
   <li>mbvoxelclean (<a href="mbvoxelclean.html">html</a>)(<a href="mbvoxelclean.pdf">pdf</a>): mbvoxelclean  identifies  and flags artifacts in swath bathymetry data using a 3D density filter. .</li>
 </ul>
 
@@ -48,6 +50,7 @@
   <li>mbsvplist (<a href="mbsvplist.html">html</a>)(<a href="mbsvplist.pdf">pdf</a>): Extract water sound velocity profiles (SVPs) from swath data files.</li>
   <li>mbsvpselect (<a href="mbsvpselect.html">html</a>)(<a href="mbsvpselect.pdf">pdf</a>): Select the best available sound speed model for each swath file in a survey according to user specified criteria.</li>
   <li>mbvelocitytool (<a href="mbvelocitytool.html">html</a>)(<a href="mbvelocitytool.pdf">pdf</a>): Interactive program for modeling the affect of the water velocity profile on swath sonar bathymetry calculations.</li>
+  <li>mbvelocitytool-qt (<a href="mbvelocitytool-qt.html">html</a>)(<a href="mbvelocitytool-qt.pdf">pdf</a>): Interactive water sound velocity profile editor (Qt6 version).</li>
   <li>mbm_makesvp (<a href="mbm_makesvp.html">html</a>)(<a href="mbm_makesvp.pdf">pdf</a>): Generate a sound velocity profile model from sound speed and depth values in swath files.</li>
   <li>mbm_xbt (<a href="mbm_xbt.html">html</a>)(<a href="mbm_xbt.pdf">pdf</a>): Processes a Sparton XBT data file and outputs a sound velocity profile file which can be used to process swath sonar data.</li>
 </ul>
@@ -104,7 +107,9 @@
   <li>mbm_xyplot (<a href="mbm_xyplot.html">html</a>)(<a href="mbm_xyplot.pdf">pdf</a>): Reads one or more xy data files and writes a shellscript which will generate GMT plot of the data.</li>
   <li>mbpy_grd3dplot (<a href="mbpy_grd3dplot.html">html</a>)(<a href="mbpy_grd3dplot.pdf">pdf</a>): Python/PyGMT-era replacement for mbm_grd3dplot; reads a GMT grid file and writes a GMT modern-mode shellscript which will generate a 3D perspective view of the data.</li>
   <li>mbpy_grdplot (<a href="mbpy_grdplot.html">html</a>)(<a href="mbpy_grdplot.pdf">pdf</a>): Python/PyGMT-era replacement for mbm_grdplot; reads a GMT grid file (or georeferenced image) and writes a GMT modern-mode shellscript which will generate a map of the data.</li>
+  <li>mbpy_grdtiff (<a href="mbpy_grdtiff.html">html</a>)(<a href="mbpy_grdtiff.pdf">pdf</a>): Python replacement for mbm_grdtiff; reads a GMT grid file and writes a GMT modern-mode shellscript which will generate a georeferenced TIFF image of the data.</li>
   <li>mbpy_histplot (<a href="mbpy_histplot.html">html</a>)(<a href="mbpy_histplot.pdf">pdf</a>): Python/PyGMT-era replacement for mbm_histplot; creates a GMT modern-mode shellscript which will generate a frequency histogram plot of a dataset.</li>
+  <li>mbpy_plot (<a href="mbpy_plot.html">html</a>)(<a href="mbpy_plot.pdf">pdf</a>): Python replacement for mbm_plot; reads swath sonar data files and writes a GMT modern-mode shellscript which will generate a map of the data.</li>
   <li>mbpy_xyplot (<a href="mbpy_xyplot.html">html</a>)(<a href="mbpy_xyplot.pdf">pdf</a>): Python/PyGMT-era replacement for mbm_xyplot; reads one or more xy data files and writes a GMT modern-mode shellscript which will generate a plot of the data.</li>
 
 </ul>
@@ -112,6 +117,8 @@
 <p><strong>Visualization:&nbsp;</strong></p>
 <ul>
   <li>mbgrdviz (<a href="mbgrdviz.html">html</a>)(<a href="mbgrdviz.pdf">pdf</a>): Vizualize GMT grids.</li>
+  <li>mbpy_wcdview (<a href="mbpy_wcdview.html">html</a>)(<a href="mbpy_wcdview.pdf">pdf</a>): Python water column viewer, an example of the mbio_py Python API.</li>
+  <li>mbwcdview (<a href="mbwcdview.html">html</a>)(<a href="mbwcdview.pdf">pdf</a>): Display water column data, one swath at a time.</li>
 </ul>
 
 <p><strong>Tide Modeling and Correction:&nbsp;</strong></p>
@@ -172,8 +179,11 @@
 <p><strong>Graphical Interactive Programs:&nbsp;</strong></p>
 <ul>
   <li>mbedit (<a href="mbedit.html">html</a>)(<a href="mbedit.pdf">pdf</a>): Interactive editor used to flag bad beams in swath sonar bathymetry data.</li>  <li>mbeditviz (<a href="mbeditviz.html">html</a>)(<a href="mbeditviz.pdf">pdf</a>): Interactive 3D visualization bathymetry editing and attitude bias patch test.</li>
+  <li>mbedit-qt (<a href="mbedit-qt.html">html</a>)(<a href="mbedit-qt.pdf">pdf</a>): Interactive editor used to flag bad bathymetry values in swath sonar bathymetry data (Qt6 version).</li>
   <li>mbgrdviz (<a href="mbgrdviz.html">html</a>)(<a href="mbgrdviz.pdf">pdf</a>): Vizualize GMT grids.</li>
   <li>mbvelocitytool (<a href="mbvelocitytool.html">html</a>)(<a href="mbvelocitytool.pdf">pdf</a>): Interactive program for modeling the affect of the water velocity profile on swath sonar bathymetry calculations.</li>
+  <li>mbvelocitytool-qt (<a href="mbvelocitytool-qt.html">html</a>)(<a href="mbvelocitytool-qt.pdf">pdf</a>): Interactive water sound velocity profile editor (Qt6 version).</li>
+  <li>mbwcdview (<a href="mbwcdview.html">html</a>)(<a href="mbwcdview.pdf">pdf</a>): Display water column data, one swath at a time.</li>
   <li>mbnavadjust (<a href="mbnavadjust.html">html</a>)(<a href="mbnavadjust.pdf">pdf</a>): Package  that solves for optimal navigation by matching bathymetry of overlapping swathes.</li>
   <li>mbnavedit (<a href="mbnavedit.html">html</a>)(<a href="mbnavedit.pdf">pdf</a>): Interactive editor used to fix problems with navigation in swath sonar data files.</li>
 </ul>
@@ -214,6 +224,7 @@
   <li>mbdefaults (<a href="mbdefaults.html">html</a>)(<a href="mbdefaults.pdf">pdf</a>): Set or list default mbio parameters for reading and writing swath sonar data</li>
   <li>mbdumpesf (<a href="mbdumpesf.html">html</a>)(<a href="mbdumpesf.pdf">pdf</a>): mbdumpesf reads an MB-System edit save file and dumps the contents as an ascii table to stdout.</li>
   <li>mbedit (<a href="mbedit.html">html</a>)(<a href="mbedit.pdf">pdf</a>): Interactive editor used to flag bad beams in swath sonar bathymetry data.</li>
+  <li>mbedit-qt (<a href="mbedit-qt.html">html</a>)(<a href="mbedit-qt.pdf">pdf</a>): Interactive editor used to flag bad bathymetry values in swath sonar bathymetry data (Qt6 version).</li>
   <li>mbeditviz (<a href="mbeditviz.html">html</a>)(<a href="mbeditviz.pdf">pdf</a>): Interactive 3D visualization bathymetry editing and attitude bias patch test.</li>
   <li>mbextractsegy (<a href="mbextractsegy.html">html</a>)(<a href="mbextractsegy.pdf">pdf</a>): Extract subbottom profiler or center beam reflection data to segy files.</li>
   <li>mbfilter (<a href="mbfilter.html">html</a>)(<a href="mbfilter.pdf">pdf</a>): Apply  one or more simple filters to sidescan and/or beam amplitude data.</li>
@@ -228,6 +239,7 @@
   <li>mbgrdviz (<a href="mbgrdviz.html">html</a>)(<a href="mbgrdviz.pdf">pdf</a>): Vizualize GMT grids.</li>
   <li>mbgrid (<a href="mbgrid.html">html</a>)(<a href="mbgrid.pdf">pdf</a>): Grid bathymetry, amplitude, and sidescan data from swath sonar data files.</li>
   <li>mbhistogram (<a href="mbhistogram.html">html</a>)(<a href="mbhistogram.pdf">pdf</a>): Obtain histogram of bathymetry, amplitude, or sidescan data from swath sonar data files.</li>
+  <li>mbhistory (<a href="mbhistory.html">html</a>)(<a href="mbhistory.pdf">pdf</a>): List, compare, tag, prune and restore the versions of edit save files.</li>
   <li>mbimagecorrect (<a href="mbimagecorrect.html">html</a>)(<a href="mbimagecorrect.pdf">pdf</a>): Applies brightness and contrast corrections to images using OpenCV algorithms.</li>
   <li>mbimagelist (<a href="mbimagelist.html">html</a>)(<a href="mbimagelist.pdf">pdf</a>): Parses recursive imagelist structures, performing one or more tasks on the image files referenced in the imagelist(s).</li>
   <li>mbinfo (<a href="mbinfo.html">html</a>)(<a href="mbinfo.pdf">pdf</a>): Output some basic statistics of swath sonar data files.</li>
@@ -265,7 +277,9 @@
   <li>mbtrnpp (<a href="mbtrnpp.html">html</a>)(<a href="mbtrnpp.pdf">pdf</a>): Real-time preprocessor that reads multibeam sonar data, applies automated cleaning and downsampling, and passes the resulting bathymetry to a terrain relative navigation (TRN) process.</li>
   <li>mbusbl2fnv (<a href="mbusbl2fnv.html">html</a>)(<a href="mbusbl2fnv.pdf">pdf</a>): Converts a USBL (ultra-short baseline) ROV tracking CSV file to an MB-System fast navigation (fnv) text file.</li>
   <li>mbvelocitytool (<a href="mbvelocitytool.html">html</a>)(<a href="mbvelocitytool.pdf">pdf</a>): Interactive program for modeling the affect of the water velocity profile on swath sonar bathymetry calculations.</li>
+  <li>mbvelocitytool-qt (<a href="mbvelocitytool-qt.html">html</a>)(<a href="mbvelocitytool-qt.pdf">pdf</a>): Interactive water sound velocity profile editor (Qt6 version).</li>
   <li>mbvoxelclean (<a href="mbvoxelclean.html">html</a>)(<a href="mbvoxelclean.pdf">pdf</a>): mbvoxelclean  identifies  and flags artifacts in swath bathymetry data using a 3D density filter. .</li>
+  <li>mbwcdview (<a href="mbwcdview.html">html</a>)(<a href="mbwcdview.pdf">pdf</a>): Display water column data, one swath at a time.</li>
 </ul>
 <p><strong>Alphabetical List of GMT Modules:</strong></p>
 MB-system also includes four plug-in modules for the GMT software package that are built as a shared library that can be called by GMT.
@@ -309,7 +323,10 @@ easily. Some are written in Perl and others in Python3.
   <li>mbm_xyplot (<a href="mbm_xyplot.html">html</a>)(<a href="mbm_xyplot.pdf">pdf</a>): Reads one or more xy data files and writes a shellscript which will generate GMT plot of the data.</li>
   <li>mbpy_grd3dplot (<a href="mbpy_grd3dplot.html">html</a>)(<a href="mbpy_grd3dplot.pdf">pdf</a>): Python/PyGMT-era replacement for mbm_grd3dplot; reads a GMT grid file and writes a GMT modern-mode shellscript which will generate a 3D perspective view of the data.</li>
   <li>mbpy_grdplot (<a href="mbpy_grdplot.html">html</a>)(<a href="mbpy_grdplot.pdf">pdf</a>): Python/PyGMT-era replacement for mbm_grdplot; reads a GMT grid file (or georeferenced image) and writes a GMT modern-mode shellscript which will generate a map of the data.</li>
+  <li>mbpy_grdtiff (<a href="mbpy_grdtiff.html">html</a>)(<a href="mbpy_grdtiff.pdf">pdf</a>): Python replacement for mbm_grdtiff; reads a GMT grid file and writes a GMT modern-mode shellscript which will generate a georeferenced TIFF image of the data.</li>
   <li>mbpy_histplot (<a href="mbpy_histplot.html">html</a>)(<a href="mbpy_histplot.pdf">pdf</a>): Python/PyGMT-era replacement for mbm_histplot; creates a GMT modern-mode shellscript which will generate a frequency histogram plot of a dataset.</li>
+  <li>mbpy_plot (<a href="mbpy_plot.html">html</a>)(<a href="mbpy_plot.pdf">pdf</a>): Python replacement for mbm_plot; reads swath sonar data files and writes a GMT modern-mode shellscript which will generate a map of the data.</li>
+  <li>mbpy_wcdview (<a href="mbpy_wcdview.html">html</a>)(<a href="mbpy_wcdview.pdf">pdf</a>): Python water column viewer, an example of the mbio_py Python API.</li>
   <li>mbpy_xyplot (<a href="mbpy_xyplot.html">html</a>)(<a href="mbpy_xyplot.pdf">pdf</a>): Python/PyGMT-era replacement for mbm_xyplot; reads one or more xy data files and writes a GMT modern-mode shellscript which will generate a plot of the data.</li>
 </ul>
 

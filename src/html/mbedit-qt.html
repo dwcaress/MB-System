@@ -1,0 +1,533 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbedit-qt</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbedit-qt</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  2 November 2026 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbedit-qt</B> - Interactive editor used to flag bad bathymetry values in swath sonar bathymetry data (Qt6 version).
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbedit-qt</B>
+<BR>
+
+[--begin-time=yr/mo/da/hr/mn/sc {-Byr/mo/da/hr/mn/sc}
+<BR>
+
+--browse {-D}
+<BR>
+
+--end-time=yr/mo/da/hr/mn/sc {-Eyr/mo/da/hr/mn/sc}
+<BR>
+
+--format=format_id {-Fformat_id}
+<BR>
+
+--gui-mode {-G}
+<BR>
+
+--help {-H}
+<BR>
+
+--input=file {-Ifile}
+<BR>
+
+--reference=grid
+<BR>
+
+--run-mbprocess {-X}
+<BR>
+
+--use-edit-save {-S}
+<BR>
+
+--verbose {-V}
+<BR>
+
+--dump
+<BR>
+
+--export=image [--size=WxH]
+<BR>
+
+--replay=script]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbedit-qt</B> is a Qt6 port of <B>mbedit</B>. It displays the bathymetry
+profiles of several pings and lets the user flag and unflag soundings. The
+edits are written to an edit save file, which <B>mbprocess</B> applies when it
+writes a processed swath file. It reads and writes the same edit save
+files, parameter files and lock files as <B>mbedit</B>, so a file can move
+between the two programs. The two cannot edit one file at the same time.
+<P>
+The window can be resized, and it follows the light or dark mode of the system.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian dos Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>--begin-time=yr/mo/da/hr/mn/sc -Byr/mo/da/hr/mn/sc</B>
+
+<DD>
+Pings before this time are ignored. Default: 1962/2/21/10/30/0.
+<DT><B>--browse -D</B>
+
+<DD>
+Starts in browse mode: no edits are written.
+<DT><B>--end-time=yr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc</B>
+
+<DD>
+Pings after this time are ignored. Default: 2062/2/21/10/30/0.
+<DT><B>--format=format_id -Fformat_id</B>
+
+<DD>
+Sets the <B>MBIO</B> format id for the <B>--input</B> options that follow it. By
+default it is inferred from the file name. A format of -1 means a datalist.
+<DT><B>--gui-mode -G</B>
+
+<DD>
+<B>Done</B> also quits the program, for use when another program starts
+<B>mbedit-qt</B> for one file.
+<DT><B>--help -H</B>
+
+<DD>
+Prints a description of the program and exits.
+<DT><B>--input=file -Ifile</B>
+
+<DD>
+Adds a swath file, or the files of a datalist, to the list of files to edit.
+The first is loaded at startup. May be given several times.
+<DT><B>--reference=</B><I>grid</I>
+
+<DD>
+Loads this grid as a reference surface (see REFERENCE SURFACE).
+<DT><B>--run-mbprocess -X</B>
+
+<DD>
+Runs <B>mbprocess</B> on a file when it is closed, if its edits were saved.
+<DT><B>--use-edit-save -S</B>
+
+<DD>
+Applies an existing edit save file of the first input file without asking.
+<DT><B>--verbose -V</B>
+
+<DD>
+Prints more information to stderr.
+<DT><B>--dump</B>
+
+<DD>
+Without a window, prints one line per ping of the input files: file, record,
+time, number of beams, and the numbers of good, null, manual, filter, sonar and
+other flagged beams. Nothing is written.
+<DT><B>--export=image --size=WxH</B>
+
+<DD>
+Without a window, writes an image of the first pings of the first input file.
+Nothing else is written. The default size is 1400x900.
+<DT><B>--replay=script</B>
+
+<DD>
+Without a window, runs a script of editing actions, one per line, for testing.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>THE WINDOW</H2>
+
+Clicking a time series beside the soundings, or the map shown by
+<B>Show Track Map</B> in the <B>View</B> menu, moves to that ping. The map draws the
+navigation of the pings in memory, with those in view marked.
+<P>
+<DL COMPACT>
+<DT><B>File</B>
+
+<DD>
+<B>Open</B> adds a swath file or datalist to the list and loads it.
+<B>File Selection List</B> shows the list, with <B>&lt;loaded&gt;</B>, <B>&lt;locked&gt;</B>
+and <B>&lt;esf&gt;</B> marks; a file can be edited or removed from it. <B>Browse Only</B>
+sets the output mode for the files loaded next. <B>Save</B> writes the edits without
+closing the file.
+<DT><B>Edit</B>
+
+<DD>
+<B>Undo</B> and <B>Redo</B> (the usual shortcuts of the system). One click or one drag, or
+one key or filter run, is one step. Undo reaches back to the last <B>Next Buffer</B>, because
+the pings written then have left memory. Saving does not end it.
+<B>Flags by Reason</B> shows or hides manual, filter and sonar flags, and unflags those of one
+reason in the pings in view, from the first ping in view, or in all pings in memory. Filter
+flags of earlier sessions count as filter flags; the edit save file does not record
+which program made them. Soundings hidden here are not changed by clicks.
+<DT><B>View</B>
+
+<DD>
+<B>Waterfall</B>, <B>Alongtrack</B> and <B>Acrosstrack View</B>. <B>Show Flagged
+Soundings</B> and <B>Show Flagged Profile</B>. Colours by <B>Flag State</B> (unflagged
+in the text colour, manual red, filter blue, sonar green), by <B>Bottom Detect
+Algorithm</B>, by <B>Source Pulse Type</B>, by <B>Amplitude</B> or by <B>Beam Angle</B>, the last
+two with a colour bar for the soundings in view. Amplitude is offered only if the file has
+one for each beam; 2% of the values at each end are left out of its scale. <B>Reset Zoom</B>
+sets the plot width from the data again. <B>Wide Bathymetry Profiles</B>,
+<B>Print Time Stamps</B>, or a time series beside the soundings: ping interval,
+longitude, latitude, heading, speed, center beam depth, sonar altitude, sonar
+depth, roll, pitch or heave. With the roll, the acrosstrack slope is red and the
+difference between them blue; if they correlate, there may be a timing error in
+the roll correction.
+<DT><B>Controls</B>
+
+<DD>
+<B>Go To Specified Time</B> finds the first ping later than the time, reading
+further buffers if needed; if the time is past the end of the file, the file
+is saved and closed. <B>Buffer Controls</B> sets the number of pings held in memory
+(30000 to start with, limited only by memory; about 40 bytes per sounding) and the
+number retained at <B>Next Buffer</B>. <B>Annotation</B> sets the tick intervals.
+<B>Filters</B> opens the filters below. <B>Reverse Right/Left Key Macros</B> is for
+data with beams ordered starboard to port. <B>Reverse Mouse Buttons</B> swaps the left
+and right buttons.
+<DT><B>Tools</B>
+
+<DD>
+<B>Next Suspect Ping</B> and <B>Previous Suspect Ping</B> are the review queue, below.
+<B>Preview mbclean</B> runs <B>mbclean</B> with the options given on a link to the file in a
+temporary folder, starting from the current edits, and outlines what it would change;
+<B>Accept</B> takes it as one step of undo, for the pings in memory.
+<DT><B>Acrosstrack Width, Vertical Exaggeration, Pings Shown, Pings to Step</B>
+
+<DD>
+Set the plot. The sliders double their range at their upper end. The width is at
+most 40000 m and the number of pings shown at most 250.
+<DT><B>Ping slider</B>
+
+<DD>
+At the bottom of the window. Shows the first ping in view and moves through the
+pings in memory, one ping per wheel notch. Data are read forward only, so in a
+file larger than the buffer it cannot go back past the retained pings.
+<DT><B>Start, Reverse, Forward, End</B>
+
+<DD>
+Move in the pings in memory, by <B>Pings to Step</B>.
+<DT><B>Next Buffer</B>
+
+<DD>
+Writes the pings that leave memory and reads more. They cannot be edited again
+in this session.
+<DT><B>Done | Next File</B>
+
+<DD>
+Saves the edits without asking, closes the file, and loads the next in the list if
+there is one.
+<DT><B>Flag View, Unflag View, Unflag Forward</B>
+
+<DD>
+Flag or unflag the soundings in view; the last unflags from the first ping in view to
+the end of the buffer.
+<DT><B>Quit</B>
+
+<DD>
+As closing the window.
+<P>
+</DL>
+<A NAME="lbAI">&nbsp;</A>
+<H2>EDIT MODES</H2>
+
+With the left mouse button, and the keys given:
+<DL COMPACT>
+<DT><B>Toggle Q U</B>
+
+<DD>
+The sounding within 50 pixels nearest the click changes state.
+<DT><B>Pick W I</B>
+
+<DD>
+The nearest good sounding is flagged.
+<DT><B>Erase E O</B>
+
+<DD>
+Good soundings within 15 pixels of the mouse are flagged while the button is down.
+<DT><B>Restore R P</B>
+
+<DD>
+As Erase, but flagged soundings are unflagged.
+<DT><B>Grab T { [</B>
+
+<DD>
+Good soundings inside the rectangle dragged are flagged.
+<DT><B>Lasso H</B>
+
+<DD>
+Good soundings inside the outline drawn are flagged.
+<DT><B>Info Y } ]</B>
+
+<DD>
+Shows, and prints to stdout, the data of the nearest sounding.
+
+In Toggle, Pick and Info a ring marks the sounding that a click would take.
+<P>
+A ping with good soundings outside the plot has a red label with a small box beside it:
+clicking the box flags those soundings. A green label means that only
+flagged soundings are outside. A label is left out where it would overlap the one
+below; its colour and box remain.
+<P>
+</DL>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>MOUSE AND KEYS</H2>
+
+<DL COMPACT>
+<DT><B>Middle button, right button</B>
+
+<DD>
+One step back, one step forward; more if held for 2 seconds. With <B>G</B> held, to the start
+or the end. <B>Shift</B> with the right button opens a menu for the
+nearest sounding: flag or unflag its ping, center on it, open its water column, and undo or redo.
+<DT><B>Wheel</B>
+
+<DD>
+Steps by <B>Pings to Step</B>: up goes forward, down goes back.
+<DT><B>Command or Control with the wheel, or the pinch of a trackpad</B>
+
+<DD>
+Zooms the width around the mouse.
+<DT><B>Shift with the wheel</B>
+
+<DD>
+Changes the vertical exaggeration.
+<DT><B>Space with the left button</B>
+
+<DD>
+Moves the plot. <B>0</B> puts it back and sets the width from the data.
+
+After zooming the width or moving the plot, what lies outside the plot is hidden: clicks,
+drags, <B>Flag View</B> and <B>Unflag View</B> do not change it, and ping labels have no
+colours or zap boxes. <B>Bad Ping</B>, <B>Good Ping</B> and the left and right keys
+still act on the whole ping.
+<DT><B>F, V, left and right arrows</B>
+
+<DD>
+One step forward or back; with <B>G</B> held, to the end or start. The arrows move one ping.
+<DT><B>Z M</B>
+
+<DD>
+Flags the good soundings of the last picked ping.
+<DT><B>S K</B>
+
+<DD>
+Unflags the flagged soundings of the last picked ping.
+<DT><B>A J, D L</B>
+
+<DD>
+Flags the good soundings of the last picked ping to the left, or right, of and including
+the last picked beam.
+<DT><B>X &lt; ,</B>
+
+<DD>
+Flag View.
+<DT><B>C &gt; .</B>
+
+<DD>
+Unflag View.
+<DT><B>!</B>
+
+<DD>
+Makes all beams of the last picked ping null. Only <B>Undo</B> brings them back. They cannot be
+unflagged afterwards in <B>mbedit-qt</B> or <B>mbedit</B>; the data file is not changed.
+<DT><B>2 @, 3 #, 4 $</B>
+
+<DD>
+Waterfall, alongtrack and acrosstrack views.
+
+<B>Z</B>, <B>S</B>, <B>A</B> or <B>D</B> held while clicking applies the action to the
+sounding just picked.
+<P>
+</DL>
+<A NAME="lbAK">&nbsp;</A>
+<H2>FILTERS</H2>
+
+Apply removes the flags of the previous filter runs of this session and runs the filters
+from the first ping in view to the end of the buffer. Active filters also run on
+each new buffer. Flags of earlier sessions and of other programs are not removed.
+<DL COMPACT>
+<DT><B>Median Spike</B>
+
+<DD>
+Flags soundings further from the local median depth than a percentage of the
+sonar altitude. The window has an odd number of beams and of pings.
+<DT><B>Wrong Side</B>
+
+<DD>
+Flags soundings on the wrong side of the swath, except within a number of
+beams from the center.
+<DT><B>Flag by Beam Number, Distance, Beam Angle</B>
+
+<DD>
+Flags soundings between a start and an end value, or if the start is above the end, on both
+edges of the swath.
+<P>
+A <B>Preview</B> in the dialog, on by default, outlines what <B>Apply</B> would change, orange for
+new flags and turquoise for flags removed, and gives the numbers. It runs the same steps as
+<B>Apply</B> on a copy of the flags, and nothing changes until then.
+<P>
+</DL>
+<A NAME="lbAL">&nbsp;</A>
+<H2>REVIEW QUEUE</H2>
+
+After each buffer is read, pings are ranked without changing anything: by soundings further
+than 0.25% of the altitude from the median of nine beams of their ping, by a drop in good
+soundings against the neighbouring pings, and by jumps in attitude or ping time. The
+strip above the ping slider shows them, darkest for the worst. <B>N</B> goes to the next
+worst and <B>B</B> back; the status bar says why, and the ping label is outlined. Treat this
+as a suggestion of an order: pings without a mark can still have bad soundings. It is
+not recalculated after edits, until the next buffer is read.
+<P>
+<A NAME="lbAM">&nbsp;</A>
+<H2>REFERENCE SURFACE</H2>
+
+<B>Load Reference Surface</B> in the <B>Tools</B> menu reads a grid in any form
+that <B>mbgrid</B> writes, geographic or projected, or starts with
+<B>--reference</B>. <B>Show Difference from Reference</B> then colours each sounding
+by its depth minus the depth of the grid, interpolated between the four nearest
+nodes: red is deeper than the grid, blue is shallower. Green soundings have no grid
+value. The range of the colours is symmetric about zero and is set by the soundings
+in view. Whether the grid holds depths or topography (seafloor negative) is decided by
+comparing it with the soundings, and the status bar says which was found.
+While a surface is loaded, the review queue also counts soundings further than 2%
+of the altitude from it.
+<P>
+<A NAME="lbAN">&nbsp;</A>
+<H2>OTHER PROGRAMS</H2>
+
+<B>Edit History</B> lists the versions of the edit save file kept by
+<B>mbhistory</B>. <B>Preview</B> outlines what a version would change in the
+pings in memory. <B>Restore</B> closes the file, runs <B>mbhistory --restore</B>,
+which keeps the current edits as a new version, and reopens the file.
+<P>
+<B>Water Column at Center Ping</B> starts <B>mbwcdview</B> on this file or on a
+Kongsberg file of the same name beside it. The item is there only if
+<B>mbwcdview</B> can be found. It takes no lock, so editing can go on. The
+ping number is that of this program; <B>mbwcdview</B> counts water column
+pings, so it can show another ping if some pings have no water column data, or
+if each ping holds two swaths.
+<P>
+<B>Save and Open in mbeditviz</B> closes the file, asking whether to save, and
+starts <B>mbeditviz</B>, which takes the lock. It opens at the start of the file.
+<P>
+<A NAME="lbAO">&nbsp;</A>
+<H2>SAVING</H2>
+
+The existing edit save file is not touched until the edits are saved. Until then new edits go
+to <I>file</I>.esf.new and <I>file</I>.esf.new.stream. Saving keeps the old edit
+save file in the <B>mbhistory</B> directory, replaces it and updates the
+<B>mbprocess</B> parameter file.
+<P>
+When the window is closed, the program quits or another file is opened with changes
+unsaved, the program asks whether to save or discard them, or to cancel. After Discard,
+the files are as they were before the session. Without changes, nothing is written. If an
+existing edit save file is not applied when asked, saving replaces it.
+<P>
+After a crash the lock file remains and the edits are in the two files above. When
+the file is opened again, the program offers to remove the lock and to recover the edits.
+Beams made null and brought back by undo before the crash stay null.
+<P>
+<A NAME="lbAP">&nbsp;</A>
+<H2>DIFFERENCES FROM MBEDIT</H2>
+
+Toggle and Restore do not change soundings that are not
+drawn. An edit save file is written only with changes, and always in explicit mode, even
+if an earlier one was implicit (<B>mbgetesf</B>). Erase and Restore also take the soundings
+between the mouse positions reported. The roll difference starts from the first ping in
+view. Ping labels are numbered from 1 in every plot mode. Where the center beam is flagged
+or null, as is usual in dual swath data, ping labels and the center beam depth plot use the
+sonar altitude plus the sonar depth instead of its value. The automatic plot width and
+the width slider stop at 40000 m. <B>mbprocess</B> does not
+block the window. The program name in the edit save file, lock file and history is mbedit-qt.
+<P>
+<A NAME="lbAQ">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbedit.html">mbedit</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1), <B><A HREF="mbhistory.html">mbhistory</A></B>(1),
+<B><A HREF="mbclean.html">mbclean</A></B>(1), <B><A HREF="mbeditviz.html">mbeditviz</A></B>(1), <B><A HREF="mbgetesf.html">mbgetesf</A></B>(1), <B><A HREF="mbhistory.html">mbhistory</A></B>(1), <B><A HREF="mbwcdview.html">mbwcdview</A></B>(1)
+<P>
+<A NAME="lbAR">&nbsp;</A>
+<H2>BUGS</H2>
+
+Only tested on macOS so far.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">THE WINDOW</A><DD>
+<DT><A HREF="#lbAI">EDIT MODES</A><DD>
+<DT><A HREF="#lbAJ">MOUSE AND KEYS</A><DD>
+<DT><A HREF="#lbAK">FILTERS</A><DD>
+<DT><A HREF="#lbAL">REVIEW QUEUE</A><DD>
+<DT><A HREF="#lbAM">REFERENCE SURFACE</A><DD>
+<DT><A HREF="#lbAN">OTHER PROGRAMS</A><DD>
+<DT><A HREF="#lbAO">SAVING</A><DD>
+<DT><A HREF="#lbAP">DIFFERENCES FROM MBEDIT</A><DD>
+<DT><A HREF="#lbAQ">SEE ALSO</A><DD>
+<DT><A HREF="#lbAR">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 2 November 2026</P></CENTER>
+
+<HR>
+<center>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>

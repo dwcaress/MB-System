@@ -56,6 +56,7 @@ set(HTML
     mbeditviz.html
     mbextractsegy.html
     mbfilter.html
+    mbfnv2navlab.html
     mbformat.html
     mbgetesf.html
     mbgpstide.html
@@ -65,8 +66,10 @@ set(HTML
     mbgrdviz.html
     mbgrid.html
     mbhistogram.html
+    mbhistory.html
     mbhsdump.html
     mbhysweeppreprocess.html
+    mbimagelist.html
     mbinfo.html
     mbkongsbergpreprocess.html
     mblevitus.html
@@ -85,6 +88,11 @@ set(HTML
     mbm_grid.html
     mbm_histplot.html
     mbm_makedatalist.html
+    mbm_phins2fnv.html
+    mbm_rollerror.html
+    mbm_tmap.html
+    mbm_trnplot.html
+    mbmakedatalist.html
     mbmakeplatform.html
     mbm_makesvp.html
     mbm_multicopy.html
@@ -96,13 +104,18 @@ set(HTML
     mbm_utm.html
     mbm_xbt.html
     mbm_xyplot.html
+    mbmapscale.html
+    mbmesh.html
+    mbminirovnav.html
     mbmosaic.html
     mbnavadjust.html
     mbnavadjustmerge.html
     mbnavedit.html
+    mbnavlab2fnv.html
     mbnavlist.html
     mbneptune2esf.html
     mbotps.html
+    mbotpsold.html
     mbpreprocess.html
     mbprocess.html
     mbpy_grd3dplot.html
@@ -110,6 +123,7 @@ set(HTML
     mbpy_grdtiff.html
     mbpy_histplot.html
     mbpy_plot.html
+    mbpy_wcdview.html
     mbpy_xyplot.html
     mbrollbias.html
     mbrolltimelag.html
@@ -124,8 +138,11 @@ set(HTML
     mbsvplist.html
     mbsvpselect.html
     mbswath.html
+    mbswath2las.html
     mbswplspreprocess.html
+    mbtiff2png.html
     mbtime.html
+    mbusbl2fnv.html
     mbvelocitytool.html
     mbvoxelclean.html)
 
@@ -155,6 +172,7 @@ set(PDF
     mbeditviz.pdf
     mbextractsegy.pdf
     mbfilter.pdf
+    mbfnv2navlab.pdf
     mbformat.pdf
     mbgetesf.pdf
     mbgpstide.pdf
@@ -164,12 +182,19 @@ set(PDF
     mbgrdviz.pdf
     mbgrid.pdf
     mbhistogram.pdf
+    mbhistory.pdf
     mbhsdump.pdf
     mbhysweeppreprocess.pdf
+    mbimagelist.pdf
     mbinfo.pdf
     mbkongsbergpreprocess.pdf
     mblevitus.pdf
     mblist.pdf
+    mbm_phins2fnv.pdf
+    mbm_rollerror.pdf
+    mbm_tmap.pdf
+    mbm_trnplot.pdf
+    mbmakedatalist.pdf
     mbmakeplatform.pdf
     mbm_arc2grd.pdf
     mbm_bpr.pdf
@@ -195,13 +220,18 @@ set(PDF
     mbm_utm.pdf
     mbm_xbt.pdf
     mbm_xyplot.pdf
+    mbmapscale.pdf
+    mbmesh.pdf
+    mbminirovnav.pdf
     mbmosaic.pdf
     mbnavadjust.pdf
     mbnavadjustmerge.pdf
     mbnavedit.pdf
+    mbnavlab2fnv.pdf
     mbnavlist.pdf
     mbneptune2esf.pdf
     mbotps.pdf
+    mbotpsold.pdf
     mbpreprocess.pdf
     mbprocess.pdf
     mbpy_grd3dplot.pdf
@@ -209,6 +239,7 @@ set(PDF
     mbpy_grdtiff.pdf
     mbpy_histplot.pdf
     mbpy_plot.pdf
+    mbpy_wcdview.pdf
     mbpy_xyplot.pdf
     mbrollbias.pdf
     mbrolltimelag.pdf
@@ -223,9 +254,49 @@ set(PDF
     mbsvplist.pdf
     mbsvpselect.pdf
     mbswath.pdf
+    mbswath2las.pdf
     mbswplspreprocess.pdf
+    mbtiff2png.pdf
     mbtime.pdf
+    mbusbl2fnv.pdf
     mbvelocitytool.pdf
     mbvoxelclean.pdf)
+
+if(buildTRN)
+  list(APPEND HTML
+      mbgrd2octree.html
+      mbgrdtilemaker.html
+      mbtrnpp.html)
+  list(APPEND PDF
+      mbgrd2octree.pdf
+      mbgrdtilemaker.pdf
+      mbtrnpp.pdf)
+endif()
+
+if(buildOpenCV)
+  list(APPEND HTML
+      mbgetphotocorrection.html
+      mbimagecorrect.html
+      mbm_makeimagelist.html
+      mbphotogrammetry.html
+      mbphotomosaic.html)
+  list(APPEND PDF
+      mbgetphotocorrection.pdf
+      mbimagecorrect.pdf
+      mbm_makeimagelist.pdf
+      mbphotogrammetry.pdf
+      mbphotomosaic.pdf)
+endif()
+
+if(buildQt6Tools)
+  list(APPEND HTML
+      mbedit-qt.html
+      mbvelocitytool-qt.html
+      mbwcdview.html)
+  list(APPEND PDF
+      mbedit-qt.pdf
+      mbvelocitytool-qt.pdf
+      mbwcdview.pdf)
+endif()
 
 install(FILES ${HTML} ${PDF} DESTINATION ${CMAKE_INSTALL_DOC}/mbsystem/html)
