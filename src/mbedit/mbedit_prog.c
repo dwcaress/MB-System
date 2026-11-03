@@ -4308,8 +4308,10 @@ int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, in
 		/* reset message */
 		do_message_on("MBedit is applying saved edits...");
 
-		/* loop over each data record, checking each edit */
-		for (int i = 0; i < nbuff; i++) {
+		/* loop over each newly loaded data record, checking each edit - pings
+		    retained from the previous buffer already have these edits, and
+		    applying them again would undo changes made to those pings since */
+		for (int i = nbuff - nload; i < nbuff; i++) {
 			/* apply edits for this ping */
 			status =
 			    mb_esf_apply(verbose, &esf, ping[i].time_d, ping[i].multiplicity, ping[i].beams_bath, ping[i].beamflag, &error);
@@ -4336,8 +4338,10 @@ int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, in
 		/* reset message */
 		do_message_on("MBedit is applying bathymetry filters...");
 
-		/* loop over each data record, checking each edit */
-		for (int i = 0; i < nbuff; i++) {
+		/* loop over each newly loaded data record - filtering pings retained
+		    from the previous buffer again would undo changes made to those
+		    pings since */
+		for (int i = nbuff - nload; i < nbuff; i++) {
 			mbedit_filter_ping(i);
 
 			/* update message every 250 records */
