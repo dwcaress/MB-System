@@ -131,6 +131,9 @@ check_SCRIPTS += mbsslayout_test.py
 TESTS += mbsvpbest_test.py
 check_SCRIPTS += mbsvpbest_test.py
 
+TESTS += mbsvpextract_test.py
+check_SCRIPTS += mbsvpextract_test.py
+
 TESTS += mbsvplist_test.py
 check_SCRIPTS += mbsvplist_test.py
 

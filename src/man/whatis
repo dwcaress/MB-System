@@ -76,6 +76,7 @@ mbsegypsd(1)             - Calculates the power spectral densisty function (PSD)
 mbset(1)                 - Sets values in mbprocess parameter files
 mbstripNaN(1)            - filter to remove NaN nodes
 mbsvpbest(1)             - Compare World Ocean Atlas and embedded sound velocity profiles on swath data over locally planar seafloor
+mbsvpextract(1)          - Extract World Ocean Atlas sound velocity profiles at the sites of a site file or the waypoints of a route file
 mbsvplist(1)             - List water sound velocity profiles in swath sonar data files
 mbswath(1)               - GMT compatible utility for color fill or color shaded relief swath plots of swath sonar data using Postscript
 mbsystem(1)              - A set of utilities for manipulating and processing swath sonar bathymetry, amplitude, and sidescan data

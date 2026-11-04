@@ -113,6 +113,7 @@ src/utilities/mbset
 src/utilities/mbsslayout
 src/deprecated/mbstripnan
 src/svptools/mbsvpbest
+src/svptools/mbsvpextract
 src/utilities/mbsvplist
 src/utilities/mbsvpselect
 src/deprecated/mbswplspreprocess

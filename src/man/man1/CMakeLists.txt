@@ -89,6 +89,7 @@ set(manpages
     mbset.1
     mbsslayout.1
     mbsvpbest.1
+    mbsvpextract.1
     mbsvplist.1
     mbsvpselect.1
     mbswath.1

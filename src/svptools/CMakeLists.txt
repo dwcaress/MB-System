@@ -28,6 +28,7 @@ find_package(NetCDF REQUIRED)
 
 add_library(mbsvptools STATIC
     mbsvp_location.c
+    mbsvp_points.c
     mbsvp_profile.c
     mbsvp_score.c
     mbsvp_tools.h
@@ -39,4 +40,7 @@ target_link_libraries(mbsvptools PUBLIC mbio NetCDF::NetCDF)
 add_executable(mbsvpbest mbsvpbest.c)
 target_link_libraries(mbsvpbest PRIVATE mbsvptools ${MB_SYSLIBS})
 
-install(TARGETS mbsvpbest DESTINATION ${CMAKE_INSTALL_BINDIR})
+add_executable(mbsvpextract mbsvpextract.c)
+target_link_libraries(mbsvpextract PRIVATE mbsvptools ${MB_SYSLIBS})
+
+install(TARGETS mbsvpbest mbsvpextract DESTINATION ${CMAKE_INSTALL_BINDIR})
