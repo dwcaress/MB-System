@@ -33,6 +33,7 @@
 #include <fstream>
 #include <iomanip>
 #include <limits>
+#include "parse_utils.h"
 
 // parser debug output macros
 #define CTX_DPRINT(fmt,...) if(TrnPlayerCtx::gdebug(false) > 1)fprintf(stderr, fmt, __VA_ARGS__)
@@ -101,6 +102,7 @@ public:
     , sensor_type(2)
     , mod_weight(TRN_WT_NONE)
     , reinit_en(false)
+    , no_rand(false)
     , map_interp(0)
     , force_lgf(false)
     , dec_period_ms(0)
@@ -308,6 +310,7 @@ public:
         fprintf(stderr, " %*s : [%.3lf, %.3lf, %.3lf]\n", wkey, "geo_dr", ctx->geo_dr[0], ctx->geo_dr[1], ctx->geo_dr[2]);
         fprintf(stderr, " %*s : [%.3lf, %.3lf, %.3lf]\n", wkey, "geo_dt", ctx->geo_dt[0], ctx->geo_dt[1], ctx->geo_dt[2]);
         fprintf(stderr, " %*s : %c\n", wkey, "reinit", BIN2CH(ctx->reinit_en));
+        fprintf(stderr, " %*s : %c\n", wkey, "no_rand", BIN2CH(ctx->no_rand));
         fprintf(stderr, " %*s : %d (%s)\n", wkey, "mod_wt", ctx->mod_weight, wtypes[(ctx->mod_weight % 6)]);
         fprintf(stderr, " %*s : %d (%s)\n", wkey, "interp", ctx->map_interp, Itypes[(ctx->map_interp % 4)]);
         fprintf(stderr, " %*s : %c\n", wkey, "fstat", BIN2CH(ctx->force_status));
@@ -391,6 +394,7 @@ public:
         fprintf(stderr, "                           1: PARTICLES (all particles; large data volume)\n");
         fprintf(stderr, "    -P <s>, --pfile    : particles file name (w/o path)\n");
         fprintf(stderr, "    -r <b>, --reinits  : allow TRN particle filter reinits\n");
+        fprintf(stderr, "    -R <b>, --norand   : set NO_RAND (filter uses seed_rand=0)\n");
         fprintf(stderr, "    -s <d>, --stype    : Bathymetry data format passed to \n");
         fprintf(stderr, "                         measurement update; may differ from sensor of origin\n");
         fprintf(stderr, "                         Corresponds to terrainAid.cfg sensor_type\n");
@@ -433,6 +437,7 @@ public:
         fprintf(stderr, " - eofile   : NONE\n");
         fprintf(stderr, " - mofile   : NONE\n");
         fprintf(stderr, " - pfile    : NONE\n");
+        fprintf(stderr, " - no_rand  : false\n");
         fprintf(stderr, "\n");
         fprintf(stderr, "Notes:\n");
         fprintf(stderr, " - config files support terrainAid.cfg and long opts above\n");
@@ -520,6 +525,7 @@ public:
             {"useMbTrnServer", required_argument, NULL, 0},
             {"mapInterpMethod", required_argument, NULL, 0},
             {"allowFilterReinits", required_argument, NULL, 0},
+            {"norand", required_argument, NULL, 0},
 
             {NULL, 0, NULL, 0}
         };
@@ -527,7 +533,7 @@ public:
         optind=1;
 
         // process argument list
-        while ((c = getopt_long(argc, argv, "c:C:d:D:E:f:FG:hi:I:m:M:N:o:O:P:r:s:vV:w:x:z:Z:", options, &option_index)) != -1) {
+        while ((c = getopt_long(argc, argv, "c:C:d:D:E:f:FG:hi:I:m:M:N:o:O:P:r:R:s:vV:w:x:z:Z:", options, &option_index)) != -1) {
 
             switch (c) {
                 case 0:
@@ -629,6 +635,9 @@ public:
                         }
                         else if(strcmp("reinits", options[option_index].name) == 0) {
                             c = 'r';
+                        }
+                        else if(strcmp("norand", options[option_index].name) == 0) {
+                            c = 'R';
                         }
                         else if(strcmp("stype", options[option_index].name) == 0) {
                             c = 's';
@@ -818,7 +827,10 @@ public:
                     ctx->is_particles_set = true;
                     break;
                 case 'r':
-                    parse_bool(&ctx->reinit_en, optarg);
+                    pu_parse_bool(&ctx->reinit_en, optarg);
+                    break;
+                case 'R':
+                    pu_parse_bool(&ctx->no_rand, optarg);
                     break;
                 case 's':
                     sscanf(optarg, "%d", &ctx->sensor_type);
@@ -882,7 +894,7 @@ public:
                     break;
                 case 1100:
                     // forceLowGradeFilter force low grade filter
-                    parse_bool(&ctx->force_lgf, optarg);
+                    pu_parse_bool(&ctx->force_lgf, optarg);
                     break;
                 case 1130:
                     // samplePeriod decimation by time (sec)
@@ -1233,6 +1245,8 @@ public:
 
     // allow filter reinitialization
     bool reinit_en;
+    // NO_RAND (filter uses seed_randn=0)
+    bool no_rand;
 
     // Map interpolation method
     // 0 : nearest-neighbor (no interpolation, default)

@@ -240,6 +240,7 @@ struct commsT
     char *cfgname;
     char *particlename;
     char *logname;
+    bool no_rand;
 
     commsT();
     explicit commsT(char msg_type);
@@ -247,7 +248,7 @@ struct commsT
     commsT(char msg_type, int parameter, float vdr);
     commsT(char msg_type, const poseT& pt);
     commsT(char msg_type, int parameter, const measT& mt);
-    commsT(char msg_type, int parameter, char *map, char *cfg, char *particles, char *logdir);
+    commsT(char msg_type, int parameter, char *map, char *cfg, char *particles, char *logdir, bool norand=false);
     commsT(char msg_type, double x, double y, double z);
     commsT(char msg_type, int parameter, double x, double y, double z);
     commsT(char msg_type, int parameter, double ofs_x, double ofs_y, double ofs_z,

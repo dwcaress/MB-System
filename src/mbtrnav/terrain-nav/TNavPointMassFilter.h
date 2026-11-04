@@ -98,7 +98,7 @@ class TNavPointMassFilter : public TNavFilter
   //TNavPointMassFilter(char *mapName, char *vehicleSpecs,
   //		      char *directory, const double *windowVar, const int &mapType);
   TNavPointMassFilter(TerrainMap* terrainMap, char *vehicleSpecs,
-  		      char *directory, const double *windowVar, const int &mapType);
+  		      char *directory, const double *windowVar, const int &mapType, bool no_rand=false);
 
   /* Destructor: ~TNavPointMassFilter()
    * Usage: delete trnFilter;

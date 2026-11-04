@@ -53,18 +53,8 @@ message("In src/mbtrnav")
 # set build option defaults
 option(buildVerbose "build with verbose output" ON)
 option(buildTRNOptional "build targets in buildTRNOptional" OFF)
-option(buildTrnNoRand "build with TRN_NORAND (random seed disabled)" OFF)
 #option(buildTrnLog "build using WITH_TRNLOG (TRN binary logging)" ON)
 #option(buildTrnLogEst "build using WITH_TRNLOG_EST_OUT (TRN MMSE logging)" ON)
-
-if(buildTrnNoRand)
-    # add TRN_NORAND to disable TRN random seed.
-    # compile using cmake .. -DbuildTrnNoRand=ON
-    add_compile_definitions(TRN_NORAND)
-    message("TRN_NORAND set : TRN random seed DISABLED")
-else()
-    message("TRN_NORAND unset : TRN random seed ENABLED")
-endif()
 
 # WITH_TRNLOG         : enable TRN binary log (-DbuildTrnLog=ON)
 # WITH_TRNLOG_EST_OUT : enable TRN binary log (-DbuildTrnLogEst=ON)
@@ -138,7 +128,6 @@ message(" buildVerbose                ${buildVerbose}")
 message(" buildTRNOptional            ${buildTRNOptional}")
 message(" buildUseProj                ${buildUseProj}")
 message(" buildTRNLCM                 ${buildTRNLCM}")
-message(" buildTrnNoRand              ${buildTrnNoRand}")
 message(" COMPILE_DEFINITIONS         ${DirDefs}")
 message(" Libmframe_FOUND             ${Libmframe_FOUND}")
 message(" Libmframe_INCLUDE_DIRS      ${Libmframe_INCLUDE_DIRS}")
@@ -483,6 +472,15 @@ target_link_libraries(trnwcli PRIVATE mbtrnframe newmat geolib trnw qnx mb1 tnav
 target_include_directories(trnwcli PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
 )
+##################################
+#  build libputils (CLI parse utils)
+
+add_library(putils STATIC
+    ${UTILS_SRC_DIR}/parse_utils.c
+)
+
+# specify include paths and libraries (none)
+
 #
 #------------------------------------------------------------------------------
 #
@@ -588,7 +586,7 @@ add_executable(trn-player
 )
 
 # specify include paths and libraries
-target_link_libraries(trn-player PRIVATE tnav qnx newmat NetCDF::NetCDF)
+target_link_libraries(trn-player PRIVATE putils tnav qnx newmat NetCDF::NetCDF)
 
 target_include_directories(trn-player PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
@@ -633,7 +631,7 @@ add_executable(mb1log-player
 )
 
 # specify include paths and libraries
-target_link_libraries(mb1log-player PRIVATE trnw trncli netif tnav qnx newmat geolib)
+target_link_libraries(mb1log-player PRIVATE putils trnw trncli netif tnav qnx newmat geolib)
 
 target_include_directories(mb1log-player PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
@@ -657,7 +655,7 @@ add_executable(trnlog-player
 )
 
 # specify include paths and libraries
-target_link_libraries(trnlog-player PRIVATE trnw trncli netif tnav qnx newmat geolib NetCDF::NetCDF)
+target_link_libraries(trnlog-player PRIVATE putils trnw trncli netif tnav qnx newmat geolib NetCDF::NetCDF)
 
 target_include_directories(trnlog-player PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
@@ -681,7 +679,7 @@ add_executable(csvlog-player
 )
 
 # specify include paths and libraries
-target_link_libraries(csvlog-player PRIVATE trnw trncli netif tnav qnx newmat geolib NetCDF::NetCDF)
+target_link_libraries(csvlog-player PRIVATE putils trnw trncli netif tnav qnx newmat geolib NetCDF::NetCDF)
 
 target_include_directories(csvlog-player PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
@@ -737,7 +735,7 @@ add_executable(trn-client
 )
 
 # specify include paths and libraries
-target_link_libraries(trn-client PRIVATE tnav newmat qnx NetCDF::NetCDF)
+target_link_libraries(trn-client PRIVATE putils tnav newmat qnx NetCDF::NetCDF)
 
 target_include_directories(trn-client PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
@@ -758,7 +756,7 @@ add_executable(trn-cli
 )
 
 # specify include paths and libraries
-target_link_libraries(trn-cli PRIVATE mbtrnframe trnw trnwcli qnx newmat geocon m)
+target_link_libraries(trn-cli PRIVATE putils mbtrnframe trnw trnwcli qnx newmat geocon m)
 
 target_include_directories(trn-cli PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
@@ -938,7 +936,7 @@ add_executable(test-trnif
 )
 
 # specify include paths and libraries
-target_link_libraries(test-trnif PRIVATE mbtrnframe netif newmat geolib trnw qnx mb1 tnav NetCDF::NetCDF)
+target_link_libraries(test-trnif PRIVATE putils mbtrnframe netif newmat geolib trnw qnx mb1 tnav NetCDF::NetCDF)
 
 target_include_directories(test-trnif PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
@@ -954,7 +952,7 @@ add_executable(test-trnlog
 )
 
 # specify include paths and libraries
-target_link_libraries(test-trnlog PRIVATE tnav newmat qnx geolib NetCDF::NetCDF)
+target_link_libraries(test-trnlog PRIVATE putils tnav newmat qnx geolib NetCDF::NetCDF)
 
 target_include_directories(test-trnlog PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}

@@ -163,6 +163,7 @@ class TerrainNav
 public:
 
     TerrainNav();
+    explicit TerrainNav(bool no_rand);
 
     /* Constructor: TerrainNav(mapName)
      * Usage: tercom = new TerrainNav("canyonmap");
@@ -170,7 +171,7 @@ public:
     /*! Initializes a new TerrainNav with terrain map "mapName.txt". The mapping
      * AUV specs and the Point Mass Filter algorithm are used as defaults.
      */
-    explicit TerrainNav(char *mapName);
+    explicit TerrainNav(char *mapName, bool no_rand = false);
 
 
     /* Constructor: TerrainNav(mapName, vehicleName)
@@ -181,7 +182,7 @@ public:
      * Makes a call to createFilter(1) to initialize a new TerrainNav
      * object with default type = 1 (Point Mass Filter).
      */
-    TerrainNav(char *mapName, char *vehicleSpecs);
+    TerrainNav(char *mapName, char *vehicleSpecs, bool no_rand = false);
 
 
     /* Constructor: TerrainNav(mapName, vehicleName, filterType)
@@ -193,7 +194,7 @@ public:
      * object with specified type.
      */
     TerrainNav(char *mapName, char *vehicleSpecs,
-               const int &filterType);
+               const int &filterType, bool no_rand = false);
 
 
     /* Constructor: TerrainNav(mapName, vehicleName, filterType, directory)
@@ -205,7 +206,7 @@ public:
      * object with specified type.
      */
     TerrainNav(char *mapName, char *vehicleSpecs,
-               const int &filterType, char *directory);
+               const int &filterType, char *directory, bool no_rand = false);
 
     /* Constructor: TerrainNav(mapName, vehicleName, filterType, mapType)
      * Usage: tercom = new TerrainNav("canyonmap", "mappingAuv", 1, 1);
@@ -216,7 +217,7 @@ public:
      * object with specified type.
      */
     TerrainNav(char *mapName, char *vehicleSpecs,
-               const int &filterType, const int &mapType);
+               const int &filterType, const int &mapType, bool no_rand = false);
 
     /* Constructor: TerrainNav(mapName, vehicleName, filterType, mapType, directory)
      * Usage: tercom = new TerrainNav("canyonmap", "mappingAuv", 1, 1, "/home/");
@@ -228,7 +229,7 @@ public:
      * object with specified type.
      */
     TerrainNav(char *mapName, char *vehicleSpecs,
-               const int &filterType, const int &mapType, char *directory);
+               const int &filterType, const int &mapType, char *directory, bool no_rand = false);
 
     /* Constructor: TerrainNav(map, vehicleSpecs, particles, filter, mapType, dir)
      * Usage: tercom = new TerrainNav("canyon", "mapping", "particles" 1, 1, "/log/");
@@ -241,7 +242,7 @@ public:
      * object with specified type.
      */
     TerrainNav(char* mapName, char* vehicleSpecs, char* particles,
-               const int& filterType, const int& mapType, char* directory);
+               const int& filterType, const int& mapType, char* directory, bool no_rand = false);
 
     TerrainNav(const TerrainNav &other);
     /* Destructor: ~TerrainNav
@@ -551,6 +552,14 @@ public:
     void initSessionVars();
 #endif
 
+    // setNoRand() affects the next filter (re)creation, not the running filter.
+    void setNoRand(bool no_rand)
+    {
+        _no_rand = no_rand;
+    }
+
+    bool noRand() const {return _no_rand;}
+
 protected:
 
     char *getSessionDir(const char *dir_prefix, char *dest, size_t len, bool create);
@@ -678,6 +687,7 @@ protected:
     bool checkFilterHealth();
 
 
+
     //Protected structures and components of a TerrainNav object:
     /*********************************************************/
     /*!array containing the last good velocity measurements and bottom-lock status
@@ -752,6 +762,14 @@ protected:
     //!boolean indicating true if initialized successfully (i.e., the mapfile was found)
     bool _initialized;
 
+    // if _no_rand is true, the filter is initialized with
+    // random seed 0. Otherwise, it is intialized using
+    // a value passed by the filter.
+    // Setting _no_rand true is useful for comparing runs,
+    // since causes the search to start from the same place.
+    // Reproducible only with one TerrainNav per process;
+    // each createFilter reseeds.
+    bool _no_rand;
 
     // log files
     TerrainNavLog *_trnLog;

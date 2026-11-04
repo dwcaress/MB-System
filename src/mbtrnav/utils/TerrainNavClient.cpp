@@ -55,10 +55,14 @@ TerrainNavClient::TerrainNavClient()
     _initialized = false;
 }
 
+TerrainNavClient::TerrainNavClient(bool no_rand)
+:TerrainNav(no_rand)
+{}
+
 // Just establish a connection to a server that does not need initialization.
 // Used to connect to the Trn server in mbtrnpp
-TerrainNavClient::TerrainNavClient(char *server_ip, int port)
-: TerrainNav()
+TerrainNavClient::TerrainNavClient(char *server_ip, int port, bool no_rand)
+: TerrainNav(no_rand)
 , _sockport(port)
 {
 //    fprintf(stderr, "%s:%d - <<<<< INIT(2) CTOR >>>>>\n", __func__, __LINE__);
@@ -69,11 +73,12 @@ TerrainNavClient::TerrainNavClient(char *server_ip, int port)
   _initialized = true;
 }
 
+
 // Use default ctor and initialize only the members needed for client
 TerrainNavClient::TerrainNavClient(char *server_ip, int port,
            char *mapName, char *vehicleSpecs, char *particlefile, char *logdir,
-           const int &filterType, const int &mapType)
-: TerrainNav()
+           const int &filterType, const int &mapType, bool no_rand)
+: TerrainNav(no_rand)
 , _sockport(port)
 {
 //    fprintf(stderr, "%s:%d - <<<<< INIT(8) CTOR >>>>>\n", __func__, __LINE__);
@@ -345,8 +350,12 @@ size_t TerrainNavClient::send_msg(commsT& msg)
 
   // Check to see if client is still connected first
   if (is_connected()) {
-    memset(_comms_buf, 0, sizeof(_comms_buf));
-    msg.serialize(_comms_buf);
+
+      memset(_comms_buf, 0, sizeof(_comms_buf));
+      if(msg.serialize(_comms_buf) <= 0) {
+          fprintf(stderr,"%s:%d: ERR - commsT serialize failed\n",__func__,__LINE__);
+          return 0;
+      }
 
     // Send the whole message
 #if 0
@@ -423,7 +432,8 @@ void TerrainNavClient::init_server()
                 TRNUtils::basename(map),
                 TRNUtils::basename(veh),
                 TRNUtils::basename(par),
-                TRNUtils::basename(log)
+                TRNUtils::basename(log),
+                _no_rand
                 );
 
     free(map);

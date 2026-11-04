@@ -20,6 +20,7 @@
 #include <math.h>
 #include <string.h>
 #include <memory.h>
+#include <ctype.h>
 #include <libgen.h>
 #include <inttypes.h>
 #include <sstream>
@@ -33,6 +34,7 @@
 #include "TrnClient.h"
 #include "trn_debug.hpp"
 #include "flag_utils.hpp"
+#include "parse_utils.h"
 #include "NavUtils.h"
 
 // /////////////////
@@ -104,13 +106,13 @@ public:
     }OFlags;
 
    MB1LogConfig()
-    : mDebug(0), mVerbose(false), mHost("localhost"), mTrnCfg(), mPort(TRN_SERVER_PORT_DFL), mServer(false), mTrnInCsvEn(false), mTrnOutCsvEn(false), mTrnInCsvPath(), mTrnOutCsvPath(), mTrnSensor(TRN_SENSOR_MB), mOFlags(), mUtmZone(10), mBeams(0), mStep(false), mSwath(0.), mSkipRecs(0), mLimitRecs(0), mTrniFormat(0)
+    : mDebug(0), mVerbose(false), mHost("localhost"), mTrnCfg(), mPort(TRN_SERVER_PORT_DFL), mServer(false), mTrnInCsvEn(false), mTrnOutCsvEn(false), mTrnInCsvPath(), mTrnOutCsvPath(), mTrnSensor(TRN_SENSOR_MB), mOFlags(), mUtmZone(10), mBeams(0), mStep(false), mSwath(0.), mSkipRecs(0), mLimitRecs(0), mTrniFormat(0), mNoRand(false)
     {
 
     }
 
     MB1LogConfig(const MB1LogConfig &other)
-    : mDebug(other.mDebug), mVerbose(other.mVerbose), mHost(other.mHost), mTrnCfg(other.mTrnCfg), mPort(other.mPort), mServer(other.mServer),  mTrnInCsvEn(other.mTrnInCsvEn), mTrnOutCsvEn(other.mTrnOutCsvEn), mTrnInCsvPath(other.mTrnInCsvPath), mTrnOutCsvPath(other.mTrnOutCsvPath), mTrnSensor(other.mTrnSensor), mOFlags(other.mOFlags), mUtmZone(other.mUtmZone), mBeams(other.mBeams), mStep(other.mStep), mSwath(other.mSwath), mSkipRecs(other.mSkipRecs), mLimitRecs(other.mLimitRecs), mTrniFormat(other.mTrniFormat)
+    : mDebug(other.mDebug), mVerbose(other.mVerbose), mHost(other.mHost), mTrnCfg(other.mTrnCfg), mPort(other.mPort), mServer(other.mServer),  mTrnInCsvEn(other.mTrnInCsvEn), mTrnOutCsvEn(other.mTrnOutCsvEn), mTrnInCsvPath(other.mTrnInCsvPath), mTrnOutCsvPath(other.mTrnOutCsvPath), mTrnSensor(other.mTrnSensor), mOFlags(other.mOFlags), mUtmZone(other.mUtmZone), mBeams(other.mBeams), mStep(other.mStep), mSwath(other.mSwath), mSkipRecs(other.mSkipRecs), mLimitRecs(other.mLimitRecs), mTrniFormat(other.mTrniFormat), mNoRand(other.mNoRand)
     {
 
     }
@@ -136,6 +138,7 @@ public:
     uint32_t skip_recs(){return mSkipRecs;}
     uint32_t lim_recs(){return mLimitRecs;}
     unsigned int trni_format(){return mTrniFormat;}
+    bool no_rand(){return mNoRand;}
 
     void set_server(bool enable){mServer = enable;}
     void set_trni_csv(bool enable){mTrnInCsvEn = enable;}
@@ -156,6 +159,7 @@ public:
     void set_skip_recs(uint32_t skip_recs){mSkipRecs = skip_recs;}
     void set_lim_recs(uint32_t lim){mLimitRecs = lim;}
     void set_trni_format(unsigned int fmt){mTrniFormat = fmt;}
+    void set_norand(bool no_rand){mNoRand = no_rand;}
 
     void tostream(std::ostream &os, int wkey=15, int wval=18)
     {
@@ -185,6 +189,7 @@ public:
         os << std::setw(wkey) << "mSkipRecs" << std::setw(wval) << mSkipRecs << std::endl;
         os << std::setw(wkey) << "mLimitRecs" << std::setw(wval) << mLimitRecs << std::endl;
         os << std::setw(wkey) << "mTrniFormat" << std::setw(wval) << mTrniFormat << std::endl;
+        os << std::setw(wkey) << "mNoRand" << std::setw(wval) << (mNoRand ? 'Y' : 'N') << std::endl;
     }
 
     std::string tostring(int wkey=15, int wval=18)
@@ -220,6 +225,7 @@ private:
     uint32_t mSkipRecs;
     uint32_t mLimitRecs;
     unsigned int mTrniFormat;
+    bool mNoRand;
 };
 
 class MLPStats
@@ -952,7 +958,7 @@ protected:
         int retval = -1;
 
         if(NULL == mTrn){
-            mTrn = new TrnClient(mConfig.host().c_str(), mConfig.port());
+            mTrn = new TrnClient(mConfig.host().c_str(), mConfig.port(), mConfig.no_rand());
             if(NULL != mTrn)
             {
                 mTrn->setQuitRef(quit);
@@ -1358,6 +1364,7 @@ public:
             {"trn-host", required_argument, NULL, 0},
             {"trn-cfg", required_argument, NULL, 0},
             {"trn-sensor", required_argument, NULL, 0},
+            {"trn-norand", required_argument, NULL, 0},
             {"trni-csv", required_argument, NULL, 0},
             {"trno-csv", required_argument, NULL, 0},
             {"utm", required_argument, NULL, 0},
@@ -1548,6 +1555,15 @@ public:
                             if(sscanf(optarg, "%" PRIu32 "", &u32val) == 1)
                             mTBConfig.set_trni_format(u32val);
                         }
+                        // norand
+                        else if (strcmp("trn-norand", options[option_index].name) == 0) {
+                            bool nropt = false;
+                            if(pu_parse_bool(&nropt, optarg)) {
+                                mTBConfig.set_norand(nropt);
+                            } else {
+                                fprintf(stderr, "%s:%d invalid value %s\n", __func__, __LINE__, optarg);
+                            }
+                        }
                     }
                     break;
                 default:
@@ -1582,6 +1598,14 @@ public:
         " --trn-host=addr[:port] : send output to TRN server\n"
         " --trn-cfg=s            : TRN config file\n"
         " --trn-sensor=n         : TRN sensor type\n"
+        "                           1: TRN_SENSOR_DVL\n"
+        "                           2: TRN_SENSOR_MB\n"
+        "                           3: TRN_SENSOR_PENCIL\n"
+        "                           4: TRN_SENSOR_HOMER\n"
+        "                           5: TRN_SENSOR_DELTAT\n"
+        " --trn-norand=b         : set NORAND flag (TRN filter uses seed_randn=0)\n"
+        " --beams=n              : number of output beams\n"
+
         " --utm=n                : UTM zone\n"
         " --beams=n              : number of output beams\n"
         " --swath=f              : limit beams to center swath degrees\n"

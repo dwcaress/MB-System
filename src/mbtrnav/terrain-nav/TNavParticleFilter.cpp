@@ -39,8 +39,8 @@
 //TNavParticleFilter(char* mapName, char* vehicleSpecs, char* directory, const double* windowVar,
 //				   const int& mapType) : TNavFilter(mapName, vehicleSpecs, directory, windowVar, mapType) {
 TNavParticleFilter::
-TNavParticleFilter(TerrainMap* terrainMap, char* vehicleSpecs, char* directory, const double* windowVar, const int& mapType) :
-TNavFilter(terrainMap, vehicleSpecs, directory, windowVar, mapType),
+TNavParticleFilter(TerrainMap* terrainMap, char* vehicleSpecs, char* directory, const double* windowVar, const int& mapType, bool no_rand) :
+TNavFilter(terrainMap, vehicleSpecs, directory, windowVar, mapType, no_rand),
 navData_x_(0.), navData_y_(0.)
 {
     int i=0;

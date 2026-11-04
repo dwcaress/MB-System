@@ -68,6 +68,7 @@ filterType(1),
 mapType(1),
 terrainMap(NULL),
 _initialized(false),
+_no_rand(false),
 _trnLog(NULL)
 #ifdef WITH_TRNLOG
 ,_trnBinLog(NULL)
@@ -84,8 +85,14 @@ _trnLog(NULL)
     // after configuration is complete
 }
 
-TerrainNav::TerrainNav(char* mapName)
+TerrainNav::TerrainNav(bool no_rand)
 : TerrainNav()
+{
+    _no_rand = no_rand;
+}
+
+TerrainNav::TerrainNav(char* mapName, bool no_rand)
+: TerrainNav(no_rand)
 {
 //    fprintf(stderr, "%s:%d - <<<<< INIT(1) CTOR >>>>>\n", __func__, __LINE__);
 
@@ -103,8 +110,8 @@ TerrainNav::TerrainNav(char* mapName)
 
 }
 
-TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs)
-: TerrainNav()
+TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs, bool no_rand)
+: TerrainNav(no_rand)
 {
 //    fprintf(stderr, "%s:%d - <<<<< INIT(2) CTOR >>>>>\n", __func__, __LINE__);
 	//initialize pointers
@@ -122,8 +129,8 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs)
 }
 
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
-					   const int& filterType)
-: TerrainNav()
+					   const int& filterType, bool no_rand)
+: TerrainNav(no_rand)
 {
 //    fprintf(stderr, "%s:%d - <<<<< INIT(3) CTOR >>>>>\n", __func__, __LINE__);
 	//initialize pointers
@@ -142,8 +149,8 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 }
 
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
-					   const int& filterType, char* directory)
-: TerrainNav()
+					   const int& filterType, char* directory, bool no_rand)
+: TerrainNav(no_rand)
 {
 //    fprintf(stderr, "%s:%d - <<<<< INIT(4.1) CTOR >>>>>\n", __func__, __LINE__);
 	//initialize pointers
@@ -162,8 +169,8 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 }
 
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
-					   const int& filterType, const int& mapType)
-: TerrainNav()
+					   const int& filterType, const int& mapType, bool no_rand)
+: TerrainNav(no_rand)
 {
 //    fprintf(stderr, "%s:%d - <<<<< INIT(4.2) CTOR >>>>>\n", __func__, __LINE__);
 	//initialize pointers
@@ -184,8 +191,8 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 }
 
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
-					   const int& filterType, const int& mapType, char* directory)
-: TerrainNav()
+					   const int& filterType, const int& mapType, char* directory, bool no_rand)
+: TerrainNav(no_rand)
 {
 //    fprintf(stderr, "%s:%d - <<<<< INIT(5) CTOR >>>>>\n", __func__, __LINE__);
 	//initialize pointers
@@ -207,7 +214,8 @@ TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs,
 }
 
 TerrainNav::TerrainNav(char* mapName, char* vehicleSpecs, char* particles,
-							  const int& filterType, const int& mapType, char* directory)
+							  const int& filterType, const int& mapType, char* directory, bool no_rand)
+: TerrainNav(no_rand)
 {
 //    fprintf(stderr, "%s:%d - <<<<< INIT(6) CTOR >>>>>\n", __func__, __LINE__);
 	//initialize pointers
@@ -263,6 +271,7 @@ TerrainNav::TerrainNav(const TerrainNav &other)
         terrainMap = new TerrainMapOctree(this->mapFile);
     }
     _initVars.setXYZ(X_STDDEV_INIT,Y_STDDEV_INIT,Z_STDDEV_INIT);
+    this->_no_rand = other._no_rand;
     //initialize terrainNav private variables
     initVariables();
 
@@ -732,20 +741,20 @@ void TerrainNav::createFilter(const int filterType, const double* windowVar) {
 	switch(filterType) {
 		case 1:
 			tNavFilter = new TNavPointMassFilter(this->terrainMap, this->vehicleSpecFile,
-												 this->saveDirectory, windowVar, this->mapType);
+												 this->saveDirectory, windowVar, this->mapType, this->_no_rand);
 			break;
 
 		case 2:
 			tNavFilter = new TNavParticleFilter(this->terrainMap, this->vehicleSpecFile,
-												this->saveDirectory, windowVar, this->mapType);
+												this->saveDirectory, windowVar, this->mapType, this->_no_rand);
 			break;
 		case 3:
 			tNavFilter = new TNavBankFilter(this->terrainMap, this->vehicleSpecFile,
-												this->saveDirectory, windowVar, this->mapType);
+												this->saveDirectory, windowVar, this->mapType, this->_no_rand);
 			break;
 		default:
 			tNavFilter = new TNavPointMassFilter(this->terrainMap, this->vehicleSpecFile,
-												 this->saveDirectory, windowVar, this->mapType);
+												 this->saveDirectory, windowVar, this->mapType, this->_no_rand);
 	}
 	this->filterType = filterType;
 	logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TerrainNav::TNavFilter initialized with type %i\n", filterType);

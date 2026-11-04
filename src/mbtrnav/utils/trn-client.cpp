@@ -28,6 +28,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <signal.h>
+#include <ctype.h>
 // OS X before Sierra does not have clock_gettime, use clock_get_time
 #if defined(__APPLE__) && !defined(__CLOCK_AVAILABILITY) && defined(__MACH__)
 // host_get_clock_service
@@ -41,6 +42,7 @@
 #include "matrixArrayCalcs.h"
 #include "TNavConfig.h"
 #include "TerrainNavClient.h"
+#include "parse_utils.h"
 
 #define TRNCLI_PER_DFL 2
 #define TRNCLI_RUN_SEM_NAME "trncli_run_sem"
@@ -68,6 +70,7 @@ typedef struct trn_worker_s
     TerrainNav *tnav;
     bool quit;
     sem_t *run_sem;
+    bool no_rand;
 }trn_worker_t;
 
 static int numReinits = 0;
@@ -239,6 +242,7 @@ int main(int argc, char** argv)
     worker->trncli=NULL;
     worker->tnav=NULL;
     worker->quit=false;
+    worker->no_rand=false;
 
     worker->mt.numMeas    = 4;
     worker->mt.ranges     = new double[11];
@@ -253,7 +257,7 @@ int main(int argc, char** argv)
     int c=0;
     double delay_sec=0.0;
 
-    while ( (c = getopt(argc, argv, "a:f:hl:M:V:C:o:p:st:v:")) != EOF )
+    while ( (c = getopt(argc, argv, "a:f:hl:M:R:V:C:o:p:st:v:")) != EOF )
     {
         if (c == 'l'){
             if(NULL!=worker->logdir)
@@ -279,6 +283,14 @@ int main(int argc, char** argv)
             if(NULL!=worker->trncfg)
             free(worker->trncfg);
             worker->trncfg = strdup(optarg);     // TRN map overrides map in config file
+        }
+        else if (c == 'R'){
+            bool nropt = false;
+            if(pu_parse_bool(&nropt, optarg)) {
+                worker->no_rand = nropt;
+            } else {
+                fprintf(stderr, "%s:%d invalid value %s\n", __func__, __LINE__, optarg);
+            }
         }
         else if (c == 'p'){
             worker->port = atol(optarg);       // TRN port overrides port in config file
@@ -322,6 +334,7 @@ int main(int argc, char** argv)
             fprintf(stderr,"  -M s   : map file name\n");
             fprintf(stderr,"  -V s   : vehicle file name\n");
             fprintf(stderr,"  -C s   : TRN config file (e.g. terrainAid.cfg)\n");
+            fprintf(stderr,"  -R b   : TRN NORAND (Y/1|N/0) (TRN filter uses seed_randn=0)\n");
             fprintf(stderr,"  -h     : help message\n");
             fprintf(stderr,"\n");
             exit(0);
@@ -340,7 +353,7 @@ int main(int argc, char** argv)
     // Create and initialize the TrnClient object
     //
 
-    worker->trncli = new TrnClient(worker->host, worker->port);
+    worker->trncli = new TrnClient(worker->host, worker->port, worker->no_rand);
     worker->trncli->setVerbose(worker->verbose);
 
     worker->trncli->loadCfgAttributes(worker->trncfg);

@@ -341,13 +341,17 @@ inline double unif_zeroOne()
  * Usage:    unsigned int seed = 27;
  *           seed_randn(&seed);
  * -------------------------------------------------------------------------*/
-/*! Seed the random number generator using:
- *    - the seed pointed to by p_seed if p_seed is not NULL.
- *    - if p_seed is NULL, use the result of time(NULL) as the seed
- *    - zero if the compiler switch TRN_NORAND is set. 
- *  Returns the seed used.
- */
-unsigned int seed_randn(unsigned int *p_seed);
+// Reproducible only with one TerrainNav per process;
+// each createFilter reseeds.
+// Seed the random number generator using:
+//   p_seed   no_rand  seed
+//   ------------------
+//   NULL      FALSE    time(NULL)
+//   NULL      TRUE     0
+//   !=NULL   FALSE   the seed pointed to by p_seed
+//   !=NULL   TRUE    the seed pointed to by p_seed
+// Returns the seed used.
+unsigned int seed_randn(unsigned int *p_seed, bool no_rand=false);
 
 
 /* Function:  randn

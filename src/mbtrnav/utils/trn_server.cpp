@@ -58,7 +58,7 @@
 static TerrainNav* _tercom;
 static int _servfd;   // socket to bind
 static int _connfd;   // socket to handle client
-static bool _connected;
+static bool _connected = false;
 static struct commsT _ct;
 static struct commsT _ack(TRN_ACK);
 static struct commsT _nack(TRN_NACK);
@@ -69,7 +69,6 @@ static struct sockaddr_in _server_addr;     // Server Socket object
 
 static char _sock_buf[TRN_MSG_SIZE];
 static char logbuf[LOGBUF_BYTES];
-
 
 // Return true/false if server has a connection to the client.
 // Uses select() to determine if the client has hung-up
@@ -187,16 +186,24 @@ size_t send_msg(commsT& msg) {
 	//
 	if(is_connected()) {
 		memset(_sock_buf, 0, sizeof(_sock_buf));
-		msg.serialize(_sock_buf);
+		if(msg.serialize(_sock_buf) <= 0){
+            fprintf(stderr,"%s:%d: ERR - commsT serialize failed\n",__func__,__LINE__);
+            return 0;
+        }
 
 		// Send the whole message
-        // TODO: check send return value (may return -1, and this doesn't handle it)
-		for(sl = 0; sl < sizeof(_sock_buf);) {
-            ssize_t test=0;
-            if( (test=send(_connfd, _sock_buf, sizeof(_sock_buf), 0))>=0){
-                sl+=test;
-            }// else error
-		}
+        for(sl = 0; sl < sizeof(_sock_buf);) {
+            ssize_t test = send(_connfd, _sock_buf + sl, sizeof(_sock_buf) - sl, 0);
+            if(test < 0) {
+                if(errno == EINTR) continue;   // interrupted, retry
+                fprintf(stderr, "%s:%d: ERR - send failed [%d/%s]\n", __func__, __LINE__, errno, strerror(errno));
+                break;
+            } else if (test == 0) {
+                fprintf(stderr, "%s:%d: ERR - send returned 0 [%d/%s]\n", __func__, __LINE__, errno, strerror(errno));
+                break;
+            }
+            sl += test;
+        }
 	}
 	return sl;
 }
@@ -224,7 +231,7 @@ int init() {
     char* logPath = getenv("TRN_LOGFILES");
 
     fprintf(stderr, "ENV: maps:%s cfgs:%s logs:%s\n", mapPath, cfgPath, logPath);
-    fprintf(stderr, "CT: map:%s cfg:%s par:%s\n", _ct.mapname, _ct.cfgname, _ct.particlename);
+    fprintf(stderr, "CT: map:%s cfg:%s par:%s norand:%c\n", _ct.mapname, _ct.cfgname, _ct.particlename, (_ct.no_rand ? 'Y' : 'N'));
 
 	char dotSlash[] = "./";
 	if(mapPath == NULL) {
@@ -327,18 +334,18 @@ int init() {
 	int mapType    = _ct.parameter / 10;
 	int filterType = _ct.parameter % 10;
 
-    fprintf(stderr, "Constructing tercom with map:%s, cfg:%s, map type: %d, and filter:%d\n",
-         mapname, cfgname, mapType, filterType);
+    fprintf(stderr, "Constructing tercom with map:%s, cfg:%s, map type: %d, filter:%d, norand:%c\n",
+         mapname, cfgname, mapType, filterType, (_ct.no_rand ? 'Y' : 'N'));
 
-    logs( TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"Constructing tercom with map:%s, cfg:%s, map type: %d, and filter:%d\n",
-         mapname, cfgname, mapType, filterType);
+    logs( TL_OMASK(TL_TRN_SERVER, (TL_LOG|TL_SERR)),"Constructing tercom with map:%s, cfg:%s, map type: %d, filter:%d, norand:%c\n",
+         mapname, cfgname, mapType, filterType, (_ct.no_rand ? 'Y' : 'N'));
 
     logs(TL_OMASK(TL_TERRAIN_NAV, TL_LOG),"TRNBeam,Time,Index,Num,Along,Cross,Alt\n");
 
     try
     {
 //    TODO : make particles file optional (select different CTOR if not specified)
-        _tercom = new TerrainNav(mapname, cfgname, particlename, filterType, mapType, _ct.logname);
+        _tercom = new TerrainNav(mapname, cfgname, particlename, filterType, mapType, _ct.logname, _ct.no_rand);
 
       // Acknowledge initialization if successful
       //

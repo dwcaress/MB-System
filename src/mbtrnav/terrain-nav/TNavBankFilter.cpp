@@ -32,8 +32,8 @@ operator[](int index){
 //				   const int& mapType) : TNavFilter(mapName, vehicleSpecs, directory, windowVar, mapType) {
 TNavBankFilter::
 TNavBankFilter(TerrainMap* terrainMap, char* vehicleSpecs, char* directory, const double* windowVar,
-               const int& mapType)
-: TNavFilter(terrainMap, vehicleSpecs, directory, windowVar, mapType), numFilters(0), bfLogs(NULL), logCount(0)
+               const int& mapType, bool no_rand)
+: TNavFilter(terrainMap, vehicleSpecs, directory, windowVar, mapType, no_rand), numFilters(0), bfLogs(NULL), logCount(0)
 {
     initVariables();
     this->tempUseBeam = new bool[TRN_MAX_BEAMS];

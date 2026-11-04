@@ -162,7 +162,7 @@ class TNavParticleFilter : public TNavFilter
    * uses different maps based on mapType (1:DEM,2:octree).
    */
   //TNavParticleFilter(char *mapName, char *vehicleSpecs, char *directory, const double *windowVar, const int &mapType); //Map Reload Issue
-  TNavParticleFilter(TerrainMap* terrainMap, char *vehicleSpecs, char *directory, const double *windowVar, const int &mapType);
+  TNavParticleFilter(TerrainMap* terrainMap, char *vehicleSpecs, char *directory, const double *windowVar, const int &mapType, bool no_rand=false);
 
 
 

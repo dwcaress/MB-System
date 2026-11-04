@@ -42,11 +42,12 @@ class TerrainNavClient : public TerrainNav
 
   /* Default Constructor:
    */
-  TerrainNavClient();
+    TerrainNavClient();
+    explicit TerrainNavClient(bool no_rand);
 
   /* Server constructor: Just establish a connection to a server.
    */
-  TerrainNavClient(char *server_ip, int server_port);
+  TerrainNavClient(char *server_ip, int server_port, bool no_rand=false);
 
 
   /* Constructor: TerrainNavClient(mapName)
@@ -59,7 +60,7 @@ class TerrainNavClient : public TerrainNav
   TerrainNavClient(char *server_ip, int server_port,
 		   char *mapName, char *vehicleSpecs, char *particlefile, char *logdir,
 		   const int &filterType,
-		   const int &mapType);
+		   const int &mapType, bool no_rand=false);
 
     TerrainNavClient(const TerrainNavClient &other);
 
@@ -70,7 +71,7 @@ class TerrainNavClient : public TerrainNav
   /*! Initializes a new TerrainNav with terrain map "mapName.txt". The mapping 
    * AUV specs and the Point Mass Filter algorithm are used as defaults.
    */
-  TerrainNavClient(char *mapName);
+  TerrainNavClient(char *mapName, bool no_rand=false);
 
 
   /* Constructor: TerrainNavClient(mapName, vehicleName)
@@ -81,7 +82,7 @@ class TerrainNavClient : public TerrainNav
    * Makes a call to createFilter(1) to initialize a new TerrainNav
    * object with default type = 1 (Point Mass Filter). 
    */
-  TerrainNavClient(char *mapName, char *vehicleSpecs);
+  TerrainNavClient(char *mapName, char *vehicleSpecs, bool no_rand=false);
 
 
   /* Constructor: TerrainNavClient(mapName, vehicleName, filterType)
@@ -94,7 +95,7 @@ class TerrainNavClient : public TerrainNav
    */
   TerrainNavClient(char *server_ip, int server_port,
 		   char *mapName, char *vehicleSpecs, 
-		   const int &filterType, const int &mapType);
+		   const int &filterType, const int &mapType, bool no_rand=false);
 
 
   /* Constructor: TerrainNavClient(mapName, vehicleName, filterType, directory)
@@ -106,7 +107,7 @@ class TerrainNavClient : public TerrainNav
    * object with specified type. 
    */
   TerrainNavClient(char *mapName, char *vehicleSpecs, 
-		   const int &filterType, char *directory, int mapType);
+		   const int &filterType, char *directory, int mapType, bool no_rand=false);
 
 #endif
 

@@ -18,7 +18,7 @@
 
 TNavFilter::
 //TNavFilter(char* mapName, char* vehicleSpecs, char* directory, const double* windowVar, const int& mapType) {Reload Map Issue
-TNavFilter(TerrainMap* terrainMap, char* vehicleSpecs, char* directory, const double* windowVar, const int& mapType)
+TNavFilter(TerrainMap* terrainMap, char* vehicleSpecs, char* directory, const double* windowVar, const int& mapType, bool no_rand)
 :SubcloudNIS(0.0),
 forceHighGradeFilter(false),
 forceLowGradeFilter(false)
@@ -52,7 +52,7 @@ forceLowGradeFilter(false)
 	currVar[1] = windowVar[2];
 
 	//Initialize random number generator
-    unsigned int seed = seed_randn(NULL);
+    unsigned int seed = seed_randn(NULL, no_rand);
     logs(TL_OMASK(TL_TNAV_PARTICLE_FILTER, TL_LOG),
           "Random noise generator initialized with %d", seed);
 

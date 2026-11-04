@@ -217,7 +217,7 @@ class TNavBankFilter : public TNavFilter
    * uses different maps based on mapType (1:DEM,2:octree).
    */
   //TNavBankFilter(char *mapName, char *vehicleSpecs, char *directory, const double *windowVar, const int &mapType); //Map Reload Issue
-  TNavBankFilter(TerrainMap* terrainMap, char *vehicleSpecs, char *directory, const double *windowVar, const int &mapType);
+  TNavBankFilter(TerrainMap* terrainMap, char *vehicleSpecs, char *directory, const double *windowVar, const int &mapType, bool no_rand=false);
 
 
 

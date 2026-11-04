@@ -16,10 +16,6 @@
 #define _STR(x) #x
 #define STR(x) _STR(x)
 
-#ifdef TRN_NORAND
-#pragma message( __FILE__":" STR(__LINE__) " - feature TRN_NORAND enabled (see FEATURE_OPTIONS in Makefile)" )
-#endif
-
 #ifdef USE_MATLAB
 Engine* matlabEng;
 #endif
@@ -64,21 +60,25 @@ int round(const double& num) {
  * Usage:    unsigned int seed = 27;
  *           seed_randn(&seed);
  * -------------------------------------------------------------------------*/
-/*! Seed the random number generator using:
- *    - the seed pointed to by p_seed if p_seed is not NULL.
- *    - if p_seed is NULL, use the result of time(NULL) as the seed
- *    - zero if the compiler switch TRN_NORAND is set. 
- *  Returns the seed used.
- */
-unsigned int seed_randn(unsigned int *p_seed)
-{
+// Seed the random number generator using:
+//   p_seed   no_rand  seed
+//   ------------------
+//   NULL      FALSE    time(NULL)
+//   NULL      TRUE     0
+//   !=NULL   FALSE   the seed pointed to by p_seed
+//   !=NULL   TRUE    the seed pointed to by p_seed
+// Returns the seed used.
 
-#ifdef TRN_NORAND
-   // Building to use the same set of random numbers
+unsigned int seed_randn(unsigned int *p_seed, bool no_rand)
+{
+    // use the same set of random numbers if seed==0
     unsigned int seed = 0;
-#else
-    unsigned int seed = (NULL != p_seed)? *p_seed : time(NULL);
-#endif
+    if(no_rand) {
+        seed = (NULL != p_seed) ? *p_seed : 0;
+    } else {
+        // seed with time or specified value if non-NULL
+        seed = (NULL != p_seed) ? *p_seed : time(NULL);
+    }
 
 	//Initialize random number generator
    srand(seed);

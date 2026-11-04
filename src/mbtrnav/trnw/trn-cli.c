@@ -66,6 +66,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <ctype.h>
 #include "trn_cli.h"
 #include "mframe.h"
 #include "mfile.h"
@@ -73,6 +74,7 @@
 #include "msocket.h"
 #include "mlog.h"
 #include "mb1_msg.h"
+#include "parse_utils.h"
 
 /////////////////////////
 // Macros
@@ -311,6 +313,7 @@ static void s_show_help()
     "                  3: TRN_MWEIGHT_SUBCLOUD_SHANDOR\n"
     "                  4: TRN_MWEIGHT_SUBCLOUD_NISON\n"
     " --trn-utm      : TRN UTM zone\n"
+    " --trn-norand=b : TRN NORAND (filter uses seed_randn=0)\n"
     " --trn-ncov     : TRN max northing covariance\n"
     " --trn-nerr     : TRN max northing error\n"
     " --trn-ecov     : TRN max easing covariance\n"
@@ -401,6 +404,7 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"trn-freinit", required_argument, NULL, 0},
         {"trn-fgrade", required_argument, NULL, 0},
         {"trn-mw", required_argument, NULL, 0},
+        {"trn-norand", required_argument, NULL, 0},
         {"trn-ncov", required_argument, NULL, 0},
         {"trn-nerr", required_argument, NULL, 0},
         {"trn-ecov", required_argument, NULL, 0},
@@ -716,6 +720,15 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 else if (strcmp("state-n", options[option_index].name) == 0) {
                     sscanf(optarg,"%d",&cfg->state_n);
                 }
+                // norand
+                else if (strcmp("trn-norand", options[option_index].name) == 0) {
+                    bool nropt = false;
+                    if(pu_parse_bool(&nropt, optarg)) {
+                        cfg->trn_cfg->no_rand = nropt;
+                    } else {
+                        fprintf(stderr, "%s:%d invalid value %s\n", __func__, __LINE__, optarg);
+                    }
+                }
 
                 break;
             default:
@@ -751,6 +764,7 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
     s_dbg_printf(stderr, cfg->verbose, "mtype     [%d]\n", cfg->trn_cfg->map_type);
     s_dbg_printf(stderr, cfg->verbose, "freinit   [%d]\n", cfg->trn_cfg->filter_reinit);
     s_dbg_printf(stderr, cfg->verbose, "fgrade    [%d]\n", cfg->trn_cfg->filter_grade);
+    s_dbg_printf(stderr, cfg->verbose, "norand    [%s]\n", (cfg->trn_cfg->no_rand?"Y":"N"));
     s_dbg_printf(stderr, cfg->verbose, "mw        [%d]\n", cfg->trn_cfg->mod_weight);
     s_dbg_printf(stderr, cfg->verbose, "utm       [%ld]\n", cfg->trn_cfg->utm_zone);
     s_dbg_printf(stderr, cfg->verbose, "ncov      [%.3lf]\n", cfg->trn_cfg->max_northing_cov);
@@ -835,6 +849,7 @@ static app_cfg_t *app_cfg_new()
         instance->trn_cfg->max_northing_err = TRN_MAX_NERR_DFL;
         instance->trn_cfg->max_easting_cov = TRN_MAX_ECOV_DFL;
         instance->trn_cfg->max_easting_err = TRN_MAX_EERR_DFL;
+        instance->trn_cfg->no_rand = false;
     }
     return instance;
 }

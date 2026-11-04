@@ -18,7 +18,7 @@
 //TNavPointMassFilter::TNavPointMassFilter(char* mapName, char* vehicleSpecs, char* directory, const double* windowVar,
 //		const int& mapType) : TNavFilter(mapName, vehicleSpecs, directory, windowVar, mapType) {
 TNavPointMassFilter::TNavPointMassFilter(TerrainMap* terrainMap, char* vehicleSpecs, char* directory, const double* windowVar,
-		const int& mapType) : TNavFilter(terrainMap, vehicleSpecs, directory, windowVar, mapType) {
+		const int& mapType, bool no_rand) : TNavFilter(terrainMap, vehicleSpecs, directory, windowVar, mapType, no_rand) {
 	priorPDF = new mapT;
 	likeSurf = new mapT;
     for(int i=0;i<4;i++){

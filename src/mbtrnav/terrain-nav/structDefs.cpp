@@ -1442,7 +1442,8 @@ est_nav_ofs(),
 mapname(NULL),
 cfgname(NULL),
 particlename(NULL),
-logname(NULL)
+logname(NULL),
+no_rand(false)
 {
 }
 
@@ -1458,7 +1459,8 @@ est_nav_ofs(),
 mapname(NULL),
 cfgname(NULL),
 particlename(NULL),
-logname(NULL)
+logname(NULL),
+no_rand(false)
 {
 }
 
@@ -1474,7 +1476,8 @@ est_nav_ofs(),
 mapname(NULL),
 cfgname(NULL),
 particlename(NULL),
-logname(NULL)
+logname(NULL),
+no_rand(false)
 {
 }
 
@@ -1490,12 +1493,13 @@ est_nav_ofs(),
 mapname(NULL),
 cfgname(NULL),
 particlename(NULL),
-logname(NULL)
+logname(NULL),
+no_rand(false)
 {
 }
 
 commsT::commsT(char type, int param, char* map, char* cfg,
-                char* partfile, char* logdir)
+                char* partfile, char* logdir, bool norand)
 :
 msg_type(type),
 parameter(param),
@@ -1507,7 +1511,8 @@ est_nav_ofs(),
 mapname(NULL),
 cfgname(NULL),
 particlename(NULL),
-logname(NULL)
+logname(NULL),
+no_rand(norand)
 {
     mapname = STRDUPNULL(map);
     cfgname = STRDUPNULL(cfg);
@@ -1532,7 +1537,8 @@ est_nav_ofs(),
 mapname(NULL),
 cfgname(NULL),
 particlename(NULL),
-logname(NULL)
+logname(NULL),
+no_rand(false)
 {
     // Measure update message?
     //
@@ -1556,7 +1562,8 @@ est_nav_ofs(),
 mapname(NULL),
 cfgname(NULL),
 particlename(NULL),
-logname(NULL)
+logname(NULL),
+no_rand(false)
 {
     // Measure update message?
     //
@@ -1580,7 +1587,8 @@ est_nav_ofs(),
 mapname(NULL),
 cfgname(NULL),
 particlename(NULL),
-logname(NULL)
+logname(NULL),
+no_rand(false)
 {
     if( (msg_type == TRN_SET_INITSTDDEVXYZ) ||
        (msg_type == TRN_GET_INITSTDDEVXYZ)) {
@@ -1609,7 +1617,8 @@ est_nav_ofs(),
 mapname(NULL),
 cfgname(NULL),
 particlename(NULL),
-logname(NULL)
+logname(NULL),
+no_rand(false)
 {
     if(msg_type == TRN_FILT_REINIT_OFFSET) {
         est_nav_ofs.x = ofs_x;
@@ -1633,7 +1642,9 @@ est_nav_ofs(),
 mapname(NULL),
 cfgname(NULL),
 particlename(NULL),
-logname(NULL) {
+logname(NULL),
+no_rand(false)
+{
     if(msg_type == TRN_FILT_REINIT_BOX) {
         xyz_sdev.x = sdev_x;
         xyz_sdev.y = sdev_y;
@@ -1669,7 +1680,7 @@ commsT::~commsT() {
 int commsT::serialize(char* buf, int buf_length) {
     //printf("Serializing commsT\n");
     int len = 0;
-    unsigned int ml;
+    unsigned int ml = 0;
     char* p_ml;
     memcpy(buf + len, &msg_type,  sizeof(msg_type));
     len += sizeof(msg_type);
@@ -1697,6 +1708,7 @@ int commsT::serialize(char* buf, int buf_length) {
     // Initialization message?
     //
     else if(msg_type == TRN_INIT) {
+
         if(NULL==mapname){
             strcpy(buf + len, "");
             len += 1;
@@ -1725,6 +1737,15 @@ int commsT::serialize(char* buf, int buf_length) {
             strcpy(buf + len, logname);
             len += strlen(logname) + 1;
         }
+        // optional trailing no_rand byte (absent from older senders)
+        if((size_t)buf_length > (len + sizeof(uint8_t))){
+            uint8_t nr = (no_rand ? 1 : 0);
+            memcpy(buf + len, &nr, sizeof(uint8_t));
+            len += sizeof(uint8_t);
+        } else {
+            fprintf(stderr, "%s:%d - ERR buffer full, could not write norand field\n", __func__, __LINE__);
+            return -1;
+        }
     }
     // Set xyz_sdev_init message?
     //
@@ -1745,6 +1766,8 @@ int commsT::serialize(char* buf, int buf_length) {
         len += sizeof(est_nav_ofs);
     }
 
+    // NOTE: serialize() writes ml = total_len - 1 (see ml formula there), so the
+    // real end of the message is ml + 1, not ml.
     ml = len - sizeof(msg_type) + sizeof(parameter) - sizeof(unsigned int);
     memcpy(p_ml, &ml, sizeof(ml));
 
@@ -1754,7 +1777,7 @@ int commsT::serialize(char* buf, int buf_length) {
 int commsT::unserialize(char* buf, int buf_length) {
     //printf("Unserializing commsT\n");
     int len = 0;
-    unsigned int ml;
+    unsigned int ml = 0;
 
     memcpy(&msg_type,  buf + len, sizeof(msg_type));
     len += sizeof(msg_type);
@@ -1787,6 +1810,10 @@ int commsT::unserialize(char* buf, int buf_length) {
     // Initialization message?
     //
     else if(msg_type == TRN_INIT) {
+        // NOTE: serialize() writes ml = total_len - 1 (see ml formula there), so the
+        // real end of the message is ml + 1, not ml.
+        const int msg_end = (int)ml + 1;
+
         mapname = STRDUPNULL(buf + len);
         len += strlen(mapname) + 1;
         cfgname = STRDUPNULL(buf + len);
@@ -1795,8 +1822,17 @@ int commsT::unserialize(char* buf, int buf_length) {
         len += strlen(particlename) + 1;
         logname = STRDUPNULL(buf + len);
         len += strlen(logname) + 1;
-      LOGM("commsT::serialize - setting log name [%s]\n",logname);
+        // optional trailing no_rand byte (absent from older senders)
+        if(len + (int)sizeof(uint8_t) <= msg_end && msg_end <= buf_length) {
+            uint8_t nr = 0;
+            memcpy(&nr, buf + len, sizeof(nr));
+            no_rand = (nr != 0);
+            len += sizeof(nr);
+        } else {
+            no_rand = false;
+        }
 
+        LOGM("commsT::unserialize - setting log name [%s]\n",logname);
     }
     // Set xyz_sdev_init message?
     //

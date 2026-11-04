@@ -21,6 +21,7 @@
 #include <string.h>
 #include <memory.h>
 #include <libgen.h>
+#include <ctype.h>
 #include <sstream>
 #include <fstream>
 #include <iostream>
@@ -32,6 +33,7 @@
 #include "TrnClient.h"
 #include "trn_debug.hpp"
 #include "flag_utils.hpp"
+#include "parse_utils.h"
 #include "NavUtils.h"
 
 // /////////////////
@@ -179,13 +181,13 @@ public:
 
 
    CSVLogConfig()
-    : mDebug(0), mVerbose(false), mHost("localhost"), mTrnCfg(), mPort(TRN_SERVER_PORT_DFL), mServer(false), mTrnInCsvEn(false), mTrnOutCsvEn(false), mTrnInCsvPath(), mTrnOutCsvPath(), mTrnSensor(TRN_SENSOR_MB), mOFlags(0), mFmtFlags(0), mUtmZone(10), mBeams(0), mStep(false), mSwath(0.)
+    : mDebug(0), mVerbose(false), mHost("localhost"), mTrnCfg(), mPort(TRN_SERVER_PORT_DFL), mServer(false), mTrnInCsvEn(false), mTrnOutCsvEn(false), mTrnInCsvPath(), mTrnOutCsvPath(), mTrnSensor(TRN_SENSOR_MB), mOFlags(0), mFmtFlags(0), mUtmZone(10), mBeams(0), mStep(false), mSwath(0.), mNoRand(false)
     {
         memset(mSFRot,0,3*sizeof(double));
     }
 
     CSVLogConfig(const CSVLogConfig &other)
-    : mDebug(other.mDebug), mVerbose(other.mVerbose), mHost(other.mHost), mTrnCfg(other.mTrnCfg), mPort(other.mPort), mServer(other.mServer),  mTrnInCsvEn(other.mTrnInCsvEn), mTrnOutCsvEn(other.mTrnOutCsvEn), mTrnInCsvPath(other.mTrnInCsvPath), mTrnOutCsvPath(other.mTrnOutCsvPath), mTrnSensor(other.mTrnSensor), mOFlags(other.mOFlags),  mFmtFlags(other.mFmtFlags), mUtmZone(other.mUtmZone), mBeams(other.mBeams), mStep(other.mStep), mSwath(other.mSwath)
+    : mDebug(other.mDebug), mVerbose(other.mVerbose), mHost(other.mHost), mTrnCfg(other.mTrnCfg), mPort(other.mPort), mServer(other.mServer),  mTrnInCsvEn(other.mTrnInCsvEn), mTrnOutCsvEn(other.mTrnOutCsvEn), mTrnInCsvPath(other.mTrnInCsvPath), mTrnOutCsvPath(other.mTrnOutCsvPath), mTrnSensor(other.mTrnSensor), mOFlags(other.mOFlags),  mFmtFlags(other.mFmtFlags), mUtmZone(other.mUtmZone), mBeams(other.mBeams), mStep(other.mStep), mSwath(other.mSwath), mNoRand(other.mNoRand)
     {
         memset(mSFRot,0,3*sizeof(double));
     }
@@ -210,6 +212,7 @@ public:
     double *sfrot(){return mSFRot;}
     bool step(){return mStep;}
     double swath(){return mSwath;}
+    bool no_rand(){return mNoRand;}
 
     void set_server(bool enable){mServer = enable;}
     void set_trni_csv(bool enable){mTrnInCsvEn = enable;}
@@ -233,6 +236,7 @@ public:
     }
     void set_step(bool step){mStep = step;}
     void set_swath(double swath){mSwath = swath;}
+    void set_norand(bool no_rand){mNoRand = no_rand;}
 
     void tostream(std::ostream &os, int wkey=15, int wval=18)
     {
@@ -260,6 +264,7 @@ public:
         os << std::setw(wkey) << "mSFRot" << std::setw(wval) << "[" << mSFRot[0] << "," <<mSFRot[1] << "," <<mSFRot[2] << "]" << std::endl;
         os << std::setw(wkey) << "mOFlags" << std::hex << std::setw(wval) << (uint32_t)mOFlags.get() << std::endl;
         os << std::setw(wkey) << "mFmtFlags" << std::hex << std::setw(wval) << (uint32_t)mFmtFlags.get() << std::endl;
+        os << std::setw(wkey) << "mNoRand" << std::setw(wval) << (mNoRand ? 'Y' : 'N') << std::endl;
         os << dec;
     }
 
@@ -295,6 +300,7 @@ private:
     double mSFRot[3];
     bool mStep;
     double mSwath;
+    bool mNoRand;
 };
 
 class MLPStats
@@ -959,7 +965,7 @@ protected:
         int retval = -1;
 
         if(NULL == mTrn){
-            mTrn = new TrnClient(mConfig.host().c_str(), mConfig.port());
+            mTrn = new TrnClient(mConfig.host().c_str(), mConfig.port(), mConfig.no_rand());
             if(NULL != mTrn)
             {
                 mTrn->setQuitRef(quit);
@@ -1817,6 +1823,7 @@ public:
             {"trn-host", required_argument, NULL, 0},
             {"trn-cfg", required_argument, NULL, 0},
             {"trn-sensor", required_argument, NULL, 0},
+            {"trn-norand", required_argument, NULL, 0},
             {"trni-csv", required_argument, NULL, 0},
             {"trno-csv", required_argument, NULL, 0},
             {"utm", required_argument, NULL, 0},
@@ -2010,6 +2017,15 @@ public:
                             if(sscanf(optarg, "%lf", &swath_deg) == 1)
                                 mTBConfig.set_swath(swath_deg);
                         }
+                        // norand
+                        else if (strcmp("trn-norand", options[option_index].name) == 0) {
+                            bool nropt = false;
+                            if(pu_parse_bool(&nropt, optarg)) {
+                                mTBConfig.set_norand(nropt);
+                            } else {
+                                fprintf(stderr, "%s:%d invalid value %s\n", __func__, __LINE__, optarg);
+                            }
+                        }
                     }
                     break;
                 default:
@@ -2045,6 +2061,13 @@ public:
         " --trn-host=addr[:port] : send output to TRN server\n"
         " --trn-cfg=s            : TRN config file\n"
         " --trn-sensor=n         : TRN sensor type\n"
+        "                           1: TRN_SENSOR_DVL\n"
+        "                           2: TRN_SENSOR_MB\n"
+        "                           3: TRN_SENSOR_PENCIL\n"
+        "                           4: TRN_SENSOR_HOMER\n"
+        "                           5: TRN_SENSOR_DELTAT\n"
+        " --trn-norand=b         : set NORAND flag (TRN filter uses seed_randn=0)\n"
+        " --beams=n              : number of output beams\n"
         " --utm=n                : UTM zone\n"
         " --beams=n              : number of output beams\n"
         " --swath=f              : limit beams to center swath degrees\n"

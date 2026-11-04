@@ -140,7 +140,7 @@ class TNavFilter
    * to choose which type of map to use (1=DEM, 2=octree). 
    */
   //TNavFilter(char *mapName, char *vehicleSpecs, char *directory, const double *windowVar, const int &mapType);//Reload Map Issue
-  TNavFilter(TerrainMap* terrainMap, char *vehicleSpecs, char *directory, const double *windowVar, const int &mapType);
+  TNavFilter(TerrainMap* terrainMap, char *vehicleSpecs, char *directory, const double *windowVar, const int &mapType, bool no_rand=false);
 
   /* Destructor: ~TNavFilter()
    * Usage: delete tnavFilter;

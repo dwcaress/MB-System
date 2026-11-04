@@ -48,7 +48,6 @@ endif()
 add_compile_definitions(
 HAVE_CONFIG_H
 _GNU_SOURCE
-#TRN_NORAND
 WITH_TESTS
 WITH_MMDEBUG
 WITH_MST_MSTATS

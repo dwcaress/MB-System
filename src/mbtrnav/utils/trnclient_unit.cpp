@@ -82,6 +82,7 @@
 #include "matrixArrayCalcs.h"
 #include "TNavConfig.h"
 #include "TerrainNavClient.h"
+#include "parse_utils.h"
 
 /////////////////////////
 // Macros
@@ -136,7 +137,7 @@
 #define TRNCLI_UNIT_VERSION_STR VERSION_STRING(TRNCLI_UNIT_VER)
 #define TRNCLI_UNIT_BUILD_STR VERSION_STRING(TRNCLI_UNIT_BUILD)
 
-#define PARSE_BOOL(s) (strcasecmp(s,"Y")==0 || strcasecmp(s,"1")==0 || strcasecmp(s,"TRUE")==0 ? true : false)
+//#define PARSE_BOOL(s) (strcasecmp(s,"Y")==0 || strcasecmp(s,"1")==0 || strcasecmp(s,"TRUE")==0 ? true : false)
 #define BOOLC_YN(b) (b ? 'Y' : 'N')
 #define BOOLC_10(b) (b ? '1' : '0')
 #define BOOLS_TF(b) (b ? "true" : "false")
@@ -226,6 +227,8 @@ typedef struct app_cfg_s
     TerrainNav *tnav;
     // test resources (hold test/message return values)
     test_res_t res;
+    // TRN NORAND flag (TRN filter uses seed_randn=0)
+    bool no_rand;
 }app_cfg_t;
 
 static double s_etime();
@@ -352,28 +355,28 @@ static void s_show_help()
     "--trn-cfg      : path to terrainAid.cfg\n"
     "--log-id=s     : TRN server log directory prefix (<log-id>-TRN.nn)\n"
     "--sensor=c     : TRN data (sensor) type\n"
-    "                  [d1]:TRN_SENSOR_DVL\n"
-    "                  [m2]:TRN_SENSOR_MB\n"
-    "                  [p3]:TRN_SENSOR_PENCIL\n"
-    "                  [h4]:TRN_SENSOR_HOMER\n"
-    "                  [t5]:TRN_SENSOR_DELTAT-T\n"
+    "                  [d,1]: TRN_SENSOR_DVL\n"
+    "                  [m,2]: TRN_SENSOR_MB\n"
+    "                  [p,3]: TRN_SENSOR_PENCIL\n"
+    "                  [h,4]: TRN_SENSOR_HOMER\n"
+    "                  [t,5]: TRN_SENSOR_DELTAT-T\n"
     "--trn-mw=i     : set TRN modified weighting algorithm\n"
-    "                   0: TRN_WT_NONE     - No weighting modifications at all."
-    "                   1: TRN_WT_NORM     - Shandor's original alpha modification."
-    "                   2: TRN_WT_XBEAM    - Crossbeam with original"
-    "                   3: TRN_WT_SUBCL    - Subcloud  with original"
-    "                   4: TRN_FORCE_SUBCL - Forced to do Subcloud on every measurement"
-    "                   5: TRN_WT_INVAL    - Any value >= 5 is invalid"
-    "                  0: TRN_WT_NONE"
+    "                   0: TRN_WT_NONE     - No weighting modifications at all.\n"
+    "                   1: TRN_WT_NORM     - Shandor's original alpha modification.\n"
+    "                   2: TRN_WT_XBEAM    - Crossbeam with original\n"
+    "                   3: TRN_WT_SUBCL    - Subcloud  with original\n"
+    "                   4: TRN_FORCE_SUBCL - Forced to do Subcloud on every measurement\n"
+    "                   5: TRN_WT_INVAL    - Any value >= 5 is invalid\n"
     "--trn-im=i     : TRN interp method\n"
-    "                   0: nearest-neighbor (no interpolation)"
-    "                   1: bilinear"
-    "                   2: bicubic"
-    "                   3: spline"
+    "                   0: nearest-neighbor (no interpolation)\n"
+    "                   1: bilinear\n"
+    "                   2: bicubic\n"
+    "                   3: spline\n"
     "--trn-ima=b    : set TRN interp measurement attitude\n"
     "--trn-vdr=d    : velocity drift rate\n"
     "--trn-fren=b   : filter reinit enable\n"
     "--trn-frl=b    : filter reinit lowInfoTransition\n"
+    "--trn-norand=b : set TRN NORAND (TRN uses seed_randn=0)\n"
     "\n";
     printf("%s",help_message);
     printf("%s",usage_message);
@@ -401,7 +404,8 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"trn-im", required_argument, NULL, 0},
         {"trn-vdr", required_argument, NULL, 0},
         {"trn-fren", required_argument, NULL, 0},
-        {"trn_frl", required_argument, NULL, 0},
+        {"trn-frl", required_argument, NULL, 0},
+        {"trn-norand", required_argument, NULL, 0},
         {NULL, 0, NULL, 0}};
     while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1){
         char *scpy = NULL;
@@ -496,7 +500,10 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
                 }
                 // trn-ima
                 else if (strcmp("trn-ima", options[option_index].name) == 0) {
-                    cfg->trn_ima = PARSE_BOOL(optarg);
+                    if(!pu_parse_bool(&cfg->trn_ima, optarg)){
+                        fprintf(stderr,"WARN: invalid trn-ima (setting false)\n");
+                        cfg->trn_ima = false;
+                    }
                 }
                 // trn-im
                 else if (strcmp("trn-im", options[option_index].name) == 0) {
@@ -527,11 +534,24 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
                 }
                 // trn-fren
                 else if (strcmp("trn-fren", options[option_index].name) == 0) {
-                    cfg->trn_fren = PARSE_BOOL(optarg);
+                    if(!pu_parse_bool(&cfg->trn_fren, optarg)){
+                        fprintf(stderr,"WARN: invalid trn-fren (setting false)\n");
+                        cfg->trn_fren = false;
+                    }
                 }
                 // trn-frl
                 else if (strcmp("trn-frl", options[option_index].name) == 0) {
-                    cfg->trn_frl = PARSE_BOOL(optarg);
+                        if(!pu_parse_bool(&cfg->trn_frl, optarg)){
+                            fprintf(stderr,"WARN: invalid trn-frl (setting false)\n");
+                            cfg->trn_frl = false;
+                        }
+                }
+                // trn-norand
+                else if (strcmp("trn-norand", options[option_index].name) == 0) {
+                        if(!pu_parse_bool(&cfg->no_rand, optarg)) {
+                            fprintf(stderr,"WARN: invalid no_rand (setting false)\n");
+                            cfg->no_rand = false;
+                        }
                 }
                 }// end switch
 
@@ -562,6 +582,7 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
     fprintf(stderr,"%*s %*lf\n",wkey,"trn-vdr ",wval,cfg->trn_vdr);
     fprintf(stderr,"%*s %*c\n",wkey,"trn-fren",wval,BOOLC_YN(cfg->trn_fren));
     fprintf(stderr,"%*s %*c\n",wkey,"trn-frl",wval,BOOLC_YN(cfg->trn_frl));
+    fprintf(stderr,"%*s %*c\n",wkey,"trn-norand",wval,BOOLC_YN(cfg->no_rand));
 
 }
 
@@ -601,6 +622,7 @@ static app_cfg_t *s_app_cfg_new()
         instance->trn_vdr=0.0;
         instance->trn_fren=true;
         instance->trn_frl=true;
+        instance->no_rand=false;
 
         instance->res.pt = new poseT;
         instance->res.mle = new poseT;
@@ -968,7 +990,7 @@ int app_main(app_cfg_t *cfg, uint16_t *r_count, uint64_t *r_stat)
     uint64_t eflags=0x0;
 
     // Create and initialize the TRNCient instance
-    cfg->trncli = new TrnClient(cfg->log_id, cfg->trn_host, cfg->trn_port);
+    cfg->trncli = new TrnClient(cfg->trn_host, cfg->trn_port, cfg->no_rand);
     cfg->trncli->setVerbose(cfg->verbose);
 
     // Load TRN configuration from config (or use defaults if NULL)

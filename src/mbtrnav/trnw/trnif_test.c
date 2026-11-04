@@ -66,12 +66,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <ctype.h>
 
 #include "netif.h"
 #include "trn_msg.h"
 #include "trnw.h"
 #include "trnif_msg.h"
 #include "trnif_proto.h"
+#include "parse_utils.h"
 
 #include "mframe.h"
 
@@ -113,6 +115,7 @@ typedef struct app_cfg_s{
     char *cfg;
     char *particles;
     char *logdir;
+    bool no_rand;
 }app_cfg_t;
 
 bool g_interrupt=false;
@@ -144,6 +147,7 @@ static void s_show_help()
     "--cfg=s        : config file        [*]\n"
     "--particles=s  : particles file     [*]\n"
     "--logdir=s     : logdir prefix      [*]\n"
+    "--norand=b     : set TRN NORAND flag\n"
     "[*] - required\n"
     "\n";
     printf("%s",help_message);
@@ -175,6 +179,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         {"cfg", required_argument, NULL, 0},
         {"particles", required_argument, NULL, 0},
         {"logdir", required_argument, NULL, 0},
+        {"norand", required_argument, NULL, 0},
         {NULL, 0, NULL, 0}};
 
     // process argument list
@@ -196,7 +201,15 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 else if (strcmp("version", options[option_index].name) == 0) {
                     version = true;
                 }
-
+                // norand
+                else if (strcmp("norand", options[option_index].name) == 0) {
+                    bool nropt = false;
+                    if(pu_parse_bool(&nropt, optarg)) {
+                        cfg->no_rand = nropt;
+                    } else {
+                        fprintf(stderr, "%s:%d invalid value %s\n", __func__, __LINE__, optarg);
+                    }
+                }
                 // host
                 else if (strcmp("host", options[option_index].name) == 0) {
 
@@ -480,7 +493,7 @@ static int s_app_main(app_cfg_t *cfg)
                                    NULL,
                                    NULL);
 
-        trn_config_t *trn_cfg = trncfg_new(cfg->host,
+        trn_config_t *trn_cfg = trncfg_rnew(cfg->host,
                                            cfg->port,
                                            false,
                                            0,
@@ -500,7 +513,8 @@ static int s_app_main(app_cfg_t *cfg)
                                            TRN_MAX_NCOV_DFL,
                                            TRN_MAX_NERR_DFL,
                                            TRN_MAX_ECOV_DFL,
-                                           TRN_MAX_EERR_DFL
+                                           TRN_MAX_EERR_DFL,
+                                           cfg->no_rand
                                            );
         if(NULL!=netif && NULL!=trn_cfg){
             wtnav_t *trn = wtnav_new(trn_cfg);

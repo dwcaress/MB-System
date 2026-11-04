@@ -153,6 +153,7 @@ typedef struct trn_config_s{
     double max_northing_err;
     double max_easting_cov;
     double max_easting_err;
+    bool no_rand;
 }trn_config_t;
 
 /////////////////////////
@@ -163,27 +164,53 @@ extern "C" {
 #endif
     // TRN config API
     trn_config_t *trncfg_dnew();
-    trn_config_t *trncfg_new(char *host, int port,
-                             bool use_proj,
-                             int projection,
-                             char *trn_crs,
-                             long int utm_zone,
-                             int map_type,
-                             int sensor_type,
-                             int filter_type,
-                             int filter_grade,
-                             int filter_reinit,
-                             int mod_weight,
-                             char *map_file,
-                             char *cfg_file,
-                             char *particles_file,
-                             char *logdir,
-                             trnw_oflags_t oflags,
-                             double max_northing_cov,
-                             double max_northing_err,
-                             double max_easting_cov,
-                             double max_easting_err
-                             );
+
+// deprecated; maintained for backwards compatibility
+// new applications should use trncfg_rnew
+trn_config_t *trncfg_new(char *host, int port,
+                         bool use_proj,
+                         int projection,
+                         char *trn_crs,
+                         long int utm_zone,
+                         int map_type,
+                         int sensor_type,
+                         int filter_type,
+                         int filter_grade,
+                         int filter_reinit,
+                         int mod_weight,
+                         char *map_file,
+                         char *cfg_file,
+                         char *particles_file,
+                         char *logdir,
+                         trnw_oflags_t oflags,
+                         double max_northing_cov,
+                         double max_northing_err,
+                         double max_easting_cov,
+                         double max_easting_err
+                         );
+
+trn_config_t *trncfg_rnew(char *host, int port,
+                         bool use_proj,
+                         int projection,
+                         char *trn_crs,
+                         long int utm_zone,
+                         int map_type,
+                         int sensor_type,
+                         int filter_type,
+                         int filter_grade,
+                         int filter_reinit,
+                         int mod_weight,
+                         char *map_file,
+                         char *cfg_file,
+                         char *particles_file,
+                         char *logdir,
+                         trnw_oflags_t oflags,
+                         double max_northing_cov,
+                         double max_northing_err,
+                         double max_easting_cov,
+                         double max_easting_err,
+                         bool no_rand
+                         );
 
     void trncfg_destroy(trn_config_t **pself);
     void trncfg_show(trn_config_t *obj, bool verbose, int indent);

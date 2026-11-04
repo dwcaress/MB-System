@@ -159,7 +159,7 @@ wtnav_t *wtnav_new(trn_config_t *cfg)
     wtnav_t *m = (wtnav_t *)malloc(sizeof(*m));
     if(NULL!=m){
         memset(m,0,sizeof(*m));
-        TerrainNav *obj = new TerrainNav(cfg->map_file, cfg->cfg_file, cfg->particles_file, cfg->filter_type, cfg->map_type, cfg->log_dir);
+        TerrainNav *obj = new TerrainNav(cfg->map_file, cfg->cfg_file, cfg->particles_file, cfg->filter_type, cfg->map_type, cfg->log_dir, cfg->no_rand);
         m->obj = obj;
         if(NULL!=obj){
             obj->setModifiedWeighting(cfg->mod_weight);
@@ -886,7 +886,7 @@ void commst_initialize(wtnav_t *self, wcommst_t *msg)
 
             if(errors==0){
                 fprintf(stderr,"%s : allocating new wtnav TRN\n",__FUNCTION__);
-                TerrainNav *trn_new = new TerrainNav(mapname, cfgname, particlename, ftype, mtype, ct->logname);
+                TerrainNav *trn_new = new TerrainNav(mapname, cfgname, particlename, ftype, mtype, ct->logname, ct->no_rand);
                 if(NULL!=trn_new){
                    fprintf(stderr,"%s : OK replacing wtnav trn[%p] trn->obj[%p] w/ trn_new[%p]\n",__FUNCTION__,self,self->obj,trn_new);
 
@@ -1677,9 +1677,13 @@ int32_t trnw_init_msg(char **dest, trn_config_t *cfg)
 
         // filter type and map type encoded in single integer
         int param = cfg->map_type*10+cfg->filter_type;
-        commsT ct(TRN_INIT, param, cfg->map_file,cfg->cfg_file,cfg->particles_file,cfg->log_dir);
+        commsT ct(TRN_INIT, param, cfg->map_file, cfg->cfg_file, cfg->particles_file, cfg->log_dir, cfg->no_rand);
 
-        ct.serialize(msg,TRN_MSG_SIZE);
+        if(ct.serialize(msg,TRN_MSG_SIZE) <= 0) {
+            fprintf(stderr,"%s:%d: ERR - commsT serialize failed\n",__func__,__LINE__);
+            free(msg);
+            return -1;
+        }
         *dest=msg;
         retval=TRN_MSG_SIZE;
     }
@@ -1846,10 +1850,13 @@ trn_config_t *trncfg_dnew()
         instance->filter_type=TRNW_TRN_FILTER_TYPE_DFL;
         instance->map_type=TRNW_TRN_MAP_TYPE_DFL;
         instance->sensor_type=TRN_SENSOR_MB;
+        instance->no_rand=false;
     }
     return instance;
 }
 
+// deprecated; maintained for backwards compatibility
+// new applications should use trncfg_rnew
 trn_config_t *trncfg_new(char *host,int port,
                          bool use_proj,
                          int projection, char *crs,
@@ -1868,6 +1875,49 @@ trn_config_t *trncfg_new(char *host,int port,
                          double max_northing_err,
                          double max_easting_cov,
                          double max_easting_err
+                         )
+{
+    return trncfg_rnew(host, port,
+                       use_proj,
+                       projection, crs,
+                       utm_zone, map_type,
+                       sensor_type,
+                       filter_type,
+                       filter_grade,
+                       filter_reinit,
+                       mod_weight,
+                       map_file,
+                       cfg_file,
+                       particles_file,
+                       log_dir,
+                       oflags,
+                       max_northing_cov,
+                       max_northing_err,
+                       max_easting_cov,
+                       max_easting_err,
+                       false
+                       );
+}
+
+trn_config_t *trncfg_rnew(char *host,int port,
+                         bool use_proj,
+                         int projection, char *crs,
+                         long int utm_zone, int map_type,
+                         int sensor_type,
+                         int filter_type,
+                         int filter_grade,
+                         int filter_reinit,
+                         int mod_weight,
+                         char *map_file,
+                         char *cfg_file,
+                         char *particles_file,
+                         char *log_dir,
+                         trnw_oflags_t oflags,
+                         double max_northing_cov,
+                         double max_northing_err,
+                         double max_easting_cov,
+                         double max_easting_err,
+                         bool no_rand
                          )
 {
     trn_config_t *instance = (trn_config_t *)calloc(1,sizeof(*instance));
@@ -1894,6 +1944,7 @@ trn_config_t *trncfg_new(char *host,int port,
         instance->max_northing_err = max_northing_err;
         instance->max_easting_cov = max_easting_cov;
         instance->max_easting_err = max_easting_err;
+        instance->no_rand = no_rand;
    }
     return instance;
 }
@@ -1944,6 +1995,7 @@ void trncfg_show(trn_config_t *obj, bool verbose, int indent)
         fprintf(stderr,"%*s[maxNerr    %10s%.3lf]\n",indent,(indent>0?" ":""), "",obj->max_northing_err);
         fprintf(stderr,"%*s[maxEcov    %10s%.3lf]\n",indent,(indent>0?" ":""), "",obj->max_easting_cov);
         fprintf(stderr,"%*s[maxEerr    %10s%.3lf]\n",indent,(indent>0?" ":""), "",obj->max_easting_err);
+        fprintf(stderr,"%*s[no_rand    %10c]\n",indent,(indent>0?" ":""), (obj->no_rand ? 'Y' : 'N'));
     }
 }
 

@@ -87,8 +87,12 @@ TrnClient::TrnClient()
 
 }
 
-TrnClient::TrnClient(const char *host, int port)
-: TerrainNavClient()
+TrnClient::TrnClient(bool no_rand)
+:TerrainNavClient(no_rand)
+{}
+
+TrnClient::TrnClient(const char *host, int port, bool no_rand)
+: TerrainNavClient(no_rand)
 , verbose(0)
 , _quit_ref(NULL)
 , _cfg_file(NULL)
@@ -281,13 +285,14 @@ void TrnClient::initServer()
 
     // Use basenames (no pathnames) of files and folders when connecting
     // to trn-server. Let the server find the files in its environment.
-    fprintf(stderr,"%s:%d - server initializating...\n", __func__, __LINE__);
+    fprintf(stderr,"%s:%d - server initializating...norand:%c\n", __func__, __LINE__,(_no_rand ? 'Y' : 'N'));
 
     commsT init(TRN_INIT, param,
                 TRNUtils::basename(_trn_attr.mapName),
                 TRNUtils::basename(_trn_attr.vehicleCfgName),
                 TRNUtils::basename(_trn_attr.particlesName),
-                TRNUtils::basename(_sessionPrefix)
+                TRNUtils::basename(_sessionPrefix),
+                _no_rand
                 );
 
     _initialized = false;

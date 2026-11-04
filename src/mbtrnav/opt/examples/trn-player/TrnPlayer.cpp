@@ -94,9 +94,9 @@ int TrnPlayer::configure(int argc, char **argv)
     // configure a TRN instance
     try {
         if(ctx->is_particles_set == 0) {
-            trn = new TerrainNav(ctx->mpath, ctx->vpath, ctx->filter_type, ctx->map_type, ctx->odir);
+            trn = new TerrainNav(ctx->mpath, ctx->vpath, ctx->filter_type, ctx->map_type, ctx->odir, ctx->no_rand);
         } else {
-            trn = new TerrainNav(ctx->mpath, ctx->vpath, ctx->ppath, ctx->filter_type, ctx->map_type, ctx->odir);
+            trn = new TerrainNav(ctx->mpath, ctx->vpath, ctx->ppath, ctx->filter_type, ctx->map_type, ctx->odir, ctx->no_rand);
         }
     } catch(...) {
         fprintf(stderr, "%s ERR TerrainNav failed; check input directories and file names; use -v\n", __func__);

@@ -59,8 +59,9 @@ class TrnClient : public TerrainNavClient {
 public:
     
     TrnClient();
+    explicit TrnClient(bool no_rand);
 
-    explicit TrnClient(const char *host, int port=0);
+    explicit TrnClient(const char *host, int port=0, bool no_rand=false);
 
     TrnClient(const TrnClient& other);
 
