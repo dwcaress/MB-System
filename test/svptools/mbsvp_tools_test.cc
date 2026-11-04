@@ -59,7 +59,7 @@ class Profile {
 bool Complete(Profile *input) {
   char message[MBSVP_MESSAGE_SIZE] = "";
   int error = MB_ERROR_NO_ERROR;
-  return mbsvp_profile_complete(0, &input->raw, MBSVP_TARGET_DEPTH, &input->p, message, &error) == MB_SUCCESS;
+  return mbsvp_profile_complete(0, &input->raw, MBSVP_TARGET_DEPTH, MBSVP_LEROY, 0.0, &input->p, nullptr, message, &error) == MB_SUCCESS;
 }
 
 TEST(ProfileTest, NanRemovedBeforeJoin) {
@@ -72,22 +72,44 @@ TEST(ProfileTest, NanRemovedBeforeJoin) {
   EXPECT_THAT(primary.speed(), testing::ElementsAre(1500, 1510, 1520, 1530));
 }
 
-TEST(ProfileTest, LinearEndpoint) {
-  std::vector<double> z, c;
-  for (double depth = 0; depth < 6000; depth += 1000) {
-    z.push_back(depth);
-    c.push_back(1480 + .017 * depth);
-  }
-  Profile profile(z, c);
-  ASSERT_TRUE(Complete(&profile));
-  EXPECT_EQ(11000, profile.depth().back());
-  EXPECT_NEAR(1667, profile.speed().back(), 1e-9);
+TEST(SoundSpeedTest, Formulas) {
+  EXPECT_NEAR(1573.419024, mbsvp_speed_chen(10.0, 35.0, 500.0), 1e-6);
+  EXPECT_NEAR(1574.747, mbsvp_speed_leroy(10.0, 35.0, 5000.0, 45.0), 1e-6);
+  EXPECT_NEAR(510.10314, mbsvp_depth_to_pressure(5000.0, 45.0), 1e-5);
+  EXPECT_NEAR(3.255976e-4, mbsvp_adiabatic_lapse(40.0, 40.0, 10000.0), 1e-9);  // check value of Fofonoff and Millard 1983
 }
 
-TEST(ProfileTest, TrendUsesLast2000MetersOnly) {
-  Profile profile({0, 1000, 2000, 3000, 4000, 5000}, {1200, 1250, 1300, 1530, 1540, 1550});
+TEST(SoundSpeedTest, PhysicsTail) {
+  const double depth[3] = {6000.0, 8000.0, 11000.0};
+  double speed[3];
+  char message[MBSVP_MESSAGE_SIZE] = "";
+  int error = MB_ERROR_NO_ERROR;
+  ASSERT_EQ(MB_SUCCESS, mbsvp_physics_tail(0, MBSVP_LEROY, 5500.0, 1548.15, -23.5, 3, depth, speed, message, &error));
+  EXPECT_NEAR(1557.512442, speed[0], 1e-6);
+  EXPECT_NEAR(1595.46944, speed[1], 1e-6);
+  EXPECT_NEAR(1652.767904, speed[2], 1e-6);
+  ASSERT_EQ(MB_SUCCESS, mbsvp_physics_tail(0, MBSVP_CHEN, 4000.0, 1530.0, 40.0, 3, depth, speed, message, &error));
+  EXPECT_NEAR(1566.98355, speed[0], 1e-6);
+  EXPECT_NEAR(1662.949932, speed[2], 1e-6);
+}
+
+TEST(ProfileTest, ThermoclineDoesNotReachTheTail) {
+  // the trend of this shallow profile would give a negative speed at 11000 m
+  Profile profile({0, 10, 20, 30}, {1520, 1515, 1510, 1505});
   ASSERT_TRUE(Complete(&profile));
-  EXPECT_NEAR(1610, profile.speed().back(), 1e-9);
+  EXPECT_EQ(11000, profile.depth().back());
+  EXPECT_GT(profile.speed().back(), 1600);
+  EXPECT_LT(profile.speed().back(), 1720);
+  // whole multiples of the step between the end and the target
+  EXPECT_EQ(500, profile.depth()[4]);
+  EXPECT_EQ(10500, profile.depth()[profile.p.n - 2]);
+}
+
+TEST(ProfileTest, ImpossibleStartFails) {
+  Profile profile({0, 1000}, {1500, 9000});
+  char message[MBSVP_MESSAGE_SIZE] = "";
+  int error = MB_ERROR_NO_ERROR;
+  EXPECT_EQ(MB_FAILURE, mbsvp_profile_complete(0, &profile.raw, MBSVP_TARGET_DEPTH, MBSVP_LEROY, 0.0, &profile.p, nullptr, message, &error));
 }
 
 TEST(ProfileTest, Chain) {
@@ -107,7 +129,7 @@ TEST(ProfileTest, Chain) {
   for (auto &item : observed) {
     struct mbsvp_profile complete;
     mbsvp_profile_init(&complete);
-    ASSERT_EQ(MB_SUCCESS, mbsvp_profile_complete(0, &item, MBSVP_TARGET_DEPTH, &complete, message, &error));
+    ASSERT_EQ(MB_SUCCESS, mbsvp_profile_complete(0, &item, MBSVP_TARGET_DEPTH, MBSVP_LEROY, 0.0, &complete, nullptr, message, &error));
     EXPECT_EQ(11000, complete.depth[complete.n - 1]);
     mbsvp_profile_free(0, &complete, &error);
     mbsvp_profile_free(0, &item, &error);
@@ -160,9 +182,10 @@ TEST(ProfileTest, DuplicateDepthsRejected) {
   EXPECT_STREQ("Duplicate depths in profile", message);
 }
 
-TEST(ProfileTest, SparseTailRejected) {
+TEST(ProfileTest, SparseSamplesComplete) {
   Profile profile({0, 1000, 5000}, {1500, 1510, 1550});
-  EXPECT_FALSE(Complete(&profile));
+  ASSERT_TRUE(Complete(&profile));
+  EXPECT_EQ(11000, profile.depth().back());
 }
 
 TEST(ProfileTest, AllNanRejected) {
@@ -190,7 +213,7 @@ TEST(ProfileTest, MonthlyUsesAnnualWithoutSeasonal) {
     mbsvp_profile_free(0, &item, &error);
 }
 
-TEST(ProfileTest, NoAnnualUsesOwnTrend) {
+TEST(ProfileTest, NoAnnualCompletesFromItsOwnEnd) {
   Profile monthly({0, 1000, 2000}, {1500, 1510, 1520});
   const struct mbsvp_profile *raw[MBSVP_KINDS] = {nullptr, nullptr, &monthly.raw};
   char message[MBSVP_MESSAGE_SIZE];
@@ -199,8 +222,10 @@ TEST(ProfileTest, NoAnnualUsesOwnTrend) {
   for (auto &item : observed)
     mbsvp_profile_init(&item);
   ASSERT_EQ(MB_SUCCESS, mbsvp_profile_chain(0, raw, observed, message, &error));
-  ASSERT_EQ(MB_SUCCESS, mbsvp_profile_complete(0, &observed[MBSVP_MONTHLY], MBSVP_TARGET_DEPTH, &monthly.p, message, &error));
-  EXPECT_NEAR(1610, monthly.speed().back(), 1e-9);
+  double from = 0.0;
+  ASSERT_EQ(MB_SUCCESS, mbsvp_profile_complete(0, &observed[MBSVP_MONTHLY], MBSVP_TARGET_DEPTH, MBSVP_LEROY, 0.0, &monthly.p, &from, message, &error));
+  EXPECT_EQ(2000, from);
+  EXPECT_EQ(11000, monthly.depth().back());
   for (auto &item : observed)
     mbsvp_profile_free(0, &item, &error);
 }
@@ -1014,6 +1039,178 @@ TEST_F(UtilTest, CommitFile) {
   error = MB_ERROR_NO_ERROR;
   ASSERT_EQ(MB_SUCCESS, mbsvp_commit_file(0, temporary.c_str(), target.c_str(), true, &error));
   EXPECT_EQ("three", ReadAll(target));
+}
+
+/*--------------------------------------------------------------------*/
+/* Neighbours: a grid of four depth levels, one speed per cell and level. */
+class NeighbourTest : public TempDirTest {
+ protected:
+  void Write(const std::vector<float> &lat, const std::vector<float> &lon, const std::vector<float> &depth,
+             float (*value)(float, float, float)) {
+    int ncid, dlat, dlon, ddepth, vlat, vlon, vdepth, v0, v1;
+    ASSERT_EQ(NC_NOERR, nc_create(Path("n.nc").c_str(), NC_CLOBBER, &ncid));
+    nc_def_dim(ncid, "lat", lat.size(), &dlat);
+    nc_def_dim(ncid, "lon", lon.size(), &dlon);
+    nc_def_dim(ncid, "depth", depth.size(), &ddepth);
+    nc_def_var(ncid, "lat", NC_FLOAT, 1, &dlat, &vlat);
+    nc_def_var(ncid, "lon", NC_FLOAT, 1, &dlon, &vlon);
+    nc_def_var(ncid, "depth", NC_FLOAT, 1, &ddepth, &vdepth);
+    const int dims[3] = {ddepth, dlat, dlon};
+    nc_def_var(ncid, "v_an_chen", NC_FLOAT, 3, dims, &v0);
+    nc_def_var(ncid, "v_an_leroy", NC_FLOAT, 3, dims, &v1);
+    const float fill = -999.0f;
+    nc_put_att_float(ncid, v0, "_FillValue", NC_FLOAT, 1, &fill);
+    nc_put_att_float(ncid, v1, "_FillValue", NC_FLOAT, 1, &fill);
+    nc_enddef(ncid);
+    nc_put_var_float(ncid, vlat, lat.data());
+    nc_put_var_float(ncid, vlon, lon.data());
+    nc_put_var_float(ncid, vdepth, depth.data());
+    std::vector<float> data;
+    for (float z : depth)
+      for (float y : lat)
+        for (float x : lon)
+          data.push_back(value(y, x, z));
+    nc_put_var_float(ncid, v0, data.data());
+    nc_put_var_float(ncid, v1, data.data());
+    nc_close(ncid);
+    const bool want[2] = {false, true};
+    char message[MBSVP_MESSAGE_SIZE] = "";
+    int error = MB_ERROR_NO_ERROR;
+    mbsvp_atlas_init(&atlas);
+    ASSERT_EQ(MB_SUCCESS, mbsvp_atlas_open(0, Path("n.nc").c_str(), want, &atlas, message, &error)) << message;
+  }
+  void TearDown() override {
+    int error = MB_ERROR_NO_ERROR;
+    mbsvp_profile_free(0, &extended, &error);
+    mbsvp_atlas_close(0, &atlas, &error);
+    TempDirTest::TearDown();
+  }
+  /* extend the column of one cell */
+  void Extend(int lat_index, int lon_index) {
+    std::vector<double> speed(atlas.ndepth);
+    char message[MBSVP_MESSAGE_SIZE] = "";
+    int error = MB_ERROR_NO_ERROR;
+    ASSERT_EQ(MB_SUCCESS, mbsvp_atlas_read_cell(0, &atlas, 1, lat_index, lon_index, speed.data(), message, &error));
+    const struct mbsvp_profile raw = {atlas.ndepth, atlas.depth, speed.data()};
+    mbsvp_profile_init(&extended);
+    ASSERT_EQ(MB_SUCCESS, mbsvp_atlas_extend(0, &atlas, 1, lat_index, lon_index, &raw, &extended, &used, message, &error)) << message;
+  }
+  struct mbsvp_atlas atlas;
+  struct mbsvp_profile extended{};
+  bool used = false;
+};
+
+TEST_F(NeighbourTest, TakesDeeperNeighbourWithFadingOffset) {
+  // cell at lon 0.5 ends at 1000 m and is 5 m/s faster than its neighbour there
+  Write({0.5f}, {0.5f, 1.5f}, {0, 1000, 2000, 3000}, [](float, float x, float z) -> float {
+    if (x < 1 && z > 1000)
+      return -999.0f;
+    return (x < 1 ? 1505.0f : 1500.0f) + z / 100;
+  });
+  Extend(0, 0);
+  EXPECT_TRUE(used);
+  ASSERT_EQ(4, extended.n);
+  EXPECT_EQ(1505 + 10, extended.speed[1]);
+  EXPECT_NEAR(1500 + 20 + 5 * exp(-1.0), extended.speed[2], 1e-3);
+  EXPECT_NEAR(1500 + 30 + 5 * exp(-2.0), extended.speed[3], 1e-3);
+}
+
+TEST_F(NeighbourTest, RefusesOtherWaterMass) {
+  // 25 m/s apart at the join, as across a sill
+  Write({0.5f}, {0.5f, 1.5f}, {0, 1000, 2000, 3000}, [](float, float x, float z) -> float {
+    if (x < 1 && z > 1000)
+      return -999.0f;
+    return (x < 1 ? 1525.0f : 1500.0f) + z / 100;
+  });
+  Extend(0, 0);
+  EXPECT_FALSE(used);
+  EXPECT_EQ(2, extended.n);
+}
+
+TEST_F(NeighbourTest, StepsThroughEverDeeperCells) {
+  Write({0.5f}, {0.5f, 1.5f, 2.5f}, {0, 1000, 2000, 3000}, [](float, float x, float z) -> float {
+    if (x < 1 && z > 1000)
+      return -999.0f;
+    if (x < 2 && z > 2000)
+      return -999.0f;
+    return 1500.0f + z / 100;
+  });
+  Extend(0, 0);
+  EXPECT_TRUE(used);
+  ASSERT_EQ(4, extended.n);
+  EXPECT_NEAR(1530, extended.speed[3], 1e-3);
+}
+
+TEST_F(NeighbourTest, CrossesTheSeamOfAGlobalGrid) {
+  std::vector<float> lon;
+  for (int i = 0; i < 360; i++)
+    lon.push_back(-179.5f + i);
+  Write({0.5f}, lon, {0, 1000, 2000, 3000}, [](float, float x, float z) -> float {
+    if (z > 1000 && x != 179.5f)
+      return -999.0f;
+    return 1500.0f + z / 100;
+  });
+  Extend(0, 0);  // -179.5, next to 179.5 across the dateline
+  EXPECT_TRUE(used);
+  EXPECT_EQ(4, extended.n);
+}
+
+TEST_F(NeighbourTest, RadiusLimitsTheSearchAndCroppedGridsDoNotWrap) {
+  std::vector<float> lon;
+  for (int i = 0; i < 12; i++)
+    lon.push_back(0.5f + i);
+  Write({0.5f}, lon, {0, 1000, 2000, 3000}, [](float, float x, float z) -> float {
+    if (z > 1000 && x != 11.5f)
+      return -999.0f;
+    return 1500.0f + z / 100;
+  });
+  Extend(0, 0);  // 11 cells away, more than 8 degrees
+  EXPECT_FALSE(used);
+  EXPECT_EQ(2, extended.n);
+}
+
+TEST(PositionBoxTest, IgnoresPositionsFarFromTheOthers) {
+  std::vector<double> lon(100, -11.4), lat(100, 36.7);
+  for (int i = 0; i < 100; i++) {
+    lon[i] += i * 1e-3;
+    lat[i] += i * 1e-3;
+  }
+  lon[0] = 0.0039;
+  lat[0] = -0.0019;
+  lon[1] = 0.0040;
+  lat[1] = -0.0018;
+  double box[4];
+  int noutliers = 0;
+  EXPECT_EQ(98, mbsvp_position_box(lon.data(), lat.data(), 100, 0.0, box, &noutliers));
+  EXPECT_EQ(2, noutliers);
+  EXPECT_NEAR(-11.398, box[0], 1e-9);
+  EXPECT_NEAR(-11.301, box[1], 1e-9);
+  EXPECT_NEAR(36.702, box[2], 1e-9);
+  EXPECT_NEAR(36.799, box[3], 1e-9);
+}
+
+TEST(PositionBoxTest, KeepsALongLineAndAddsTheMargin) {
+  std::vector<double> lon, lat;
+  for (int i = 0; i < 500; i++) {
+    lon.push_back(-40.0 + i * 0.04);
+    lat.push_back(0.0);
+  }
+  double box[4];
+  int noutliers = 1;
+  EXPECT_EQ(500, mbsvp_position_box(lon.data(), lat.data(), 500, 11112.0, box, &noutliers));
+  EXPECT_EQ(0, noutliers);
+  EXPECT_NEAR(-40.1, box[0], 1e-6);
+  EXPECT_NEAR(0.1, box[3], 1e-6);
+}
+
+TEST(PositionBoxTest, HandlesTheDateline) {
+  std::vector<double> lon = {179.9, 179.95, -179.95, -179.9, 179.8, -179.8};
+  std::vector<double> lat(6, 10.0);
+  double box[4];
+  int noutliers = 1;
+  EXPECT_EQ(6, mbsvp_position_box(lon.data(), lat.data(), 6, 0.0, box, &noutliers));
+  EXPECT_EQ(0, noutliers);
+  EXPECT_NEAR(0.4, box[1] - box[0], 1e-9);
 }
 
 }  // namespace

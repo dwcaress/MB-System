@@ -28,6 +28,14 @@
  * profile files. The grids hold sound speed already computed from the
  * atlas temperature and salinity, in the variables v_an_chen and
  * v_an_leroy. WOA18 and WOA23 profiles are never blended.
+ *
+ * A profile that stops short of the target depth continues through nearby
+ * deeper cells of the same grid, stepping to deeper ones until none is in
+ * reach. The shape of a neighbour is used, with an offset that fades with
+ * depth so that nothing jumps at the join. A neighbour that differs a lot at
+ * the join lies in another water mass, such as across a sill, and is refused.
+ * The rest of the tail is computed from pressure (mbsvp_soundspeed.c). Each cell
+ * is completed by itself and the completed cells are then averaged.
  */
 
 #include <math.h>
@@ -103,6 +111,9 @@ void mbsvp_grid_init(struct mbsvp_grid *grid) {
   grid->depth = NULL;
   grid->chen = NULL;
   grid->leroy = NULL;
+  grid->ncells = 0;
+  grid->cell_lat = NULL;
+  grid->cell_lon = NULL;
   mbsvp_location_init(&grid->location);
 }
 /*--------------------------------------------------------------------*/
@@ -113,6 +124,11 @@ int mbsvp_grid_free(int verbose, struct mbsvp_grid *grid, int *error) {
     mb_freed(verbose, __FILE__, __LINE__, (void **)&grid->chen, error);
   if (grid->leroy != NULL)
     mb_freed(verbose, __FILE__, __LINE__, (void **)&grid->leroy, error);
+  if (grid->cell_lat != NULL)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&grid->cell_lat, error);
+  if (grid->cell_lon != NULL)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&grid->cell_lon, error);
+  grid->ncells = 0;
   grid->ndepth = 0;
   return MB_SUCCESS;
 }
@@ -529,7 +545,12 @@ static int mbsvp_nearest_cell(int verbose, int ncid, const struct mbsvp_variable
       grid->location.longitude = lon->value[best_lon[c]];
       grid->location.latitude = lat->value[best_lat[c]];
       strcpy(grid->location.method, "nearest");
-      (void)verbose;
+      if (mb_mallocd(verbose, __FILE__, __LINE__, sizeof(int), (void **)&grid->cell_lat, error) != MB_SUCCESS ||
+          mb_mallocd(verbose, __FILE__, __LINE__, sizeof(int), (void **)&grid->cell_lon, error) != MB_SUCCESS)
+        return MB_FAILURE;
+      grid->cell_lat[0] = lat->index[best_lat[c]];
+      grid->cell_lon[0] = lon->index[best_lon[c]];
+      grid->ncells = 1;
       return MB_SUCCESS;
     }
   }
@@ -647,6 +668,21 @@ int mbsvp_woa_read_grid(int verbose, const char *path, const struct mbsvp_survey
       location->grid_lat = lat_b - lat_a;
       location->grid_lon = lon_b - lon_a;
       strcpy(location->representative, "selected_grid_axis_mean");
+      const int ncells = (lat_b - lat_a) * (lon_b - lon_a);
+      status = mb_mallocd(verbose, __FILE__, __LINE__, ncells * sizeof(int), (void **)&grid->cell_lat, error);
+      if (status == MB_SUCCESS)
+        status = mb_mallocd(verbose, __FILE__, __LINE__, ncells * sizeof(int), (void **)&grid->cell_lon, error);
+      if (status == MB_SUCCESS) {
+        int k = 0;
+        for (int i = lat_a; i < lat_b; i++) {
+          for (int j = lon_a; j < lon_b; j++) {
+            grid->cell_lat[k] = lat.index[i];
+            grid->cell_lon[k] = lon.index[j];
+            k++;
+          }
+        }
+        grid->ncells = ncells;
+      }
     }
   }
 
@@ -687,6 +723,25 @@ int mbsvp_atlas_close(int verbose, struct mbsvp_atlas *atlas, int *error) {
     mb_freed(verbose, __FILE__, __LINE__, (void **)&atlas->depth, error);
   if (atlas->buffer != NULL)
     mb_freed(verbose, __FILE__, __LINE__, (void **)&atlas->buffer, error);
+  if (atlas->lat_order != NULL)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&atlas->lat_order, error);
+  if (atlas->lon_order != NULL)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&atlas->lon_order, error);
+  if (atlas->lat_rank != NULL)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&atlas->lat_rank, error);
+  if (atlas->lon_rank != NULL)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&atlas->lon_rank, error);
+  for (int v = 0; v < 2; v++) {
+    if (atlas->columns[v] != NULL)
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&atlas->columns[v], error);
+    if (atlas->deepest[v] != NULL)
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&atlas->deepest[v], error);
+  }
+  for (int i = 0; i < atlas->npool; i++)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&atlas->pool[i], error);
+  if (atlas->pool != NULL)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&atlas->pool, error);
+  atlas->npool = 0;
   return MB_SUCCESS;
 }
 /*--------------------------------------------------------------------*/
@@ -761,6 +816,235 @@ int mbsvp_atlas_read_cell(int verbose, const struct mbsvp_atlas *atlas, int vari
   return MB_SUCCESS;
 }
 /*--------------------------------------------------------------------*/
+#define MBSVP_POOL_COLUMNS 1024
+/* Axes in increasing order, for rings of cells around a cell. */
+static int mbsvp_atlas_prepare(int verbose, struct mbsvp_atlas *atlas, int variable, int *error) {
+  if (atlas->lat_order == NULL) {
+    if (mb_mallocd(verbose, __FILE__, __LINE__, atlas->nlat * sizeof(int), (void **)&atlas->lat_order, error) != MB_SUCCESS ||
+        mb_mallocd(verbose, __FILE__, __LINE__, atlas->nlon * sizeof(int), (void **)&atlas->lon_order, error) != MB_SUCCESS ||
+        mb_mallocd(verbose, __FILE__, __LINE__, atlas->nlat * sizeof(int), (void **)&atlas->lat_rank, error) != MB_SUCCESS ||
+        mb_mallocd(verbose, __FILE__, __LINE__, atlas->nlon * sizeof(int), (void **)&atlas->lon_rank, error) != MB_SUCCESS)
+      return MB_FAILURE;
+    for (int pass = 0; pass < 2; pass++) {
+      const double *axis = pass == 0 ? atlas->lat : atlas->lon;
+      const int n = pass == 0 ? atlas->nlat : atlas->nlon;
+      int *order = pass == 0 ? atlas->lat_order : atlas->lon_order;
+      int *rank = pass == 0 ? atlas->lat_rank : atlas->lon_rank;
+      for (int i = 0; i < n; i++) {
+        int j = i - 1;
+        while (j >= 0 && axis[order[j]] > axis[i]) {
+          order[j + 1] = order[j];
+          j--;
+        }
+        order[j + 1] = i;
+      }
+      for (int i = 0; i < n; i++)
+        rank[order[i]] = i;
+    }
+    const double step = atlas->nlat > 1 ? fabs(atlas->lat[atlas->lat_order[1]] - atlas->lat[atlas->lat_order[0]]) : 1.0;
+    atlas->radius = step > 0.0 ? (int)ceil(MBSVP_NEIGHBOUR_RADIUS / step) : 1;
+    const double lonstep = atlas->nlon > 1 ? fabs(atlas->lon[atlas->lon_order[1]] - atlas->lon[atlas->lon_order[0]]) : 360.0;
+    atlas->wraps = atlas->lon[atlas->lon_order[atlas->nlon - 1]] - atlas->lon[atlas->lon_order[0]] + 1.5 * lonstep >= 360.0;
+  }
+  if (atlas->columns[variable] == NULL) {
+    const size_t cells = (size_t)atlas->nlat * atlas->nlon;
+    if (mb_mallocd(verbose, __FILE__, __LINE__, cells * sizeof(double *), (void **)&atlas->columns[variable], error) != MB_SUCCESS ||
+        mb_mallocd(verbose, __FILE__, __LINE__, cells * sizeof(double), (void **)&atlas->deepest[variable], error) != MB_SUCCESS)
+      return MB_FAILURE;
+    memset(atlas->columns[variable], 0, cells * sizeof(double *));
+  }
+  return MB_SUCCESS;
+}
+/*--------------------------------------------------------------------*/
+/* The sound speed column of a cell, kept for later, and its deepest valid
+   depth, negative when the column has no valid sample. */
+static int mbsvp_atlas_column(int verbose, struct mbsvp_atlas *atlas, int variable, int lat_index, int lon_index, const double **column,
+                              double *deepest, char *message, int *error) {
+  const size_t cell = (size_t)lat_index * atlas->nlon + lon_index;
+  if (atlas->columns[variable][cell] == NULL) {
+    if (atlas->npool == 0 || atlas->pool_used >= MBSVP_POOL_COLUMNS) {
+      if (mb_reallocd(verbose, __FILE__, __LINE__, (atlas->npool + 1) * sizeof(double *), (void **)&atlas->pool, error) != MB_SUCCESS)
+        return MB_FAILURE;
+      atlas->pool[atlas->npool] = NULL;
+      if (mb_mallocd(verbose, __FILE__, __LINE__, (size_t)MBSVP_POOL_COLUMNS * atlas->ndepth * sizeof(double),
+                     (void **)&atlas->pool[atlas->npool], error) != MB_SUCCESS)
+        return MB_FAILURE;
+      atlas->npool++;
+      atlas->pool_used = 0;
+    }
+    double *values = &atlas->pool[atlas->npool - 1][(size_t)atlas->pool_used * atlas->ndepth];
+    if (mbsvp_atlas_read_cell(verbose, atlas, variable, lat_index, lon_index, values, message, error) != MB_SUCCESS)
+      return MB_FAILURE;
+    atlas->pool_used++;
+    atlas->columns[variable][cell] = values;
+    double deep = -1.0;
+    for (int k = 0; k < atlas->ndepth; k++)
+      if (isfinite(values[k]) && isfinite(atlas->depth[k]) && atlas->depth[k] > deep)
+        deep = atlas->depth[k];
+    atlas->deepest[variable][cell] = deep;
+  }
+  *column = atlas->columns[variable][cell];
+  *deepest = atlas->deepest[variable][cell];
+  return MB_SUCCESS;
+}
+/*--------------------------------------------------------------------*/
+/* The nearest cell, by rings around the cell, that is valid deeper than zmin. */
+static int mbsvp_atlas_nearest_deeper(int verbose, struct mbsvp_atlas *atlas, int variable, int lat_index, int lon_index, double zmin,
+                                      int *found_lat, int *found_lon, bool *found, char *message, int *error) {
+  *found = false;
+  const int i0 = atlas->lat_rank[lat_index];
+  const int j0 = atlas->lon_rank[lon_index];
+  const double scale = cos(DTR * atlas->lat[lat_index]);
+  for (int r = 1; r <= atlas->radius; r++) {
+    double best = 0.0;
+    int best_i = -1;
+    int best_j = -1;
+    for (int di = -r; di <= r; di++) {
+      const int i = i0 + di;
+      if (i < 0 || i >= atlas->nlat)
+        continue;
+      for (int dj = -r; dj <= r; dj++) {
+        if (MAX(abs(di), abs(dj)) != r)
+          continue;
+        int j = j0 + dj;
+        if (atlas->wraps)
+          j = ((j % atlas->nlon) + atlas->nlon) % atlas->nlon;
+        else if (j < 0 || j >= atlas->nlon)
+          continue;
+        const double *column;
+        double deepest;
+        if (mbsvp_atlas_column(verbose, atlas, variable, atlas->lat_order[i], atlas->lon_order[j], &column, &deepest, message, error) !=
+            MB_SUCCESS)
+          return MB_FAILURE;
+        if (deepest <= zmin)
+          continue;
+        const double dx = dj * scale;
+        const double distance = di * di + dx * dx;
+        if (best_i < 0 || distance < best || (distance == best && (i < best_i || (i == best_i && j < best_j)))) {
+          best = distance;
+          best_i = i;
+          best_j = j;
+        }
+      }
+    }
+    if (best_i >= 0) {
+      *found_lat = atlas->lat_order[best_i];
+      *found_lon = atlas->lon_order[best_j];
+      *found = true;
+      return MB_SUCCESS;
+    }
+  }
+  return MB_SUCCESS;
+}
+/*--------------------------------------------------------------------*/
+/* Continue a profile through nearby deeper cells of the same grid. The offset
+   at each join fades with depth. A neighbour that differs by more than the
+   gate at the join stops the search, since it is likely another water mass.
+   A profile without a valid start is returned as it is. */
+int mbsvp_atlas_extend(int verbose, struct mbsvp_atlas *atlas, int variable, int lat_index, int lon_index,
+                       const struct mbsvp_profile *observed, struct mbsvp_profile *extended, bool *used_neighbour, char *message,
+                       int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2       cell:       %d %d\n", lat_index, lon_index);
+    fprintf(stderr, "dbg2       observed n: %d\n", observed->n);
+  }
+
+  *used_neighbour = false;
+  struct mbsvp_profile z;
+  mbsvp_profile_init(&z);
+  int status = mbsvp_profile_clean(verbose, observed->n, observed->depth, observed->speed, &z, message, error);
+  double *depth = NULL;
+  double *speed = NULL;
+  int count = z.n;
+  int alloc = z.n;
+  if (status == MB_SUCCESS) {
+    alloc = z.n + 16;
+    status = mb_mallocd(verbose, __FILE__, __LINE__, alloc * sizeof(double), (void **)&depth, error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(verbose, __FILE__, __LINE__, alloc * sizeof(double), (void **)&speed, error);
+  }
+  if (status == MB_SUCCESS) {
+    memcpy(depth, z.depth, z.n * sizeof(double));
+    memcpy(speed, z.speed, z.n * sizeof(double));
+    if (z.n >= 2 && z.depth[0] <= 1.0) {
+      status = mbsvp_atlas_prepare(verbose, atlas, variable, error);
+      double z0 = z.depth[z.n - 1];
+      double c0 = z.speed[z.n - 1];
+      while (status == MB_SUCCESS && z0 < MBSVP_TARGET_DEPTH) {
+        int a;
+        int b;
+        bool found;
+        status = mbsvp_atlas_nearest_deeper(verbose, atlas, variable, lat_index, lon_index, z0, &a, &b, &found, message, error);
+        if (status != MB_SUCCESS || !found)
+          break;
+        const double *column;
+        double deepest;
+        status = mbsvp_atlas_column(verbose, atlas, variable, a, b, &column, &deepest, message, error);
+        if (status != MB_SUCCESS)
+          break;
+        /* the neighbour at the join, between its valid samples */
+        double at_join = NAN;
+        double below = -HUGE_VAL;
+        double value_below = NAN;
+        for (int k = 0; k < atlas->ndepth; k++) {
+          if (!isfinite(column[k]))
+            continue;
+          if (atlas->depth[k] == z0) {
+            at_join = column[k];
+            break;
+          }
+          if (atlas->depth[k] < z0 && atlas->depth[k] > below) {
+            below = atlas->depth[k];
+            value_below = column[k];
+          }
+          if (atlas->depth[k] > z0) {
+            if (isfinite(value_below))
+              at_join = value_below + (z0 - below) / (atlas->depth[k] - below) * (column[k] - value_below);
+            else
+              at_join = column[k];
+            break;
+          }
+        }
+        const double offset = c0 - at_join;
+        if (!isfinite(offset) || fabs(offset) > MBSVP_NEIGHBOUR_GATE)
+          break;
+        const double start = z0;
+        for (int k = 0; k < atlas->ndepth && status == MB_SUCCESS; k++) {
+          if (!isfinite(column[k]) || !(atlas->depth[k] > start))
+            continue;
+          if (count >= alloc) {
+            alloc += 64;
+            status = mb_reallocd(verbose, __FILE__, __LINE__, alloc * sizeof(double), (void **)&depth, error);
+            if (status == MB_SUCCESS)
+              status = mb_reallocd(verbose, __FILE__, __LINE__, alloc * sizeof(double), (void **)&speed, error);
+            if (status != MB_SUCCESS)
+              break;
+          }
+          depth[count] = atlas->depth[k];
+          speed[count] = column[k] + offset * exp(-(atlas->depth[k] - start) / MBSVP_NEIGHBOUR_FADE);
+          z0 = depth[count];
+          c0 = speed[count];
+          count++;
+        }
+        *used_neighbour = true;
+      }
+    }
+  }
+  if (status == MB_SUCCESS)
+    status = mbsvp_profile_clean(verbose, count, depth, speed, extended, message, error);
+  int error_free = MB_ERROR_NO_ERROR;
+  mbsvp_profile_free(verbose, &z, &error_free);
+  if (depth != NULL)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&depth, &error_free);
+  if (speed != NULL)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&speed, &error_free);
+
+  if (verbose >= 2)
+    fprintf(stderr, "dbg2  Function <%s> completed, n %d neighbour %d status %d\n", __func__, count, *used_neighbour, status);
+  return status;
+}
+/*--------------------------------------------------------------------*/
 int mbsvp_write_profile(int verbose, const char *path, const struct mbsvp_profile *profile, const char *description,
                         const struct mbsvp_location *location, const struct mbsvp_location *donors, int ndonors,
                         char *message, int *error) {
@@ -806,86 +1090,189 @@ int mbsvp_write_profile(int verbose, const char *path, const struct mbsvp_profil
   return status;
 }
 /*--------------------------------------------------------------------*/
-/* Write one candidate of one kind and formula. Only samples really taken
-   from a donor are recorded as donors. */
+static int mbsvp_note(int verbose, struct mbsvp_strings *notes, int year, const char *what, const char *why, int *error) {
+  char text[2 * MBSVP_MESSAGE_SIZE];
+  snprintf(text, sizeof(text), "WOA%d: %s: %s", year, what, why);
+  return mbsvp_strings_add(verbose, notes, text, error);
+}
+/*--------------------------------------------------------------------*/
+/* The candidate of one kind and formula: complete each cell by itself, with
+   donor samples from the same cell, then average the completed cells on the
+   union of their depths. */
 static int mbsvp_woa_write_candidate(int verbose, const char *folder, int year, const char *period, const char *resolution,
-                                     const char *codes[MBSVP_KINDS], int kind, int formula,
+                                     const char *codes[MBSVP_KINDS], int kind, int formula, struct mbsvp_atlas atlases[MBSVP_KINDS],
                                      const struct mbsvp_grid grids[MBSVP_KINDS], const bool present[MBSVP_KINDS],
-                                     const struct mbsvp_profile raw[MBSVP_KINDS],
-                                     const struct mbsvp_profile *observed, struct mbsvp_strings *candidates, char *message,
-                                     int *error) {
-  struct mbsvp_profile complete;
-  struct mbsvp_profile primary;
-  struct mbsvp_profile donor_clean;
-  mbsvp_profile_init(&complete);
-  mbsvp_profile_init(&primary);
-  mbsvp_profile_init(&donor_clean);
-  struct mbsvp_location location = grids[kind].location;
-  struct mbsvp_location donors[2];
-  int ndonors = 0;
+                                     struct mbsvp_strings *candidates, char *message, int *error) {
+  const struct mbsvp_grid *grid = &grids[kind];
+  struct mbsvp_atlas *self = &atlases[kind];
+  /* donors and neighbours need a grid with the same cells */
+  bool usable[MBSVP_KINDS];
+  for (int k = 0; k < MBSVP_KINDS; k++)
+    usable[k] = present[k] && k <= kind && atlases[k].nlat == self->nlat && atlases[k].nlon == self->nlon;
+  struct mbsvp_atlas *deep_atlas = usable[MBSVP_ANNUAL] ? &atlases[MBSVP_ANNUAL] : self;
 
-  int status = mbsvp_profile_complete(verbose, observed, MBSVP_TARGET_DEPTH, &complete, message, error);
+  struct mbsvp_profile *cells = NULL;
+  int ncomplete = 0;
+  int nneighbour = 0;
+  double physics_from = MBSVP_TARGET_DEPTH;
+  bool has_donor[MBSVP_KINDS] = {false, false, false};
+  double donor_min[MBSVP_KINDS] = {0.0, 0.0, 0.0};
+  double donor_max[MBSVP_KINDS] = {0.0, 0.0, 0.0};
+  double *columns[MBSVP_KINDS] = {NULL, NULL, NULL};
+  char reason[MBSVP_MESSAGE_SIZE] = "No cell in the selected area";
 
-  char name[512];
-  char source[16];
-  snprintf(source, sizeof(source), "WOA%d", year);
-  snprintf(name, sizeof(name), "woa%d_%s_svp%s_%s", year, period, codes[kind], resolution);
-  snprintf(location.source, sizeof(location.source), "%s", source);
-  snprintf(location.dataset, sizeof(location.dataset), "%s.nc", name);
-  snprintf(location.formula, sizeof(location.formula), "%s", mbsvp_formula_name[formula]);
+  int status = mb_mallocd(verbose, __FILE__, __LINE__, grid->ncells * sizeof(struct mbsvp_profile), (void **)&cells, error);
+  for (int k = 0; k < MBSVP_KINDS && status == MB_SUCCESS; k++)
+    if (usable[k])
+      status = mb_mallocd(verbose, __FILE__, __LINE__, atlases[k].ndepth * sizeof(double), (void **)&columns[k], error);
 
-  if (status == MB_SUCCESS)
-    status = mbsvp_profile_clean(verbose, raw[kind].n, raw[kind].depth, raw[kind].speed, &primary, message, error);
-  if (status == MB_SUCCESS) {
-    double deepest = primary.n > 0 ? primary.depth[primary.n - 1] : -HUGE_VAL;
-    int donor_kinds[2] = {-1, -1};
-    if (kind == MBSVP_MONTHLY) {
-      donor_kinds[0] = MBSVP_SEASONAL;
-      donor_kinds[1] = MBSVP_ANNUAL;
-    }
-    else if (kind == MBSVP_SEASONAL) {
-      donor_kinds[0] = MBSVP_ANNUAL;
-    }
-    for (int d = 0; d < 2 && status == MB_SUCCESS; d++) {
-      const int donor_kind = donor_kinds[d];
-      if (donor_kind < 0 || !present[donor_kind])
+  for (int c = 0; c < grid->ncells && status == MB_SUCCESS; c++) {
+    const int ilat = grid->cell_lat[c];
+    const int ilon = grid->cell_lon[c];
+    struct mbsvp_profile raw[MBSVP_KINDS];
+    const struct mbsvp_profile *raw_pointers[MBSVP_KINDS] = {NULL, NULL, NULL};
+    struct mbsvp_profile observed[MBSVP_KINDS];
+    struct mbsvp_profile extended;
+    mbsvp_profile_init(&extended);
+    for (int k = 0; k < MBSVP_KINDS; k++)
+      mbsvp_profile_init(&observed[k]);
+    for (int k = 0; k < MBSVP_KINDS && status == MB_SUCCESS; k++) {
+      if (!usable[k])
         continue;
-      status = mbsvp_profile_clean(verbose, raw[donor_kind].n, raw[donor_kind].depth, raw[donor_kind].speed, &donor_clean,
-                                   message, error);
-      if (status != MB_SUCCESS)
-        break;
-      int first = -1;
-      int last = -1;
-      for (int i = 0; i < donor_clean.n; i++) {
-        if (donor_clean.depth[i] > deepest) {
-          if (first < 0)
-            first = i;
-          last = i;
+      status = mbsvp_atlas_read_cell(verbose, &atlases[k], formula, ilat, ilon, columns[k], message, error);
+      raw[k].n = atlases[k].ndepth;
+      raw[k].depth = atlases[k].depth;
+      raw[k].speed = columns[k];
+      raw_pointers[k] = &raw[k];
+    }
+    bool used_neighbour = false;
+    int local_error = MB_ERROR_NO_ERROR;
+    struct mbsvp_profile *complete = &cells[ncomplete];
+    mbsvp_profile_init(complete);
+    double from = MBSVP_TARGET_DEPTH;
+    if (status == MB_SUCCESS && mbsvp_profile_chain(verbose, raw_pointers, observed, reason, &local_error) == MB_SUCCESS &&
+        mbsvp_atlas_extend(verbose, deep_atlas, formula, ilat, ilon, &observed[kind], &extended, &used_neighbour, reason, &local_error) ==
+            MB_SUCCESS &&
+        mbsvp_profile_complete(verbose, &extended, MBSVP_TARGET_DEPTH, formula, atlases[kind].lat[ilat], complete, &from, reason,
+                               &local_error) == MB_SUCCESS) {
+      ncomplete++;
+      if (used_neighbour)
+        nneighbour++;
+      if (from < physics_from)
+        physics_from = from;
+      /* only samples really taken from a donor are recorded */
+      struct mbsvp_profile own;
+      mbsvp_profile_init(&own);
+      double deepest = -HUGE_VAL;
+      if (mbsvp_profile_clean(verbose, raw[kind].n, raw[kind].depth, raw[kind].speed, &own, reason, &local_error) == MB_SUCCESS &&
+          own.n > 0)
+        deepest = own.depth[own.n - 1];
+      for (int k = kind - 1; k >= 0; k--) {
+        if (!usable[k])
+          continue;
+        if (mbsvp_profile_clean(verbose, raw[k].n, raw[k].depth, raw[k].speed, &own, reason, &local_error) != MB_SUCCESS)
+          continue;
+        for (int i = 0; i < own.n; i++) {
+          if (own.depth[i] > deepest) {
+            if (!has_donor[k] || own.depth[i] < donor_min[k])
+              donor_min[k] = own.depth[i];
+            if (!has_donor[k] || own.depth[i] > donor_max[k])
+              donor_max[k] = own.depth[i];
+            has_donor[k] = true;
+          }
         }
+        if (own.n > 0 && own.depth[own.n - 1] > deepest)
+          deepest = own.depth[own.n - 1];
       }
-      if (first < 0)
-        continue;
-      struct mbsvp_location *donor = &donors[ndonors++];
-      *donor = grids[donor_kind].location;
-      snprintf(donor->source, sizeof(donor->source), "%s", source);
-      snprintf(donor->dataset, sizeof(donor->dataset), "woa%d_%s_svp%s_%s.nc", year, period, codes[donor_kind], resolution);
-      snprintf(donor->kind, sizeof(donor->kind), "%s", mbsvp_kind_name[donor_kind]);
-      donor->has_appended = true;
-      donor->appended_min_depth = donor_clean.depth[first];
-      donor->appended_max_depth = donor_clean.depth[last];
-      deepest = donor_clean.depth[last];
+      int error_free = MB_ERROR_NO_ERROR;
+      mbsvp_profile_free(verbose, &own, &error_free);
+    }
+    int error_free = MB_ERROR_NO_ERROR;
+    mbsvp_profile_free(verbose, &extended, &error_free);
+    for (int k = 0; k < MBSVP_KINDS; k++)
+      mbsvp_profile_free(verbose, &observed[k], &error_free);
+  }
+
+  if (status == MB_SUCCESS && ncomplete == 0) {
+    mbsvp_set_message(message, "%s", reason);
+    *error = MB_ERROR_BAD_DATA;
+    status = MB_FAILURE;
+  }
+
+  /* the mean on the union of the depths */
+  struct mbsvp_profile mean;
+  mbsvp_profile_init(&mean);
+  if (status == MB_SUCCESS) {
+    int total = 0;
+    for (int c = 0; c < ncomplete; c++)
+      total += cells[c].n;
+    status = mb_mallocd(verbose, __FILE__, __LINE__, total * sizeof(double), (void **)&mean.depth, error);
+    if (status == MB_SUCCESS)
+      status = mb_mallocd(verbose, __FILE__, __LINE__, total * sizeof(double), (void **)&mean.speed, error);
+    if (status == MB_SUCCESS) {
+      int k = 0;
+      for (int c = 0; c < ncomplete; c++)
+        for (int i = 0; i < cells[c].n; i++)
+          mean.depth[k++] = cells[c].depth[i];
+      qsort(mean.depth, total, sizeof(double), mbsvp_compare_doubles);
+      int n = 0;
+      for (int i = 0; i < total; i++)
+        if (n == 0 || mean.depth[i] > mean.depth[n - 1])
+          mean.depth[n++] = mean.depth[i];
+      mean.n = n;
+      for (int i = 0; i < n; i++) {
+        double sum = 0.0;
+        for (int c = 0; c < ncomplete; c++) {
+          const struct mbsvp_profile *p = &cells[c];
+          int j = 0;
+          while (j < p->n - 1 && p->depth[j + 1] < mean.depth[i])
+            j++;
+          if (mean.depth[i] <= p->depth[0])
+            sum += p->speed[0];
+          else if (j >= p->n - 1)
+            sum += p->speed[p->n - 1];
+          else
+            sum += p->speed[j] + (mean.depth[i] - p->depth[j]) / (p->depth[j + 1] - p->depth[j]) * (p->speed[j + 1] - p->speed[j]);
+        }
+        mean.speed[i] = sum / ncomplete;
+      }
     }
   }
 
   if (status == MB_SUCCESS) {
+    char name[512];
+    char source[16];
+    struct mbsvp_location location = grid->location;
+    struct mbsvp_location donors[2];
+    int ndonors = 0;
+    snprintf(source, sizeof(source), "WOA%d", year);
+    snprintf(name, sizeof(name), "woa%d_%s_svp%s_%s", year, period, codes[kind], resolution);
+    snprintf(location.source, sizeof(location.source), "%s", source);
+    snprintf(location.dataset, sizeof(location.dataset), "%s.nc", name);
+    snprintf(location.formula, sizeof(location.formula), "%s", mbsvp_formula_name[formula]);
+    location.has_tail = true;
+    location.cells_used = ncomplete;
+    location.cells_with_neighbour = nneighbour;
+    location.physics_from_depth = physics_from;
+    for (int k = kind - 1; k >= 0 && ndonors < 2; k--) {
+      if (!has_donor[k])
+        continue;
+      struct mbsvp_location *donor = &donors[ndonors++];
+      *donor = grids[k].location;
+      snprintf(donor->source, sizeof(donor->source), "%s", source);
+      snprintf(donor->dataset, sizeof(donor->dataset), "woa%d_%s_svp%s_%s.nc", year, period, codes[k], resolution);
+      snprintf(donor->kind, sizeof(donor->kind), "%s", mbsvp_kind_name[k]);
+      donor->has_appended = true;
+      donor->appended_min_depth = donor_min[k];
+      donor->appended_max_depth = donor_max[k];
+    }
     mb_path file;
     mb_path path;
     char description[1024];
     snprintf(description, sizeof(description),
-             "WOA%d; period=%s; time=%s; resolution=%s; formula=%s; "
-             "NaNs removed before annual->seasonal->monthly tail extension; "
-             "endpoint=11000m; remaining shortfall uses least-squares "
-             "trend over deepest 2000m of valid climatological values",
+             "WOA%d; period=%s; time=%s; resolution=%s; formula=%s; each cell completed to 11000m, then averaged: "
+             "NaNs removed, annual->seasonal->monthly samples, deeper nearby cells, then pressure only "
+             "at constant potential temperature and salinity",
              year, period, codes[kind], resolution, mbsvp_formula_name[formula]);
     const int len = snprintf(file, sizeof(file), "%s_%s.svp", name, mbsvp_formula_name[formula]);
     if (len < 0 || (size_t)len >= sizeof(file) || !mbsvp_join(path, sizeof(path), folder, file)) {
@@ -894,22 +1281,21 @@ static int mbsvp_woa_write_candidate(int verbose, const char *folder, int year, 
       status = MB_FAILURE;
     }
     if (status == MB_SUCCESS)
-      status = mbsvp_write_profile(verbose, path, &complete, description, &location, donors, ndonors, message, error);
+      status = mbsvp_write_profile(verbose, path, &mean, description, &location, donors, ndonors, message, error);
     if (status == MB_SUCCESS)
       status = mbsvp_strings_add(verbose, candidates, path, error);
   }
 
   int error_free = MB_ERROR_NO_ERROR;
-  mbsvp_profile_free(verbose, &complete, &error_free);
-  mbsvp_profile_free(verbose, &primary, &error_free);
-  mbsvp_profile_free(verbose, &donor_clean, &error_free);
+  mbsvp_profile_free(verbose, &mean, &error_free);
+  for (int c = 0; c < ncomplete; c++)
+    mbsvp_profile_free(verbose, &cells[c], &error_free);
+  if (cells != NULL)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&cells, &error_free);
+  for (int k = 0; k < MBSVP_KINDS; k++)
+    if (columns[k] != NULL)
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&columns[k], &error_free);
   return status;
-}
-/*--------------------------------------------------------------------*/
-static int mbsvp_note(int verbose, struct mbsvp_strings *notes, int year, const char *what, const char *why, int *error) {
-  char text[2 * MBSVP_MESSAGE_SIZE];
-  snprintf(text, sizeof(text), "WOA%d: %s: %s", year, what, why);
-  return mbsvp_strings_add(verbose, notes, text, error);
 }
 /*--------------------------------------------------------------------*/
 /* All candidates of one edition, period and resolution. A kind or formula
@@ -920,7 +1306,9 @@ static int mbsvp_woa_generate_atlas(int verbose, const char *nc_folder, const ch
   const char *codes[MBSVP_KINDS] = {"00", survey->season, survey->month};
   /* candidates are presented in this order; the annual grid is read first */
   const int order[MBSVP_KINDS] = {MBSVP_SEASONAL, MBSVP_MONTHLY, MBSVP_ANNUAL};
+  const bool want[2] = {true, true};
   struct mbsvp_grid grids[MBSVP_KINDS];
+  struct mbsvp_atlas atlases[MBSVP_KINDS];
   bool present[MBSVP_KINDS];
   char message[MBSVP_MESSAGE_SIZE];
   int status = MB_SUCCESS;
@@ -930,6 +1318,7 @@ static int mbsvp_woa_generate_atlas(int verbose, const char *nc_folder, const ch
     mb_path file;
     mb_path path;
     mbsvp_grid_init(&grids[kind]);
+    mbsvp_atlas_init(&atlases[kind]);
     present[kind] = false;
     snprintf(name, sizeof(name), "woa%d_%s_svp%s_%s", year, period, codes[kind], resolution);
     const int len = snprintf(file, sizeof(file), "%s.nc", name);
@@ -938,7 +1327,8 @@ static int mbsvp_woa_generate_atlas(int verbose, const char *nc_folder, const ch
     if (len < 0 || (size_t)len >= sizeof(file) || !mbsvp_join(path, sizeof(path), nc_folder, file)) {
       mbsvp_set_message(message, "Path is too long");
     }
-    else if (mbsvp_woa_read_grid(verbose, path, survey, nearest, &grids[kind], message, &local_error) == MB_SUCCESS) {
+    else if (mbsvp_woa_read_grid(verbose, path, survey, nearest, &grids[kind], message, &local_error) == MB_SUCCESS &&
+             mbsvp_atlas_open(verbose, path, want, &atlases[kind], message, &local_error) == MB_SUCCESS) {
       present[kind] = true;
     }
     if (!present[kind]) {
@@ -952,47 +1342,26 @@ static int mbsvp_woa_generate_atlas(int verbose, const char *nc_folder, const ch
   }
 
   for (int formula = 0; formula < 2 && status == MB_SUCCESS; formula++) {
-    struct mbsvp_profile raw[MBSVP_KINDS];
-    const struct mbsvp_profile *raw_pointers[MBSVP_KINDS];
-    struct mbsvp_profile observed[MBSVP_KINDS];
-    for (int kind = 0; kind < MBSVP_KINDS; kind++) {
-      raw[kind].n = grids[kind].ndepth;
-      raw[kind].depth = grids[kind].depth;
-      raw[kind].speed = formula == 0 ? grids[kind].chen : grids[kind].leroy;
-      raw_pointers[kind] = present[kind] ? &raw[kind] : NULL;
-      mbsvp_profile_init(&observed[kind]);
-    }
-    message[0] = '\0';
-    int local_error = MB_ERROR_NO_ERROR;
-    if (mbsvp_profile_chain(verbose, raw_pointers, observed, message, &local_error) != MB_SUCCESS) {
-      char what[512];
-      snprintf(what, sizeof(what), "%s/%s/%s", period, resolution, mbsvp_formula_name[formula]);
-      status = mbsvp_note(verbose, notes, year, what, message, error);
-    }
-    else {
-      for (int k = 0; k < MBSVP_KINDS && status == MB_SUCCESS; k++) {
-        const int kind = order[k];
-        if (!present[kind])
-          continue;
-        message[0] = '\0';
-        local_error = MB_ERROR_NO_ERROR;
-        if (mbsvp_woa_write_candidate(verbose, folder, year, period, resolution, codes, kind, formula, grids, present, raw,
-                                      &observed[kind], candidates, message, &local_error) != MB_SUCCESS) {
-          char what[512];
-          snprintf(what, sizeof(what), "woa%d_%s_svp%s_%s/%s", year, period, codes[kind], resolution,
-                   mbsvp_formula_name[formula]);
-          status = mbsvp_note(verbose, notes, year, what, message, error);
-        }
+    for (int k = 0; k < MBSVP_KINDS && status == MB_SUCCESS; k++) {
+      const int kind = order[k];
+      if (!present[kind])
+        continue;
+      message[0] = '\0';
+      int local_error = MB_ERROR_NO_ERROR;
+      if (mbsvp_woa_write_candidate(verbose, folder, year, period, resolution, codes, kind, formula, atlases, grids, present, candidates,
+                                    message, &local_error) != MB_SUCCESS) {
+        char what[512];
+        snprintf(what, sizeof(what), "woa%d_%s_svp%s_%s/%s", year, period, codes[kind], resolution, mbsvp_formula_name[formula]);
+        status = mbsvp_note(verbose, notes, year, what, message, error);
       }
     }
-    int error_free = MB_ERROR_NO_ERROR;
-    for (int kind = 0; kind < MBSVP_KINDS; kind++)
-      mbsvp_profile_free(verbose, &observed[kind], &error_free);
   }
 
   int error_free = MB_ERROR_NO_ERROR;
-  for (int kind = 0; kind < MBSVP_KINDS; kind++)
+  for (int kind = 0; kind < MBSVP_KINDS; kind++) {
     mbsvp_grid_free(verbose, &grids[kind], &error_free);
+    mbsvp_atlas_close(verbose, &atlases[kind], &error_free);
+  }
   return status;
 }
 /*--------------------------------------------------------------------*/

@@ -20,6 +20,7 @@ mbsvpbest_SOURCES += mbsvp_location.c
 mbsvpbest_SOURCES += mbsvp_points.c
 mbsvpbest_SOURCES += mbsvp_profile.c
 mbsvpbest_SOURCES += mbsvp_score.c
+mbsvpbest_SOURCES += mbsvp_soundspeed.c
 mbsvpbest_SOURCES += mbsvp_util.c
 mbsvpbest_SOURCES += mbsvp_woa.c
 
@@ -28,5 +29,6 @@ mbsvpextract_SOURCES += mbsvp_location.c
 mbsvpextract_SOURCES += mbsvp_points.c
 mbsvpextract_SOURCES += mbsvp_profile.c
 mbsvpextract_SOURCES += mbsvp_score.c
+mbsvpextract_SOURCES += mbsvp_soundspeed.c
 mbsvpextract_SOURCES += mbsvp_util.c
 mbsvpextract_SOURCES += mbsvp_woa.c

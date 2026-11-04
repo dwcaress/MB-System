@@ -28,9 +28,9 @@
  * then takes deeper valid annual samples and a monthly profile takes the
  * deeper seasonal and annual samples; no value is changed at a join.
  * Only after that is each profile completed: a profile that stops short
- * gets an endpoint from a least-squares line through the samples in its
- * deepest 2000 m, and a deeper one is cut at the target by interpolation.
- * A fitted endpoint is never passed on as a donor sample.
+ * gets a tail in which only pressure changes the speed (mbsvp_soundspeed.c),
+ * and a deeper one is cut at the target by interpolation. A computed tail is
+ * never passed on as a donor sample.
  */
 
 #include <ctype.h>
@@ -151,19 +151,19 @@ int mbsvp_profile_tail(int verbose, const struct mbsvp_profile *primary, const s
   return status;
 }
 /*--------------------------------------------------------------------*/
-int mbsvp_profile_complete(int verbose, const struct mbsvp_profile *observed, double target,
-                           struct mbsvp_profile *complete, char *message, int *error) {
+int mbsvp_profile_complete(int verbose, const struct mbsvp_profile *observed, double target, enum mbsvp_formula formula,
+                           double latitude, struct mbsvp_profile *complete, double *physics_from, char *message, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
     fprintf(stderr, "dbg2       observed n: %d\n", observed->n);
     fprintf(stderr, "dbg2       target:     %f\n", target);
+    fprintf(stderr, "dbg2       formula:    %d\n", formula);
+    fprintf(stderr, "dbg2       latitude:   %f\n", latitude);
   }
 
   struct mbsvp_profile z;
   mbsvp_profile_init(&z);
   int status = mbsvp_profile_clean(verbose, observed->n, observed->depth, observed->speed, &z, message, error);
-  double endpoint = 0.0;
-  int nkeep = z.n;
   if (status == MB_SUCCESS && z.n < 2) {
     mbsvp_set_message(message, "Need at least two valid depth/speed pairs");
     *error = MB_ERROR_BAD_DATA;
@@ -174,70 +174,62 @@ int mbsvp_profile_complete(int verbose, const struct mbsvp_profile *observed, do
     *error = MB_ERROR_BAD_DATA;
     status = MB_FAILURE;
   }
-  if (status == MB_SUCCESS) {
-    const double deepest = z.depth[z.n - 1];
-    if (deepest >= target) {
-      /* interpolate at the target and cut the profile there */
-      nkeep = 0;
-      while (nkeep < z.n && z.depth[nkeep] < target)
-        nkeep++;
-      if (nkeep == 0 || z.depth[nkeep] == target) {
-        endpoint = z.speed[nkeep];
-      }
-      else {
-        const double fraction = (target - z.depth[nkeep - 1]) / (z.depth[nkeep] - z.depth[nkeep - 1]);
-        endpoint = z.speed[nkeep - 1] + fraction * (z.speed[nkeep] - z.speed[nkeep - 1]);
-      }
+  if (physics_from != NULL)
+    *physics_from = target;
+
+  if (status == MB_SUCCESS && z.depth[z.n - 1] >= target) {
+    /* interpolate at the target and cut the profile there */
+    int nkeep = 0;
+    while (nkeep < z.n && z.depth[nkeep] < target)
+      nkeep++;
+    double endpoint;
+    if (nkeep == 0 || z.depth[nkeep] == target) {
+      endpoint = z.speed[nkeep];
     }
     else {
-      /* straight line through the samples in the deepest 2000 m */
-      int nfit = 0;
-      double sumx = 0.0;
-      double sumy = 0.0;
-      for (int i = 0; i < z.n; i++) {
-        if (z.depth[i] >= deepest - MBSVP_TREND_WINDOW) {
-          sumx += z.depth[i] - deepest;
-          sumy += z.speed[i];
-          nfit++;
-        }
-      }
-      if (nfit < 2) {
-        mbsvp_set_message(message, "Need at least two valid values in deepest 2000 m for trend");
-        *error = MB_ERROR_BAD_DATA;
-        status = MB_FAILURE;
-      }
-      else {
-        const double meanx = sumx / nfit;
-        const double meany = sumy / nfit;
-        double sxx = 0.0;
-        double sxy = 0.0;
-        for (int i = 0; i < z.n; i++) {
-          if (z.depth[i] >= deepest - MBSVP_TREND_WINDOW) {
-            const double dx = z.depth[i] - deepest - meanx;
-            sxx += dx * dx;
-            sxy += dx * (z.speed[i] - meany);
-          }
-        }
-        const double slope = sxy / sxx;
-        endpoint = meany + slope * (target - deepest - meanx);
-        if (!isfinite(endpoint)) {
-          mbsvp_set_message(message, "Nonfinite extrapolated sound speed");
-          *error = MB_ERROR_BAD_DATA;
-          status = MB_FAILURE;
-        }
-      }
+      const double fraction = (target - z.depth[nkeep - 1]) / (z.depth[nkeep] - z.depth[nkeep - 1]);
+      endpoint = z.speed[nkeep - 1] + fraction * (z.speed[nkeep] - z.speed[nkeep - 1]);
+    }
+    status = mbsvp_profile_alloc(verbose, nkeep + 1, complete, error);
+    if (status == MB_SUCCESS) {
+      memcpy(complete->depth, z.depth, nkeep * sizeof(double));
+      memcpy(complete->speed, z.speed, nkeep * sizeof(double));
+      complete->depth[nkeep] = target;
+      complete->speed[nkeep] = endpoint;
+      complete->n = nkeep + 1;
     }
   }
-  if (status == MB_SUCCESS)
-    status = mbsvp_profile_alloc(verbose, nkeep + 1, complete, error);
-  if (status == MB_SUCCESS) {
-    for (int i = 0; i < nkeep; i++) {
-      complete->depth[i] = z.depth[i];
-      complete->speed[i] = z.speed[i];
+  else if (status == MB_SUCCESS) {
+    /* samples of the tail at whole multiples of the step, and at the target */
+    const double deepest = z.depth[z.n - 1];
+    if (physics_from != NULL)
+      *physics_from = deepest;
+    int ntail = 0;
+    for (double zt = (floor(deepest / MBSVP_PHYSICS_STEP) + 1.0) * MBSVP_PHYSICS_STEP; zt < target; zt += MBSVP_PHYSICS_STEP)
+      ntail++;
+    ntail++;
+    status = mbsvp_profile_alloc(verbose, z.n + ntail, complete, error);
+    if (status == MB_SUCCESS) {
+      memcpy(complete->depth, z.depth, z.n * sizeof(double));
+      memcpy(complete->speed, z.speed, z.n * sizeof(double));
+      for (int i = 0; i < ntail - 1; i++)
+        complete->depth[z.n + i] = (floor(deepest / MBSVP_PHYSICS_STEP) + 1.0 + i) * MBSVP_PHYSICS_STEP;
+      complete->depth[z.n + ntail - 1] = target;
+      status = mbsvp_physics_tail(verbose, formula, deepest, z.speed[z.n - 1], latitude, ntail, &complete->depth[z.n],
+                                  &complete->speed[z.n], message, error);
+      complete->n = z.n + ntail;
     }
-    complete->depth[nkeep] = target;
-    complete->speed[nkeep] = endpoint;
-    complete->n = nkeep + 1;
+    if (status == MB_SUCCESS) {
+      for (int i = z.n; i < complete->n; i++) {
+        if (!(complete->speed[i] > MBSVP_MIN_SPEED && complete->speed[i] < MBSVP_MAX_SPEED)) {
+          mbsvp_set_message(message, "Sound speed %.1f m/s at %.0f m is outside %.0f-%.0f m/s", complete->speed[i], complete->depth[i],
+                            MBSVP_MIN_SPEED, MBSVP_MAX_SPEED);
+          *error = MB_ERROR_BAD_DATA;
+          status = MB_FAILURE;
+          break;
+        }
+      }
+    }
   }
   int error_free = MB_ERROR_NO_ERROR;
   mbsvp_profile_free(verbose, &z, &error_free);

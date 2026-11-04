@@ -129,6 +129,8 @@ class MbsvpbestRunTest(unittest.TestCase):
     with open(run + '/woa18_decav_svp00_01_chen.svp') as f:
       text = f.read()
     self.assertIn('"method":"nearest"', text)
+    self.assertIn('"cells_used":1,', text)
+    self.assertIn('physics_from_depth', text)
 
   def testNoCandidateOfGrids(self):
     # the internal profile is still a candidate

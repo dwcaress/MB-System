@@ -318,7 +318,7 @@ static int expand_inputs(int verbose, const char *input, struct input_list *list
 /* Bounds, maximum depth and date of a file, from mbinfo. Its output goes in
    the run directory, so nothing is added next to the swath file. */
 static int read_metadata(int verbose, const struct input_file *file, const char *folder, int index, const char *log_file,
-                         bool end, struct mbsvp_survey *survey, char *message, int *error) {
+                         bool end, struct mbsvp_survey *survey, struct mbsvp_strings *notes, char *message, int *error) {
   mb_path root;
   mb_path inf;
   char format_option[32];
@@ -349,6 +349,29 @@ static int read_metadata(int verbose, const struct input_file *file, const char 
   survey->south = info.lat_min;
   survey->north = info.lat_max;
   survey->depth = info.depth_max;
+
+  /* a few pings far from all the others must not decide which water is used */
+  double box[4];
+  int npings = 0;
+  int noutliers = 0;
+  mb_path path;
+  snprintf(path, sizeof(path), "%s", file->path);
+  if (mbsvp_navigation_box(verbose, path, file->format, box, &npings, &noutliers, message, error) != MB_SUCCESS)
+    return MB_FAILURE;
+  if (noutliers > 0) {
+    char note[MB_PATH_MAXLINE + 256];
+    snprintf(note, sizeof(note),
+             "%d of %d pings of %s lie far from the others and are ignored for the survey bounds, which are %.4f/%.4f/%.4f/%.4f "
+             "without them; run mbpreprocess over the whole survey first",
+             noutliers, npings, file->path, box[0], box[1], box[2], box[3]);
+    fprintf(stderr, "Warning: %s\n", note);
+    if (mbsvp_strings_add(verbose, notes, note, error) != MB_SUCCESS)
+      return MB_FAILURE;
+    survey->west = box[0];
+    survey->east = box[1];
+    survey->south = box[2];
+    survey->north = box[3];
+  }
   int time_i[7];
   mb_get_date(verbose, end ? info.time_end : info.time_start, time_i);
   snprintf(survey->month, sizeof(survey->month), "%02d", time_i[1]);
@@ -925,7 +948,7 @@ static void evaluate_group(const struct options *options, const struct input_lis
     goto done;
   }
   for (int i = 0; i < files->n; i++) {
-    if (read_metadata(verbose, &files->items[i], folder, i, log_file, options->enddate, &surveys[i], message, &error) != MB_SUCCESS)
+    if (read_metadata(verbose, &files->items[i], folder, i, log_file, options->enddate, &surveys[i], &notes, message, &error) != MB_SUCCESS)
       goto done;
     if (mbsvp_interrupted)
       goto done;

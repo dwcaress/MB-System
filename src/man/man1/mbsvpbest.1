@@ -68,7 +68,8 @@ true water column. The metric assumes locally planar seafloor, so use data free 
 real relief across the swath. There is no common mask of soundings across candidates: a
 candidate that loses difficult outer soundings can gain from it, so compare the
 sounding counts and read \fBprofile_notes\fP and \fBcandidate_failures\fP
-in the report.
+in the report. A lower RMSE does not always mean a better profile: on rough seafloor a profile that is too
+slow lowers the score by compressing the relief, so small differences should be treated as ties.
 
 .B Sound speed grids
 .br
@@ -84,12 +85,21 @@ resolutions and the month or season of the survey are used.
 
 .B Completion to 11000 m
 .br
-Invalid samples are removed. A seasonal profile takes deeper valid annual samples,
-and a monthly profile takes the deeper seasonal and annual samples, from the same
-edition, period and resolution; no value is changed at a join. A profile that is still
-short gets an endpoint at 11000 m from a least-squares line through its samples in
-the deepest 2000 m of valid coverage. This endpoint is a processing extrapolation,
-not an observation. A survey deeper than 11000 m is rejected.
+Each grid cell is completed by itself, and the completed cells are then averaged. Invalid samples
+are removed. A seasonal profile takes deeper valid annual samples from the same cell, and a monthly
+profile takes the deeper seasonal and annual samples, from the same edition, period and resolution; no
+value is changed at a join. A profile that is still short continues through nearby deeper cells,
+stepping to deeper ones until none lies within 8 degrees, using the shape of the neighbour with an offset
+that fades with depth. A neighbour that differs by more than 10 m/s at the join is refused, because it
+likely holds another water mass. Below that, only pressure changes the speed: potential temperature
+and salinity are held at their values in the last sample, assuming a salinity of 35 to find the
+temperature. A tail is a processing estimate, not an observation. A survey deeper than 11000 m is rejected.
+
+.B Preprocessing
+.br
+Run \fBmbpreprocess\fP(1) over the whole survey first. In raw files, pings before the first navigation
+record of a file can have positions near (0,0). Positions far from all the others in a file are ignored
+when the survey bounds are found, with a warning and a note in the report.
 
 .B Selection modes
 .br
@@ -221,5 +231,6 @@ After reviewing the scores, coverage and notes, apply the winner:
 \fBmbsvpselect\fP(1), \fBmbsystem\fP(1), \fBmbvelocitytool\fP(1)
 
 .SH BUGS
-The automatic selection has not been validated for arbitrary terrain. Interior
+The automatic selection has not been validated for arbitrary terrain. Reprocessing some GSF files (format 121)
+places port beams on the starboard side, so scores on GSF data should not be trusted until this is understood. Interior
 missing samples of a climatological profile are removed, not filled.

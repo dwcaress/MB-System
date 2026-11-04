@@ -106,9 +106,9 @@ static void handle_signal(int signal_number) {
 /*--------------------------------------------------------------------*/
 /* The profile of the nearest completable cell. All wanted formulas must
    complete in the same cell. */
-static int extract_point(int verbose, const struct mbsvp_atlas *atlas, const struct mbsvp_point *point, const bool want[2],
+static int extract_point(int verbose, struct mbsvp_atlas *atlas, const struct mbsvp_point *point, const bool want[2],
                          bool strict, double *speed, struct mbsvp_profile profiles[2], int *rank, double *cell_lon,
-                         double *cell_lat, char *message, int *error) {
+                         double *cell_lat, bool *used_neighbour, double *physics_from, char *message, int *error) {
   int cell_lat_index[MBSVP_NEAREST_CELLS];
   int cell_lon_index[MBSVP_NEAREST_CELLS];
   int ncells = 0;
@@ -122,6 +122,8 @@ static int extract_point(int verbose, const struct mbsvp_atlas *atlas, const str
   int status = MB_FAILURE;
   for (int c = 0; c < ncells && status != MB_SUCCESS; c++) {
     bool complete = true;
+    *used_neighbour = false;
+    *physics_from = MBSVP_TARGET_DEPTH;
     for (int v = 0; v < 2 && complete; v++) {
       if (!want[v])
         continue;
@@ -136,11 +138,26 @@ static int extract_point(int verbose, const struct mbsvp_atlas *atlas, const str
         return MB_FAILURE;
       }
       const struct mbsvp_profile raw = {atlas->ndepth, atlas->depth, speed};
-      if (mbsvp_profile_complete(verbose, &raw, MBSVP_TARGET_DEPTH, &profiles[v], reason, &local_error) != MB_SUCCESS) {
+      struct mbsvp_profile extended;
+      mbsvp_profile_init(&extended);
+      bool neighbour = false;
+      double from = MBSVP_TARGET_DEPTH;
+      if (mbsvp_atlas_extend(verbose, atlas, v, cell_lat_index[c], cell_lon_index[c], &raw, &extended, &neighbour, reason, &local_error) !=
+              MB_SUCCESS ||
+          mbsvp_profile_complete(verbose, &extended, MBSVP_TARGET_DEPTH, v == 0 ? MBSVP_CHEN : MBSVP_LEROY, atlas->lat[cell_lat_index[c]],
+                                 &profiles[v], &from, reason, &local_error) != MB_SUCCESS) {
         complete = false;
         if (!mbsvp_strings_contains(&reasons, reason))
           mbsvp_strings_add(verbose, &reasons, reason, error);
       }
+      else {
+        if (neighbour)
+          *used_neighbour = true;
+        if (from < *physics_from)
+          *physics_from = from;
+      }
+      int error_extended = MB_ERROR_NO_ERROR;
+      mbsvp_profile_free(verbose, &extended, &error_extended);
     }
     if (complete) {
       *rank = c;
@@ -164,7 +181,7 @@ static int extract_point(int verbose, const struct mbsvp_atlas *atlas, const str
 /*--------------------------------------------------------------------*/
 /* The JSON metadata of a profile, in one line. */
 static bool make_metadata(const struct options *options, const struct mbsvp_point *point, double cell_lon, double cell_lat,
-                          char *metadata, size_t size) {
+                          bool used_neighbour, double physics_from, char *metadata, size_t size) {
   char lon[64];
   char lat[64];
   char woa_lon[64];
@@ -187,7 +204,10 @@ static bool make_metadata(const struct options *options, const struct mbsvp_poin
       return false;
     len += added;
   }
-  const int added = snprintf(&metadata[len], size - len, "}");
+  char from[64];
+  mbsvp_format_double(physics_from, from, sizeof(from));
+  const int added = snprintf(&metadata[len], size - len, ",\"Deeper_neighbour\":%s,\"Physics_from_depth\":%s}",
+                             used_neighbour ? "true" : "false", from);
   return added > 0 && (size_t)added < size - len;
 }
 /*--------------------------------------------------------------------*/
@@ -294,7 +314,7 @@ static void write_summary(const char *summary, const char *created, const struct
 }
 /*--------------------------------------------------------------------*/
 /* Process one point. A failure is recorded and the run goes on. */
-static void process_point(const struct options *options, const struct mbsvp_atlas *atlas, const struct mbsvp_point *point,
+static void process_point(const struct options *options, struct mbsvp_atlas *atlas, const struct mbsvp_point *point,
                           const char *folder, const bool want[2], double *speed, struct row *row) {
   const int verbose = options->verbose;
   int error = MB_ERROR_NO_ERROR;
@@ -328,9 +348,12 @@ static void process_point(const struct options *options, const struct mbsvp_atla
   double cell_lon = 0.0;
   double cell_lat = 0.0;
   int rank = 0;
+  bool used_neighbour = false;
+  double physics_from = MBSVP_TARGET_DEPTH;
   int status = extract_point(verbose, atlas, point, want, options->strict_nearest, speed, profiles, &rank, &cell_lon, &cell_lat,
-                             row->error, &error);
-  if (status == MB_SUCCESS && !make_metadata(options, point, cell_lon, cell_lat, row->metadata, sizeof(row->metadata))) {
+                             &used_neighbour, &physics_from, row->error, &error);
+  if (status == MB_SUCCESS &&
+      !make_metadata(options, point, cell_lon, cell_lat, used_neighbour, physics_from, row->metadata, sizeof(row->metadata))) {
     mbsvp_set_message(row->error, "Profile comment is too long");
     status = MB_FAILURE;
   }

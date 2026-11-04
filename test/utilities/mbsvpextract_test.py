@@ -112,9 +112,12 @@ class MbsvpextractRunTest(unittest.TestCase):
     self.assertTrue(lines[1].startswith('# MBSVPEXTRACT_LOCATION {'))
     meta = json.loads(lines[1].split(' ', 2)[2])
     self.assertEqual({'version': 1, 'Longitude_site': -11.5, 'Latitude_site': 37.0, 'WOAdataset': 'WOA23',
-                      'WOA_resolution': '01', 'WOA_period': 'decav', 'Longitude_WOA': -11.5, 'Latitude_WOA': 36.5}, meta)
+                      'WOA_resolution': '01', 'WOA_period': 'decav', 'Longitude_WOA': -11.5, 'Latitude_WOA': 36.5,
+                      'Deeper_neighbour': False, 'Physics_from_depth': 5100.0}, meta)
     self.assertTrue(lines[2].startswith('0.000000 '))
     self.assertTrue(lines[-1].startswith('11000.000000 '))
+    for line in lines[2:]:
+      self.assertTrue(1200 < float(line.split()[1]) < 2000, line)
     # a usual file mode, not owner only
     self.assertTrue(stat.S_IMODE(os.stat(os.path.join(self.output, 'Site_0.svp')).st_mode) & 0o044)
     report = self.summary()
