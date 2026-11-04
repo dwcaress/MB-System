@@ -39,6 +39,7 @@ SUBDIRS += mbbitpack
 SUBDIRS += mbio
 SUBDIRS += mbaux
 SUBDIRS += utilities
+SUBDIRS += svptools
 SUBDIRS += $(XBUILD_SUB_MBTRNBIN)
 SUBDIRS += gmt
 SUBDIRS += otps

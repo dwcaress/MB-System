@@ -40,6 +40,7 @@ set(tests
     mbsegypsd_test
     mbset_test
     mbsslayout_test
+    mbsvpbest_test
     mbsvplist_test
     mbsvpselect_test
     mbswath2las_test

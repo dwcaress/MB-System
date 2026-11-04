@@ -112,6 +112,7 @@ src/utilities/mbsegypsd
 src/utilities/mbset
 src/utilities/mbsslayout
 src/deprecated/mbstripnan
+src/svptools/mbsvpbest
 src/utilities/mbsvplist
 src/utilities/mbsvpselect
 src/deprecated/mbswplspreprocess

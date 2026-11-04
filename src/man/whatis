@@ -75,6 +75,7 @@ mbsegylist(1)            - List selected header values in segy format seismic da
 mbsegypsd(1)             - Calculates the power spectral densisty function (PSD) of each trace in a segy file, outputting the PSD estimates as a GMT grid file with trace number along the x axis and frequency along the y axis
 mbset(1)                 - Sets values in mbprocess parameter files
 mbstripNaN(1)            - filter to remove NaN nodes
+mbsvpbest(1)             - Compare World Ocean Atlas and embedded sound velocity profiles on swath data over locally planar seafloor
 mbsvplist(1)             - List water sound velocity profiles in swath sonar data files
 mbswath(1)               - GMT compatible utility for color fill or color shaded relief swath plots of swath sonar data using Postscript
 mbsystem(1)              - A set of utilities for manipulating and processing swath sonar bathymetry, amplitude, and sidescan data
