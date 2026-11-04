@@ -4947,7 +4947,7 @@ int mbtrnpp_geo_to_tm_gctp(double lat_rad, double lon_rad, double *r_northing_m,
         return -1;
     }
 
-    int retval = wgeocon_navutils_geoToUtm(lat_rad, lon_rad, mbtrn_cfg->trn_utm_zone, r_northing_m, r_easting_m);
+    int retval = wgeocon_cb_geoToUtm(lat_rad, lon_rad, mbtrn_cfg->trn_utm_zone, r_northing_m, r_easting_m);
     return retval;
 }
 

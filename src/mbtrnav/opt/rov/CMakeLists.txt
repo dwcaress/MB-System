@@ -60,6 +60,18 @@ WITH_TRNLOG
 WITH_TRNLOG_EST_OUT
 )
 
+if(buildGeoPROJ)
+# add GEO_PROJ_EN to enable libproj support for trnw
+# compile using cmake .. -buildGeoPROJ=ON
+add_compile_definitions(GEO_PROJ_EN)
+endif()
+
+if(buildGeoGCTP)
+# add GEO_GCTP_EN to enable gctp support for trnw
+# compile using cmake .. -buildGeoGCTP=ON
+add_compile_definitions(GEO_GCTP_EN)
+endif()
+
 # define source directories
 set(GCTP_SRC_DIR   ${CMAKE_SOURCE_DIR}/src/mbtrnav/gctp/source)
 set(NEWMAT_SRC_DIR ${CMAKE_SOURCE_DIR}/src/mbtrnav/newmat)

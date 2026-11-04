@@ -5,11 +5,11 @@
 // i.e. lat/lon <> mercator projection, e.g. utm).
 // See also GeoCon.hpp
 
-#include <memory.h>
-#include <string.h>
-
 #ifndef GEOCON_H
 #define GEOCON_H
+
+#include <memory.h>
+#include <string.h>
 
 // CRS: UTM10N (Monterey Bay)
 #define GEOIF_TCRS_UTM10N "EPSG:32610"
@@ -39,9 +39,16 @@ typedef struct wgeocon_s wgeocon_t;
 typedef int (*GeoToTMCallback)(double lat_rad, double lon_rad, double *r_northing_m, double *r_easting_m);
 typedef int (*TMToGeoCallback)(double northing_m, double easting_m, double *r_lat_rad, double *r_lon_rad);
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+void gctp(double *incoor, long *insys, long *inzone, double *inparm,
+     long *inunit, long *indatum, long *ipr, char *efile,
+     long *jpr, char *pfile, double *outcoor, long *outsys,
+     long *outzone, double *outparm, long *outunit,
+     long *outdatum, char *fn27, char *fn83, long *iflg);
 
 // GeoCon C API
 
@@ -72,8 +79,8 @@ int wgeocon_geo_to_mp(wgeocon_t *self, double lat_rad, double lon_rad, double *r
 // mercator projection to lat/lon
 int wgeocon_mp_to_geo(wgeocon_t *self, double northing_m, double easting_m, double *r_lat_rad, double *r_lon_rad);
 
-// lat/lon to mercator projection (wraps NavUtils::GeoToUtm directly, w/o underlying object; for use with callbacks)
-int wgeocon_navutils_geoToUtm(double lat_rad, double lon_rad, long int utm_zone, double *r_northing_m, double *r_easting_m);
+// lat/lon to mercator projection (calls gctp directly, w/o underlying object; for use with callbacks)
+int wgeocon_cb_geoToUtm(double lat_rad, double lon_rad, long int utm_zone, double *r_northing_m, double *r_easting_m);
 
 // get a pointer to a member (optional; keys defined per implementation)
 void *wgeocon_get_member(wgeocon_t *self, const char *key);

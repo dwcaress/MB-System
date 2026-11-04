@@ -24,6 +24,7 @@ void gctp(double *incoor, long *insys, long *inzone, double *inparm,
 int NavUtils::geoToUtm(double latitude, double longitude, long utmZone,
 		       double *northing, double *easting)
 {
+#ifdef GEO_GCTP_EN
   long insys     = Geographic;
   long inzone    = Ignored;
   long inunit    = Radians;  
@@ -60,12 +61,17 @@ int NavUtils::geoToUtm(double latitude, double longitude, long utmZone,
   *northing = outputCoord[1];
 
   return 0;
+#else
+    fprintf(stderr, "%s:%d - ERR GCTP support disabled (compile with -DGEO_GCTP_EN)\n", __func__, __LINE__);
+    return -1;
+#endif // GEO_GCTP_EN
 }
 
 
 int NavUtils::utmToGeo(double northing, double easting, long utmZone,
 		       double *latitude, double *longitude)
 {
+#ifdef GEO_GCTP_EN
   long insys     = UTM;
 
   long inzone    = utmZone;
@@ -104,6 +110,10 @@ int NavUtils::utmToGeo(double northing, double easting, long utmZone,
   *latitude = outputCoord[1];
 
   return 0;
+#else
+    fprintf(stderr, "%s:%d - ERR GCTP support disabled (compile with -DGEO_GCTP_EN)\n", __func__, __LINE__);
+    return -1;
+#endif // GEO_GCTP_EN
 }
 
 ///////////////////////////////////////////////////////////////////

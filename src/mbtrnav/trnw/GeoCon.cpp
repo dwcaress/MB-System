@@ -6,12 +6,25 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
-#ifdef TRN_USE_PROJ
+#include <math.h>
+#ifdef GEO_PROJ_EN
 #include <proj.h>
 #endif
 
 #include "GeoCon.h"
 #include "GeoCon.hpp"
+
+#ifdef GEO_GCTP_EN
+// Defined constants for use with gctpc
+#define Geographic 0
+#define UTM 1
+#define WGS84Spheroid 12
+#define Radians  0           // Radians
+#define Meters   2           // Meters
+#define SilentMode -1
+#define NameLen   256
+#define Ignored -1
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -75,7 +88,7 @@ int GeoConIF::debug()
     return m_debug;
 }
 
-#ifdef TRN_USE_PROJ
+#ifdef GEO_PROJ_EN
 
 GeoConProj::GeoConProj()
 : m_scrs(nullptr)
@@ -134,7 +147,7 @@ int GeoConProj::geo_to_mp(double lat_rad, double lon_rad, double *r_northing_m, 
         return -1;
     }
 
-    PJ_COORD cin = proj_coord(Math::radToDeg(lon_rad), Math::radToDeg(lat_rad), 0, 0);
+    PJ_COORD cin = proj_coord(GeoCon::radToDeg(lon_rad), GeoCon::radToDeg(lat_rad), 0, 0);
     PJ_COORD cout = proj_trans((PJ *)m_proj_xfm, PJ_FWD, cin);
 
     // set output
@@ -157,11 +170,11 @@ int GeoConProj::mp_to_geo(double northing_m, double easting_m, double *r_lat_rad
     PJ_COORD cout = proj_trans((PJ *)m_proj_xfm, PJ_INV, cin);
 
     // set output
-    *r_lon_rad = Math::degToRad(cout.v[0]);
-    *r_lat_rad = Math::degToRad(cout.v[1]);
+    *r_lon_rad = GeoCon::degToRad(cout.v[0]);
+    *r_lat_rad = GeoCon::degToRad(cout.v[1]);
 
     if(debug() != 0)
-    std::cerr << typestr() << "::" << __func__ << " lat,lon: " << Math::radToDeg(*r_lat_rad) << ", " << Math::radToDeg(*r_lon_rad) << std::endl;
+    std::cerr << typestr() << "::" << __func__ << " lat,lon: " << GeoCon::radToDeg(*r_lat_rad) << ", " << GeoCon::radToDeg(*r_lon_rad) << std::endl;
 
     return 0;
 }
@@ -249,8 +262,9 @@ void GeoConProj::auto_delete(const char *key, bool enable)
     if(strcasecmp(key, "XFM") == 0)
         m_auto_delete_xfm = enable;
 }
-#endif
+#endif // GEO_PROJ_EN
 
+#ifdef GEO_GCTP_EN
 GeoConGCTP::GeoConGCTP()
 : m_utm(10)
 {
@@ -276,12 +290,45 @@ int GeoConGCTP::geo_to_mp(double lat_rad, double lon_rad, double *r_northing, do
         return -1;
     }
 
-    int retval = NavUtils::geoToUtm(lat_rad, lon_rad, m_utm, r_northing, r_easting);
+    long insys     = Geographic;
+    long inzone    = Ignored;
+    long inunit    = Radians;
+    long indatum   = WGS84Spheroid;
+    long ipr       = SilentMode;
+    long jpr       = SilentMode;
+
+    long outsys    = UTM;
+    long outunit   = Meters;
+    long outdatum  = WGS84Spheroid;
+
+    long outzone   = m_utm;
+
+    double inparm[15];
+
+    double inputCoord[2];
+    inputCoord[0] = lon_rad;
+    inputCoord[1] = lat_rad;
+
+    double outparm[15];
+    double outputCoord[2];
+
+    char errorFile[32];
+    char projMsgFile[32];
+    char nad27File[32];
+    char nad83File[32];
+    long errorFlag;
+
+    gctp(inputCoord, &insys, &inzone, inparm, &inunit, &indatum, &ipr,
+         errorFile, &jpr, projMsgFile, outputCoord, &outsys, &outzone, outparm,
+         &outunit, &outdatum, nad27File, nad83File, &errorFlag);
+
+    *r_easting = outputCoord[0];
+    *r_northing = outputCoord[1];
 
     if(debug() != 0)
-    std::cerr << typestr() << "::" << __func__ << " ret:" << retval << " E,N: " << *r_easting << ", " << *r_northing << std::endl;
+    std::cerr << typestr() << "::" << __func__ << " ret:" << 0 << " E,N: " << *r_easting << ", " << *r_northing << std::endl;
 
-    return retval;
+    return 0;
 }
 
 int GeoConGCTP::mp_to_geo(double northing_m, double easting_m, double *r_lat_rad, double *r_lon_rad)
@@ -292,40 +339,88 @@ int GeoConGCTP::mp_to_geo(double northing_m, double easting_m, double *r_lat_rad
     if(r_lat_rad == NULL || r_lon_rad == NULL)
         return -1;
 
-    int retval = NavUtils::utmToGeo(northing_m, easting_m, m_utm, r_lat_rad, r_lon_rad);
+    long insys     = UTM;
+
+    long inzone    = m_utm;
+
+    long inunit    = Meters;
+    long indatum   = WGS84Spheroid;
+    long ipr       = SilentMode;
+    long jpr       = SilentMode;
+
+    long outsys    = Geographic;
+    long outunit   = Radians;
+    long outdatum  = WGS84Spheroid;
+
+    long outzone   = Ignored;
+
+    double inparm[15];
+
+    double inputCoord[2];
+    inputCoord[0] = easting_m;
+    inputCoord[1] = northing_m;
+
+    double outparm[15];
+    double outputCoord[2];
+
+    char errorFile[32];
+    char projMsgFile[32];
+    char nad27File[32];
+    char nad83File[32];
+    long errorFlag;
+
+    gctp(inputCoord, &insys, &inzone, inparm, &inunit, &indatum, &ipr,
+         errorFile, &jpr, projMsgFile, outputCoord, &outsys, &outzone, outparm,
+         &outunit, &outdatum, nad27File, nad83File, &errorFlag);
+
+    *r_lon_rad = outputCoord[0];
+    *r_lat_rad = outputCoord[1];
 
     if(debug() != 0)
-    std::cerr << typestr() << "::" << __func__ << " ret: " << retval << " lat,lon: " << Math::radToDeg(*r_lat_rad) << ", " << Math::radToDeg(*r_lon_rad) << std::endl;
+    std::cerr << typestr() << "::" << __func__ << " ret: " << 0 << " lat,lon: " << GeoCon::radToDeg(*r_lat_rad) << ", " << GeoCon::radToDeg(*r_lon_rad) << std::endl;
 
-    return retval;
+    return 0;
 }
+#endif // GEO_GCTP_EN
 
 GeoCon::GeoCon()
 : m_geocon(nullptr)
 {}
 
+#ifdef GEO_GCTP_EN
 // implementation backed by GCTP library (via NavUtils)
 GeoCon::GeoCon(long int utm)
+: GeoCon()
 {
     // create a GCTP instance
     m_geocon = new GeoConGCTP(utm);
 }
+#else
+GeoCon::GeoCon(long int utm)
+: GeoCon()
+{
+    std::cerr << __func__ << ": ERR gctp not supported; build using -DGEO_GCTP_EN" << std::endl;
+}
+#endif // GEO_GCTP_EN
 
-#ifdef TRN_USE_PROJ
+#ifdef GEO_PROJ_EN
 // implementation backed by libproj coordinate transform (PJ *)
 GeoCon::GeoCon(const char *tcrs)
+: GeoCon()
 {
     // create a PROJ instance
     m_geocon = new GeoConProj(tcrs);
 }
 
 GeoCon::GeoCon(void *xfm, bool autodel, const char *tcrs, const char *scrs)
+: GeoCon()
 {
     // create a PROJ instance
     m_geocon = new GeoConProj(xfm, autodel, tcrs, scrs);
 }
 
 GeoCon::GeoCon(void *xfm, bool autodel)
+: GeoCon()
 {
     // create a PROJ instance
     m_geocon = new GeoConProj(xfm, autodel);
@@ -333,18 +428,20 @@ GeoCon::GeoCon(void *xfm, bool autodel)
 #else
 // if libproj is not available, disable proj implementation
 GeoCon::GeoCon(const char *tcrs)
-: m_geocon(nullptr)
+: GeoCon()
 {
-    std::cerr << __func__ << ": ERR proj not supported; build using -DTRN_USE_PROJ" << std::endl;
+    std::cerr << __func__ << ": ERR proj not supported; build using -DGEO_PROJ_EN" << std::endl;
 }
 GeoCon::GeoCon(void *xfm, bool autodel, const char *tcrs, const char *scrs)
+: GeoCon()
 {
-    std::cerr << __func__ << ": ERR proj not supported; build using -DTRN_USE_PROJ" << std::endl;
+    std::cerr << __func__ << ": ERR proj not supported; build using -DGEO_PROJ_EN" << std::endl;
 }
 
 GeoCon::GeoCon(void *xfm, bool autodel)
+: GeoCon()
 {
-    std::cerr << __func__ << ": ERR proj not supported; build using -DTRN_USE_PROJ" << std::endl;
+    std::cerr << __func__ << ": ERR proj not supported; build using -DGEO_PROJ_EN" << std::endl;
 }
 #endif
 
@@ -352,6 +449,16 @@ GeoCon::~GeoCon()
 {
     if(m_geocon != nullptr)
         delete m_geocon;
+}
+
+double GeoCon::radToDeg(double rad)
+{
+    return rad * 180./M_PI;
+}
+
+double GeoCon::degToRad(double deg)
+{
+    return deg * M_PI/180;
 }
 
 // lat/lon to mercator projection
@@ -445,6 +552,7 @@ struct wgeocon_s {
     void *obj;
 };
 
+#ifdef GEO_GCTP_EN
 wgeocon_t *wgeocon_new_gctp(long int utm)
 {
     wgeocon_t *m = (wgeocon_t *)malloc(sizeof(*m));
@@ -455,7 +563,16 @@ wgeocon_t *wgeocon_new_gctp(long int utm)
     }
     return m;
 }
+#else
+wgeocon_t *wgeocon_new_gctp(long int utm)
+{
+    std::cerr << __func__ << ": ERR gctp support disabled; build using -DGEO_GCTP_EN" << std::endl;
+    return NULL;
+}
 
+#endif // GEO_GCTP_EN
+
+#ifdef GEO_PROJ_EN
 wgeocon_t *wgeocon_new_proj(const char *crs)
 {
     wgeocon_t *m = (wgeocon_t *)malloc(sizeof(*m));
@@ -488,6 +605,24 @@ wgeocon_t *wgeocon_xnew_proj(void *xfm, bool autodel)
     }
     return m;
 }
+#else
+wgeocon_t *wgeocon_new_proj(const char *crs)
+{
+    std::cerr << __func__ << ": ERR proj support disabled; build using -DGEO_PROJ_EN" << std::endl;
+    return NULL;
+}
+wgeocon_t *wgeocon_inew_proj(void *xfm, bool autodel, const char *tcrs, const char *scrs)
+{
+    std::cerr << __func__ << ": ERR proj support disabled; build using -DGEO_PROJ_EN" << std::endl;
+    return NULL;
+}
+wgeocon_t *wgeocon_xnew_proj(void *xfm, bool autodel)
+{
+    std::cerr << __func__ << ": ERR proj support disabled; build using -DGEO_PROJ_EN" << std::endl;
+    return NULL;
+}
+#endif // GEO_PROJ_EN
+
 void wgeocon_delete(wgeocon_t *self)
 {
     if (NULL!=self){
@@ -559,11 +694,54 @@ int wgeocon_mp_to_geo(wgeocon_t *self, double northing_m, double easting_m, doub
     }
     return -1;
 }
-
-int wgeocon_navutils_geoToUtm(double lat_rad, double lon_rad, long int utm_zone, double *r_northing_m, double *r_easting_m)
+#ifdef GEO_GCTP_EN
+int wgeocon_cb_geoToUtm(double lat_rad, double lon_rad, long int utm_zone, double *r_northing_m, double *r_easting_m)
 {
-    return NavUtils::geoToUtm(lat_rad, lon_rad, utm_zone, r_northing_m, r_easting_m);
+//    return NavUtils::geoToUtm(lat_rad, lon_rad, utm_zone, r_northing_m, r_easting_m);
+    long insys     = Geographic;
+    long inzone    = Ignored;
+    long inunit    = Radians;
+    long indatum   = WGS84Spheroid;
+    long ipr       = SilentMode;
+    long jpr       = SilentMode;
+
+    long outsys    = UTM;
+    long outunit   = Meters;
+    long outdatum  = WGS84Spheroid;
+
+    long outzone   = utm_zone;
+
+    double inparm[15];
+
+    double inputCoord[2];
+    inputCoord[0] = lon_rad;
+    inputCoord[1] = lat_rad;
+
+    double outparm[15];
+    double outputCoord[2];
+
+    char errorFile[32];
+    char projMsgFile[32];
+    char nad27File[32];
+    char nad83File[32];
+    long errorFlag;
+
+    gctp(inputCoord, &insys, &inzone, inparm, &inunit, &indatum, &ipr,
+         errorFile, &jpr, projMsgFile, outputCoord, &outsys, &outzone, outparm,
+         &outunit, &outdatum, nad27File, nad83File, &errorFlag);
+
+    *r_easting_m = outputCoord[0];
+    *r_northing_m = outputCoord[1];
+
+    return 0;
 }
+#else
+int wgeocon_cb_geoToUtm(double lat_rad, double lon_rad, long int utm_zone, double *r_northing_m, double *r_easting_m)
+{
+    std::cerr << __func__ << ": ERR not implemented. gctp support disabled; build using -DGEO_GCTP_EN" << std::endl;
+    return -1;
+}
+#endif
 
 void *wgeocon_get_member(wgeocon_t *self, const char *key)
 {

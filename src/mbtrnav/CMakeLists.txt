@@ -54,6 +54,8 @@ message("In src/mbtrnav")
 option(buildVerbose "build with verbose output" ON)
 option(buildTRNOptional "build targets in buildTRNOptional" OFF)
 option(buildTrnNoRand "build with TRN_NORAND (random seed disabled)" OFF)
+option(buildGeoGCTP "build with GCTP GeoCon implementation" OFF)
+option(buildGeoPROJ "build with PROJ GeoCon implementation" ON)
 #option(buildTrnLog "build using WITH_TRNLOG (TRN binary logging)" ON)
 #option(buildTrnLogEst "build using WITH_TRNLOG_EST_OUT (TRN MMSE logging)" ON)
 
@@ -65,6 +67,32 @@ if(buildTrnNoRand)
 else()
     message("TRN_NORAND unset : TRN random seed ENABLED")
 endif()
+
+if(buildGeoPROJ)
+find_package(LibPROJ REQUIRED)
+# add GEO_PROJ_EN to enable libproj support for trnw
+# compile using cmake .. -buildGeoPROJ=ON
+add_compile_definitions(GEO_PROJ_EN)
+endif()
+
+if(buildGeoGCTP)
+# add GEO_GCTP_EN to enable gctp support for trnw
+# compile using cmake .. -buildGeoGCTP=ON
+add_compile_definitions(GEO_GCTP_EN)
+endif()
+
+if(NOT buildGeoGCTP)
+if(NOT buildGeoPROJ)
+message("WARN: neither GCTP and PROJ are enabled (must enable one)")
+endif()
+endif()
+
+if(buildGeoGCTP)
+if(buildGeoPROJ)
+message("WARN: both GCTP and PROJ are enabled")
+endif()
+endif()
+
 
 # WITH_TRNLOG         : enable TRN binary log (-DbuildTrnLog=ON)
 # WITH_TRNLOG_EST_OUT : enable TRN binary log (-DbuildTrnLogEst=ON)
@@ -139,6 +167,8 @@ message(" buildTRNOptional            ${buildTRNOptional}")
 message(" buildUseProj                ${buildUseProj}")
 message(" buildTRNLCM                 ${buildTRNLCM}")
 message(" buildTrnNoRand              ${buildTrnNoRand}")
+message(" buildGeoGCTP                ${buildGeoGCTP}")
+message(" buildGeoPROJ                ${buildGeoPROJ}")
 message(" COMPILE_DEFINITIONS         ${DirDefs}")
 message(" Libmframe_FOUND             ${Libmframe_FOUND}")
 message(" Libmframe_INCLUDE_DIRS      ${Libmframe_INCLUDE_DIRS}")
@@ -180,8 +210,8 @@ endif()
 #------------------------------------------------------------------------------
 #
 # build libgeolib (gctp)
-
-add_library(geolib 
+if(buildGeoGCTP)
+add_library(geolib
    ${GCTP_SRC_DIR}/gctp.c
    ${GCTP_SRC_DIR}/alberfor.c
    ${GCTP_SRC_DIR}/alberinv.c
@@ -261,6 +291,13 @@ target_compile_options(geolib PRIVATE
 "-Wno-uninitialized"
 "-Wno-sometimes-uninitialized"
 )
+
+else()
+message("!!! COMPILING w/ GEOLIB STUB !!!")
+add_library(geolib STATIC
+ ${TRNW_SRC_DIR}/gctp_stub.c
+)
+endif() # buildGeoGCTP
 
 #
 #------------------------------------------------------------------------------
@@ -374,7 +411,7 @@ add_library(geocon
 )
 
 # specify include paths and libraries
-target_link_libraries(geocon PRIVATE qnx LibPROJ::LibPROJ )
+target_link_libraries(geocon PRIVATE qnx geolib LibPROJ::LibPROJ )
 
 target_include_directories(geocon PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}

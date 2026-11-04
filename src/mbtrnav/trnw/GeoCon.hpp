@@ -7,16 +7,19 @@
 // reference argument instead of utmZone. T
 // The underlying implementation  may be GCTP or Proj, and
 // may be selected at run time
+#ifndef GEOCON_HPP
+#define GEOCON_HPP
+#ifndef GEO_GCTP_EN
+#ifndef GEO_PROJ_EN
+#pragma message("ERROR no GeoCon impl defined; compile with GEO_GCTP_EN or GEO_PROJ_EN")
+#endif
+#endif
 
 #include <iostream>
 #include <memory.h>
 #include <string.h>
-#include <NavUtils.h>
-#include <MathP.h>
 #include "GeoCon.h"
 
-#ifndef GEOCON_HPP
-#define GEOCON_HPP
 
 // GeoConIF
 // Virtual base class (interface)
@@ -65,7 +68,7 @@ protected:
     int m_debug;
 };
 
-#ifdef TRN_USE_PROJ
+#ifdef GEO_PROJ_EN
 // GeoConProj
 // Implementation backed by libproj coordinate transform (PJ*).
 // callers may opt to manage (initialize, destroy) the underlying transform,
@@ -112,7 +115,7 @@ private:
     void *m_proj_xfm;
     bool m_auto_delete_xfm;
 };
-#endif // TRN_USE_PROJ
+#endif // GEO_PROJ_EN
 
 // GeoConGCTP
 // implementation backed by GCTP library (via NavUtils)
@@ -123,6 +126,7 @@ private:
 //
 // init argments: not implemented
 
+#ifdef GEO_GCTP_EN
 class GeoConGCTP : public GeoConIF
 {
 public:
@@ -139,6 +143,7 @@ public:
 private:
     long int m_utm;
 };
+#endif // GEO_GCTP_EN
 
 // GeoCon
 // Concrete implementation for GeoConIF
@@ -188,6 +193,8 @@ public:
     // debug level accessors
     void set_debug(int level);
     int debug();
+    static double radToDeg(double rad);
+    static double degToRad(double deg);
 
 private:
     // underlying implementation
