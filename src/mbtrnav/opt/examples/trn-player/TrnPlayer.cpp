@@ -272,16 +272,13 @@ void TrnPlayer::show()
         double lat_r = GeoCon::degToRad(lat);
         double lon_r = GeoCon::degToRad(lon);
         unsigned int utm_zone = GeoCon::geoToUtmZone(lat_r, lon_r);
+        // get GCTP GeoCon instance
         GeoCon gcon(utm_zone);
         
         if(gcon.geo_to_mp(lat_r, lon_r, &pt->x, &pt->y) != 0) {
             fprintf(stderr, "%s:%d - ERR coordinate conversion failed\n", __func__, __LINE__);
             return -1;
         }
-
-//        NavUtils::geoToUtm(Math::degToRad(lat), Math::degToRad(lon),
-//                           NavUtils::geoToUtmZone(Math::degToRad(lat),Math::degToRad(lon)),
-//                           &pt->x, &pt->y);
 
         mbtrn_log->fields.get( 4,&f); pt->z = atof(f->ascii());
         mbtrn_log->fields.get( 5,&f); pt->psi = atof(f->ascii());
