@@ -1,0 +1,225 @@
+.TH mbsvpbest 1 "3 November 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbsvpbest\fP \- Compare World Ocean Atlas and embedded sound velocity
+profiles on swath data over locally planar seafloor.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbsvpbest\fP
+.br
+--svpfolder=directory {-Sdirectory}
+.br
+--apply-best
+.br
+--enddate {-E}
+.br
+--help {-H}
+.br
+--input=file {-Ifile} (also --swathfile)
+.br
+--minimum-beams=number
+.br
+--nearest {-N}
+.br
+--outputfolder=directory {-Odirectory}
+.br
+--period=period[,period...] {-Pperiod[,period...]}
+.br
+--plots
+.br
+--resolution=01|04[,...] {-R01|04[,...]}
+.br
+--selection=combined|per-file
+.br
+--verbose {-V}
+
+.SH DESCRIPTION
+\fBmbsvpbest\fP compares sound velocity profiles (SVPs) by applying each of
+them to swath data through \fBmbprocess\fP and measuring how far the resulting
+depths lie from a straight line in each ping. The most recently measured
+profile is not always the most representative one for a survey, so the profile
+embedded in the swath file is tested as one candidate among the others rather
+than taken as a reference.
+
+The candidates are:
+.br
+\- World Ocean Atlas 2018 and 2023 climatological profiles at the survey, for
+the requested periods and resolutions, in annual, seasonal and monthly versions
+for the month of the survey, each computed with the Chen and Millero and with the
+Leroy sound speed formulas. WOA18 and WOA23 values are never blended.
+.br
+\- The profiles embedded in the swath files, extracted with \fBmbsvplist\fP.
+These must start within 1 m of the surface, reach the maximum depth of the survey,
+have strictly increasing depths and speeds between 1200 and 2000 m/s, and are
+otherwise rejected with a note. A profile with the same depths and speeds as one
+already kept is evaluated only once.
+
+In each ping, depth is fitted by a straight line against acrosstrack distance.
+The residuals of all pings and all files are pooled, and the candidates are ranked by
+the root mean square of these residuals (RMSE); the lowest finite RMSE
+wins, and equal scores keep the candidate order. The mean absolute error, mean square
+error, mean error and the sounding and ping counts are reported too.
+
+\fBThe result needs care.\fP The winner is the best of the profiles tested, for the
+selected data and this metric. The ranking does not show that it reproduces the
+true water column. The metric assumes locally planar seafloor, so use data free of
+real relief across the swath. There is no common mask of soundings across candidates: a
+candidate that loses difficult outer soundings can gain from it, so compare the
+sounding counts and read \fBprofile_notes\fP and \fBcandidate_failures\fP
+in the report.
+
+.B Sound speed grids
+.br
+The program requires at least one of the sound speed datasets posted at
+https://zenodo.org/communities/mb-system_woa_svp_datasets/
+.br
+The directory given with \fB\-\-svpfolder\fP holds these NetCDF files, named
+woaYY_PERIOD_svpTT_RR.nc, where YY is 18 or 23, TT is 00 (annual), 01 to 12
+(months) or 13 to 16 (seasons), and RR is 01 (1 degree) or 04 (0.25 degree). They
+contain the variables v_an_chen and v_an_leroy on the dimensions depth, lat and lon.
+Only direct children of the directory that match the requested periods and
+resolutions and the month or season of the survey are used.
+
+.B Completion to 11000 m
+.br
+Invalid samples are removed. A seasonal profile takes deeper valid annual samples,
+and a monthly profile takes the deeper seasonal and annual samples, from the same
+edition, period and resolution; no value is changed at a join. A profile that is still
+short gets an endpoint at 11000 m from a least-squares line through its samples in
+the deepest 2000 m of valid coverage. This endpoint is a processing extrapolation,
+not an observation. A survey deeper than 11000 m is rejected.
+
+.B Selection modes
+.br
+With \fB\-\-selection=combined\fP, the default, one profile is chosen for all the input
+files. The candidates use the combined bounds of the files, and all files must share the
+selected month. With \fB\-\-selection=per-file\fP each file is evaluated on its own with
+its own bounds, date, candidates and winner. A file that fails is recorded and the next one
+goes on; an interrupt stops the batch.
+
+.B Files
+.br
+A combined evaluation makes OUTPUTFOLDER/run-DATE-TIME holding the candidate
+profiles, ranking.json, ranking.csv and commands.log, the output of the programs run. A
+per-file evaluation makes OUTPUTFOLDER/per-file-DATE-TIME with summary.json and a
+folder NNNN_NAME/run-DATE-TIME for each input file. The candidates carry their source and
+location in comment lines starting with # MBSVPBEST_LOCATION and # MBSVPBEST_DONOR.
+
+During the evaluation \fBmbsvpbest\fP changes the parameter file of each input
+file, and \fBmbprocess\fP rewrites its reverse edit save file (.resf) and may leave a
+lock file (.lck) if it is stopped. These are put back as they were at the end of the run,
+on failure and on an interrupt; copies stay in the backup folder of the run directory
+until then, in case the program is killed. Do not run other jobs on the same files at the same time, and try
+new settings on copies of the data first. Paths written to a parameter file
+cannot contain spaces.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian dos Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH AUTHORSHIP OF THIS PROGRAM
+Christian dos Santos Ferreira
+.br
+  MARUM, University of Bremen
+
+This program derives from the Python program mbbestsvp, later renamed mbsvpbest, by
+Dominik Patrick Nommensen
+(https://github.com/DominikPatrickNommensen/MB-System-Best-WOA18-SVP).
+
+.SH OPTIONS
+.TP
+.B \-\-apply-best
+Set the winning profile in the parameter files of the input files and process
+them with \fBmbprocess\fP. In combined mode the parameter files are put back if any
+file fails, but outputs already made stay. In per-file mode each winner is applied right
+after its evaluation, so earlier applications stay after a later failure. Processing can
+overwrite existing output files: review a ranking first.
+.TP
+.B \-\-enddate {\-E}
+Select the month and season from the end of each file instead of its start.
+.TP
+.B \-\-help {\-H}
+Print a short description and the usage, and exit.
+.TP
+.B \-\-input=\fIfile\fP {\-I\fIfile\fP}
+Swath file or datalist. Nested datalists are allowed, a datalist that includes itself,
+a listed file that does not exist and formats below \-1 are errors.
+Default: datalist.mb-1. \fB\-\-swathfile\fP is the same option.
+.TP
+.B \-\-minimum-beams=\fInumber\fP
+A ping with fewer valid soundings is left out and counted as rejected. Minimum 3,
+default 5.
+.TP
+.B \-\-nearest {\-N}
+Use the profile of the nearest grid cell with valid near-surface coverage, instead of
+the mean over the cells that bracket the survey. Only the 16 nearest cells are
+examined, with a warning when a neighbour replaces the nearest cell.
+.TP
+.B \-\-outputfolder=\fIdirectory\fP {\-O\fIdirectory\fP}
+Parent directory of the output, made if necessary. Default: svpprofiles.
+.TP
+.B \-\-period=\fIperiod\fP[,\fIperiod\fP...] {\-P\fIperiod\fP[,\fIperiod\fP...]}
+Climatological periods to use, separated by commas or spaces or by repeating the option.
+Default: decav, A5B7 and B5C2. Periods that exist for only one edition
+are used for that edition.
+.TP
+.B \-\-plots
+For each candidate write a table of the mean, standard deviation and count of the
+residuals by beam, and plot it to a PNG file with GMT. A plot that fails gives a
+warning and does not stop the evaluation.
+.TP
+.B \-\-resolution=01|04[,...] {\-R01|04[,...]}
+Grid resolutions to use: 01 is 1 degree, 04 is 0.25 degree, separated by commas or
+spaces or by repeating the option. Default: both.
+.TP
+.B \-\-selection=combined|per-file
+One winner for all input files (default) or one for each input file.
+.TP
+.B \-\-svpfolder=\fIdirectory\fP {\-S\fIdirectory\fP}
+Directory of the sound speed grids, from the datasets posted at
+https://zenodo.org/communities/mb-system_woa_svp_datasets/
+Required.
+.TP
+.B \-\-verbose {\-V}
+Print the commands that are run. Repeat for debugging output.
+
+.SH EXIT STATUS
+0 on success, 1 on failure (for per-file selection, if any file failed), 9 for wrong
+usage and 130 after an interrupt.
+
+.SH EXAMPLES
+Compare the decav candidates at 1 degree with the embedded profiles of a set of lines
+from the same month, using one profile for all of them:
+.br
+	mbsvpbest -I datalist.mb-1 -S woa_data -P decav -R 01 -O evaluation
+
+One winner for each line, for all default periods at both resolutions, using the nearest cell:
+.br
+	mbsvpbest -I datalist.mb-1 -S woa_data -N --selection=per-file -O evaluation
+
+After reviewing the scores, coverage and notes, apply the winner:
+.br
+	mbsvpbest -I datalist.mb-1 -S woa_data -P decav -R 01 -O evaluation --apply-best
+
+.SH SEE ALSO
+\fBmblevitus\fP(1), \fBmbprocess\fP(1), \fBmbset\fP(1), \fBmbsvplist\fP(1),
+\fBmbsvpselect\fP(1), \fBmbsystem\fP(1), \fBmbvelocitytool\fP(1)
+
+.SH BUGS
+The automatic selection has not been validated for arbitrary terrain. Interior
+missing samples of a climatological profile are removed, not filled.
