@@ -46,16 +46,6 @@ struct mbsvp_axis {
   int *index;    /* position of each value in the file */
 };
 
-struct mbsvp_variable {
-  int varid;
-  int ndims;
-  int depth_dim;
-  int lat_dim;
-  int lon_dim;
-  bool has_fill[2];
-  float fill[2];
-};
-
 static const char *mbsvp_kind_name[MBSVP_KINDS] = {"annual", "seasonal", "monthly"};
 static const char *mbsvp_formula_name[2] = {"chen", "leroy"};
 
@@ -324,36 +314,192 @@ static int mbsvp_area_mean(int verbose, int ncid, const struct mbsvp_variable *v
   return status;
 }
 /*--------------------------------------------------------------------*/
+/* -180 to 180. A value already in range keeps its exact value. */
+double mbsvp_normalize_longitude(double longitude) {
+  if (longitude >= -180.0 && longitude < 180.0)
+    return longitude;
+  double wrapped = fmod(longitude + 180.0, 360.0);
+  if (wrapped < 0.0)
+    wrapped += 360.0;
+  return wrapped - 180.0;
+}
+/*--------------------------------------------------------------------*/
+/* The cells closest to a position in a local distance with circular
+   longitude, closest first. Equal distances keep the order of the axes. */
+static void mbsvp_rank_cells(const double *lat, int nlat, const double *lon, int nlon, double target_lat, double target_lon,
+                             int limit, int *cell_lat, int *cell_lon, int *ncells) {
+  const double scale = MAX(cos(DTR * target_lat), 0.05);
+  double best_distance[MBSVP_NEAREST_CELLS];
+  int nbest = 0;
+  for (int i = 0; i < nlat; i++) {
+    const double dy = lat[i] - target_lat;
+    for (int j = 0; j < nlon; j++) {
+      double dx = fmod(lon[j] - target_lon + 180.0, 360.0);
+      if (dx < 0.0)
+        dx += 360.0;
+      dx = (dx - 180.0) * scale;
+      const double distance = dy * dy + dx * dx;
+      if (nbest == limit && distance >= best_distance[nbest - 1])
+        continue;
+      int k = nbest < limit ? nbest : limit - 1;
+      while (k > 0 && best_distance[k - 1] > distance) {
+        best_distance[k] = best_distance[k - 1];
+        cell_lat[k] = cell_lat[k - 1];
+        cell_lon[k] = cell_lon[k - 1];
+        k--;
+      }
+      best_distance[k] = distance;
+      cell_lat[k] = i;
+      cell_lon[k] = j;
+      if (nbest < limit)
+        nbest++;
+    }
+  }
+  *ncells = nbest;
+}
+/*--------------------------------------------------------------------*/
+static int mbsvp_compare_doubles(const void *a, const void *b) {
+  const double x = *(const double *)a;
+  const double y = *(const double *)b;
+  return x < y ? -1 : (x > y ? 1 : 0);
+}
+/*--------------------------------------------------------------------*/
+/* Check that a position lies inside a possibly cropped grid, then rank the
+   cells around it. The axes are in file order and are not changed. A remote
+   edge of a cropped grid is never used silently. */
+int mbsvp_woa_order_cells(int verbose, const double *lat, int nlat, const double *lon, int nlon, double target_lat,
+                          double target_lon, int limit, int *cell_lat, int *cell_lon, int *ncells, char *message, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2       target:     %f %f\n", target_lon, target_lat);
+    fprintf(stderr, "dbg2       limit:      %d\n", limit);
+  }
+
+  *ncells = 0;
+  if (nlat < 1 || nlon < 1 || limit < 1 || limit > MBSVP_NEAREST_CELLS) {
+    mbsvp_set_message(message, "Invalid grid or cell limit");
+    *error = MB_ERROR_BAD_PARAMETER;
+    return MB_FAILURE;
+  }
+  const size_t size = (size_t)MAX(nlat, nlon + 1) * sizeof(double);
+  double *work = NULL;
+  double *gaps = NULL;
+  if (mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&work, error) != MB_SUCCESS ||
+      mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&gaps, error) != MB_SUCCESS) {
+    int error_free = MB_ERROR_NO_ERROR;
+    if (work != NULL)
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&work, &error_free);
+    return MB_FAILURE;
+  }
+  int status = MB_SUCCESS;
+
+  /* longitude axis */
+  for (int i = 0; i < nlon && status == MB_SUCCESS; i++) {
+    if (!isfinite(lon[i])) {
+      mbsvp_set_message(message, "Invalid lon coordinate axis");
+      status = MB_FAILURE;
+    }
+    work[i] = lon[i];
+  }
+  if (status == MB_SUCCESS) {
+    qsort(work, nlon, sizeof(double), mbsvp_compare_doubles);
+    for (int i = 1; i < nlon && status == MB_SUCCESS; i++) {
+      if (work[i] == work[i - 1]) {
+        mbsvp_set_message(message, "Duplicate lon coordinates");
+        status = MB_FAILURE;
+      }
+    }
+  }
+  if (status == MB_SUCCESS && nlon > 1) {
+    for (int i = 0; i < nlon; i++) {
+      double wrapped = fmod(lon[i] + 180.0, 360.0);
+      if (wrapped < 0.0)
+        wrapped += 360.0;
+      work[i] = wrapped - 180.0;
+    }
+    qsort(work, nlon, sizeof(double), mbsvp_compare_doubles);
+    double largest = -1.0;
+    int k = 0;
+    for (int i = 0; i < nlon; i++) {
+      gaps[i] = i < nlon - 1 ? work[i + 1] - work[i] : work[0] + 360.0 - work[nlon - 1];
+      if (gaps[i] > largest) {
+        largest = gaps[i];
+        k = i;
+      }
+    }
+    const double start = work[(k + 1) % nlon];
+    qsort(gaps, nlon, sizeof(double), mbsvp_compare_doubles);
+    const double typical = nlon % 2 == 1 ? gaps[nlon / 2] : 0.5 * (gaps[nlon / 2 - 1] + gaps[nlon / 2]);
+    if (largest > MAX(typical * 3.0, 1.0e-6)) {
+      const double span = 360.0 - largest;
+      double offset = fmod(target_lon - start, 360.0);
+      if (offset < 0.0)
+        offset += 360.0;
+      if (offset > span + typical / 2.0 + 1.0e-8 && offset < 360.0 - typical / 2.0 - 1.0e-8) {
+        mbsvp_set_message(message, "Site outside cropped longitude coverage");
+        status = MB_FAILURE;
+      }
+    }
+  }
+  else if (status == MB_SUCCESS) {
+    double dx = fmod(lon[0] - target_lon + 180.0, 360.0);
+    if (dx < 0.0)
+      dx += 360.0;
+    if (fabs(dx - 180.0) > 1.0e-6) {
+      mbsvp_set_message(message, "Site outside single-cell longitude coverage");
+      status = MB_FAILURE;
+    }
+  }
+
+  /* latitude axis */
+  for (int i = 0; i < nlat && status == MB_SUCCESS; i++) {
+    if (!isfinite(lat[i])) {
+      mbsvp_set_message(message, "Invalid lat coordinate axis");
+      status = MB_FAILURE;
+    }
+    else if (fabs(lat[i]) > 90.0) {
+      mbsvp_set_message(message, "Latitude grid outside [-90,90]");
+      status = MB_FAILURE;
+    }
+    work[i] = lat[i];
+  }
+  if (status == MB_SUCCESS) {
+    qsort(work, nlat, sizeof(double), mbsvp_compare_doubles);
+    double tolerance = 1.0e-6;
+    for (int i = 1; i < nlat && status == MB_SUCCESS; i++) {
+      if (work[i] == work[i - 1]) {
+        mbsvp_set_message(message, "Duplicate lat coordinates");
+        status = MB_FAILURE;
+      }
+      if (i == 1 || 0.5 * (work[i] - work[i - 1]) < tolerance)
+        tolerance = 0.5 * (work[i] - work[i - 1]);
+    }
+    if (status == MB_SUCCESS &&
+        (target_lat < work[0] - tolerance - 1.0e-8 || target_lat > work[nlat - 1] + tolerance + 1.0e-8)) {
+      mbsvp_set_message(message, "Site outside latitude coverage");
+      status = MB_FAILURE;
+    }
+  }
+
+  if (status == MB_SUCCESS)
+    mbsvp_rank_cells(lat, nlat, lon, nlon, target_lat, target_lon, limit, cell_lat, cell_lon, ncells);
+  else
+    *error = MB_ERROR_BAD_PARAMETER;
+
+  int error_free = MB_ERROR_NO_ERROR;
+  mb_freed(verbose, __FILE__, __LINE__, (void **)&work, &error_free);
+  mb_freed(verbose, __FILE__, __LINE__, (void **)&gaps, &error_free);
+  return status;
+}
+/*--------------------------------------------------------------------*/
 /* Examine only nearby cells: a remote ocean is never used silently. */
 static int mbsvp_nearest_cell(int verbose, int ncid, const struct mbsvp_variable variable[2], double target_lat,
                               double center, const struct mbsvp_axis *lat, const struct mbsvp_axis *lon,
                               struct mbsvp_grid *grid, float *buffer, char *message, int *error) {
-  const double scale = MAX(cos(DTR * target_lat), 0.05);
-  double best_distance[MBSVP_NEAREST_CELLS];
   int best_lat[MBSVP_NEAREST_CELLS];
   int best_lon[MBSVP_NEAREST_CELLS];
   int nbest = 0;
-  for (int i = 0; i < lat->n; i++) {
-    const double dy = lat->value[i] - target_lat;
-    for (int j = 0; j < lon->n; j++) {
-      const double dx = (lon->value[j] - center) * scale;
-      const double distance = dy * dy + dx * dx;
-      if (nbest == MBSVP_NEAREST_CELLS && distance >= best_distance[nbest - 1])
-        continue;
-      int k = nbest < MBSVP_NEAREST_CELLS ? nbest : MBSVP_NEAREST_CELLS - 1;
-      while (k > 0 && best_distance[k - 1] > distance) {
-        best_distance[k] = best_distance[k - 1];
-        best_lat[k] = best_lat[k - 1];
-        best_lon[k] = best_lon[k - 1];
-        k--;
-      }
-      best_distance[k] = distance;
-      best_lat[k] = i;
-      best_lon[k] = j;
-      if (nbest < MBSVP_NEAREST_CELLS)
-        nbest++;
-    }
-  }
+  mbsvp_rank_cells(lat->value, lat->n, lon->value, lon->n, target_lat, center, MBSVP_NEAREST_CELLS, best_lat, best_lon, &nbest);
 
   for (int c = 0; c < nbest; c++) {
     double *speed[2] = {grid->chen, grid->leroy};
@@ -523,6 +669,96 @@ int mbsvp_woa_read_grid(int verbose, const char *path, const struct mbsvp_survey
     fprintf(stderr, "dbg2       status:     %d\n", status);
   }
   return status;
+}
+/*--------------------------------------------------------------------*/
+void mbsvp_atlas_init(struct mbsvp_atlas *atlas) {
+  memset(atlas, 0, sizeof(struct mbsvp_atlas));
+}
+/*--------------------------------------------------------------------*/
+int mbsvp_atlas_close(int verbose, struct mbsvp_atlas *atlas, int *error) {
+  if (atlas->open)
+    nc_close(atlas->ncid);
+  atlas->open = false;
+  if (atlas->lat != NULL)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&atlas->lat, error);
+  if (atlas->lon != NULL)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&atlas->lon, error);
+  if (atlas->depth != NULL)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&atlas->depth, error);
+  if (atlas->buffer != NULL)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&atlas->buffer, error);
+  return MB_SUCCESS;
+}
+/*--------------------------------------------------------------------*/
+/* Open a grid that must hold the wanted variables, each with one entry in
+   any dimension other than depth, lat and lon. */
+int mbsvp_atlas_open(int verbose, const char *path, const bool want[2], struct mbsvp_atlas *atlas, char *message, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2       path:       %s\n", path);
+    fprintf(stderr, "dbg2       want:       %d %d\n", want[0], want[1]);
+  }
+
+  const char *names[2] = {"v_an_chen", "v_an_leroy"};
+  const int nc_status = nc_open(path, NC_NOWRITE, &atlas->ncid);
+  if (nc_status != NC_NOERR) {
+    mbsvp_set_message(message, "%s: %s", path, nc_strerror(nc_status));
+    *error = MB_ERROR_OPEN_FAIL;
+    return MB_FAILURE;
+  }
+  atlas->open = true;
+
+  int status = mbsvp_axis_read(verbose, atlas->ncid, "lat", &atlas->lat, &atlas->nlat, message, error);
+  if (status == MB_SUCCESS)
+    status = mbsvp_axis_read(verbose, atlas->ncid, "lon", &atlas->lon, &atlas->nlon, message, error);
+  if (status == MB_SUCCESS)
+    status = mbsvp_axis_read(verbose, atlas->ncid, "depth", &atlas->depth, &atlas->ndepth, message, error);
+  for (int v = 0; v < 2 && status == MB_SUCCESS; v++) {
+    atlas->have[v] = false;
+    if (!want[v])
+      continue;
+    if (mbsvp_variable_open(atlas->ncid, names[v], &atlas->variable[v]) != MB_SUCCESS) {
+      mbsvp_set_message(message, "Missing %s in %s", names[v], path);
+      *error = MB_ERROR_BAD_DATA;
+      status = MB_FAILURE;
+      break;
+    }
+    atlas->have[v] = true;
+    int dimids[NC_MAX_VAR_DIMS];
+    nc_inq_vardimid(atlas->ncid, atlas->variable[v].varid, dimids);
+    for (int d = 0; d < atlas->variable[v].ndims; d++) {
+      size_t len = 1;
+      nc_inq_dimlen(atlas->ncid, dimids[d], &len);
+      if (d != atlas->variable[v].depth_dim && d != atlas->variable[v].lat_dim && d != atlas->variable[v].lon_dim && len != 1) {
+        mbsvp_set_message(message, "Annual dataset must have exactly one time entry: %s", path);
+        *error = MB_ERROR_BAD_DATA;
+        status = MB_FAILURE;
+      }
+    }
+  }
+  if (status == MB_SUCCESS)
+    status = mb_mallocd(verbose, __FILE__, __LINE__, atlas->ndepth * sizeof(float), (void **)&atlas->buffer, error);
+  return status;
+}
+/*--------------------------------------------------------------------*/
+/* The sound speed column of one cell, with missing values as NaN. */
+int mbsvp_atlas_read_cell(int verbose, const struct mbsvp_atlas *atlas, int variable, int lat_index, int lon_index, double *speed,
+                          char *message, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2       cell:       %d %d\n", lat_index, lon_index);
+  }
+
+  if (!atlas->have[variable] ||
+      mbsvp_variable_read(atlas->ncid, &atlas->variable[variable], 0, atlas->ndepth, lat_index, 1, lon_index, 1, atlas->buffer) !=
+          MB_SUCCESS) {
+    mbsvp_set_message(message, "Cannot read sound speed");
+    *error = MB_ERROR_BAD_DATA;
+    return MB_FAILURE;
+  }
+  for (int k = 0; k < atlas->ndepth; k++)
+    speed[k] = atlas->buffer[k];
+  return MB_SUCCESS;
 }
 /*--------------------------------------------------------------------*/
 int mbsvp_write_profile(int verbose, const char *path, const struct mbsvp_profile *profile, const char *description,

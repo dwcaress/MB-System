@@ -748,4 +748,272 @@ TEST(CommandTest, InterruptedChildIsSeen) {
   mbsvp_interrupted = 0;
 }
 
+/*--------------------------------------------------------------------*/
+TEST(CoordinateTest, Values) {
+  double value = 0.0;
+  char message[MBSVP_MESSAGE_SIZE] = "";
+  ASSERT_EQ(MB_SUCCESS, mbsvp_coordinate(" -47.5628237", false, &value, message));
+  EXPECT_EQ(-47.5628237, value);  // in range: the exact value is kept
+  ASSERT_EQ(MB_SUCCESS, mbsvp_coordinate("348.5", false, &value, message));
+  EXPECT_EQ(-11.5, value);
+  ASSERT_EQ(MB_SUCCESS, mbsvp_coordinate("-121:04.2", false, &value, message));
+  EXPECT_NEAR(-121.07, value, 1e-12);
+  ASSERT_EQ(MB_SUCCESS, mbsvp_coordinate("-0:30", true, &value, message));
+  EXPECT_EQ(-0.5, value);
+  EXPECT_EQ(MB_FAILURE, mbsvp_coordinate("91", true, &value, message));
+  EXPECT_STREQ("Latitude outside [-90,90]", message);
+  EXPECT_EQ(MB_FAILURE, mbsvp_coordinate("361", false, &value, message));
+  EXPECT_EQ(MB_FAILURE, mbsvp_coordinate("10:60", true, &value, message));
+  EXPECT_STREQ("Minutes must be in [0,60)", message);
+  EXPECT_EQ(MB_FAILURE, mbsvp_coordinate("abc", true, &value, message));
+  EXPECT_EQ(MB_FAILURE, mbsvp_coordinate("1 2", true, &value, message));
+  EXPECT_EQ(MB_FAILURE, mbsvp_coordinate("nan", true, &value, message));
+}
+
+class PointsTest : public TempDirTest {
+ protected:
+  void TearDown() override {
+    int error = MB_ERROR_NO_ERROR;
+    mbsvp_points_free(0, &points, &error);
+    mbsvp_strings_free(0, &notes, &error);
+    TempDirTest::TearDown();
+  }
+  void SetUp() override {
+    TempDirTest::SetUp();
+    mbsvp_points_init(&points);
+    mbsvp_strings_init(&notes);
+  }
+  int Read(const std::string &text, enum mbsvp_input_type type) {
+    std::ofstream(Path("input")) << text;
+    int error = MB_ERROR_NO_ERROR;
+    message[0] = '\0';
+    return mbsvp_points_read(0, Path("input").c_str(), type, &points, &notes, message, &error);
+  }
+  struct mbsvp_points points;
+  struct mbsvp_strings notes;
+  char message[MBSVP_MESSAGE_SIZE];
+};
+
+TEST_F(PointsTest, SitesCommaFormat) {
+  ASSERT_EQ(MB_SUCCESS, Read("\xEF\xBB\xBF## Site File Version 2.00\n# comment\n\n"
+                             " -47.5628237,  56.5673256, -3612.394, 4, 1,Site 0\r\n"
+                             "-10:30,-5:15,0,0,0,  name, with commas  \n"
+                             "1.5,2.5\n",
+                             MBSVP_INPUT_SITES))
+      << message;
+  ASSERT_EQ(3, points.n);
+  EXPECT_STREQ("Site 0", points.items[0].name);
+  EXPECT_EQ(-47.5628237, points.items[0].longitude);
+  EXPECT_EQ(4, points.items[0].line);
+  EXPECT_FALSE(points.items[0].is_waypoint);
+  EXPECT_STREQ("name, with commas", points.items[1].name);
+  EXPECT_EQ(-10.5, points.items[1].longitude);
+  EXPECT_EQ(-5.25, points.items[1].latitude);
+  EXPECT_STREQ("Site 2", points.items[2].name);
+}
+
+TEST_F(PointsTest, SitesWhiteSpaceFormat) {
+  ASSERT_EQ(MB_SUCCESS, Read("## Site File Version 1.00\n-10.5 20.5 -100 1 2 A name, here\n", MBSVP_INPUT_SITES)) << message;
+  ASSERT_EQ(1, points.n);
+  EXPECT_STREQ("A name, here", points.items[0].name);
+  int error = MB_ERROR_NO_ERROR;
+  mbsvp_points_free(0, &points, &error);
+  ASSERT_EQ(MB_SUCCESS, Read("-10.5 20.5\n", MBSVP_INPUT_SITES)) << message;
+  EXPECT_EQ(20.5, points.items[0].latitude);
+}
+
+TEST_F(PointsTest, SitesErrors) {
+  EXPECT_EQ(MB_FAILURE, Read("## Site File Version 2.00\n# only comments\n", MBSVP_INPUT_SITES));
+  EXPECT_THAT(message, testing::HasSubstr("No sites"));
+  EXPECT_EQ(MB_FAILURE, Read("1,2,0,0,0,a\n1,95,0,0,0,b\n", MBSVP_INPUT_SITES));
+  EXPECT_THAT(message, testing::HasSubstr(":2: Latitude outside"));
+  EXPECT_EQ(MB_FAILURE, Read("oops\n", MBSVP_INPUT_SITES));
+  EXPECT_THAT(message, testing::HasSubstr(":1: Expected longitude and latitude"));
+}
+
+const char kRouteHead[] =
+    "## Route File Version 2.00\n"
+    "##   WAYPOINT_NONE         0  Defines topography between waypoints\n"
+    "##   WAYPOINT_SIMPLE       1  Waypoint along survey line\n";
+
+TEST_F(PointsTest, RouteMarkersAndRoutes) {
+  const std::vector<std::pair<int, std::string>> markers = {
+      {1, ""},          {2, " TRANSIT"},    {3, " STARTLINE"},  {4, " ENDLINE"},    {5, " STARTLINE2"}, {6, " ENDLINE2"},
+      {7, " STARTLINE3"}, {8, " ENDLINE3"}, {9, " STARTLINE4"}, {10, " ENDLINE4"}, {11, " STARTLINE5"}, {12, " ENDLINE5"}};
+  std::ostringstream text;
+  text << kRouteHead << "> ## STARTROUTE 13,0,1,1,Route:1\n";
+  for (const auto &marker : markers)
+    text << marker.first << ".5,2.5,-100.0," << marker.first << ",90,0,0,0 ## WAYPOINT" << marker.second << "\n";
+  text << "9.9,9.9,-100.0,0,90,0,0,0\n> ## ENDROUTE\n";
+  text << "> ## STARTROUTE 1,0,1,1,Second route\n-5.5,-2.5,0.0,1,90,0,0,0 ## WAYPOINT\n> ## ENDROUTE\n";
+  ASSERT_EQ(MB_SUCCESS, Read(text.str(), MBSVP_INPUT_ROUTE)) << message;
+  ASSERT_EQ(13, points.n);
+  EXPECT_EQ(0, notes.n);
+  EXPECT_STREQ("Route:1 WP000", points.items[0].name);
+  EXPECT_EQ(1.5, points.items[0].longitude);
+  EXPECT_EQ(2.5, points.items[0].latitude);
+  EXPECT_EQ(12, points.items[11].waypoint_type);
+  EXPECT_EQ(11, points.items[11].waypoint);
+  EXPECT_STREQ("Second route WP000", points.items[12].name);
+  EXPECT_EQ(2, points.items[12].route_number);
+  EXPECT_TRUE(points.items[12].is_waypoint);
+  mbsvp_points_make_bases(&points);
+  EXPECT_STREQ("Route_1_WP000", points.items[0].base);
+  EXPECT_STREQ("Second_route_WP000", points.items[12].base);
+}
+
+TEST_F(PointsTest, RouteOlderFormats) {
+  ASSERT_EQ(MB_SUCCESS, Read("## Route File Version 1.00\n## ROUTENAME Old\n> ## STARTROUTE\n"
+                             "-5.5 -2.5 0.0 3 ## WAYPOINT STARTLINE\n1.0 1.0 0.0 0\n",
+                             MBSVP_INPUT_ROUTE))
+      << message;
+  ASSERT_EQ(1, points.n);
+  EXPECT_EQ(-5.5, points.items[0].longitude);
+  EXPECT_EQ(3, points.items[0].waypoint_type);
+}
+
+TEST_F(PointsTest, RouteProblems) {
+  EXPECT_EQ(MB_FAILURE, Read(std::string(kRouteHead) + "> ## STARTROUTE 1,0,1,1,R\n1,2,3,0,0,0,0,0\n> ## ENDROUTE\n", MBSVP_INPUT_ROUTE));
+  EXPECT_THAT(message, testing::HasSubstr("No lines marked ## WAYPOINT"));
+  EXPECT_EQ(MB_FAILURE, Read(std::string(kRouteHead) + "bad ## WAYPOINT\n", MBSVP_INPUT_ROUTE));
+  EXPECT_THAT(message, testing::HasSubstr(":4: Expected longitude and latitude"));
+  EXPECT_EQ(MB_FAILURE, Read(std::string(kRouteHead) + "1,95,3,1,0,0,0,0 ## WAYPOINT\n", MBSVP_INPUT_ROUTE));
+  EXPECT_THAT(message, testing::HasSubstr(":4: Latitude outside"));
+  EXPECT_EQ(MB_FAILURE, Read(std::string(kRouteHead) + "1,2,3,1,0,0,0,0 ## WAYPOINTS\n", MBSVP_INPUT_ROUTE));
+  int error = MB_ERROR_NO_ERROR;
+  mbsvp_strings_free(0, &notes, &error);
+  ASSERT_EQ(MB_SUCCESS, Read(std::string(kRouteHead) +
+                                 "> ## STARTROUTE 5,0,1,1,R\n1,2,3,1,0,0,0,0\n4,5,6,0,0,0,0,0 ## WAYPOINT\n> ## ENDROUTE\n",
+                             MBSVP_INPUT_ROUTE))
+      << message;
+  ASSERT_EQ(1, points.n);  // the marker decides
+  EXPECT_EQ(4, points.items[0].longitude);
+  ASSERT_EQ(3, notes.n);  // no comment, comment with type 0, and the count
+  EXPECT_THAT(notes.items[0], testing::HasSubstr("no ## WAYPOINT comment"));
+  EXPECT_THAT(notes.items[1], testing::HasSubstr("waypoint type 0"));
+  EXPECT_THAT(notes.items[2], testing::HasSubstr("lists 5 points but holds 2"));
+}
+
+using DetectTest = TempDirTest;
+
+TEST_F(DetectTest, HeaderThenSuffix) {
+  enum mbsvp_input_type type;
+  char message[MBSVP_MESSAGE_SIZE] = "";
+  int error = MB_ERROR_NO_ERROR;
+  std::ofstream(Path("a.ste")) << "## Route File Version 2.00\n";
+  ASSERT_EQ(MB_SUCCESS, mbsvp_points_detect(0, Path("a.ste").c_str(), &type, message, &error));
+  EXPECT_EQ(MBSVP_INPUT_ROUTE, type);
+  std::ofstream(Path("b.rte")) << "# x\n## Site File Version 2.00\n";
+  ASSERT_EQ(MB_SUCCESS, mbsvp_points_detect(0, Path("b.rte").c_str(), &type, message, &error));
+  EXPECT_EQ(MBSVP_INPUT_SITES, type);
+  std::ofstream(Path("c.rte")) << "1 2\n";
+  ASSERT_EQ(MB_SUCCESS, mbsvp_points_detect(0, Path("c.rte").c_str(), &type, message, &error));
+  EXPECT_EQ(MBSVP_INPUT_ROUTE, type);
+  std::ofstream(Path("d.txt")) << "1 2\n";
+  EXPECT_EQ(MB_FAILURE, mbsvp_points_detect(0, Path("d.txt").c_str(), &type, message, &error));
+  EXPECT_THAT(message, testing::HasSubstr("--sites or --route"));
+}
+
+TEST(BasesTest, SafeAndUnique) {
+  struct mbsvp_point items[6];
+  memset(items, 0, sizeof(items));
+  strcpy(items[0].name, "Site 1");
+  strcpy(items[1].name, "site:1");   // same without regard to case
+  strcpy(items[2].name, "site 1");
+  strcpy(items[3].name, "..__--");   // nothing left
+  strcpy(items[4].name, "a  /b\xC3\xA9.c-");
+  memset(items[5].name, 'x', 300);
+  struct mbsvp_points points = {6, 6, items};
+  mbsvp_points_make_bases(&points);
+  EXPECT_STREQ("Site_1", items[0].base);
+  EXPECT_STREQ("site_1_2", items[1].base);
+  EXPECT_STREQ("site_1_3", items[2].base);
+  EXPECT_STREQ("Site_3", items[3].base);
+  EXPECT_STREQ("a_b_.c", items[4].base);
+  EXPECT_EQ(100u, strlen(items[5].base));
+}
+
+/*--------------------------------------------------------------------*/
+TEST(OrderCellsTest, NearestFirstWithTiesInAxisOrder) {
+  const std::vector<double> lat = {10.5, 11.5};
+  const std::vector<double> lon = {20.5, 21.5, 22.5};
+  int cell_lat[MBSVP_NEAREST_CELLS], cell_lon[MBSVP_NEAREST_CELLS], n = 0, error = MB_ERROR_NO_ERROR;
+  char message[MBSVP_MESSAGE_SIZE] = "";
+  ASSERT_EQ(MB_SUCCESS, mbsvp_woa_order_cells(0, lat.data(), 2, lon.data(), 3, 11.0, 21.5, 3, cell_lat, cell_lon, &n, message, &error));
+  ASSERT_EQ(3, n);
+  EXPECT_EQ(0, cell_lat[0]);  // equal distance: first latitude first
+  EXPECT_EQ(1, cell_lon[0]);
+  EXPECT_EQ(1, cell_lat[1]);
+  EXPECT_EQ(1, cell_lon[1]);
+  ASSERT_EQ(MB_SUCCESS, mbsvp_woa_order_cells(0, lat.data(), 2, lon.data(), 3, 11.0, 21.5, 1, cell_lat, cell_lon, &n, message, &error));
+  EXPECT_EQ(1, n);
+}
+
+TEST(OrderCellsTest, CircularLongitude) {
+  std::vector<double> lon;
+  for (int i = 0; i < 360; i++)
+    lon.push_back(-179.5 + i);
+  const std::vector<double> lat = {0.5};
+  int cell_lat[MBSVP_NEAREST_CELLS], cell_lon[MBSVP_NEAREST_CELLS], n = 0, error = MB_ERROR_NO_ERROR;
+  char message[MBSVP_MESSAGE_SIZE] = "";
+  ASSERT_EQ(MB_SUCCESS, mbsvp_woa_order_cells(0, lat.data(), 1, lon.data(), 360, 0.5, 179.9, 2, cell_lat, cell_lon, &n, message, &error));
+  EXPECT_EQ(359, cell_lon[0]);  // 179.5
+  EXPECT_EQ(0, cell_lon[1]);    // -179.5 across the dateline
+}
+
+TEST(OrderCellsTest, CoverageAndAxes) {
+  const std::vector<double> lat = {30.5, 31.5, 32.5};
+  const std::vector<double> lon = {-20.5, -19.5, -18.5, -17.5, -16.5};
+  int cell_lat[MBSVP_NEAREST_CELLS], cell_lon[MBSVP_NEAREST_CELLS], n = 0, error = MB_ERROR_NO_ERROR;
+  char message[MBSVP_MESSAGE_SIZE] = "";
+  EXPECT_EQ(MB_FAILURE, mbsvp_woa_order_cells(0, lat.data(), 3, lon.data(), 5, 31.0, -10.0, 1, cell_lat, cell_lon, &n, message, &error));
+  EXPECT_STREQ("Site outside cropped longitude coverage", message);
+  ASSERT_EQ(MB_SUCCESS, mbsvp_woa_order_cells(0, lat.data(), 3, lon.data(), 5, 31.0, -16.2, 1, cell_lat, cell_lon, &n, message, &error));
+  EXPECT_EQ(MB_FAILURE, mbsvp_woa_order_cells(0, lat.data(), 3, lon.data(), 5, 40.0, -18.0, 1, cell_lat, cell_lon, &n, message, &error));
+  EXPECT_STREQ("Site outside latitude coverage", message);
+  const std::vector<double> one = {5.5};
+  EXPECT_EQ(MB_FAILURE, mbsvp_woa_order_cells(0, lat.data(), 3, one.data(), 1, 31.0, 6.0, 1, cell_lat, cell_lon, &n, message, &error));
+  EXPECT_STREQ("Site outside single-cell longitude coverage", message);
+  const std::vector<double> repeated = {1.5, 1.5};
+  EXPECT_EQ(MB_FAILURE, mbsvp_woa_order_cells(0, lat.data(), 3, repeated.data(), 2, 31.0, 1.5, 1, cell_lat, cell_lon, &n, message, &error));
+  EXPECT_STREQ("Duplicate lon coordinates", message);
+  const std::vector<double> nonfinite = {1.5, NaN};
+  EXPECT_EQ(MB_FAILURE, mbsvp_woa_order_cells(0, lat.data(), 3, nonfinite.data(), 2, 31.0, 1.5, 1, cell_lat, cell_lon, &n, message, &error));
+  EXPECT_STREQ("Invalid lon coordinate axis", message);
+}
+
+TEST_F(GridTest, AtlasReadsOneCellAndOneVariable) {
+  Write("g.nc", Range(-89.5f, 1, 180), Range(-179.5f, 1, 360));
+  struct mbsvp_atlas atlas;
+  mbsvp_atlas_init(&atlas);
+  const bool want[2] = {false, true};
+  char message[MBSVP_MESSAGE_SIZE] = "";
+  int error = MB_ERROR_NO_ERROR;
+  ASSERT_EQ(MB_SUCCESS, mbsvp_atlas_open(0, Path("g.nc").c_str(), want, &atlas, message, &error)) << message;
+  EXPECT_EQ(3, atlas.ndepth);
+  double speed[3];
+  ASSERT_EQ(MB_SUCCESS, mbsvp_atlas_read_cell(0, &atlas, 1, 100, 200, speed, message, &error));
+  EXPECT_NEAR(1500 + 10.5 + (20.5 + 180) / 1000 + 1, speed[2], 1e-3);
+  EXPECT_EQ(MB_FAILURE, mbsvp_atlas_read_cell(0, &atlas, 0, 100, 200, speed, message, &error));
+  mbsvp_atlas_close(0, &atlas, &error);
+}
+
+TEST_F(UtilTest, CommitFile) {
+  int error = MB_ERROR_NO_ERROR;
+  const std::string temporary = Path("temporary");
+  const std::string target = Path("target");
+  std::ofstream(temporary) << "one";
+  ASSERT_EQ(MB_SUCCESS, mbsvp_commit_file(0, temporary.c_str(), target.c_str(), false, &error));
+  EXPECT_EQ("one", ReadAll(target));
+  EXPECT_FALSE(mbsvp_is_file(temporary.c_str()));
+  std::ofstream(temporary) << "two";
+  EXPECT_EQ(MB_FAILURE, mbsvp_commit_file(0, temporary.c_str(), target.c_str(), false, &error));
+  EXPECT_EQ("one", ReadAll(target));
+  EXPECT_FALSE(mbsvp_is_file(temporary.c_str()));
+  std::ofstream(temporary) << "three";
+  error = MB_ERROR_NO_ERROR;
+  ASSERT_EQ(MB_SUCCESS, mbsvp_commit_file(0, temporary.c_str(), target.c_str(), true, &error));
+  EXPECT_EQ("three", ReadAll(target));
+}
+
 }  // namespace

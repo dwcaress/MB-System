@@ -28,6 +28,7 @@
 
 #include <dirent.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -38,6 +39,8 @@
 #include <time.h>
 #ifdef _WIN32
 #include <direct.h>
+#include <io.h>
+#include <process.h>
 #else
 #include <sys/wait.h>
 #include <unistd.h>
@@ -352,6 +355,44 @@ int mbsvp_remove_dir(int verbose, const char *path, int *error) {
   int error_free = MB_ERROR_NO_ERROR;
   mbsvp_strings_free(verbose, &names, &error_free);
   return status;
+}
+/*--------------------------------------------------------------------*/
+int mbsvp_process_id(void) {
+#ifdef _WIN32
+  return (int)_getpid();
+#else
+  return (int)getpid();
+#endif
+}
+/*--------------------------------------------------------------------*/
+/* Give a finished temporary file its final name. Without overwrite an
+   existing file is left alone and the temporary file is removed. */
+int mbsvp_commit_file(int verbose, const char *temporary, const char *path, bool overwrite, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2       temporary:  %s\n", temporary);
+    fprintf(stderr, "dbg2       path:       %s\n", path);
+    fprintf(stderr, "dbg2       overwrite:  %d\n", overwrite);
+  }
+
+  if (!overwrite) {
+    const int fd = open(path, O_WRONLY | O_CREAT | O_EXCL, 0666);
+    if (fd < 0) {
+      remove(temporary);
+      *error = MB_ERROR_OPEN_FAIL;
+      return MB_FAILURE;
+    }
+    close(fd);
+  }
+#ifdef _WIN32
+  remove(path);
+#endif
+  if (rename(temporary, path) != 0) {
+    remove(temporary);
+    *error = MB_ERROR_WRITE_FAIL;
+    return MB_FAILURE;
+  }
+  return MB_SUCCESS;
 }
 /*--------------------------------------------------------------------*/
 /* Quote one argument for the shell that system() runs. */

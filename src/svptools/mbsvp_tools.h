@@ -28,6 +28,7 @@
  * mbsvp_location.c  location and provenance comments in profile files
  * mbsvp_woa.c       World Ocean Atlas file discovery and grid sampling
  * mbsvp_score.c     residual score of swath bathymetry
+ * mbsvp_points.c    sites and route waypoints read from MB-System files
  * mbsvp_util.c      strings, files, external commands and JSON numbers
  *
  * Functions follow the MBIO pattern: they take verbose first and error
@@ -58,6 +59,8 @@ extern "C" {
 #define MBSVP_COMMENT_LIMIT 900
 #define MBSVP_MARKER_LOCATION "# MBSVPBEST_LOCATION "
 #define MBSVP_MARKER_DONOR "# MBSVPBEST_DONOR "
+#define MBSVP_MARKER_EXTRACT "# MBSVPEXTRACT_LOCATION "
+#define MBSVP_DATASETS_URL "https://zenodo.org/communities/mb-system_woa_svp_datasets/"
 
 /*--------------------------------------------------------------------*/
 /* mbsvp_util.c */
@@ -91,6 +94,8 @@ int mbsvp_make_unique_dir(int verbose, const char *parent, const char *prefix, c
 int mbsvp_copy_file(int verbose, const char *source, const char *target, int *error);
 int mbsvp_link_or_copy(int verbose, const char *source, const char *target, int *error);
 int mbsvp_remove_dir(int verbose, const char *path, int *error);
+int mbsvp_commit_file(int verbose, const char *temporary, const char *path, bool overwrite, int *error);
+int mbsvp_process_id(void);
 int mbsvp_list_dir(int verbose, const char *path, struct mbsvp_strings *names, int *error);
 
 int mbsvp_run_command(int verbose, const char *const *argv, const char *stdout_file, const char *log_file,
@@ -178,7 +183,40 @@ struct mbsvp_grid {
   struct mbsvp_location location;
 };
 
+struct mbsvp_variable {
+  int varid;
+  int ndims;
+  int depth_dim;
+  int lat_dim;
+  int lon_dim;
+  bool has_fill[2];
+  float fill[2];
+};
+
+/* An open sound speed grid. Variable 0 is v_an_chen, variable 1 is v_an_leroy. */
+struct mbsvp_atlas {
+  int ncid;
+  bool open;
+  int nlat;
+  int nlon;
+  int ndepth;
+  double *lat;
+  double *lon;
+  double *depth;
+  float *buffer;
+  bool have[2];
+  struct mbsvp_variable variable[2];
+};
+
 void mbsvp_circular_bounds(double *west, double *east);
+double mbsvp_normalize_longitude(double longitude);
+int mbsvp_woa_order_cells(int verbose, const double *lat, int nlat, const double *lon, int nlon, double target_lat,
+                          double target_lon, int limit, int *cell_lat, int *cell_lon, int *ncells, char *message, int *error);
+void mbsvp_atlas_init(struct mbsvp_atlas *atlas);
+int mbsvp_atlas_open(int verbose, const char *path, const bool want[2], struct mbsvp_atlas *atlas, char *message, int *error);
+int mbsvp_atlas_read_cell(int verbose, const struct mbsvp_atlas *atlas, int variable, int lat_index, int lon_index, double *speed,
+                          char *message, int *error);
+int mbsvp_atlas_close(int verbose, struct mbsvp_atlas *atlas, int *error);
 bool mbsvp_woa_parse_name(const char *name, int *year, char *period, size_t period_size, char *time_code,
                           char *resolution);
 void mbsvp_grid_init(struct mbsvp_grid *grid);
@@ -191,6 +229,38 @@ int mbsvp_woa_generate(int verbose, const char *nc_folder, const char *folder, c
 int mbsvp_write_profile(int verbose, const char *path, const struct mbsvp_profile *profile, const char *description,
                         const struct mbsvp_location *location, const struct mbsvp_location *donors, int ndonors,
                         char *message, int *error);
+
+/*--------------------------------------------------------------------*/
+/* mbsvp_points.c */
+
+enum mbsvp_input_type { MBSVP_INPUT_AUTO = 0, MBSVP_INPUT_SITES = 1, MBSVP_INPUT_ROUTE = 2 };
+
+struct mbsvp_point {
+  char name[512];
+  char base[128];
+  double longitude;
+  double latitude;
+  int line;
+  bool is_waypoint;
+  char route[256];
+  int route_number;
+  int waypoint;
+  int waypoint_type;
+};
+
+struct mbsvp_points {
+  int n;
+  int alloc;
+  struct mbsvp_point *items;
+};
+
+void mbsvp_points_init(struct mbsvp_points *points);
+int mbsvp_points_free(int verbose, struct mbsvp_points *points, int *error);
+int mbsvp_points_detect(int verbose, const char *path, enum mbsvp_input_type *type, char *message, int *error);
+int mbsvp_points_read(int verbose, const char *path, enum mbsvp_input_type type, struct mbsvp_points *points,
+                      struct mbsvp_strings *notes, char *message, int *error);
+int mbsvp_coordinate(const char *text, bool latitude, double *value, char *message);
+void mbsvp_points_make_bases(struct mbsvp_points *points);
 
 /*--------------------------------------------------------------------*/
 /* mbsvp_score.c */
