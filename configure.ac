@@ -1501,6 +1501,7 @@ AC_CONFIG_FILES([\
     src/mbbitpack/Makefile \
     src/mbaux/Makefile \
     src/utilities/Makefile \
+    src/svptools/Makefile \
     src/gmt/Makefile \
     src/macros/Makefile \
     src/python/Makefile \

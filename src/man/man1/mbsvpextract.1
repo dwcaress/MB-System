@@ -1,0 +1,175 @@
+.TH mbsvpextract 1 "4 November 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbsvpextract\fP \- Extract World Ocean Atlas sound velocity profiles at the
+sites of a site file or the waypoints of a route file.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbsvpextract\fP
+.br
+--input=file {-Ifile} (or --sites=file or --route=file)
+.br
+--svpfolder=directory {-Sdirectory}
+.br
+--outputfolder=directory {-Odirectory}
+.br
+--woa-version=18|23
+.br
+--period=period {-Pperiod}
+.br
+--resolution=01|04 {-R01|04}
+.br
+--formula=chen|leroy|both
+.br
+--strict-nearest
+.br
+--overwrite
+.br
+--help {-H}
+.br
+--verbose {-V}
+
+.SH DESCRIPTION
+\fBmbsvpextract\fP writes annual sound velocity profiles (SVPs) from a World Ocean
+Atlas sound speed grid for positions chosen by the user. It does not need swath
+data, so it can prepare profiles for earlier cruises and for planned surveys. A profile
+is a climatological candidate, not a forecast or a measurement of the water
+column at that position. \fBmbsvpbest\fP(1) can compare candidates on swath data.
+
+.B Positions
+.br
+The positions come from an MB-System site file (.ste), with one profile for each site, or
+from a route file (.rte), with one profile for each waypoint. These files are
+described in \fBmbgrdviz\fP(1). A waypoint is a numeric line with a comment starting with
+"## WAYPOINT", such as "## WAYPOINT" or "## WAYPOINT STARTLINE". Numeric lines without
+this comment only give the topography between waypoints and are not used, and a
+file with no such lines is an error. Only the position is read, and the topography
+in the file plays no part. A file with several routes gives waypoints for each of them.
+
+.B Sound speed grids
+.br
+The program requires at least one of the sound speed datasets posted at
+https://zenodo.org/communities/mb-system_woa_svp_datasets/
+.br
+You name the grid to use with \fB\-\-woa-version\fP, \fB\-\-period\fP and
+\fB\-\-resolution\fP; none of them has a default, because the datasets installed differ
+from one user to another. The grid is the annual file
+woaYY_PERIOD_svp00_RR.nc in the directory given with \fB\-\-svpfolder\fP. It must contain
+the variable v_an_chen, v_an_leroy or both, as needed for \fB\-\-formula\fP, on the
+dimensions depth, lat and lon.
+
+.B Grid cell
+.br
+Each position takes the profile of the nearest grid cell that can be completed
+to 11000 m, among the 16 nearest cells, or only the nearest with
+\fB\-\-strict-nearest\fP. Using another cell than the nearest gives a warning. All wanted
+formulas must complete in the same cell. A position outside a cropped grid fails. One cell can serve
+several positions; each still gets its own file.
+
+.B Completion to 11000 m
+.br
+Invalid samples are removed, and a profile must start within 1 m of the surface. A profile
+that stops short continues through nearby deeper cells of the same grid, stepping to
+deeper ones until none lies within 8 degrees. The shape of the neighbour is used, with an offset
+at the join that fades with depth so that nothing jumps. A neighbour that differs by more than 10 m/s
+at the join is refused, because it likely holds another water mass, such as across a sill. Below that,
+only pressure changes the speed: potential temperature and salinity are held at their values in the
+last sample, assuming a salinity of 35 to find the temperature. Full depth CTD casts from hadal
+trenches support this (Kolbusz and Jamieson, 2024). A tail is a processing estimate, not an observation.
+
+.B Files
+.br
+Profiles are named after the site, or after the route and waypoint number counted from zero
+such as Route_1_WP000.svp, using safe characters only. With \fB\-\-formula=both\fP
+the names end in _chen and _leroy. The first comment gives the formula, period and
+position name, and a comment starting with # MBSVPEXTRACT_LOCATION gives the requested position,
+the position of the grid cell, whether a deeper neighbour was used and the depth where the pressure-only
+tail starts. A position that fails is recorded and the next one
+goes on. Each run also writes a new summary, mbsvpextract-DATE-TIME.json, updated after each
+position.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian dos Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+.SH AUTHORSHIP OF THIS PROGRAM
+Christian dos Santos Ferreira
+.br
+  MARUM, University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-\-formula=chen|leroy|both
+Sound speed formula of the profiles: Chen and Millero, Leroy, or one file for each.
+Default: chen.
+.TP
+.B \-\-help {\-H}
+Print a short description and the usage, and exit.
+.TP
+.B \-\-input=\fIfile\fP {\-I\fIfile\fP}
+Site or route file, told apart by its header line and then by its suffix.
+\fB\-\-sites\fP and \fB\-\-route\fP give the same file and state the type. Required.
+.TP
+.B \-\-outputfolder=\fIdirectory\fP {\-O\fIdirectory\fP}
+Directory of the output, made if necessary. Required.
+.TP
+.B \-\-overwrite
+Replace existing profile files. Without it, a position whose file exists fails.
+.TP
+.B \-\-period=\fIperiod\fP {\-P\fIperiod\fP}
+Climatological period of the grid, such as decav, A5B7 or B5C2. Required.
+.TP
+.B \-\-resolution=01|04 {\-R01|04}
+Grid resolution: 01 is 1 degree, 04 is 0.25 degree. Required.
+.TP
+.B \-\-route=\fIfile\fP
+Route file. See \fB\-\-input\fP.
+.TP
+.B \-\-sites=\fIfile\fP
+Site file. See \fB\-\-input\fP.
+.TP
+.B \-\-strict-nearest
+Use only the nearest grid cell.
+.TP
+.B \-\-svpfolder=\fIdirectory\fP {\-S\fIdirectory\fP}
+Directory of the sound speed grids. Required.
+.TP
+.B \-\-verbose {\-V}
+Print the version. Repeat for debugging output.
+.TP
+.B \-\-woa-version=18|23
+World Ocean Atlas edition of the grid. Required.
+
+.SH EXIT STATUS
+0 on success, 1 if any position or the run failed, 9 for wrong usage and 130 after an
+interrupt.
+
+.SH EXAMPLES
+Extract WOA23 decav profiles at 1 degree for the sites of a file:
+.br
+	mbsvpextract -I sites.ste -S woa_data --woa-version=23 -P decav -R 01 -O profiles
+
+Extract WOA18 A5B7 profiles at 0.25 degree for the waypoints of a route, with both formulas:
+.br
+	mbsvpextract -I route.rte -S woa_data --woa-version=18 -P A5B7 -R 04 --formula=both -O profiles
+
+.SH SEE ALSO
+\fBmbgrdviz\fP(1), \fBmblevitus\fP(1), \fBmbprocess\fP(1), \fBmbsvpbest\fP(1),
+\fBmbsvplist\fP(1), \fBmbsystem\fP(1)
+
+.SH BUGS
+Only annual profiles are available.
