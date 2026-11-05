@@ -195,6 +195,7 @@ public:
     int debug();
     static double radToDeg(double rad);
     static double degToRad(double deg);
+    static unsigned int geoToUtmZone(double lat_r, double lon_r);
 
 private:
     // underlying implementation

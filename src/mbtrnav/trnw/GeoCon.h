@@ -94,6 +94,13 @@ void *wgeocon_init(wgeocon_t *self, int argc, void **argv);
 // enable/disable deletion of members (optional; keys defined per implementation)
 void wgeocon_auto_delete(wgeocon_t *self, const char *key, bool enable);
 
+// angle unit conversion
+double wgeocon_radToDeg(double rad);
+double wgeocon_degToRad(double deg);
+
+// lat/lon to UTM zone
+unsigned int wgeocon_geoToUtmZone(double lat_r, double lon_r);
+
 #ifdef __cplusplus
 }
 #endif

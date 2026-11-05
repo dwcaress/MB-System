@@ -453,12 +453,20 @@ GeoCon::~GeoCon()
 
 double GeoCon::radToDeg(double rad)
 {
-    return rad * 180./M_PI;
+    // Call underlying C impl
+    return wgeocon_radToDeg(rad);
 }
 
 double GeoCon::degToRad(double deg)
 {
-    return deg * M_PI/180;
+    // Call underlying C impl
+    return wgeocon_degToRad(deg);
+}
+
+unsigned int GeoCon::geoToUtmZone(double lat_r, double lon_r)
+{
+    // Call underlying C impl
+    return wgeocon_geoToUtmZone(lat_r, lon_r);
 }
 
 // lat/lon to mercator projection
@@ -785,6 +793,57 @@ void *wgeocon_init(wgeocon_t *self, int argc, void **argv)
     }
     return NULL;
 }
+
+double wgeocon_radToDeg(double rad)
+{
+    return rad * 180./M_PI;
+}
+
+double wgeocon_degToRad(double deg)
+{
+    return deg * M_PI/180;
+}
+
+unsigned int wgeocon_geoToUtmZone(double lat_r, double lon_r)
+{
+  if (lon_r > M_PI   || lon_r < -M_PI)
+  {
+    fprintf(stderr, "%s:%d - input error: Lon %.2f\n", __func__, __LINE__, lon_r);
+    fprintf(stderr, "%s:%d - -PI <= Lon <= PI\n", __func__, __LINE__);
+    return 0;
+  }
+
+  if (lat_r  > M_PI/2 || lat_r  < -M_PI/2)
+  {
+    fprintf(stderr, "%s:%d - input error: Lat %.2f\n", __func__, __LINE__, lat_r);
+    fprintf(stderr, "%s:%d - -PI/2 <= Lat <= PI/2\n", __func__, __LINE__);
+    return 0;
+  }
+
+  // Convert to degrees for this computation
+  //
+  double lat_d = wgeocon_radToDeg(lat_r), lon_d = wgeocon_radToDeg(lon_r);
+
+  // Initialize using the default calculation
+  //
+  unsigned int ZoneNumber = floor((lon_d + 180)/6) + 1;
+  // Norway
+  if (lat_d >= 56.0 && lat_d < 64.0 && lon_d >= 3.0 && lon_d < 12.0)
+  {
+    ZoneNumber = 32;
+  }
+  // Special zones for Svalbard
+  else if (lat_d >= 72.0 && lat_d < 84.0)
+  {
+    if      (lon_d >= 0.0  && lon_d <  9.0) ZoneNumber = 31;
+    else if (lon_d >= 9.0  && lon_d < 21.0) ZoneNumber = 33;
+    else if (lon_d >= 21.0 && lon_d < 33.0) ZoneNumber = 35;
+    else if (lon_d >= 33.0 && lon_d < 42.0) ZoneNumber = 37;
+  }
+
+  return ZoneNumber;
+}
+
 #ifdef __cplusplus
 }
 #endif

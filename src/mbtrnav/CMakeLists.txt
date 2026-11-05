@@ -625,7 +625,7 @@ add_executable(trn-player
 )
 
 # specify include paths and libraries
-target_link_libraries(trn-player PRIVATE tnav qnx newmat NetCDF::NetCDF)
+target_link_libraries(trn-player PRIVATE tnav qnx newmat geocon NetCDF::NetCDF)
 
 target_include_directories(trn-player PRIVATE BEFORE
     ${LIBTRNAV_INCLUDES}
