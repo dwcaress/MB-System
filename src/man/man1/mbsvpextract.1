@@ -70,18 +70,23 @@ several positions; each still gets its own file.
 
 .B Completion to 11000 m
 .br
-Invalid samples are removed. A profile must start within 1 m of the surface. A profile that
-stops short gets an endpoint at 11000 m from a least-squares line through its samples in the
-deepest 2000 m of valid coverage. This endpoint is a processing extrapolation, not
-an observation.
+Invalid samples are removed, and a profile must start within 1 m of the surface. A profile
+that stops short continues through nearby deeper cells of the same grid, stepping to
+deeper ones until none lies within 8 degrees. The shape of the neighbour is used, with an offset
+at the join that fades with depth so that nothing jumps. A neighbour that differs by more than 10 m/s
+at the join is refused, because it likely holds another water mass, such as across a sill. Below that,
+only pressure changes the speed: potential temperature and salinity are held at their values in the
+last sample, assuming a salinity of 35 to find the temperature. Full depth CTD casts from hadal
+trenches support this (Kolbusz and Jamieson, 2024). A tail is a processing estimate, not an observation.
 
 .B Files
 .br
 Profiles are named after the site, or after the route and waypoint number counted from zero
 such as Route_1_WP000.svp, using safe characters only. With \fB\-\-formula=both\fP
 the names end in _chen and _leroy. The first comment gives the formula, period and
-position name, and a comment starting with # MBSVPEXTRACT_LOCATION gives the requested position
-and the position of the grid cell. A position that fails is recorded and the next one
+position name, and a comment starting with # MBSVPEXTRACT_LOCATION gives the requested position,
+the position of the grid cell, whether a deeper neighbour was used and the depth where the pressure-only
+tail starts. A position that fails is recorded and the next one
 goes on. Each run also writes a new summary, mbsvpextract-DATE-TIME.json, updated after each
 position.
 

@@ -133,6 +133,14 @@ int mbsvp_location_comment(int verbose, const struct mbsvp_location *location, c
     mbsvp_format_double(location->appended_max_depth, v2, sizeof(v2));
     fits = mbsvp_append(line, size, &len, ",\"appended_min_depth\":%s,\"appended_max_depth\":%s", v1, v2);
   }
+  if (fits && location->has_tail) {
+    snprintf(v1, sizeof(v1), "%d", location->cells_used);
+    snprintf(v2, sizeof(v2), "%d", location->cells_with_neighbour);
+    fits = mbsvp_append(line, size, &len, ",\"cells_used\":%s,\"cells_with_deeper_neighbour\":%s", v1, v2);
+    mbsvp_format_double(location->physics_from_depth, v1, sizeof(v1));
+    if (fits)
+      fits = mbsvp_append(line, size, &len, ",\"physics_from_depth\":%s%s", v1, "");
+  }
   if (fits)
     fits = mbsvp_append(line, size, &len, "}%s%s", "", "");
 

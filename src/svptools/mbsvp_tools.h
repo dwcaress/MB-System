@@ -25,6 +25,7 @@
  * Shared code of the sound velocity profile tools in src/svptools.
  *
  * mbsvp_profile.c   cleaning and completion of climatological profiles
+ * mbsvp_soundspeed.c  sound speed formulas and the deep part of a profile
  * mbsvp_location.c  location and provenance comments in profile files
  * mbsvp_woa.c       World Ocean Atlas file discovery and grid sampling
  * mbsvp_score.c     residual score of swath bathymetry
@@ -54,7 +55,12 @@ extern "C" {
 
 #define MBSVP_MESSAGE_SIZE 4096
 #define MBSVP_TARGET_DEPTH 11000.0
-#define MBSVP_TREND_WINDOW 2000.0
+#define MBSVP_PHYSICS_STEP 500.0
+#define MBSVP_MIN_SPEED 1200.0
+#define MBSVP_MAX_SPEED 2000.0
+#define MBSVP_NEIGHBOUR_RADIUS 8.0
+#define MBSVP_NEIGHBOUR_GATE 10.0
+#define MBSVP_NEIGHBOUR_FADE 1000.0
 #define MBSVP_NEAREST_CELLS 16
 #define MBSVP_COMMENT_LIMIT 900
 #define MBSVP_MARKER_LOCATION "# MBSVPBEST_LOCATION "
@@ -116,6 +122,7 @@ struct mbsvp_profile {
 };
 
 enum mbsvp_kind { MBSVP_ANNUAL = 0, MBSVP_SEASONAL = 1, MBSVP_MONTHLY = 2, MBSVP_KINDS = 3 };
+enum mbsvp_formula { MBSVP_CHEN = 0, MBSVP_LEROY = 1 };
 
 void mbsvp_profile_init(struct mbsvp_profile *profile);
 int mbsvp_profile_free(int verbose, struct mbsvp_profile *profile, int *error);
@@ -123,13 +130,23 @@ int mbsvp_profile_clean(int verbose, int n, const double *depth, const double *s
                         char *message, int *error);
 int mbsvp_profile_tail(int verbose, const struct mbsvp_profile *primary, const struct mbsvp_profile *donor,
                        struct mbsvp_profile *result, char *message, int *error);
-int mbsvp_profile_complete(int verbose, const struct mbsvp_profile *observed, double target,
-                           struct mbsvp_profile *complete, char *message, int *error);
+int mbsvp_profile_complete(int verbose, const struct mbsvp_profile *observed, double target, enum mbsvp_formula formula,
+                           double latitude, struct mbsvp_profile *complete, double *physics_from, char *message, int *error);
 int mbsvp_profile_chain(int verbose, const struct mbsvp_profile *raw[MBSVP_KINDS],
                         struct mbsvp_profile observed[MBSVP_KINDS], char *message, int *error);
 int mbsvp_profile_read_internal(int verbose, const char *path, double maximum, struct mbsvp_profile *profile, bool *valid,
                                 int *error);
 bool mbsvp_profile_equal(const struct mbsvp_profile *a, const struct mbsvp_profile *b);
+
+/*--------------------------------------------------------------------*/
+/* mbsvp_soundspeed.c */
+
+double mbsvp_depth_to_pressure(double depth, double latitude);
+double mbsvp_speed_chen(double t, double s, double p);
+double mbsvp_speed_leroy(double t, double s, double z, double latitude);
+double mbsvp_adiabatic_lapse(double s, double t, double p);
+int mbsvp_physics_tail(int verbose, enum mbsvp_formula formula, double z0, double c0, double latitude, int n, const double *depth,
+                       double *speed, char *message, int *error);
 
 /*--------------------------------------------------------------------*/
 /* mbsvp_location.c */
@@ -154,6 +171,10 @@ struct mbsvp_location {
   bool has_appended;
   double appended_min_depth;
   double appended_max_depth;
+  bool has_tail;
+  int cells_used;
+  int cells_with_neighbour;
+  double physics_from_depth;
 };
 
 void mbsvp_location_init(struct mbsvp_location *location);
@@ -181,6 +202,9 @@ struct mbsvp_grid {
   double *chen;
   double *leroy;
   struct mbsvp_location location;
+  int ncells;
+  int *cell_lat;
+  int *cell_lon;
 };
 
 struct mbsvp_variable {
@@ -206,6 +230,18 @@ struct mbsvp_atlas {
   float *buffer;
   bool have[2];
   struct mbsvp_variable variable[2];
+  /* for the search through nearby cells, made when first needed */
+  int *lat_order;
+  int *lon_order;
+  int *lat_rank;
+  int *lon_rank;
+  int radius;
+  bool wraps;
+  double **columns[2];
+  double *deepest[2];
+  double **pool;
+  int npool;
+  int pool_used;
 };
 
 void mbsvp_circular_bounds(double *west, double *east);
@@ -217,6 +253,9 @@ int mbsvp_atlas_open(int verbose, const char *path, const bool want[2], struct m
 int mbsvp_atlas_read_cell(int verbose, const struct mbsvp_atlas *atlas, int variable, int lat_index, int lon_index, double *speed,
                           char *message, int *error);
 int mbsvp_atlas_close(int verbose, struct mbsvp_atlas *atlas, int *error);
+int mbsvp_atlas_extend(int verbose, struct mbsvp_atlas *atlas, int variable, int lat_index, int lon_index,
+                       const struct mbsvp_profile *observed, struct mbsvp_profile *extended, bool *used_neighbour, char *message,
+                       int *error);
 bool mbsvp_woa_parse_name(const char *name, int *year, char *period, size_t period_size, char *time_code,
                           char *resolution);
 void mbsvp_grid_init(struct mbsvp_grid *grid);
@@ -284,6 +323,8 @@ int mbsvp_score_free(int verbose, struct mbsvp_score *score, int *error);
 int mbsvp_score_ping(int verbose, int n, const int *beam, const double *across, const double *depth, int minimum,
                      struct mbsvp_score *score, int *error);
 int mbsvp_score_file(int verbose, char *file, int format, int minimum, struct mbsvp_score *score, char *message, int *error);
+int mbsvp_position_box(const double *lon, const double *lat, int n, double margin, double box[4], int *noutliers);
+int mbsvp_navigation_box(int verbose, char *file, int format, double box[4], int *npings, int *noutliers, char *message, int *error);
 
 #ifdef __cplusplus
 } /* extern "C" */

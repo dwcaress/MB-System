@@ -281,3 +281,208 @@ int mbsvp_score_file(int verbose, char *file, int format, int minimum, struct mb
   return status;
 }
 /*--------------------------------------------------------------------*/
+static int mbsvp_compare(const void *a, const void *b) {
+  const double x = *(const double *)a;
+  const double y = *(const double *)b;
+  return x < y ? -1 : (x > y ? 1 : 0);
+}
+/*--------------------------------------------------------------------*/
+/* The box around ping positions, without positions far from all the others,
+   such as pings before the first navigation record of a file that has not
+   been through mbpreprocess. Distance from the median position is compared
+   with the 90th percentile of all distances, so that a long line is safe.
+   margin is added to each side, in metres. Returns the number of positions
+   kept. The arrays are not changed. */
+int mbsvp_position_box(const double *lon, const double *lat, int n, double margin, double box[4], int *noutliers) {
+  *noutliers = 0;
+  if (n <= 0)
+    return 0;
+  double *dx = (double *)malloc(n * sizeof(double));
+  double *dy = (double *)malloc(n * sizeof(double));
+  double *dd = (double *)malloc(n * sizeof(double));
+  if (dx == NULL || dy == NULL || dd == NULL) {
+    free(dx);
+    free(dy);
+    free(dd);
+    return 0;
+  }
+  /* longitudes on one circular branch, around a circular mean */
+  double sumx = 0.0;
+  double sumy = 0.0;
+  for (int i = 0; i < n; i++) {
+    sumx += cos(DTR * lon[i]);
+    sumy += sin(DTR * lon[i]);
+  }
+  const double reference = RTD * atan2(sumy, sumx);
+  for (int i = 0; i < n; i++) {
+    double d = fmod(lon[i] - reference + 180.0, 360.0);
+    if (d < 0.0)
+      d += 360.0;
+    dx[i] = reference + d - 180.0;
+    dy[i] = lat[i];
+    dd[i] = dx[i];
+  }
+  qsort(dd, n, sizeof(double), mbsvp_compare);
+  const double medlon = dd[n / 2];
+  memcpy(dd, dy, n * sizeof(double));
+  qsort(dd, n, sizeof(double), mbsvp_compare);
+  const double medlat = dd[n / 2];
+  const double scale = MAX(cos(DTR * medlat), 0.05);
+  for (int i = 0; i < n; i++) {
+    const double a = (dx[i] - medlon) * scale;
+    const double b = dy[i] - medlat;
+    dd[i] = sqrt(a * a + b * b);
+  }
+  double *sorted = (double *)malloc(n * sizeof(double));
+  int nkept = 0;
+  if (sorted != NULL) {
+    memcpy(sorted, dd, n * sizeof(double));
+    qsort(sorted, n, sizeof(double), mbsvp_compare);
+    const double limit = MAX(1.0, 5.0 * sorted[(int)(0.9 * (n - 1))]);
+    for (int i = 0; i < n; i++) {
+      if (dd[i] > limit) {
+        (*noutliers)++;
+        continue;
+      }
+      if (nkept == 0 || dx[i] < box[0])
+        box[0] = dx[i];
+      if (nkept == 0 || dx[i] > box[1])
+        box[1] = dx[i];
+      if (nkept == 0 || dy[i] < box[2])
+        box[2] = dy[i];
+      if (nkept == 0 || dy[i] > box[3])
+        box[3] = dy[i];
+      nkept++;
+    }
+    const double mperdeg = 111120.0;
+    box[0] -= margin / (mperdeg * scale);
+    box[1] += margin / (mperdeg * scale);
+    box[2] -= margin / mperdeg;
+    box[3] += margin / mperdeg;
+  }
+  free(sorted);
+  free(dx);
+  free(dy);
+  free(dd);
+  return nkept;
+}
+/*--------------------------------------------------------------------*/
+/* Read the ping positions of a file and find its box. */
+int mbsvp_navigation_box(int verbose, char *file, int format, double box[4], int *npings, int *noutliers, char *message, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2       file:       %s\n", file);
+    fprintf(stderr, "dbg2       format:     %d\n", format);
+  }
+
+  *npings = 0;
+  *noutliers = 0;
+  int format_default;
+  int pings;
+  int lonflip;
+  double bounds[4];
+  int btime_i[7];
+  int etime_i[7];
+  double speedmin;
+  double timegap;
+  mb_defaults(verbose, &format_default, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+  pings = 1;
+
+  void *mbio_ptr = NULL;
+  double btime_d;
+  double etime_d;
+  int beams_bath;
+  int beams_amp;
+  int pixels_ss;
+  if (mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mbio_ptr, &btime_d, &etime_d,
+                   &beams_bath, &beams_amp, &pixels_ss, error) != MB_SUCCESS) {
+    char *mbio_message;
+    mb_error(verbose, *error, &mbio_message);
+    mbsvp_set_message(message, "Cannot read %s: %s", file, mbio_message);
+    return MB_FAILURE;
+  }
+  char *beamflag = NULL;
+  double *bath = NULL;
+  double *amp = NULL;
+  double *bathacrosstrack = NULL;
+  double *bathalongtrack = NULL;
+  double *ss = NULL;
+  double *ssacrosstrack = NULL;
+  double *ssalongtrack = NULL;
+  int status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&beamflag, error);
+  if (status == MB_SUCCESS)
+    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bath, error);
+  if (status == MB_SUCCESS)
+    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&amp, error);
+  if (status == MB_SUCCESS)
+    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathacrosstrack, error);
+  if (status == MB_SUCCESS)
+    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&bathalongtrack, error);
+  if (status == MB_SUCCESS)
+    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ss, error);
+  if (status == MB_SUCCESS)
+    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, error);
+  if (status == MB_SUCCESS)
+    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, error);
+
+  double *lon = NULL;
+  double *lat = NULL;
+  int alloc = 0;
+  double reach = 0.0;
+  while (status == MB_SUCCESS && !mbsvp_interrupted) {
+    void *store_ptr = NULL;
+    int kind = MB_DATA_NONE;
+    int time_i[7];
+    double time_d;
+    double navlon;
+    double navlat;
+    double speed;
+    double heading;
+    double distance;
+    double altitude;
+    double sensordepth;
+    char comment[MB_COMMENT_MAXLINE];
+    int local_error = MB_ERROR_NO_ERROR;
+    mb_get_all(verbose, mbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading, &distance, &altitude,
+               &sensordepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack,
+               ssalongtrack, comment, &local_error);
+    if (local_error == MB_ERROR_TIME_GAP)
+      local_error = MB_ERROR_NO_ERROR;
+    if (local_error > MB_ERROR_NO_ERROR)
+      break;
+    if (local_error != MB_ERROR_NO_ERROR || kind != MB_DATA_DATA)
+      continue;
+    if (*npings >= alloc) {
+      alloc += 4096;
+      if (mb_reallocd(verbose, __FILE__, __LINE__, alloc * sizeof(double), (void **)&lon, error) != MB_SUCCESS ||
+          mb_reallocd(verbose, __FILE__, __LINE__, alloc * sizeof(double), (void **)&lat, error) != MB_SUCCESS) {
+        status = MB_FAILURE;
+        break;
+      }
+    }
+    lon[*npings] = navlon;
+    lat[*npings] = navlat;
+    (*npings)++;
+    for (int j = 0; j < beams_bath; j++)
+      if (mb_beam_ok(beamflag[j]) && isfinite(bathacrosstrack[j]) && fabs(bathacrosstrack[j]) > reach)
+        reach = fabs(bathacrosstrack[j]);
+  }
+  int error_close = MB_ERROR_NO_ERROR;
+  mb_close(verbose, &mbio_ptr, &error_close);
+
+  if (status == MB_SUCCESS && !mbsvp_interrupted && mbsvp_position_box(lon, lat, *npings, reach, box, noutliers) == 0) {
+    mbsvp_set_message(message, "No ping positions in %s", file);
+    *error = MB_ERROR_BAD_DATA;
+    status = MB_FAILURE;
+  }
+  int error_free = MB_ERROR_NO_ERROR;
+  if (lon != NULL)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&lon, &error_free);
+  if (lat != NULL)
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&lat, &error_free);
+
+  if (verbose >= 2)
+    fprintf(stderr, "dbg2  Function <%s> completed, pings %d outliers %d status %d\n", __func__, *npings, *noutliers, status);
+  return status;
+}
+/*--------------------------------------------------------------------*/

@@ -31,6 +31,7 @@ add_library(mbsvptools STATIC
     mbsvp_points.c
     mbsvp_profile.c
     mbsvp_score.c
+    mbsvp_soundspeed.c
     mbsvp_tools.h
     mbsvp_util.c
     mbsvp_woa.c)
