@@ -33,25 +33,16 @@
 #include "raw_signal_input.hpp"
 
 #include "structDefs.h"
-#include "MathP.h"
 #include "newmat.h"
 #include "trn_msg.h"
 #include "mb1_msg.h"
 #include "udpm_sub.h"
 #include "trn_debug.hpp"
 #include "geo_cfg.hpp"
-#include "NavUtils.h"
 #include "GeoCon.hpp"
 
 // /////////////////
 // Macros
-
-#ifndef DTR
-#define DTR(x) ((x) * M_PI/180.)
-#endif
-#ifndef RTD
-#define RTD(x) ((x) * 180./M_PI)
-#endif
 
 // /////////////////
 // Types
@@ -289,9 +280,10 @@ public:
         } else {
             double posN=0., posE=0.;
 
-            NavUtils::geoToUtm(Math::degToRad(ni->lat()),
-                               Math::degToRad(ni->lon()),
-                               utm, &posN, &posE);
+            GeoCon gcon(utm);
+            gcon.geo_to_mp(GeoCon::degToRad(ni->lat()), GeoCon::degToRad(ni->lon()),
+                           &posN, &posE);
+
             //fprintf(stderr, "utm %ld posN %lf, posE %lf\n",utm, posN, posE);
             os << posN << ",";
             os << posE << ",";
@@ -377,9 +369,10 @@ public:
         } else {
             double posN=0., posE=0.;
 
-            NavUtils::geoToUtm(Math::degToRad(ni->lat()),
-                               Math::degToRad(ni->lon()),
-                               utm, &posN, &posE);
+            GeoCon gcon(utm);
+            gcon.geo_to_mp(GeoCon::degToRad(ni->lat()), GeoCon::degToRad(ni->lon()),
+                           &posN, &posE);
+
             //fprintf(stderr, "utm %ld posN %lf, posE %lf\n",utm, posN, posE);
             os << std::setw(wkey) << "utmN_m" << std::endl;
             os << std::setw(wval) << posN << std::endl;
@@ -836,7 +829,7 @@ public:
         square(4,4) = 1.;
 
         // 90 deg CW rotation about Z (psi)
-        double rot[3] = {Math::degToRad(0.),Math::degToRad(0.),Math::degToRad(90.)};
+        double rot[3] = {GeoCon::degToRad(0.),GeoCon::degToRad(0.),GeoCon::degToRad(90.)};
 
         // translation sequence
         // X  1.5 Y  1.5
@@ -1034,8 +1027,8 @@ public:
             }
 
             // psi (yaw), theta (pitch) to radians
-            double yr = DTR(yd);
-            double pr = DTR(pd);
+            double yr = GeoCon::degToRad(yd);
+            double pr = GeoCon::degToRad(pd);
 
             // beam components (reference orientation, sensor frame)
             // 1: along (x) 2: across (y) 3: down (z)
@@ -1099,8 +1092,8 @@ public:
             // beam yaw, pitch angles (sensor frame)
             double yd = geo->yaw_rf[idx[0]];
             double pd = geo->pitch_rf[idx[0]];
-            double yr = DTR(yd);
-            double pr = DTR(pd);
+            double yr = GeoCon::degToRad(yd);
+            double pr = GeoCon::degToRad(pd);
 
             // beam components (reference orientation, sensor frame)
             // 1: along (x) 2: across (y) 3: down (z)
@@ -1171,7 +1164,7 @@ public:
         // sensor mounting angles (relative to vehicle, radians)
         // 3-2-1 euler angles, r/p/y  (phi/theta/psi)
         // wrt sensor mounted across track, b[0] port, downward facing
-        double SROT[3] = { DTR(geo[0]->svr_deg[0]), DTR(geo[0]->svr_deg[1]), DTR(geo[0]->svr_deg[2])};
+        double SROT[3] = { GeoCon::degToRad(geo[0]->svr_deg[0]), GeoCon::degToRad(geo[0]->svr_deg[1]), GeoCon::degToRad(geo[0]->svr_deg[2])};
 
         // sensor mounting translation offsets (relative to vehicle CRP, meters)
         // +x: fwd +y: stbd, +z:down (aka FSK, fwd,stbd,keel)
@@ -1194,10 +1187,11 @@ public:
         const char *pinv = (ai[0]->flags().is_set(trn::AF_INVERT_PITCH)? "(p-)" :"(p+)");
 
         TRN_NDPRINT(TRNDL_PLUGOIDELTAT, "VATT (deg) [%.2lf, %.2lf, %.2lf (%.2lf)] %s\n",
-                    Math::radToDeg(VATT[0]), Math::radToDeg(VATT[1]), Math::radToDeg(VATT[2]), Math::radToDeg(ai[0]->heading()), pinv);
+                    GeoCon::radToDeg(VATT[0]), GeoCon::radToDeg(VATT[1]), GeoCon::radToDeg(VATT[2]), GeoCon::radToDeg(ai[0]->heading()), pinv);
+
         TRN_NDPRINT(TRNDL_PLUGOIDELTAT, "XTRN[%.3lf, %.3lf, %.3lf]\n", XTRN[0], XTRN[1], XTRN[2]);
         TRN_NDPRINT(TRNDL_PLUGOIDELTAT, "XROT[%.3lf, %.3lf, %.3lf]\n", XROT[0], XROT[1], XROT[2]);
-        TRN_NDPRINT(TRNDL_PLUGOIDELTAT, "pitch (deg) veh[%.3lf] ois[%.3lf] angle[%.3lf]\n", Math::radToDeg(ai[0]->pitch()), Math::radToDeg(ai[1]->pitch()), Math::radToDeg(XR));
+        TRN_NDPRINT(TRNDL_PLUGOIDELTAT, "pitch (deg) veh[%.3lf] ois[%.3lf] angle[%.3lf]\n", GeoCon::radToDeg(ai[0]->pitch()), GeoCon::radToDeg(ai[1]->pitch()), GeoCon::radToDeg(XR));
         TRN_NDPRINT(TRNDL_PLUGOIDELTAT, "\n");
 
         // generate coordinate tranformation matrices
@@ -1265,9 +1259,9 @@ public:
                             r_snd->beams[idx[0]].rhox,
                             r_snd->beams[idx[0]].rhoy,
                             r_snd->beams[idx[0]].rhoz,
-                            Math::radToDeg(axr),
-                            Math::radToDeg(ayr),
-                            Math::radToDeg(azr)
+                            GeoCon::radToDeg(axr),
+                            GeoCon::radToDeg(ayr),
+                            GeoCon::radToDeg(azr)
                             );
             }
         }
@@ -1317,7 +1311,7 @@ public:
 //        // sensor mounting angles (relative to vehicle, radians)
 //        // 3-2-1 euler angles, r/p/y  (phi/theta/psi)
 //        // wrt sensor mounted across track, b[0] port, downward facing
-//        double SROT[3] = { DTR(geo[0]->svr_deg[0]), DTR(geo[0]->svr_deg[1]), DTR(geo[0]->svr_deg[2])};
+//        double SROT[3] = { GeoCon::degToRad(geo[0]->svr_deg[0]), GeoCon::degToRad(geo[0]->svr_deg[1]), GeoCon::degToRad(geo[0]->svr_deg[2])};
 //
 //        // sensor mounting translation offsets (relative to vehicle CRP, meters)
 //        // +x: fwd +y: stbd, +z:down (aka FSK, fwd,stbd,keel)
@@ -1340,10 +1334,10 @@ public:
 //        const char *pinv = (ai[0]->flags().is_set(trn::AF_INVERT_PITCH)? "(p-)" :"(p+)");
 //
 //        TRN_NDPRINT(TRNDL_PLUGOIDELTAT, "VATT (deg) [%.2lf, %.2lf, %.2lf (%.2lf)] %s\n",
-//                    Math::radToDeg(VATT[0]), Math::radToDeg(VATT[1]), Math::radToDeg(VATT[2]), Math::radToDeg(ai[0]->heading()), pinv);
+//                    GeoCon::radToDeg(VATT[0]), GeoCon::radToDeg(VATT[1]), GeoCon::radToDeg(VATT[2]), GeoCon::radToDeg(ai[0]->heading()), pinv);
 //        TRN_NDPRINT(TRNDL_PLUGOIDELTAT, "XTRN[%.3lf, %.3lf, %.3lf]\n", XTRN[0], XTRN[1], XTRN[2]);
 //        TRN_NDPRINT(TRNDL_PLUGOIDELTAT, "XROT[%.3lf, %.3lf, %.3lf]\n", XROT[0], XROT[1], XROT[2]);
-//        TRN_NDPRINT(TRNDL_PLUGOIDELTAT, "pitch (deg) veh[%.3lf] ois[%.3lf] angle[%.3lf]\n", Math::radToDeg(ai[0]->pitch()), Math::radToDeg(ai[1]->pitch()), Math::radToDeg(XR));
+//        TRN_NDPRINT(TRNDL_PLUGOIDELTAT, "pitch (deg) veh[%.3lf] ois[%.3lf] angle[%.3lf]\n", GeoCon::radToDeg(ai[0]->pitch()), GeoCon::radToDeg(ai[1]->pitch()), GeoCon::radToDeg(XR));
 //        TRN_NDPRINT(TRNDL_PLUGOIDELTAT, "\n");
 //
 //        // generate coordinate tranformation matrices
@@ -1411,9 +1405,9 @@ public:
 //                            r_snd->beams[idx[0]].rhox,
 //                            r_snd->beams[idx[0]].rhoy,
 //                            r_snd->beams[idx[0]].rhoz,
-//                            Math::radToDeg(axr),
-//                            Math::radToDeg(ayr),
-//                            Math::radToDeg(azr)
+//                            GeoCon::radToDeg(axr),
+//                            GeoCon::radToDeg(ayr),
+//                            GeoCon::radToDeg(azr)
 //                            );
 //            }
 //        }
@@ -1556,8 +1550,8 @@ public:
         double vBathLoc[3] = {Bx, By, Bz};
 
         // get rotated coordinates of nav, bath (world frame)
-        Matrix mBathLocWF = trnx_utils::affine2DRotatePoint(DTR(H), vBathLoc);
-        Matrix mNavLocWF = trnx_utils::affine2DRotatePoint(DTR(H), vNavLoc);
+        Matrix mBathLocWF = trnx_utils::affine2DRotatePoint(GeoCon::degToRad(H), vBathLoc);
+        Matrix mNavLocWF = trnx_utils::affine2DRotatePoint(GeoCon::degToRad(H), vNavLoc);
 
         // rotated nav,bath coordinates (world frame)
         double Nyr = mNavLocWF(1,1);
@@ -1579,7 +1573,9 @@ public:
         double snd_east = 0.;
 
         // convert sounding lat/lon to mercator projection (cartesian)
-        gcon->geo_to_mp(DTR(r_snd->lat), DTR(r_snd->lon), &snd_north, &snd_east);
+        gcon->geo_to_mp(GeoCon::degToRad(r_snd->lat), GeoCon::degToRad(r_snd->lon), 
+                        &snd_north, &snd_east);
+
         // add offset
         snd_north += dNr;
         snd_east += dEr;
@@ -1590,15 +1586,15 @@ public:
         gcon->mp_to_geo(snd_north, snd_east, &lat_rad, &lon_rad);
 
         // update souding LAT/LON
-        r_snd->lat = RTD(lat_rad);
-        r_snd->lon = RTD(lon_rad);
+        r_snd->lat = GeoCon::radToDeg(lat_rad);
+        r_snd->lon = GeoCon::radToDeg(lon_rad);
 
         // update sounding depth
         r_snd->depth += dZr ;
 
         std::cerr << "N: {" << Nx << ", " << Ny << ", " << Nz << "} mag: " << sqrt((Nx*Nx) + (Ny*Ny)) << std::endl;
         std::cerr << "B: {" << Bx << ", " << By << ", " << Bz << "} mag: " << sqrt((Bx*Bx) + (By*By)) << std::endl;
-        std::cerr << "H: " << H << " (" << DTR(H) << ") " << std::endl;
+        std::cerr << "H: " << H << " (" << GeoCon::degToRad(H) << ") " << std::endl;
         std::cerr << "R: " << sqrt((Bx-Nx)*(Bx-Nx) + (By-Ny)*(By-Ny)) << std::endl;
         std::cerr << "dE: " << dE << " dN:" << dN << " dZ:" << dZ << std::endl;
 
@@ -1665,8 +1661,8 @@ public:
         double vBathLoc[3] = {Bx, By, Bz};
 
         // get rotated coordinates of nav, bath (world frame)
-        Matrix mBathLocWF = trnx_utils::affine2DRotatePoint(DTR(H), vBathLoc);
-        Matrix mNavLocWF = trnx_utils::affine2DRotatePoint(DTR(H), vNavLoc);
+        Matrix mBathLocWF = trnx_utils::affine2DRotatePoint(GeoCon::degToRad(H), vBathLoc);
+        Matrix mNavLocWF = trnx_utils::affine2DRotatePoint(GeoCon::degToRad(H), vNavLoc);
 
         // rotated nav,bath coordinates (world frame)
         double Nyr = mNavLocWF(1,1);
@@ -1685,7 +1681,9 @@ public:
         double snd_east = 0.;
 
         // convert sounding lat/lon to mercator projection (cartesian)
-        gcon->geo_to_mp(DTR(r_snd->lat), DTR(r_snd->lon), &snd_north, &snd_east);
+        gcon->geo_to_mp(GeoCon::degToRad(r_snd->lat), GeoCon::degToRad(r_snd->lon), 
+                        &snd_north, &snd_east);
+
         // add offset
         snd_north += dNr;
         snd_east += dEr;
@@ -1696,15 +1694,15 @@ public:
         gcon->mp_to_geo(snd_north, snd_east, &lat_rad, &lon_rad);
 
         // update souding LAT/LON
-        r_snd->lat = RTD(lat_rad);
-        r_snd->lon = RTD(lon_rad);
+        r_snd->lat = GeoCon::radToDeg(lat_rad);
+        r_snd->lon = GeoCon::radToDeg(lon_rad);
 
         // update sounding depth
         r_snd->depth += dZr ;
 
         std::cerr << "N: {" << Nx << ", " << Ny << ", " << Nz << "} mag: " << sqrt((Nx*Nx) + (Ny*Ny)) << std::endl;
         std::cerr << "B: {" << Bx << ", " << By << ", " << Bz << "} mag: " << sqrt((Bx*Bx) + (By*By)) << std::endl;
-        std::cerr << "H: " << H << " (" << DTR(H) << ") " << std::endl;
+        std::cerr << "H: " << H << " (" << GeoCon::degToRad(H) << ") " << std::endl;
         std::cerr << "R: " << sqrt((Bx-Nx)*(Bx-Nx) + (By-Ny)*(By-Ny)) << std::endl;
         std::cerr << "dE: " << dE << " dN:" << dN << " dZ:" << dZ << std::endl;
 
@@ -1787,8 +1785,8 @@ public:
 
         double lat = ni->lat();
         double lon = ni->lon();
-        long int utm = NavUtils::geoToUtmZone(Math::degToRad(lat),
-                                              Math::degToRad(lon));
+        long int utm = GeoCon::geoToUtmZone(GeoCon::degToRad(lat),
+                                            GeoCon::degToRad(lon));
 
         double x = 0.;
         double y = 0.;
@@ -1806,11 +1804,10 @@ public:
         bool gpsValid = (z < 2 ? true : false);// ni->flags().is_set(trn::NF_POS_VALID);
         bool bottomLock = bi->flags().is_set(trn::BF_BLOCK);
 
-        // NavUtils::geoToUtm(latitude, longitude, utmZone, *northing, *easting)
         // Note that TRN uses N,E,D frame (i.e. N:x E:y D:z)
-        NavUtils::geoToUtm(Math::degToRad(lat),
-                           Math::degToRad(lon),
-                           utm, &x, &y);
+        GeoCon gcon(utm);
+        gcon.geo_to_mp(GeoCon::degToRad(lat), GeoCon::degToRad(lon),
+                       &x, &y);
 
         TRN_NDPRINT(2, "%s:%d lat[%.6lf] lon[%.6lf] utm[%ld]\n", __func__, __LINE__, lat, lon, utm);
 
@@ -1863,11 +1860,12 @@ public:
             double lon = snd->lon;
             double pos_N=0;
             double pos_E=0;
-            long int utm = NavUtils::geoToUtmZone(Math::degToRad(lat),
-                                                  Math::degToRad(lon));
+            long int utm = GeoCon::geoToUtmZone(GeoCon::degToRad(lat),
+                                                  GeoCon::degToRad(lon));
 
-            // NavUtils::geoToUtm(latitude, longitude, utmZone, *northing, *easting)
-            NavUtils::geoToUtm(Math::degToRad(lat), Math::degToRad(lon), utm, &pos_N, &pos_E);
+            GeoCon gcon(utm);
+            gcon.geo_to_mp(GeoCon::degToRad(lat), GeoCon::degToRad(lon),
+                           &pos_N, &pos_E);
 
             // STANDARD Format
             // time POSIX epoch sec
@@ -2054,11 +2052,12 @@ public:
             double lon = snd->lon;
             double pos_N=0;
             double pos_E=0;
-            long int utm = NavUtils::geoToUtmZone(Math::degToRad(lat),
-                                                  Math::degToRad(lon));
+            long int utm = GeoCon::geoToUtmZone(GeoCon::degToRad(lat),
+                                                GeoCon::degToRad(lon));
 
-            // NavUtils::geoToUtm(latitude, longitude, utmZone, *northing, *easting)
-            NavUtils::geoToUtm(Math::degToRad(lat), Math::degToRad(lon), utm, &pos_N, &pos_E);
+            GeoCon gcon(utm);
+            gcon.geo_to_mp(GeoCon::degToRad(lat), GeoCon::degToRad(lon), 
+                           &pos_N, &pos_E);
 
             ss << std::dec << std::fixed << std::setprecision(7);
             ss << snd->ts << ",";
@@ -2165,11 +2164,12 @@ public:
             double lon = ni->lon();
             double pos_N=0;
             double pos_E=0;
-            long int utm = NavUtils::geoToUtmZone(Math::degToRad(lat),
-                                                  Math::degToRad(lon));
+            long int utm = GeoCon::geoToUtmZone(GeoCon::degToRad(lat),
+                                                GeoCon::degToRad(lon));
 
-            // NavUtils::geoToUtm(latitude, longitude, utmZone, *northing, *easting)
-            NavUtils::geoToUtm(Math::degToRad(lat), Math::degToRad(lon), utm, &pos_N, &pos_E);
+            GeoCon gcon(utm);
+            gcon.geo_to_mp(GeoCon::degToRad(lat), GeoCon::degToRad(lon), 
+                           &pos_N, &pos_E);
 
             ss << std::dec << std::setfill(' ') << std::fixed << std::setprecision(7);
             ss << bi->time_usec()/1000000. << ",";
@@ -2318,8 +2318,7 @@ public:
 
             obj->time = src->ts;
 
-            geocon->geo_to_mp(Math::degToRad(src->lat),
-                               Math::degToRad(src->lon),
+            geocon->geo_to_mp(GeoCon::degToRad(src->lat), GeoCon::degToRad(src->lon),
                                &(obj->x), &(obj->y));
 
             obj->z = src->depth;
@@ -2393,9 +2392,8 @@ public:
             obj->psi = src->hdg;
             obj->z = src->depth;
 
-            geocon->geo_to_mp(Math::degToRad(src->lat),
-                               Math::degToRad(src->lon),
-                               &(obj->x), &(obj->y));
+            geocon->geo_to_mp(GeoCon::degToRad(src->lat), GeoCon::degToRad(src->lon),
+                              &(obj->x), &(obj->y));
 
             for(int i = 0; i < obj->numMeas; i++){
                 // TODO: fill in measT from ping...

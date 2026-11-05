@@ -31,7 +31,6 @@
 #include "udpm_sub.h"
 #include "trn_debug.hpp"
 #include "log_utils.hpp"
-#include "NavUtils.h"
 #include "trnxpp_cfg.hpp"
 #include "trnxpp_ctx.hpp"
 #include "trn/trn_pose_t.hpp"

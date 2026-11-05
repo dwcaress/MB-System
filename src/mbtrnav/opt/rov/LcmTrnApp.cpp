@@ -28,7 +28,7 @@
 #include "LcmTrnCtx.h"
 #include "LcmTrnPP.h"
 #include "mb1_server.hpp"
-#include "NavUtils.h"
+
 #include "trn_msg_utils.hpp"
 #include "trn/trn_pose_t.hpp"
 #include "udpm_sub.h"

@@ -28,7 +28,6 @@
 #include "TrnClient.h"
 #include "udpm_sub.h"
 #include "trn_debug.hpp"
-#include "NavUtils.h"
 #include "trnxpp_cfg.hpp"
 #include "bathymetry_provider_IF.hpp"
 #include "navigation_provider_IF.hpp"
