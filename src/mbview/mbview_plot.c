@@ -380,7 +380,7 @@ int mbview_drawdata(size_t instance, int rez) {
           // - somehow the color grids are being written or overwritten incorrectly
           // before.
           // Note 24 October 2026: the likely cause was the background color
-          // work function (do_mbview_workfunction in mbview_callbacks.c), which
+          // work function (do_mbview_workfunction in mbv_core.c), which
           // computed the column index as k / primary_n_columns instead of
           // k / primary_n_rows, so on non-square grids it colored cells with the
           // secondary value of the wrong location and marked them done. That is
@@ -428,7 +428,7 @@ int mbview_drawdata(size_t instance, int rez) {
           // - somehow the color grids are being written or overwritten incorrectly
           // before.
           // Note 24 October 2026: the likely cause was the background color
-          // work function (do_mbview_workfunction in mbview_callbacks.c), which
+          // work function (do_mbview_workfunction in mbv_core.c), which
           // computed the column index as k / primary_n_columns instead of
           // k / primary_n_rows, so on non-square grids it colored cells with the
           // secondary value of the wrong location and marked them done. That is

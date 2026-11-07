@@ -433,6 +433,7 @@ int mbview_addaction(int verbose, size_t instance, void(mbview_action_notify)(Wi
                      int sensitive, int *error);
 int mbview_addactionseparator(int verbose, size_t instance, int *error);
 int mbview_setstate(int verbose, size_t instance, int mask, int value, int *error);
+int mbview_setmousemode(size_t instance, int mode);
 int mbview_addpicknotify(int verbose, size_t instance, int picktype, void(mbview_pick_notify)(size_t), int *error);
 int mbview_setsensitivitynotify(int verbose, size_t instance, void(mbview_sensitivity_notify)(), int *error);
 void mbview_resize(Widget w, XtPointer client_data, XEvent *event, Boolean *unused);

@@ -3596,89 +3596,32 @@ void do_mbview_mouse_rmode(Widget w, XtPointer client_data, XtPointer call_data)
 		XtGetValues(w, args, ac);
 
 		struct mbview_world_struct *view = &(mbviews[instance]);
-		struct mbview_struct *data = &(view->data);
 
 		/* get mode value */
 		MB3DViewData *mb3dviewptr = &(view->mb3dview);
 
-		bool replot = false;
-
+		int mode = -1; /* unknown: leaves the mouse mode unchanged */
 		if (w == (mb3dviewptr->mbview_toggleButton_mode_rmove))
-			data->mouse_mode = MBV_MOUSE_MOVE;
+			mode = MBV_MOUSE_MOVE;
 		else if (w == (mb3dviewptr->mbview_toggleButton_mode_rrotate))
-			data->mouse_mode = MBV_MOUSE_ROTATE;
+			mode = MBV_MOUSE_ROTATE;
 		else if (w == (mb3dviewptr->mbview_toggleButton_mode_rshade))
-			data->mouse_mode = MBV_MOUSE_SHADE;
+			mode = MBV_MOUSE_SHADE;
 		else if (w == (mb3dviewptr->mbview_toggleButton_mode_rviewpoint))
-			data->mouse_mode = MBV_MOUSE_VIEWPOINT;
+			mode = MBV_MOUSE_VIEWPOINT;
 		else if (w == (mb3dviewptr->mbview_toggleButton_mode_rarea))
-			data->mouse_mode = MBV_MOUSE_AREA;
-		else if (w == (mb3dviewptr->mbview_toggleButton_mode_rsite)) {
-			data->mouse_mode = MBV_MOUSE_SITE;
-			data->site_view_mode = MBV_VIEW_ON;
-			set_mbview_site_view_mode(instance, data->site_view_mode);
-			replot = true;
-		}
-		else if (w == (mb3dviewptr->mbview_toggleButton_mode_rroute)) {
-			data->mouse_mode = MBV_MOUSE_ROUTE;
-			data->route_view_mode = MBV_VIEW_ON;
-			set_mbview_route_view_mode(instance, data->route_view_mode);
-			replot = true;
-		}
-		else if (w == (mb3dviewptr->mbview_toggleButton_mode_rnav)) {
-			data->mouse_mode = MBV_MOUSE_NAV;
-			if (data->display_mode == MBV_DISPLAY_3D) {
-				data->navdrape_view_mode = MBV_VIEW_ON;
-				set_mbview_navdrape_view_mode(instance, data->navdrape_view_mode);
-				replot = true;
-			}
-			else {
-				data->nav_view_mode = MBV_VIEW_ON;
-				set_mbview_nav_view_mode(instance, data->nav_view_mode);
-				replot = true;
-			}
-		}
-		else if (w == (mb3dviewptr->mbview_toggleButton_mode_rnavfile)) {
-			data->mouse_mode = MBV_MOUSE_NAVFILE;
-			if (data->display_mode == MBV_DISPLAY_3D) {
-				data->navdrape_view_mode = MBV_VIEW_ON;
-				set_mbview_navdrape_view_mode(instance, data->navdrape_view_mode);
-				replot = true;
-			}
-			else {
-				data->nav_view_mode = MBV_VIEW_ON;
-				set_mbview_nav_view_mode(instance, data->nav_view_mode);
-				replot = true;
-			}
-		}
+			mode = MBV_MOUSE_AREA;
+		else if (w == (mb3dviewptr->mbview_toggleButton_mode_rsite))
+			mode = MBV_MOUSE_SITE;
+		else if (w == (mb3dviewptr->mbview_toggleButton_mode_rroute))
+			mode = MBV_MOUSE_ROUTE;
+		else if (w == (mb3dviewptr->mbview_toggleButton_mode_rnav))
+			mode = MBV_MOUSE_NAV;
+		else if (w == (mb3dviewptr->mbview_toggleButton_mode_rnavfile))
+			mode = MBV_MOUSE_NAVFILE;
 
-		/* make sure sites or routes aren't selected if edit modes off */
-		if (data->mouse_mode != MBV_MOUSE_SITE && shared.shareddata.site_selected != MBV_SELECT_NONE) {
-			shared.shareddata.site_selected = MBV_SELECT_NONE;
-			data->pickinfo_mode = data->pick_type;
-			replot = true;
-		}
-		if (data->mouse_mode != MBV_MOUSE_ROUTE && shared.shareddata.route_selected != MBV_SELECT_NONE &&
-		    shared.shareddata.route_mode != MBV_ROUTE_NAVADJUST) {
-			shared.shareddata.route_selected = MBV_SELECT_NONE;
-			shared.shareddata.route_point_selected = MBV_SELECT_NONE;
-			data->pickinfo_mode = data->pick_type;
-			replot = true;
-		}
-
-		/* set mouse togglebuttons */
-		set_mbview_mouse_mode(instance, data->mouse_mode);
-
-		/* replot if necessary */
-		if (replot) {
-			/* set pick annotation */
-			mbview_pick_text(instance);
-
-			/* draw */
-			if (mbv_verbose >= 2)
-				fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_mouse_rmode\n");
-			mbview_plotlowhigh(instance);
-		}
+		/* change the mouse mode */
+		mbview_setmousemode(instance, mode);
 	}
 }
 
@@ -6023,166 +5966,4 @@ int do_mbview_settimer() {
 	return (status);
 }
 
-/*------------------------------------------------------------------------------*/
-
-int do_mbview_workfunction(XtPointer client_data) {
-	/* set starting values */
-	size_t instance = (size_t)client_data;
-	bool plotting = false;
-	int mode = MBV_BACKGROUND_NONE;
-
-	/*fprintf(stderr,"\ndo_mbview_workfunction called: instance:%zu timer_count:%d\n", instance, timer_count);*/
-
-	/* first make sure no plotting is active */
-	struct mbview_struct *data = NULL;
-	for (int i = 0; i < MBV_MAX_WINDOWS && !plotting; i++) {
-		struct mbview_world_struct *view = &(mbviews[i]);
-		data = &(view->data);
-
-		/* check it if nothing already found */
-		if (data->primary_nxy > 0 &&
-		    (view->plot_recursion > 0 || !view->plot_interrupt_allowed || view->button1down ||
-		     view->button2down || view->button3down)) {
-			plotting = true;
-		}
-	}
-
-	bool found = false;
-
-	/* first see if possible to work with instance value */
-	if (!plotting && instance != MBV_NO_WINDOW && instance < MBV_MAX_WINDOWS && data->primary_nxy > 0) {
-		struct mbview_world_struct *view = &(mbviews[instance]);
-		data = &(view->data);
-
-		if (view->zscaledonecount < data->primary_nxy - 1) {
-			/* set found */
-			found = true;
-			mode = MBV_BACKGROUND_ZSCALE;
-		}
-
-		/* then work on color */
-		else if (view->colordonecount < data->primary_nxy - 1) {
-			/* set found */
-			found = true;
-			mode = MBV_BACKGROUND_COLOR;
-		}
-
-		/* finally do the full rez plot */
-		else if (view->lastdrawrez != MBV_REZ_FULL && timer_count > timer_timeout_count) {
-			/* set found */
-			found = true;
-			mode = MBV_BACKGROUND_FULLPLOT;
-		}
-	}
-
-	/* if not found check all possible instances */
-	if (!plotting && !found) {
-		for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
-			struct mbview_world_struct *view = &(mbviews[i]);
-			data = &(view->data);
-
-			/* check it if nothing already found */
-			if (!found && data->primary_nxy > 0) {
-				if (view->zscaledonecount < data->primary_nxy - 1) {
-					/* set found */
-					found = true;
-					mode = MBV_BACKGROUND_ZSCALE;
-					instance = i;
-				}
-
-				/* then work on color */
-				else if (view->colordonecount < data->primary_nxy - 1) {
-					/* set found */
-					found = true;
-					mode = MBV_BACKGROUND_COLOR;
-					instance = i;
-				}
-
-				/* finally do the full rez plot */
-				else if (view->lastdrawrez != MBV_REZ_FULL && timer_count > timer_timeout_count) {
-					/* set found */
-					found = true;
-					mode = MBV_BACKGROUND_FULLPLOT;
-					instance = i;
-				}
-			}
-		}
-	}
-	/*fprintf(stderr, "do_mbview_workfunction: plotting:%d found:%d instance:%zu mode:%d\n",
-	plotting,found,instance,mode);*/
-
-	/* do the work if instance found */
-	if (!plotting && found) {
-		struct mbview_world_struct *view = &(mbviews[instance]);
-		data = &(view->data);
-
-		/* first work on zscale */
-		if (mode == MBV_BACKGROUND_ZSCALE) {
-			/*fprintf(stderr,"do_mbview_workfunction: recalculating zscale in background %d of %d...\n",
-			view->zscaledonecount,data->primary_nxy);*/
-			/* recalculate zscale for MBV_NUMBACKGROUNDCALC cells */
-			int ncalc = 0;
-			for (int k = view->zscaledonecount; k < data->primary_nxy && ncalc < MBV_NUMBACKGROUNDCALC; k++) {
-				if (!(data->primary_stat_z[k / 8] & statmask[k % 8])) {
-					mbview_zscalegridpoint(instance, k);
-					ncalc++;
-				}
-				view->zscaledonecount = k;
-			}
-		}
-
-		/* then work on color */
-		else if (mode == MBV_BACKGROUND_COLOR) {
-			/* fprintf(stderr,"do_mbview_workfunction: recalculating color in background %d of %d...\n",
-			view->colordonecount,data->primary_nxy);*/
-
-			/* use histogram equalization if needed */
-			float *histogram = NULL;
-			if (data->grid_mode == MBV_GRID_VIEW_PRIMARY && data->primary_histogram) {
-				histogram = view->primary_histogram;
-			}
-			else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE && data->primaryslope_histogram) {
-				histogram = view->primaryslope_histogram;
-			}
-			else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY && data->secondary_histogram) {
-				histogram = view->secondary_histogram;
-			}
-
-			/* recalculate color for MBV_NUMBACKGROUNDCALC cells */
-			int ncalc = 0;
-			for (int k = view->colordonecount; k < data->primary_nxy && ncalc < MBV_NUMBACKGROUNDCALC; k++) {
-				if (!(data->primary_stat_color[k / 8] & statmask[k % 8])) {
-					const int i = k / data->primary_n_rows;
-					const int j = k % data->primary_n_rows;
-					mbview_colorpoint(view, data, histogram, i, j, k);
-					ncalc++;
-				}
-				view->colordonecount = k;
-			}
-		}
-
-		/* finally do the full rez plot */
-		else if (mode == MBV_BACKGROUND_FULLPLOT) {
-			/*fprintf(stderr,"do_mbview_workfunction: plotting instance %d full resolution on timeout...\n", instance);*/
-			/* do full rez plot */
-			mbview_plotfull(instance);
-		}
-	}
-
-	/* reset the work function as either background or timed */
-	work_function_set = false;
-	if (found) {
-		do_mbview_setbackgroundwork(instance);
-		timer_count = 0;
-	}
-	else {
-		do_mbview_settimer();
-		if (plotting)
-			timer_count = 0;
-		else
-			timer_count++;
-	}
-
-	return (MB_SUCCESS);
-}
 /*------------------------------------------------------------------------------*/

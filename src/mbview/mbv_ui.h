@@ -38,9 +38,12 @@
  * mbviewprivate.h or mb3dsoundingsprivate.h. Another toolkit has to
  * provide them too:
  *   mbview_callbacks.c: do_mbview_status, do_mbview_xevents,
+ *     do_mbview_settimer, do_mbview_setbackgroundwork,
  *     mbview_action_sensitivity, mbview_update_sensitivity,
  *     mbview_set_widgets, set_mbview_label_multiline_string,
- *     set_mbview_route_view_mode, set_mbview_polyline_view_mode,
+ *     set_mbview_mouse_mode, set_mbview_site_view_mode,
+ *     set_mbview_route_view_mode, set_mbview_nav_view_mode,
+ *     set_mbview_navdrape_view_mode, set_mbview_polyline_view_mode,
  *     set_mbview_polygon_view_mode, set_mbview_gispoint_view_mode
  *   mbview_gislist.c: mbview_gis_routelistbutton, mbview_gislist_reset
  *   mbv_ui_motif.c: mbview_updatenavlist, mbview_updateroutelist,
