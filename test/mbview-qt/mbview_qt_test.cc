@@ -44,12 +44,15 @@
 #include <QElapsedTimer>
 #include <QEventLoop>
 #include <QImage>
+#include <QDialog>
 #include <QLabel>
+#include <QLineEdit>
 #include <QMenu>
 #include <QMouseEvent>
 #include <QOpenGLWidget>
 #include <QPushButton>
 #include <QRadioButton>
+#include <QSlider>
 #include <QTimer>
 #include <algorithm>
 #include <cmath>
@@ -67,6 +70,8 @@ extern "C" {
 }
 #include "mbvq.h"
 #include "mbvq_bridge.h"
+#include "mbvq_dialogs.h"
+#include "mbvq_window.h"
 
 namespace {
 
@@ -287,6 +292,85 @@ int test_null() {
       button->click();
   check(data->exaggeration == 1.0 && data->modelelevation3d == 90.0, "Reset restores the view defaults");
 
+  /* Controls dialogs: they show the core values and apply through the core */
+  auto *map_window = static_cast<mbvq::MapWindow *>(window);
+  mbvq::ControlDialogs *dialogs = map_window->dialogs();
+  view_item("Colors && Contours")->trigger();
+  check(dialogs->dialog(MBVQ_DIALOG_COLORBOUNDS)->isVisible() &&
+            dialogs->field(MBVQ_F_DATAMIN)->text() == QString::asprintf("%g", data->primary_colortable_min),
+        "Colors & Contours shows the colour bounds of the core");
+  check(!dialogs->field(MBVQ_F_OVERLAYMIN)->isEnabled(), "overlay bounds are disabled without an overlay grid");
+  dialogs->field(MBVQ_F_DATAMAX)->setText(QStringLiteral("-500"));
+  dialogs->field(MBVQ_F_CONTOURS)->setText(QStringLiteral("25"));
+  dialogs->hot_to_cold(MBVQ_T_DATA_HTOC)->setChecked(true);
+  for (QPushButton *b : dialogs->dialog(MBVQ_DIALOG_COLORBOUNDS)->findChildren<QPushButton *>())
+    if (b->text() == QStringLiteral("Apply"))
+      b->click();
+  check(data->primary_colortable_max == -500.0 && data->contour_interval == 25.0 &&
+            data->primary_colortable_mode == MBV_COLORTABLE_REVERSED,
+        "Apply sets the colour bounds, contour interval and colour mode");
+
+  view_item("3D Controls")->trigger();
+  dialogs->field(MBVQ_F_EXAGGERATION)->setText(QStringLiteral("2.5"));
+  dialogs->field(MBVQ_F_MODEL_ELEV)->setText(QStringLiteral("not a number"));
+  for (QPushButton *b : dialogs->dialog(MBVQ_DIALOG_VIEW3D)->findChildren<QPushButton *>())
+    if (b->text() == QStringLiteral("Apply"))
+      b->click();
+  check(data->exaggeration == 2.5 && data->modelelevation3d == 90.0,
+        "3D Apply sets the exaggeration and ignores text that is not a number");
+  for (QPushButton *button : window->findChildren<QPushButton *>())
+    if (button->text() == QStringLiteral("Reset") && button->window() == window)
+      button->click();
+  check(dialogs->field(MBVQ_F_EXAGGERATION)->text() == QStringLiteral("1") &&
+            dialogs->field(MBVQ_F_MODEL_ELEV)->text() == QStringLiteral("90"),
+        "the open 3D dialog shows the values after Reset");
+
+  view_item("Shading")->trigger();
+  dialogs->field(MBVQ_F_ILLUM_AZI)->setText(QStringLiteral("45"));
+  for (QPushButton *b : dialogs->dialog(MBVQ_DIALOG_SHADE)->findChildren<QPushButton *>())
+    if (b->text() == QStringLiteral("Apply"))
+      b->click();
+  check(data->illuminate_azimuth == 45.0, "Shading Apply sets the illumination azimuth");
+
+  view_item("2D Controls")->trigger();
+  dialogs->field(MBVQ_F_ZOOM2D)->setText(QStringLiteral("2"));
+  for (QPushButton *b : dialogs->dialog(MBVQ_DIALOG_VIEW2D)->findChildren<QPushButton *>())
+    if (b->text() == QStringLiteral("Apply"))
+      b->click();
+  struct mbvq_controls controls;
+  mbvq_c_controls(instance, &controls);
+  check(controls.field[MBVQ_F_ZOOM2D] == 2.0, "2D Apply sets the zoom");
+
+  view_item("Resolution")->trigger();
+  auto *low = dialogs->dialog(MBVQ_DIALOG_RESOLUTION)->findChildren<QSlider *>().value(0);
+  if (low != nullptr)
+    low->setValue(112);
+  check(data->lorez_dimension == 100 && low != nullptr && low->value() == 100,
+        "Resolution rounds the low dimension to 100 and the slider shows it");
+
+  view_item("Projections")->trigger();
+  QRadioButton *decimal = nullptr, *spheroid = nullptr;
+  for (QRadioButton *b : dialogs->dialog(MBVQ_DIALOG_PROJECTION)->findChildren<QRadioButton *>()) {
+    if (b->text() == QStringLiteral("Decimal Degrees"))
+      decimal = b;
+    if (b->text() == QStringLiteral("Spheroid"))
+      spheroid = b;
+  }
+  QLabel *projection_label = nullptr;
+  for (QLabel *l : dialogs->dialog(MBVQ_DIALOG_PROJECTION)->findChildren<QLabel *>())
+    if (l->text().startsWith(QStringLiteral("Primary Grid Projection:")))
+      projection_label = l;
+  check(projection_label != nullptr && projection_label->text().contains(QStringLiteral("Geographic")),
+        "Projections shows the projection label of the core");
+  if (decimal != nullptr)
+    decimal->click();
+  if (spheroid != nullptr)
+    spheroid->click();
+  mbvq_c_controls(instance, &controls);
+  check(controls.lonlatstyle == 0 && controls.display_projection == 2 && projection_label != nullptr &&
+            projection_label->text().contains(QStringLiteral("Spheroid")),
+        "Projections sets the annotation style and the display projection");
+
   /* Action menu: items added by the program, enabled by the pick masks */
   mbview_addaction(0, instance, count_action, const_cast<char *>("Always"), MBV_PICKMASK_NONE, &error);
   mbview_addactionseparator(0, instance, &error);
@@ -435,6 +519,8 @@ int test_gl(bool mode3d) {
 }  // namespace
 
 int main(int argc, char **argv) {
+  /* line by line, so that results before a crash are not lost */
+  std::setvbuf(stdout, nullptr, _IOLBF, 0);
   bool null = false, gl = false, show = false, mode3d = false;
   const char *grdfile = nullptr;
   for (int i = 1; i < argc; i++) {

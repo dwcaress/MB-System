@@ -41,6 +41,7 @@
 #include "mbv_ui.h"
 #include "mbvq.h"
 #include "mbvq_backend.h"
+#include "mbvq_dialogs.h"
 
 namespace mbvq {
 
@@ -105,8 +106,26 @@ MapWindow::MapWindow(size_t instance) : instance_(instance) {
   struct mbvq_state state;
   mbvq_c_state(instance_, &state);
 
-  /* menus in the order of the Motif window; Controls comes in step 3c */
+  /* menus in the order of the Motif window */
   build_view_menu();
+  dialogs_ = new ControlDialogs(instance_, this);
+  QMenu *controls_menu = menuBar()->addMenu(tr("Controls"));
+  struct ControlItem {
+    const char *label;
+    int dialog;
+  };
+  const ControlItem controls[] = {{"Colors & Contours", MBVQ_DIALOG_COLORBOUNDS}, {"2D Controls", MBVQ_DIALOG_VIEW2D},
+                                  {"3D Controls", MBVQ_DIALOG_VIEW3D},         {"Shading", MBVQ_DIALOG_SHADE},
+                                  {"Resolution", MBVQ_DIALOG_RESOLUTION},      {"Projections", MBVQ_DIALOG_PROJECTION}};
+  for (const ControlItem &item : controls) {
+    const int dialog = item.dialog;
+    connect(controls_menu->addAction(plain(item.label)), &QAction::triggered, this,
+            [this, dialog] { dialogs_->show_dialog(dialog); });
+  }
+  controls_menu->addSeparator();
+  /* the list windows come in step 3d */
+  for (const char *list : {"Site List", "Route List", "Navigation List", "Polyline List", "Polygon List", "Point List"})
+    controls_menu->addAction(tr(list))->setEnabled(false);
   QMenu *mouse_menu = menuBar()->addMenu(tr("Mouse"));
   action_menu_ = menuBar()->addMenu(tr("Action"));
   QMenu *dismiss_menu = menuBar()->addMenu(tr("Dismiss"));
@@ -243,6 +262,8 @@ void MapWindow::set_label(int label, const QString &text) {
   labels_[label] = text;
   if (label == MBVQ_LABEL_PICKINFO)
     pick_info_->setText(text);
+  else if (label == MBVQ_LABEL_PROJECTION && dialogs_ != nullptr)
+    dialogs_->set_projection_label(text);
 }
 
 QString MapWindow::label(int label) const {

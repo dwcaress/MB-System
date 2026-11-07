@@ -51,7 +51,8 @@ extern "C" {
 #define MBVQ_LABEL_PICKINFO 0
 #define MBVQ_LABEL_PROFILEINFO 1
 #define MBVQ_LABEL_ABOUTVERSION 2
-#define MBVQ_LABEL_OTHER 3
+#define MBVQ_LABEL_PROJECTION 3
+#define MBVQ_LABEL_OTHER 4
 
 /* ---- implemented by the C half (mbvq_core.c) ---- */
 
@@ -128,6 +129,71 @@ void mbvq_c_view(size_t instance, int item, bool value);
 /* Action menu */
 void mbvq_c_action(size_t instance, int index);
 
+/* Controls dialogs */
+#define MBVQ_DIALOG_COLORBOUNDS 0
+#define MBVQ_DIALOG_VIEW2D 1
+#define MBVQ_DIALOG_VIEW3D 2
+#define MBVQ_DIALOG_SHADE 3
+#define MBVQ_DIALOG_RESOLUTION 4
+#define MBVQ_DIALOG_PROJECTION 5
+#define MBVQ_DIALOGS 6
+
+/* the text fields of the dialogs, shown with "%g" as in Motif */
+#define MBVQ_F_DATAMIN 0
+#define MBVQ_F_DATAMAX 1
+#define MBVQ_F_CONTOURS 2
+#define MBVQ_F_SLOPEMIN 3
+#define MBVQ_F_SLOPEMAX 4
+#define MBVQ_F_OVERLAYMIN 5
+#define MBVQ_F_OVERLAYMAX 6
+#define MBVQ_F_ILLUM_AMP 7
+#define MBVQ_F_ILLUM_AZI 8
+#define MBVQ_F_ILLUM_ELEV 9
+#define MBVQ_F_SLOPE_AMP 10
+#define MBVQ_F_OVERLAY_AMP 11
+#define MBVQ_F_OVERLAY_CENTER 12
+#define MBVQ_F_MODEL_AZI 13
+#define MBVQ_F_MODEL_ELEV 14
+#define MBVQ_F_VIEW_AZI 15
+#define MBVQ_F_VIEW_ELEV 16
+#define MBVQ_F_EXAGGERATION 17
+#define MBVQ_F_OFFSET3DX 18
+#define MBVQ_F_OFFSET3DY 19
+#define MBVQ_F_MODEL_3DZOOM 20
+#define MBVQ_F_VIEW_3DZOOM 21
+#define MBVQ_F_OFFSET2DX 22
+#define MBVQ_F_OFFSET2DY 23
+#define MBVQ_F_ZOOM2D 24
+#define MBVQ_FIELDS 25
+
+/* the toggles: 1 for Hot-to-Cold */
+#define MBVQ_T_DATA_HTOC 0
+#define MBVQ_T_SLOPE_HTOC 1
+#define MBVQ_T_OVERLAY_HTOC 2
+#define MBVQ_T_OVERLAY_SHADE_HTOC 3
+#define MBVQ_TOGGLES 4
+
+struct mbvq_controls {
+	double field[MBVQ_FIELDS];
+	int toggle[MBVQ_TOGGLES];
+	int lorez_dimension, hirez_dimension, lorez_navdecimate, hirez_navdecimate;
+	int display_projection;      /* 0 geographic, 1 UTM (any projected), 2 spheroid */
+	int lonlatstyle;             /* 0 decimal degrees, 1 degrees and minutes */
+	bool primary, secondary;     /* grids present */
+};
+void mbvq_c_controls(size_t instance, struct mbvq_controls *controls);
+/* Apply of the colour bounds, shading, 3D and 2D dialogs: the texts of all
+   MBVQ_FIELDS fields (only those of the dialog are used) and the toggles */
+void mbvq_c_apply(size_t instance, int dialog, const char *const *text, const int *toggle);
+void mbvq_c_setresolution(size_t instance, int lorez_dimension, int hirez_dimension, int lorez_navdecimate,
+                          int hirez_navdecimate);
+/* build the projection label (MBVQ_LABEL_PROJECTION), as the Motif popup does */
+void mbvq_c_projection_label(size_t instance);
+/* projection: 0 geographic, 1 UTM, 2 spheroid */
+void mbvq_c_setprojection(size_t instance, int projection);
+/* annotation: 0 decimal degrees, 1 degrees and minutes */
+void mbvq_c_setlonlatstyle(size_t instance, int style);
+
 /* ---- implemented by the Qt half ---- */
 
 /* true if the backend draws (the legacy OpenGL backend), false for the null backend */
@@ -148,7 +214,10 @@ void mbvq_qt_sensitivity_changed(size_t instance);
 void mbvq_qt_lists_changed(void);
 void mbvq_qt_bell(void);
 void mbvq_qt_cursor(size_t instance, int cursor);
-/* view values changed by dragging (MBV_VALUES_*) */
+/* view values changed by dragging or rounding (MBV_VALUES_*), or all values
+   of the 2D or 3D view dialog (MBVQ_VALUES_ALL_2D, MBVQ_VALUES_ALL_3D) */
+#define MBVQ_VALUES_ALL_2D 100
+#define MBVQ_VALUES_ALL_3D 101
 void mbvq_qt_values_changed(size_t instance, int values);
 /* Action menu: an item (index in the order added) or a separator was added */
 void mbvq_qt_add_action(size_t instance, int index, const char *label);

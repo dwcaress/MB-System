@@ -163,6 +163,7 @@ int mbvq_c_open(int verbose, size_t instance, int *error) {
 	view->mb3dview.mbview_label_pickinfo = (Widget)&mbvq_label_token[instance][MBVQ_LABEL_PICKINFO];
 	view->mb3dview.mbview_profile_label_info = (Widget)&mbvq_label_token[instance][MBVQ_LABEL_PROFILEINFO];
 	view->mb3dview.mbview_label_about_version = (Widget)&mbvq_label_token[instance][MBVQ_LABEL_ABOUTVERSION];
+	view->mb3dview.mbview_label_projection = (Widget)&mbvq_label_token[instance][MBVQ_LABEL_PROJECTION];
 	if (view->init != MBV_WINDOW_VISIBLE) {
 		mbvq_qt_open_window(instance);
 		view->init = MBV_WINDOW_VISIBLE;
@@ -471,6 +472,131 @@ void mbvq_c_view(size_t instance, int item, bool value) {
 }
 
 /*------------------------------------------------------------------------------*/
+/* Controls dialogs: the values they show, as the Motif popup functions fill them */
+void mbvq_c_controls(size_t instance, struct mbvq_controls *controls) {
+	const struct mbview_world_struct *view = &(mbviews[instance]);
+	const struct mbview_struct *data = &(view->data);
+	memset(controls, 0, sizeof(*controls));
+	double *f = controls->field;
+	f[MBVQ_F_DATAMIN] = data->primary_colortable_min;
+	f[MBVQ_F_DATAMAX] = data->primary_colortable_max;
+	f[MBVQ_F_CONTOURS] = data->contour_interval;
+	f[MBVQ_F_SLOPEMIN] = data->slope_colortable_min;
+	f[MBVQ_F_SLOPEMAX] = data->slope_colortable_max;
+	f[MBVQ_F_OVERLAYMIN] = data->secondary_colortable_min;
+	f[MBVQ_F_OVERLAYMAX] = data->secondary_colortable_max;
+	f[MBVQ_F_ILLUM_AMP] = data->illuminate_magnitude;
+	f[MBVQ_F_ILLUM_AZI] = data->illuminate_azimuth;
+	f[MBVQ_F_ILLUM_ELEV] = data->illuminate_elevation;
+	f[MBVQ_F_SLOPE_AMP] = data->slope_magnitude;
+	f[MBVQ_F_OVERLAY_AMP] = data->overlay_shade_magnitude;
+	f[MBVQ_F_OVERLAY_CENTER] = data->overlay_shade_center;
+	f[MBVQ_F_MODEL_AZI] = data->modelazimuth3d;
+	f[MBVQ_F_MODEL_ELEV] = data->modelelevation3d;
+	f[MBVQ_F_VIEW_AZI] = data->viewazimuth3d;
+	f[MBVQ_F_VIEW_ELEV] = data->viewelevation3d;
+	f[MBVQ_F_EXAGGERATION] = data->exaggeration;
+	f[MBVQ_F_OFFSET3DX] = view->offset3d_x;
+	f[MBVQ_F_OFFSET3DY] = view->offset3d_y;
+	f[MBVQ_F_MODEL_3DZOOM] = view->offset3d_z;
+	f[MBVQ_F_VIEW_3DZOOM] = view->viewoffset3d_z;
+	f[MBVQ_F_OFFSET2DX] = view->offset2d_x;
+	f[MBVQ_F_OFFSET2DY] = view->offset2d_y;
+	f[MBVQ_F_ZOOM2D] = view->size2d;
+	controls->toggle[MBVQ_T_DATA_HTOC] = data->primary_colortable_mode == MBV_COLORTABLE_REVERSED;
+	controls->toggle[MBVQ_T_SLOPE_HTOC] = data->slope_colortable_mode == MBV_COLORTABLE_REVERSED;
+	controls->toggle[MBVQ_T_OVERLAY_HTOC] = data->secondary_colortable_mode == MBV_COLORTABLE_REVERSED;
+	controls->toggle[MBVQ_T_OVERLAY_SHADE_HTOC] = data->overlay_shade_mode == MBV_COLORTABLE_REVERSED;
+	controls->lorez_dimension = data->lorez_dimension;
+	controls->hirez_dimension = data->hirez_dimension;
+	controls->lorez_navdecimate = data->lorez_navdecimate;
+	controls->hirez_navdecimate = data->hirez_navdecimate;
+	/* PROJECTED and ALREADYPROJECTED show as UTM, as in the Motif popup */
+	controls->display_projection = -1;
+	if (data->display_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
+		controls->display_projection = 0;
+	else if (data->display_projection_mode == MBV_PROJECTION_PROJECTED ||
+	         data->display_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
+		controls->display_projection = 1;
+	else if (data->display_projection_mode == MBV_PROJECTION_SPHEROID)
+		controls->display_projection = 2;
+	controls->lonlatstyle = shared.lonlatstyle == MBV_LONLAT_DEGREESMINUTES ? 1 : 0;
+	controls->primary = data->primary_nxy > 0 && data->primary_data != NULL;
+	controls->secondary = data->secondary_nxy > 0 && data->secondary_data != NULL;
+}
+
+/* Apply buttons, as the Motif callbacks: the texts go to the core unchanged */
+void mbvq_c_apply(size_t instance, int dialog, const char *const *text, const int *toggle) {
+	if (dialog == MBVQ_DIALOG_COLORBOUNDS) {
+		struct mbview_colorbounds_values values;
+		snprintf(values.datamin, sizeof(values.datamin), "%s", text[MBVQ_F_DATAMIN]);
+		snprintf(values.datamax, sizeof(values.datamax), "%s", text[MBVQ_F_DATAMAX]);
+		snprintf(values.contours, sizeof(values.contours), "%s", text[MBVQ_F_CONTOURS]);
+		values.data_htoc = toggle[MBVQ_T_DATA_HTOC];
+		snprintf(values.slopemin, sizeof(values.slopemin), "%s", text[MBVQ_F_SLOPEMIN]);
+		snprintf(values.slopemax, sizeof(values.slopemax), "%s", text[MBVQ_F_SLOPEMAX]);
+		values.slope_htoc = toggle[MBVQ_T_SLOPE_HTOC];
+		snprintf(values.overlaymin, sizeof(values.overlaymin), "%s", text[MBVQ_F_OVERLAYMIN]);
+		snprintf(values.overlaymax, sizeof(values.overlaymax), "%s", text[MBVQ_F_OVERLAYMAX]);
+		values.overlay_htoc = toggle[MBVQ_T_OVERLAY_HTOC];
+		mbview_colorboundsapply(instance, &values);
+	}
+	else if (dialog == MBVQ_DIALOG_SHADE) {
+		struct mbview_shadeparms_values values;
+		snprintf(values.illum_amp, sizeof(values.illum_amp), "%s", text[MBVQ_F_ILLUM_AMP]);
+		snprintf(values.illum_azi, sizeof(values.illum_azi), "%s", text[MBVQ_F_ILLUM_AZI]);
+		snprintf(values.illum_elev, sizeof(values.illum_elev), "%s", text[MBVQ_F_ILLUM_ELEV]);
+		snprintf(values.slope_amp, sizeof(values.slope_amp), "%s", text[MBVQ_F_SLOPE_AMP]);
+		snprintf(values.overlay_amp, sizeof(values.overlay_amp), "%s", text[MBVQ_F_OVERLAY_AMP]);
+		snprintf(values.overlay_center, sizeof(values.overlay_center), "%s", text[MBVQ_F_OVERLAY_CENTER]);
+		values.overlay_shade_htoc = toggle[MBVQ_T_OVERLAY_SHADE_HTOC];
+		mbview_shadeparmsapply(instance, &values);
+	}
+	else if (dialog == MBVQ_DIALOG_VIEW3D) {
+		struct mbview_3dparms_values values;
+		snprintf(values.model_azimuth, sizeof(values.model_azimuth), "%s", text[MBVQ_F_MODEL_AZI]);
+		snprintf(values.model_elevation, sizeof(values.model_elevation), "%s", text[MBVQ_F_MODEL_ELEV]);
+		snprintf(values.view_azimuth, sizeof(values.view_azimuth), "%s", text[MBVQ_F_VIEW_AZI]);
+		snprintf(values.view_elevation, sizeof(values.view_elevation), "%s", text[MBVQ_F_VIEW_ELEV]);
+		snprintf(values.exaggeration, sizeof(values.exaggeration), "%s", text[MBVQ_F_EXAGGERATION]);
+		snprintf(values.view_3doffsetx, sizeof(values.view_3doffsetx), "%s", text[MBVQ_F_OFFSET3DX]);
+		snprintf(values.view_3doffsety, sizeof(values.view_3doffsety), "%s", text[MBVQ_F_OFFSET3DY]);
+		snprintf(values.model_3dzoom, sizeof(values.model_3dzoom), "%s", text[MBVQ_F_MODEL_3DZOOM]);
+		snprintf(values.view_3dzoom, sizeof(values.view_3dzoom), "%s", text[MBVQ_F_VIEW_3DZOOM]);
+		mbview_3dparmsapply(instance, &values);
+	}
+	else if (dialog == MBVQ_DIALOG_VIEW2D) {
+		struct mbview_2dparms_values values;
+		snprintf(values.view_2doffsetx, sizeof(values.view_2doffsetx), "%s", text[MBVQ_F_OFFSET2DX]);
+		snprintf(values.view_2doffsety, sizeof(values.view_2doffsety), "%s", text[MBVQ_F_OFFSET2DY]);
+		snprintf(values.view_2dzoom, sizeof(values.view_2dzoom), "%s", text[MBVQ_F_ZOOM2D]);
+		mbview_2dparmsapply(instance, &values);
+	}
+}
+
+void mbvq_c_setresolution(size_t instance, int lorez_dimension, int hirez_dimension, int lorez_navdecimate,
+                          int hirez_navdecimate) {
+	mbview_setresolution(instance, lorez_dimension, hirez_dimension, lorez_navdecimate, hirez_navdecimate);
+}
+
+void mbvq_c_projection_label(size_t instance) { do_mbview_set_projection_label(instance); }
+
+void mbvq_c_setprojection(size_t instance, int projection) {
+	if (projection == 0)
+		mbview_setdisplayprojection(instance, MBV_PROJECTION_GEOGRAPHIC);
+	else if (projection == 1)
+		mbview_setdisplayprojection(instance, MBV_PROJECTION_PROJECTED);
+	else if (projection == 2)
+		mbview_setdisplayprojection(instance, MBV_PROJECTION_SPHEROID);
+	/* the window shows the state of the core again (menus) */
+	mbvq_qt_modes_changed(instance);
+}
+
+void mbvq_c_setlonlatstyle(size_t instance, int style) {
+	mbview_setlonlatstyle(instance, style == 1 ? MBV_LONLAT_DEGREESMINUTES : MBV_LONLAT_DEGREESDECIMAL);
+}
+
+/*------------------------------------------------------------------------------*/
 /* Action menu: the program's callbacks, called as Motif calls them, with the
    instance as client data */
 static void (*mbvq_action_notify[MBV_MAX_WINDOWS][MBV_NUM_ACTIONS])(Widget, XtPointer, XtPointer);
@@ -729,13 +855,13 @@ void set_mbview_colortable_mode(size_t instance, int mode) {
 	mbvq_qt_modes_changed(instance);
 }
 
-/* the 2D and 3D view parameter dialogs come in step 3c */
+/* the 2D and 3D view parameter dialogs show the values again (after Reset) */
 int do_mbview_2dparmstext(size_t instance) {
-	mbvq_qt_values_changed(instance, MBV_VALUES_VIEW_2DOFFSET);
+	mbvq_qt_values_changed(instance, MBVQ_VALUES_ALL_2D);
 	return (MB_SUCCESS);
 }
 int do_mbview_3dparmstext(size_t instance) {
-	mbvq_qt_values_changed(instance, MBV_VALUES_VIEW_3DOFFSET);
+	mbvq_qt_values_changed(instance, MBVQ_VALUES_ALL_3D);
 	return (MB_SUCCESS);
 }
 

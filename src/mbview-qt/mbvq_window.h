@@ -46,6 +46,8 @@ class QRadioButton;
 
 namespace mbvq {
 
+class ControlDialogs;
+
 class MapWindow final : public QMainWindow {
  public:
   explicit MapWindow(size_t instance);
@@ -61,6 +63,8 @@ class MapWindow final : public QMainWindow {
   void set_label(int label, const QString &text);
   QString label(int label) const;
   void set_map_cursor(int cursor);
+  /* the Controls dialogs */
+  ControlDialogs *dialogs() const { return dialogs_; }
   /* Action menu */
   void add_action(int index, const QString &label);
   void add_action_separator();
@@ -81,6 +85,7 @@ class MapWindow final : public QMainWindow {
   QAction *mouse_action_[MBVQ_MOUSE_MODES] = {};
   QRadioButton *mouse_button_[MBVQ_MOUSE_MODES] = {};
   QMenu *action_menu_ = nullptr;
+  ControlDialogs *dialogs_ = nullptr;
   std::vector<QAction *> actions_;
   bool closing_ = false;
 };

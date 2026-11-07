@@ -35,6 +35,7 @@
 #include "mbvq.h"
 #include "mbvq_backend.h"
 #include "mbvq_bridge.h"
+#include "mbvq_dialogs.h"
 #include "mbvq_window.h"
 
 namespace mbvq {
@@ -183,9 +184,8 @@ void mbvq_qt_cursor(size_t instance, int cursor) {
 }
 
 void mbvq_qt_values_changed(size_t instance, int values) {
-  /* shown in the view parameter dialogs (step 3b) */
-  (void)instance;
-  (void)values;
+  if (mbvq::MapWindow *window = window_of(instance))
+    window->dialogs()->values_changed(values);
 }
 
 void mbvq_qt_schedule_work(size_t instance, int delay_ms) {

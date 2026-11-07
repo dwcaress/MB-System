@@ -64,6 +64,8 @@ add_library(
   ${mbview_core}
   mbvq_core.c
   mbvq_bridge.h
+  mbvq_dialogs.cc
+  mbvq_dialogs.h
   mbvq.h
   mbvq_backend.h
   mbvq_backend_gl.cc
