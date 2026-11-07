@@ -28,7 +28,8 @@
  *   mbview_qt_test --gl [--3d]    draws a synthetic grid with the OpenGL backend,
  *                                 waits for the full resolution drawing and checks
  *                                 picks made with mouse events
- *   mbview_qt_test --show [--3d] [grid]   opens a window to use by hand; with
+ *   mbview_qt_test --show [--3d] [--edit] [grid]   opens a window to use by hand
+ *                                 (--edit: sites, routes and polylines enabled); with
  *                                 MBVIEW_QT_TEST_SNAPSHOT=file it saves the first
  *                                 full resolution drawing and quits; with
  *                                 MBVIEW_QT_TEST_CLOSE also set, it picks and
@@ -47,6 +48,7 @@
 #include <QDialog>
 #include <QLabel>
 #include <QLineEdit>
+#include <QListWidget>
 #include <QMenu>
 #include <QMouseEvent>
 #include <QOpenGLWidget>
@@ -71,6 +73,7 @@ extern "C" {
 #include "mbvq.h"
 #include "mbvq_bridge.h"
 #include "mbvq_dialogs.h"
+#include "mbvq_lists.h"
 #include "mbvq_window.h"
 
 namespace {
@@ -371,6 +374,80 @@ int test_null() {
             projection_label->text().contains(QStringLiteral("Spheroid")),
         "Projections sets the annotation style and the display projection");
 
+  /* List windows: they show the rows of the core and pass the selected rows */
+  struct mbview_shareddata_struct *sd = nullptr;
+  mbview_getsharedptr(0, &sd, &error);
+  auto list_button = [](QWidget *w, const char *text) -> QPushButton * {
+    for (QPushButton *b : w->findChildren<QPushButton *>())
+      if (b->text() == QString::fromLatin1(text))
+        return b;
+    return nullptr;
+  };
+  mbview_enableeditsites(0, instance, &error);
+  double slon[3] = {10.05, 10.1, 10.15}, slat[3] = {54.05, 54.075, 54.1};
+  double stopo[3] = {surface(slon[0], slat[0]), surface(slon[1], slat[1]), surface(slon[2], slat[2])};
+  int scolor[3] = {MBV_COLOR_BLACK, MBV_COLOR_BLUE, MBV_COLOR_GREEN}, ssize[3] = {1, 1, 1};
+  mb_path sname[3];
+  for (int i = 0; i < 3; i++)
+    std::snprintf(sname[i], sizeof(sname[i]), "Site %c", 'A' + i);
+  mbview_addsites(0, instance, 3, slon, slat, stopo, scolor, ssize, sname, &error);
+  view_item("Site List")->trigger();
+  mbvq::ListWindow *sites = mbvq::list_window(MBVQ_LIST_SITE);
+  check(sites->isVisible() && sites->view()->count() == 3 && sites->view()->item(1)->text().startsWith(QStringLiteral("  1 | ")) &&
+            sites->view()->item(1)->text().endsWith(QStringLiteral("| Site B")),
+        "Site List shows a row per site");
+  sites->view()->item(1)->setSelected(true);
+  spin(50);
+  check(sd->site_selected == 1, "selecting a site row selects the site");
+  list_button(sites, "Delete Selected Sites")->click();
+  check(sd->nsite == 2 && sites->view()->count() == 2, "Delete Selected Sites deletes the selected site");
+
+  mbview_enableeditroutes(0, instance, &error);
+  mbview_enableviewpolylines(0, instance, &error);
+  double rlon[3] = {10.05, 10.1, 10.15}, rlat[3] = {54.05, 54.06, 54.07};
+  int waypoint[3] = {MBV_ROUTE_WAYPOINT_STARTLINE, MBV_ROUTE_WAYPOINT_TRANSIT, MBV_ROUTE_WAYPOINT_ENDLINE};
+  mb_path rname;
+  std::snprintf(rname, sizeof(rname), "Test Route");
+  int iroute = -1;
+  mbview_addroute(0, instance, 3, rlon, rlat, waypoint, MBV_COLOR_BLUE, 2, 1, rname, &iroute, &error);
+  view_item("Route List")->trigger();
+  mbvq::ListWindow *routes = mbvq::list_window(MBVQ_LIST_ROUTE);
+  check(routes->view()->count() == 4 && routes->view()->item(0)->text().startsWith(QStringLiteral("Editable Route   0")) &&
+            routes->view()->item(2)->text().endsWith(QStringLiteral("-TRANSIT-")),
+        "Route List shows the route and its waypoints");
+  routes->view()->item(2)->setSelected(true);
+  spin(50);
+  check(sd->route_selected == 0 && sd->route_point_selected == 1, "selecting a waypoint row selects the waypoint");
+
+  int ilayer = -1;
+  mbview_addgislayer(0, instance, MBV_GISLAYER_POLYLINE, false, "Test Layer", &ilayer, &error);
+  int partstart[1] = {0};
+  double plon[3] = {10.02, 10.1, 10.18}, plat[3] = {54.02, 54.1, 54.03}, pz[3] = {0.0, 0.0, 0.0};
+  int ipolyline = -1;
+  mbview_addpolyline(0, instance, 1, partstart, 3, plon, plat, pz, MBV_COLOR_BLACK, 1, "Test Polyline", ilayer, &ipolyline,
+                     &error);
+  view_item("Polyline List")->trigger();
+  mbvq::ListWindow *polylines = mbvq::list_window(MBVQ_LIST_POLYLINE);
+  check(polylines->view()->count() == 2 && polylines->view()->item(0)->text().startsWith(QStringLiteral("Layer ")) &&
+            polylines->view()->item(1)->text().contains(QStringLiteral("| Shown |")),
+        "Polyline List shows the layer and its polyline");
+  polylines->view()->item(1)->setSelected(true);
+  spin(50);
+  check(sd->polyline_selected == 0, "selecting a polyline row selects the polyline");
+  list_button(polylines, "Show/Hide Selected")->click();
+  check(polylines->view()->item(1)->text().contains(QStringLiteral("| Hidden |")) && polylines->view()->item(1)->isSelected(),
+        "Show/Hide hides the polyline and keeps the selection");
+
+  QPushButton *topolylines = list_button(routes, "Convert Selected to Polylines");
+  check(topolylines != nullptr && topolylines->isVisible(), "the route list offers the conversion when polylines are shown");
+  {
+    const QSignalBlocker block(routes->view());
+    routes->view()->clearSelection();
+    routes->view()->item(0)->setSelected(true);
+  }
+  topolylines->click();
+  check(sd->npolyline == 2 && polylines->view()->count() == 4, "Convert Selected to Polylines adds a polyline in a new layer");
+
   /* Action menu: items added by the program, enabled by the pick masks */
   mbview_addaction(0, instance, count_action, const_cast<char *>("Always"), MBV_PICKMASK_NONE, &error);
   mbview_addactionseparator(0, instance, &error);
@@ -397,6 +474,9 @@ int test_null() {
   spin(100);
   check(dismissed == 1, "Dismiss calls the dismiss notify function once");
   check(mbvq::window(instance) == nullptr && !data->active, "Dismiss removes the window and frees the instance");
+  check(!mbvq::list_window(MBVQ_LIST_SITE)->isVisible() && !mbvq::list_window(MBVQ_LIST_ROUTE)->isVisible() &&
+            !mbvq::list_window(MBVQ_LIST_POLYLINE)->isVisible(),
+        "the list windows close with the last instance");
 
   /* a second instance closed with the window's close button */
   size_t second = MBV_NO_WINDOW;
@@ -521,7 +601,7 @@ int test_gl(bool mode3d) {
 int main(int argc, char **argv) {
   /* line by line, so that results before a crash are not lost */
   std::setvbuf(stdout, nullptr, _IOLBF, 0);
-  bool null = false, gl = false, show = false, mode3d = false;
+  bool null = false, gl = false, show = false, mode3d = false, edit = false;
   const char *grdfile = nullptr;
   for (int i = 1; i < argc; i++) {
     if (std::strcmp(argv[i], "--null") == 0)
@@ -532,11 +612,13 @@ int main(int argc, char **argv) {
       show = true;
     else if (std::strcmp(argv[i], "--3d") == 0)
       mode3d = true;
+    else if (std::strcmp(argv[i], "--edit") == 0)
+      edit = true;
     else
       grdfile = argv[i];
   }
   if (null + gl + show != 1) {
-    std::fprintf(stderr, "usage: mbview_qt_test --null | --gl [--3d] | --show [--3d] [grid]\n");
+    std::fprintf(stderr, "usage: mbview_qt_test --null | --gl [--3d] | --show [--3d] [--edit] [grid]\n");
     return 2;
   }
 
@@ -552,6 +634,12 @@ int main(int argc, char **argv) {
   size_t instance = MBV_NO_WINDOW;
   if (!open_view(mode3d, grdfile, &instance))
     return 1;
+  if (edit) {
+    /* sites, routes and polylines as mbgrdviz enables them */
+    mbview_enableeditsites(0, instance, &error);
+    mbview_enableeditroutes(0, instance, &error);
+    mbview_enableviewpolylines(0, instance, &error);
+  }
   QObject::connect(&app, &QApplication::lastWindowClosed, &app, &QApplication::quit);
   if (const char *snapshot = std::getenv("MBVIEW_QT_TEST_SNAPSHOT")) {
     /* save the first full resolution drawing and quit */

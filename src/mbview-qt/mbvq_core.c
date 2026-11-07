@@ -597,6 +597,126 @@ void mbvq_c_setlonlatstyle(size_t instance, int style) {
 }
 
 /*------------------------------------------------------------------------------*/
+/* List windows: the rows and actions of the core; the windows are shared by
+   all instances, as in Motif */
+static int mbvq_gistype(int list) {
+	if (list == MBVQ_LIST_POLYLINE)
+		return (MBV_GISLAYER_POLYLINE);
+	if (list == MBVQ_LIST_POLYGON)
+		return (MBV_GISLAYER_POLYGON);
+	if (list == MBVQ_LIST_GISPOINT)
+		return (MBV_GISLAYER_GISPOINT);
+	return (-1);
+}
+
+void *mbvq_c_rows(int list) {
+	struct mbview_listrows *rows = (struct mbview_listrows *)calloc(1, sizeof(struct mbview_listrows));
+	if (rows == NULL)
+		return (NULL);
+	int status = MB_SUCCESS;
+	if (list == MBVQ_LIST_SITE)
+		status = mbview_sitelist_rows(rows);
+	else if (list == MBVQ_LIST_ROUTE)
+		status = mbview_routelist_rows(rows);
+	else if (list == MBVQ_LIST_NAV)
+		status = mbview_navlist_rows(rows);
+	else if (mbvq_gistype(list) >= 0)
+		status = mbview_gislist_rows(mbvq_gistype(list), rows);
+	if (status != MB_SUCCESS)
+		mbview_listrows_free(rows);
+	return (rows);
+}
+
+int mbvq_c_rows_count(const void *rows) { return (rows != NULL ? ((const struct mbview_listrows *)rows)->nrows : 0); }
+
+const char *mbvq_c_rows_text(const void *rows, int i) {
+	const struct mbview_listrows *r = (const struct mbview_listrows *)rows;
+	return (r != NULL && i >= 0 && i < r->nrows ? r->row[i] : "");
+}
+
+int mbvq_c_rows_selected(const void *rows) { return (rows != NULL ? ((const struct mbview_listrows *)rows)->selected : 0); }
+
+void mbvq_c_rows_free(void *rows) {
+	if (rows != NULL) {
+		mbview_listrows_free((struct mbview_listrows *)rows);
+		free(rows);
+	}
+}
+
+int mbvq_c_list_action(int list, int action, int position_count, const int *position_list) {
+	/* the core functions take the positions as the Motif callbacks read them */
+	int *positions = (int *)position_list;
+	const int gistype = mbvq_gistype(list);
+	if (action == MBVQ_LIST_SELECT) {
+		if (list == MBVQ_LIST_SITE)
+			mbview_sitelist_select(position_count, positions);
+		else if (list == MBVQ_LIST_ROUTE)
+			mbview_routelist_select(position_count, positions);
+		else if (list == MBVQ_LIST_NAV)
+			mbview_navlist_select(position_count, positions);
+		else if (gistype >= 0)
+			return (mbview_gislist_select(gistype, position_count, position_list));
+	}
+	else if (action == MBVQ_LIST_DELETE) {
+		if (list == MBVQ_LIST_SITE)
+			mbview_sitelist_delete(position_count, positions);
+		else if (list == MBVQ_LIST_ROUTE)
+			mbview_routelist_delete(position_count, positions);
+		else if (list == MBVQ_LIST_NAV)
+			mbview_navlist_delete(position_count, positions);
+		else if (gistype >= 0)
+			mbview_gislist_delete(gistype, position_count, position_list);
+	}
+	else if (action == MBVQ_LIST_SHOWHIDE && gistype >= 0 && position_count > 0) {
+		mbview_gislist_showhide(gistype, position_count, position_list);
+	}
+	else if (action == MBVQ_LIST_TOROUTES && gistype >= 0) {
+		mbview_gislist_toroutes(gistype, position_count, position_list);
+	}
+	else if (action == MBVQ_LIST_TOPOLYLINES && list == MBVQ_LIST_ROUTE && position_count > 0) {
+		mbview_routelist_topolylines(position_count, position_list);
+	}
+	return (0);
+}
+
+void mbvq_c_list_redraw(void) { mbview_gislist_redraw(); }
+
+void mbvq_c_list_shown(int list, bool shown) {
+	const int init = shown ? MBV_WINDOW_VISIBLE : MBV_WINDOW_NULL;
+	if (list == MBVQ_LIST_SITE)
+		shared.init_sitelist = init;
+	else if (list == MBVQ_LIST_ROUTE)
+		shared.init_routelist = init;
+	else if (list == MBVQ_LIST_NAV)
+		shared.init_navlist = init;
+	else if (mbvq_gistype(list) >= 0)
+		shared.init_gislist[mbvq_gistype(list)] = init;
+}
+
+const char *mbvq_c_list_title(int list) {
+	if (list == MBVQ_LIST_SITE)
+		return ("Site List");
+	if (list == MBVQ_LIST_ROUTE)
+		return ("Route List");
+	if (list == MBVQ_LIST_NAV)
+		return ("Navigation List");
+	return (mbview_gislist_title(mbvq_gistype(list)));
+}
+
+/* the column headers of mbview_startup() and mbview_gislist_create() */
+const char *mbvq_c_list_header(int list) {
+	if (list == MBVQ_LIST_SITE)
+		return ("Site | Lon | Lat | Depth | Color | Size | Name");
+	if (list == MBVQ_LIST_ROUTE)
+		return ("Route | Waypoint | Lon | Lat | Depth | Distance | DistanceOverTopo | Waypoint Type");
+	if (list == MBVQ_LIST_NAV)
+		return ("Route | Navpoints | Color | Size | Name");
+	return (mbview_gislist_header(mbvq_gistype(list)));
+}
+
+bool mbvq_c_routes_to_polylines(void) { return (shared.shareddata.polyline_mode != MBV_POLYLINE_OFF); }
+
+/*------------------------------------------------------------------------------*/
 /* Action menu: the program's callbacks, called as Motif calls them, with the
    instance as client data */
 static void (*mbvq_action_notify[MBV_MAX_WINDOWS][MBV_NUM_ACTIONS])(Widget, XtPointer, XtPointer);
@@ -895,21 +1015,26 @@ void set_mbview_gispoint_view_mode(size_t instance, int mode) {
 }
 
 /* list windows */
-void mbview_gis_routelistbutton(void) { mbvq_qt_lists_changed(); }
-void mbview_gislist_reset(bool mode) {
-	(void)mode;
-	mbvq_qt_lists_changed();
+void mbview_gis_routelistbutton(void) { mbvq_qt_list_changed(MBVQ_LIST_ROUTE); }
+int mbview_updategislist(int type) {
+	if (type == MBV_GISLAYER_POLYLINE)
+		mbvq_qt_list_changed(MBVQ_LIST_POLYLINE);
+	else if (type == MBV_GISLAYER_POLYGON)
+		mbvq_qt_list_changed(MBVQ_LIST_POLYGON);
+	else if (type == MBV_GISLAYER_GISPOINT)
+		mbvq_qt_list_changed(MBVQ_LIST_GISPOINT);
+	return (MB_SUCCESS);
 }
 int mbview_updatenavlist(void) {
-	mbvq_qt_lists_changed();
+	mbvq_qt_list_changed(MBVQ_LIST_NAV);
 	return (MB_SUCCESS);
 }
 int mbview_updateroutelist(void) {
-	mbvq_qt_lists_changed();
+	mbvq_qt_list_changed(MBVQ_LIST_ROUTE);
 	return (MB_SUCCESS);
 }
 int mbview_updatesitelist(void) {
-	mbvq_qt_lists_changed();
+	mbvq_qt_list_changed(MBVQ_LIST_SITE);
 	return (MB_SUCCESS);
 }
 
@@ -927,7 +1052,7 @@ void mbv_ui_cursor(size_t instance, int cursor) { mbvq_qt_cursor(instance, curso
 void mbv_ui_view_values_changed(size_t instance, int values) { mbvq_qt_values_changed(instance, values); }
 void mbv_ui_reset_view(size_t instance) { mbview_resetview(instance); }
 void mbv_ui_destroy_window(size_t instance) { mbvq_qt_close_window(instance); }
-void mbv_ui_close_lists(void) { mbvq_qt_lists_changed(); }
+void mbv_ui_close_lists(void) { mbvq_qt_lists_closed(); }
 
 /* 3D soundings view: Phase 5 */
 void mbv_ui_soundings_cursor(int cursor) { (void)cursor; }

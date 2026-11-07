@@ -129,6 +129,42 @@ void mbvq_c_view(size_t instance, int item, bool value);
 /* Action menu */
 void mbvq_c_action(size_t instance, int index);
 
+/* List windows (shared by all instances) */
+#define MBVQ_LIST_SITE 0
+#define MBVQ_LIST_ROUTE 1
+#define MBVQ_LIST_NAV 2
+#define MBVQ_LIST_POLYLINE 3
+#define MBVQ_LIST_POLYGON 4
+#define MBVQ_LIST_GISPOINT 5
+#define MBVQ_LISTS 6
+
+/* actions on the selected rows */
+#define MBVQ_LIST_SELECT 0      /* rows were selected */
+#define MBVQ_LIST_DELETE 1      /* Delete Selected */
+#define MBVQ_LIST_SHOWHIDE 2    /* GIS: Show/Hide Selected */
+#define MBVQ_LIST_TOROUTES 3    /* polylines: Convert Selected to Routes */
+#define MBVQ_LIST_TOPOLYLINES 4 /* routes: Convert Selected to Polylines */
+
+/* the rows of a list: an opaque handle, freed with mbvq_c_rows_free */
+void *mbvq_c_rows(int list);
+int mbvq_c_rows_count(const void *rows);
+const char *mbvq_c_rows_text(const void *rows, int i);
+/* the list position (1 for the first row) to select and show, 0 for none */
+int mbvq_c_rows_selected(const void *rows);
+void mbvq_c_rows_free(void *rows);
+/* an action on the selected positions (1 for the first row); for
+   MBVQ_LIST_SELECT of a GIS list, returns the position to select again
+   (0 for none); the caller then redraws with mbvq_c_list_redraw() */
+int mbvq_c_list_action(int list, int action, int position_count, const int *position_list);
+void mbvq_c_list_redraw(void);
+/* the list window was shown or dismissed, as the Motif popup and popdown */
+void mbvq_c_list_shown(int list, bool shown);
+/* window titles and column headers */
+const char *mbvq_c_list_title(int list);
+const char *mbvq_c_list_header(int list);
+/* the route list offers Convert Selected to Polylines */
+bool mbvq_c_routes_to_polylines(void);
+
 /* Controls dialogs */
 #define MBVQ_DIALOG_COLORBOUNDS 0
 #define MBVQ_DIALOG_VIEW2D 1
@@ -210,8 +246,10 @@ void mbvq_qt_label(size_t instance, int label, const char *bxstring);
 void mbvq_qt_modes_changed(size_t instance);
 /* the sensitivity of menu items and actions may have changed */
 void mbvq_qt_sensitivity_changed(size_t instance);
-/* the site, route, navigation or GIS lists changed */
-void mbvq_qt_lists_changed(void);
+/* the rows of a list changed (MBVQ_LIST_*) */
+void mbvq_qt_list_changed(int list);
+/* all list windows close (the last instance closed) */
+void mbvq_qt_lists_closed(void);
 void mbvq_qt_bell(void);
 void mbvq_qt_cursor(size_t instance, int cursor);
 /* view values changed by dragging or rounding (MBV_VALUES_*), or all values

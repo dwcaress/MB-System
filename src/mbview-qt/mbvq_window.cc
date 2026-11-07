@@ -42,6 +42,7 @@
 #include "mbvq.h"
 #include "mbvq_backend.h"
 #include "mbvq_dialogs.h"
+#include "mbvq_lists.h"
 
 namespace mbvq {
 
@@ -123,9 +124,10 @@ MapWindow::MapWindow(size_t instance) : instance_(instance) {
             [this, dialog] { dialogs_->show_dialog(dialog); });
   }
   controls_menu->addSeparator();
-  /* the list windows come in step 3d */
-  for (const char *list : {"Site List", "Route List", "Navigation List", "Polyline List", "Polygon List", "Point List"})
-    controls_menu->addAction(tr(list))->setEnabled(false);
+  /* the list windows, shared by all instances */
+  for (int list = 0; list < MBVQ_LISTS; list++)
+    connect(controls_menu->addAction(QString::fromLatin1(mbvq_c_list_title(list))), &QAction::triggered, this,
+            [list] { show_list(list); });
   QMenu *mouse_menu = menuBar()->addMenu(tr("Mouse"));
   action_menu_ = menuBar()->addMenu(tr("Action"));
   QMenu *dismiss_menu = menuBar()->addMenu(tr("Dismiss"));

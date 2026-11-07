@@ -36,6 +36,7 @@
 #include "mbvq_backend.h"
 #include "mbvq_bridge.h"
 #include "mbvq_dialogs.h"
+#include "mbvq_lists.h"
 #include "mbvq_window.h"
 
 namespace mbvq {
@@ -159,7 +160,9 @@ void mbvq_qt_sensitivity_changed(size_t instance) {
     window->refresh_modes();
 }
 
-void mbvq_qt_lists_changed(void) {}
+void mbvq_qt_list_changed(int list) { mbvq::list_changed(list); }
+
+void mbvq_qt_lists_closed(void) { mbvq::close_lists(); }
 
 void mbvq_qt_add_action(size_t instance, int index, const char *label) {
   if (mbvq::MapWindow *window = window_of(instance))

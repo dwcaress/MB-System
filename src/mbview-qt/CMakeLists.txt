@@ -55,6 +55,8 @@ set(mbview_core
     ${mbview_dir}/mbview_polyline.c
     ${mbview_dir}/mbview_profile.c
     ${mbview_dir}/mbv_core.c
+    ${mbview_dir}/mbv_lists_core.c
+    ${mbview_dir}/mbv_gislist_core.c
     ${mbview_dir}/mbv_soundings_core.c
     ${mbview_dir}/mbv_globals.c
     ${mbview_dir}/mbv_render.c)
@@ -72,6 +74,8 @@ add_library(
   mbvq_backend_null.cc
   mbvq_input.cc
   mbvq_input.h
+  mbvq_lists.cc
+  mbvq_lists.h
   mbvq_ui.cc
   mbvq_window.cc
   mbvq_window.h)
