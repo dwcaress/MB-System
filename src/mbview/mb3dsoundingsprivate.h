@@ -206,7 +206,7 @@ struct mb3dsoundings_world_struct {
 
 /* library variables */
 /*   note that global mb3dsoundings variables will only be defined when
-     this code is included in mb3dsoundings_callbacks.c where the
+     this code is included in mbv_soundings_core.c where the
      MB3DSOUNDINGSGLOBAL flag is defined - other blocks of code will
      have these variables declared as extern  */
 #ifdef MB3DSOUNDINGSGLOBAL
@@ -225,11 +225,19 @@ EXTERNAL XtAppContext mbs_app_context;
 EXTERNAL int mbs_work_function_set;
 EXTERNAL int mbs_timer_count;
 EXTERNAL struct mb3dsoundings_world_struct mb3dsoundings;
-EXTERNAL int key_g_down = 0;
-EXTERNAL int key_z_down = 0;
-EXTERNAL int key_s_down = 0;
-EXTERNAL int key_a_down = 0;
-EXTERNAL int key_d_down = 0;
+#ifdef MB3DSOUNDINGSGLOBAL
+int key_g_down = 0;
+int key_z_down = 0;
+int key_s_down = 0;
+int key_a_down = 0;
+int key_d_down = 0;
+#else
+extern int key_g_down;
+extern int key_z_down;
+extern int key_s_down;
+extern int key_a_down;
+extern int key_d_down;
+#endif
 
 /* global declarations */
 #ifdef MB3DSOUNDINGSGLOBAL

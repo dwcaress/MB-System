@@ -27,20 +27,26 @@
  * The core files (mbview_plot.c, mbview_process.c, mbview_primary.c,
  * mbview_secondary.c, mbview_pick.c, mbview_nav.c, mbview_route.c,
  * mbview_site.c, mbview_vector.c, mbview_gispoint.c, mbview_polygon.c,
- * mbview_polyline.c, mbview_profile.c) make no X11 or Motif calls. When
- * the user interface has to react, they call the functions below. The
- * Motif library implements them in mbv_ui_motif.c; another toolkit
- * implements the same functions.
+ * mbview_polyline.c, mbview_profile.c, mbv_core.c, mbv_soundings_core.c,
+ * mbv_globals.c, mbv_render.c) make no X11 or Motif calls. When the user
+ * interface has to react, they call the functions below. The Motif
+ * library implements them in mbv_ui_motif.c and
+ * mb3dsoundings_callbacks.c; another toolkit implements the same
+ * functions.
  *
  * The core also calls these user interface functions, declared in
- * mbviewprivate.h. Another toolkit has to provide them too:
+ * mbviewprivate.h or mb3dsoundingsprivate.h. Another toolkit has to
+ * provide them too:
  *   mbview_callbacks.c: do_mbview_status, do_mbview_xevents,
- *     mbview_update_sensitivity, set_mbview_label_multiline_string,
+ *     mbview_action_sensitivity, mbview_update_sensitivity,
+ *     mbview_set_widgets, set_mbview_label_multiline_string,
  *     set_mbview_route_view_mode, set_mbview_polyline_view_mode,
  *     set_mbview_polygon_view_mode, set_mbview_gispoint_view_mode
- *   mbview_gislist.c: mbview_gis_routelistbutton
+ *   mbview_gislist.c: mbview_gis_routelistbutton, mbview_gislist_reset
  *   mbv_ui_motif.c: mbview_updatenavlist, mbview_updateroutelist,
  *     mbview_updatesitelist
+ *   mb3dsoundings_callbacks.c: mb3dsoundings_updatecursor,
+ *     mb3dsoundings_updatemodetoggles, mb3dsoundings_updatestatus
  */
 
 #ifndef MBVIEW_MBV_UI_H
@@ -79,6 +85,9 @@ void mbv_ui_cursor(size_t instance, int cursor);
 
 /* set the mouse cursor of the 3D soundings view */
 void mbv_ui_soundings_cursor(int cursor);
+
+/* signal a refused or invalid action in the 3D soundings view */
+void mbv_ui_soundings_bell(void);
 
 /* view values that mouse dragging changes, shown in the view control dialogs */
 #define MBV_VALUES_VIEW_2DOFFSET 0      /* view->offset2d_x, offset2d_y */
