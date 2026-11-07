@@ -65,6 +65,22 @@
 const char mbgrdviz_program_name[] = "MBgrdviz";
 int mbgrdviz_verbose;
 int mbgrdviz_error;
+
+/* the survey generation dialog */
+int mbgrdviz_working_route = -1;
+int mbgrdviz_survey_instance = 0;
+int mbgrdviz_survey_mode = MBGRDVIZ_SURVEY_MODE_UNIFORM;
+int mbgrdviz_survey_platform = MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE;
+int mbgrdviz_survey_interleaving = 1;
+int mbgrdviz_survey_direction = MBGRDVIZ_SURVEY_DIRECTION_SW;
+bool mbgrdviz_survey_crosslines_last = false;
+int mbgrdviz_survey_crosslines = 0;
+int mbgrdviz_survey_linespacing = 200;
+int mbgrdviz_survey_swathwidth = 120;
+int mbgrdviz_survey_depth = 0;
+int mbgrdviz_survey_altitude = 150;
+int mbgrdviz_survey_color = MBV_COLOR_BLACK;
+char mbgrdviz_survey_name[MB_PATH_MAXLINE];
 bool mbgrdviz_mbview_id[MBV_MAX_WINDOWS];
 
 /* local functions */
@@ -4974,4 +4990,1034 @@ void do_mbgrdviz_addgisactions(size_t instance) {
                    MBV_EXISTMASK_POLYGON, &error);
   mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_exportgispoint, "Export Points as Shapefile",
                    MBV_EXISTMASK_GISPOINT, &error);
+}
+/*---------------------------------------------------------------------------------------*/
+
+void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_data) {
+  int status = MB_SUCCESS;
+  int ixmin, ixmax, jymin, jymax;
+  int i, j, k, ksource;
+
+  /* existing mbview instance */
+  size_t instance_source;
+  struct mbview_struct *data_source;
+  char button_name_source[MB_PATH_MAXLINE];
+
+  /* new mbview instance */
+  size_t instance = MBV_NO_WINDOW;
+  char button_name[MB_PATH_MAXLINE+12];
+
+  /* mbview parameters */
+  char mbv_title[MB_PATH_MAXLINE+25];
+  int mbv_xo;
+  int mbv_yo;
+  int mbv_width;
+  int mbv_height;
+  int mbv_lorez_dimension;
+  int mbv_hirez_dimension;
+  int mbv_lorez_navdecimate;
+  int mbv_hirez_navdecimate;
+  int mbv_primary_nxy;
+  int mbv_primary_n_columns;
+  int mbv_primary_n_rows;
+  double mbv_primary_min;
+  double mbv_primary_max;
+  double mbv_primary_xmin;
+  double mbv_primary_xmax;
+  double mbv_primary_ymin;
+  double mbv_primary_ymax;
+  double mbv_primary_dx;
+  double mbv_primary_dy;
+  float *mbv_primary_data;
+  int mbv_secondary_nxy;
+  int mbv_secondary_n_columns;
+  int mbv_secondary_n_rows;
+  double mbv_secondary_min;
+  double mbv_secondary_max;
+  double mbv_secondary_xmin;
+  double mbv_secondary_xmax;
+  double mbv_secondary_ymin;
+  double mbv_secondary_ymax;
+  double mbv_secondary_dx;
+  double mbv_secondary_dy;
+  float *mbv_secondary_data;
+
+  /* get source mbview instance */
+  instance_source = (size_t)client_data;
+  /*fprintf(stderr,"Called do_mbgrdviz_open_region instance:%d\n", instance_source);*/
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       w:           %p\n", w);
+    fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+    fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+  }
+
+  /* get new instance number */
+  if (instance_source != MBV_NO_WINDOW && instance_source < MBV_MAX_WINDOWS) {
+    status = mbview_init(verbose, &instance, &error);
+    if (instance == MBV_NO_WINDOW) {
+      fprintf(stderr, "Unable to create mbview - %d mbview windows already created\n", MBV_MAX_WINDOWS);
+      status = MB_FAILURE;
+    }
+  }
+  else {
+    status = MB_FAILURE;
+  }
+
+  /* check data source for region to extract */
+  if (status == MB_SUCCESS) {
+    /* get source data */
+    mbview_getdataptr(verbose, instance_source, &data_source, &error);
+
+    /* extract the grid from the source */
+    if (data_source->region_type != MBV_REGION_QUAD)
+      status = MB_FAILURE;
+  }
+
+  /* extract data from source and create new mbview instance */
+  if (status == MB_SUCCESS) {
+    /* get source data */
+    mbview_getdataptr(verbose, instance_source, &data_source, &error);
+
+    /* get button name */
+    sscanf(data_source->title, "MBgrdviz: %s", button_name_source);
+    sprintf(button_name, "Region from %s", button_name_source);
+
+    /* set parameters */
+    sprintf(mbv_title, "MBgrdviz: %s\n", button_name);
+    mbv_xo = 200;
+    mbv_yo = 200;
+    mbv_width = 560;
+    mbv_height = 500;
+    mbv_lorez_dimension = data_source->lorez_dimension;
+    mbv_hirez_dimension = data_source->hirez_dimension;
+    mbv_lorez_navdecimate = data_source->lorez_navdecimate;
+    mbv_hirez_navdecimate = data_source->hirez_navdecimate;
+
+    /* set basic mbview window parameters */
+    status = mbview_setwindowparms(verbose, instance, &do_mbgrdviz_dismiss_notify, mbv_title, mbv_xo, mbv_yo, mbv_width,
+                                   mbv_height, mbv_lorez_dimension, mbv_hirez_dimension, mbv_lorez_navdecimate,
+                                   mbv_hirez_navdecimate, &error);
+
+    /* extract the primary grid from the source */
+    mbv_primary_dx = data_source->primary_dx;
+    mbv_primary_dy = data_source->primary_dy;
+    mbv_primary_xmin = MIN(data_source->region.cornerpoints[0].xgrid, data_source->region.cornerpoints[3].xgrid);
+    mbv_primary_xmax = MAX(data_source->region.cornerpoints[0].xgrid, data_source->region.cornerpoints[3].xgrid);
+    mbv_primary_ymin = MIN(data_source->region.cornerpoints[0].ygrid, data_source->region.cornerpoints[3].ygrid);
+    mbv_primary_ymax = MAX(data_source->region.cornerpoints[0].ygrid, data_source->region.cornerpoints[3].ygrid);
+    ixmin = (mbv_primary_xmin - data_source->primary_xmin) / mbv_primary_dx;
+    ixmax = ((mbv_primary_xmax - data_source->primary_xmin) / mbv_primary_dx) + 1;
+    jymin = (mbv_primary_ymin - data_source->primary_ymin) / mbv_primary_dy;
+    jymax = ((mbv_primary_ymax - data_source->primary_ymin) / mbv_primary_dy) + 1;
+    ixmin = MAX(ixmin, 0);
+    ixmax = MIN(ixmax, data_source->primary_n_columns - 1);
+    jymin = MAX(jymin, 0);
+    jymax = MIN(jymax, data_source->primary_n_rows - 1);
+    mbv_primary_xmin = data_source->primary_xmin + mbv_primary_dx * ixmin;
+    mbv_primary_xmax = data_source->primary_xmin + mbv_primary_dx * ixmax;
+    mbv_primary_ymin = data_source->primary_ymin + mbv_primary_dy * jymin;
+    mbv_primary_ymax = data_source->primary_ymin + mbv_primary_dy * jymax;
+    mbv_primary_n_columns = ixmax - ixmin + 1;
+    mbv_primary_n_rows = jymax - jymin + 1;
+    mbv_primary_nxy = mbv_primary_n_columns * mbv_primary_n_rows;
+    status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * mbv_primary_nxy, (void **)&mbv_primary_data, &error);
+    mbv_primary_min = data_source->primary_nodatavalue;
+    mbv_primary_max = data_source->primary_nodatavalue;
+    for (i = 0; status == MB_SUCCESS && i < mbv_primary_n_columns; i++) {
+      for (j = 0; j < mbv_primary_n_rows; j++) {
+        k = i * mbv_primary_n_rows + j;
+        ksource = (i + ixmin) * data_source->primary_n_rows + (j + jymin);
+        mbv_primary_data[k] = data_source->primary_data[ksource];
+        if (mbv_primary_data[k] != data_source->primary_nodatavalue) {
+          if (mbv_primary_min == data_source->primary_nodatavalue || mbv_primary_data[k] < mbv_primary_min) {
+            mbv_primary_min = mbv_primary_data[k];
+          }
+          if (mbv_primary_max == data_source->primary_nodatavalue || mbv_primary_data[k] > mbv_primary_max) {
+            mbv_primary_max = mbv_primary_data[k];
+          }
+        }
+      }
+    }
+
+    /* set basic mbview view controls */
+    if (status == MB_SUCCESS)
+      status = mbview_setviewcontrols(
+          verbose, instance, data_source->display_mode, data_source->mouse_mode, data_source->grid_mode,
+          data_source->primary_histogram, data_source->primaryslope_histogram, data_source->secondary_histogram,
+          data_source->primary_shade_mode, data_source->slope_shade_mode, data_source->secondary_shade_mode,
+          data_source->grid_contour_mode, data_source->site_view_mode, data_source->route_view_mode,
+          data_source->nav_view_mode, data_source->navswathbounds_view_mode, data_source->navdrape_view_mode, data_source->vector_view_mode,
+          data_source->exaggeration, data_source->modelelevation3d, data_source->modelazimuth3d,
+          data_source->viewelevation3d, data_source->viewazimuth3d, data_source->illuminate_magnitude,
+          data_source->illuminate_elevation, data_source->illuminate_azimuth, data_source->slope_magnitude,
+          data_source->overlay_shade_magnitude, data_source->overlay_shade_center, data_source->overlay_shade_mode,
+          data_source->contour_interval, data_source->display_projection_mode, data_source->display_projection_id, &error);
+
+    /* set more mbview control values */
+    if (status == MB_SUCCESS)
+      status = mbview_setprimarygrid(verbose, instance, data_source->primary_grid_projection_mode,
+                                     data_source->primary_grid_projection_id, data_source->primary_nodatavalue,
+                                     mbv_primary_n_columns, mbv_primary_n_rows, mbv_primary_min, mbv_primary_max, mbv_primary_xmin,
+                                     mbv_primary_xmax, mbv_primary_ymin, mbv_primary_ymax, mbv_primary_dx, mbv_primary_dy,
+                                     mbv_primary_data, &error);
+    mb_freed(verbose, __FILE__, __LINE__, (void **)&mbv_primary_data, &error);
+    if (status == MB_SUCCESS)
+      status = mbview_setprimarycolortable(verbose, instance, data_source->primary_colortable,
+                                           data_source->primary_colortable_mode, data_source->primary_colortable_min,
+                                           data_source->primary_colortable_max, &error);
+    if (status == MB_SUCCESS)
+      status =
+          mbview_setslopecolortable(verbose, instance, data_source->slope_colortable, data_source->slope_colortable_mode,
+                                    data_source->slope_colortable_min, data_source->slope_colortable_max, &error);
+    if (status == MB_SUCCESS)
+      status = mbview_enableeditsites(verbose, instance, &error);
+    if (status == MB_SUCCESS)
+      status = mbview_enableeditroutes(verbose, instance, &error);
+
+    /* show GIS polylines, polygons, and points as in the source window */
+    if (status == MB_SUCCESS) {
+      struct mbview_struct *data_new = NULL;
+      mbview_getdataptr(verbose, instance, &data_new, &error);
+      data_new->polyline_view_mode = data_source->polyline_view_mode;
+      data_new->polygon_view_mode = data_source->polygon_view_mode;
+      data_new->gispoint_view_mode = data_source->gispoint_view_mode;
+    }
+
+    /* open up mbview window */
+    if (status == MB_SUCCESS) {
+      /*fprintf(stderr,"about to open mbview instance:%zu\n",instance);*/
+      status = mbview_open(verbose, instance, &error);
+      if (status == MB_SUCCESS)
+        mbview_id[instance] = true;
+      else
+        mbview_id[instance] = false;
+      /*fprintf(stderr,"done opening mbview instance:%zu\n",instance);*/
+
+      /* add action button */
+      if (status == MB_SUCCESS) {
+        mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openoverlay, "Open Overlay Grid",
+                         MBV_PICKMASK_NONE, &error);
+        mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_opensite, "Open Site File", MBV_PICKMASK_NONE,
+                         &error);
+        mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openroute, "Open Route File", MBV_PICKMASK_NONE,
+                         &error);
+        mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_opennav, "Open Navigation", MBV_PICKMASK_NONE,
+                         &error);
+        mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openswath, "Open Swath Data", MBV_PICKMASK_NONE,
+                         &error);
+        mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openvector, "Open Vector File",
+                         MBV_PICKMASK_NONE, &error);
+        do_mbgrdviz_addgisactions(instance);
+        mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savesite, "Save Site File", MBV_EXISTMASK_SITE,
+                         &error);
+        mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_saveroute, "Save Route File",
+                         MBV_EXISTMASK_ROUTE, &error);
+        mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_saverisiscriptheading, "Save Risi Script File (variable heading)",
+                         MBV_EXISTMASK_ROUTE, &error);
+        mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_saverisiscriptnoheading, "Save Risi Script File (static heading)",
+                         MBV_EXISTMASK_ROUTE, &error);
+        mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savedegdecmin,
+                         "Save Route as Degrees + Decimal Minutes File", MBV_EXISTMASK_ROUTE, &error);
+        mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savelnw, "Save Route as Hypack LNW File",
+                         MBV_EXISTMASK_ROUTE, &error);
+        mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_saveprofile, "Save Profile File",
+                         MBV_PICKMASK_TWOPOINT + MBV_PICKMASK_ROUTE + MBV_PICKMASK_NAVTWOPOINT, &error);
+        mbview_addactionseparator(verbose, instance, &error);
+
+        mbview_addaction(verbose, instance, do_mbgrdviz_open_mbedit, "Open Selected Nav in MBedit", MBV_PICKMASK_NAVANY,
+                         &error);
+        mbview_addaction(verbose, instance, do_mbgrdviz_open_mbeditviz, "Open Selected Nav in MBeditviz",
+                         MBV_PICKMASK_NAVANY, &error);
+        mbview_addaction(verbose, instance, do_mbgrdviz_open_mbnavedit, "Open Selected Nav in MBnavedit",
+                         MBV_PICKMASK_NAVANY, &error);
+        mbview_addaction(verbose, instance, do_mbgrdviz_open_mbvelocitytool, "Open Selected Nav in MBvelocitytool",
+                         MBV_PICKMASK_NAVANY, &error);
+
+        mbview_addaction(verbose, instance, do_mbgrdviz_open_region, "Open Region as New View",
+                         MBV_PICKMASK_REGION + MBV_PICKMASK_NEWINSTANCE, &error);
+        mbview_addactionseparator(verbose, instance, &error);
+        mbview_addaction(verbose, instance, do_mbgrdviz_make_survey, "Generate Survey Route from Area", MBV_PICKMASK_AREA,
+                         &error);
+      }
+    }
+
+    /* extract the secondary grid, if it exists, from the source */
+    if (data_source->secondary_nxy > 0 && data_source->secondary_data != NULL) {
+      mbv_secondary_dx = data_source->secondary_dx;
+      mbv_secondary_dy = data_source->secondary_dy;
+      mbv_secondary_xmin = MIN(data_source->region.cornerpoints[0].xgrid, data_source->region.cornerpoints[3].xgrid);
+      mbv_secondary_xmax = MAX(data_source->region.cornerpoints[0].xgrid, data_source->region.cornerpoints[3].xgrid);
+      mbv_secondary_ymin = MIN(data_source->region.cornerpoints[0].ygrid, data_source->region.cornerpoints[3].ygrid);
+      mbv_secondary_ymax = MAX(data_source->region.cornerpoints[0].ygrid, data_source->region.cornerpoints[3].ygrid);
+      ixmin = (mbv_secondary_xmin - data_source->secondary_xmin) / mbv_secondary_dx;
+      ixmax = ((mbv_secondary_xmax - data_source->secondary_xmin) / mbv_secondary_dx) + 1;
+      jymin = (mbv_secondary_ymin - data_source->secondary_ymin) / mbv_secondary_dy;
+      jymax = ((mbv_secondary_ymax - data_source->secondary_ymin) / mbv_secondary_dy) + 1;
+      ixmin = MAX(ixmin, 0);
+      ixmax = MIN(ixmax, data_source->secondary_n_columns - 1);
+      jymin = MAX(jymin, 0);
+      jymax = MIN(jymax, data_source->secondary_n_rows - 1);
+      mbv_secondary_xmin = data_source->secondary_xmin + mbv_secondary_dx * ixmin;
+      mbv_secondary_xmax = data_source->secondary_xmin + mbv_secondary_dx * ixmax;
+      mbv_secondary_ymin = data_source->secondary_ymin + mbv_secondary_dy * jymin;
+      mbv_secondary_ymax = data_source->secondary_ymin + mbv_secondary_dy * jymax;
+      mbv_secondary_n_columns = ixmax - ixmin + 1;
+      mbv_secondary_n_rows = jymax - jymin + 1;
+      mbv_secondary_nxy = mbv_secondary_n_columns * mbv_secondary_n_rows;
+      status =
+          mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * mbv_secondary_nxy, (void **)&mbv_secondary_data, &error);
+      mbv_secondary_min = data_source->secondary_nodatavalue;
+      mbv_secondary_max = data_source->secondary_nodatavalue;
+      for (i = 0; status == MB_SUCCESS && i < mbv_secondary_n_columns; i++) {
+        for (j = 0; j < mbv_secondary_n_rows; j++) {
+          k = i * mbv_secondary_n_rows + j;
+          ksource = (i + ixmin) * data_source->secondary_n_rows + (j + jymin);
+          mbv_secondary_data[k] = data_source->secondary_data[ksource];
+          if (mbv_secondary_data[k] != data_source->secondary_nodatavalue) {
+            if (mbv_secondary_min == data_source->secondary_nodatavalue ||
+                mbv_secondary_data[k] < mbv_secondary_min) {
+              mbv_secondary_min = mbv_secondary_data[k];
+            }
+            if (mbv_secondary_max == data_source->secondary_nodatavalue ||
+                mbv_secondary_data[k] > mbv_secondary_max) {
+              mbv_secondary_max = mbv_secondary_data[k];
+            }
+          }
+        }
+      }
+
+      /* set more mbview control values */
+      if (status == MB_SUCCESS)
+        status = mbview_setsecondarygrid(verbose, instance, data_source->secondary_grid_projection_mode,
+                                         data_source->secondary_grid_projection_id, data_source->secondary_nodatavalue,
+                                         mbv_secondary_n_columns, mbv_secondary_n_rows, mbv_secondary_min, mbv_secondary_max,
+                                         mbv_secondary_xmin, mbv_secondary_xmax, mbv_secondary_ymin, mbv_secondary_ymax,
+                                         mbv_secondary_dx, mbv_secondary_dy, mbv_secondary_data, &error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&mbv_secondary_data, &error);
+      if (status == MB_SUCCESS)
+        status =
+            mbview_setsecondarycolortable(verbose, instance, data_source->secondary_colortable,
+                                          data_source->secondary_colortable_mode, data_source->secondary_colortable_min,
+                                          data_source->secondary_colortable_max, data_source->overlay_shade_magnitude,
+                                          data_source->overlay_shade_center, data_source->overlay_shade_mode, &error);
+    }
+  }
+
+  /* update widgets */
+  if (instance != MBV_NO_WINDOW && instance < MBV_MAX_WINDOWS && mbview_id[instance])
+    status = mbview_update(verbose, instance, &error);
+
+  /* set sensitivity of widgets that require an mbview instance to be active */
+  do_mbgrdviz_sensitivity();
+}
+/*---------------------------------------------------------------------------------------*/
+void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call_data) {
+  int status = MB_SUCCESS;
+
+  /* mbview instance */
+  struct mbview_struct *data;
+
+  /* survey construction parameters */
+  int color;
+  double line_spacing;
+  double line_spacing_use;
+  double sonar_depth;
+  double sonar_altitude;
+  double maxtopo;
+  struct mbview_linesegment_struct segment;
+  int nlines;
+  int nlinegroups, npoints;
+  double xgrid, ygrid;
+  double xlon, ylat, zdata;
+  double xdisplay, ydisplay, zdisplay;
+  double dsign;
+  int waypoint;
+  bool first;
+  double dsigna[4] = {1.0, -1.0, 1.0, -1.0};
+  int jendpointa[4] = {0, 0, 1, 1};
+
+  char *error_message;
+  double *xx = NULL;
+  double dx, dy, r, dxuse, dyuse, dxd, dyd, dxextra, dyextra;
+  double rrr[4], xxx, yyy;
+  int iline, jendpoint;
+  bool ok;
+  int startcorner, endcorner, jstart, kend;
+  int nlines_alloc = 0;
+
+  /* get source mbview instance */
+  size_t instance = (size_t)client_data;
+
+  /* getting instance from client_data doesn't seem
+      to work so use survey_instance instead */
+  instance = survey_instance;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       w:           %p\n", w);
+    fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+    fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+  }
+
+  /* check data source for area to bounding desired survey */
+  status = mbview_getdataptr(verbose, instance, &data, &error);
+
+  /* check if area is currently defined */
+  if (status == MB_SUCCESS) {
+    if (data->area_type != MBV_AREA_QUAD)
+      status = MB_FAILURE;
+  }
+
+  /* generate survey lines from area and add as new route */
+  if (status == MB_SUCCESS) {
+    /* delete current working route if defined - but first confirm that
+       working_route still refers to the survey route we created. Its
+       index can go stale if the user deleted some other route via
+       3D-view picking while this dialog stayed open, which shifts route
+       array indices and would otherwise make working_route refer to an
+       unrelated route */
+    if (working_route > -1) {
+      int wr_nroutewaypoint, wr_nroutpoint, wr_routecolor, wr_routesize;
+      double wr_routedistancelateral, wr_routedistancetopo;
+      char wr_routename[MB_PATH_MAXLINE];
+      int wr_status = mbview_getrouteinfo(verbose, instance, working_route, &wr_nroutewaypoint, &wr_nroutpoint,
+                                          wr_routename, &wr_routecolor, &wr_routesize, &wr_routedistancelateral,
+                                          &wr_routedistancetopo, &error);
+      if (wr_status == MB_SUCCESS && strcmp(wr_routename, survey_name) == 0) {
+        mbview_deleteroute(verbose, instance, working_route, &error);
+      }
+      working_route = -1;
+    }
+
+    /* get unit vector for survey area boundaries */
+    dx = data->area.cornerpoints[1].xdisplay - data->area.cornerpoints[0].xdisplay;
+    dy = data->area.cornerpoints[1].ydisplay - data->area.cornerpoints[0].ydisplay;
+    r = sqrt(dx * dx + dy * dy);
+    dx = dx / r;
+    dy = dy / r;
+
+    /* get parameters */
+    int k = 0;
+    if (data->area.bearing >= 315.0 || data->area.bearing < 45.0) {
+      if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SW)
+        k = 0;
+      else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SE)
+        k = 1;
+      else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NW)
+        k = 2;
+      else /* if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NE) */
+        k = 3;
+    }
+    else if (data->area.bearing >= 45.0 && data->area.bearing < 135.0) {
+      if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SW)
+        k = 1;
+      else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SE)
+        k = 3;
+      else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NW)
+        k = 0;
+      else /* if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NE) */
+        k = 2;
+    }
+    else if (data->area.bearing >= 135.0 && data->area.bearing < 225.0) {
+      if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SW)
+        k = 3;
+      else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SE)
+        k = 2;
+      else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NW)
+        k = 1;
+      else /* if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NE) */
+        k = 0;
+    }
+    else /* if (data->area.bearing >= 225.0 && data->area.bearing < 315.0) */
+    {
+      if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SW)
+        k = 2;
+      else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SE)
+        k = 0;
+      else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NW)
+        k = 3;
+      else /* if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NE) */
+        k = 1;
+    }
+    dsign = dsigna[k];
+    jendpoint = jendpointa[k];
+    if (survey_color == 0)
+      color = MBV_COLOR_BLACK;
+    else if (survey_color == 1)
+      color = MBV_COLOR_YELLOW;
+    else if (survey_color == 2)
+      color = MBV_COLOR_GREEN;
+    else if (survey_color == 3)
+      color = MBV_COLOR_BLUEGREEN;
+    else if (survey_color == 4)
+      color = MBV_COLOR_BLUE;
+    else if (survey_color == 5)
+      color = MBV_COLOR_PURPLE;
+
+    /* initialize number of waypoints */
+    npoints = 0;
+    first = true;
+
+    /* do uniform line spacing */
+    if (survey_mode == MBGRDVIZ_SURVEY_MODE_UNIFORM) {
+      /* get number of lines */
+      line_spacing = (double)survey_linespacing;
+      line_spacing_use = line_spacing * r / data->area.width;
+      nlines = (data->area.width / line_spacing) + 1;
+
+      /* allocate space for line position array */
+      status = mb_mallocd(verbose, __FILE__, __LINE__, nlines * sizeof(double), (void **)&xx, &error);
+      if (status != MB_SUCCESS) {
+        nlines_alloc = 0;
+        mb_error(verbose, error, &error_message);
+        fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
+      }
+      else
+        nlines_alloc = nlines;
+
+      /* calculate line positions */
+      if (status == MB_SUCCESS)
+        for (int i = 0; i < nlines; i++) {
+          /* get line position in survey area */
+          xx[i] = dsign * line_spacing_use * (((double)i) - 0.5 * (nlines - 1.0));
+        }
+    }
+
+    /* do variable line spacing with constant altitude */
+    else if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE && survey_platform == MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE) {
+      /* get number of lines */
+      line_spacing = (double)survey_altitude * 2.0 * tan(DTR * 0.5 * (double)survey_swathwidth);
+      line_spacing_use = line_spacing * r / data->area.width;
+      nlines = (data->area.width / line_spacing) + 1;
+
+      /* allocate space for line position array */
+      status = mb_mallocd(verbose, __FILE__, __LINE__, nlines * sizeof(double), (void **)&xx, &error);
+      if (status != MB_SUCCESS) {
+        nlines_alloc = 0;
+        mb_error(verbose, error, &error_message);
+        fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
+      }
+      else
+        nlines_alloc = nlines;
+
+      /* calculate line positions */
+      if (status == MB_SUCCESS)
+        for (int i = 0; i < nlines; i++) {
+          /* get line position in survey area */
+          xx[i] = dsign * line_spacing_use * (((double)i) - 0.5 * (nlines - 1.0));
+        }
+    }
+
+    /* do variable line spacing with variable altitude */
+    else if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE) {
+      /* get platform depth */
+      if (survey_platform == MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_DEPTH) {
+        sonar_depth = (double)survey_depth;
+      }
+      else {
+        sonar_depth = 0.0;
+      }
+
+      /* allocate space for line position array */
+      nlines_alloc += 100;
+      status = mb_mallocd(verbose, __FILE__, __LINE__, nlines_alloc * sizeof(double), (void **)&xx, &error);
+      if (status != MB_SUCCESS) {
+        nlines_alloc = 0;
+        mb_error(verbose, error, &error_message);
+        fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
+      }
+
+      /* start on the port side of the survey */
+      /* find range of altitude along each line and calculate the swath width
+          from the smallest altitude */
+      nlines = 1;
+      segment.nls = 0;
+      segment.nls_alloc = 0;
+      segment.lspoints = NULL;
+
+      if (status == MB_SUCCESS) {
+        bool line_spacing_limited = false;
+        xx[0] = -dsign * 0.5 * r;
+
+        while (nlines == 1 || fabs(xx[nlines - 1] + dsign * 0.5 * line_spacing_use) < 0.5 * r) {
+          /* allocate more space for xx if needed */
+          if (nlines_alloc <= nlines) {
+            nlines_alloc += 100;
+            status = mb_reallocd(verbose, __FILE__, __LINE__, nlines_alloc * sizeof(double), (void **)&xx, &error);
+            if (status != MB_SUCCESS) {
+              nlines_alloc = 0;
+              mb_error(verbose, error, &error_message);
+              fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", error_message);
+              break;
+            }
+          }
+          /* get offset from last xx */
+          dxuse = dx * xx[nlines - 1];
+          dyuse = dy * xx[nlines - 1];
+
+          /* get first point */
+          segment.endpoints[0].xdisplay = data->area.endpoints[0].xdisplay + dxuse;
+          segment.endpoints[0].ydisplay = data->area.endpoints[0].ydisplay + dyuse;
+          segment.endpoints[0].zdisplay = data->area.endpoints[0].zdisplay;
+          mbview_projectinverse(instance, true, segment.endpoints[0].xdisplay, segment.endpoints[0].ydisplay,
+                                segment.endpoints[0].zdisplay, &segment.endpoints[0].xlon, &segment.endpoints[0].ylat,
+                                &segment.endpoints[0].xgrid, &segment.endpoints[0].ygrid);
+          mbview_getzdata(instance, segment.endpoints[0].xgrid, segment.endpoints[0].ygrid, &ok,
+                          &segment.endpoints[0].zdata);
+
+          /* get second point */
+          segment.endpoints[1].xdisplay = data->area.endpoints[1].xdisplay + dxuse;
+          segment.endpoints[1].ydisplay = data->area.endpoints[1].ydisplay + dyuse;
+          segment.endpoints[1].zdisplay = data->area.endpoints[1].zdisplay;
+          mbview_projectinverse(instance, true, segment.endpoints[1].xdisplay, segment.endpoints[1].ydisplay,
+                                segment.endpoints[1].zdisplay, &segment.endpoints[1].xlon, &segment.endpoints[1].ylat,
+                                &segment.endpoints[1].xgrid, &segment.endpoints[1].ygrid);
+          mbview_getzdata(instance, segment.endpoints[1].xgrid, segment.endpoints[1].ygrid, &ok,
+                          &segment.endpoints[1].zdata);
+
+          /* drape line and get max topo */
+          mbview_drapesegment(instance, &(segment));
+          maxtopo = -9999999.9;
+          if (segment.endpoints[0].zdata < -sonar_depth) {
+            maxtopo = segment.endpoints[0].zdata;
+          }
+          if (segment.endpoints[1].zdata < -sonar_depth && segment.endpoints[1].zdata > maxtopo) {
+            maxtopo = segment.endpoints[1].zdata;
+          }
+          for (int i = 0; i < segment.nls; i++) {
+            if (segment.lspoints[i].zdata < -sonar_depth)
+              maxtopo = MAX(maxtopo, segment.lspoints[i].zdata);
+          }
+
+          /* figure minimum swath width and location of next line */
+          sonar_altitude = -maxtopo - sonar_depth;
+          line_spacing = sonar_altitude * 2.0 * tan(DTR * 0.5 * (double)survey_swathwidth);
+          line_spacing_use = line_spacing * r / data->area.width;
+
+          /* keep the number of lines finite when the altitude (and thus the
+             swath width) is near zero */
+          if (!(line_spacing_use >= r / MBGRDVIZ_SURVEY_MAXLINES)) {
+            line_spacing_use = r / MBGRDVIZ_SURVEY_MAXLINES;
+            line_spacing = line_spacing_use * data->area.width / r;
+            if (!line_spacing_limited) {
+              fprintf(stderr, "Survey line spacing limited to %.3f m (at most %d lines) because the altitude is near zero\n",
+                      line_spacing, MBGRDVIZ_SURVEY_MAXLINES);
+              line_spacing_limited = true;
+            }
+          }
+
+          xx[nlines] = xx[nlines - 1] + dsign * line_spacing_use;
+          nlines++;
+        }
+      }
+
+      /* deallocate segment points */
+      if (segment.lspoints != NULL) {
+        mb_freed(verbose, __FILE__, __LINE__, (void **)&(segment.lspoints), &error);
+        segment.nls_alloc = 0;
+      }
+    }
+
+    /* do crosslines if requested */
+    if (survey_crosslines > 0 && !survey_crosslines_last && status == MB_SUCCESS) {
+      /* figure out which corner the main lines start at */
+      dxuse = dx * xx[0];
+      dyuse = dy * xx[0];
+      dxextra = 0.0;
+      dyextra = 0.0;
+      xdisplay = data->area.endpoints[jendpoint].xdisplay + dxuse + dxextra;
+      ydisplay = data->area.endpoints[jendpoint].ydisplay + dyuse + dyextra;
+      for (int i = 0; i < 4; i++) {
+        xxx = xdisplay - data->area.cornerpoints[i].xdisplay;
+        yyy = ydisplay - data->area.cornerpoints[i].ydisplay;
+        rrr[i] = sqrt(xxx * xxx + yyy * yyy);
+      }
+      startcorner = 0;
+      for (int i = 1; i < 4; i++) {
+        if (rrr[i] < rrr[startcorner])
+          startcorner = i;
+      }
+
+      /* figure out which corner the cross lines should start at */
+      if (survey_crosslines % 2 == 0) {
+        if (startcorner == 0)
+          startcorner = 3;
+        else if (startcorner == 1)
+          startcorner = 2;
+        else if (startcorner == 2)
+          startcorner = 1;
+        else if (startcorner == 3)
+          startcorner = 0;
+      }
+      else {
+        if (startcorner == 0)
+          startcorner = 2;
+        else if (startcorner == 1)
+          startcorner = 3;
+        else if (startcorner == 2)
+          startcorner = 0;
+        else if (startcorner == 3)
+          startcorner = 1;
+      }
+
+      /* get crossline vector */
+      if (startcorner == 0 || startcorner == 3) {
+        dx = data->area.cornerpoints[1].xdisplay - data->area.cornerpoints[0].xdisplay;
+        dy = data->area.cornerpoints[1].ydisplay - data->area.cornerpoints[0].ydisplay;
+      }
+      else {
+        dx = data->area.cornerpoints[0].xdisplay - data->area.cornerpoints[1].xdisplay;
+        dy = data->area.cornerpoints[0].ydisplay - data->area.cornerpoints[1].ydisplay;
+      }
+      r = sqrt(dx * dx + dy * dy);
+      dxd = dx / r;
+      dyd = dy / r;
+
+      /* generate cross lines */
+      jstart = startcorner;
+      if (startcorner == 0 || startcorner == 2)
+        kend = jstart + 1;
+      else
+        kend = jstart - 1;
+      dx = (data->area.endpoints[1].xdisplay - data->area.endpoints[0].xdisplay) / (survey_crosslines + 1);
+      dy = (data->area.endpoints[1].ydisplay - data->area.endpoints[0].ydisplay) / (survey_crosslines + 1);
+      if (startcorner >= 2) {
+        dx = -dx;
+        dy = -dy;
+      }
+      int j = jstart;
+      for (int i = 0; i < survey_crosslines; i++) {
+        /* get offset from corners */
+        dxuse = (i + 1) * dx;
+        dyuse = (i + 1) * dy;
+        if (j == jstart) {
+          dxextra = -dxd * line_spacing_use;
+          dyextra = -dyd * line_spacing_use;
+        }
+        else {
+          dxextra = dxd * line_spacing_use;
+          dyextra = dyd * line_spacing_use;
+        }
+
+        /* get first point */
+        waypoint = MBV_ROUTE_WAYPOINT_STARTLINE;
+        xdisplay = data->area.cornerpoints[j].xdisplay + dxuse + dxextra;
+        ydisplay = data->area.cornerpoints[j].ydisplay + dyuse + dyextra;
+        zdisplay = data->area.cornerpoints[j].zdisplay;
+        mbview_projectinverse(instance, true, xdisplay, ydisplay, zdisplay, &xlon, &ylat, &xgrid, &ygrid);
+        mbview_getzdata(instance, xgrid, ygrid, &ok, &zdata);
+        if (!ok)
+          zdata = data->area.cornerpoints[jendpoint].zdata;
+        mbview_projectll2display(instance, xlon, ylat, zdata, &xdisplay, &ydisplay, &zdisplay);
+        if (first) {
+          mbview_addroute(verbose, instance, 1, &xlon, &ylat, &waypoint, color, 2, true, survey_name, &working_route,
+                          &error);
+          first = false;
+        }
+        else {
+          mbview_route_add(verbose, instance, working_route, npoints, waypoint, xgrid, ygrid, xlon, ylat, zdata,
+                           xdisplay, ydisplay, zdisplay);
+        }
+        npoints++;
+
+        /* get second point */
+        if (j == jstart)
+          j = kend;
+        else
+          j = jstart;
+        if (j == jstart) {
+          dxextra = -dxd * line_spacing_use;
+          dyextra = -dyd * line_spacing_use;
+        }
+        else {
+          dxextra = dxd * line_spacing_use;
+          dyextra = dyd * line_spacing_use;
+        }
+
+        /* get second point */
+        waypoint = MBV_ROUTE_WAYPOINT_STARTLINE;
+        xdisplay = data->area.cornerpoints[j].xdisplay + dxuse + dxextra;
+        ydisplay = data->area.cornerpoints[j].ydisplay + dyuse + dyextra;
+        zdisplay = data->area.cornerpoints[j].zdisplay;
+        mbview_projectinverse(instance, true, xdisplay, ydisplay, zdisplay, &xlon, &ylat, &xgrid, &ygrid);
+        mbview_getzdata(instance, xgrid, ygrid, &ok, &zdata);
+        if (!ok)
+          zdata = data->area.cornerpoints[jendpoint].zdata;
+        mbview_projectll2display(instance, xlon, ylat, zdata, &xdisplay, &ydisplay, &zdisplay);
+        mbview_route_add(verbose, instance, working_route, npoints, waypoint, xgrid, ygrid, xlon, ylat, zdata, xdisplay,
+                         ydisplay, zdisplay);
+        npoints++;
+      }
+    }
+
+    /* generate the lines */
+    if (nlines > 0 && status == MB_SUCCESS) {
+      /* get unit vector for survey area boundaries */
+      dx = data->area.cornerpoints[1].xdisplay - data->area.cornerpoints[0].xdisplay;
+      dy = data->area.cornerpoints[1].ydisplay - data->area.cornerpoints[0].ydisplay;
+      r = sqrt(dx * dx + dy * dy);
+      dx = dx / r;
+      dy = dy / r;
+
+      /* generate points */
+      /* work in display coordinates */
+      nlinegroups = nlines / survey_interleaving + 1;
+      for (int j = 0; j < survey_interleaving; j++)
+        for (int i = 0; i < nlinegroups; i++) {
+          /* get line number */
+          iline = i * survey_interleaving + j;
+
+          if (iline < nlines) {
+            /* get line position in survey area */
+            dxuse = dx * xx[iline];
+            dyuse = dy * xx[iline];
+
+            /* add a bit of transit before later interleaved lines */
+            if (jendpoint == 1) {
+              dxextra = -dy * j * 0.25 * line_spacing_use;
+              dyextra = dx * j * 0.25 * line_spacing_use;
+            }
+            else {
+              dxextra = dy * j * 0.25 * line_spacing_use;
+              dyextra = -dx * j * 0.25 * line_spacing_use;
+            }
+
+            /* get first point */
+            waypoint = MBV_ROUTE_WAYPOINT_STARTLINE;
+            xdisplay = data->area.endpoints[jendpoint].xdisplay + dxuse + dxextra;
+            ydisplay = data->area.endpoints[jendpoint].ydisplay + dyuse + dyextra;
+            zdisplay = data->area.endpoints[jendpoint].zdisplay;
+            mbview_projectinverse(instance, true, xdisplay, ydisplay, zdisplay, &xlon, &ylat, &xgrid, &ygrid);
+            mbview_getzdata(instance, xgrid, ygrid, &ok, &zdata);
+            if (!ok)
+              zdata = data->area.endpoints[jendpoint].zdata;
+            mbview_projectll2display(instance, xlon, ylat, zdata, &xdisplay, &ydisplay, &zdisplay);
+            fprintf(stderr, "\nSurvey Line:%d Point:%d  Position: %f %f %f  %f %f   %f %f %f\n", iline, jendpoint,
+                    xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay);
+
+            /* add new route for first point, just add single point
+                after that */
+            if (first) {
+              mbview_addroute(verbose, instance, 1, &xlon, &ylat, &waypoint, color, 2, true, survey_name,
+                              &working_route, &error);
+              first = false;
+            }
+            else {
+              mbview_route_add(verbose, instance, working_route, npoints, waypoint, xgrid, ygrid, xlon, ylat, zdata,
+                               xdisplay, ydisplay, zdisplay);
+            }
+            npoints++;
+
+            /* switch endpoint */
+            jendpoint = (jendpoint + 1) % 2;
+
+            /* add a bit of transit before interleaved lines */
+            if (jendpoint == 1) {
+              dxextra = -dy * j * 0.25 * line_spacing_use;
+              dyextra = dx * j * 0.25 * line_spacing_use;
+            }
+            else {
+              dxextra = dy * j * 0.25 * line_spacing_use;
+              dyextra = -dx * j * 0.25 * line_spacing_use;
+            }
+
+            /* get second point */
+            waypoint = MBV_ROUTE_WAYPOINT_STARTLINE;
+            xdisplay = data->area.endpoints[jendpoint].xdisplay + dxuse + dxextra;
+            ydisplay = data->area.endpoints[jendpoint].ydisplay + dyuse + dyextra;
+            zdisplay = data->area.endpoints[jendpoint].zdisplay;
+            mbview_projectinverse(instance, true, xdisplay, ydisplay, zdisplay, &xlon, &ylat, &xgrid, &ygrid);
+            mbview_getzdata(instance, xgrid, ygrid, &ok, &zdata);
+            if (!ok)
+              zdata = data->area.endpoints[jendpoint].zdata;
+            mbview_projectll2display(instance, xlon, ylat, zdata, &xdisplay, &ydisplay, &zdisplay);
+            fprintf(stderr, "Survey Line:%d Point:%d  Position: %f %f %f  %f %f   %f %f %f\n", iline, jendpoint, xlon,
+                    ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay);
+
+            /* add single point */
+            mbview_route_add(verbose, instance, working_route, npoints, waypoint, xgrid, ygrid, xlon, ylat, zdata,
+                             xdisplay, ydisplay, zdisplay);
+            npoints++;
+          }
+        }
+
+      /* deallocate line position array */
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&xx, &error);
+    }
+
+    /* do crosslines if requested */
+    if (survey_crosslines > 0 && survey_crosslines_last && status == MB_SUCCESS) {
+      /* figure out which corner the mail lines ended at */
+      for (int i = 0; i < 4; i++) {
+        xxx = xdisplay - data->area.cornerpoints[i].xdisplay;
+        yyy = ydisplay - data->area.cornerpoints[i].ydisplay;
+        rrr[i] = sqrt(xxx * xxx + yyy * yyy);
+      }
+      endcorner = 0;
+      for (int i = 1; i < 4; i++) {
+        if (rrr[i] < rrr[endcorner])
+          endcorner = i;
+      }
+
+      /* get crossline vector */
+      if (endcorner == 0 || endcorner == 3) {
+        dx = data->area.cornerpoints[1].xdisplay - data->area.cornerpoints[0].xdisplay;
+        dy = data->area.cornerpoints[1].ydisplay - data->area.cornerpoints[0].ydisplay;
+      }
+      else {
+        dx = data->area.cornerpoints[0].xdisplay - data->area.cornerpoints[1].xdisplay;
+        dy = data->area.cornerpoints[0].ydisplay - data->area.cornerpoints[1].ydisplay;
+      }
+      r = sqrt(dx * dx + dy * dy);
+      dxd = dx / r;
+      dyd = dy / r;
+
+      /* generate cross lines */
+      jstart = endcorner;
+      if (endcorner == 0 || endcorner == 2)
+        kend = jstart + 1;
+      else
+        kend = jstart - 1;
+      dx = (data->area.endpoints[1].xdisplay - data->area.endpoints[0].xdisplay) / (survey_crosslines + 1);
+      dy = (data->area.endpoints[1].ydisplay - data->area.endpoints[0].ydisplay) / (survey_crosslines + 1);
+      if (endcorner >= 2) {
+        dx = -dx;
+        dy = -dy;
+      }
+      int j = jstart;
+      for (int i = 0; i < survey_crosslines; i++) {
+        /* get offset from corners */
+        dxuse = (i + 1) * dx;
+        dyuse = (i + 1) * dy;
+        if (j == jstart) {
+          dxextra = -dxd * line_spacing_use;
+          dyextra = -dyd * line_spacing_use;
+        }
+        else {
+          dxextra = dxd * line_spacing_use;
+          dyextra = dyd * line_spacing_use;
+        }
+
+        /* get first point */
+        waypoint = MBV_ROUTE_WAYPOINT_STARTLINE;
+        xdisplay = data->area.cornerpoints[j].xdisplay + dxuse + dxextra;
+        ydisplay = data->area.cornerpoints[j].ydisplay + dyuse + dyextra;
+        zdisplay = data->area.cornerpoints[j].zdisplay;
+        mbview_projectinverse(instance, true, xdisplay, ydisplay, zdisplay, &xlon, &ylat, &xgrid, &ygrid);
+        mbview_getzdata(instance, xgrid, ygrid, &ok, &zdata);
+        if (!ok)
+          zdata = data->area.cornerpoints[jendpoint].zdata;
+        mbview_projectll2display(instance, xlon, ylat, zdata, &xdisplay, &ydisplay, &zdisplay);
+        mbview_route_add(verbose, instance, working_route, npoints, waypoint, xgrid, ygrid, xlon, ylat, zdata, xdisplay,
+                         ydisplay, zdisplay);
+        npoints++;
+
+        /* get second point */
+        if (j == jstart)
+          j = kend;
+        else
+          j = jstart;
+        if (j == jstart) {
+          dxextra = -dxd * line_spacing_use;
+          dyextra = -dyd * line_spacing_use;
+        }
+        else {
+          dxextra = dxd * line_spacing_use;
+          dyextra = dyd * line_spacing_use;
+        }
+
+        /* get second point */
+        waypoint = MBV_ROUTE_WAYPOINT_STARTLINE;
+        xdisplay = data->area.cornerpoints[j].xdisplay + dxuse + dxextra;
+        ydisplay = data->area.cornerpoints[j].ydisplay + dyuse + dyextra;
+        zdisplay = data->area.cornerpoints[j].zdisplay;
+        mbview_projectinverse(instance, true, xdisplay, ydisplay, zdisplay, &xlon, &ylat, &xgrid, &ygrid);
+        mbview_getzdata(instance, xgrid, ygrid, &ok, &zdata);
+        if (!ok)
+          zdata = data->area.cornerpoints[jendpoint].zdata;
+        mbview_projectll2display(instance, xlon, ylat, zdata, &xdisplay, &ydisplay, &zdisplay);
+        mbview_route_add(verbose, instance, working_route, npoints, waypoint, xgrid, ygrid, xlon, ylat, zdata, xdisplay,
+                         ydisplay, zdisplay);
+        npoints++;
+      }
+    }
+
+    /* free the memory for xx */
+    status = mb_freed(verbose, __FILE__, __LINE__, (void **)&xx, &error);
+
+    /* update widgets */
+    mbview_updateroutelist();
+    do_mbgrdviz_arearoute_info(instance);
+    mbview_enableviewnavs(verbose, instance, &error);
+    status = mbview_update(verbose, instance, &error);
+  }
+
+  /* update widgets of remaining mbview windows */
+  for (unsigned int i = 0; i < MBV_MAX_WINDOWS; i++) {
+    if (i != instance && mbview_id[i])
+      status = mbview_update(verbose, i, &error);
+  }
+}
+/*---------------------------------------------------------------------------------------*/
+void do_mbgrdviz_arearoute_dismiss(Widget w, XtPointer client_data, XtPointer call_data) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       w:           %p\n", w);
+    fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+    fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+  }
+  /* reset current working route so the last one generated is saved */
+  working_route = -1;
+}
+/*---------------------------------------------------------------------------------------*/
+void do_mbgrdviz_arearoute_info(size_t instance) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       instance:   %zu\n", instance);
+  }
+
+  /* check data source for area to bounding desired survey */
+  struct mbview_struct *data;
+  int status = mbview_getdataptr(verbose, instance, &data, &error);
+
+  /* check if area is currently defined */
+  char info_text[2*MB_PATH_MAXLINE];
+  if (status == MB_SUCCESS) {
+    if (data->area_type != MBV_AREA_QUAD)
+      status = MB_FAILURE;
+    sprintf(info_text, ":::t\"No Current Area:\"");
+  }
+
+  /* set widgets */
+  if (status == MB_SUCCESS) {
+    if (working_route >= 0) {
+      int nroutewaypoint = 0;
+      int nroutpoint = 0;
+      char routename[MB_PATH_MAXLINE] = "";
+      int routecolor;
+      int routesize;
+      double routedistancelateral = 0.0;
+      double routedistancetopo = 0.0;
+
+      /* get info for working route */
+      status = mbview_getrouteinfo(verbose, instance, working_route, &nroutewaypoint, &nroutpoint, routename, &routecolor,
+                                   &routesize, &routedistancelateral, &routedistancetopo, &error);
+
+      sprintf(info_text,
+              ":::t\"Current Area:\":t\" Length: %.1f m  Width: %.1f m  Bearing: %.1f deg\":t\"New Route: %d  Name: "
+              "%s\":t\" Waypoints: %d  Total Points:%d\":t\" Distance: %.1f m (lateral) %.1f m (over bottom)\"",
+              data->area.length, data->area.width, data->area.bearing, working_route, routename, nroutewaypoint, nroutpoint,
+              routedistancelateral, routedistancetopo);
+    } else {
+      sprintf(info_text, ":::t\"Current Area:\":t\" Length: %.3f m\":t\" Width: %.3f m\":t\" Bearing: %.1f deg\"",
+              data->area.length, data->area.width, data->area.bearing);
+    }
+    mbgrdviz_ui_arearoute_info(info_text);
+  }
 }

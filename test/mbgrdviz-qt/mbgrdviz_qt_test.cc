@@ -39,7 +39,9 @@
  *     Saved routes hold bearings and distances in display coordinates, which
  *     only drawing sets up (mbview_projectdata in mbview_plot): --gl draws
  *     with the OpenGL backend (needs a display), as the Motif program does.
- *     Without drawing the route checks are skipped.
+ *     Without drawing the route checks are skipped. With --gl it also picks an
+ *     area and generates a survey route through the survey dialog, and picks
+ *     a region and opens it as a new view.
  */
 
 #include <cstdio>
@@ -53,8 +55,12 @@
 #include <QElapsedTimer>
 #include <QEventLoop>
 #include <QTimer>
+#include <QLabel>
 #include <QMenuBar>
+#include <QPushButton>
 
+#include "mbgrdviz_qt_bridge.h"
+#include "mbgrdviz_qt_dialogs.h"
 #include "mbgrdviz_qt_window.h"
 #include "mbvq_bridge.h"
 #include "mbvq.h"
@@ -63,8 +69,15 @@ extern "C" {
 #include "mb_define.h"
 #include "mb_status.h"
 #include "mbgrdviz_core.h"
+/* mbview_area() and mbview_region(), the area and region picks */
+#include "MB3DView.h"
+#include "MB3DSiteList.h"
+#include "MB3DRouteList.h"
+#include "MB3DNavList.h"
+#include "mbviewprivate.h"
 
 extern int mbgrdviz_verbose;
+extern int mbgrdviz_working_route;
 extern bool mbgrdviz_mbview_id[MBV_MAX_WINDOWS];
 int mbview_site_delete(size_t instance, int isite);
 }
@@ -265,6 +278,69 @@ int main(int argc, char **argv) {
         mbgrdviz_openfile(MBGRDVIZ_OPENROUTE, instance, route_out.data());
         mbgrdviz_openfile(MBGRDVIZ_SAVEROUTE, instance, route_again.data());
         check(body(route_again) == body(route_out), "route saved, cleared, read and saved again is identical");
+
+        /* a survey from an area picked across the middle of the view */
+        struct mbview_struct *data = nullptr;
+        mbview_getdataptr(0, instance, &data, &error);
+        const int x0 = data->width * 2 / 5, x1 = data->width * 3 / 5, y = data->height / 2;
+        mbview_area(instance, MBV_AREALENGTH_DOWN, x0, y);
+        mbview_area(instance, MBV_AREALENGTH_MOVE, x1, y);
+        mbview_area(instance, MBV_AREALENGTH_UP, x1, y);
+        check(data->area_type == MBV_AREA_QUAD, "area picked");
+        clear_sites_routes();
+        do_mbgrdviz_make_survey(nullptr, reinterpret_cast<XtPointer>(instance), nullptr);
+        SurveyDialog *dialog = SurveyDialog::instance(nullptr);
+        check(dialog->isVisible(), "survey dialog shown");
+        QLabel *info = nullptr;
+        for (QLabel *label : dialog->findChildren<QLabel *>())
+          if (label->text().startsWith(QStringLiteral("Current Area")))
+            info = label;
+        check(info != nullptr && info->text().contains(QStringLiteral("Length:")), "survey dialog shows the area");
+        struct mbgrdviz_qt_survey survey;
+        mbgrdviz_qt_survey_get(&survey);
+        survey.linespacing = 500;
+        survey.crosslines = 1;
+        snprintf(survey.name, sizeof(survey.name), "Test survey");
+        mbgrdviz_qt_survey_set(&survey);
+        mbgrdviz_qt_survey_generate();
+        int nsurvey = 0;
+        mbview_getroutecount(0, instance, &nsurvey, &error);
+        check(nsurvey == 1 && mbgrdviz_working_route == 0, "Generate Route made one route");
+        check(info != nullptr && info->text().contains(QStringLiteral("Test survey")), "survey dialog shows the new route");
+        std::string survey_out = dir + "/survey_saved.rte";
+        mbgrdviz_openfile(MBGRDVIZ_SAVEROUTE, instance, survey_out.data());
+        const std::string survey_text = body(survey_out);
+        int waypoints_saved = 0;
+        {
+          std::istringstream in(survey_text);
+          std::string line;
+          while (std::getline(in, line))
+            if (line.size() > 21 && line.compare(line.size() - 21, 21, "## WAYPOINT STARTLINE") == 0)
+              waypoints_saved++;
+        }
+        check(survey_text.find("> ## STARTROUTE") != std::string::npos &&
+                  survey_text.find("Test survey") != std::string::npos && waypoints_saved > 0,
+              "survey route saved with its name and " + std::to_string(waypoints_saved) + " line waypoints");
+        QPushButton *dismiss = nullptr;
+        for (QPushButton *button : dialog->findChildren<QPushButton *>())
+          if (button->text() == QStringLiteral("Dismiss"))
+            dismiss = button;
+        if (dismiss != nullptr)
+          dismiss->click();
+        check(!dialog->isVisible() && mbgrdviz_working_route == -1, "Dismiss closes the dialog and ends the route");
+
+        /* a region opened as a new view */
+        mbview_region(instance, MBV_REGION_DOWN, x0, data->height * 2 / 5);
+        mbview_region(instance, MBV_REGION_MOVE, x1, data->height * 3 / 5);
+        mbview_region(instance, MBV_REGION_UP, x1, data->height * 3 / 5);
+        check(data->region_type == MBV_REGION_QUAD, "region picked");
+        int before = 0, after = 0;
+        for (int i = 0; i < MBV_MAX_WINDOWS; i++)
+          before += mbgrdviz_mbview_id[i] ? 1 : 0;
+        do_mbgrdviz_open_region(nullptr, reinterpret_cast<XtPointer>(instance), nullptr);
+        for (int i = 0; i < MBV_MAX_WINDOWS; i++)
+          after += mbgrdviz_mbview_id[i] ? 1 : 0;
+        check(after == before + 1, "Open Region as New View opens a new instance");
       }
     }
   }

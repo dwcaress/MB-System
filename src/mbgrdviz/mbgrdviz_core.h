@@ -148,6 +148,10 @@ int do_mbgrdviz_opentest(size_t instance, double factor1, double factor2, double
 int do_mbgrdviz_opengis(size_t instance, int type, char *input_file_ptr);
 int do_mbgrdviz_importshapefile(size_t instance, char *input_file_ptr);
 int do_mbgrdviz_savegis(size_t instance, int type, bool shapefile, char *output_file_ptr);
+void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_arearoute_dismiss(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_arearoute_info(size_t instance);
 
 /* user interface functions that each program provides */
 /* signal a refused or failed action */
@@ -156,6 +160,9 @@ void mbgrdviz_ui_bell(void);
 void do_mbgrdviz_sensitivity(void);
 /* show the path of the realtime data source in the realtime setup */
 void mbgrdviz_ui_realtime_path(char *path);
+/* show the survey generation dialog's area and route information
+   (a label string in Motif "BX" form) */
+void mbgrdviz_ui_arearoute_info(char *info_text);
 /* the actions that mbgrdviz adds to each instance (mbview_addaction) */
 void do_mbgrdviz_fileSelectionBox(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_exportgispoint(Widget w, XtPointer client_data, XtPointer call_data);
@@ -194,7 +201,6 @@ void do_mbgrdviz_open_mbedit(Widget w, XtPointer client_data, XtPointer call_dat
 void do_mbgrdviz_open_mbeditviz(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_open_mbnavedit(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_open_mbvelocitytool(Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_data);
 
 #ifdef __cplusplus
 }

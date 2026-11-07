@@ -46,6 +46,35 @@ void mbgrdviz_qt_file_dialog(int mode, size_t instance, const char *title, const
 /* an action of a later step of the port */
 void mbgrdviz_qt_not_yet(size_t instance, const char *what);
 
+/* the survey generation dialog: the values of its fields (the survey state of
+   mbgrdviz_core.c; mode, platform, direction and color are list positions) */
+struct mbgrdviz_qt_survey {
+  int mode;
+  int platform;
+  int interleaving;
+  int direction;
+  bool crosslines_last;
+  int crosslines;
+  int linespacing;
+  int swathwidth;
+  int depth;
+  int altitude;
+  int color;
+  char name[1024];
+};
+
+/* implemented in mbgrdviz_qt_ui.c */
+void mbgrdviz_qt_survey_get(struct mbgrdviz_qt_survey *survey);
+void mbgrdviz_qt_survey_set(const struct mbgrdviz_qt_survey *survey);
+void mbgrdviz_qt_survey_generate(void);
+void mbgrdviz_qt_survey_dismiss(void);
+
+/* implemented in mbgrdviz_qt_dialogs.cc */
+void mbgrdviz_qt_survey_dialog(void);
+void mbgrdviz_qt_survey_sensitivity(bool linespacing, bool platform, bool swathwidth, bool altitude, bool depth);
+void mbgrdviz_qt_survey_info(const char *info_text);
+void mbgrdviz_qt_survey_name(const char *name);
+
 #ifdef __cplusplus
 }
 #endif

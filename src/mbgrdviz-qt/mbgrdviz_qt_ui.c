@@ -31,6 +31,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "mb_define.h"
 #include "mb_status.h"
@@ -44,6 +45,8 @@
 void mbgrdviz_ui_bell(void) { mbgrdviz_qt_bell(); }
 
 void mbgrdviz_ui_realtime_path(char *path) { mbgrdviz_qt_realtime_path(path); }
+
+void mbgrdviz_ui_arearoute_info(char *info_text) { mbgrdviz_qt_survey_info(info_text); }
 
 /*------------------------------------------------------------------------------*/
 /* the menu items of the main window, as the Motif do_mbgrdviz_sensitivity() */
@@ -233,12 +236,7 @@ void do_mbgrdviz_fileSelectionBox_savetecdislst(Widget w, XtPointer client_data,
 }
 
 /*------------------------------------------------------------------------------*/
-/* actions of later steps (survey generation, region, starting other programs) */
-void do_mbgrdviz_make_survey(Widget w, XtPointer client_data, XtPointer call_data) {
-  (void)w;
-  (void)call_data;
-  mbgrdviz_qt_not_yet((size_t)client_data, "make_survey");
-}
+/* actions of a later step (starting other programs) */
 void do_mbgrdviz_open_mbedit(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w;
   (void)call_data;
@@ -259,8 +257,111 @@ void do_mbgrdviz_open_mbvelocitytool(Widget w, XtPointer client_data, XtPointer 
   (void)call_data;
   mbgrdviz_qt_not_yet((size_t)client_data, "open_mbvelocitytool");
 }
-void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_data) {
+
+/*------------------------------------------------------------------------------*/
+/* the survey generation dialog (Action menu "Generate Survey Route from Area"),
+   as the Motif do_mbgrdviz_make_survey(), do_mbgrdviz_arearoute_parameterchange()
+   and do_mbgrdviz_arearoute_recalc(); the survey state and the generation are
+   in mbgrdviz_core.c */
+static void mbgrdviz_qt_survey_recalc(size_t instance) {
+  struct mbview_struct *data;
+  int status = mbview_getdataptr(verbose, instance, &data, &error);
+  if (status == MB_SUCCESS && data->area_type != MBV_AREA_QUAD)
+    status = MB_FAILURE;
+  if (status == MB_SUCCESS) {
+    const bool variable = survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE;
+    mbgrdviz_qt_survey_sensitivity(survey_mode == MBGRDVIZ_SURVEY_MODE_UNIFORM, variable, variable,
+                                   variable && survey_platform == MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE,
+                                   variable && survey_platform == MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_DEPTH);
+    do_mbgrdviz_arearoute_info(instance);
+  }
+}
+
+void do_mbgrdviz_make_survey(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w;
   (void)call_data;
-  mbgrdviz_qt_not_yet((size_t)client_data, "open_region");
+  const size_t instance = (size_t)client_data;
+
+  /* check data source for area to bounding desired survey */
+  struct mbview_struct *data;
+  int status = mbview_getdataptr(verbose, instance, &data, &error);
+  if (status == MB_SUCCESS && data->area_type != MBV_AREA_QUAD)
+    status = MB_FAILURE;
+
+  /* set parameters and display the survey generation dialog */
+  if (status == MB_SUCCESS) {
+    survey_instance = instance;
+    mbgrdviz_qt_survey_dialog();
+    mbgrdviz_qt_survey_recalc(instance);
+  }
+}
+
+void mbgrdviz_qt_survey_get(struct mbgrdviz_qt_survey *survey) {
+  survey->mode = survey_mode;
+  survey->platform = survey_platform;
+  survey->interleaving = survey_interleaving;
+  survey->direction = survey_direction;
+  survey->crosslines_last = survey_crosslines_last;
+  survey->crosslines = survey_crosslines;
+  survey->linespacing = survey_linespacing;
+  survey->swathwidth = survey_swathwidth;
+  survey->depth = survey_depth;
+  survey->altitude = survey_altitude;
+  survey->color = survey_color;
+  snprintf(survey->name, sizeof(survey->name), "%s", survey_name);
+}
+
+void mbgrdviz_qt_survey_set(const struct mbgrdviz_qt_survey *survey) {
+  const size_t instance = survey_instance;
+
+  /* check data source for area to bounding desired survey */
+  struct mbview_struct *data;
+  int status = mbview_getdataptr(verbose, instance, &data, &error);
+  if (status == MB_SUCCESS && data->area_type != MBV_AREA_QUAD)
+    status = MB_FAILURE;
+
+  /* get parameters */
+  if (status == MB_SUCCESS) {
+    survey_mode = survey->mode;
+    survey_platform = survey->platform;
+    survey_interleaving = survey->interleaving;
+    survey_direction = survey->direction;
+    survey_crosslines_last = survey->crosslines_last;
+    survey_crosslines = survey->crosslines;
+    survey_linespacing = survey->linespacing;
+    survey_swathwidth = survey->swathwidth;
+    survey_depth = survey->depth;
+    survey_altitude = survey->altitude;
+    survey_color = survey->color;
+    snprintf(survey_name, sizeof(survey_name), "%s", survey->name);
+    if (strlen(survey_name) <= 0) {
+      snprintf(survey_name, sizeof(survey_name), "Survey");
+      mbgrdviz_qt_survey_name(survey_name);
+    }
+
+    fprintf(stderr, "\nIn do_mbgrdviz_arearoute_parameterchange:\n");
+    fprintf(stderr, "  survey_mode:                %d\n", survey_mode);
+    fprintf(stderr, "  survey_platform:            %d\n", survey_platform);
+    fprintf(stderr, "  survey_interleaving:        %d\n", survey_interleaving);
+    fprintf(stderr, "  survey_direction:           %d\n", survey_direction);
+    fprintf(stderr, "  survey_crosslines_last:     %d\n", survey_crosslines_last);
+    fprintf(stderr, "  survey_crosslines:          %d\n", survey_crosslines);
+    fprintf(stderr, "  survey_linespacing:         %d\n", survey_linespacing);
+    fprintf(stderr, "  survey_swathwidth:          %d\n", survey_swathwidth);
+    fprintf(stderr, "  survey_depth:               %d\n", survey_depth);
+    fprintf(stderr, "  survey_altitude:            %d\n", survey_altitude);
+    fprintf(stderr, "  survey_color:               %d\n", survey_color);
+    fprintf(stderr, "  survey_name:                %s\n", survey_name);
+
+    /* reset widgets accordingly (sensitivity and info) */
+    mbgrdviz_qt_survey_recalc(instance);
+  }
+}
+
+void mbgrdviz_qt_survey_generate(void) {
+  do_mbgrdviz_generate_survey(NULL, (XtPointer)(size_t)survey_instance, NULL);
+}
+
+void mbgrdviz_qt_survey_dismiss(void) {
+  do_mbgrdviz_arearoute_dismiss(NULL, NULL, NULL);
 }

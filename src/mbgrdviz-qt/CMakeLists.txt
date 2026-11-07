@@ -40,6 +40,8 @@ add_library(
   mbgrdviz-qt-ui STATIC
   ${CMAKE_SOURCE_DIR}/src/mbgrdviz/mbgrdviz_core.c
   mbgrdviz_qt_bridge.h
+  mbgrdviz_qt_dialogs.cc
+  mbgrdviz_qt_dialogs.h
   mbgrdviz_qt_ui.c
   mbgrdviz_qt_window.cc
   mbgrdviz_qt_window.h)

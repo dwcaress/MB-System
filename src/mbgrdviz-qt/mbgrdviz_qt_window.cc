@@ -35,6 +35,7 @@
 #include <QVBoxLayout>
 
 #include "mbgrdviz_qt_bridge.h"
+#include "mbgrdviz_qt_dialogs.h"
 #include "mbvq.h"
 
 extern "C" {
@@ -95,10 +96,20 @@ MbgrdvizWindow::MbgrdvizWindow() {
   file->addSeparator();
   connect(file->addAction(tr("Quit")), &QAction::triggered, this, &QWidget::close);
 
-  /* Realtime menu: step 4c */
+  /* Realtime menu: as in Motif, only the setup dialog; the realtime display is
+     not implemented in mbgrdviz, so Start, Stop, Pause and Resume, which do
+     nothing in Motif, are disabled */
   QMenu *realtime = menuBar()->addMenu(tr("Realtime"));
-  for (const char *label : {"Setup", "Start", "Stop", "Pause", "Resume"})
-    realtime->addAction(tr(label))->setEnabled(false);
+  connect(realtime->addAction(tr("Setup")), &QAction::triggered, this, [this] {
+    RealtimeDialog *dialog = RealtimeDialog::instance(this);
+    dialog->show();
+    dialog->raise();
+  });
+  for (const char *label : {"Start", "Stop", "Pause", "Resume"}) {
+    QAction *action = realtime->addAction(tr(label));
+    action->setEnabled(false);
+    action->setToolTip(tr("The realtime display is not implemented in mbgrdviz yet"));
+  }
 
   QMenu *help = menuBar()->addMenu(tr("Help"));
   connect(help->addAction(tr("About")), &QAction::triggered, this, [this] { about(); });
@@ -159,8 +170,8 @@ extern "C" {
 void mbgrdviz_qt_bell(void) { QApplication::beep(); }
 
 void mbgrdviz_qt_realtime_path(const char *path) {
-  /* the realtime setup comes in step 4c */
-  (void)path;
+  if (main_window != nullptr)
+    RealtimeDialog::instance(main_window)->set_path(QFile::decodeName(path));
 }
 
 void mbgrdviz_qt_sensitivity(bool open_primary, bool open_other, bool save_site, bool save_route) {
