@@ -61,6 +61,8 @@ add_library(
   mbv_globals.c
   mbv_ui_motif.c
   mbv_core.c
+  mbv_lists_core.c
+  mbv_gislist_core.c
   mbv_soundings_core.c)
 
 set_target_properties(mbview PROPERTIES VERSION "0" SOVERSION "0")

@@ -82,7 +82,6 @@ void do_mbview_reset_view(Widget w, XtPointer client_data, XtPointer call_data);
 /* scratch buffers, as in the files the code came from */
 static Cardinal ac = 0;
 static Arg args[256];
-static char value_string[2*MB_PATH_MAXLINE];
 
 /*------------------------------------------------------------------------------*/
 void mbv_ui_bell(size_t instance) {
@@ -156,83 +155,25 @@ void mbv_ui_secondary_name_changed(size_t instance, char *name) {
 int mbview_updatenavlist() {
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Input arguments:\n");
 	}
+
+	int status = MB_SUCCESS;
 
 	/* update nav list */
 	if (shared.init_navlist == MBV_WINDOW_VISIBLE) {
 		/* remove all existing items */
 		XmListDeleteAllItems(shared.mb3d_navlist.mbview_list_navlist);
 
-		if (shared.shareddata.nnav > 0) {
-			/* get number of items */
-			int nitems = 0;
-			for (int inav = 0; inav < shared.shareddata.nnav; inav++) {
-        if (shared.shareddata.navs[inav].active) {
-				  nitems += 1;
-        }
-			}
-
-      if (nitems > 0) {
-
-  			/* allocate array of label XmStrings */
-  			XmString *xstr = (XmString *)malloc(nitems * sizeof(XmString));
-  			if (xstr == NULL)
-  				return (MB_FAILURE);
-
-  			/* loop over the navs */
-  			nitems = 0;
-  			for (int inav = 0; inav < shared.shareddata.nnav; inav++) {
-          if (shared.shareddata.navs[inav].active) {
-    				/* add list item for each nav */
-    				sprintf(value_string, "%3d | %3d | %s | %d | %s", inav, shared.shareddata.navs[inav].npoints,
-    				        mbview_colorname[shared.shareddata.navs[inav].color], shared.shareddata.navs[inav].size,
-    				        shared.shareddata.navs[inav].name);
-    				xstr[nitems] = XmStringCreateLocalized(value_string);
-    				nitems++;
-          }
-  			}
-
-  			/* add list items */
-  			XmListAddItems(shared.mb3d_navlist.mbview_list_navlist, xstr, nitems, 0);
-
-  			/* deallocate memory no longer needed */
-  			for (int iitem = 0; iitem < nitems; iitem++) {
-  				XmStringFree(xstr[iitem]);
-  			}
-  			free(xstr);
-
-  			/* check for completely selected navs */
-  			/* (the list holds only active navs, so count list positions) */
-  			int inavselect = MBV_SELECT_NONE;
-  			int iitem = 0;
-  			for (int inav = 0; inav < shared.shareddata.nnav && inavselect == MBV_SELECT_NONE; inav++) {
-          if (shared.shareddata.navs[inav].active) {
-    				iitem++;
-    				if (shared.shareddata.navs[inav].npoints > 1 &&
-    				    shared.shareddata.navs[inav].nselected == shared.shareddata.navs[inav].npoints) {
-    					inavselect = inav;
-    				}
-          }
-  			}
-
-  			/* select first item with fully selected nav */
-  			if (inavselect != MBV_SELECT_NONE) {
-  				XmListSelectPos(shared.mb3d_navlist.mbview_list_navlist, iitem, 0);
-  				XmListSetPos(shared.mb3d_navlist.mbview_list_navlist, MAX(iitem - 5, 1));
-  			}
-
-      }
-		}
+		/* the rows of the core */
+		struct mbview_listrows rows;
+		status = mbview_navlist_rows(&rows);
+		if (status == MB_SUCCESS)
+			mbv_ui_motif_fill_list(shared.mb3d_navlist.mbview_list_navlist, &rows);
+		mbview_listrows_free(&rows);
 	}
-
-	const int status = MB_SUCCESS;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
 	return (status);
@@ -240,154 +181,29 @@ int mbview_updatenavlist() {
 
 /*------------------------------------------------------------------------------*/
 int mbview_updateroutelist() {
-	/* local variables */
-	int status = MB_SUCCESS;
-	XmString *xstr;
-	int jpoint;
-	int nitems;
-	int iitem;
-	char londstr0[24], lonmstr0[24];
-	char latdstr0[24], latmstr0[24];
-	char waypointstr[10];
-	int iroute, jwaypoint;
-
-	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Input arguments:\n");
 	}
+
+	int status = MB_SUCCESS;
 
 	/* update route list */
 	if (shared.init_routelist == MBV_WINDOW_VISIBLE) {
 		/* remove all existing items */
 		XmListDeleteAllItems(shared.mb3d_routelist.mbview_list_routelist);
 
-		if (shared.shareddata.nroute > 0) {
-			/* get number of items */
-			nitems = 0;
-			for (iroute = 0; iroute < shared.shareddata.nroute; iroute++) {
-        if (shared.shareddata.routes[iroute].active) {
-  				nitems += 1 + shared.shareddata.routes[iroute].npoints;
-        }
-			}
-
-      if (nitems > 0) {
-  			/* allocate array of label XmStrings */
-  			xstr = (XmString *)malloc(nitems * sizeof(XmString));
-  			if (xstr == NULL)
-  				return (MB_FAILURE);
-
-  			/* loop over the routes */
-  			nitems = 0;
-  			for (iroute = 0; iroute < shared.shareddata.nroute; iroute++) {
-          if (shared.shareddata.routes[iroute].active) {
-    				if (shared.shareddata.routes[iroute].editmode)
-    					sprintf(value_string, "Editable Route %3d | Waypoints:%3d | Length:%.2f %.2f m | %s | Name: %s", iroute,
-    					        shared.shareddata.routes[iroute].npoints, shared.shareddata.routes[iroute].distancelateral,
-    					        shared.shareddata.routes[iroute].distancetopo,
-    					        mbview_colorname[shared.shareddata.routes[iroute].color], shared.shareddata.routes[iroute].name);
-    				else
-    					sprintf(value_string, "Static Route %3d | Waypoints:%3d | Length:%.2f %.2f m | %s | Name: %s", iroute,
-    					        shared.shareddata.routes[iroute].npoints, shared.shareddata.routes[iroute].distancelateral,
-    					        shared.shareddata.routes[iroute].distancetopo,
-    					        mbview_colorname[shared.shareddata.routes[iroute].color], shared.shareddata.routes[iroute].name);
-    				xstr[nitems] = XmStringCreateLocalized(value_string);
-    				nitems++;
-
-    				/* add list item for each waypoint */
-    				for (jpoint = 0; jpoint < shared.shareddata.routes[iroute].npoints; jpoint++) {
-    					/* add list item for each route */
-    					mbview_setlonlatstrings(shared.shareddata.routes[iroute].points[jpoint].xlon,
-    					                        shared.shareddata.routes[iroute].points[jpoint].ylat, londstr0, latdstr0, lonmstr0,
-    					                        latmstr0);
-
-    					if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_SIMPLE)
-    						strcpy(waypointstr, "---------");
-    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_TRANSIT)
-    						strcpy(waypointstr, "-TRANSIT-");
-    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE)
-    						strcpy(waypointstr, "--START--");
-    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE)
-    						strcpy(waypointstr, "---END---");
-    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE2)
-    						strcpy(waypointstr, "--START2-");
-    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE2)
-    						strcpy(waypointstr, "---END2--");
-    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE3)
-    						strcpy(waypointstr, "--START3-");
-    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE3)
-    						strcpy(waypointstr, "---END3--");
-    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE4)
-    						strcpy(waypointstr, "--START4-");
-    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE4)
-    						strcpy(waypointstr, "---END4--");
-    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE5)
-    						strcpy(waypointstr, "--START5-");
-    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE5)
-    						strcpy(waypointstr, "---END5--");
-    					else
-    						strcpy(waypointstr, "-------");
-    					if (shared.lonlatstyle == MBV_LONLAT_DEGREESDECIMAL)
-    						sprintf(value_string, "%3d | %3d | %s | %s | %.2f | %.2f | %.2f | %s", iroute, jpoint, londstr0, latdstr0,
-    						        shared.shareddata.routes[iroute].points[jpoint].zdata,
-    						        shared.shareddata.routes[iroute].distlateral[jpoint],
-    						        shared.shareddata.routes[iroute].disttopo[jpoint], waypointstr);
-    					else
-    						sprintf(value_string, "%3d | %3d | %s | %s | %.2f | %.2f | %.2f | %s", iroute, jpoint, lonmstr0, latmstr0,
-    						        shared.shareddata.routes[iroute].points[jpoint].zdata,
-    						        shared.shareddata.routes[iroute].distlateral[jpoint],
-    						        shared.shareddata.routes[iroute].disttopo[jpoint], waypointstr);
-    					xstr[nitems] = XmStringCreateLocalized(value_string);
-    					nitems++;
-    				}
-          }
-  			}
-
-  			/* add list items */
-  			XmListAddItems(shared.mb3d_routelist.mbview_list_routelist, xstr, nitems, 0);
-
-  			/* select list item for selected route */
-  			if (shared.shareddata.route_selected != MBV_SELECT_NONE) {
-    				/* get item number - inactive routes contribute no rows to the
-    				    widget (see the nitems loops above), so they must be skipped
-    				    here too to keep iitem in sync with the actual widget position */
-    				iitem = 0;
-    				for (iroute = 0; iroute < shared.shareddata.nroute; iroute++) {
-    					if (!shared.shareddata.routes[iroute].active)
-    						continue;
-    					iitem++;
-    					if (iroute == shared.shareddata.route_selected && shared.shareddata.route_point_selected == MBV_SELECT_ALL) {
-    						XmListSelectPos(shared.mb3d_routelist.mbview_list_routelist, iitem, 0);
-    						XmListSetPos(shared.mb3d_routelist.mbview_list_routelist, MAX(iitem - 5, 1));
-    					}
-    					for (jwaypoint = 0; jwaypoint < shared.shareddata.routes[iroute].npoints; jwaypoint++) {
-    						iitem++;
-    						if (iroute == shared.shareddata.route_selected && shared.shareddata.route_point_selected == jwaypoint) {
-    							XmListSelectPos(shared.mb3d_routelist.mbview_list_routelist, iitem, 0);
-    							XmListSetPos(shared.mb3d_routelist.mbview_list_routelist, MAX(iitem - 5, 1));
-    						}
-    					}
-    				}
-        }
-
-  			/* deallocate memory no longer needed */
-  			for (iitem = 0; iitem < nitems; iitem++) {
-  				XmStringFree(xstr[iitem]);
-  			}
-  			free(xstr);
-      }
-		}
+		/* the rows of the core */
+		struct mbview_listrows rows;
+		status = mbview_routelist_rows(&rows);
+		if (status == MB_SUCCESS)
+			mbv_ui_motif_fill_list(shared.mb3d_routelist.mbview_list_routelist, &rows);
+		mbview_listrows_free(&rows);
 	}
 
-	/* print output debug statements */
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
@@ -395,9 +211,9 @@ int mbview_updateroutelist() {
 int mbview_updatesitelist() {
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Input arguments:\n");
 	}
+
+	int status = MB_SUCCESS;
 
 	/* update site list */
 	if (shared.init_sitelist == MBV_WINDOW_VISIBLE) {
@@ -423,79 +239,16 @@ int mbview_updatesitelist() {
   		}
   	}
 
-		if (shared.shareddata.nsite > 0) {
-			/* count active sites - inactive sites (currently only possible in
-			    unused tail slots beyond nsite, but checked defensively here
-			    since nothing else in this file assumes that invariant) contribute
-			    no row to the widget */
-			int nitems = 0;
-			for (int isite = 0; isite < shared.shareddata.nsite; isite++) {
-				if (shared.shareddata.sites[isite].active)
-					nitems++;
-			}
-
-		if (nitems > 0) {
-			/* allocate array of label XmStrings, sized to only the active sites
-			    actually being added, so every slot gets initialized below */
-			XmString *xstr = (XmString *)malloc(nitems * sizeof(XmString));
-			if (xstr == NULL)
-				return (MB_FAILURE);
-
-			/* loop over the sites */
-			nitems = 0;
-			for (int isite = 0; isite < shared.shareddata.nsite; isite++) {
-        if (shared.shareddata.sites[isite].active) {
-  				/* add list item for each site */
-  				char londstr0[24], lonmstr0[24];
-  				char latdstr0[24], latmstr0[24];
-  				mbview_setlonlatstrings(shared.shareddata.sites[isite].point.xlon, shared.shareddata.sites[isite].point.ylat,
-  				                        londstr0, latdstr0, lonmstr0, latmstr0);
-  				if (shared.lonlatstyle == MBV_LONLAT_DEGREESDECIMAL)
-  					sprintf(value_string, "%3d | %s | %s | %.3f | %s | %d | %s", isite, londstr0, latdstr0,
-  					        shared.shareddata.sites[isite].point.zdata, mbview_colorname[shared.shareddata.sites[isite].color],
-  					        shared.shareddata.sites[isite].size, shared.shareddata.sites[isite].name);
-  				else
-  					sprintf(value_string, "%3d | %s | %s | %.3f | %s | %d | %s", isite, lonmstr0, latmstr0,
-  					        shared.shareddata.sites[isite].point.zdata, mbview_colorname[shared.shareddata.sites[isite].color],
-  					        shared.shareddata.sites[isite].size, shared.shareddata.sites[isite].name);
-  				xstr[nitems] = XmStringCreateLocalized(value_string);
-  				nitems++;
-  			}
-      }
-
-			/* add list items */
-			XmListAddItems(shared.mb3d_sitelist.mbview_list_sitelist, xstr, nitems, 0);
-
-			/* select list item for selected site - translate the site index to
-			    a widget position by counting only active sites up to and
-			    including it, keeping this in sync with the active-only rows
-			    just added above */
-			if (shared.shareddata.site_selected != MBV_SELECT_NONE &&
-			    shared.shareddata.sites[shared.shareddata.site_selected].active) {
-				int iitem = 0;
-				for (int isite = 0; isite <= shared.shareddata.site_selected; isite++) {
-					if (shared.shareddata.sites[isite].active)
-						iitem++;
-				}
-				XmListSelectPos(shared.mb3d_sitelist.mbview_list_sitelist, iitem, 0);
-				XmListSetPos(shared.mb3d_sitelist.mbview_list_sitelist, MAX(iitem - 5, 1));
-			}
-
-			/* deallocate memory no longer needed */
-			for (int iitem = 0; iitem < nitems; iitem++) {
-				XmStringFree(xstr[iitem]);
-			}
-			free(xstr);
-		}
-		}
+		/* the rows of the core */
+		struct mbview_listrows rows;
+		status = mbview_sitelist_rows(&rows);
+		if (status == MB_SUCCESS)
+			mbv_ui_motif_fill_list(shared.mb3d_sitelist.mbview_list_sitelist, &rows);
+		mbview_listrows_free(&rows);
 	}
-
-	const int status = MB_SUCCESS;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
 	return (status);
@@ -776,4 +529,30 @@ void mbv_ui_close_lists(void) {
 	XtPopdown(XtParent(shared.mainWindow_navlist));
 
 	mbview_gislist_popdownall();
+}
+
+/*------------------------------------------------------------------------------*/
+/* show the rows of the core in a Motif list (the list is empty) */
+void mbv_ui_motif_fill_list(Widget list, const struct mbview_listrows *rows) {
+	if (rows->nrows <= 0)
+		return;
+
+	/* allocate array of label XmStrings */
+	XmString *xstr = (XmString *)malloc(rows->nrows * sizeof(XmString));
+	if (xstr == NULL)
+		return;
+	for (int iitem = 0; iitem < rows->nrows; iitem++)
+		xstr[iitem] = XmStringCreateLocalized(rows->row[iitem]);
+
+	/* add list items, select the item for the selected entry */
+	XmListAddItems(list, xstr, rows->nrows, 0);
+	if (rows->selected > 0) {
+		XmListSelectPos(list, rows->selected, 0);
+		XmListSetPos(list, MAX(rows->selected - 5, 1));
+	}
+
+	/* deallocate memory no longer needed */
+	for (int iitem = 0; iitem < rows->nrows; iitem++)
+		XmStringFree(xstr[iitem]);
+	free(xstr);
 }

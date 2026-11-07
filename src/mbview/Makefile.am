@@ -51,6 +51,8 @@ libmbview_la_SOURCES += mbv_render_glx.c
 libmbview_la_SOURCES += mbv_globals.c
 libmbview_la_SOURCES += mbv_ui_motif.c
 libmbview_la_SOURCES += mbv_core.c
+libmbview_la_SOURCES += mbv_lists_core.c
+libmbview_la_SOURCES += mbv_gislist_core.c
 libmbview_la_SOURCES += mbv_soundings_core.c
 
 libmbview_la_LIBADD =

@@ -116,6 +116,14 @@ struct mbview_2dparms_values {
 	mb_path view_2dzoom;
 };
 
+/* the rows of a list window: the text of each row and the row to select */
+struct mbview_listrows {
+	int nrows;    /* number of rows */
+	int nalloc;   /* rows allocated */
+	char **row;   /* the text of each row */
+	int selected; /* list position (1 for the first row) to select and show, 0 for none */
+};
+
 /* view toggles of the View menu (mbview_setviewtoggle) */
 #define MBV_VIEWTOGGLE_CONTOUR 0
 #define MBV_VIEWTOGGLE_SITE 1
@@ -507,6 +515,28 @@ int mbview_2dparmsapply(size_t instance, const struct mbview_2dparms_values *val
 int mbview_setresolution(size_t instance, int lorez_dimension, int hirez_dimension, int lorez_navdecimate, int hirez_navdecimate);
 int mbview_setdisplayprojection(size_t instance, int projection);
 int mbview_setlonlatstyle(size_t instance, int style);
+int mbview_listrows_add(struct mbview_listrows *rows, const char *text);
+void mbview_listrows_free(struct mbview_listrows *rows);
+int mbview_sitelist_rows(struct mbview_listrows *rows);
+int mbview_routelist_rows(struct mbview_listrows *rows);
+int mbview_navlist_rows(struct mbview_listrows *rows);
+int mbview_sitelist_select(int position_count, int *position_list);
+int mbview_sitelist_delete(int position_count, int *position_list);
+int mbview_routelist_select(int position_count, int *position_list);
+int mbview_routelist_delete(int position_count, int *position_list);
+int mbview_navlist_select(int position_count, int *position_list);
+int mbview_navlist_delete(int position_count, int *position_list);
+const char *mbview_gislist_title(int type);
+const char *mbview_gislist_header(int type);
+void mbview_gislist_redraw(void);
+int mbview_gislist_rows(int type, struct mbview_listrows *rows);
+int mbview_gislist_select(int type, int position_count, const int *position_list);
+int mbview_gislist_showhide(int type, int position_count, const int *position_list);
+int mbview_gislist_delete(int type, int position_count, const int *position_list);
+int mbview_gislist_toroutes(int type, int position_count, const int *position_list);
+int mbview_routelist_topolylines(int position_count, const int *position_list);
+/* Motif only (mbv_ui_motif.c) */
+void mbv_ui_motif_fill_list(Widget list, const struct mbview_listrows *rows);
 int mbview_addpicknotify(int verbose, size_t instance, int picktype, void(mbview_pick_notify)(size_t), int *error);
 int mbview_setsensitivitynotify(int verbose, size_t instance, void(mbview_sensitivity_notify)(), int *error);
 void mbview_resize(Widget w, XtPointer client_data, XEvent *event, Boolean *unused);

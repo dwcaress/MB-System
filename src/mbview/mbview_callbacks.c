@@ -3244,50 +3244,7 @@ void do_mbview_sitelistselect(Widget w, XtPointer client_data, XtPointer call_da
 	ac++;
 	XtGetValues(w, args, ac);
 
-	/* save last site selection if any */
-	int site_selected_old = shared.shareddata.site_selected;
-
-	/* find selected site point if any */
-	shared.shareddata.site_selected = MBV_SELECT_NONE;
-	if (position_count == 1) {
-		shared.shareddata.site_selected = position_list[0] - 1;
-	}
-
-	/* change site color if clicked more than once - only if a valid site
-	    is selected; with no single selection both values are MBV_SELECT_NONE */
-	if (site_selected_old == shared.shareddata.site_selected && shared.shareddata.site_selected >= 0 &&
-	    shared.shareddata.site_selected < shared.shareddata.nsite) {
-		const int isite = shared.shareddata.site_selected;
-
-		/* increment color */
-		shared.shareddata.sites[isite].color++;
-		if (shared.shareddata.sites[isite].color == MBV_COLOR_RED)
-			shared.shareddata.sites[isite].color++;
-		if (shared.shareddata.sites[isite].color > MBV_COLOR_PURPLE)
-			shared.shareddata.sites[isite].color = MBV_COLOR_BLACK;
-
-		/* update site list */
-		mbview_updatesitelist();
-	}
-
-	/* redraw valid instances */
-	size_t instance = MBV_NO_WINDOW;
-	for (size_t i = 0; i < MBV_MAX_WINDOWS; i++) {
-		if (mbviews[i].data.active) {
-			/* set instance to first good instance */
-			if (instance == MBV_NO_WINDOW)
-				instance = i;
-
-			/* set pick annotation */
-			mbviews[i].data.pickinfo_mode = MBV_PICK_SITE;
-			mbview_pick_text(i);
-			/* draw */
-			if (mbv_verbose >= 2)
-				fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_sitelistselect instance:%zu\n", instance);
-			mbview_plotlowhigh(i);
-			mbview_plotlowhighall(i);
-		}
-	}
+	mbview_sitelist_select(position_count, position_list);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -3310,86 +3267,7 @@ void do_mbview_routelistselect(Widget w, XtPointer client_data, XtPointer call_d
 	ac++;
 	XtGetValues(shared.mb3d_routelist.mbview_list_routelist, args, ac);
 
-	/* save last route selection if any */
-	const int route_selected_old = shared.shareddata.route_selected;
-	const int route_point_selected_old = shared.shareddata.route_point_selected;
-
-	/* find selected route point if any */
-	shared.shareddata.route_selected = MBV_SELECT_NONE;
-	shared.shareddata.route_point_selected = MBV_SELECT_NONE;
-	if (position_count == 1) {
-		const int iposition = position_list[0] - 1;
-		int iroutepos = 0;
-		for (int iroute = 0; iroute < shared.shareddata.nroute; iroute++) {
-			/* mbview_updateroutelist() skips inactive routes when building the
-			    widget's rows, so they must be skipped here too to keep iroutepos
-			    in sync with the actual widget position */
-			if (!shared.shareddata.routes[iroute].active)
-				continue;
-			if (iroutepos == iposition) {
-				shared.shareddata.route_selected = iroute;
-				shared.shareddata.route_point_selected = MBV_SELECT_ALL;
-			}
-			else if (iroutepos < iposition && iroutepos + shared.shareddata.routes[iroute].npoints >= iposition) {
-				shared.shareddata.route_selected = iroute;
-				shared.shareddata.route_point_selected = iposition - iroutepos - 1;
-			}
-			iroutepos += shared.shareddata.routes[iroute].npoints + 1;
-		}
-
-		/* change route color if clicked more than once */
-		if (route_selected_old == shared.shareddata.route_selected && route_point_selected_old == MBV_SELECT_ALL &&
-		    shared.shareddata.route_point_selected == MBV_SELECT_ALL) {
-			const int iroute = shared.shareddata.route_selected;
-
-			/* increment color */
-			shared.shareddata.routes[iroute].color++;
-			if (shared.shareddata.routes[iroute].color == MBV_COLOR_RED)
-				shared.shareddata.routes[iroute].color++;
-			if (shared.shareddata.routes[iroute].color > MBV_COLOR_PURPLE)
-				shared.shareddata.routes[iroute].color = MBV_COLOR_BLACK;
-
-			/* update route list */
-			mbview_updateroutelist();
-		}
-
-		/* change waypoint type if a waypoint (not a whole route) is clicked more than once */
-		if (shared.shareddata.route_selected >= 0 && shared.shareddata.route_point_selected >= 0 &&
-		    route_selected_old == shared.shareddata.route_selected &&
-		    route_point_selected_old == shared.shareddata.route_point_selected) {
-			const int iroute = shared.shareddata.route_selected;
-			const int iwaypoint = shared.shareddata.route_point_selected;
-
-			/* increment waypoint type */
-			shared.shareddata.routes[iroute].waypoint[iwaypoint]++;
-			if (shared.shareddata.routes[iroute].waypoint[iwaypoint] < MBV_ROUTE_WAYPOINT_SIMPLE ||
-			    shared.shareddata.routes[iroute].waypoint[iwaypoint] > MBV_ROUTE_WAYPOINT_ENDLINE5)
-				shared.shareddata.routes[iroute].waypoint[iwaypoint] = MBV_ROUTE_WAYPOINT_SIMPLE;
-
-			/* update route list */
-			mbview_updateroutelist();
-		}
-	}
-
-	/* redraw valid instances */
-	size_t instance = MBV_NO_WINDOW;
-	for (size_t i = 0; i < MBV_MAX_WINDOWS; i++) {
-		if (mbviews[i].data.active) {
-			/* set instance to first good instance */
-			if (instance == MBV_NO_WINDOW)
-				instance = i;
-
-			/* set pick annotation */
-			mbviews[i].data.pickinfo_mode = MBV_PICK_ROUTE;
-			mbview_pick_text(i);
-
-			/* draw */
-			if (mbv_verbose >= 2)
-				fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_routelistselect\n");
-			mbview_plotlowhigh(i);
-			mbview_plotlowhighall(i);
-		}
-	}
+	mbview_routelist_select(position_count, position_list);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -3399,17 +3277,6 @@ void do_mbview_routelistselect(Widget w, XtPointer client_data, XtPointer call_d
     (position - 1) is only correct as long as every nav in range is
     active; this walks the same active-only enumeration to stay in sync.
     Returns MBV_SELECT_NONE if the position doesn't match any active nav. */
-static int mbview_navlist_position_to_inav(int position) {
-	int iitem = 0;
-	for (int inav = 0; inav < shared.shareddata.nnav; inav++) {
-		if (shared.shareddata.navs[inav].active) {
-			iitem++;
-			if (iitem == position)
-				return inav;
-		}
-	}
-	return MBV_SELECT_NONE;
-}
 
 /*------------------------------------------------------------------------------*/
 void do_mbview_navlistselect(Widget w, XtPointer client_data, XtPointer call_data) {
@@ -3431,93 +3298,7 @@ void do_mbview_navlistselect(Widget w, XtPointer client_data, XtPointer call_dat
 	ac++;
 	XtGetValues(shared.mb3d_navlist.mbview_list_navlist, args, ac);
 
-	/* first deselect all navigation */
-	shared.shareddata.navpick_type = MBV_PICK_NONE;
-	shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
-	shared.shareddata.nav_point_selected[0] = MBV_SELECT_NONE;
-	shared.shareddata.nav_selected[1] = MBV_SELECT_NONE;
-	shared.shareddata.nav_point_selected[1] = MBV_SELECT_NONE;
-	for (int inav = 0; inav < shared.shareddata.nnav; inav++) {
-		shared.shareddata.navs[inav].nselected = 0;
-		for (int jpt = 0; jpt < shared.shareddata.navs[inav].npoints; jpt++) {
-			shared.shareddata.navs[inav].navpts[jpt].selected = false;
-		}
-	}
-
-	/* now select all nav points in selected files */
-	for (int j = 0; j < position_count; j++) {
-		int inav = mbview_navlist_position_to_inav(position_list[j]);
-		if (inav != MBV_SELECT_NONE && shared.shareddata.navs[inav].npoints > 0) {
-
-			/* Select all nav points in inav */
-			for (int jpt = 0; jpt < shared.shareddata.navs[inav].npoints; jpt++) {
-				shared.shareddata.navs[inav].navpts[jpt].selected = true;
-				shared.shareddata.navs[inav].nselected++;
-			}
-
-			/* pick first and last navigation points */
-			if (j == 0) {
-				shared.shareddata.navpick_type = MBV_PICK_ONEPOINT;
-				shared.shareddata.nav_selected[0] = inav;
-				shared.shareddata.nav_point_selected[0] = 0;
-				shared.shareddata.navpick.endpoints[0] =
-				    shared.shareddata.navs[inav].navpts[shared.shareddata.nav_point_selected[0]].point;
-			}
-			if (j == position_count - 1) {
-				shared.shareddata.navpick_type = MBV_PICK_TWOPOINT;
-				shared.shareddata.nav_selected[1] = inav;
-				shared.shareddata.nav_point_selected[1] = shared.shareddata.navs[inav].npoints - 1;
-				shared.shareddata.navpick.endpoints[1] =
-				    shared.shareddata.navs[inav].navpts[shared.shareddata.nav_point_selected[1]].point;
-			}
-		}
-	}
-
-	/* only call it a two point pick if the two points are different */
-	if (shared.shareddata.navpick_type == MBV_PICK_TWOPOINT &&
-	    shared.shareddata.nav_selected[0] == shared.shareddata.nav_selected[1] &&
-	    shared.shareddata.nav_point_selected[0] == shared.shareddata.nav_point_selected[1])
-		shared.shareddata.navpick_type = MBV_PICK_ONEPOINT;
-
-	/* redraw valid instances */
-	size_t instance = MBV_NO_WINDOW;
-	for (size_t i = 0; i < MBV_MAX_WINDOWS; i++) {
-		if (mbviews[i].data.active) {
-			/* set instance to first good instance */
-			if (instance == MBV_NO_WINDOW)
-				instance = i;
-
-			/* generate 3D drape of pick marks */
-			mbview_navpicksize(i);
-
-			/* set pick annotation */
-			mbviews[i].data.pickinfo_mode = MBV_PICK_NAV;
-			mbview_pick_text(i);
-
-			/* draw */
-			if (mbv_verbose >= 2)
-				fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_navlistselect: instance:%zu\n", i);
-			mbview_plotlowhigh(i);
-			mbview_plotlowhighall(i);
-
-			/* extract profile if pick is right type */
-			if (mbviews[i].data.pickinfo_mode == MBV_PICK_NAV)
-				mbview_extract_nav_profile(i);
-
-			/* now replot profile */
-			mbview_plotprofile(i);
-		}
-	}
-
-	/* call picknav notify if defined */
-	if (instance != MBV_NO_WINDOW
-    && mbviews[instance].data.mbview_picknav_notify != NULL
-    && shared.shareddata.navpick_type != MBV_PICK_NONE) {
-		(mbviews[instance].data.mbview_picknav_notify)(instance);
-	}
-
-	/* set widget sensitivity */
-	mbview_action_sensitivityall();
+	mbview_navlist_select(position_count, position_list);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -3540,45 +3321,7 @@ void do_mbview_sitelist_delete(Widget w, XtPointer client_data, XtPointer call_d
 	ac++;
 	XtGetValues(shared.mb3d_sitelist.mbview_list_sitelist, args, ac);
 
-	/* deselect any selected site */
-	shared.shareddata.site_selected = MBV_SELECT_NONE;
-
-	/* get first valid instance */
-	size_t instance = MBV_NO_WINDOW;
-	for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
-		if (instance == MBV_NO_WINDOW && mbviews[i].data.active)
-			instance = i;
-	}
-
-	/* delete selected site points in reverse order if any */
-	for (int i = position_count - 1; i >= 0; i--) {
-		const int isite = position_list[i] - 1;
-		mbview_site_delete(instance, isite);
-	}
-
-	/* reset pick annotation */
-	if (position_count > 0) {
-		for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
-			if (mbviews[i].data.active) {
-				/* set pick annotation */
-				if (mbviews[i].data.pickinfo_mode == MBV_PICK_SITE)
-					mbviews[i].data.pickinfo_mode = MBV_PICK_NONE;
-				mbview_pick_text(i);
-
-				/* draw */
-				if (mbv_verbose >= 2)
-					fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_sitelist_delete\n");
-				mbview_plotlowhigh(i);
-				mbview_plotlowhighall(i);
-			}
-		}
-
-		/* update site list */
-		mbview_updatesitelist();
-	}
-
-	/* set widget sensitivity */
-	mbview_action_sensitivityall();
+	mbview_sitelist_delete(position_count, position_list);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -3601,80 +3344,7 @@ void do_mbview_routelist_delete(Widget w, XtPointer client_data, XtPointer call_
 	ac++;
 	XtGetValues(shared.mb3d_routelist.mbview_list_routelist, args, ac);
 
-	/* deselect any selected route */
-	shared.shareddata.route_selected = MBV_SELECT_NONE;
-
-	/* get first valid instance */
-	size_t instance = MBV_NO_WINDOW;
-	for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
-		if (instance == MBV_NO_WINDOW && mbviews[i].data.active)
-			instance = i;
-	}
-
-	/* figure out which routes and waypoints are selected,
-	    and flag them for deletion by settting waypoint
-	    values to MBV_ROUTE_WAYPOINT_DELETEFLAG */
-	for (int i = 0; i < position_count; i++) {
-		int iposition = 0;
-		bool done = false;
-		for (int iroute = 0; iroute < shared.shareddata.nroute && !done; iroute++) {
-			/* mbview_updateroutelist() skips inactive routes when building the
-			    widget's rows, so they must be skipped here too to keep iposition
-			    in sync with the actual widget position */
-			if (!shared.shareddata.routes[iroute].active)
-				continue;
-			iposition++;
-
-			/* delete entire route */
-			if (iposition == position_list[i]) {
-				for (int jwaypoint = 0; jwaypoint < shared.shareddata.routes[iroute].npoints; jwaypoint++) {
-					shared.shareddata.routes[iroute].waypoint[jwaypoint] = MBV_ROUTE_WAYPOINT_DELETEFLAG;
-				}
-				done = true;
-			} else {
-				/* else check waypoints */
-				for (int jwaypoint = 0; jwaypoint < shared.shareddata.routes[iroute].npoints && !done; jwaypoint++) {
-					iposition++;
-					if (iposition == position_list[i]) {
-						shared.shareddata.routes[iroute].waypoint[jwaypoint] = MBV_ROUTE_WAYPOINT_DELETEFLAG;
-						done = true;
-					}
-				}
-			}
-		}
-	}
-
-	/* now loop over all route waypoints backwards, deleting any that have been flagged */
-	for (int iroute = shared.shareddata.nroute - 1; iroute >= 0; iroute--) {
-		for (int jwaypoint = shared.shareddata.routes[iroute].npoints - 1; jwaypoint >= 0; jwaypoint--) {
-			if (shared.shareddata.routes[iroute].waypoint[jwaypoint] == MBV_ROUTE_WAYPOINT_DELETEFLAG)
-				mbview_route_delete(instance, iroute, jwaypoint);
-		}
-	}
-
-	/* reset pick annotation */
-	if (position_count > 0) {
-		for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
-			if (mbviews[i].data.active) {
-				/* set pick annotation */
-				if (mbviews[i].data.pickinfo_mode == MBV_PICK_ROUTE)
-					mbviews[i].data.pickinfo_mode = MBV_PICK_NONE;
-				mbview_pick_text(i);
-
-				/* draw */
-				if (mbv_verbose >= 2)
-					fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_routelist_delete\n");
-				mbview_plotlowhigh(i);
-				mbview_plotlowhighall(i);
-			}
-		}
-
-		/* update route list */
-		mbview_updateroutelist();
-	}
-
-	/* set widget sensitivity */
-	mbview_action_sensitivityall();
+	mbview_routelist_delete(position_count, position_list);
 }
 /*------------------------------------------------------------------------------*/
 void do_mbview_navlist_delete(Widget w, XtPointer client_data, XtPointer call_data) {
@@ -3696,59 +3366,7 @@ void do_mbview_navlist_delete(Widget w, XtPointer client_data, XtPointer call_da
 	ac++;
 	XtGetValues(shared.mb3d_navlist.mbview_list_navlist, args, ac);
 
-	/* deselect any selected nav */
-	shared.shareddata.navpick_type = MBV_PICK_NONE;
-	shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
-	shared.shareddata.nav_selected[1] = MBV_SELECT_NONE;
-	shared.shareddata.nav_point_selected[0] = MBV_SELECT_NONE;
-	shared.shareddata.nav_point_selected[1] = MBV_SELECT_NONE;
-	shared.shareddata.nav_selected_mbnavadjust[0] = MBV_SELECT_NONE;
-	shared.shareddata.nav_selected_mbnavadjust[1] = MBV_SELECT_NONE;
-
-	/* get first valid instance */
-	size_t instance = MBV_NO_WINDOW;
-	for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
-		if (instance == MBV_NO_WINDOW && mbviews[i].data.active)
-			instance = i;
-	}
-
-	/* delete selected nav points in reverse order if any */
-	for (int i = position_count - 1; i >= 0; i--) {
-		const int inav = mbview_navlist_position_to_inav(position_list[i]);
-		if (inav != MBV_SELECT_NONE)
-			mbview_nav_delete(instance, inav);
-	}
-
-	/* reset pick annotation */
-	if (position_count > 0) {
-		for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
-			if (mbviews[i].data.active) {
-				/* set pick annotation */
-				if (mbviews[i].data.pickinfo_mode == MBV_PICK_NAV)
-					mbviews[i].data.pickinfo_mode = MBV_PICK_NONE;
-				mbview_pick_text(i);
-
-				/* draw */
-				if (mbv_verbose >= 2)
-					fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_navlist_delete\n");
-				mbview_plotlowhigh(instance);
-				mbview_plotlowhighall(instance);
-
-				/* extract profile if pick is right type */
-				if (mbviews[i].data.pickinfo_mode == MBV_PICK_NAV)
-					mbview_extract_nav_profile(i);
-
-				/* now replot profile */
-				mbview_plotprofile(i);
-			}
-		}
-
-		/* update nav list */
-		mbview_updatenavlist();
-	}
-
-	/* set widget sensitivity */
-	mbview_action_sensitivityall();
+	mbview_navlist_delete(position_count, position_list);
 }
 
 /*------------------------------------------------------------------------------*/
