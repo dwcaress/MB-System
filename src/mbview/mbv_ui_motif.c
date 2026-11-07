@@ -749,3 +749,26 @@ void mbv_input_from_xevent(XEvent *xevent, struct mbv_input_event *event) {
 		break;
 	}
 }
+
+/*------------------------------------------------------------------------------*/
+/* destroy the window of an instance (mbview_destroy) */
+void mbv_ui_destroy_window(size_t instance) {
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	XtDestroyWidget(view->topLevelShell);
+}
+
+/*------------------------------------------------------------------------------*/
+/* clear and close the site, route, navigation and GIS list windows when the last
+    instance is destroyed (mbview_destroy) */
+void mbv_ui_close_lists(void) {
+	XmListDeleteAllItems(shared.mb3d_sitelist.mbview_list_sitelist);
+	XtPopdown(XtParent(shared.mainWindow_sitelist));
+
+	XmListDeleteAllItems(shared.mb3d_routelist.mbview_list_routelist);
+	XtPopdown(XtParent(shared.mainWindow_routelist));
+
+	XmListDeleteAllItems(shared.mb3d_navlist.mbview_list_navlist);
+	XtPopdown(XtParent(shared.mainWindow_navlist));
+
+	mbview_gislist_popdownall();
+}

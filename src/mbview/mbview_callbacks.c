@@ -1135,13 +1135,6 @@ int mbview_action_sensitivity(size_t instance) {
 		fprintf(stderr, "dbg2       instance:                  %zu\n", instance);
 	}
 
-	/* check if all available instances are active */
-	bool mbview_allactive = true;
-	for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
-		if (!mbviews[i].data.active)
-			mbview_allactive = false;
-	}
-
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
 
@@ -1149,110 +1142,8 @@ int mbview_action_sensitivity(size_t instance) {
 	for (int i = 0; i < view->naction; i++) {
 		if (view->pushButton_action[i] != NULL) {
 			Arg args[256];
-      Cardinal ac = 0;
-			XtSetArg(args[ac], XmNsensitive, False);
-			if (view->actionsensitive[i] == MBV_PICKMASK_NONE) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			else if (view->actionsensitive[i] & MBV_PICKMASK_ONEPOINT && data->pick_type == MBV_PICK_ONEPOINT) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			else if (view->actionsensitive[i] & MBV_PICKMASK_TWOPOINT && data->pick_type == MBV_PICK_TWOPOINT) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			else if (view->actionsensitive[i] & MBV_PICKMASK_AREA && data->area_type == MBV_AREA_QUAD) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			else if (view->actionsensitive[i] & MBV_PICKMASK_REGION && data->region_type == MBV_REGION_QUAD) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			else if (view->actionsensitive[i] & MBV_PICKMASK_SITE && shared.shareddata.site_selected >= 0) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			else if (view->actionsensitive[i] & MBV_PICKMASK_ROUTE && shared.shareddata.route_selected >= 0) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			else if (view->actionsensitive[i] & MBV_PICKMASK_NAVONEPOINT && shared.shareddata.navpick_type == MBV_PICK_ONEPOINT) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			else if (view->actionsensitive[i] & MBV_PICKMASK_NAVTWOPOINT && shared.shareddata.navpick_type == MBV_PICK_TWOPOINT) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			else if (view->actionsensitive[i] & MBV_PICKMASK_NAVANY) {
-				for (int j = 0; j < shared.shareddata.nnav; j++) {
-					if (shared.shareddata.navs[j].nselected > 0)
-						XtSetArg(args[ac], XmNsensitive, True);
-				}
-			}
-			else if (view->actionsensitive[i] & MBV_EXISTMASK_SITE && shared.shareddata.nsite > 0) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			else if (view->actionsensitive[i] & MBV_EXISTMASK_ROUTE && shared.shareddata.nroute > 0) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			else if (view->actionsensitive[i] & MBV_EXISTMASK_POLYLINE && shared.shareddata.npolyline > 0) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			else if (view->actionsensitive[i] & MBV_EXISTMASK_POLYGON && shared.shareddata.npolygon > 0) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			else if (view->actionsensitive[i] & MBV_EXISTMASK_GISPOINT && shared.shareddata.ngispoint > 0) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			if (view->actionsensitive[i] & MBV_STATEMASK_16 && data->state16) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			if (view->actionsensitive[i] & MBV_STATEMASK_17 && data->state17) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			if (view->actionsensitive[i] & MBV_STATEMASK_18 && data->state18) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			if (view->actionsensitive[i] & MBV_STATEMASK_19 && data->state19) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			if (view->actionsensitive[i] & MBV_STATEMASK_20 && data->state20) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			if (view->actionsensitive[i] & MBV_STATEMASK_21 && data->state21) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			if (view->actionsensitive[i] & MBV_STATEMASK_22 && data->state22) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			if (view->actionsensitive[i] & MBV_STATEMASK_23 && data->state23) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			if (view->actionsensitive[i] & MBV_STATEMASK_24 && data->state24) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			if (view->actionsensitive[i] & MBV_STATEMASK_25 && data->state25) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			if (view->actionsensitive[i] & MBV_STATEMASK_26 && data->state26) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			if (view->actionsensitive[i] & MBV_STATEMASK_27 && data->state27) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			if (view->actionsensitive[i] & MBV_STATEMASK_28 && data->state28) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			if (view->actionsensitive[i] & MBV_STATEMASK_29 && data->state29) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			if (view->actionsensitive[i] & MBV_STATEMASK_30 && data->state30) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-			if (view->actionsensitive[i] & MBV_STATEMASK_31 && data->state31) {
-				XtSetArg(args[ac], XmNsensitive, True);
-			}
-
-			/* actions that open a new window need a free window */
-			if (view->actionsensitive[i] & MBV_PICKMASK_NEWINSTANCE && mbview_allactive) {
-				XtSetArg(args[ac], XmNsensitive, False);
-			}
-
+			Cardinal ac = 0;
+			XtSetArg(args[ac], XmNsensitive, mbview_actionsensitive(instance, i) ? True : False);
 			ac++;
 			XtSetValues(view->pushButton_action[i], args, ac);
 		}
@@ -2147,288 +2038,6 @@ void do_mbview_goaway(Widget w, XtPointer client_data, XtPointer call_data) {
 	}
 }
 /*------------------------------------------------------------------------------*/
-int mbview_destroy(int verbose, size_t instance, bool destroywidgets, int *error) {
-	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       instance:        %zu\n", instance);
-		fprintf(stderr, "dbg2       destroywidgets:  %d\n", destroywidgets);
-	}
-
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	int status = MB_SUCCESS;
-
-	/* handle destruction if not already handled */
-	if (data->active) {
-		/* destroy the widgets */
-		if (destroywidgets) {
-			/* delete old glx_context if it exists */
-			if (view->prglx_init) {
-/* make correct window current for OpenGL */
-#ifdef MBV_DEBUG_GLX
-				fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, __func__, instance,
-				        view->dpy, XtWindow(view->prglwmda), view->prglx_context);
-#endif
-				//glXMakeCurrent(view->dpy, XtWindow(view->prglwmda), view->prglx_context);
-
-#ifdef MBV_GET_GLX_ERRORS
-				mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
-#endif
-
-#ifdef MBV_DEBUG_GLX
-				fprintf(stderr, "%s:%d:%s instance:%zu glXDestroyContext(%p,%p)\n", __FILE__, __LINE__, __func__, instance,
-				        view->dpy, view->prglx_context);
-#endif
-				mbv_render_context_destroy(MBV_RENDER_PROFILE, instance);
-				view->prglx_init = false;
-
-#ifdef MBV_GET_GLX_ERRORS
-				mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
-#endif
-			}
-
-			/* delete old glx_context if it exists */
-			if (view->glx_init) {
-/* make correct window current for OpenGL */
-#ifdef MBV_DEBUG_GLX
-				fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, __func__, instance,
-				        XtDisplay(view->glwmda), XtWindow(view->glwmda), view->glx_context);
-#endif
-				//glXMakeCurrent(XtDisplay(view->glwmda), XtWindow(view->glwmda), view->glx_context);
-
-#ifdef MBV_GET_GLX_ERRORS
-				mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
-#endif
-
-#ifdef MBV_DEBUG_GLX
-				fprintf(stderr, "%s:%d:%s instance:%zu glXDestroyContext(%p,%p)\n", __FILE__, __LINE__, __func__, instance,
-				        view->dpy, view->glx_context);
-#endif
-				mbv_render_context_destroy(MBV_RENDER_MAP, instance);
-				view->glx_init = false;
-
-#ifdef MBV_GET_GLX_ERRORS
-				mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
-#endif
-			}
-
-/* destroy the topLevelShell and all its children */
-#ifdef MBV_DEBUG_GLX
-			fprintf(stderr, "%s:%d:%s instance:%zu XtDestroyWidget(%p)\n", __FILE__, __LINE__, __func__, instance,
-			        view->topLevelShell);
-#endif
-			XtDestroyWidget(view->topLevelShell);
-
-#ifdef MBV_GET_GLX_ERRORS
-			mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
-#endif
-		}
-
-		data->active = false;
-		view->init = MBV_WINDOW_NULL;
-		mbv_ninstance--;
-
-		/* deallocate memory */
-		if (status == MB_SUCCESS && data->primary_data != NULL)
-			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_data, error);
-		if (status == MB_SUCCESS && data->primary_x != NULL)
-			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_x, error);
-		if (status == MB_SUCCESS && data->primary_y != NULL)
-			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_y, error);
-		if (status == MB_SUCCESS && data->primary_z != NULL)
-			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_z, error);
-		if (status == MB_SUCCESS && data->primary_dzdx != NULL)
-			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_dzdx, error);
-		if (status == MB_SUCCESS && data->primary_dzdy != NULL)
-			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_dzdy, error);
-		if (status == MB_SUCCESS && data->primary_r != NULL)
-			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_r, error);
-		if (status == MB_SUCCESS && data->primary_g != NULL)
-			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_g, error);
-		if (status == MB_SUCCESS && data->primary_b != NULL)
-			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_b, error);
-		if (status == MB_SUCCESS && data->primary_stat_color != NULL)
-			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_stat_color, error);
-		if (status == MB_SUCCESS && data->primary_stat_z != NULL)
-			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_stat_z, error);
-		if (status == MB_SUCCESS && data->secondary_data != NULL)
-			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->secondary_data, error);
-		if (status == MB_SUCCESS && data->pick.segment.nls_alloc != 0 && data->pick.segment.lspoints != NULL) {
-			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->pick.segment.lspoints, error);
-			data->pick.segment.nls_alloc = 0;
-		}
-		for (int i = 0; i < 4; i++) {
-			if (status == MB_SUCCESS && data->pick.xsegments[i].nls_alloc != 0 && data->pick.xsegments[i].lspoints != NULL) {
-				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->pick.xsegments[i].lspoints, error);
-				data->pick.xsegments[i].nls_alloc = 0;
-			}
-		}
-		if (status == MB_SUCCESS && data->area.segment.nls_alloc != 0 && data->area.segment.lspoints != NULL) {
-			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->area.segment.lspoints, error);
-			data->area.segment.nls_alloc = 0;
-		}
-		for (int i = 0; i < 4; i++) {
-			if (status == MB_SUCCESS && data->area.segments[i].nls_alloc != 0 && data->area.segments[i].lspoints != NULL) {
-				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->area.segments[i].lspoints, error);
-				data->area.segments[i].nls_alloc = 0;
-			}
-		}
-		for (int i = 0; i < 4; i++) {
-			if (status == MB_SUCCESS && data->region.segments[i].nls_alloc != 0 && data->region.segments[i].lspoints != NULL) {
-				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->region.segments[i].lspoints, error);
-				data->region.segments[i].nls_alloc = 0;
-			}
-		}
-		if (data->profile.npoints_alloc > 0) {
-			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->profile.points, error);
-			data->profile.npoints_alloc = 0;
-		}
-
-		/* deallocate shared data if no more active instances */
-		if (mbv_ninstance <= 0) {
-			shared.init_sitelist = MBV_WINDOW_NULL;
-			XmListDeleteAllItems(shared.mb3d_sitelist.mbview_list_sitelist);
-			XtPopdown(XtParent(shared.mainWindow_sitelist));
-
-			shared.init_routelist = MBV_WINDOW_NULL;
-			XmListDeleteAllItems(shared.mb3d_routelist.mbview_list_routelist);
-			XtPopdown(XtParent(shared.mainWindow_routelist));
-
-			shared.init_navlist = MBV_WINDOW_NULL;
-			XmListDeleteAllItems(shared.mb3d_navlist.mbview_list_navlist);
-			XtPopdown(XtParent(shared.mainWindow_navlist));
-
-			mbview_gislist_popdownall();
-
-			if (status == MB_SUCCESS && shared.shareddata.navpick.segment.nls_alloc != 0 &&
-			    shared.shareddata.navpick.segment.lspoints != NULL) {
-				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&shared.shareddata.navpick.segment.lspoints, error);
-				shared.shareddata.navpick.segment.nls_alloc = 0;
-			}
-			for (int i = 0; i < 4; i++) {
-				if (status == MB_SUCCESS && shared.shareddata.navpick.xsegments[i].lspoints != 0 &&
-				    shared.shareddata.navpick.xsegments[i].lspoints != NULL)
-					status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&shared.shareddata.navpick.xsegments[i].lspoints,
-					                  error);
-			}
-			if (status == MB_SUCCESS && shared.shareddata.nsite_alloc != 0 && shared.shareddata.sites != NULL) {
-				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.sites), error);
-				shared.shareddata.nsite_alloc = 0;
-				shared.shareddata.sites = NULL;
-			}
-			if (status == MB_SUCCESS && shared.shareddata.nroute_alloc != 0 && shared.shareddata.routes != NULL) {
-				for (int i = 0; i < shared.shareddata.nroute_alloc; i++) {
-					for (int j = 0; j < shared.shareddata.routes[i].npoints_alloc; j++) {
-						if (shared.shareddata.routes[i].segments[j].nls_alloc != 0 &&
-						    shared.shareddata.routes[i].segments[j].lspoints != NULL) {
-							status = mb_freed(mbv_verbose, __FILE__, __LINE__,
-							                  (void **)&shared.shareddata.routes[i].segments[j].lspoints, error);
-							shared.shareddata.routes[i].segments[j].nls_alloc = 0;
-						}
-					}
-					status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.routes[i].waypoint), error);
-					status =
-					    mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.routes[i].distlateral), error);
-					status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.routes[i].disttopo), error);
-					status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.routes[i].points), error);
-					status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.routes[i].segments), error);
-				}
-				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.routes), error);
-				shared.shareddata.nroute_alloc = 0;
-				shared.shareddata.routes = NULL;
-			}
-			if (status == MB_SUCCESS && shared.shareddata.nnav_alloc != 0 && shared.shareddata.navs != NULL) {
-				for (int i = 0; i < shared.shareddata.nnav_alloc; i++) {
-					if (shared.shareddata.navs[i].segments != NULL) {
-						for (int j = 0; j < shared.shareddata.navs[i].npoints_alloc; j++) {
-							if (shared.shareddata.navs[i].segments[j].lspoints != NULL)
-								mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.navs[i].segments[j].lspoints),
-								         error);
-						}
-						mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.navs[i].segments), error);
-					}
-					if (shared.shareddata.navs[i].navpts != NULL)
-						mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.navs[i].navpts), error);
-				}
-				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.navs), error);
-				shared.shareddata.nnav_alloc = 0;
-				shared.shareddata.navs = NULL;
-			}
-			if (status == MB_SUCCESS && shared.shareddata.nvector_alloc != 0 && shared.shareddata.vectors != NULL) {
-				for (int i = 0; i < shared.shareddata.nvector_alloc; i++) {
-					if (shared.shareddata.vectors[i].segments != NULL) {
-						for (int j = 0; j < shared.shareddata.vectors[i].npoints_alloc; j++) {
-							if (shared.shareddata.vectors[i].segments[j].lspoints != NULL)
-								mb_freed(mbv_verbose, __FILE__, __LINE__,
-								         (void **)&(shared.shareddata.vectors[i].segments[j].lspoints), error);
-						}
-						mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.vectors[i].segments), error);
-					}
-					if (shared.shareddata.vectors[i].vectorpts != NULL)
-						mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.vectors[i].vectorpts), error);
-				}
-				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.vectors), error);
-				shared.shareddata.nvector = 0;
-				shared.shareddata.nvector_alloc = 0;
-				shared.shareddata.vectors = NULL;
-			}
-			if (status == MB_SUCCESS && shared.shareddata.polylines != NULL) {
-				status = mbview_deleteallpolylines(mbv_verbose, instance, error);
-				mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.polylines), error);
-				shared.shareddata.npolyline_alloc = 0;
-			}
-			if (status == MB_SUCCESS && shared.shareddata.polygons != NULL) {
-				status = mbview_deleteallpolygons(mbv_verbose, instance, error);
-				mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.polygons), error);
-				shared.shareddata.npolygon_alloc = 0;
-			}
-			if (status == MB_SUCCESS && shared.shareddata.gispoints != NULL) {
-				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.gispoints), error);
-				shared.shareddata.ngispoint = 0;
-				shared.shareddata.ngispoint_alloc = 0;
-			}
-			if (status == MB_SUCCESS && shared.shareddata.gislayers != NULL) {
-				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.gislayers), error);
-				shared.shareddata.ngislayer = 0;
-				shared.shareddata.ngislayer_alloc = 0;
-			}
-		}
-
-		if (status != MB_SUCCESS) {
-			fprintf(stderr, "\nUnable to free memory\n");
-			fprintf(stderr, "\nProgram terminated in function <%s>\n", __func__);
-			exit(0);
-		}
-
-		/* if no more active instances reset shared data */
-		if (mbv_ninstance <= 0)
-			mbview_reset_shared(false);
-
-		/* initialize view for next use */
-		mbview_reset(instance);
-
-		/* reset action button sensitivity for all instances */
-		mbview_action_sensitivityall();
-
-		/* let the calling program know */
-		(data->mbview_dismiss_notify)(instance);
-	}
-
-	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:        %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*------------------------------------------------------------------------------*/
 
 int mbview_quit(int verbose, int *error) {
 	if (mbv_verbose >= 2) {
@@ -2475,31 +2084,7 @@ void do_mbview_display_2D(Widget w, XtPointer client_data, XtPointer call_data) 
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	/* get mode value */
-	data->display_mode = MBV_DISPLAY_2D;
-
-	/* set togglebuttons */
-	set_mbview_display_mode(instance, data->display_mode);
-	set_mbview_mouse_mode(instance, data->mouse_mode);
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_display_2d instance:%zu mode:%d\n", instance, data->display_mode);
-
-	/* set contour flags */
-	view->contourlorez = false;
-	view->contourhirez = false;
-	view->contourfullrez = false;
-
-	/* set flag to reset view bounds */
-	view->viewboundscount = MBV_BOUNDSFREQUENCY;
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_display_2D\n");
-	mbview_plotlowhigh(instance);
+	mbview_setdisplaymode(instance, MBV_DISPLAY_2D);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -2514,31 +2099,7 @@ void do_mbview_display_3D(Widget w, XtPointer client_data, XtPointer call_data) 
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	/* get mode value */
-	data->display_mode = MBV_DISPLAY_3D;
-
-	/* set togglebuttons */
-	set_mbview_display_mode(instance, data->display_mode);
-	set_mbview_mouse_mode(instance, data->mouse_mode);
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_display_3d instance:%zu mode:%d\n", instance, data->display_mode);
-
-	/* set contour flags */
-	view->contourlorez = false;
-	view->contourhirez = false;
-	view->contourfullrez = false;
-
-	/* set flag to reset view bounds */
-	view->viewboundscount = MBV_BOUNDSFREQUENCY;
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_display_3D\n");
-	mbview_plotlowhigh(instance);
+	mbview_setdisplaymode(instance, MBV_DISPLAY_3D);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -2553,34 +2114,7 @@ void do_mbview_data_primary(Widget w, XtPointer client_data, XtPointer call_data
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	/* get mode value */
-	data->grid_mode = MBV_GRID_VIEW_PRIMARY;
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_data_primary instance:%zu mode:%d\n", instance, data->grid_mode);
-
-	/* set togglebuttons */
-	set_mbview_grid_mode(instance, data->grid_mode);
-	set_mbview_histogram_mode(instance, data->primary_histogram);
-	set_mbview_colortable(instance, data->primary_colortable);
-	set_mbview_colortable_mode(instance, data->primary_colortable_mode);
-	set_mbview_shade_mode(instance, data->primary_shade_mode);
-
-	/* clear color status array */
-	mbview_setcolorparms(instance);
-	mbview_colorclear(instance);
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_data_primary\n");
-	mbview_plotlowhigh(instance);
-
-	/* notify parent program of color change */
-	if (data->mbview_colorchange_notify != NULL)
-		(data->mbview_colorchange_notify)(instance);
+	mbview_setgridmode(instance, MBV_GRID_VIEW_PRIMARY);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -2595,34 +2129,7 @@ void do_mbview_data_primaryslope(Widget w, XtPointer client_data, XtPointer call
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	/* get mode value */
-	data->grid_mode = MBV_GRID_VIEW_PRIMARYSLOPE;
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_data_primaryslope instance:%zu mode:%d\n", instance, data->grid_mode);
-
-	/* set togglebuttons */
-	set_mbview_grid_mode(instance, data->grid_mode);
-	set_mbview_histogram_mode(instance, data->primaryslope_histogram);
-	set_mbview_colortable(instance, data->slope_colortable);
-	set_mbview_colortable_mode(instance, data->slope_colortable_mode);
-	set_mbview_shade_mode(instance, data->slope_shade_mode);
-
-	/* clear color status array */
-	mbview_setcolorparms(instance);
-	mbview_colorclear(instance);
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_data_primaryslope\n");
-	mbview_plotlowhigh(instance);
-
-	/* notify parent program of color change */
-	if (data->mbview_colorchange_notify != NULL)
-		(data->mbview_colorchange_notify)(instance);
+	mbview_setgridmode(instance, MBV_GRID_VIEW_PRIMARYSLOPE);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -2637,34 +2144,7 @@ void do_mbview_data_secondary(Widget w, XtPointer client_data, XtPointer call_da
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	/* get mode value */
-	data->grid_mode = MBV_GRID_VIEW_SECONDARY;
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_data_secondary instance:%zu mode:%d\n", instance, data->grid_mode);
-
-	/* set togglebuttons */
-	set_mbview_grid_mode(instance, data->grid_mode);
-	set_mbview_histogram_mode(instance, data->secondary_histogram);
-	set_mbview_colortable(instance, data->secondary_colortable);
-	set_mbview_colortable_mode(instance, data->secondary_colortable_mode);
-	set_mbview_shade_mode(instance, data->secondary_shade_mode);
-
-	/* clear color status array */
-	mbview_setcolorparms(instance);
-	mbview_colorclear(instance);
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_data_secondary\n");
-	mbview_plotlowhigh(instance);
-
-	/* notify parent program of color change */
-	if (data->mbview_colorchange_notify != NULL)
-		(data->mbview_colorchange_notify)(instance);
+	mbview_setgridmode(instance, MBV_GRID_VIEW_SECONDARY);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -2678,38 +2158,8 @@ void do_mbview_histogram(Widget w, XtPointer client_data, XtPointer call_data) {
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
 	XtGetValues(w, args, ac);
-	/*fprintf(stderr,"do_mbview_histogram instance:%zu\n", instance);*/
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	/* get histogram value */
-	const Boolean value = XmToggleButtonGetState(w);
-	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
-		data->primary_histogram = value;
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE) {
-		data->primaryslope_histogram = value;
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) {
-		data->secondary_histogram = value;
-	}
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_histogram instance:%zu mode:%d\n", instance, data->grid_mode);
-
-	/* clear color status array */
-	mbview_setcolorparms(instance);
-	mbview_colorclear(instance);
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_histogram\n");
-	mbview_plotlowhigh(instance);
-
-	/* notify parent program of color change */
-	if (data->mbview_colorchange_notify != NULL)
-		(data->mbview_colorchange_notify)(instance);
+	mbview_sethistogram(instance, XmToggleButtonGetState(w));
 }
 
 /*------------------------------------------------------------------------------*/
@@ -2724,38 +2174,7 @@ void do_mbview_overlay_none(Widget w, XtPointer client_data, XtPointer call_data
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_overlay_none instance:%zu\n", instance);
-
-	/* set mode value */
-	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
-		data->primary_shade_mode = MBV_SHADE_VIEW_NONE;
-		set_mbview_shade_mode(instance, data->primary_shade_mode);
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE) {
-		data->slope_shade_mode = MBV_SHADE_VIEW_NONE;
-		set_mbview_shade_mode(instance, data->slope_shade_mode);
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) {
-		data->secondary_shade_mode = MBV_SHADE_VIEW_NONE;
-		set_mbview_shade_mode(instance, data->secondary_shade_mode);
-	}
-
-	/* clear color status array */
-	mbview_setcolorparms(instance);
-	mbview_colorclear(instance);
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_overlay_none\n");
-	mbview_plotlowhigh(instance);
-
-	/* notify parent program of color change */
-	if (data->mbview_colorchange_notify != NULL)
-		(data->mbview_colorchange_notify)(instance);
+	mbview_setshademode(instance, MBV_SHADE_VIEW_NONE);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -2770,39 +2189,7 @@ void do_mbview_overlay_slope(Widget w, XtPointer client_data, XtPointer call_dat
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_overlay_slope instance:%zu\n", instance);
-
-	/* set mode value */
-	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
-		data->primary_shade_mode = MBV_SHADE_VIEW_SLOPE;
-		set_mbview_shade_mode(instance, data->primary_shade_mode);
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE) {
-		data->slope_shade_mode = MBV_SHADE_VIEW_SLOPE;
-		set_mbview_shade_mode(instance, data->slope_shade_mode);
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) {
-		data->secondary_shade_mode = MBV_SHADE_VIEW_SLOPE;
-		set_mbview_shade_mode(instance, data->secondary_shade_mode);
-	}
-
-	/* clear color status array */
-	mbview_setcolorparms(instance);
-	mbview_colorclear(instance);
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_overlay_slope\n");
-	mbview_plotlowhigh(instance);
-
-	/* notify parent program of color change */
-	if (data->mbview_colorchange_notify != NULL)
-		(data->mbview_colorchange_notify)(instance);
-
+	mbview_setshademode(instance, MBV_SHADE_VIEW_SLOPE);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -2817,38 +2204,7 @@ void do_mbview_overlay_illumination(Widget w, XtPointer client_data, XtPointer c
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_overlay_illumination instance:%zu\n", instance);
-
-	/* set mode value */
-	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
-		data->primary_shade_mode = MBV_SHADE_VIEW_ILLUMINATION;
-		set_mbview_shade_mode(instance, data->primary_shade_mode);
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE) {
-		data->slope_shade_mode = MBV_SHADE_VIEW_ILLUMINATION;
-		set_mbview_shade_mode(instance, data->slope_shade_mode);
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) {
-		data->secondary_shade_mode = MBV_SHADE_VIEW_ILLUMINATION;
-		set_mbview_shade_mode(instance, data->secondary_shade_mode);
-	}
-
-	/* clear color status array */
-	mbview_setcolorparms(instance);
-	mbview_colorclear(instance);
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_overlay_illumination\n");
-	mbview_plotlowhigh(instance);
-
-	/* notify parent program of color change */
-	if (data->mbview_colorchange_notify != NULL)
-		(data->mbview_colorchange_notify)(instance);
+	mbview_setshademode(instance, MBV_SHADE_VIEW_ILLUMINATION);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -2863,38 +2219,7 @@ void do_mbview_overlay_secondary(Widget w, XtPointer client_data, XtPointer call
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_overlay_secondary instance:%zu\n", instance);
-
-	/* set mode value */
-	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
-		data->primary_shade_mode = MBV_SHADE_VIEW_OVERLAY;
-		set_mbview_shade_mode(instance, data->primary_shade_mode);
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE) {
-		data->slope_shade_mode = MBV_SHADE_VIEW_OVERLAY;
-		set_mbview_shade_mode(instance, data->slope_shade_mode);
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) {
-		data->secondary_shade_mode = MBV_SHADE_VIEW_OVERLAY;
-		set_mbview_shade_mode(instance, data->secondary_shade_mode);
-	}
-
-	/* clear color status array */
-	mbview_setcolorparms(instance);
-	mbview_colorclear(instance);
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_overlay_secondary\n");
-	mbview_plotlowhigh(instance);
-
-	/* notify parent program of color change */
-	if (data->mbview_colorchange_notify != NULL)
-		(data->mbview_colorchange_notify)(instance);
+	mbview_setshademode(instance, MBV_SHADE_VIEW_OVERLAY);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -2909,19 +2234,7 @@ void do_mbview_overlay_contour(Widget w, XtPointer client_data, XtPointer call_d
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	const Boolean value = XmToggleButtonGetState(w);
-	data->grid_contour_mode = value ? MBV_VIEW_ON : MBV_VIEW_OFF;
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_overlay_contour instance:%zu mode:%d\n", instance, data->grid_contour_mode);
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_overlay_contour\n");
-	mbview_plotlowhigh(instance);
+	mbview_setviewtoggle(instance, MBV_VIEWTOGGLE_CONTOUR, XmToggleButtonGetState(w));
 }
 /*------------------------------------------------------------------------------*/
 void do_mbview_site(Widget w, XtPointer client_data, XtPointer call_data) {
@@ -2935,37 +2248,7 @@ void do_mbview_site(Widget w, XtPointer client_data, XtPointer call_data) {
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	/* get mode value */
-	const Boolean value = XmToggleButtonGetState(w);
-	if (value) {
-		data->site_view_mode = MBV_VIEW_ON;
-	} else {
-		data->site_view_mode = MBV_VIEW_OFF;
-
-		/* if site view is off, site edit must be off */
-		if (data->mouse_mode == MBV_MOUSE_SITE) {
-			data->mouse_mode = MBV_MOUSE_MOVE;
-			set_mbview_mouse_mode(instance, data->mouse_mode);
-
-			/* make sure sites aren't selected if edit modes off */
-			shared.shareddata.site_selected = MBV_SELECT_NONE;
-			data->pickinfo_mode = data->pick_type;
-
-			/* set pick annotation */
-			mbview_pick_text(instance);
-		}
-	}
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_site instance:%zu mode:%d\n", instance, data->site_view_mode);
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_site\n");
-	mbview_plotlowhigh(instance);
+	mbview_setviewtoggle(instance, MBV_VIEWTOGGLE_SITE, XmToggleButtonGetState(w));
 }
 /*------------------------------------------------------------------------------*/
 
@@ -2980,38 +2263,7 @@ void do_mbview_route(Widget w, XtPointer client_data, XtPointer call_data) {
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	/* get mode value */
-	const Boolean value = XmToggleButtonGetState(w);
-	if (value) {
-		data->route_view_mode = MBV_VIEW_ON;
-	} else {
-		data->route_view_mode = MBV_VIEW_OFF;
-
-		/* if route view is off, route edit must be off */
-		if (data->mouse_mode == MBV_MOUSE_ROUTE) {
-			data->mouse_mode = MBV_MOUSE_MOVE;
-			set_mbview_mouse_mode(instance, data->mouse_mode);
-
-			/* make sure routes aren't selected if edit modes off */
-			shared.shareddata.route_selected = MBV_SELECT_NONE;
-			shared.shareddata.route_point_selected = MBV_SELECT_NONE;
-			data->pickinfo_mode = data->pick_type;
-
-			/* set pick annotation */
-			mbview_pick_text(instance);
-		}
-	}
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_route instance:%zu mode:%d\n", instance, data->route_view_mode);
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_route\n");
-	mbview_plotlowhigh(instance);
+	mbview_setviewtoggle(instance, MBV_VIEWTOGGLE_ROUTE, XmToggleButtonGetState(w));
 }
 
 /*------------------------------------------------------------------------------*/
@@ -3027,29 +2279,7 @@ void do_mbview_nav(Widget w, XtPointer client_data, XtPointer call_data) {
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	/* get mode value */
-	Boolean value = XmToggleButtonGetState(w);
-	if (value) {
-		data->nav_view_mode = MBV_VIEW_ON;
-	} else {
-		data->nav_view_mode = MBV_VIEW_OFF;
-		if (data->navdrape_view_mode == MBV_VIEW_OFF &&
-		    (data->mouse_mode == MBV_MOUSE_NAV || data->mouse_mode == MBV_MOUSE_NAVFILE)) {
-			data->mouse_mode = MBV_MOUSE_MOVE;
-			set_mbview_mouse_mode(instance, data->mouse_mode);
-		}
-	}
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_nav instance:%zu mode:%d\n", instance, data->nav_view_mode);
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_nav\n");
-	mbview_plotlowhigh(instance);
+	mbview_setviewtoggle(instance, MBV_VIEWTOGGLE_NAV, XmToggleButtonGetState(w));
 }
 
 /*------------------------------------------------------------------------------*/
@@ -3065,24 +2295,7 @@ void do_mbview_navswathbounds(Widget w, XtPointer client_data, XtPointer call_da
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	/* get mode value */
-	Boolean value = XmToggleButtonGetState(w);
-	if (value) {
-		data->navswathbounds_view_mode = MBV_VIEW_ON;
-	} else {
-		data->navswathbounds_view_mode = MBV_VIEW_OFF;
-	}
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_navswathbounds instance:%zu mode:%d\n", instance, data->navswathbounds_view_mode);
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_navswathbounds\n");
-	mbview_plotlowhigh(instance);
+	mbview_setviewtoggle(instance, MBV_VIEWTOGGLE_NAVSWATHBOUNDS, XmToggleButtonGetState(w));
 }
 
 /*------------------------------------------------------------------------------*/
@@ -3098,28 +2311,7 @@ void do_mbview_navdrape(Widget w, XtPointer client_data, XtPointer call_data) {
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	/* get mode value */
-	const Boolean value = XmToggleButtonGetState(w);
-	if (value) {
-		data->navdrape_view_mode = MBV_VIEW_ON;
-	} else {
-		data->navdrape_view_mode = MBV_VIEW_OFF;
-		if (data->nav_view_mode == MBV_VIEW_OFF && (data->mouse_mode == MBV_MOUSE_NAV || data->mouse_mode == MBV_MOUSE_NAVFILE)) {
-			data->mouse_mode = MBV_MOUSE_MOVE;
-			set_mbview_mouse_mode(instance, data->mouse_mode);
-		}
-	}
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_navdrape instance:%zu mode:%d\n", instance, data->navdrape_view_mode);
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_navdrape\n");
-	mbview_plotlowhigh(instance);
+	mbview_setviewtoggle(instance, MBV_VIEWTOGGLE_NAVDRAPE, XmToggleButtonGetState(w));
 }
 /*------------------------------------------------------------------------------*/
 
@@ -3134,28 +2326,7 @@ void do_mbview_vector(Widget w, XtPointer client_data, XtPointer call_data) {
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	/* get mode value */
-	const Boolean value = XmToggleButtonGetState(w);
-	if (value) {
-		data->vector_view_mode = MBV_VIEW_ON;
-	} else {
-		data->vector_view_mode = MBV_VIEW_OFF;
-		if (data->mouse_mode == MBV_MOUSE_VECTOR) {
-			data->mouse_mode = MBV_MOUSE_MOVE;
-			set_mbview_mouse_mode(instance, data->mouse_mode);
-		}
-	}
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_vector instance:%zu mode:%d\n", instance, data->vector_view_mode);
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_vector\n");
-	mbview_plotlowhigh(instance);
+	mbview_setviewtoggle(instance, MBV_VIEWTOGGLE_VECTOR, XmToggleButtonGetState(w));
 }
 /*------------------------------------------------------------------------------*/
 
@@ -3170,16 +2341,7 @@ void do_mbview_polyline(Widget w, XtPointer client_data, XtPointer call_data) {
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_struct *data = &(mbviews[instance].data);
-
-	/* get mode value */
-	data->polyline_view_mode = XmToggleButtonGetState(w) ? MBV_VIEW_ON : MBV_VIEW_OFF;
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_polyline instance:%zu mode:%d\n", instance, data->polyline_view_mode);
-
-	/* draw */
-	mbview_plotlowhigh(instance);
+	mbview_setviewtoggle(instance, MBV_VIEWTOGGLE_POLYLINE, XmToggleButtonGetState(w));
 }
 /*------------------------------------------------------------------------------*/
 
@@ -3194,16 +2356,7 @@ void do_mbview_polygon(Widget w, XtPointer client_data, XtPointer call_data) {
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_struct *data = &(mbviews[instance].data);
-
-	/* get mode value */
-	data->polygon_view_mode = XmToggleButtonGetState(w) ? MBV_VIEW_ON : MBV_VIEW_OFF;
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_polygon instance:%zu mode:%d\n", instance, data->polygon_view_mode);
-
-	/* draw */
-	mbview_plotlowhigh(instance);
+	mbview_setviewtoggle(instance, MBV_VIEWTOGGLE_POLYGON, XmToggleButtonGetState(w));
 }
 /*------------------------------------------------------------------------------*/
 
@@ -3218,16 +2371,7 @@ void do_mbview_gispoint(Widget w, XtPointer client_data, XtPointer call_data) {
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_struct *data = &(mbviews[instance].data);
-
-	/* get mode value */
-	data->gispoint_view_mode = XmToggleButtonGetState(w) ? MBV_VIEW_ON : MBV_VIEW_OFF;
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_gispoint instance:%zu mode:%d\n", instance, data->gispoint_view_mode);
-
-	/* draw */
-	mbview_plotlowhigh(instance);
+	mbview_setviewtoggle(instance, MBV_VIEWTOGGLE_GISPOINT, XmToggleButtonGetState(w));
 }
 
 /*------------------------------------------------------------------------------*/
@@ -3243,41 +2387,7 @@ void do_mbview_colortable_haxby(Widget w, XtPointer client_data, XtPointer call_
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	/* get mode value */
-	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
-		data->primary_colortable = MBV_COLORTABLE_HAXBY;
-		set_mbview_colortable(instance, data->primary_colortable);
-		set_mbview_colortable_mode(instance, data->primary_colortable_mode);
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE) {
-		data->slope_colortable = MBV_COLORTABLE_HAXBY;
-		set_mbview_colortable(instance, data->slope_colortable);
-		set_mbview_colortable_mode(instance, data->slope_colortable_mode);
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) {
-		data->secondary_colortable = MBV_COLORTABLE_HAXBY;
-		set_mbview_colortable(instance, data->secondary_colortable);
-		set_mbview_colortable_mode(instance, data->secondary_colortable_mode);
-	}
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_colortable_haxby instance:%zu\n", instance);
-
-	/* clear color status array */
-	mbview_setcolorparms(instance);
-	mbview_colorclear(instance);
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_colortable_haxby\n");
-	mbview_plotlowhigh(instance);
-
-	/* notify parent program of color change */
-	if (data->mbview_colorchange_notify != NULL)
-		(data->mbview_colorchange_notify)(instance);
+	mbview_setcolortable(instance, MBV_COLORTABLE_HAXBY);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -3292,41 +2402,7 @@ void do_mbview_colortable_bright(Widget w, XtPointer client_data, XtPointer call
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	/* get mode value */
-	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
-		data->primary_colortable = MBV_COLORTABLE_BRIGHT;
-		set_mbview_colortable(instance, data->primary_colortable);
-		set_mbview_colortable_mode(instance, data->primary_colortable_mode);
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE) {
-		data->slope_colortable = MBV_COLORTABLE_BRIGHT;
-		set_mbview_colortable(instance, data->slope_colortable);
-		set_mbview_colortable_mode(instance, data->slope_colortable_mode);
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) {
-		data->secondary_colortable = MBV_COLORTABLE_BRIGHT;
-		set_mbview_colortable(instance, data->secondary_colortable);
-		set_mbview_colortable_mode(instance, data->secondary_colortable_mode);
-	}
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_colortable_bright instance:%zu\n", instance);
-
-	/* clear color status array */
-	mbview_setcolorparms(instance);
-	mbview_colorclear(instance);
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_colortable_bright\n");
-	mbview_plotlowhigh(instance);
-
-	/* notify parent program of color change */
-	if (data->mbview_colorchange_notify != NULL)
-		(data->mbview_colorchange_notify)(instance);
+	mbview_setcolortable(instance, MBV_COLORTABLE_BRIGHT);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -3341,41 +2417,7 @@ void do_mbview_colortable_muted(Widget w, XtPointer client_data, XtPointer call_
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	/* get mode value */
-	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
-		data->primary_colortable = MBV_COLORTABLE_MUTED;
-		set_mbview_colortable(instance, data->primary_colortable);
-		set_mbview_colortable_mode(instance, data->primary_colortable_mode);
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE) {
-		data->slope_colortable = MBV_COLORTABLE_MUTED;
-		set_mbview_colortable(instance, data->slope_colortable);
-		set_mbview_colortable_mode(instance, data->slope_colortable_mode);
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) {
-		data->secondary_colortable = MBV_COLORTABLE_MUTED;
-		set_mbview_colortable(instance, data->secondary_colortable);
-		set_mbview_colortable_mode(instance, data->secondary_colortable_mode);
-	}
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_colortable_muted instance:%zu\n", instance);
-
-	/* clear color status array */
-	mbview_setcolorparms(instance);
-	mbview_colorclear(instance);
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_colortable_muted\n");
-	mbview_plotlowhigh(instance);
-
-	/* notify parent program of color change */
-	if (data->mbview_colorchange_notify != NULL)
-		(data->mbview_colorchange_notify)(instance);
+	mbview_setcolortable(instance, MBV_COLORTABLE_MUTED);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -3390,41 +2432,7 @@ void do_mbview_colortable_gray(Widget w, XtPointer client_data, XtPointer call_d
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	/* get mode value */
-	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
-		data->primary_colortable = MBV_COLORTABLE_GRAY;
-		set_mbview_colortable(instance, data->primary_colortable);
-		set_mbview_colortable_mode(instance, data->primary_colortable_mode);
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE) {
-		data->slope_colortable = MBV_COLORTABLE_GRAY;
-		set_mbview_colortable(instance, data->slope_colortable);
-		set_mbview_colortable_mode(instance, data->slope_colortable_mode);
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) {
-		data->secondary_colortable = MBV_COLORTABLE_GRAY;
-		set_mbview_colortable(instance, data->secondary_colortable);
-		set_mbview_colortable_mode(instance, data->secondary_colortable_mode);
-	}
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_colortable_gray instance:%zu\n", instance);
-
-	/* clear color status array */
-	mbview_setcolorparms(instance);
-	mbview_colorclear(instance);
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_colortable_gray\n");
-	mbview_plotlowhigh(instance);
-
-	/* notify parent program of color change */
-	if (data->mbview_colorchange_notify != NULL)
-		(data->mbview_colorchange_notify)(instance);
+	mbview_setcolortable(instance, MBV_COLORTABLE_GRAY);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -3439,41 +2447,7 @@ void do_mbview_colortable_flat(Widget w, XtPointer client_data, XtPointer call_d
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	/* get mode value */
-	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
-		data->primary_colortable = MBV_COLORTABLE_FLAT;
-		set_mbview_colortable(instance, data->primary_colortable);
-		set_mbview_colortable_mode(instance, data->primary_colortable_mode);
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE) {
-		data->slope_colortable = MBV_COLORTABLE_FLAT;
-		set_mbview_colortable(instance, data->slope_colortable);
-		set_mbview_colortable_mode(instance, data->slope_colortable_mode);
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) {
-		data->secondary_colortable = MBV_COLORTABLE_FLAT;
-		set_mbview_colortable(instance, data->secondary_colortable);
-		set_mbview_colortable_mode(instance, data->secondary_colortable_mode);
-	}
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_colortable_flat instance:%zu\n", instance);
-
-	/* clear color status array */
-	mbview_setcolorparms(instance);
-	mbview_colorclear(instance);
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_colortable_flat\n");
-	mbview_plotlowhigh(instance);
-
-	/* notify parent program of color change */
-	if (data->mbview_colorchange_notify != NULL)
-		(data->mbview_colorchange_notify)(instance);
+	mbview_setcolortable(instance, MBV_COLORTABLE_FLAT);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -3489,41 +2463,7 @@ void do_mbview_colortable_sealevel1(Widget w, XtPointer client_data, XtPointer c
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	/* get mode value */
-	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
-		data->primary_colortable = MBV_COLORTABLE_SEALEVEL1;
-		set_mbview_colortable(instance, data->primary_colortable);
-		set_mbview_colortable_mode(instance, data->primary_colortable_mode);
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE) {
-		data->slope_colortable = MBV_COLORTABLE_SEALEVEL1;
-		set_mbview_colortable(instance, data->slope_colortable);
-		set_mbview_colortable_mode(instance, data->slope_colortable_mode);
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) {
-		data->secondary_colortable = MBV_COLORTABLE_SEALEVEL1;
-		set_mbview_colortable(instance, data->secondary_colortable);
-		set_mbview_colortable_mode(instance, data->secondary_colortable_mode);
-	}
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_colortable_sealevel1 instance:%zu\n", instance);
-
-	/* clear color status array */
-	mbview_setcolorparms(instance);
-	mbview_colorclear(instance);
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_colortable_sealevel1\n");
-	mbview_plotlowhigh(instance);
-
-	/* notify parent program of color change */
-	if (data->mbview_colorchange_notify != NULL)
-		(data->mbview_colorchange_notify)(instance);
+	mbview_setcolortable(instance, MBV_COLORTABLE_SEALEVEL1);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -3538,41 +2478,7 @@ void do_mbview_colortable_sealevel2(Widget w, XtPointer client_data, XtPointer c
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	/* get mode value */
-	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
-		data->primary_colortable = MBV_COLORTABLE_SEALEVEL2;
-		set_mbview_colortable(instance, data->primary_colortable);
-		set_mbview_colortable_mode(instance, data->primary_colortable_mode);
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE) {
-		data->slope_colortable = MBV_COLORTABLE_SEALEVEL2;
-		set_mbview_colortable(instance, data->slope_colortable);
-		set_mbview_colortable_mode(instance, data->slope_colortable_mode);
-	}
-	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) {
-		data->secondary_colortable = MBV_COLORTABLE_SEALEVEL2;
-		set_mbview_colortable(instance, data->secondary_colortable);
-		set_mbview_colortable_mode(instance, data->secondary_colortable_mode);
-	}
-
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_colortable_sealevel2 instance:%zu\n", instance);
-
-	/* clear color status array */
-	mbview_setcolorparms(instance);
-	mbview_colorclear(instance);
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_colortable_sealevel2\n");
-	mbview_plotlowhigh(instance);
-
-	/* notify parent program of color change */
-	if (data->mbview_colorchange_notify != NULL)
-		(data->mbview_colorchange_notify)(instance);
+	mbview_setcolortable(instance, MBV_COLORTABLE_SEALEVEL2);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -5515,16 +4421,7 @@ void do_mbview_full_render(Widget w, XtPointer client_data, XtPointer call_data)
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_full_render\n");
-
-	/* replot in full rez if last draw was lower rez */
-	if (view->lastdrawrez != MBV_REZ_FULL) {
-		if (mbv_verbose >= 2)
-			fprintf(stderr, "Calling mbview_plotfull from do_mbview_full_render:\n");
-		mbview_plotfull(instance);
-	}
+	mbview_fullrender(instance);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -5539,54 +4436,7 @@ void do_mbview_reset_view(Widget w, XtPointer client_data, XtPointer call_data) 
 	ac++;
 	XtGetValues(w, args, ac);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "do_mbview_reset_view\n");
-
-	/* reset the the view to defaults */
-	view->offset2d_x = 0.0;
-	view->offset2d_y = 0.0;
-	view->size2d = 0.0;
-	view->offset3d_x = 0.0;
-	view->offset3d_y = 0.0;
-	view->offset3d_z = 0.0;
-	view->viewoffset3d_z = 0.0;
-	data->exaggeration = 1.0;
-	data->modelelevation3d = 90.0;
-	data->modelazimuth3d = 0.0;
-	data->viewelevation3d = 90.0;
-	data->viewazimuth3d = 0.0;
-	view->size2d = 1.0;
-
-	/* reset dialog widgets */
-	do_mbview_3dparmstext(instance);
-	do_mbview_2dparmstext(instance);
-
-	/* rescale grid */
-	mbview_zscaleclear(instance);
-
-	/* rescale data other than the grid */
-	mbview_zscale(instance);
-
-	/* clear color status array */
-	if (data->display_mode == MBV_DISPLAY_3D) {
-		view->lastdrawrez = MBV_REZ_NONE;
-		mbview_setcolorparms(instance);
-		mbview_colorclear(instance);
-	}
-
-	/* set flag to reset view bounds */
-	view->viewboundscount = MBV_BOUNDSFREQUENCY;
-
-	/* draw */
-	if (mbv_verbose >= 2)
-		fprintf(stderr, "Calling mbview_plotlowhigh from do_mbview_reset_view\n");
-	mbview_plotlowhigh(instance);
-
-	/* notify parent program of color change */
-	if (data->mbview_colorchange_notify != NULL)
-		(data->mbview_colorchange_notify)(instance);
+	mbview_resetview(instance);
 }
 
 /*------------------------------------------------------------------------------*/

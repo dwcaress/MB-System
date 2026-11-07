@@ -71,6 +71,18 @@
 #define MBV_BACKGROUND_COLOR 2
 #define MBV_BACKGROUND_FULLPLOT 3
 
+/* view toggles of the View menu (mbview_setviewtoggle) */
+#define MBV_VIEWTOGGLE_CONTOUR 0
+#define MBV_VIEWTOGGLE_SITE 1
+#define MBV_VIEWTOGGLE_ROUTE 2
+#define MBV_VIEWTOGGLE_NAV 3
+#define MBV_VIEWTOGGLE_NAVSWATHBOUNDS 4
+#define MBV_VIEWTOGGLE_NAVDRAPE 5
+#define MBV_VIEWTOGGLE_VECTOR 6
+#define MBV_VIEWTOGGLE_POLYLINE 7
+#define MBV_VIEWTOGGLE_POLYGON 8
+#define MBV_VIEWTOGGLE_GISPOINT 9
+
 #define MBV_PICK_IDIVISION 15
 #define MBV_PICK_DIVISION ((double)MBV_PICK_IDIVISION)
 #define MBV_PICK_DOWN 1
@@ -434,6 +446,15 @@ int mbview_addaction(int verbose, size_t instance, void(mbview_action_notify)(Wi
 int mbview_addactionseparator(int verbose, size_t instance, int *error);
 int mbview_setstate(int verbose, size_t instance, int mask, int value, int *error);
 int mbview_setmousemode(size_t instance, int mode);
+int mbview_setdisplaymode(size_t instance, int mode);
+int mbview_setgridmode(size_t instance, int grid_mode);
+int mbview_sethistogram(size_t instance, bool value);
+int mbview_setshademode(size_t instance, int shade_mode);
+int mbview_setcolortable(size_t instance, int colortable);
+int mbview_setviewtoggle(size_t instance, int toggle, bool value);
+int mbview_resetview(size_t instance);
+int mbview_fullrender(size_t instance);
+bool mbview_actionsensitive(size_t instance, int iaction);
 int mbview_addpicknotify(int verbose, size_t instance, int picktype, void(mbview_pick_notify)(size_t), int *error);
 int mbview_setsensitivitynotify(int verbose, size_t instance, void(mbview_sensitivity_notify)(), int *error);
 void mbview_resize(Widget w, XtPointer client_data, XEvent *event, Boolean *unused);

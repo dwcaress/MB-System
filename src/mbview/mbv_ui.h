@@ -41,10 +41,14 @@
  *     do_mbview_settimer, do_mbview_setbackgroundwork,
  *     mbview_action_sensitivity, mbview_update_sensitivity,
  *     mbview_set_widgets, set_mbview_label_multiline_string,
- *     set_mbview_mouse_mode, set_mbview_site_view_mode,
+ *     set_mbview_mouse_mode, set_mbview_display_mode,
+ *     set_mbview_grid_mode, set_mbview_histogram_mode,
+ *     set_mbview_shade_mode, set_mbview_colortable,
+ *     set_mbview_colortable_mode, set_mbview_site_view_mode,
  *     set_mbview_route_view_mode, set_mbview_nav_view_mode,
  *     set_mbview_navdrape_view_mode, set_mbview_polyline_view_mode,
- *     set_mbview_polygon_view_mode, set_mbview_gispoint_view_mode
+ *     set_mbview_polygon_view_mode, set_mbview_gispoint_view_mode,
+ *     do_mbview_2dparmstext, do_mbview_3dparmstext
  *   mbview_gislist.c: mbview_gis_routelistbutton, mbview_gislist_reset
  *   mbv_ui_motif.c: mbview_updatenavlist, mbview_updateroutelist,
  *     mbview_updatesitelist
@@ -111,6 +115,13 @@ void mbv_ui_view_values_changed(size_t instance, int values);
 
 /* the user asked to reset the view of an instance (key 'r') */
 void mbv_ui_reset_view(size_t instance);
+
+/* destroy the window of an instance (mbview_destroy) */
+void mbv_ui_destroy_window(size_t instance);
+
+/* clear and close the site, route, navigation and GIS list windows when the
+   last instance is destroyed (mbview_destroy) */
+void mbv_ui_close_lists(void);
 
 #ifdef __cplusplus
 }

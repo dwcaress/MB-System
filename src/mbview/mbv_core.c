@@ -2932,3 +2932,935 @@ int do_mbview_workfunction(XtPointer client_data) {
 
 	return (MB_SUCCESS);
 }
+
+/*------------------------------------------------------------------------------*/
+int mbview_setdisplaymode(size_t instance, int mode) {
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+		fprintf(stderr, "dbg2       mode:             %d\n", mode);
+	}
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	/* get mode value */
+	data->display_mode = mode;
+
+	/* set togglebuttons */
+	set_mbview_display_mode(instance, data->display_mode);
+	set_mbview_mouse_mode(instance, data->mouse_mode);
+
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "%s instance:%zu mode:%d\n", __func__, instance, data->display_mode);
+
+	/* set contour flags */
+	view->contourlorez = false;
+	view->contourhirez = false;
+	view->contourfullrez = false;
+
+	/* set flag to reset view bounds */
+	view->viewboundscount = MBV_BOUNDSFREQUENCY;
+
+	/* draw */
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "Calling mbview_plotlowhigh from %s\n", __func__);
+	mbview_plotlowhigh(instance);
+
+	return (MB_SUCCESS);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_setgridmode(size_t instance, int grid_mode) {
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+		fprintf(stderr, "dbg2       grid_mode:        %d\n", grid_mode);
+	}
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	/* get mode value */
+	data->grid_mode = grid_mode;
+
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "%s instance:%zu mode:%d\n", __func__, instance, data->grid_mode);
+
+	/* set togglebuttons */
+	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
+		set_mbview_grid_mode(instance, data->grid_mode);
+		set_mbview_histogram_mode(instance, data->primary_histogram);
+		set_mbview_colortable(instance, data->primary_colortable);
+		set_mbview_colortable_mode(instance, data->primary_colortable_mode);
+		set_mbview_shade_mode(instance, data->primary_shade_mode);
+	}
+	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE) {
+		set_mbview_grid_mode(instance, data->grid_mode);
+		set_mbview_histogram_mode(instance, data->primaryslope_histogram);
+		set_mbview_colortable(instance, data->slope_colortable);
+		set_mbview_colortable_mode(instance, data->slope_colortable_mode);
+		set_mbview_shade_mode(instance, data->slope_shade_mode);
+	}
+	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) {
+		set_mbview_grid_mode(instance, data->grid_mode);
+		set_mbview_histogram_mode(instance, data->secondary_histogram);
+		set_mbview_colortable(instance, data->secondary_colortable);
+		set_mbview_colortable_mode(instance, data->secondary_colortable_mode);
+		set_mbview_shade_mode(instance, data->secondary_shade_mode);
+	}
+
+	/* clear color status array */
+	mbview_setcolorparms(instance);
+	mbview_colorclear(instance);
+
+	/* draw */
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "Calling mbview_plotlowhigh from %s\n", __func__);
+	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
+
+	return (MB_SUCCESS);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_sethistogram(size_t instance, bool value) {
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+		fprintf(stderr, "dbg2       value:            %d\n", value);
+	}
+
+	/*fprintf(stderr,"%s instance:%zu\n", __func__, instance);*/
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	/* get histogram value */
+	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
+		data->primary_histogram = value;
+	}
+	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE) {
+		data->primaryslope_histogram = value;
+	}
+	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) {
+		data->secondary_histogram = value;
+	}
+
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "%s instance:%zu mode:%d\n", __func__, instance, data->grid_mode);
+
+	/* clear color status array */
+	mbview_setcolorparms(instance);
+	mbview_colorclear(instance);
+
+	/* draw */
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "Calling mbview_plotlowhigh from %s\n", __func__);
+	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
+
+	return (MB_SUCCESS);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_setshademode(size_t instance, int shade_mode) {
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+		fprintf(stderr, "dbg2       shade_mode:       %d\n", shade_mode);
+	}
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "%s instance:%zu\n", __func__, instance);
+
+	/* set mode value */
+	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
+		data->primary_shade_mode = shade_mode;
+		set_mbview_shade_mode(instance, data->primary_shade_mode);
+	}
+	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE) {
+		data->slope_shade_mode = shade_mode;
+		set_mbview_shade_mode(instance, data->slope_shade_mode);
+	}
+	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) {
+		data->secondary_shade_mode = shade_mode;
+		set_mbview_shade_mode(instance, data->secondary_shade_mode);
+	}
+
+	/* clear color status array */
+	mbview_setcolorparms(instance);
+	mbview_colorclear(instance);
+
+	/* draw */
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "Calling mbview_plotlowhigh from %s\n", __func__);
+	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
+
+	return (MB_SUCCESS);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_setcolortable(size_t instance, int colortable) {
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+		fprintf(stderr, "dbg2       colortable:       %d\n", colortable);
+	}
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	/* get mode value */
+	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY) {
+		data->primary_colortable = colortable;
+		set_mbview_colortable(instance, data->primary_colortable);
+		set_mbview_colortable_mode(instance, data->primary_colortable_mode);
+	}
+	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE) {
+		data->slope_colortable = colortable;
+		set_mbview_colortable(instance, data->slope_colortable);
+		set_mbview_colortable_mode(instance, data->slope_colortable_mode);
+	}
+	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) {
+		data->secondary_colortable = colortable;
+		set_mbview_colortable(instance, data->secondary_colortable);
+		set_mbview_colortable_mode(instance, data->secondary_colortable_mode);
+	}
+
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "%s instance:%zu\n", __func__, instance);
+
+	/* clear color status array */
+	mbview_setcolorparms(instance);
+	mbview_colorclear(instance);
+
+	/* draw */
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "Calling mbview_plotlowhigh from %s\n", __func__);
+	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
+
+	return (MB_SUCCESS);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_setviewtoggle(size_t instance, int toggle, bool value) {
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+		fprintf(stderr, "dbg2       toggle:           %d\n", toggle);
+		fprintf(stderr, "dbg2       value:            %d\n", value);
+	}
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+	(void)view;  // Unused by some toggles
+
+	switch (toggle) {
+	case MBV_VIEWTOGGLE_CONTOUR: {
+		data->grid_contour_mode = value ? MBV_VIEW_ON : MBV_VIEW_OFF;
+
+		if (mbv_verbose >= 2)
+			fprintf(stderr, "%s instance:%zu mode:%d\n", __func__, instance, data->grid_contour_mode);
+
+		/* draw */
+		if (mbv_verbose >= 2)
+			fprintf(stderr, "Calling mbview_plotlowhigh from %s\n", __func__);
+		mbview_plotlowhigh(instance);
+		break;
+	}
+	case MBV_VIEWTOGGLE_SITE: {
+		/* get mode value */
+		if (value) {
+			data->site_view_mode = MBV_VIEW_ON;
+		} else {
+			data->site_view_mode = MBV_VIEW_OFF;
+
+			/* if site view is off, site edit must be off */
+			if (data->mouse_mode == MBV_MOUSE_SITE) {
+				data->mouse_mode = MBV_MOUSE_MOVE;
+				set_mbview_mouse_mode(instance, data->mouse_mode);
+
+				/* make sure sites aren't selected if edit modes off */
+				shared.shareddata.site_selected = MBV_SELECT_NONE;
+				data->pickinfo_mode = data->pick_type;
+
+				/* set pick annotation */
+				mbview_pick_text(instance);
+			}
+		}
+
+		if (mbv_verbose >= 2)
+			fprintf(stderr, "%s instance:%zu mode:%d\n", __func__, instance, data->site_view_mode);
+
+		/* draw */
+		if (mbv_verbose >= 2)
+			fprintf(stderr, "Calling mbview_plotlowhigh from %s\n", __func__);
+		mbview_plotlowhigh(instance);
+		break;
+	}
+	case MBV_VIEWTOGGLE_ROUTE: {
+		/* get mode value */
+		if (value) {
+			data->route_view_mode = MBV_VIEW_ON;
+		} else {
+			data->route_view_mode = MBV_VIEW_OFF;
+
+			/* if route view is off, route edit must be off */
+			if (data->mouse_mode == MBV_MOUSE_ROUTE) {
+				data->mouse_mode = MBV_MOUSE_MOVE;
+				set_mbview_mouse_mode(instance, data->mouse_mode);
+
+				/* make sure routes aren't selected if edit modes off */
+				shared.shareddata.route_selected = MBV_SELECT_NONE;
+				shared.shareddata.route_point_selected = MBV_SELECT_NONE;
+				data->pickinfo_mode = data->pick_type;
+
+				/* set pick annotation */
+				mbview_pick_text(instance);
+			}
+		}
+
+		if (mbv_verbose >= 2)
+			fprintf(stderr, "%s instance:%zu mode:%d\n", __func__, instance, data->route_view_mode);
+
+		/* draw */
+		if (mbv_verbose >= 2)
+			fprintf(stderr, "Calling mbview_plotlowhigh from %s\n", __func__);
+		mbview_plotlowhigh(instance);
+		break;
+	}
+	case MBV_VIEWTOGGLE_NAV: {
+		/* get mode value */
+		if (value) {
+			data->nav_view_mode = MBV_VIEW_ON;
+		} else {
+			data->nav_view_mode = MBV_VIEW_OFF;
+			if (data->navdrape_view_mode == MBV_VIEW_OFF &&
+			    (data->mouse_mode == MBV_MOUSE_NAV || data->mouse_mode == MBV_MOUSE_NAVFILE)) {
+				data->mouse_mode = MBV_MOUSE_MOVE;
+				set_mbview_mouse_mode(instance, data->mouse_mode);
+			}
+		}
+
+		if (mbv_verbose >= 2)
+			fprintf(stderr, "%s instance:%zu mode:%d\n", __func__, instance, data->nav_view_mode);
+
+		/* draw */
+		if (mbv_verbose >= 2)
+			fprintf(stderr, "Calling mbview_plotlowhigh from %s\n", __func__);
+		mbview_plotlowhigh(instance);
+		break;
+	}
+	case MBV_VIEWTOGGLE_NAVSWATHBOUNDS: {
+		/* get mode value */
+		if (value) {
+			data->navswathbounds_view_mode = MBV_VIEW_ON;
+		} else {
+			data->navswathbounds_view_mode = MBV_VIEW_OFF;
+		}
+
+		if (mbv_verbose >= 2)
+			fprintf(stderr, "%s instance:%zu mode:%d\n", __func__, instance, data->navswathbounds_view_mode);
+
+		/* draw */
+		if (mbv_verbose >= 2)
+			fprintf(stderr, "Calling mbview_plotlowhigh from %s\n", __func__);
+		mbview_plotlowhigh(instance);
+		break;
+	}
+	case MBV_VIEWTOGGLE_NAVDRAPE: {
+		/* get mode value */
+		if (value) {
+			data->navdrape_view_mode = MBV_VIEW_ON;
+		} else {
+			data->navdrape_view_mode = MBV_VIEW_OFF;
+			if (data->nav_view_mode == MBV_VIEW_OFF && (data->mouse_mode == MBV_MOUSE_NAV || data->mouse_mode == MBV_MOUSE_NAVFILE)) {
+				data->mouse_mode = MBV_MOUSE_MOVE;
+				set_mbview_mouse_mode(instance, data->mouse_mode);
+			}
+		}
+
+		if (mbv_verbose >= 2)
+			fprintf(stderr, "%s instance:%zu mode:%d\n", __func__, instance, data->navdrape_view_mode);
+
+		/* draw */
+		if (mbv_verbose >= 2)
+			fprintf(stderr, "Calling mbview_plotlowhigh from %s\n", __func__);
+		mbview_plotlowhigh(instance);
+		break;
+	}
+	case MBV_VIEWTOGGLE_VECTOR: {
+		/* get mode value */
+		if (value) {
+			data->vector_view_mode = MBV_VIEW_ON;
+		} else {
+			data->vector_view_mode = MBV_VIEW_OFF;
+			if (data->mouse_mode == MBV_MOUSE_VECTOR) {
+				data->mouse_mode = MBV_MOUSE_MOVE;
+				set_mbview_mouse_mode(instance, data->mouse_mode);
+			}
+		}
+
+		if (mbv_verbose >= 2)
+			fprintf(stderr, "%s instance:%zu mode:%d\n", __func__, instance, data->vector_view_mode);
+
+		/* draw */
+		if (mbv_verbose >= 2)
+			fprintf(stderr, "Calling mbview_plotlowhigh from %s\n", __func__);
+		mbview_plotlowhigh(instance);
+		break;
+	}
+	case MBV_VIEWTOGGLE_POLYLINE: {
+		/* get mode value */
+		data->polyline_view_mode = value ? MBV_VIEW_ON : MBV_VIEW_OFF;
+
+		if (mbv_verbose >= 2)
+			fprintf(stderr, "%s instance:%zu mode:%d\n", __func__, instance, data->polyline_view_mode);
+
+		/* draw */
+		mbview_plotlowhigh(instance);
+		break;
+	}
+	case MBV_VIEWTOGGLE_POLYGON: {
+		/* get mode value */
+		data->polygon_view_mode = value ? MBV_VIEW_ON : MBV_VIEW_OFF;
+
+		if (mbv_verbose >= 2)
+			fprintf(stderr, "%s instance:%zu mode:%d\n", __func__, instance, data->polygon_view_mode);
+
+		/* draw */
+		mbview_plotlowhigh(instance);
+		break;
+	}
+	case MBV_VIEWTOGGLE_GISPOINT: {
+		/* get mode value */
+		data->gispoint_view_mode = value ? MBV_VIEW_ON : MBV_VIEW_OFF;
+
+		if (mbv_verbose >= 2)
+			fprintf(stderr, "%s instance:%zu mode:%d\n", __func__, instance, data->gispoint_view_mode);
+
+		/* draw */
+		mbview_plotlowhigh(instance);
+		break;
+	}
+	default:
+		break;
+	}
+
+	return (MB_SUCCESS);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_resetview(size_t instance) {
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+	}
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "%s\n", __func__);
+
+	/* reset the the view to defaults */
+	view->offset2d_x = 0.0;
+	view->offset2d_y = 0.0;
+	view->size2d = 0.0;
+	view->offset3d_x = 0.0;
+	view->offset3d_y = 0.0;
+	view->offset3d_z = 0.0;
+	view->viewoffset3d_z = 0.0;
+	data->exaggeration = 1.0;
+	data->modelelevation3d = 90.0;
+	data->modelazimuth3d = 0.0;
+	data->viewelevation3d = 90.0;
+	data->viewazimuth3d = 0.0;
+	view->size2d = 1.0;
+
+	/* reset dialog widgets */
+	do_mbview_3dparmstext(instance);
+	do_mbview_2dparmstext(instance);
+
+	/* rescale grid */
+	mbview_zscaleclear(instance);
+
+	/* rescale data other than the grid */
+	mbview_zscale(instance);
+
+	/* clear color status array */
+	if (data->display_mode == MBV_DISPLAY_3D) {
+		view->lastdrawrez = MBV_REZ_NONE;
+		mbview_setcolorparms(instance);
+		mbview_colorclear(instance);
+	}
+
+	/* set flag to reset view bounds */
+	view->viewboundscount = MBV_BOUNDSFREQUENCY;
+
+	/* draw */
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "Calling mbview_plotlowhigh from %s\n", __func__);
+	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
+
+	return (MB_SUCCESS);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_fullrender(size_t instance) {
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+	}
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "%s\n", __func__);
+
+	/* replot in full rez if last draw was lower rez */
+	if (view->lastdrawrez != MBV_REZ_FULL) {
+		if (mbv_verbose >= 2)
+			fprintf(stderr, "Calling mbview_plotfull from %s:\n", __func__);
+		mbview_plotfull(instance);
+	}
+
+	return (MB_SUCCESS);
+}
+
+/*------------------------------------------------------------------------------*/
+bool mbview_actionsensitive(size_t instance, int iaction) {
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+		fprintf(stderr, "dbg2       iaction:          %d\n", iaction);
+	}
+
+	/* check if all available instances are active */
+	bool mbview_allactive = true;
+	for (int i = 0; i < MBV_MAX_WINDOWS; i++) {
+		if (!mbviews[i].data.active)
+			mbview_allactive = false;
+	}
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	/* an action is available according to the current pick states */
+	bool sensitive = false;
+	if (view->actionsensitive[iaction] == MBV_PICKMASK_NONE) {
+		sensitive = true;
+	}
+	else if (view->actionsensitive[iaction] & MBV_PICKMASK_ONEPOINT && data->pick_type == MBV_PICK_ONEPOINT) {
+		sensitive = true;
+	}
+	else if (view->actionsensitive[iaction] & MBV_PICKMASK_TWOPOINT && data->pick_type == MBV_PICK_TWOPOINT) {
+		sensitive = true;
+	}
+	else if (view->actionsensitive[iaction] & MBV_PICKMASK_AREA && data->area_type == MBV_AREA_QUAD) {
+		sensitive = true;
+	}
+	else if (view->actionsensitive[iaction] & MBV_PICKMASK_REGION && data->region_type == MBV_REGION_QUAD) {
+		sensitive = true;
+	}
+	else if (view->actionsensitive[iaction] & MBV_PICKMASK_SITE && shared.shareddata.site_selected >= 0) {
+		sensitive = true;
+	}
+	else if (view->actionsensitive[iaction] & MBV_PICKMASK_ROUTE && shared.shareddata.route_selected >= 0) {
+		sensitive = true;
+	}
+	else if (view->actionsensitive[iaction] & MBV_PICKMASK_NAVONEPOINT && shared.shareddata.navpick_type == MBV_PICK_ONEPOINT) {
+		sensitive = true;
+	}
+	else if (view->actionsensitive[iaction] & MBV_PICKMASK_NAVTWOPOINT && shared.shareddata.navpick_type == MBV_PICK_TWOPOINT) {
+		sensitive = true;
+	}
+	else if (view->actionsensitive[iaction] & MBV_PICKMASK_NAVANY) {
+		for (int j = 0; j < shared.shareddata.nnav; j++) {
+			if (shared.shareddata.navs[j].nselected > 0)
+				sensitive = true;
+		}
+	}
+	else if (view->actionsensitive[iaction] & MBV_EXISTMASK_SITE && shared.shareddata.nsite > 0) {
+		sensitive = true;
+	}
+	else if (view->actionsensitive[iaction] & MBV_EXISTMASK_ROUTE && shared.shareddata.nroute > 0) {
+		sensitive = true;
+	}
+	else if (view->actionsensitive[iaction] & MBV_EXISTMASK_POLYLINE && shared.shareddata.npolyline > 0) {
+		sensitive = true;
+	}
+	else if (view->actionsensitive[iaction] & MBV_EXISTMASK_POLYGON && shared.shareddata.npolygon > 0) {
+		sensitive = true;
+	}
+	else if (view->actionsensitive[iaction] & MBV_EXISTMASK_GISPOINT && shared.shareddata.ngispoint > 0) {
+		sensitive = true;
+	}
+	if (view->actionsensitive[iaction] & MBV_STATEMASK_16 && data->state16) {
+		sensitive = true;
+	}
+	if (view->actionsensitive[iaction] & MBV_STATEMASK_17 && data->state17) {
+		sensitive = true;
+	}
+	if (view->actionsensitive[iaction] & MBV_STATEMASK_18 && data->state18) {
+		sensitive = true;
+	}
+	if (view->actionsensitive[iaction] & MBV_STATEMASK_19 && data->state19) {
+		sensitive = true;
+	}
+	if (view->actionsensitive[iaction] & MBV_STATEMASK_20 && data->state20) {
+		sensitive = true;
+	}
+	if (view->actionsensitive[iaction] & MBV_STATEMASK_21 && data->state21) {
+		sensitive = true;
+	}
+	if (view->actionsensitive[iaction] & MBV_STATEMASK_22 && data->state22) {
+		sensitive = true;
+	}
+	if (view->actionsensitive[iaction] & MBV_STATEMASK_23 && data->state23) {
+		sensitive = true;
+	}
+	if (view->actionsensitive[iaction] & MBV_STATEMASK_24 && data->state24) {
+		sensitive = true;
+	}
+	if (view->actionsensitive[iaction] & MBV_STATEMASK_25 && data->state25) {
+		sensitive = true;
+	}
+	if (view->actionsensitive[iaction] & MBV_STATEMASK_26 && data->state26) {
+		sensitive = true;
+	}
+	if (view->actionsensitive[iaction] & MBV_STATEMASK_27 && data->state27) {
+		sensitive = true;
+	}
+	if (view->actionsensitive[iaction] & MBV_STATEMASK_28 && data->state28) {
+		sensitive = true;
+	}
+	if (view->actionsensitive[iaction] & MBV_STATEMASK_29 && data->state29) {
+		sensitive = true;
+	}
+	if (view->actionsensitive[iaction] & MBV_STATEMASK_30 && data->state30) {
+		sensitive = true;
+	}
+	if (view->actionsensitive[iaction] & MBV_STATEMASK_31 && data->state31) {
+		sensitive = true;
+	}
+
+	/* actions that open a new window need a free window */
+	if (view->actionsensitive[iaction] & MBV_PICKMASK_NEWINSTANCE && mbview_allactive) {
+		sensitive = false;
+	}
+
+	return (sensitive);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_destroy(int verbose, size_t instance, bool destroywidgets, int *error) {
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       instance:        %zu\n", instance);
+		fprintf(stderr, "dbg2       destroywidgets:  %d\n", destroywidgets);
+	}
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	int status = MB_SUCCESS;
+
+	/* handle destruction if not already handled */
+	if (data->active) {
+		/* destroy the widgets */
+		if (destroywidgets) {
+			/* delete old glx_context if it exists */
+			if (view->prglx_init) {
+/* make correct window current for OpenGL */
+#ifdef MBV_DEBUG_GLX
+				fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, __func__, instance,
+				        view->dpy, XtWindow(view->prglwmda), view->prglx_context);
+#endif
+				//glXMakeCurrent(view->dpy, XtWindow(view->prglwmda), view->prglx_context);
+
+#ifdef MBV_GET_GLX_ERRORS
+				mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
+#endif
+
+#ifdef MBV_DEBUG_GLX
+				fprintf(stderr, "%s:%d:%s instance:%zu glXDestroyContext(%p,%p)\n", __FILE__, __LINE__, __func__, instance,
+				        view->dpy, view->prglx_context);
+#endif
+				mbv_render_context_destroy(MBV_RENDER_PROFILE, instance);
+				view->prglx_init = false;
+
+#ifdef MBV_GET_GLX_ERRORS
+				mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
+#endif
+			}
+
+			/* delete old glx_context if it exists */
+			if (view->glx_init) {
+/* make correct window current for OpenGL */
+#ifdef MBV_DEBUG_GLX
+				fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, __func__, instance,
+				        XtDisplay(view->glwmda), XtWindow(view->glwmda), view->glx_context);
+#endif
+				//glXMakeCurrent(XtDisplay(view->glwmda), XtWindow(view->glwmda), view->glx_context);
+
+#ifdef MBV_GET_GLX_ERRORS
+				mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
+#endif
+
+#ifdef MBV_DEBUG_GLX
+				fprintf(stderr, "%s:%d:%s instance:%zu glXDestroyContext(%p,%p)\n", __FILE__, __LINE__, __func__, instance,
+				        view->dpy, view->glx_context);
+#endif
+				mbv_render_context_destroy(MBV_RENDER_MAP, instance);
+				view->glx_init = false;
+
+#ifdef MBV_GET_GLX_ERRORS
+				mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
+#endif
+			}
+
+/* destroy the topLevelShell and all its children */
+#ifdef MBV_DEBUG_GLX
+			fprintf(stderr, "%s:%d:%s instance:%zu XtDestroyWidget(%p)\n", __FILE__, __LINE__, __func__, instance,
+			        view->topLevelShell);
+#endif
+			mbv_ui_destroy_window(instance);
+
+#ifdef MBV_GET_GLX_ERRORS
+			mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
+#endif
+		}
+
+		data->active = false;
+		view->init = MBV_WINDOW_NULL;
+		mbv_ninstance--;
+
+		/* deallocate memory */
+		if (status == MB_SUCCESS && data->primary_data != NULL)
+			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_data, error);
+		if (status == MB_SUCCESS && data->primary_x != NULL)
+			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_x, error);
+		if (status == MB_SUCCESS && data->primary_y != NULL)
+			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_y, error);
+		if (status == MB_SUCCESS && data->primary_z != NULL)
+			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_z, error);
+		if (status == MB_SUCCESS && data->primary_dzdx != NULL)
+			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_dzdx, error);
+		if (status == MB_SUCCESS && data->primary_dzdy != NULL)
+			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_dzdy, error);
+		if (status == MB_SUCCESS && data->primary_r != NULL)
+			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_r, error);
+		if (status == MB_SUCCESS && data->primary_g != NULL)
+			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_g, error);
+		if (status == MB_SUCCESS && data->primary_b != NULL)
+			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_b, error);
+		if (status == MB_SUCCESS && data->primary_stat_color != NULL)
+			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_stat_color, error);
+		if (status == MB_SUCCESS && data->primary_stat_z != NULL)
+			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_stat_z, error);
+		if (status == MB_SUCCESS && data->secondary_data != NULL)
+			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->secondary_data, error);
+		if (status == MB_SUCCESS && data->pick.segment.nls_alloc != 0 && data->pick.segment.lspoints != NULL) {
+			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->pick.segment.lspoints, error);
+			data->pick.segment.nls_alloc = 0;
+		}
+		for (int i = 0; i < 4; i++) {
+			if (status == MB_SUCCESS && data->pick.xsegments[i].nls_alloc != 0 && data->pick.xsegments[i].lspoints != NULL) {
+				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->pick.xsegments[i].lspoints, error);
+				data->pick.xsegments[i].nls_alloc = 0;
+			}
+		}
+		if (status == MB_SUCCESS && data->area.segment.nls_alloc != 0 && data->area.segment.lspoints != NULL) {
+			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->area.segment.lspoints, error);
+			data->area.segment.nls_alloc = 0;
+		}
+		for (int i = 0; i < 4; i++) {
+			if (status == MB_SUCCESS && data->area.segments[i].nls_alloc != 0 && data->area.segments[i].lspoints != NULL) {
+				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->area.segments[i].lspoints, error);
+				data->area.segments[i].nls_alloc = 0;
+			}
+		}
+		for (int i = 0; i < 4; i++) {
+			if (status == MB_SUCCESS && data->region.segments[i].nls_alloc != 0 && data->region.segments[i].lspoints != NULL) {
+				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->region.segments[i].lspoints, error);
+				data->region.segments[i].nls_alloc = 0;
+			}
+		}
+		if (data->profile.npoints_alloc > 0) {
+			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->profile.points, error);
+			data->profile.npoints_alloc = 0;
+		}
+
+		/* deallocate shared data if no more active instances */
+		if (mbv_ninstance <= 0) {
+			shared.init_sitelist = MBV_WINDOW_NULL;
+			shared.init_routelist = MBV_WINDOW_NULL;
+			shared.init_navlist = MBV_WINDOW_NULL;
+			mbv_ui_close_lists();
+
+			if (status == MB_SUCCESS && shared.shareddata.navpick.segment.nls_alloc != 0 &&
+			    shared.shareddata.navpick.segment.lspoints != NULL) {
+				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&shared.shareddata.navpick.segment.lspoints, error);
+				shared.shareddata.navpick.segment.nls_alloc = 0;
+			}
+			for (int i = 0; i < 4; i++) {
+				if (status == MB_SUCCESS && shared.shareddata.navpick.xsegments[i].lspoints != 0 &&
+				    shared.shareddata.navpick.xsegments[i].lspoints != NULL)
+					status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&shared.shareddata.navpick.xsegments[i].lspoints,
+					                  error);
+			}
+			if (status == MB_SUCCESS && shared.shareddata.nsite_alloc != 0 && shared.shareddata.sites != NULL) {
+				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.sites), error);
+				shared.shareddata.nsite_alloc = 0;
+				shared.shareddata.sites = NULL;
+			}
+			if (status == MB_SUCCESS && shared.shareddata.nroute_alloc != 0 && shared.shareddata.routes != NULL) {
+				for (int i = 0; i < shared.shareddata.nroute_alloc; i++) {
+					for (int j = 0; j < shared.shareddata.routes[i].npoints_alloc; j++) {
+						if (shared.shareddata.routes[i].segments[j].nls_alloc != 0 &&
+						    shared.shareddata.routes[i].segments[j].lspoints != NULL) {
+							status = mb_freed(mbv_verbose, __FILE__, __LINE__,
+							                  (void **)&shared.shareddata.routes[i].segments[j].lspoints, error);
+							shared.shareddata.routes[i].segments[j].nls_alloc = 0;
+						}
+					}
+					status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.routes[i].waypoint), error);
+					status =
+					    mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.routes[i].distlateral), error);
+					status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.routes[i].disttopo), error);
+					status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.routes[i].points), error);
+					status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.routes[i].segments), error);
+				}
+				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.routes), error);
+				shared.shareddata.nroute_alloc = 0;
+				shared.shareddata.routes = NULL;
+			}
+			if (status == MB_SUCCESS && shared.shareddata.nnav_alloc != 0 && shared.shareddata.navs != NULL) {
+				for (int i = 0; i < shared.shareddata.nnav_alloc; i++) {
+					if (shared.shareddata.navs[i].segments != NULL) {
+						for (int j = 0; j < shared.shareddata.navs[i].npoints_alloc; j++) {
+							if (shared.shareddata.navs[i].segments[j].lspoints != NULL)
+								mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.navs[i].segments[j].lspoints),
+								         error);
+						}
+						mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.navs[i].segments), error);
+					}
+					if (shared.shareddata.navs[i].navpts != NULL)
+						mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.navs[i].navpts), error);
+				}
+				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.navs), error);
+				shared.shareddata.nnav_alloc = 0;
+				shared.shareddata.navs = NULL;
+			}
+			if (status == MB_SUCCESS && shared.shareddata.nvector_alloc != 0 && shared.shareddata.vectors != NULL) {
+				for (int i = 0; i < shared.shareddata.nvector_alloc; i++) {
+					if (shared.shareddata.vectors[i].segments != NULL) {
+						for (int j = 0; j < shared.shareddata.vectors[i].npoints_alloc; j++) {
+							if (shared.shareddata.vectors[i].segments[j].lspoints != NULL)
+								mb_freed(mbv_verbose, __FILE__, __LINE__,
+								         (void **)&(shared.shareddata.vectors[i].segments[j].lspoints), error);
+						}
+						mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.vectors[i].segments), error);
+					}
+					if (shared.shareddata.vectors[i].vectorpts != NULL)
+						mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.vectors[i].vectorpts), error);
+				}
+				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.vectors), error);
+				shared.shareddata.nvector = 0;
+				shared.shareddata.nvector_alloc = 0;
+				shared.shareddata.vectors = NULL;
+			}
+			if (status == MB_SUCCESS && shared.shareddata.polylines != NULL) {
+				status = mbview_deleteallpolylines(mbv_verbose, instance, error);
+				mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.polylines), error);
+				shared.shareddata.npolyline_alloc = 0;
+			}
+			if (status == MB_SUCCESS && shared.shareddata.polygons != NULL) {
+				status = mbview_deleteallpolygons(mbv_verbose, instance, error);
+				mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.polygons), error);
+				shared.shareddata.npolygon_alloc = 0;
+			}
+			if (status == MB_SUCCESS && shared.shareddata.gispoints != NULL) {
+				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.gispoints), error);
+				shared.shareddata.ngispoint = 0;
+				shared.shareddata.ngispoint_alloc = 0;
+			}
+			if (status == MB_SUCCESS && shared.shareddata.gislayers != NULL) {
+				status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.gislayers), error);
+				shared.shareddata.ngislayer = 0;
+				shared.shareddata.ngislayer_alloc = 0;
+			}
+		}
+
+		if (status != MB_SUCCESS) {
+			fprintf(stderr, "\nUnable to free memory\n");
+			fprintf(stderr, "\nProgram terminated in function <%s>\n", __func__);
+			exit(0);
+		}
+
+		/* if no more active instances reset shared data */
+		if (mbv_ninstance <= 0)
+			mbview_reset_shared(false);
+
+		/* initialize view for next use */
+		mbview_reset(instance);
+
+		/* reset action button sensitivity for all instances */
+		mbview_action_sensitivityall();
+
+		/* let the calling program know */
+		(data->mbview_dismiss_notify)(instance);
+	}
+
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:        %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
