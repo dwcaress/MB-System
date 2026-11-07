@@ -1,0 +1,155 @@
+/*--------------------------------------------------------------------
+ *    The MB-system:  mbvq_ui.cc  11/7/2026
+ *
+ *    Copyright (c) 2026 by
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *
+ *    MB-System was created by Caress and Chayes in 1992 at the
+ *      Lamont-Doherty Earth Observatory
+ *      Columbia University
+ *      Palisades, NY 10964
+ *
+ *    See README.md file for copying and redistribution conditions.
+ *--------------------------------------------------------------------*/
+/*
+ * The Qt half of the user interface functions (mbvq_bridge.h) and the
+ * public functions of mbvq.h.
+ */
+
+#include <QApplication>
+#include <QRegularExpression>
+#include <QString>
+#include <QTimer>
+
+#include "mbvq.h"
+#include "mbvq_backend.h"
+#include "mbvq_bridge.h"
+#include "mbvq_window.h"
+
+namespace mbvq {
+
+namespace {
+
+Backend current_backend = Backend::LegacyGL;
+bool backend_installed = false;
+MapWindow *windows[MBVQ_MAX_WINDOWS] = {};
+
+void install_backend() {
+  if (backend_installed)
+    return;
+  if (current_backend == Backend::LegacyGL)
+    gl_backend::install();
+  else
+    null_backend::install();
+  backend_installed = true;
+}
+
+MapWindow *window_of(size_t instance) { return instance < MBVQ_MAX_WINDOWS ? windows[instance] : nullptr; }
+
+}  // namespace
+
+void set_backend(Backend backend) {
+  current_backend = backend;
+  backend_installed = false;
+  if (backend == Backend::LegacyGL)
+    gl_backend::configure();
+  install_backend();
+}
+
+Backend backend() { return current_backend; }
+
+QWidget *window(size_t instance) { return window_of(instance); }
+
+QWidget *map_view(size_t instance) {
+  MapWindow *window = window_of(instance);
+  return window != nullptr ? window->map_view() : nullptr;
+}
+
+QString label_text(const char *bxstring) {
+  /* the quoted parts are the lines; font tags and separators are dropped */
+  QStringList lines;
+  static const QRegularExpression quoted(QStringLiteral("\"([^\"]*)\""));
+  auto match = quoted.globalMatch(QString::fromLocal8Bit(bxstring));
+  while (match.hasNext())
+    lines << match.next().captured(1);
+  return lines.join(QLatin1Char('\n'));
+}
+
+}  // namespace mbvq
+
+using mbvq::window_of;
+
+extern "C" {
+
+bool mbvq_qt_drawable(void) {
+  mbvq::install_backend();
+  return mbvq::current_backend == mbvq::Backend::LegacyGL;
+}
+
+void mbvq_qt_open_window(size_t instance) {
+  if (instance >= MBVQ_MAX_WINDOWS)
+    return;
+  mbvq::install_backend();
+  if (mbvq::windows[instance] == nullptr)
+    mbvq::windows[instance] = new mbvq::MapWindow(instance);
+  mbvq::windows[instance]->refresh_modes();
+  mbvq::windows[instance]->show();
+}
+
+void mbvq_qt_close_window(size_t instance) {
+  if (instance >= MBVQ_MAX_WINDOWS || mbvq::windows[instance] == nullptr)
+    return;
+  delete mbvq::windows[instance];
+  mbvq::windows[instance] = nullptr;
+}
+
+void mbvq_qt_status(size_t instance, const char *message) {
+  if (mbvq::MapWindow *window = window_of(instance))
+    window->set_status(QString::fromLocal8Bit(message));
+}
+
+void mbvq_qt_label(size_t instance, int label, const char *bxstring) {
+  if (mbvq::MapWindow *window = window_of(instance))
+    window->set_label(label, mbvq::label_text(bxstring));
+}
+
+void mbvq_qt_modes_changed(size_t instance) {
+  if (mbvq::MapWindow *window = window_of(instance))
+    window->refresh_modes();
+}
+
+void mbvq_qt_sensitivity_changed(size_t instance) {
+  if (mbvq::MapWindow *window = window_of(instance))
+    window->refresh_modes();
+}
+
+void mbvq_qt_lists_changed(void) {}
+
+void mbvq_qt_bell(void) { QApplication::beep(); }
+
+void mbvq_qt_cursor(size_t instance, int cursor) {
+  if (mbvq::MapWindow *window = window_of(instance))
+    window->set_map_cursor(cursor);
+}
+
+void mbvq_qt_values_changed(size_t instance, int values) {
+  /* shown in the view parameter dialogs (step 3b) */
+  (void)instance;
+  (void)values;
+}
+
+void mbvq_qt_schedule_work(size_t instance, int delay_ms) {
+  QTimer::singleShot(delay_ms, qApp, [instance] { mbvq_c_work(instance); });
+}
+
+}  // extern "C"
