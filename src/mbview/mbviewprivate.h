@@ -124,6 +124,11 @@ struct mbview_listrows {
 	int selected; /* list position (1 for the first row) to select and show, 0 for none */
 };
 
+/* profile controls (mbview_setprofilecontrol) */
+#define MBV_PROFILE_CONTROL_WIDTH 0        /* width multiple, 1 to 5 */
+#define MBV_PROFILE_CONTROL_SLOPE 1        /* slope threshold in hundredths */
+#define MBV_PROFILE_CONTROL_EXAGGERATION 2 /* vertical exaggeration in tenths */
+
 /* view toggles of the View menu (mbview_setviewtoggle) */
 #define MBV_VIEWTOGGLE_CONTOUR 0
 #define MBV_VIEWTOGGLE_SITE 1
@@ -515,6 +520,7 @@ int mbview_2dparmsapply(size_t instance, const struct mbview_2dparms_values *val
 int mbview_setresolution(size_t instance, int lorez_dimension, int hirez_dimension, int lorez_navdecimate, int hirez_navdecimate);
 int mbview_setdisplayprojection(size_t instance, int projection);
 int mbview_setlonlatstyle(size_t instance, int style);
+int mbview_setprofilecontrol(size_t instance, int control, int value);
 int mbview_listrows_add(struct mbview_listrows *rows, const char *text);
 void mbview_listrows_free(struct mbview_listrows *rows);
 int mbview_sitelist_rows(struct mbview_listrows *rows);

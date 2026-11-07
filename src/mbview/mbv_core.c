@@ -4546,3 +4546,42 @@ void do_mbview_set_projection_label(size_t instance) {
 	}
 	set_mbview_label_multiline_string(view->mb3dview.mbview_label_projection, value_text);
 }
+
+/*------------------------------------------------------------------------------*/
+/* a profile control (MBV_PROFILE_CONTROL_*) with the value of its slider, as
+    do_mbview_profile_width, do_mbview_profile_slope and do_mbview_profile_exagger
+    set it; the caller sizes and draws the profile again */
+int mbview_setprofilecontrol(size_t instance, int control, int value) {
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+		fprintf(stderr, "dbg2       control:          %d\n", control);
+		fprintf(stderr, "dbg2       value:            %d\n", value);
+	}
+
+	struct mbview_struct *data = &(mbviews[instance].data);
+
+	switch (control) {
+	case MBV_PROFILE_CONTROL_WIDTH: {
+		const int profile_widthfactor = value;
+		data->profile_widthfactor = profile_widthfactor;
+		break;
+	}
+	case MBV_PROFILE_CONTROL_SLOPE: {
+		const int profile_slopethreshold = value;
+		data->profile_slopethreshold = 0.01 * profile_slopethreshold;
+		break;
+	}
+	case MBV_PROFILE_CONTROL_EXAGGERATION: {
+		const int profile_exagger = value;
+		data->profile_exaggeration = 0.1 * profile_exagger;
+		break;
+	}
+	default:
+		break;
+	}
+
+	return (MB_SUCCESS);
+}

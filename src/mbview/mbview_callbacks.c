@@ -3616,11 +3616,8 @@ void do_mbview_profile_exagger(Widget w, XtPointer client_data, XtPointer call_d
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_profile_exagger: instance:%zu\n", instance);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
 
-	const int profile_exagger = acs->value;
-	data->profile_exaggeration = 0.1 * profile_exagger;
+	mbview_setprofilecontrol(instance, MBV_PROFILE_CONTROL_EXAGGERATION, acs->value);
 
 	/* reinitialize the opengl widget */
 	mbview_reset_prglx(instance);
@@ -3644,11 +3641,8 @@ void do_mbview_profile_width(Widget w, XtPointer client_data, XtPointer call_dat
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_profile_width: instance:%zu\n", instance);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
 
-	const int profile_widthfactor = acs->value;
-	data->profile_widthfactor = profile_widthfactor;
+	mbview_setprofilecontrol(instance, MBV_PROFILE_CONTROL_WIDTH, acs->value);
 
 	/* reinitialize the opengl widget */
 	mbview_reset_prglx(instance);
@@ -3672,11 +3666,8 @@ void do_mbview_profile_slope(Widget w, XtPointer client_data, XtPointer call_dat
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "do_mbview_profile_slope: instance:%zu\n", instance);
 
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
 
-	const int profile_slopethreshold = acs->value;
-	data->profile_slopethreshold = 0.01 * profile_slopethreshold;
+	mbview_setprofilecontrol(instance, MBV_PROFILE_CONTROL_SLOPE, acs->value);
 
 	/* reinitialize the opengl widget */
 	mbview_reset_prglx(instance);
