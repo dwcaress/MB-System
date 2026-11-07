@@ -46,6 +46,8 @@ libmbview_la_SOURCES += Mb3dsdg.c
 libmbview_la_SOURCES += mb3dsoundings_callbacks.c
 libmbview_la_SOURCES += MBpedit.c
 libmbview_la_SOURCES += mbpingedit_callbacks.c
+libmbview_la_SOURCES += mbv_render.c
+libmbview_la_SOURCES += mbv_render_glx.c
 
 libmbview_la_LIBADD =
 libmbview_la_LIBADD += ${top_builddir}/src/bsio/libmbbsio.la

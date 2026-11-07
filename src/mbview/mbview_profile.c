@@ -79,6 +79,7 @@
 /* mbview include */
 #include "mbview.h"
 #include "mbviewprivate.h"
+#include "mbv_render.h"
 
 //#define MBV_DEBUG_GLX 1
 //#define MBV_GET_GLX_ERRORS 1
@@ -420,7 +421,7 @@ int mbview_reset_prglx(size_t instance) {
 #ifdef MBV_DEBUG_GLX
 			fprintf(stderr, "%s:%d:%s instance:%zu glXDestroyContext(%p,%p)\n", __FILE__, __LINE__, __func__, instance, view->dpy, view->prglx_context);
 #endif
-			glXDestroyContext(view->dpy, view->prglx_context);
+			mbv_render_context_destroy(MBV_RENDER_PROFILE, instance);
 #ifdef MBV_GET_GLX_ERRORS
 			mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
 #endif
@@ -450,20 +451,12 @@ int mbview_reset_prglx(size_t instance) {
 		XtSetValues(view->prglwmda, args, ac);
 
 		/* set up a new opengl context */
-		ac = 0;
-		XtSetArg(args[ac], mbGLwNvisualInfo, &(view->prvi));
-		ac++;
-		XtGetValues(view->prglwmda, args, ac);
-#ifdef MBV_DEBUG_GLX
-		fprintf(stderr, "%s:%d:%s instance:%zu glXCreateContext(%p,%p)\n", __FILE__, __LINE__, __func__, instance, view->dpy,
-		        view->prvi);
-#endif
-		view->prglx_context = glXCreateContext(view->dpy, view->prvi, NULL, GL_TRUE);
+		mbv_render_context_create(MBV_RENDER_PROFILE, instance);
 #ifdef MBV_DEBUG_GLX
 		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%p,%p)\n", __FILE__, __LINE__, __func__, instance,
 		        view->dpy, XtWindow(view->prglwmda), view->prglx_context);
 #endif
-		glXMakeCurrent(view->dpy, XtWindow(view->prglwmda), view->prglx_context);
+		mbv_render_make_current(MBV_RENDER_PROFILE, instance);
 
 #ifdef MBV_GET_GLX_ERRORS
 		mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
@@ -512,7 +505,7 @@ int mbview_destroy_prglx(size_t instance) {
 	if (data->profile_view_mode == MBV_VIEW_ON) {
 		/* delete old glx_context if it exists */
 		if (view->prglx_init) {
-			glXDestroyContext(view->dpy, view->prglx_context);
+			mbv_render_context_destroy(MBV_RENDER_PROFILE, instance);
 			view->prglx_init = false;
 		}
 	}
@@ -559,8 +552,8 @@ int mbview_plotprofile(size_t instance) {
 	view = &(mbviews[instance]);
 	data = &(view->data);
 
-	/* If there is a profile plot it */
-	if (data->profile_view_mode == MBV_VIEW_ON) {
+	/* If there is a profile plot it, unless the renderer draws later by itself */
+	if (data->profile_view_mode == MBV_VIEW_ON && !mbv_render_defer_draw(MBV_RENDER_PROFILE, instance, 0)) {
 
 		/* get scaling */
 		scale = MBV_OPENGL_WIDTH / data->profile.length;
@@ -580,7 +573,7 @@ int mbview_plotprofile(size_t instance) {
 		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%p,%p)\n", __FILE__, __LINE__, __func__, instance,
 		        view->dpy, XtWindow(view->prglwmda), view->prglx_context);
 #endif
-		glXMakeCurrent(view->dpy, XtWindow(view->prglwmda), view->prglx_context);
+		mbv_render_make_current(MBV_RENDER_PROFILE, instance);
 
 #ifdef MBV_GET_GLX_ERRORS
 		mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
@@ -678,7 +671,7 @@ int mbview_plotprofile(size_t instance) {
 #endif
 
 		/* swap opengl buffers */
-		glXSwapBuffers(XtDisplay(view->prglwmda), XtWindow(view->prglwmda));
+		mbv_render_present(MBV_RENDER_PROFILE, instance);
 #ifdef MBV_GETERRORS
 		mbview_glerrorcheck(instance, 3, __func__);
 #endif

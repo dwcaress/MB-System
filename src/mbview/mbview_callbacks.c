@@ -89,6 +89,7 @@
 
 #include "mbview.h"
 #include "mbviewprivate.h"
+#include "mbv_render.h"
 
 //#define MBV_DEBUG_GLX 1
 //#define MBV_GET_GLX_ERRORS 1
@@ -124,6 +125,9 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error) {
 
 	/* set starting number of windows */
 	mbv_ninstance = 0;
+
+	/* draw with GLX */
+	mbv_render_use_glx();
 
 	/* initialize shared data */
 	mbview_reset_shared(true);
@@ -4816,7 +4820,7 @@ int mbview_destroy(int verbose, size_t instance, bool destroywidgets, int *error
 				fprintf(stderr, "%s:%d:%s instance:%zu glXDestroyContext(%p,%p)\n", __FILE__, __LINE__, __func__, instance,
 				        view->dpy, view->prglx_context);
 #endif
-				glXDestroyContext(view->dpy, view->prglx_context);
+				mbv_render_context_destroy(MBV_RENDER_PROFILE, instance);
 				view->prglx_init = false;
 
 #ifdef MBV_GET_GLX_ERRORS
@@ -4841,7 +4845,7 @@ int mbview_destroy(int verbose, size_t instance, bool destroywidgets, int *error
 				fprintf(stderr, "%s:%d:%s instance:%zu glXDestroyContext(%p,%p)\n", __FILE__, __LINE__, __func__, instance,
 				        view->dpy, view->glx_context);
 #endif
-				glXDestroyContext(view->dpy, view->glx_context);
+				mbv_render_context_destroy(MBV_RENDER_MAP, instance);
 				view->glx_init = false;
 
 #ifdef MBV_GET_GLX_ERRORS

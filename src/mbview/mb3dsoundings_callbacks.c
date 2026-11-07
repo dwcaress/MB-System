@@ -73,6 +73,7 @@
 #include "mb3dsoundingsprivate.h"
 #include "mbview.h"
 #include "mbviewprivate.h"
+#include "mbv_render.h"
 
 //#define MBV_DEBUG_GLX 1
 //#define MBV_GET_GLX_ERRORS 1
@@ -99,6 +100,9 @@ int mb3dsoundings_startup(int verbose, Widget parent, XtAppContext app, int *err
     fprintf(stderr, "dbg2       parent:                  %p\n", parent);
     fprintf(stderr, "dbg2       app:                     %p\n", app);
   }
+
+  /* draw with GLX */
+  mbv_render_use_glx();
 
   /* set parent widget and app context */
   mbs_parent_widget = parent;
@@ -482,7 +486,7 @@ int mb3dsoundings_end(int verbose, int *error) {
   if (mb3dsoundings.init != MBS_WINDOW_NULL) {
     /* delete old glx_context if it exists */
     if (mb3dsoundings.glx_init) {
-      glXDestroyContext(mb3dsoundings.dpy, mb3dsoundings.glx_context);
+      mbv_render_context_destroy(MBV_RENDER_SOUNDINGS, 0);
       XtDestroyWidget(mb3dsoundings.glwmda);
       mb3dsoundings.glx_init = false;
     }
@@ -1021,6 +1025,27 @@ int mb3dsoundings_open(int verbose, struct mb3dsoundings_struct *soundingdata, i
   return (mbs_status);
 }
 /*------------------------------------------------------------------------------*/
+/* GLX calls of the soundings view, used by the GLX renderer (mbv_render_glx.c) */
+void mb3dsoundings_glx_context_create(void) {
+  ac = 0;
+  XtSetArg(args[ac], mbGLwNvisualInfo, &(mb3dsoundings.vi));
+  ac++;
+  XtGetValues(mb3dsoundings.glwmda, args, ac);
+#ifdef MBV_DEBUG_GLX
+  fprintf(stderr, "%s:%d:%s glXCreateContext(%p,%p)\n", __FILE__, __LINE__, __func__, mb3dsoundings.dpy, mb3dsoundings.vi);
+#endif
+  mb3dsoundings.glx_context = glXCreateContext(mb3dsoundings.dpy, mb3dsoundings.vi, NULL, GL_TRUE);
+}
+void mb3dsoundings_glx_context_destroy(void) {
+  glXDestroyContext(mb3dsoundings.dpy, mb3dsoundings.glx_context);
+}
+void mb3dsoundings_glx_make_current(void) {
+  glXMakeCurrent(XtDisplay(mb3dsoundings.glwmda), XtWindow(mb3dsoundings.glwmda), mb3dsoundings.glx_context);
+}
+void mb3dsoundings_glx_present(void) {
+  glXSwapBuffers(XtDisplay(mb3dsoundings.glwmda), XtWindow(mb3dsoundings.glwmda));
+}
+/*------------------------------------------------------------------------------*/
 int mb3dsoundings_reset_glx() {
   if (mbs_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1034,7 +1059,7 @@ int mb3dsoundings_reset_glx() {
 #ifdef MBV_DEBUG_GLX
   fprintf(stderr, "%s:%d:%s glXDestroyContext(%p,%p)\n", __FILE__, __LINE__, __func__, mb3dsoundings.dpy, mb3dsoundings.glx_context);
 #endif
-    glXDestroyContext(mb3dsoundings.dpy, mb3dsoundings.glx_context);
+    mbv_render_context_destroy(MBV_RENDER_SOUNDINGS, 0);
 #ifdef MBV_DEBUG_GLX
   fprintf(stderr, "%s:%d:%s XtDestroyWidget(%p)\n", __FILE__, __LINE__, __func__, mb3dsoundings.glwmda);
 #endif
@@ -1073,19 +1098,12 @@ int mb3dsoundings_reset_glx() {
   XtAddCallback(mb3dsoundings.glwmda, "inputCallback", &(do_mb3dsdg_glwda_input), (XtPointer)NULL);
 
   /* set up a new opengl context */
-  ac = 0;
-  XtSetArg(args[ac], mbGLwNvisualInfo, &(mb3dsoundings.vi));
-  ac++;
-  XtGetValues(mb3dsoundings.glwmda, args, ac);
-#ifdef MBV_DEBUG_GLX
-  fprintf(stderr, "%s:%d:%s glXCreateContext(%p,%p)\n", __FILE__, __LINE__, __func__, mb3dsoundings.dpy, mb3dsoundings.vi);
-#endif
-  mb3dsoundings.glx_context = glXCreateContext(mb3dsoundings.dpy, mb3dsoundings.vi, NULL, GL_TRUE);
+  mbv_render_context_create(MBV_RENDER_SOUNDINGS, 0);
 #ifdef MBV_DEBUG_GLX
   fprintf(stderr, "%s:%d:%s glXMakeCurrent(%p,%p,%p)\n", __FILE__, __LINE__, __func__, XtDisplay(mb3dsoundings.glwmda),
           XtWindow(mb3dsoundings.glwmda), mb3dsoundings.glx_context);
 #endif
-  glXMakeCurrent(XtDisplay(mb3dsoundings.glwmda), XtWindow(mb3dsoundings.glwmda), mb3dsoundings.glx_context);
+  mbv_render_make_current(MBV_RENDER_SOUNDINGS, 0);
 #ifdef MBV_GET_GLX_ERRORS
   mbview_glerrorcheck(0, __FILE__, __LINE__, __func__);
 #endif
@@ -2470,6 +2488,10 @@ int mb3dsoundings_plot(int verbose, int *error) {
     fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
   }
 
+  /* the renderer may draw later by itself */
+  if (mbv_render_defer_draw(MBV_RENDER_SOUNDINGS, 0, 0))
+    return (mbs_status);
+
   /* get sounding data structure */
   struct mb3dsoundings_struct *soundingdata =
     (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
@@ -2481,7 +2503,7 @@ soundingdata->num_soundings); */
   fprintf(stderr, "%s:%d:%s glXMakeCurrent(%p,%p,%p)\n", __FILE__, __LINE__, __func__, XtDisplay(mb3dsoundings.glwmda),
           XtWindow(mb3dsoundings.glwmda), mb3dsoundings.glx_context);
 #endif
-  glXMakeCurrent(XtDisplay(mb3dsoundings.glwmda), XtWindow(mb3dsoundings.glwmda), mb3dsoundings.glx_context);
+  mbv_render_make_current(MBV_RENDER_SOUNDINGS, 0);
 
 #ifdef MBV_GET_GLX_ERRORS
   mbview_glerrorcheck(0, __FILE__, __LINE__, __func__);
@@ -2893,7 +2915,7 @@ soundingdata->num_soundings); */
   glFlush();
 
   /* swap opengl buffers */
-  glXSwapBuffers(XtDisplay(mb3dsoundings.glwmda), XtWindow(mb3dsoundings.glwmda));
+  mbv_render_present(MBV_RENDER_SOUNDINGS, 0);
 
 #ifdef MBV_GET_GLX_ERRORS
   mbview_glerrorcheck(0, __FILE__, __LINE__, __func__);

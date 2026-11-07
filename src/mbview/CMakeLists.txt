@@ -55,7 +55,9 @@ add_library(
   mbview_polyline.c
   mbview_polygon.c
   mbview_gispoint.c
-  mbview_gislist.c)
+  mbview_gislist.c
+  mbv_render.c
+  mbv_render_glx.c)
 
 set_target_properties(mbview PROPERTIES VERSION "0" SOVERSION "0")
 target_include_directories(mbview PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
