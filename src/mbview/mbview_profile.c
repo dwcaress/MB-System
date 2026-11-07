@@ -97,8 +97,6 @@ extern struct mbview_world_struct mbviews[MBV_MAX_WINDOWS];
 extern char *mbsystem_library_name;
 
 /* local variables */
-static Cardinal ac = 0;
-static Arg args[256];
 static char value_text[2*MB_PATH_MAXLINE];
 
 
@@ -395,94 +393,6 @@ int mbview_getprofile(int verbose, size_t instance, mb_path source_name, double 
 	return (status);
 }
 
-/*------------------------------------------------------------------------------*/
-int mbview_reset_prglx(size_t instance) {
-	/* local variables */
-	int status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	Dimension scrolledWindow_width;
-	Dimension scrolledWindow_height;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
-	}
-
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-	/* If profile view enabled update opengl plotting widget */
-	if (data->profile_view_mode == MBV_VIEW_ON) {
-		/* delete old glx_context if it exists */
-		if (view->prglx_init) {
-#ifdef MBV_DEBUG_GLX
-			fprintf(stderr, "%s:%d:%s instance:%zu glXDestroyContext(%p,%p)\n", __FILE__, __LINE__, __func__, instance, view->dpy, view->prglx_context);
-#endif
-			mbv_render_context_destroy(MBV_RENDER_PROFILE, instance);
-#ifdef MBV_GET_GLX_ERRORS
-			mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
-#endif
-			view->prglx_init = false;
-		}
-
-		/* get and set sizes of the drawingArea */
-		XtVaGetValues(view->mb3dview.mbview_scrolledWindow_profile, XmNwidth, &scrolledWindow_width, XmNheight,
-		              &scrolledWindow_height, NULL);
-		data->prheight = scrolledWindow_height - 35;
-		data->prwidth = data->profile_widthfactor * (scrolledWindow_width - 20);
-
-		/* set drawing area size */
-		ac = 0;
-		XtSetArg(args[ac], XmNwidth, data->prwidth);
-		ac++;
-		XtSetArg(args[ac], XmNheight, data->prheight);
-		ac++;
-		XtSetValues(view->mb3dview.mbview_drawingArea_profile, args, ac);
-		ac = 0;
-
-		/* set prglwda size */
-		XtSetArg(args[ac], XmNwidth, data->prwidth);
-		ac++;
-		XtSetArg(args[ac], XmNheight, data->prheight);
-		ac++;
-		XtSetValues(view->prglwmda, args, ac);
-
-		/* set up a new opengl context */
-		mbv_render_context_create(MBV_RENDER_PROFILE, instance);
-#ifdef MBV_DEBUG_GLX
-		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%p,%p)\n", __FILE__, __LINE__, __func__, instance,
-		        view->dpy, XtWindow(view->prglwmda), view->prglx_context);
-#endif
-		mbv_render_make_current(MBV_RENDER_PROFILE, instance);
-
-#ifdef MBV_GET_GLX_ERRORS
-		mbview_glerrorcheck(instance, __FILE__, __LINE__, __func__);
-#endif
-		view->prglx_init = true;
-		glViewport(0, 0, data->prwidth, data->prheight);
-		view->praspect_ratio = ((float)data->prheight) / ((float)data->prwidth);
-	}
-
-	/* print output debug statements */
-	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:                %d\n", status);
-		fprintf(stderr, "dbg2       view->dpy:             %p\n", view->dpy);
-		fprintf(stderr, "dbg2       view->prvi:            %p\n", view->prvi);
-		fprintf(stderr, "dbg2       view->prglwmda:        %p\n", view->prglwmda);
-		fprintf(stderr, "dbg2       view->prglx_context:   %p\n", view->prglx_context);
-		fprintf(stderr, "dbg2       view->prglx_init:      %d\n", view->prglx_init);
-	}
-
-	/* return */
-	return (status);
-}
 
 /*------------------------------------------------------------------------------*/
 int mbview_destroy_prglx(size_t instance) {

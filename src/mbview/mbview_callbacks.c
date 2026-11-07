@@ -84,9 +84,6 @@
 #endif
 #include "mb_glwdrawa.h"
 
-/* Set flag to define mbview global variables in this code block */
-#define MBVIEWGLOBAL
-
 #include "mbview.h"
 #include "mbviewprivate.h"
 #include "mbv_render.h"

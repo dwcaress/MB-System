@@ -78,6 +78,7 @@
 
 #include "mbview.h"
 #include "mbviewprivate.h"
+#include "mbv_ui.h"
 
 /*------------------------------------------------------------------------------*/
 
@@ -88,7 +89,6 @@ extern XtAppContext app_context;
 extern struct mbview_world_struct mbviews[MBV_MAX_WINDOWS];
 extern char *mbsystem_library_name;
 
-static char value_string[2*MB_PATH_MAXLINE];
 
 
 /*------------------------------------------------------------------------------*/
@@ -318,7 +318,7 @@ int mbview_addsites(int verbose, size_t instance, int nsite, double *sitelon, do
 			        "Failed to add site at position lon:%f lat:%f due to display coordinate projection (%f %f %f) far outside "
 			        "view...\n",
 			        sitelon[i], sitelat[i], xdisplay, ydisplay, zdisplay);
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 	}
 
@@ -574,7 +574,7 @@ int mbview_pick_site_select(size_t instance, int which, int xpixel, int ypixel) 
 			}
 		}
 		else if (shared.shareddata.site_selected == MBV_SELECT_NONE) {
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 		else {
 			/* deselect previously selected site */
@@ -615,7 +615,7 @@ int mbview_pick_site_select(size_t instance, int which, int xpixel, int ypixel) 
 			shared.shareddata.site_selected = MBV_SELECT_NONE;
 		}
 
-		XBell(view->dpy, 100);
+		mbv_ui_bell(instance);
 	}
 
 	/* set what kind of pick to annotate */
@@ -739,7 +739,7 @@ int mbview_pick_site_add(size_t instance, int which, int xpixel, int ypixel) {
 
 			/* cannot add a site if the allocation failed */
 			if (shared.shareddata.nsite_alloc < shared.shareddata.nsite + 1) {
-				XBell(view->dpy, 100);
+				mbv_ui_bell(instance);
 			}
 			else {
 				/* move old sites if necessary */
@@ -772,7 +772,7 @@ int mbview_pick_site_add(size_t instance, int which, int xpixel, int ypixel) {
 			}
 		}
 		else if (shared.shareddata.site_selected == MBV_SELECT_NONE) {
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 	}
 
@@ -808,7 +808,7 @@ int mbview_pick_site_add(size_t instance, int which, int xpixel, int ypixel) {
 			/* deselect previously selected site */
 			shared.shareddata.site_selected = MBV_SELECT_NONE;
 		}
-		XBell(view->dpy, 100);
+		mbv_ui_bell(instance);
 	}
 
 	/* set what kind of pick to annotate */
@@ -917,7 +917,7 @@ int mbview_pick_site_delete(size_t instance, int xpixel, int ypixel) {
 
 	/* beep for failure */
 	if (status == MB_FAILURE) {
-		XBell(view->dpy, 100);
+		mbv_ui_bell(instance);
 	}
 
 	/* set what kind of pick to annotate */
@@ -1122,114 +1122,5 @@ int mbview_drawsite(size_t instance, int rez) {
 	return (status);
 }
 
-/*------------------------------------------------------------------------------*/
-int mbview_updatesitelist() {
-	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-	}
-
-	/* update site list */
-	if (shared.init_sitelist == MBV_WINDOW_VISIBLE) {
-		/* remove all existing items */
-		XmListDeleteAllItems(shared.mb3d_sitelist.mbview_list_sitelist);
-
-  	/* print site debug statements */
-  	if (mbv_verbose >= 2) {
-  		fprintf(stderr, "\ndbg2  Site data in function <%s>\n", __func__);
-  		fprintf(stderr, "dbg2  Site values:\n");
-  		fprintf(stderr, "dbg2       site_mode:           %d\n", shared.shareddata.site_mode);
-  		fprintf(stderr, "dbg2       nsite:               %d\n", shared.shareddata.nsite);
-  		fprintf(stderr, "dbg2       nsite_alloc:         %d\n", shared.shareddata.nsite_alloc);
-  		fprintf(stderr, "dbg2       site_selected:       %d\n", shared.shareddata.site_selected);
-  		for (int i = 0; i < shared.shareddata.nsite; i++) {
-  			fprintf(stderr, "dbg2       site %d active:      %d\n", i, shared.shareddata.sites[i].active);
-  			fprintf(stderr, "dbg2       site %d color:       %d\n", i, shared.shareddata.sites[i].color);
-  			fprintf(stderr, "dbg2       site %d size:        %d\n", i, shared.shareddata.sites[i].size);
-  			fprintf(stderr, "dbg2       site %d name:        %s\n", i, shared.shareddata.sites[i].name);
-  			fprintf(stderr, "dbg2       site %d xlon:        %f\n", i, shared.shareddata.sites[i].point.xlon);
-  			fprintf(stderr, "dbg2       site %d ylat:        %f\n", i, shared.shareddata.sites[i].point.ylat);
-  			fprintf(stderr, "dbg2       site %d zdata:       %f\n", i, shared.shareddata.sites[i].point.zdata);
-  		}
-  	}
-
-		if (shared.shareddata.nsite > 0) {
-			/* count active sites - inactive sites (currently only possible in
-			    unused tail slots beyond nsite, but checked defensively here
-			    since nothing else in this file assumes that invariant) contribute
-			    no row to the widget */
-			int nitems = 0;
-			for (int isite = 0; isite < shared.shareddata.nsite; isite++) {
-				if (shared.shareddata.sites[isite].active)
-					nitems++;
-			}
-
-		if (nitems > 0) {
-			/* allocate array of label XmStrings, sized to only the active sites
-			    actually being added, so every slot gets initialized below */
-			XmString *xstr = (XmString *)malloc(nitems * sizeof(XmString));
-			if (xstr == NULL)
-				return (MB_FAILURE);
-
-			/* loop over the sites */
-			nitems = 0;
-			for (int isite = 0; isite < shared.shareddata.nsite; isite++) {
-        if (shared.shareddata.sites[isite].active) {
-  				/* add list item for each site */
-  				char londstr0[24], lonmstr0[24];
-  				char latdstr0[24], latmstr0[24];
-  				mbview_setlonlatstrings(shared.shareddata.sites[isite].point.xlon, shared.shareddata.sites[isite].point.ylat,
-  				                        londstr0, latdstr0, lonmstr0, latmstr0);
-  				if (shared.lonlatstyle == MBV_LONLAT_DEGREESDECIMAL)
-  					sprintf(value_string, "%3d | %s | %s | %.3f | %s | %d | %s", isite, londstr0, latdstr0,
-  					        shared.shareddata.sites[isite].point.zdata, mbview_colorname[shared.shareddata.sites[isite].color],
-  					        shared.shareddata.sites[isite].size, shared.shareddata.sites[isite].name);
-  				else
-  					sprintf(value_string, "%3d | %s | %s | %.3f | %s | %d | %s", isite, lonmstr0, latmstr0,
-  					        shared.shareddata.sites[isite].point.zdata, mbview_colorname[shared.shareddata.sites[isite].color],
-  					        shared.shareddata.sites[isite].size, shared.shareddata.sites[isite].name);
-  				xstr[nitems] = XmStringCreateLocalized(value_string);
-  				nitems++;
-  			}
-      }
-
-			/* add list items */
-			XmListAddItems(shared.mb3d_sitelist.mbview_list_sitelist, xstr, nitems, 0);
-
-			/* select list item for selected site - translate the site index to
-			    a widget position by counting only active sites up to and
-			    including it, keeping this in sync with the active-only rows
-			    just added above */
-			if (shared.shareddata.site_selected != MBV_SELECT_NONE &&
-			    shared.shareddata.sites[shared.shareddata.site_selected].active) {
-				int iitem = 0;
-				for (int isite = 0; isite <= shared.shareddata.site_selected; isite++) {
-					if (shared.shareddata.sites[isite].active)
-						iitem++;
-				}
-				XmListSelectPos(shared.mb3d_sitelist.mbview_list_sitelist, iitem, 0);
-				XmListSetPos(shared.mb3d_sitelist.mbview_list_sitelist, MAX(iitem - 5, 1));
-			}
-
-			/* deallocate memory no longer needed */
-			for (int iitem = 0; iitem < nitems; iitem++) {
-				XmStringFree(xstr[iitem]);
-			}
-			free(xstr);
-		}
-		}
-	}
-
-	const int status = MB_SUCCESS;
-
-	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
 
 /*------------------------------------------------------------------------------*/

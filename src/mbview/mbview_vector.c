@@ -74,6 +74,7 @@
 
 #include "mbview.h"
 #include "mbviewprivate.h"
+#include "mbv_ui.h"
 
 /*------------------------------------------------------------------------------*/
 int mbview_getvectorcount(int verbose, size_t instance, int *nvector, int *error) {
@@ -535,7 +536,7 @@ int mbview_pick_vector_select(size_t instance, int select, int which, int xpixel
 			data->pickinfo_mode = data->pick_type;
 			shared.shareddata.vector_selected = MBV_SELECT_NONE;
 			shared.shareddata.vector_point_selected = MBV_SELECT_NONE;
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 	}
 
@@ -543,7 +544,7 @@ int mbview_pick_vector_select(size_t instance, int select, int which, int xpixel
 	else {
 		shared.shareddata.vector_selected = MBV_SELECT_NONE;
 		shared.shareddata.vector_point_selected = MBV_SELECT_NONE;
-		XBell(view->dpy, 100);
+		mbv_ui_bell(instance);
 		for (int i = 0; i < shared.shareddata.nvector; i++) {
 			for (int j = 0; j < shared.shareddata.vectors[i].npoints; j++) {
 				shared.shareddata.vectors[i].vectorpts[j].selected = false;
