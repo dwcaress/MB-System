@@ -87,6 +87,8 @@
 #include "mbview.h"
 #include "mbviewprivate.h"
 #include "mbv_render.h"
+#include "mbv_input.h"
+#include "mbv_ui.h"
 
 //#define MBV_DEBUG_GLX 1
 //#define MBV_GET_GLX_ERRORS 1
@@ -3573,18 +3575,13 @@ void do_mbview_glwda_resize(Widget w, XtPointer client_data, XtPointer call_data
 /*------------------------------------------------------------------------------*/
 
 void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data) {
+	(void)client_data;  // Unused parameter
 	Arg args[256];
   Cardinal ac = 0;
 	size_t instance;
 	XtSetArg(args[ac], XmNuserData, (XtPointer)&instance);
 	ac++;
 	XtGetValues(w, args, ac);
-
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	bool replotall = false;
-	bool replotprofile = false;
 
 	/* get event */
 	mbGLwDrawingAreaCallbackStruct *acs = (mbGLwDrawingAreaCallbackStruct *)call_data;
@@ -3594,20 +3591,36 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 		fprintf(stderr, "do_mbview_glwda_input: %d %d  instance:%zu type:%d\n", acs->width, acs->height, instance,
 		        event->xany.type);
 
+	/* If there is input in the drawing area pass it on as a toolkit-neutral event */
+	if (acs->reason == XmCR_INPUT) {
+		struct mbv_input_event input;
+		mbv_input_from_xevent(event, &input);
+		mbview_input(instance, &input);
+	}
+}
 
-	/* If there is input in the drawing area and the drawing area is still initialized */
-	if (acs->reason == XmCR_INPUT && view->init != MBV_WINDOW_NULL) {
+/*------------------------------------------------------------------------------*/
+/* Handle mouse and key input in the map view of an instance (see mbv_input.h) */
+void mbview_input(size_t instance, const struct mbv_input_event *event) {
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	bool replotall = false;
+	bool replotprofile = false;
+
+	/* If the drawing area is still initialized */
+	if (view->init != MBV_WINDOW_NULL) {
 
 		/* Check for mouse pressed. */
-		if (event->xany.type == ButtonPress) {
-			/*fprintf(stderr, "event->xany.type == ButtonPress  %d %d  mouse mode:%d\n",
-			event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
+		if (event->type == MBV_INPUT_PRESS) {
+			/*fprintf(stderr, "event->type == MBV_INPUT_PRESS  %d %d  mouse mode:%d\n",
+			event->x,event->y, data->mouse_mode);*/
 			/* save location */
-			view->button_down_x = event->xbutton.x;
-			view->button_down_y = event->xbutton.y;
+			view->button_down_x = event->x;
+			view->button_down_y = event->y;
 
 			/* If left mouse button is pushed */
-			if (event->xbutton.button == 1) {
+			if (event->button == 1) {
 				/* set button1down flag */
 				view->button1down = true;
 
@@ -3616,7 +3629,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				    data->mouse_mode == MBV_MOUSE_SHADE || data->mouse_mode == MBV_MOUSE_VIEWPOINT ||
 				    data->mouse_mode == MBV_MOUSE_NAV || data->mouse_mode == MBV_MOUSE_NAVFILE) {
 					/* set cursor for pick */
-					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_TARGET_RED);
 
 					/* process pick */
 					mbview_pick(instance, MBV_PICK_DOWN, view->button_down_x, data->height - view->button_down_y);
@@ -3631,7 +3644,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle region picking */
 				else if (data->mouse_mode == MBV_MOUSE_AREA) {
 					/* set cursor for area */
-					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_TARGET_RED);
 
 					/* process area */
 					mbview_region(instance, MBV_REGION_DOWN, view->button_down_x, data->height - view->button_down_y);
@@ -3643,7 +3656,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle editing sites */
 				else if (data->mouse_mode == MBV_MOUSE_SITE) {
 					/* set cursor for site */
-					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_TARGET_RED);
 
 					/* process site select */
 					mbview_pick_site_select(instance, MBV_PICK_DOWN, view->button_down_x, data->height - view->button_down_y);
@@ -3658,7 +3671,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle editing routes */
 				else if (data->mouse_mode == MBV_MOUSE_ROUTE) {
 					/* set cursor for route */
-					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_TARGET_RED);
 
 					/* process route select */
 					mbview_pick_route_select(mbv_verbose, instance, MBV_PICK_DOWN, view->button_down_x,
@@ -3677,14 +3690,14 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 			} /* end of left button events */
 
 			/* If middle mouse button is pushed */
-			else if (event->xbutton.button == 2) {
+			else if (event->button == 2) {
 				/* set button2down flag */
 				view->button2down = true;
 
 				/* handle move */
 				if (data->mouse_mode == MBV_MOUSE_MOVE) {
 					/* set cursor for move */
-					XDefineCursor(view->dpy, view->xid, view->FleurBlackCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_FLEUR_BLACK);
 
 					/* save starting position offsets */
 					if (data->display_mode == MBV_DISPLAY_2D) {
@@ -3700,7 +3713,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle 3D rotate */
 				else if (data->mouse_mode == MBV_MOUSE_ROTATE) {
 					/* set cursor for rotate */
-					XDefineCursor(view->dpy, view->xid, view->FleurBlackCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_FLEUR_BLACK);
 
 					view->modelazimuth3d_save = data->modelazimuth3d;
 					view->modelelevation3d_save = data->modelelevation3d;
@@ -3720,7 +3733,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					/* handle shading by illumination */
 					if (shade_mode == MBV_SHADE_VIEW_ILLUMINATION) {
 						/* set cursor for shade */
-						XDefineCursor(view->dpy, view->xid, view->FleurBlackCursor);
+						mbv_ui_cursor(instance, MBV_CURSOR_FLEUR_BLACK);
 
 						view->illuminate_azimuth_save = data->illuminate_azimuth;
 						view->illuminate_elevation_save = data->illuminate_elevation;
@@ -3729,20 +3742,20 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					/* handle shading by overlay */
 					else if (shade_mode == MBV_SHADE_VIEW_SLOPE) {
 						/* set cursor for shade */
-						XDefineCursor(view->dpy, view->xid, view->FleurBlackCursor);
+						mbv_ui_cursor(instance, MBV_CURSOR_FLEUR_BLACK);
 					}
 
 					/* handle shading by overlay */
 					else if (shade_mode == MBV_SHADE_VIEW_OVERLAY) {
 						/* set cursor for shade */
-						XDefineCursor(view->dpy, view->xid, view->FleurBlackCursor);
+						mbv_ui_cursor(instance, MBV_CURSOR_FLEUR_BLACK);
 					}
 				}
 
 				/* handle viewpoint rotation */
 				else if (data->mouse_mode == MBV_MOUSE_VIEWPOINT) {
 					/* set cursor for rotate */
-					XDefineCursor(view->dpy, view->xid, view->FleurBlackCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_FLEUR_BLACK);
 
 					view->viewazimuth3d_save = data->viewazimuth3d;
 					view->viewelevation3d_save = data->viewelevation3d;
@@ -3751,7 +3764,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle area picking */
 				else if (data->mouse_mode == MBV_MOUSE_AREA) {
 					/* set cursor for area */
-					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_TARGET_RED);
 
 					/* process area */
 					mbview_area(instance, MBV_AREALENGTH_DOWN, view->button_down_x, data->height - view->button_down_y);
@@ -3763,7 +3776,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle editing sites */
 				else if (data->mouse_mode == MBV_MOUSE_SITE) {
 					/* set cursor for site */
-					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_TARGET_RED);
 
 					/* process site select */
 					mbview_pick_site_add(instance, MBV_PICK_DOWN, view->button_down_x, data->height - view->button_down_y);
@@ -3778,7 +3791,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle editing routes */
 				else if (data->mouse_mode == MBV_MOUSE_ROUTE) {
 					/* set cursor for route */
-					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_TARGET_RED);
 
 					/* process route select */
 					mbview_pick_route_add(mbv_verbose, instance, MBV_PICK_DOWN, view->button_down_x,
@@ -3797,7 +3810,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle selecting navigation */
 				else if (data->mouse_mode == MBV_MOUSE_NAV || data->mouse_mode == MBV_MOUSE_NAVFILE) {
 					/* set cursor for nav */
-					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_TARGET_RED);
 
 					/* process nav select */
 					mbview_pick_nav_select(instance, true, MBV_PICK_DOWN, view->button_down_x,
@@ -3813,14 +3826,14 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 			} /* end of middle button events */
 
 			/* If right mouse button is pushed */
-			else if (event->xbutton.button == 3) {
+			else if (event->button == 3) {
 				/* set button3down flag */
 				view->button3down = true;
 
 				/* change the map scaling */
 				if (data->mouse_mode == MBV_MOUSE_MOVE) {
 					/* set cursor for scaling */
-					XDefineCursor(view->dpy, view->xid, view->SizingBlackCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_SIZING_BLACK);
 
 					/* save starting size */
 					if (data->display_mode == MBV_DISPLAY_2D) {
@@ -3834,7 +3847,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle vertical exaggerate */
 				else if (data->mouse_mode == MBV_MOUSE_ROTATE) {
 					/* set cursor for exaggerate */
-					XDefineCursor(view->dpy, view->xid, view->FleurBlackCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_FLEUR_BLACK);
 
 					view->exaggeration_save = data->exaggeration;
 				}
@@ -3853,7 +3866,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					/* handle shading by illumination */
 					if (shade_mode == MBV_SHADE_VIEW_ILLUMINATION) {
 						/* set cursor for shading */
-						XDefineCursor(view->dpy, view->xid, view->FleurBlackCursor);
+						mbv_ui_cursor(instance, MBV_CURSOR_FLEUR_BLACK);
 
 						view->illuminate_magnitude_save = data->illuminate_magnitude;
 					}
@@ -3861,7 +3874,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					/* handle shading by slope */
 					else if (shade_mode == MBV_SHADE_VIEW_SLOPE) {
 						/* set cursor for shading */
-						XDefineCursor(view->dpy, view->xid, view->FleurBlackCursor);
+						mbv_ui_cursor(instance, MBV_CURSOR_FLEUR_BLACK);
 
 						view->slope_magnitude_save = data->slope_magnitude;
 					}
@@ -3869,7 +3882,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					/* handle shading by overlay */
 					else if (shade_mode == MBV_SHADE_VIEW_OVERLAY) {
 						/* set cursor for shading */
-						XDefineCursor(view->dpy, view->xid, view->FleurBlackCursor);
+						mbv_ui_cursor(instance, MBV_CURSOR_FLEUR_BLACK);
 
 						view->overlay_shade_magnitude_save = data->overlay_shade_magnitude;
 					}
@@ -3878,7 +3891,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle viewpoint rotation */
 				else if (data->mouse_mode == MBV_MOUSE_VIEWPOINT) {
 					/* set cursor for scaling */
-					XDefineCursor(view->dpy, view->xid, view->SizingBlackCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_SIZING_BLACK);
 
 					/* save starting size */
 					if (data->display_mode == MBV_DISPLAY_2D) {
@@ -3892,7 +3905,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle area picking */
 				else if (data->mouse_mode == MBV_MOUSE_AREA) {
 					/* set cursor for area width */
-					XDefineCursor(view->dpy, view->xid, view->SizingBlackCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_SIZING_BLACK);
 
 					/* process area */
 					view->areaaspect_save = view->areaaspect;
@@ -3901,7 +3914,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle editing sites */
 				else if (data->mouse_mode == MBV_MOUSE_SITE) {
 					/* set cursor for area */
-					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_TARGET_RED);
 
 					/* process site select */
 					mbview_pick_site_delete(instance, view->button_down_x, data->height - view->button_down_y);
@@ -3916,7 +3929,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle editing routes */
 				else if (data->mouse_mode == MBV_MOUSE_ROUTE) {
 					/* set cursor for area */
-					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_TARGET_RED);
 
 					/* process route select */
 					mbview_pick_route_delete(mbv_verbose, instance, view->button_down_x, data->height - view->button_down_y);
@@ -3934,7 +3947,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle deselecting navigation */
 				else if (data->mouse_mode == MBV_MOUSE_NAV || data->mouse_mode == MBV_MOUSE_NAVFILE) {
 					/* set cursor for area */
-					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_TARGET_RED);
 
 					/* process nav deselect */
 					mbview_pick_nav_select(instance, false, MBV_PICK_DOWN, view->button_down_x,
@@ -3957,22 +3970,22 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 		} /* end of button press events */
 
 		/* Check for mouse motion while pressed. */
-		if (event->xany.type == MotionNotify) {
-			/*fprintf(stderr, "event->xany.type == MotionNotify  %d %d  mouse mode:%d\n",
-			event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
+		if (event->type == MBV_INPUT_MOTION) {
+			/*fprintf(stderr, "event->type == MBV_INPUT_MOTION  %d %d  mouse mode:%d\n",
+			event->x,event->y, data->mouse_mode);*/
 
 			/* prohibit event interruption of plotting */
 			view->plot_interrupt_allowed = false;
 
 			/* save location */
-			view->button_move_x = event->xmotion.x;
-			view->button_move_y = event->xmotion.y;
+			view->button_move_x = event->x;
+			view->button_move_y = event->y;
 
 			/* If left mouse button is dragged */
 			if (view->button1down) {
 
 				/* set cursor for drag */
-				XDefineCursor(view->dpy, view->xid, view->FleurRedCursor);
+				mbv_ui_cursor(instance, MBV_CURSOR_FLEUR_RED);
 
 				/* handle move */
 				if (data->mouse_mode == MBV_MOUSE_MOVE || data->mouse_mode == MBV_MOUSE_ROTATE ||
@@ -3991,7 +4004,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle region picking */
 				else if (data->mouse_mode == MBV_MOUSE_AREA) {
 					/* set cursor for region */
-					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_TARGET_RED);
 
 					/* process region */
 					mbview_region(instance, MBV_REGION_MOVE, view->button_move_x, data->height - view->button_move_y);
@@ -4003,7 +4016,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle editing sites */
 				else if (data->mouse_mode == MBV_MOUSE_SITE) {
 					/* set cursor for site */
-					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_TARGET_RED);
 
 					/* process site select */
 					mbview_pick_site_select(instance, MBV_PICK_MOVE, view->button_move_x, data->height - view->button_move_y);
@@ -4018,7 +4031,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle editing routes */
 				else if (data->mouse_mode == MBV_MOUSE_ROUTE) {
 					/* set cursor for route */
-					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_TARGET_RED);
 
 					/* process route select */
 					mbview_pick_route_select(mbv_verbose, instance, MBV_PICK_MOVE, view->button_move_x,
@@ -4041,7 +4054,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle move */
 				if (data->mouse_mode == MBV_MOUSE_MOVE) {
 					/* set cursor for move */
-					XDefineCursor(view->dpy, view->xid, view->FleurRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_FLEUR_RED);
 
 					/* move map */
 					if (data->display_mode == MBV_DISPLAY_2D) {
@@ -4049,13 +4062,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						                   (view->button_move_x - view->button_down_x) * (view->right - view->left) / data->width;
 						view->offset2d_y = view->offset2d_y_save - (view->button_move_y - view->button_down_y) *
 						                                               (view->top - view->bottom) / data->height;
-						if (XtIsManaged(view->mb3dview.mbview_textField_view_2doffsetx)) {
-              mb_path value_text;
-							snprintf(value_text, sizeof(value_text), "%g", view->offset2d_x);
-							XmTextFieldSetString(view->mb3dview.mbview_textField_view_2doffsetx, value_text);
-							snprintf(value_text, sizeof(value_text), "%g", view->offset2d_y);
-							XmTextFieldSetString(view->mb3dview.mbview_textField_view_2doffsety, value_text);
-						}
+						mbv_ui_view_values_changed(instance, MBV_VALUES_VIEW_2DOFFSET);
 					}
 					else {
 						view->offset3d_x = view->offset3d_x_save + (view->button_move_x - view->button_down_x) *
@@ -4063,13 +4070,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						view->offset3d_y = view->offset3d_y_save - (view->button_move_y - view->button_down_y) *
 						                                               view->aspect_ratio * view->aspect_ratio *
 						                                               MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH / data->height;
-						if (XtIsManaged(view->mb3dview.mbview_textField_view_3doffsetx)) {
-              mb_path value_text;
-							snprintf(value_text, sizeof(value_text), "%g", view->offset3d_x);
-							XmTextFieldSetString(view->mb3dview.mbview_textField_view_3doffsetx, value_text);
-							snprintf(value_text, sizeof(value_text), "%g", view->offset3d_y);
-							XmTextFieldSetString(view->mb3dview.mbview_textField_view_3doffsety, value_text);
-						}
+						mbv_ui_view_values_changed(instance, MBV_VALUES_VIEW_3DOFFSET);
 					}
 
 					/* set flag to reset view bounds */
@@ -4082,7 +4083,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle 3D rotate */
 				else if (data->mouse_mode == MBV_MOUSE_ROTATE) {
 					/* set cursor for rotate */
-					XDefineCursor(view->dpy, view->xid, view->FleurRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_FLEUR_RED);
 
 					/* rotate viewpoint of 3D map */
 					data->modelazimuth3d = view->modelazimuth3d_save +
@@ -4090,13 +4091,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					data->modelelevation3d =
 					    view->modelelevation3d_save +
 					    180.0 * ((double)(view->button_move_y - view->button_down_y)) / ((double)data->height);
-					if (XtIsManaged(view->mb3dview.mbview_textField_model_azimuth)) {
-            mb_path value_text;
-						snprintf(value_text, sizeof(value_text), "%g", data->modelazimuth3d);
-						XmTextFieldSetString(view->mb3dview.mbview_textField_model_azimuth, value_text);
-						snprintf(value_text, sizeof(value_text), "%g", data->modelelevation3d);
-						XmTextFieldSetString(view->mb3dview.mbview_textField_model_elevation, value_text);
-					}
+					mbv_ui_view_values_changed(instance, MBV_VALUES_MODEL_ORIENTATION);
 
 					/* set flag to reset view bounds */
 					view->viewboundscount++;
@@ -4119,7 +4114,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					/* handle shading by illumination */
 					if (shade_mode == MBV_SHADE_VIEW_ILLUMINATION) {
 						/* set cursor for shade */
-						XDefineCursor(view->dpy, view->xid, view->FleurBlackCursor);
+						mbv_ui_cursor(instance, MBV_CURSOR_FLEUR_BLACK);
 
 						/* rotate illumination */
 						data->illuminate_azimuth =
@@ -4128,13 +4123,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						data->illuminate_elevation =
 						    view->illuminate_elevation_save +
 						    180.0 * ((double)(view->button_move_y - view->button_down_y)) / ((double)data->height);
-						if (XtIsManaged(view->mb3dview.mbview_textField_illum_azi)) {
-              mb_path value_text;
-							snprintf(value_text, sizeof(value_text), "%g", data->illuminate_azimuth);
-							XmTextFieldSetString(view->mb3dview.mbview_textField_illum_azi, value_text);
-							snprintf(value_text, sizeof(value_text), "%g", data->illuminate_elevation);
-							XmTextFieldSetString(view->mb3dview.mbview_textField_illum_elev, value_text);
-						}
+						mbv_ui_view_values_changed(instance, MBV_VALUES_ILLUMINATION);
 
 						/* clear color status array */
 						mbview_setcolorparms(instance);
@@ -4148,7 +4137,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle viewpoint rotation */
 				else if (data->mouse_mode == MBV_MOUSE_VIEWPOINT) {
 					/* set cursor for rotate */
-					XDefineCursor(view->dpy, view->xid, view->FleurRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_FLEUR_RED);
 
 					/* rotate viewpoint of 3D map */
 					data->viewazimuth3d = view->viewazimuth3d_save +
@@ -4156,13 +4145,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					data->viewelevation3d =
 					    view->viewelevation3d_save +
 					    180.0 * ((double)(view->button_move_y - view->button_down_y)) / ((double)data->height);
-					if (XtIsManaged(view->mb3dview.mbview_textField_view_azimuth)) {
-            mb_path value_text;
-						snprintf(value_text, sizeof(value_text), "%g", data->viewazimuth3d);
-						XmTextFieldSetString(view->mb3dview.mbview_textField_view_azimuth, value_text);
-						snprintf(value_text, sizeof(value_text), "%g", data->viewelevation3d);
-						XmTextFieldSetString(view->mb3dview.mbview_textField_view_elevation, value_text);
-					}
+					mbv_ui_view_values_changed(instance, MBV_VALUES_VIEW_ORIENTATION);
 
 					/* set flag to reset view bounds */
 					view->viewboundscount++;
@@ -4174,7 +4157,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle area picking */
 				else if (data->mouse_mode == MBV_MOUSE_AREA) {
 					/* set cursor for area */
-					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_TARGET_RED);
 
 					/* process area */
 					mbview_area(instance, MBV_AREALENGTH_MOVE, view->button_move_x, data->height - view->button_move_y);
@@ -4186,7 +4169,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle editing sites */
 				else if (data->mouse_mode == MBV_MOUSE_SITE) {
 					/* set cursor for site */
-					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_TARGET_RED);
 
 					/* process site select */
 					mbview_pick_site_add(instance, MBV_PICK_MOVE, view->button_move_x, data->height - view->button_move_y);
@@ -4201,7 +4184,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle editing routes */
 				else if (data->mouse_mode == MBV_MOUSE_ROUTE) {
 					/* set cursor for route */
-					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_TARGET_RED);
 
 					/* process route select */
 					mbview_pick_route_add(mbv_verbose, instance, MBV_PICK_MOVE, view->button_move_x,
@@ -4220,7 +4203,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle selecting navigation */
 				else if (data->mouse_mode == MBV_MOUSE_NAV || data->mouse_mode == MBV_MOUSE_NAVFILE) {
 					/* set cursor for nav */
-					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_TARGET_RED);
 
 					/* process nav select */
 					mbview_pick_nav_select(instance, true, MBV_PICK_MOVE, view->button_move_x,
@@ -4241,28 +4224,20 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* change the map scaling */
 				if (data->mouse_mode == MBV_MOUSE_MOVE) {
 					/* set cursor for scaling */
-					XDefineCursor(view->dpy, view->xid, view->SizingBlackCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_SIZING_BLACK);
 
 					/* rescale 2D map */
 					if (data->display_mode == MBV_DISPLAY_2D) {
 						view->size2d = view->size2d_save *
 						               exp(((double)(view->button_down_y - view->button_move_y)) / ((double)data->height));
-						if (XtIsManaged(view->mb3dview.mbview_textField_view_2dzoom)) {
-              mb_path value_text;
-							snprintf(value_text, sizeof(value_text), "%g", view->size2d);
-							XmTextFieldSetString(view->mb3dview.mbview_textField_view_2dzoom, value_text);
-						}
+						mbv_ui_view_values_changed(instance, MBV_VALUES_VIEW_2DZOOM);
 					}
 
 					/* rescale 3D map */
 					else {
 						view->offset3d_z = view->offset3d_z_save +
 						                   2.0 * (((double)(view->button_down_y - view->button_move_y)) / ((double)data->height));
-						if (XtIsManaged(view->mb3dview.mbview_textField_model_3dzoom)) {
-              mb_path value_text;
-							snprintf(value_text, sizeof(value_text), "%g", view->offset3d_z);
-							XmTextFieldSetString(view->mb3dview.mbview_textField_model_3dzoom, value_text);
-						}
+						mbv_ui_view_values_changed(instance, MBV_VALUES_MODEL_3DZOOM);
 					}
 
 					/* set flag to reset view bounds */
@@ -4275,7 +4250,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle vertical exaggerate */
 				else if (data->mouse_mode == MBV_MOUSE_ROTATE) {
 					/* set cursor for exaggerate */
-					XDefineCursor(view->dpy, view->xid, view->FleurRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_FLEUR_RED);
 
 					/* change vertical exaggeration of 3D map */
 					data->exaggeration = view->exaggeration_save *
@@ -4283,11 +4258,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					if (data->display_projection_mode != MBV_PROJECTION_SPHEROID) {
 						view->zorigin = data->exaggeration * 0.5 * (data->primary_min + data->primary_max);
 					}
-					if (XtIsManaged(view->mb3dview.mbview_textField_exaggeration)) {
-            mb_path value_text;
-						snprintf(value_text, sizeof(value_text), "%g", data->exaggeration);
-						XmTextFieldSetString(view->mb3dview.mbview_textField_exaggeration, value_text);
-					}
+					mbv_ui_view_values_changed(instance, MBV_VALUES_EXAGGERATION);
 
 					/* reset flags */
 					mbview_zscaleclear(instance);
@@ -4319,17 +4290,13 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					/* handle shading by illumination */
 					if (shade_mode == MBV_SHADE_VIEW_ILLUMINATION) {
 						/* set cursor for shading */
-						XDefineCursor(view->dpy, view->xid, view->FleurBlackCursor);
+						mbv_ui_cursor(instance, MBV_CURSOR_FLEUR_BLACK);
 
 						/* change magnitude of illumination */
 						data->illuminate_magnitude =
 						    view->illuminate_magnitude_save *
 						    exp(((double)(view->button_down_y - view->button_move_y)) / ((double)data->height));
-						if (XtIsManaged(view->mb3dview.mbview_textField_illum_amp)) {
-              mb_path value_text;
-							snprintf(value_text, sizeof(value_text), "%g", data->illuminate_magnitude);
-							XmTextFieldSetString(view->mb3dview.mbview_textField_illum_amp, value_text);
-						}
+						mbv_ui_view_values_changed(instance, MBV_VALUES_ILLUMINATION_AMP);
 
 						/* clear color status array */
 						mbview_setcolorparms(instance);
@@ -4342,17 +4309,13 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					/* handle shading by slope */
 					else if (shade_mode == MBV_SHADE_VIEW_SLOPE) {
 						/* set cursor for shading */
-						XDefineCursor(view->dpy, view->xid, view->FleurBlackCursor);
+						mbv_ui_cursor(instance, MBV_CURSOR_FLEUR_BLACK);
 
 						/* change magnitude of slope shading */
 						data->slope_magnitude =
 						    view->slope_magnitude_save *
 						    exp(((double)(view->button_down_y - view->button_move_y)) / ((double)data->height));
-						if (XtIsManaged(view->mb3dview.mbview_textField_slope_amp)) {
-              mb_path value_text;
-							snprintf(value_text, sizeof(value_text), "%g", data->slope_magnitude);
-							XmTextFieldSetString(view->mb3dview.mbview_textField_slope_amp, value_text);
-						}
+						mbv_ui_view_values_changed(instance, MBV_VALUES_SLOPE_AMP);
 
 						/* clear color status array */
 						mbview_setcolorparms(instance);
@@ -4365,17 +4328,13 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 					/* handle shading by overlay */
 					else if (shade_mode == MBV_SHADE_VIEW_OVERLAY) {
 						/* set cursor for shading */
-						XDefineCursor(view->dpy, view->xid, view->FleurBlackCursor);
+						mbv_ui_cursor(instance, MBV_CURSOR_FLEUR_BLACK);
 
 						/* change magnitude of overlay shading */
 						data->overlay_shade_magnitude =
 						    view->overlay_shade_magnitude_save *
 						    exp(((double)(view->button_down_y - view->button_move_y)) / ((double)data->height));
-						if (XtIsManaged(view->mb3dview.mbview_textField_overlay_amp)) {
-              mb_path value_text;
-							snprintf(value_text, sizeof(value_text), "%g", data->overlay_shade_magnitude);
-							XmTextFieldSetString(view->mb3dview.mbview_textField_overlay_amp, value_text);
-						}
+						mbv_ui_view_values_changed(instance, MBV_VALUES_OVERLAY_AMP);
 
 						/* clear color status array */
 						mbview_setcolorparms(instance);
@@ -4389,17 +4348,13 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle viewpoint rotation */
 				else if (data->mouse_mode == MBV_MOUSE_VIEWPOINT) {
 					/* set cursor for scaling */
-					XDefineCursor(view->dpy, view->xid, view->SizingBlackCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_SIZING_BLACK);
 
 					/* rescale 2D map */
 					if (data->display_mode == MBV_DISPLAY_2D) {
 						view->size2d = view->size2d_save *
 						               exp(((double)(view->button_down_y - view->button_move_y)) / ((double)data->height));
-						if (XtIsManaged(view->mb3dview.mbview_textField_view_2dzoom)) {
-              mb_path value_text;
-							snprintf(value_text, sizeof(value_text), "%g", view->size2d);
-							XmTextFieldSetString(view->mb3dview.mbview_textField_view_2dzoom, value_text);
-						}
+						mbv_ui_view_values_changed(instance, MBV_VALUES_VIEW_2DZOOM);
 					}
 
 					/* rescale 3D map */
@@ -4407,11 +4362,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 						view->viewoffset3d_z =
 						    view->viewoffset3d_z_save +
 						    2.0 * (((double)(view->button_down_y - view->button_move_y)) / ((double)data->height));
-						if (XtIsManaged(view->mb3dview.mbview_textField_view_3dzoom)) {
-							mb_path value_text;
-							snprintf(value_text, sizeof(value_text), "%g", view->viewoffset3d_z);
-							XmTextFieldSetString(view->mb3dview.mbview_textField_view_3dzoom, value_text);
-						}
+						mbv_ui_view_values_changed(instance, MBV_VALUES_VIEW_3DZOOM);
 					}
 
 					/* set flag to reset view bounds */
@@ -4424,7 +4375,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle area picking */
 				else if (data->mouse_mode == MBV_MOUSE_AREA) {
 					/* set cursor for area */
-					XDefineCursor(view->dpy, view->xid, view->SizingBlackCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_SIZING_BLACK);
 
 					/* process area */
 					view->areaaspect = view->areaaspect_save *
@@ -4440,7 +4391,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle editing sites */
 				else if (data->mouse_mode == MBV_MOUSE_SITE) {
 					/* set cursor for sites */
-					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_TARGET_RED);
 
 					/* set replotall */
 					replotall = true;
@@ -4452,7 +4403,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle editing routes */
 				else if (data->mouse_mode == MBV_MOUSE_ROUTE) {
 					/* set cursor for routes */
-					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_TARGET_RED);
 
 					/* set replotall */
 					replotall = true;
@@ -4467,7 +4418,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				/* handle deselecting navigation */
 				else if (data->mouse_mode == MBV_MOUSE_NAV || data->mouse_mode == MBV_MOUSE_NAVFILE) {
 					/* set cursor for nav */
-					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_TARGET_RED);
 
 					/* process nav deselect */
 					mbview_pick_nav_select(instance, false, MBV_PICK_MOVE, view->button_move_x,
@@ -4490,13 +4441,13 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 		} /* end of motion notify events */
 
 		/* Check for mouse released. */
-		if (event->xany.type == ButtonRelease) {
-			/*fprintf(stderr, "event->xany.type == ButtonRelease  %d %d  mouse mode:%d\n",
-			event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
+		if (event->type == MBV_INPUT_RELEASE) {
+			/*fprintf(stderr, "event->type == MBV_INPUT_RELEASE  %d %d  mouse mode:%d\n",
+			event->x,event->y, data->mouse_mode);*/
 
 			/* save location */
-			view->button_up_x = event->xbutton.x;
-			view->button_up_y = event->xbutton.y;
+			view->button_up_x = event->x;
+			view->button_up_y = event->y;
 
 			/* If left mouse button is released */
 			if (view->button1down) {
@@ -4506,7 +4457,7 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 				     data->mouse_mode == MBV_MOUSE_SHADE || data->mouse_mode == MBV_MOUSE_VIEWPOINT) &&
 				    ((view->button_down_x != view->button_up_x) || (view->button_down_y != view->button_up_y))) {
 					/* set cursor for pick */
-					XDefineCursor(view->dpy, view->xid, view->TargetRedCursor);
+					mbv_ui_cursor(instance, MBV_CURSOR_TARGET_RED);
 
 					/* process pick */
 					mbview_pick(instance, MBV_PICK_UP, view->button_up_x, data->height - view->button_up_y);
@@ -4684,26 +4635,22 @@ void do_mbview_glwda_input(Widget w, XtPointer client_data, XtPointer call_data)
 			}
 
 			/* reset cursor */
-			XDefineCursor(view->dpy, view->xid, view->TargetBlackCursor);
+			mbv_ui_cursor(instance, MBV_CURSOR_TARGET_BLACK);
 
 			/* allow event interruption of plotting */
 			view->plot_interrupt_allowed = true;
 		} /* end of button release events */
 
 		/* Deal with KeyPress events */
-		if (event->xany.type == KeyPress) {
+		if (event->type == MBV_INPUT_KEYPRESS) {
 			/* fprintf(stderr,"KeyPress event\n"); */
-			/* Get key pressed - buffer[0] */
-			// int actual =
-			KeySym keysym;
-			char buffer[1];
-			XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
+			/* Get key pressed */
 
 			/* process events */
-			switch (buffer[0]) {
+			switch (event->key) {
 			case 'R':
 			case 'r':
-				do_mbview_reset_view(w, client_data, call_data);
+				mbv_ui_reset_view(instance);
 				break;
 			default:
 				break;

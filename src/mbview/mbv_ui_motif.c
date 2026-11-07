@@ -74,6 +74,10 @@
 #include "mbviewprivate.h"
 #include "mbv_render.h"
 #include "mbv_ui.h"
+#include "mbv_input.h"
+
+/* defined in mbview_callbacks.c */
+void do_mbview_reset_view(Widget w, XtPointer client_data, XtPointer call_data);
 
 /* scratch buffers, as in the files the code came from */
 static Cardinal ac = 0;
@@ -586,3 +590,162 @@ int mbview_reset_prglx(size_t instance) {
 	return (status);
 }
 
+/*------------------------------------------------------------------------------*/
+void mbv_ui_cursor(size_t instance, int cursor) {
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	switch (cursor) {
+	case MBV_CURSOR_TARGET_BLACK: XDefineCursor(view->dpy, view->xid, view->TargetBlackCursor); break;
+	case MBV_CURSOR_TARGET_GREEN: XDefineCursor(view->dpy, view->xid, view->TargetGreenCursor); break;
+	case MBV_CURSOR_TARGET_RED: XDefineCursor(view->dpy, view->xid, view->TargetRedCursor); break;
+	case MBV_CURSOR_FLEUR_BLACK: XDefineCursor(view->dpy, view->xid, view->FleurBlackCursor); break;
+	case MBV_CURSOR_FLEUR_RED: XDefineCursor(view->dpy, view->xid, view->FleurRedCursor); break;
+	case MBV_CURSOR_SIZING_BLACK: XDefineCursor(view->dpy, view->xid, view->SizingBlackCursor); break;
+	case MBV_CURSOR_SIZING_RED: XDefineCursor(view->dpy, view->xid, view->SizingRedCursor); break;
+	default: break;
+	}
+}
+
+/*------------------------------------------------------------------------------*/
+void mbv_ui_view_values_changed(size_t instance, int values) {
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+	switch (values) {
+	case MBV_VALUES_VIEW_2DOFFSET:
+		if (XtIsManaged(view->mb3dview.mbview_textField_view_2doffsetx)) {
+              mb_path value_text;
+			snprintf(value_text, sizeof(value_text), "%g", view->offset2d_x);
+			XmTextFieldSetString(view->mb3dview.mbview_textField_view_2doffsetx, value_text);
+			snprintf(value_text, sizeof(value_text), "%g", view->offset2d_y);
+			XmTextFieldSetString(view->mb3dview.mbview_textField_view_2doffsety, value_text);
+		}
+		break;
+	case MBV_VALUES_VIEW_3DOFFSET:
+		if (XtIsManaged(view->mb3dview.mbview_textField_view_3doffsetx)) {
+              mb_path value_text;
+			snprintf(value_text, sizeof(value_text), "%g", view->offset3d_x);
+			XmTextFieldSetString(view->mb3dview.mbview_textField_view_3doffsetx, value_text);
+			snprintf(value_text, sizeof(value_text), "%g", view->offset3d_y);
+			XmTextFieldSetString(view->mb3dview.mbview_textField_view_3doffsety, value_text);
+		}
+		break;
+	case MBV_VALUES_MODEL_ORIENTATION:
+		if (XtIsManaged(view->mb3dview.mbview_textField_model_azimuth)) {
+            mb_path value_text;
+			snprintf(value_text, sizeof(value_text), "%g", data->modelazimuth3d);
+			XmTextFieldSetString(view->mb3dview.mbview_textField_model_azimuth, value_text);
+			snprintf(value_text, sizeof(value_text), "%g", data->modelelevation3d);
+			XmTextFieldSetString(view->mb3dview.mbview_textField_model_elevation, value_text);
+		}
+		break;
+	case MBV_VALUES_ILLUMINATION:
+		if (XtIsManaged(view->mb3dview.mbview_textField_illum_azi)) {
+              mb_path value_text;
+			snprintf(value_text, sizeof(value_text), "%g", data->illuminate_azimuth);
+			XmTextFieldSetString(view->mb3dview.mbview_textField_illum_azi, value_text);
+			snprintf(value_text, sizeof(value_text), "%g", data->illuminate_elevation);
+			XmTextFieldSetString(view->mb3dview.mbview_textField_illum_elev, value_text);
+		}
+		break;
+	case MBV_VALUES_VIEW_ORIENTATION:
+		if (XtIsManaged(view->mb3dview.mbview_textField_view_azimuth)) {
+            mb_path value_text;
+			snprintf(value_text, sizeof(value_text), "%g", data->viewazimuth3d);
+			XmTextFieldSetString(view->mb3dview.mbview_textField_view_azimuth, value_text);
+			snprintf(value_text, sizeof(value_text), "%g", data->viewelevation3d);
+			XmTextFieldSetString(view->mb3dview.mbview_textField_view_elevation, value_text);
+		}
+		break;
+	case MBV_VALUES_VIEW_2DZOOM:
+		if (XtIsManaged(view->mb3dview.mbview_textField_view_2dzoom)) {
+              mb_path value_text;
+			snprintf(value_text, sizeof(value_text), "%g", view->size2d);
+			XmTextFieldSetString(view->mb3dview.mbview_textField_view_2dzoom, value_text);
+		}
+		break;
+	case MBV_VALUES_MODEL_3DZOOM:
+		if (XtIsManaged(view->mb3dview.mbview_textField_model_3dzoom)) {
+              mb_path value_text;
+			snprintf(value_text, sizeof(value_text), "%g", view->offset3d_z);
+			XmTextFieldSetString(view->mb3dview.mbview_textField_model_3dzoom, value_text);
+		}
+		break;
+	case MBV_VALUES_EXAGGERATION:
+		if (XtIsManaged(view->mb3dview.mbview_textField_exaggeration)) {
+            mb_path value_text;
+			snprintf(value_text, sizeof(value_text), "%g", data->exaggeration);
+			XmTextFieldSetString(view->mb3dview.mbview_textField_exaggeration, value_text);
+		}
+		break;
+	case MBV_VALUES_ILLUMINATION_AMP:
+		if (XtIsManaged(view->mb3dview.mbview_textField_illum_amp)) {
+              mb_path value_text;
+			snprintf(value_text, sizeof(value_text), "%g", data->illuminate_magnitude);
+			XmTextFieldSetString(view->mb3dview.mbview_textField_illum_amp, value_text);
+		}
+		break;
+	case MBV_VALUES_SLOPE_AMP:
+		if (XtIsManaged(view->mb3dview.mbview_textField_slope_amp)) {
+              mb_path value_text;
+			snprintf(value_text, sizeof(value_text), "%g", data->slope_magnitude);
+			XmTextFieldSetString(view->mb3dview.mbview_textField_slope_amp, value_text);
+		}
+		break;
+	case MBV_VALUES_OVERLAY_AMP:
+		if (XtIsManaged(view->mb3dview.mbview_textField_overlay_amp)) {
+              mb_path value_text;
+			snprintf(value_text, sizeof(value_text), "%g", data->overlay_shade_magnitude);
+			XmTextFieldSetString(view->mb3dview.mbview_textField_overlay_amp, value_text);
+		}
+		break;
+	case MBV_VALUES_VIEW_3DZOOM:
+		if (XtIsManaged(view->mb3dview.mbview_textField_view_3dzoom)) {
+			mb_path value_text;
+			snprintf(value_text, sizeof(value_text), "%g", view->viewoffset3d_z);
+			XmTextFieldSetString(view->mb3dview.mbview_textField_view_3dzoom, value_text);
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+/*------------------------------------------------------------------------------*/
+void mbv_ui_reset_view(size_t instance) {
+	/* the input callback passed its own widget, the map drawing area, whose
+	   user data is the instance; the other arguments are unused */
+	do_mbview_reset_view(mbviews[instance].glwmda, NULL, NULL);
+}
+
+/*------------------------------------------------------------------------------*/
+void mbv_input_from_xevent(XEvent *xevent, struct mbv_input_event *event) {
+	memset(event, 0, sizeof(struct mbv_input_event));
+	switch (xevent->xany.type) {
+	case ButtonPress:
+	case ButtonRelease:
+		event->type = xevent->xany.type == ButtonPress ? MBV_INPUT_PRESS : MBV_INPUT_RELEASE;
+		event->button = xevent->xbutton.button;
+		event->x = xevent->xbutton.x;
+		event->y = xevent->xbutton.y;
+		break;
+	case MotionNotify:
+		event->type = MBV_INPUT_MOTION;
+		event->x = xevent->xmotion.x;
+		event->y = xevent->xmotion.y;
+		break;
+	case KeyPress:
+	case KeyRelease: {
+		event->type = xevent->xany.type == KeyPress ? MBV_INPUT_KEYPRESS : MBV_INPUT_KEYRELEASE;
+		char buffer[2] = {0};
+		KeySym keysym;
+		const int actual = XLookupString((XKeyEvent *)xevent, buffer, 1, &keysym, NULL);
+		event->key = actual > 0 ? buffer[0] : '\0';
+	} break;
+	case Expose:
+	case GraphicsExpose:
+		event->type = MBV_INPUT_EXPOSE;
+		break;
+	default:
+		event->type = MBV_INPUT_OTHER;
+		break;
+	}
+}

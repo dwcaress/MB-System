@@ -74,6 +74,8 @@
 #include "mbview.h"
 #include "mbviewprivate.h"
 #include "mbv_render.h"
+#include "mbv_input.h"
+#include "mbv_ui.h"
 
 //#define MBV_DEBUG_GLX 1
 //#define MBV_GET_GLX_ERRORS 1
@@ -1025,6 +1027,25 @@ int mb3dsoundings_open(int verbose, struct mb3dsoundings_struct *soundingdata, i
   return (mbs_status);
 }
 /*------------------------------------------------------------------------------*/
+/* mouse cursor of the soundings view (see mbv_ui.h) */
+void mbv_ui_soundings_cursor(int cursor) {
+  Cursor xcursor;
+  switch (cursor) {
+  case MBV_CURSOR_TARGET_BLACK: xcursor = mb3dsoundings.TargetBlackCursor; break;
+  case MBV_CURSOR_TARGET_GREEN: xcursor = mb3dsoundings.TargetGreenCursor; break;
+  case MBV_CURSOR_TARGET_RED: xcursor = mb3dsoundings.TargetRedCursor; break;
+  case MBV_CURSOR_TARGET_BLUE: xcursor = mb3dsoundings.TargetBlueCursor; break;
+  case MBV_CURSOR_EXCHANGE_BLACK: xcursor = mb3dsoundings.ExchangeBlackCursor; break;
+  case MBV_CURSOR_EXCHANGE_GREEN: xcursor = mb3dsoundings.ExchangeGreenCursor; break;
+  case MBV_CURSOR_EXCHANGE_RED: xcursor = mb3dsoundings.ExchangeRedCursor; break;
+  case MBV_CURSOR_FLEUR_BLACK: xcursor = mb3dsoundings.FleurBlackCursor; break;
+  case MBV_CURSOR_FLEUR_RED: xcursor = mb3dsoundings.FleurRedCursor; break;
+  default: return;
+  }
+  XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), XtWindow(mb3dsoundings.mb3dsdg.drawingArea), xcursor);
+}
+
+/*------------------------------------------------------------------------------*/
 /* GLX calls of the soundings view, used by the GLX renderer (mbv_render_glx.c) */
 void mb3dsoundings_glx_context_create(void) {
   ac = 0;
@@ -1319,19 +1340,30 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
   XEvent *event = acs->event;
 
   /* fprintf(stderr,"Called do_mb3dsdg_glwda_input: reason:%d type:%d\n", acs->reason, event->xany.type); */
-  /* If there is input in the drawing area */
+  /* If there is input in the drawing area pass it on as a toolkit-neutral event */
   if (acs->reason == XmCR_INPUT) {
+    struct mbv_input_event input;
+    mbv_input_from_xevent(event, &input);
+    mb3dsoundings_input(&input);
+  }
+}
+
+/*------------------------------------------------------------------------------*/
+/* Handle mouse and key input in the 3D soundings view (see mbv_input.h) */
+void mb3dsoundings_input(const struct mbv_input_event *event) {
+  /* If there is input in the drawing area */
+  if (event != NULL) {
 
     /* Check for mouse pressed. */
-    if (event->xany.type == ButtonPress) {
-      /* fprintf(stderr, "event->xany.type == ButtonPress  button:%d position: %d %d  mouse mode:%d\n",
-      event->xbutton.button,event->xbutton.x,event->xbutton.y, mb3dsoundings.mouse_mode); */
+    if (event->type == MBV_INPUT_PRESS) {
+      /* fprintf(stderr, "event->type == MBV_INPUT_PRESS  button:%d position: %d %d  mouse mode:%d\n",
+      event->button,event->x,event->y, mb3dsoundings.mouse_mode); */
       /* save location */
-      mb3dsoundings.button_down_x = event->xbutton.x;
-      mb3dsoundings.button_down_y = mb3dsoundings.gl_height - 1 - event->xbutton.y;
+      mb3dsoundings.button_down_x = event->x;
+      mb3dsoundings.button_down_y = mb3dsoundings.gl_height - 1 - event->y;
 
       /* If left mouse button is pushed */
-      if (event->xbutton.button == 1) {
+      if (event->button == 1) {
         /* set button1down flag */
         mb3dsoundings.button1down = true;
 
@@ -1358,15 +1390,14 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
       } /* end of left button events */
 
       /* If middle mouse button is pushed */
-      else if (event->xbutton.button == 2) {
+      else if (event->button == 2) {
         /* rotate mode */
         if (mb3dsoundings.mouse_mode == MBS_MOUSE_ROTATE) {
           /* set button2down flag */
           mb3dsoundings.button2down = true;
 
           /* set cursor for rotate */
-          XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), XtWindow(mb3dsoundings.mb3dsdg.drawingArea),
-                        mb3dsoundings.FleurBlackCursor);
+          mbv_ui_soundings_cursor(MBV_CURSOR_FLEUR_BLACK);
 
           mb3dsoundings.azimuth_save = mb3dsoundings.azimuth;
           mb3dsoundings.elevation_save = mb3dsoundings.elevation;
@@ -1378,8 +1409,7 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
           mb3dsoundings.button2down = true;
 
           /* set cursor for rotate */
-          XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), XtWindow(mb3dsoundings.mb3dsdg.drawingArea),
-                        mb3dsoundings.FleurBlackCursor);
+          mbv_ui_soundings_cursor(MBV_CURSOR_FLEUR_BLACK);
 
           mb3dsoundings.gl_offset_x_save = mb3dsoundings.gl_offset_x;
           mb3dsoundings.gl_offset_y_save = mb3dsoundings.gl_offset_y;
@@ -1387,15 +1417,14 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
       } /* end of middle button events */
 
       /* If right mouse button is pushed */
-      else if (event->xbutton.button == 3) {
+      else if (event->button == 3) {
         /* rotate mode */
         if (mb3dsoundings.mouse_mode == MBS_MOUSE_ROTATE) {
           /* set button3down flag */
           mb3dsoundings.button3down = true;
 
           /* set cursor for exaggerate */
-          XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), XtWindow(mb3dsoundings.mb3dsdg.drawingArea),
-                        mb3dsoundings.FleurBlackCursor);
+          mbv_ui_soundings_cursor(MBV_CURSOR_FLEUR_BLACK);
 
           mb3dsoundings.exaggeration_save = mb3dsoundings.exaggeration;
         }
@@ -1406,8 +1435,7 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
           mb3dsoundings.button3down = true;
 
           /* set cursor for exaggerate */
-          XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), XtWindow(mb3dsoundings.mb3dsdg.drawingArea),
-                        mb3dsoundings.FleurBlackCursor);
+          mbv_ui_soundings_cursor(MBV_CURSOR_FLEUR_BLACK);
 
           mb3dsoundings.gl_size_save = mb3dsoundings.gl_size;
         }
@@ -1417,13 +1445,13 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
     } /* end of button press events */
 
     /* Check for mouse motion while pressed. */
-    if (event->xany.type == MotionNotify) {
-      /* fprintf(stderr, "event->xany.type == MotionNotify  %d %d  mouse mode:%d\n",
-      event->xbutton.x,event->xmotion.y, mb3dsoundings.mouse_mode); */
+    if (event->type == MBV_INPUT_MOTION) {
+      /* fprintf(stderr, "event->type == MBV_INPUT_MOTION  %d %d  mouse mode:%d\n",
+      event->x,event->y, mb3dsoundings.mouse_mode); */
 
       /* save location */
-      mb3dsoundings.button_move_x = event->xmotion.x;
-      mb3dsoundings.button_move_y = mb3dsoundings.gl_height - 1 - event->xmotion.y;
+      mb3dsoundings.button_move_x = event->x;
+      mb3dsoundings.button_move_y = mb3dsoundings.gl_height - 1 - event->y;
 
       /* If left mouse button is dragged */
       if (mb3dsoundings.button1down) {
@@ -1454,8 +1482,7 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
         /* rotate mode */
         if (mb3dsoundings.mouse_mode == MBS_MOUSE_ROTATE) {
           /* set cursor for rotate */
-          XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), XtWindow(mb3dsoundings.mb3dsdg.drawingArea),
-                        mb3dsoundings.FleurRedCursor);
+          mbv_ui_soundings_cursor(MBV_CURSOR_FLEUR_RED);
 
           /* rotate viewpoint of 3D map */
           mb3dsoundings.azimuth = mb3dsoundings.azimuth_save +
@@ -1482,8 +1509,7 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
         /* pan zoom mode */
         else if (mb3dsoundings.mouse_mode == MBS_MOUSE_PANZOOM) {
           /* set cursor for pan zoom */
-          XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), XtWindow(mb3dsoundings.mb3dsdg.drawingArea),
-                        mb3dsoundings.FleurRedCursor);
+          mbv_ui_soundings_cursor(MBV_CURSOR_FLEUR_RED);
 
           /* pan */
           mb3dsoundings.gl_offset_x = mb3dsoundings.gl_offset_x_save +
@@ -1503,8 +1529,7 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
         /* rotate mode */
         if (mb3dsoundings.mouse_mode == MBS_MOUSE_ROTATE) {
           /* set cursor for exaggerate */
-          XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), XtWindow(mb3dsoundings.mb3dsdg.drawingArea),
-                        mb3dsoundings.FleurRedCursor);
+          mbv_ui_soundings_cursor(MBV_CURSOR_FLEUR_RED);
 
           /* change vertical exaggeration of 3D map */
           mb3dsoundings.exaggeration = mb3dsoundings.exaggeration_save *
@@ -1519,8 +1544,7 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
         /* pan zoom mode */
         else if (mb3dsoundings.mouse_mode == MBS_MOUSE_PANZOOM) {
           /* set cursor for zoom */
-          XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), XtWindow(mb3dsoundings.mb3dsdg.drawingArea),
-                        mb3dsoundings.FleurRedCursor);
+          mbv_ui_soundings_cursor(MBV_CURSOR_FLEUR_RED);
 
           /* change zoom */
           mb3dsoundings.gl_size =
@@ -1535,13 +1559,13 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
     } /* end of motion notify events */
 
     /* Check for mouse released. */
-    if (event->xany.type == ButtonRelease) {
-      /* fprintf(stderr, "event->xany.type == ButtonRelease  %d %d  mouse mode:%d\n",
-      event->xbutton.x,event->xbutton.y, mb3dsoundings.mouse_mode); */
+    if (event->type == MBV_INPUT_RELEASE) {
+      /* fprintf(stderr, "event->type == MBV_INPUT_RELEASE  %d %d  mouse mode:%d\n",
+      event->x,event->y, mb3dsoundings.mouse_mode); */
 
       /* save location */
-      mb3dsoundings.button_up_x = event->xbutton.x;
-      mb3dsoundings.button_up_y = mb3dsoundings.gl_height - 1 - event->xbutton.y;
+      mb3dsoundings.button_up_x = event->x;
+      mb3dsoundings.button_up_y = mb3dsoundings.gl_height - 1 - event->y;
 
       /* If left mouse button is released */
       if (mb3dsoundings.button1down) {
@@ -1583,21 +1607,18 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
     } /* end of button release events */
 
     /* deal with expose events by replotting */
-    if (event->xany.type == Expose || event->xany.type == GraphicsExpose) {
+    if (event->type == MBV_INPUT_EXPOSE) {
       mb3dsoundings_updatestatus();
       mb3dsoundings_plot(mbs_verbose, &mbs_error);
     }
 
     /* Deal with KeyPress events */
-    if (event->xany.type == KeyPress) {
+    if (event->type == MBV_INPUT_KEYPRESS) {
       fprintf(stderr,"KeyPress event\n");
-      /* Get key pressed - buffer[0] */
-      char buffer[2] = {0};
-      KeySym keysym;
-      const int actual = XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
+      /* Get key pressed */
 
       /* process events (keys without a character, e.g. Shift, are ignored) */
-      switch (actual > 0 ? buffer[0] : '\0') {
+      switch (event->key) {
       case 'G':
       case 'g':
         key_g_down = 1;
@@ -1717,14 +1738,11 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
     }     /* end of key press events */
 
     /* Deal with KeyRelease events */
-    if (event->xany.type == KeyRelease) {
-      /* Get key pressed - buffer[0] */
-      char buffer[2] = {0};
-      KeySym keysym;
-      const int actual = XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
+    if (event->type == MBV_INPUT_KEYRELEASE) {
+      /* Get key pressed */
 
       /* process events (keys without a character, e.g. Shift, are ignored) */
-      switch (actual > 0 ? buffer[0] : '\0') {
+      switch (event->key) {
       case 'G':
       case 'g':
         key_g_down = 0;

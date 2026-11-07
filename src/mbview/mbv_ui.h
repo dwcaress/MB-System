@@ -61,6 +61,45 @@ void mbv_ui_secondary_colortable_changed(size_t instance);
 /* the secondary grid of an instance got a new name */
 void mbv_ui_secondary_name_changed(size_t instance, char *name);
 
+/* mouse cursors */
+#define MBV_CURSOR_TARGET_BLACK 0
+#define MBV_CURSOR_TARGET_GREEN 1
+#define MBV_CURSOR_TARGET_RED 2
+#define MBV_CURSOR_TARGET_BLUE 3
+#define MBV_CURSOR_FLEUR_BLACK 4
+#define MBV_CURSOR_FLEUR_RED 5
+#define MBV_CURSOR_SIZING_BLACK 6
+#define MBV_CURSOR_SIZING_RED 7
+#define MBV_CURSOR_EXCHANGE_BLACK 8
+#define MBV_CURSOR_EXCHANGE_GREEN 9
+#define MBV_CURSOR_EXCHANGE_RED 10
+
+/* set the mouse cursor of the map view of an instance */
+void mbv_ui_cursor(size_t instance, int cursor);
+
+/* set the mouse cursor of the 3D soundings view */
+void mbv_ui_soundings_cursor(int cursor);
+
+/* view values that mouse dragging changes, shown in the view control dialogs */
+#define MBV_VALUES_VIEW_2DOFFSET 0      /* view->offset2d_x, offset2d_y */
+#define MBV_VALUES_VIEW_3DOFFSET 1      /* view->offset3d_x, offset3d_y */
+#define MBV_VALUES_MODEL_ORIENTATION 2  /* data->modelazimuth3d, modelelevation3d */
+#define MBV_VALUES_ILLUMINATION 3       /* data->illuminate_azimuth, illuminate_elevation */
+#define MBV_VALUES_VIEW_ORIENTATION 4   /* data->viewazimuth3d, viewelevation3d */
+#define MBV_VALUES_VIEW_2DZOOM 5        /* view->size2d */
+#define MBV_VALUES_MODEL_3DZOOM 6       /* view->offset3d_z */
+#define MBV_VALUES_EXAGGERATION 7       /* data->exaggeration */
+#define MBV_VALUES_ILLUMINATION_AMP 8   /* data->illuminate_magnitude */
+#define MBV_VALUES_SLOPE_AMP 9          /* data->slope_magnitude */
+#define MBV_VALUES_OVERLAY_AMP 10       /* data->overlay_shade_magnitude */
+#define MBV_VALUES_VIEW_3DZOOM 11       /* view->viewoffset3d_z */
+
+/* view values of an instance changed while dragging */
+void mbv_ui_view_values_changed(size_t instance, int values);
+
+/* the user asked to reset the view of an instance (key 'r') */
+void mbv_ui_reset_view(size_t instance);
+
 #ifdef __cplusplus
 }
 #endif
