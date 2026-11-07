@@ -47,6 +47,7 @@
 #endif
 
 /* Motif required Headers */
+#ifndef MBVIEW_NO_MOTIF
 #include <X11/StringDefs.h>
 #include <X11/cursorfont.h>
 #include <Xm/Xm.h>
@@ -59,18 +60,19 @@
 #include <Xm/CascadeB.h>
 #include <Xm/PushB.h>
 #include <Xm/Separator.h>
+#else
+#include "mbv_xtypes.h"
+#endif
 #include "MB3DView.h"
 #include "MB3DSiteList.h"
 #include "MB3DRouteList.h"
 #include "MB3DNavList.h"
 
 /* OpenGL include files */
-#include <GL/gl.h>
-#include <GL/glu.h>
-#ifndef WIN32
-#include <GL/glx.h>
-#endif
+#include "mbv_gl.h"
+#ifndef MBVIEW_NO_MOTIF
 #include "mb_glwdrawa.h"
+#endif
 
 /* MBIO include files */
 #include "mb_status.h"

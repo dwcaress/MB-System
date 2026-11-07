@@ -37,6 +37,11 @@
 #include "mb_define.h"
 #endif
 
+/* stand-in X11/Motif types when built without Motif (Qt6 programs) */
+#ifdef MBVIEW_NO_MOTIF
+#include "mbv_xtypes.h"
+#endif
+
 /* maximum number of mbview windows */
 #define MBV_MAX_WINDOWS 10
 
