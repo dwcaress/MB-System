@@ -48,6 +48,8 @@ void mbgrdviz_ui_realtime_path(char *path) { mbgrdviz_qt_realtime_path(path); }
 
 void mbgrdviz_ui_arearoute_info(char *info_text) { mbgrdviz_qt_survey_info(info_text); }
 
+void mbgrdviz_ui_launch(char *const argv[]) { mbgrdviz_qt_launch((const char *const *)argv); }
+
 /*------------------------------------------------------------------------------*/
 /* the menu items of the main window, as the Motif do_mbgrdviz_sensitivity() */
 void do_mbgrdviz_sensitivity(void) {
@@ -233,29 +235,6 @@ void do_mbgrdviz_fileSelectionBox_savetecdislst(Widget w, XtPointer client_data,
   (void)w;
   (void)call_data;
   mbgrdviz_qt_file_dialog(MBGRDVIZ_SAVETECDISLST, (size_t)client_data, "Save Route as TECDIS LST File", "*");
-}
-
-/*------------------------------------------------------------------------------*/
-/* actions of a later step (starting other programs) */
-void do_mbgrdviz_open_mbedit(Widget w, XtPointer client_data, XtPointer call_data) {
-  (void)w;
-  (void)call_data;
-  mbgrdviz_qt_not_yet((size_t)client_data, "open_mbedit");
-}
-void do_mbgrdviz_open_mbeditviz(Widget w, XtPointer client_data, XtPointer call_data) {
-  (void)w;
-  (void)call_data;
-  mbgrdviz_qt_not_yet((size_t)client_data, "open_mbeditviz");
-}
-void do_mbgrdviz_open_mbnavedit(Widget w, XtPointer client_data, XtPointer call_data) {
-  (void)w;
-  (void)call_data;
-  mbgrdviz_qt_not_yet((size_t)client_data, "open_mbnavedit");
-}
-void do_mbgrdviz_open_mbvelocitytool(Widget w, XtPointer client_data, XtPointer call_data) {
-  (void)w;
-  (void)call_data;
-  mbgrdviz_qt_not_yet((size_t)client_data, "open_mbvelocitytool");
 }
 
 /*------------------------------------------------------------------------------*/

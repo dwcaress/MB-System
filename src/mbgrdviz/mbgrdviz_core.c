@@ -6021,3 +6021,443 @@ void do_mbgrdviz_arearoute_info(size_t instance) {
     mbgrdviz_ui_arearoute_info(info_text);
   }
 }
+/*---------------------------------------------------------------------------------------*/
+void do_mbgrdviz_open_mbedit(Widget w, XtPointer client_data, XtPointer call_data) {
+  int status = MB_SUCCESS;
+
+  /* mbview instance */
+  size_t instance;
+  struct mbview_struct *data;
+  struct mbview_shareddata_struct *shareddata;
+  struct mbview_nav_struct *nav;
+  int nselected;
+
+  /* get source mbview instance */
+  instance = (size_t)client_data;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       w:           %p\n", w);
+    fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+    fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+  }
+
+  /* getting instance from client_data doesn't seem
+      to work so use survey_instance instead */
+  instance = survey_instance;
+  fprintf(stderr, "Called do_mbgrdviz_open_mbedit instance:%zu\n", instance);
+
+  /* check data source for area to bounding desired survey */
+  status = mbview_getdataptr(verbose, instance, &data, &error);
+  status = mbview_getsharedptr(verbose, &shareddata, &error);
+
+  /* check if any nav is selected */
+  nselected = 0;
+  if (status == MB_SUCCESS && shareddata->nnav > 0) {
+    for (int i = 0; i < shareddata->nnav; i++) {
+      nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
+      fprintf(stderr, "Nav %d name:%s path:%s format:%d nselected:%d\n", i, nav->name, nav->pathraw, nav->format,
+              nav->nselected);
+      if (nav->nselected > 0) {
+        nselected += nav->nselected;
+      }
+    }
+  }
+
+  /* open all data files with selected nav into mbedit */
+  if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0) {
+    /* build an argv array directly - no shell, no fixed-size string
+        concatenation - so neither an overlong path nor shell metacharacters
+        in a path can overflow a buffer or be interpreted as commands */
+    char **argv = (char **)malloc((size_t)(1 + 2 * shareddata->nnav + 1) * sizeof(char *));
+    if (argv == NULL) {
+      fprintf(stderr, "\nUnable to allocate memory for mbedit argument list\n");
+      mbgrdviz_ui_bell();
+    }
+    else {
+      int argc = 0;
+      bool alloc_ok = true;
+      argv[argc] = strdup("mbedit");
+      if (argv[argc] == NULL)
+        alloc_ok = false;
+      else
+        argc++;
+      for (int i = 0; alloc_ok && i < shareddata->nnav; i++) {
+        nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
+        if (nav->nselected > 0) {
+          char formatarg[32];
+          char patharg[MB_PATH_MAXLINE + 4];
+          snprintf(formatarg, sizeof(formatarg), "-F%d", nav->format);
+          snprintf(patharg, sizeof(patharg), "-I%s", nav->pathraw);
+          argv[argc] = strdup(formatarg);
+          if (argv[argc] == NULL) {
+            alloc_ok = false;
+            break;
+          }
+          argc++;
+          argv[argc] = strdup(patharg);
+          if (argv[argc] == NULL) {
+            alloc_ok = false;
+            break;
+          }
+          argc++;
+        }
+      }
+
+      if (alloc_ok) {
+        argv[argc] = NULL;
+        fprintf(stderr, "Calling mbedit with %d arguments\n", argc);
+        mbgrdviz_ui_launch(argv);
+      }
+      else {
+        fprintf(stderr, "\nUnable to allocate memory for mbedit arguments\n");
+        mbgrdviz_ui_bell();
+      }
+
+      for (int i = 0; i < argc; i++)
+        free(argv[i]);
+      free(argv);
+    }
+  }
+
+  /* update widgets of all mbview windows */
+  status = mbview_update(verbose, instance, &error);
+  for (unsigned int i = 0; i < MBV_MAX_WINDOWS; i++) {
+    if (i != instance && mbview_id[i])
+      status = mbview_update(verbose, i, &error);
+  }
+}
+/*---------------------------------------------------------------------------------------*/
+void do_mbgrdviz_open_mbeditviz(Widget w, XtPointer client_data, XtPointer call_data) {
+  int status = MB_SUCCESS;
+
+  /* mbview instance */
+  size_t instance;
+  struct mbview_struct *data;
+  struct mbview_shareddata_struct *shareddata;
+  struct mbview_nav_struct *nav;
+  mb_path datalist_file;
+  FILE *dfp;
+  int nselected;
+
+  /* get source mbview instance */
+  instance = (size_t)client_data;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       w:           %p\n", w);
+    fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+    fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+  }
+
+  /* getting instance from client_data doesn't seem
+      to work so use survey_instance instead */
+  instance = survey_instance;
+  fprintf(stderr, "Called do_mbgrdviz_open_mbeditviz instance:%zu\n", instance);
+
+  /* check data source for area to bounding desired survey */
+  status = mbview_getdataptr(verbose, instance, &data, &error);
+  status = mbview_getsharedptr(verbose, &shareddata, &error);
+
+  /* check if any nav is selected */
+  nselected = 0;
+  if (status == MB_SUCCESS && shareddata->nnav > 0) {
+    for (int i = 0; i < shareddata->nnav; i++) {
+      nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
+      nselected += nav->nselected;
+    }
+    if(nselected > 0) {
+      /* create the temporary datalist file securely: a random,
+          non-predictable name created atomically (O_EXCL) by mkstemp() in
+          the system temp directory, rather than a guessable
+          "tmp_datalist_<pid>" name fopen()'ed for write in the current
+          directory - the old approach let anyone who could predict or
+          watch for the pid pre-create (e.g. as a symlink) the target path
+          and have this process write through it */
+      const char *tmpdir = getenv("TMPDIR");
+      if (tmpdir == NULL || tmpdir[0] == '\0')
+        tmpdir = "/tmp";
+      snprintf(datalist_file, sizeof(mb_path), "%s/mbgrdviz_datalist_XXXXXX", tmpdir);
+      const int dfd = mkstemp(datalist_file);
+      dfp = dfd == -1 ? NULL : fdopen(dfd, "w");
+      if (dfp == NULL && dfd != -1)
+        close(dfd);
+      if (dfp != NULL) {
+        for (int i = 0; i < shareddata->nnav; i++) {
+          nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
+          if (nav->nselected > 0) {
+            fprintf(stderr, "Nav %d name:%s path:%s format:%d nselected:%d\n",
+                            i, nav->name, nav->pathraw, nav->format, nav->nselected);
+            fprintf(dfp, "%s %d\n", nav->pathraw, nav->format);
+          }
+        }
+        fclose(dfp);
+
+        char patharg[MB_PATH_MAXLINE + 4];
+        snprintf(patharg, sizeof(patharg), "-I%s", datalist_file);
+        char *argv[5];
+        int argc = 0;
+        bool alloc_ok = true;
+        argv[argc] = strdup("mbeditviz");
+        if (argv[argc] == NULL)
+          alloc_ok = false;
+        else
+          argc++;
+        if (alloc_ok) {
+          argv[argc] = strdup(patharg);
+          if (argv[argc] == NULL)
+            alloc_ok = false;
+          else
+            argc++;
+        }
+        /* explicit datalist format (-1) since the mkstemp() generated
+            datalist_file name no longer carries a recognizable ".mb-1"
+            suffix for mb_get_format() to auto-detect */
+        if (alloc_ok) {
+          argv[argc] = strdup("-F-1");
+          if (argv[argc] == NULL)
+            alloc_ok = false;
+          else
+            argc++;
+        }
+        if (alloc_ok) {
+          argv[argc] = strdup("-R");
+          if (argv[argc] == NULL)
+            alloc_ok = false;
+          else
+            argc++;
+        }
+
+        if (alloc_ok) {
+          argv[argc] = NULL;
+          fprintf(stderr, "Calling mbeditviz -I%s -F-1 -R\n", datalist_file);
+          mbgrdviz_ui_launch(argv);
+        }
+        else {
+          fprintf(stderr, "\nUnable to allocate memory for mbeditviz arguments\n");
+          mbgrdviz_ui_bell();
+        }
+
+        for (int i = 0; i < argc; i++)
+          free(argv[i]);
+      }
+    }
+  }
+
+  /* update widgets of all mbview windows */
+  status = mbview_update(verbose, instance, &error);
+  for (unsigned int i = 0; i < MBV_MAX_WINDOWS; i++) {
+    if (i != instance && mbview_id[i])
+      status = mbview_update(verbose, i, &error);
+  }
+}
+/*---------------------------------------------------------------------------------------*/
+void do_mbgrdviz_open_mbnavedit(Widget w, XtPointer client_data, XtPointer call_data) {
+  int status = MB_SUCCESS;
+
+  /* mbview instance */
+  size_t instance;
+  struct mbview_struct *data;
+  struct mbview_shareddata_struct *shareddata;
+  struct mbview_nav_struct *nav;
+  int nselected;
+
+  /* get source mbview instance */
+  instance = (size_t)client_data;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       w:           %p\n", w);
+    fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+    fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+  }
+
+  /* getting instance from client_data doesn't seem
+      to work so use survey_instance instead */
+  instance = survey_instance;
+  fprintf(stderr, "Called do_mbgrdviz_open_mbnavedit instance:%zu\n", instance);
+
+  /* check data source for area to bounding desired survey */
+  status = mbview_getdataptr(verbose, instance, &data, &error);
+  status = mbview_getsharedptr(verbose, &shareddata, &error);
+
+  /* check if any nav is selected */
+  nselected = 0;
+  if (status == MB_SUCCESS && shareddata->nnav > 0) {
+    for (int i = 0; i < shareddata->nnav; i++) {
+      nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
+      fprintf(stderr, "Nav %d name:%s path:%s format:%d nselected:%d\n", i, nav->name, nav->pathraw, nav->format,
+              nav->nselected);
+      if (nav->nselected > 0) {
+        nselected += nav->nselected;
+      }
+    }
+  }
+
+  /* open all data files with selected nav into mbnavedit */
+  if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0) {
+    char **argv = (char **)malloc((size_t)(1 + 2 * shareddata->nnav + 1) * sizeof(char *));
+    if (argv == NULL) {
+      fprintf(stderr, "\nUnable to allocate memory for mbnavedit argument list\n");
+      mbgrdviz_ui_bell();
+    }
+    else {
+      int argc = 0;
+      bool alloc_ok = true;
+      argv[argc] = strdup("mbnavedit");
+      if (argv[argc] == NULL)
+        alloc_ok = false;
+      else
+        argc++;
+      for (int i = 0; alloc_ok && i < shareddata->nnav; i++) {
+        nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
+        if (nav->nselected > 0) {
+          char formatarg[32];
+          char patharg[MB_PATH_MAXLINE + 4];
+          snprintf(formatarg, sizeof(formatarg), "-F%d", nav->format);
+          snprintf(patharg, sizeof(patharg), "-I%s", nav->pathraw);
+          argv[argc] = strdup(formatarg);
+          if (argv[argc] == NULL) {
+            alloc_ok = false;
+            break;
+          }
+          argc++;
+          argv[argc] = strdup(patharg);
+          if (argv[argc] == NULL) {
+            alloc_ok = false;
+            break;
+          }
+          argc++;
+        }
+      }
+
+      if (alloc_ok) {
+        argv[argc] = NULL;
+        fprintf(stderr, "Calling mbnavedit with %d arguments\n", argc);
+        mbgrdviz_ui_launch(argv);
+      }
+      else {
+        fprintf(stderr, "\nUnable to allocate memory for mbnavedit arguments\n");
+        mbgrdviz_ui_bell();
+      }
+
+      for (int i = 0; i < argc; i++)
+        free(argv[i]);
+      free(argv);
+    }
+  }
+
+  /* update widgets of all mbview windows */
+  status = mbview_update(verbose, instance, &error);
+  for (unsigned int i = 0; i < MBV_MAX_WINDOWS; i++) {
+    if (i != instance && mbview_id[i])
+      status = mbview_update(verbose, i, &error);
+  }
+}
+/*---------------------------------------------------------------------------------------*/
+void do_mbgrdviz_open_mbvelocitytool(Widget w, XtPointer client_data, XtPointer call_data) {
+  int status = MB_SUCCESS;
+
+  /* mbview instance */
+  size_t instance;
+  struct mbview_struct *data;
+  struct mbview_shareddata_struct *shareddata;
+  struct mbview_nav_struct *nav;
+  int nselected;
+
+  /* get source mbview instance */
+  instance = (size_t)client_data;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       w:           %p\n", w);
+    fprintf(stderr, "dbg2       client_data: %p\n", client_data);
+    fprintf(stderr, "dbg2       call_data:   %p\n", call_data);
+  }
+
+  /* getting instance from client_data doesn't seem
+      to work so use survey_instance instead */
+  instance = survey_instance;
+  fprintf(stderr, "Called do_mbgrdviz_open_mbvelocitytool instance:%zu\n", instance);
+
+  /* check data source for area to bounding desired survey */
+  status = mbview_getdataptr(verbose, instance, &data, &error);
+  status = mbview_getsharedptr(verbose, &shareddata, &error);
+
+  /* check if any nav is selected */
+  nselected = 0;
+  if (status == MB_SUCCESS && shareddata->nnav > 0) {
+    for (int i = 0; i < shareddata->nnav; i++) {
+      nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
+      fprintf(stderr, "Nav %d name:%s path:%s format:%d nselected:%d\n", i, nav->name, nav->pathraw, nav->format,
+              nav->nselected);
+      if (nav->nselected > 0) {
+        nselected += nav->nselected;
+      }
+    }
+  }
+
+  /* open all data files with selected nav into mbvelocitytool */
+  if (status == MB_SUCCESS && shareddata->nnav > 0 && nselected > 0) {
+    char **argv = (char **)malloc((size_t)(1 + 2 * shareddata->nnav + 1) * sizeof(char *));
+    if (argv == NULL) {
+      fprintf(stderr, "\nUnable to allocate memory for mbvelocitytool argument list\n");
+      mbgrdviz_ui_bell();
+    }
+    else {
+      int argc = 0;
+      bool alloc_ok = true;
+      argv[argc] = strdup("mbvelocitytool");
+      if (argv[argc] == NULL)
+        alloc_ok = false;
+      else
+        argc++;
+      for (int i = 0; alloc_ok && i < shareddata->nnav; i++) {
+        nav = (struct mbview_nav_struct *)&(shareddata->navs[i]);
+        if (nav->nselected > 0) {
+          char formatarg[32];
+          char patharg[MB_PATH_MAXLINE + 4];
+          snprintf(formatarg, sizeof(formatarg), "-F%d", nav->format);
+          snprintf(patharg, sizeof(patharg), "-I%s", nav->pathraw);
+          argv[argc] = strdup(formatarg);
+          if (argv[argc] == NULL) {
+            alloc_ok = false;
+            break;
+          }
+          argc++;
+          argv[argc] = strdup(patharg);
+          if (argv[argc] == NULL) {
+            alloc_ok = false;
+            break;
+          }
+          argc++;
+        }
+      }
+
+      if (alloc_ok) {
+        argv[argc] = NULL;
+        fprintf(stderr, "Calling mbvelocitytool with %d arguments\n", argc);
+        mbgrdviz_ui_launch(argv);
+      }
+      else {
+        fprintf(stderr, "\nUnable to allocate memory for mbvelocitytool arguments\n");
+        mbgrdviz_ui_bell();
+      }
+
+      for (int i = 0; i < argc; i++)
+        free(argv[i]);
+      free(argv);
+    }
+  }
+
+  /* update widgets of all mbview windows */
+  status = mbview_update(verbose, instance, &error);
+  for (unsigned int i = 0; i < MBV_MAX_WINDOWS; i++) {
+    if (i != instance && mbview_id[i])
+      status = mbview_update(verbose, i, &error);
+  }
+}

@@ -24,6 +24,8 @@
 
 #include "mbgrdviz_qt_window.h"
 
+#include <cstdio>
+
 #include <QAction>
 #include <QApplication>
 #include <QCloseEvent>
@@ -32,6 +34,8 @@
 #include <QLabel>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QProcess>
+#include <QStandardPaths>
 #include <QVBoxLayout>
 
 #include "mbgrdviz_qt_bridge.h"
@@ -124,6 +128,24 @@ MbgrdvizWindow::MbgrdvizWindow() {
 
 MbgrdvizWindow *MbgrdvizWindow::instance() { return main_window; }
 
+QString MbgrdvizWindow::find_tool(const QString &tool, const QString &directory) {
+  /* the Qt versions of the tools */
+  QStringList names;
+  if (tool == QStringLiteral("mbedit") || tool == QStringLiteral("mbvelocitytool"))
+    names << tool + QStringLiteral("-qt");
+  names << tool;
+  for (const QString &name : names) {
+    /* installed next to this program, or in its own directory of a CMake
+       build tree (src/mbedit-qt beside src/mbgrdviz-qt) */
+    QString found = QStandardPaths::findExecutable(name, {directory, directory + QStringLiteral("/../") + name});
+    if (found.isEmpty())
+      found = QStandardPaths::findExecutable(name);
+    if (!found.isEmpty())
+      return found;
+  }
+  return QString();
+}
+
 void MbgrdvizWindow::set_sensitivity(bool open_primary, bool open_other, bool save_site, bool save_route) {
   open_primary_->setEnabled(open_primary);
   for (QAction *action : open_other_)
@@ -184,10 +206,23 @@ void mbgrdviz_qt_file_dialog(int mode, size_t instance, const char *title, const
     main_window->file_dialog(mode, instance, QString::fromLatin1(title), QString::fromLatin1(pattern));
 }
 
-void mbgrdviz_qt_not_yet(size_t instance, const char *what) {
-  (void)instance;
-  QMessageBox::information(main_window, QStringLiteral("MBgrdviz"),
-                           QObject::tr("\"%1\" comes in a later step of the Qt6 port.").arg(QString::fromLatin1(what)));
+void mbgrdviz_qt_launch(const char *const argv[]) {
+  /* as the Motif mbgrdviz, without a shell; QProcess also works on Windows */
+  const QString tool = QString::fromLocal8Bit(argv[0]);
+  const QString program = MbgrdvizWindow::find_tool(tool, QCoreApplication::applicationDirPath());
+  if (program.isEmpty()) {
+    fprintf(stderr, "Unable to find %s\n", argv[0]);
+    QApplication::beep();
+    return;
+  }
+  QStringList arguments;
+  for (int i = 1; argv[i] != nullptr; i++)
+    arguments << QString::fromLocal8Bit(argv[i]);
+  fprintf(stderr, "Starting %s\n", QFile::encodeName(program).constData());
+  if (!QProcess::startDetached(program, arguments)) {
+    fprintf(stderr, "Unable to start %s\n", QFile::encodeName(program).constData());
+    QApplication::beep();
+  }
 }
 
 }  // extern "C"

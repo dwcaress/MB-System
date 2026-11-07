@@ -43,8 +43,9 @@ void mbgrdviz_qt_realtime_path(const char *path);
 void mbgrdviz_qt_sensitivity(bool open_primary, bool open_other, bool save_site, bool save_route);
 /* a file dialog for mode (MBGRDVIZ_OPENGRID and the other MBGRDVIZ_ modes) */
 void mbgrdviz_qt_file_dialog(int mode, size_t instance, const char *title, const char *pattern);
-/* an action of a later step of the port */
-void mbgrdviz_qt_not_yet(size_t instance, const char *what);
+/* start the tool argv[0] with the arguments argv (NULL-terminated) in the
+   background; the Qt version of the tool where one exists */
+void mbgrdviz_qt_launch(const char *const argv[]);
 
 /* the survey generation dialog: the values of its fields (the survey state of
    mbgrdviz_core.c; mode, platform, direction and color are list positions) */
