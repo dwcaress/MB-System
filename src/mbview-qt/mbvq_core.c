@@ -1121,3 +1121,5 @@ void mbv_ui_soundings_bell(void) { mbvq_qt_bell(); }
 int mb3dsoundings_updatecursor(void) { return (MB_SUCCESS); }
 int mb3dsoundings_updatemodetoggles(void) { return (MB_SUCCESS); }
 int mb3dsoundings_updatestatus(void) { return (MB_SUCCESS); }
+int mb3dsoundings_updategui(void) { return (MB_SUCCESS); }
+void mbv_ui_soundings_mousemode(char *text) { (void)text; }

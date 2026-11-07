@@ -1978,4 +1978,840 @@ soundingdata->num_soundings); */
 
   return (mbs_status);
 }
+/*------------------------------------------------------------------------------*/
+/* Soundings window logic moved from mb3dsoundings_callbacks.c (Phase 5a): the
+   callbacks without Motif calls, unchanged, and the toolkit-free parts of the
+   others. */
 
+/* the mouse mode label text (mb3dsoundings_updatelabelmousemode) */
+static mb_path value_text;
+
+void do_mb3dsdg_mouse_toggle(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  /* fprintf(stderr,"Called do_mb3dsdg_mouse_toggle\n"); */
+
+  mb3dsoundings.edit_mode = MBS_EDIT_TOGGLE;
+
+  /* set mouse mode label */
+  mb3dsoundings_updatelabelmousemode();
+
+  /* set edit cursor */
+  mb3dsoundings_updatecursor();
+
+  /* set status label */
+  mb3dsoundings_updatestatus();
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_mouse_pick(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  /* fprintf(stderr,"Called do_mb3dsdg_mouse_pick\n"); */
+
+  mb3dsoundings.edit_mode = MBS_EDIT_PICK;
+
+  /* set mouse mode label */
+  mb3dsoundings_updatelabelmousemode();
+
+  /* set edit cursor */
+  mb3dsoundings_updatecursor();
+
+  /* set status label */
+  mb3dsoundings_updatestatus();
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_mouse_erase(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  /* fprintf(stderr,"Called do_mb3dsdg_mouse_erase\n"); */
+
+  mb3dsoundings.edit_mode = MBS_EDIT_ERASE;
+
+  /* set mouse mode label */
+  mb3dsoundings_updatelabelmousemode();
+
+  /* set edit cursor */
+  mb3dsoundings_updatecursor();
+
+  /* set status label */
+  mb3dsoundings_updatestatus();
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_mouse_restore(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  /* fprintf(stderr,"Called do_mb3dsdg_mouse_restore\n"); */
+
+  mb3dsoundings.edit_mode = MBS_EDIT_RESTORE;
+
+  /* set mouse mode label */
+  mb3dsoundings_updatelabelmousemode();
+
+  /* set edit cursor */
+  mb3dsoundings_updatecursor();
+
+  /* set status label */
+  mb3dsoundings_updatestatus();
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_mouse_grab(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  /* fprintf(stderr,"Called do_mb3dsdg_mouse_grab\n"); */
+
+  mb3dsoundings.edit_mode = MBS_EDIT_GRAB;
+
+  /* set mouse mode label */
+  mb3dsoundings_updatelabelmousemode();
+
+  /* set edit cursor */
+  mb3dsoundings_updatecursor();
+
+  /* set status label */
+  mb3dsoundings_updatestatus();
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_mouse_info(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  /* fprintf(stderr,"Called do_mb3dsdg_mouse_info\n"); */
+
+  mb3dsoundings.edit_mode = MBS_EDIT_INFO;
+
+  /* set mouse mode label */
+  mb3dsoundings_updatelabelmousemode();
+
+  /* set edit cursor */
+  mb3dsoundings_updatecursor();
+
+  /* set status label */
+  mb3dsoundings_updatestatus();
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_resetview(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+
+  /* fprintf(stderr,"Called do_mb3dsdg_view_reset\n"); */
+
+  /* reset view orientation */
+  mb3dsoundings.elevation = 0.0;
+  mb3dsoundings.azimuth = 0.0;
+  mb3dsoundings.exaggeration = 1.0;
+
+  /* rescale */
+  mb3dsoundings_scalez(mbs_verbose, &mbs_error);
+  mb3dsoundings_updatestatus();
+
+  /* replot the data */
+  mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_action_applybias(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+
+  /* fprintf(stderr,"Called do_mb3dsdg_action_applybias\n"); */
+
+  /* send bias parameters to calling program to be applied */
+  if (mb3dsoundings.mb3dsoundings_biasapply_notify != NULL)
+    (mb3dsoundings.mb3dsoundings_biasapply_notify)(
+        0.01 * ((double)mb3dsoundings.irollbias), 0.01 * ((double)mb3dsoundings.ipitchbias),
+        0.01 * ((double)mb3dsoundings.iheadingbias), 0.01 * ((double)mb3dsoundings.itimelag),
+      0.0001 * ((double)mb3dsoundings.isnell));
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_action_flagsparsevoxels_A(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+
+  /* fprintf(stderr,"Called do_mb3dsdg_action_flagsparsevoxels_A\n"); */
+
+  /* send bias parameters to calling program to be applied */
+  if (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify != NULL)
+    (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify)(1, 10);
+
+  /* replot the data */
+  mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_action_flagsparsevoxels_B(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+
+  /* fprintf(stderr,"Called do_mb3dsdg_action_flagsparsevoxels_B\n"); */
+
+  /* send bias parameters to calling program to be applied */
+  if (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify != NULL)
+    (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify)(1, 2);
+
+  /* replot the data */
+  mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_action_flagsparsevoxels_C(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+
+  /* fprintf(stderr,"Called do_mb3dsdg_action_flagsparsevoxels_C\n"); */
+
+  /* send bias parameters to calling program to be applied */
+  if (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify != NULL)
+    (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify)(4, 10);
+
+  /* replot the data */
+  mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_action_flagsparsevoxels_D(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+
+  /* fprintf(stderr,"Called do_mb3dsdg_action_flagsparsevoxels_D\n"); */
+
+  /* send bias parameters to calling program to be applied */
+  if (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify != NULL)
+    (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify)(4, 2);
+
+  /* replot the data */
+  mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_action_flagsparsevoxels_E(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+
+  /* fprintf(stderr,"Called do_mb3dsdg_action_flagsparsevoxels_E\n"); */
+
+  /* send bias parameters to calling program to be applied */
+  if (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify != NULL)
+    (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify)(8, 10);
+
+  /* replot the data */
+  mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_action_flagsparsevoxels_F(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+
+  /* fprintf(stderr,"Called do_mb3dsdg_action_flagsparsevoxels_F\n"); */
+
+  /* send bias parameters to calling program to be applied */
+  if (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify != NULL)
+    (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify)(8, 2);
+
+  /* replot the data */
+  mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_action_colorsoundingsblack(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+
+  /* fprintf(stderr,"Called do_mb3dsdg_action_colorsoundingsblack\n"); */
+
+  /* notify calling program to color current selected unflagged soundings */
+  if (mb3dsoundings.mb3dsoundings_colorsoundings_notify != NULL)
+    (mb3dsoundings.mb3dsoundings_colorsoundings_notify)(MBV_COLOR_BLACK);
+
+  /* replot the data */
+  mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_action_colorsoundingsred(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+
+  /* fprintf(stderr,"Called do_mb3dsdg_action_colorsoundingsred\n"); */
+
+  /* notify calling program to color current selected unflagged soundings */
+  if (mb3dsoundings.mb3dsoundings_colorsoundings_notify != NULL)
+    (mb3dsoundings.mb3dsoundings_colorsoundings_notify)(MBV_COLOR_RED);
+
+  /* replot the data */
+  mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_action_colorsoundingsyellow(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+
+  /* fprintf(stderr,"Called do_mb3dsdg_action_colorsoundingsyellow\n"); */
+
+  /* notify calling program to color current selected unflagged soundings */
+  if (mb3dsoundings.mb3dsoundings_colorsoundings_notify != NULL)
+    (mb3dsoundings.mb3dsoundings_colorsoundings_notify)(MBV_COLOR_YELLOW);
+
+  /* replot the data */
+  mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_action_colorsoundingsgreen(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+
+  /* fprintf(stderr,"Called do_mb3dsdg_action_colorsoundingsgreen\n"); */
+
+  /* notify calling program to color current selected unflagged soundings */
+  if (mb3dsoundings.mb3dsoundings_colorsoundings_notify != NULL)
+    (mb3dsoundings.mb3dsoundings_colorsoundings_notify)(MBV_COLOR_GREEN);
+
+  /* replot the data */
+  mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_action_colorsoundingsbluegreen(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+
+  /* fprintf(stderr,"Called do_mb3dsdg_action_colorsoundingsbluegreen\n"); */
+
+  /* notify calling program to color current selected unflagged soundings */
+  if (mb3dsoundings.mb3dsoundings_colorsoundings_notify != NULL)
+    (mb3dsoundings.mb3dsoundings_colorsoundings_notify)(MBV_COLOR_BLUEGREEN);
+
+  /* replot the data */
+  mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_action_colorsoundingsblue(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+
+  /* fprintf(stderr,"Called do_mb3dsdg_action_colorsoundingsblue\n"); */
+
+  /* notify calling program to color current selected unflagged soundings */
+  if (mb3dsoundings.mb3dsoundings_colorsoundings_notify != NULL)
+    (mb3dsoundings.mb3dsoundings_colorsoundings_notify)(MBV_COLOR_BLUE);
+
+  /* replot the data */
+  mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_action_colorsoundingspurple(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+
+  /* fprintf(stderr,"Called do_mb3dsdg_action_colorsoundingspurple\n"); */
+
+  /* notify calling program to color current selected unflagged soundings */
+  if (mb3dsoundings.mb3dsoundings_colorsoundings_notify != NULL)
+    (mb3dsoundings.mb3dsoundings_colorsoundings_notify)(MBV_COLOR_PURPLE);
+
+  /* replot the data */
+  mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_action_optimizebiasvalues_r(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+
+  /* fprintf(stderr,"Called do_mb3dsdg_action_optimizebiasvalues_r\n"); */
+
+  /* notify calling program to color current selected unflagged soundings */
+  if (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify != NULL) {
+    /* get bias parameters */
+    double rollbias = 0.01 * ((double)mb3dsoundings.irollbias);
+    double pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
+    double headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
+    double timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+    double snell = 0.0001 * ((double)mb3dsoundings.isnell);
+
+    (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_R, &rollbias, &pitchbias, &headingbias,
+                                                            &timelag, &snell);
+
+    /* set the bias parameters stored for the gui */
+    mb3dsoundings.irollbias = (int)round(100 * rollbias);
+    mb3dsoundings.ipitchbias = (int)round(100 * pitchbias);
+    mb3dsoundings.iheadingbias = (int)round(100 * headingbias);
+    mb3dsoundings.itimelag = (int)round(100 * timelag);
+    mb3dsoundings.isnell = (int)round(10000 * snell);
+
+    /* update the gui */
+    mb3dsoundings_updategui();
+
+    /* rescale data to the gl coordinates */
+    mb3dsoundings_scale(mbs_verbose, &mbs_error);
+    mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
+
+    /* replot the data */
+    mb3dsoundings_plot(mbs_verbose, &mbs_error);
+  }
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_action_optimizebiasvalues_p(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  double rollbias;
+  double pitchbias;
+  double headingbias;
+  double timelag;
+  double snell;
+
+  /* fprintf(stderr,"Called do_mb3dsdg_action_optimizebiasvalues_p\n"); */
+
+  /* notify calling program to color current selected unflagged soundings */
+  if (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify != NULL) {
+    /* get bias parameters */
+    rollbias = 0.01 * ((double)mb3dsoundings.irollbias);
+    pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
+    headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
+    timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+    snell = 0.0001 * ((double)mb3dsoundings.isnell);
+
+    (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_P, &rollbias, &pitchbias, &headingbias,
+                                                            &timelag, &snell);
+
+    /* set the bias parameters stored for the gui */
+    mb3dsoundings.irollbias = (int)round(100 * rollbias);
+    mb3dsoundings.ipitchbias = (int)round(100 * pitchbias);
+    mb3dsoundings.iheadingbias = (int)round(100 * headingbias);
+    mb3dsoundings.itimelag = (int)round(100 * timelag);
+    mb3dsoundings.isnell = (int)round(10000 * snell);
+
+    /* update the gui */
+    mb3dsoundings_updategui();
+
+    /* rescale data to the gl coordinates */
+    mb3dsoundings_scale(mbs_verbose, &mbs_error);
+    mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
+
+    /* replot the data */
+    mb3dsoundings_plot(mbs_verbose, &mbs_error);
+  }
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_action_optimizebiasvalues_h(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+
+  /* fprintf(stderr,"Called do_mb3dsdg_action_optimizebiasvalues_h\n"); */
+
+  /* notify calling program to color current selected unflagged soundings */
+  if (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify != NULL) {
+    /* get bias parameters */
+    double rollbias = 0.01 * ((double)mb3dsoundings.irollbias);
+    double pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
+    double headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
+    double timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+    double snell = 0.0001 * ((double)mb3dsoundings.isnell);
+
+    (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_H, &rollbias, &pitchbias, &headingbias,
+                                                            &timelag, &snell);
+
+    /* set the bias parameters stored for the gui */
+    mb3dsoundings.irollbias = (int)round(100 * rollbias);
+    mb3dsoundings.ipitchbias = (int)round(100 * pitchbias);
+    mb3dsoundings.iheadingbias = (int)round(100 * headingbias);
+    mb3dsoundings.itimelag = (int)round(100 * timelag);
+    mb3dsoundings.isnell = (int)round(10000 * snell);
+
+    /* update the gui */
+    mb3dsoundings_updategui();
+
+    /* rescale data to the gl coordinates */
+    mb3dsoundings_scale(mbs_verbose, &mbs_error);
+    mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
+
+    /* replot the data */
+    mb3dsoundings_plot(mbs_verbose, &mbs_error);
+  }
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_action_optimizebiasvalues_rp(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  double rollbias;
+  double pitchbias;
+  double headingbias;
+  double timelag;
+  double snell;
+
+  /* fprintf(stderr,"Called do_mb3dsdg_action_optimizebiasvalues_rp\n"); */
+
+  /* notify calling program to color current selected unflagged soundings */
+  if (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify != NULL) {
+    /* get bias parameters */
+    rollbias = 0.01 * ((double)mb3dsoundings.irollbias);
+    pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
+    headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
+    timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+    snell = 0.0001 * ((double)mb3dsoundings.isnell);
+
+    (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_RP, &rollbias, &pitchbias,
+                                                            &headingbias, &timelag, &snell);
+
+    /* set the bias parameters stored for the gui */
+    mb3dsoundings.irollbias = (int)round(100 * rollbias);
+    mb3dsoundings.ipitchbias = (int)round(100 * pitchbias);
+    mb3dsoundings.iheadingbias = (int)round(100 * headingbias);
+    mb3dsoundings.itimelag = (int)round(100 * timelag);
+    mb3dsoundings.isnell = (int)round(10000 * snell);
+
+    /* update the gui */
+    mb3dsoundings_updategui();
+
+    /* rescale data to the gl coordinates */
+    mb3dsoundings_scale(mbs_verbose, &mbs_error);
+    mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
+
+    /* replot the data */
+    mb3dsoundings_plot(mbs_verbose, &mbs_error);
+  }
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_action_optimizebiasvalues_rph(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  double rollbias;
+  double pitchbias;
+  double headingbias;
+  double timelag;
+  double snell;
+
+  /* fprintf(stderr,"Called do_mb3dsdg_action_optimizebiasvalues_rph\n"); */
+
+  /* notify calling program to color current selected unflagged soundings */
+  if (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify != NULL) {
+    /* get bias parameters */
+    rollbias = 0.01 * ((double)mb3dsoundings.irollbias);
+    pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
+    headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
+    timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+    snell = 0.0001 * ((double)mb3dsoundings.isnell);
+
+    (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_RPH, &rollbias, &pitchbias,
+                                                            &headingbias, &timelag, &snell);
+
+    /* set the bias parameters stored for the gui */
+    mb3dsoundings.irollbias = (int)round(100 * rollbias);
+    mb3dsoundings.ipitchbias = (int)round(100 * pitchbias);
+    mb3dsoundings.iheadingbias = (int)round(100 * headingbias);
+    mb3dsoundings.itimelag = (int)round(100 * timelag);
+    mb3dsoundings.isnell = (int)round(10000 * snell);
+
+    /* update the gui */
+    mb3dsoundings_updategui();
+
+    /* rescale data to the gl coordinates */
+    mb3dsoundings_scale(mbs_verbose, &mbs_error);
+    mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
+
+    /* replot the data */
+    mb3dsoundings_plot(mbs_verbose, &mbs_error);
+  }
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_action_optimizebiasvalues_t(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+  /* fprintf(stderr,"Called do_mb3dsdg_action_optimizebiasvalues_rph\n"); */
+
+  /* notify calling program to color current selected unflagged soundings */
+  if (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify != NULL) {
+    /* get bias parameters */
+    double rollbias = 0.01 * ((double)mb3dsoundings.irollbias);
+    double pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
+    double headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
+    double timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+    double snell = 0.0001 * ((double)mb3dsoundings.isnell);
+
+    (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_T, &rollbias, &pitchbias, &headingbias,
+                                                            &timelag, &snell);
+
+    /* set the bias parameters stored for the gui */
+    mb3dsoundings.irollbias = (int)round(100 * rollbias);
+    mb3dsoundings.ipitchbias = (int)round(100 * pitchbias);
+    mb3dsoundings.iheadingbias = (int)round(100 * headingbias);
+    mb3dsoundings.itimelag = (int)round(100 * timelag);
+    mb3dsoundings.isnell = (int)round(10000 * snell);
+
+    /* update the gui */
+    mb3dsoundings_updategui();
+
+    /* rescale data to the gl coordinates */
+    mb3dsoundings_scale(mbs_verbose, &mbs_error);
+    mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
+
+    /* replot the data */
+    mb3dsoundings_plot(mbs_verbose, &mbs_error);
+  }
+}
+/*------------------------------------------------------------------------------*/
+void do_mb3dsdg_action_optimizebiasvalues_s(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;  // Unused parameter
+  (void)client_data;  // Unused parameter
+  (void)call_data;  // Unused parameter
+  // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
+
+  /* fprintf(stderr,"Called do_mb3dsdg_action_optimizebiasvalues_rph\n"); */
+
+  /* notify calling program to color current selected unflagged soundings */
+  if (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify != NULL) {
+    /* get bias parameters */
+    double rollbias = 0.01 * ((double)mb3dsoundings.irollbias);
+    double pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
+    double headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
+    double timelag = 0.01 * ((double)mb3dsoundings.itimelag);
+    double snell = 0.0001 * ((double)mb3dsoundings.isnell);
+
+    (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_S, &rollbias, &pitchbias, &headingbias,
+                                                            &timelag, &snell);
+
+    /* set the bias parameters stored for the gui */
+    mb3dsoundings.irollbias = (int)round(100 * rollbias);
+    mb3dsoundings.ipitchbias = (int)round(100 * pitchbias);
+    mb3dsoundings.iheadingbias = (int)round(100 * headingbias);
+    mb3dsoundings.itimelag = (int)round(100 * timelag);
+    mb3dsoundings.isnell = (int)round(10000 * snell);
+
+    /* update the gui */
+    mb3dsoundings_updategui();
+
+    /* rescale data to the gl coordinates */
+    mb3dsoundings_scale(mbs_verbose, &mbs_error);
+    mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
+
+    /* replot the data */
+    mb3dsoundings_plot(mbs_verbose, &mbs_error);
+  }
+}
+/*------------------------------------------------------------------------------*/
+int mb3dsoundings_updatelabelmousemode() {
+  /* set mouse mode label */
+  if (mb3dsoundings.mouse_mode == MBS_MOUSE_PANZOOM) {
+    if (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE) {
+      snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Toggle)\":t\"M: Pan\"\"R: Zoom\"");
+    }
+    else if (mb3dsoundings.edit_mode == MBS_EDIT_PICK) {
+      snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Pick)\":t\"M: Pan\"\"R: Zoom\"");
+    }
+    else if (mb3dsoundings.edit_mode == MBS_EDIT_ERASE) {
+      snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Erase)\":t\"M: Pan\"\"R: Zoom\"");
+    }
+    else if (mb3dsoundings.edit_mode == MBS_EDIT_RESTORE) {
+      snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Restore)\":t\"M: Pan\"\"R: Zoom\"");
+    }
+    else if (mb3dsoundings.edit_mode == MBS_EDIT_GRAB) {
+      snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Grab)\":t\"M: Pan\"\"R: Zoom\"");
+    }
+    else if (mb3dsoundings.edit_mode == MBS_EDIT_INFO) {
+      snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Info)\":t\"M: Pan\"\"R: Zoom\"");
+    }
+  }
+  else /* if (mb3dsoundings.mouse_mode == MBS_MOUSE_ROTATE) */ {
+    if (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE) {
+      snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Toggle)\":t\"M: Rotate Soundings\"\"R: exaggeration\"");
+    }
+    else if (mb3dsoundings.edit_mode == MBS_EDIT_PICK) {
+      snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Pick)\":t\"M: Rotate Soundings\"\"R: exaggeration\"");
+    }
+    else if (mb3dsoundings.edit_mode == MBS_EDIT_ERASE) {
+      snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Erase)\":t\"M: Rotate Soundings\"\"R: exaggeration\"");
+    }
+    else if (mb3dsoundings.edit_mode == MBS_EDIT_RESTORE) {
+      snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Restore)\":t\"M: Rotate Soundings\"\"R: exaggeration\"");
+    }
+    else if (mb3dsoundings.edit_mode == MBS_EDIT_GRAB) {
+      snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Grab)\":t\"M: Rotate Soundings\"\"R: exaggeration\"");
+    }
+    else if (mb3dsoundings.edit_mode == MBS_EDIT_INFO) {
+      snprintf(value_text, sizeof(value_text), ":::t\"Mouse Mode:\":t\"L: Edit (Info)\":t\"M: Rotate Soundings\"\"R: exaggeration\"");
+    }
+  }
+  mbv_ui_soundings_mousemode(value_text);
+
+  return (mbs_status);
+}
+/*------------------------------------------------------------------------------*/
+/* the bias values (irollbias ... isnell) changed: send them to the calling
+   program, rescale and replot (the bias sliders) */
+void mb3dsoundings_bias_changed(void) {
+  /* send bias parameters to calling program */
+  if (mb3dsoundings.mb3dsoundings_bias_notify != NULL)
+    (mb3dsoundings.mb3dsoundings_bias_notify)(
+        0.01 * ((double)mb3dsoundings.irollbias), 0.01 * ((double)mb3dsoundings.ipitchbias),
+        0.01 * ((double)mb3dsoundings.iheadingbias), 0.01 * ((double)mb3dsoundings.itimelag),
+      0.0001 * ((double)mb3dsoundings.isnell));
+
+  /* rescale data to the gl coordinates */
+  mb3dsoundings_scale(mbs_verbose, &mbs_error);
+  mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
+
+  /* replot the data */
+  mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+/*------------------------------------------------------------------------------*/
+/* a view toggle of the soundings window changed (MBS_VIEWTOGGLE_*) */
+void mb3dsoundings_setviewtoggle(int toggle, bool state) {
+  if (toggle == MBS_VIEWTOGGLE_FLAGGED)
+    mb3dsoundings.view_flagged = state;
+  else if (toggle == MBS_VIEWTOGGLE_SECONDARY)
+    mb3dsoundings.view_secondary = state;
+  else if (toggle == MBS_VIEWTOGGLE_BOUNDINGBOX)
+    mb3dsoundings.view_boundingbox = state;
+  else if (toggle == MBS_VIEWTOGGLE_SCALEWITHFLAGGED)
+    mb3dsoundings.view_scalewithflagged = state;
+
+  /* replot the data */
+  if (toggle == MBS_VIEWTOGGLE_SCALEWITHFLAGGED)
+    mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
+  mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+/*------------------------------------------------------------------------------*/
+/* how profiles are drawn (MBS_VIEW_PROFILES_*) */
+void mb3dsoundings_setprofiles(int mode) {
+  mb3dsoundings.view_profiles = mode;
+
+  /* replot the data */
+  mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+/*------------------------------------------------------------------------------*/
+/* how soundings are coloured (MBS_VIEW_COLOR_*) */
+void mb3dsoundings_setcolor(int mode) {
+  mb3dsoundings.view_color = mode;
+
+  /* replot the data */
+  mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+/*------------------------------------------------------------------------------*/
+/* what the middle and right mouse buttons do (MBS_MOUSE_*) */
+void mb3dsoundings_setmousemode(int mode) {
+  mb3dsoundings.mouse_mode = mode;
+
+  /* set mouse mode label */
+  mb3dsoundings_updatelabelmousemode();
+}
+/*------------------------------------------------------------------------------*/
+/* the soundings to show: print their statistics, set the data pointer and
+   scale it (the data part of mb3dsoundings_open) */
+int mb3dsoundings_setdata(int verbose, struct mb3dsoundings_struct *soundingdata, int *error) {
+  /* print out some statistics of the selected soundings */
+  struct mb3dsoundings_sounding_struct *soundings = soundingdata->soundings;
+  int num_soundings = 0;
+  int num_soundings_null = 0;
+  int num_soundings_unflagged = 0;
+  int num_soundings_flagged = 0;
+  int num_soundings_flagged_manual = 0;
+  int num_soundings_flagged_sonar = 0;
+  int num_soundings_flagged_filter = 0;
+  int num_soundings_flagged_filter2 = 0;
+  int num_soundings_flagged_secondary = 0;
+  int num_soundings_flagged_interpolated = 0;
+  for (int i = 0; i < soundingdata->num_soundings; i++) {
+    num_soundings++;
+    num_soundings_null += mb_beam_check_flag_null(soundings[i].beamflag);
+    num_soundings_unflagged += mb_beam_ok(soundings[i].beamflag);
+    num_soundings_flagged += mb_beam_check_flag_flagged(soundings[i].beamflag);
+    num_soundings_flagged_manual += mb_beam_check_flag_manual(soundings[i].beamflag);
+    num_soundings_flagged_sonar += mb_beam_check_flag_sonar(soundings[i].beamflag);
+    num_soundings_flagged_filter += mb_beam_check_flag_filter(soundings[i].beamflag);
+    num_soundings_flagged_filter2 += mb_beam_check_flag_filter2(soundings[i].beamflag);
+    num_soundings_flagged_secondary += mb_beam_check_flag_multipick(soundings[i].beamflag);
+    num_soundings_flagged_interpolated += mb_beam_check_flag_interpolate(soundings[i].beamflag);
+  }
+  //if (verbose) {
+    fprintf(stdout, "\nMBeditviz 3D Sounding View:\n");
+    fprintf(stdout, "  Soundings:                        %d\n", num_soundings);
+    fprintf(stdout, "  Null Soundings:                   %d\n", num_soundings_null);
+    fprintf(stdout, "  Unflagged Soundings:              %d\n", num_soundings_unflagged);
+    fprintf(stdout, "  Flagged Soundings:                %d\n", num_soundings_flagged);
+    fprintf(stdout, "  Manual Flagged Soundings:         %d\n", num_soundings_flagged_manual);
+    fprintf(stdout, "  Sonar Flagged Soundings:          %d\n", num_soundings_flagged_sonar);
+    fprintf(stdout, "  Filter Flagged Soundings:         %d\n", num_soundings_flagged_filter);
+    fprintf(stdout, "  Filter2 Flagged Soundings:        %d\n", num_soundings_flagged_filter2);
+    fprintf(stdout, "  Secondary Flagged Soundings:      %d\n", num_soundings_flagged_secondary);
+    fprintf(stdout, "  Interpolated Flagged Soundings:   %d\n", num_soundings_flagged_interpolated);
+  //}
+
+  /* set the data pointer */
+  mb3dsoundings.soundingdata = (struct mb3dsoundings_struct *)soundingdata;
+  mb3dsoundings_scale(verbose, error);
+
+  /* reset info flag */
+  mb3dsoundings.last_sounding_defined = false;
+  mb3dsoundings.last_sounding_edited = 0;
+
+  return (mbs_status);
+}
+/*------------------------------------------------------------------------------*/
+/* reset the soundings window state, keeping the bias values (the reset part
+   of mb3dsoundings_end) */
+void mb3dsoundings_reset_keepbias(void) {
+  /* reinitialize parameters, but keep the patch test bias values: the
+   * calling application keeps applying them (e.g. mbeditviz regrids
+   * with the values returned by mb3dsoundings_get_bias_values()), so the
+   * sliders must still show them when the window is reopened */
+  const int irollbias = mb3dsoundings.irollbias;
+  const int ipitchbias = mb3dsoundings.ipitchbias;
+  const int iheadingbias = mb3dsoundings.iheadingbias;
+  const int itimelag = mb3dsoundings.itimelag;
+  const int isnell = mb3dsoundings.isnell;
+  mb3dsoundings_reset();
+  mb3dsoundings.irollbias = irollbias;
+  mb3dsoundings.ipitchbias = ipitchbias;
+  mb3dsoundings.iheadingbias = iheadingbias;
+  mb3dsoundings.itimelag = itimelag;
+  mb3dsoundings.isnell = isnell;
+}
+/*------------------------------------------------------------------------------*/
+/* the soundings window was hidden: tell the calling program */
+void mb3dsoundings_dismissed(void) {
+  mb3dsoundings.init = MBS_WINDOW_HIDDEN;
+  (mb3dsoundings.mb3dsoundings_dismiss_notify)();
+}

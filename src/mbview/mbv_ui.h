@@ -53,7 +53,8 @@
  *   mbv_ui_motif.c: mbview_updatenavlist, mbview_updateroutelist,
  *     mbview_updatesitelist
  *   mb3dsoundings_callbacks.c: mb3dsoundings_updatecursor,
- *     mb3dsoundings_updatemodetoggles, mb3dsoundings_updatestatus
+ *     mb3dsoundings_updatemodetoggles, mb3dsoundings_updatestatus,
+ *     mb3dsoundings_updategui
  */
 
 #ifndef MBVIEW_MBV_UI_H
@@ -95,6 +96,10 @@ void mbv_ui_soundings_cursor(int cursor);
 
 /* signal a refused or invalid action in the 3D soundings view */
 void mbv_ui_soundings_bell(void);
+
+/* show the mouse mode label text of the 3D soundings view (a label string in
+   Motif "BX" form) */
+void mbv_ui_soundings_mousemode(char *text);
 
 /* view values that mouse dragging changes, shown in the view control dialogs */
 #define MBV_VALUES_VIEW_2DOFFSET 0      /* view->offset2d_x, offset2d_y */
