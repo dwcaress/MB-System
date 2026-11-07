@@ -72,8 +72,61 @@ bool mbvq_c_display_3d(size_t instance);
 void mbvq_c_set_mouse_mode(size_t instance, int mode);
 const char *mbvq_c_title(size_t instance);
 void mbvq_c_geometry(size_t instance, int *xo, int *yo, int *width, int *height);
-/* the dismiss callback of the program, as the Motif dismiss button calls it */
-void mbvq_c_dismiss(size_t instance);
+/* close an instance, as the Motif Dismiss menu does (mbview_destroy) */
+void mbvq_c_destroy(size_t instance);
+/* the Clear, Reset and Full buttons */
+void mbvq_c_clearpicks(size_t instance);
+void mbvq_c_resetview(size_t instance);
+void mbvq_c_fullrender(size_t instance);
+
+/* View menu items, in the order of the Motif View menu */
+#define MBVQ_VIEW_DISPLAY_2D 0
+#define MBVQ_VIEW_DISPLAY_3D 1
+#define MBVQ_VIEW_GRID_PRIMARY 2
+#define MBVQ_VIEW_GRID_PRIMARYSLOPE 3
+#define MBVQ_VIEW_GRID_SECONDARY 4
+#define MBVQ_VIEW_HISTOGRAM 5
+#define MBVQ_VIEW_SHADE_NONE 6
+#define MBVQ_VIEW_SHADE_ILLUMINATION 7
+#define MBVQ_VIEW_SHADE_SLOPE 8
+#define MBVQ_VIEW_SHADE_OVERLAY 9
+#define MBVQ_VIEW_CONTOUR 10
+#define MBVQ_VIEW_SITE 11
+#define MBVQ_VIEW_ROUTE 12
+#define MBVQ_VIEW_NAV 13
+#define MBVQ_VIEW_NAVSWATHBOUNDS 14
+#define MBVQ_VIEW_NAVDRAPE 15
+#define MBVQ_VIEW_VECTOR 16
+#define MBVQ_VIEW_POLYLINE 17
+#define MBVQ_VIEW_POLYGON 18
+#define MBVQ_VIEW_GISPOINT 19
+#define MBVQ_VIEW_COLORTABLE_HAXBY 20
+#define MBVQ_VIEW_COLORTABLE_BRIGHT 21
+#define MBVQ_VIEW_COLORTABLE_MUTED 22
+#define MBVQ_VIEW_COLORTABLE_GRAY 23
+#define MBVQ_VIEW_COLORTABLE_FLAT 24
+#define MBVQ_VIEW_COLORTABLE_SEALEVEL1 25
+#define MBVQ_VIEW_COLORTABLE_SEALEVEL2 26
+#define MBVQ_VIEW_PROFILE 27
+#define MBVQ_VIEW_ITEMS 28
+
+/* mouse modes, indexed by MBV_MOUSE_* (0 to 8) */
+#define MBVQ_MOUSE_MODES 9
+
+/* what the window shows: the state of the menu items and mouse modes */
+struct mbvq_state {
+	bool view_checked[MBVQ_VIEW_ITEMS];
+	bool view_enabled[MBVQ_VIEW_ITEMS];
+	int mouse_mode;
+	bool mouse_enabled[MBVQ_MOUSE_MODES];
+	const char *mouse_label[MBVQ_MOUSE_MODES];
+};
+void mbvq_c_state(size_t instance, struct mbvq_state *state);
+/* a View menu item was chosen; value is the new state of a toggle */
+void mbvq_c_view(size_t instance, int item, bool value);
+
+/* Action menu */
+void mbvq_c_action(size_t instance, int index);
 
 /* ---- implemented by the Qt half ---- */
 
@@ -97,6 +150,10 @@ void mbvq_qt_bell(void);
 void mbvq_qt_cursor(size_t instance, int cursor);
 /* view values changed by dragging (MBV_VALUES_*) */
 void mbvq_qt_values_changed(size_t instance, int values);
+/* Action menu: an item (index in the order added) or a separator was added */
+void mbvq_qt_add_action(size_t instance, int index, const char *label);
+void mbvq_qt_add_action_separator(size_t instance);
+void mbvq_qt_action_enabled(size_t instance, int index, bool enabled);
 /* run mbvq_c_work(instance) after delay_ms milliseconds */
 void mbvq_qt_schedule_work(size_t instance, int delay_ms);
 

@@ -22,8 +22,9 @@
  *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * The window of an mbview instance: the map view of the backend, the
- * mouse mode controls, the pick information and the status line.
+ * The window of an mbview instance: the map view of the backend, the View,
+ * Mouse, Action and Dismiss menus, the mouse mode buttons, the pick
+ * information and the status line.
  */
 
 #ifndef MBVIEW_QT_MBVQ_WINDOW_H
@@ -32,11 +33,15 @@
 #include <QMainWindow>
 #include <QString>
 #include <cstddef>
+#include <vector>
+
+#include "mbvq_bridge.h"
 
 class QAction;
 class QActionGroup;
 class QButtonGroup;
 class QLabel;
+class QMenu;
 class QRadioButton;
 
 namespace mbvq {
@@ -46,28 +51,38 @@ class MapWindow final : public QMainWindow {
   explicit MapWindow(size_t instance);
 
   QWidget *map_view() const { return map_view_; }
-  /* show the mouse mode and the view toggles of the core */
+  /* delete the map view now, while Qt and its OpenGL contexts are alive; the
+     window itself may be deleted later, even during the exit of the program */
+  void delete_map_view();
+  /* show the state of the core: checked and enabled menu items, mouse modes */
   void refresh_modes();
   void set_status(const QString &text);
   /* a label the core writes (MBVQ_LABEL_*) */
   void set_label(int label, const QString &text);
   QString label(int label) const;
   void set_map_cursor(int cursor);
+  /* Action menu */
+  void add_action(int index, const QString &label);
+  void add_action_separator();
+  void set_action_enabled(int index, bool enabled);
 
  protected:
   void closeEvent(QCloseEvent *event) override;
 
  private:
-  static constexpr int kMouseModes = 9;
+  void build_view_menu();
+
   size_t instance_;
   QWidget *map_view_ = nullptr;
   QLabel *status_ = nullptr;
   QLabel *pick_info_ = nullptr;
-  QString labels_[3];
-  QActionGroup *mouse_actions_ = nullptr;
-  QButtonGroup *mouse_buttons_ = nullptr;
-  QAction *mouse_action_[kMouseModes] = {};
-  QRadioButton *mouse_button_[kMouseModes] = {};
+  QString labels_[MBVQ_LABEL_OTHER];
+  QAction *view_action_[MBVQ_VIEW_ITEMS] = {};
+  QAction *mouse_action_[MBVQ_MOUSE_MODES] = {};
+  QRadioButton *mouse_button_[MBVQ_MOUSE_MODES] = {};
+  QMenu *action_menu_ = nullptr;
+  std::vector<QAction *> actions_;
+  bool closing_ = false;
 };
 
 }  // namespace mbvq

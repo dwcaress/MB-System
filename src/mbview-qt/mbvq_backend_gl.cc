@@ -67,6 +67,7 @@ class GlMapView final : public QOpenGLWidget {
   bool defer(int rez);
 
  protected:
+  void initializeGL() override;
   void resizeGL(int width, int height) override;
   void paintGL() override;
   bool event(QEvent *qevent) override;
@@ -75,6 +76,8 @@ class GlMapView final : public QOpenGLWidget {
   int pixel_width() const { return static_cast<int>(std::lround(width() * devicePixelRatioF())); }
   int pixel_height() const { return static_cast<int>(std::lround(height() * devicePixelRatioF())); }
   void deliver(const struct mbv_input_event &event);
+  /* free the OpenGL objects of this view while its context still exists */
+  void release_gl();
 
   size_t instance_;
   std::deque<int> queue_;
@@ -91,11 +94,19 @@ GlMapView::GlMapView(size_t instance, QWidget *parent) : QOpenGLWidget(parent), 
 
 GlMapView::~GlMapView() {
   views[instance_] = nullptr;
-  if (pick_fbo_) {
-    makeCurrent();
-    pick_fbo_.reset();
-    doneCurrent();
-  }
+  release_gl();
+}
+
+void GlMapView::initializeGL() {
+  connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, [this] { release_gl(); }, Qt::DirectConnection);
+}
+
+void GlMapView::release_gl() {
+  if (!pick_fbo_)
+    return;
+  makeCurrent();
+  pick_fbo_.reset();
+  doneCurrent();
 }
 
 bool GlMapView::defer(int rez) {

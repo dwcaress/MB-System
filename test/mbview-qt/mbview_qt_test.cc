@@ -30,7 +30,10 @@
  *                                 picks made with mouse events
  *   mbview_qt_test --show [--3d] [grid]   opens a window to use by hand; with
  *                                 MBVIEW_QT_TEST_SNAPSHOT=file it saves the first
- *                                 full resolution drawing and quits
+ *                                 full resolution drawing and quits; with
+ *                                 MBVIEW_QT_TEST_CLOSE also set, it picks and
+ *                                 closes the window instead (=exit: then calls
+ *                                 exit() as the macOS Quit menu does)
  *
  * The synthetic grid is a smooth surface known in closed form, so that the
  * picked depths can be checked against it.
@@ -42,8 +45,10 @@
 #include <QEventLoop>
 #include <QImage>
 #include <QLabel>
+#include <QMenu>
 #include <QMouseEvent>
 #include <QOpenGLWidget>
+#include <QPushButton>
 #include <QRadioButton>
 #include <QTimer>
 #include <algorithm>
@@ -180,8 +185,9 @@ bool open_view(bool mode3d, const char *grdfile, size_t *instance) {
 }
 
 QAction *mouse_action(QWidget *window, const QString &text) {
+  /* menu items only, not the title actions of the menus */
   for (QAction *action : window->findChildren<QAction *>())
-    if (action->text() == text)
+    if (action->text() == text && action->menu() == nullptr)
       return action;
   return nullptr;
 }
@@ -191,6 +197,15 @@ QRadioButton *mouse_button(QWidget *window, const QString &text) {
     if (button->text() == text)
       return button;
   return nullptr;
+}
+
+int action_calls = 0;
+size_t action_instance = MBV_NO_WINDOW;
+void count_action(Widget w, XtPointer client_data, XtPointer call_data) {
+  (void)w;
+  (void)call_data;
+  action_calls++;
+  action_instance = reinterpret_cast<size_t>(client_data);
 }
 
 void click(QWidget *view, QPointF position) {
@@ -221,15 +236,68 @@ int test_null() {
   if (area != nullptr)
     area->trigger();
   check(mbvq_c_mouse_mode(instance) == MBV_MOUSE_AREA, "menu item Pick Area sets the core mouse mode");
-  QRadioButton *move = mouse_button(window, QStringLiteral("Pan and Zoom"));
+  QRadioButton *move = mouse_button(window, QStringLiteral("Pan && Zoom"));
   if (move != nullptr)
     move->click();
   check(mbvq_c_mouse_mode(instance) == MBV_MOUSE_MOVE, "radio button Pan and Zoom sets the core mouse mode");
-  check(area != nullptr && !area->isChecked() && mouse_action(window, QStringLiteral("Pan and Zoom"))->isChecked(),
+  check(area != nullptr && !area->isChecked() && mouse_action(window, QStringLiteral("Pan && Zoom"))->isChecked(),
         "the menu shows the mode set by the radio button");
 
   check(mbvq::label_text(":::t\"Pick Info:\":t\" Lon: 10.1\"") == QStringLiteral("Pick Info:\n Lon: 10.1"),
         "Motif multiline label strings become plain lines");
+
+  /* View menu: each item changes the core, and the menu shows the core state */
+  struct mbview_struct *data = nullptr;
+  int error = MB_ERROR_NO_ERROR;
+  mbview_getdataptr(0, instance, &data, &error);
+  auto view_item = [window](const char *text) { return mouse_action(window, QString::fromLatin1(text)); };
+  check(view_item("Map Display") != nullptr && view_item("Map Display")->isChecked(), "View menu shows Map Display");
+  view_item("3D Display")->trigger();
+  check(mbvq_c_display_3d(instance) && view_item("3D Display")->isChecked() && rotate->isEnabled(),
+        "3D Display sets the 3D display and enables Rotate Model");
+  view_item("Map Display")->trigger();
+  check(!mbvq_c_display_3d(instance) && !rotate->isEnabled(), "Map Display returns to 2D");
+  view_item("Bright Rainbow Colortable")->trigger();
+  check(data->primary_colortable == MBV_COLORTABLE_BRIGHT && view_item("Bright Rainbow Colortable")->isChecked() &&
+            !view_item("Haxby Colortable")->isChecked(),
+        "a colour table item sets the colour table of the grid shown");
+  view_item("Shading by Illumination")->trigger();
+  check(data->primary_shade_mode == MBV_SHADE_VIEW_ILLUMINATION, "a shading item sets the shading of the grid shown");
+  view_item("Histogram Equalization")->trigger();
+  check(data->primary_histogram && view_item("Histogram Equalization")->isChecked(), "Histogram Equalization toggles on");
+  view_item("Topography Contours")->trigger();
+  check(data->grid_contour_mode == MBV_VIEW_ON, "Topography Contours toggles on");
+  view_item("Topography Slope")->trigger();
+  check(data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE && !view_item("Histogram Equalization")->isChecked() &&
+            view_item("Haxby Colortable")->isChecked(),
+        "Topography Slope shows the slope grid with its own settings");
+  view_item("Topography")->trigger();
+  check(data->grid_mode == MBV_GRID_VIEW_PRIMARY && view_item("Bright Rainbow Colortable")->isChecked(),
+        "Topography shows the primary grid with its settings kept");
+  check(!view_item("Overlay")->isEnabled() && !view_item("Shading by Overlay")->isEnabled(),
+        "overlay items are disabled without an overlay grid");
+  check(!view_item("Sites")->isEnabled() && !view_item("Navigation")->isEnabled() && !view_item("Profile")->isEnabled(),
+        "Sites, Navigation and Profile are disabled when not enabled by the program");
+
+  /* Reset button: view defaults, as the Motif Reset button */
+  data->exaggeration = 3.0;
+  data->modelelevation3d = 30.0;
+  for (QPushButton *button : window->findChildren<QPushButton *>())
+    if (button->text() == QStringLiteral("Reset"))
+      button->click();
+  check(data->exaggeration == 1.0 && data->modelelevation3d == 90.0, "Reset restores the view defaults");
+
+  /* Action menu: items added by the program, enabled by the pick masks */
+  mbview_addaction(0, instance, count_action, const_cast<char *>("Always"), MBV_PICKMASK_NONE, &error);
+  mbview_addactionseparator(0, instance, &error);
+  mbview_addaction(0, instance, count_action, const_cast<char *>("Needs One Pick"), MBV_PICKMASK_ONEPOINT, &error);
+  QAction *always = mouse_action(window, QStringLiteral("Always"));
+  QAction *needs_pick = mouse_action(window, QStringLiteral("Needs One Pick"));
+  check(always != nullptr && always->isEnabled(), "an action without a pick mask is enabled");
+  check(needs_pick != nullptr && !needs_pick->isEnabled(), "an action that needs a one-point pick is disabled");
+  if (always != nullptr)
+    always->trigger();
+  check(action_calls == 1 && action_instance == instance, "an action calls the program with the instance as client data");
 
   /* mouse input reaches the core; without drawing no point is found */
   QWidget *view = mbvq::map_view(instance);
@@ -240,8 +308,19 @@ int test_null() {
   spin(1500);
   check(mbvq_c_lastdrawrez(instance) == MBVQ_REZ_NONE, "the null backend draws nothing");
 
-  window->close();
-  check(dismissed == 1, "closing the window calls the dismiss notify function once");
+  /* Dismiss menu, as in Motif: mbview_destroy() closes the instance */
+  mouse_action(window, QStringLiteral("Dismiss"))->trigger();
+  spin(100);
+  check(dismissed == 1, "Dismiss calls the dismiss notify function once");
+  check(mbvq::window(instance) == nullptr && !data->active, "Dismiss removes the window and frees the instance");
+
+  /* a second instance closed with the window's close button */
+  size_t second = MBV_NO_WINDOW;
+  check(open_view(false, nullptr, &second), "a second instance opens after the first was dismissed");
+  if (QWidget *window2 = mbvq::window(second))
+    window2->close();
+  spin(100);
+  check(dismissed == 2 && mbvq::window(second) == nullptr, "closing the window dismisses the instance once");
   return failures == 0 ? 0 : 1;
 }
 
@@ -306,6 +385,14 @@ int test_gl(bool mode3d) {
       }
     }
   check(found == 9, std::to_string(found) + " of 9 clicks picked a point");
+  mbview_addaction(0, instance, count_action, const_cast<char *>("Needs One Pick"), MBV_PICKMASK_ONEPOINT, &error);
+  QAction *needs_pick = mouse_action(mbvq::window(instance), QStringLiteral("Needs One Pick"));
+  check(needs_pick != nullptr && needs_pick->isEnabled(), "after a pick the one-point action is enabled");
+  for (QPushButton *button : mbvq::window(instance)->findChildren<QPushButton *>())
+    if (button->text() == QStringLiteral("Clear"))
+      button->click();
+  check(data->pick_type == MBV_PICK_NONE && needs_pick != nullptr && !needs_pick->isEnabled(),
+        "Clear removes the pick and disables the one-point action");
   check(close == found && found > 0, "picked depths agree with the surface (largest difference " +
                                           std::to_string(max_error) + " m)");
   check(pick_info != nullptr && pick_info->text().startsWith(QStringLiteral("Pick Info:")) &&
@@ -313,6 +400,35 @@ int test_gl(bool mode3d) {
         "the pick information label shows the last pick");
   const QImage after = view->grabFramebuffer();
   check(!after.isNull(), "the view still draws after the picks");
+
+  /* Full: draws at full resolution at once when the last drawing was coarser
+     (Reset draws low then high; the background work would take about 1 s) */
+  QPushButton *reset_button = nullptr, *full_button = nullptr;
+  for (QPushButton *button : mbvq::window(instance)->findChildren<QPushButton *>()) {
+    if (button->text() == QStringLiteral("Reset"))
+      reset_button = button;
+    if (button->text() == QStringLiteral("Full"))
+      full_button = button;
+  }
+  reset_button->click();
+  spin(150);
+  const int before_full = mbvq_c_lastdrawrez(instance);
+  full_button->click();
+  spin(150);
+  check(before_full != MBVQ_REZ_FULL && mbvq_c_lastdrawrez(instance) == MBVQ_REZ_FULL,
+        "Full draws at full resolution at once after a coarser drawing (before: " + std::to_string(before_full) + ")");
+
+  full_button->click();
+  QString status_text;
+  for (QLabel *label : mbvq::window(instance)->findChildren<QLabel *>())
+    if (label->text() == QStringLiteral("Already at full resolution"))
+      status_text = label->text();
+  check(!status_text.isEmpty(), "Full at full resolution says so in the status line");
+
+  /* closing the window removes the OpenGL view and frees the instance */
+  mbvq::window(instance)->close();
+  spin(300);
+  check(mbvq::window(instance) == nullptr && !data->active, "closing the OpenGL window dismisses the instance");
   return failures == 0 ? 0 : 1;
 }
 
@@ -362,7 +478,19 @@ int main(int argc, char **argv) {
         if (view != nullptr)
           view->grabFramebuffer().save(QString::fromLocal8Bit(snapshot));
         std::printf("full resolution after %lld ms, saved %s\n", static_cast<long long>(since->elapsed()), snapshot);
-        QApplication::quit();
+        /* with MBVIEW_QT_TEST_CLOSE set, close the window as a user would */
+        if (std::getenv("MBVIEW_QT_TEST_CLOSE") != nullptr && mbvq::window(instance) != nullptr) {
+          /* pick first: the pick framebuffer must be freed safely at exit */
+          QWidget *view = mbvq::map_view(instance);
+          click(view, QPointF(view->width() / 2.0, view->height() / 2.0));
+          mbvq::window(instance)->close();
+          /* MBVIEW_QT_TEST_CLOSE=exit: then leave as the macOS Quit menu does,
+             with exit() from inside the event loop */
+          if (std::strcmp(std::getenv("MBVIEW_QT_TEST_CLOSE"), "exit") == 0)
+            std::exit(0);
+        }
+        else
+          QApplication::quit();
       }
     });
     poll->start(50);

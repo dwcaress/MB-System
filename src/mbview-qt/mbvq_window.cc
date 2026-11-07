@@ -32,30 +32,69 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMenuBar>
+#include <QPushButton>
 #include <QRadioButton>
 #include <QStatusBar>
 #include <QVBoxLayout>
 #include <algorithm>
 
 #include "mbv_ui.h"
-#include "mbvq_backend.h"
 #include "mbvq.h"
-#include "mbvq_bridge.h"
+#include "mbvq_backend.h"
 
 namespace mbvq {
 
 namespace {
 
-/* the mouse modes in the order of the Motif menu, with their MBV_MOUSE_* values */
-struct MouseMode {
-  int mode;
+/* the mouse modes in the order of the Motif window (MBV_MOUSE_* values) */
+constexpr int kMouseOrder[MBVQ_MOUSE_MODES] = {0, 1, 3, 2, 4, 5, 6, 7, 8};
+
+/* a label for Qt menus and buttons, where '&' marks a shortcut key */
+QString plain(const char *text) { return QString::fromLatin1(text).replace(QLatin1Char('&'), QStringLiteral("&&")); }
+
+/* the View menu, in the order of the Motif View menu; 0 marks a separator */
+struct ViewItem {
+  int item;
   const char *label;
+  int group; /* items with the same nonzero group are exclusive */
 };
-constexpr MouseMode kMouseMode[] = {{0, "Pan and Zoom"}, {1, "Rotate Model"}, {3, "Rotate View"},
-                                    {2, "Shading"},      {4, "Pick Area"},    {5, "Edit Sites"},
-                                    {6, "Edit Routes"},  {7, "Select Nav"},   {8, "Select Nav File"}};
-constexpr int kMouseRotate = 1;    /* MBV_MOUSE_ROTATE */
-constexpr int kMouseViewpoint = 3; /* MBV_MOUSE_VIEWPOINT */
+constexpr ViewItem kViewMenu[] = {
+    {MBVQ_VIEW_DISPLAY_2D, "Map Display", 1},
+    {MBVQ_VIEW_DISPLAY_3D, "3D Display", 1},
+    {-1, nullptr, 0},
+    {MBVQ_VIEW_GRID_PRIMARY, "Topography", 2},
+    {MBVQ_VIEW_GRID_PRIMARYSLOPE, "Topography Slope", 2},
+    {MBVQ_VIEW_GRID_SECONDARY, "Overlay", 2},
+    {-1, nullptr, 0},
+    {MBVQ_VIEW_HISTOGRAM, "Histogram Equalization", 0},
+    {-1, nullptr, 0},
+    {MBVQ_VIEW_SHADE_NONE, "No Shading", 3},
+    {MBVQ_VIEW_SHADE_ILLUMINATION, "Shading by Illumination", 3},
+    {MBVQ_VIEW_SHADE_SLOPE, "Shading by Slope", 3},
+    {MBVQ_VIEW_SHADE_OVERLAY, "Shading by Overlay", 3},
+    {-1, nullptr, 0},
+    {MBVQ_VIEW_CONTOUR, "Topography Contours", 0},
+    {MBVQ_VIEW_SITE, "Sites", 0},
+    {MBVQ_VIEW_ROUTE, "Routes", 0},
+    {-1, nullptr, 0},
+    {MBVQ_VIEW_NAV, "Navigation", 0},
+    {MBVQ_VIEW_NAVSWATHBOUNDS, "Navigation Swath Bounds", 0},
+    {MBVQ_VIEW_NAVDRAPE, "Draped Navigation", 0},
+    {MBVQ_VIEW_VECTOR, "Vector", 0},
+    {MBVQ_VIEW_POLYLINE, "Polylines", 0},
+    {MBVQ_VIEW_POLYGON, "Polygons", 0},
+    {MBVQ_VIEW_GISPOINT, "Points", 0},
+    {-1, nullptr, 0},
+    {MBVQ_VIEW_COLORTABLE_HAXBY, "Haxby Colortable", 4},
+    {MBVQ_VIEW_COLORTABLE_BRIGHT, "Bright Rainbow Colortable", 4},
+    {MBVQ_VIEW_COLORTABLE_MUTED, "Muted Rainbow Colortable", 4},
+    {MBVQ_VIEW_COLORTABLE_GRAY, "Grayscale Colortable", 4},
+    {MBVQ_VIEW_COLORTABLE_FLAT, "Flat Gray Colortable", 4},
+    {MBVQ_VIEW_COLORTABLE_SEALEVEL1, "Sealevel1 Colortable", 4},
+    {MBVQ_VIEW_COLORTABLE_SEALEVEL2, "Sealevel2 Colortable", 4},
+    {-1, nullptr, 0},
+    {MBVQ_VIEW_PROFILE, "Profile", 0},
+};
 
 }  // namespace
 
@@ -63,24 +102,50 @@ MapWindow::MapWindow(size_t instance) : instance_(instance) {
   setAttribute(Qt::WA_DeleteOnClose, false);
   setWindowTitle(QString::fromLocal8Bit(mbvq_c_title(instance)));
 
-  /* mouse modes: a menu and radio buttons, as in the Motif window */
-  QMenu *mouse_menu = menuBar()->addMenu(tr("&Mouse"));
-  mouse_actions_ = new QActionGroup(this);
-  mouse_actions_->setExclusive(true);
+  struct mbvq_state state;
+  mbvq_c_state(instance_, &state);
+
+  /* menus in the order of the Motif window; Controls comes in step 3c */
+  build_view_menu();
+  QMenu *mouse_menu = menuBar()->addMenu(tr("Mouse"));
+  action_menu_ = menuBar()->addMenu(tr("Action"));
+  QMenu *dismiss_menu = menuBar()->addMenu(tr("Dismiss"));
+  connect(dismiss_menu->addAction(tr("Dismiss")), &QAction::triggered, this, [this] { mbvq_c_destroy(instance_); });
+
+  /* mouse modes: the menu and the radio buttons, as in the Motif window */
+  auto *mouse_actions = new QActionGroup(this);
+  mouse_actions->setExclusive(true);
   auto *mouse_box = new QGroupBox(tr("Mouse Mode"));
   auto *mouse_layout = new QVBoxLayout(mouse_box);
-  mouse_buttons_ = new QButtonGroup(this);
-  for (int i = 0; i < kMouseModes; i++) {
-    const int mode = kMouseMode[i].mode;
-    mouse_action_[i] = mouse_menu->addAction(tr(kMouseMode[i].label));
-    mouse_action_[i]->setCheckable(true);
-    mouse_actions_->addAction(mouse_action_[i]);
-    connect(mouse_action_[i], &QAction::triggered, this, [this, mode] { mbvq_c_set_mouse_mode(instance_, mode); });
-    mouse_button_[i] = new QRadioButton(tr(kMouseMode[i].label));
-    mouse_buttons_->addButton(mouse_button_[i], mode);
-    mouse_layout->addWidget(mouse_button_[i]);
-    connect(mouse_button_[i], &QRadioButton::clicked, this, [this, mode] { mbvq_c_set_mouse_mode(instance_, mode); });
+  auto *mouse_buttons = new QButtonGroup(this);
+  for (int mode : kMouseOrder) {
+    const QString text = plain(state.mouse_label[mode]);
+    mouse_action_[mode] = mouse_menu->addAction(text);
+    mouse_action_[mode]->setCheckable(true);
+    mouse_actions->addAction(mouse_action_[mode]);
+    connect(mouse_action_[mode], &QAction::triggered, this, [this, mode] { mbvq_c_set_mouse_mode(instance_, mode); });
+    mouse_button_[mode] = new QRadioButton(text);
+    mouse_buttons->addButton(mouse_button_[mode], mode);
+    mouse_layout->addWidget(mouse_button_[mode]);
+    connect(mouse_button_[mode], &QRadioButton::clicked, this, [this, mode] { mbvq_c_set_mouse_mode(instance_, mode); });
   }
+
+  /* the Clear, Reset and Full buttons of the Motif window */
+  auto *buttons = new QWidget;
+  auto *buttons_layout = new QHBoxLayout(buttons);
+  buttons_layout->setContentsMargins(0, 0, 0, 0);
+  auto *clear = new QPushButton(tr("Clear"));
+  clear->setToolTip(tr("Clear the picks"));
+  auto *reset = new QPushButton(tr("Reset"));
+  reset->setToolTip(tr("Reset the view"));
+  auto *full = new QPushButton(tr("Full"));
+  full->setToolTip(tr("Draw at full resolution"));
+  buttons_layout->addWidget(clear);
+  buttons_layout->addWidget(reset);
+  buttons_layout->addWidget(full);
+  connect(clear, &QPushButton::clicked, this, [this] { mbvq_c_clearpicks(instance_); });
+  connect(reset, &QPushButton::clicked, this, [this] { mbvq_c_resetview(instance_); });
+  connect(full, &QPushButton::clicked, this, [this] { mbvq_c_fullrender(instance_); });
 
   /* the pick information never changes the panel width: a width change would
      resize the map view and redraw it at low resolution (flicker) */
@@ -92,12 +157,14 @@ MapWindow::MapWindow(size_t instance) : instance_(instance) {
 
   auto *left = new QWidget;
   auto *left_layout = new QVBoxLayout(left);
+  left_layout->addWidget(buttons);
   left_layout->addWidget(mouse_box);
   left_layout->addWidget(pick_info_);
   left_layout->addStretch(1);
   const QMargins margins = left_layout->contentsMargins();
   const int text_width = pick_info_->fontMetrics().horizontalAdvance(QStringLiteral(" Lat 2:  -89  59.999999 S "));
-  left->setFixedWidth(std::max(mouse_box->sizeHint().width(), text_width) + margins.left() + margins.right());
+  left->setFixedWidth(std::max({mouse_box->sizeHint().width(), buttons->sizeHint().width(), text_width}) +
+                      margins.left() + margins.right());
 
   int xo = 0, yo = 0, width = 0, height = 0;
   mbvq_c_geometry(instance, &xo, &yo, &width, &height);
@@ -116,21 +183,56 @@ MapWindow::MapWindow(size_t instance) : instance_(instance) {
   statusBar()->addWidget(status_, 1);
 
   move(xo, yo);
-  resize(width + left->sizeHint().width(), height + menuBar()->sizeHint().height() + statusBar()->sizeHint().height());
+  resize(width + left->width(), height + menuBar()->sizeHint().height() + statusBar()->sizeHint().height());
   set_map_cursor(MBV_CURSOR_TARGET_BLACK);
 }
 
-void MapWindow::refresh_modes() {
-  const int current = mbvq_c_mouse_mode(instance_);
-  const bool display_3d = mbvq_c_display_3d(instance_);
-  for (int i = 0; i < kMouseModes; i++) {
-    const int mode = kMouseMode[i].mode;
-    const bool needs_3d = mode == kMouseRotate || mode == kMouseViewpoint;
-    mouse_action_[i]->setEnabled(display_3d || !needs_3d);
-    mouse_button_[i]->setEnabled(display_3d || !needs_3d);
-    mouse_action_[i]->setChecked(mode == current);
-    mouse_button_[i]->setChecked(mode == current);
+void MapWindow::build_view_menu() {
+  QMenu *menu = menuBar()->addMenu(tr("View"));
+  QActionGroup *groups[5] = {};
+  for (const ViewItem &entry : kViewMenu) {
+    if (entry.item < 0) {
+      menu->addSeparator();
+      continue;
+    }
+    QAction *action = menu->addAction(tr(entry.label));
+    action->setCheckable(true);
+    if (entry.group > 0) {
+      if (groups[entry.group] == nullptr) {
+        groups[entry.group] = new QActionGroup(this);
+        groups[entry.group]->setExclusive(true);
+      }
+      groups[entry.group]->addAction(action);
+    }
+    const int item = entry.item;
+    connect(action, &QAction::triggered, this, [this, item](bool checked) { mbvq_c_view(instance_, item, checked); });
+    view_action_[item] = action;
   }
+}
+
+void MapWindow::refresh_modes() {
+  struct mbvq_state state;
+  mbvq_c_state(instance_, &state);
+  for (int item = 0; item < MBVQ_VIEW_ITEMS; item++) {
+    if (view_action_[item] == nullptr)
+      continue;
+    view_action_[item]->setChecked(state.view_checked[item]);
+    view_action_[item]->setEnabled(state.view_enabled[item]);
+  }
+  for (int mode = 0; mode < MBVQ_MOUSE_MODES; mode++) {
+    const QString text = plain(state.mouse_label[mode]);
+    mouse_action_[mode]->setText(text);
+    mouse_button_[mode]->setText(text);
+    mouse_action_[mode]->setEnabled(state.mouse_enabled[mode]);
+    mouse_button_[mode]->setEnabled(state.mouse_enabled[mode]);
+    mouse_action_[mode]->setChecked(mode == state.mouse_mode);
+    mouse_button_[mode]->setChecked(mode == state.mouse_mode);
+  }
+}
+
+void MapWindow::delete_map_view() {
+  delete map_view_;
+  map_view_ = nullptr;
 }
 
 void MapWindow::set_status(const QString &text) { status_->setText(text); }
@@ -168,13 +270,33 @@ void MapWindow::set_map_cursor(int cursor) {
     shape = Qt::CrossCursor;
     break;
   }
-  map_view_->setCursor(shape);
+  if (map_view_ != nullptr)
+    map_view_->setCursor(shape);
+}
+
+void MapWindow::add_action(int index, const QString &label) {
+  QAction *action = action_menu_->addAction(QString(label).replace(QLatin1Char('&'), QStringLiteral("&&")));
+  connect(action, &QAction::triggered, this, [this, index] { mbvq_c_action(instance_, index); });
+  if (index >= static_cast<int>(actions_.size()))
+    actions_.resize(index + 1, nullptr);
+  actions_[index] = action;
+}
+
+void MapWindow::add_action_separator() { action_menu_->addSeparator(); }
+
+void MapWindow::set_action_enabled(int index, bool enabled) {
+  if (index >= 0 && index < static_cast<int>(actions_.size()) && actions_[index] != nullptr)
+    actions_[index]->setEnabled(enabled);
 }
 
 void MapWindow::closeEvent(QCloseEvent *event) {
-  /* as the Motif dismiss button: the program decides what follows */
+  /* as the Motif Dismiss menu: mbview_destroy() closes the instance and lets
+     the program know; it removes this window afterwards */
   event->accept();
-  mbvq_c_dismiss(instance_);
+  if (!closing_) {
+    closing_ = true;
+    mbvq_c_destroy(instance_);
+  }
 }
 
 }  // namespace mbvq

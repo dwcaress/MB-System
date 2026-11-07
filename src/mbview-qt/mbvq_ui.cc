@@ -30,6 +30,7 @@
 #include <QRegularExpression>
 #include <QString>
 #include <QTimer>
+#include <vector>
 
 #include "mbvq.h"
 #include "mbvq_backend.h"
@@ -43,6 +44,18 @@ namespace {
 Backend current_backend = Backend::LegacyGL;
 bool backend_installed = false;
 MapWindow *windows[MBVQ_MAX_WINDOWS] = {};
+
+/* Closed windows, hidden. They are deleted at a safe point, never by a posted
+   deferred deletion: on macOS the Quit menu calls exit() from inside the event
+   loop, and a window that held an OpenGL view cannot be deleted then. */
+std::vector<MapWindow *> closed_windows;
+bool quit_connected = false;
+
+void delete_closed_windows() {
+  for (MapWindow *window : closed_windows)
+    delete window;
+  closed_windows.clear();
+}
 
 void install_backend() {
   if (backend_installed)
@@ -100,6 +113,12 @@ void mbvq_qt_open_window(size_t instance) {
   if (instance >= MBVQ_MAX_WINDOWS)
     return;
   mbvq::install_backend();
+  /* a safe point: called by the program, not from an event of a closed window */
+  mbvq::delete_closed_windows();
+  if (!mbvq::quit_connected) {
+    QObject::connect(qApp, &QCoreApplication::aboutToQuit, qApp, [] { mbvq::delete_closed_windows(); });
+    mbvq::quit_connected = true;
+  }
   if (mbvq::windows[instance] == nullptr)
     mbvq::windows[instance] = new mbvq::MapWindow(instance);
   mbvq::windows[instance]->refresh_modes();
@@ -109,8 +128,14 @@ void mbvq_qt_open_window(size_t instance) {
 void mbvq_qt_close_window(size_t instance) {
   if (instance >= MBVQ_MAX_WINDOWS || mbvq::windows[instance] == nullptr)
     return;
-  delete mbvq::windows[instance];
+  /* Called from mbview_destroy(), possibly inside an event of this window: the
+     window is hidden now and deleted at a safe point (see closed_windows). Its
+     OpenGL map view and context are freed now. */
+  mbvq::MapWindow *window = mbvq::windows[instance];
   mbvq::windows[instance] = nullptr;
+  window->hide();
+  window->delete_map_view();
+  mbvq::closed_windows.push_back(window);
 }
 
 void mbvq_qt_status(size_t instance, const char *message) {
@@ -134,6 +159,21 @@ void mbvq_qt_sensitivity_changed(size_t instance) {
 }
 
 void mbvq_qt_lists_changed(void) {}
+
+void mbvq_qt_add_action(size_t instance, int index, const char *label) {
+  if (mbvq::MapWindow *window = window_of(instance))
+    window->add_action(index, QString::fromLocal8Bit(label));
+}
+
+void mbvq_qt_add_action_separator(size_t instance) {
+  if (mbvq::MapWindow *window = window_of(instance))
+    window->add_action_separator();
+}
+
+void mbvq_qt_action_enabled(size_t instance, int index, bool enabled) {
+  if (mbvq::MapWindow *window = window_of(instance))
+    window->set_action_enabled(index, enabled);
+}
 
 void mbvq_qt_bell(void) { QApplication::beep(); }
 
