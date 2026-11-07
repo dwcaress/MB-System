@@ -116,6 +116,8 @@ extern "C" {
 #define MBGRDVIZ_REALTIME_PAUSE 2
 
 /* opening and saving (mbgrdviz_core.c) */
+int mbgrdviz_openfile(size_t mode, size_t instance, char *file_ptr);
+void do_mbgrdviz_addgisactions(size_t instance);
 int do_mbgrdviz_dismiss_notify(size_t instance);
 int do_mbgrdviz_openprimary(char *input_file_ptr);
 int do_mbgrdviz_openoverlay(size_t instance, char *input_file_ptr);
@@ -152,9 +154,20 @@ int do_mbgrdviz_savegis(size_t instance, int type, bool shapefile, char *output_
 void mbgrdviz_ui_bell(void);
 /* the menus of the main window follow the open instances */
 void do_mbgrdviz_sensitivity(void);
-/* add the GIS actions to the Action menu of an instance */
-void do_mbgrdviz_addgisactions(size_t instance);
+/* show the path of the realtime data source in the realtime setup */
+void mbgrdviz_ui_realtime_path(char *path);
 /* the actions that mbgrdviz adds to each instance (mbview_addaction) */
+void do_mbgrdviz_fileSelectionBox(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_exportgispoint(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_exportpolygon(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_exportpolyline(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_importshapefile(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_opengispoint(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_openpolygon(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_openpolyline(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_savegispoint(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_savepolygon(Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_savepolyline(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_opennav(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_openoverlay(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_openroute(Widget w, XtPointer client_data, XtPointer call_data);

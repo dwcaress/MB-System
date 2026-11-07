@@ -4728,3 +4728,250 @@ int do_mbgrdviz_savegis(size_t instance, int type, bool shapefile, char *output_
 
   return (status);
 }
+
+/*------------------------------------------------------------------------------*/
+/* Open or save the file chosen in a file dialog: mode is MBGRDVIZ_OPENGRID and
+    the other MBGRDVIZ_ modes, instance the mbview instance (instance 0 from the
+    main window menu). Moved from do_mbgrdviz_openfile(); the caller frees the
+    file name. */
+int mbgrdviz_openfile(size_t mode, size_t instance, char *file_ptr) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2       mode:                %zu\n", mode);
+    fprintf(stderr, "dbg2       instance:            %zu\n", instance);
+    fprintf(stderr, "dbg2       file_ptr:            %s\n", file_ptr != NULL ? file_ptr : "(null)");
+  }
+
+  /* the main window file menu items pass instance 0; if that mbview window
+     is not open use the first open one (as do_mbgrdviz_sensitivity() does) */
+  if (mode > MBGRDVIZ_OPENGRID && mode != MBGRDVIZ_REALTIME
+      && (instance >= MBV_MAX_WINDOWS || !mbview_id[instance])) {
+    instance = MBV_NO_WINDOW;
+    for (size_t i = 0; i < MBV_MAX_WINDOWS && instance == MBV_NO_WINDOW; i++) {
+      if (mbview_id[i])
+        instance = i;
+    }
+  }
+
+  /* every file operation other than opening a primary grid needs a file name,
+     and all but setting the realtime source need an open mbview window */
+  if (mode > MBGRDVIZ_OPENGRID && (file_ptr == NULL || (mode != MBGRDVIZ_REALTIME && instance == MBV_NO_WINDOW))) {
+    mbgrdviz_ui_bell();
+    return (MB_FAILURE);
+  }
+
+  /* open primary grid */
+  // int status = MB_SUCCESS;
+  if (mode <= MBGRDVIZ_OPENGRID) {
+    /* read the grid and open mbview window */
+    /* status = */ do_mbgrdviz_openprimary(file_ptr);
+  }
+
+  /* else open overlay grid */
+  else if (mode == MBGRDVIZ_OPENOVERLAY) {
+    /* read the grid and update mbview window */
+    do_mbview_message_on("Reading overlay grid...", instance);
+    /* status = */ do_mbgrdviz_openoverlay(instance, file_ptr);
+  }
+
+  /* else open site data */
+  else if (mode == MBGRDVIZ_OPENSITE) {
+    /* read site file and update mbview window */
+    do_mbview_message_on("Reading site data...", instance);
+    /* status = */ do_mbgrdviz_opensite(instance, file_ptr);
+  }
+
+  /* else open route data */
+  else if (mode == MBGRDVIZ_OPENROUTE) {
+    /* read route file and update mbview window */
+    do_mbview_message_on("Reading route data...", instance);
+    /* status = */ do_mbgrdviz_openroute(instance, file_ptr);
+  }
+
+  /* else open nav data */
+  else if (mode == MBGRDVIZ_OPENNAV) {
+    /* read nav file and update mbview window */
+    do_mbview_message_on("Reading navigation data...", instance);
+    /* status = */ do_mbgrdviz_opennav(instance, false, file_ptr);
+  }
+
+  /* else open swath data */
+  else if (mode == MBGRDVIZ_OPENSWATH) {
+    /* read nav file and update mbview window */
+    do_mbview_message_on("Reading swath data...", instance);
+    /* status = */ do_mbgrdviz_opennav(instance, true, file_ptr);
+  }
+
+  /* else open vector data */
+  else if (mode == MBGRDVIZ_OPENVECTOR) {
+    /* read vector file and update mbview window */
+    do_mbview_message_on("Reading vector data...", instance);
+    /* status = */ do_mbgrdviz_openvector(instance, file_ptr);
+  }
+
+  /* else write site data */
+  else if (mode == MBGRDVIZ_SAVESITE) {
+    /* write site file */
+    do_mbview_message_on("Saving site data...", instance);
+    /* status = */ do_mbgrdviz_savesite(instance, file_ptr);
+  }
+
+  /* else write route data */
+  else if (mode == MBGRDVIZ_SAVEROUTE) {
+    /* write route file */
+    do_mbview_message_on("Saving route data...", instance);
+    /* status = */ do_mbgrdviz_saveroute(instance, file_ptr);
+  }
+
+  /* else write route data reversed */
+  else if (mode == MBGRDVIZ_SAVEROUTEREVERSED) {
+    /* write route file */
+    do_mbview_message_on("Saving reversed route data...", instance);
+    /* status = */ do_mbgrdviz_saveroutereversed(instance, file_ptr);
+  }
+
+  /* else write route data as Risi script with variable heading */
+  else if (mode == MBGRDVIZ_SAVERISISCRIPTHEADING) {
+    /* write route file */
+    do_mbview_message_on("Saving route as Risi script with variable heading...", instance);
+    /* status = */ do_mbgrdviz_saverisiscriptheading(instance, file_ptr);
+  }
+
+  /* else write route data as Risi script with static heading */
+  else if (mode == MBGRDVIZ_SAVERISISCRIPTNOHEADING) {
+    /* write route file */
+    do_mbview_message_on("Saving route as Risi script with static heading...", instance);
+    /* status = */ do_mbgrdviz_saverisiscriptnoheading(instance, file_ptr);
+  }
+
+  /* else write route data as Risi 2 script with variable heading */
+  else if (mode == MBGRDVIZ_SAVERISI2SCRIPTHEADING) {
+    /* write route file */
+    do_mbview_message_on("Saving route as Risi 2 script with variable heading...", instance);
+    /* status = */ do_mbgrdviz_saverisi2scriptheading(instance, file_ptr);
+  }
+
+  /* else write route data as Risi 2 script with static heading */
+  else if (mode == MBGRDVIZ_SAVERISI2SCRIPTNOHEADING) {
+    /* write route file */
+    do_mbview_message_on("Saving route as Risi 2 script with static heading...", instance);
+    /* status = */ do_mbgrdviz_saverisi2scriptnoheading(instance, file_ptr);
+  }
+
+  /* else write route data as degrees decimal minutes file */
+  else if (mode == MBGRDVIZ_SAVEDEGDECMIN) {
+    /* write route file */
+    do_mbview_message_on("Saving route as degrees + decimal minutes file...", instance);
+    /* status = */ do_mbgrdviz_savedegdecmin(instance, file_ptr);
+  }
+
+  /* else write route data as Hypack lnw file */
+  else if (mode == MBGRDVIZ_SAVELNW) {
+    /* write route file */
+    do_mbview_message_on("Saving route as Hypack LNW file...", instance);
+    /* status = */ do_mbgrdviz_savelnw(instance, file_ptr);
+  }
+
+  /* else write route data as Hypack lnw file */
+  else if (mode == MBGRDVIZ_SAVEGREENSEAYML) {
+    /* write route file */
+    do_mbview_message_on("Saving route as Greensea YML file...", instance);
+    /* status = */ do_mbgrdviz_savegreenseayml(instance, file_ptr);
+  }
+
+  /* else write route data as TECDIS lst file */
+  else if (mode == MBGRDVIZ_SAVETECDISLST) {
+    /* write route file */
+    do_mbview_message_on("Saving route as TECDIS LST file...", instance);
+    /* status = */ do_mbgrdviz_savetecdislst(instance, file_ptr);
+  }
+
+  /* else write route data as Kongsberg DP waypoint file */
+  else if (mode == MBGRDVIZ_SAVEKONGSBERGDP) {
+    /* write route file */
+    do_mbview_message_on("Saving route as Kongsberg DP waypoint file...", instance);
+    /* status = */ do_mbgrdviz_savekongsbergdp(instance, file_ptr);
+  }
+
+  /* else write route data as SIS ASCIIPlan waypoint file */
+  else if (mode == MBGRDVIZ_SAVESISASCIIPLAN1) {
+    /* write route file */
+    do_mbview_message_on("Saving route as SIS ASCIIPlan lines file...", instance);
+    /* status = */ do_mbgrdviz_savesisasciiplan1(instance, file_ptr);
+  }
+
+  /* else write route data as SIS ASCIIPlan waypoint file */
+  else if (mode == MBGRDVIZ_SAVESISASCIIPLAN2) {
+    /* write route file */
+    do_mbview_message_on("Saving route as SIS ASCIIPlan route file...", instance);
+    /* status = */ do_mbgrdviz_savesisasciiplan2(instance, file_ptr);
+  }
+
+  /* else write route data */
+  else if (mode == MBGRDVIZ_SAVEPROFILE) {
+    /* write route file */
+    do_mbview_message_on("Saving profile data...", instance);
+    /* status = */ do_mbgrdviz_saveprofile(instance, file_ptr);
+  }
+
+  /* else open GIS polyline, polygon, or point data */
+  else if (mode == MBGRDVIZ_OPENPOLYLINE || mode == MBGRDVIZ_OPENPOLYGON || mode == MBGRDVIZ_OPENGISPOINT) {
+    do_mbview_message_on("Reading GIS data...", instance);
+    const int type = mode == MBGRDVIZ_OPENPOLYLINE ? MBV_GISLAYER_POLYLINE
+                         : (mode == MBGRDVIZ_OPENPOLYGON ? MBV_GISLAYER_POLYGON : MBV_GISLAYER_GISPOINT);
+    /* status = */ do_mbgrdviz_opengis(instance, type, file_ptr);
+  }
+
+  /* else import a shapefile */
+  else if (mode == MBGRDVIZ_IMPORTSHAPEFILE) {
+    do_mbview_message_on("Importing shapefile...", instance);
+    /* status = */ do_mbgrdviz_importshapefile(instance, file_ptr);
+  }
+
+  /* else save GIS polyline, polygon, or point data as an MB-System file or a shapefile */
+  else if (mode >= MBGRDVIZ_SAVEPOLYLINE && mode <= MBGRDVIZ_EXPORTGISPOINT) {
+    const bool shapefile = mode >= MBGRDVIZ_EXPORTPOLYLINE;
+    do_mbview_message_on(shapefile ? "Exporting shapefile..." : "Saving GIS data...", instance);
+    const size_t offset = shapefile ? mode - MBGRDVIZ_EXPORTPOLYLINE : mode - MBGRDVIZ_SAVEPOLYLINE;
+    const int type = offset == 0 ? MBV_GISLAYER_POLYLINE : (offset == 1 ? MBV_GISLAYER_POLYGON : MBV_GISLAYER_GISPOINT);
+    /* status = */ do_mbgrdviz_savegis(instance, type, shapefile, file_ptr);
+  }
+
+  /* else set realtime data source */
+  else if (mode == MBGRDVIZ_REALTIME) {
+    /* Set realtime source path */
+    mbgrdviz_ui_realtime_path(file_ptr);
+  }
+
+  /* close the message */
+  if (mode > MBGRDVIZ_OPENGRID && mode != MBGRDVIZ_REALTIME)
+    do_mbview_message_off(instance);
+
+  return (MB_SUCCESS);
+}
+
+/*------------------------------------------------------------------------------*/
+void do_mbgrdviz_addgisactions(size_t instance) {
+  mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openpolyline, "Open Polyline File", MBV_PICKMASK_NONE,
+                   &error);
+  mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_openpolygon, "Open Polygon File", MBV_PICKMASK_NONE,
+                   &error);
+  mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_opengispoint, "Open Point File", MBV_PICKMASK_NONE,
+                   &error);
+  mbview_addactionseparator(verbose, instance, &error);
+  mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_importshapefile, "Import Shapefile", MBV_PICKMASK_NONE,
+                   &error);
+  mbview_addactionseparator(verbose, instance, &error);
+  mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savepolyline, "Save Polyline File",
+                   MBV_EXISTMASK_POLYLINE, &error);
+  mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savepolygon, "Save Polygon File", MBV_EXISTMASK_POLYGON,
+                   &error);
+  mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_savegispoint, "Save Point File", MBV_EXISTMASK_GISPOINT,
+                   &error);
+  mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_exportpolyline, "Export Polylines as Shapefile",
+                   MBV_EXISTMASK_POLYLINE, &error);
+  mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_exportpolygon, "Export Polygons as Shapefile",
+                   MBV_EXISTMASK_POLYGON, &error);
+  mbview_addaction(verbose, instance, do_mbgrdviz_fileSelectionBox_exportgispoint, "Export Points as Shapefile",
+                   MBV_EXISTMASK_GISPOINT, &error);
+}
