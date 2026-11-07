@@ -27,7 +27,7 @@
  *     the main window menu sensitivity; two instances of the built-in test
  *     grid; sites and a route saved, cleared, read and saved again (identical
  *     files apart from the date line); quitting.
- *   mbgrdviz_qt_test [--gl] <directory> <grid> <site file> <route file>
+ *   mbgrdviz_qt_test [--gl] <directory> <grid> <site file> <route file> [<risi script>]
  *     also reads the site and route files into the grid and saves them as
  *     <directory>/site_saved.ste and route_saved.rte, to compare with the
  *     files the Motif mbgrdviz saved: the site file must be identical apart
@@ -39,18 +39,23 @@
  *     Saved routes hold bearings and distances in display coordinates, which
  *     only drawing sets up (mbview_projectdata in mbview_plot): --gl draws
  *     with the OpenGL backend (needs a display), as the Motif program does.
- *     Without drawing the route checks are skipped. With --gl it also picks an
+ *     Without drawing the route checks are skipped. --gl also writes all 12
+ *     route exports, and compares the RISI script without heading with
+ *     <risi script>, saved by the Motif mbgrdviz from the same route. With --gl it also picks an
  *     area and generates a survey route through the survey dialog, and picks
  *     a region and opens it as a new view.
  *   Both forms also check which programs the Action menu starts: the Qt
  *   versions of mbedit and mbvelocitytool, found in the CMake build tree.
  */
 
+#include <algorithm>
+#include <cmath>
 #include <cstdio>
 #include <cstring>
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include <QAction>
 #include <QApplication>
@@ -182,8 +187,8 @@ int main(int argc, char **argv) {
     argc--;
     argv++;
   }
-  if (argc != 2 && argc != 5) {
-    std::fprintf(stderr, "usage: mbgrdviz_qt_test [--gl] <directory> [<grid> <site file> <route file>]\n");
+  if (argc != 2 && argc != 5 && argc != 6) {
+    std::fprintf(stderr, "usage: mbgrdviz_qt_test [--gl] <directory> [<grid> <site file> <route file> [<risi script>]]\n");
     return 2;
   }
   const std::string dir = argv[1];
@@ -250,7 +255,7 @@ int main(int argc, char **argv) {
   check(count_lines(body(dir + "/test_site_0.ste"), " ", true) == 2, "site file holds two sites");
 
   /* the Motif reference files */
-  if (argc == 5) {
+  if (argc >= 5) {
     do_mbgrdviz_openprimary(argv[2]);
     size_t instance = MBV_NO_WINDOW;
     for (size_t i = 0; i < MBV_MAX_WINDOWS && instance == MBV_NO_WINDOW; i++)
@@ -281,6 +286,60 @@ int main(int argc, char **argv) {
         mbgrdviz_openfile(MBGRDVIZ_OPENROUTE, instance, route_out.data());
         mbgrdviz_openfile(MBGRDVIZ_SAVEROUTE, instance, route_again.data());
         check(body(route_again) == body(route_out), "route saved, cleared, read and saved again is identical");
+
+        /* every route export of the Motif File menu of the route list */
+        const int exports[] = {MBGRDVIZ_SAVEROUTEREVERSED,     MBGRDVIZ_SAVERISISCRIPTHEADING,
+                               MBGRDVIZ_SAVERISISCRIPTNOHEADING, MBGRDVIZ_SAVERISI2SCRIPTHEADING,
+                               MBGRDVIZ_SAVERISI2SCRIPTNOHEADING, MBGRDVIZ_SAVEDEGDECMIN,
+                               MBGRDVIZ_SAVELNW,               MBGRDVIZ_SAVEGREENSEAYML,
+                               MBGRDVIZ_SAVETECDISLST,         MBGRDVIZ_SAVEKONGSBERGDP,
+                               MBGRDVIZ_SAVESISASCIIPLAN1,     MBGRDVIZ_SAVESISASCIIPLAN2};
+        int written = 0;
+        for (int mode : exports) {
+          std::string out = dir + "/route_export_" + std::to_string(mode);
+          mbgrdviz_openfile(static_cast<size_t>(mode), instance, out.data());
+          std::ifstream in(out);
+          if (in.peek() != std::ifstream::traits_type::eof())
+            written++;
+        }
+        check(written == 12, "all 12 route exports written (" + std::to_string(written) + ")");
+
+        /* the RISI script without heading, as the Motif mbgrdviz saved it from
+           the picked route: equal apart from the date and the number of route
+           points (a route read from a file is densified again). The route file
+           stores longitude and latitude with 6 decimals (0.11 m), so the north
+           and east offsets of the POS lines agree within 0.15 m */
+        if (argc == 6) {
+          const auto lines = [](const std::string &path) {
+            std::ifstream in(path);
+            std::vector<std::string> out;
+            std::string line;
+            while (std::getline(in, line))
+              if (line.rfind("## Run by user", 0) != 0 && line.rfind("## ROUTEPOINTS", 0) != 0)
+                out.push_back(line);
+            return out;
+          };
+          const std::vector<std::string> mine =
+              lines(dir + "/route_export_" + std::to_string(MBGRDVIZ_SAVERISISCRIPTNOHEADING));
+          const std::vector<std::string> motif = lines(argv[5]);
+          bool same = !mine.empty() && mine.size() == motif.size();
+          double largest = 0.0;
+          for (size_t i = 0; same && i < mine.size(); i++) {
+            if (mine[i] == motif[i])
+              continue;
+            double a[5], b[5];
+            same = mine[i].rfind("POS,", 0) == 0 && motif[i].rfind("POS,", 0) == 0 &&
+                   std::sscanf(mine[i].c_str(), "POS, %lf, %lf, %lf, %lf, %lf", &a[0], &a[1], &a[2], &a[3], &a[4]) == 5 &&
+                   std::sscanf(motif[i].c_str(), "POS, %lf, %lf, %lf, %lf, %lf", &b[0], &b[1], &b[2], &b[3], &b[4]) == 5 &&
+                   a[2] == b[2] && a[3] == b[3] && a[4] == b[4];
+            for (int k = 0; same && k < 2; k++)
+              largest = std::max(largest, std::fabs(a[k] - b[k]));
+          }
+          char text[64];
+          std::snprintf(text, sizeof(text), "%.3f", largest);
+          check(same && largest < 0.15,
+                std::string("RISI script as the Motif mbgrdviz saved it (POS offsets within ") + text + " m)");
+        }
 
         /* a survey from an area picked across the middle of the view */
         struct mbview_struct *data = nullptr;

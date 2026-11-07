@@ -1,0 +1,100 @@
+.TH mbgrdviz-qt 1 "7 November 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbgrdviz-qt\fP \- Simple interactive 2D/3D visualization of GMT grids (Qt6 version).
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbgrdviz-qt\fP
+.br
+[--grid-file=grdfile {-Igrdfile}
+.br
+--help {-H}
+.br
+--overlay-file=grdfile {-Jgrdfile}
+.br
+--test {-T}
+.br
+--verbose {-V}]
+
+.SH DESCRIPTION
+\fBmbgrdviz-qt\fP is a Qt6 port of \fBmbgrdviz\fP. The two programs share
+their program logic and the \fBmbview\fP drawing code, so they open the same
+grids, overlays, sites, routes, navigation, swath data, vectors, polylines,
+polygons, points and shapefiles, and they write the same site, route, survey,
+profile and GIS files. A file saved by one program can be opened by the other.
+
+The windows, menus, mouse modes and keys are those of \fBmbgrdviz\fP; see
+\fBmbgrdviz\fP(1) for the interactive controls, the mouse and keyboard
+actions and the file formats. The map is drawn by the original OpenGL drawing
+code of \fBmbview\fP in an OpenGL 2.1 compatibility context. The windows can be
+resized.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian dos Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-\-grid\-file=grdfile \-Igrdfile
+Sets a GMT grid file to be read and displayed at startup.
+.TP
+.B \-\-help \-H
+Prints a description of the program and its options, then exits.
+.TP
+.B \-\-overlay\-file=grdfile \-Jgrdfile
+Sets a GMT grid file to be read and displayed as an overlay at startup.
+This option has no effect unless \fB\-\-grid\-file\fP also sets a primary grid.
+.TP
+.B \-\-test \-T
+Calculates and displays a test grid at startup, so that the program can be
+tried without a grid file.
+.TP
+.B \-\-verbose \-V
+Prints the program version and more information about its work to the
+stderr stream. Give it twice for debugging output.
+
+.SH OTHER PROGRAMS
+The Action menu items "Open Selected Nav in MBedit" and "Open Selected Nav in
+MBvelocitytool" start the Qt6 versions \fBmbedit-qt\fP and
+\fBmbvelocitytool-qt\fP with the swath files of the selected navigation.
+"Open Selected Nav in MBeditviz" and "Open Selected Nav in MBnavedit" start
+\fBmbeditviz\fP and \fBmbnavedit\fP. A program is looked for in the directory
+of \fBmbgrdviz-qt\fP, then on the PATH; if a Qt6 version is not found, the
+Motif program is started instead.
+
+.SH DIFFERENCES FROM MBGRDVIZ
+The realtime display is not implemented in \fBmbgrdviz\fP either: its Start,
+Stop, Pause, Resume and Test controls do nothing there. \fBmbgrdviz-qt\fP
+disables them. The Realtime Setup window records the navigation source.
+
+The Mouse menu works as the mouse mode buttons: choosing a site, route or
+navigation mode switches on that overlay and redraws the map at once. The
+Mouse menu of \fBmbgrdviz\fP switches the overlay on without redrawing.
+
+Pressing Full when the map is already drawn at full resolution shows
+"Already at full resolution" in the status line.
+
+Messages name the program \fBmbgrdviz-qt\fP; the files it writes say "Output
+by Program MBgrdviz", as those of \fBmbgrdviz\fP do.
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbgrdviz\fP(1), \fBmbedit-qt\fP(1),
+\fBmbvelocitytool-qt\fP(1), \fBmbeditviz\fP(1), \fBmbnavedit\fP(1)
+
+.SH BUGS
+Only tested on macOS so far.

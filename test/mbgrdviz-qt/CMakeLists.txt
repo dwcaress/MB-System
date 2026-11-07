@@ -22,9 +22,11 @@
 #    See README.md file for copying and redistribution conditions.
 #------------------------------------------------------------------------------
 
-# Test of mbgrdviz-qt without drawing (null backend, offscreen platform): the
-# main window menus, and sites and routes saved and read again through the
-# shared mbgrdviz core.
+# Tests of mbgrdviz-qt. mbgrdviz_qt_test runs without drawing (null backend,
+# offscreen platform): the main window menus, and sites and routes saved and
+# read again through the shared mbgrdviz core; with --gl (needs a display, not
+# run by ctest) also the comparison with files the Motif mbgrdviz saved.
+# mbgrdviz_qt_test.py checks the usage text and a bad option.
 
 if(APPLE)
   list(REMOVE_ITEM CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/build-utils")
@@ -38,3 +40,9 @@ target_link_libraries(mbgrdviz_qt_test PRIVATE mbgrdviz-qt-ui)
 
 add_test(NAME mbgrdviz_qt_test COMMAND mbgrdviz_qt_test ${CMAKE_CURRENT_BINARY_DIR})
 set_tests_properties(mbgrdviz_qt_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+find_package(Python3 COMPONENTS Interpreter)
+if(Python3_FOUND)
+  add_test(NAME mbgrdviz_qt_usage_test COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mbgrdviz_qt_test.py")
+  set_tests_properties(mbgrdviz_qt_usage_test PROPERTIES ENVIRONMENT "MBGRDVIZ_QT=$<TARGET_FILE:mbgrdviz-qt>")
+endif()

@@ -44,13 +44,15 @@ extern "C" {
 #include "mbgrdviz_core.h"
 
 /* mbgrdviz_state.h is for C only */
-extern const char mbgrdviz_program_name[];
 extern int mbgrdviz_verbose;
 extern bool mbgrdviz_mbview_id[MBV_MAX_WINDOWS];
 }
 
 namespace {
 
+/* the name in messages; the files the program writes keep "MBgrdviz"
+   (mbgrdviz_program_name), as the Motif mbgrdviz writes them */
+const char program_name[] = "mbgrdviz-qt";
 const char help_message[] = "MBgrdviz provides simple interactive 2D/3Dvizualization of GMT grids.";
 const char usage_message[] =
     "mbgrdviz-qt\n"
@@ -135,14 +137,14 @@ int main(int argc, char **argv) {
   /* if error flagged then print it and exit */
   if (errflg) {
     fprintf(stderr, "usage: %s\n", usage_message);
-    fprintf(stderr, "\nProgram <%s> Terminated\n", mbgrdviz_program_name);
+    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
     error = MB_ERROR_BAD_USAGE;
     exit(error);
   }
 
   /* print starting message */
   if (verbose == 1 || help) {
-    fprintf(stderr, "\nProgram %s\n", mbgrdviz_program_name);
+    fprintf(stderr, "\nProgram %s\n", program_name);
     fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
   }
 
