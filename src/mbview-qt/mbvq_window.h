@@ -40,6 +40,7 @@
 class QAction;
 class QActionGroup;
 class QButtonGroup;
+class QDialog;
 class QLabel;
 class QMenu;
 class QRadioButton;
@@ -47,6 +48,7 @@ class QRadioButton;
 namespace mbvq {
 
 class ControlDialogs;
+class ProfileWindow;
 
 class MapWindow final : public QMainWindow {
  public:
@@ -65,6 +67,12 @@ class MapWindow final : public QMainWindow {
   void set_map_cursor(int cursor);
   /* the Controls dialogs */
   ControlDialogs *dialogs() const { return dialogs_; }
+  /* the profile window */
+  ProfileWindow *profile() const { return profile_; }
+  /* a message while the program works (do_mbview_message_on/off) */
+  void show_message(const QString &text, bool on);
+  /* the About dialog */
+  void show_about();
   /* Action menu */
   void add_action(int index, const QString &label);
   void add_action_separator();
@@ -86,6 +94,10 @@ class MapWindow final : public QMainWindow {
   QRadioButton *mouse_button_[MBVQ_MOUSE_MODES] = {};
   QMenu *action_menu_ = nullptr;
   ControlDialogs *dialogs_ = nullptr;
+  ProfileWindow *profile_ = nullptr;
+  QDialog *about_ = nullptr;
+  QDialog *message_ = nullptr;
+  QLabel *message_label_ = nullptr;
   std::vector<QAction *> actions_;
   bool closing_ = false;
 };

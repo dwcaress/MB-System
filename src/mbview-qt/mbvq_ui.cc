@@ -91,13 +91,21 @@ QWidget *map_view(size_t instance) {
 }
 
 QString label_text(const char *bxstring) {
-  /* the quoted parts are the lines; font tags and separators are dropped */
-  QStringList lines;
-  static const QRegularExpression quoted(QStringLiteral("\"([^\"]*)\""));
-  auto match = quoted.globalMatch(QString::fromLocal8Bit(bxstring));
-  while (match.hasNext())
-    lines << match.next().captured(1);
-  return lines.join(QLatin1Char('\n'));
+  /* The quoted parts are the text; ":t" before a part ends the line after
+     it, as in the Motif (Builder Xcessory) compound strings. Font tags are
+     dropped. */
+  QString text;
+  static const QRegularExpression part(QStringLiteral("(:t)?\"([^\"]*)\""));
+  auto match = part.globalMatch(QString::fromLocal8Bit(bxstring));
+  while (match.hasNext()) {
+    const QRegularExpressionMatch m = match.next();
+    text += m.captured(2);
+    if (!m.captured(1).isEmpty())
+      text += QLatin1Char('\n');
+  }
+  while (text.endsWith(QLatin1Char('\n')))
+    text.chop(1);
+  return text;
 }
 
 }  // namespace mbvq
@@ -138,6 +146,11 @@ void mbvq_qt_close_window(size_t instance) {
   window->hide();
   window->delete_map_view();
   mbvq::closed_windows.push_back(window);
+}
+
+void mbvq_qt_message(size_t instance, const char *message, bool on) {
+  if (mbvq::MapWindow *window = window_of(instance))
+    window->show_message(QString::fromLocal8Bit(message), on);
 }
 
 void mbvq_qt_status(size_t instance, const char *message) {

@@ -88,5 +88,12 @@ void install() {
 
 QWidget *create_map_view(size_t instance, QWidget *parent) { return new NullMapView(instance, parent); }
 
+QWidget *create_profile_view(size_t instance, QWidget *parent) {
+  /* nothing is drawn; the size is still passed on as for a drawing */
+  auto *view = new QWidget(parent);
+  (void)instance;
+  return view;
+}
+
 }  // namespace null_backend
 }  // namespace mbvq

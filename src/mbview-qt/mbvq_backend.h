@@ -44,11 +44,13 @@ void configure();
 /* install the renderer operations */
 void install();
 QWidget *create_map_view(size_t instance, QWidget *parent);
+QWidget *create_profile_view(size_t instance, QWidget *parent);
 }  // namespace gl_backend
 
 namespace null_backend {
 void install();
 QWidget *create_map_view(size_t instance, QWidget *parent);
+QWidget *create_profile_view(size_t instance, QWidget *parent);
 }  // namespace null_backend
 
 }  // namespace mbvq

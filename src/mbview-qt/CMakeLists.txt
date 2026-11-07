@@ -76,6 +76,8 @@ add_library(
   mbvq_input.h
   mbvq_lists.cc
   mbvq_lists.h
+  mbvq_profile.cc
+  mbvq_profile.h
   mbvq_ui.cc
   mbvq_window.cc
   mbvq_window.h)

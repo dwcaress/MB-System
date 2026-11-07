@@ -87,6 +87,59 @@ class GlMapView final : public QOpenGLWidget {
 
 GlMapView *views[MBVQ_MAX_WINDOWS] = {};
 
+/* The profile view: mbview_plotprofile() draws only inside paintGL(); its
+   size is the profile drawing size (prwidth, prheight). No input, as in Motif. */
+class GlProfileView final : public QOpenGLWidget {
+ public:
+  GlProfileView(size_t instance, QWidget *parent);
+  ~GlProfileView() override;
+  bool defer();
+
+ protected:
+  void resizeGL(int width, int height) override;
+  void paintGL() override;
+
+ private:
+  int pixel_width() const { return static_cast<int>(std::lround(width() * devicePixelRatioF())); }
+  int pixel_height() const { return static_cast<int>(std::lround(height() * devicePixelRatioF())); }
+
+  size_t instance_;
+  bool painting_ = false;
+};
+
+GlProfileView *profile_views[MBVQ_MAX_WINDOWS] = {};
+
+GlProfileView::GlProfileView(size_t instance, QWidget *parent) : QOpenGLWidget(parent), instance_(instance) {
+  profile_views[instance_] = this;
+}
+
+GlProfileView::~GlProfileView() {
+  if (profile_views[instance_] == this)
+    profile_views[instance_] = nullptr;
+}
+
+bool GlProfileView::defer() {
+  if (painting_)
+    return false;
+  update();
+  return true;
+}
+
+void GlProfileView::resizeGL(int width, int height) {
+  (void)width;
+  (void)height;
+  mbvq_c_profile_resize(instance_, pixel_width(), pixel_height());
+}
+
+void GlProfileView::paintGL() {
+  glViewport(0, 0, pixel_width(), pixel_height());
+  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  painting_ = true;
+  mbvq_c_plotprofile(instance_);
+  painting_ = false;
+}
+
 GlMapView::GlMapView(size_t instance, QWidget *parent) : QOpenGLWidget(parent), instance_(instance) {
   setFocusPolicy(Qt::StrongFocus);
   views[instance_] = this;
@@ -172,7 +225,12 @@ void GlMapView::deliver(const struct mbv_input_event &event) {
 }
 
 bool defer_draw(int view, size_t instance, int rez) {
-  /* the profile and 3D soundings views come in later steps: never draw them */
+  if (view == MBV_RENDER_PROFILE) {
+    if (instance >= MBVQ_MAX_WINDOWS || profile_views[instance] == nullptr)
+      return true;
+    return profile_views[instance]->defer();
+  }
+  /* the 3D soundings view comes in Phase 5: never draw it */
   if (view != MBV_RENDER_MAP)
     return true;
   if (instance >= MBVQ_MAX_WINDOWS || views[instance] == nullptr)
@@ -203,6 +261,8 @@ void install() {
 }
 
 QWidget *create_map_view(size_t instance, QWidget *parent) { return new GlMapView(instance, parent); }
+
+QWidget *create_profile_view(size_t instance, QWidget *parent) { return new GlProfileView(instance, parent); }
 
 }  // namespace gl_backend
 }  // namespace mbvq

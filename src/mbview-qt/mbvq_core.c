@@ -328,7 +328,7 @@ void mbvq_c_state(size_t instance, struct mbvq_state *state) {
 	c[MBVQ_VIEW_COLORTABLE_FLAT] = colortable == MBV_COLORTABLE_FLAT;
 	c[MBVQ_VIEW_COLORTABLE_SEALEVEL1] = colortable == MBV_COLORTABLE_SEALEVEL1;
 	c[MBVQ_VIEW_COLORTABLE_SEALEVEL2] = colortable == MBV_COLORTABLE_SEALEVEL2;
-	c[MBVQ_VIEW_PROFILE] = false;
+	c[MBVQ_VIEW_PROFILE] = data->profile_view_mode == MBV_VIEW_ON;
 
 	const bool primary = data->primary_nxy > 0 && data->primary_data != NULL;
 	const bool secondary = data->secondary_nxy > 0 && data->secondary_data != NULL;
@@ -354,8 +354,7 @@ void mbvq_c_state(size_t instance, struct mbvq_state *state) {
 	e[MBVQ_VIEW_POLYLINE] = sd->polyline_mode != MBV_POLYLINE_OFF;
 	e[MBVQ_VIEW_POLYGON] = sd->polygon_mode != MBV_POLYGON_OFF;
 	e[MBVQ_VIEW_GISPOINT] = sd->gispoint_mode != MBV_GISPOINT_OFF;
-	/* the profile window comes in step 3e */
-	e[MBVQ_VIEW_PROFILE] = false;
+	e[MBVQ_VIEW_PROFILE] = primary;
 
 	state->mouse_mode = data->mouse_mode;
 	const bool display_3d = data->display_mode == MBV_DISPLAY_3D;
@@ -597,6 +596,52 @@ void mbvq_c_setlonlatstyle(size_t instance, int style) {
 }
 
 /*------------------------------------------------------------------------------*/
+/* Profile window, as do_mbview_view_profile, do_mbview_profile_dismiss and the
+   profile sliders do without the Motif widgets */
+void mbvq_c_profile_show(size_t instance, bool on) {
+	struct mbview_struct *data = &(mbviews[instance].data);
+	if (on && data->profile_view_mode == MBV_VIEW_OFF) {
+		data->profile_view_mode = MBV_VIEW_ON;
+		mbview_plotprofile(instance);
+	}
+	else if (!on && data->profile_view_mode == MBV_VIEW_ON) {
+		mbview_destroy_prglx(instance);
+		data->profile_view_mode = MBV_VIEW_OFF;
+	}
+	mbvq_qt_modes_changed(instance);
+}
+
+bool mbvq_c_profile_shown(size_t instance) { return (mbviews[instance].data.profile_view_mode == MBV_VIEW_ON); }
+
+void mbvq_c_profile_resize(size_t instance, int width, int height) {
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	/* what mbview_reset_prglx() sets */
+	data->prwidth = width > 0 ? width : 1;
+	data->prheight = height > 0 ? height : 1;
+	view->praspect_ratio = ((float)data->prheight) / ((float)data->prwidth);
+}
+
+void mbvq_c_plotprofile(size_t instance) { mbview_plotprofile(instance); }
+
+void mbvq_c_profile_control(size_t instance, int control, int value) {
+	int c = MBV_PROFILE_CONTROL_WIDTH;
+	if (control == 1)
+		c = MBV_PROFILE_CONTROL_SLOPE;
+	else if (control == 2)
+		c = MBV_PROFILE_CONTROL_EXAGGERATION;
+	mbview_setprofilecontrol(instance, c, value);
+}
+
+void mbvq_c_profile_controls(size_t instance, int *width, int *slope, int *exaggeration) {
+	const struct mbview_struct *data = &(mbviews[instance].data);
+	*width = data->profile_widthfactor;
+	*slope = (int)lround(100.0 * data->profile_slopethreshold);
+	*exaggeration = (int)lround(10.0 * data->profile_exaggeration);
+}
+
+/*------------------------------------------------------------------------------*/
 /* List windows: the rows and actions of the core; the windows are shared by
    all instances, as in Motif */
 static int mbvq_gistype(int list) {
@@ -835,6 +880,22 @@ int do_mbview_status(char *message, size_t instance) {
 	view->message_on = true;
 
 	mbvq_qt_status(instance, message);
+
+	return (1);
+}
+
+int do_mbview_message_on(char *message, size_t instance) {
+	struct mbview_world_struct *view = &(mbviews[instance]);
+
+	view->message_on = true;
+
+	mbvq_qt_message(instance, message, true);
+
+	return (1);
+}
+
+int do_mbview_message_off(size_t instance) {
+	mbvq_qt_message(instance, "", false);
 
 	return (1);
 }

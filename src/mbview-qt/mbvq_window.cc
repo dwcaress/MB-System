@@ -27,7 +27,10 @@
 #include <QAction>
 #include <QActionGroup>
 #include <QButtonGroup>
+#include <QApplication>
 #include <QCloseEvent>
+#include <QDialog>
+#include <QDialogButtonBox>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -43,6 +46,7 @@
 #include "mbvq_backend.h"
 #include "mbvq_dialogs.h"
 #include "mbvq_lists.h"
+#include "mbvq_profile.h"
 
 namespace mbvq {
 
@@ -108,6 +112,7 @@ MapWindow::MapWindow(size_t instance) : instance_(instance) {
   mbvq_c_state(instance_, &state);
 
   /* menus in the order of the Motif window */
+  profile_ = new ProfileWindow(instance_, this);
   build_view_menu();
   dialogs_ = new ControlDialogs(instance_, this);
   QMenu *controls_menu = menuBar()->addMenu(tr("Controls"));
@@ -130,6 +135,8 @@ MapWindow::MapWindow(size_t instance) : instance_(instance) {
             [list] { show_list(list); });
   QMenu *mouse_menu = menuBar()->addMenu(tr("Mouse"));
   action_menu_ = menuBar()->addMenu(tr("Action"));
+  /* as in Motif, About is the first item of the Action menu */
+  connect(action_menu_->addAction(tr("About MBview...")), &QAction::triggered, this, [this] { show_about(); });
   QMenu *dismiss_menu = menuBar()->addMenu(tr("Dismiss"));
   connect(dismiss_menu->addAction(tr("Dismiss")), &QAction::triggered, this, [this] { mbvq_c_destroy(instance_); });
 
@@ -226,7 +233,10 @@ void MapWindow::build_view_menu() {
       groups[entry.group]->addAction(action);
     }
     const int item = entry.item;
-    connect(action, &QAction::triggered, this, [this, item](bool checked) { mbvq_c_view(instance_, item, checked); });
+    if (item == MBVQ_VIEW_PROFILE)
+      connect(action, &QAction::triggered, this, [this] { profile_->toggle(); });
+    else
+      connect(action, &QAction::triggered, this, [this, item](bool checked) { mbvq_c_view(instance_, item, checked); });
     view_action_[item] = action;
   }
 }
@@ -252,8 +262,72 @@ void MapWindow::refresh_modes() {
 }
 
 void MapWindow::delete_map_view() {
+  /* the OpenGL views go now: the map view and the profile window */
+  delete profile_;
+  profile_ = nullptr;
   delete map_view_;
   map_view_ = nullptr;
+}
+
+void MapWindow::show_message(const QString &text, bool on) {
+  if (message_ == nullptr) {
+    message_ = new QDialog(this);
+    message_->setWindowTitle(windowTitle());
+    auto *layout = new QVBoxLayout(message_);
+    message_label_ = new QLabel;
+    layout->addWidget(message_label_);
+    layout->addWidget(new QLabel(tr("Thank you for your patience.")));
+  }
+  if (on) {
+    message_label_->setText(text);
+    message_->show();
+    message_->raise();
+    /* as XSync and XmUpdateDisplay: show the message before the work goes on */
+    QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+  }
+  else {
+    message_->hide();
+  }
+}
+
+void MapWindow::show_about() {
+  if (about_ == nullptr) {
+    /* the texts of the Motif About dialog */
+    about_ = new QDialog(this);
+    about_->setWindowTitle(tr("About MBview"));
+    auto *layout = new QVBoxLayout(about_);
+    auto add = [layout](const QString &text, int points) {
+      auto *label = new QLabel(text);
+      label->setAlignment(Qt::AlignCenter);
+      QFont font = label->font();
+      font.setBold(true);
+      font.setPointSize(points);
+      label->setFont(font);
+      layout->addWidget(label);
+    };
+    add(label_text("::#TimesBold24\"MBview\":t\"\"#TimesBold18\"A 2D/3D Visualization API\""), 20);
+    add(label(MBVQ_LABEL_ABOUTVERSION), 13);
+    add(label_text("::#TimesBold14:t\"One component of the\"#TimesBold24\"MB-System\"#TimesBold14:t\"\"#TimesBold14:t\"An open "
+                   "Source Software Package\"#TimesBold14:t\"for Processing and Display\"#TimesBold14\"of Swath Sonar Data\""),
+        13);
+    add(label_text("::#TimesBold14:t\"Created By:\"#TimesBold14\"David W. Caress   and   Dale N. Chayes \""), 13);
+    /* the Qt6 version */
+    add(tr("Qt6 user interface by:\nChristian dos Santos Ferreira"), 13);
+    auto *places = new QHBoxLayout;
+    for (const char *text : {"::#TimesBold12:t\"Monterey Bay\"#TimesBold12:t\"Aquarium\"#TimesBold12\"Research Institute\"",
+                             "::#TimesBold12:t\"Lamont-Doherty\"#TimesBold12:t\"Earth Observatory\"#TimesBold12\"of Columbia University\"",
+                             "::#TimesBold12:t\"MARUM\"#TimesBold12:t\"Center for Marine\"#TimesBold12:t\"Environmental Sciences\"#TimesBold12\"University of Bremen\""}) {
+      auto *label = new QLabel(label_text(text));
+      label->setAlignment(Qt::AlignCenter);
+      places->addWidget(label);
+    }
+    layout->addLayout(places);
+    auto *box = new QDialogButtonBox;
+    connect(box->addButton(tr("Dismiss"), QDialogButtonBox::RejectRole), &QPushButton::clicked, about_, &QDialog::hide);
+    layout->addWidget(box);
+  }
+  about_->show();
+  about_->raise();
 }
 
 void MapWindow::set_status(const QString &text) { status_->setText(text); }
@@ -266,6 +340,8 @@ void MapWindow::set_label(int label, const QString &text) {
     pick_info_->setText(text);
   else if (label == MBVQ_LABEL_PROJECTION && dialogs_ != nullptr)
     dialogs_->set_projection_label(text);
+  else if (label == MBVQ_LABEL_PROFILEINFO && profile_ != nullptr)
+    profile_->set_info(text);
 }
 
 QString MapWindow::label(int label) const {

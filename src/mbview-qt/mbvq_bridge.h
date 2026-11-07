@@ -129,6 +129,20 @@ void mbvq_c_view(size_t instance, int item, bool value);
 /* Action menu */
 void mbvq_c_action(size_t instance, int index);
 
+/* Profile window */
+/* show or dismiss the profile, as the View > Profile toggle and the profile
+   Dismiss button (profile_view_mode) */
+void mbvq_c_profile_show(size_t instance, bool on);
+bool mbvq_c_profile_shown(size_t instance);
+/* the size of the profile drawing in physical pixels (prwidth, prheight) */
+void mbvq_c_profile_resize(size_t instance, int width, int height);
+/* draw the profile, inside a paint */
+void mbvq_c_plotprofile(size_t instance);
+/* a profile slider: 0 width multiple (1-5), 1 slope threshold in hundredths
+   (1-200), 2 vertical exaggeration in tenths (0-100) */
+void mbvq_c_profile_control(size_t instance, int control, int value);
+void mbvq_c_profile_controls(size_t instance, int *width, int *slope, int *exaggeration);
+
 /* List windows (shared by all instances) */
 #define MBVQ_LIST_SITE 0
 #define MBVQ_LIST_ROUTE 1
@@ -242,6 +256,8 @@ void mbvq_qt_close_window(size_t instance);
 void mbvq_qt_status(size_t instance, const char *message);
 /* a label in Motif "BX" multiline form (:::t"line":t"line"...) */
 void mbvq_qt_label(size_t instance, int label, const char *bxstring);
+/* a message while the program works (do_mbview_message_on/off) */
+void mbvq_qt_message(size_t instance, const char *message, bool on);
 /* the mouse mode or a view toggle of an instance changed */
 void mbvq_qt_modes_changed(size_t instance);
 /* the sensitivity of menu items and actions may have changed */

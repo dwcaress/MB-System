@@ -52,10 +52,12 @@
 #include <QMenu>
 #include <QMouseEvent>
 #include <QOpenGLWidget>
+#include <QScrollArea>
 #include <QPushButton>
 #include <QRadioButton>
 #include <QSlider>
 #include <QTimer>
+#include <QWindow>
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
@@ -74,6 +76,7 @@ extern "C" {
 #include "mbvq_bridge.h"
 #include "mbvq_dialogs.h"
 #include "mbvq_lists.h"
+#include "mbvq_profile.h"
 #include "mbvq_window.h"
 
 namespace {
@@ -284,8 +287,9 @@ int test_null() {
         "Topography shows the primary grid with its settings kept");
   check(!view_item("Overlay")->isEnabled() && !view_item("Shading by Overlay")->isEnabled(),
         "overlay items are disabled without an overlay grid");
-  check(!view_item("Sites")->isEnabled() && !view_item("Navigation")->isEnabled() && !view_item("Profile")->isEnabled(),
-        "Sites, Navigation and Profile are disabled when not enabled by the program");
+  check(!view_item("Sites")->isEnabled() && !view_item("Navigation")->isEnabled(),
+        "Sites and Navigation are disabled when not enabled by the program");
+  check(view_item("Profile")->isEnabled() && !view_item("Profile")->isChecked(), "Profile is available with a grid");
 
   /* Reset button: view defaults, as the Motif Reset button */
   data->exaggeration = 3.0;
@@ -448,6 +452,55 @@ int test_null() {
   topolylines->click();
   check(sd->npolyline == 2 && polylines->view()->count() == 4, "Convert Selected to Polylines adds a polyline in a new layer");
 
+  /* Profile window: View > Profile, the sliders and Dismiss */
+  view_item("Profile")->trigger();
+  mbvq::ProfileWindow *profile = map_window->profile();
+  check(profile->isVisible() && mbvq_c_profile_shown(instance) && view_item("Profile")->isChecked(),
+        "View > Profile opens the profile window");
+  profile->slider(2)->setValue(20);
+  profile->slider(1)->setValue(50);
+  profile->slider(0)->setValue(3);
+  auto *scroll = profile->findChild<QScrollArea *>();
+  check(data->profile_exaggeration == 2.0 && data->profile_slopethreshold == 0.5 && data->profile_widthfactor == 3 &&
+            scroll != nullptr && profile->view()->width() == 3 * scroll->viewport()->width(),
+        "the profile sliders set exaggeration, slope threshold and width multiple");
+  for (QPushButton *b : profile->findChildren<QPushButton *>())
+    if (b->text() == QStringLiteral("Dismiss"))
+      b->click();
+  check(!profile->isVisible() && !mbvq_c_profile_shown(instance) && !view_item("Profile")->isChecked(),
+        "Dismiss closes the profile window");
+
+  /* About and messages */
+  view_item("About MBview...")->trigger();
+  bool about = false, qt_author = false, marum = false;
+  for (QDialog *d : window->findChildren<QDialog *>())
+    if (d->isVisible() && d->windowTitle() == QStringLiteral("About MBview"))
+      for (QLabel *l : d->findChildren<QLabel *>()) {
+        if (l->text().startsWith(QStringLiteral("MB-System Release ")))
+          about = true;
+        if (l->text().contains(QStringLiteral("Christian dos Santos Ferreira")))
+          qt_author = true;
+        if (l->text().startsWith(QStringLiteral("MARUM\n")) && l->text().endsWith(QStringLiteral("University of Bremen")))
+          marum = true;
+      }
+  check(about, "About MBview shows the MB-System release");
+  check(qt_author && marum, "About MBview names the author of the Qt6 version and MARUM");
+  char message[] = "Reading the grid...";
+  do_mbview_message_on(message, instance);
+  bool shown = false;
+  for (QLabel *l : window->findChildren<QLabel *>())
+    if (l->text() == QStringLiteral("Reading the grid...") && l->isVisible())
+      shown = true;
+  do_mbview_message_off(instance);
+  bool hidden = true;
+  for (QLabel *l : window->findChildren<QLabel *>())
+    if (l->text() == QStringLiteral("Reading the grid...") && l->isVisible())
+      hidden = false;
+  check(shown && hidden, "do_mbview_message_on and _off show and hide the message");
+  check(mbvq::label_text("::#TimesBold24\"MBview\":t\"\"#TimesBold18\"A 2D/3D Visualization API\"") ==
+            QStringLiteral("MBview\nA 2D/3D Visualization API"),
+        "only :t ends a line in Motif label strings");
+
   /* Action menu: items added by the program, enabled by the pick masks */
   mbview_addaction(0, instance, count_action, const_cast<char *>("Always"), MBV_PICKMASK_NONE, &error);
   mbview_addactionseparator(0, instance, &error);
@@ -575,12 +628,25 @@ int test_gl(bool mode3d) {
       full_button = button;
   }
   reset_button->click();
-  spin(150);
+  {
+    /* wait for the low or high drawing of the reset */
+    QElapsedTimer wait;
+    wait.start();
+    while (mbvq_c_lastdrawrez(instance) == MBVQ_REZ_NONE && wait.elapsed() < 2000)
+      spin(10);
+  }
   const int before_full = mbvq_c_lastdrawrez(instance);
   full_button->click();
-  spin(150);
-  check(before_full != MBVQ_REZ_FULL && mbvq_c_lastdrawrez(instance) == MBVQ_REZ_FULL,
-        "Full draws at full resolution at once after a coarser drawing (before: " + std::to_string(before_full) + ")");
+  QElapsedTimer full_timer;
+  full_timer.start();
+  while (mbvq_c_lastdrawrez(instance) != MBVQ_REZ_FULL && full_timer.elapsed() < 3000)
+    spin(10);
+  /* the background work would need about a second of rest: well before that */
+  check(before_full != MBVQ_REZ_NONE && before_full != MBVQ_REZ_FULL && mbvq_c_lastdrawrez(instance) == MBVQ_REZ_FULL &&
+            full_timer.elapsed() < 700,
+        "Full draws at full resolution at once after a coarser drawing (before: " + std::to_string(before_full) + ", " +
+            std::to_string(full_timer.elapsed()) + " ms, window exposed: " +
+            std::to_string(view->window()->windowHandle() != nullptr && view->window()->windowHandle()->isExposed()) + ")");
 
   full_button->click();
   QString status_text;
@@ -588,6 +654,31 @@ int test_gl(bool mode3d) {
     if (label->text() == QStringLiteral("Already at full resolution"))
       status_text = label->text();
   check(!status_text.isEmpty(), "Full at full resolution says so in the status line");
+
+  /* a two-point pick (drag) gives a profile, drawn in its own OpenGL view */
+  {
+    const QPointF a(view->width() * 0.3, view->height() * 0.5), b(view->width() * 0.7, view->height() * 0.5);
+    QMouseEvent press(QEvent::MouseButtonPress, a, view->mapToGlobal(a), Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
+    QApplication::sendEvent(view, &press);
+    for (int k = 1; k <= 10; k++) {
+      const QPointF p = a + (b - a) * (k / 10.0);
+      QMouseEvent move(QEvent::MouseMove, p, view->mapToGlobal(p), Qt::NoButton, Qt::LeftButton, Qt::NoModifier);
+      QApplication::sendEvent(view, &move);
+    }
+    QMouseEvent release(QEvent::MouseButtonRelease, b, view->mapToGlobal(b), Qt::LeftButton, Qt::NoButton, Qt::NoModifier);
+    QApplication::sendEvent(view, &release);
+    spin(200);
+  }
+  check(data->pick_type == MBV_PICK_TWOPOINT && data->profile.npoints > 1,
+        "a drag makes a two-point pick with a profile of " + std::to_string(data->profile.npoints) + " points");
+  auto *gl_window = static_cast<mbvq::MapWindow *>(mbvq::window(instance));
+  gl_window->profile()->open();
+  spin(300);
+  if (const char *snapshot = std::getenv("MBVIEW_QT_TEST_PROFILE"))
+    qobject_cast<QOpenGLWidget *>(gl_window->profile()->view())->grabFramebuffer().save(QString::fromLocal8Bit(snapshot));
+  auto *profile_view = qobject_cast<QOpenGLWidget *>(gl_window->profile()->view());
+  check(profile_view != nullptr && !profile_view->grabFramebuffer().isNull() && data->prwidth > 0 && data->prheight > 0,
+        "the profile view draws (" + std::to_string(data->prwidth) + " x " + std::to_string(data->prheight) + " pixels)");
 
   /* closing the window removes the OpenGL view and frees the instance */
   mbvq::window(instance)->close();
