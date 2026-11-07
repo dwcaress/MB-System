@@ -71,6 +71,51 @@
 #define MBV_BACKGROUND_COLOR 2
 #define MBV_BACKGROUND_FULLPLOT 3
 
+/* values of the colour bounds and contour interval dialog (mbview_colorboundsapply) */
+struct mbview_colorbounds_values {
+	mb_path datamin;
+	mb_path datamax;
+	mb_path contours;
+	int data_htoc;
+	mb_path slopemin;
+	mb_path slopemax;
+	int slope_htoc;
+	mb_path overlaymin;
+	mb_path overlaymax;
+	int overlay_htoc;
+};
+
+/* values of the shading parameters dialog (mbview_shadeparmsapply) */
+struct mbview_shadeparms_values {
+	mb_path illum_amp;
+	mb_path illum_azi;
+	mb_path illum_elev;
+	mb_path slope_amp;
+	mb_path overlay_amp;
+	mb_path overlay_center;
+	int overlay_shade_htoc;
+};
+
+/* values of the 3D view parameters dialog (mbview_3dparmsapply) */
+struct mbview_3dparms_values {
+	mb_path model_azimuth;
+	mb_path model_elevation;
+	mb_path view_azimuth;
+	mb_path view_elevation;
+	mb_path exaggeration;
+	mb_path view_3doffsetx;
+	mb_path view_3doffsety;
+	mb_path model_3dzoom;
+	mb_path view_3dzoom;
+};
+
+/* values of the 2D view parameters dialog (mbview_2dparmsapply) */
+struct mbview_2dparms_values {
+	mb_path view_2doffsetx;
+	mb_path view_2doffsety;
+	mb_path view_2dzoom;
+};
+
 /* view toggles of the View menu (mbview_setviewtoggle) */
 #define MBV_VIEWTOGGLE_CONTOUR 0
 #define MBV_VIEWTOGGLE_SITE 1
@@ -455,6 +500,13 @@ int mbview_setviewtoggle(size_t instance, int toggle, bool value);
 int mbview_resetview(size_t instance);
 int mbview_fullrender(size_t instance);
 bool mbview_actionsensitive(size_t instance, int iaction);
+int mbview_colorboundsapply(size_t instance, const struct mbview_colorbounds_values *values);
+int mbview_shadeparmsapply(size_t instance, const struct mbview_shadeparms_values *values);
+int mbview_3dparmsapply(size_t instance, const struct mbview_3dparms_values *values);
+int mbview_2dparmsapply(size_t instance, const struct mbview_2dparms_values *values);
+int mbview_setresolution(size_t instance, int lorez_dimension, int hirez_dimension, int lorez_navdecimate, int hirez_navdecimate);
+int mbview_setdisplayprojection(size_t instance, int projection);
+int mbview_setlonlatstyle(size_t instance, int style);
 int mbview_addpicknotify(int verbose, size_t instance, int picktype, void(mbview_pick_notify)(size_t), int *error);
 int mbview_setsensitivitynotify(int verbose, size_t instance, void(mbview_sensitivity_notify)(), int *error);
 void mbview_resize(Widget w, XtPointer client_data, XEvent *event, Boolean *unused);

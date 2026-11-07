@@ -3864,3 +3864,685 @@ int mbview_destroy(int verbose, size_t instance, bool destroywidgets, int *error
 
 	return (status);
 }
+
+/*------------------------------------------------------------------------------*/
+int mbview_colorboundsapply(size_t instance, const struct mbview_colorbounds_values *values) {
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+	}
+
+
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "%s: instance:%zu\n", __func__, instance);
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+
+	/* get values of widgets */
+
+	bool change = false;
+
+	double dvalue;
+	if (sscanf(values->datamin, "%lf", &dvalue) == 1 && dvalue != data->primary_colortable_min) {
+		data->primary_colortable_min = dvalue;
+		view->primary_histogram_set = false;
+		if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
+			change = true;
+	}
+
+	if (sscanf(values->datamax, "%lf", &dvalue) == 1 && dvalue != data->primary_colortable_max) {
+		data->primary_colortable_max = dvalue;
+		view->primary_histogram_set = false;
+		if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
+			change = true;
+	}
+
+	if (sscanf(values->contours, "%lf", &dvalue) == 1 && dvalue > 0.0 && dvalue != data->contour_interval) {
+		data->contour_interval = dvalue;
+		view->contourlorez = false;
+		view->contourhirez = false;
+		view->contourfullrez = false;
+		view->primary_histogram_set = false;
+		view->primaryslope_histogram_set = false;
+		view->secondary_histogram_set = false;
+		if (data->grid_contour_mode == MBV_VIEW_ON)
+			change = true;
+	}
+
+	int ivalue = values->data_htoc;
+	if (ivalue != data->primary_colortable_mode) {
+		data->primary_colortable_mode = ivalue;
+		if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
+			change = true;
+	}
+
+	if (sscanf(values->slopemin, "%lf", &dvalue) == 1 && dvalue != data->slope_colortable_min) {
+		data->slope_colortable_min = dvalue;
+		view->primaryslope_histogram_set = false;
+		if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
+			change = true;
+	}
+
+	if (sscanf(values->slopemax, "%lf", &dvalue) == 1 && dvalue != data->slope_colortable_max) {
+		data->slope_colortable_max = dvalue;
+		view->primaryslope_histogram_set = false;
+		if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
+			change = true;
+	}
+
+	ivalue = values->slope_htoc;
+	if (ivalue != data->slope_colortable_mode) {
+		data->slope_colortable_mode = ivalue;
+		if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
+			change = true;
+	}
+
+	if (sscanf(values->overlaymin, "%lf", &dvalue) == 1 && dvalue != data->secondary_colortable_min) {
+		data->secondary_colortable_min = dvalue;
+		view->secondary_histogram_set = false;
+		if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
+			change = true;
+	}
+
+	if (sscanf(values->overlaymax, "%lf", &dvalue) == 1 && dvalue != data->secondary_colortable_max) {
+		data->secondary_colortable_max = dvalue;
+		view->secondary_histogram_set = false;
+		if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
+			change = true;
+	}
+
+	ivalue = values->overlay_htoc;
+	if (ivalue != data->secondary_colortable_mode) {
+		data->secondary_colortable_mode = ivalue;
+		if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
+			change = true;
+	}
+
+	/* clear color status array */
+	if (change) {
+		view->lastdrawrez = MBV_REZ_NONE;
+		mbview_setcolorparms(instance);
+		mbview_colorclear(instance);
+	}
+
+	/* draw */
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "Calling mbview_plotlowhigh from %s\n", __func__);
+	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
+
+	return (MB_SUCCESS);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_shadeparmsapply(size_t instance, const struct mbview_shadeparms_values *values) {
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+	}
+
+
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "%s: instance:%zu\n", __func__, instance);
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	int shade_mode;
+	/* check current shading mode */
+	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
+		shade_mode = data->primary_shade_mode;
+	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
+		shade_mode = data->slope_shade_mode;
+	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
+		shade_mode = data->secondary_shade_mode;
+
+	/* get values of widgets */
+
+	/* handle illumination */
+	bool change = false;
+
+	double dvalue;
+	if (sscanf(values->illum_amp, "%lf", &dvalue) == 1 && dvalue != data->illuminate_magnitude) {
+		data->illuminate_magnitude = dvalue;
+		if (shade_mode == MBV_SHADE_VIEW_ILLUMINATION)
+			change = true;
+	}
+
+	if (sscanf(values->illum_azi, "%lf", &dvalue) == 1 && dvalue != data->illuminate_azimuth) {
+		data->illuminate_azimuth = dvalue;
+		if (shade_mode == MBV_SHADE_VIEW_ILLUMINATION)
+			change = true;
+	}
+
+	if (sscanf(values->illum_elev, "%lf", &dvalue) == 1 && dvalue != data->illuminate_elevation) {
+		data->illuminate_elevation = dvalue;
+		if (shade_mode == MBV_SHADE_VIEW_ILLUMINATION)
+			change = true;
+	}
+
+	if (sscanf(values->slope_amp, "%lf", &dvalue) == 1 && dvalue != data->slope_magnitude) {
+		data->slope_magnitude = dvalue;
+		if (shade_mode == MBV_SHADE_VIEW_SLOPE)
+			change = true;
+	}
+
+	if (sscanf(values->overlay_amp, "%lf", &dvalue) == 1 && dvalue != data->overlay_shade_magnitude) {
+		data->overlay_shade_magnitude = dvalue;
+		if (shade_mode == MBV_SHADE_VIEW_OVERLAY)
+			change = true;
+	}
+
+	if (sscanf(values->overlay_center, "%lf", &dvalue) == 1 && dvalue != data->overlay_shade_center) {
+		data->overlay_shade_center = dvalue;
+		if (shade_mode == MBV_SHADE_VIEW_OVERLAY)
+			change = true;
+	}
+
+	int ivalue = values->overlay_shade_htoc;
+	if (ivalue != data->overlay_shade_mode) {
+		data->overlay_shade_mode = ivalue;
+		if (shade_mode == MBV_SHADE_VIEW_OVERLAY)
+			change = true;
+	}
+
+	/* clear color status array */
+	if (change) {
+		view->lastdrawrez = MBV_REZ_NONE;
+		mbview_setcolorparms(instance);
+		mbview_colorclear(instance);
+	}
+
+	/* draw */
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "Calling mbview_plotlowhigh from %s\n", __func__);
+	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
+
+	return (MB_SUCCESS);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_3dparmsapply(size_t instance, const struct mbview_3dparms_values *values) {
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+	}
+
+
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "%s: instance:%zu\n", __func__, instance);
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	/* get values of widgets */
+
+	bool change = false;
+
+	double dvalue;
+	if (sscanf(values->model_azimuth, "%lf", &dvalue) == 1 && dvalue != data->modelazimuth3d) {
+		data->modelazimuth3d = dvalue;
+		change = true;
+	}
+
+	if (sscanf(values->model_elevation, "%lf", &dvalue) == 1 && dvalue != data->modelelevation3d) {
+		data->modelelevation3d = dvalue;
+		change = true;
+	}
+
+	if (sscanf(values->view_azimuth, "%lf", &dvalue) == 1 && dvalue != data->viewazimuth3d) {
+		data->viewazimuth3d = dvalue;
+		change = true;
+	}
+
+	if (sscanf(values->view_elevation, "%lf", &dvalue) == 1 && dvalue != data->viewelevation3d) {
+		data->viewelevation3d = dvalue;
+		change = true;
+	}
+
+	if (sscanf(values->exaggeration, "%lf", &dvalue) == 1 && dvalue != data->exaggeration) {
+		data->exaggeration = dvalue;
+		if (data->display_projection_mode != MBV_PROJECTION_SPHEROID) {
+			view->zorigin = data->exaggeration * 0.5 * (data->primary_min + data->primary_max);
+		}
+		change = true;
+
+		mbview_zscaleclear(instance);
+		view->contourlorez = false;
+		view->contourhirez = false;
+		view->contourfullrez = false;
+
+		/* rescale data other than the grid */
+		mbview_zscale(instance);
+
+		/* set flag to reset view bounds */
+		view->viewboundscount++;
+	}
+
+	if (sscanf(values->view_3doffsetx, "%lf", &dvalue) == 1 && dvalue != view->offset3d_x) {
+		view->offset3d_x = dvalue;
+		change = true;
+	}
+
+	if (sscanf(values->view_3doffsety, "%lf", &dvalue) == 1 && dvalue != view->offset3d_y) {
+		view->offset3d_y = dvalue;
+		change = true;
+	}
+
+	if (sscanf(values->model_3dzoom, "%lf", &dvalue) == 1 && dvalue != view->offset3d_z) {
+		view->offset3d_z = dvalue;
+		change = true;
+	}
+
+	if (sscanf(values->view_3dzoom, "%lf", &dvalue) == 1 && dvalue != view->viewoffset3d_z) {
+		view->viewoffset3d_z = dvalue;
+		change = true;
+	}
+
+	/* clear color status array */
+	if (change && data->display_mode == MBV_DISPLAY_3D) {
+		view->lastdrawrez = MBV_REZ_NONE;
+		mbview_setcolorparms(instance);
+		mbview_colorclear(instance);
+	}
+
+	/* set flag to reset view bounds */
+	view->viewboundscount = MBV_BOUNDSFREQUENCY;
+
+	/* draw */
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "Calling mbview_plotlowhigh from %s\n", __func__);
+	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
+
+	return (MB_SUCCESS);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_2dparmsapply(size_t instance, const struct mbview_2dparms_values *values) {
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+	}
+
+
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "%s: instance:%zu\n", __func__, instance);
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	/* get values of widgets */
+
+	bool change = false;
+
+	double dvalue;
+	if (sscanf(values->view_2doffsetx, "%lf", &dvalue) == 1 && dvalue != view->offset2d_x) {
+		view->offset2d_x = dvalue;
+		change = true;
+	}
+
+	if (sscanf(values->view_2doffsety, "%lf", &dvalue) == 1 && dvalue != view->offset2d_y) {
+		view->offset2d_y = dvalue;
+		change = true;
+	}
+
+	if (sscanf(values->view_2dzoom, "%lf", &dvalue) == 1 && dvalue != view->size2d) {
+		view->size2d = dvalue;
+		change = true;
+	}
+
+	/* clear color status array */
+	if (change && data->display_mode == MBV_DISPLAY_2D) {
+		view->lastdrawrez = MBV_REZ_NONE;
+		mbview_setcolorparms(instance);
+		mbview_colorclear(instance);
+	}
+
+	/* set flag to reset view bounds */
+	view->viewboundscount = MBV_BOUNDSFREQUENCY;
+
+	/* draw */
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "Calling mbview_plotlowhigh from %s\n", __func__);
+	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
+
+	return (MB_SUCCESS);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_setresolution(size_t instance, int lorez_dimension, int hirez_dimension, int lorez_navdecimate, int hirez_navdecimate) {
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+		fprintf(stderr, "dbg2       lorez_dimension:  %d\n", lorez_dimension);
+		fprintf(stderr, "dbg2       hirez_dimension:  %d\n", hirez_dimension);
+		fprintf(stderr, "dbg2       lorez_navdecimate: %d\n", lorez_navdecimate);
+		fprintf(stderr, "dbg2       hirez_navdecimate: %d\n", hirez_navdecimate);
+	}
+
+
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "%s: instance:%zu\n", __func__, instance);
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+
+	/* make dimensions even multiples of 10 */
+	if (lorez_dimension > hirez_dimension)
+		hirez_dimension = lorez_dimension;
+	data->lorez_dimension = 25 * ((int)((lorez_dimension + 12.5) / 25));
+	data->hirez_dimension = 25 * ((int)((hirez_dimension + 12.5) / 25));
+
+	/* show the rounded dimensions */
+	mbv_ui_view_values_changed(instance, MBV_VALUES_RESOLUTION);
+
+	/* set nav decimation */
+	data->lorez_navdecimate = lorez_navdecimate;
+	data->hirez_navdecimate = hirez_navdecimate;
+
+	/* reset status flags and arrays */
+	view->lastdrawrez = MBV_REZ_NONE;
+	mbview_setcolorparms(instance);
+	mbview_colorclear(instance);
+	mbview_zscaleclear(instance);
+	view->contourlorez = false;
+	view->contourhirez = false;
+	view->contourfullrez = false;
+
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "%s instance:%zu resolutions: %d %d decimations: %d %d\n", __func__, instance,
+		        data->lorez_dimension, data->hirez_dimension, data->lorez_navdecimate, data->hirez_navdecimate);
+
+	/* draw */
+	if (mbv_verbose >= 2)
+		fprintf(stderr, "Calling mbview_plotlowhigh from %s\n", __func__);
+	mbview_plotlowhigh(instance);
+
+	/* notify parent program of color change */
+	if (data->mbview_colorchange_notify != NULL)
+		(data->mbview_colorchange_notify)(instance);
+
+	return (MB_SUCCESS);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_setdisplayprojection(size_t instance, int projection) {
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+		fprintf(stderr, "dbg2       projection:       %d\n", projection);
+	}
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+	int projectionid, utmzone;
+	double reference_lon;
+	double reference_lat;
+
+	data->display_projection_mode = projection;
+	view->plot_done = false;
+	view->projected = false;
+	view->globalprojected = false;
+	view->viewboundscount = MBV_BOUNDSFREQUENCY;
+
+	/* UTM: the zone of the grid centre */
+	if (projection == MBV_PROJECTION_PROJECTED) {
+		mbview_projectgrid2ll(instance, 0.5 * (data->primary_xmin + data->primary_xmax),
+		                      0.5 * (data->primary_ymin + data->primary_ymax), &reference_lon, &reference_lat);
+		if (reference_lon > 180.0)
+			reference_lon -= 360.0;
+		utmzone = (int)(((reference_lon + 183.0) / 6.0) + 0.5);
+		if (reference_lat >= 0.0)
+			projectionid = 32600 + utmzone;
+		else
+			projectionid = 32700 + utmzone;
+		sprintf(data->display_projection_id, "EPSG:%d", projectionid);
+	}
+
+	/* set label */
+	do_mbview_set_projection_label(instance);
+
+	/* clear zscale for grid */
+	mbview_zscaleclear(instance);
+
+	/* project and scale data other than the grid */
+	mbview_zscale(instance);
+
+	/* draw */
+	fprintf(stderr, "Calling mbview_plotlowhigh from %s\n", __func__);
+	mbview_plotlowhigh(instance);
+
+	return (MB_SUCCESS);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_setlonlatstyle(size_t instance, int style) {
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+		fprintf(stderr, "dbg2       style:            %d\n", style);
+	}
+
+	/* lon/lat style of the pick annotation */
+	shared.lonlatstyle = style;
+	mbview_pick_text(instance);
+
+	return (MB_SUCCESS);
+}
+
+/*------------------------------------------------------------------------------*/
+void do_mbview_set_projection_label(size_t instance) {
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	/* set projection label */
+  char value_text[4 * MB_PATH_MAXLINE];
+	snprintf(value_text, sizeof(value_text), ":::t\"Primary Grid Projection:\"");
+	if (data->primary_grid_projection_mode == MBV_PROJECTION_GEOGRAPHIC) {
+		strncat(value_text, ":t\"  Geographic\"", sizeof(value_text) - strlen(value_text) - 1);
+	}
+	else if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED ||
+	         data->primary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED) {
+		int projectionid;
+		char tmptext[MB_PATH_MAXLINE*2];
+		if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1 && projectionid == 32661) {
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->primary_grid_projection_id);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+		}
+		else if (sscanf(data->primary_grid_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid == 32661) {
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->primary_grid_projection_id);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+		}
+		else if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1 && projectionid == 32761) {
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    South Polar Steographic\"", data->primary_grid_projection_id);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+		}
+		else if (sscanf(data->primary_grid_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid == 32761) {
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    South Polar Steographic\"", data->primary_grid_projection_id);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+		}
+		else if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1 && projectionid >= 32600 &&
+		         projectionid < 32700) {
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    UTM Zone %d N\"", data->primary_grid_projection_id,
+			        projectionid - 32600);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+		}
+		else if (sscanf(data->primary_grid_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid >= 32600 &&
+		         projectionid < 32700) {
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    UTM Zone %d N\"", data->primary_grid_projection_id,
+			        projectionid - 32600);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+		}
+		else if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1 && projectionid >= 32700 &&
+		         projectionid < 32800) {
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    UTM Zone %d S\"", data->primary_grid_projection_id,
+			        projectionid - 32700);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+		}
+		else if (sscanf(data->primary_grid_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid >= 32700 &&
+		         projectionid < 32800) {
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    UTM Zone %d S\"", data->primary_grid_projection_id,
+			        projectionid - 32700);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+		}
+		else {
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\"", data->primary_grid_projection_id);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+		}
+	}
+	else if (data->primary_grid_projection_mode == MBV_PROJECTION_SPHEROID) {
+		strncat(value_text, ":t\"  Spheroid\"", sizeof(value_text) - strlen(value_text) - 1);
+	}
+
+	if (data->secondary_nxy > 0) {
+		strncat(value_text, ":t\"Secondary Grid Projection:\"", sizeof(value_text) - strlen(value_text) - 1);
+		if (data->secondary_grid_projection_mode == MBV_PROJECTION_GEOGRAPHIC) {
+			strncat(value_text, ":t\"  Geographic\"", sizeof(value_text) - strlen(value_text) - 1);
+		}
+		else if (data->secondary_grid_projection_mode == MBV_PROJECTION_PROJECTED ||
+		         data->secondary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED) {
+			int projectionid;
+			char tmptext[MB_PATH_MAXLINE*2];
+			if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1 && projectionid == 32661) {
+				snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->secondary_grid_projection_id);
+				strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+			}
+			else if (sscanf(data->secondary_grid_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid == 32661) {
+				snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->secondary_grid_projection_id);
+				strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+			}
+			else if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1 && projectionid == 32761) {
+				snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    South Polar Steographic\"", data->secondary_grid_projection_id);
+				strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+			}
+			else if (sscanf(data->secondary_grid_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid == 32761) {
+				snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    South Polar Steographic\"", data->secondary_grid_projection_id);
+				strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+			}
+			else if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1 && projectionid >= 32600 &&
+			         projectionid < 32700) {
+				snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    UTM Zone %d N\"", data->secondary_grid_projection_id,
+				        projectionid - 32600);
+				strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+			}
+			else if (sscanf(data->secondary_grid_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid >= 32600 &&
+			         projectionid < 32700) {
+				snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    UTM Zone %d N\"", data->secondary_grid_projection_id,
+				        projectionid - 32600);
+				strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+			}
+			else if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1 && projectionid >= 32700 &&
+			         projectionid < 32800) {
+				snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    UTM Zone %d S\"", data->secondary_grid_projection_id,
+				        projectionid - 32700);
+				strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+			}
+			else if (sscanf(data->secondary_grid_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid >= 32700 &&
+			         projectionid < 32800) {
+				snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    UTM Zone %d S\"", data->secondary_grid_projection_id,
+				        projectionid - 32700);
+				strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+			}
+			else {
+				snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\"", data->secondary_grid_projection_id);
+				strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+			}
+		}
+		else if (data->secondary_grid_projection_mode == MBV_PROJECTION_SPHEROID) {
+			strncat(value_text, ":t\"  Spheroid\"", sizeof(value_text) - strlen(value_text) - 1);
+		}
+	}
+
+	strncat(value_text, ":t\"Display Grid Projection:\"", sizeof(value_text) - strlen(value_text) - 1);
+	if (data->display_projection_mode == MBV_PROJECTION_GEOGRAPHIC) {
+		strncat(value_text, ":t\"  Geographic\"", sizeof(value_text) - strlen(value_text) - 1);
+	}
+	else if (data->display_projection_mode == MBV_PROJECTION_PROJECTED ||
+	         data->display_projection_mode == MBV_PROJECTION_ALREADYPROJECTED) {
+		int projectionid;
+		double lon_origin;
+		double lat_origin;
+		char tmptext[MB_PATH_MAXLINE*2];
+		if (sscanf(data->display_projection_id, "LTM%lf/%lf", &lon_origin, &lat_origin) == 2) {
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    Local Transverse Mercator with origin %.5f %.5f\"", 
+								data->display_projection_id, lon_origin, lat_origin);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+		}
+		else if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1 && projectionid == 32661) {
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->display_projection_id);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+		}
+		else if (sscanf(data->display_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid == 32661) {
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->display_projection_id);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+		}
+		else if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1 && projectionid == 32761) {
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    South Polar Steographic\"", data->display_projection_id);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+		}
+		else if (sscanf(data->display_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid == 32761) {
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    South Polar Steographic\"", data->display_projection_id);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+		}
+		else if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1 && projectionid >= 32600 &&
+		         projectionid < 32700) {
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    UTM Zone %d N\"", data->display_projection_id, projectionid - 32600);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+		}
+		else if (sscanf(data->display_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid >= 32600 &&
+		         projectionid < 32700) {
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    UTM Zone %d N\"", data->display_projection_id, projectionid - 32600);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+		}
+		else if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1 && projectionid >= 32700 &&
+		         projectionid < 32800) {
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    UTM Zone %d S\"", data->display_projection_id, projectionid - 32700);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+		}
+		else if (sscanf(data->display_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid >= 32700 &&
+		         projectionid < 32800) {
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\":t\"    UTM Zone %d S\"", data->display_projection_id, projectionid - 32700);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+		}
+		else {
+			snprintf(tmptext, sizeof(tmptext), ":t\"  Projected: %s\"", data->display_projection_id);
+			strncat(value_text, tmptext, sizeof(value_text) - strlen(value_text) - 1);
+		}
+	}
+	else if (data->display_projection_mode == MBV_PROJECTION_SPHEROID) {
+		strncat(value_text, ":t\"  Spheroid\"", sizeof(value_text) - strlen(value_text) - 1);
+	}
+	set_mbview_label_multiline_string(view->mb3dview.mbview_label_projection, value_text);
+}

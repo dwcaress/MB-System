@@ -704,6 +704,11 @@ void mbv_ui_view_values_changed(size_t instance, int values) {
 			XmTextFieldSetString(view->mb3dview.mbview_textField_view_3dzoom, value_text);
 		}
 		break;
+	case MBV_VALUES_RESOLUTION:
+		/* set values of resolution sliders */
+		XtVaSetValues(view->mb3dview.mbview_scale_lowresolution, XmNvalue, data->lorez_dimension, NULL);
+		XtVaSetValues(view->mb3dview.mbview_scale_mediumresolution, XmNvalue, data->hirez_dimension, NULL);
+		break;
 	default:
 		break;
 	}

@@ -109,8 +109,9 @@ void mbv_ui_soundings_bell(void);
 #define MBV_VALUES_SLOPE_AMP 9          /* data->slope_magnitude */
 #define MBV_VALUES_OVERLAY_AMP 10       /* data->overlay_shade_magnitude */
 #define MBV_VALUES_VIEW_3DZOOM 11       /* view->viewoffset3d_z */
+#define MBV_VALUES_RESOLUTION 12       /* data->lorez_dimension, hirez_dimension */
 
-/* view values of an instance changed while dragging */
+/* view values of an instance changed while dragging, or rounded */
 void mbv_ui_view_values_changed(size_t instance, int values);
 
 /* the user asked to reset the view of an instance (key 'r') */
