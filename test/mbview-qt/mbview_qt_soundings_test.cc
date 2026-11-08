@@ -54,6 +54,7 @@
 #include <QMouseEvent>
 #include <QOpenGLWidget>
 #include <QRadioButton>
+#include <QSlider>
 #include <QTimer>
 #include <cmath>
 #include <cstdio>
@@ -117,6 +118,40 @@ void edit_notify(int ifile, int iping, int ibeam, char beamflag, int flush) {
   edit_ibeam = ibeam;
   edit_flag = beamflag;
 }
+int bias_calls = 0, biasapply_calls = 0;
+double bias_values[5] = {};
+void bias_notify(double roll, double pitch, double heading, double timelag, double snell) {
+  bias_calls++;
+  bias_values[0] = roll;
+  bias_values[1] = pitch;
+  bias_values[2] = heading;
+  bias_values[3] = timelag;
+  bias_values[4] = snell;
+}
+void biasapply_notify(double roll, double pitch, double heading, double timelag, double snell) {
+  (void)roll;
+  (void)pitch;
+  (void)heading;
+  (void)timelag;
+  (void)snell;
+  biasapply_calls++;
+}
+int sparse_cells = -1, sparse_n = -1;
+void sparse_notify(int cells, int n) {
+  sparse_cells = cells;
+  sparse_n = n;
+}
+int color_notified = -1;
+void color_notify(int color) { color_notified = color; }
+int optimize_mode = -1;
+void optimize_notify(int mode, double *roll, double *pitch, double *heading, double *timelag, double *snell) {
+  (void)pitch;
+  (void)heading;
+  (void)timelag;
+  (void)snell;
+  optimize_mode = mode;
+  *roll = 1.25;
+}
 void info_notify(int ifile, int iping, int ibeam, char *infostring) {
   info_calls++;
   std::snprintf(infostring, MB_PATH_MAXLINE, "Sounding: file %d ping %d beam %d", ifile, iping, ibeam);
@@ -169,6 +204,24 @@ void open_soundings() {
   mb3dsoundings_set_dismiss_notify(0, &dismiss_notify, &error);
   mb3dsoundings_set_edit_notify(0, &edit_notify, &error);
   mb3dsoundings_set_info_notify(0, &info_notify, &error);
+  mb3dsoundings_set_bias_notify(0, &bias_notify, &error);
+  mb3dsoundings_set_biasapply_notify(0, &biasapply_notify, &error);
+  mb3dsoundings_set_flagsparsevoxels_notify(0, &sparse_notify, &error);
+  mb3dsoundings_set_colorsoundings_notify(0, &color_notify, &error);
+  mb3dsoundings_set_optimizebiasvalues_notify(0, &optimize_notify, &error);
+}
+
+QSlider *slider_after(QWidget *window, const char *label_text) {
+  /* the slider in the same box as its label */
+  for (QLabel *label : window->findChildren<QLabel *>())
+    if (label->text() == QString::fromLatin1(label_text))
+      for (QSlider *slider : label->parentWidget()->findChildren<QSlider *>()) {
+        const int lx = label->mapTo(window, QPoint(0, 0)).x();
+        const int sx = slider->mapTo(window, QPoint(0, 0)).x();
+        if (std::abs(lx - sx) < 5)
+          return slider;
+      }
+  return nullptr;
 }
 
 QAction *menu_action(QMainWindow *window, const char *menu, const char *text) {
@@ -270,6 +323,56 @@ int test_null() {
   check(edit_calls == unflagged, "the ',' key flags the soundings in view (" +
                                                              std::to_string(edit_calls) + " edits)");
 
+  /* the View menu shows and sets the core state */
+  struct mbvq_soundings_state state;
+  QAction *box = menu_action(window, "View", "Show Bounding Box");
+  QAction *flagged = menu_action(window, "View", "Show Flagged Soundings");
+  check(box != nullptr && box->isChecked() && flagged != nullptr && flagged->isChecked() &&
+            menu_action(window, "View", "Show No Profiles")->isChecked() &&
+            menu_action(window, "View", "Color by Flag State")->isChecked(),
+        "the View menu shows the initial state (box, flagged, no profiles, colour by flag)");
+  flagged->trigger();
+  menu_action(window, "View", "Show All Profiles")->trigger();
+  menu_action(window, "View", "Color by Topography")->trigger();
+  mbvq_c_soundings_state(&state);
+  check(!state.view[MBVQ_SDG_VIEW_FLAGGED] && state.profiles == MBVQ_SDG_PROFILES_ALL &&
+            state.color == MBVQ_SDG_COLOR_TOPO,
+        "View menu items set flagged, profiles and colouring");
+
+  /* the Action menu calls the program */
+  menu_action(window, "Action", "Color Unflagged Soundings Red")->trigger();
+  check(color_notified == MBV_COLOR_RED, "Color Unflagged Soundings Red asks the program for red");
+  menu_action(window, "Action", "Filter by sparse voxels (1 X cell, n<10)")->trigger();
+  check(sparse_cells == 1 && sparse_n == 10, "the first sparse voxel filter asks for 1 cell, n<10");
+  menu_action(window, "Action", "Apply Bias Values to Grid")->trigger();
+  check(biasapply_calls == 1, "Apply Bias Values to Grid calls the program");
+  int actions = 0;
+  for (QAction *top : window->menuBar()->actions())
+    if (top->text() == QStringLiteral("Action"))
+      for (QAction *action : top->menu()->actions())
+        actions += action->isSeparator() ? 0 : 1;
+  check(actions == MBVQ_SDG_ACTIONS, "the Action menu has the 21 Motif items");
+
+  /* optimisation: the program returns the new roll bias, the slider shows it */
+  QSlider *roll = slider_after(window, "Roll Bias (degrees)");
+  check(roll != nullptr, "a Roll Bias slider");
+  menu_action(window, "Action", "Optimize Bias Values (roll)")->trigger();
+  check(optimize_mode == MB3DSDG_OPTIMIZEBIASVALUES_R && roll != nullptr && roll->value() == 125 &&
+            roll->minimum() == 0 && roll->maximum() == 200,
+        "Optimize Bias Values (roll) sets the slider to 1.25 with the Motif range 0 to 2");
+
+  /* a released slider value reaches the program; at an end the range moves */
+  QSlider *pitch = slider_after(window, "Pitch Bias (degrees)");
+  const int calls = bias_calls;
+  pitch->setValue(50);
+  check(bias_calls == calls + 1 && std::fabs(bias_values[1] - 0.5) < 1e-9 && std::fabs(bias_values[0] - 1.25) < 1e-9,
+        "a pitch slider value of 0.50 reaches the program with the roll bias 1.25");
+  pitch->setValue(pitch->maximum());
+  check(pitch->minimum() == 0 && pitch->maximum() == 200, "at the end of its range the slider recentres on the value");
+  QSlider *snell = slider_after(window, "Snell Correction");
+  check(snell != nullptr && snell->value() == 10000 && snell->minimum() == 9900 && snell->maximum() == 10100,
+        "the Snell slider runs from 0.99 to 1.01 at 1.0000");
+
   /* Dismiss hides the window and tells the program; open shows it again */
   QAction *dismiss = menu_action(window, "Dismiss", "Dismiss");
   check(dismiss != nullptr, "the Dismiss menu has Dismiss");
@@ -370,6 +473,10 @@ int test_gl() {
   spin(100);
   check(info_calls >= 1 && label_containing(window, "Sounding: file 0").contains(QStringLiteral("beam")),
         "a click in Info mode shows the sounding information in the status line");
+  QSlider *any_slider = window->findChild<QSlider *>();
+  check(any_slider != nullptr && !any_slider->isVisible(), "the sliders give way to the sounding information");
+  mbvq_c_soundings_edit_mode(MBVQ_SDG_EDIT_TOGGLE);
+  check(any_slider != nullptr && any_slider->isVisible(), "the sliders come back in Toggle mode");
 
   int error = MB_ERROR_NO_ERROR;
   mb3dsoundings_end(0, &error);

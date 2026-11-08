@@ -269,6 +269,51 @@ void mbvq_c_soundings_resetview(void);
 void mbvq_c_soundings_dismiss(void);
 void mbvq_c_soundings_modes(int *edit_mode, int *mouse_mode);
 
+/* View menu toggles (MBS_VIEWTOGGLE_*), profiles (MBS_VIEW_PROFILES_*) and
+   colouring (MBS_VIEW_COLOR_*) */
+#define MBVQ_SDG_VIEW_FLAGGED 0
+#define MBVQ_SDG_VIEW_SECONDARY 1
+#define MBVQ_SDG_VIEW_BOUNDINGBOX 2
+#define MBVQ_SDG_VIEW_SCALEWITHFLAGGED 3
+#define MBVQ_SDG_PROFILES_NONE 0
+#define MBVQ_SDG_PROFILES_UNFLAGGED 1
+#define MBVQ_SDG_PROFILES_ALL 2
+#define MBVQ_SDG_COLOR_FLAG 0
+#define MBVQ_SDG_COLOR_TOPO 1
+#define MBVQ_SDG_COLOR_AMP 2
+#define MBVQ_SDG_COLOR_SOUNDING 3
+void mbvq_c_soundings_viewtoggle(int toggle, bool on);
+void mbvq_c_soundings_profiles(int mode);
+void mbvq_c_soundings_color(int mode);
+
+/* Action menu items, in the order of the Motif menu */
+#define MBVQ_SDG_ACTION_APPLYBIAS 0
+#define MBVQ_SDG_ACTION_SPARSEVOXELS 1 /* A to F: 1 to 6 */
+#define MBVQ_SDG_ACTION_COLOR 7        /* black, red, yellow, green, bluegreen, blue, purple: 7 to 13 */
+#define MBVQ_SDG_ACTION_OPTIMIZE 14    /* r, p, h, rp, rph, t, s: 14 to 20 */
+#define MBVQ_SDG_ACTIONS 21
+void mbvq_c_soundings_action(int action);
+
+/* the bias sliders, in hundredths (snell in ten-thousandths) */
+#define MBVQ_SDG_BIAS_ROLL 0
+#define MBVQ_SDG_BIAS_PITCH 1
+#define MBVQ_SDG_BIAS_HEADING 2
+#define MBVQ_SDG_BIAS_TIMELAG 3
+#define MBVQ_SDG_BIAS_SNELL 4
+#define MBVQ_SDG_BIASES 5
+void mbvq_c_soundings_bias(int bias, int value);
+
+/* the state the controls show */
+struct mbvq_soundings_state {
+	int edit_mode;
+	int mouse_mode;
+	bool view[4]; /* MBVQ_SDG_VIEW_* */
+	int profiles;
+	int color;
+	int bias[MBVQ_SDG_BIASES];
+};
+void mbvq_c_soundings_state(struct mbvq_soundings_state *state);
+
 /* ---- implemented by the Qt half ---- */
 
 /* true if the backend draws (the legacy OpenGL backend), false for the null backend */

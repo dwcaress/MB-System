@@ -1125,6 +1125,17 @@ typedef char mbvq_check_sdg_edit[(MBVQ_SDG_EDIT_TOGGLE == MBS_EDIT_TOGGLE && MBV
                                   MBVQ_SDG_EDIT_GRAB == MBS_EDIT_GRAB && MBVQ_SDG_EDIT_INFO == MBS_EDIT_INFO)
                                      ? 1
                                      : -1];
+typedef char mbvq_check_sdg_view[(MBVQ_SDG_VIEW_FLAGGED == MBS_VIEWTOGGLE_FLAGGED &&
+                                  MBVQ_SDG_VIEW_SECONDARY == MBS_VIEWTOGGLE_SECONDARY &&
+                                  MBVQ_SDG_VIEW_BOUNDINGBOX == MBS_VIEWTOGGLE_BOUNDINGBOX &&
+                                  MBVQ_SDG_VIEW_SCALEWITHFLAGGED == MBS_VIEWTOGGLE_SCALEWITHFLAGGED &&
+                                  MBVQ_SDG_PROFILES_NONE == MBS_VIEW_PROFILES_NONE &&
+                                  MBVQ_SDG_PROFILES_UNFLAGGED == MBS_VIEW_PROFILES_UNFLAGGED &&
+                                  MBVQ_SDG_PROFILES_ALL == MBS_VIEW_PROFILES_ALL && MBVQ_SDG_COLOR_FLAG == MBS_VIEW_COLOR_FLAG &&
+                                  MBVQ_SDG_COLOR_TOPO == MBS_VIEW_COLOR_TOPO && MBVQ_SDG_COLOR_AMP == MBS_VIEW_COLOR_AMP &&
+                                  MBVQ_SDG_COLOR_SOUNDING == MBS_VIEW_COLOR_SOUNDING)
+                                     ? 1
+                                     : -1];
 typedef char mbvq_check_sdg_mouse[(MBVQ_SDG_MOUSE_ROTATE == MBS_MOUSE_ROTATE && MBVQ_SDG_MOUSE_PANZOOM == MBS_MOUSE_PANZOOM)
                                       ? 1
                                       : -1];
@@ -1289,8 +1300,8 @@ int mb3dsoundings_updatestatus(void) {
 	return (mbs_status);
 }
 
-/* the controls show the state of the core (the bias sliders come with the
-   soundings controls) */
+/* the controls show the state of the core, as the Motif
+   mb3dsoundings_updategui() */
 int mb3dsoundings_updategui(void) {
 	mbvq_qt_soundings_refresh();
 	return (mbs_status);
@@ -1337,6 +1348,72 @@ void mbvq_c_soundings_resetview(void) { do_mb3dsdg_resetview(NULL, NULL, NULL); 
 void mbvq_c_soundings_dismiss(void) {
 	mbvq_qt_soundings_hide();
 	mb3dsoundings_dismissed();
+}
+
+void mbvq_c_soundings_viewtoggle(int toggle, bool on) { mb3dsoundings_setviewtoggle(toggle, on); }
+void mbvq_c_soundings_profiles(int mode) { mb3dsoundings_setprofiles(mode); }
+void mbvq_c_soundings_color(int mode) { mb3dsoundings_setcolor(mode); }
+
+/* the Action menu callbacks, in the order of the Motif menu */
+static void (*const mbvq_soundings_actions[MBVQ_SDG_ACTIONS])(Widget, XtPointer, XtPointer) = {
+    do_mb3dsdg_action_applybias,
+    do_mb3dsdg_action_flagsparsevoxels_A,
+    do_mb3dsdg_action_flagsparsevoxels_B,
+    do_mb3dsdg_action_flagsparsevoxels_C,
+    do_mb3dsdg_action_flagsparsevoxels_D,
+    do_mb3dsdg_action_flagsparsevoxels_E,
+    do_mb3dsdg_action_flagsparsevoxels_F,
+    do_mb3dsdg_action_colorsoundingsblack,
+    do_mb3dsdg_action_colorsoundingsred,
+    do_mb3dsdg_action_colorsoundingsyellow,
+    do_mb3dsdg_action_colorsoundingsgreen,
+    do_mb3dsdg_action_colorsoundingsbluegreen,
+    do_mb3dsdg_action_colorsoundingsblue,
+    do_mb3dsdg_action_colorsoundingspurple,
+    do_mb3dsdg_action_optimizebiasvalues_r,
+    do_mb3dsdg_action_optimizebiasvalues_p,
+    do_mb3dsdg_action_optimizebiasvalues_h,
+    do_mb3dsdg_action_optimizebiasvalues_rp,
+    do_mb3dsdg_action_optimizebiasvalues_rph,
+    do_mb3dsdg_action_optimizebiasvalues_t,
+    do_mb3dsdg_action_optimizebiasvalues_s};
+
+void mbvq_c_soundings_action(int action) {
+	if (action >= 0 && action < MBVQ_SDG_ACTIONS)
+		(mbvq_soundings_actions[action])(NULL, NULL, NULL);
+}
+
+/* a bias slider was released at value, as the Motif scale callbacks */
+void mbvq_c_soundings_bias(int bias, int value) {
+	if (bias == MBVQ_SDG_BIAS_ROLL)
+		mb3dsoundings.irollbias = value;
+	else if (bias == MBVQ_SDG_BIAS_PITCH)
+		mb3dsoundings.ipitchbias = value;
+	else if (bias == MBVQ_SDG_BIAS_HEADING)
+		mb3dsoundings.iheadingbias = value;
+	else if (bias == MBVQ_SDG_BIAS_TIMELAG)
+		mb3dsoundings.itimelag = value;
+	else if (bias == MBVQ_SDG_BIAS_SNELL)
+		mb3dsoundings.isnell = value;
+	else
+		return;
+	mb3dsoundings_bias_changed();
+}
+
+void mbvq_c_soundings_state(struct mbvq_soundings_state *state) {
+	state->edit_mode = mb3dsoundings.edit_mode;
+	state->mouse_mode = mb3dsoundings.mouse_mode;
+	state->view[MBVQ_SDG_VIEW_FLAGGED] = mb3dsoundings.view_flagged;
+	state->view[MBVQ_SDG_VIEW_SECONDARY] = mb3dsoundings.view_secondary;
+	state->view[MBVQ_SDG_VIEW_BOUNDINGBOX] = mb3dsoundings.view_boundingbox;
+	state->view[MBVQ_SDG_VIEW_SCALEWITHFLAGGED] = mb3dsoundings.view_scalewithflagged;
+	state->profiles = mb3dsoundings.view_profiles;
+	state->color = mb3dsoundings.view_color;
+	state->bias[MBVQ_SDG_BIAS_ROLL] = mb3dsoundings.irollbias;
+	state->bias[MBVQ_SDG_BIAS_PITCH] = mb3dsoundings.ipitchbias;
+	state->bias[MBVQ_SDG_BIAS_HEADING] = mb3dsoundings.iheadingbias;
+	state->bias[MBVQ_SDG_BIAS_TIMELAG] = mb3dsoundings.itimelag;
+	state->bias[MBVQ_SDG_BIAS_SNELL] = mb3dsoundings.isnell;
 }
 
 void mbvq_c_soundings_modes(int *edit_mode, int *mouse_mode) {

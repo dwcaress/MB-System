@@ -23,9 +23,10 @@
  *--------------------------------------------------------------------*/
 /*
  * The 3D soundings window of mbview-qt, as the Motif "3D Soundings" window
- * (Mb3dsdg): the edit mode buttons, the status line, Reset View, the mouse
- * mode buttons and label, the Mouse and Dismiss menus, and the soundings
- * drawing of the backend. One window per program, as in Motif.
+ * (Mb3dsdg): the edit mode buttons, the status line, the bias and time lag
+ * sliders, Reset View, the mouse mode buttons and label, the View, Mouse,
+ * Action and Dismiss menus, and the soundings drawing of the backend. One
+ * window per program, as in Motif.
  */
 
 #ifndef MBVIEW_QT_MBVQ_SOUNDINGS_H
@@ -38,6 +39,7 @@
 class QAction;
 class QLabel;
 class QRadioButton;
+class QSlider;
 
 namespace mbvq {
 
@@ -64,6 +66,12 @@ class SoundingsWindow final : public QMainWindow {
   QRadioButton *edit_[MBVQ_SDG_EDIT_MODES] = {};
   QRadioButton *mouse_[2] = {};
   QAction *mouse_action_[2] = {};
+  QAction *view_toggle_[4] = {};
+  QAction *profiles_[3] = {};
+  QAction *color_[4] = {};
+  QWidget *sliders_ = nullptr;
+  QSlider *bias_[MBVQ_SDG_BIASES] = {};
+  QLabel *bias_value_[MBVQ_SDG_BIASES] = {};
 };
 
 /* the soundings window, nullptr if it has none */
