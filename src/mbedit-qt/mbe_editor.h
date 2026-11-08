@@ -54,9 +54,12 @@ class QRadioButton;
 class QSplitter;
 class QSpinBox;
 class QDoubleSpinBox;
+class QHideEvent;
+class QShowEvent;
 class QTableWidget;
 class QThread;
 class QTimer;
+class QToolBar;
 
 namespace mbe {
 
@@ -64,6 +67,9 @@ namespace mbe {
 enum class SavedEdits { Ask, Apply, Ignore };
 /* what to do with a file locked by the same user on the same computer */
 enum class LockChoice { Refuse, OpenAnyway };
+/* Window: the rows of controls of the program mbedit-qt. Panel: a compact form for
+   part of another program's window, with one toolbar and one row under the plot. */
+enum class Presentation { Window, Panel };
 
 /* The whole editor as a widget, for a window of its own or a panel of another program.
    Before deleting it with a file open, call prepareToClose: deleting it discards edits
@@ -72,10 +78,10 @@ class EditorWidget : public QWidget {
   Q_OBJECT
 
  public:
-  explicit EditorWidget(QWidget *parent = nullptr);
+  explicit EditorWidget(Presentation presentation = Presentation::Window, QWidget *parent = nullptr);
   ~EditorWidget() override;
 
-  QSize sizeHint() const override { return QSize(1400, 850); }
+  QSize sizeHint() const override { return presentation_ == Presentation::Panel ? QSize(900, 620) : QSize(1400, 850); }
 
   mbe::Session &session() { return session_; }
   Canvas *canvas() { return canvas_; }
@@ -130,8 +136,13 @@ class EditorWidget : public QWidget {
   void editsSaved(const QString &path);
   void soundingInfo(const QStringList &lines);
 
+ protected:
+  void hideEvent(QHideEvent *event) override;
+  void showEvent(QShowEvent *event) override;
+
  private:
   /* set up */
+  void buildPanel();
   QMenu *newMenu(const QString &title);
   void setWorking(bool working);
   void buildMenus();
@@ -211,7 +222,14 @@ class EditorWidget : public QWidget {
   bool browse_ = false;
   bool run_mbprocess_ = false;
   std::string saved_path_;
+  const Presentation presentation_;
   QWidget *central_;
+  QToolBar *panel_bar_ = nullptr;
+  QWidget *scales_panel_ = nullptr;
+  QLabel *info_line_ = nullptr;
+  QAction *reset_zoom_ = nullptr;
+  bool job_had_focus_ = false;
+  QList<QDialog *> hidden_dialogs_;
   QList<QMenu *> menus_;
   QString display_name_ = PROGRAM_NAME;
   QString title_;

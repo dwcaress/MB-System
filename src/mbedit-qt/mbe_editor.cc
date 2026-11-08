@@ -47,6 +47,7 @@
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QHideEvent>
 #include <QInputDialog>
 #include <QLabel>
 #include <QLineEdit>
@@ -58,6 +59,7 @@
 #include <QRadioButton>
 #include <QSpinBox>
 #include <QSettings>
+#include <QShowEvent>
 #include <QSplitter>
 #include <QStandardPaths>
 #include <QTableWidget>
@@ -65,7 +67,10 @@
 #include <QThread>
 #include <QTimeZone>
 #include <QTimer>
+#include <QToolBar>
+#include <QToolButton>
 #include <QVBoxLayout>
+#include <QWidgetAction>
 
 #include "mb_define.h"
 #include "mb_status.h"
@@ -88,7 +93,7 @@ QAction *checkable(QMenu *menu, QActionGroup *group, const QString &text, int id
 }  // namespace
 
 /*--------------------------------------------------------------------*/
-EditorWidget::EditorWidget(QWidget *parent) : QWidget(parent) {
+EditorWidget::EditorWidget(Presentation presentation, QWidget *parent) : QWidget(parent), presentation_(presentation) {
   session_.on_progress = [this](const std::string &text) {
     const QString message = QString::fromStdString(text);
     QMetaObject::invokeMethod(this, [this, message] { emit statusMessage(message, 0); }, Qt::QueuedConnection);
@@ -106,6 +111,8 @@ EditorWidget::EditorWidget(QWidget *parent) : QWidget(parent) {
   map_->hide();
   buildControls();
   buildMenus();
+  if (presentation_ == Presentation::Panel)
+    buildPanel();
   buildGotoDialog();
   buildBufferDialog();
   buildAnnotationDialog();
@@ -230,8 +237,12 @@ void EditorWidget::setDisplayName(const QString &name) {
 }
 
 void EditorWidget::setShortcutContext(Qt::ShortcutContext context) {
-  for (QAction *action : {open_action_, save_action_, undo_action_, redo_action_})
+  for (QAction *action : {open_action_, save_action_, undo_action_, redo_action_}) {
     action->setShortcutContext(context);
+    /* with a smaller scope than the window the key works only if the action is on this widget */
+    if (context != Qt::WindowShortcut)
+      addAction(action);
+  }
 }
 
 void EditorWidget::buildControls() {
@@ -243,8 +254,16 @@ void EditorWidget::buildControls() {
   auto *layout = new QVBoxLayout(central_);
 
   /* edit mode */
-  auto *mode_row = new QHBoxLayout;
-  mode_row->addWidget(new QLabel("Mode:"));
+  const bool panel = presentation_ == Presentation::Panel;
+  QHBoxLayout *mode_row = panel ? nullptr : new QHBoxLayout;
+  if (panel) {
+    panel_bar_ = new QToolBar;
+    panel_bar_->setObjectName("panel_bar");
+    panel_bar_->setToolButtonStyle(Qt::ToolButtonTextOnly);
+  }
+  else {
+    mode_row->addWidget(new QLabel("Mode:"));
+  }
   mode_group_ = new QButtonGroup(this);
   const struct {
     const char *name;
@@ -252,16 +271,31 @@ void EditorWidget::buildControls() {
   } mode_buttons[] = {{"Toggle", Canvas::MODE_TOGGLE}, {"Pick", Canvas::MODE_PICK},   {"Erase", Canvas::MODE_ERASE}, {"Restore", Canvas::MODE_RESTORE},
                       {"Grab", Canvas::MODE_GRAB},     {"Lasso", Canvas::MODE_LASSO}, {"Info", Canvas::MODE_INFO}};
   for (const auto &m : mode_buttons) {
-    auto *button = new QRadioButton(m.name);
+    QAbstractButton *button;
+    if (panel) {
+      auto *tool = new QToolButton;
+      tool->setText(m.name);
+      tool->setCheckable(true);
+      button = tool;
+      panel_bar_->addWidget(tool);
+    }
+    else {
+      button = new QRadioButton(m.name);
+      mode_row->addWidget(button);
+    }
     button->setObjectName(QString("mode_%1").arg(QString(m.name).toLower()));
     button->setFocusPolicy(Qt::NoFocus);
     mode_group_->addButton(button, m.mode);
-    mode_row->addWidget(button);
   }
   mode_group_->button(0)->setChecked(true);
   connect(mode_group_, &QButtonGroup::idClicked, this, &EditorWidget::setModeFromUi);
-  mode_row->addStretch(1);
-  layout->addLayout(mode_row);
+  if (panel) {
+    layout->addWidget(panel_bar_);
+  }
+  else {
+    mode_row->addStretch(1);
+    layout->addLayout(mode_row);
+  }
 
   /* scales */
   width_ = new ScaleControl(1, 20000, mbe::MAX_PLOT_WIDTH, 0);
@@ -281,7 +315,13 @@ void EditorWidget::buildControls() {
   scales->addWidget(pings_, 1, 1);
   scales->addWidget(new QLabel("Pings to Step:"), 1, 2);
   scales->addWidget(step_, 1, 3);
-  layout->addLayout(scales);
+  if (panel) {
+    scales_panel_ = new QWidget;
+    scales_panel_->setLayout(scales);
+  }
+  else {
+    layout->addLayout(scales);
+  }
   connect(width_, &ScaleControl::valueChanged, this, [this](int v) {
     session_.settings.plot_width = v;
     applySettings();
@@ -307,27 +347,32 @@ void EditorWidget::buildControls() {
   layout->addWidget(splitter_, 1);
 
   /* buttons */
-  auto *buttons = new QHBoxLayout;
+  QHBoxLayout *buttons = panel ? nullptr : new QHBoxLayout;
   auto button = [&](QPushButton *&member, const char *text, const char *name) {
-    member = new QPushButton(text);
+    member = new QPushButton(text, central_);
     member->setObjectName(name);
     member->setFocusPolicy(Qt::NoFocus);
-    buttons->addWidget(member);
+    if (buttons != nullptr)
+      buttons->addWidget(member);
   };
   button(start_, "Start", "button_start");
   button(reverse_, "Reverse", "button_reverse");
   button(forward_, "Forward", "button_forward");
   button(end_, "End", "button_end");
-  buttons->addSpacing(16);
+  if (buttons != nullptr)
+    buttons->addSpacing(16);
   button(next_, "Next Buffer", "button_next");
   button(done_, "Done", "button_done");
-  buttons->addSpacing(16);
+  if (buttons != nullptr)
+    buttons->addSpacing(16);
   button(flag_view_, "Flag View", "button_flag_view");
   button(unflag_view_, "Unflag View", "button_unflag_view");
   button(unflag_forward_, "Unflag Forward", "button_unflag_forward");
-  buttons->addStretch(1);
+  if (buttons != nullptr)
+    buttons->addStretch(1);
   button(quit_, "Quit", "button_quit");
-  layout->addLayout(buttons);
+  if (buttons != nullptr)
+    layout->addLayout(buttons);
 
   auto move = [this](int nsteps) {
     if (session_.step(nsteps) != MB_SUCCESS)
@@ -348,7 +393,13 @@ void EditorWidget::buildControls() {
 
   /* position in the buffer */
   auto *slider_row = new QHBoxLayout;
-  slider_row->addWidget(new QLabel("Ping:"));
+  if (panel) {
+    slider_row->addWidget(start_);
+    slider_row->addWidget(reverse_);
+  }
+  else {
+    slider_row->addWidget(new QLabel("Ping:"));
+  }
   slider_ = new PingSlider(Qt::Horizontal);
   slider_->setObjectName("ping_slider");
   slider_->setFocusPolicy(Qt::NoFocus);
@@ -362,8 +413,23 @@ void EditorWidget::buildControls() {
   slider_row->addLayout(slider_column, 1);
   position_ = new QLabel;
   position_->setObjectName("ping_position");
-  slider_row->addWidget(position_);
-  layout->addLayout(slider_row);
+  if (panel) {
+    slider_row->addWidget(forward_);
+    slider_row->addWidget(end_);
+    slider_row->addWidget(next_);
+    layout->addLayout(slider_row);
+    auto *info_row = new QHBoxLayout;
+    info_line_ = new QLabel;
+    info_line_->setObjectName("panel_info");
+    info_line_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+    info_row->addWidget(info_line_, 1);
+    info_row->addWidget(position_);
+    layout->addLayout(info_row);
+  }
+  else {
+    slider_row->addWidget(position_);
+    layout->addLayout(slider_row);
+  }
   connect(slider_, &QSlider::valueChanged, this, &EditorWidget::sliderMoved);
 }
 
@@ -499,7 +565,7 @@ void EditorWidget::buildMenus() {
   connect(reverse_mouse_, &QAction::toggled, this, [this](bool on) { canvas_->reverseMouse = on; });
 
   view->addSeparator();
-  view->addAction("Reset Zoom", this, [this] {
+  reset_zoom_ = view->addAction("Reset Zoom", this, [this] {
     session_.resetView();
     canvas_->redraw();
     syncControls();
@@ -532,6 +598,102 @@ void EditorWidget::buildMenus() {
   QMenu *help = newMenu("Help");
   QAction *about_action = help->addAction("About mbedit-qt", this, &EditorWidget::about);
   about_action->setMenuRole(QAction::AboutRole);
+}
+
+/* the compact form: what the rows of the window hold, on one toolbar */
+void EditorWidget::buildPanel() {
+  panel_bar_->addSeparator();
+  panel_bar_->addAction(undo_action_);
+  panel_bar_->addAction(redo_action_);
+  panel_bar_->addSeparator();
+
+  auto popup_button = [this](const char *text, const char *name, QMenu *menu) {
+    auto *button = new QToolButton;
+    button->setText(text);
+    button->setObjectName(name);
+    button->setPopupMode(QToolButton::InstantPopup);
+    button->setMenu(menu);
+    panel_bar_->addWidget(button);
+  };
+  auto *scales_menu = new QMenu(this);
+  auto *scales_action = new QWidgetAction(scales_menu);
+  scales_action->setDefaultWidget(scales_panel_);
+  scales_menu->addAction(scales_action);
+  popup_button("Scales", "panel_scales", scales_menu);
+  auto *panel_menu = new QMenu(this);
+  for (QMenu *menu : menus_)
+    panel_menu->addMenu(menu);
+  popup_button("Menu", "panel_menu", panel_menu);
+  panel_bar_->addAction(reset_zoom_);
+  panel_bar_->addSeparator();
+  for (QPushButton *button : {flag_view_, unflag_view_, unflag_forward_}) {
+    button->setFlat(true);
+    panel_bar_->addWidget(button);
+  }
+
+  /* the program around the panel chooses the files and closes it */
+  done_->hide();
+  quit_->hide();
+  filelist_action_->setVisible(false);
+
+  const struct {
+    QPushButton *button;
+    const char *text, *tip;
+  } steps[] = {{start_, "|<", "Start"}, {reverse_, "<", "Reverse"}, {forward_, ">", "Forward"}, {end_, ">|", "End"}, {next_, "Next", "Next Buffer"}};
+  for (const auto &step : steps) {
+    step.button->setText(step.text);
+    step.button->setToolTip(step.tip);
+    step.button->setFixedWidth(step.button->fontMetrics().horizontalAdvance(step.text) + 20);
+  }
+
+  connect(canvas_, &Canvas::soundingHovered, this, [this](int ping, int beam) {
+    if (ping < 0 || ping >= session_.nbuff() || beam >= session_.pings()[ping].beams_bath) {
+      info_line_->clear();
+      return;
+    }
+    const mbe::Ping &p = session_.pings()[ping];
+    info_line_->setText(QString("%1/%2/%3 %4:%5:%6   Ping %7   Across %8 m   Depth %9 m")
+                            .arg(p.time_i[1], 2, 10, QChar('0'))
+                            .arg(p.time_i[2], 2, 10, QChar('0'))
+                            .arg(p.time_i[0])
+                            .arg(p.time_i[3], 2, 10, QChar('0'))
+                            .arg(p.time_i[4], 2, 10, QChar('0'))
+                            .arg(p.time_i[5], 2, 10, QChar('0'))
+                            .arg(p.record + 1)
+                            .arg(p.bathacrosstrack[beam], 0, 'f', 1)
+                            .arg(p.bath[beam], 0, 'f', 1));
+  });
+
+  setFocusProxy(canvas_);
+  setShortcutContext(Qt::WidgetWithChildrenShortcut);
+  canvas_->setCompact(true);
+  canvas_->setShowTitles(false);
+  setPlotMode(mbe::PLOT_WIDE);
+  for (QAction *action : plot_group_->actions())
+    action->setChecked(action->data().toInt() == mbe::PLOT_WIDE);
+}
+
+/* the dialogs are windows of their own: they go and come with the panel */
+void EditorWidget::hideEvent(QHideEvent *event) {
+  if (presentation_ == Presentation::Panel && !event->spontaneous()) {
+    hidden_dialogs_.clear();
+    for (QDialog *dialog : findChildren<QDialog *>(QString(), Qt::FindDirectChildrenOnly)) {
+      if (dialog->isVisible()) {
+        hidden_dialogs_.push_back(dialog);
+        dialog->hide();
+      }
+    }
+  }
+  QWidget::hideEvent(event);
+}
+
+void EditorWidget::showEvent(QShowEvent *event) {
+  QWidget::showEvent(event);
+  if (!event->spontaneous()) {
+    for (QDialog *dialog : hidden_dialogs_)
+      dialog->show();
+    hidden_dialogs_.clear();
+  }
 }
 
 void EditorWidget::buildGotoDialog() {
@@ -746,6 +908,8 @@ void EditorWidget::runJob(const QString &message, std::function<void()> work, st
   stopBackground();
   clearPreview();
   canvas_->setMarkedPing(-1);
+  const QWidget *focus = QApplication::focusWidget();
+  job_had_focus_ = focus != nullptr && (focus == this || isAncestorOf(focus));
   emit statusMessage(message, 0);
   worker_ = QThread::create(std::move(work));
   setWorking(true);
@@ -753,7 +917,8 @@ void EditorWidget::runJob(const QString &message, std::function<void()> work, st
     worker_->deleteLater();
     worker_ = nullptr;
     setWorking(false);
-    canvas_->setFocus();
+    if (presentation_ == Presentation::Window || job_had_focus_)
+      canvas_->setFocus();
     canvas_->layoutChanged();
     startMbprocess();
     done();

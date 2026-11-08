@@ -32,8 +32,10 @@
 #include <QApplication>
 #include <QDockWidget>
 #include <QElapsedTimer>
+#include <QDialog>
 #include <QFile>
 #include <QFileInfo>
+#include <QLabel>
 #include <QMainWindow>
 #include <QMenu>
 #include <QMenuBar>
@@ -42,6 +44,7 @@
 #include <QPushButton>
 #include <QStatusBar>
 #include <QTimer>
+#include <QToolButton>
 
 #include <algorithm>
 #include <cstdio>
@@ -171,6 +174,7 @@ int main(int argc, char **argv) {
   {
     EditorWidget solo;
     solo.show();
+    CHECK(find_action(&solo, "Save")->shortcutContext() == Qt::WindowShortcut);
     CHECK(solo.openFile(c_path, format, SavedEdits::Ignore));
     wait_for({&solo});
     edit(&solo);
@@ -184,7 +188,7 @@ int main(int argc, char **argv) {
   QMainWindow host;
   host.setWindowTitle("host");
   auto *a = new EditorWidget;
-  auto *b = new EditorWidget;
+  auto *b = new EditorWidget(mbe::Presentation::Panel);
   auto *dock_a = new QDockWidget("A");
   auto *dock_b = new QDockWidget("B");
   dock_a->setWidget(a);
@@ -205,8 +209,21 @@ int main(int argc, char **argv) {
   CHECK(a->menus().size() == 6);
   CHECK(find_action(a, "Quit") == nullptr);
   CHECK(find_action(a, "Save")->shortcutContext() == Qt::WidgetWithChildrenShortcut);
-  CHECK(find_action(b, "Save")->shortcutContext() == Qt::WindowShortcut);
+  CHECK(find_action(b, "Save")->shortcutContext() == Qt::WidgetWithChildrenShortcut);
   CHECK(a->title().startsWith("Swath Editor"));
+
+  /* the panel form */
+  CHECK(b->minimumSizeHint().width() <= 420);
+  CHECK(b->minimumSizeHint().height() <= 360);
+  CHECK(b->focusProxy() == b->canvas());
+  CHECK(b->findChild<QToolButton *>("panel_menu")->menu()->actions().size() == 6);
+  CHECK(b->findChild<QToolButton *>("panel_scales") != nullptr);
+  CHECK(b->findChild<QWidget *>("scale_width") != nullptr);
+  CHECK(!b->findChild<QPushButton *>("button_quit")->isVisible());
+  CHECK(!b->findChild<QPushButton *>("button_done")->isVisible());
+  CHECK(b->findChild<QPushButton *>("button_forward")->isVisible());
+  CHECK(b->session().settings.show_time == mbe::PLOT_WIDE);
+  CHECK(!find_action(b, "File Selection List...")->isVisible());
 
   /* loading at the same time, without questions */
   asked = 0;
@@ -263,7 +280,24 @@ int main(int argc, char **argv) {
     QMouseEvent release_event(QEvent::MouseButtonRelease, at, b->canvas()->mapToGlobal(at), Qt::LeftButton, Qt::NoButton, Qt::NoModifier);
     QApplication::sendEvent(b->canvas(), &release_event);
     CHECK(!nb.info.isEmpty());
+    QMouseEvent move_event(QEvent::MouseMove, at, b->canvas()->mapToGlobal(at), Qt::NoButton, Qt::NoButton, Qt::NoModifier);
+    QApplication::sendEvent(b->canvas(), &move_event);
+    CHECK(b->findChild<QLabel *>("panel_info")->text().contains("Across"));
     b->canvas()->setMode(mbe::Canvas::MODE_TOGGLE);
+  }
+
+  /* the dialogs of a panel go and come with it */
+  {
+    auto *filters = b->findChild<QDialog *>("dialog_filters");
+    filters->show();
+    QApplication::processEvents();
+    dock_b->hide();
+    QApplication::processEvents();
+    CHECK(!filters->isVisible());
+    dock_b->show();
+    QApplication::processEvents();
+    CHECK(filters->isVisible());
+    filters->hide();
   }
 
   /* the Quit button asks, and the editor stays */
