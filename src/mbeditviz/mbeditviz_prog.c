@@ -54,8 +54,10 @@
 #include <windows.h>
 #endif
 
+#ifndef MBVIEW_NO_MOTIF
 #include <X11/StringDefs.h>
 #include <Xm/Xm.h>
+#endif
 #include "mbview.h"
 
 #define MBEDITVIZ_DECLARE_GLOBALS

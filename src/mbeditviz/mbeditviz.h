@@ -313,6 +313,12 @@ int do_error_dialog(char *s1, char *s2, char *s3);
 void set_label_string(Widget w, String str);
 void set_label_multiline_string(Widget w, String str);
 int do_wait_until_viewed(void);
+/* View Selected without the list (mbeditviz_core.c) */
+void do_mbeditviz_viewselected_prepare(void);
+void do_mbeditviz_viewselected_files(Widget w, XtPointer client_data, XtPointer call_data, int position_count,
+                                     int *position_list);
+/* user interface function each program provides: signal a refused action */
+void mbeditviz_ui_bell(void);
 int do_mbeditviz_settimer(void);
 int do_mbeditviz_workfunction(XtPointer client_data);
 
@@ -386,6 +392,8 @@ void mbeditviz_mb3dsoundings_getbiasvariance(double local_grid_xmin, double loca
                                              int *variance_total_num, double *variance_total);
 
 
+/* Builder Xcessory helpers of the Motif interface */
+#ifndef MBVIEW_NO_MOTIF
 void BxUnmanageCB(Widget w, XtPointer client, XtPointer call);
 void BxManageCB(Widget w, XtPointer client, XtPointer call);
 void BxPopupCB(Widget w, XtPointer client, XtPointer call);
@@ -398,6 +406,7 @@ XtPointer BX_SINGLE(float);
 void BX_MENU_POST(Widget, XtPointer, XEvent *, Boolean *);
 Pixmap XPM_PIXMAP(Widget, char **);
 void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
+#endif
 
 /* end this include */
 #endif
