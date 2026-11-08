@@ -307,6 +307,14 @@ class MbeditQtTest(unittest.TestCase):
     result = subprocess.run([os.environ["MBEDIT_QT_WINDOW_TEST"], first, second, grid], cwd=d, capture_output=True, text=True, errors="replace", env=env, timeout=300)
     self.assertEqual(result.returncode, 0, "\n".join(l for l in result.stdout.splitlines() if l.startswith("FAIL") or "checks" in l))
 
+  def test_sessions_in_one_process(self):
+    d = self.folder("sessions")
+    shutil.copy(os.path.join(d, "line.kmall"), os.path.join(d, "second.kmall"))
+    env = {key: value for key, value in os.environ.items() if key != "MB_HISTORY"}
+    result = subprocess.run([os.environ["MBEDIT_QT_SESSION_TEST"], "261", "line.kmall", "second.kmall"], cwd=d, env=env, capture_output=True, text=True, errors="replace")
+    self.assertEqual(result.returncode, 0, result.stdout)
+    self.assertNotIn("initialized for reading", result.stderr)
+
   def grid(self, folder, swath, name, kind):
     """a grid of the line itself"""
     # not name.mb-1: mbgrid writes that file itself
