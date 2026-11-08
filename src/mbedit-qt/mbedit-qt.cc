@@ -44,11 +44,11 @@
 #include <QImage>
 #include <QTimer>
 
-#include "MainWindow.h"
 #include "mb_define.h"
 #include "mb_status.h"
 #include "mbe_canvas.h"
 #include "mbe_core.h"
+#include "mbe_window.h"
 
 namespace {
 
@@ -700,18 +700,18 @@ int main(int argc, char **argv) {
   int qt_argc = 1;
   QApplication app(qt_argc, argv);
   QApplication::setApplicationName(mbe::PROGRAM_NAME);
-  mbe::MainWindow window;
+  mbe::EditorWindow window;
   window.session().verbose = verbose;
   window.session().btime_i[0] = session.btime_i[0];
   std::copy(session.btime_i, session.btime_i + 7, window.session().btime_i);
   std::copy(session.etime_i, session.etime_i + 7, window.session().etime_i);
-  window.setBrowse(browse);
-  window.setGuiMode(gui_mode);
-  window.setRunMbprocess(run_mbprocess);
+  window.editor()->setBrowse(browse);
+  window.editor()->setGuiMode(gui_mode);
+  window.editor()->setRunMbprocess(run_mbprocess);
   for (const mbe::InputFile &file : files)
-    window.addInput(file.path, file.format);
-  window.setStartReference(QString::fromStdString(reference));
+    window.editor()->addInput(file.path, file.format);
+  window.editor()->setStartReference(QString::fromStdString(reference));
   window.show();
-  QTimer::singleShot(0, &window, [&window, use_esf] { window.loadFirstFile(use_esf); });
+  QTimer::singleShot(0, &window, [&window, use_esf] { window.editor()->loadFirstFile(use_esf); });
   return app.exec();
 }

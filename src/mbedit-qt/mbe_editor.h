@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------
- *    The MB-system:  MainWindow.h  2/11/2026
+ *    The MB-system:  mbe_editor.h  2/11/2026
  *
  *    Copyright (c) 2026 by
  *    Christian dos Santos Ferreira
@@ -22,8 +22,8 @@
  *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 
-#ifndef MBEDIT_QT_MAINWINDOW_H
-#define MBEDIT_QT_MAINWINDOW_H
+#ifndef MBEDIT_QT_MBE_EDITOR_H
+#define MBEDIT_QT_MBE_EDITOR_H
 
 #include <atomic>
 #include <functional>
@@ -32,7 +32,8 @@
 #include <vector>
 
 #include <QDialog>
-#include <QMainWindow>
+#include <QList>
+#include <QWidget>
 
 #include "mbe_canvas.h"
 #include "mbe_core.h"
@@ -45,6 +46,7 @@ class QCheckBox;
 class QComboBox;
 class QLabel;
 class QLineEdit;
+class QMenu;
 class QProcess;
 class QTemporaryDir;
 class QPushButton;
@@ -58,12 +60,17 @@ class QTimer;
 
 namespace mbe {
 
-class MainWindow : public QMainWindow {
+/* The whole editor as a widget, for a window of its own or a panel of another program.
+   Before deleting it with a file open, call prepareToClose: deleting it discards edits
+   that have not been saved. */
+class EditorWidget : public QWidget {
   Q_OBJECT
 
  public:
-  explicit MainWindow(QWidget *parent = nullptr);
-  ~MainWindow() override;
+  explicit EditorWidget(QWidget *parent = nullptr);
+  ~EditorWidget() override;
+
+  QSize sizeHint() const override { return QSize(1400, 850); }
 
   mbe::Session &session() { return session_; }
   Canvas *canvas() { return canvas_; }
@@ -78,11 +85,26 @@ class MainWindow : public QMainWindow {
   void loadReference(const QString &path);
   void setStartReference(const QString &path) { start_reference_ = path; }
 
- protected:
-  void closeEvent(QCloseEvent *event) override;
+  /* for the surrounding window */
+  QList<QMenu *> menus() const { return menus_; }
+  QString title() const { return title_; }
+  void setDisplayName(const QString &name);  // in titles and message boxes
+  void setShortcutContext(Qt::ShortcutContext context);
+  /* True if the editor may close now. Otherwise it stays, because it is busy, the user
+     cancelled, or the edits are being saved; closed_later is then called once they are. */
+  bool prepareToClose(std::function<void()> closed_later);
+
+ signals:
+  void titleChanged(const QString &title);
+  void unsavedChanged(bool unsaved);
+  void statusMessage(const QString &text, int timeout_ms);
+  void busyChanged(bool busy);
+  void closeRequested();  // the Quit button, or the last file is done in GUI mode
 
  private:
   /* set up */
+  QMenu *newMenu(const QString &title);
+  void setWorking(bool working);
   void buildMenus();
   void buildControls();
   void buildGotoDialog();
@@ -160,6 +182,11 @@ class MainWindow : public QMainWindow {
   bool browse_ = false;
   bool run_mbprocess_ = false;
   std::string saved_path_;
+  QWidget *central_;
+  QList<QMenu *> menus_;
+  QString display_name_ = PROGRAM_NAME;
+  QString title_;
+  bool unsaved_ = false;
   bool closing_ = false;
 
   Canvas *canvas_;

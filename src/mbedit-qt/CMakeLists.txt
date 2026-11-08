@@ -47,12 +47,14 @@ set(CMAKE_AUTOMOC ON)
 
 add_library(
   mbedit-qt-ui STATIC
-  MainWindow.cc
-  MainWindow.h
   mbe_canvas.cc
   mbe_canvas.h
+  mbe_editor.cc
+  mbe_editor.h
   mbe_panels.cc
-  mbe_panels.h)
+  mbe_panels.h
+  mbe_window.cc
+  mbe_window.h)
 
 target_link_libraries(mbedit-qt-ui PUBLIC mbedit-qt-core Qt6::Widgets)
 
