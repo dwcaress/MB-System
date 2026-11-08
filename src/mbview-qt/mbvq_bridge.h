@@ -244,6 +244,31 @@ void mbvq_c_setprojection(size_t instance, int projection);
 /* annotation: 0 decimal degrees, 1 degrees and minutes */
 void mbvq_c_setlonlatstyle(size_t instance, int style);
 
+/* ---- 3D soundings window (mb3dsoundings) ---- */
+
+/* edit modes (MBS_EDIT_*) and mouse modes (MBS_MOUSE_*) */
+#define MBVQ_SDG_EDIT_TOGGLE 0
+#define MBVQ_SDG_EDIT_PICK 1
+#define MBVQ_SDG_EDIT_ERASE 2
+#define MBVQ_SDG_EDIT_RESTORE 3
+#define MBVQ_SDG_EDIT_GRAB 4
+#define MBVQ_SDG_EDIT_INFO 5
+#define MBVQ_SDG_EDIT_MODES 6
+#define MBVQ_SDG_MOUSE_ROTATE 0
+#define MBVQ_SDG_MOUSE_PANZOOM 1
+
+/* the size of the soundings drawing in physical pixels (gl_width, gl_height) */
+void mbvq_c_soundings_resize(int width, int height);
+/* draw the soundings, inside a paint */
+void mbvq_c_soundings_plot(void);
+/* the edit mode radio buttons, the mouse mode buttons and menu, Reset View */
+void mbvq_c_soundings_edit_mode(int mode);
+void mbvq_c_soundings_mouse_mode(int mode);
+void mbvq_c_soundings_resetview(void);
+/* the window was dismissed: hide it and tell the calling program */
+void mbvq_c_soundings_dismiss(void);
+void mbvq_c_soundings_modes(int *edit_mode, int *mouse_mode);
+
 /* ---- implemented by the Qt half ---- */
 
 /* true if the backend draws (the legacy OpenGL backend), false for the null backend */
@@ -279,6 +304,18 @@ void mbvq_qt_add_action_separator(size_t instance);
 void mbvq_qt_action_enabled(size_t instance, int index, bool enabled);
 /* run mbvq_c_work(instance) after delay_ms milliseconds */
 void mbvq_qt_schedule_work(size_t instance, int delay_ms);
+/* the soundings window: create (hidden), show, hide, destroy */
+void mbvq_qt_soundings_create(void);
+void mbvq_qt_soundings_show(void);
+void mbvq_qt_soundings_hide(void);
+void mbvq_qt_soundings_destroy(void);
+/* the window shows the state of the core again (modes, toggles) */
+void mbvq_qt_soundings_refresh(void);
+/* the mouse mode label (Motif "BX" form) and the status line; the bias
+   sliders are hidden while the status shows sounding information */
+void mbvq_qt_soundings_mousemode(const char *bxstring);
+void mbvq_qt_soundings_status(const char *text, bool sliders);
+void mbvq_qt_soundings_cursor(int cursor);
 
 #ifdef __cplusplus
 }

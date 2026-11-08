@@ -1115,11 +1115,231 @@ void mbv_ui_reset_view(size_t instance) { mbview_resetview(instance); }
 void mbv_ui_destroy_window(size_t instance) { mbvq_qt_close_window(instance); }
 void mbv_ui_close_lists(void) { mbvq_qt_lists_closed(); }
 
-/* 3D soundings view: Phase 5 */
-void mbv_ui_soundings_cursor(int cursor) { (void)cursor; }
+/*------------------------------------------------------------------------------*/
+/* The 3D soundings window: the Qt versions of the window functions of
+   mb3dsoundings_callbacks.c (startup, open, end and the user interface
+   functions). The logic is the shared code of mbv_soundings_core.c. */
+
+typedef char mbvq_check_sdg_edit[(MBVQ_SDG_EDIT_TOGGLE == MBS_EDIT_TOGGLE && MBVQ_SDG_EDIT_PICK == MBS_EDIT_PICK &&
+                                  MBVQ_SDG_EDIT_ERASE == MBS_EDIT_ERASE && MBVQ_SDG_EDIT_RESTORE == MBS_EDIT_RESTORE &&
+                                  MBVQ_SDG_EDIT_GRAB == MBS_EDIT_GRAB && MBVQ_SDG_EDIT_INFO == MBS_EDIT_INFO)
+                                     ? 1
+                                     : -1];
+typedef char mbvq_check_sdg_mouse[(MBVQ_SDG_MOUSE_ROTATE == MBS_MOUSE_ROTATE && MBVQ_SDG_MOUSE_PANZOOM == MBS_MOUSE_PANZOOM)
+                                      ? 1
+                                      : -1];
+
+/* the status line text (mb3dsoundings_updatestatus) */
+static mb_path mbvq_soundings_text;
+
+int mb3dsoundings_startup(int verbose, Widget parent, XtAppContext app, int *error) {
+	/* set local verbosity */
+	mbs_verbose = verbose;
+
+	if (mbs_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+	}
+
+	/* set parent widget and app context (unused by Qt) */
+	mbs_parent_widget = parent;
+	mbs_app_context = app;
+	mbs_work_function_set = false;
+	mbs_timer_count = 0;
+
+	/* initialize window */
+	mb3dsoundings_reset();
+
+	*error = mbs_error;
+
+	if (mbs_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+	}
+
+	return (mbs_status);
+}
+
+int mb3dsoundings_open(int verbose, struct mb3dsoundings_struct *soundingdata, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+	}
+
+	/* show the statistics and set the data */
+	mb3dsoundings_setdata(verbose, soundingdata, error);
+
+	/* create the window if needed, then show it */
+	if (mb3dsoundings.init == MBS_WINDOW_NULL) {
+		mbvq_qt_soundings_create();
+		mb3dsoundings.init = MBS_WINDOW_HIDDEN;
+	}
+	if (mb3dsoundings.init == MBS_WINDOW_HIDDEN) {
+		mbvq_qt_soundings_show();
+		mb3dsoundings.init = MBS_WINDOW_VISIBLE;
+	}
+
+	/* update gui widgets */
+	mb3dsoundings_updategui();
+
+	/* the drawing view sets gl_width and gl_height when it is sized */
+	mb3dsoundings.glx_init = true;
+
+	/* recalculate vertical scaling */
+	mb3dsoundings_setzscale(verbose, error);
+
+	/* replot the data */
+	mb3dsoundings_plot(verbose, error);
+
+	*error = mbs_error;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+	}
+
+	return (mbs_status);
+}
+
+int mb3dsoundings_end(int verbose, int *error) {
+	/* set local verbosity */
+	mbs_verbose = verbose;
+
+	if (mbs_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+	}
+
+	/* handle destruction if not already handled */
+	if (mb3dsoundings.init != MBS_WINDOW_NULL) {
+		mbvq_qt_soundings_destroy();
+		mb3dsoundings.glx_init = false;
+		mb3dsoundings.init = MBS_WINDOW_NULL;
+	}
+
+	/* reinitialize parameters, but keep the patch test bias values */
+	mb3dsoundings_reset_keepbias();
+
+	/* set flags */
+	mbs_status = MB_SUCCESS;
+	mbs_error = MB_ERROR_NO_ERROR;
+
+	*error = mbs_error;
+
+	if (mbs_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+	}
+
+	return (mbs_status);
+}
+
+/* the cursor of each edit mode, as the Motif mb3dsoundings_updatecursor() */
+int mb3dsoundings_updatecursor(void) {
+	int cursor = MBV_CURSOR_TARGET_RED;
+	if (mb3dsoundings.edit_mode == MBS_EDIT_ERASE)
+		cursor = MBV_CURSOR_EXCHANGE_RED;
+	else if (mb3dsoundings.edit_mode == MBS_EDIT_RESTORE)
+		cursor = MBV_CURSOR_EXCHANGE_GREEN;
+	else if (mb3dsoundings.edit_mode == MBS_EDIT_INFO)
+		cursor = MBV_CURSOR_TARGET_BLUE;
+	mbvq_qt_soundings_cursor(cursor);
+	return (mbs_status);
+}
+
+/* the edit mode radio buttons and the mouse mode label, as the Motif
+   mb3dsoundings_updatemodetoggles() (whose label always names Pan and Zoom) */
+int mb3dsoundings_updatemodetoggles(void) {
+	mbvq_qt_soundings_refresh();
+	const char *mode = "Toggle";
+	if (mb3dsoundings.edit_mode == MBS_EDIT_PICK)
+		mode = "Pick";
+	else if (mb3dsoundings.edit_mode == MBS_EDIT_ERASE)
+		mode = "Erase";
+	else if (mb3dsoundings.edit_mode == MBS_EDIT_RESTORE)
+		mode = "Restore";
+	else if (mb3dsoundings.edit_mode == MBS_EDIT_GRAB)
+		mode = "Grab";
+	else if (mb3dsoundings.edit_mode == MBS_EDIT_INFO)
+		mode = "Info";
+	snprintf(mbvq_soundings_text, sizeof(mbvq_soundings_text),
+	         ":::t\"Mouse Mode:\":t\"L: Edit (%s)\":t\"M: Pan\"\"R: Zoom\"", mode);
+	mbvq_qt_soundings_mousemode(mbvq_soundings_text);
+	return (mbs_status);
+}
+
+/* the status line, as the Motif mb3dsoundings_updatestatus() */
+int mb3dsoundings_updatestatus(void) {
+	struct mb3dsoundings_struct *soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
+	if (soundingdata == NULL)
+		return (mbs_status);
+
+	/* if in info mode and sounding picked print info as status */
+	if (mb3dsoundings.edit_mode == MBS_EDIT_INFO && mb3dsoundings.last_sounding_defined) {
+		struct mb3dsoundings_sounding_struct *sounding =
+		    (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);
+		(mb3dsoundings.mb3dsoundings_info_notify)(sounding->ifile, sounding->iping, sounding->ibeam, mbvq_soundings_text);
+		fprintf(stderr, "\n%s\n", mbvq_soundings_text);
+		mbvq_qt_soundings_status(mbvq_soundings_text, false);
+	}
+
+	/* else set standard status label */
+	else {
+		snprintf(mbvq_soundings_text, sizeof(mbvq_soundings_text),
+		         "Azi:%.2f | Elev: %.2f | exagger:%.2f | Tot:%d Good:%d Flagged:%d", mb3dsoundings.azimuth,
+		         mb3dsoundings.elevation, mb3dsoundings.exaggeration, soundingdata->num_soundings,
+		         soundingdata->num_soundings_unflagged, soundingdata->num_soundings_flagged);
+		mbvq_qt_soundings_status(mbvq_soundings_text, true);
+	}
+
+	return (mbs_status);
+}
+
+/* the controls show the state of the core (the bias sliders come with the
+   soundings controls) */
+int mb3dsoundings_updategui(void) {
+	mbvq_qt_soundings_refresh();
+	return (mbs_status);
+}
+
+void mbv_ui_soundings_mousemode(char *text) { mbvq_qt_soundings_mousemode(text); }
+void mbv_ui_soundings_cursor(int cursor) { mbvq_qt_soundings_cursor(cursor); }
 void mbv_ui_soundings_bell(void) { mbvq_qt_bell(); }
-int mb3dsoundings_updatecursor(void) { return (MB_SUCCESS); }
-int mb3dsoundings_updatemodetoggles(void) { return (MB_SUCCESS); }
-int mb3dsoundings_updatestatus(void) { return (MB_SUCCESS); }
-int mb3dsoundings_updategui(void) { return (MB_SUCCESS); }
-void mbv_ui_soundings_mousemode(char *text) { (void)text; }
+
+void mbvq_c_soundings_resize(int width, int height) {
+	mb3dsoundings.gl_width = width;
+	mb3dsoundings.gl_height = height;
+	if (height > 0)
+		mb3dsoundings.aspect_ratio = ((float)width) / ((float)height);
+}
+
+void mbvq_c_soundings_plot(void) {
+	if (mb3dsoundings.soundingdata != NULL)
+		mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+
+void mbvq_c_soundings_edit_mode(int mode) {
+	if (mode == MBS_EDIT_TOGGLE)
+		do_mb3dsdg_mouse_toggle(NULL, NULL, NULL);
+	else if (mode == MBS_EDIT_PICK)
+		do_mb3dsdg_mouse_pick(NULL, NULL, NULL);
+	else if (mode == MBS_EDIT_ERASE)
+		do_mb3dsdg_mouse_erase(NULL, NULL, NULL);
+	else if (mode == MBS_EDIT_RESTORE)
+		do_mb3dsdg_mouse_restore(NULL, NULL, NULL);
+	else if (mode == MBS_EDIT_GRAB)
+		do_mb3dsdg_mouse_grab(NULL, NULL, NULL);
+	else if (mode == MBS_EDIT_INFO)
+		do_mb3dsdg_mouse_info(NULL, NULL, NULL);
+}
+
+void mbvq_c_soundings_mouse_mode(int mode) {
+	mb3dsoundings_setmousemode(mode);
+	mbvq_qt_soundings_refresh();
+}
+
+void mbvq_c_soundings_resetview(void) { do_mb3dsdg_resetview(NULL, NULL, NULL); }
+
+void mbvq_c_soundings_dismiss(void) {
+	mbvq_qt_soundings_hide();
+	mb3dsoundings_dismissed();
+}
+
+void mbvq_c_soundings_modes(int *edit_mode, int *mouse_mode) {
+	*edit_mode = mb3dsoundings.edit_mode;
+	*mouse_mode = mb3dsoundings.mouse_mode;
+}

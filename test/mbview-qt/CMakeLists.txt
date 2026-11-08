@@ -40,3 +40,12 @@ target_link_libraries(mbview_qt_test PRIVATE mbview-qt mbaux mbio Qt6::Widgets Q
 
 add_test(NAME mbview_qt_test COMMAND mbview_qt_test --null)
 set_tests_properties(mbview_qt_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+# The 3D soundings window: ctest runs the checks without drawing;
+# --gl, --time and --show need a display.
+add_executable(mbview_qt_soundings_test mbview_qt_soundings_test.cc)
+set_target_properties(mbview_qt_soundings_test PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+target_link_libraries(mbview_qt_soundings_test PRIVATE mbview-qt mbio Qt6::Widgets Qt6::OpenGLWidgets ${MB_SYSLIBS})
+
+add_test(NAME mbview_qt_soundings_test COMMAND mbview_qt_soundings_test --null)
+set_tests_properties(mbview_qt_soundings_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")

@@ -45,12 +45,14 @@ void configure();
 void install();
 QWidget *create_map_view(size_t instance, QWidget *parent);
 QWidget *create_profile_view(size_t instance, QWidget *parent);
+QWidget *create_soundings_view(QWidget *parent);
 }  // namespace gl_backend
 
 namespace null_backend {
 void install();
 QWidget *create_map_view(size_t instance, QWidget *parent);
 QWidget *create_profile_view(size_t instance, QWidget *parent);
+QWidget *create_soundings_view(QWidget *parent);
 }  // namespace null_backend
 
 }  // namespace mbvq

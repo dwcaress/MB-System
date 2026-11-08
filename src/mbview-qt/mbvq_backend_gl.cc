@@ -34,6 +34,10 @@
  *   because mbview_findpointrez() draws colour-coded triangles and reads
  *   them back. The widget's own framebuffer is bound again afterwards.
  * - data->width and data->height are physical pixels.
+ * - The 3D soundings view also draws only inside paintGL(). Its picks use
+ *   the screen positions that mb3dsoundings_plot() stores for each sounding
+ *   (gluProject), so its mouse and key events need no context. gl_width and
+ *   gl_height are physical pixels.
  */
 
 #include <QApplication>
@@ -108,6 +112,68 @@ class GlProfileView final : public QOpenGLWidget {
 };
 
 GlProfileView *profile_views[MBVQ_MAX_WINDOWS] = {};
+
+/* The 3D soundings view (one per program, as in Motif). */
+class GlSoundingsView final : public QOpenGLWidget {
+ public:
+  explicit GlSoundingsView(QWidget *parent);
+  ~GlSoundingsView() override;
+  bool defer();
+
+ protected:
+  void resizeGL(int width, int height) override;
+  void paintGL() override;
+  bool event(QEvent *qevent) override;
+
+ private:
+  int pixel_width() const { return static_cast<int>(std::lround(width() * devicePixelRatioF())); }
+  int pixel_height() const { return static_cast<int>(std::lround(height() * devicePixelRatioF())); }
+
+  bool painting_ = false;
+};
+
+GlSoundingsView *soundings_view = nullptr;
+
+GlSoundingsView::GlSoundingsView(QWidget *parent) : QOpenGLWidget(parent) {
+  setFocusPolicy(Qt::StrongFocus);
+  soundings_view = this;
+}
+
+GlSoundingsView::~GlSoundingsView() {
+  if (soundings_view == this)
+    soundings_view = nullptr;
+}
+
+bool GlSoundingsView::defer() {
+  if (painting_)
+    return false;
+  update();
+  return true;
+}
+
+void GlSoundingsView::resizeGL(int width, int height) {
+  (void)width;
+  (void)height;
+  mbvq_c_soundings_resize(pixel_width(), pixel_height());
+}
+
+void GlSoundingsView::paintGL() {
+  glViewport(0, 0, pixel_width(), pixel_height());
+  painting_ = true;
+  mbvq_c_soundings_plot();
+  painting_ = false;
+}
+
+bool GlSoundingsView::event(QEvent *qevent) {
+  struct mbv_input_event event;
+  if (translate_event(qevent, devicePixelRatioF(), &event)) {
+    /* nothing is drawn before the first paint, so nothing can be picked */
+    if (isValid())
+      mb3dsoundings_input(&event);
+    return true;
+  }
+  return QOpenGLWidget::event(qevent);
+}
 
 GlProfileView::GlProfileView(size_t instance, QWidget *parent) : QOpenGLWidget(parent), instance_(instance) {
   profile_views[instance_] = this;
@@ -230,7 +296,8 @@ bool defer_draw(int view, size_t instance, int rez) {
       return true;
     return profile_views[instance]->defer();
   }
-  /* the 3D soundings view comes in Phase 5: never draw it */
+  if (view == MBV_RENDER_SOUNDINGS)
+    return soundings_view == nullptr ? true : soundings_view->defer();
   if (view != MBV_RENDER_MAP)
     return true;
   if (instance >= MBVQ_MAX_WINDOWS || views[instance] == nullptr)
@@ -263,6 +330,8 @@ void install() {
 QWidget *create_map_view(size_t instance, QWidget *parent) { return new GlMapView(instance, parent); }
 
 QWidget *create_profile_view(size_t instance, QWidget *parent) { return new GlProfileView(instance, parent); }
+
+QWidget *create_soundings_view(QWidget *parent) { return new GlSoundingsView(parent); }
 
 }  // namespace gl_backend
 }  // namespace mbvq

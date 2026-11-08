@@ -72,6 +72,32 @@ class NullMapView final : public QWidget {
   size_t instance_;
 };
 
+/* The 3D soundings view: nothing is drawn, so mb3dsoundings_plot() never
+   stores screen positions and picks find nothing near the mouse. */
+class NullSoundingsView final : public QWidget {
+ public:
+  explicit NullSoundingsView(QWidget *parent) : QWidget(parent) { setFocusPolicy(Qt::StrongFocus); }
+
+ protected:
+  void resizeEvent(QResizeEvent *) override {
+    mbvq_c_soundings_resize(static_cast<int>(std::lround(width() * devicePixelRatioF())),
+                            static_cast<int>(std::lround(height() * devicePixelRatioF())));
+  }
+  void paintEvent(QPaintEvent *) override {
+    QPainter painter(this);
+    painter.fillRect(rect(), palette().window());
+    painter.drawText(rect(), Qt::AlignCenter, QStringLiteral("(no renderer)"));
+  }
+  bool event(QEvent *qevent) override {
+    struct mbv_input_event event;
+    if (translate_event(qevent, devicePixelRatioF(), &event)) {
+      mb3dsoundings_input(&event);
+      return true;
+    }
+    return QWidget::event(qevent);
+  }
+};
+
 bool defer_draw(int view, size_t instance, int rez) {
   (void)view;
   (void)instance;
@@ -94,6 +120,8 @@ QWidget *create_profile_view(size_t instance, QWidget *parent) {
   (void)instance;
   return view;
 }
+
+QWidget *create_soundings_view(QWidget *parent) { return new NullSoundingsView(parent); }
 
 }  // namespace null_backend
 }  // namespace mbvq

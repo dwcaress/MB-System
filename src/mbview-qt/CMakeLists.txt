@@ -78,6 +78,8 @@ add_library(
   mbvq_lists.h
   mbvq_profile.cc
   mbvq_profile.h
+  mbvq_soundings.cc
+  mbvq_soundings.h
   mbvq_ui.cc
   mbvq_window.cc
   mbvq_window.h)
