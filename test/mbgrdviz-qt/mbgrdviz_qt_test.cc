@@ -45,7 +45,8 @@
  *     area and generates a survey route through the survey dialog, and picks
  *     a region and opens it as a new view.
  *   Both forms also check which programs the Action menu starts: the Qt
- *   versions of mbedit and mbvelocitytool, found in the CMake build tree.
+ *   versions of mbedit, mbeditviz and mbvelocitytool, found in the CMake build
+ *   tree.
  */
 
 #include <algorithm>
@@ -407,8 +408,9 @@ int main(int argc, char **argv) {
     }
   }
 
-  /* the tools that the Action menu starts: the Qt versions of mbedit and
-     mbvelocitytool, found beside mbgrdviz-qt in the CMake build tree */
+  /* the tools that the Action menu starts: the Qt versions of mbedit,
+     mbeditviz and mbvelocitytool, found beside mbgrdviz-qt in the CMake build
+     tree */
   const QString program_dir = QCoreApplication::applicationDirPath() + QStringLiteral("/../../src/mbgrdviz-qt");
   const auto tool_is = [&](const char *tool, const char *expected) {
     const QString found = MbgrdvizWindow::find_tool(QString::fromLatin1(tool), program_dir);
@@ -416,6 +418,7 @@ int main(int argc, char **argv) {
   };
   check(tool_is("mbedit", "mbedit-qt"), "Open mbedit starts mbedit-qt");
   check(tool_is("mbvelocitytool", "mbvelocitytool-qt"), "Open mbvelocitytool starts mbvelocitytool-qt");
+  check(tool_is("mbeditviz", "mbeditviz-qt"), "Open mbeditviz starts mbeditviz-qt");
   check(MbgrdvizWindow::find_tool(QStringLiteral("mbgrdviz_no_such_tool"), program_dir).isEmpty(),
         "a missing tool is not found");
 

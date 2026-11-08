@@ -45,7 +45,7 @@ class MbgrdvizWindow final : public QMainWindow {
   void about();
 
   /* the executable to start for an MB-System tool: the Qt version where one
-     exists (mbedit-qt, mbvelocitytool-qt), else the tool itself; looked for
+     exists (mbedit-qt, mbeditviz-qt, mbvelocitytool-qt), else the tool itself; looked for
      in directory (the directory of this program), next to it in a CMake
      build tree, then on PATH; empty if not found */
   static QString find_tool(const QString &tool, const QString &directory);

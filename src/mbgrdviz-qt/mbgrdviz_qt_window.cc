@@ -131,7 +131,8 @@ MbgrdvizWindow *MbgrdvizWindow::instance() { return main_window; }
 QString MbgrdvizWindow::find_tool(const QString &tool, const QString &directory) {
   /* the Qt versions of the tools */
   QStringList names;
-  if (tool == QStringLiteral("mbedit") || tool == QStringLiteral("mbvelocitytool"))
+  if (tool == QStringLiteral("mbedit") || tool == QStringLiteral("mbeditviz") ||
+      tool == QStringLiteral("mbvelocitytool"))
     names << tool + QStringLiteral("-qt");
   names << tool;
   for (const QString &name : names) {
