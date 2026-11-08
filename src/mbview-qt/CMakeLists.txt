@@ -102,5 +102,10 @@ endif()
 
 target_link_libraries(mbview-qt PUBLIC mbio Qt6::Widgets PRIVATE Qt6::OpenGL Qt6::OpenGLWidgets ${mbvq_opengl}
                                                                    ${MB_SYSLIBS})
+# mb_define.h includes mb_xdr_win32.h on Windows (src/mbaux); mbio links that
+# library privately, and mbview-qt does not use mbaux
+if(WIN32)
+  target_link_libraries(mbview-qt PUBLIC mb_xdr_win32)
+endif()
 
 install(TARGETS mbview-qt DESTINATION ${CMAKE_INSTALL_LIBDIR})
