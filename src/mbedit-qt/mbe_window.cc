@@ -30,6 +30,8 @@
 #include <QMenuBar>
 #include <QStatusBar>
 
+#include <cstdio>
+
 namespace mbe {
 
 EditorWindow::EditorWindow(QWidget *parent) : QMainWindow(parent) {
@@ -50,6 +52,12 @@ EditorWindow::EditorWindow(QWidget *parent) : QMainWindow(parent) {
   connect(editor_, &EditorWidget::statusMessage, statusBar(), &QStatusBar::showMessage);
   connect(editor_, &EditorWidget::busyChanged, this, [this](bool busy) { menuBar()->setEnabled(!busy); });
   connect(editor_, &EditorWidget::closeRequested, this, &QWidget::close);
+  connect(editor_, &EditorWidget::soundingInfo, this, [](const QStringList &lines) {
+    printf("\nSelected sounding:\n");
+    for (const QString &line : lines)
+      printf("%s\n", line.toUtf8().constData());
+    fflush(stdout);
+  });
 
   statusBar()->showMessage("Ready");
   resize(1400, 900);

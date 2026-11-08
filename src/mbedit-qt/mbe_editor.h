@@ -60,6 +60,11 @@ class QTimer;
 
 namespace mbe {
 
+/* whether to apply the edits saved for a file when it is opened */
+enum class SavedEdits { Ask, Apply, Ignore };
+/* what to do with a file locked by the same user on the same computer */
+enum class LockChoice { Refuse, OpenAnyway };
+
 /* The whole editor as a widget, for a window of its own or a panel of another program.
    Before deleting it with a file open, call prepareToClose: deleting it discards edits
    that have not been saved. */
@@ -85,6 +90,24 @@ class EditorWidget : public QWidget {
   void loadReference(const QString &path);
   void setStartReference(const QString &path) { start_reference_ = path; }
 
+  /* set before opening a file */
+  void setProgramName(const std::string &name) { session_.program_name = name; }
+  void setVerbose(int verbose) { session_.verbose = verbose; }
+  void setTimeWindow(const int begin[7], const int end[7]);
+  void setProgramDirectory(const QString &directory) { program_directory_ = directory; }  // where to look for other programs first
+  /* decides about a lock instead of the question to the user */
+  void setLockChoice(std::function<LockChoice(const QString &path, const QString &holder)> choose) { lock_choice_ = std::move(choose); }
+  /* Opens mbeditviz or the water column for this file instead of starting the program.
+     Returns false if that failed. The format is 0 if not known, the ping -1 if none. */
+  void setToolOpener(std::function<bool(const QString &tool, const QString &path, int format, long ping)> open);
+
+  /* From outside. These return false if the editor cannot do it now; the work of
+     openFile runs in the background, so watch the signals. */
+  bool openFile(const QString &path, int format, SavedEdits edits = SavedEdits::Ask);
+  bool save();
+  bool goToTime(double time_d);
+  bool showRecord(long record);
+
   /* for the surrounding window */
   QList<QMenu *> menus() const { return menus_; }
   QString title() const { return title_; }
@@ -100,6 +123,12 @@ class EditorWidget : public QWidget {
   void statusMessage(const QString &text, int timeout_ms);
   void busyChanged(bool busy);
   void closeRequested();  // the Quit button, or the last file is done in GUI mode
+  void fileOpened(const QString &path, int format);
+  void fileClosed(const QString &path);
+  void viewChanged(const QString &path, long first_record, long last_record, double first_time_d, double last_time_d);
+  void editsChanged(const QString &path, long changes);
+  void editsSaved(const QString &path);
+  void soundingInfo(const QStringList &lines);
 
  private:
   /* set up */
@@ -121,7 +150,6 @@ class EditorWidget : public QWidget {
   void openDialog();
   void loadFile(int index, bool ask_saved_edits, bool use_saved_edits);
   void afterCurrentFileClosed(std::function<void()> next);
-  void saveNow();
   void doneOrNextFile();
   void nextBuffer();
   void startMbprocess();
@@ -129,6 +157,7 @@ class EditorWidget : public QWidget {
 
   /* controls */
   void syncControls();
+  void reportState();
   void syncFileList();
   void applySettings();
   void afterEdit();
@@ -162,7 +191,7 @@ class EditorWidget : public QWidget {
   void mbcleanFinished();
 
   /* other programs */
-  static QString findProgram(const QString &name);
+  QString findProgram(const QString &name) const;
   QString waterColumnFile() const;
   void openWaterColumn(int ping);
   void openMbeditviz();
@@ -187,6 +216,11 @@ class EditorWidget : public QWidget {
   QString display_name_ = PROGRAM_NAME;
   QString title_;
   bool unsaved_ = false;
+  QString program_directory_;
+  std::function<LockChoice(const QString &, const QString &)> lock_choice_;
+  std::function<bool(const QString &, const QString &, int, long)> tool_opener_;
+  QString open_path_;
+  long view_first_ = -1, view_last_ = -1, reported_changes_ = -1;
   bool closing_ = false;
 
   Canvas *canvas_;

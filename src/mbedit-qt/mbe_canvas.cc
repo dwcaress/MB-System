@@ -631,10 +631,10 @@ void Canvas::editAt(int x, int y, int grab_mode) {
     status = session_.mouseInfo(x, y);
     const std::vector<std::string> info = session_.infoText();
     if (!info.empty()) {
-      printf("\nSelected sounding:\n");
+      QStringList lines;
       for (const std::string &line : info)
-        printf("%s\n", line.c_str());
-      fflush(stdout);
+        lines << QString::fromStdString(line);
+      emit soundingInfo(lines);
     }
     break;
   }

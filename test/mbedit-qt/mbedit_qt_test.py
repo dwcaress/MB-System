@@ -315,6 +315,16 @@ class MbeditQtTest(unittest.TestCase):
     self.assertEqual(result.returncode, 0, result.stdout)
     self.assertNotIn("initialized for reading", result.stderr)
 
+  def test_editors_inside_another_window(self):
+    d = self.folder("embedded")
+    for name in ("second.kmall", "third.kmall"):
+      shutil.copy(os.path.join(d, "line.kmall"), os.path.join(d, name))
+    env = {key: value for key, value in os.environ.items() if key != "MB_HISTORY"}
+    env.setdefault("QT_QPA_PLATFORM", "offscreen")
+    files = [os.path.join(d, name) for name in ("line.kmall", "second.kmall", "third.kmall")]
+    result = subprocess.run([os.environ["MBEDIT_QT_EMBED_TEST"], "261"] + files, cwd=d, env=env, capture_output=True, text=True, errors="replace")
+    self.assertEqual(result.returncode, 0, result.stdout)
+
   def grid(self, folder, swath, name, kind):
     """a grid of the line itself"""
     # not name.mb-1: mbgrid writes that file itself

@@ -28,6 +28,7 @@
 #include <QImage>
 #include <QPoint>
 #include <QString>
+#include <QStringList>
 #include <QPolygon>
 #include <QWidget>
 
@@ -72,6 +73,7 @@ class Canvas : public QWidget {
   void viewChanged();        // the width or exaggeration changed by zooming
   void suspectKey(int direction);
   void contextMenuAt(QPoint global, int ping, int beam);  // Shift and the right button
+  void soundingInfo(const QStringList &lines);            // a click in Info mode
 
  protected:
   void paintEvent(QPaintEvent *event) override;

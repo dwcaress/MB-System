@@ -25,6 +25,7 @@
 #include "mbe_editor.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstring>
 #include <filesystem>
 #include <memory>
@@ -50,6 +51,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QMenu>
+#include <QMetaMethod>
 #include <QMessageBox>
 #include <QProcess>
 #include <QPushButton>
@@ -120,6 +122,7 @@ EditorWidget::EditorWidget(QWidget *parent) : QWidget(parent) {
   connect(canvas_, &Canvas::viewKey, this, [this](int view) { setViewMode(view); });
   connect(canvas_, &Canvas::viewChanged, this, &EditorWidget::syncControls);
   connect(canvas_, &Canvas::contextMenuAt, this, &EditorWidget::pingContextMenu);
+  connect(canvas_, &Canvas::soundingInfo, this, &EditorWidget::soundingInfo);
   connect(panel_, &TimeSeriesPanel::pingClicked, this, &EditorWidget::showPing);
   connect(map_, &TrackMap::pingClicked, this, &EditorWidget::showPing);
 
@@ -149,6 +152,76 @@ void EditorWidget::setWorking(bool working) {
   for (QMenu *menu : menus_)
     menu->setEnabled(!working);
   emit busyChanged(working);
+}
+
+void EditorWidget::setTimeWindow(const int begin[7], const int end[7]) {
+  std::copy(begin, begin + 7, session_.btime_i);
+  std::copy(end, end + 7, session_.etime_i);
+}
+
+void EditorWidget::setToolOpener(std::function<bool(const QString &, const QString &, int, long)> open) {
+  tool_opener_ = std::move(open);
+  water_column_->setVisible(tool_opener_ || !findProgram("mbwcdview").isEmpty());
+}
+
+bool EditorWidget::openFile(const QString &path, int format, SavedEdits edits) {
+  if (busy())
+    return false;
+  if (session_.isOpen() && path == QString::fromUtf8(session_.file()))
+    return true;
+  const std::string name = path.toStdString();
+  afterCurrentFileClosed([this, name, format, edits] {
+    int index = -1;
+    for (int i = 0; i < (int)files_.size(); i++)
+      if (files_[i].path == name)
+        index = i;
+    if (index < 0) {
+      const size_t before = files_.size();
+      std::string message;
+      if (!mbe::parse_input(name, format, files_, message) || files_.size() == before) {
+        showError(QString::fromStdString(message), QString::fromStdString(name), "");
+        return;
+      }
+      index = (int)before;
+      syncFileList();
+    }
+    loadFile(index, edits == SavedEdits::Ask, edits == SavedEdits::Apply);
+  });
+  return true;
+}
+
+bool EditorWidget::goToTime(double time_d) {
+  if (busy() || !session_.isOpen() || session_.nbuff() == 0)
+    return false;
+  const std::vector<mbe::Ping> &pings = session_.pings();
+  if (time_d < pings.front().time_d)
+    return false;
+  if (time_d > pings.back().time_d) {
+    /* in the pings not read yet */
+    auto target = std::make_shared<std::vector<int>>(7, 0);
+    mb_get_date(0, time_d, target->data());
+    runJob("Looking for the time...", [this, target] { session_.gotoTime(target->data()); }, [this] { canvas_->layoutChanged(); });
+    return true;
+  }
+  int nearest = 0;
+  for (int i = 1; i < (int)pings.size(); i++)
+    if (std::abs(pings[i].time_d - time_d) < std::abs(pings[nearest].time_d - time_d))
+      nearest = i;
+  showPing(nearest);
+  return true;
+}
+
+bool EditorWidget::showRecord(long record) {
+  if (busy() || !session_.isOpen())
+    return false;
+  const std::vector<mbe::Ping> &pings = session_.pings();
+  for (int i = 0; i < (int)pings.size(); i++) {
+    if (pings[i].record == record) {
+      showPing(i);
+      return true;
+    }
+  }
+  return false;
 }
 
 void EditorWidget::setDisplayName(const QString &name) {
@@ -308,7 +381,7 @@ void EditorWidget::buildMenus() {
   browse_action_->setCheckable(true);
   connect(browse_action_, &QAction::toggled, this, &EditorWidget::setBrowse);
   file->addSeparator();
-  save_action_ = file->addAction("Save", this, &EditorWidget::saveNow);
+  save_action_ = file->addAction("Save", this, &EditorWidget::save);
   save_action_->setShortcut(QKeySequence::Save);
 
   QMenu *edit = newMenu("Edit");
@@ -697,6 +770,8 @@ void EditorWidget::startMbprocess() {
     else
       emit statusMessage("Edits being applied using mbprocess...", 5000);
   }
+  if (!saved_path_.empty())
+    emit editsSaved(QString::fromStdString(saved_path_));
   saved_path_.clear();
 }
 
@@ -761,9 +836,12 @@ void EditorWidget::loadFile(int index, bool ask_saved_edits, bool use_saved_edit
   std::string description;
   bool mine = false;
   if (mbe::Session::lockInfo(path, description, mine) && mine) {
-    if (QMessageBox::question(this, display_name_,
-                              QString("%1 is locked by %2.\nIf that program is no longer running, the lock was left by a crash. Open the file anyway?")
-                                  .arg(file_name(path), QString::fromStdString(description))) == QMessageBox::Yes)
+    const bool open_anyway =
+        lock_choice_ ? lock_choice_(QString::fromStdString(path), QString::fromStdString(description)) == LockChoice::OpenAnyway
+                     : QMessageBox::question(this, display_name_,
+                                             QString("%1 is locked by %2.\nIf that program is no longer running, the lock was left by a crash. Open the file anyway?")
+                                                 .arg(file_name(path), QString::fromStdString(description))) == QMessageBox::Yes;
+    if (open_anyway)
       mbe::Session::removeLock(path);
   }
 
@@ -839,10 +917,16 @@ void EditorWidget::afterCurrentFileClosed(std::function<void()> next) {
   next();
 }
 
-void EditorWidget::saveNow() {
-  if (session_.save() == MB_SUCCESS)
+bool EditorWidget::save() {
+  if (busy())
+    return false;
+  const bool saved = session_.save() == MB_SUCCESS;
+  if (saved) {
     emit statusMessage("Edits saved", 3000);
+    emit editsSaved(QString::fromUtf8(session_.file()));
+  }
   syncControls();
+  return saved;
 }
 
 bool EditorWidget::prepareToClose(std::function<void()> closed_later) {
@@ -874,6 +958,7 @@ bool EditorWidget::prepareToClose(std::function<void()> closed_later) {
     }
   }
   startMbprocess();
+  syncControls();
   return true;
 }
 
@@ -960,6 +1045,7 @@ void EditorWidget::syncControls() {
     title_ = title;
     emit titleChanged(title_);
   }
+  reportState();
 
   width_->setValueQuietly(session_.settings.plot_width);
   exagger_->setValueQuietly(session_.settings.exagger);
@@ -968,6 +1054,36 @@ void EditorWidget::syncControls() {
   panel_->setVisible(session_.settings.show_time > mbe::PLOT_TIME);
   panel_->update();
   map_->update();
+}
+
+/* tells the surrounding program what changed since the last time */
+void EditorWidget::reportState() {
+  const QString path = session_.isOpen() ? QString::fromUtf8(session_.file()) : QString();
+  if (path != open_path_) {
+    if (!open_path_.isEmpty())
+      emit fileClosed(open_path_);
+    open_path_ = path;
+    view_first_ = view_last_ = reported_changes_ = -1;
+    if (!path.isEmpty())
+      emit fileOpened(path, session_.format());
+  }
+  if (path.isEmpty() || session_.nbuff() == 0)
+    return;
+  const mbe::Ping &first = session_.pings()[session_.current()];
+  const mbe::Ping &last = session_.pings()[std::min(session_.current() + std::max(session_.nplot(), 1) - 1, session_.nbuff() - 1)];
+  if (first.record != view_first_ || last.record != view_last_) {
+    view_first_ = first.record;
+    view_last_ = last.record;
+    emit viewChanged(path, view_first_, view_last_, first.time_d, last.time_d);
+  }
+  /* counting the changes takes time when the buffer is large */
+  if (isSignalConnected(QMetaMethod::fromSignal(&EditorWidget::editsChanged))) {
+    const long changes = session_.changes();
+    if (changes != reported_changes_) {
+      reported_changes_ = changes;
+      emit editsChanged(path, changes);
+    }
+  }
 }
 
 void EditorWidget::syncFileList() {
@@ -1358,8 +1474,8 @@ void EditorWidget::buildMbcleanDialog() {
 }
 
 /* beside this program first, for a build that is not installed */
-QString EditorWidget::findProgram(const QString &name) {
-  const QString here = QCoreApplication::applicationDirPath();
+QString EditorWidget::findProgram(const QString &name) const {
+  const QString here = program_directory_.isEmpty() ? QCoreApplication::applicationDirPath() : program_directory_;
   const QString program = QStandardPaths::findExecutable(name, {here, here + "/../utilities", here + "/../" + name});
   return program.isEmpty() ? QStandardPaths::findExecutable(name) : program;
 }
@@ -1525,10 +1641,18 @@ QString EditorWidget::waterColumnFile() const {
 }
 
 void EditorWidget::openWaterColumn(int ping) {
-  const QString program = findProgram("mbwcdview"), path = waterColumnFile();
-  if (program.isEmpty() || path.isEmpty() || session_.nbuff() == 0)
+  const QString path = waterColumnFile();
+  if (path.isEmpty() || session_.nbuff() == 0)
     return;
   const long index = session_.pingsBefore() + std::min(std::max(ping, 0), session_.nbuff() - 1);
+  if (tool_opener_) {
+    if (!tool_opener_("mbwcdview", path, 0, index))
+      showError("Unable to open the water column", path, "");
+    return;
+  }
+  const QString program = findProgram("mbwcdview");
+  if (program.isEmpty())
+    return;
   if (QProcess::startDetached(program, {"--input=" + path, QString("--ping=%1").arg(index)}))
     emit statusMessage(QString("Opened %1 at ping %2: mbwcdview counts water column pings, so it may differ").arg(file_name(path.toStdString())).arg(index), 8000);
   else
@@ -1536,6 +1660,16 @@ void EditorWidget::openWaterColumn(int ping) {
 }
 
 void EditorWidget::openMbeditviz() {
+  if (tool_opener_) {
+    const QString path = QString::fromUtf8(session_.file());
+    const int format = session_.format();
+    afterCurrentFileClosed([this, path, format] {
+      syncControls();
+      if (!tool_opener_("mbeditviz", path, format, -1))
+        showError("Unable to open mbeditviz", path, "");
+    });
+    return;
+  }
   const QString program = findProgram("mbeditviz");
   if (program.isEmpty()) {
     showError("mbeditviz was not found", "", "");
