@@ -38,8 +38,10 @@
 #error "mbv_xtypes.h is only for builds without Motif (MBVIEW_NO_MOTIF)"
 #endif
 
-/* X11 */
-typedef struct mbv_x_display Display;
+/* X11. Display uses the Xlib structure name, because Qt on Linux (with its
+   X11 support) declares "typedef struct _XDisplay Display;" in
+   qguiapplication_platform.h; the same declaration twice is allowed in C++. */
+typedef struct _XDisplay Display;
 typedef unsigned long Window;
 typedef unsigned long Cursor;
 typedef struct mbv_x_visualinfo XVisualInfo;
