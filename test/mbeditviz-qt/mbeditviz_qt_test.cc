@@ -34,6 +34,22 @@
  *                                  with --gl (OpenGL backend, needs a display)
  *                                  also an area picked in the map opens the 3D
  *                                  soundings view with the soundings inside it
+ *   mbeditviz_qt_test --parity-qt LIST EDITS N [OFFSET]
+ *                                  edit parity, Qt side (OpenGL, needs a
+ *                                  display): Edit mode, View All, Apply, an
+ *                                  area pick, then N mouse clicks in Toggle
+ *                                  mode on soundings of the 3D view, Quit;
+ *                                  writes each edit made (file, ping, beam,
+ *                                  new flag) to EDITS
+ *   mbeditviz_qt_test --parity-ref LIST EDITS
+ *                                  edit parity, reference side (no drawing):
+ *                                  the same files in Edit mode, View All,
+ *                                  Apply, then the edits of EDITS given
+ *                                  straight to mbeditviz_mb3dsoundings_edit(),
+ *                                  which the Motif soundings window calls too,
+ *                                  then Quit
+ *   Run the two on fresh copies of the same data; their .esf and .esf.stream
+ *   files must be identical.
  */
 
 #include <QAction>
@@ -44,13 +60,18 @@
 #include <QFileInfo>
 #include <QLabel>
 #include <QListWidget>
+#include <QMouseEvent>
 #include <QMenuBar>
 #include <QPushButton>
 #include <QRadioButton>
 #include <QSlider>
 #include <QTimer>
 #include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <vector>
 #include <cstring>
+#include <cmath>
 #include <string>
 
 #include "mbeditviz_qt_bridge.h"
@@ -133,8 +154,156 @@ const QString kRemove = mbvq::label_text(":::t\"Remove\":t\"Selected\"\"Files\""
 
 }  // namespace
 
+/* open the datalist, Edit mode, View All, Apply: files loaded and gridded */
+bool parity_open(MbeditvizWindow &window, const char *datalist) {
+  char program[] = "mbeditviz-qt", help[] = "", usage[] = "";
+  char opt_i[] = "-I";
+  std::string list = datalist;
+  char *args[] = {program, opt_i, list.data(), nullptr};
+  mbeditviz_init(3, args, program, help, usage, &do_mbeditviz_message_on, &do_mbeditviz_message_off,
+                 &do_mbeditviz_update_gui, &do_error_dialog);
+  spin(200);
+  mbeditviz_qt_set_edit_mode(true);
+  window.show_mode();
+  button(&window, kViewAll)->click();
+  spin(200);
+  QDialog *grid = visible_dialog(&window, "Grid Parameters");
+  if (grid == nullptr)
+    return false;
+  button(grid, QStringLiteral("Apply"))->click();
+  spin(300);
+  return mbev_grid.status == MBEV_GRID_VIEWED && mbev_num_files_loaded == mbev_num_files;
+}
+
+struct Edit {
+  int ifile, iping, ibeam, flag;
+};
+
+/* the Qt side: real mouse clicks in Toggle mode on soundings of the 3D view */
+int parity_qt(const char *datalist, const char *edits_file, int count, int offset) {
+  int qt_argc = 1;
+  char name[] = "mbeditviz_qt_test";
+  char *qt_argv[] = {name, nullptr};
+  QApplication app(qt_argc, qt_argv);
+  MbeditvizWindow window;
+  window.show();
+  mbeditviz_qt_start(&window);
+  check(parity_open(window, datalist), "Edit mode, View All and Apply load and grid the files");
+
+  /* an area across the middle of the map opens the 3D soundings view */
+  QElapsedTimer timer;
+  timer.start();
+  while (mbvq_c_lastdrawrez(0) != MBVQ_REZ_FULL && timer.elapsed() < 20000)
+    spin(50);
+  struct mbview_struct *data = nullptr;
+  int error = MB_ERROR_NO_ERROR;
+  mbview_getdataptr(0, 0, &data, &error);
+  mbview_area(0, MBV_AREALENGTH_DOWN, data->width * 2 / 5, data->height / 2);
+  mbview_area(0, MBV_AREALENGTH_MOVE, data->width * 3 / 5, data->height / 2);
+  mbview_area(0, MBV_AREALENGTH_UP, data->width * 3 / 5, data->height / 2);
+  spin(500);
+  mbvq::SoundingsWindow *soundings = mbvq::soundings_window();
+  QWidget *view = soundings != nullptr ? soundings->view() : nullptr;
+  check(view != nullptr && mbev_selected.num_soundings > 0,
+        "the soundings view opens with " + std::to_string(mbev_selected.num_soundings) + " soundings");
+  if (view == nullptr || mbev_selected.num_soundings == 0)
+    return 1;
+  timer.restart();
+  bool drawn = false;
+  while (!drawn && timer.elapsed() < 20000) {
+    for (int i = 0; i < mbev_selected.num_soundings && !drawn; i++)
+      drawn = mbev_selected.soundings[i].winx != 0 || mbev_selected.soundings[i].winy != 0;
+    spin(50);
+  }
+
+  /* clicks on soundings spread over the selection; each click must change
+     exactly one sounding, which is recorded */
+  const double ratio = view->devicePixelRatioF();
+  const int width = static_cast<int>(std::lround(view->width() * ratio));
+  const int height = static_cast<int>(std::lround(view->height() * ratio));
+  std::vector<Edit> edits;
+  std::vector<char> before(static_cast<size_t>(mbev_selected.num_soundings));
+  const int n = mbev_selected.num_soundings;
+  for (int k = 0; k < count; k++) {
+    int i = (offset + (k * 9973) + k * n / count) % n;
+    /* the next sounding inside the view */
+    int tries = 0;
+    while (tries < n && (mbev_selected.soundings[i].winx < 5 || mbev_selected.soundings[i].winx > width - 5 ||
+                         mbev_selected.soundings[i].winy < 5 || mbev_selected.soundings[i].winy > height - 5)) {
+      i = (i + 1) % n;
+      tries++;
+    }
+    for (int j = 0; j < n; j++)
+      before[j] = mbev_selected.soundings[j].beamflag;
+    const QPointF position(mbev_selected.soundings[i].winx / ratio, (height - 1 - mbev_selected.soundings[i].winy) / ratio);
+    QMouseEvent press(QEvent::MouseButtonPress, position, view->mapToGlobal(position), Qt::LeftButton, Qt::LeftButton,
+                      Qt::NoModifier);
+    QApplication::sendEvent(view, &press);
+    QMouseEvent release(QEvent::MouseButtonRelease, position, view->mapToGlobal(position), Qt::LeftButton,
+                        Qt::NoButton, Qt::NoModifier);
+    QApplication::sendEvent(view, &release);
+    spin(150);
+    int changed = 0;
+    for (int j = 0; j < n; j++)
+      if (mbev_selected.soundings[j].beamflag != before[j]) {
+        changed++;
+        const auto &s = mbev_selected.soundings[j];
+        edits.push_back({s.ifile, s.iping, s.ibeam, static_cast<unsigned char>(s.beamflag)});
+      }
+    if (changed != 1)
+      std::printf("      click %d changed %d soundings\n", k, changed);
+  }
+  check(static_cast<int>(edits.size()) == count, std::to_string(edits.size()) + " soundings edited by " +
+                                                     std::to_string(count) + " clicks");
+  std::ofstream out(edits_file);
+  for (const Edit &e : edits)
+    out << e.ifile << ' ' << e.iping << ' ' << e.ibeam << ' ' << e.flag << '\n';
+  out.close();
+
+  /* Dismiss, then Quit: the edits are written */
+  mbvq_c_soundings_dismiss();
+  window.close();
+  spin(300);
+  check(mbev_num_files_loaded == 0, "Quit unloads the files");
+  std::printf("%d failures\n", failures);
+  return failures == 0 ? 0 : 1;
+}
+
+/* the reference side: the recorded edits given straight to the edit function */
+int parity_ref(const char *datalist, const char *edits_file) {
+  int qt_argc = 1;
+  char name[] = "mbeditviz_qt_test";
+  char *qt_argv[] = {name, nullptr};
+  QApplication app(qt_argc, qt_argv);
+  MbeditvizWindow window;
+  window.show();
+  mbeditviz_qt_start(&window);
+  check(parity_open(window, datalist), "Edit mode, View All and Apply load and grid the files");
+  std::ifstream in(edits_file);
+  Edit e;
+  int count = 0;
+  while (in >> e.ifile >> e.iping >> e.ibeam >> e.flag) {
+    mbeditviz_mb3dsoundings_edit(e.ifile, e.iping, e.ibeam, static_cast<char>(e.flag), MB3DSDG_EDIT_FLUSH);
+    count++;
+  }
+  check(count > 0, std::to_string(count) + " edits replayed");
+  window.close();
+  spin(300);
+  check(mbev_num_files_loaded == 0, "Quit unloads the files");
+  std::printf("%d failures\n", failures);
+  return failures == 0 ? 0 : 1;
+}
+
 int main(int argc, char **argv) {
   std::setvbuf(stdout, nullptr, _IOLBF, 0);
+  if (argc >= 5 && std::strcmp(argv[1], "--parity-qt") == 0) {
+    mbvq::set_backend(mbvq::Backend::LegacyGL);
+    return parity_qt(argv[2], argv[3], std::atoi(argv[4]), argc > 5 ? std::atoi(argv[5]) : 0);
+  }
+  if (argc == 4 && std::strcmp(argv[1], "--parity-ref") == 0) {
+    mbvq::set_backend(mbvq::Backend::Null);
+    return parity_ref(argv[2], argv[3]);
+  }
   const char *datalist = nullptr;
   const bool gl = argc > 1 && std::strcmp(argv[1], "--gl") == 0;
   if (gl) {
