@@ -33,25 +33,11 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
 set(CMAKE_AUTOMOC ON)
 
-set(tool_dir "${CMAKE_SOURCE_DIR}/src/mbedit-qt")
-
-add_executable(
-  mbedit_qt_window_test
-  mbedit_qt_window_test.cc
-  ${tool_dir}/MainWindow.cc
-  ${tool_dir}/MainWindow.h
-  ${tool_dir}/mbe_canvas.cc
-  ${tool_dir}/mbe_canvas.h
-  ${tool_dir}/mbe_core.cc
-  ${tool_dir}/mbe_core.h
-  ${tool_dir}/mbe_panels.cc
-  ${tool_dir}/mbe_panels.h)
+add_executable(mbedit_qt_window_test mbedit_qt_window_test.cc)
 
 set_target_properties(mbedit_qt_window_test PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 
-target_include_directories(mbedit_qt_window_test PRIVATE ${tool_dir})
-
-target_link_libraries(mbedit_qt_window_test PRIVATE mbaux mbio Qt6::Widgets ${MB_SYSLIBS})
+target_link_libraries(mbedit_qt_window_test PRIVATE mbedit-qt-ui)
 
 find_package(Python3 COMPONENTS Interpreter)
 if(Python3_FOUND)
