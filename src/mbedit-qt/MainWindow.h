@@ -56,6 +56,8 @@ class QTableWidget;
 class QThread;
 class QTimer;
 
+namespace mbe {
+
 class MainWindow : public QMainWindow {
   Q_OBJECT
 
@@ -224,5 +226,7 @@ class MainWindow : public QMainWindow {
   QLabel *history_status_;
   std::vector<mbe::Session::HistoryVersion> history_;
 };
+
+}  // namespace mbe
 
 #endif

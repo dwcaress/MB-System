@@ -60,6 +60,13 @@
 #include "mb_define.h"
 #include "mb_status.h"
 
+using mbe::Canvas;
+using mbe::MainWindow;
+using mbe::ScaleControl;
+using mbe::SuspectStrip;
+using mbe::TimeSeriesPanel;
+using mbe::TrackMap;
+
 namespace {
 
 int checks = 0, failures = 0;

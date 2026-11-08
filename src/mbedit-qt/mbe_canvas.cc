@@ -45,6 +45,8 @@
 #include "mb_define.h"
 #include "mb_status.h"
 
+namespace mbe {
+
 namespace {
 
 constexpr int LABEL_CHARS_TIME = 40;   // "%5d mm/dd/yyyy hh:mm:ss.mmm %10.3f"
@@ -1038,3 +1040,5 @@ void Canvas::focusOutEvent(QFocusEvent *event) {
   }
   QWidget::focusOutEvent(event);
 }
+
+}  // namespace mbe

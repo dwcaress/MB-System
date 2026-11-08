@@ -35,6 +35,8 @@
 
 class QTimer;
 
+namespace mbe {
+
 /* The soundings and the mouse and key actions on them. The soundings are drawn
    once into an image, which is rebuilt when anything changes; the highlight of
    the sounding under the mouse and the grab rectangle are drawn over it. */
@@ -113,5 +115,7 @@ class Canvas : public QWidget {
   bool hover_ = false;
   int hover_ping_ = 0, hover_beam_ = 0;
 };
+
+}  // namespace mbe
 
 #endif

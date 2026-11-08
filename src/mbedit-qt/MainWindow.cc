@@ -71,6 +71,8 @@
 #include "mb_define.h"
 #include "mb_status.h"
 
+namespace mbe {
+
 namespace {
 
 QString file_name(const std::string &path) { return QFileInfo(QString::fromStdString(path)).fileName(); }
@@ -915,7 +917,7 @@ void MainWindow::syncControls() {
   slider_->blockSignals(false);
   if (have_data) {
     const mbe::Ping &p = session_.pings()[session_.current()];
-    const QDateTime time = QDateTime::fromMSecsSinceEpoch((qint64)(p.time_d * 1000.0), QTimeZone::UTC);
+    const QDateTime time = QDateTime::fromMSecsSinceEpoch((qint64)(p.time_d * 1000.0), QTimeZone::utc());
     position_->setText(QString("%1-%2 of %3   %4")
                            .arg(session_.current() + 1)
                            .arg(session_.current() + session_.nplot())
@@ -1680,3 +1682,5 @@ void MainWindow::pingContextMenu(QPoint global, int ping, int beam) {
     menu.addAction(redo_action_);
   menu.exec(global);
 }
+
+}  // namespace mbe

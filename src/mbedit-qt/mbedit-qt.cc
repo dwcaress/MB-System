@@ -687,7 +687,7 @@ int main(int argc, char **argv) {
       qputenv("QT_QPA_PLATFORM", "offscreen");
     int qt_argc = 1;
     QApplication app(qt_argc, argv);
-    Canvas canvas(session);
+    mbe::Canvas canvas(session);
     if (session.open(files[0].path, files[0].format, use_esf, mbe::OUTPUT_BROWSE) != MB_SUCCESS)
       return MB_ERROR_BAD_DATA;
     const bool ok = canvas.render(QSize(export_width, export_height), 2.0).save(QString::fromStdString(export_file));
@@ -700,7 +700,7 @@ int main(int argc, char **argv) {
   int qt_argc = 1;
   QApplication app(qt_argc, argv);
   QApplication::setApplicationName(mbe::PROGRAM_NAME);
-  MainWindow window;
+  mbe::MainWindow window;
   window.session().verbose = verbose;
   window.session().btime_i[0] = session.btime_i[0];
   std::copy(session.btime_i, session.btime_i + 7, window.session().btime_i);
