@@ -60,6 +60,9 @@
 /* a scratch buffer for messages (as in mbeditviz_callbacks.c) */
 static char value_text[MB_PATH_MAXLINE];
 
+/* the names of the gridding algorithms (MBEV_GRID_ALGORITHM_*) */
+static char *mbev_grid_algorithm_label[] = {"Simple Mean", "Footprint", "Shoal Bias"};
+
 /*------------------------------------------------------------------------------*/
 void do_mbeditviz_quit(Widget w, XtPointer client_data, XtPointer call_data) {
   if (mbev_verbose >= 2) {
@@ -1058,4 +1061,187 @@ void do_mbeditviz_viewselected_files(Widget w, XtPointer client_data, XtPointer 
 #ifdef MBEDITVIZ_GUI_DEBUG
   fprintf(stderr, "return do_mbeditviz_viewselected status:%d\n", mbev_status);
 #endif
+}
+/*------------------------------------------------------------------------------*/
+/* count the loaded files, pings and soundings (mbev_num_*_loaded) and write
+   the status text (a label string in Motif "BX" form) into string; the status
+   part of do_mbeditviz_update_gui */
+void mbeditviz_status_text(char *string, size_t size) {
+  /* set status text */
+  mbev_num_files_loaded = 0;
+  mbev_num_pings_loaded = 0;
+  mbev_num_soundings_loaded = 0;
+  mbev_num_soundings_secondary = 0;
+  for (int i = 0; i < mbev_num_files; i++) {
+    struct mbev_file_struct *file = &(mbev_files[i]);
+    if (file->load_status) {
+      mbev_num_files_loaded++;
+      mbev_num_pings_loaded += file->num_pings;
+      for (int j = 0; j < file->num_pings; j++) {
+        struct mbev_ping_struct *ping = &(file->pings[j]);
+        for (int k = 0; k < ping->beams_bath; k++) {
+          if (!mb_beam_check_flag_unusable(ping->beamflag[k]))
+            mbev_num_soundings_loaded++;
+          if (mb_beam_check_flag_multipick(ping->beamflag[k]))
+            mbev_num_soundings_secondary++;
+        }
+      }
+    }
+  }
+
+  if (mbev_grid.status == MBEV_GRID_NONE)
+    snprintf(string, size, ":::t\"Available Files: %d\":t\"Loaded Files: %d\":t\"Grid Not Generated\"", mbev_num_files,
+            mbev_num_files_loaded);
+  else
+    snprintf(string, size,
+            ":::t\"Available Files: %d\":t\"Loaded Files: %d\":t\"Grid:\":t\"  Lon: %f %f\":t\"  Lat: %f %f\":t\"  Cell "
+            "Size: %f m\":t\"  Algorithm: %d\":t\"  Interpolation: %d\":t\"  Dimensions: %d %d\"",
+            mbev_num_files, mbev_num_files_loaded, mbev_grid.bounds[0], mbev_grid.bounds[1], mbev_grid.bounds[2],
+            mbev_grid.bounds[3], mbev_grid.dx, mbev_grid_algorithm, mbev_grid_interpolation,
+            mbev_grid.n_columns, mbev_grid.n_rows);
+}
+/*------------------------------------------------------------------------------*/
+/* check the load, lock and edit save file state of every file; true if the
+   file list has to be rebuilt (the checks of do_mbeditviz_update_filelist) */
+bool mbeditviz_filelist_check(void) {
+  struct mbev_file_struct *file;
+
+  /* esf file checking variables */
+  bool esf_exists = false;
+  struct stat file_status;
+  char save_file[MB_PATH_MAXLINE+40];
+
+  /* check to see if anything has changed */
+  bool update_filelist = false;
+
+  /* check for change in load status, lock status, or esf status */
+  for (int i = 0; i < mbev_num_files; i++) {
+    file = &(mbev_files[i]);
+
+    /* check load status */
+    if (file->load_status != file->load_status_shown) {
+      file->load_status_shown = file->load_status;
+      update_filelist = true;
+    }
+
+		/* swath file locking variables */
+		int lock_error = MB_ERROR_NO_ERROR;
+		bool locked = false;
+		int lock_purpose;
+		mb_path lock_program;
+		mb_path lock_cpu;
+		mb_path lock_user;
+		char lock_date[25];
+
+    /* check for locks */
+    // int lock_status =
+    mb_pr_lockinfo(mbev_verbose, mbev_files[i].path, &locked, &lock_purpose, lock_program, lock_user, lock_cpu,
+                   lock_date, &lock_error);
+    if (locked != file->locked) {
+      file->locked = locked;
+      update_filelist = true;
+    }
+
+    /* check for edit save file */
+    snprintf(save_file, sizeof(save_file), "%s.esf", mbev_files[i].path);
+    const int fstat = stat(save_file, &file_status);
+    if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR)
+      esf_exists = true;
+    else
+      esf_exists = false;
+    if (esf_exists != file->esf_exists) {
+      file->esf_exists = esf_exists;
+      update_filelist = true;
+    }
+  }
+
+  return (update_filelist);
+}
+/*------------------------------------------------------------------------------*/
+/* the list label of file i (lock or load state, edit save file, async
+   data, name, format), as do_mbeditviz_update_filelist shows it */
+void mbeditviz_filelist_item(int i, char *string, size_t size) {
+  struct mbev_file_struct *file = &(mbev_files[i]);
+  char athchar;
+  char atschar;
+  char atachar;
+  char *lockstrptr;
+  char *esfstrptr;
+  const char *lockedstr = "<Locked>";
+  const char *unlockedstr = "        ";
+  const char *loadedstr = "<loaded>";
+  const char *esfyesstr = "<esf>";
+  const char *esfnostr = "     ";
+
+  /* set label strings */
+  if (file->load_status)
+    lockstrptr = (char *) loadedstr;
+  else if (file->locked)
+    lockstrptr = (char *) lockedstr;
+  else
+    lockstrptr = (char *) unlockedstr;
+  if (file->esf_exists)
+    esfstrptr = (char *) esfyesstr;
+  else
+    esfstrptr = (char *) esfnostr;
+  if (file->n_async_heading > 0)
+    athchar = 'H';
+  else
+    athchar = ' ';
+  if (file->n_async_sensordepth > 0)
+    atschar = 'S';
+  else
+    atschar = ' ';
+  if (file->n_async_attitude > 0)
+    atachar = 'A';
+  else
+    atachar = ' ';
+  snprintf(string, size, "%s %s %c%c%c %s %d", lockstrptr, esfstrptr, athchar, atschar, atachar, mbev_files[i].name,
+          mbev_files[i].format);
+}
+/*------------------------------------------------------------------------------*/
+/* the grid bounds and suggested grid parameters text of the grid parameters
+   dialog (a label string in Motif "BX" form) */
+void mbeditviz_gridparameters_text(char *string, size_t size) {
+  double xx = (mbev_grid_boundsutm[1] - mbev_grid_boundsutm[0]);
+  double yy = (mbev_grid_boundsutm[3] - mbev_grid_boundsutm[2]);
+
+  snprintf(string, size, ":::t\"Grid Bounds:\""
+          ":t\"    Longitude: %10.5f %10.5f  | %6.3f km  | %9.3f m\""
+          ":t\"    Latitude: %9.5f %9.5f | %6.3f km  | %9.3f m\""
+          ":t\"Suggested Grid Parameters:\""
+          ":t\"    Cell Size: %.2f m\""
+          ":t\"    Dimensions: %d %d\"",
+          mbev_grid_bounds[0], mbev_grid_bounds[1], 0.001 * xx, xx,
+          mbev_grid_bounds[2], mbev_grid_bounds[3], 0.001 * yy, yy,
+          mbev_grid_cellsize, mbev_grid_n_columns, mbev_grid_n_rows);
+}
+/*------------------------------------------------------------------------------*/
+/* the selected grid parameters text of the grid parameters dialog */
+void mbeditviz_gridparameters_implied(char *string, size_t size) {
+  // char string2[MB_PATH_MAXLINE];
+  snprintf(string, size, ":::t\"Selected Grid Parameters:\""
+                  ":t\"    Cell Size: %.2f m\""
+                  ":t\"    Dimensions: %d %d\""
+                  ":t\"    Algorithm: %s\""
+                  ":t\"    Interpolation: %d cell gaps\"",
+                  mbev_grid_cellsize,
+                  mbev_grid_n_columns, mbev_grid_n_rows,
+                  mbev_grid_algorithm_label[mbev_grid_algorithm],
+                  mbev_grid_interpolation);
+}
+/*------------------------------------------------------------------------------*/
+/* the grid dimensions for the cell size mbev_grid_cellsize */
+void mbeditviz_set_grid_dimensions(void) {
+  /* get updated grid dimensions */
+  mbev_grid_n_columns = (mbev_grid_boundsutm[1] - mbev_grid_boundsutm[0]) / mbev_grid_cellsize + 1;
+  mbev_grid_n_rows = (mbev_grid_boundsutm[3] - mbev_grid_boundsutm[2]) / mbev_grid_cellsize + 1;
+  if (mbev_verbose > 0) {
+    fprintf(stderr, "Grid bounds: %f %f %f %f    %f %f %f %f\n",
+            mbev_grid_bounds[0], mbev_grid_bounds[1],
+            mbev_grid_bounds[2], mbev_grid_bounds[3],
+            mbev_grid_boundsutm[0], mbev_grid_boundsutm[1],
+            mbev_grid_boundsutm[2],  mbev_grid_boundsutm[3]);
+    fprintf(stderr, "cell size:%f dimensions: %d %d\n", mbev_grid_cellsize, mbev_grid_n_columns, mbev_grid_n_rows);
+  }
 }

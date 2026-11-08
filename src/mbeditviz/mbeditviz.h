@@ -319,6 +319,13 @@ void do_mbeditviz_viewselected_files(Widget w, XtPointer client_data, XtPointer 
                                      int *position_list);
 /* user interface function each program provides: signal a refused action */
 void mbeditviz_ui_bell(void);
+/* toolkit-free parts of the user interface (mbeditviz_core.c) */
+void mbeditviz_status_text(char *string, size_t size);
+bool mbeditviz_filelist_check(void);
+void mbeditviz_filelist_item(int i, char *string, size_t size);
+void mbeditviz_gridparameters_text(char *string, size_t size);
+void mbeditviz_gridparameters_implied(char *string, size_t size);
+void mbeditviz_set_grid_dimensions(void);
 int do_mbeditviz_settimer(void);
 int do_mbeditviz_workfunction(XtPointer client_data);
 

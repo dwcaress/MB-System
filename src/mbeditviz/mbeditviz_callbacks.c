@@ -95,7 +95,6 @@ static char value_text[MB_PATH_MAXLINE];
 Widget BxFindTopShell(Widget);
 WidgetList BxWidgetIdsFromNames(Widget, char *, char *);
 
-static char *mbev_grid_algorithm_label[] = {"Simple Mean", "Footprint", "Shoal Bias"};
 
 /*---------------------------------------------------------------------------------------*/
 /*      Function Name:   BxManageCB
@@ -443,16 +442,7 @@ void do_mbeditviz_set_label_implied() {
 #endif
 
   char string[MB_PATH_MAXLINE];
-  // char string2[MB_PATH_MAXLINE];
-  snprintf(string, sizeof(string), ":::t\"Selected Grid Parameters:\""
-                  ":t\"    Cell Size: %.2f m\""
-                  ":t\"    Dimensions: %d %d\""
-                  ":t\"    Algorithm: %s\""
-                  ":t\"    Interpolation: %d cell gaps\"",
-                  mbev_grid_cellsize,
-                  mbev_grid_n_columns, mbev_grid_n_rows,
-                  mbev_grid_algorithm_label[mbev_grid_algorithm],
-                  mbev_grid_interpolation);
+  mbeditviz_gridparameters_implied(string, sizeof(string));
   set_label_multiline_string(label_implied, (String)string);
 }
 
@@ -503,16 +493,7 @@ void do_mbeditviz_changecellsize(Widget w, XtPointer client_data, XtPointer call
 
 
   /* get updated grid dimensions */
-  mbev_grid_n_columns = (mbev_grid_boundsutm[1] - mbev_grid_boundsutm[0]) / mbev_grid_cellsize + 1;
-  mbev_grid_n_rows = (mbev_grid_boundsutm[3] - mbev_grid_boundsutm[2]) / mbev_grid_cellsize + 1;
-  if (mbev_verbose > 0) {
-    fprintf(stderr, "Grid bounds: %f %f %f %f    %f %f %f %f\n",
-            mbev_grid_bounds[0], mbev_grid_bounds[1],
-            mbev_grid_bounds[2], mbev_grid_bounds[3],
-            mbev_grid_boundsutm[0], mbev_grid_boundsutm[1],
-            mbev_grid_boundsutm[2],  mbev_grid_boundsutm[3]);
-    fprintf(stderr, "cell size:%f dimensions: %d %d\n", mbev_grid_cellsize, mbev_grid_n_columns, mbev_grid_n_rows);
-  }
+  mbeditviz_set_grid_dimensions();
 
   do_mbeditviz_set_label_implied();
 
@@ -561,19 +542,8 @@ void do_mbeditviz_gridparameters(Widget w, XtPointer client_data, XtPointer call
   snprintf(value_text, sizeof(value_text), "%d", mbev_grid_interpolation);
   XmTextSetString(text_interpolation, value_text);
 
-  double xx = (mbev_grid_boundsutm[1] - mbev_grid_boundsutm[0]);
-  double yy = (mbev_grid_boundsutm[3] - mbev_grid_boundsutm[2]);
-
   char string[MB_PATH_MAXLINE];
-  snprintf(string, sizeof(string), ":::t\"Grid Bounds:\""
-          ":t\"    Longitude: %10.5f %10.5f  | %6.3f km  | %9.3f m\""
-          ":t\"    Latitude: %9.5f %9.5f | %6.3f km  | %9.3f m\""
-          ":t\"Suggested Grid Parameters:\""
-          ":t\"    Cell Size: %.2f m\""
-          ":t\"    Dimensions: %d %d\"",
-          mbev_grid_bounds[0], mbev_grid_bounds[1], 0.001 * xx, xx,
-          mbev_grid_bounds[2], mbev_grid_bounds[3], 0.001 * yy, yy,
-          mbev_grid_cellsize, mbev_grid_n_columns, mbev_grid_n_rows);
+  mbeditviz_gridparameters_text(string, sizeof(string));
   set_label_multiline_string(label_current, (String)string);
 
   do_mbeditviz_set_label_implied();
@@ -731,38 +701,8 @@ void do_mbeditviz_update_gui() {
 #endif
 
   /* set status text */
-  mbev_num_files_loaded = 0;
-  mbev_num_pings_loaded = 0;
-  mbev_num_soundings_loaded = 0;
-  mbev_num_soundings_secondary = 0;
-  for (int i = 0; i < mbev_num_files; i++) {
-    struct mbev_file_struct *file = &(mbev_files[i]);
-    if (file->load_status) {
-      mbev_num_files_loaded++;
-      mbev_num_pings_loaded += file->num_pings;
-      for (int j = 0; j < file->num_pings; j++) {
-        struct mbev_ping_struct *ping = &(file->pings[j]);
-        for (int k = 0; k < ping->beams_bath; k++) {
-          if (!mb_beam_check_flag_unusable(ping->beamflag[k]))
-            mbev_num_soundings_loaded++;
-          if (mb_beam_check_flag_multipick(ping->beamflag[k]))
-            mbev_num_soundings_secondary++;
-        }
-      }
-    }
-  }
-
   char string[MB_PATH_MAXLINE];
-  if (mbev_grid.status == MBEV_GRID_NONE)
-    snprintf(string, sizeof(string), ":::t\"Available Files: %d\":t\"Loaded Files: %d\":t\"Grid Not Generated\"", mbev_num_files,
-            mbev_num_files_loaded);
-  else
-    snprintf(string, sizeof(string),
-            ":::t\"Available Files: %d\":t\"Loaded Files: %d\":t\"Grid:\":t\"  Lon: %f %f\":t\"  Lat: %f %f\":t\"  Cell "
-            "Size: %f m\":t\"  Algorithm: %d\":t\"  Interpolation: %d\":t\"  Dimensions: %d %d\"",
-            mbev_num_files, mbev_num_files_loaded, mbev_grid.bounds[0], mbev_grid.bounds[1], mbev_grid.bounds[2],
-            mbev_grid.bounds[3], mbev_grid.dx, mbev_grid_algorithm, mbev_grid_interpolation,
-            mbev_grid.n_columns, mbev_grid.n_rows);
+  mbeditviz_status_text(string, sizeof(string));
   set_label_multiline_string(label_mbeditviz_status, (String)string);
 
   /* build available file list */
@@ -806,27 +746,11 @@ void do_mbeditviz_update_filelist() {
   fprintf(stderr, "do_mbeditviz_update_filelist status:%d\n", mbev_status);
 #endif
 
-  struct mbev_file_struct *file;
-
   char string[MB_PATH_MAXLINE+40];
   int *position_list = NULL;
   int position_list_save[MB_PATH_MAXLINE];
   int position_count = 0;
-  char athchar;
-  char atschar;
-  char atachar;
   XmString *xstr;
-  char *lockstrptr;
-  const char *lockedstr = "<Locked>";
-  const char *unlockedstr = "        ";
-  const char *loadedstr = "<loaded>";
-  const char *esfyesstr = "<esf>";
-  const char *esfnostr = "     ";
-
-  /* esf file checking variables */
-  bool esf_exists = false;
-  struct stat file_status;
-  char save_file[MB_PATH_MAXLINE+40];
 
   /* check to see if anything has changed */
   bool update_filelist = false;
@@ -842,45 +766,8 @@ void do_mbeditviz_update_filelist() {
     update_filelist = true;
 
   /* check for change in load status, lock status, or esf status */
-  for (int i = 0; i < mbev_num_files; i++) {
-    file = &(mbev_files[i]);
-
-    /* check load status */
-    if (file->load_status != file->load_status_shown) {
-      file->load_status_shown = file->load_status;
-      update_filelist = true;
-    }
-
-		/* swath file locking variables */
-		int lock_error = MB_ERROR_NO_ERROR;
-		bool locked = false;
-		int lock_purpose;
-		mb_path lock_program;
-		mb_path lock_cpu;
-		mb_path lock_user;
-		char lock_date[25];
-
-    /* check for locks */
-    // int lock_status =
-    mb_pr_lockinfo(mbev_verbose, mbev_files[i].path, &locked, &lock_purpose, lock_program, lock_user, lock_cpu,
-                   lock_date, &lock_error);
-    if (locked != file->locked) {
-      file->locked = locked;
-      update_filelist = true;
-    }
-
-    /* check for edit save file */
-    snprintf(save_file, sizeof(save_file), "%s.esf", mbev_files[i].path);
-    const int fstat = stat(save_file, &file_status);
-    if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR)
-      esf_exists = true;
-    else
-      esf_exists = false;
-    if (esf_exists != file->esf_exists) {
-      file->esf_exists = esf_exists;
-      update_filelist = true;
-    }
-  }
+  if (mbeditviz_filelist_check())
+    update_filelist = true;
 
   /* only update the filelist if necessary */
   if (update_filelist) {
@@ -911,35 +798,8 @@ void do_mbeditviz_update_filelist() {
         do_error_dialog("Unable to update the file list", "due to a memory", "allocation error!");
       }
       else {
-        char *esfstrptr;
         for (int i = 0; i < mbev_num_files; i++) {
-          file = &(mbev_files[i]);
-
-          /* set label strings */
-          if (file->load_status)
-            lockstrptr = (char *) loadedstr;
-          else if (file->locked)
-            lockstrptr = (char *) lockedstr;
-          else
-            lockstrptr = (char *) unlockedstr;
-          if (file->esf_exists)
-            esfstrptr = (char *) esfyesstr;
-          else
-            esfstrptr = (char *) esfnostr;
-          if (file->n_async_heading > 0)
-            athchar = 'H';
-          else
-            athchar = ' ';
-          if (file->n_async_sensordepth > 0)
-            atschar = 'S';
-          else
-            atschar = ' ';
-          if (file->n_async_attitude > 0)
-            atachar = 'A';
-          else
-            atachar = ' ';
-          snprintf(string, sizeof(string), "%s %s %c%c%c %s %d", lockstrptr, esfstrptr, athchar, atschar, atachar, mbev_files[i].name,
-                  mbev_files[i].format);
+          mbeditviz_filelist_item(i, string, sizeof(string));
           xstr[i] = XmStringCreateLocalized(string);
         }
         XmListAddItems(list_filelist, xstr, mbev_num_files, 0);
