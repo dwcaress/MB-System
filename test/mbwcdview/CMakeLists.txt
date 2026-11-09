@@ -22,7 +22,7 @@
 #    See README.md file for copying and redistribution conditions.
 #------------------------------------------------------------------------------
 
-# The window test of mbwcdview, run by test/python/mbwcdview_test.py, which writes the synthetic files.
+# The window and embedding tests of mbwcdview, run by test/python/mbwcdview_test.py, which writes the synthetic files.
 
 if(APPLE)
   list(REMOVE_ITEM CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/build-utils")
@@ -35,3 +35,9 @@ add_executable(mbwcdview_window_test mbwcdview_window_test.cc)
 set_target_properties(mbwcdview_window_test PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 
 target_link_libraries(mbwcdview_window_test PRIVATE mbwcdview-ui)
+
+add_executable(mbwcdview_embed_test mbwcdview_embed_test.cc)
+
+set_target_properties(mbwcdview_embed_test PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+
+target_link_libraries(mbwcdview_embed_test PRIVATE mbwcdview-ui)

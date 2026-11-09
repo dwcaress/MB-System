@@ -62,7 +62,7 @@ if(mbio_py_tests_ok)
   if(buildQt6Tools)
     add_test(NAME mbwcdview_test COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mbwcdview_test.py")
     set_tests_properties(mbwcdview_test PROPERTIES ENVIRONMENT
-                         "${test_environment};MBWCDVIEW=$<TARGET_FILE:mbwcdview>;MBWCDVIEW_WINDOW_TEST=$<TARGET_FILE:mbwcdview_window_test>")
+                         "${test_environment};MBWCDVIEW=$<TARGET_FILE:mbwcdview>;MBWCDVIEW_WINDOW_TEST=$<TARGET_FILE:mbwcdview_window_test>;MBWCDVIEW_EMBED_TEST=$<TARGET_FILE:mbwcdview_embed_test>")
   endif()
 else()
   message("mbio_py tests not added: they need python3 with numpy and BUILD_SHARED_LIBS=ON")

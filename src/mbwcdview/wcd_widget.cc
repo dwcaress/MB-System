@@ -280,6 +280,7 @@ bool WaterColumnWidget::openFile(const QString &path) {
   showStatus("Reading survey file (navigation, bathymetry)...");
   line_ = wcd::Line();
   steps_.clear();
+  reported_step_ = -1;
 
   struct Load {
     wcd::Line line;
@@ -301,23 +302,25 @@ bool WaterColumnWidget::openFile(const QString &path) {
     load->ok = load->line.load(file, progress, &load->message);
   });
   worker_->setParent(this);
-  connect(worker_, &QThread::finished, this, [this, load] {
+  connect(worker_, &QThread::finished, this, [this, load, path] {
     worker_->deleteLater();
     worker_ = nullptr;
     central_->setEnabled(true);
     /* disabling the controls took the focus away, and the keys need it */
     if (job_had_focus_ || QApplication::focusWidget() == nullptr)
       setFocus();
-    finishOpen(std::move(load->line), load->ok, load->message);
+    finishOpen(path, std::move(load->line), load->ok, load->message);
+    emit busyChanged(false);
   });
   const QWidget *focus = QApplication::focusWidget();
   job_had_focus_ = focus != nullptr && (focus == this || isAncestorOf(focus));
   central_->setEnabled(false);
   worker_->start();
+  emit busyChanged(true);
   return true;
 }
 
-void WaterColumnWidget::finishOpen(Line line, bool ok, const std::string &message) {
+void WaterColumnWidget::finishOpen(const QString &path, Line line, bool ok, const std::string &message) {
   line_ = std::move(line);
   const int ping = pending_ping_;
   pending_ping_ = -1;
@@ -326,6 +329,7 @@ void WaterColumnWidget::finishOpen(Line line, bool ok, const std::string &messag
                                 : QString("Cannot read %1: %2").arg(file_label_, QString::fromStdString(message)));
     view_->plot().setData(wcd::PlotData());
     view_->update();
+    emit fileOpenFailed(path);
     return;
   }
   emit diagnostic(QString("survey=%1 water column=%2").arg(QString::fromStdString(line_.kmall), QString::fromStdString(line_.kmwcd)));
@@ -365,6 +369,7 @@ void WaterColumnWidget::finishOpen(Line line, bool ok, const std::string &messag
   slider_->blockSignals(false);
   current_ = 0;
   updatePlotSettings();
+  emit fileOpened(path);
   redraw();
 
   const QString summary =
@@ -408,6 +413,10 @@ void WaterColumnWidget::redraw() {
   step_label_->setText(QString("%1 / %2").arg(current_).arg((int)steps_.size() - 1));
   if (!info.status.isEmpty())
     showStatus(info.status);
+  if (current_ != reported_step_) {
+    reported_step_ = current_;
+    emit pingChanged(current_, ping, line_.wc.pings[ping].ping_number, swath, line_.wc.pings[ping].time_d);
+  }
 }
 
 void WaterColumnWidget::setStep(int step) { slider_->setValue(step); }
@@ -423,6 +432,20 @@ void WaterColumnWidget::showPing(int ping) {
       return;
     }
   }
+}
+
+bool WaterColumnWidget::showTime(double time_d) {
+  if (steps_.empty())
+    return false;
+  const auto time_of = [this](size_t k) { return line_.wc.pings[steps_[k].first].time_d; };
+  if (time_d < time_of(0) || time_d > time_of(steps_.size() - 1))
+    return false;
+  size_t best = 0;
+  for (size_t k = 0; k < steps_.size(); k++)
+    if (std::abs(time_of(k) - time_d) < std::abs(time_of(best) - time_d))
+      best = k;
+  slider_->setValue((int)best);
+  return true;
 }
 
 void WaterColumnWidget::onSlider(int value) {
@@ -556,6 +579,7 @@ QStringList WaterColumnWidget::pick(double across, double depth) {
                            source};
   showPickDialog();
   pick_dialog_->addRow(row);
+  emit pickAdded(row);
   return row;
 }
 

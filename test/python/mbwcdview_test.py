@@ -87,6 +87,19 @@ class MbwcdviewTest(unittest.TestCase):
     self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
     self.assertIn(" 0 failed", result.stdout)
 
+  def test_embed(self):
+    # two copies of the line, because each tool opens its own files
+    a, b = (os.path.join(self.tmp.name, name) for name in ("embed_a", "embed_b"))
+    os.mkdir(a)
+    os.mkdir(b)
+    file_a = S.write_line(a)[0]
+    file_b = S.write_line(b)[0]
+    env = dict(os.environ, QT_QPA_PLATFORM="offscreen")
+    result = subprocess.run([os.environ["MBWCDVIEW_EMBED_TEST"], file_a, file_b, self.tmp.name], capture_output=True,
+                            text=True, cwd=self.tmp.name, env=env, timeout=300)
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+    self.assertIn(" 0 failed", result.stdout)
+
 
 if __name__ == "__main__":
   unittest.main()

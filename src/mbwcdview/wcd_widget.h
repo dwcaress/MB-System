@@ -87,6 +87,7 @@ class WaterColumnWidget : public QWidget {
   bool busy() const { return worker_ != nullptr; }
   bool loaded() const { return !steps_.empty(); }
   void waitUntilIdle();
+  bool showTime(double time_d);  // the ping nearest to this time; false when no file is in or the time is outside of it
   void setStep(int step);
   void showPing(int ping);  // first slider step of water column ping index ping; waits for a file that is loading
   bool saveImage(const QString &path);
@@ -96,6 +97,11 @@ class WaterColumnWidget : public QWidget {
  signals:
   void statusMessage(const QString &message, int timeout_ms);
   void diagnostic(const QString &message);  // the program writes these to stderr
+  void busyChanged(bool busy);
+  void fileOpened(const QString &path);
+  void fileOpenFailed(const QString &path);
+  void pingChanged(int step, int ping, int ping_number, int swath, double time_d);  // ping is the index in the file
+  void pickAdded(const QStringList &row);  // the columns of PickDialog
 
  protected:
   void keyPressEvent(QKeyEvent *event) override;
@@ -103,7 +109,7 @@ class WaterColumnWidget : public QWidget {
  private:
   void showStatus(const QString &message, int timeout_ms = 0);
   void openDialog();
-  void finishOpen(Line line, bool ok, const std::string &message);
+  void finishOpen(const QString &path, Line line, bool ok, const std::string &message);
   void saveImageDialog();
   void redraw();
   void updatePlotSettings();
@@ -122,6 +128,7 @@ class WaterColumnWidget : public QWidget {
   QThread *worker_ = nullptr;
   bool job_had_focus_ = false;
   int pending_ping_ = -1;
+  int reported_step_ = -1;
 
   QWidget *central_;
   WcdView *view_;
