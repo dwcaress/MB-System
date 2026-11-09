@@ -27,6 +27,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdio>
+#include <initializer_list>
 #include <memory>
 #include <utility>
 
@@ -39,6 +40,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QFormLayout>
+#include <QHideEvent>
 #include <QHBoxLayout>
 #include <QInputDialog>
 #include <QLabel>
@@ -47,11 +49,14 @@
 #include <QProgressBar>
 #include <QRadioButton>
 #include <QScreen>
+#include <QShowEvent>
 #include <QSlider>
 #include <QSplitter>
 #include <QThread>
 #include <QToolBar>
+#include <QToolButton>
 #include <QVBoxLayout>
+#include <QWidgetAction>
 
 #include "mb_define.h"
 #include "mb_process.h"
@@ -71,17 +76,16 @@ constexpr int ASK_ABOVE_NODES = 50;  // a longer profile offers to be simplified
 }  // namespace
 
 /*--------------------------------------------------------------------*/
-ScalingDialog::ScalingDialog(QWidget *parent) : QDialog(parent) {
-  setWindowTitle("Plot Scaling");
+ScalingControls::ScalingControls(QWidget *parent) : QWidget(parent) {
   auto *form = new QFormLayout(this);
+  form->setContentsMargins(0, 0, 0, 0);
   maxdepth_ = addRow(form, "Maximum Depth (m):", 1.0, 17000.0, 0);
   velrange_ = addRow(form, "Velocity Range (m/s):", 25.0, 1000.0, 0);
   velcenter_ = addRow(form, "Velocity Center (m/s):", 1300.0, 1700.0, 0);
   resrange_ = addRow(form, "Residual Range (m):", 0.1, 200.0, 1);
-  setMinimumWidth(460);
 }
 
-ScalingDialog::Row ScalingDialog::addRow(QFormLayout *form, const QString &label, double low, double high, int decimals) {
+ScalingControls::Row ScalingControls::addRow(QFormLayout *form, const QString &label, double low, double high, int decimals) {
   Row row;
   row.factor = decimals > 0 ? 10.0 : 1.0;
   row.slider = new QSlider(Qt::Horizontal);
@@ -107,26 +111,35 @@ ScalingDialog::Row ScalingDialog::addRow(QFormLayout *form, const QString &label
   return row;
 }
 
-void ScalingDialog::setRow(const Row &row, double value) {
+void ScalingControls::setRow(const Row &row, double value) {
   const QSignalBlocker block_slider(row.slider), block_spin(row.spin);
   row.spin->setValue(value);
   row.slider->setValue((int)(row.spin->value() * row.factor + 0.5));
 }
 
-void ScalingDialog::setScale(const PlotScale &scale) {
+void ScalingControls::setScale(const PlotScale &scale) {
   setRow(maxdepth_, scale.maxdepth);
   setRow(velrange_, scale.velrange);
   setRow(velcenter_, scale.velcenter);
   setRow(resrange_, scale.resrange);
 }
 
-PlotScale ScalingDialog::scale() const {
+PlotScale ScalingControls::scale() const {
   PlotScale scale;
   scale.maxdepth = maxdepth_.spin->value();
   scale.velrange = velrange_.spin->value();
   scale.velcenter = velcenter_.spin->value();
   scale.resrange = resrange_.spin->value();
   return scale;
+}
+
+ScalingDialog::ScalingDialog(QWidget *parent) : QDialog(parent) {
+  setWindowTitle("Plot Scaling");
+  controls_ = new ScalingControls;
+  auto *layout = new QVBoxLayout(this);
+  layout->addWidget(controls_);
+  setMinimumWidth(460);
+  connect(controls_, &ScalingControls::changed, this, &ScalingDialog::changed);
 }
 
 /*--------------------------------------------------------------------*/
@@ -164,8 +177,9 @@ ActivateDialog::ActivateDialog(const mbvt::Profile &profile, QWidget *parent) : 
 double ActivateDialog::tolerance() const { return simplified_->isChecked() ? tolerance_->value() : 0.0; }
 
 /*--------------------------------------------------------------------*/
-VelocityWidget::VelocityWidget(int verbose, int nthreads, int anglemode, const int btime_i[7], const int etime_i[7], bool quiet)
-    : verbose_(verbose), nthreads_(nthreads), anglemode_(anglemode), quiet_(quiet) {
+VelocityWidget::VelocityWidget(int verbose, int nthreads, int anglemode, const int btime_i[7], const int etime_i[7], bool quiet,
+                               Presentation presentation)
+    : verbose_(verbose), nthreads_(nthreads), anglemode_(anglemode), quiet_(quiet), presentation_(presentation) {
   std::copy(btime_i, btime_i + 7, btime_i_);
   std::copy(etime_i, etime_i + 7, etime_i_);
   title_ = "mbvelocitytool-qt[*]";
@@ -200,6 +214,10 @@ VelocityWidget::VelocityWidget(int verbose, int nthreads, int anglemode, const i
   labels->addWidget(edit_label_, 3);
   labels->addWidget(display_label_, 1);
   auto *layout = new QVBoxLayout(this);
+  if (presentation_ == Presentation::Panel) {
+    layout->setContentsMargins(2, 2, 2, 2);
+    layout->setSpacing(2);
+  }
   layout->addLayout(labels);
   layout->addWidget(plots, 1);
 
@@ -221,10 +239,19 @@ VelocityWidget::VelocityWidget(int verbose, int nthreads, int anglemode, const i
   scaling_dialog_->setScale(scale_);
   connect(scaling_dialog_, &ScalingDialog::changed, this, [this] {
     scale_ = scaling_dialog_->scale();
+    if (panel_scales_ != nullptr)
+      panel_scales_->setScale(scale_);
     applyScale();
   });
 
   createMenus();
+  if (presentation_ == Presentation::Panel) {
+    buildPanelBar(layout);
+    setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    setFocusProxy(velocity_plot_);
+    for (QWidget *plot : std::initializer_list<QWidget *>{velocity_plot_, residual_plot_, raypath_plot_})
+      plot->setMinimumSize(160, 100);
+  }
   applyScale();
   updateState();
 
@@ -298,6 +325,67 @@ void VelocityWidget::createMenus() {
   QMenu *help = add_menu("&Help");
   QAction *about = help->addAction("&About mbvelocitytool-qt", this, &VelocityWidget::showAbout);
   about->setMenuRole(QAction::AboutRole);
+}
+
+void VelocityWidget::buildPanelBar(QBoxLayout *layout) {
+  auto *bar = new QToolBar;
+  bar->setObjectName("panel_bar");
+  bar->setToolButtonStyle(Qt::ToolButtonTextOnly);
+  const auto popup_button = [bar](const char *text, const char *name, QMenu *menu) {
+    auto *button = new QToolButton;
+    button->setText(text);
+    button->setObjectName(name);
+    button->setMenu(menu);
+    button->setPopupMode(QToolButton::InstantPopup);
+    button->setFocusPolicy(Qt::NoFocus);
+    bar->addWidget(button);
+  };
+
+  auto *panel_menu = new QMenu(this);
+  for (QMenu *menu : menus_)
+    panel_menu->addMenu(menu);
+  popup_button("Menu", "panel_menu", panel_menu);
+
+  panel_scales_ = new ScalingControls;
+  panel_scales_->setObjectName("panel_scales_controls");
+  panel_scales_->setContentsMargins(8, 8, 8, 8);
+  panel_scales_->setScale(scale_);
+  connect(panel_scales_, &ScalingControls::changed, this, [this] {
+    scale_ = panel_scales_->scale();
+    scaling_dialog_->setScale(scale_);
+    applyScale();
+  });
+  auto *scales_menu = new QMenu(this);
+  auto *scales_action = new QWidgetAction(scales_menu);
+  scales_action->setDefaultWidget(panel_scales_);
+  scales_menu->addAction(scales_action);
+  popup_button("Scales", "panel_scales", scales_menu);
+
+  bar->addAction(reprocess_action_);
+  layout->insertWidget(0, bar);
+}
+
+/* the dialogs are windows of their own: they go and come with the panel */
+void VelocityWidget::hideEvent(QHideEvent *event) {
+  if (presentation_ == Presentation::Panel && !event->spontaneous()) {
+    hidden_dialogs_.clear();
+    for (QDialog *dialog : findChildren<QDialog *>(QString(), Qt::FindDirectChildrenOnly)) {
+      if (dialog->isVisible()) {
+        hidden_dialogs_.push_back(dialog);
+        dialog->hide();
+      }
+    }
+  }
+  QWidget::hideEvent(event);
+}
+
+void VelocityWidget::showEvent(QShowEvent *event) {
+  QWidget::showEvent(event);
+  if (!event->spontaneous()) {
+    for (QDialog *dialog : hidden_dialogs_)
+      dialog->show();
+    hidden_dialogs_.clear();
+  }
 }
 
 void VelocityWidget::addToolActions(QToolBar *bar) {
@@ -611,6 +699,8 @@ bool VelocityWidget::openSwath(const QString &path, int format) {
              scale_.maxdepth = 1.25 * swath_.bath_max;
              scale_.resrange = std::min(std::max(0.02 * swath_.bath_max, 0.1), 200.0);
              scaling_dialog_->setScale(scale_);
+             if (panel_scales_ != nullptr)
+               panel_scales_->setScale(scale_);
              applyScale();
            }
            setTitle("mbvelocitytool-qt - " + file_name(swath_.path) + "[*]");

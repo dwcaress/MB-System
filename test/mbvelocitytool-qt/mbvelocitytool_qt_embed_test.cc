@@ -33,6 +33,7 @@
 #include <QAbstractButton>
 #include <QApplication>
 #include <QDockWidget>
+#include <QDoubleSpinBox>
 #include <QElapsedTimer>
 #include <QFile>
 #include <QLabel>
@@ -43,6 +44,8 @@
 #include <QProgressBar>
 #include <QStatusBar>
 #include <QTimer>
+#include <QToolBar>
+#include <QToolButton>
 
 #include <cstdio>
 #include <initializer_list>
@@ -71,6 +74,7 @@ int checks = 0, failures = 0;
 
 const int TIME_BEGIN[7] = {1962, 2, 21, 10, 30, 0, 0};
 const int TIME_END[7] = {2062, 2, 21, 10, 30, 0, 0};
+const int PANEL_MAX_MIN_WIDTH = 420, PANEL_MAX_MIN_HEIGHT = 360;
 
 struct Notes {
   int titles = 0, statuses = 0, opened = 0, failed = 0, busy_changes = 0, edits = 0, residuals = 0, saves = 0, opened_format = -1;
@@ -180,7 +184,7 @@ int main(int argc, char **argv) {
   QMainWindow host;
   host.setWindowTitle("host");
   auto *a = new VelocityWidget(0, 0, MBP_ANGLES_SNELL, TIME_BEGIN, TIME_END, false);
-  auto *b = new VelocityWidget(0, 0, MBP_ANGLES_SNELL, TIME_BEGIN, TIME_END, false);
+  auto *b = new VelocityWidget(0, 0, MBP_ANGLES_SNELL, TIME_BEGIN, TIME_END, false, mbvt::Presentation::Panel);
   auto *dock_a = new QDockWidget("A");
   auto *dock_b = new QDockWidget("B");
   dock_a->setWidget(a);
@@ -192,7 +196,6 @@ int main(int argc, char **argv) {
   watch(a, na);
   watch(b, nb);
   a->setShortcutContext(Qt::WidgetWithChildrenShortcut);
-  b->setShortcutContext(Qt::WidgetWithChildrenShortcut);
   host.show();
   QApplication::processEvents();
 
@@ -206,7 +209,43 @@ int main(int argc, char **argv) {
   CHECK(a->pointerLabel()->isVisible());
   CHECK(!a->progressBar()->isVisible());
 
+  /* the panel form */
+  CHECK(b->minimumSizeHint().width() <= PANEL_MAX_MIN_WIDTH);
+  CHECK(b->minimumSizeHint().height() <= PANEL_MAX_MIN_HEIGHT);
+  CHECK(b->focusProxy() == b->velocityPlot());
+  CHECK(find_action(b, "&Reprocess")->shortcutContext() == Qt::WidgetWithChildrenShortcut);
+  CHECK(b->findChild<QToolBar *>("panel_bar")->isVisible());
+  CHECK(a->findChild<QToolBar *>("panel_bar") == nullptr);
+  CHECK(b->findChild<QToolButton *>("panel_menu")->menu()->actions().size() == 4);
+  CHECK(b->findChild<QToolButton *>("panel_scales") != nullptr);
+  CHECK(b->pointerLabel()->isVisible());
+
+  /* its two scale controls follow each other */
+  {
+    const auto popup = b->findChild<QWidget *>("panel_scales_controls")->findChildren<QDoubleSpinBox *>();
+    const auto dialog = b->scalingDialog()->findChildren<QDoubleSpinBox *>();
+    CHECK(popup.size() == 4 && dialog.size() == 4);
+    popup[0]->setValue(1234.0);
+    CHECK(dialog[0]->value() == 1234.0);
+    CHECK(b->scalingDialog()->scale().maxdepth == 1234.0);
+    dialog[0]->setValue(2345.0);
+    CHECK(popup[0]->value() == 2345.0);
+  }
+
+  /* its dialog goes and comes with it */
+  b->scalingDialog()->show();
+  QApplication::processEvents();
+  CHECK(b->scalingDialog()->isVisible());
+  dock_b->hide();
+  QApplication::processEvents();
+  CHECK(!b->scalingDialog()->isVisible());
+  dock_b->show();
+  QApplication::processEvents();
+  CHECK(b->scalingDialog()->isVisible());
+  b->scalingDialog()->hide();
+
   /* loading at the same time, without questions */
+  const QString popup_before = QString::number(b->findChild<QWidget *>("panel_scales_controls")->findChildren<QDoubleSpinBox *>()[0]->value());
   CHECK(a->openSwath(a_path, 0));
   CHECK(b->openSwath(b_path, 0));
   CHECK(na.busy && nb.busy);
@@ -227,6 +266,9 @@ int main(int argc, char **argv) {
   CHECK(same(a->residuals(), alone));
   CHECK(same(b->residuals(), alone));
   CHECK(!a->failed());
+  /* the plots follow the depth of the new data, and so does the popup */
+  CHECK(QString::number(b->findChild<QWidget *>("panel_scales_controls")->findChildren<QDoubleSpinBox *>()[0]->value()) != popup_before);
+  CHECK(b->findChild<QWidget *>("panel_scales_controls")->findChildren<QDoubleSpinBox *>()[0]->value() == b->scalingDialog()->scale().maxdepth);
 
   /* a file that cannot be read leaves the tool as it was */
   CHECK(a->openSwath(dir + "/missing.kmall", 0));

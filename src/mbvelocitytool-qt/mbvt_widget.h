@@ -39,6 +39,7 @@
 
 class QAction;
 class QActionGroup;
+class QBoxLayout;
 class QDoubleSpinBox;
 class QFormLayout;
 class QLabel;
@@ -51,6 +52,9 @@ class QToolBar;
 
 namespace mbvt {
 
+/* Window: the full tool, for the window of the program. Panel: compact, for a part of another program's window. */
+enum class Presentation { Window, Panel };
+
 struct PlotScale {
   double maxdepth = 3000.0;
   double velrange = 500.0;
@@ -58,11 +62,11 @@ struct PlotScale {
   double resrange = 200.0;
 };
 
-/* modeless dialog with the sliders of the Plot Scaling button of mbvelocitytool */
-class ScalingDialog : public QDialog {
+/* the sliders of the Plot Scaling button of mbvelocitytool */
+class ScalingControls : public QWidget {
   Q_OBJECT
  public:
-  explicit ScalingDialog(QWidget *parent = nullptr);
+  explicit ScalingControls(QWidget *parent = nullptr);
   void setScale(const PlotScale &scale);
   PlotScale scale() const;
 
@@ -79,6 +83,21 @@ class ScalingDialog : public QDialog {
   static void setRow(const Row &row, double value);
 
   Row maxdepth_, velrange_, velcenter_, resrange_;
+};
+
+/* modeless dialog with the sliders */
+class ScalingDialog : public QDialog {
+  Q_OBJECT
+ public:
+  explicit ScalingDialog(QWidget *parent = nullptr);
+  void setScale(const PlotScale &scale) { controls_->setScale(scale); }
+  PlotScale scale() const { return controls_->scale(); }
+
+ signals:
+  void changed();
+
+ private:
+  ScalingControls *controls_;
 };
 
 /* how a long display profile becomes the edit profile: all of its nodes, or the fewer that keep its shape */
@@ -99,7 +118,8 @@ class VelocityWidget : public QWidget {
 
  public:
   /* quiet: errors go to stderr instead of dialogs, and nothing asks anything */
-  VelocityWidget(int verbose, int nthreads, int anglemode, const int btime_i[7], const int etime_i[7], bool quiet);
+  VelocityWidget(int verbose, int nthreads, int anglemode, const int btime_i[7], const int etime_i[7], bool quiet,
+                 Presentation presentation = Presentation::Window);
   ~VelocityWidget() override;
 
   /* for the window around the tool */
@@ -155,8 +175,13 @@ class VelocityWidget : public QWidget {
   void residualsChanged();
   void fileSaved(const QString &path);
 
+ protected:
+  void hideEvent(QHideEvent *event) override;
+  void showEvent(QShowEvent *event) override;
+
  private:
   void createMenus();
+  void buildPanelBar(QBoxLayout *layout);
   void setTitle(const QString &title);
   void setEditModified(bool modified);
   void runJob(const QString &message, std::function<void()> work, std::function<void()> done);
@@ -177,6 +202,7 @@ class VelocityWidget : public QWidget {
   int verbose_, nthreads_, anglemode_;
   int btime_i_[7], etime_i_[7];
   bool quiet_;
+  Presentation presentation_;
   bool failed_ = false;
   QString title_;
 
@@ -201,6 +227,8 @@ class VelocityWidget : public QWidget {
   QLabel *swath_label_, *edit_label_, *display_label_, *pointer_label_, *result_label_;
   QProgressBar *progress_;
   ScalingDialog *scaling_dialog_;
+  ScalingControls *panel_scales_ = nullptr;
+  QList<QDialog *> hidden_dialogs_;
   QList<QMenu *> menus_;
   QAction *show_hidden_action_, *open_display_action_, *scaling_action_;
   QAction *open_swath_action_, *open_swath_format_action_, *save_edit_action_, *save_swath_action_, *save_residuals_action_,
