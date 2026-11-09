@@ -33,11 +33,20 @@
 #include <QApplication>
 #include <QCheckBox>
 #include <QDockWidget>
+#include <QDoubleSpinBox>
 #include <QElapsedTimer>
+#include <QHideEvent>
+#include <QKeyEvent>
+#include <QLabel>
 #include <QMainWindow>
+#include <QMenu>
 #include <QMenuBar>
+#include <QPushButton>
+#include <QShowEvent>
 #include <QSlider>
 #include <QStatusBar>
+#include <QToolBar>
+#include <QToolButton>
 
 #include <cstdio>
 #include <cstring>
@@ -102,6 +111,8 @@ void wait_for(std::initializer_list<WaterColumnWidget *> tools) {
   QApplication::processEvents();
 }
 
+const int PANEL_MAX_MIN_WIDTH = 420, PANEL_MAX_MIN_HEIGHT = 360;
+
 const wcd::PlotData &data_of(WaterColumnWidget *v) { return v->findChild<wcd::WcdView *>()->plot().data(); }
 
 /* NaN marks the cells with nothing to draw, so the values are compared as bytes */
@@ -111,6 +122,13 @@ bool same(const std::vector<float> &x, const std::vector<float> &y) {
 
 bool same_plot(const wcd::PlotData &x, const wcd::PlotData &y) {
   return same(x.across, y.across) && same(x.depth, y.depth) && same(x.amplitude, y.amplitude);
+}
+
+void wait_ms(int ms) {
+  QElapsedTimer timer;
+  timer.start();
+  while (timer.elapsed() < ms)
+    QApplication::processEvents(QEventLoop::AllEvents, 10);
 }
 
 QCheckBox *box(WaterColumnWidget *v, const QString &text) {
@@ -149,7 +167,7 @@ int main(int argc, char **argv) {
   QMainWindow host;
   host.setWindowTitle("host");
   auto *a = new WaterColumnWidget;
-  auto *b = new WaterColumnWidget;
+  auto *b = new WaterColumnWidget(wcd::Presentation::Panel);
   auto *dock_a = new QDockWidget("A");
   auto *dock_b = new QDockWidget("B");
   dock_a->setWidget(a);
@@ -167,6 +185,16 @@ int main(int argc, char **argv) {
   CHECK(host.findChild<QMenuBar *>() == nullptr);
   CHECK(host.findChild<QStatusBar *>() == nullptr);
   CHECK(!a->showTime(0.0));
+
+  /* the panel form */
+  CHECK(b->minimumSizeHint().width() <= PANEL_MAX_MIN_WIDTH);
+  CHECK(b->minimumSizeHint().height() <= PANEL_MAX_MIN_HEIGHT);
+  CHECK(b->findChild<QToolBar *>("panel_bar") != nullptr);
+  CHECK(a->findChild<QToolBar *>("panel_bar") == nullptr);
+  CHECK(b->findChild<QToolButton *>("panel_scales") != nullptr);
+  CHECK(b->findChild<QWidget *>("panel_scales_controls")->findChildren<QDoubleSpinBox *>().size() == 6);
+  CHECK(b->focusProxy() == b->findChild<wcd::WcdView *>());
+  CHECK(box(b, "Ray trace") != nullptr && box(a, "Ray trace (SVP)") != nullptr);
 
   /* loading at the same time */
   CHECK(a->openFile(a_path));
@@ -190,6 +218,21 @@ int main(int argc, char **argv) {
   auto *slider = a->findChild<QSlider *>();
   const int last = slider->maximum();
   CHECK(last > 2);
+
+  /* the panel shows the messages of the tool and the ping */
+  wait_ms(1100);
+  CHECK(b->findChild<QLabel *>("panel_status")->text().startsWith("Nav summary"));
+
+  /* keys reach a panel through the plot */
+  {
+    QKeyEvent right(QEvent::KeyPress, Qt::Key_Right, Qt::NoModifier);
+    QApplication::sendEvent(b, &right);
+    CHECK(nb.step == 1);
+    QKeyEvent left(QEvent::KeyPress, Qt::Key_Left, Qt::NoModifier);
+    QApplication::sendEvent(b, &left);
+    CHECK(nb.step == 0);
+    nb.pings = 1;
+  }
 
   /* moving one tool moves only that one */
   a->setStep(last);
@@ -230,6 +273,32 @@ int main(int argc, char **argv) {
   CHECK(na.picks == 1 && na.pick == row && nb.picks == 0);
   CHECK(a->findChild<wcd::PickDialog *>()->isVisible());
   CHECK(b->findChild<wcd::PickDialog *>() == nullptr);
+
+  /* the pick table of a panel goes and comes with it, and a hidden panel does not replay */
+  {
+    b->setStep(0);
+    const wcd::PlotData &panel_data = data_of(b);
+    size_t panel_cell = 0;
+    while (panel_cell < panel_data.amplitude.size() && !(panel_data.amplitude[panel_cell] == panel_data.amplitude[panel_cell] && panel_data.across[panel_cell] == panel_data.across[panel_cell] && panel_data.depth[panel_cell] == panel_data.depth[panel_cell]))
+      panel_cell++;
+    CHECK(!b->pick(panel_data.across[panel_cell], panel_data.depth[panel_cell]).isEmpty());
+    auto *dialog = b->findChild<wcd::PickDialog *>();
+    CHECK(dialog != nullptr && dialog->isVisible());
+    QPushButton *replay = nullptr;
+    for (QPushButton *button : b->findChildren<QPushButton *>())
+      if (button->text() == "Replay")
+        replay = button;
+    replay->click();
+    CHECK(replay->isChecked());
+    QHideEvent hide_event;
+    QApplication::sendEvent(b, &hide_event);
+    CHECK(!dialog->isVisible());
+    CHECK(!replay->isChecked());
+    QShowEvent show_event;
+    QApplication::sendEvent(b, &show_event);
+    CHECK(dialog->isVisible());
+    dialog->hide();
+  }
 
   /* a file that cannot be read */
   const QString missing = dir + "/missing.kmall";

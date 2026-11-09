@@ -29,6 +29,7 @@
 #include <vector>
 
 #include <QDialog>
+#include <QList>
 #include <QSlider>
 #include <QString>
 #include <QStringList>
@@ -75,12 +76,15 @@ class PickDialog : public QDialog {
   QTableWidget *table_;
 };
 
+/* Window: the full tool, for the window of the program. Panel: compact, for a part of another program's window. */
+enum class Presentation { Window, Panel };
+
 /* The tool: the plot, its controls and the data. WaterColumnWindow puts it in the window of the program. */
 class WaterColumnWidget : public QWidget {
   Q_OBJECT
 
  public:
-  explicit WaterColumnWidget(QWidget *parent = nullptr);
+  explicit WaterColumnWidget(Presentation presentation = Presentation::Window, QWidget *parent = nullptr);
   ~WaterColumnWidget() override;
 
   bool openFile(const QString &path);  // runs in the background; false when another file is still loading
@@ -105,6 +109,8 @@ class WaterColumnWidget : public QWidget {
 
  protected:
   void keyPressEvent(QKeyEvent *event) override;
+  void hideEvent(QHideEvent *event) override;
+  void showEvent(QShowEvent *event) override;
 
  private:
   void showStatus(const QString &message, int timeout_ms = 0);
@@ -130,7 +136,9 @@ class WaterColumnWidget : public QWidget {
   int pending_ping_ = -1;
   int reported_step_ = -1;
 
+  Presentation presentation_;
   QWidget *central_;
+  QList<QDialog *> hidden_dialogs_;
   WcdView *view_;
   QLabel *file_name_, *meta_, *step_label_;
   QCheckBox *bottom_, *wc_bottom_, *raytrace_, *pick_;
