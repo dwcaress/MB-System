@@ -51,6 +51,7 @@ class WcdView : public QOpenGLWidget {
   void mousePressEvent(QMouseEvent *event) override;
 
  private:
+  void releaseGL();
   wcd::WcdPlot plot_;
   std::unique_ptr<wcd::SwathGL> gl_;
 };

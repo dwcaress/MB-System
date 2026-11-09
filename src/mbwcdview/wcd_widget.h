@@ -42,6 +42,7 @@ class QDoubleSpinBox;
 class QLabel;
 class QPushButton;
 class QTableWidget;
+class QThread;
 class QTimer;
 
 namespace wcd {
@@ -80,9 +81,14 @@ class WaterColumnWidget : public QWidget {
 
  public:
   explicit WaterColumnWidget(QWidget *parent = nullptr);
-  bool openFile(const QString &path);
+  ~WaterColumnWidget() override;
+
+  bool openFile(const QString &path);  // runs in the background; false when another file is still loading
+  bool busy() const { return worker_ != nullptr; }
+  bool loaded() const { return !steps_.empty(); }
+  void waitUntilIdle();
   void setStep(int step);
-  void showPing(int ping);  // first slider step of water column ping index ping
+  void showPing(int ping);  // first slider step of water column ping index ping; waits for a file that is loading
   bool saveImage(const QString &path);
   QStringList pick(double across, double depth);  // for tests: pick the cell nearest to a point
   QString title() const;
@@ -97,6 +103,7 @@ class WaterColumnWidget : public QWidget {
  private:
   void showStatus(const QString &message, int timeout_ms = 0);
   void openDialog();
+  void finishOpen(Line line, bool ok, const std::string &message);
   void saveImageDialog();
   void redraw();
   void updatePlotSettings();
@@ -112,7 +119,11 @@ class WaterColumnWidget : public QWidget {
   std::vector<std::pair<int, int>> steps_;  // (water column ping, swath) per slider step
   int current_ = 0;
   QString file_label_;
+  QThread *worker_ = nullptr;
+  bool job_had_focus_ = false;
+  int pending_ping_ = -1;
 
+  QWidget *central_;
   WcdView *view_;
   QLabel *file_name_, *meta_, *step_label_;
   QCheckBox *bottom_, *wc_bottom_, *raytrace_, *pick_;

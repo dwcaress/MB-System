@@ -126,16 +126,26 @@ int main(int argc, char **argv) {
   CHECK(window.windowTitle().startsWith("mbwcdview"));
   CHECK(status->currentMessage() == "Ready");
   CHECK(has_label(window, "No file loaded"));
+  CHECK(!w.busy() && !w.loaded());
   CHECK(!w.saveImage(dir + "/empty.png"));
   CHECK(w.pick(0.0, 100.0).isEmpty());
   CHECK(status->currentMessage().startsWith("Nothing to pick"));
 
   /* a file that cannot be read */
-  CHECK(!w.openFile(dir + "/missing.kmall"));
+  CHECK(w.openFile(dir + "/missing.kmall"));
+  CHECK(w.busy());
+  w.waitUntilIdle();
+  CHECK(!w.busy() && !w.loaded());
   CHECK(status->currentMessage().startsWith("Cannot read missing.kmall"));
 
-  /* a line */
+  /* a line, loaded in the background with the controls off */
   CHECK(w.openFile(kmall));
+  CHECK(w.busy());
+  CHECK(!slider->isEnabled() && !button(window, "Save Image")->isEnabled());
+  CHECK(!w.openFile(kmall));
+  w.waitUntilIdle();
+  CHECK(!w.busy() && w.loaded());
+  CHECK(slider->isEnabled() && button(window, "Save Image")->isEnabled());
   const int last = slider->maximum();
   CHECK(last > 2);
   CHECK(slider->value() == 0);
@@ -256,8 +266,15 @@ int main(int argc, char **argv) {
   CHECK(replay->isChecked());
   CHECK(w.openFile(kmall));
   CHECK(!replay->isChecked());
+  w.waitUntilIdle();
   CHECK(slider->value() == 0 && slider->maximum() == last);
   CHECK(has_label(window, QString("0 / %1").arg(last)));
+
+  /* a ping asked for while the file loads is shown when it is in */
+  CHECK(w.openFile(kmall));
+  w.showPing(2);
+  w.waitUntilIdle();
+  CHECK(slider->value() > 1);
 
   window.close();
   CHECK(!window.isVisible());

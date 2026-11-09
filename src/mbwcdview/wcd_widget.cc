@@ -27,12 +27,15 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <memory>
+#include <utility>
 
 #include <QAbstractItemView>
 #include <QApplication>
 #include <QCheckBox>
 #include <QDateTime>
 #include <QDoubleSpinBox>
+#include <QEventLoop>
 #include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -43,6 +46,7 @@
 #include <QPushButton>
 #include <QTableWidget>
 #include <QTextStream>
+#include <QThread>
 #include <QTimeZone>
 #include <QTimer>
 #include <QVBoxLayout>
@@ -156,7 +160,13 @@ void PickDialog::clearAndClose() {
 /*--------------------------------------------------------------------*/
 WaterColumnWidget::WaterColumnWidget(QWidget *parent) : QWidget(parent) {
   setFocusPolicy(Qt::StrongFocus);
-  auto *layout = new QVBoxLayout(this);
+
+  /* the controls are disabled while a file loads, but not the pick table, which is a child of this widget */
+  central_ = new QWidget;
+  auto *outer = new QVBoxLayout(this);
+  outer->setContentsMargins(0, 0, 0, 0);
+  outer->addWidget(central_);
+  auto *layout = new QVBoxLayout(central_);
 
   /* header */
   auto *header = new QHBoxLayout;
@@ -239,6 +249,17 @@ WaterColumnWidget::WaterColumnWidget(QWidget *parent) : QWidget(parent) {
   layout->addLayout(slider_row);
 }
 
+WaterColumnWidget::~WaterColumnWidget() {
+  /* the thread writes to data held by its lambda and posts to this object */
+  if (worker_ != nullptr)
+    worker_->wait();
+}
+
+void WaterColumnWidget::waitUntilIdle() {
+  while (worker_ != nullptr)
+    QCoreApplication::processEvents(QEventLoop::WaitForMoreEvents);
+}
+
 QString WaterColumnWidget::title() const { return "mbwcdview - water column through MB-System MBIO"; }
 
 void WaterColumnWidget::showStatus(const QString &message, int timeout_ms) { emit statusMessage(message, timeout_ms); }
@@ -251,30 +272,61 @@ void WaterColumnWidget::openDialog() {
 }
 
 bool WaterColumnWidget::openFile(const QString &path) {
+  if (worker_ != nullptr)
+    return false;
   replay_->setChecked(false);
   file_label_ = QFileInfo(path).fileName();
   file_name_->setText(file_label_);
   showStatus("Reading survey file (navigation, bathymetry)...");
-  QApplication::processEvents();
-  int last = -1;
-  auto progress = [&](int npings, double fraction) {
-    const int pct = (int)(100.0 * fraction);
-    if (pct != last) {
-      last = pct;
-      showStatus(QString("Loading pings... %1% (%2 pings)").arg(pct).arg(npings));
-      QApplication::processEvents();
-    }
-  };
-  std::string message;
   line_ = wcd::Line();
   steps_.clear();
-  if (!line_.load(path.toStdString(), progress, &message) || !line_.has_wc) {
+
+  struct Load {
+    wcd::Line line;
+    std::string message;
+    bool ok = false;
+  };
+  auto load = std::make_shared<Load>();
+  const std::string file = path.toStdString();
+  worker_ = QThread::create([this, load, file] {
+    int last = -1;
+    const wcd::Progress progress = [this, &last](int npings, double fraction) {
+      const int pct = (int)(100.0 * fraction);
+      if (pct != last) {
+        last = pct;
+        QMetaObject::invokeMethod(
+            this, [this, pct, npings] { showStatus(QString("Loading pings... %1% (%2 pings)").arg(pct).arg(npings)); }, Qt::QueuedConnection);
+      }
+    };
+    load->ok = load->line.load(file, progress, &load->message);
+  });
+  worker_->setParent(this);
+  connect(worker_, &QThread::finished, this, [this, load] {
+    worker_->deleteLater();
+    worker_ = nullptr;
+    central_->setEnabled(true);
+    /* disabling the controls took the focus away, and the keys need it */
+    if (job_had_focus_ || QApplication::focusWidget() == nullptr)
+      setFocus();
+    finishOpen(std::move(load->line), load->ok, load->message);
+  });
+  const QWidget *focus = QApplication::focusWidget();
+  job_had_focus_ = focus != nullptr && (focus == this || isAncestorOf(focus));
+  central_->setEnabled(false);
+  worker_->start();
+  return true;
+}
+
+void WaterColumnWidget::finishOpen(Line line, bool ok, const std::string &message) {
+  line_ = std::move(line);
+  const int ping = pending_ping_;
+  pending_ping_ = -1;
+  if (!ok || !line_.has_wc) {
     showStatus(line_.has_survey ? "No water column data found."
-                                              : QString("Cannot read %1: %2").arg(file_label_,
-                                                                                    QString::fromStdString(message)));
+                                : QString("Cannot read %1: %2").arg(file_label_, QString::fromStdString(message)));
     view_->plot().setData(wcd::PlotData());
     view_->update();
-    return false;
+    return;
   }
   emit diagnostic(QString("survey=%1 water column=%2").arg(QString::fromStdString(line_.kmall), QString::fromStdString(line_.kmwcd)));
   for (size_t i = 0; i < line_.wc.size(); i++)
@@ -325,7 +377,8 @@ bool WaterColumnWidget::openFile(const QString &path) {
           .arg(wc.has_fill ? QString::number(wc.fill_value, 'f', 1) : QString("none"));
   emit diagnostic(summary);
   QTimer::singleShot(900, this, [this, summary]() { showStatus(summary, 6000); });
-  return true;
+  if (ping >= 0)
+    showPing(ping);
 }
 
 /*--------------------------------------------------------------------*/
@@ -360,6 +413,10 @@ void WaterColumnWidget::redraw() {
 void WaterColumnWidget::setStep(int step) { slider_->setValue(step); }
 
 void WaterColumnWidget::showPing(int ping) {
+  if (worker_ != nullptr) {
+    pending_ping_ = ping;
+    return;
+  }
   for (size_t k = 0; k < steps_.size(); k++) {
     if (steps_[k].first >= ping) {
       slider_->setValue((int)k);
