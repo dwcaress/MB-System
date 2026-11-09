@@ -1,0 +1,190 @@
+/*--------------------------------------------------------------------
+ *    The MB-system:  mbne_widget.h  9/11/2026
+ *
+ *    Copyright (c) 2026 by
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *
+ *    MB-System was created by Caress and Chayes in 1992 at the
+ *      Lamont-Doherty Earth Observatory
+ *      Columbia University
+ *      Palisades, NY 10964
+ *
+ *    See README.md file for copying and redistribution conditions.
+ *--------------------------------------------------------------------*/
+
+#ifndef MBNAVEDIT_QT_MBNE_WIDGET_H
+#define MBNAVEDIT_QT_MBNE_WIDGET_H
+
+#include <functional>
+#include <string>
+#include <vector>
+
+#include <QList>
+#include <QWidget>
+
+#include "mbne_canvas.h"
+#include "mbne_core.h"
+#include "mbne_panels.h"
+
+class QAction;
+class QButtonGroup;
+class QComboBox;
+class QDialog;
+class QDoubleSpinBox;
+class QLabel;
+class QLineEdit;
+class QMenu;
+class QPushButton;
+class QRadioButton;
+class QScrollArea;
+class QSpinBox;
+class QTableWidget;
+class QThread;
+class QTimer;
+
+namespace mbne {
+
+/* The whole navigation editor as a widget. Before deleting it with a file open, call
+   prepareToClose: deleting it discards edits that have not been saved. */
+class NavEditWidget : public QWidget {
+  Q_OBJECT
+
+ public:
+  explicit NavEditWidget(QWidget *parent = nullptr);
+  ~NavEditWidget() override;
+
+  QSize sizeHint() const override { return QSize(1300, 950); }
+
+  Session &session() { return session_; }
+  Canvas *canvas() { return canvas_; }
+  bool busy() const { return worker_ != nullptr; }
+
+  /* the command line */
+  void addInput(const std::string &path, int format);
+  void setBrowse(bool browse);
+  void setRunMbprocess(bool run) { run_mbprocess_ = run; }
+  void setGuiMode(bool gui_mode) { session_.gui_mode = gui_mode; }
+  void loadFirstFile();
+
+  /* These return false if the editor cannot do it now; the work of openFile runs in the background. */
+  bool openFile(const QString &path, int format);
+  bool save();
+
+  /* for the surrounding window */
+  QList<QMenu *> menus() const { return menus_; }
+  QString title() const { return title_; }
+  /* True if the editor may close now. Otherwise it stays, because it is busy, the user
+     cancelled, or the edits are being saved; closed_later is then called once they are. */
+  bool prepareToClose(std::function<void()> closed_later);
+
+ signals:
+  void titleChanged(const QString &title);
+  void unsavedChanged(bool unsaved);
+  void statusMessage(const QString &text, int timeout_ms);
+  void busyChanged(bool busy);
+  void closeRequested();  // the Quit button, or the last file is done in GUI mode
+
+ private:
+  struct ShowToggle {
+    QAction *action;
+    bool Show::*field;
+  };
+
+  void buildControls();
+  void buildMenus();
+  void buildFileListDialog();
+  void buildTimeSteppingDialog();
+  void buildModelDialog();
+  void buildTimeToolDialogs();
+  void buildOffsetDialog();
+  void buildDespikeDialog();
+  QDialog *newDialog(const QString &title, const QString &name);
+  QPushButton *newButton(const QString &text, const QString &name, std::function<void()> action);
+
+  void setWorking(bool working);
+  void runJob(const QString &message, std::function<void()> work, std::function<void()> done);
+  void startMbprocess();
+  void showError(const QString &a, const QString &b, const QString &c);
+  void openDialog();
+  void loadFile(int index);
+  void afterCurrentFileClosed(std::function<void()> next);
+  void doneOrNextFile();
+  void nextBuffer();
+  void editSelectedFile();
+  void removeSelectedFile();
+  void about();
+
+  void syncControls();
+  void syncFileList();
+  void edit(std::function<int()> action);
+  void move(std::function<int()> action);
+  void applyModel(bool mode_changed);
+  void showChanged(bool Show::*field, bool on);
+  void sliderChanged(int value);
+  void runDespike();
+  void interpolateSpikes();
+
+  Session session_;
+  QThread *worker_ = nullptr;
+  std::vector<InputFile> files_;
+  int current_file_ = -1;
+  bool browse_ = false;
+  bool run_mbprocess_ = false;
+  std::string saved_path_;
+  QList<QMenu *> menus_;
+  QString title_;
+  bool unsaved_ = false;
+  bool quiet_ = false;
+
+  QWidget *central_;
+  Canvas *canvas_;
+  QScrollArea *scroll_;
+  TimeSlider *slider_;
+  QLabel *position_;
+  QButtonGroup *mode_group_;
+  QPushButton *pick_zoom_;
+  QList<QWidget *> need_file_;
+  QAction *open_action_, *filelist_action_, *save_action_, *browse_action_, *undo_action_, *redo_action_;
+  QList<QAction *> need_file_actions_;
+  std::vector<ShowToggle> show_toggles_;
+
+  QDialog *filelist_dialog_ = nullptr;
+  QTableWidget *filelist_;
+  QRadioButton *filelist_edit_, *filelist_browse_;
+  QTimer *filelist_timer_;
+
+  QDialog *timestep_dialog_ = nullptr;
+  ScaleControl *time_span_, *time_step_;
+
+  QDialog *model_dialog_ = nullptr;
+  QComboBox *model_mode_;
+  ScaleControl *model_window_;
+  QSpinBox *drift_lon_, *drift_lat_;
+  QLineEdit *weight_speed_, *weight_acceleration_;
+
+  QDialog *time_interpolation_dialog_ = nullptr;
+  QDialog *delete_bad_dialog_ = nullptr;
+  QPushButton *time_interpolation_apply_, *delete_bad_apply_;
+
+  QDialog *offset_dialog_ = nullptr;
+  QDoubleSpinBox *offset_lon_, *offset_lat_;
+
+  QDialog *despike_dialog_ = nullptr;
+  QDoubleSpinBox *despike_window_, *despike_threshold_;
+  QLabel *despike_result_;
+  int despike_found_ = 0;
+};
+
+}  // namespace mbne
+
+#endif

@@ -47,6 +47,47 @@ bool file_exists(const std::string &path) {
 
 }  // namespace
 
+/*--------------------------------------------------------------------*/
+bool parse_input(const std::string &path, int form, std::vector<InputFile> &files, std::string &message) {
+  mb_path file;
+  if (path.size() >= sizeof(file)) {
+    message = "File name too long: " + path;
+    return false;
+  }
+  snprintf(file, sizeof(file), "%s", path.c_str());
+
+  int format = form;
+  int error = MB_ERROR_NO_ERROR;
+  if (form == 0) {
+    mb_path root;
+    if (mb_get_format(0, file, root, &format, &error) != MB_SUCCESS)
+      format = 0;
+  }
+  if (format > 0) {
+    files.push_back({path, format});
+    return true;
+  }
+  if (format != -1) {
+    message = "Unable to tell the MBIO format of " + path;
+    return false;
+  }
+
+  void *datalist = nullptr;
+  error = MB_ERROR_NO_ERROR;
+  if (mb_datalist_open(0, &datalist, file, MB_DATALIST_LOOK_NO, &error) != MB_SUCCESS) {
+    message = "Unable to open datalist " + path;
+    return false;
+  }
+  int filestatus, fileformat;
+  double weight;
+  mb_path fileraw, fileprocessed, dfile;
+  while (mb_datalist_read2(0, datalist, &filestatus, fileraw, fileprocessed, dfile, &fileformat, &weight, &error) == MB_SUCCESS)
+    files.push_back({fileraw, fileformat});
+  mb_datalist_close(0, &datalist, &error);
+  return true;
+}
+
+/*--------------------------------------------------------------------*/
 Session::Session() {
   mb_uselockfiles(verbose, &uselockfiles_);
   recountPlots();
@@ -1671,9 +1712,11 @@ int Session::revert() {
   return plotAll();
 }
 
-int Session::despikeDepth(double window, double threshold, int *count) {
+int Session::despikeDepth(double window, double threshold, int *count, double *largest) {
   if (count != nullptr)
     *count = 0;
+  if (largest != nullptr)
+    *largest = 0.0;
   if (nplot_ <= 0 || !show.draft || window <= 0.0 || threshold <= 0.0)
     return MB_FAILURE;
   /* Interpolate acts on everything selected */
@@ -1696,7 +1739,10 @@ int Session::despikeDepth(double window, double threshold, int *count) {
     for (int j = first; j <= last; j++)
       values.push_back(rec_[j].draft);
     std::nth_element(values.begin(), values.begin() + values.size() / 2, values.end());
-    if (std::fabs(rec_[i].draft - values[values.size() / 2]) > threshold) {
+    const double distance = std::fabs(rec_[i].draft - values[values.size() / 2]);
+    if (largest != nullptr)
+      *largest = std::max(*largest, distance);
+    if (distance > threshold) {
       rec_[i].setSelected(PLOT_DRAFT, true);
       found++;
     }

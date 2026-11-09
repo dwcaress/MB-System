@@ -89,6 +89,19 @@ class MbnaveditQtTest(unittest.TestCase):
     result = subprocess.run([os.environ["MBNAVEDIT_QT_CANVAS_TEST"], self.kmall], capture_output=True, text=True, errors="replace", env=env)
     self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
+  def test_window(self):
+    first = os.path.join(self.tmp.name, "a")
+    second = os.path.join(self.tmp.name, "b")
+    os.makedirs(first)
+    os.makedirs(second)
+    files = [S.write_line(first)[0], S.write_line(second)[0]]
+    datalist = os.path.join(self.tmp.name, "list.mb-1")
+    with open(datalist, "w") as f:
+      f.write("".join("%s 261\n" % name for name in files))
+    env = dict(os.environ, QT_QPA_PLATFORM="offscreen")
+    result = subprocess.run([os.environ["MBNAVEDIT_QT_WINDOW_TEST"], files[0], files[1], datalist], capture_output=True, text=True, errors="replace", env=env, timeout=120)
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
   def test_export(self):
     image = os.path.join(self.tmp.name, "plots.png")
     subprocess.run([self.program, "--export=" + image, "--size=800x900", "-I", self.kmall], capture_output=True, check=True, env=dict(os.environ, QT_QPA_PLATFORM="offscreen"))
@@ -164,6 +177,19 @@ class MbnaveditQtTest(unittest.TestCase):
     self.assertEqual(new[2], (new[0][0] + 1, new[0][1]))  # selected
     self.assertEqual(counts("compat 1"), [(0, 0)] * 3)
 
+  def test_line_stays_when_originals_are_hidden(self):
+    env = dict(os.environ, QT_QPA_PLATFORM="offscreen")
+    script = os.path.join(self.tmp.name, "script.txt")
+    def lines(*before):
+      with open(script, "w") as f:
+        f.write("\n".join(list(before) + [self.opened(mode="browse"), "plot", "drawcount", "show draft_org 0", "drawcount", "done"]) + "\n")
+      out = subprocess.run([self.program, "--replay=" + script], capture_output=True, text=True, errors="replace", cwd=self.tmp.name, check=True, env=env).stdout
+      return [int(x) for x in re.findall(r"line_green (\d+)", out)]
+    new = lines()
+    self.assertEqual(new[0], new[1])  # a line through the points instead
+    motif = lines("compat 1")
+    self.assertEqual(motif[1], motif[0] - (self.records() - 1))  # none in the Motif program
+
   def test_despike(self):
     window = "1000000"
     n = self.records()
@@ -177,6 +203,13 @@ class MbnaveditQtTest(unittest.TestCase):
     self.assertEqual(int(rows[1][1]), 0)
     self.assertEqual(float(rows[2][0]), 90.0)  # one undo brings it back
     self.assertGreaterEqual(n, 4)
+
+  def test_despike_first_and_last_record(self):
+    n = self.records()
+    out = self.out(self.opened(mode="browse"), "set draft 0 90", "set draft %d 91" % (n - 1), "plot", "despike 1000000 5", "interpolate", "attitude 0", "attitude %d" % (n - 1), "done")
+    self.assertRegex(out, r"despike: 2 largest 8\d\.\d+")
+    self.assertLess(self.attitude(out, 0)[3], 80.0)
+    self.assertLess(self.attitude(out, n - 1)[3], 80.0)
 
   def test_despike_bad_arguments(self):
     out = self.out(self.opened(mode="browse"), "despike 0 5", "despike 10 0", "show draft 0", "plot", "despike 1000000 5", "done")

@@ -151,6 +151,14 @@ struct Show {
   bool heave = false;
 };
 
+struct InputFile {
+  std::string path;
+  int format = 0;
+};
+
+/* a file, or the files of a datalist when the format is -1, as the -I option takes them */
+bool parse_input(const std::string &path, int format, std::vector<InputFile> &files, std::string &message);
+
 class Session {
  public:
   Session();
@@ -248,8 +256,9 @@ class Session {
 
   /* Selects the sonar depths further than threshold meters from the median of the records
      within window seconds around them, among the records in view, and nothing else, so that
-     Interpolate then replaces them. Not an edit. A spike must be shorter than half the window. */
-  int despikeDepth(double window, double threshold, int *count);
+     Interpolate then replaces them. Not an edit. A spike must be shorter than half the window.
+     Also gives the largest distance from the median found, to help choose the threshold. */
+  int despikeDepth(double window, double threshold, int *count, double *largest = nullptr);
 
   /* edits: each one is a step of undo */
   int useDr();

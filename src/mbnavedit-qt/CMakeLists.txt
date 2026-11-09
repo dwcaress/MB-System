@@ -49,7 +49,16 @@ endif()
 
 set(CMAKE_AUTOMOC ON)
 
-add_library(mbnavedit-qt-ui STATIC mbne_canvas.cc mbne_canvas.h)
+add_library(
+  mbnavedit-qt-ui STATIC
+  mbne_canvas.cc
+  mbne_canvas.h
+  mbne_panels.cc
+  mbne_panels.h
+  mbne_widget.cc
+  mbne_widget.h
+  mbne_window.cc
+  mbne_window.h)
 
 target_link_libraries(mbnavedit-qt-ui PUBLIC mbnavedit-qt-core Qt6::Widgets)
 

@@ -1,0 +1,345 @@
+.TH mbnavedit-qt 1 "9 November 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbnavedit-qt\fP \- Interactive navigation editor for swath sonar data.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbnavedit-qt\fP
+.br
+[--begin-time=yr/mo/da/hr/mn/sc {-Byr/mo/da/hr/mn/sc}
+.br
+--browse {-D}
+.br
+--end-time=yr/mo/da/hr/mn/sc {-Eyr/mo/da/hr/mn/sc}
+.br
+--format=format_id {-Fformat_id}
+.br
+--gui-mode {-G}
+.br
+--help {-H}
+.br
+--input=file {-Ifile}
+.br
+--strip-comments {-N}
+.br
+--use-ping-data {-P}
+.br
+--run-mbprocess {-X}
+.br
+--verbose {-V}]
+
+.SH DESCRIPTION
+\fBMBnavedit-qt\fP is an interactive editor used to identify and fix
+problems with the navigation of swath sonar data.
+
+In the default mode the edited navigation is output to
+a file with the suffix ".nve" appended to the input swath
+data filename. The program can also be operated
+in a "browse" mode where no navigation is output.
+If saved, the edited navigation can be merged
+with the swath data using the program \fBmbprocess\fP, which
+outputs a processed swath data file.
+The \fBmbprocess\fP program is also used to apply
+bathymetry edits, recalculate bathymetry, and apply
+other corrections to swath bathymetry data. Users
+may cause \fBmbprocess\fP to be run automatically by
+specifying the \fB\-X\fP option when starting \fBMBnavedit-qt\fP.
+
+In previous versions of \fBMB-System\fP
+(version 4.6.10 or earlier), \fBMBnavedit-qt\fP
+produced output swath data files directly by reading and
+storing all of the swath data information in memory (including
+non-survey data records). This approach limited the
+amount of data that could be handled
+at once, frequently requiring users to process files in
+small pieces. The current version only stores
+and outputs the navigation data.
+
+Once the navigation
+from a swath data file has been
+read in, \fBMBnavedit-qt\fP displays autoscaled plots of the longitude,
+latitude, speed, heading, and sonar depth time series, along with a plot of
+the time interval between navigation values. The user may select
+outliers and interpolate over them or, in the case of heading or
+speed data, replace the erroneous values with estimates derived
+from "course-made-good" or "speed-made-good", respectively.
+Data can only be selected and altered in a single
+plot at a time (this avoids confusion and prevents mistakes).
+
+The nature of the navigation data being edited depends upon the
+data format. Some data formats include the navigation in the
+same data records as the ping or survey data. This synchronous
+navigation implies that either in the sonar or in later processing,
+the raw navigation has been interpolated to yield values at the
+same time stamps as the sonar pings. Other data formats do not
+hold navigation values in the survey data records, and instead use
+separate navigation records with different time stamps. This
+asynchronous navigation requires that MBIO interpolate or
+extrapolate the navigation as the survey data records are read.
+For data formats with synchronous navigation, the navigation
+values edited using \fBMBnavedit-qt\fP are those in the survey data
+records. For data formats with only asynchronous navigation,
+\fBMBnavedit-qt\fP displays and operates on the values from the
+navigation records. The \fBMBIO\fP manual page includes a listing
+of which type of navigation is used by the supported data formats.
+
+For some data formats, the user can also
+inspect plots of roll, pitch, and heaved
+data to determine if the ship's vertical reference sensors
+were working properly.
+
+The edited data is usually output to a file, but the program
+can be operated in a "browse" mode where no data is output.
+
+\fBMBnavedit-qt\fP is the Qt6 version of \fBmbnavedit\fP. It differs from that
+program in these ways. The ".nve" file stays as it is until the edits are saved, and the
+new navigation is written beside it and replaces it at that moment, so that a crash or a
+discarded session leaves the earlier ".nve" untouched. A session with no changes writes nothing.
+Closing the window or opening another file with unsaved edits asks whether to save.
+Every edit can be undone and redone. Plots can be resized with the window, and a slider moves through
+the buffer. Interpolation of heading follows the shorter way around north.
+The time interpolation and bad time deletion tools recalculate the time intervals,
+the speed and course made good, and the navigation model.
+Interpolating a sonar depth does not mark the position of that record as bad.
+Roll and pitch can be selected, interpolated and reverted like the other values, and the
+edited values are used by \fBmbprocess\fP. Heave is only shown, because
+\fBmbprocess\fP calculates depths from the heave stored in the data,
+so that an edited heave would not change the bathymetry.
+Spikes in sonar depth can be selected automatically.
+
+.SH SMOOTHING NAVIGATION
+
+Three algorithms for obtaining and using smooth navigation models are
+available. Replacing the original navigation with a smoothed
+version can be advantageous in some cases of very noisy
+navigation (typically from sonars on towed platforms or
+submerged vehicles). The first smoothing scheme is the covolution
+of a Gaussian kernal of user-defined time width with the data.
+Users may select and flag outlier navigation points; any flagged
+points are not used to calculate the Gaussian-weighted mean
+navigation values.
+The second approach is simple dead reckoning
+from the initial position using the current (possibly edited)
+heading and speed values. The dead reckoning navigation can also
+incorporate user-specified longitude and latitude drift rates.
+The third algorithm is an inversion for a smooth
+navigation that minimizes
+speed and acceleration while fitting the original navigation
+in a least squares sense. The inversion weighting against
+speed and acceleration are user specified, and only unflagged
+navigation values are used in the inversion.
+
+.SH HANDLING BAD TIME STAMPS
+
+The time interval plot allows
+users to spot problems with time stamps and to change the
+time stamps, if necessary. The most obvious time stamp errors
+are multiple pings with the same time stamps (producing a zero
+time interval value), or
+sequential pings with decreasing time stamps (resulting in
+negative time interval values). \fBMBnavedit-qt\fP
+provides two tools for dealing with zero or negative time intervals:
+time stamp interpolation or deletion of the affected pings. Control
+dialogs allow users to apply either to the entire buffer at once.
+Time stamp interpolation may also be accomplished by selecting
+the relevant values in the time interval display, and then
+selecting interpolation.
+
+If the navigation is
+asynchronous, that generally means the time interval should be
+constant since navigation systems are set to output values at
+a uniform rate. A problem with the time stamps of asynchronous
+navigation should produce spikes in both the time interval plot
+and the speed-made-good plot, and can be solved by selecting
+the offending point in the time interval plot and interpolating
+to reset the time stamp.
+
+If the navigation is synchronous with the sonar
+pings, then the time interval will likely vary because the ping
+rate for most sonars varies with the sonars altitude above the
+seafloor. In this case, time stamp problems will
+not produce spikes in the speed-made-good plot
+because the navigation has been interpolated
+using the existing time stamps. Time interval spikes may also
+reflect problems with the sonar (e.g. occasional failure to ping
+at the appropriate time) rather than erroneous time stamps.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian dos Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-\-begin\-time=yr/mo/da/hr/mn/sc \-Byr/mo/da/hr/mn/sc
+Sets the starting time for data allowed in the input data; pings
+with times before the starting time will be ignored.
+Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
+.TP
+.B \-\-browse \-D
+Starts up the program in "browse" mode. If a file is opened
+in browse mode (either at startup or later), none
+of the edited data will be output to a file. The default
+is to output the edited data to a file.
+.TP
+.B \-\-end\-time=yr/mo/da/hr/mn/sc \-Eyr/mo/da/hr/mn/sc
+Sets the ending time for data allowed in the input data; pings
+with times after the ending time will be ignored.
+Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
+.TP
+.B \-\-format=format_id \-Fformat_id
+Sets the format at startup for the input and output swath sonar data using
+\fBMBIO\fP integer format identifiers. This value can also be set
+interactively when specifying the input file.
+This program uses the \fBMBIO\fP library and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
+currently supported by \fBMBIO\fP and their identifier values
+is given in the \fBMBIO\fP manual page.
+By default the \fIformat\fP id value is inferred using the \fBMB-System\fP
+convention of an ".mbXX" suffix (the XX corresponds to the \fBMBIO\fP format id).
+.TP
+.B \-\-gui\-mode \-G
+This flag causes \fBMBnavedit-qt\fP to treat the \fBDone\fP button as
+equivalent to the \fBQuit\fP button. This option is used when
+\fBMBnavedit-qt\fP is started automatically by some other process and
+only a single file is to edited.
+.TP
+.B \-\-help \-H
+This "help" flag cause the program to print out a description
+of its operation and then exit immediately.
+.TP
+.B \-\-input=file \-Ifile
+Sets the data file from which the input data will be read at startup.
+This value can also be set interactively.
+.TP
+.B \-\-strip\-comments \-N
+Normally, all \fBMB-System\fP processing
+programs embed comment records describing the processing actions
+and parameters into output swath data files.
+This flag, when used in conjunction with the \fB\-X\fP flag,
+causes \fBMBnavedit-qt\fP to invoke \fBmbprocess\fP with it's
+\fB\-N\fP option. In turn, this causes \fBmbprocess\fP to
+generate an output, processed swath data file without any
+comment records.
+.TP
+.B \-\-use\-ping\-data \-P
+Causes \fBMBnavedit-qt\fP to load and work with navigation from
+survey data records even if the data format uses asynchronous
+navigation records. In this case, the only edits which will
+actually be applied to the output data are changes to the
+time stamps of the survey records.
+.TP
+.B \-\-verbose \-V
+Normally, \fBMBnavedit-qt\fP outputs information to the stderr stream
+regarding the number of records loaded and dumped.  If the
+\fB\-V\fP flag is given, then \fBMBnavedit-qt\fP works in a "verbose" mode and
+outputs the program version being used, all error status messages,
+and a large amount of other information including all of the
+beams flagged or zeroed.
+.TP
+.B \-\-run\-mbprocess \-X
+This option causes \fBmbprocess\fP to run automatically
+on an input swath data file when the \fBMBnavedit-qt\fP editing session
+is completed. The \fB\-X\fP option effectively means that the
+corresponding processed swath data is generated or updated immediately.
+The program \fBmbprocess\fP will not be invoked if the
+editing session is in the browse mode.
+
+.SH INTERACTIVE CONTROLS
+.TP
+.B File menu
+\fBOpen\fP asks for a swath file or datalist. The format is taken from the name of the file, or asked
+for when that is not possible. \fBFile Selection List\fP shows the files given to the program,
+each marked \fB<loaded>\fP or \fB<Locked>\fP, and \fB<nve>\fP if it has edited navigation; a selected file can be edited or
+removed from the list. \fBSave\fP writes the edits once the whole file has been read.
+\fBBrowse Only\fP means that the next file opened will not be written.
+.TP
+.B Edit menu
+\fBUndo\fP and \fBRedo\fP. Undo and redo reach back to the last Next Buffer.
+.TP
+.B View menu
+Turns on and off each plot, the original values in each plot, the model in the longitude and latitude
+plots, and speed made good and course made good. Roll, pitch and heave are shown together.
+.TP
+.B Controls menu
+\fBTime Stepping\fP sets the time span shown and the time step, in seconds; a slider
+doubles or halves its range at its ends.
+\fBNav Modeling\fP selects Off, Gaussian Mean, Dead Reckoning or Inversion, and sets the width of the Gaussian
+window, the drift rates in longitude and latitude and the weights
+against speed and acceleration (with \fBApply\fP).
+\fBTime Interpolation\fP and \fBDelete Bad Times\fP treat all repeated or reversed time stamps of the buffer, and can
+be applied only when such time stamps have been found.
+\fBPosition Offset\fP adds a longitude and latitude offset to the records in memory and
+to those read later.
+\fBDespike Sonar Depth\fP selects the sonar depths in view that are further than a threshold in meters from
+the median of the records within a time window around them. Their squares turn
+red, and the largest distance from the median in view is reported to help in choosing the threshold.
+\fBInterpolate\fP replaces them and hides the line of original sonar depths, which would otherwise still show the spikes and
+keep the vertical range wide. A spike must be shorter than half of the window.
+.TP
+.B Start, Reverse, Forward, End
+Move to the start of the buffer, back or forward by the time step, or to the end of the buffer.
+.TP
+.B Show All, Pick Zoom
+\fBShow All\fP shows the whole buffer. After \fBPick Zoom\fP the left mouse button sets one
+edge of the time interval to be shown and the middle button, or a second left click, the other edge; the
+right button applies them.
+.TP
+.B Pick, Select, Deselect, Select All, Deselect All
+The edit modes, described under \fBMOUSE ACTIONS\fP.
+.TP
+.B Next Buffer
+Writes all but the end of the buffer and reads more of the file.
+.TP
+.B Done / Next File
+Writes the edits without asking, closes the file, and opens the next file of the list if there is one.
+.TP
+.B Quit
+Closes the program, asking first if there are unsaved edits.
+.TP
+.B Interpolate, Interpolate Repeats
+\fBInterpolate\fP replaces selected values by values interpolated in time
+from their nearest unselected neighbours. \fBInterpolate Repeats\fP does this only for selected values which repeat the previous one.
+.TP
+.B Revert
+Returns selected values to their original values.
+.TP
+.B Flag, Unflag
+Marks or unmarks the selected positions as bad, so that the models leave them out.
+.TP
+.B Use Solution, Use Speed-Made-Good, Use Course-Made-Good
+Replace selected longitudes and latitudes by the model, selected speeds by the speed
+made good, and selected headings by the course made good.
+.TP
+.B Slider
+Moves through the buffer, one record per wheel notch.
+
+.SH MOUSE ACTIONS
+In the \fBPick\fP mode the left button turns on or off the selection of the nearest point within 50 pixels.
+In the \fBSelect\fP and \fBDeselect\fP modes the left button changes the points within 10 pixels, and follows the pointer while it is held.
+\fBSelect All\fP and \fBDeselect All\fP act on all points in view of the plot clicked and of all plots, respectively.
+Selecting in one plot clears selections in the others, and leaving the view clears a selection.
+The keys Y and Q choose Pick, U and W Select, I and E Deselect, O and R Select All, and P and T Deselect All.
+The middle button moves back and the right button moves forward by the time step.
+When all of the plots fit in the window the mouse wheel does the same; otherwise it moves the plots up and down.
+
+.SH SEE ALSO
+\fBmbnavedit\fP(1), \fBmbsystem\fP(1), \fBmbio\fP(1), \fBmbprocess\fP(1), \fBmbset\fP(1),
+\fBmbedit\fP(1), \fBmbeditviz\fP(1), \fBmbinfo\fP(1)
+
+.SH BUGS
+Heave cannot be edited.

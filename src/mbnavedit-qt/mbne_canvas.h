@@ -44,7 +44,7 @@ struct DrawCounts {
   long line_blue = 0;
 };
 
-constexpr int MIN_PLOT_HEIGHT = 110;
+constexpr int MIN_PLOT_HEIGHT = 300;
 
 /* sets the size and margins of the plots of a session for a drawing area, and lays them out */
 void layout_plots(Session &session, const QSize &size, const QFont &font);
@@ -83,6 +83,7 @@ class Canvas : public QWidget {
   void mouseMoveEvent(QMouseEvent *event) override;
   void mouseReleaseEvent(QMouseEvent *event) override;
   void keyPressEvent(QKeyEvent *event) override;
+  void wheelEvent(QWheelEvent *event) override;
 
  private:
   void updateCursor();
@@ -95,6 +96,7 @@ class Canvas : public QWidget {
   QPoint last_position_;
   QImage image_;
   bool dirty_ = true;
+  int wheel_ = 0;
 };
 
 }  // namespace mbne

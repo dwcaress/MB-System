@@ -41,11 +41,13 @@
 #include <QImage>
 #include <QPainter>
 #include <QPalette>
+#include <QTimer>
 
 #include "mb_define.h"
 #include "mb_status.h"
 #include "mbne_canvas.h"
 #include "mbne_core.h"
+#include "mbne_window.h"
 
 using mbne::Record;
 using mbne::Session;
@@ -360,8 +362,9 @@ int run_line(Session &s, const char *line) {
   else if (strcmp(c, "despike") == 0) {
     sscanf(rest, "%lf %lf", &d0, &d1);
     int count = 0;
-    status = s.despikeDepth(d0, d1, &count);
-    printf("despike: %d\n", count);
+    double largest = 0.0;
+    status = s.despikeDepth(d0, d1, &count, &largest);
+    printf("despike: %d largest %.3f\n", count, largest);
   }
   else if (strcmp(c, "set") == 0) {
     sscanf(rest, "%63s %d %lf", b, &i0, &d0);
@@ -503,9 +506,10 @@ int main(int argc, char **argv) {
 
   Session session;
   int verbose = 0, format = 0, help = 0, errflg = 0;
-  bool do_dump = false;
+  bool do_dump = false, browse = false, run_mbprocess = false;
   int width = 1000, height = 1200;
   std::string input, replay_script, export_file;
+  std::vector<std::pair<std::string, int>> inputs;
   int c;
   while ((c = getopt_long(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:NnPpXx", options, nullptr)) != -1) {
     switch (c) {
@@ -531,6 +535,7 @@ int main(int argc, char **argv) {
       break;
     case 'D':
     case 'd':
+      browse = true;
       break;
     case 'F':
     case 'f':
@@ -542,12 +547,14 @@ int main(int argc, char **argv) {
       break;
     case 'I':
     case 'i':
-      input = optarg;
+      inputs.emplace_back(optarg, format);  // a format option must come before the input
       break;
     case 'N':
     case 'n':
+      break;
     case 'X':
     case 'x':
+      run_mbprocess = true;
       break;
     case 'P':
     case 'p':
@@ -585,6 +592,8 @@ int main(int argc, char **argv) {
     return MB_ERROR_NO_ERROR;
   }
   session.verbose = verbose;
+  if (!inputs.empty())
+    input = inputs.front().first;
 
   if (!replay_script.empty())
     return replay(replay_script, verbose);
@@ -602,6 +611,21 @@ int main(int argc, char **argv) {
     }
     return export_image(session, input, format, export_file, width, height);
   }
-  fprintf(stderr, "%s: this version has no window yet: use --dump, --export or --replay\n", program_name);
-  return MB_ERROR_BAD_USAGE;
+
+  int qt_argc = 1;
+  QApplication app(qt_argc, argv);
+  QApplication::setApplicationName(mbne::PROGRAM_NAME);
+  mbne::NavEditWindow window;
+  window.session().verbose = verbose;
+  window.session().use_ping_data = session.use_ping_data;
+  std::copy(session.btime_i, session.btime_i + 7, window.session().btime_i);
+  std::copy(session.etime_i, session.etime_i + 7, window.session().etime_i);
+  window.editor()->setBrowse(browse);
+  window.editor()->setGuiMode(session.gui_mode);
+  window.editor()->setRunMbprocess(run_mbprocess);
+  for (const auto &file : inputs)
+    window.editor()->addInput(file.first, file.second);
+  window.show();
+  QTimer::singleShot(0, &window, [&window] { window.editor()->loadFirstFile(); });
+  return app.exec();
 }

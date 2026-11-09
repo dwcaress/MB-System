@@ -35,6 +35,7 @@
 #include <QMouseEvent>
 #include <QPaintEvent>
 #include <QPainter>
+#include <QWheelEvent>
 
 #include "mb_define.h"
 
@@ -46,9 +47,10 @@ constexpr int DECIMATE_ABOVE = 20000;     // records in view: above this, one ma
 constexpr int ANTIALIAS_UP_TO = 100000;  // records in view
 constexpr int SQUARE = 4;
 constexpr int BAR_WIDTH = 160;
+constexpr int AXIS_DIVISIONS = 8;  // a value in the middle, with three more ticks on each side of it
 
 struct Colors {
-  QColor background, text, grid, red, blue, green, purple, orange, bar;
+  QColor background, text, grid, light_grid, red, blue, green, purple, orange, bar;
 };
 
 Colors colors_for(const QPalette &palette) {
@@ -59,6 +61,7 @@ Colors colors_for(const QPalette &palette) {
   c.background = dark ? base : QColor(Qt::white);
   c.text = dark ? QColor(235, 235, 235) : QColor(Qt::black);
   c.grid = dark ? QColor(150, 150, 150) : QColor(Qt::black);
+  c.light_grid = dark ? QColor(95, 95, 95) : QColor(205, 205, 205);
   c.red = dark ? QColor(255, 110, 110) : QColor(220, 0, 0);
   c.blue = dark ? QColor(120, 170, 255) : QColor(0, 0, 230);
   c.green = dark ? QColor(100, 215, 100) : QColor(0, 150, 0);
@@ -250,13 +253,29 @@ void draw_plots(QPainter &painter, const Session &session, const QSize &size, co
     }
 
     /* the range of values, and zero */
-    const int value_right = p.ixmin - 4;
+    const int value_right = p.ixmin - 7;
     const QRect value_rect(0, 0, value_right, metrics.height());
     painter.setPen(c.text);
     painter.drawText(value_rect.translated(0, p.iymin - metrics.height() / 2), Qt::AlignRight, format_value(p.type, p.ymin));
     painter.drawText(value_rect.translated(0, p.iymax - metrics.height() / 2), Qt::AlignRight, format_value(p.type, p.ymax));
-    if ((p.ymax > 0.0 && p.ymin < 0.0) || (p.ymax < 0.0 && p.ymin > 0.0)) {
-      const int iyzero = p.iymin - p.yscale * p.ymin;
+
+    /* ticks along the vertical axis, each with a light dashed line across the plot */
+    for (int k = 1; k < AXIS_DIVISIONS; k++) {
+      const int iy = p.iymin + (p.iymax - p.iymin) * k / AXIS_DIVISIONS;
+      painter.setPen(QPen(c.light_grid, 1.0, Qt::DashLine));
+      painter.drawLine(p.ixmin + 1, iy, p.ixmax - 1, iy);
+      painter.setPen(QPen(c.grid, 1.0));
+      painter.drawLine(p.ixmin - 5, iy, p.ixmin - 1, iy);
+    }
+
+    /* the value in the middle, unless zero is shown about there */
+    const bool has_zero = (p.ymax > 0.0 && p.ymin < 0.0) || (p.ymax < 0.0 && p.ymin > 0.0);
+    const int iymiddle = (p.iymin + p.iymax) / 2;
+    const int iyzero = has_zero ? (int)(p.iymin - p.yscale * p.ymin) : 0;
+    painter.setPen(c.text);
+    if (!has_zero || std::abs(iyzero - iymiddle) > metrics.height())
+      painter.drawText(value_rect.translated(0, iymiddle - metrics.height() / 2), Qt::AlignRight, format_value(p.type, 0.5 * (p.ymin + p.ymax)));
+    if (has_zero) {
       if (std::abs(iyzero - p.iymin) > metrics.height() && std::abs(iyzero - p.iymax) > metrics.height())
         painter.drawText(value_rect.translated(0, iyzero - metrics.height() / 2), Qt::AlignRight, format_value(p.type, 0.0));
       painter.setPen(QPen(c.grid, 1.0, Qt::DashLine));
@@ -272,44 +291,45 @@ void draw_plots(QPainter &painter, const Session &session, const QSize &size, co
     /* the lines under the points */
     painter.setRenderHint(QPainter::Antialiasing, count <= ANTIALIAS_UP_TO);
     double Record::*value = nullptr;
+    /* the green line of the original values, or with those hidden one through the points; the Motif program has none then */
+    const auto original_line = [&](bool shown, double Record::*org, double Record::*current) {
+      if (shown)
+        draw_series(painter, p, rec, first, count, org, c.green, &local.line_green);
+      else if (!session.compatibility)
+        draw_series(painter, p, rec, first, count, current, c.green, &local.line_green);
+    };
     switch (p.type) {
     case PLOT_TINT:
       value = &Record::tint;
-      if (show.tint_org)
-        draw_series(painter, p, rec, first, count, &Record::tint_org, c.green, &local.line_green);
+      original_line(show.tint_org, &Record::tint_org, &Record::tint);
       break;
     case PLOT_LONGITUDE:
       value = &Record::lon;
-      if (show.lon_org)
-        draw_series(painter, p, rec, first, count, &Record::lon_org, c.green, &local.line_green);
+      original_line(show.lon_org, &Record::lon_org, &Record::lon);
       if (session.model_mode != MODEL_OFF && show.lon_dr)
         draw_series(painter, p, rec, first, count, &Record::lon_dr, c.blue, &local.line_blue);
       break;
     case PLOT_LATITUDE:
       value = &Record::lat;
-      if (show.lat_org)
-        draw_series(painter, p, rec, first, count, &Record::lat_org, c.green, &local.line_green);
+      original_line(show.lat_org, &Record::lat_org, &Record::lat);
       if (session.model_mode != MODEL_OFF && show.lat_dr)
         draw_series(painter, p, rec, first, count, &Record::lat_dr, c.blue, &local.line_blue);
       break;
     case PLOT_SPEED:
       value = &Record::speed;
-      if (show.speed_org)
-        draw_series(painter, p, rec, first, count, &Record::speed_org, c.green, &local.line_green);
+      original_line(show.speed_org, &Record::speed_org, &Record::speed);
       if (show.smg)
         draw_series(painter, p, rec, first, count, &Record::speed_made_good, c.blue, &local.line_blue);
       break;
     case PLOT_HEADING:
       value = &Record::heading;
-      if (show.heading_org)
-        draw_series(painter, p, rec, first, count, &Record::heading_org, c.green, &local.line_green);
+      original_line(show.heading_org, &Record::heading_org, &Record::heading);
       if (show.cmg)
         draw_series(painter, p, rec, first, count, &Record::course_made_good, c.blue, &local.line_blue);
       break;
     case PLOT_DRAFT:
       value = &Record::draft;
-      if (show.draft_org)
-        draw_series(painter, p, rec, first, count, &Record::draft_org, c.green, &local.line_green);
+      original_line(show.draft_org, &Record::draft_org, &Record::draft);
       break;
     case PLOT_ROLL:
       if (session.editablePlots() > PLOT_ROLL) {
@@ -436,7 +456,9 @@ void Canvas::redraw() {
 
 void Canvas::resizeEvent(QResizeEvent *event) {
   QWidget::resizeEvent(event);
-  layoutChanged();
+  /* disabled while a thread is reading or writing the records: it is laid out afterwards */
+  if (isEnabled())
+    layoutChanged();
 }
 
 void Canvas::changeEvent(QEvent *event) {
@@ -446,6 +468,13 @@ void Canvas::changeEvent(QEvent *event) {
 }
 
 void Canvas::paintEvent(QPaintEvent *) {
+  /* disabled while a thread is reading or writing the records */
+  if (!isEnabled()) {
+    QPainter painter(this);
+    painter.fillRect(rect(), palette().color(QPalette::Base));
+    painter.drawImage(0, 0, image_);
+    return;
+  }
   const qreal ratio = devicePixelRatioF();
   const QSize pixels = size() * ratio;
   if (dirty_ || image_.size() != pixels) {
@@ -547,6 +576,23 @@ void Canvas::mouseMoveEvent(QMouseEvent *event) {
 void Canvas::mouseReleaseEvent(QMouseEvent *event) {
   if (event->button() == Qt::LeftButton)
     dragging_ = false;
+}
+
+void Canvas::wheelEvent(QWheelEvent *event) {
+  /* when the plots are taller than the window the wheel moves them, not the time */
+  if (parentWidget() != nullptr && height() > parentWidget()->height()) {
+    event->ignore();
+    return;
+  }
+  /* a trackpad sends many small steps */
+  wheel_ += event->angleDelta().y();
+  event->accept();
+  if (std::abs(wheel_) < 120)
+    return;
+  session_.step(wheel_ > 0 ? -session_.data_step_size : session_.data_step_size);
+  wheel_ = 0;
+  redraw();
+  emit viewChanged();
 }
 
 void Canvas::keyPressEvent(QKeyEvent *event) {
