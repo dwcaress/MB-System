@@ -52,6 +52,9 @@
 #include "mb_define.h"
 #include "mb_process.h"
 
+using mbvt::ActivateDialog;
+using mbvt::MainWindow;
+
 namespace {
 
 int checks = 0, failures = 0;

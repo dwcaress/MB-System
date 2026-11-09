@@ -61,6 +61,8 @@
 #include "mb_process.h"
 #include "mb_status.h"
 
+namespace mbvt {
+
 namespace {
 
 constexpr double DEFAULT_SIMPLIFY_TOLERANCE = 0.25;  // m/s; on real 500-900 node profiles: 23-89 nodes, residuals within about 0.1 m
@@ -801,3 +803,5 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   }
   event->accept();
 }
+
+}  // namespace mbvt

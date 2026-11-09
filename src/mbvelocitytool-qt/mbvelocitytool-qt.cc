@@ -206,7 +206,7 @@ int main(int argc, char **argv) {
   if (!dump && !saving) {
     QApplication app(argc, argv);
     const bool quiet = !export_file.empty();
-    MainWindow window(verbose, nthreads, anglemode, btime_i, etime_i, quiet);
+    mbvt::MainWindow window(verbose, nthreads, anglemode, btime_i, etime_i, quiet);
     if (!quiet)
       window.show();
     if (!edit_file.empty())

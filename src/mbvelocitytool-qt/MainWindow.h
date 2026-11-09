@@ -45,6 +45,8 @@ class QRadioButton;
 class QSlider;
 class QThread;
 
+namespace mbvt {
+
 struct PlotScale {
   double maxdepth = 3000.0;
   double velrange = 500.0;
@@ -173,5 +175,7 @@ class MainWindow : public QMainWindow {
       *reprocess_action_;
   QActionGroup *angle_group_;
 };
+
+}  // namespace mbvt
 
 #endif
