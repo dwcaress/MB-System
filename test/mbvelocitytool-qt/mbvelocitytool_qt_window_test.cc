@@ -48,12 +48,13 @@
 #include <QSlider>
 #include <QTimer>
 
-#include "MainWindow.h"
 #include "mb_define.h"
 #include "mb_process.h"
+#include "mbvt_window.h"
 
 using mbvt::ActivateDialog;
-using mbvt::MainWindow;
+using mbvt::VelocityWidget;
+using mbvt::VelocityWindow;
 
 namespace {
 
@@ -128,7 +129,7 @@ bool same_result(const mbvt::Residuals &a, const mbvt::Residuals &b) {
          a.acrosstrack == b.acrosstrack && a.rays_traced == b.rays_traced;
 }
 
-bool reprocess_is_direct(MainWindow &w, const mbvt::SwathFile &swath, int anglemode) {
+bool reprocess_is_direct(VelocityWidget &w, const mbvt::SwathFile &swath, int anglemode) {
   w.reprocess();
   w.waitUntilIdle();
   mbvt::Residuals direct;
@@ -138,7 +139,7 @@ bool reprocess_is_direct(MainWindow &w, const mbvt::SwathFile &swath, int anglem
 }
 
 /* index of a display profile by its number of nodes among those stored in the file, or -1 */
-int stored_index(const MainWindow &w, int nodes) {
+int stored_index(const VelocityWidget &w, int nodes) {
   const std::vector<mbvt::Profile> &display = w.displayProfiles();
   for (int i = 0; i < (int)display.size(); i++)
     if (display[i].source == mbvt::ProfileSource::SwathRecord && display[i].size() == nodes)
@@ -146,7 +147,7 @@ int stored_index(const MainWindow &w, int nodes) {
   return -1;
 }
 
-void set_scale(MainWindow &w, double maxdepth, double velrange, double velcenter) {
+void set_scale(VelocityWidget &w, double maxdepth, double velrange, double velcenter) {
   const auto spins = w.scalingDialog()->findChildren<QDoubleSpinBox *>();
   spins[0]->setValue(maxdepth);
   spins[1]->setValue(velrange);
@@ -157,9 +158,10 @@ void set_scale(MainWindow &w, double maxdepth, double velrange, double velcenter
 /*--------------------------------------------------------------------*/
 void test_editing(const std::string &file, const mbvt::SwathFile &swath) {
   std::string error;
-  MainWindow w(0, 0, MBP_ANGLES_SNELL, TIME_BEGIN, TIME_END, true);
-  w.resize(1100, 750);
-  w.show();
+  VelocityWindow window(0, 0, MBP_ANGLES_SNELL, TIME_BEGIN, TIME_END, true);
+  VelocityWidget &w = *window.editor();
+  window.resize(1100, 750);
+  window.show();
   auto *plot = w.velocityPlot();
 
   /* no data and no profile: nothing to edit */
@@ -272,10 +274,10 @@ void test_editing(const std::string &file, const mbvt::SwathFile &swath) {
 
   /* redraw at any size, with the image of the whole window opaque */
   for (const QSize &size : {QSize(640, 480), QSize(1016, 668), QSize(1800, 1100)}) {
-    w.resize(size);
+    window.resize(size);
     QApplication::processEvents();
-    CHECK(w.size() == size);
-    CHECK(!w.grab().isNull());
+    CHECK(window.size() == size);
+    CHECK(!window.grab().isNull());
   }
 
   /* bad input leaves everything as it was */
@@ -292,9 +294,10 @@ void test_activate(const std::string &file, const std::string &other_file, const
   std::string error;
   const int deep_nodes = swath.profiles[0].size();
   const int other_nodes = swath.profiles[1].size();
-  MainWindow w(0, 0, MBP_ANGLES_SNELL, TIME_BEGIN, TIME_END, true);
-  w.resize(1400, 900);
-  w.show();
+  VelocityWindow window(0, 0, MBP_ANGLES_SNELL, TIME_BEGIN, TIME_END, true);
+  VelocityWidget &w = *window.editor();
+  window.resize(1400, 900);
+  window.show();
   w.openSwath(QString::fromStdString(file), 0);
   w.waitUntilIdle();
   auto *plot = w.velocityPlot();
@@ -446,11 +449,11 @@ void test_activate(const std::string &file, const std::string &other_file, const
 
   /* the image of --export has no transparent part */
   const QString image = QString::fromStdString(dir + "/window_test.png");
-  CHECK(w.saveImage(image, 800, 600));
+  CHECK(window.saveImage(image, 800, 600));
   const QImage saved(image);
   CHECK(saved.width() == 800 && saved.height() == 600);
   CHECK(qAlpha(saved.pixel(2, 2)) == 255);
-  w.close();
+  window.close();
 }
 
 /*--------------------------------------------------------------------*/
@@ -508,8 +511,8 @@ int main(int argc, char **argv) {
 
   /* quitting with work under way waits for it */
   {
-    auto *w = new MainWindow(0, 0, MBP_ANGLES_SNELL, TIME_BEGIN, TIME_END, true);
-    w->openSwath(QString::fromStdString(file), 0);
+    auto *w = new VelocityWindow(0, 0, MBP_ANGLES_SNELL, TIME_BEGIN, TIME_END, true);
+    w->editor()->openSwath(QString::fromStdString(file), 0);
     delete w;
     checks++;
   }

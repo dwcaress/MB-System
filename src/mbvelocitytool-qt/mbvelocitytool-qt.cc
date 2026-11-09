@@ -44,11 +44,11 @@
 #include <QApplication>
 #include <QString>
 
-#include "MainWindow.h"
 #include "mb_define.h"
 #include "mb_process.h"
 #include "mb_status.h"
 #include "mbvt_core.h"
+#include "mbvt_window.h"
 
 constexpr char help_message[] =
     "MBVELOCITYTOOL-QT is an interactive water velocity profile editor used to examine\n"
@@ -206,21 +206,22 @@ int main(int argc, char **argv) {
   if (!dump && !saving) {
     QApplication app(argc, argv);
     const bool quiet = !export_file.empty();
-    mbvt::MainWindow window(verbose, nthreads, anglemode, btime_i, etime_i, quiet);
+    mbvt::VelocityWindow window(verbose, nthreads, anglemode, btime_i, etime_i, quiet);
+    mbvt::VelocityWidget *editor = window.editor();
     if (!quiet)
       window.show();
     if (!edit_file.empty())
-      window.openEditProfile(QString::fromStdString(edit_file));
+      editor->openEditProfile(QString::fromStdString(edit_file));
     if (!display_file.empty())
-      window.openDisplayProfile(QString::fromStdString(display_file));
+      editor->openDisplayProfile(QString::fromStdString(display_file));
     if (!input.empty())
-      window.openSwath(QString::fromStdString(input), format);
+      editor->openSwath(QString::fromStdString(input), format);
     if (!quiet)
       return app.exec();
 
     /* write the plots to an image without showing a window */
-    window.waitUntilIdle();
-    if (window.failed())
+    editor->waitUntilIdle();
+    if (editor->failed())
       return MB_ERROR_OPEN_FAIL;
     if (!window.saveImage(QString::fromStdString(export_file), width, height)) {
       fprintf(stderr, "%s: cannot write %s\n", mbvt::PROGRAM_NAME, export_file.c_str());

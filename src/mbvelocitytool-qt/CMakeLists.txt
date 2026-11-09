@@ -47,10 +47,12 @@ set(CMAKE_AUTOMOC ON)
 
 add_library(
   mbvelocitytool-qt-ui STATIC
-  MainWindow.cc
-  MainWindow.h
   mbvt_plots.cc
-  mbvt_plots.h)
+  mbvt_plots.h
+  mbvt_widget.cc
+  mbvt_widget.h
+  mbvt_window.cc
+  mbvt_window.h)
 
 target_link_libraries(mbvelocitytool-qt-ui PUBLIC mbvelocitytool-qt-core Qt6::Widgets)
 

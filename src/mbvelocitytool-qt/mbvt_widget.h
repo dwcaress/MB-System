@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------
- *    The MB-system:  MainWindow.h  2/11/2026
+ *    The MB-system:  mbvt_widget.h  2/11/2026
  *
  *    Copyright (c) 2026 by
  *    Christian dos Santos Ferreira
@@ -22,15 +22,17 @@
  *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 
-#ifndef MBVELOCITYTOOL_QT_MAINWINDOW_H
-#define MBVELOCITYTOOL_QT_MAINWINDOW_H
+#ifndef MBVELOCITYTOOL_QT_MBVT_WIDGET_H
+#define MBVELOCITYTOOL_QT_MBVT_WIDGET_H
 
 #include <functional>
 #include <vector>
 
 #include <QDialog>
-#include <QMainWindow>
+#include <QList>
+#include <QSize>
 #include <QString>
+#include <QWidget>
 
 #include "mbvt_core.h"
 #include "mbvt_plots.h"
@@ -40,10 +42,12 @@ class QActionGroup;
 class QDoubleSpinBox;
 class QFormLayout;
 class QLabel;
+class QMenu;
 class QProgressBar;
 class QRadioButton;
 class QSlider;
 class QThread;
+class QToolBar;
 
 namespace mbvt {
 
@@ -89,13 +93,24 @@ class ActivateDialog : public QDialog {
   QDoubleSpinBox *tolerance_;
 };
 
-class MainWindow : public QMainWindow {
+/* The tool: the plots, their menus and the work. VelocityWindow puts it in the window of the program. */
+class VelocityWidget : public QWidget {
   Q_OBJECT
 
  public:
   /* quiet: errors go to stderr instead of dialogs, and nothing asks anything */
-  MainWindow(int verbose, int nthreads, int anglemode, const int btime_i[7], const int etime_i[7], bool quiet);
-  ~MainWindow() override;
+  VelocityWidget(int verbose, int nthreads, int anglemode, const int btime_i[7], const int etime_i[7], bool quiet);
+  ~VelocityWidget() override;
+
+  /* for the window around the tool */
+  QList<QMenu *> menus() const { return menus_; }
+  void addToolActions(QToolBar *bar);
+  QLabel *pointerLabel() { return pointer_label_; }
+  QLabel *resultLabel() { return result_label_; }
+  QProgressBar *progressBar() { return progress_; }
+  QString title() const { return title_; }
+  bool prepareToClose();  // asks about unsaved work; false when the user cancelled
+  static QSize initialSize();
 
   bool openDisplayProfile(const QString &path);
   bool openEditProfile(const QString &path);
@@ -112,7 +127,6 @@ class MainWindow : public QMainWindow {
 
   void waitUntilIdle();
   bool failed() const { return failed_; }  // an open or Reprocess failed
-  bool saveImage(const QString &path, int width, int height);
 
   /* for the tests */
   mbvt::VelocityPlot *velocityPlot() { return velocity_plot_; }
@@ -124,11 +138,15 @@ class MainWindow : public QMainWindow {
   bool editModified() const { return edit_modified_; }
   ScalingDialog *scalingDialog() { return scaling_dialog_; }
 
- protected:
-  void closeEvent(QCloseEvent *event) override;
+ signals:
+  void titleChanged(const QString &title);  // with the [*] of QWidget::setWindowTitle
+  void unsavedChanged(bool unsaved);
+  void statusMessage(const QString &message, int timeout_ms);
 
  private:
   void createMenus();
+  void setTitle(const QString &title);
+  void setEditModified(bool modified);
   void runJob(const QString &message, std::function<void()> work, std::function<void()> done);
   void report(const QString &title, const QString &text);
   bool offerToSaveEdit();  // false when the user cancelled
@@ -149,6 +167,7 @@ class MainWindow : public QMainWindow {
   int btime_i_[7], etime_i_[7];
   bool quiet_;
   bool failed_ = false;
+  QString title_;
 
   mbvt::SwathFile swath_;
   bool have_edit_ = false;
@@ -170,7 +189,8 @@ class MainWindow : public QMainWindow {
   QLabel *swath_label_, *edit_label_, *display_label_, *pointer_label_, *result_label_;
   QProgressBar *progress_;
   ScalingDialog *scaling_dialog_;
-  QAction *show_hidden_action_;
+  QList<QMenu *> menus_;
+  QAction *show_hidden_action_, *open_display_action_, *scaling_action_;
   QAction *open_swath_action_, *open_swath_format_action_, *save_edit_action_, *save_swath_action_, *save_residuals_action_,
       *reprocess_action_;
   QActionGroup *angle_group_;
