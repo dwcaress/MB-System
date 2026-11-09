@@ -206,6 +206,7 @@ class Session {
   int done(bool *quit);
   int nextBuffer(bool *quit);
   bool unsaved() const;
+  long changes() const;  // the records with a value different from the original one
   bool isOpen() const { return file_open_; }
   const char *file() const { return ifile_; }
   int format() const { return format_; }
@@ -260,6 +261,12 @@ class Session {
      Also gives the largest distance from the median found, to help choose the threshold. */
   int despikeDepth(double window, double threshold, int *count, double *largest = nullptr);
 
+  /* A change of the selection between these two calls is a step of undo, joined with the
+     changes of selection just before it, so that one undo clears the picks made since the
+     last edit. It is not an edit: it makes nothing unsaved. */
+  void beginSelection();
+  void finishSelection();
+
   /* edits: each one is a step of undo */
   int useDr();
   int useSmg();
@@ -301,8 +308,14 @@ class Session {
     bool timestamp_problem;
     double offset_lon, offset_lat, offset_lon_applied, offset_lat_applied;
   };
+  struct SelectionChange {
+    int index;
+    unsigned char before, after;
+  };
   struct UndoStep {
     std::string label;
+    bool is_selection = false;
+    std::vector<SelectionChange> selection;
     Scalars before, after;
     std::vector<Change> changes;
     std::vector<Record> whole_before, whole_after;  // when the number of records changed
@@ -316,6 +329,7 @@ class Session {
   void beginEdit(bool whole = false);
   void finishEdit(const char *label);
   void clearUndo();
+  long editDepth() const;  // the steps of undo that are edits
   int applyStep(const UndoStep &step, bool forward);
 
   void error3(const std::string &a, const std::string &b, const std::string &c);
@@ -408,6 +422,7 @@ class Session {
 
   /* undo */
   std::vector<UndoStep> undo_, redo_;
+  std::vector<unsigned char> selection_snapshot_;
   long undo_bytes_ = 0;
   long saved_depth_ = 0;         // the number of undo steps at the last save; -1 when out of reach
   bool dumped_changes_ = false;  // edited records have left the buffer since the last save

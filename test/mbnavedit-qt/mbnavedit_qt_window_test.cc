@@ -185,7 +185,8 @@ int main(int argc, char **argv) {
   CHECK(child<QRadioButton>(window, "mode_select")->isChecked());
   click(*canvas, point(s, 2, PLOT_DRAFT));
   CHECK(s.records()[2].isSelected(PLOT_DRAFT));
-  CHECK(!menu_action(editor, "Undo")->isEnabled());
+  CHECK(menu_action(editor, "Undo")->text() == "Undo Selection");
+  CHECK(!window.isWindowModified());  // a selection is not an edit
   s.recordsForTest()[2].draft = 90.0;
   child<QPushButton>(window, "interpolate")->click();
   CHECK(s.records()[2].draft < 80.0);
@@ -194,6 +195,15 @@ int main(int argc, char **argv) {
   menu_action(editor, "Undo")->trigger();
   CHECK(s.records()[2].draft == 90.0);
   CHECK(!window.isWindowModified());
+  /* the next Undo takes back the selection, and Redo brings both back */
+  CHECK(s.records()[2].isSelected(PLOT_DRAFT));
+  CHECK(menu_action(editor, "Undo")->text() == "Undo Selection");
+  menu_action(editor, "Undo")->trigger();
+  CHECK(!s.records()[2].isSelected(PLOT_DRAFT));
+  CHECK(!menu_action(editor, "Undo")->isEnabled());
+  CHECK(!window.isWindowModified());
+  menu_action(editor, "Redo")->trigger();
+  CHECK(s.records()[2].isSelected(PLOT_DRAFT));
   menu_action(editor, "Redo")->trigger();
   CHECK(s.records()[2].draft < 80.0);
   child<QRadioButton>(window, "mode_deselectall")->click();

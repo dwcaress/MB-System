@@ -40,20 +40,26 @@
 #include <QFrame>
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QHideEvent>
 #include <QInputDialog>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMetaMethod>
 #include <QMenu>
 #include <QMessageBox>
 #include <QProcess>
 #include <QPushButton>
 #include <QRadioButton>
 #include <QScrollArea>
+#include <QShowEvent>
 #include <QSpinBox>
 #include <QTableWidget>
 #include <QThread>
 #include <QTimer>
+#include <QToolBar>
+#include <QToolButton>
 #include <QVBoxLayout>
+#include <QWidgetAction>
 
 #include "mb_define.h"
 #include "mb_status.h"
@@ -78,7 +84,7 @@ QFrame *separator() {
 }  // namespace
 
 /*--------------------------------------------------------------------*/
-NavEditWidget::NavEditWidget(QWidget *parent) : QWidget(parent) {
+NavEditWidget::NavEditWidget(Presentation presentation, QWidget *parent) : QWidget(parent), presentation_(presentation) {
   session_.on_progress = [this](const std::string &text) {
     const QString message = QString::fromStdString(text);
     QMetaObject::invokeMethod(this, [this, message] { emit statusMessage(message, 0); }, Qt::QueuedConnection);
@@ -98,12 +104,15 @@ NavEditWidget::NavEditWidget(QWidget *parent) : QWidget(parent) {
   buildTimeToolDialogs();
   buildOffsetDialog();
   buildDespikeDialog();
+  if (presentation_ == Presentation::Panel)
+    buildPanel();
 
   connect(canvas_, &Canvas::modeChanged, this, [this](int mode) {
     mode_group_->button(mode)->setChecked(true);
     syncControls();
   });
   connect(canvas_, &Canvas::viewChanged, this, &NavEditWidget::syncControls);
+  connect(canvas_, &Canvas::selectionChanged, this, &NavEditWidget::syncUndo);
   syncControls();
 }
 
@@ -133,6 +142,11 @@ void NavEditWidget::buildControls() {
   top->setContentsMargins(0, 0, 0, 0);
   top->addWidget(central_);
   auto *layout = new QVBoxLayout(central_);
+  controls_ = new QWidget;
+  controls_->setObjectName("controls");
+  auto *controls_layout = new QVBoxLayout(controls_);
+  controls_layout->setContentsMargins(0, 0, 0, 0);
+  layout->addWidget(controls_);
 
   /* moving through the data, the modes, and the files */
   auto *row1 = new QHBoxLayout;
@@ -184,7 +198,7 @@ void NavEditWidget::buildControls() {
   need_file_.push_back(next);
   need_file_.push_back(done);
   row1->addWidget(newButton("Quit", "quit", [this] { emit closeRequested(); }));
-  layout->addLayout(row1);
+  controls_layout->addLayout(row1);
 
   /* the edits */
   auto *row2 = new QHBoxLayout;
@@ -203,7 +217,7 @@ void NavEditWidget::buildControls() {
   editing("Use Speed-Made-Good", "use_smg", [this] { return session_.useSmg(); });
   editing("Use Course-Made-Good", "use_cmg", [this] { return session_.useCmg(); });
   row2->addStretch(1);
-  layout->addLayout(row2);
+  controls_layout->addLayout(row2);
 
   /* the plots share the height, with a scroll bar only below their minimum height */
   scroll_ = new QScrollArea;
@@ -249,10 +263,10 @@ void NavEditWidget::buildMenus() {
   browse_action_->setCheckable(true);
   connect(browse_action_, &QAction::toggled, this, [this](bool on) { setBrowse(on); });
 
-  QMenu *edit_menu = new_menu("Edit");
-  undo_action_ = edit_menu->addAction("Undo", this, [this] { edit([this] { return session_.undo(); }); });
+  edit_menu_ = new_menu("Edit");
+  undo_action_ = edit_menu_->addAction("Undo", this, [this] { edit([this] { return session_.undo(); }); });
   undo_action_->setShortcut(QKeySequence::Undo);
-  redo_action_ = edit_menu->addAction("Redo", this, [this] { edit([this] { return session_.redo(); }); });
+  redo_action_ = edit_menu_->addAction("Redo", this, [this] { edit([this] { return session_.redo(); }); });
   redo_action_->setShortcut(QKeySequence::Redo);
 
   QMenu *view = new_menu("View");
@@ -346,14 +360,16 @@ void NavEditWidget::buildTimeSteppingDialog() {
   timestep_dialog_ = newDialog("Time Stepping", "dialog_timestepping");
   timestep_dialog_->resize(460, 120);
   auto *layout = new QVBoxLayout(timestep_dialog_);
-  auto *form = new QFormLayout;
+  scales_panel_ = new QWidget;
+  auto *form = new QFormLayout(scales_panel_);
   time_span_ = new ScaleControl(1, session_.data_show_max, TIME_LIMIT, 0);
   time_span_->setObjectName("time_span");
   time_step_ = new ScaleControl(1, session_.data_step_max, TIME_LIMIT, 0);
   time_step_->setObjectName("time_step");
   form->addRow("Time Span Shown (seconds):", time_span_);
   form->addRow("Time Step (seconds):", time_step_);
-  layout->addLayout(form);
+  if (presentation_ == Presentation::Window)
+    layout->addWidget(scales_panel_);
   layout->addWidget(newButton("Dismiss", "timestepping_dismiss", [this] { timestep_dialog_->hide(); }), 0, Qt::AlignRight);
   connect(time_span_, &ScaleControl::valueChanged, this, [this](int value) {
     session_.data_show_size = value;
@@ -501,6 +517,136 @@ void NavEditWidget::buildDespikeDialog() {
   layout->addLayout(row);
 }
 
+void NavEditWidget::buildPanel() {
+  central_->layout()->setContentsMargins(2, 2, 2, 2);
+  panel_bar_ = new QToolBar;
+  panel_bar_->setObjectName("panel_bar");
+  panel_bar_->setToolButtonStyle(Qt::ToolButtonTextOnly);
+  qobject_cast<QVBoxLayout *>(central_->layout())->insertWidget(0, panel_bar_);
+
+  const auto put = [this](const char *name, const char *text = nullptr, const char *tip = nullptr) {
+    auto *button = findChild<QAbstractButton *>(name);
+    if (text != nullptr)
+      button->setText(text);
+    if (tip != nullptr)
+      button->setToolTip(tip);
+    if (auto *push = qobject_cast<QPushButton *>(button)) {
+      push->setFlat(true);
+      push->setFixedWidth(push->fontMetrics().horizontalAdvance(push->text()) + 16);
+    }
+    panel_bar_->addWidget(button);
+  };
+  /* first, so that they do not end up behind the overflow of a narrow toolbar */
+  const auto popup = [this](const char *text, const char *name, QMenu *menu) {
+    auto *button = new QToolButton;
+    button->setText(text);
+    button->setObjectName(name);
+    button->setPopupMode(QToolButton::InstantPopup);
+    button->setMenu(menu);
+    panel_bar_->addWidget(button);
+  };
+  auto *scales_menu = new QMenu(this);
+  auto *scales_action = new QWidgetAction(scales_menu);
+  scales_action->setDefaultWidget(scales_panel_);
+  scales_menu->addAction(scales_action);
+  popup("Scales", "panel_scales", scales_menu);
+  auto *panel_menu = new QMenu(this);
+  for (QMenu *menu : menus_)
+    panel_menu->addMenu(menu);
+  popup("Menu", "panel_menu", panel_menu);
+  panel_bar_->addSeparator();
+  put("start", "|<", "Start");
+  put("reverse", "<", "Reverse");
+  put("forward", ">", "Forward");
+  put("end", ">|", "End");
+  put("next_buffer", ">>", "Next Buffer");
+  panel_bar_->addSeparator();
+  put("show_all");
+  put("pick_zoom");
+  panel_bar_->addSeparator();
+  put("mode_pick");
+  put("mode_select");
+  put("mode_deselect");
+  put("mode_selectall", "All", "Select All");
+  put("mode_deselectall", "None", "Deselect All");
+  panel_bar_->addSeparator();
+  panel_bar_->addAction(undo_action_);
+  panel_bar_->addAction(redo_action_);
+  panel_bar_->addSeparator();
+  put("interpolate");
+  put("revert");
+  put("flag");
+  put("unflag");
+  panel_bar_->addSeparator();
+
+  /* what has no room in the toolbar */
+  edit_menu_->addSeparator();
+  for (const char *name : {"interpolate_repeats", "use_solution", "use_smg", "use_cmg"}) {
+    auto *button = findChild<QPushButton *>(name);
+    QAction *action = edit_menu_->addAction(button->text(), button, &QPushButton::click);
+    need_file_actions_.push_back(action);
+  }
+
+  /* the program around the panel chooses the files and closes it */
+  controls_->hide();
+  filelist_action_->setVisible(false);
+  for (QMenu *menu : menus_)
+    for (QAction *action : menu->actions())
+      if (action->text() == "Time Stepping...")
+        action->setVisible(false);
+  setShortcutContext(Qt::WidgetWithChildrenShortcut);
+}
+
+/* the dialogs are windows of their own: they go and come with the panel */
+void NavEditWidget::hideEvent(QHideEvent *event) {
+  if (presentation_ == Presentation::Panel && !event->spontaneous()) {
+    hidden_dialogs_.clear();
+    for (QDialog *dialog : findChildren<QDialog *>(QString(), Qt::FindDirectChildrenOnly)) {
+      if (dialog->isVisible()) {
+        hidden_dialogs_.push_back(dialog);
+        dialog->hide();
+      }
+    }
+  }
+  QWidget::hideEvent(event);
+}
+
+void NavEditWidget::showEvent(QShowEvent *event) {
+  QWidget::showEvent(event);
+  if (!event->spontaneous()) {
+    for (QDialog *dialog : hidden_dialogs_)
+      dialog->show();
+    hidden_dialogs_.clear();
+  }
+}
+
+void NavEditWidget::setTimeWindow(const int begin[7], const int end[7]) {
+  std::copy(begin, begin + 7, session_.btime_i);
+  std::copy(end, end + 7, session_.etime_i);
+}
+
+void NavEditWidget::setDisplayName(const QString &name) {
+  display_name_ = name;
+  syncControls();
+}
+
+void NavEditWidget::setShortcutContext(Qt::ShortcutContext context) {
+  for (QAction *action : {open_action_, save_action_, undo_action_, redo_action_}) {
+    action->setShortcutContext(context);
+    /* with a smaller scope than the window the key works only if the action is on this widget */
+    if (context != Qt::WindowShortcut)
+      addAction(action);
+  }
+}
+
+bool NavEditWidget::goToTime(double time_d) {
+  if (busy() || !session_.isOpen() || session_.goToTime(time_d) != MB_SUCCESS)
+    return false;
+  canvas_->redraw();
+  syncControls();
+  return true;
+}
+
 /*--------------------------------------------------------------------*/
 void NavEditWidget::setWorking(bool working) {
   central_->setEnabled(!working);
@@ -512,6 +658,8 @@ void NavEditWidget::setWorking(bool working) {
 /* Reading and writing a whole file may take long, so it happens in a thread. Nothing else touches the session meanwhile. */
 void NavEditWidget::runJob(const QString &message, std::function<void()> work, std::function<void()> done) {
   canvas_->setIntervalMode(false);
+  const QWidget *focus = QApplication::focusWidget();
+  job_had_focus_ = focus != nullptr && (focus == this || isAncestorOf(focus));
   emit statusMessage(message, 0);
   worker_ = QThread::create(std::move(work));
   setWorking(true);
@@ -519,7 +667,8 @@ void NavEditWidget::runJob(const QString &message, std::function<void()> work, s
     worker_->deleteLater();
     worker_ = nullptr;
     setWorking(false);
-    canvas_->setFocus();
+    if (presentation_ == Presentation::Window || job_had_focus_)
+      canvas_->setFocus();
     canvas_->layoutChanged();
     startMbprocess();
     done();
@@ -530,15 +679,21 @@ void NavEditWidget::runJob(const QString &message, std::function<void()> work, s
 
 void NavEditWidget::startMbprocess() {
   if (!saved_path_.empty() && run_mbprocess_) {
-    if (!QProcess::startDetached("mbprocess", {"-I", QString::fromStdString(saved_path_)}))
+    const QString program = program_directory_.isEmpty() ? QString("mbprocess") : program_directory_ + "/mbprocess";
+    if (!QProcess::startDetached(program, {"-I", QString::fromStdString(saved_path_)}))
       showError("Unable to start mbprocess", QString::fromStdString(saved_path_), "");
     else
       emit statusMessage("Edits being applied using mbprocess...", 5000);
   }
+  /* once for each save: closing after a Save with nothing new writes nothing */
+  if (!saved_path_.empty() && !save_reported_)
+    emit editsSaved(QString::fromStdString(saved_path_));
+  if (!saved_path_.empty())
+    save_reported_ = false;
   saved_path_.clear();
 }
 
-void NavEditWidget::showError(const QString &a, const QString &b, const QString &c) { QMessageBox::warning(this, PROGRAM_NAME, a + "\n" + b + "\n" + c); }
+void NavEditWidget::showError(const QString &a, const QString &b, const QString &c) { QMessageBox::warning(this, display_name_, a + "\n" + b + "\n" + c); }
 
 void NavEditWidget::addInput(const std::string &path, int format) {
   std::string message;
@@ -562,13 +717,13 @@ void NavEditWidget::loadFirstFile() {
     loadFile(0);
 }
 
-bool NavEditWidget::openFile(const QString &path, int format) {
+bool NavEditWidget::openFile(const QString &path, int format, SavedEdits edits) {
   if (busy())
     return false;
   if (session_.isOpen() && path == QString::fromUtf8(session_.file()))
     return true;
   const std::string name = path.toStdString();
-  afterCurrentFileClosed([this, name, format] {
+  afterCurrentFileClosed([this, name, format, edits] {
     int index = -1;
     for (int i = 0; i < (int)files_.size(); i++)
       if (files_[i].path == name)
@@ -583,7 +738,7 @@ bool NavEditWidget::openFile(const QString &path, int format) {
       index = (int)before;
       syncFileList();
     }
-    loadFile(index);
+    loadFile(index, edits == SavedEdits::Ask, edits == SavedEdits::Apply);
   });
   return true;
 }
@@ -611,7 +766,7 @@ void NavEditWidget::openDialog() {
   });
 }
 
-void NavEditWidget::loadFile(int index) {
+void NavEditWidget::loadFile(int index, bool ask_saved_edits, bool use_saved_edits) {
   if (index < 0 || index >= (int)files_.size())
     return;
   const std::string path = files_[index].path;
@@ -621,16 +776,18 @@ void NavEditWidget::loadFile(int index) {
   std::string description;
   bool mine = false;
   if (Session::lockInfo(path, description, mine) && mine) {
-    const auto answer = QMessageBox::question(this, PROGRAM_NAME,
-                                              QString("%1 is locked by %2.\nIf that program is no longer running, the lock was left by a crash.\nOpen it anyway?")
-                                                  .arg(file_name(path), QString::fromStdString(description)));
-    if (answer == QMessageBox::Yes)
+    const bool open_anyway =
+        lock_choice_ ? lock_choice_(QString::fromStdString(path), QString::fromStdString(description)) == LockChoice::OpenAnyway
+                     : QMessageBox::question(this, display_name_,
+                                             QString("%1 is locked by %2.\nIf that program is no longer running, the lock was left by a crash.\nOpen it anyway?")
+                                                 .arg(file_name(path), QString::fromStdString(description))) == QMessageBox::Yes;
+    if (open_anyway)
       Session::removeLock(path);
   }
 
-  bool use_previous = false;
-  if (Session::hasSavedEdits(path))
-    use_previous = QMessageBox::question(this, PROGRAM_NAME,
+  bool use_previous = use_saved_edits && Session::hasSavedEdits(path);
+  if (ask_saved_edits && Session::hasSavedEdits(path))
+    use_previous = QMessageBox::question(this, display_name_,
                                          QString("%1 has edited navigation saved.\nDo you want to start from those edits?").arg(file_name(path))) ==
                    QMessageBox::Yes;
 
@@ -658,7 +815,7 @@ void NavEditWidget::afterCurrentFileClosed(std::function<void()> next) {
     return;
   }
   if (session_.unsaved()) {
-    const auto answer = QMessageBox::question(this, PROGRAM_NAME, QString("Save changes to the navigation of %1?").arg(file_name(session_.file())),
+    const auto answer = QMessageBox::question(this, display_name_, QString("Save changes to the navigation of %1?").arg(file_name(session_.file())),
                                               QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Save);
     if (answer == QMessageBox::Cancel)
       return;
@@ -687,8 +844,11 @@ bool NavEditWidget::save() {
   if (busy() || !session_.canSave())
     return false;
   const bool saved = session_.save() == MB_SUCCESS;
-  if (saved)
+  if (saved) {
     emit statusMessage("Edits saved", 3000);
+    emit editsSaved(QString::fromUtf8(session_.file()));
+    save_reported_ = true;
+  }
   startMbprocess();
   syncControls();
   syncFileList();
@@ -700,7 +860,7 @@ bool NavEditWidget::prepareToClose(std::function<void()> closed_later) {
     return false;
   if (session_.isOpen()) {
     if (session_.unsaved()) {
-      const auto answer = QMessageBox::question(this, PROGRAM_NAME, QString("Save changes to the navigation of %1?").arg(file_name(session_.file())),
+      const auto answer = QMessageBox::question(this, display_name_, QString("Save changes to the navigation of %1?").arg(file_name(session_.file())),
                                                 QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Save);
       if (answer == QMessageBox::Cancel)
         return false;
@@ -779,6 +939,18 @@ void NavEditWidget::about() {
 }
 
 /*--------------------------------------------------------------------*/
+void NavEditWidget::syncUndo() {
+  const bool panel = presentation_ == Presentation::Panel;
+  undo_action_->setEnabled(session_.canUndo());
+  const QString undo_text = session_.canUndo() ? "Undo " + QString::fromStdString(session_.undoLabel()) : "Undo";
+  undo_action_->setText(panel ? "Undo" : undo_text);
+  undo_action_->setToolTip(undo_text);
+  redo_action_->setEnabled(session_.canRedo());
+  const QString redo_text = session_.canRedo() ? "Redo " + QString::fromStdString(session_.redoLabel()) : "Redo";
+  redo_action_->setText(panel ? "Redo" : redo_text);
+  redo_action_->setToolTip(redo_text);
+}
+
 void NavEditWidget::syncControls() {
   if (busy())
     return;
@@ -787,10 +959,8 @@ void NavEditWidget::syncControls() {
     widget->setEnabled(open);
   for (QAction *action : need_file_actions_)
     action->setEnabled(open);
-  undo_action_->setEnabled(session_.canUndo());
-  undo_action_->setText(session_.canUndo() ? "Undo " + QString::fromStdString(session_.undoLabel()) : "Undo");
-  redo_action_->setEnabled(session_.canRedo());
-  redo_action_->setText(session_.canRedo() ? "Redo " + QString::fromStdString(session_.redoLabel()) : "Redo");
+  syncUndo();
+  const bool panel = presentation_ == Presentation::Panel;
   save_action_->setEnabled(open && session_.canSave() && session_.unsaved());
   time_interpolation_apply_->setEnabled(open && session_.timestampProblem());
   delete_bad_apply_->setEnabled(open && session_.timestampProblem());
@@ -820,10 +990,10 @@ void NavEditWidget::syncControls() {
   }
   quiet_ = false;
 
-  position_->setText(open ? QString("Records %1 to %2 of %3").arg(session_.current() + 1).arg(session_.current() + session_.nplot()).arg(session_.nbuff())
-                          : QString("No file open"));
+  const QString position_format = panel ? "%1-%2 of %3" : "Records %1 to %2 of %3";
+  position_->setText(open ? position_format.arg(session_.current() + 1).arg(session_.current() + session_.nplot()).arg(session_.nbuff()) : QString("No file open"));
 
-  const QString title = open ? QString("%1[*] - %2").arg(file_name(session_.file()), PROGRAM_NAME) : QString(PROGRAM_NAME);
+  const QString title = open ? QString("%1[*] - %2").arg(file_name(session_.file()), display_name_) : display_name_;
   if (title != title_) {
     title_ = title;
     emit titleChanged(title_);
@@ -832,6 +1002,39 @@ void NavEditWidget::syncControls() {
   if (unsaved != unsaved_) {
     unsaved_ = unsaved;
     emit unsavedChanged(unsaved_);
+  }
+  if (unsaved)
+    save_reported_ = false;
+  reportState();
+}
+
+/* tells the surrounding program what changed since the last time */
+void NavEditWidget::reportState() {
+  const QString path = session_.isOpen() ? QString::fromUtf8(session_.file()) : QString();
+  if (path != open_path_) {
+    if (!open_path_.isEmpty())
+      emit fileClosed(open_path_);
+    open_path_ = path;
+    view_first_ = view_last_ = reported_changes_ = -1;
+    if (!path.isEmpty())
+      emit fileOpened(path, session_.format());
+  }
+  if (path.isEmpty() || session_.nbuff() == 0 || session_.nplot() <= 0)
+    return;
+  const Record &first = session_.records()[session_.current()];
+  const Record &last = session_.records()[std::min(session_.current() + session_.nplot() - 1, session_.nbuff() - 1)];
+  if (first.record != view_first_ || last.record != view_last_) {
+    view_first_ = first.record;
+    view_last_ = last.record;
+    emit viewChanged(path, view_first_, view_last_, first.time_d, last.time_d);
+  }
+  /* counting the changes takes time when the buffer is large */
+  if (isSignalConnected(QMetaMethod::fromSignal(&NavEditWidget::editsChanged))) {
+    const long changes = session_.changes();
+    if (changes != reported_changes_) {
+      reported_changes_ = changes;
+      emit editsChanged(path, changes);
+    }
   }
 }
 
@@ -929,7 +1132,9 @@ void NavEditWidget::runDespike() {
   }
   int count = 0;
   double largest = 0.0;
+  session_.beginSelection();
   session_.despikeDepth(despike_window_->value(), despike_threshold_->value(), &count, &largest);
+  session_.finishSelection();
   despike_found_ = count;
   canvas_->redraw();
   despike_result_->setText(QString("%1. Largest distance from the median in view: %2 m.")

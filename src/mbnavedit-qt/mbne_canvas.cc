@@ -502,6 +502,7 @@ void Canvas::paintEvent(QPaintEvent *) {
 }
 
 void Canvas::applyAt(const QPoint &position) {
+  session_.beginSelection();
   switch (mode_) {
   case MODE_PICK:
     session_.mousePick(position.x(), position.y());
@@ -519,6 +520,7 @@ void Canvas::applyAt(const QPoint &position) {
     session_.mouseDeselectAll();
     break;
   }
+  session_.finishSelection();
   redraw();
   emit selectionChanged();
 }

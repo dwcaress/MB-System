@@ -414,7 +414,7 @@ int Session::save() {
     return MB_FAILURE;
   }
   updatePar();
-  saved_depth_ = (long)undo_.size();
+  saved_depth_ = editDepth();
   dumped_changes_ = false;
   replacing_ = false;
   saved_in_session_ = true;
@@ -422,7 +422,7 @@ int Session::save() {
 }
 
 bool Session::unsaved() const {
-  return file_open_ && output_mode_ == OUTPUT_EDIT && (replacing_ || dumped_changes_ || (long)undo_.size() != saved_depth_);
+  return file_open_ && output_mode_ == OUTPUT_EDIT && (replacing_ || dumped_changes_ || editDepth() != saved_depth_);
 }
 
 int Session::closeSave() {
@@ -446,7 +446,7 @@ int Session::nextBuffer(bool *quit) {
   *quit = false;
   int status = MB_SUCCESS;
   if (file_open_) {
-    if ((long)undo_.size() != saved_depth_)
+    if (editDepth() != saved_depth_)
       dumped_changes_ = true;
     clearUndo();
     saved_depth_ = 0;
@@ -1212,7 +1212,7 @@ void Session::setScalars(const Scalars &s) {
 }
 
 long Session::UndoStep::bytes() const {
-  return (long)(changes.size() * sizeof(Change) + (whole_before.size() + whole_after.size()) * sizeof(Record));
+  return (long)(changes.size() * sizeof(Change) + selection.size() * sizeof(SelectionChange) + (whole_before.size() + whole_after.size()) * sizeof(Record));
 }
 
 void Session::beginEdit(bool whole) {
@@ -1262,16 +1262,81 @@ void Session::finishEdit(const char *label) {
   if (step.changes.empty() && step.whole_before.empty() && step.whole_after.empty() && same_scalars)
     return;
 
-  if (saved_depth_ > (long)undo_.size())
+  if (saved_depth_ > editDepth())
     saved_depth_ = -1;  // the saved state was undone, and now it is out of reach
   undo_bytes_ += step.bytes();
   undo_.push_back(std::move(step));
   redo_.clear();
   while (undo_bytes_ > UNDO_LIMIT && undo_.size() > 1) {
     undo_bytes_ -= undo_.front().bytes();
+    const bool was_edit = !undo_.front().is_selection;
     undo_.erase(undo_.begin());
-    saved_depth_ = saved_depth_ > 0 ? saved_depth_ - 1 : -1;
+    if (was_edit)
+      saved_depth_ = saved_depth_ > 0 ? saved_depth_ - 1 : -1;
   }
+}
+
+long Session::editDepth() const {
+  long depth = 0;
+  for (const UndoStep &step : undo_)
+    depth += step.is_selection ? 0 : 1;
+  return depth;
+}
+
+void Session::beginSelection() {
+  selection_snapshot_.resize(rec_.size());
+  for (size_t i = 0; i < rec_.size(); i++)
+    selection_snapshot_[i] = rec_[i].selected;
+}
+
+void Session::finishSelection() {
+  std::vector<SelectionChange> changes;
+  if (selection_snapshot_.size() == rec_.size())
+    for (size_t i = 0; i < rec_.size(); i++)
+      if (selection_snapshot_[i] != rec_[i].selected)
+        changes.push_back({(int)i, selection_snapshot_[i], rec_[i].selected});
+  std::vector<unsigned char>().swap(selection_snapshot_);
+  if (changes.empty())
+    return;
+
+  if (saved_depth_ > editDepth())
+    saved_depth_ = -1;  // the saved state was undone, and now it is out of reach
+  redo_.clear();
+  if (undo_.empty() || !undo_.back().is_selection) {
+    UndoStep step;
+    step.label = "Selection";
+    step.is_selection = true;
+    step.before = step.after = scalars();
+    step.selection = std::move(changes);
+    undo_bytes_ += step.bytes();
+    undo_.push_back(std::move(step));
+    return;
+  }
+
+  /* with the changes of selection before it, both in the order of the records */
+  UndoStep &last = undo_.back();
+  undo_bytes_ -= last.bytes();
+  std::vector<SelectionChange> merged;
+  size_t a = 0, b = 0;
+  while (a < last.selection.size() || b < changes.size()) {
+    const bool from_old = b >= changes.size() || (a < last.selection.size() && last.selection[a].index < changes[b].index);
+    const bool from_new = a >= last.selection.size() || (b < changes.size() && changes[b].index < last.selection[a].index);
+    SelectionChange c;
+    if (from_old)
+      c = last.selection[a++];
+    else if (from_new)
+      c = changes[b++];
+    else
+      c = {last.selection[a].index, last.selection[a++].before, changes[b++].after};
+    if (c.before != c.after)
+      merged.push_back(c);
+  }
+  if (merged.empty()) {
+    undo_.pop_back();
+    return;
+  }
+  last.selection = std::move(merged);
+  undo_bytes_ += last.bytes();
 }
 
 void Session::clearUndo() {
@@ -1291,6 +1356,11 @@ const std::string &Session::redoLabel() const {
 }
 
 int Session::applyStep(const UndoStep &step, bool forward) {
+  if (step.is_selection) {
+    for (const SelectionChange &c : step.selection)
+      rec_[c.index].selected = forward ? c.after : c.before;
+    return plotAll();
+  }
   const int view = current_id_;
   const bool whole = !step.whole_before.empty() || !step.whole_after.empty();
   if (whole) {
@@ -1710,6 +1780,15 @@ int Session::revert() {
     getModel();
   finishEdit("Revert");
   return plotAll();
+}
+
+long Session::changes() const {
+  long count = 0;
+  for (const Record &r : rec_)
+    if (r.lon != r.lon_org || r.lat != r.lat_org || r.speed != r.speed_org || r.heading != r.heading_org || r.draft != r.draft_org ||
+        r.time_d != r.time_d_org || r.roll != r.roll_org || r.pitch != r.pitch_org)
+      count++;
+  return count;
 }
 
 int Session::despikeDepth(double window, double threshold, int *count, double *largest) {

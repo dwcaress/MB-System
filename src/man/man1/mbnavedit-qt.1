@@ -269,7 +269,8 @@ removed from the list. \fBSave\fP writes the edits once the whole file has been 
 \fBBrowse Only\fP means that the next file opened will not be written.
 .TP
 .B Edit menu
-\fBUndo\fP and \fBRedo\fP. Undo and redo reach back to the last Next Buffer.
+\fBUndo\fP and \fBRedo\fP. Undo and redo reach back to the last Next Buffer. Besides the edits they take
+back the selection: all of the points selected since the last edit are one step, which makes nothing unsaved.
 .TP
 .B View menu
 Turns on and off each plot, the original values in each plot, the model in the longitude and latitude

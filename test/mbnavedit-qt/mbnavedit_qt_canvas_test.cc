@@ -118,6 +118,42 @@ int main(int argc, char **argv) {
   click(canvas, point(s, 1, PLOT_LONGITUDE));
   CHECK(selected(s, PLOT_LONGITUDE) == 0);
 
+  /* several picks are one step of undo, and only the undo takes them back */
+  click(canvas, point(s, 0, PLOT_LONGITUDE));
+  click(canvas, point(s, 1, PLOT_LONGITUDE));
+  click(canvas, point(s, 2, PLOT_LONGITUDE));
+  CHECK(selected(s, PLOT_LONGITUDE) == 3);
+  CHECK(s.canUndo() && s.undoLabel() == "Selection");
+  CHECK(!s.unsaved());
+  s.undo();
+  CHECK(selected(s, PLOT_LONGITUDE) == 0);
+  CHECK(!s.canUndo());
+  s.redo();
+  CHECK(selected(s, PLOT_LONGITUDE) == 3);
+
+  /* pick, flag, interpolate: each Undo goes back one of them, so nothing has to be cleared by hand */
+  s.flag();
+  CHECK(s.records()[1].lonlat_flag);
+  s.interpolate();
+  CHECK(s.undoLabel() == "Interpolate" || s.undoLabel() == "Flag");
+  if (s.undoLabel() == "Interpolate")
+    s.undo();
+  CHECK(s.undoLabel() == "Flag");
+  s.undo();
+  CHECK(!s.records()[1].lonlat_flag);
+  CHECK(selected(s, PLOT_LONGITUDE) == 3);
+  CHECK(s.undoLabel() == "Selection");
+  s.undo();
+  CHECK(selected(s, PLOT_LONGITUDE) == 0);
+  CHECK(!s.canUndo() && s.canRedo());
+
+  /* toggling a point on and off leaves nothing to undo */
+  s.deselectAll(PLOT_LONGITUDE);
+  click(canvas, point(s, 1, PLOT_LONGITUDE));
+  click(canvas, point(s, 1, PLOT_LONGITUDE));
+  CHECK(selected(s, PLOT_LONGITUDE) == 0);
+  CHECK(!s.canUndo());
+
   /* the keys of the modes, both hands */
   int reported = -1;
   QObject::connect(&canvas, &Canvas::modeChanged, [&reported](int mode) { reported = mode; });

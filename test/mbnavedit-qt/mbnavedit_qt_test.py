@@ -102,6 +102,16 @@ class MbnaveditQtTest(unittest.TestCase):
     result = subprocess.run([os.environ["MBNAVEDIT_QT_WINDOW_TEST"], files[0], files[1], datalist], capture_output=True, text=True, errors="replace", env=env, timeout=120)
     self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
+  def test_embed(self):
+    names = []
+    for i in range(3):
+      directory = os.path.join(self.tmp.name, "embed%d" % i)
+      os.makedirs(directory)
+      names.append(S.write_line(directory)[0])
+    env = dict(os.environ, QT_QPA_PLATFORM="offscreen")
+    result = subprocess.run([os.environ["MBNAVEDIT_QT_EMBED_TEST"]] + names, capture_output=True, text=True, errors="replace", env=env, timeout=180)
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
   def test_export(self):
     image = os.path.join(self.tmp.name, "plots.png")
     subprocess.run([self.program, "--export=" + image, "--size=800x900", "-I", self.kmall], capture_output=True, check=True, env=dict(os.environ, QT_QPA_PLATFORM="offscreen"))

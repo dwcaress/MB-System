@@ -48,22 +48,33 @@ class QPushButton;
 class QRadioButton;
 class QScrollArea;
 class QSpinBox;
+class QToolBar;
+class QHideEvent;
+class QShowEvent;
 class QTableWidget;
 class QThread;
 class QTimer;
 
 namespace mbne {
 
-/* The whole navigation editor as a widget. Before deleting it with a file open, call
+/* whether to start from the navigation edits saved for a file when it is opened */
+enum class SavedEdits { Ask, Apply, Ignore };
+/* what to do with a file locked by the same user on the same computer */
+enum class LockChoice { Refuse, OpenAnyway };
+/* Window: the rows of controls of the program mbnavedit-qt. Panel: a compact form for
+   part of another program's window, with one toolbar. */
+enum class Presentation { Window, Panel };
+
+/* The whole navigation editor as a widget, for a window of its own or a panel of another program. Before deleting it with a file open, call
    prepareToClose: deleting it discards edits that have not been saved. */
 class NavEditWidget : public QWidget {
   Q_OBJECT
 
  public:
-  explicit NavEditWidget(QWidget *parent = nullptr);
+  explicit NavEditWidget(Presentation presentation = Presentation::Window, QWidget *parent = nullptr);
   ~NavEditWidget() override;
 
-  QSize sizeHint() const override { return QSize(1300, 950); }
+  QSize sizeHint() const override { return presentation_ == Presentation::Panel ? QSize(900, 620) : QSize(1300, 950); }
 
   Session &session() { return session_; }
   Canvas *canvas() { return canvas_; }
@@ -76,13 +87,22 @@ class NavEditWidget : public QWidget {
   void setGuiMode(bool gui_mode) { session_.gui_mode = gui_mode; }
   void loadFirstFile();
 
-  /* These return false if the editor cannot do it now; the work of openFile runs in the background. */
-  bool openFile(const QString &path, int format);
+  /* set before opening a file */
+  void setTimeWindow(const int begin[7], const int end[7]);
+  void setProgramDirectory(const QString &directory) { program_directory_ = directory; }  // where to look for mbprocess
+  /* decides about a lock instead of the question to the user */
+  void setLockChoice(std::function<LockChoice(const QString &path, const QString &holder)> choose) { lock_choice_ = std::move(choose); }
+
+  /* These return false if the editor cannot do it now; the work of openFile runs in the background, so watch the signals. */
+  bool openFile(const QString &path, int format, SavedEdits edits = SavedEdits::Ask);
   bool save();
+  bool goToTime(double time_d);  // only within the records in memory
 
   /* for the surrounding window */
   QList<QMenu *> menus() const { return menus_; }
   QString title() const { return title_; }
+  void setDisplayName(const QString &name);  // in titles and message boxes
+  void setShortcutContext(Qt::ShortcutContext context);
   /* True if the editor may close now. Otherwise it stays, because it is busy, the user
      cancelled, or the edits are being saved; closed_later is then called once they are. */
   bool prepareToClose(std::function<void()> closed_later);
@@ -93,6 +113,15 @@ class NavEditWidget : public QWidget {
   void statusMessage(const QString &text, int timeout_ms);
   void busyChanged(bool busy);
   void closeRequested();  // the Quit button, or the last file is done in GUI mode
+  void fileOpened(const QString &path, int format);
+  void fileClosed(const QString &path);
+  void viewChanged(const QString &path, long first_record, long last_record, double first_time_d, double last_time_d);
+  void editsChanged(const QString &path, long changes);
+  void editsSaved(const QString &path);
+
+ protected:
+  void hideEvent(QHideEvent *event) override;
+  void showEvent(QShowEvent *event) override;
 
  private:
   struct ShowToggle {
@@ -102,6 +131,7 @@ class NavEditWidget : public QWidget {
 
   void buildControls();
   void buildMenus();
+  void buildPanel();
   void buildFileListDialog();
   void buildTimeSteppingDialog();
   void buildModelDialog();
@@ -116,7 +146,7 @@ class NavEditWidget : public QWidget {
   void startMbprocess();
   void showError(const QString &a, const QString &b, const QString &c);
   void openDialog();
-  void loadFile(int index);
+  void loadFile(int index, bool ask_saved_edits = true, bool use_saved_edits = false);
   void afterCurrentFileClosed(std::function<void()> next);
   void doneOrNextFile();
   void nextBuffer();
@@ -125,7 +155,9 @@ class NavEditWidget : public QWidget {
   void about();
 
   void syncControls();
+  void syncUndo();
   void syncFileList();
+  void reportState();
   void edit(std::function<int()> action);
   void move(std::function<int()> action);
   void applyModel(bool mode_changed);
@@ -145,8 +177,21 @@ class NavEditWidget : public QWidget {
   QString title_;
   bool unsaved_ = false;
   bool quiet_ = false;
+  const Presentation presentation_;
+  QString display_name_ = PROGRAM_NAME;
+  QString program_directory_;
+  std::function<LockChoice(const QString &, const QString &)> lock_choice_;
+  QString open_path_;
+  long view_first_ = -1, view_last_ = -1, reported_changes_ = -1;
+  bool save_reported_ = false;
+  bool job_had_focus_ = false;
+  QList<QDialog *> hidden_dialogs_;
 
   QWidget *central_;
+  QWidget *controls_;
+  QToolBar *panel_bar_ = nullptr;
+  QWidget *scales_panel_ = nullptr;
+  QMenu *edit_menu_ = nullptr;
   Canvas *canvas_;
   QScrollArea *scroll_;
   TimeSlider *slider_;
