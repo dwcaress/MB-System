@@ -60,20 +60,34 @@ class OneStepWheelSlider : public QSlider {
   void wheelEvent(QWheelEvent *event) override;
 };
 
-/* modeless table of picked positions */
-class PickDialog : public QDialog {
+/* table of picked positions */
+class PickTable : public QWidget {
   Q_OBJECT
  public:
-  explicit PickDialog(QWidget *parent = nullptr);
+  explicit PickTable(QWidget *parent = nullptr);
   void addRow(const QStringList &values);
   bool saveText(const QString &path);
   static const QStringList columns;
+
+ signals:
+  void closeRequested();
 
  private:
   void saveDialog();
   void removeSelected();
   void clearAndClose();
   QTableWidget *table_;
+};
+
+/* the table as a modeless window, when the program around the tool does not take it */
+class PickDialog : public QDialog {
+  Q_OBJECT
+ public:
+  explicit PickDialog(QWidget *parent = nullptr);
+  PickTable *table() { return table_; }
+
+ private:
+  PickTable *table_;
 };
 
 /* Window: the full tool, for the window of the program. Panel: compact, for a part of another program's window. */
@@ -98,6 +112,11 @@ class WaterColumnWidget : public QWidget {
   QStringList pick(double across, double depth);  // for tests: pick the cell nearest to a point
   QString title() const;
 
+  /* For a window that shows the table of picks itself, for example in a dock. It then gets
+     pickTableWanted when the table should be shown, and calls pickTableClosed when the user closes it. */
+  PickTable *takePickTable();
+  void pickTableClosed();
+
  signals:
   void statusMessage(const QString &message, int timeout_ms);
   void diagnostic(const QString &message);  // the program writes these to stderr
@@ -105,7 +124,8 @@ class WaterColumnWidget : public QWidget {
   void fileOpened(const QString &path);
   void fileOpenFailed(const QString &path);
   void pingChanged(int step, int ping, int ping_number, int swath, double time_d);  // ping is the index in the file
-  void pickAdded(const QStringList &row);  // the columns of PickDialog
+  void pickAdded(const QStringList &row);  // the columns of PickTable
+  void pickTableWanted();
 
  protected:
   void keyPressEvent(QKeyEvent *event) override;
@@ -146,6 +166,8 @@ class WaterColumnWidget : public QWidget {
   QPushButton *replay_;
   OneStepWheelSlider *slider_;
   QTimer *replay_timer_;
+  PickTable *pick_table_ = nullptr;
+  bool pick_table_taken_ = false;
   PickDialog *pick_dialog_ = nullptr;
   bool pick_shown_once_ = false;
 };

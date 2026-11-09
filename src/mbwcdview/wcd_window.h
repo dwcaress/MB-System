@@ -29,6 +29,8 @@
 
 #include "wcd_widget.h"
 
+class QDockWidget;
+
 namespace wcd {
 
 /* The window of the program mbwcdview: the tool with a status bar and a title. */
@@ -40,8 +42,16 @@ class WaterColumnWindow : public QMainWindow {
 
   WaterColumnWidget *editor() { return editor_; }
 
+ protected:
+  bool eventFilter(QObject *watched, QEvent *event) override;
+
  private:
+  void showPickDock();
+
   WaterColumnWidget *editor_;
+  PickTable *pick_table_;
+  QDockWidget *pick_dock_ = nullptr;
+  bool pick_shown_once_ = false;
 };
 
 }  // namespace wcd

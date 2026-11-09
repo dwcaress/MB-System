@@ -94,11 +94,10 @@ void OneStepWheelSlider::wheelEvent(QWheelEvent *event) {
 }
 
 /*--------------------------------------------------------------------*/
-const QStringList PickDialog::columns = {"Ping", "UTC", "AcrossTrack_m", "Depth_m", "ShipLat",
+const QStringList PickTable::columns = {"Ping", "UTC", "AcrossTrack_m", "Depth_m", "ShipLat",
                                          "ShipLon", "PointLat", "PointLon", "Azimuth"};
 
-PickDialog::PickDialog(QWidget *parent) : QDialog(parent) {
-  setWindowTitle("Picked Positions");
+PickTable::PickTable(QWidget *parent) : QWidget(parent) {
   table_ = new QTableWidget(0, columns.size(), this);
   table_->setHorizontalHeaderLabels(columns);
   table_->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -108,27 +107,28 @@ PickDialog::PickDialog(QWidget *parent) : QDialog(parent) {
   auto *save = new QPushButton("Save as TXT");
   auto *remove = new QPushButton("Remove selected");
   auto *close = new QPushButton("Close");
-  connect(save, &QPushButton::clicked, this, &PickDialog::saveDialog);
-  connect(remove, &QPushButton::clicked, this, &PickDialog::removeSelected);
-  connect(close, &QPushButton::clicked, this, &PickDialog::clearAndClose);
+  connect(save, &QPushButton::clicked, this, &PickTable::saveDialog);
+  connect(remove, &QPushButton::clicked, this, &PickTable::removeSelected);
+  connect(close, &QPushButton::clicked, this, &PickTable::clearAndClose);
   auto *buttons = new QHBoxLayout;
   buttons->addWidget(save);
   buttons->addWidget(remove);
   buttons->addStretch(1);
   buttons->addWidget(close);
   auto *layout = new QVBoxLayout(this);
+  layout->setContentsMargins(0, 0, 0, 0);
   layout->addWidget(table_);
   layout->addLayout(buttons);
 }
 
-void PickDialog::addRow(const QStringList &values) {
+void PickTable::addRow(const QStringList &values) {
   const int r = table_->rowCount();
   table_->insertRow(r);
   for (int c = 0; c < values.size() && c < columns.size(); c++)
     table_->setItem(r, c, new QTableWidgetItem(values[c]));
 }
 
-bool PickDialog::saveText(const QString &path) {
+bool PickTable::saveText(const QString &path) {
   QFile file(path);
   if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
     return false;
@@ -143,14 +143,14 @@ bool PickDialog::saveText(const QString &path) {
   return true;
 }
 
-void PickDialog::saveDialog() {
+void PickTable::saveDialog() {
   const QString path =
       QFileDialog::getSaveFileName(this, "Save Picks", "picks.txt", "Text Files (*.txt);;All Files (*)");
   if (!path.isEmpty())
     saveText(path);
 }
 
-void PickDialog::removeSelected() {
+void PickTable::removeSelected() {
   QList<int> rows;
   for (const QModelIndex &index : table_->selectionModel()->selectedRows())
     rows << index.row();
@@ -159,9 +159,17 @@ void PickDialog::removeSelected() {
     table_->removeRow(r);
 }
 
-void PickDialog::clearAndClose() {
+void PickTable::clearAndClose() {
   table_->setRowCount(0);
-  close();
+  emit closeRequested();
+}
+
+PickDialog::PickDialog(QWidget *parent) : QDialog(parent) {
+  setWindowTitle("Picked Positions");
+  table_ = new PickTable;
+  auto *layout = new QVBoxLayout(this);
+  layout->addWidget(table_);
+  connect(table_, &PickTable::closeRequested, this, &QWidget::close);
 }
 
 /*--------------------------------------------------------------------*/
@@ -616,9 +624,24 @@ void WaterColumnWidget::saveImageDialog() {
 /*--------------------------------------------------------------------*/
 void WaterColumnWidget::togglePick(bool on) { view_->setCursor(on ? Qt::CrossCursor : Qt::ArrowCursor); }
 
+PickTable *WaterColumnWidget::takePickTable() {
+  pick_table_ = new PickTable(this);
+  pick_table_->hide();
+  pick_table_taken_ = true;
+  connect(pick_table_, &PickTable::closeRequested, this, &WaterColumnWidget::pickTableClosed);
+  return pick_table_;
+}
+
+void WaterColumnWidget::pickTableClosed() { pick_->setChecked(false); }
+
 void WaterColumnWidget::showPickDialog() {
+  if (pick_table_taken_) {
+    emit pickTableWanted();
+    return;
+  }
   if (pick_dialog_ == nullptr) {
     pick_dialog_ = new PickDialog(this);
+    pick_table_ = pick_dialog_->table();
     connect(pick_dialog_, &QDialog::finished, this, [this]() { pick_->setChecked(false); });
     const QWidget *beside = presentation_ == Presentation::Panel ? static_cast<const QWidget *>(this) : window();
     pick_dialog_->resize(std::max(600, beside->width()), std::max(240, beside->height() / 3));
@@ -689,7 +712,7 @@ QStringList WaterColumnWidget::pick(double across, double depth) {
                            number_or_empty(pt_lon, 6),
                            source};
   showPickDialog();
-  pick_dialog_->addRow(row);
+  pick_table_->addRow(row);
   emit pickAdded(row);
   return row;
 }

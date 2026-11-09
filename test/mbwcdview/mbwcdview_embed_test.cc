@@ -45,6 +45,7 @@
 #include <QShowEvent>
 #include <QSlider>
 #include <QStatusBar>
+#include <QTableWidget>
 #include <QToolBar>
 #include <QToolButton>
 
@@ -298,6 +299,28 @@ int main(int argc, char **argv) {
     QApplication::sendEvent(b, &show_event);
     CHECK(dialog->isVisible());
     dialog->hide();
+  }
+
+  /* a host can show the table itself; otherwise the tool opens a window of its own */
+  {
+    WaterColumnWidget c;
+    wcd::PickTable *table = c.takePickTable();
+    int wanted = 0;
+    QObject::connect(&c, &WaterColumnWidget::pickTableWanted, [&wanted] { wanted++; });
+    CHECK(c.openFile(a_path));
+    wait_for({&c});
+    const wcd::PlotData &c_data = data_of(&c);
+    size_t c_cell = 0;
+    while (c_cell < c_data.amplitude.size() && !(c_data.amplitude[c_cell] == c_data.amplitude[c_cell] && c_data.across[c_cell] == c_data.across[c_cell] && c_data.depth[c_cell] == c_data.depth[c_cell]))
+      c_cell++;
+    CHECK(!c.pick(c_data.across[c_cell], c_data.depth[c_cell]).isEmpty());
+    CHECK(wanted == 1);
+    CHECK(c.findChild<wcd::PickDialog *>() == nullptr);
+    CHECK(table->findChild<QTableWidget *>()->rowCount() == 1);
+    box(&c, "Pick")->click();
+    CHECK(box(&c, "Pick")->isChecked());
+    c.pickTableClosed();
+    CHECK(!box(&c, "Pick")->isChecked());
   }
 
   /* a file that cannot be read */

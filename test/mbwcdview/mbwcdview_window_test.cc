@@ -31,6 +31,7 @@
 
 #include <QApplication>
 #include <QCheckBox>
+#include <QDockWidget>
 #include <QDoubleSpinBox>
 #include <QElapsedTimer>
 #include <QFile>
@@ -208,14 +209,18 @@ int main(int argc, char **argv) {
   CHECK(cell < data.amplitude.size());
   const double x = data.across[cell], z = data.depth[cell];
   const QStringList row = w.pick(x, z);
-  CHECK(row.size() == wcd::PickDialog::columns.size());
+  CHECK(row.size() == wcd::PickTable::columns.size());
   CHECK(row.size() > 3 && std::abs(row[2].toDouble() - x) < 0.01 && std::abs(row[3].toDouble() - z) < 0.01);
-  auto *dialog = window.findChild<wcd::PickDialog *>();
-  CHECK(dialog != nullptr && dialog->isVisible());
+  /* the table opens in a floating dock */
+  auto *dialog = window.findChild<QDockWidget *>();
+  CHECK(dialog != nullptr && dialog->isVisible() && dialog->isFloating());
+  CHECK(dialog->features() & QDockWidget::DockWidgetMovable);
+  auto *pick_table = dialog->findChild<wcd::PickTable *>();
+  CHECK(pick_table != nullptr);
   auto *table = dialog->findChild<QTableWidget *>();
   CHECK(table->rowCount() == 1);
   const QString picks = dir + "/picks.txt";
-  CHECK(dialog->saveText(picks));
+  CHECK(pick_table->saveText(picks));
   {
     QFile file(picks);
     CHECK(file.open(QIODevice::ReadOnly | QIODevice::Text));
@@ -240,6 +245,24 @@ int main(int argc, char **argv) {
   button(*dialog, "Close")->click();
   CHECK(table->rowCount() == 0 && !dialog->isVisible());
   CHECK(!box(window, "Pick")->isChecked());
+
+  /* the close button of the dock stops picking and keeps the rows */
+  CHECK(!w.pick(x, z).isEmpty());
+  CHECK(dialog->isVisible() && table->rowCount() == 1);
+  box(window, "Pick")->click();
+  CHECK(box(window, "Pick")->isChecked());
+  dialog->close();
+  CHECK(!dialog->isVisible() && table->rowCount() == 1);
+  CHECK(!box(window, "Pick")->isChecked());
+
+  /* docked, it still takes the picks */
+  dialog->setFloating(false);
+  CHECK(!dialog->isFloating());
+  CHECK(window.dockWidgetArea(dialog) == Qt::BottomDockWidgetArea);
+  CHECK(!w.pick(x, z).isEmpty());
+  CHECK(table->rowCount() == 2);
+  button(*dialog, "Close")->click();
+  CHECK(table->rowCount() == 0);
 
   /* replay goes round the steps */
   spins[5]->setValue(10.0);
