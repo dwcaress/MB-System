@@ -221,6 +221,8 @@ class Session {
   double plotEndTime() const { return plot_end_time_; }
   double fileStartTime() const { return file_start_time_d_; }
   void setPlotSize(int width, int height);
+  /* in pixels; without these the margins are those of the Motif program, a fixed share of the plot */
+  void setPlotMargins(int left, int right, int top, int bottom);
   int plotWidth() const { return plot_width_; }
   int plotHeight() const { return plot_height_; }
   int plotAll();
@@ -329,6 +331,7 @@ class Session {
   std::vector<Plot> plots_;
   int plot_width_ = DEFAULT_PLOT_WIDTH;
   int plot_height_ = DEFAULT_PLOT_HEIGHT;
+  int margin_left_ = -1, margin_right_ = -1, margin_top_ = -1, margin_bottom_ = -1;
   double plot_start_time_ = 0.0;
   double plot_end_time_ = 0.0;
   double file_start_time_d_ = 0.0;

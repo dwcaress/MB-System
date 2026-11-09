@@ -84,6 +84,32 @@ class MbnaveditQtTest(unittest.TestCase):
     self.assertIn("Format: 261", out)
     self.assertRegex(out, r"Records loaded: \d+")
 
+  def test_canvas(self):
+    env = dict(os.environ, QT_QPA_PLATFORM="offscreen")
+    result = subprocess.run([os.environ["MBNAVEDIT_QT_CANVAS_TEST"], self.kmall], capture_output=True, text=True, errors="replace", env=env)
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+  def test_export(self):
+    image = os.path.join(self.tmp.name, "plots.png")
+    subprocess.run([self.program, "--export=" + image, "--size=800x900", "-I", self.kmall], capture_output=True, check=True, env=dict(os.environ, QT_QPA_PLATFORM="offscreen"))
+    with open(image, "rb") as f:
+      self.assertEqual(f.read(8), b"\x89PNG\r\n\x1a\n")
+    self.assertGreater(os.path.getsize(image), 1000)
+
+  def test_draw_counts(self):
+    n = self.records()
+    env = dict(os.environ, QT_QPA_PLATFORM="offscreen")
+    script = os.path.join(self.tmp.name, "script.txt")
+    with open(script, "w") as f:
+      f.write(self.opened(mode="browse") + "\ndrawcount\npick lon 1\ndrawcount\ndone\n")
+    out = subprocess.run([self.program, "--replay=" + script], capture_output=True, text=True, errors="replace", cwd=self.tmp.name, check=True, env=env).stdout
+    counts = re.findall(r"drawcount: fill_black (\d+) rect_red (\d+)", out)
+    self.assertEqual(len(counts), 2)
+    self.assertEqual(int(counts[0][1]), 0)
+    self.assertEqual(int(counts[1][1]), 1)
+    self.assertEqual(int(counts[0][0]), int(counts[1][0]) + 1)
+    self.assertEqual(int(counts[0][0]) % n, 0)
+
   def test_saved_edit(self):
     n = self.records()
     self.assertGreaterEqual(n, 4)

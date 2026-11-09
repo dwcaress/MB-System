@@ -586,6 +586,13 @@ void Session::setPlotSize(int width, int height) {
   plot_height_ = height;
 }
 
+void Session::setPlotMargins(int left, int right, int top, int bottom) {
+  margin_left_ = left;
+  margin_right_ = right;
+  margin_top_ = top;
+  margin_bottom_ = bottom;
+}
+
 int Session::plotAll() {
   const int n = nbuff();
   nplot_ = 0;
@@ -758,10 +765,18 @@ int Session::plotAll() {
     const int k = (int)plots_.size();
     Plot p;
     p.type = type;
-    p.ixmin = 1.25 * margin_x;
-    p.ixmax = plot_width_ - margin_x / 2;
-    p.iymin = plot_height_ - margin_y + k * plot_height_;
-    p.iymax = k * plot_height_ + margin_y;
+    if (margin_left_ >= 0) {
+      p.ixmin = margin_left_;
+      p.ixmax = plot_width_ - margin_right_;
+      p.iymin = plot_height_ - margin_bottom_ + k * plot_height_;
+      p.iymax = k * plot_height_ + margin_top_;
+    }
+    else {
+      p.ixmin = 1.25 * margin_x;
+      p.ixmax = plot_width_ - margin_x / 2;
+      p.iymin = plot_height_ - margin_y + k * plot_height_;
+      p.iymax = k * plot_height_ + margin_y;
+    }
     p.xmin = time_min;
     p.xmax = time_max;
     p.ymin = ymin;

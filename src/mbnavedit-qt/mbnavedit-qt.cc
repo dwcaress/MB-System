@@ -37,8 +37,14 @@
 #include <cstring>
 #include <string>
 
+#include <QApplication>
+#include <QImage>
+#include <QPainter>
+#include <QPalette>
+
 #include "mb_define.h"
 #include "mb_status.h"
+#include "mbne_canvas.h"
 #include "mbne_core.h"
 
 using mbne::Record;
@@ -64,7 +70,20 @@ constexpr char usage_message[] =
     "\t--run-mbprocess {-X}\n"
     "\t--verbose {-V}\n"
     "\t--dump\n"
+    "\t--export=image.png --size=widthxheight\n"
     "\t--replay=script\n\n";
+
+/* drawing without a window needs an application, on the offscreen platform if none is asked for */
+void ensure_application() {
+  static int argc = 1;
+  static char name[] = "mbnavedit-qt";
+  static char *argv[] = {name, nullptr};
+  if (QCoreApplication::instance() == nullptr) {
+    if (qEnvironmentVariableIsEmpty("QT_QPA_PLATFORM"))
+      qputenv("QT_QPA_PLATFORM", "offscreen");
+    new QApplication(argc, argv);
+  }
+}
 
 unsigned long hash_bytes(unsigned long h, const void *p, size_t n) {
   const unsigned char *c = (const unsigned char *)p;
@@ -337,6 +356,16 @@ int run_line(Session &s, const char *line) {
     else if (strcmp(b, "lon") == 0)
       r.lon = d0;
   }
+  else if (strcmp(c, "drawcount") == 0) {
+    ensure_application();
+    QImage image(1000, 1000, QImage::Format_RGB32);
+    QPainter painter(&image);
+    mbne::DrawCounts counts;
+    s.plotAll();
+    mbne::draw_plots(painter, s, image.size(), QApplication::palette(), &counts);
+    printf("drawcount: fill_black %ld rect_red %ld rect_purple %ld rect_orange %ld line_green %ld line_blue %ld\n", counts.fill_black, counts.rect_red,
+           counts.rect_purple, counts.rect_orange, counts.line_green, counts.line_blue);
+  }
   else if (strcmp(c, "abort") == 0) {
     fflush(stdout);
     abort();
@@ -402,10 +431,32 @@ int dump(Session &session, const std::string &input, int format) {
   return MB_ERROR_NO_ERROR;
 }
 
+int export_image(Session &session, const std::string &input, int format, const std::string &path, int width, int height) {
+  session.on_error = [](const std::string &a, const std::string &b, const std::string &c) {
+    fprintf(stderr, "%s\n%s\n%s\n", a.c_str(), b.c_str(), c.c_str());
+  };
+  if (session.open(input, format, false, mbne::OUTPUT_BROWSE) != MB_SUCCESS)
+    return MB_ERROR_OPEN_FAIL;
+  ensure_application();
+  const QSize size(width, height);
+  mbne::layout_plots(session, size, QApplication::font());
+  QImage image(size, QImage::Format_RGB32);
+  QPainter painter(&image);
+  painter.setFont(QApplication::font());
+  mbne::draw_plots(painter, session, size, QApplication::palette());
+  painter.end();
+  session.closeDiscard();
+  if (!image.save(QString::fromStdString(path))) {
+    fprintf(stderr, "%s: cannot write %s\n", program_name, path.c_str());
+    return MB_ERROR_WRITE_FAIL;
+  }
+  return MB_ERROR_NO_ERROR;
+}
+
 }  // namespace
 
 int main(int argc, char **argv) {
-  enum { OPT_DUMP = 1000, OPT_REPLAY };
+  enum { OPT_DUMP = 1000, OPT_REPLAY, OPT_EXPORT, OPT_SIZE };
   static struct option options[] = {{"verbose", no_argument, nullptr, 'V'},
                                     {"help", no_argument, nullptr, 'H'},
                                     {"begin-time", required_argument, nullptr, 'B'},
@@ -419,12 +470,15 @@ int main(int argc, char **argv) {
                                     {"run-mbprocess", no_argument, nullptr, 'X'},
                                     {"dump", no_argument, nullptr, OPT_DUMP},
                                     {"replay", required_argument, nullptr, OPT_REPLAY},
+                                    {"export", required_argument, nullptr, OPT_EXPORT},
+                                    {"size", required_argument, nullptr, OPT_SIZE},
                                     {nullptr, 0, nullptr, 0}};
 
   Session session;
   int verbose = 0, format = 0, help = 0, errflg = 0;
   bool do_dump = false;
-  std::string input, replay_script;
+  int width = 1000, height = 1200;
+  std::string input, replay_script, export_file;
   int c;
   while ((c = getopt_long(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:NnPpXx", options, nullptr)) != -1) {
     switch (c) {
@@ -478,6 +532,12 @@ int main(int argc, char **argv) {
     case OPT_REPLAY:
       replay_script = optarg;
       break;
+    case OPT_EXPORT:
+      export_file = optarg;
+      break;
+    case OPT_SIZE:
+      sscanf(optarg, "%dx%d", &width, &height);
+      break;
     default:
       errflg++;
     }
@@ -508,6 +568,13 @@ int main(int argc, char **argv) {
     }
     return dump(session, input, format);
   }
-  fprintf(stderr, "%s: this version has no window yet: use --dump or --replay\n", program_name);
+  if (!export_file.empty()) {
+    if (input.empty() || width <= 0 || height <= 0) {
+      fprintf(stderr, "--export needs an input file and a size\n");
+      return MB_ERROR_BAD_USAGE;
+    }
+    return export_image(session, input, format, export_file, width, height);
+  }
+  fprintf(stderr, "%s: this version has no window yet: use --dump, --export or --replay\n", program_name);
   return MB_ERROR_BAD_USAGE;
 }
