@@ -65,7 +65,8 @@ enum PlotType {
   PLOT_PITCH = 7,
   PLOT_HEAVE = 8
 };
-constexpr int EDITABLE_PLOTS = 6;  // the first six types can be selected and changed
+constexpr int EDITABLE_PLOTS = 8;  // the types up to pitch can be selected and changed; heave only shown
+constexpr int MOTIF_EDITABLE_PLOTS = 6;  // the Motif program stops at the sonar depth
 enum ModelMode { MODEL_OFF = 0, MODEL_MEAN = 1, MODEL_DR = 2, MODEL_INVERT = 3 };
 
 struct Record {
@@ -90,6 +91,8 @@ struct Record {
   double speed_org = 0.0;
   double heading_org = 0.0;
   double draft_org = 0.0;
+  double roll_org = 0.0;
+  double pitch_org = 0.0;
   bool mean_ok = false;
   double lon_dr = 0.0;
   double lat_dr = 0.0;
@@ -97,7 +100,7 @@ struct Record {
   double course_made_good = 0.0;
   bool lonlat_flag = false;
   unsigned char selected = 0;  // one bit per editable plot
-  int pixel[2 * EDITABLE_PLOTS] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};  // x, y per editable plot
+  int pixel[2 * EDITABLE_PLOTS] = {};  // x, y per editable plot
 
   bool isSelected(int type) const { return (selected & (1 << type)) != 0; }
   void setSelected(int type, bool on) {
@@ -243,6 +246,11 @@ class Session {
   bool intervalSet(int which) const { return which == 0 ? interval_set1_ : interval_set2_; }
   int intervalBound(int which) const { return which == 0 ? interval_bound1_ : interval_bound2_; }
 
+  /* Selects the sonar depths further than threshold meters from the median of the records
+     within window seconds around them, among the records in view, and nothing else, so that
+     Interpolate then replaces them. Not an edit. A spike must be shorter than half the window. */
+  int despikeDepth(double window, double threshold, int *count);
+
   /* edits: each one is a step of undo */
   int useDr();
   int useSmg();
@@ -267,10 +275,12 @@ class Session {
 
   void getModel();
 
+  int editablePlots() const { return compatibility ? MOTIF_EDITABLE_PLOTS : EDITABLE_PLOTS; }
+
  private:
   struct RecordState {
     int time_i[7];
-    double time_d, file_time_d, tint, lon, lat, speed, heading, draft, speed_made_good, course_made_good;
+    double time_d, file_time_d, tint, lon, lat, speed, heading, draft, roll, pitch, speed_made_good, course_made_good;
     bool lonlat_flag;
   };
   struct Change {

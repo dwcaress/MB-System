@@ -110,6 +110,78 @@ class MbnaveditQtTest(unittest.TestCase):
     self.assertEqual(int(counts[0][0]), int(counts[1][0]) + 1)
     self.assertEqual(int(counts[0][0]) % n, 0)
 
+  def attitude(self, out, index):
+    m = re.search(r"attitude %d: roll (\S+) pitch (\S+) heave (\S+) draft (\S+) flag (\d) selected (\d+)" % index, out)
+    self.assertIsNotNone(m, out)
+    return float(m.group(1)), float(m.group(2)), float(m.group(3)), float(m.group(4)), int(m.group(5)), int(m.group(6))
+
+  def test_roll_and_pitch_edits(self):
+    base = self.attitude(self.out(self.opened(mode="browse"), "attitude 1", "attitude 3", "done"), 1)
+    show = ["show vru 1", "plot"]
+    out = self.out(self.opened(), *show, "set roll 2 40", "set pitch 2 -40", "plot", "select roll 2 2", "interpolate", "attitude 2", "undo", "attitude 2", "redo",
+                   "deselectall", "select pitch 2 2", "interpolate", "attitude 2", "done")
+    after_roll = re.findall(r"attitude 2: roll (\S+) pitch (\S+)", out)
+    self.assertEqual(len(after_roll), 3)
+    self.assertLess(abs(float(after_roll[0][0])), 30)  # the spike in roll is gone
+    self.assertEqual(float(after_roll[0][1]), -40.0)  # pitch was not selected
+    self.assertEqual(float(after_roll[1][0]), 40.0)  # undo
+    self.assertLess(abs(float(after_roll[2][1])), 30)  # the spike in pitch is gone
+    self.assertLess(abs(float(after_roll[2][0])), 30)  # redo kept the first edit
+    fields = self.read(".nve").split(b"\r\n")[2].split()
+    self.assertEqual(float(fields[12]), float(after_roll[2][0]))
+    self.assertEqual(float(fields[13]), float(after_roll[2][1]))
+    self.assertTrue(base)
+
+  def test_roll_revert(self):
+    original = self.attitude(self.out(self.opened(mode="browse"), "attitude 2", "done"), 2)[0]
+    out = self.out(self.opened(mode="browse"), "show vru 1", "plot", "set roll 2 40", "plot", "select roll 2 2", "revert", "attitude 2", "done")
+    self.assertAlmostEqual(self.attitude(out, 2)[0], original, 3)
+
+  def test_heave_stays_shown_only(self):
+    out = self.out(self.opened(mode="browse"), "show vru 1", "plot", "selectall heave", "state", "selectall roll", "state", "done")
+    self.assertEqual(re.findall(r"selected (\d+) ", out)[0], "0")
+    self.assertGreater(int(re.findall(r"selected (\d+) ", out)[1]), 0)
+
+  def test_compat_keeps_attitude_shown_only(self):
+    out = self.out("compat 1", self.opened(mode="browse"), "show vru 1", "plot", "set roll 2 40", "plot", "selectall roll", "interpolate", "attitude 2", "done")
+    self.assertEqual(self.attitude(out, 2)[0], 40.0)
+
+  def test_depth_interpolation_flags_only_in_compat(self):
+    lines = ["plot", "set draft 2 90", "select draft 2 2", "interpolate", "attitude 2", "done"]
+    self.assertEqual(self.attitude(self.out(self.opened(mode="browse"), *lines), 2)[4], 0)
+    self.assertEqual(self.attitude(self.out("compat 1", self.opened(mode="browse"), *lines), 2)[4], 1)
+
+  def test_attitude_points_are_drawn(self):
+    env = dict(os.environ, QT_QPA_PLATFORM="offscreen")
+    script = os.path.join(self.tmp.name, "script.txt")
+    def counts(*before):
+      with open(script, "w") as f:
+        f.write("\n".join(list(before) + [self.opened(mode="browse"), "show vru 1", "plot", "drawcount", "set roll 2 40", "drawcount", "select roll 2 2", "drawcount", "done"]) + "\n")
+      out = subprocess.run([self.program, "--replay=" + script], capture_output=True, text=True, errors="replace", cwd=self.tmp.name, check=True, env=env).stdout
+      return [(int(a), int(b)) for a, b in re.findall(r"drawcount: fill_black \d+ rect_red (\d+) rect_purple (\d+)", out)]
+    new = counts()
+    self.assertEqual(new[1][1], new[0][1] + 1)  # changed
+    self.assertEqual(new[2], (new[0][0] + 1, new[0][1]))  # selected
+    self.assertEqual(counts("compat 1"), [(0, 0)] * 3)
+
+  def test_despike(self):
+    window = "1000000"
+    n = self.records()
+    out = self.out(self.opened(), "set draft 2 90", "plot", "select lon 0 0", "despike %s 5" % window, "attitude 2", "state", "interpolate", "attitude 2", "state", "despike %s 5" % window, "undo", "attitude 2", "done")
+    self.assertRegex(out, r"despike: 1\b")
+    self.assertRegex(out, r"despike: 0\b")
+    rows = re.findall(r"attitude 2: .*draft (\S+) flag (\d) selected (\d+)", out)
+    self.assertEqual(float(rows[0][0]), 90.0)
+    self.assertEqual(int(rows[0][2]), 1 << 5)  # only the sonar depth, and the selection in longitude is gone
+    self.assertLess(float(rows[1][0]), 80.0)
+    self.assertEqual(int(rows[1][1]), 0)
+    self.assertEqual(float(rows[2][0]), 90.0)  # one undo brings it back
+    self.assertGreaterEqual(n, 4)
+
+  def test_despike_bad_arguments(self):
+    out = self.out(self.opened(mode="browse"), "despike 0 5", "despike 10 0", "show draft 0", "plot", "despike 1000000 5", "done")
+    self.assertEqual(len(re.findall(r"despike: 0\b", out)), 3)
+
   def test_saved_edit(self):
     n = self.records()
     self.assertGreaterEqual(n, 4)

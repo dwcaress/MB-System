@@ -312,10 +312,22 @@ void draw_plots(QPainter &painter, const Session &session, const QSize &size, co
         draw_series(painter, p, rec, first, count, &Record::draft_org, c.green, &local.line_green);
       break;
     case PLOT_ROLL:
-      draw_series(painter, p, rec, first, count, &Record::roll, c.green, &local.line_green);
+      if (session.editablePlots() > PLOT_ROLL) {
+        value = &Record::roll;
+        draw_series(painter, p, rec, first, count, &Record::roll_org, c.green, &local.line_green);
+      }
+      else {
+        draw_series(painter, p, rec, first, count, &Record::roll, c.green, &local.line_green);
+      }
       break;
     case PLOT_PITCH:
-      draw_series(painter, p, rec, first, count, &Record::pitch, c.green, &local.line_green);
+      if (session.editablePlots() > PLOT_PITCH) {
+        value = &Record::pitch;
+        draw_series(painter, p, rec, first, count, &Record::pitch_org, c.green, &local.line_green);
+      }
+      else {
+        draw_series(painter, p, rec, first, count, &Record::pitch, c.green, &local.line_green);
+      }
       break;
     default:
       draw_series(painter, p, rec, first, count, &Record::heave, c.green, &local.line_green);
@@ -332,7 +344,9 @@ void draw_plots(QPainter &painter, const Session &session, const QSize &size, co
                                 : p.type == PLOT_LATITUDE  ? &Record::lat_org
                                 : p.type == PLOT_SPEED     ? &Record::speed_org
                                 : p.type == PLOT_HEADING   ? &Record::heading_org
-                                                           : &Record::draft_org;
+                                : p.type == PLOT_DRAFT     ? &Record::draft_org
+                                : p.type == PLOT_ROLL      ? &Record::roll_org
+                                                           : &Record::pitch_org;
     Squares flagged(many), selected(many), changed(many), plain(many);
     for (int i = first; i < first + count; i++) {
       const Record &r = rec[i];

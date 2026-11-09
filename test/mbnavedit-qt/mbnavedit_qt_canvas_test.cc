@@ -220,6 +220,34 @@ int main(int argc, char **argv) {
   canvas.setIntervalMode(false);
   CHECK(!s.intervalSet(0) && !s.intervalSet(1));
 
+  /* roll and pitch are selected like the others, and heave is only shown */
+  s.show.roll = s.show.pitch = s.show.heave = true;
+  s.recountPlots();
+  s.showAll();
+  canvas.layoutChanged();
+  key(canvas, Qt::Key_Y);
+  click(canvas, point(s, 1, PLOT_ROLL));
+  CHECK(s.records()[1].isSelected(PLOT_ROLL));
+  click(canvas, point(s, 1, PLOT_PITCH));
+  CHECK(s.records()[1].isSelected(PLOT_PITCH));
+  CHECK(!s.records()[1].isSelected(PLOT_ROLL));
+  bool heave_found = false;
+  for (const Plot &p : s.plots()) {
+    if (p.type != PLOT_HEAVE)
+      continue;
+    heave_found = true;
+    click(canvas, QPoint((p.ixmin + p.ixmax) / 2, (p.iymin + p.iymax) / 2));
+    CHECK(selected(s, PLOT_PITCH) == 0);
+    int any = 0;
+    for (const Record &r : s.records())
+      any += r.selected != 0 ? 1 : 0;
+    CHECK(any == 0);
+  }
+  CHECK(heave_found);
+  s.show.roll = s.show.pitch = s.show.heave = false;
+  s.recountPlots();
+  canvas.layoutChanged();
+
   /* the plots follow the palette of the application */
   QPalette light = canvas.palette();
   light.setColor(QPalette::Base, Qt::white);

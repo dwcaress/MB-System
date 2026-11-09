@@ -104,13 +104,17 @@ void print_state(const Session &s) {
     data = hash_bytes(data, &r.speed, sizeof(double));
     data = hash_bytes(data, &r.heading, sizeof(double));
     data = hash_bytes(data, &r.draft, sizeof(double));
+    if (!s.compatibility) {
+      data = hash_bytes(data, &r.roll, sizeof(double));
+      data = hash_bytes(data, &r.pitch, sizeof(double));
+    }
     const int flag = r.lonlat_flag ? 1 : 0;
     data = hash_bytes(data, &flag, sizeof(int));
     model = hash_bytes(model, &r.lon_dr, sizeof(double));
     model = hash_bytes(model, &r.lat_dr, sizeof(double));
     model = hash_bytes(model, &r.speed_made_good, sizeof(double));
     model = hash_bytes(model, &r.course_made_good, sizeof(double));
-    for (int t = 0; t < mbne::EDITABLE_PLOTS; t++)
+    for (int t = 0; t < s.editablePlots(); t++)
       nsel += r.isSelected(t) ? 1 : 0;
     nflag += flag;
     if (r.lon != r.lon_org || r.lat != r.lat_org || r.speed != r.speed_org || r.heading != r.heading_org || r.draft != r.draft_org ||
@@ -118,7 +122,7 @@ void print_state(const Session &s) {
       nchanged++;
   }
   for (int i = std::max(s.current(), 0); i < s.current() + s.nplot() && i < s.nbuff(); i++)
-    pixels = hash_bytes(pixels, s.records()[i].pixel, sizeof(s.records()[i].pixel));
+    pixels = hash_bytes(pixels, s.records()[i].pixel, 2 * mbne::MOTIF_EDITABLE_PLOTS * sizeof(int));
   printf("state: nbuff %d current %d nplot %d plots %d span %d loaded %d dumped %d selected %ld flagged %ld changed %ld tsproblem %d data %lx model %lx "
          "pixels %lx\n",
          s.nbuff(), s.current(), s.nplot(), s.numberPlots(), s.data_show_size, s.loadedTotal(), s.dumpedTotal(), nsel, nflag, nchanged,
@@ -145,6 +149,9 @@ int run_line(Session &s, const char *line) {
   int status = MB_SUCCESS;
   bool quit = false;
   const auto pixel_of = [&s](int type, int i, int &x, int &y) {
+    x = y = 0;
+    if (type < 0 || type >= mbne::EDITABLE_PLOTS)
+      return;
     const Record &r = s.records()[s.current() + i];
     x = r.pixel[2 * type];
     y = r.pixel[2 * type + 1];
@@ -344,6 +351,18 @@ int run_line(Session &s, const char *line) {
     printf("row %d: t %.6f tint %.6f torg %.6f lon %.9f lat %.9f spd %.3f hdg %.3f dft %.3f smg %.3f cmg %.3f flag %d\n", i0, r.time_d, r.tint, r.tint_org,
            r.lon, r.lat, r.speed, r.heading, r.draft, r.speed_made_good, r.course_made_good, r.lonlat_flag ? 1 : 0);
   }
+  else if (strcmp(c, "attitude") == 0) {
+    sscanf(rest, "%d", &i0);
+    const Record &r = s.records()[i0];
+    printf("attitude %d: roll %.3f pitch %.3f heave %.4f draft %.4f flag %d selected %d\n", i0, r.roll, r.pitch, r.heave, r.draft, r.lonlat_flag ? 1 : 0,
+           (int)r.selected);
+  }
+  else if (strcmp(c, "despike") == 0) {
+    sscanf(rest, "%lf %lf", &d0, &d1);
+    int count = 0;
+    status = s.despikeDepth(d0, d1, &count);
+    printf("despike: %d\n", count);
+  }
   else if (strcmp(c, "set") == 0) {
     sscanf(rest, "%63s %d %lf", b, &i0, &d0);
     Record &r = s.recordsForTest()[i0];
@@ -355,6 +374,14 @@ int run_line(Session &s, const char *line) {
       r.tint = d0;
     else if (strcmp(b, "lon") == 0)
       r.lon = d0;
+    else if (strcmp(b, "draft") == 0)
+      r.draft = d0;
+    else if (strcmp(b, "roll") == 0)
+      r.roll = d0;
+    else if (strcmp(b, "pitch") == 0)
+      r.pitch = d0;
+    else if (strcmp(b, "heave") == 0)
+      r.heave = d0;
   }
   else if (strcmp(c, "drawcount") == 0) {
     ensure_application();

@@ -506,6 +506,8 @@ int Session::loadData() {
       r.speed_org = r.speed;
       r.heading_org = r.heading;
       r.draft_org = r.draft;
+      r.roll_org = r.roll;
+      r.pitch_org = r.pitch;
       r.file_time_d = r.time_d - file_start_time_d_;
       r.lon += offset_lon_;
       r.lat += offset_lat_;
@@ -690,6 +692,12 @@ int Session::plotAll() {
     roll_max = std::max(r.roll, roll_max);
     pitch_min = std::min(r.pitch, pitch_min);
     pitch_max = std::max(r.pitch, pitch_max);
+    if (!compatibility) {
+      roll_min = std::min(r.roll_org, roll_min);
+      roll_max = std::max(r.roll_org, roll_max);
+      pitch_min = std::min(r.pitch_org, pitch_min);
+      pitch_max = std::max(r.pitch_org, pitch_max);
+    }
     heave_min = std::min(r.heave, heave_min);
     heave_max = std::max(r.heave, heave_max);
   }
@@ -810,7 +818,7 @@ int Session::plotAll() {
 
   /* where each point is */
   for (const Plot &p : plots_) {
-    if (p.type >= EDITABLE_PLOTS)
+    if (p.type >= editablePlots())
       continue;
     for (int i = current_id_; i < current_id_ + nplot_; i++) {
       Record &r = rec_[i];
@@ -819,7 +827,9 @@ int Session::plotAll() {
                            : p.type == PLOT_LATITUDE  ? r.lat
                            : p.type == PLOT_SPEED     ? r.speed
                            : p.type == PLOT_HEADING   ? r.heading
-                                                      : r.draft;
+                           : p.type == PLOT_DRAFT     ? r.draft
+                           : p.type == PLOT_ROLL      ? r.roll
+                                                      : r.pitch;
       r.pixel[2 * p.type] = p.ixmin + p.xscale * (r.file_time_d - p.xmin);
       r.pixel[2 * p.type + 1] = p.iymin + p.yscale * (value - p.ymin);
     }
@@ -961,7 +971,7 @@ int Session::mousePick(int x, int y) {
   if (deselectOthers(active))
     plotAll();
   const int type = plots_[active].type;
-  if (type >= EDITABLE_PLOTS)
+  if (type >= editablePlots())
     return MB_SUCCESS;
 
   int range_min = 100000;
@@ -987,7 +997,7 @@ int Session::mouseSelect(int x, int y) {
   if (deselectOthers(active))
     plotAll();
   const int type = plots_[active].type;
-  if (type >= EDITABLE_PLOTS)
+  if (type >= editablePlots())
     return MB_SUCCESS;
   for (int i = current_id_; i < current_id_ + nplot_; i++) {
     const int ix = x - rec_[i].pixel[2 * type];
@@ -1005,7 +1015,7 @@ int Session::mouseDeselect(int x, int y) {
   if (deselectOthers(active))
     plotAll();
   const int type = plots_[active].type;
-  if (type >= EDITABLE_PLOTS)
+  if (type >= editablePlots())
     return MB_SUCCESS;
   for (int i = current_id_; i < current_id_ + nplot_; i++) {
     const int ix = x - rec_[i].pixel[2 * type];
@@ -1022,7 +1032,7 @@ int Session::mouseSelectAll(int x, int y) {
     return MB_FAILURE;
   deselectOthers(active);
   const int type = plots_[active].type;
-  if (type < EDITABLE_PLOTS)
+  if (type < editablePlots())
     for (int i = current_id_; i < current_id_ + nplot_; i++)
       rec_[i].setSelected(type, true);
   return plotAll();
@@ -1037,7 +1047,7 @@ int Session::mouseDeselectAll() {
 }
 
 int Session::deselectAll(int type) {
-  if (nplot_ <= 0 || type >= EDITABLE_PLOTS)
+  if (nplot_ <= 0 || type >= editablePlots())
     return MB_FAILURE;
   int ndeselect = 0;
   for (Record &r : rec_) {
@@ -1116,6 +1126,8 @@ Session::RecordState Session::stateOf(const Record &r) {
   s.speed = r.speed;
   s.heading = r.heading;
   s.draft = r.draft;
+  s.roll = r.roll;
+  s.pitch = r.pitch;
   s.speed_made_good = r.speed_made_good;
   s.course_made_good = r.course_made_good;
   s.lonlat_flag = r.lonlat_flag;
@@ -1132,6 +1144,8 @@ void Session::setState(Record &r, const RecordState &s) {
   r.speed = s.speed;
   r.heading = s.heading;
   r.draft = s.draft;
+  r.roll = s.roll;
+  r.pitch = s.pitch;
   r.speed_made_good = s.speed_made_good;
   r.course_made_good = s.course_made_good;
   r.lonlat_flag = s.lonlat_flag;
@@ -1139,7 +1153,7 @@ void Session::setState(Record &r, const RecordState &s) {
 
 bool Session::sameState(const RecordState &a, const RecordState &b) {
   return std::memcmp(a.time_i, b.time_i, sizeof(a.time_i)) == 0 && a.time_d == b.time_d && a.file_time_d == b.file_time_d && a.tint == b.tint &&
-         a.lon == b.lon && a.lat == b.lat && a.speed == b.speed && a.heading == b.heading && a.draft == b.draft &&
+         a.lon == b.lon && a.lat == b.lat && a.speed == b.speed && a.heading == b.heading && a.draft == b.draft && a.roll == b.roll && a.pitch == b.pitch &&
          a.speed_made_good == b.speed_made_good && a.course_made_good == b.course_made_good && a.lonlat_flag == b.lonlat_flag;
 }
 
@@ -1512,7 +1526,11 @@ int Session::interpolate() {
   interpolateTrack(&Record::lat, PLOT_LATITUDE, timelonlat_change);
   interpolateHold(&Record::speed, PLOT_SPEED, false, timelonlat_change, speedheading_change);
   interpolateHold(&Record::heading, PLOT_HEADING, false, timelonlat_change, speedheading_change);
-  interpolateHold(&Record::draft, PLOT_DRAFT, true, timelonlat_change, speedheading_change);
+  /* the Motif program marks the position of a record as bad when its sonar depth is interpolated */
+  interpolateHold(&Record::draft, PLOT_DRAFT, compatibility, timelonlat_change, speedheading_change);
+  bool attitude_change = false;
+  interpolateHold(&Record::roll, PLOT_ROLL, false, timelonlat_change, attitude_change);
+  interpolateHold(&Record::pitch, PLOT_PITCH, false, timelonlat_change, attitude_change);
 
   if (timelonlat_change)
     for (int i = 0; i < n; i++)
@@ -1604,7 +1622,7 @@ int Session::revert() {
   for (const Plot &p : plots_) {
     for (int i = current_id_; i < current_id_ + nplot_; i++) {
       Record &r = rec_[i];
-      if (p.type >= EDITABLE_PLOTS || !r.isSelected(p.type))
+      if (p.type >= editablePlots() || !r.isSelected(p.type))
         continue;
       switch (p.type) {
       case PLOT_TINT:
@@ -1632,8 +1650,14 @@ int Session::revert() {
         r.heading = r.heading_org;
         speedheading_change = true;
         break;
-      default:
+      case PLOT_DRAFT:
         r.draft = r.draft_org;
+        break;
+      case PLOT_ROLL:
+        r.roll = r.roll_org;
+        break;
+      default:
+        r.pitch = r.pitch_org;
         break;
       }
     }
@@ -1644,6 +1668,41 @@ int Session::revert() {
   if (speedheading_change && model_mode == MODEL_DR)
     getModel();
   finishEdit("Revert");
+  return plotAll();
+}
+
+int Session::despikeDepth(double window, double threshold, int *count) {
+  if (count != nullptr)
+    *count = 0;
+  if (nplot_ <= 0 || !show.draft || window <= 0.0 || threshold <= 0.0)
+    return MB_FAILURE;
+  /* Interpolate acts on everything selected */
+  for (int type = 0; type < editablePlots(); type++)
+    deselectAll(type);
+
+  const int n = nbuff();
+  const double half = 0.5 * window;
+  std::vector<double> values;
+  int found = 0;
+  for (int i = current_id_; i < current_id_ + nplot_; i++) {
+    int first = i, last = i;
+    while (first > 0 && rec_[i].time_d - rec_[first - 1].time_d <= half)
+      first--;
+    while (last < n - 1 && rec_[last + 1].time_d - rec_[i].time_d <= half)
+      last++;
+    if (last - first + 1 < 3)
+      continue;
+    values.clear();
+    for (int j = first; j <= last; j++)
+      values.push_back(rec_[j].draft);
+    std::nth_element(values.begin(), values.begin() + values.size() / 2, values.end());
+    if (std::fabs(rec_[i].draft - values[values.size() / 2]) > threshold) {
+      rec_[i].setSelected(PLOT_DRAFT, true);
+      found++;
+    }
+  }
+  if (count != nullptr)
+    *count = found;
   return plotAll();
 }
 
