@@ -42,6 +42,9 @@ class QLabel;
 class QPushButton;
 class QTableWidget;
 class QTimer;
+
+namespace wcd {
+
 class WcdView;
 
 /* slider that moves exactly one step per mouse wheel notch */
@@ -112,5 +115,7 @@ class MainWindow : public QMainWindow {
   PickDialog *pick_dialog_ = nullptr;
   bool pick_shown_once_ = false;
 };
+
+}  // namespace wcd
 
 #endif

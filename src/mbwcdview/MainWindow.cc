@@ -53,6 +53,8 @@
 #include "mb_define.h"
 #include "WcdView.h"
 
+namespace wcd {
+
 namespace {
 
 QString utc_text(double time_d) {
@@ -503,3 +505,5 @@ QStringList MainWindow::pick(double across, double depth) {
   pick_dialog_->addRow(row);
   return row;
 }
+
+}  // namespace wcd

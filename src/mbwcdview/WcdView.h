@@ -31,6 +31,8 @@
 
 #include "wcd_plot.h"
 
+namespace wcd {
+
 /* the water column swath plot in the window */
 class WcdView : public QOpenGLWidget {
   Q_OBJECT
@@ -52,5 +54,7 @@ class WcdView : public QOpenGLWidget {
   wcd::WcdPlot plot_;
   std::unique_ptr<wcd::SwathGL> gl_;
 };
+
+}  // namespace wcd
 
 #endif

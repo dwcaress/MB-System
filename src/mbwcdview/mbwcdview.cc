@@ -195,7 +195,7 @@ int main(int argc, char **argv) {
     return MB_ERROR_NO_ERROR;
   }
 
-  MainWindow window;
+  wcd::MainWindow window;
   window.show();
   if (!input.empty()) {
     window.openFile(QString::fromStdString(input));

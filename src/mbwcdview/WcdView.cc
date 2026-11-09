@@ -31,6 +31,8 @@
 #include <QOpenGLFunctions>
 #include <QPainter>
 
+namespace wcd {
+
 WcdView::WcdView(QWidget *parent) : QOpenGLWidget(parent) { setMinimumSize(400, 300); }
 
 WcdView::~WcdView() {
@@ -66,3 +68,5 @@ void WcdView::mousePressEvent(QMouseEvent *event) {
     emit clicked(across, depth);
   QOpenGLWidget::mousePressEvent(event);
 }
+
+}  // namespace wcd
