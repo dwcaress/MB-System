@@ -80,6 +80,13 @@ class MbwcdviewTest(unittest.TestCase):
     self.assertIn("ping number %d" % A.PINGS[2], out)
     self.assertIn("beams %d," % (A.nbeams_read(2) + 2), out)  # two empty beams mark the lost datagram
 
+  def test_window(self):
+    env = dict(os.environ, QT_QPA_PLATFORM="offscreen")
+    result = subprocess.run([os.environ["MBWCDVIEW_WINDOW_TEST"], self.kmall, self.tmp.name], capture_output=True,
+                            text=True, cwd=self.tmp.name, env=env, timeout=300)
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+    self.assertIn(" 0 failed", result.stdout)
+
 
 if __name__ == "__main__":
   unittest.main()

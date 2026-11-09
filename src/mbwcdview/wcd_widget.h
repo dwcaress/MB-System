@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------
- *    The MB-system:  MainWindow.h  1/11/2026
+ *    The MB-system:  wcd_widget.h  1/11/2026
  *
  *    Copyright (c) 2026 by
  *    Christian dos Santos Ferreira
@@ -22,16 +22,17 @@
  *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 
-#ifndef MBWCDVIEW_MAINWINDOW_H
-#define MBWCDVIEW_MAINWINDOW_H
+#ifndef MBWCDVIEW_WCD_WIDGET_H
+#define MBWCDVIEW_WCD_WIDGET_H
 
 #include <utility>
 #include <vector>
 
 #include <QDialog>
-#include <QMainWindow>
 #include <QSlider>
+#include <QString>
 #include <QStringList>
+#include <QWidget>
 
 #include "wcd_data.h"
 #include "wcd_scene.h"
@@ -73,21 +74,28 @@ class PickDialog : public QDialog {
   QTableWidget *table_;
 };
 
-class MainWindow : public QMainWindow {
+/* The tool: the plot, its controls and the data. WaterColumnWindow puts it in the window of the program. */
+class WaterColumnWidget : public QWidget {
   Q_OBJECT
 
  public:
-  explicit MainWindow(QWidget *parent = nullptr);
+  explicit WaterColumnWidget(QWidget *parent = nullptr);
   bool openFile(const QString &path);
   void setStep(int step);
   void showPing(int ping);  // first slider step of water column ping index ping
   bool saveImage(const QString &path);
   QStringList pick(double across, double depth);  // for tests: pick the cell nearest to a point
+  QString title() const;
+
+ signals:
+  void statusMessage(const QString &message, int timeout_ms);
+  void diagnostic(const QString &message);  // the program writes these to stderr
 
  protected:
   void keyPressEvent(QKeyEvent *event) override;
 
  private:
+  void showStatus(const QString &message, int timeout_ms = 0);
   void openDialog();
   void saveImageDialog();
   void redraw();

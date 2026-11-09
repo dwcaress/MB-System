@@ -59,14 +59,16 @@ set(CMAKE_AUTOMOC ON)
 
 add_library(
   mbwcdview-ui STATIC
-  MainWindow.cc
-  MainWindow.h
   WcdView.cc
   WcdView.h
   wcd_plot.cc
   wcd_plot.h
   wcd_scene.cc
   wcd_scene.h
+  wcd_widget.cc
+  wcd_widget.h
+  wcd_window.cc
+  wcd_window.h
   viridis.h)
 
 target_link_libraries(mbwcdview-ui PUBLIC mbwcdview-core Qt6::Widgets Qt6::OpenGL Qt6::OpenGLWidgets)
