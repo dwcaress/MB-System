@@ -105,6 +105,7 @@ class VelocityWidget : public QWidget {
   /* for the window around the tool */
   QList<QMenu *> menus() const { return menus_; }
   void addToolActions(QToolBar *bar);
+  void setShortcutContext(Qt::ShortcutContext context);  // Qt::WidgetWithChildrenShortcut when the window holds other tools
   QLabel *pointerLabel() { return pointer_label_; }
   QLabel *resultLabel() { return result_label_; }
   QProgressBar *progressBar() { return progress_; }
@@ -115,9 +116,14 @@ class VelocityWidget : public QWidget {
   bool openDisplayProfile(const QString &path);
   bool openEditProfile(const QString &path);
   void newEditProfile();
-  void openSwath(const QString &path, int format);  // format 0 is identified from the name; runs in the background
+  /* Format 0 is identified from the name. Runs in the background and ends in swathOpened or swathOpenFailed;
+     false when it did not start, because another job is under way or the format is not known. */
+  bool openSwath(const QString &path, int format);
   void reprocess();                                 // runs in the background
   void setAngleMode(int anglemode);
+  bool saveEditProfile(const QString &path);
+  bool saveSwathSvp();  // the files of the swath file and its parameter file; false while a job is under way
+  bool saveResidualsAsOffsets();
 
   /* tolerance in m/s, 0 for all of the nodes. The display profile stays; the edit profile it replaces joins the display profiles. */
   bool activateDisplayProfile(int index, double tolerance);
@@ -142,6 +148,12 @@ class VelocityWidget : public QWidget {
   void titleChanged(const QString &title);  // with the [*] of QWidget::setWindowTitle
   void unsavedChanged(bool unsaved);
   void statusMessage(const QString &message, int timeout_ms);
+  void busyChanged(bool busy);  // false only when opening a swath file has finished its first Reprocess too
+  void swathOpened(const QString &path, int format);
+  void swathOpenFailed(const QString &path);
+  void editProfileChanged();
+  void residualsChanged();
+  void fileSaved(const QString &path);
 
  private:
   void createMenus();
@@ -154,12 +166,11 @@ class VelocityWidget : public QWidget {
   void openDisplayDialog();
   void openEditDialog();
   void openSwathDialog(bool ask_format);
-  void saveSwathSvp();
-  void saveResidualsAsOffsets();
   void showAbout();
   void applyScale();
   void editChanged();
   void updateState();
+  void reportBusy();
   void onProfileAction(int index, const QString &name, mbvt::ProfileAction action);
   bool saveDisplayDialog(int index);
 
@@ -182,6 +193,7 @@ class VelocityWidget : public QWidget {
   PlotScale scale_;
 
   QThread *worker_ = nullptr;
+  bool reported_busy_ = false;
 
   mbvt::VelocityPlot *velocity_plot_;
   mbvt::ResidualPlot *residual_plot_;

@@ -203,7 +203,7 @@ VelocityWidget::VelocityWidget(int verbose, int nthreads, int anglemode, const i
   layout->addLayout(labels);
   layout->addWidget(plots, 1);
 
-  /* these three go in the status bar of the window */
+  /* a line under the plots, unless the window around the tool moves them to its status bar */
   pointer_label_ = new QLabel(this);
   result_label_ = new QLabel(this);
   result_label_->setContentsMargins(0, 0, 10, 0);
@@ -211,6 +211,11 @@ VelocityWidget::VelocityWidget(int verbose, int nthreads, int anglemode, const i
   progress_->setRange(0, 0);
   progress_->setMaximumWidth(160);
   progress_->hide();
+  auto *status = new QHBoxLayout;
+  status->addWidget(pointer_label_, 1);
+  status->addWidget(result_label_);
+  status->addWidget(progress_);
+  layout->addLayout(status);
 
   scaling_dialog_ = new ScalingDialog(this);
   scaling_dialog_->setScale(scale_);
@@ -303,6 +308,15 @@ void VelocityWidget::addToolActions(QToolBar *bar) {
   bar->addAction(scaling_action_);
 }
 
+void VelocityWidget::setShortcutContext(Qt::ShortcutContext context) {
+  for (QAction *action : {save_edit_action_, open_swath_action_, reprocess_action_}) {
+    action->setShortcutContext(context);
+    /* with a smaller scope than the window the key works only if the action is on this widget */
+    if (context != Qt::WindowShortcut)
+      addAction(action);
+  }
+}
+
 void VelocityWidget::setTitle(const QString &title) {
   title_ = title;
   emit titleChanged(title_);
@@ -332,11 +346,20 @@ void VelocityWidget::runJob(const QString &message, std::function<void()> work, 
     progress_->hide();
     done();
     updateState();
+    reportBusy();
   });
   result_label_->setText(message);
   progress_->show();
   worker_->start();
   updateState();
+  reportBusy();
+}
+
+void VelocityWidget::reportBusy() {
+  if (busy() != reported_busy_) {
+    reported_busy_ = busy();
+    emit busyChanged(reported_busy_);
+  }
 }
 
 void VelocityWidget::waitUntilIdle() {
@@ -373,6 +396,7 @@ bool VelocityWidget::openEditProfile(const QString &path) {
   edit_version_++;
   setEditModified(false);
   updateState();
+  emit editProfileChanged();
   return true;
 }
 
@@ -384,12 +408,14 @@ void VelocityWidget::newEditProfile() {
   edit_version_++;
   setEditModified(false);
   updateState();
+  emit editProfileChanged();
 }
 
 void VelocityWidget::editChanged() {
   edit_version_++;
   setEditModified(true);
   updateState();
+  emit editProfileChanged();
 }
 
 void VelocityWidget::setAngleMode(int anglemode) {
@@ -478,6 +504,7 @@ bool VelocityWidget::activateDisplayProfile(int index, double tolerance) {
   edit_version_++;
   setEditModified(unsaved || tolerance > 0.0);
   updateState();
+  emit editProfileChanged();
   return true;
 }
 
@@ -515,11 +542,14 @@ bool VelocityWidget::saveDisplayDialog(int index) {
   }
   display_[index].unsaved = false;
   emit statusMessage("Saved the profile to " + path, 5000);
+  emit fileSaved(path);
   return true;
 }
 
 /*--------------------------------------------------------------------*/
-void VelocityWidget::openSwath(const QString &path, int format) {
+bool VelocityWidget::openSwath(const QString &path, int format) {
+  if (worker_ != nullptr)
+    return false;
   if (format == 0 && !mbvt::identify_format(path.toStdString(), format)) {
     bool ok = false;
     if (!quiet_)
@@ -528,7 +558,8 @@ void VelocityWidget::openSwath(const QString &path, int format) {
     if (!ok || format == 0) {
       failed_ = true;
       report("Swath data not loaded", "The format of " + path + " is not known.");
-      return;
+      emit swathOpenFailed(path);
+      return false;
     }
   }
 
@@ -548,11 +579,12 @@ void VelocityWidget::openSwath(const QString &path, int format) {
              return;
            load->profiles = mbvt::swath_display_profiles(load->swath, load->levitus_error);
          },
-         [this, load] {
+         [this, load, path, format] {
            if (!load->ok) {
              failed_ = true;
              updateState();
              report("Data loading aborted", QString::fromStdString(load->error));
+             emit swathOpenFailed(path);
              return;
            }
 
@@ -582,6 +614,7 @@ void VelocityWidget::openSwath(const QString &path, int format) {
              applyScale();
            }
            setTitle("mbvelocitytool-qt - " + file_name(swath_.path) + "[*]");
+           emit swathOpened(path, format);
 
            reprocess();
 
@@ -590,6 +623,7 @@ void VelocityWidget::openSwath(const QString &path, int format) {
            if (!load->warning.empty())
              report("Data doesn't include travel times", QString::fromStdString(load->warning));
          });
+  return true;
 }
 
 void VelocityWidget::reprocess() {
@@ -627,6 +661,7 @@ void VelocityWidget::reprocess() {
            processed_version_ = job->version;
            residual_plot_->setData(&residuals_, swath_.beams_bath);
            raypath_plot_->setData(&residuals_);
+           emit residualsChanged();
          });
 }
 
@@ -646,6 +681,10 @@ bool VelocityWidget::saveEditDialog() {
   const QString path = QFileDialog::getSaveFileName(this, "Save Editable Profile", QString(), "Sound Velocity Profiles (*.svp);;All Files (*)");
   if (path.isEmpty())
     return false;
+  return saveEditProfile(path);
+}
+
+bool VelocityWidget::saveEditProfile(const QString &path) {
   std::string error;
   if (!mbvt::write_profile(path.toStdString(), edit_, "", error)) {
     report("Unable to save the editable profile", QString::fromStdString(error));
@@ -653,6 +692,7 @@ bool VelocityWidget::saveEditDialog() {
   }
   setEditModified(false);
   emit statusMessage("Saved the editable profile to " + path, 5000);
+  emit fileSaved(path);
   return true;
 }
 
@@ -685,27 +725,36 @@ void VelocityWidget::openSwathDialog(bool ask_format) {
   openSwath(path, format);
 }
 
-void VelocityWidget::saveSwathSvp() {
+bool VelocityWidget::saveSwathSvp() {
+  if (worker_ != nullptr)
+    return false;
   std::string saved, error;
   if (!mbvt::save_swath_profile(swath_, edit_, anglemode_, saved, error)) {
     report("Unable to save the swath SVP file", QString::fromStdString(error));
-    return;
+    return false;
   }
   setEditModified(false);
   emit statusMessage("Saved " + QString::fromStdString(saved) + " and set it in the mbprocess parameter file", 5000);
+  emit fileSaved(QString::fromStdString(saved));
+  return true;
 }
 
-void VelocityWidget::saveResidualsAsOffsets() {
+bool VelocityWidget::saveResidualsAsOffsets() {
+  if (worker_ != nullptr)
+    return false;
   if (residualsOutOfDate() && !quiet_ &&
       QMessageBox::question(this, "Save Residuals As Offsets",
                             "The residuals are from before the latest change. Save them anyway?") != QMessageBox::Yes)
-    return;
+    return false;
   std::string saved, error;
   if (!mbvt::save_residuals(swath_, edit_, residuals_, saved, error)) {
     report("Unable to save the residuals", QString::fromStdString(error));
-    return;
+    return false;
   }
   emit statusMessage("Saved " + QString::fromStdString(saved) + " and set it in the mbprocess parameter file", 5000);
+  emit fileSaved(QString::fromStdString(swath_.path + ".sbo"));
+  emit fileSaved(QString::fromStdString(swath_.path + ".sbao"));
+  return true;
 }
 
 void VelocityWidget::showAbout() {

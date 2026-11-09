@@ -43,6 +43,11 @@ target_include_directories(mbvelocitytool-qt-core PUBLIC ${CMAKE_CURRENT_SOURCE_
 
 target_link_libraries(mbvelocitytool-qt-core PUBLIC mbio ${MB_SYSLIBS})
 
+# mb_define.h includes the header of this library on Windows, and mbio links it privately
+if(WIN32)
+  target_link_libraries(mbvelocitytool-qt-core PUBLIC mb_xdr_win32)
+endif()
+
 set(CMAKE_AUTOMOC ON)
 
 add_library(
