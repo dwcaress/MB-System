@@ -42,6 +42,12 @@ add_library(
   ${CMAKE_SOURCE_DIR}/src/mbeditviz/mbeditviz_core.c
   ${CMAKE_SOURCE_DIR}/src/mbeditviz/mbeditviz_prog.c
   mbeditviz_qt_bridge.h
+  mbeditviz_qt_controller.cc
+  mbeditviz_qt_controller.h
+  mbeditviz_qt_dialogs.cc
+  mbeditviz_qt_dialogs.h
+  mbeditviz_qt_filelist.cc
+  mbeditviz_qt_filelist.h
   mbeditviz_qt_ui.c
   mbeditviz_qt_window.cc
   mbeditviz_qt_window.h)

@@ -40,6 +40,14 @@ target_link_libraries(mbeditviz_qt_test PRIVATE mbeditviz-qt-ui)
 add_test(NAME mbeditviz_qt_test COMMAND mbeditviz_qt_test)
 set_tests_properties(mbeditviz_qt_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 
+# mbeditviz inside another program's window (null backend, offscreen platform;
+# with --data and a datalist also swath data, not run by ctest)
+add_executable(mbeditviz_qt_embed_test mbeditviz_qt_embed_test.cc)
+set_target_properties(mbeditviz_qt_embed_test PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+target_link_libraries(mbeditviz_qt_embed_test PRIVATE mbeditviz-qt-ui)
+add_test(NAME mbeditviz_qt_embed_test COMMAND mbeditviz_qt_embed_test)
+set_tests_properties(mbeditviz_qt_embed_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
 find_package(Python3 COMPONENTS Interpreter)
 if(Python3_FOUND)
   add_test(NAME mbeditviz_qt_usage_test COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mbeditviz_qt_test.py")

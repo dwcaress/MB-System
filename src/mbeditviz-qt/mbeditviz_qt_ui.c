@@ -27,6 +27,8 @@
  * do_mbeditviz_message_on, do_mbeditviz_message_off,
  * do_mbeditviz_gridparameters, mbeditviz_ui_bell), the file list and error
  * functions passed to mbeditviz_init(), and the actions of the Qt window.
+ * The error function has a name of its own, as other Qt tools that may share
+ * a program with mbeditviz-qt define do_error_dialog too.
  * They follow the Motif versions in mbeditviz_callbacks.c; the toolkit-free
  * parts are shared in mbeditviz_core.c.
  */
@@ -88,7 +90,7 @@ int do_mbeditviz_message_off(void) {
 	return (1);
 }
 
-int do_error_dialog(char *s1, char *s2, char *s3) {
+int mbeditviz_qt_error_dialog(char *s1, char *s2, char *s3) {
 	mbeditviz_qt_error(s1, s2, s3);
 	return (1);
 }
