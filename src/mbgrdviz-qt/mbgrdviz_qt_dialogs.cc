@@ -38,7 +38,7 @@
 #include <QVBoxLayout>
 
 #include "mbgrdviz_qt_bridge.h"
-#include "mbgrdviz_qt_window.h"
+#include "mbgrdviz_qt_controller.h"
 #include "mbvq.h"
 
 extern "C" {
@@ -264,7 +264,8 @@ RealtimeDialog::RealtimeDialog(QWidget *parent) : QDialog(parent) {
 
   /* Browse: the Motif "Set Realtime Navigation Source" file dialog */
   connect(browse, &QPushButton::clicked, this, [this] {
-    MbgrdvizWindow::instance()->file_dialog(MBGRDVIZ_REALTIME, 0, tr("Set Realtime Navigation Source"), QStringLiteral("*"));
+    if (mbgvq::Controller *controller = mbgvq::Controller::current())
+      controller->fileDialog(MBGRDVIZ_REALTIME, 0, tr("Set Realtime Navigation Source"), QStringLiteral("*"));
   });
   /* as in Motif, Test does nothing yet */
   test->setEnabled(false);
@@ -283,7 +284,8 @@ void RealtimeDialog::set_path(const QString &path) { path_->setText(path); }
 extern "C" {
 
 void mbgrdviz_qt_survey_dialog(void) {
-  SurveyDialog *dialog = SurveyDialog::instance(MbgrdvizWindow::instance());
+  mbgvq::Controller *controller = mbgvq::Controller::current();
+  SurveyDialog *dialog = SurveyDialog::instance(controller != nullptr ? controller->dialogParent() : nullptr);
   dialog->load();
   dialog->show();
   dialog->raise();
