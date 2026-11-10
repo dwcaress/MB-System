@@ -34,11 +34,15 @@
 #define MBVIEW_QT_MBVQ_H
 
 #include <cstddef>
+#include <functional>
 
 class QString;
 class QWidget;
 
 namespace mbvq {
+
+class MapWidget;
+class SoundingsWidget;
 
 /* The renderer of the program. One backend per process: call
    set_backend() in main() before creating the QApplication, because the
@@ -50,8 +54,22 @@ enum class Backend {
 void set_backend(Backend backend);
 Backend backend();
 
-/* the window of an mbview instance, nullptr if it has none */
+/* Starts mbview and the 3D soundings view, once however many tools in the
+   program call it. mbview_startup() itself resets all maps and shared data. */
+void start(int verbose);
+
+/* For a host: called with each new map or 3D soundings widget, to put it
+   somewhere. Without a placement each one gets a window of its own. The library
+   shows and removes the widget; a host never deletes it. */
+void set_map_placement(std::function<void(MapWidget *)> place);
+void set_soundings_placement(std::function<void(SoundingsWidget *)> place);
+
+/* the window of an mbview instance, or its widget if a host placed it;
+   nullptr if it has none */
 QWidget *window(size_t instance);
+
+/* the widget of an mbview instance, nullptr if it has none */
+MapWidget *map_widget(size_t instance);
 
 /* the map view of an mbview instance, nullptr if it has none */
 QWidget *map_view(size_t instance);

@@ -27,6 +27,7 @@
  */
 
 #include <QApplication>
+#include <QPointer>
 #include <QRegularExpression>
 #include <QString>
 #include <QTimer>
@@ -45,17 +46,20 @@ namespace {
 
 Backend current_backend = Backend::LegacyGL;
 bool backend_installed = false;
-MapWindow *windows[MBVQ_MAX_WINDOWS] = {};
+MapWidget *widgets[MBVQ_MAX_WINDOWS] = {};
+MapWindow *windows[MBVQ_MAX_WINDOWS] = {}; /* none for a map placed by a host */
+std::function<void(MapWidget *)> map_placement;
 
-/* Closed windows, hidden. They are deleted at a safe point, never by a posted
-   deferred deletion: on macOS the Quit menu calls exit() from inside the event
-   loop, and a window that held an OpenGL view cannot be deleted then. */
-std::vector<MapWindow *> closed_windows;
+/* Closed windows or widgets, hidden. They are deleted at a safe point, never by
+   a posted deferred deletion: on macOS the Quit menu calls exit() from inside
+   the event loop, and a window that held an OpenGL view cannot be deleted then.
+   A host may have deleted the parent of a placed widget before that. */
+std::vector<QPointer<QWidget>> closed_windows;
 bool quit_connected = false;
 
 void delete_closed_windows() {
-  for (MapWindow *window : closed_windows)
-    delete window;
+  for (const QPointer<QWidget> &window : closed_windows)
+    delete window.data();
   closed_windows.clear();
 }
 
@@ -69,7 +73,14 @@ void install_backend() {
   backend_installed = true;
 }
 
-MapWindow *window_of(size_t instance) { return instance < MBVQ_MAX_WINDOWS ? windows[instance] : nullptr; }
+MapWidget *widget_of(size_t instance) { return instance < MBVQ_MAX_WINDOWS ? widgets[instance] : nullptr; }
+
+/* the standalone window if there is one, otherwise the widget */
+QWidget *outermost(size_t instance) {
+  if (instance >= MBVQ_MAX_WINDOWS)
+    return nullptr;
+  return windows[instance] != nullptr ? static_cast<QWidget *>(windows[instance]) : widgets[instance];
+}
 
 }  // namespace
 
@@ -83,11 +94,17 @@ void set_backend(Backend backend) {
 
 Backend backend() { return current_backend; }
 
-QWidget *window(size_t instance) { return window_of(instance); }
+void start(int verbose) { mbvq_c_start(verbose); }
+
+void set_map_placement(std::function<void(MapWidget *)> place) { map_placement = std::move(place); }
+
+QWidget *window(size_t instance) { return outermost(instance); }
+
+MapWidget *map_widget(size_t instance) { return widget_of(instance); }
 
 QWidget *map_view(size_t instance) {
-  MapWindow *window = window_of(instance);
-  return window != nullptr ? window->map_view() : nullptr;
+  MapWidget *widget = widget_of(instance);
+  return widget != nullptr ? widget->map_view() : nullptr;
 }
 
 QString label_text(const char *bxstring) {
@@ -110,7 +127,7 @@ QString label_text(const char *bxstring) {
 
 }  // namespace mbvq
 
-using mbvq::window_of;
+using mbvq::widget_of;
 
 extern "C" {
 
@@ -129,47 +146,55 @@ void mbvq_qt_open_window(size_t instance) {
     QObject::connect(qApp, &QCoreApplication::aboutToQuit, qApp, [] { mbvq::delete_closed_windows(); });
     mbvq::quit_connected = true;
   }
-  if (mbvq::windows[instance] == nullptr)
-    mbvq::windows[instance] = new mbvq::MapWindow(instance);
-  mbvq::windows[instance]->refresh_modes();
-  mbvq::windows[instance]->show();
+  if (mbvq::widgets[instance] == nullptr) {
+    mbvq::widgets[instance] = new mbvq::MapWidget(instance);
+    if (mbvq::map_placement)
+      mbvq::map_placement(mbvq::widgets[instance]);
+    else
+      mbvq::windows[instance] = new mbvq::MapWindow(mbvq::widgets[instance]);
+  }
+  mbvq::widgets[instance]->refresh_modes();
+  mbvq::outermost(instance)->show();
 }
 
 void mbvq_qt_close_window(size_t instance) {
-  if (instance >= MBVQ_MAX_WINDOWS || mbvq::windows[instance] == nullptr)
+  if (instance >= MBVQ_MAX_WINDOWS || mbvq::widgets[instance] == nullptr)
     return;
   /* Called from mbview_destroy(), possibly inside an event of this window: the
      window is hidden now and deleted at a safe point (see closed_windows). Its
      OpenGL map view and context are freed now. */
-  mbvq::MapWindow *window = mbvq::windows[instance];
+  mbvq::MapWidget *widget = mbvq::widgets[instance];
+  QWidget *top = mbvq::outermost(instance);
+  mbvq::widgets[instance] = nullptr;
   mbvq::windows[instance] = nullptr;
-  window->hide();
-  window->delete_map_view();
-  mbvq::closed_windows.push_back(window);
+  top->hide();
+  widget->delete_map_view();
+  mbvq::closed_windows.push_back(top);
+  emit widget->closed(instance);
 }
 
 void mbvq_qt_message(size_t instance, const char *message, bool on) {
-  if (mbvq::MapWindow *window = window_of(instance))
+  if (mbvq::MapWidget *window = widget_of(instance))
     window->show_message(QString::fromLocal8Bit(message), on);
 }
 
 void mbvq_qt_status(size_t instance, const char *message) {
-  if (mbvq::MapWindow *window = window_of(instance))
+  if (mbvq::MapWidget *window = widget_of(instance))
     window->set_status(QString::fromLocal8Bit(message));
 }
 
 void mbvq_qt_label(size_t instance, int label, const char *bxstring) {
-  if (mbvq::MapWindow *window = window_of(instance))
+  if (mbvq::MapWidget *window = widget_of(instance))
     window->set_label(label, mbvq::label_text(bxstring));
 }
 
 void mbvq_qt_modes_changed(size_t instance) {
-  if (mbvq::MapWindow *window = window_of(instance))
+  if (mbvq::MapWidget *window = widget_of(instance))
     window->refresh_modes();
 }
 
 void mbvq_qt_sensitivity_changed(size_t instance) {
-  if (mbvq::MapWindow *window = window_of(instance))
+  if (mbvq::MapWidget *window = widget_of(instance))
     window->refresh_modes();
 }
 
@@ -178,29 +203,29 @@ void mbvq_qt_list_changed(int list) { mbvq::list_changed(list); }
 void mbvq_qt_lists_closed(void) { mbvq::close_lists(); }
 
 void mbvq_qt_add_action(size_t instance, int index, const char *label) {
-  if (mbvq::MapWindow *window = window_of(instance))
+  if (mbvq::MapWidget *window = widget_of(instance))
     window->add_action(index, QString::fromLocal8Bit(label));
 }
 
 void mbvq_qt_add_action_separator(size_t instance) {
-  if (mbvq::MapWindow *window = window_of(instance))
+  if (mbvq::MapWidget *window = widget_of(instance))
     window->add_action_separator();
 }
 
 void mbvq_qt_action_enabled(size_t instance, int index, bool enabled) {
-  if (mbvq::MapWindow *window = window_of(instance))
+  if (mbvq::MapWidget *window = widget_of(instance))
     window->set_action_enabled(index, enabled);
 }
 
 void mbvq_qt_bell(void) { QApplication::beep(); }
 
 void mbvq_qt_cursor(size_t instance, int cursor) {
-  if (mbvq::MapWindow *window = window_of(instance))
+  if (mbvq::MapWidget *window = widget_of(instance))
     window->set_map_cursor(cursor);
 }
 
 void mbvq_qt_values_changed(size_t instance, int values) {
-  if (mbvq::MapWindow *window = window_of(instance))
+  if (mbvq::MapWidget *window = widget_of(instance))
     window->dialogs()->values_changed(values);
 }
 

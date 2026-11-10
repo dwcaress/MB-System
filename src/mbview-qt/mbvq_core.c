@@ -152,6 +152,17 @@ int mbview_open(int verbose, size_t instance, int *error) {
 }
 
 /*------------------------------------------------------------------------------*/
+void mbvq_c_start(int verbose) {
+	static bool started = false;
+	if (started)
+		return;
+	started = true;
+	int error = MB_ERROR_NO_ERROR;
+	mbview_startup(verbose, NULL, NULL, &error);
+	mb3dsoundings_startup(verbose, NULL, NULL, &error);
+}
+
+/*------------------------------------------------------------------------------*/
 int mbvq_c_open(int verbose, size_t instance, int *error) {
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);

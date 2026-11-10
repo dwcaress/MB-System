@@ -314,6 +314,9 @@ void configure() {
   format.setDepthBufferSize(24);
   format.setSamples(0);
   QSurfaceFormat::setDefaultFormat(format);
+  /* A map moved into a dock, or floated, gets a new top-level window. Without
+     sharing, Qt then replaces its context and the contour display lists are lost. */
+  QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
 #ifdef _WIN32
   QCoreApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
 #endif

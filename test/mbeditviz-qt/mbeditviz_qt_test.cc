@@ -203,7 +203,7 @@ int parity_qt(const char *datalist, const char *edits_file, int count, int offse
   mbview_area(0, MBV_AREALENGTH_UP, data->width * 3 / 5, data->height / 2);
   spin(500);
   mbvq::SoundingsWindow *soundings = mbvq::soundings_window();
-  QWidget *view = soundings != nullptr ? soundings->view() : nullptr;
+  QWidget *view = soundings != nullptr ? soundings->widget()->view() : nullptr;
   check(view != nullptr && mbev_selected.num_soundings > 0,
         "the soundings view opens with " + std::to_string(mbev_selected.num_soundings) + " soundings");
   if (view == nullptr || mbev_selected.num_soundings == 0)

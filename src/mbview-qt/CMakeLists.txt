@@ -61,8 +61,9 @@ set(mbview_core
     ${mbview_dir}/mbv_globals.c
     ${mbview_dir}/mbv_render.c)
 
+# static, like the libraries of the other Qt tools: not installed
 add_library(
-  mbview-qt
+  mbview-qt STATIC
   ${mbview_core}
   mbvq_core.c
   mbvq_bridge.h
@@ -84,7 +85,7 @@ add_library(
   mbvq_window.cc
   mbvq_window.h)
 
-set_target_properties(mbview-qt PROPERTIES VERSION "0" SOVERSION "0" CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+set_target_properties(mbview-qt PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 target_compile_definitions(mbview-qt PUBLIC MBVIEW_NO_MOTIF)
 if(APPLE)
   target_compile_definitions(mbview-qt PRIVATE GL_SILENCE_DEPRECATION)
@@ -100,12 +101,9 @@ else()
   set(mbvq_opengl OpenGL::GL OpenGL::GLU)
 endif()
 
-target_link_libraries(mbview-qt PUBLIC mbio Qt6::Widgets PRIVATE Qt6::OpenGL Qt6::OpenGLWidgets ${mbvq_opengl}
-                                                                   ${MB_SYSLIBS})
+target_link_libraries(mbview-qt PUBLIC mbio Qt6::Widgets PRIVATE Qt6::OpenGL Qt6::OpenGLWidgets ${mbvq_opengl})
 # mb_define.h includes mb_xdr_win32.h on Windows (src/mbaux); mbio links that
 # library privately, and mbview-qt does not use mbaux
 if(WIN32)
   target_link_libraries(mbview-qt PUBLIC mb_xdr_win32)
 endif()
-
-install(TARGETS mbview-qt DESTINATION ${CMAKE_INSTALL_LIBDIR})

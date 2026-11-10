@@ -104,9 +104,8 @@ constexpr ViewItem kViewMenu[] = {
 
 }  // namespace
 
-MapWindow::MapWindow(size_t instance) : instance_(instance) {
-  setAttribute(Qt::WA_DeleteOnClose, false);
-  setWindowTitle(QString::fromLocal8Bit(mbvq_c_title(instance)));
+MapWidget::MapWidget(size_t instance, QWidget *parent) : QWidget(parent), instance_(instance) {
+  title_ = QString::fromLocal8Bit(mbvq_c_title(instance));
 
   struct mbvq_state state;
   mbvq_c_state(instance_, &state);
@@ -115,7 +114,7 @@ MapWindow::MapWindow(size_t instance) : instance_(instance) {
   profile_ = new ProfileWindow(instance_, this);
   build_view_menu();
   dialogs_ = new ControlDialogs(instance_, this);
-  QMenu *controls_menu = menuBar()->addMenu(tr("Controls"));
+  QMenu *controls_menu = new_menu(tr("Controls"));
   struct ControlItem {
     const char *label;
     int dialog;
@@ -133,12 +132,12 @@ MapWindow::MapWindow(size_t instance) : instance_(instance) {
   for (int list = 0; list < MBVQ_LISTS; list++)
     connect(controls_menu->addAction(QString::fromLatin1(mbvq_c_list_title(list))), &QAction::triggered, this,
             [list] { show_list(list); });
-  QMenu *mouse_menu = menuBar()->addMenu(tr("Mouse"));
-  action_menu_ = menuBar()->addMenu(tr("Action"));
+  QMenu *mouse_menu = new_menu(tr("Mouse"));
+  action_menu_ = new_menu(tr("Action"));
   /* as in Motif, About is the first item of the Action menu */
   connect(action_menu_->addAction(tr("About MBview...")), &QAction::triggered, this, [this] { show_about(); });
-  QMenu *dismiss_menu = menuBar()->addMenu(tr("Dismiss"));
-  connect(dismiss_menu->addAction(tr("Dismiss")), &QAction::triggered, this, [this] { mbvq_c_destroy(instance_); });
+  QMenu *dismiss_menu = new_menu(tr("Dismiss"));
+  connect(dismiss_menu->addAction(tr("Dismiss")), &QAction::triggered, this, [this] { dismiss(); });
 
   /* mouse modes: the menu and the radio buttons, as in the Motif window */
   auto *mouse_actions = new QActionGroup(this);
@@ -184,6 +183,7 @@ MapWindow::MapWindow(size_t instance) : instance_(instance) {
   pick_info_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 
   auto *left = new QWidget;
+  control_panel_ = left;
   auto *left_layout = new QVBoxLayout(left);
   left_layout->addWidget(buttons);
   left_layout->addWidget(mouse_box);
@@ -196,6 +196,9 @@ MapWindow::MapWindow(size_t instance) : instance_(instance) {
 
   int xo = 0, yo = 0, width = 0, height = 0;
   mbvq_c_geometry(instance, &xo, &yo, &width, &height);
+  outer_ = new QVBoxLayout(this);
+  outer_->setContentsMargins(0, 0, 0, 0);
+  outer_->setSpacing(0);
   auto *central = new QWidget;
   auto *layout = new QHBoxLayout(central);
   layout->setContentsMargins(0, 0, 0, 0);
@@ -205,18 +208,55 @@ MapWindow::MapWindow(size_t instance) : instance_(instance) {
   map_view_->setMinimumSize(100, 100);
   map_view_->resize(width, height);
   layout->addWidget(map_view_, 1);
-  setCentralWidget(central);
+  outer_->addWidget(central, 1);
 
   status_ = new QLabel;
-  statusBar()->addWidget(status_, 1);
+  outer_->addWidget(status_);
 
-  move(xo, yo);
-  resize(width + left->width(), height + menuBar()->sizeHint().height() + statusBar()->sizeHint().height());
   set_map_cursor(MBV_CURSOR_TARGET_BLACK);
 }
 
-void MapWindow::build_view_menu() {
-  QMenu *menu = menuBar()->addMenu(tr("View"));
+QSize MapWidget::sizeHint() const {
+  int xo = 0, yo = 0, width = 0, height = 0;
+  mbvq_c_geometry(instance_, &xo, &yo, &width, &height);
+  return QSize(width + control_panel_->width(), height + status_->sizeHint().height());
+}
+
+QMenu *MapWidget::new_menu(const QString &title) {
+  auto *menu = new QMenu(title, this);
+  menus_.append(menu);
+  return menu;
+}
+
+void MapWidget::setTitle(const QString &title) {
+  if (title == title_)
+    return;
+  title_ = title;
+  emit titleChanged(title_);
+}
+
+void MapWidget::setMenuBarShown(bool shown) {
+  if (menu_bar_ == nullptr && shown) {
+    menu_bar_ = new QMenuBar(this);
+    /* on macOS a native bar of a widget inside a window would not be seen */
+    menu_bar_->setNativeMenuBar(false);
+    for (QMenu *menu : menus_)
+      menu_bar_->addMenu(menu);
+    outer_->insertWidget(0, menu_bar_);
+  }
+  if (menu_bar_ != nullptr)
+    menu_bar_->setVisible(shown);
+}
+
+void MapWidget::dismiss() { mbvq_c_destroy(instance_); }
+
+QLabel *MapWidget::takeStatusLabel() {
+  outer_->removeWidget(status_);
+  return status_;
+}
+
+void MapWidget::build_view_menu() {
+  QMenu *menu = new_menu(tr("View"));
   QActionGroup *groups[5] = {};
   for (const ViewItem &entry : kViewMenu) {
     if (entry.item < 0) {
@@ -241,7 +281,7 @@ void MapWindow::build_view_menu() {
   }
 }
 
-void MapWindow::refresh_modes() {
+void MapWidget::refresh_modes() {
   struct mbvq_state state;
   mbvq_c_state(instance_, &state);
   for (int item = 0; item < MBVQ_VIEW_ITEMS; item++) {
@@ -261,7 +301,7 @@ void MapWindow::refresh_modes() {
   }
 }
 
-void MapWindow::delete_map_view() {
+void MapWidget::delete_map_view() {
   /* the OpenGL views go now: the map view and the profile window */
   delete profile_;
   profile_ = nullptr;
@@ -269,10 +309,10 @@ void MapWindow::delete_map_view() {
   map_view_ = nullptr;
 }
 
-void MapWindow::show_message(const QString &text, bool on) {
+void MapWidget::show_message(const QString &text, bool on) {
   if (message_ == nullptr) {
     message_ = new QDialog(this);
-    message_->setWindowTitle(windowTitle());
+    message_->setWindowTitle(title_);
     auto *layout = new QVBoxLayout(message_);
     message_label_ = new QLabel;
     layout->addWidget(message_label_);
@@ -290,7 +330,7 @@ void MapWindow::show_message(const QString &text, bool on) {
   }
 }
 
-void MapWindow::show_about() {
+void MapWidget::show_about() {
   if (about_ == nullptr) {
     /* the texts of the Motif About dialog */
     about_ = new QDialog(this);
@@ -330,9 +370,12 @@ void MapWindow::show_about() {
   about_->raise();
 }
 
-void MapWindow::set_status(const QString &text) { status_->setText(text); }
+void MapWidget::set_status(const QString &text) {
+  status_->setText(text);
+  emit statusMessage(text);
+}
 
-void MapWindow::set_label(int label, const QString &text) {
+void MapWidget::set_label(int label, const QString &text) {
   if (label < 0 || label >= MBVQ_LABEL_OTHER)
     return;
   labels_[label] = text;
@@ -344,11 +387,11 @@ void MapWindow::set_label(int label, const QString &text) {
     profile_->set_info(text);
 }
 
-QString MapWindow::label(int label) const {
+QString MapWidget::label(int label) const {
   return label >= 0 && label < MBVQ_LABEL_OTHER ? labels_[label] : QString();
 }
 
-void MapWindow::set_map_cursor(int cursor) {
+void MapWidget::set_map_cursor(int cursor) {
   /* Qt has no coloured cursors; the shape carries the meaning */
   Qt::CursorShape shape = Qt::CrossCursor;
   switch (cursor) {
@@ -373,7 +416,7 @@ void MapWindow::set_map_cursor(int cursor) {
     map_view_->setCursor(shape);
 }
 
-void MapWindow::add_action(int index, const QString &label) {
+void MapWidget::add_action(int index, const QString &label) {
   QAction *action = action_menu_->addAction(QString(label).replace(QLatin1Char('&'), QStringLiteral("&&")));
   connect(action, &QAction::triggered, this, [this, index] { mbvq_c_action(instance_, index); });
   if (index >= static_cast<int>(actions_.size()))
@@ -381,11 +424,26 @@ void MapWindow::add_action(int index, const QString &label) {
   actions_[index] = action;
 }
 
-void MapWindow::add_action_separator() { action_menu_->addSeparator(); }
+void MapWidget::add_action_separator() { action_menu_->addSeparator(); }
 
-void MapWindow::set_action_enabled(int index, bool enabled) {
+void MapWidget::set_action_enabled(int index, bool enabled) {
   if (index >= 0 && index < static_cast<int>(actions_.size()) && actions_[index] != nullptr)
     actions_[index]->setEnabled(enabled);
+}
+
+MapWindow::MapWindow(MapWidget *widget) : widget_(widget) {
+  setAttribute(Qt::WA_DeleteOnClose, false);
+  setWindowTitle(widget->title());
+  connect(widget, &MapWidget::titleChanged, this, &QWidget::setWindowTitle);
+  for (QMenu *menu : widget->menus())
+    menuBar()->addMenu(menu);
+  setCentralWidget(widget);
+  statusBar()->addWidget(widget->takeStatusLabel(), 1);
+
+  int xo = 0, yo = 0, width = 0, height = 0;
+  mbvq_c_geometry(widget->instance(), &xo, &yo, &width, &height);
+  move(xo, yo);
+  resize(width + widget->controlPanel()->width(), height + menuBar()->sizeHint().height() + statusBar()->sizeHint().height());
 }
 
 void MapWindow::closeEvent(QCloseEvent *event) {
@@ -394,7 +452,7 @@ void MapWindow::closeEvent(QCloseEvent *event) {
   event->accept();
   if (!closing_) {
     closing_ = true;
-    mbvq_c_destroy(instance_);
+    widget_->dismiss();
   }
 }
 

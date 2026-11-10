@@ -165,7 +165,7 @@ int main(int argc, char **argv) {
 
   /* initialize the vizualization code */
   mbgrdviz_verbose = verbose;
-  mbview_startup(verbose, nullptr, nullptr, &error);
+  mbvq::start(verbose);
   for (int i = 0; i < MBV_MAX_WINDOWS; i++)
     mbgrdviz_mbview_id[i] = false;
   do_mbgrdviz_sensitivity();

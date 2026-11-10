@@ -249,8 +249,7 @@ void mbeditviz_qt_start(MbeditvizWindow *window) {
   do_mbeditviz_update_gui();
 
   /* initialize the vizualization code */
-  mbview_startup(mbev_verbose, nullptr, nullptr, &mbev_error);
-  mb3dsoundings_startup(mbev_verbose, nullptr, nullptr, &mbev_error);
+  mbvq::start(mbev_verbose);
   mb3dsoundings_set_dismiss_notify(mbev_verbose, mbeditviz_mb3dsoundings_dismiss, &mbev_error);
   mb3dsoundings_set_edit_notify(mbev_verbose, mbeditviz_mb3dsoundings_edit, &mbev_error);
 
