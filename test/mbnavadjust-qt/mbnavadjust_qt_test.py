@@ -35,6 +35,7 @@ import synth_kmall as S  # noqa: E402
 PROGRAM = os.environ["MBNAVADJUST_QT"]
 MERGE = os.environ["MBNAVADJUSTMERGE"]
 TOOLS = os.path.dirname(os.environ["MBINFO"])
+VIEW_TEST = os.environ["MBNAVADJUST_QT_VIEW_TEST"]
 
 CROSSINGS = [
     "U     0 00:000:000 01:001:000   1  0",
@@ -106,10 +107,14 @@ class MbnavadjustQtTest(unittest.TestCase):
             stream.write(text)
         return path
 
-    def replay(self, path, commands):
+    def script(self, path, text):
         script = path + ".script"
         with open(script, "w") as stream:
-            stream.write("open " + path + "\n" + commands)
+            stream.write(text)
+        return script
+
+    def replay(self, path, commands):
+        script = self.script(path, "open " + path + "\n" + commands)
         run = subprocess.run([PROGRAM, "--replay=" + script], cwd=os.path.dirname(path), env=self.env,
                              stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, universal_newlines=True)
         self.assertEqual(run.returncode, 0, run.stdout[-2000:])
@@ -183,6 +188,47 @@ class MbnavadjustQtTest(unittest.TestCase):
         path = self.project()
         state = self.replay(path, "list truecrossings\nclick 1\nnext\nstate\n")[0]
         self.assertEqual(self.values(state, "window")[0], "mode 1 status 2 current -1 -1 -1 -1")
+
+    def test_mouse_on_the_contour_plot(self):
+        path = self.project()
+        states = self.replay(path, "list crossings\nclick 2\nstate\ncontpress 1 300 300\ncontmove 340 280\n"
+                                   "contrelease 1 340 280\nstate\ncontpress 2 200 200\ncontmove 400 400\n"
+                                   "contrelease 2 400 400\nstate\n")
+        moved = [float(value) for value in self.values(states[1], "working")[0].split()[:2]]
+        start = [float(value) for value in self.values(states[0], "working")[0].split()[:2]]
+        self.assertGreater(moved[0], start[0])
+        self.assertGreater(moved[1], start[1])
+        self.assertTrue(self.enabled(states[2], "pushButton_naverr_fullsize"))
+
+    def test_contours_from_layers_match_shared_code(self):
+        path = self.project()
+        run = subprocess.run([PROGRAM, "--replay=" + self.script(path, "open %s\nlist crossings\nclick 2\ncontourcheck\n"
+                                                                       "contpress 1 300 300\ncontmove 330 280\n"
+                                                                       "contrelease 1 330 280\ncontourcheck\n" % path)],
+                             cwd=os.path.dirname(path), env=self.env, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                             universal_newlines=True)
+        self.assertEqual(run.returncode, 0)
+        self.assertEqual(re.findall(r"contour-difference: (\d+)", run.stdout), ["0", "0"])
+
+    def test_export_writes_the_plots(self):
+        path = self.project()
+        prefix = path + "_export"
+        subprocess.check_call([PROGRAM, "--input=" + path, "--export=" + prefix, "--crossing=1"], cwd=os.path.dirname(path),
+                              env=self.env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        for name in ("contour", "misfit", "zoffset"):
+            with open("%s_%s.png" % (prefix, name), "rb") as stream:
+                self.assertEqual(stream.read(8), b"\x89PNG\r\n\x1a\n", name)
+
+    def test_model_plot_and_widgets(self):
+        path = self.project()
+        self.replay(path, "list crossings\nclick 2\nminmisfit\naddtie\nsettie\nnext\nminmisfit\naddtie\nsettie\nnext\n"
+                          "minmisfit\naddtie\nsettie\ndismiss\ninvert\nwrite\n")
+        states = self.replay(path, "list ties\nclick 1\nmodelshow\nstate\nmodelstyle tieoffsets\nstate\n")
+        self.assertEqual(len(self.values(states[0], "model")), 2)
+        self.assertNotEqual(self.values(states[0], "plots")[0].split("|")[3].split(), ["0", "0", "0", "0"])
+        run = subprocess.run([VIEW_TEST, path], cwd=os.path.dirname(path), env=self.env, stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT, universal_newlines=True)
+        self.assertEqual(run.returncode, 0, run.stdout[-3000:])
 
 
 if __name__ == "__main__":

@@ -45,8 +45,30 @@ target_include_directories(
 
 target_link_libraries(mbnavadjust-qt-core PUBLIC mbnavadjust_core mbaux mbio ${MB_SYSLIBS})
 
+# On macOS Qt uses the system OpenGL framework. build-utils/FindOpenGL.cmake finds
+# the X11 Mesa libGL of the Motif programs, so in this directory let Qt's
+# find_package(OpenGL) use CMake's own module.
+if(APPLE)
+  list(REMOVE_ITEM CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/build-utils")
+endif()
+
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
+
+# mbnavadjust-qt-ui: the plots as images and the widgets that show them.
+add_library(
+  mbnavadjust-qt-ui STATIC
+  mbnaq_plots.cc
+  mbnaq_plots.h
+  mbnaq_views.cc
+  mbnaq_views.h)
+
+set_target_properties(mbnavadjust-qt-ui PROPERTIES AUTOMOC ON CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+target_include_directories(mbnavadjust-qt-ui BEFORE PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/x11)
+target_include_directories(mbnavadjust-qt-ui PRIVATE ${CMAKE_SOURCE_DIR}/src/mbnavadjust)
+target_link_libraries(mbnavadjust-qt-ui PUBLIC mbnavadjust-qt-core Qt6::Widgets)
+
 add_executable(mbnavadjust-qt mbnavadjust-qt.cc)
 set_target_properties(mbnavadjust-qt PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
-target_link_libraries(mbnavadjust-qt PRIVATE mbnavadjust-qt-core)
+target_link_libraries(mbnavadjust-qt PRIVATE mbnavadjust-qt-ui)
 
 install(TARGETS mbnavadjust-qt DESTINATION ${CMAKE_INSTALL_BINDIR})

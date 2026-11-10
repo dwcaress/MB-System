@@ -62,8 +62,10 @@ void do_update_status(void) {
     Session::current()->updateStatus();
 }
 
-/* The model plot arrives with the plots; until then project.modelplot is never set. */
-void do_update_modelplot_status(void) {}
+void do_update_modelplot_status(void) {
+  if (Session::current() != nullptr)
+    Session::current()->updateModelPlotStatus();
+}
 
 /* The map view arrives with mbview-qt. */
 void do_update_visualization_status(void) {}
@@ -208,23 +210,31 @@ int do_check_nav_active(int ifile, int isection) {
 }
 
 void xg_drawline(void *xgid, int x1, int y1, int x2, int y2, unsigned int pixel, int style) {
-  if (xgid != nullptr)
+  if (xgid != nullptr) {
+    static_cast<DrawSurface *>(xgid)->lines++;
     static_cast<DrawSurface *>(xgid)->line(x1, y1, x2, y2, pixel, style);
+  }
 }
 
 void xg_drawrectangle(void *xgid, int x, int y, int width, int height, unsigned int pixel, int style) {
-  if (xgid != nullptr)
+  if (xgid != nullptr) {
+    static_cast<DrawSurface *>(xgid)->rectangles++;
     static_cast<DrawSurface *>(xgid)->rectangle(x, y, width, height, pixel, style);
+  }
 }
 
 void xg_fillrectangle(void *xgid, int x, int y, int width, int height, unsigned int pixel, int style) {
-  if (xgid != nullptr)
+  if (xgid != nullptr) {
+    static_cast<DrawSurface *>(xgid)->fills++;
     static_cast<DrawSurface *>(xgid)->fillRectangle(x, y, width, height, pixel, style);
+  }
 }
 
 void xg_drawstring(void *xgid, int x, int y, char *string, unsigned int pixel, int style) {
-  if (xgid != nullptr)
+  if (xgid != nullptr) {
+    static_cast<DrawSurface *>(xgid)->texts++;
     static_cast<DrawSurface *>(xgid)->text(x, y, string, pixel, style);
+  }
 }
 
 void xg_justify(void *xgid, char *string, int *width, int *ascent, int *descent) {

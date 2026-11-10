@@ -22,7 +22,18 @@
 #    See README.md file for copying and redistribution conditions.
 #------------------------------------------------------------------------------
 
-# Test of mbnavadjust-qt on a synthetic project, without windows.
+# Tests of mbnavadjust-qt on a synthetic project, without a display: the program
+# and a program that drives the plot widgets with mouse events.
+
+if(APPLE)
+  list(REMOVE_ITEM CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/build-utils")
+endif()
+
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
+
+add_executable(mbnavadjust_qt_view_test mbnavadjust_qt_view_test.cc)
+set_target_properties(mbnavadjust_qt_view_test PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+target_link_libraries(mbnavadjust_qt_view_test PRIVATE mbnavadjust-qt-ui)
 
 find_package(Python3 COMPONENTS Interpreter)
 if(Python3_FOUND)
@@ -30,5 +41,5 @@ if(Python3_FOUND)
   set_tests_properties(
     mbnavadjust_qt_test
     PROPERTIES ENVIRONMENT
-               "MBNAVADJUST_QT=$<TARGET_FILE:mbnavadjust-qt>;MBNAVADJUSTMERGE=$<TARGET_FILE:mbnavadjustmerge>;MBINFO=$<TARGET_FILE:mbinfo>;SYNTH_KMALL_DIR=${CMAKE_SOURCE_DIR}/test/python")
+               "MBNAVADJUST_QT=$<TARGET_FILE:mbnavadjust-qt>;MBNAVADJUST_QT_VIEW_TEST=$<TARGET_FILE:mbnavadjust_qt_view_test>;MBNAVADJUSTMERGE=$<TARGET_FILE:mbnavadjustmerge>;MBINFO=$<TARGET_FILE:mbinfo>;SYNTH_KMALL_DIR=${CMAKE_SOURCE_DIR}/test/python")
 endif()

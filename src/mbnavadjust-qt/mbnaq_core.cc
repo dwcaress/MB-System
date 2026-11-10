@@ -378,7 +378,7 @@ Session *Session::create() {
 
 Session *Session::current() { return the_session; }
 
-Session::Session() {
+Session::Session() : contourSurface_(&null_cont), misfitSurface_(&null_corr), zOffsetSurface_(&null_zoff) {
   mbnavadjust_init_globals();
 
   /* colors are passed through as indexes that the surfaces interpret */
@@ -978,6 +978,48 @@ void Session::updateCrossing() {
     callbacks_.crossingChanged();
 }
 
+/* What the status line of the model plot says, and the mode that depends on the list. */
+void Session::updateModelPlotStatus() {
+  if (!project.modelplot)
+    return;
+
+  setEnabled("pushButton_modelplot_clearblock", mbna_crossing_select != MBNA_SELECT_NONE);
+
+  if (mbna_view_list == MBNA_VIEW_LIST_FILESECTIONS || mbna_view_list == MBNA_VIEW_LIST_GLOBALTIES ||
+      mbna_view_list == MBNA_VIEW_LIST_GLOBALTIESSORTED)
+    mbna_modelplot_mode = MBNA_MODELPLOT_MODE_SECTIONS;
+  else
+    mbna_modelplot_mode = MBNA_MODELPLOT_MODE_CROSSINGS;
+
+  const bool timeline =
+      project.modelplot_style == MBNA_MODELPLOT_TIMESERIES || project.modelplot_style == MBNA_MODELPLOT_PERTURBATION;
+  const bool crossing_ok = mbna_crossing_select >= 0 && mbna_crossing_select < project.num_crossings;
+  std::string mouse, selected = "No Selection";
+  if (mbna_modelplot_mode == MBNA_MODELPLOT_MODE_SECTIONS && timeline) {
+    const bool section_ok =
+        mbna_section_select != MBNA_SELECT_NONE && mbna_current_file >= 0 && mbna_current_file < project.num_files;
+    mouse = section_ok ? "Mouse: <left> select global tie; <middle> select untied section <right> drag zoom extent"
+                       : "Mouse: <left> select global tie; <middle> select untied section; <right> drag zoom extent";
+    if (section_ok)
+      selected = fmt("Selected Section: %2.2d:%3.3d:%3.3d", project.files[mbna_current_file].survey, mbna_current_file,
+                     mbna_current_section);
+  } else {
+    mouse = timeline && mbna_modelplot_mode == MBNA_MODELPLOT_MODE_CROSSINGS
+                ? "Mouse: <left> select  tie; <middle> select untied crossing; <right> drag zoom extent"
+                : "Mouse: <left> select  tie; <middle> select block to view; <right> drag zoom extent";
+    if (crossing_ok) {
+      const struct mbna_crossing *crossing = &(project.crossings[mbna_crossing_select]);
+      selected = fmt("Selected Crossing: %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d", mbna_crossing_select,
+                     project.files[crossing->file_id_1].survey, crossing->file_id_1, crossing->section_1,
+                     project.files[crossing->file_id_2].survey, crossing->file_id_2, crossing->section_2);
+    }
+  }
+  modelLines_.clear();
+  modelLines_.push_back(mouse);
+  modelLines_.push_back(selected);
+  notifyPlots();
+}
+
 void Session::updateCrossingOffsets() {
   offsetLines_.clear();
   if ((mbna_naverr_mode == MBNA_NAVERR_MODE_CROSSING && mbna_current_crossing >= 0) ||
@@ -1041,16 +1083,22 @@ void Session::notifyError(const char *s1, const char *s2, const char *s3) {
 
 /* When a step finds no other crossing the program logic clears the current
    one, and its plot function would then read project.crossings[-1]. */
-void Session::plotCrossing() {
+void Session::plotCrossing(int plotMode) {
   if (mbna_naverr_mode == MBNA_NAVERR_MODE_CROSSING && mbna_current_crossing < 0)
     return;
   if (mbna_naverr_mode == MBNA_NAVERR_MODE_SECTION && (mbna_current_file < 0 || mbna_current_section < 0))
     return;
-  mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
+  mbnavadjust_naverr_plot(plotMode);
+  notifyPlots();
+}
+
+void Session::notifyPlots() {
+  if (plotsChanged_)
+    plotsChanged_();
 }
 
 void Session::initCrossingWindow(int mode) {
-  mbnavadjust_set_graphics(&null_cont, &null_corr, &null_zoff);
+  mbnavadjust_set_graphics(contourSurface_, misfitSurface_, zOffsetSurface_);
   mbna_status = MBNA_STATUS_NAVERR;
   if (mode == MBNA_NAVERR_MODE_CROSSING) {
     if (mbna_crossing_select == MBNA_SELECT_NONE)
@@ -1063,7 +1111,7 @@ void Session::initCrossingWindow(int mode) {
     else
       mbnavadjust_naverr_specific_section(mbna_file_select, mbna_section_select);
   }
-  plotCrossing();
+  plotCrossing(MBNA_PLOT_MODE_FIRST);
   updateCrossing();
   updateStatus();
 }
@@ -1183,6 +1231,7 @@ void Session::refreshAfterEdit(bool modelOutOfDate) {
       project.modelplot_uptodate = false;
     do_update_modelplot_status();
     mbnavadjust_modelplot_plot(__FILE__, __LINE__);
+    notifyPlots();
   }
   if (project.visualization_status) {
     mbnavadjust_reset_visualization_navties();
@@ -1219,7 +1268,7 @@ void Session::loadCrossingRow(int crossing, int tie) {
     initCrossingWindow(MBNA_NAVERR_MODE_CROSSING);
   } else {
     mbnavadjust_naverr_specific_crossing(mbna_crossing_select, mbna_tie_select);
-    plotCrossing();
+    plotCrossing(MBNA_PLOT_MODE_FIRST);
     updateCrossing();
   }
 }
@@ -1231,7 +1280,7 @@ void Session::loadSectionRow(int file, int section) {
     initCrossingWindow(MBNA_NAVERR_MODE_SECTION);
   } else {
     mbnavadjust_naverr_specific_section(mbna_file_select, mbna_section_select);
-    plotCrossing();
+    plotCrossing(MBNA_PLOT_MODE_FIRST);
     updateCrossing();
   }
 }
@@ -1307,7 +1356,7 @@ void Session::nextCrossing() {
     mbnavadjust_naverr_next_crossing();
   else if (mbna_naverr_mode == MBNA_NAVERR_MODE_SECTION)
     mbnavadjust_naverr_next_section();
-  plotCrossing();
+  plotCrossing(MBNA_PLOT_MODE_FIRST);
   updateCrossing();
   refreshAfterEdit(false);
 }
@@ -1317,7 +1366,7 @@ void Session::previousCrossing() {
     mbnavadjust_naverr_previous_crossing();
   else if (mbna_naverr_mode == MBNA_NAVERR_MODE_SECTION)
     mbnavadjust_naverr_previous_section();
-  plotCrossing();
+  plotCrossing(MBNA_PLOT_MODE_FIRST);
   updateCrossing();
   refreshAfterEdit(false);
 }
@@ -1327,42 +1376,42 @@ void Session::nextUnsetCrossing() {
     mbnavadjust_naverr_nextunset_crossing();
   else if (mbna_naverr_mode == MBNA_NAVERR_MODE_SECTION)
     mbnavadjust_naverr_nextunset_section();
-  plotCrossing();
+  plotCrossing(MBNA_PLOT_MODE_FIRST);
   updateCrossing();
   refreshAfterEdit(false);
 }
 
 void Session::addTie() {
   mbnavadjust_naverr_addtie();
-  plotCrossing();
+  plotCrossing(MBNA_PLOT_MODE_FIRST);
   updateCrossing();
   refreshAfterEdit(true);
 }
 
 void Session::deleteTie() {
   mbnavadjust_naverr_deletetie();
-  plotCrossing();
+  plotCrossing(MBNA_PLOT_MODE_FIRST);
   updateCrossing();
   refreshAfterEdit(true);
 }
 
 void Session::selectTie() {
   mbnavadjust_naverr_selecttie();
-  plotCrossing();
+  plotCrossing(MBNA_PLOT_MODE_FIRST);
   updateCrossing();
   refreshAfterEdit(true);
 }
 
 void Session::setTie() {
   mbnavadjust_naverr_save();
-  plotCrossing();
+  plotCrossing(MBNA_PLOT_MODE_FIRST);
   updateCrossing();
   refreshAfterEdit(true);
 }
 
 void Session::resetTie() {
   mbnavadjust_naverr_resettie();
-  plotCrossing();
+  plotCrossing(MBNA_PLOT_MODE_FIRST);
   updateCrossing();
   refreshAfterEdit(false);
 }
@@ -1373,7 +1422,7 @@ void Session::unsetCrossing() {
     mbnavadjust_naverr_next_crossing();
   else if (mbna_naverr_mode == MBNA_NAVERR_MODE_SECTION)
     mbnavadjust_naverr_next_section();
-  plotCrossing();
+  plotCrossing(MBNA_PLOT_MODE_FIRST);
   updateCrossing();
   refreshAfterEdit(true);
 }
@@ -1384,7 +1433,7 @@ void Session::skipCrossing() {
     mbnavadjust_naverr_nextunset_crossing();
   else if (mbna_naverr_mode == MBNA_NAVERR_MODE_SECTION)
     mbnavadjust_naverr_nextunset_section();
-  plotCrossing();
+  plotCrossing(MBNA_PLOT_MODE_FIRST);
   updateCrossing();
   refreshAfterEdit(true);
 }
@@ -1410,7 +1459,7 @@ void Session::fullSize() {
   mbna_plot_lat_min = mbna_lat_min;
   mbna_plot_lat_max = mbna_lat_max;
   mbnavadjust_get_misfit();
-  plotCrossing();
+  plotCrossing(MBNA_PLOT_MODE_FIRST);
   updateCrossing();
 }
 
@@ -1420,7 +1469,7 @@ void Session::zeroOffset() {
   mbna_offset_z = 0.0;
   mbnavadjust_get_misfitxy();
   mbnavadjust_naverr_replot();
-  plotCrossing();
+  plotCrossing(MBNA_PLOT_MODE_FIRST);
   updateCrossingOffsets();
 }
 
@@ -1428,13 +1477,13 @@ void Session::zeroZOffset() {
   mbna_offset_z = 0.0;
   mbnavadjust_get_misfitxy();
   mbnavadjust_naverr_replot();
-  plotCrossing();
+  plotCrossing(MBNA_PLOT_MODE_FIRST);
   updateCrossingOffsets();
 }
 
 void Session::applyZOffset() {
   mbnavadjust_get_misfitxy();
-  plotCrossing();
+  plotCrossing(MBNA_PLOT_MODE_FIRST);
   updateCrossingOffsets();
 }
 
@@ -1444,7 +1493,7 @@ void Session::moveToMinimumMisfit() {
   mbna_offset_z = mbna_minmisfit_z;
   mbnavadjust_get_misfitxy();
   mbnavadjust_naverr_replot();
-  plotCrossing();
+  plotCrossing(MBNA_PLOT_MODE_FIRST);
   updateCrossing();
 }
 
@@ -1453,15 +1502,386 @@ void Session::moveToMinimumXYMisfit() {
   mbna_offset_y = mbna_minmisfit_yh;
   mbna_offset_z = mbna_minmisfit_zh;
   mbnavadjust_naverr_replot();
-  plotCrossing();
+  plotCrossing(MBNA_PLOT_MODE_FIRST);
   updateCrossing();
 }
 
 void Session::setMisfitCenter(bool zeroCenter) {
   mbna_misfit_center = zeroCenter ? MBNA_MISFIT_ZEROCENTER : MBNA_MISFIT_AUTOCENTER;
   mbnavadjust_get_misfit();
-  plotCrossing();
+  plotCrossing(MBNA_PLOT_MODE_FIRST);
   updateCrossing();
+}
+
+/*--------------------------------------------------------------------*/
+/* plots */
+
+void Session::setCrossingSurfaces(DrawSurface *contour, DrawSurface *misfit, DrawSurface *zOffset) {
+  contourSurface_ = contour != nullptr ? contour : &null_cont;
+  misfitSurface_ = misfit != nullptr ? misfit : &null_corr;
+  zOffsetSurface_ = zOffset != nullptr ? zOffset : &null_zoff;
+  mbnavadjust_set_graphics(contourSurface_, misfitSurface_, zOffsetSurface_);
+}
+
+bool Session::crossingLoaded() const {
+  return (mbna_naverr_mode == MBNA_NAVERR_MODE_CROSSING && mbna_current_crossing >= 0) ||
+         (mbna_naverr_mode == MBNA_NAVERR_MODE_SECTION && mbna_current_file >= 0 && mbna_current_section >= 0);
+}
+
+void Session::replotCrossing() {
+  if (crossingLoaded()) {
+    mbnavadjust_get_misfit();
+    plotCrossing(MBNA_PLOT_MODE_FIRST);
+  }
+}
+
+void Session::setCrossingPlotSizes(int contourWidth, int contourHeight, int misfitWidth, int misfitHeight, int zOffsetWidth,
+                                   int zOffsetHeight) {
+  /* The scaling widens the bounds to fit the shape of the plot, so a resize
+     starts again from the bounds that were asked for unless they have changed. */
+  if (crossingLoaded()) {
+    const bool unchanged = haveRequestedBounds_ && mbna_plot_lon_min == scaledBounds_[0] &&
+                           mbna_plot_lon_max == scaledBounds_[1] && mbna_plot_lat_min == scaledBounds_[2] &&
+                           mbna_plot_lat_max == scaledBounds_[3];
+    if (unchanged) {
+      mbna_plot_lon_min = requestedBounds_[0];
+      mbna_plot_lon_max = requestedBounds_[1];
+      mbna_plot_lat_min = requestedBounds_[2];
+      mbna_plot_lat_max = requestedBounds_[3];
+    } else {
+      requestedBounds_[0] = mbna_plot_lon_min;
+      requestedBounds_[1] = mbna_plot_lon_max;
+      requestedBounds_[2] = mbna_plot_lat_min;
+      requestedBounds_[3] = mbna_plot_lat_max;
+      haveRequestedBounds_ = true;
+    }
+  }
+
+  int cont[4] = {0, contourWidth, 0, contourHeight};
+  int corr[4] = {0, misfitWidth, 0, misfitHeight};
+  int zoff[4] = {0, zOffsetWidth, 0, zOffsetHeight};
+  mbnavadjust_set_borders(cont, corr, zoff);
+  if (crossingLoaded()) {
+    plotCrossing(MBNA_PLOT_MODE_FIRST);
+    scaledBounds_[0] = mbna_plot_lon_min;
+    scaledBounds_[1] = mbna_plot_lon_max;
+    scaledBounds_[2] = mbna_plot_lat_min;
+    scaledBounds_[3] = mbna_plot_lat_max;
+  }
+}
+
+void Session::contourPress(int button, int x, int y) {
+  if (!crossingLoaded())
+    return;
+  if (button == 1) {
+    button1Down_ = true;
+    locX_ = x;
+    locY_ = y;
+    mbna_offset_x_old = mbna_offset_x;
+    mbna_offset_y_old = mbna_offset_y;
+    mbna_offset_z_old = mbna_offset_z;
+    mbnavadjust_naverr_checkoksettie();
+    updateCrossingOffsets();
+  } else if (button == 2) {
+    button2Down_ = true;
+    mbna_zoom_x1 = x;
+    mbna_zoom_y1 = y;
+    mbna_zoom_x2 = x;
+    mbna_zoom_y2 = y;
+    plotCrossing(MBNA_PLOT_MODE_ZOOMFIRST);
+  } else if (button == 3) {
+    button3Down_ = true;
+    mbnavadjust_naverr_snavpoints(x, y);
+    plotCrossing(MBNA_PLOT_MODE_FIRST);
+    updateCrossing();
+  }
+}
+
+void Session::contourDrag(int x, int y) {
+  if (!crossingLoaded())
+    return;
+  if (button1Down_) {
+    mbna_offset_x = mbna_offset_x_old + (x - locX_) / mbna_plotx_scale;
+    mbna_offset_y = mbna_offset_y_old - (y - locY_) / mbna_ploty_scale;
+    plotCrossing(MBNA_PLOT_MODE_MOVE);
+    updateCrossingOffsets();
+    locX_ = x;
+    locY_ = y;
+    mbna_offset_x_old = mbna_offset_x;
+    mbna_offset_y_old = mbna_offset_y;
+  } else if (button2Down_) {
+    mbna_zoom_x2 = x;
+    mbna_zoom_y2 = y;
+    plotCrossing(MBNA_PLOT_MODE_ZOOM);
+  }
+}
+
+void Session::contourRelease(int button, int x, int y) {
+  if (button == 1) {
+    button1Down_ = false;
+    notifyPlots();
+  } else if (button == 2) {
+    button2Down_ = false;
+    if (!crossingLoaded())
+      return;
+    mbna_zoom_x2 = x;
+    mbna_zoom_y2 = y;
+    /* a click without a drag would make an empty plot */
+    if (mbna_zoom_x1 != mbna_zoom_x2 && mbna_zoom_y1 != mbna_zoom_y2) {
+      const double x1 = mbna_zoom_x1 / mbna_plotx_scale + mbna_plot_lon_min;
+      const double y1 = (cont_borders[3] - mbna_zoom_y1) / mbna_ploty_scale + mbna_plot_lat_min;
+      const double x2 = mbna_zoom_x2 / mbna_plotx_scale + mbna_plot_lon_min;
+      const double y2 = (cont_borders[3] - mbna_zoom_y2) / mbna_ploty_scale + mbna_plot_lat_min;
+      mbna_plot_lon_min = MIN(x1, x2);
+      mbna_plot_lon_max = MAX(x1, x2);
+      mbna_plot_lat_min = MIN(y1, y2);
+      mbna_plot_lat_max = MAX(y1, y2);
+      mbnavadjust_get_misfit();
+    }
+    plotCrossing(MBNA_PLOT_MODE_FIRST);
+    updateCrossing();
+  } else if (button == 3) {
+    button3Down_ = false;
+  }
+}
+
+void Session::misfitPress(int x, int y) {
+  if (!crossingLoaded())
+    return;
+  button1Down_ = true;
+  mbna_offset_x_old = mbna_offset_x;
+  mbna_offset_y_old = mbna_offset_y;
+  mbna_offset_z_old = mbna_offset_z;
+  mbna_offset_x = mbna_misfit_offset_x + (x - (corr_borders[0] + corr_borders[1]) / 2) / mbna_misfit_xscale;
+  mbna_offset_y = mbna_misfit_offset_y - (y - (corr_borders[3] + corr_borders[2]) / 2) / mbna_misfit_yscale;
+  plotCrossing(MBNA_PLOT_MODE_MOVE);
+  updateCrossing();
+  updateCrossingOffsets();
+}
+
+void Session::misfitDrag(int x, int y) {
+  if (!crossingLoaded() || !button1Down_)
+    return;
+  mbna_offset_x = mbna_misfit_offset_x + (x - (corr_borders[0] + corr_borders[1]) / 2) / mbna_misfit_xscale;
+  mbna_offset_y = mbna_misfit_offset_y - (y - (corr_borders[3] + corr_borders[2]) / 2) / mbna_misfit_yscale;
+  plotCrossing(MBNA_PLOT_MODE_MOVE);
+  updateCrossing();
+  updateCrossingOffsets();
+  mbna_offset_x_old = mbna_offset_x;
+  mbna_offset_y_old = mbna_offset_y;
+  mbna_offset_z_old = mbna_offset_z;
+}
+
+void Session::misfitRelease() {
+  button1Down_ = false;
+  notifyPlots();
+}
+
+void Session::zOffsetPress(int x, int y) {
+  (void)y;
+  if (!crossingLoaded())
+    return;
+  button1Down_ = true;
+  mbna_offset_x_old = mbna_offset_x;
+  mbna_offset_y_old = mbna_offset_y;
+  mbna_offset_z_old = mbna_offset_z;
+  mbna_offset_z = (x / mbna_zoff_scale_x) + mbna_misfit_offset_z - 0.5 * project.zoffsetwidth;
+  mbnavadjust_get_misfitxy();
+  plotCrossing(MBNA_PLOT_MODE_MOVE);
+  updateCrossing();
+  updateCrossingOffsets();
+}
+
+void Session::zOffsetDrag(int x, int y) {
+  (void)y;
+  if (!crossingLoaded() || !button1Down_)
+    return;
+  mbna_offset_z = (x / mbna_zoff_scale_x) + mbna_misfit_offset_z - 0.5 * project.zoffsetwidth;
+  mbnavadjust_get_misfitxy();
+  plotCrossing(MBNA_PLOT_MODE_MOVE);
+  updateCrossing();
+  updateCrossingOffsets();
+  mbna_offset_x_old = mbna_offset_x;
+  mbna_offset_y_old = mbna_offset_y;
+  mbna_offset_z_old = mbna_offset_z;
+}
+
+void Session::zOffsetRelease() {
+  button1Down_ = false;
+  if (!crossingLoaded())
+    return;
+  mbnavadjust_naverr_replot();
+  plotCrossing(MBNA_PLOT_MODE_FIRST);
+  updateCrossing();
+  updateCrossingOffsets();
+}
+
+/*--------------------------------------------------------------------*/
+/* model plot */
+
+bool Session::modelPlotOpen() const { return project.modelplot; }
+
+void Session::setModelPlotBorders(int width, int height) {
+  mbna_modelplot_width = width;
+  mbna_modelplot_height = height;
+  modelBorders_[0] = 0;
+  modelBorders_[1] = width - 1;
+  modelBorders_[2] = 0;
+  modelBorders_[3] = height - 1;
+  mbnavadjust_set_modelplot_graphics(modelSurface_, modelBorders_);
+}
+
+void Session::openModelPlot(DrawSurface *surface, int width, int height) {
+  modelSurface_ = surface;
+  setModelPlotBorders(width, height);
+  project.modelplot = true;
+  project.modelplot_uptodate = false;
+  mbna_modelplot_zoom = false;
+  mbna_modelplot_zoom_x1 = 0;
+  mbna_modelplot_zoom_x2 = 0;
+  mbna_modelplot_start = 0;
+  mbna_modelplot_end = 0;
+  updateStatus();
+  updateModelPlotStatus();
+  mbnavadjust_modelplot_plot(__FILE__, __LINE__);
+  notifyPlots();
+}
+
+void Session::closeModelPlot() {
+  project.modelplot = false;
+  notifyPlots();
+}
+
+void Session::resizeModelPlot(int width, int height) {
+  if (!project.modelplot || (width == mbna_modelplot_width && height == mbna_modelplot_height))
+    return;
+  setModelPlotBorders(width, height);
+  project.modelplot_uptodate = false;
+  mbnavadjust_modelplot_plot(__FILE__, __LINE__);
+  notifyPlots();
+}
+
+void Session::replotModelPlot() {
+  if (!project.modelplot)
+    return;
+  project.modelplot_uptodate = false;
+  mbnavadjust_modelplot_plot(__FILE__, __LINE__);
+  notifyPlots();
+}
+
+void Session::setModelPlotStyle(ModelPlotStyle style) {
+  project.modelplot_style = style == ModelPlotStyle::TimeSeries
+                                ? MBNA_MODELPLOT_TIMESERIES
+                                : (style == ModelPlotStyle::Perturbation ? MBNA_MODELPLOT_PERTURBATION : MBNA_MODELPLOT_TIEOFFSETS);
+  project.modelplot_uptodate = false;
+  updateModelPlotStatus();
+  mbnavadjust_modelplot_plot(__FILE__, __LINE__);
+  notifyPlots();
+}
+
+void Session::modelPlotFullSize() {
+  mbna_modelplot_zoom_x1 = 0;
+  mbna_modelplot_zoom_x2 = 0;
+  if (project.modelplot_style == MBNA_MODELPLOT_TIMESERIES || project.modelplot_style == MBNA_MODELPLOT_PERTURBATION) {
+    mbna_modelplot_zoom = false;
+    mbna_modelplot_start = 0;
+    mbna_modelplot_end = 0;
+  } else {
+    mbna_modelplot_tiezoom = false;
+    mbna_modelplot_tiestartzoom = 0;
+    mbna_modelplot_tieendzoom = 0;
+    mbna_survey_select = MBNA_SELECT_NONE;
+    mbna_survey_select1 = MBNA_SELECT_NONE;
+    mbna_survey_select2 = MBNA_SELECT_NONE;
+  }
+  project.modelplot_uptodate = false;
+  mbnavadjust_modelplot_setzoom();
+  mbnavadjust_modelplot_plot(__FILE__, __LINE__);
+  updateModelPlotStatus();
+  notifyPlots();
+}
+
+void Session::modelPlotClearBlock() {
+  mbnavadjust_modelplot_clearblock();
+  if (mbna_naverr_mode != MBNA_NAVERR_MODE_UNLOADED) {
+    plotCrossing(MBNA_PLOT_MODE_FIRST);
+    updateCrossing();
+  }
+  updateStatus();
+  updateModelPlotStatus();
+  mbnavadjust_modelplot_plot(__FILE__, __LINE__);
+  notifyPlots();
+}
+
+void Session::modelPlotPress(int button, int x, int y) {
+  (void)y;
+  if (!project.modelplot)
+    return;
+  if (button == 1) {
+    button1Down_ = true;
+  } else if (button == 2) {
+    button2Down_ = true;
+  } else if (button == 3) {
+    button3Down_ = true;
+    mbna_modelplot_zoom_x1 = x;
+    mbna_modelplot_zoom_x2 = x;
+    project.modelplot_uptodate = false;
+    mbnavadjust_modelplot_plot(__FILE__, __LINE__);
+    notifyPlots();
+  }
+}
+
+void Session::modelPlotDrag(int x, int y) {
+  (void)y;
+  if (!project.modelplot || !button3Down_)
+    return;
+  mbna_modelplot_zoom_x2 = x;
+  project.modelplot_uptodate = false;
+  mbnavadjust_modelplot_plot(__FILE__, __LINE__);
+  notifyPlots();
+}
+
+void Session::modelPlotRelease(int button, int x, int y) {
+  if (!project.modelplot)
+    return;
+  if (button == 1 || button == 2) {
+    if (button == 1) {
+      button1Down_ = false;
+      mbnavadjust_modelplot_pick(x, y);
+    } else {
+      button2Down_ = false;
+      mbnavadjust_modelplot_middlepick(x, y);
+    }
+    if (!project.modelplot_uptodate) {
+      updateModelPlotStatus();
+      updateStatus();
+      updateModelPlotStatus();
+      mbnavadjust_modelplot_plot(__FILE__, __LINE__);
+      if (project.visualization_status)
+        do_update_visualization_status();
+    }
+  } else if (button == 3) {
+    button3Down_ = false;
+    mbna_modelplot_zoom_x2 = x;
+    updateModelPlotStatus();
+    mbnavadjust_modelplot_setzoom();
+    project.modelplot_uptodate = false;
+    mbnavadjust_modelplot_plot(__FILE__, __LINE__);
+    mbna_modelplot_zoom_x1 = 0;
+    mbna_modelplot_zoom_x2 = 0;
+  }
+  notifyPlots();
+}
+
+std::string Session::drawCounts() const {
+  const DrawSurface *surfaces[4] = {contourSurface_, misfitSurface_, zOffsetSurface_, modelSurface_};
+  std::string line;
+  for (int i = 0; i < 4; i++) {
+    const DrawSurface *s = surfaces[i];
+    line += fmt("%s%ld %ld %ld %ld", i == 0 ? "" : " | ", s != nullptr ? s->lines : 0, s != nullptr ? s->rectangles : 0,
+                s != nullptr ? s->fills : 0, s != nullptr ? s->texts : 0);
+  }
+  return line;
 }
 
 /*--------------------------------------------------------------------*/

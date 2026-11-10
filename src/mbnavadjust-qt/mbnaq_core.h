@@ -50,6 +50,9 @@ class DrawSurface {
   virtual void text(int x, int y, const char *string, unsigned int pixel, int style) = 0;
   virtual void measure(const char *string, int *width, int *ascent, int *descent) = 0;
   virtual void clip(int x, int y, int width, int height) = 0;
+
+  /* what has been drawn on this surface */
+  long lines = 0, rectangles = 0, fills = 0, texts = 0;
 };
 
 /* The values match MBNA_VIEW_LIST_* in mbnavadjust_io.h. */
@@ -88,6 +91,7 @@ enum ViewMode {
 enum class FileNav { Poor, Good, Fixed, FixedXY, FixedZ };
 enum class TieSetting { XY, Z, XYZ, Unfixed, Fixed };
 enum class CrossingWindowMode { Crossing, Section };
+enum class ModelPlotStyle { TimeSeries, Perturbation, TieOffsets };
 
 /* The list shown in the main window. */
 struct ListView {
@@ -177,6 +181,44 @@ class Session {
   void moveToMinimumXYMisfit();
   void setMisfitCenter(bool zeroCenter);
 
+  /* plots: without surfaces the plot code still runs and draws nothing */
+  void setCrossingSurfaces(DrawSurface *contour, DrawSurface *misfit, DrawSurface *zOffset);
+  /* plot sizes as the shared plot code uses them: the last pixel position in each direction */
+  void setCrossingPlotSizes(int contourWidth, int contourHeight, int misfitWidth, int misfitHeight, int zOffsetWidth,
+                            int zOffsetHeight);
+  bool crossingLoaded() const;
+  bool zooming() const { return button2Down_; }
+  void replotCrossing();
+  void setPlotsChanged(const std::function<void()> &plotsChanged) { plotsChanged_ = plotsChanged; }
+
+  /* mouse on the plots; button is 1 left, 2 middle, 3 right */
+  void contourPress(int button, int x, int y);
+  void contourDrag(int x, int y);
+  void contourRelease(int button, int x, int y);
+  void misfitPress(int x, int y);
+  void misfitDrag(int x, int y);
+  void misfitRelease();
+  void zOffsetPress(int x, int y);
+  void zOffsetDrag(int x, int y);
+  void zOffsetRelease();
+
+  /* model plot */
+  bool modelPlotOpen() const;
+  void openModelPlot(DrawSurface *surface, int width, int height);
+  void closeModelPlot();
+  void resizeModelPlot(int width, int height);
+  void setModelPlotStyle(ModelPlotStyle style);
+  void replotModelPlot();
+  void modelPlotFullSize();
+  void modelPlotClearBlock();
+  void modelPlotPress(int button, int x, int y);
+  void modelPlotDrag(int x, int y);
+  void modelPlotRelease(int button, int x, int y);
+  const std::vector<std::string> &modelPlotLines() const { return modelLines_; }
+
+  /* one line with the counts of what each plot has drawn */
+  std::string drawCounts() const;
+
   /* main window actions */
   void setFileNav(FileNav value);
   void setTieSetting(TieSetting value);
@@ -192,6 +234,7 @@ class Session {
   /* called from the program logic through the bridge */
   void updateStatus();
   void updateCrossing();
+  void updateModelPlotStatus();
   void initCrossingWindow(int mode);
   void addInfo(const char *info, bool timeTag);
   void notifyMessageOn(const char *message);
@@ -213,7 +256,9 @@ class Session {
   std::string listTitle() const;
   void updateEnabled();
   void updateCrossingOffsets();
-  void plotCrossing();
+  void plotCrossing(int plotMode);
+  void notifyPlots();
+  void setModelPlotBorders(int width, int height);
   void loadCrossingRow(int crossing, int tie);
   void loadSectionRow(int file, int section);
   void refreshAfterEdit(bool modelOutOfDate);
@@ -225,7 +270,27 @@ class Session {
   std::vector<std::string> statusLines_;
   std::vector<std::string> crossingLines_;
   std::vector<std::string> offsetLines_;
+  std::vector<std::string> modelLines_;
   std::map<std::string, bool> enabled_;
+  std::function<void()> plotsChanged_;
+
+  DrawSurface *contourSurface_;
+  DrawSurface *misfitSurface_;
+  DrawSurface *zOffsetSurface_;
+  DrawSurface *modelSurface_ = nullptr;
+  int modelBorders_[4] = {0, 0, 0, 0};
+
+  /* the mouse buttons, shared by the plots as in the Motif code */
+  bool button1Down_ = false;
+  bool button2Down_ = false;
+  bool button3Down_ = false;
+  int locX_ = 0;
+  int locY_ = 0;
+
+  /* the plot bounds that were asked for; the scaling widens them to fit each plot size */
+  bool haveRequestedBounds_ = false;
+  double requestedBounds_[4] = {0.0, 0.0, 0.0, 0.0};
+  double scaledBounds_[4] = {0.0, 0.0, 0.0, 0.0};
 };
 
 }  // namespace mbnaq
