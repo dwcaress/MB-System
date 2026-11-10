@@ -139,6 +139,7 @@ if(buildQt6Tools)
         mbwcdview.1
         mbvelocitytool-qt.1
         mbedit-qt.1
+        mbnavedit-qt.1
         mbnavadjust-qt.1)
 endif()
 

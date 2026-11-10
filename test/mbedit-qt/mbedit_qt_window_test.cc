@@ -56,9 +56,16 @@
 #include <QTimer>
 #include <QWheelEvent>
 
-#include "MainWindow.h"
+#include "mbe_window.h"
 #include "mb_define.h"
 #include "mb_status.h"
+
+using mbe::Canvas;
+using MainWindow = mbe::EditorWindow;
+using mbe::ScaleControl;
+using mbe::SuspectStrip;
+using mbe::TimeSeriesPanel;
+using mbe::TrackMap;
 
 namespace {
 
@@ -154,7 +161,7 @@ QAction *menu_action(MainWindow &window, const QString &text) {
 }
 
 void open_file(MainWindow &window, bool use_saved = false) {
-  window.loadFirstFile(use_saved);
+  window.editor()->loadFirstFile(use_saved);
   wait_for(window);
 }
 
@@ -170,7 +177,7 @@ int main(int argc, char **argv) {
   const QString esf = QString::fromStdString(file) + ".esf";
 
   MainWindow window;
-  window.addInput(file, 0);
+  window.editor()->addInput(file, 0);
   window.show();
   QApplication::processEvents();
   open_file(window);
@@ -753,7 +760,7 @@ int main(int argc, char **argv) {
   window.show();
   asked = false;
   answer(QMessageBox::Yes, &asked);
-  window.loadFirstFile(false);
+  window.editor()->loadFirstFile(false);
   wait_for(window);
   CHECK(asked);
   CHECK(s.isOpen());
@@ -769,7 +776,7 @@ int main(int argc, char **argv) {
   CHECK(QFile(esf).size() == 1024 + 2 * 16);
 
   /* a second file: Done moves on and saves without asking */
-  window.addInput(file2, 0);
+  window.editor()->addInput(file2, 0);
   QApplication::processEvents();
   CHECK(menu_action(window, "Browse Only") != nullptr);
   click(canvas, where(window, 2, saved_beam + 2));
@@ -788,13 +795,13 @@ int main(int argc, char **argv) {
 
   /* browse mode: no question and no files */
   CHECK(window.close());
-  window.setBrowse(true);
+  window.editor()->setBrowse(true);
   window.show();
   const QString esf2 = QString::fromStdString(file2) + ".esf";
   CHECK(!QFile::exists(esf2));
-  window.addInput(file2, 0);
+  window.editor()->addInput(file2, 0);
   QApplication::processEvents();
-  window.loadFirstFile(true);
+  window.editor()->loadFirstFile(true);
   wait_for(window);
   click(canvas, where(window, 1, 5));
   asked = false;
@@ -806,12 +813,12 @@ int main(int argc, char **argv) {
   CHECK(!QFile::exists(esf2));
 
   /* holding the right button repeats after 2 seconds */
-  window.setBrowse(false);
+  window.editor()->setBrowse(false);
   window.show();
   bool applied = false;
   answer(QMessageBox::No, &applied);
   s.setBuffer(20, 5);
-  window.loadFirstFile(false);
+  window.editor()->loadFirstFile(false);
   wait_for(window);
   CHECK(applied);
   CHECK(s.isOpen() && s.nbuff() == 20);
@@ -874,7 +881,7 @@ int main(int argc, char **argv) {
       QTimer::singleShot(50, yes);
   };
   QTimer::singleShot(50, yes);
-  window.loadFirstFile(false);
+  window.editor()->loadFirstFile(false);
   wait_for(window);
   CHECK(prompts == 2);
   CHECK(s.isOpen());
@@ -887,11 +894,11 @@ int main(int argc, char **argv) {
   /* a reference surface, the panels, the history and the context menu */
   if (argc > 3) {
     MainWindow w;
-    w.addInput(file, 0);
+    w.editor()->addInput(file, 0);
     w.show();
     w.resize(1100, 700);
     QApplication::processEvents();
-    w.loadFirstFile(true);
+    w.editor()->loadFirstFile(true);
     wait_for(w);
     mbe::Session &t = w.session();
     CHECK(t.isOpen());
@@ -914,7 +921,7 @@ int main(int argc, char **argv) {
       });
       watch.start(20);
       const QString missing = QString::fromStdString(file) + ".nothing.grd";
-      w.loadReference(missing);
+      w.editor()->loadReference(missing);
       QElapsedTimer box_timer;
       box_timer.start();
       while (!asked && box_timer.elapsed() < 20000)
@@ -925,7 +932,7 @@ int main(int argc, char **argv) {
       CHECK(asked);
     }
 
-    w.loadReference(argv[3]);
+    w.editor()->loadReference(argv[3]);
     wait_for(w);
     CHECK(t.hasReference());
     CHECK(t.settings.show_mode == mbe::SHOW_RESIDUAL);
@@ -944,7 +951,7 @@ int main(int argc, char **argv) {
     CHECK(!t.hasReference());
     CHECK(t.settings.show_mode == mbe::SHOW_FLAG);
     CHECK(!difference->isEnabled());
-    w.loadReference(argv[3]);
+    w.editor()->loadReference(argv[3]);
     wait_for(w);
     CHECK(t.settings.show_mode == mbe::SHOW_RESIDUAL);
 
