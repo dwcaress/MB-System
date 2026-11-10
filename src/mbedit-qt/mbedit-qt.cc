@@ -44,11 +44,11 @@
 #include <QImage>
 #include <QTimer>
 
-#include "MainWindow.h"
 #include "mb_define.h"
 #include "mb_status.h"
 #include "mbe_canvas.h"
 #include "mbe_core.h"
+#include "mbe_window.h"
 
 namespace {
 
@@ -687,7 +687,7 @@ int main(int argc, char **argv) {
       qputenv("QT_QPA_PLATFORM", "offscreen");
     int qt_argc = 1;
     QApplication app(qt_argc, argv);
-    Canvas canvas(session);
+    mbe::Canvas canvas(session);
     if (session.open(files[0].path, files[0].format, use_esf, mbe::OUTPUT_BROWSE) != MB_SUCCESS)
       return MB_ERROR_BAD_DATA;
     const bool ok = canvas.render(QSize(export_width, export_height), 2.0).save(QString::fromStdString(export_file));
@@ -700,18 +700,18 @@ int main(int argc, char **argv) {
   int qt_argc = 1;
   QApplication app(qt_argc, argv);
   QApplication::setApplicationName(mbe::PROGRAM_NAME);
-  MainWindow window;
+  mbe::EditorWindow window;
   window.session().verbose = verbose;
   window.session().btime_i[0] = session.btime_i[0];
   std::copy(session.btime_i, session.btime_i + 7, window.session().btime_i);
   std::copy(session.etime_i, session.etime_i + 7, window.session().etime_i);
-  window.setBrowse(browse);
-  window.setGuiMode(gui_mode);
-  window.setRunMbprocess(run_mbprocess);
+  window.editor()->setBrowse(browse);
+  window.editor()->setGuiMode(gui_mode);
+  window.editor()->setRunMbprocess(run_mbprocess);
   for (const mbe::InputFile &file : files)
-    window.addInput(file.path, file.format);
-  window.setStartReference(QString::fromStdString(reference));
+    window.editor()->addInput(file.path, file.format);
+  window.editor()->setStartReference(QString::fromStdString(reference));
   window.show();
-  QTimer::singleShot(0, &window, [&window, use_esf] { window.loadFirstFile(use_esf); });
+  QTimer::singleShot(0, &window, [&window, use_esf] { window.editor()->loadFirstFile(use_esf); });
   return app.exec();
 }

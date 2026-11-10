@@ -45,6 +45,8 @@
 #include "mb_define.h"
 #include "mb_status.h"
 
+namespace mbe {
+
 namespace {
 
 constexpr int LABEL_CHARS_TIME = 40;   // "%5d mm/dd/yyyy hh:mm:ss.mmm %10.3f"
@@ -242,9 +244,14 @@ void Canvas::setPlotRectFor(QSize size) {
   const int chars = session_.settings.show_time == mbe::PLOT_TIME ? LABEL_CHARS_TIME : LABEL_CHARS_PLAIN;
   const int xmin = chars * char_width + 32;
   const int xmax = size.width() - 7 * char_width;
-  const int ymin = 3 * metrics.lineSpacing() + 10;
+  const int ymin = show_titles_ ? 3 * metrics.lineSpacing() + 10 : 6;
   const int ymax = size.height() - metrics.lineSpacing() - 8;
   session_.setPlotRect(size.width(), size.height(), xmin, xmax, ymin, ymax);
+}
+
+void Canvas::setShowTitles(bool show) {
+  show_titles_ = show;
+  layoutChanged();
 }
 
 void Canvas::layoutChanged() {
@@ -414,57 +421,59 @@ void Canvas::paintPlot(QImage &image, double ratio) {
     range.high = size;
   }
 
-  /* the file and the state of the plot */
-  painter.setPen(colors.text);
-  painter.drawText(6, line_height, fileText);
-  const std::vector<std::string> info = session_.infoText();
-  auto centered = [&](int row, const QString &text) {
-    painter.drawText(std::max(0, (width_px - metrics.horizontalAdvance(text)) / 2), row * line_height, text);
-  };
-  if (!info.empty()) {
-    for (size_t i = 0; i < info.size(); i++)
-      centered((int)i + 1, QString::fromStdString(info[i]));
-  }
-  else {
-    centered(1, pings[first].dualprofile ? "Dual Swath per Ping" : "Single Swath per Ping");
-    struct Part {
-      QString text;
-      QColor color;
-    };
-    std::vector<Part> parts;
-    if (set.show_mode == mbe::SHOW_AMPLITUDE || set.show_mode == mbe::SHOW_ANGLE || set.show_mode == mbe::SHOW_RESIDUAL) {
-      /* a colour bar with its range */
-      const bool residual = set.show_mode == mbe::SHOW_RESIDUAL;
-      const QString name = residual ? "Sounding Depth minus Reference (m):" : set.show_mode == mbe::SHOW_AMPLITUDE ? "Sounding Colors by Amplitude:" : "Sounding Colors by Beam Angle (deg):";
-      const QString low = QString::number(range.low, 'f', 1), high = QString::number(range.high, 'f', 1);
-      const int bar = 160;
-      int x = std::max(0, (width_px - metrics.horizontalAdvance(name + low + high) - bar - 3 * 8) / 2);
-      painter.drawText(x, 2 * line_height, name);
-      x += metrics.horizontalAdvance(name) + 8;
-      painter.drawText(x, 2 * line_height, low);
-      x += metrics.horizontalAdvance(low) + 8;
-      for (int k = 0; k < bar; k++)
-        painter.fillRect(x + k, 2 * line_height - metrics.ascent(), 1, metrics.ascent(), QColor(residual ? diverging_color((double)k / bar) : scale_color((double)k / bar)));
-      x += bar + 8;
-      painter.drawText(x, 2 * line_height, high);
-    }
-    else if (set.show_mode == mbe::SHOW_FLAG)
-      parts = {{"Sounding Colors by Flagging:  Unflagged  ", colors.text}, {"Manual  ", colors.red}, {"Filter  ", colors.blue}, {"Sonar", colors.green}};
-    else if (set.show_mode == mbe::SHOW_DETECT)
-      parts = {{"Sounding Colors by Bottom Detection:  Amplitude  ", colors.text}, {"Phase  ", colors.red}, {"Unknown", colors.green}};
-    else
-      parts = {{"Sounding Colors by Source Type:  CW  ", colors.text}, {"Up-Chirp  ", colors.red}, {"Down-Chirp  ", colors.blue}, {"Unknown", colors.green}};
-    int total = 0;
-    for (const Part &part : parts)
-      total += metrics.horizontalAdvance(part.text);
-    int x = std::max(0, (width_px - total) / 2);
-    for (const Part &part : parts) {
-      painter.setPen(part.color);
-      painter.drawText(x, 2 * line_height, part.text);
-      x += metrics.horizontalAdvance(part.text);
-    }
+  if (show_titles_) {
+    /* the file and the state of the plot */
     painter.setPen(colors.text);
-    centered(3, QString("Vertical exaggeration: %1   All Distances and Depths in Meters").arg(set.exagger / 100.0, 4, 'f', 2));
+    painter.drawText(6, line_height, fileText);
+    const std::vector<std::string> info = session_.infoText();
+    auto centered = [&](int row, const QString &text) {
+      painter.drawText(std::max(0, (width_px - metrics.horizontalAdvance(text)) / 2), row * line_height, text);
+    };
+    if (!info.empty()) {
+      for (size_t i = 0; i < info.size(); i++)
+        centered((int)i + 1, QString::fromStdString(info[i]));
+    }
+    else {
+      centered(1, pings[first].dualprofile ? "Dual Swath per Ping" : "Single Swath per Ping");
+      struct Part {
+        QString text;
+        QColor color;
+      };
+      std::vector<Part> parts;
+      if (set.show_mode == mbe::SHOW_AMPLITUDE || set.show_mode == mbe::SHOW_ANGLE || set.show_mode == mbe::SHOW_RESIDUAL) {
+        /* a colour bar with its range */
+        const bool residual = set.show_mode == mbe::SHOW_RESIDUAL;
+        const QString name = residual ? "Sounding Depth minus Reference (m):" : set.show_mode == mbe::SHOW_AMPLITUDE ? "Sounding Colors by Amplitude:" : "Sounding Colors by Beam Angle (deg):";
+        const QString low = QString::number(range.low, 'f', 1), high = QString::number(range.high, 'f', 1);
+        const int bar = 160;
+        int x = std::max(0, (width_px - metrics.horizontalAdvance(name + low + high) - bar - 3 * 8) / 2);
+        painter.drawText(x, 2 * line_height, name);
+        x += metrics.horizontalAdvance(name) + 8;
+        painter.drawText(x, 2 * line_height, low);
+        x += metrics.horizontalAdvance(low) + 8;
+        for (int k = 0; k < bar; k++)
+          painter.fillRect(x + k, 2 * line_height - metrics.ascent(), 1, metrics.ascent(), QColor(residual ? diverging_color((double)k / bar) : scale_color((double)k / bar)));
+        x += bar + 8;
+        painter.drawText(x, 2 * line_height, high);
+      }
+      else if (set.show_mode == mbe::SHOW_FLAG)
+        parts = {{"Sounding Colors by Flagging:  Unflagged  ", colors.text}, {"Manual  ", colors.red}, {"Filter  ", colors.blue}, {"Sonar", colors.green}};
+      else if (set.show_mode == mbe::SHOW_DETECT)
+        parts = {{"Sounding Colors by Bottom Detection:  Amplitude  ", colors.text}, {"Phase  ", colors.red}, {"Unknown", colors.green}};
+      else
+        parts = {{"Sounding Colors by Source Type:  CW  ", colors.text}, {"Up-Chirp  ", colors.red}, {"Down-Chirp  ", colors.blue}, {"Unknown", colors.green}};
+      int total = 0;
+      for (const Part &part : parts)
+        total += metrics.horizontalAdvance(part.text);
+      int x = std::max(0, (width_px - total) / 2);
+      for (const Part &part : parts) {
+        painter.setPen(part.color);
+        painter.drawText(x, 2 * line_height, part.text);
+        x += metrics.horizontalAdvance(part.text);
+      }
+      painter.setPen(colors.text);
+      centered(3, QString("Vertical exaggeration: %1   All Distances and Depths in Meters").arg(set.exagger / 100.0, 4, 'f', 2));
+    }
   }
 
   /* axes and grid */
@@ -480,13 +489,18 @@ void Canvas::paintPlot(QImage &image, double ratio) {
   if ((int)(set.x_interval * dxscale) > 0) {
     const int first_tick = (int)std::ceil((pan - half_width) / set.x_interval);
     const int last_tick = (int)std::floor((pan + half_width) / set.x_interval);
+    int last_label_end = box.xmin - 1000000;
     for (int i = first_tick; i <= last_tick; i++) {
       const int x = xcen + (int)((i * set.x_interval - pan) * dxscale);
       const QString text = QString::number(std::abs(i) * set.x_interval);
       painter.setPen(dash);
       painter.drawLine(x, box.ymin, x, box.ymax);
       painter.setPen(solid);
-      painter.drawText(x - metrics.horizontalAdvance(text) / 2, box.ymax + metrics.ascent() + 3, text);
+      const int label_start = x - metrics.horizontalAdvance(text) / 2;
+      if (!compact_ || label_start > last_label_end + 4) {
+        painter.drawText(label_start, box.ymax + metrics.ascent() + 3, text);
+        last_label_end = label_start + metrics.horizontalAdvance(text);
+      }
     }
   }
   const int y_int = (int)(set.y_interval * dyscale);
@@ -629,10 +643,10 @@ void Canvas::editAt(int x, int y, int grab_mode) {
     status = session_.mouseInfo(x, y);
     const std::vector<std::string> info = session_.infoText();
     if (!info.empty()) {
-      printf("\nSelected sounding:\n");
+      QStringList lines;
       for (const std::string &line : info)
-        printf("%s\n", line.c_str());
-      fflush(stdout);
+        lines << QString::fromStdString(line);
+      emit soundingInfo(lines);
     }
     break;
   }
@@ -742,8 +756,10 @@ void Canvas::updateHover(QPoint position) {
   hover_ = false;
   if (mode_ == MODE_TOGGLE || mode_ == MODE_PICK || mode_ == MODE_INFO)
     hover_ = session_.nearestBeam(position.x(), position.y(), mode_ == MODE_PICK, &hover_ping_, &hover_beam_);
-  if (had || hover_)
+  if (had || hover_) {
     update();
+    emit soundingHovered(hover_ ? hover_ping_ : -1, hover_ ? hover_beam_ : -1);
+  }
 }
 
 void Canvas::leaveEvent(QEvent *event) {
@@ -1038,3 +1054,5 @@ void Canvas::focusOutEvent(QFocusEvent *event) {
   }
   QWidget::focusOutEvent(event);
 }
+
+}  // namespace mbe
