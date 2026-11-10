@@ -59,13 +59,29 @@ ProjectController::ProjectController(Session *session, QObject *parent)
   };
   /* The background step waits here, so that the widgets read a stable project. */
   callbacks.statusChanged = [this] {
-    onGuiThread([this] { emit statusChanged(); }, true);
+    onGuiThread([this] {
+      reportChanges();
+      emit statusChanged();
+    }, true);
   };
   callbacks.crossingChanged = [this] {
     onGuiThread([this] { emit crossingChanged(); }, true);
   };
+  last_ = session_->selection();
   session_->setCallbacks(callbacks);
   session_->updateStatus();
+}
+
+void ProjectController::reportChanges() {
+  const Selection now = session_->selection();
+  if (now.list != last_.list || now.mode != last_.mode || now.survey != last_.survey || now.file != last_.file ||
+      now.section != last_.section || now.crossing != last_.crossing || now.tie != last_.tie)
+    emit selectionChanged();
+  if (now.numTies != last_.numTies)
+    emit tiesChanged(now.numTies);
+  if (now.inversionStatus != last_.inversionStatus)
+    emit inversionChanged(now.inversionStatus);
+  last_ = now;
 }
 
 ProjectController::~ProjectController() {
@@ -107,6 +123,7 @@ void ProjectController::runJob(const QString &message, const std::function<void(
     if (done)
       done();
     emit statusMessage(QString());
+    reportChanges();
     emit statusChanged();
     emit busyChanged(false);
     emit jobFinished();
@@ -194,6 +211,32 @@ void ProjectController::closeProject() {
   session_->closeProject(true);
   updateTitle();
   emit projectClosed();
+}
+
+bool ProjectController::prepareToClose() {
+  if (busy_)
+    return false;
+  if (session_->selection().projectIsOpen)
+    closeProject();
+  return true;
+}
+
+bool ProjectController::showList(ListKind kind) {
+  if (busy_ || !session_->selection().projectIsOpen)
+    return false;
+  session_->showList(kind);
+  return true;
+}
+
+bool ProjectController::setViewMode(ViewMode mode) { return !busy_ && session_->setViewMode(mode); }
+
+bool ProjectController::openCrossing(int crossing, int tie) { return !busy_ && session_->showCrossing(crossing, tie); }
+
+bool ProjectController::openSection(int file, int section) { return !busy_ && session_->showSection(file, section); }
+
+void ProjectController::dismissCrossing() {
+  if (!busy_)
+    session_->dismissCrossingWindow();
 }
 
 void ProjectController::undo() {

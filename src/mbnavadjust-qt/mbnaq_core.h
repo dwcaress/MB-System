@@ -110,6 +110,7 @@ struct Selection {
   int saveCount;
   bool projectIsOpen;
   int numTies;
+  int inversionStatus;
 };
 
 /* The values of the Controls form. */
@@ -187,6 +188,9 @@ class Session {
 
   /* crossing window */
   void openCrossingWindow(CrossingWindowMode mode);
+  /* load one crossing or section, as a click in the list does; false if there is no such one */
+  bool showCrossing(int crossing, int tie);
+  bool showSection(int file, int section);
   void nextCrossing();
   void previousCrossing();
   void nextUnsetCrossing();

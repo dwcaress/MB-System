@@ -462,6 +462,7 @@ Selection Session::selection() const {
   s.saveCount = project.save_count;
   s.projectIsOpen = project.open;
   s.numTies = project.num_ties;
+  s.inversionStatus = project.inversion_status;
   return s;
 }
 
@@ -1312,6 +1313,24 @@ void Session::loadSectionRow(int file, int section) {
     plotCrossing(MBNA_PLOT_MODE_FIRST);
     updateCrossing();
   }
+}
+
+bool Session::showCrossing(int crossing, int tie) {
+  if (!project.open || crossing < 0 || crossing >= project.num_crossings)
+    return false;
+  loadCrossingRow(crossing, tie);
+  project.modelplot_uptodate = false;
+  refreshAfterEdit(false);
+  return true;
+}
+
+bool Session::showSection(int file, int section) {
+  if (!project.open || file < 0 || file >= project.num_files || section < 0 || section >= project.files[file].num_sections)
+    return false;
+  loadSectionRow(file, section);
+  project.modelplot_uptodate = false;
+  refreshAfterEdit(false);
+  return true;
 }
 
 void Session::clickListRow(int row) {

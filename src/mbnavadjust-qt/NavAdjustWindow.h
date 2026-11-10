@@ -66,6 +66,10 @@ class NavAdjustWindow : public QMainWindow {
   ModelPlot *modelPlot() { return modelPlot_; }
   QAction *action(const char *name) const { return actions_.value(name, nullptr); }
 
+ signals:
+  /* the window has closed, and with it the project */
+  void windowClosed();
+
  protected:
   void closeEvent(QCloseEvent *event) override;
   void changeEvent(QEvent *event) override;

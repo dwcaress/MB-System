@@ -73,6 +73,15 @@ class ProjectController : public QObject {
 
   /* Closing writes the outstanding edits; a project is saved every 10 edits anyway. */
   void closeProject();
+  /* true when the host may close: nothing is running, and the project has been closed */
+  bool prepareToClose();
+
+  /* for a host: these return false if the program is busy or there is no such item */
+  bool showList(ListKind kind);
+  bool setViewMode(ViewMode mode);
+  bool openCrossing(int crossing, int tie = -1);
+  bool openSection(int file, int section);
+  void dismissCrossing();
 
   void undo();
   void redo();
@@ -91,6 +100,11 @@ class ProjectController : public QObject {
   void messageLogged(const QString &text);
   void errorReported(const QString &line1, const QString &line2, const QString &line3);
   void titleChanged(const QString &title);
+  /* the selected list, view, survey, file, section, crossing or tie has changed */
+  void selectionChanged();
+  void tiesChanged(int numberOfTies);
+  /* 0 none, 1 out of date, 2 current */
+  void inversionChanged(int status);
   void jobFinished();
 
  private:
@@ -98,11 +112,13 @@ class ProjectController : public QObject {
   void runJob(const QString &message, const std::function<void()> &job, const std::function<void()> &done);
   void onGuiThread(const std::function<void()> &call, bool wait);
   void updateTitle();
+  void reportChanges();
 
   Session *session_;
   std::unique_ptr<PlotSet> plots_;
   QThread *worker_ = nullptr;
   bool busy_ = false;
+  Selection last_;
 };
 
 }  // namespace mbnaq

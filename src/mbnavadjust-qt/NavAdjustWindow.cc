@@ -365,6 +365,7 @@ void NavAdjustWindow::closeEvent(QCloseEvent *event) {
   if (controller_.session().selection().projectIsOpen)
     controller_.closeProject();
   event->accept();
+  emit windowClosed();
 }
 
 }  // namespace mbnaq
