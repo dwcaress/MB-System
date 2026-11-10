@@ -31,21 +31,34 @@
 #include <QOpenGLFunctions>
 #include <QPainter>
 
+namespace wcd {
+
 WcdView::WcdView(QWidget *parent) : QOpenGLWidget(parent) { setMinimumSize(400, 300); }
 
-WcdView::~WcdView() {
-  /* the GL resources belong to this widget's context */
+WcdView::~WcdView() { releaseGL(); }
+
+/* the GL resources belong to this widget's context */
+void WcdView::releaseGL() {
+  if (gl_ == nullptr)
+    return;
   makeCurrent();
   gl_.reset();
   doneCurrent();
 }
 
 void WcdView::initializeGL() {
+  /* a dock that is floated or docked again moves this widget to a new context: the old resources
+     go with the old context, and the mesh must be sent to the new one */
+  connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &WcdView::releaseGL);
   gl_ = std::make_unique<wcd::SwathGL>();
   gl_->init();
+  plot_.requestMesh();
 }
 
 void WcdView::paintGL() {
+  /* the painter must know of the OpenGL calls before it: in a new context it would otherwise draw text as blocks */
+  QPainter painter(this);
+  painter.beginNativePainting();
   QOpenGLFunctions *f = context()->functions();
   f->glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   f->glClear(GL_COLOR_BUFFER_BIT);
@@ -56,7 +69,7 @@ void WcdView::paintGL() {
     gl_->upload(vertices, indices);
   }
   plot_.drawGL(*gl_, size(), devicePixelRatioF());
-  QPainter painter(this);
+  painter.endNativePainting();
   plot_.drawOverlay(painter, size());
 }
 
@@ -66,3 +79,5 @@ void WcdView::mousePressEvent(QMouseEvent *event) {
     emit clicked(across, depth);
   QOpenGLWidget::mousePressEvent(event);
 }
+
+}  // namespace wcd

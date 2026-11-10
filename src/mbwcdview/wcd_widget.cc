@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------
- *    The MB-system:  MainWindow.cc  1/11/2026
+ *    The MB-system:  wcd_widget.cc  1/11/2026
  *
  *    Copyright (c) 2026 by
  *    Christian dos Santos Ferreira
@@ -22,41 +22,52 @@
  *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 
-#include "MainWindow.h"
+#include "wcd_widget.h"
 
 #include <algorithm>
 #include <cmath>
-#include <cstdio>
 #include <limits>
+#include <memory>
+#include <utility>
 
 #include <QAbstractItemView>
 #include <QApplication>
 #include <QCheckBox>
 #include <QDateTime>
 #include <QDoubleSpinBox>
+#include <QEventLoop>
 #include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QFormLayout>
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QHideEvent>
 #include <QKeyEvent>
 #include <QLabel>
+#include <QMenu>
 #include <QPushButton>
-#include <QStatusBar>
+#include <QShowEvent>
 #include <QTableWidget>
 #include <QTextStream>
+#include <QThread>
 #include <QTimeZone>
 #include <QTimer>
+#include <QToolBar>
+#include <QToolButton>
 #include <QVBoxLayout>
 #include <QWheelEvent>
+#include <QWidgetAction>
 
 #include "mb_define.h"
 #include "WcdView.h"
 
+namespace wcd {
+
 namespace {
 
 QString utc_text(double time_d) {
-  return QDateTime::fromMSecsSinceEpoch((qint64)std::llround(time_d * 1000.0), QTimeZone::UTC)
+  return QDateTime::fromMSecsSinceEpoch((qint64)std::llround(time_d * 1000.0), QTimeZone::utc())
              .toString("yyyy-MM-dd HH:mm:ss.zzz") + " UTC";
 }
 
@@ -83,11 +94,10 @@ void OneStepWheelSlider::wheelEvent(QWheelEvent *event) {
 }
 
 /*--------------------------------------------------------------------*/
-const QStringList PickDialog::columns = {"Ping", "UTC", "AcrossTrack_m", "Depth_m", "ShipLat",
+const QStringList PickTable::columns = {"Ping", "UTC", "AcrossTrack_m", "Depth_m", "ShipLat",
                                          "ShipLon", "PointLat", "PointLon", "Azimuth"};
 
-PickDialog::PickDialog(QWidget *parent) : QDialog(parent) {
-  setWindowTitle("Picked Positions");
+PickTable::PickTable(QWidget *parent) : QWidget(parent) {
   table_ = new QTableWidget(0, columns.size(), this);
   table_->setHorizontalHeaderLabels(columns);
   table_->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -97,27 +107,28 @@ PickDialog::PickDialog(QWidget *parent) : QDialog(parent) {
   auto *save = new QPushButton("Save as TXT");
   auto *remove = new QPushButton("Remove selected");
   auto *close = new QPushButton("Close");
-  connect(save, &QPushButton::clicked, this, &PickDialog::saveDialog);
-  connect(remove, &QPushButton::clicked, this, &PickDialog::removeSelected);
-  connect(close, &QPushButton::clicked, this, &PickDialog::clearAndClose);
+  connect(save, &QPushButton::clicked, this, &PickTable::saveDialog);
+  connect(remove, &QPushButton::clicked, this, &PickTable::removeSelected);
+  connect(close, &QPushButton::clicked, this, &PickTable::clearAndClose);
   auto *buttons = new QHBoxLayout;
   buttons->addWidget(save);
   buttons->addWidget(remove);
   buttons->addStretch(1);
   buttons->addWidget(close);
   auto *layout = new QVBoxLayout(this);
+  layout->setContentsMargins(0, 0, 0, 0);
   layout->addWidget(table_);
   layout->addLayout(buttons);
 }
 
-void PickDialog::addRow(const QStringList &values) {
+void PickTable::addRow(const QStringList &values) {
   const int r = table_->rowCount();
   table_->insertRow(r);
   for (int c = 0; c < values.size() && c < columns.size(); c++)
     table_->setItem(r, c, new QTableWidgetItem(values[c]));
 }
 
-bool PickDialog::saveText(const QString &path) {
+bool PickTable::saveText(const QString &path) {
   QFile file(path);
   if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
     return false;
@@ -132,14 +143,14 @@ bool PickDialog::saveText(const QString &path) {
   return true;
 }
 
-void PickDialog::saveDialog() {
+void PickTable::saveDialog() {
   const QString path =
       QFileDialog::getSaveFileName(this, "Save Picks", "picks.txt", "Text Files (*.txt);;All Files (*)");
   if (!path.isEmpty())
     saveText(path);
 }
 
-void PickDialog::removeSelected() {
+void PickTable::removeSelected() {
   QList<int> rows;
   for (const QModelIndex &index : table_->selectionModel()->selectedRows())
     rows << index.row();
@@ -148,47 +159,82 @@ void PickDialog::removeSelected() {
     table_->removeRow(r);
 }
 
-void PickDialog::clearAndClose() {
+void PickTable::clearAndClose() {
   table_->setRowCount(0);
-  close();
+  emit closeRequested();
+}
+
+PickDialog::PickDialog(QWidget *parent) : QDialog(parent) {
+  setWindowTitle("Picked Positions");
+  table_ = new PickTable;
+  auto *layout = new QVBoxLayout(this);
+  layout->addWidget(table_);
+  connect(table_, &PickTable::closeRequested, this, &QWidget::close);
 }
 
 /*--------------------------------------------------------------------*/
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
-  setWindowTitle("mbwcdview - water column through MB-System MBIO");
+WaterColumnWidget::WaterColumnWidget(Presentation presentation, QWidget *parent) : QWidget(parent), presentation_(presentation) {
   setFocusPolicy(Qt::StrongFocus);
-  auto *central = new QWidget;
-  setCentralWidget(central);
-  auto *layout = new QVBoxLayout(central);
 
-  /* header */
-  auto *header = new QHBoxLayout;
-  auto *open = new QPushButton("Open .kmwcd/.kmall/.wcd/.all");
-  connect(open, &QPushButton::clicked, this, &MainWindow::openDialog);
-  header->addWidget(open);
+  /* the controls are disabled while a file loads, but not the pick table, which is a child of this widget */
+  central_ = new QWidget;
+  auto *outer = new QVBoxLayout(this);
+  outer->setContentsMargins(0, 0, 0, 0);
+  outer->addWidget(central_);
+  auto *layout = new QVBoxLayout(central_);
+
+  /* header: a row, or the tool bar of the panel */
+  const bool panel = presentation_ == Presentation::Panel;
+  QToolBar *bar = panel ? new QToolBar : nullptr;
+  QHBoxLayout *header = panel ? nullptr : new QHBoxLayout;
+  const auto to_header = [bar, header](QWidget *widget) {
+    if (bar != nullptr) {
+      widget->setFocusPolicy(Qt::NoFocus);
+      bar->addWidget(widget);
+    }
+    else {
+      header->addWidget(widget);
+    }
+  };
+  if (bar != nullptr) {
+    bar->setObjectName("panel_bar");
+    bar->setToolButtonStyle(Qt::ToolButtonTextOnly);
+  }
+  auto *open = new QPushButton(panel ? "Open" : "Open .kmwcd/.kmall/.wcd/.all");
+  connect(open, &QPushButton::clicked, this, &WaterColumnWidget::openDialog);
+  to_header(open);
   file_name_ = new QLabel("No file loaded");
   file_name_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-  header->addWidget(file_name_);
+  if (!panel)
+    header->addWidget(file_name_);
   auto *save = new QPushButton("Save Image");
-  connect(save, &QPushButton::clicked, this, &MainWindow::saveImageDialog);
-  header->addWidget(save);
+  connect(save, &QPushButton::clicked, this, &WaterColumnWidget::saveImageDialog);
+  to_header(save);
+  QAction *scales_place = panel ? bar->addSeparator() : nullptr;
   bottom_ = new QCheckBox("Bottom");
   wc_bottom_ = new QCheckBox("WC bottom");
-  raytrace_ = new QCheckBox("Ray trace (SVP)");
+  raytrace_ = new QCheckBox(panel ? "Ray trace" : "Ray trace (SVP)");
   raytrace_->setToolTip("Trace the water column samples through the sound velocity profile instead of "
                         "straight rays with the sound speed at the transducer");
   for (QCheckBox *box : {bottom_, wc_bottom_, raytrace_}) {
-    connect(box, &QCheckBox::toggled, this, &MainWindow::redraw);
-    header->addWidget(box);
+    connect(box, &QCheckBox::toggled, this, &WaterColumnWidget::redraw);
+    to_header(box);
   }
   pick_ = new QCheckBox("Pick");
-  connect(pick_, &QCheckBox::clicked, this, &MainWindow::showPickDialog);
-  connect(pick_, &QCheckBox::toggled, this, &MainWindow::togglePick);
-  header->addWidget(pick_);
+  connect(pick_, &QCheckBox::clicked, this, &WaterColumnWidget::showPickDialog);
+  connect(pick_, &QCheckBox::toggled, this, &WaterColumnWidget::togglePick);
+  to_header(pick_);
   meta_ = new QLabel;
-  meta_->setWordWrap(true);
-  header->addWidget(meta_);
-  layout->addLayout(header);
+  if (panel) {
+    layout->setContentsMargins(2, 2, 2, 2);
+    layout->setSpacing(2);
+    layout->addWidget(bar);
+  }
+  else {
+    meta_->setWordWrap(true);
+    header->addWidget(meta_);
+    layout->addLayout(header);
+  }
 
   /* depth, amplitude, across-track and replay controls */
   dmin_ = spin_box(0, 1.0e5, 1.0, 2);
@@ -198,87 +244,187 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   xmax_ = spin_box(0, 1.0e6, 10.0, 2);
   replay_rate_ = spin_box(0.1, 10.0, 0.1, 1);
   replay_rate_->setValue(2.0);
-  auto *depth_row = new QHBoxLayout;
-  depth_row->addWidget(new QLabel("Depth Min (m):"));
-  depth_row->addWidget(dmin_);
-  depth_row->addWidget(new QLabel("Depth Max (m):"));
-  depth_row->addWidget(dmax_);
-  layout->addLayout(depth_row);
-  auto *amp_row = new QHBoxLayout;
-  amp_row->addWidget(new QLabel("Amp Min (dB):"));
-  amp_row->addWidget(amin_);
-  amp_row->addWidget(new QLabel("Amp Max (dB):"));
-  amp_row->addWidget(amax_);
-  layout->addLayout(amp_row);
-  auto *x_row = new QHBoxLayout;
-  x_row->addWidget(new QLabel("Across-track Max (m):"));
-  x_row->addWidget(xmax_);
-  x_row->addWidget(new QLabel("Replay (pings/s):"));
-  x_row->addWidget(replay_rate_);
   replay_ = new QPushButton("Replay");
   replay_->setCheckable(true);
-  x_row->addWidget(replay_);
-  layout->addLayout(x_row);
+  if (panel) {
+    /* the numbers are in a popup, so that the plot keeps the space */
+    auto *scales = new QWidget;
+    scales->setObjectName("panel_scales_controls");
+    auto *form = new QFormLayout(scales);
+    form->addRow("Depth Min (m):", dmin_);
+    form->addRow("Depth Max (m):", dmax_);
+    form->addRow("Amp Min (dB):", amin_);
+    form->addRow("Amp Max (dB):", amax_);
+    form->addRow("Across-track Max (m):", xmax_);
+    form->addRow("Replay (pings/s):", replay_rate_);
+    auto *scales_menu = new QMenu(this);
+    auto *scales_action = new QWidgetAction(scales_menu);
+    scales_action->setDefaultWidget(scales);
+    scales_menu->addAction(scales_action);
+    auto *scales_button = new QToolButton;
+    scales_button->setText("Scales");
+    scales_button->setObjectName("panel_scales");
+    scales_button->setMenu(scales_menu);
+    scales_button->setPopupMode(QToolButton::InstantPopup);
+    scales_button->setFocusPolicy(Qt::NoFocus);
+    bar->insertWidget(scales_place, scales_button);
+    to_header(replay_);
+  }
+  else {
+    auto *depth_row = new QHBoxLayout;
+    depth_row->addWidget(new QLabel("Depth Min (m):"));
+    depth_row->addWidget(dmin_);
+    depth_row->addWidget(new QLabel("Depth Max (m):"));
+    depth_row->addWidget(dmax_);
+    layout->addLayout(depth_row);
+    auto *amp_row = new QHBoxLayout;
+    amp_row->addWidget(new QLabel("Amp Min (dB):"));
+    amp_row->addWidget(amin_);
+    amp_row->addWidget(new QLabel("Amp Max (dB):"));
+    amp_row->addWidget(amax_);
+    layout->addLayout(amp_row);
+    auto *x_row = new QHBoxLayout;
+    x_row->addWidget(new QLabel("Across-track Max (m):"));
+    x_row->addWidget(xmax_);
+    x_row->addWidget(new QLabel("Replay (pings/s):"));
+    x_row->addWidget(replay_rate_);
+    x_row->addWidget(replay_);
+    layout->addLayout(x_row);
+  }
   for (QDoubleSpinBox *box : {dmin_, dmax_, amin_, amax_, xmax_})
-    connect(box, &QDoubleSpinBox::valueChanged, this, &MainWindow::updatePlotSettings);
-  connect(replay_, &QPushButton::toggled, this, &MainWindow::toggleReplay);
-  connect(replay_rate_, &QDoubleSpinBox::valueChanged, this, &MainWindow::updateReplayInterval);
+    connect(box, &QDoubleSpinBox::valueChanged, this, &WaterColumnWidget::updatePlotSettings);
+  connect(replay_, &QPushButton::toggled, this, &WaterColumnWidget::toggleReplay);
+  connect(replay_rate_, &QDoubleSpinBox::valueChanged, this, &WaterColumnWidget::updateReplayInterval);
   replay_timer_ = new QTimer(this);
-  connect(replay_timer_, &QTimer::timeout, this, &MainWindow::replayTick);
+  connect(replay_timer_, &QTimer::timeout, this, &WaterColumnWidget::replayTick);
 
   /* plot */
   view_ = new WcdView;
-  connect(view_, &WcdView::clicked, this, &MainWindow::onClicked);
+  connect(view_, &WcdView::clicked, this, &WaterColumnWidget::onClicked);
   layout->addWidget(view_, 1);
 
   /* ping slider */
   auto *slider_row = new QHBoxLayout;
   slider_row->addWidget(new QLabel("Ping:"));
   slider_ = new OneStepWheelSlider(Qt::Horizontal);
-  connect(slider_, &QSlider::valueChanged, this, &MainWindow::onSlider);
+  connect(slider_, &QSlider::valueChanged, this, &WaterColumnWidget::onSlider);
   slider_row->addWidget(slider_);
   step_label_ = new QLabel("0");
   slider_row->addWidget(step_label_);
   layout->addLayout(slider_row);
 
-  statusBar()->showMessage("Ready");
-  resize(1400, 900);
+  if (panel) {
+    /* one line for the ping and for the messages of the tool; the host can show the messages too */
+    file_name_->setParent(central_);
+    file_name_->hide();
+    auto *status = new QLabel;
+    status->setObjectName("panel_status");
+    for (QLabel *label : {meta_, status})
+      label->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+    status->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    auto *info = new QHBoxLayout;
+    info->addWidget(meta_, 3);
+    info->addWidget(status, 2);
+    layout->addLayout(info);
+    connect(this, &WaterColumnWidget::statusMessage, status, [status](const QString &message, int timeout_ms) {
+      status->setText(message);
+      status->setToolTip(message);
+      if (timeout_ms > 0)
+        QTimer::singleShot(timeout_ms, status, [status, message] {
+          if (status->text() == message)
+            status->clear();
+        });
+    });
+    view_->setMinimumSize(200, 150);
+    view_->setFocusPolicy(Qt::ClickFocus);
+    setFocusProxy(view_);
+  }
 }
 
+WaterColumnWidget::~WaterColumnWidget() {
+  /* the thread writes to data held by its lambda and posts to this object */
+  if (worker_ != nullptr)
+    worker_->wait();
+}
+
+void WaterColumnWidget::waitUntilIdle() {
+  while (worker_ != nullptr)
+    QCoreApplication::processEvents(QEventLoop::WaitForMoreEvents);
+}
+
+QString WaterColumnWidget::title() const { return "mbwcdview - water column through MB-System MBIO"; }
+
+void WaterColumnWidget::showStatus(const QString &message, int timeout_ms) { emit statusMessage(message, timeout_ms); }
+
 /*--------------------------------------------------------------------*/
-void MainWindow::openDialog() {
+void WaterColumnWidget::openDialog() {
   const QString path = QFileDialog::getOpenFileName(this, "Open .kmwcd/.kmall/.wcd/.all", "", "*.kmwcd *.kmall *.wcd *.all");
   if (!path.isEmpty())
     openFile(path);
 }
 
-bool MainWindow::openFile(const QString &path) {
+bool WaterColumnWidget::openFile(const QString &path) {
+  if (worker_ != nullptr)
+    return false;
   replay_->setChecked(false);
   file_label_ = QFileInfo(path).fileName();
   file_name_->setText(file_label_);
-  statusBar()->showMessage("Reading survey file (navigation, bathymetry)...");
-  QApplication::processEvents();
-  int last = -1;
-  auto progress = [&](int npings, double fraction) {
-    const int pct = (int)(100.0 * fraction);
-    if (pct != last) {
-      last = pct;
-      statusBar()->showMessage(QString("Loading pings... %1% (%2 pings)").arg(pct).arg(npings));
-      QApplication::processEvents();
-    }
-  };
-  std::string message;
+  showStatus("Reading survey file (navigation, bathymetry)...");
   line_ = wcd::Line();
   steps_.clear();
-  if (!line_.load(path.toStdString(), progress, &message) || !line_.has_wc) {
-    statusBar()->showMessage(line_.has_survey ? "No water column data found."
-                                              : QString("Cannot read %1: %2").arg(file_label_,
-                                                                                    QString::fromStdString(message)));
+  reported_step_ = -1;
+
+  struct Load {
+    wcd::Line line;
+    std::string message;
+    bool ok = false;
+  };
+  auto load = std::make_shared<Load>();
+  const std::string file = path.toStdString();
+  worker_ = QThread::create([this, load, file] {
+    int last = -1;
+    const wcd::Progress progress = [this, &last](int npings, double fraction) {
+      const int pct = (int)(100.0 * fraction);
+      if (pct != last) {
+        last = pct;
+        QMetaObject::invokeMethod(
+            this, [this, pct, npings] { showStatus(QString("Loading pings... %1% (%2 pings)").arg(pct).arg(npings)); }, Qt::QueuedConnection);
+      }
+    };
+    load->ok = load->line.load(file, progress, &load->message);
+  });
+  worker_->setParent(this);
+  connect(worker_, &QThread::finished, this, [this, load, path] {
+    worker_->deleteLater();
+    worker_ = nullptr;
+    central_->setEnabled(true);
+    /* disabling the controls took the focus away, and the keys need it */
+    if (job_had_focus_ || QApplication::focusWidget() == nullptr)
+      setFocus();
+    finishOpen(path, std::move(load->line), load->ok, load->message);
+    emit busyChanged(false);
+  });
+  const QWidget *focus = QApplication::focusWidget();
+  job_had_focus_ = focus != nullptr && (focus == this || isAncestorOf(focus));
+  central_->setEnabled(false);
+  worker_->start();
+  emit busyChanged(true);
+  return true;
+}
+
+void WaterColumnWidget::finishOpen(const QString &path, Line line, bool ok, const std::string &message) {
+  line_ = std::move(line);
+  const int ping = pending_ping_;
+  pending_ping_ = -1;
+  if (!ok || !line_.has_wc) {
+    showStatus(line_.has_survey ? "No water column data found."
+                                : QString("Cannot read %1: %2").arg(file_label_, QString::fromStdString(message)));
     view_->plot().setData(wcd::PlotData());
     view_->update();
-    return false;
+    emit fileOpenFailed(path);
+    return;
   }
-  fprintf(stderr, "[diag] survey=%s water column=%s\n", line_.kmall.c_str(), line_.kmwcd.c_str());
+  emit diagnostic(QString("survey=%1 water column=%2").arg(QString::fromStdString(line_.kmall), QString::fromStdString(line_.kmwcd)));
   for (size_t i = 0; i < line_.wc.size(); i++)
     for (const int s : line_.wc.swaths(i))
       steps_.emplace_back((int)i, s);
@@ -315,6 +461,7 @@ bool MainWindow::openFile(const QString &path) {
   slider_->blockSignals(false);
   current_ = 0;
   updatePlotSettings();
+  emit fileOpened(path);
   redraw();
 
   const QString summary =
@@ -325,13 +472,14 @@ bool MainWindow::openFile(const QString &path) {
           .arg((int)wc.size())
           .arg(line_.matched())
           .arg(wc.has_fill ? QString::number(wc.fill_value, 'f', 1) : QString("none"));
-  fprintf(stderr, "[diag] %s\n", summary.toStdString().c_str());
-  QTimer::singleShot(900, this, [this, summary]() { statusBar()->showMessage(summary, 6000); });
-  return true;
+  emit diagnostic(summary);
+  QTimer::singleShot(900, this, [this, summary]() { showStatus(summary, 6000); });
+  if (ping >= 0)
+    showPing(ping);
 }
 
 /*--------------------------------------------------------------------*/
-void MainWindow::updatePlotSettings() {
+void WaterColumnWidget::updatePlotSettings() {
   wcd::WcdPlot &plot = view_->plot();
   plot.setColorRange(amin_->value(), amax_->value());
   plot.setDepthWindow(dmin_->value(), dmax_->value());
@@ -339,7 +487,7 @@ void MainWindow::updatePlotSettings() {
   view_->update();
 }
 
-void MainWindow::redraw() {
+void WaterColumnWidget::redraw() {
   if (steps_.empty())
     return;
   current_ = std::min(std::max(current_, 0), (int)steps_.size() - 1);
@@ -354,14 +502,24 @@ void MainWindow::redraw() {
   view_->plot().setData(std::move(data));
   view_->update();
   meta_->setText(wcd::metadata_text(line_, ping, swath));
+  if (presentation_ == Presentation::Panel)
+    meta_->setToolTip(file_label_ + "\n" + meta_->text());
   step_label_->setText(QString("%1 / %2").arg(current_).arg((int)steps_.size() - 1));
   if (!info.status.isEmpty())
-    statusBar()->showMessage(info.status);
+    showStatus(info.status);
+  if (current_ != reported_step_) {
+    reported_step_ = current_;
+    emit pingChanged(current_, ping, line_.wc.pings[ping].ping_number, swath, line_.wc.pings[ping].time_d);
+  }
 }
 
-void MainWindow::setStep(int step) { slider_->setValue(step); }
+void WaterColumnWidget::setStep(int step) { slider_->setValue(step); }
 
-void MainWindow::showPing(int ping) {
+void WaterColumnWidget::showPing(int ping) {
+  if (worker_ != nullptr) {
+    pending_ping_ = ping;
+    return;
+  }
   for (size_t k = 0; k < steps_.size(); k++) {
     if (steps_[k].first >= ping) {
       slider_->setValue((int)k);
@@ -370,22 +528,60 @@ void MainWindow::showPing(int ping) {
   }
 }
 
-void MainWindow::onSlider(int value) {
+bool WaterColumnWidget::showTime(double time_d) {
+  if (steps_.empty())
+    return false;
+  const auto time_of = [this](size_t k) { return line_.wc.pings[steps_[k].first].time_d; };
+  if (time_d < time_of(0) || time_d > time_of(steps_.size() - 1))
+    return false;
+  size_t best = 0;
+  for (size_t k = 0; k < steps_.size(); k++)
+    if (std::abs(time_of(k) - time_d) < std::abs(time_of(best) - time_d))
+      best = k;
+  slider_->setValue((int)best);
+  return true;
+}
+
+void WaterColumnWidget::onSlider(int value) {
   current_ = value;
   redraw();
 }
 
-void MainWindow::keyPressEvent(QKeyEvent *event) {
+void WaterColumnWidget::keyPressEvent(QKeyEvent *event) {
   if (event->key() == Qt::Key_Left && current_ > 0)
     slider_->setValue(current_ - 1);
   else if (event->key() == Qt::Key_Right && current_ < slider_->maximum())
     slider_->setValue(current_ + 1);
   else
-    QMainWindow::keyPressEvent(event);
+    QWidget::keyPressEvent(event);
+}
+
+/* the pick table is a window of its own: it goes and comes with the panel, and a hidden panel does not replay */
+void WaterColumnWidget::hideEvent(QHideEvent *event) {
+  if (presentation_ == Presentation::Panel && !event->spontaneous()) {
+    replay_->setChecked(false);
+    hidden_dialogs_.clear();
+    for (QDialog *dialog : findChildren<QDialog *>(QString(), Qt::FindDirectChildrenOnly)) {
+      if (dialog->isVisible()) {
+        hidden_dialogs_.push_back(dialog);
+        dialog->hide();
+      }
+    }
+  }
+  QWidget::hideEvent(event);
+}
+
+void WaterColumnWidget::showEvent(QShowEvent *event) {
+  QWidget::showEvent(event);
+  if (!event->spontaneous()) {
+    for (QDialog *dialog : hidden_dialogs_)
+      dialog->show();
+    hidden_dialogs_.clear();
+  }
 }
 
 /*--------------------------------------------------------------------*/
-void MainWindow::toggleReplay(bool on) {
+void WaterColumnWidget::toggleReplay(bool on) {
   if (on && !steps_.empty()) {
     updateReplayInterval();
     replay_timer_->start();
@@ -396,14 +592,14 @@ void MainWindow::toggleReplay(bool on) {
   }
 }
 
-void MainWindow::updateReplayInterval() {
+void WaterColumnWidget::updateReplayInterval() {
   const double pps = std::max(replay_rate_->value(), 0.1);
   replay_timer_->setInterval(std::max(1, (int)(1000.0 / pps)));
   if (replay_timer_->isActive() || replay_->isChecked())
     replay_->setText(QString("Stop (%1 p/s)").arg(pps, 0, 'f', 1));
 }
 
-void MainWindow::replayTick() {
+void WaterColumnWidget::replayTick() {
   if (steps_.empty()) {
     replay_->setChecked(false);
     return;
@@ -412,27 +608,43 @@ void MainWindow::replayTick() {
 }
 
 /*--------------------------------------------------------------------*/
-bool MainWindow::saveImage(const QString &path) {
+bool WaterColumnWidget::saveImage(const QString &path) {
   if (steps_.empty())
     return false;
   const QImage image = view_->plot().render(view_->size(), 2.0, file_label_ + " | " + meta_->text());
   return image.save(path);
 }
 
-void MainWindow::saveImageDialog() {
+void WaterColumnWidget::saveImageDialog() {
   const QString path = QFileDialog::getSaveFileName(this, "Save Image", file_label_, "PNG (*.png);;JPEG (*.jpg)");
   if (!path.isEmpty() && !saveImage(path))
-    statusBar()->showMessage("Cannot write " + path, 5000);
+    showStatus("Cannot write " + path, 5000);
 }
 
 /*--------------------------------------------------------------------*/
-void MainWindow::togglePick(bool on) { view_->setCursor(on ? Qt::CrossCursor : Qt::ArrowCursor); }
+void WaterColumnWidget::togglePick(bool on) { view_->setCursor(on ? Qt::CrossCursor : Qt::ArrowCursor); }
 
-void MainWindow::showPickDialog() {
+PickTable *WaterColumnWidget::takePickTable() {
+  pick_table_ = new PickTable(this);
+  pick_table_->hide();
+  pick_table_taken_ = true;
+  connect(pick_table_, &PickTable::closeRequested, this, &WaterColumnWidget::pickTableClosed);
+  return pick_table_;
+}
+
+void WaterColumnWidget::pickTableClosed() { pick_->setChecked(false); }
+
+void WaterColumnWidget::showPickDialog() {
+  if (pick_table_taken_) {
+    emit pickTableWanted();
+    return;
+  }
   if (pick_dialog_ == nullptr) {
     pick_dialog_ = new PickDialog(this);
+    pick_table_ = pick_dialog_->table();
     connect(pick_dialog_, &QDialog::finished, this, [this]() { pick_->setChecked(false); });
-    pick_dialog_->resize(std::max(600, width()), std::max(240, height() / 3));
+    const QWidget *beside = presentation_ == Presentation::Panel ? static_cast<const QWidget *>(this) : window();
+    pick_dialog_->resize(std::max(600, beside->width()), std::max(240, beside->height() / 3));
     pick_dialog_->setMinimumSize(600, 240);
   }
   pick_dialog_->show();
@@ -443,12 +655,12 @@ void MainWindow::showPickDialog() {
   }
 }
 
-void MainWindow::onClicked(double across, double depth) {
+void WaterColumnWidget::onClicked(double across, double depth) {
   if (pick_->isChecked())
     pick(across, depth);
 }
 
-QStringList MainWindow::pick(double across, double depth) {
+QStringList WaterColumnWidget::pick(double across, double depth) {
   const wcd::PlotData &d = view_->plot().data();
   size_t best = d.across.size();
   double best_d2 = std::numeric_limits<double>::max();
@@ -463,7 +675,7 @@ QStringList MainWindow::pick(double across, double depth) {
     }
   }
   if (best == d.across.size() || steps_.empty()) {
-    statusBar()->showMessage("Nothing to pick (no grid).", 3000);
+    showStatus("Nothing to pick (no grid).", 3000);
     return QStringList();
   }
   const auto [ping, swath] = steps_[current_];
@@ -500,6 +712,9 @@ QStringList MainWindow::pick(double across, double depth) {
                            number_or_empty(pt_lon, 6),
                            source};
   showPickDialog();
-  pick_dialog_->addRow(row);
+  pick_table_->addRow(row);
+  emit pickAdded(row);
   return row;
 }
+
+}  // namespace wcd

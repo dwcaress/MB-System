@@ -95,6 +95,7 @@ class WcdPlot {
 
   /* mesh for SwathGL::upload(); changes with the data and the depth window */
   bool meshChanged() const { return mesh_dirty_; }
+  void requestMesh() { mesh_dirty_ = true; }  // a new OpenGL context has no mesh yet
   void buildMesh(std::vector<float> &vertices, std::vector<unsigned int> &indices);
 
   void drawGL(SwathGL &gl, const QSize &size, double dpr);

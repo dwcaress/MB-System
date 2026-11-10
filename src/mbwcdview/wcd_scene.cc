@@ -122,7 +122,7 @@ QString metadata_text(const Line &line, size_t i, int swath) {
   const WcPing &ping = line.wc.pings[i];
   double lon, lat, sog, cog;
   line.nav_at(ping.time_d, lon, lat, sog, cog);
-  const QString time = QDateTime::fromMSecsSinceEpoch((qint64)std::llround(ping.time_d * 1000.0), QTimeZone::UTC)
+  const QString time = QDateTime::fromMSecsSinceEpoch((qint64)std::llround(ping.time_d * 1000.0), QTimeZone::utc())
                            .toString("yyyy-MM-dd HH:mm:ss.zzz") + " UTC";
   return QString("Ping %1 swath %2: DateTime=%3, SOG=%4 kn, COG=%5, Hdg=%6, Pos=%7,%8")
       .arg(ping.ping_number)
