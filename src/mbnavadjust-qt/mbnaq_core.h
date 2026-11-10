@@ -41,6 +41,8 @@
 namespace mbnaq {
 
 /* Where the program logic draws. The plots receive one surface each. */
+struct UndoStep;
+
 class DrawSurface {
  public:
   virtual ~DrawSurface();
@@ -106,6 +108,24 @@ struct Selection {
   int naverrMode, status, currentCrossing, currentTie, currentFile, currentSection;
   double offsetX, offsetY, offsetZ, sortedThreshold;
   int saveCount;
+  bool projectIsOpen;
+  int numTies;
+};
+
+/* The values of the Controls form. */
+struct ControlValues {
+  int decimation;
+  double sectionLength;
+  int sectionSoundings;
+  double contourInterval, colorInterval, tickInterval, smoothing, zOffsetWidth;
+  int useMode; /* 0 primary, 1 secondary, 2 tertiary */
+};
+
+/* The heading and roll biases of the two loaded sections. */
+struct BiasValues {
+  bool available;
+  int file1, section1, file2, section2;
+  double heading1, roll1, heading2, roll2;
 };
 
 /* What the owner of a Session is told. Each may be left empty. They are
@@ -135,6 +155,9 @@ class Session {
   void setVerbose(int verbose);
   void setDarkBackground(bool dark);
   void setResetCrossings(bool reset);
+  /* keep the faults of the Motif program, for comparing with it */
+  void setMotifCompatibility(bool compatible) { motifCompatibility_ = compatible; }
+  bool motifCompatibility() const { return motifCompatibility_; }
 
   /* project */
   bool newProject(const std::string &path);
@@ -144,6 +167,8 @@ class Session {
   /* Motif's File>Close dropped up to nine edits; pass true to write them. */
   void closeProject(bool writeOutstanding);
   bool writeProject();
+  std::string projectName() const;
+  std::string versionText() const;
 
   /* main window list */
   void showList(ListKind kind);
@@ -180,6 +205,21 @@ class Session {
   void moveToMinimumMisfit();
   void moveToMinimumXYMisfit();
   void setMisfitCenter(bool zeroCenter);
+  bool misfitCenterIsZero() const;
+  void reloadCrossingWindow();
+
+  /* Controls and Biases forms */
+  ControlValues controlValues() const;
+  void applyControls(const ControlValues &values);
+  BiasValues biasValues() const;
+  void applyBiases(double heading1, double roll1, double heading2, double roll2);
+  void applyBiasesToAllFiles(double heading, double roll);
+
+  /* undo of interactive tie and status edits */
+  bool canUndo() const { return !undoSteps_.empty(); }
+  bool canRedo() const { return !redoSteps_.empty(); }
+  void undo();
+  void redo();
 
   /* plots: without surfaces the plot code still runs and draws nothing */
   void setCrossingSurfaces(DrawSurface *contour, DrawSurface *misfit, DrawSurface *zOffset);
@@ -262,6 +302,9 @@ class Session {
   void loadCrossingRow(int crossing, int tie);
   void loadSectionRow(int file, int section);
   void refreshAfterEdit(bool modelOutOfDate);
+  void pushUndo();
+  void applyStep(struct UndoStep &step);
+  void takeStep(struct UndoStep &step) const;
   void resetSelections();
 
   Callbacks callbacks_;
@@ -272,6 +315,9 @@ class Session {
   std::vector<std::string> offsetLines_;
   std::vector<std::string> modelLines_;
   std::map<std::string, bool> enabled_;
+  bool motifCompatibility_ = false;
+  std::vector<struct UndoStep> undoSteps_;
+  std::vector<struct UndoStep> redoSteps_;
   std::function<void()> plotsChanged_;
 
   DrawSurface *contourSurface_;

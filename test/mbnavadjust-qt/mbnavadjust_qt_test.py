@@ -36,6 +36,7 @@ PROGRAM = os.environ["MBNAVADJUST_QT"]
 MERGE = os.environ["MBNAVADJUSTMERGE"]
 TOOLS = os.path.dirname(os.environ["MBINFO"])
 VIEW_TEST = os.environ["MBNAVADJUST_QT_VIEW_TEST"]
+WINDOW_TEST = os.environ["MBNAVADJUST_QT_WINDOW_TEST"]
 
 CROSSINGS = [
     "U     0 00:000:000 01:001:000   1  0",
@@ -229,6 +230,14 @@ class MbnavadjustQtTest(unittest.TestCase):
         run = subprocess.run([VIEW_TEST, path], cwd=os.path.dirname(path), env=self.env, stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT, universal_newlines=True)
         self.assertEqual(run.returncode, 0, run.stdout[-3000:])
+
+    def test_main_window(self):
+        path = self.project()
+        self.replay(path, "list crossings\nclick 2\nminmisfit\naddtie\nsettie\nnext\nminmisfit\naddtie\nsettie\nnext\n"
+                          "minmisfit\naddtie\nsettie\ndismiss\ninvert\nwrite\n")
+        run = subprocess.run([WINDOW_TEST, path], cwd=os.path.dirname(path), env=self.env, stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT, universal_newlines=True)
+        self.assertEqual(run.returncode, 0, run.stdout[-4000:])
 
 
 if __name__ == "__main__":

@@ -35,6 +35,7 @@
 #include <QImage>
 #include <QObject>
 #include <QPainter>
+#include <QSize>
 #include <QString>
 
 #include <array>
@@ -120,9 +121,9 @@ class PlotSet : public QObject {
 
   Session &session() { return session_; }
   ContourLayers &contour() { return contour_; }
-  const QImage &misfitImage() { return misfit_.image(); }
-  const QImage &zOffsetImage() { return zOffset_.image(); }
-  const QImage &modelImage() { return model_.image(); }
+  const QImage &misfitImage() { return frozen_ ? frozenMisfit_ : misfit_.image(); }
+  const QImage &zOffsetImage() { return frozen_ ? frozenZOffset_ : zOffset_.image(); }
+  const QImage &modelImage() { return frozen_ ? frozenModel_ : model_.image(); }
 
   /* sizes in pixels */
   void setContourSize(int width, int height);
@@ -137,6 +138,14 @@ class PlotSet : public QObject {
 
   /* the current plots as PNG files named after the prefix */
   bool exportImages(const QString &prefix);
+  /* During a background job the program logic is in use, so the widgets show copies. */
+  void freeze();
+  void unfreeze();
+  bool frozen() const { return frozen_; }
+  /* whether the crossing plots have a crossing to show */
+  bool crossingShown() const;
+  void paintContour(QPainter &painter);
+
   /* the contour plot from the layers compared with the shared plot code; the number of pixels that differ */
   long compareContourWithShared();
 
@@ -152,6 +161,10 @@ class PlotSet : public QObject {
   ImageSurface zOffset_;
   ImageSurface model_;
   bool dark_ = false;
+  bool frozen_ = false;
+  bool frozenCrossingShown_ = false;
+  QImage frozenContour_, frozenMisfit_, frozenZOffset_, frozenModel_;
+  QSize pendingContour_, pendingMisfit_, pendingZOffset_, pendingModel_;
 };
 
 }  // namespace mbnaq

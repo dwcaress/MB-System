@@ -90,7 +90,7 @@ static QPen penOf(unsigned int pixel, int style) {
 
 static QFont plotFont() {
   QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-  font.setPixelSize(13);
+  font.setPixelSize(12);
   font.setBold(true);
   return font;
 }
@@ -375,7 +375,48 @@ void PlotSet::applySizes() {
                                 zOffset_.width() - 1, zOffset_.height() - 1);
 }
 
+void PlotSet::freeze() {
+  if (frozen_)
+    return;
+  frozenCrossingShown_ = session_.crossingLoaded();
+  frozenContour_ = contour_.render(session_);
+  frozenMisfit_ = misfit_.image().copy();
+  frozenZOffset_ = zOffset_.image().copy();
+  frozenModel_ = model_.image().copy();
+  frozen_ = true;
+}
+
+void PlotSet::unfreeze() {
+  if (!frozen_)
+    return;
+  frozen_ = false;
+  contour_.markStale();
+  if (pendingContour_.isValid())
+    setContourSize(pendingContour_.width(), pendingContour_.height());
+  if (pendingMisfit_.isValid())
+    setMisfitSize(pendingMisfit_.width(), pendingMisfit_.height());
+  if (pendingZOffset_.isValid())
+    setZOffsetSize(pendingZOffset_.width(), pendingZOffset_.height());
+  if (pendingModel_.isValid())
+    setModelSize(pendingModel_.width(), pendingModel_.height());
+  pendingContour_ = pendingMisfit_ = pendingZOffset_ = pendingModel_ = QSize();
+  emit changed();
+}
+
+bool PlotSet::crossingShown() const { return frozen_ ? frozenCrossingShown_ : session_.crossingLoaded(); }
+
+void PlotSet::paintContour(QPainter &painter) {
+  if (frozen_)
+    painter.drawImage(0, 0, frozenContour_);
+  else
+    contour_.paint(painter, session_);
+}
+
 void PlotSet::setContourSize(int width, int height) {
+  if (frozen_) {
+    pendingContour_ = QSize(width, height);
+    return;
+  }
   if (width == contour_.width() && height == contour_.height())
     return;
   contour_.resize(width, height);
@@ -383,6 +424,10 @@ void PlotSet::setContourSize(int width, int height) {
 }
 
 void PlotSet::setMisfitSize(int width, int height) {
+  if (frozen_) {
+    pendingMisfit_ = QSize(width, height);
+    return;
+  }
   if (width == misfit_.width() && height == misfit_.height())
     return;
   misfit_.resize(width, height, !dark_);
@@ -390,6 +435,10 @@ void PlotSet::setMisfitSize(int width, int height) {
 }
 
 void PlotSet::setZOffsetSize(int width, int height) {
+  if (frozen_) {
+    pendingZOffset_ = QSize(width, height);
+    return;
+  }
   if (width == zOffset_.width() && height == zOffset_.height())
     return;
   zOffset_.resize(width, height, !dark_);
@@ -397,6 +446,10 @@ void PlotSet::setZOffsetSize(int width, int height) {
 }
 
 void PlotSet::setModelSize(int width, int height) {
+  if (frozen_) {
+    pendingModel_ = QSize(width, height);
+    return;
+  }
   if (width == model_.width() && height == model_.height())
     return;
   model_.resize(width, height, !dark_);

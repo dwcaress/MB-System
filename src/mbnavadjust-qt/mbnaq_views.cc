@@ -47,6 +47,26 @@ int PlotView::buttonNumber(const QMouseEvent *event) {
   return event->button() == Qt::LeftButton ? 1 : 0;
 }
 
+void PlotView::paintOffline(QPainter &painter, bool withExplanation) {
+  painter.fillRect(rect(), plots_.dark() ? QColor(Qt::black) : QColor(Qt::white));
+  QFont big = font();
+  big.setBold(true);
+  big.setPixelSize(qMax(14, qMin(width() / 6, height() / 3)));
+  painter.setFont(big);
+  painter.setPen(QColor(128, 128, 128, 150));
+  QRect area = rect();
+  if (withExplanation)
+    area.setHeight(height() / 2 + big.pixelSize() / 2);
+  painter.drawText(area, withExplanation ? (Qt::AlignHCenter | Qt::AlignBottom) : Qt::AlignCenter, QStringLiteral("Offline"));
+  if (withExplanation) {
+    QFont small = font();
+    small.setPixelSize(qMax(12, width() / 45));
+    painter.setFont(small);
+    painter.drawText(rect().adjusted(20, height() / 2 + big.pixelSize() / 2 + 12, -20, 0), Qt::AlignHCenter | Qt::AlignTop | Qt::TextWordWrap,
+                     QStringLiteral("No crossing is loaded. Project actions such as Auto-Pick and Invert Navigation are available."));
+  }
+}
+
 /*--------------------------------------------------------------------*/
 
 ContourView::ContourView(PlotSet &plots, QWidget *parent) : PlotView(plots, parent) { setMinimumSize(200, 200); }
@@ -55,7 +75,10 @@ QSize ContourView::sizeHint() const { return QSize(601, 601); }
 
 void ContourView::paintEvent(QPaintEvent *) {
   QPainter painter(this);
-  plots_.contour().paint(painter, plots_.session());
+  if (plots_.crossingShown())
+    plots_.paintContour(painter);
+  else
+    paintOffline(painter, true);
 }
 
 void ContourView::resizeEvent(QResizeEvent *) { plots_.setContourSize(width(), height()); }
@@ -83,7 +106,10 @@ QSize MisfitView::sizeHint() const { return QSize(302, 302); }
 
 void MisfitView::paintEvent(QPaintEvent *) {
   QPainter painter(this);
-  painter.drawImage(0, 0, plots_.misfitImage());
+  if (plots_.crossingShown())
+    painter.drawImage(0, 0, plots_.misfitImage());
+  else
+    paintOffline(painter, false);
 }
 
 void MisfitView::resizeEvent(QResizeEvent *) { plots_.setMisfitSize(width(), height()); }
@@ -113,7 +139,10 @@ QSize ZOffsetView::sizeHint() const { return QSize(301, 61); }
 
 void ZOffsetView::paintEvent(QPaintEvent *) {
   QPainter painter(this);
-  painter.drawImage(0, 0, plots_.zOffsetImage());
+  if (plots_.crossingShown())
+    painter.drawImage(0, 0, plots_.zOffsetImage());
+  else
+    paintOffline(painter, false);
 }
 
 void ZOffsetView::resizeEvent(QResizeEvent *) { plots_.setZOffsetSize(width(), height()); }

@@ -28,6 +28,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <utility>
 
 extern "C" {
 #include <X11/Intrinsic.h>
@@ -43,6 +44,20 @@ extern "C" {
 #define MBNA_VIEW_MODES 7
 
 namespace mbnaq {
+
+static const size_t kUndoLimit = 100;
+
+/* What an interactive edit can change. */
+struct UndoStep {
+  int crossingIndex = -1;
+  struct mbna_crossing crossing;
+  std::vector<std::pair<std::pair<int, int>, struct mbna_section>> sections;
+  std::vector<int> fileStatus;
+  int numTies, numGlobalTies, numCrossingsAnalyzed, numTrueCrossingsAnalyzed, numGlobalTiesAnalyzed;
+  int inversionStatus, gridStatus;
+  int crossingSelect, tieSelect, fileSelect, sectionSelect, surveySelect;
+  int naverrMode, currentCrossing, currentTie, currentFile, currentSection;
+};
 
 static Session *the_session = nullptr;
 
@@ -398,6 +413,8 @@ Session::~Session() {
     the_session = nullptr;
 }
 
+bool Session::misfitCenterIsZero() const { return mbna_misfit_center == MBNA_MISFIT_ZEROCENTER; }
+
 void Session::setCallbacks(const Callbacks &callbacks) { callbacks_ = callbacks; }
 
 void Session::setVerbose(int verbose) { mbna_verbose = verbose; }
@@ -443,6 +460,8 @@ Selection Session::selection() const {
   s.offsetZ = mbna_offset_z;
   s.sortedThreshold = project.tiessortedthreshold;
   s.saveCount = project.save_count;
+  s.projectIsOpen = project.open;
+  s.numTies = project.num_ties;
   return s;
 }
 
@@ -666,8 +685,9 @@ void Session::buildList() {
       for (int i = 0; i < project.num_crossings; i++) {
         if (do_check_crossing_listok(i)) {
           struct mbna_crossing *crossing = &(project.crossings[i]);
-          /* the Motif code has the marker the other way round in the true crossings list */
-          const bool marked = mbna_view_list == MBNA_VIEW_LIST_TRUECROSSINGS ? !crossing->truecrossing : crossing->truecrossing;
+          /* the Motif code has this marker the other way round in the true crossings list */
+          const bool marked = mbna_view_list == MBNA_VIEW_LIST_TRUECROSSINGS && motifCompatibility_ ? !crossing->truecrossing
+                                                                                                     : crossing->truecrossing;
           const char trueMarker = marked ? 'X' : ' ';
           if (i == mbna_crossing_select)
             list_.selected = static_cast<int>(list_.rows.size());
@@ -956,7 +976,8 @@ void Session::updateCrossing() {
       setEnabled(kNavSteps, kCount3, false);
     } else if (section_mode && kind == MBNA_VIEW_LIST_FILESECTIONS) {
       setEnabled(kNavSteps, kCount3, true);
-    } else if (kind == MBNA_VIEW_LIST_CROSSINGS || kind == MBNA_VIEW_LIST_GOODCROSSINGS || kind == MBNA_VIEW_LIST_TRUECROSSINGS) {
+    } else if (kind == MBNA_VIEW_LIST_CROSSINGS || kind == MBNA_VIEW_LIST_GOODCROSSINGS || kind == MBNA_VIEW_LIST_TRUECROSSINGS ||
+               (!motifCompatibility_ && (kind == MBNA_VIEW_LIST_MEDIOCRECROSSINGS || kind == MBNA_VIEW_LIST_BETTERCROSSINGS))) {
       setEnabled(kNavSteps, 2, true);
       bool all_done;
       if (section_mode && kind == MBNA_VIEW_LIST_CROSSINGS)
@@ -1162,6 +1183,8 @@ bool Session::newProject(const std::string &path) {
 }
 
 bool Session::openProject(const std::string &path) {
+  undoSteps_.clear();
+  redoSteps_.clear();
   notifyMessageOn(fmt("Opening MBnavadjust project %s", path.c_str()).c_str());
   char name[MB_PATH_MAXLINE];
   snprintf(name, sizeof(name), "%s", path.c_str());
@@ -1204,6 +1227,8 @@ bool Session::importReference(const std::string &path) {
 }
 
 void Session::closeProject(bool writeOutstanding) {
+  undoSteps_.clear();
+  redoSteps_.clear();
   int error = MB_ERROR_NO_ERROR;
   if (mbna_naverr_mode != MBNA_NAVERR_MODE_UNLOADED)
     dismissCrossingWindow();
@@ -1215,6 +1240,10 @@ void Session::closeProject(bool writeOutstanding) {
   resetSelections();
   refreshAfterEdit(false);
 }
+
+std::string Session::versionText() const { return fmt("%s %s", MB_VERSION, MB_VERSION_DATE); }
+
+std::string Session::projectName() const { return project.open ? std::string(project.name) : std::string(); }
 
 bool Session::writeProject() {
   int error = MB_ERROR_NO_ERROR;
@@ -1382,6 +1411,7 @@ void Session::nextUnsetCrossing() {
 }
 
 void Session::addTie() {
+  pushUndo();
   mbnavadjust_naverr_addtie();
   plotCrossing(MBNA_PLOT_MODE_FIRST);
   updateCrossing();
@@ -1389,6 +1419,7 @@ void Session::addTie() {
 }
 
 void Session::deleteTie() {
+  pushUndo();
   mbnavadjust_naverr_deletetie();
   plotCrossing(MBNA_PLOT_MODE_FIRST);
   updateCrossing();
@@ -1403,6 +1434,7 @@ void Session::selectTie() {
 }
 
 void Session::setTie() {
+  pushUndo();
   mbnavadjust_naverr_save();
   plotCrossing(MBNA_PLOT_MODE_FIRST);
   updateCrossing();
@@ -1417,6 +1449,7 @@ void Session::resetTie() {
 }
 
 void Session::unsetCrossing() {
+  pushUndo();
   mbnavadjust_naverr_unset();
   if (mbna_naverr_mode == MBNA_NAVERR_MODE_CROSSING)
     mbnavadjust_naverr_next_crossing();
@@ -1428,6 +1461,7 @@ void Session::unsetCrossing() {
 }
 
 void Session::skipCrossing() {
+  pushUndo();
   mbnavadjust_naverr_skip();
   if (mbna_naverr_mode == MBNA_NAVERR_MODE_CROSSING)
     mbnavadjust_naverr_nextunset_crossing();
@@ -1451,6 +1485,7 @@ void Session::dismissCrossingWindow() {
   mbnavadjust_naverr_checkoksettie();
   updateCrossing();
   refreshAfterEdit(false);
+  notifyPlots();
 }
 
 void Session::fullSize() {
@@ -1511,6 +1546,234 @@ void Session::setMisfitCenter(bool zeroCenter) {
   mbnavadjust_get_misfit();
   plotCrossing(MBNA_PLOT_MODE_FIRST);
   updateCrossing();
+}
+
+/*--------------------------------------------------------------------*/
+/* forms and undo */
+
+void Session::reloadCrossingWindow() {
+  if (mbna_naverr_mode == MBNA_NAVERR_MODE_CROSSING && mbna_current_crossing >= 0)
+    mbnavadjust_naverr_specific_crossing(mbna_current_crossing, mbna_current_tie);
+  else if (mbna_naverr_mode == MBNA_NAVERR_MODE_SECTION && mbna_current_file >= 0 && mbna_current_section >= 0)
+    mbnavadjust_naverr_specific_section(mbna_current_file, mbna_current_section);
+  else
+    return;
+  plotCrossing(MBNA_PLOT_MODE_FIRST);
+  updateCrossing();
+  updateStatus();
+}
+
+ControlValues Session::controlValues() const {
+  ControlValues v;
+  v.decimation = project.decimation;
+  v.sectionLength = project.section_length;
+  v.sectionSoundings = project.section_soundings;
+  v.contourInterval = project.cont_int;
+  v.colorInterval = project.col_int;
+  v.tickInterval = project.tick_int;
+  v.smoothing = project.smoothing;
+  v.zOffsetWidth = project.zoffsetwidth;
+  v.useMode = project.use_mode == MBNA_USE_MODE_SECONDARY ? 1 : (project.use_mode == MBNA_USE_MODE_TERTIARY ? 2 : 0);
+  return v;
+}
+
+void Session::applyControls(const ControlValues &values) {
+  int error = MB_ERROR_NO_ERROR;
+  project.decimation = values.decimation;
+  project.section_length = values.sectionLength;
+  project.section_soundings = values.sectionSoundings;
+  project.cont_int = values.contourInterval;
+  project.col_int = values.colorInterval;
+  project.tick_int = values.tickInterval;
+  project.smoothing = values.smoothing;
+  project.zoffsetwidth = values.zOffsetWidth;
+  project.use_mode = values.useMode == 1 ? MBNA_USE_MODE_SECONDARY
+                                         : (values.useMode == 2 ? MBNA_USE_MODE_TERTIARY : MBNA_USE_MODE_PRIMARY);
+  if (mbna_file_id_1 >= 0 && mbna_section_1 >= 0)
+    project.files[mbna_file_id_1].sections[mbna_section_1].contoursuptodate = false;
+  if (mbna_file_id_2 >= 0 && mbna_section_2 >= 0)
+    project.files[mbna_file_id_2].sections[mbna_section_2].contoursuptodate = false;
+  if (crossingLoaded())
+    mbnavadjust_naverr_replot();
+  mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
+  if (crossingLoaded()) {
+    mbnavadjust_get_misfit();
+    plotCrossing(MBNA_PLOT_MODE_FIRST);
+  }
+  updateStatus();
+  updateCrossing();
+}
+
+BiasValues Session::biasValues() const {
+  BiasValues v = {false, -1, -1, -1, -1, 0.0, 0.0, 0.0, 0.0};
+  if (mbna_file_id_1 < 0 || mbna_file_id_1 >= project.num_files || mbna_file_id_2 < 0 || mbna_file_id_2 >= project.num_files)
+    return v;
+  v.available = true;
+  v.file1 = mbna_file_id_1;
+  v.section1 = mbna_section_1;
+  v.file2 = mbna_file_id_2;
+  v.section2 = mbna_section_2;
+  v.heading1 = project.files[mbna_file_id_1].heading_bias;
+  v.roll1 = project.files[mbna_file_id_1].roll_bias;
+  v.heading2 = project.files[mbna_file_id_2].heading_bias;
+  v.roll2 = project.files[mbna_file_id_2].roll_bias;
+  return v;
+}
+
+void Session::applyBiases(double heading1, double roll1, double heading2, double roll2) {
+  if (mbna_file_id_1 < 0 || mbna_file_id_1 >= project.num_files || mbna_file_id_2 < 0 || mbna_file_id_2 >= project.num_files)
+    return;
+  struct mbna_file *file1 = &(project.files[mbna_file_id_1]);
+  struct mbna_file *file2 = &(project.files[mbna_file_id_2]);
+  file1->heading_bias = heading1;
+  file1->roll_bias = roll1;
+  file2->heading_bias = heading2;
+  file2->roll_bias = roll2;
+  for (int i = 0; i < file1->num_sections; i++)
+    file1->sections[i].contoursuptodate = false;
+  for (int i = 0; i < file2->num_sections; i++)
+    file2->sections[i].contoursuptodate = false;
+  if (crossingLoaded()) {
+    mbnavadjust_naverr_replot();
+    mbnavadjust_get_misfit();
+    plotCrossing(MBNA_PLOT_MODE_FIRST);
+  }
+  updateStatus();
+}
+
+void Session::applyBiasesToAllFiles(double heading, double roll) {
+  for (int ifile = 0; ifile < project.num_files; ifile++) {
+    struct mbna_file *file = &(project.files[ifile]);
+    file->heading_bias = heading;
+    file->roll_bias = roll;
+    for (int i = 0; i < file->num_sections; i++)
+      file->sections[i].contoursuptodate = false;
+  }
+  if (crossingLoaded()) {
+    mbnavadjust_naverr_replot();
+    mbnavadjust_get_misfit();
+    plotCrossing(MBNA_PLOT_MODE_FIRST);
+  }
+  refreshAfterEdit(false);
+}
+
+void Session::takeStep(UndoStep &step) const {
+  const int crossing = mbna_naverr_mode == MBNA_NAVERR_MODE_CROSSING && mbna_current_crossing >= 0 ? mbna_current_crossing
+                                                                                                   : mbna_crossing_select;
+  const auto addSection = [&](int file, int section) {
+    if (file < 0 || file >= project.num_files || section < 0 || section >= project.files[file].num_sections)
+      return;
+    for (const auto &saved : step.sections) {
+      if (saved.first.first == file && saved.first.second == section)
+        return;
+    }
+    step.sections.push_back(std::make_pair(std::make_pair(file, section), project.files[file].sections[section]));
+  };
+  if (crossing >= 0 && crossing < project.num_crossings) {
+    step.crossingIndex = crossing;
+    step.crossing = project.crossings[crossing];
+    addSection(step.crossing.file_id_1, step.crossing.section_1);
+    addSection(step.crossing.file_id_2, step.crossing.section_2);
+  }
+  if (mbna_naverr_mode == MBNA_NAVERR_MODE_SECTION)
+    addSection(mbna_current_file, mbna_current_section);
+  addSection(mbna_file_select, mbna_section_select);
+  step.fileStatus.resize(project.num_files);
+  for (int i = 0; i < project.num_files; i++)
+    step.fileStatus[i] = project.files[i].status;
+  step.numTies = project.num_ties;
+  step.numGlobalTies = project.num_globalties;
+  step.numCrossingsAnalyzed = project.num_crossings_analyzed;
+  step.numTrueCrossingsAnalyzed = project.num_truecrossings_analyzed;
+  step.numGlobalTiesAnalyzed = project.num_globalties_analyzed;
+  step.inversionStatus = project.inversion_status;
+  step.gridStatus = project.grid_status;
+  step.crossingSelect = mbna_crossing_select;
+  step.tieSelect = mbna_tie_select;
+  step.fileSelect = mbna_file_select;
+  step.sectionSelect = mbna_section_select;
+  step.surveySelect = mbna_survey_select;
+  step.naverrMode = mbna_naverr_mode;
+  step.currentCrossing = mbna_current_crossing;
+  step.currentTie = mbna_current_tie;
+  step.currentFile = mbna_current_file;
+  step.currentSection = mbna_current_section;
+}
+
+void Session::applyStep(UndoStep &step) {
+  if (step.crossingIndex >= 0 && step.crossingIndex < project.num_crossings)
+    project.crossings[step.crossingIndex] = step.crossing;
+  for (const auto &saved : step.sections)
+    project.files[saved.first.first].sections[saved.first.second] = saved.second;
+  for (int i = 0; i < project.num_files && i < static_cast<int>(step.fileStatus.size()); i++)
+    project.files[i].status = step.fileStatus[i];
+  project.num_ties = step.numTies;
+  project.num_globalties = step.numGlobalTies;
+  project.num_crossings_analyzed = step.numCrossingsAnalyzed;
+  project.num_truecrossings_analyzed = step.numTrueCrossingsAnalyzed;
+  project.num_globalties_analyzed = step.numGlobalTiesAnalyzed;
+  project.inversion_status = step.inversionStatus;
+  project.grid_status = step.gridStatus;
+  project.modelplot_uptodate = false;
+  project.save_count++;
+  if (project.save_count < 0 || project.save_count >= mbna_save_frequency) {
+    int error = MB_ERROR_NO_ERROR;
+    mbnavadjust_write_project(mbna_verbose, &project, __FILE__, __LINE__, __FUNCTION__, &error);
+    project.save_count = 0;
+  }
+  mbna_crossing_select = step.crossingSelect;
+  mbna_tie_select = step.tieSelect;
+  mbna_file_select = step.fileSelect;
+  mbna_section_select = step.sectionSelect;
+  mbna_survey_select = step.surveySelect;
+  if (step.naverrMode == MBNA_NAVERR_MODE_CROSSING && step.currentCrossing >= 0) {
+    if (mbna_naverr_mode == MBNA_NAVERR_MODE_UNLOADED) {
+      mbna_crossing_select = step.currentCrossing;
+      mbna_tie_select = step.currentTie;
+      initCrossingWindow(MBNA_NAVERR_MODE_CROSSING);
+    } else {
+      mbnavadjust_naverr_specific_crossing(step.currentCrossing, step.currentTie);
+    }
+  } else if (step.naverrMode == MBNA_NAVERR_MODE_SECTION && step.currentFile >= 0 && step.currentSection >= 0) {
+    if (mbna_naverr_mode == MBNA_NAVERR_MODE_UNLOADED)
+      initCrossingWindow(MBNA_NAVERR_MODE_SECTION);
+    else
+      mbnavadjust_naverr_specific_section(step.currentFile, step.currentSection);
+  }
+  plotCrossing(MBNA_PLOT_MODE_FIRST);
+  updateCrossing();
+  refreshAfterEdit(true);
+}
+
+void Session::pushUndo() {
+  UndoStep step;
+  takeStep(step);
+  undoSteps_.push_back(std::move(step));
+  if (undoSteps_.size() > kUndoLimit)
+    undoSteps_.erase(undoSteps_.begin());
+  redoSteps_.clear();
+}
+
+void Session::undo() {
+  if (undoSteps_.empty())
+    return;
+  UndoStep current;
+  takeStep(current);
+  UndoStep step = std::move(undoSteps_.back());
+  undoSteps_.pop_back();
+  redoSteps_.push_back(std::move(current));
+  applyStep(step);
+}
+
+void Session::redo() {
+  if (redoSteps_.empty())
+    return;
+  UndoStep current;
+  takeStep(current);
+  UndoStep step = std::move(redoSteps_.back());
+  redoSteps_.pop_back();
+  undoSteps_.push_back(std::move(current));
+  applyStep(step);
 }
 
 /*--------------------------------------------------------------------*/
@@ -1888,6 +2151,7 @@ std::string Session::drawCounts() const {
 /* main window actions */
 
 void Session::setFileNav(FileNav value) {
+  pushUndo();
   switch (value) {
   case FileNav::Poor:
     mbnavadjust_poornav_file();
@@ -1909,6 +2173,7 @@ void Session::setFileNav(FileNav value) {
 }
 
 void Session::setTieSetting(TieSetting value) {
+  pushUndo();
   switch (value) {
   case TieSetting::XY:
     mbnavadjust_set_tie_xy();

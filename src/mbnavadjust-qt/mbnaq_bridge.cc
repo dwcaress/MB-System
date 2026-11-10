@@ -176,13 +176,13 @@ int do_check_section_listok(int ifile, int isection) {
   }
 
   if (use_status) {
-    /* The Motif code compares the selected file with the survey in the
-       with-survey mode, and this keeps that behaviour for now. */
+    /* The Motif code compares the selected file with the survey in the with-survey mode. */
+    const bool motif = Session::current() != nullptr && Session::current()->motifCompatibility();
     use_status =
         (mbna_view_mode == MBNA_VIEW_MODE_ALL) ||
         (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == project.files[ifile].survey) ||
         (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == ifile) ||
-        (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_file_select == project.files[ifile].survey) ||
+        (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && (motif ? mbna_file_select : mbna_survey_select) == project.files[ifile].survey) ||
         (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE && mbna_file_select == ifile) ||
         (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == ifile && mbna_section_select == isection);
   }

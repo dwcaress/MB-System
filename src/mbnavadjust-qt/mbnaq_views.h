@@ -32,6 +32,7 @@
 #include <QWidget>
 
 class QMouseEvent;
+class QPainter;
 
 namespace mbnaq {
 
@@ -44,6 +45,8 @@ class PlotView : public QWidget {
  protected:
   /* 1 left, 2 middle, 3 right; Alt with the left button counts as middle */
   static int buttonNumber(const QMouseEvent *event);
+  /* shown instead of the plot when no crossing is loaded */
+  void paintOffline(QPainter &painter, bool withExplanation);
 
   PlotSet &plots_;
 };

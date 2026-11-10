@@ -60,7 +60,15 @@ add_library(
   mbnaq_plots.cc
   mbnaq_plots.h
   mbnaq_views.cc
-  mbnaq_views.h)
+  mbnaq_views.h
+  mbnaq_controller.cc
+  mbnaq_controller.h
+  mbnaq_terminal.cc
+  mbnaq_terminal.h
+  mbnaq_widgets.cc
+  mbnaq_widgets.h
+  NavAdjustWindow.cc
+  NavAdjustWindow.h)
 
 set_target_properties(mbnavadjust-qt-ui PROPERTIES AUTOMOC ON CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 target_include_directories(mbnavadjust-qt-ui BEFORE PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/x11)

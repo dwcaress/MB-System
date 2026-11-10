@@ -38,11 +38,15 @@
 #include <string>
 #include <vector>
 
+#include <QApplication>
 #include <QGuiApplication>
 #include <QString>
 
+#include "NavAdjustWindow.h"
+#include "mbnaq_controller.h"
 #include "mbnaq_core.h"
 #include "mbnaq_plots.h"
+#include "mbnaq_terminal.h"
 
 using namespace mbnaq;
 
@@ -333,6 +337,27 @@ int main(int argc, char **argv) {
     return EXIT_SUCCESS;
   }
 
+  /* the program with its windows */
+  if (replay.empty() && !dump && export_prefix.empty()) {
+    int qt_argc = 1;
+    QApplication app(qt_argc, argv);
+    ProjectController *controller = ProjectController::create();
+    controller->session().setVerbose(verbose);
+    controller->session().setResetCrossings(reset);
+    int exit_code = EXIT_SUCCESS;
+    {
+      OutputCapture::instance().start();
+      NavAdjustWindow window(*controller, dark);
+      window.show();
+      if (!input.empty())
+        controller->openProject(QString::fromStdString(input));
+      exit_code = app.exec();
+    }
+    delete controller;
+    OutputCapture::instance().stop();
+    return exit_code;
+  }
+
   /* the plots draw on images, which needs no display */
   if (qEnvironmentVariableIsEmpty("QT_QPA_PLATFORM"))
     qputenv("QT_QPA_PLATFORM", "offscreen");
@@ -350,6 +375,7 @@ int main(int argc, char **argv) {
     printf("ERROR %s | %s | %s\n", s1.c_str(), s2.c_str(), s3.c_str());
   };
   session->setCallbacks(callbacks);
+  session->setMotifCompatibility(true);
   session->setVerbose(verbose);
   session->setResetCrossings(reset);
   session->updateStatus();
@@ -395,8 +421,6 @@ int main(int argc, char **argv) {
       fprintf(stderr, "%s: could not write the images %s\n", program_name, export_prefix.c_str());
       status = EXIT_FAILURE;
     }
-  } else {
-    printf("%s: the windows are not part of this build step; use --dump, --replay or --export\n", program_name);
   }
 
   fflush(stdout);
