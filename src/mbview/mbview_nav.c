@@ -45,6 +45,7 @@
 #include <windows.h>
 #endif
 
+#ifndef MBVIEW_NO_MOTIF
 #include <X11/StringDefs.h>
 #include <X11/cursorfont.h>
 #include <Xm/Xm.h>
@@ -58,22 +59,23 @@
 #include <Xm/PushB.h>
 #include <Xm/Separator.h>
 #include <Xm/List.h>
+#else
+#include "mbv_xtypes.h"
+#endif
 #include "MB3DView.h"
 #include "MB3DSiteList.h"
 #include "MB3DRouteList.h"
 #include "MB3DNavList.h"
 
-#include <GL/gl.h>
-#include <GL/glu.h>
-#ifndef WIN32
-#include <GL/glx.h>
-#endif
+#include "mbv_gl.h"
+#ifndef MBVIEW_NO_MOTIF
 #include "mb_glwdrawa.h"
+#endif
 
 #include "mbview.h"
 #include "mbviewprivate.h"
+#include "mbv_ui.h"
 
-static char value_string[2*MB_PATH_MAXLINE];
 
 /*------------------------------------------------------------------------------*/
 int mbview_getnavcount(int verbose, size_t instance, int *nnav, int *error) {
@@ -895,7 +897,7 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 					shared.shareddata.navpick_type = MBV_PICK_NONE;
 					shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
 					shared.shareddata.nav_point_selected[0] = MBV_SELECT_NONE;
-					XBell(view->dpy, 100);
+					mbv_ui_bell(instance);
 				}
 			}
 
@@ -1179,7 +1181,7 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 					shared.shareddata.navpick_type = MBV_PICK_NONE;
 					shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
 					shared.shareddata.nav_point_selected[0] = MBV_SELECT_NONE;
-					XBell(view->dpy, 100);
+					mbv_ui_bell(instance);
 				}
 			}
 
@@ -1411,7 +1413,7 @@ int mbview_pick_nav_select(size_t instance, int select, int which, int xpixel, i
 		shared.shareddata.nav_point_selected[1] = MBV_SELECT_NONE;
 		shared.shareddata.nav_selected_mbnavadjust[0] = MBV_SELECT_NONE;
 		shared.shareddata.nav_selected_mbnavadjust[1] = MBV_SELECT_NONE;
-		XBell(view->dpy, 100);
+		mbv_ui_bell(instance);
 		for (int i = 0; i < shared.shareddata.nnav; i++) {
 			for (int j = 0; j < shared.shareddata.navs[i].npoints; j++) {
 				shared.shareddata.navs[i].navpts[j].selected = false;
@@ -2359,91 +2361,6 @@ int mbview_drawnav(size_t instance, int rez) {
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
-int mbview_updatenavlist() {
-	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-	}
-
-	/* update nav list */
-	if (shared.init_navlist == MBV_WINDOW_VISIBLE) {
-		/* remove all existing items */
-		XmListDeleteAllItems(shared.mb3d_navlist.mbview_list_navlist);
-
-		if (shared.shareddata.nnav > 0) {
-			/* get number of items */
-			int nitems = 0;
-			for (int inav = 0; inav < shared.shareddata.nnav; inav++) {
-        if (shared.shareddata.navs[inav].active) {
-				  nitems += 1;
-        }
-			}
-
-      if (nitems > 0) {
-
-  			/* allocate array of label XmStrings */
-  			XmString *xstr = (XmString *)malloc(nitems * sizeof(XmString));
-  			if (xstr == NULL)
-  				return (MB_FAILURE);
-
-  			/* loop over the navs */
-  			nitems = 0;
-  			for (int inav = 0; inav < shared.shareddata.nnav; inav++) {
-          if (shared.shareddata.navs[inav].active) {
-    				/* add list item for each nav */
-    				sprintf(value_string, "%3d | %3d | %s | %d | %s", inav, shared.shareddata.navs[inav].npoints,
-    				        mbview_colorname[shared.shareddata.navs[inav].color], shared.shareddata.navs[inav].size,
-    				        shared.shareddata.navs[inav].name);
-    				xstr[nitems] = XmStringCreateLocalized(value_string);
-    				nitems++;
-          }
-  			}
-
-  			/* add list items */
-  			XmListAddItems(shared.mb3d_navlist.mbview_list_navlist, xstr, nitems, 0);
-
-  			/* deallocate memory no longer needed */
-  			for (int iitem = 0; iitem < nitems; iitem++) {
-  				XmStringFree(xstr[iitem]);
-  			}
-  			free(xstr);
-
-  			/* check for completely selected navs */
-  			/* (the list holds only active navs, so count list positions) */
-  			int inavselect = MBV_SELECT_NONE;
-  			int iitem = 0;
-  			for (int inav = 0; inav < shared.shareddata.nnav && inavselect == MBV_SELECT_NONE; inav++) {
-          if (shared.shareddata.navs[inav].active) {
-    				iitem++;
-    				if (shared.shareddata.navs[inav].npoints > 1 &&
-    				    shared.shareddata.navs[inav].nselected == shared.shareddata.navs[inav].npoints) {
-    					inavselect = inav;
-    				}
-          }
-  			}
-
-  			/* select first item with fully selected nav */
-  			if (inavselect != MBV_SELECT_NONE) {
-  				XmListSelectPos(shared.mb3d_navlist.mbview_list_navlist, iitem, 0);
-  				XmListSetPos(shared.mb3d_navlist.mbview_list_navlist, MAX(iitem - 5, 1));
-  			}
-
-      }
-		}
-	}
-
-	const int status = MB_SUCCESS;
-
-	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*------------------------------------------------------------------------------*/
 
 int mbview_picknavbyname(int verbose, size_t instance, char *name, int *error) {
 	(void)verbose;  // Unused parameter
@@ -2493,7 +2410,7 @@ int mbview_picknavbyname(int verbose, size_t instance, char *name, int *error) {
 		shared.shareddata.nav_point_selected[1] = MBV_SELECT_NONE;
 		shared.shareddata.nav_selected_mbnavadjust[0] = MBV_SELECT_NONE;
 		shared.shareddata.nav_selected_mbnavadjust[1] = MBV_SELECT_NONE;
-		XBell(view->dpy, 100);
+		mbv_ui_bell(instance);
 		for (int i = 0; i < shared.shareddata.nnav; i++) {
 			for (int j = 0; j < shared.shareddata.navs[i].npoints; j++) {
 				shared.shareddata.navs[i].navpts[j].selected = false;

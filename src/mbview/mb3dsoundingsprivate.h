@@ -84,6 +84,12 @@
 #define MBS_VIEW_COLOR_AMP 2
 #define MBS_VIEW_COLOR_SOUNDING 3
 
+/* view toggles of the soundings window (mb3dsoundings_setviewtoggle) */
+#define MBS_VIEWTOGGLE_FLAGGED 0
+#define MBS_VIEWTOGGLE_SECONDARY 1
+#define MBS_VIEWTOGGLE_BOUNDINGBOX 2
+#define MBS_VIEWTOGGLE_SCALEWITHFLAGGED 3
+
 /* structure to hold instances of mb3dsoundings windows */
 struct mb3dsoundings_world_struct {
 	/* flag if this instance is initialized */
@@ -206,7 +212,7 @@ struct mb3dsoundings_world_struct {
 
 /* library variables */
 /*   note that global mb3dsoundings variables will only be defined when
-     this code is included in mb3dsoundings_callbacks.c where the
+     this code is included in mbv_soundings_core.c where the
      MB3DSOUNDINGSGLOBAL flag is defined - other blocks of code will
      have these variables declared as extern  */
 #ifdef MB3DSOUNDINGSGLOBAL
@@ -225,11 +231,19 @@ EXTERNAL XtAppContext mbs_app_context;
 EXTERNAL int mbs_work_function_set;
 EXTERNAL int mbs_timer_count;
 EXTERNAL struct mb3dsoundings_world_struct mb3dsoundings;
-EXTERNAL int key_g_down = 0;
-EXTERNAL int key_z_down = 0;
-EXTERNAL int key_s_down = 0;
-EXTERNAL int key_a_down = 0;
-EXTERNAL int key_d_down = 0;
+#ifdef MB3DSOUNDINGSGLOBAL
+int key_g_down = 0;
+int key_z_down = 0;
+int key_s_down = 0;
+int key_a_down = 0;
+int key_d_down = 0;
+#else
+extern int key_g_down;
+extern int key_z_down;
+extern int key_s_down;
+extern int key_a_down;
+extern int key_d_down;
+#endif
 
 /* global declarations */
 #ifdef MB3DSOUNDINGSGLOBAL
@@ -249,6 +263,16 @@ extern char *mb3dsoundings_colorname[MBS_NUM_COLORS];
 int mb3dsoundings_startup(int verbose, Widget parent, XtAppContext app, int *error);
 int mb3dsoundings_updatecursor(void);
 int mb3dsoundings_updategui(void);
+/* toolkit-free soundings window logic (mbv_soundings_core.c) */
+int mb3dsoundings_updatelabelmousemode(void);
+void mb3dsoundings_bias_changed(void);
+void mb3dsoundings_setviewtoggle(int toggle, bool state);
+void mb3dsoundings_setprofiles(int mode);
+void mb3dsoundings_setcolor(int mode);
+void mb3dsoundings_setmousemode(int mode);
+int mb3dsoundings_setdata(int verbose, struct mb3dsoundings_struct *soundingdata, int *error);
+void mb3dsoundings_reset_keepbias(void);
+void mb3dsoundings_dismissed(void);
 int mb3dsoundings_updatestatus(void);
 int mb3dsoundings_reset(void);
 int mb3dsoundings_reset_glx(void);

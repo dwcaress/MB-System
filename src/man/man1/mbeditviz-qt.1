@@ -1,0 +1,144 @@
+.TH mbeditviz-qt 1 "8 November 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbeditviz-qt\fP \- Bathymetry editor and patch test tool (Qt6 version).
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbeditviz-qt\fP
+.br
+[--delete-input-file {-R}
+.br
+--format=format_id {-Fformat_id}
+.br
+--help {-H}
+.br
+--input=file {-Ifile}
+.br
+--simple-mean-grid {-G}
+.br
+--verbose {-V}]
+
+.SH DESCRIPTION
+\fBmbeditviz-qt\fP is a Qt6 port of \fBmbeditviz\fP. It lists swath files,
+grids the soundings of the files to be edited and shows the grid in a map.
+Soundings picked in the map with an area, a region or a navigation track open
+in a 3D soundings view, where they can be flagged and unflagged and where
+roll, pitch and heading biases, a time lag and a Snell correction can be
+tested and optimised. The edits are written to edit save files, which
+\fBmbprocess\fP applies.
+
+The two programs share their program logic, the gridding and editing code and
+the \fBmbview\fP drawing code, so they read the same swath files and datalists
+and write the same edit save files and parameter files; a file edited with one
+program can be edited further with the other. Two programs cannot edit one
+file at the same time. The map is drawn by the original OpenGL drawing code of
+\fBmbview\fP in an OpenGL 2.1 compatibility context; the map window is
+described in \fBmbgrdviz\fP(1). The windows can be resized.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian dos Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-\-delete\-input\-file \-R
+Deletes the file given with \fB\-\-input\fP after its swath files have been
+listed. \fBmbgrdviz\fP and \fBmbgrdviz-qt\fP use it for the temporary
+datalist they pass.
+.TP
+.B \-\-format=format_id \-Fformat_id
+Sets the \fBMBIO\fP format id of the file given with \fB\-\-input\fP. By
+default it is taken from the ".mbXX" suffix of the file name.
+.TP
+.B \-\-help \-H
+Prints a description of the program and its options, then exits.
+.TP
+.B \-\-input=file \-Ifile
+Lists the swath files of a datalist (or one swath file) as available for
+editing.
+.TP
+.B \-\-simple\-mean\-grid \-G
+Grids with the simple mean algorithm instead of the footprint algorithm.
+.TP
+.B \-\-verbose \-V
+Prints the program version and more information about its work to the
+stderr stream. Give it twice for debugging output.
+
+.SH THE MAIN WINDOW
+The status shows the number of available and loaded files and the grid.
+\fBMode\fP chooses whether edits are written (Edit Bathymetry) or not (Browse
+Only). \fBSwath Files\fP lists the files; a row shows <loaded> or <Locked>,
+<esf> if an edit save file exists, H, S and A for asynchronous heading,
+sensor depth and attitude data, the file name and the format.
+\fBRemove Selected Files\fP removes the selected files from the list.
+\fBView Selected Files\fP and \fBView All Files\fP load the files and open the
+Grid Parameters window.
+
+File > Open Swath Data adds a swath file or datalist: choose the output mode,
+the \fBMBIO\fP format (filled in from the file name) and the file. Options >
+Generate New Grid opens the Grid Parameters window again for the loaded
+files. File > Quit unloads the files, writing the edits, and ends the program;
+closing the window does the same.
+
+.SH THE GRID PARAMETERS WINDOW
+It shows the grid bounds and suggested parameters, and the parameters
+selected with the grid cell size slider, the gridding algorithm (Simple Mean,
+Footprint, Shoal Bias) and the interpolation scale in grid cells. Apply makes
+the grid and shows it in the map window; Dismiss closes the window.
+
+.SH THE 3D SOUNDINGS WINDOW
+Choose the Pick Area mouse mode in the map window and drag a line across the
+data, or pick a region or a navigation track, to show the soundings inside it.
+
+The edit mode buttons set what the left mouse button does: Toggle flags or
+unflags the sounding nearest the mouse, Pick flags it, Erase flags and Restore
+unflags the soundings the mouse passes over, Grab flags the soundings in a
+dragged rectangle, and Info shows a sounding's file, ping and beam in the
+status line. The middle and right buttons rotate the soundings and change the
+vertical exaggeration, or pan and zoom (Mouse menu, or the buttons under Reset
+View).
+
+Keys: u or q Toggle, i or w Pick, o or e Erase, p or r Restore, t, [ or {
+Grab, y, ] or } Info. The ping keys act on the ping of the last edited
+sounding: z or m flags and s or k unflags all its soundings, a or j flags its
+soundings on one side of that sounding (beam numbers up to it) and d or l
+those on the other side, and ! sets its soundings to null. x, < or , flags
+and c, > or . unflags all soundings in view.
+
+The View menu shows or hides the bounding box, flagged soundings and secondary
+picks, draws profiles, scales with flagged soundings, and colours the
+soundings by flag state, topography, sounding colour or amplitude. The Action
+menu applies the bias values to the grid, flags soundings in sparse voxels,
+colours the unflagged soundings and optimises the bias values. The Heading,
+Roll and Pitch Bias, Time Lag and Snell Correction sliders set the values; a
+slider's range moves when it reaches an end. Dismiss closes the window.
+
+.SH DIFFERENCES FROM MBEDITVIZ
+The program name in lock files and edit save files is mbeditviz-qt.
+
+In the 3D soundings window the Mouse menu works as the mouse mode buttons,
+and the Info text replaces the bias sliders while it is shown, as in
+\fBmbeditviz\fP.
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbeditviz\fP(1), \fBmbgrdviz-qt\fP(1), \fBmbedit-qt\fP(1),
+\fBmbprocess\fP(1), \fBmbset\fP(1)
+
+.SH BUGS
+The Shoal Bias gridding algorithm gives an empty grid, in \fBmbeditviz\fP
+too. Only tested on macOS so far.

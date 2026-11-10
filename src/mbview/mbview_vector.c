@@ -45,6 +45,7 @@
 #include <windows.h>
 #endif
 
+#ifndef MBVIEW_NO_MOTIF
 #include <X11/StringDefs.h>
 #include <X11/cursorfont.h>
 #include <Xm/Xm.h>
@@ -58,20 +59,22 @@
 #include <Xm/PushB.h>
 #include <Xm/Separator.h>
 #include <Xm/List.h>
+#else
+#include "mbv_xtypes.h"
+#endif
 #include "MB3DView.h"
 #include "MB3DSiteList.h"
 #include "MB3DRouteList.h"
 #include "MB3DNavList.h"
 
-#include <GL/gl.h>
-#include <GL/glu.h>
-#ifndef WIN32
-#include <GL/glx.h>
-#endif
+#include "mbv_gl.h"
+#ifndef MBVIEW_NO_MOTIF
 #include "mb_glwdrawa.h"
+#endif
 
 #include "mbview.h"
 #include "mbviewprivate.h"
+#include "mbv_ui.h"
 
 /*------------------------------------------------------------------------------*/
 int mbview_getvectorcount(int verbose, size_t instance, int *nvector, int *error) {
@@ -533,7 +536,7 @@ int mbview_pick_vector_select(size_t instance, int select, int which, int xpixel
 			data->pickinfo_mode = data->pick_type;
 			shared.shareddata.vector_selected = MBV_SELECT_NONE;
 			shared.shareddata.vector_point_selected = MBV_SELECT_NONE;
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 	}
 
@@ -541,7 +544,7 @@ int mbview_pick_vector_select(size_t instance, int select, int which, int xpixel
 	else {
 		shared.shareddata.vector_selected = MBV_SELECT_NONE;
 		shared.shareddata.vector_point_selected = MBV_SELECT_NONE;
-		XBell(view->dpy, 100);
+		mbv_ui_bell(instance);
 		for (int i = 0; i < shared.shareddata.nvector; i++) {
 			for (int j = 0; j < shared.shareddata.vectors[i].npoints; j++) {
 				shared.shareddata.vectors[i].vectorpts[j].selected = false;

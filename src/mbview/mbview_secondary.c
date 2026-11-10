@@ -49,6 +49,7 @@
 #include <windows.h>
 #endif
 
+#ifndef MBVIEW_NO_MOTIF
 #include <X11/StringDefs.h>
 #include <X11/cursorfont.h>
 #include <Xm/Xm.h>
@@ -63,22 +64,23 @@
 #include <Xm/TextF.h>
 #include <Xm/Separator.h>
 #include <Xm/ToggleB.h>
+#else
+#include "mbv_xtypes.h"
+#endif
 #include "MB3DView.h"
 #include "MB3DSiteList.h"
 #include "MB3DRouteList.h"
 #include "MB3DNavList.h"
 
-#include <GL/gl.h>
-#include <GL/glu.h>
-#ifndef WIN32
-#include <GL/glx.h>
-#endif
+#include "mbv_gl.h"
+#ifndef MBVIEW_NO_MOTIF
 #include "mb_glwdrawa.h"
+#endif
 
 #include "mbview.h"
 #include "mbviewprivate.h"
+#include "mbv_ui.h"
 
-static char value_text[MB_PATH_MAXLINE];
 
 /*------------------------------------------------------------------------------*/
 int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_projection_mode, char *secondary_grid_projection_id,
@@ -316,31 +318,8 @@ int mbview_setsecondarycolortable(int verbose, size_t instance, int secondary_co
 	data->overlay_shade_center = overlay_shade_center;
 	data->overlay_shade_mode = overlay_shade_mode;
 
-	/* set secondary color control widgets if managed */
-	if (XtIsManaged(view->mb3dview.mbview_textField_overlaymin)) {
-		snprintf(value_text, sizeof(value_text), "%g", data->secondary_colortable_min);
-		XmTextFieldSetString(view->mb3dview.mbview_textField_overlaymin, value_text);
-		snprintf(value_text, sizeof(value_text), "%g", data->secondary_colortable_max);
-		XmTextFieldSetString(view->mb3dview.mbview_textField_overlaymax, value_text);
-		if (data->secondary_colortable_mode == MBV_COLORTABLE_NORMAL) {
-			XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_overlay_ctoh, TRUE, TRUE);
-		}
-		else {
-			XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_overlay_htoc, TRUE, TRUE);
-		}
-	}
-	if (XtIsManaged(view->mb3dview.mbview_textField_overlay_amp)) {
-		snprintf(value_text, sizeof(value_text), "%g", data->overlay_shade_magnitude);
-		XmTextFieldSetString(view->mb3dview.mbview_textField_overlay_amp, value_text);
-		snprintf(value_text, sizeof(value_text), "%g", data->overlay_shade_center);
-		XmTextFieldSetString(view->mb3dview.mbview_textField_overlay_center, value_text);
-		if (data->overlay_shade_mode == MBV_COLORTABLE_NORMAL) {
-			XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_overlay_shade_ctoh, TRUE, TRUE);
-		}
-		else {
-			XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_overlay_shade_htoc, TRUE, TRUE);
-		}
-	}
+	/* set secondary color control widgets */
+	mbv_ui_secondary_colortable_changed(instance);
 
 	const int status = MB_SUCCESS;
 
@@ -373,27 +352,7 @@ int mbview_setsecondaryname(int verbose, size_t instance, char *name, int *error
 	// struct mbview_struct *data = &(view->data);
 
 	/* set secondary grid labels */
-	if (XtIsManaged(view->mb3dview.mbview_toggleButton_data_secondary)) {
-		Boolean argok = False;
-		Cardinal ac = 0;
-		XmString tmp0 = (XmString)BX_CONVERT(view->mb3dview.mbview_toggleButton_data_secondary, (char *)name, XmRXmString, 0, &argok);
-		Arg args[256];
-		XtSetArg(args[ac], XmNlabelString, tmp0);
-		if (argok)
-			ac++;
-		XtSetValues(view->mb3dview.mbview_toggleButton_data_secondary, args, ac);
-		XmStringFree((XmString)tmp0);
-
-		ac = 0;
-		snprintf(value_text, sizeof(value_text), "Shading by %s", name);
-		tmp0 = (XmString)BX_CONVERT(view->mb3dview.mbview_toggleButton_overlay_secondary, (char *)value_text, XmRXmString, 0,
-		                            &argok);
-		XtSetArg(args[ac], XmNlabelString, tmp0);
-		if (argok)
-			ac++;
-		XtSetValues(view->mb3dview.mbview_toggleButton_overlay_secondary, args, ac);
-		XmStringFree((XmString)tmp0);
-	}
+	mbv_ui_secondary_name_changed(instance, name);
 
 	const int status = MB_SUCCESS;
 

@@ -48,6 +48,7 @@
 #include <windows.h>
 #endif
 
+#ifndef MBVIEW_NO_MOTIF
 #include <X11/StringDefs.h>
 #include <X11/cursorfont.h>
 #include <Xm/Xm.h>
@@ -60,20 +61,22 @@
 #include <Xm/CascadeB.h>
 #include <Xm/PushB.h>
 #include <Xm/Separator.h>
+#else
+#include "mbv_xtypes.h"
+#endif
 #include "MB3DView.h"
 #include "MB3DSiteList.h"
 #include "MB3DRouteList.h"
 #include "MB3DNavList.h"
 
-#include <GL/gl.h>
-#include <GL/glu.h>
-#ifndef WIN32
-#include <GL/glx.h>
-#endif
+#include "mbv_gl.h"
+#ifndef MBVIEW_NO_MOTIF
 #include "mb_glwdrawa.h"
+#endif
 
 #include "mbview.h"
 #include "mbviewprivate.h"
+#include "mbv_ui.h"
 
 /*------------------------------------------------------------------------------*/
 int mbview_clearpicks(size_t instance) {
@@ -338,10 +341,10 @@ int mbview_pick(size_t instance, int which, int xpixel, int ypixel) {
 		if (which == MBV_PICK_DOWN) {
 			data->pickinfo_mode = MBV_PICK_NONE;
 			data->pick_type = MBV_PICK_NONE;
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 		else if (which == MBV_PICK_MOVE) {
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 	}
 
@@ -1216,7 +1219,7 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 		/* ignore an identical pair of points */
 		if (found && data->region.cornerpoints[3].xgrid == xgrid && data->region.cornerpoints[3].ygrid == ygrid) {
 			data->region_type = MBV_REGION_ONEPOINT;
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 
 		/* use any good pair of points */
@@ -1234,7 +1237,7 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 			data->region.cornerpoints[0].zdisplay = zdisplay;
 		} else /* if (!found) */ {
 			/* ignore a bad point */
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 	}
 
@@ -1248,7 +1251,7 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 		/* ignore an identical pair of points */
 		if (found && data->region.cornerpoints[2].xgrid == xgrid && data->region.cornerpoints[2].ygrid == ygrid) {
 			data->region_type = MBV_REGION_ONEPOINT;
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 
 		/* use any good pair of points */
@@ -1266,7 +1269,7 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 			data->region.cornerpoints[1].zdisplay = zdisplay;
 		} else /* if (!found) */ {
 			/* ignore a bad point */
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 	}
 
@@ -1280,7 +1283,7 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 		/* ignore an identical pair of points */
 		if (found && data->region.cornerpoints[1].xgrid == xgrid && data->region.cornerpoints[1].ygrid == ygrid) {
 			data->region_type = MBV_REGION_ONEPOINT;
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 
 		/* use any good pair of points */
@@ -1298,7 +1301,7 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 			data->region.cornerpoints[2].zdisplay = zdisplay;
 		} else /* if (!found) */ {
 			/* ignore a bad point */
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 	}
 
@@ -1312,7 +1315,7 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 		/* ignore an identical pair of points */
 		if (found && data->region.cornerpoints[0].xgrid == xgrid && data->region.cornerpoints[0].ygrid == ygrid) {
 			data->region_type = MBV_REGION_ONEPOINT;
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 
 		/* use any good pair of points */
@@ -1330,7 +1333,7 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 			data->region.cornerpoints[3].zdisplay = zdisplay;
 		} else /* if (!found) */ {
 			/* ignore a bad point */
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 	}
 
@@ -1623,7 +1626,7 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 		if (found && data->area.endpoints[1].xgrid == xgrid && data->area.endpoints[1].ygrid == ygrid) {
 			data->area_type = MBV_AREA_ONEPOINT;
 			data->area_pickendpoint = MBV_AREA_PICKENDPOINT0;
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 
 		/* use any good pair of points */
@@ -1641,7 +1644,7 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 			data->area.endpoints[0].zdisplay = zdisplay;
 		} else /* if (!found) */ {
 			/* ignore a bad point */
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 	}
 
@@ -1658,7 +1661,7 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 		if (found && data->area.endpoints[0].xgrid == xgrid && data->area.endpoints[0].ygrid == ygrid) {
 			data->area_type = MBV_AREA_ONEPOINT;
 			data->area_pickendpoint = MBV_AREA_PICKENDPOINT1;
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 
 		/* use any good pair of points */
@@ -1676,7 +1679,7 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 			data->area.endpoints[1].zdisplay = zdisplay;
 		} else /* if (!found) */ {
 			/* ignore a bad point */
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 	}
 

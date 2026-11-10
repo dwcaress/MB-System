@@ -48,6 +48,7 @@
 #include <windows.h>
 #endif
 
+#ifndef MBVIEW_NO_MOTIF
 #include <X11/StringDefs.h>
 #include <X11/cursorfont.h>
 #include <Xm/Xm.h>
@@ -60,98 +61,26 @@
 #include <Xm/CascadeB.h>
 #include <Xm/PushB.h>
 #include <Xm/Separator.h>
+#else
+#include "mbv_xtypes.h"
+#endif
 #include "MB3DView.h"
 #include "MB3DSiteList.h"
 #include "MB3DRouteList.h"
 #include "MB3DNavList.h"
 
-#include <GL/gl.h>
-#include <GL/glu.h>
-#ifndef WIN32
-#include <GL/glx.h>
-#endif
+#include "mbv_gl.h"
+#ifndef MBVIEW_NO_MOTIF
 #include "mb_glwdrawa.h"
+#endif
 
 #include "mbview.h"
 #include "mbviewprivate.h"
+#include "mbv_render.h"
 
 // #define MBV_DEBUG_GLX 1
 // #define MBV_GET_GLX_ERRORS 1
 // #define MBV_DEBUG_TIMING
-
-/*------------------------------------------------------------------------------*/
-/* Diagnostic: report - unconditionally, to stderr - what MB-System believes
-    the OpenGL drawing area's size is (data->width/height) versus what X11
-    and GLX/Mesa actually report for the glwmda window and its parent
-    drawingArea widget: their sizes, their positions relative to their
-    parent, their absolute on-screen positions, the GLX drawable size Mesa
-    itself reports, and the OpenGL viewport currently in effect. Used to
-    localize a rendered-image/pick offset (such as the one seen with some
-    Mesa versions on macOS) to a specific layer: Xt/Motif widget geometry,
-    the X11 window tree, the GLX drawable, or the GL viewport state. */
-void mbview_debug_glgeometry(size_t instance, const char *tag) {
-	if (mbv_verbose <= 0)
-		return;
-
-	struct mbview_world_struct *view = &(mbviews[instance]);
-	struct mbview_struct *data = &(view->data);
-
-	fprintf(stderr, "MBVIEW GEOMETRY [%s] instance:%zu data->width:%d data->height:%d\n", tag, instance, data->width,
-	        data->height);
-
-	if (!view->glx_init || !XtIsRealized(view->glwmda)) {
-		fprintf(stderr, "MBVIEW GEOMETRY [%s] glwmda not realized/initialized yet\n", tag);
-		return;
-	}
-
-	Window root;
-	int x, y;
-	unsigned int uwidth, uheight, border, depth;
-	Window child;
-
-	if (XGetGeometry(view->dpy, XtWindow(view->glwmda), &root, &x, &y, &uwidth, &uheight, &border, &depth)) {
-		int abs_x = 0, abs_y = 0;
-		XTranslateCoordinates(view->dpy, XtWindow(view->glwmda), root, 0, 0, &abs_x, &abs_y, &child);
-		fprintf(stderr,
-		        "MBVIEW GEOMETRY [%s] glwmda X window: local-to-parent x:%d y:%d  w:%u h:%u border:%u depth:%u  "
-		        "screen-absolute x:%d y:%d\n",
-		        tag, x, y, uwidth, uheight, border, depth, abs_x, abs_y);
-	}
-	else {
-		fprintf(stderr, "MBVIEW GEOMETRY [%s] XGetGeometry failed for glwmda window\n", tag);
-	}
-
-	if (XGetGeometry(view->dpy, XtWindow(view->mb3dview.mbview_drawingArea_mbview), &root, &x, &y, &uwidth, &uheight, &border,
-	                  &depth)) {
-		int abs_x = 0, abs_y = 0;
-		XTranslateCoordinates(view->dpy, XtWindow(view->mb3dview.mbview_drawingArea_mbview), root, 0, 0, &abs_x, &abs_y,
-		                       &child);
-		fprintf(stderr,
-		        "MBVIEW GEOMETRY [%s] drawingArea X window: local-to-parent x:%d y:%d  w:%u h:%u border:%u depth:%u  "
-		        "screen-absolute x:%d y:%d\n",
-		        tag, x, y, uwidth, uheight, border, depth, abs_x, abs_y);
-	}
-	else {
-		fprintf(stderr, "MBVIEW GEOMETRY [%s] XGetGeometry failed for drawingArea window\n", tag);
-	}
-
-#if defined(GLX_VERSION_1_3)
-	{
-		unsigned int glxwidth = 0, glxheight = 0;
-		glXQueryDrawable(view->dpy, XtWindow(view->glwmda), GLX_WIDTH, &glxwidth);
-		glXQueryDrawable(view->dpy, XtWindow(view->glwmda), GLX_HEIGHT, &glxheight);
-		fprintf(stderr, "MBVIEW GEOMETRY [%s] GLX drawable (Mesa's own idea of the render-target size): w:%u h:%u\n", tag,
-		        glxwidth, glxheight);
-	}
-#endif
-
-	{
-		GLint viewport[4] = {-1, -1, -1, -1};
-		glGetIntegerv(GL_VIEWPORT, viewport);
-		fprintf(stderr, "MBVIEW GEOMETRY [%s] current GL_VIEWPORT: x:%d y:%d w:%d h:%d\n", tag, viewport[0], viewport[1],
-		        viewport[2], viewport[3]);
-	}
-}
 
 /*------------------------------------------------------------------------------*/
 int mbview_reset_glx(size_t instance) {
@@ -180,7 +109,7 @@ int mbview_reset_glx(size_t instance) {
 		fprintf(stderr, "%s:%d:%s instance:%zu glXDestroyContext(%p,%lu,%p)\n", __FILE__, __LINE__, (char *) __FUNCTION__, instance,
 		        view->dpy, XtWindow(view->glwmda), view->glx_context);
 #endif
-		glXDestroyContext(view->dpy, view->glx_context);
+		mbv_render_context_destroy(MBV_RENDER_MAP, instance);
 		view->glx_init = false;
 
 #ifdef MBV_GET_GLX_ERRORS
@@ -188,24 +117,13 @@ int mbview_reset_glx(size_t instance) {
 #endif
 	}
 
-  Cardinal ac;
-  Arg args[256];
-
 	/* set up a new opengl context */
-	ac = 0;
-	XtSetArg(args[ac], mbGLwNvisualInfo, &(view->vi));
-	ac++;
-	XtGetValues(view->glwmda, args, ac);
-#ifdef MBV_DEBUG_GLX
-	fprintf(stderr, "%s:%d:%s instance:%zu glXCreateContext(%p,%p)\n", __FILE__, __LINE__, (char *) __FUNCTION__, instance, view->dpy,
-	        view->vi);
-#endif
-	view->glx_context = glXCreateContext(view->dpy, view->vi, NULL, GL_TRUE);
+	mbv_render_context_create(MBV_RENDER_MAP, instance);
 #ifdef MBV_DEBUG_GLX
 	fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, (char *) __FUNCTION__, instance, view->dpy,
 	        XtWindow(view->glwmda), view->glx_context);
 #endif
-	glXMakeCurrent(view->dpy, XtWindow(view->glwmda), view->glx_context);
+	mbv_render_make_current(MBV_RENDER_MAP, instance);
 	view->glx_init = true;
 	glViewport(0, 0, data->width, data->height);
 	view->aspect_ratio = ((float)data->width) / ((float)data->height);
@@ -462,7 +380,7 @@ int mbview_drawdata(size_t instance, int rez) {
           // - somehow the color grids are being written or overwritten incorrectly
           // before.
           // Note 24 October 2026: the likely cause was the background color
-          // work function (do_mbview_workfunction in mbview_callbacks.c), which
+          // work function (do_mbview_workfunction in mbv_core.c), which
           // computed the column index as k / primary_n_columns instead of
           // k / primary_n_rows, so on non-square grids it colored cells with the
           // secondary value of the wrong location and marked them done. That is
@@ -510,7 +428,7 @@ int mbview_drawdata(size_t instance, int rez) {
           // - somehow the color grids are being written or overwritten incorrectly
           // before.
           // Note 24 October 2026: the likely cause was the background color
-          // work function (do_mbview_workfunction in mbview_callbacks.c), which
+          // work function (do_mbview_workfunction in mbv_core.c), which
           // computed the column index as k / primary_n_columns instead of
           // k / primary_n_rows, so on non-square grids it colored cells with the
           // secondary value of the wrong location and marked them done. That is
@@ -950,8 +868,9 @@ int mbview_plot(size_t instance, int rez) {
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
 
-	/* only plot if this view is still active */
-	if (view->glx_init) {
+	/* only plot if this view is still active, and if the renderer does not
+	   draw later by itself */
+	if (view->glx_init && !mbv_render_defer_draw(MBV_RENDER_MAP, instance, rez)) {
 
 #ifdef MBV_DEBUG_TIMING
 		struct timespec starttime;
@@ -963,7 +882,7 @@ int mbview_plot(size_t instance, int rez) {
 		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, (char *) __FUNCTION__, instance,
 		        view->dpy, XtWindow(view->glwmda), view->glx_context);
 #endif
-		glXMakeCurrent(view->dpy, XtWindow(view->glwmda), view->glx_context);
+		mbv_render_make_current(MBV_RENDER_MAP, instance);
 
 #ifdef MBV_GET_GLX_ERRORS
 		mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
@@ -1077,7 +996,7 @@ int mbview_plot(size_t instance, int rez) {
 			fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, (char *) __FUNCTION__, instance,
 			        view->dpy, XtWindow(view->glwmda), view->glx_context);
 #endif
-			glXMakeCurrent(view->dpy, XtWindow(view->glwmda), view->glx_context);
+			mbv_render_make_current(MBV_RENDER_MAP, instance);
 
 #ifdef MBV_GET_GLX_ERRORS
 			mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
@@ -1088,7 +1007,7 @@ int mbview_plot(size_t instance, int rez) {
 			fprintf(stderr, "%s:%d:%s instance:%zu glXSwapBuffers(%p,%lu)\n", __FILE__, __LINE__, (char *) __FUNCTION__, instance,
 			        view->dpy, XtWindow(view->glwmda));
 #endif
-			glXSwapBuffers(view->dpy, XtWindow(view->glwmda));
+			mbv_render_present(MBV_RENDER_MAP, instance);
 #ifdef MBV_GET_GLX_ERRORS
 			mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
@@ -1295,7 +1214,7 @@ int mbview_findpointrez(size_t instance, int rez, int xpixel, int ypixel, int ij
 		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, (char *) __FUNCTION__, instance,
 		        view->dpy, XtWindow(view->glwmda), view->glx_context);
 #endif
-		glXMakeCurrent(view->dpy, XtWindow(view->glwmda), view->glx_context);
+		mbv_render_make_current(MBV_RENDER_MAP, instance);
 
 if (rez <= MBV_REZ_LOW)
 //fprintf(stderr,"\nmbview_findpointrez: instance:%zu point:%d %d  bounds:%d %d %d %d\n",
@@ -1453,7 +1372,7 @@ data->primary_x[m], data->primary_y[m], data->primary_z[m]);*/
 		glDisable(GL_DEPTH_TEST);
 
 		/* now read the color at the pick point */
-		glReadBuffer(GL_BACK);
+		mbv_render_readback_begin(MBV_RENDER_MAP, instance);
 		float rgba[4];
 /*for (int iii=0; iii<1000; iii++) {
 for (int jjj=0; jjj<1000; jjj++) {
@@ -1465,7 +1384,7 @@ iii, jjj, rgba[0], rgba[1], rgba[2], rgba[3]);
 
 
 		glReadPixels(xpixel, ypixel, 1, 1, GL_RGBA, GL_FLOAT, rgba);
-		glReadBuffer(GL_FRONT);
+		mbv_render_readback_end(MBV_RENDER_MAP, instance);
 
 /*if (rez <= MBV_REZ_LOW)
 fprintf(stderr, "%s:%d:%s: rgba: %f %f %f %f\n",
@@ -1571,7 +1490,7 @@ int mbview_viewbounds(size_t instance) {
 		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, (char *) __FUNCTION__, instance,
 		        view->dpy, XtWindow(view->glwmda), view->glx_context);
 #endif
-		glXMakeCurrent(view->dpy, XtWindow(view->glwmda), view->glx_context);
+		mbv_render_make_current(MBV_RENDER_MAP, instance);
 
 #ifdef MBV_GET_GLX_ERRORS
 		mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
@@ -1775,7 +1694,7 @@ int mbview_viewbounds(size_t instance) {
 			glDisable(GL_DEPTH_TEST);
 
 			/* now read the color at a number of points in the screen */
-			glReadBuffer(GL_BACK);
+			mbv_render_readback_begin(MBV_RENDER_MAP, instance);
 			found = false;
 			data->viewbounds[0] = 0;
 			data->viewbounds[1] = data->primary_n_columns - 1;
@@ -1847,7 +1766,7 @@ int mbview_viewbounds(size_t instance) {
 			data->viewbounds[3] = MIN(data->viewbounds[3] + stride, data->primary_n_rows - 1);
 
 			/* reset buffer mode */
-			glReadBuffer(GL_FRONT);
+			mbv_render_readback_end(MBV_RENDER_MAP, instance);
 		}
 /*fprintf(stderr,"data->viewbounds: %d %d %d %d\n",
 data->viewbounds[0], data->viewbounds[1], data->viewbounds[2], data->viewbounds[3]);*/
