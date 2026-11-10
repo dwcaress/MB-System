@@ -46,13 +46,13 @@
 #include <QImage>
 #include <QString>
 
-#include "MainWindow.h"
 #include "mb_define.h"
 #include "mb_status.h"
 #include "wcd_data.h"
 #include "wcd_dump.h"
 #include "wcd_plot.h"
 #include "wcd_scene.h"
+#include "wcd_window.h"
 
 constexpr char program_name[] = "MBWCDVIEW";
 constexpr char help_message[] =
@@ -195,11 +195,11 @@ int main(int argc, char **argv) {
     return MB_ERROR_NO_ERROR;
   }
 
-  MainWindow window;
+  wcd::WaterColumnWindow window;
   window.show();
   if (!input.empty()) {
-    window.openFile(QString::fromStdString(input));
-    window.showPing(ping);
+    window.editor()->openFile(QString::fromStdString(input));
+    window.editor()->showPing(ping);
   }
   return app.exec();
 }
