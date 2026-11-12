@@ -1253,13 +1253,13 @@ int main(int argc, char **argv) {
 		}
 		if (status == MB_SUCCESS)
 			status =
-			    mb_platform_set_sensor_offset(verbose, (void *)platform, 0, 0, multibeam_offset_mode, mbtransmit_offset_x,
-			                                  mbtransmit_offset_y, mbtransmit_offset_z, multibeam_offset_mode,
+			    mb_platform_set_sensor_offset(verbose, (void *)platform, 0, 0, mbtransmit_offset_x,
+			                                  mbtransmit_offset_y, mbtransmit_offset_z,
 			                                  mbtransmit_offset_heading, mbtransmit_offset_roll, mbtransmit_offset_pitch, &error);
 		if (status == MB_SUCCESS)
 			status =
-			    mb_platform_set_sensor_offset(verbose, (void *)platform, 0, 1, multibeam_offset_mode, mbreceive_offset_x,
-			                                  mbreceive_offset_y, mbreceive_offset_z, multibeam_offset_mode,
+			    mb_platform_set_sensor_offset(verbose, (void *)platform, 0, 1, mbreceive_offset_x,
+			                                  mbreceive_offset_y, mbreceive_offset_z,
 			                                  mbreceive_offset_heading, mbreceive_offset_roll, mbreceive_offset_pitch, &error);
 
 		/* set sensor 1 (position sensor) */
@@ -1268,7 +1268,7 @@ int main(int argc, char **argv) {
 			                                ntimelag, &error);
 		if (status == MB_SUCCESS)
 			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 1, 0, position_offset_x,
-			                                       position_offset_y, position_offset_z, false, 0.0, 0.0, 0.0, &error);
+			                                       position_offset_y, position_offset_z, 0.0, 0.0, 0.0, &error);
 		if (status == MB_SUCCESS)
 			status = mb_platform_set_sensor_timelatency(verbose, (void *)platform, 1, timelagmode, timelagconstant, ntimelag,
 			                                            timelag_time_d, timelag_model, &error);
@@ -1278,8 +1278,8 @@ int main(int argc, char **argv) {
 			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_PRESSURE, nullptr, nullptr, nullptr, 0, 0, 1,
 			                                ntimelag, &error);
 		if (status == MB_SUCCESS)
-			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 2, 0, depth_offset_mode, depth_offset_x,
-			                                       depth_offset_y, depth_offset_z, false, 0.0, 0.0, 0.0, &error);
+			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 2, 0, depth_offset_x,
+			                                       depth_offset_y, depth_offset_z, 0.0, 0.0, 0.0, &error);
 		if (status == MB_SUCCESS)
 			status = mb_platform_set_sensor_timelatency(verbose, (void *)platform, 2, timelagmode, timelagconstant, ntimelag,
 			                                            timelag_time_d, timelag_model, &error);
@@ -1289,7 +1289,7 @@ int main(int argc, char **argv) {
 			status = mb_platform_add_sensor(verbose, (void *)platform, MB_SENSOR_TYPE_COMPASS, nullptr, nullptr, nullptr, 0, 0, 1,
 			                                ntimelag, &error);
 		if (status == MB_SUCCESS)
-			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 3, 0, false, 0.0, 0.0, 0.0, heading_offset_mode,
+			status = mb_platform_set_sensor_offset(verbose, (void *)platform, 3, 0, 0.0, 0.0, 0.0,
 			                                       heading_offset_heading, heading_offset_roll, heading_offset_pitch, &error);
 		if (status == MB_SUCCESS)
 			status = mb_platform_set_sensor_timelatency(verbose, (void *)platform, 3, timelagmode, timelagconstant, ntimelag,
@@ -1301,7 +1301,7 @@ int main(int argc, char **argv) {
 			                                &error);
 		if (status == MB_SUCCESS)
 			status =
-			    mb_platform_set_sensor_offset(verbose, (void *)platform, 4, 0, false, 0.0, 0.0, 0.0, rollpitch_offset_mode,
+			    mb_platform_set_sensor_offset(verbose, (void *)platform, 4, 0, 0.0, 0.0, 0.0,
 			                                  rollpitch_offset_heading, rollpitch_offset_roll, rollpitch_offset_pitch, &error);
 		if (status == MB_SUCCESS)
 			status = mb_platform_set_sensor_timelatency(verbose, (void *)platform, 4, timelagmode, timelagconstant, ntimelag,

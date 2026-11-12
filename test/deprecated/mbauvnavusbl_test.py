@@ -44,7 +44,7 @@ class MbauvnavusblTest(unittest.TestCase):
     self.assertIn('-Uusblfile', output)
     self.assertIn('dbg2', output)
     self.assertIn('lonflip', output)
-    self.assertIn('usbl format:', output)
+    self.assertIn('usbl file:', output)
 
   # TODO(schwehr): Add tests of actual usage.
 

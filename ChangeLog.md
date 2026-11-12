@@ -106,6 +106,14 @@ minimum altitude, rejects invalid options and files with more than one route,
 handles filenames with spaces, and prints behavior messages only with -V. The
 man page was updated to match.
 
+Program mb7kpreprocess (src/deprecated/mb7kpreprocess.cc): updated calls to
+mb_platform_set_sensor_offset() to its current signature, fixing the build when
+deprecated programs are enabled.
+
+Test mbauvnavusbl_test (test/deprecated/mbauvnavusbl_test.py): updated an
+assertion that still expected the "usbl format" debug output removed in
+5.8.3beta21.
+
 The above work was done with the assistance of the AI coding assistant Claude Opus 5.5
 (Anthropic, model claude-opus-5-5), operating as Claude Code under developer
 supervision and review.
