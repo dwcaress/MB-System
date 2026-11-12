@@ -1,4 +1,4 @@
-.TH mbnavadjustmerge 1 "7 September 2026" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavadjustmerge 1 "9 November 2026" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavadjustmerge\fP \- Command line tool to create and modify MBnavadjust
 projects, including creating new projects, importing swath data, changing
@@ -169,6 +169,16 @@ Version 5.0
 --unset-short-section-ties=min_length
 .br
 --skip-short-section-crossings=min_length
+.br
+--remove-short-sections=min_length
+.br
+--remove-file=file
+.br
+--remove-survey=survey
+.br
+--remake-mb166-files
+.br
+--fix-sensordepth
 .br
 --verbose
 .br
@@ -810,7 +820,20 @@ than \fImin_length\fP into the immediately prior section in the same file.
 .B \--remove-file=file
 This option removes the specified file (identified by its numerical id in
 the project) from the \fBMBnavadjust\fP project, along with all of its
-sections, crossings, and ties.
+sections, crossings, and ties. The ids of all later files shift down by one,
+and survey and block ids are renumbered so that they remain contiguous; the
+file that followed the removed file starts a new block. Commands are applied
+in the order given, so any later command on the same command line must use
+the new ids. The option may be given more than once.
+.TP
+.B \--remove-survey=survey
+This option removes all files of the specified survey (identified by its
+numerical id in the project, as shown in the \fBMBnavadjust\fP survey lists)
+from the project, along with all of their sections, crossings, and ties.
+A survey here is a group of files imported together (e.g. with
+\fB--import-as-survey\fP), not a continuity block. The ids of all later
+surveys and files shift down, and later commands on the same command line
+must use the new ids. The option may be given more than once.
 .TP
 .B \--remake-mb166-files
 This option causes \fBmbnavadjustmerge\fP to remake the navigation files inside

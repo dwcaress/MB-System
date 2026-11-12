@@ -1,4 +1,4 @@
-.TH mbm_route2mission 1 "7 September 2026" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_route2mission 1 "11 November 2026" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_route2mission\fP \- Macro to convert an \fBmbgrdviz\fP route file into an
 MBARI AUV mission script.
@@ -10,7 +10,7 @@ Version 5.0\fP
 \fBmbm_route2mission\fP \fB\-I\fP\fIroutefile\fP
 [\fB\-A\fP\fIaltmin/altabort[/altdesired[/altdesired2[/altdesired3]]]\fP
 \fB\-B\fP\fIbehavior1[/behavior2[/behavior3[/behavior4[/behavior5]]]]\fP \fB\-C\fP\fImissiontime\fP
-\fB\-D\fP\fIdepthconstant[/depthconstant2]\fP \fB\-E\fP\fIstarttime\fP
+\fB\-D\fP\fIdepthconstant[/depthconstant2[/depthlimit]]\fP \fB\-E\fP\fIstarttime\fP
 \fB\-F\fP\fIforwarddistance\fP \fB\-G\fP\fIsurfacewaypoint\fP
 \fB\-J\fP\fIdepthprofilefile\fP \fB\-K\fP\fIinsmode\fP \fB\-L\fP\fIapproachdepth\fP
 \fB\-M\fP\fI[sensorlist]\fP \fB\-N\fP[\fIspiraldescentaltitude\fP[\fI/mode\fP]] \fB\-O\fP\fImissionfile\fP
@@ -157,7 +157,9 @@ for the approach to each waypoint), 1 (WayPointDepth, in which each mission
 segment has both a starting and an ending depth specified, and the vehicle is
 commanded to fly a depth profile that is a linear ramp between the two
 depths), 2 (WayPointWall), or 3 (WayPointBottom); any other value is treated
-as 1 (WayPointDepth). Default: \fIbehavior1\fP = \fIbehavior2\fP = \fIbehavior3\fP
+as 1 (WayPointDepth). Mission segments that precede the first survey line
+waypoint use \fIbehavior1\fP; the approach to the first waypoint always uses
+WayPoint. Default: \fIbehavior1\fP = \fIbehavior2\fP = \fIbehavior3\fP
 = \fIbehavior4\fP = \fIbehavior5\fP = 1.
 .TP
 .B \-C
@@ -165,16 +167,25 @@ as 1 (WayPointDepth). Default: \fIbehavior1\fP = \fIbehavior2\fP = \fIbehavior3\
 .br
 Sets the maximum time allowed for the AUV mission. If the \fImissiontime\fP is
 exceeded, the AUV will transition to it's internal abort plan.
-Default: mission abort time calculated from mission parameters.
+Default: mission abort time calculated as 1.5 times the estimated mission
+duration, including the time for any ascents to the surface for GPS fixes
+requested with \fB\-G\fP. In either case the abort time is reduced if
+necessary so that it does not exceed the vehicle battery life less a
+safety margin and the final ascent time.
 .TP
 .B \-D
-\fIdepthconstant[/depthconstant2]\fP
+\fIdepthconstant[/depthconstant2[/depthlimit]]\fP
 .br
 Sets constant depth values that will be used between waypoints of
-typ START4 and END4 for \fIdepthconstant\fP and START5 and END5 for
+type START4 and END4 for \fIdepthconstant\fP and START5 and END5 for
 \fIdepthconstant2\fP. These are the waypoint types defined in
 \fBMBgrdviz\fP routes. While these waypoint types are active, the
-AUV is commanded to the specified constant depth value.
+AUV is commanded to the specified constant depth value. The optional
+\fIdepthlimit\fP sets the maximum depth that will be commanded anywhere
+in the mission. The program prints warnings (the first ten individually,
+then a total count) for mission points where the commanded depth leaves
+the vehicle closer to the bottom than \fIaltmin\fP.
+Default: \fIdepthconstant\fP = \fIdepthconstant2\fP = 50 m, \fIdepthlimit\fP = 5900 m.
 .TP
 .B \-E
 \fIstarttime\fP
@@ -197,7 +208,9 @@ fly at least \fIaltmin\fP above that depth.
 By default the AUV does not surface between the descent at the start and the ascent at the
 end of the mission. This option specifies a waypoint type at which the AUV will pause
 survey data collection, ascend to the surface, obtain positioning through GPS, descend,
-resume data collection, and then resume running the survey mission. The waypoint types
+resume data collection, and then resume running the survey mission. The AUV does
+not surface at the first or last waypoints of the route, since the mission
+already begins and ends at the surface. The waypoint types
 can be set while interactively editing a survey route using \fBmgrdviz\fP; 
 the options are:
 .br
@@ -224,14 +237,25 @@ of its operation and then exit immediately.
 Sets the filename of the input \fBmbgrdviz\fP route file.
 A route file specifies a desired survey route as a set of
 lines between waypoints. In addition to the waypoints, the file
-also includes the depth profiles along those lines.
+also includes the depth profiles along those lines. The route file must
+contain a single route; the program aborts if it finds more than one.
 .TP
 .B \-J
 \fIdepthprofilefile\fP
 .br
 Sets the filename of an input desired depth profile file. This is the depth
 profile that the vehicle should follow when flying the mission (as opposed to
-following the bottom at a particular altitude).
+following the bottom at a particular altitude). The first two lines of the
+file are treated as a header and skipped; each following line must contain
+five whitespace separated values:
+.br
+     depth altitude longitude latitude distance
+.br
+where \fIdepth\fP is the commanded vehicle depth (m, positive down) and
+\fIdistance\fP is the distance along the route (m). Each mission point is
+assigned the depth of the last profile point whose distance does not exceed
+the distance of the mission point. The \fIaltitude\fP, \fIlongitude\fP and
+\fIlatitude\fP values are read but not used.
 .TP
 .B \-K
 \fIinsmode\fP
@@ -287,11 +311,14 @@ behaviors.
 Sets the filename of the output MBARI AUV mission script.
 .TP
 .B \-P
-\fIlon/lat\fP
+\fIlon/lat\fP | \fIstartdistance\fP
 .br
 This sets the expected starting position (\fIlon\fP longitude
-and \fIlat\fP latitude) of the Mapping AUV so that the
-expected time to run to the first waypoint can be estimated. If neither
+and \fIlat\fP latitude) of the Mapping AUV, or alternatively the
+distance \fIstartdistance\fP in meters from the starting position to the first
+waypoint, so that the expected time to run to the first waypoint can be
+estimated using the \fIascentdescentspeed\fP (see \fB\-S\fP). If both \fB\-P\fP
+and \fB\-E\fP are given, \fB\-P\fP takes precedence. If neither
 the \fB\-P\fP or \fB\-E\fP options are specified, a default transit time of
 2000 seconds (with a floor of 600 seconds) is assumed.
 .TP
@@ -318,8 +345,8 @@ Default: \fItransmitpower\fP = 220, \fIreceivegain\fP = 75,
 This sets the commanded AUV speed(s) in meters/second. \fIsurveyspeed\fP is used
 while running survey lines, \fIascentdescentspeed\fP is used during ascent and
 descent (and to estimate the time to reach the first waypoint when \fB\-P\fP is
-used), and \fItransitspeed\fP is used while transiting between survey lines. If
-only \fIsurveyspeed\fP is given, it is also used for the other two speeds.
+used), and \fItransitspeed\fP is used while transiting between survey lines.
+Any speed that is not given keeps its default value.
 Default: \fIsurveyspeed\fP = \fIascentdescentspeed\fP = \fItransitspeed\fP = 1.5 m/s.
 .TP
 .B \-T
@@ -338,7 +365,10 @@ up earlier so the planned climb angle never exceed \fImaxclimbrate\fP.
 Default: \fImaxclimbrate\fP = 25 degrees.
 .TP
 .B \-V
-The \fB\-V\fP option causes \fBmbm_route2mission\fP to print out status messages.
+The \fB\-V\fP option causes \fBmbm_route2mission\fP to print out status messages,
+including a full mission summary and a list of the behaviors written to the
+mission script. Warnings (excessive climb slopes, planned altitudes below
+\fIaltmin\fP) are printed regardless of \fB\-V\fP.
 .TP
 .B \-W
 \fIwaypointspacing\fP
