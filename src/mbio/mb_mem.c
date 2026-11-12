@@ -407,10 +407,6 @@ int mb_realloc(int verbose, size_t size, void **ptr, int *error) {
     }
   }
 
-  /* assume success */
-  *error = MB_ERROR_NO_ERROR;
-  status = MB_SUCCESS;
-
   if (verbose >= 2 || mb_mem_debug) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return value:\n");
@@ -518,10 +514,6 @@ int mb_reallocd(int verbose, const char *sourcefile, int sourceline, size_t size
                 mb_alloc_sourcefile[i], mb_alloc_sourceline[i]);
     }
   }
-
-  /* assume success */
-  *error = MB_ERROR_NO_ERROR;
-  status = MB_SUCCESS;
 
   if (verbose >= 2 || mb_mem_debug) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
