@@ -761,6 +761,7 @@ int mbview_plotlow(size_t instance);
 int mbview_plotlowhigh(size_t instance);
 int mbview_plothigh(size_t instance);
 int mbview_plotfull(size_t instance);
+int mbview_camera(size_t instance, double projection[16], double modelview[16]);
 int mbview_plot(size_t instance, int rez);
 int mbview_findpoint(size_t instance, int xpixel, int ypixel, bool *found, double *xgrid, double *ygrid, double *xlon,
                      double *ylat, double *zdata, double *xdisplay, double *ydisplay, double *zdisplay);
