@@ -154,6 +154,19 @@ int main(int argc, char **argv) {
   CHECK(has_label(window, name));
   CHECK(has_label(window, QString("0 / %1").arg(last)));
   CHECK(!view->plot().data().across.empty());
+  {
+    /* the fill value is no data only before the first echo of a beam: synth_kmall starts every
+       beam with 2 fill samples (NFILL) and puts one more at sample 12 of beam 1 (INNER_FILL),
+       which is drawn with the lowest colour */
+    const wcd::PlotData &d = view->plot().data();
+    bool leading = d.nbeams > 1 && d.nsamples > 12;
+    for (int b = 0; leading && b < d.nbeams; b++)
+      leading = !std::isfinite(d.amplitude[(size_t)b * d.nsamples]) &&
+                !std::isfinite(d.amplitude[(size_t)b * d.nsamples + 1]) &&
+                std::isfinite(d.amplitude[(size_t)b * d.nsamples + 2]);
+    CHECK(leading);
+    CHECK(d.nsamples > 12 && std::fabs(d.amplitude[(size_t)d.nsamples + 12] + 94.0f) < 0.01f);
+  }
   CHECK(box(window, "Ray trace (SVP)")->isEnabled() && box(window, "Ray trace (SVP)")->isChecked());
   CHECK(spins[2]->value() == spins[2]->minimum() && spins[3]->value() == spins[3]->maximum());
   CHECK(spins[0]->value() == 0.0 && spins[1]->value() > 0.0);
