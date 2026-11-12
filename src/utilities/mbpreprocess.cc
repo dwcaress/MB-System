@@ -2647,12 +2647,16 @@ int main(int argc, char **argv) {
   		flipsign_roll = true;
   	if (sensor_rollpitch != nullptr && sensor_rollpitch->attitude_flipsign_pitch)
   		flipsign_pitch = true;
-		if (verbose > 0 && (flipsign_roll || flipsign_pitch)) {
+		if (verbose > 0) {
 			fprintf(stderr, "\n-----------------------------------------------\n");
 			if (flipsign_roll)
-				fprintf(stderr, "Flipping sign of roll\n");
+				fprintf(stderr, "Roll sign flipped\n");
+			else
+				fprintf(stderr, "Roll sign unchanged\n");
 			if (flipsign_pitch)
-				fprintf(stderr, "Flipping sign of pitch\n");
+				fprintf(stderr, "Pitch sign flipped\n");
+			else
+				fprintf(stderr, "Pitch sign unchanged\n");
 		}
 
 		/* roll */

@@ -21,6 +21,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.3beta29    November 11, 2026
 - Version 5.8.3beta28    November 3, 2026
 - Version 5.8.3beta27    November 3, 2026
 - Version 5.8.3beta26    November 1, 2026
@@ -82,6 +83,35 @@ or beta, are equally accessible as tarballs through the Github interface.
 - Version 5.8.1beta02    February 7, 2024
 - Version 5.8.1beta01    February 1, 2024
 - **Version 5.8.0          January 22, 2024**
+
+---
+
+#### 5.8.3beta29 (November 11, 2026)
+
+Program mbnavadjustmerge (src/mbnavadjust/mbnavadjustmerge.c): added the
+--remove-survey option, which removes all files of a survey from an MBnavadjust
+project. Fixed --remove-file so it can be given more than once. Removing a file
+now also keeps survey and block numbering, tie counts and the project's datalists
+consistent.
+
+Macro mbm_route2mission (src/macros/mbm_route2mission): fixed bugs in the
+generated MBARI AUV missions. The mission timeout now includes the time for
+surfacing GPS fixes (-G), so it no longer risks aborting the survey early. The
+magnetometer calibration turns are now only done for -N mode 2, four-value -R
+arguments no longer blank the multibeam settings, and malformed or misnumbered
+stopCamera, descend and delta_t behaviors are fixed. The distance to the first
+waypoint from -P now uses the correct latitude scaling, and -P can also give a
+distance. The macro now warns when commanded depths leave the vehicle below the
+minimum altitude, rejects invalid options and files with more than one route,
+handles filenames with spaces, and prints behavior messages only with -V. The
+man page was updated to match.
+
+The above work was done with the assistance of the AI coding assistant Claude Opus 5.5
+(Anthropic, model claude-opus-5-5), operating as Claude Code under developer
+supervision and review.
+
+Program mbpreprocess (src/utilities/mbpreprocess.cc): corrected informational print
+statements regarding pitch and roll sign flipping options.
 
 ---
 

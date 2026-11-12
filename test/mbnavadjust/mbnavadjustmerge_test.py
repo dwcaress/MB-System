@@ -17,6 +17,8 @@ class MbnavadjustmergeTest(unittest.TestCase):
     self.assertIn('Program mbnavadjustmerge', output)
     self.assertIn('merges two existing mbnavadjust projects', output)
     self.assertIn('usage: mbnavadjustmerge --input=project_path', output)
+    self.assertIn('--remove-file=file', output)
+    self.assertIn('--remove-survey=survey', output)
 
 
 if __name__ == '__main__':
