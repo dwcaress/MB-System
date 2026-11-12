@@ -52,15 +52,19 @@ bool build_scene(const Line &line, size_t i, int swath, const SceneOptions &opti
     return false;
   const WcPing &ping = line.wc.pings[i];
 
-  /* amplitudes of the swath, the fill value drawn as nothing */
+  /* amplitudes of the swath; the fill value is drawn as nothing before the first echo of
+     a beam (the near field), and later in the beam, where it is a weak echo clipped to the
+     lowest level, with the lowest colour */
   std::vector<int> beams;
   int nsamples = 0;
   line.wc.amplitudes(i, swath, beams, nsamples, data.amplitude);
   if (line.wc.has_fill) {
     const float fill = (float)line.wc.fill_value + 0.05f;
-    for (float &a : data.amplitude)
-      if (a <= fill)
-        a = std::numeric_limits<float>::quiet_NaN();
+    for (size_t b = 0; b < beams.size(); b++) {
+      float *a = &data.amplitude[b * (size_t)nsamples];
+      for (int k = 0; k < nsamples && a[k] <= fill; k++)
+        a[k] = std::numeric_limits<float>::quiet_NaN();
+    }
   }
   data.nbeams = (int)beams.size();
   data.nsamples = nsamples;

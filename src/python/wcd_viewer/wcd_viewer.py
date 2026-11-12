@@ -393,7 +393,10 @@ class MainWindow(QMainWindow):
             zlabel += " - ray traced" + ("" if j is not None else ", draft 0")
         amp = wc.amplitude.copy()
         if self.line.wc.fill_value is not None:
-            amp[amp <= self.line.wc.fill_value] = np.nan
+            # no data only before the first echo of a beam (the near field); later in the
+            # beam the fill value is a weak echo clipped to the lowest level
+            leading = np.logical_and.accumulate(amp <= self.line.wc.fill_value, axis=1)
+            amp[leading] = np.nan
         mask = (depth >= self.dmin.value()) & (depth <= self.dmax.value())
         amp[~mask] = np.nan
         valid = np.isfinite(amp)

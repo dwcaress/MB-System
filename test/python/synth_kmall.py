@@ -30,7 +30,9 @@ through MBIO can be computed exactly:
   its name is 1 s later, and its last ping has only fan 0 (file cut)
 - water column: sample rate FS, start sample START_SAMPLE in odd beams (0 in even
   beams), NSAMPLES samples, the first NFILL samples the fill value -128, the other
-  raw values ampl_raw(), one single raw value RARE_RAW (the lowest non-fill value)
+  raw values ampl_raw(), one single raw value RARE_RAW (the lowest non-fill value);
+  in the first water column ping, sample INNER_FILL of beam 1 of both fans is -128 too
+  (a weak echo clipped to the lowest level)
 - soundings: method amplitude in even beams, phase in odd beams; beam REJECTED of
   fan 0 rejected (detectionType 2), beam EXTRA of fan 0 an extra detection (1)
 - position records every 0.5 s in both files, moving north-east
@@ -48,6 +50,7 @@ FS = 20.0                 # Hz, water column sample rate
 NSAMPLES = 60
 START_SAMPLE = 3
 NFILL = 2
+INNER_FILL = 12
 RARE_RAW = -50
 TVG_OFFSET = 30           # dB
 LINE = "0001"
@@ -77,6 +80,8 @@ def detect_samples(b):
 def ampl_raw(ping, fan, b, k):
     """Raw amplitude (0.5 dB steps) of sample k of a beam; -128 = fill."""
     if k < NFILL:
+        return -128
+    if ping == PING0 + 1 and b == 1 and k == INNER_FILL:
         return -128
     if ping == PING0 + 1 and fan == 0 and b == 0 and k == NFILL:
         return RARE_RAW

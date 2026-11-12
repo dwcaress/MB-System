@@ -72,8 +72,10 @@ during the ping (heave, pitch, roll) is applied.
 The amplitudes are shown in dB. For Kongsberg data these are the logged values
 (0.5 dB steps) minus the gain offset (TVGoffset_dB), the display value defined by
 Kongsberg. In kmall data the lowest logged value (\-128, i.e. \-94 dB with a 30 dB
-offset) is a fill value when the next values are practically absent, and is then drawn
-as no data. In *.wcd and *.all data the amplitudes are the logged values minus the TVG
+offset) is a fill value when the next values are practically absent. It is then drawn
+as no data before the first echo of each beam (the near field), and later in the beam,
+where it is a weak echo clipped to the lowest level, with the lowest colour.
+In *.wcd and *.all data the amplitudes are the logged values minus the TVG
 offset C, and the lowest value is a valid level, weak samples clipped to it.
 
 The window has controls for the depth range, the amplitude range of the colour
