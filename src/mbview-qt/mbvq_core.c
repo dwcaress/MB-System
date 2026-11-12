@@ -237,6 +237,15 @@ void mbvq_c_resize(size_t instance, int width, int height) {
 
 /*------------------------------------------------------------------------------*/
 int mbvq_c_plot(size_t instance, int rez) {
+	/* The background work can colour grid nodes before the first drawing of a
+	   map has called mbview_projectdata(), from slopes and a scale that are not
+	   computed yet, and mbview_projectdata() clears only the z-scale. Forget
+	   those colours before the first drawing; the drawing and the background
+	   work colour the nodes again. */
+	const struct mbview_world_struct *view = &(mbviews[instance]);
+	if (!view->projected && view->lastdrawrez == MBV_REZ_NONE)
+		mbview_colorclear(instance);
+
 	if (rez == MBV_REZ_LOW)
 		return (mbview_plotlow(instance));
 	if (rez == MBV_REZ_HIGH)
