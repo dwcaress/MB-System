@@ -28,15 +28,21 @@
 #include <cmath>
 #include <limits>
 
+#include <QPainterPath>
+
+#ifdef MBWCD_HAVE_GL
 #include <QOffscreenSurface>
 #include <QOpenGLBuffer>
 #include <QOpenGLContext>
 #include <QOpenGLFramebufferObject>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLTexture>
-#include <QPainterPath>
+#endif
 
 #include "viridis.h"
+#ifdef MBWCD_HAVE_RHI
+#include "wcd_swath_rhi.h"
+#endif
 
 namespace wcd {
 
@@ -46,6 +52,7 @@ namespace {
 constexpr double MARGIN_LEFT = 72.0, MARGIN_RIGHT = 104.0, MARGIN_TOP = 16.0, MARGIN_BOTTOM = 46.0;
 constexpr double CAPTION_HEIGHT = 20.0;
 
+#ifdef MBWCD_HAVE_GL
 const char *vertex_shader =
     "#version 120\n"
     "attribute vec2 position;\n"
@@ -65,13 +72,7 @@ const char *fragment_shader =
     "void main() {\n"
     "  gl_FragColor = texture2D(lut, vec2(clamp(level, 0.0, 1.0) * 255.0 / 256.0 + 0.5 / 256.0, 0.5));\n"
     "}\n";
-
-QImage colormap_image() {
-  QImage lut(256, 1, QImage::Format_RGBA8888);
-  for (int i = 0; i < 256; i++)
-    lut.setPixelColor(i, 0, QColor(viridis_rgb[i][0], viridis_rgb[i][1], viridis_rgb[i][2]));
-  return lut;
-}
+#endif
 
 /* tick spacing 1, 2 or 5 x 10^n giving about n ticks over span */
 double tick_step(double span, int n) {
@@ -90,7 +91,25 @@ QString tick_label(double v, double step) {
 
 }  // namespace
 
+QImage colormap_image() {
+  QImage lut(256, 1, QImage::Format_RGBA8888);
+  for (int i = 0; i < 256; i++)
+    lut.setPixelColor(i, 0, QColor(viridis_rgb[i][0], viridis_rgb[i][1], viridis_rgb[i][2]));
+  return lut;
+}
+
+bool use_rhi() {
+#if defined(MBWCD_HAVE_RHI) && defined(MBWCD_HAVE_GL)
+  return qgetenv("MB_RENDERER") != "legacy-gl";
+#elif defined(MBWCD_HAVE_RHI)
+  return true;
+#else
+  return false;
+#endif
+}
+
 /*--------------------------------------------------------------------*/
+#ifdef MBWCD_HAVE_GL
 SwathGL::SwathGL() = default;
 SwathGL::~SwathGL() = default;
 
@@ -143,6 +162,7 @@ void SwathGL::draw(float sx, float ox, float sz, float oz, float vmin, float vma
   lut_->release();
   program_->release();
 }
+#endif
 
 /*--------------------------------------------------------------------*/
 void WcdPlot::setData(PlotData data) {
@@ -244,18 +264,30 @@ void WcdPlot::buildMesh(std::vector<float> &vertices, std::vector<unsigned int> 
   mesh_dirty_ = false;
 }
 
-void WcdPlot::drawGL(SwathGL &gl, const QSize &size, double dpr) {
+QRect WcdPlot::deviceViewport(const QSize &size, double dpr) const {
   const QRectF r = plotRect(size);
+  return QRect((int)std::lround(r.left() * dpr), (int)std::lround((size.height() - r.bottom()) * dpr),
+               (int)std::lround(r.width() * dpr), (int)std::lround(r.height() * dpr));
+}
+
+void WcdPlot::deviceTransform(float &sx, float &ox, float &sz, float &oz) const {
+  /* depth increases downward */
+  sx = (float)(2.0 / (view_x1_ - view_x0_));
+  ox = (float)(-1.0 - view_x0_ * sx);
+  sz = (float)(-2.0 / (view_z1_ - view_z0_));
+  oz = (float)(1.0 - view_z0_ * sz);
+}
+
+#ifdef MBWCD_HAVE_GL
+void WcdPlot::drawGL(SwathGL &gl, const QSize &size, double dpr) {
+  const QRect v = deviceViewport(size, dpr);
   QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-  f->glViewport((int)std::lround(r.left() * dpr), (int)std::lround((size.height() - r.bottom()) * dpr),
-                (int)std::lround(r.width() * dpr), (int)std::lround(r.height() * dpr));
-  /* data to normalized device coordinates: depth increases downward */
-  const float sx = (float)(2.0 / (view_x1_ - view_x0_));
-  const float ox = (float)(-1.0 - view_x0_ * sx);
-  const float sz = (float)(-2.0 / (view_z1_ - view_z0_));
-  const float oz = (float)(1.0 - view_z0_ * sz);
+  f->glViewport(v.x(), v.y(), v.width(), v.height());
+  float sx, ox, sz, oz;
+  deviceTransform(sx, ox, sz, oz);
   gl.draw(sx, ox, sz, oz, (float)vmin_, (float)vmax_);
 }
+#endif
 
 /*--------------------------------------------------------------------*/
 void WcdPlot::drawOverlay(QPainter &p, const QSize &size, const QString &caption) const {
@@ -348,11 +380,12 @@ void WcdPlot::drawOverlay(QPainter &p, const QSize &size, const QString &caption
 }
 
 /*--------------------------------------------------------------------*/
-QImage WcdPlot::render(const QSize &size, double scale, const QString &caption) const {
-  const QSize pixels(std::lround(size.width() * scale), std::lround(size.height() * scale));
-  QImage image(pixels, QImage::Format_ARGB32_Premultiplied);
-  image.fill(Qt::white);
+#ifdef MBWCD_HAVE_GL
+namespace {
 
+/* the swath of the plot into image with an OpenGL context of its own */
+void render_swath_gl(const WcdPlot &plot, const QSize &size, double scale, QImage &image) {
+  const QSize pixels = image.size();
   QOffscreenSurface surface;
   surface.create();
   QOpenGLContext context;
@@ -365,7 +398,7 @@ QImage WcdPlot::render(const QSize &size, double scale, const QString &caption) 
       QOpenGLFunctions *f = context.functions();
       f->glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
       f->glClear(GL_COLOR_BUFFER_BIT);
-      WcdPlot copy(*this);
+      WcdPlot copy(plot);
       std::vector<float> vertices;
       std::vector<unsigned int> indices;
       copy.buildMesh(vertices, indices);
@@ -379,6 +412,24 @@ QImage WcdPlot::render(const QSize &size, double scale, const QString &caption) 
     }
     context.doneCurrent();
   }
+}
+
+}  // namespace
+#endif
+
+QImage WcdPlot::render(const QSize &size, double scale, const QString &caption) const {
+  const QSize pixels(std::lround(size.width() * scale), std::lround(size.height() * scale));
+  QImage image(pixels, QImage::Format_ARGB32_Premultiplied);
+  image.fill(Qt::white);
+
+#ifdef MBWCD_HAVE_RHI
+  if (use_rhi() && !render_swath_rhi(*this, size, scale, image))
+    qWarning("mbwcdview: no QRhi for the image, so the water column is not drawn");
+#endif
+#ifdef MBWCD_HAVE_GL
+  if (!use_rhi())
+    render_swath_gl(*this, size, scale, image);
+#endif
   image.setDevicePixelRatio(scale);
   QPainter painter(&image);
   drawOverlay(painter, size, caption);

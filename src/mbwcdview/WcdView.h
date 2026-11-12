@@ -25,35 +25,40 @@
 #ifndef MBWCDVIEW_WCDVIEW_H
 #define MBWCDVIEW_WCDVIEW_H
 
-#include <memory>
-
-#include <QOpenGLWidget>
+#include <QWidget>
 
 #include "wcd_plot.h"
 
 namespace wcd {
 
-/* the water column swath plot in the window */
-class WcdView : public QOpenGLWidget {
+/* the widget that draws the swath: with QRhi (wcd_view_rhi.h) or with OpenGL (wcd_view_gl.h) */
+class SwathDrawing {
+ public:
+  virtual ~SwathDrawing() = default;
+  virtual void redraw() = 0;
+};
+
+/* the water column swath plot in the window: the plot and the widget that draws it,
+   with QRhi where it is built (unless MB_RENDERER=legacy-gl) and with OpenGL otherwise */
+class WcdView : public QWidget {
   Q_OBJECT
 
  public:
   explicit WcdView(QWidget *parent = nullptr);
   ~WcdView() override;
   wcd::WcdPlot &plot() { return plot_; }
+  /* draw again after the plot changed */
+  void redraw();
+  bool usesRhi() const { return rhi_; }
 
  signals:
   void clicked(double across, double depth);
 
- protected:
-  void initializeGL() override;
-  void paintGL() override;
-  void mousePressEvent(QMouseEvent *event) override;
-
  private:
-  void releaseGL();
   wcd::WcdPlot plot_;
-  std::unique_ptr<wcd::SwathGL> gl_;
+  QWidget *drawing_widget_ = nullptr;
+  SwathDrawing *drawing_ = nullptr;
+  bool rhi_ = false;
 };
 
 }  // namespace wcd
