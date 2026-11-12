@@ -215,6 +215,7 @@ class Session {
   Session &operator=(const Session &) = delete;
 
   /* set before opening a file */
+  std::string program_name = PROGRAM_NAME;  // written in lock files and edit save files
   int verbose = 0;
   int lonflip = 0;
   double bounds[4] = {-360.0, 360.0, -90.0, 90.0};
@@ -232,6 +233,8 @@ class Session {
   std::function<void(const std::string &)> on_progress;
   /* called after a save, once the file is unlocked (for -X) */
   std::function<void(const std::string &)> on_saved;
+  /* the messages of the session; they go to stderr if this is not set */
+  std::function<void(const std::string &)> on_log;
   /* the width of a text in the plot, in pixels */
   std::function<int(const char *)> text_width;
   int text_ascent = 11;
@@ -393,6 +396,7 @@ class Session {
   void layoutPingLabel(int iping, bool save);
   void error3(const std::string &a, const std::string &b, const std::string &c);
   void progress(const std::string &text);
+  void log(const char *format, ...) const;
   void streamFlush();
   void resetInfo() { info_.set = false; }
 

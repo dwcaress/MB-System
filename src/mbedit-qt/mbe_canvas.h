@@ -28,12 +28,15 @@
 #include <QImage>
 #include <QPoint>
 #include <QString>
+#include <QStringList>
 #include <QPolygon>
 #include <QWidget>
 
 #include "mbe_core.h"
 
 class QTimer;
+
+namespace mbe {
 
 /* The soundings and the mouse and key actions on them. The soundings are drawn
    once into an image, which is rebuilt when anything changes; the highlight of
@@ -55,6 +58,10 @@ class Canvas : public QWidget {
   /* what would change, drawn over the soundings; not owned */
   void setPreview(const mbe::FlagPreview *preview);
   void setMarkedPing(int ping);
+  /* the three lines of text above the plot */
+  void setShowTitles(bool show);
+  /* skip the labels of the across-track axis that would overlap, in a narrow plot */
+  void setCompact(bool compact) { compact_ = compact; }
 
   /* after the session changed: follow the size of the widget and draw again */
   void layoutChanged();
@@ -70,6 +77,8 @@ class Canvas : public QWidget {
   void viewChanged();        // the width or exaggeration changed by zooming
   void suspectKey(int direction);
   void contextMenuAt(QPoint global, int ping, int beam);  // Shift and the right button
+  void soundingInfo(const QStringList &lines);            // a click in Info mode
+  void soundingHovered(int ping, int beam);               // under the mouse; -1 if none
 
  protected:
   void paintEvent(QPaintEvent *event) override;
@@ -111,7 +120,11 @@ class Canvas : public QWidget {
   bool key_g_ = false, key_z_ = false, key_s_ = false, key_a_ = false, key_d_ = false;
   int wheel_ = 0;
   bool hover_ = false;
+  bool show_titles_ = true;
+  bool compact_ = false;
   int hover_ping_ = 0, hover_beam_ = 0;
 };
+
+}  // namespace mbe
 
 #endif

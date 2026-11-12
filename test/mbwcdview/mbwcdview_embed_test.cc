@@ -1,0 +1,349 @@
+/*--------------------------------------------------------------------
+ *    The MB-system:  mbwcdview_embed_test.cc  9/11/2026
+ *
+ *    Copyright (c) 2026 by
+ *    Christian dos Santos Ferreira
+ *      MARUM
+ *      University of Bremen
+ *      Bremen Germany
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, California, USA
+ *    Dale N. Chayes
+ *      Center for Coastal and Ocean Mapping
+ *      University of New Hampshire
+ *      Durham, New Hampshire, USA
+ *
+ *    MB-System was created by Caress and Chayes in 1992 at the
+ *      Lamont-Doherty Earth Observatory
+ *      Columbia University
+ *      Palisades, NY 10964
+ *
+ *    See README.md file for copying and redistribution conditions.
+ *--------------------------------------------------------------------*/
+
+/*
+ * The tool as a widget inside another program's window, with no window of its
+ * own: what a future unified application will use. Two of them in docks of one
+ * main window. It reads what is drawn from the data of the plot, so it needs no
+ * OpenGL. Arguments: the .kmall files of two copies of a line, each with its
+ * .kmwcd beside it, and a directory to write in.
+ */
+
+#include <QApplication>
+#include <QCheckBox>
+#include <QDockWidget>
+#include <QDoubleSpinBox>
+#include <QElapsedTimer>
+#include <QHideEvent>
+#include <QKeyEvent>
+#include <QLabel>
+#include <QMainWindow>
+#include <QMenu>
+#include <QMenuBar>
+#include <QPushButton>
+#include <QShowEvent>
+#include <QSlider>
+#include <QStatusBar>
+#include <QTableWidget>
+#include <QToolBar>
+#include <QToolButton>
+
+#include <cstdio>
+#include <cstring>
+#include <initializer_list>
+
+#include "WcdView.h"
+#include "mb_define.h"
+#include "mb_status.h"
+#include "wcd_widget.h"
+
+using wcd::WaterColumnWidget;
+
+namespace {
+
+int checks = 0, failures = 0;
+
+#define CHECK(condition)                                  \
+  do {                                                    \
+    checks++;                                             \
+    if (!(condition)) {                                   \
+      failures++;                                         \
+      printf("FAIL line %d: %s\n", __LINE__, #condition); \
+    }                                                     \
+  } while (0)
+
+struct Notes {
+  int opened = 0, failed = 0, busy_changes = 0, pings = 0, picks = 0, statuses = 0, diagnostics = 0;
+  bool busy = false;
+  QString opened_path, failed_path;
+  int step = -1, ping = -1, ping_number = -1, swath = -1;
+  double time_d = 0.0;
+  QStringList pick;
+};
+
+void watch(WaterColumnWidget *v, Notes &n) {
+  QObject::connect(v, &WaterColumnWidget::statusMessage, [&n](const QString &, int) { n.statuses++; });
+  QObject::connect(v, &WaterColumnWidget::diagnostic, [&n](const QString &) { n.diagnostics++; });
+  QObject::connect(v, &WaterColumnWidget::busyChanged, [&n](bool busy) { n.busy_changes++; n.busy = busy; });
+  QObject::connect(v, &WaterColumnWidget::fileOpened, [&n](const QString &path) { n.opened++; n.opened_path = path; });
+  QObject::connect(v, &WaterColumnWidget::fileOpenFailed, [&n](const QString &path) { n.failed++; n.failed_path = path; });
+  QObject::connect(v, &WaterColumnWidget::pingChanged, [&n](int step, int ping, int number, int swath, double time_d) {
+    n.pings++;
+    n.step = step;
+    n.ping = ping;
+    n.ping_number = number;
+    n.swath = swath;
+    n.time_d = time_d;
+  });
+  QObject::connect(v, &WaterColumnWidget::pickAdded, [&n](const QStringList &row) { n.picks++; n.pick = row; });
+}
+
+void wait_for(std::initializer_list<WaterColumnWidget *> tools) {
+  QElapsedTimer timer;
+  timer.start();
+  bool busy = true;
+  while (busy && timer.elapsed() < 60000) {
+    QApplication::processEvents(QEventLoop::AllEvents, 20);
+    busy = false;
+    for (WaterColumnWidget *v : tools)
+      busy = busy || v->busy();
+  }
+  QApplication::processEvents();
+}
+
+const int PANEL_MAX_MIN_WIDTH = 420, PANEL_MAX_MIN_HEIGHT = 360;
+
+const wcd::PlotData &data_of(WaterColumnWidget *v) { return v->findChild<wcd::WcdView *>()->plot().data(); }
+
+/* NaN marks the cells with nothing to draw, so the values are compared as bytes */
+bool same(const std::vector<float> &x, const std::vector<float> &y) {
+  return x.size() == y.size() && std::memcmp(x.data(), y.data(), x.size() * sizeof(float)) == 0;
+}
+
+bool same_plot(const wcd::PlotData &x, const wcd::PlotData &y) {
+  return same(x.across, y.across) && same(x.depth, y.depth) && same(x.amplitude, y.amplitude);
+}
+
+void wait_ms(int ms) {
+  QElapsedTimer timer;
+  timer.start();
+  while (timer.elapsed() < ms)
+    QApplication::processEvents(QEventLoop::AllEvents, 10);
+}
+
+QCheckBox *box(WaterColumnWidget *v, const QString &text) {
+  for (QCheckBox *b : v->findChildren<QCheckBox *>())
+    if (b->text() == text)
+      return b;
+  return nullptr;
+}
+
+}  // namespace
+
+int main(int argc, char **argv) {
+  if (argc != 4) {
+    fprintf(stderr, "usage: mbwcdview_embed_test file1.kmall file2.kmall directory\n");
+    return 2;
+  }
+  QApplication app(argc, argv);
+  const QString a_path = argv[1], b_path = argv[2], dir = argv[3];
+
+  /* what a program with several tools has to do */
+  int error = MB_ERROR_NO_ERROR;
+  mb_mem_list_disable(0, &error);
+
+  /* one tool alone, for comparison */
+  wcd::PlotData alone;
+  {
+    WaterColumnWidget solo;
+    CHECK(solo.openFile(a_path));
+    wait_for({&solo});
+    CHECK(solo.loaded());
+    alone = data_of(&solo);
+    CHECK(!alone.across.empty());
+  }
+
+  /* two tools in docks of one main window */
+  QMainWindow host;
+  host.setWindowTitle("host");
+  auto *a = new WaterColumnWidget;
+  auto *b = new WaterColumnWidget(wcd::Presentation::Panel);
+  auto *dock_a = new QDockWidget("A");
+  auto *dock_b = new QDockWidget("B");
+  dock_a->setWidget(a);
+  dock_b->setWidget(b);
+  host.addDockWidget(Qt::LeftDockWidgetArea, dock_a);
+  host.addDockWidget(Qt::RightDockWidgetArea, dock_b);
+  host.resize(1800, 900);
+  Notes na, nb;
+  watch(a, na);
+  watch(b, nb);
+  /* never shown: on a platform without OpenGL, such as offscreen, Qt 6.4 crashes showing a window that holds an OpenGL widget */
+  QApplication::processEvents();
+
+  /* nothing of a window of its own */
+  CHECK(host.findChild<QMenuBar *>() == nullptr);
+  CHECK(host.findChild<QStatusBar *>() == nullptr);
+  CHECK(!a->showTime(0.0));
+
+  /* the panel form */
+  CHECK(b->minimumSizeHint().width() <= PANEL_MAX_MIN_WIDTH);
+  CHECK(b->minimumSizeHint().height() <= PANEL_MAX_MIN_HEIGHT);
+  CHECK(b->findChild<QToolBar *>("panel_bar") != nullptr);
+  CHECK(a->findChild<QToolBar *>("panel_bar") == nullptr);
+  CHECK(b->findChild<QToolButton *>("panel_scales") != nullptr);
+  CHECK(b->findChild<QWidget *>("panel_scales_controls")->findChildren<QDoubleSpinBox *>().size() == 6);
+  CHECK(b->focusProxy() == b->findChild<wcd::WcdView *>());
+  CHECK(box(b, "Ray trace") != nullptr && box(a, "Ray trace (SVP)") != nullptr);
+
+  /* loading at the same time */
+  CHECK(a->openFile(a_path));
+  CHECK(b->openFile(b_path));
+  CHECK(na.busy && nb.busy);
+  CHECK(!a->openFile(b_path));
+  wait_for({a, b});
+  CHECK(na.opened == 1 && nb.opened == 1);
+  CHECK(na.opened_path == a_path && nb.opened_path == b_path);
+  CHECK(na.failed == 0);
+  CHECK(na.busy_changes == 2 && !na.busy);
+  CHECK(na.statuses > 0);
+  CHECK(na.diagnostics == 2);  // the files of the line, and the summary
+  CHECK(host.windowTitle() == "host");
+  CHECK(same_plot(data_of(a), alone));
+  CHECK(same_plot(data_of(b), alone));
+
+  /* the first ping is reported */
+  CHECK(na.pings == 1 && na.step == 0);
+  const double first_time = na.time_d;
+  auto *slider = a->findChild<QSlider *>();
+  const int last = slider->maximum();
+  CHECK(last > 2);
+
+  /* the panel shows the messages of the tool and the ping */
+  wait_ms(1100);
+  CHECK(b->findChild<QLabel *>("panel_status")->text().startsWith("Nav summary"));
+
+  /* keys reach a panel through the plot */
+  {
+    QKeyEvent right(QEvent::KeyPress, Qt::Key_Right, Qt::NoModifier);
+    QApplication::sendEvent(b, &right);
+    CHECK(nb.step == 1);
+    QKeyEvent left(QEvent::KeyPress, Qt::Key_Left, Qt::NoModifier);
+    QApplication::sendEvent(b, &left);
+    CHECK(nb.step == 0);
+    nb.pings = 1;
+  }
+
+  /* moving one tool moves only that one */
+  a->setStep(last);
+  CHECK(na.pings == 2 && na.step == last);
+  CHECK(nb.pings == 1 && nb.step == 0);
+  CHECK(na.time_d > first_time && na.ping > 0);
+  CHECK(na.ping_number > 0);
+  const double last_time = na.time_d;
+  CHECK(same_plot(data_of(b), alone));
+
+  /* a redraw of the same ping is not reported */
+  box(a, "Bottom")->click();
+  CHECK(na.pings == 2);
+  box(a, "Bottom")->click();
+
+  /* moving from outside */
+  CHECK(a->showTime(first_time));
+  CHECK(na.step == 0 && na.time_d == first_time);
+  CHECK(a->showTime(last_time));
+  CHECK(na.time_d == last_time);
+  CHECK(a->showTime(first_time + 0.4 * (last_time - first_time)));
+  CHECK(na.time_d > first_time && na.time_d < last_time);
+  const int pings_before = na.pings;
+  CHECK(!a->showTime(first_time - 100.0));
+  CHECK(!a->showTime(last_time + 100.0));
+  CHECK(na.pings == pings_before);
+  a->showPing(2);
+  CHECK(na.ping == 2);
+
+  /* a pick */
+  a->setStep(0);
+  const wcd::PlotData &data = data_of(a);
+  size_t cell = 0;
+  while (cell < data.amplitude.size() && !(data.amplitude[cell] == data.amplitude[cell] && data.across[cell] == data.across[cell] && data.depth[cell] == data.depth[cell]))
+    cell++;
+  CHECK(cell < data.amplitude.size());
+  const QStringList row = a->pick(data.across[cell], data.depth[cell]);
+  CHECK(na.picks == 1 && na.pick == row && nb.picks == 0);
+  CHECK(a->findChild<wcd::PickDialog *>()->isVisible());
+  CHECK(b->findChild<wcd::PickDialog *>() == nullptr);
+
+  /* the pick table of a panel goes and comes with it, and a hidden panel does not replay */
+  {
+    b->setStep(0);
+    const wcd::PlotData &panel_data = data_of(b);
+    size_t panel_cell = 0;
+    while (panel_cell < panel_data.amplitude.size() && !(panel_data.amplitude[panel_cell] == panel_data.amplitude[panel_cell] && panel_data.across[panel_cell] == panel_data.across[panel_cell] && panel_data.depth[panel_cell] == panel_data.depth[panel_cell]))
+      panel_cell++;
+    CHECK(!b->pick(panel_data.across[panel_cell], panel_data.depth[panel_cell]).isEmpty());
+    auto *dialog = b->findChild<wcd::PickDialog *>();
+    CHECK(dialog != nullptr && dialog->isVisible());
+    QPushButton *replay = nullptr;
+    for (QPushButton *button : b->findChildren<QPushButton *>())
+      if (button->text() == "Replay")
+        replay = button;
+    replay->click();
+    CHECK(replay->isChecked());
+    QHideEvent hide_event;
+    QApplication::sendEvent(b, &hide_event);
+    CHECK(!dialog->isVisible());
+    CHECK(!replay->isChecked());
+    QShowEvent show_event;
+    QApplication::sendEvent(b, &show_event);
+    CHECK(dialog->isVisible());
+    dialog->hide();
+  }
+
+  /* a host can show the table itself; otherwise the tool opens a window of its own */
+  {
+    WaterColumnWidget c;
+    wcd::PickTable *table = c.takePickTable();
+    int wanted = 0;
+    QObject::connect(&c, &WaterColumnWidget::pickTableWanted, [&wanted] { wanted++; });
+    CHECK(c.openFile(a_path));
+    wait_for({&c});
+    const wcd::PlotData &c_data = data_of(&c);
+    size_t c_cell = 0;
+    while (c_cell < c_data.amplitude.size() && !(c_data.amplitude[c_cell] == c_data.amplitude[c_cell] && c_data.across[c_cell] == c_data.across[c_cell] && c_data.depth[c_cell] == c_data.depth[c_cell]))
+      c_cell++;
+    CHECK(!c.pick(c_data.across[c_cell], c_data.depth[c_cell]).isEmpty());
+    CHECK(wanted == 1);
+    CHECK(c.findChild<wcd::PickDialog *>() == nullptr);
+    CHECK(table->findChild<QTableWidget *>()->rowCount() == 1);
+    box(&c, "Pick")->click();
+    CHECK(box(&c, "Pick")->isChecked());
+    c.pickTableClosed();
+    CHECK(!box(&c, "Pick")->isChecked());
+  }
+
+  /* a file that cannot be read */
+  const QString missing = dir + "/missing.kmall";
+  CHECK(a->openFile(missing));
+  wait_for({a});
+  CHECK(na.failed == 1 && na.failed_path == missing);
+  CHECK(na.opened == 1);
+  CHECK(!a->loaded() && !a->showTime(first_time));
+  CHECK(!na.busy);
+
+  /* and the same tool opens a good one after it */
+  CHECK(a->openFile(a_path));
+  wait_for({a});
+  CHECK(na.opened == 2 && a->loaded());
+  CHECK(na.step == 0);
+
+  /* removing a tool from the host with work under way waits for it */
+  CHECK(a->openFile(a_path));
+  CHECK(a->busy());
+  delete dock_a;
+  CHECK(same_plot(data_of(b), alone));
+
+  printf("%d checks, %d failed\n", checks, failures);
+  return failures != 0;
+}
