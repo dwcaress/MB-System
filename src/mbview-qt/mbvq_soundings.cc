@@ -33,6 +33,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMenuBar>
+#include <QPointer>
 #include <QPushButton>
 #include <QRadioButton>
 #include <QSignalBlocker>
@@ -48,19 +49,24 @@ namespace mbvq {
 
 namespace {
 
+SoundingsWidget *the_widget = nullptr;
 SoundingsWindow *the_window = nullptr;
+std::function<void(SoundingsWidget *)> placement;
 
-/* Destroyed windows, hidden; deleted at a safe point (the next window, or
-   when the program quits), never by a posted deferred deletion, for the same
-   reason as the map windows (mbvq_ui.cc). */
-std::vector<SoundingsWindow *> closed;
+/* Destroyed windows or widgets, hidden; deleted at a safe point (the next
+   one, or when the program quits), never by a posted deferred deletion, for
+   the same reason as the maps (mbvq_ui.cc). */
+std::vector<QPointer<QWidget>> closed;
 bool quit_connected = false;
 
 void delete_closed() {
-  for (SoundingsWindow *window : closed)
-    delete window;
+  for (const QPointer<QWidget> &widget : closed)
+    delete widget.data();
   closed.clear();
 }
+
+/* the standalone window if there is one, otherwise the widget */
+QWidget *outermost() { return the_window != nullptr ? static_cast<QWidget *>(the_window) : the_widget; }
 
 /* the bias sliders in the order of the Motif window */
 const int kBiasOrder[MBVQ_SDG_BIASES] = {MBVQ_SDG_BIAS_HEADING, MBVQ_SDG_BIAS_ROLL, MBVQ_SDG_BIAS_PITCH,
@@ -88,11 +94,14 @@ const char *const kEditLabels[MBVQ_SDG_EDIT_MODES] = {"Toggle", "Pick", "Erase",
 
 SoundingsWindow *soundings_window() { return the_window; }
 
-SoundingsWindow::SoundingsWindow() {
-  setWindowTitle(tr("3D Soundings"));
+SoundingsWidget *soundings_widget() { return the_widget; }
+
+void set_soundings_placement(std::function<void(SoundingsWidget *)> place) { placement = std::move(place); }
+
+SoundingsWidget::SoundingsWidget(QWidget *parent) : QWidget(parent), title_(tr("3D Soundings")) {
 
   /* View menu, as in Motif */
-  QMenu *view_menu = menuBar()->addMenu(tr("View"));
+  QMenu *view_menu = new_menu(tr("View"));
   const auto add_view = [this, view_menu](int toggle, const char *label) {
     view_toggle_[toggle] = view_menu->addAction(tr(label));
     view_toggle_[toggle]->setCheckable(true);
@@ -127,7 +136,7 @@ SoundingsWindow::SoundingsWindow() {
     connect(color_[mode], &QAction::triggered, this, [mode] { mbvq_c_soundings_color(mode); });
   }
 
-  QMenu *mouse_menu = menuBar()->addMenu(tr("Mouse"));
+  QMenu *mouse_menu = new_menu(tr("Mouse"));
   auto *mouse_actions = new QActionGroup(this);
   mouse_actions->setExclusive(true);
   const int mouse_modes[2] = {MBVQ_SDG_MOUSE_ROTATE, MBVQ_SDG_MOUSE_PANZOOM};
@@ -140,7 +149,7 @@ SoundingsWindow::SoundingsWindow() {
     connect(mouse_action_[mode], &QAction::triggered, this, [mode] { mbvq_c_soundings_mouse_mode(mode); });
   }
   /* Action menu, as in Motif */
-  QMenu *action_menu = menuBar()->addMenu(tr("Action"));
+  QMenu *action_menu = new_menu(tr("Action"));
   const char *const action_labels[MBVQ_SDG_ACTIONS] = {"Apply Bias Values to Grid",
                                                        "Filter by sparse voxels (1 X cell, n<10)",
                                                        "Filter by sparse voxels (1 X cell, n<2)",
@@ -170,14 +179,17 @@ SoundingsWindow::SoundingsWindow() {
             [action] { mbvq_c_soundings_action(action); });
   }
 
-  QMenu *dismiss_menu = menuBar()->addMenu(tr("Dismiss"));
-  connect(dismiss_menu->addAction(tr("Dismiss")), &QAction::triggered, this, [] { mbvq_c_soundings_dismiss(); });
+  QMenu *dismiss_menu = new_menu(tr("Dismiss"));
+  connect(dismiss_menu->addAction(tr("Dismiss")), &QAction::triggered, this, [this] { dismiss(); });
 
-  auto *central = new QWidget;
-  auto *layout = new QVBoxLayout(central);
-  auto *top = new QGridLayout;
+  /* compact: the controls take a few lines, the drawing the rest */
+  layout_ = new QVBoxLayout(this);
+  auto *layout = layout_;
+  layout->setContentsMargins(8, 4, 8, 4);
+  layout->setSpacing(2);
 
-  /* the edit modes, as the Motif radio box */
+  /* first line: the edit modes (the Motif radio box), Reset View and the
+     mouse mode buttons */
   auto *edit_row = new QHBoxLayout;
   auto *edit_group = new QButtonGroup(this);
   for (int mode = 0; mode < MBVQ_SDG_EDIT_MODES; mode++) {
@@ -187,19 +199,43 @@ SoundingsWindow::SoundingsWindow() {
     connect(edit_[mode], &QRadioButton::clicked, this, [mode] { mbvq_c_soundings_edit_mode(mode); });
   }
   edit_row->addStretch();
-  top->addLayout(edit_row, 0, 0);
+  auto *reset = new QPushButton(tr("Reset View"));
+  connect(reset, &QPushButton::clicked, this, [] { mbvq_c_soundings_resetview(); });
+  edit_row->addWidget(reset);
+  auto *mouse_group = new QButtonGroup(this);
+  const char *const button_labels[2] = {"Pan and Zoom", "Rotate Soundings"};
+  const int button_modes[2] = {MBVQ_SDG_MOUSE_PANZOOM, MBVQ_SDG_MOUSE_ROTATE};
+  for (int i = 0; i < 2; i++) {
+    const int mode = button_modes[i];
+    mouse_[mode] = new QRadioButton(tr(button_labels[i]));
+    mouse_group->addButton(mouse_[mode], mode);
+    edit_row->addWidget(mouse_[mode]);
+    connect(mouse_[mode], &QRadioButton::clicked, this, [mode] { mbvq_c_soundings_mouse_mode(mode); });
+  }
+  layout->addLayout(edit_row);
 
-  /* the status line */
+  /* second line: the status and the mouse mode help, each on one line; a
+     long status is cut rather than widening the editor */
+  auto *info_row = new QHBoxLayout;
   status_ = new QLabel;
   status_->setTextInteractionFlags(Qt::TextSelectableByMouse);
-  top->addWidget(status_, 1, 0);
+  status_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+  info_row->addWidget(status_, 1);
+  /* the default text of the Motif label until the first mode change */
+  mousemode_ = new QLabel;
+  mousemode_->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+  set_mousemode(label_text(":::t\"Mouse Mode:\":t\"L: Edit (Toggle)\":t\"M: Rotate Soundings\"\"R: Exageration\""));
+  info_row->addWidget(mousemode_);
+  layout->addLayout(info_row);
 
   /* the bias and time lag sliders, released values go to the core */
   sliders_ = new QWidget;
   auto *slider_row = new QHBoxLayout(sliders_);
   slider_row->setContentsMargins(0, 0, 0, 0);
+  slider_row->setSpacing(16);
   for (int bias : kBiasOrder) {
     auto *box = new QVBoxLayout;
+    box->setSpacing(0);
     box->addWidget(new QLabel(tr(kBiasLabels[bias])));
     bias_[bias] = new QSlider(Qt::Horizontal);
     bias_[bias]->setTracking(false);
@@ -224,45 +260,51 @@ SoundingsWindow::SoundingsWindow() {
       }
     });
   }
-  top->addWidget(sliders_, 2, 0);
+  layout->addWidget(sliders_);
 
-  /* Reset View, the mouse mode buttons and label */
-  auto *right = new QVBoxLayout;
-  auto *reset = new QPushButton(tr("Reset View"));
-  connect(reset, &QPushButton::clicked, this, [] { mbvq_c_soundings_resetview(); });
-  right->addWidget(reset);
-  auto *mouse_group = new QButtonGroup(this);
-  const char *const button_labels[2] = {"Pan and Zoom", "Rotate Soundings"};
-  const int button_modes[2] = {MBVQ_SDG_MOUSE_PANZOOM, MBVQ_SDG_MOUSE_ROTATE};
-  for (int i = 0; i < 2; i++) {
-    const int mode = button_modes[i];
-    mouse_[mode] = new QRadioButton(tr(button_labels[i]));
-    mouse_group->addButton(mouse_[mode], mode);
-    right->addWidget(mouse_[mode]);
-    connect(mouse_[mode], &QRadioButton::clicked, this, [mode] { mbvq_c_soundings_mouse_mode(mode); });
-  }
-  /* the default text of the Motif label until the first mode change */
-  mousemode_ = new QLabel(label_text(
-      ":::t\"Mouse Mode:\":t\"L: Edit (Toggle)\":t\"M: Rotate Soundings\"\"R: Exageration\""));
-  /* a fixed width, so that a longer label does not resize the drawing */
-  mousemode_->setFixedWidth(220);
-  mousemode_->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-  right->addWidget(mousemode_);
-  top->addLayout(right, 0, 1, 3, 1);
-  top->setColumnStretch(0, 1);
-  layout->addLayout(top);
-
-  view_ = backend() == Backend::LegacyGL ? gl_backend::create_soundings_view(central)
-                                         : null_backend::create_soundings_view(central);
+  view_ = backend() == Backend::LegacyGL ? gl_backend::create_soundings_view(this)
+                                         : null_backend::create_soundings_view(this);
   view_->setMinimumSize(200, 150);
   layout->addWidget(view_, 1);
-  setCentralWidget(central);
-  resize(1040, 600);
   set_view_cursor(MBV_CURSOR_TARGET_RED);
   refresh();
 }
 
-void SoundingsWindow::refresh() {
+QMenu *SoundingsWidget::new_menu(const QString &title) {
+  auto *menu = new QMenu(title, this);
+  menus_.append(menu);
+  return menu;
+}
+
+void SoundingsWidget::setTitle(const QString &title) {
+  if (title == title_)
+    return;
+  title_ = title;
+  emit titleChanged(title_);
+}
+
+void SoundingsWidget::setMenuBarShown(bool shown) {
+  if (menu_bar_ == nullptr && shown) {
+    menu_bar_ = new QMenuBar(this);
+    /* on macOS a native bar of a widget inside a window would not be seen */
+    menu_bar_->setNativeMenuBar(false);
+    for (QMenu *menu : menus_)
+      menu_bar_->addMenu(menu);
+    layout_->insertWidget(0, menu_bar_);
+  }
+  if (menu_bar_ != nullptr)
+    menu_bar_->setVisible(shown);
+}
+
+void SoundingsWidget::dismiss() { mbvq_c_soundings_dismiss(); }
+
+bool SoundingsWidget::prepareToClose(std::function<void()> closed_later) {
+  (void)closed_later;
+  dismiss();
+  return true;
+}
+
+void SoundingsWidget::refresh() {
   int edit_mode = 0;
   int mouse_mode = 0;
   mbvq_c_soundings_modes(&edit_mode, &mouse_mode);
@@ -286,15 +328,19 @@ void SoundingsWindow::refresh() {
   }
 }
 
-void SoundingsWindow::set_mousemode(const QString &text) { mousemode_->setText(text); }
+void SoundingsWidget::set_mousemode(const QString &text) {
+  /* the Motif label has a line per button; here they share one line */
+  mousemode_->setText(QString(text).replace(QLatin1Char('\n'), QStringLiteral("   ")));
+}
 
-void SoundingsWindow::set_status(const QString &text, bool sliders) {
+void SoundingsWidget::set_status(const QString &text, bool sliders) {
   status_->setText(text);
+  emit statusMessage(text);
   /* as in Motif, the sliders give way to the sounding information */
   sliders_->setVisible(sliders);
 }
 
-void SoundingsWindow::set_view_cursor(int cursor) {
+void SoundingsWidget::set_view_cursor(int cursor) {
   /* Qt has no coloured cursors; the shape carries the meaning */
   Qt::CursorShape shape = Qt::CrossCursor;
   switch (cursor) {
@@ -319,15 +365,24 @@ void SoundingsWindow::set_view_cursor(int cursor) {
     view_->setCursor(shape);
 }
 
-void SoundingsWindow::delete_view() {
+void SoundingsWidget::delete_view() {
   delete view_;
   view_ = nullptr;
+}
+
+SoundingsWindow::SoundingsWindow(SoundingsWidget *widget) : widget_(widget) {
+  setWindowTitle(widget->title());
+  connect(widget, &SoundingsWidget::titleChanged, this, &QWidget::setWindowTitle);
+  for (QMenu *menu : widget->menus())
+    menuBar()->addMenu(menu);
+  setCentralWidget(widget);
+  resize(1040, 600);
 }
 
 void SoundingsWindow::closeEvent(QCloseEvent *event) {
   /* as Dismiss: hide the window and tell the calling program */
   event->ignore();
-  mbvq_c_soundings_dismiss();
+  widget_->dismiss();
 }
 
 }  // namespace mbvq
@@ -341,54 +396,66 @@ void mbvq_qt_soundings_create(void) {
     QObject::connect(qApp, &QCoreApplication::aboutToQuit, qApp, [] { mbvq::delete_closed(); });
     mbvq::quit_connected = true;
   }
-  if (mbvq::the_window == nullptr)
-    mbvq::the_window = new mbvq::SoundingsWindow;
+  if (mbvq::the_widget != nullptr)
+    return;
+  mbvq::the_widget = new mbvq::SoundingsWidget;
+  if (mbvq::placement)
+    mbvq::placement(mbvq::the_widget);
+  else
+    mbvq::the_window = new mbvq::SoundingsWindow(mbvq::the_widget);
 }
 
 void mbvq_qt_soundings_show(void) {
-  if (mbvq::the_window == nullptr)
+  if (mbvq::the_widget == nullptr)
     return;
-  mbvq::the_window->show();
-  mbvq::the_window->raise();
-  if (mbvq::the_window->view() != nullptr)
-    mbvq::the_window->view()->setFocus();
+  QWidget *top = mbvq::outermost();
+  top->show();
+  top->raise();
+  if (mbvq::the_widget->view() != nullptr)
+    mbvq::the_widget->view()->setFocus();
+  emit mbvq::the_widget->opened();
 }
 
 void mbvq_qt_soundings_hide(void) {
-  if (mbvq::the_window != nullptr)
-    mbvq::the_window->hide();
+  if (mbvq::the_widget == nullptr)
+    return;
+  mbvq::outermost()->hide();
+  emit mbvq::the_widget->closed();
 }
 
 void mbvq_qt_soundings_destroy(void) {
   /* possibly inside an event of the window: hide it now, free its OpenGL
      view now, delete the window at a safe point */
-  mbvq::SoundingsWindow *window = mbvq::the_window;
-  if (window == nullptr)
+  mbvq::SoundingsWidget *widget = mbvq::the_widget;
+  if (widget == nullptr)
     return;
+  QWidget *top = mbvq::outermost();
+  mbvq::the_widget = nullptr;
   mbvq::the_window = nullptr;
-  window->hide();
-  window->delete_view();
-  mbvq::closed.push_back(window);
+  top->hide();
+  widget->delete_view();
+  mbvq::closed.push_back(top);
+  emit widget->closed();
 }
 
 void mbvq_qt_soundings_refresh(void) {
-  if (mbvq::the_window != nullptr)
-    mbvq::the_window->refresh();
+  if (mbvq::the_widget != nullptr)
+    mbvq::the_widget->refresh();
 }
 
 void mbvq_qt_soundings_mousemode(const char *bxstring) {
-  if (mbvq::the_window != nullptr)
-    mbvq::the_window->set_mousemode(mbvq::label_text(bxstring));
+  if (mbvq::the_widget != nullptr)
+    mbvq::the_widget->set_mousemode(mbvq::label_text(bxstring));
 }
 
 void mbvq_qt_soundings_status(const char *text, bool sliders) {
-  if (mbvq::the_window != nullptr)
-    mbvq::the_window->set_status(QString::fromLocal8Bit(text), sliders);
+  if (mbvq::the_widget != nullptr)
+    mbvq::the_widget->set_status(QString::fromLocal8Bit(text), sliders);
 }
 
 void mbvq_qt_soundings_cursor(int cursor) {
-  if (mbvq::the_window != nullptr)
-    mbvq::the_window->set_view_cursor(cursor);
+  if (mbvq::the_widget != nullptr)
+    mbvq::the_widget->set_view_cursor(cursor);
 }
 
 }  // extern "C"

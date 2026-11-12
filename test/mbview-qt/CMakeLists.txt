@@ -49,3 +49,12 @@ target_link_libraries(mbview_qt_soundings_test PRIVATE mbview-qt mbio Qt6::Widge
 
 add_test(NAME mbview_qt_soundings_test COMMAND mbview_qt_soundings_test --null)
 set_tests_properties(mbview_qt_soundings_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+# Maps and the 3D soundings editor inside another program's window: ctest runs
+# the checks without drawing; --gl needs a display.
+add_executable(mbview_qt_embed_test mbview_qt_embed_test.cc)
+set_target_properties(mbview_qt_embed_test PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+target_link_libraries(mbview_qt_embed_test PRIVATE mbview-qt mbio Qt6::Widgets Qt6::OpenGLWidgets ${MB_SYSLIBS})
+
+add_test(NAME mbview_qt_embed_test COMMAND mbview_qt_embed_test --null)
+set_tests_properties(mbview_qt_embed_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")

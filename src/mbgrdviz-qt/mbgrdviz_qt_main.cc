@@ -35,6 +35,9 @@
 
 #include <QApplication>
 
+#include <QFile>
+
+#include "mbgrdviz_qt_controller.h"
 #include "mbgrdviz_qt_window.h"
 #include "mbvq.h"
 
@@ -160,25 +163,28 @@ int main(int argc, char **argv) {
   QApplication app(argc, argv);
   QApplication::setApplicationName(QStringLiteral("mbgrdviz-qt"));
 
-  MbgrdvizWindow window;
+  /* the controller holds the menus and opens the maps; the window shows them */
+  mbgvq::Controller controller;
+  MbgrdvizWindow window(&controller);
+  QObject::connect(&window, &MbgrdvizWindow::closed, &app, &QApplication::quit);
   window.show();
 
   /* initialize the vizualization code */
   mbgrdviz_verbose = verbose;
-  mbview_startup(verbose, nullptr, nullptr, &error);
+  mbvq::start(verbose);
   for (int i = 0; i < MBV_MAX_WINDOWS; i++)
     mbgrdviz_mbview_id[i] = false;
   do_mbgrdviz_sensitivity();
 
   /* open the files specified on the command line */
   if (ifileflag > 0) {
-    do_mbgrdviz_openprimary(ifile);
-    if (jfileflag > 0) {
-      do_mbgrdviz_openoverlay(0, jfile);
+    const size_t instance = controller.openPrimary(QFile::decodeName(ifile));
+    if (jfileflag > 0 && instance != MBV_NO_WINDOW) {
+      controller.openOverlay(instance, QFile::decodeName(jfile));
     }
   }
   else if (testflag > 0) {
-    do_mbgrdviz_openprimary(nullptr);
+    controller.openPrimary(QString());
   }
 
   return app.exec();

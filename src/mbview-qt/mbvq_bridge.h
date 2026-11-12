@@ -75,6 +75,8 @@ const char *mbvq_c_title(size_t instance);
 void mbvq_c_geometry(size_t instance, int *xo, int *yo, int *width, int *height);
 /* close an instance, as the Motif Dismiss menu does (mbview_destroy) */
 void mbvq_c_destroy(size_t instance);
+/* mbview_startup and mb3dsoundings_startup, once */
+void mbvq_c_start(int verbose);
 /* the Clear, Reset and Full buttons */
 void mbvq_c_clearpicks(size_t instance);
 void mbvq_c_resetview(size_t instance);

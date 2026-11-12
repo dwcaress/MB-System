@@ -301,7 +301,7 @@ int test_null() {
 
   /* Controls dialogs: they show the core values and apply through the core */
   auto *map_window = static_cast<mbvq::MapWindow *>(window);
-  mbvq::ControlDialogs *dialogs = map_window->dialogs();
+  mbvq::ControlDialogs *dialogs = map_window->widget()->dialogs();
   view_item("Colors && Contours")->trigger();
   check(dialogs->dialog(MBVQ_DIALOG_COLORBOUNDS)->isVisible() &&
             dialogs->field(MBVQ_F_DATAMIN)->text() == QString::asprintf("%g", data->primary_colortable_min),
@@ -454,7 +454,7 @@ int test_null() {
 
   /* Profile window: View > Profile, the sliders and Dismiss */
   view_item("Profile")->trigger();
-  mbvq::ProfileWindow *profile = map_window->profile();
+  mbvq::ProfileWindow *profile = map_window->widget()->profile();
   check(profile->isVisible() && mbvq_c_profile_shown(instance) && view_item("Profile")->isChecked(),
         "View > Profile opens the profile window");
   profile->slider(2)->setValue(20);
@@ -672,11 +672,11 @@ int test_gl(bool mode3d) {
   check(data->pick_type == MBV_PICK_TWOPOINT && data->profile.npoints > 1,
         "a drag makes a two-point pick with a profile of " + std::to_string(data->profile.npoints) + " points");
   auto *gl_window = static_cast<mbvq::MapWindow *>(mbvq::window(instance));
-  gl_window->profile()->open();
+  gl_window->widget()->profile()->open();
   spin(300);
   if (const char *snapshot = std::getenv("MBVIEW_QT_TEST_PROFILE"))
-    qobject_cast<QOpenGLWidget *>(gl_window->profile()->view())->grabFramebuffer().save(QString::fromLocal8Bit(snapshot));
-  auto *profile_view = qobject_cast<QOpenGLWidget *>(gl_window->profile()->view());
+    qobject_cast<QOpenGLWidget *>(gl_window->widget()->profile()->view())->grabFramebuffer().save(QString::fromLocal8Bit(snapshot));
+  auto *profile_view = qobject_cast<QOpenGLWidget *>(gl_window->widget()->profile()->view());
   check(profile_view != nullptr && !profile_view->grabFramebuffer().isNull() && data->prwidth > 0 && data->prheight > 0,
         "the profile view draws (" + std::to_string(data->prwidth) + " x " + std::to_string(data->prheight) + " pixels)");
 

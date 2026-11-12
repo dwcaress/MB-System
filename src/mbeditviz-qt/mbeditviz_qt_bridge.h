@@ -24,7 +24,7 @@
 /*
  * Between the C half of mbeditviz-qt (mbeditviz_qt_ui.c: the user interface
  * functions that mbeditviz_core.c and mbeditviz_prog.c call) and its Qt
- * window (mbeditviz_qt_window.cc). Plain C types only.
+ * controller (mbeditviz_qt_controller.cc). Plain C types only.
  */
 
 #ifndef MBEDITVIZ_QT_BRIDGE_H
@@ -51,6 +51,8 @@ void mbeditviz_qt_set_edit_mode(bool edit);
 bool mbeditviz_qt_edit_mode(void);
 /* the file list timer (the Motif work function) */
 void mbeditviz_qt_tick(void);
+/* the error function passed to mbeditviz_init(), as the Motif do_error_dialog */
+int mbeditviz_qt_error_dialog(char *s1, char *s2, char *s3);
 
 /* the grid parameters dialog */
 struct mbeditviz_qt_grid {
@@ -64,7 +66,7 @@ void mbeditviz_qt_grid_set(const struct mbeditviz_qt_grid *grid);
 void mbeditviz_qt_grid_texts(char *current, char *implied, size_t size);
 void mbeditviz_qt_grid_apply(void);
 
-/* ---- implemented by the Qt window (mbeditviz_qt_window.cc) ---- */
+/* ---- implemented by the Qt controller (mbeditviz_qt_controller.cc) ---- */
 
 void mbeditviz_qt_status(const char *bxstring);
 void mbeditviz_qt_sensitivity(bool open, bool files);

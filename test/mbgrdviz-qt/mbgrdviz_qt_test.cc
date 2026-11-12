@@ -69,6 +69,7 @@
 #include <QPushButton>
 
 #include "mbgrdviz_qt_bridge.h"
+#include "mbgrdviz_qt_controller.h"
 #include "mbgrdviz_qt_dialogs.h"
 #include "mbgrdviz_qt_window.h"
 #include "mbvq_bridge.h"
@@ -109,10 +110,13 @@ void check(bool ok, const std::string &what) {
   std::printf("%s: %s\n", ok ? "ok" : "FAILED", what.c_str());
 }
 
+/* an item of the menus shown in the menu bar */
 QAction *action(MbgrdvizWindow &window, const char *text) {
-  for (QAction *a : window.menuBar()->findChildren<QAction *>())
-    if (a->text() == QString::fromLatin1(text) && a->menu() == nullptr)
-      return a;
+  for (QAction *top : window.menuBar()->actions())
+    if (top->menu() != nullptr)
+      for (QAction *a : top->menu()->actions())
+        if (a->text() == QString::fromLatin1(text) && a->menu() == nullptr)
+          return a;
   return nullptr;
 }
 
@@ -413,13 +417,13 @@ int main(int argc, char **argv) {
      tree */
   const QString program_dir = QCoreApplication::applicationDirPath() + QStringLiteral("/../../src/mbgrdviz-qt");
   const auto tool_is = [&](const char *tool, const char *expected) {
-    const QString found = MbgrdvizWindow::find_tool(QString::fromLatin1(tool), program_dir);
+    const QString found = mbgvq::Controller::findTool(QString::fromLatin1(tool), program_dir);
     return QFileInfo(found).completeBaseName() == QString::fromLatin1(expected);
   };
   check(tool_is("mbedit", "mbedit-qt"), "Open mbedit starts mbedit-qt");
   check(tool_is("mbvelocitytool", "mbvelocitytool-qt"), "Open mbvelocitytool starts mbvelocitytool-qt");
   check(tool_is("mbeditviz", "mbeditviz-qt"), "Open mbeditviz starts mbeditviz-qt");
-  check(MbgrdvizWindow::find_tool(QStringLiteral("mbgrdviz_no_such_tool"), program_dir).isEmpty(),
+  check(mbgvq::Controller::findTool(QStringLiteral("mbgrdviz_no_such_tool"), program_dir).isEmpty(),
         "a missing tool is not found");
 
   /* Quit closes all instances */

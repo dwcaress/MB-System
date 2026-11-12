@@ -285,7 +285,7 @@ int test_null() {
   check(edit_mode() == MBVQ_SDG_EDIT_ERASE, "the Erase button sets the erase mode");
   check(label_containing(window, "Mouse Mode:").contains(QStringLiteral("L: Edit (Erase)")),
         "the mouse mode label names the erase mode");
-  check(window->view()->cursor().shape() == Qt::PointingHandCursor, "the erase mode has the exchange cursor");
+  check(window->widget()->view()->cursor().shape() == Qt::PointingHandCursor, "the erase mode has the exchange cursor");
   radio(window, "Info")->click();
   check(edit_mode() == MBVQ_SDG_EDIT_INFO, "the Info button sets the info mode");
 
@@ -313,11 +313,11 @@ int test_null() {
   for (const auto &s : storage)
     unflagged += mb_beam_ok(s.beamflag) ? 1 : 0;
   edit_calls = 0;
-  window->view()->setFocus();
+  window->widget()->view()->setFocus();
   QKeyEvent comma(QEvent::KeyPress, Qt::Key_Comma, Qt::NoModifier, QStringLiteral(","));
-  QApplication::sendEvent(window->view(), &comma);
+  QApplication::sendEvent(window->widget()->view(), &comma);
   QKeyEvent comma_up(QEvent::KeyRelease, Qt::Key_Comma, Qt::NoModifier, QStringLiteral(","));
-  QApplication::sendEvent(window->view(), &comma_up);
+  QApplication::sendEvent(window->widget()->view(), &comma_up);
   /* without drawing every sounding is at screen position 0,0, so all count
      as in view */
   check(edit_calls == unflagged, "the ',' key flags the soundings in view (" +
@@ -436,7 +436,7 @@ int test_gl() {
   make_soundings(100, 50);
   open_soundings();
   mbvq::SoundingsWindow *window = mbvq::soundings_window();
-  auto *view = window != nullptr ? qobject_cast<QOpenGLWidget *>(window->view()) : nullptr;
+  auto *view = window != nullptr ? qobject_cast<QOpenGLWidget *>(window->widget()->view()) : nullptr;
   check(view != nullptr, "the soundings view is an OpenGL widget");
   if (view == nullptr)
     return 1;
@@ -490,7 +490,7 @@ int test_time(int n) {
   make_soundings(std::max(1, n / nbeams), nbeams);
   open_soundings();
   mbvq::SoundingsWindow *window = mbvq::soundings_window();
-  auto *view = window != nullptr ? qobject_cast<QOpenGLWidget *>(window->view()) : nullptr;
+  auto *view = window != nullptr ? qobject_cast<QOpenGLWidget *>(window->widget()->view()) : nullptr;
   if (view == nullptr || !wait_drawn(20000)) {
     std::printf("FAIL: not drawn\n");
     return 1;

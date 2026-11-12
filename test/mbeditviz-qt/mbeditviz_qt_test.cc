@@ -54,6 +54,7 @@
 
 #include <QAction>
 #include <QApplication>
+#include <QDialog>
 #include <QDir>
 #include <QElapsedTimer>
 #include <QEventLoop>
@@ -77,6 +78,8 @@
 #include "mbeditviz_qt_bridge.h"
 #include "mbvq_bridge.h"
 #include "mbvq_soundings.h"
+#include "mbeditviz_qt_controller.h"
+#include "mbeditviz_qt_filelist.h"
 #include "mbeditviz_qt_window.h"
 #include "mbvq.h"
 
@@ -156,15 +159,13 @@ const QString kRemove = mbvq::label_text(":::t\"Remove\":t\"Selected\"\"Files\""
 
 /* open the datalist, Edit mode, View All, Apply: files loaded and gridded */
 bool parity_open(MbeditvizWindow &window, const char *datalist) {
-  char program[] = "mbeditviz-qt", help[] = "", usage[] = "";
+  char program[] = "mbeditviz-qt";
   char opt_i[] = "-I";
   std::string list = datalist;
   char *args[] = {program, opt_i, list.data(), nullptr};
-  mbeditviz_init(3, args, program, help, usage, &do_mbeditviz_message_on, &do_mbeditviz_message_off,
-                 &do_mbeditviz_update_gui, &do_error_dialog);
+  window.controller()->init(3, args);
   spin(200);
-  mbeditviz_qt_set_edit_mode(true);
-  window.show_mode();
+  window.controller()->setEditMode(true);
   button(&window, kViewAll)->click();
   spin(200);
   QDialog *grid = visible_dialog(&window, "Grid Parameters");
@@ -187,7 +188,6 @@ int parity_qt(const char *datalist, const char *edits_file, int count, int offse
   QApplication app(qt_argc, qt_argv);
   MbeditvizWindow window;
   window.show();
-  mbeditviz_qt_start(&window);
   check(parity_open(window, datalist), "Edit mode, View All and Apply load and grid the files");
 
   /* an area across the middle of the map opens the 3D soundings view */
@@ -203,7 +203,7 @@ int parity_qt(const char *datalist, const char *edits_file, int count, int offse
   mbview_area(0, MBV_AREALENGTH_UP, data->width * 3 / 5, data->height / 2);
   spin(500);
   mbvq::SoundingsWindow *soundings = mbvq::soundings_window();
-  QWidget *view = soundings != nullptr ? soundings->view() : nullptr;
+  QWidget *view = soundings != nullptr ? soundings->widget()->view() : nullptr;
   check(view != nullptr && mbev_selected.num_soundings > 0,
         "the soundings view opens with " + std::to_string(mbev_selected.num_soundings) + " soundings");
   if (view == nullptr || mbev_selected.num_soundings == 0)
@@ -277,7 +277,6 @@ int parity_ref(const char *datalist, const char *edits_file) {
   QApplication app(qt_argc, qt_argv);
   MbeditvizWindow window;
   window.show();
-  mbeditviz_qt_start(&window);
   check(parity_open(window, datalist), "Edit mode, View All and Apply load and grid the files");
   std::ifstream in(edits_file);
   Edit e;
@@ -321,7 +320,6 @@ int main(int argc, char **argv) {
   QApplication app(qt_argc, argv);
   MbeditvizWindow window;
   window.show();
-  mbeditviz_qt_start(&window);
 
   /* the window as Motif: menus, mode, buttons, status */
   check(window.windowTitle() == QStringLiteral("MBeditviz"), "the window title is that of Motif");
@@ -358,18 +356,17 @@ int main(int argc, char **argv) {
 
   if (datalist != nullptr) {
     /* open the datalist as -I does */
-    char program[] = "mbeditviz-qt", help[] = "", usage[] = "";
+    char program[] = "mbeditviz-qt";
     char opt_i[] = "-I";
     std::string list = datalist;
     char *args[] = {program, opt_i, list.data(), nullptr};
-    mbeditviz_init(3, args, program, help, usage, &do_mbeditviz_message_on, &do_mbeditviz_message_off,
-                   &do_mbeditviz_update_gui, &do_error_dialog);
+    window.controller()->init(3, args);
     spin(200);
     const int files = mbev_num_files;
-    check(files > 0 && window.list()->count() == files,
+    check(files > 0 && window.fileList()->list()->count() == files,
           "the file list shows the " + std::to_string(files) + " files of the datalist");
-    check(files > 0 && window.list()->item(0)->text().contains(QStringLiteral(".mb")),
-          "a list row names its file: " + (files > 0 ? window.list()->item(0)->text().toStdString() : std::string()));
+    check(files > 0 && window.fileList()->list()->item(0)->text().contains(QStringLiteral(".mb")),
+          "a list row names its file: " + (files > 0 ? window.fileList()->list()->item(0)->text().toStdString() : std::string()));
     const QString status = label_containing(&window, "Available Files");
     check(status.contains(QStringLiteral("Available Files: %1").arg(files)) && status.contains(QStringLiteral("Loaded Files: 0")),
           "the status counts the files, none loaded");
