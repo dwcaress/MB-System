@@ -54,8 +54,11 @@ if(NOT TARGET Draco::Draco)
 	if(NOT Draco_FOUND)
 		message("Using local Draco source files from the project directory")
 
-		# Recursively find all Draco .cc files and .h files
-		file(GLOB_RECURSE DRACO_SOURCES "${DRACO_DIR}/*.cc" "${DRACO_DIR}/*.h")
+		# Recursively find all Draco .cc files and .h files, as paths
+		# relative to this directory (draco/...), so that the test filter
+		# below does not depend on where the source tree is located
+		file(GLOB_RECURSE DRACO_SOURCES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+			"${DRACO_DIR}/*.cc" "${DRACO_DIR}/*.h")
 
 		# Recursively filter out all test files
 		list(FILTER DRACO_SOURCES EXCLUDE REGEX ".*/.*test.*")
