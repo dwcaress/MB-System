@@ -367,6 +367,13 @@ __FILE__, __LINE__, __FUNCTION__, xlonmin, xlonmax, ylatmin, ylatmax);
 		view->projected = true;
 	}
 
+	/* the positions and the slopes behind the colours were rewritten. The mark
+	   is raised here, at the end: the loops above hand events to the toolkit
+	   every few columns (do_mbview_xevents), so a mark taken at entry would be
+	   a mark before the data, and they can also leave the pass unfinished. */
+	mbv_marks_position(&view->marks);
+	mbv_marks_color(&view->marks);
+
 	const int status = MB_SUCCESS;
 
 	if (mbv_verbose >= 2) {
@@ -2270,6 +2277,10 @@ int mbview_colorclear(size_t instance) {
 	if (data->primary_stat_color != NULL)
 		memset(data->primary_stat_color, 0, (data->primary_nxy / 8) + 1);
 
+	/* every node's colour is invalid now; the drawing recomputes them lazily
+	   and a user of the arrays prepares what it reads (mbv_marks.h) */
+	mbv_marks_color(&view->marks);
+
 	const int status = MB_SUCCESS;
 
 	if (mbv_verbose >= 2) {
@@ -2301,6 +2312,9 @@ int mbview_zscaleclear(size_t instance) {
 	view->zscaledonecount = 0;
 	if (data->primary_stat_z != NULL)
 		memset(data->primary_stat_z, 0, (data->primary_nxy / 8) + 1);
+
+	/* every node's position is invalid now (mbv_marks.h) */
+	mbv_marks_position(&view->marks);
 
 	const int status = MB_SUCCESS;
 

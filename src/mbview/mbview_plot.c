@@ -160,6 +160,129 @@ int mbview_reset_glx(size_t instance) {
 }
 
 /*------------------------------------------------------------------------------*/
+/* Scale the z and compute the colour of the nodes of a range, as the drawing
+   does for the nodes it draws, but without any OpenGL call: what a renderer
+   that keeps its own copy of the node arrays calls before it reads them, after
+   a change mark told it to (mbv_marks.h).
+
+   The conditions are those of mbview_drawdata() below: the colour parameters
+   and the histograms of the grid mode (and the secondary histogram for overlay
+   shading) are made first, nodes without data are left alone, a node is
+   scaled or coloured only if its status bit is clear, and in the secondary
+   grid mode at stride 1 both are computed again, as the workaround in the
+   drawing loop does. The range ends are included and clamped to the grid, and
+   the marks are not raised: this is the recomputation a raised mark asks for,
+   not a change of its own. */
+int mbview_prepare_nodes(int verbose, size_t instance, int i0, int i1, int j0, int j1, int stride, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", (char *) __FUNCTION__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+		fprintf(stderr, "dbg2       i0:               %d\n", i0);
+		fprintf(stderr, "dbg2       i1:               %d\n", i1);
+		fprintf(stderr, "dbg2       j0:               %d\n", j0);
+		fprintf(stderr, "dbg2       j1:               %d\n", j1);
+		fprintf(stderr, "dbg2       stride:           %d\n", stride);
+	}
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	*error = MB_ERROR_NO_ERROR;
+	const int status = MB_SUCCESS;
+
+	if (data->primary_data == NULL || data->primary_nxy <= 0 || stride < 1) {
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", (char *) __FUNCTION__);
+			fprintf(stderr, "dbg2  Return status:\n");
+			fprintf(stderr, "dbg2       status:  %d\n", status);
+		}
+		return (status);
+	}
+
+	/* the range of nodes, ends included */
+	if (i0 < 0)
+		i0 = 0;
+	if (j0 < 0)
+		j0 = 0;
+	if (i1 > data->primary_n_columns - 1)
+		i1 = data->primary_n_columns - 1;
+	if (j1 > data->primary_n_rows - 1)
+		j1 = data->primary_n_rows - 1;
+
+	/* set color parameters and make the histograms, as mbview_drawdata does */
+	mbview_setcolorparms(instance);
+	float *histogram = NULL;
+	bool make_histogram = false;
+	int which_data = MBV_DATA_PRIMARY;
+	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY && data->primary_histogram) {
+		if (!view->primary_histogram_set) {
+			make_histogram = true;
+			which_data = MBV_DATA_PRIMARY;
+		}
+		histogram = view->primary_histogram;
+	}
+	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE && data->primaryslope_histogram) {
+		if (!view->primaryslope_histogram_set) {
+			make_histogram = true;
+			which_data = MBV_DATA_PRIMARYSLOPE;
+		}
+		histogram = view->primaryslope_histogram;
+	}
+	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY && data->secondary_histogram) {
+		if (!view->secondary_histogram_set) {
+			make_histogram = true;
+			which_data = MBV_DATA_SECONDARY;
+		}
+		histogram = view->secondary_histogram;
+	}
+	if (make_histogram)
+		mbview_make_histogram(view, data, which_data);
+	if (view->shade_mode == MBV_SHADE_VIEW_OVERLAY && data->secondary_histogram && !view->secondary_histogram_set)
+		mbview_make_histogram(view, data, MBV_DATA_SECONDARY);
+
+	/* prepare the nodes that hold data */
+	for (int i = i0; i <= i1; i += stride) {
+		for (int j = j0; j <= j1; j += stride) {
+			const int k = i * data->primary_n_rows + j;
+			if (data->primary_data[k] == data->primary_nodatavalue)
+				continue;
+			if (data->grid_mode == MBV_GRID_VIEW_SECONDARY) {
+				double secondary_value;
+				if (data->secondary_sameas_primary)
+					secondary_value = data->secondary_data[k];
+				else
+					mbview_getsecondaryvalue(view, data, i, j, &secondary_value);
+				if (secondary_value == data->secondary_nodatavalue)
+					continue;
+				if (stride == 1 || !(data->primary_stat_z[k / 8] & statmask[k % 8]))
+					mbview_zscalegridpoint(instance, k);
+				if (stride == 1 || !(data->primary_stat_color[k / 8] & statmask[k % 8]))
+					mbview_colorpoint(view, data, histogram, i, j, k);
+			}
+			else {
+				if (!(data->primary_stat_z[k / 8] & statmask[k % 8]))
+					mbview_zscalegridpoint(instance, k);
+				if (!(data->primary_stat_color[k / 8] & statmask[k % 8]))
+					mbview_colorpoint(view, data, histogram, i, j, k);
+			}
+		}
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", (char *) __FUNCTION__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:   %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+
+/*------------------------------------------------------------------------------*/
 int mbview_drawdata(size_t instance, int rez) {
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", (char *) __FUNCTION__);
