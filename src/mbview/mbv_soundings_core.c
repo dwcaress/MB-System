@@ -71,6 +71,7 @@
 #include "mbv_input.h"
 #include "mbv_ui.h"
 #include "mbv_camera.h"
+#include "mbv_draw.h"
 
 /*------------------------------------------------------------------------------*/
 /* What changed in the soundings, for users outside the drawing code: a
@@ -2101,8 +2102,10 @@ int mb3dsoundings_plot(int verbose, int *error) {
     fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
   }
 
-  /* the renderer may draw later by itself */
-  if (mbv_render_defer_draw(MBV_RENDER_SOUNDINGS, 0, 0))
+  /* with OpenGL the renderer may draw later by itself; filling a batch
+     (mbv_draw.h) is the renderer drawing now, without OpenGL */
+  const bool opengl = mbv_draw_opengl();
+  if (opengl && mbv_render_defer_draw(MBV_RENDER_SOUNDINGS, 0, 0))
     return (mbs_status);
 
   /* get sounding data structure */
@@ -2111,24 +2114,28 @@ int mb3dsoundings_plot(int verbose, int *error) {
 /* fprintf(stderr,"Called mb3dsoundings_plot: %d soundings\n",
 soundingdata->num_soundings); */
 
-/* make correct window current for OpenGL */
+  if (opengl) {
+  /* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
-  fprintf(stderr, "%s:%d:%s glXMakeCurrent(%p,%p,%p)\n", __FILE__, __LINE__, __func__, XtDisplay(mb3dsoundings.glwmda),
-          XtWindow(mb3dsoundings.glwmda), mb3dsoundings.glx_context);
+      fprintf(stderr, "%s:%d:%s glXMakeCurrent(%p,%p,%p)\n", __FILE__, __LINE__, __func__, XtDisplay(mb3dsoundings.glwmda),
+              XtWindow(mb3dsoundings.glwmda), mb3dsoundings.glx_context);
 #endif
-  mbv_render_make_current(MBV_RENDER_SOUNDINGS, 0);
+      mbv_render_make_current(MBV_RENDER_SOUNDINGS, 0);
 
 #ifdef MBV_GET_GLX_ERRORS
-  mbview_glerrorcheck(0, __FILE__, __LINE__, __func__);
+      mbview_glerrorcheck(0, __FILE__, __LINE__, __func__);
 #endif
 
 
-  /* set background color */
-  glClearColor(1.0, 1.0, 1.0, 0.0);
-  glClearDepth((GLclampd)(2000 * MBS_OPENGL_WIDTH));
-  glEnable (GL_DEPTH_TEST);
-  glDepthFunc(GL_LESS);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      /* set background color */
+      glClearColor(1.0, 1.0, 1.0, 0.0);
+      glClearDepth((GLclampd)(2000 * MBS_OPENGL_WIDTH));
+  }
+  mbv_draw_enable(MBV_DRAW_DEPTH_TEST);
+  if (opengl) {
+    glDepthFunc(GL_LESS);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  }
 
   /* set projection */
   mb3dsoundings.left = -1.0 / mb3dsoundings.gl_size;
@@ -2136,26 +2143,28 @@ soundingdata->num_soundings); */
   mb3dsoundings.bottom = -1.0 / mb3dsoundings.gl_size;
   mb3dsoundings.top = 1.0 / mb3dsoundings.gl_size;
   mb3dsoundings.aspect_ratio = 1.0 / mb3dsoundings.gl_size;
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  glOrtho(mb3dsoundings.left, mb3dsoundings.right, mb3dsoundings.bottom, mb3dsoundings.top, MBS_OPENGL_ZMIN2D,
-          MBS_OPENGL_ZMAX2D);
-
-  /* set up translations */
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  glTranslated(mb3dsoundings.gl_offset_x, mb3dsoundings.gl_offset_y, MBS_OPENGL_ZMIN2D);
-  glRotated((float)(mb3dsoundings.elevation - 90.0), 1.0, 0.0, 0.0);
-  glRotated((float)(mb3dsoundings.azimuth), 0.0, 0.0, 1.0);
-  /* fprintf(stderr,"elevation:%f azimuth:%f\n",mb3dsoundings.elevation,mb3dsoundings.azimuth); */
-
-  /* get modelview and projection matrices and viewport */
   GLdouble model_matrix[16];
-  glGetDoublev(GL_MODELVIEW_MATRIX, model_matrix);
   GLdouble projection_matrix[16];
-  glGetDoublev(GL_PROJECTION_MATRIX, projection_matrix);
   GLint viewport[4];
-  glGetIntegerv(GL_VIEWPORT, viewport);
+  if (opengl) {
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(mb3dsoundings.left, mb3dsoundings.right, mb3dsoundings.bottom, mb3dsoundings.top, MBS_OPENGL_ZMIN2D,
+            MBS_OPENGL_ZMAX2D);
+
+    /* set up translations */
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glTranslated(mb3dsoundings.gl_offset_x, mb3dsoundings.gl_offset_y, MBS_OPENGL_ZMIN2D);
+    glRotated((float)(mb3dsoundings.elevation - 90.0), 1.0, 0.0, 0.0);
+    glRotated((float)(mb3dsoundings.azimuth), 0.0, 0.0, 1.0);
+    /* fprintf(stderr,"elevation:%f azimuth:%f\n",mb3dsoundings.elevation,mb3dsoundings.azimuth); */
+
+    /* get modelview and projection matrices and viewport */
+    glGetDoublev(GL_MODELVIEW_MATRIX, model_matrix);
+    glGetDoublev(GL_PROJECTION_MATRIX, projection_matrix);
+    glGetIntegerv(GL_VIEWPORT, viewport);
+  }
 
   float glxmin, glymin, glxmax, glymax;
 
@@ -2167,117 +2176,117 @@ soundingdata->num_soundings); */
     glymax = soundingdata->scale * soundingdata->ymax;
     float glzmin = mb3dsoundings.exaggeration * soundingdata->zscale * soundingdata->zmin;
     float glzmax = mb3dsoundings.exaggeration * soundingdata->zscale * soundingdata->zmax;
-    glLineWidth(1.0);
-    glColor3f(0.0, 0.0, 0.0);
-    glEnable(GL_LINE_STIPPLE);
+    mbv_draw_line_width(1.0);
+    mbv_draw_color3f(0.0, 0.0, 0.0);
+    mbv_draw_enable(MBV_DRAW_LINE_STIPPLE);
 
     if (mb3dsoundings.elevation <= 0.0)
-      glLineStipple(1, 0xFFFF);
+      mbv_draw_line_stipple(1, 0xFFFF);
     else
-      glLineStipple(1, 0x1111);
-    glBegin(GL_LINE_LOOP);
-    glVertex3f(glxmin, glymin, glzmin);
-    glVertex3f(glxmax, glymin, glzmin);
-    glVertex3f(glxmax, glymax, glzmin);
-    glVertex3f(glxmin, glymax, glzmin);
-    glEnd();
+      mbv_draw_line_stipple(1, 0x1111);
+    mbv_draw_begin(MBV_DRAW_LINE_LOOP);
+    mbv_draw_vertex3f(glxmin, glymin, glzmin);
+    mbv_draw_vertex3f(glxmax, glymin, glzmin);
+    mbv_draw_vertex3f(glxmax, glymax, glzmin);
+    mbv_draw_vertex3f(glxmin, glymax, glzmin);
+    mbv_draw_end();
 
     if (mb3dsoundings.elevation >= 0.0)
-      glLineStipple(1, 0xFFFF);
+      mbv_draw_line_stipple(1, 0xFFFF);
     else
-      glLineStipple(1, 0x1111);
-    glBegin(GL_LINE_LOOP);
-    glVertex3f(glxmin, glymin, glzmax);
-    glVertex3f(glxmax, glymin, glzmax);
-    glVertex3f(glxmax, glymax, glzmax);
-    glVertex3f(glxmin, glymax, glzmax);
-    glEnd();
+      mbv_draw_line_stipple(1, 0x1111);
+    mbv_draw_begin(MBV_DRAW_LINE_LOOP);
+    mbv_draw_vertex3f(glxmin, glymin, glzmax);
+    mbv_draw_vertex3f(glxmax, glymin, glzmax);
+    mbv_draw_vertex3f(glxmax, glymax, glzmax);
+    mbv_draw_vertex3f(glxmin, glymax, glzmax);
+    mbv_draw_end();
 
     if ((mb3dsoundings.azimuth >= 0.0 && mb3dsoundings.azimuth <= 90.0) ||
         (mb3dsoundings.azimuth >= 270.0 && mb3dsoundings.azimuth <= 360.0)) {
       if (mb3dsoundings.elevation >= -90.0 && mb3dsoundings.elevation <= 90.0)
-        glLineStipple(1, 0xFFFF);
+        mbv_draw_line_stipple(1, 0xFFFF);
       else
-        glLineStipple(1, 0x1111);
+        mbv_draw_line_stipple(1, 0x1111);
     }
     else {
       if (mb3dsoundings.elevation >= -90.0 && mb3dsoundings.elevation <= 90.0)
-        glLineStipple(1, 0x1111);
+        mbv_draw_line_stipple(1, 0x1111);
       else
-        glLineStipple(1, 0xFFFF);
+        mbv_draw_line_stipple(1, 0xFFFF);
     }
-    glBegin(GL_LINE_LOOP);
-    glVertex3f(glxmin, glymin, glzmin);
-    glVertex3f(glxmax, glymin, glzmin);
-    glVertex3f(glxmax, glymin, glzmax);
-    glVertex3f(glxmin, glymin, glzmax);
-    glEnd();
+    mbv_draw_begin(MBV_DRAW_LINE_LOOP);
+    mbv_draw_vertex3f(glxmin, glymin, glzmin);
+    mbv_draw_vertex3f(glxmax, glymin, glzmin);
+    mbv_draw_vertex3f(glxmax, glymin, glzmax);
+    mbv_draw_vertex3f(glxmin, glymin, glzmax);
+    mbv_draw_end();
 
     if (mb3dsoundings.azimuth >= 180.0 && mb3dsoundings.azimuth <= 360.0) {
       if (mb3dsoundings.elevation >= -90.0 && mb3dsoundings.elevation <= 90.0)
-        glLineStipple(1, 0xFFFF);
+        mbv_draw_line_stipple(1, 0xFFFF);
       else
-        glLineStipple(1, 0x1111);
+        mbv_draw_line_stipple(1, 0x1111);
     }
     else {
       if (mb3dsoundings.elevation >= -90.0 && mb3dsoundings.elevation <= 90.0)
-        glLineStipple(1, 0x1111);
+        mbv_draw_line_stipple(1, 0x1111);
       else
-        glLineStipple(1, 0xFFFF);
+        mbv_draw_line_stipple(1, 0xFFFF);
     }
-    glBegin(GL_LINE_LOOP);
-    glVertex3f(glxmax, glymin, glzmin);
-    glVertex3f(glxmax, glymax, glzmin);
-    glVertex3f(glxmax, glymax, glzmax);
-    glVertex3f(glxmax, glymin, glzmax);
-    glEnd();
+    mbv_draw_begin(MBV_DRAW_LINE_LOOP);
+    mbv_draw_vertex3f(glxmax, glymin, glzmin);
+    mbv_draw_vertex3f(glxmax, glymax, glzmin);
+    mbv_draw_vertex3f(glxmax, glymax, glzmax);
+    mbv_draw_vertex3f(glxmax, glymin, glzmax);
+    mbv_draw_end();
 
     if (mb3dsoundings.azimuth >= 90.0 && mb3dsoundings.azimuth <= 270.0) {
       if (mb3dsoundings.elevation >= -90.0 && mb3dsoundings.elevation <= 90.0)
-        glLineStipple(1, 0xFFFF);
+        mbv_draw_line_stipple(1, 0xFFFF);
       else
-        glLineStipple(1, 0x1111);
+        mbv_draw_line_stipple(1, 0x1111);
     }
     else {
       if (mb3dsoundings.elevation >= -90.0 && mb3dsoundings.elevation <= 90.0)
-        glLineStipple(1, 0x1111);
+        mbv_draw_line_stipple(1, 0x1111);
       else
-        glLineStipple(1, 0xFFFF);
+        mbv_draw_line_stipple(1, 0xFFFF);
     }
-    glBegin(GL_LINE_LOOP);
-    glVertex3f(glxmax, glymax, glzmin);
-    glVertex3f(glxmin, glymax, glzmin);
-    glVertex3f(glxmin, glymax, glzmax);
-    glVertex3f(glxmax, glymax, glzmax);
-    glEnd();
+    mbv_draw_begin(MBV_DRAW_LINE_LOOP);
+    mbv_draw_vertex3f(glxmax, glymax, glzmin);
+    mbv_draw_vertex3f(glxmin, glymax, glzmin);
+    mbv_draw_vertex3f(glxmin, glymax, glzmax);
+    mbv_draw_vertex3f(glxmax, glymax, glzmax);
+    mbv_draw_end();
 
     if ((mb3dsoundings.azimuth >= 0.0 && mb3dsoundings.azimuth <= 180.0) ||
         (mb3dsoundings.azimuth >= 0.0 && mb3dsoundings.azimuth <= 90.0)) {
       if (mb3dsoundings.elevation >= -90.0 && mb3dsoundings.elevation <= 90.0)
-        glLineStipple(1, 0xFFFF);
+        mbv_draw_line_stipple(1, 0xFFFF);
       else
-        glLineStipple(1, 0x1111);
+        mbv_draw_line_stipple(1, 0x1111);
     }
     else {
       if (mb3dsoundings.elevation >= -90.0 && mb3dsoundings.elevation <= 90.0)
-        glLineStipple(1, 0x1111);
+        mbv_draw_line_stipple(1, 0x1111);
       else
-        glLineStipple(1, 0xFFFF);
+        mbv_draw_line_stipple(1, 0xFFFF);
     }
-    glBegin(GL_LINE_LOOP);
-    glVertex3f(glxmin, glymax, glzmin);
-    glVertex3f(glxmin, glymin, glzmin);
-    glVertex3f(glxmin, glymin, glzmax);
-    glVertex3f(glxmin, glymax, glzmax);
-    glEnd();
+    mbv_draw_begin(MBV_DRAW_LINE_LOOP);
+    mbv_draw_vertex3f(glxmin, glymax, glzmin);
+    mbv_draw_vertex3f(glxmin, glymin, glzmin);
+    mbv_draw_vertex3f(glxmin, glymin, glzmax);
+    mbv_draw_vertex3f(glxmin, glymax, glzmax);
+    mbv_draw_end();
 
-    glDisable(GL_LINE_STIPPLE);
+    mbv_draw_disable(MBV_DRAW_LINE_STIPPLE);
   }
 
   /* Plot the profiles if desired */
   if (mb3dsoundings.view_profiles != MBS_VIEW_PROFILES_NONE) {
-    glLineWidth(1.0);
-    glBegin(GL_LINES);
+    mbv_draw_line_width(1.0);
+    mbv_draw_begin(MBV_DRAW_LINES);
     for (int i = 0; i < soundingdata->num_soundings - 1; i++) {
       struct mb3dsoundings_sounding_struct *sounding = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
       struct mb3dsoundings_sounding_struct *sounding2 = (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i + 1]);
@@ -2286,153 +2295,167 @@ soundingdata->num_soundings); */
       if (sounding2->ifile == sounding->ifile && sounding->iping == sounding2->iping && sounding->iprofile == sounding2->iprofile) {
         /* plot in black if both soundings are good */
         if (mb_beam_ok(sounding->beamflag) && mb_beam_ok(sounding2->beamflag)) {
-          glColor3f(0.0, 0.0, 0.0);
-          glVertex3f(sounding->glx, sounding->gly, sounding->glz);
-          glVertex3f(sounding2->glx, sounding2->gly, sounding2->glz);
+          mbv_draw_color3f(0.0, 0.0, 0.0);
+          mbv_draw_vertex3f(sounding->glx, sounding->gly, sounding->glz);
+          mbv_draw_vertex3f(sounding2->glx, sounding2->gly, sounding2->glz);
         }
 
         /* else plot in red if flagged profiles are desired */
         else if (mb3dsoundings.view_profiles == MBS_VIEW_PROFILES_ALL) {
-          glColor3f(1.0, 0.0, 0.0);
-          glVertex3f(sounding->glx, sounding->gly, sounding->glz);
-          glVertex3f(sounding2->glx, sounding2->gly, sounding2->glz);
+          mbv_draw_color3f(1.0, 0.0, 0.0);
+          mbv_draw_vertex3f(sounding->glx, sounding->gly, sounding->glz);
+          mbv_draw_vertex3f(sounding2->glx, sounding2->gly, sounding2->glz);
         }
       }
     }
-    glEnd();
+    mbv_draw_end();
   }
 
   /* Plot the soundings */
 
   /* Color by flag state */
   if (mb3dsoundings.view_color == MBS_VIEW_COLOR_FLAG) {
-    glPointSize(3.0);
-    glBegin(GL_POINTS);
-    for (int i = 0; i < soundingdata->num_soundings; i++) {
-      struct mb3dsoundings_sounding_struct *sounding =
-        (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+    mbv_draw_point_size(3.0);
+    mbv_draw_slot(MBV_DRAW_SLOT_SOUNDINGS);
+    if (opengl) {
+      glBegin(GL_POINTS);
+      for (int i = 0; i < soundingdata->num_soundings; i++) {
+        struct mb3dsoundings_sounding_struct *sounding =
+          (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
 
-      /* plot unflagged sounding, and flagged sounding if requested, in the
-         colour of its flag (mb3dsoundings_flag_color) */
-      float r, g, b;
-      if (mb3dsoundings_flag_color(sounding, &r, &g, &b)) {
-        glColor3f(r, g, b);
-        glVertex3f(sounding->glx, sounding->gly, sounding->glz);
+        /* plot unflagged sounding, and flagged sounding if requested, in the
+           colour of its flag (mb3dsoundings_flag_color) */
+        float r, g, b;
+        if (mb3dsoundings_flag_color(sounding, &r, &g, &b)) {
+          glColor3f(r, g, b);
+          glVertex3f(sounding->glx, sounding->gly, sounding->glz);
+        }
       }
+      glEnd();
     }
-    glEnd();
   }
 
   /* Color by topography */
   else if (mb3dsoundings.view_color == MBS_VIEW_COLOR_TOPO) {
-    glPointSize(3.0);
-    glBegin(GL_POINTS);
-    for (int i = 0; i < soundingdata->num_soundings; i++) {
-      struct mb3dsoundings_sounding_struct *sounding =
-        (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+    mbv_draw_point_size(3.0);
+    mbv_draw_slot(MBV_DRAW_SLOT_SOUNDINGS);
+    if (opengl) {
+      glBegin(GL_POINTS);
+      for (int i = 0; i < soundingdata->num_soundings; i++) {
+        struct mb3dsoundings_sounding_struct *sounding =
+          (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
 
-      /* plot sounding */
-      if (mb3dsoundings_shown(sounding)) {
-        glColor3f(sounding->r, sounding->g, sounding->b);
-        glVertex3f(sounding->glx, sounding->gly, sounding->glz);
+        /* plot sounding */
+        if (mb3dsoundings_shown(sounding)) {
+          glColor3f(sounding->r, sounding->g, sounding->b);
+          glVertex3f(sounding->glx, sounding->gly, sounding->glz);
+        }
       }
+      glEnd();
     }
-    glEnd();
   }
 
   /* Color by soundings - stretch the topography color scale over the
      range of soundings currently displayed in the 3D Soundings view
      rather than the associated Survey Viewer's min/max */
   else if (mb3dsoundings.view_color == MBS_VIEW_COLOR_SOUNDING) {
+    mbv_draw_point_size(3.0);
+    mbv_draw_slot(MBV_DRAW_SLOT_SOUNDINGS);
+    if (opengl) {
 
-    /* get the topography min max over the soundings currently viewed
-       (mb3dsoundings_depth_range) */
-    double zmin;
-    double zmax;
-    mb3dsoundings_depth_range(soundingdata, &zmin, &zmax);
+      /* get the topography min max over the soundings currently viewed
+         (mb3dsoundings_depth_range) */
+      double zmin;
+      double zmax;
+      mb3dsoundings_depth_range(soundingdata, &zmin, &zmax);
 
-    glPointSize(3.0);
-    glBegin(GL_POINTS);
-    for (int i = 0; i < soundingdata->num_soundings; i++) {
-      struct mb3dsoundings_sounding_struct *sounding =
-        (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+      glBegin(GL_POINTS);
+      for (int i = 0; i < soundingdata->num_soundings; i++) {
+        struct mb3dsoundings_sounding_struct *sounding =
+          (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
 
-      /* plot sounding */
-      if (mb3dsoundings_shown(sounding)) {
-        float r, g, b;
-        mb3dsoundings_depth_color(sounding->z, zmin, zmax, &r, &g, &b);
-        glColor3f(r, g, b);
-        glVertex3f(sounding->glx, sounding->gly, sounding->glz);
+        /* plot sounding */
+        if (mb3dsoundings_shown(sounding)) {
+          float r, g, b;
+          mb3dsoundings_depth_color(sounding->z, zmin, zmax, &r, &g, &b);
+          glColor3f(r, g, b);
+          glVertex3f(sounding->glx, sounding->gly, sounding->glz);
+        }
       }
+      glEnd();
     }
-    glEnd();
   }
 
   /* Color by amplitude */
   else if (mb3dsoundings.view_color == MBS_VIEW_COLOR_AMP) {
+    mbv_draw_point_size(3.0);
+    mbv_draw_slot(MBV_DRAW_SLOT_SOUNDINGS);
+    if (opengl) {
 
-    /* get the amplitude min max over the soundings drawn
-       (mb3dsoundings_amplitude_range) */
-    double ampmin;
-    double ampmax;
-    mb3dsoundings_amplitude_range(soundingdata, &ampmin, &ampmax);
+      /* get the amplitude min max over the soundings drawn
+         (mb3dsoundings_amplitude_range) */
+      double ampmin;
+      double ampmax;
+      mb3dsoundings_amplitude_range(soundingdata, &ampmin, &ampmax);
 
-    glPointSize(3.0);
-    glBegin(GL_POINTS);
-    for (int i = 0; i < soundingdata->num_soundings; i++) {
-      struct mb3dsoundings_sounding_struct *sounding =
-        (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+      glBegin(GL_POINTS);
+      for (int i = 0; i < soundingdata->num_soundings; i++) {
+        struct mb3dsoundings_sounding_struct *sounding =
+          (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
 
-      /* plot sounding */
-      if (mb3dsoundings_shown(sounding)) {
-        float r, g, b;
-        mb3dsoundings_amplitude_color(sounding->a, ampmin, ampmax, &r, &g, &b);
-        glColor3f(r, g, b);
-        glVertex3f(sounding->glx, sounding->gly, sounding->glz);
+        /* plot sounding */
+        if (mb3dsoundings_shown(sounding)) {
+          float r, g, b;
+          mb3dsoundings_amplitude_color(sounding->a, ampmin, ampmax, &r, &g, &b);
+          glColor3f(r, g, b);
+          glVertex3f(sounding->glx, sounding->gly, sounding->glz);
+        }
       }
+      glEnd();
     }
-    glEnd();
   }
 
   /* If in info mode and sounding picked plot it green if view color by flag, black otherwise */
   if (mb3dsoundings.edit_mode == MBS_EDIT_INFO && mb3dsoundings.last_sounding_defined) {
     if (mb3dsoundings.view_color == MBS_VIEW_COLOR_FLAG) {
-      glColor3f(0.0, 1.0, 1.0);
+      mbv_draw_color3f(0.0, 1.0, 1.0);
     }
     else {
-      glColor3f(0.0, 0.0, 0.0);
+      mbv_draw_color3f(0.0, 0.0, 0.0);
     }
-    glBegin(GL_POINTS);
+    mbv_draw_begin(MBV_DRAW_POINTS);
     struct mb3dsoundings_sounding_struct *sounding =
       (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[mb3dsoundings.last_sounding_edited]);
-    glVertex3f(sounding->glx, sounding->gly, sounding->glz);
-    glEnd();
+    mbv_draw_vertex3f(sounding->glx, sounding->gly, sounding->glz);
+    mbv_draw_end();
   }
 
-  /* save the screen positions of the soundings to facilitate picking */
-  for (int i = 0; i < soundingdata->num_soundings; i++) {
-    struct mb3dsoundings_sounding_struct *sounding =
-      (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
-    if (mb_beam_ok(sounding->beamflag)) {
-      glVertex3f(sounding->glx, sounding->gly, sounding->glz);
-      /* fprintf(stderr," PLOTTED");*/
+  /* save the screen positions of the soundings to facilitate picking; without
+     OpenGL the readers fill them on demand (mb3dsoundings_screen_positions) */
+  if (opengl) {
+    for (int i = 0; i < soundingdata->num_soundings; i++) {
+      struct mb3dsoundings_sounding_struct *sounding =
+        (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
+      if (mb_beam_ok(sounding->beamflag)) {
+        glVertex3f(sounding->glx, sounding->gly, sounding->glz);
+        /* fprintf(stderr," PLOTTED");*/
+      }
+      double xx;
+      double yy;
+      double zz;
+      gluProject((double)(sounding->glx), (double)(sounding->gly), (double)(sounding->glz), model_matrix, projection_matrix,
+                 viewport, &xx, &yy, &zz);
+      sounding->winx = (int)xx;
+      sounding->winy = (int)yy;
     }
-    double xx;
-    double yy;
-    double zz;
-    gluProject((double)(sounding->glx), (double)(sounding->gly), (double)(sounding->glz), model_matrix, projection_matrix,
-               viewport, &xx, &yy, &zz);
-    sounding->winx = (int)xx;
-    sounding->winy = (int)yy;
-  }
 
-  /* the screen positions belong to this camera and these soundings, so the
-     pick, erase, grab and info functions use them as they are */
-  mb3dsoundings_screen_stamp();
+    /* the screen positions belong to this camera and these soundings, so the
+       pick, erase, grab and info functions use them as they are */
+    mb3dsoundings_screen_stamp();
+  }
 
   /* plot grab rectangle before rotations */
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
+  mbv_draw_identity_modelview();
   if (mb3dsoundings.button1down && mb3dsoundings.grab_start_defined &&
       mb3dsoundings.grab_end_defined) {
     const int grabxmin = MIN(mb3dsoundings.grab_start_x, mb3dsoundings.grab_end_x);
@@ -2448,23 +2471,25 @@ soundingdata->num_soundings); */
     glymax = (mb3dsoundings.top - mb3dsoundings.bottom) * ((float)grabymax) / ((float)mb3dsoundings.gl_height) -
              0.5 * (mb3dsoundings.top - mb3dsoundings.bottom);
     /* fprintf(stderr,"glxmin:%f glxmax:%f glymin:%f glymax:%f\n", glxmin, glxmax, glymin, glymax); */
-    glColor3f(1.0, 1.0, 0.0);
-    glLineWidth(3.0);
-    glBegin(GL_LINE_LOOP);
-    glVertex3f(glxmin, glymin, -MBS_OPENGL_ZMIN2D - 0.5 * (MBS_OPENGL_ZMAX2D - MBS_OPENGL_ZMIN2D));
-    glVertex3f(glxmax, glymin, -MBS_OPENGL_ZMIN2D - 0.5 * (MBS_OPENGL_ZMAX2D - MBS_OPENGL_ZMIN2D));
-    glVertex3f(glxmax, glymax, -MBS_OPENGL_ZMIN2D - 0.5 * (MBS_OPENGL_ZMAX2D - MBS_OPENGL_ZMIN2D));
-    glVertex3f(glxmin, glymax, -MBS_OPENGL_ZMIN2D - 0.5 * (MBS_OPENGL_ZMAX2D - MBS_OPENGL_ZMIN2D));
-    glEnd();
-    glLineWidth(1.0);
+    mbv_draw_color3f(1.0, 1.0, 0.0);
+    mbv_draw_line_width(3.0);
+    mbv_draw_begin(MBV_DRAW_LINE_LOOP);
+    mbv_draw_vertex3f(glxmin, glymin, -MBS_OPENGL_ZMIN2D - 0.5 * (MBS_OPENGL_ZMAX2D - MBS_OPENGL_ZMIN2D));
+    mbv_draw_vertex3f(glxmax, glymin, -MBS_OPENGL_ZMIN2D - 0.5 * (MBS_OPENGL_ZMAX2D - MBS_OPENGL_ZMIN2D));
+    mbv_draw_vertex3f(glxmax, glymax, -MBS_OPENGL_ZMIN2D - 0.5 * (MBS_OPENGL_ZMAX2D - MBS_OPENGL_ZMIN2D));
+    mbv_draw_vertex3f(glxmin, glymax, -MBS_OPENGL_ZMIN2D - 0.5 * (MBS_OPENGL_ZMAX2D - MBS_OPENGL_ZMIN2D));
+    mbv_draw_end();
+    mbv_draw_line_width(1.0);
   }
-  glDisable (GL_DEPTH_TEST);
+  mbv_draw_disable(MBV_DRAW_DEPTH_TEST);
 
   /* flush opengl buffers */
-  glFlush();
+  if (opengl)
+    glFlush();
 
   /* swap opengl buffers */
-  mbv_render_present(MBV_RENDER_SOUNDINGS, 0);
+  if (opengl)
+    mbv_render_present(MBV_RENDER_SOUNDINGS, 0);
 
 #ifdef MBV_GET_GLX_ERRORS
   mbview_glerrorcheck(0, __FILE__, __LINE__, __func__);

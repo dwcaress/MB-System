@@ -69,6 +69,7 @@ extern "C" {
 #include "mb_define.h"
 #include "mb_status.h"
 #include "mbview.h"
+#include "mbv_draw_batch.h"
 }
 #include "mbvq.h"
 #include "mbvq_bridge.h"
@@ -443,6 +444,60 @@ int test_null() {
     mb3dsoundings_getmarks(0, &position4, &color4, &mask4, &error);
     check(color4 > color3 && position4 == position3 && mask4 == mask3,
           "the program telling of new colours raises the colour mark only");
+  }
+
+  /* the drawing as data (src/mbview/mbv_draw_batch.h): with a batch as the
+     target the view is recorded, not drawn - here without any OpenGL context,
+     so a single OpenGL call would fail. The view shows the bounding box (its
+     six faces as stippled line loops, black, with the depth test) and the
+     soundings, whose points are a slot between them. */
+  {
+    struct mbv_draw_batch batch;
+    mbv_draw_batch_init(&batch);
+    mbv_draw_set_target(&batch);
+    int error = MB_ERROR_NO_ERROR;
+    mb3dsoundings_plot(0, &error);
+    mbv_draw_set_target(nullptr);
+    int loops = 0, loops_ok = 0, slot_count = 0, other = 0;
+    for (int c = 0; c < batch.num_commands; c++) {
+      const struct mbv_draw_command &command = batch.commands[c];
+      if (command.kind == MBV_DRAW_SLOT && command.primitive == MBV_DRAW_SLOT_SOUNDINGS) {
+        slot_count++;
+      } else if (command.kind == MBV_DRAW_PRIMITIVE && command.primitive == MBV_DRAW_LINE_LOOP) {
+        loops++;
+        bool ok = command.count == 4 && command.stipple && command.depth_test && command.camera;
+        for (int v = command.first; ok && v < command.first + command.count; v++)
+          ok = batch.vertices[v].rgba[0] == 0 && batch.vertices[v].rgba[1] == 0 && batch.vertices[v].rgba[2] == 0 &&
+               batch.vertices[v].rgba[3] == 255;
+        loops_ok += ok ? 1 : 0;
+      } else {
+        other++;
+      }
+    }
+    check(mbv_draw_get_target() == nullptr && !batch.failed, "filling a batch draws nothing and leaves OpenGL as the target");
+    check(loops == 6 && loops_ok == 6 && batch.num_vertices == 24,
+          "the batch holds the bounding box: " + std::to_string(loops) + " stippled black line loops, " +
+              std::to_string(batch.num_vertices) + " vertices");
+    check(slot_count == 1 && other == 0, "the soundings points are one slot in the batch");
+
+    /* the recorder keeps OpenGL's rules: a vertex outside begin and end draws
+       nothing, state changes inside are ignored, an empty primitive is no
+       command */
+    mbv_draw_batch_clear(&batch);
+    mbv_draw_batch_vertex3f(&batch, 1.0f, 2.0f, 3.0f);
+    mbv_draw_batch_begin(&batch, MBV_DRAW_LINES);
+    mbv_draw_batch_end(&batch);
+    mbv_draw_batch_color3f(&batch, 1.0f, 0.5f, 0.0f);
+    mbv_draw_batch_begin(&batch, MBV_DRAW_LINE_STRIP);
+    mbv_draw_batch_line_width(&batch, 7.0f);
+    mbv_draw_batch_vertex3f(&batch, 0.0f, 0.0f, 0.0f);
+    mbv_draw_batch_vertex3f(&batch, 1.0f, 1.0f, 0.0f);
+    mbv_draw_batch_end(&batch);
+    check(batch.num_commands == 1 && batch.num_vertices == 2 && batch.commands[0].primitive == MBV_DRAW_LINE_STRIP &&
+              batch.commands[0].line_width == 1.0f && batch.vertices[0].rgba[0] == 255 &&
+              batch.vertices[0].rgba[1] == 128 && batch.vertices[0].rgba[2] == 0,
+          "the recorder keeps OpenGL's rules (colour 1, 0.5, 0 recorded as 255, 128, 0)");
+    mbv_draw_batch_free(&batch);
   }
 
   /* keys reach the core: ',' flags all soundings in view */
