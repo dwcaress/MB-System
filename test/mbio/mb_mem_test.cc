@@ -203,4 +203,74 @@ TEST(MbMem, UpdateArrayptrLocalCopyAfterStagedBathThenSidescanGrow) {
   EXPECT_EQ(MB_SUCCESS, mb_deall_ioarrays(verbose, &mbio, &error));
 }
 
+// A failed reallocation in mb_update_arrays() must leave the descriptor as it
+// was before the call: the failure is reported, the descriptor and every array
+// keep their allocations and the dimensions are unchanged, a later call can
+// still grow them, and mb_deall_ioarrays() (called by mb_close()) frees all.
+TEST(MbMem, UpdateArraysFailureKeepsDescriptorAndArrays) {
+  int error = MB_ERROR_NO_ERROR;
+  const int verbose = 0;
+  int nblocks_start = 0;
+  int nallocmax = 0;
+  int overflow = 0;
+  size_t allocsize = 0;
+  ASSERT_EQ(MB_SUCCESS, mb_memory_status(verbose, &nblocks_start, &nallocmax, &overflow, &allocsize, &error));
+
+  // Allocated the way mb_read_init() allocates it.
+  struct mb_io_struct *mbio = nullptr;
+  ASSERT_EQ(MB_SUCCESS, mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mb_io_struct), (void **)&mbio, &error));
+  InitMinimalMbio(mbio, 0, 0);
+
+  double *bath = nullptr;
+  double *amp = nullptr;
+  ASSERT_EQ(MB_SUCCESS, mb_register_array(verbose, mbio, MB_MEM_TYPE_BATHYMETRY,
+                                          sizeof(double), (void **)&bath, &error));
+  ASSERT_EQ(MB_SUCCESS, mb_register_array(verbose, mbio, MB_MEM_TYPE_AMPLITUDE,
+                                          sizeof(double), (void **)&amp, &error));
+  ASSERT_EQ(MB_SUCCESS, mb_update_arrays(verbose, mbio, 100, 100, 0, &error));
+  ASSERT_EQ(256, mbio->beams_bath_alloc);
+  ASSERT_EQ(256, mbio->beams_amp_alloc);
+  bath[255] = 1.0;
+  amp[255] = 2.0;
+  double *const bath_before = bath;
+  double *const amp_before = amp;
+  double *const mbio_amp_before = mbio->amp;
+
+  // An impossible element size makes the growth of the registered
+  // bathymetry array fail after the standard bathymetry arrays have grown.
+  mbio->regarray_size[0] = static_cast<size_t>(1) << 52;
+  EXPECT_EQ(MB_FAILURE, mb_update_arrays(verbose, mbio, 300, 300, 0, &error));
+  EXPECT_EQ(MB_ERROR_MEMORY_FAIL, error);
+  EXPECT_EQ(256, mbio->beams_bath_alloc);
+  EXPECT_EQ(256, mbio->beams_amp_alloc);
+  EXPECT_EQ(100, mbio->beams_bath_max);
+  EXPECT_EQ(100, mbio->beams_amp_max);
+  ASSERT_EQ(bath_before, bath);
+  ASSERT_EQ(amp_before, amp);
+  EXPECT_EQ(static_cast<void *>(bath), mbio->regarray_ptr[0]);
+  EXPECT_EQ(1.0, bath[255]);
+  EXPECT_EQ(2.0, amp[255]);
+  EXPECT_NE(nullptr, mbio->beamflag);
+  EXPECT_NE(nullptr, mbio->new_bath_alongtrack);
+  EXPECT_EQ(mbio_amp_before, mbio->amp);
+
+  // With a normal element size the next call grows everything.
+  mbio->regarray_size[0] = sizeof(double);
+  ASSERT_EQ(MB_SUCCESS, mb_update_arrays(verbose, mbio, 300, 300, 0, &error));
+  EXPECT_EQ(512, mbio->beams_bath_alloc);
+  EXPECT_EQ(512, mbio->beams_amp_alloc);
+  EXPECT_EQ(1.0, bath[255]);
+  EXPECT_EQ(2.0, amp[255]);
+  bath[511] = 3.0;
+  amp[511] = 4.0;
+
+  EXPECT_EQ(MB_SUCCESS, mb_deall_ioarrays(verbose, mbio, &error));
+  EXPECT_EQ(nullptr, bath);
+  EXPECT_EQ(nullptr, amp);
+  EXPECT_EQ(MB_SUCCESS, mb_freed(verbose, __FILE__, __LINE__, (void **)&mbio, &error));
+  int nblocks_end = 0;
+  ASSERT_EQ(MB_SUCCESS, mb_memory_status(verbose, &nblocks_end, &nallocmax, &overflow, &allocsize, &error));
+  EXPECT_EQ(nblocks_start, nblocks_end);
+}
+
 }  // namespace

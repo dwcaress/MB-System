@@ -5055,6 +5055,12 @@ to by \fImbio_ptr\fP to match new maximum numbers of bathymetry
 beams \fInbath\fP, amplitude beams \fInamp\fP, and sidescan pixels
 \fInss\fP. It is called internally as necessary while reading data
 whose numbers of beams or pixels can vary from ping to ping.
+If an allocation fails, the function returns \fBMB_FAILURE\fP with
+\fI*error\fP set to \fBMB_ERROR_MEMORY_FAIL\fP and keeps the previous
+dimensions. Every array stays allocated, at least at its previous size
+and with its contents (an array enlarged before the failure keeps its
+new allocation), so that the descriptor can still be used and
+\fBmb_close\fP frees the arrays as usual.
 
 \---------------------------------------------------------
 .br
