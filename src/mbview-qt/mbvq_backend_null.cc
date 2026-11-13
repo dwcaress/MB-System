@@ -23,8 +23,10 @@
  *--------------------------------------------------------------------*/
 /*
  * Null backend: draws nothing. The core keeps glx_init false, so it skips
- * all drawing and finds no picks, while every other part (mouse modes,
- * background work, labels) runs as usual. For tests without a display.
+ * all drawing, while every other part (mouse modes, background work, labels)
+ * runs as usual. Terrain picks are found on the CPU (mbvq_pick_cpu.c), so
+ * the mouse modes pick as with a drawing backend. For tests without a
+ * display.
  */
 
 #include <QEvent>
@@ -108,7 +110,8 @@ bool defer_draw(int view, size_t instance, int rez) {
 }  // namespace
 
 void install() {
-  const struct mbv_render_ops ops = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, defer_draw};
+  const struct mbv_render_ops ops = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, defer_draw,
+                                     mbvq_pick_cpu_terrain, mbvq_pick_cpu_viewbounds};
   mbv_render_set_ops(&ops);
 }
 

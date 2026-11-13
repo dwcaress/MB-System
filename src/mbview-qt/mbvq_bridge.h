@@ -316,6 +316,14 @@ struct mbvq_soundings_state {
 };
 void mbvq_c_soundings_state(struct mbvq_soundings_state *state);
 
+/* ---- implemented by the C half (mbvq_pick_cpu.c) ---- */
+
+/* the terrain pick and the 3D view bounds of the map view on the CPU, for
+   backends that do not draw with OpenGL: the pick_terrain and view_bounds
+   entries of struct mbv_render_ops (mbv_render.h) */
+bool mbvq_pick_cpu_terrain(size_t instance, int xpixel, int ypixel, double *xgrid, double *ygrid, double *zdata);
+void mbvq_pick_cpu_viewbounds(size_t instance, int viewbounds[4]);
+
 /* ---- implemented by the Qt half ---- */
 
 /* true if the backend draws (the legacy OpenGL backend), false for the null backend */
