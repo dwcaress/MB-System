@@ -56,7 +56,9 @@
 #include <QRadioButton>
 #include <QSlider>
 #include <QTimer>
+#include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -75,6 +77,7 @@ extern "C" {
 /* from the private soundings header, which needs the Motif-shaped headers */
 extern "C" void mb3dsoundings_setviewtoggle(int toggle, bool state);
 constexpr int kViewToggleBoundingBox = 2; /* MBS_VIEWTOGGLE_BOUNDINGBOX */
+constexpr int kViewToggleFlagged = 0;     /* MBS_VIEWTOGGLE_FLAGGED */
 
 namespace {
 
@@ -308,6 +311,140 @@ int test_null() {
   check(status.contains(QStringLiteral("Tot:5000")) && status.contains(QStringLiteral("Flagged:218")),
         "Reset View shows the sounding counts in the status line: " + status.toStdString());
 
+  /* the soundings as data, for a renderer without OpenGL
+     (src/mbview/mbv_soundings_core.c): what changed, the colours and display
+     positions it draws, and the screen positions a pick needs - which the null
+     backend never draws, so they are filled on demand */
+  {
+    int error = MB_ERROR_NO_ERROR;
+    uint64_t position = 0, color = 0, mask = 0;
+    mb3dsoundings_getmarks(0, &position, &color, &mask, &error);
+    uint64_t position2 = 0, color2 = 0, mask2 = 0;
+    mb3dsoundings_getmarks(0, &position2, &color2, &mask2, &error);
+    check(position > 0 && color > 0 && mask > 0, "handing over the soundings raised every mark");
+    check(position2 == position && color2 == color && mask2 == mask, "reading the marks changes nothing");
+
+    int count = 0;
+    mb3dsoundings_getcount(0, &count, &error);
+    check(count == static_cast<int>(storage.size()), "the count of the soundings shown (" + std::to_string(count) + ")");
+    int manual = 0;
+    for (const auto &sounding : storage)
+      manual += (sounding.beamflag & MB_FLAG_MANUAL) != 0 ? 1 : 0;
+
+    /* the flag colour mode with flagged soundings shown: the unflagged ones in
+       their beam colour (black here), the manually flagged ones red */
+    std::vector<unsigned char> rgba(4 * storage.size());
+    int n = 0;
+    int colors_status = mb3dsoundings_colors(0, count, rgba.data(), &n, &error);
+    int black = 0, red = 0, other = 0;
+    for (size_t i = 0; i < storage.size(); i++) {
+      const unsigned char *c = &rgba[4 * i];
+      const bool flagged_manual = (storage[i].beamflag & MB_FLAG_MANUAL) != 0;
+      if (!flagged_manual && c[0] == 0 && c[1] == 0 && c[2] == 0 && c[3] == 255)
+        black++;
+      else if (flagged_manual && c[0] == 255 && c[1] == 0 && c[2] == 0 && c[3] == 255)
+        red++;
+      else
+        other++;
+    }
+    check(colors_status == MB_SUCCESS && n == count && red == manual && black == count - manual && other == 0,
+          "the colours of the flag mode: " + std::to_string(black) + " unflagged black, " + std::to_string(red) +
+              " flagged red");
+
+    /* a buffer for fewer soundings than there are is refused untouched */
+    std::vector<unsigned char> small(4, 7);
+    colors_status = mb3dsoundings_colors(0, 1, small.data(), &n, &error);
+    check(colors_status == MB_FAILURE && error == MB_ERROR_BAD_PARAMETER && n == count && small[0] == 7,
+          "a buffer for fewer soundings than there are is refused");
+
+    /* hiding the flagged soundings raises only the colour mark, and exactly
+       those soundings get alpha 0 */
+    mb3dsoundings_setviewtoggle(kViewToggleFlagged, false);
+    uint64_t position3 = 0, color3 = 0, mask3 = 0;
+    mb3dsoundings_getmarks(0, &position3, &color3, &mask3, &error);
+    check(color3 > color && position3 == position && mask3 == mask,
+          "hiding the flagged soundings raises the colour mark only");
+    mb3dsoundings_colors(0, count, rgba.data(), &n, &error);
+    int hidden = 0;
+    bool hidden_flagged = true;
+    for (size_t i = 0; i < storage.size(); i++) {
+      const bool flagged_manual = (storage[i].beamflag & MB_FLAG_MANUAL) != 0;
+      if (rgba[4 * i + 3] == 0) {
+        hidden++;
+        hidden_flagged = hidden_flagged && flagged_manual;
+      } else if (flagged_manual) {
+        hidden_flagged = false;
+      }
+    }
+    check(hidden_flagged && hidden == manual,
+          "with flagged soundings hidden exactly those " + std::to_string(hidden) + " have alpha 0");
+    mb3dsoundings_setviewtoggle(kViewToggleFlagged, true);
+
+    /* the display positions are those the drawing uses */
+    std::vector<float> xyz(3 * storage.size());
+    mb3dsoundings_positions(0, count, xyz.data(), &n, &error);
+    bool same = n == count;
+    for (size_t i = 0; same && i < storage.size(); i++)
+      same = xyz[3 * i] == storage[i].glx && xyz[3 * i + 1] == storage[i].gly && xyz[3 * i + 2] == storage[i].glz;
+    check(same, "the display positions are glx/gly/glz of every sounding");
+
+    /* the view reset rescales z: the position mark rises, the colour mark not */
+    mb3dsoundings_getmarks(0, &position3, &color3, &mask3, &error);
+    mbvq_c_soundings_resetview();
+    uint64_t position4 = 0, color4 = 0, mask4 = 0;
+    mb3dsoundings_getmarks(0, &position4, &color4, &mask4, &error);
+    check(position4 > position3 && color4 == color3, "a view reset raises the position mark and not the colour mark");
+
+    /* a click edits the sounding under it although nothing has been drawn:
+       the screen positions are filled for the current camera on demand */
+    QWidget *view = window->widget()->view();
+    const double dpr = view->devicePixelRatioF();
+    const int gl_width = static_cast<int>(std::lround(view->width() * dpr));
+    const int gl_height = static_cast<int>(std::lround(view->height() * dpr));
+    mb3dsoundings_screen_positions(0, &error);
+    size_t target = storage.size();
+    double best = 1.0e30;
+    for (size_t i = 0; i < storage.size(); i++) {
+      if (!mb_beam_ok(storage[i].beamflag))
+        continue;
+      const double d = std::hypot(storage[i].winx - 0.5 * gl_width, storage[i].winy - 0.5 * gl_height);
+      if (d < best) {
+        best = d;
+        target = i;
+      }
+    }
+    check(target < storage.size() && best < 0.25 * std::min(gl_width, gl_height),
+          "after filling the screen positions a sounding lies near the middle of the view");
+    if (target < storage.size()) {
+      const int x = storage[target].winx, y = storage[target].winy;
+      mb3dsoundings_getmarks(0, &position3, &color3, &mask3, &error);
+      const int calls = edit_calls;
+      click(view, QPointF(x / dpr, (gl_height - 1 - y) / dpr));
+      spin(50);
+      size_t edited = storage.size();
+      for (size_t i = 0; i < storage.size(); i++)
+        if (storage[i].ifile == edit_ifile && storage[i].iping == edit_iping && storage[i].ibeam == edit_ibeam)
+          edited = i;
+      check(edit_calls == calls + 1 && edited < storage.size() && std::abs(storage[edited].winx - x) <= 1 &&
+                std::abs(storage[edited].winy - y) <= 1 && !mb_beam_ok(storage[edited].beamflag),
+            "a click flags the sounding under it, with nothing drawn");
+      mb3dsoundings_getmarks(0, &position4, &color4, &mask4, &error);
+      check(color4 > color3 && position4 == position3, "the edit raises the colour mark only");
+      click(view, QPointF(x / dpr, (gl_height - 1 - y) / dpr));
+      spin(50);
+      check(edit_calls == calls + 2 && edited < storage.size() && mb_beam_ok(storage[edited].beamflag),
+            "a second click restores it");
+    }
+
+    /* the program recoloured the soundings itself, as mbeditviz does when its
+       colour table changes */
+    mb3dsoundings_getmarks(0, &position3, &color3, &mask3, &error);
+    mb3dsoundings_colors_changed(0, &error);
+    mb3dsoundings_getmarks(0, &position4, &color4, &mask4, &error);
+    check(color4 > color3 && position4 == position3 && mask4 == mask3,
+          "the program telling of new colours raises the colour mark only");
+  }
+
   /* keys reach the core: ',' flags all soundings in view */
   int unflagged = 0;
   for (const auto &s : storage)
@@ -318,8 +455,7 @@ int test_null() {
   QApplication::sendEvent(window->widget()->view(), &comma);
   QKeyEvent comma_up(QEvent::KeyRelease, Qt::Key_Comma, Qt::NoModifier, QStringLiteral(","));
   QApplication::sendEvent(window->widget()->view(), &comma_up);
-  /* without drawing every sounding is at screen position 0,0, so all count
-     as in view */
+  /* ',' flags every unflagged sounding, whatever its screen position */
   check(edit_calls == unflagged, "the ',' key flags the soundings in view (" +
                                                              std::to_string(edit_calls) + " edits)");
 
@@ -376,9 +512,21 @@ int test_null() {
   /* Dismiss hides the window and tells the program; open shows it again */
   QAction *dismiss = menu_action(window, "Dismiss", "Dismiss");
   check(dismiss != nullptr, "the Dismiss menu has Dismiss");
+  uint64_t before_dismiss[3] = {0, 0, 0}, after_dismiss[3] = {0, 0, 0};
+  {
+    int error = MB_ERROR_NO_ERROR;
+    mb3dsoundings_getmarks(0, &before_dismiss[0], &before_dismiss[1], &before_dismiss[2], &error);
+  }
   if (dismiss != nullptr)
     dismiss->trigger();
   check(!window->isVisible() && dismiss_calls == 1, "Dismiss hides the window and calls the dismiss notify");
+  {
+    int error = MB_ERROR_NO_ERROR;
+    mb3dsoundings_getmarks(0, &after_dismiss[0], &after_dismiss[1], &after_dismiss[2], &error);
+  }
+  check(after_dismiss[0] > before_dismiss[0] && after_dismiss[1] > before_dismiss[1] &&
+            after_dismiss[2] > before_dismiss[2],
+        "Dismiss raises every mark: the program releases the soundings");
   open_soundings();
   check(mbvq::soundings_window() == window && window->isVisible(), "a second open shows the same window");
   window->close();

@@ -1120,6 +1120,20 @@ int mb3dsoundings_set_optimizebiasvalues_notify(int verbose,
                                                 void(optimizebiasvalues_notify)(int, double *, double *, double *, double *, double *),
                                                 int *error);
 int mb3dsoundings_plot(int verbose, int *error);
+/* the soundings as data, for a renderer without OpenGL (src/mbview/
+   mbv_soundings_core.c): what changed since it last looked (counters that only
+   rise: positions, colours, the array itself), how many soundings there are,
+   their colours (RGBA bytes, alpha 0 where none is drawn) and display
+   positions (x, y, z floats) in caller buffers, and their screen positions
+   filled for the current camera before a pick */
+int mb3dsoundings_getmarks(int verbose, uint64_t *position, uint64_t *color, uint64_t *mask, int *error);
+int mb3dsoundings_getcount(int verbose, int *num_soundings, int *error);
+int mb3dsoundings_colors(int verbose, int nalloc, unsigned char *rgba, int *num_soundings, int *error);
+int mb3dsoundings_positions(int verbose, int nalloc, float *xyz, int *num_soundings, int *error);
+int mb3dsoundings_screen_positions(int verbose, int *error);
+/* for the calling program, after it changed the colours (r/g/b) of the
+   soundings it handed over */
+int mb3dsoundings_colors_changed(int verbose, int *error);
 int mb3dsoundings_get_bias_values(int verbose, double *rollbias, double *pitchbias, double *headingbias, double *timelag,
                                   double *snell, int *error);
 

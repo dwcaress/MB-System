@@ -73,6 +73,193 @@
 #include "mbv_camera.h"
 
 /*------------------------------------------------------------------------------*/
+/* What changed in the soundings, for users outside the drawing code: a
+   renderer that keeps its own copy of their positions and colours. The
+   counters of src/mbview/mbv_marks.h only rise, and reading them changes
+   nothing. The soundings use three of them and no blocks:
+     position - glx/gly/glz of every sounding. Only mb3dsoundings_scale(),
+                mb3dsoundings_scalez() and mb3dsoundings_setzscale() write
+                them, and each raises this once after its loop; a new writer
+                must do the same.
+     color    - the colour of a sounding or whether it is drawn: its flag,
+                beam colour, r/g/b, z or a, the view switches and the colour
+                mode (mb3dsoundings_colors()).
+     mask     - the sounding array itself was handed over or released.
+   A mark is raised where values become invalid, before any replot, never
+   where they are computed again. A mark raised by mb3dsoundings_reset() or
+   mb3dsoundings_dismissed() means stop reading: the calling program
+   releases the array right afterwards. These are file statics, not fields
+   of struct mb3dsoundings_world_struct, so that the layout of that
+   structure, which the Motif programs share, does not change. */
+static struct mbv_marks mb3dsoundings_marks;
+
+/* the camera and the data the screen positions winx/winy were last computed
+   for, by the drawing or by mb3dsoundings_screen_positions() */
+static struct {
+  bool valid;
+  uint64_t position;
+  uint64_t mask;
+  float elevation;
+  float azimuth;
+  float gl_offset_x;
+  float gl_offset_y;
+  float gl_size;
+  int gl_width;
+  int gl_height;
+} mb3dsoundings_screen;
+
+/* record that winx/winy now belong to the current camera and soundings */
+static void mb3dsoundings_screen_stamp(void) {
+  mb3dsoundings_screen.valid = true;
+  mb3dsoundings_screen.position = mbv_marks_getposition(&mb3dsoundings_marks);
+  mb3dsoundings_screen.mask = mbv_marks_getmask(&mb3dsoundings_marks);
+  mb3dsoundings_screen.elevation = mb3dsoundings.elevation;
+  mb3dsoundings_screen.azimuth = mb3dsoundings.azimuth;
+  mb3dsoundings_screen.gl_offset_x = mb3dsoundings.gl_offset_x;
+  mb3dsoundings_screen.gl_offset_y = mb3dsoundings.gl_offset_y;
+  mb3dsoundings_screen.gl_size = mb3dsoundings.gl_size;
+  mb3dsoundings_screen.gl_width = mb3dsoundings.gl_width;
+  mb3dsoundings_screen.gl_height = mb3dsoundings.gl_height;
+}
+
+/* whether winx/winy belong to the current camera and soundings */
+static bool mb3dsoundings_screen_current(void) {
+  return mb3dsoundings_screen.valid
+         && mb3dsoundings_screen.position == mbv_marks_getposition(&mb3dsoundings_marks)
+         && mb3dsoundings_screen.mask == mbv_marks_getmask(&mb3dsoundings_marks)
+         && mb3dsoundings_screen.elevation == mb3dsoundings.elevation
+         && mb3dsoundings_screen.azimuth == mb3dsoundings.azimuth
+         && mb3dsoundings_screen.gl_offset_x == mb3dsoundings.gl_offset_x
+         && mb3dsoundings_screen.gl_offset_y == mb3dsoundings.gl_offset_y
+         && mb3dsoundings_screen.gl_size == mb3dsoundings.gl_size
+         && mb3dsoundings_screen.gl_width == mb3dsoundings.gl_width
+         && mb3dsoundings_screen.gl_height == mb3dsoundings.gl_height;
+}
+
+/*------------------------------------------------------------------------------*/
+/* The rule that decides which soundings are drawn and in which colour, shared
+   by the drawing (mb3dsoundings_plot) and by mb3dsoundings_colors(), so that a
+   renderer without OpenGL colours them exactly as OpenGL does. */
+
+/* the colour mode MBS_VIEW_COLOR_FLAG: unflagged soundings in their beam
+   colour and, if flagged soundings are shown, flagged ones in the colour of
+   their flag reason; false if the sounding is not drawn */
+static bool mb3dsoundings_flag_color(const struct mb3dsoundings_sounding_struct *sounding, float *r, float *g,
+                                     float *b) {
+  /* unflagged sounding */
+  if (mb_beam_ok(sounding->beamflag)) {
+    *r = colortable_object_red[sounding->beamcolor];
+    *g = colortable_object_green[sounding->beamcolor];
+    *b = colortable_object_blue[sounding->beamcolor];
+    return (true);
+  }
+
+  /* flagged sounding if requested */
+  if (mb3dsoundings.view_flagged) {
+    if (mb_beam_check_flag_manual(sounding->beamflag)) {
+      *r = 1.0;
+      *g = 0.0;
+      *b = 0.0;
+      return (true);
+    } else if (mb_beam_check_flag_filter(sounding->beamflag)
+                || mb_beam_check_flag_filter2(sounding->beamflag)) {
+      *r = 0.0;
+      *g = 0.0;
+      *b = 1.0;
+      return (true);
+    } else if (mb_beam_check_flag_sonar(sounding->beamflag)) {
+      *r = 0.0;
+      *g = 1.0;
+      *b = 0.0;
+      return (true);
+    } else if (mb3dsoundings.view_secondary && mb_beam_check_flag_multipick(sounding->beamflag)) {
+      *r = 0.0;
+      *g = 1.0;
+      *b = 1.0;
+      return (true);
+    }
+  }
+
+  return (false);
+}
+
+/* the other colour modes: unflagged soundings and, if flagged soundings are
+   shown, flagged ones that are not null and not hidden secondary picks */
+static bool mb3dsoundings_shown(const struct mb3dsoundings_sounding_struct *sounding) {
+  return (mb_beam_ok(sounding->beamflag)
+          || (mb3dsoundings.view_flagged
+              && !mb_beam_check_flag_null(sounding->beamflag)
+              && (!mb_beam_check_flag_multipick(sounding->beamflag)
+                  || mb3dsoundings.view_secondary)));
+}
+
+/* the depth range of MBS_VIEW_COLOR_SOUNDING: the topography min max over the
+   soundings currently viewed, regardless of beamflag state if flagged
+   soundings are being shown, else over the unflagged soundings only */
+static void mb3dsoundings_depth_range(const struct mb3dsoundings_struct *soundingdata, double *zmin, double *zmax) {
+  double min = 0.0;
+  double max = 0.0;
+  bool first = true;
+  for (int i = 0; i < soundingdata->num_soundings; i++) {
+    const struct mb3dsoundings_sounding_struct *sounding = &(soundingdata->soundings[i]);
+    if (mb3dsoundings.view_flagged || mb_beam_ok(sounding->beamflag)) {
+      if (first) {
+        first = false;
+        min = sounding->z;
+        max = sounding->z;
+      } else {
+        min = MIN(min, sounding->z);
+        max = MAX(max, sounding->z);
+      }
+    }
+  }
+  *zmin = min;
+  *zmax = max;
+}
+
+/* the colour of MBS_VIEW_COLOR_SOUNDING: the topography colour scale
+   stretched over the range of the soundings viewed */
+static void mb3dsoundings_depth_color(double z, double zmin, double zmax, float *r, float *g, float *b) {
+  mbview_getcolor(z, zmin, zmax, MBV_COLORTABLE_NORMAL,
+                  colortable_haxby_red[0], colortable_haxby_green[0], colortable_haxby_blue[0],
+                  colortable_haxby_red[MBV_NUM_COLORS - 1], colortable_haxby_green[MBV_NUM_COLORS - 1],
+                  colortable_haxby_blue[MBV_NUM_COLORS - 1],
+                  colortable_haxby_red, colortable_haxby_green, colortable_haxby_blue,
+                  r, g, b);
+}
+
+/* the amplitude range of MBS_VIEW_COLOR_AMP: over the soundings drawn */
+static void mb3dsoundings_amplitude_range(const struct mb3dsoundings_struct *soundingdata, double *ampmin,
+                                          double *ampmax) {
+  double min = 0.0;
+  double max = 0.0;
+  bool first = true;
+  for (int i = 0; i < soundingdata->num_soundings; i++) {
+    const struct mb3dsoundings_sounding_struct *sounding = &(soundingdata->soundings[i]);
+    if (mb3dsoundings_shown(sounding)) {
+      if (first) {
+        first = false;
+        min = sounding->a;
+        max = sounding->a;
+      } else {
+        min = MIN(min, sounding->a);
+        max = MAX(max, sounding->a);
+      }
+    }
+  }
+  *ampmin = min;
+  *ampmax = max;
+}
+
+/* the colour of MBS_VIEW_COLOR_AMP: red to blue over the amplitude range */
+static void mb3dsoundings_amplitude_color(double a, double ampmin, double ampmax, float *r, float *g, float *b) {
+  mbview_getcolor(a, ampmin, ampmax, MBV_COLORTABLE_NORMAL,
+                  (float)0.0, (float)0.0, (float)1.0, (float)1.0, (float)0.0, (float)0.0,
+                  colortable_redtoblue_red, colortable_redtoblue_green, colortable_redtoblue_blue,
+                  r, g, b);
+}
+
+/*------------------------------------------------------------------------------*/
 
 int mb3dsoundings_set_dismiss_notify(int verbose, void(dismiss_notify)(), int *error) {
   if (verbose >= 2) {
@@ -364,6 +551,12 @@ int mb3dsoundings_reset() {
   /* last sounding edited */
   mb3dsoundings.last_sounding_defined = false;
   mb3dsoundings.last_sounding_edited = 0;
+
+  /* the window state is reset and the calling program releases its soundings
+     next: users of the soundings stop reading them, and the screen positions
+     belong to no camera (the marks keep rising, see the top of this file) */
+  mbv_marks_everything(&mb3dsoundings_marks);
+  mb3dsoundings_screen.valid = false;
 
   if (mbs_verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -822,6 +1015,9 @@ int mb3dsoundings_scale(int verbose, int *error) {
     sounding->glz = mb3dsoundings.exaggeration * soundingdata->zscale * (sounding->z - soundingdata->zorigin);
   }
 
+  /* the display positions changed */
+  mbv_marks_position(&mb3dsoundings_marks);
+
   return (mbs_status);
 }
 
@@ -841,12 +1037,18 @@ int mb3dsoundings_scalez(int verbose, int *error) {
     sounding->glz = mb3dsoundings.exaggeration * soundingdata->zscale * (sounding->z - soundingdata->zorigin);
   }
 
+  /* the display positions changed */
+  mbv_marks_position(&mb3dsoundings_marks);
+
   return (mbs_status);
 }
 
 /*------------------------------------------------------------------------------*/
 int mb3dsoundings_eraserestore(int x, int y) {
   /* fprintf(stderr,"\nCalled mb3dsoundings_eraserestore\n"); */
+
+  /* the screen positions of the current camera */
+  mb3dsoundings_screen_positions(mbs_verbose, &mbs_error);
 
   /* loop over all soundings */
   int neditevent = 0;
@@ -905,6 +1107,9 @@ int mb3dsoundings_eraserestore(int x, int y) {
 
   /* replot and flush the edit events in the calling application */
   if (neditevent > 0) {
+    /* flags changed: raise the mark before the replot (top of this file) */
+    mbv_marks_color(&mb3dsoundings_marks);
+
     /* replot the data */
     mb3dsoundings_plot(mbs_verbose, &mbs_error);
     mb3dsoundings_updatestatus();
@@ -947,6 +1152,9 @@ int mb3dsoundings_grab(int x, int y, int grabmode) {
 
   /* apply grab */
   else if (grabmode == MBS_EDIT_GRAB_END) {
+    /* the screen positions of the current camera */
+    mb3dsoundings_screen_positions(mbs_verbose, &mbs_error);
+
     /* loop over all soundings */
     int neditevent = 0;
     const int xmin = MIN(mb3dsoundings.grab_start_x, mb3dsoundings.grab_end_x);
@@ -989,6 +1197,9 @@ int mb3dsoundings_grab(int x, int y, int grabmode) {
 
     /* replot and flush the edit events in the calling application */
     if (neditevent > 0) {
+      /* flags changed: raise the mark before the replot (top of this file) */
+      mbv_marks_color(&mb3dsoundings_marks);
+
       /* replot the data */
       mb3dsoundings_plot(mbs_verbose, &mbs_error);
       mb3dsoundings_updatestatus();
@@ -1031,6 +1242,9 @@ int mb3dsoundings_unflag_view() {
 
   /* replot and flush the edit events in the calling application */
   if (neditevent > 0) {
+    /* flags changed: raise the mark before the replot (top of this file) */
+    mbv_marks_color(&mb3dsoundings_marks);
+
     /* replot the data */
     mb3dsoundings_plot(mbs_verbose, &mbs_error);
     mb3dsoundings_updatestatus();
@@ -1075,6 +1289,9 @@ int mb3dsoundings_flag_view() {
 
   /* replot and flush the edit events in the calling application */
   if (neditevent > 0) {
+    /* flags changed: raise the mark before the replot (top of this file) */
+    mbv_marks_color(&mb3dsoundings_marks);
+
     /* replot the data */
     mb3dsoundings_plot(mbs_verbose, &mbs_error);
     mb3dsoundings_updatestatus();
@@ -1136,6 +1353,9 @@ int mb3dsoundings_setzscale(int verbose, int *error) {
                                       * (soundingdata->soundings[i].z - soundingdata->zorigin);
   }
 
+  /* the display positions changed */
+  mbv_marks_position(&mb3dsoundings_marks);
+
   return (mbs_status);
 }
 
@@ -1159,6 +1379,9 @@ int mb3dsoundings_get_bias_values(int verbose, double *rollbias, double *pitchbi
 
 /*------------------------------------------------------------------------------*/
 int mb3dsoundings_pick(int x, int y) {
+  /* the screen positions of the current camera */
+  mb3dsoundings_screen_positions(mbs_verbose, &mbs_error);
+
   /* fprintf(stderr,"Called mb3dsoundings_pick\n"); */
 
   /* loop over all soundings */
@@ -1235,6 +1458,9 @@ int mb3dsoundings_pick(int x, int y) {
 
   /* replot the data */
   if (editevent) {
+    /* a flag changed: raise the mark before the replot (top of this file) */
+    mbv_marks_color(&mb3dsoundings_marks);
+
     mb3dsoundings_plot(mbs_verbose, &mbs_error);
     mb3dsoundings_updatestatus();
   }
@@ -1251,6 +1477,9 @@ int mb3dsoundings_pick(int x, int y) {
 /*------------------------------------------------------------------------------*/
 int mb3dsoundings_info(int x, int y) {
   /* fprintf(stderr,"Called mb3dsoundings_info\n"); */
+
+  /* the screen positions of the current camera */
+  mb3dsoundings_screen_positions(mbs_verbose, &mbs_error);
 
   /* loop over all soundings */
   struct mb3dsoundings_struct *soundingdata;
@@ -1321,6 +1550,9 @@ int mb3dsoundings_bad_ping() {
 
   /* replot and flush the edit events in the calling application */
   if (neditevent > 0) {
+    /* flags changed: raise the mark before the replot (top of this file) */
+    mbv_marks_color(&mb3dsoundings_marks);
+
     /* replot the data */
     mb3dsoundings_plot(mbs_verbose, &mbs_error);
     mb3dsoundings_updatestatus();
@@ -1370,6 +1602,9 @@ int mb3dsoundings_zero_ping() {
 
   /* replot and flush the edit events in the calling application */
   if (neditevent > 0) {
+    /* flags changed: raise the mark before the replot (top of this file) */
+    mbv_marks_color(&mb3dsoundings_marks);
+
     /* replot the data */
     mb3dsoundings_plot(mbs_verbose, &mbs_error);
     mb3dsoundings_updatestatus();
@@ -1418,6 +1653,9 @@ int mb3dsoundings_left_ping() {
 
   /* replot and flush the edit events in the calling application */
   if (neditevent > 0) {
+    /* flags changed: raise the mark before the replot (top of this file) */
+    mbv_marks_color(&mb3dsoundings_marks);
+
     /* replot the data */
     mb3dsoundings_plot(mbs_verbose, &mbs_error);
     mb3dsoundings_updatestatus();
@@ -1467,6 +1705,9 @@ int mb3dsoundings_right_ping() {
 
   /* replot and flush the edit events in the calling application */
   if (neditevent > 0) {
+    /* flags changed: raise the mark before the replot (top of this file) */
+    mbv_marks_color(&mb3dsoundings_marks);
+
     /* replot the data */
     mb3dsoundings_plot(mbs_verbose, &mbs_error);
     mb3dsoundings_updatestatus();
@@ -1516,6 +1757,9 @@ int mb3dsoundings_good_ping() {
 
   /* replot and flush the edit events in the calling application */
   if (neditevent > 0) {
+    /* flags changed: raise the mark before the replot (top of this file) */
+    mbv_marks_color(&mb3dsoundings_marks);
+
     /* replot the data */
     mb3dsoundings_plot(mbs_verbose, &mbs_error);
     mb3dsoundings_updatestatus();
@@ -1564,6 +1808,285 @@ int mb3dsoundings_camera(int verbose, double projection[16], double modelview[16
     fprintf(stderr, "dbg2       error:                   %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:                  %d\n", status);
+  }
+
+  return (status);
+}
+
+/*------------------------------------------------------------------------------*/
+/* What changed in the soundings since a user last looked (the top of this
+   file): three counters that only rise. */
+int mb3dsoundings_getmarks(int verbose, uint64_t *position, uint64_t *color, uint64_t *mask, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
+  }
+
+  *position = mbv_marks_getposition(&mb3dsoundings_marks);
+  *color = mbv_marks_getcolor(&mb3dsoundings_marks);
+  *mask = mbv_marks_getmask(&mb3dsoundings_marks);
+  *error = MB_ERROR_NO_ERROR;
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       position:         %llu\n", (unsigned long long)*position);
+    fprintf(stderr, "dbg2       color:            %llu\n", (unsigned long long)*color);
+    fprintf(stderr, "dbg2       mask:             %llu\n", (unsigned long long)*mask);
+    fprintf(stderr, "dbg2       error:            %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:           %d\n", status);
+  }
+
+  return (status);
+}
+
+/*------------------------------------------------------------------------------*/
+/* the number of soundings shown, 0 when there are none */
+int mb3dsoundings_getcount(int verbose, int *num_soundings, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
+  }
+
+  const struct mb3dsoundings_struct *soundingdata = (const struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
+  *num_soundings = 0;
+  if (soundingdata != NULL && soundingdata->soundings != NULL && soundingdata->num_soundings > 0)
+    *num_soundings = soundingdata->num_soundings;
+  *error = MB_ERROR_NO_ERROR;
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       num_soundings:    %d\n", *num_soundings);
+    fprintf(stderr, "dbg2       error:            %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:           %d\n", status);
+  }
+
+  return (status);
+}
+
+/*------------------------------------------------------------------------------*/
+/* one colour byte, rounded to nearest as OpenGL rounds a float colour into an
+   8-bit framebuffer */
+static unsigned char mb3dsoundings_color_byte(float c) {
+  if (!(c > 0.0f))
+    return (0);
+  if (c >= 1.0f)
+    return (255);
+  return ((unsigned char)lroundf(c * 255.0f));
+}
+
+/* The colour of every sounding as the drawing gives it, 4 bytes (RGBA) per
+   sounding in the order of the array, alpha 0 (and black) for a sounding that
+   is not drawn. nalloc is the number of soundings the caller's buffer holds;
+   num_soundings returns the number of soundings. Nothing is kept here: every
+   call computes the colours again, as the drawing does every frame. */
+int mb3dsoundings_colors(int verbose, int nalloc, unsigned char *rgba, int *num_soundings, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
+    fprintf(stderr, "dbg2       nalloc:           %d\n", nalloc);
+    fprintf(stderr, "dbg2       rgba:             %p\n", (void *)rgba);
+  }
+
+  const struct mb3dsoundings_struct *soundingdata = (const struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
+  int status = MB_SUCCESS;
+  *error = MB_ERROR_NO_ERROR;
+  *num_soundings = 0;
+  if (soundingdata != NULL && soundingdata->soundings != NULL && soundingdata->num_soundings > 0)
+    *num_soundings = soundingdata->num_soundings;
+
+  if (*num_soundings > 0 && (rgba == NULL || nalloc < *num_soundings)) {
+    status = MB_FAILURE;
+    *error = MB_ERROR_BAD_PARAMETER;
+  } else if (*num_soundings > 0) {
+    /* the ranges the colour modes stretch over */
+    double zmin = 0.0;
+    double zmax = 0.0;
+    double ampmin = 0.0;
+    double ampmax = 0.0;
+    if (mb3dsoundings.view_color == MBS_VIEW_COLOR_SOUNDING)
+      mb3dsoundings_depth_range(soundingdata, &zmin, &zmax);
+    else if (mb3dsoundings.view_color == MBS_VIEW_COLOR_AMP)
+      mb3dsoundings_amplitude_range(soundingdata, &ampmin, &ampmax);
+
+    for (int i = 0; i < *num_soundings; i++) {
+      const struct mb3dsoundings_sounding_struct *sounding = &(soundingdata->soundings[i]);
+      float r = 0.0f;
+      float g = 0.0f;
+      float b = 0.0f;
+      bool shown = false;
+      if (mb3dsoundings.view_color == MBS_VIEW_COLOR_FLAG) {
+        shown = mb3dsoundings_flag_color(sounding, &r, &g, &b);
+      } else if (mb3dsoundings_shown(sounding)) {
+        shown = true;
+        if (mb3dsoundings.view_color == MBS_VIEW_COLOR_TOPO) {
+          r = sounding->r;
+          g = sounding->g;
+          b = sounding->b;
+        } else if (mb3dsoundings.view_color == MBS_VIEW_COLOR_SOUNDING) {
+          mb3dsoundings_depth_color(sounding->z, zmin, zmax, &r, &g, &b);
+        } else if (mb3dsoundings.view_color == MBS_VIEW_COLOR_AMP) {
+          mb3dsoundings_amplitude_color(sounding->a, ampmin, ampmax, &r, &g, &b);
+        } else {
+          /* no colour mode the drawing knows: it draws nothing */
+          shown = false;
+        }
+      }
+      unsigned char *out = &rgba[4 * (size_t)i];
+      if (shown) {
+        out[0] = mb3dsoundings_color_byte(r);
+        out[1] = mb3dsoundings_color_byte(g);
+        out[2] = mb3dsoundings_color_byte(b);
+        out[3] = 255;
+      } else {
+        out[0] = 0;
+        out[1] = 0;
+        out[2] = 0;
+        out[3] = 0;
+      }
+    }
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       num_soundings:    %d\n", *num_soundings);
+    fprintf(stderr, "dbg2       error:            %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:           %d\n", status);
+  }
+
+  return (status);
+}
+
+/*------------------------------------------------------------------------------*/
+/* The display positions glx/gly/glz of every sounding, 3 floats per sounding
+   in the order of the array, copied as the drawing uses them (never computed
+   again from x/y/z). nalloc and num_soundings as for mb3dsoundings_colors(). */
+int mb3dsoundings_positions(int verbose, int nalloc, float *xyz, int *num_soundings, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
+    fprintf(stderr, "dbg2       nalloc:           %d\n", nalloc);
+    fprintf(stderr, "dbg2       xyz:              %p\n", (void *)xyz);
+  }
+
+  const struct mb3dsoundings_struct *soundingdata = (const struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
+  int status = MB_SUCCESS;
+  *error = MB_ERROR_NO_ERROR;
+  *num_soundings = 0;
+  if (soundingdata != NULL && soundingdata->soundings != NULL && soundingdata->num_soundings > 0)
+    *num_soundings = soundingdata->num_soundings;
+
+  if (*num_soundings > 0 && (xyz == NULL || nalloc < *num_soundings)) {
+    status = MB_FAILURE;
+    *error = MB_ERROR_BAD_PARAMETER;
+  } else {
+    for (int i = 0; i < *num_soundings; i++) {
+      const struct mb3dsoundings_sounding_struct *sounding = &(soundingdata->soundings[i]);
+      xyz[3 * (size_t)i] = sounding->glx;
+      xyz[3 * (size_t)i + 1] = sounding->gly;
+      xyz[3 * (size_t)i + 2] = sounding->glz;
+    }
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       num_soundings:    %d\n", *num_soundings);
+    fprintf(stderr, "dbg2       error:            %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:           %d\n", status);
+  }
+
+  return (status);
+}
+
+/*------------------------------------------------------------------------------*/
+/* Fill the screen positions winx/winy of every sounding for the current
+   camera, as the drawing fills them with gluProject (window y up, truncated
+   to whole pixels), unless they already belong to this camera and these
+   soundings - as they do after an OpenGL frame. The pick, erase, grab and
+   info functions call this first, so they also work when nothing draws the
+   soundings with OpenGL. */
+int mb3dsoundings_screen_positions(int verbose, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
+  }
+
+  struct mb3dsoundings_struct *soundingdata = (struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
+  *error = MB_ERROR_NO_ERROR;
+  const int status = MB_SUCCESS;
+
+  if (soundingdata != NULL && soundingdata->soundings != NULL && soundingdata->num_soundings > 0
+      && mb3dsoundings.gl_width != 0 && mb3dsoundings.gl_height != 0 && !mb3dsoundings_screen_current()) {
+    double projection[16];
+    double modelview[16];
+    mb3dsoundings_camera(verbose, projection, modelview, error);
+    const int viewport[4] = {0, 0, (int)mb3dsoundings.gl_width, (int)mb3dsoundings.gl_height};
+    for (int i = 0; i < soundingdata->num_soundings; i++) {
+      struct mb3dsoundings_sounding_struct *sounding = &(soundingdata->soundings[i]);
+      double xx;
+      double yy;
+      double zz;
+      if (mbv_camera_project(modelview, projection, viewport, (double)(sounding->glx), (double)(sounding->gly),
+                             (double)(sounding->glz), &xx, &yy, &zz)) {
+        sounding->winx = (int)xx;
+        sounding->winy = (int)yy;
+      }
+    }
+    mb3dsoundings_screen_stamp();
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:            %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:           %d\n", status);
+  }
+
+  return (status);
+}
+
+/*------------------------------------------------------------------------------*/
+/* For the calling program, after it changed the colours of the soundings it
+   handed over (their r/g/b, from its own colour table) without going through
+   this window: raise the colour mark (the top of this file). */
+int mb3dsoundings_colors_changed(int verbose, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
+  }
+
+  mbv_marks_color(&mb3dsoundings_marks);
+  *error = MB_ERROR_NO_ERROR;
+  const int status = MB_SUCCESS;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:            %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:           %d\n", status);
   }
 
   return (status);
@@ -1789,29 +2312,12 @@ soundingdata->num_soundings); */
       struct mb3dsoundings_sounding_struct *sounding =
         (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
 
-      /* plot unflagged sounding */
-      if (mb_beam_ok(sounding->beamflag)) {
-        glColor3f(colortable_object_red[sounding->beamcolor], colortable_object_green[sounding->beamcolor],
-                  colortable_object_blue[sounding->beamcolor]);
+      /* plot unflagged sounding, and flagged sounding if requested, in the
+         colour of its flag (mb3dsoundings_flag_color) */
+      float r, g, b;
+      if (mb3dsoundings_flag_color(sounding, &r, &g, &b)) {
+        glColor3f(r, g, b);
         glVertex3f(sounding->glx, sounding->gly, sounding->glz);
-      }
-
-      /* plot flagged sounding if requested */
-      else if (mb3dsoundings.view_flagged) {
-        if (mb_beam_check_flag_manual(sounding->beamflag)) {
-          glColor3f(1.0, 0.0, 0.0);
-          glVertex3f(sounding->glx, sounding->gly, sounding->glz);
-        } else if (mb_beam_check_flag_filter(sounding->beamflag)
-                    || mb_beam_check_flag_filter2(sounding->beamflag)) {
-          glColor3f(0.0, 0.0, 1.0);
-          glVertex3f(sounding->glx, sounding->gly, sounding->glz);
-        } else if (mb_beam_check_flag_sonar(sounding->beamflag)) {
-          glColor3f(0.0, 1.0, 0.0);
-          glVertex3f(sounding->glx, sounding->gly, sounding->glz);
-        } else if (mb3dsoundings.view_secondary && mb_beam_check_flag_multipick(sounding->beamflag)) {
-          glColor3f(0.0, 1.0, 1.0);
-          glVertex3f(sounding->glx, sounding->gly, sounding->glz);
-        }
       }
     }
     glEnd();
@@ -1826,11 +2332,7 @@ soundingdata->num_soundings); */
         (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
 
       /* plot sounding */
-      if (mb_beam_ok(sounding->beamflag)
-          || (mb3dsoundings.view_flagged
-              && !mb_beam_check_flag_null(sounding->beamflag)
-              && (!mb_beam_check_flag_multipick(sounding->beamflag)
-                  || mb3dsoundings.view_secondary))) {
+      if (mb3dsoundings_shown(sounding)) {
         glColor3f(sounding->r, sounding->g, sounding->b);
         glVertex3f(sounding->glx, sounding->gly, sounding->glz);
       }
@@ -1843,26 +2345,11 @@ soundingdata->num_soundings); */
      rather than the associated Survey Viewer's min/max */
   else if (mb3dsoundings.view_color == MBS_VIEW_COLOR_SOUNDING) {
 
-    /* get the topography min max over the soundings currently viewed,
-       regardless of beamflag state if flagged soundings are being shown,
-       else over the unflagged soundings only */
-    double zmin = 0.0;
-    double zmax = 0.0;
-    bool first = true;
-    for (int i = 0; i < soundingdata->num_soundings; i++) {
-      struct mb3dsoundings_sounding_struct *sounding =
-        (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
-      if (mb3dsoundings.view_flagged || mb_beam_ok(sounding->beamflag)) {
-        if (first) {
-          first = false;
-          zmin = sounding->z;
-          zmax = sounding->z;
-        } else {
-          zmin = MIN(zmin, sounding->z);
-          zmax = MAX(zmax, sounding->z);
-        }
-      }
-    }
+    /* get the topography min max over the soundings currently viewed
+       (mb3dsoundings_depth_range) */
+    double zmin;
+    double zmax;
+    mb3dsoundings_depth_range(soundingdata, &zmin, &zmax);
 
     glPointSize(3.0);
     glBegin(GL_POINTS);
@@ -1871,18 +2358,9 @@ soundingdata->num_soundings); */
         (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
 
       /* plot sounding */
-      if (mb_beam_ok(sounding->beamflag)
-          || (mb3dsoundings.view_flagged
-              && !mb_beam_check_flag_null(sounding->beamflag)
-              && (!mb_beam_check_flag_multipick(sounding->beamflag)
-                  || mb3dsoundings.view_secondary))) {
+      if (mb3dsoundings_shown(sounding)) {
         float r, g, b;
-        mbview_getcolor(sounding->z, zmin, zmax, MBV_COLORTABLE_NORMAL,
-                        colortable_haxby_red[0], colortable_haxby_green[0], colortable_haxby_blue[0],
-                        colortable_haxby_red[MBV_NUM_COLORS - 1], colortable_haxby_green[MBV_NUM_COLORS - 1],
-                        colortable_haxby_blue[MBV_NUM_COLORS - 1],
-                        colortable_haxby_red, colortable_haxby_green, colortable_haxby_blue,
-                        &r, &g, &b);
+        mb3dsoundings_depth_color(sounding->z, zmin, zmax, &r, &g, &b);
         glColor3f(r, g, b);
         glVertex3f(sounding->glx, sounding->gly, sounding->glz);
       }
@@ -1893,27 +2371,11 @@ soundingdata->num_soundings); */
   /* Color by amplitude */
   else if (mb3dsoundings.view_color == MBS_VIEW_COLOR_AMP) {
 
-    double ampmin = 0.0;
-    double ampmax = 0.0;
-    bool first = true;
-    for (int i = 0; i < soundingdata->num_soundings; i++) {
-      struct mb3dsoundings_sounding_struct *sounding =
-        (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
-      if (mb_beam_ok(sounding->beamflag)
-          || (mb3dsoundings.view_flagged
-              && !mb_beam_check_flag_null(sounding->beamflag)
-              && (!mb_beam_check_flag_multipick(sounding->beamflag)
-                  || mb3dsoundings.view_secondary))) {
-        if (first) {
-          first = false;
-          ampmin = sounding->a;
-          ampmax = sounding->a;
-        } else {
-          ampmin = MIN(ampmin, sounding->a);
-          ampmax = MAX(ampmax, sounding->a);
-        }
-      }
-    }
+    /* get the amplitude min max over the soundings drawn
+       (mb3dsoundings_amplitude_range) */
+    double ampmin;
+    double ampmax;
+    mb3dsoundings_amplitude_range(soundingdata, &ampmin, &ampmax);
 
     glPointSize(3.0);
     glBegin(GL_POINTS);
@@ -1922,16 +2384,9 @@ soundingdata->num_soundings); */
         (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
 
       /* plot sounding */
-      if (mb_beam_ok(sounding->beamflag)
-          || (mb3dsoundings.view_flagged
-              && !mb_beam_check_flag_null(sounding->beamflag)
-              && (!mb_beam_check_flag_multipick(sounding->beamflag)
-                  || mb3dsoundings.view_secondary))) {
+      if (mb3dsoundings_shown(sounding)) {
         float r, g, b;
-        mbview_getcolor(sounding->a, ampmin, ampmax, MBV_COLORTABLE_NORMAL,
-                        (float)0.0, (float)0.0, (float)1.0, (float)1.0, (float)0.0, (float)0.0,
-                        colortable_redtoblue_red, colortable_redtoblue_green, colortable_redtoblue_blue,
-                        &r, &g, &b);
+        mb3dsoundings_amplitude_color(sounding->a, ampmin, ampmax, &r, &g, &b);
         glColor3f(r, g, b);
         glVertex3f(sounding->glx, sounding->gly, sounding->glz);
       }
@@ -1970,6 +2425,10 @@ soundingdata->num_soundings); */
     sounding->winx = (int)xx;
     sounding->winy = (int)yy;
   }
+
+  /* the screen positions belong to this camera and these soundings, so the
+     pick, erase, grab and info functions use them as they are */
+  mb3dsoundings_screen_stamp();
 
   /* plot grab rectangle before rotations */
   glMatrixMode(GL_MODELVIEW);
@@ -2192,6 +2651,9 @@ void do_mb3dsdg_action_flagsparsevoxels_A(Widget w, XtPointer client_data, XtPoi
   if (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify != NULL)
     (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify)(1, 10);
 
+  /* the program flagged soundings: raise the mark before the replot (top of this file) */
+  mbv_marks_color(&mb3dsoundings_marks);
+
   /* replot the data */
   mb3dsoundings_plot(mbs_verbose, &mbs_error);
 }
@@ -2207,6 +2669,9 @@ void do_mb3dsdg_action_flagsparsevoxels_B(Widget w, XtPointer client_data, XtPoi
   /* send bias parameters to calling program to be applied */
   if (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify != NULL)
     (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify)(1, 2);
+
+  /* the program flagged soundings: raise the mark before the replot (top of this file) */
+  mbv_marks_color(&mb3dsoundings_marks);
 
   /* replot the data */
   mb3dsoundings_plot(mbs_verbose, &mbs_error);
@@ -2224,6 +2689,9 @@ void do_mb3dsdg_action_flagsparsevoxels_C(Widget w, XtPointer client_data, XtPoi
   if (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify != NULL)
     (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify)(4, 10);
 
+  /* the program flagged soundings: raise the mark before the replot (top of this file) */
+  mbv_marks_color(&mb3dsoundings_marks);
+
   /* replot the data */
   mb3dsoundings_plot(mbs_verbose, &mbs_error);
 }
@@ -2239,6 +2707,9 @@ void do_mb3dsdg_action_flagsparsevoxels_D(Widget w, XtPointer client_data, XtPoi
   /* send bias parameters to calling program to be applied */
   if (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify != NULL)
     (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify)(4, 2);
+
+  /* the program flagged soundings: raise the mark before the replot (top of this file) */
+  mbv_marks_color(&mb3dsoundings_marks);
 
   /* replot the data */
   mb3dsoundings_plot(mbs_verbose, &mbs_error);
@@ -2256,6 +2727,9 @@ void do_mb3dsdg_action_flagsparsevoxels_E(Widget w, XtPointer client_data, XtPoi
   if (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify != NULL)
     (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify)(8, 10);
 
+  /* the program flagged soundings: raise the mark before the replot (top of this file) */
+  mbv_marks_color(&mb3dsoundings_marks);
+
   /* replot the data */
   mb3dsoundings_plot(mbs_verbose, &mbs_error);
 }
@@ -2271,6 +2745,9 @@ void do_mb3dsdg_action_flagsparsevoxels_F(Widget w, XtPointer client_data, XtPoi
   /* send bias parameters to calling program to be applied */
   if (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify != NULL)
     (mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify)(8, 2);
+
+  /* the program flagged soundings: raise the mark before the replot (top of this file) */
+  mbv_marks_color(&mb3dsoundings_marks);
 
   /* replot the data */
   mb3dsoundings_plot(mbs_verbose, &mbs_error);
@@ -2288,6 +2765,9 @@ void do_mb3dsdg_action_colorsoundingsblack(Widget w, XtPointer client_data, XtPo
   if (mb3dsoundings.mb3dsoundings_colorsoundings_notify != NULL)
     (mb3dsoundings.mb3dsoundings_colorsoundings_notify)(MBV_COLOR_BLACK);
 
+  /* the program coloured soundings: raise the mark before the replot (top of this file) */
+  mbv_marks_color(&mb3dsoundings_marks);
+
   /* replot the data */
   mb3dsoundings_plot(mbs_verbose, &mbs_error);
 }
@@ -2303,6 +2783,9 @@ void do_mb3dsdg_action_colorsoundingsred(Widget w, XtPointer client_data, XtPoin
   /* notify calling program to color current selected unflagged soundings */
   if (mb3dsoundings.mb3dsoundings_colorsoundings_notify != NULL)
     (mb3dsoundings.mb3dsoundings_colorsoundings_notify)(MBV_COLOR_RED);
+
+  /* the program coloured soundings: raise the mark before the replot (top of this file) */
+  mbv_marks_color(&mb3dsoundings_marks);
 
   /* replot the data */
   mb3dsoundings_plot(mbs_verbose, &mbs_error);
@@ -2320,6 +2803,9 @@ void do_mb3dsdg_action_colorsoundingsyellow(Widget w, XtPointer client_data, XtP
   if (mb3dsoundings.mb3dsoundings_colorsoundings_notify != NULL)
     (mb3dsoundings.mb3dsoundings_colorsoundings_notify)(MBV_COLOR_YELLOW);
 
+  /* the program coloured soundings: raise the mark before the replot (top of this file) */
+  mbv_marks_color(&mb3dsoundings_marks);
+
   /* replot the data */
   mb3dsoundings_plot(mbs_verbose, &mbs_error);
 }
@@ -2335,6 +2821,9 @@ void do_mb3dsdg_action_colorsoundingsgreen(Widget w, XtPointer client_data, XtPo
   /* notify calling program to color current selected unflagged soundings */
   if (mb3dsoundings.mb3dsoundings_colorsoundings_notify != NULL)
     (mb3dsoundings.mb3dsoundings_colorsoundings_notify)(MBV_COLOR_GREEN);
+
+  /* the program coloured soundings: raise the mark before the replot (top of this file) */
+  mbv_marks_color(&mb3dsoundings_marks);
 
   /* replot the data */
   mb3dsoundings_plot(mbs_verbose, &mbs_error);
@@ -2352,6 +2841,9 @@ void do_mb3dsdg_action_colorsoundingsbluegreen(Widget w, XtPointer client_data, 
   if (mb3dsoundings.mb3dsoundings_colorsoundings_notify != NULL)
     (mb3dsoundings.mb3dsoundings_colorsoundings_notify)(MBV_COLOR_BLUEGREEN);
 
+  /* the program coloured soundings: raise the mark before the replot (top of this file) */
+  mbv_marks_color(&mb3dsoundings_marks);
+
   /* replot the data */
   mb3dsoundings_plot(mbs_verbose, &mbs_error);
 }
@@ -2368,6 +2860,9 @@ void do_mb3dsdg_action_colorsoundingsblue(Widget w, XtPointer client_data, XtPoi
   if (mb3dsoundings.mb3dsoundings_colorsoundings_notify != NULL)
     (mb3dsoundings.mb3dsoundings_colorsoundings_notify)(MBV_COLOR_BLUE);
 
+  /* the program coloured soundings: raise the mark before the replot (top of this file) */
+  mbv_marks_color(&mb3dsoundings_marks);
+
   /* replot the data */
   mb3dsoundings_plot(mbs_verbose, &mbs_error);
 }
@@ -2383,6 +2878,9 @@ void do_mb3dsdg_action_colorsoundingspurple(Widget w, XtPointer client_data, XtP
   /* notify calling program to color current selected unflagged soundings */
   if (mb3dsoundings.mb3dsoundings_colorsoundings_notify != NULL)
     (mb3dsoundings.mb3dsoundings_colorsoundings_notify)(MBV_COLOR_PURPLE);
+
+  /* the program coloured soundings: raise the mark before the replot (top of this file) */
+  mbv_marks_color(&mb3dsoundings_marks);
 
   /* replot the data */
   mb3dsoundings_plot(mbs_verbose, &mbs_error);
@@ -2407,6 +2905,9 @@ void do_mb3dsdg_action_optimizebiasvalues_r(Widget w, XtPointer client_data, XtP
 
     (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_R, &rollbias, &pitchbias, &headingbias,
                                                             &timelag, &snell);
+
+    /* the program rewrote every sounding's z, which colours them by depth: raise the mark before the replot (top of this file) */
+    mbv_marks_color(&mb3dsoundings_marks);
 
     /* set the bias parameters stored for the gui */
     mb3dsoundings.irollbias = (int)round(100 * rollbias);
@@ -2452,6 +2953,9 @@ void do_mb3dsdg_action_optimizebiasvalues_p(Widget w, XtPointer client_data, XtP
     (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_P, &rollbias, &pitchbias, &headingbias,
                                                             &timelag, &snell);
 
+    /* the program rewrote every sounding's z, which colours them by depth: raise the mark before the replot (top of this file) */
+    mbv_marks_color(&mb3dsoundings_marks);
+
     /* set the bias parameters stored for the gui */
     mb3dsoundings.irollbias = (int)round(100 * rollbias);
     mb3dsoundings.ipitchbias = (int)round(100 * pitchbias);
@@ -2490,6 +2994,9 @@ void do_mb3dsdg_action_optimizebiasvalues_h(Widget w, XtPointer client_data, XtP
 
     (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_H, &rollbias, &pitchbias, &headingbias,
                                                             &timelag, &snell);
+
+    /* the program rewrote every sounding's z, which colours them by depth: raise the mark before the replot (top of this file) */
+    mbv_marks_color(&mb3dsoundings_marks);
 
     /* set the bias parameters stored for the gui */
     mb3dsoundings.irollbias = (int)round(100 * rollbias);
@@ -2535,6 +3042,9 @@ void do_mb3dsdg_action_optimizebiasvalues_rp(Widget w, XtPointer client_data, Xt
     (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_RP, &rollbias, &pitchbias,
                                                             &headingbias, &timelag, &snell);
 
+    /* the program rewrote every sounding's z, which colours them by depth: raise the mark before the replot (top of this file) */
+    mbv_marks_color(&mb3dsoundings_marks);
+
     /* set the bias parameters stored for the gui */
     mb3dsoundings.irollbias = (int)round(100 * rollbias);
     mb3dsoundings.ipitchbias = (int)round(100 * pitchbias);
@@ -2579,6 +3089,9 @@ void do_mb3dsdg_action_optimizebiasvalues_rph(Widget w, XtPointer client_data, X
     (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_RPH, &rollbias, &pitchbias,
                                                             &headingbias, &timelag, &snell);
 
+    /* the program rewrote every sounding's z, which colours them by depth: raise the mark before the replot (top of this file) */
+    mbv_marks_color(&mb3dsoundings_marks);
+
     /* set the bias parameters stored for the gui */
     mb3dsoundings.irollbias = (int)round(100 * rollbias);
     mb3dsoundings.ipitchbias = (int)round(100 * pitchbias);
@@ -2616,6 +3129,9 @@ void do_mb3dsdg_action_optimizebiasvalues_t(Widget w, XtPointer client_data, XtP
 
     (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_T, &rollbias, &pitchbias, &headingbias,
                                                             &timelag, &snell);
+
+    /* the program rewrote every sounding's z, which colours them by depth: raise the mark before the replot (top of this file) */
+    mbv_marks_color(&mb3dsoundings_marks);
 
     /* set the bias parameters stored for the gui */
     mb3dsoundings.irollbias = (int)round(100 * rollbias);
@@ -2655,6 +3171,9 @@ void do_mb3dsdg_action_optimizebiasvalues_s(Widget w, XtPointer client_data, XtP
 
     (mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify)(MB3DSDG_OPTIMIZEBIASVALUES_S, &rollbias, &pitchbias, &headingbias,
                                                             &timelag, &snell);
+
+    /* the program rewrote every sounding's z, which colours them by depth: raise the mark before the replot (top of this file) */
+    mbv_marks_color(&mb3dsoundings_marks);
 
     /* set the bias parameters stored for the gui */
     mb3dsoundings.irollbias = (int)round(100 * rollbias);
@@ -2732,6 +3251,10 @@ void mb3dsoundings_bias_changed(void) {
         0.01 * ((double)mb3dsoundings.iheadingbias), 0.01 * ((double)mb3dsoundings.itimelag),
       0.0001 * ((double)mb3dsoundings.isnell));
 
+  /* the program rewrote every sounding's z, which colours them by depth: raise
+     the mark (top of this file); the rescaling raises the positions */
+  mbv_marks_color(&mb3dsoundings_marks);
+
   /* rescale data to the gl coordinates */
   mb3dsoundings_scale(mbs_verbose, &mbs_error);
   mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
@@ -2751,6 +3274,11 @@ void mb3dsoundings_setviewtoggle(int toggle, bool state) {
   else if (toggle == MBS_VIEWTOGGLE_SCALEWITHFLAGGED)
     mb3dsoundings.view_scalewithflagged = state;
 
+  /* which soundings are drawn changed (top of this file); the scaling raises
+     the positions */
+  if (toggle == MBS_VIEWTOGGLE_FLAGGED || toggle == MBS_VIEWTOGGLE_SECONDARY)
+    mbv_marks_color(&mb3dsoundings_marks);
+
   /* replot the data */
   if (toggle == MBS_VIEWTOGGLE_SCALEWITHFLAGGED)
     mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
@@ -2768,6 +3296,9 @@ void mb3dsoundings_setprofiles(int mode) {
 /* how soundings are coloured (MBS_VIEW_COLOR_*) */
 void mb3dsoundings_setcolor(int mode) {
   mb3dsoundings.view_color = mode;
+
+  /* every colour changed (top of this file) */
+  mbv_marks_color(&mb3dsoundings_marks);
 
   /* replot the data */
   mb3dsoundings_plot(mbs_verbose, &mbs_error);
@@ -2824,6 +3355,12 @@ int mb3dsoundings_setdata(int verbose, struct mb3dsoundings_struct *soundingdata
 
   /* set the data pointer */
   mb3dsoundings.soundingdata = (struct mb3dsoundings_struct *)soundingdata;
+
+  /* new soundings, perhaps in the same array as before: raise every mark (top
+     of this file); the screen positions belong to no camera yet */
+  mbv_marks_everything(&mb3dsoundings_marks);
+  mb3dsoundings_screen.valid = false;
+
   mb3dsoundings_scale(verbose, error);
 
   /* reset info flag */
@@ -2856,5 +3393,11 @@ void mb3dsoundings_reset_keepbias(void) {
 /* the soundings window was hidden: tell the calling program */
 void mb3dsoundings_dismissed(void) {
   mb3dsoundings.init = MBS_WINDOW_HIDDEN;
+
+  /* the calling program releases the soundings in the notify: users of them
+     stop reading (top of this file) */
+  mbv_marks_everything(&mb3dsoundings_marks);
+  mb3dsoundings_screen.valid = false;
+
   (mb3dsoundings.mb3dsoundings_dismiss_notify)();
 }

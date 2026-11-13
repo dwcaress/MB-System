@@ -113,3 +113,29 @@ void mbv_camera_rotate(double m[16], double angle, double x, double y, double z)
 	mbv_camera_multiply(m, r);
 }
 /*------------------------------------------------------------------------------*/
+/* out = m * in, for a column-major m */
+static void mbv_camera_transform(const double m[16], const double in[4], double out[4]) {
+	for (int row = 0; row < 4; row++)
+		out[row] = in[0] * m[row] + in[1] * m[4 + row] + in[2] * m[8 + row] + in[3] * m[12 + row];
+}
+/*------------------------------------------------------------------------------*/
+bool mbv_camera_project(const double modelview[16], const double projection[16], const int viewport[4], double x,
+                        double y, double z, double *winx, double *winy, double *winz) {
+	const double object[4] = {x, y, z, 1.0};
+	double eye[4];
+	double clip[4];
+	mbv_camera_transform(modelview, object, eye);
+	mbv_camera_transform(projection, eye, clip);
+	if (clip[3] == 0.0)
+		return false;
+
+	/* normalised device coordinates, then the range 0 to 1, then the viewport */
+	const double ndc_x = clip[0] / clip[3];
+	const double ndc_y = clip[1] / clip[3];
+	const double ndc_z = clip[2] / clip[3];
+	*winx = (ndc_x * 0.5 + 0.5) * viewport[2] + viewport[0];
+	*winy = (ndc_y * 0.5 + 0.5) * viewport[3] + viewport[1];
+	*winz = ndc_z * 0.5 + 0.5;
+	return true;
+}
+/*------------------------------------------------------------------------------*/
