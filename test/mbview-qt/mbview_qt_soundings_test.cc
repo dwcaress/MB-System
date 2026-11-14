@@ -79,6 +79,9 @@ extern "C" {
 extern "C" void mb3dsoundings_setviewtoggle(int toggle, bool state);
 constexpr int kViewToggleBoundingBox = 2; /* MBS_VIEWTOGGLE_BOUNDINGBOX */
 constexpr int kViewToggleFlagged = 0;     /* MBS_VIEWTOGGLE_FLAGGED */
+extern "C" void mb3dsoundings_setcolor(int mode);
+constexpr int kViewColorFlag = 0; /* MBS_VIEW_COLOR_FLAG */
+constexpr int kViewColorTopo = 1; /* MBS_VIEW_COLOR_TOPO */
 
 namespace {
 
@@ -358,6 +361,45 @@ int test_null() {
     check(colors_status == MB_FAILURE && error == MB_ERROR_BAD_PARAMETER && n == count && small[0] == 7,
           "a buffer for fewer soundings than there are is refused");
 
+    /* colours become bytes by rounding the exact product with 255 to nearest,
+       so the grey table's 0.7 and 0.9 give 178 and 229, the bytes Apple's
+       OpenGL writes (lroundf of the float product gives 179 and 230) */
+    {
+      size_t k = 0;
+      while (k < storage.size() && !mb_beam_ok(storage[k].beamflag))
+        k++;
+      bool exact = false;
+      std::string bytes = "no unflagged sounding";
+      if (k < storage.size()) {
+        const float saved[3] = {storage[k].r, storage[k].g, storage[k].b};
+        storage[k].r = 0.7f;
+        storage[k].g = 0.9f;
+        storage[k].b = 0.5f;
+        mb3dsoundings_setcolor(kViewColorTopo);
+        mb3dsoundings_colors(0, count, rgba.data(), &n, &error);
+        const unsigned char *c = &rgba[4 * k];
+        exact = c[0] == 178 && c[1] == 229 && c[2] == 128 && c[3] == 255;
+        bytes = std::to_string(c[0]) + ", " + std::to_string(c[1]) + ", " + std::to_string(c[2]);
+        mb3dsoundings_setcolor(kViewColorFlag);
+        storage[k].r = saved[0];
+        storage[k].g = saved[1];
+        storage[k].b = saved[2];
+      }
+      check(exact, "colours 0.7, 0.9 and 0.5 become the exactly rounded bytes (" + bytes + ")");
+    }
+
+    /* setting the colour modes above raised the colour mark, and only it; the
+       marks after it are the base of the next check */
+    {
+      uint64_t position_c = 0, color_c = 0, mask_c = 0;
+      mb3dsoundings_getmarks(0, &position_c, &color_c, &mask_c, &error);
+      check(color_c > color && position_c == position && mask_c == mask,
+            "setting the colour mode raises the colour mark only");
+      position = position_c;
+      color = color_c;
+      mask = mask_c;
+    }
+
     /* hiding the flagged soundings raises only the colour mark, and exactly
        those soundings get alpha 0 */
     mb3dsoundings_setviewtoggle(kViewToggleFlagged, false);
@@ -467,8 +509,7 @@ int test_null() {
         loops++;
         bool ok = command.count == 4 && command.stipple && command.depth_test && command.camera;
         for (int v = command.first; ok && v < command.first + command.count; v++)
-          ok = batch.vertices[v].rgba[0] == 0 && batch.vertices[v].rgba[1] == 0 && batch.vertices[v].rgba[2] == 0 &&
-               batch.vertices[v].rgba[3] == 255;
+          ok = batch.vertices[v].r == 0.0f && batch.vertices[v].g == 0.0f && batch.vertices[v].b == 0.0f;
         loops_ok += ok ? 1 : 0;
       } else {
         other++;
@@ -494,9 +535,19 @@ int test_null() {
     mbv_draw_batch_vertex3f(&batch, 1.0f, 1.0f, 0.0f);
     mbv_draw_batch_end(&batch);
     check(batch.num_commands == 1 && batch.num_vertices == 2 && batch.commands[0].primitive == MBV_DRAW_LINE_STRIP &&
-              batch.commands[0].line_width == 1.0f && batch.vertices[0].rgba[0] == 255 &&
-              batch.vertices[0].rgba[1] == 128 && batch.vertices[0].rgba[2] == 0,
-          "the recorder keeps OpenGL's rules (colour 1, 0.5, 0 recorded as 255, 128, 0)");
+              batch.commands[0].line_width == 1.0f && batch.vertices[0].r == 1.0f &&
+              batch.vertices[0].g == 0.5f && batch.vertices[0].b == 0.0f,
+          "the recorder keeps OpenGL's rules and the colour as given (1, 0.5, 0)");
+
+    /* a line width or point size of 0 or less is an error in OpenGL, which
+       keeps the one it has */
+    mbv_draw_batch_line_width(&batch, 0.0f);
+    mbv_draw_batch_point_size(&batch, -2.0f);
+    mbv_draw_batch_begin(&batch, MBV_DRAW_POINTS);
+    mbv_draw_batch_vertex3f(&batch, 0.0f, 0.0f, 0.0f);
+    mbv_draw_batch_end(&batch);
+    check(batch.num_commands == 2 && batch.commands[1].line_width == 1.0f && batch.commands[1].point_size == 1.0f,
+          "a line width or point size of 0 or less is ignored, as OpenGL ignores it");
     mbv_draw_batch_free(&batch);
   }
 

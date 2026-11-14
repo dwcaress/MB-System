@@ -1875,14 +1875,20 @@ int mb3dsoundings_getcount(int verbose, int *num_soundings, int *error) {
 }
 
 /*------------------------------------------------------------------------------*/
-/* one colour byte, rounded to nearest as OpenGL rounds a float colour into an
-   8-bit framebuffer */
+/* one colour byte: the exact product with 255, which double holds exactly,
+   rounded to nearest (half up). These are the bytes Apple's OpenGL writes into
+   an 8-bit framebuffer: 0.7 and 0.9, values of the grey colour table, give 178
+   and 229. Mesa rounds the product computed in float, half to even, which can
+   be one step apart where that float product is exactly a half step (0.9 gives
+   230 there; 0.7 gives 178 in both), so no byte formula matches every OpenGL.
+   Rounding the float product half up, as lroundf() does, matches neither: it
+   gives 179 for 0.7, where both give 178. */
 static unsigned char mb3dsoundings_color_byte(float c) {
   if (!(c > 0.0f))
     return (0);
   if (c >= 1.0f)
     return (255);
-  return ((unsigned char)lroundf(c * 255.0f));
+  return ((unsigned char)lround((double)c * 255.0));
 }
 
 /* The colour of every sounding as the drawing gives it, 4 bytes (RGBA) per

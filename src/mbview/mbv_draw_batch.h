@@ -74,7 +74,12 @@ struct mbv_draw_vertex {
 	float x;
 	float y;
 	float z;
-	unsigned char rgba[4]; /* rounded to nearest, alpha 255 */
+	/* the colour as the drawing gave it to OpenGL: a renderer converts it the
+	   way its framebuffer needs (bytes made from floats round differently
+	   depending on how they are computed, so the batch keeps the floats) */
+	float r;
+	float g;
+	float b;
 };
 
 struct mbv_draw_command {

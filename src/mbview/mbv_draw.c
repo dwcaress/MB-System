@@ -26,7 +26,6 @@
  * This file uses no toolkit and no OpenGL.
  */
 
-#include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
@@ -101,14 +100,6 @@ static bool mbv_draw_batch_grow(struct mbv_draw_batch *batch, void **array, int 
 	return true;
 }
 /*------------------------------------------------------------------------------*/
-static unsigned char mbv_draw_byte(float c) {
-	if (!(c > 0.0f))
-		return 0;
-	if (c >= 1.0f)
-		return 255;
-	return (unsigned char)lroundf(c * 255.0f);
-}
-/*------------------------------------------------------------------------------*/
 /* a command with the current state */
 static struct mbv_draw_command *mbv_draw_batch_command(struct mbv_draw_batch *batch, int kind, int primitive) {
 	if (!mbv_draw_batch_grow(batch, (void **)&batch->commands, batch->num_commands, &batch->num_commands_alloc,
@@ -166,21 +157,21 @@ void mbv_draw_batch_vertex3f(struct mbv_draw_batch *batch, float x, float y, flo
 	vertex->x = x;
 	vertex->y = y;
 	vertex->z = z;
-	vertex->rgba[0] = mbv_draw_byte(batch->color[0]);
-	vertex->rgba[1] = mbv_draw_byte(batch->color[1]);
-	vertex->rgba[2] = mbv_draw_byte(batch->color[2]);
-	vertex->rgba[3] = 255;
+	vertex->r = batch->color[0];
+	vertex->g = batch->color[1];
+	vertex->b = batch->color[2];
 }
 /*------------------------------------------------------------------------------*/
 /* the state calls change nothing while a primitive is open, as in OpenGL,
-   where they are errors between glBegin and glEnd */
+   where they are errors between glBegin and glEnd; a line width or point size
+   of 0 or less is an error too, and OpenGL keeps the one it has */
 void mbv_draw_batch_line_width(struct mbv_draw_batch *batch, float width) {
-	if (!batch->open)
+	if (!batch->open && width > 0.0f)
 		batch->line_width = width;
 }
 /*------------------------------------------------------------------------------*/
 void mbv_draw_batch_point_size(struct mbv_draw_batch *batch, float size) {
-	if (!batch->open)
+	if (!batch->open && size > 0.0f)
 		batch->point_size = size;
 }
 /*------------------------------------------------------------------------------*/
