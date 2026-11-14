@@ -522,6 +522,13 @@ int mbview_reset(size_t instance) {
 		view->primaryslope_histogram_set = false;
 		view->secondary_histogram_set = false;
 
+		/* the view has no grid now: drop the blocks of the old one and raise
+		   every mark. The counters are not reset, so a user that kept the
+		   values of a previous view of this instance cannot match them
+		   (mbv_marks.h). */
+		mbv_marks_free(mbv_verbose, &view->marks);
+		mbview_contour_free_segments(instance);
+
 		/* grid display bounds */
 		view->xmin = 0.0;
 		view->xmax = 0.0;
@@ -953,6 +960,104 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 }
 
 /*------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------*/
+/* What changed in a view's terrain, for a user that keeps its own copy of the
+   node arrays or caches picks (src/mbview/mbv_marks.h). Reading changes
+   nothing, so several users can follow one view. */
+int mbview_getmarks(int verbose, size_t instance, uint64_t *position, uint64_t *color, uint64_t *mask, uint64_t *drawn,
+                    int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+	}
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	*position = mbv_marks_getposition(&view->marks);
+	*color = mbv_marks_getcolor(&view->marks);
+	*mask = mbv_marks_getmask(&view->marks);
+	*drawn = mbv_marks_getdrawn(&view->marks);
+	*error = MB_ERROR_NO_ERROR;
+
+	const int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       position:         %llu\n", (unsigned long long)*position);
+		fprintf(stderr, "dbg2       color:            %llu\n", (unsigned long long)*color);
+		fprintf(stderr, "dbg2       mask:             %llu\n", (unsigned long long)*mask);
+		fprintf(stderr, "dbg2       drawn:            %llu\n", (unsigned long long)*drawn);
+		fprintf(stderr, "dbg2       error:            %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:           %d\n", status);
+	}
+
+	return (status);
+}
+/*------------------------------------------------------------------------------*/
+int mbview_getnodeversion(int verbose, size_t instance, int i0, int i1, int j0, int j1, uint64_t *version, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+		fprintf(stderr, "dbg2       i0:               %d\n", i0);
+		fprintf(stderr, "dbg2       i1:               %d\n", i1);
+		fprintf(stderr, "dbg2       j0:               %d\n", j0);
+		fprintf(stderr, "dbg2       j1:               %d\n", j1);
+	}
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	*version = mbv_marks_nodesversion(&view->marks, i0, i1, j0, j1);
+	*error = MB_ERROR_NO_ERROR;
+
+	const int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       version:          %llu\n", (unsigned long long)*version);
+		fprintf(stderr, "dbg2       error:            %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:           %d\n", status);
+	}
+
+	return (status);
+}
+/*------------------------------------------------------------------------------*/
+int mbview_getmarkblocks(int verbose, size_t instance, int *block_nodes, int *nblock_i, int *nblock_j, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+	}
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	mbv_marks_blocks(&view->marks, block_nodes, nblock_i, nblock_j);
+	*error = MB_ERROR_NO_ERROR;
+
+	const int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       block_nodes:      %d\n", *block_nodes);
+		fprintf(stderr, "dbg2       nblock_i:         %d\n", *nblock_i);
+		fprintf(stderr, "dbg2       nblock_j:         %d\n", *nblock_j);
+		fprintf(stderr, "dbg2       error:            %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:           %d\n", status);
+	}
+
+	return (status);
+}
+/*------------------------------------------------------------------------------*/
 int mbview_getsharedptr(int verbose, struct mbview_shareddata_struct **sharedhandle, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1191,6 +1296,11 @@ int mbview_setwindowparms(int verbose, size_t instance, int (*mbview_dismiss_not
 	data->lorez_navdecimate = lorez_navdecimate;
 	data->hirez_navdecimate = hirez_navdecimate;
 
+	/* the window size and the resolution dimensions decide the node range and
+	   the stride a renderer should draw; the data does not change here
+	   (mbv_marks.h) */
+	mbv_marks_drawn(&view->marks);
+
 	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -1275,6 +1385,10 @@ int mbview_setviewcontrols(int verbose, size_t instance, int display_mode, int m
 	data->navdrape_view_mode = navdrape_view_mode;
 	data->vector_view_mode = vector_view_mode;
 	data->exaggeration = exaggeration;
+
+	/* the vertical exaggeration scales every node's position, and the view
+	   controls also carry the grid mode and the shading (mbv_marks.h) */
+	mbv_marks_everything(&view->marks);
 	data->modelelevation3d = modelelevation3d;
 	data->modelazimuth3d = modelazimuth3d;
 	data->viewelevation3d = viewelevation3d;
@@ -1349,6 +1463,11 @@ int mbview_update(int verbose, size_t instance, int *error) {
 		data->secondary_colortable_max = data->secondary_max + 0.01 * (data->secondary_max - data->secondary_min);
 		data->overlay_shade_center = 0.5 * (data->secondary_max + data->secondary_min);
 	}
+
+	/* the colour bounds above are written after the mbview_colorclear of this
+	   function, so the colours of every node depend on them: raise the colour
+	   mark here, after them, not with the clear (mbv_marks.h) */
+	mbv_marks_color(&view->marks);
 
 	/* set widgets */
 	if (data->active)
@@ -2949,6 +3068,10 @@ int mbview_setdisplaymode(size_t instance, int mode) {
 	/* get mode value */
 	data->display_mode = mode;
 
+	/* the node range and the stride a renderer should draw change, the data
+	   does not (mbv_marks.h) */
+	mbv_marks_drawn(&view->marks);
+
 	/* set togglebuttons */
 	set_mbview_display_mode(instance, data->display_mode);
 	set_mbview_mouse_mode(instance, data->mouse_mode);
@@ -2987,6 +3110,12 @@ int mbview_setgridmode(size_t instance, int grid_mode) {
 
 	/* get mode value */
 	data->grid_mode = grid_mode;
+
+	/* the colours of every node come from the grid this mode selects, and in
+	   secondary grid mode the secondary no-data pattern decides which triangles
+	   are drawn (mbv_marks.h) */
+	mbv_marks_color(&view->marks);
+	mbv_marks_mask(&view->marks);
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "%s instance:%zu mode:%d\n", __func__, instance, data->grid_mode);
@@ -3677,6 +3806,11 @@ int mbview_destroy(int verbose, size_t instance, bool destroywidgets, int *error
 		view->init = MBV_WINDOW_NULL;
 		mbv_ninstance--;
 
+		/* the node arrays are about to be freed: raise every mark first, so a
+		   user still holding this instance stops reading them (mbv_marks.h) */
+		mbv_marks_free(mbv_verbose, &view->marks);
+		mbview_contour_free_segments(instance);
+
 		/* deallocate memory */
 		if (status == MB_SUCCESS && data->primary_data != NULL)
 			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_data, error);
@@ -4268,6 +4402,10 @@ int mbview_setresolution(size_t instance, int lorez_dimension, int hirez_dimensi
 	data->lorez_navdecimate = lorez_navdecimate;
 	data->hirez_navdecimate = hirez_navdecimate;
 
+	/* the stride a renderer should draw comes from these dimensions
+	   (mbv_marks.h); the clears below raise the position and colour marks */
+	mbv_marks_drawn(&view->marks);
+
 	/* reset status flags and arrays */
 	view->lastdrawrez = MBV_REZ_NONE;
 	mbview_setcolorparms(instance);
@@ -4313,6 +4451,10 @@ int mbview_setdisplayprojection(size_t instance, int projection) {
 	view->plot_done = false;
 	view->projected = false;
 	view->globalprojected = false;
+
+	/* every node will be projected again into new display coordinates
+	   (mbv_marks.h) */
+	mbv_marks_everything(&view->marks);
 	view->viewboundscount = MBV_BOUNDSFREQUENCY;
 
 	/* UTM: the zone of the grid centre */

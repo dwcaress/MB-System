@@ -32,7 +32,12 @@
  * drawing code did before. Other toolkits can install their own.
  *
  * Every operation is optional: a NULL entry does nothing, and a NULL
- * defer_draw means "draw now".
+ * defer_draw means "draw now". A renderer that does not draw with OpenGL
+ * gives pick_terrain and view_bounds, which find on the CPU what the
+ * colour-coded drawing of mbview_findpointrez and mbview_viewbounds finds;
+ * NULL entries keep that drawing. While a batch is filled (mbv_draw.h)
+ * defer_draw, make_current, present and the read-back are not asked for, and
+ * without view_bounds the 3D view bounds are the whole grid, not drawn.
  */
 
 #ifndef MBVIEW_MBV_RENDER_H
@@ -66,6 +71,13 @@ struct mbv_render_ops {
 	/* return true if the renderer has queued the drawing for later, so that
 	   the caller must not draw now; rez is MBV_REZ_* for the map view */
 	bool (*defer_draw)(int view, size_t instance, int rez);
+	/* pick the terrain of the map view at a pixel without drawing, the pixel
+	   counted as glReadPixels counts it (origin at the bottom left, physical
+	   pixels); return true and the grid position and data value of the centroid
+	   of the full-resolution triangle seen at the pixel, false if none is seen */
+	bool (*pick_terrain)(size_t instance, int xpixel, int ypixel, double *xgrid, double *ygrid, double *zdata);
+	/* set the grid bounds seen in the 3D map view without drawing */
+	void (*view_bounds)(size_t instance, int viewbounds[4]);
 };
 
 /* install a renderer; the table is copied */
@@ -82,6 +94,12 @@ void mbv_render_present(int view, size_t instance);
 void mbv_render_readback_begin(int view, size_t instance);
 void mbv_render_readback_end(int view, size_t instance);
 bool mbv_render_defer_draw(int view, size_t instance, int rez);
+
+/* the picks of a renderer that finds them without drawing; each returns false
+   if the renderer has none, and the caller then draws */
+bool mbv_render_pick_terrain(size_t instance, int xpixel, int ypixel, bool *found, double *xgrid, double *ygrid,
+                             double *zdata);
+bool mbv_render_view_bounds(size_t instance, int viewbounds[4]);
 
 #ifdef __cplusplus
 }

@@ -29,6 +29,9 @@
 #ifndef MBVIEW_MBVIEW_H_
 #define MBVIEW_MBVIEW_H_
 
+/* the change marks of a view are counters wide enough never to wrap */
+#include <stdint.h>
+
 #ifndef MB_STATUS_DEF
 #include "mb_status.h"
 #endif
@@ -854,6 +857,35 @@ int mbview_init(int verbose, size_t *instance, int *error);
 int mbview_quit(int verbose, int *error);
 int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datahandle, int *error);
 int mbview_getsharedptr(int verbose, struct mbview_shareddata_struct **sharedhandle, int *error);
+/* what changed in a view's terrain, for a user that keeps its own copy of the
+   node arrays or caches picks: four counters that only rise. Keep the values
+   last seen and compare; reading changes nothing. A raised counter means the
+   values must be prepared again (mbview_prepare_nodes) and read again, never
+   that they are ready. Written in src/mbview/mbv_marks.h. */
+int mbview_getmarks(int verbose, size_t instance, uint64_t *position, uint64_t *color, uint64_t *mask, uint64_t *drawn,
+                    int *error);
+/* the version of a range of nodes, ends included: it rises when single cells
+   of that range changed, as while editing */
+int mbview_getnodeversion(int verbose, size_t instance, int i0, int i1, int j0, int j1, uint64_t *version, int *error);
+/* the block grid the node versions are kept in, for a user sizing its cache */
+int mbview_getmarkblocks(int verbose, size_t instance, int *block_nodes, int *nblock_i, int *nblock_j, int *error);
+/* scale the z and compute the colours of a range of nodes, as the drawing does
+   for what it draws, without any OpenGL call */
+int mbview_prepare_nodes(int verbose, size_t instance, int i0, int i1, int j0, int j1, int stride, int *error);
+/* the contour segments a renderer draws where a batch (mbv_draw.h) has the
+   contour slot of a resolution: rez MBV_REZ_LOW, MBV_REZ_HIGH or MBV_REZ_FULL
+   (1, 2, 3 in mbviewprivate.h) for MBV_DRAW_SLOT_CONTOURS_LOW, _HIGH or _FULL
+   (mbv_draw_batch.h). x, y and z of each vertex in the terrain's display
+   coordinates, two vertices per segment (lines, black, one pixel wide), and
+   their generation, which changes whenever they are made again or freed. Only
+   filling a batch keeps them, and *xyz is NULL where none were kept (with
+   OpenGL the drawing compiles them into display lists instead). Each time the
+   contours of a resolution are made, they are made for one way of drawing
+   only, and the view does not record which: a process draws a view one way.
+   The array is the view's, valid until the next drawing, mbview_reset or
+   mbview_destroy. */
+int mbview_contour_segments(int verbose, size_t instance, int rez, const float **xyz, size_t *nvertex,
+                            uint64_t *generation, int *error);
 int mbview_setwindowparms(int verbose, size_t instance, int (*mbview_dismiss_notify)(size_t), char *title, int xo, int yo,
                           int width, int height, int lorez_dimension, int hirez_dimension, int lorez_navdecimate,
                           int hirez_navdecimate, int *error);
@@ -1102,6 +1134,20 @@ int mb3dsoundings_set_optimizebiasvalues_notify(int verbose,
                                                 void(optimizebiasvalues_notify)(int, double *, double *, double *, double *, double *),
                                                 int *error);
 int mb3dsoundings_plot(int verbose, int *error);
+/* the soundings as data, for a renderer without OpenGL (src/mbview/
+   mbv_soundings_core.c): what changed since it last looked (counters that only
+   rise: positions, colours, the array itself), how many soundings there are,
+   their colours (RGBA bytes, alpha 0 where none is drawn) and display
+   positions (x, y, z floats) in caller buffers, and their screen positions
+   filled for the current camera before a pick */
+int mb3dsoundings_getmarks(int verbose, uint64_t *position, uint64_t *color, uint64_t *mask, int *error);
+int mb3dsoundings_getcount(int verbose, int *num_soundings, int *error);
+int mb3dsoundings_colors(int verbose, int nalloc, unsigned char *rgba, int *num_soundings, int *error);
+int mb3dsoundings_positions(int verbose, int nalloc, float *xyz, int *num_soundings, int *error);
+int mb3dsoundings_screen_positions(int verbose, int *error);
+/* for the calling program, after it changed the colours (r/g/b) of the
+   soundings it handed over */
+int mb3dsoundings_colors_changed(int verbose, int *error);
 int mb3dsoundings_get_bias_values(int verbose, double *rollbias, double *pitchbias, double *headingbias, double *timelag,
                                   double *snell, int *error);
 

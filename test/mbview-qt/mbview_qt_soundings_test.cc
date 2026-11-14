@@ -56,7 +56,9 @@
 #include <QRadioButton>
 #include <QSlider>
 #include <QTimer>
+#include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -67,6 +69,7 @@ extern "C" {
 #include "mb_define.h"
 #include "mb_status.h"
 #include "mbview.h"
+#include "mbv_draw_batch.h"
 }
 #include "mbvq.h"
 #include "mbvq_bridge.h"
@@ -75,6 +78,10 @@ extern "C" {
 /* from the private soundings header, which needs the Motif-shaped headers */
 extern "C" void mb3dsoundings_setviewtoggle(int toggle, bool state);
 constexpr int kViewToggleBoundingBox = 2; /* MBS_VIEWTOGGLE_BOUNDINGBOX */
+constexpr int kViewToggleFlagged = 0;     /* MBS_VIEWTOGGLE_FLAGGED */
+extern "C" void mb3dsoundings_setcolor(int mode);
+constexpr int kViewColorFlag = 0; /* MBS_VIEW_COLOR_FLAG */
+constexpr int kViewColorTopo = 1; /* MBS_VIEW_COLOR_TOPO */
 
 namespace {
 
@@ -308,6 +315,288 @@ int test_null() {
   check(status.contains(QStringLiteral("Tot:5000")) && status.contains(QStringLiteral("Flagged:218")),
         "Reset View shows the sounding counts in the status line: " + status.toStdString());
 
+  /* the soundings as data, for a renderer without OpenGL
+     (src/mbview/mbv_soundings_core.c): what changed, the colours and display
+     positions it draws, and the screen positions a pick needs - which the null
+     backend never draws, so they are filled on demand */
+  {
+    int error = MB_ERROR_NO_ERROR;
+    uint64_t position = 0, color = 0, mask = 0;
+    mb3dsoundings_getmarks(0, &position, &color, &mask, &error);
+    uint64_t position2 = 0, color2 = 0, mask2 = 0;
+    mb3dsoundings_getmarks(0, &position2, &color2, &mask2, &error);
+    check(position > 0 && color > 0 && mask > 0, "handing over the soundings raised every mark");
+    check(position2 == position && color2 == color && mask2 == mask, "reading the marks changes nothing");
+
+    int count = 0;
+    mb3dsoundings_getcount(0, &count, &error);
+    check(count == static_cast<int>(storage.size()), "the count of the soundings shown (" + std::to_string(count) + ")");
+    int manual = 0;
+    for (const auto &sounding : storage)
+      manual += (sounding.beamflag & MB_FLAG_MANUAL) != 0 ? 1 : 0;
+
+    /* the flag colour mode with flagged soundings shown: the unflagged ones in
+       their beam colour (black here), the manually flagged ones red */
+    std::vector<unsigned char> rgba(4 * storage.size());
+    int n = 0;
+    int colors_status = mb3dsoundings_colors(0, count, rgba.data(), &n, &error);
+    int black = 0, red = 0, other = 0;
+    for (size_t i = 0; i < storage.size(); i++) {
+      const unsigned char *c = &rgba[4 * i];
+      const bool flagged_manual = (storage[i].beamflag & MB_FLAG_MANUAL) != 0;
+      if (!flagged_manual && c[0] == 0 && c[1] == 0 && c[2] == 0 && c[3] == 255)
+        black++;
+      else if (flagged_manual && c[0] == 255 && c[1] == 0 && c[2] == 0 && c[3] == 255)
+        red++;
+      else
+        other++;
+    }
+    check(colors_status == MB_SUCCESS && n == count && red == manual && black == count - manual && other == 0,
+          "the colours of the flag mode: " + std::to_string(black) + " unflagged black, " + std::to_string(red) +
+              " flagged red");
+
+    /* a buffer for fewer soundings than there are is refused untouched */
+    std::vector<unsigned char> small(4, 7);
+    colors_status = mb3dsoundings_colors(0, 1, small.data(), &n, &error);
+    check(colors_status == MB_FAILURE && error == MB_ERROR_BAD_PARAMETER && n == count && small[0] == 7,
+          "a buffer for fewer soundings than there are is refused");
+
+    /* colours become bytes by rounding the exact product with 255 to nearest,
+       so the grey table's 0.7 and 0.9 give 178 and 229, the bytes Apple's
+       OpenGL writes (lroundf of the float product gives 179 and 230) */
+    {
+      size_t k = 0;
+      while (k < storage.size() && !mb_beam_ok(storage[k].beamflag))
+        k++;
+      bool exact = false;
+      std::string bytes = "no unflagged sounding";
+      if (k < storage.size()) {
+        const float saved[3] = {storage[k].r, storage[k].g, storage[k].b};
+        storage[k].r = 0.7f;
+        storage[k].g = 0.9f;
+        storage[k].b = 0.5f;
+        mb3dsoundings_setcolor(kViewColorTopo);
+        mb3dsoundings_colors(0, count, rgba.data(), &n, &error);
+        const unsigned char *c = &rgba[4 * k];
+        exact = c[0] == 178 && c[1] == 229 && c[2] == 128 && c[3] == 255;
+        bytes = std::to_string(c[0]) + ", " + std::to_string(c[1]) + ", " + std::to_string(c[2]);
+        mb3dsoundings_setcolor(kViewColorFlag);
+        storage[k].r = saved[0];
+        storage[k].g = saved[1];
+        storage[k].b = saved[2];
+      }
+      check(exact, "colours 0.7, 0.9 and 0.5 become the exactly rounded bytes (" + bytes + ")");
+    }
+
+    /* setting the colour modes above raised the colour mark, and only it; the
+       marks after it are the base of the next check */
+    {
+      uint64_t position_c = 0, color_c = 0, mask_c = 0;
+      mb3dsoundings_getmarks(0, &position_c, &color_c, &mask_c, &error);
+      check(color_c > color && position_c == position && mask_c == mask,
+            "setting the colour mode raises the colour mark only");
+      position = position_c;
+      color = color_c;
+      mask = mask_c;
+    }
+
+    /* hiding the flagged soundings raises only the colour mark, and exactly
+       those soundings get alpha 0 */
+    mb3dsoundings_setviewtoggle(kViewToggleFlagged, false);
+    uint64_t position3 = 0, color3 = 0, mask3 = 0;
+    mb3dsoundings_getmarks(0, &position3, &color3, &mask3, &error);
+    check(color3 > color && position3 == position && mask3 == mask,
+          "hiding the flagged soundings raises the colour mark only");
+    mb3dsoundings_colors(0, count, rgba.data(), &n, &error);
+    int hidden = 0;
+    bool hidden_flagged = true;
+    for (size_t i = 0; i < storage.size(); i++) {
+      const bool flagged_manual = (storage[i].beamflag & MB_FLAG_MANUAL) != 0;
+      if (rgba[4 * i + 3] == 0) {
+        hidden++;
+        hidden_flagged = hidden_flagged && flagged_manual;
+      } else if (flagged_manual) {
+        hidden_flagged = false;
+      }
+    }
+    check(hidden_flagged && hidden == manual,
+          "with flagged soundings hidden exactly those " + std::to_string(hidden) + " have alpha 0");
+    mb3dsoundings_setviewtoggle(kViewToggleFlagged, true);
+
+    /* the display positions are those the drawing uses */
+    std::vector<float> xyz(3 * storage.size());
+    mb3dsoundings_positions(0, count, xyz.data(), &n, &error);
+    bool same = n == count;
+    for (size_t i = 0; same && i < storage.size(); i++)
+      same = xyz[3 * i] == storage[i].glx && xyz[3 * i + 1] == storage[i].gly && xyz[3 * i + 2] == storage[i].glz;
+    check(same, "the display positions are glx/gly/glz of every sounding");
+
+    /* the view reset rescales z: the position mark rises, the colour mark not */
+    mb3dsoundings_getmarks(0, &position3, &color3, &mask3, &error);
+    mbvq_c_soundings_resetview();
+    uint64_t position4 = 0, color4 = 0, mask4 = 0;
+    mb3dsoundings_getmarks(0, &position4, &color4, &mask4, &error);
+    check(position4 > position3 && color4 == color3, "a view reset raises the position mark and not the colour mark");
+
+    /* a click edits the sounding under it although nothing has been drawn:
+       the screen positions are filled for the current camera on demand */
+    QWidget *view = window->widget()->view();
+    const double dpr = view->devicePixelRatioF();
+    const int gl_width = static_cast<int>(std::lround(view->width() * dpr));
+    const int gl_height = static_cast<int>(std::lround(view->height() * dpr));
+    mb3dsoundings_screen_positions(0, &error);
+    size_t target = storage.size();
+    double best = 1.0e30;
+    for (size_t i = 0; i < storage.size(); i++) {
+      if (!mb_beam_ok(storage[i].beamflag))
+        continue;
+      const double d = std::hypot(storage[i].winx - 0.5 * gl_width, storage[i].winy - 0.5 * gl_height);
+      if (d < best) {
+        best = d;
+        target = i;
+      }
+    }
+    check(target < storage.size() && best < 0.25 * std::min(gl_width, gl_height),
+          "after filling the screen positions a sounding lies near the middle of the view");
+    if (target < storage.size()) {
+      const int x = storage[target].winx, y = storage[target].winy;
+      mb3dsoundings_getmarks(0, &position3, &color3, &mask3, &error);
+      const int calls = edit_calls;
+      click(view, QPointF(x / dpr, (gl_height - 1 - y) / dpr));
+      spin(50);
+      size_t edited = storage.size();
+      for (size_t i = 0; i < storage.size(); i++)
+        if (storage[i].ifile == edit_ifile && storage[i].iping == edit_iping && storage[i].ibeam == edit_ibeam)
+          edited = i;
+      check(edit_calls == calls + 1 && edited < storage.size() && std::abs(storage[edited].winx - x) <= 1 &&
+                std::abs(storage[edited].winy - y) <= 1 && !mb_beam_ok(storage[edited].beamflag),
+            "a click flags the sounding under it, with nothing drawn");
+      mb3dsoundings_getmarks(0, &position4, &color4, &mask4, &error);
+      check(color4 > color3 && position4 == position3, "the edit raises the colour mark only");
+      click(view, QPointF(x / dpr, (gl_height - 1 - y) / dpr));
+      spin(50);
+      check(edit_calls == calls + 2 && edited < storage.size() && mb_beam_ok(storage[edited].beamflag),
+            "a second click restores it");
+    }
+
+    /* the program recoloured the soundings itself, as mbeditviz does when its
+       colour table changes */
+    mb3dsoundings_getmarks(0, &position3, &color3, &mask3, &error);
+    mb3dsoundings_colors_changed(0, &error);
+    mb3dsoundings_getmarks(0, &position4, &color4, &mask4, &error);
+    check(color4 > color3 && position4 == position3 && mask4 == mask3,
+          "the program telling of new colours raises the colour mark only");
+  }
+
+  /* the drawing as data (src/mbview/mbv_draw_batch.h): with a batch as the
+     target the view is recorded, not drawn - here without any OpenGL context,
+     where an OpenGL call would crash on macOS (on Linux and Windows a call
+     without a context does nothing). The view shows the bounding box (its
+     six faces as stippled line loops, black, with the depth test) and the
+     soundings, whose points are a slot between them. */
+  {
+    struct mbv_draw_batch batch;
+    mbv_draw_batch_init(&batch);
+    mbv_draw_set_target(&batch);
+    int error = MB_ERROR_NO_ERROR;
+    mb3dsoundings_plot(0, &error);
+    mbv_draw_set_target(nullptr);
+    int loops = 0, loops_ok = 0, slot_count = 0, other = 0;
+    for (int c = 0; c < batch.num_commands; c++) {
+      const struct mbv_draw_command &command = batch.commands[c];
+      if (command.kind == MBV_DRAW_SLOT && command.primitive == MBV_DRAW_SLOT_SOUNDINGS) {
+        slot_count++;
+      } else if (command.kind == MBV_DRAW_PRIMITIVE && command.primitive == MBV_DRAW_LINE_LOOP) {
+        loops++;
+        bool ok = command.count == 4 && command.stipple && command.depth_test && command.camera;
+        for (int v = command.first; ok && v < command.first + command.count; v++)
+          ok = batch.vertices[v].r == 0.0f && batch.vertices[v].g == 0.0f && batch.vertices[v].b == 0.0f;
+        loops_ok += ok ? 1 : 0;
+      } else {
+        other++;
+      }
+    }
+    check(mbv_draw_get_target() == nullptr && !batch.failed, "filling a batch draws nothing and leaves OpenGL as the target");
+    check(loops == 6 && loops_ok == 6 && batch.num_vertices == 24,
+          "the batch holds the bounding box: " + std::to_string(loops) + " stippled black line loops, " +
+              std::to_string(batch.num_vertices) + " vertices");
+    check(slot_count == 1 && other == 0, "the soundings points are one slot in the batch");
+
+    /* the recorder keeps OpenGL's rules: a vertex outside begin and end draws
+       nothing, state changes inside are ignored, an empty primitive is no
+       command */
+    mbv_draw_batch_clear(&batch);
+    mbv_draw_batch_vertex3f(&batch, 1.0f, 2.0f, 3.0f);
+    mbv_draw_batch_begin(&batch, MBV_DRAW_LINES);
+    mbv_draw_batch_end(&batch);
+    mbv_draw_batch_color3f(&batch, 1.0f, 0.5f, 0.0f);
+    mbv_draw_batch_begin(&batch, MBV_DRAW_LINE_STRIP);
+    mbv_draw_batch_line_width(&batch, 7.0f);
+    mbv_draw_batch_vertex3f(&batch, 0.0f, 0.0f, 0.0f);
+    mbv_draw_batch_vertex3f(&batch, 1.0f, 1.0f, 0.0f);
+    mbv_draw_batch_end(&batch);
+    check(batch.num_commands == 1 && batch.num_vertices == 2 && batch.commands[0].primitive == MBV_DRAW_LINE_STRIP &&
+              batch.commands[0].line_width == 1.0f && batch.vertices[0].r == 1.0f &&
+              batch.vertices[0].g == 0.5f && batch.vertices[0].b == 0.0f,
+          "the recorder keeps OpenGL's rules and the colour as given (1, 0.5, 0)");
+
+    /* a line width or point size of 0 or less is an error in OpenGL, which
+       keeps the one it has */
+    mbv_draw_batch_line_width(&batch, 0.0f);
+    mbv_draw_batch_point_size(&batch, -2.0f);
+    mbv_draw_batch_begin(&batch, MBV_DRAW_POINTS);
+    mbv_draw_batch_vertex3f(&batch, 0.0f, 0.0f, 0.0f);
+    mbv_draw_batch_end(&batch);
+    check(batch.num_commands == 2 && batch.commands[1].line_width == 1.0f && batch.commands[1].point_size == 1.0f,
+          "a line width or point size of 0 or less is ignored, as OpenGL ignores it");
+
+    /* the map's markers: a shape is recorded where its display list is
+       defined, which changes nothing; a marker takes the current colour and
+       joins the run of the marker before it; a disk marker leaves the ring
+       colour current, as its display list does; a marker of a list with no
+       shape draws nothing */
+    mbv_draw_batch_clear(&batch);
+    mbv_draw_batch_marker(&batch, 40, 1.0f, 2.0f, 3.0f);
+    const bool nothing_without_shape = batch.num_commands == 0 && batch.num_instances == 0;
+    mbv_draw_batch_color3f(&batch, 1.0f, 0.0f, 0.0f);
+    mbv_draw_batch_marker_disks(&batch, 40, 2.0, 1.6, 10, 4, 0.0f, 0.0f, 0.0f);
+    const bool shape_keeps_colour = batch.color[0] == 1.0f && batch.color[1] == 0.0f && batch.color[2] == 0.0f;
+    mbv_draw_batch_marker(&batch, 40, 1.0f, 2.0f, 3.0f);
+    mbv_draw_batch_marker(&batch, 40, 4.0f, 5.0f, 6.0f);
+    mbv_draw_batch_marker_sphere(&batch, 41, 0.5, 10, 8);
+    mbv_draw_batch_color3f(&batch, 0.0f, 0.0f, 1.0f);
+    mbv_draw_batch_marker(&batch, 41, 7.0f, 8.0f, 9.0f);
+    mbv_draw_batch_group(&batch, MBV_DRAW_GROUP_VECTOR);
+    const struct mbv_draw_command *cmd = batch.commands;
+    check(nothing_without_shape && shape_keeps_colour && batch.num_commands == 5 && batch.num_shapes == 2 &&
+              batch.num_instances == 3 && cmd[0].kind == MBV_DRAW_SHAPE && cmd[1].kind == MBV_DRAW_MARKERS &&
+              cmd[1].primitive == 0 && cmd[1].first == 0 && cmd[1].count == 2 && cmd[2].kind == MBV_DRAW_SHAPE &&
+              cmd[3].kind == MBV_DRAW_MARKERS && cmd[3].primitive == 1 && cmd[3].first == 2 && cmd[3].count == 1 &&
+              cmd[4].kind == MBV_DRAW_GROUP && cmd[4].primitive == MBV_DRAW_GROUP_VECTOR,
+          "markers are recorded as their shapes where they are defined and as runs of markers, in drawing order");
+    const struct mbv_draw_instance *in = batch.instances;
+    const struct mbv_draw_shape *sh = batch.shapes;
+    check(batch.num_instances == 3 && batch.num_shapes == 2 && in[0].r == 1.0f && in[0].g == 0.0f && in[0].b == 0.0f &&
+              in[1].r == 0.0f && in[1].g == 0.0f && in[1].b == 0.0f && in[1].x == 4.0f && in[1].y == 5.0f &&
+              in[1].z == 6.0f && in[2].b == 1.0f && sh[0].kind == MBV_DRAW_SHAPE_DISKS && sh[0].list == 40 &&
+              sh[0].outer == 2.0 && sh[0].inner == 1.6 && sh[0].slices == 10 && sh[0].ring_slices == 4 &&
+              sh[1].kind == MBV_DRAW_SHAPE_SPHERE && sh[1].list == 41 && sh[1].outer == 0.5 && sh[1].slices == 10 &&
+              sh[1].stacks == 8,
+          "a marker takes the current colour and a disk marker leaves its ring colour current, as OpenGL does");
+    mbv_draw_batch_line_width(&batch, 3.0f);
+    const int before = batch.num_commands;
+    mbv_draw_batch_slot(&batch, MBV_DRAW_SLOT_CONTOURS_FULL);
+    check(batch.num_commands == before + 1 && batch.commands[before].kind == MBV_DRAW_SLOT &&
+              batch.commands[before].primitive == MBV_DRAW_SLOT_CONTOURS_FULL &&
+              batch.commands[before].line_width == 3.0f && batch.color[0] == 0.0f && batch.color[1] == 0.0f &&
+              batch.color[2] == 0.0f && batch.line_width == 1.0f,
+          "a contour slot is recorded and leaves black and a line width of 1 current, as the contour display list does");
+    mbv_draw_batch_clear(&batch);
+    check(batch.num_commands == 0 && batch.num_shapes == 0 && batch.num_instances == 0,
+          "clearing the batch empties its shapes and markers too");
+    mbv_draw_batch_free(&batch);
+  }
+
   /* keys reach the core: ',' flags all soundings in view */
   int unflagged = 0;
   for (const auto &s : storage)
@@ -318,8 +607,7 @@ int test_null() {
   QApplication::sendEvent(window->widget()->view(), &comma);
   QKeyEvent comma_up(QEvent::KeyRelease, Qt::Key_Comma, Qt::NoModifier, QStringLiteral(","));
   QApplication::sendEvent(window->widget()->view(), &comma_up);
-  /* without drawing every sounding is at screen position 0,0, so all count
-     as in view */
+  /* ',' flags every unflagged sounding, whatever its screen position */
   check(edit_calls == unflagged, "the ',' key flags the soundings in view (" +
                                                              std::to_string(edit_calls) + " edits)");
 
@@ -376,9 +664,21 @@ int test_null() {
   /* Dismiss hides the window and tells the program; open shows it again */
   QAction *dismiss = menu_action(window, "Dismiss", "Dismiss");
   check(dismiss != nullptr, "the Dismiss menu has Dismiss");
+  uint64_t before_dismiss[3] = {0, 0, 0}, after_dismiss[3] = {0, 0, 0};
+  {
+    int error = MB_ERROR_NO_ERROR;
+    mb3dsoundings_getmarks(0, &before_dismiss[0], &before_dismiss[1], &before_dismiss[2], &error);
+  }
   if (dismiss != nullptr)
     dismiss->trigger();
   check(!window->isVisible() && dismiss_calls == 1, "Dismiss hides the window and calls the dismiss notify");
+  {
+    int error = MB_ERROR_NO_ERROR;
+    mb3dsoundings_getmarks(0, &after_dismiss[0], &after_dismiss[1], &after_dismiss[2], &error);
+  }
+  check(after_dismiss[0] > before_dismiss[0] && after_dismiss[1] > before_dismiss[1] &&
+            after_dismiss[2] > before_dismiss[2],
+        "Dismiss raises every mark: the program releases the soundings");
   open_soundings();
   check(mbvq::soundings_window() == window && window->isVisible(), "a second open shows the same window");
   window->close();

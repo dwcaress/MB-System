@@ -76,6 +76,7 @@
 
 #include "mbview.h"
 #include "mbviewprivate.h"
+#include "mbv_draw.h"
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectdata(size_t instance) {
@@ -366,6 +367,13 @@ __FILE__, __LINE__, __FUNCTION__, xlonmin, xlonmax, ylatmin, ylatmax);
 	if (!view->plot_done) {
 		view->projected = true;
 	}
+
+	/* the positions and the slopes behind the colours were rewritten. The mark
+	   is raised here, at the end: the loops above hand events to the toolkit
+	   every few columns (do_mbview_xevents), so a mark taken at entry would be
+	   a mark before the data, and they can also leave the pass unfinished. */
+	mbv_marks_position(&view->marks);
+	mbv_marks_color(&view->marks);
 
 	const int status = MB_SUCCESS;
 
@@ -2270,6 +2278,10 @@ int mbview_colorclear(size_t instance) {
 	if (data->primary_stat_color != NULL)
 		memset(data->primary_stat_color, 0, (data->primary_nxy / 8) + 1);
 
+	/* every node's colour is invalid now; the drawing recomputes them lazily
+	   and a user of the arrays prepares what it reads (mbv_marks.h) */
+	mbv_marks_color(&view->marks);
+
 	const int status = MB_SUCCESS;
 
 	if (mbv_verbose >= 2) {
@@ -2301,6 +2313,9 @@ int mbview_zscaleclear(size_t instance) {
 	view->zscaledonecount = 0;
 	if (data->primary_stat_z != NULL)
 		memset(data->primary_stat_z, 0, (data->primary_nxy / 8) + 1);
+
+	/* every node's position is invalid now (mbv_marks.h) */
+	mbv_marks_position(&view->marks);
 
 	const int status = MB_SUCCESS;
 
@@ -3292,6 +3307,40 @@ __FILE__, __LINE__, __FUNCTION__, xlon, ylat);
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
+/* add one contour segment (two vertices) to the array xyz, growing it as needed */
+static int mbview_contour_addsegment(float **xyz, size_t *nvertex, size_t *nalloc, const float xx[2], const float yy[2],
+                                     const float zz[2], int *error) {
+	int status = MB_SUCCESS;
+	if (*nvertex + 2 > *nalloc) {
+		const size_t nalloc_new = (*nalloc > 0) ? 2 * *nalloc : 16384;
+		float *xyz_old = *xyz;
+		status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, 3 * nalloc_new * sizeof(float), (void **)xyz, error);
+		/* when the allocation fails mb_reallocd sets *xyz to NULL (and without #1687 still
+		   returns MB_SUCCESS), and realloc keeps the old array: check both and free it */
+		if (status != MB_SUCCESS || *xyz == NULL) {
+			if (xyz_old != NULL) {
+				int error_free = MB_ERROR_NO_ERROR;
+				*xyz = xyz_old;
+				mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)xyz, &error_free);
+			}
+			*nvertex = 0;
+			*nalloc = 0;
+			*error = MB_ERROR_MEMORY_FAIL;
+			return (MB_FAILURE);
+		}
+		*nalloc = nalloc_new;
+	}
+	float *v = &(*xyz)[3 * *nvertex];
+	v[0] = xx[0];
+	v[1] = yy[0];
+	v[2] = zz[0];
+	v[3] = xx[1];
+	v[4] = yy[1];
+	v[5] = zz[1];
+	*nvertex += 2;
+	return (status);
+}
+/*------------------------------------------------------------------------------*/
 int mbview_contour(size_t instance, int rez) {
 	int i, j, k, l, kk;
 	int stride;
@@ -3305,6 +3354,11 @@ int mbview_contour(size_t instance, int rez) {
 	float xx[2], yy[2], zz[2];
 	bool global;
 	double contour_offset_factor;
+	float *segments = NULL;
+	size_t nsegment_vertex = 0;
+	size_t nsegment_alloc = 0;
+	int error = MB_ERROR_NO_ERROR;
+	int status = MB_SUCCESS;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -3327,20 +3381,6 @@ int mbview_contour(size_t instance, int rez) {
 	else
 		stride = MAX((int)ceil(((double)data->primary_n_columns) / ((double)data->lorez_dimension)),
 		             (int)ceil(((double)data->primary_n_rows) / ((double)data->lorez_dimension)));
-
-	/* start openGL list */
-	if (rez == MBV_REZ_FULL) {
-		glNewList((GLuint)(3 * instance + 3), GL_COMPILE);
-	}
-	else if (rez == MBV_REZ_HIGH) {
-		glNewList((GLuint)(3 * instance + 2), GL_COMPILE);
-	}
-	else {
-		glNewList((GLuint)(3 * instance + 1), GL_COMPILE);
-	}
-	glColor3f(0.0, 0.0, 0.0);
-	glLineWidth(1.0);
-	glBegin(GL_LINES);
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "mbview_contour: instance:%zu rez:%d stride:%d contour interval:%f\n", instance, rez, stride,
@@ -3469,8 +3509,9 @@ int mbview_contour(size_t instance, int rez) {
 									zz[0] += contour_offset_factor;
 									zz[1] += contour_offset_factor;
 								}
-								glVertex3f(xx[0], yy[0], zz[0]);
-								glVertex3f(xx[1], yy[1], zz[1]);
+								if (status == MB_SUCCESS)
+									status = mbview_contour_addsegment(&segments, &nsegment_vertex, &nsegment_alloc, xx, yy, zz,
+									                                   &error);
 							}
 						}
 
@@ -3531,8 +3572,9 @@ int mbview_contour(size_t instance, int rez) {
 									zz[0] += contour_offset_factor;
 									zz[1] += contour_offset_factor;
 								}
-								glVertex3f(xx[0], yy[0], zz[0]);
-								glVertex3f(xx[1], yy[1], zz[1]);
+								if (status == MB_SUCCESS)
+									status = mbview_contour_addsegment(&segments, &nsegment_vertex, &nsegment_alloc, xx, yy, zz,
+									                                   &error);
 							}
 						}
 					}
@@ -3549,12 +3591,45 @@ int mbview_contour(size_t instance, int rez) {
 			i = data->primary_n_columns;
 	}
 
-	/* end openGL list */
-	glEnd();
-	glEndList();
+	/* compile the openGL list from the segments (or keep the segments while a
+	   batch is filled) and set the rez flag, only if plotting not done at a
+	   higher recursion and the segments are complete */
+	if (status != MB_SUCCESS) {
+		fprintf(stderr, "\nUnable to allocate memory for the contours of view %zu\n", instance);
+	}
+	else if (!view->plot_done) {
+		if (mbv_draw_opengl()) {
+			if (rez == MBV_REZ_FULL) {
+				glNewList((GLuint)(3 * instance + 3), GL_COMPILE);
+			}
+			else if (rez == MBV_REZ_HIGH) {
+				glNewList((GLuint)(3 * instance + 2), GL_COMPILE);
+			}
+			else {
+				glNewList((GLuint)(3 * instance + 1), GL_COMPILE);
+			}
+			glColor3f(0.0, 0.0, 0.0);
+			glLineWidth(1.0);
+			glBegin(GL_LINES);
+			for (size_t m = 0; m < nsegment_vertex; m++)
+				glVertex3f(segments[3 * m], segments[3 * m + 1], segments[3 * m + 2]);
+			glEnd();
+			glEndList();
+		}
 
-	/* set rez flag only if plotting not done */
-	if (!view->plot_done) {
+		/* filling a batch (mbv_draw.h) there is no OpenGL: the renderer draws
+		   the segments itself (mbview_contour_segments), so the view keeps them */
+		else {
+			const int r = (rez == MBV_REZ_FULL) ? 2 : ((rez == MBV_REZ_HIGH) ? 1 : 0);
+			if (view->contour_segments[r] != NULL)
+				mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&view->contour_segments[r], &error);
+			view->contour_segments[r] = segments;
+			view->contour_nvertex[r] = nsegment_vertex;
+			view->contour_generations++;
+			view->contour_generation[r] = view->contour_generations;
+			segments = NULL;
+		}
+
 		if (rez == MBV_REZ_FULL) {
 			view->contourfullrez = true;
 		}
@@ -3565,8 +3640,8 @@ int mbview_contour(size_t instance, int rez) {
 			view->contourlorez = true;
 		}
 	}
-
-	const int status = MB_SUCCESS;
+	if (segments != NULL)
+		mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&segments, &error);
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -3575,6 +3650,65 @@ int mbview_contour(size_t instance, int rez) {
 	}
 
 	return (status);
+}
+/*------------------------------------------------------------------------------*/
+/* the contour segments kept for a renderer that fills batches (mbview.h) */
+int mbview_contour_segments(int verbose, size_t instance, int rez, const float **xyz, size_t *nvertex,
+                            uint64_t *generation, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+		fprintf(stderr, "dbg2       rez:              %d\n", rez);
+	}
+
+	int status = MB_SUCCESS;
+	*error = MB_ERROR_NO_ERROR;
+	*xyz = NULL;
+	*nvertex = 0;
+	*generation = 0;
+	if (instance >= MBV_MAX_WINDOWS || (rez != MBV_REZ_LOW && rez != MBV_REZ_HIGH && rez != MBV_REZ_FULL)) {
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_PARAMETER;
+	}
+	else {
+		const struct mbview_world_struct *view = &(mbviews[instance]);
+		const int r = (rez == MBV_REZ_FULL) ? 2 : ((rez == MBV_REZ_HIGH) ? 1 : 0);
+		*xyz = view->contour_segments[r];
+		*nvertex = view->contour_nvertex[r];
+		*generation = view->contour_generation[r];
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       xyz:              %p\n", (const void *)*xyz);
+		fprintf(stderr, "dbg2       nvertex:          %zu\n", *nvertex);
+		fprintf(stderr, "dbg2       generation:       %llu\n", (unsigned long long)*generation);
+		fprintf(stderr, "dbg2       error:            %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:           %d\n", status);
+	}
+
+	return (status);
+}
+/*------------------------------------------------------------------------------*/
+/* free the contour segments a view kept for a renderer that fills batches; the
+   generation counter goes on, so a renderer never mistakes new segments for
+   the ones it has */
+void mbview_contour_free_segments(size_t instance) {
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	for (int r = 0; r < 3; r++) {
+		if (view->contour_segments[r] != NULL) {
+			int error = MB_ERROR_NO_ERROR;
+			mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&view->contour_segments[r], &error);
+		}
+		view->contour_nvertex[r] = 0;
+		view->contour_generations++;
+		view->contour_generation[r] = view->contour_generations;
+	}
 }
 /*------------------------------------------------------------------------------*/
 int mbview_getzdata(size_t instance, double xgrid, double ygrid, bool *found, double *zdata) {

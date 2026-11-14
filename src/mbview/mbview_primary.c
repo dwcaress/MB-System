@@ -156,6 +156,14 @@ int mbview_setprimarygrid(int verbose, size_t instance, int primary_grid_project
 		exit(*error);
 	}
 
+	/* size the change marks for the new grid and raise all of them: the arrays
+	   are new, so a user of them drops whatever it kept (mbv_marks.h). Without
+	   the blocks the marks still work, one view at a time. */
+	if (mbv_marks_setsize(verbose, &view->marks, data->primary_n_columns, data->primary_n_rows, error) != MB_SUCCESS)
+		fprintf(stderr, "\nUnable to allocate memory for the change marks of view %zu: single grid cells will be reported as\n"
+		                "changes of the whole view\n",
+		        instance);
+
 	/* copy grid */
 	memcpy(data->primary_data, primary_data, data->primary_nxy * sizeof(float));
 
@@ -235,6 +243,10 @@ int mbview_updateprimarygrid(int verbose, size_t instance, int primary_n_columns
 	view->primary_histogram_set = false;
 	view->primaryslope_histogram_set = false;
 
+	/* the whole grid was replaced, so which nodes hold data can have changed
+	   everywhere; the clears above raised the position and colour marks */
+	mbv_marks_mask(&view->marks);
+
 	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -270,12 +282,21 @@ int mbview_updateprimarygridcell(int verbose, size_t instance, int primary_ix, i
 	if (primary_ix >= 0 && primary_ix < data->primary_n_columns && primary_jy >= 0 && primary_jy < data->primary_n_rows) {
 		/* update the cell value */
 		const int k = primary_ix * data->primary_n_rows + primary_jy;
+		const bool was_nodata = data->primary_data[k] == data->primary_nodatavalue;
 		data->primary_data[k] = value;
 		data->primary_stat_z[k / 8] = data->primary_stat_z[k / 8] & (255 - statmask[k % 8]);
 		data->primary_stat_color[k / 8] = data->primary_stat_color[k / 8] & (255 - statmask[k % 8]);
 
 		/* calculate new derivative */
 		mbview_derivative(instance, primary_ix, primary_jy);
+
+		/* tell users of the node arrays what changed (mbv_marks.h): this node,
+		   and the four neighbours whose slope the derivative stencil takes from
+		   it, which can lie in the next block. Triangles appear or disappear
+		   only where the value crosses the no-data value. */
+		mbv_marks_nodes(&view->marks, primary_ix - 1, primary_ix + 1, primary_jy - 1, primary_jy + 1);
+		if (was_nodata != (value == data->primary_nodatavalue))
+			mbv_marks_mask(&view->marks);
 
 		/* reset contour flags */
 		view->contourlorez = false;
@@ -322,6 +343,9 @@ int mbview_setprimarycolortable(int verbose, size_t instance, int primary_colort
 	data->primary_colortable_min = primary_colortable_min;
 	data->primary_colortable_max = primary_colortable_max;
 
+	/* every node's colour comes from this table (mbv_marks.h) */
+	mbv_marks_color(&view->marks);
+
 	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -360,6 +384,9 @@ int mbview_setslopecolortable(int verbose, size_t instance, int slope_colortable
 	data->slope_colortable_mode = slope_colortable_mode;
 	data->slope_colortable_min = slope_colortable_min;
 	data->slope_colortable_max = slope_colortable_max;
+
+	/* the slope colours of every node come from this table (mbv_marks.h) */
+	mbv_marks_color(&view->marks);
 
 	const int status = MB_SUCCESS;
 

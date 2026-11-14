@@ -30,6 +30,7 @@
 #define MBVIEW_MBVIEWPRIVATE_H_
 
 #include "MB3DGisList.h"
+#include "mbv_marks.h"
 
 /* OpenGL Error checking */
 /* #define MBV_GET_GLX_ERRORS	1 */
@@ -362,6 +363,22 @@ struct mbview_world_struct {
 	int button_move_y;
 	int button_up_x;
 	int button_up_y;
+
+	/* what changed for users outside the drawing code (mbv_marks.h): a renderer
+	   that keeps its own copy of the node arrays, and the terrain pick on the
+	   CPU. The drawing code does not read them. Kept last so that no field the
+	   drawing uses moves: the hot loops are sensitive to the layout. */
+	struct mbv_marks marks;
+
+	/* the contour segments of each resolution (low, high, full), kept only
+	   where a renderer fills batches (mbv_draw.h) instead of drawing with
+	   OpenGL, which compiles them into display lists: x, y and z of each
+	   vertex, two vertices per segment, and the generation they were made in
+	   (mbview_contour_segments). Kept last, as the marks. */
+	float *contour_segments[3];
+	size_t contour_nvertex[3];
+	uint64_t contour_generation[3];
+	uint64_t contour_generations;
 };
 
 /* library variables */
@@ -748,12 +765,16 @@ int mbview_getcolor_histogram(double value, double min, double max, int colortab
 int mbview_applyshade(double intensity, float *r, float *g, float *b);
 int mbview_getsecondaryvalue(struct mbview_world_struct *view, struct mbview_struct *data, int i, int j, double *secondary_value);
 int mbview_contour(size_t instance, int rez);
+int mbview_contour_segments(int verbose, size_t instance, int rez, const float **xyz, size_t *nvertex,
+                            uint64_t *generation, int *error);
+void mbview_contour_free_segments(size_t instance);
 int mbview_getzdata(size_t instance, double xgrid, double ygrid, bool *found, double *zdata);
 
 /* mbview_plot.c function prototypes */
 int mbview_reset_glx(size_t instance);
 void mbview_debug_glgeometry(size_t instance, const char *tag);
 int mbview_drawdata(size_t instance, int rez);
+int mbview_prepare_nodes(int verbose, size_t instance, int i0, int i1, int j0, int j1, int stride, int *error);
 int mbview_plotlowall(size_t instance);
 int mbview_plotlowhighall(size_t instance);
 int mbview_plothighall(size_t instance);
@@ -761,6 +782,8 @@ int mbview_plotlow(size_t instance);
 int mbview_plotlowhigh(size_t instance);
 int mbview_plothigh(size_t instance);
 int mbview_plotfull(size_t instance);
+int mbview_camera(size_t instance, double projection[16], double modelview[16]);
+int mbview_profile_camera(size_t instance, double projection[16], double modelview[16]);
 int mbview_plot(size_t instance, int rez);
 int mbview_findpoint(size_t instance, int xpixel, int ypixel, bool *found, double *xgrid, double *ygrid, double *xlon,
                      double *ylat, double *zdata, double *xdisplay, double *ydisplay, double *zdisplay);

@@ -24,7 +24,8 @@
 /*
  * Test program of the mbview-qt library.
  *
- *   mbview_qt_test --null         checks without drawing (null backend), for ctest
+ *   mbview_qt_test --null         checks without drawing (null backend; picks are
+ *                                 found on the CPU), for ctest
  *   mbview_qt_test --gl [--3d]    draws a synthetic grid with the OpenGL backend,
  *                                 waits for the full resolution drawing and checks
  *                                 picks made with mouse events
@@ -72,6 +73,7 @@ extern "C" {
 #include "mb_status.h"
 #include "mbview.h"
 }
+#include "mbv_draw_batch.h"
 #include "mbvq.h"
 #include "mbvq_bridge.h"
 #include "mbvq_dialogs.h"
@@ -452,6 +454,22 @@ int test_null() {
   topolylines->click();
   check(sd->npolyline == 2 && polylines->view()->count() == 4, "Convert Selected to Polylines adds a polyline in a new layer");
 
+  /* the contour segments a view keeps for a renderer that fills batches
+     instead of drawing with OpenGL (mbview_contour_segments): the null
+     backend never draws, so none are kept; a resolution other than low, high
+     or full is refused */
+  {
+    const float *xyz = nullptr;
+    size_t nvertex = 1;
+    uint64_t generation = 0;
+    int status = mbview_contour_segments(0, instance, MBVQ_REZ_FULL, &xyz, &nvertex, &generation, &error);
+    const bool none = status == MB_SUCCESS && error == MB_ERROR_NO_ERROR && xyz == nullptr && nvertex == 0;
+    status = mbview_contour_segments(0, instance, MBVQ_REZ_FULL + 1, &xyz, &nvertex, &generation, &error);
+    check(none && status == MB_FAILURE && error == MB_ERROR_BAD_PARAMETER && xyz == nullptr && nvertex == 0,
+          "a view that kept no contour segments gives none, and an unknown resolution is refused");
+    error = MB_ERROR_NO_ERROR;
+  }
+
   /* Profile window: View > Profile, the sliders and Dismiss */
   view_item("Profile")->trigger();
   mbvq::ProfileWindow *profile = map_window->widget()->profile();
@@ -513,14 +531,163 @@ int test_null() {
     always->trigger();
   check(action_calls == 1 && action_instance == instance, "an action calls the program with the instance as client data");
 
-  /* mouse input reaches the core; without drawing no point is found */
+  /* mouse clicks in Pan and Zoom mode pick a point; without drawing, the null
+     backend finds it on the CPU (mbvq_pick_cpu.c). In the 3D display, which
+     takes no position from the pixel when no terrain is found, every click
+     well inside the grid finds the terrain, and the depth is the mean of the
+     three grid nodes of the picked triangle, close to the surface */
   QWidget *view = mbvq::map_view(instance);
-  click(view, QPointF(view->width() / 2.0, view->height() / 2.0));
-  check(true, "mouse events pass through the core without a renderer");
+  view_item("3D Display")->trigger();
+  int found = 0, close = 0;
+  double max_error = 0.0;
+  for (int j = 1; j <= 3; j++)
+    for (int i = 1; i <= 3; i++) {
+      const QPointF position(view->width() * (0.35 + 0.15 * (i - 1)), view->height() * (0.35 + 0.15 * (j - 1)));
+      data->pick_type = MBV_PICK_NONE;
+      click(view, position);
+      spin(50);
+      if (data->pick_type == MBV_PICK_ONEPOINT) {
+        found++;
+        const struct mbview_point_struct &point = data->pick.endpoints[0];
+        const double difference = std::fabs(point.zdata - surface(point.xlon, point.ylat));
+        max_error = std::max(max_error, difference);
+        if (difference < 2.0)
+          close++;
+      }
+    }
+  view_item("Map Display")->trigger();
+  check(found == 9, std::to_string(found) + " of 9 clicks in the 3D display picked a point without drawing");
+  check(close == found && found > 0,
+        "picked depths agree with the surface (largest difference " + std::to_string(max_error) + " m)");
+
+  /* the change marks tell a user of the node arrays what became invalid
+     (src/mbview/mbv_marks.h): a local edit raises the version of its own nodes
+     and leaves the whole-view marks alone, while a colour table raises the
+     colour mark for the whole view. Reading them changes nothing. */
+  {
+    uint64_t position = 0, color = 0, mask = 0, drawn = 0;
+    mbview_getmarks(0, instance, &position, &color, &mask, &drawn, &error);
+    uint64_t position2 = 0, color2 = 0, mask2 = 0, drawn2 = 0;
+    mbview_getmarks(0, instance, &position2, &color2, &mask2, &drawn2, &error);
+    check(position == position2 && color == color2 && mask == mask2 && drawn == drawn2, "reading the marks changes nothing");
+
+    int block_nodes = 0, nblock_i = 0, nblock_j = 0;
+    mbview_getmarkblocks(0, instance, &block_nodes, &nblock_i, &nblock_j, &error);
+    const int columns = data->primary_n_columns, rows = data->primary_n_rows;
+    check(block_nodes > 0 && nblock_i == (columns + block_nodes - 1) / block_nodes &&
+              nblock_j == (rows + block_nodes - 1) / block_nodes,
+          "the marks cover the grid in blocks of " + std::to_string(block_nodes) + " nodes (" + std::to_string(nblock_i) +
+              " x " + std::to_string(nblock_j) + ")");
+
+    /* one cell of the grid, in the middle, well away from the edges */
+    const int edit_i = columns / 2, edit_j = rows / 2;
+    uint64_t before = 0, elsewhere_before = 0;
+    mbview_getnodeversion(0, instance, edit_i, edit_i, edit_j, edit_j, &before, &error);
+    mbview_getnodeversion(0, instance, 0, 0, 0, 0, &elsewhere_before, &error);
+    mbview_updateprimarygridcell(0, instance, edit_i, edit_j, static_cast<float>(data->primary_data[edit_i * rows + edit_j] - 5.0),
+                                 &error);
+    uint64_t after = 0, elsewhere_after = 0, position3 = 0, color3 = 0, mask3 = 0, drawn3 = 0;
+    mbview_getnodeversion(0, instance, edit_i, edit_i, edit_j, edit_j, &after, &error);
+    mbview_getnodeversion(0, instance, 0, 0, 0, 0, &elsewhere_after, &error);
+    mbview_getmarks(0, instance, &position3, &color3, &mask3, &drawn3, &error);
+    check(after > before, "an edited cell raises the version of its own nodes");
+    check(elsewhere_after == elsewhere_before, "it leaves the version of a far corner alone");
+    check(position3 == position && color3 == color && mask3 == mask && drawn3 == drawn,
+          "it raises no whole-view mark: the value stayed within the data");
+
+    /* the four neighbours whose slope comes from this node must be covered too */
+    uint64_t neighbour = 0;
+    mbview_getnodeversion(0, instance, edit_i + 1, edit_i + 1, edit_j, edit_j, &neighbour, &error);
+    check(neighbour == after, "the neighbours whose slope the edit changes are covered");
+
+    /* a colour table is a whole-view change */
+    mbview_setprimarycolortable(0, instance, data->primary_colortable, data->primary_colortable_mode,
+                                data->primary_colortable_min, data->primary_colortable_max, &error);
+    uint64_t position4 = 0, color4 = 0, mask4 = 0, drawn4 = 0;
+    mbview_getmarks(0, instance, &position4, &color4, &mask4, &drawn4, &error);
+    check(color4 > color3 && position4 == position3, "a colour table raises the colour mark and not the positions");
+
+    /* preparing nodes is the answer to a raised mark, not a change of its own */
+    mbview_prepare_nodes(0, instance, edit_i - 2, edit_i + 2, edit_j - 2, edit_j + 2, 1, &error);
+    uint64_t position5 = 0, color5 = 0, mask5 = 0, drawn5 = 0;
+    uint64_t version5 = 0;
+    mbview_getmarks(0, instance, &position5, &color5, &mask5, &drawn5, &error);
+    mbview_getnodeversion(0, instance, edit_i, edit_i, edit_j, edit_j, &version5, &error);
+    check(position5 == position4 && color5 == color4 && mask5 == mask4 && drawn5 == drawn4 && version5 == after,
+          "preparing nodes raises no mark");
+  }
 
   /* the background work runs from the Qt timer without errors */
   spin(1500);
   check(mbvq_c_lastdrawrez(instance) == MBVQ_REZ_NONE, "the null backend draws nothing");
+
+  /* the map as data (src/mbview/mbv_draw_batch.h): with a batch as the target
+     mbview_drawdata() records the map instead of drawing it - here under the
+     null backend, without any OpenGL context, where an OpenGL call would crash
+     on macOS (on Linux and Windows a call without a context does nothing). The
+     plot that fills a renderer's batch first projects the data and finds the
+     view bounds; the null backend never plots, and outside a plot
+     mbview_projectdata() projects the first column of nodes only, so the view
+     bounds are set within that column (the marker sizes are read from the
+     nodes at their corners). No contours were made here, so the batch has no
+     contour slot. The view is in 3D on the spheroid by now (the projection set
+     above), so the markers are spheres and every command carries the depth
+     test. This comes after the check that the null backend draws nothing:
+     mbview_drawdata() records the resolution it drew, as with OpenGL. */
+  {
+    mbview_projectdata(instance);
+    data->viewbounds[0] = 0;
+    data->viewbounds[1] = 0;
+    data->viewbounds[2] = 0;
+    data->viewbounds[3] = data->primary_n_rows - 1;
+    data->site_view_mode = MBV_VIEW_ON;
+    data->route_view_mode = MBV_VIEW_ON;
+    struct mbv_draw_batch batch;
+    mbv_draw_batch_init(&batch);
+    mbv_draw_set_target(&batch);
+    mbview_drawdata(instance, MBVQ_REZ_FULL);
+    const bool target_kept = mbv_draw_get_target() == &batch;
+    mbv_draw_set_target(nullptr);
+    std::vector<int> stream; /* the slots as -1 - slot, the groups as their number */
+    const bool depth = data->display_mode == MBV_DISPLAY_3D || data->display_projection_mode == MBV_PROJECTION_SPHEROID;
+    const int kind = data->display_mode == MBV_DISPLAY_3D ? MBV_DRAW_SHAPE_SPHERE : MBV_DRAW_SHAPE_DISKS;
+    int site_markers = 0, route_markers = 0, shapes = 0, kind_shapes = 0, depth_commands = 0, group = -1;
+    for (int c = 0; c < batch.num_commands; c++) {
+      const struct mbv_draw_command &command = batch.commands[c];
+      depth_commands += command.depth_test == depth ? 1 : 0;
+      if (command.kind == MBV_DRAW_SLOT) {
+        stream.push_back(-1 - command.primitive);
+      } else if (command.kind == MBV_DRAW_GROUP) {
+        group = command.primitive;
+        stream.push_back(group);
+      } else if (command.kind == MBV_DRAW_SHAPE) {
+        shapes++;
+        if (command.primitive >= 0 && command.primitive < batch.num_shapes && batch.shapes[command.primitive].kind == kind)
+          kind_shapes++;
+      } else if (command.kind == MBV_DRAW_MARKERS && group == MBV_DRAW_GROUP_SITE) {
+        site_markers += command.count;
+      } else if (command.kind == MBV_DRAW_MARKERS && group == MBV_DRAW_GROUP_ROUTE) {
+        route_markers += command.count;
+      }
+    }
+    std::vector<int> expected = {-1 - MBV_DRAW_SLOT_TERRAIN};
+    for (int g = MBV_DRAW_GROUP_PICK; g <= MBV_DRAW_GROUP_VECTOR; g++)
+      expected.push_back(g);
+    int sites_active = 0, route_points = 0;
+    for (int i = 0; i < sd->nsite; i++)
+      sites_active += sd->sites[i].active ? 1 : 0;
+    for (int r = 0; r < sd->nroute; r++)
+      route_points += sd->routes[r].active ? sd->routes[r].npoints : 0;
+    check(target_kept && !batch.failed && stream == expected && depth_commands == batch.num_commands,
+          "the map's batch holds the terrain slot and the eleven overlay groups in their order, with the depth test of "
+          "the display");
+    check(sites_active > 0 && route_points > 0 && site_markers == sites_active && route_markers == route_points &&
+              shapes == 4 && kind_shapes == 4,
+          "the sites and the route points are markers of four shapes of the display's kind (" +
+              std::to_string(site_markers) + " and " + std::to_string(route_markers) + " markers, " +
+              std::string(kind == MBV_DRAW_SHAPE_SPHERE ? "spheres" : "disks") + ")");
+    mbv_draw_batch_free(&batch);
+  }
 
   /* Dismiss menu, as in Motif: mbview_destroy() closes the instance */
   mouse_action(window, QStringLiteral("Dismiss"))->trigger();

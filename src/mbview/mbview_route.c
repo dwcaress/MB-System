@@ -86,6 +86,7 @@
 /* mbview include */
 #include "mbview.h"
 #include "mbviewprivate.h"
+#include "mbv_draw.h"
 #include "mbv_ui.h"
 
 /*------------------------------------------------------------------------------*/
@@ -2426,7 +2427,6 @@ int mbview_drawroute(size_t instance, int rez) {
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	GLUquadricObj *globj;
 	double routesizesmall, routesizelarge;
 	double xx, yy;
 	int iroute, jpoint;
@@ -2459,45 +2459,25 @@ int mbview_drawroute(size_t instance, int rez) {
 		/* Use disks for 2D plotting */
 		if (data->display_mode == MBV_DISPLAY_2D) {
 			/* make list for small route */
-			glNewList((GLuint)MBV_GLLIST_ROUTESMALL, GL_COMPILE);
-			globj = gluNewQuadric();
-			gluDisk(globj, 0.0, routesizesmall, 4, 1);
-			gluDeleteQuadric(globj);
 			icolor = MBV_COLOR_BLACK;
-			glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
-			globj = gluNewQuadric();
-			gluDisk(globj, 0.8 * routesizesmall, routesizesmall, 10, 1);
-			gluDeleteQuadric(globj);
-			glEndList();
+			mbv_draw_marker_disks(MBV_GLLIST_ROUTESMALL, routesizesmall, 0.8 * routesizesmall, 4, 10,
+			                      colortable_object_red[icolor], colortable_object_green[icolor],
+			                      colortable_object_blue[icolor]);
 
 			/* make list for large route */
-			glNewList((GLuint)MBV_GLLIST_ROUTELARGE, GL_COMPILE);
-			globj = gluNewQuadric();
-			gluDisk(globj, 0.0, routesizelarge, 4, 1);
-			gluDeleteQuadric(globj);
 			icolor = MBV_COLOR_BLACK;
-			glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
-			globj = gluNewQuadric();
-			gluDisk(globj, 0.8 * routesizelarge, routesizelarge, 10, 1);
-			gluDeleteQuadric(globj);
-			glEndList();
+			mbv_draw_marker_disks(MBV_GLLIST_ROUTELARGE, routesizelarge, 0.8 * routesizelarge, 4, 10,
+			                      colortable_object_red[icolor], colortable_object_green[icolor],
+			                      colortable_object_blue[icolor]);
 		}
 
 		/* Use spheres for 3D plotting */
 		else if (data->display_mode == MBV_DISPLAY_3D) {
 			/* make list for small route */
-			glNewList((GLuint)MBV_GLLIST_ROUTESMALL, GL_COMPILE);
-			globj = gluNewQuadric();
-			gluSphere(globj, routesizesmall, 4, 3);
-			gluDeleteQuadric(globj);
-			glEndList();
+			mbv_draw_marker_sphere(MBV_GLLIST_ROUTESMALL, routesizesmall, 4, 3);
 
 			/* make list for large route */
-			glNewList((GLuint)MBV_GLLIST_ROUTELARGE, GL_COMPILE);
-			globj = gluNewQuadric();
-			gluSphere(globj, routesizelarge, 4, 3);
-			gluDeleteQuadric(globj);
-			glEndList();
+			mbv_draw_marker_sphere(MBV_GLLIST_ROUTELARGE, routesizelarge, 4, 3);
 		}
 
 		/* loop over the route points */
@@ -2511,27 +2491,23 @@ int mbview_drawroute(size_t instance, int rez) {
   					icolor = MBV_COLOR_RED;
   				else
   					icolor = shared.shareddata.routes[iroute].color;
-  				glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
+  				mbv_draw_color3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
 
   				/* draw the route point as a disk or sphere using GLUT */
 
-  				glTranslatef(shared.shareddata.routes[iroute].points[jpoint].xdisplay[instance],
-  				             shared.shareddata.routes[iroute].points[jpoint].ydisplay[instance],
-  				             shared.shareddata.routes[iroute].points[jpoint].zdisplay[instance]);
+  				int list = MBV_GLLIST_ROUTESMALL;
   				if (iroute == shared.shareddata.route_selected && (jpoint == shared.shareddata.route_point_selected ||
   				                                                   shared.shareddata.route_point_selected == MBV_SELECT_ALL))
-  					glCallList((GLuint)MBV_GLLIST_ROUTELARGE);
-  				else
-  					glCallList((GLuint)MBV_GLLIST_ROUTESMALL);
-  				glTranslatef(-shared.shareddata.routes[iroute].points[jpoint].xdisplay[instance],
-  				             -shared.shareddata.routes[iroute].points[jpoint].ydisplay[instance],
-  				             -shared.shareddata.routes[iroute].points[jpoint].zdisplay[instance]);
+  					list = MBV_GLLIST_ROUTELARGE;
+  				mbv_draw_marker(list, shared.shareddata.routes[iroute].points[jpoint].xdisplay[instance],
+  				                shared.shareddata.routes[iroute].points[jpoint].ydisplay[instance],
+  				                shared.shareddata.routes[iroute].points[jpoint].zdisplay[instance]);
   			}
 
   			/* draw draped route line segments */
-  			glColor3f(0.0, 0.0, 0.0);
-  			glLineWidth((float)(2.0));
-  			glBegin(GL_LINE_STRIP);
+  			mbv_draw_color3f(0.0, 0.0, 0.0);
+  			mbv_draw_line_width((float)(2.0));
+  			mbv_draw_begin(MBV_DRAW_LINE_STRIP);
   			for (jpoint = 0; jpoint < shared.shareddata.routes[iroute].npoints - 1; jpoint++) {
   				/* set size and color */
   				if (iroute == shared.shareddata.route_selected &&
@@ -2542,17 +2518,17 @@ int mbview_drawroute(size_t instance, int rez) {
   				else {
   					icolor = shared.shareddata.routes[iroute].color;
   				}
-  				glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
+  				mbv_draw_color3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
 
   				/* draw draped segment */
   				for (k = 0; k < shared.shareddata.routes[iroute].segments[jpoint].nls; k++) {
   					/* draw points */
-  					glVertex3f((float)(shared.shareddata.routes[iroute].segments[jpoint].lspoints[k].xdisplay[instance]),
+  					mbv_draw_vertex3f((float)(shared.shareddata.routes[iroute].segments[jpoint].lspoints[k].xdisplay[instance]),
   					           (float)(shared.shareddata.routes[iroute].segments[jpoint].lspoints[k].ydisplay[instance]),
   					           (float)(shared.shareddata.routes[iroute].segments[jpoint].lspoints[k].zdisplay[instance]));
   				}
   			}
-  			glEnd();
+  			mbv_draw_end();
   		}
     }
 	}
