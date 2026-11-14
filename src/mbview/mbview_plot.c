@@ -2170,6 +2170,7 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 			if (status == MB_FAILURE) {
 				done = true;
 				seg->nls_alloc = 0;
+				seg->nls = 0;
 			}
 		}
 	}
@@ -2284,6 +2285,10 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 							done = true;
 						}
 					}
+				if (insert < 0)
+					insert = 0;
+				else if (insert > seg->nls)
+					insert = seg->nls;
 				if (found) {
 					for (int ii = seg->nls; ii > insert; ii--) {
 						seg->lspoints[ii].xgrid = seg->lspoints[ii - 1].xgrid;
@@ -2295,6 +2300,10 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 					seg->lspoints[insert].zdata = zdata;
 					seg->nls++;
 				}
+				if (insert <= 0)
+					insert = 1;
+				else if (insert >= seg->nls)
+					insert = seg->nls - 1;
 			}
 		}
 
@@ -2653,6 +2662,7 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 			if (status == MB_FAILURE) {
 				done = true;
 				seg->nls_alloc = 0;
+				seg->nls = 0;
 			}
 		}
 	}
