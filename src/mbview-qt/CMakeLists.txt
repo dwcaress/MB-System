@@ -59,13 +59,15 @@ set(mbview_core
     ${mbview_dir}/mbv_gislist_core.c
     ${mbview_dir}/mbv_soundings_core.c
     ${mbview_dir}/mbv_globals.c
-    ${mbview_dir}/mbv_render.c)
+    ${mbview_dir}/mbv_render.c
+    ${mbview_dir}/mbv_camera.c)
 
 # static, like the libraries of the other Qt tools: not installed
 add_library(
   mbview-qt STATIC
   ${mbview_core}
   mbvq_core.c
+  mbvq_pick_cpu.c
   mbvq_bridge.h
   mbvq_dialogs.cc
   mbvq_dialogs.h

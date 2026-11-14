@@ -70,6 +70,7 @@
 #include "mbv_render.h"
 #include "mbv_input.h"
 #include "mbv_ui.h"
+#include "mbv_camera.h"
 
 /*------------------------------------------------------------------------------*/
 
@@ -1524,6 +1525,48 @@ int mb3dsoundings_good_ping() {
   }
 
   return (mbs_status);
+}
+
+/*------------------------------------------------------------------------------*/
+/* The camera of the 3D soundings view: the orthographic projection matrix and
+   the modelview matrix (translation and rotations), in the column-major order of
+   OpenGL. Also sets mb3dsoundings.left, right, bottom, top and aspect_ratio. */
+int mb3dsoundings_camera(int verbose, double projection[16], double modelview[16], int *error) {
+  if (mbs_verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
+  }
+
+  /* set projection */
+  mb3dsoundings.left = -1.0 / mb3dsoundings.gl_size;
+  mb3dsoundings.right = 1.0 / mb3dsoundings.gl_size;
+  mb3dsoundings.bottom = -1.0 / mb3dsoundings.gl_size;
+  mb3dsoundings.top = 1.0 / mb3dsoundings.gl_size;
+  mb3dsoundings.aspect_ratio = 1.0 / mb3dsoundings.gl_size;
+  mbv_camera_identity(projection);
+  mbv_camera_ortho(projection, mb3dsoundings.left, mb3dsoundings.right, mb3dsoundings.bottom, mb3dsoundings.top,
+                   MBS_OPENGL_ZMIN2D, MBS_OPENGL_ZMAX2D);
+
+  /* set up translations */
+  mbv_camera_identity(modelview);
+  mbv_camera_translate(modelview, mb3dsoundings.gl_offset_x, mb3dsoundings.gl_offset_y, MBS_OPENGL_ZMIN2D);
+  mbv_camera_rotate(modelview, (float)(mb3dsoundings.elevation - 90.0), 1.0, 0.0, 0.0);
+  mbv_camera_rotate(modelview, (float)(mb3dsoundings.azimuth), 0.0, 0.0, 1.0);
+
+  *error = MB_ERROR_NO_ERROR;
+  const int status = MB_SUCCESS;
+
+  if (mbs_verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:                   %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:                  %d\n", status);
+  }
+
+  return (status);
 }
 
 /*------------------------------------------------------------------------------*/
