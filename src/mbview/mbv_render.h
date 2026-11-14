@@ -35,7 +35,9 @@
  * defer_draw means "draw now". A renderer that does not draw with OpenGL
  * gives pick_terrain and view_bounds, which find on the CPU what the
  * colour-coded drawing of mbview_findpointrez and mbview_viewbounds finds;
- * NULL entries keep that drawing.
+ * NULL entries keep that drawing. While a batch is filled (mbv_draw.h)
+ * defer_draw, make_current, present and the read-back are not asked for, and
+ * without view_bounds the 3D view bounds are the whole grid, not drawn.
  */
 
 #ifndef MBVIEW_MBV_RENDER_H

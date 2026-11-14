@@ -369,6 +369,16 @@ struct mbview_world_struct {
 	   CPU. The drawing code does not read them. Kept last so that no field the
 	   drawing uses moves: the hot loops are sensitive to the layout. */
 	struct mbv_marks marks;
+
+	/* the contour segments of each resolution (low, high, full), kept only
+	   where a renderer fills batches (mbv_draw.h) instead of drawing with
+	   OpenGL, which compiles them into display lists: x, y and z of each
+	   vertex, two vertices per segment, and the generation they were made in
+	   (mbview_contour_segments). Kept last, as the marks. */
+	float *contour_segments[3];
+	size_t contour_nvertex[3];
+	uint64_t contour_generation[3];
+	uint64_t contour_generations;
 };
 
 /* library variables */
@@ -755,6 +765,9 @@ int mbview_getcolor_histogram(double value, double min, double max, int colortab
 int mbview_applyshade(double intensity, float *r, float *g, float *b);
 int mbview_getsecondaryvalue(struct mbview_world_struct *view, struct mbview_struct *data, int i, int j, double *secondary_value);
 int mbview_contour(size_t instance, int rez);
+int mbview_contour_segments(int verbose, size_t instance, int rez, const float **xyz, size_t *nvertex,
+                            uint64_t *generation, int *error);
+void mbview_contour_free_segments(size_t instance);
 int mbview_getzdata(size_t instance, double xgrid, double ygrid, bool *found, double *zdata);
 
 /* mbview_plot.c function prototypes */

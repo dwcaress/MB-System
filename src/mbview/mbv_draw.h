@@ -22,14 +22,18 @@
  *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * The drawing interface of the overlays, the profile view and the 3D soundings
- * decorations: one call for each OpenGL call those functions make. With no
- * batch as the target (the default, and always in the Motif programs) every
- * call makes exactly the OpenGL call it stands for, so the pictures are those
- * of OpenGL by construction. With a batch as the target nothing is drawn: the
- * call is recorded (mbv_draw_batch.h). The calls are inline, so OpenGL mode
- * costs one test of the target per call. Only the drawing code of src/mbview
- * includes this file, after the OpenGL headers it already uses.
+ * The drawing interface of the map and its overlays, the profile view and the
+ * 3D soundings decorations. Most calls stand for one OpenGL call (the modelview
+ * reset for two, glMatrixMode and glLoadIdentity); the marker
+ * calls stand for the display list a map overlay compiles (its GLU calls
+ * included) and for the translate, call and translate back that place a
+ * marker; the group and slot calls stand for nothing. With no batch as the
+ * target (the default, and always in the Motif programs) every call makes
+ * exactly the OpenGL calls it stands for, so the pictures are those of OpenGL
+ * by construction. With a batch as the target nothing is drawn: the call is
+ * recorded (mbv_draw_batch.h). The calls are inline, so OpenGL mode costs one
+ * test of the target per call. Only the drawing code of src/mbview includes
+ * this file, after the OpenGL headers it already uses.
  */
 
 #ifndef MBVIEW_MBV_DRAW_H
@@ -48,7 +52,8 @@ extern struct mbv_draw_batch *mbv_draw_target;
 #endif
 
 /* true when the calls draw with OpenGL: code that draws without this
-   interface (clears, cameras, the terrain, the soundings points) runs only
+   interface (contexts, clears, cameras, the terrain, the contour display
+   lists, the soundings points, read-backs, flushes and presents) runs only
    then */
 static inline bool mbv_draw_opengl(void) { return mbv_draw_target == NULL; }
 
@@ -132,6 +137,58 @@ static inline void mbv_draw_identity_modelview(void) {
 static inline void mbv_draw_slot(int slot) {
 	if (mbv_draw_target != NULL)
 		mbv_draw_batch_slot(mbv_draw_target, slot);
+}
+
+/* The display list of a 2D marker: a filled disk in the current colour, then a
+   ring over it in the ring colour, which stays current. With OpenGL exactly the
+   calls the overlays made: the list compiled, a new quadric for each GLU call. */
+static inline void mbv_draw_marker_disks(int list, double outer, double inner, int slices, int ring_slices,
+                                         float ring_r, float ring_g, float ring_b) {
+	if (mbv_draw_target == NULL) {
+		glNewList((GLuint)list, GL_COMPILE);
+		GLUquadricObj *quadric = gluNewQuadric();
+		gluDisk(quadric, 0.0, outer, slices, 1);
+		gluDeleteQuadric(quadric);
+		glColor3f(ring_r, ring_g, ring_b);
+		quadric = gluNewQuadric();
+		gluDisk(quadric, inner, outer, ring_slices, 1);
+		gluDeleteQuadric(quadric);
+		glEndList();
+	} else {
+		mbv_draw_batch_marker_disks(mbv_draw_target, list, outer, inner, slices, ring_slices, ring_r, ring_g, ring_b);
+	}
+}
+
+/* The display list of a sphere marker */
+static inline void mbv_draw_marker_sphere(int list, double radius, int slices, int stacks) {
+	if (mbv_draw_target == NULL) {
+		glNewList((GLuint)list, GL_COMPILE);
+		GLUquadricObj *quadric = gluNewQuadric();
+		gluSphere(quadric, radius, slices, stacks);
+		gluDeleteQuadric(quadric);
+		glEndList();
+	} else {
+		mbv_draw_batch_marker_sphere(mbv_draw_target, list, radius, slices, stacks);
+	}
+}
+
+/* One marker: the list drawn at (x, y, z), placed as the overlays placed it,
+   with a translate and the translate back (not a matrix push and pop: the
+   float rounding this leaves in the modelview is part of today's picture) */
+static inline void mbv_draw_marker(int list, float x, float y, float z) {
+	if (mbv_draw_target == NULL) {
+		glTranslatef(x, y, z);
+		glCallList((GLuint)list);
+		glTranslatef(-x, -y, -z);
+	} else {
+		mbv_draw_batch_marker(mbv_draw_target, list, x, y, z);
+	}
+}
+
+/* where a map overlay begins (MBV_DRAW_GROUP_*); nothing with OpenGL */
+static inline void mbv_draw_group(int group) {
+	if (mbv_draw_target != NULL)
+		mbv_draw_batch_group(mbv_draw_target, group);
 }
 
 #endif /* MBVIEW_MBV_DRAW_H */

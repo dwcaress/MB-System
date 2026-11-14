@@ -78,6 +78,7 @@
 
 #include "mbview.h"
 #include "mbviewprivate.h"
+#include "mbv_draw.h"
 #include "mbv_ui.h"
 
 /*------------------------------------------------------------------------------*/
@@ -1036,45 +1037,25 @@ int mbview_drawsite(size_t instance, int rez) {
 		/* Use disks for 2D plotting */
 		if (data->display_mode == MBV_DISPLAY_2D) {
 			/* make list for small site */
-			glNewList((GLuint)MBV_GLLIST_SITESMALL, GL_COMPILE);
-			GLUquadricObj *globj = gluNewQuadric();
-			gluDisk(globj, 0.0, sitesizesmall, 10, 1);
-			gluDeleteQuadric(globj);
 			int icolor = MBV_COLOR_BLACK;
-			glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
-			globj = gluNewQuadric();
-			gluDisk(globj, 0.8 * sitesizesmall, sitesizesmall, 10, 1);
-			gluDeleteQuadric(globj);
-			glEndList();
+			mbv_draw_marker_disks(MBV_GLLIST_SITESMALL, sitesizesmall, 0.8 * sitesizesmall, 10, 10,
+			                      colortable_object_red[icolor], colortable_object_green[icolor],
+			                      colortable_object_blue[icolor]);
 
 			/* make list for large site */
-			glNewList((GLuint)MBV_GLLIST_SITELARGE, GL_COMPILE);
-			globj = gluNewQuadric();
-			gluDisk(globj, 0.0, sitesizelarge, 10, 1);
-			gluDeleteQuadric(globj);
 			icolor = MBV_COLOR_BLACK;
-			glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
-			globj = gluNewQuadric();
-			gluDisk(globj, 0.8 * sitesizelarge, sitesizelarge, 10, 1);
-			gluDeleteQuadric(globj);
-			glEndList();
+			mbv_draw_marker_disks(MBV_GLLIST_SITELARGE, sitesizelarge, 0.8 * sitesizelarge, 10, 10,
+			                      colortable_object_red[icolor], colortable_object_green[icolor],
+			                      colortable_object_blue[icolor]);
 		}
 
 		/* Use spheres for 3D plotting */
 		else if (data->display_mode == MBV_DISPLAY_3D) {
 			/* make list for small site */
-			glNewList((GLuint)MBV_GLLIST_SITESMALL, GL_COMPILE);
-			GLUquadricObj *globj = gluNewQuadric();
-			gluSphere(globj, sitesizesmall, 10, 10);
-			gluDeleteQuadric(globj);
-			glEndList();
+			mbv_draw_marker_sphere(MBV_GLLIST_SITESMALL, sitesizesmall, 10, 10);
 
 			/* make list for large site */
-			glNewList((GLuint)MBV_GLLIST_SITELARGE, GL_COMPILE);
-			globj = gluNewQuadric();
-			gluSphere(globj, sitesizelarge, 10, 10);
-			gluDeleteQuadric(globj);
-			glEndList();
+			mbv_draw_marker_sphere(MBV_GLLIST_SITELARGE, sitesizelarge, 10, 10);
 		}
 
 		/* loop over the sites */
@@ -1087,23 +1068,19 @@ int mbview_drawsite(size_t instance, int rez) {
   				icolor = MBV_COLOR_RED;
   			else
   				icolor = shared.shareddata.sites[isite].color;
-  			glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
+  			mbv_draw_color3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
 
   			/* draw the site as a disk or sphere using GLUT */
-  			glTranslatef(shared.shareddata.sites[isite].point.xdisplay[instance],
-  			             shared.shareddata.sites[isite].point.ydisplay[instance],
-  			             shared.shareddata.sites[isite].point.zdisplay[instance]);
   			/*fprintf(stderr,"site:%d position: %f %f %f\n",
   			isite,shared.shareddata.sites[isite].point.xdisplay[instance],
   			shared.shareddata.sites[isite].point.ydisplay[instance],
   			shared.shareddata.sites[isite].point.zdisplay[instance]);*/
+  			int list = MBV_GLLIST_SITESMALL;
   			if (isite == shared.shareddata.site_selected)
-  				glCallList((GLuint)MBV_GLLIST_SITELARGE);
-  			else
-  				glCallList((GLuint)MBV_GLLIST_SITESMALL);
-  			glTranslatef(-shared.shareddata.sites[isite].point.xdisplay[instance],
-  			             -shared.shareddata.sites[isite].point.ydisplay[instance],
-  			             -shared.shareddata.sites[isite].point.zdisplay[instance]);
+  				list = MBV_GLLIST_SITELARGE;
+  			mbv_draw_marker(list, shared.shareddata.sites[isite].point.xdisplay[instance],
+  			                shared.shareddata.sites[isite].point.ydisplay[instance],
+  			                shared.shareddata.sites[isite].point.zdisplay[instance]);
   		}
     }
 	}

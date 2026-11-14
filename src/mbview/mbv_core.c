@@ -527,6 +527,7 @@ int mbview_reset(size_t instance) {
 		   values of a previous view of this instance cannot match them
 		   (mbv_marks.h). */
 		mbv_marks_free(mbv_verbose, &view->marks);
+		mbview_contour_free_segments(instance);
 
 		/* grid display bounds */
 		view->xmin = 0.0;
@@ -3808,6 +3809,7 @@ int mbview_destroy(int verbose, size_t instance, bool destroywidgets, int *error
 		/* the node arrays are about to be freed: raise every mark first, so a
 		   user still holding this instance stops reading them (mbv_marks.h) */
 		mbv_marks_free(mbv_verbose, &view->marks);
+		mbview_contour_free_segments(instance);
 
 		/* deallocate memory */
 		if (status == MB_SUCCESS && data->primary_data != NULL)

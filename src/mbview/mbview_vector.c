@@ -74,6 +74,7 @@
 
 #include "mbview.h"
 #include "mbviewprivate.h"
+#include "mbv_draw.h"
 #include "mbv_ui.h"
 
 /*------------------------------------------------------------------------------*/
@@ -733,11 +734,7 @@ int mbview_drawvector(size_t instance, int rez) {
 		const double ballsize = 0.001 * sqrt(xx * xx + yy * yy);
 
 		/* make list for ball */
-		glNewList((GLuint)MBV_GLLIST_VECTORBALL, GL_COMPILE);
-		GLUquadricObj *globj = gluNewQuadric();
-		gluSphere(globj, ballsize, 10, 10);
-		gluDeleteQuadric(globj);
-		glEndList();
+		mbv_draw_marker_sphere(MBV_GLLIST_VECTORBALL, ballsize, 10, 10);
 
 		/* loop over the vecs plotting xyz vectors */
 		for (int ivec = 0; ivec < shared.shareddata.nvector; ivec++) {
@@ -761,11 +758,11 @@ int mbview_drawvector(size_t instance, int rez) {
   				if (shared.shareddata.vectors[ivec].vectorpts[jpoint].selected ||
   				    (jpoint < shared.shareddata.vectors[ivec].npoints - 1 &&
   				     shared.shareddata.vectors[ivec].vectorpts[jpoint + 1].selected)) {
-  					glColor3f(colortable_object_red[MBV_COLOR_RED], colortable_object_green[MBV_COLOR_RED],
+  					mbv_draw_color3f(colortable_object_red[MBV_COLOR_RED], colortable_object_green[MBV_COLOR_RED],
   					          colortable_object_blue[MBV_COLOR_RED]);
   				}
   				else {
-  					glColor3f(red, green, blue);
+  					mbv_draw_color3f(red, green, blue);
   				}
 
   				/* draw points in line */
@@ -774,13 +771,10 @@ int mbview_drawvector(size_t instance, int rez) {
   				        (float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.zdisplay[instance])); */
 
   				/* draw points as balls */
-  				glTranslatef((float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.xdisplay[instance]),
-  				             (float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.ydisplay[instance]),
-  				             (float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.zdisplay[instance]));
-  				glCallList((GLuint)MBV_GLLIST_VECTORBALL);
-  				glTranslatef((float)(-shared.shareddata.vectors[ivec].vectorpts[jpoint].point.xdisplay[instance]),
-  				             (float)(-shared.shareddata.vectors[ivec].vectorpts[jpoint].point.ydisplay[instance]),
-  				             (float)(-shared.shareddata.vectors[ivec].vectorpts[jpoint].point.zdisplay[instance]));
+  				mbv_draw_marker(MBV_GLLIST_VECTORBALL,
+  				                (float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.xdisplay[instance]),
+  				                (float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.ydisplay[instance]),
+  				                (float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.zdisplay[instance]));
   			}
   			/* glEnd();*/
   		}

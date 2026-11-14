@@ -78,6 +78,7 @@
 #include "mbviewprivate.h"
 #include "mbv_render.h"
 #include "mbv_camera.h"
+#include "mbv_draw.h"
 
 // #define MBV_DEBUG_GLX 1
 // #define MBV_GET_GLX_ERRORS 1
@@ -295,6 +296,12 @@ int mbview_drawdata(size_t instance, int rez) {
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
 
+	/* drawing with OpenGL, or into a batch (mbv_draw.h) for a renderer without
+	   OpenGL: the batch gets slots where the terrain and the contours are drawn,
+	   and the renderer draws them from the node arrays (mbview_prepare_nodes)
+	   and the contour segments (mbview_contour_segments) */
+	const bool opengl = mbv_draw_opengl();
+
 	/* get size of grid in view */
 	const int nxrange = data->viewbounds[1] - data->viewbounds[0] + 1;
 	const int nyrange = data->viewbounds[3] - data->viewbounds[2] + 1;
@@ -317,9 +324,10 @@ int mbview_drawdata(size_t instance, int rez) {
 
 	/* enable depth test for 3D plots */
 	if (data->display_mode == MBV_DISPLAY_3D || data->display_projection_mode == MBV_PROJECTION_SPHEROID)
-		glEnable(GL_DEPTH_TEST);
+		mbv_draw_enable(MBV_DRAW_DEPTH_TEST);
 #ifdef MBV_GET_GLX_ERRORS
-	mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
+	if (opengl)
+		mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
 
 	/* set color parameters */
@@ -359,7 +367,10 @@ int mbview_drawdata(size_t instance, int rez) {
 	/*fprintf(stderr,"mbview_drawdata: %d %d stride:%d\n", instance,rez,stride);*/
 
 	/* draw the data as triangle strips */
-	if (data->grid_mode != MBV_GRID_VIEW_SECONDARY) {
+	if (!opengl) {
+		mbv_draw_slot(MBV_DRAW_SLOT_TERRAIN);
+	}
+	else if (data->grid_mode != MBV_GRID_VIEW_SECONDARY) {
 		for (int i = data->viewbounds[0]; i <= data->viewbounds[1] - stride; i += stride) {
 			bool on = false;
 			bool flip = false;
@@ -597,7 +608,8 @@ int mbview_drawdata(size_t instance, int rez) {
 		}
 	}
 #ifdef MBV_GET_GLX_ERRORS
-	mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
+	if (opengl)
+		mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
 
 	/* draw the triangle outlines */
@@ -643,49 +655,75 @@ int mbview_drawdata(size_t instance, int rez) {
 
 	/* draw contours */
 	if (data->grid_contour_mode == MBV_VIEW_ON) {
-		if (rez == MBV_REZ_FULL && view->contourfullrez)
-			glCallList((GLuint)(3 * instance + 3));
-		else if (rez == MBV_REZ_HIGH && view->contourhirez)
-			glCallList((GLuint)(3 * instance + 2));
-		else if (rez == MBV_REZ_LOW && view->contourlorez)
-			glCallList((GLuint)(3 * instance + 1));
+		if (rez == MBV_REZ_FULL && view->contourfullrez) {
+			if (opengl)
+				glCallList((GLuint)(3 * instance + 3));
+			else
+				mbv_draw_slot(MBV_DRAW_SLOT_CONTOURS_FULL);
+		}
+		else if (rez == MBV_REZ_HIGH && view->contourhirez) {
+			if (opengl)
+				glCallList((GLuint)(3 * instance + 2));
+			else
+				mbv_draw_slot(MBV_DRAW_SLOT_CONTOURS_HIGH);
+		}
+		else if (rez == MBV_REZ_LOW && view->contourlorez) {
+			if (opengl)
+				glCallList((GLuint)(3 * instance + 1));
+			else
+				mbv_draw_slot(MBV_DRAW_SLOT_CONTOURS_LOW);
+		}
 	}
 
 #ifdef MBV_GET_GLX_ERRORS
-	mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
+	if (opengl)
+		mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
 
+	/* the overlays: a batch marks where each begins (mbv_draw_group) */
+
 	/* draw current pick */
+	mbv_draw_group(MBV_DRAW_GROUP_PICK);
 	mbview_drawpick(instance);
 
 	/* draw current area */
+	mbv_draw_group(MBV_DRAW_GROUP_AREA);
 	mbview_drawarea(instance);
 
 	/* draw current region */
+	mbv_draw_group(MBV_DRAW_GROUP_REGION);
 	mbview_drawregion(instance);
 
 	/* draw current navpick */
+	mbv_draw_group(MBV_DRAW_GROUP_NAVPICK);
 	mbview_drawnavpick(instance);
 
 	/* draw GIS polygons, polylines, and points beneath sites and routes */
+	mbv_draw_group(MBV_DRAW_GROUP_POLYGON);
 	mbview_drawpolygon(instance, rez);
+	mbv_draw_group(MBV_DRAW_GROUP_POLYLINE);
 	mbview_drawpolyline(instance, rez);
+	mbv_draw_group(MBV_DRAW_GROUP_GISPOINT);
 	mbview_drawgispoint(instance, rez);
 
 	/* draw sites */
+	mbv_draw_group(MBV_DRAW_GROUP_SITE);
 	mbview_drawsite(instance, rez);
 
 	/* draw routes */
+	mbv_draw_group(MBV_DRAW_GROUP_ROUTE);
 	mbview_drawroute(instance, rez);
 
 	/* draw nav */
+	mbv_draw_group(MBV_DRAW_GROUP_NAV);
 	mbview_drawnav(instance, rez);
 
 	/* draw vectors */
+	mbv_draw_group(MBV_DRAW_GROUP_VECTOR);
 	mbview_drawvector(instance, rez);
 
 	/* make sure depth test is off */
-	glDisable(GL_DEPTH_TEST);
+	mbv_draw_disable(MBV_DRAW_DEPTH_TEST);
 
 	/* set lastdrawrez flag */
 	view->lastdrawrez = rez;
@@ -1047,8 +1085,10 @@ int mbview_plot(size_t instance, int rez) {
 	struct mbview_struct *data = &(view->data);
 
 	/* only plot if this view is still active, and if the renderer does not
-	   draw later by itself */
-	if (view->glx_init && !mbv_render_defer_draw(MBV_RENDER_MAP, instance, rez)) {
+	   draw later by itself; filling a batch (mbv_draw.h) is the renderer
+	   drawing now, without OpenGL, at this one resolution */
+	const bool opengl = mbv_draw_opengl();
+	if (view->glx_init && (!opengl || !mbv_render_defer_draw(MBV_RENDER_MAP, instance, rez))) {
 
 #ifdef MBV_DEBUG_TIMING
 		struct timespec starttime;
@@ -1060,10 +1100,12 @@ int mbview_plot(size_t instance, int rez) {
 		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, (char *) __FUNCTION__, instance,
 		        view->dpy, XtWindow(view->glwmda), view->glx_context);
 #endif
-		mbv_render_make_current(MBV_RENDER_MAP, instance);
+		if (opengl)
+			mbv_render_make_current(MBV_RENDER_MAP, instance);
 
 #ifdef MBV_GET_GLX_ERRORS
-		mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
+		if (opengl)
+			mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
 
 		/*fprintf(stderr,"\nmbview_plot: instance:%zu rez:%d recursion:%zu\n",instance,rez,view->plot_recursion);
@@ -1116,41 +1158,47 @@ int mbview_plot(size_t instance, int rez) {
 
 		/* do the actual openGL plotting */
 		if (!view->plot_done) {
-			/* set projection to 2D or 3D */
-			glMatrixMode(GL_PROJECTION);
-			glLoadIdentity();
+			/* the extent of the view, which the 2D view bounds read */
 			view->right = MBV_OPENGL_WIDTH / view->size2d;
 			view->left = -MBV_OPENGL_WIDTH / view->size2d;
 			view->top = MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
 			view->bottom = -MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
-			if (data->display_mode == MBV_DISPLAY_2D) {
-				glOrtho(view->left, view->right, view->bottom, view->top, MBV_OPENGL_ZMIN2D, MBV_OPENGL_ZMAX2D);
-			}
-			else {
-				gluPerspective(40.0, view->aspect_ratio, 0.01 * MBV_OPENGL_WIDTH, 1000 * MBV_OPENGL_WIDTH);
-			}
 
-			/* set up translations */
-			glMatrixMode(GL_MODELVIEW);
-			glLoadIdentity();
-			if (data->display_mode == MBV_DISPLAY_2D) {
-				glTranslated(view->offset2d_x, view->offset2d_y, MBV_OPENGL_ZMIN2D);
-			}
-			else if (data->display_mode == MBV_DISPLAY_3D) {
-				const float viewdistance = 0.48 * MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH / view->aspect_ratio;
-				glTranslated(0.0, 0.0, -viewdistance + view->viewoffset3d_z);
-				glRotated((float)(data->viewelevation3d - 90.0), 1.0, 0.0, 0.0);
-				glRotated((float)(data->viewazimuth3d), 0.0, 1.0, 1.0);
-				glTranslated(view->offset3d_x, view->offset3d_y, -viewdistance + view->offset3d_z);
-				glRotated((float)(data->modelelevation3d - 90.0), 1.0, 0.0, 0.0);
-				glRotated((float)(data->modelazimuth3d), 0.0, 0.0, 1.0);
-			}
+			/* the camera and the clear only with OpenGL: a renderer that fills a
+			   batch sets its camera with mbview_camera() */
+			if (opengl) {
+				/* set projection to 2D or 3D */
+				glMatrixMode(GL_PROJECTION);
+				glLoadIdentity();
+				if (data->display_mode == MBV_DISPLAY_2D) {
+					glOrtho(view->left, view->right, view->bottom, view->top, MBV_OPENGL_ZMIN2D, MBV_OPENGL_ZMAX2D);
+				}
+				else {
+					gluPerspective(40.0, view->aspect_ratio, 0.01 * MBV_OPENGL_WIDTH, 1000 * MBV_OPENGL_WIDTH);
+				}
 
-			/* set background color */
-			glClearColor(1.0, 1.0, 1.0, 0.0);
-			glClearDepth((GLclampd)(2000 * MBV_OPENGL_WIDTH));
-			glDepthFunc(GL_LESS);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				/* set up translations */
+				glMatrixMode(GL_MODELVIEW);
+				glLoadIdentity();
+				if (data->display_mode == MBV_DISPLAY_2D) {
+					glTranslated(view->offset2d_x, view->offset2d_y, MBV_OPENGL_ZMIN2D);
+				}
+				else if (data->display_mode == MBV_DISPLAY_3D) {
+					const float viewdistance = 0.48 * MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH / view->aspect_ratio;
+					glTranslated(0.0, 0.0, -viewdistance + view->viewoffset3d_z);
+					glRotated((float)(data->viewelevation3d - 90.0), 1.0, 0.0, 0.0);
+					glRotated((float)(data->viewazimuth3d), 0.0, 1.0, 1.0);
+					glTranslated(view->offset3d_x, view->offset3d_y, -viewdistance + view->offset3d_z);
+					glRotated((float)(data->modelelevation3d - 90.0), 1.0, 0.0, 0.0);
+					glRotated((float)(data->modelazimuth3d), 0.0, 0.0, 1.0);
+				}
+
+				/* set background color */
+				glClearColor(1.0, 1.0, 1.0, 0.0);
+				glClearDepth((GLclampd)(2000 * MBV_OPENGL_WIDTH));
+				glDepthFunc(GL_LESS);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			}
 
 			/* draw data */
 			if (!view->plot_done) {
@@ -1164,8 +1212,8 @@ int mbview_plot(size_t instance, int rez) {
 
 		/* the plot_done flag will still be false if this
 		   is the highest recursion level to be reached - finish the plot
-		   only in this case */
-		if (!view->plot_done) {
+		   only in this case (with OpenGL: a batch is the renderer's to draw) */
+		if (opengl && !view->plot_done) {
 			/* flush opengl buffers */
 			glFlush();
 
@@ -1693,17 +1741,21 @@ int mbview_viewbounds(size_t instance) {
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
 
-	/* only plot if this view is still active */
+	/* only plot if this view is still active; while a batch is filled
+	   (mbv_draw.h) there is no OpenGL */
+	const bool opengl = mbv_draw_opengl();
 	if (view->glx_init) {
 /* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
 		fprintf(stderr, "%s:%d:%s instance:%zu glXMakeCurrent(%p,%lu,%p)\n", __FILE__, __LINE__, (char *) __FUNCTION__, instance,
 		        view->dpy, XtWindow(view->glwmda), view->glx_context);
 #endif
-		mbv_render_make_current(MBV_RENDER_MAP, instance);
+		if (opengl)
+			mbv_render_make_current(MBV_RENDER_MAP, instance);
 
 #ifdef MBV_GET_GLX_ERRORS
-		mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
+		if (opengl)
+			mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
 
 		/* apply projection if needed */
@@ -1800,8 +1852,19 @@ int mbview_viewbounds(size_t instance) {
 			data->viewbounds[3] = MIN(data->viewbounds[3] + stride, data->primary_n_rows - 1);
 		}
 
+		/* 3D case while a batch is filled (mbv_draw.h): no OpenGL to draw with,
+		   so without the renderer's bounds take the whole grid, as mbview_plot
+		   does in 3D at full resolution (the bounds a new grid starts with lie
+		   one past its last node) */
+		else if (!opengl && !mbv_render_view_bounds(instance, data->viewbounds)) {
+			data->viewbounds[0] = 0;
+			data->viewbounds[1] = data->primary_n_columns - 1;
+			data->viewbounds[2] = 0;
+			data->viewbounds[3] = data->primary_n_rows - 1;
+		}
+
 		/* 3D case requires plotting, unless the renderer finds the bounds without drawing */
-		else if (!mbv_render_view_bounds(instance, data->viewbounds)) {
+		else if (opengl && !mbv_render_view_bounds(instance, data->viewbounds)) {
 			/* set projection to 2D or 3D */
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();
@@ -1982,7 +2045,8 @@ int mbview_viewbounds(size_t instance) {
 data->viewbounds[0], data->viewbounds[1], data->viewbounds[2], data->viewbounds[3]);*/
 
 #ifdef MBV_GET_GLX_ERRORS
-		mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
+		if (opengl)
+			mbview_glerrorcheck(instance, __FILE__, __LINE__, (char *) __FUNCTION__);
 #endif
 	}
 

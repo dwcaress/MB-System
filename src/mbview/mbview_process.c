@@ -76,6 +76,7 @@
 
 #include "mbview.h"
 #include "mbviewprivate.h"
+#include "mbv_draw.h"
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectdata(size_t instance) {
@@ -3590,28 +3591,44 @@ int mbview_contour(size_t instance, int rez) {
 			i = data->primary_n_columns;
 	}
 
-	/* compile the openGL list from the segments and set the rez flag, only if
-	   plotting not done at a higher recursion and the segments are complete */
+	/* compile the openGL list from the segments (or keep the segments while a
+	   batch is filled) and set the rez flag, only if plotting not done at a
+	   higher recursion and the segments are complete */
 	if (status != MB_SUCCESS) {
 		fprintf(stderr, "\nUnable to allocate memory for the contours of view %zu\n", instance);
 	}
 	else if (!view->plot_done) {
-		if (rez == MBV_REZ_FULL) {
-			glNewList((GLuint)(3 * instance + 3), GL_COMPILE);
+		if (mbv_draw_opengl()) {
+			if (rez == MBV_REZ_FULL) {
+				glNewList((GLuint)(3 * instance + 3), GL_COMPILE);
+			}
+			else if (rez == MBV_REZ_HIGH) {
+				glNewList((GLuint)(3 * instance + 2), GL_COMPILE);
+			}
+			else {
+				glNewList((GLuint)(3 * instance + 1), GL_COMPILE);
+			}
+			glColor3f(0.0, 0.0, 0.0);
+			glLineWidth(1.0);
+			glBegin(GL_LINES);
+			for (size_t m = 0; m < nsegment_vertex; m++)
+				glVertex3f(segments[3 * m], segments[3 * m + 1], segments[3 * m + 2]);
+			glEnd();
+			glEndList();
 		}
-		else if (rez == MBV_REZ_HIGH) {
-			glNewList((GLuint)(3 * instance + 2), GL_COMPILE);
-		}
+
+		/* filling a batch (mbv_draw.h) there is no OpenGL: the renderer draws
+		   the segments itself (mbview_contour_segments), so the view keeps them */
 		else {
-			glNewList((GLuint)(3 * instance + 1), GL_COMPILE);
+			const int r = (rez == MBV_REZ_FULL) ? 2 : ((rez == MBV_REZ_HIGH) ? 1 : 0);
+			if (view->contour_segments[r] != NULL)
+				mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&view->contour_segments[r], &error);
+			view->contour_segments[r] = segments;
+			view->contour_nvertex[r] = nsegment_vertex;
+			view->contour_generations++;
+			view->contour_generation[r] = view->contour_generations;
+			segments = NULL;
 		}
-		glColor3f(0.0, 0.0, 0.0);
-		glLineWidth(1.0);
-		glBegin(GL_LINES);
-		for (size_t m = 0; m < nsegment_vertex; m++)
-			glVertex3f(segments[3 * m], segments[3 * m + 1], segments[3 * m + 2]);
-		glEnd();
-		glEndList();
 
 		if (rez == MBV_REZ_FULL) {
 			view->contourfullrez = true;
@@ -3633,6 +3650,65 @@ int mbview_contour(size_t instance, int rez) {
 	}
 
 	return (status);
+}
+/*------------------------------------------------------------------------------*/
+/* the contour segments kept for a renderer that fills batches (mbview.h) */
+int mbview_contour_segments(int verbose, size_t instance, int rez, const float **xyz, size_t *nvertex,
+                            uint64_t *generation, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+		fprintf(stderr, "dbg2       rez:              %d\n", rez);
+	}
+
+	int status = MB_SUCCESS;
+	*error = MB_ERROR_NO_ERROR;
+	*xyz = NULL;
+	*nvertex = 0;
+	*generation = 0;
+	if (instance >= MBV_MAX_WINDOWS || (rez != MBV_REZ_LOW && rez != MBV_REZ_HIGH && rez != MBV_REZ_FULL)) {
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_PARAMETER;
+	}
+	else {
+		const struct mbview_world_struct *view = &(mbviews[instance]);
+		const int r = (rez == MBV_REZ_FULL) ? 2 : ((rez == MBV_REZ_HIGH) ? 1 : 0);
+		*xyz = view->contour_segments[r];
+		*nvertex = view->contour_nvertex[r];
+		*generation = view->contour_generation[r];
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       xyz:              %p\n", (const void *)*xyz);
+		fprintf(stderr, "dbg2       nvertex:          %zu\n", *nvertex);
+		fprintf(stderr, "dbg2       generation:       %llu\n", (unsigned long long)*generation);
+		fprintf(stderr, "dbg2       error:            %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:           %d\n", status);
+	}
+
+	return (status);
+}
+/*------------------------------------------------------------------------------*/
+/* free the contour segments a view kept for a renderer that fills batches; the
+   generation counter goes on, so a renderer never mistakes new segments for
+   the ones it has */
+void mbview_contour_free_segments(size_t instance) {
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	for (int r = 0; r < 3; r++) {
+		if (view->contour_segments[r] != NULL) {
+			int error = MB_ERROR_NO_ERROR;
+			mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&view->contour_segments[r], &error);
+		}
+		view->contour_nvertex[r] = 0;
+		view->contour_generations++;
+		view->contour_generation[r] = view->contour_generations;
+	}
 }
 /*------------------------------------------------------------------------------*/
 int mbview_getzdata(size_t instance, double xgrid, double ygrid, bool *found, double *zdata) {
