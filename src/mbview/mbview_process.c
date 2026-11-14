@@ -367,6 +367,13 @@ __FILE__, __LINE__, __FUNCTION__, xlonmin, xlonmax, ylatmin, ylatmax);
 		view->projected = true;
 	}
 
+	/* the positions and the slopes behind the colours were rewritten. The mark
+	   is raised here, at the end: the loops above hand events to the toolkit
+	   every few columns (do_mbview_xevents), so a mark taken at entry would be
+	   a mark before the data, and they can also leave the pass unfinished. */
+	mbv_marks_position(&view->marks);
+	mbv_marks_color(&view->marks);
+
 	const int status = MB_SUCCESS;
 
 	if (mbv_verbose >= 2) {
@@ -2270,6 +2277,10 @@ int mbview_colorclear(size_t instance) {
 	if (data->primary_stat_color != NULL)
 		memset(data->primary_stat_color, 0, (data->primary_nxy / 8) + 1);
 
+	/* every node's colour is invalid now; the drawing recomputes them lazily
+	   and a user of the arrays prepares what it reads (mbv_marks.h) */
+	mbv_marks_color(&view->marks);
+
 	const int status = MB_SUCCESS;
 
 	if (mbv_verbose >= 2) {
@@ -2301,6 +2312,9 @@ int mbview_zscaleclear(size_t instance) {
 	view->zscaledonecount = 0;
 	if (data->primary_stat_z != NULL)
 		memset(data->primary_stat_z, 0, (data->primary_nxy / 8) + 1);
+
+	/* every node's position is invalid now (mbv_marks.h) */
+	mbv_marks_position(&view->marks);
 
 	const int status = MB_SUCCESS;
 
@@ -3292,6 +3306,40 @@ __FILE__, __LINE__, __FUNCTION__, xlon, ylat);
 	return (status);
 }
 /*------------------------------------------------------------------------------*/
+/* add one contour segment (two vertices) to the array xyz, growing it as needed */
+static int mbview_contour_addsegment(float **xyz, size_t *nvertex, size_t *nalloc, const float xx[2], const float yy[2],
+                                     const float zz[2], int *error) {
+	int status = MB_SUCCESS;
+	if (*nvertex + 2 > *nalloc) {
+		const size_t nalloc_new = (*nalloc > 0) ? 2 * *nalloc : 16384;
+		float *xyz_old = *xyz;
+		status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, 3 * nalloc_new * sizeof(float), (void **)xyz, error);
+		/* when the allocation fails mb_reallocd sets *xyz to NULL but still returns
+		   MB_SUCCESS, and realloc keeps the old array: check the pointer and free it */
+		if (status != MB_SUCCESS || *xyz == NULL) {
+			if (xyz_old != NULL) {
+				int error_free = MB_ERROR_NO_ERROR;
+				*xyz = xyz_old;
+				mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)xyz, &error_free);
+			}
+			*nvertex = 0;
+			*nalloc = 0;
+			*error = MB_ERROR_MEMORY_FAIL;
+			return (MB_FAILURE);
+		}
+		*nalloc = nalloc_new;
+	}
+	float *v = &(*xyz)[3 * *nvertex];
+	v[0] = xx[0];
+	v[1] = yy[0];
+	v[2] = zz[0];
+	v[3] = xx[1];
+	v[4] = yy[1];
+	v[5] = zz[1];
+	*nvertex += 2;
+	return (status);
+}
+/*------------------------------------------------------------------------------*/
 int mbview_contour(size_t instance, int rez) {
 	int i, j, k, l, kk;
 	int stride;
@@ -3305,6 +3353,11 @@ int mbview_contour(size_t instance, int rez) {
 	float xx[2], yy[2], zz[2];
 	bool global;
 	double contour_offset_factor;
+	float *segments = NULL;
+	size_t nsegment_vertex = 0;
+	size_t nsegment_alloc = 0;
+	int error = MB_ERROR_NO_ERROR;
+	int status = MB_SUCCESS;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -3327,20 +3380,6 @@ int mbview_contour(size_t instance, int rez) {
 	else
 		stride = MAX((int)ceil(((double)data->primary_n_columns) / ((double)data->lorez_dimension)),
 		             (int)ceil(((double)data->primary_n_rows) / ((double)data->lorez_dimension)));
-
-	/* start openGL list */
-	if (rez == MBV_REZ_FULL) {
-		glNewList((GLuint)(3 * instance + 3), GL_COMPILE);
-	}
-	else if (rez == MBV_REZ_HIGH) {
-		glNewList((GLuint)(3 * instance + 2), GL_COMPILE);
-	}
-	else {
-		glNewList((GLuint)(3 * instance + 1), GL_COMPILE);
-	}
-	glColor3f(0.0, 0.0, 0.0);
-	glLineWidth(1.0);
-	glBegin(GL_LINES);
 
 	if (mbv_verbose >= 2)
 		fprintf(stderr, "mbview_contour: instance:%zu rez:%d stride:%d contour interval:%f\n", instance, rez, stride,
@@ -3469,8 +3508,9 @@ int mbview_contour(size_t instance, int rez) {
 									zz[0] += contour_offset_factor;
 									zz[1] += contour_offset_factor;
 								}
-								glVertex3f(xx[0], yy[0], zz[0]);
-								glVertex3f(xx[1], yy[1], zz[1]);
+								if (status == MB_SUCCESS)
+									status = mbview_contour_addsegment(&segments, &nsegment_vertex, &nsegment_alloc, xx, yy, zz,
+									                                   &error);
 							}
 						}
 
@@ -3531,8 +3571,9 @@ int mbview_contour(size_t instance, int rez) {
 									zz[0] += contour_offset_factor;
 									zz[1] += contour_offset_factor;
 								}
-								glVertex3f(xx[0], yy[0], zz[0]);
-								glVertex3f(xx[1], yy[1], zz[1]);
+								if (status == MB_SUCCESS)
+									status = mbview_contour_addsegment(&segments, &nsegment_vertex, &nsegment_alloc, xx, yy, zz,
+									                                   &error);
 							}
 						}
 					}
@@ -3549,12 +3590,29 @@ int mbview_contour(size_t instance, int rez) {
 			i = data->primary_n_columns;
 	}
 
-	/* end openGL list */
-	glEnd();
-	glEndList();
+	/* compile the openGL list from the segments and set the rez flag, only if
+	   plotting not done at a higher recursion and the segments are complete */
+	if (status != MB_SUCCESS) {
+		fprintf(stderr, "\nUnable to allocate memory for the contours of view %zu\n", instance);
+	}
+	else if (!view->plot_done) {
+		if (rez == MBV_REZ_FULL) {
+			glNewList((GLuint)(3 * instance + 3), GL_COMPILE);
+		}
+		else if (rez == MBV_REZ_HIGH) {
+			glNewList((GLuint)(3 * instance + 2), GL_COMPILE);
+		}
+		else {
+			glNewList((GLuint)(3 * instance + 1), GL_COMPILE);
+		}
+		glColor3f(0.0, 0.0, 0.0);
+		glLineWidth(1.0);
+		glBegin(GL_LINES);
+		for (size_t m = 0; m < nsegment_vertex; m++)
+			glVertex3f(segments[3 * m], segments[3 * m + 1], segments[3 * m + 2]);
+		glEnd();
+		glEndList();
 
-	/* set rez flag only if plotting not done */
-	if (!view->plot_done) {
 		if (rez == MBV_REZ_FULL) {
 			view->contourfullrez = true;
 		}
@@ -3565,8 +3623,8 @@ int mbview_contour(size_t instance, int rez) {
 			view->contourlorez = true;
 		}
 	}
-
-	const int status = MB_SUCCESS;
+	if (segments != NULL)
+		mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&segments, &error);
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);

@@ -30,6 +30,7 @@
 #define MBVIEW_MBVIEWPRIVATE_H_
 
 #include "MB3DGisList.h"
+#include "mbv_marks.h"
 
 /* OpenGL Error checking */
 /* #define MBV_GET_GLX_ERRORS	1 */
@@ -362,6 +363,12 @@ struct mbview_world_struct {
 	int button_move_y;
 	int button_up_x;
 	int button_up_y;
+
+	/* what changed for users outside the drawing code (mbv_marks.h): a renderer
+	   that keeps its own copy of the node arrays, and the terrain pick on the
+	   CPU. The drawing code does not read them. Kept last so that no field the
+	   drawing uses moves: the hot loops are sensitive to the layout. */
+	struct mbv_marks marks;
 };
 
 /* library variables */
@@ -754,6 +761,7 @@ int mbview_getzdata(size_t instance, double xgrid, double ygrid, bool *found, do
 int mbview_reset_glx(size_t instance);
 void mbview_debug_glgeometry(size_t instance, const char *tag);
 int mbview_drawdata(size_t instance, int rez);
+int mbview_prepare_nodes(int verbose, size_t instance, int i0, int i1, int j0, int j1, int stride, int *error);
 int mbview_plotlowall(size_t instance);
 int mbview_plotlowhighall(size_t instance);
 int mbview_plothighall(size_t instance);
@@ -761,6 +769,7 @@ int mbview_plotlow(size_t instance);
 int mbview_plotlowhigh(size_t instance);
 int mbview_plothigh(size_t instance);
 int mbview_plotfull(size_t instance);
+int mbview_camera(size_t instance, double projection[16], double modelview[16]);
 int mbview_plot(size_t instance, int rez);
 int mbview_findpoint(size_t instance, int xpixel, int ypixel, bool *found, double *xgrid, double *ygrid, double *xlon,
                      double *ylat, double *zdata, double *xdisplay, double *ydisplay, double *zdisplay);

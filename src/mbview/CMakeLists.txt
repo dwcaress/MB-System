@@ -58,6 +58,8 @@ add_library(
   mbview_gislist.c
   mbv_render.c
   mbv_render_glx.c
+  mbv_camera.c
+  mbv_marks.c
   mbv_globals.c
   mbv_ui_motif.c
   mbv_core.c
