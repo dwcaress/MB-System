@@ -1463,6 +1463,15 @@ int mbview_extract_route_profile(size_t instance) {
 					data->profile.npoints++;
 				}
 			}
+			/* slope of the first point: forward difference, as in mbview_extract_nav_profile() */
+			if (data->profile.npoints > 1) {
+				dy = (data->profile.points[1].zdata - data->profile.points[0].zdata);
+				dx = (data->profile.points[1].distance - data->profile.points[0].distance);
+				if (dx > 0.0)
+					data->profile.points[0].slope = fabs(dy / dx);
+				else
+					data->profile.points[0].slope = 0.0;
+			}
 			data->profile.length = data->profile.points[data->profile.npoints - 1].distance;
 		}
 	}

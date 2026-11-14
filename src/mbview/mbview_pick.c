@@ -450,6 +450,13 @@ int mbview_extract_pick_profile(size_t instance) {
 				data->profile.points[i].navzdata = 0.0;
 				data->profile.points[i].navtime_d = 0.0;
 			}
+			/* slope of the first point: forward difference, as in mbview_extract_nav_profile() */
+			const double dy = (data->profile.points[1].zdata - data->profile.points[0].zdata);
+			const double dx = (data->profile.points[1].distance - data->profile.points[0].distance);
+			if (dx > 0.0)
+				data->profile.points[0].slope = fabs(dy / dx);
+			else
+				data->profile.points[0].slope = 0.0;
 			data->profile.points[0].boundary = true;
 			data->profile.points[npoints - 1].boundary = true;
 			data->profile.npoints = npoints;
