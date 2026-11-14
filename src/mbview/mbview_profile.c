@@ -233,13 +233,20 @@ int mbview_allocprofilearrays(int verbose, int npoints, double **distance, doubl
 
 	/* allocate the arrays using mb_reallocd */
 	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)distance, error);
-	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)zdata, error);
-	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)boundary, error);
-	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)xlon, error);
-	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)ylat, error);
-	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)distovertopo, error);
-	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)bearing, error);
-	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)slope, error);
+	if (status == MB_SUCCESS)
+		status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)zdata, error);
+	if (status == MB_SUCCESS)
+		status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(int), (void **)boundary, error);
+	if (status == MB_SUCCESS)
+		status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)xlon, error);
+	if (status == MB_SUCCESS)
+		status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)ylat, error);
+	if (status == MB_SUCCESS)
+		status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)distovertopo, error);
+	if (status == MB_SUCCESS)
+		status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)bearing, error);
+	if (status == MB_SUCCESS)
+		status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)slope, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -360,7 +367,9 @@ int mbview_getprofile(int verbose, size_t instance, mb_path source_name, double 
 		for (i = 0; i < data->profile.npoints; i++) {
 			distance[i] = data->profile.points[i].distance;
 			zdata[i] = data->profile.points[i].zdata;
-			boundary[i] = data->profile.points[i].boundary;
+			/* the ends of the profile and both sides of a gap in the grid data are boundaries too */
+			boundary[i] = data->profile.points[i].boundary || data->profile.points[i].gap || i == 0 ||
+			              data->profile.points[i - 1].gap || i == data->profile.npoints - 1;
 			xlon[i] = data->profile.points[i].xlon;
 			ylat[i] = data->profile.points[i].ylat;
 			distovertopo[i] = data->profile.points[i].distovertopo;
@@ -602,7 +611,8 @@ int mbview_plotprofile(size_t instance) {
 		glLineWidth(1.0);
 		glBegin(GL_QUADS);
 		for (i = 0; i < data->profile.npoints - 1; i++) {
-			if (data->profile.points[i].boundary == false || data->profile.points[i + 1].boundary == false) {
+			if ((data->profile.points[i].boundary == false || data->profile.points[i + 1].boundary == false) &&
+			    data->profile.points[i].gap == false) {
 				if (data->profile.points[i].slope < data->profile_slopethreshold) {
 					glColor3f(colortable_object_red[MBV_COLOR_BLACK], colortable_object_green[MBV_COLOR_BLACK],
 					          colortable_object_blue[MBV_COLOR_BLACK]);
@@ -721,8 +731,7 @@ int mbview_profile_text(size_t instance) {
 	/* update profile info */
 	if (data->profile.npoints > 0 && data->profile.source != MBV_PROFILE_NONE) {
 		snprintf(value_text, sizeof(value_text), ":::t\"Profile Source: %s\":t\" Length: %.2f m\":t\" Vertical Range: \":t\" %.2f to %.2f m\"",
-		        data->profile.source_name, data->profile.points[data->profile.npoints - 1].distance, data->profile.zmin,
-		        data->profile.zmax);
+		        data->profile.source_name, data->profile.length, data->profile.zmin, data->profile.zmax);
 	}
 	else {
 		snprintf(value_text, sizeof(value_text), ":::t\"Profile Source: None\":t\"No Profile\"");
@@ -737,6 +746,142 @@ int mbview_profile_text(size_t instance) {
 	}
 
 	/* return */
+	return (status);
+}
+
+/*------------------------------------------------------------------------------*/
+/* true if the primary grid has data at the grid position xgrid, ygrid: the position lies
+   in a grid cell whose four corner nodes all have data, or within 0.001 cell of one (points
+   on grid lines), and not on or beyond the last column or row, where
+   mbview_projectll2xyzgrid() finds no height */
+static bool mbview_profile_hasdata(struct mbview_struct *data, double xgrid, double ygrid) {
+	const double tolerance = 0.001;
+	const double fi = (xgrid - data->primary_xmin) / data->primary_dx;
+	const double fj = (ygrid - data->primary_ymin) / data->primary_dy;
+	if (!(fi > -1.0 && fi < data->primary_n_columns - 1 && fj > -1.0 && fj < data->primary_n_rows - 1))
+		return (false);
+	for (int i = (int)floor(fi - tolerance); i <= (int)floor(fi + tolerance); i++) {
+		for (int j = (int)floor(fj - tolerance); j <= (int)floor(fj + tolerance); j++) {
+			if (i >= 0 && i < data->primary_n_columns - 1 && j >= 0 && j < data->primary_n_rows - 1) {
+				const int k = i * data->primary_n_rows + j;
+				const int l = (i + 1) * data->primary_n_rows + j;
+				if (data->primary_data[k] != data->primary_nodatavalue &&
+				    data->primary_data[k + 1] != data->primary_nodatavalue &&
+				    data->primary_data[l] != data->primary_nodatavalue &&
+				    data->primary_data[l + 1] != data->primary_nodatavalue)
+					return (true);
+			}
+		}
+	}
+	return (false);
+}
+
+/* true if the primary grid has data at both profile points and all along the
+   straight span between them, sampled at most a quarter of a grid cell apart */
+static bool mbview_profile_spanhasdata(struct mbview_struct *data, const struct mbview_profilepoint_struct *point0,
+                                       const struct mbview_profilepoint_struct *point1) {
+	if (!mbview_profile_hasdata(data, point0->xgrid, point0->ygrid) ||
+	    !mbview_profile_hasdata(data, point1->xgrid, point1->ygrid))
+		return (false);
+	const double dx = point1->xgrid - point0->xgrid;
+	const double dy = point1->ygrid - point0->ygrid;
+	const double di = dx / data->primary_dx;
+	const double dj = dy / data->primary_dy;
+	const int nstep = MAX(2, (int)ceil(4.0 * sqrt(di * di + dj * dj)));
+	for (int k = 1; k < nstep; k++) {
+		if (!mbview_profile_hasdata(data, point0->xgrid + k * dx / nstep, point0->ygrid + k * dy / nstep))
+			return (false);
+	}
+	return (true);
+}
+
+/*------------------------------------------------------------------------------*/
+/* Leave out of the current profile the points where the primary grid has no data
+   and mark the spans that cross grid cells without data, so that mbview_plotprofile()
+   leaves them blank and slopes stop at them. A span between two boundary points
+   (between two navigation runs, or a profile of two points) is never drawn and is not
+   tested; it is marked only where points were left out between its ends. A profile
+   with data at every point and along every drawn span is left as it is. */
+int mbview_profile_markgaps(size_t instance) {
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+	}
+
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+	struct mbview_profilepoint_struct *points = data->profile.points;
+	const int npoints = data->profile.npoints;
+
+	/* check every point and every span that is drawn */
+	bool complete = true;
+	for (int i = 0; i < npoints; i++) {
+		points[i].gap = false;
+		if (complete && (!mbview_profile_hasdata(data, points[i].xgrid, points[i].ygrid) ||
+		                 (i > 0 && (!points[i - 1].boundary || !points[i].boundary) &&
+		                  !mbview_profile_spanhasdata(data, &points[i - 1], &points[i]))))
+			complete = false;
+	}
+
+	if (!complete) {
+		/* keep the points with data, mark each span that crosses no data */
+		int nkeep = 0;
+		int ilast = -1;
+		for (int i = 0; i < npoints; i++) {
+			if (mbview_profile_hasdata(data, points[i].xgrid, points[i].ygrid)) {
+				if (nkeep > 0 && (ilast != i - 1 || ((!points[nkeep - 1].boundary || !points[i].boundary) &&
+				                                     !mbview_profile_spanhasdata(data, &points[nkeep - 1], &points[i]))))
+					points[nkeep - 1].gap = true;
+				if (nkeep < i)
+					points[nkeep] = points[i];
+				nkeep++;
+				ilast = i;
+			}
+		}
+		data->profile.npoints = nkeep;
+		if (nkeep == 0) {
+			data->profile.zmin = 0.0;
+			data->profile.zmax = 0.0;
+		}
+
+		/* depth range, distance over topography and slopes of the points kept,
+		   slopes only from points on the same side of a gap */
+		for (int i = 0; i < nkeep; i++) {
+			if (i == 0) {
+				data->profile.zmin = points[i].zdata;
+				data->profile.zmax = points[i].zdata;
+				points[i].distovertopo = points[i].distance;
+			}
+			else {
+				data->profile.zmin = MIN(data->profile.zmin, points[i].zdata);
+				data->profile.zmax = MAX(data->profile.zmax, points[i].zdata);
+				const double dy = points[i].zdata - points[i - 1].zdata;
+				const double dx = points[i].distance - points[i - 1].distance;
+				points[i].distovertopo = points[i - 1].distovertopo + sqrt(dy * dy + dx * dx);
+			}
+			const int i0 = (i > 0 && !points[i - 1].gap) ? i - 1 : i;
+			const int i1 = (i < nkeep - 1 && !points[i].gap) ? i + 1 : i;
+			const double dy = points[i1].zdata - points[i0].zdata;
+			const double dx = points[i1].distance - points[i0].distance;
+			if (dx > 0.0)
+				points[i].slope = fabs(dy / dx);
+			else
+				points[i].slope = 0.0;
+		}
+	}
+
+	const int status = MB_SUCCESS;
+
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       npoints:         %d\n", data->profile.npoints);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
 	return (status);
 }
 

@@ -348,6 +348,8 @@ struct mbview_vectorpointw_struct {
 
 struct mbview_profilepoint_struct {
 	int boundary;
+	/* the primary grid has no data between this point and the next one */
+	int gap;
 	double xgrid;
 	double ygrid;
 	double xlon;

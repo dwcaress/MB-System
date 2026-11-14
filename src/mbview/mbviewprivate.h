@@ -778,6 +778,7 @@ int mbview_reset_prglx(size_t instance);
 int mbview_destroy_prglx(size_t instance);
 int mbview_plotprofile(size_t instance);
 int mbview_profile_text(size_t instance);
+int mbview_profile_markgaps(size_t instance);
 
 XtPointer BX_CONVERT(Widget w, char *from_string, char *to_type, int to_size, Boolean *success);
 
