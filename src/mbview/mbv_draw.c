@@ -95,7 +95,7 @@ static bool mbv_draw_batch_grow(struct mbv_draw_batch *batch, void **array, int 
 	const int alloc_new = *alloc > 0 ? 2 * *alloc : 256;
 	void *grown = *array;
 	int error = MB_ERROR_NO_ERROR;
-	/* mb_reallocd's status is not reliable: check the pointer */
+	/* check the pointer: without #1687 mb_reallocd reports success when it fails */
 	mb_reallocd(0, __FILE__, __LINE__, (size_t)alloc_new * size, &grown, &error);
 	if (grown == NULL) {
 		batch->failed = true;

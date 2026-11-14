@@ -3315,8 +3315,8 @@ static int mbview_contour_addsegment(float **xyz, size_t *nvertex, size_t *nallo
 		const size_t nalloc_new = (*nalloc > 0) ? 2 * *nalloc : 16384;
 		float *xyz_old = *xyz;
 		status = mb_reallocd(mbv_verbose, __FILE__, __LINE__, 3 * nalloc_new * sizeof(float), (void **)xyz, error);
-		/* when the allocation fails mb_reallocd sets *xyz to NULL but still returns
-		   MB_SUCCESS, and realloc keeps the old array: check the pointer and free it */
+		/* when the allocation fails mb_reallocd sets *xyz to NULL (and without #1687 still
+		   returns MB_SUCCESS), and realloc keeps the old array: check both and free it */
 		if (status != MB_SUCCESS || *xyz == NULL) {
 			if (xyz_old != NULL) {
 				int error_free = MB_ERROR_NO_ERROR;
