@@ -24,7 +24,8 @@
 /*
  * Test program of the mbview-qt library.
  *
- *   mbview_qt_test --null         checks without drawing (null backend), for ctest
+ *   mbview_qt_test --null         checks without drawing (null backend; picks are
+ *                                 found on the CPU), for ctest
  *   mbview_qt_test --gl [--3d]    draws a synthetic grid with the OpenGL backend,
  *                                 waits for the full resolution drawing and checks
  *                                 picks made with mouse events
@@ -513,10 +514,91 @@ int test_null() {
     always->trigger();
   check(action_calls == 1 && action_instance == instance, "an action calls the program with the instance as client data");
 
-  /* mouse input reaches the core; without drawing no point is found */
+  /* mouse clicks in Pan and Zoom mode pick a point; without drawing, the null
+     backend finds it on the CPU (mbvq_pick_cpu.c). In the 3D display, which
+     takes no position from the pixel when no terrain is found, every click
+     well inside the grid finds the terrain, and the depth is the mean of the
+     three grid nodes of the picked triangle, close to the surface */
   QWidget *view = mbvq::map_view(instance);
-  click(view, QPointF(view->width() / 2.0, view->height() / 2.0));
-  check(true, "mouse events pass through the core without a renderer");
+  view_item("3D Display")->trigger();
+  int found = 0, close = 0;
+  double max_error = 0.0;
+  for (int j = 1; j <= 3; j++)
+    for (int i = 1; i <= 3; i++) {
+      const QPointF position(view->width() * (0.35 + 0.15 * (i - 1)), view->height() * (0.35 + 0.15 * (j - 1)));
+      data->pick_type = MBV_PICK_NONE;
+      click(view, position);
+      spin(50);
+      if (data->pick_type == MBV_PICK_ONEPOINT) {
+        found++;
+        const struct mbview_point_struct &point = data->pick.endpoints[0];
+        const double difference = std::fabs(point.zdata - surface(point.xlon, point.ylat));
+        max_error = std::max(max_error, difference);
+        if (difference < 2.0)
+          close++;
+      }
+    }
+  view_item("Map Display")->trigger();
+  check(found == 9, std::to_string(found) + " of 9 clicks in the 3D display picked a point without drawing");
+  check(close == found && found > 0,
+        "picked depths agree with the surface (largest difference " + std::to_string(max_error) + " m)");
+
+  /* the change marks tell a user of the node arrays what became invalid
+     (src/mbview/mbv_marks.h): a local edit raises the version of its own nodes
+     and leaves the whole-view marks alone, while a colour table raises the
+     colour mark for the whole view. Reading them changes nothing. */
+  {
+    uint64_t position = 0, color = 0, mask = 0, drawn = 0;
+    mbview_getmarks(0, instance, &position, &color, &mask, &drawn, &error);
+    uint64_t position2 = 0, color2 = 0, mask2 = 0, drawn2 = 0;
+    mbview_getmarks(0, instance, &position2, &color2, &mask2, &drawn2, &error);
+    check(position == position2 && color == color2 && mask == mask2 && drawn == drawn2, "reading the marks changes nothing");
+
+    int block_nodes = 0, nblock_i = 0, nblock_j = 0;
+    mbview_getmarkblocks(0, instance, &block_nodes, &nblock_i, &nblock_j, &error);
+    const int columns = data->primary_n_columns, rows = data->primary_n_rows;
+    check(block_nodes > 0 && nblock_i == (columns + block_nodes - 1) / block_nodes &&
+              nblock_j == (rows + block_nodes - 1) / block_nodes,
+          "the marks cover the grid in blocks of " + std::to_string(block_nodes) + " nodes (" + std::to_string(nblock_i) +
+              " x " + std::to_string(nblock_j) + ")");
+
+    /* one cell of the grid, in the middle, well away from the edges */
+    const int edit_i = columns / 2, edit_j = rows / 2;
+    uint64_t before = 0, elsewhere_before = 0;
+    mbview_getnodeversion(0, instance, edit_i, edit_i, edit_j, edit_j, &before, &error);
+    mbview_getnodeversion(0, instance, 0, 0, 0, 0, &elsewhere_before, &error);
+    mbview_updateprimarygridcell(0, instance, edit_i, edit_j, static_cast<float>(data->primary_data[edit_i * rows + edit_j] - 5.0),
+                                 &error);
+    uint64_t after = 0, elsewhere_after = 0, position3 = 0, color3 = 0, mask3 = 0, drawn3 = 0;
+    mbview_getnodeversion(0, instance, edit_i, edit_i, edit_j, edit_j, &after, &error);
+    mbview_getnodeversion(0, instance, 0, 0, 0, 0, &elsewhere_after, &error);
+    mbview_getmarks(0, instance, &position3, &color3, &mask3, &drawn3, &error);
+    check(after > before, "an edited cell raises the version of its own nodes");
+    check(elsewhere_after == elsewhere_before, "it leaves the version of a far corner alone");
+    check(position3 == position && color3 == color && mask3 == mask && drawn3 == drawn,
+          "it raises no whole-view mark: the value stayed within the data");
+
+    /* the four neighbours whose slope comes from this node must be covered too */
+    uint64_t neighbour = 0;
+    mbview_getnodeversion(0, instance, edit_i + 1, edit_i + 1, edit_j, edit_j, &neighbour, &error);
+    check(neighbour == after, "the neighbours whose slope the edit changes are covered");
+
+    /* a colour table is a whole-view change */
+    mbview_setprimarycolortable(0, instance, data->primary_colortable, data->primary_colortable_mode,
+                                data->primary_colortable_min, data->primary_colortable_max, &error);
+    uint64_t position4 = 0, color4 = 0, mask4 = 0, drawn4 = 0;
+    mbview_getmarks(0, instance, &position4, &color4, &mask4, &drawn4, &error);
+    check(color4 > color3 && position4 == position3, "a colour table raises the colour mark and not the positions");
+
+    /* preparing nodes is the answer to a raised mark, not a change of its own */
+    mbview_prepare_nodes(0, instance, edit_i - 2, edit_i + 2, edit_j - 2, edit_j + 2, 1, &error);
+    uint64_t position5 = 0, color5 = 0, mask5 = 0, drawn5 = 0;
+    uint64_t version5 = 0;
+    mbview_getmarks(0, instance, &position5, &color5, &mask5, &drawn5, &error);
+    mbview_getnodeversion(0, instance, edit_i, edit_i, edit_j, edit_j, &version5, &error);
+    check(position5 == position4 && color5 == color4 && mask5 == mask4 && drawn5 == drawn4 && version5 == after,
+          "preparing nodes raises no mark");
+  }
 
   /* the background work runs from the Qt timer without errors */
   spin(1500);
