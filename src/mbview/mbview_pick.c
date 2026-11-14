@@ -463,6 +463,9 @@ int mbview_extract_pick_profile(size_t instance) {
 			data->profile.points[0].boundary = true;
 			data->profile.points[npoints - 1].boundary = true;
 			data->profile.npoints = npoints;
+
+			/* leave out the points without grid data, mark the gaps */
+			mbview_profile_markgaps(instance);
 		}
 		else {
 			/* do not keep the points of an earlier profile */

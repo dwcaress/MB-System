@@ -1478,6 +1478,9 @@ int mbview_extract_route_profile(size_t instance) {
 					data->profile.points[0].slope = 0.0;
 			}
 			data->profile.length = data->profile.points[data->profile.npoints - 1].distance;
+
+			/* leave out the points without grid data, mark the gaps */
+			mbview_profile_markgaps(instance);
 		}
 		else {
 			/* do not keep the points of an earlier profile */
