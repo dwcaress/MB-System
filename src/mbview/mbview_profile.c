@@ -233,13 +233,20 @@ int mbview_allocprofilearrays(int verbose, int npoints, double **distance, doubl
 
 	/* allocate the arrays using mb_reallocd */
 	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)distance, error);
-	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)zdata, error);
-	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)boundary, error);
-	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)xlon, error);
-	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)ylat, error);
-	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)distovertopo, error);
-	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)bearing, error);
-	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)slope, error);
+	if (status == MB_SUCCESS)
+		status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)zdata, error);
+	if (status == MB_SUCCESS)
+		status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(int), (void **)boundary, error);
+	if (status == MB_SUCCESS)
+		status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)xlon, error);
+	if (status == MB_SUCCESS)
+		status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)ylat, error);
+	if (status == MB_SUCCESS)
+		status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)distovertopo, error);
+	if (status == MB_SUCCESS)
+		status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)bearing, error);
+	if (status == MB_SUCCESS)
+		status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)slope, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
