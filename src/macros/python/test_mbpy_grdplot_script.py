@@ -181,6 +181,31 @@ def main():
     all_ok &= check("explicit-interval script runs without error", proc3.returncode == 0,
                      detail=f"stdout:\n{proc3.stdout}\nstderr:\n{proc3.stderr}")
 
+    # --- case 3b: bare --coast gets mbm_grdplot's default pen and resolution ---
+    # a real bug once here: with no pen/fill given, a bare `gmt coast -J -R`
+    # was emitted and GMT failed with "Must specify at least one of ...".
+    print("\n=== case coast_defaults ===")
+    root3b = tmp / "coast_defaults"
+    opts3b = script.ScriptOptions(
+        grid=str(grid_path), root=str(root3b), layout=lay, grid_info=grid_info,
+        output_format="png", cpt_lines=cpt_lines,
+        coast=misc.CoastOptions(coast_control=True),
+    )
+    script_path3b = tmp / "coast_defaults.sh"
+    script.generate_and_write(opts3b, str(script_path3b))
+    text3b = script_path3b.read_text()
+    all_ok &= check("bare coast defaults to -W1p -Df",
+                     re.search(r"gmt coast .*-Df.*-W1p\b", text3b) is not None, detail=text3b)
+    proc3b = run_script(script_path3b)
+    all_ok &= check("bare-coast script runs without error", proc3b.returncode == 0,
+                     detail=f"stdout:\n{proc3b.stdout}\nstderr:\n{proc3b.stderr}")
+    co = misc.resolve_coast_defaults(misc.CoastOptions(coast_control=True, coast_dryfill="gray"))
+    all_ok &= check("no default pen when a dry fill is given", co.coast_pen is None, detail=str(co))
+    co = misc.resolve_coast_defaults(misc.CoastOptions(coast_control=True), default_dryfill="200")
+    all_ok &= check("mbm_grd3dplot/mbm_plot style default: pen 1p and dry fill 200",
+                     (co.coast_pen, co.coast_dryfill, co.coast_resolution) == ("1p", "200", "f"),
+                     detail=str(co))
+
     # --- case 4: vertical (scale_loc "l") colorbar -- Y must be hardcoded to 0 ---
     print("\n=== case vertical_colorbar ===")
     lay_left = layout.compute_layout(grid_info, pagesize="a", scale_loc="l")

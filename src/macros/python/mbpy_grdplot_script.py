@@ -88,7 +88,7 @@ from typing import List, Optional, Tuple
 
 from mbpy_color import CptLine
 from mbpy_layout import GridInfo, Layout
-from mbpy_misc import ContourOptions, CoastOptions, NavigationOptions, XYOverlayEntry
+from mbpy_misc import ContourOptions, CoastOptions, NavigationOptions, XYOverlayEntry, resolve_coast_defaults
 
 # mbm_grdplot's own approximation of pi (mbm_grdplot line ~87: "$DTR =
 # 3.1415926 / 180.0"), not math.pi -- kept for parity with its exact
@@ -636,7 +636,7 @@ def generate_script(opts: ScriptOptions) -> str:
         lines.append("")
 
     if opts.coast is not None:
-        co = opts.coast
+        co = resolve_coast_defaults(opts.coast)
         cparts = [f"gmt coast {j} {r}"]
         if co.coast_resolution:
             cparts.append(f"-D{co.coast_resolution}")
