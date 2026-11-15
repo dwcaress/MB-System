@@ -45,14 +45,27 @@ class MapWidget;
 class SoundingsWidget;
 
 /* The renderer of the program. One backend per process: call
-   set_backend() in main() before creating the QApplication, because the
-   OpenGL backend sets the default surface format there. */
+   set_backend_from_environment() or set_backend() in main() before creating
+   the QApplication, because the OpenGL backend sets the default surface
+   format there. */
 enum class Backend {
   LegacyGL, /* the mbview OpenGL drawing code in a 2.1 compatibility context */
-  Null      /* draws nothing, for tests without a display */
+  Null,     /* draws nothing, for tests without a display */
+  Rhi       /* QRhi: the drawing the core records, with Metal, Direct3D, Vulkan
+               or OpenGL; built with Qt 6.8 or later and Qt Shader Tools */
 };
-void set_backend(Backend backend);
+/* the graphics API of the QRhi backend, as QRhiWidget::Api; Default is Metal
+   on Apple, Direct3D 11 on Windows and OpenGL elsewhere */
+enum class RhiApi { Default, OpenGL, Metal, Vulkan, Direct3D11, Direct3D12 };
+/* a backend this build lacks gives a message and the other one */
+void set_backend(Backend backend, RhiApi api = RhiApi::Default);
 Backend backend();
+/* whether this build has the backend (the OpenGL and null backends always) */
+bool backend_built(Backend backend);
+/* the backend that the environment variable MB_RENDERER names (auto, metal,
+   d3d11, d3d12, vulkan, opengl, legacy-gl or null), else the OpenGL backend;
+   in main() before creating the QApplication */
+void set_backend_from_environment();
 
 /* Starts mbview and the 3D soundings view, once however many tools in the
    program call it. mbview_startup() itself resets all maps and shared data. */

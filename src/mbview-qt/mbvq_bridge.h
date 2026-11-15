@@ -324,9 +324,49 @@ void mbvq_c_soundings_state(struct mbvq_soundings_state *state);
 bool mbvq_pick_cpu_terrain(size_t instance, int xpixel, int ypixel, double *xgrid, double *ygrid, double *zdata);
 void mbvq_pick_cpu_viewbounds(size_t instance, int viewbounds[4]);
 
+/* ---- implemented by the C half (mbvq_render_core.c) ---- */
+
+/* What a renderer that draws the core's arrays without OpenGL (the QRhi
+   backend) reads from the private part of the core. */
+
+/* the node arrays of the primary grid of a view, node k = i * n_rows + j (i is
+   the column), and the modes they are drawn in; the pointers stay valid until
+   the grid changes, and the positions and colours hold what the last
+   preparation computed (mbview_prepare_nodes) */
+struct mbvq_grid {
+	int n_columns;
+	int n_rows;
+	float nodata;      /* the data value of a node without data */
+	const float *data; /* the grid values */
+	const float *x;    /* display coordinates */
+	const float *y;
+	const float *z;
+	const float *r; /* colours, 0 to 1 */
+	const float *g;
+	const float *b;
+	int grid_mode;                 /* MBV_GRID_VIEW_* */
+	int display_mode;              /* MBV_DISPLAY_2D or MBV_DISPLAY_3D */
+	int projection_mode;           /* the display projection, MBV_PROJECTION_* */
+	bool secondary_sameas_primary; /* the secondary grid has the nodes of the primary */
+	bool contours;                 /* contours are shown */
+	int viewbounds[4];             /* the grid bounds seen: first and last column, first and last row */
+};
+void mbvq_c_grid(size_t instance, struct mbvq_grid *grid);
+/* the camera of the map view, column-major, in double precision
+   (mbview_camera); also sets the view's extents as a drawing does */
+int mbvq_c_camera(size_t instance, double projection[16], double modelview[16]);
+/* 1 for each lattice node i0, i0 + stride, ... <= i1 by j0, j0 + stride, ...
+   <= j1 (i the slow index) that a triangle of the drawing may use: the node
+   holds data and, in the secondary grid mode, secondary data as well, as the
+   drawing asks (mbview_drawdata); 0 otherwise and outside the grid */
+void mbvq_c_node_validity(size_t instance, int i0, int i1, int j0, int j1, int stride, unsigned char *valid);
+/* whether the contours of a resolution (MBVQ_REZ_LOW, _HIGH or _FULL) are made */
+bool mbvq_c_contours_made(size_t instance, int rez);
+
 /* ---- implemented by the Qt half ---- */
 
-/* true if the backend draws (the legacy OpenGL backend), false for the null backend */
+/* true if the backend draws (the legacy OpenGL and the QRhi backends), false
+   for the null backend */
 bool mbvq_qt_drawable(void);
 /* create and show the window of an instance (from mbview_open) */
 void mbvq_qt_open_window(size_t instance);

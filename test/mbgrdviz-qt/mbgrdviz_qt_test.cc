@@ -27,7 +27,7 @@
  *     the main window menu sensitivity; two instances of the built-in test
  *     grid; sites and a route saved, cleared, read and saved again (identical
  *     files apart from the date line); quitting.
- *   mbgrdviz_qt_test [--gl] <directory> <grid> <site file> <route file> [<risi script>]
+ *   mbgrdviz_qt_test [--gl | --rhi] <directory> <grid> <site file> <route file> [<risi script>]
  *     also reads the site and route files into the grid and saves them as
  *     <directory>/site_saved.ste and route_saved.rte, to compare with the
  *     files the Motif mbgrdviz saved: the site file must be identical apart
@@ -38,24 +38,30 @@
  *     that the route saved, cleared, read and saved again is identical.
  *     Saved routes hold bearings and distances in display coordinates, which
  *     only drawing sets up (mbview_projectdata in mbview_plot): --gl draws
- *     with the OpenGL backend (needs a display), as the Motif program does.
- *     Without drawing the route checks are skipped. --gl also writes all 12
- *     route exports, and compares the RISI script without heading with
- *     <risi script>, saved by the Motif mbgrdviz from the same route. With --gl it also picks an
- *     area and generates a survey route through the survey dialog, and picks
- *     a region and opens it as a new view.
+ *     with the OpenGL backend (needs a display), as the Motif program does,
+ *     and --rhi with the QRhi backend (needs a display; where it is built,
+ *     77, skipped, elsewhere), which fills the core's drawing into a batch
+ *     without OpenGL. Both have a watchdog.
+ *     Without drawing the route checks are skipped. --gl and --rhi also write
+ *     all 12 route exports, and compare the RISI script without heading with
+ *     <risi script>, saved by the Motif mbgrdviz from the same route. With
+ *     --gl or --rhi it also picks an area and generates a survey route through
+ *     the survey dialog, and picks a region and opens it as a new view.
  *   Both forms also check which programs the Action menu starts: the Qt
  *   versions of mbedit, mbeditviz and mbvelocitytool, found in the CMake build
  *   tree.
  */
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include <QAction>
@@ -108,6 +114,16 @@ void check(bool ok, const std::string &what) {
   if (!ok)
     failures++;
   std::printf("%s: %s\n", ok ? "ok" : "FAILED", what.c_str());
+}
+
+/* the test ends after seconds even if it hangs */
+void start_watchdog(int seconds, const char *mode) {
+  std::thread([seconds, mode] {
+    std::this_thread::sleep_for(std::chrono::seconds(seconds));
+    std::fprintf(stderr, "mbgrdviz_qt_test %s: watchdog, stopped after %d s\n", mode, seconds);
+    std::fflush(stdout);
+    std::_Exit(4);
+  }).detach();
 }
 
 /* an item of the menus shown in the menu bar */
@@ -188,17 +204,29 @@ bool save_and_compare(int save_mode, int open_mode, const std::string &first, co
 int main(int argc, char **argv) {
   std::setvbuf(stdout, nullptr, _IOLBF, 0);
   const bool gl = argc > 1 && std::strcmp(argv[1], "--gl") == 0;
-  if (gl) {
+  const bool rhi = argc > 1 && std::strcmp(argv[1], "--rhi") == 0;
+  /* the checks that need drawing, with either backend that draws */
+  const bool draws = gl || rhi;
+  /* a build without QRhi would draw with OpenGL instead */
+  if (rhi && !mbvq::backend_built(mbvq::Backend::Rhi)) {
+    std::printf("skipped: this build has no QRhi drawing\n");
+    return 77;
+  }
+  /* the modes that draw end after 150 s even if they hang (their own waits
+     add up to well under that) */
+  if (draws) {
+    start_watchdog(150, argv[1]);
     argc--;
     argv++;
   }
   if (argc != 2 && argc != 5 && argc != 6) {
-    std::fprintf(stderr, "usage: mbgrdviz_qt_test [--gl] <directory> [<grid> <site file> <route file> [<risi script>]]\n");
+    std::fprintf(stderr,
+                 "usage: mbgrdviz_qt_test [--gl | --rhi] <directory> [<grid> <site file> <route file> [<risi script>]]\n");
     return 2;
   }
   const std::string dir = argv[1];
 
-  mbvq::set_backend(gl ? mbvq::Backend::LegacyGL : mbvq::Backend::Null);
+  mbvq::set_backend(gl ? mbvq::Backend::LegacyGL : rhi ? mbvq::Backend::Rhi : mbvq::Backend::Null);
   QApplication app(argc, argv);
   MbgrdvizWindow window;
   window.show();
@@ -219,7 +247,7 @@ int main(int argc, char **argv) {
   do_mbgrdviz_openprimary(nullptr);
   check(mbgrdviz_mbview_id[0] && mbgrdviz_mbview_id[1] && mbvq::window(0) != nullptr && mbvq::window(1) != nullptr,
         "two test grid instances open");
-  if (gl) {
+  if (draws) {
     QElapsedTimer timer;
     timer.start();
     while ((mbvq_c_lastdrawrez(0) != MBVQ_REZ_FULL || mbvq_c_lastdrawrez(1) != MBVQ_REZ_FULL) && timer.elapsed() < 20000)
@@ -269,7 +297,7 @@ int main(int argc, char **argv) {
     check(instance != MBV_NO_WINDOW, "grid opened");
     if (instance != MBV_NO_WINDOW) {
       clear_sites_routes();
-      if (gl) {
+      if (draws) {
         QElapsedTimer timer;
         timer.start();
         while (mbvq_c_lastdrawrez(instance) != MBVQ_REZ_FULL && timer.elapsed() < 20000)
@@ -283,7 +311,7 @@ int main(int argc, char **argv) {
       mbgrdviz_openfile(MBGRDVIZ_SAVESITE, instance, site_out.data());
       mbgrdviz_openfile(MBGRDVIZ_SAVEROUTE, instance, route_out.data());
       check(body(site_out) == body(site), "site file as the Motif mbgrdviz saved it");
-      if (gl) {
+      if (draws) {
         const std::string motif = waypoints(route);
         check(!motif.empty() && waypoints(route_out) == motif, "route waypoints at the positions of the Motif file");
         clear_sites_routes();

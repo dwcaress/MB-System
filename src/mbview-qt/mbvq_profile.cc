@@ -66,8 +66,7 @@ ProfileWindow::ProfileWindow(size_t instance, QWidget *parent) : QWidget(parent,
   scroll_ = new QScrollArea;
   scroll_->setWidgetResizable(false);
   scroll_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  view_ = backend() == Backend::LegacyGL ? gl_backend::create_profile_view(instance, nullptr)
-                                         : null_backend::create_profile_view(instance, nullptr);
+  view_ = create_profile_view(instance, nullptr);
   scroll_->setWidget(view_);
   scroll_->viewport()->installEventFilter(this);
   layout->addWidget(scroll_, 1);
@@ -140,7 +139,9 @@ void ProfileWindow::layout_profile() {
   mbvq_c_profile_controls(instance_, &width, &slope, &exaggeration);
   const QSize visible = scroll_->viewport()->size();
   view_->resize(width * visible.width(), visible.height());
-  if (backend() == Backend::Null) {
+  /* the OpenGL view passes its own size on; a null view (also under QRhi,
+     which has no profile view yet) does not */
+  if (backend() != Backend::LegacyGL) {
     const double ratio = view_->devicePixelRatioF();
     mbvq_c_profile_resize(instance_, static_cast<int>(view_->width() * ratio), static_cast<int>(view_->height() * ratio));
   }

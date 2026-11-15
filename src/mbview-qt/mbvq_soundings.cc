@@ -262,8 +262,7 @@ SoundingsWidget::SoundingsWidget(QWidget *parent) : QWidget(parent), title_(tr("
   }
   layout->addWidget(sliders_);
 
-  view_ = backend() == Backend::LegacyGL ? gl_backend::create_soundings_view(this)
-                                         : null_backend::create_soundings_view(this);
+  view_ = create_soundings_view(this);
   view_->setMinimumSize(200, 150);
   layout->addWidget(view_, 1);
   set_view_cursor(MBV_CURSOR_TARGET_RED);

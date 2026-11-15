@@ -24,7 +24,8 @@
 
 # Tests of the mbview-qt library. ctest runs the checks without drawing (null
 # backend, offscreen platform). mbview_qt_test --gl checks drawing and picks with
-# the OpenGL backend and needs a display; it is not run by ctest.
+# the OpenGL backend, and --rhi with the QRhi backend where it is built; they
+# need a display and are not run by ctest.
 
 if(APPLE)
   list(REMOVE_ITEM CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/build-utils")
@@ -58,3 +59,24 @@ target_link_libraries(mbview_qt_embed_test PRIVATE mbview-qt mbio Qt6::Widgets Q
 
 add_test(NAME mbview_qt_embed_test COMMAND mbview_qt_embed_test --null)
 set_tests_properties(mbview_qt_embed_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+# The QRhi backend, where it is built (src/mbview-qt sets MBVQ_RHI): four
+# headless modes on the offscreen platform, each with its own watchdog. The
+# Metal mode returns 77 (skipped) where no Metal QRhi can be made. --display
+# and --bench (frame times, also of the OpenGL backend) draw in a window and
+# need a display; they are not run by ctest.
+if(MBVQ_RHI)
+  add_executable(mbview_qt_rhi_test mbview_qt_rhi_test.cc)
+  set_target_properties(mbview_qt_rhi_test PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+  target_link_libraries(mbview_qt_rhi_test PRIVATE mbview-qt mbaux mbio Qt6::Widgets ${MB_SYSLIBS})
+  add_test(NAME mbview_qt_rhi_model COMMAND mbview_qt_rhi_test --model)
+  add_test(NAME mbview_qt_rhi_widgets COMMAND mbview_qt_rhi_test --widgets)
+  add_test(NAME mbview_qt_rhi_null COMMAND mbview_qt_rhi_test --render-null)
+  set_tests_properties(mbview_qt_rhi_model mbview_qt_rhi_widgets mbview_qt_rhi_null
+                       PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 60)
+  if(APPLE)
+    add_test(NAME mbview_qt_rhi_metal COMMAND mbview_qt_rhi_test --render-metal)
+    set_tests_properties(mbview_qt_rhi_metal PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 60
+                                                        SKIP_RETURN_CODE 77)
+  endif()
+endif()

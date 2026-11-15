@@ -27,13 +27,28 @@
 # without Motif (MBVIEW_NO_MOTIF); the Motif library in src/mbview is unchanged.
 # The legacy OpenGL backend runs the mbview drawing code in a 2.1 compatibility
 # context; on macOS GL_SILENCE_DEPRECATION hides the deprecation warnings of the
-# OpenGL framework.
+# OpenGL framework. The QRhi backend (Metal on macOS, Direct3D 11 on Windows,
+# OpenGL elsewhere) draws what the core records in a batch; it is chosen at run
+# time with MB_RENDERER=auto (or an API name) and needs Qt 6.8 or later with its
+# private Gui module and Qt Shader Tools.
 
 if(APPLE)
   list(REMOVE_ITEM CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/build-utils")
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets OpenGL OpenGLWidgets)
+
+# QRhi needs Qt 6.8 or later, the private Gui module (rhi/qrhi.h) and Qt Shader
+# Tools (qt6_add_shaders); without them the views are drawn with OpenGL only
+set(mbvq_rhi OFF)
+if(buildQt6Rhi)
+  find_package(Qt6 QUIET COMPONENTS GuiPrivate ShaderTools)
+  if(Qt6_VERSION VERSION_GREATER_EQUAL 6.8 AND TARGET Qt6::GuiPrivate AND COMMAND qt6_add_shaders)
+    set(mbvq_rhi ON)
+  endif()
+endif()
+# for the tests (test/mbview-qt is added later from the same scope)
+set(MBVQ_RHI ${mbvq_rhi} PARENT_SCOPE)
 
 set(CMAKE_AUTOMOC ON)
 
@@ -70,6 +85,7 @@ add_library(
   ${mbview_core}
   mbvq_core.c
   mbvq_pick_cpu.c
+  mbvq_render_core.c
   mbvq_bridge.h
   mbvq_dialogs.cc
   mbvq_dialogs.h
@@ -110,4 +126,17 @@ target_link_libraries(mbview-qt PUBLIC mbio Qt6::Widgets PRIVATE Qt6::OpenGL Qt6
 # library privately, and mbview-qt does not use mbaux
 if(WIN32)
   target_link_libraries(mbview-qt PUBLIC mb_xdr_win32)
+endif()
+
+# the QRhi backend; the OpenGL backend stays the default and is always built
+if(mbvq_rhi)
+  target_sources(mbview-qt PRIVATE mbvq_rhi.h mbvq_rhi_model.cc mbvq_rhi_model.h mbvq_rhi_frame.cc mbvq_rhi_frame.h
+                                   mbvq_rhi_renderer.cc mbvq_rhi_renderer.h mbvq_backend_rhi.cc)
+  target_link_libraries(mbview-qt PRIVATE Qt6::GuiPrivate)
+  target_compile_definitions(mbview-qt PUBLIC MBVQ_HAVE_RHI)
+  qt6_add_shaders(mbview-qt "mbvq_shaders" PREFIX "/mbvq" BASE shaders FILES shaders/mbvq_terrain.vert
+                  shaders/mbvq_colour.frag)
+  message(STATUS "mbview-qt: the views are drawn with OpenGL, or with QRhi with MB_RENDERER=auto")
+else()
+  message(STATUS "mbview-qt: the views are drawn with OpenGL (QRhi needs Qt 6.8 or later with Qt Shader Tools)")
 endif()

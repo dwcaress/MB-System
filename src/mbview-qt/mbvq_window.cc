@@ -203,8 +203,7 @@ MapWidget::MapWidget(size_t instance, QWidget *parent) : QWidget(parent), instan
   auto *layout = new QHBoxLayout(central);
   layout->setContentsMargins(0, 0, 0, 0);
   layout->addWidget(left);
-  map_view_ = backend() == Backend::LegacyGL ? gl_backend::create_map_view(instance, central)
-                                             : null_backend::create_map_view(instance, central);
+  map_view_ = create_map_view(instance, central);
   map_view_->setMinimumSize(100, 100);
   map_view_->resize(width, height);
   layout->addWidget(map_view_, 1);
@@ -372,7 +371,13 @@ void MapWidget::show_about() {
 
 void MapWidget::set_status(const QString &text) {
   status_->setText(text);
-  emit statusMessage(text);
+  /* While a QRhi view fills its batch, a slot of the program that processed
+     events could draw another view in the middle of the fill: the signal then
+     goes out after the fill. The OpenGL backend sends it at once, as before. */
+  if (fill_active())
+    QMetaObject::invokeMethod(this, [this, text] { emit statusMessage(text); }, Qt::QueuedConnection);
+  else
+    emit statusMessage(text);
 }
 
 void MapWidget::set_label(int label, const QString &text) {
