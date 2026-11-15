@@ -69,6 +69,7 @@ bool ViewRenderer::compatible(const QRhiRenderPassDescriptor *pass) const {
 MapRenderer::MapRenderer(QRhi *rhi, const RenderOptions &options)
     : ViewRenderer(rhi), options_(options), float_colours_(options.float_terrain_colours) {
   plan_.set_float_colours(float_colours_);
+  std::fill(outside_level_ms_, outside_level_ms_ + kLevels, -1.0);
 }
 
 MapRenderer::~MapRenderer() { release(); }
@@ -86,11 +87,12 @@ void MapRenderer::drop_tiles() {
   /* the GPU copies and the plan that says what they hold: the next frame
      plans, prepares and uploads every tile again */
   tiles_.clear();
+  drawn_.clear();
+  drawn_counts_.clear();
   id_positions_.reset();
   id_colours_.reset();
   id_vertices_ = 0;
-  plan_ = TerrainPlan();
-  plan_.set_float_colours(float_colours_);
+  plan_.reset();
   generation_ = -1;
 }
 
@@ -110,13 +112,19 @@ int MapRenderer::resources() const {
   n += pass_ != nullptr;
   n += id_positions_ != nullptr;
   n += id_colours_ != nullptr;
-  for (const TileGpu &tile : tiles_)
-    n += (tile.positions != nullptr) + (tile.colours != nullptr) + (tile.indices != nullptr);
+  for (const std::array<TileGpu, kLevels> &tile : tiles_)
+    for (const TileGpu &level : tile)
+      n += (level.positions != nullptr) + (level.colours != nullptr) + (level.indices != nullptr);
   return n;
 }
 
 bool MapRenderer::create(QRhiRenderPassDescriptor *pass, int samples) {
   release();
+  /* Qt's Metal backend keeps every buffer that is not a storage buffer once
+     per frame in flight, so the memory budget counts the tile levels' bytes
+     that many times there (the other backends keep a static buffer once) */
+  copies_ = rhi_->backend() == QRhi::Metal ? rhi_->resourceLimit(QRhi::FramesInFlight) : 1;
+  plan_.set_copies(copies_);
 
   /* the wide lines, markers and point quads that later complete the map are
      instanced: without instancing nothing is drawn, rather than a map that
@@ -176,15 +184,15 @@ bool MapRenderer::create(QRhiRenderPassDescriptor *pass, int samples) {
 }
 
 bool MapRenderer::upload(QRhiResourceUpdateBatch *updates, TileUpload *upload) {
-  TileGpu &gpu = tiles_[upload->tile];
-  const TerrainPlan::Tile &tile = plan_.tiles()[upload->tile];
+  TileGpu &gpu = tiles_[upload->tile][upload->level];
+  const TerrainPlan::Level &level = plan_.tiles()[upload->tile].levels[upload->level];
 
-  /* a tile without triangles holds nothing */
+  /* a tile level without triangles holds nothing */
   if (upload->indices && upload->index.empty()) {
     gpu = TileGpu();
     return true;
   }
-  const quint32 nodes = static_cast<quint32>(tile.ni) * static_cast<quint32>(tile.nj);
+  const quint32 nodes = static_cast<quint32>(level.ni) * static_cast<quint32>(level.nj);
   if (upload->positions) {
     if (gpu.positions == nullptr && (gpu.positions = make_buffer(QRhiBuffer::VertexBuffer, 12 * nodes)) == nullptr)
       return false;
@@ -276,6 +284,8 @@ bool MapRenderer::upload_triangle_ids(QRhiResourceUpdateBatch *updates, const Fr
 }
 
 Prepared MapRenderer::frame(MapFrame *frame, QRhiResourceUpdateBatch *updates, bool continued, QSize pixels) {
+  /* the previous frame's submission came, or will not count any more */
+  submission_due_ = false;
   FrameInput input;
   const bool refused = !frame->begin(continued, pixels.width(), pixels.height(), &input);
   const Clock::time_point start = Clock::now();
@@ -314,22 +324,53 @@ Prepared MapRenderer::prepare(QRhiResourceUpdateBatch *updates, const FrameInput
   draw_terrain_ = input.terrain_slot;
   depth_test_ = input.depth_test;
 
-  /* the terrain: what the marks made stale, within the upload budget (all of
-     it at once for the triangle colours of a test); only after a fill that
-     drew the terrain, which also projected the data */
-  std::vector<TileUpload> uploads;
-  PlanStats plan_stats;
-  const bool more = draw_terrain_ && plan_.plan(input.terrain, options_.triangle_ids ? SIZE_MAX : options_.upload_budget,
-                                                &uploads, &plan_stats);
+  /* the terrain: what the marks made stale at the frame's stride, within the
+     budgets (every tile at stride 1, all at once, for the triangle colours
+     of a test); only after a fill that drew the terrain, which also
+     projected the data */
+  PlanOptions options;
+  options.upload_budget = options_.triangle_ids ? SIZE_MAX : options_.upload_budget;
+  options.force_stride1 = options_.force_stride1 || options_.triangle_ids;
+  options.culling = options_.culling && !options_.triangle_ids;
+  options.drag = input.drag;
+  /* The drag budget leaves room for the costs of the previous frame outside
+     its preparing and gathering. Its uploads, its recording and the wait for
+     its GPU work grow with the bytes of its stride, so during a drag a
+     stride is weighed with the latest such costs of a frame drawn at it, if
+     larger: a finer stride is not taken on the costs of a coarser frame
+     alone, only to be dropped again in the next frame for its own. */
+  if (input.drag && !dragging_)
+    std::fill(outside_level_ms_, outside_level_ms_ + kLevels, -1.0);
+  dragging_ = input.drag;
+  options.budget_ms = options_.prep_budget_ms >= 0.0 ? options_.prep_budget_ms : drag_budget_ms(outside_ms_);
+  if (options_.prep_budget_ms < 0.0)
+    for (int l = 0; l < kLevels; l++)
+      if (outside_level_ms_[l] >= 0.0)
+        options.level_budget_ms[l] = drag_budget_ms(std::max(outside_ms_, outside_level_ms_[l]));
+  options.node_ns_colour = options_.node_ns_colour;
+  options.node_ns_z = options_.node_ns_z;
+  PlanResult result;
+  const bool more = draw_terrain_ && plan_.plan(input.terrain, options, &result);
+  const PlanStats &plan_stats = result.stats;
   stats_.prepare_ms = plan_stats.prepare_ms;
   if (generation_ != plan_.generation()) {
     tiles_.clear();
     tiles_.resize(plan_.tiles().size());
     generation_ = plan_.generation();
   }
-  for (TileUpload &upload : uploads)
+  else {
+    /* levels evicted for the memory budget, by this frame or another
+       renderer's, go before the uploads */
+    for (const LevelKey &key : result.drops)
+      tiles_[key.tile][key.level] = TileGpu();
+  }
+  for (TileUpload &upload : result.uploads)
     if (!this->upload(updates, &upload))
       return Prepared::Failed;
+  drawn_ = result.drawn;
+  drawn_counts_.clear();
+  for (const LevelKey &key : drawn_)
+    drawn_counts_.push_back(plan_.tiles()[key.tile].levels[key.level].index_count);
   stats_.tiles = static_cast<int>(plan_.tiles().size());
   stats_.tiles_waiting = plan_stats.tiles_waiting;
   stats_.tiles_prepared += plan_stats.tiles_prepared;
@@ -341,6 +382,26 @@ Prepared MapRenderer::prepare(QRhiResourceUpdateBatch *updates, const FrameInput
   stats_.bytes_indices += plan_stats.bytes_indices;
   stats_.bytes_largest_frame = std::max(
       stats_.bytes_largest_frame, plan_stats.bytes_positions + plan_stats.bytes_colours + plan_stats.bytes_indices);
+  stats_.stride = plan_stats.stride;
+  stats_.stride_zoom = plan_stats.stride_zoom;
+  stats_.stride_target = plan_stats.stride_target;
+  stats_.tiles_visible = plan_stats.tiles_visible;
+  stats_.tiles_culled = plan_stats.tiles_culled;
+  stats_.drag_budget = plan_stats.drag_coarser;
+  stats_.memory_budget = plan_stats.memory_coarser;
+  stats_.over_memory_budget = plan_stats.over_memory;
+  stats_.budget_ms = plan_stats.budget_ms;
+  stats_.outside_ms = outside_ms_;
+  for (int l = 0; l < kLevels; l++)
+    if (level_stride(l) == plan_stats.stride_target && outside_level_ms_[l] >= 0.0)
+      stats_.outside_ms = std::max(outside_ms_, outside_level_ms_[l]);
+  stats_.estimated_ms = plan_stats.estimated_ms;
+  stats_.work_ms = plan_stats.work_ms;
+  stats_.bounds_ms = plan_stats.bounds_ms;
+  stats_.resident_bytes = plan_.held_bytes();
+  stats_.cache_bytes = cache_bytes();
+  stats_.buffer_copies = copies_;
+  stats_.evictions = plan_.evictions();
   if (options_.triangle_ids && !upload_triangle_ids(updates, input))
     return Prepared::Failed;
 
@@ -384,17 +445,17 @@ void MapRenderer::record(QRhiCommandBuffer *cb, QSize pixels) {
     }
     return;
   }
-  /* the tiles whose every stream is as new as the marks; the others wait for
-     their upload (a hole for a frame or two) */
-  for (int t = 0; t < static_cast<int>(tiles_.size()); t++) {
-    const TileGpu &gpu = tiles_[t];
-    if (!plan_.drawable(t) || gpu.positions == nullptr || gpu.colours == nullptr || gpu.indices == nullptr)
+  /* the tile levels of the frame's stride whose every stream is as new as
+     the marks (the plan's drawn set) */
+  for (size_t d = 0; d < drawn_.size(); d++) {
+    const TileGpu &gpu = tiles_[drawn_[d].tile][drawn_[d].level];
+    if (gpu.positions == nullptr || gpu.colours == nullptr || gpu.indices == nullptr)
       continue;
     const QRhiCommandBuffer::VertexInput inputs[] = {{gpu.positions.get(), 0}, {gpu.colours.get(), 0}};
     cb->setVertexInput(0, 2, inputs, gpu.indices.get(), 0, QRhiCommandBuffer::IndexUInt16);
-    cb->drawIndexed(plan_.tiles()[t].index_count);
+    cb->drawIndexed(drawn_counts_[d]);
     stats_.tiles_drawn++;
-    stats_.triangles += plan_.tiles()[t].index_count / 3;
+    stats_.triangles += drawn_counts_[d] / 3;
   }
 }
 
@@ -406,6 +467,27 @@ void MapRenderer::set_pass_times(double upload_ms, double record_ms, double rend
   stats_.gpu_ms = gpu_ms;
   stats_.render_begin_ms = begin_ms;
   stats_.render_end_ms = end_ms;
+  /* the frame's cost outside its preparing and gathering (the fill, the
+     marks, the uploads, the uniforms and the pass), for the next frame's
+     drag budget, also as the latest of its stride during a drag; a view adds
+     the time to its window's submission */
+  if (render_ms > 0.0) {
+    outside_ms_ = std::max(0.0, render_ms - stats_.work_ms);
+    outside_level_ = drawn_.empty() ? -1 : drawn_.front().level;
+    if (dragging_ && outside_level_ >= 0)
+      outside_level_ms_[outside_level_] = outside_ms_;
+    submission_due_ = true;
+  }
+}
+
+void MapRenderer::frame_submitted(double at_ms) {
+  /* once per frame: a window can submit frames this view did not render */
+  if (!submission_due_)
+    return;
+  outside_ms_ += std::max(0.0, at_ms - stats_.render_end_ms);
+  if (dragging_ && outside_level_ >= 0)
+    outside_level_ms_[outside_level_] = outside_ms_;
+  submission_due_ = false;
 }
 
 }  // namespace rhi
@@ -520,6 +602,8 @@ bool OffscreenRenderer::render_map(size_t instance, int width, int height, const
     return false;
   if (d.frame == nullptr || d.frame->instance() != instance)
     d.frame = std::make_unique<rhi::MapFrame>(instance);
+  /* the frames as while a map mouse button is down, or not */
+  d.frame->set_drag(options.drag);
   if (d.renderer != nullptr &&
       (!d.renderer->compatible(d.pass.get()) || d.renderer->float_colours() != options.float_terrain_colours))
     d.drop_renderer();

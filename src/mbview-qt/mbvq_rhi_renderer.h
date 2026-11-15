@@ -34,14 +34,18 @@
  * batch, and record() draws inside the pass. A view and the offscreen
  * renderer of the tests run the same frame() and record().
  *
- * MapRenderer draws the map view: the terrain from the tiles of the terrain
- * plan (mbvq_rhi_model.h), with the depth test of the batch's terrain slot.
+ * MapRenderer draws the map view: the terrain from the tile levels of the
+ * terrain plan (mbvq_rhi_model.h), one stride per frame, with the depth test
+ * of the batch's terrain slot. Its plan shares the process-wide memory budget
+ * of the tile levels with the other renderers.
  */
 
 #ifndef MBVIEW_QT_MBVQ_RHI_RENDERER_H
 #define MBVIEW_QT_MBVQ_RHI_RENDERER_H
 
 #include <QSize>
+#include <array>
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -116,6 +120,21 @@ class MapRenderer final : public ViewRenderer {
      (-1 if none), and where the frame began and ended on the clock */
   void set_pass_times(double upload_ms, double record_ms, double render_ms, double gpu_ms, double begin_ms,
                       double end_ms);
+  /* a view's window submitted the frame (QRhiWidget::frameSubmitted) at a
+     time of the same clock (ms since its epoch): the time from the end of
+     render() to there, the wait for the frame's GPU work and the window's
+     composition, counts among the frame's costs outside its preparing and
+     gathering, which the next drag budget leaves room for */
+  void frame_submitted(double at_ms);
+  /* the view is shown (true) or hidden: a shown view's latest levels are
+     kept from other views' evictions */
+  void set_visible(bool visible) { plan_.set_visible(visible); }
+  /* called when this renderer should draw a frame for the memory budget:
+     another renderer evicted tile levels of this one, whose GPU memory this
+     renderer's next frame frees; or the memory budget made this renderer's
+     latest frame coarser and another let go of levels it kept. The view asks
+     for that frame. */
+  void set_frame_request(std::function<void()> request) { plan_.set_evicted_callback(std::move(request)); }
 
   const RenderStats &stats() const { return stats_; }
   const TerrainPlan &plan() const { return plan_; }
@@ -137,7 +156,19 @@ class MapRenderer final : public ViewRenderer {
   bool float_colours_;
   TerrainPlan plan_;
   int generation_ = -1; /* of the plan's tiles in tiles_ */
-  std::vector<TileGpu> tiles_;
+  std::vector<std::array<TileGpu, kLevels>> tiles_;
+  /* the levels the last frame draws, with their triangles' index counts */
+  std::vector<LevelKey> drawn_;
+  std::vector<uint32_t> drawn_counts_;
+  /* the previous frame's cost outside its preparing and gathering (ms), the
+     level it drew, and whether its window's submission is still to come;
+     during a drag the latest such cost of a frame at each level (< 0: none) */
+  double outside_ms_ = 0.0;
+  int outside_level_ = -1;
+  bool submission_due_ = false;
+  bool dragging_ = false;
+  double outside_level_ms_[kLevels];
+  int copies_ = 1; /* the copies the QRhi keeps of each buffer */
   std::unique_ptr<QRhiBuffer> uniforms_;
   std::unique_ptr<QRhiShaderResourceBindings> bindings_;
   std::unique_ptr<QRhiGraphicsPipeline> terrain_[2]; /* without and with the depth test */
