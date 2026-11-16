@@ -60,7 +60,8 @@ set(mbview_core
     ${mbview_dir}/mbv_soundings_core.c
     ${mbview_dir}/mbv_globals.c
     ${mbview_dir}/mbv_render.c
-    ${mbview_dir}/mbv_camera.c)
+    ${mbview_dir}/mbv_camera.c
+    ${mbview_dir}/mbv_marks.c)
 
 # static, like the libraries of the other Qt tools: not installed
 add_library(

@@ -31,9 +31,9 @@
  * and B = (i+s,j)(i+s,j+s)(i,j+s), each where its three nodes hold data.
  * In 3D the nearest triangle wins, as with the depth test; in 2D, which is
  * drawn without one, the last triangle drawn. Blocks of 16 x 16 cells with
- * their bounds in display coordinates keep the search short. The bounds are
- * found again for every call, because the core does not yet mark what has
- * changed.
+ * their bounds in display coordinates keep the search short; they are kept
+ * between calls and built again only when the core's change marks say the
+ * terrain changed (mbv_marks.h).
  *
  * The pick works at full resolution and returns the centroid of the triangle
  * seen, with the formula of mbview_findpointrez(). The drawing pick narrows a
@@ -310,6 +310,65 @@ static bool mbvq_pick_mesh_init(size_t instance, int stride, int ilimit, int jli
 	return true;
 }
 /*------------------------------------------------------------------------------*/
+/* The meshes are kept between calls and built again only when the core says the
+   terrain changed (mbv_marks.h): the positions of the nodes, which nodes hold
+   data, or the version of the whole grid's blocks, which rises when single
+   cells were edited. Two per view: the full-resolution mesh of the pick and
+   the low-resolution one of the view bounds. */
+struct mbvq_pick_cache {
+	bool valid;
+	struct mbvq_pick_mesh mesh;
+	uint64_t position;
+	uint64_t mask;
+	uint64_t nodes;
+	int stride;
+	int ilimit;
+	int jlimit;
+	bool zscale;
+};
+
+#define MBVQ_PICK_CACHE_PICK 0
+#define MBVQ_PICK_CACHE_BOUNDS 1
+#define MBVQ_PICK_CACHE_KINDS 2
+
+static struct mbvq_pick_cache mbvq_pick_cache[MBV_MAX_WINDOWS][MBVQ_PICK_CACHE_KINDS];
+
+/* the mesh of a view, built if the terrain changed since it was last built;
+   NULL if it cannot be built */
+static struct mbvq_pick_mesh *mbvq_pick_mesh_get(size_t instance, int kind, int stride, int ilimit, int jlimit,
+                                                 bool zscale) {
+	if (instance >= MBV_MAX_WINDOWS)
+		return (NULL);
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+	struct mbvq_pick_cache *cache = &mbvq_pick_cache[instance][kind];
+
+	const uint64_t position = mbv_marks_getposition(&view->marks);
+	const uint64_t mask = mbv_marks_getmask(&view->marks);
+	const uint64_t nodes =
+	    mbv_marks_nodesversion(&view->marks, 0, data->primary_n_columns - 1, 0, data->primary_n_rows - 1);
+	if (cache->valid && cache->position == position && cache->mask == mask && cache->nodes == nodes &&
+	    cache->stride == stride && cache->ilimit == ilimit && cache->jlimit == jlimit && cache->zscale == zscale)
+		return (&cache->mesh);
+
+	if (cache->valid) {
+		mbvq_pick_mesh_free(&cache->mesh);
+		cache->valid = false;
+	}
+	if (!mbvq_pick_mesh_init(instance, stride, ilimit, jlimit, zscale, &cache->mesh))
+		return (NULL);
+	cache->valid = true;
+	cache->position = position;
+	cache->mask = mask;
+	cache->nodes = nodes;
+	cache->stride = stride;
+	cache->ilimit = ilimit;
+	cache->jlimit = jlimit;
+	cache->zscale = zscale;
+	return (&cache->mesh);
+}
+
+/*------------------------------------------------------------------------------*/
 /* keep a triangle met by the ray if it is the one the drawing shows: the
    nearest in 3D (depth test GL_LESS, so the first drawn of equal depths),
    the last drawn in 2D (no depth test) */
@@ -419,13 +478,13 @@ bool mbvq_pick_cpu_terrain(size_t instance, int xpixel, int ypixel, double *xgri
 	double inverse[16];
 	double origin[3];
 	double direction[3];
-	struct mbvq_pick_mesh mesh;
+	struct mbvq_pick_mesh *mesh = NULL;
 	struct mbvq_pick_hit hit;
 	if (mbvq_pick_camera(instance, inverse) &&
 	    mbvq_pick_ray(inverse, data->width, data->height, xpixel, ypixel, origin, direction) &&
-	    mbvq_pick_mesh_init(instance, 1, data->primary_n_columns - 1, data->primary_n_rows - 1, true, &mesh)) {
-		mbvq_pick_search(&mesh, origin, direction, data->display_mode != MBV_DISPLAY_2D, &hit);
-		mbvq_pick_mesh_free(&mesh);
+	    (mesh = mbvq_pick_mesh_get(instance, MBVQ_PICK_CACHE_PICK, 1, data->primary_n_columns - 1,
+	                               data->primary_n_rows - 1, true)) != NULL) {
+		mbvq_pick_search(mesh, origin, direction, data->display_mode != MBV_DISPLAY_2D, &hit);
 
 		/* its centroid, as mbview_findpointrez() computes it at full resolution */
 		if (hit.found) {
@@ -491,10 +550,10 @@ void mbvq_pick_cpu_viewbounds(size_t instance, int viewbounds[4]) {
 	/* the block of the triangle seen at the pixels that mbview_viewbounds()
 	   reads: every 20th of the width and height, then the four corners */
 	double inverse[16];
-	struct mbvq_pick_mesh mesh;
+	struct mbvq_pick_mesh *mesh = NULL;
 	if (mbvq_pick_camera(instance, inverse) &&
-	    mbvq_pick_mesh_init(instance, stride, data->primary_n_columns - stride, data->primary_n_rows - stride, false,
-	                        &mesh)) {
+	    (mesh = mbvq_pick_mesh_get(instance, MBVQ_PICK_CACHE_BOUNDS, stride, data->primary_n_columns - stride,
+	                               data->primary_n_rows - stride, false)) != NULL) {
 		const int iscreenstride = data->width / 20;
 		const int jscreenstride = data->height / 20;
 		for (int xpixel = 0; iscreenstride > 0 && xpixel < data->width; xpixel += iscreenstride) {
@@ -504,7 +563,7 @@ void mbvq_pick_cpu_viewbounds(size_t instance, int viewbounds[4]) {
 				struct mbvq_pick_hit hit;
 				if (!mbvq_pick_ray(inverse, data->width, data->height, xpixel, ypixel, origin, direction))
 					continue;
-				mbvq_pick_search(&mesh, origin, direction, data->display_mode != MBV_DISPLAY_2D, &hit);
+				mbvq_pick_search(mesh, origin, direction, data->display_mode != MBV_DISPLAY_2D, &hit);
 				if (hit.found) {
 					const int i = ipickstride * (hit.i / ipickstride);
 					const int j = jpickstride * (hit.j / jpickstride);
@@ -531,7 +590,7 @@ void mbvq_pick_cpu_viewbounds(size_t instance, int viewbounds[4]) {
 				struct mbvq_pick_hit hit;
 				if (!mbvq_pick_ray(inverse, data->width, data->height, xpixel, ypixel, origin, direction))
 					continue;
-				mbvq_pick_search(&mesh, origin, direction, data->display_mode != MBV_DISPLAY_2D, &hit);
+				mbvq_pick_search(mesh, origin, direction, data->display_mode != MBV_DISPLAY_2D, &hit);
 				if (hit.found) {
 					int ijbounds[4];
 					const int i = ipickstride * (hit.i / ipickstride);
@@ -562,7 +621,6 @@ void mbvq_pick_cpu_viewbounds(size_t instance, int viewbounds[4]) {
 				}
 			}
 		}
-		mbvq_pick_mesh_free(&mesh);
 	}
 	viewbounds[0] = MAX(viewbounds[0] - stride, 0);
 	viewbounds[1] = MIN(viewbounds[1] + stride, data->primary_n_columns - 1);

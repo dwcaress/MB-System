@@ -179,6 +179,13 @@ int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_pro
 	/* reset histogram flag */
 	view->secondary_histogram_set = false;
 
+	/* the secondary grid decides the colours in secondary and overlay mode, and
+	   in secondary grid mode also which triangles are drawn (mbv_marks.h). This
+	   function does not clear the colours of the nodes, so the mark is the only
+	   notice a user of the arrays gets. */
+	mbv_marks_color(&view->marks);
+	mbv_marks_mask(&view->marks);
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -234,6 +241,10 @@ int mbview_updatesecondarygrid(int verbose, size_t instance, int secondary_n_col
 	/* reset histogram flag */
 	view->secondary_histogram_set = false;
 
+	/* in secondary grid mode the no-data pattern of this grid decides which
+	   triangles are drawn (mbv_marks.h); the clear above raised the colours */
+	mbv_marks_mask(&view->marks);
+
 	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -269,7 +280,15 @@ int mbview_updatesecondarygridcell(int verbose, size_t instance, int secondary_i
 	if (secondary_ix >= 0 && secondary_ix < data->secondary_n_columns && secondary_jy >= 0 && secondary_jy < data->secondary_n_rows) {
 		/* update the cell value */
 		const int k = secondary_ix * data->secondary_n_rows + secondary_jy;
+		const bool was_nodata = data->secondary_data[k] == data->secondary_nodatavalue;
 		data->secondary_data[k] = value;
+
+		/* tell users of the node arrays (mbv_marks.h). The node keeps the colour
+		   it already has, as before this change: this function clears no status
+		   bit, so the drawing does not recolour it. */
+		mbv_marks_nodes(&view->marks, secondary_ix, secondary_ix, secondary_jy, secondary_jy);
+		if (was_nodata != (value == data->secondary_nodatavalue))
+			mbv_marks_mask(&view->marks);
 	}
 
 	const int status = MB_SUCCESS;
@@ -320,6 +339,9 @@ int mbview_setsecondarycolortable(int verbose, size_t instance, int secondary_co
 
 	/* set secondary color control widgets */
 	mbv_ui_secondary_colortable_changed(instance);
+
+	/* this table and the overlay shading colour every node (mbv_marks.h) */
+	mbv_marks_color(&view->marks);
 
 	const int status = MB_SUCCESS;
 

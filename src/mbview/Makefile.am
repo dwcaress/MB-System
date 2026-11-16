@@ -49,6 +49,7 @@ libmbview_la_SOURCES += mbpingedit_callbacks.c
 libmbview_la_SOURCES += mbv_render.c
 libmbview_la_SOURCES += mbv_render_glx.c
 libmbview_la_SOURCES += mbv_camera.c
+libmbview_la_SOURCES += mbv_marks.c
 libmbview_la_SOURCES += mbv_globals.c
 libmbview_la_SOURCES += mbv_ui_motif.c
 libmbview_la_SOURCES += mbv_core.c

@@ -201,6 +201,11 @@ int mbvq_c_open(int verbose, size_t instance, int *error) {
 			data->contour_interval = pow(10.0, floor(log10(data->primary_max - data->primary_min)) - 1.0);
 	}
 
+	/* these colour bounds are written after the mbview_colorclear above, so the
+	   colours of every node depend on them: raise the colour mark after them
+	   (mbv_marks.h) */
+	mbv_marks_color(&view->marks);
+
 	/* set about version label */
 	mb_path value_text;
 	snprintf(value_text, sizeof(value_text), "::#TimesMedium14:t\"MB-System Release %s\"#TimesMedium14\"%s\"", MB_VERSION,

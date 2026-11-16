@@ -29,6 +29,9 @@
 #ifndef MBVIEW_MBVIEW_H_
 #define MBVIEW_MBVIEW_H_
 
+/* the change marks of a view are counters wide enough never to wrap */
+#include <stdint.h>
+
 #ifndef MB_STATUS_DEF
 #include "mb_status.h"
 #endif
@@ -854,6 +857,21 @@ int mbview_init(int verbose, size_t *instance, int *error);
 int mbview_quit(int verbose, int *error);
 int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datahandle, int *error);
 int mbview_getsharedptr(int verbose, struct mbview_shareddata_struct **sharedhandle, int *error);
+/* what changed in a view's terrain, for a user that keeps its own copy of the
+   node arrays or caches picks: four counters that only rise. Keep the values
+   last seen and compare; reading changes nothing. A raised counter means the
+   values must be prepared again (mbview_prepare_nodes) and read again, never
+   that they are ready. Written in src/mbview/mbv_marks.h. */
+int mbview_getmarks(int verbose, size_t instance, uint64_t *position, uint64_t *color, uint64_t *mask, uint64_t *drawn,
+                    int *error);
+/* the version of a range of nodes, ends included: it rises when single cells
+   of that range changed, as while editing */
+int mbview_getnodeversion(int verbose, size_t instance, int i0, int i1, int j0, int j1, uint64_t *version, int *error);
+/* the block grid the node versions are kept in, for a user sizing its cache */
+int mbview_getmarkblocks(int verbose, size_t instance, int *block_nodes, int *nblock_i, int *nblock_j, int *error);
+/* scale the z and compute the colours of a range of nodes, as the drawing does
+   for what it draws, without any OpenGL call */
+int mbview_prepare_nodes(int verbose, size_t instance, int i0, int i1, int j0, int j1, int stride, int *error);
 int mbview_setwindowparms(int verbose, size_t instance, int (*mbview_dismiss_notify)(size_t), char *title, int xo, int yo,
                           int width, int height, int lorez_dimension, int hirez_dimension, int lorez_navdecimate,
                           int hirez_navdecimate, int *error);
