@@ -603,7 +603,7 @@ What works:
 
 Known limitations:
 
-- The tilesets have been checked in X3DOM only; they have not been validated with `3d-tiles-validator` or loaded in CesiumJS.
+- The tilesets are validated with `3d-tiles-validator` 0.6.1 (no errors or warnings, though it cannot look inside Draco), load in X3DOM, and load in CesiumJS 1.114 through `mbglb2tiles --cesium-html`; that was tried on a small test tileset in headless Chrome, not on a large survey.
 - The coarser levels of a tileset come from clustering the finished mesh (`mbglb2tiles`), not from reconstructing again from decimated points; `mbmesh --tileset` writes only the finest level. `mbglb2tiles` holds the whole mesh in memory (about 12 GB at its peak for a mesh of 38 million vertices, with the weld taking about 5 minutes and the first clustering about 2.4), so there is no out-of-core path from the chunk files.
 - A tileset has one frame, at its center, for all its tiles; a survey large enough that the Earth's curvature matters across it would need a frame for each tile.
 - The height colors are one table with the heights of the survey; there is no other colormap for a tileset, and no color from the data (backscatter, for example). The page's checkbox reaches the tiles through X3DOM's internal nodes, so a new X3DOM could break it.

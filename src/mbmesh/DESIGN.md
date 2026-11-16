@@ -88,7 +88,7 @@ tileset/L1/…  Ln/…
   `--lift=<meters>`. The lift is written as `liftMeters` in the extras; the pages lift their other models and viewpoints by it, and Copy GeoViewpoint takes it off.
 - **Screen-space error.** The page sets the `GeoTileset` `maximumScreenSpaceError` to 1 pixel (`--sse` in `mbglb2tiles`); X3DOM's default of 8 refines
   tiles of centimeter errors only within a few meters.
-- **Colors.** Every tile vertex has a `COLOR_0` (bytes, Draco-compressed) from the Haxby table over the heights of the whole survey, so all tiles
+- **Colors.** Every tile vertex has a `COLOR_0` (floats from 0 to 1 quantized to 10 bits in Draco, since CesiumJS decodes Draco colors of bytes wrongly; bytes without Draco) from the Haxby table over the heights of the whole survey, so all tiles
   and levels agree, with a white base color so the colors show unchanged (`--no-colors` writes tiles as before). The bounds are recorded as
   `heightColors` in the extras.
 
@@ -136,6 +136,7 @@ CMake builds everything (`mbdraco`, `mbgrd2gltf`, `mbmesh`, `mbglb2tiles`). The 
   primitives), `mbglb2tiles` levels; plus `mbmesh_test.py`, which runs the program.
 - **3D Tiles validator.** `3d-tiles-validator` 0.6.1 reports no errors and no warnings on a one-tile tileset and on the multi-level lidar (380 tiles)
   and multibeam (301 tiles) tilesets of OceanImaging2018 20180925d1; it cannot look inside Draco, and says so.
+- **CesiumJS.** `mbglb2tiles --cesium-html` pages load the tilesets in CesiumJS 1.114; colors, the scale axes, the viewpoints and their copy button were checked in headless Chrome on a small tileset.
 - **X3DOM.** The tilesets load in `GeoTileset`; finer levels load as the camera approaches (with `--lift` and a screen-space error of 1); the color
   checkbox was exercised in headless Chrome and by hand on the survey page.
 - **Products overlay.** `mbmesh` and `mbgrd2gltf` products with the same GeoOrigin line up.
