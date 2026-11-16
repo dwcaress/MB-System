@@ -123,6 +123,15 @@ int main(int argc, char **argv) {
   const auto spins = window.findChildren<QDoubleSpinBox *>();  // depth, amplitude, across-track, replay rate
   CHECK(view != nullptr && slider != nullptr && spins.size() == 6);
 
+  /* the swath is drawn with QRhi where it is built, unless MB_RENDERER=legacy-gl asks for OpenGL */
+#if defined(MBWCD_HAVE_RHI) && defined(MBWCD_HAVE_GL)
+  CHECK(view->usesRhi() == (qgetenv("MB_RENDERER") != "legacy-gl"));
+#elif defined(MBWCD_HAVE_RHI)
+  CHECK(view->usesRhi());
+#else
+  CHECK(!view->usesRhi());
+#endif
+
   /* nothing open */
   CHECK(window.windowTitle().startsWith("mbwcdview"));
   CHECK(status->currentMessage() == "Ready");
@@ -154,6 +163,19 @@ int main(int argc, char **argv) {
   CHECK(has_label(window, name));
   CHECK(has_label(window, QString("0 / %1").arg(last)));
   CHECK(!view->plot().data().across.empty());
+  {
+    /* the fill value is no data only before the first echo of a beam: synth_kmall starts every
+       beam with 2 fill samples (NFILL) and puts one more at sample 12 of beam 1 (INNER_FILL),
+       which is drawn with the lowest colour */
+    const wcd::PlotData &d = view->plot().data();
+    bool leading = d.nbeams > 1 && d.nsamples > 12;
+    for (int b = 0; leading && b < d.nbeams; b++)
+      leading = !std::isfinite(d.amplitude[(size_t)b * d.nsamples]) &&
+                !std::isfinite(d.amplitude[(size_t)b * d.nsamples + 1]) &&
+                std::isfinite(d.amplitude[(size_t)b * d.nsamples + 2]);
+    CHECK(leading);
+    CHECK(d.nsamples > 12 && std::fabs(d.amplitude[(size_t)d.nsamples + 12] + 94.0f) < 0.01f);
+  }
   CHECK(box(window, "Ray trace (SVP)")->isEnabled() && box(window, "Ray trace (SVP)")->isChecked());
   CHECK(spins[2]->value() == spins[2]->minimum() && spins[3]->value() == spins[3]->maximum());
   CHECK(spins[0]->value() == 0.0 && spins[1]->value() > 0.0);

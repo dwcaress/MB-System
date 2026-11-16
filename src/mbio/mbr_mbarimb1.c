@@ -542,7 +542,17 @@ int mbr_wt_mbarimb1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     if (*bufferalloc < write_len) {
       status = mb_reallocd(verbose, __FILE__, __LINE__, write_len, (void **)bufferptr, error);
       if (status != MB_SUCCESS) {
-        *bufferalloc = 0;
+        /* the buffer could not be enlarged: keep the old buffer, which realloc()
+           leaves allocated, and do not write the record */
+        *bufferptr = buffer;
+        if (verbose >= 2) {
+          fprintf(stderr, "\ndbg2  MBIO function <%s> terminated with error\n", __func__);
+          fprintf(stderr, "dbg2  Return values:\n");
+          fprintf(stderr, "dbg2       error:      %d\n", *error);
+          fprintf(stderr, "dbg2  Return status:\n");
+          fprintf(stderr, "dbg2       status:  %d\n", status);
+        }
+        return (status);
       }
       else {
         buffer = (char *)*bufferptr;

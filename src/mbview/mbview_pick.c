@@ -388,6 +388,9 @@ int mbview_extract_pick_profile(size_t instance) {
 		data->profile.source = MBV_PROFILE_TWOPOINT;
 		strcpy(data->profile.source_name, "Two point pick");
 		data->profile.length = data->pick.range;
+		/* a pick within one grid cell has no draped points: use its two ends */
+		const struct mbview_point_struct *lspoints =
+		    data->pick.segment.nls >= 2 ? data->pick.segment.lspoints : data->pick.segment.endpoints;
 		const int npoints = MAX(2, data->pick.segment.nls);
 		if (data->profile.npoints_alloc < npoints) {
 			int error = MB_ERROR_NO_ERROR;
@@ -399,17 +402,17 @@ int mbview_extract_pick_profile(size_t instance) {
 				data->profile.npoints_alloc = 0;
 			}
 		}
-		if (npoints > 2 && data->profile.npoints_alloc >= npoints) {
+		if (data->profile.npoints_alloc >= npoints) {
 			/* get the profile data */
 			for (int i = 0; i < npoints; i++) {
 				data->profile.points[i].boundary = false;
-				data->profile.points[i].xgrid = data->pick.segment.lspoints[i].xgrid;
-				data->profile.points[i].ygrid = data->pick.segment.lspoints[i].ygrid;
-				data->profile.points[i].xlon = data->pick.segment.lspoints[i].xlon;
-				data->profile.points[i].ylat = data->pick.segment.lspoints[i].ylat;
-				data->profile.points[i].zdata = data->pick.segment.lspoints[i].zdata;
-				data->profile.points[i].xdisplay = data->pick.segment.lspoints[i].xdisplay;
-				data->profile.points[i].ydisplay = data->pick.segment.lspoints[i].ydisplay;
+				data->profile.points[i].xgrid = lspoints[i].xgrid;
+				data->profile.points[i].ygrid = lspoints[i].ygrid;
+				data->profile.points[i].xlon = lspoints[i].xlon;
+				data->profile.points[i].ylat = lspoints[i].ylat;
+				data->profile.points[i].zdata = lspoints[i].zdata;
+				data->profile.points[i].xdisplay = lspoints[i].xdisplay;
+				data->profile.points[i].ydisplay = lspoints[i].ydisplay;
 				if (i == 0) {
 					data->profile.zmin = data->profile.points[i].zdata;
 					data->profile.zmax = data->profile.points[i].zdata;
@@ -450,9 +453,23 @@ int mbview_extract_pick_profile(size_t instance) {
 				data->profile.points[i].navzdata = 0.0;
 				data->profile.points[i].navtime_d = 0.0;
 			}
+			/* slope of the first point: forward difference, as in mbview_extract_nav_profile() */
+			const double dy = (data->profile.points[1].zdata - data->profile.points[0].zdata);
+			const double dx = (data->profile.points[1].distance - data->profile.points[0].distance);
+			if (dx > 0.0)
+				data->profile.points[0].slope = fabs(dy / dx);
+			else
+				data->profile.points[0].slope = 0.0;
 			data->profile.points[0].boundary = true;
 			data->profile.points[npoints - 1].boundary = true;
 			data->profile.npoints = npoints;
+
+			/* leave out the points without grid data, mark the gaps */
+			mbview_profile_markgaps(instance);
+		}
+		else {
+			/* do not keep the points of an earlier profile */
+			data->profile.npoints = 0;
 		}
 	}
 

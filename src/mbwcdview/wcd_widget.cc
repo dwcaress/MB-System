@@ -420,7 +420,7 @@ void WaterColumnWidget::finishOpen(const QString &path, Line line, bool ok, cons
     showStatus(line_.has_survey ? "No water column data found."
                                 : QString("Cannot read %1: %2").arg(file_label_, QString::fromStdString(message)));
     view_->plot().setData(wcd::PlotData());
-    view_->update();
+    view_->redraw();
     emit fileOpenFailed(path);
     return;
   }
@@ -484,7 +484,7 @@ void WaterColumnWidget::updatePlotSettings() {
   plot.setColorRange(amin_->value(), amax_->value());
   plot.setDepthWindow(dmin_->value(), dmax_->value());
   plot.setAcrossMax(xmax_->value());
-  view_->update();
+  view_->redraw();
 }
 
 void WaterColumnWidget::redraw() {
@@ -500,7 +500,7 @@ void WaterColumnWidget::redraw() {
   wcd::SceneInfo info;
   wcd::build_scene(line_, ping, swath, options, data, info);
   view_->plot().setData(std::move(data));
-  view_->update();
+  view_->redraw();
   meta_->setText(wcd::metadata_text(line_, ping, swath));
   if (presentation_ == Presentation::Panel)
     meta_->setToolTip(file_label_ + "\n" + meta_->text());

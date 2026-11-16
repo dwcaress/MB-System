@@ -24,60 +24,48 @@
 
 #include "WcdView.h"
 
-#include <vector>
+#include <QVBoxLayout>
 
-#include <QMouseEvent>
-#include <QOpenGLContext>
-#include <QOpenGLFunctions>
-#include <QPainter>
+#ifdef MBWCD_HAVE_RHI
+#include "wcd_view_rhi.h"
+#endif
+#ifdef MBWCD_HAVE_GL
+#include "wcd_view_gl.h"
+#endif
+
+#if !defined(MBWCD_HAVE_RHI) && !defined(MBWCD_HAVE_GL)
+#error "mbwcdview needs QRhi (MBWCD_HAVE_RHI) or OpenGL (MBWCD_HAVE_GL) to draw the swath"
+#endif
 
 namespace wcd {
 
-WcdView::WcdView(QWidget *parent) : QOpenGLWidget(parent) { setMinimumSize(400, 300); }
-
-WcdView::~WcdView() { releaseGL(); }
-
-/* the GL resources belong to this widget's context */
-void WcdView::releaseGL() {
-  if (gl_ == nullptr)
-    return;
-  makeCurrent();
-  gl_.reset();
-  doneCurrent();
-}
-
-void WcdView::initializeGL() {
-  /* a dock that is floated or docked again moves this widget to a new context: the old resources
-     go with the old context, and the mesh must be sent to the new one */
-  connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &WcdView::releaseGL);
-  gl_ = std::make_unique<wcd::SwathGL>();
-  gl_->init();
-  plot_.requestMesh();
-}
-
-void WcdView::paintGL() {
-  /* the painter must know of the OpenGL calls before it: in a new context it would otherwise draw text as blocks */
-  QPainter painter(this);
-  painter.beginNativePainting();
-  QOpenGLFunctions *f = context()->functions();
-  f->glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-  f->glClear(GL_COLOR_BUFFER_BIT);
-  if (plot_.meshChanged()) {
-    std::vector<float> vertices;
-    std::vector<unsigned int> indices;
-    plot_.buildMesh(vertices, indices);
-    gl_->upload(vertices, indices);
+WcdView::WcdView(QWidget *parent) : QWidget(parent) {
+  setMinimumSize(400, 300);
+  auto *layout = new QVBoxLayout(this);
+  layout->setContentsMargins(0, 0, 0, 0);
+#ifdef MBWCD_HAVE_RHI
+  if (use_rhi()) {
+    auto *view = new RhiSwathView(plot_);
+    connect(view, &RhiSwathView::clicked, this, &WcdView::clicked);
+    drawing_widget_ = view;
+    drawing_ = view;
+    rhi_ = true;
   }
-  plot_.drawGL(*gl_, size(), devicePixelRatioF());
-  painter.endNativePainting();
-  plot_.drawOverlay(painter, size());
+#endif
+#ifdef MBWCD_HAVE_GL
+  if (drawing_ == nullptr) {
+    auto *view = new GlSwathView(plot_);
+    connect(view, &GlSwathView::clicked, this, &WcdView::clicked);
+    drawing_widget_ = view;
+    drawing_ = view;
+  }
+#endif
+  layout->addWidget(drawing_widget_);
 }
 
-void WcdView::mousePressEvent(QMouseEvent *event) {
-  double across, depth;
-  if (event->button() == Qt::LeftButton && plot_.toData(event->position(), size(), across, depth))
-    emit clicked(across, depth);
-  QOpenGLWidget::mousePressEvent(event);
-}
+/* the drawing widget uses the plot: delete it first */
+WcdView::~WcdView() { delete drawing_widget_; }
+
+void WcdView::redraw() { drawing_->redraw(); }
 
 }  // namespace wcd
