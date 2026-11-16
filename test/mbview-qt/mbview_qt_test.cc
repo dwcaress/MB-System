@@ -24,7 +24,8 @@
 /*
  * Test program of the mbview-qt library.
  *
- *   mbview_qt_test --null         checks without drawing (null backend), for ctest
+ *   mbview_qt_test --null         checks without drawing (null backend; picks are
+ *                                 found on the CPU), for ctest
  *   mbview_qt_test --gl [--3d]    draws a synthetic grid with the OpenGL backend,
  *                                 waits for the full resolution drawing and checks
  *                                 picks made with mouse events
@@ -513,10 +514,34 @@ int test_null() {
     always->trigger();
   check(action_calls == 1 && action_instance == instance, "an action calls the program with the instance as client data");
 
-  /* mouse input reaches the core; without drawing no point is found */
+  /* mouse clicks in Pan and Zoom mode pick a point; without drawing, the null
+     backend finds it on the CPU (mbvq_pick_cpu.c). In the 3D display, which
+     takes no position from the pixel when no terrain is found, every click
+     well inside the grid finds the terrain, and the depth is the mean of the
+     three grid nodes of the picked triangle, close to the surface */
   QWidget *view = mbvq::map_view(instance);
-  click(view, QPointF(view->width() / 2.0, view->height() / 2.0));
-  check(true, "mouse events pass through the core without a renderer");
+  view_item("3D Display")->trigger();
+  int found = 0, close = 0;
+  double max_error = 0.0;
+  for (int j = 1; j <= 3; j++)
+    for (int i = 1; i <= 3; i++) {
+      const QPointF position(view->width() * (0.35 + 0.15 * (i - 1)), view->height() * (0.35 + 0.15 * (j - 1)));
+      data->pick_type = MBV_PICK_NONE;
+      click(view, position);
+      spin(50);
+      if (data->pick_type == MBV_PICK_ONEPOINT) {
+        found++;
+        const struct mbview_point_struct &point = data->pick.endpoints[0];
+        const double difference = std::fabs(point.zdata - surface(point.xlon, point.ylat));
+        max_error = std::max(max_error, difference);
+        if (difference < 2.0)
+          close++;
+      }
+    }
+  view_item("Map Display")->trigger();
+  check(found == 9, std::to_string(found) + " of 9 clicks in the 3D display picked a point without drawing");
+  check(close == found && found > 0,
+        "picked depths agree with the surface (largest difference " + std::to_string(max_error) + " m)");
 
   /* the background work runs from the Qt timer without errors */
   spin(1500);

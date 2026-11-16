@@ -32,7 +32,7 @@
 #include "mbv_render.h"
 
 /* the installed renderer; all entries NULL until one is installed */
-static struct mbv_render_ops mbv_render = {NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+static struct mbv_render_ops mbv_render = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 
 /*------------------------------------------------------------------------------*/
 void mbv_render_set_ops(const struct mbv_render_ops *ops) {
@@ -74,5 +74,20 @@ bool mbv_render_defer_draw(int view, size_t instance, int rez) {
 	if (mbv_render.defer_draw != NULL)
 		return mbv_render.defer_draw(view, instance, rez);
 	return false;
+}
+/*------------------------------------------------------------------------------*/
+bool mbv_render_pick_terrain(size_t instance, int xpixel, int ypixel, bool *found, double *xgrid, double *ygrid,
+                             double *zdata) {
+	if (mbv_render.pick_terrain == NULL)
+		return false;
+	*found = mbv_render.pick_terrain(instance, xpixel, ypixel, xgrid, ygrid, zdata);
+	return true;
+}
+/*------------------------------------------------------------------------------*/
+bool mbv_render_view_bounds(size_t instance, int viewbounds[4]) {
+	if (mbv_render.view_bounds == NULL)
+		return false;
+	mbv_render.view_bounds(instance, viewbounds);
+	return true;
 }
 /*------------------------------------------------------------------------------*/

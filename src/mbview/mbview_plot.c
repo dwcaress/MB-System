@@ -1088,6 +1088,24 @@ int mbview_plot(size_t instance, int rez) {
 }
 
 /*------------------------------------------------------------------------------*/
+/* the position at a pixel of the 2D map view, where no terrain was picked */
+static void mbview_findpoint2d(size_t instance, int xpixel, int ypixel, bool *found, double *xgrid, double *ygrid,
+                               double *xlon, double *ylat, double *zdata, double *xdisplay, double *ydisplay,
+                               double *zdisplay) {
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	*xdisplay =
+	    view->left - view->offset2d_x + 2.0 * MBV_OPENGL_WIDTH / view->size2d * ((double)xpixel) / ((double)data->width);
+	*ydisplay = view->bottom - view->offset2d_y +
+	            2.0 * MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d * ((double)ypixel) / ((double)data->height);
+	*zdisplay = 0.0;
+	mbview_projectdisplay2ll(instance, *xdisplay, *ydisplay, *zdisplay, xlon, ylat);
+	mbview_projectll2xyzgrid(instance, *xlon, *ylat, xgrid, ygrid, zdata);
+	*found = true;
+}
+
+/*------------------------------------------------------------------------------*/
 int mbview_findpoint(size_t instance, int xpixel, int ypixel, bool *found, double *xgrid, double *ygrid, double *xlon,
                      double *ylat, double *zdata, double *xdisplay, double *ydisplay, double *zdisplay) {
 	if (mbv_verbose >= 2) {
@@ -1102,8 +1120,28 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel, bool *found, doubl
 	struct mbview_world_struct *view = &(mbviews[instance]);
 	struct mbview_struct *data = &(view->data);
 
+	/* a renderer that picks without drawing needs no drawing context */
+	if (mbv_render_pick_terrain(instance, xpixel, ypixel, found, xgrid, ygrid, zdata)) {
+		if (*found)
+			mbview_projectforward(instance, true, *xgrid, *ygrid, *zdata, xlon, ylat, xdisplay, ydisplay, zdisplay);
+
+		/* if not found and 2D get position directly from pixels */
+		else if (data->display_mode == MBV_DISPLAY_2D)
+			mbview_findpoint2d(instance, xpixel, ypixel, found, xgrid, ygrid, xlon, ylat, zdata, xdisplay, ydisplay,
+			                   zdisplay);
+
+		/* if not found and 3D nothing is picked; zero results as the drawing does */
+		else {
+			*xlon = 0.0;
+			*ylat = 0.0;
+			*xdisplay = 0.0;
+			*ydisplay = 0.0;
+			*zdisplay = 0.0;
+		}
+	}
+
 	/* only plot if this view is still active */
-	if (view->glx_init) {
+	else if (view->glx_init) {
 		/* look for point at low resolution */
 		*found = false;
 		bool foundsave = false;
@@ -1191,14 +1229,8 @@ __FILE__, __LINE__, (char *) __FUNCTION__);*/
 
 		/* if not found and 2D get position directly from pixels */
 		if (!(*found) && data->display_mode == MBV_DISPLAY_2D) {
-			*xdisplay =
-			    view->left - view->offset2d_x + 2.0 * MBV_OPENGL_WIDTH / view->size2d * ((double)xpixel) / ((double)data->width);
-			*ydisplay = view->bottom - view->offset2d_y +
-			            2.0 * MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d * ((double)ypixel) / ((double)data->height);
-			*zdisplay = 0.0;
-			mbview_projectdisplay2ll(instance, *xdisplay, *ydisplay, *zdisplay, xlon, ylat);
-			mbview_projectll2xyzgrid(instance, *xlon, *ylat, xgrid, ygrid, zdata);
-			*found = true;
+			mbview_findpoint2d(instance, xpixel, ypixel, found, xgrid, ygrid, xlon, ylat, zdata, xdisplay, ydisplay,
+			                   zdisplay);
 		}
 
 		/* if not found and 3D use the best pick location found */
@@ -1645,8 +1677,8 @@ int mbview_viewbounds(size_t instance) {
 			data->viewbounds[3] = MIN(data->viewbounds[3] + stride, data->primary_n_rows - 1);
 		}
 
-		/* 3D case requires plotting */
-		else {
+		/* 3D case requires plotting, unless the renderer finds the bounds without drawing */
+		else if (!mbv_render_view_bounds(instance, data->viewbounds)) {
 			/* set projection to 2D or 3D */
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();

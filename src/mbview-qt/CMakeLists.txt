@@ -67,6 +67,7 @@ add_library(
   mbview-qt STATIC
   ${mbview_core}
   mbvq_core.c
+  mbvq_pick_cpu.c
   mbvq_bridge.h
   mbvq_dialogs.cc
   mbvq_dialogs.h
