@@ -73,6 +73,7 @@ extern "C" {
 #include "mb_status.h"
 #include "mbview.h"
 }
+#include "mbv_draw_batch.h"
 #include "mbvq.h"
 #include "mbvq_bridge.h"
 #include "mbvq_dialogs.h"
@@ -453,6 +454,22 @@ int test_null() {
   topolylines->click();
   check(sd->npolyline == 2 && polylines->view()->count() == 4, "Convert Selected to Polylines adds a polyline in a new layer");
 
+  /* the contour segments a view keeps for a renderer that fills batches
+     instead of drawing with OpenGL (mbview_contour_segments): the null
+     backend never draws, so none are kept; a resolution other than low, high
+     or full is refused */
+  {
+    const float *xyz = nullptr;
+    size_t nvertex = 1;
+    uint64_t generation = 0;
+    int status = mbview_contour_segments(0, instance, MBVQ_REZ_FULL, &xyz, &nvertex, &generation, &error);
+    const bool none = status == MB_SUCCESS && error == MB_ERROR_NO_ERROR && xyz == nullptr && nvertex == 0;
+    status = mbview_contour_segments(0, instance, MBVQ_REZ_FULL + 1, &xyz, &nvertex, &generation, &error);
+    check(none && status == MB_FAILURE && error == MB_ERROR_BAD_PARAMETER && xyz == nullptr && nvertex == 0,
+          "a view that kept no contour segments gives none, and an unknown resolution is refused");
+    error = MB_ERROR_NO_ERROR;
+  }
+
   /* Profile window: View > Profile, the sliders and Dismiss */
   view_item("Profile")->trigger();
   mbvq::ProfileWindow *profile = map_window->widget()->profile();
@@ -603,6 +620,74 @@ int test_null() {
   /* the background work runs from the Qt timer without errors */
   spin(1500);
   check(mbvq_c_lastdrawrez(instance) == MBVQ_REZ_NONE, "the null backend draws nothing");
+
+  /* the map as data (src/mbview/mbv_draw_batch.h): with a batch as the target
+     mbview_drawdata() records the map instead of drawing it - here under the
+     null backend, without any OpenGL context, where an OpenGL call would crash
+     on macOS (on Linux and Windows a call without a context does nothing). The
+     plot that fills a renderer's batch first projects the data and finds the
+     view bounds; the null backend never plots, and outside a plot
+     mbview_projectdata() projects the first column of nodes only, so the view
+     bounds are set within that column (the marker sizes are read from the
+     nodes at their corners). No contours were made here, so the batch has no
+     contour slot. The view is in 3D on the spheroid by now (the projection set
+     above), so the markers are spheres and every command carries the depth
+     test. This comes after the check that the null backend draws nothing:
+     mbview_drawdata() records the resolution it drew, as with OpenGL. */
+  {
+    mbview_projectdata(instance);
+    data->viewbounds[0] = 0;
+    data->viewbounds[1] = 0;
+    data->viewbounds[2] = 0;
+    data->viewbounds[3] = data->primary_n_rows - 1;
+    data->site_view_mode = MBV_VIEW_ON;
+    data->route_view_mode = MBV_VIEW_ON;
+    struct mbv_draw_batch batch;
+    mbv_draw_batch_init(&batch);
+    mbv_draw_set_target(&batch);
+    mbview_drawdata(instance, MBVQ_REZ_FULL);
+    const bool target_kept = mbv_draw_get_target() == &batch;
+    mbv_draw_set_target(nullptr);
+    std::vector<int> stream; /* the slots as -1 - slot, the groups as their number */
+    const bool depth = data->display_mode == MBV_DISPLAY_3D || data->display_projection_mode == MBV_PROJECTION_SPHEROID;
+    const int kind = data->display_mode == MBV_DISPLAY_3D ? MBV_DRAW_SHAPE_SPHERE : MBV_DRAW_SHAPE_DISKS;
+    int site_markers = 0, route_markers = 0, shapes = 0, kind_shapes = 0, depth_commands = 0, group = -1;
+    for (int c = 0; c < batch.num_commands; c++) {
+      const struct mbv_draw_command &command = batch.commands[c];
+      depth_commands += command.depth_test == depth ? 1 : 0;
+      if (command.kind == MBV_DRAW_SLOT) {
+        stream.push_back(-1 - command.primitive);
+      } else if (command.kind == MBV_DRAW_GROUP) {
+        group = command.primitive;
+        stream.push_back(group);
+      } else if (command.kind == MBV_DRAW_SHAPE) {
+        shapes++;
+        if (command.primitive >= 0 && command.primitive < batch.num_shapes && batch.shapes[command.primitive].kind == kind)
+          kind_shapes++;
+      } else if (command.kind == MBV_DRAW_MARKERS && group == MBV_DRAW_GROUP_SITE) {
+        site_markers += command.count;
+      } else if (command.kind == MBV_DRAW_MARKERS && group == MBV_DRAW_GROUP_ROUTE) {
+        route_markers += command.count;
+      }
+    }
+    std::vector<int> expected = {-1 - MBV_DRAW_SLOT_TERRAIN};
+    for (int g = MBV_DRAW_GROUP_PICK; g <= MBV_DRAW_GROUP_VECTOR; g++)
+      expected.push_back(g);
+    int sites_active = 0, route_points = 0;
+    for (int i = 0; i < sd->nsite; i++)
+      sites_active += sd->sites[i].active ? 1 : 0;
+    for (int r = 0; r < sd->nroute; r++)
+      route_points += sd->routes[r].active ? sd->routes[r].npoints : 0;
+    check(target_kept && !batch.failed && stream == expected && depth_commands == batch.num_commands,
+          "the map's batch holds the terrain slot and the eleven overlay groups in their order, with the depth test of "
+          "the display");
+    check(sites_active > 0 && route_points > 0 && site_markers == sites_active && route_markers == route_points &&
+              shapes == 4 && kind_shapes == 4,
+          "the sites and the route points are markers of four shapes of the display's kind (" +
+              std::to_string(site_markers) + " and " + std::to_string(route_markers) + " markers, " +
+              std::string(kind == MBV_DRAW_SHAPE_SPHERE ? "spheres" : "disks") + ")");
+    mbv_draw_batch_free(&batch);
+  }
 
   /* Dismiss menu, as in Motif: mbview_destroy() closes the instance */
   mouse_action(window, QStringLiteral("Dismiss"))->trigger();

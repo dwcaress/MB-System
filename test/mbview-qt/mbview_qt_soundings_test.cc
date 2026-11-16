@@ -79,6 +79,9 @@ extern "C" {
 extern "C" void mb3dsoundings_setviewtoggle(int toggle, bool state);
 constexpr int kViewToggleBoundingBox = 2; /* MBS_VIEWTOGGLE_BOUNDINGBOX */
 constexpr int kViewToggleFlagged = 0;     /* MBS_VIEWTOGGLE_FLAGGED */
+extern "C" void mb3dsoundings_setcolor(int mode);
+constexpr int kViewColorFlag = 0; /* MBS_VIEW_COLOR_FLAG */
+constexpr int kViewColorTopo = 1; /* MBS_VIEW_COLOR_TOPO */
 
 namespace {
 
@@ -358,6 +361,45 @@ int test_null() {
     check(colors_status == MB_FAILURE && error == MB_ERROR_BAD_PARAMETER && n == count && small[0] == 7,
           "a buffer for fewer soundings than there are is refused");
 
+    /* colours become bytes by rounding the exact product with 255 to nearest,
+       so the grey table's 0.7 and 0.9 give 178 and 229, the bytes Apple's
+       OpenGL writes (lroundf of the float product gives 179 and 230) */
+    {
+      size_t k = 0;
+      while (k < storage.size() && !mb_beam_ok(storage[k].beamflag))
+        k++;
+      bool exact = false;
+      std::string bytes = "no unflagged sounding";
+      if (k < storage.size()) {
+        const float saved[3] = {storage[k].r, storage[k].g, storage[k].b};
+        storage[k].r = 0.7f;
+        storage[k].g = 0.9f;
+        storage[k].b = 0.5f;
+        mb3dsoundings_setcolor(kViewColorTopo);
+        mb3dsoundings_colors(0, count, rgba.data(), &n, &error);
+        const unsigned char *c = &rgba[4 * k];
+        exact = c[0] == 178 && c[1] == 229 && c[2] == 128 && c[3] == 255;
+        bytes = std::to_string(c[0]) + ", " + std::to_string(c[1]) + ", " + std::to_string(c[2]);
+        mb3dsoundings_setcolor(kViewColorFlag);
+        storage[k].r = saved[0];
+        storage[k].g = saved[1];
+        storage[k].b = saved[2];
+      }
+      check(exact, "colours 0.7, 0.9 and 0.5 become the exactly rounded bytes (" + bytes + ")");
+    }
+
+    /* setting the colour modes above raised the colour mark, and only it; the
+       marks after it are the base of the next check */
+    {
+      uint64_t position_c = 0, color_c = 0, mask_c = 0;
+      mb3dsoundings_getmarks(0, &position_c, &color_c, &mask_c, &error);
+      check(color_c > color && position_c == position && mask_c == mask,
+            "setting the colour mode raises the colour mark only");
+      position = position_c;
+      color = color_c;
+      mask = mask_c;
+    }
+
     /* hiding the flagged soundings raises only the colour mark, and exactly
        those soundings get alpha 0 */
     mb3dsoundings_setviewtoggle(kViewToggleFlagged, false);
@@ -448,7 +490,8 @@ int test_null() {
 
   /* the drawing as data (src/mbview/mbv_draw_batch.h): with a batch as the
      target the view is recorded, not drawn - here without any OpenGL context,
-     so a single OpenGL call would fail. The view shows the bounding box (its
+     where an OpenGL call would crash on macOS (on Linux and Windows a call
+     without a context does nothing). The view shows the bounding box (its
      six faces as stippled line loops, black, with the depth test) and the
      soundings, whose points are a slot between them. */
   {
@@ -467,8 +510,7 @@ int test_null() {
         loops++;
         bool ok = command.count == 4 && command.stipple && command.depth_test && command.camera;
         for (int v = command.first; ok && v < command.first + command.count; v++)
-          ok = batch.vertices[v].rgba[0] == 0 && batch.vertices[v].rgba[1] == 0 && batch.vertices[v].rgba[2] == 0 &&
-               batch.vertices[v].rgba[3] == 255;
+          ok = batch.vertices[v].r == 0.0f && batch.vertices[v].g == 0.0f && batch.vertices[v].b == 0.0f;
         loops_ok += ok ? 1 : 0;
       } else {
         other++;
@@ -494,9 +536,64 @@ int test_null() {
     mbv_draw_batch_vertex3f(&batch, 1.0f, 1.0f, 0.0f);
     mbv_draw_batch_end(&batch);
     check(batch.num_commands == 1 && batch.num_vertices == 2 && batch.commands[0].primitive == MBV_DRAW_LINE_STRIP &&
-              batch.commands[0].line_width == 1.0f && batch.vertices[0].rgba[0] == 255 &&
-              batch.vertices[0].rgba[1] == 128 && batch.vertices[0].rgba[2] == 0,
-          "the recorder keeps OpenGL's rules (colour 1, 0.5, 0 recorded as 255, 128, 0)");
+              batch.commands[0].line_width == 1.0f && batch.vertices[0].r == 1.0f &&
+              batch.vertices[0].g == 0.5f && batch.vertices[0].b == 0.0f,
+          "the recorder keeps OpenGL's rules and the colour as given (1, 0.5, 0)");
+
+    /* a line width or point size of 0 or less is an error in OpenGL, which
+       keeps the one it has */
+    mbv_draw_batch_line_width(&batch, 0.0f);
+    mbv_draw_batch_point_size(&batch, -2.0f);
+    mbv_draw_batch_begin(&batch, MBV_DRAW_POINTS);
+    mbv_draw_batch_vertex3f(&batch, 0.0f, 0.0f, 0.0f);
+    mbv_draw_batch_end(&batch);
+    check(batch.num_commands == 2 && batch.commands[1].line_width == 1.0f && batch.commands[1].point_size == 1.0f,
+          "a line width or point size of 0 or less is ignored, as OpenGL ignores it");
+
+    /* the map's markers: a shape is recorded where its display list is
+       defined, which changes nothing; a marker takes the current colour and
+       joins the run of the marker before it; a disk marker leaves the ring
+       colour current, as its display list does; a marker of a list with no
+       shape draws nothing */
+    mbv_draw_batch_clear(&batch);
+    mbv_draw_batch_marker(&batch, 40, 1.0f, 2.0f, 3.0f);
+    const bool nothing_without_shape = batch.num_commands == 0 && batch.num_instances == 0;
+    mbv_draw_batch_color3f(&batch, 1.0f, 0.0f, 0.0f);
+    mbv_draw_batch_marker_disks(&batch, 40, 2.0, 1.6, 10, 4, 0.0f, 0.0f, 0.0f);
+    const bool shape_keeps_colour = batch.color[0] == 1.0f && batch.color[1] == 0.0f && batch.color[2] == 0.0f;
+    mbv_draw_batch_marker(&batch, 40, 1.0f, 2.0f, 3.0f);
+    mbv_draw_batch_marker(&batch, 40, 4.0f, 5.0f, 6.0f);
+    mbv_draw_batch_marker_sphere(&batch, 41, 0.5, 10, 8);
+    mbv_draw_batch_color3f(&batch, 0.0f, 0.0f, 1.0f);
+    mbv_draw_batch_marker(&batch, 41, 7.0f, 8.0f, 9.0f);
+    mbv_draw_batch_group(&batch, MBV_DRAW_GROUP_VECTOR);
+    const struct mbv_draw_command *cmd = batch.commands;
+    check(nothing_without_shape && shape_keeps_colour && batch.num_commands == 5 && batch.num_shapes == 2 &&
+              batch.num_instances == 3 && cmd[0].kind == MBV_DRAW_SHAPE && cmd[1].kind == MBV_DRAW_MARKERS &&
+              cmd[1].primitive == 0 && cmd[1].first == 0 && cmd[1].count == 2 && cmd[2].kind == MBV_DRAW_SHAPE &&
+              cmd[3].kind == MBV_DRAW_MARKERS && cmd[3].primitive == 1 && cmd[3].first == 2 && cmd[3].count == 1 &&
+              cmd[4].kind == MBV_DRAW_GROUP && cmd[4].primitive == MBV_DRAW_GROUP_VECTOR,
+          "markers are recorded as their shapes where they are defined and as runs of markers, in drawing order");
+    const struct mbv_draw_instance *in = batch.instances;
+    const struct mbv_draw_shape *sh = batch.shapes;
+    check(batch.num_instances == 3 && batch.num_shapes == 2 && in[0].r == 1.0f && in[0].g == 0.0f && in[0].b == 0.0f &&
+              in[1].r == 0.0f && in[1].g == 0.0f && in[1].b == 0.0f && in[1].x == 4.0f && in[1].y == 5.0f &&
+              in[1].z == 6.0f && in[2].b == 1.0f && sh[0].kind == MBV_DRAW_SHAPE_DISKS && sh[0].list == 40 &&
+              sh[0].outer == 2.0 && sh[0].inner == 1.6 && sh[0].slices == 10 && sh[0].ring_slices == 4 &&
+              sh[1].kind == MBV_DRAW_SHAPE_SPHERE && sh[1].list == 41 && sh[1].outer == 0.5 && sh[1].slices == 10 &&
+              sh[1].stacks == 8,
+          "a marker takes the current colour and a disk marker leaves its ring colour current, as OpenGL does");
+    mbv_draw_batch_line_width(&batch, 3.0f);
+    const int before = batch.num_commands;
+    mbv_draw_batch_slot(&batch, MBV_DRAW_SLOT_CONTOURS_FULL);
+    check(batch.num_commands == before + 1 && batch.commands[before].kind == MBV_DRAW_SLOT &&
+              batch.commands[before].primitive == MBV_DRAW_SLOT_CONTOURS_FULL &&
+              batch.commands[before].line_width == 3.0f && batch.color[0] == 0.0f && batch.color[1] == 0.0f &&
+              batch.color[2] == 0.0f && batch.line_width == 1.0f,
+          "a contour slot is recorded and leaves black and a line width of 1 current, as the contour display list does");
+    mbv_draw_batch_clear(&batch);
+    check(batch.num_commands == 0 && batch.num_shapes == 0 && batch.num_instances == 0,
+          "clearing the batch empties its shapes and markers too");
     mbv_draw_batch_free(&batch);
   }
 

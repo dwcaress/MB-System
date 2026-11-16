@@ -872,6 +872,20 @@ int mbview_getmarkblocks(int verbose, size_t instance, int *block_nodes, int *nb
 /* scale the z and compute the colours of a range of nodes, as the drawing does
    for what it draws, without any OpenGL call */
 int mbview_prepare_nodes(int verbose, size_t instance, int i0, int i1, int j0, int j1, int stride, int *error);
+/* the contour segments a renderer draws where a batch (mbv_draw.h) has the
+   contour slot of a resolution: rez MBV_REZ_LOW, MBV_REZ_HIGH or MBV_REZ_FULL
+   (1, 2, 3 in mbviewprivate.h) for MBV_DRAW_SLOT_CONTOURS_LOW, _HIGH or _FULL
+   (mbv_draw_batch.h). x, y and z of each vertex in the terrain's display
+   coordinates, two vertices per segment (lines, black, one pixel wide), and
+   their generation, which changes whenever they are made again or freed. Only
+   filling a batch keeps them, and *xyz is NULL where none were kept (with
+   OpenGL the drawing compiles them into display lists instead). Each time the
+   contours of a resolution are made, they are made for one way of drawing
+   only, and the view does not record which: a process draws a view one way.
+   The array is the view's, valid until the next drawing, mbview_reset or
+   mbview_destroy. */
+int mbview_contour_segments(int verbose, size_t instance, int rez, const float **xyz, size_t *nvertex,
+                            uint64_t *generation, int *error);
 int mbview_setwindowparms(int verbose, size_t instance, int (*mbview_dismiss_notify)(size_t), char *title, int xo, int yo,
                           int width, int height, int lorez_dimension, int hirez_dimension, int lorez_navdecimate,
                           int hirez_navdecimate, int *error);

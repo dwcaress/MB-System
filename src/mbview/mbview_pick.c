@@ -76,6 +76,7 @@
 
 #include "mbview.h"
 #include "mbviewprivate.h"
+#include "mbv_draw.h"
 #include "mbv_ui.h"
 
 /*------------------------------------------------------------------------------*/
@@ -1937,102 +1938,102 @@ int mbview_drawpick(size_t instance) {
 			xlength = 0.05 / view->size2d;
 
 		/* set color and linewidth */
-		glColor3f(1.0, 0.0, 0.0);
-		glLineWidth(3.0);
+		mbv_draw_color3f(1.0, 0.0, 0.0);
+		mbv_draw_line_width(3.0);
 
 		/* plot first pick point */
 		if (data->display_mode == MBV_DISPLAY_3D && data->pick.xsegments[0].nls > 0 && data->pick.xsegments[1].nls > 0) {
-			glBegin(GL_LINE_STRIP);
+			mbv_draw_begin(MBV_DRAW_LINE_STRIP);
 			for (int i = 0; i < data->pick.xsegments[0].nls; i++) {
-				glVertex3f((float)(data->pick.xsegments[0].lspoints[i].xdisplay),
+				mbv_draw_vertex3f((float)(data->pick.xsegments[0].lspoints[i].xdisplay),
 				           (float)(data->pick.xsegments[0].lspoints[i].ydisplay),
 				           (float)(data->pick.xsegments[0].lspoints[i].zdisplay));
 			}
-			glEnd();
-			glBegin(GL_LINE_STRIP);
+			mbv_draw_end();
+			mbv_draw_begin(MBV_DRAW_LINE_STRIP);
 			for (int i = 0; i < data->pick.xsegments[1].nls; i++) {
-				glVertex3f((float)(data->pick.xsegments[1].lspoints[i].xdisplay),
+				mbv_draw_vertex3f((float)(data->pick.xsegments[1].lspoints[i].xdisplay),
 				           (float)(data->pick.xsegments[1].lspoints[i].ydisplay),
 				           (float)(data->pick.xsegments[1].lspoints[i].zdisplay));
 			}
-			glEnd();
+			mbv_draw_end();
 		}
 		else if (data->display_mode == MBV_DISPLAY_3D) {
-			glBegin(GL_LINES);
+			mbv_draw_begin(MBV_DRAW_LINES);
 			for (int i = 0; i < 4; i++) {
-				glVertex3f((float)(data->pick.xpoints[i].xdisplay), (float)(data->pick.xpoints[i].ydisplay),
+				mbv_draw_vertex3f((float)(data->pick.xpoints[i].xdisplay), (float)(data->pick.xpoints[i].ydisplay),
 				           (float)(data->pick.xpoints[i].zdisplay));
 			}
-			glEnd();
+			mbv_draw_end();
 		}
 		else {
-			glBegin(GL_LINES);
-			glVertex3f((float)(data->pick.endpoints[0].xdisplay - xlength), (float)(data->pick.endpoints[0].ydisplay - xlength),
+			mbv_draw_begin(MBV_DRAW_LINES);
+			mbv_draw_vertex3f((float)(data->pick.endpoints[0].xdisplay - xlength), (float)(data->pick.endpoints[0].ydisplay - xlength),
 			           (float)(data->pick.endpoints[0].zdisplay));
-			glVertex3f((float)(data->pick.endpoints[0].xdisplay + xlength), (float)(data->pick.endpoints[0].ydisplay + xlength),
+			mbv_draw_vertex3f((float)(data->pick.endpoints[0].xdisplay + xlength), (float)(data->pick.endpoints[0].ydisplay + xlength),
 			           (float)(data->pick.endpoints[0].zdisplay));
-			glVertex3f((float)(data->pick.endpoints[0].xdisplay + xlength), (float)(data->pick.endpoints[0].ydisplay - xlength),
+			mbv_draw_vertex3f((float)(data->pick.endpoints[0].xdisplay + xlength), (float)(data->pick.endpoints[0].ydisplay - xlength),
 			           (float)(data->pick.endpoints[0].zdisplay));
-			glVertex3f((float)(data->pick.endpoints[0].xdisplay - xlength), (float)(data->pick.endpoints[0].ydisplay + xlength),
+			mbv_draw_vertex3f((float)(data->pick.endpoints[0].xdisplay - xlength), (float)(data->pick.endpoints[0].ydisplay + xlength),
 			           (float)(data->pick.endpoints[0].zdisplay));
-			glEnd();
+			mbv_draw_end();
 		}
 
 		if (data->pick_type == MBV_PICK_TWOPOINT) {
 			/* plot second pick point */
 			if (data->display_mode == MBV_DISPLAY_3D && data->pick.xsegments[2].nls > 0 && data->pick.xsegments[3].nls > 0) {
-				glBegin(GL_LINE_STRIP);
+				mbv_draw_begin(MBV_DRAW_LINE_STRIP);
 				for (int i = 0; i < data->pick.xsegments[2].nls; i++) {
-					glVertex3f((float)(data->pick.xsegments[2].lspoints[i].xdisplay),
+					mbv_draw_vertex3f((float)(data->pick.xsegments[2].lspoints[i].xdisplay),
 					           (float)(data->pick.xsegments[2].lspoints[i].ydisplay),
 					           (float)(data->pick.xsegments[2].lspoints[i].zdisplay));
 				}
-				glEnd();
-				glBegin(GL_LINE_STRIP);
+				mbv_draw_end();
+				mbv_draw_begin(MBV_DRAW_LINE_STRIP);
 				for (int i = 0; i < data->pick.xsegments[3].nls; i++) {
-					glVertex3f((float)(data->pick.xsegments[3].lspoints[i].xdisplay),
+					mbv_draw_vertex3f((float)(data->pick.xsegments[3].lspoints[i].xdisplay),
 					           (float)(data->pick.xsegments[3].lspoints[i].ydisplay),
 					           (float)(data->pick.xsegments[3].lspoints[i].zdisplay));
 				}
-				glEnd();
+				mbv_draw_end();
 			}
 			else if (data->display_mode == MBV_DISPLAY_3D) {
-				glBegin(GL_LINES);
+				mbv_draw_begin(MBV_DRAW_LINES);
 				for (int i = 4; i < 8; i++) {
-					glVertex3f((float)(data->pick.xpoints[i].xdisplay), (float)(data->pick.xpoints[i].ydisplay),
+					mbv_draw_vertex3f((float)(data->pick.xpoints[i].xdisplay), (float)(data->pick.xpoints[i].ydisplay),
 					           (float)(data->pick.xpoints[i].zdisplay));
 				}
-				glEnd();
+				mbv_draw_end();
 			}
 			else {
-				glBegin(GL_LINES);
-				glVertex3f((float)(data->pick.endpoints[1].xdisplay - xlength),
+				mbv_draw_begin(MBV_DRAW_LINES);
+				mbv_draw_vertex3f((float)(data->pick.endpoints[1].xdisplay - xlength),
 				           (float)(data->pick.endpoints[1].ydisplay - xlength), (float)(data->pick.endpoints[1].zdisplay));
-				glVertex3f((float)(data->pick.endpoints[1].xdisplay + xlength),
+				mbv_draw_vertex3f((float)(data->pick.endpoints[1].xdisplay + xlength),
 				           (float)(data->pick.endpoints[1].ydisplay + xlength), (float)(data->pick.endpoints[1].zdisplay));
-				glVertex3f((float)(data->pick.endpoints[1].xdisplay + xlength),
+				mbv_draw_vertex3f((float)(data->pick.endpoints[1].xdisplay + xlength),
 				           (float)(data->pick.endpoints[1].ydisplay - xlength), (float)(data->pick.endpoints[1].zdisplay));
-				glVertex3f((float)(data->pick.endpoints[1].xdisplay - xlength),
+				mbv_draw_vertex3f((float)(data->pick.endpoints[1].xdisplay - xlength),
 				           (float)(data->pick.endpoints[1].ydisplay + xlength), (float)(data->pick.endpoints[1].zdisplay));
-				glEnd();
+				mbv_draw_end();
 			}
 
 			/* plot line segment between pick points */
 			if (data->display_mode == MBV_DISPLAY_3D && data->pick.segment.nls > 0) {
-				glBegin(GL_LINE_STRIP);
+				mbv_draw_begin(MBV_DRAW_LINE_STRIP);
 				for (int i = 0; i < data->pick.segment.nls; i++) {
-					glVertex3f((float)(data->pick.segment.lspoints[i].xdisplay), (float)(data->pick.segment.lspoints[i].ydisplay),
+					mbv_draw_vertex3f((float)(data->pick.segment.lspoints[i].xdisplay), (float)(data->pick.segment.lspoints[i].ydisplay),
 					           (float)(data->pick.segment.lspoints[i].zdisplay));
 				}
-				glEnd();
+				mbv_draw_end();
 			}
 			else {
-				glBegin(GL_LINES);
-				glVertex3f((float)(data->pick.endpoints[0].xdisplay), (float)(data->pick.endpoints[0].ydisplay),
+				mbv_draw_begin(MBV_DRAW_LINES);
+				mbv_draw_vertex3f((float)(data->pick.endpoints[0].xdisplay), (float)(data->pick.endpoints[0].ydisplay),
 				           (float)(data->pick.endpoints[0].zdisplay));
-				glVertex3f((float)(data->pick.endpoints[1].xdisplay), (float)(data->pick.endpoints[1].ydisplay),
+				mbv_draw_vertex3f((float)(data->pick.endpoints[1].xdisplay), (float)(data->pick.endpoints[1].ydisplay),
 				           (float)(data->pick.endpoints[1].zdisplay));
-				glEnd();
+				mbv_draw_end();
 			}
 		}
 	}
@@ -2066,30 +2067,30 @@ int mbview_drawregion(size_t instance) {
 	/* draw current area */
 	if (data->region_type == MBV_REGION_QUAD) {
 		/* set color and linewidth */
-		glColor3f(colortable_object_red[MBV_COLOR_YELLOW], colortable_object_green[MBV_COLOR_YELLOW],
+		mbv_draw_color3f(colortable_object_red[MBV_COLOR_YELLOW], colortable_object_green[MBV_COLOR_YELLOW],
 		          colortable_object_blue[MBV_COLOR_YELLOW]);
-		glLineWidth(3.0);
+		mbv_draw_line_width(3.0);
 
 		/* plot quad segments */
 		for (int i = 0; i < 4; i++) {
 			if (data->display_mode == MBV_DISPLAY_3D && data->region.segments[i].nls > 2) {
-				glBegin(GL_LINE_STRIP);
+				mbv_draw_begin(MBV_DRAW_LINE_STRIP);
 				for (int j = 0; j < data->region.segments[i].nls - 1; j++) {
-					glVertex3f((float)(data->region.segments[i].lspoints[j].xdisplay),
+					mbv_draw_vertex3f((float)(data->region.segments[i].lspoints[j].xdisplay),
 					           (float)(data->region.segments[i].lspoints[j].ydisplay),
 					           (float)(data->region.segments[i].lspoints[j].zdisplay));
 				}
-				glEnd();
+				mbv_draw_end();
 			}
 			else {
-				glBegin(GL_LINES);
-				glVertex3f((float)(data->region.segments[i].endpoints[0].xdisplay),
+				mbv_draw_begin(MBV_DRAW_LINES);
+				mbv_draw_vertex3f((float)(data->region.segments[i].endpoints[0].xdisplay),
 				           (float)(data->region.segments[i].endpoints[0].ydisplay),
 				           (float)(data->region.segments[i].endpoints[0].zdisplay));
-				glVertex3f((float)(data->region.segments[i].endpoints[1].xdisplay),
+				mbv_draw_vertex3f((float)(data->region.segments[i].endpoints[1].xdisplay),
 				           (float)(data->region.segments[i].endpoints[1].ydisplay),
 				           (float)(data->region.segments[i].endpoints[1].zdisplay));
-				glEnd();
+				mbv_draw_end();
 #ifdef MBV_GETERRORS
 				mbview_glerrorcheck(instance, 1, __func__);
 #endif
@@ -2123,29 +2124,29 @@ int mbview_drawarea(size_t instance) {
 	/* draw current area */
 	if (data->area_type == MBV_AREA_QUAD) {
 		/* set color and linewidth */
-		glColor3f(colortable_object_red[MBV_COLOR_YELLOW], colortable_object_green[MBV_COLOR_YELLOW],
+		mbv_draw_color3f(colortable_object_red[MBV_COLOR_YELLOW], colortable_object_green[MBV_COLOR_YELLOW],
 		          colortable_object_blue[MBV_COLOR_YELLOW]);
-		glLineWidth(3.0);
+		mbv_draw_line_width(3.0);
 
 		/* plot center segment */
 		if (data->display_mode == MBV_DISPLAY_3D && data->area.segment.nls > 2) {
-			glBegin(GL_LINE_STRIP);
+			mbv_draw_begin(MBV_DRAW_LINE_STRIP);
 			for (int j = 0; j < data->area.segment.nls; j++) {
-				glVertex3f((float)(data->area.segment.lspoints[j].xdisplay), (float)(data->area.segment.lspoints[j].ydisplay),
+				mbv_draw_vertex3f((float)(data->area.segment.lspoints[j].xdisplay), (float)(data->area.segment.lspoints[j].ydisplay),
 				           (float)(data->area.segment.lspoints[j].zdisplay));
 			}
-			glEnd();
+			mbv_draw_end();
 #ifdef MBV_GETERRORS
 			mbview_glerrorcheck(instance, 1, __func__);
 #endif
 		}
 		else {
-			glBegin(GL_LINES);
-			glVertex3f((float)(data->area.segment.endpoints[0].xdisplay), (float)(data->area.segment.endpoints[0].ydisplay),
+			mbv_draw_begin(MBV_DRAW_LINES);
+			mbv_draw_vertex3f((float)(data->area.segment.endpoints[0].xdisplay), (float)(data->area.segment.endpoints[0].ydisplay),
 			           (float)(data->area.segment.endpoints[0].zdisplay));
-			glVertex3f((float)(data->area.segment.endpoints[1].xdisplay), (float)(data->area.segment.endpoints[1].ydisplay),
+			mbv_draw_vertex3f((float)(data->area.segment.endpoints[1].xdisplay), (float)(data->area.segment.endpoints[1].ydisplay),
 			           (float)(data->area.segment.endpoints[1].zdisplay));
-			glEnd();
+			mbv_draw_end();
 #ifdef MBV_GETERRORS
 			mbview_glerrorcheck(instance, 1, __func__);
 #endif
@@ -2154,26 +2155,26 @@ int mbview_drawarea(size_t instance) {
 		/* plot quad segments */
 		for (int i = 0; i < 4; i++) {
 			if (data->display_mode == MBV_DISPLAY_3D && data->area.segments[i].nls > 2) {
-				glBegin(GL_LINE_STRIP);
+				mbv_draw_begin(MBV_DRAW_LINE_STRIP);
 				for (int j = 0; j < data->area.segments[i].nls - 1; j++) {
-					glVertex3f((float)(data->area.segments[i].lspoints[j].xdisplay),
+					mbv_draw_vertex3f((float)(data->area.segments[i].lspoints[j].xdisplay),
 					           (float)(data->area.segments[i].lspoints[j].ydisplay),
 					           (float)(data->area.segments[i].lspoints[j].zdisplay));
 				}
-				glEnd();
+				mbv_draw_end();
 #ifdef MBV_GETERRORS
 				mbview_glerrorcheck(instance, 1, __func__);
 #endif
 			}
 			else {
-				glBegin(GL_LINES);
-				glVertex3f((float)(data->area.segments[i].endpoints[0].xdisplay),
+				mbv_draw_begin(MBV_DRAW_LINES);
+				mbv_draw_vertex3f((float)(data->area.segments[i].endpoints[0].xdisplay),
 				           (float)(data->area.segments[i].endpoints[0].ydisplay),
 				           (float)(data->area.segments[i].endpoints[0].zdisplay));
-				glVertex3f((float)(data->area.segments[i].endpoints[1].xdisplay),
+				mbv_draw_vertex3f((float)(data->area.segments[i].endpoints[1].xdisplay),
 				           (float)(data->area.segments[i].endpoints[1].ydisplay),
 				           (float)(data->area.segments[i].endpoints[1].zdisplay));
-				glEnd();
+				mbv_draw_end();
 #ifdef MBV_GETERRORS
 				mbview_glerrorcheck(instance, 1, __func__);
 #endif

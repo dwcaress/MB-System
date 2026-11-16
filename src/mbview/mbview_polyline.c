@@ -80,6 +80,7 @@
 
 #include "mbview.h"
 #include "mbviewprivate.h"
+#include "mbv_draw.h"
 
 /*------------------------------------------------------------------------------*/
 /* Check that parts start at increasing point indices beginning with 0 and that
@@ -154,28 +155,28 @@ void mbview_gis_freesegments(int nsegments, struct mbview_linesegmentw_struct *s
 void mbview_gis_drawlines(size_t instance, int npart, const int *partstart, int npoints,
                           struct mbview_pointw_struct *points, struct mbview_linesegmentw_struct *segments, int icolor,
                           int size) {
-	glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
-	glLineWidth((float)size);
+	mbv_draw_color3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
+	mbv_draw_line_width((float)size);
 	for (int i = 0; i < npart; i++) {
 		const int start = partstart[i];
 		const int end = i < npart - 1 ? partstart[i + 1] : npoints;
-		glBegin(GL_LINE_STRIP);
+		mbv_draw_begin(MBV_DRAW_LINE_STRIP);
 		for (int j = start; j < end - 1; j++) {
 			/* segments within one grid cell are not draped */
 			if (segments[j].nls > 0) {
 				for (int k = 0; k < segments[j].nls; k++)
-					glVertex3f((float)(segments[j].lspoints[k].xdisplay[instance]),
+					mbv_draw_vertex3f((float)(segments[j].lspoints[k].xdisplay[instance]),
 					           (float)(segments[j].lspoints[k].ydisplay[instance]),
 					           (float)(segments[j].lspoints[k].zdisplay[instance]));
 			}
 			else {
-				glVertex3f((float)(points[j].xdisplay[instance]), (float)(points[j].ydisplay[instance]),
+				mbv_draw_vertex3f((float)(points[j].xdisplay[instance]), (float)(points[j].ydisplay[instance]),
 				           (float)(points[j].zdisplay[instance]));
-				glVertex3f((float)(points[j + 1].xdisplay[instance]), (float)(points[j + 1].ydisplay[instance]),
+				mbv_draw_vertex3f((float)(points[j + 1].xdisplay[instance]), (float)(points[j + 1].ydisplay[instance]),
 				           (float)(points[j + 1].zdisplay[instance]));
 			}
 		}
-		glEnd();
+		mbv_draw_end();
 	}
 }
 
