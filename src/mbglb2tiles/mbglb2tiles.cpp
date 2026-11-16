@@ -67,6 +67,7 @@ struct Options {
     std::string x3dom_url;           // empty: the default of the page writer
     bool write_cesium_html = false;  // --cesium-html: a page for CesiumJS as well
     std::string cesium_url;          // empty: the default of the page writer
+    std::vector<X3DomUserViewpoint> viewpoints;   // --geoviewpoint, for the pages
     double lift = 0.0;               // meters up along the local vertical, in the transform of tileset.json
     bool lift_requested = false;     // --lift as --geoorigin of mbmesh works: without it no lift; with no value, decided from the depth of the mesh
     bool lift_given = false;         // with a value
@@ -98,6 +99,12 @@ void print_usage() {
         "                               translucent. The tileset is shown at its true height whatever --lift says\n"
         "      --cesium-url <url>       The directory of the CesiumJS build of the --cesium-html page, with Cesium.js and Widgets/widgets.css in it\n"
         "                               [https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium]\n"
+        "      --geoviewpoint <lon,lat,elev,clon,clat,celev>\n"
+        "                               A viewpoint for the --html and --cesium-html pages, which can be repeated: the position of the camera and the\n"
+        "                               point it looks at, geodetic, true heights. Ten numbers, lon,lat,elev,ax,ay,az,angle,clon,clat,celev, give the\n"
+        "                               orientation too, as an axis and an angle in the local frame (as a GeoViewpoint takes it; 1 0 0 -1.5708 looks\n"
+        "                               straight down). The pages offer them in the Viewpoint menu as the viewpoints of the user. The Copy GeoViewpoint\n"
+        "                               button of the X3DOM page and the Copy viewpoint button of the Cesium page give the option for the view\n"
         "      --x3dom-url <url>        The X3DOM script of the --html page [https://www.x3dom.org/x3dom/dist/x3dom-full.js]; a GeoTileset needs a\n"
         "                               build of X3DOM that has it\n"
         "      --lift[=<meters>]        Lift the tileset above the ellipsoid along the local vertical, in the transform of tileset.json:\n"
@@ -145,6 +152,7 @@ int main(int argc, char **argv) {
         {"no-colors", no_argument, nullptr, 1010},
         {"cesium-html", no_argument, nullptr, 1011},
         {"cesium-url", required_argument, nullptr, 1012},
+        {"geoviewpoint", required_argument, nullptr, 1013},
         {"no-draco", no_argument, nullptr, 1003},
         {"draco-precision", required_argument, nullptr, 1004},
         {"draco-normal-bits", required_argument, nullptr, 1005},
@@ -192,6 +200,18 @@ int main(int argc, char **argv) {
         case 1012:
             options.cesium_url = optarg;
             break;
+        case 1013: {
+            X3DomUserViewpoint viewpoint;
+            std::string viewpoint_error;
+            double axis[3];
+            double angle = 0.0;
+            if (!parse_user_viewpoint(optarg, &viewpoint, &viewpoint_error) || !geoviewpoint_orientation(viewpoint, axis, &angle, &viewpoint_error)) {
+                LOG_ERROR("invalid --geoviewpoint:", viewpoint_error);
+                return 1;
+            }
+            options.viewpoints.push_back(viewpoint);
+            break;
+        }
         case 1008: {
             options.lift_requested = true;
             if (optarg == nullptr) {
@@ -283,6 +303,8 @@ int main(int argc, char **argv) {
                                                   : std::string("viewer page: no (--html writes one)"));
         LOG_INFO("[settings]", options.write_cesium_html ? "Cesium page: yes (--cesium-html), CesiumJS from " + (options.cesium_url.empty() ? std::string(default_cesium_url()) + " (default)" : options.cesium_url + " (--cesium-url)")
                                                          : std::string("Cesium page: no (--cesium-html writes one)"));
+        LOG_INFO("[settings]", options.viewpoints.empty() ? std::string("viewpoints of the user: none (--geoviewpoint adds one)")
+                                                          : "viewpoints of the user: " + std::to_string(options.viewpoints.size()) + " (--geoviewpoint)");
         LOG_INFO("[settings]", !options.lift_requested ? std::string("lift: none, the true heights (default; --lift lifts the tileset above the ellipsoid)")
                                   : options.lift_given    ? "lift: " + std::to_string(options.lift) + " m (--lift)"
                                                           : std::string("lift: decided from the depth of the mesh once it is read (--lift)"));
@@ -644,6 +666,7 @@ int main(int argc, char **argv) {
         model.visible = true;
         model.is_tileset = true;
         html_options.models.push_back(model);
+        html_options.user_viewpoints = options.viewpoints;
         html_options.metadata = metadata;
         html_options.geo_summary = geo_metadata_summary(run);
         if (!write_log()) {
@@ -671,6 +694,7 @@ int main(int argc, char **argv) {
         cesium_options.lift_meters = options.lift;
         cesium_options.max_screen_space_error = options.sse;
         cesium_options.height_colors = options.colors;
+        cesium_options.user_viewpoints = options.viewpoints;
         if (!write_cesium_page(cesium_path, cesium_options, &error)) {
             LOG_ERROR(error);
             return 1;

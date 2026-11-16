@@ -386,6 +386,9 @@ int main() {
         ok &= check(contains(page, "<script type='text/javascript' src='http://127.0.0.1:8000/x3dom-full.js'></script>") &&
                         contains(page, "href='http://127.0.0.1:8000/x3dom.css'") && !contains(page, "www.x3dom.org/x3dom/dist"),
                     "the page loads the X3DOM script it was given, and the stylesheet beside it");
+        ok &= check(contains(page, "<div id='geotileset-warning'") && contains(page, "x3dom.nodeTypes.GeoTileset") &&
+                        contains(page, "The X3DOM script of this page, http://127.0.0.1:8000/x3dom-full.js, has no GeoTileset node"),
+                    "a page with a tileset says so when the X3DOM script has no GeoTileset node");
         ok &= check(!contains(page, "<Inline id='inline_0'") && contains(page, "<Inline id='inline_1'"), "a tileset is not an Inline");
         ok &= check(contains(page, "{ uri: 'mbmesh_output/tileset/tileset.json', loaded: true }"), "a tileset needs no lazy loading");
 
@@ -393,6 +396,9 @@ int main() {
         X3DomWriterOptions absolute = options;
         absolute.use_geoorigin = false;
         const std::string absolute_page = write_page(absolute);
+        X3DomWriterOptions no_tileset = options;
+        no_tileset.models = {model("mbmesh_output/track.glb", "track.glb", "mbmesh_output", true)};
+        ok &= check(!contains(write_page(no_tileset), "geotileset-warning"), "a page without a tileset has no such warning");
         ok &= check(contains(absolute_page, "<GeoTileset id='tileset_0'") && !contains(absolute_page, "GRID_ORIGIN"), "without a GeoOrigin the GeoTileset has none");
 
         // The default script.

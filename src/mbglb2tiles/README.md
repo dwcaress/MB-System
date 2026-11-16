@@ -5,7 +5,7 @@ reconstructing anything: the mesh is read, coarsened level by level, and cut int
 
 ```
 mbglb2tiles -I mesh.glb [-O outputdir] [--tile-size meters] [--weld-tolerance meters] [--threads n]
-            [--no-draco] [--draco-precision meters] [--draco-normal-bits n] [--html [--x3dom-url url] [--sse pixels]] [--cesium-html [--cesium-url url]] [--lift[=meters]] [--no-colors] [-V]
+            [--no-draco] [--draco-precision meters] [--draco-normal-bits n] [--html [--x3dom-url url] [--sse pixels]] [--cesium-html [--cesium-url url]] [--geoviewpoint lon,lat,elev,clon,clat,celev]... [--lift[=meters]] [--no-colors] [-V]
 ```
 
 The output directory (`tileset` beside the input by default, where `mbmesh --tileset` writes its tileset) gets `tileset.json` and one directory `L<level>` of tile GLBs
@@ -25,6 +25,12 @@ again, so the tileset is at its true height, and has a "color by height" check b
 build, with `Cesium.js` and `Widgets/widgets.css` in it (release 1.114 from Cesium's web site by default). The page has to be served over HTTP, as the
 X3DOM page does. It has the scale object too, with a "scale axes" check box. Cesium gives a page no center of rotation, so the axes are put where the middle of the view meets
 the data (a depth pick there; the center of the tileset where there is none) and are resized as the camera moves, as in the X3DOM pages.
+
+The Viewpoint menu of the Cesium page opens looking straight down, with views at 45 and 15 degrees from the south. `--geoviewpoint` adds viewpoints of your own to
+the menus of both pages, as it does in `mbmesh`: `--geoviewpoint=lon,lat,elev,clon,clat,celev` (the camera and the point it looks at) or
+`--geoviewpoint=lon,lat,elev,ax,ay,az,angle,clon,clat,celev` (with the orientation as an axis and an angle in the local frame, as a GeoViewpoint takes it; `1 0 0 -1.5708`
+looks straight down), which can be repeated. The values are geodetic and the heights true, whatever `--lift` says. The Copy GeoViewpoint button of the X3DOM
+page and the Copy viewpoint button of the Cesium page put the option for the view on the screen on the clipboard, so a view set in one page can be used in the other.
 
 The X3DOM pages have a scale object: axes East (red), North (green) and Up (blue) at the center of rotation, which the page resizes whenever the viewpoint changes so that they stay about a sixth of the height of the view, with their length in the label, rounded down to 1, 2 or 5 times a power of ten ("5 m", "20 cm", "2 km"). The length is true at the axes, and the perspective makes other distances differ; the "scale axes" check box switches the object off.
 

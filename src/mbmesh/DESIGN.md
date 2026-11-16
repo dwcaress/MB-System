@@ -113,8 +113,13 @@ tileset/L1/…  Ln/…
   are done as they arrive.
 - `mbglb2tiles --cesium-html` writes a page for CesiumJS (`io/cesium_writer.cpp`): a `Cesium3DTileset` from `tileset.json`, the globe hidden at the start with a
   check box that shows it translucent (the data are below the ellipsoid, which the globe would hide), the lift taken off again by a `modelMatrix` of the tileset, a
-  "color by height" check box (a style that replaces the colors with gray), a link to the log, and the scale object (polylines and labels at the point of the data
-  under the middle of the view, from a depth pick, resized on `camera.changed`). Seen in headless Chrome with CesiumJS 1.114 and the test tileset;
+  "color by height" check box (a custom shader that sets a gray base color before the lighting; the `REPLACE` blend mode of a style paints the final color and
+  loses the shading), a link to the log, and the scale object (polylines and labels at the point of the data under the middle of the view, from a depth pick,
+  resized before each render, with the origin raised a tenth of the axis length above the surface). The Viewpoint menu has an overview looking down, which the
+  page opens with, and views at 45 and 15 degrees from the south, and then the viewpoints of the user: `--geoviewpoint`, in the form of the X3DOM pages (the
+  six or ten numbers, true heights, so no lift), is converted in the page from the axis and angle in the local frame (X east, Y up, Z south) to the direction and
+  up of the camera; the **Copy viewpoint** button writes the ten-number option for the view on the screen, with the point under the middle of the view as the
+  center, so that an option copied from either kind of page works in the other. Seen in headless Chrome with CesiumJS 1.114 and the test tileset;
   not tried on a large survey or with the OpenStreetMap imagery, which the headless run did not load. `mbmesh` and `mbgrd2gltf` do not have the option yet.
 - The pages need an X3DOM build that has `GeoTileset` ([PR 1364](https://github.com/x3dom/x3dom/pull/1364)), given with `--x3dom-url`.
 
@@ -139,7 +144,7 @@ CMake builds everything (`mbdraco`, `mbgrd2gltf`, `mbmesh`, `mbglb2tiles`). The 
 
 None of these blocks use of the tileset; each is small enough for its own issue.
 
-- **CesiumJS.** The tilesets have been checked in X3DOM and with the validator, not loaded in CesiumJS.
+- **CesiumJS.** The tilesets load in CesiumJS 1.114 in headless Chrome, as a small test tileset; large surveys have not been tried.
 - **Coarse levels.** Made by clustering the finished mesh, not by re-reconstructing from points decimated at twice the cell size, so thin features and
   sharp edges round off at coarse levels. `mbmesh --tileset` itself writes only `L0`.
 - **Memory of `mbglb2tiles`.** The whole mesh is held (about 12 GB at the peak for 38 million vertices, the weld about 5 minutes and the first

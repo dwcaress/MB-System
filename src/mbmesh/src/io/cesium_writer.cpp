@@ -1,6 +1,7 @@
 #include "io/cesium_writer.h"
 
 #include <fstream>
+#include <iomanip>
 #include <sstream>
 
 namespace {
@@ -37,6 +38,106 @@ std::string escape_js(const std::string &text) {
 
 // The script of the scale object. The center of rotation of Cesium is not a point that a page can ask for, so the axes are put at the point of the
 // data under the middle of the view (a pick of the depth there), and at the center of the tileset where there is none.
+// The user viewpoints as the elements of a JavaScript array: the camera position, longitude, latitude and height, and the orientation as an
+// axis and an angle in the local frame of the camera (X east, Y up, Z south, the camera looks along its -Z), as a GeoViewpoint takes it.
+std::string user_viewpoints_script(const std::vector<X3DomUserViewpoint> &viewpoints) {
+    std::ostringstream out;
+    out << std::setprecision(12);
+    bool first = true;
+    for (const X3DomUserViewpoint &viewpoint : viewpoints) {
+        double axis[3];
+        double angle = 0.0;
+        std::string error;
+        if (!geoviewpoint_orientation(viewpoint, axis, &angle, &error)) {
+            continue;   // the program checks each one when it reads the option
+        }
+        out << (first ? "" : ", ") << "{ position: [" << viewpoint.longitude << ", " << viewpoint.latitude << ", " << viewpoint.elevation
+            << "], axis: [" << axis[0] << ", " << axis[1] << ", " << axis[2] << "], angle: " << angle << " }";
+        first = false;
+    }
+    return out.str();
+}
+
+// The script of the viewpoints of the user, and of the button that gives the option for the view on the screen.
+const char *viewpoint_script() {
+    return R"JS(    // A viewpoint of the user is the camera position and its orientation as an axis and an angle in the local frame there, X east, Y up and Z south, with
+    // the camera looking along its -Z, as the GeoViewpoint of X3DOM has it: this takes that to the ECEF direction and up that Cesium wants.
+    function setUserViewpoint(viewpoint, animate) {
+      if (!viewpoint) {
+        return;
+      }
+      var destination = Cesium.Cartesian3.fromDegrees(viewpoint.position[0], viewpoint.position[1], viewpoint.position[2]);
+      var rotation = Cesium.Matrix3.fromQuaternion(Cesium.Quaternion.fromAxisAngle(new Cesium.Cartesian3(viewpoint.axis[0], viewpoint.axis[1], viewpoint.axis[2]), viewpoint.angle));
+      var frame = Cesium.Transforms.eastNorthUpToFixedFrame(destination);
+      var toEcef = function (local) {
+        var enu = Cesium.Matrix3.multiplyByVector(rotation, local, new Cesium.Cartesian3());
+        return Cesium.Matrix4.multiplyByPointAsVector(frame, new Cesium.Cartesian3(enu.x, -enu.z, enu.y), new Cesium.Cartesian3());
+      };
+      var orientation = { direction: toEcef(new Cesium.Cartesian3(0, 0, -1)), up: toEcef(new Cesium.Cartesian3(0, 1, 0)) };
+      if (animate) {
+        viewer.camera.flyTo({ destination: destination, orientation: orientation, duration: 1.0 });
+      } else {
+        viewer.camera.setView({ destination: destination, orientation: orientation });
+      }
+    }
+
+    // The option for the view on the screen: the camera, its orientation in the local frame as an axis and an angle, and the point of the data in the
+    // middle of the view, which is what the --geoviewpoint of the X3DOM pages has, so that an option copied from one page works in the other.
+    function copyViewpoint() {
+      var camera = viewer.camera;
+      var position = Cesium.Cartographic.fromCartesian(camera.positionWC);
+      var center = null;
+      try {
+        var canvas = viewer.scene.canvas;
+        center = viewer.scene.pickPosition(new Cesium.Cartesian2(canvas.clientWidth / 2, canvas.clientHeight / 2));
+      } catch (e) {
+        center = null;
+      }
+      if (!center && tileset) {
+        center = tileset.boundingSphere.center;
+      }
+      if (!center) {
+        return;
+      }
+      var target = Cesium.Cartographic.fromCartesian(center);
+      var toLocal = Cesium.Matrix4.inverseTransformation(Cesium.Transforms.eastNorthUpToFixedFrame(camera.positionWC), new Cesium.Matrix4());
+      var local = function (vector) {
+        var enu = Cesium.Matrix4.multiplyByPointAsVector(toLocal, vector, new Cesium.Cartesian3());
+        return [enu.x, enu.z, -enu.y];
+      };
+      // The camera's axes in the local frame: its X to the right, its Y up and its Z backwards.
+      var axes = [local(camera.rightWC), local(camera.upWC), local(Cesium.Cartesian3.negate(camera.directionWC, new Cesium.Cartesian3()))];
+      var o = function (i, j) { return axes[j][i]; };
+      var angle = Math.acos(Math.max(-1, Math.min(1, (o(0, 0) + o(1, 1) + o(2, 2) - 1) / 2)));
+      var axis = [o(2, 1) - o(1, 2), o(0, 2) - o(2, 0), o(1, 0) - o(0, 1)];
+      var length = Math.sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
+      if (length < 1e-9) {
+        axis = [0, 0, 1];
+        angle = 0;
+      } else {
+        axis = [axis[0] / length, axis[1] / length, axis[2] / length];
+      }
+      var degrees = Cesium.Math.toDegrees;
+      var numbers = [degrees(position.longitude), degrees(position.latitude), position.height, axis[0], axis[1], axis[2], angle,
+                     degrees(target.longitude), degrees(target.latitude), target.height];
+      var digits = [7, 7, 3, 8, 8, 8, 8, 7, 7, 3];
+      var text = '--geoviewpoint=' + numbers.map(function (value, index) { return value.toFixed(digits[index]); }).join(',');
+      var failed = function () {
+        window.prompt('Copy the option:', text);
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(function () {
+          showStatus('The --geoviewpoint option was copied to the clipboard', false);
+          setTimeout(function () { showStatus('', false); }, 4000);
+        }, failed);
+      } else {
+        failed();
+      }
+    }
+
+)JS";
+}
+
 const char *scale_axes_script() {
     return R"JS(
     // The scale object: axes East (red), North (green) and Up (blue) where the middle of the view meets the data, as long on the screen at any
@@ -187,8 +288,12 @@ std::string cesium_page_text(const CesiumPageOptions &options) {
     out << "    <label>Viewpoint: <select id='viewpoint-select' onchange='setViewpoint(this.value, true);'>\n"
         << "      <option value='down'>Overview, looking down</option>\n"
         << "      <option value='oblique'>Oblique, 45&deg; from the south</option>\n"
-        << "      <option value='side'>Low, 15&deg; from the south</option>\n"
-        << "    </select></label>\n";
+        << "      <option value='side'>Low, 15&deg; from the south</option>\n";
+    for (std::size_t i = 0; i < options.user_viewpoints.size(); i++) {
+        out << "      <option value='user" << i << "'>User viewpoint " << (i + 1) << "</option>\n";
+    }
+    out << "    </select></label>\n"
+        << "    <label><button onclick='copyViewpoint();' title='Puts the --geoviewpoint option for the view on the screen on the clipboard'>Copy viewpoint</button></label>\n";
     if (options.height_colors) {
         out << "    <label><input id='color-checkbox' type='checkbox' checked onclick='setColors(this.checked);'> color by height</label>\n";
     }
@@ -206,6 +311,7 @@ std::string cesium_page_text(const CesiumPageOptions &options) {
         << "    var liftMeters = " << options.lift_meters << ";\n"
         << "    var maximumScreenSpaceError = " << options.max_screen_space_error << ";\n"
         << "    var tileset = null;\n"
+        << "    var userViewpoints = [" << user_viewpoints_script(options.user_viewpoints) << "];\n"
         << "\n"
         << "    function showStatus(text, isError) {\n"
         << "      var status = document.getElementById('status');\n"
@@ -233,6 +339,10 @@ std::string cesium_page_text(const CesiumPageOptions &options) {
         << "    // The distance fits the bounding sphere of the tileset in the view.\n"
         << "    var viewpoints = { down: -90, oblique: -45, side: -15 };\n"
         << "    function setViewpoint(name, animate) {\n"
+        << "      if (name.indexOf('user') === 0) {\n"
+        << "        setUserViewpoint(userViewpoints[Number(name.substring(4))], animate);\n"
+        << "        return;\n"
+        << "      }\n"
         << "      if (!tileset || !(name in viewpoints)) {\n"
         << "        return;\n"
         << "      }\n"
@@ -246,6 +356,7 @@ std::string cesium_page_text(const CesiumPageOptions &options) {
         << "      }\n"
         << "    }\n"
         << "\n"
+        << viewpoint_script()
         << "    // The colors are the COLOR_0 of the tiles; a gray base color replaces them. A custom shader sets the base color before the lighting, which\n"
         << "    // keeps the relief shaded: the REPLACE blend mode of a style paints the final color and loses it.\n"
         << "    var grayShader = new Cesium.CustomShader({\n"

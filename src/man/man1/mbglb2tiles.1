@@ -5,7 +5,7 @@ mbglb2tiles \- make an OGC 3D Tiles tileset of levels of detail from a GLB mesh 
 \fBmbglb2tiles\fR \fB-I\fI mesh.glb\fR [\fB-O\fI outputdir\fR]
 [\fB--tile-size\fI meters\fR] [\fB--weld-tolerance\fI meters\fR] [\fB--threads\fI n\fR]
 [\fB--no-draco\fR] [\fB--draco-precision\fI meters\fR] [\fB--draco-normal-bits\fI n\fR]
-[\fB--html\fR [\fB--x3dom-url\fI url\fR] [\fB--sse\fI pixels\fR]] [\fB--cesium-html\fR [\fB--cesium-url\fI url\fR]] [\fB--lift\fR[=\fImeters\fR]] [\fB--no-colors\fR] [\fB-V\fR] [\fB-h\fR]
+[\fB--html\fR [\fB--x3dom-url\fI url\fR] [\fB--sse\fI pixels\fR]] [\fB--cesium-html\fR [\fB--cesium-url\fI url\fR]] [\fB--geoviewpoint\fI lon,lat,elev,clon,clat,celev\fR]... [\fB--lift\fR[=\fImeters\fR]] [\fB--no-colors\fR] [\fB-V\fR] [\fB-h\fR]
 .SH DESCRIPTION
 .LP
 \fBmbglb2tiles\fR turns a triangle mesh in a binary glTF (GLB) file written by \fBmbmesh\fR or
@@ -101,6 +101,12 @@ tileset is at its true height. It must be served over HTTP, like the \fB--html\f
 .B \--cesium-url\fI url\fR
 The directory of the CesiumJS build that the \fB--cesium-html\fR page loads, with Cesium.js and Widgets/widgets.css in it (default
 https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium).
+.TP
+.B \--geoviewpoint\fI lon,lat,elev,clon,clat,celev\fR
+Add a viewpoint to the Viewpoint menu of the \fB--html\fR and \fB--cesium-html\fR pages; the option can be repeated. The values are geodetic, longitude first, with true
+heights whatever \fB--lift\fR says: the position of the camera and the point it looks at. Ten numbers, \fIlon,lat,elev,ax,ay,az,angle,clon,clat,celev\fR, give the
+orientation as well, as an axis and an angle in the local frame (X east, Y up, Z south) as a GeoViewpoint takes it; \fI1 0 0 -1.5708\fR looks straight down.
+The Copy GeoViewpoint button of the X3DOM page and the Copy viewpoint button of the Cesium page give the option for the view on the screen.
 .TP
 .B \--no-colors
 Do not color the tiles by height. By default every vertex has a color (\fBCOLOR_0\fR) from the Haxby table over the heights of the whole mesh, so that all tiles and levels agree, with a white base color; \fBtileset.json\fR records the bounds as \fBheightColors\fR, and the \fB--html\fR page has a "color by height" checkbox that turns the colors off, which shows the tiles in gray.

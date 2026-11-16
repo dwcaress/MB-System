@@ -110,6 +110,9 @@ mbmesh_test_x3dom_writer_SOURCES = \
 mbmesh_test_cesium_writer_CXXFLAGS = -std=c++17
 mbmesh_test_cesium_writer_SOURCES = \
 	tests/test_cesium_writer.cpp \
+	src/io/coordinate_frame.cpp \
+	src/io/provenance.cpp \
+	src/io/x3dom_writer.cpp \
 	src/io/cesium_writer.cpp
 
 mbmesh_test_tileset_CXXFLAGS = -std=c++17

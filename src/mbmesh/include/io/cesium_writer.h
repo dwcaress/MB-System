@@ -2,6 +2,9 @@
 
 #include <filesystem>
 #include <string>
+#include <vector>
+
+#include "io/x3dom_writer.h"
 
 // A viewer page of an OGC 3D Tiles tileset for CesiumJS, which is the reference renderer of 3D Tiles (the X3DOM pages need a build of X3DOM that has
 // GeoTileset). The data of a survey are below the ellipsoid, which the globe of Cesium hides, so the page starts with the globe hidden and has a
@@ -29,6 +32,9 @@ struct CesiumPageOptions {
     bool scale_axes = true;
     // Whether the globe is there when the page opens, which it is not by default; the check box shows or hides it either way.
     bool show_globe = false;
+    // Viewpoints of the user, --geoviewpoint, which the Viewpoint menu offers as "User viewpoint 1", "User viewpoint 2" and so on. They are geodetic and
+    // true heights, which the page uses as they are: it has no lift. The "Copy viewpoint" button gives the option for the view on the screen.
+    std::vector<X3DomUserViewpoint> user_viewpoints;
 };
 
 // The default of CesiumPageOptions::cesium_url.

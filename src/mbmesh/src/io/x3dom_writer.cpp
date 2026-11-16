@@ -1753,8 +1753,26 @@ bool write_glb_x3dom_file(const std::filesystem::path &html_path, const X3DomWri
 
     output << "      </div>\n"
            << "    </div>\n"
-           << "    \n"
-           << "    <script>\n"
+           << "    \n";
+    // A GeoTileset is an unknown node to a build of X3DOM that lacks it, which ignores it without a word and shows nothing: say so on the page.
+    bool has_tileset = false;
+    for (const X3DomModel &model : options.models) {
+        has_tileset = has_tileset || model.is_tileset;
+    }
+    if (has_tileset) {
+        output << "    <div id='geotileset-warning' style='display:none; position:absolute; bottom:20px; left:50%; transform:translateX(-50%); z-index:30; max-width:40em; "
+               << "background:#fff3f3; color:#b00020; border:1px solid #b00020; border-radius:4px; padding:8px 12px; font-size:14px;'>\n"
+               << "      The X3DOM script of this page, " << escape_html(options.x3dom_url) << ", has no GeoTileset node, so the tileset is not shown. "
+               << "Use a build of X3DOM that has it (the <code>--x3dom-url</code> option gives the script of the page).\n"
+               << "    </div>\n"
+               << "    <script>\n"
+               << "      if (!(window.x3dom && x3dom.nodeTypes && x3dom.nodeTypes.GeoTileset)) {\n"
+               << "        document.getElementById('geotileset-warning').style.display = 'block';\n"
+               << "        console.error('This X3DOM build has no GeoTileset node: the tileset is not shown. Use --x3dom-url.');\n"
+               << "      }\n"
+               << "    </script>\n";
+    }
+    output << "    <script>\n"
            << "      var logUrl = '" << (options.log_url.empty() ? std::string() : escape_html(options.log_url)) << "';\n"
            << "      var viewerModels = [\n";
     for (std::size_t i = 0; i < options.models.size(); i++) {

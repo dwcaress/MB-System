@@ -53,6 +53,29 @@ int main() {
                 "gray comes from a custom shader, which keeps the shading that the REPLACE blend mode loses");
     ok &= check(has(page, "<a href='ZTopo_tileset/mbglb2tiles.log' target='_blank'>log</a>"), "the log is linked");
 
+    ok &= check(has(page, "var userViewpoints = [];") && !has(page, "value='user0'") && has(page, "function copyViewpoint()") && has(page, "'--geoviewpoint='"),
+                "without viewpoints of the user the menu has none, and the page can give the option for a view");
+    CesiumPageOptions with_views = options;
+    X3DomUserViewpoint down;   // straight down, 100 m above the point
+    down.longitude = -122.304;
+    down.latitude = 36.3928;
+    down.elevation = -740.0;
+    down.center_longitude = -122.304;
+    down.center_latitude = 36.3928;
+    down.center_elevation = -840.0;
+    down.has_orientation = true;
+    down.axis[0] = 1.0;
+    down.axis[1] = 0.0;
+    down.axis[2] = 0.0;
+    down.angle = -1.5708;
+    X3DomUserViewpoint oblique = down;   // from the position looking toward the center, with no orientation
+    oblique.has_orientation = false;
+    oblique.longitude = -122.3041;
+    with_views.user_viewpoints = {down, oblique};
+    const std::string views_page = cesium_page_text(with_views);
+    ok &= check(has(views_page, "<option value='user0'>User viewpoint 1</option>") && has(views_page, "<option value='user1'>User viewpoint 2</option>") &&
+                    has(views_page, "{ position: [-122.304, 36.3928, -740], axis: [1, 0, 0], angle: -1.5708 }") && has(views_page, "function setUserViewpoint("),
+                "the viewpoints of the user are in the menu, with the camera and its orientation as an axis and an angle");
     ok &= check(has(page, "<select id='viewpoint-select'") && has(page, "value='down'") && has(page, "function setViewpoint(name, animate)") &&
                     has(page, "setViewpoint('down', false);"),
                 "the page has the viewpoint menu, and opens looking down");
