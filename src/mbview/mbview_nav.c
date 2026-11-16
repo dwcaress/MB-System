@@ -1713,6 +1713,9 @@ int mbview_extract_nav_profile(size_t instance) {
 				else
 					data->profile.points[i].slope = 0.0;
 			}
+
+			/* leave out the points without grid data, mark the gaps */
+			mbview_profile_markgaps(instance);
 		}
 		else {
 			/* do not keep the points of an earlier profile */
