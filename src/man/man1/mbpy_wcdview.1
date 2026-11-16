@@ -42,7 +42,9 @@ profile; on when a profile is found) and \fBPick\fP (positions clicked in the
 image go into a table that can be saved as text), the depth and amplitude ranges,
 a fixed across track scale, a replay rate, and a slider that steps one swath at a
 time (also the mouse wheel and the left and right arrow keys). Amplitudes are in
-dB; the fill value of Kongsberg kmall data is drawn as no data. In *.wcd and *.all data
+dB; the fill value of Kongsberg kmall data is drawn as no data before the first echo of
+each beam (the near field), and later in the beam, where it is a weak echo clipped to the
+lowest level, with the lowest color. In *.wcd and *.all data
 the lowest value is a valid level and is drawn with the lowest color.
 
 \fBmbpy_wcdview\fP needs Python >= 3.11, numpy, matplotlib and PySide6, and an

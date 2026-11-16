@@ -57,6 +57,13 @@ class MbpyWcdviewTest(unittest.TestCase):
       self.assertEqual(len(w.steps), 2 * (S.NPINGS - 1) - 1)  # the last ping has one swath
       self.assertEqual(w.line.matched, S.NPINGS - 1)
       self.assertTrue(w.chk_raytrace.isChecked())
+      # the fill value is no data only before the first echo of a beam: NFILL fill samples
+      # start every beam, and the one inside beam 1 is drawn with the lowest colour
+      import numpy as np
+      w.redraw()
+      amp = w._last_grid["amp"]
+      self.assertTrue(np.isnan(amp[:, :S.NFILL]).all())
+      self.assertAlmostEqual(float(amp[1, S.INNER_FILL]), 0.5 * -128 - S.TVG_OFFSET, places=3)
       w.chk_bottom.setChecked(True)
       w.chk_wcbottom.setChecked(True)
       w.slider.setValue(2)
