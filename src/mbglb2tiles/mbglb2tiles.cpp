@@ -15,6 +15,7 @@
 #include "io/glb_writer.h"
 #include "io/provenance.h"
 #include "io/tileset_writer.h"
+#include "io/cesium_writer.h"
 #include "io/x3dom_writer.h"
 #include "util/logger.h"
 #include "util/memory.h"
@@ -64,6 +65,8 @@ struct Options {
     bool verbose = false;
     bool write_html = false;
     std::string x3dom_url;           // empty: the default of the page writer
+    bool write_cesium_html = false;  // --cesium-html: a page for CesiumJS as well
+    std::string cesium_url;          // empty: the default of the page writer
     double lift = 0.0;               // meters up along the local vertical, in the transform of tileset.json
     bool lift_requested = false;     // --lift as --geoorigin of mbmesh works: without it no lift; with no value, decided from the depth of the mesh
     bool lift_given = false;         // with a value
@@ -90,6 +93,11 @@ void print_usage() {
         "      --threads <n>            Tiles written at once [the cores, at most 8]\n"
         "      --html                   Also write a viewer page, <outputdir>.html beside the output directory, that shows the tileset with an X3DOM\n"
         "                               GeoTileset node, and print the command to serve and view it\n"
+        "      --cesium-html            Also write a viewer page for CesiumJS, <outputdir>_cesium.html beside the output directory. The globe of Cesium\n"
+        "                               would hide data below the ellipsoid, so the page starts with it hidden and has a check box that shows it,\n"
+        "                               translucent. The tileset is shown at its true height whatever --lift says\n"
+        "      --cesium-url <url>       The directory of the CesiumJS build of the --cesium-html page, with Cesium.js and Widgets/widgets.css in it\n"
+        "                               [https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium]\n"
         "      --x3dom-url <url>        The X3DOM script of the --html page [https://www.x3dom.org/x3dom/dist/x3dom-full.js]; a GeoTileset needs a\n"
         "                               build of X3DOM that has it\n"
         "      --lift[=<meters>]        Lift the tileset above the ellipsoid along the local vertical, in the transform of tileset.json:\n"
@@ -135,6 +143,8 @@ int main(int argc, char **argv) {
         {"lift", optional_argument, nullptr, 1008},
         {"sse", required_argument, nullptr, 1009},
         {"no-colors", no_argument, nullptr, 1010},
+        {"cesium-html", no_argument, nullptr, 1011},
+        {"cesium-url", required_argument, nullptr, 1012},
         {"no-draco", no_argument, nullptr, 1003},
         {"draco-precision", required_argument, nullptr, 1004},
         {"draco-normal-bits", required_argument, nullptr, 1005},
@@ -175,6 +185,12 @@ int main(int argc, char **argv) {
             break;
         case 1010:
             options.colors = false;
+            break;
+        case 1011:
+            options.write_cesium_html = true;
+            break;
+        case 1012:
+            options.cesium_url = optarg;
             break;
         case 1008: {
             options.lift_requested = true;
@@ -265,6 +281,8 @@ int main(int argc, char **argv) {
         LOG_INFO("[settings]", options.write_html ? "viewer page: yes (--html), X3DOM from " + (options.x3dom_url.empty() ? std::string("https://www.x3dom.org/x3dom/dist/x3dom-full.js (default)") : options.x3dom_url + " (--x3dom-url)") +
                                                         ", maximumScreenSpaceError " + std::to_string(options.sse) + " px" + (options.sse_given ? " (--sse)" : " (default)")
                                                   : std::string("viewer page: no (--html writes one)"));
+        LOG_INFO("[settings]", options.write_cesium_html ? "Cesium page: yes (--cesium-html), CesiumJS from " + (options.cesium_url.empty() ? std::string(default_cesium_url()) + " (default)" : options.cesium_url + " (--cesium-url)")
+                                                         : std::string("Cesium page: no (--cesium-html writes one)"));
         LOG_INFO("[settings]", !options.lift_requested ? std::string("lift: none, the true heights (default; --lift lifts the tileset above the ellipsoid)")
                                   : options.lift_given    ? "lift: " + std::to_string(options.lift) + " m (--lift)"
                                                           : std::string("lift: decided from the depth of the mesh once it is read (--lift)"));
@@ -559,25 +577,38 @@ int main(int argc, char **argv) {
                               std::to_string(bytes_written / (1024 * 1024)) + " MiB");
     LOG_INFO("[complete]", "total " + run_timer.text() + ", " + mbmesh::peak_memory_text());
 
-    // ---- The viewer page ----
-    if (options.write_html) {
-        const std::filesystem::path web_root = viewer_web_root(options.output);
-        const std::filesystem::path html_path = viewer_page_path(options.output);
-        const std::filesystem::path log_path = options.output / "mbglb2tiles.log";
-        const std::string directory_name = options.output.has_filename() ? options.output.filename().string() : options.output.parent_path().filename().string();
-        const auto url_encode = [](const std::string &text) {
-            std::string encoded;
-            for (const unsigned char character : text) {
-                if (std::isalnum(character) || character == '-' || character == '.' || character == '_' || character == '~' || character == '/') {
-                    encoded += static_cast<char>(character);
-                } else {
-                    std::ostringstream hex;
-                    hex << '%' << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(character);
-                    encoded += hex.str();
-                }
+    // ---- The viewer pages ----
+    const auto url_encode = [](const std::string &text) {
+        std::string encoded;
+        for (const unsigned char character : text) {
+            if (std::isalnum(character) || character == '-' || character == '.' || character == '_' || character == '~' || character == '/') {
+                encoded += static_cast<char>(character);
+            } else {
+                std::ostringstream hex;
+                hex << '%' << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(character);
+                encoded += hex.str();
             }
-            return encoded;
-        };
+        }
+        return encoded;
+    };
+    const std::filesystem::path web_root = viewer_web_root(options.output);
+    const std::filesystem::path log_path = options.output / "mbglb2tiles.log";
+    const std::string directory_name = options.output.has_filename() ? options.output.filename().string() : options.output.parent_path().filename().string();
+    const std::filesystem::path absolute_root = std::filesystem::absolute(web_root);
+    const auto write_log = [&]() {
+        std::string log_error;
+        if (!write_log_file(log_path, mbmesh::Logger::captured_messages(), mbmesh::Logger::captured_omitted(), &log_error)) {
+            LOG_ERROR(log_error);
+            return false;
+        }
+        return true;
+    };
+
+    // The pages that were written, for the command that serves them and the URL of each.
+    std::vector<std::string> page_names;
+
+    if (options.write_html) {
+        const std::filesystem::path html_path = viewer_page_path(options.output);
 
         X3DomWriterOptions html_options;
         html_options.title = viewer_title(web_root);
@@ -615,8 +646,7 @@ int main(int argc, char **argv) {
         html_options.models.push_back(model);
         html_options.metadata = metadata;
         html_options.geo_summary = geo_metadata_summary(run);
-        if (!write_log_file(log_path, mbmesh::Logger::captured_messages(), mbmesh::Logger::captured_omitted(), &error)) {
-            LOG_ERROR(error);
+        if (!write_log()) {
             return 1;
         }
         html_options.log_url = url_encode(directory_name + "/mbglb2tiles.log");
@@ -625,10 +655,36 @@ int main(int argc, char **argv) {
             return 1;
         }
         LOG_INFO("[html]", "wrote " + html_path.string() + ", showing the tileset and the log " + log_path.string());
-        const std::filesystem::path absolute_root = std::filesystem::absolute(web_root);
-        LOG_INFO("[html]", "to view " + html_path.filename().string() + ", run this command in a terminal (Ctrl-C stops it), then open the URL:");
+        page_names.push_back(html_path.filename().string());
+    }
+
+    if (options.write_cesium_html) {
+        const std::filesystem::path cesium_path = cesium_page_path(options.output);
+        if (!write_log()) {
+            return 1;
+        }
+        CesiumPageOptions cesium_options;
+        cesium_options.title = viewer_title(web_root);
+        cesium_options.tileset_uri = url_encode(directory_name + "/tileset.json");
+        cesium_options.log_url = url_encode(directory_name + "/mbglb2tiles.log");
+        cesium_options.cesium_url = options.cesium_url;
+        cesium_options.lift_meters = options.lift;
+        cesium_options.max_screen_space_error = options.sse;
+        cesium_options.height_colors = options.colors;
+        if (!write_cesium_page(cesium_path, cesium_options, &error)) {
+            LOG_ERROR(error);
+            return 1;
+        }
+        LOG_INFO("[cesium]", "wrote " + cesium_path.string() + ", showing the tileset with the globe hidden; the check box in the page shows it");
+        page_names.push_back(cesium_path.filename().string());
+    }
+    if (!page_names.empty()) {
+        LOG_INFO("[html]", std::string("to view ") + (page_names.size() > 1 ? "the pages" : page_names[0]) +
+                               ", run this command in a terminal (Ctrl-C stops it), then open the URL" + (page_names.size() > 1 ? "s" : "") + ":");
         LOG_INFO("[html]", "  python3 -m http.server 8000 --bind 127.0.0.1 --directory '" + absolute_root.string() + "'");
-        LOG_INFO("[html]", "  http://127.0.0.1:8000/" + url_encode(html_path.filename().string()));
+        for (const std::string &name : page_names) {
+            LOG_INFO("[html]", "  http://127.0.0.1:8000/" + url_encode(name));
+        }
     }
     return 0;
 }

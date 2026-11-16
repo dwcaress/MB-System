@@ -30,7 +30,7 @@ mbmesh_SOURCES = \
 mbmesh_LDADD = $(top_builddir)/src/mbio/libmbio.la $(top_builddir)/src/mbdraco/libmbdraco.la -lpthread
 
 # The unit tests are those of the CMake build (mbmesh_test.py, which runs the program, is run by CMake only).
-check_PROGRAMS = mbmesh_test_support_trimming mbmesh_test_settings mbmesh_test_coverage_footprint mbmesh_test_seam_blending mbmesh_test_point_spill mbmesh_test_coordinate_frame mbmesh_test_chunking mbmesh_test_track mbmesh_test_x3dom_writer mbmesh_test_tileset mbmesh_test_provenance mbmesh_test_marching_cubes mbmesh_test_normal_estimation mbmesh_test_draco_mesh
+check_PROGRAMS = mbmesh_test_support_trimming mbmesh_test_settings mbmesh_test_coverage_footprint mbmesh_test_seam_blending mbmesh_test_point_spill mbmesh_test_coordinate_frame mbmesh_test_chunking mbmesh_test_track mbmesh_test_x3dom_writer mbmesh_test_cesium_writer mbmesh_test_tileset mbmesh_test_provenance mbmesh_test_marching_cubes mbmesh_test_normal_estimation mbmesh_test_draco_mesh
 TESTS = $(check_PROGRAMS)
 
 mbmesh_test_support_trimming_CXXFLAGS = -std=c++17
@@ -107,6 +107,11 @@ mbmesh_test_x3dom_writer_SOURCES = \
 	src/io/provenance.cpp \
 	src/io/x3dom_writer.cpp
 
+mbmesh_test_cesium_writer_CXXFLAGS = -std=c++17
+mbmesh_test_cesium_writer_SOURCES = \
+	tests/test_cesium_writer.cpp \
+	src/io/cesium_writer.cpp
+
 mbmesh_test_tileset_CXXFLAGS = -std=c++17
 mbmesh_test_tileset_SOURCES = \
 	tests/test_tileset.cpp \
@@ -160,6 +165,7 @@ noinst_HEADERS = \
 	include/data_types/swathfile.h \
 	include/io/coordinate_frame.h \
 	include/io/datalist_reader.h \
+	include/io/cesium_writer.h \
 	include/io/glb_writer.h \
 	include/io/point_spill.h \
 	include/io/provenance.h \

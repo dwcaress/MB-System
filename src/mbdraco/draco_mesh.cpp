@@ -100,7 +100,8 @@ bool encode(const std::vector<float> &positions, const std::vector<float> *norma
     int color_attribute_id = -1;
     if (colors != nullptr) {
         draco::GeometryAttribute color_attribute;
-        color_attribute.Init(draco::GeometryAttribute::COLOR, nullptr, 3, draco::DT_UINT8, true, 3, 0);
+        // Floats, not bytes: CesiumJS decodes a Draco color of bytes wrongly (noise of red, green and blue), and a float color is right in it and in X3DOM.
+        color_attribute.Init(draco::GeometryAttribute::COLOR, nullptr, 3, draco::DT_FLOAT32, false, 12, 0);
         color_attribute_id = mesh.AddAttribute(color_attribute, true, static_cast<std::uint32_t>(point_count));
         if (color_attribute_id < 0) {
             return fail("Draco: the color attribute could not be added");
@@ -108,7 +109,8 @@ bool encode(const std::vector<float> &positions, const std::vector<float> *norma
     }
     for (std::size_t n = 0; n < point_count; n++) {
         if (color_attribute_id >= 0) {
-            mesh.attribute(color_attribute_id)->SetAttributeValue(draco::AttributeValueIndex(static_cast<std::uint32_t>(n)), &(*colors)[3 * n]);
+            const float rgb[3] = {(*colors)[3 * n] / 255.0f, (*colors)[3 * n + 1] / 255.0f, (*colors)[3 * n + 2] / 255.0f};
+            mesh.attribute(color_attribute_id)->SetAttributeValue(draco::AttributeValueIndex(static_cast<std::uint32_t>(n)), rgb);
         }
         mesh.attribute(position_attribute_id)->SetAttributeValue(draco::AttributeValueIndex(static_cast<std::uint32_t>(n)), &positions[3 * n]);
         if (normal_attribute_id >= 0) {
@@ -123,6 +125,9 @@ bool encode(const std::vector<float> &positions, const std::vector<float> *norma
     draco::Encoder encoder;
     encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, position_bits);
     encoder.SetAttributeQuantization(draco::GeometryAttribute::NORMAL, normal_bits);
+    if (colors != nullptr) {
+        encoder.SetAttributeQuantization(draco::GeometryAttribute::COLOR, 10);   // a step of 1/1023 at most, finer than the bytes they come from
+    }
     draco::EncoderBuffer buffer;
     const draco::Status status = encoder.EncodeMeshToBuffer(mesh, &buffer);
     if (!status.ok()) {
@@ -245,8 +250,8 @@ bool add_primitive(tinygltf::Model *model, tinygltf::Mesh *mesh, std::vector<uns
     int color_index = -1;
     if (encoded.color_id >= 0) {
         tinygltf::Accessor color_accessor;
-        color_accessor.componentType = TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE;
-        color_accessor.normalized = true;
+        color_accessor.componentType = TINYGLTF_COMPONENT_TYPE_FLOAT;
+        color_accessor.normalized = false;
         color_accessor.count = encoded.point_count;
         color_accessor.type = TINYGLTF_TYPE_VEC3;
         model->accessors.push_back(std::move(color_accessor));

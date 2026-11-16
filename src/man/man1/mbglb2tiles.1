@@ -5,7 +5,7 @@ mbglb2tiles \- make an OGC 3D Tiles tileset of levels of detail from a GLB mesh 
 \fBmbglb2tiles\fR \fB-I\fI mesh.glb\fR [\fB-O\fI outputdir\fR]
 [\fB--tile-size\fI meters\fR] [\fB--weld-tolerance\fI meters\fR] [\fB--threads\fI n\fR]
 [\fB--no-draco\fR] [\fB--draco-precision\fI meters\fR] [\fB--draco-normal-bits\fI n\fR]
-[\fB--html\fR [\fB--x3dom-url\fI url\fR] [\fB--sse\fI pixels\fR]] [\fB--lift\fR[=\fImeters\fR]] [\fB--no-colors\fR] [\fB-V\fR] [\fB-h\fR]
+[\fB--html\fR [\fB--x3dom-url\fI url\fR] [\fB--sse\fI pixels\fR]] [\fB--cesium-html\fR [\fB--cesium-url\fI url\fR]] [\fB--lift\fR[=\fImeters\fR]] [\fB--no-colors\fR] [\fB-V\fR] [\fB-h\fR]
 .SH DESCRIPTION
 .LP
 \fBmbglb2tiles\fR turns a triangle mesh in a binary glTF (GLB) file written by \fBmbmesh\fR or
@@ -92,6 +92,15 @@ the command that serves it (\fBpython3 -m http.server\fR), and does not start it
 .B \--x3dom-url\fI url\fR
 The X3DOM script that the \fB--html\fR page loads (default https://www.x3dom.org/x3dom/dist/x3dom-full.js). A GeoTileset needs a build of X3DOM
 that has it, which that one may not.
+.TP
+.B \--cesium-html
+Also write a viewer page for CesiumJS, \fIoutputdir\fR_cesium.html in the directory that holds the output directory. The globe of Cesium hides data that are below
+the ellipsoid, so the page starts with the globe hidden and has a check box that shows it, translucent. The page takes the lift of \fB--lift\fR off again, so that the
+tileset is at its true height. It must be served over HTTP, like the \fB--html\fR page.
+.TP
+.B \--cesium-url\fI url\fR
+The directory of the CesiumJS build that the \fB--cesium-html\fR page loads, with Cesium.js and Widgets/widgets.css in it (default
+https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium).
 .TP
 .B \--no-colors
 Do not color the tiles by height. By default every vertex has a color (\fBCOLOR_0\fR) from the Haxby table over the heights of the whole mesh, so that all tiles and levels agree, with a white base color; \fBtileset.json\fR records the bounds as \fBheightColors\fR, and the \fB--html\fR page has a "color by height" checkbox that turns the colors off, which shows the tiles in gray.

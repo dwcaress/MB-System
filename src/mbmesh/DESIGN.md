@@ -111,6 +111,11 @@ tileset/L1/…  Ln/…
 - A tileset with colors gets a "color by height" checkbox, one for each tileset: unchecked, it turns the vertex colors off and sets the gray
   base color that MeshLab shows (192 of 255). The tiles are reached through X3DOM's internal nodes from the `GeoTileset`, and tiles that load later
   are done as they arrive.
+- `mbglb2tiles --cesium-html` writes a page for CesiumJS (`io/cesium_writer.cpp`): a `Cesium3DTileset` from `tileset.json`, the globe hidden at the start with a
+  check box that shows it translucent (the data are below the ellipsoid, which the globe would hide), the lift taken off again by a `modelMatrix` of the tileset, a
+  "color by height" check box (a style that replaces the colors with gray), a link to the log, and the scale object (polylines and labels at the point of the data
+  under the middle of the view, from a depth pick, resized on `camera.changed`). Seen in headless Chrome with CesiumJS 1.114 and the test tileset;
+  not tried on a large survey or with the OpenStreetMap imagery, which the headless run did not load. `mbmesh` and `mbgrd2gltf` do not have the option yet.
 - The pages need an X3DOM build that has `GeoTileset` ([PR 1364](https://github.com/x3dom/x3dom/pull/1364)), given with `--x3dom-url`.
 
 ## Build

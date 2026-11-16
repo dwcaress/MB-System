@@ -5,7 +5,7 @@ reconstructing anything: the mesh is read, coarsened level by level, and cut int
 
 ```
 mbglb2tiles -I mesh.glb [-O outputdir] [--tile-size meters] [--weld-tolerance meters] [--threads n]
-            [--no-draco] [--draco-precision meters] [--draco-normal-bits n] [--html [--x3dom-url url] [--sse pixels]] [--lift[=meters]] [--no-colors] [-V]
+            [--no-draco] [--draco-precision meters] [--draco-normal-bits n] [--html [--x3dom-url url] [--sse pixels]] [--cesium-html [--cesium-url url]] [--lift[=meters]] [--no-colors] [-V]
 ```
 
 The output directory (`tileset` beside the input by default, where `mbmesh --tileset` writes its tileset) gets `tileset.json` and one directory `L<level>` of tile GLBs
@@ -18,9 +18,17 @@ With `--html` it also writes a viewer page, `<outputdir>.html` beside the output
 output directory), and prints the command to serve and view it. `--x3dom-url` names the X3DOM script, which must be a build that has `GeoTileset`;
 `--sse` is the `maximumScreenSpaceError` of that node, 1 pixel by default (X3DOM's own 8 refines tiles of centimeter errors only within a few meters).
 
-The pages have a scale object: axes East (red), North (green) and Up (blue) at the center of rotation, which the page resizes whenever the viewpoint changes so that they stay about a sixth of the height of the view, with their length in the label, rounded down to 1, 2 or 5 times a power of ten ("5 m", "20 cm", "2 km"). The length is true at the axes, and the perspective makes other distances differ; the "scale axes" check box switches the object off.
+With `--cesium-html` it also writes a page for CesiumJS, the reference renderer of 3D Tiles, `<outputdir>_cesium.html` beside the output directory,
+which needs no special build of the viewer. Data below the ellipsoid, as seafloor is, would be hidden by Cesium's globe, so the page starts with the
+globe hidden and has a "show globe (translucent)" check box that shows it, with the data seen through it. The page takes the lift of `--lift` off
+again, so the tileset is at its true height, and has a "color by height" check box and a link to the log. `--cesium-url` is the directory of the CesiumJS
+build, with `Cesium.js` and `Widgets/widgets.css` in it (release 1.114 from Cesium's web site by default). The page has to be served over HTTP, as the
+X3DOM page does. It has the scale object too, with a "scale axes" check box. Cesium gives a page no center of rotation, so the axes are put where the middle of the view meets
+the data (a depth pick there; the center of the tileset where there is none) and are resized as the camera moves, as in the X3DOM pages.
 
-Tiles are colored by height unless `--no-colors`: every vertex has a `COLOR_0` (bytes, Draco-compressed with the rest) from the Haxby table over the heights of the whole mesh, so every tile and level agrees, with a white base color so the colors show unchanged. `tileset.json` records the bounds as `heightColors` in its extras, and the `--html` page has a "color by height" checkbox that turns the vertex colors off, which shows the tiles in gray.
+The X3DOM pages have a scale object: axes East (red), North (green) and Up (blue) at the center of rotation, which the page resizes whenever the viewpoint changes so that they stay about a sixth of the height of the view, with their length in the label, rounded down to 1, 2 or 5 times a power of ten ("5 m", "20 cm", "2 km"). The length is true at the axes, and the perspective makes other distances differ; the "scale axes" check box switches the object off.
+
+Tiles are colored by height unless `--no-colors`: every vertex has a `COLOR_0` (bytes, or with Draco floats quantized to 10 bits: CesiumJS decodes a Draco color of bytes wrongly) from the Haxby table over the heights of the whole mesh, so every tile and level agrees, with a white base color so the colors show unchanged. `tileset.json` records the bounds as `heightColors` in its extras, and the `--html` page has a "color by height" checkbox that turns the vertex colors off, which shows the tiles in gray.
 
 `--lift` puts the tileset above the ellipsoid, in the transform of `tileset.json`, and works as `mbmesh --geoorigin` does: without it the tileset has the true heights (and a warning says so if any are below the ellipsoid); with `--lift` alone the lift is the default below; with `--lift=900` it is that many meters. `GeoTileset` takes the height of the camera as at least 1 m,
 so a camera below the ellipsoid, as over the seafloor, never gets close enough to refine a tile and only the root tile loads. The default lift is enough to

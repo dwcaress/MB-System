@@ -65,7 +65,8 @@ struct Encoded {
 // the positions in position_bits bits (2 to 30) over the largest of the ranges of the three axes, and the normals in
 // normal_bits bits each. The result is decoded again to check it, and to count what it holds. Returns false and says why in
 // *error if it cannot.
-// colors, if not null, are three bytes (red, green, blue) for each vertex, written without quantization.
+// colors, if not null, are three bytes (red, green, blue) for each vertex. Draco gets them as floats from 0 to 1, quantized to 10 bits, which is finer than the bytes: CesiumJS decodes
+// a Draco color of bytes wrongly. The glTF accessor of COLOR_0 is then FLOAT. Without Draco the colors are bytes.
 [[nodiscard]] bool encode(const std::vector<float> &positions, const std::vector<float> *normals, const std::vector<std::uint32_t> &indices,
                           int position_bits, int normal_bits, Encoded *result, std::string *error,
                           const std::vector<std::uint8_t> *colors = nullptr);

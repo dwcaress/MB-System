@@ -153,6 +153,14 @@ if(buildTests)
     ${CMAKE_SOURCE_DIR}/src/mbgrd2gltf)
   add_test(NAME mbmesh_x3dom_writer COMMAND mbmesh_test_x3dom_writer)
 
+  add_executable(mbmesh_test_cesium_writer
+    tests/test_cesium_writer.cpp
+    src/io/cesium_writer.cpp)
+  target_compile_features(mbmesh_test_cesium_writer PRIVATE cxx_std_17)
+  target_include_directories(mbmesh_test_cesium_writer PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include)
+  add_test(NAME mbmesh_cesium_writer COMMAND mbmesh_test_cesium_writer)
+
   add_executable(mbmesh_test_tileset
     tests/test_tileset.cpp
     src/io/coordinate_frame.cpp

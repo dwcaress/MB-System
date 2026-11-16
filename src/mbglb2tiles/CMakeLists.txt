@@ -15,6 +15,7 @@ set(MBGLB2TILES_SHARED_SOURCES
   ${MBMESH_DIR}/src/io/glb_writer.cpp
   ${MBMESH_DIR}/src/io/tileset_writer.cpp
   ${MBMESH_DIR}/src/io/x3dom_writer.cpp
+  ${MBMESH_DIR}/src/io/cesium_writer.cpp
   ${MBMESH_DIR}/src/algorithms/seam_blending.cpp
   ${MBMESH_DIR}/src/algorithms/marching_cubes.cpp)
 

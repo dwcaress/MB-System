@@ -19,6 +19,7 @@ mbglb2tiles_SOURCES = \
 	../mbmesh/src/io/glb_writer.cpp \
 	../mbmesh/src/io/tileset_writer.cpp \
 	../mbmesh/src/io/x3dom_writer.cpp \
+	../mbmesh/src/io/cesium_writer.cpp \
 	../mbmesh/src/algorithms/seam_blending.cpp \
 	../mbmesh/src/algorithms/marching_cubes.cpp
 
@@ -39,6 +40,7 @@ mbglb2tiles_test_levels_SOURCES = \
 	../mbmesh/src/io/glb_writer.cpp \
 	../mbmesh/src/io/tileset_writer.cpp \
 	../mbmesh/src/io/x3dom_writer.cpp \
+	../mbmesh/src/io/cesium_writer.cpp \
 	../mbmesh/src/algorithms/seam_blending.cpp \
 	../mbmesh/src/algorithms/marching_cubes.cpp
 mbglb2tiles_test_levels_LDADD = $(top_builddir)/src/mbdraco/libmbdraco.la -lpthread
