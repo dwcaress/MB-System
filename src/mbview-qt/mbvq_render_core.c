@@ -31,7 +31,11 @@
  * made. Only plain C types cross to the Qt half (mbvq_bridge.h).
  * Compiled in every build, like the CPU pick (mbvq_pick_cpu.c); nothing here
  * draws or changes the core's state, apart from the view extents that
- * mbview_camera() sets as a drawing does.
+ * mbview_camera() sets as a drawing does, with one exception:
+ * mbvq_c_pick_size() does what a plot does every MBV_BOUNDSFREQUENCY plots,
+ * and so changes the view-bounds counter, data->viewbounds, the pick marks
+ * and the CPU pick's cache of the view bounds (call it once per full fill,
+ * with the batch target set).
  */
 
 #include <stdbool.h>
@@ -171,5 +175,21 @@ bool mbvq_c_contours_made(size_t instance, int rez) {
 	if (rez == MBV_REZ_LOW)
 		return (view->contourlorez);
 	return (false);
+}
+/*------------------------------------------------------------------------------*/
+bool mbvq_c_pick_size(size_t instance) {
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	/* outside a plot the projection could stop after one column
+	   (mbview_projectdata): the counter waits for a projected view */
+	if (!view->glx_init || !view->projected || data->display_mode != MBV_DISPLAY_3D ||
+	    view->viewboundscount < MBV_BOUNDSFREQUENCY)
+		return (false);
+	mbview_viewbounds(instance);
+	view->viewboundscount = 0;
+	if (data->pick_type != MBV_PICK_NONE)
+		mbview_picksize(instance);
+	return (true);
 }
 /*------------------------------------------------------------------------------*/

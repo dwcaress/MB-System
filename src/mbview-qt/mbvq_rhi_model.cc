@@ -237,6 +237,19 @@ int fill_resolution(int pending, int lastdrawrez, bool contours_shown, bool full
   return MBVQ_REZ_FULL;
 }
 
+int fill_resolution(int pending, int lastdrawrez, bool contours_shown, bool full_contours_made, bool button_down,
+                    double full_ms, double fallback_ms) {
+  const int rez = fill_resolution(pending, lastdrawrez, contours_shown, full_contours_made);
+  if (rez == MBVQ_REZ_FULL && button_down && full_ms > fallback_ms) {
+    /* the resolution asked for, as with contours due */
+    int requested = pending >= 0 ? pending : lastdrawrez;
+    if (requested == MBVQ_REZ_NONE)
+      requested = MBVQ_REZ_LOW;
+    return requested;
+  }
+  return rez;
+}
+
 double drag_budget_ms(double outside_ms) { return std::max(kDragMinimumMs, kDragFrameMs - outside_ms - kDragMarginMs); }
 
 int zoom_level(double cell_pixels) {
@@ -1369,6 +1382,276 @@ bool TerrainPlan::plan(const TerrainInput &input, const PlanOptions &options, Pl
   if (visible_ && pinned_bytes_ < pinned_before)
     cache.freed(this);
   return result->more;
+}
+
+/*--------------------------------------------------------------------*/
+int Style::physical(double logical, double ratio, double factor) {
+  const double size = std::floor(logical * ratio * factor + 0.5);
+  if (!(size >= 1.0))
+    return 1;
+  return size > 4096.0 ? 4096 : static_cast<int>(size);
+}
+
+int BatchPlan::add_slot(const struct mbv_draw_command &command, const Style &style) {
+  SlotSpec slot;
+  slot.camera = command.camera;
+  slot.depth_test = command.depth_test;
+  slot.width = command.kind == MBV_DRAW_PRIMITIVE && command.primitive == MBV_DRAW_POINTS ? style.point(command.point_size)
+                                                                                          : style.line(command.line_width);
+  slot.stipple = command.stipple;
+  slot.factor = style.stipple(command.stipple_factor);
+  slot.pattern = command.stipple_pattern;
+  slots_.push_back(slot);
+  return static_cast<int>(slots_.size()) - 1;
+}
+
+namespace {
+
+/* a point in window coordinates (physical pixels, y up) through a matrix of
+   OpenGL's convention; false behind the camera */
+bool window(const double m[16], const struct mbv_draw_vertex &v, int width, int height, double *x, double *y) {
+  const double c[4] = {m[0] * v.x + m[4] * v.y + m[8] * v.z + m[12], m[1] * v.x + m[5] * v.y + m[9] * v.z + m[13],
+                       m[2] * v.x + m[6] * v.y + m[10] * v.z + m[14], m[3] * v.x + m[7] * v.y + m[11] * v.z + m[15]};
+  if (!(c[3] > 0.0))
+    return false;
+  *x = (c[0] / c[3] + 1.0) * 0.5 * width;
+  *y = (c[1] / c[3] + 1.0) * 0.5 * height;
+  return true;
+}
+
+/* whether a point in window coordinates lies inside the diamond of its
+   pixel, |x - xc| + |y - yc| < 1/2 around the pixel's centre (xc, yc)
+   (OpenGL 2.1, 3.4.1) */
+bool in_diamond(double x, double y) {
+  return std::fabs(x - std::floor(x) - 0.5) + std::fabs(y - std::floor(y) - 0.5) < 0.5;
+}
+
+}  // namespace
+
+void BatchPlan::add_stipple(const struct mbv_draw_batch &batch, int c, int slot, const double matrix[16], int width,
+                            int height) {
+  /* OpenGL's stipple counter s counts the fragments of a line in the order
+     they are made, from the first fragment at the start: it goes on along a
+     strip or loop and starts again with every primitive and every segment of
+     separate lines (mbv_draw_batch.h). A line of one pixel makes one fragment
+     in each column of its major axis (each row of a steep line), and the
+     diamond-exit rule (OpenGL 2.1, 3.4.1) gives the first and the last. With
+     u the major coordinate in window pixels, mirrored so that it grows from
+     the start a to the end b, and v the minor one: the first fragment lies in
+     the column of ua, or in the next one when ua lies past that column's
+     centre and outside its diamond; the last lies in the column of ub only
+     when ub lies past its centre and outside its diamond, else in the column
+     before. The vertices carry the counter along the major axis, set so that
+     the centre of the k-th fragment (from 0) gets s + k + 1/2: the fragment
+     shader's floor() gives s + k, with half a pixel to spare for the
+     rasterisation and the interpolation. The counter carried to the next
+     segment is reduced modulo 16 times the factor, which leaves the
+     pattern's bits as they are and keeps the floats small along long strips
+     and loops. The columns of a wide line take the value at their major
+     coordinate, so each column is drawn or left out whole, and the counter
+     is that of the line one pixel wide, as Apple's legacy OpenGL counts it.
+     The rule assumes lines of one pixel rasterised by the diamond-exit rule,
+     as Metal and Direct3D draw them (Vulkan's default lines are unverified).
+     A segment that crosses the window's edge is counted from its vertex, as
+     Mesa does, while Apple's legacy OpenGL restarts the counter at the edge
+     (OpenGL 2.1 leaves the counter of a clipped segment indeterminate), so
+     the dots of such a segment can differ from Apple's. The values are
+     interpolated linearly in window coordinates, as the counter needs, only
+     under an orthographic projection (the soundings view, the only stippled
+     drawing); under a perspective one the interpolation follows depth, so
+     the pattern stretches towards the nearer end of a segment and crowds
+     towards the farther one. */
+  const struct mbv_draw_command &command = batch.commands[c];
+  const int n = command.count;
+  const struct mbv_draw_vertex *v = &batch.vertices[command.first];
+  std::vector<std::pair<int, int>> pairs;
+  bool restart = false;
+  if (command.primitive == MBV_DRAW_LINES) {
+    for (int k = 0; k + 1 < n; k += 2)
+      pairs.emplace_back(k, k + 1);
+    restart = true;
+  }
+  else if (command.primitive == MBV_DRAW_LINE_STRIP || command.primitive == MBV_DRAW_LINE_LOOP) {
+    for (int k = 0; k + 1 < n; k++)
+      pairs.emplace_back(k, k + 1);
+    if (command.primitive == MBV_DRAW_LINE_LOOP && n >= 2)
+      pairs.emplace_back(n - 1, 0);
+  }
+  if (pairs.empty())
+    return;
+  const uint32_t first = static_cast<uint32_t>(stipple_.size());
+  double counter = 0.0;
+  for (const std::pair<int, int> &pair : pairs) {
+    if (restart)
+      counter = 0.0;
+    double xa = 0.0, ya = 0.0, xb = 0.0, yb = 0.0;
+    double da = counter, db = counter;
+    if (window(matrix, v[pair.first], width, height, &xa, &ya) && window(matrix, v[pair.second], width, height, &xb, &yb)) {
+      const bool steep = std::fabs(yb - ya) > std::fabs(xb - xa);
+      const double mirror = (steep ? yb < ya : xb < xa) ? -1.0 : 1.0;
+      const double ua = mirror * (steep ? ya : xa), ub = mirror * (steep ? yb : xb);
+      const double va = steep ? xa : ya, vb = steep ? xb : yb;
+      const double ca = std::floor(ua), cb = std::floor(ub);
+      const double head = ua > ca + 0.5 && !in_diamond(ua, va) ? ca + 1.0 : ca;
+      const double tail = ub > cb + 0.5 && !in_diamond(ub, vb) ? cb : cb - 1.0;
+      da = counter + ua - head;
+      db = da + (ub - ua);
+      counter += std::max(0.0, tail - head + 1.0);
+      counter = std::fmod(counter, 16.0 * slots_[slot].factor);
+    }
+    const struct mbv_draw_vertex &a = v[pair.first];
+    const struct mbv_draw_vertex &b = v[pair.second];
+    stipple_.push_back({a.x, a.y, a.z, a.r, a.g, a.b, static_cast<float>(da)});
+    stipple_.push_back({b.x, b.y, b.z, b.r, b.g, b.b, static_cast<float>(db)});
+  }
+  const uint32_t segments = static_cast<uint32_t>(pairs.size());
+  DrawItem item;
+  item.command = c;
+  item.slot = slot;
+  item.source = DrawSource::Stipple;
+  if (Style::thin(slots_[slot].width)) {
+    item.kind = DrawKind::StippleLines;
+    item.first = first;
+    item.count = 2 * segments;
+  }
+  else {
+    item.kind = DrawKind::StippleWide;
+    item.offset = static_cast<uint32_t>(first * sizeof(StippleVertex));
+    item.count = segments;
+  }
+  segments_ += segments;
+  items_.push_back(item);
+}
+
+void BatchPlan::build(const struct mbv_draw_batch &batch, const Style &style, const double camera[16],
+                      const double projection[16], int width, int height) {
+  items_.clear();
+  slots_.clear();
+  closings_.clear();
+  triangles_.clear();
+  stipple_.clear();
+  groups_ = 0;
+  markers_ = 0;
+  segments_ = 0;
+  const auto add = [this](DrawKind kind, DrawSource source, int c, int slot, uint32_t first, uint32_t count,
+                          uint32_t offset) {
+    DrawItem item;
+    item.kind = kind;
+    item.source = source;
+    item.command = c;
+    item.slot = slot;
+    item.first = first;
+    item.count = count;
+    item.offset = offset;
+    items_.push_back(item);
+  };
+  constexpr uint32_t kVertex = sizeof(struct mbv_draw_vertex);
+  for (int c = 0; c < batch.num_commands; c++) {
+    const struct mbv_draw_command &command = batch.commands[c];
+    switch (command.kind) {
+    case MBV_DRAW_GROUP:
+      groups_++;
+      break;
+    case MBV_DRAW_SHAPE:
+      /* defines the mesh of later runs: a run names its shape by index */
+      break;
+    case MBV_DRAW_SLOT:
+      if (command.primitive == MBV_DRAW_SLOT_TERRAIN) {
+        add(DrawKind::Terrain, DrawSource::None, c, add_slot(command, style), 0, 0, 0);
+      }
+      else if (command.primitive == MBV_DRAW_SLOT_CONTOURS_LOW || command.primitive == MBV_DRAW_SLOT_CONTOURS_HIGH ||
+               command.primitive == MBV_DRAW_SLOT_CONTOURS_FULL) {
+        /* black, 1 logical pixel wide (mbview_contour) */
+        const int slot = add_slot(command, style);
+        slots_[slot].width = style.contour();
+        slots_[slot].stipple = false;
+        add(DrawKind::Contours, DrawSource::None, c, slot, 0, 0, 0);
+        items_.back().shape = command.primitive;
+      }
+      break;
+    case MBV_DRAW_MARKERS: {
+      if (command.count <= 0 || command.primitive < 0 || command.primitive >= batch.num_shapes)
+        break;
+      const int slot = add_slot(command, style);
+      const struct mbv_draw_shape &shape = batch.shapes[command.primitive];
+      std::copy(shape.ring_color, shape.ring_color + 3, slots_[slot].colour);
+      add(DrawKind::Markers, DrawSource::Instances, c, slot, 0, static_cast<uint32_t>(command.count),
+          static_cast<uint32_t>(command.first) * static_cast<uint32_t>(sizeof(struct mbv_draw_instance)));
+      items_.back().shape = command.primitive;
+      markers_ += command.count;
+      break;
+    }
+    case MBV_DRAW_PRIMITIVE: {
+      const int n = command.count;
+      if (n <= 0)
+        break;
+      const uint32_t first = static_cast<uint32_t>(command.first);
+      const int primitive = command.primitive;
+      const bool line = primitive == MBV_DRAW_LINES || primitive == MBV_DRAW_LINE_STRIP || primitive == MBV_DRAW_LINE_LOOP;
+      if (line && command.stipple) {
+        const int slot = add_slot(command, style);
+        add_stipple(batch, c, slot, command.camera ? camera : projection, width, height);
+        break;
+      }
+      if (primitive == MBV_DRAW_POINTS) {
+        add(DrawKind::Points, DrawSource::Batch, c, add_slot(command, style), first, static_cast<uint32_t>(n), 0);
+      }
+      else if (primitive == MBV_DRAW_LINES) {
+        const uint32_t pairs = static_cast<uint32_t>(n / 2);
+        if (pairs == 0)
+          break;
+        const int slot = add_slot(command, style);
+        if (Style::thin(slots_[slot].width))
+          add(DrawKind::Lines, DrawSource::Batch, c, slot, first, 2 * pairs, 0);
+        else
+          add(DrawKind::WidePairs, DrawSource::Batch, c, slot, 0, pairs, first * kVertex);
+        segments_ += pairs;
+      }
+      else if (primitive == MBV_DRAW_LINE_STRIP || primitive == MBV_DRAW_LINE_LOOP) {
+        if (n < 2)
+          break;
+        const int slot = add_slot(command, style);
+        const bool thin = Style::thin(slots_[slot].width);
+        if (thin)
+          add(DrawKind::LineStrip, DrawSource::Batch, c, slot, first, static_cast<uint32_t>(n), 0);
+        else
+          add(DrawKind::WideStrip, DrawSource::Batch, c, slot, 0, static_cast<uint32_t>(n - 1), first * kVertex);
+        segments_ += static_cast<size_t>(n - 1);
+        if (primitive == MBV_DRAW_LINE_LOOP) {
+          /* the closing segment from the last vertex to the first */
+          const uint32_t pair = static_cast<uint32_t>(closings_.size() / 2);
+          closings_.push_back(batch.vertices[command.first + n - 1]);
+          closings_.push_back(batch.vertices[command.first]);
+          if (thin)
+            add(DrawKind::Lines, DrawSource::Closings, c, slot, 2 * pair, 2, 0);
+          else
+            add(DrawKind::WidePairs, DrawSource::Closings, c, slot, 0, 1, 2 * pair * kVertex);
+          segments_++;
+        }
+      }
+      else if (primitive == MBV_DRAW_TRIANGLES) {
+        const uint32_t count = static_cast<uint32_t>(n - n % 3);
+        if (count > 0)
+          add(DrawKind::Triangles, DrawSource::Batch, c, add_slot(command, style), first, count, 0);
+      }
+      else if (primitive == MBV_DRAW_QUADS) {
+        /* each quad (a, b, c, d) as (a, b, c) and (a, c, d): one colour per
+           quad in the drawing (mbview_profile.c), so the split shows nowhere */
+        const uint32_t start = static_cast<uint32_t>(triangles_.size());
+        for (int q = 0; q + 3 < n; q += 4) {
+          const struct mbv_draw_vertex *v = &batch.vertices[command.first + q];
+          triangles_.insert(triangles_.end(), {v[0], v[1], v[2], v[0], v[2], v[3]});
+        }
+        const uint32_t count = static_cast<uint32_t>(triangles_.size()) - start;
+        if (count > 0)
+          add(DrawKind::Triangles, DrawSource::Triangles, c, add_slot(command, style), start, count, 0);
+      }
+      break;
+    }
+    default:
+      break;
+    }
+  }
 }
 
 }  // namespace rhi
