@@ -1357,13 +1357,12 @@ int mbview_extract_route_profile(size_t instance) {
 	    shared.shareddata.routes[shared.shareddata.route_selected].npoints > 1) {
 		data->profile.source = MBV_PROFILE_ROUTE;
 		strcpy(data->profile.source_name, "Route");
-		data->profile.length = 0.0;
 		iroute = shared.shareddata.route_selected;
 
 		/* make sure enough memory is allocated for the profile */
 		nprpoints = 0;
 		for (i = 0; i < shared.shareddata.routes[iroute].npoints - 1; i++) {
-			nprpoints += shared.shareddata.routes[iroute].segments[i].nls;
+			nprpoints += MAX(2, shared.shareddata.routes[iroute].segments[i].nls);
 		}
 		if (data->profile.npoints_alloc < nprpoints) {
 			status = mbview_allocprofilepoints(mbv_verbose, nprpoints, &(data->profile.points), &error);
@@ -1376,32 +1375,38 @@ int mbview_extract_route_profile(size_t instance) {
 		}
 
 		/* extract the profile */
-		if (nprpoints > 2 && data->profile.npoints_alloc >= nprpoints) {
+		if (nprpoints >= 2 && data->profile.npoints_alloc >= nprpoints) {
 			data->profile.npoints = 0;
 			for (i = 0; i < shared.shareddata.routes[iroute].npoints - 1; i++) {
+				/* a segment within one grid cell has no draped points: use its two waypoints, taken from
+				    the route points because the segment endpoints are not reprojected */
+				const struct mbview_linesegmentw_struct *segment = &(shared.shareddata.routes[iroute].segments[i]);
+				const struct mbview_pointw_struct *lspoints =
+				    segment->nls >= 2 ? segment->lspoints : &(shared.shareddata.routes[iroute].points[i]);
+				const int nls = MAX(2, segment->nls);
 				if (i == 0)
 					jstart = 0;
 				else
 					jstart = 1;
-				for (j = jstart; j < shared.shareddata.routes[iroute].segments[i].nls; j++) {
-					if (j == 0 || j == shared.shareddata.routes[iroute].segments[i].nls - 1)
+				for (j = jstart; j < nls; j++) {
+					if (j == 0 || j == nls - 1)
 						data->profile.points[data->profile.npoints].boundary = true;
 					else
 						data->profile.points[data->profile.npoints].boundary = false;
 					data->profile.points[data->profile.npoints].xgrid =
-					    shared.shareddata.routes[iroute].segments[i].lspoints[j].xgrid[instance];
+					    lspoints[j].xgrid[instance];
 					data->profile.points[data->profile.npoints].ygrid =
-					    shared.shareddata.routes[iroute].segments[i].lspoints[j].ygrid[instance];
+					    lspoints[j].ygrid[instance];
 					data->profile.points[data->profile.npoints].xlon =
-					    shared.shareddata.routes[iroute].segments[i].lspoints[j].xlon;
+					    lspoints[j].xlon;
 					data->profile.points[data->profile.npoints].ylat =
-					    shared.shareddata.routes[iroute].segments[i].lspoints[j].ylat;
+					    lspoints[j].ylat;
 					data->profile.points[data->profile.npoints].zdata =
-					    shared.shareddata.routes[iroute].segments[i].lspoints[j].zdata;
+					    lspoints[j].zdata;
 					data->profile.points[data->profile.npoints].xdisplay =
-					    shared.shareddata.routes[iroute].segments[i].lspoints[j].xdisplay[instance];
+					    lspoints[j].xdisplay[instance];
 					data->profile.points[data->profile.npoints].ydisplay =
-					    shared.shareddata.routes[iroute].segments[i].lspoints[j].ydisplay[instance];
+					    lspoints[j].ydisplay[instance];
 					if (data->profile.npoints == 0) {
 						data->profile.zmin = data->profile.points[data->profile.npoints].zdata;
 						data->profile.zmax = data->profile.points[data->profile.npoints].zdata;
@@ -1463,7 +1468,20 @@ int mbview_extract_route_profile(size_t instance) {
 					data->profile.npoints++;
 				}
 			}
+			/* slope of the first point: forward difference, as in mbview_extract_nav_profile() */
+			if (data->profile.npoints > 1) {
+				dy = (data->profile.points[1].zdata - data->profile.points[0].zdata);
+				dx = (data->profile.points[1].distance - data->profile.points[0].distance);
+				if (dx > 0.0)
+					data->profile.points[0].slope = fabs(dy / dx);
+				else
+					data->profile.points[0].slope = 0.0;
+			}
 			data->profile.length = data->profile.points[data->profile.npoints - 1].distance;
+		}
+		else {
+			/* do not keep the points of an earlier profile */
+			data->profile.npoints = 0;
 		}
 	}
 
