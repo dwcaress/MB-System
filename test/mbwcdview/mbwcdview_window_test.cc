@@ -123,6 +123,15 @@ int main(int argc, char **argv) {
   const auto spins = window.findChildren<QDoubleSpinBox *>();  // depth, amplitude, across-track, replay rate
   CHECK(view != nullptr && slider != nullptr && spins.size() == 6);
 
+  /* the swath is drawn with QRhi where it is built, unless MB_RENDERER=legacy-gl asks for OpenGL */
+#if defined(MBWCD_HAVE_RHI) && defined(MBWCD_HAVE_GL)
+  CHECK(view->usesRhi() == (qgetenv("MB_RENDERER") != "legacy-gl"));
+#elif defined(MBWCD_HAVE_RHI)
+  CHECK(view->usesRhi());
+#else
+  CHECK(!view->usesRhi());
+#endif
+
   /* nothing open */
   CHECK(window.windowTitle().startsWith("mbwcdview"));
   CHECK(status->currentMessage() == "Ready");

@@ -22,14 +22,57 @@
 
 import os
 import re
+import struct
 import subprocess
 import sys
 import tempfile
 import unittest
+import zlib
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import synth_all as A  # noqa: E402
 import synth_kmall as S  # noqa: E402
+
+
+def read_png(path):
+  """Width, height, bytes per pixel and rows of an 8 bit RGB or RGBA PNG without interlace, as Qt writes them."""
+  with open(path, "rb") as f:
+    data = f.read()
+  pos, header, idat = 8, None, b""
+  while pos < len(data):
+    length, kind = struct.unpack(">I4s", data[pos:pos + 8])
+    if kind == b"IHDR":
+      header = struct.unpack(">IIBBBBB", data[pos + 8:pos + 8 + length])
+    elif kind == b"IDAT":
+      idat += data[pos + 8:pos + 8 + length]
+    pos += 12 + length
+  width, height, depth, color, _, _, interlace = header
+  if depth != 8 or color not in (2, 6) or interlace != 0:
+    raise ValueError("unsupported PNG %s" % (header,))
+  bpp = 3 if color == 2 else 4
+  stride = width * bpp
+  raw = zlib.decompress(idat)
+  rows, prev = [], bytearray(stride)
+  for y in range(height):
+    start = y * (stride + 1)
+    kind, line = raw[start], bytearray(raw[start + 1:start + 1 + stride])
+    for i in range(stride):
+      a = line[i - bpp] if i >= bpp else 0
+      b = prev[i]
+      c = prev[i - bpp] if i >= bpp else 0
+      if kind == 1:
+        line[i] = (line[i] + a) & 0xff
+      elif kind == 2:
+        line[i] = (line[i] + b) & 0xff
+      elif kind == 3:
+        line[i] = (line[i] + ((a + b) >> 1)) & 0xff
+      elif kind == 4:
+        p = a + b - c
+        pa, pb, pc = abs(p - a), abs(p - b), abs(p - c)
+        line[i] = (line[i] + (a if pa <= pb and pa <= pc else (b if pb <= pc else c))) & 0xff
+    rows.append(line)
+    prev = line
+  return width, height, bpp, rows
 
 
 class MbwcdviewTest(unittest.TestCase):
@@ -69,6 +112,22 @@ class MbwcdviewTest(unittest.TestCase):
                     "--size=800x600"], check=True)
     with open(image, "rb") as f:
       self.assertEqual(f.read(8), b"\x89PNG\r\n\x1a\n")
+
+  def test_export_draws_swath(self):
+    # the swath is drawn on the graphics card (QRhi or OpenGL): the image area of the
+    # plot holds many colours of the colour map, where axes and labels have none
+    image = os.path.join(self.tmp.name, "swath.png")
+    subprocess.run([self.program, "-I", self.kmall, "--ping=1", "--export=" + image, "--size=400x300"], check=True)
+    width, height, bpp, rows = read_png(image)
+    # image area of WcdPlot::plotRect(): margins 72 left, 104 right, 16 top, 46 + 20 bottom
+    colours = set()
+    for y in range(16 + 4, height - 66 - 4):
+      row = rows[y]
+      for x in range(72 + 4, width - 104 - 4):
+        r, g, b = row[x * bpp], row[x * bpp + 1], row[x * bpp + 2]
+        if max(r, g, b) - min(r, g, b) > 16:
+          colours.add((r, g, b))
+    self.assertGreater(len(colours), 20)
 
   def test_dump_wcd(self):
     wcd = A.write(os.path.join(self.tmp.name, A.WCD_NAME))

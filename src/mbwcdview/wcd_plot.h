@@ -22,11 +22,11 @@
  *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * Plot of one water column swath: the amplitude cells are drawn with OpenGL as a
- * triangle mesh on their (ray traced or straight) positions, coloured through a
- * colour map texture; axes, colour bar, soundings and the water column bottom line
- * are drawn with QPainter on top. Used by the window (WcdView) and for image files
- * (render(), also without a window).
+ * Plot of one water column swath: the amplitude cells are drawn as a triangle mesh
+ * on their (ray traced or straight) positions, coloured through a colour map
+ * texture, with QRhi (wcd_swath_rhi.h) or with OpenGL (SwathGL); axes, colour bar,
+ * soundings and the water column bottom line are drawn with QPainter on top. Used
+ * by the window (WcdView) and for image files (render(), also without a window).
  */
 
 #ifndef MBWCDVIEW_WCD_PLOT_H
@@ -37,16 +37,27 @@
 
 #include <QColor>
 #include <QImage>
-#include <QOpenGLFunctions>
 #include <QPainter>
+#include <QRect>
 #include <QRectF>
 #include <QString>
+
+#ifdef MBWCD_HAVE_GL
+#include <QOpenGLFunctions>
 
 class QOpenGLBuffer;
 class QOpenGLShaderProgram;
 class QOpenGLTexture;
+#endif
 
 namespace wcd {
+
+/* the swath is drawn with QRhi where it is built, unless MB_RENDERER=legacy-gl
+   asks for OpenGL where that is built too */
+bool use_rhi();
+
+/* the colour map as a 256 x 1 RGBA image */
+QImage colormap_image();
 
 struct Sounding {
   double across, depth;
@@ -64,6 +75,7 @@ struct PlotData {
   QString ylabel = "Depth (m)";
 };
 
+#ifdef MBWCD_HAVE_GL
 /* OpenGL resources of the mesh in one context */
 class SwathGL : protected QOpenGLFunctions {
  public:
@@ -80,6 +92,7 @@ class SwathGL : protected QOpenGLFunctions {
   std::unique_ptr<QOpenGLTexture> lut_;
   int nindices_ = 0;
 };
+#endif
 
 class WcdPlot {
  public:
@@ -93,12 +106,21 @@ class WcdPlot {
   QRectF plotRect(const QSize &size) const;
   bool toData(const QPointF &pixel, const QSize &size, double &across, double &depth) const;
 
-  /* mesh for SwathGL::upload(); changes with the data and the depth window */
+  /* mesh for SwathGL::upload() and SwathRhi::upload(); changes with the data and the depth window */
   bool meshChanged() const { return mesh_dirty_; }
-  void requestMesh() { mesh_dirty_ = true; }  // a new OpenGL context has no mesh yet
+  void requestMesh() { mesh_dirty_ = true; }  // a new OpenGL context or QRhi has no mesh yet
   void buildMesh(std::vector<float> &vertices, std::vector<unsigned int> &indices);
 
+  /* the image area in device pixels, from the bottom left corner as OpenGL and QRhi count */
+  QRect deviceViewport(const QSize &size, double dpr) const;
+  /* data (across, depth) to normalized device coordinates: across * sx + ox, depth * sz + oz */
+  void deviceTransform(float &sx, float &ox, float &sz, float &oz) const;
+  double colorMin() const { return vmin_; }
+  double colorMax() const { return vmax_; }
+
+#ifdef MBWCD_HAVE_GL
   void drawGL(SwathGL &gl, const QSize &size, double dpr);
+#endif
   void drawOverlay(QPainter &painter, const QSize &size, const QString &caption = QString()) const;
 
   /* image of the plot (no window needed) at size x scale pixels */

@@ -84,7 +84,9 @@ hollow flagged) and of the bottom detections recorded in the water column itself
 arrow keys, one swath per step), a replay at a given rate, saving the image at
 twice the screen resolution with the file name and ping information, and
 picking positions in the image (\fBPick\fP) into a table that can be saved as text.
-The image is drawn with OpenGL, so stepping through the pings is fast.
+The image is drawn on the graphics card through Qt's QRhi (Metal on macOS,
+Direct3D 11 on Windows, OpenGL on Linux), or with OpenGL where \fBmbwcdview\fP
+was built with Qt older than 6.8, so stepping through the pings is fast.
 
 Without a window, \fB\-\-dump\fP prints a summary of a survey line and
 \fB\-\-export\fP writes an image of one swath.
@@ -159,6 +161,13 @@ Print the program name and version, and with \fB\-\-export\fP what was written.
 .TP
 .B \-\-help {\fB\-H\fP}
 Print the usage message and exit.
+
+.SH ENVIRONMENT
+.TP
+.B MB_RENDERER
+Set to \fBlegacy-gl\fP to draw with OpenGL instead of QRhi, where
+\fBmbwcdview\fP was built with both (\fB\-DbuildQt6LegacyGL=ON\fP, the default
+except on macOS).
 
 .SH EXAMPLES
 To view a Kongsberg survey line, open either of its files:
