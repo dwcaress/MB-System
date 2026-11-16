@@ -77,6 +77,7 @@
 #include "mbview.h"
 #include "mbviewprivate.h"
 #include "mbv_render.h"
+#include "mbv_camera.h"
 
 // #define MBV_DEBUG_GLX 1
 // #define MBV_GET_GLX_ERRORS 1
@@ -849,6 +850,60 @@ int mbview_plotfull(size_t instance) {
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", (char *) __FUNCTION__);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*------------------------------------------------------------------------------*/
+/* The camera of the map view: the projection matrix (2D orthographic or 3D
+   perspective) and the modelview matrix (translations and rotations), in the
+   column-major order of OpenGL. Also sets view->left, right, bottom and top. */
+int mbview_camera(size_t instance, double projection[16], double modelview[16]) {
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
+	}
+
+	/* get view */
+	struct mbview_world_struct *view = &(mbviews[instance]);
+	struct mbview_struct *data = &(view->data);
+
+	/* set projection to 2D or 3D */
+	view->right = MBV_OPENGL_WIDTH / view->size2d;
+	view->left = -MBV_OPENGL_WIDTH / view->size2d;
+	view->top = MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
+	view->bottom = -MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
+	mbv_camera_identity(projection);
+	if (data->display_mode == MBV_DISPLAY_2D) {
+		mbv_camera_ortho(projection, view->left, view->right, view->bottom, view->top, MBV_OPENGL_ZMIN2D, MBV_OPENGL_ZMAX2D);
+	}
+	else {
+		mbv_camera_perspective(projection, 40.0, view->aspect_ratio, 0.01 * MBV_OPENGL_WIDTH, 1000 * MBV_OPENGL_WIDTH);
+	}
+
+	/* set up translations */
+	mbv_camera_identity(modelview);
+	if (data->display_mode == MBV_DISPLAY_2D) {
+		mbv_camera_translate(modelview, view->offset2d_x, view->offset2d_y, MBV_OPENGL_ZMIN2D);
+	}
+	else if (data->display_mode == MBV_DISPLAY_3D) {
+		const float viewdistance = 0.48 * MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH / view->aspect_ratio;
+		mbv_camera_translate(modelview, 0.0, 0.0, -viewdistance + view->viewoffset3d_z);
+		mbv_camera_rotate(modelview, (float)(data->viewelevation3d - 90.0), 1.0, 0.0, 0.0);
+		mbv_camera_rotate(modelview, (float)(data->viewazimuth3d), 0.0, 1.0, 1.0);
+		mbv_camera_translate(modelview, view->offset3d_x, view->offset3d_y, -viewdistance + view->offset3d_z);
+		mbv_camera_rotate(modelview, (float)(data->modelelevation3d - 90.0), 1.0, 0.0, 0.0);
+		mbv_camera_rotate(modelview, (float)(data->modelazimuth3d), 0.0, 0.0, 1.0);
+	}
+
+	const int status = MB_SUCCESS;
+
+	if (mbv_verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}

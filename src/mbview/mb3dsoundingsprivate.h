@@ -289,6 +289,7 @@ void do_mb3dsdg_glwda_expose(Widget w, XtPointer client_data, XtPointer call_dat
 void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_glwda_resize(Widget w, XtPointer client_data, XtPointer call_data);
 int mb3dsoundings_setzscale(int verbose, int *error);
+int mb3dsoundings_camera(int verbose, double projection[16], double modelview[16], int *error);
 int mb3dsoundings_scale(int verbose, int *error);
 int mb3dsoundings_scalez(int verbose, int *error);
 int mb3dsoundings_pick(int x, int y);
