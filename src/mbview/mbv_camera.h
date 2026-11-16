@@ -29,11 +29,15 @@
  * those calls do. mbview_camera() (map view) and mb3dsoundings_camera()
  * (3D soundings view) build their cameras from these functions, so that
  * OpenGL, picks on the CPU and renderers without OpenGL share one camera.
- * This file uses no toolkit and no OpenGL.
+ * mbv_camera_project() maps a point to window coordinates as gluProject
+ * does, for the screen positions of the soundings when nothing draws them
+ * with OpenGL. This file uses no toolkit and no OpenGL.
  */
 
 #ifndef MBVIEW_MBV_CAMERA_H
 #define MBVIEW_MBV_CAMERA_H
+
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,6 +57,13 @@ void mbv_camera_translate(double m[16], double x, double y, double z);
 
 /* m = m * rotation by angle degrees about the axis (x, y, z), as glRotated */
 void mbv_camera_rotate(double m[16], double angle, double x, double y, double z);
+
+/* the window coordinates of the point (x, y, z), as gluProject computes them:
+   the modelview, then the projection, the division by w, and the mapping to
+   the viewport (x, y, width, height), with window y up as in OpenGL. Returns
+   false, leaving the outputs alone, when w is zero. */
+bool mbv_camera_project(const double modelview[16], const double projection[16], const int viewport[4], double x,
+                        double y, double z, double *winx, double *winy, double *winz);
 
 #ifdef __cplusplus
 }

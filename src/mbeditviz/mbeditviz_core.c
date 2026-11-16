@@ -955,6 +955,7 @@ void do_mbeditviz_colorchange_notify(size_t instance) {
         mbview_colorvalue_instance(instance, sounding->z, &(sounding->r), &(sounding->g), &(sounding->b));
       }
     }
+    mbev_status = mb3dsoundings_colors_changed(mbev_verbose, &mbev_error);
     mbev_status = mb3dsoundings_plot(mbev_verbose, &mbev_error);
   }
 

@@ -74,8 +74,9 @@ class NullMapView final : public QWidget {
   size_t instance_;
 };
 
-/* The 3D soundings view: nothing is drawn, so mb3dsoundings_plot() never
-   stores screen positions and picks find nothing near the mouse. */
+/* The 3D soundings view: nothing is drawn, so mb3dsoundings_plot() stores no
+   screen positions; the pick, erase, grab and info functions fill them for the
+   current camera with mb3dsoundings_screen_positions(). */
 class NullSoundingsView final : public QWidget {
  public:
   explicit NullSoundingsView(QWidget *parent) : QWidget(parent) { setFocusPolicy(Qt::StrongFocus); }
