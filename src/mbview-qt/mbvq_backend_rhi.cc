@@ -57,8 +57,10 @@
  * - The 3D soundings view draws the soundings from buffers written only where
  *   the core's change marks rose (mbvq_rhi_renderer.h), and takes input after
  *   its first frame, as the map does. Dismissed, it lets go of them as soon
- *   as the program has released them, and deleted (mb3dsoundings_end) at
- *   once, since its hidden window draws no frame that would.
+ *   as the program has released them.
+ * - The map and 3D soundings views let go of their renderers' buffers at once
+ *   when they are deleted (mbview_destroy, mb3dsoundings_end), since their
+ *   windows, hidden until a safe point, draw no frame that would.
  */
 
 #include <QEvent>
@@ -298,6 +300,24 @@ void RhiView::hide_failure() {
     failure_->hide();
 }
 
+/* Qt frees the buffers a renderer released in a later frame of their QRhi,
+   which a hidden window does not draw: now, on a QRhi that is alive (the
+   QRhi of a renderer, alive while the renderer is). Metal, Vulkan and
+   Direct3D 12 free them in finish(), OpenGL when a frame begins (an empty
+   offscreen frame), Direct3D 11 at once; inside a frame of that QRhi a
+   later frame of it frees them. */
+void run_deferred_releases(QRhi *qrhi) {
+  if (qrhi == nullptr || qrhi->isRecordingFrame())
+    return;
+  if (qrhi->backend() == QRhi::OpenGLES2) {
+    QRhiCommandBuffer *cb = nullptr;
+    if (qrhi->beginOffscreenFrame(&cb) == QRhi::FrameOpSuccess)
+      qrhi->endOffscreenFrame();
+  }
+  else
+    qrhi->finish();
+}
+
 /* The map view of an mbview instance. */
 class RhiMapView final : public RhiView {
  public:
@@ -359,10 +379,15 @@ RhiMapView::~RhiMapView() {
   /* a button down here goes with the view */
   buttons_ = 0;
   share_buttons();
-  /* the renderer goes later, with RhiView: other views' plans can no longer
-     ask this one for frames */
-  if (renderer_ != nullptr)
+  /* deleted while its window lives on hidden until a safe point
+     (mbview_destroy): once other views' plans can no longer ask this one
+     for frames, the renderer's buffers go now */
+  if (renderer_ != nullptr) {
     static_cast<rhi::MapRenderer *>(renderer_.get())->set_frame_request(nullptr);
+    QRhi *qrhi = view_rhi();
+    renderer_.reset();
+    run_deferred_releases(qrhi);
+  }
 }
 
 void RhiMapView::request(int rez) {
@@ -712,24 +737,6 @@ bool RhiProfileView::event(QEvent *qevent) {
 
 /* the point-size control of the 3D soundings view, logical pixels */
 double soundings_point_size = 3.0;
-
-/* Qt frees the buffers a renderer released in a later frame of their QRhi,
-   which a hidden window does not draw: now, on a QRhi that is alive (the
-   QRhi of a renderer, alive while the renderer is). Metal, Vulkan and
-   Direct3D 12 free them in finish(), OpenGL when a frame begins (an empty
-   offscreen frame), Direct3D 11 at once; inside a frame of that QRhi its
-   next frame frees them. */
-void run_deferred_releases(QRhi *qrhi) {
-  if (qrhi == nullptr || qrhi->isRecordingFrame())
-    return;
-  if (qrhi->backend() == QRhi::OpenGLES2) {
-    QRhiCommandBuffer *cb = nullptr;
-    if (qrhi->beginOffscreenFrame(&cb) == QRhi::FrameOpSuccess)
-      qrhi->endOffscreenFrame();
-  }
-  else
-    qrhi->finish();
-}
 
 /* The 3D soundings view (one per program). */
 class RhiSoundingsView final : public RhiView {

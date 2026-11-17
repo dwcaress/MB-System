@@ -60,7 +60,8 @@
  *        the soundings' positions read once when the standalone soundings
  *        window opens and when it opens again after Dismiss, then a million
  *        soundings in that window ended by mb3dsoundings_end with the
- *        memory it frees
+ *        memory it frees, and a second map of the grid in a window of its
+ *        own closed by mbview_destroy with the memory its view frees
  *   mbview_qt_rhi_test --quit close|quit|exit|float [--maps-only] [grid]
  *        a program with a QRhi map, its profile window and the 3D soundings
  *        in a floating dock of its main window open ends (needs a display,
@@ -8436,6 +8437,66 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
           "6d: mb3dsoundings_end() (the program's end paths) deletes the view of " + std::to_string(count) +
               " soundings (" + text("%.1f", held) + " MB) of the standalone soundings window, which waits hidden for "
               "a safe point, and the view lets go of its buffers in that call: " +
+              (!metal     ? std::string("not measured (the GPU memory is measured on Metal only)")
+               : measured ? "the Metal device holds " + text("%.1f", gpu_before - gpu_after) + " MB less (after " +
+                                std::to_string(frames) + " more frames)"
+                          : std::string("the Metal device's allocations could not be read")));
+  }
+
+  /* 6d: mbview_destroy() (a map's Dismiss, the programs' Quit, a regrid in
+     mbeditviz-qt) deletes the map view at once and its hidden standalone
+     window only at a safe point (the next map, or Quit): the view lets go of
+     its renderer's buffers when it is deleted, since that window draws no
+     frame that would. A second map of the grid in a window of its own (the
+     first is needed below), drawn completely. On Metal the device's
+     allocations right before and right after the call, without an event
+     between, after three more frames of the view (at least two required,
+     Metal's two frame slots), so that the drop is the view's own: they must
+     drop by at least 3/4 of the bytes its renderer held (the terrain's tile
+     levels, the batch and the contours, every copy counted). A Metal device
+     that cannot be read fails the check. On the other APIs nothing is
+     measured (the view, and with it its renderer's count, goes in the
+     call). */
+  {
+    size_t second = MBV_NO_WINDOW;
+    const bool second_opened = open_grid(grid, grdfile, &second);
+    const QPointer<QWidget> mwindow = second_opened ? mbvq::window(second) : nullptr;
+    const QPointer<QWidget> mview = second_opened ? mbvq::map_view(second) : nullptr;
+    auto *mview_rhi = qobject_cast<QRhiWidget *>(mview.data());
+    int drawn_frames = 0;
+    if (mwindow != nullptr && mview_rhi != nullptr) {
+      timer.restart();
+      while ((!mbvq::view_state(mview).drawn || mbvq_c_lastdrawrez(second) != MBVQ_REZ_FULL ||
+              mbvq::view_stats(mview).tiles_drawn == 0 || mbvq::view_stats(mview).tiles_waiting > 0) &&
+             timer.elapsed() < 20000)
+        spin(20);
+      spin(300);
+      drawn_frames = mbvq::view_stats(mview).frames;
+      for (int i = 0; i < 3; i++) {
+        mview->update();
+        spin(150);
+      }
+    }
+    const mbvq::RenderStats shown = mview_rhi != nullptr ? mbvq::view_stats(mview) : mbvq::RenderStats();
+    /* the view goes in the call */
+    const bool metal = mview_rhi != nullptr && mview_rhi->api() == QRhiWidget::Api::Metal;
+    const double gpu_before = metal_allocated_mb();
+    int error = MB_ERROR_NO_ERROR;
+    if (second_opened)
+      mbview_destroy(0, second, true, &error);
+    const double gpu_after = metal_allocated_mb();
+    const bool waits = mwindow != nullptr && !mwindow->isVisible() && mview == nullptr &&
+                       mbvq::map_widget(second) == nullptr;
+    const double terrain = shown.resident_bytes / 1048576.0;
+    const double held = (shown.resident_bytes + shown.batch_held_bytes + shown.contour_held_bytes) / 1048576.0;
+    const int frames = shown.frames - drawn_frames;
+    const bool measured = metal && gpu_before >= 0.0 && gpu_after >= 0.0;
+    check(mview_rhi != nullptr && shown.tiles_drawn > 0 && shown.tiles_waiting == 0 && terrain > 0.0 && waits &&
+              (!metal || (measured && frames >= 2 && gpu_before - gpu_after >= 0.75 * held)),
+          "6d: mbview_destroy() deletes the view of a map drawn completely (" + std::to_string(shown.tiles_drawn) +
+              " tiles; " + text("%.1f", held) + " MB, the terrain " + text("%.1f", terrain) + " MB) of a "
+              "standalone map window, which waits hidden for a safe point, and the view lets go of its buffers in "
+              "that call: " +
               (!metal     ? std::string("not measured (the GPU memory is measured on Metal only)")
                : measured ? "the Metal device holds " + text("%.1f", gpu_before - gpu_after) + " MB less (after " +
                                 std::to_string(frames) + " more frames)"
