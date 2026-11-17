@@ -2212,16 +2212,27 @@ struct TestBatch {
 /* the identity camera: display coordinates are normalised device coordinates */
 const double kIdentity[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
 
+/* the size rule in the test's own words: max(1, floor(logical x ratio +
+   0.25)), rounded up only from three quarters (design section 7, with the
+   rounding the developer chose by eye on 17 November) */
+int expected_px(double logical, double ratio) {
+  return std::max(1, static_cast<int>(std::floor(logical * ratio + 0.25)));
+}
+
 void model_style() {
-  /* section 7: widths 1, 2, 3 and 4, the stipple factor 1 and the point size 3 */
+  /* section 7: widths 1, 2, 3 and 4, the stipple factor 1 and the point size
+     3; ratio 1.74, just below 1.75 where 1 px lines become 2 px, and ratio
+     1.25 pin the rule's 0.25 */
   struct Row {
     double ratio;
     int widths[4];
     int point;
   };
   const Row rows[] = {{1.0, {1, 2, 3, 4}, 3},
-                      {1.25, {1, 3, 4, 5}, 4},
-                      {1.5, {2, 3, 5, 6}, 5},
+                      {1.25, {1, 2, 4, 5}, 4},
+                      {1.5, {1, 3, 4, 6}, 4},
+                      {1.74, {1, 3, 5, 7}, 5},
+                      {1.75, {2, 3, 5, 7}, 5},
                       {2.0, {2, 4, 6, 8}, 6},
                       {3.0, {3, 6, 9, 12}, 9}};
   bool table = true;
@@ -2236,8 +2247,8 @@ void model_style() {
     text_rows += " " + text("%g:", row.ratio) + std::to_string(style.line(1)) + "," + std::to_string(style.line(2)) +
                  "," + std::to_string(style.line(3)) + "," + std::to_string(style.line(4));
   }
-  check(table, "6c: the pixel-ratio rule max(1, round(logical x ratio)) for widths 1 to 4, contours, the stipple "
-               "factor and points of 3 (" + text_rows + ")");
+  check(table, "6c: the pixel-ratio rule max(1, floor(logical x ratio + 0.25)) for widths 1 to 4, contours, the "
+               "stipple factor and points of 3 (" + text_rows + ")");
   rhi::Style one;
   rhi::Style two;
   two.ratio = 2.0;
@@ -8074,8 +8085,9 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
 
   /* 6c: the overlays and contours of the batch, with the sizes scaled by the
      view's own pixel ratio (devicePixelRatioF(), not the render target's):
-     contours (1 logical px) and a route (2 logical px, with its waypoint
-     disks) are thin only at ratio 1 */
+     contours (1 logical px) are thin while they stay 1 physical px (below
+     ratio 1.75, expected_px()), and a route (2 logical px, with its waypoint
+     disks) is wide from ratio 1 */
   {
     int error = MB_ERROR_NO_ERROR;
     const int nc = data->primary_n_columns, nr = data->primary_n_rows;
@@ -8117,7 +8129,7 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
       spin(50);
     const mbvq::RenderStats overlays = mbvq::view_stats(view);
     const double ratio = view->devicePixelRatioF();
-    const bool thin = std::floor(ratio + 0.5) <= 1.0;
+    const bool thin = expected_px(1.0, ratio) <= 1;
     check(overlays.pixel_ratio == ratio && overlays.contour_rez == MBVQ_REZ_FULL && overlays.marker_draws > 0 &&
               (thin ? overlays.thin_draws > 0 : overlays.thin_draws == 0 && overlays.wide_draws >= 2),
           "6c: contours (" + std::to_string(overlays.contour_vertices) + " vertices) and a route with its waypoints "
@@ -8126,7 +8138,7 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
               " wide line draws, " + std::to_string(overlays.marker_draws) + " marker runs");
     /* the straight route's width in physical pixels in grabFramebuffer(),
        across its major axis over the middle half of its length:
-       max(1, round(2 x the view's ratio)) by the minor-axis rule */
+       max(1, floor(2 x the view's ratio + 0.25)) by the minor-axis rule */
     const QImage with = rhi_widget->grabFramebuffer().convertToFormat(QImage::Format_RGB32);
     {
       const QRgb purple = qRgb(255, 0, 255);
@@ -8139,7 +8151,7 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
             y0 = std::min(y0, y);
             y1 = std::max(y1, y);
           }
-      const int expected = std::max(1, static_cast<int>(std::floor(2.0 * ratio + 0.5)));
+      const int expected = expected_px(2.0, ratio);
       const bool across_columns = x1 - x0 >= y1 - y0;
       const int from = across_columns ? x0 + (x1 - x0) / 4 : y0 + (y1 - y0) / 4;
       const int to = across_columns ? x1 - (x1 - x0) / 4 : y1 - (y1 - y0) / 4;
@@ -8165,7 +8177,7 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
   }
 
   /* 6d: the profile view of a two-point pick across the map, in its window:
-     drawn; its frame (2 logical px) max(1, round(2 x ratio)) physical px
+     drawn; its frame (2 logical px) max(1, floor(2 x ratio + 0.25)) physical px
      wide in grabFramebuffer(); at most floor(TextureSizeMax / ratio) logical
      px wide (Metal's 16384), so a drawing 5 times a wide window is clamped
      and the core's drawing is at most 16384 px */
@@ -8214,7 +8226,7 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
       top++;
       y++;
     }
-    const int width = std::max(1, static_cast<int>(std::floor(2.0 * ratio + 0.5)));
+    const int width = expected_px(2.0, ratio);
     check(profile_rhi != nullptr && npoints_of(data) > 2 && dark > 0 && top == width &&
               mbvq::view_stats(profile).pixel_ratio == ratio,
           "6d: the profile of a two-point pick (" + std::to_string(npoints_of(data)) + " points) drawn with QRhi: " +
@@ -8346,8 +8358,8 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
       const int lx = (sdg_storage[middle].winx + sdg_storage[middle + 1].winx) / 2;
       const int ly = H - 1 - (sdg_storage[middle].winy + sdg_storage[middle + 1].winy) / 2;
       const int line = run(lx, ly);
-      const int point_px = std::max(1, static_cast<int>(std::floor(3.0 * ratio + 0.5)));
-      const int line_px = std::max(1, static_cast<int>(std::floor(1.0 * ratio + 0.5)));
+      const int point_px = expected_px(3.0, ratio);
+      const int line_px = expected_px(1.0, ratio);
       if (save != nullptr) {
         const std::string path = std::string(save) + ".soundings.png";
         check(picture.save(QString::fromStdString(path)), "the soundings' picture saved as " + path);
@@ -8380,7 +8392,7 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
       }
       if (control != nullptr)
         control->setValue(3.0);
-      const int small_px = std::max(1, static_cast<int>(std::floor(1.0 * ratio + 0.5)));
+      const int small_px = expected_px(1.0, ratio);
       check(control != nullptr && small_point == std::max(small_px, line_px),
             "6d: the point-size control at 1 px draws the points " + std::to_string(small_point) +
                 " physical px high (" + std::to_string(small_px) + ", within a line " + std::to_string(line_px) +

@@ -908,7 +908,7 @@ int test_drawing(bool mode3d, bool rhi) {
     for (int y = 0; y < picture.height(); y++)
       for (int x = 0; x < picture.width(); x++)
         dark += qGray(picture.pixel(x, y)) < 128;
-    const int frame_px = std::max(1, static_cast<int>(std::floor(2.0 * profile_view->devicePixelRatioF() + 0.5)));
+    const int frame_px = std::max(1, static_cast<int>(std::floor(2.0 * profile_view->devicePixelRatioF() + 0.25)));
     const int frame_bound = 2 * frame_px * (picture.width() + picture.height());
     check(gl_window->widget()->profile()->isVisible() && rhi_view && dark > frame_bound && data->prwidth > 0 &&
               data->prheight > 0,
