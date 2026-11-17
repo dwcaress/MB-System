@@ -88,8 +88,9 @@
       does, with the GeoOrigin of the first. A GLB with another GeoOrigin, or
       with absolute vertices, does not line up with it, and is logged as an
       ERROR that names it. <b>--geoviewpoint</b> adds GeoViewpoints to its
-      Viewpoint menu, without <b>--html</b>. Run <b>mbmesh</b> in the survey
-      directory or above it and serve that directory.</dd>
+      Viewpoint menu, without <b>--html</b>. With <b>--cesium-html</b> it also
+      writes <i>mbmesh_survey_cesium.html</i> for CesiumJS. Run <b>mbmesh</b> in
+      the survey directory or above it and serve that directory.</dd>
   <dt id="O"><a class="permalink" href="#O"><b>-O<i> outputdir</i>,
     <b>--output</b> <i>outputdir</i></b></a></dt>
   <dd>Output directory for generated files. The directory is created if needed.
@@ -437,6 +438,22 @@
       <b>--html</b> the page shows the tileset with a GeoTileset node in place
       of <b>mesh.glb</b>; X3DOM has that node only in its master of October
       2026, so use <b>--x3dom-url</b>.</dd>
+  <dt id="cesium-html"><a class="permalink" href="#cesium-html"><b>--cesium-html</b></a></dt>
+  <dd>Also write a viewer page for CesiumJS, with a check box for each GLB and
+      tileset, beside the output directory (<i>mbmesh_output_cesium.html</i>)
+      and inside it (<i>mbmesh_cesium.html</i>). The globe of Cesium would hide
+      data below the ellipsoid, so the page starts with it hidden and has a
+      check box that shows it, translucent. Tilesets are shown at their true
+      height whatever <b>--lift</b> says. The page has the Viewpoint menu, the
+      <b>--geoviewpoint</b> viewpoints, a Copy viewpoint button and the scale
+      axes, but no chunk outlines or labels. It must be served over HTTP, like
+      the <b>--html</b> page. With a directory input it also writes
+      <i>mbmesh_survey_cesium.html</i>.</dd>
+  <dt id="cesium-url"><a class="permalink" href="#cesium-url"><b>--cesium-url
+    <i>url</i></b></a></dt>
+  <dd>The directory of the CesiumJS build that the <b>--cesium-html</b> page
+      loads, with Cesium.js and Widgets/widgets.css in it (default
+      https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium).</dd>
   <dt id="x3dom-url"><a class="permalink" href="#x3dom-url"><b>--x3dom-url
     <i>url</i></b></a></dt>
   <dd>The X3DOM script that the page written by <b>--html</b> loads, and the

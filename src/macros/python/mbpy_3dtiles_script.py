@@ -24,6 +24,8 @@
 #        of detail, for the GeoTileset of X3DOM.
 #     4. mbmesh on the survey directory: the survey page that offers all of it.
 #
+#   Each of these programs also writes a page for CesiumJS (--cesium-html), beside the page for X3DOM.
+#
 #   All of the programs get the same GeoOrigin, so that their models line up,
 #   and the tilesets get the same lift, so that they stay with each other and
 #   with the models that are not tilesets.
@@ -85,6 +87,8 @@ class TilesOptions:
     extra_mbmesh: List[str] = field(default_factory=list)
     extra_mbglb2tiles: List[str] = field(default_factory=list)
     survey_page: bool = True
+    cesium_html: bool = True                                  # --cesium-html for every program
+    cesium_url: Optional[str] = None                          # --cesium-url for every program; None leaves each program's default
 
 
 def format_number(value: float, decimals: int) -> str:
@@ -161,14 +165,15 @@ def plan(options: TilesOptions) -> List[Command]:
     with_datalist = [d for d in subdirectories if os.path.isfile(os.path.join(options.survey_directory, d, options.datalist_name))]
     x3dom = ["--x3dom-url", options.x3dom_url] if options.x3dom_url else []
     lift = lift_option(options.lift_meters) if options.lift_meters is not None else ["--lift"]
+    cesium = (["--cesium-html"] + (["--cesium-url", options.cesium_url] if options.cesium_url else [])) if options.cesium_html else []
     commands: List[Command] = []
 
     for d in with_grid:
-        commands.append(Command("mbgrd2gltf", ["--input", f"{d}/{options.grid_name}", "--html", geoorigin, "--output", f"{d}/{grid_stem}"] + options.extra_mbgrd2gltf,
+        commands.append(Command("mbgrd2gltf", ["--input", f"{d}/{options.grid_name}", "--html"] + cesium + [geoorigin, "--output", f"{d}/{grid_stem}"] + options.extra_mbgrd2gltf,
                                 f"The grid of {d} as a GLB and a page"))
 
     for d in with_datalist:
-        args = ["--input", f"{d}/{options.datalist_name}", "--html"]
+        args = ["--input", f"{d}/{options.datalist_name}", "--html"] + cesium
         if options.threads:
             args += ["--threads", str(options.threads)]
         args.append(geoorigin)
@@ -181,14 +186,14 @@ def plan(options: TilesOptions) -> List[Command]:
         commands.append(Command("mbmesh", args, f"The swath data of {d} as a mesh, a point cloud and a track, and a page"))
 
     for d in with_grid:
-        commands.append(Command("mbglb2tiles", ["--input", f"{d}/{grid_stem}.glb", "--html"] + x3dom + lift + ["--output", f"{d}/{grid_stem}_tileset"] + options.extra_mbglb2tiles,
+        commands.append(Command("mbglb2tiles", ["--input", f"{d}/{grid_stem}.glb", "--html"] + cesium + x3dom + lift + ["--output", f"{d}/{grid_stem}_tileset"] + options.extra_mbglb2tiles,
                                 f"The grid of {d} as a tileset of levels of detail"))
     for d in with_datalist:
-        commands.append(Command("mbglb2tiles", ["--input", f"{d}/mbmesh_output/mesh.glb", "--html"] + x3dom + lift + options.extra_mbglb2tiles,
+        commands.append(Command("mbglb2tiles", ["--input", f"{d}/mbmesh_output/mesh.glb", "--html"] + cesium + x3dom + lift + options.extra_mbglb2tiles,
                                 f"The mesh of {d} as a tileset of levels of detail"))
 
     if options.survey_page and commands:
-        commands.append(Command("mbmesh", ["--input", ".", "--html", geoorigin] + x3dom, "The survey page, which offers all of it"))
+        commands.append(Command("mbmesh", ["--input", ".", "--html"] + cesium + [geoorigin] + x3dom, "The survey page, which offers all of it"))
     return commands
 
 
@@ -210,7 +215,7 @@ def script_text(options: TilesOptions, commands: Sequence[Command], command_line
         out += [f"# {command.comment}", command.line(), ""]
     out += ["# All done! The pages and their logs need a web server: from this directory, run",
             "#   python3 -m http.server 8000",
-            "# and open http://localhost:8000/mbmesh_survey.html",
+            "# and open http://localhost:8000/mbmesh_survey.html (mbmesh_survey_cesium.html for CesiumJS)",
             "echo All done!",
             ""]
     return "\n".join(out)

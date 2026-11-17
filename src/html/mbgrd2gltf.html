@@ -36,8 +36,9 @@
     [<b>--output</b> <i>ROOT</i>] [<b>--exaggeration</b> <i>NUM</i>]
     [<b>--geoorigin</b>[<b>=</b><i>LON,LAT,ELEV</i>]] [<b>--no-draco</b>]
     [<b>--draco-precision</b> <i>METERS</i>] [<b>--draco-normal-bits</b>
-    <i>NUM</i>] [<b>--html</b>] [<b>--geoviewpoint</b>=<i>VALUES</i>]
-    [<b>--verbose</b>] [<b>--help</b>]</p>
+    <i>NUM</i>] [<b>--html</b>] [<b>--cesium-html</b> [<b>--cesium-url</b>
+    <i>URL</i>]] [<b>--geoviewpoint</b>=<i>VALUES</i>] [<b>--verbose</b>]
+    [<b>--help</b>]</p>
 <p class="Pp"><b>Legacy single-dash syntax:</b>
   <br/>
   <b>mbgrd2gltf -I</b><i>FILE</i> [<b>-B</b>] [<b>-O</b><i>ROOT</i>]
@@ -228,23 +229,40 @@
       Output file: &lt;output_root&gt;.html
     <p class="Pp"></p>
   </dd>
+  <dt id="cesium-html"><a class="permalink" href="#cesium-html"><b>--cesium-html</b></a></dt>
+  <dd>Also write a viewer page for CesiumJS, &lt;output_root&gt;_cesium.html
+      beside the model, which has a check box for the model, a link to the log,
+      the Viewpoint menu (overview looking down, 45 and 15 degrees from the
+      south, and the <b>--geoviewpoint</b> viewpoints), a Copy viewpoint button
+      and the scale axes. The globe of Cesium would hide data below the
+      ellipsoid, so the page starts with it hidden and has a check box that
+      shows it, translucent. The mesh has no normals, so the page shades it from
+      the relief of what it sees; with <b>--exaggeration</b> the scale axes say
+      what the Up axis stands for. It must be served over HTTP, like the
+      <b>--html</b> page.</dd>
+  <dt id="cesium-url"><a class="permalink" href="#cesium-url"><b>--cesium-url
+    <i>URL</i></b></a></dt>
+  <dd>The directory of the CesiumJS build that the <b>--cesium-html</b> page
+      loads, with Cesium.js and Widgets/widgets.css in it (default
+      https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium).</dd>
   <dt id="geoviewpoint="><a class="permalink" href="#geoviewpoint="><b>--geoviewpoint=<i>VALUES</i></b></a></dt>
-  <dd>With <b>--html</b>, add a GeoViewpoint to the page; the option can be
-      repeated, and each adds a GeoViewpoint, written with its position as
-      latitude, longitude and elevation and the GeoOrigin used again, named
-      USER_GEOVIEW_1, USER_GEOVIEW_2 and so on, to the Viewpoint menu of the
-      page, after the two overview viewpoints, where Page Down also steps
-      through them. The values are geodetic, in the order of <b>--geoorigin</b>,
-      longitude first, so they do not depend on the GeoOrigin or the data and
-      can be used again in another run: <i>lon,lat,elev,clon,clat,celev</i>, the
-      camera position and the point it looks at, or
-      <i>lon,lat,elev,ax,ay,az,angle,clon,clat,celev</i>, with the orientation
-      as an axis and an angle, as a GeoViewpoint takes it. Heights are above the
-      ellipsoid. Without an orientation the top of the view is toward local up.
-      The <b>Copy GeoViewpoint</b> button of the page gives the ten-number form
-      for the view on the screen, on the clipboard and in the X3DOM log. The
-      value must be attached to the option, with an equals sign and no spaces,
-      for example <b>--geoviewpoint=-122.4,36.6,-900,-122.39,36.61,-950</b>.
+  <dd>With <b>--html</b> or <b>--cesium-html</b>, add a GeoViewpoint to the
+      page; the option can be repeated, and each adds a GeoViewpoint, written
+      with its position as latitude, longitude and elevation and the GeoOrigin
+      used again, named USER_GEOVIEW_1, USER_GEOVIEW_2 and so on, to the
+      Viewpoint menu of the page, after the two overview viewpoints, where Page
+      Down also steps through them. The values are geodetic, in the order of
+      <b>--geoorigin</b>, longitude first, so they do not depend on the
+      GeoOrigin or the data and can be used again in another run:
+      <i>lon,lat,elev,clon,clat,celev</i>, the camera position and the point it
+      looks at, or <i>lon,lat,elev,ax,ay,az,angle,clon,clat,celev</i>, with the
+      orientation as an axis and an angle, as a GeoViewpoint takes it. Heights
+      are above the ellipsoid. Without an orientation the top of the view is
+      toward local up. The <b>Copy GeoViewpoint</b> button of the page gives the
+      ten-number form for the view on the screen, on the clipboard and in the
+      X3DOM log. The value must be attached to the option, with an equals sign
+      and no spaces, for example
+      <b>--geoviewpoint=-122.4,36.6,-900,-122.39,36.61,-950</b>.
     <p class="Pp"></p>
   </dd>
   <dt id="verbose,"><a class="permalink" href="#verbose,"><b>--verbose,

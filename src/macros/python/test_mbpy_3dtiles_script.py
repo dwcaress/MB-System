@@ -37,16 +37,16 @@ def main():
         print("\n=== both subdirectories ===")
         options = script.TilesOptions(survey_directory=str(survey), geoorigin=ORIGIN, lift_meters=856.0)
         lines = [c.line() for c in script.plan(options)]
-        mbmesh = lambda d: f"mbmesh --input {d}/datalistp.mb-1 --html --threads 8 {G} -L 0.1 --raw-mesh-glb --pointcloud-glb --track-glb --label-chunks --output {d}/mbmesh_output"
+        mbmesh = lambda d: f"mbmesh --input {d}/datalistp.mb-1 --html --cesium-html --threads 8 {G} -L 0.1 --raw-mesh-glb --pointcloud-glb --track-glb --label-chunks --output {d}/mbmesh_output"
         expected = [
-            f"mbgrd2gltf --input multibeam/ZTopo.grd --html {G} --output multibeam/ZTopo",
-            f"mbgrd2gltf --input lidar/ZTopo.grd --html {G} --output lidar/ZTopo",
+            f"mbgrd2gltf --input multibeam/ZTopo.grd --html --cesium-html {G} --output multibeam/ZTopo",
+            f"mbgrd2gltf --input lidar/ZTopo.grd --html --cesium-html {G} --output lidar/ZTopo",
             mbmesh("multibeam"), mbmesh("lidar"),
-            "mbglb2tiles --input multibeam/ZTopo.glb --html --x3dom-url ./x3dom-full.js --lift 856 --output multibeam/ZTopo_tileset",
-            "mbglb2tiles --input lidar/ZTopo.glb --html --x3dom-url ./x3dom-full.js --lift 856 --output lidar/ZTopo_tileset",
-            "mbglb2tiles --input multibeam/mbmesh_output/mesh.glb --html --x3dom-url ./x3dom-full.js --lift 856",
-            "mbglb2tiles --input lidar/mbmesh_output/mesh.glb --html --x3dom-url ./x3dom-full.js --lift 856",
-            f"mbmesh --input . --html {G} --x3dom-url ./x3dom-full.js",
+            "mbglb2tiles --input multibeam/ZTopo.glb --html --cesium-html --x3dom-url ./x3dom-full.js --lift 856 --output multibeam/ZTopo_tileset",
+            "mbglb2tiles --input lidar/ZTopo.glb --html --cesium-html --x3dom-url ./x3dom-full.js --lift 856 --output lidar/ZTopo_tileset",
+            "mbglb2tiles --input multibeam/mbmesh_output/mesh.glb --html --cesium-html --x3dom-url ./x3dom-full.js --lift 856",
+            "mbglb2tiles --input lidar/mbmesh_output/mesh.glb --html --cesium-html --x3dom-url ./x3dom-full.js --lift 856",
+            f"mbmesh --input . --html --cesium-html {G} --x3dom-url ./x3dom-full.js",
         ]
         ok &= check("the commands are those of the example, in its order", lines == expected, "\n".join(lines))
 
@@ -64,11 +64,18 @@ def main():
         print("\n=== options ===")
         touch(survey / "multibeam" / "ZTopo.grd")
         options = script.TilesOptions(survey_directory=str(survey), subdirectories=("multibeam",), geoorigin=ORIGIN, lift_meters=12.5, threads=2, lod=None,
-                                      label_chunks=False, x3dom_url=None, extra_mbmesh=["--decimate", "0.05"], survey_page=False)
+                                      label_chunks=False, x3dom_url=None, extra_mbmesh=["--decimate", "0.05"], survey_page=False, cesium_html=False)
         lines = [c.line() for c in script.plan(options)]
         ok &= check("the options change the commands",
                     lines[1] == f"mbmesh --input multibeam/datalistp.mb-1 --html --threads 2 {G} --raw-mesh-glb --pointcloud-glb --track-glb --output multibeam/mbmesh_output --decimate 0.05" and
                     lines[2] == "mbglb2tiles --input multibeam/ZTopo.glb --html --lift 12.5 --output multibeam/ZTopo_tileset" and len(lines) == 4, "\n".join(lines))
+        options.cesium_html, options.cesium_url = True, "./cesium"
+        lines = [c.line() for c in script.plan(options)]
+        ok &= check("--cesium-html and --cesium-url are in every command that writes a page",
+                    all("--cesium-html --cesium-url ./cesium" in l for l in lines) and len(lines) == 4, "\n".join(lines))
+        options.cesium_html, options.cesium_url = False, None
+        lines = [c.line() for c in script.plan(options)]
+        ok &= check("without them no command has an option for CesiumJS", not any("cesium" in l for l in lines), "\n".join(lines))
         text = script.script_text(options, script.plan(options))
         ok &= check("the script stops on an error and starts in the survey directory", "set -euo pipefail" in text and f"cd {os.path.abspath(survey)}" in text)
         try:

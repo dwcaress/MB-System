@@ -13,6 +13,7 @@ mbgrd2gltf \- convert bathymetric grid data to GLTF format with optional setting
 [\fB\-\-draco-precision\fP \fIMETERS\fP]
 [\fB\-\-draco-normal-bits\fP \fINUM\fP]
 [\fB\-\-html\fP]
+[\fB\-\-cesium-html\fP [\fB\-\-cesium-url\fP \fIURL\fP]]
 [\fB\-\-geoviewpoint\fP=\fIVALUES\fP]
 [\fB\-\-verbose\fP]
 [\fB\-\-help\fP]
@@ -125,8 +126,14 @@ With Draco, the bits of each normal, 2 to 30 (default 10). The mesh has no norma
 Generate an HTML viewer page with inline 3D visualization using X3DOM. The HTML file includes the glTF/GLB model with interactive navigation controls, processing provenance metadata (command line, timestamps, grid parameters, GeoOrigin settings, compression options), and links to MB-System and X3DOM documentation. The viewer requires serving the files via HTTP to avoid browser CORS restrictions when loading local files. The program does not start a web server or a browser; it logs the command to run (python3 -m http.server 8000 --bind 127.0.0.1 --directory <output directory>) and the URL to open. The processing log is written to <output_root>.log, one message a line, and the page loads it when its Processing Log panel is first opened, so the page need not hold it. Output file: <output_root>.html
 
 .TP
+.B \-\-cesium-html
+Also write a viewer page for CesiumJS, <output_root>_cesium.html beside the model, which has a check box for the model, a link to the log, the Viewpoint menu (overview looking down, 45 and 15 degrees from the south, and the \fB\-\-geoviewpoint\fR viewpoints), a Copy viewpoint button and the scale axes. The globe of Cesium would hide data below the ellipsoid, so the page starts with it hidden and has a check box that shows it, translucent. The mesh has no normals, so the page shades it from the relief of what it sees; with \fB\-\-exaggeration\fR the scale axes say what the Up axis stands for. It must be served over HTTP, like the \fB\-\-html\fR page.
+.TP
+.B \-\-cesium-url \fIURL\fR
+The directory of the CesiumJS build that the \fB\-\-cesium-html\fR page loads, with Cesium.js and Widgets/widgets.css in it (default https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium).
+.TP
 .B \-\-geoviewpoint=\fIVALUES\fR
-With \fB\-\-html\fR, add a GeoViewpoint to the page; the option can be repeated, and each
+With \fB\-\-html\fR or \fB\-\-cesium-html\fR, add a GeoViewpoint to the page; the option can be repeated, and each
 adds a GeoViewpoint, written with its position as latitude, longitude and elevation and the GeoOrigin used again, named USER_GEOVIEW_1, USER_GEOVIEW_2 and so on, to the Viewpoint menu of the
 page, after the two overview viewpoints, where Page Down also steps through them. The
 values are geodetic, in the order of \fB\-\-geoorigin\fR, longitude first, so they do not depend on the

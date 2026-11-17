@@ -52,7 +52,7 @@ in accordions that mirror its layout, for example a survey directory with
 tileset.json is offered. The track.glb files are switched on when the page opens, the other GLBs are not. The page has an overview viewpoint over all the mbmesh GLBs found, as the page of a run does,
 with the GeoOrigin of the first. A GLB with another GeoOrigin, or with absolute vertices, does not line up
 with it, and is logged as an ERROR that names it. \fB--geoviewpoint\fR adds GeoViewpoints to its
-Viewpoint menu, without \fB--html\fR. Run \fBmbmesh\fR in the
+Viewpoint menu, without \fB--html\fR. With \fB--cesium-html\fR it also writes \fImbmesh_survey_cesium.html\fR for CesiumJS. Run \fBmbmesh\fR in the
 survey directory or above it and serve that directory.
 .TP
 .B \-O\fI outputdir\fR, \fB--output\fR \fIoutputdir\fR
@@ -351,6 +351,16 @@ and its children are the tiles, each with a box bounding volume and a geometric 
 of \fBtileset.json\fR, with \fBvertexCoordinates\fR \fBlocalFrame\fR. With \fB--html\fR the page
 shows the tileset with a GeoTileset node in place of \fBmesh.glb\fR; X3DOM has that node only
 in its master of October 2026, so use \fB--x3dom-url\fR.
+.TP
+.B \--cesium-html
+Also write a viewer page for CesiumJS, with a check box for each GLB and tileset, beside the output directory (\fImbmesh_output_cesium.html\fR) and inside it
+(\fImbmesh_cesium.html\fR). The globe of Cesium would hide data below the ellipsoid, so the page starts with it hidden and has a check box that shows it,
+translucent. Tilesets are shown at their true height whatever \fB--lift\fR says. The page has the Viewpoint menu, the \fB--geoviewpoint\fR viewpoints, a Copy viewpoint
+button and the scale axes, but no chunk outlines or labels. It must be served over HTTP, like the \fB--html\fR page. With a directory input it also writes \fImbmesh_survey_cesium.html\fR.
+.TP
+.B \--cesium-url \fIurl\fR
+The directory of the CesiumJS build that the \fB--cesium-html\fR page loads, with Cesium.js and Widgets/widgets.css in it (default
+https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium).
 .TP
 .B \--x3dom-url \fIurl\fR
 The X3DOM script that the page written by \fB--html\fR loads, and the stylesheet \fBx3dom.css\fR beside

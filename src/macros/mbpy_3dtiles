@@ -14,7 +14,7 @@
 #   Macro to generate a shellscript which, when executed, makes the standard
 #   3D products of a survey with mbgrd2gltf, mbmesh and mbglb2tiles: GLBs of
 #   the grid and the mesh of each kind of data, OGC 3D Tiles tilesets of levels
-#   of detail, and X3DOM pages, including a survey page that offers all of it.
+#   of detail, and X3DOM and CesiumJS pages, including a survey page that offers all of it.
 #   The inputs of each subdirectory of the survey directory (multibeam and
 #   lidar) are a grid, ZTopo.grd, and a datalist, datalistp.mb-1.
 #   Like the other macros it writes the shellscript and, with -X, runs it.
@@ -66,6 +66,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
     g.add_argument("--no-label-chunks", action="store_true", help="mbmesh: do not draw the outline and the name of each chunk in the page")
     g.add_argument("--x3dom-url", default="./x3dom-full.js", metavar="URL", help="the X3DOM script of the pages of mbglb2tiles and of the survey; a GeoTileset needs a build that has it [./x3dom-full.js]. "
                    "It is relative to each page, so that every page needs to find it there")
+    g.add_argument("--no-cesium-html", action="store_true", help="do not make the pages for CesiumJS (--cesium-html of each program)")
+    g.add_argument("--cesium-url", metavar="URL", help="the directory of the CesiumJS build of the pages for CesiumJS [each program's default, release 1.114 from Cesium's web site]")
     g.add_argument("--no-survey-page", action="store_true", help="do not make the survey page, mbmesh_survey.html")
     g.add_argument("--mbgrd2gltf-args", default="", metavar="ARGS", help="more options for each mbgrd2gltf, as one quoted string, with '=' after the option: --mbgrd2gltf-args='-E 2'")
     g.add_argument("--mbmesh-args", default="", metavar="ARGS", help="more options for each mbmesh that reads a datalist")
@@ -84,6 +86,7 @@ def main(argv=None) -> int:
         survey_directory=survey, subdirectories=tuple(args.subdir) if args.subdir else script.DEFAULT_SUBDIRS,
         grid_name=args.grid, datalist_name=args.datalist, lod=args.lod, threads=args.threads,
         label_chunks=not args.no_label_chunks, x3dom_url=args.x3dom_url, survey_page=not args.no_survey_page,
+        cesium_html=not args.no_cesium_html, cesium_url=args.cesium_url,
         extra_mbgrd2gltf=shlex.split(args.mbgrd2gltf_args), extra_mbmesh=shlex.split(args.mbmesh_args),
         extra_mbglb2tiles=shlex.split(args.mbglb2tiles_args))
 
