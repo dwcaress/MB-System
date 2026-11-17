@@ -609,7 +609,7 @@ Known limitations:
 - The coarser levels of a tileset come from clustering the finished mesh (`mbglb2tiles`), not from reconstructing again from decimated points; `mbmesh --tileset` writes only the finest level. `mbglb2tiles` holds the whole mesh in memory (about 12 GB at its peak for a mesh of 38 million vertices, with the weld taking about 5 minutes and the first clustering about 2.4), so there is no out-of-core path from the chunk files.
 - A tileset has one frame, at its center, for all its tiles; a survey large enough that the Earth's curvature matters across it would need a frame for each tile.
 - The height colors are one table with the heights of the survey; there is no other colormap for a tileset, and no color from the data (backscatter, for example). The page's checkbox reaches the tiles through X3DOM's internal nodes, so a new X3DOM could break it.
-- The CMake and autotools builds have been tried, the autotools build from a regenerated `configure` in a scratch copy of the tree; the committed `Makefile.in` and `configure` have to be regenerated with automake 1.18.1. A build without Draco writes uncompressed meshes, and `mbglb2tiles` cannot read a Draco-compressed input then.
+- The CMake build and its tests (`ctest`) work, and CMake is the build that is kept up to date. The autotools build works with a `configure` and `Makefile.in` files regenerated from the `Makefile.am` files (the sequence is in `configure.cmd`, with automake 1.18.1); the committed ones are not regenerated for these programs. A build without Draco writes uncompressed meshes, and `mbglb2tiles` cannot read a Draco-compressed input then.
 - Reconstruction is a single end-to-end run; there is no reusable preprocessing artifact yet.
 - Decimation is available through `--decimate`, but remains off by default because it trades reconstruction detail for lower downstream cost.
 - Screened Poisson uses a regular grid, so memory per chunk grows with grid size; a survey of fewer soundings than `--spill-points` is held in memory.
@@ -796,7 +796,7 @@ By default `INFO`, `WARN` and `ERROR` lines are shown. `-V` adds `DEBUG` lines, 
 
 - Initial implementation (PR #1584: reading swath datalists, projected and ECEF XYZ and GLB point clouds, the X3DOM viewer page, build, documentation and the `mbm_tmap` tiling macro): CSUMB Capstone, Spring 2026: Jorge Barrera-Simental, Kevin Crapo, Joceline Cortez-Arellano, Noah Mckegney, Lyn Larson, Metztli Herrera, Andre Gutierrez and David Martinez.
 - Construction and architectural layout of the mesh reconstruction pipeline (datalist reader, normal estimation, screened Poisson reconstruction, marching cubes, support trimming and the output writers): CSUMB Capstone, Summer 2026, Daniel Karnofel and Benjamin Shimek.
-- Continued refinement, Mike McCann, MBARI (issues #1559 and #1629): the ECEF frame and `--geoorigin`, chunked threaded reconstruction, Draco compression, OGC 3D Tiles tilesets with levels of detail for X3DOM (`mbglb2tiles`), the viewer and survey pages, and height colors.
+- Continued refinement, Mike McCann (supervising Claude Sonnet 5.5, an AI coding agent from Anthropic), MBARI (issues #1559 and #1629): the ECEF frame and `--geoorigin`, chunked threaded reconstruction, Draco compression, OGC 3D Tiles tilesets with levels of detail for X3DOM (`mbglb2tiles`), the viewer and survey pages, and height colors.
 
 ## Copyright and License
 

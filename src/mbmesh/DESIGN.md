@@ -132,9 +132,9 @@ tileset/L1/…  Ln/…
 
 ## Build
 
-CMake builds everything (`mbdraco`, `mbgrd2gltf`, `mbmesh`, `mbglb2tiles`). The autotools build has `Makefile.am` files for all four directories
-(`src/mbdraco`, `src/mbgrd2gltf`, `src/mbmesh`, `src/mbglb2tiles`), tried with a regenerated `configure` in a scratch copy of the tree; the committed
-`configure` and `Makefile.in` files are to be regenerated with automake 1.18.1.
+CMake builds everything (`mbdraco`, `mbgrd2gltf`, `mbmesh`, `mbglb2tiles`), and its tests (`ctest`) pass. The autotools build has `Makefile.am` files for all four
+directories (`src/mbdraco`, `src/mbgrd2gltf`, `src/mbmesh`, `src/mbglb2tiles`) and works with a `configure` and `Makefile.in` files regenerated from them (the
+sequence is in `configure.cmd`, with automake 1.18.1); the committed ones are not regenerated for these programs.
 
 ## Verification
 
@@ -161,5 +161,4 @@ None of these blocks use of the tileset; each is small enough for its own issue.
 - **Colors.** One table, over height; none from the data (backscatter), and `mesh.glb` is not colored. `mbgrd2gltf` colors its mesh by height with the same table (`src/mbdraco/haxby_colors.h`, shared with `mbmesh`), over the range of the grid, unless `--no-colors`. The checkbox relies on X3DOM internals.
 - **Reconstruction.** Sparse tiles (under 32 owned points) are skipped; boundary triangles are dropped, not clipped, by support trimming; the point
   outputs of a very large survey are limited to 5 million points; octree or adaptive Poisson is not tried.
-- **Build.** Regenerate `configure` and the `Makefile.in` files for autotools; html and pdf man pages for `mbglb2tiles` and the `src/html` pages are
-  not regenerated.
+- **Build.** The committed `configure` and `Makefile.in` files are not regenerated for the new sources; CMake is the build that is kept up to date.

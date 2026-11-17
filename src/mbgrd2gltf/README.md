@@ -79,6 +79,10 @@ The page also has a scale object: axes East (red), North (green) and Up (blue) a
 ## Fall 2025 Team
 * [MB-System Issue #1521](https://github.com/dwcaress/MB-System/issues/1521) - General mbgrd2gltf C++ code refinement
 
+## 2026: continued refinement
+Mike McCann (supervising Claude Sonnet 5.5, an AI coding agent from Anthropic), MBARI:
+* [MB-System Issue #1629](https://github.com/dwcaress/MB-System/issues/1629) - The GeoOrigin that keeps the vertices precise, the scale axes and the colors by height of the pages, the page for CesiumJS, and the material of the model (a sub-issue of [#1559](https://github.com/dwcaress/MB-System/issues/1559))
+
 # Code Formatting
 
 * This directory uses its own .clang-format file to maintain a consistent coding style for the mbgrd2gltf program.

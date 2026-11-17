@@ -81,4 +81,10 @@ primitives were decoded on several threads. The tilesets of the lidar and multib
 - The tiles are in one frame for the whole tileset; a survey tens of kilometers across would need a frame (a `transform`) for each tile to
   keep the float32 coordinates fine.
 - The coarse levels are simplified by clustering vertices, not by edge collapse with an error measure, so thin features and sharp edges round off.
-- The CMake and autotools builds have been tried (the autotools build in a scratch copy, with a regenerated `configure`).
+- The CMake build and its tests work; the autotools build works with a regenerated `configure` and `Makefile.in` files (see `configure.cmd`), which are not committed regenerated for these programs.
+
+## Credits
+
+- Levels of detail, OGC 3D Tiles tilesets and the viewer pages (issue #1629, a sub-issue of #1559), built on the reconstruction of `mbmesh` and the grids of `mbgrd2gltf`: Mike McCann (supervising Claude Sonnet 5.5, an AI coding agent from Anthropic), MBARI.
+
+These files are copyright by David W. Caress, Dale N. Chayes, and the California State University Monterey Bay Capstone team, and are licensed using GPL3 as part of MB-System.
