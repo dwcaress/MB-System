@@ -43,8 +43,8 @@
     [<b>--grid</b><i>name</i>] [<b>--datalist</b><i>name</i>]
   <br/>
   [<b>--geoorigin=</b><i>lon,lat,elev</i>] [<b>--lift</b><i>meters</i>]
-    [<b>-L</b><i>meters</i>] [<b>--threads</b><i>n</i>]
-    [<b>--no-label-chunks</b>]
+    [<b>--reference-subdir</b><i>name</i>] [<b>-L</b><i>meters</i>]
+    [<b>--threads</b><i>n</i>] [<b>--no-label-chunks</b>]
   <br/>
   [<b>--x3dom-url</b><i>url</i>] [<b>--no-cesium-html</b>]
     [<b>--cesium-url</b><i>url</i>] [<b>--no-survey-page</b>]
@@ -78,13 +78,18 @@
   <br/>
   4. <b>mbmesh</b> --input . --html --cesium-html --geoorigin --x3dom-url, the
     survey pages, mbmesh_survey.html and mbmesh_survey_cesium.html.</p>
-<p class="Pp">Every program gets the same GeoOrigin, so that the models line up,
-    and every tileset the same lift. Without <b>--geoorigin</b> the GeoOrigin is
-    the center of the area of all the grids and the mean of their mean heights,
-    read with <b>gmt grdinfo</b>; without <b>--lift</b> the lift puts the lowest
-    point of the grids 10 m above the ellipsoid, to a meter. The pages and their
-    logs need a web server: from the survey directory, <b>python3 -m
-    http.server</b>.</p>
+<p class="Pp">There is one GeoOrigin for a survey, which every program gets so
+    that the models line up, and one lift, which every tileset gets. Without
+    <b>--geoorigin</b> the GeoOrigin is the center of the grid of the reference
+    subdirectory (<b>multibeam</b>) and the mean of its heights, read with
+    <b>gmt grdinfo</b>; without <b>--lift</b> the lift puts the lowest point of
+    that grid 10 m above the ellipsoid, to a meter. The other subdirectories,
+    the lidar for example, get the same ones. <b>ZTopo.grd</b> is a standard
+    product of a survey, which this macro does not make: a subdirectory that has
+    a datalist and no grid, or a grid and no datalist, gets a warning on
+    standard error that says what will not be made, whatever <b>-V</b> says. The
+    pages and their logs need a web server: from the survey directory,
+    <b>python3 -m http.server</b>.</p>
 <p class="Pp"></p>
 </section>
 <section class="Sh">
@@ -108,6 +113,10 @@
   <dt id="lift"><a class="permalink" href="#lift"><b>--lift
     <i>meters</i></b></a></dt>
   <dd>How far the tilesets are lifted above the ellipsoid.</dd>
+  <dt id="reference"><a class="permalink" href="#reference"><b>--reference-subdir
+    <i>name</i></b></a></dt>
+  <dd>The subdirectory whose grid sets the GeoOrigin and the lift of the whole
+      survey [multibeam].</dd>
   <dt id="L"><a class="permalink" href="#L"><b>-L<i>meters</i>,
     --lod</b></a></dt>
   <dd>The smallest feature size of <b>mbmesh</b> [0.1].</dd>

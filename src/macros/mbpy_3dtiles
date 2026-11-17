@@ -59,8 +59,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
     g.add_argument("-V", "--verbose", action="store_true", help="print the commands and how the GeoOrigin and the lift were set")
 
     g = p.add_argument_group("products")
-    g.add_argument("--geoorigin", metavar="LON,LAT,ELEV", help="the GeoOrigin of every program, with the height above the ellipsoid [the center of the area of all the grids and the mean of their mean heights, from gmt grdinfo]")
-    g.add_argument("--lift", metavar="METERS", help="how far every tileset is lifted above the ellipsoid, so that GeoTileset refines it [enough to put the lowest point of the grids 10 m above it, to a meter]")
+    g.add_argument("--geoorigin", metavar="LON,LAT,ELEV", help="the GeoOrigin of every program, with the height above the ellipsoid; there is one for the survey [the center of the grid of the reference subdirectory and the mean of its heights, from gmt grdinfo]")
+    g.add_argument("--lift", metavar="METERS", help="how far every tileset is lifted above the ellipsoid, so that GeoTileset refines it [enough to put the lowest point of the grid of the reference subdirectory 10 m above it, to a meter]")
+    g.add_argument("--reference-subdir", default=script.DEFAULT_REFERENCE_SUBDIR, metavar="NAME", help="the subdirectory whose grid sets the GeoOrigin and the lift of the whole survey [multibeam]")
     g.add_argument("-L", "--lod", type=float, default=0.1, metavar="METERS", help="mbmesh: the smallest feature size [0.1]")
     g.add_argument("--threads", type=int, default=8, metavar="N", help="mbmesh: chunks reconstructed at once [8]")
     g.add_argument("--no-label-chunks", action="store_true", help="mbmesh: do not draw the outline and the name of each chunk in the page")
@@ -95,23 +96,28 @@ def main(argv=None) -> int:
         print(f"\nNo {options.grid_name} or {options.datalist_name} in {', '.join(os.path.join(survey, d) for d in options.subdirectories)}!\nmbpy_3dtiles aborted", file=sys.stderr)
         return 1
 
-    # The GeoOrigin and the lift, from the command line or from the grids
+    # A standard input that a subdirectory lacks is a warning, which is printed whatever -V says
+    for warning in script.missing_inputs(options):
+        print(f"Warning: {warning}", file=sys.stderr)
+
+    # The one GeoOrigin and the lift of the survey, from the command line or from the grid of the reference subdirectory
     try:
-        grids = [os.path.join(survey, d, options.grid_name) for d in subdirectories if os.path.isfile(os.path.join(survey, d, options.grid_name))]
+        reference = os.path.join(survey, args.reference_subdir, options.grid_name)
+        extent = script.read_grid_extent(reference) if os.path.isfile(reference) and not (args.geoorigin and args.lift) else None
         if args.geoorigin:
             lon, lat, height = (float(v) for v in args.geoorigin.split(","))
             options.geoorigin = (lon, lat, height)
-        elif grids:
-            options.geoorigin = script.geoorigin_of([script.read_grid_extent(g) for g in grids])
+        elif extent:
+            options.geoorigin = script.geoorigin_of([extent])
         else:
-            print("\nNo grid to take the GeoOrigin from: give --geoorigin\nmbpy_3dtiles aborted", file=sys.stderr)
+            print(f"\n{reference} not found to take the GeoOrigin from: give --geoorigin, or --reference-subdir\nmbpy_3dtiles aborted", file=sys.stderr)
             return 1
         if args.lift:
             options.lift_meters = float(args.lift)
-        elif grids:
-            options.lift_meters = script.lift_of([script.read_grid_extent(g) for g in grids])
+        elif extent:
+            options.lift_meters = script.lift_of([extent])
         else:
-            print("\nNo grid to take the lift from: give --lift\nmbpy_3dtiles aborted", file=sys.stderr)
+            print(f"\n{reference} not found to take the lift from: give --lift, or --reference-subdir\nmbpy_3dtiles aborted", file=sys.stderr)
             return 1
     except (ValueError, RuntimeError) as e:
         print(f"\n{e}\nmbpy_3dtiles aborted", file=sys.stderr)
@@ -124,8 +130,8 @@ def main(argv=None) -> int:
     missing = sorted({c.program for c in commands if shutil.which(c.program) is None})
     if args.verbose:
         print(f"Generated {script_path}")
-        print(f"  GeoOrigin: {script.geoorigin_option(options.geoorigin)[len('--geoorigin='):]} ({'given' if args.geoorigin else 'from the grids'})")
-        print(f"  Lift: {script.format_number(options.lift_meters, 3)} m ({'given' if args.lift else 'from the grids'})")
+        print(f"  GeoOrigin: {script.geoorigin_option(options.geoorigin)[len('--geoorigin='):]} ({'given' if args.geoorigin else 'from ' + reference})")
+        print(f"  Lift: {script.format_number(options.lift_meters, 3)} m ({'given' if args.lift else 'from ' + reference})")
         for c in commands:
             print("  " + c.line())
     if missing:

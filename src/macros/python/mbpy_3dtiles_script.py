@@ -49,6 +49,9 @@ LIFT_CLEARANCE_METERS = 10.0
 
 DEFAULT_SUBDIRS = ("multibeam", "lidar")
 
+# The subdirectory whose grid sets the GeoOrigin and the lift of every product of the survey: there is one GeoOrigin for a survey, so that all of its models line up.
+DEFAULT_REFERENCE_SUBDIR = "multibeam"
+
 
 @dataclass
 class GridExtent:
@@ -152,6 +155,19 @@ def existing_subdirectories(options: TilesOptions) -> List[str]:
         if os.path.isfile(os.path.join(directory, options.grid_name)) or os.path.isfile(os.path.join(directory, options.datalist_name)):
             found.append(name)
     return found
+
+
+def missing_inputs(options: TilesOptions) -> List[str]:
+    """Warnings for the standard inputs that a subdirectory that is there does not have. ZTopo.grd is a standard product of a survey, which this macro does
+    not make: without it there is no ZTopo.glb or tileset of the grid, and without the datalist there is no mesh."""
+    warnings = []
+    for name in existing_subdirectories(options):
+        directory = os.path.join(options.survey_directory, name)
+        if not os.path.isfile(os.path.join(directory, options.grid_name)):
+            warnings.append(f"{os.path.join(directory, options.grid_name)} not found: no {os.path.splitext(options.grid_name)[0]}.glb or tileset of the grid for {name}")
+        if not os.path.isfile(os.path.join(directory, options.datalist_name)):
+            warnings.append(f"{os.path.join(directory, options.datalist_name)} not found: no mesh, point cloud or track for {name}")
+    return warnings
 
 
 def plan(options: TilesOptions) -> List[Command]:

@@ -11,7 +11,7 @@ Version 5.0
 \fBmbpy_3dtiles\fP [\fB\-I\fP\fIsurveydir\fP] [\fB\-O\fP\fIroot\fP]
 [\fB\-\-subdir\fP\fIname\fP] [\fB\-\-grid\fP\fIname\fP] [\fB\-\-datalist\fP\fIname\fP]
 .br
-[\fB\-\-geoorigin=\fP\fIlon,lat,elev\fP] [\fB\-\-lift\fP\fImeters\fP]
+[\fB\-\-geoorigin=\fP\fIlon,lat,elev\fP] [\fB\-\-lift\fP\fImeters\fP] [\fB\-\-reference\-subdir\fP\fIname\fP]
 [\fB\-L\fP\fImeters\fP] [\fB\-\-threads\fP\fIn\fP] [\fB\-\-no\-label\-chunks\fP]
 .br
 [\fB\-\-x3dom\-url\fP\fIurl\fP] [\fB\-\-no\-cesium\-html\fP] [\fB\-\-cesium\-url\fP\fIurl\fP] [\fB\-\-no\-survey\-page\fP]
@@ -39,11 +39,15 @@ in the order that they run, with paths relative to the survey directory:
 .br
 4. \fBmbmesh\fP \-\-input . \-\-html \-\-cesium\-html \-\-geoorigin \-\-x3dom\-url, the survey pages, mbmesh_survey.html and mbmesh_survey_cesium.html.
 .PP
-Every program gets the same GeoOrigin, so that the models line up, and every
-tileset the same lift. Without \fB\-\-geoorigin\fP the GeoOrigin is the center
-of the area of all the grids and the mean of their mean heights, read with \fBgmt grdinfo\fP; without
-\fB\-\-lift\fP the lift puts the lowest point of the grids 10 m above the
-ellipsoid, to a meter. The pages and their logs need a web server: from the
+There is one GeoOrigin for a survey, which every program gets so that the models line up,
+and one lift, which every tileset gets. Without \fB\-\-geoorigin\fP the GeoOrigin is the center
+of the grid of the reference subdirectory (\fBmultibeam\fP) and the mean of its heights, read with \fBgmt grdinfo\fP; without
+\fB\-\-lift\fP the lift puts the lowest point of that grid 10 m above the
+ellipsoid, to a meter. The other subdirectories, the lidar for example, get the same ones.
+\fBZTopo.grd\fP is a standard product of a survey, which this macro does not make: a subdirectory
+that has a datalist and no grid, or a grid and no datalist, gets a warning on standard error
+that says what will not be made, whatever \fB\-V\fP says.
+The pages and their logs need a web server: from the
 survey directory, \fBpython3 \-m http.server\fP.
 
 .SH OPTIONS
@@ -66,6 +70,9 @@ minus has to be attached with an equals sign.
 .TP
 .B \-\-lift \fImeters\fP
 How far the tilesets are lifted above the ellipsoid.
+.TP
+.B \-\-reference\-subdir \fIname\fP
+The subdirectory whose grid sets the GeoOrigin and the lift of the whole survey [multibeam].
 .TP
 .B \-L\fImeters\fP, \-\-lod
 The smallest feature size of \fBmbmesh\fP [0.1].

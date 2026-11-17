@@ -61,6 +61,21 @@ def main():
         ok &= check("a subdirectory that is not there is left out", script.existing_subdirectories(
             script.TilesOptions(survey_directory=str(survey), subdirectories=("lidar", "multibeam", "sidescan"))) == ["lidar", "multibeam"])
 
+        print("\n=== missing inputs ===")
+        other_survey = Path(tmp) / "other_survey"
+        touch(other_survey / "multibeam" / "ZTopo.grd")
+        touch(other_survey / "multibeam" / "datalistp.mb-1")
+        touch(other_survey / "lidar" / "datalistp.mb-1")
+        warn_options = script.TilesOptions(survey_directory=str(other_survey))
+        warnings = script.missing_inputs(warn_options)
+        ok &= check("a subdirectory with a datalist and no grid is warned about", len(warnings) == 1 and "lidar/ZTopo.grd not found" in warnings[0] and "no ZTopo.glb" in warnings[0], "\n".join(warnings))
+        (other_survey / "multibeam" / "datalistp.mb-1").unlink()
+        warnings = script.missing_inputs(warn_options)
+        ok &= check("a missing datalist is warned about too", any("multibeam/datalistp.mb-1 not found" in w and "no mesh" in w for w in warnings), "\n".join(warnings))
+        touch(other_survey / "multibeam" / "datalistp.mb-1")
+        touch(other_survey / "lidar" / "ZTopo.grd")
+        ok &= check("nothing is warned about when the inputs are there", script.missing_inputs(warn_options) == [], "\n".join(script.missing_inputs(warn_options)))
+
         print("\n=== options ===")
         touch(survey / "multibeam" / "ZTopo.grd")
         options = script.TilesOptions(survey_directory=str(survey), subdirectories=("multibeam",), geoorigin=ORIGIN, lift_meters=12.5, threads=2, lod=None,
