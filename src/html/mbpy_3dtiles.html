@@ -51,7 +51,7 @@
     [<b>--mbgrd2gltf-args=</b><i>args</i>] [<b>--mbmesh-args=</b><i>args</i>]
     [<b>--mbglb2tiles-args=</b><i>args</i>]
   <br/>
-  [<b>-X</b>] [<b>-V</b>]</p>
+  [<b>--force</b>] [<b>-X</b>] [<b>-V</b>]</p>
 <p class="Pp"></p>
 </section>
 <section class="Sh">
@@ -87,9 +87,21 @@
     the lidar for example, get the same ones. <b>ZTopo.grd</b> is a standard
     product of a survey, which this macro does not make: a subdirectory that has
     a datalist and no grid, or a grid and no datalist, gets a warning on
-    standard error that says what will not be made, whatever <b>-V</b> says. The
-    pages and their logs need a web server: from the survey directory,
-    <b>python3 -m http.server</b>.</p>
+    standard error that says what will not be made, whatever <b>-V</b> says.</p>
+<p class="Pp">A full run takes hours, so the shellscript runs a command only if
+    it has something to do: if one of its outputs (the GLBs, the tilesets and
+    the pages that it writes) is missing or older, by modification time, than
+    one of its inputs. The inputs are the grid, for <b>mbgrd2gltf</b>; the
+    datalist and every swath file that it names, the processed files too, for
+    <b>mbmesh</b>; the GLB, for <b>mbglb2tiles</b>; and the outputs of all the
+    other commands, for the survey pages. The commands run in order, so what an
+    earlier command makes again makes what depends on it stale. The shellscript
+    checks when it runs, not when it is written. A command that is not run is
+    reported as up to date. A change of an option cannot be seen this way: use
+    <b>--force</b>, or <b>FORCE=1</b> in the environment of a shellscript made
+    without it.</p>
+<p class="Pp">The pages and their logs need a web server: from the survey
+    directory, <b>python3 -m http.server</b>.</p>
 <p class="Pp"></p>
 </section>
 <section class="Sh">
@@ -113,6 +125,8 @@
   <dt id="lift"><a class="permalink" href="#lift"><b>--lift
     <i>meters</i></b></a></dt>
   <dd>How far the tilesets are lifted above the ellipsoid.</dd>
+  <dt id="force"><a class="permalink" href="#force"><b>--force</b></a></dt>
+  <dd>Make every product again, whatever the modification times say.</dd>
   <dt id="reference"><a class="permalink" href="#reference"><b>--reference-subdir
     <i>name</i></b></a></dt>
   <dd>The subdirectory whose grid sets the GeoOrigin and the lift of the whole
@@ -144,14 +158,21 @@
   <dt id="X"><a class="permalink" href="#X"><b>-X</b></a></dt>
   <dd>Run the shellscript.</dd>
   <dt id="V"><a class="permalink" href="#V"><b>-V</b></a></dt>
-  <dd>Print the commands and how the GeoOrigin and the lift were set.
+  <dd>Print how the GeoOrigin and the lift were set and the commands, each
+      marked &quot;will run&quot; or &quot;skipped&quot; with the reason, as the
+      modification times are now: an output that is missing, an input that is
+      newer than an output, or an input that an earlier command that will run
+      makes again; with <b>--force</b> every command will run. The shellscript
+      looks at the files again each time it runs, so this is what it would do if
+      it were run now.
     <p class="Pp"></p>
   </dd>
 </dl>
 </section>
 <section class="Sh">
 <h1 class="Sh" id="AUTHOR"><a class="permalink" href="#AUTHOR">AUTHOR</a></h1>
-<p class="Pp">Mike McCann, Monterey Bay Aquarium Research Institute, with the
+<p class="Pp">Mike McCann (supervising Claude Sonnet 5.5, an AI coding agent
+    from Anthropic), Monterey Bay Aquarium Research Institute, with the
     MB-System macros by David W. Caress and Dale N. Chayes.</p>
 <p class="Pp"></p>
 </section>

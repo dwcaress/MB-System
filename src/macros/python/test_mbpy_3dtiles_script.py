@@ -3,6 +3,7 @@
 the GeoOrigin and the lift. Needs no program of MB-System; the one check that reads a grid needs gmt and is left out without it."""
 import os
 import shutil
+import time
 import subprocess
 import sys
 import tempfile
@@ -98,6 +99,97 @@ def main():
             ok &= check("no GeoOrigin is an error", False)
         except ValueError:
             ok &= check("no GeoOrigin is an error", True)
+
+        print("\n=== freshness: the shellscript with stand-in programs ===")
+        fresh = Path(tmp) / "fresh"
+        for d in ("multibeam", "lidar"):
+            touch(fresh / d / "ZTopo.grd")
+            (fresh / d / "datalistp.mb-1").write_text("$PROCESSED\ndatalist.mb-1 -1\n")
+            (fresh / d / "datalist.mb-1").write_text("swath1.mb88 88 1.0\n")
+            touch(fresh / d / "swath1.mb88")
+            touch(fresh / d / "swath1p.mb88")
+        bin_dir = Path(tmp) / "bin"
+        bin_dir.mkdir()
+        # Each stand-in writes what its program writes, appends its command to a log, and does nothing else
+        stand_in = """#!/bin/bash
+echo "$(basename $0) $*" >> "$STAND_IN_LOG"
+args=("$@")
+value() { for ((i = 0; i < ${#args[@]}; i++)); do [ "${args[$i]}" = "$1" ] && echo "${args[$((i + 1))]}"; done; }
+case "$(basename $0)" in
+  mbgrd2gltf) o=$(value --output); touch "$o.glb" "$o.html" "$o_cesium.html" "${o}_cesium.html" ;;
+  mbmesh)
+    i=$(value --input)
+    if [ "$i" = "." ]; then touch mbmesh_survey.html mbmesh_survey_cesium.html
+    else o=$(value --output); mkdir -p "$o"; touch "$o/mesh.glb" "$o/raw_mesh.glb" "$o/pointcloud.glb" "$o/track.glb" "$o.html" "${o}_cesium.html"; fi ;;
+  mbglb2tiles)
+    o=$(value --output); [ -z "$o" ] && o="$(dirname $(value --input))/tileset"
+    mkdir -p "$o"; touch "$o/tileset.json" "$o.html" "${o}_cesium.html" ;;
+esac
+"""
+        for name in ("mbgrd2gltf", "mbmesh", "mbglb2tiles"):
+            (bin_dir / name).write_text(stand_in)
+            (bin_dir / name).chmod(0o755)
+        log = Path(tmp) / "stand_in.log"
+        env = dict(os.environ, PATH=f"{bin_dir}:{os.environ['PATH']}", STAND_IN_LOG=str(log))
+        fresh_options = script.TilesOptions(survey_directory=str(fresh), geoorigin=ORIGIN, lift_meters=856.0)
+        script_path = Path(tmp) / "fresh.sh"
+        script.generate_and_write(fresh_options, str(script_path))
+
+        def run(extra_env=None):
+            log.write_text("")
+            result = subprocess.run(["bash", str(script_path)], capture_output=True, text=True, env=dict(env, **(extra_env or {})))
+            return result, [line.split()[0] + " " + " ".join(line.split()[1:3]) for line in log.read_text().splitlines()]
+
+        result, ran = run()
+        ok &= check("a first run makes everything: 2 grids, 2 meshes, 2 tilesets of the grids, 2 of the meshes, the survey page", result.returncode == 0 and len(ran) == 9, result.stderr + "\n".join(ran))
+        result, ran = run()
+        ok &= check("a second run makes nothing, and says so", result.returncode == 0 and ran == [] and "Up to date, not made again" in result.stdout, result.stderr + "\n".join(ran))
+        # An input made newer: the grid of multibeam. Its GLB, its tileset and the survey page are stale; nothing else is.
+        later = time.time() + 100
+        os.utime(fresh / "multibeam" / "ZTopo.grd", (later, later))
+        result, ran = run()
+        ok &= check("a newer grid makes its GLB, then its tileset, then the survey page, and nothing else",
+                    ran == ["mbgrd2gltf --input multibeam/ZTopo.grd", "mbglb2tiles --input multibeam/ZTopo.glb", "mbmesh --input ."], "\n".join(ran))
+        past = time.time() - 1000   # an input is made newer than its outputs by touching it into the future, and old again once it has been used
+        os.utime(fresh / "multibeam" / "ZTopo.grd", (past, past))
+        # A swath file made newer: the mesh of lidar is made again, then its tileset, then the survey page
+        later += 100
+        os.utime(fresh / "lidar" / "swath1p.mb88", (later, later))
+        result, ran = run()
+        ok &= check("a newer swath file makes the mesh of its subdirectory, its tileset and the survey page",
+                    ran == ["mbmesh --input lidar/datalistp.mb-1", "mbglb2tiles --input lidar/mbmesh_output/mesh.glb", "mbmesh --input ."], "\n".join(ran))
+        os.utime(fresh / "lidar" / "swath1p.mb88", (past, past))
+        # A missing page makes the command that writes it run again
+        (fresh / "multibeam" / "ZTopo_cesium.html").unlink()
+        result, ran = run()
+        ok &= check("a missing output makes its command run again, and what depends on it", ran[:1] == ["mbgrd2gltf --input multibeam/ZTopo.grd"], "\n".join(ran))
+        result, ran = run({"FORCE": "1"})
+        ok &= check("FORCE=1 makes everything again", len(ran) == 9, "\n".join(ran))
+        forced = script.TilesOptions(survey_directory=str(fresh), geoorigin=ORIGIN, lift_meters=856.0, force=True)
+        script.generate_and_write(forced, str(script_path))
+        result, ran = run()
+        ok &= check("a shellscript made with --force makes everything again", len(ran) == 9, "\n".join(ran))
+        # What -V says, as freshness(): after a full run all is up to date; an input made newer makes its commands, and what follows from them, run
+        fresh_commands = script.plan(fresh_options)
+        script_path_run = subprocess.run(["bash", str(script_path)], capture_output=True, text=True, env=env)
+        ok &= check("-V: after a run every command is up to date", [r for r, _ in script.freshness(fresh_options, fresh_commands)] == [False] * 9 and
+                    all("newer than inputs" in why for _, why in script.freshness(fresh_options, fresh_commands)))
+        later = time.time() + 100
+        os.utime(fresh / "multibeam" / "ZTopo.grd", (later, later))
+        status = script.freshness(fresh_options, fresh_commands)
+        ok &= check("-V: a newer grid makes its GLB run, and then what follows from it, with the reasons",
+                    [(c.program, c.args[1], r) for c, (r, _) in zip(fresh_commands, status) if r] ==
+                    [("mbgrd2gltf", "multibeam/ZTopo.grd", True), ("mbglb2tiles", "multibeam/ZTopo.glb", True), ("mbmesh", ".", True)] and
+                    "multibeam/ZTopo.grd is newer than multibeam/ZTopo.glb" in status[0][1] and "made again by an earlier command" in status[4][1], str(status))
+        (fresh / "lidar" / "ZTopo_cesium.html").unlink()
+        os.utime(fresh / "multibeam" / "ZTopo.grd", (past, past))
+        status = script.freshness(fresh_options, fresh_commands)
+        ok &= check("-V: a missing output is the reason, by name", status[1] == (True, "lidar/ZTopo_cesium.html is missing"), str(status[1]))
+        forced_options = script.TilesOptions(survey_directory=str(fresh), geoorigin=ORIGIN, lift_meters=856.0, force=True)
+        ok &= check("-V with --force: every command runs", all(r and why == "--force" for r, why in script.freshness(forced_options, script.plan(forced_options))))
+        ok &= check("the inputs of mbmesh are the datalist and the files it names, the processed ones too",
+                    script.datalist_files(str(fresh / "lidar" / "datalistp.mb-1")) ==
+                    [str(fresh / "lidar" / n) for n in ("datalistp.mb-1", "datalist.mb-1", "swath1.mb88", "swath1p.mb88")])
 
         print("\n=== GeoOrigin and lift ===")
         info = "x.grd\t-122.31\t-122.3\t36.39\t36.4\t-846.2\t-800\t0.001\t0.001\t11\t11\t-842.845\t10\t842.9\t0\t0\n"

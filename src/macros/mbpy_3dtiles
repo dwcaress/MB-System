@@ -17,7 +17,8 @@
 #   of detail, and X3DOM and CesiumJS pages, including a survey page that offers all of it.
 #   The inputs of each subdirectory of the survey directory (multibeam and
 #   lidar) are a grid, ZTopo.grd, and a datalist, datalistp.mb-1.
-#   Like the other macros it writes the shellscript and, with -X, runs it.
+#   Like the other macros it writes the shellscript and, with -X, runs it. The shellscript runs each command only if one of its outputs is missing or older than
+#   one of its inputs (modification times); --force makes everything again.
 #   See src/macros/python/mbpy_3dtiles_script.py for the commands.
 #
 # Usage:
@@ -56,7 +57,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
     g.add_argument("--grid", default="ZTopo.grd", metavar="NAME", help="the grid file of each subdirectory [ZTopo.grd]")
     g.add_argument("--datalist", default="datalistp.mb-1", metavar="NAME", help="the datalist of each subdirectory [datalistp.mb-1]")
     g.add_argument("-X", "--execute", action="store_true", help="run the generated shellscript")
-    g.add_argument("-V", "--verbose", action="store_true", help="print the commands and how the GeoOrigin and the lift were set")
+    g.add_argument("--force", action="store_true", help="make every product again; without it a command is run only if one of its outputs is missing or older than one of its inputs, "
+                   "by modification times (FORCE=1 does the same for a shellscript that was made without --force)")
+    g.add_argument("-V", "--verbose", action="store_true", help="print how the GeoOrigin and the lift were set, and the commands, each marked will run or skipped, with the reason, as the modification times are now")
 
     g = p.add_argument_group("products")
     g.add_argument("--geoorigin", metavar="LON,LAT,ELEV", help="the GeoOrigin of every program, with the height above the ellipsoid; there is one for the survey [the center of the grid of the reference subdirectory and the mean of its heights, from gmt grdinfo]")
@@ -87,7 +90,7 @@ def main(argv=None) -> int:
         survey_directory=survey, subdirectories=tuple(args.subdir) if args.subdir else script.DEFAULT_SUBDIRS,
         grid_name=args.grid, datalist_name=args.datalist, lod=args.lod, threads=args.threads,
         label_chunks=not args.no_label_chunks, x3dom_url=args.x3dom_url, survey_page=not args.no_survey_page,
-        cesium_html=not args.no_cesium_html, cesium_url=args.cesium_url,
+        cesium_html=not args.no_cesium_html, cesium_url=args.cesium_url, force=args.force,
         extra_mbgrd2gltf=shlex.split(args.mbgrd2gltf_args), extra_mbmesh=shlex.split(args.mbmesh_args),
         extra_mbglb2tiles=shlex.split(args.mbglb2tiles_args))
 
@@ -129,11 +132,19 @@ def main(argv=None) -> int:
 
     missing = sorted({c.program for c in commands if shutil.which(c.program) is None})
     if args.verbose:
+        status = script.freshness(options, commands)
         print(f"Generated {script_path}")
         print(f"  GeoOrigin: {script.geoorigin_option(options.geoorigin)[len('--geoorigin='):]} ({'given' if args.geoorigin else 'from ' + reference})")
         print(f"  Lift: {script.format_number(options.lift_meters, 3)} m ({'given' if args.lift else 'from ' + reference})")
-        for c in commands:
-            print("  " + c.line())
+        if options.force:
+            print("  --force: the script runs every command, whatever the modification times say")
+        else:
+            print("  A command is run only if one of its outputs is missing or older than one of its inputs; the script looks at the files each time it runs. As they are now:")
+        for command, (runs, why) in zip(commands, status):
+            print(f"  {'will run' if runs else 'skipped':<9}{command.line()}")
+            print(f"            {why}")
+        count = sum(1 for runs, _ in status if runs)
+        print(f"  {count} of {len(commands)} commands will run now, {len(commands) - count} are up to date" + ("" if options.force else "; --force runs all of them"))
     if missing:
         print(f"Not found on the PATH: {', '.join(missing)}", file=sys.stderr)
         if args.execute:

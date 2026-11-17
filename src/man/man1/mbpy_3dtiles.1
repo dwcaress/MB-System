@@ -18,7 +18,7 @@ Version 5.0
 [\fB\-\-mbgrd2gltf\-args=\fP\fIargs\fP] [\fB\-\-mbmesh\-args=\fP\fIargs\fP]
 [\fB\-\-mbglb2tiles\-args=\fP\fIargs\fP]
 .br
-[\fB\-X\fP] [\fB\-V\fP]
+[\fB\-\-force\fP] [\fB\-X\fP] [\fB\-V\fP]
 
 .SH DESCRIPTION
 \fBmbpy_3dtiles\fP is a macro that writes a shellscript, \fIroot\fP.sh
@@ -47,6 +47,15 @@ ellipsoid, to a meter. The other subdirectories, the lidar for example, get the 
 \fBZTopo.grd\fP is a standard product of a survey, which this macro does not make: a subdirectory
 that has a datalist and no grid, or a grid and no datalist, gets a warning on standard error
 that says what will not be made, whatever \fB\-V\fP says.
+.PP
+A full run takes hours, so the shellscript runs a command only if it has something to do: if one of its
+outputs (the GLBs, the tilesets and the pages that it writes) is missing or older, by modification time, than
+one of its inputs. The inputs are the grid, for \fBmbgrd2gltf\fP; the datalist and every swath file that it names, the
+processed files too, for \fBmbmesh\fP; the GLB, for \fBmbglb2tiles\fP; and the outputs of all the other commands, for the
+survey pages. The commands run in order, so what an earlier command makes again makes what depends on it stale. The shellscript
+checks when it runs, not when it is written. A command that is not run is reported as up to date. A change of an
+option cannot be seen this way: use \fB\-\-force\fP, or \fBFORCE=1\fP in the environment of a shellscript made without it.
+.PP
 The pages and their logs need a web server: from the
 survey directory, \fBpython3 \-m http.server\fP.
 
@@ -70,6 +79,9 @@ minus has to be attached with an equals sign.
 .TP
 .B \-\-lift \fImeters\fP
 How far the tilesets are lifted above the ellipsoid.
+.TP
+.B \-\-force
+Make every product again, whatever the modification times say.
 .TP
 .B \-\-reference\-subdir \fIname\fP
 The subdirectory whose grid sets the GeoOrigin and the lift of the whole survey [multibeam].
@@ -101,10 +113,14 @@ More options for the programs, as one quoted string.
 Run the shellscript.
 .TP
 .B \-V
-Print the commands and how the GeoOrigin and the lift were set.
+Print how the GeoOrigin and the lift were set and the commands, each marked "will run" or "skipped" with the reason, as the
+modification times are now: an output that is missing, an input that is newer than an output, or an input that an earlier
+command that will run makes again; with \fB\-\-force\fP every command will run. The shellscript looks at the files again each time
+it runs, so this is what it would do if it were run now.
 
 .SH AUTHOR
-Mike McCann, Monterey Bay Aquarium Research Institute, with the
+Mike McCann (supervising Claude Sonnet 5.5, an AI coding agent from Anthropic),
+Monterey Bay Aquarium Research Institute, with the
 MB\-System macros by David W. Caress and Dale N. Chayes.
 
 .SH SEE ALSO
