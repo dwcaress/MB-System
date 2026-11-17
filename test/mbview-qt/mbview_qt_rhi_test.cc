@@ -44,7 +44,8 @@
  *        --save file keeps the first picture
  *   The model, widgets, Null and Metal modes also check the profile and 3D
  *   soundings views (6d): the soundings plan, the frame drivers, the views
- *   without drawing, the soundings' uploads and the pixels of both views.
+ *   without drawing, the soundings' uploads, the failed frames of both
+ *   views' renderers and the pixels of both views.
  *   mbview_qt_rhi_test --display [--3d] [--save file] [grid]   a map window
  *        drawn with QRhi (needs a display, not in ctest): waits for the first
  *        frames, grabs the view, picks with the mouse, shows and hides the
@@ -4704,8 +4705,10 @@ void model_soundings_frame() {
   mb3dsoundings_end(0, &error);
 }
 
-/* the profile view's frame on a profile made by hand: the batch (quads,
-   green boundaries, the frame) and the camera of the accessor */
+/* the profile view's frame on a map whose profile has no points: it sizes
+   the core, fills the batch (only the frame, one loop) and takes the camera
+   of the accessor; the quads, green boundaries and frame of a profile with
+   points are checked in pixels by --render-metal (metal_profile) */
 void model_profile_frame() {
   Grid grid;
   size_t instance = MBV_NO_WINDOW;
@@ -4983,6 +4986,190 @@ void null_soundings() {
   mb3dsoundings_end(0, &error);
 }
 
+/* 6d with a Null QRhi: the failure paths of the soundings and profile
+   renderers, which no view reaches unless the GPU memory runs out. (A lost
+   uniform ring cannot happen in these views: their drawings have far fewer
+   commands than the ring's first 64 slots.) */
+void null_failures() {
+  int error = MB_ERROR_NO_ERROR;
+  const int P = rhi::SoundingsPlan::kPositions, C = rhi::SoundingsPlan::kColours, L = rhi::SoundingsPlan::kLists;
+  make_sdg(40, 25, 7);
+  check(open_sdg(), "6d Null failures: the soundings handed over");
+  sdg_camera(90.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+  sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_ALL, true);
+
+  /* A soundings frame whose buffers cannot be made (fail_buffers, after a
+     flag edit whose chunk needs index lists of another size) fails at once
+     and holds no GPU bytes, neither the soundings' nor the batch's; the
+     next frame reads every stream once and draws every sounding. */
+  {
+    mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+    mbvq::RenderOptions options;
+    options.soundings_chunk = 300;
+    const bool drawn = renderer.render_soundings(200, 150, options, nullptr);
+    const mbvq::RenderStats before = renderer.stats();
+    sdg_storage[12].beamflag = static_cast<char>(MB_FLAG_FLAG | MB_FLAG_MANUAL);
+    mb3dsoundings_colors_changed(0, &error);
+    options.fail_buffers = true;
+    const bool failed_frame = renderer.render_soundings(200, 150, options, nullptr);
+    const mbvq::RenderStats failed = renderer.stats();
+    const int failed_frames = renderer.last_frames();
+    options.fail_buffers = false;
+    const bool again = renderer.render_soundings(200, 150, options, nullptr);
+    const mbvq::RenderStats after = renderer.stats();
+    const int reads[3] = {after.sounding_reads[P] - failed.sounding_reads[P],
+                          after.sounding_reads[C] - failed.sounding_reads[C],
+                          after.sounding_reads[L] - failed.sounding_reads[L]};
+    check(drawn && before.sounding_held_bytes > 0 && before.batch_held_bytes > 0 && !failed_frame && failed.failed &&
+              failed_frames == 1 && failed.sounding_held_bytes == 0 && failed.batch_held_bytes == 0 &&
+              failed.batch_resources == 0 && failed.resources == failed.fixed_resources && failed.soundings_shown == 0 &&
+              again && !after.failed && reads[0] == 1 && reads[1] == 1 && reads[2] == 1 &&
+              after.soundings_shown == 1000 && after.soundings_drawn == 1000 && after.sounding_held_bytes > 0,
+          "6d Null: a soundings frame whose buffers cannot be made fails at once (" + std::to_string(failed_frames) +
+              " frame) and holds no GPU bytes (" + std::to_string(failed.sounding_held_bytes) + " of the soundings, " +
+              std::to_string(failed.batch_held_bytes) + " of the batch, against " +
+              std::to_string(before.sounding_held_bytes) + " and " + std::to_string(before.batch_held_bytes) +
+              " before); the next frame reads each stream once (" + std::to_string(reads[0]) + ", " +
+              std::to_string(reads[1]) + ", " + std::to_string(reads[2]) + ") and draws " +
+              std::to_string(after.soundings_drawn) + " soundings");
+  }
+
+  /* A read of the soundings' data that fails (fail_reads: none can today)
+     fails its frame at once, as a buffer that cannot be made does, rather
+     than asking for frames for ever while its mark stays ahead: the
+     positions after an exaggeration change, the colours after a flag edit,
+     the profile pairs after another profile mode; after each the next frame
+     reads and draws everything again. */
+  {
+    mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+    mbvq::RenderOptions options;
+    options.soundings_chunk = 300;
+    bool ok = renderer.render_soundings(200, 150, options, nullptr);
+    std::string frames;
+    for (int stream = 0; stream < 3; stream++) {
+      if (stream == 0) {
+        mb3dsoundings.exaggeration = 2.0f;
+        mb3dsoundings_scalez(0, &error);
+      }
+      else if (stream == 1) {
+        sdg_storage[600].beamflag = static_cast<char>(MB_FLAG_FLAG | MB_FLAG_MANUAL);
+        mb3dsoundings_colors_changed(0, &error);
+      }
+      else {
+        mb3dsoundings_setprofiles(MBS_VIEW_PROFILES_UNFLAGGED);
+      }
+      const int reads_before = renderer.stats().sounding_reads[stream];
+      options.fail_reads = true;
+      const bool read_failed = !renderer.render_soundings(200, 150, options, nullptr);
+      const mbvq::RenderStats failed = renderer.stats();
+      const int failed_frames = renderer.last_frames();
+      options.fail_reads = false;
+      const bool again = renderer.render_soundings(200, 150, options, nullptr);
+      const mbvq::RenderStats after = renderer.stats();
+      ok = ok && read_failed && failed.failed && failed_frames == 1 && failed.sounding_reads[stream] == reads_before &&
+           failed.sounding_held_bytes == 0 && failed.batch_held_bytes == 0 && again && !after.failed &&
+           after.sounding_reads[stream] == reads_before + 1 && after.soundings_drawn == 1000;
+      frames += (stream > 0 ? ", " : "") + std::to_string(failed_frames);
+    }
+    check(ok, "6d Null: a read that fails ends its frame at once, as a failed buffer does (positions, colours and "
+              "profile pairs: " +
+                  frames + " frames of 16 allowed), holding nothing; the next frame reads and draws everything again");
+  }
+
+  /* A failed frame hands its update batch back to the QRhi, whose pool
+     holds 64: kept by failed frames, the batches would run out after 64 of
+     them, and the frame that draws after these 70 would get none and
+     crash. Here every read fails; a buffer that cannot be made takes the
+     same path. */
+  {
+    mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+    mbvq::RenderOptions options;
+    options.soundings_chunk = 300;
+    const int tries = 70;
+    options.fail_reads = true;
+    int failures = 0;
+    for (int f = 0; f < tries; f++)
+      failures += !renderer.render_soundings(200, 150, options, nullptr) && renderer.stats().failed &&
+                  renderer.last_frames() == 1;
+    options.fail_reads = false;
+    const bool again = renderer.render_soundings(200, 150, options, nullptr);
+    const mbvq::RenderStats after = renderer.stats();
+    check(failures == tries && again && !after.failed && after.soundings_drawn == 1000,
+          "6d Null: failed soundings frames hand back their update batches (" + std::to_string(failures) + " of " +
+              std::to_string(tries) + " failed in a row, a QRhi's pool holds 64): the next frame draws " +
+              std::to_string(after.soundings_drawn) + " soundings");
+  }
+  mb3dsoundings_end(0, &error);
+
+  /* A profile frame whose buffers cannot be made (fail_buffers, when its
+     batch grows from the frame alone to a profile of seven points) fails,
+     draws nothing and lets go of the batch's buffers; the next frame draws
+     the profile again. */
+  Grid grid;
+  size_t instance = MBV_NO_WINDOW;
+  check(open_grid(grid, nullptr, &instance), "6d Null failures: a map for the profile");
+  struct mbview_struct *data = data_of(instance);
+  mbvq_c_profile_show(instance, true);
+  mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+  mbvq::RenderOptions options;
+  const bool first = renderer.render_profile(instance, 600, 200, options, nullptr);
+  const mbvq::RenderStats framed = renderer.stats();
+  const int n = 7;
+  if (data->profile.npoints_alloc < n && mbview_allocprofilepoints(0, n, &data->profile.points, &error) == MB_SUCCESS)
+    data->profile.npoints_alloc = n;
+  if (data->profile.npoints_alloc >= n) {
+    const double z[n] = {-1000.0, -985.0, -1012.0, -995.0, -1003.0, -990.0, -1008.0};
+    data->profile.npoints = n;
+    data->profile.length = 600.0;
+    data->profile.zmin = -1012.0;
+    data->profile.zmax = -985.0;
+    for (int i = 0; i < n; i++) {
+      struct mbview_profilepoint_struct &p = data->profile.points[i];
+      p.boundary = i == 0 || i == 3 || i == n - 1;
+      p.distance = 100.0 * i;
+      p.zdata = z[i];
+      p.slope = i % 2 == 0 ? 0.1 : 0.9;
+    }
+    data->profile_slopethreshold = 0.5;
+    data->profile_exaggeration = 1.0;
+  }
+  options.fail_buffers = true;
+  const bool failed_frame = renderer.render_profile(instance, 600, 200, options, nullptr);
+  const mbvq::RenderStats failed = renderer.stats();
+  options.fail_buffers = false;
+  const bool again = renderer.render_profile(instance, 600, 200, options, nullptr);
+  const mbvq::RenderStats drawn = renderer.stats();
+  check(first && !framed.failed && framed.batch_resources > 0 && data->profile.npoints == n && !failed_frame &&
+            failed.failed && failed.batch_resources == 0 && failed.batch_held_bytes == 0 &&
+            failed.resources == failed.fixed_resources && again && !drawn.failed && drawn.batch_resources > 0 &&
+            drawn.draws > framed.draws,
+        "6d Null: a profile frame whose buffers cannot be made fails and lets go of the batch's buffers (" +
+            std::to_string(failed.batch_resources) + " left, against " + std::to_string(framed.batch_resources) +
+            " before); the next frame draws the profile of " + std::to_string(n) + " points (" +
+            std::to_string(drawn.draws) + " draws, against " + std::to_string(framed.draws) + " for the frame alone)");
+
+  /* So does a failed profile frame (see the soundings above): 70 in a row
+     on another Null QRhi, then a frame that draws the profile. */
+  {
+    mbvq::OffscreenRenderer fresh(mbvq::OffscreenRenderer::Api::Null);
+    const int tries = 70;
+    options.fail_buffers = true;
+    int failures = 0;
+    for (int f = 0; f < tries; f++)
+      failures += !fresh.render_profile(instance, 600, 200, options, nullptr) && fresh.stats().failed;
+    options.fail_buffers = false;
+    const bool redrawn = fresh.render_profile(instance, 600, 200, options, nullptr);
+    const mbvq::RenderStats after = fresh.stats();
+    check(failures == tries && redrawn && !after.failed && after.draws > framed.draws,
+          "6d Null: failed profile frames hand back their update batches (" + std::to_string(failures) + " of " +
+              std::to_string(tries) + " failed in a row): the next frame draws the profile (" +
+              std::to_string(after.draws) + " draws, against " + std::to_string(framed.draws) +
+              " for the frame alone)");
+  }
+  mbvq_c_profile_show(instance, false);
+  close_instance(instance);
+}
+
 /* 6d without drawing: the profile and soundings views are QRhi views; the
    profile's width cap; the soundings view's failure label, input before the
    first frame, its point-size control and its status during a fill */
@@ -5101,6 +5288,44 @@ void widgets_views(size_t instance, QRhiWidget::Api expected) {
     point_size->setValue(3.0);
     check(two == 2.0 && snapped == 2.5 && point_size->value() == 3.0 && mbvq::soundings_point_size() == 3.0,
           "6d: the control sets the program's point size (2), a typed 2.3 becomes 2.5");
+
+    /* Keys as the user types them: a typed value counts once, on Enter or
+       when the box loses the focus (keyboard tracking off; with it the first
+       key set 2 and the third snapped the text to 2.5 under the cursor); the
+       arrows and the wheel set the size at once. */
+    const QString point = point_size->locale().decimalPoint();
+    const auto type = [point_size](const QString &keys) {
+      point_size->selectAll();
+      for (const QChar c : keys) {
+        QKeyEvent key(QEvent::KeyPress, 0, Qt::NoModifier, QString(c));
+        QApplication::sendEvent(point_size, &key);
+      }
+    };
+    type(QStringLiteral("2") + point + QStringLiteral("3"));
+    const double typing = mbvq::soundings_point_size();
+    QKeyEvent enter(QEvent::KeyPress, Qt::Key_Return, Qt::NoModifier);
+    QApplication::sendEvent(point_size, &enter);
+    const double entered = mbvq::soundings_point_size();
+    type(QStringLiteral("4") + point + QStringLiteral("2"));
+    const double typing_again = mbvq::soundings_point_size();
+    QFocusEvent leave(QEvent::FocusOut, Qt::TabFocusReason);
+    QApplication::sendEvent(point_size, &leave);
+    const double left = mbvq::soundings_point_size();
+    QKeyEvent up(QEvent::KeyPress, Qt::Key_Up, Qt::NoModifier);
+    QApplication::sendEvent(point_size, &up);
+    const double arrow = mbvq::soundings_point_size();
+    QWheelEvent wheel(QPointF(5, 5), point_size->mapToGlobal(QPointF(5, 5)), QPoint(), QPoint(0, 120), Qt::NoButton,
+                      Qt::NoModifier, Qt::NoScrollPhase, false);
+    QApplication::sendEvent(point_size, &wheel);
+    const double wheeled = mbvq::soundings_point_size();
+    point_size->setValue(3.0);
+    check(!point_size->keyboardTracking() && typing == 3.0 && entered == 2.5 && typing_again == 2.5 && left == 4.0 &&
+              arrow == 4.5 && wheeled == 5.0 && mbvq::soundings_point_size() == 3.0,
+          "6d: a size typed into the control counts once: 2" + point.toStdString() + "3 sets nothing (" +
+              text("%.1f", typing) + ") until Enter, then 2.5 (" + text("%.1f", entered) + "); 4" +
+              point.toStdString() + "2 nothing (" + text("%.1f", typing_again) + ") until the box loses the focus, " +
+              "then 4 (" + text("%.1f", left) + "); the up arrow and the wheel at once (" + text("%.1f", arrow) +
+              ", " + text("%.1f", wheeled) + ")");
   }
 
   /* the status during a QRhi fill: the label, the signal and the sliders
@@ -6491,6 +6716,7 @@ int test_render_null() {
   null_buffers();
   null_meshes();
   null_soundings();
+  null_failures();
   return result();
 }
 
@@ -8604,7 +8830,11 @@ int test_quit(const char *how, const char *grdfile, bool maps_only) {
     spin(1200);
     const int frames = sview != nullptr ? mbvq::view_stats(sview).frames : 0;
     mbvq_c_soundings_plot();
-    spin(400);
+    /* the frame comes when the window is next composed: waited for, up to
+       5 s, rather than a fixed time */
+    timer.restart();
+    while (sview != nullptr && mbvq::view_stats(sview).frames == frames && timer.elapsed() < 5000)
+      spin(20);
     check(docked_drawn && soundings_dock != nullptr && soundings_dock->isFloating() &&
               mbvq::view_stats(sview).frames > frames && mbvq::view_state(sview).renderer,
           "6d: the soundings drawn in their dock, then floated and drawn with the QRhi of the floating window");

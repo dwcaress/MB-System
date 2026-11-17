@@ -71,6 +71,10 @@ struct RenderOptions {
      lets go of its pipelines, bindings and ring and makes them again in its
      next frame */
   bool fail_slot_restore = false;
+  /* the 3D soundings' positions, colours and profile pairs cannot be read,
+     as if the core no longer had the soundings the frame counted: the frame
+     fails as when a buffer cannot be made */
+  bool fail_reads = false;
   /* the terrain colours as the core's floats (16 bytes per node) instead of
      bytes (4), for comparisons with OpenGL without the 8-bit rounding of the
      node colours; taken when the renderer is made */

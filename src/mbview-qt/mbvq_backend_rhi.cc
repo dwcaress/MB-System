@@ -762,7 +762,9 @@ class RhiSoundingsView final : public RhiView {
   rhi::SoundingsFrame frame_;
   bool drawn_ = false;         /* a frame was filled: input may reach the core */
   bool continued_ = false;     /* the next frame is one this view asked for to continue writes */
-  bool upload_failed_ = false; /* a buffer could not be made: wait for the core's next request */
+  /* a buffer could not be made, or the soundings could not be read: wait
+     for the core's next request */
+  bool upload_failed_ = false;
 };
 
 RhiSoundingsView *soundings_view = nullptr;
@@ -817,9 +819,10 @@ void RhiSoundingsView::render(QRhiCommandBuffer *cb) {
   QRhiResourceUpdateBatch *updates = rhi()->nextResourceUpdateBatch();
   auto *renderer = static_cast<rhi::SoundingsRenderer *>(renderer_.get());
   const QSize pixels = renderTarget()->pixelSize();
-  /* Nothing to draw without a renderer, nor while writes that failed wait
-     for the core's next request: trying again in every frame would loop
-     where the GPU memory ran out. */
+  /* Nothing to draw without a renderer, nor while a frame that failed (a
+     buffer that could not be made, or soundings that could not be read)
+     waits for the core's next request: trying again in every frame would
+     loop where the GPU memory ran out or the read keeps failing. */
   if (renderer == nullptr || (upload_failed_ && !frame_.requested())) {
     /* picks use the core's size, also while nothing is drawn */
     if (renderer != nullptr)

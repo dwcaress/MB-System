@@ -1311,7 +1311,9 @@ bool SoundingsRenderer::make_view_pipelines(QRhiRenderPassDescriptor *pass, int 
 Prepared SoundingsRenderer::frame(SoundingsFrame *frame, QRhiResourceUpdateBatch *updates, bool continued,
                                   QSize pixels) {
   SoundingsInput input;
-  const bool filled = frame->begin(continued, pixels.width(), pixels.height(), &input);
+  /* false only if the fill was refused (another fill runs): true also when
+     the frame reuses the batch, and without soundings */
+  const bool not_refused = frame->begin(continued, pixels.width(), pixels.height(), &input);
   const Clock::time_point start = Clock::now();
   Prepared prepared = Prepared::Failed;
   if (begin_frame(input.frame)) {
@@ -1362,10 +1364,10 @@ Prepared SoundingsRenderer::frame(SoundingsFrame *frame, QRhiResourceUpdateBatch
   if (prepared == Prepared::Failed)
     return prepared;
   /* writes wait, a mark that rose during its stream's upload is still to be
-     read (no request of the core brings it: a drag's last motion), or a
-     refused fill: another frame */
-  return plan_.waiting() || behind(input) || !filled || prepared == Prepared::More ? Prepared::More
-                                                                                   : Prepared::Done;
+     read (no request of the core brings it: a drag's last motion), or the
+     fill was refused: another frame */
+  return plan_.waiting() || behind(input) || !not_refused || prepared == Prepared::More ? Prepared::More
+                                                                                        : Prepared::Done;
 }
 
 bool SoundingsRenderer::behind(const SoundingsInput &input) const {
@@ -1419,18 +1421,24 @@ bool SoundingsRenderer::prepare_soundings(QRhiResourceUpdateBatch *updates, Soun
 
   /* Read where the marks rose, and only while the stream's last upload is
      done: an upload takes its data from what was read, until its last
-     write (a mark that rises meanwhile is taken after it). */
+     write (a mark that rises meanwhile is taken after it). A read that
+     fails (the core no longer has the soundings begin() counted; none can
+     today, since begin() counted them in this thread) fails the frame as a
+     buffer that cannot be made does: the soundings and the batch are
+     dropped and read again in a later frame (in a view after the core's
+     next request), so that no frame asks for another one while behind()
+     stays true. */
   if ((!positions_read_ || input.position != position_mark_) && !plan_.busy(SoundingsPlan::kPositions)) {
-    if (!frame->positions(input.count, &positions_))
-      return true;
+    if (options_.fail_reads || !frame->positions(input.count, &positions_))
+      return false;
     positions_read_ = true;
     position_mark_ = input.position;
     plan_.start(SoundingsPlan::kPositions);
     stats_.sounding_reads[SoundingsPlan::kPositions]++;
   }
   if ((!colours_read_ || input.colour != colour_mark_) && !plan_.busy(SoundingsPlan::kColours)) {
-    if (!frame->colours(input.count, &colours_))
-      return true;
+    if (options_.fail_reads || !frame->colours(input.count, &colours_))
+      return false;
     colours_read_ = true;
     colour_mark_ = input.colour;
     plan_.start(SoundingsPlan::kColours);
@@ -1441,8 +1449,8 @@ bool SoundingsRenderer::prepare_soundings(QRhiResourceUpdateBatch *updates, Soun
      which raises no mark */
   if ((!lists_made_ || input.colour != lists_colour_ || input.profiles != lists_mode_) &&
       !plan_.busy(SoundingsPlan::kLists) && !plan_.busy(SoundingsPlan::kPairColours)) {
-    if (!frame->pairs(input.count, &black_, &red_))
-      return true;
+    if (options_.fail_reads || !frame->pairs(input.count, &black_, &red_))
+      return false;
     split_lists();
     lists_made_ = true;
     lists_colour_ = input.colour;

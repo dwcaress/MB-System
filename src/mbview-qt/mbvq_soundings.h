@@ -76,7 +76,8 @@ class SoundingsWidget final : public QWidget {
   void set_status(const QString &text, bool sliders);
   void set_view_cursor(int cursor);
   QWidget *view() const { return view_; }
-  /* free the drawing view (and its OpenGL context) now */
+  /* free the drawing view now (an OpenGL view with its context; a QRhi view
+     lets go of its GPU buffers as it is deleted) */
   void delete_view();
 
  signals:

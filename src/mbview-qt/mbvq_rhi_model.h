@@ -514,6 +514,10 @@ enum class DrawKind {
    from the soundings' positions with index lists of its own. A slot of
    mbview-qt only: the core has none of this number (mbv_draw_batch.h). */
 constexpr int kSlotProfileLines = 100;
+/* above the core's highest slot id: if the core adds slots, compare with its
+   new highest here, and raise kSlotProfileLines should that reach it */
+static_assert(kSlotProfileLines > MBV_DRAW_SLOT_CONTOURS_FULL,
+              "kSlotProfileLines must lie above the core's slot ids (mbv_draw_batch.h)");
 
 /* the buffer a draw reads its vertices or instances from */
 enum class DrawSource {

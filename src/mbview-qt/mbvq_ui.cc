@@ -395,7 +395,8 @@ void mbvq_qt_close_window(size_t instance) {
     return;
   /* Called from mbview_destroy(), possibly inside an event of this window: the
      window is hidden now and deleted at a safe point (see closed_windows). Its
-     OpenGL map view and context are freed now. */
+     drawing view goes now (an OpenGL map view with its context; a QRhi map
+     view lets go of its GPU buffers as it is deleted). */
   mbvq::MapWidget *widget = mbvq::widgets[instance];
   QWidget *top = mbvq::outermost(instance);
   mbvq::widgets[instance] = nullptr;

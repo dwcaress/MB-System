@@ -118,7 +118,7 @@ constexpr size_t kMeshes = 32;
 enum class Prepared {
   Done,  /* everything is uploaded */
   More,  /* uploads wait for the next frames, or the fill was refused: ask for another frame */
-  Failed /* a buffer could not be made: nothing is drawn (the renderers' frame()) */
+  Failed /* a buffer could not be made, or the 3D soundings not read: nothing is drawn (the renderers' frame()) */
 };
 
 class ViewRenderer {
@@ -416,8 +416,9 @@ class SoundingsRenderer final : public BatchRenderer {
      the batch's uploads and uniforms. More: writes wait for the next frames,
      a mark rose while its stream's upload ran (its data are read in a later
      frame, which nothing else asks for), or the fill was refused. Failed: a
-     buffer could not be made; updates was released, the soundings and the
-     batch dropped, and a later frame reads and writes everything again. */
+     buffer could not be made, or a read of the soundings' data failed;
+     updates was released, the soundings and the batch dropped, and a later
+     frame reads and writes everything again. */
   Prepared frame(SoundingsFrame *frame, QRhiResourceUpdateBatch *updates, bool continued, QSize pixels);
   /* The program released its soundings while the view is hidden (Dismiss),
      so no frame comes to drop what this renderer holds of them: the GPU
@@ -458,7 +459,7 @@ class SoundingsRenderer final : public BatchRenderer {
 
   void drop_soundings();
   /* the soundings' data read again where their marks rose, and the uploads
-     of this frame; false if a buffer could not be made */
+     of this frame; false if a read failed or a buffer could not be made */
   bool prepare_soundings(QRhiResourceUpdateBatch *updates, SoundingsFrame *frame, const SoundingsInput &input);
   /* the data on the GPU are older than the core's marks of this frame: a
      mark rose while its stream's upload ran, so prepare_soundings() left it

@@ -212,6 +212,9 @@ SoundingsWidget::SoundingsWidget(QWidget *parent) : QWidget(parent), title_(tr("
     point_size->setSuffix(tr(" px"));
     point_size->setValue(soundings_point_size());
     point_size->setToolTip(tr("logical pixels, times the screen's pixel ratio"));
+    /* a typed value counts once, on Enter or when the box loses the focus,
+       not at every key; the arrows and the wheel set it at once */
+    point_size->setKeyboardTracking(false);
     auto *point_label = new QLabel(tr("Point size"));
     point_label->setBuddy(point_size);
     connect(point_size, &QDoubleSpinBox::valueChanged, this, [point_size](double value) {
@@ -487,8 +490,9 @@ void mbvq_qt_soundings_released(void) {
 }
 
 void mbvq_qt_soundings_destroy(void) {
-  /* possibly inside an event of the window: hide it now, free its OpenGL
-     view now, delete the window at a safe point */
+  /* possibly inside an event of the window: hide it now, free its drawing
+     view now (an OpenGL view with its context; a QRhi view lets go of its
+     GPU buffers as it is deleted), delete the window at a safe point */
   mbvq::SoundingsWidget *widget = mbvq::the_widget;
   if (widget == nullptr)
     return;
