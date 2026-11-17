@@ -31,7 +31,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Set the sources for the executable
-set(SOURCES bathymetry.cpp geometry.cpp logger.cpp main.cpp model.cpp options.cpp provenance.cpp viewpoint.cpp)
+# The page for CesiumJS (--cesium-html) is written by the source of mbmesh and mbglb2tiles, which uses only the standard library.
+set(SOURCES bathymetry.cpp geometry.cpp logger.cpp main.cpp model.cpp options.cpp provenance.cpp viewpoint.cpp
+	${CMAKE_SOURCE_DIR}/src/mbmesh/src/io/cesium_writer.cpp)
 
 # Include directories (Draco is in the shared mbdraco library, src/mbdraco)
 include_directories(
@@ -47,6 +49,7 @@ target_include_directories(mbgrd2gltf
 	PRIVATE ${NetCDF_INCLUDE_DIRS}
 	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tinygltf
+	PRIVATE ${CMAKE_SOURCE_DIR}/src/mbmesh/include
 )
 
 target_link_libraries(mbgrd2gltf

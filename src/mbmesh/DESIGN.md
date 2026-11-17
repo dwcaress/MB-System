@@ -111,16 +111,22 @@ tileset/L1/…  Ln/…
 - A tileset with colors gets a "color by height" checkbox, one for each tileset: unchecked, it turns the vertex colors off and sets the gray
   base color that MeshLab shows (192 of 255). The tiles are reached through X3DOM's internal nodes from the `GeoTileset`, and tiles that load later
   are done as they arrive.
-- `mbglb2tiles --cesium-html` writes a page for CesiumJS (`io/cesium_writer.cpp`): a `Cesium3DTileset` from `tileset.json`, the globe hidden at the start with a
-  check box that shows it translucent (the data are below the ellipsoid, which the globe would hide), the lift taken off again by a `modelMatrix` of the tileset, a
-  "color by height" check box (a custom shader that sets a gray base color before the lighting; the `REPLACE` blend mode of a style paints the final color and
-  loses the shading), a link to the log, and the scale object (polylines and labels at the point of the data under the middle of the view, from a depth pick,
-  resized before each render, with the origin raised a tenth of the axis length above the surface). The Viewpoint menu has an overview looking down, which the
-  page opens with, and views at 45 and 15 degrees from the south, and then the viewpoints of the user: `--geoviewpoint`, in the form of the X3DOM pages (the
-  six or ten numbers, true heights, so no lift), is converted in the page from the axis and angle in the local frame (X east, Y up, Z south) to the direction and
-  up of the camera; the **Copy viewpoint** button writes the ten-number option for the view on the screen, with the point under the middle of the view as the
-  center, so that an option copied from either kind of page works in the other. Seen in headless Chrome with CesiumJS 1.114 and the test tileset;
-  not tried on a large survey or with the OpenStreetMap imagery, which the headless run did not load. `mbmesh` and `mbgrd2gltf` do not have the option yet.
+- `--cesium-html` of `mbglb2tiles`, `mbmesh` and `mbgrd2gltf` writes a page for CesiumJS with one writer, `io/cesium_writer.cpp` (standard library only, so that `mbgrd2gltf`
+  takes the source too; `io/cesium_convert.h` turns the models and the `--geoviewpoint` values of the X3DOM pages into its options). The page lists models, each with a check box
+  that loads it the first time it is switched on. A tileset is a `Cesium3DTileset`, with the lift taken off again by its `modelMatrix` (Cesium needs none) and a "color by height"
+  check box (a custom shader that sets a gray base color before the lighting; the `REPLACE` blend mode of a style paints the final color and loses the shading). A GLB is a `Model`
+  placed by the translation of the GeoOrigin alone, with `upAxis` Z and `forwardAxis` X, which leaves the axes of glTF as they are, since the vertices are ECEF. A GLB without normals
+  (the mesh of `mbgrd2gltf`) is unlit in CesiumJS, which ignores a lighting model that a custom shader asks for, so a custom shader shades it from `dFdx` and `dFdy` of the eye-space
+  position and a fixed light. The globe starts hidden, with a check box that shows it translucent (the data are below the ellipsoid, which the globe would hide). The scale object is
+  polylines and labels at the point of the data under the middle of the view, from a depth pick, resized before each render, with the origin raised a tenth of the axis length above
+  the surface; with `--exaggeration` its label says what the Up axis stands for. The Viewpoint menu has an overview looking down, which the page opens with, fitted to the models that
+  are shown (if none is, as in the survey page of `mbmesh`, which starts with only the tracks on, the first tileset is shown), views at 45 and 15 degrees from the south, and the
+  viewpoints of the user: `--geoviewpoint`, in the form of the X3DOM pages (six or ten numbers, true heights, so no lift), is converted in the page from the axis and angle in the
+  local frame (X east, Y up, Z south) to the direction and up of the camera. The **Copy viewpoint** button writes the ten-number option for the view on the screen, with the point
+  under the middle of the view as the center, so that an option copied from either kind of page works in the other. `mbmesh` writes the page beside the output directory and inside it,
+  and `mbmesh_survey_cesium.html` for a directory input; it has no chunk outlines or labels. Seen in headless Chrome with CesiumJS 1.114: `mbglb2tiles` on a small tileset, `mbmesh` on a
+  small run and on a small survey directory (a tileset and its `mesh.glb` line up), and `mbgrd2gltf` on one grid; not tried on a large survey or with the OpenStreetMap imagery, which
+  the headless run did not load.
 - The pages need an X3DOM build that has `GeoTileset` ([PR 1364](https://github.com/x3dom/x3dom/pull/1364)), given with `--x3dom-url`.
 
 ## Build

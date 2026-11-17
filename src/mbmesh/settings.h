@@ -32,6 +32,10 @@ struct Options {
 
     bool write_html = false;
 
+    // --cesium-html: also write a page for CesiumJS (see io/cesium_writer.h), and --cesium-url, the directory of the CesiumJS build it loads, if not the default.
+    bool write_cesium_html = false;
+    std::string cesium_url;
+
     // --label-chunks: the --html page draws the outline and the file name of each chunk.
     bool label_chunks = false;
     // Draco compression of the triangle meshes written to GLB files (--no-draco, --draco-precision, --draco-normal-bits).

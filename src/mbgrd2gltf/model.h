@@ -50,6 +50,8 @@ void write_gltf(const Geometry& geometry, const Options& options, GridRunInfo& r
 void write_html(const Bathymetry& bathymetry, const Geometry& geometry, const Options& options, 
                 const std::string& command_line, const std::string& timestamp,
                 const std::vector<std::string>& log_messages, const GridRunInfo& run);
+// Writes the page for CesiumJS, <output>_cesium.html beside the model, and the log that it links to (<output>.log), which write_html() writes too.
+void write_cesium_html(const Geometry& geometry, const Options& options, const std::vector<std::string>& log_messages, const GridRunInfo& run);
 }
 } // namespace mbgrd2gltf
 

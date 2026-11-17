@@ -19,6 +19,7 @@ mbmesh_SOURCES = \
 	src/io/glb_writer.cpp \
 	src/io/tileset_writer.cpp \
 	src/io/x3dom_writer.cpp \
+	src/io/cesium_writer.cpp \
 	src/algorithms/point_decimation.cpp \
 	src/algorithms/normal_estimation.cpp \
 	src/algorithms/screened_poisson.cpp \
@@ -110,9 +111,6 @@ mbmesh_test_x3dom_writer_SOURCES = \
 mbmesh_test_cesium_writer_CXXFLAGS = -std=c++17
 mbmesh_test_cesium_writer_SOURCES = \
 	tests/test_cesium_writer.cpp \
-	src/io/coordinate_frame.cpp \
-	src/io/provenance.cpp \
-	src/io/x3dom_writer.cpp \
 	src/io/cesium_writer.cpp
 
 mbmesh_test_tileset_CXXFLAGS = -std=c++17
@@ -168,6 +166,7 @@ noinst_HEADERS = \
 	include/data_types/swathfile.h \
 	include/io/coordinate_frame.h \
 	include/io/datalist_reader.h \
+	include/io/cesium_convert.h \
 	include/io/cesium_writer.h \
 	include/io/glb_writer.h \
 	include/io/point_spill.h \

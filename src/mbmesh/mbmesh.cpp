@@ -30,6 +30,8 @@
 #include "io/point_spill.h"
 #include "util/memory.h"
 #include "io/track.h"
+#include "io/cesium_convert.h"
+#include "io/cesium_writer.h"
 #include "io/x3dom_writer.h"
 
 #include "algorithms/coverage_footprint.h"
@@ -155,7 +157,7 @@ bool write_outputs(
 
 void print_html_viewer_command(
     const std::filesystem::path &directory,
-    const std::string &html_filename);
+    const std::vector<std::string> &page_names);
 
 // ========================================================================================================
 
@@ -163,7 +165,7 @@ namespace {
 
 // The page of a directory input: every GLB beneath it. Returns false after logging an error.
 bool write_survey_page(const std::filesystem::path &survey_directory, const std::string &x3dom_url, const std::vector<std::string> &geoviewpoints,
-                       bool label_chunks) {
+                       bool label_chunks, bool cesium_html, const std::string &cesium_url) {
     const std::filesystem::path html_path = survey_page_path();
     X3DomWriterOptions html_options;
     html_options.title = viewer_title(survey_directory);
@@ -210,7 +212,33 @@ bool write_survey_page(const std::filesystem::path &survey_directory, const std:
         return false;
     }
     LOG_INFO("[html]", "wrote " + html_path.string() + ", offering " + std::to_string(html_options.models.size()) + " GLB files");
-    print_html_viewer_command(html_path.parent_path(), html_path.filename().string());
+    std::vector<std::string> page_names = {html_path.filename().string()};
+    if (cesium_html) {
+        // The same models for CesiumJS, placed by the GeoOrigin of the first; it has no chunk outlines or labels.
+        CesiumPageOptions cesium_options;
+        cesium_options.title = viewer_title(survey_directory);
+        cesium_options.cesium_url = cesium_url;
+        cesium_options.models = cesium_models(html_options.models);
+        if (html_options.use_geoorigin) {
+            const Vec3 origin = geodetic_to_ecef(GeodeticPosition{html_options.geo.origin_lon, html_options.geo.origin_lat, html_options.geo.origin_elevation});
+            cesium_options.model_origin[0] = origin.x;
+            cesium_options.model_origin[1] = origin.y;
+            cesium_options.model_origin[2] = origin.z;
+        }
+        if (!cesium_user_viewpoints(html_options.user_viewpoints, &cesium_options.user_viewpoints, &error)) {
+            LOG_ERROR("invalid --geoviewpoint:", error);
+            return false;
+        }
+        std::filesystem::path cesium_path = html_path;
+        cesium_path.replace_filename(html_path.stem().string() + "_cesium.html");
+        if (!write_cesium_page(cesium_path, cesium_options, &error)) {
+            LOG_ERROR(error);
+            return false;
+        }
+        LOG_INFO("[cesium]", "wrote " + cesium_path.string() + ", offering " + std::to_string(cesium_options.models.size()) + " models, with the globe hidden; the check box in the page shows it");
+        page_names.push_back(cesium_path.filename().string());
+    }
+    print_html_viewer_command(html_path.parent_path(), page_names);
     return true;
 }
 
@@ -240,7 +268,7 @@ int main(int argc, char **argv) {
     }
 
     // Keep the log for the processing log in the HTML page.
-    if (options.write_html) {
+    if (options.write_html || options.write_cesium_html) {
         Logger::start_capture();
     }
 
@@ -266,7 +294,7 @@ int main(int argc, char **argv) {
     {
         std::error_code directory_error;
         if (std::filesystem::is_directory(options.input_datalist, directory_error)) {
-            return write_survey_page(options.input_datalist, options.x3dom_url, options.geoviewpoints, options.label_chunks) ? 0 : 1;
+            return write_survey_page(options.input_datalist, options.x3dom_url, options.geoviewpoints, options.label_chunks, options.write_cesium_html, options.cesium_url) ? 0 : 1;
         }
     }
 
@@ -506,6 +534,7 @@ int main(int argc, char **argv) {
         {
             std::vector<std::string> outputs;
             if (options.write_html) outputs.push_back(options.label_chunks ? "viewer page with chunk outlines and names (--html, --label-chunks)" : "viewer page (--html)");
+            if (options.write_cesium_html) outputs.push_back("CesiumJS viewer page (--cesium-html)");
             if (options.write_tileset) outputs.push_back("3D Tiles tileset (--tileset)");
             if (options.write_raw_mesh_glb) outputs.push_back("raw mesh (--raw-mesh-glb)");
             if (options.write_pointcloud_glb) outputs.push_back(std::string("point cloud colored by ") + point_color_map_name(options.pointcloud_colormap) + " (--pointcloud-glb)");
@@ -1024,11 +1053,13 @@ int main(int argc, char **argv) {
     // X3DOM Viewer
     // ====================================================================================================
 
+    std::vector<std::string> viewer_pages;   // the pages that were written, for the command that serves them
+    const std::filesystem::path web_root = viewer_web_root(options.output_directory);
+
     if (options.write_html) {
         // Written last so that the processing log in the page holds the whole run.
         // The page is in the parent of the output directory, so that the parent is the
         // root of the web server and GLBs beside the output directory can be shown too.
-        const std::filesystem::path web_root = viewer_web_root(options.output_directory);
         const std::filesystem::path html_path = viewer_page_path(options.output_directory);
 
         X3DomWriterOptions html_options;
@@ -1084,7 +1115,66 @@ int main(int argc, char **argv) {
             LOG_INFO("[html]", "wrote " + inner_path.string() + ", showing " + std::to_string(inner_options.models.size()) + " GLB files");
         }
 
-        print_html_viewer_command(web_root, html_path.filename().string());
+        viewer_pages.push_back(html_path.filename().string());
+    }
+
+    if (options.write_cesium_html) {
+        // The page of CesiumJS shows the same GLBs and tileset, in the parent of the output directory (mbmesh_output_cesium.html), and again inside the output
+        // directory (mbmesh_cesium.html) for a server that is rooted there. It has no chunk outlines or labels.
+        const std::filesystem::path log_path = viewer_log_path(options.output_directory);
+        if (!options.write_html && !write_log_file(log_path, Logger::captured_messages(), Logger::captured_omitted(), &error)) {
+            LOG_ERROR(error);
+            return 1;
+        }
+        CesiumPageOptions cesium_options;
+        cesium_options.title = viewer_title(web_root);
+        cesium_options.cesium_url = options.cesium_url;
+        cesium_options.log_uri = viewer_log_url(options.output_directory);
+        cesium_options.log_label = "mbmesh log";
+        if (placement.use_geoorigin) {
+            const Vec3 origin = geodetic_to_ecef(placement.geoorigin);
+            cesium_options.model_origin[0] = origin.x;
+            cesium_options.model_origin[1] = origin.y;
+            cesium_options.model_origin[2] = origin.z;
+        }
+        std::vector<X3DomUserViewpoint> viewpoints;
+        for (const std::string &text : options.geoviewpoints) {
+            X3DomUserViewpoint viewpoint;
+            std::string viewpoint_error;
+            if (!parse_user_viewpoint(text, &viewpoint, &viewpoint_error)) {
+                LOG_ERROR(viewpoint_error);
+                return 1;
+            }
+            viewpoints.push_back(viewpoint);
+        }
+        if (!cesium_user_viewpoints(viewpoints, &cesium_options.user_viewpoints, &error)) {
+            LOG_ERROR("invalid --geoviewpoint:", error);
+            return 1;
+        }
+        cesium_options.models = cesium_models(find_viewer_models(web_root, options.output_directory, options.write_tileset));
+        const std::filesystem::path cesium_path = cesium_page_path(options.output_directory);
+        if (!write_cesium_page(cesium_path, cesium_options, &error)) {
+            LOG_ERROR(error);
+            return 1;
+        }
+        LOG_INFO("[cesium]", "wrote " + cesium_path.string() + ", showing " + std::to_string(cesium_options.models.size()) + " models, with the globe hidden; the check box in the page shows it");
+        {
+            CesiumPageOptions inner_options = cesium_options;
+            inner_options.log_uri = log_path.filename().string();
+            inner_options.models = cesium_models(find_viewer_models(web_root, options.output_directory, options.write_tileset, true));
+            std::filesystem::path inner_path = viewer_inner_page_path(options.output_directory);
+            inner_path.replace_filename(inner_path.stem().string() + "_cesium.html");
+            if (!write_cesium_page(inner_path, inner_options, &error)) {
+                LOG_ERROR(error);
+                return 1;
+            }
+            LOG_INFO("[cesium]", "wrote " + inner_path.string() + ", showing " + std::to_string(inner_options.models.size()) + " models");
+        }
+        viewer_pages.push_back(cesium_path.filename().string());
+    }
+
+    if (!viewer_pages.empty()) {
+        print_html_viewer_command(web_root, viewer_pages);
     }
 
     return 0;
@@ -1109,6 +1199,7 @@ Options parse_options(int argc, char **argv) {
 
     static const SingleDashLongOption single_dash_long_options[] = {
         {"-html", "--html"},
+        {"-cesium-html", "--cesium-html"},
         {"-local-xyz", "--local-xyz"},
         {"-ecef-xyz", "--ecef-xyz"},
         {"-xyz", "--xyz"},
@@ -1174,6 +1265,8 @@ Options parse_options(int argc, char **argv) {
         {"track-glb", no_argument, nullptr, 1017},
         {"tileset", no_argument, nullptr, 1019},
         {"x3dom-url", required_argument, nullptr, 1020},
+        {"cesium-html", no_argument, nullptr, 1050},
+        {"cesium-url", required_argument, nullptr, 1051},
         {"poisson-solver", required_argument, nullptr, 1021},
         {"poisson-iterations", required_argument, nullptr, 1022},
         {"geoviewpoint", required_argument, nullptr, 1018},
@@ -1397,6 +1490,14 @@ Options parse_options(int argc, char **argv) {
             options.x3dom_url = optarg;
             break;
 
+        case 1050:
+            options.write_cesium_html = true;
+            break;
+
+        case 1051:
+            options.cesium_url = optarg;
+            break;
+
         case 1024:
             if (!parse_point_color_map(optarg, &options.pointcloud_colormap)) {
                 LOG_ERROR("invalid --pointcloud-colormap:", std::string("'") + optarg + "' is not one of " + point_color_map_names());
@@ -1528,8 +1629,8 @@ Options parse_options(int argc, char **argv) {
     // A directory input writes the survey page, which takes --geoviewpoint without --html.
     std::error_code input_error;
     const bool directory_input = !options.input_datalist.empty() && std::filesystem::is_directory(options.input_datalist, input_error);
-    if (!options.geoviewpoints.empty() && !options.write_html && !directory_input) {
-        LOG_ERROR("--geoviewpoint adds a GeoViewpoint to the page that --html writes; use --html too");
+    if (!options.geoviewpoints.empty() && !options.write_html && !options.write_cesium_html && !directory_input) {
+        LOG_ERROR("--geoviewpoint adds a viewpoint to the page that --html or --cesium-html writes; use one of them too");
         std::exit(1);
     }
     if (options.label_chunks && !options.write_html && !directory_input) {
@@ -1589,7 +1690,7 @@ void print_usage() {
     std::cout << "                               The value must be attached to the option, with an equals sign and no\n";
     std::cout << "                               spaces: --geoorigin=-122.4,36.6,0 or -G-122.4,36.6,0. A value in a\n";
     std::cout << "                               separate argument is not accepted\n";
-    std::cout << "      --geoviewpoint=<values>  With --html, add a GeoViewpoint to the page, which can be repeated. The values are\n";
+    std::cout << "      --geoviewpoint=<values>  With --html or --cesium-html, add a GeoViewpoint to the page, which can be repeated. The values are\n";
     std::cout << "                               geodetic, in the order of --geoorigin, so they do not depend on the GeoOrigin, the\n";
     std::cout << "                               area or the data and can be used again: lon,lat,elev,clon,clat,celev, the camera\n";
     std::cout << "                               position and the point it looks at, or lon,lat,elev,ax,ay,az,angle,clon,clat,celev,\n";
@@ -1657,6 +1758,12 @@ void print_usage() {
     std::cout << "                               processing log, in the parent of the output directory (for example\n";
     std::cout << "                               mbmesh_output.html), and print the command to view it. The output directory\n";
     std::cout << "                               gets its own page too, mbmesh.html, without the GLBs beside the directory\n";
+    std::cout << "      --cesium-html            Also write a viewer page for CesiumJS, with a check box for each GLB and tileset, beside the output\n";
+    std::cout << "                               directory (mbmesh_output_cesium.html) and inside it (mbmesh_cesium.html). The globe of Cesium would hide data\n";
+    std::cout << "                               below the ellipsoid, so the page starts with it hidden and has a check box that shows it, translucent. Tilesets\n";
+    std::cout << "                               are shown at their true height whatever --lift says. It has no chunk outlines or labels\n";
+    std::cout << "      --cesium-url <url>       The directory of the CesiumJS build of the --cesium-html page, with Cesium.js and Widgets/widgets.css in it\n";
+    std::cout << "                               [https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium]\n";
     std::cout << "      --xyz                    Also write local and ECEF XYZ point clouds\n";
     std::cout << "      --local-xyz              Also write pointcloud-local.xyz\n";
     std::cout << "      --ecef-xyz               Also write pointcloud-ecef.xyz\n";
@@ -1685,7 +1792,7 @@ void print_usage() {
     std::cout << "web server will serve the directory, and the page loads the GLBs by relative path. The page\n";
     std::cout << "has an overview viewpoint over all the mbmesh GLBs found, with the GeoOrigin of the first, so GLBs from runs with another GeoOrigin\n";
     std::cout << "do not line up with it; each is logged as an ERROR. --geoviewpoint adds GeoViewpoints to its Viewpoint menu, as it does with --html;\n";
-    std::cout << "--x3dom-url sets its X3DOM script.\n";
+    std::cout << "--x3dom-url sets its X3DOM script. With --cesium-html it also writes mbmesh_survey_cesium.html, the same models for CesiumJS.\n";
     std::cout << "Single-dash long output options such as -html are accepted for legacy compatibility.\n";
 }
 
@@ -1870,11 +1977,11 @@ bool write_outputs(
 
 void print_html_viewer_command(
     const std::filesystem::path &directory,
-    const std::string &html_filename)
+    const std::vector<std::string> &page_names)
 {
-    // The viewer page loads its GLBs over HTTP, which browsers require for local
-    // files. The directory is the web root, the parent of the output directory. Rather than starting a server and a browser, which would leave a
-    // process running and hold the port, log the command to run.
+    // The viewer pages load their GLBs over HTTP, which browsers require for
+    // local files. The directory is the web root, the parent of the output directory. Rather than starting a server and a browser, which would leave a
+    // process running and hold the port, log the command to run, and the URL of each page.
     constexpr int port = 8000;
 
     std::error_code filesystem_error;
@@ -1883,8 +1990,11 @@ void print_html_viewer_command(
         absolute_directory = directory;
     }
 
-    LOG_INFO("[html]", "to view " + html_filename + ", run this command in a terminal (Ctrl-C stops it), then open the URL:");
+    LOG_INFO("[html]", std::string("to view ") + (page_names.size() > 1 ? "the pages" : page_names.front()) +
+                           ", run this command in a terminal (Ctrl-C stops it), then open the URL" + (page_names.size() > 1 ? "s" : "") + ":");
     LOG_INFO("[html]", "  python3 -m http.server " + std::to_string(port) + " --bind 127.0.0.1 --directory " +
                     shell_quote(absolute_directory.string()));
-    LOG_INFO("[html]", "  http://127.0.0.1:" + std::to_string(port) + "/" + html_filename);
+    for (const std::string &name : page_names) {
+        LOG_INFO("[html]", "  http://127.0.0.1:" + std::to_string(port) + "/" + name);
+    }
 }

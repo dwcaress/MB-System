@@ -210,21 +210,9 @@ int main(int argc, char* argv[]) {
     LOG_INFO("Successfully wrote glTF file to", abs_output_file, 
              "(" + std::string(output_size_str) + " MB)");
     
-    // Generate HTML viewer if requested
-    if (options.is_html_output()) {
-      // Get current timestamp in ISO 8601 format
-      std::time_t now = std::time(nullptr);
-      std::tm* gmt = std::gmtime(&now);
-      std::ostringstream timestamp_stream;
-      timestamp_stream << std::put_time(gmt, "%Y-%m-%dT%H:%M:%SZ");
-      std::string timestamp = timestamp_stream.str();
-      
-      // Get captured log messages for provenance
-      const std::vector<std::string>& log_messages = Logger::get_captured_logs();
-      
-      model::write_html(bathymetry, geometry, options, command_line, timestamp, log_messages, run);
-      
-      // The viewer page loads the model over HTTP, which browsers require for
+    // Generate the viewer pages if requested
+    if (options.is_html_output() || options.is_cesium_html_output()) {
+      // The pages load the model over HTTP, which browsers require for
       // local files. Log the command to run rather than starting a server, so
       // no process is left running and no port is held.
       std::string html_dir = ".";
@@ -233,13 +221,32 @@ int main(int argc, char* argv[]) {
         html_dir = abs_output_file.substr(0, abs_slash);
       }
 
-      // Get just the HTML filename
+      // Get just the page filenames
       std::string html_filename = options.output_filepath();
       size_t last_slash = html_filename.find_last_of("/\\");
       if (last_slash != std::string::npos) {
         html_filename = html_filename.substr(last_slash + 1);
       }
-      html_filename += ".html";
+      std::vector<std::string> page_names;
+
+      // Get captured log messages for provenance
+      const std::vector<std::string>& log_messages = Logger::get_captured_logs();
+
+      if (options.is_html_output()) {
+        // Get current timestamp in ISO 8601 format
+        std::time_t now = std::time(nullptr);
+        std::tm* gmt = std::gmtime(&now);
+        std::ostringstream timestamp_stream;
+        timestamp_stream << std::put_time(gmt, "%Y-%m-%dT%H:%M:%SZ");
+        std::string timestamp = timestamp_stream.str();
+
+        model::write_html(bathymetry, geometry, options, command_line, timestamp, log_messages, run);
+        page_names.push_back(html_filename + ".html");
+      }
+      if (options.is_cesium_html_output()) {
+        model::write_cesium_html(geometry, options, log_messages, run);
+        page_names.push_back(html_filename + "_cesium.html");
+      }
 
       // Quote the directory for the shell
       std::string quoted_dir = "'";
@@ -252,9 +259,12 @@ int main(int argc, char* argv[]) {
       }
       quoted_dir += "'";
 
-      LOG_INFO("To view", html_filename + ", run this command in a terminal (Ctrl-C stops it), then open the URL:");
+      LOG_INFO("To view", std::string(page_names.size() > 1 ? "the pages" : page_names.front()) + ", run this command in a terminal (Ctrl-C stops it), then open the URL" +
+                              (page_names.size() > 1 ? "s" : "") + ":");
       LOG_INFO("  python3 -m http.server 8000 --bind 127.0.0.1 --directory", quoted_dir);
-      LOG_INFO("  http://127.0.0.1:8000/" + html_filename);
+      for (const std::string& page_name : page_names) {
+        LOG_INFO("  http://127.0.0.1:8000/" + page_name);
+      }
     }
   } catch (const std::invalid_argument& e) {
     std::cerr << "Invalid argument error: " << e.what() << std::endl;

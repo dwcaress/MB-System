@@ -135,7 +135,7 @@ void print_help() {
   std::cout << "                                bits that make the step of its quantization no coarser, between 8 and 30\n";
   std::cout << "  --draco-normal-bits NUM       With Draco, the bits of each normal, 2-30 [default: 10]; the mesh has no normals\n";
   std::cout << "                                today, so this changes nothing\n";
-  std::cout << "  --geoviewpoint=VALUES         With --html, add a GeoViewpoint to the page; can be repeated. The values are\n";
+  std::cout << "  --geoviewpoint=VALUES         With --html or --cesium-html, add a GeoViewpoint to the page; can be repeated. The values are\n";
   std::cout << "                                geodetic, in the order of --geoorigin, so they do not depend on the GeoOrigin\n";
   std::cout << "                                or the grid and can be used again: lon,lat,elev,clon,clat,celev, the camera\n";
   std::cout << "                                position and the point it looks at, or lon,lat,elev,ax,ay,az,angle,clon,clat,celev,\n";
@@ -143,6 +143,10 @@ void print_help() {
   std::cout << "                                above the ellipsoid. The Copy GeoViewpoint button of the page gives the ten-number form.\n";
   std::cout << "                                The value must be attached: --geoviewpoint=-122.0,36.8,-900,...\n";
   std::cout << "  --html, -W                    Generate HTML viewer with inline glTF/GLB model and print the command to view it\n";
+  std::cout << "  --cesium-html                 Also write a viewer page for CesiumJS, <output>_cesium.html beside the model. The globe of Cesium would hide\n";
+  std::cout << "                                data below the ellipsoid, so the page starts with it hidden and has a check box that shows it, translucent\n";
+  std::cout << "  --cesium-url URL              The directory of the CesiumJS build of the --cesium-html page, with Cesium.js and Widgets/widgets.css in it\n";
+  std::cout << "                                [https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium]\n";
   std::cout << "  --verbose, -V                 Enable verbose output\n";
   std::cout << "  --help, -H                    Print this help message\n\n";
 }
@@ -191,7 +195,7 @@ Options::Options(unsigned argc, const char* argv[]) {
       // Get value from next arg if not in --option=value format
       if (!value_ptr && i + 1 < argc && argv[i + 1][0] != '-') {
         // Don't consume next arg for flags
-        if (opt_name != "binary" && opt_name != "no-binary" && opt_name != "draco" && opt_name != "no-draco" && opt_name != "verbose" && opt_name != "help" && opt_name != "geoorigin" && opt_name != "html") {
+        if (opt_name != "binary" && opt_name != "no-binary" && opt_name != "draco" && opt_name != "no-draco" && opt_name != "verbose" && opt_name != "help" && opt_name != "geoorigin" && opt_name != "html" && opt_name != "cesium-html") {
           value_ptr = argv[++i];
         }
       }
@@ -266,6 +270,13 @@ Options::Options(unsigned argc, const char* argv[]) {
       }
       else if (opt_name == "html") {
         _is_html_output = true;
+      }
+      else if (opt_name == "cesium-html") {
+        _is_cesium_html_output = true;
+      }
+      else if (opt_name == "cesium-url") {
+        if (!value_ptr) throw std::invalid_argument("--cesium-url requires the directory of a CesiumJS build");
+        _cesium_url = value_ptr;
       }
       else if (opt_name == "help") {
         print_help();
@@ -379,8 +390,8 @@ Options::Options(unsigned argc, const char* argv[]) {
     }
   }
 
-  if (!_geoviewpoints.empty() && !_is_html_output) {
-    throw std::invalid_argument("--geoviewpoint adds a GeoViewpoint to the page that --html writes; use --html too");
+  if (!_geoviewpoints.empty() && !_is_html_output && !_is_cesium_html_output) {
+    throw std::invalid_argument("--geoviewpoint adds a viewpoint to the page that --html or --cesium-html writes; use one of them too");
   }
 
   // Check required arguments

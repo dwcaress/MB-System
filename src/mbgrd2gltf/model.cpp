@@ -34,6 +34,7 @@
 #include "model.h"
 #include "logger.h"
 #include "viewpoint.h"
+#include "io/cesium_writer.h"
 #include "scale_axes.h"
 
 // external libraries
@@ -629,6 +630,17 @@ static const char* copy_viewpoint_script = R"JS(
  * @param timestamp : ISO 8601 timestamp of processing
  * @param log_messages : Captured log messages for provenance
  */
+// The log of the run, in a file of its own beside the model, which the pages link to.
+static void write_log_file(const std::string& log_filepath, const std::vector<std::string>& log_messages) {
+  std::ofstream log_file(log_filepath);
+  if (!log_file.is_open()) {
+    throw std::runtime_error("Failed to open log output file: " + log_filepath);
+  }
+  for (const auto& log_msg : log_messages) {
+    log_file << log_msg << "\n";
+  }
+}
+
 void write_html(const Bathymetry& bathymetry, const Geometry& geometry, const Options& options,
                 const std::string& command_line, const std::string& timestamp,
                 const std::vector<std::string>& log_messages, const GridRunInfo& run) {
@@ -652,18 +664,9 @@ void write_html(const Bathymetry& bathymetry, const Geometry& geometry, const Op
   
   // The log goes in a file of its own beside the page, which the page loads when the log is first shown, so
   // that a long log does not make the page large and hard to edit by hand.
-  std::string log_filepath = options.output_filepath() + ".log";
   std::string log_url = html_filepath.substr(html_filepath.find_last_of("/\\") == std::string::npos ? 0 : html_filepath.find_last_of("/\\") + 1);
   log_url = log_url.substr(0, log_url.size() - 5) + ".log";
-  {
-    std::ofstream log_file(log_filepath);
-    if (!log_file.is_open()) {
-      throw std::runtime_error("Failed to open log output file: " + log_filepath);
-    }
-    for (const auto& log_msg : log_messages) {
-      log_file << log_msg << "\n";
-    }
-  }
+  write_log_file(options.output_filepath() + ".log", log_messages);
 
   // Get grid bounds from bathymetry
   double lon_min = bathymetry.longitude_min();
@@ -1068,6 +1071,57 @@ void write_html(const Bathymetry& bathymetry, const Geometry& geometry, const Op
   html_file.close();
   
   LOG_INFO("Successfully wrote HTML viewer to", html_filepath);
+}
+
+void write_cesium_html(const Geometry& geometry, const Options& options, const std::vector<std::string>& log_messages, const GridRunInfo& run) {
+  std::string root = options.output_filepath();
+  const size_t last_slash = root.find_last_of("/\\");
+  const std::string name = last_slash == std::string::npos ? root : root.substr(last_slash + 1);
+  write_log_file(root + ".log", log_messages);
+
+  CesiumPageOptions page;
+  page.title = run.title.empty() ? name : run.title;
+  page.cesium_url = options.cesium_url();
+  page.vertical_exaggeration = options.exaggeration();
+  page.log_uri = name + ".log";
+  page.log_label = "mbgrd2gltf log";
+  // The vertices are ECEF offsets from the GeoOrigin if there is one, absolute ECEF otherwise.
+  if (options.is_geoorigin_auto() || options.is_geoorigin_set()) {
+    page.model_origin[0] = geometry.geoorigin_x();
+    page.model_origin[1] = geometry.geoorigin_y();
+    page.model_origin[2] = geometry.geoorigin_z();
+  }
+  CesiumModel model;
+  model.uri = name + (options.is_binary_output() ? ".glb" : ".gltf");
+  model.label = model.uri;
+  model.visible = true;
+  model.shade_without_normals = true;   // the mesh has no normals
+  page.models.push_back(model);
+  for (size_t i = 0; i < options.geoviewpoints().size(); ++i) {
+    UserViewpoint user;
+    double axis[3];
+    double angle = 0.0;
+    std::string viewpoint_error;
+    if (!parse_user_viewpoint(options.geoviewpoints()[i], &user, &viewpoint_error) ||
+        !geoviewpoint_orientation(user, axis, &angle, &viewpoint_error)) {
+      throw std::runtime_error("GeoViewpoint " + std::to_string(i + 1) + ": " + viewpoint_error);
+    }
+    CesiumUserViewpoint viewpoint;
+    viewpoint.longitude = user.longitude;
+    viewpoint.latitude = user.latitude;
+    viewpoint.height = user.elevation;
+    for (int k = 0; k < 3; ++k) {
+      viewpoint.axis[k] = axis[k];
+    }
+    viewpoint.angle = angle;
+    page.user_viewpoints.push_back(viewpoint);
+  }
+  const std::string html_filepath = root + "_cesium.html";
+  std::string error;
+  if (!write_cesium_page(html_filepath, page, &error)) {
+    throw std::runtime_error(error);
+  }
+  LOG_INFO("Wrote Cesium page", html_filepath, "with the globe hidden; the check box in the page shows it");
 }
 
 } // namespace model

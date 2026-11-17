@@ -15,6 +15,7 @@
 #include "io/glb_writer.h"
 #include "io/provenance.h"
 #include "io/tileset_writer.h"
+#include "io/cesium_convert.h"
 #include "io/cesium_writer.h"
 #include "io/x3dom_writer.h"
 #include "util/logger.h"
@@ -688,13 +689,22 @@ int main(int argc, char **argv) {
         }
         CesiumPageOptions cesium_options;
         cesium_options.title = viewer_title(web_root);
-        cesium_options.tileset_uri = url_encode(directory_name + "/tileset.json");
-        cesium_options.log_url = url_encode(directory_name + "/mbglb2tiles.log");
         cesium_options.cesium_url = options.cesium_url;
-        cesium_options.lift_meters = options.lift;
-        cesium_options.max_screen_space_error = options.sse;
-        cesium_options.height_colors = options.colors;
-        cesium_options.user_viewpoints = options.viewpoints;
+        CesiumModel tileset_model;
+        tileset_model.uri = url_encode(directory_name + "/tileset.json");
+        tileset_model.label = directory_name + " (OGC 3D Tiles, " + std::to_string(top + 1) + " levels)";
+        tileset_model.visible = true;
+        tileset_model.is_tileset = true;
+        tileset_model.max_screen_space_error = options.sse;
+        tileset_model.lift_meters = options.lift;
+        tileset_model.height_colors = options.colors;
+        tileset_model.log_uri = url_encode(directory_name + "/mbglb2tiles.log");
+        tileset_model.log_label = "mbglb2tiles log";
+        cesium_options.models.push_back(tileset_model);
+        if (!cesium_user_viewpoints(options.viewpoints, &cesium_options.user_viewpoints, &error)) {
+            LOG_ERROR("invalid --geoviewpoint:", error);
+            return 1;
+        }
         if (!write_cesium_page(cesium_path, cesium_options, &error)) {
             LOG_ERROR(error);
             return 1;

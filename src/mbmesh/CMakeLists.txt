@@ -21,6 +21,7 @@ set(MBMESH_SOURCES
   src/io/glb_writer.cpp
   src/io/tileset_writer.cpp
   src/io/x3dom_writer.cpp
+  src/io/cesium_writer.cpp
   src/algorithms/point_decimation.cpp
   src/algorithms/normal_estimation.cpp
   src/algorithms/screened_poisson.cpp
@@ -155,14 +156,10 @@ if(buildTests)
 
   add_executable(mbmesh_test_cesium_writer
     tests/test_cesium_writer.cpp
-    src/io/coordinate_frame.cpp
-    src/io/provenance.cpp
-    src/io/x3dom_writer.cpp
     src/io/cesium_writer.cpp)
   target_compile_features(mbmesh_test_cesium_writer PRIVATE cxx_std_17)
   target_include_directories(mbmesh_test_cesium_writer PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/src/mbgrd2gltf)
+    ${CMAKE_CURRENT_SOURCE_DIR}/include)
   add_test(NAME mbmesh_cesium_writer COMMAND mbmesh_test_cesium_writer)
 
   add_executable(mbmesh_test_tileset
