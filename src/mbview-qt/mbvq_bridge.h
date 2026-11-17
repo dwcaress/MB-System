@@ -267,7 +267,8 @@ void mbvq_c_soundings_plot(void);
 void mbvq_c_soundings_edit_mode(int mode);
 void mbvq_c_soundings_mouse_mode(int mode);
 void mbvq_c_soundings_resetview(void);
-/* the window was dismissed: hide it and tell the calling program */
+/* the window was dismissed: hide it and tell the calling program, which
+   releases the soundings in its notification (mbvq_qt_soundings_released) */
 void mbvq_c_soundings_dismiss(void);
 void mbvq_c_soundings_modes(int *edit_mode, int *mouse_mode);
 
@@ -394,6 +395,23 @@ bool mbvq_c_contours_made(size_t instance, int rez);
    next fill projects them) or in 2D. Call once per full fill, with the
    batch target set. True if it took the bounds. */
 bool mbvq_c_pick_size(size_t instance);
+/* the camera of the profile view of an instance, column-major, in double
+   precision, as the profile drawing sets it up (mbview_profile_camera) */
+int mbvq_c_profile_camera(size_t instance, double projection[16], double modelview[16]);
+/* the camera of the 3D soundings view, column-major, in double precision
+   (mb3dsoundings_camera); also sets the view's left, right, bottom, top and
+   aspect ratio as a drawing does (mb3dsoundings_reset() leaves them swapped,
+   and the pan of the mouse scales by them) */
+int mbvq_c_soundings_camera(double projection[16], double modelview[16]);
+/* The pairs of soundings that the profile lines of the 3D soundings view
+   join, by the rule of the drawing (mb3dsoundings_plot): two consecutive
+   soundings i and i + 1 of the same file, ping and profile, black where both
+   are unflagged, red where one is flagged while all profiles are shown,
+   none while no profiles are shown. Each pair is two entries, i and i + 1,
+   in the order of the sounding array: black and red take up to
+   2 (count - 1) entries each, or are NULL to count only; n_black and n_red
+   get the entries. Returns the number of soundings (0: none). */
+int mbvq_c_soundings_profile_pairs(unsigned int *black, int *n_black, unsigned int *red, int *n_red);
 
 /* ---- implemented by the Qt half ---- */
 
@@ -436,6 +454,9 @@ void mbvq_qt_soundings_create(void);
 void mbvq_qt_soundings_show(void);
 void mbvq_qt_soundings_hide(void);
 void mbvq_qt_soundings_destroy(void);
+/* the calling program released the soundings of the hidden window (in its
+   dismiss notification): its view lets go of what it holds of them */
+void mbvq_qt_soundings_released(void);
 /* the window shows the state of the core again (modes, toggles) */
 void mbvq_qt_soundings_refresh(void);
 /* the mouse mode label (Motif "BX" form) and the status line; the bias

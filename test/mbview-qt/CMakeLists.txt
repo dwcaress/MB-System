@@ -74,6 +74,11 @@ if(MBVQ_RHI)
   add_test(NAME mbview_qt_rhi_null COMMAND mbview_qt_rhi_test --render-null)
   set_tests_properties(mbview_qt_rhi_model mbview_qt_rhi_widgets mbview_qt_rhi_null
                        PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 60)
+  # the widgets again at a pixel ratio of 2, where the profile view's cap is
+  # half as wide
+  add_test(NAME mbview_qt_rhi_widgets_ratio2 COMMAND mbview_qt_rhi_test --widgets)
+  set_tests_properties(mbview_qt_rhi_widgets_ratio2 PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_SCALE_FACTOR=2"
+                                                               TIMEOUT 60)
   if(APPLE)
     add_test(NAME mbview_qt_rhi_metal COMMAND mbview_qt_rhi_test --render-metal)
     set_tests_properties(mbview_qt_rhi_metal PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 60

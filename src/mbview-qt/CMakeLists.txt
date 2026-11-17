@@ -143,7 +143,9 @@ if(mbvq_rhi)
   qt6_add_shaders(mbview-qt "mbvq_shaders" PREFIX "/mbvq" BASE shaders FILES shaders/mbvq_terrain.vert
                   shaders/mbvq_colour.frag shaders/mbvq_line.vert shaders/mbvq_point.vert shaders/mbvq_wide.vert
                   shaders/mbvq_contour.vert shaders/mbvq_wide_contour.vert shaders/mbvq_marker.vert
-                  shaders/mbvq_stipple_thin.vert shaders/mbvq_stipple_wide.vert shaders/mbvq_stipple.frag)
+                  shaders/mbvq_stipple_thin.vert shaders/mbvq_stipple_wide.vert shaders/mbvq_stipple.frag
+                  shaders/mbvq_batch_pointquad.vert shaders/mbvq_points.vert shaders/mbvq_pointquad.vert
+                  shaders/mbvq_wide_pairs.vert)
   message(STATUS "mbview-qt: the views are drawn with OpenGL, or with QRhi with MB_RENDERER=auto")
 else()
   message(STATUS "mbview-qt: the views are drawn with OpenGL (QRhi needs Qt 6.8 or later with Qt Shader Tools)")

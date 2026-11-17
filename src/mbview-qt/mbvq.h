@@ -67,6 +67,13 @@ bool backend_built(Backend backend);
    in main() before creating the QApplication */
 void set_backend_from_environment();
 
+/* The point size of the 3D soundings view in logical pixels, 0.5 to 8 (3 by
+   default; the core draws 3 pixel points), times the screen's pixel ratio:
+   the control of the soundings window under the QRhi backend sets it, for
+   the whole program; the other backends draw the core's size. Not saved. */
+void set_soundings_point_size(double logical_px);
+double soundings_point_size();
+
 /* Starts mbview and the 3D soundings view, once however many tools in the
    program call it. mbview_startup() itself resets all maps and shared data. */
 void start(int verbose);

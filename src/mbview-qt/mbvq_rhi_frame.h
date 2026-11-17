@@ -49,6 +49,9 @@
  * calls the core and sets it back to none. A fill asked for while another one
  * runs (a slot of the program drawing a view from inside a fill) is refused,
  * and the frame draws the batch it has.
+ *
+ * ProfileFrame and SoundingsFrame do the same for the profile view of a map
+ * and the 3D soundings view.
  */
 
 #ifndef MBVIEW_QT_MBVQ_RHI_FRAME_H
@@ -56,6 +59,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <vector>
 
 #include "mbv_draw_batch.h"
 #include "mbvq_bridge.h"
@@ -64,8 +68,9 @@
 namespace mbvq {
 namespace rhi {
 
-/* what one frame of the map view gives the renderer; the pointers are valid
-   only during the render() that made it */
+/* what one frame of a view gives the renderer (the terrain and the contours
+   only in the map view); the pointers are valid only during the render()
+   that made it */
 struct FrameInput {
   const struct mbv_draw_batch *batch = nullptr;
   TerrainInput terrain;
@@ -219,6 +224,137 @@ class MapFrame {
      prepared */
   uint64_t refill_position_ = 0;
   bool refill_known_ = false;
+};
+
+/* The profile view of a map: its batch is filled in every frame
+   (mbvq_c_plotprofile; a few hundred vertices, and the core has no change
+   marks for the profile), and drawn with the profile's camera
+   (mbvq_c_profile_camera), without the depth test. The fill also writes the
+   profile's information label. */
+class ProfileFrame {
+ public:
+  explicit ProfileFrame(size_t instance);
+  ~ProfileFrame();
+  ProfileFrame(const ProfileFrame &) = delete;
+  ProfileFrame &operator=(const ProfileFrame &) = delete;
+
+  size_t instance() const { return instance_; }
+  /* give the core the size of the drawing in physical pixels if it differs
+     from the size given last (mbvq_c_profile_resize); true if it did */
+  bool size_core(int width, int height);
+  /* the start of every frame: the core's size, the fill, the camera; false
+     if the fill was refused (another fill runs): the frame draws the batch
+     it has and asks for another frame */
+  bool begin(int width, int height, FrameInput *input);
+
+  const struct mbv_draw_batch &batch() const { return batch_; }
+  int fills() const { return fills_; }
+  int refusals() const { return refusals_; }
+  /* the CPU time of the last fill in ms (0 when refused) */
+  double fill_ms() const { return fill_ms_; }
+
+ private:
+  size_t instance_;
+  int width_ = 0;
+  int height_ = 0;
+  struct mbv_draw_batch batch_;
+  int fills_ = 0;
+  int refusals_ = 0;
+  bool warned_refused_ = false;
+  double fill_ms_ = 0.0;
+};
+
+/* what one frame of the 3D soundings view gives its renderer: the batch
+   (the decorations: the core's batch with the vertices of the profile lines
+   left out, SoundingsFrame::decorations), the camera and the projection,
+   and the soundings' state */
+struct SoundingsInput {
+  FrameInput frame;
+  int count = 0;         /* soundings (0: none, and nothing is drawn) */
+  uint64_t position = 0; /* the change marks after the fill (mb3dsoundings_getmarks) */
+  uint64_t colour = 0;
+  uint64_t mask = 0;
+  int profiles = 0;      /* the profile lines shown (MBVQ_SDG_PROFILES_*) */
+};
+
+/* The 3D soundings view (one per program): the soundings are a global of
+   the core, handed over and released by the calling program (mbeditviz).
+   A frame draws nothing while there are none (after Dismiss the count is 0
+   while the drawing's information highlight would read the released
+   array). Otherwise it fills the batch with the decorations of the drawing
+   (mb3dsoundings_plot: the bounding box, the profile lines, the soundings
+   slot, the information highlight, the grab rectangle), unless it only
+   continues uploads and nothing changed, and takes the camera from the core
+   in every frame (mbvq_c_soundings_camera, which also sets the view's
+   extents that mb3dsoundings_reset() leaves swapped). The positions, colours
+   and profile pairs of the soundings are read only when the renderer asks
+   for them, after their change marks rose: each read is O(count). */
+class SoundingsFrame {
+ public:
+  SoundingsFrame();
+  ~SoundingsFrame();
+  SoundingsFrame(const SoundingsFrame &) = delete;
+  SoundingsFrame &operator=(const SoundingsFrame &) = delete;
+
+  /* a drawing the core asked for (defer_draw) */
+  void request() { requested_ = true; }
+  bool requested() const { return requested_; }
+  /* give the core the size of the drawing in physical pixels if it differs
+     from the size given last (mbvq_c_soundings_resize); true if it did */
+  bool size_core(int width, int height);
+  /* The start of every frame: the core's size, then the batch, filled again
+     unless this frame only continues uploads (continued) and nothing changed
+     since the last fill (no request, no risen mark, the same count and
+     size); then the camera and the soundings' state. False if the fill was
+     refused (another fill runs): the frame draws the batch it has and asks
+     for another frame. */
+  bool begin(bool continued, int width, int height, SoundingsInput *input);
+
+  /* The data of the soundings as the drawing uses them, for the renderer:
+     the display positions (3 floats per sounding), the colours (RGBA8, alpha
+     0 for a sounding that is not drawn), and the pairs of the profile lines
+     (mbvq_c_soundings_profile_pairs). Each reads every sounding. False if
+     the core no longer has count soundings. */
+  bool positions(int count, std::vector<float> *xyz) const;
+  bool colours(int count, std::vector<unsigned char> *rgba) const;
+  bool pairs(int count, std::vector<uint32_t> *black, std::vector<uint32_t> *red) const;
+  /* For a hidden view: if the program released its soundings (the core has
+     none, as after Dismiss), the batch's arrays and the decorations go (the
+     next frame fills again), and true. */
+  bool release();
+
+  /* the batch as the core recorded it, and the decorations the renderer
+     draws: the same commands, the LINES command of the profile lines
+     replaced by the slot kSlotProfileLines without vertices */
+  const struct mbv_draw_batch &batch() const { return batch_; }
+  const struct mbv_draw_batch &decorations() const { return decorations_; }
+  int fills() const { return fills_; }
+  int refusals() const { return refusals_; }
+  /* the CPU times of the last begin() in ms: the fill (0 when the batch was
+     reused or the fill refused), and the marks and camera read */
+  double fill_ms() const { return fill_ms_; }
+  double marks_ms() const { return marks_ms_; }
+
+ private:
+  bool fill();
+  void decorate();
+
+  int width_ = 0;
+  int height_ = 0;
+  bool resized_ = false;
+  bool requested_ = false;
+  struct mbv_draw_batch batch_;
+  std::vector<struct mbv_draw_vertex> decoration_vertices_;
+  std::vector<struct mbv_draw_command> decoration_commands_;
+  struct mbv_draw_batch decorations_;
+  int count_ = 0;          /* soundings at the last fill */
+  uint64_t marks_[3] = {}; /* position, colour and mask at the last fill */
+  int fills_ = 0;
+  int refusals_ = 0;
+  bool warned_refused_ = false;
+  bool warned_failed_ = false;
+  double fill_ms_ = 0.0;
+  double marks_ms_ = 0.0;
 };
 
 /* r = a x b for column-major 4 x 4 matrices */

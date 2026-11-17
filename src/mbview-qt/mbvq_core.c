@@ -1202,6 +1202,11 @@ int mb3dsoundings_open(int verbose, struct mb3dsoundings_struct *soundingdata, i
 	/* show the statistics and set the data */
 	mb3dsoundings_setdata(verbose, soundingdata, error);
 
+	/* recalculate vertical scaling before the window is shown: a QRhi view
+	   paints at once when it is shown, inside this call, and reads the
+	   positions then (Motif scales after its popup, which paints later) */
+	mb3dsoundings_setzscale(verbose, error);
+
 	/* create the window if needed, then show it */
 	if (mb3dsoundings.init == MBS_WINDOW_NULL) {
 		mbvq_qt_soundings_create();
@@ -1217,9 +1222,6 @@ int mb3dsoundings_open(int verbose, struct mb3dsoundings_struct *soundingdata, i
 
 	/* the drawing view sets gl_width and gl_height when it is sized */
 	mb3dsoundings.glx_init = true;
-
-	/* recalculate vertical scaling */
-	mb3dsoundings_setzscale(verbose, error);
 
 	/* replot the data */
 	mb3dsoundings_plot(verbose, error);
@@ -1373,6 +1375,9 @@ void mbvq_c_soundings_resetview(void) { do_mb3dsdg_resetview(NULL, NULL, NULL); 
 void mbvq_c_soundings_dismiss(void) {
 	mbvq_qt_soundings_hide();
 	mb3dsoundings_dismissed();
+	/* the program released the soundings in the notification: the hidden
+	   view lets go of what it holds of them */
+	mbvq_qt_soundings_released();
 }
 
 void mbvq_c_soundings_viewtoggle(int toggle, bool on) { mb3dsoundings_setviewtoggle(toggle, on); }

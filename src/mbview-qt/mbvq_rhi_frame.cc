@@ -329,5 +329,257 @@ void MapFrame::make_input(FrameInput *input, bool filled, const uint64_t marks[5
   }
 }
 
+/*--------------------------------------------------------------------*/
+ProfileFrame::ProfileFrame(size_t instance) : instance_(instance) { mbv_draw_batch_init(&batch_); }
+
+ProfileFrame::~ProfileFrame() { mbv_draw_batch_free(&batch_); }
+
+bool ProfileFrame::size_core(int width, int height) {
+  if (width == width_ && height == height_)
+    return false;
+  width_ = width;
+  height_ = height;
+  mbvq_c_profile_resize(instance_, width, height);
+  return true;
+}
+
+bool ProfileFrame::begin(int width, int height, FrameInput *input) {
+  fill_ms_ = 0.0;
+  size_core(width, height);
+  bool filled = false;
+  /* the batch target is one for the whole process: no fill inside another */
+  if (mbv_draw_get_target() != nullptr) {
+    refusals_++;
+    if (!warned_refused_) {
+      std::fprintf(stderr, "mbview-qt: the profile of map %zu was asked to draw while another view filled its "
+                           "drawing; it draws in the next frame\n", instance_);
+      warned_refused_ = true;
+    }
+  }
+  else {
+    /* the profile records only while it is shown, and writes its label */
+    const Clock::time_point start = Clock::now();
+    mbv_draw_batch_clear(&batch_);
+    set_fill_active(true);
+    mbv_draw_set_target(&batch_);
+    mbvq_c_plotprofile(instance_);
+    mbv_draw_set_target(nullptr);
+    set_fill_active(false);
+    fills_++;
+    filled = true;
+    fill_ms_ = milliseconds(start, Clock::now());
+  }
+
+  *input = FrameInput();
+  input->batch = &batch_;
+  input->filled = filled;
+  double projection[16];
+  double modelview[16];
+  mbvq_c_profile_camera(instance_, projection, modelview);
+  multiply(projection, modelview, input->camera);
+  std::copy(projection, projection + 16, input->projection);
+  return filled;
+}
+
+/*--------------------------------------------------------------------*/
+SoundingsFrame::SoundingsFrame() {
+  mbv_draw_batch_init(&batch_);
+  mbv_draw_batch_init(&decorations_);
+}
+
+SoundingsFrame::~SoundingsFrame() { mbv_draw_batch_free(&batch_); }
+
+bool SoundingsFrame::release() {
+  int error = MB_ERROR_NO_ERROR;
+  int count = 0;
+  mb3dsoundings_getcount(0, &count, &error);
+  if (count > 0)
+    return false;
+  mbv_draw_batch_free(&batch_);
+  std::vector<struct mbv_draw_vertex>().swap(decoration_vertices_);
+  std::vector<struct mbv_draw_command>().swap(decoration_commands_);
+  mbv_draw_batch_init(&decorations_);
+  count_ = 0;
+  return true;
+}
+
+bool SoundingsFrame::size_core(int width, int height) {
+  if (width == width_ && height == height_)
+    return false;
+  width_ = width;
+  height_ = height;
+  resized_ = true;
+  mbvq_c_soundings_resize(width, height);
+  return true;
+}
+
+bool SoundingsFrame::fill() {
+  /* the batch target is one for the whole process: no fill inside another */
+  if (mbv_draw_get_target() != nullptr) {
+    refusals_++;
+    if (!warned_refused_) {
+      std::fprintf(stderr, "mbview-qt: the 3D soundings were asked to draw while another view filled its drawing; "
+                           "they draw in the next frame\n");
+      warned_refused_ = true;
+    }
+    return false;
+  }
+  const Clock::time_point start = Clock::now();
+  mbv_draw_batch_clear(&batch_);
+  set_fill_active(true);
+  mbv_draw_set_target(&batch_);
+  mbvq_c_soundings_plot();
+  mbv_draw_set_target(nullptr);
+  set_fill_active(false);
+  fills_++;
+  resized_ = false;
+  requested_ = false;
+  if (batch_.failed && !warned_failed_) {
+    std::fprintf(stderr, "mbview-qt: not enough memory for the drawing of the 3D soundings: they are drawn as far as "
+                         "it goes\n");
+    warned_failed_ = true;
+  }
+  decorate();
+  fill_ms_ = milliseconds(start, Clock::now());
+  return true;
+}
+
+void SoundingsFrame::decorate() {
+  /* The commands of the batch with their vertices, except the drawing's
+     LINES command of the profile lines (its only LINES command, recorded
+     before the soundings slot): a slot without vertices takes its place,
+     with its state (width, depth test, camera). The renderer draws those
+     lines from the soundings' positions. */
+  decoration_vertices_.clear();
+  decoration_commands_.clear();
+  bool soundings = false;
+  bool profiles = false;
+  for (int c = 0; c < batch_.num_commands; c++) {
+    struct mbv_draw_command command = batch_.commands[c];
+    if (command.kind == MBV_DRAW_SLOT && command.primitive == MBV_DRAW_SLOT_SOUNDINGS)
+      soundings = true;
+    const bool primitive = command.kind == MBV_DRAW_PRIMITIVE;
+    if (primitive && command.primitive == MBV_DRAW_LINES && !soundings && !profiles) {
+      command.kind = MBV_DRAW_SLOT;
+      command.primitive = kSlotProfileLines;
+      command.first = static_cast<int>(decoration_vertices_.size());
+      command.count = 0;
+      profiles = true;
+    }
+    else if (primitive) {
+      const int first = command.first;
+      command.first = static_cast<int>(decoration_vertices_.size());
+      decoration_vertices_.insert(decoration_vertices_.end(), batch_.vertices + first,
+                                  batch_.vertices + first + command.count);
+    }
+    else {
+      command.first = command.kind == MBV_DRAW_MARKERS ? command.first : static_cast<int>(decoration_vertices_.size());
+    }
+    decoration_commands_.push_back(command);
+  }
+  mbv_draw_batch_init(&decorations_);
+  decorations_.vertices = decoration_vertices_.data();
+  decorations_.num_vertices = static_cast<int>(decoration_vertices_.size());
+  decorations_.commands = decoration_commands_.data();
+  decorations_.num_commands = static_cast<int>(decoration_commands_.size());
+  /* the drawing has no markers; were there any, their shapes and instances
+     are the batch's own */
+  decorations_.shapes = batch_.shapes;
+  decorations_.num_shapes = batch_.num_shapes;
+  decorations_.instances = batch_.instances;
+  decorations_.num_instances = batch_.num_instances;
+  decorations_.failed = batch_.failed;
+}
+
+bool SoundingsFrame::begin(bool continued, int width, int height, SoundingsInput *input) {
+  fill_ms_ = 0.0;
+  marks_ms_ = 0.0;
+  size_core(width, height);
+  *input = SoundingsInput();
+
+  const Clock::time_point start = Clock::now();
+  int error = MB_ERROR_NO_ERROR;
+  int count = 0;
+  mb3dsoundings_getcount(0, &count, &error);
+  uint64_t marks[3] = {};
+  mb3dsoundings_getmarks(0, &marks[0], &marks[1], &marks[2], &error);
+  marks_ms_ += milliseconds(start, Clock::now());
+
+  /* Nothing is drawn without soundings, and nothing is read: after Dismiss
+     the count is 0 while the information highlight of the drawing would
+     read the released array. */
+  bool ok = true;
+  if (count <= 0) {
+    requested_ = false;
+    mbv_draw_batch_clear(&batch_);
+    decorate();
+    count_ = 0;
+    input->position = marks[0];
+    input->colour = marks[1];
+    input->mask = marks[2];
+    return true;
+  }
+
+  /* A frame that only continues uploads reuses the batch while nothing
+     changed; any other fills, as paintGL() draws in every paint. */
+  const bool reuse = continued && !resized_ && !requested_ && fills_ > 0 && count == count_ &&
+                     std::equal(marks, marks + 3, marks_);
+  bool filled = false;
+  if (!reuse) {
+    filled = fill();
+    ok = filled;
+    if (filled) {
+      count_ = count;
+      std::copy(marks, marks + 3, marks_);
+    }
+  }
+
+  const Clock::time_point read = Clock::now();
+  input->frame.batch = ok || fills_ > 0 ? &decorations_ : nullptr;
+  input->frame.filled = filled;
+  double projection[16];
+  double modelview[16];
+  mbvq_c_soundings_camera(projection, modelview);
+  multiply(projection, modelview, input->frame.camera);
+  std::copy(projection, projection + 16, input->frame.projection);
+  input->count = count;
+  input->position = marks[0];
+  input->colour = marks[1];
+  input->mask = marks[2];
+  struct mbvq_soundings_state state;
+  mbvq_c_soundings_state(&state);
+  input->profiles = state.profiles;
+  marks_ms_ += milliseconds(read, Clock::now());
+  return ok;
+}
+
+bool SoundingsFrame::positions(int count, std::vector<float> *xyz) const {
+  xyz->resize(3 * static_cast<size_t>(std::max(0, count)));
+  int n = 0;
+  int error = MB_ERROR_NO_ERROR;
+  return mb3dsoundings_positions(0, count, xyz->data(), &n, &error) == MB_SUCCESS && n == count;
+}
+
+bool SoundingsFrame::colours(int count, std::vector<unsigned char> *rgba) const {
+  rgba->resize(4 * static_cast<size_t>(std::max(0, count)));
+  int n = 0;
+  int error = MB_ERROR_NO_ERROR;
+  return mb3dsoundings_colors(0, count, rgba->data(), &n, &error) == MB_SUCCESS && n == count;
+}
+
+bool SoundingsFrame::pairs(int count, std::vector<uint32_t> *black, std::vector<uint32_t> *red) const {
+  /* counted first, so that the lists take only what they hold */
+  int n_black = 0;
+  int n_red = 0;
+  if (mbvq_c_soundings_profile_pairs(nullptr, &n_black, nullptr, &n_red) != count)
+    return false;
+  black->resize(static_cast<size_t>(n_black));
+  red->resize(static_cast<size_t>(n_red));
+  int m_black = 0;
+  int m_red = 0;
+  const int n = mbvq_c_soundings_profile_pairs(black->data(), &m_black, red->data(), &m_red);
+  return n == count && m_black == n_black && m_red == n_red;
+}
+
 }  // namespace rhi
 }  // namespace mbvq
