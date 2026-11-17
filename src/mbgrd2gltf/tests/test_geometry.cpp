@@ -309,6 +309,22 @@ int main() {
       const double worst = worst_position_error(geometry, primary, altitudes, 3.0, mean);
       std::printf("Exaggeration x3: worst vertex position error %.2e m\n", worst);
       ok &= check(worst < 1e-3, "exaggeration scales altitudes about their mean, worst error " + std::to_string(worst) + " m");
+
+      // The colors go by the grid value of each vertex, in the order of Vertex::index(), whatever the exaggeration
+      bool altitudes_match = true;
+      size_t checked = 0;
+      for (int y = 0; y < ny; y++) {
+        for (int x = 0; x < nx; x++) {
+          if (node_is_missing(x, y))
+            continue;
+          const Vertex& vertex = geometry.vertices().at(x, y);
+          altitudes_match = altitudes_match && vertex.index() < geometry.altitudes().size() &&
+                            geometry.altitudes()[vertex.index()] == altitudes[static_cast<size_t>(y) * nx + x];
+          checked++;
+        }
+      }
+      ok &= check(altitudes_match && checked == geometry.altitudes().size(),
+                  "the true height of each vertex is kept, by index, under a vertical exaggeration of 3");
     }
 
     // ---- the model does not depend on which GeoOrigin is used, with or without exaggeration

@@ -314,1385 +314,1297 @@ ET
 BT
 /F1 11 Tf
 121.792 579.876 Td
+(--no-colors) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+172.502 579.876 Td
+(]) Tj
+ET
+BT
+/F0 11 Tf
+178.915 579.876 Td
+([) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+182.578 579.876 Td
 (--html) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-151.118 579.876 Td
+211.904 579.876 Td
 (]) Tj
 ET
 BT
 /F0 11 Tf
-157.531 579.876 Td
+218.317 579.876 Td
 ([) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-161.194 579.876 Td
+221.980 579.876 Td
 (--cesium-html) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-229.317 579.876 Td
+290.103 579.876 Td
 ([) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-232.980 579.876 Td
+293.766 579.876 Td
 (--cesium-url) Tj
 ET
 /F2 11 Tf
 BT
 /F2 11 Tf
-293.161 579.876 Td
+353.947 579.876 Td
 (URL) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-313.940 579.876 Td
+374.726 579.876 Td
 (]]) Tj
 ET
 BT
 /F0 11 Tf
-324.016 579.876 Td
+384.802 579.876 Td
 ([) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-327.679 579.876 Td
+388.465 579.876 Td
 (--geoviewpoint) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-396.726 579.876 Td
+457.512 579.876 Td
 (=) Tj
 ET
 /F2 11 Tf
 BT
 /F2 11 Tf
-402.930 579.876 Td
+463.716 579.876 Td
 (VALUES) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-442.651 579.876 Td
+503.437 579.876 Td
 (]) Tj
 ET
 BT
 /F0 11 Tf
-449.064 579.876 Td
+87.274 564.487 Td
 ([) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-452.727 579.876 Td
+90.937 564.487 Td
 (--verbose) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-496.100 579.876 Td
+134.310 564.487 Td
 (]) Tj
 ET
 BT
 /F0 11 Tf
-502.513 579.876 Td
+140.723 564.487 Td
 ([) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-506.176 579.876 Td
+144.386 564.487 Td
 (--help) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-533.676 579.876 Td
+171.886 564.487 Td
 (]) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-87.274 549.098 Td
+87.274 533.709 Td
 (Legacy) Tj
 ET
 BT
 /F1 11 Tf
-123.629 549.098 Td
+123.629 533.709 Td
 (single-dash) Tj
 ET
 BT
 /F1 11 Tf
-178.948 549.098 Td
+178.948 533.709 Td
 (syntax:) Tj
 ET
 BT
 /F1 11 Tf
-87.274 533.709 Td
+87.274 518.320 Td
 (mbgrd2gltf) Tj
 ET
 BT
 /F1 11 Tf
-143.187 533.709 Td
+143.187 518.320 Td
 (-I) Tj
 ET
 /F2 11 Tf
 BT
 /F2 11 Tf
-151.129 533.709 Td
+151.129 518.320 Td
 (FILE) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-177.100 533.709 Td
+177.100 518.320 Td
 ([) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-180.763 533.709 Td
+180.763 518.320 Td
 (-B) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-191.763 533.709 Td
+191.763 518.320 Td
 (]) Tj
 ET
 BT
 /F0 11 Tf
-198.176 533.709 Td
+198.176 518.320 Td
 ([) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-201.839 533.709 Td
+201.839 518.320 Td
 (-O) Tj
 ET
 /F2 11 Tf
 BT
 /F2 11 Tf
-214.060 533.709 Td
+214.060 518.320 Td
 (ROOT) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-242.781 533.709 Td
+242.781 518.320 Td
 (]) Tj
 ET
 BT
 /F0 11 Tf
-249.194 533.709 Td
+249.194 518.320 Td
 ([) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-252.857 533.709 Td
+252.857 518.320 Td
 (-E) Tj
 ET
 /F2 11 Tf
 BT
 /F2 11 Tf
-263.857 533.709 Td
+263.857 518.320 Td
 (NUM) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-288.299 533.709 Td
+288.299 518.320 Td
 (]) Tj
 ET
 BT
 /F0 11 Tf
-294.712 533.709 Td
+294.712 518.320 Td
 ([) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-298.375 533.709 Td
+298.375 518.320 Td
 (-G) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-310.596 533.709 Td
+310.596 518.320 Td
 ([) Tj
 ET
 /F2 11 Tf
 BT
 /F2 11 Tf
-314.259 533.709 Td
+314.259 518.320 Td
 (LON,LAT,ELEV) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-386.386 533.709 Td
+386.386 518.320 Td
 (]]) Tj
 ET
 BT
 /F0 11 Tf
-396.462 533.709 Td
+396.462 518.320 Td
 ([) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-400.125 533.709 Td
+400.125 518.320 Td
 (-D) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-411.730 533.709 Td
+411.730 518.320 Td
 (]) Tj
 ET
 BT
 /F0 11 Tf
-418.143 533.709 Td
+418.143 518.320 Td
 ([) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-421.806 533.709 Td
+421.806 518.320 Td
 (-Qp) Tj
 ET
 /F2 11 Tf
 BT
 /F2 11 Tf
-440.143 533.709 Td
+440.143 518.320 Td
 (NUM) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-464.585 533.709 Td
+464.585 518.320 Td
 (]) Tj
 ET
 BT
 /F0 11 Tf
-470.998 533.709 Td
+470.998 518.320 Td
 ([) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-474.661 533.709 Td
+474.661 518.320 Td
 (-Qn) Tj
 ET
 /F2 11 Tf
 BT
 /F2 11 Tf
-492.998 533.709 Td
+492.998 518.320 Td
 (NUM) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-517.440 533.709 Td
+517.440 518.320 Td
 (]) Tj
 ET
 BT
 /F0 11 Tf
-87.274 518.320 Td
+87.274 502.931 Td
 ([) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-90.937 518.320 Td
+90.937 502.931 Td
 (-Qt) Tj
 ET
 /F2 11 Tf
 BT
 /F2 11 Tf
-106.821 518.320 Td
+106.821 502.931 Td
 (NUM) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-131.263 518.320 Td
+131.263 502.931 Td
 (]) Tj
 ET
 BT
 /F0 11 Tf
-137.676 518.320 Td
+137.676 502.931 Td
 ([) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-141.339 518.320 Td
+141.339 502.931 Td
 (-Qc) Tj
 ET
 /F2 11 Tf
 BT
 /F2 11 Tf
-158.444 518.320 Td
+158.444 502.931 Td
 (NUM) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-182.886 518.320 Td
+182.886 502.931 Td
 (]) Tj
 ET
 BT
 /F0 11 Tf
-189.299 518.320 Td
+189.299 502.931 Td
 ([) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-192.962 518.320 Td
+192.962 502.931 Td
 (-W) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-207.625 518.320 Td
+207.625 502.931 Td
 (]) Tj
 ET
 BT
 /F0 11 Tf
-214.038 518.320 Td
+214.038 502.931 Td
 ([) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-217.701 518.320 Td
+217.701 502.931 Td
 (-V) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-229.306 518.320 Td
+229.306 502.931 Td
 (]) Tj
 ET
 BT
 /F0 11 Tf
-235.719 518.320 Td
+235.719 502.931 Td
 ([) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-239.382 518.320 Td
+239.382 502.931 Td
 (-H) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-251.603 518.320 Td
+251.603 502.931 Td
 (]) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-68.024 472.153 Td
+68.024 456.764 Td
 (DESCRIPTION) Tj
 ET
 BT
 /F1 11 Tf
-87.274 456.764 Td
+87.274 441.375 Td
 (mbgrd2gltf) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-143.187 456.764 Td
+143.187 441.375 Td
 (is) Tj
 ET
 BT
 /F0 11 Tf
-153.274 456.764 Td
+153.274 441.375 Td
 (a) Tj
 ET
 BT
 /F0 11 Tf
-160.908 456.764 Td
+160.908 441.375 Td
 (tool) Tj
 ET
 BT
 /F0 11 Tf
-180.774 456.764 Td
+180.774 441.375 Td
 (designed) Tj
 ET
 BT
 /F0 11 Tf
-222.629 456.764 Td
+222.629 441.375 Td
 (to) Tj
 ET
 BT
 /F0 11 Tf
-233.937 456.764 Td
+233.937 441.375 Td
 (convert) Tj
 ET
 BT
 /F0 11 Tf
-269.676 456.764 Td
+269.676 441.375 Td
 (grid) Tj
 ET
 BT
 /F0 11 Tf
-290.147 456.764 Td
+290.147 441.375 Td
 (data) Tj
 ET
 BT
 /F0 11 Tf
-311.223 456.764 Td
+311.223 441.375 Td
 (files) Tj
 ET
 BT
 /F0 11 Tf
-332.915 456.764 Td
+332.915 441.375 Td
 (\(GRD\)) Tj
 ET
 BT
 /F0 11 Tf
-366.212 456.764 Td
+366.212 441.375 Td
 (to) Tj
 ET
 BT
 /F0 11 Tf
-377.520 456.764 Td
+377.520 441.375 Td
 (Graphics) Tj
 ET
 BT
 /F0 11 Tf
-419.980 456.764 Td
+419.980 441.375 Td
 (Library) Tj
 ET
 BT
 /F0 11 Tf
-455.719 456.764 Td
+455.719 441.375 Td
 (Transmission) Tj
 ET
 BT
 /F0 11 Tf
-87.274 441.375 Td
+87.274 425.986 Td
 (Format) Tj
 ET
 BT
 /F0 11 Tf
-121.803 441.375 Td
+121.803 425.986 Td
 (\(GLTF\)) Tj
 ET
 BT
 /F0 11 Tf
-159.379 441.375 Td
+159.379 425.986 Td
 (files.) Tj
 ET
 BT
 /F0 11 Tf
-183.821 441.375 Td
+183.821 425.986 Td
 (It) Tj
 ET
 BT
 /F0 11 Tf
-193.292 441.375 Td
+193.292 425.986 Td
 (writes) Tj
 ET
 BT
 /F0 11 Tf
-222.926 441.375 Td
+222.926 425.986 Td
 (binary) Tj
 ET
 BT
 /F0 11 Tf
-253.781 441.375 Td
+253.781 425.986 Td
 (GLTF) Tj
 ET
 BT
 /F0 11 Tf
-284.031 441.375 Td
+284.031 425.986 Td
 (\(GLB\)) Tj
 ET
 BT
 /F0 11 Tf
-316.107 441.375 Td
+316.107 425.986 Td
 (by) Tj
 ET
 BT
 /F0 11 Tf
-329.857 441.375 Td
+329.857 425.986 Td
 (default,) Tj
 ET
 BT
 /F0 11 Tf
-365.904 441.375 Td
+365.904 425.986 Td
 (which) Tj
 ET
 BT
 /F0 11 Tf
-395.538 441.375 Td
+395.538 425.986 Td
 (is) Tj
 ET
 BT
 /F0 11 Tf
-405.625 441.375 Td
+405.625 425.986 Td
 (more) Tj
 ET
 BT
 /F0 11 Tf
-430.980 441.375 Td
+430.980 425.986 Td
 (compact,) Tj
 ET
 BT
 /F0 11 Tf
-473.748 441.375 Td
+473.748 425.986 Td
 (and) Tj
 ET
 BT
 /F0 11 Tf
-492.382 441.375 Td
+492.382 425.986 Td
 (can) Tj
 ET
 BT
 /F0 11 Tf
-510.400 441.375 Td
+510.400 425.986 Td
 (write) Tj
 ET
 BT
 /F0 11 Tf
-87.274 425.986 Td
+87.274 410.597 Td
 (text-based) Tj
 ET
 BT
 /F0 11 Tf
-135.234 425.986 Td
+135.234 410.597 Td
 (GLTF) Tj
 ET
 BT
 /F0 11 Tf
-165.484 425.986 Td
+165.484 410.597 Td
 (with) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-187.792 425.986 Td
+187.792 410.597 Td
 (--no-binary) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-241.571 425.986 Td
+241.571 410.597 Td
 (;) Tj
 ET
 BT
 /F0 11 Tf
-247.379 425.986 Td
+247.379 410.597 Td
 (it) Tj
 ET
 BT
 /F0 11 Tf
-256.245 425.986 Td
+256.245 410.597 Td
 (can) Tj
 ET
 BT
 /F0 11 Tf
-274.263 425.986 Td
+274.263 410.597 Td
 (exaggerate) Tj
 ET
 BT
 /F0 11 Tf
-324.654 425.986 Td
+324.654 410.597 Td
 (vertex) Tj
 ET
 BT
 /F0 11 Tf
-354.893 425.986 Td
+354.893 410.597 Td
 (altitude) Tj
 ET
 BT
 /F0 11 Tf
-390.643 425.986 Td
+390.643 410.597 Td
 (to) Tj
 ET
 BT
 /F0 11 Tf
-401.951 425.986 Td
+401.951 410.597 Td
 (enhance) Tj
 ET
 BT
 /F0 11 Tf
-440.737 425.986 Td
+440.737 410.597 Td
 (topographic) Tj
 ET
 BT
 /F0 11 Tf
-496.034 425.986 Td
+496.034 410.597 Td
 (features.) Tj
 ET
 BT
 /F0 11 Tf
-87.274 410.597 Td
+87.274 395.208 Td
 (The) Tj
 ET
 BT
 /F0 11 Tf
-107.129 410.597 Td
+107.129 395.208 Td
 (grid) Tj
 ET
 BT
 /F0 11 Tf
-127.600 410.597 Td
+127.600 395.208 Td
 (is) Tj
 ET
 BT
 /F0 11 Tf
-137.687 410.597 Td
+137.687 395.208 Td
 (written) Tj
 ET
 BT
 /F0 11 Tf
-171.600 410.597 Td
+171.600 395.208 Td
 (as) Tj
 ET
 BT
 /F0 11 Tf
-183.513 410.597 Td
+183.513 395.208 Td
 (blocks) Tj
 ET
 BT
 /F0 11 Tf
-214.984 410.597 Td
+214.984 395.208 Td
 (of) Tj
 ET
 BT
 /F0 11 Tf
-226.897 410.597 Td
+226.897 395.208 Td
 (256) Tj
 ET
 BT
 /F0 11 Tf
-246.147 410.597 Td
+246.147 395.208 Td
 (by) Tj
 ET
 BT
 /F0 11 Tf
-259.897 410.597 Td
+259.897 395.208 Td
 (256) Tj
 ET
 BT
 /F0 11 Tf
-279.147 410.597 Td
+279.147 395.208 Td
 (cells,) Tj
 ET
 BT
 /F0 11 Tf
-304.810 410.597 Td
+304.810 395.208 Td
 (each) Tj
 ET
 BT
 /F0 11 Tf
-327.712 410.597 Td
+327.712 395.208 Td
 (its) Tj
 ET
 BT
 /F0 11 Tf
-340.857 410.597 Td
+340.857 395.208 Td
 (own) Tj
 ET
 BT
 /F0 11 Tf
-362.549 410.597 Td
+362.549 395.208 Td
 (glTF) Tj
 ET
 BT
 /F0 11 Tf
-386.694 410.597 Td
+386.694 395.208 Td
 (primitive,) Tj
 ET
 BT
 /F0 11 Tf
-432.531 410.597 Td
+432.531 395.208 Td
 (to) Tj
 ET
 BT
 /F0 11 Tf
-443.839 410.597 Td
+443.839 395.208 Td
 (handle) Tj
 ET
 BT
 /F0 11 Tf
-475.915 410.597 Td
+475.915 395.208 Td
 (large) Tj
 ET
 BT
 /F0 11 Tf
-500.654 410.597 Td
+500.654 395.208 Td
 (datasets) Tj
 ET
 BT
 /F0 11 Tf
-87.274 395.208 Td
+87.274 379.819 Td
 (efficiently.) Tj
 ET
 BT
 /F0 11 Tf
-137.984 395.208 Td
+137.984 379.819 Td
 (Draco) Tj
 ET
 BT
 /F0 11 Tf
-167.607 395.208 Td
+167.607 379.819 Td
 (compression,) Tj
 ET
 BT
 /F0 11 Tf
-228.712 395.208 Td
+228.712 379.819 Td
 (which) Tj
 ET
 BT
 /F0 11 Tf
-258.346 395.208 Td
+258.346 379.819 Td
 (is) Tj
 ET
 BT
 /F0 11 Tf
-268.433 395.208 Td
+268.433 379.819 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-284.625 395.208 Td
+284.625 379.819 Td
 (default,) Tj
 ET
 BT
 /F0 11 Tf
-320.672 395.208 Td
+320.672 379.819 Td
 (reduces) Tj
 ET
 BT
 /F0 11 Tf
-357.016 395.208 Td
+357.016 379.819 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-373.208 395.208 Td
+373.208 379.819 Td
 (output) Tj
 ET
 BT
 /F0 11 Tf
-404.074 395.208 Td
+404.074 379.819 Td
 (GLTF) Tj
 ET
 BT
 /F0 11 Tf
-434.324 395.208 Td
+434.324 379.819 Td
 (file) Tj
 ET
 BT
 /F0 11 Tf
-451.737 395.208 Td
+451.737 379.819 Td
 (size) Tj
 ET
 BT
 /F0 11 Tf
-471.592 395.208 Td
+471.592 379.819 Td
 (by) Tj
 ET
 BT
 /F0 11 Tf
-485.342 395.208 Td
+485.342 379.819 Td
 (about) Tj
 ET
 BT
 /F0 11 Tf
-512.534 395.208 Td
+512.534 379.819 Td
 (a) Tj
 ET
 BT
 /F0 11 Tf
-87.274 379.819 Td
+87.274 364.430 Td
 (factor) Tj
 ET
 BT
 /F0 11 Tf
-115.676 379.819 Td
+115.676 364.430 Td
 (of) Tj
 ET
 BT
 /F0 11 Tf
-127.589 379.819 Td
+127.589 364.430 Td
 (ten) Tj
 ET
 BT
 /F0 11 Tf
-143.781 379.819 Td
+143.781 364.430 Td
 (while) Tj
 ET
 BT
 /F0 11 Tf
-170.973 379.819 Td
+170.973 364.430 Td
 (keeping) Tj
 ET
 BT
 /F0 11 Tf
-208.549 379.819 Td
+208.549 364.430 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-224.741 379.819 Td
+224.741 364.430 Td
 (positions) Tj
 ET
 BT
 /F0 11 Tf
-267.223 379.819 Td
+267.223 364.430 Td
 (to) Tj
 ET
 BT
 /F0 11 Tf
-278.531 379.819 Td
+278.531 364.430 Td
 (a) Tj
 ET
 BT
 /F0 11 Tf
-286.165 379.819 Td
+286.165 364.430 Td
 (stated) Tj
 ET
 BT
 /F0 11 Tf
-314.578 379.819 Td
+314.578 364.430 Td
 (precision) Tj
 ET
 BT
 /F0 11 Tf
-357.654 379.819 Td
+357.654 364.430 Td
 (\(by) Tj
 ET
 BT
 /F0 11 Tf
-375.067 379.819 Td
+375.067 364.430 Td
 (default) Tj
 ET
 BT
 /F0 11 Tf
-408.364 379.819 Td
+408.364 364.430 Td
 (a) Tj
 ET
 BT
 /F0 11 Tf
-415.998 379.819 Td
+415.998 364.430 Td
 (millimeter\).) Tj
 ET
 BT
 /F0 11 Tf
-87.274 349.041 Td
+87.274 333.652 Td
 (The) Tj
 ET
 BT
 /F0 11 Tf
-107.129 349.041 Td
+107.129 333.652 Td
 (output) Tj
 ET
 BT
 /F0 11 Tf
-137.995 349.041 Td
+137.995 333.652 Td
 (mesh) Tj
 ET
 BT
 /F0 11 Tf
-163.966 349.041 Td
+163.966 333.652 Td
 (vertices) Tj
 ET
 BT
 /F0 11 Tf
-200.926 349.041 Td
+200.926 333.652 Td
 (are) Tj
 ET
 BT
 /F0 11 Tf
-217.107 349.041 Td
+217.107 333.652 Td
 (positioned) Tj
 ET
 BT
 /F0 11 Tf
-265.694 349.041 Td
+265.694 333.652 Td
 (in) Tj
 ET
 BT
 /F0 11 Tf
-277.002 349.041 Td
+277.002 333.652 Td
 (an) Tj
 ET
 BT
 /F0 11 Tf
-290.136 349.041 Td
+290.136 333.652 Td
 (Earth-Centered,) Tj
 ET
 BT
 /F0 11 Tf
-362.835 349.041 Td
+362.835 333.652 Td
 (Earth-Fixed) Tj
 ET
 BT
 /F0 11 Tf
-418.132 349.041 Td
+418.132 333.652 Td
 (\(ECEF\)) Tj
 ET
 BT
 /F0 11 Tf
-455.103 349.041 Td
+455.103 333.652 Td
 (Cartesian) Tj
 ET
 BT
 /F0 11 Tf
-87.274 333.652 Td
+87.274 318.263 Td
 (coordinate) Tj
 ET
 BT
 /F0 11 Tf
-136.455 333.652 Td
+136.455 318.263 Td
 (system) Tj
 ET
 BT
 /F0 11 Tf
-169.763 333.652 Td
+169.763 318.263 Td
 (with) Tj
 ET
 BT
 /F0 11 Tf
-192.071 333.652 Td
+192.071 318.263 Td
 (units) Tj
 ET
 BT
 /F0 11 Tf
-216.216 333.652 Td
+216.216 318.263 Td
 (in) Tj
 ET
 BT
 /F0 11 Tf
-227.524 333.652 Td
+227.524 318.263 Td
 (meters.) Tj
 ET
 BT
 /F0 11 Tf
-262.350 333.652 Td
+262.350 318.263 Td
 (ECEF) Tj
 ET
 BT
 /F0 11 Tf
-291.995 333.652 Td
+291.995 318.263 Td
 (is) Tj
 ET
 BT
 /F0 11 Tf
-302.082 333.652 Td
+302.082 318.263 Td
 (a) Tj
 ET
 BT
 /F0 11 Tf
-309.716 333.652 Td
+309.716 318.263 Td
 (3D) Tj
 ET
 BT
 /F0 11 Tf
-325.908 333.652 Td
+325.908 318.263 Td
 (right-handed) Tj
 ET
 BT
 /F0 11 Tf
-384.868 333.652 Td
+384.868 318.263 Td
 (coordinate) Tj
 ET
 BT
 /F0 11 Tf
-434.049 333.652 Td
+434.049 318.263 Td
 (system) Tj
 ET
 BT
 /F0 11 Tf
-467.357 333.652 Td
+467.357 318.263 Td
 (with) Tj
 ET
 BT
 /F0 11 Tf
-489.665 333.652 Td
+489.665 318.263 Td
 (its) Tj
 ET
 BT
 /F0 11 Tf
-502.810 333.652 Td
+502.810 318.263 Td
 (origin) Tj
 ET
 BT
 /F0 11 Tf
-531.839 333.652 Td
-(at) Tj
-ET
-BT
-/F0 11 Tf
-87.274 318.263 Td
-(Earth's) Tj
-ET
-BT
-/F0 11 Tf
-121.792 318.263 Td
-(center) Tj
-ET
-BT
-/F0 11 Tf
-151.415 318.263 Td
-(of) Tj
-ET
-BT
-/F0 11 Tf
-163.328 318.263 Td
-(mass,) Tj
-ET
-BT
-/F0 11 Tf
-190.828 318.263 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-207.020 318.263 Td
-(Z-axis) Tj
-ET
-BT
-/F0 11 Tf
-237.875 318.263 Td
-(pointing) Tj
-ET
-BT
-/F0 11 Tf
-277.299 318.263 Td
-(toward) Tj
-ET
-BT
-/F0 11 Tf
-310.596 318.263 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-326.788 318.263 Td
-(North) Tj
-ET
-BT
-/F0 11 Tf
-355.201 318.263 Td
-(Pole,) Tj
-ET
-BT
-/F0 11 Tf
-380.259 318.263 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-396.451 318.263 Td
-(X-axis) Tj
-ET
-BT
-/F0 11 Tf
-428.527 318.263 Td
-(intersecting) Tj
-ET
-BT
-/F0 11 Tf
-482.603 318.263 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-498.795 318.263 Td
-(equator) Tj
-ET
-BT
-/F0 11 Tf
-534.534 318.263 Td
+531.839 318.263 Td
 (at) Tj
 ET
 BT
 /F0 11 Tf
 87.274 302.874 Td
-(the) Tj
+(Earth's) Tj
 ET
 BT
 /F0 11 Tf
-103.466 302.874 Td
-(prime) Tj
+121.792 302.874 Td
+(center) Tj
 ET
 BT
 /F0 11 Tf
-131.879 302.874 Td
-(meridian,) Tj
-ET
-BT
-/F0 11 Tf
-176.484 302.874 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-195.118 302.874 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-211.310 302.874 Td
-(Y-axis) Tj
-ET
-BT
-/F0 11 Tf
-243.386 302.874 Td
-(completing) Tj
-ET
-BT
-/F0 11 Tf
-295.636 302.874 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-311.828 302.874 Td
-(right-handed) Tj
-ET
-BT
-/F0 11 Tf
-370.788 302.874 Td
-(system) Tj
-ET
-BT
-/F0 11 Tf
-404.096 302.874 Td
-(at) Tj
-ET
-BT
-/F0 11 Tf
-414.788 302.874 Td
-(90) Tj
-ET
-BT
-/F0 11 Tf
-428.538 302.874 Td
-(degrees) Tj
-ET
-BT
-/F0 11 Tf
-464.882 302.874 Td
-(east) Tj
-ET
-BT
-/F0 11 Tf
-484.737 302.874 Td
-(longitude.) Tj
-ET
-BT
-/F0 11 Tf
-87.274 272.096 Td
-(Grid) Tj
-ET
-BT
-/F0 11 Tf
-110.187 272.096 Td
-(node) Tj
-ET
-BT
-/F0 11 Tf
-134.321 272.096 Td
-(positions) Tj
-ET
-BT
-/F0 11 Tf
-176.803 272.096 Td
-(follow) Tj
-ET
-BT
-/F0 11 Tf
-208.274 272.096 Td
-(GMT) Tj
-ET
-BT
-/F0 11 Tf
-235.466 272.096 Td
-(conventions:) Tj
-ET
-BT
-/F0 11 Tf
-294.437 272.096 Td
-(for) Tj
-ET
-BT
-/F0 11 Tf
-310.013 272.096 Td
-(a) Tj
-ET
-BT
-/F0 11 Tf
-317.647 272.096 Td
-(gridline-registered) Tj
-ET
-BT
-/F0 11 Tf
-401.654 272.096 Td
-(grid) Tj
-ET
-BT
-/F0 11 Tf
-422.125 272.096 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-438.317 272.096 Td
-(nodes) Tj
-ET
-BT
-/F0 11 Tf
-466.730 272.096 Td
-(lie) Tj
-ET
-BT
-/F0 11 Tf
-480.480 272.096 Td
-(on) Tj
-ET
-BT
-/F0 11 Tf
-494.230 272.096 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-510.422 272.096 Td
-(edges) Tj
-ET
-BT
-/F0 11 Tf
-87.274 256.707 Td
+151.415 302.874 Td
 (of) Tj
 ET
 BT
 /F0 11 Tf
-99.187 256.707 Td
+163.328 302.874 Td
+(mass,) Tj
+ET
+BT
+/F0 11 Tf
+190.828 302.874 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-115.379 256.707 Td
-(region) Tj
+207.020 302.874 Td
+(Z-axis) Tj
 ET
 BT
 /F0 11 Tf
-146.234 256.707 Td
+237.875 302.874 Td
+(pointing) Tj
+ET
+BT
+/F0 11 Tf
+277.299 302.874 Td
+(toward) Tj
+ET
+BT
+/F0 11 Tf
+310.596 302.874 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+326.788 302.874 Td
+(North) Tj
+ET
+BT
+/F0 11 Tf
+355.201 302.874 Td
+(Pole,) Tj
+ET
+BT
+/F0 11 Tf
+380.259 302.874 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+396.451 302.874 Td
+(X-axis) Tj
+ET
+BT
+/F0 11 Tf
+428.527 302.874 Td
+(intersecting) Tj
+ET
+BT
+/F0 11 Tf
+482.603 302.874 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+498.795 302.874 Td
+(equator) Tj
+ET
+BT
+/F0 11 Tf
+534.534 302.874 Td
+(at) Tj
+ET
+BT
+/F0 11 Tf
+87.274 287.485 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+103.466 287.485 Td
+(prime) Tj
+ET
+BT
+/F0 11 Tf
+131.879 287.485 Td
+(meridian,) Tj
+ET
+BT
+/F0 11 Tf
+176.484 287.485 Td
 (and) Tj
 ET
 BT
 /F0 11 Tf
-164.868 256.707 Td
-(are) Tj
+195.118 287.485 Td
+(the) Tj
 ET
 BT
 /F0 11 Tf
-181.049 256.707 Td
-(spaced) Tj
+211.310 287.485 Td
+(Y-axis) Tj
 ET
 BT
 /F0 11 Tf
-213.730 256.707 Td
-(\(max) Tj
+243.386 287.485 Td
+(completing) Tj
 ET
 BT
 /F0 11 Tf
-239.085 256.707 Td
-(-) Tj
+295.636 287.485 Td
+(the) Tj
 ET
 BT
 /F0 11 Tf
-245.498 256.707 Td
-(min\)) Tj
+311.828 287.485 Td
+(right-handed) Tj
 ET
 BT
 /F0 11 Tf
-269.027 256.707 Td
-(/) Tj
+370.788 287.485 Td
+(system) Tj
 ET
 BT
 /F0 11 Tf
-274.835 256.707 Td
-(\(N) Tj
+404.096 287.485 Td
+(at) Tj
 ET
 BT
 /F0 11 Tf
-289.190 256.707 Td
-(-) Tj
+414.788 287.485 Td
+(90) Tj
 ET
 BT
 /F0 11 Tf
-295.603 256.707 Td
-(1\)) Tj
+428.538 287.485 Td
+(degrees) Tj
 ET
 BT
 /F0 11 Tf
-307.516 256.707 Td
-(apart,) Tj
+464.882 287.485 Td
+(east) Tj
 ET
 BT
 /F0 11 Tf
-335.005 256.707 Td
-(and) Tj
+484.737 287.485 Td
+(longitude.) Tj
 ET
 BT
 /F0 11 Tf
-353.639 256.707 Td
+87.274 256.707 Td
+(Grid) Tj
+ET
+BT
+/F0 11 Tf
+110.187 256.707 Td
+(node) Tj
+ET
+BT
+/F0 11 Tf
+134.321 256.707 Td
+(positions) Tj
+ET
+BT
+/F0 11 Tf
+176.803 256.707 Td
+(follow) Tj
+ET
+BT
+/F0 11 Tf
+208.274 256.707 Td
+(GMT) Tj
+ET
+BT
+/F0 11 Tf
+235.466 256.707 Td
+(conventions:) Tj
+ET
+BT
+/F0 11 Tf
+294.437 256.707 Td
 (for) Tj
 ET
 BT
 /F0 11 Tf
-369.215 256.707 Td
+310.013 256.707 Td
 (a) Tj
 ET
 BT
 /F0 11 Tf
-376.849 256.707 Td
-(pixel-registered) Tj
+317.647 256.707 Td
+(gridline-registered) Tj
 ET
 BT
 /F0 11 Tf
-448.635 256.707 Td
+401.654 256.707 Td
 (grid) Tj
 ET
 BT
 /F0 11 Tf
-469.106 256.707 Td
-(\(node_offset) Tj
+422.125 256.707 Td
+(the) Tj
 ET
 BT
 /F0 11 Tf
-527.450 256.707 Td
-(=) Tj
+438.317 256.707 Td
+(nodes) Tj
+ET
+BT
+/F0 11 Tf
+466.730 256.707 Td
+(lie) Tj
+ET
+BT
+/F0 11 Tf
+480.480 256.707 Td
+(on) Tj
+ET
+BT
+/F0 11 Tf
+494.230 256.707 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+510.422 256.707 Td
+(edges) Tj
 ET
 BT
 /F0 11 Tf
 87.274 241.318 Td
-(1\)) Tj
+(of) Tj
 ET
 BT
 /F0 11 Tf
@@ -1702,674 +1614,709 @@ ET
 BT
 /F0 11 Tf
 115.379 241.318 Td
-(nodes) Tj
+(region) Tj
 ET
 BT
 /F0 11 Tf
-143.792 241.318 Td
+146.234 241.318 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+164.868 241.318 Td
 (are) Tj
 ET
 BT
 /F0 11 Tf
-159.973 241.318 Td
-(at) Tj
+181.049 241.318 Td
+(spaced) Tj
 ET
 BT
 /F0 11 Tf
-170.665 241.318 Td
-(the) Tj
+213.730 241.318 Td
+(\(max) Tj
 ET
 BT
 /F0 11 Tf
-186.857 241.318 Td
-(cell) Tj
+239.085 241.318 Td
+(-) Tj
 ET
 BT
 /F0 11 Tf
-205.491 241.318 Td
-(centers.) Tj
+245.498 241.318 Td
+(min\)) Tj
 ET
 BT
 /F0 11 Tf
-242.143 241.318 Td
-(Both) Tj
+269.027 241.318 Td
+(/) Tj
 ET
 BT
 /F0 11 Tf
-266.288 241.318 Td
-(the) Tj
+274.835 241.318 Td
+(\(N) Tj
 ET
 BT
 /F0 11 Tf
-282.480 241.318 Td
-(old) Tj
+289.190 241.318 Td
+(-) Tj
 ET
 BT
 /F0 11 Tf
-299.288 241.318 Td
-(GMT) Tj
+295.603 241.318 Td
+(1\)) Tj
 ET
 BT
 /F0 11 Tf
-326.480 241.318 Td
-(netCDF) Tj
+307.516 241.318 Td
+(apart,) Tj
 ET
 BT
 /F0 11 Tf
-364.067 241.318 Td
-(layout) Tj
-ET
-BT
-/F0 11 Tf
-394.317 241.318 Td
+335.005 241.318 Td
 (and) Tj
 ET
 BT
 /F0 11 Tf
-412.951 241.318 Td
-(netCDF) Tj
+353.639 241.318 Td
+(for) Tj
 ET
 BT
 /F0 11 Tf
-450.538 241.318 Td
-(CF) Tj
+369.215 241.318 Td
+(a) Tj
 ET
 BT
 /F0 11 Tf
-466.741 241.318 Td
-(grids) Tj
+376.849 241.318 Td
+(pixel-registered) Tj
 ET
 BT
 /F0 11 Tf
-491.491 241.318 Td
-(with) Tj
+448.635 241.318 Td
+(grid) Tj
 ET
 BT
 /F0 11 Tf
-513.799 241.318 Td
-(x) Tj
+469.106 241.318 Td
+(\(node_offset) Tj
 ET
 BT
 /F0 11 Tf
-522.049 241.318 Td
-(and) Tj
+527.450 241.318 Td
+(=) Tj
 ET
 BT
 /F0 11 Tf
 87.274 225.929 Td
-(y) Tj
+(1\)) Tj
 ET
 BT
 /F0 11 Tf
-95.524 225.929 Td
-(coordinate) Tj
+99.187 225.929 Td
+(the) Tj
 ET
 BT
 /F0 11 Tf
-144.705 225.929 Td
-(variables) Tj
+115.379 225.929 Td
+(nodes) Tj
 ET
 BT
 /F0 11 Tf
-187.165 225.929 Td
+143.792 225.929 Td
 (are) Tj
 ET
 BT
 /F0 11 Tf
-203.346 225.929 Td
-(read,) Tj
+159.973 225.929 Td
+(at) Tj
 ET
 BT
 /F0 11 Tf
-227.777 225.929 Td
+170.665 225.929 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+186.857 225.929 Td
+(cell) Tj
+ET
+BT
+/F0 11 Tf
+205.491 225.929 Td
+(centers.) Tj
+ET
+BT
+/F0 11 Tf
+242.143 225.929 Td
+(Both) Tj
+ET
+BT
+/F0 11 Tf
+266.288 225.929 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+282.480 225.929 Td
+(old) Tj
+ET
+BT
+/F0 11 Tf
+299.288 225.929 Td
+(GMT) Tj
+ET
+BT
+/F0 11 Tf
+326.480 225.929 Td
+(netCDF) Tj
+ET
+BT
+/F0 11 Tf
+364.067 225.929 Td
+(layout) Tj
+ET
+BT
+/F0 11 Tf
+394.317 225.929 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+412.951 225.929 Td
+(netCDF) Tj
+ET
+BT
+/F0 11 Tf
+450.538 225.929 Td
+(CF) Tj
+ET
+BT
+/F0 11 Tf
+466.741 225.929 Td
+(grids) Tj
+ET
+BT
+/F0 11 Tf
+491.491 225.929 Td
 (with) Tj
 ET
 BT
 /F0 11 Tf
-250.085 225.929 Td
+513.799 225.929 Td
+(x) Tj
+ET
+BT
+/F0 11 Tf
+522.049 225.929 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+87.274 210.540 Td
+(y) Tj
+ET
+BT
+/F0 11 Tf
+95.524 210.540 Td
+(coordinate) Tj
+ET
+BT
+/F0 11 Tf
+144.705 210.540 Td
+(variables) Tj
+ET
+BT
+/F0 11 Tf
+187.165 210.540 Td
+(are) Tj
+ET
+BT
+/F0 11 Tf
+203.346 210.540 Td
+(read,) Tj
+ET
+BT
+/F0 11 Tf
+227.777 210.540 Td
+(with) Tj
+ET
+BT
+/F0 11 Tf
+250.085 210.540 Td
 (rows) Tj
 ET
 BT
 /F0 11 Tf
-274.219 225.929 Td
+274.219 210.540 Td
 (running) Tj
 ET
 BT
 /F0 11 Tf
-311.190 225.929 Td
+311.190 210.540 Td
 (either) Tj
 ET
 BT
 /F0 11 Tf
-338.987 225.929 Td
+338.987 210.540 Td
 (north) Tj
 ET
 BT
 /F0 11 Tf
-364.958 225.929 Td
+364.958 210.540 Td
 (to) Tj
 ET
 BT
 /F0 11 Tf
-376.266 225.929 Td
+376.266 210.540 Td
 (south) Tj
 ET
 BT
 /F0 11 Tf
-402.853 225.929 Td
+402.853 210.540 Td
 (or) Tj
 ET
 BT
 /F0 11 Tf
-414.766 225.929 Td
+414.766 210.540 Td
 (south) Tj
 ET
 BT
 /F0 11 Tf
-441.353 225.929 Td
+441.353 210.540 Td
 (to) Tj
 ET
 BT
 /F0 11 Tf
-452.661 225.929 Td
+452.661 210.540 Td
 (north.) Tj
 ET
 BT
 /F0 11 Tf
-87.274 195.151 Td
+87.274 179.762 Td
 (For) Tj
 ET
 BT
 /F0 11 Tf
-105.303 195.151 Td
+105.303 179.762 Td
 (improved) Tj
 ET
 BT
 /F0 11 Tf
-150.216 195.151 Td
+150.216 179.762 Td
 (rendering) Tj
 ET
 BT
 /F0 11 Tf
-195.118 195.151 Td
+195.118 179.762 Td
 (precision) Tj
 ET
 BT
 /F0 11 Tf
-238.194 195.151 Td
+238.194 179.762 Td
 (in) Tj
 ET
 BT
 /F0 11 Tf
-249.502 195.151 Td
+249.502 179.762 Td
 (localized) Tj
 ET
 BT
 /F0 11 Tf
-291.962 195.151 Td
+291.962 179.762 Td
 (areas,) Tj
 ET
 BT
 /F0 11 Tf
-320.056 195.151 Td
+320.056 179.762 Td
 (the) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-336.248 195.151 Td
+336.248 179.762 Td
 (--geoorigin) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-390.324 195.151 Td
+390.324 179.762 Td
 (option) Tj
 ET
 BT
 /F0 11 Tf
-421.190 195.151 Td
+421.190 179.762 Td
 (allows) Tj
 ET
 BT
 /F0 11 Tf
-452.661 195.151 Td
+452.661 179.762 Td
 (vertices) Tj
 ET
 BT
 /F0 11 Tf
-489.621 195.151 Td
+489.621 179.762 Td
 (to) Tj
 ET
 BT
 /F0 11 Tf
-500.929 195.151 Td
+500.929 179.762 Td
 (be) Tj
-ET
-BT
-/F0 11 Tf
-87.274 179.762 Td
-(expressed) Tj
-ET
-BT
-/F0 11 Tf
-133.397 179.762 Td
-(as) Tj
-ET
-BT
-/F0 11 Tf
-145.310 179.762 Td
-(offsets) Tj
-ET
-BT
-/F0 11 Tf
-177.386 179.762 Td
-(from) Tj
-ET
-BT
-/F0 11 Tf
-201.520 179.762 Td
-(a) Tj
-ET
-BT
-/F0 11 Tf
-209.154 179.762 Td
-(local) Tj
-ET
-BT
-/F0 11 Tf
-233.288 179.762 Td
-(origin) Tj
-ET
-BT
-/F0 11 Tf
-262.317 179.762 Td
-(point) Tj
-ET
-BT
-/F0 11 Tf
-287.683 179.762 Td
-(rather) Tj
-ET
-BT
-/F0 11 Tf
-316.085 179.762 Td
-(than) Tj
-ET
-BT
-/F0 11 Tf
-337.777 179.762 Td
-(from) Tj
-ET
-BT
-/F0 11 Tf
-361.911 179.762 Td
-(Earth's) Tj
-ET
-BT
-/F0 11 Tf
-396.429 179.762 Td
-(center.) Tj
-ET
-BT
-/F0 11 Tf
-428.802 179.762 Td
-(ECEF) Tj
-ET
-BT
-/F0 11 Tf
-458.447 179.762 Td
-(coordinates) Tj
 ET
 BT
 /F0 11 Tf
 87.274 164.373 Td
-(typically) Tj
+(expressed) Tj
 ET
 BT
 /F0 11 Tf
-128.524 164.373 Td
-(have) Tj
+133.397 164.373 Td
+(as) Tj
 ET
 BT
 /F0 11 Tf
-152.042 164.373 Td
-(magnitudes) Tj
+145.310 164.373 Td
+(offsets) Tj
 ET
 BT
 /F0 11 Tf
-205.513 164.373 Td
-(on) Tj
-ET
-BT
-/F0 11 Tf
-219.263 164.373 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-235.455 164.373 Td
-(order) Tj
-ET
-BT
-/F0 11 Tf
-261.415 164.373 Td
-(of) Tj
-ET
-BT
-/F0 11 Tf
-273.328 164.373 Td
-(millions) Tj
-ET
-BT
-/F0 11 Tf
-312.147 164.373 Td
-(of) Tj
-ET
-BT
-/F0 11 Tf
-324.060 164.373 Td
-(meters,) Tj
-ET
-BT
-/F0 11 Tf
-358.886 164.373 Td
-(which) Tj
-ET
-BT
-/F0 11 Tf
-388.520 164.373 Td
-(can) Tj
-ET
-BT
-/F0 11 Tf
-406.538 164.373 Td
-(cause) Tj
-ET
-BT
-/F0 11 Tf
-433.719 164.373 Td
-(precision) Tj
-ET
-BT
-/F0 11 Tf
-476.795 164.373 Td
-(loss) Tj
-ET
-BT
-/F0 11 Tf
-496.661 164.373 Td
-(when) Tj
-ET
-BT
-/F0 11 Tf
-87.274 148.984 Td
-(using) Tj
-ET
-BT
-/F0 11 Tf
-113.861 148.984 Td
-(GPU) Tj
-ET
-BT
-/F0 11 Tf
-138.611 148.984 Td
-(single-precision) Tj
-ET
-BT
-/F0 11 Tf
-211.629 148.984 Td
-(floating) Tj
-ET
-BT
-/F0 11 Tf
-248.600 148.984 Td
-(point) Tj
-ET
-BT
-/F0 11 Tf
-273.966 148.984 Td
-(arithmetic.) Tj
-ET
-BT
-/F0 11 Tf
-324.071 148.984 Td
-(By) Tj
-ET
-BT
-/F0 11 Tf
-339.658 148.984 Td
-(specifying) Tj
-ET
-BT
-/F0 11 Tf
-388.234 148.984 Td
-(a) Tj
-ET
-BT
-/F0 11 Tf
-395.868 148.984 Td
-(GeoOrigin) Tj
-ET
-BT
-/F0 11 Tf
-445.665 148.984 Td
-(near) Tj
-ET
-BT
-/F0 11 Tf
-467.346 148.984 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-483.538 148.984 Td
-(area) Tj
-ET
-BT
-/F0 11 Tf
-504.603 148.984 Td
-(of) Tj
-ET
-BT
-/F0 11 Tf
-87.274 133.595 Td
-(interest,) Tj
-ET
-BT
-/F0 11 Tf
-125.158 133.595 Td
-(coordinate) Tj
-ET
-BT
-/F0 11 Tf
-174.339 133.595 Td
-(magnitudes) Tj
-ET
-BT
-/F0 11 Tf
-227.810 133.595 Td
-(are) Tj
-ET
-BT
-/F0 11 Tf
-243.991 133.595 Td
-(reduced) Tj
-ET
-BT
-/F0 11 Tf
-281.556 133.595 Td
-(to) Tj
-ET
-BT
-/F0 11 Tf
-292.864 133.595 Td
-(thousands) Tj
-ET
-BT
-/F0 11 Tf
-339.614 133.595 Td
-(of) Tj
-ET
-BT
-/F0 11 Tf
-351.527 133.595 Td
-(meters,) Tj
-ET
-BT
-/F0 11 Tf
-386.353 133.595 Td
-(significantly) Tj
-ET
-BT
-/F0 11 Tf
-444.103 133.595 Td
-(improving) Tj
-ET
-BT
-/F0 11 Tf
-492.690 133.595 Td
-(rendering) Tj
-ET
-BT
-/F0 11 Tf
-87.274 118.206 Td
-(quality.) Tj
-ET
-BT
-/F0 11 Tf
-123.332 118.206 Td
-(The) Tj
-ET
-BT
-/F0 11 Tf
-143.187 118.206 Td
-(GeoOrigin) Tj
-ET
-BT
-/F0 11 Tf
-192.984 118.206 Td
-(can) Tj
-ET
-BT
-/F0 11 Tf
-211.002 118.206 Td
-(be) Tj
-ET
-BT
-/F0 11 Tf
-224.136 118.206 Td
-(explicitly) Tj
-ET
-BT
-/F0 11 Tf
-268.444 118.206 Td
-(specified) Tj
-ET
-BT
-/F0 11 Tf
-310.904 118.206 Td
-(with) Tj
-ET
-BT
-/F0 11 Tf
-333.212 118.206 Td
-(longitude,) Tj
-ET
-BT
-/F0 11 Tf
-380.270 118.206 Td
-(latitude,) Tj
-ET
-BT
-/F0 11 Tf
-418.770 118.206 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-437.404 118.206 Td
-(elevation) Tj
-ET
-BT
-/F0 11 Tf
-480.480 118.206 Td
-(values,) Tj
-ET
-BT
-/F0 11 Tf
-514.085 118.206 Td
-(or) Tj
-ET
-BT
-/F0 11 Tf
-87.274 102.817 Td
-(automatically) Tj
-ET
-BT
-/F0 11 Tf
-149.908 102.817 Td
-(computed) Tj
-ET
-BT
-/F0 11 Tf
-196.042 102.817 Td
+177.386 164.373 Td
 (from) Tj
 ET
 BT
 /F0 11 Tf
-220.176 102.817 Td
+201.520 164.373 Td
+(a) Tj
+ET
+BT
+/F0 11 Tf
+209.154 164.373 Td
+(local) Tj
+ET
+BT
+/F0 11 Tf
+233.288 164.373 Td
+(origin) Tj
+ET
+BT
+/F0 11 Tf
+262.317 164.373 Td
+(point) Tj
+ET
+BT
+/F0 11 Tf
+287.683 164.373 Td
+(rather) Tj
+ET
+BT
+/F0 11 Tf
+316.085 164.373 Td
+(than) Tj
+ET
+BT
+/F0 11 Tf
+337.777 164.373 Td
+(from) Tj
+ET
+BT
+/F0 11 Tf
+361.911 164.373 Td
+(Earth's) Tj
+ET
+BT
+/F0 11 Tf
+396.429 164.373 Td
+(center.) Tj
+ET
+BT
+/F0 11 Tf
+428.802 164.373 Td
+(ECEF) Tj
+ET
+BT
+/F0 11 Tf
+458.447 164.373 Td
+(coordinates) Tj
+ET
+BT
+/F0 11 Tf
+87.274 148.984 Td
+(typically) Tj
+ET
+BT
+/F0 11 Tf
+128.524 148.984 Td
+(have) Tj
+ET
+BT
+/F0 11 Tf
+152.042 148.984 Td
+(magnitudes) Tj
+ET
+BT
+/F0 11 Tf
+205.513 148.984 Td
+(on) Tj
+ET
+BT
+/F0 11 Tf
+219.263 148.984 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-236.368 102.817 Td
-(grid's) Tj
+235.455 148.984 Td
+(order) Tj
 ET
 BT
 /F0 11 Tf
-264.781 102.817 Td
-(geographic) Tj
+261.415 148.984 Td
+(of) Tj
 ET
 BT
 /F0 11 Tf
-316.404 102.817 Td
-(center) Tj
+273.328 148.984 Td
+(millions) Tj
 ET
 BT
 /F0 11 Tf
-346.027 102.817 Td
-(and) Tj
+312.147 148.984 Td
+(of) Tj
 ET
 BT
 /F0 11 Tf
-364.661 102.817 Td
-(mean) Tj
+324.060 148.984 Td
+(meters,) Tj
 ET
 BT
 /F0 11 Tf
-391.237 102.817 Td
-(altitude.) Tj
+358.886 148.984 Td
+(which) Tj
 ET
 BT
 /F0 11 Tf
-429.737 102.817 Td
-(When) Tj
+388.520 148.984 Td
+(can) Tj
 ET
 BT
 /F0 11 Tf
-458.755 102.817 Td
-(no) Tj
+406.538 148.984 Td
+(cause) Tj
 ET
 BT
 /F0 11 Tf
-472.505 102.817 Td
+433.719 148.984 Td
+(precision) Tj
+ET
+BT
+/F0 11 Tf
+476.795 148.984 Td
+(loss) Tj
+ET
+BT
+/F0 11 Tf
+496.661 148.984 Td
+(when) Tj
+ET
+BT
+/F0 11 Tf
+87.274 133.595 Td
+(using) Tj
+ET
+BT
+/F0 11 Tf
+113.861 133.595 Td
+(GPU) Tj
+ET
+BT
+/F0 11 Tf
+138.611 133.595 Td
+(single-precision) Tj
+ET
+BT
+/F0 11 Tf
+211.629 133.595 Td
+(floating) Tj
+ET
+BT
+/F0 11 Tf
+248.600 133.595 Td
+(point) Tj
+ET
+BT
+/F0 11 Tf
+273.966 133.595 Td
+(arithmetic.) Tj
+ET
+BT
+/F0 11 Tf
+324.071 133.595 Td
+(By) Tj
+ET
+BT
+/F0 11 Tf
+339.658 133.595 Td
+(specifying) Tj
+ET
+BT
+/F0 11 Tf
+388.234 133.595 Td
+(a) Tj
+ET
+BT
+/F0 11 Tf
+395.868 133.595 Td
 (GeoOrigin) Tj
 ET
 BT
 /F0 11 Tf
-522.302 102.817 Td
-(is) Tj
+445.665 133.595 Td
+(near) Tj
+ET
+BT
+/F0 11 Tf
+467.346 133.595 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+483.538 133.595 Td
+(area) Tj
+ET
+BT
+/F0 11 Tf
+504.603 133.595 Td
+(of) Tj
+ET
+BT
+/F0 11 Tf
+87.274 118.206 Td
+(interest,) Tj
+ET
+BT
+/F0 11 Tf
+125.158 118.206 Td
+(coordinate) Tj
+ET
+BT
+/F0 11 Tf
+174.339 118.206 Td
+(magnitudes) Tj
+ET
+BT
+/F0 11 Tf
+227.810 118.206 Td
+(are) Tj
+ET
+BT
+/F0 11 Tf
+243.991 118.206 Td
+(reduced) Tj
+ET
+BT
+/F0 11 Tf
+281.556 118.206 Td
+(to) Tj
+ET
+BT
+/F0 11 Tf
+292.864 118.206 Td
+(thousands) Tj
+ET
+BT
+/F0 11 Tf
+339.614 118.206 Td
+(of) Tj
+ET
+BT
+/F0 11 Tf
+351.527 118.206 Td
+(meters,) Tj
+ET
+BT
+/F0 11 Tf
+386.353 118.206 Td
+(significantly) Tj
+ET
+BT
+/F0 11 Tf
+444.103 118.206 Td
+(improving) Tj
+ET
+BT
+/F0 11 Tf
+492.690 118.206 Td
+(rendering) Tj
+ET
+BT
+/F0 11 Tf
+87.274 102.817 Td
+(quality.) Tj
+ET
+BT
+/F0 11 Tf
+123.332 102.817 Td
+(The) Tj
+ET
+BT
+/F0 11 Tf
+143.187 102.817 Td
+(GeoOrigin) Tj
+ET
+BT
+/F0 11 Tf
+192.984 102.817 Td
+(can) Tj
+ET
+BT
+/F0 11 Tf
+211.002 102.817 Td
+(be) Tj
+ET
+BT
+/F0 11 Tf
+224.136 102.817 Td
+(explicitly) Tj
+ET
+BT
+/F0 11 Tf
+268.444 102.817 Td
+(specified) Tj
+ET
+BT
+/F0 11 Tf
+310.904 102.817 Td
+(with) Tj
+ET
+BT
+/F0 11 Tf
+333.212 102.817 Td
+(longitude,) Tj
+ET
+BT
+/F0 11 Tf
+380.270 102.817 Td
+(latitude,) Tj
+ET
+BT
+/F0 11 Tf
+418.770 102.817 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+437.404 102.817 Td
+(elevation) Tj
+ET
+BT
+/F0 11 Tf
+480.480 102.817 Td
+(values,) Tj
+ET
+BT
+/F0 11 Tf
+514.085 102.817 Td
+(or) Tj
 ET
 /F0 11 Tf
 BT
@@ -2435,7 +2382,7 @@ ET
 endstream
 endobj
 8 0 obj
-22062
+21560
 endobj
 9 0 obj
 <<
@@ -2464,890 +2411,872 @@ stream
 BT
 /F0 11 Tf
 87.274 702.988 Td
-(specified,) Tj
+(automatically) Tj
 ET
 BT
 /F0 11 Tf
-132.484 702.988 Td
-(vertices) Tj
+149.908 702.988 Td
+(computed) Tj
 ET
 BT
 /F0 11 Tf
-169.444 702.988 Td
-(use) Tj
+196.042 702.988 Td
+(from) Tj
 ET
 BT
 /F0 11 Tf
-186.857 702.988 Td
+220.176 702.988 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-203.049 702.988 Td
+236.368 702.988 Td
+(grid's) Tj
+ET
+BT
+/F0 11 Tf
+264.781 702.988 Td
+(geographic) Tj
+ET
+BT
+/F0 11 Tf
+316.404 702.988 Td
+(center) Tj
+ET
+BT
+/F0 11 Tf
+346.027 702.988 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+364.661 702.988 Td
+(mean) Tj
+ET
+BT
+/F0 11 Tf
+391.237 702.988 Td
+(altitude.) Tj
+ET
+BT
+/F0 11 Tf
+429.737 702.988 Td
+(When) Tj
+ET
+BT
+/F0 11 Tf
+458.755 702.988 Td
+(no) Tj
+ET
+BT
+/F0 11 Tf
+472.505 702.988 Td
+(GeoOrigin) Tj
+ET
+BT
+/F0 11 Tf
+522.302 702.988 Td
+(is) Tj
+ET
+BT
+/F0 11 Tf
+87.274 687.599 Td
+(specified,) Tj
+ET
+BT
+/F0 11 Tf
+132.484 687.599 Td
+(vertices) Tj
+ET
+BT
+/F0 11 Tf
+169.444 687.599 Td
+(use) Tj
+ET
+BT
+/F0 11 Tf
+186.857 687.599 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+203.049 687.599 Td
 (full) Tj
 ET
 BT
 /F0 11 Tf
-221.078 702.988 Td
+221.078 687.599 Td
 (ECEF) Tj
 ET
 BT
 /F0 11 Tf
-250.723 702.988 Td
+250.723 687.599 Td
 (coordinates.) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-68.024 656.821 Td
+68.024 641.432 Td
 (MB-SYSTEM) Tj
 ET
 BT
 /F1 11 Tf
-137.390 656.821 Td
+137.390 641.432 Td
 (AUTHORSHIP) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-87.274 641.432 Td
+87.274 626.043 Td
 (David) Tj
 ET
 BT
 /F0 11 Tf
-116.908 641.432 Td
+116.908 626.043 Td
 (W.) Tj
 ET
 BT
 /F0 11 Tf
-132.792 641.432 Td
+132.792 626.043 Td
 (Caress) Tj
 ET
 BT
 /F0 11 Tf
-164.868 641.432 Td
+164.868 626.043 Td
 (-) Tj
 ET
 BT
 /F0 11 Tf
-171.281 641.432 Td
+171.281 626.043 Td
 (Monterey) Tj
 ET
 BT
 /F0 11 Tf
-216.799 641.432 Td
+216.799 626.043 Td
 (Bay) Tj
 ET
 BT
 /F0 11 Tf
-237.270 641.432 Td
+237.270 626.043 Td
 (Aquarium) Tj
 ET
 BT
 /F0 11 Tf
-284.625 641.432 Td
+284.625 626.043 Td
 (Research) Tj
 ET
 BT
 /F0 11 Tf
-327.690 641.432 Td
+327.690 626.043 Td
 (Institute) Tj
 ET
 BT
 /F0 11 Tf
-87.274 626.043 Td
+87.274 610.654 Td
 (Dale) Tj
 ET
 BT
 /F0 11 Tf
-110.792 626.043 Td
+110.792 610.654 Td
 (N.) Tj
 ET
 BT
 /F0 11 Tf
-124.234 626.043 Td
+124.234 610.654 Td
 (Chayes) Tj
 ET
 BT
 /F0 11 Tf
-159.368 626.043 Td
+159.368 610.654 Td
 (-) Tj
 ET
 BT
 /F0 11 Tf
-165.781 626.043 Td
+165.781 610.654 Td
 (Center) Tj
 ET
 BT
 /F0 11 Tf
-197.857 626.043 Td
+197.857 610.654 Td
 (for) Tj
 ET
 BT
 /F0 11 Tf
-213.433 626.043 Td
+213.433 610.654 Td
 (Coastal) Tj
 ET
 BT
 /F0 11 Tf
-249.183 626.043 Td
+249.183 610.654 Td
 (and) Tj
 ET
 BT
 /F0 11 Tf
-267.817 626.043 Td
+267.817 610.654 Td
 (Ocean) Tj
 ET
 BT
 /F0 11 Tf
-298.661 626.043 Td
+298.661 610.654 Td
 (Mapping,) Tj
 ET
 BT
 /F0 11 Tf
-343.882 626.043 Td
+343.882 610.654 Td
 (University) Tj
 ET
 BT
 /F0 11 Tf
-393.074 626.043 Td
+393.074 610.654 Td
 (of) Tj
 ET
 BT
 /F0 11 Tf
-404.987 626.043 Td
+404.987 610.654 Td
 (New) Tj
 ET
 BT
 /F0 11 Tf
-428.505 626.043 Td
+428.505 610.654 Td
 (Hampshire) Tj
 ET
 BT
 /F0 11 Tf
-87.274 610.654 Td
+87.274 595.265 Td
 (Christian) Tj
 ET
 BT
 /F0 11 Tf
-130.361 610.654 Td
+130.361 595.265 Td
 (dos) Tj
 ET
 BT
 /F0 11 Tf
-148.390 610.654 Td
+148.390 595.265 Td
 (Santos) Tj
 ET
 BT
 /F0 11 Tf
-180.477 610.654 Td
+180.477 595.265 Td
 (Ferreira) Tj
 ET
 BT
 /F0 11 Tf
-218.042 610.654 Td
+218.042 595.265 Td
 (-) Tj
 ET
 BT
 /F0 11 Tf
-224.455 610.654 Td
+224.455 595.265 Td
 (MARUM,) Tj
 ET
 BT
 /F0 11 Tf
-272.734 610.654 Td
+272.734 595.265 Td
 (University) Tj
 ET
 BT
 /F0 11 Tf
-321.926 610.654 Td
+321.926 595.265 Td
 (of) Tj
 ET
 BT
 /F0 11 Tf
-333.839 610.654 Td
+333.839 595.265 Td
 (Bremen) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-68.024 564.487 Td
+68.024 549.098 Td
 (MBGRD2GLTF) Tj
 ET
 BT
 /F1 11 Tf
-148.390 564.487 Td
+148.390 549.098 Td
 (AUTHORSHIP) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-87.274 549.098 Td
+87.274 533.709 Td
 (The) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-107.129 549.098 Td
+107.129 533.709 Td
 (mbgrd2gltf) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-163.042 549.098 Td
+163.042 533.709 Td
 (program) Tj
 ET
 BT
 /F0 11 Tf
-203.060 549.098 Td
+203.060 533.709 Td
 (was) Tj
 ET
 BT
 /F0 11 Tf
-222.915 549.098 Td
+222.915 533.709 Td
 (contributed) Tj
 ET
 BT
 /F0 11 Tf
-275.770 549.098 Td
+275.770 533.709 Td
 (to) Tj
 ET
 BT
 /F0 11 Tf
-287.078 549.098 Td
+287.078 533.709 Td
 (MB-System) Tj
 ET
 BT
 /F0 11 Tf
-343.002 549.098 Td
+343.002 533.709 Td
 (by) Tj
 ET
 BT
 /F0 11 Tf
-356.752 549.098 Td
+356.752 533.709 Td
 (California) Tj
 ET
 BT
 /F0 11 Tf
-404.107 549.098 Td
+404.107 533.709 Td
 (State) Tj
 ET
 BT
 /F0 11 Tf
-428.857 549.098 Td
+428.857 533.709 Td
 (University) Tj
 ET
 BT
 /F0 11 Tf
-478.049 549.098 Td
+478.049 533.709 Td
 (Monterey) Tj
 ET
 BT
 /F0 11 Tf
-523.567 549.098 Td
+523.567 533.709 Td
 (Bay) Tj
-ET
-BT
-/F0 11 Tf
-87.274 533.709 Td
-(\(CSUMB\)) Tj
-ET
-BT
-/F0 11 Tf
-135.861 533.709 Td
-(Capstone) Tj
-ET
-BT
-/F0 11 Tf
-179.553 533.709 Td
-(teams.) Tj
-ET
-BT
-/F0 11 Tf
-210.716 533.709 Td
-(The) Tj
-ET
-BT
-/F0 11 Tf
-230.571 533.709 Td
-(original) Tj
-ET
-BT
-/F0 11 Tf
-267.542 533.709 Td
-(gltf-generator) Tj
-ET
-BT
-/F0 11 Tf
-330.770 533.709 Td
-(program) Tj
-ET
-BT
-/F0 11 Tf
-370.788 533.709 Td
-(was) Tj
-ET
-BT
-/F0 11 Tf
-390.643 533.709 Td
-(created) Tj
-ET
-BT
-/F0 11 Tf
-425.150 533.709 Td
-(for) Tj
-ET
-BT
-/F0 11 Tf
-440.726 533.709 Td
-(STOQS) Tj
-ET
-BT
-/F0 11 Tf
-478.313 533.709 Td
-(starting) Tj
-ET
-BT
-/F0 11 Tf
-514.063 533.709 Td
-(in) Tj
-ET
-BT
-/F0 11 Tf
-525.371 533.709 Td
-(Fall) Tj
 ET
 BT
 /F0 11 Tf
 87.274 518.320 Td
+(\(CSUMB\)) Tj
+ET
+BT
+/F0 11 Tf
+135.861 518.320 Td
+(Capstone) Tj
+ET
+BT
+/F0 11 Tf
+179.553 518.320 Td
+(teams.) Tj
+ET
+BT
+/F0 11 Tf
+210.716 518.320 Td
+(The) Tj
+ET
+BT
+/F0 11 Tf
+230.571 518.320 Td
+(original) Tj
+ET
+BT
+/F0 11 Tf
+267.542 518.320 Td
+(gltf-generator) Tj
+ET
+BT
+/F0 11 Tf
+330.770 518.320 Td
+(program) Tj
+ET
+BT
+/F0 11 Tf
+370.788 518.320 Td
+(was) Tj
+ET
+BT
+/F0 11 Tf
+390.643 518.320 Td
+(created) Tj
+ET
+BT
+/F0 11 Tf
+425.150 518.320 Td
+(for) Tj
+ET
+BT
+/F0 11 Tf
+440.726 518.320 Td
+(STOQS) Tj
+ET
+BT
+/F0 11 Tf
+478.313 518.320 Td
+(starting) Tj
+ET
+BT
+/F0 11 Tf
+514.063 518.320 Td
+(in) Tj
+ET
+BT
+/F0 11 Tf
+525.371 518.320 Td
+(Fall) Tj
+ET
+BT
+/F0 11 Tf
+87.274 502.931 Td
 (2020:) Tj
 ET
 BT
 /F0 11 Tf
-87.274 487.542 Td
+87.274 472.153 Td
 (Fall) Tj
 ET
 BT
 /F0 11 Tf
-107.140 487.542 Td
+107.140 472.153 Td
 (2020) Tj
 ET
 BT
 /F0 11 Tf
-131.890 487.542 Td
+131.890 472.153 Td
 (Team) Tj
 ET
 BT
 /F0 11 Tf
-159.687 487.542 Td
+159.687 472.153 Td
 (\(STOQS) Tj
 ET
 BT
 /F0 11 Tf
-200.937 487.542 Td
+200.937 472.153 Td
 (gltf-generator\):) Tj
 ET
 BT
 /F0 11 Tf
-87.274 472.153 Td
+87.274 456.764 Td
 (Edward) Tj
 ET
 BT
 /F0 11 Tf
-124.234 472.153 Td
+124.234 456.764 Td
 (Montoya,) Tj
 ET
 BT
 /F0 11 Tf
-169.455 472.153 Td
+169.455 456.764 Td
 (Sean) Tj
 ET
 BT
 /F0 11 Tf
-193.589 472.153 Td
+193.589 456.764 Td
 (Towne) Tj
 ET
 BT
 /F0 11 Tf
-87.274 441.375 Td
+87.274 425.986 Td
 (Fall) Tj
 ET
 BT
 /F0 11 Tf
-107.140 441.375 Td
+107.140 425.986 Td
 (2021) Tj
 ET
 BT
 /F0 11 Tf
-131.890 441.375 Td
+131.890 425.986 Td
 (Team) Tj
 ET
 BT
 /F0 11 Tf
-159.687 441.375 Td
+159.687 425.986 Td
 (\(STOQS) Tj
 ET
 BT
 /F0 11 Tf
-200.937 441.375 Td
+200.937 425.986 Td
 (gltf-generator\):) Tj
 ET
 BT
 /F0 11 Tf
-87.274 425.986 Td
+87.274 410.597 Td
 (Isaac) Tj
 ET
 BT
 /F0 11 Tf
-112.618 425.986 Td
+112.618 410.597 Td
 (Hirzel,) Tj
 ET
 BT
 /F0 11 Tf
-145.607 425.986 Td
+145.607 410.597 Td
 (Oliver) Tj
 ET
 BT
 /F0 11 Tf
-176.462 425.986 Td
+176.462 410.597 Td
 (Stringer,) Tj
 ET
 BT
 /F0 11 Tf
-217.404 425.986 Td
+217.404 410.597 Td
 (Zachary) Tj
 ET
 BT
 /F0 11 Tf
-256.190 425.986 Td
+256.190 410.597 Td
 (Abbett) Tj
 ET
 BT
 /F0 11 Tf
-87.274 395.208 Td
+87.274 379.819 Td
 (Spring) Tj
 ET
 BT
 /F0 11 Tf
-119.361 395.208 Td
+119.361 379.819 Td
 (2023) Tj
 ET
 BT
 /F0 11 Tf
-144.111 395.208 Td
+144.111 379.819 Td
 (Team) Tj
 ET
 BT
 /F0 11 Tf
-171.908 395.208 Td
+171.908 379.819 Td
 (\(MB-System) Tj
 ET
 BT
 /F0 11 Tf
-231.495 395.208 Td
+231.495 379.819 Td
 (integration\):) Tj
 ET
 BT
 /F0 11 Tf
-87.274 379.819 Td
+87.274 364.430 Td
 (Nicolas) Tj
 ET
 BT
 /F0 11 Tf
-123.629 379.819 Td
+123.629 364.430 Td
 (Porras) Tj
 ET
 BT
 /F0 11 Tf
-154.484 379.819 Td
+154.484 364.430 Td
 (Falconio,) Tj
 ET
 BT
 /F0 11 Tf
-198.484 379.819 Td
+198.484 364.430 Td
 (Kyle) Tj
 ET
 BT
 /F0 11 Tf
-222.618 379.819 Td
+222.618 364.430 Td
 (Dowling,) Tj
 ET
 BT
 /F0 11 Tf
-266.618 379.819 Td
+266.618 364.430 Td
 (Jesse) Tj
 ET
 BT
 /F0 11 Tf
-291.973 379.819 Td
+291.973 364.430 Td
 (Benavides,) Tj
 ET
 BT
 /F0 11 Tf
-343.299 379.819 Td
+343.299 364.430 Td
 (Julian) Tj
 ET
 BT
 /F0 11 Tf
-372.328 379.819 Td
+372.328 364.430 Td
 (Fortin) Tj
 ET
 BT
 /F0 11 Tf
-87.274 349.041 Td
+87.274 333.652 Td
 (Spring) Tj
 ET
 BT
 /F0 11 Tf
-119.361 349.041 Td
+119.361 333.652 Td
 (2024) Tj
 ET
 BT
 /F0 11 Tf
-144.111 349.041 Td
+144.111 333.652 Td
 (Team) Tj
 ET
 BT
 /F0 11 Tf
-171.908 349.041 Td
+171.908 333.652 Td
 (\(Draco) Tj
 ET
 BT
 /F0 11 Tf
-205.194 349.041 Td
+205.194 333.652 Td
 (compression\):) Tj
 ET
 BT
 /F0 11 Tf
-87.274 333.652 Td
+87.274 318.263 Td
 (Ivan) Tj
 ET
 BT
 /F0 11 Tf
-109.571 333.652 Td
+109.571 318.263 Td
 (Martinez,) Tj
 ET
 BT
 /F0 11 Tf
-154.781 333.652 Td
+154.781 318.263 Td
 (Steven) Tj
 ET
 BT
 /F0 11 Tf
-187.473 333.652 Td
+187.473 318.263 Td
 (Patrick,) Tj
 ET
 BT
 /F0 11 Tf
-224.136 333.652 Td
+224.136 318.263 Td
 (Varad) Tj
 ET
 BT
 /F0 11 Tf
-253.759 333.652 Td
+253.759 318.263 Td
 (Poddar,) Tj
 ET
 BT
 /F0 11 Tf
-290.422 333.652 Td
+290.422 318.263 Td
 (Aret) Tj
 ET
 BT
 /F0 11 Tf
-312.719 333.652 Td
+312.719 318.263 Td
 (Tinoco) Tj
 ET
 BT
 /F0 11 Tf
-87.274 302.874 Td
+87.274 287.485 Td
 (Fall) Tj
 ET
 BT
 /F0 11 Tf
-107.140 302.874 Td
+107.140 287.485 Td
 (2025) Tj
 ET
 BT
 /F0 11 Tf
-131.890 302.874 Td
+131.890 287.485 Td
 (Team) Tj
 ET
 BT
 /F0 11 Tf
-159.687 302.874 Td
+159.687 287.485 Td
 (\(mbgrd2gltf) Tj
 ET
 BT
 /F0 11 Tf
-215.600 302.874 Td
+215.600 287.485 Td
 (C++) Tj
 ET
 BT
 /F0 11 Tf
-238.095 302.874 Td
+238.095 287.485 Td
 (code) Tj
 ET
 BT
 /F0 11 Tf
-261.613 302.874 Td
+261.613 287.485 Td
 (refinements\):) Tj
 ET
 BT
 /F0 11 Tf
-87.274 287.485 Td
+87.274 272.096 Td
 (Miguel) Tj
 ET
 BT
 /F0 11 Tf
-121.803 287.485 Td
+121.803 272.096 Td
 (Gonzales,) Tj
 ET
 BT
 /F0 11 Tf
-168.234 287.485 Td
+168.234 272.096 Td
 (Eric) Tj
 ET
 BT
 /F0 11 Tf
-189.310 287.485 Td
+189.310 272.096 Td
 (Rios,) Tj
 ET
 BT
 /F0 11 Tf
-214.984 287.485 Td
+214.984 272.096 Td
 (Jonathan) Tj
 ET
 BT
 /F0 11 Tf
-256.839 287.485 Td
+256.839 272.096 Td
 (Ramirez-Fausto,) Tj
 ET
 BT
 /F0 11 Tf
-332.607 287.485 Td
+332.607 272.096 Td
 (Tanmay) Tj
 ET
 BT
 /F0 11 Tf
-371.404 287.485 Td
+371.404 272.096 Td
 (Zende) Tj
 ET
 BT
 /F0 11 Tf
-87.274 256.707 Td
+87.274 241.318 Td
 (Mentor:) Tj
 ET
 BT
 /F0 11 Tf
-125.466 256.707 Td
+125.466 241.318 Td
 (Mike) Tj
 ET
 BT
 /F0 11 Tf
-151.437 256.707 Td
+151.437 241.318 Td
 (McCann) Tj
 ET
 BT
 /F0 11 Tf
-192.071 256.707 Td
+192.071 241.318 Td
 (-) Tj
 ET
 BT
 /F0 11 Tf
-198.484 256.707 Td
+198.484 241.318 Td
 (Monterey) Tj
 ET
 BT
 /F0 11 Tf
-244.002 256.707 Td
+244.002 241.318 Td
 (Bay) Tj
 ET
 BT
 /F0 11 Tf
-264.473 256.707 Td
+264.473 241.318 Td
 (Aquarium) Tj
 ET
 BT
 /F0 11 Tf
-311.828 256.707 Td
+311.828 241.318 Td
 (Research) Tj
 ET
 BT
 /F0 11 Tf
-354.893 256.707 Td
+354.893 241.318 Td
 (Institute) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-68.024 210.540 Td
+68.024 195.151 Td
 (OPTIONS) Tj
 ET
 BT
 /F1 11 Tf
-87.274 195.151 Td
+87.274 179.762 Td
 (--input,) Tj
 ET
 BT
 /F1 11 Tf
-125.169 195.151 Td
+125.169 179.762 Td
 (-I) Tj
 ET
 /F2 11 Tf
 BT
 /F2 11 Tf
-106.524 179.762 Td
+106.524 164.373 Td
 (FILE) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-106.524 164.373 Td
+106.524 148.984 Td
 (Input) Tj
 ET
 BT
 /F0 11 Tf
-132.495 164.373 Td
+132.495 148.984 Td
 (GMT) Tj
 ET
 BT
 /F0 11 Tf
-159.687 164.373 Td
+159.687 148.984 Td
 (GRD) Tj
 ET
 BT
 /F0 11 Tf
-185.658 164.373 Td
+185.658 148.984 Td
 (format) Tj
 ET
 BT
 /F0 11 Tf
-217.734 164.373 Td
+217.734 148.984 Td
 (bathymetry) Tj
 ET
 BT
 /F0 11 Tf
-270.589 164.373 Td
+270.589 148.984 Td
 (grid) Tj
 ET
 BT
 /F0 11 Tf
-291.060 164.373 Td
+291.060 148.984 Td
 (file.) Tj
 ET
 BT
 /F0 11 Tf
-311.223 164.373 Td
+311.223 148.984 Td
 (This) Tj
 ET
 BT
 /F0 11 Tf
-333.531 164.373 Td
+333.531 148.984 Td
 (option) Tj
 ET
 BT
 /F0 11 Tf
-364.397 164.373 Td
+364.397 148.984 Td
 (is) Tj
 ET
 BT
 /F0 11 Tf
-374.484 164.373 Td
+374.484 148.984 Td
 (required.) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-87.274 118.206 Td
+87.274 102.817 Td
 (--no-binary) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-106.524 102.817 Td
-(Write) Tj
-ET
-BT
-/F0 11 Tf
-134.321 102.817 Td
-(text-based) Tj
-ET
-BT
-/F0 11 Tf
-182.281 102.817 Td
-(GLTF) Tj
-ET
-BT
-/F0 11 Tf
-212.531 102.817 Td
-(\(a) Tj
-ET
-/F2 11 Tf
-BT
-/F2 11 Tf
-223.828 102.817 Td
-(.gltf) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-244.002 102.817 Td
-(file) Tj
-ET
-BT
-/F0 11 Tf
-261.415 102.817 Td
-(of) Tj
-ET
-BT
-/F0 11 Tf
-273.328 102.817 Td
-(JSON) Tj
-ET
-BT
-/F0 11 Tf
-302.357 102.817 Td
-(with) Tj
-ET
-BT
-/F0 11 Tf
-324.665 102.817 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-340.857 102.817 Td
-(buffers) Tj
-ET
-BT
-/F0 11 Tf
-374.759 102.817 Td
-(embedded\)) Tj
-ET
-BT
-/F0 11 Tf
-426.382 102.817 Td
-(in) Tj
-ET
-BT
-/F0 11 Tf
-437.690 102.817 Td
-(place) Tj
-ET
-BT
-/F0 11 Tf
-463.650 102.817 Td
-(of) Tj
-ET
-BT
-/F0 11 Tf
-475.563 102.817 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-491.755 102.817 Td
-(binary) Tj
 ET
 /F0 11 Tf
 BT
@@ -3413,7 +3342,7 @@ ET
 endstream
 endobj
 12 0 obj
-8945
+8795
 endobj
 13 0 obj
 <<
@@ -3442,1801 +3371,1878 @@ stream
 BT
 /F0 11 Tf
 106.524 702.988 Td
+(Write) Tj
+ET
+BT
+/F0 11 Tf
+134.321 702.988 Td
+(text-based) Tj
+ET
+BT
+/F0 11 Tf
+182.281 702.988 Td
 (GLTF) Tj
 ET
 BT
 /F0 11 Tf
-136.774 702.988 Td
+212.531 702.988 Td
+(\(a) Tj
+ET
+/F2 11 Tf
+BT
+/F2 11 Tf
+223.828 702.988 Td
+(.gltf) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+244.002 702.988 Td
+(file) Tj
+ET
+BT
+/F0 11 Tf
+261.415 702.988 Td
+(of) Tj
+ET
+BT
+/F0 11 Tf
+273.328 702.988 Td
+(JSON) Tj
+ET
+BT
+/F0 11 Tf
+302.357 702.988 Td
+(with) Tj
+ET
+BT
+/F0 11 Tf
+324.665 702.988 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+340.857 702.988 Td
+(buffers) Tj
+ET
+BT
+/F0 11 Tf
+374.759 702.988 Td
+(embedded\)) Tj
+ET
+BT
+/F0 11 Tf
+426.382 702.988 Td
+(in) Tj
+ET
+BT
+/F0 11 Tf
+437.690 702.988 Td
+(place) Tj
+ET
+BT
+/F0 11 Tf
+463.650 702.988 Td
+(of) Tj
+ET
+BT
+/F0 11 Tf
+475.563 702.988 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+491.755 702.988 Td
+(binary) Tj
+ET
+BT
+/F0 11 Tf
+106.524 687.599 Td
+(GLTF) Tj
+ET
+BT
+/F0 11 Tf
+136.774 687.599 Td
 (\(GLB,) Tj
 ET
 BT
 /F0 11 Tf
-167.937 702.988 Td
+167.937 687.599 Td
 (a) Tj
 ET
 /F2 11 Tf
 BT
 /F2 11 Tf
-175.571 702.988 Td
+175.571 687.599 Td
 (.glb) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-195.129 702.988 Td
+195.129 687.599 Td
 (file\)) Tj
 ET
 BT
 /F0 11 Tf
-216.205 702.988 Td
+216.205 687.599 Td
 (that) Tj
 ET
 BT
 /F0 11 Tf
-235.455 702.988 Td
+235.455 687.599 Td
 (is) Tj
 ET
 BT
 /F0 11 Tf
-245.542 702.988 Td
+245.542 687.599 Td
 (written) Tj
 ET
 BT
 /F0 11 Tf
-279.455 702.988 Td
+279.455 687.599 Td
 (by) Tj
 ET
 BT
 /F0 11 Tf
-293.205 702.988 Td
+293.205 687.599 Td
 (default.) Tj
 ET
 BT
 /F0 11 Tf
-329.252 702.988 Td
+329.252 687.599 Td
 (Binary) Tj
 ET
 BT
 /F0 11 Tf
-361.944 702.988 Td
+361.944 687.599 Td
 (GLTF) Tj
 ET
 BT
 /F0 11 Tf
-392.194 702.988 Td
+392.194 687.599 Td
 (is) Tj
 ET
 BT
 /F0 11 Tf
-402.281 702.988 Td
+402.281 687.599 Td
 (more) Tj
 ET
 BT
 /F0 11 Tf
-427.636 702.988 Td
+427.636 687.599 Td
 (compact) Tj
 ET
 BT
 /F0 11 Tf
-467.654 702.988 Td
+467.654 687.599 Td
 (and) Tj
 ET
 BT
 /F0 11 Tf
-486.288 702.988 Td
+486.288 687.599 Td
 (typically) Tj
 ET
 BT
 /F0 11 Tf
-106.524 687.599 Td
+106.524 672.210 Td
 (loads) Tj
 ET
 BT
 /F0 11 Tf
-132.495 687.599 Td
+132.495 672.210 Td
 (faster.) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-162.426 687.599 Td
+162.426 672.210 Td
 (--binary) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-200.926 687.599 Td
+200.926 672.210 Td
 (,) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-206.426 687.599 Td
+206.426 672.210 Td
 (-B) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-220.176 687.599 Td
+220.176 672.210 Td
 (are) Tj
 ET
 BT
 /F0 11 Tf
-236.357 687.599 Td
+236.357 672.210 Td
 (still) Tj
 ET
 BT
 /F0 11 Tf
-255.618 687.599 Td
+255.618 672.210 Td
 (accepted) Tj
 ET
 BT
 /F0 11 Tf
-296.846 687.599 Td
+296.846 672.210 Td
 (and) Tj
 ET
 BT
 /F0 11 Tf
-315.480 687.599 Td
+315.480 672.210 Td
 (do) Tj
 ET
 BT
 /F0 11 Tf
-329.230 687.599 Td
+329.230 672.210 Td
 (nothing,) Tj
 ET
 BT
 /F0 11 Tf
-368.346 687.599 Td
+368.346 672.210 Td
 (since) Tj
 ET
 BT
 /F0 11 Tf
-393.701 687.599 Td
+393.701 672.210 Td
 (binary) Tj
 ET
 BT
 /F0 11 Tf
-424.556 687.599 Td
+424.556 672.210 Td
 (is) Tj
 ET
 BT
 /F0 11 Tf
-434.643 687.599 Td
+434.643 672.210 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-450.835 687.599 Td
+450.835 672.210 Td
 (default.) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-87.274 641.432 Td
+87.274 626.043 Td
 (--output,) Tj
 ET
 BT
 /F1 11 Tf
-131.274 641.432 Td
+131.274 626.043 Td
 (-O) Tj
 ET
 /F2 11 Tf
 BT
 /F2 11 Tf
-106.524 626.043 Td
+106.524 610.654 Td
 (ROOT) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-106.524 610.654 Td
+106.524 595.265 Td
 (Specify) Tj
 ET
 BT
 /F0 11 Tf
-142.879 610.654 Td
+142.879 595.265 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-159.071 610.654 Td
+159.071 595.265 Td
 (output) Tj
 ET
 BT
 /F0 11 Tf
-189.937 610.654 Td
+189.937 595.265 Td
 (file) Tj
 ET
 BT
 /F0 11 Tf
-207.350 610.654 Td
+207.350 595.265 Td
 (root.) Tj
 ET
 BT
 /F0 11 Tf
-230.571 610.654 Td
+230.571 595.265 Td
 (The) Tj
 ET
 BT
 /F0 11 Tf
-250.426 610.654 Td
+250.426 595.265 Td
 (appropriate) Tj
 ET
 BT
 /F0 11 Tf
-303.270 610.654 Td
+303.270 595.265 Td
 (file) Tj
 ET
 BT
 /F0 11 Tf
-320.683 610.654 Td
+320.683 595.265 Td
 (extension) Tj
 ET
 BT
 /F0 11 Tf
-365.596 610.654 Td
+365.596 595.265 Td
 (\(.gltf) Tj
 ET
 BT
 /F0 11 Tf
-390.038 610.654 Td
+390.038 595.265 Td
 (or) Tj
 ET
 BT
 /F0 11 Tf
-401.951 610.654 Td
+401.951 595.265 Td
 (.glb\)) Tj
 ET
 BT
 /F0 11 Tf
-425.172 610.654 Td
+425.172 595.265 Td
 (will) Tj
 ET
 BT
 /F0 11 Tf
-445.038 610.654 Td
+445.038 595.265 Td
 (be) Tj
 ET
 BT
 /F0 11 Tf
-458.172 610.654 Td
+458.172 595.265 Td
 (appended) Tj
 ET
 BT
 /F0 11 Tf
-106.524 595.265 Td
+106.524 579.876 Td
 (automatically.) Tj
 ET
 BT
 /F0 11 Tf
-171.908 595.265 Td
+171.908 579.876 Td
 (Default:) Tj
 ET
 BT
 /F0 11 Tf
-210.705 595.265 Td
+210.705 579.876 Td
 (input) Tj
 ET
 BT
 /F0 11 Tf
-236.071 595.265 Td
+236.071 579.876 Td
 (file) Tj
 ET
 BT
 /F0 11 Tf
-253.484 595.265 Td
+253.484 579.876 Td
 (basename) Tj
 ET
 BT
 /F0 11 Tf
-299.607 595.265 Td
+299.607 579.876 Td
 (in) Tj
 ET
 BT
 /F0 11 Tf
-310.915 595.265 Td
+310.915 579.876 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-327.107 595.265 Td
+327.107 579.876 Td
 (same) Tj
 ET
 BT
 /F0 11 Tf
-352.462 595.265 Td
+352.462 579.876 Td
 (directory.) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-87.274 549.098 Td
+87.274 533.709 Td
 (--exaggeration,) Tj
 ET
 BT
 /F1 11 Tf
-160.589 549.098 Td
+160.589 533.709 Td
 (-E) Tj
 ET
 /F2 11 Tf
 BT
 /F2 11 Tf
-106.524 533.709 Td
+106.524 518.320 Td
 (NUM) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-106.524 518.320 Td
+106.524 502.931 Td
 (Specify) Tj
 ET
 BT
 /F0 11 Tf
-142.879 518.320 Td
+142.879 502.931 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-159.071 518.320 Td
+159.071 502.931 Td
 (vertical) Tj
 ET
 BT
 /F0 11 Tf
-194.810 518.320 Td
+194.810 502.931 Td
 (exaggeration) Tj
 ET
 BT
 /F0 11 Tf
-254.375 518.320 Td
+254.375 502.931 Td
 (factor) Tj
 ET
 BT
 /F0 11 Tf
-282.777 518.320 Td
+282.777 502.931 Td
 (as) Tj
 ET
 BT
 /F0 11 Tf
-294.690 518.320 Td
+294.690 502.931 Td
 (a) Tj
 ET
 BT
 /F0 11 Tf
-302.324 518.320 Td
+302.324 502.931 Td
 (decimal) Tj
 ET
 BT
 /F0 11 Tf
-339.900 518.320 Td
+339.900 502.931 Td
 (number.) Tj
 ET
 BT
 /F0 11 Tf
-379.005 518.320 Td
+379.005 502.931 Td
 (The) Tj
 ET
 BT
 /F0 11 Tf
-398.860 518.320 Td
+398.860 502.931 Td
 (relief) Tj
 ET
 BT
 /F0 11 Tf
-424.820 518.320 Td
+424.820 502.931 Td
 (is) Tj
 ET
 BT
 /F0 11 Tf
-434.907 518.320 Td
+434.907 502.931 Td
 (scaled) Tj
 ET
 BT
 /F0 11 Tf
-465.146 518.320 Td
+465.146 502.931 Td
 (about) Tj
 ET
 BT
 /F0 11 Tf
-492.338 518.320 Td
+492.338 502.931 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-508.530 518.320 Td
+508.530 502.931 Td
 (mean) Tj
-ET
-BT
-/F0 11 Tf
-106.524 502.931 Td
-(altitude) Tj
-ET
-BT
-/F0 11 Tf
-142.274 502.931 Td
-(of) Tj
-ET
-BT
-/F0 11 Tf
-154.187 502.931 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-170.379 502.931 Td
-(grid,) Tj
-ET
-BT
-/F0 11 Tf
-193.600 502.931 Td
-(so) Tj
-ET
-BT
-/F0 11 Tf
-206.129 502.931 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-222.321 502.931 Td
-(model) Tj
-ET
-BT
-/F0 11 Tf
-252.571 502.931 Td
-(stays) Tj
-ET
-BT
-/F0 11 Tf
-277.321 502.931 Td
-(in) Tj
-ET
-BT
-/F0 11 Tf
-288.629 502.931 Td
-(place) Tj
-ET
-BT
-/F0 11 Tf
-314.589 502.931 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-333.223 502.931 Td
-(each) Tj
-ET
-BT
-/F0 11 Tf
-356.125 502.931 Td
-(altitude's) Tj
-ET
-BT
-/F0 11 Tf
-399.817 502.931 Td
-(distance) Tj
-ET
-BT
-/F0 11 Tf
-438.614 502.931 Td
-(from) Tj
-ET
-BT
-/F0 11 Tf
-462.748 502.931 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-478.940 502.931 Td
-(mean) Tj
-ET
-BT
-/F0 11 Tf
-505.516 502.931 Td
-(is) Tj
 ET
 BT
 /F0 11 Tf
 106.524 487.542 Td
-(multiplied) Tj
+(altitude) Tj
 ET
 BT
 /F0 11 Tf
-154.506 487.542 Td
-(by) Tj
-ET
-BT
-/F0 11 Tf
-168.256 487.542 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-184.448 487.542 Td
-(factor.) Tj
-ET
-BT
-/F0 11 Tf
-215.600 487.542 Td
-(This) Tj
-ET
-BT
-/F0 11 Tf
-237.908 487.542 Td
-(can) Tj
-ET
-BT
-/F0 11 Tf
-255.926 487.542 Td
-(enhance) Tj
-ET
-BT
-/F0 11 Tf
-294.712 487.542 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-310.904 487.542 Td
-(visibility) Tj
-ET
-BT
-/F0 11 Tf
-352.781 487.542 Td
+142.274 487.542 Td
 (of) Tj
 ET
 BT
 /F0 11 Tf
-364.694 487.542 Td
-(topographic) Tj
-ET
-BT
-/F0 11 Tf
-419.991 487.542 Td
-(features.) Tj
-ET
-BT
-/F0 11 Tf
-460.306 487.542 Td
-(The) Tj
-ET
-BT
-/F0 11 Tf
-480.161 487.542 Td
-(result) Tj
-ET
-BT
-/F0 11 Tf
-507.353 487.542 Td
-(does) Tj
-ET
-BT
-/F0 11 Tf
-106.524 472.153 Td
-(not) Tj
-ET
-BT
-/F0 11 Tf
-123.332 472.153 Td
-(depend) Tj
-ET
-BT
-/F0 11 Tf
-157.850 472.153 Td
-(on) Tj
-ET
-BT
-/F0 11 Tf
-171.600 472.153 Td
+154.187 487.542 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-187.792 472.153 Td
+170.379 487.542 Td
+(grid,) Tj
+ET
+BT
+/F0 11 Tf
+193.600 487.542 Td
+(so) Tj
+ET
+BT
+/F0 11 Tf
+206.129 487.542 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+222.321 487.542 Td
+(model) Tj
+ET
+BT
+/F0 11 Tf
+252.571 487.542 Td
+(stays) Tj
+ET
+BT
+/F0 11 Tf
+277.321 487.542 Td
+(in) Tj
+ET
+BT
+/F0 11 Tf
+288.629 487.542 Td
+(place) Tj
+ET
+BT
+/F0 11 Tf
+314.589 487.542 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+333.223 487.542 Td
+(each) Tj
+ET
+BT
+/F0 11 Tf
+356.125 487.542 Td
+(altitude's) Tj
+ET
+BT
+/F0 11 Tf
+399.817 487.542 Td
+(distance) Tj
+ET
+BT
+/F0 11 Tf
+438.614 487.542 Td
+(from) Tj
+ET
+BT
+/F0 11 Tf
+462.748 487.542 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+478.940 487.542 Td
+(mean) Tj
+ET
+BT
+/F0 11 Tf
+505.516 487.542 Td
+(is) Tj
+ET
+BT
+/F0 11 Tf
+106.524 472.153 Td
+(multiplied) Tj
+ET
+BT
+/F0 11 Tf
+154.506 472.153 Td
+(by) Tj
+ET
+BT
+/F0 11 Tf
+168.256 472.153 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+184.448 472.153 Td
+(factor.) Tj
+ET
+BT
+/F0 11 Tf
+215.600 472.153 Td
+(This) Tj
+ET
+BT
+/F0 11 Tf
+237.908 472.153 Td
+(can) Tj
+ET
+BT
+/F0 11 Tf
+255.926 472.153 Td
+(enhance) Tj
+ET
+BT
+/F0 11 Tf
+294.712 472.153 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+310.904 472.153 Td
+(visibility) Tj
+ET
+BT
+/F0 11 Tf
+352.781 472.153 Td
+(of) Tj
+ET
+BT
+/F0 11 Tf
+364.694 472.153 Td
+(topographic) Tj
+ET
+BT
+/F0 11 Tf
+419.991 472.153 Td
+(features.) Tj
+ET
+BT
+/F0 11 Tf
+460.306 472.153 Td
+(The) Tj
+ET
+BT
+/F0 11 Tf
+480.161 472.153 Td
+(result) Tj
+ET
+BT
+/F0 11 Tf
+507.353 472.153 Td
+(does) Tj
+ET
+BT
+/F0 11 Tf
+106.524 456.764 Td
+(not) Tj
+ET
+BT
+/F0 11 Tf
+123.332 456.764 Td
+(depend) Tj
+ET
+BT
+/F0 11 Tf
+157.850 456.764 Td
+(on) Tj
+ET
+BT
+/F0 11 Tf
+171.600 456.764 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+187.792 456.764 Td
 (GeoOrigin.) Tj
 ET
 BT
 /F0 11 Tf
-240.339 472.153 Td
+240.339 456.764 Td
 (Default:) Tj
 ET
 BT
 /F0 11 Tf
-279.136 472.153 Td
+279.136 456.764 Td
 (1.0) Tj
 ET
 BT
 /F0 11 Tf
-295.636 472.153 Td
+295.636 456.764 Td
 (\(no) Tj
 ET
 BT
 /F0 11 Tf
-313.049 472.153 Td
+313.049 456.764 Td
 (exaggeration\).) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-87.274 425.986 Td
+87.274 410.597 Td
 (--geoorigin[=) Tj
 ET
 /F2 11 Tf
 BT
 /F2 11 Tf
-148.533 425.986 Td
+148.533 410.597 Td
 (LON,LAT,ELEV) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-220.660 425.986 Td
+220.660 410.597 Td
 (],) Tj
 ET
 BT
 /F1 11 Tf
-229.823 425.986 Td
+229.823 410.597 Td
 (-G[) Tj
 ET
 /F2 11 Tf
 BT
 /F2 11 Tf
-245.707 425.986 Td
+245.707 410.597 Td
 (LON,LAT,ELEV) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-317.834 425.986 Td
+317.834 410.597 Td
 (]) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-106.524 410.597 Td
+106.524 395.208 Td
 (Specify) Tj
 ET
 BT
 /F0 11 Tf
-142.879 410.597 Td
+142.879 395.208 Td
 (a) Tj
 ET
 BT
 /F0 11 Tf
-150.513 410.597 Td
+150.513 395.208 Td
 (GeoOrigin) Tj
 ET
 BT
 /F0 11 Tf
-200.310 410.597 Td
+200.310 395.208 Td
 (point) Tj
 ET
 BT
 /F0 11 Tf
-225.676 410.597 Td
+225.676 395.208 Td
 (for) Tj
 ET
 BT
 /F0 11 Tf
-241.252 410.597 Td
+241.252 395.208 Td
 (high-precision) Tj
 ET
 BT
 /F0 11 Tf
-307.549 410.597 Td
+307.549 395.208 Td
 (local) Tj
 ET
 BT
 /F0 11 Tf
-331.683 410.597 Td
+331.683 395.208 Td
 (coordinates.) Tj
 ET
 BT
 /F0 11 Tf
-387.893 410.597 Td
+387.893 395.208 Td
 (All) Tj
 ET
 BT
 /F0 11 Tf
-404.701 410.597 Td
+404.701 395.208 Td
 (vertex) Tj
 ET
 BT
 /F0 11 Tf
-434.940 410.597 Td
+434.940 395.208 Td
 (coordinates) Tj
 ET
 BT
 /F0 11 Tf
-488.400 410.597 Td
+488.400 395.208 Td
 (will) Tj
 ET
 BT
 /F0 11 Tf
-508.266 410.597 Td
+508.266 395.208 Td
 (be) Tj
-ET
-BT
-/F0 11 Tf
-106.524 395.208 Td
-(expressed) Tj
-ET
-BT
-/F0 11 Tf
-152.647 395.208 Td
-(as) Tj
-ET
-BT
-/F0 11 Tf
-164.560 395.208 Td
-(offsets) Tj
-ET
-BT
-/F0 11 Tf
-196.636 395.208 Td
-(from) Tj
-ET
-BT
-/F0 11 Tf
-220.770 395.208 Td
-(this) Tj
-ET
-BT
-/F0 11 Tf
-239.415 395.208 Td
-(origin) Tj
-ET
-BT
-/F0 11 Tf
-268.444 395.208 Td
-(point) Tj
-ET
-BT
-/F0 11 Tf
-293.810 395.208 Td
-(in) Tj
-ET
-BT
-/F0 11 Tf
-305.118 395.208 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-321.310 395.208 Td
-(ECEF) Tj
-ET
-BT
-/F0 11 Tf
-350.955 395.208 Td
-(coordinate) Tj
-ET
-BT
-/F0 11 Tf
-400.136 395.208 Td
-(system.) Tj
-ET
-BT
-/F0 11 Tf
-436.194 395.208 Td
-(This) Tj
-ET
-BT
-/F0 11 Tf
-458.502 395.208 Td
-(improves) Tj
 ET
 BT
 /F0 11 Tf
 106.524 379.819 Td
-(rendering) Tj
+(expressed) Tj
 ET
 BT
 /F0 11 Tf
-151.426 379.819 Td
-(precision) Tj
+152.647 379.819 Td
+(as) Tj
 ET
 BT
 /F0 11 Tf
-194.502 379.819 Td
-(for) Tj
+164.560 379.819 Td
+(offsets) Tj
 ET
 BT
 /F0 11 Tf
-210.078 379.819 Td
-(localized) Tj
-ET
-BT
-/F0 11 Tf
-252.538 379.819 Td
-(areas) Tj
-ET
-BT
-/F0 11 Tf
-277.882 379.819 Td
-(by) Tj
-ET
-BT
-/F0 11 Tf
-291.632 379.819 Td
-(reducing) Tj
-ET
-BT
-/F0 11 Tf
-332.871 379.819 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-349.063 379.819 Td
-(magnitude) Tj
-ET
-BT
-/F0 11 Tf
-398.255 379.819 Td
-(of) Tj
-ET
-BT
-/F0 11 Tf
-410.168 379.819 Td
-(coordinate) Tj
-ET
-BT
-/F0 11 Tf
-459.349 379.819 Td
-(values,) Tj
-ET
-BT
-/F0 11 Tf
-492.954 379.819 Td
-(which) Tj
-ET
-BT
-/F0 11 Tf
-106.524 364.430 Td
-(helps) Tj
-ET
-BT
-/F0 11 Tf
-132.495 364.430 Td
-(overcome) Tj
-ET
-BT
-/F0 11 Tf
-178.618 364.430 Td
-(GPU) Tj
-ET
-BT
-/F0 11 Tf
-203.368 364.430 Td
-(single-precision) Tj
-ET
-BT
-/F0 11 Tf
-276.386 364.430 Td
-(floating) Tj
-ET
-BT
-/F0 11 Tf
-313.357 364.430 Td
-(point) Tj
-ET
-BT
-/F0 11 Tf
-338.723 364.430 Td
-(limitations.) Tj
-ET
-BT
-/F0 11 Tf
-106.524 349.041 Td
-(With) Tj
-ET
-BT
-/F0 11 Tf
-131.274 349.041 Td
-(values) Tj
-ET
-BT
-/F0 11 Tf
-162.129 349.041 Td
-(\(e.g.,) Tj
-ET
-BT
-/F0 11 Tf
-187.176 349.041 Td
-(--geoorigin=-122.0,36.8,-1000\):) Tj
-ET
-BT
-/F0 11 Tf
-331.166 349.041 Td
-(use) Tj
-ET
-BT
-/F0 11 Tf
-348.579 349.041 Td
-(specified) Tj
-ET
-BT
-/F0 11 Tf
-391.039 349.041 Td
-(GeoOrigin.) Tj
-ET
-BT
-/F0 11 Tf
-106.524 333.652 Td
-(Without) Tj
-ET
-BT
-/F0 11 Tf
-145.332 333.652 Td
-(values:) Tj
-ET
-BT
-/F0 11 Tf
-179.245 333.652 Td
-(automatically) Tj
-ET
-BT
-/F0 11 Tf
-241.879 333.652 Td
-(compute) Tj
-ET
-BT
-/F0 11 Tf
-282.513 333.652 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-301.147 333.652 Td
-(use) Tj
-ET
-BT
-/F0 11 Tf
-318.560 333.652 Td
-(grid) Tj
-ET
-BT
-/F0 11 Tf
-339.031 333.652 Td
-(center) Tj
-ET
-BT
-/F0 11 Tf
-368.654 333.652 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-387.288 333.652 Td
-(mean) Tj
-ET
-BT
-/F0 11 Tf
-413.864 333.652 Td
-(altitude.) Tj
-ET
-BT
-/F0 11 Tf
-106.524 318.263 Td
-(Not) Tj
-ET
-BT
-/F0 11 Tf
-125.774 318.263 Td
-(specified:) Tj
-ET
-BT
-/F0 11 Tf
-171.292 318.263 Td
-(vertices) Tj
-ET
-BT
-/F0 11 Tf
-208.252 318.263 Td
-(use) Tj
-ET
-BT
-/F0 11 Tf
-225.665 318.263 Td
-(original) Tj
-ET
-BT
-/F0 11 Tf
-262.636 318.263 Td
-(ECEF) Tj
-ET
-BT
-/F0 11 Tf
-292.281 318.263 Td
-(coordinates) Tj
-ET
-BT
-/F0 11 Tf
-345.741 318.263 Td
+196.636 379.819 Td
 (from) Tj
 ET
 BT
 /F0 11 Tf
-369.875 318.263 Td
-(Earth's) Tj
+220.770 379.819 Td
+(this) Tj
 ET
 BT
 /F0 11 Tf
-404.393 318.263 Td
-(center) Tj
+239.415 379.819 Td
+(origin) Tj
 ET
 BT
 /F0 11 Tf
-434.016 318.263 Td
-(\(default\).) Tj
+268.444 379.819 Td
+(point) Tj
 ET
 BT
 /F0 11 Tf
-106.524 302.874 Td
-(The) Tj
-ET
-BT
-/F0 11 Tf
-126.379 302.874 Td
-(value) Tj
-ET
-BT
-/F0 11 Tf
-152.955 302.874 Td
-(must) Tj
-ET
-BT
-/F0 11 Tf
-177.100 302.874 Td
-(be) Tj
-ET
-BT
-/F0 11 Tf
-190.234 302.874 Td
-(attached) Tj
-ET
-BT
-/F0 11 Tf
-229.636 302.874 Td
-(to) Tj
-ET
-BT
-/F0 11 Tf
-240.944 302.874 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-257.136 302.874 Td
-(option.) Tj
-ET
-BT
-/F0 11 Tf
-290.752 302.874 Td
-(For) Tj
-ET
-BT
-/F0 11 Tf
-308.781 302.874 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-324.973 302.874 Td
-(long) Tj
-ET
-BT
-/F0 11 Tf
-347.281 302.874 Td
-(form) Tj
-ET
-BT
-/F0 11 Tf
-371.415 302.874 Td
-(write) Tj
-ET
-BT
-/F0 11 Tf
-396.770 302.874 Td
-(an) Tj
-ET
-BT
-/F0 11 Tf
-409.904 302.874 Td
-(equals) Tj
-ET
-BT
-/F0 11 Tf
-440.759 302.874 Td
-(sign) Tj
-ET
-BT
-/F0 11 Tf
-461.846 302.874 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-480.480 302.874 Td
-(no) Tj
-ET
-BT
-/F0 11 Tf
-494.230 302.874 Td
-(spaces,) Tj
-ET
-BT
-/F0 11 Tf
-528.440 302.874 Td
-(as) Tj
-ET
-BT
-/F0 11 Tf
-106.524 287.485 Td
+293.810 379.819 Td
 (in) Tj
 ET
 BT
 /F0 11 Tf
-117.832 287.485 Td
-(--geoorigin=-122.0,36.8,-1000;) Tj
-ET
-BT
-/F0 11 Tf
-258.159 287.485 Td
-(for) Tj
-ET
-BT
-/F0 11 Tf
-273.735 287.485 Td
+305.118 379.819 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-289.927 287.485 Td
-(short) Tj
-ET
-BT
-/F0 11 Tf
-314.677 287.485 Td
-(form) Tj
-ET
-BT
-/F0 11 Tf
-338.811 287.485 Td
-(put) Tj
-ET
-BT
-/F0 11 Tf
-355.619 287.485 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-371.811 287.485 Td
-(value) Tj
-ET
-BT
-/F0 11 Tf
-398.387 287.485 Td
-(directly) Tj
-ET
-BT
-/F0 11 Tf
-434.742 287.485 Td
-(after) Tj
-ET
-BT
-/F0 11 Tf
-457.644 287.485 Td
-(-G,) Tj
-ET
-BT
-/F0 11 Tf
-474.749 287.485 Td
-(as) Tj
-ET
-BT
-/F0 11 Tf
-486.662 287.485 Td
-(in) Tj
-ET
-BT
-/F0 11 Tf
-106.524 272.096 Td
-(-G-122.0,36.8,-1000.) Tj
-ET
-BT
-/F0 11 Tf
-202.455 272.096 Td
-(A) Tj
-ET
-BT
-/F0 11 Tf
-213.147 272.096 Td
-(value) Tj
-ET
-BT
-/F0 11 Tf
-239.723 272.096 Td
-(given) Tj
-ET
-BT
-/F0 11 Tf
-266.915 272.096 Td
-(as) Tj
-ET
-BT
-/F0 11 Tf
-278.828 272.096 Td
-(a) Tj
-ET
-BT
-/F0 11 Tf
-286.462 272.096 Td
-(separate) Tj
-ET
-BT
-/F0 11 Tf
-325.248 272.096 Td
-(argument,) Tj
-ET
-BT
-/F0 11 Tf
-372.295 272.096 Td
-(such) Tj
-ET
-BT
-/F0 11 Tf
-395.208 272.096 Td
-(as) Tj
-ET
-BT
-/F0 11 Tf
-407.121 272.096 Td
-(--geoorigin) Tj
-ET
-BT
-/F0 11 Tf
-459.360 272.096 Td
-(-122.0,36.8,-1000,) Tj
-ET
-BT
-/F0 11 Tf
-106.524 256.707 Td
-(is) Tj
-ET
-BT
-/F0 11 Tf
-116.611 256.707 Td
-(not) Tj
-ET
-BT
-/F0 11 Tf
-133.419 256.707 Td
-(accepted,) Tj
-ET
-BT
-/F0 11 Tf
-177.397 256.707 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-196.031 256.707 Td
-(neither) Tj
-ET
-BT
-/F0 11 Tf
-229.328 256.707 Td
-(is) Tj
-ET
-BT
-/F0 11 Tf
-239.415 256.707 Td
-(a) Tj
-ET
-BT
-/F0 11 Tf
-247.049 256.707 Td
-(value) Tj
-ET
-BT
-/F0 11 Tf
-273.625 256.707 Td
-(with) Tj
-ET
-BT
-/F0 11 Tf
-295.933 256.707 Td
-(spaces) Tj
-ET
-BT
-/F0 11 Tf
-327.393 256.707 Td
-(unless) Tj
-ET
-BT
-/F0 11 Tf
-357.643 256.707 Td
-(it) Tj
-ET
-BT
-/F0 11 Tf
-366.509 256.707 Td
-(is) Tj
-ET
-BT
-/F0 11 Tf
-376.596 256.707 Td
-(quoted) Tj
-ET
-BT
-/F0 11 Tf
-409.288 256.707 Td
-(so) Tj
-ET
-BT
-/F0 11 Tf
-421.817 256.707 Td
-(that) Tj
-ET
-BT
-/F0 11 Tf
-441.067 256.707 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-457.259 256.707 Td
-(shell) Tj
-ET
-BT
-/F0 11 Tf
-480.788 256.707 Td
-(passes) Tj
-ET
-BT
-/F0 11 Tf
-511.643 256.707 Td
-(it) Tj
-ET
-BT
-/F0 11 Tf
-520.509 256.707 Td
-(as) Tj
-ET
-BT
-/F0 11 Tf
-106.524 241.318 Td
-(one) Tj
-ET
-BT
-/F0 11 Tf
-125.158 241.318 Td
-(argument.) Tj
-ET
-BT
-/F0 11 Tf
-106.524 225.929 Td
-(GLB) Tj
-ET
-BT
-/F0 11 Tf
-131.274 225.929 Td
-(positions) Tj
-ET
-BT
-/F0 11 Tf
-173.756 225.929 Td
-(are) Tj
-ET
-BT
-/F0 11 Tf
-189.937 225.929 Td
-(32-bit) Tj
-ET
-BT
-/F0 11 Tf
-218.966 225.929 Td
-(floats,) Tj
-ET
-BT
-/F0 11 Tf
-248.908 225.929 Td
-(so) Tj
-ET
-BT
-/F0 11 Tf
-261.437 225.929 Td
-(absolute) Tj
-ET
-BT
-/F0 11 Tf
-300.850 225.929 Td
+321.310 379.819 Td
 (ECEF) Tj
 ET
 BT
 /F0 11 Tf
-330.495 225.929 Td
-(\(magnitudes) Tj
+350.955 379.819 Td
+(coordinate) Tj
 ET
 BT
 /F0 11 Tf
-387.629 225.929 Td
+400.136 379.819 Td
+(system.) Tj
+ET
+BT
+/F0 11 Tf
+436.194 379.819 Td
+(This) Tj
+ET
+BT
+/F0 11 Tf
+458.502 379.819 Td
+(improves) Tj
+ET
+BT
+/F0 11 Tf
+106.524 364.430 Td
+(rendering) Tj
+ET
+BT
+/F0 11 Tf
+151.426 364.430 Td
+(precision) Tj
+ET
+BT
+/F0 11 Tf
+194.502 364.430 Td
+(for) Tj
+ET
+BT
+/F0 11 Tf
+210.078 364.430 Td
+(localized) Tj
+ET
+BT
+/F0 11 Tf
+252.538 364.430 Td
+(areas) Tj
+ET
+BT
+/F0 11 Tf
+277.882 364.430 Td
+(by) Tj
+ET
+BT
+/F0 11 Tf
+291.632 364.430 Td
+(reducing) Tj
+ET
+BT
+/F0 11 Tf
+332.871 364.430 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+349.063 364.430 Td
+(magnitude) Tj
+ET
+BT
+/F0 11 Tf
+398.255 364.430 Td
 (of) Tj
 ET
 BT
 /F0 11 Tf
-399.542 225.929 Td
-(about) Tj
+410.168 364.430 Td
+(coordinate) Tj
 ET
 BT
 /F0 11 Tf
-426.734 225.929 Td
-(6.4) Tj
+459.349 364.430 Td
+(values,) Tj
 ET
 BT
 /F0 11 Tf
-443.234 225.929 Td
-(million) Tj
+492.954 364.430 Td
+(which) Tj
 ET
 BT
 /F0 11 Tf
-477.774 225.929 Td
-(meters\)) Tj
+106.524 349.041 Td
+(helps) Tj
 ET
 BT
 /F0 11 Tf
-106.524 210.540 Td
-(resolves) Tj
+132.495 349.041 Td
+(overcome) Tj
 ET
 BT
 /F0 11 Tf
-145.321 210.540 Td
-(only) Tj
+178.618 349.041 Td
+(GPU) Tj
 ET
 BT
 /F0 11 Tf
-167.629 210.540 Td
-(about) Tj
+203.368 349.041 Td
+(single-precision) Tj
 ET
 BT
 /F0 11 Tf
-194.821 210.540 Td
-(0.5) Tj
+276.386 349.041 Td
+(floating) Tj
 ET
 BT
 /F0 11 Tf
-211.321 210.540 Td
-(m;) Tj
+313.357 349.041 Td
+(point) Tj
 ET
 BT
 /F0 11 Tf
-225.687 210.540 Td
+338.723 349.041 Td
+(limitations.) Tj
+ET
+BT
+/F0 11 Tf
+106.524 333.652 Td
+(With) Tj
+ET
+BT
+/F0 11 Tf
+131.274 333.652 Td
+(values) Tj
+ET
+BT
+/F0 11 Tf
+162.129 333.652 Td
+(\(e.g.,) Tj
+ET
+BT
+/F0 11 Tf
+187.176 333.652 Td
+(--geoorigin=-122.0,36.8,-1000\):) Tj
+ET
+BT
+/F0 11 Tf
+331.166 333.652 Td
 (use) Tj
 ET
 BT
 /F0 11 Tf
-243.100 210.540 Td
-(a) Tj
+348.579 333.652 Td
+(specified) Tj
 ET
 BT
 /F0 11 Tf
-250.734 210.540 Td
-(GeoOrigin) Tj
+391.039 333.652 Td
+(GeoOrigin.) Tj
 ET
 BT
 /F0 11 Tf
-300.531 210.540 Td
+106.524 318.263 Td
+(Without) Tj
+ET
+BT
+/F0 11 Tf
+145.332 318.263 Td
+(values:) Tj
+ET
+BT
+/F0 11 Tf
+179.245 318.263 Td
+(automatically) Tj
+ET
+BT
+/F0 11 Tf
+241.879 318.263 Td
+(compute) Tj
+ET
+BT
+/F0 11 Tf
+282.513 318.263 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+301.147 318.263 Td
+(use) Tj
+ET
+BT
+/F0 11 Tf
+318.560 318.263 Td
+(grid) Tj
+ET
+BT
+/F0 11 Tf
+339.031 318.263 Td
+(center) Tj
+ET
+BT
+/F0 11 Tf
+368.654 318.263 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+387.288 318.263 Td
+(mean) Tj
+ET
+BT
+/F0 11 Tf
+413.864 318.263 Td
+(altitude.) Tj
+ET
+BT
+/F0 11 Tf
+106.524 302.874 Td
+(Not) Tj
+ET
+BT
+/F0 11 Tf
+125.774 302.874 Td
+(specified:) Tj
+ET
+BT
+/F0 11 Tf
+171.292 302.874 Td
+(vertices) Tj
+ET
+BT
+/F0 11 Tf
+208.252 302.874 Td
+(use) Tj
+ET
+BT
+/F0 11 Tf
+225.665 302.874 Td
+(original) Tj
+ET
+BT
+/F0 11 Tf
+262.636 302.874 Td
+(ECEF) Tj
+ET
+BT
+/F0 11 Tf
+292.281 302.874 Td
+(coordinates) Tj
+ET
+BT
+/F0 11 Tf
+345.741 302.874 Td
+(from) Tj
+ET
+BT
+/F0 11 Tf
+369.875 302.874 Td
+(Earth's) Tj
+ET
+BT
+/F0 11 Tf
+404.393 302.874 Td
+(center) Tj
+ET
+BT
+/F0 11 Tf
+434.016 302.874 Td
+(\(default\).) Tj
+ET
+BT
+/F0 11 Tf
+106.524 287.485 Td
+(The) Tj
+ET
+BT
+/F0 11 Tf
+126.379 287.485 Td
+(value) Tj
+ET
+BT
+/F0 11 Tf
+152.955 287.485 Td
+(must) Tj
+ET
+BT
+/F0 11 Tf
+177.100 287.485 Td
+(be) Tj
+ET
+BT
+/F0 11 Tf
+190.234 287.485 Td
+(attached) Tj
+ET
+BT
+/F0 11 Tf
+229.636 287.485 Td
 (to) Tj
 ET
 BT
 /F0 11 Tf
-311.839 210.540 Td
+240.944 287.485 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+257.136 287.485 Td
+(option.) Tj
+ET
+BT
+/F0 11 Tf
+290.752 287.485 Td
+(For) Tj
+ET
+BT
+/F0 11 Tf
+308.781 287.485 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+324.973 287.485 Td
+(long) Tj
+ET
+BT
+/F0 11 Tf
+347.281 287.485 Td
+(form) Tj
+ET
+BT
+/F0 11 Tf
+371.415 287.485 Td
+(write) Tj
+ET
+BT
+/F0 11 Tf
+396.770 287.485 Td
+(an) Tj
+ET
+BT
+/F0 11 Tf
+409.904 287.485 Td
+(equals) Tj
+ET
+BT
+/F0 11 Tf
+440.759 287.485 Td
+(sign) Tj
+ET
+BT
+/F0 11 Tf
+461.846 287.485 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+480.480 287.485 Td
+(no) Tj
+ET
+BT
+/F0 11 Tf
+494.230 287.485 Td
+(spaces,) Tj
+ET
+BT
+/F0 11 Tf
+528.440 287.485 Td
+(as) Tj
+ET
+BT
+/F0 11 Tf
+106.524 272.096 Td
+(in) Tj
+ET
+BT
+/F0 11 Tf
+117.832 272.096 Td
+(--geoorigin=-122.0,36.8,-1000;) Tj
+ET
+BT
+/F0 11 Tf
+258.159 272.096 Td
+(for) Tj
+ET
+BT
+/F0 11 Tf
+273.735 272.096 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+289.927 272.096 Td
+(short) Tj
+ET
+BT
+/F0 11 Tf
+314.677 272.096 Td
+(form) Tj
+ET
+BT
+/F0 11 Tf
+338.811 272.096 Td
+(put) Tj
+ET
+BT
+/F0 11 Tf
+355.619 272.096 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+371.811 272.096 Td
+(value) Tj
+ET
+BT
+/F0 11 Tf
+398.387 272.096 Td
+(directly) Tj
+ET
+BT
+/F0 11 Tf
+434.742 272.096 Td
+(after) Tj
+ET
+BT
+/F0 11 Tf
+457.644 272.096 Td
+(-G,) Tj
+ET
+BT
+/F0 11 Tf
+474.749 272.096 Td
+(as) Tj
+ET
+BT
+/F0 11 Tf
+486.662 272.096 Td
+(in) Tj
+ET
+BT
+/F0 11 Tf
+106.524 256.707 Td
+(-G-122.0,36.8,-1000.) Tj
+ET
+BT
+/F0 11 Tf
+202.455 256.707 Td
+(A) Tj
+ET
+BT
+/F0 11 Tf
+213.147 256.707 Td
+(value) Tj
+ET
+BT
+/F0 11 Tf
+239.723 256.707 Td
+(given) Tj
+ET
+BT
+/F0 11 Tf
+266.915 256.707 Td
+(as) Tj
+ET
+BT
+/F0 11 Tf
+278.828 256.707 Td
+(a) Tj
+ET
+BT
+/F0 11 Tf
+286.462 256.707 Td
+(separate) Tj
+ET
+BT
+/F0 11 Tf
+325.248 256.707 Td
+(argument,) Tj
+ET
+BT
+/F0 11 Tf
+372.295 256.707 Td
+(such) Tj
+ET
+BT
+/F0 11 Tf
+395.208 256.707 Td
+(as) Tj
+ET
+BT
+/F0 11 Tf
+407.121 256.707 Td
+(--geoorigin) Tj
+ET
+BT
+/F0 11 Tf
+459.360 256.707 Td
+(-122.0,36.8,-1000,) Tj
+ET
+BT
+/F0 11 Tf
+106.524 241.318 Td
+(is) Tj
+ET
+BT
+/F0 11 Tf
+116.611 241.318 Td
+(not) Tj
+ET
+BT
+/F0 11 Tf
+133.419 241.318 Td
+(accepted,) Tj
+ET
+BT
+/F0 11 Tf
+177.397 241.318 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+196.031 241.318 Td
+(neither) Tj
+ET
+BT
+/F0 11 Tf
+229.328 241.318 Td
+(is) Tj
+ET
+BT
+/F0 11 Tf
+239.415 241.318 Td
+(a) Tj
+ET
+BT
+/F0 11 Tf
+247.049 241.318 Td
+(value) Tj
+ET
+BT
+/F0 11 Tf
+273.625 241.318 Td
+(with) Tj
+ET
+BT
+/F0 11 Tf
+295.933 241.318 Td
+(spaces) Tj
+ET
+BT
+/F0 11 Tf
+327.393 241.318 Td
+(unless) Tj
+ET
+BT
+/F0 11 Tf
+357.643 241.318 Td
+(it) Tj
+ET
+BT
+/F0 11 Tf
+366.509 241.318 Td
+(is) Tj
+ET
+BT
+/F0 11 Tf
+376.596 241.318 Td
+(quoted) Tj
+ET
+BT
+/F0 11 Tf
+409.288 241.318 Td
+(so) Tj
+ET
+BT
+/F0 11 Tf
+421.817 241.318 Td
+(that) Tj
+ET
+BT
+/F0 11 Tf
+441.067 241.318 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+457.259 241.318 Td
+(shell) Tj
+ET
+BT
+/F0 11 Tf
+480.788 241.318 Td
+(passes) Tj
+ET
+BT
+/F0 11 Tf
+511.643 241.318 Td
+(it) Tj
+ET
+BT
+/F0 11 Tf
+520.509 241.318 Td
+(as) Tj
+ET
+BT
+/F0 11 Tf
+106.524 225.929 Td
+(one) Tj
+ET
+BT
+/F0 11 Tf
+125.158 225.929 Td
+(argument.) Tj
+ET
+BT
+/F0 11 Tf
+106.524 210.540 Td
+(GLB) Tj
+ET
+BT
+/F0 11 Tf
+131.274 210.540 Td
+(positions) Tj
+ET
+BT
+/F0 11 Tf
+173.756 210.540 Td
+(are) Tj
+ET
+BT
+/F0 11 Tf
+189.937 210.540 Td
+(32-bit) Tj
+ET
+BT
+/F0 11 Tf
+218.966 210.540 Td
+(floats,) Tj
+ET
+BT
+/F0 11 Tf
+248.908 210.540 Td
+(so) Tj
+ET
+BT
+/F0 11 Tf
+261.437 210.540 Td
+(absolute) Tj
+ET
+BT
+/F0 11 Tf
+300.850 210.540 Td
+(ECEF) Tj
+ET
+BT
+/F0 11 Tf
+330.495 210.540 Td
+(\(magnitudes) Tj
+ET
+BT
+/F0 11 Tf
+387.629 210.540 Td
+(of) Tj
+ET
+BT
+/F0 11 Tf
+399.542 210.540 Td
+(about) Tj
+ET
+BT
+/F0 11 Tf
+426.734 210.540 Td
+(6.4) Tj
+ET
+BT
+/F0 11 Tf
+443.234 210.540 Td
+(million) Tj
+ET
+BT
+/F0 11 Tf
+477.774 210.540 Td
+(meters\)) Tj
+ET
+BT
+/F0 11 Tf
+106.524 195.151 Td
+(resolves) Tj
+ET
+BT
+/F0 11 Tf
+145.321 195.151 Td
+(only) Tj
+ET
+BT
+/F0 11 Tf
+167.629 195.151 Td
+(about) Tj
+ET
+BT
+/F0 11 Tf
+194.821 195.151 Td
+(0.5) Tj
+ET
+BT
+/F0 11 Tf
+211.321 195.151 Td
+(m;) Tj
+ET
+BT
+/F0 11 Tf
+225.687 195.151 Td
+(use) Tj
+ET
+BT
+/F0 11 Tf
+243.100 195.151 Td
+(a) Tj
+ET
+BT
+/F0 11 Tf
+250.734 195.151 Td
+(GeoOrigin) Tj
+ET
+BT
+/F0 11 Tf
+300.531 195.151 Td
+(to) Tj
+ET
+BT
+/F0 11 Tf
+311.839 195.151 Td
 (preserve) Tj
 ET
 BT
 /F0 11 Tf
-351.846 210.540 Td
+351.846 195.151 Td
 (sub-meter) Tj
 ET
 BT
 /F0 11 Tf
-398.585 210.540 Td
+398.585 195.151 Td
 (detail.) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-87.274 164.373 Td
+87.274 148.984 Td
 (--no-draco) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-106.524 148.984 Td
+106.524 133.595 Td
 (Write) Tj
 ET
 BT
 /F0 11 Tf
-134.321 148.984 Td
+134.321 133.595 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-150.513 148.984 Td
+150.513 133.595 Td
 (mesh) Tj
 ET
 BT
 /F0 11 Tf
-176.484 148.984 Td
+176.484 133.595 Td
 (as) Tj
 ET
 BT
 /F0 11 Tf
-188.397 148.984 Td
+188.397 133.595 Td
 (arrays.) Tj
 ET
 BT
 /F0 11 Tf
-220.770 148.984 Td
+220.770 133.595 Td
 (By) Tj
 ET
 BT
 /F0 11 Tf
-236.357 148.984 Td
+236.357 133.595 Td
 (default) Tj
 ET
 BT
 /F0 11 Tf
-269.654 148.984 Td
+269.654 133.595 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-285.846 148.984 Td
+285.846 133.595 Td
 (mesh) Tj
 ET
 BT
 /F0 11 Tf
-311.817 148.984 Td
+311.817 133.595 Td
 (is) Tj
 ET
 BT
 /F0 11 Tf
-321.904 148.984 Td
+321.904 133.595 Td
 (compressed) Tj
 ET
 BT
 /F0 11 Tf
-376.585 148.984 Td
+376.585 133.595 Td
 (with) Tj
 ET
 BT
 /F0 11 Tf
-398.893 148.984 Td
+398.893 133.595 Td
 (Draco) Tj
 ET
 BT
 /F0 11 Tf
-428.516 148.984 Td
+428.516 133.595 Td
 (\(the) Tj
 ET
 BT
 /F0 11 Tf
-448.371 148.984 Td
+448.371 133.595 Td
 (glTF) Tj
 ET
 BT
 /F0 11 Tf
-472.516 148.984 Td
+472.516 133.595 Td
 (extension) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-106.524 133.595 Td
+106.524 118.206 Td
 (KHR) Tj
 ET
 /F2 11 Tf
 BT
 /F2 11 Tf
-131.582 133.595 Td
+131.582 118.206 Td
 (_) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-137.082 133.595 Td
+137.082 118.206 Td
 (draco) Tj
 ET
 /F2 11 Tf
 BT
 /F2 11 Tf
-163.966 133.595 Td
+163.966 118.206 Td
 (_) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-169.466 133.595 Td
+169.466 118.206 Td
 (mesh) Tj
 ET
 /F2 11 Tf
 BT
 /F2 11 Tf
-193.908 133.595 Td
+193.908 118.206 Td
 (_) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-199.408 133.595 Td
+199.408 118.206 Td
 (compression) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-258.071 133.595 Td
+258.071 118.206 Td
 (\),) Tj
 ET
 BT
 /F0 11 Tf
-267.234 133.595 Td
+267.234 118.206 Td
 (as) Tj
 ET
 BT
 /F0 11 Tf
-279.147 133.595 Td
+279.147 118.206 Td
 (mbmesh\(1\)) Tj
 ET
 BT
 /F0 11 Tf
-332.002 133.595 Td
+332.002 118.206 Td
 (compresses) Tj
 ET
 BT
 /F0 11 Tf
-385.462 133.595 Td
+385.462 118.206 Td
 (its) Tj
 ET
 BT
 /F0 11 Tf
-398.607 133.595 Td
+398.607 118.206 Td
 (meshes,) Tj
 ET
 BT
 /F0 11 Tf
-436.491 133.595 Td
+436.491 118.206 Td
 (with) Tj
 ET
 BT
 /F0 11 Tf
-458.799 133.595 Td
+458.799 118.206 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-474.991 133.595 Td
+474.991 118.206 Td
 (code) Tj
 ET
 BT
 /F0 11 Tf
-498.509 133.595 Td
+498.509 118.206 Td
 (that) Tj
 ET
 BT
 /F0 11 Tf
-517.759 133.595 Td
+517.759 118.206 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-533.951 133.595 Td
+533.951 118.206 Td
 (two) Tj
 ET
 BT
 /F0 11 Tf
-106.524 118.206 Td
+106.524 102.817 Td
 (programs) Tj
 ET
 BT
 /F0 11 Tf
-150.821 118.206 Td
+150.821 102.817 Td
 (share) Tj
 ET
 BT
 /F0 11 Tf
-176.781 118.206 Td
+176.781 102.817 Td
 (\() Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-180.444 118.206 Td
+180.444 102.817 Td
 (src/mbdraco) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-239.712 118.206 Td
+239.712 102.817 Td
 (\).) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-248.875 118.206 Td
+248.875 102.817 Td
 (--draco) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-283.085 118.206 Td
+283.085 102.817 Td
 (,) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-288.585 118.206 Td
+288.585 102.817 Td
 (-D) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-302.940 118.206 Td
+302.940 102.817 Td
 (are) Tj
 ET
 BT
 /F0 11 Tf
-319.121 118.206 Td
+319.121 102.817 Td
 (still) Tj
 ET
 BT
 /F0 11 Tf
-338.382 118.206 Td
+338.382 102.817 Td
 (accepted) Tj
 ET
 BT
 /F0 11 Tf
-379.610 118.206 Td
+379.610 102.817 Td
 (and) Tj
 ET
 BT
 /F0 11 Tf
-398.244 118.206 Td
+398.244 102.817 Td
 (do) Tj
 ET
 BT
 /F0 11 Tf
-411.994 118.206 Td
+411.994 102.817 Td
 (nothing,) Tj
 ET
 BT
 /F0 11 Tf
-451.110 118.206 Td
+451.110 102.817 Td
 (since) Tj
 ET
 BT
 /F0 11 Tf
-476.465 118.206 Td
+476.465 102.817 Td
 (compression) Tj
 ET
 BT
 /F0 11 Tf
-534.820 118.206 Td
+534.820 102.817 Td
 (is) Tj
-ET
-BT
-/F0 11 Tf
-106.524 102.817 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-122.716 102.817 Td
-(default.) Tj
 ET
 /F0 11 Tf
 BT
@@ -5302,7 +5308,7 @@ ET
 endstream
 endobj
 16 0 obj
-17321
+18024
 endobj
 17 0 obj
 <<
@@ -5329,1961 +5335,1912 @@ endobj
 >>
 stream
 BT
+/F0 11 Tf
+106.524 702.988 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+122.716 702.988 Td
+(default.) Tj
+ET
 /F1 11 Tf
-87.274 702.988 Td
+BT
+/F1 11 Tf
+87.274 656.821 Td
 (--draco-precision) Tj
 ET
 /F2 11 Tf
 BT
 /F2 11 Tf
-170.676 702.988 Td
+170.676 656.821 Td
 (METERS) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-106.524 687.599 Td
+106.524 641.432 Td
 (With) Tj
 ET
 BT
 /F0 11 Tf
-131.274 687.599 Td
+131.274 641.432 Td
 (Draco,) Tj
 ET
 BT
 /F0 11 Tf
-163.647 687.599 Td
+163.647 641.432 Td
 (keep) Tj
 ET
 BT
 /F0 11 Tf
-187.165 687.599 Td
+187.165 641.432 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-203.357 687.599 Td
+203.357 641.432 Td
 (positions) Tj
 ET
 BT
 /F0 11 Tf
-245.839 687.599 Td
+245.839 641.432 Td
 (to) Tj
 ET
 BT
 /F0 11 Tf
-257.147 687.599 Td
+257.147 641.432 Td
 (this) Tj
 ET
 BT
 /F0 11 Tf
-275.792 687.599 Td
+275.792 641.432 Td
 (many) Tj
 ET
 BT
 /F0 11 Tf
-302.984 687.599 Td
+302.984 641.432 Td
 (meters) Tj
 ET
 BT
 /F0 11 Tf
-335.060 687.599 Td
+335.060 641.432 Td
 (\(default) Tj
 ET
 BT
 /F0 11 Tf
-372.020 687.599 Td
+372.020 641.432 Td
 (0.001\).) Tj
 ET
 BT
 /F0 11 Tf
-405.933 687.599 Td
+405.933 641.432 Td
 (Each) Tj
 ET
 BT
 /F0 11 Tf
-430.672 687.599 Td
+430.672 641.432 Td
 (block) Tj
 ET
 BT
 /F0 11 Tf
-457.864 687.599 Td
+457.864 641.432 Td
 (of) Tj
 ET
 BT
 /F0 11 Tf
-469.777 687.599 Td
+469.777 641.432 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-485.969 687.599 Td
+485.969 641.432 Td
 (model) Tj
 ET
 BT
 /F0 11 Tf
-516.219 687.599 Td
+516.219 641.432 Td
 (gets) Tj
 ET
 BT
 /F0 11 Tf
-106.524 672.210 Td
+106.524 626.043 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-122.716 672.210 Td
+122.716 626.043 Td
 (number) Tj
 ET
 BT
 /F0 11 Tf
-159.071 672.210 Td
+159.071 626.043 Td
 (of) Tj
 ET
 BT
 /F0 11 Tf
-170.984 672.210 Td
+170.984 626.043 Td
 (bits) Tj
 ET
 BT
 /F0 11 Tf
-189.629 672.210 Td
+189.629 626.043 Td
 (\(8) Tj
 ET
 BT
 /F0 11 Tf
-201.542 672.210 Td
+201.542 626.043 Td
 (to) Tj
 ET
 BT
 /F0 11 Tf
-212.850 672.210 Td
+212.850 626.043 Td
 (30\)) Tj
 ET
 BT
 /F0 11 Tf
-230.263 672.210 Td
+230.263 626.043 Td
 (that) Tj
 ET
 BT
 /F0 11 Tf
-249.513 672.210 Td
+249.513 626.043 Td
 (makes) Tj
 ET
 BT
 /F0 11 Tf
-280.368 672.210 Td
+280.368 626.043 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-296.560 672.210 Td
+296.560 626.043 Td
 (step) Tj
 ET
 BT
 /F0 11 Tf
-317.031 672.210 Td
+317.031 626.043 Td
 (of) Tj
 ET
 BT
 /F0 11 Tf
-328.944 672.210 Td
+328.944 626.043 Td
 (its) Tj
 ET
 BT
 /F0 11 Tf
-342.089 672.210 Td
+342.089 626.043 Td
 (quantization) Tj
 ET
 BT
 /F0 11 Tf
-399.223 672.210 Td
+399.223 626.043 Td
 (no) Tj
 ET
 BT
 /F0 11 Tf
-412.973 672.210 Td
+412.973 626.043 Td
 (more) Tj
 ET
 BT
 /F0 11 Tf
-438.328 672.210 Td
+438.328 626.043 Td
 (than) Tj
 ET
 BT
 /F0 11 Tf
-460.020 672.210 Td
+460.020 626.043 Td
 (this) Tj
 ET
 BT
 /F0 11 Tf
-478.665 672.210 Td
+478.665 626.043 Td
 (over) Tj
 ET
 BT
 /F0 11 Tf
-500.962 672.210 Td
+500.962 626.043 Td
 (its) Tj
 ET
 BT
 /F0 11 Tf
-514.107 672.210 Td
+514.107 626.043 Td
 (extent,) Tj
 ET
 BT
 /F0 11 Tf
-106.524 656.821 Td
+106.524 610.654 Td
 (so) Tj
 ET
 BT
 /F0 11 Tf
-119.053 656.821 Td
+119.053 610.654 Td
 (a) Tj
 ET
 BT
 /F0 11 Tf
-126.687 656.821 Td
+126.687 610.654 Td
 (small) Tj
 ET
 BT
 /F0 11 Tf
-153.274 656.821 Td
+153.274 610.654 Td
 (block) Tj
 ET
 BT
 /F0 11 Tf
-180.466 656.821 Td
+180.466 610.654 Td
 (gets) Tj
 ET
 BT
 /F0 11 Tf
-200.937 656.821 Td
+200.937 610.654 Td
 (few) Tj
 ET
 BT
 /F0 11 Tf
-220.176 656.821 Td
+220.176 610.654 Td
 (bits) Tj
 ET
 BT
 /F0 11 Tf
-238.821 656.821 Td
+238.821 610.654 Td
 (and) Tj
 ET
 BT
 /F0 11 Tf
-257.455 656.821 Td
+257.455 610.654 Td
 (a) Tj
 ET
 BT
 /F0 11 Tf
-265.089 656.821 Td
+265.089 610.654 Td
 (large) Tj
 ET
 BT
 /F0 11 Tf
-289.828 656.821 Td
+289.828 610.654 Td
 (one) Tj
 ET
 BT
 /F0 11 Tf
-308.462 656.821 Td
+308.462 610.654 Td
 (more.) Tj
 ET
 BT
 /F0 11 Tf
-339.317 656.821 Td
+339.317 610.654 Td
 (This) Tj
 ET
 BT
 /F0 11 Tf
-361.625 656.821 Td
+361.625 610.654 Td
 (replaces) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-400.411 656.821 Td
+400.411 610.654 Td
 (--quantize-position) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-491.777 656.821 Td
+491.777 610.654 Td
 (and) Tj
 ET
 BT
 /F0 11 Tf
-510.411 656.821 Td
+510.411 610.654 Td
 (its) Tj
 ET
 BT
 /F0 11 Tf
-523.556 656.821 Td
+523.556 610.654 Td
 (fixed) Tj
 ET
 BT
 /F0 11 Tf
-106.524 641.432 Td
+106.524 595.265 Td
 (16) Tj
 ET
 BT
 /F0 11 Tf
-120.274 641.432 Td
+120.274 595.265 Td
 (bits,) Tj
 ET
 BT
 /F0 11 Tf
-141.669 641.432 Td
+141.669 595.265 Td
 (which) Tj
 ET
 BT
 /F0 11 Tf
-171.303 641.432 Td
+171.303 595.265 Td
 (gave) Tj
 ET
 BT
 /F0 11 Tf
-194.821 641.432 Td
+194.821 595.265 Td
 (a) Tj
 ET
 BT
 /F0 11 Tf
-202.455 641.432 Td
+202.455 595.265 Td
 (step) Tj
 ET
 BT
 /F0 11 Tf
-222.926 641.432 Td
+222.926 595.265 Td
 (that) Tj
 ET
 BT
 /F0 11 Tf
-242.176 641.432 Td
+242.176 595.265 Td
 (depended) Tj
 ET
 BT
 /F0 11 Tf
-287.078 641.432 Td
+287.078 595.265 Td
 (on) Tj
 ET
 BT
 /F0 11 Tf
-300.828 641.432 Td
+300.828 595.265 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-317.020 641.432 Td
+317.020 595.265 Td
 (size) Tj
 ET
 BT
 /F0 11 Tf
-336.875 641.432 Td
+336.875 595.265 Td
 (of) Tj
 ET
 BT
 /F0 11 Tf
-348.788 641.432 Td
+348.788 595.265 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-364.980 641.432 Td
+364.980 595.265 Td
 (block.) Tj
 ET
 BT
 /F0 11 Tf
-394.922 641.432 Td
+394.922 595.265 Td
 (The) Tj
 ET
 BT
 /F0 11 Tf
-414.777 641.432 Td
+414.777 595.265 Td
 (options) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-449.922 641.432 Td
+449.922 595.265 Td
 (--quantize-position) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-538.538 641.432 Td
+538.538 595.265 Td
 (,) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-106.524 626.043 Td
+106.524 579.876 Td
 (--quantize-normal) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-192.071 626.043 Td
+192.071 579.876 Td
 (,) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-197.571 626.043 Td
+197.571 579.876 Td
 (--quantize-texcoord) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-289.828 626.043 Td
+289.828 579.876 Td
 (,) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-295.328 626.043 Td
+295.328 579.876 Td
 (--quantize-color) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-373.230 626.043 Td
+373.230 579.876 Td
 (and) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-391.864 626.043 Td
+391.864 579.876 Td
 (-Q) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-406.835 626.043 Td
+406.835 579.876 Td
 (are) Tj
 ET
 BT
 /F0 11 Tf
-423.016 626.043 Td
+423.016 579.876 Td
 (refused) Tj
 ET
 BT
 /F0 11 Tf
-458.139 626.043 Td
+458.139 579.876 Td
 (with) Tj
 ET
 BT
 /F0 11 Tf
-480.447 626.043 Td
+480.447 579.876 Td
 (a) Tj
 ET
 BT
 /F0 11 Tf
-488.081 626.043 Td
+488.081 579.876 Td
 (message) Tj
 ET
 BT
 /F0 11 Tf
-528.099 626.043 Td
+528.099 579.876 Td
 (that) Tj
 ET
 BT
 /F0 11 Tf
-106.524 610.654 Td
+106.524 564.487 Td
 (names) Tj
 ET
 BT
 /F0 11 Tf
-137.379 610.654 Td
+137.379 564.487 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-153.571 610.654 Td
+153.571 564.487 Td
 (new) Tj
 ET
 BT
 /F0 11 Tf
-174.647 610.654 Td
+174.647 564.487 Td
 (options.) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-87.274 564.487 Td
+87.274 518.320 Td
 (--draco-normal-bits) Tj
 ET
 /F2 11 Tf
 BT
 /F2 11 Tf
-182.897 564.487 Td
+182.897 518.320 Td
 (NUM) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-106.524 549.098 Td
+106.524 502.931 Td
 (With) Tj
 ET
 BT
 /F0 11 Tf
-131.274 549.098 Td
+131.274 502.931 Td
 (Draco,) Tj
 ET
 BT
 /F0 11 Tf
-163.647 549.098 Td
+163.647 502.931 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-179.839 549.098 Td
+179.839 502.931 Td
 (bits) Tj
 ET
 BT
 /F0 11 Tf
-198.484 549.098 Td
+198.484 502.931 Td
 (of) Tj
 ET
 BT
 /F0 11 Tf
-210.397 549.098 Td
+210.397 502.931 Td
 (each) Tj
 ET
 BT
 /F0 11 Tf
-233.299 549.098 Td
+233.299 502.931 Td
 (normal,) Tj
 ET
 BT
 /F0 11 Tf
-269.962 549.098 Td
+269.962 502.931 Td
 (2) Tj
 ET
 BT
 /F0 11 Tf
-278.212 549.098 Td
+278.212 502.931 Td
 (to) Tj
 ET
 BT
 /F0 11 Tf
-289.520 549.098 Td
+289.520 502.931 Td
 (30) Tj
 ET
 BT
 /F0 11 Tf
-303.270 549.098 Td
+303.270 502.931 Td
 (\(default) Tj
 ET
 BT
 /F0 11 Tf
-340.230 549.098 Td
+340.230 502.931 Td
 (10\).) Tj
 ET
 BT
 /F0 11 Tf
-360.393 549.098 Td
+360.393 502.931 Td
 (The) Tj
 ET
 BT
 /F0 11 Tf
-380.248 549.098 Td
+380.248 502.931 Td
 (mesh) Tj
 ET
 BT
 /F0 11 Tf
-406.219 549.098 Td
+406.219 502.931 Td
 (has) Tj
 ET
 BT
 /F0 11 Tf
-423.632 549.098 Td
+423.632 502.931 Td
 (no) Tj
 ET
 BT
 /F0 11 Tf
-437.382 549.098 Td
+437.382 502.931 Td
 (normals) Tj
 ET
 BT
 /F0 11 Tf
-475.574 549.098 Td
+475.574 502.931 Td
 (today,) Tj
 ET
 BT
 /F0 11 Tf
-505.516 549.098 Td
+505.516 502.931 Td
 (so) Tj
 ET
 BT
 /F0 11 Tf
-518.045 549.098 Td
+518.045 502.931 Td
 (this) Tj
 ET
 BT
 /F0 11 Tf
-106.524 533.709 Td
+106.524 487.542 Td
 (changes) Tj
 ET
 BT
 /F0 11 Tf
-144.705 533.709 Td
+144.705 487.542 Td
 (nothing;) Tj
 ET
 BT
 /F0 11 Tf
-184.129 533.709 Td
+184.129 487.542 Td
 (it) Tj
 ET
 BT
 /F0 11 Tf
-192.995 533.709 Td
+192.995 487.542 Td
 (is) Tj
 ET
 BT
 /F0 11 Tf
-203.082 533.709 Td
+203.082 487.542 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-219.274 533.709 Td
+219.274 487.542 Td
 (option) Tj
 ET
 BT
 /F0 11 Tf
-250.140 533.709 Td
+250.140 487.542 Td
 (that) Tj
 ET
 BT
 /F0 11 Tf
-269.390 533.709 Td
+269.390 487.542 Td
 (mbmesh\(1\)) Tj
 ET
 BT
 /F0 11 Tf
-322.245 533.709 Td
+322.245 487.542 Td
 (takes.) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-87.274 487.542 Td
-(--html,) Tj
-ET
-BT
-/F1 11 Tf
-122.100 487.542 Td
-(-W) Tj
+87.274 441.375 Td
+(--no-colors) Tj
 ET
 /F0 11 Tf
-BT
-/F0 11 Tf
-106.524 472.153 Td
-(Generate) Tj
-ET
-BT
-/F0 11 Tf
-148.973 472.153 Td
-(an) Tj
-ET
-BT
-/F0 11 Tf
-162.107 472.153 Td
-(HTML) Tj
-ET
-BT
-/F0 11 Tf
-196.020 472.153 Td
-(viewer) Tj
-ET
-BT
-/F0 11 Tf
-228.701 472.153 Td
-(page) Tj
-ET
-BT
-/F0 11 Tf
-252.219 472.153 Td
-(with) Tj
-ET
-BT
-/F0 11 Tf
-274.527 472.153 Td
-(inline) Tj
-ET
-BT
-/F0 11 Tf
-302.335 472.153 Td
-(3D) Tj
-ET
-BT
-/F0 11 Tf
-318.527 472.153 Td
-(visualization) Tj
-ET
-BT
-/F0 11 Tf
-377.498 472.153 Td
-(using) Tj
-ET
-BT
-/F0 11 Tf
-404.085 472.153 Td
-(X3DOM.) Tj
-ET
-BT
-/F0 11 Tf
-448.690 472.153 Td
-(The) Tj
-ET
-BT
-/F0 11 Tf
-468.545 472.153 Td
-(HTML) Tj
-ET
-BT
-/F0 11 Tf
-502.458 472.153 Td
-(file) Tj
-ET
-BT
-/F0 11 Tf
-106.524 456.764 Td
-(includes) Tj
-ET
-BT
-/F0 11 Tf
-145.937 456.764 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-162.129 456.764 Td
-(glTF/GLB) Tj
-ET
-BT
-/F0 11 Tf
-211.332 456.764 Td
-(model) Tj
-ET
-BT
-/F0 11 Tf
-241.582 456.764 Td
-(with) Tj
-ET
-BT
-/F0 11 Tf
-263.890 456.764 Td
-(interactive) Tj
-ET
-BT
-/F0 11 Tf
-313.071 456.764 Td
-(navigation) Tj
-ET
-BT
-/F0 11 Tf
-362.263 456.764 Td
-(controls,) Tj
-ET
-BT
-/F0 11 Tf
-403.205 456.764 Td
-(processing) Tj
-ET
-BT
-/F0 11 Tf
-453.002 456.764 Td
-(provenance) Tj
-ET
-BT
-/F0 11 Tf
-106.524 441.375 Td
-(metadata) Tj
-ET
-BT
-/F0 11 Tf
-148.984 441.375 Td
-(\(command) Tj
-ET
-BT
-/F0 11 Tf
-198.781 441.375 Td
-(line,) Tj
-ET
-BT
-/F0 11 Tf
-220.781 441.375 Td
-(timestamps,) Tj
-ET
-BT
-/F0 11 Tf
-276.397 441.375 Td
-(grid) Tj
-ET
-BT
-/F0 11 Tf
-296.868 441.375 Td
-(parameters,) Tj
-ET
-BT
-/F0 11 Tf
-350.625 441.375 Td
-(GeoOrigin) Tj
-ET
-BT
-/F0 11 Tf
-400.422 441.375 Td
-(settings,) Tj
-ET
-BT
-/F0 11 Tf
-439.538 441.375 Td
-(compression) Tj
-ET
-BT
-/F0 11 Tf
-497.893 441.375 Td
-(options\),) Tj
-ET
 BT
 /F0 11 Tf
 106.524 425.986 Td
-(and) Tj
+(Do) Tj
 ET
 BT
 /F0 11 Tf
-125.158 425.986 Td
-(links) Tj
+122.716 425.986 Td
+(not) Tj
 ET
 BT
 /F0 11 Tf
-149.303 425.986 Td
-(to) Tj
+139.524 425.986 Td
+(color) Tj
 ET
 BT
 /F0 11 Tf
-160.611 425.986 Td
-(MB-System) Tj
-ET
-BT
-/F0 11 Tf
-216.535 425.986 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-235.169 425.986 Td
-(X3DOM) Tj
-ET
-BT
-/F0 11 Tf
-277.024 425.986 Td
-(documentation.) Tj
-ET
-BT
-/F0 11 Tf
-347.908 425.986 Td
-(The) Tj
-ET
-BT
-/F0 11 Tf
-367.763 425.986 Td
-(viewer) Tj
-ET
-BT
-/F0 11 Tf
-400.444 425.986 Td
-(requires) Tj
-ET
-BT
-/F0 11 Tf
-438.625 425.986 Td
-(serving) Tj
-ET
-BT
-/F0 11 Tf
-473.759 425.986 Td
+164.879 425.986 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-489.951 425.986 Td
-(files) Tj
+181.071 425.986 Td
+(vertices) Tj
 ET
 BT
 /F0 11 Tf
-511.643 425.986 Td
-(via) Tj
+218.031 425.986 Td
+(by) Tj
+ET
+BT
+/F0 11 Tf
+231.781 425.986 Td
+(height.) Tj
+ET
+BT
+/F0 11 Tf
+264.781 425.986 Td
+(By) Tj
+ET
+BT
+/F0 11 Tf
+280.368 425.986 Td
+(default) Tj
+ET
+BT
+/F0 11 Tf
+313.665 425.986 Td
+(every) Tj
+ET
+BT
+/F0 11 Tf
+340.846 425.986 Td
+(vertex) Tj
+ET
+BT
+/F0 11 Tf
+371.085 425.986 Td
+(has) Tj
+ET
+BT
+/F0 11 Tf
+388.498 425.986 Td
+(a) Tj
+ET
+BT
+/F0 11 Tf
+396.132 425.986 Td
+(color) Tj
+ET
+BT
+/F0 11 Tf
+421.487 425.986 Td
+(\(COLOR_0\)) Tj
+ET
+BT
+/F0 11 Tf
+479.842 425.986 Td
+(from) Tj
+ET
+BT
+/F0 11 Tf
+503.976 425.986 Td
+(the) Tj
 ET
 BT
 /F0 11 Tf
 106.524 410.597 Td
-(HTTP) Tj
+(Haxby) Tj
 ET
 BT
 /F0 11 Tf
-136.774 410.597 Td
-(to) Tj
+138.600 410.597 Td
+(table) Tj
 ET
 BT
 /F0 11 Tf
-148.082 410.597 Td
-(avoid) Tj
-ET
-BT
-/F0 11 Tf
-175.274 410.597 Td
-(browser) Tj
-ET
-BT
-/F0 11 Tf
-213.455 410.597 Td
-(CORS) Tj
-ET
-BT
-/F0 11 Tf
-244.937 410.597 Td
-(restrictions) Tj
-ET
-BT
-/F0 11 Tf
-296.571 410.597 Td
-(when) Tj
-ET
-BT
-/F0 11 Tf
-323.147 410.597 Td
-(loading) Tj
-ET
-BT
-/F0 11 Tf
-358.897 410.597 Td
-(local) Tj
-ET
-BT
-/F0 11 Tf
-383.031 410.597 Td
-(files.) Tj
-ET
-BT
-/F0 11 Tf
-407.473 410.597 Td
-(The) Tj
-ET
-BT
-/F0 11 Tf
-427.328 410.597 Td
-(program) Tj
-ET
-BT
-/F0 11 Tf
-467.346 410.597 Td
-(does) Tj
-ET
-BT
-/F0 11 Tf
-490.259 410.597 Td
-(not) Tj
-ET
-BT
-/F0 11 Tf
-507.067 410.597 Td
-(start) Tj
-ET
-BT
-/F0 11 Tf
-528.759 410.597 Td
-(a) Tj
-ET
-BT
-/F0 11 Tf
-106.524 395.208 Td
-(web) Tj
-ET
-BT
-/F0 11 Tf
-127.600 395.208 Td
-(server) Tj
-ET
-BT
-/F0 11 Tf
-157.223 395.208 Td
-(or) Tj
-ET
-BT
-/F0 11 Tf
-169.136 395.208 Td
-(a) Tj
-ET
-BT
-/F0 11 Tf
-176.770 395.208 Td
-(browser;) Tj
-ET
-BT
-/F0 11 Tf
-218.009 395.208 Td
-(it) Tj
-ET
-BT
-/F0 11 Tf
-226.875 395.208 Td
-(logs) Tj
-ET
-BT
-/F0 11 Tf
-247.962 395.208 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-264.154 395.208 Td
-(command) Tj
-ET
-BT
-/F0 11 Tf
-310.288 395.208 Td
-(to) Tj
-ET
-BT
-/F0 11 Tf
-321.596 395.208 Td
-(run) Tj
-ET
-BT
-/F0 11 Tf
-339.009 395.208 Td
-(\(python3) Tj
-ET
-BT
-/F0 11 Tf
-381.480 395.208 Td
-(-m) Tj
-ET
-BT
-/F0 11 Tf
-396.451 395.208 Td
-(http.server) Tj
-ET
-BT
-/F0 11 Tf
-445.940 395.208 Td
-(8000) Tj
-ET
-BT
-/F0 11 Tf
-470.690 395.208 Td
-(--bind) Tj
-ET
-BT
-/F0 11 Tf
-500.324 395.208 Td
-(127.0.0.1) Tj
-ET
-BT
-/F0 11 Tf
-106.524 379.819 Td
-(--directory) Tj
-ET
-BT
-/F0 11 Tf
-156.310 379.819 Td
-(<output) Tj
-ET
-BT
-/F0 11 Tf
-193.380 379.819 Td
-(directory>\)) Tj
-ET
-BT
-/F0 11 Tf
-245.707 379.819 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-264.341 379.819 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-280.533 379.819 Td
-(URL) Tj
-ET
-BT
-/F0 11 Tf
-305.283 379.819 Td
-(to) Tj
-ET
-BT
-/F0 11 Tf
-316.591 379.819 Td
-(open.) Tj
-ET
-BT
-/F0 11 Tf
-343.475 379.819 Td
-(The) Tj
-ET
-BT
-/F0 11 Tf
-363.330 379.819 Td
-(processing) Tj
-ET
-BT
-/F0 11 Tf
-413.127 379.819 Td
-(log) Tj
-ET
-BT
-/F0 11 Tf
-429.935 379.819 Td
-(is) Tj
-ET
-BT
-/F0 11 Tf
-440.022 379.819 Td
-(written) Tj
-ET
-BT
-/F0 11 Tf
-473.935 379.819 Td
-(to) Tj
-ET
-BT
-/F0 11 Tf
-106.524 364.430 Td
-(<output_root>.log,) Tj
-ET
-BT
-/F0 11 Tf
-192.577 364.430 Td
-(one) Tj
-ET
-BT
-/F0 11 Tf
-211.211 364.430 Td
-(message) Tj
-ET
-BT
-/F0 11 Tf
-251.229 364.430 Td
-(a) Tj
-ET
-BT
-/F0 11 Tf
-258.863 364.430 Td
-(line,) Tj
-ET
-BT
-/F0 11 Tf
-280.863 364.430 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-299.497 364.430 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-315.689 364.430 Td
-(page) Tj
-ET
-BT
-/F0 11 Tf
-339.207 364.430 Td
-(loads) Tj
-ET
-BT
-/F0 11 Tf
-365.178 364.430 Td
-(it) Tj
-ET
-BT
-/F0 11 Tf
-374.044 364.430 Td
-(when) Tj
-ET
-BT
-/F0 11 Tf
-400.620 364.430 Td
-(its) Tj
-ET
-BT
-/F0 11 Tf
-413.765 364.430 Td
-(Processing) Tj
-ET
-BT
-/F0 11 Tf
-464.178 364.430 Td
-(Log) Tj
-ET
-BT
-/F0 11 Tf
-484.649 364.430 Td
-(panel) Tj
-ET
-BT
-/F0 11 Tf
-511.225 364.430 Td
-(is) Tj
-ET
-BT
-/F0 11 Tf
-521.312 364.430 Td
-(first) Tj
-ET
-BT
-/F0 11 Tf
-106.524 349.041 Td
-(opened,) Tj
-ET
-BT
-/F0 11 Tf
-143.792 349.041 Td
-(so) Tj
-ET
-BT
-/F0 11 Tf
-156.321 349.041 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-172.513 349.041 Td
-(page) Tj
-ET
-BT
-/F0 11 Tf
-196.031 349.041 Td
-(need) Tj
-ET
-BT
-/F0 11 Tf
-219.549 349.041 Td
-(not) Tj
-ET
-BT
-/F0 11 Tf
-236.357 349.041 Td
-(hold) Tj
-ET
-BT
-/F0 11 Tf
-258.665 349.041 Td
-(it.) Tj
-ET
-BT
-/F0 11 Tf
-270.281 349.041 Td
-(Output) Tj
-ET
-BT
-/F0 11 Tf
-303.589 349.041 Td
-(file:) Tj
-ET
-BT
-/F0 11 Tf
-324.060 349.041 Td
-(<output_root>.html) Tj
-ET
-/F1 11 Tf
-BT
-/F1 11 Tf
-87.274 302.874 Td
-(--cesium-html) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-106.524 287.485 Td
-(Also) Tj
-ET
-BT
-/F0 11 Tf
-130.053 287.485 Td
-(write) Tj
-ET
-BT
-/F0 11 Tf
-155.408 287.485 Td
-(a) Tj
-ET
-BT
-/F0 11 Tf
-163.042 287.485 Td
-(viewer) Tj
-ET
-BT
-/F0 11 Tf
-195.723 287.485 Td
-(page) Tj
-ET
-BT
-/F0 11 Tf
-219.241 287.485 Td
-(for) Tj
-ET
-BT
-/F0 11 Tf
-234.817 287.485 Td
-(CesiumJS,) Tj
-ET
-BT
-/F0 11 Tf
-284.328 287.485 Td
-(<output_root>_cesium.html) Tj
-ET
-BT
-/F0 11 Tf
-410.410 287.485 Td
-(beside) Tj
-ET
-BT
-/F0 11 Tf
-441.265 287.485 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-457.457 287.485 Td
-(model,) Tj
-ET
-BT
-/F0 11 Tf
-490.457 287.485 Td
-(which) Tj
-ET
-BT
-/F0 11 Tf
-520.091 287.485 Td
-(has) Tj
-ET
-BT
-/F0 11 Tf
-537.504 287.485 Td
-(a) Tj
-ET
-BT
-/F0 11 Tf
-106.524 272.096 Td
-(check) Tj
-ET
-BT
-/F0 11 Tf
-134.926 272.096 Td
-(box) Tj
-ET
-BT
-/F0 11 Tf
-154.176 272.096 Td
-(for) Tj
-ET
-BT
-/F0 11 Tf
-169.752 272.096 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-185.944 272.096 Td
-(model,) Tj
-ET
-BT
-/F0 11 Tf
-218.944 272.096 Td
-(a) Tj
-ET
-BT
-/F0 11 Tf
-226.578 272.096 Td
-(link) Tj
-ET
-BT
-/F0 11 Tf
-246.444 272.096 Td
-(to) Tj
-ET
-BT
-/F0 11 Tf
-257.752 272.096 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-273.944 272.096 Td
-(log,) Tj
-ET
-BT
-/F0 11 Tf
-293.502 272.096 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-309.694 272.096 Td
-(Viewpoint) Tj
-ET
-BT
-/F0 11 Tf
-358.886 272.096 Td
-(menu) Tj
-ET
-BT
-/F0 11 Tf
-386.078 272.096 Td
-(\(overview) Tj
-ET
-BT
-/F0 11 Tf
-433.422 272.096 Td
-(looking) Tj
-ET
-BT
-/F0 11 Tf
-469.788 272.096 Td
-(down,) Tj
-ET
-BT
-/F0 11 Tf
-499.730 272.096 Td
-(45) Tj
-ET
-BT
-/F0 11 Tf
-513.480 272.096 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-532.114 272.096 Td
-(15) Tj
-ET
-BT
-/F0 11 Tf
-106.524 256.707 Td
-(degrees) Tj
-ET
-BT
-/F0 11 Tf
-142.868 256.707 Td
-(from) Tj
-ET
-BT
-/F0 11 Tf
-167.002 256.707 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-183.194 256.707 Td
-(south,) Tj
-ET
-BT
-/F0 11 Tf
-212.531 256.707 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-231.165 256.707 Td
-(the) Tj
-ET
-/F1 11 Tf
-BT
-/F1 11 Tf
-247.357 256.707 Td
-(--geoviewpoint) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-319.154 256.707 Td
-(viewpoints\),) Tj
-ET
-BT
-/F0 11 Tf
-376.596 256.707 Td
-(a) Tj
-ET
-BT
-/F0 11 Tf
-384.230 256.707 Td
-(Copy) Tj
-ET
-BT
-/F0 11 Tf
-410.817 256.707 Td
-(viewpoint) Tj
-ET
-BT
-/F0 11 Tf
-457.567 256.707 Td
-(button) Tj
-ET
-BT
-/F0 11 Tf
-488.433 256.707 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-507.067 256.707 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-523.259 256.707 Td
-(scale) Tj
-ET
-BT
-/F0 11 Tf
-106.524 241.318 Td
-(axes.) Tj
-ET
-BT
-/F0 11 Tf
-131.571 241.318 Td
-(The) Tj
-ET
-BT
-/F0 11 Tf
-151.426 241.318 Td
-(globe) Tj
-ET
-BT
-/F0 11 Tf
-178.618 241.318 Td
-(of) Tj
-ET
-BT
-/F0 11 Tf
-190.531 241.318 Td
-(Cesium) Tj
-ET
-BT
-/F0 11 Tf
-226.897 241.318 Td
-(would) Tj
-ET
-BT
-/F0 11 Tf
-257.147 241.318 Td
-(hide) Tj
-ET
-BT
-/F0 11 Tf
-278.839 241.318 Td
-(data) Tj
-ET
-BT
-/F0 11 Tf
-299.915 241.318 Td
-(below) Tj
-ET
-BT
-/F0 11 Tf
-329.549 241.318 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-345.741 241.318 Td
-(ellipsoid,) Tj
-ET
-BT
-/F0 11 Tf
-389.136 241.318 Td
-(so) Tj
-ET
-BT
-/F0 11 Tf
-401.665 241.318 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-417.857 241.318 Td
-(page) Tj
-ET
-BT
-/F0 11 Tf
-441.375 241.318 Td
-(starts) Tj
-ET
-BT
-/F0 11 Tf
-467.346 241.318 Td
-(with) Tj
-ET
-BT
-/F0 11 Tf
-489.654 241.318 Td
-(it) Tj
-ET
-BT
-/F0 11 Tf
-498.520 241.318 Td
-(hidden) Tj
-ET
-BT
-/F0 11 Tf
-106.524 225.929 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-125.158 225.929 Td
-(has) Tj
-ET
-BT
-/F0 11 Tf
-142.571 225.929 Td
-(a) Tj
-ET
-BT
-/F0 11 Tf
-150.205 225.929 Td
-(check) Tj
-ET
-BT
-/F0 11 Tf
-178.607 225.929 Td
-(box) Tj
-ET
-BT
-/F0 11 Tf
-197.857 225.929 Td
+162.734 410.597 Td
 (that) Tj
 ET
 BT
 /F0 11 Tf
-217.107 225.929 Td
-(shows) Tj
+181.984 410.597 Td
+(mbm_grdplot) Tj
 ET
 BT
 /F0 11 Tf
-247.357 225.929 Td
-(it,) Tj
+244.629 410.597 Td
+(uses,) Tj
 ET
 BT
 /F0 11 Tf
-258.973 225.929 Td
-(translucent.) Tj
-ET
-BT
-/F0 11 Tf
-312.741 225.929 Td
-(The) Tj
-ET
-BT
-/F0 11 Tf
-332.596 225.929 Td
-(mesh) Tj
-ET
-BT
-/F0 11 Tf
-358.567 225.929 Td
-(has) Tj
-ET
-BT
-/F0 11 Tf
-375.980 225.929 Td
-(no) Tj
-ET
-BT
-/F0 11 Tf
-389.730 225.929 Td
-(normals,) Tj
-ET
-BT
-/F0 11 Tf
-430.672 225.929 Td
-(so) Tj
-ET
-BT
-/F0 11 Tf
-443.201 225.929 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-459.393 225.929 Td
-(page) Tj
-ET
-BT
-/F0 11 Tf
-482.911 225.929 Td
-(shades) Tj
-ET
-BT
-/F0 11 Tf
-514.987 225.929 Td
-(it) Tj
-ET
-BT
-/F0 11 Tf
-106.524 210.540 Td
-(from) Tj
-ET
-BT
-/F0 11 Tf
-130.658 210.540 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-146.850 210.540 Td
-(relief) Tj
-ET
-BT
-/F0 11 Tf
-172.810 210.540 Td
-(of) Tj
-ET
-BT
-/F0 11 Tf
-184.723 210.540 Td
-(what) Tj
-ET
-BT
-/F0 11 Tf
-208.857 210.540 Td
-(it) Tj
-ET
-BT
-/F0 11 Tf
-217.723 210.540 Td
-(sees;) Tj
-ET
-BT
-/F0 11 Tf
-241.857 210.540 Td
-(with) Tj
-ET
-/F1 11 Tf
-BT
-/F1 11 Tf
-264.165 210.540 Td
-(--exaggeration) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-334.730 210.540 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-350.922 210.540 Td
-(scale) Tj
-ET
-BT
-/F0 11 Tf
-375.661 210.540 Td
-(axes) Tj
-ET
-BT
-/F0 11 Tf
-397.958 210.540 Td
-(say) Tj
-ET
-BT
-/F0 11 Tf
-415.371 210.540 Td
-(what) Tj
-ET
-BT
-/F0 11 Tf
-439.505 210.540 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-455.697 210.540 Td
-(Up) Tj
-ET
-BT
-/F0 11 Tf
-471.889 210.540 Td
-(axis) Tj
-ET
-BT
-/F0 11 Tf
-492.360 210.540 Td
-(stands) Tj
-ET
-BT
-/F0 11 Tf
-522.610 210.540 Td
-(for.) Tj
-ET
-BT
-/F0 11 Tf
-540.936 210.540 Td
-(It) Tj
-ET
-BT
-/F0 11 Tf
-106.524 195.151 Td
-(must) Tj
-ET
-BT
-/F0 11 Tf
-130.669 195.151 Td
-(be) Tj
-ET
-BT
-/F0 11 Tf
-143.803 195.151 Td
-(served) Tj
-ET
-BT
-/F0 11 Tf
-175.263 195.151 Td
+269.071 410.597 Td
 (over) Tj
 ET
 BT
 /F0 11 Tf
-197.560 195.151 Td
-(HTTP,) Tj
-ET
-BT
-/F0 11 Tf
-230.560 195.151 Td
-(like) Tj
-ET
-BT
-/F0 11 Tf
-249.810 195.151 Td
+291.368 410.597 Td
 (the) Tj
 ET
+BT
+/F0 11 Tf
+307.560 410.597 Td
+(range) Tj
+ET
+BT
+/F0 11 Tf
+334.741 410.597 Td
+(of) Tj
+ET
+BT
+/F0 11 Tf
+346.654 410.597 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+362.846 410.597 Td
+(grid) Tj
+ET
+BT
+/F0 11 Tf
+383.317 410.597 Td
+(\(the) Tj
+ET
+BT
+/F0 11 Tf
+403.172 410.597 Td
+(grid) Tj
+ET
+BT
+/F0 11 Tf
+423.643 410.597 Td
+(value,) Tj
+ET
+BT
+/F0 11 Tf
+452.969 410.597 Td
+(not) Tj
+ET
+BT
+/F0 11 Tf
+469.777 410.597 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+485.969 410.597 Td
+(exaggerated) Tj
+ET
+BT
+/F0 11 Tf
+106.524 395.208 Td
+(height\),) Tj
+ET
+BT
+/F0 11 Tf
+143.187 395.208 Td
+(written) Tj
+ET
+BT
+/F0 11 Tf
+177.100 395.208 Td
+(as) Tj
+ET
+BT
+/F0 11 Tf
+189.013 395.208 Td
+(part) Tj
+ET
+BT
+/F0 11 Tf
+208.868 395.208 Td
+(of) Tj
+ET
+BT
+/F0 11 Tf
+220.781 395.208 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+236.973 395.208 Td
+(model) Tj
+ET
+BT
+/F0 11 Tf
+267.223 395.208 Td
+(\(about) Tj
+ET
+BT
+/F0 11 Tf
+298.078 395.208 Td
+(15) Tj
+ET
+BT
+/F0 11 Tf
+311.828 395.208 Td
+(per) Tj
+ET
+BT
+/F0 11 Tf
+328.625 395.208 Td
+(cent) Tj
+ET
+BT
+/F0 11 Tf
+349.701 395.208 Td
+(more) Tj
+ET
+BT
+/F0 11 Tf
+375.056 395.208 Td
+(bytes\),) Tj
+ET
+BT
+/F0 11 Tf
+407.440 395.208 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+426.074 395.208 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+442.266 395.208 Td
+(pages) Tj
+ET
+BT
+/F0 11 Tf
+470.063 395.208 Td
+(written) Tj
+ET
+BT
+/F0 11 Tf
+503.976 395.208 Td
+(by) Tj
+ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-266.002 195.151 Td
+106.524 379.819 Td
 (--html) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-298.078 195.151 Td
-(page.) Tj
+138.600 379.819 Td
+(and) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-87.274 164.373 Td
-(--cesium-url) Tj
-ET
-/F2 11 Tf
-BT
-/F2 11 Tf
-147.455 164.373 Td
-(URL) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-106.524 148.984 Td
-(The) Tj
-ET
-BT
-/F0 11 Tf
-126.379 148.984 Td
-(directory) Tj
-ET
-BT
-/F0 11 Tf
-168.839 148.984 Td
-(of) Tj
-ET
-BT
-/F0 11 Tf
-180.752 148.984 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-196.944 148.984 Td
-(CesiumJS) Tj
-ET
-BT
-/F0 11 Tf
-243.705 148.984 Td
-(build) Tj
-ET
-BT
-/F0 11 Tf
-269.071 148.984 Td
-(that) Tj
-ET
-BT
-/F0 11 Tf
-288.321 148.984 Td
-(the) Tj
-ET
-/F1 11 Tf
-BT
-/F1 11 Tf
-304.513 148.984 Td
+157.234 379.819 Td
 (--cesium-html) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-372.636 148.984 Td
-(page) Tj
+225.357 379.819 Td
+(have) Tj
 ET
 BT
 /F0 11 Tf
-396.154 148.984 Td
-(loads,) Tj
+248.875 379.819 Td
+(a) Tj
 ET
 BT
 /F0 11 Tf
-424.875 148.984 Td
-(with) Tj
+256.509 379.819 Td
+("color) Tj
 ET
 BT
 /F0 11 Tf
-447.183 148.984 Td
-(Cesium.js) Tj
+286.352 379.819 Td
+(by) Tj
 ET
 BT
 /F0 11 Tf
-493.636 148.984 Td
-(and) Tj
+300.102 379.819 Td
+(height") Tj
 ET
 BT
 /F0 11 Tf
-106.524 133.595 Td
-(Widgets/widgets.css) Tj
+334.840 379.819 Td
+(check) Tj
 ET
 BT
 /F0 11 Tf
-199.408 133.595 Td
+363.242 379.819 Td
+(box) Tj
+ET
+BT
+/F0 11 Tf
+382.492 379.819 Td
+(that) Tj
+ET
+BT
+/F0 11 Tf
+401.742 379.819 Td
+(turns) Tj
+ET
+BT
+/F0 11 Tf
+426.492 379.819 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+442.684 379.819 Td
+(colors) Tj
+ET
+BT
+/F0 11 Tf
+472.318 379.819 Td
+(off,) Tj
+ET
+BT
+/F0 11 Tf
+490.644 379.819 Td
+(which) Tj
+ET
+BT
+/F0 11 Tf
+520.278 379.819 Td
+(shows) Tj
+ET
+BT
+/F0 11 Tf
+106.524 364.430 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+122.716 364.430 Td
+(model) Tj
+ET
+BT
+/F0 11 Tf
+152.966 364.430 Td
 (in) Tj
 ET
 BT
 /F0 11 Tf
-210.716 133.595 Td
+164.274 364.430 Td
+(one) Tj
+ET
+BT
+/F0 11 Tf
+182.908 364.430 Td
+(gray,) Tj
+ET
+BT
+/F0 11 Tf
+207.955 364.430 Td
+(as) Tj
+ET
+BT
+/F0 11 Tf
+219.868 364.430 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+236.060 364.430 Td
+(pages) Tj
+ET
+BT
+/F0 11 Tf
+263.857 364.430 Td
+(of) Tj
+ET
+BT
+/F0 11 Tf
+275.770 364.430 Td
+(mbmesh) Tj
+ET
+BT
+/F0 11 Tf
+315.799 364.430 Td
+(do.) Tj
+ET
+BT
+/F0 11 Tf
+332.299 364.430 Td
+(The) Tj
+ET
+BT
+/F0 11 Tf
+352.154 364.430 Td
+(same) Tj
+ET
+BT
+/F0 11 Tf
+377.509 364.430 Td
+(table) Tj
+ET
+BT
+/F0 11 Tf
+401.643 364.430 Td
+(colors) Tj
+ET
+BT
+/F0 11 Tf
+431.277 364.430 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+447.469 364.430 Td
+(tiles) Tj
+ET
+BT
+/F0 11 Tf
+468.556 364.430 Td
+(of) Tj
+ET
+BT
+/F0 11 Tf
+480.469 364.430 Td
+(mbmesh) Tj
+ET
+BT
+/F0 11 Tf
+520.498 364.430 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+106.524 349.041 Td
+(mbglb2tiles.) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+87.274 318.263 Td
+(--html,) Tj
+ET
+BT
+/F1 11 Tf
+122.100 318.263 Td
+(-W) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+106.524 302.874 Td
+(Generate) Tj
+ET
+BT
+/F0 11 Tf
+148.973 302.874 Td
+(an) Tj
+ET
+BT
+/F0 11 Tf
+162.107 302.874 Td
+(HTML) Tj
+ET
+BT
+/F0 11 Tf
+196.020 302.874 Td
+(viewer) Tj
+ET
+BT
+/F0 11 Tf
+228.701 302.874 Td
+(page) Tj
+ET
+BT
+/F0 11 Tf
+252.219 302.874 Td
+(with) Tj
+ET
+BT
+/F0 11 Tf
+274.527 302.874 Td
+(inline) Tj
+ET
+BT
+/F0 11 Tf
+302.335 302.874 Td
+(3D) Tj
+ET
+BT
+/F0 11 Tf
+318.527 302.874 Td
+(visualization) Tj
+ET
+BT
+/F0 11 Tf
+377.498 302.874 Td
+(using) Tj
+ET
+BT
+/F0 11 Tf
+404.085 302.874 Td
+(X3DOM.) Tj
+ET
+BT
+/F0 11 Tf
+448.690 302.874 Td
+(The) Tj
+ET
+BT
+/F0 11 Tf
+468.545 302.874 Td
+(HTML) Tj
+ET
+BT
+/F0 11 Tf
+502.458 302.874 Td
+(file) Tj
+ET
+BT
+/F0 11 Tf
+106.524 287.485 Td
+(includes) Tj
+ET
+BT
+/F0 11 Tf
+145.937 287.485 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+162.129 287.485 Td
+(glTF/GLB) Tj
+ET
+BT
+/F0 11 Tf
+211.332 287.485 Td
+(model) Tj
+ET
+BT
+/F0 11 Tf
+241.582 287.485 Td
+(with) Tj
+ET
+BT
+/F0 11 Tf
+263.890 287.485 Td
+(interactive) Tj
+ET
+BT
+/F0 11 Tf
+313.071 287.485 Td
+(navigation) Tj
+ET
+BT
+/F0 11 Tf
+362.263 287.485 Td
+(controls,) Tj
+ET
+BT
+/F0 11 Tf
+403.205 287.485 Td
+(processing) Tj
+ET
+BT
+/F0 11 Tf
+453.002 287.485 Td
+(provenance) Tj
+ET
+BT
+/F0 11 Tf
+106.524 272.096 Td
+(metadata) Tj
+ET
+BT
+/F0 11 Tf
+148.984 272.096 Td
+(\(command) Tj
+ET
+BT
+/F0 11 Tf
+198.781 272.096 Td
+(line,) Tj
+ET
+BT
+/F0 11 Tf
+220.781 272.096 Td
+(timestamps,) Tj
+ET
+BT
+/F0 11 Tf
+276.397 272.096 Td
+(grid) Tj
+ET
+BT
+/F0 11 Tf
+296.868 272.096 Td
+(parameters,) Tj
+ET
+BT
+/F0 11 Tf
+350.625 272.096 Td
+(GeoOrigin) Tj
+ET
+BT
+/F0 11 Tf
+400.422 272.096 Td
+(settings,) Tj
+ET
+BT
+/F0 11 Tf
+439.538 272.096 Td
+(compression) Tj
+ET
+BT
+/F0 11 Tf
+497.893 272.096 Td
+(options\),) Tj
+ET
+BT
+/F0 11 Tf
+106.524 256.707 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+125.158 256.707 Td
+(links) Tj
+ET
+BT
+/F0 11 Tf
+149.303 256.707 Td
+(to) Tj
+ET
+BT
+/F0 11 Tf
+160.611 256.707 Td
+(MB-System) Tj
+ET
+BT
+/F0 11 Tf
+216.535 256.707 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+235.169 256.707 Td
+(X3DOM) Tj
+ET
+BT
+/F0 11 Tf
+277.024 256.707 Td
+(documentation.) Tj
+ET
+BT
+/F0 11 Tf
+347.908 256.707 Td
+(The) Tj
+ET
+BT
+/F0 11 Tf
+367.763 256.707 Td
+(viewer) Tj
+ET
+BT
+/F0 11 Tf
+400.444 256.707 Td
+(requires) Tj
+ET
+BT
+/F0 11 Tf
+438.625 256.707 Td
+(serving) Tj
+ET
+BT
+/F0 11 Tf
+473.759 256.707 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+489.951 256.707 Td
+(files) Tj
+ET
+BT
+/F0 11 Tf
+511.643 256.707 Td
+(via) Tj
+ET
+BT
+/F0 11 Tf
+106.524 241.318 Td
+(HTTP) Tj
+ET
+BT
+/F0 11 Tf
+136.774 241.318 Td
+(to) Tj
+ET
+BT
+/F0 11 Tf
+148.082 241.318 Td
+(avoid) Tj
+ET
+BT
+/F0 11 Tf
+175.274 241.318 Td
+(browser) Tj
+ET
+BT
+/F0 11 Tf
+213.455 241.318 Td
+(CORS) Tj
+ET
+BT
+/F0 11 Tf
+244.937 241.318 Td
+(restrictions) Tj
+ET
+BT
+/F0 11 Tf
+296.571 241.318 Td
+(when) Tj
+ET
+BT
+/F0 11 Tf
+323.147 241.318 Td
+(loading) Tj
+ET
+BT
+/F0 11 Tf
+358.897 241.318 Td
+(local) Tj
+ET
+BT
+/F0 11 Tf
+383.031 241.318 Td
+(files.) Tj
+ET
+BT
+/F0 11 Tf
+407.473 241.318 Td
+(The) Tj
+ET
+BT
+/F0 11 Tf
+427.328 241.318 Td
+(program) Tj
+ET
+BT
+/F0 11 Tf
+467.346 241.318 Td
+(does) Tj
+ET
+BT
+/F0 11 Tf
+490.259 241.318 Td
+(not) Tj
+ET
+BT
+/F0 11 Tf
+507.067 241.318 Td
+(start) Tj
+ET
+BT
+/F0 11 Tf
+528.759 241.318 Td
+(a) Tj
+ET
+BT
+/F0 11 Tf
+106.524 225.929 Td
+(web) Tj
+ET
+BT
+/F0 11 Tf
+127.600 225.929 Td
+(server) Tj
+ET
+BT
+/F0 11 Tf
+157.223 225.929 Td
+(or) Tj
+ET
+BT
+/F0 11 Tf
+169.136 225.929 Td
+(a) Tj
+ET
+BT
+/F0 11 Tf
+176.770 225.929 Td
+(browser;) Tj
+ET
+BT
+/F0 11 Tf
+218.009 225.929 Td
 (it) Tj
 ET
 BT
 /F0 11 Tf
-219.582 133.595 Td
-(\(default) Tj
+226.875 225.929 Td
+(logs) Tj
 ET
 BT
 /F0 11 Tf
+247.962 225.929 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+264.154 225.929 Td
+(command) Tj
+ET
+BT
+/F0 11 Tf
+310.288 225.929 Td
+(to) Tj
+ET
+BT
+/F0 11 Tf
+321.596 225.929 Td
+(run) Tj
+ET
+BT
+/F0 11 Tf
+339.009 225.929 Td
+(\(python3) Tj
+ET
+BT
+/F0 11 Tf
+381.480 225.929 Td
+(-m) Tj
+ET
+BT
+/F0 11 Tf
+396.451 225.929 Td
+(http.server) Tj
+ET
+BT
+/F0 11 Tf
+445.940 225.929 Td
+(8000) Tj
+ET
+BT
+/F0 11 Tf
+470.690 225.929 Td
+(--bind) Tj
+ET
+BT
+/F0 11 Tf
+500.324 225.929 Td
+(127.0.0.1) Tj
+ET
+BT
+/F0 11 Tf
+106.524 210.540 Td
+(--directory) Tj
+ET
+BT
+/F0 11 Tf
+156.310 210.540 Td
+(<output) Tj
+ET
+BT
+/F0 11 Tf
+193.380 210.540 Td
+(directory>\)) Tj
+ET
+BT
+/F0 11 Tf
+245.707 210.540 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+264.341 210.540 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+280.533 210.540 Td
+(URL) Tj
+ET
+BT
+/F0 11 Tf
+305.283 210.540 Td
+(to) Tj
+ET
+BT
+/F0 11 Tf
+316.591 210.540 Td
+(open.) Tj
+ET
+BT
+/F0 11 Tf
+343.475 210.540 Td
+(The) Tj
+ET
+BT
+/F0 11 Tf
+363.330 210.540 Td
+(processing) Tj
+ET
+BT
+/F0 11 Tf
+413.127 210.540 Td
+(log) Tj
+ET
+BT
+/F0 11 Tf
+429.935 210.540 Td
+(is) Tj
+ET
+BT
+/F0 11 Tf
+440.022 210.540 Td
+(written) Tj
+ET
+BT
+/F0 11 Tf
+473.935 210.540 Td
+(to) Tj
+ET
+BT
+/F0 11 Tf
+106.524 195.151 Td
+(<output_root>.log,) Tj
+ET
+BT
+/F0 11 Tf
+192.577 195.151 Td
+(one) Tj
+ET
+BT
+/F0 11 Tf
+211.211 195.151 Td
+(message) Tj
+ET
+BT
+/F0 11 Tf
+251.229 195.151 Td
+(a) Tj
+ET
+BT
+/F0 11 Tf
+258.863 195.151 Td
+(line,) Tj
+ET
+BT
+/F0 11 Tf
+280.863 195.151 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+299.497 195.151 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+315.689 195.151 Td
+(page) Tj
+ET
+BT
+/F0 11 Tf
+339.207 195.151 Td
+(loads) Tj
+ET
+BT
+/F0 11 Tf
+365.178 195.151 Td
+(it) Tj
+ET
+BT
+/F0 11 Tf
+374.044 195.151 Td
+(when) Tj
+ET
+BT
+/F0 11 Tf
+400.620 195.151 Td
+(its) Tj
+ET
+BT
+/F0 11 Tf
+413.765 195.151 Td
+(Processing) Tj
+ET
+BT
+/F0 11 Tf
+464.178 195.151 Td
+(Log) Tj
+ET
+BT
+/F0 11 Tf
+484.649 195.151 Td
+(panel) Tj
+ET
+BT
+/F0 11 Tf
+511.225 195.151 Td
+(is) Tj
+ET
+BT
+/F0 11 Tf
+521.312 195.151 Td
+(first) Tj
+ET
+BT
+/F0 11 Tf
+106.524 179.762 Td
+(opened,) Tj
+ET
+BT
+/F0 11 Tf
+143.792 179.762 Td
+(so) Tj
+ET
+BT
+/F0 11 Tf
+156.321 179.762 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+172.513 179.762 Td
+(page) Tj
+ET
+BT
+/F0 11 Tf
+196.031 179.762 Td
+(need) Tj
+ET
+BT
+/F0 11 Tf
+219.549 179.762 Td
+(not) Tj
+ET
+BT
+/F0 11 Tf
+236.357 179.762 Td
+(hold) Tj
+ET
+BT
+/F0 11 Tf
+258.665 179.762 Td
+(it.) Tj
+ET
+BT
+/F0 11 Tf
+270.281 179.762 Td
+(Output) Tj
+ET
+BT
+/F0 11 Tf
+303.589 179.762 Td
+(file:) Tj
+ET
+BT
+/F0 11 Tf
+324.060 179.762 Td
+(<output_root>.html) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+87.274 133.595 Td
+(--cesium-html) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
 106.524 118.206 Td
-(https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium\).) Tj
+(Also) Tj
+ET
+BT
+/F0 11 Tf
+130.053 118.206 Td
+(write) Tj
+ET
+BT
+/F0 11 Tf
+155.408 118.206 Td
+(a) Tj
+ET
+BT
+/F0 11 Tf
+163.042 118.206 Td
+(viewer) Tj
+ET
+BT
+/F0 11 Tf
+195.723 118.206 Td
+(page) Tj
+ET
+BT
+/F0 11 Tf
+219.241 118.206 Td
+(for) Tj
+ET
+BT
+/F0 11 Tf
+234.817 118.206 Td
+(CesiumJS,) Tj
+ET
+BT
+/F0 11 Tf
+284.328 118.206 Td
+(<output_root>_cesium.html) Tj
+ET
+BT
+/F0 11 Tf
+410.410 118.206 Td
+(beside) Tj
+ET
+BT
+/F0 11 Tf
+441.265 118.206 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+457.457 118.206 Td
+(model,) Tj
+ET
+BT
+/F0 11 Tf
+490.457 118.206 Td
+(which) Tj
+ET
+BT
+/F0 11 Tf
+520.091 118.206 Td
+(has) Tj
+ET
+BT
+/F0 11 Tf
+537.504 118.206 Td
+(a) Tj
+ET
+BT
+/F0 11 Tf
+106.524 102.817 Td
+(check) Tj
+ET
+BT
+/F0 11 Tf
+134.926 102.817 Td
+(box) Tj
+ET
+BT
+/F0 11 Tf
+154.176 102.817 Td
+(for) Tj
+ET
+BT
+/F0 11 Tf
+169.752 102.817 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+185.944 102.817 Td
+(model,) Tj
+ET
+BT
+/F0 11 Tf
+218.944 102.817 Td
+(a) Tj
+ET
+BT
+/F0 11 Tf
+226.578 102.817 Td
+(link) Tj
+ET
+BT
+/F0 11 Tf
+246.444 102.817 Td
+(to) Tj
+ET
+BT
+/F0 11 Tf
+257.752 102.817 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+273.944 102.817 Td
+(log,) Tj
+ET
+BT
+/F0 11 Tf
+293.502 102.817 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+309.694 102.817 Td
+(Viewpoint) Tj
+ET
+BT
+/F0 11 Tf
+358.886 102.817 Td
+(menu) Tj
+ET
+BT
+/F0 11 Tf
+386.078 102.817 Td
+(\(overview) Tj
+ET
+BT
+/F0 11 Tf
+433.422 102.817 Td
+(looking) Tj
+ET
+BT
+/F0 11 Tf
+469.788 102.817 Td
+(down,) Tj
+ET
+BT
+/F0 11 Tf
+499.730 102.817 Td
+(45) Tj
+ET
+BT
+/F0 11 Tf
+513.480 102.817 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+532.114 102.817 Td
+(15) Tj
 ET
 /F0 11 Tf
 BT
@@ -7349,7 +7306,7 @@ ET
 endstream
 endobj
 20 0 obj
-18725
+18195
 endobj
 21 0 obj
 <<
@@ -7376,1975 +7333,1914 @@ endobj
 >>
 stream
 BT
-/F1 11 Tf
-87.274 702.988 Td
-(--geoviewpoint=) Tj
+/F0 11 Tf
+106.524 702.988 Td
+(degrees) Tj
 ET
-/F2 11 Tf
 BT
-/F2 11 Tf
-162.591 702.988 Td
-(VALUES) Tj
+/F0 11 Tf
+142.868 702.988 Td
+(from) Tj
+ET
+BT
+/F0 11 Tf
+167.002 702.988 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+183.194 702.988 Td
+(south,) Tj
+ET
+BT
+/F0 11 Tf
+212.531 702.988 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+231.165 702.988 Td
+(the) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+247.357 702.988 Td
+(--geoviewpoint) Tj
 ET
 /F0 11 Tf
+BT
+/F0 11 Tf
+319.154 702.988 Td
+(viewpoints\),) Tj
+ET
+BT
+/F0 11 Tf
+376.596 702.988 Td
+(a) Tj
+ET
+BT
+/F0 11 Tf
+384.230 702.988 Td
+(Copy) Tj
+ET
+BT
+/F0 11 Tf
+410.817 702.988 Td
+(viewpoint) Tj
+ET
+BT
+/F0 11 Tf
+457.567 702.988 Td
+(button) Tj
+ET
+BT
+/F0 11 Tf
+488.433 702.988 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+507.067 702.988 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+523.259 702.988 Td
+(scale) Tj
+ET
 BT
 /F0 11 Tf
 106.524 687.599 Td
-(With) Tj
+(axes.) Tj
+ET
+BT
+/F0 11 Tf
+131.571 687.599 Td
+(The) Tj
+ET
+BT
+/F0 11 Tf
+151.426 687.599 Td
+(globe) Tj
+ET
+BT
+/F0 11 Tf
+178.618 687.599 Td
+(of) Tj
+ET
+BT
+/F0 11 Tf
+190.531 687.599 Td
+(Cesium) Tj
+ET
+BT
+/F0 11 Tf
+226.897 687.599 Td
+(would) Tj
+ET
+BT
+/F0 11 Tf
+257.147 687.599 Td
+(hide) Tj
+ET
+BT
+/F0 11 Tf
+278.839 687.599 Td
+(data) Tj
+ET
+BT
+/F0 11 Tf
+299.915 687.599 Td
+(below) Tj
+ET
+BT
+/F0 11 Tf
+329.549 687.599 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+345.741 687.599 Td
+(ellipsoid,) Tj
+ET
+BT
+/F0 11 Tf
+389.136 687.599 Td
+(so) Tj
+ET
+BT
+/F0 11 Tf
+401.665 687.599 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+417.857 687.599 Td
+(page) Tj
+ET
+BT
+/F0 11 Tf
+441.375 687.599 Td
+(starts) Tj
+ET
+BT
+/F0 11 Tf
+467.346 687.599 Td
+(with) Tj
+ET
+BT
+/F0 11 Tf
+489.654 687.599 Td
+(it) Tj
+ET
+BT
+/F0 11 Tf
+498.520 687.599 Td
+(hidden) Tj
+ET
+BT
+/F0 11 Tf
+106.524 672.210 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+125.158 672.210 Td
+(has) Tj
+ET
+BT
+/F0 11 Tf
+142.571 672.210 Td
+(a) Tj
+ET
+BT
+/F0 11 Tf
+150.205 672.210 Td
+(check) Tj
+ET
+BT
+/F0 11 Tf
+178.607 672.210 Td
+(box) Tj
+ET
+BT
+/F0 11 Tf
+197.857 672.210 Td
+(that) Tj
+ET
+BT
+/F0 11 Tf
+217.107 672.210 Td
+(shows) Tj
+ET
+BT
+/F0 11 Tf
+247.357 672.210 Td
+(it,) Tj
+ET
+BT
+/F0 11 Tf
+258.973 672.210 Td
+(translucent.) Tj
+ET
+BT
+/F0 11 Tf
+312.741 672.210 Td
+(The) Tj
+ET
+BT
+/F0 11 Tf
+332.596 672.210 Td
+(mesh) Tj
+ET
+BT
+/F0 11 Tf
+358.567 672.210 Td
+(has) Tj
+ET
+BT
+/F0 11 Tf
+375.980 672.210 Td
+(no) Tj
+ET
+BT
+/F0 11 Tf
+389.730 672.210 Td
+(normals,) Tj
+ET
+BT
+/F0 11 Tf
+430.672 672.210 Td
+(so) Tj
+ET
+BT
+/F0 11 Tf
+443.201 672.210 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+459.393 672.210 Td
+(page) Tj
+ET
+BT
+/F0 11 Tf
+482.911 672.210 Td
+(shades) Tj
+ET
+BT
+/F0 11 Tf
+514.987 672.210 Td
+(it) Tj
+ET
+BT
+/F0 11 Tf
+106.524 656.821 Td
+(from) Tj
+ET
+BT
+/F0 11 Tf
+130.658 656.821 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+146.850 656.821 Td
+(relief) Tj
+ET
+BT
+/F0 11 Tf
+172.810 656.821 Td
+(of) Tj
+ET
+BT
+/F0 11 Tf
+184.723 656.821 Td
+(what) Tj
+ET
+BT
+/F0 11 Tf
+208.857 656.821 Td
+(it) Tj
+ET
+BT
+/F0 11 Tf
+217.723 656.821 Td
+(sees;) Tj
+ET
+BT
+/F0 11 Tf
+241.857 656.821 Td
+(with) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-131.274 687.599 Td
+264.165 656.821 Td
+(--exaggeration) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+334.730 656.821 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+350.922 656.821 Td
+(scale) Tj
+ET
+BT
+/F0 11 Tf
+375.661 656.821 Td
+(axes) Tj
+ET
+BT
+/F0 11 Tf
+397.958 656.821 Td
+(say) Tj
+ET
+BT
+/F0 11 Tf
+415.371 656.821 Td
+(what) Tj
+ET
+BT
+/F0 11 Tf
+439.505 656.821 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+455.697 656.821 Td
+(Up) Tj
+ET
+BT
+/F0 11 Tf
+471.889 656.821 Td
+(axis) Tj
+ET
+BT
+/F0 11 Tf
+492.360 656.821 Td
+(stands) Tj
+ET
+BT
+/F0 11 Tf
+522.610 656.821 Td
+(for.) Tj
+ET
+BT
+/F0 11 Tf
+540.936 656.821 Td
+(It) Tj
+ET
+BT
+/F0 11 Tf
+106.524 641.432 Td
+(must) Tj
+ET
+BT
+/F0 11 Tf
+130.669 641.432 Td
+(be) Tj
+ET
+BT
+/F0 11 Tf
+143.803 641.432 Td
+(served) Tj
+ET
+BT
+/F0 11 Tf
+175.263 641.432 Td
+(over) Tj
+ET
+BT
+/F0 11 Tf
+197.560 641.432 Td
+(HTTP,) Tj
+ET
+BT
+/F0 11 Tf
+230.560 641.432 Td
+(like) Tj
+ET
+BT
+/F0 11 Tf
+249.810 641.432 Td
+(the) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+266.002 641.432 Td
 (--html) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-163.350 687.599 Td
-(or) Tj
+298.078 641.432 Td
+(page.) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-175.263 687.599 Td
+87.274 610.654 Td
+(--cesium-url) Tj
+ET
+/F2 11 Tf
+BT
+/F2 11 Tf
+147.455 610.654 Td
+(URL) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+106.524 595.265 Td
+(The) Tj
+ET
+BT
+/F0 11 Tf
+126.379 595.265 Td
+(directory) Tj
+ET
+BT
+/F0 11 Tf
+168.839 595.265 Td
+(of) Tj
+ET
+BT
+/F0 11 Tf
+180.752 595.265 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+196.944 595.265 Td
+(CesiumJS) Tj
+ET
+BT
+/F0 11 Tf
+243.705 595.265 Td
+(build) Tj
+ET
+BT
+/F0 11 Tf
+269.071 595.265 Td
+(that) Tj
+ET
+BT
+/F0 11 Tf
+288.321 595.265 Td
+(the) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+304.513 595.265 Td
 (--cesium-html) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-240.636 687.599 Td
-(,) Tj
+372.636 595.265 Td
+(page) Tj
 ET
 BT
 /F0 11 Tf
-246.136 687.599 Td
-(add) Tj
+396.154 595.265 Td
+(loads,) Tj
 ET
 BT
 /F0 11 Tf
-264.770 687.599 Td
-(a) Tj
-ET
-BT
-/F0 11 Tf
-272.404 687.599 Td
-(GeoViewpoint) Tj
-ET
-BT
-/F0 11 Tf
-339.922 687.599 Td
-(to) Tj
-ET
-BT
-/F0 11 Tf
-351.230 687.599 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-367.422 687.599 Td
-(page;) Tj
-ET
-BT
-/F0 11 Tf
-393.998 687.599 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-410.190 687.599 Td
-(option) Tj
-ET
-BT
-/F0 11 Tf
-441.056 687.599 Td
-(can) Tj
-ET
-BT
-/F0 11 Tf
-459.074 687.599 Td
-(be) Tj
-ET
-BT
-/F0 11 Tf
-472.208 687.599 Td
-(repeated,) Tj
-ET
-BT
-/F0 11 Tf
-514.965 687.599 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-106.524 672.210 Td
-(each) Tj
-ET
-BT
-/F0 11 Tf
-129.426 672.210 Td
-(adds) Tj
-ET
-BT
-/F0 11 Tf
-152.339 672.210 Td
-(a) Tj
-ET
-BT
-/F0 11 Tf
-159.973 672.210 Td
-(GeoViewpoint,) Tj
-ET
-BT
-/F0 11 Tf
-230.241 672.210 Td
-(written) Tj
-ET
-BT
-/F0 11 Tf
-264.154 672.210 Td
+424.875 595.265 Td
 (with) Tj
 ET
 BT
 /F0 11 Tf
-286.462 672.210 Td
-(its) Tj
+447.183 595.265 Td
+(Cesium.js) Tj
 ET
 BT
 /F0 11 Tf
-299.607 672.210 Td
-(position) Tj
-ET
-BT
-/F0 11 Tf
-337.810 672.210 Td
-(as) Tj
-ET
-BT
-/F0 11 Tf
-349.723 672.210 Td
-(latitude,) Tj
-ET
-BT
-/F0 11 Tf
-388.223 672.210 Td
-(longitude) Tj
-ET
-BT
-/F0 11 Tf
-432.531 672.210 Td
+493.636 595.265 Td
 (and) Tj
 ET
 BT
 /F0 11 Tf
-451.165 672.210 Td
-(elevation) Tj
+106.524 579.876 Td
+(Widgets/widgets.css) Tj
 ET
 BT
 /F0 11 Tf
-494.241 672.210 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-512.875 672.210 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-106.524 656.821 Td
-(GeoOrigin) Tj
-ET
-BT
-/F0 11 Tf
-156.321 656.821 Td
-(used) Tj
-ET
-BT
-/F0 11 Tf
-179.234 656.821 Td
-(again,) Tj
-ET
-BT
-/F0 11 Tf
-208.560 656.821 Td
-(named) Tj
-ET
-BT
-/F0 11 Tf
-240.636 656.821 Td
-(USER_GEOVIEW_1,) Tj
-ET
-BT
-/F0 11 Tf
-342.067 656.821 Td
-(USER_GEOVIEW_2) Tj
-ET
-BT
-/F0 11 Tf
-440.748 656.821 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-459.382 656.821 Td
-(so) Tj
-ET
-BT
-/F0 11 Tf
-471.911 656.821 Td
-(on,) Tj
-ET
-BT
-/F0 11 Tf
-488.411 656.821 Td
-(to) Tj
-ET
-BT
-/F0 11 Tf
-499.719 656.821 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-106.524 641.432 Td
-(Viewpoint) Tj
-ET
-BT
-/F0 11 Tf
-155.716 641.432 Td
-(menu) Tj
-ET
-BT
-/F0 11 Tf
-182.908 641.432 Td
-(of) Tj
-ET
-BT
-/F0 11 Tf
-194.821 641.432 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-211.013 641.432 Td
-(page,) Tj
-ET
-BT
-/F0 11 Tf
-237.281 641.432 Td
-(after) Tj
-ET
-BT
-/F0 11 Tf
-260.183 641.432 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-276.375 641.432 Td
-(two) Tj
-ET
-BT
-/F0 11 Tf
-295.625 641.432 Td
-(overview) Tj
-ET
-BT
-/F0 11 Tf
-339.306 641.432 Td
-(viewpoints,) Tj
-ET
-BT
-/F0 11 Tf
-393.085 641.432 Td
-(where) Tj
-ET
-BT
-/F0 11 Tf
-422.708 641.432 Td
-(Page) Tj
-ET
-BT
-/F0 11 Tf
-446.842 641.432 Td
-(Down) Tj
-ET
-BT
-/F0 11 Tf
-476.476 641.432 Td
-(also) Tj
-ET
-BT
-/F0 11 Tf
-496.947 641.432 Td
-(steps) Tj
-ET
-BT
-/F0 11 Tf
-106.524 626.043 Td
-(through) Tj
-ET
-BT
-/F0 11 Tf
-143.495 626.043 Td
-(them.) Tj
-ET
-BT
-/F0 11 Tf
-170.995 626.043 Td
-(The) Tj
-ET
-BT
-/F0 11 Tf
-190.850 626.043 Td
-(values) Tj
-ET
-BT
-/F0 11 Tf
-221.705 626.043 Td
-(are) Tj
-ET
-BT
-/F0 11 Tf
-237.886 626.043 Td
-(geodetic,) Tj
-ET
-BT
-/F0 11 Tf
-280.654 626.043 Td
+199.408 579.876 Td
 (in) Tj
 ET
 BT
 /F0 11 Tf
-291.962 626.043 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-308.154 626.043 Td
-(order) Tj
-ET
-BT
-/F0 11 Tf
-334.114 626.043 Td
-(of) Tj
-ET
-/F1 11 Tf
-BT
-/F1 11 Tf
-346.027 626.043 Td
-(--geoorigin) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-397.353 626.043 Td
-(,) Tj
-ET
-BT
-/F0 11 Tf
-402.853 626.043 Td
-(longitude) Tj
-ET
-BT
-/F0 11 Tf
-447.161 626.043 Td
-(first,) Tj
-ET
-BT
-/F0 11 Tf
-470.382 626.043 Td
-(so) Tj
-ET
-BT
-/F0 11 Tf
-482.911 626.043 Td
-(they) Tj
-ET
-BT
-/F0 11 Tf
-504.603 626.043 Td
-(do) Tj
-ET
-BT
-/F0 11 Tf
-518.353 626.043 Td
-(not) Tj
-ET
-BT
-/F0 11 Tf
-106.524 610.654 Td
-(depend) Tj
-ET
-BT
-/F0 11 Tf
-141.042 610.654 Td
-(on) Tj
-ET
-BT
-/F0 11 Tf
-154.792 610.654 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-170.984 610.654 Td
-(GeoOrigin) Tj
-ET
-BT
-/F0 11 Tf
-220.781 610.654 Td
-(or) Tj
-ET
-BT
-/F0 11 Tf
-232.694 610.654 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-248.886 610.654 Td
-(data) Tj
-ET
-BT
-/F0 11 Tf
-269.962 610.654 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-288.596 610.654 Td
-(can) Tj
-ET
-BT
-/F0 11 Tf
-306.614 610.654 Td
-(be) Tj
-ET
-BT
-/F0 11 Tf
-319.748 610.654 Td
-(used) Tj
-ET
-BT
-/F0 11 Tf
-342.661 610.654 Td
-(again) Tj
-ET
-BT
-/F0 11 Tf
-369.237 610.654 Td
-(in) Tj
-ET
-BT
-/F0 11 Tf
-380.545 610.654 Td
-(another) Tj
-ET
-BT
-/F0 11 Tf
-416.284 610.654 Td
-(run:) Tj
-ET
-/F2 11 Tf
-BT
-/F2 11 Tf
-106.524 595.265 Td
-(lon,lat,elev,clon,clat,celev) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-221.694 595.265 Td
-(,) Tj
-ET
-BT
-/F0 11 Tf
-227.194 595.265 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-243.386 595.265 Td
-(camera) Tj
-ET
-BT
-/F0 11 Tf
-277.893 595.265 Td
-(position) Tj
-ET
-BT
-/F0 11 Tf
-316.096 595.265 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-334.730 595.265 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-350.922 595.265 Td
-(point) Tj
-ET
-BT
-/F0 11 Tf
-376.288 595.265 Td
+210.716 579.876 Td
 (it) Tj
 ET
 BT
 /F0 11 Tf
-385.154 595.265 Td
-(looks) Tj
-ET
-BT
-/F0 11 Tf
-411.741 595.265 Td
-(at,) Tj
-ET
-BT
-/F0 11 Tf
-425.183 595.265 Td
-(or) Tj
-ET
-/F2 11 Tf
-BT
-/F2 11 Tf
-106.524 579.876 Td
-(lon,lat,elev,ax,ay,az,angle,clon,clat,celev) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-287.683 579.876 Td
-(,) Tj
-ET
-BT
-/F0 11 Tf
-293.183 579.876 Td
-(with) Tj
-ET
-BT
-/F0 11 Tf
-315.491 579.876 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-331.683 579.876 Td
-(orientation) Tj
-ET
-BT
-/F0 11 Tf
-382.096 579.876 Td
-(as) Tj
-ET
-BT
-/F0 11 Tf
-394.009 579.876 Td
-(an) Tj
-ET
-BT
-/F0 11 Tf
-407.143 579.876 Td
-(axis) Tj
-ET
-BT
-/F0 11 Tf
-427.614 579.876 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-446.248 579.876 Td
-(an) Tj
-ET
-BT
-/F0 11 Tf
-459.382 579.876 Td
-(angle,) Tj
-ET
-BT
-/F0 11 Tf
-488.708 579.876 Td
-(as) Tj
-ET
-BT
-/F0 11 Tf
-500.621 579.876 Td
-(a) Tj
+219.582 579.876 Td
+(\(default) Tj
 ET
 BT
 /F0 11 Tf
 106.524 564.487 Td
-(GeoViewpoint) Tj
-ET
-BT
-/F0 11 Tf
-174.042 564.487 Td
-(takes) Tj
-ET
-BT
-/F0 11 Tf
-199.397 564.487 Td
-(it.) Tj
-ET
-BT
-/F0 11 Tf
-211.013 564.487 Td
-(Heights) Tj
-ET
-BT
-/F0 11 Tf
-247.984 564.487 Td
-(are) Tj
-ET
-BT
-/F0 11 Tf
-264.165 564.487 Td
-(above) Tj
-ET
-BT
-/F0 11 Tf
-293.183 564.487 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-309.375 564.487 Td
-(ellipsoid.) Tj
-ET
-BT
-/F0 11 Tf
-352.770 564.487 Td
-(Without) Tj
-ET
-BT
-/F0 11 Tf
-391.578 564.487 Td
-(an) Tj
-ET
-BT
-/F0 11 Tf
-404.712 564.487 Td
-(orientation) Tj
-ET
-BT
-/F0 11 Tf
-455.125 564.487 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-471.317 564.487 Td
-(top) Tj
-ET
-BT
-/F0 11 Tf
-488.125 564.487 Td
-(of) Tj
-ET
-BT
-/F0 11 Tf
-500.038 564.487 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-516.230 564.487 Td
-(view) Tj
-ET
-BT
-/F0 11 Tf
-106.524 549.098 Td
-(is) Tj
-ET
-BT
-/F0 11 Tf
-116.611 549.098 Td
-(toward) Tj
-ET
-BT
-/F0 11 Tf
-149.908 549.098 Td
-(local) Tj
-ET
-BT
-/F0 11 Tf
-174.042 549.098 Td
-(up.) Tj
-ET
-BT
-/F0 11 Tf
-190.542 549.098 Td
-(The) Tj
+(https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium\).) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-210.397 549.098 Td
-(Copy) Tj
+87.274 533.709 Td
+(--geoviewpoint=) Tj
 ET
+/F2 11 Tf
 BT
-/F1 11 Tf
-238.205 549.098 Td
-(GeoViewpoint) Tj
+/F2 11 Tf
+162.591 533.709 Td
+(VALUES) Tj
 ET
 /F0 11 Tf
-BT
-/F0 11 Tf
-308.176 549.098 Td
-(button) Tj
-ET
-BT
-/F0 11 Tf
-339.042 549.098 Td
-(of) Tj
-ET
-BT
-/F0 11 Tf
-350.955 549.098 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-367.147 549.098 Td
-(page) Tj
-ET
-BT
-/F0 11 Tf
-390.665 549.098 Td
-(gives) Tj
-ET
-BT
-/F0 11 Tf
-416.636 549.098 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-432.828 549.098 Td
-(ten-number) Tj
-ET
-BT
-/F0 11 Tf
-486.288 549.098 Td
-(form) Tj
-ET
-BT
-/F0 11 Tf
-510.422 549.098 Td
-(for) Tj
-ET
-BT
-/F0 11 Tf
-525.998 549.098 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-106.524 533.709 Td
-(view) Tj
-ET
-BT
-/F0 11 Tf
-130.658 533.709 Td
-(on) Tj
-ET
-BT
-/F0 11 Tf
-144.408 533.709 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-160.600 533.709 Td
-(screen,) Tj
-ET
-BT
-/F0 11 Tf
-194.194 533.709 Td
-(on) Tj
-ET
-BT
-/F0 11 Tf
-207.944 533.709 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-224.136 533.709 Td
-(clipboard) Tj
-ET
-BT
-/F0 11 Tf
-268.433 533.709 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-287.067 533.709 Td
-(in) Tj
-ET
-BT
-/F0 11 Tf
-298.375 533.709 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-314.567 533.709 Td
-(X3DOM) Tj
-ET
-BT
-/F0 11 Tf
-356.422 533.709 Td
-(log.) Tj
-ET
-BT
-/F0 11 Tf
-375.980 533.709 Td
-(The) Tj
-ET
-BT
-/F0 11 Tf
-395.835 533.709 Td
-(value) Tj
-ET
-BT
-/F0 11 Tf
-422.411 533.709 Td
-(must) Tj
-ET
-BT
-/F0 11 Tf
-446.556 533.709 Td
-(be) Tj
-ET
-BT
-/F0 11 Tf
-459.690 533.709 Td
-(attached) Tj
-ET
-BT
-/F0 11 Tf
-499.092 533.709 Td
-(to) Tj
-ET
-BT
-/F0 11 Tf
-510.400 533.709 Td
-(the) Tj
-ET
 BT
 /F0 11 Tf
 106.524 518.320 Td
-(option,) Tj
-ET
-BT
-/F0 11 Tf
-140.140 518.320 Td
-(with) Tj
-ET
-BT
-/F0 11 Tf
-162.448 518.320 Td
-(an) Tj
-ET
-BT
-/F0 11 Tf
-175.582 518.320 Td
-(equals) Tj
-ET
-BT
-/F0 11 Tf
-206.437 518.320 Td
-(sign) Tj
-ET
-BT
-/F0 11 Tf
-227.524 518.320 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-246.158 518.320 Td
-(no) Tj
-ET
-BT
-/F0 11 Tf
-259.908 518.320 Td
-(spaces,) Tj
-ET
-BT
-/F0 11 Tf
-294.118 518.320 Td
-(for) Tj
-ET
-BT
-/F0 11 Tf
-309.694 518.320 Td
-(example) Tj
+(With) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-106.524 502.931 Td
-(--geoviewpoint=-122.4,36.6,-900,-122.39,36.61,-950) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-342.243 502.931 Td
-(.) Tj
-ET
-/F1 11 Tf
-BT
-/F1 11 Tf
-87.274 456.764 Td
-(--verbose,) Tj
-ET
-BT
-/F1 11 Tf
-136.147 456.764 Td
-(-V) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-106.524 441.375 Td
-(Enable) Tj
-ET
-BT
-/F0 11 Tf
-139.821 441.375 Td
-(verbose) Tj
-ET
-BT
-/F0 11 Tf
-176.781 441.375 Td
-(output) Tj
-ET
-BT
-/F0 11 Tf
-207.647 441.375 Td
-(showing) Tj
-ET
-BT
-/F0 11 Tf
-247.676 441.375 Td
-(NetCDF) Tj
-ET
-BT
-/F0 11 Tf
-287.705 441.375 Td
-(reading) Tj
-ET
-BT
-/F0 11 Tf
-323.444 441.375 Td
-(details) Tj
-ET
-BT
-/F0 11 Tf
-354.915 441.375 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-373.549 441.375 Td
-(memory) Tj
-ET
-BT
-/F0 11 Tf
-412.962 441.375 Td
-(allocation) Tj
-ET
-BT
-/F0 11 Tf
-459.096 441.375 Td
-(information.) Tj
-ET
-/F1 11 Tf
-BT
-/F1 11 Tf
-87.274 395.208 Td
-(--help,) Tj
-ET
-BT
-/F1 11 Tf
-120.274 395.208 Td
-(-H) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-106.524 379.819 Td
-(Display) Tj
-ET
-BT
-/F0 11 Tf
-143.495 379.819 Td
-(help) Tj
-ET
-BT
-/F0 11 Tf
-165.187 379.819 Td
-(message) Tj
-ET
-BT
-/F0 11 Tf
-205.205 379.819 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-223.839 379.819 Td
-(exit.) Tj
-ET
-/F1 11 Tf
-BT
-/F1 11 Tf
-68.024 333.652 Td
-(GEOREFERENCE) Tj
-ET
-BT
-/F1 11 Tf
-163.064 333.652 Td
-(AND) Tj
-ET
-BT
-/F1 11 Tf
-189.640 333.652 Td
-(PROVENANCE) Tj
-ET
-BT
-/F1 11 Tf
-269.995 333.652 Td
-(METADATA) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-87.274 318.263 Td
-(The) Tj
-ET
-BT
-/F0 11 Tf
-107.129 318.263 Td
-(glTF) Tj
-ET
-BT
-/F0 11 Tf
-131.274 318.263 Td
-(file) Tj
-ET
-BT
-/F0 11 Tf
-148.687 318.263 Td
-(records) Tj
-ET
-BT
-/F0 11 Tf
-183.810 318.263 Td
-(where) Tj
-ET
-BT
-/F0 11 Tf
-213.433 318.263 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-229.625 318.263 Td
-(model) Tj
-ET
-BT
-/F0 11 Tf
-259.875 318.263 Td
-(is) Tj
-ET
-BT
-/F0 11 Tf
-269.962 318.263 Td
-(on) Tj
-ET
-BT
-/F0 11 Tf
-283.712 318.263 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-299.904 318.263 Td
-(Earth) Tj
-ET
-BT
-/F0 11 Tf
-326.480 318.263 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-345.114 318.263 Td
-(how) Tj
-ET
-BT
-/F0 11 Tf
-366.806 318.263 Td
-(it) Tj
-ET
-BT
-/F0 11 Tf
-375.672 318.263 Td
-(was) Tj
-ET
-BT
-/F0 11 Tf
-395.527 318.263 Td
-(made) Tj
-ET
-BT
-/F0 11 Tf
-422.103 318.263 Td
-(in) Tj
-ET
-BT
-/F0 11 Tf
-433.411 318.263 Td
-(its) Tj
-ET
-/F1 11 Tf
-BT
-/F1 11 Tf
-446.556 318.263 Td
-(asset.extras) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-500.621 318.263 Td
-(,) Tj
-ET
-BT
-/F0 11 Tf
-506.121 318.263 Td
-(in) Tj
-ET
-BT
-/F0 11 Tf
-517.429 318.263 Td
-(three) Tj
-ET
-BT
-/F0 11 Tf
-87.274 302.874 Td
-(blocks.) Tj
-ET
-/F1 11 Tf
-BT
-/F1 11 Tf
-121.495 302.874 Td
-(georeference) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-184.096 302.874 Td
-(gives) Tj
-ET
-BT
-/F0 11 Tf
-210.067 302.874 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-226.259 302.874 Td
-(coordinate) Tj
-ET
-BT
-/F0 11 Tf
-275.440 302.874 Td
-(reference) Tj
-ET
-BT
-/F0 11 Tf
-319.099 302.874 Td
-(system) Tj
-ET
-BT
-/F0 11 Tf
-352.407 302.874 Td
-(\() Tj
-ET
-/F1 11 Tf
-BT
-/F1 11 Tf
-356.070 302.874 Td
-(EPSG:4978) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-410.465 302.874 Td
-(\),) Tj
-ET
-BT
-/F0 11 Tf
-419.628 302.874 Td
-(whether) Tj
-ET
-BT
-/F0 11 Tf
-457.809 302.874 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-474.001 302.874 Td
-(vertices) Tj
-ET
-BT
-/F0 11 Tf
-510.961 302.874 Td
-(are) Tj
-ET
-/F1 11 Tf
-BT
-/F1 11 Tf
-87.274 287.485 Td
-(absolute) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-129.140 287.485 Td
-(or) Tj
-ET
-/F1 11 Tf
-BT
-/F1 11 Tf
-141.053 287.485 Td
-(relativeToCenter) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-221.694 287.485 Td
-(,) Tj
-ET
-BT
-/F0 11 Tf
-227.194 287.485 Td
-(the) Tj
-ET
-/F1 11 Tf
-BT
-/F1 11 Tf
-243.386 287.485 Td
-(center) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-275.451 287.485 Td
-(\(the) Tj
-ET
-BT
-/F0 11 Tf
-295.306 287.485 Td
-(GeoOrigin) Tj
-ET
-BT
-/F0 11 Tf
-345.103 287.485 Td
-(as) Tj
-ET
-BT
-/F0 11 Tf
-357.016 287.485 Td
-(ECEF) Tj
-ET
-BT
-/F0 11 Tf
-386.661 287.485 Td
-(meters,) Tj
-ET
-BT
-/F0 11 Tf
-421.487 287.485 Td
-(with) Tj
-ET
-BT
-/F0 11 Tf
-443.795 287.485 Td
-(absolute) Tj
-ET
-BT
-/F0 11 Tf
-483.208 287.485 Td
-(=) Tj
-ET
-BT
-/F0 11 Tf
-492.162 287.485 Td
-(vertex) Tj
-ET
-BT
-/F0 11 Tf
-522.401 287.485 Td
-(+) Tj
-ET
-BT
-/F0 11 Tf
-87.274 272.096 Td
-(center\),) Tj
-ET
-BT
-/F0 11 Tf
-123.310 272.096 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-139.502 272.096 Td
-(same) Tj
-ET
-BT
-/F0 11 Tf
-164.857 272.096 Td
-(point) Tj
-ET
-BT
-/F0 11 Tf
-190.223 272.096 Td
-(as) Tj
-ET
-/F1 11 Tf
-BT
-/F1 11 Tf
-202.136 272.096 Td
-(geodeticCenter) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-275.748 272.096 Td
-(\(longitude,) Tj
-ET
-BT
-/F0 11 Tf
-326.469 272.096 Td
-(latitude,) Tj
-ET
-BT
-/F0 11 Tf
-364.969 272.096 Td
-(height\),) Tj
-ET
-BT
-/F0 11 Tf
-401.632 272.096 Td
-(the) Tj
-ET
-/F1 11 Tf
-BT
-/F1 11 Tf
-417.824 272.096 Td
-(heightReference) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-496.936 272.096 Td
-(\(the) Tj
-ET
-BT
-/F0 11 Tf
-87.274 256.707 Td
-(ellipsoid\)) Tj
-ET
-BT
-/F0 11 Tf
-131.582 256.707 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-150.216 256.707 Td
-(the) Tj
-ET
-/F1 11 Tf
-BT
-/F1 11 Tf
-166.408 256.707 Td
-(extent) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-197.868 256.707 Td
-(of) Tj
-ET
-BT
-/F0 11 Tf
-209.781 256.707 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-225.973 256.707 Td
-(grid.) Tj
-ET
-/F1 11 Tf
-BT
-/F1 11 Tf
-249.194 256.707 Td
-(provenance) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-306.328 256.707 Td
-(gives) Tj
-ET
-BT
-/F0 11 Tf
-332.299 256.707 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-348.491 256.707 Td
-(software) Tj
-ET
-BT
-/F0 11 Tf
-389.114 256.707 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-407.748 256.707 Td
-(version,) Tj
-ET
-BT
-/F0 11 Tf
-445.632 256.707 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-461.824 256.707 Td
-(time) Tj
-ET
-BT
-/F0 11 Tf
-484.132 256.707 Td
-(of) Tj
-ET
-BT
-/F0 11 Tf
-496.045 256.707 Td
-(execution) Tj
-ET
-BT
-/F0 11 Tf
-87.274 241.318 Td
-(\(UTC\),) Tj
-ET
-BT
-/F0 11 Tf
-122.100 241.318 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-138.292 241.318 Td
-(command) Tj
-ET
-BT
-/F0 11 Tf
-184.426 241.318 Td
-(line,) Tj
-ET
-BT
-/F0 11 Tf
-206.426 241.318 Td
-(working) Tj
-ET
-BT
-/F0 11 Tf
-245.839 241.318 Td
-(directory,) Tj
-ET
-BT
-/F0 11 Tf
-291.049 241.318 Td
-(user) Tj
-ET
-BT
-/F0 11 Tf
-312.125 241.318 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-330.759 241.318 Td
-(host,) Tj
-ET
-BT
-/F0 11 Tf
-354.596 241.318 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-373.230 241.318 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-389.422 241.318 Td
-(input) Tj
-ET
-BT
-/F0 11 Tf
-414.788 241.318 Td
-(grid) Tj
-ET
-BT
-/F0 11 Tf
-435.259 241.318 Td
-(file.) Tj
-ET
-/F1 11 Tf
-BT
-/F1 11 Tf
-455.422 241.318 Td
-(MB-System) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-513.161 241.318 Td
-(gives) Tj
-ET
-BT
-/F0 11 Tf
-87.274 225.929 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-103.466 225.929 Td
-(grid) Tj
-ET
-BT
-/F0 11 Tf
-123.937 225.929 Td
-(size,) Tj
-ET
-BT
-/F0 11 Tf
-146.542 225.929 Td
-(spacing) Tj
-ET
-BT
-/F0 11 Tf
-182.897 225.929 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-201.531 225.929 Td
-(registration,) Tj
-ET
-BT
-/F0 11 Tf
-257.136 225.929 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-273.328 225.929 Td
-(vertical) Tj
-ET
-BT
-/F0 11 Tf
-309.067 225.929 Td
-(exaggeration,) Tj
-ET
-BT
-/F0 11 Tf
-371.382 225.929 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-387.574 225.929 Td
-(vertical) Tj
-ET
-BT
-/F0 11 Tf
-423.313 225.929 Td
-(reference,) Tj
-ET
-BT
-/F0 11 Tf
-469.722 225.929 Td
-(and) Tj
-ET
-/F1 11 Tf
-BT
-/F1 11 Tf
-87.274 210.540 Td
-(content.compression) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-186.263 210.540 Td
-(\(the) Tj
-ET
-BT
-/F0 11 Tf
-206.118 210.540 Td
-(Draco) Tj
-ET
-BT
-/F0 11 Tf
-235.741 210.540 Td
-(bits) Tj
-ET
-BT
-/F0 11 Tf
-254.386 210.540 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-273.020 210.540 Td
-(step\)) Tj
-ET
-BT
-/F0 11 Tf
-297.154 210.540 Td
-(when) Tj
-ET
-BT
-/F0 11 Tf
-323.730 210.540 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-339.922 210.540 Td
-(mesh) Tj
-ET
-BT
-/F0 11 Tf
-365.893 210.540 Td
-(is) Tj
-ET
-BT
-/F0 11 Tf
-375.980 210.540 Td
-(compressed.) Tj
-ET
-BT
-/F0 11 Tf
-433.411 210.540 Td
-(The) Tj
-ET
-BT
-/F0 11 Tf
-453.266 210.540 Td
-(page) Tj
-ET
-BT
-/F0 11 Tf
-476.784 210.540 Td
-(written) Tj
-ET
-BT
-/F0 11 Tf
-510.697 210.540 Td
-(by) Tj
-ET
-/F1 11 Tf
-BT
-/F1 11 Tf
-87.274 195.151 Td
+131.274 518.320 Td
 (--html) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-119.350 195.151 Td
-(holds) Tj
-ET
-BT
-/F0 11 Tf
-145.937 195.151 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-162.129 195.151 Td
-(same) Tj
-ET
-BT
-/F0 11 Tf
-187.484 195.151 Td
-(in) Tj
-ET
-BT
-/F0 11 Tf
-198.792 195.151 Td
-(X3D) Tj
+163.350 518.320 Td
+(or) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-222.926 195.151 Td
-(GeoMetadata) Tj
+175.263 518.320 Td
+(--cesium-html) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-289.828 195.151 Td
-(and) Tj
-ET
-/F1 11 Tf
-BT
-/F1 11 Tf
-308.462 195.151 Td
-(WorldInfo) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-361.328 195.151 Td
-(nodes.) Tj
+240.636 518.320 Td
+(,) Tj
 ET
 BT
 /F0 11 Tf
-392.491 195.151 Td
-(The) Tj
+246.136 518.320 Td
+(add) Tj
 ET
 BT
 /F0 11 Tf
-412.346 195.151 Td
-(names) Tj
-ET
-BT
-/F0 11 Tf
-443.201 195.151 Td
-(are) Tj
-ET
-BT
-/F0 11 Tf
-459.382 195.151 Td
-(shared) Tj
-ET
-BT
-/F0 11 Tf
-490.842 195.151 Td
-(with) Tj
-ET
-BT
-/F0 11 Tf
-87.274 179.762 Td
-(mbmesh\(1\)) Tj
-ET
-BT
-/F0 11 Tf
-140.129 179.762 Td
-(and) Tj
-ET
-BT
-/F0 11 Tf
-158.763 179.762 Td
-(are) Tj
-ET
-BT
-/F0 11 Tf
-174.944 179.762 Td
-(described) Tj
-ET
-BT
-/F0 11 Tf
-219.846 179.762 Td
-(in) Tj
-ET
-/F1 11 Tf
-BT
-/F1 11 Tf
-231.154 179.762 Td
-(src/mbmesh/GEOREFERENCE.md) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-401.357 179.762 Td
-(.) Tj
-ET
-BT
-/F0 11 Tf
-409.607 179.762 Td
-(The) Tj
-ET
-BT
-/F0 11 Tf
-429.462 179.762 Td
-(grid) Tj
-ET
-BT
-/F0 11 Tf
-449.933 179.762 Td
-(value) Tj
-ET
-BT
-/F0 11 Tf
-476.509 179.762 Td
-(is) Tj
-ET
-BT
-/F0 11 Tf
-486.596 179.762 Td
-(used) Tj
-ET
-BT
-/F0 11 Tf
-509.509 179.762 Td
-(as) Tj
-ET
-BT
-/F0 11 Tf
-521.422 179.762 Td
+264.770 518.320 Td
 (a) Tj
 ET
 BT
 /F0 11 Tf
-87.274 164.373 Td
-(height) Tj
+272.404 518.320 Td
+(GeoViewpoint) Tj
 ET
 BT
 /F0 11 Tf
-117.524 164.373 Td
-(above) Tj
-ET
-BT
-/F0 11 Tf
-146.542 164.373 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-162.734 164.373 Td
-(WGS) Tj
-ET
-BT
-/F0 11 Tf
-189.926 164.373 Td
-(84) Tj
-ET
-BT
-/F0 11 Tf
-203.676 164.373 Td
-(ellipsoid,) Tj
-ET
-BT
-/F0 11 Tf
-247.071 164.373 Td
-(with) Tj
-ET
-BT
-/F0 11 Tf
-269.379 164.373 Td
-(no) Tj
-ET
-BT
-/F0 11 Tf
-283.129 164.373 Td
-(geoid) Tj
-ET
-BT
-/F0 11 Tf
-310.321 164.373 Td
-(correction.) Tj
-ET
-/F1 11 Tf
-BT
-/F1 11 Tf
-68.024 118.206 Td
-(EXAMPLES) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-87.274 102.817 Td
-(Convert) Tj
-ET
-BT
-/F0 11 Tf
-125.466 102.817 Td
-(a) Tj
-ET
-BT
-/F0 11 Tf
-133.100 102.817 Td
-(GMT) Tj
-ET
-BT
-/F0 11 Tf
-160.292 102.817 Td
-(GRD) Tj
-ET
-BT
-/F0 11 Tf
-186.263 102.817 Td
-(file) Tj
-ET
-BT
-/F0 11 Tf
-203.676 102.817 Td
+339.922 518.320 Td
 (to) Tj
 ET
 BT
 /F0 11 Tf
-214.984 102.817 Td
+351.230 518.320 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+367.422 518.320 Td
+(page;) Tj
+ET
+BT
+/F0 11 Tf
+393.998 518.320 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+410.190 518.320 Td
+(option) Tj
+ET
+BT
+/F0 11 Tf
+441.056 518.320 Td
+(can) Tj
+ET
+BT
+/F0 11 Tf
+459.074 518.320 Td
+(be) Tj
+ET
+BT
+/F0 11 Tf
+472.208 518.320 Td
+(repeated,) Tj
+ET
+BT
+/F0 11 Tf
+514.965 518.320 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+106.524 502.931 Td
+(each) Tj
+ET
+BT
+/F0 11 Tf
+129.426 502.931 Td
+(adds) Tj
+ET
+BT
+/F0 11 Tf
+152.339 502.931 Td
 (a) Tj
 ET
 BT
 /F0 11 Tf
-222.618 102.817 Td
-(GLTF) Tj
+159.973 502.931 Td
+(GeoViewpoint,) Tj
 ET
 BT
 /F0 11 Tf
-252.868 102.817 Td
-(file) Tj
+230.241 502.931 Td
+(written) Tj
 ET
 BT
 /F0 11 Tf
-270.281 102.817 Td
+264.154 502.931 Td
 (with) Tj
 ET
 BT
 /F0 11 Tf
-292.589 102.817 Td
-(default) Tj
+286.462 502.931 Td
+(its) Tj
 ET
 BT
 /F0 11 Tf
-325.886 102.817 Td
-(settings:) Tj
+299.607 502.931 Td
+(position) Tj
+ET
+BT
+/F0 11 Tf
+337.810 502.931 Td
+(as) Tj
+ET
+BT
+/F0 11 Tf
+349.723 502.931 Td
+(latitude,) Tj
+ET
+BT
+/F0 11 Tf
+388.223 502.931 Td
+(longitude) Tj
+ET
+BT
+/F0 11 Tf
+432.531 502.931 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+451.165 502.931 Td
+(elevation) Tj
+ET
+BT
+/F0 11 Tf
+494.241 502.931 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+512.875 502.931 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+106.524 487.542 Td
+(GeoOrigin) Tj
+ET
+BT
+/F0 11 Tf
+156.321 487.542 Td
+(used) Tj
+ET
+BT
+/F0 11 Tf
+179.234 487.542 Td
+(again,) Tj
+ET
+BT
+/F0 11 Tf
+208.560 487.542 Td
+(named) Tj
+ET
+BT
+/F0 11 Tf
+240.636 487.542 Td
+(USER_GEOVIEW_1,) Tj
+ET
+BT
+/F0 11 Tf
+342.067 487.542 Td
+(USER_GEOVIEW_2) Tj
+ET
+BT
+/F0 11 Tf
+440.748 487.542 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+459.382 487.542 Td
+(so) Tj
+ET
+BT
+/F0 11 Tf
+471.911 487.542 Td
+(on,) Tj
+ET
+BT
+/F0 11 Tf
+488.411 487.542 Td
+(to) Tj
+ET
+BT
+/F0 11 Tf
+499.719 487.542 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+106.524 472.153 Td
+(Viewpoint) Tj
+ET
+BT
+/F0 11 Tf
+155.716 472.153 Td
+(menu) Tj
+ET
+BT
+/F0 11 Tf
+182.908 472.153 Td
+(of) Tj
+ET
+BT
+/F0 11 Tf
+194.821 472.153 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+211.013 472.153 Td
+(page,) Tj
+ET
+BT
+/F0 11 Tf
+237.281 472.153 Td
+(after) Tj
+ET
+BT
+/F0 11 Tf
+260.183 472.153 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+276.375 472.153 Td
+(two) Tj
+ET
+BT
+/F0 11 Tf
+295.625 472.153 Td
+(overview) Tj
+ET
+BT
+/F0 11 Tf
+339.306 472.153 Td
+(viewpoints,) Tj
+ET
+BT
+/F0 11 Tf
+393.085 472.153 Td
+(where) Tj
+ET
+BT
+/F0 11 Tf
+422.708 472.153 Td
+(Page) Tj
+ET
+BT
+/F0 11 Tf
+446.842 472.153 Td
+(Down) Tj
+ET
+BT
+/F0 11 Tf
+476.476 472.153 Td
+(also) Tj
+ET
+BT
+/F0 11 Tf
+496.947 472.153 Td
+(steps) Tj
+ET
+BT
+/F0 11 Tf
+106.524 456.764 Td
+(through) Tj
+ET
+BT
+/F0 11 Tf
+143.495 456.764 Td
+(them.) Tj
+ET
+BT
+/F0 11 Tf
+170.995 456.764 Td
+(The) Tj
+ET
+BT
+/F0 11 Tf
+190.850 456.764 Td
+(values) Tj
+ET
+BT
+/F0 11 Tf
+221.705 456.764 Td
+(are) Tj
+ET
+BT
+/F0 11 Tf
+237.886 456.764 Td
+(geodetic,) Tj
+ET
+BT
+/F0 11 Tf
+280.654 456.764 Td
+(in) Tj
+ET
+BT
+/F0 11 Tf
+291.962 456.764 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+308.154 456.764 Td
+(order) Tj
+ET
+BT
+/F0 11 Tf
+334.114 456.764 Td
+(of) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+346.027 456.764 Td
+(--geoorigin) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+397.353 456.764 Td
+(,) Tj
+ET
+BT
+/F0 11 Tf
+402.853 456.764 Td
+(longitude) Tj
+ET
+BT
+/F0 11 Tf
+447.161 456.764 Td
+(first,) Tj
+ET
+BT
+/F0 11 Tf
+470.382 456.764 Td
+(so) Tj
+ET
+BT
+/F0 11 Tf
+482.911 456.764 Td
+(they) Tj
+ET
+BT
+/F0 11 Tf
+504.603 456.764 Td
+(do) Tj
+ET
+BT
+/F0 11 Tf
+518.353 456.764 Td
+(not) Tj
+ET
+BT
+/F0 11 Tf
+106.524 441.375 Td
+(depend) Tj
+ET
+BT
+/F0 11 Tf
+141.042 441.375 Td
+(on) Tj
+ET
+BT
+/F0 11 Tf
+154.792 441.375 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+170.984 441.375 Td
+(GeoOrigin) Tj
+ET
+BT
+/F0 11 Tf
+220.781 441.375 Td
+(or) Tj
+ET
+BT
+/F0 11 Tf
+232.694 441.375 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+248.886 441.375 Td
+(data) Tj
+ET
+BT
+/F0 11 Tf
+269.962 441.375 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+288.596 441.375 Td
+(can) Tj
+ET
+BT
+/F0 11 Tf
+306.614 441.375 Td
+(be) Tj
+ET
+BT
+/F0 11 Tf
+319.748 441.375 Td
+(used) Tj
+ET
+BT
+/F0 11 Tf
+342.661 441.375 Td
+(again) Tj
+ET
+BT
+/F0 11 Tf
+369.237 441.375 Td
+(in) Tj
+ET
+BT
+/F0 11 Tf
+380.545 441.375 Td
+(another) Tj
+ET
+BT
+/F0 11 Tf
+416.284 441.375 Td
+(run:) Tj
+ET
+/F2 11 Tf
+BT
+/F2 11 Tf
+106.524 425.986 Td
+(lon,lat,elev,clon,clat,celev) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+221.694 425.986 Td
+(,) Tj
+ET
+BT
+/F0 11 Tf
+227.194 425.986 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+243.386 425.986 Td
+(camera) Tj
+ET
+BT
+/F0 11 Tf
+277.893 425.986 Td
+(position) Tj
+ET
+BT
+/F0 11 Tf
+316.096 425.986 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+334.730 425.986 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+350.922 425.986 Td
+(point) Tj
+ET
+BT
+/F0 11 Tf
+376.288 425.986 Td
+(it) Tj
+ET
+BT
+/F0 11 Tf
+385.154 425.986 Td
+(looks) Tj
+ET
+BT
+/F0 11 Tf
+411.741 425.986 Td
+(at,) Tj
+ET
+BT
+/F0 11 Tf
+425.183 425.986 Td
+(or) Tj
+ET
+/F2 11 Tf
+BT
+/F2 11 Tf
+106.524 410.597 Td
+(lon,lat,elev,ax,ay,az,angle,clon,clat,celev) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+287.683 410.597 Td
+(,) Tj
+ET
+BT
+/F0 11 Tf
+293.183 410.597 Td
+(with) Tj
+ET
+BT
+/F0 11 Tf
+315.491 410.597 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+331.683 410.597 Td
+(orientation) Tj
+ET
+BT
+/F0 11 Tf
+382.096 410.597 Td
+(as) Tj
+ET
+BT
+/F0 11 Tf
+394.009 410.597 Td
+(an) Tj
+ET
+BT
+/F0 11 Tf
+407.143 410.597 Td
+(axis) Tj
+ET
+BT
+/F0 11 Tf
+427.614 410.597 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+446.248 410.597 Td
+(an) Tj
+ET
+BT
+/F0 11 Tf
+459.382 410.597 Td
+(angle,) Tj
+ET
+BT
+/F0 11 Tf
+488.708 410.597 Td
+(as) Tj
+ET
+BT
+/F0 11 Tf
+500.621 410.597 Td
+(a) Tj
+ET
+BT
+/F0 11 Tf
+106.524 395.208 Td
+(GeoViewpoint) Tj
+ET
+BT
+/F0 11 Tf
+174.042 395.208 Td
+(takes) Tj
+ET
+BT
+/F0 11 Tf
+199.397 395.208 Td
+(it.) Tj
+ET
+BT
+/F0 11 Tf
+211.013 395.208 Td
+(Heights) Tj
+ET
+BT
+/F0 11 Tf
+247.984 395.208 Td
+(are) Tj
+ET
+BT
+/F0 11 Tf
+264.165 395.208 Td
+(above) Tj
+ET
+BT
+/F0 11 Tf
+293.183 395.208 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+309.375 395.208 Td
+(ellipsoid.) Tj
+ET
+BT
+/F0 11 Tf
+352.770 395.208 Td
+(Without) Tj
+ET
+BT
+/F0 11 Tf
+391.578 395.208 Td
+(an) Tj
+ET
+BT
+/F0 11 Tf
+404.712 395.208 Td
+(orientation) Tj
+ET
+BT
+/F0 11 Tf
+455.125 395.208 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+471.317 395.208 Td
+(top) Tj
+ET
+BT
+/F0 11 Tf
+488.125 395.208 Td
+(of) Tj
+ET
+BT
+/F0 11 Tf
+500.038 395.208 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+516.230 395.208 Td
+(view) Tj
+ET
+BT
+/F0 11 Tf
+106.524 379.819 Td
+(is) Tj
+ET
+BT
+/F0 11 Tf
+116.611 379.819 Td
+(toward) Tj
+ET
+BT
+/F0 11 Tf
+149.908 379.819 Td
+(local) Tj
+ET
+BT
+/F0 11 Tf
+174.042 379.819 Td
+(up.) Tj
+ET
+BT
+/F0 11 Tf
+190.542 379.819 Td
+(The) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+210.397 379.819 Td
+(Copy) Tj
+ET
+BT
+/F1 11 Tf
+238.205 379.819 Td
+(GeoViewpoint) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+308.176 379.819 Td
+(button) Tj
+ET
+BT
+/F0 11 Tf
+339.042 379.819 Td
+(of) Tj
+ET
+BT
+/F0 11 Tf
+350.955 379.819 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+367.147 379.819 Td
+(page) Tj
+ET
+BT
+/F0 11 Tf
+390.665 379.819 Td
+(gives) Tj
+ET
+BT
+/F0 11 Tf
+416.636 379.819 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+432.828 379.819 Td
+(ten-number) Tj
+ET
+BT
+/F0 11 Tf
+486.288 379.819 Td
+(form) Tj
+ET
+BT
+/F0 11 Tf
+510.422 379.819 Td
+(for) Tj
+ET
+BT
+/F0 11 Tf
+525.998 379.819 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+106.524 364.430 Td
+(view) Tj
+ET
+BT
+/F0 11 Tf
+130.658 364.430 Td
+(on) Tj
+ET
+BT
+/F0 11 Tf
+144.408 364.430 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+160.600 364.430 Td
+(screen,) Tj
+ET
+BT
+/F0 11 Tf
+194.194 364.430 Td
+(on) Tj
+ET
+BT
+/F0 11 Tf
+207.944 364.430 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+224.136 364.430 Td
+(clipboard) Tj
+ET
+BT
+/F0 11 Tf
+268.433 364.430 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+287.067 364.430 Td
+(in) Tj
+ET
+BT
+/F0 11 Tf
+298.375 364.430 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+314.567 364.430 Td
+(X3DOM) Tj
+ET
+BT
+/F0 11 Tf
+356.422 364.430 Td
+(log.) Tj
+ET
+BT
+/F0 11 Tf
+375.980 364.430 Td
+(The) Tj
+ET
+BT
+/F0 11 Tf
+395.835 364.430 Td
+(value) Tj
+ET
+BT
+/F0 11 Tf
+422.411 364.430 Td
+(must) Tj
+ET
+BT
+/F0 11 Tf
+446.556 364.430 Td
+(be) Tj
+ET
+BT
+/F0 11 Tf
+459.690 364.430 Td
+(attached) Tj
+ET
+BT
+/F0 11 Tf
+499.092 364.430 Td
+(to) Tj
+ET
+BT
+/F0 11 Tf
+510.400 364.430 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+106.524 349.041 Td
+(option,) Tj
+ET
+BT
+/F0 11 Tf
+140.140 349.041 Td
+(with) Tj
+ET
+BT
+/F0 11 Tf
+162.448 349.041 Td
+(an) Tj
+ET
+BT
+/F0 11 Tf
+175.582 349.041 Td
+(equals) Tj
+ET
+BT
+/F0 11 Tf
+206.437 349.041 Td
+(sign) Tj
+ET
+BT
+/F0 11 Tf
+227.524 349.041 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+246.158 349.041 Td
+(no) Tj
+ET
+BT
+/F0 11 Tf
+259.908 349.041 Td
+(spaces,) Tj
+ET
+BT
+/F0 11 Tf
+294.118 349.041 Td
+(for) Tj
+ET
+BT
+/F0 11 Tf
+309.694 349.041 Td
+(example) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+106.524 333.652 Td
+(--geoviewpoint=-122.4,36.6,-900,-122.39,36.61,-950) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+342.243 333.652 Td
+(.) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+87.274 287.485 Td
+(--verbose,) Tj
+ET
+BT
+/F1 11 Tf
+136.147 287.485 Td
+(-V) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+106.524 272.096 Td
+(Enable) Tj
+ET
+BT
+/F0 11 Tf
+139.821 272.096 Td
+(verbose) Tj
+ET
+BT
+/F0 11 Tf
+176.781 272.096 Td
+(output) Tj
+ET
+BT
+/F0 11 Tf
+207.647 272.096 Td
+(showing) Tj
+ET
+BT
+/F0 11 Tf
+247.676 272.096 Td
+(NetCDF) Tj
+ET
+BT
+/F0 11 Tf
+287.705 272.096 Td
+(reading) Tj
+ET
+BT
+/F0 11 Tf
+323.444 272.096 Td
+(details) Tj
+ET
+BT
+/F0 11 Tf
+354.915 272.096 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+373.549 272.096 Td
+(memory) Tj
+ET
+BT
+/F0 11 Tf
+412.962 272.096 Td
+(allocation) Tj
+ET
+BT
+/F0 11 Tf
+459.096 272.096 Td
+(information.) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+87.274 225.929 Td
+(--help,) Tj
+ET
+BT
+/F1 11 Tf
+120.274 225.929 Td
+(-H) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+106.524 210.540 Td
+(Display) Tj
+ET
+BT
+/F0 11 Tf
+143.495 210.540 Td
+(help) Tj
+ET
+BT
+/F0 11 Tf
+165.187 210.540 Td
+(message) Tj
+ET
+BT
+/F0 11 Tf
+205.205 210.540 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+223.839 210.540 Td
+(exit.) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+68.024 164.373 Td
+(GEOREFERENCE) Tj
+ET
+BT
+/F1 11 Tf
+163.064 164.373 Td
+(AND) Tj
+ET
+BT
+/F1 11 Tf
+189.640 164.373 Td
+(PROVENANCE) Tj
+ET
+BT
+/F1 11 Tf
+269.995 164.373 Td
+(METADATA) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+87.274 148.984 Td
+(The) Tj
+ET
+BT
+/F0 11 Tf
+107.129 148.984 Td
+(glTF) Tj
+ET
+BT
+/F0 11 Tf
+131.274 148.984 Td
+(file) Tj
+ET
+BT
+/F0 11 Tf
+148.687 148.984 Td
+(records) Tj
+ET
+BT
+/F0 11 Tf
+183.810 148.984 Td
+(where) Tj
+ET
+BT
+/F0 11 Tf
+213.433 148.984 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+229.625 148.984 Td
+(model) Tj
+ET
+BT
+/F0 11 Tf
+259.875 148.984 Td
+(is) Tj
+ET
+BT
+/F0 11 Tf
+269.962 148.984 Td
+(on) Tj
+ET
+BT
+/F0 11 Tf
+283.712 148.984 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+299.904 148.984 Td
+(Earth) Tj
+ET
+BT
+/F0 11 Tf
+326.480 148.984 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+345.114 148.984 Td
+(how) Tj
+ET
+BT
+/F0 11 Tf
+366.806 148.984 Td
+(it) Tj
+ET
+BT
+/F0 11 Tf
+375.672 148.984 Td
+(was) Tj
+ET
+BT
+/F0 11 Tf
+395.527 148.984 Td
+(made) Tj
+ET
+BT
+/F0 11 Tf
+422.103 148.984 Td
+(in) Tj
+ET
+BT
+/F0 11 Tf
+433.411 148.984 Td
+(its) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+446.556 148.984 Td
+(asset.extras) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+500.621 148.984 Td
+(,) Tj
+ET
+BT
+/F0 11 Tf
+506.121 148.984 Td
+(in) Tj
+ET
+BT
+/F0 11 Tf
+517.429 148.984 Td
+(three) Tj
+ET
+BT
+/F0 11 Tf
+87.274 133.595 Td
+(blocks.) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+121.495 133.595 Td
+(georeference) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+184.096 133.595 Td
+(gives) Tj
+ET
+BT
+/F0 11 Tf
+210.067 133.595 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+226.259 133.595 Td
+(coordinate) Tj
+ET
+BT
+/F0 11 Tf
+275.440 133.595 Td
+(reference) Tj
+ET
+BT
+/F0 11 Tf
+319.099 133.595 Td
+(system) Tj
+ET
+BT
+/F0 11 Tf
+352.407 133.595 Td
+(\() Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+356.070 133.595 Td
+(EPSG:4978) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+410.465 133.595 Td
+(\),) Tj
+ET
+BT
+/F0 11 Tf
+419.628 133.595 Td
+(whether) Tj
+ET
+BT
+/F0 11 Tf
+457.809 133.595 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+474.001 133.595 Td
+(vertices) Tj
+ET
+BT
+/F0 11 Tf
+510.961 133.595 Td
+(are) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+87.274 118.206 Td
+(absolute) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+129.140 118.206 Td
+(or) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+141.053 118.206 Td
+(relativeToCenter) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+221.694 118.206 Td
+(,) Tj
+ET
+BT
+/F0 11 Tf
+227.194 118.206 Td
+(the) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+243.386 118.206 Td
+(center) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+275.451 118.206 Td
+(\(the) Tj
+ET
+BT
+/F0 11 Tf
+295.306 118.206 Td
+(GeoOrigin) Tj
+ET
+BT
+/F0 11 Tf
+345.103 118.206 Td
+(as) Tj
+ET
+BT
+/F0 11 Tf
+357.016 118.206 Td
+(ECEF) Tj
+ET
+BT
+/F0 11 Tf
+386.661 118.206 Td
+(meters,) Tj
+ET
+BT
+/F0 11 Tf
+421.487 118.206 Td
+(with) Tj
+ET
+BT
+/F0 11 Tf
+443.795 118.206 Td
+(absolute) Tj
+ET
+BT
+/F0 11 Tf
+483.208 118.206 Td
+(=) Tj
+ET
+BT
+/F0 11 Tf
+492.162 118.206 Td
+(vertex) Tj
+ET
+BT
+/F0 11 Tf
+522.401 118.206 Td
+(+) Tj
+ET
+BT
+/F0 11 Tf
+87.274 102.817 Td
+(center\),) Tj
+ET
+BT
+/F0 11 Tf
+123.310 102.817 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+139.502 102.817 Td
+(same) Tj
+ET
+BT
+/F0 11 Tf
+164.857 102.817 Td
+(point) Tj
+ET
+BT
+/F0 11 Tf
+190.223 102.817 Td
+(as) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+202.136 102.817 Td
+(geodeticCenter) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+275.748 102.817 Td
+(\(longitude,) Tj
+ET
+BT
+/F0 11 Tf
+326.469 102.817 Td
+(latitude,) Tj
+ET
+BT
+/F0 11 Tf
+364.969 102.817 Td
+(height\),) Tj
+ET
+BT
+/F0 11 Tf
+401.632 102.817 Td
+(the) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+417.824 102.817 Td
+(heightReference) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+496.936 102.817 Td
+(\(the) Tj
 ET
 /F0 11 Tf
 BT
@@ -9410,7 +9306,7 @@ ET
 endstream
 endobj
 24 0 obj
-18881
+18335
 endobj
 25 0 obj
 <<
@@ -9437,689 +9333,1217 @@ endobj
 >>
 stream
 BT
+/F0 11 Tf
+87.274 702.988 Td
+(ellipsoid\)) Tj
+ET
+BT
+/F0 11 Tf
+131.582 702.988 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+150.216 702.988 Td
+(the) Tj
+ET
 /F1 11 Tf
-106.524 702.988 Td
+BT
+/F1 11 Tf
+166.408 702.988 Td
+(extent) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+197.868 702.988 Td
+(of) Tj
+ET
+BT
+/F0 11 Tf
+209.781 702.988 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+225.973 702.988 Td
+(grid.) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+249.194 702.988 Td
+(provenance) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+306.328 702.988 Td
+(gives) Tj
+ET
+BT
+/F0 11 Tf
+332.299 702.988 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+348.491 702.988 Td
+(software) Tj
+ET
+BT
+/F0 11 Tf
+389.114 702.988 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+407.748 702.988 Td
+(version,) Tj
+ET
+BT
+/F0 11 Tf
+445.632 702.988 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+461.824 702.988 Td
+(time) Tj
+ET
+BT
+/F0 11 Tf
+484.132 702.988 Td
+(of) Tj
+ET
+BT
+/F0 11 Tf
+496.045 702.988 Td
+(execution) Tj
+ET
+BT
+/F0 11 Tf
+87.274 687.599 Td
+(\(UTC\),) Tj
+ET
+BT
+/F0 11 Tf
+122.100 687.599 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+138.292 687.599 Td
+(command) Tj
+ET
+BT
+/F0 11 Tf
+184.426 687.599 Td
+(line,) Tj
+ET
+BT
+/F0 11 Tf
+206.426 687.599 Td
+(working) Tj
+ET
+BT
+/F0 11 Tf
+245.839 687.599 Td
+(directory,) Tj
+ET
+BT
+/F0 11 Tf
+291.049 687.599 Td
+(user) Tj
+ET
+BT
+/F0 11 Tf
+312.125 687.599 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+330.759 687.599 Td
+(host,) Tj
+ET
+BT
+/F0 11 Tf
+354.596 687.599 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+373.230 687.599 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+389.422 687.599 Td
+(input) Tj
+ET
+BT
+/F0 11 Tf
+414.788 687.599 Td
+(grid) Tj
+ET
+BT
+/F0 11 Tf
+435.259 687.599 Td
+(file.) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+455.422 687.599 Td
+(MB-System) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+513.161 687.599 Td
+(gives) Tj
+ET
+BT
+/F0 11 Tf
+87.274 672.210 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+103.466 672.210 Td
+(grid) Tj
+ET
+BT
+/F0 11 Tf
+123.937 672.210 Td
+(size,) Tj
+ET
+BT
+/F0 11 Tf
+146.542 672.210 Td
+(spacing) Tj
+ET
+BT
+/F0 11 Tf
+182.897 672.210 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+201.531 672.210 Td
+(registration,) Tj
+ET
+BT
+/F0 11 Tf
+257.136 672.210 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+273.328 672.210 Td
+(vertical) Tj
+ET
+BT
+/F0 11 Tf
+309.067 672.210 Td
+(exaggeration,) Tj
+ET
+BT
+/F0 11 Tf
+371.382 672.210 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+387.574 672.210 Td
+(vertical) Tj
+ET
+BT
+/F0 11 Tf
+423.313 672.210 Td
+(reference,) Tj
+ET
+BT
+/F0 11 Tf
+469.722 672.210 Td
+(and) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+87.274 656.821 Td
+(content.compression) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+186.263 656.821 Td
+(\(the) Tj
+ET
+BT
+/F0 11 Tf
+206.118 656.821 Td
+(Draco) Tj
+ET
+BT
+/F0 11 Tf
+235.741 656.821 Td
+(bits) Tj
+ET
+BT
+/F0 11 Tf
+254.386 656.821 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+273.020 656.821 Td
+(step\)) Tj
+ET
+BT
+/F0 11 Tf
+297.154 656.821 Td
+(when) Tj
+ET
+BT
+/F0 11 Tf
+323.730 656.821 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+339.922 656.821 Td
+(mesh) Tj
+ET
+BT
+/F0 11 Tf
+365.893 656.821 Td
+(is) Tj
+ET
+BT
+/F0 11 Tf
+375.980 656.821 Td
+(compressed.) Tj
+ET
+BT
+/F0 11 Tf
+433.411 656.821 Td
+(The) Tj
+ET
+BT
+/F0 11 Tf
+453.266 656.821 Td
+(page) Tj
+ET
+BT
+/F0 11 Tf
+476.784 656.821 Td
+(written) Tj
+ET
+BT
+/F0 11 Tf
+510.697 656.821 Td
+(by) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+87.274 641.432 Td
+(--html) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+119.350 641.432 Td
+(holds) Tj
+ET
+BT
+/F0 11 Tf
+145.937 641.432 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+162.129 641.432 Td
+(same) Tj
+ET
+BT
+/F0 11 Tf
+187.484 641.432 Td
+(in) Tj
+ET
+BT
+/F0 11 Tf
+198.792 641.432 Td
+(X3D) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+222.926 641.432 Td
+(GeoMetadata) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+289.828 641.432 Td
+(and) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+308.462 641.432 Td
+(WorldInfo) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+361.328 641.432 Td
+(nodes.) Tj
+ET
+BT
+/F0 11 Tf
+392.491 641.432 Td
+(The) Tj
+ET
+BT
+/F0 11 Tf
+412.346 641.432 Td
+(names) Tj
+ET
+BT
+/F0 11 Tf
+443.201 641.432 Td
+(are) Tj
+ET
+BT
+/F0 11 Tf
+459.382 641.432 Td
+(shared) Tj
+ET
+BT
+/F0 11 Tf
+490.842 641.432 Td
+(with) Tj
+ET
+BT
+/F0 11 Tf
+87.274 626.043 Td
+(mbmesh\(1\)) Tj
+ET
+BT
+/F0 11 Tf
+140.129 626.043 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+158.763 626.043 Td
+(are) Tj
+ET
+BT
+/F0 11 Tf
+174.944 626.043 Td
+(described) Tj
+ET
+BT
+/F0 11 Tf
+219.846 626.043 Td
+(in) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+231.154 626.043 Td
+(src/mbmesh/GEOREFERENCE.md) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+401.357 626.043 Td
+(.) Tj
+ET
+BT
+/F0 11 Tf
+409.607 626.043 Td
+(The) Tj
+ET
+BT
+/F0 11 Tf
+429.462 626.043 Td
+(grid) Tj
+ET
+BT
+/F0 11 Tf
+449.933 626.043 Td
+(value) Tj
+ET
+BT
+/F0 11 Tf
+476.509 626.043 Td
+(is) Tj
+ET
+BT
+/F0 11 Tf
+486.596 626.043 Td
+(used) Tj
+ET
+BT
+/F0 11 Tf
+509.509 626.043 Td
+(as) Tj
+ET
+BT
+/F0 11 Tf
+521.422 626.043 Td
+(a) Tj
+ET
+BT
+/F0 11 Tf
+87.274 610.654 Td
+(height) Tj
+ET
+BT
+/F0 11 Tf
+117.524 610.654 Td
+(above) Tj
+ET
+BT
+/F0 11 Tf
+146.542 610.654 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+162.734 610.654 Td
+(WGS) Tj
+ET
+BT
+/F0 11 Tf
+189.926 610.654 Td
+(84) Tj
+ET
+BT
+/F0 11 Tf
+203.676 610.654 Td
+(ellipsoid,) Tj
+ET
+BT
+/F0 11 Tf
+247.071 610.654 Td
+(with) Tj
+ET
+BT
+/F0 11 Tf
+269.379 610.654 Td
+(no) Tj
+ET
+BT
+/F0 11 Tf
+283.129 610.654 Td
+(geoid) Tj
+ET
+BT
+/F0 11 Tf
+310.321 610.654 Td
+(correction.) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+68.024 564.487 Td
+(EXAMPLES) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+87.274 549.098 Td
+(Convert) Tj
+ET
+BT
+/F0 11 Tf
+125.466 549.098 Td
+(a) Tj
+ET
+BT
+/F0 11 Tf
+133.100 549.098 Td
+(GMT) Tj
+ET
+BT
+/F0 11 Tf
+160.292 549.098 Td
+(GRD) Tj
+ET
+BT
+/F0 11 Tf
+186.263 549.098 Td
+(file) Tj
+ET
+BT
+/F0 11 Tf
+203.676 549.098 Td
+(to) Tj
+ET
+BT
+/F0 11 Tf
+214.984 549.098 Td
+(a) Tj
+ET
+BT
+/F0 11 Tf
+222.618 549.098 Td
+(GLTF) Tj
+ET
+BT
+/F0 11 Tf
+252.868 549.098 Td
+(file) Tj
+ET
+BT
+/F0 11 Tf
+270.281 549.098 Td
+(with) Tj
+ET
+BT
+/F0 11 Tf
+292.589 549.098 Td
+(default) Tj
+ET
+BT
+/F0 11 Tf
+325.886 549.098 Td
+(settings:) Tj
+ET
+/F1 11 Tf
+BT
+/F1 11 Tf
+106.524 533.709 Td
 (mbgrd2gltf) Tj
 ET
 BT
 /F1 11 Tf
-162.437 702.988 Td
+162.437 533.709 Td
 (--input) Tj
 ET
 BT
 /F1 11 Tf
-197.582 702.988 Td
+197.582 533.709 Td
 (input.grd) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-87.274 672.210 Td
+87.274 502.931 Td
 (Convert) Tj
 ET
 BT
 /F0 11 Tf
-125.466 672.210 Td
+125.466 502.931 Td
 (a) Tj
 ET
 BT
 /F0 11 Tf
-133.100 672.210 Td
+133.100 502.931 Td
 (GRD) Tj
 ET
 BT
 /F0 11 Tf
-159.071 672.210 Td
+159.071 502.931 Td
 (file) Tj
 ET
 BT
 /F0 11 Tf
-176.484 672.210 Td
+176.484 502.931 Td
 (to) Tj
 ET
 BT
 /F0 11 Tf
-187.792 672.210 Td
+187.792 502.931 Td
 (GLB) Tj
 ET
 BT
 /F0 11 Tf
-212.542 672.210 Td
+212.542 502.931 Td
 (\(Binary) Tj
 ET
 BT
 /F0 11 Tf
-248.897 672.210 Td
+248.897 502.931 Td
 (GLTF\)) Tj
 ET
 BT
 /F0 11 Tf
-282.810 672.210 Td
+282.810 502.931 Td
 (with) Tj
 ET
 BT
 /F0 11 Tf
-305.118 672.210 Td
+305.118 502.931 Td
 (specified) Tj
 ET
 BT
 /F0 11 Tf
-347.578 672.210 Td
+347.578 502.931 Td
 (output) Tj
 ET
 BT
 /F0 11 Tf
-378.444 672.210 Td
+378.444 502.931 Td
 (folder,) Tj
 ET
 BT
 /F0 11 Tf
-410.212 672.210 Td
+410.212 502.931 Td
 (keeping) Tj
 ET
 BT
 /F0 11 Tf
-447.788 672.210 Td
+447.788 502.931 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-463.980 672.210 Td
+463.980 502.931 Td
 (positions) Tj
 ET
 BT
 /F0 11 Tf
-506.462 672.210 Td
+506.462 502.931 Td
 (to) Tj
 ET
 BT
 /F0 11 Tf
-517.770 672.210 Td
+517.770 502.931 Td
 (a) Tj
 ET
 BT
 /F0 11 Tf
-87.274 656.821 Td
+87.274 487.542 Td
 (centimeter) Tj
 ET
 BT
 /F0 11 Tf
-136.455 656.821 Td
+136.455 487.542 Td
 (\(Draco) Tj
 ET
 BT
 /F0 11 Tf
-169.741 656.821 Td
+169.741 487.542 Td
 (compression) Tj
 ET
 BT
 /F0 11 Tf
-228.096 656.821 Td
+228.096 487.542 Td
 (is) Tj
 ET
 BT
 /F0 11 Tf
-238.183 656.821 Td
+238.183 487.542 Td
 (the) Tj
 ET
 BT
 /F0 11 Tf
-254.375 656.821 Td
+254.375 487.542 Td
 (default\):) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-106.524 641.432 Td
+106.524 472.153 Td
 (mbgrd2gltf) Tj
 ET
 BT
 /F1 11 Tf
-162.437 641.432 Td
+162.437 472.153 Td
 (--input) Tj
 ET
 BT
 /F1 11 Tf
-197.582 641.432 Td
+197.582 472.153 Td
 (input.grd) Tj
 ET
 BT
 /F1 11 Tf
-244.651 641.432 Td
+244.651 472.153 Td
 (--binary) Tj
 ET
 BT
 /F1 11 Tf
-285.901 641.432 Td
+285.901 472.153 Td
 (--output) Tj
 ET
 BT
 /F1 11 Tf
-327.151 641.432 Td
+327.151 472.153 Td
 (/path/to/output/mymodel) Tj
 ET
 BT
 /F1 11 Tf
-447.249 641.432 Td
+447.249 472.153 Td
 (--draco-precision) Tj
 ET
 BT
 /F1 11 Tf
-530.651 641.432 Td
+530.651 472.153 Td
 (0.01) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-87.274 610.654 Td
+87.274 441.375 Td
 (Convert) Tj
 ET
 BT
 /F0 11 Tf
-125.466 610.654 Td
+125.466 441.375 Td
 (with) Tj
 ET
 BT
 /F0 11 Tf
-147.774 610.654 Td
+147.774 441.375 Td
 (vertical) Tj
 ET
 BT
 /F0 11 Tf
-183.513 610.654 Td
+183.513 441.375 Td
 (exaggeration,) Tj
 ET
 BT
 /F0 11 Tf
-245.828 610.654 Td
+245.828 441.375 Td
 (without) Tj
 ET
 BT
 /F0 11 Tf
-282.194 610.654 Td
+282.194 441.375 Td
 (compression,) Tj
 ET
 BT
 /F0 11 Tf
-343.299 610.654 Td
+343.299 441.375 Td
 (and) Tj
 ET
 BT
 /F0 11 Tf
-361.933 610.654 Td
+361.933 441.375 Td
 (verbose) Tj
 ET
 BT
 /F0 11 Tf
-398.893 610.654 Td
+398.893 441.375 Td
 (output:) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-106.524 595.265 Td
+106.524 425.986 Td
 (mbgrd2gltf) Tj
 ET
 BT
 /F1 11 Tf
-162.437 595.265 Td
+162.437 425.986 Td
 (--input) Tj
 ET
 BT
 /F1 11 Tf
-197.582 595.265 Td
+197.582 425.986 Td
 (input.grd) Tj
 ET
 BT
 /F1 11 Tf
-244.651 595.265 Td
+244.651 425.986 Td
 (--output) Tj
 ET
 BT
 /F1 11 Tf
-285.901 595.265 Td
+285.901 425.986 Td
 (/path/to/output/mymodel) Tj
 ET
 BT
 /F1 11 Tf
-405.999 595.265 Td
+405.999 425.986 Td
 (--binary) Tj
 ET
 BT
 /F1 11 Tf
-447.249 595.265 Td
+447.249 425.986 Td
 (--no-draco) Tj
 ET
 BT
 /F1 11 Tf
-499.488 595.265 Td
+499.488 425.986 Td
 (--exaggeration) Tj
 ET
 BT
 /F1 11 Tf
-570.053 595.265 Td
+570.053 425.986 Td
 (20) Tj
 ET
 BT
 /F1 11 Tf
-583.803 595.265 Td
+583.803 425.986 Td
 (--verbose) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-87.274 564.487 Td
+87.274 395.208 Td
 (Convert) Tj
 ET
 BT
 /F0 11 Tf
-125.466 564.487 Td
+125.466 395.208 Td
 (bathymetry) Tj
 ET
 BT
 /F0 11 Tf
-178.321 564.487 Td
+178.321 395.208 Td
 (with) Tj
 ET
 BT
 /F0 11 Tf
-200.629 564.487 Td
+200.629 395.208 Td
 (10x) Tj
 ET
 BT
 /F0 11 Tf
-219.879 564.487 Td
+219.879 395.208 Td
 (vertical) Tj
 ET
 BT
 /F0 11 Tf
-255.618 564.487 Td
+255.618 395.208 Td
 (exaggeration:) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-106.524 549.098 Td
+106.524 379.819 Td
 (mbgrd2gltf) Tj
 ET
 BT
 /F1 11 Tf
-162.437 549.098 Td
+162.437 379.819 Td
 (--input) Tj
 ET
 BT
 /F1 11 Tf
-197.582 549.098 Td
+197.582 379.819 Td
 (bathymetry.grd) Tj
 ET
 BT
 /F1 11 Tf
-274.571 549.098 Td
+274.571 379.819 Td
 (--exaggeration) Tj
 ET
 BT
 /F1 11 Tf
-345.136 549.098 Td
+345.136 379.819 Td
 (10.0) Tj
 ET
 BT
 /F1 11 Tf
-367.136 549.098 Td
+367.136 379.819 Td
 (--binary) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-87.274 518.320 Td
+87.274 349.041 Td
 (Convert) Tj
 ET
 BT
 /F0 11 Tf
-125.466 518.320 Td
+125.466 349.041 Td
 (bathymetry) Tj
 ET
 BT
 /F0 11 Tf
-178.321 518.320 Td
+178.321 349.041 Td
 (with) Tj
 ET
 BT
 /F0 11 Tf
-200.629 518.320 Td
+200.629 349.041 Td
 (a) Tj
 ET
 BT
 /F0 11 Tf
-208.263 518.320 Td
+208.263 349.041 Td
 (GeoOrigin) Tj
 ET
 BT
 /F0 11 Tf
-258.060 518.320 Td
+258.060 349.041 Td
 (for) Tj
 ET
 BT
 /F0 11 Tf
-273.636 518.320 Td
+273.636 349.041 Td
 (improved) Tj
 ET
 BT
 /F0 11 Tf
-318.549 518.320 Td
+318.549 349.041 Td
 (precision:) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-106.524 502.931 Td
+106.524 333.652 Td
 (mbgrd2gltf) Tj
 ET
 BT
 /F1 11 Tf
-162.437 502.931 Td
+162.437 333.652 Td
 (--input) Tj
 ET
 BT
 /F1 11 Tf
-197.582 502.931 Td
+197.582 333.652 Td
 (monterey.grd) Tj
 ET
 BT
 /F1 11 Tf
-264.176 502.931 Td
+264.176 333.652 Td
 (--geoorigin=-122.0,36.8,-1000) Tj
 ET
 BT
 /F1 11 Tf
-403.348 502.931 Td
+403.348 333.652 Td
 (--binary) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-87.274 472.153 Td
+87.274 302.874 Td
 (Convert) Tj
 ET
 BT
 /F0 11 Tf
-125.466 472.153 Td
+125.466 302.874 Td
 (using) Tj
 ET
 BT
 /F0 11 Tf
-152.053 472.153 Td
+152.053 302.874 Td
 (automatic) Tj
 ET
 BT
 /F0 11 Tf
-198.187 472.153 Td
+198.187 302.874 Td
 (GeoOrigin) Tj
 ET
 BT
 /F0 11 Tf
-247.984 472.153 Td
+247.984 302.874 Td
 (\(grid) Tj
 ET
 BT
 /F0 11 Tf
-272.118 472.153 Td
+272.118 302.874 Td
 (center\):) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-106.524 456.764 Td
+106.524 287.485 Td
 (mbgrd2gltf) Tj
 ET
 BT
 /F1 11 Tf
-162.437 456.764 Td
+162.437 287.485 Td
 (--input) Tj
 ET
 BT
 /F1 11 Tf
-197.582 456.764 Td
+197.582 287.485 Td
 (monterey.grd) Tj
 ET
 BT
 /F1 11 Tf
-264.176 456.764 Td
+264.176 287.485 Td
 (--geoorigin) Tj
 ET
 BT
 /F1 11 Tf
-318.252 456.764 Td
+318.252 287.485 Td
 (--binary) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-87.274 425.986 Td
+87.274 256.707 Td
 (Generate) Tj
 ET
 BT
 /F0 11 Tf
-129.723 425.986 Td
+129.723 256.707 Td
 (HTML) Tj
 ET
 BT
 /F0 11 Tf
-163.636 425.986 Td
+163.636 256.707 Td
 (viewer) Tj
 ET
 BT
 /F0 11 Tf
-196.317 425.986 Td
+196.317 256.707 Td
 (with) Tj
 ET
 BT
 /F0 11 Tf
-218.625 425.986 Td
+218.625 256.707 Td
 (3D) Tj
 ET
 BT
 /F0 11 Tf
-234.817 425.986 Td
+234.817 256.707 Td
 (visualization:) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-106.524 410.597 Td
+106.524 241.318 Td
 (mbgrd2gltf) Tj
 ET
 BT
 /F1 11 Tf
-162.437 410.597 Td
+162.437 241.318 Td
 (--input) Tj
 ET
 BT
 /F1 11 Tf
-197.582 410.597 Td
+197.582 241.318 Td
 (bathymetry.grd) Tj
 ET
 BT
 /F1 11 Tf
-274.571 410.597 Td
+274.571 241.318 Td
 (--exaggeration) Tj
 ET
 BT
 /F1 11 Tf
-345.136 410.597 Td
+345.136 241.318 Td
 (10) Tj
 ET
 BT
 /F1 11 Tf
-358.886 410.597 Td
+358.886 241.318 Td
 (--html) Tj
 ET
 BT
 /F1 11 Tf
-390.962 410.597 Td
+390.962 241.318 Td
 (--binary) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-87.274 379.819 Td
+87.274 210.540 Td
 (Legacy) Tj
 ET
 BT
 /F0 11 Tf
-122.397 379.819 Td
+122.397 210.540 Td
 (syntax) Tj
 ET
 BT
 /F0 11 Tf
-153.868 379.819 Td
+153.868 210.540 Td
 (\(still) Tj
 ET
 BT
 /F0 11 Tf
-176.792 379.819 Td
+176.792 210.540 Td
 (supported\):) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-106.524 364.430 Td
+106.524 195.151 Td
 (mbgrd2gltf) Tj
 ET
 BT
 /F1 11 Tf
-162.437 364.430 Td
+162.437 195.151 Td
 (-I) Tj
 ET
 BT
 /F1 11 Tf
-173.129 364.430 Td
+173.129 195.151 Td
 (input.grd) Tj
 ET
 BT
 /F1 11 Tf
-220.198 364.430 Td
+220.198 195.151 Td
 (-B) Tj
 ET
 BT
 /F1 11 Tf
-233.948 364.430 Td
+233.948 195.151 Td
 (-O) Tj
 ET
 BT
 /F1 11 Tf
-248.919 364.430 Td
+248.919 195.151 Td
 (/path/to/output/mymodel) Tj
 ET
 BT
 /F1 11 Tf
-369.017 364.430 Td
+369.017 195.151 Td
 (-D) Tj
 ET
 BT
 /F1 11 Tf
-383.372 364.430 Td
+383.372 195.151 Td
 (-Qp) Tj
 ET
 BT
 /F1 11 Tf
-404.459 364.430 Td
+404.459 195.151 Td
 (20) Tj
 ET
 BT
 /F1 11 Tf
-418.209 364.430 Td
+418.209 195.151 Td
 (-E) Tj
 ET
 BT
 /F1 11 Tf
-431.959 364.430 Td
+431.959 195.151 Td
 (10) Tj
 ET
 BT
 /F1 11 Tf
-445.709 364.430 Td
+445.709 195.151 Td
 (-V) Tj
 ET
 BT
 /F1 11 Tf
-68.024 318.263 Td
+68.024 148.984 Td
 (SEE) Tj
 ET
 BT
 /F1 11 Tf
-91.564 318.263 Td
+91.564 148.984 Td
 (ALSO) Tj
 ET
 BT
 /F1 11 Tf
-87.274 302.874 Td
+87.274 133.595 Td
 (mbinfo\(1\),) Tj
 ET
 BT
 /F1 11 Tf
-139.216 302.874 Td
+139.216 133.595 Td
 (mbprocess\(1\),) Tj
 ET
 BT
 /F1 11 Tf
-207.647 302.874 Td
+207.647 133.595 Td
 (mblist\(1\)) Tj
-ET
-BT
-/F1 11 Tf
-68.024 256.707 Td
-(BUGS) Tj
-ET
-/F0 11 Tf
-BT
-/F0 11 Tf
-87.274 241.318 Td
-(Please) Tj
-ET
-BT
-/F0 11 Tf
-118.129 241.318 Td
-(report) Tj
-ET
-BT
-/F0 11 Tf
-147.147 241.318 Td
-(any) Tj
-ET
-BT
-/F0 11 Tf
-165.781 241.318 Td
-(bugs) Tj
-ET
-BT
-/F0 11 Tf
-189.310 241.318 Td
-(on) Tj
-ET
-BT
-/F0 11 Tf
-203.060 241.318 Td
-(the) Tj
-ET
-BT
-/F0 11 Tf
-219.252 241.318 Td
-(MB-System) Tj
-ET
-BT
-/F0 11 Tf
-275.176 241.318 Td
-(GitHub) Tj
-ET
-BT
-/F0 11 Tf
-310.926 241.318 Td
-(Issue) Tj
-ET
-BT
-/F0 11 Tf
-336.281 241.318 Td
-(Tracker.) Tj
 ET
 /F0 11 Tf
 BT
@@ -10185,7 +10609,7 @@ ET
 endstream
 endobj
 28 0 obj
-7232
+12127
 endobj
 29 0 obj
 <<
@@ -10206,60 +10630,210 @@ endobj
 /Contents 27 0 R
 >>
 endobj
+31 0 obj
+<<
+/Length 32 0 R
+>>
+stream
+BT
+/F1 11 Tf
+68.024 702.988 Td
+(BUGS) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+87.274 687.599 Td
+(Please) Tj
+ET
+BT
+/F0 11 Tf
+118.129 687.599 Td
+(report) Tj
+ET
+BT
+/F0 11 Tf
+147.147 687.599 Td
+(any) Tj
+ET
+BT
+/F0 11 Tf
+165.781 687.599 Td
+(bugs) Tj
+ET
+BT
+/F0 11 Tf
+189.310 687.599 Td
+(on) Tj
+ET
+BT
+/F0 11 Tf
+203.060 687.599 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+219.252 687.599 Td
+(MB-System) Tj
+ET
+BT
+/F0 11 Tf
+275.176 687.599 Td
+(GitHub) Tj
+ET
+BT
+/F0 11 Tf
+310.926 687.599 Td
+(Issue) Tj
+ET
+BT
+/F0 11 Tf
+336.281 687.599 Td
+(Tracker.) Tj
+ET
+/F0 11 Tf
+BT
+/F0 11 Tf
+68.024 739.233 Td
+(MBGRD2GLTF\(1\)) Tj
+ET
+BT
+/F0 11 Tf
+242.737 739.233 Td
+(MB-System) Tj
+ET
+BT
+/F0 11 Tf
+298.661 739.233 Td
+(User) Tj
+ET
+BT
+/F0 11 Tf
+322.179 739.233 Td
+(Commands) Tj
+ET
+BT
+/F0 11 Tf
+458.095 739.233 Td
+(MBGRD2GLTF\(1\)) Tj
+ET
+BT
+/F0 11 Tf
+68.024 36.245 Td
+(MB-System) Tj
+ET
+BT
+/F0 11 Tf
+123.948 36.245 Td
+(version) Tj
+ET
+BT
+/F0 11 Tf
+159.082 36.245 Td
+(5.8) Tj
+ET
+BT
+/F0 11 Tf
+272.536 36.245 Td
+(7) Tj
+ET
+BT
+/F0 11 Tf
+280.786 36.245 Td
+(January,) Tj
+ET
+BT
+/F0 11 Tf
+320.496 36.245 Td
+(2026) Tj
+ET
+BT
+/F0 11 Tf
+458.095 36.245 Td
+(MBGRD2GLTF\(1\)) Tj
+ET
+endstream
+endobj
+32 0 obj
+1106
+endobj
+33 0 obj
+<<
+/ProcSet [/PDF /Text]
+/Font <<
+/F0 3 0 R
+/F1 4 0 R
+/F2 5 0 R
+/F3 6 0 R
+>>
+>>
+endobj
+34 0 obj
+<<
+/Type /Page
+/Parent 2 0 R
+/Resources 33 0 R
+/Contents 31 0 R
+>>
+endobj
 2 0 obj
 <<
 /Type /Pages
 /MediaBox [0 0 612 790]
-/Count 6
-/Kids [ 10 0 R 14 0 R 18 0 R 22 0 R 26 0 R 30 0 R]
+/Count 7
+/Kids [ 10 0 R 14 0 R 18 0 R 22 0 R 26 0 R 30 0 R 34 0 R]
 >>
 endobj
-31 0 obj
+35 0 obj
 <<
 /Type /Catalog
 /Pages 2 0 R
 >>
 endobj
 xref
-0 32
+0 36
 0000000000 65535 f 
 0000000009 00000 n 
-0000095051 00000 n 
+0000100282 00000 n 
 0000000030 00000 n 
 0000000112 00000 n 
 0000000193 00000 n 
 0000000276 00000 n 
 0000000363 00000 n 
-0000022477 00000 n 
-0000022498 00000 n 
-0000022593 00000 n 
-0000022674 00000 n 
-0000031673 00000 n 
-0000031694 00000 n 
-0000031790 00000 n 
-0000031873 00000 n 
-0000049248 00000 n 
-0000049270 00000 n 
-0000049366 00000 n 
-0000049449 00000 n 
-0000068228 00000 n 
-0000068250 00000 n 
-0000068346 00000 n 
-0000068429 00000 n 
-0000087364 00000 n 
-0000087386 00000 n 
-0000087482 00000 n 
-0000087565 00000 n 
-0000094851 00000 n 
-0000094872 00000 n 
-0000094968 00000 n 
-0000095169 00000 n 
+0000021975 00000 n 
+0000021996 00000 n 
+0000022091 00000 n 
+0000022172 00000 n 
+0000031021 00000 n 
+0000031042 00000 n 
+0000031138 00000 n 
+0000031221 00000 n 
+0000049299 00000 n 
+0000049321 00000 n 
+0000049417 00000 n 
+0000049500 00000 n 
+0000067749 00000 n 
+0000067771 00000 n 
+0000067867 00000 n 
+0000067950 00000 n 
+0000086339 00000 n 
+0000086361 00000 n 
+0000086457 00000 n 
+0000086540 00000 n 
+0000098721 00000 n 
+0000098743 00000 n 
+0000098839 00000 n 
+0000098922 00000 n 
+0000100082 00000 n 
+0000100103 00000 n 
+0000100199 00000 n 
+0000100407 00000 n 
 trailer
 <<
-/Size 32
-/Root 31 0 R
+/Size 36
+/Root 35 0 R
 /Info 1 0 R
 >>
 startxref
-95219
+100457
 %%EOF

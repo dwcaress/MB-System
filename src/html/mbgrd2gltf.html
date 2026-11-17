@@ -36,9 +36,9 @@
     [<b>--output</b> <i>ROOT</i>] [<b>--exaggeration</b> <i>NUM</i>]
     [<b>--geoorigin</b>[<b>=</b><i>LON,LAT,ELEV</i>]] [<b>--no-draco</b>]
     [<b>--draco-precision</b> <i>METERS</i>] [<b>--draco-normal-bits</b>
-    <i>NUM</i>] [<b>--html</b>] [<b>--cesium-html</b> [<b>--cesium-url</b>
-    <i>URL</i>]] [<b>--geoviewpoint</b>=<i>VALUES</i>] [<b>--verbose</b>]
-    [<b>--help</b>]</p>
+    <i>NUM</i>] [<b>--no-colors</b>] [<b>--html</b>] [<b>--cesium-html</b>
+    [<b>--cesium-url</b> <i>URL</i>]] [<b>--geoviewpoint</b>=<i>VALUES</i>]
+    [<b>--verbose</b>] [<b>--help</b>]</p>
 <p class="Pp"><b>Legacy single-dash syntax:</b>
   <br/>
   <b>mbgrd2gltf -I</b><i>FILE</i> [<b>-B</b>] [<b>-O</b><i>ROOT</i>]
@@ -214,6 +214,15 @@
       takes.
     <p class="Pp"></p>
   </dd>
+  <dt id="no-colors"><a class="permalink" href="#no-colors"><b>--no-colors</b></a></dt>
+  <dd>Do not color the vertices by height. By default every vertex has a color
+      (COLOR_0) from the Haxby table that mbm_grdplot uses, over the range of
+      the grid (the grid value, not the exaggerated height), written as part of
+      the model (about 15 per cent more bytes), and the pages written by
+      <b>--html</b> and <b>--cesium-html</b> have a &quot;color by height&quot;
+      check box that turns the colors off, which shows the model in one gray, as
+      the pages of mbmesh do. The same table colors the tiles of mbmesh and
+      mbglb2tiles.</dd>
   <dt id="html,"><a class="permalink" href="#html,"><b>--html, -W</b></a></dt>
   <dd>Generate an HTML viewer page with inline 3D visualization using X3DOM. The
       HTML file includes the glTF/GLB model with interactive navigation

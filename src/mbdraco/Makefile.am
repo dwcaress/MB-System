@@ -108,6 +108,7 @@ libmbdraco_la_SOURCES = \
 
 noinst_HEADERS = \
 	draco_mesh.h \
+	haxby_colors.h \
 	draco/attributes/attribute_octahedron_transform.h \
 	draco/attributes/attribute_quantization_transform.h \
 	draco/attributes/attribute_transform.h \

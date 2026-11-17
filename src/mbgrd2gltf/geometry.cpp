@@ -118,7 +118,7 @@ Geometry::Geometry(const Bathymetry& bathymetry, const Options& options) {
   
   // Generate vertices with GeoOrigin offset applied (or no offset if not set)
   _vertices = get_vertices(bathymetry, options.exaggeration(), reference_altitude,
-                           _geoorigin_x, _geoorigin_y, _geoorigin_z);
+                           _geoorigin_x, _geoorigin_y, _geoorigin_z, &_altitudes);
   
   size_t valid_vertices = 0;
   for (const auto& v : _vertices) {
@@ -158,7 +158,8 @@ Vertex Geometry::get_earth_centered_vertex(double longitude, double latitude, do
 
 Matrix<Vertex> Geometry::get_vertices(const Bathymetry& bathymetry, double vertical_exaggeration,
                                        double reference_altitude,
-                                       double geoorigin_x, double geoorigin_y, double geoorigin_z) {
+                                       double geoorigin_x, double geoorigin_y, double geoorigin_z,
+                                       std::vector<float>* vertex_altitudes) {
   Matrix<Vertex> out(bathymetry.size_x(), bathymetry.size_y());
   const auto& altitudes = bathymetry.altitudes();
   uint32_t vertex_id = 1;
@@ -182,6 +183,7 @@ Matrix<Vertex> Geometry::get_vertices(const Bathymetry& bathymetry, double verti
         // snap every vertex to a 0.25-0.5 m lattice, whatever the grid spacing.
         const EcefPosition ecef = get_ecef_position(longitude, latitude, adjusted_altitude);
         const uint32_t this_id = vertex_id++;
+        vertex_altitudes->push_back(altitude);   // index() is the id less one, so this is where the vertex's value is
         
         // Print first few valid vertices for debugging
         if (!printed_first) {

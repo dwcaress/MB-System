@@ -12,6 +12,7 @@ mbgrd2gltf \- convert bathymetric grid data to GLTF format with optional setting
 [\fB\-\-no-draco\fP]
 [\fB\-\-draco-precision\fP \fIMETERS\fP]
 [\fB\-\-draco-normal-bits\fP \fINUM\fP]
+[\fB\-\-no-colors\fP]
 [\fB\-\-html\fP]
 [\fB\-\-cesium-html\fP [\fB\-\-cesium-url\fP \fIURL\fP]]
 [\fB\-\-geoviewpoint\fP=\fIVALUES\fP]
@@ -121,6 +122,9 @@ This replaces \fB\-\-quantize-position\fP and its fixed 16 bits, which gave a st
 .B \-\-draco-normal-bits \fINUM\fP
 With Draco, the bits of each normal, 2 to 30 (default 10). The mesh has no normals today, so this changes nothing; it is the option that mbmesh(1) takes.
 
+.TP
+.B \-\-no-colors
+Do not color the vertices by height. By default every vertex has a color (COLOR_0) from the Haxby table that mbm_grdplot uses, over the range of the grid (the grid value, not the exaggerated height), written as part of the model (about 15 per cent more bytes), and the pages written by \fB\-\-html\fR and \fB\-\-cesium-html\fR have a "color by height" check box that turns the colors off, which shows the model in one gray, as the pages of mbmesh do. The same table colors the tiles of mbmesh and mbglb2tiles.
 .TP
 .B \-\-html, \-W
 Generate an HTML viewer page with inline 3D visualization using X3DOM. The HTML file includes the glTF/GLB model with interactive navigation controls, processing provenance metadata (command line, timestamps, grid parameters, GeoOrigin settings, compression options), and links to MB-System and X3DOM documentation. The viewer requires serving the files via HTTP to avoid browser CORS restrictions when loading local files. The program does not start a web server or a browser; it logs the command to run (python3 -m http.server 8000 --bind 127.0.0.1 --directory <output directory>) and the URL to open. The processing log is written to <output_root>.log, one message a line, and the page loads it when its Processing Log panel is first opened, so the page need not hold it. Output file: <output_root>.html

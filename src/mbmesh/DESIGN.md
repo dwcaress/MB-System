@@ -117,7 +117,8 @@ tileset/L1/…  Ln/…
   check box (a custom shader that sets a gray base color before the lighting; the `REPLACE` blend mode of a style paints the final color and loses the shading). A GLB is a `Model`
   placed by the translation of the GeoOrigin alone, with `upAxis` Z and `forwardAxis` X, which leaves the axes of glTF as they are, since the vertices are ECEF. A GLB without normals
   (the mesh of `mbgrd2gltf`) is unlit in CesiumJS, which ignores a lighting model that a custom shader asks for, so a custom shader shades it from `dFdx` and `dFdy` of the eye-space
-  position and a fixed light. The globe starts hidden, with a check box that shows it translucent (the data are below the ellipsoid, which the globe would hide). The scale object is
+  position and a fixed light; the vertex colors of such a GLB (`mbgrd2gltf` colors its mesh by height) are in `material.diffuse` by then, and the shader mixes them with gray by a uniform that the
+  "color by height" check box sets. The globe starts hidden, with a check box that shows it translucent (the data are below the ellipsoid, which the globe would hide). The scale object is
   polylines and labels at the point of the data under the middle of the view, from a depth pick, resized before each render, with the origin raised a tenth of the axis length above
   the surface; with `--exaggeration` its label says what the Up axis stands for. The Viewpoint menu has an overview looking down, which the page opens with, fitted to the models that
   are shown (if none is, as in the survey page of `mbmesh`, which starts with only the tracks on, the first tileset is shown), views at 45 and 15 degrees from the south, and the
@@ -157,7 +158,7 @@ None of these blocks use of the tileset; each is small enough for its own issue.
 - **Memory of `mbglb2tiles`.** The whole mesh is held (about 12 GB at the peak for 38 million vertices, the weld about 5 minutes and the first
   clustering about 2.4); there is no path from the chunk files.
 - **One frame.** All tiles share one ENU frame; a survey tens of kilometers across would need a frame for each tile.
-- **Colors.** One table, over height; none from the data (backscatter), and `mesh.glb` is not colored. The checkbox relies on X3DOM internals.
+- **Colors.** One table, over height; none from the data (backscatter), and `mesh.glb` is not colored. `mbgrd2gltf` colors its mesh by height with the same table (`src/mbdraco/haxby_colors.h`, shared with `mbmesh`), over the range of the grid, unless `--no-colors`. The checkbox relies on X3DOM internals.
 - **Reconstruction.** Sparse tiles (under 32 owned points) are skipped; boundary triangles are dropped, not clipped, by support trimming; the point
   outputs of a very large survey are limited to 5 million points; octree or adaptive Poisson is not tried.
 - **Build.** Regenerate `configure` and the `Makefile.in` files for autotools; html and pdf man pages for `mbglb2tiles` and the `src/html` pages are

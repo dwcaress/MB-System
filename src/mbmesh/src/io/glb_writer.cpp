@@ -1,6 +1,7 @@
 #include "io/glb_writer.h"
 
 #include "draco_mesh.h"
+#include "haxby_colors.h"
 #include "util/logger.h"
 
 #include <algorithm>
@@ -278,81 +279,12 @@ int add_index_accessor(tinygltf::Model *model, int buffer_view_index, std::size_
     return static_cast<int>(model->accessors.size()) - 1;
 }
 
-// The Haxby color table that mbm_grdplot uses (its palette 1), from low to high: 11 colors.
-constexpr int haxby_color_count = 11;
-const double haxby_colors[haxby_color_count][3] = {
-    {37, 57, 175}, {40, 127, 251}, {50, 190, 255}, {106, 235, 255}, {138, 236, 174}, {205, 255, 162},
-    {240, 236, 121}, {255, 189, 87}, {255, 161, 68}, {255, 186, 133}, {255, 255, 255},
-};
-
-// The color of the palette at x, from 0 (first color) to 10 (last), interpolated between the colors.
-[[nodiscard]] std::array<double, 3> haxby_palette_color(double x) {
-    x = std::min(static_cast<double>(haxby_color_count - 1), std::max(0.0, x));
-    const int i1 = std::min(haxby_color_count - 2, static_cast<int>(x));
-    std::array<double, 3> color;
-    for (int c = 0; c < 3; c++) {
-        color[c] = haxby_colors[i1][c] + (haxby_colors[i1 + 1][c] - haxby_colors[i1][c]) * (x - i1);
-    }
-    return color;
-}
-
-// The bounds of the color table that "mbm_grdplot -G5" makes without -S: 11 equal steps from a rounded value below the
-// minimum, the step chosen as mbm_grdplot does from the range of the values.
-void linear_color_bounds(double minimum, double maximum, std::vector<double> *bounds) {
-    bounds->clear();
-    const double range = maximum - minimum;
-    if (!(range > 0.0)) {
-        bounds->push_back(minimum);
-        return;
-    }
-    const int steps = haxby_color_count - 1;
-    double contour_interval = std::pow(10.0, std::trunc(std::log10(range) + 0.5)) / 10.0;
-    if (range / contour_interval < 10.0) {
-        contour_interval /= 4.0;
-    } else if (range / contour_interval < 20.0) {
-        contour_interval /= 2.0;
-    }
-    const double start_interval = contour_interval / 2.0;
-    double multiplier = std::trunc(range / steps / start_interval) + 1.0;
-    double color_interval = multiplier * start_interval;
-    const auto first_bound = [&](double interval) {
-        return minimum < 0.0 ? interval * (std::trunc(minimum / interval) - 1.0) : interval * std::trunc(minimum / interval);
-    };
-    double start = first_bound(color_interval);
-    if (start + color_interval * steps < maximum) {
-        multiplier += 1.0;
-        color_interval = multiplier * start_interval;
-        start = first_bound(color_interval);
-    }
-    for (int i = 0; i <= steps; i++) {
-        bounds->push_back(start + color_interval * i);
-    }
-}
-
-// The color, 0 to 255, of a value on a table of bounds with a color at each: linear between the two bounds around it, the last color
-// above the last bound.
-[[nodiscard]] std::array<double, 3> color_for_value(double value, const std::vector<double> &bounds, const std::vector<std::array<double, 3>> &bound_colors) {
-    const int bound_count = static_cast<int>(bounds.size());
-    std::array<double, 3> color = bound_colors.back();
-    if (bound_count > 1 && value < bounds.back()) {
-        const int upper = static_cast<int>(std::upper_bound(bounds.begin(), bounds.end(), value) - bounds.begin());
-        const int lower = std::max(0, upper - 1);
-        const int next = std::min(bound_count - 1, upper);
-        const double fraction = next > lower ? (value - bounds[lower]) / (bounds[next] - bounds[lower]) : 0.0;
-        for (int c = 0; c < 3; c++) {
-            color[c] = bound_colors[lower][c] + (bound_colors[next][c] - bound_colors[lower][c]) * fraction;
-        }
-    }
-    return color;
-}
-
-[[nodiscard]] std::vector<std::array<double, 3>> palette_colors_for_bounds(int bound_count) {
-    std::vector<std::array<double, 3>> bound_colors;
-    for (int i = 0; i < bound_count; i++) {
-        bound_colors.push_back(haxby_palette_color(bound_count > 1 ? (haxby_color_count - 1.0) * i / (bound_count - 1.0) : haxby_color_count / 2.0));
-    }
-    return bound_colors;
-}
+// The Haxby color table that mbm_grdplot uses, and the bounds and colors by height, are shared with mbgrd2gltf (src/mbdraco/haxby_colors.h).
+using mbdraco::color_for_value;
+using mbdraco::haxby_color_count;
+using mbdraco::haxby_palette_color;
+using mbdraco::linear_color_bounds;
+using mbdraco::palette_colors_for_bounds;
 
 // The colors for the heights, as the color table that mbm_grdplot -G5 makes for a grid with the Haxby colors, with a color at each of
 // 11 bounds and the color changing linearly from one to the next; the bounds are returned in bounds. For HaxbyLinear they

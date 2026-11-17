@@ -142,6 +142,9 @@ void print_help() {
   std::cout << "                                with the orientation as an axis and an angle, as a GeoViewpoint takes it. Heights are\n";
   std::cout << "                                above the ellipsoid. The Copy GeoViewpoint button of the page gives the ten-number form.\n";
   std::cout << "                                The value must be attached: --geoviewpoint=-122.0,36.8,-900,...\n";
+  std::cout << "  --no-colors                   Do not color the vertices by height. By default every vertex has a color (COLOR_0) from the Haxby table that\n";
+  std::cout << "                                mbm_grdplot uses, over the range of the grid, and the pages have a \"color by height\" check box that turns\n";
+  std::cout << "                                the colors off, which shows the model in one gray, as mbmesh does\n";
   std::cout << "  --html, -W                    Generate HTML viewer with inline glTF/GLB model and print the command to view it\n";
   std::cout << "  --cesium-html                 Also write a viewer page for CesiumJS, <output>_cesium.html beside the model. The globe of Cesium would hide\n";
   std::cout << "                                data below the ellipsoid, so the page starts with it hidden and has a check box that shows it, translucent\n";
@@ -195,7 +198,7 @@ Options::Options(unsigned argc, const char* argv[]) {
       // Get value from next arg if not in --option=value format
       if (!value_ptr && i + 1 < argc && argv[i + 1][0] != '-') {
         // Don't consume next arg for flags
-        if (opt_name != "binary" && opt_name != "no-binary" && opt_name != "draco" && opt_name != "no-draco" && opt_name != "verbose" && opt_name != "help" && opt_name != "geoorigin" && opt_name != "html" && opt_name != "cesium-html") {
+        if (opt_name != "binary" && opt_name != "no-binary" && opt_name != "draco" && opt_name != "no-draco" && opt_name != "verbose" && opt_name != "help" && opt_name != "geoorigin" && opt_name != "html" && opt_name != "cesium-html" && opt_name != "no-colors") {
           value_ptr = argv[++i];
         }
       }
@@ -270,6 +273,9 @@ Options::Options(unsigned argc, const char* argv[]) {
       }
       else if (opt_name == "html") {
         _is_html_output = true;
+      }
+      else if (opt_name == "no-colors") {
+        _colors = false;
       }
       else if (opt_name == "cesium-html") {
         _is_cesium_html_output = true;

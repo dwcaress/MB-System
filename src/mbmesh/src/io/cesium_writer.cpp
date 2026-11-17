@@ -325,7 +325,7 @@ std::string cesium_page_text(const CesiumPageOptions &options) {
             out << " <a class='log' href='" << escape_html(model.log_uri) << "' target='_blank'>" << escape_html(model.log_label.empty() ? "log" : model.log_label) << "</a>";
         }
         out << "</label>\n";
-        if (model.is_tileset && model.height_colors) {
+        if (model.height_colors) {
             out << "    <label class='sub'><input id='color-checkbox-" << i << "' type='checkbox' checked onclick='setModelColors(" << i
                 << ", this.checked);'> color by height</label>\n";
         }
@@ -341,7 +341,8 @@ std::string cesium_page_text(const CesiumPageOptions &options) {
     for (std::size_t i = 0; i < models.size(); i++) {
         const CesiumModel &model = models[i];
         out << "      { uri: '" << escape_js(model.uri) << "', tileset: " << (model.is_tileset ? "true" : "false") << ", visible: " << (model.visible ? "true" : "false")
-            << ", lift: " << model.lift_meters << ", sse: " << model.max_screen_space_error << ", shade: " << (model.shade_without_normals ? "true" : "false") << " }" << (i + 1 < models.size() ? "," : "") << "\n";
+            << ", lift: " << model.lift_meters << ", sse: " << model.max_screen_space_error << ", shade: " << (model.shade_without_normals ? "true" : "false")
+            << ", colors: " << (model.height_colors ? "true" : "false") << " }" << (i + 1 < models.size() ? "," : "") << "\n";
     }
     out << "    ];\n"
         << "    // The ECEF position that the vertices of the GLBs are relative to, the GeoOrigin; zeros for absolute ones.\n"
@@ -401,6 +402,10 @@ std::string cesium_page_text(const CesiumPageOptions &options) {
         << "      if (!model.primitive) {\n"
         << "        return;\n"
         << "      }\n"
+        << "      if (!model.tileset) {\n"
+        << "        model.primitive.customShader.setUniform('u_colors', on ? 1.0 : 0.0);\n"
+        << "        return;\n"
+        << "      }\n"
         << "      model.primitive.customShader = on ? undefined : new Cesium.CustomShader({\n"
         << "        fragmentShaderText: 'void fragmentMain(FragmentInput fsInput, inout czm_modelMaterial material) { material.diffuse = vec3(0.75); }'\n"
         << "      });\n"
@@ -428,13 +433,18 @@ std::string cesium_page_text(const CesiumPageOptions &options) {
         << "        });\n"
         << "      } else {\n"
         << "        var options = { url: model.uri, modelMatrix: Cesium.Matrix4.fromTranslation(modelOrigin), upAxis: Cesium.Axis.Z, forwardAxis: Cesium.Axis.X };\n"
-        << "        if (model.shade) {\n"
-        << "          // No normals: CesiumJS draws the model unlit, in one flat color, and ignores a lighting model that a shader asks for. The shader takes the normal\n"
-        << "          // of the surface through the pixel and its neighbors, in eye space, and shades the gray with a light from above and a little to the side of the camera.\n"
+        << "        if (model.shade || model.colors) {\n"
+        << "          // The colors of the vertices are in material.diffuse by now; u_colors is 1 to show them and 0 to show gray in their place (the check box).\n"
+        << "          // Without normals CesiumJS draws the model unlit, in one flat color, and ignores a lighting model that a custom shader asks for, so then the shader\n"
+        << "          // takes the normal of the surface through the pixel and its neighbors, in eye space, and shades with a light from above and a little to the side of\n"
+        << "          // the camera. With normals the lighting of CesiumJS does the shading.\n"
+        << "          var base = model.colors ? 'mix(vec3(0.7), material.diffuse, u_colors)' : 'vec3(0.7)';\n"
+        << "          var code = model.shade ? 'vec3 p = fsInput.attributes.positionEC; vec3 n = normalize(cross(dFdx(p), dFdy(p))); '\n"
+        << "                                   + 'float s = max(dot(n, normalize(vec3(-0.35, 0.55, 0.75))), 0.0); material.diffuse = ' + base + ' * (0.25 + 0.75 * s);'\n"
+        << "                                 : 'material.diffuse = ' + base + ';';\n"
         << "          options.customShader = new Cesium.CustomShader({\n"
-        << "            fragmentShaderText: 'void fragmentMain(FragmentInput fsInput, inout czm_modelMaterial material) { vec3 p = fsInput.attributes.positionEC; '\n"
-        << "                                + 'vec3 n = normalize(cross(dFdx(p), dFdy(p))); float s = max(dot(n, normalize(vec3(-0.35, 0.55, 0.75))), 0.0); '\n"
-        << "                                + 'material.diffuse = vec3(0.7) * (0.25 + 0.75 * s); }'\n"
+        << "            uniforms: { u_colors: { type: Cesium.UniformType.FLOAT, value: 1.0 } },\n"
+        << "            fragmentShaderText: 'void fragmentMain(FragmentInput fsInput, inout czm_modelMaterial material) { ' + code + ' }'\n"
         << "          });\n"
         << "        }\n"
         << "        model.loading = Cesium.Model.fromGltfAsync(options).then(function (loaded) {\n"

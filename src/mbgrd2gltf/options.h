@@ -57,6 +57,7 @@ private: // members
   bool _is_geoorigin_set = false;
   bool _is_geoorigin_auto = false;
   bool _is_html_output = false;
+  bool _colors = true;                            // COLOR_0 by height, unless --no-colors
   bool _is_cesium_html_output = false;            // --cesium-html: also a page for CesiumJS
   std::string _cesium_url;                        // --cesium-url: the CesiumJS build of that page; empty for the default
   mbdraco::Settings _draco;                       // on by default; see src/mbdraco/draco_mesh.h
@@ -81,6 +82,7 @@ public: // members
   bool is_geoorigin_auto() const { return _is_geoorigin_auto; }
   bool is_html_output() const { return _is_html_output; }
   bool is_cesium_html_output() const { return _is_cesium_html_output; }
+  bool colors() const { return _colors; }
   const std::string& cesium_url() const { return _cesium_url; }
   const mbdraco::Settings& draco() const { return _draco; }
   const std::vector<std::string>& geoviewpoints() const { return _geoviewpoints; }

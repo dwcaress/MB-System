@@ -43,9 +43,12 @@
 #define TINYGLTF_NO_STB_IMAGE_WRITE
 #include "tinygltf/tiny_gltf.h"
 #include "draco_mesh.h"
+#include "haxby_colors.h"
 
 // standard library
 #include <sys/stat.h>
+#include <algorithm>
+#include <array>
 #include <fstream>
 #include <iomanip>
 #include <sstream>
@@ -111,13 +114,18 @@ struct BlockBuild {
   int accVerts = -1;
 
   std::vector<double> vmin, vmax;
+
+  std::vector<uint8_t> colors; // r,g,b bytes for each vertex, if the model is colored
+  int bvColors = -1;
+  int accColors = -1;
 };
 
 // Remap global vertex IDs in 'tris' to local 0..k-1 and build a block-local vertex buffer.
 // Uses the id_to_offset map to correctly locate vertices in the master buffer.
 static BlockBuild build_block_buffers(const std::vector<float>& masterVerts,
                                     const std::vector<Triangle>& tris,
-                                    const std::unordered_map<uint32_t, size_t>& id_to_offset) {
+                                    const std::unordered_map<uint32_t, size_t>& id_to_offset,
+                                    const std::vector<uint8_t>* masterColors = nullptr) {
   BlockBuild tb;
   if (tris.empty())
     return tb;
@@ -141,6 +149,9 @@ static BlockBuild build_block_buffers(const std::vector<float>& masterVerts,
       tb.verts.push_back(0.0f);
       tb.verts.push_back(0.0f);
       tb.verts.push_back(0.0f);
+      if (masterColors) {
+        tb.colors.insert(tb.colors.end(), {255, 255, 255});
+      }
       return lidx;
     }
     
@@ -148,6 +159,10 @@ static BlockBuild build_block_buffers(const std::vector<float>& masterVerts,
     tb.verts.push_back(masterVerts[off + 0]);
     tb.verts.push_back(masterVerts[off + 1]);
     tb.verts.push_back(masterVerts[off + 2]);
+    if (masterColors) {
+      // off counts floats, three for each vertex, and the colors are three bytes for each vertex in the same order
+      tb.colors.insert(tb.colors.end(), masterColors->begin() + off, masterColors->begin() + off + 3);
+    }
     return lidx;
   };
 
@@ -296,6 +311,26 @@ void write_gltf(const Geometry& geometry, const Options& options, GridRunInfo& r
   const std::vector<float> master_vertex_buffer = get_vertex_buffer(geometry.vertices(), &id_to_offset);
   const size_t kBlockSizeDefault = 256;
 
+  // Colors by height, with the Haxby table over the range of the grid: three bytes for each vertex, in the order of the vertex buffer. The height is the
+  // grid value, not the exaggerated one, so that the colors mean the same whatever --exaggeration says.
+  std::vector<uint8_t> master_colors;
+  if (options.colors() && !geometry.altitudes().empty()) {
+    const std::vector<float>& heights = geometry.altitudes();
+    const auto range = std::minmax_element(heights.begin(), heights.end());
+    const std::vector<double> bounds = mbdraco::haxby_bounds(*range.first, *range.second);
+    const std::vector<std::array<double, 3>> bound_colors = mbdraco::palette_colors_for_bounds(static_cast<int>(bounds.size()));
+    master_colors.reserve(master_vertex_buffer.size());
+    for (const float height : heights) {
+      const std::array<uint8_t, 3> color = mbdraco::haxby_color_bytes(height, bounds, bound_colors);
+      master_colors.insert(master_colors.end(), color.begin(), color.end());
+    }
+    LOG_INFO("Colors: by height with the Haxby table of mbm_grdplot, from", bounds.front(), "to", bounds.back(),
+             "m (--no-colors leaves them out)");
+  } else if (!options.colors()) {
+    LOG_INFO("Colors: none (--no-colors)");
+  }
+  const std::vector<uint8_t>* master_colors_ptr = master_colors.empty() ? nullptr : &master_colors;
+
   std::vector<Geometry::Block> blocks = geometry.blocks();
 
   if (blocks.empty()) {
@@ -311,7 +346,7 @@ void write_gltf(const Geometry& geometry, const Options& options, GridRunInfo& r
       built.reserve(blocks.size());
       size_t block_count = 0;
       for (const auto& block : blocks) {
-        built.emplace_back(build_block_buffers(master_vertex_buffer, block.triangles, id_to_offset));
+        built.emplace_back(build_block_buffers(master_vertex_buffer, block.triangles, id_to_offset, master_colors_ptr));
         block_count++;
         if (block_count % 100 == 0 || block_count == blocks.size()) {
           LOG_INFO("  Built block", block_count, "of", blocks.size());
@@ -339,7 +374,8 @@ void write_gltf(const Geometry& geometry, const Options& options, GridRunInfo& r
         }
 
         std::string reason;
-        if (!mbdraco::add_primitive(&model, &mesh, &bin, tb.verts, nullptr, idx, options.draco(), 0, &used, &reason)) {
+        if (!mbdraco::add_primitive(&model, &mesh, &bin, tb.verts, nullptr, idx, options.draco(), 0, &used, &reason,
+                                   tb.colors.empty() ? nullptr : &tb.colors)) {
           LOG_WARN("Draco compression failed (" + reason + ")");
           encode_ok = false;
           break;
@@ -361,6 +397,9 @@ void write_gltf(const Geometry& geometry, const Options& options, GridRunInfo& r
         model.meshes.push_back(std::move(mesh));
         tinygltf::Material mat;
         mat.doubleSided = true;
+        // Not the defaults of glTF, fully metallic and rough, which a viewer with no environment to reflect draws black; as in mbmesh.
+        mat.pbrMetallicRoughness.metallicFactor = 0.0;
+        mat.pbrMetallicRoughness.roughnessFactor = 0.65;
         model.materials.push_back(mat);
 
         tinygltf::Scene scene;
@@ -401,7 +440,7 @@ void write_gltf(const Geometry& geometry, const Options& options, GridRunInfo& r
   built.reserve(blocks.size());
   size_t block_count = 0;
   for (const auto& block : blocks) {
-    built.emplace_back(build_block_buffers(master_vertex_buffer, block.triangles, id_to_offset));
+    built.emplace_back(build_block_buffers(master_vertex_buffer, block.triangles, id_to_offset, master_colors_ptr));
     block_count++;
     if (block_count % 100 == 0 || block_count == blocks.size()) {
       LOG_INFO("  Built block", block_count, "of", blocks.size());
@@ -474,6 +513,28 @@ void write_gltf(const Geometry& geometry, const Options& options, GridRunInfo& r
     append_bytes(bin, tb.verts);
     tb.bvVerts = pushBufferView(start, tb.verts.size() * sizeof(float), /*isIndex*/ false);
 
+    // colors, as floats from 0 to 1 (three bytes would not be aligned to four)
+    if (!tb.colors.empty()) {
+      std::vector<float> color_floats;
+      color_floats.reserve(tb.colors.size());
+      for (const uint8_t c : tb.colors) {
+        color_floats.push_back(static_cast<float>(c) / 255.0f);
+      }
+      start = align4(bin.size());
+      if (start != bin.size())
+        bin.resize(start);
+      append_bytes(bin, color_floats);
+      tb.bvColors = pushBufferView(start, color_floats.size() * sizeof(float), /*isIndex*/ false);
+      tinygltf::Accessor acc;
+      acc.bufferView = tb.bvColors;
+      acc.byteOffset = 0;
+      acc.componentType = TINYGLTF_COMPONENT_TYPE_FLOAT;
+      acc.count = tb.colors.size() / 3;
+      acc.type = TINYGLTF_TYPE_VEC3;
+      model.accessors.push_back(std::move(acc));
+      tb.accColors = static_cast<int>(model.accessors.size()) - 1;
+    }
+
     // accessors
     tb.accIndices = pushAccessorIndex(tb, tb.bvIndices);
     tb.accVerts = pushAccessorVerts(tb, tb.bvVerts);
@@ -483,6 +544,9 @@ void write_gltf(const Geometry& geometry, const Options& options, GridRunInfo& r
     prim.mode = TINYGLTF_MODE_TRIANGLES;
     prim.indices = tb.accIndices;
     prim.attributes["POSITION"] = tb.accVerts;
+    if (tb.accColors >= 0) {
+      prim.attributes["COLOR_0"] = tb.accColors;
+    }
     prim.material = 0;
     mesh.primitives.push_back(std::move(prim));
     
@@ -501,6 +565,8 @@ void write_gltf(const Geometry& geometry, const Options& options, GridRunInfo& r
   model.meshes.push_back(std::move(mesh));
   tinygltf::Material mat;
   mat.doubleSided = true;
+  mat.pbrMetallicRoughness.metallicFactor = 0.0;   // see the Draco path above: the glTF defaults are black without an environment
+  mat.pbrMetallicRoughness.roughnessFactor = 0.65;
   model.materials.push_back(mat);
 
   tinygltf::Scene scene;
@@ -524,6 +590,82 @@ void write_gltf(const Geometry& geometry, const Options& options, GridRunInfo& r
     validate_gltf_file(output_filepath, options.is_binary_output());
   }
 }
+
+// The check box that turns the colors of the model off. The vertices have a color each (COLOR_0) and the material a white base color; with the colors off
+// the vertex colors are not used and the base color is the gray that MeshLab shows a mesh in, as in the pages of mbmesh. The model is an Inline, whose nodes X3DOM
+// makes when the file has arrived, so they are reached through its internal nodes, and done again from time to time while the colors are off.
+static const char* height_colors_script = R"JS(
+      var heightColorsOn = true;
+      var heightColorsGray = 0.75;   // 192 of 255, the gray that MeshLab shows a mesh in
+
+      function collectShapes(node, shapes, seen) {
+        if (!node || seen.indexOf(node) >= 0) {
+          return;
+        }
+        seen.push(node);
+        if (node.typeName && node.typeName() === 'Shape') {
+          shapes.push(node);
+          return;
+        }
+        var children = node._childNodes || [];
+        for (var i = 0; i < children.length; i++) {
+          collectShapes(children[i], shapes, seen);
+        }
+        var fields = node._cf || {};
+        for (var name in fields) {
+          if (fields[name] && fields[name].node) {
+            collectShapes(fields[name].node, shapes, seen);
+          }
+        }
+      }
+
+      function applyHeightColors() {
+        var inline = document.getElementById('inline');
+        if (!inline || !inline._x3domNode) {
+          return;
+        }
+        var shapes = [], changed = false;
+        collectShapes(inline._x3domNode, shapes, []);
+        for (var s = 0; s < shapes.length; s++) {
+          var shape = shapes[s], material = shape._cf && shape._cf.appearance && shape._cf.appearance.node &&
+                                            shape._cf.appearance.node._cf.material && shape._cf.appearance.node._cf.material.node;
+          var geometry = shape._cf && shape._cf.geometry && shape._cf.geometry.node;
+          if (!material || !geometry || !material._vf || shape._colorsOn === heightColorsOn) {
+            continue;
+          }
+          if (shape._colorsOn === undefined && geometry._hasColor !== true) {
+            continue;   // a block without vertex colors
+          }
+          var gray = heightColorsOn ? 1 : heightColorsGray;
+          material._vf.baseColorFactor = new x3dom.fields.SFColorRGBA(gray, gray, gray, 1);
+          material.fieldChanged('baseColorFactor');
+          geometry._hasColor = heightColorsOn;
+          shape._dirty.shader = true;
+          shape._dirty.colors = true;
+          geometry.invalidateVolume();
+          shape._colorsOn = heightColorsOn;
+          changed = true;
+        }
+        if (changed) {
+          var runtime = document.getElementById('x3dElement').runtime;
+          if (runtime && runtime.canvas && runtime.canvas.doc) {
+            runtime.canvas.doc.needRender = true;
+          }
+        }
+      }
+
+      function setHeightColors(on) {
+        heightColorsOn = on;
+        applyHeightColors();
+      }
+
+      // Blocks arrive as the file is read: the ones that arrive while the colors are off are made gray.
+      setInterval(function () {
+        if (heightColorsOn === false) {
+          try { applyHeightColors(); } catch (e) { }
+        }
+      }, 500);
+)JS";
 
 // The script of the Copy GeoViewpoint button: the --geoviewpoint option for the current view, geodetic like a
 // GeoViewpoint, so that it does not depend on the GeoOrigin or the grid. The page defines modelOrigin, the
@@ -907,6 +1049,14 @@ void write_html(const Bathymetry& bathymetry, const Geometry& geometry, const Op
   html_file << "              <div id='copy-status' style='visibility:hidden; font-size:smaller; width:0; min-width:100%; min-height:1.2em;'>&nbsp;</div>\n";
   html_file << "            </td>\n";
   html_file << "          </tr>\n";
+  if (options.colors()) {
+    html_file << "          <tr>\n";
+    html_file << "            <td colspan='2'>\n";
+    html_file << "              <input id='height-colors-checkbox' type='checkbox' checked onclick='setHeightColors(this.checked);'>\n";
+    html_file << "              </input> color by height\n";
+    html_file << "            </td>\n";
+    html_file << "          </tr>\n";
+  }
   scale_axes::write_checkbox_row(html_file);
   html_file << "        </table>\n";
   html_file << "      </div>\n";
@@ -1014,6 +1164,9 @@ void write_html(const Bathymetry& bathymetry, const Geometry& geometry, const Op
     html_file << "      var logUrl = '" << escaped_url << "';\n";
   }
   html_file << copy_viewpoint_script << "\n";
+  if (options.colors()) {
+    html_file << height_colors_script << "\n";
+  }
   html_file << "      // Makes one of the page's viewpoints the one in use.\n";
   html_file << "      function bindViewpoint(id) {\n";
   html_file << "        var viewpoint = document.getElementById(id);\n";
@@ -1096,6 +1249,7 @@ void write_cesium_html(const Geometry& geometry, const Options& options, const s
   model.label = model.uri;
   model.visible = true;
   model.shade_without_normals = true;   // the mesh has no normals
+  model.height_colors = options.colors();
   page.models.push_back(model);
   for (size_t i = 0; i < options.geoviewpoints().size(); ++i) {
     UserViewpoint user;

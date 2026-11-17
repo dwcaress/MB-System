@@ -71,6 +71,7 @@ private: // members
   double _geoorigin_y = 0.0;
   double _geoorigin_z = 0.0;
   double _reference_altitude = 0.0;
+  std::vector<float> _altitudes;   // the grid value of each vertex, in the order of Vertex::index(): the true height, whatever the vertical exaggeration
 
 private: // methods
   static double to_radians(double degrees);
@@ -80,7 +81,8 @@ private: // methods
                                           uint32_t id);
   static Matrix<Vertex> get_vertices(const Bathymetry& bathymetry, double vertical_exaggeration,
                                      double reference_altitude,
-                                     double geoorigin_x, double geoorigin_y, double geoorigin_z);
+                                     double geoorigin_x, double geoorigin_y, double geoorigin_z,
+                                     std::vector<float>* vertex_altitudes);
 
 public: // methods
   // The WGS84 ECEF position of a longitude and latitude in degrees and a height above the ellipsoid in meters.
@@ -94,6 +96,8 @@ public: // methods
   // The mean altitude of the valid grid values: the automatic GeoOrigin's height, and the
   // level that vertical exaggeration is applied about.
   double reference_altitude() const { return _reference_altitude; }
+  // The grid value (height above the ellipsoid) of each vertex, indexed by Vertex::index(), without the vertical exaggeration: what --colors colors by.
+  const std::vector<float>& altitudes() const { return _altitudes; }
 };
 } // namespace mbgrd2gltf
 

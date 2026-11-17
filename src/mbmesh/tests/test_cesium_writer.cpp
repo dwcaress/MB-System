@@ -49,7 +49,7 @@ int main() {
     ok &= check(has(page, "<script src='https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Cesium.js'></script>") &&
                     has(page, "Build/Cesium/Widgets/widgets.css"),
                 "the page loads CesiumJS from its web site by default");
-    ok &= check(has(page, "{ uri: 'ZTopo_tileset/tileset.json', tileset: true, visible: true, lift: 857, sse: 1, shade: false }") && has(page, "Cesium.Cesium3DTileset.fromUrl(model.uri"),
+    ok &= check(has(page, "{ uri: 'ZTopo_tileset/tileset.json', tileset: true, visible: true, lift: 857, sse: 1, shade: false, colors: true }") && has(page, "Cesium.Cesium3DTileset.fromUrl(model.uri"),
                 "the page loads the tileset, with its lift and its screen-space error");
     ok &= check(has(page, "viewer.scene.globe.show = false;") && has(page, "<input id='globe-checkbox' type='checkbox' onclick='setGlobe(this.checked);'>") &&
                     has(page, "function setGlobe(on)"),
@@ -117,7 +117,7 @@ int main() {
     survey.models = {tileset_model(), mesh, track, lidar};
     survey.models[0].group = "multibeam";
     const std::string survey_page = cesium_page_text(survey);
-    ok &= check(has(survey_page, "{ uri: 'multibeam/mbmesh_output/mesh.glb', tileset: false, visible: false, lift: 0, sse: 0, shade: false }") &&
+    ok &= check(has(survey_page, "{ uri: 'multibeam/mbmesh_output/mesh.glb', tileset: false, visible: false, lift: 0, sse: 0, shade: false, colors: false }") &&
                     has(survey_page, "Cesium.Model.fromGltfAsync(options)") &&
                     has(survey_page, "modelMatrix: Cesium.Matrix4.fromTranslation(modelOrigin), upAxis: Cesium.Axis.Z, forwardAxis: Cesium.Axis.X"),
                 "a GLB is a model placed by the translation of the GeoOrigin alone, with the axes of glTF left as they are");
@@ -152,11 +152,14 @@ int main() {
     grid_model.label = "grid.glb";
     grid_model.visible = true;
     grid_model.shade_without_normals = true;
+    grid_model.height_colors = true;
     grid.models = {grid_model};
     const std::string grid_page = cesium_page_text(grid);
-    ok &= check(has(grid_page, "{ uri: 'grid.glb', tileset: false, visible: true, lift: 0, sse: 0, shade: true }") && has(grid_page, "options.customShader = new Cesium.CustomShader(") &&
-                    has(grid_page, "vec3 n = normalize(cross(dFdx(p), dFdy(p)))"),
-                "a GLB without normals is shaded with a normal found from the position of neighboring pixels");
+    ok &= check(has(grid_page, "{ uri: 'grid.glb', tileset: false, visible: true, lift: 0, sse: 0, shade: true, colors: true }") && has(grid_page, "options.customShader = new Cesium.CustomShader(") &&
+                    has(grid_page, "vec3 n = normalize(cross(dFdx(p), dFdy(p)))") && has(grid_page, "mix(vec3(0.7), material.diffuse, u_colors)") &&
+                    has(grid_page, "<input id='color-checkbox-0' type='checkbox' checked onclick='setModelColors(0, this.checked);'> color by height") &&
+                    has(grid_page, "model.primitive.customShader.setUniform('u_colors', on ? 1.0 : 0.0)"),
+                "a GLB without normals is shaded with a normal found from the position of neighboring pixels, its vertex colors have a check box, and gray replaces them");
 
     // The options change the page
     CesiumPageOptions plain = options;

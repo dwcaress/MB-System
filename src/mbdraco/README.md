@@ -13,6 +13,7 @@ The positions of a mesh are quantized over the largest of the ranges of its thre
 ## Code
 
 - `draco_mesh.h`, `draco_mesh.cpp` - namespace `mbdraco`: `Settings` and the defaults; `position_bits()`; `parse_precision()` and `parse_normal_bits()` for the options; `encode()` of a mesh (positions, optional normals, triangles), which decodes the result again to check it and to count what it holds, and `decode()` for tests; `add_primitive()`, which encodes a mesh into a buffer shared by the meshes of a file and adds the primitive, its accessors (which have no buffer views) and the extension, listed as used and required, to a `tinygltf::Model`.
+- `haxby_colors.h` - namespace `mbdraco`, header only: the Haxby color table of `mbm_grdplot`, the bounds that `mbm_grdplot -G5` chooses from a range of heights, and the color of a height, for the colors by height of `mbmesh`, `mbglb2tiles` and `mbgrd2gltf`.
 - `draco/` - the Draco source (encoder and decoder), moved here from `src/mbgrd2gltf/draco`.
 - `test_mbdraco.cpp` - the test, built by CMake as `mbdraco_test_draco_mesh`.
 
