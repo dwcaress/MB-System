@@ -8977,50 +8977,180 @@ BT
 243.683 533.709 Td
 (Institute) Tj
 ET
+BT
+/F0 11 Tf
+87.274 518.320 Td
+(Levels) Tj
+ET
+BT
+/F0 11 Tf
+119.350 518.320 Td
+(of) Tj
+ET
+BT
+/F0 11 Tf
+131.263 518.320 Td
+(detail,) Tj
+ET
+BT
+/F0 11 Tf
+161.205 518.320 Td
+(OGC) Tj
+ET
+BT
+/F0 11 Tf
+187.176 518.320 Td
+(3D) Tj
+ET
+BT
+/F0 11 Tf
+203.368 518.320 Td
+(Tiles) Tj
+ET
+BT
+/F0 11 Tf
+228.118 518.320 Td
+(tilesets) Tj
+ET
+BT
+/F0 11 Tf
+261.426 518.320 Td
+(and) Tj
+ET
+BT
+/F0 11 Tf
+280.060 518.320 Td
+(the) Tj
+ET
+BT
+/F0 11 Tf
+296.252 518.320 Td
+(viewer) Tj
+ET
+BT
+/F0 11 Tf
+328.933 518.320 Td
+(pages) Tj
+ET
+BT
+/F0 11 Tf
+356.730 518.320 Td
+(\(issue) Tj
+ET
+BT
+/F0 11 Tf
+385.143 518.320 Td
+(#1629\):) Tj
+ET
+BT
+/F0 11 Tf
+422.114 518.320 Td
+(Mike) Tj
+ET
+BT
+/F0 11 Tf
+448.085 518.320 Td
+(McCann) Tj
+ET
+BT
+/F0 11 Tf
+488.719 518.320 Td
+(\(supervising) Tj
+ET
+BT
+/F0 11 Tf
+87.274 502.931 Td
+(Claude) Tj
+ET
+BT
+/F0 11 Tf
+121.187 502.931 Td
+(Sonnet) Tj
+ET
+BT
+/F0 11 Tf
+154.495 502.931 Td
+(5.5,) Tj
+ET
+BT
+/F0 11 Tf
+173.745 502.931 Td
+(an) Tj
+ET
+BT
+/F0 11 Tf
+186.879 502.931 Td
+(AI) Tj
+ET
+BT
+/F0 11 Tf
+201.234 502.931 Td
+(coding) Tj
+ET
+BT
+/F0 11 Tf
+233.926 502.931 Td
+(agent) Tj
+ET
+BT
+/F0 11 Tf
+260.502 502.931 Td
+(from) Tj
+ET
+BT
+/F0 11 Tf
+284.636 502.931 Td
+(Anthropic\),) Tj
+ET
+BT
+/F0 11 Tf
+338.404 502.931 Td
+(MBARI) Tj
+ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-68.024 502.931 Td
+68.024 472.153 Td
 (SEE) Tj
 ET
 BT
 /F1 11 Tf
-91.564 502.931 Td
+91.564 472.153 Td
 (ALSO) Tj
 ET
 BT
 /F1 11 Tf
-87.274 487.542 Td
+87.274 456.764 Td
 (mb-system) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-137.984 487.542 Td
+137.984 456.764 Td
 (\(1\),) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-156.310 487.542 Td
+156.310 456.764 Td
 (mbmesh) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-196.031 487.542 Td
+196.031 456.764 Td
 (\(1\),) Tj
 ET
 /F1 11 Tf
 BT
 /F1 11 Tf
-214.357 487.542 Td
+214.357 456.764 Td
 (mbgrd2gltf) Tj
 ET
 /F0 11 Tf
 BT
 /F0 11 Tf
-267.520 487.542 Td
+267.520 456.764 Td
 (\(1\)) Tj
 ET
 /F0 11 Tf
@@ -9072,7 +9202,7 @@ ET
 endstream
 endobj
 24 0 obj
-5945
+7149
 endobj
 25 0 obj
 <<
@@ -9111,7 +9241,7 @@ xref
 0 28
 0000000000 65535 f 
 0000000009 00000 n 
-0000083410 00000 n 
+0000084614 00000 n 
 0000000030 00000 n 
 0000000112 00000 n 
 0000000193 00000 n 
@@ -9133,10 +9263,10 @@ xref
 0000077032 00000 n 
 0000077128 00000 n 
 0000077211 00000 n 
-0000083210 00000 n 
-0000083231 00000 n 
-0000083327 00000 n 
-0000083521 00000 n 
+0000084414 00000 n 
+0000084435 00000 n 
+0000084531 00000 n 
+0000084725 00000 n 
 trailer
 <<
 /Size 28
@@ -9144,5 +9274,5 @@ trailer
 /Info 1 0 R
 >>
 startxref
-83571
+84775
 %%EOF
