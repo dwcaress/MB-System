@@ -31,21 +31,24 @@
  *                                  View All, the grid parameters dialog, Apply
  *                                  (grid and map view), Generate New Grid, and
  *                                  Quit, which unloads and unlocks the files;
- *                                  with --gl (OpenGL backend) or --rhi (QRhi
- *                                  backend, where it is built, with the API
- *                                  MB_RENDERER names), which need a display,
+ *                                  with --gl (legacy OpenGL backend) or --rhi
+ *                                  (QRhi backend, with the API MB_RENDERER
+ *                                  names), each where it is built (77,
+ *                                  skipped, elsewhere), which need a display,
  *                                  also an area picked in the map opens the 3D
  *                                  soundings view with the soundings inside it
  *   mbeditviz_qt_test [--rhi] --parity-qt LIST EDITS N [OFFSET]
- *                                  edit parity, Qt side (OpenGL, or QRhi with
- *                                  --rhi; needs a display): Edit mode, View
- *                                  All, Apply, an area pick, then N mouse
- *                                  clicks in Toggle mode on soundings of the 3D
- *                                  view, Quit; writes each edit made (file,
- *                                  ping, beam, new flag) to EDITS. QRhi stores
- *                                  no screen positions: they are computed for
- *                                  the clicks as the soundings view's picks
- *                                  compute them (mb3dsoundings_screen_positions)
+ *                                  edit parity, Qt side (the legacy OpenGL
+ *                                  backend, where it is built, 77 elsewhere,
+ *                                  or QRhi with --rhi; needs a display): Edit
+ *                                  mode, View All, Apply, an area pick, then
+ *                                  N mouse clicks in Toggle mode on soundings
+ *                                  of the 3D view, Quit; writes each edit made
+ *                                  (file, ping, beam, new flag) to EDITS. QRhi
+ *                                  stores no screen positions: they are
+ *                                  computed for the clicks as the soundings
+ *                                  view's picks compute them
+ *                                  (mb3dsoundings_screen_positions)
  *   mbeditviz_qt_test --parity-ref LIST EDITS
  *                                  edit parity, reference side (no drawing):
  *                                  the same files in Edit mode, View All,
@@ -382,8 +385,14 @@ int main(int argc, char **argv) {
     start_watchdog(240);
   }
   if (argc >= 5 && std::strcmp(argv[1], "--parity-qt") == 0) {
-    if (!rhi)
+    if (!rhi) {
+      /* a build without the legacy OpenGL backend would draw with QRhi */
+      if (!mbvq::backend_built(mbvq::Backend::LegacyGL)) {
+        std::printf("skipped: this build has no legacy OpenGL drawing\n");
+        return 77;
+      }
       mbvq::set_backend(mbvq::Backend::LegacyGL);
+    }
     return parity_qt(argv[2], argv[3], std::atoi(argv[4]), argc > 5 ? std::atoi(argv[5]) : 0);
   }
   if (argc == 4 && std::strcmp(argv[1], "--parity-ref") == 0) {
@@ -395,6 +404,11 @@ int main(int argc, char **argv) {
   if (gl) {
     argc--;
     argv++;
+    /* a build without the legacy OpenGL backend would draw with QRhi */
+    if (!mbvq::backend_built(mbvq::Backend::LegacyGL)) {
+      std::printf("skipped: this build has no legacy OpenGL drawing\n");
+      return 77;
+    }
   }
   if (argc == 3 && std::strcmp(argv[1], "--data") == 0)
     datalist = argv[2];

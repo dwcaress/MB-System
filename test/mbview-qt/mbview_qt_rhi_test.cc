@@ -84,19 +84,22 @@
  *        frames with every value, the parts of a frame before and after the
  *        view's paint, under QRhi with the renderer's phases, the waits
  *        around them, the GPU time and the nodes prepared, and the process
- *        memory. MB_RENDERER=legacy-gl measures the OpenGL
- *        backend with the same script; WxH is the window size given to
+ *        memory. MB_RENDERER=legacy-gl measures the legacy OpenGL
+ *        backend with the same script, where the legacy OpenGL drawing is
+ *        built (77, skipped, elsewhere); WxH is the window size given to
  *        mbview (640x480)
  *   mbview_qt_rhi_test --bench-soundings n [--frames n]   frame times of the
  *        3D soundings view with n synthetic soundings (needs a display, not
  *        in ctest; a measurement): a rotation, an erase drag, an exaggeration
  *        drag, bias changes and a rotation with profiles shown, n steps each
- *        (60); also for the OpenGL backend with MB_RENDERER=legacy-gl
+ *        (60); also for the legacy OpenGL backend with MB_RENDERER=legacy-gl,
+ *        where the legacy OpenGL drawing is built (77, skipped, elsewhere)
  *
  * The headless modes run on the offscreen platform unless QT_QPA_PLATFORM
  * names another; the modes with a window draw with the QRhi API that
  * MB_RENDERER names (the platform's API otherwise), the bench with the
- * OpenGL backend for MB_RENDERER=legacy-gl. The synthetic grid is a
+ * legacy OpenGL backend for MB_RENDERER=legacy-gl, where the legacy OpenGL
+ * drawing is built. The synthetic grid is a
  * seamount on a sloping plain, known in closed form, with a block of nodes
  * without data and some single ones.
  */
@@ -5373,6 +5376,10 @@ void widgets_views(size_t instance, QRhiWidget::Api expected) {
   mb3dsoundings_end(0, &error);
 }
 
+/* mbvq::backend() and rhi_api() before main's set_backend(): what a host that
+   never calls set_backend() draws with (set in main) */
+mbvq::Backend initial_backend = mbvq::Backend::Null;
+mbvq::RhiApi initial_api = mbvq::RhiApi::Vulkan;
 
 int test_model() {
   /* the names of MB_RENDERER, and what the environment chooses */
@@ -5431,21 +5438,58 @@ int test_model() {
           std::string("the APIs possible on this platform (Metal ") + (apple ? "yes" : "no") + ", Direct3D " +
               (windows ? "yes" : "no") + ", Vulkan " + (vulkan ? "yes" : "no") + ")");
 
-    std::string message;
+    /* The default of this build and platform: QRhi with the platform's API
+       on Apple; elsewhere the legacy OpenGL backend where it is built, else
+       QRhi. The legacy OpenGL backend only where MBVQ_HAVE_GL is defined. */
+#if defined(__APPLE__) || !defined(MBVQ_HAVE_GL)
+    const Backend expected = Backend::Rhi;
+#else
+    const Backend expected = Backend::LegacyGL;
+#endif
+#ifdef MBVQ_HAVE_GL
+    const bool legacy = true;
+#else
+    const bool legacy = false;
+#endif
+    const std::string platform = mbvq::rhi_api_name(RhiApi::Default);
+    const std::string no_legacy = "mbview-qt: this build has no legacy OpenGL drawing (it needs -DbuildQt6LegacyGL=ON); "
+                                  "the views are drawn with QRhi and " +
+                                  platform;
+    const std::string drawn = expected == Backend::Rhi ? "; the views are drawn with QRhi and " + platform
+                                                       : std::string("; the views are drawn with OpenGL");
+    const auto ends_with = [](const std::string &text, const std::string &tail) {
+      return text.size() >= tail.size() && text.compare(text.size() - tail.size(), tail.size(), tail) == 0;
+    };
+
+    std::string message = "before";
     mbvq::choose_renderer(nullptr, &backend, &api, &message);
-    bool chosen = backend == Backend::LegacyGL && api == RhiApi::Default && message.empty();
+    bool chosen = backend == expected && api == RhiApi::Default && message.empty();
+    message = "before";
     mbvq::choose_renderer("", &backend, &api, &message);
-    chosen = chosen && backend == Backend::LegacyGL && message.empty();
-    check(chosen, "MB_RENDERER unset or empty: the OpenGL backend, without a message");
+    chosen = chosen && backend == expected && api == RhiApi::Default && message.empty();
+    check(chosen, std::string("MB_RENDERER unset or empty: the default of this build, ") +
+                      (expected == Backend::Rhi ? "QRhi with the platform's API" : "the legacy OpenGL backend") +
+                      ", without a message");
+    check(initial_backend == expected && initial_api == RhiApi::Default,
+          "before any set_backend(): the default of this build with the platform's API, what a host that never "
+          "calls it draws with");
     mbvq::choose_renderer("auto", &backend, &api, &message);
     check(backend == Backend::Rhi && api == RhiApi::Default && message.empty(), "MB_RENDERER=auto: QRhi, the platform's API");
     mbvq::choose_renderer("legacy-gl", &backend, &api, &message);
-    chosen = backend == Backend::LegacyGL && message.empty();
+    if (legacy)
+      check(backend == Backend::LegacyGL && api == RhiApi::Default && message.empty(),
+            "MB_RENDERER=legacy-gl: the legacy OpenGL backend, without a message");
+    else
+      check(backend == Backend::Rhi && api == RhiApi::Default && message == no_legacy,
+            "MB_RENDERER=legacy-gl in a build without the legacy OpenGL backend: QRhi with the platform's API, and "
+            "one line (" +
+                message + ")");
     mbvq::choose_renderer("null", &backend, &api, &message);
-    check(chosen && backend == Backend::Null && message.empty(), "MB_RENDERER=legacy-gl and null: those backends");
+    check(backend == Backend::Null && message.empty(), "MB_RENDERER=null: the null backend");
     mbvq::choose_renderer("nonsense", &backend, &api, &message);
-    check(backend == Backend::LegacyGL && message.find("not one of auto, metal") != std::string::npos,
-          "an unknown MB_RENDERER: the OpenGL backend and a line naming the values");
+    check(backend == expected && api == RhiApi::Default && message.find("not one of auto, metal") != std::string::npos &&
+              ends_with(message, drawn),
+          "an unknown MB_RENDERER: the default, and a line naming the values and what draws (" + message + ")");
     const char *impossible = apple ? "d3d11" : "metal";
     mbvq::choose_renderer(impossible, &backend, &api, &message);
     check(backend == Backend::Rhi && api == RhiApi::Default &&
@@ -5455,8 +5499,45 @@ int test_model() {
     mbvq::choose_renderer(apple ? "metal" : "opengl", &backend, &api, &message);
     check(backend == Backend::Rhi && api == (apple ? RhiApi::Metal : RhiApi::OpenGL) && message.empty(),
           "a possible API is taken as named");
-    check(mbvq::backend_built(Backend::Rhi) && mbvq::backend_built(Backend::LegacyGL) && mbvq::backend_built(Backend::Null),
-          "this build has the QRhi, OpenGL and null backends");
+    check(mbvq::backend_built(Backend::Rhi) && mbvq::backend_built(Backend::Null) &&
+              mbvq::backend_built(Backend::LegacyGL) == legacy,
+          std::string("this build has the QRhi and null backends, ") + (legacy ? "and" : "but not") +
+              " the legacy OpenGL backend");
+
+    /* what set_backend() makes of a request (resolve_backend): a backend this
+       build lacks gives the other one and a line, a built one stays as asked
+       without a line */
+    Backend asked = Backend::LegacyGL;
+    RhiApi asked_api = RhiApi::Default;
+    std::string line = "before";
+    mbvq::resolve_backend(&asked, &asked_api, &line);
+    if (legacy)
+      check(asked == Backend::LegacyGL && asked_api == RhiApi::Default && line.empty(),
+            "set_backend(LegacyGL): the legacy OpenGL backend, without a line");
+    else
+      check(asked == Backend::Rhi && asked_api == RhiApi::Default && line == no_legacy,
+            "set_backend(LegacyGL) in a build without it: QRhi with the platform's API, and one line (" + line + ")");
+    bool kept = true;
+    for (const RhiApi possible : {RhiApi::Default, apple ? RhiApi::Metal : RhiApi::OpenGL}) {
+      asked = Backend::Rhi;
+      asked_api = possible;
+      line = "before";
+      mbvq::resolve_backend(&asked, &asked_api, &line);
+      kept = kept && asked == Backend::Rhi && asked_api == possible && line.empty();
+    }
+    asked = Backend::Null;
+    asked_api = RhiApi::Default;
+    line = "before";
+    mbvq::resolve_backend(&asked, &asked_api, &line);
+    kept = kept && asked == Backend::Null && line.empty();
+    check(kept, "set_backend(Rhi) with the platform's API or a named one, and set_backend(Null): kept, without a line");
+    /* set_backend() itself, where that changes nothing here (the line goes to
+       stderr): in a build without the legacy OpenGL backend it stays QRhi */
+    if (!legacy) {
+      mbvq::set_backend(Backend::LegacyGL);
+      check(mbvq::backend() == Backend::Rhi && mbvq::rhi_api() == RhiApi::Default,
+            "set_backend(LegacyGL) in a build without it draws with QRhi and the platform's API");
+    }
   }
 
   check(mbvq::backend() == mbvq::Backend::Rhi && mbvq_qt_drawable(), "under QRhi the core fills the map (glx_init)");
@@ -6000,6 +6081,20 @@ int test_widgets() {
         "renderFailed: a label on the view and one line on stderr (label " + std::to_string(failed.failure_shown) +
             ", " + std::to_string(failed.failures) + " failures, " + std::to_string(mbvq::failure_messages()) +
             " lines)");
+  /* the label (the line's text) names MB_RENDERER=legacy-gl only where the
+     legacy OpenGL backend is built */
+  {
+#ifdef MBVQ_HAVE_GL
+    const QString advice = QStringLiteral("; MB_RENDERER=legacy-gl draws them with OpenGL");
+#else
+    const QString advice = QStringLiteral("; this build has no legacy OpenGL drawing");
+#endif
+    const auto *label = view->findChild<QLabel *>(QString(), Qt::FindDirectChildrenOnly);
+    const QString text = label != nullptr ? label->text() : QString();
+    check(text == QStringLiteral("mbview-qt: the views could not be drawn with QRhi (") +
+                      QString::fromLatin1(mbvq::rhi_api_name(mbvq::RhiApi::Default)) + QLatin1Char(')') + advice,
+          "the label says what this build can draw with instead (" + text.toStdString() + ")");
+  }
   size_t second = MBV_NO_WINDOW;
   check(open_grid(grid, nullptr, &second), "a second map under QRhi");
   QWidget *view2 = mbvq::map_view(second);
@@ -9911,6 +10006,15 @@ int main(int argc, char **argv) {
                          "| --bench-soundings n [--frames n]\n");
     return 2;
   }
+  /* the bench of the legacy OpenGL backend needs it: a build without it
+     would measure QRhi under that name */
+  if (bench_mode && !mbvq::backend_built(mbvq::Backend::LegacyGL)) {
+    const char *value = std::getenv("MB_RENDERER");
+    if (value != nullptr && std::strcmp(value, "legacy-gl") == 0) {
+      std::printf("skipped: this build has no legacy OpenGL drawing\n");
+      return 77;
+    }
+  }
   /* 10 s for the headless modes (ctest gives 60 s), a minute with a window,
      a quarter of an hour for the bench */
   start_watchdog(bench_mode ? 900 : display ? 60 : 10, mode);
@@ -9937,6 +10041,9 @@ int main(int argc, char **argv) {
     if (named != mbvq::Backend::Rhi)
       api = mbvq::RhiApi::Default;
   }
+  /* nothing above sets the backend (--model checks the initial one) */
+  initial_backend = mbvq::backend();
+  initial_api = mbvq::rhi_api();
   mbvq::set_backend(backend, api);
   /* the program's own arguments stay away from Qt, whose X11 platform would
      take the one after --display for the name of a display */

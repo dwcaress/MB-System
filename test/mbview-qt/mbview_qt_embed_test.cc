@@ -27,9 +27,11 @@
  * docks of one main window: float, attach, two maps, close one, open another.
  *
  *   mbview_qt_embed_test --null   no drawing (null backend), for ctest
- *   mbview_qt_embed_test --gl     also checks the drawing with OpenGL: the
- *                                 contours survive moving and floating the
- *                                 map; needs a display
+ *   mbview_qt_embed_test --gl     also checks the drawing with the legacy
+ *                                 OpenGL backend (where it is built; 77,
+ *                                 skipped, elsewhere): the contours survive
+ *                                 moving and floating the map; needs a
+ *                                 display
  *   mbview_qt_embed_test --rhi    also checks the drawing with QRhi (where it
  *                                 is built; 77, skipped, elsewhere): the
  *                                 terrain is drawn docked, floating (a new
@@ -49,7 +51,9 @@
 #include <QMainWindow>
 #include <QMenu>
 #include <QMenuBar>
+#ifdef MBVQ_HAVE_GL
 #include <QOpenGLWidget>
+#endif
 #include <QTimer>
 #include <QWindow>
 #include <chrono>
@@ -220,6 +224,7 @@ int stale_callbacks() {
 #endif
 }
 
+#ifdef MBVQ_HAVE_GL
 /* dark pixels of a map view: the contours */
 int dark_pixels(size_t instance) {
   auto *view = qobject_cast<QOpenGLWidget *>(mbvq::map_view(instance));
@@ -231,6 +236,7 @@ int dark_pixels(size_t instance) {
         n++;
   return n;
 }
+#endif
 
 void wait_drawn(size_t instance) {
   for (int i = 0; i < 400 && mbvq_c_lastdrawrez(instance) != MBVQ_REZ_FULL; i++)
@@ -292,6 +298,7 @@ int run(bool gl, bool rhi) {
   map->setMenuBarShown(false);
   check(!bar->isVisible(), "setMenuBarShown(false) hides it");
 
+#ifdef MBVQ_HAVE_GL
   int dark_docked = 0;
   QOpenGLContext *context = nullptr;
   if (gl) {
@@ -304,6 +311,7 @@ int run(bool gl, bool rhi) {
     dark_docked = dark_pixels(first);
     check(dark_docked > 0, "OpenGL: contours are drawn in the dock (" + std::to_string(dark_docked) + " dark pixels)");
   }
+#endif
   if (rhi) {
     host.resizeDocks({docks[0]}, {900}, Qt::Horizontal);
     wait_drawn(first);
@@ -317,6 +325,7 @@ int run(bool gl, bool rhi) {
   docks[0]->setFloating(true);
   spin(draws ? 1500 : 100);
   check(docks[0]->isFloating() && map->isVisible() && mbvq::map_widget(first) == map, "the dock floats with the map");
+#ifdef MBVQ_HAVE_GL
   if (gl) {
     mbvq_c_resetview(first);
     spin(1500);
@@ -324,6 +333,7 @@ int run(bool gl, bool rhi) {
     check(qobject_cast<QOpenGLWidget *>(mbvq::map_view(first))->context() == context, "OpenGL: floating keeps the context");
     check(dark_pixels(first) > 0, "OpenGL: the contours survive floating");
   }
+#endif
   if (rhi) {
     mbvq_c_resetview(first);
     spin(1500);
@@ -333,6 +343,7 @@ int run(bool gl, bool rhi) {
   docks[0]->setFloating(false);
   spin(draws ? 1500 : 100);
   check(!docks[0]->isFloating() && map->isVisible(), "the dock attaches again");
+#ifdef MBVQ_HAVE_GL
   if (gl) {
     mbvq_c_resetview(first);
     spin(1500);
@@ -340,6 +351,7 @@ int run(bool gl, bool rhi) {
     check(qobject_cast<QOpenGLWidget *>(mbvq::map_view(first))->context() == context, "OpenGL: attaching keeps the context");
     check(dark_pixels(first) > 0, "OpenGL: the contours survive attaching");
   }
+#endif
   if (rhi) {
     mbvq_c_resetview(first);
     spin(1500);
@@ -462,6 +474,11 @@ int main(int argc, char **argv) {
   /* a build without QRhi would draw with OpenGL instead */
   if (rhi && !mbvq::backend_built(mbvq::Backend::Rhi)) {
     std::printf("skipped: this build has no QRhi drawing\n");
+    return 77;
+  }
+  /* and a build without the legacy OpenGL backend with QRhi */
+  if (gl && !mbvq::backend_built(mbvq::Backend::LegacyGL)) {
+    std::printf("skipped: this build has no legacy OpenGL drawing\n");
     return 77;
   }
   /* the modes that draw end after 150 s even if they hang (their own waits

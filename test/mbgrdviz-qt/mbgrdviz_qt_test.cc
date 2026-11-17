@@ -38,10 +38,11 @@
  *     that the route saved, cleared, read and saved again is identical.
  *     Saved routes hold bearings and distances in display coordinates, which
  *     only drawing sets up (mbview_projectdata in mbview_plot): --gl draws
- *     with the OpenGL backend (needs a display), as the Motif program does,
- *     and --rhi with the QRhi backend (needs a display; where it is built,
- *     77, skipped, elsewhere), which fills the core's drawing into a batch
- *     without OpenGL. Both have a watchdog.
+ *     with the legacy OpenGL backend (needs a display; where it is built,
+ *     77, skipped, elsewhere), as the Motif program does, and --rhi with the
+ *     QRhi backend (needs a display; where it is built, 77, skipped,
+ *     elsewhere), which fills the core's drawing into a batch without
+ *     OpenGL. Both have a watchdog.
  *     Without drawing the route checks are skipped. --gl and --rhi also write
  *     all 12 route exports, and compare the RISI script without heading with
  *     <risi script>, saved by the Motif mbgrdviz from the same route. With
@@ -210,6 +211,11 @@ int main(int argc, char **argv) {
   /* a build without QRhi would draw with OpenGL instead */
   if (rhi && !mbvq::backend_built(mbvq::Backend::Rhi)) {
     std::printf("skipped: this build has no QRhi drawing\n");
+    return 77;
+  }
+  /* and a build without the legacy OpenGL backend with QRhi */
+  if (gl && !mbvq::backend_built(mbvq::Backend::LegacyGL)) {
+    std::printf("skipped: this build has no legacy OpenGL drawing\n");
     return 77;
   }
   /* the modes that draw end after 150 s even if they hang (their own waits

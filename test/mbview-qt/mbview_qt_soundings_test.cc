@@ -27,8 +27,10 @@
  *   mbview_qt_soundings_test --null       checks without drawing (null
  *                                         backend), for ctest
  *   mbview_qt_soundings_test --gl         draws synthetic soundings with the
- *                                         OpenGL backend and edits and
- *                                         inspects soundings with mouse events
+ *                                         legacy OpenGL backend (where it is
+ *                                         built; 77, skipped, elsewhere) and
+ *                                         edits and inspects soundings with
+ *                                         mouse events
  *   mbview_qt_soundings_test --rhi        the same with the QRhi backend (where
  *                                         it is built), with the QRhi API that
  *                                         MB_RENDERER names (the platform's
@@ -40,9 +42,14 @@
  *                                         without the bounding box, whose
  *                                         stippled lines make Apple's OpenGL
  *                                         fall back to software vertex
- *                                         processing
- *   mbview_qt_soundings_test --show [N]   a window to use by hand; Dismiss or
- *                                         closing the window ends the program
+ *                                         processing (the legacy OpenGL
+ *                                         backend, where it is built; 77,
+ *                                         skipped, elsewhere)
+ *   mbview_qt_soundings_test --show [N]   a window to use by hand, drawn as the
+ *                                         programs draw: with the backend
+ *                                         MB_RENDERER names, else the build's
+ *                                         default; Dismiss or closing the
+ *                                         window ends the program
  *                                         (MBVIEW_QT_TEST_DISMISS: Dismiss after
  *                                         half a second)
  *
@@ -59,7 +66,9 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QMouseEvent>
+#ifdef MBVQ_HAVE_GL
 #include <QOpenGLWidget>
+#endif
 #include <QRadioButton>
 #ifdef MBVQ_HAVE_RHI
 #include <QRhiWidget>
@@ -93,7 +102,9 @@ extern "C" {
 
 /* from the private soundings header, which needs the Motif-shaped headers */
 extern "C" void mb3dsoundings_setviewtoggle(int toggle, bool state);
+#ifdef MBVQ_HAVE_GL
 constexpr int kViewToggleBoundingBox = 2; /* MBS_VIEWTOGGLE_BOUNDINGBOX */
+#endif
 constexpr int kViewToggleFlagged = 0;     /* MBS_VIEWTOGGLE_FLAGGED */
 extern "C" void mb3dsoundings_setcolor(int mode);
 constexpr int kViewColorFlag = 0; /* MBS_VIEW_COLOR_FLAG */
@@ -716,8 +727,10 @@ int test_null() {
    QRhiWidget::grabFramebuffer() for QRhi, which renders a new frame (a fill
    of the view, with its side effects) and reads it back. */
 QImage grab(QWidget *view) {
+#ifdef MBVQ_HAVE_GL
   if (auto *gl = qobject_cast<QOpenGLWidget *>(view))
     return gl->grabFramebuffer();
+#endif
 #ifdef MBVQ_HAVE_RHI
   if (auto *rhi = qobject_cast<QRhiWidget *>(view))
     return rhi->grabFramebuffer();
@@ -787,7 +800,11 @@ int test_gl(bool rhi) {
 #endif
   }
   else {
+#ifdef MBVQ_HAVE_GL
     view = qobject_cast<QOpenGLWidget *>(view);
+#else
+    view = nullptr;
+#endif
     check(view != nullptr, "the soundings view is an OpenGL widget");
   }
   if (view == nullptr)
@@ -837,6 +854,7 @@ int test_gl(bool rhi) {
 }
 
 /*------------------------------------------------------------------------------*/
+#ifdef MBVQ_HAVE_GL
 int test_time(int n) {
   const int nbeams = 400;
   make_soundings(std::max(1, n / nbeams), nbeams);
@@ -862,6 +880,7 @@ int test_time(int n) {
   mb3dsoundings_end(0, &error);
   return 0;
 }
+#endif
 
 }  // namespace
 
@@ -874,6 +893,13 @@ int main(int argc, char **argv) {
       std::strcmp(mode, "--show") != 0) {
     std::fprintf(stderr, "usage: mbview_qt_soundings_test --null | --gl | --rhi | --time N | --show [N]\n");
     return 2;
+  }
+  /* --gl and --time need the legacy OpenGL backend: a build without it would
+     draw with QRhi instead */
+  if ((std::strcmp(mode, "--gl") == 0 || std::strcmp(mode, "--time") == 0) &&
+      !mbvq::backend_built(mbvq::Backend::LegacyGL)) {
+    std::printf("skipped: this build has no legacy OpenGL drawing\n");
+    return 77;
   }
   if (rhi) {
     if (!mbvq::backend_built(mbvq::Backend::Rhi)) {
@@ -893,6 +919,11 @@ int main(int argc, char **argv) {
       std::fflush(stdout);
       std::_Exit(4);
     }).detach();
+  }
+  else if (std::strcmp(mode, "--show") == 0) {
+    /* drawn as the programs draw: the backend MB_RENDERER names, else the
+       build's default */
+    mbvq::set_backend_from_environment();
   }
   else
     mbvq::set_backend(null ? mbvq::Backend::Null : mbvq::Backend::LegacyGL);
@@ -915,8 +946,10 @@ int main(int argc, char **argv) {
     }
     return status;
   }
+#ifdef MBVQ_HAVE_GL
   if (std::strcmp(mode, "--time") == 0)
     return test_time(argc > 2 ? std::atoi(argv[2]) : 200000);
+#endif
   const int n = argc > 2 ? std::atoi(argv[2]) : 20000;
   make_soundings(std::max(1, n / 200), 200);
   /* Dismiss only hides the window, as in Motif, so it ends the program here */
