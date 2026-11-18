@@ -2257,7 +2257,7 @@ print "Behavior: reson (reset, Log_Mode = 0, line  = $iwaypoint, waypoint($i) ty
 				print MFILE "speed        = ASCENTDESCENT_SPEED; \r\n";
 				print MFILE "} \r\n";
 print "Behavior: waypoint\n" if $verbose;
-        		}
+        }
 			if ($insmode == 1)
 				{
 				print MFILE "# Phins behavior - USBL and DVL bottom track aiding on, DVL water track aiding off, GNSS aiding on \r\n";
@@ -2419,6 +2419,91 @@ print "Behavior: waypoint\n" if $verbose;
 			print WFILE "$mlons[$i] $mlats[$i]\r\n";
 			}
 
+		# first waypoint without spiral descent
+		elsif ($i == 0)
+			{
+			if ($mappingsonar)
+				{
+				print MFILE "# \r\n";
+				print MFILE "# Turn Reson logging on.\r\n";
+				print MFILE "behavior reson \r\n";
+				print MFILE "{ \r\n";
+				$behavior_id = $BEHAVIOR_reson;
+				$behavior_count = $behavior_count + 1;
+				print MFILE "id     = $behavior_id; \r\n";
+				print MFILE "duration  = RESON_DURATION; \r\n";
+				print MFILE "Log_Mode  = $logmode; \r\n";
+				print MFILE "} \r\n";
+print "Behavior: reson (startup, Log_Mode = $logmode)\r\n" if $verbose;
+				}
+			if ($mappingsonar)
+				{
+				print MFILE "# Turn Reson power on.\r\n";
+				print MFILE "behavior reson \r\n";
+				print MFILE "{ \r\n";
+				$behavior_id = $BEHAVIOR_reson;
+				$behavior_count = $behavior_count + 1;
+				print MFILE "id     = $behavior_id; \r\n";
+				print MFILE "duration  = RESON_DURATION; \r\n";
+				print MFILE "MB_Power = $mb_transmitgain; \r\n";
+				printf MFILE "MB_Range = %.2f; \r\n", $mb_range;
+				print MFILE "MB_Rate = $mb_pingrate; \r\n";
+				print MFILE "MB_Gain = $mb_receivegain; \r\n";
+				print MFILE "MB_Sound_Velocity = 0.0; \r\n";
+				printf MFILE "MB_Pulse_Width = %f; \r\n", $mb_pulsewidth;
+				printf MFILE "MB_Bottom_Detect_Filter_Min_Range = %.2f; \r\n", $mb_minrange;
+				printf MFILE "MB_Bottom_Detect_Filter_Max_Range = %.2f; \r\n", $mb_maxrange;
+				printf MFILE "MB_Bottom_Detect_Filter_Min_Depth = %.2f; \r\n", $mb_mindepth;
+				printf MFILE "MB_Bottom_Detect_Filter_Max_Depth = %.2f; \r\n", $mb_maxdepth;
+				print MFILE "MB_Bottom_Detect_Range_Mode = 1; \r\n";
+				print MFILE "MB_Bottom_Detect_Depth_Mode = 0; \r\n";
+				print MFILE "Snippet_Mode = $mb_snippetmode; \r\n";
+				print MFILE "Window_Size = 200; \r\n";
+				print MFILE "Log_Mode = 0; \r\n";
+				print MFILE "} \r\n";
+				print MFILE "# \r\n";
+print "Behavior: reson (reset, Log_Mode = 0, line  = $iwaypoint, waypoint($i) type = $mwaypoints[$i], SBP on, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\r\n" if $verbose;
+				}
+			if ($insmode == 1)
+				{
+				print MFILE "# Phins behavior - USBL and DVL bottom track aiding on, DVL water track aiding off, GNSS aiding on \r\n";
+				print MFILE "# \r\n";
+				print MFILE "behavior phins \r\n";
+				print MFILE "{ \r\n";
+				$behavior_id = $BEHAVIOR_phins;
+				$behavior_count = $behavior_count + 1;
+				print MFILE "id     = $behavior_id; \r\n";
+				print MFILE "duration  = 5; \r\n";
+				print MFILE "usbl = 1; \r\n";
+				print MFILE "dvl_bt = 1; \r\n";
+				print MFILE "dvl_wt = 0; \r\n";
+				print MFILE "gps = 1; \r\n";
+				print MFILE "} \r\n";
+print "Behavior: phins (USBL on, DVL bottom track on, DVL water track off, GNSS on)\n" if $verbose;
+				}
+			print MFILE "# \r\n";
+			print MFILE "#######################################################\r\n";
+			print MFILE "# \r\n";
+			print MFILE "# Waypoint behavior to get to start of line 1\r\n";
+			printf MFILE "#   Segment length %f meters\r\n", $startdistance;
+			printf MFILE "#   Minimum depth: %f meters looking forward %f meters along route\r\n", -$mtopomaxs[$i], $forwarddist;
+			printf MFILE "#   Maximum depth: %f meters looking forward %f meters along route\r\n", -$mtopomins[$i], $forwarddist;
+			printf MFILE "#   Vehicle depth: %f meters\r\n", $approachdepth;
+			print MFILE "behavior waypoint  \r\n";
+			print MFILE "{ \r\n";
+			$behavior_id = $BEHAVIOR_waypoint;
+			$behavior_count = $behavior_count + 1;
+			print MFILE "id     = $behavior_id; \r\n";
+			printf MFILE "latitude     = %f; \r\n", $mlats[$i];
+			printf MFILE "longitude    = %f; \r\n", $mlons[$i];
+			printf MFILE "duration     = 600; \r\n";
+			printf MFILE "depth        = %f; \r\n", $approachdepth;
+			print MFILE "speed        = ASCENTDESCENT_SPEED; \r\n";
+			print MFILE "} \r\n";
+print "Behavior: waypoint\n" if $verbose;
+			print WFILE "$mlons[$i] $mlats[$i]\r\n";
+			}
+			
 		# output $behaviorWaypointID mission point behavior
 		elsif ($behavior == $behaviorWaypointID)
 			{
