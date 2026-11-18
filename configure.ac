@@ -1510,7 +1510,6 @@ AC_CONFIG_FILES([\
     src/mbgrd2gltf/Makefile \
     src/mbmesh/Makefile \
     src/mbnavadjust/Makefile \
-    src/mbmesh/Makefile \
     src/mbglb2tiles/Makefile \
     src/man/Makefile \
     src/man/man1/Makefile \
