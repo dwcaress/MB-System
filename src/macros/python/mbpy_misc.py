@@ -200,6 +200,30 @@ class CoastOptions:
     coast_pen: Optional[str] = None           # -MTW
 
 
+def resolve_coast_defaults(coast: CoastOptions, default_dryfill: Optional[str] = None) -> CoastOptions:
+    """Port of the pscoast defaults at mbm_grdplot lines ~1937-1951 (also
+    mbm_grd3dplot and mbm_plot): if the coastline overlay is enabled with
+    none of a wet fill, dry fill, coastline pen, national boundary or
+    river given, draw the coastline with a 1 point pen (otherwise `gmt
+    coast` fails with "Must specify at least one of -C, -G, -S, -E, -I,
+    -N, -Q and -W"); and default the resolution to full. mbm_grd3dplot
+    and mbm_plot also fill land with gray 200 in that case: pass
+    default_dryfill="200" for them. Returns an updated copy of `coast`.
+    """
+    coast_pen = coast.coast_pen
+    coast_dryfill = coast.coast_dryfill
+    coast_resolution = coast.coast_resolution
+    if coast.coast_control and not (coast.coast_wetfill or coast_dryfill
+                                    or coast_pen or coast.coast_boundaries
+                                    or coast.coast_river):
+        coast_pen = "1p"
+        coast_dryfill = default_dryfill
+    if coast.coast_control and not coast_resolution:
+        coast_resolution = "f"
+    return replace(coast, coast_pen=coast_pen, coast_dryfill=coast_dryfill,
+                   coast_resolution=coast_resolution)
+
+
 @dataclass
 class XYOverlayEntry:
     file: str

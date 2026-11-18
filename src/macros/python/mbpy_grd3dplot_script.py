@@ -116,7 +116,7 @@ from typing import List, Optional, Tuple
 import mbpy_layout as layout
 from mbpy_color import CptLine
 from mbpy_layout import GridInfo
-from mbpy_misc import CoastOptions
+from mbpy_misc import CoastOptions, resolve_coast_defaults
 from mbpy_grdplot_script import (
     ShadeOptions,
     resolve_shade_defaults,
@@ -650,7 +650,8 @@ def generate_script_3d(opts: ScriptOptions3D) -> str:
     lines.append("")
 
     if opts.coast is not None:
-        co = opts.coast
+        # mbm_grd3dplot defaults: 1p pen and gray 200 land fill, full resolution
+        co = resolve_coast_defaults(opts.coast, default_dryfill="200")
         cparts = [f"gmt coast {j} {p} {r}"]
         if co.coast_resolution:
             cparts.append(f"-D{co.coast_resolution}")
