@@ -4192,7 +4192,7 @@ int main(int argc, char **argv) {
       //            error);
       MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MB_GETALL_XT], mtime_dtime());
       MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_MB_PING_XT], mtime_dtime());
-      if (error <= 0) {
+      if (error <= 0 && kind >= 0 && kind <= MB_DATA_KINDS) {
         num_kinds_read[kind]++;
         num_kinds_read_tot[kind]++;
       }
@@ -4747,7 +4747,7 @@ int main(int argc, char **argv) {
                             "| Read 25 non-survey data records...\n",
             time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], ping[idataread].time_d);
 
-            for (int i = 0; i < MB_DATA_KINDS; i++) {
+            for (int i = 0; i <= MB_DATA_KINDS; i++) {
               if (num_kinds_read[i] > 0) {
                 if (mb_notice_message(mbtrn_cfg->verbose, i, &message) == MB_SUCCESS) {
                   fprintf(stderr, "     %6d %s\n", num_kinds_read[i], message);

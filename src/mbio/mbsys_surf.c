@@ -71,14 +71,44 @@ double mbsys_get_depth(SurfMultiBeamDepth *MultiBeamDepth, SurfTransducerParamet
 			}
 		}
 
+	/* use the mean if the beams do not constrain a slope (e.g. a single beam) */
+	const double denominator = N * b - a * a;
 	const double depth =
             N <= 0
             ? 0.0
-            : (b * c - a * d) / (N * b - a * a) - heave + TransducerTable.transducerDepth;
+            : (fabs(denominator) > 1.0e-6 ? (b * c - a * d) / denominator : c / N)
+              - heave + TransducerTable.transducerDepth;
 
 	return (depth);
 }
 
+/*--------------------------------------------------------------------*/
+/* Positions are stored relative to the reference position, either in
+   radians or, if presentationOfPosition is X_Y, as projected easting and
+   northing in meters. Projected positions are passed through unchanged:
+   mbr_samesurf sets up the projection and MBIO converts them to and from
+   longitude and latitude. */
+static void mbsys_surf_get_position(const struct mbsys_surf_struct *store, double *navlon, double *navlat) {
+	if (store->GlobalData.presentationOfPosition == X_Y) {
+		*navlon = (double)store->CenterPosition[0].centerPositionX + store->GlobalData.referenceOfPositionX;
+		*navlat = (double)store->CenterPosition[0].centerPositionY + store->GlobalData.referenceOfPositionY;
+	}
+	else {
+		*navlon = RTD * ((double)store->CenterPosition[0].centerPositionX + store->GlobalData.referenceOfPositionX);
+		*navlat = RTD * ((double)store->CenterPosition[0].centerPositionY + store->GlobalData.referenceOfPositionY);
+	}
+}
+/*--------------------------------------------------------------------*/
+static void mbsys_surf_set_position(struct mbsys_surf_struct *store, double navlon, double navlat) {
+	if (store->GlobalData.presentationOfPosition == X_Y) {
+		store->CenterPosition[0].centerPositionX = (float)(navlon - store->GlobalData.referenceOfPositionX);
+		store->CenterPosition[0].centerPositionY = (float)(navlat - store->GlobalData.referenceOfPositionY);
+	}
+	else {
+		store->CenterPosition[0].centerPositionX = (float)(DTR * navlon - store->GlobalData.referenceOfPositionX);
+		store->CenterPosition[0].centerPositionY = (float)(DTR * navlat - store->GlobalData.referenceOfPositionY);
+	}
+}
 /*--------------------------------------------------------------------*/
 int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	if (verbose >= 2) {
@@ -217,8 +247,7 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		mb_get_date(verbose, *time_d, time_i);
 
 		/* get navigation */
-		*navlon = RTD * ((double)store->CenterPosition[0].centerPositionX + store->GlobalData.referenceOfPositionX);
-		*navlat = RTD * ((double)store->CenterPosition[0].centerPositionY + store->GlobalData.referenceOfPositionY);
+		mbsys_surf_get_position(store, navlon, navlat);
 
 		/* get heading */
 		*heading = RTD * store->SoundingData.headingWhileTransmitting;
@@ -245,10 +274,13 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		}
 		/* read distance and depth values into storage arrays */
 		*nbath = store->NrBeams;
+		/* beams deleted or suppressed in the SURF data, or in a deleted
+		    sounding, still have depths - flag them rather than nulling them
+		    so that they can be unflagged */
+		const bool sounding_deleted = (store->SoundingData.soundingFlag & SF_DELETED) != 0;
 		for (int i = 0; i < store->NrBeams; i++) {
-			if ((store->MultiBeamDepth[i].depthFlag & SB_DELETED) != 0)
-				beamflag[i] = MB_FLAG_NULL;
-			else if ((store->MultiBeamDepth[i].depthFlag & (SB_DEPTH_SUPPRESSED | SB_REDUCED_FAN)) != 0)
+			if (sounding_deleted
+			    || (store->MultiBeamDepth[i].depthFlag & (SB_DELETED | SB_DEPTH_SUPPRESSED | SB_REDUCED_FAN)) != 0)
 				beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MANUAL;
 			else
 				beamflag[i] = MB_FLAG_NONE;
@@ -292,9 +324,8 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 				amp[0] = 0.0;
 			}
 			if (*nbath == 1) {
-				if ((int)(store->SingleBeamDepth.depthFlag & SB_DELETED) != 0)
-					beamflag[0] = MB_FLAG_NULL;
-				else if ((int)(store->SingleBeamDepth.depthFlag & (SB_DEPTH_SUPPRESSED + SB_REDUCED_FAN)) != 0)
+				if (sounding_deleted
+				    || (store->SingleBeamDepth.depthFlag & (SB_DELETED | SB_DEPTH_SUPPRESSED | SB_REDUCED_FAN)) != 0)
 					beamflag[0] = MB_FLAG_FLAG + MB_FLAG_MANUAL;
 				else
 					beamflag[0] = MB_FLAG_NONE;
@@ -319,17 +350,20 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 			z0 -= tlz;
 			const double t0 = z0 / v0;
 			const double t2 = t0 * t0;
-			/* read portside scan */
+			/* port pixels may have been truncated to MBSYS_SURF_MAXPIXELS on reading */
+			const int nport = MIN(store->SidescanData.actualNrOfSsDataPort, store->NrSidescan);
+			/* read portside scan - nearest pixel first, stored in reverse order */
 			if (store->SidescanData.actualNrOfSsDataPort > 1) {
 				/* initialise */
 				tn = store->SidescanData.minSsTimePort / 2;
 				dt = (store->SidescanData.maxSsTimePort / 2 - tn) / (store->SidescanData.actualNrOfSsDataPort - 1);
 				/* start reading: */
-				for (int i = 0, j = store->SidescanData.actualNrOfSsDataPort; 0 < --j; i++) {
+				for (int i = 0; i < nport; i++) {
+					const int j = nport - 1 - i;
 					y = (tn > t0 ? v0 * sqrt(tn * tn - t2) : 0.0);
 					ssalongtrack[j] = tlx;
 					ssacrosstrack[j] = tly - y;
-					ss[j] = store->SidescanData.ssData[i];
+					ss[j] = store->ssData[i];
 					tn += dt;
 				}
 			}
@@ -338,11 +372,11 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 				/* initialise */
 				tn = store->SidescanData.minSsTimeStb / 2;
 				dt = (store->SidescanData.maxSsTimeStb / 2 - tn) / (store->SidescanData.actualNrOfSsDataStb - 1);
-				for (int j = store->SidescanData.actualNrOfSsDataPort; j < store->NrSidescan; j++) {
+				for (int j = nport; j < store->NrSidescan; j++) {
 					y = (tn > t0 ? v0 * sqrt(tn * tn - t2) : 0.0);
 					ssalongtrack[j] = tlx;
 					ssacrosstrack[j] = tly + y;
-					ss[j] = store->SidescanData.ssData[j];
+					ss[j] = store->ssData[j];
 					tn += dt;
 				}
 			}
@@ -503,8 +537,7 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 		store->SoundingData.relTime = (float)(time_d - store->AbsoluteStartTimeOfProfile);
 
 		/* set navigation */
-		store->CenterPosition[0].centerPositionX = (float)(DTR * navlon - store->GlobalData.referenceOfPositionX);
-		store->CenterPosition[0].centerPositionY = (float)(DTR * navlat - store->GlobalData.referenceOfPositionY);
+		mbsys_surf_set_position(store, navlon, navlat);
 
 		/* set heading */
 		store->SoundingData.headingWhileTransmitting = (float)(DTR * heading);
@@ -552,12 +585,13 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 			store->MultibeamBeamAmplitudes[i].beamAmplitude = (unsigned short)amp[i];
 		}
 
-		if (nss == store->SidescanData.actualNrOfSsDataPort + store->SidescanData.actualNrOfSsDataStb) {
+		if (nss == store->SidescanData.actualNrOfSsDataPort + store->SidescanData.actualNrOfSsDataStb
+		    && nss <= MBSYS_SURF_MAXPIXELS) {
 			for (int i = 0; i < store->SidescanData.actualNrOfSsDataPort; i++) {
-				store->SidescanData.ssData[i] = ss[store->SidescanData.actualNrOfSsDataPort - i - 1];
+				store->ssData[i] = ss[store->SidescanData.actualNrOfSsDataPort - i - 1];
 			}
-			for (int i = store->SidescanData.actualNrOfSsDataStb; i < nss; i++) {
-				store->SidescanData.ssData[i] = ss[i];
+			for (int i = store->SidescanData.actualNrOfSsDataPort; i < nss; i++) {
+				store->ssData[i] = ss[i];
 			}
 		}
 	}
@@ -633,7 +667,7 @@ int mbsys_surf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 			}
 			for (int i = 0; i < store->NrBeams; i++) {
 				ttimes[i] = 2 * store->MultiBeamTraveltime[i].travelTimeOfRay;
-				const double angle = 90. - RTD * store->ActualAngleTable.beamAngle[i];
+				const double angle = 90. - RTD * store->beamAngle[i];
 				mb_rollpitch_to_takeoff(verbose, pitch, angle, &angles[i], &angles_forward[i], error);
 				heave[i] =
 				    -0.5 * (store->SoundingData.heaveWhileTransmitting + store->MultiBeamReceiveParams[i].heaveWhileReceiving);
@@ -813,19 +847,45 @@ int mbsys_surf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, in
 	if (*kind == MB_DATA_DATA) {
 		/* get transducer depth and altitude */
 		*transducer_depth = store->ActualTransducerTable.transducerDepth - store->SoundingData.heaveWhileTransmitting;
-		const double bath_best = mbsys_get_depth(store->MultiBeamDepth, store->ActualTransducerTable,
-		                            store->SoundingData.heaveWhileTransmitting, store->NrBeams);
+		double bath_best = 0.0;
 
-		if (bath_best > *transducer_depth) {
-			*altitude = bath_best - *transducer_depth;
-			*error = MB_ERROR_NO_ERROR;
-			status = MB_SUCCESS;
+		/* single beam sounder - use the depth of the first available frequency */
+		if (store->NrBeams == 0 && store->GlobalData.typeOfSounder == VERTICAL_SOUNDER) {
+			if (store->SingleBeamDepth.depthHFreq > 0.0)
+				bath_best = store->SingleBeamDepth.depthHFreq;
+			else if (store->SingleBeamDepth.depthMFreq > 0.0)
+				bath_best = store->SingleBeamDepth.depthMFreq;
+			else if (store->SingleBeamDepth.depthLFreq > 0.0)
+				bath_best = store->SingleBeamDepth.depthLFreq;
 		}
+
+		/* multibeam - fit the beams near nadir, else use the unflagged beam
+		    closest to the transducer acrosstrack */
 		else {
-			*altitude = 0.0;
-			*error = MB_ERROR_OTHER;
-			status = MB_FAILURE;
+			bath_best = mbsys_get_depth(store->MultiBeamDepth, store->ActualTransducerTable,
+			                            store->SoundingData.heaveWhileTransmitting, store->NrBeams);
+			if (bath_best <= *transducer_depth) {
+				bath_best = 0.0;
+				double xtrack_min = 99999999.9;
+				for (int i = 0; i < MIN(store->NrBeams, MBSYS_SURF_MAXBEAMS); i++) {
+					const double xtrack =
+					    fabs(store->MultiBeamDepth[i].beamPositionStar - store->ActualTransducerTable.transducerPositionStar);
+					if ((store->MultiBeamDepth[i].depthFlag & (SB_DELETED | SB_DEPTH_SUPPRESSED | SB_REDUCED_FAN)) == 0
+					    && store->MultiBeamDepth[i].depth > *transducer_depth && xtrack < xtrack_min) {
+						xtrack_min = xtrack;
+						bath_best = store->MultiBeamDepth[i].depth;
+					}
+				}
+			}
 		}
+
+		/* no valid depth is not an error - the ping is still returned */
+		if (bath_best > *transducer_depth)
+			*altitude = bath_best - *transducer_depth;
+		else
+			*altitude = 0.0;
+		*error = MB_ERROR_NO_ERROR;
+		status = MB_SUCCESS;
 
 		/* done translating values */
 	}
@@ -887,8 +947,7 @@ int mbsys_surf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		mb_get_date(verbose, *time_d, time_i);
 
 		/* get navigation */
-		*navlon = RTD * ((double)store->CenterPosition[0].centerPositionX + store->GlobalData.referenceOfPositionX);
-		*navlat = RTD * ((double)store->CenterPosition[0].centerPositionY + store->GlobalData.referenceOfPositionY);
+		mbsys_surf_get_position(store, navlon, navlat);
 
 		/* get draft */
 		*draft = store->ActualTransducerTable.transducerDepth;
@@ -1015,8 +1074,7 @@ int mbsys_surf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time
 		store->SoundingData.relTime = (float)(time_d - store->AbsoluteStartTimeOfProfile);
 
 		/* get navigation */
-		store->CenterPosition[0].centerPositionX = (float)(DTR * navlon - store->GlobalData.referenceOfPositionX);
-		store->CenterPosition[0].centerPositionY = (float)(DTR * navlat - store->GlobalData.referenceOfPositionY);
+		mbsys_surf_set_position(store, navlon, navlat);
 
 		/* get heading */
 		store->SoundingData.headingWhileTransmitting = (float)(DTR * heading);
@@ -1070,12 +1128,12 @@ int mbsys_surf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA && store->ActualCProfileTable.numberOfActualValues > 0) {
 		/* get number of depth-velocity pairs */
-		*nsvp = store->ActualCProfileTable.numberOfActualValues;
+		*nsvp = MIN(store->ActualCProfileTable.numberOfActualValues, MBSYS_SURF_MAXCVALUES);
 
 		/* get profile */
 		for (int i = 0; i < *nsvp; i++) {
-			depth[i] = store->ActualCProfileTable.values[i].depth;
-			velocity[i] = store->ActualCProfileTable.values[i].cValue;
+			depth[i] = store->cProfileValues[i].depth;
+			velocity[i] = store->cProfileValues[i].cValue;
 		}
 
 		/* done translating values */
@@ -1140,8 +1198,8 @@ int mbsys_surf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp
 
 		/* set profile */
 		for (int i = 0; i < store->ActualCProfileTable.numberOfActualValues; i++) {
-			store->ActualCProfileTable.values[i].depth = depth[i];
-			store->ActualCProfileTable.values[i].cValue = velocity[i];
+			store->cProfileValues[i].depth = depth[i];
+			store->cProfileValues[i].cValue = velocity[i];
 		}
 	}
 

@@ -927,6 +927,29 @@ int mb_platform_deall(int verbose, void **platform_ptr, int *error) {
 }
 
 /*--------------------------------------------------------------------*/
+/* Copy the text following the first nfields whitespace-delimited fields
+   of a platform file line into value (bounded by value_size), without
+   leading or trailing whitespace. Text values may contain spaces. */
+static void mb_platform_text_value(const char *buffer, int nfields, char *value, size_t value_size) {
+  const char *s = buffer;
+  for (int i = 0; i < nfields; i++) {
+    while (*s == ' ' || *s == '\t')
+      s++;
+    while (*s != '\0' && *s != ' ' && *s != '\t')
+      s++;
+  }
+  while (*s == ' ' || *s == '\t')
+    s++;
+  size_t len = strlen(s);
+  while (len > 0 && (s[len - 1] == ' ' || s[len - 1] == '\t' || s[len - 1] == '\r' || s[len - 1] == '\n'))
+    len--;
+  if (len > value_size - 1)
+    len = value_size - 1;
+  memcpy(value, s, len);
+  value[len] = '\0';
+}
+
+/*--------------------------------------------------------------------*/
 
 int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int *error) {
   if (verbose >= 2) {
@@ -961,7 +984,7 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
           if (len > 0) {
             if (buffer[len - 1] == '\n')
               buffer[len - 1] = '\0';
-            if (buffer[len - 2] == '\r')
+            if (len > 1 && buffer[len - 2] == '\r')
               buffer[len - 2] = '\0';
           }
 
@@ -972,13 +995,13 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
             sscanf(buffer, "%s %d", dummy, &platform->type);
           }
           else if (strncmp(buffer, "PLATFORM_NAME", 13) == 0) {
-            sscanf(buffer, "%s %s", dummy, platform->name);
+            mb_platform_text_value(buffer, 1, platform->name, sizeof(platform->name));
           }
           else if (strncmp(buffer, "PLATFORM_ORGANIZATION", 21) == 0) {
-            sscanf(buffer, "%s %s", dummy, platform->organization);
+            mb_platform_text_value(buffer, 1, platform->organization, sizeof(platform->organization));
           }
           else if (strncmp(buffer, "DOCUMENTATION_URL", 17) == 0) {
-            sscanf(buffer, "%s %s", dummy, platform->documentation_url);
+            mb_platform_text_value(buffer, 1, platform->documentation_url, sizeof(platform->documentation_url));
           }
           else if (strncmp(buffer, "START_TIME_D", 12) == 0) {
             sscanf(buffer, "%s %lf", dummy, &platform->start_time_d);
@@ -1019,28 +1042,28 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
           else if (strncmp(buffer, "SOURCE_BACKSCATTER", 18) == 0) {
             sscanf(buffer, "%s %d", dummy, &platform->source_backscatter);
           }
-          else if (strncmp(buffer, "SOURCE_SUBBOTTOM1", 19) == 0) {
+          else if (strncmp(buffer, "SOURCE_SUBBOTTOM1", 17) == 0) {
             sscanf(buffer, "%s %d", dummy, &platform->source_subbottom1);
           }
-          else if (strncmp(buffer, "SOURCE_SUBBOTTOM2", 19) == 0) {
+          else if (strncmp(buffer, "SOURCE_SUBBOTTOM2", 17) == 0) {
             sscanf(buffer, "%s %d", dummy, &platform->source_subbottom2);
           }
-          else if (strncmp(buffer, "SOURCE_SUBBOTTOM3", 19) == 0) {
+          else if (strncmp(buffer, "SOURCE_SUBBOTTOM3", 17) == 0) {
             sscanf(buffer, "%s %d", dummy, &platform->source_subbottom3);
           }
-          else if (strncmp(buffer, "SOURCE_SUBBOTTOM", 18) == 0) {
+          else if (strncmp(buffer, "SOURCE_SUBBOTTOM", 16) == 0) {
             sscanf(buffer, "%s %d", dummy, &platform->source_subbottom);
           }
-          else if (strncmp(buffer, "SOURCE_SUBCAMERA1", 19) == 0) {
+          else if (strncmp(buffer, "SOURCE_CAMERA1", 14) == 0 || strncmp(buffer, "SOURCE_SUBCAMERA1", 17) == 0) {
             sscanf(buffer, "%s %d", dummy, &platform->source_camera1);
           }
-          else if (strncmp(buffer, "SOURCE_SUBCAMERA2", 19) == 0) {
+          else if (strncmp(buffer, "SOURCE_CAMERA2", 14) == 0 || strncmp(buffer, "SOURCE_SUBCAMERA2", 17) == 0) {
             sscanf(buffer, "%s %d", dummy, &platform->source_camera2);
           }
-          else if (strncmp(buffer, "SOURCE_SUBCAMERA3", 19) == 0) {
+          else if (strncmp(buffer, "SOURCE_CAMERA3", 14) == 0 || strncmp(buffer, "SOURCE_SUBCAMERA3", 17) == 0) {
             sscanf(buffer, "%s %d", dummy, &platform->source_camera3);
           }
-          else if (strncmp(buffer, "SOURCE_SUBCAMERA", 18) == 0) {
+          else if (strncmp(buffer, "SOURCE_CAMERA", 13) == 0 || strncmp(buffer, "SOURCE_SUBCAMERA", 16) == 0) {
             sscanf(buffer, "%s %d", dummy, &platform->source_camera);
           }
           else if (strncmp(buffer, "SOURCE_POSITION1", 16) == 0) {
@@ -1131,25 +1154,25 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
               platform->sensors[isensor].type = ivalue;
           }
           else if (strncmp(buffer, "SENSOR_MODEL", 12) == 0) {
-            int isensor;
-            char svalue[MB_PATH_MAXLINE];
-            sscanf(buffer, "%s %d %s", dummy, &isensor, svalue);
+            int isensor = -1;
+            sscanf(buffer, "%s %d", dummy, &isensor);
             if (isensor >= 0 && isensor < platform->num_sensors)
-              strcpy(platform->sensors[isensor].model, svalue);
+              mb_platform_text_value(buffer, 2, platform->sensors[isensor].model,
+                                     sizeof(platform->sensors[isensor].model));
           }
           else if (strncmp(buffer, "SENSOR_MANUFACTURER", 19) == 0) {
-            int isensor;
-            char svalue[MB_PATH_MAXLINE];
-            sscanf(buffer, "%s %d %s", dummy, &isensor, svalue);
+            int isensor = -1;
+            sscanf(buffer, "%s %d", dummy, &isensor);
             if (isensor >= 0 && isensor < platform->num_sensors)
-              strcpy(platform->sensors[isensor].manufacturer, svalue);
+              mb_platform_text_value(buffer, 2, platform->sensors[isensor].manufacturer,
+                                     sizeof(platform->sensors[isensor].manufacturer));
           }
           else if (strncmp(buffer, "SENSOR_SERIALNUMBER", 19) == 0) {
-            int isensor;
-            char svalue[MB_PATH_MAXLINE];
-            sscanf(buffer, "%s %d %s", dummy, &isensor, svalue);
+            int isensor = -1;
+            sscanf(buffer, "%s %d", dummy, &isensor);
             if (isensor >= 0 && isensor < platform->num_sensors)
-              strcpy(platform->sensors[isensor].serialnumber, svalue);
+              mb_platform_text_value(buffer, 2, platform->sensors[isensor].serialnumber,
+                                     sizeof(platform->sensors[isensor].serialnumber));
           }
           else if (strncmp(buffer, "SENSOR_CAPABILITY1", 18) == 0) {
             int isensor;
@@ -1165,7 +1188,7 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
             if (isensor >= 0 && isensor < platform->num_sensors)
               platform->sensors[isensor].capability2 = ivalue;
           }
-          else if (strncmp(buffer, "SENSOR_NUM_OFFSETS", 17) == 0) {
+          else if (strncmp(buffer, "SENSOR_NUM_OFFSETS", 18) == 0) {
             int isensor;
             int ivalue;
             sscanf(buffer, "%s %d %d", dummy, &isensor, &ivalue);

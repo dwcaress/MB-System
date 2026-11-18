@@ -4477,11 +4477,32 @@ int mbr_em710mba_rd_ss2_mba(int verbose, void *mbio_ptr, int swap, struct mbsys_
 	return (status);
 }
 /*--------------------------------------------------------------------*/
+/* the water column ping in the store is complete, or as complete as it will get */
+static void mbr_em710mba_wc_ping_done(struct mbsys_simrad3_struct *store) {
+	store->kind = MB_DATA_WATER_COLUMN;
+	store->type = EM3_WATERCOLUMN;
+	store->date = store->wc->wtc_date;
+	store->msec = store->wc->wtc_msec;
+	store->wc->wtc_in_progress = false;
+}
+/*--------------------------------------------------------------------*/
+/* read one water column datagram into the ping in the store - *ping_done is set when
+   the ping can be returned: it ends with its last datagram, with a datagram of another
+   ping (whose header is saved for the next call) or with the end of the file */
 int mbr_em710mba_rd_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
-                       int *error) {
+                       bool *ping_done, int *error) {
+	struct mbsys_simrad3_watercolumn_struct *wc;
 	char line[EM3_WC_HEADER_SIZE];
 	short short_val = 0;
 	size_t read_len;
+	int date = 0;
+	int msec = 0;
+	int count = 0;
+	int serial = 0;
+	int datagram = 0;
+	int ntx = 0;
+	int nbeam = 0;
+	bool other_ping = false;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4493,99 +4514,153 @@ int mbr_em710mba_rd_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 		fprintf(stderr, "dbg2       sonar:      %d\n", sonar);
 	}
 
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
 	/* set goodend false until a good end is found */
 	*goodend = false;
+	*ping_done = false;
 
 	/* get  storage structure */
-	struct mbsys_simrad3_watercolumn_struct *wc = (struct mbsys_simrad3_watercolumn_struct *)store->wc;
+	wc = (struct mbsys_simrad3_watercolumn_struct *)store->wc;
 
-	/* set kind and type values */
-	store->kind = MB_DATA_WATER_COLUMN;
-	store->type = EM3_WATERCOLUMN;
+	/* this is not a water column record until the ping is complete */
+	store->kind = MB_DATA_NONE;
 	store->sonar = sonar;
 
-	/* read binary header values into char array */
-	read_len = (size_t)EM3_WC_HEADER_SIZE;
-	int status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
+	/* read binary header values into char array, unless already read */
+	int status = MB_SUCCESS;
+	if (wc->wtc_header_saved) {
+		memcpy(line, wc->wtc_header, EM3_WC_HEADER_SIZE);
+		wc->wtc_header_saved = false;
+	}
+	else {
+		read_len = (size_t)EM3_WC_HEADER_SIZE;
+		status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
+	}
 
-	/* get binary header data */
+	/* find out which ping this datagram belongs to */
 	if (status == MB_SUCCESS) {
-		mb_get_binary_int(swap, &line[0], &wc->wtc_date);
-		store->date = wc->wtc_date;
-		mb_get_binary_int(swap, &line[4], &wc->wtc_msec);
-		store->msec = wc->wtc_msec;
+		mb_get_binary_int(swap, &line[0], &date);
+		mb_get_binary_int(swap, &line[4], &msec);
 		mb_get_binary_short(swap, &line[8], &short_val);
-		wc->wtc_count = (int)((unsigned short)short_val);
+		count = (int)((unsigned short)short_val);
 		mb_get_binary_short(swap, &line[10], &short_val);
-		wc->wtc_serial = (int)((unsigned short)short_val);
-		mb_get_binary_short(swap, &line[12], &short_val);
-		wc->wtc_ndatagrams = (int)((unsigned short)short_val);
+		serial = (int)((unsigned short)short_val);
 		mb_get_binary_short(swap, &line[14], &short_val);
-		wc->wtc_datagram = (int)((unsigned short)short_val);
+		datagram = (int)((unsigned short)short_val);
 		mb_get_binary_short(swap, &line[16], &short_val);
-		wc->wtc_ntx = (int)((unsigned short)short_val);
-		mb_get_binary_short(swap, &line[18], &short_val);
-		wc->wtc_nrx = (int)((unsigned short)short_val);
+		ntx = (int)((unsigned short)short_val);
 		mb_get_binary_short(swap, &line[20], &short_val);
-		wc->wtc_nbeam = (int)((unsigned short)short_val);
-		mb_get_binary_short(swap, &line[22], &short_val);
-		wc->wtc_ssv = (int)((unsigned short)short_val);
-		mb_get_binary_int(swap, &line[24], &(wc->wtc_sfreq));
-		mb_get_binary_short(swap, &line[28], &short_val);
-		wc->wtc_heave = (int)((short)short_val);
-		mb_get_binary_short(swap, &line[30], &short_val);
-		wc->wtc_spare1 = (int)((unsigned short)short_val);
-		mb_get_binary_short(swap, &line[32], &short_val);
-		wc->wtc_spare2 = (int)((unsigned short)short_val);
-		mb_get_binary_short(swap, &line[34], &short_val);
-		wc->wtc_spare3 = (int)((unsigned short)short_val);
+		nbeam = (int)((unsigned short)short_val);
+		other_ping = wc->wtc_in_progress && (count != wc->wtc_count || serial != wc->wtc_serial || datagram <= wc->wtc_datagram);
+	}
+
+	/* a datagram of another ping ends this ping - keep the header, the rest
+	    of the datagram is read by the next call */
+	if (status == MB_SUCCESS && other_ping) {
+		if (wc->wtc_nbeam > 0) {
+			memcpy(wc->wtc_header, line, EM3_WC_HEADER_SIZE);
+			wc->wtc_header_saved = true;
+			mb_io_ptr->save_label_flag = true;
+			mbr_em710mba_wc_ping_done(store);
+			*goodend = true;
+			*ping_done = true;
+		}
+		else
+			wc->wtc_in_progress = false;
 	}
 
 	/* check for some indicators of a broken record
 	    - these do happen!!!! */
-	if (status == MB_SUCCESS) {
-		if (wc->wtc_nbeam < 0 || wc->wtc_nbeam > MBSYS_SIMRAD3_MAXBEAMS || wc->wtc_ntx < 0 || wc->wtc_ntx > MBSYS_SIMRAD3_MAXTX) {
+	if (status == MB_SUCCESS && !*ping_done) {
+		const int nbeam_read = wc->wtc_in_progress ? wc->wtc_nbeam : 0;
+		const int nread = wc->wtc_in_progress ? wc->wtc_nread : 0;
+		if (nbeam_read + nbeam > MBSYS_SIMRAD3_MAXBEAMS || ntx > MBSYS_SIMRAD3_MAXTX || nread >= MBSYS_SIMRAD3_MAXWCDATAGRAMS) {
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
 		}
 	}
 
-	/* read binary beam values */
-	if (status == MB_SUCCESS) {
-		for (int i = 0; i < wc->wtc_ntx && status == MB_SUCCESS; i++) {
+	/* get binary header data */
+	if (status == MB_SUCCESS && !*ping_done) {
+		if (!wc->wtc_in_progress) {
+			wc->wtc_date = date;
+			wc->wtc_msec = msec;
+			wc->wtc_count = count;
+			wc->wtc_serial = serial;
+			mb_get_binary_short(swap, &line[12], &short_val);
+			wc->wtc_ndatagrams = (int)((unsigned short)short_val);
+			wc->wtc_ntx = ntx;
+			mb_get_binary_short(swap, &line[18], &short_val);
+			wc->wtc_nrx = (int)((unsigned short)short_val);
+			mb_get_binary_short(swap, &line[22], &short_val);
+			wc->wtc_ssv = (int)((unsigned short)short_val);
+			mb_get_binary_int(swap, &line[24], &(wc->wtc_sfreq));
+			mb_get_binary_short(swap, &line[28], &short_val);
+			wc->wtc_heave = (int)((short)short_val);
+			wc->wtc_tvg_function = (int)((mb_u_char)line[30]);
+			wc->wtc_tvg_offset = (int)((mb_s_char)line[31]);
+			wc->wtc_scanning_info = (int)((mb_u_char)line[32]);
+			wc->wtc_spare1 = (int)((mb_u_char)line[33]);
+			wc->wtc_spare2 = (int)((mb_u_char)line[34]);
+			wc->wtc_spare3 = (int)((mb_u_char)line[35]);
+			wc->wtc_nbeam = 0;
+			wc->wtc_nread = 0;
+			wc->wtc_in_progress = true;
+		}
+		wc->wtc_datagram = datagram;
+	}
+
+	/* read binary beam values - a beam counts only when all of it was read */
+	if (status == MB_SUCCESS && !*ping_done) {
+		for (int i = 0; i < ntx && status == MB_SUCCESS; i++) {
 			read_len = (size_t)EM3_WC_TX_SIZE;
 			status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
-			if (status == MB_SUCCESS && i < MBSYS_SIMRAD3_MAXTX) {
+			if (status == MB_SUCCESS) {
 				mb_get_binary_short(swap, &line[0], &short_val);
 				wc->wtc_txtiltangle[i] = (int)(short_val);
 				mb_get_binary_short(swap, &line[2], &short_val);
-				wc->wtc_txcenter[i] = (int)(short_val);
+				wc->wtc_txcenter[i] = (int)((unsigned short)short_val);
 				wc->wtc_txsector[i] = (int)((mb_u_char)line[4]);
 			}
 		}
-		for (int i = 0; i < wc->wtc_nbeam && status == MB_SUCCESS; i++) {
+		int nbeam_done = 0;
+		for (int i = 0; i < nbeam && status == MB_SUCCESS; i++) {
+			struct mbsys_simrad3_wcbeam_struct *beam = &wc->beam[wc->wtc_nbeam + i];
 			read_len = (size_t)EM3_WC_BEAM_SIZE;
 			status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
-			if (status == MB_SUCCESS && i < MBSYS_SIMRAD3_MAXBEAMS) {
+			if (status == MB_SUCCESS) {
 				mb_get_binary_short(swap, &line[0], &short_val);
-				wc->beam[i].wtc_rxpointangle = (int)(short_val);
+				beam->wtc_rxpointangle = (int)(short_val);
 				mb_get_binary_short(swap, &line[2], &short_val);
-				wc->beam[i].wtc_start_sample = (int)(short_val);
+				beam->wtc_start_sample = (int)(unsigned short)(short_val);
 				mb_get_binary_short(swap, &line[4], &short_val);
-				wc->beam[i].wtc_beam_samples = (int)(unsigned short)(short_val);
+				beam->wtc_beam_samples = (int)(unsigned short)(short_val);
 				mb_get_binary_short(swap, &line[6], &short_val);
-				wc->beam[i].wtc_beam_spare = (int)(unsigned short)(short_val);
-				wc->beam[i].wtc_sector = (int)(mb_u_char)(line[8]);
-				wc->beam[i].wtc_beam = (int)(mb_u_char)(line[9]);
+				beam->wtc_detected_range = (int)(unsigned short)(short_val);
+				beam->wtc_sector = (int)(mb_u_char)(line[8]);
+				beam->wtc_beam = (int)(mb_u_char)(line[9]);
+				read_len = (size_t)beam->wtc_beam_samples;
+				status = mb_fileio_get(verbose, mbio_ptr, (char *)beam->wtc_amp, &read_len, error);
 			}
-			read_len = (size_t)wc->beam[i].wtc_beam_samples;
-			status = mb_fileio_get(verbose, mbio_ptr, (char *)wc->beam[i].wtc_amp, &read_len, error);
+			if (status == MB_SUCCESS)
+				nbeam_done++;
+		}
+
+		/* keep what is needed to write this datagram again */
+		if (status == MB_SUCCESS || nbeam_done > 0) {
+			wc->wtc_read[wc->wtc_nread].wtc_date = date;
+			wc->wtc_read[wc->wtc_nread].wtc_msec = msec;
+			wc->wtc_read[wc->wtc_nread].wtc_datagram = datagram;
+			wc->wtc_read[wc->wtc_nread].wtc_nbeam = nbeam_done;
+			wc->wtc_nread++;
+			wc->wtc_nbeam += nbeam_done;
 		}
 	}
 
 	/* now loop over reading individual characters to
 	    get last bytes of record */
-	if (status == MB_SUCCESS) {
+	if (status == MB_SUCCESS && !*ping_done) {
 		bool done = false;
 		while (!done) {
 			read_len = (size_t)1;
@@ -4610,15 +4685,21 @@ int mbr_em710mba_rd_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 				    file will return error */
 				status = MB_SUCCESS;
 				*error = MB_ERROR_NO_ERROR;
+				*goodend = true;
 			}
 		}
 #ifdef MBR_EM710MBA_DEBUG
 		fprintf(stderr, "\n");
 #endif
+
+		/* that was the last datagram of the ping */
+		if (status == MB_SUCCESS && wc->wtc_datagram >= wc->wtc_ndatagrams) {
+			mbr_em710mba_wc_ping_done(store);
+			*ping_done = true;
+		}
 	}
 
 	/* print debug info if set in mbinfo */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
   if (status == MB_SUCCESS  
     		&& (mb_io_ptr->enable_debug_record_type_listing 
     				|| mb_io_ptr->num_debug_record_identifiers > 0)) {
@@ -4650,6 +4731,9 @@ int mbr_em710mba_rd_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 		fprintf(stderr, "dbg5       wtc_ssv:         %d\n", wc->wtc_ssv);
 		fprintf(stderr, "dbg5       wtc_sfreq:       %d\n", wc->wtc_sfreq);
 		fprintf(stderr, "dbg5       wtc_heave:       %d\n", wc->wtc_heave);
+		fprintf(stderr, "dbg5       wtc_tvg_function:  %d\n", wc->wtc_tvg_function);
+		fprintf(stderr, "dbg5       wtc_tvg_offset:    %d\n", wc->wtc_tvg_offset);
+		fprintf(stderr, "dbg5       wtc_scanning_info: %d\n", wc->wtc_scanning_info);
 		fprintf(stderr, "dbg5       wtc_spare1:      %d\n", wc->wtc_spare1);
 		fprintf(stderr, "dbg5       wtc_spare2:      %d\n", wc->wtc_spare2);
 		fprintf(stderr, "dbg5       wtc_spare3:      %d\n", wc->wtc_spare3);
@@ -4660,10 +4744,10 @@ int mbr_em710mba_rd_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 			fprintf(stderr, "dbg5       %3d %6d %6d %6d\n", i, wc->wtc_txtiltangle[i], wc->wtc_txcenter[i], wc->wtc_txsector[i]);
 		for (int i = 0; i < wc->wtc_nbeam; i++) {
 			fprintf(stderr, "dbg5       --------------------------------------------------\n");
-			fprintf(stderr, "dbg5       cnt  angle start samples unknown sector beam\n");
+			fprintf(stderr, "dbg5       cnt  angle start samples detected_range sector beam\n");
 			fprintf(stderr, "dbg5       --------------------------------------------------\n");
 			fprintf(stderr, "dbg5        %4d %3d %2d %4d %4d %4d %4d\n", i, wc->beam[i].wtc_rxpointangle,
-			        wc->beam[i].wtc_start_sample, wc->beam[i].wtc_beam_samples, wc->beam[i].wtc_beam_spare,
+			        wc->beam[i].wtc_start_sample, wc->beam[i].wtc_beam_samples, wc->beam[i].wtc_detected_range,
 			        wc->beam[i].wtc_sector, wc->beam[i].wtc_beam);
 			/*			fprintf(stderr,"dbg5       --------------------------------------------------\n");
 			            fprintf(stderr,"dbg5       beam[%d]: sample amplitude\n",i);
@@ -4678,6 +4762,7 @@ int mbr_em710mba_rd_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       goodend:    %d\n", *goodend);
+		fprintf(stderr, "dbg2       ping_done:  %d\n", *ping_done);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
@@ -4692,6 +4777,7 @@ int mbr_em710mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	short type;
 	short sonar;
 	int good_end_bytes;
+	bool ping_done;
 	size_t read_len;
 	int skip = 0;
 	char junk;
@@ -5263,8 +5349,8 @@ Have a nice day...\n");
 #ifdef MBR_EM710MBA_DEBUG
 			fprintf(stderr, "call mbr_em710mba_rd_wc type %x\n", type);
 #endif
-			status = mbr_em710mba_rd_wc(verbose, mbio_ptr, swap, store, sonar, &good_end_bytes, error);
-			if (status == MB_SUCCESS) {
+			status = mbr_em710mba_rd_wc(verbose, mbio_ptr, swap, store, sonar, &good_end_bytes, &ping_done, error);
+			if (status == MB_SUCCESS && ping_done) {
 				done = true;
 			}
 #ifdef MBR_EM710MBA_DEBUG3
@@ -5308,6 +5394,18 @@ Have a nice day...\n");
 			}
 		}
 
+		/* the file ended while a water column ping was being assembled - return what
+		    was read, the next attempt to read the file will return the end of file */
+		if (status == MB_FAILURE && *error == MB_ERROR_EOF && store->wc != NULL && store->wc->wtc_in_progress) {
+			if (store->wc->wtc_nbeam > 0) {
+				mbr_em710mba_wc_ping_done(store);
+				status = MB_SUCCESS;
+				*error = MB_ERROR_NO_ERROR;
+			}
+			else
+				store->wc->wtc_in_progress = false;
+		}
+
 #ifdef MBR_EM710MBA_DEBUG
 		fprintf(stderr, "record_size:%d bytes read:%ld file_pos old:%ld new:%ld\n", record_size,
 		        ftell(mbfp) - mb_io_ptr->file_bytes, mb_io_ptr->file_bytes, ftell(mbfp));
@@ -5321,7 +5419,8 @@ Have a nice day...\n");
 
 		/* get file position */
 		if (*label_save_flag)
-			mb_io_ptr->file_bytes = ftell(mbfp) - 2;
+			/* the saved label is that of a water column datagram whose header was read too */
+			mb_io_ptr->file_bytes = ftell(mbfp) - EM3_WC_HEADER_SIZE - 8;
 		else
 			mb_io_ptr->file_bytes = ftell(mbfp);
 	}
@@ -9045,7 +9144,21 @@ int mbr_em710mba_wr_ss2_mba(int verbose, void *mbio_ptr, int swap, struct mbsys_
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_wr_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
+/* write one of the datagrams read for the water column ping in the store, with beams
+   starting at firstbeam */
+int mbr_em710mba_wr_wc_datagram(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int idatagram,
+                                int firstbeam, int *error) {
+	struct mbsys_simrad3_watercolumn_struct *wc;
+	char line[EM3_WC_HEADER_SIZE];
+	short label;
+	char *labelchar;
+	size_t write_len;
+	int write_size;
+	unsigned short checksum;
+	mb_u_char *uchar_ptr;
+	int record_size;
+	int pad;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -9053,10 +9166,14 @@ int mbr_em710mba_wr_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       swap:       %d\n", swap);
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
+		fprintf(stderr, "dbg2       idatagram:  %d\n", idatagram);
+		fprintf(stderr, "dbg2       firstbeam:  %d\n", firstbeam);
 	}
 
 	/* get storage structure */
-	struct mbsys_simrad3_watercolumn_struct *wc = (struct mbsys_simrad3_watercolumn_struct *)store->wc;
+	wc = (struct mbsys_simrad3_watercolumn_struct *)store->wc;
+	const struct mbsys_simrad3_wcdatagram_struct *datagram = &wc->wtc_read[idatagram];
+	const struct mbsys_simrad3_wcbeam_struct *beam = &wc->beam[firstbeam];
 
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
@@ -9064,18 +9181,22 @@ int mbr_em710mba_wr_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
 		fprintf(stderr, "dbg5       msec:            %d\n", store->msec);
-		fprintf(stderr, "dbg5       wtc_date:        %d\n", wc->wtc_date);
-		fprintf(stderr, "dbg5       wtc_msec:        %d\n", wc->wtc_msec);
+		fprintf(stderr, "dbg5       wtc_date:        %d\n", datagram->wtc_date);
+		fprintf(stderr, "dbg5       wtc_msec:        %d\n", datagram->wtc_msec);
 		fprintf(stderr, "dbg5       wtc_count:       %d\n", wc->wtc_count);
 		fprintf(stderr, "dbg5       wtc_serial:      %d\n", wc->wtc_serial);
+
 		fprintf(stderr, "dbg5       wtc_ndatagrams:  %d\n", wc->wtc_ndatagrams);
-		fprintf(stderr, "dbg5       wtc_datagram:    %d\n", wc->wtc_datagram);
+		fprintf(stderr, "dbg5       wtc_datagram:    %d\n", datagram->wtc_datagram);
 		fprintf(stderr, "dbg5       wtc_ntx:         %d\n", wc->wtc_ntx);
 		fprintf(stderr, "dbg5       wtc_nrx:         %d\n", wc->wtc_nrx);
-		fprintf(stderr, "dbg5       wtc_nbeam:       %d\n", wc->wtc_nbeam);
+		fprintf(stderr, "dbg5       wtc_nbeam:       %d\n", datagram->wtc_nbeam);
 		fprintf(stderr, "dbg5       wtc_ssv:         %d\n", wc->wtc_ssv);
 		fprintf(stderr, "dbg5       wtc_sfreq:       %d\n", wc->wtc_sfreq);
 		fprintf(stderr, "dbg5       wtc_heave:       %d\n", wc->wtc_heave);
+		fprintf(stderr, "dbg5       wtc_tvg_function:  %d\n", wc->wtc_tvg_function);
+		fprintf(stderr, "dbg5       wtc_tvg_offset:    %d\n", wc->wtc_tvg_offset);
+		fprintf(stderr, "dbg5       wtc_scanning_info: %d\n", wc->wtc_scanning_info);
 		fprintf(stderr, "dbg5       wtc_spare1:      %d\n", wc->wtc_spare1);
 		fprintf(stderr, "dbg5       wtc_spare2:      %d\n", wc->wtc_spare2);
 		fprintf(stderr, "dbg5       wtc_spare3:      %d\n", wc->wtc_spare3);
@@ -9084,32 +9205,35 @@ int mbr_em710mba_wr_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 		fprintf(stderr, "dbg5       ---------------------------\n");
 		for (int i = 0; i < wc->wtc_ntx; i++)
 			fprintf(stderr, "dbg5       %3d %6d %6d %6d\n", i, wc->wtc_txtiltangle[i], wc->wtc_txcenter[i], wc->wtc_txsector[i]);
-		for (int i = 0; i < wc->wtc_nbeam; i++) {
+		for (int i = 0; i < datagram->wtc_nbeam; i++) {
 			fprintf(stderr, "dbg5       --------------------------------------------------\n");
-			fprintf(stderr, "dbg5       cnt  angle start samples unknown sector beam\n");
+			fprintf(stderr, "dbg5       cnt  angle start samples detected_range sector beam\n");
 			fprintf(stderr, "dbg5       --------------------------------------------------\n");
-			fprintf(stderr, "dbg5        %4d %3d %2d %4d %4d %4d %4d\n", i, wc->beam[i].wtc_rxpointangle,
-			        wc->beam[i].wtc_start_sample, wc->beam[i].wtc_beam_samples, wc->beam[i].wtc_beam_spare,
-			        wc->beam[i].wtc_sector, wc->beam[i].wtc_beam);
+			fprintf(stderr, "dbg5        %4d %3d %2d %4d %4d %4d %4d\n", i, beam[i].wtc_rxpointangle,
+			        beam[i].wtc_start_sample, beam[i].wtc_beam_samples, beam[i].wtc_detected_range,
+			        beam[i].wtc_sector, beam[i].wtc_beam);
 			/*			fprintf(stderr,"dbg5       --------------------------------------------------\n");
 			            fprintf(stderr,"dbg5       beam[%d]: sample amplitude\n",i);
 			            fprintf(stderr,"dbg5       --------------------------------------------------\n");
-			            for (j=0;j<wc->beam[i].wtc_beam_samples;j++)
+			            for (j=0;j<beam[i].wtc_beam_samples;j++)
 			                fprintf(stderr,"dbg5        %4d %4d\n",
-			                    j, wc->beam[i].wtc_amp[j]);*/
+			                    j, beam[i].wtc_amp[j]);*/
 		}
 	}
 
+	/* zero checksum */
+	checksum = 0;
+
 	/* write the record size */
-	int record_size = EM3_WC_HEADER_SIZE + EM3_WC_BEAM_SIZE * wc->wtc_nbeam + EM3_WC_TX_SIZE * wc->wtc_ntx + 8;
-	for (int i = 0; i < wc->wtc_nbeam; i++) {
-		record_size += wc->beam[i].wtc_beam_samples;
+	/* the size counts the label (4 bytes), the end identifier (1) and the checksum (2) but not itself */
+	record_size = EM3_WC_HEADER_SIZE + EM3_WC_BEAM_SIZE * datagram->wtc_nbeam + EM3_WC_TX_SIZE * wc->wtc_ntx + 7;
+	for (int i = 0; i < datagram->wtc_nbeam; i++) {
+		record_size += beam[i].wtc_beam_samples;
 	}
-	int pad = (record_size % 2);
+	pad = (record_size % 2);
 	record_size += pad;
-	int write_size;
 	mb_put_binary_int(swap, record_size, (void *)&write_size);
-	size_t write_len = 4;
+	write_len = 4;
 	mb_fileio_put(verbose, mbio_ptr, (char *)&write_size, &write_len, error);
 	int status = MB_SUCCESS;
 	if (write_len != 4) {
@@ -9119,13 +9243,9 @@ int mbr_em710mba_wr_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 	else
 		status = MB_SUCCESS;
 
-	unsigned short checksum = 0;
-	mb_u_char *uchar_ptr;
-	short label;
-
 	/* write the record label */
 	if (status == MB_SUCCESS) {
-		char *labelchar = (char *)&label;
+		labelchar = (char *)&label;
 		labelchar[0] = EM3_START_BYTE;
 		labelchar[1] = EM3_ID_WATERCOLUMN;
 		write_len = 2;
@@ -9147,25 +9267,26 @@ int mbr_em710mba_wr_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 		checksum += uchar_ptr[1];
 	}
 
-	char line[EM3_WC_HEADER_SIZE];
-
 	/* output binary header data */
 	if (status == MB_SUCCESS) {
-		mb_put_binary_int(swap, (int)wc->wtc_date, (void *)&line[0]);
-		mb_put_binary_int(swap, (int)wc->wtc_msec, (void *)&line[4]);
+		mb_put_binary_int(swap, (int)datagram->wtc_date, (void *)&line[0]);
+		mb_put_binary_int(swap, (int)datagram->wtc_msec, (void *)&line[4]);
 		mb_put_binary_short(swap, (unsigned short)wc->wtc_count, (void *)&line[8]);
 		mb_put_binary_short(swap, (unsigned short)wc->wtc_serial, (void *)&line[10]);
 		mb_put_binary_short(swap, (unsigned short)wc->wtc_ndatagrams, (void *)&line[12]);
-		mb_put_binary_short(swap, (unsigned short)wc->wtc_datagram, (void *)&line[14]);
+		mb_put_binary_short(swap, (unsigned short)datagram->wtc_datagram, (void *)&line[14]);
 		mb_put_binary_short(swap, (unsigned short)wc->wtc_ntx, (void *)&line[16]);
 		mb_put_binary_short(swap, (unsigned short)wc->wtc_nrx, (void *)&line[18]);
-		mb_put_binary_short(swap, (unsigned short)wc->wtc_nbeam, (void *)&line[20]);
+		mb_put_binary_short(swap, (unsigned short)datagram->wtc_nbeam, (void *)&line[20]);
 		mb_put_binary_short(swap, (unsigned short)wc->wtc_ssv, (void *)&line[22]);
 		mb_put_binary_int(swap, (int)wc->wtc_sfreq, (void *)&line[24]);
 		mb_put_binary_short(swap, (short)wc->wtc_heave, (void *)&line[28]);
-		mb_put_binary_short(swap, (unsigned short)wc->wtc_spare1, (void *)&line[30]);
-		mb_put_binary_short(swap, (unsigned short)wc->wtc_spare2, (void *)&line[32]);
-		mb_put_binary_short(swap, (unsigned short)wc->wtc_spare3, (void *)&line[34]);
+		line[30] = (mb_u_char)wc->wtc_tvg_function;
+		line[31] = (mb_s_char)wc->wtc_tvg_offset;
+		line[32] = (mb_u_char)wc->wtc_scanning_info;
+		line[33] = (mb_u_char)wc->wtc_spare1;
+		line[34] = (mb_u_char)wc->wtc_spare2;
+		line[35] = (mb_u_char)wc->wtc_spare3;
 
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *)line;
@@ -9194,13 +9315,13 @@ int mbr_em710mba_wr_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 			write_len = EM3_WC_TX_SIZE;
 			status = mb_fileio_put(verbose, mbio_ptr, line, &write_len, error);
 		}
-		for (int i = 0; i < wc->wtc_nbeam; i++) {
-			mb_put_binary_short(swap, (short)wc->beam[i].wtc_rxpointangle, (void *)&line[0]);
-			mb_put_binary_short(swap, (unsigned short)wc->beam[i].wtc_start_sample, (void *)&line[2]);
-			mb_put_binary_short(swap, (unsigned short)wc->beam[i].wtc_beam_samples, (void *)&line[4]);
-			mb_put_binary_short(swap, (unsigned short)wc->beam[i].wtc_beam_spare, (void *)&line[6]);
-			line[8] = (mb_u_char)wc->beam[i].wtc_sector;
-			line[9] = (mb_u_char)wc->beam[i].wtc_beam;
+		for (int i = 0; i < datagram->wtc_nbeam; i++) {
+			mb_put_binary_short(swap, (short)beam[i].wtc_rxpointangle, (void *)&line[0]);
+			mb_put_binary_short(swap, (unsigned short)beam[i].wtc_start_sample, (void *)&line[2]);
+			mb_put_binary_short(swap, (unsigned short)beam[i].wtc_beam_samples, (void *)&line[4]);
+			mb_put_binary_short(swap, (unsigned short)beam[i].wtc_detected_range, (void *)&line[6]);
+			line[8] = (mb_u_char)beam[i].wtc_sector;
+			line[9] = (mb_u_char)beam[i].wtc_beam;
 
 			/* compute checksum */
 			uchar_ptr = (mb_u_char *)line;
@@ -9212,13 +9333,13 @@ int mbr_em710mba_wr_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 			status = mb_fileio_put(verbose, mbio_ptr, line, &write_len, error);
 
 			/* compute checksum */
-			uchar_ptr = (mb_u_char *)wc->beam[i].wtc_amp;
-			for (int j = 0; j < wc->beam[i].wtc_beam_samples; j++)
+			uchar_ptr = (mb_u_char *)beam[i].wtc_amp;
+			for (int j = 0; j < beam[i].wtc_beam_samples; j++)
 				checksum += uchar_ptr[j];
 
 			/* write out data */
-			write_len = wc->beam[i].wtc_beam_samples;
-			status = mb_fileio_put(verbose, mbio_ptr, (char *)wc->beam[i].wtc_amp, &write_len, error);
+			write_len = beam[i].wtc_beam_samples;
+			status = mb_fileio_put(verbose, mbio_ptr, (char *)beam[i].wtc_amp, &write_len, error);
 		}
 	}
 
@@ -9244,6 +9365,35 @@ int mbr_em710mba_wr_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+/* write the water column ping in the store, as the datagrams it was read from */
+int mbr_em710mba_wr_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       swap:       %d\n", swap);
+		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
+	}
+
+	int status = MB_SUCCESS;
+	int firstbeam = 0;
+	for (int i = 0; i < store->wc->wtc_nread && status == MB_SUCCESS; i++) {
+		status = mbr_em710mba_wr_wc_datagram(verbose, mbio_ptr, swap, store, i, firstbeam, error);
+		firstbeam += store->wc->wtc_read[i].wtc_nbeam;
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
 	return (status);
@@ -9611,6 +9761,8 @@ int mbr_register_em710mba(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_insert_nav = &mbsys_simrad3_insert_nav;
 	mb_io_ptr->mb_io_extract_altitude = &mbsys_simrad3_extract_altitude;
 	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_wcdimensions = &mbsys_simrad3_extract_wcdimensions;
+	mb_io_ptr->mb_io_extract_wc = &mbsys_simrad3_extract_wc;
 	mb_io_ptr->mb_io_extract_svp = &mbsys_simrad3_extract_svp;
 	mb_io_ptr->mb_io_insert_svp = &mbsys_simrad3_insert_svp;
 	mb_io_ptr->mb_io_ttimes = &mbsys_simrad3_ttimes;

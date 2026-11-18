@@ -1,0 +1,83 @@
+#!/usr/bin/env python3
+#--------------------------------------------------------------------
+#    The MB-system:  mbpy_wcdview  1/11/2026
+#
+#    Copyright (c) 2025-2026 by
+#    Christian dos Santos Ferreira
+#      MARUM
+#      University of Bremen
+#      Bremen Germany
+#    David W. Caress (caress@mbari.org)
+#      Monterey Bay Aquarium Research Institute
+#      Moss Landing, California, USA
+#    Dale N. Chayes
+#      Center for Coastal and Ocean Mapping
+#      University of New Hampshire
+#      Durham, New Hampshire, USA
+#
+#    See README.md file for copying and redistribution conditions.
+#--------------------------------------------------------------------
+#
+# Purpose:
+#   Start the Python water column viewer (wcd_viewer.py), an example
+#   application of the mbio_py Python API to MBIO. It finds mbio_py and the
+#   viewer in <prefix>/share/mbsystem/python when installed, or next to this
+#   script in a source tree (src/python). The C++/Qt6 viewer mbwcdview is the
+#   faster program for the same task.
+#
+# Usage:
+#   mbpy_wcdview [--input=file -Ifile] [file] [--help -H]
+#
+# Needs Python >= 3.11, numpy, PySide6 and matplotlib, and an MB-System
+# libmbio with mb_extract_wc().
+#--------------------------------------------------------------------
+
+import getopt
+import os
+import sys
+
+program_name = "MBPY_WCDVIEW"
+help_message = (
+    "MBPY_WCDVIEW starts the Python water column viewer, an example application of the\n"
+    "mbio_py Python API to the MB-System MBIO library. It opens a Kongsberg *.kmwcd or\n"
+    "*.kmall and finds the other file of the survey line. Needs Python >= 3.11, numpy,\n"
+    "PySide6 and matplotlib.")
+usage_message = "mbpy_wcdview [--input=file -Ifile] [file] [--help -H]"
+
+
+def _find_package():
+    here = os.path.dirname(os.path.realpath(__file__))
+    for candidate in (os.path.join(here, "..", "share", "mbsystem", "python"), here):
+        if os.path.isdir(os.path.join(candidate, "mbio_py")) and os.path.isdir(
+                os.path.join(candidate, "wcd_viewer")):
+            return os.path.abspath(candidate)
+    return None
+
+
+def main():
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "HhI:i:", ["help", "input="])
+    except getopt.GetoptError as ex:
+        sys.stderr.write(f"{ex}\nusage: {usage_message}\n\nProgram <{program_name}> Terminated\n")
+        return 1
+    path = args[0] if args else None
+    for opt, value in opts:
+        if opt in ("-H", "-h", "--help"):
+            sys.stderr.write(f"\nProgram {program_name}\n\n{help_message}\n\nusage: {usage_message}\n")
+            return 0
+        if opt in ("-I", "-i", "--input"):
+            path = value
+
+    base = _find_package()
+    if base is None:
+        sys.stderr.write(f"{program_name}: mbio_py and wcd_viewer not found next to this program\n")
+        return 1
+    sys.path.insert(0, os.path.join(base, "wcd_viewer"))
+    sys.path.insert(0, base)
+    sys.argv = [sys.argv[0]] + ([path] if path else [])
+    import wcd_viewer
+    return wcd_viewer._bootstrap()
+
+
+if __name__ == "__main__":
+    sys.exit(main())

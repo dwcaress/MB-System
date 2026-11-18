@@ -1,0 +1,193 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbpy_wcdview</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbpy_wcdview</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  1 November 2026 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbpy_wcdview</B> - Python water column viewer, an example of the mbio_py Python API.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbpy_wcdview</B>
+<BR>
+
+[
+<BR>
+
+<B>--input</B>=<I>file</I> {<B>-I</B><I>file</I>}
+<BR>
+
+<I>file</I>
+<BR>
+
+<B>--help</B> {<B>-H</B>}
+<BR>
+
+]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbpy_wcdview</B> displays water column data, one swath at a time, read through
+the MBIO library with <B>mbio_py</B>, the Python API to MBIO installed with
+MB-System in <I>&lt;prefix&gt;/share/mbsystem/python</I>. It is written in Python with
+PySide6 (Qt6 for Python) and matplotlib, and serves as an example application of
+the API; <B><A HREF="mbwcdview.html">mbwcdview</A></B>(1) is the faster C++/Qt6 program for the same task.
+<P>
+Opening a Kongsberg *.kmwcd, *.kmall, *.wcd or *.all file finds the other file of
+the survey line in the same directory (same line number, nearest file name time) and
+matches the pings by ping number and time. The *.kmall or *.all supplies the
+soundings, navigation, heading and transducer depth; the *.kmwcd or *.wcd the water
+column. A *.all without a *.wcd supplies the water column too, if it holds any.
+Either may be missing: without a *.kmall or *.all the navigation comes from the
+position records of the *.kmwcd or *.wcd and depths are given below the transducer.
+<P>
+The window has an Open button, Save Image (twice the screen resolution, with the
+file name and ping information), check boxes <B>Bottom</B> (soundings of the
+matching survey ping: red amplitude and dark blue phase detections, filled good,
+hollow flagged), <B>WC bottom</B> (the bottom detections recorded in the water
+column), <B>Ray trace (SVP)</B> (samples traced through the logged sound velocity
+profile; on when a profile is found) and <B>Pick</B> (positions clicked in the
+image go into a table that can be saved as text), the depth and amplitude ranges,
+a fixed across track scale, a replay rate, and a slider that steps one swath at a
+time (also the mouse wheel and the left and right arrow keys). Amplitudes are in
+dB; the fill value of Kongsberg kmall data is drawn as no data. In *.wcd and *.all data
+the lowest value is a valid level and is drawn with the lowest color.
+<P>
+<B>mbpy_wcdview</B> needs Python &gt;= 3.11, numpy, matplotlib and PySide6, and an
+MB-System libmbio with <B><A HREF="mb_extract_wc.html">mb_extract_wc</A></B>(3). The README in
+<I>&lt;prefix&gt;/share/mbsystem/python</I> explains the installation of these packages
+and the use of the API.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian dos Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>--input</B>=<I>file</I> {<B>-I</B><I>file</I>}
+
+<DD>
+<BR>
+
+The *.kmwcd, *.kmall, *.wcd or *.all to open; it may also be given as the last argument.
+<DT><B>--help {-H</B>}
+
+<DD>
+Print the usage message and exit.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>ENVIRONMENT</H2>
+
+<DL COMPACT>
+<DT><B>MBSYSTEM_LIBMBIO</B>
+
+<DD>
+Full path of the libmbio to use instead of the one of the installation.
+<DT><B>MBIO_PY_PATH</B>
+
+<DD>
+Directory containing mbio_py, instead of the installation's.
+<P>
+</DL>
+<A NAME="lbAI">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+To view a Kongsberg survey line:
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbpy_wcdview 0080_20250618_223434.kmwcd<BR>
+<BR>
+
+<P>
+To run it with numpy, matplotlib and PySide6 from a virtual environment:
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>~/mbpy/bin/python $(which mbpy_wcdview) 0080_20250618_223434.kmall<BR>
+<BR>
+
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbwcdview.html">mbwcdview</A></B>(1), <B><A HREF="mbio.html">mbio</A></B>(3)
+<P>
+<A NAME="lbAK">&nbsp;</A>
+<H2>BUGS</H2>
+
+Stepping through the pings is slow compared with <B>mbwcdview</B>, as matplotlib
+redraws every cell of a swath. All water column pings of a file are kept in
+memory (about two bytes per sample).
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">ENVIRONMENT</A><DD>
+<DT><A HREF="#lbAI">EXAMPLES</A><DD>
+<DT><A HREF="#lbAJ">SEE ALSO</A><DD>
+<DT><A HREF="#lbAK">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 1 November 2026</P></CENTER>
+
+<HR>
+<center>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>

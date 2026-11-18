@@ -186,6 +186,53 @@ struct mb_topogrid_struct {
   float *data;
 };
 
+/* GIS vector data (polylines, polygons, points) for mb_gisfile.c */
+#define MB_GIS_NONE 0
+#define MB_GIS_POLYLINE 1
+#define MB_GIS_POLYGON 2
+#define MB_GIS_POINT 3
+#define MB_GIS_PART_LINE 0
+#define MB_GIS_PART_OUTER 1
+#define MB_GIS_PART_HOLE 2
+#define MB_GIS_COLOR_NONE -1
+#define MB_GIS_COLOR_MAX 7
+#define MB_GISFILE_VERSION_MAJOR 1
+#define MB_GISFILE_VERSION_MINOR 0
+
+/* one layer per file loaded or imported */
+struct mb_gislayer_struct {
+  mb_path name;
+};
+
+/* one polyline, polygon, or point; points have npart = npoint = 1,
+    polylines have parts of type MB_GIS_PART_LINE, polygons have closed
+    rings of type MB_GIS_PART_OUTER or MB_GIS_PART_HOLE */
+struct mb_gisfeature_struct {
+  int layer;
+  int color;
+  int size;
+  int fillcolor;
+  mb_path name;
+  int npart;
+  int *partstart;
+  int *parttype;
+  int npoint;
+  double *lon;
+  double *lat;
+  double *z;
+};
+
+struct mb_gisdata_struct {
+  int type;
+  bool hasz;
+  int nlayer;
+  int nlayer_alloc;
+  struct mb_gislayer_struct *layers;
+  int nfeature;
+  int nfeature_alloc;
+  struct mb_gisfeature_struct *features;
+};
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -268,6 +315,20 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, doubl
                               double navlat, double heading, double altitude, double sensordepth, double pitch,
                               double *table_angle, double *table_xtrack, double *table_ltrack, double *table_altitude,
                               double *table_range, int *error);
+
+/* mb_gisfile function prototypes */
+int mb_gis_init(int verbose, int type, struct mb_gisdata_struct **gis, int *error);
+int mb_gis_deall(int verbose, struct mb_gisdata_struct **gis, int *error);
+int mb_gis_addlayer(int verbose, struct mb_gisdata_struct *gis, const char *name, int *ilayer, int *error);
+int mb_gis_addfeature(int verbose, struct mb_gisdata_struct *gis, int layer, int color, int size, int fillcolor,
+                      const char *name, int npart, const int *partstart, const int *parttype, int npoint, const double *lon,
+                      const double *lat, const double *z, int *error);
+int mb_gis_read(int verbose, const char *file, struct mb_gisdata_struct *gis, int *error);
+int mb_gis_write(int verbose, const char *file, const char *program_name, struct mb_gisdata_struct *gis, int *error);
+int mb_gis_shapefile_type(int verbose, const char *file, int *type, int *error);
+int mb_gis_import_shapefile(int verbose, const char *file, const double *bounds, int color, int size, int fillcolor,
+                            struct mb_gisdata_struct *gis, int *nimport, int *nskip, int *error);
+int mb_gis_export_shapefile(int verbose, const char *file, struct mb_gisdata_struct *gis, int *error);
 
 /* lsqr.h */
 /*!

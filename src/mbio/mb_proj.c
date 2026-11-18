@@ -492,9 +492,7 @@ int mb_proj_forward(int verbose, void *pjptr, double u, double v, double *uu, do
       to easting northing in a projected coordinate system like UTM */
   if (pjptr != NULL) {
     PJ *p = (PJ *) pjptr;
-    PJ_COORD c;
-    c.v[0] = u;
-    c.v[1] = v;
+    PJ_COORD c = proj_coord(u, v, 0.0, 0.0);
     c = proj_trans(p, PJ_FWD, c);
     *uu = c.v[0];
     *vv = c.v[1];
@@ -531,9 +529,7 @@ int mb_proj_inverse(int verbose, void *pjptr, double u, double v, double *uu, do
       in a projected coordinate system like UTM to lon lat in WGS84 */
   if (pjptr != NULL) {
     PJ *p = (PJ *) pjptr;
-    PJ_COORD c;
-    c.v[0] = u;
-    c.v[1] = v;
+    PJ_COORD c = proj_coord(u, v, 0.0, 0.0);
     c = proj_trans(p, PJ_INV, c);
     *uu = c.v[0];
     *vv = c.v[1];

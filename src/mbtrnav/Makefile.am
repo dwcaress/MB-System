@@ -242,6 +242,7 @@ libtrncli_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 libtrncli_la_SOURCES =
 libtrncli_la_SOURCES += utils/TerrainNavClient.cpp
 libtrncli_la_SOURCES += utils/TrnClient.cpp
+libtrncli_la_SOURCES += utils/TrnAttr.cpp
 
 libtrncli_la_LIBADD = libnewmat.la libgeolib.la libqnx.la libtrnw.la libmb1.la libtnav.la -lnetcdf 
 
@@ -704,7 +705,7 @@ trn_replay_SOURCES = opt/dorado/Replay.cpp opt/dorado/trn_replay.cpp
 
 trn_replay_LDADD = libtnav.la  libnewmat.la libqnx.la libgeolib.la libtrncli.la -lnetcdf -lm -lpthread 
 
-trnclient_test_SOURCES =  utils/trnclient_test.cpp
+trnclient_test_SOURCES =  utils/trn-client.cpp
 
 trnclient_test_LDADD = libtnav.la libnewmat.la libtrncli.la
 
@@ -714,16 +715,16 @@ mmcpub_LDADD = ${LIBMBTRNFRAME}
 mmcsub_SOURCES = trnw/mmcsub.c
 mmcsub_LDADD = ${LIBMBTRNFRAME}
 
-trnu_cli_SOURCES = trnw/trnucli_test.c trnw/trnu_cli.c
+trnu_cli_SOURCES = trnw/trnu-cli.c trnw/trnu_cli.c
 trnu_cli_LDADD = ${LIBMBTRNFRAME} libtrnw.la libnetif.la
 
-trn_cli_SOURCES = trnw/trncli_test.c trnw/trn_cli.c
+trn_cli_SOURCES = trnw/trn-cli.c trnw/trn_cli.c
 trn_cli_LDADD = ${LIBMBTRNFRAME} libtrnw.la
 
 trnif_test_SOURCES =  trnw/trnif_test.c
 trnif_test_LDADD = ${LIBMBTRNFRAME} libnetif.la  libtrnw.la
 
-trnusvr_test_SOURCES = trnw/trnusvr_test.c
+trnusvr_test_SOURCES = trnw/trnu-svr.c
 trnusvr_test_LDADD = ${LIBMBTRNFRAME} libnetif.la libtrnw.la
 
 netif_test_SOURCES = utils/netif-test.c

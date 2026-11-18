@@ -1,0 +1,468 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbvelocitytool-qt</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbvelocitytool-qt</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  2 November 2026 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbvelocitytool-qt</B> - Interactive water sound velocity profile editor (Qt6 version).
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbvelocitytool-qt</B>
+<BR>
+
+[
+<BR>
+
+<B>--input</B>=<I>file</I> {<B>-I</B><I>file</I>}
+<BR>
+
+<B>--format</B>=<I>format_id</I> {<B>-F</B><I>format_id</I>}
+<BR>
+
+<B>--begin-time</B>=<I>yr/mo/da/hr/mn/sc</I> {<B>-B</B><I>yr/mo/da/hr/mn/sc</I>}
+<BR>
+
+<B>--end-time</B>=<I>yr/mo/da/hr/mn/sc</I> {<B>-E</B><I>yr/mo/da/hr/mn/sc</I>}
+<BR>
+
+<B>--display-svp-file</B>=<I>svpfile</I> {<B>-S</B><I>svpfile</I>}
+<BR>
+
+<B>--edit-svp-file</B>=<I>svpfile</I> {<B>-W</B><I>svpfile</I>}
+<BR>
+
+<B>--angle-mode</B>=<I>mode</I>
+<BR>
+
+<B>--threads</B>=<I>number</I>
+<BR>
+
+<B>--dump</B>
+<BR>
+
+<B>--raypaths</B>
+<BR>
+
+<B>--save-edit-svp</B>=<I>svpfile</I>
+<BR>
+
+<B>--save-swath-svp</B>
+<BR>
+
+<B>--save-residuals</B>
+<BR>
+
+<B>--export</B>=<I>image.png</I>
+<BR>
+
+<B>--size</B>=<I>width</I>x<I>height</I>
+<BR>
+
+<B>--verbose</B> {<B>-V</B>}
+<BR>
+
+<B>--help</B> {<B>-H</B>}
+<BR>
+
+]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbvelocitytool-qt</B> is the Qt6 version of <B><A HREF="mbvelocitytool.html">mbvelocitytool</A></B>(1). It is used to
+examine sound velocity profiles (SVPs), to create new ones, and to model the effect of
+changing a profile on swath bathymetry. Profiles made with it are used by
+<B><A HREF="mbprocess.html">mbprocess</A></B>(1) to recalculate bathymetry from raw travel times and angles. The
+<B><A HREF="mbvelocitytool.html">mbvelocitytool</A></B>(1) manual page explains the method: the raytracing, the fit of a
+line to each ping, the reading of the beam residuals and the three angle modes. This
+page describes the program itself and how it differs.
+<P>
+The window holds three plots that follow the size of the window, and whose shares of it
+can be changed by dragging the bars between them: the profiles (depth against velocity),
+the beam residuals (shallow up, deep down, with error bars of one standard deviation) and
+the raypaths without vertical exaggeration. The program takes its appearance from the
+desktop, including dark mode.
+<P>
+One profile at a time is the editable profile, drawn in the text color with a square at
+each node. The others are display profiles, in colors that cycle through six in the
+order they are loaded, and named in the legend of the plot. When a swath file is opened,
+these display profiles are loaded with it:
+<DL COMPACT>
+<DT><B>the Levitus profile</B>
+
+<DD>
+of the first position in the file, from <B><A HREF="mblevitus.html">mblevitus</A></B>(1), if that program is found.
+<DT><B>the profiles stored in the file</B>
+
+<DD>
+in formats that record them. Each different profile is shown once, named by its number
+and the time of the survey ping before it (or after it, when it comes first in the file).
+Repeats of a profile with exactly the same nodes are left out.
+<DT><B>files named </B><I>swathfile</I>_NNN.svp
+
+<DD>
+as written by <B><A HREF="mbsvplist.html">mbsvplist</A></B>(1), unless they are only copies of a stored profile.
+</DL>
+<P>
+
+These profiles are replaced when another swath file is opened. Profiles opened by the
+user and edited profiles stay.
+<P>
+A profile with its nodes as given is what is saved. For the raytracing a copy of it is
+prepared as <B>mbprocess</B> does: a node is added at 0 m if there is none, nodes that do
+not increase in depth are ignored, and the profile is extended to 12000 m at its last
+velocity. Up to 25000 pings are read; the rest of a longer file is not used, and stored
+profiles after that point are not found. The window reports it when this limit is reached.
+<P>
+<B>mbvelocitytool-qt</B> is built only by CMake, with the option -DbuildQt6Tools=ON.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian dos Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>--input=</B><I>file</I> -I<I>file</I>
+
+<DD>
+Swath file to read at startup.
+<DT><B>--format=</B><I>format_id</I> -F<I>format_id</I>
+
+<DD>
+The <B>MBIO</B> format id of the swath file. Default: 0, the format is found from the
+file name, and the program asks for it in the window if the name does not tell.
+<DT><B>--begin-time=</B><I>yr/mo/da/hr/mn/sc</I> -B<I>yr/mo/da/hr/mn/sc</I>
+
+<DD>
+Pings before this time are ignored. Default: 1962/2/21/10/30/0.
+<DT><B>--end-time=</B><I>yr/mo/da/hr/mn/sc</I> -E<I>yr/mo/da/hr/mn/sc</I>
+
+<DD>
+Pings after this time are ignored. Default: 2062/2/21/10/30/0.
+<DT><B>--display-svp-file=</B><I>svpfile</I> -S<I>svpfile</I>
+
+<DD>
+A display profile to read at startup.
+<DT><B>--edit-svp-file=</B><I>svpfile</I> -W<I>svpfile</I>
+
+<DD>
+The editable profile to read at startup. The first residuals are calculated with it.
+<DT><B>--angle-mode=</B><I>mode</I>
+
+<DD>
+The angle mode: 0 do not change the beam angles, 1 adjust them using Snell's law,
+2 adjust them using the sonar geometry. Default: 1.
+<DT><B>--threads=</B><I>number</I>
+
+<DD>
+The number of threads for Reprocess. Default: 0, all processors. The result does not
+depend on this number.
+<DT><B>--dump</B>
+
+<DD>
+Without a window: load the data, raytrace it through the editable profile, and print the
+profiles found, the number of rays that failed or stopped at the bottom of the profile,
+and the table of beam residuals.
+<DT><B>--raypaths</B>
+
+<DD>
+With <B>--dump</B>, also print the points of the raypaths.
+<DT><B>--save-edit-svp=</B><I>svpfile</I>
+
+<DD>
+Without a window: write the editable profile to this file.
+<DT><B>--save-swath-svp</B>
+
+<DD>
+Without a window: do what <B>Save Swath SVP File</B> does, below.
+<DT><B>--save-residuals</B>
+
+<DD>
+Without a window: do what <B>Save Residuals As Offsets</B> does, below.
+<DT><B>--export=</B><I>image.png</I>
+
+<DD>
+Without showing a window: load the data, raytrace it, and write an image of the window.
+<DT><B>--size=</B><I>width</I>x<I>height</I>
+
+<DD>
+The size of the image of <B>--export</B>. Default: 1016x668.
+<DT><B>--verbose -V</B>
+
+<DD>
+Print the program version and, when given again, debugging information from <B>MBIO</B>.
+<DT><B>--help -H</B>
+
+<DD>
+Print a description of the program and exit.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>INTERACTIVE CONTROLS</H2>
+
+<A NAME="lbAI">&nbsp;</A>
+<H3>Mouse, in the profile plot</H3>
+
+<DL COMPACT>
+<DT><B>Left button on a node of the editable profile</B>
+
+<DD>
+Drag the node. It stays inside the plot and between the depths of its neighbors. The
+first node keeps its depth and changes only in velocity.
+<DT><B>Double-click or middle button</B>
+
+<DD>
+Add a node to the editable profile at this place.
+<DT><B>Right button</B>
+
+<DD>
+Opens a menu of what is under the mouse:
+<DL COMPACT><DT><DD>
+<DL COMPACT>
+<DT><B>Activate as Editing Profile</B>
+
+<DD>
+Makes a copy of the display profile the editable profile, to be changed with the mouse
+and applied with <B>Reprocess</B>. The original stays as a display profile. The profile it
+replaces becomes a display profile too, marked (edited) if it was changed, unless it is
+the unchanged default or a copy of a profile already shown. If the profile has more than
+50 nodes, a dialog offers all of the nodes or a simplified profile, with as few nodes as keep the
+velocity at every left out node within a tolerance. Default: 0.25 m/s. A simplified
+profile changes the result of <B>Reprocess</B> slightly; all of the nodes do not.
+<DT><B>Hide, Remove</B>
+
+<DD>
+Take the display profile off the plot, for now or for good.
+<DT><B>Save Profile As</B>
+
+<DD>
+Writes the display profile to a file.
+<DT><B>Delete Node</B>
+
+<DD>
+Removes the node of the editable profile. Two nodes always remain.
+<DT><B>Add Node Here</B>
+
+<DD>
+Adds a node to the editable profile.
+<DT><B>Show Hidden Profiles</B>
+
+<DD>
+Brings back the hidden display profiles.
+</DL></DL>
+
+<DT><DD>
+When several display profiles are close to the mouse, each has a submenu under its name.
+</DL>
+<A NAME="lbAJ">&nbsp;</A>
+<H3>File menu</H3>
+
+<DL COMPACT>
+<DT><B>Open Display Profile</B>
+
+<DD>
+Reads one or more display profiles.
+<DT><B>Open Editable Profile</B>
+
+<DD>
+Reads a file as the editable profile. The program offers to save changes to the previous one.
+<DT><B>New Editable Profile</B>
+
+<DD>
+Creates the default profile of 6 nodes at 1500 m/s.
+<DT><B>Save Editable Profile</B>
+
+<DD>
+Writes the editable profile to a file, without changing any <B>mbprocess</B> parameters.
+<DT><B>Open Swath Sonar Data</B>
+
+<DD>
+Reads a swath file, in the background, and then raytraces it through the editable profile,
+creating the default one if there is none. The format comes from the file name, or is asked for.
+Travel times and angles are needed; if the format has none they are estimated for
+1500 m/s, with a warning, and the modeling is then only suited to exporting residuals (see
+<B><A HREF="mbvelocitytool.html">mbvelocitytool</A></B>(1)).
+<DT><B>Open Swath Sonar Data With Format</B>
+
+<DD>
+The same, asking for the format.
+<DT><B>Save Swath SVP File</B>
+
+<DD>
+Writes the editable profile to <I>swathfile</I>.svp and sets it and the angle mode in the
+<B>mbprocess</B> parameter file of the swath file. The profile needs more than two nodes.
+<DT><B>Save Residuals As Offsets</B>
+
+<DD>
+Writes the residuals of the last <B>Reprocess</B> to <I>swathfile</I>.sbo (static beam
+offsets) and <I>swathfile</I>.sbao (static beam angle offsets), and sets the <B>mbprocess</B>
+parameter file to apply the .sbo file. The program asks first if the residuals are out of
+date. The profile needs more than two nodes.
+<DT><B>Quit</B>
+
+<DD>
+Exits, offering to save changes to the editable profile and warning of edited display
+profiles that are not saved.
+</DL>
+<A NAME="lbAK">&nbsp;</A>
+<H3>View menu</H3>
+
+<DL COMPACT>
+<DT><B>Plot Scaling</B>
+
+<DD>
+A dialog that can stay open, setting the Maximum Depth of the profile plot (also of the
+raypath plot while no data are loaded; then the raypaths set their own depth range), the
+Velocity Range and Velocity Center (the plot shows the center minus half of the range to
+the center plus half of the range), and the Residual Range (from minus to plus this value).
+Opening a swath file sets the Maximum Depth and Residual Range from its depths.
+<DT><B>Show Hidden Profiles</B>
+
+<DD>
+Brings back the hidden display profiles.
+</DL>
+<A NAME="lbAL">&nbsp;</A>
+<H3>Processing menu</H3>
+
+<DL COMPACT>
+<DT><B>Reprocess</B>
+
+<DD>
+Raytraces the data through the editable profile in the background, using all processors,
+and draws the new residuals and raypaths. The status bar then gives the time taken and any
+rays that failed or stopped at the bottom of the profile, and it says when the residuals
+are out of date because the profile or the angle mode has changed since.
+<DT><B>Angle Mode</B>
+
+<DD>
+Do Not Change Beam Angles, Adjust Angles Using Snell's Law (the default) or Adjust Angles
+Using Sonar Geometry. The mode is used by <B>Reprocess</B> and written by <B>Save Swath SVP File</B>.
+<P>
+</DL>
+<A NAME="lbAM">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+To work on a swath file in the window:
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbvelocitytool-qt -I 0030_20250208_100905.kmall<BR>
+<P>
+To print the beam residuals with a given profile, without a window:
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbvelocitytool-qt --dump -I 0030_20250208_100905.kmall -W cast.svp<BR>
+<P>
+To set a profile for <B>mbprocess</B> from a script:
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbvelocitytool-qt -I 0030_20250208_100905.kmall -W cast.svp --save-swath-svp<BR>
+<P>
+To write an image of the plots:
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbvelocitytool-qt -I 0030_20250208_100905.kmall --export=plots.png --size=1400x900<BR>
+<P>
+<A NAME="lbAN">&nbsp;</A>
+<H2>DIFFERENCES FROM MBVELOCITYTOOL</H2>
+
+The residuals, raypaths and output files are those of <B><A HREF="mbvelocitytool.html">mbvelocitytool</A></B>(1) for the same
+data, profile and angle mode, except that a profile too short for the data, or starting below
+the sonar, is prepared as <B>mbprocess</B> does, so its residuals are not misleadingly
+flat. The other differences: <B>-W</B> applies before the first residuals; a node is taken
+only within 10 pixels of the mouse, and does not jump on a click; the number of nodes
+and of display profiles is not limited; a ping whose beams all have the same acrosstrack
+distance has a flat fit at its mean depth, instead of reusing the fit of the ping before; and
+the temporary file of the Levitus profile is not written in the current directory.
+<P>
+<A NAME="lbAO">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbvelocitytool.html">mbvelocitytool</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1), <B><A HREF="mbset.html">mbset</A></B>(1),
+<B><A HREF="mbsvplist.html">mbsvplist</A></B>(1), <B><A HREF="mblevitus.html">mblevitus</A></B>(1)
+<P>
+<A NAME="lbAP">&nbsp;</A>
+<H2>BUGS</H2>
+
+The legend can lie over the profiles when zoomed in. The colors of the display profiles
+follow their place in the list, so removing one can change the colors of the following ones.
+Activating a profile does not change the plot scale.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">INTERACTIVE CONTROLS</A><DD>
+<DL>
+<DT><A HREF="#lbAI">Mouse, in the profile plot</A><DD>
+<DT><A HREF="#lbAJ">File menu</A><DD>
+<DT><A HREF="#lbAK">View menu</A><DD>
+<DT><A HREF="#lbAL">Processing menu</A><DD>
+</DL>
+<DT><A HREF="#lbAM">EXAMPLES</A><DD>
+<DT><A HREF="#lbAN">DIFFERENCES FROM MBVELOCITYTOOL</A><DD>
+<DT><A HREF="#lbAO">SEE ALSO</A><DD>
+<DT><A HREF="#lbAP">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 2 November 2026</P></CENTER>
+
+<HR>
+<center>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>

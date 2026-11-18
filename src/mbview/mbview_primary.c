@@ -220,10 +220,11 @@ int mbview_updateprimarygrid(int verbose, size_t instance, int primary_n_columns
 		}
 	}
 
-	/* reset plotting and colors */
+	/* reset plotting, colors and z-scaled vertices */
 	view->lastdrawrez = MBV_REZ_NONE;
 	mbview_setcolorparms(instance);
 	mbview_colorclear(instance);
+	mbview_zscaleclear(instance);
 
 	/* reset contour and histogram flags */
 	view->contourlorez = false;

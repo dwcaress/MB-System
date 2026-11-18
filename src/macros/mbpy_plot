@@ -1,0 +1,373 @@
+#!/usr/bin/env python3
+#--------------------------------------------------------------------
+#    The MB-system:  mbpy_plot
+#
+#    Copyright (c) 2026 by
+#    David W. Caress (caress@mbari.org)
+#      Monterey Bay Aquarium Research Institute
+#      Moss Landing, California, USA
+#
+#    See README.md file for copying and redistribution conditions.
+#--------------------------------------------------------------------
+#
+# Purpose:
+#   Python/PyGMT-era replacement for the Perl macro mbm_plot: reads a
+#   swath data file or datalist and generates a GMT **modern mode**
+#   shellscript that maps the swath data itself (not a grid) with
+#   MB-System's `gmt mbswath` (bathymetry color fill or shaded relief,
+#   bathymetry shaded by amplitude, amplitude or sidescan fill) and
+#   `gmt mbcontour` (bathymetry contours, annotated navigation), plus
+#   optional coastline, xy and text overlays, color scale and basemap.
+#   The page layout and projection fitting follow mbm_plot (shared with
+#   the other mbpy_* macros in src/macros/python/mbpy_layout.py); the
+#   swath-specific bounds, color and control logic, and the fixes made
+#   relative to mbm_plot, are in src/macros/python/mbpy_plot_script.py.
+#
+#   As in mbpy_grdplot, mbm_plot's "-M<sub>:<sub>:..." grammar is
+#   replaced by descriptive long options -- see the --help text.
+#
+# Usage:
+#   mbpy_plot -I datalist.mb-1 [-O root] [options...]
+#   mbpy_plot --input datalist.mb-1 --color-mode 2 --contour 50 \
+#       --navigation 0.25/1/4 --coast --execute
+#
+import argparse
+import os
+import re
+import shlex
+import subprocess
+import sys
+
+_here = os.path.dirname(os.path.realpath(__file__))
+for _candidate in (_here, os.path.join(_here, "python")):
+    if _candidate not in sys.path:
+        sys.path.insert(0, _candidate)
+
+import mbpy_layout as layout
+import mbpy_color as color
+import mbpy_misc as misc
+import mbpy_plot_script as script
+
+
+def build_arg_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(
+        prog="mbpy_plot",
+        description="Generate a GMT modern-mode script that maps swath sonar data with "
+                    "mbswath and mbcontour (Python/PyGMT-era replacement for mbm_plot). "
+                    "With none of --color-mode, --contour or --navigation, the navigation "
+                    "track is plotted.",
+    )
+
+    g = p.add_argument_group("input/output")
+    g.add_argument("-I", "--input", default="datalist.mb-1", metavar="FILE",
+                   help="swath data file or datalist [datalist.mb-1]")
+    g.add_argument("-F", "--data-format", type=int, metavar="FORMAT",
+                   help="MB-System format id of the input, -1 for a datalist [from mbformat]")
+    g.add_argument("-O", "--output", metavar="ROOT",
+                   help="output root name: writes ROOT.sh and ROOT.<format> [default: input's basename without extension]")
+    g.add_argument("--format", default="pdf", metavar="FMT", help="output format: pdf, png, ps, jpg, tif, eps, ... [pdf]")
+    g.add_argument("--title", metavar="TEXT", help='plot title [default: "Data List File <input>" or "Data File <input>"]')
+    g.add_argument("--colorbar-label", metavar="TEXT",
+                   help='color scale label [by color mode: "Depth (meters)", "Beam Amplitude Values", "Sidescan Pixel Values"]')
+    g.add_argument("--dpi", type=int, metavar="DPI", help="resolution of the mbswath image and of a raster output")
+    g.add_argument("-X", "--execute", action="store_true", help="run the generated script immediately")
+    g.add_argument("-V", "--verbose", action="store_true", help="print progress and a brief summary")
+
+    g = p.add_argument_group("region / projection / page")
+    g.add_argument("-R", "--region", metavar="W/E/S/N", help="map region [default: data bounds, padded]")
+    g.add_argument("-J", "--projection", metavar="SPEC", help='GMT map scale/projection spec, e.g. "m1.0", "Xd6i" [default: auto-fit Mercator]')
+    g.add_argument("-P", "--pagesize", default="a", metavar="SIZE", help="page size code (a, b, c, ... a4, ...) [a]")
+    orient = p.add_mutually_exclusive_group()
+    orient.add_argument("--portrait", action="store_const", dest="orientation", const=1, help="force portrait orientation")
+    orient.add_argument("--landscape", action="store_const", dest="orientation", const=2, help="force landscape orientation")
+    p.set_defaults(orientation=0)
+    g.add_argument("--scale-location", default="b", choices=["l", "r", "t", "b"], help="color scale bar placement [b]")
+    g.add_argument("--tick-info", metavar="SPEC", help="raw -B basemap tick spec override")
+    g.add_argument("--length-scale", metavar="SPEC",
+                   help='GMT distance scale bar spec, e.g. "fx1/1/36.8/10+lkm"; "center" in it is replaced by the map center lon/lat')
+    g.add_argument("--timestamp", nargs="?", const="", default=None, metavar="LABEL",
+                   help="add a GMT time stamp (-U), optionally with a label")
+
+    g = p.add_argument_group("swath image (mbswath)")
+    g.add_argument("-G", "--color-mode", type=int, choices=range(1, 6), metavar="{1-5}",
+                   help="1 bathymetry color fill, 2 bathymetry shaded relief, 3 bathymetry shaded by amplitude, "
+                        "4 amplitude fill, 5 sidescan fill")
+    g.add_argument("--filtered", action="store_true", help="plot filtered amplitude/sidescan (mbswath -Z<mode>F)")
+    g.add_argument("-W", "--color-control", metavar="SPEC",
+                   help='"style/palette[/ncolors]" (style 1 continuous, 2 discrete; palette 1-7), or a path '
+                        "to an existing .cpt file [1/1/11; palette 4 (grayscale) for color modes 4 and 5]")
+    g.add_argument("-D", "--color-flip", action="store_true", help="reverse the color palette")
+    g.add_argument("-Y", "--no-nice-interval", action="store_true",
+                   help="use a direct linear color stretch instead of rounded intervals")
+    g.add_argument("-S", "--stretch-color", action="store_true",
+                   help="histogram-equalize the color stretch (using mbhistogram)")
+    g.add_argument("-Z", "--zbounds", metavar="MIN/MAX",
+                   help="range of the colored quantity (depth, or amplitude/sidescan for color modes 4/5)")
+
+    g = p.add_argument_group("shading (color modes 2 and 3)")
+    g.add_argument("-A", "--shade", metavar="MAG[/AZIM|/ZERO]",
+                   help="magnitude and illumination azimuth (mode 2) or amplitude zero level (mode 3), as in mbm_plot -A")
+    g.add_argument("--magnitude", type=float, metavar="VAL", help="shading magnitude [2.5 for mode 2]")
+    g.add_argument("--azimuth", type=float, metavar="DEG", help="illumination azimuth for mode 2 [0]")
+    g.add_argument("--zero-level", type=float, metavar="VAL", help="amplitude giving zero shading for mode 3 [from the amplitude range]")
+    g.add_argument("--shade-flip", action="store_true", help="reverse the shading (mode 2: azimuth + 180; mode 3 stretched shade: gray scale)")
+    g.add_argument("--stretch-shade", action="store_true", help="equalize the amplitude shading for mode 3 (Gaussian mbhistogram)")
+
+    g = p.add_argument_group("contours and navigation (mbcontour)")
+    g.add_argument("-C", "--contour", nargs="?", const=True, default=False,
+                   metavar="CONT[/COLOR[/TICK[/LABEL[/TICKLEN[/LABELHGT]]]]]",
+                   help="plot bathymetry contours, optionally at these intervals and sizes [auto]")
+    g.add_argument("--contour-algorithm", metavar="N", help="mbcontour -Z contour algorithm (-MMZ)")
+    g.add_argument("--contour-nplot", metavar="PINGS", help="number of pings contoured at a time (-MMN)")
+    g.add_argument("-N", "--navigation", nargs="?", const=True, default=False,
+                   metavar="TICK[/ANNOT[/DATE[/SIZE]]] | F | FP",
+                   help="plot the navigation track, optionally with time ticks/annotations (hours), "
+                        "or F/FP to annotate file names (FP perpendicular to the track)")
+    g.add_argument("--nav-names", nargs="?", const="0.15", default=None, metavar="HEIGHT[/P]",
+                   help="annotate file names on the track, optionally perpendicular (-MNA)")
+    g.add_argument("--ping-ticks", nargs="?", const="50/100/0.1", default=None, metavar="TICK[/ANNOT[/LEN]]",
+                   help="ping number ticks and annotations (-MNP) [50/100/0.1]")
+
+    g = p.add_argument_group("data selection (mbswath and mbcontour)")
+    g.add_argument("--footprint", metavar="FACTOR/MODE/DEPTH", help="beam footprint parameters, mbswath -A (-MMA) [1]")
+    g.add_argument("--swath-scale", metavar="MODE/SCALE[/MIN/MAX]", help="amplitude/sidescan scaling, mbswath -D (-MMD)")
+    g.add_argument("--begin-time", metavar="YR/MO/DA/HR/MN/SC", help="plot data from this time (-MMB)")
+    g.add_argument("--end-time", metavar="YR/MO/DA/HR/MN/SC", help="plot data until this time (-MME)")
+    g.add_argument("--speedmin", metavar="KM/HR", help="minimum ship speed (-MMS)")
+    g.add_argument("--timegap", metavar="MINUTES", help="time gap threshold (-MMT)")
+    g.add_argument("--lonflip", type=int, choices=(-1, 0, 1), help="longitude range: -1 -360..0, 0 -180..180, 1 0..360 (-MML) [0]")
+
+    g = p.add_argument_group("coastline")
+    g.add_argument("-T", "--coast", action="store_true", help="plot coastline [dry fill 200, pen 1p when nothing else is set]")
+    g.add_argument("--coast-resolution", choices=["f", "h", "i", "l", "c"], metavar="{f,h,i,l,c}", help="[f]")
+    g.add_argument("--coast-dry-fill", metavar="COLOR")
+    g.add_argument("--coast-wet-fill", metavar="COLOR")
+    g.add_argument("--coast-lake-fill", metavar="COLOR")
+    g.add_argument("--coast-river", metavar="SPEC")
+    g.add_argument("--coast-boundary", action="append", default=[], metavar="SPEC", help="national boundary spec (repeatable)")
+    g.add_argument("--coast-pen", metavar="PEN")
+
+    g = p.add_argument_group("xy overlay")
+    g.add_argument("--xy-overlay", action="append", default=[], metavar="FILE[:fill=..][:symbol=..][:pen=..]",
+                   help='an xy data file to overlay, e.g. "points.xy:fill=red:symbol=c0.1:pen=1p,blue" (repeatable)')
+
+    g = p.add_argument_group("text labels")
+    g.add_argument("--text", action="append", default=[], metavar="LON/LAT/SIZE/ANGLE/FONT/JUSTIFY/TEXT",
+                   help='a text label, e.g. "-11.7/36.8/12/0/1/LB/Gorringe Bank" (repeatable)')
+
+    g = p.add_argument_group("GMT defaults")
+    g.add_argument("--gmt-default", action="append", default=[], metavar="PARAM/VALUE",
+                   help="override a GMT default (repeatable)")
+
+    return p
+
+
+def parse_xy_overlay(spec: str) -> misc.XYOverlayEntry:
+    parts = spec.split(":")
+    styles = {"fill": "N", "symbol": "N", "pen": "N"}
+    for part in parts[1:]:
+        key, _, value = part.partition("=")
+        if key not in styles:
+            raise ValueError(f"unknown xy-overlay style {key!r} in {spec!r} (expected fill/symbol/pen)")
+        styles[key] = value
+    return misc.XYOverlayEntry(file=parts[0], symbol=styles["symbol"], fill=styles["fill"],
+                               segment="N", segchar=">", pen=styles["pen"])
+
+
+def resolve_navigation(args) -> misc.NavigationOptions:
+    """mbm_plot's -N / -MNA / -MNP handling (lines ~760-845)."""
+    control = args.navigation if isinstance(args.navigation, str) else None
+    nav = misc.NavigationOptions(
+        navigation_mode=True,
+        # a bare -N (or the default track-only plot) is the track with no
+        # time ticks or annotations, unlike mbm_grdplot's bare -MNN
+        navigation_control=control or "100000/100000/100000/0.15",
+    )
+    if args.nav_names is not None:
+        hgt, _, perp = args.nav_names.partition("/")
+        if hgt.upper() == "P":
+            hgt, perp = "0.15", "P"
+        nav.name_mode, nav.nav_name_hgt, nav.name_perp = True, float(hgt or 0.15), perp.upper() == "P"
+    if args.ping_ticks is not None:
+        f = args.ping_ticks.split("/")
+        nav.pingnumber_mode = True
+        nav.pingnumber_tick = float(f[0])
+        nav.pingnumber_annot = float(f[1]) if len(f) > 1 else 100.0
+        nav.pingnumber_tick_len = float(f[2]) if len(f) > 2 else 0.10
+    return misc.resolve_navigation_control(nav, has_swathnavdatalist=True)
+
+
+def main(argv=None) -> int:
+    parser = build_arg_parser()
+    raw_argv = sys.argv[1:] if argv is None else list(argv)
+    args = parser.parse_args(misc.join_dash_values(parser, raw_argv))
+
+    if not os.path.exists(args.input):
+        parser.error(f"input file {args.input} cannot be opened")
+    color_mode = args.color_mode or 0
+    if not color_mode and not args.contour and not args.navigation:
+        args.navigation = True
+
+    fmt = args.data_format
+    if fmt is None:
+        fmt = int(misc.resolve_swath_format(args.input))
+    root = args.output or re.sub(r"\.[A-Za-z0-9-]+$", "", os.path.basename(args.input))
+
+    region_bounds = None
+    if args.region:
+        if args.region.endswith("r"):
+            parser.error("corner-point regions (W/S/E/Nr) are not supported; give W/E/S/N")
+        parts = args.region.split("/")
+        if len(parts) != 4:
+            parser.error("--region must be W/E/S/N")
+        region_bounds = tuple(layout.get_decimal_degrees(v) for v in parts)
+
+    files = script.list_swath_files(args.input, fmt, args.region)
+    try:
+        bounds = script.get_swath_bounds(
+            files, region_bounds, args.region, args.begin_time, args.end_time,
+            lonflip=args.lonflip or 0, color_mode=color_mode, verbose=args.verbose,
+        )
+    except RuntimeError as e:
+        parser.error(str(e))
+
+    # range of the colored quantity, and of bathymetry (for contours)
+    zmin, zmax = bounds.zmin, bounds.zmax
+    dmin, dmax = zmin, zmax
+    if color_mode == 4:
+        dmin, dmax = bounds.amin, bounds.amax
+    elif color_mode == 5:
+        dmin, dmax = bounds.smin, bounds.smax
+    if args.zbounds:
+        lo, hi = (float(v) for v in args.zbounds.split("/")[:2])
+        dmin, dmax = lo, hi
+        if color_mode in (0, 1, 2, 3):
+            zmin, zmax = lo, hi
+    needed = {1: "bathymetry", 2: "bathymetry", 3: "bathymetry", 4: "amplitude", 5: "sidescan"}
+    if color_mode and (dmin is None or dmax is None or dmin >= dmax):
+        parser.error(f"does not appear to be any {needed[color_mode]} data in the input")
+    if color_mode == 3 and not args.stretch_shade and (bounds.amin is None or bounds.amin >= bounds.amax):
+        parser.error("does not appear to be any amplitude data in the input")
+    if zmin is None or zmax is None or zmin >= zmax:
+        zmin, zmax = 0.0, 1.0   # no bathymetry: only the track can be plotted
+
+    if region_bounds:
+        xmin, xmax, ymin, ymax = region_bounds
+    else:
+        xmin, xmax, ymin, ymax = script.expand_bounds(bounds.xmin, bounds.xmax, bounds.ymin, bounds.ymax)
+    region = f"{xmin:.8g}/{xmax:.8g}/{ymin:.8g}/{ymax:.8g}"
+
+    grid_info = layout.GridInfo(xmin, xmax, ymin, ymax, zmin, zmax, gridprojected=0)
+    lay = layout.compute_layout(
+        grid_info, pagesize=args.pagesize.lower(), scale_loc=args.scale_location,
+        map_scale=args.projection, orientation=args.orientation, region=region,
+    )
+
+    # colors
+    cc = color.resolve_color_control(args.color_control)
+    color_style, color_palette, ncolors = cc.color_style, cc.color_palette, cc.ncolors
+    if not args.color_control and color_mode in (4, 5):
+        color_palette = 4
+    if not cc.file_cpt and not 1 <= color_palette <= 7:
+        print(f"mbpy_plot: palette {color_palette} is not available here (1-7); using 1", file=sys.stderr)
+        color_palette = 1
+    cpt_lines = None
+    if color_mode and not cc.file_cpt:
+        colors = color.interpolate_palette(color_palette, ncolors)
+        boundaries = None
+        color_start = color_int = 0.0
+        if args.stretch_color:
+            data_type = {4: 1, 5: 2}.get(color_mode, 0)
+            boundaries = script.run_mbhistogram(args.input, fmt, data_type, dmin, dmax, ncolors)
+        else:
+            ncolors_use = ncolors if color_style == 1 else ncolors + 1
+            color_start, color_int = script.compute_color_interval_plot(
+                dmin, dmax, zmax, ncolors_use, args.no_nice_interval)
+        cpt_lines = script.build_cpt_plot(colors, color_style, args.color_flip,
+                                          color_start, color_int, boundaries)
+
+    # shading
+    magnitude, second = args.magnitude, (args.zero_level if color_mode == 3 else args.azimuth)
+    if args.shade:
+        sp = args.shade.split("/")
+        if magnitude is None:
+            magnitude = float(sp[0])
+        if len(sp) > 1 and second is None:
+            second = float(sp[1])
+    shade = shade_cpt = None
+    if color_mode in (2, 3):
+        shade = script.resolve_shade_control(color_mode, magnitude, second, bounds.amin, bounds.amax,
+                                             args.stretch_shade, args.shade_flip)
+        if color_mode == 3 and args.stretch_shade:
+            hist = script.run_mbhistogram(args.input, fmt, 1, bounds.amin, bounds.amax, script.NCPT, gaussian=True)
+            shade_cpt = script.build_shade_cpt(hist, args.shade_flip)
+
+    # contours and navigation
+    contour_control = None
+    if args.contour:
+        contour_control = script.resolve_contour_control(
+            args.contour if isinstance(args.contour, str) else None,
+            script.nice_interval(zmax - zmin), color_mode, layout.PAGE_HEIGHT_IN[lay.pagesize])
+    navigation = resolve_navigation(args) if (args.navigation or args.nav_names or args.ping_ticks) else None
+
+    coast = None
+    if args.coast or args.coast_dry_fill or args.coast_wet_fill or args.coast_lake_fill \
+            or args.coast_river or args.coast_boundary or args.coast_pen:
+        coast = misc.CoastOptions(
+            coast_control=True, coast_resolution=args.coast_resolution or "f",
+            coast_dryfill=args.coast_dry_fill, coast_wetfill=args.coast_wet_fill,
+            coast_lakefill=args.coast_lake_fill, coast_river=args.coast_river,
+            coast_boundaries=list(args.coast_boundary), coast_pen=args.coast_pen,
+        )
+        if not (coast.coast_dryfill or coast.coast_wetfill or coast.coast_pen
+                or coast.coast_boundaries or coast.coast_river):
+            coast.coast_dryfill, coast.coast_pen = "200", "1p"
+
+    length_scale = args.length_scale
+    if length_scale and "center" in length_scale:
+        length_scale = length_scale.replace("center", f"{0.5 * (xmin + xmax):.8g}/{0.5 * (ymin + ymax):.8g}")
+
+    title = args.title
+    if title is None:
+        title = f"Data List File {args.input}" if fmt < 0 else f"Data File {args.input}"
+
+    opts = script.ScriptOptionsPlot(
+        file_data=args.input, fmt=fmt, root=root, layout=lay,
+        output_format=args.format, title=title, tick_info=args.tick_info,
+        colorbar_label=args.colorbar_label, length_scale=length_scale,
+        unix_stamp=args.timestamp, dpi=args.dpi,
+        color_mode=color_mode, use_filtered=args.filtered,
+        color_palette=1 if cc.file_cpt else color_palette, color_flip=args.color_flip,
+        cpt_lines=cpt_lines, cpt_file=cc.file_cpt,
+        shade=shade, shade_cpt_lines=shade_cpt,
+        contour_control=contour_control, navigation=navigation,
+        swath=script.SwathOptions(
+            footprint=args.footprint, btime=args.begin_time, etime=args.end_time,
+            swath_scale=args.swath_scale, contour_nplot=args.contour_nplot,
+            speedmin=args.speedmin, timegap=args.timegap,
+            contour_algorithm=args.contour_algorithm, lonflip=args.lonflip,
+        ),
+        coast=coast, xy_entries=[parse_xy_overlay(s) for s in args.xy_overlay],
+        text_labels=list(args.text), gmt_defs=list(args.gmt_default),
+    )
+    command_line = "mbpy_plot " + " ".join(shlex.quote(a) for a in raw_argv)
+    script_path = script.generate_and_write_plot(opts, command_line)
+
+    if args.verbose:
+        style = script.COLOR_MODE_NAMES.get(color_mode)
+        extras = [s for s, on in (("contours", contour_control), ("navigation", navigation)) if on]
+        print(f"Generated {script_path} (output: {root}.{args.format})")
+        print(f"  Plot:    {', '.join(([style] if style else []) + extras)}")
+        print(f"  Region:  {lay.region}   Projection: -J{lay.projection}{lay.projection_pars}")
+        print(f"  Page:    {lay.pagesize} {'landscape' if lay.landscape else 'portrait'}")
+        if cpt_lines is not None or cc.file_cpt:
+            print(f"  CPT:     {opts.cpt_path}")
+
+    if args.execute:
+        subprocess.run(["bash", script_path], check=True)
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,7 +1,7 @@
 if BUILD_MOTIF
 XBUILD_SUB_MOTIF = mbedit mbnavedit mbvelocitytool
 if BUILD_GL
-XBUILD_SUB_GL = mbview mbgrdviz mbeditviz mbnavadjust
+XBUILD_SUB_GL = mbview mbgrdviz mbeditviz
 endif
 endif
 
@@ -22,10 +22,6 @@ if BUILD_OPENCVTOOLS
 XBUILD_SUB_OPENCVTOOLS = photo
 endif
 
-if BUILD_QTTOOLS
-XBUILD_SUB_QTTOOLS = qt-mbgrdviz qt-mbgrdviz-2 qt-guilib qt-mbgrdviz-3
-endif
-
 if BUILD_DEPRECATED
 XBUILD_SUB_DEPRECATED = deprecated
 endif
@@ -43,6 +39,7 @@ SUBDIRS += mbbitpack
 SUBDIRS += mbio
 SUBDIRS += mbaux
 SUBDIRS += utilities
+SUBDIRS += svptools
 SUBDIRS += $(XBUILD_SUB_MBTRNBIN)
 SUBDIRS += gmt
 SUBDIRS += otps
@@ -51,13 +48,14 @@ SUBDIRS += mbgrd2gltf
 SUBDIRS += mbmesh
 SUBDIRS += mbglb2tiles
 SUBDIRS += macros
+SUBDIRS += python
 SUBDIRS += share
 SUBDIRS += man
 SUBDIRS += html
 SUBDIRS += $(XBUILD_SUB_MOTIF)
 SUBDIRS += $(XBUILD_SUB_GL)
+SUBDIRS += mbnavadjust
 SUBDIRS += $(XBUILD_SUB_OPENCVTOOLS)
-SUBDIRS += $(XBUILD_SUB_QTTOOLS)
 SUBDIRS += $(XBUILD_SUB_DEPRECATED)
 
 CLEANFILES =

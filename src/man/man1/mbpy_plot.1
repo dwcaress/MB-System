@@ -1,0 +1,368 @@
+.TH mbpy_plot 1 "3 November 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbpy_plot\fP \- Create an executable shellscript which will generate
+a GMT modern-mode map of swath sonar data.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbpy_plot\fP [\fB\-I\fP\fIfile\fP] [\fB\-F\fP\fIformat\fP]
+[\fB\-O\fP\fIroot\fP]
+[\fB\-\-format\fP \fIfmt\fP]
+[\fB\-\-title\fP \fItext\fP]
+[\fB\-\-colorbar\-label\fP \fItext\fP]
+[\fB\-\-dpi\fP \fIdpi\fP]
+[\fB\-X\fP] [\fB\-V\fP]
+.br
+[\fB\-R\fP\fIwest/east/south/north\fP]
+[\fB\-J\fP\fIspec\fP]
+[\fB\-P\fP\fIpagesize\fP]
+[\fB\-\-portrait\fP | \fB\-\-landscape\fP]
+[\fB\-\-scale\-location\fP \fIl|r|t|b\fP]
+[\fB\-\-tick\-info\fP \fIspec\fP]
+[\fB\-\-length\-scale\fP \fIspec\fP]
+[\fB\-\-timestamp\fP [\fIlabel\fP]]
+.br
+[\fB\-G\fP\fIcolor_mode\fP] [\fB\-\-filtered\fP]
+[\fB\-W\fP\fIcolor_style/palette\fP[\fI/ncolors\fP] | \fIcptfile\fP]
+[\fB\-D\fP] [\fB\-Y\fP] [\fB\-S\fP]
+[\fB\-Z\fP\fImin/max\fP]
+.br
+[\fB\-A\fP\fImagnitude\fP[\fI/azimuth\fP | \fI/zero_level\fP]]
+[\fB\-\-magnitude\fP \fIval\fP]
+[\fB\-\-azimuth\fP \fIdeg\fP]
+[\fB\-\-zero\-level\fP \fIval\fP]
+[\fB\-\-shade\-flip\fP]
+[\fB\-\-stretch\-shade\fP]
+.br
+[\fB\-C\fP[\fIcont_int/color_int/tick_int/label_int/tick_len/label_hgt\fP]]
+[\fB\-\-contour\-algorithm\fP \fIn\fP]
+[\fB\-\-contour\-nplot\fP \fIpings\fP]
+.br
+[\fB\-N\fP[\fItime_tick/time_annot/date_annot/tick_len\fP | \fBF\fP | \fBFP\fP]]
+[\fB\-\-nav\-names\fP [\fIheight\fP[\fI/P\fP]]]
+[\fB\-\-ping\-ticks\fP [\fItick/annot/len\fP]]
+.br
+[\fB\-\-footprint\fP \fIfactor/mode/depth\fP]
+[\fB\-\-swath\-scale\fP \fImode/scale\fP[\fI/min/max\fP]]
+[\fB\-\-begin\-time\fP \fIyr/mo/da/hr/mn/sc\fP]
+[\fB\-\-end\-time\fP \fIyr/mo/da/hr/mn/sc\fP]
+[\fB\-\-speedmin\fP \fIspeed\fP]
+[\fB\-\-timegap\fP \fIminutes\fP]
+[\fB\-\-lonflip\fP \fI\-1|0|1\fP]
+.br
+[\fB\-T\fP] [\fB\-\-coast\-resolution\fP \fIres\fP]
+[\fB\-\-coast\-dry\-fill\fP \fIcolor\fP]
+[\fB\-\-coast\-wet\-fill\fP \fIcolor\fP]
+[\fB\-\-coast\-lake\-fill\fP \fIcolor\fP]
+[\fB\-\-coast\-river\fP \fIspec\fP]
+[\fB\-\-coast\-boundary\fP \fIspec\fP]
+[\fB\-\-coast\-pen\fP \fIpen\fP]
+.br
+[\fB\-\-xy\-overlay\fP \fIfile\fP[\fI:fill=..\fP][\fI:symbol=..\fP][\fI:pen=..\fP]]
+[\fB\-\-text\fP \fIlon/lat/size/angle/font/justify/text\fP]
+[\fB\-\-gmt\-default\fP \fIparam/value\fP]
+
+.SH DESCRIPTION
+\fBmbpy_plot\fP is a Python/PyGMT-era replacement for the Perl macro
+\fBmbm_plot\fP. It reads a swath sonar data file, or a datalist of
+them, and generates an executable shellscript of \fBGMT\fP \fBmodern
+mode\fP commands which, when run, maps the swath data themselves
+(rather than a grid made from them) with the \fBMB-System\fP GMT
+modules \fBmbswath\fP and \fBmbcontour\fP. The map may include a
+bathymetry color fill (\fB\-G1\fP), bathymetry color shaded relief
+(\fB\-G2\fP), bathymetry shaded by beam amplitude (\fB\-G3\fP), an
+amplitude fill (\fB\-G4\fP) or a sidescan fill (\fB\-G5\fP);
+bathymetry contours (\fB\-C\fP); the ship track with time and file name
+annotation (\fB\-N\fP); a coastline; xy data drawn as lines or symbols;
+text labels; a color scale; and a distance scale. If none of \fB\-G\fP,
+\fB\-C\fP and \fB\-N\fP is given, the navigation track is plotted.
+
+The map bounds come from the files' ".inf" files (made by \fBmbinfo\fP
+or \fBmbdatalist \-O\fP) when they exist and no time window is given,
+and otherwise from running \fBmbinfo\fP; they are padded by 5% and,
+if needed, widened so that the map is no more than twice as long as
+it is wide. The map is scaled to fit the page size (\fB\-P\fP) in the
+orientation that gives the larger map, unless the projection or scale
+is given with \fB\-J\fP. Page layout and projection fitting are shared
+with \fBmbpy_grdplot\fP.
+
+The generated script is named \fIroot\fP.sh and makes
+\fIroot\fP.\fIfmt\fP (\fBpdf\fP by default). A generated color palette
+is written to \fIroot\fP.cpt (and, for a stretched amplitude shade,
+\fIroot\fP.shade.cpt) by \fBmbpy_plot\fP itself. When the input is a
+single swath file rather than a datalist, the script makes and then
+removes a one-line datalist \fIroot\fP_datalist.mb\-1 for it. No gmt.conf
+file is created or deleted in the current directory.
+
+As in \fBmbpy_grdplot\fP, the colon-separated \fB\-M\fP\fIsub\fP
+options of \fBmbm_plot\fP are replaced by descriptive long options.
+Palettes are limited to 1-7, as in \fBmbm_plot\fP.
+
+\fBmbpy_plot\fP requires \fBGMT\fP 6 or later with the \fBMB-System\fP
+GMT modules, and a Python 3 interpreter. It uses the modules
+\fBmbpy_layout.py\fP, \fBmbpy_color.py\fP, \fBmbpy_misc.py\fP,
+\fBmbpy_grdplot_script.py\fP and \fBmbpy_plot_script.py\fP, installed
+alongside it.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian do Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-I\fP, \fB\-\-input\fP \fIfile\fP
+Swath data file or datalist. Default: datalist.mb\-1.
+.TP
+.B \-F\fP, \fB\-\-data\-format\fP \fIformat\fP
+\fBMB-System\fP format id of the input file, or \-1 for a datalist.
+Default: determined with \fBmbformat\fP.
+.TP
+.B \-O\fP, \fB\-\-output\fP \fIroot\fP
+Output root name. Default: the input's basename without its extension.
+.TP
+.B \-\-format\fP \fIfmt\fP
+Output format passed to \fBgmt begin\fP: pdf, png, ps, jpg, tif, eps,
+\&... Default \fBpdf\fP.
+.TP
+.B \-\-title\fP \fItext\fP
+Map title. Default: "Data List File \fIfile\fP" or "Data File
+\fIfile\fP".
+.TP
+.B \-\-colorbar\-label\fP \fItext\fP
+Color scale label. Default: "Depth (meters)", "Beam Amplitude Values"
+or "Sidescan Pixel Values", by color mode.
+.TP
+.B \-\-dpi\fP \fIdpi\fP
+Resolution of the \fBmbswath\fP image (\fBmbswath \-E\fP) and of a
+raster output file.
+.TP
+.B \-X\fP, \fB\-\-execute
+Run the generated script immediately after writing it.
+.TP
+.B \-V\fP, \fB\-\-verbose
+Print progress and a summary of the map.
+.TP
+.B \-R\fP, \fB\-\-region\fP \fIwest/east/south/north\fP
+Map bounds in longitude and latitude. Default: the data bounds,
+padded as described above.
+.TP
+.B \-J\fP, \fB\-\-projection\fP \fIspec\fP
+GMT map projection with a scale or width, e.g. \fBm1.0\fP or
+\fBM6i\fP; giving only the projection lets \fBmbpy_plot\fP choose the
+scale. Default: a Mercator projection scaled to fill the page.
+.TP
+.B \-P\fP, \fB\-\-pagesize\fP \fIpagesize\fP
+Page size code (a, b, c, d, e, f, e1, a0-a10, b0-b10, c0-c7, m1-m6),
+as in \fBmbm_plot\fP. Default \fBa\fP.
+.TP
+.B \-\-portrait\fP, \fB\-\-landscape
+Force the page orientation instead of choosing it automatically.
+.TP
+.B \-\-scale\-location\fP \fIl|r|t|b\fP
+Place the color scale at the left, right, top or bottom of the map.
+Default \fBb\fP.
+.TP
+.B \-\-tick\-info\fP \fIspec\fP
+Raw \fB\-B\fP basemap tick-interval spec, replacing the computed one.
+.TP
+.B \-\-length\-scale\fP \fIspec\fP
+Draw a distance scale with \fBgmt basemap \-L\fP\fIspec\fP, e.g.
+"jBL+c36.8+w5k+o0.3/0.3". The word "center" in \fIspec\fP is replaced
+by the longitude/latitude of the map center, e.g. "gcenter+c36.8+w5k".
+.TP
+.B \-\-timestamp\fP [\fIlabel\fP]
+Add a GMT time stamp (\fB\-U\fP), with an optional label.
+.TP
+.B \-G\fP, \fB\-\-color\-mode\fP \fIcolor_mode\fP
+Swath image style (\fBmbswath \-Z\fP):
+.br
+  \fIcolor_mode\fP = 1: Bathymetry color fill.
+.br
+  \fIcolor_mode\fP = 2: Bathymetry color shaded relief.
+.br
+  \fIcolor_mode\fP = 3: Bathymetry color shaded by beam amplitude.
+.br
+  \fIcolor_mode\fP = 4: Beam amplitude fill.
+.br
+  \fIcolor_mode\fP = 5: Sidescan fill.
+.TP
+.B \-\-filtered
+Plot filtered amplitude or sidescan values (\fBmbswath
+\-Z\fP\fImode\fP\fBF\fP).
+.TP
+.B \-W\fP, \fB\-\-color\-control\fP \fIcolor_style/palette\fP[\fI/ncolors\fP] | \fIcptfile\fP
+Color palette. \fIcolor_style\fP 1 gives a continuous palette, 2 a
+discrete one. \fIpalette\fP is 1 Haxby colors, 2 high intensity
+colors, 3 low intensity colors, 4 grayscale, 5 uniform gray, 6
+uniform black or 7 uniform white; no color scale is drawn for 5-7.
+\fIncolors\fP is the number of colors [11]. Default: 1/1, or 1/4
+(grayscale) for color modes 4 and 5. If the argument names an existing
+file, that file is used as the color palette table. With the default
+order, the smallest values (the shallowest depths) get the first color
+of the palette.
+.TP
+.B \-D\fP, \fB\-\-color\-flip
+Reverse the color palette.
+.TP
+.B \-Y\fP, \fB\-\-no\-nice\-interval
+Stretch the colors linearly over the data range instead of using
+rounded color intervals.
+.TP
+.B \-S\fP, \fB\-\-stretch\-color
+Set the color boundaries from the distribution of the plotted values
+(\fBmbhistogram\fP), so that each color covers the same number of
+values.
+.TP
+.B \-Z\fP, \fB\-\-zbounds\fP \fImin/max\fP
+Range of the colored quantity: depth for color modes 1-3, amplitude for
+mode 4, sidescan for mode 5. Default: the data range.
+.TP
+.B \-A\fP, \fB\-\-shade\fP \fImagnitude\fP[\fI/azimuth\fP | \fI/zero_level\fP]
+Shading parameters in one argument, as in \fBmbm_plot \-A\fP:
+magnitude and illumination azimuth for mode 2, or magnitude and the
+amplitude of zero shading for mode 3 (\fBmbswath \-G\fP). The separate
+options below take precedence.
+.TP
+.B \-\-magnitude\fP \fIval\fP
+Shading magnitude. Defaults: 2.5 for mode 2; for mode 3, 2/(amax \-
+amin) from the amplitude range, or 1 with \fB\-\-stretch\-shade\fP.
+.TP
+.B \-\-azimuth\fP \fIdeg\fP
+Illumination azimuth for mode 2 [0].
+.TP
+.B \-\-zero\-level\fP \fIval\fP
+Amplitude giving zero shading for mode 3. Default: amin + 0.2 (amax \-
+amin), or 191 with \fB\-\-stretch\-shade\fP.
+.TP
+.B \-\-shade\-flip
+Reverse the shading: for mode 2 the illumination azimuth is turned by
+180 degrees; for a stretched mode 3 shade the gray scale is reversed.
+.TP
+.B \-\-stretch\-shade
+Shade mode 3 maps with a gray scale fitted to a Gaussian distribution
+of the amplitudes (\fBmbhistogram \-G\fP), written to
+\fIroot\fP.shade.cpt and passed to \fBmbswath \-N\fP.
+.TP
+.B \-C\fP, \fB\-\-contour\fP [\fIcont_int/color_int/tick_int/label_int/tick_len/label_hgt\fP]
+Plot bathymetry contours (\fBmbcontour \-A\fP) at \fIcont_int\fP,
+with heavier contours every \fIcolor_int\fP, downhill ticks every
+\fItick_int\fP and labels every \fIlabel_int\fP; \fItick_len\fP and
+\fIlabel_hgt\fP are in inches. Missing fields get the defaults of
+\fBmbm_plot\fP. With no argument, the contour interval is chosen from
+the depth range, and the heavier contours, ticks and labels are every
+fourth contour (or omitted when a swath image is also drawn).
+.TP
+.B \-\-contour\-algorithm\fP \fIn\fP
+Contouring algorithm (\fBmbcontour \-Z\fP). Default: chosen by
+\fBmbcontour\fP, except 1 for formats 41, 101 and 102.
+.TP
+.B \-\-contour\-nplot\fP \fIpings\fP
+Number of pings contoured at a time (\fBmbcontour \-N\fP).
+.TP
+.B \-N\fP, \fB\-\-navigation\fP [\fItime_tick/time_annot/date_annot/tick_len\fP | \fBF\fP | \fBFP\fP]
+Plot the ship track (\fBmbcontour \-D\fP), with ticks every
+\fItime_tick\fP hours, time annotations every \fItime_annot\fP hours
+and date annotations every \fIdate_annot\fP hours; \fItick_len\fP is in
+inches. With no argument only the track is drawn. \fBF\fP annotates
+the track with file names as well (\fBFP\fP perpendicular to the
+track), with ticks every 0.25 hours.
+.TP
+.B \-\-nav\-names\fP [\fIheight\fP[\fI/P\fP]]
+Annotate the track with file names of this height in inches [0.15];
+\fI/P\fP places them perpendicular to the track.
+.TP
+.B \-\-ping\-ticks\fP [\fItick/annot/len\fP]
+Mark ping numbers along the track (\fBmbcontour \-M\fP). Default
+50/100/0.1.
+.TP
+.B \-\-footprint\fP \fIfactor/mode/depth\fP
+Beam footprint parameters (\fBmbswath \-A\fP). Default 1.
+.TP
+.B \-\-swath\-scale\fP \fImode/scale\fP[\fI/min/max\fP]
+Amplitude or sidescan scaling (\fBmbswath \-D\fP).
+.TP
+.B \-\-begin\-time\fP \fIyr/mo/da/hr/mn/sc\fP, \fB\-\-end\-time\fP \fIyr/mo/da/hr/mn/sc\fP
+Plot only data inside this time window.
+.TP
+.B \-\-speedmin\fP \fIspeed\fP
+Minimum ship speed in km/hr.
+.TP
+.B \-\-timegap\fP \fIminutes\fP
+Time gap threshold.
+.TP
+.B \-\-lonflip\fP \fI\-1|0|1\fP
+Longitude range: \-1 for \-360 to 0, 0 for \-180 to 180, 1 for 0 to
+360. Default 0.
+.TP
+.B \-T\fP, \fB\-\-coast
+Plot a coastline (\fBgmt coast\fP). If no coastline fill, pen, river
+or boundary option is given, land is filled with gray 200 and the
+coastline drawn with a 1p pen.
+.TP
+.B \-\-coast\-resolution\fP \fIres\fP
+Coastline resolution: f, h, i, l or c. Default \fBf\fP.
+.TP
+.B \-\-coast\-dry\-fill\fP \fIcolor\fP, \fB\-\-coast\-wet\-fill\fP \fIcolor\fP, \fB\-\-coast\-lake\-fill\fP \fIcolor\fP
+Fill land, water or lakes.
+.TP
+.B \-\-coast\-river\fP \fIspec\fP, \fB\-\-coast\-boundary\fP \fIspec\fP, \fB\-\-coast\-pen\fP \fIpen\fP
+Draw rivers (\fBgmt coast \-I\fP), national boundaries (\fB\-N\fP,
+repeatable) or the coastline (\fB\-W\fP).
+.TP
+.B \-\-xy\-overlay\fP \fIfile\fP[\fI:fill=color\fP][\fI:symbol=symbol\fP][\fI:pen=pen\fP]
+Plot the lon/lat data in \fIfile\fP with \fBgmt plot\fP, as lines
+(with a pen) or symbols; repeatable. Example:
+"stations.xy:symbol=c0.1:fill=red".
+.TP
+.B \-\-text\fP \fIlon/lat/size/angle/font/justify/text\fP
+Place a text label; repeatable. Example: "\-11.7/36.8/12/0/1/LB/Gorringe
+Bank".
+.TP
+.B \-\-gmt\-default\fP \fIparam/value\fP
+Override a GMT default parameter in the generated script; repeatable.
+
+.SH EXAMPLES
+A shaded relief map of the swath bathymetry in a datalist, with
+contours and an annotated ship track, rendered at once to a PNG:
+
+.br
+ mbpy_plot \-I datalist.mb\-1 \-G2 \-C \-N 0.25/1/4 \\
+.br
+     \-\-format png \-X \-V
+
+A sidescan map of one file with an equalized grayscale stretch:
+
+.br
+ mbpy_plot \-I 0003_20111219_180559_METEOR_EM122p.mb59 \-G5 \-S
+
+A track map with file names, a coastline and a distance scale at the
+map center:
+
+.br
+ mbpy_plot \-I datalist.mb\-1 \-N F \-T \\
+.br
+     \-\-length\-scale "gcenter+c36.8+w5k"
+
+.SH SEE ALSO
+\fBmbm_plot\fP(1), \fBmbswath\fP(1), \fBmbcontour\fP(1),
+\fBmbpy_grdplot\fP(1), \fBmbpy_grdtiff\fP(1), \fBmbinfo\fP(1),
+\fBmbhistogram\fP(1), \fBmbsystem\fP(1)
+
+.SH BUGS
+Please report any bugs to the MB-System project on GitHub
+(https://github.com/dwcaress/MB-System).

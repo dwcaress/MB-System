@@ -1,0 +1,164 @@
+#!/usr/bin/env python3
+#--------------------------------------------------------------------
+#    The MB-system:  mbwcdview_test.py  1/11/2026
+#
+#    Copyright (c) 2026 by
+#    Christian dos Santos Ferreira
+#      MARUM
+#      University of Bremen
+#      Bremen Germany
+#    David W. Caress (caress@mbari.org)
+#      Monterey Bay Aquarium Research Institute
+#      Moss Landing, California, USA
+#    Dale N. Chayes
+#      Center for Coastal and Ocean Mapping
+#      University of New Hampshire
+#      Durham, New Hampshire, USA
+#
+#    See README.md file for copying and redistribution conditions.
+#--------------------------------------------------------------------
+"""mbwcdview (C++/Qt6) without a window: usage, --dump and --export on a synthetic
+*.kmall/*.kmwcd pair and *.wcd file. Run only when built with -DbuildQt6Tools=ON."""
+
+import os
+import re
+import struct
+import subprocess
+import sys
+import tempfile
+import unittest
+import zlib
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import synth_all as A  # noqa: E402
+import synth_kmall as S  # noqa: E402
+
+
+def read_png(path):
+  """Width, height, bytes per pixel and rows of an 8 bit RGB or RGBA PNG without interlace, as Qt writes them."""
+  with open(path, "rb") as f:
+    data = f.read()
+  pos, header, idat = 8, None, b""
+  while pos < len(data):
+    length, kind = struct.unpack(">I4s", data[pos:pos + 8])
+    if kind == b"IHDR":
+      header = struct.unpack(">IIBBBBB", data[pos + 8:pos + 8 + length])
+    elif kind == b"IDAT":
+      idat += data[pos + 8:pos + 8 + length]
+    pos += 12 + length
+  width, height, depth, color, _, _, interlace = header
+  if depth != 8 or color not in (2, 6) or interlace != 0:
+    raise ValueError("unsupported PNG %s" % (header,))
+  bpp = 3 if color == 2 else 4
+  stride = width * bpp
+  raw = zlib.decompress(idat)
+  rows, prev = [], bytearray(stride)
+  for y in range(height):
+    start = y * (stride + 1)
+    kind, line = raw[start], bytearray(raw[start + 1:start + 1 + stride])
+    for i in range(stride):
+      a = line[i - bpp] if i >= bpp else 0
+      b = prev[i]
+      c = prev[i - bpp] if i >= bpp else 0
+      if kind == 1:
+        line[i] = (line[i] + a) & 0xff
+      elif kind == 2:
+        line[i] = (line[i] + b) & 0xff
+      elif kind == 3:
+        line[i] = (line[i] + ((a + b) >> 1)) & 0xff
+      elif kind == 4:
+        p = a + b - c
+        pa, pb, pc = abs(p - a), abs(p - b), abs(p - c)
+        line[i] = (line[i] + (a if pa <= pb and pa <= pc else (b if pb <= pc else c))) & 0xff
+    rows.append(line)
+    prev = line
+  return width, height, bpp, rows
+
+
+class MbwcdviewTest(unittest.TestCase):
+
+  @classmethod
+  def setUpClass(cls):
+    cls.program = os.environ["MBWCDVIEW"]
+    cls.tmp = tempfile.TemporaryDirectory()
+    cls.kmall, cls.kmwcd = S.write_line(cls.tmp.name)
+
+  @classmethod
+  def tearDownClass(cls):
+    cls.tmp.cleanup()
+
+  def test_usage(self):
+    result = subprocess.run([self.program, "-H"], capture_output=True, text=True)
+    self.assertEqual(result.returncode, 0)
+    self.assertIn("usage: mbwcdview", result.stderr)
+
+  def test_dump(self):
+    out = subprocess.run([self.program, "--dump", "-I", self.kmwcd, "--ping=1"], capture_output=True, text=True,
+                         check=True).stdout
+    self.assertIn(S.KMALL_NAME, out)
+    self.assertIn("water column pings %d, matched %d" % (S.NPINGS - 1, S.NPINGS - 1), out)
+    self.assertIn("fill value -94.0 dB, amplitude -55.0 .. -10.0 dB", out)
+    self.assertIn("ping number %d" % (S.PING0 + 2), out)
+    ratio = re.search(r"straight ([0-9.]+), ray traced ([0-9.]+)", out)
+    self.assertIsNotNone(ratio, out)
+    # flat seafloor, constant sound speed: both geometries agree and put the detections on the
+    # soundings, apart from the 1-2 deg along track tilt of the sectors (cos 2 deg = 0.9994)
+    self.assertAlmostEqual(float(ratio.group(1)), float(ratio.group(2)), places=4)
+    self.assertAlmostEqual(float(ratio.group(1)), 1.0, delta=0.001)
+
+  def test_export(self):
+    image = os.path.join(self.tmp.name, "ping.png")
+    subprocess.run([self.program, "-I", self.kmall, "--ping=1", "--bottom", "--wc-bottom", "--export=" + image,
+                    "--size=800x600"], check=True)
+    with open(image, "rb") as f:
+      self.assertEqual(f.read(8), b"\x89PNG\r\n\x1a\n")
+
+  def test_export_draws_swath(self):
+    # the swath is drawn on the graphics card (QRhi or OpenGL): the image area of the
+    # plot holds many colours of the colour map, where axes and labels have none
+    image = os.path.join(self.tmp.name, "swath.png")
+    subprocess.run([self.program, "-I", self.kmall, "--ping=1", "--export=" + image, "--size=400x300"], check=True)
+    width, height, bpp, rows = read_png(image)
+    # image area of WcdPlot::plotRect(): margins 72 left, 104 right, 16 top, 46 + 20 bottom
+    colours = set()
+    for y in range(16 + 4, height - 66 - 4):
+      row = rows[y]
+      for x in range(72 + 4, width - 104 - 4):
+        r, g, b = row[x * bpp], row[x * bpp + 1], row[x * bpp + 2]
+        if max(r, g, b) - min(r, g, b) > 16:
+          colours.add((r, g, b))
+    self.assertGreater(len(colours), 20)
+
+  def test_dump_wcd(self):
+    wcd = A.write(os.path.join(self.tmp.name, A.WCD_NAME))
+    out = subprocess.run([self.program, "--dump", "-I", wcd, "--ping=2"], capture_output=True, text=True,
+                         check=True).stdout
+    self.assertIn("water column pings %d, matched 0" % len(A.PINGS), out)
+    self.assertIn("amplitude %.1f .. " % (0.5 * -128 - A.TVG_OFFSET), out)
+    self.assertIn("fill value none", out)
+    self.assertIn("ping number %d" % A.PINGS[2], out)
+    self.assertIn("beams %d," % (A.nbeams_read(2) + 2), out)  # two empty beams mark the lost datagram
+
+  def test_window(self):
+    env = dict(os.environ, QT_QPA_PLATFORM="offscreen")
+    result = subprocess.run([os.environ["MBWCDVIEW_WINDOW_TEST"], self.kmall, self.tmp.name], capture_output=True,
+                            text=True, cwd=self.tmp.name, env=env, timeout=300)
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+    self.assertIn(" 0 failed", result.stdout)
+
+  def test_embed(self):
+    # two copies of the line, because each tool opens its own files
+    a, b = (os.path.join(self.tmp.name, name) for name in ("embed_a", "embed_b"))
+    os.mkdir(a)
+    os.mkdir(b)
+    file_a = S.write_line(a)[0]
+    file_b = S.write_line(b)[0]
+    env = dict(os.environ, QT_QPA_PLATFORM="offscreen")
+    result = subprocess.run([os.environ["MBWCDVIEW_EMBED_TEST"], file_a, file_b, self.tmp.name], capture_output=True,
+                            text=True, cwd=self.tmp.name, env=env, timeout=300)
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+    self.assertIn(" 0 failed", result.stdout)
+
+
+if __name__ == "__main__":
+  unittest.main()

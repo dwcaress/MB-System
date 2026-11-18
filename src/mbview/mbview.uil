@@ -96,6 +96,12 @@ procedure do_mbview_navlist_delete();
 procedure do_mbview_navlist_popdown();
 procedure do_mbview_navlistpopup();
 procedure do_mbview_navlistselect();
+procedure do_mbview_gislistpopup();
+procedure do_mbview_gislistselect();
+procedure do_mbview_gislist_showhide();
+procedure do_mbview_gislist_delete();
+procedure do_mbview_gislist_toroutes();
+procedure do_mbview_gislist_popdown();
 procedure do_mbview_overlay_contour();
 procedure do_mbview_overlay_illumination();
 procedure do_mbview_overlay_none();
@@ -113,6 +119,7 @@ procedure do_mbview_resolutionpopdown();
 procedure do_mbview_resolutionpopup();
 procedure do_mbview_route();
 procedure do_mbview_routelist_delete();
+procedure do_mbview_routelist_topolylines();
 procedure do_mbview_routelist_popdown();
 procedure do_mbview_routelistpopup();
 procedure do_mbview_routelistselect();
@@ -125,6 +132,9 @@ procedure do_mbview_sitelist_popdown();
 procedure do_mbview_sitelistpopup();
 procedure do_mbview_sitelistselect();
 procedure do_mbview_vector();
+procedure do_mbview_polyline();
+procedure do_mbview_polygon();
+procedure do_mbview_gispoint();
 procedure do_mbview_view_profile();
 
 list BaseStyle : arguments {
@@ -208,6 +218,7 @@ object mB3DRouteList : XmFormDialog widget {
     controls {
          managed XmLabel mB3DRouteList_mbview_routelist_label;
          managed XmPushButton mB3DRouteList_mbview_pushButton_routelist_delete;
+         unmanaged XmPushButton mB3DRouteList_mbview_pushButton_routelist_topolylines;
          managed XmPushButton mB3DRouteList_mbview_pushButton_routelist_dismiss;
          managed XmScrolledWindow mB3DRouteList_mbview_scrolledWindow_routelist;
     };
@@ -678,6 +689,30 @@ object mB3DRouteList_mbview_pushButton_routelist_delete : XmPushButton widget {
 !(BX)    };
 };
 
+! Managed only when GIS polylines are displayed (mbview_gis_routelistbutton())
+object mB3DRouteList_mbview_pushButton_routelist_topolylines : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Convert Selected to Polylines");
+        XmNtopAttachment = XmATTACH_NONE;
+        XmNleftAttachment = XmATTACH_WIDGET;
+        XmNleftWidget = XmPushButton mB3DRouteList_mbview_pushButton_routelist_delete;
+        XmNbottomAttachment = XmATTACH_FORM;
+        XmNbottomOffset = 9;
+        XmNleftOffset = 10;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mbview_routelist_topolylines();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object mB3DRouteList_mbview_routelist_label : XmLabel widget {
     arguments {
         arguments Style_use;
@@ -729,6 +764,7 @@ object mB3DRouteList_mbview_form_routelist : XmForm widget {
     controls {
          managed XmLabel mB3DRouteList_mbview_routelist_label;
          managed XmPushButton mB3DRouteList_mbview_pushButton_routelist_delete;
+         unmanaged XmPushButton mB3DRouteList_mbview_pushButton_routelist_topolylines;
          managed XmPushButton mB3DRouteList_mbview_pushButton_routelist_dismiss;
          managed XmScrolledWindow mB3DRouteList_mbview_scrolledWindow_routelist;
     };
@@ -739,6 +775,197 @@ object mB3DRouteList_mbview_form_routelist : XmForm widget {
 !(BX)        handlers Style_useHandlers;
 !(BX)    };
 };
+
+! GIS list class, created three times (polylines, polygons, points); the
+! C code passes the GIS type to the callbacks as client data and manages the
+! convert button only for polylines.
+object mB3DGisList_mbview_form_gislist : XmForm widget {
+    arguments {
+!(BX) BxNclassOnly = "MB3DGisList";
+!(BX) BxNsubclassDerived = "False";
+!(BX) BxNclassOnlyFile = "False";
+!(BX) BxNclassFilebase = "MB3DGisList";
+!(BX) BxNclassGeometry = "720x300+72+524";
+!(BX) BxNgenerate = "True";
+!(BX) BxNreference = "True";
+!(BX) BxNpaletteGroup = "Project Classes";
+!(BX) BxNpaletteName = "MB3DGisList";
+!(BX) BxNpaletteGeom = "+0+0";
+        arguments Style_use;
+        XmNresizePolicy = XmRESIZE_GROW;
+        XmNx = 72;
+        XmNy = 524;
+        XmNwidth = 720;
+        XmNheight = 300;
+    };
+    controls {
+         managed XmLabel mB3DGisList_mbview_gislist_label;
+         managed XmPushButton mB3DGisList_mbview_pushButton_gislist_showhide;
+         managed XmPushButton mB3DGisList_mbview_pushButton_gislist_delete;
+         unmanaged XmPushButton mB3DGisList_mbview_pushButton_gislist_toroutes;
+         managed XmPushButton mB3DGisList_mbview_pushButton_gislist_dismiss;
+         managed XmScrolledWindow mB3DGisList_mbview_scrolledWindow_gislist;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DGisList_mbview_gislist_label : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNlabelString = compound_string("GIS List:");
+        XmNtopAttachment = XmATTACH_FORM;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNleftOffset = 10;
+        XmNrightOffset = 15;
+        XmNtopOffset = 10;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DGisList_mbview_pushButton_gislist_showhide : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Show/Hide Selected");
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_FORM;
+        XmNbottomOffset = 9;
+        XmNleftOffset = 10;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mbview_gislist_showhide();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DGisList_mbview_pushButton_gislist_delete : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Delete Selected");
+        XmNleftAttachment = XmATTACH_WIDGET;
+        XmNleftWidget = XmPushButton mB3DGisList_mbview_pushButton_gislist_showhide;
+        XmNbottomAttachment = XmATTACH_FORM;
+        XmNbottomOffset = 9;
+        XmNleftOffset = 10;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mbview_gislist_delete();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DGisList_mbview_pushButton_gislist_toroutes : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Convert Selected to Routes");
+        XmNleftAttachment = XmATTACH_WIDGET;
+        XmNleftWidget = XmPushButton mB3DGisList_mbview_pushButton_gislist_delete;
+        XmNbottomAttachment = XmATTACH_FORM;
+        XmNbottomOffset = 9;
+        XmNleftOffset = 10;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mbview_gislist_toroutes();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DGisList_mbview_pushButton_gislist_dismiss : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Dismiss");
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_FORM;
+        XmNbottomOffset = 9;
+        XmNrightOffset = 15;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mbview_gislist_popdown();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DGisList_mbview_scrolledWindow_gislist : XmScrolledWindow widget {
+    arguments {
+        arguments Style_use;
+        XmNscrollingPolicy = XmAPPLICATION_DEFINED;
+        XmNtopAttachment = XmATTACH_WIDGET;
+        XmNtopWidget = XmLabel mB3DGisList_mbview_gislist_label;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_FORM;
+        XmNbottomOffset = 49;
+        XmNleftOffset = 10;
+        XmNrightOffset = 15;
+        XmNtopOffset = 0;
+    };
+    controls {
+         managed XmList mB3DGisList_mbview_list_gislist;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DGisList_mbview_list_gislist : XmList widget {
+    arguments {
+        arguments Style_use;
+        XmNselectionPolicy = XmEXTENDED_SELECT;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNsingleSelectionCallback = procedure do_mbview_gislistselect();
+        XmNextendedSelectionCallback = procedure do_mbview_gislistselect();
+        XmNbrowseSelectionCallback = procedure do_mbview_gislistselect();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 
 object mB3DNavList_mbview_list_navlist : XmList widget {
     arguments {
@@ -4157,6 +4384,20 @@ object mB3DView_mbview_toggleButton_route : XmToggleButton widget {
 !(BX)    };
 };
 
+object mB3DView_mbview_separator22 : XmSeparator widget {
+    arguments {
+        arguments Style_use;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object mB3DView_mbview_toggleButton_nav : XmToggleButton widget {
     arguments {
         arguments Style_use;
@@ -4215,6 +4456,54 @@ object mB3DView_mbview_toggleButton_vector : XmToggleButton widget {
     callbacks {
         callbacks Style_useReasons;
         XmNvalueChangedCallback = procedure do_mbview_vector();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_toggleButton_polyline : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Polylines");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNvalueChangedCallback = procedure do_mbview_polyline();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_toggleButton_polygon : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Polygons");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNvalueChangedCallback = procedure do_mbview_polygon();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_toggleButton_gispoint : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Points");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNvalueChangedCallback = procedure do_mbview_gispoint();
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -4398,9 +4687,13 @@ object mbview_pulldownMenu_view : XmPulldownMenu widget {
          managed XmToggleButton mbview_toggleButton_overlay_contour;
          managed XmToggleButton mB3DView_mbview_toggleButton_site;
          managed XmToggleButton mB3DView_mbview_toggleButton_route;
+         managed XmSeparator mB3DView_mbview_separator22;
          managed XmToggleButton mB3DView_mbview_toggleButton_nav;
          managed XmToggleButton mB3DView_mbview_toggleButton_navdrape;
          managed XmToggleButton mB3DView_mbview_toggleButton_vector;
+         managed XmToggleButton mB3DView_mbview_toggleButton_polyline;
+         managed XmToggleButton mB3DView_mbview_toggleButton_polygon;
+         managed XmToggleButton mB3DView_mbview_toggleButton_gispoint;
          managed XmSeparator mB3DView_mbview_separator8;
          managed XmToggleButton mB3DView_mbview_toggleButton_colortable_haxby;
          managed XmToggleButton mB3DView_mbview_toggleButton_colortable_bright;
@@ -4584,6 +4877,56 @@ object mB3DView_mbview_pushButton_navlist : XmPushButton widget {
 !(BX)    };
 };
 
+! The GIS list items pass MBV_GISLAYER_POLYLINE, MBV_GISLAYER_POLYGON, or
+! MBV_GISLAYER_GISPOINT to do_mbview_gislistpopup() as client data.
+object mB3DView_mbview_pushButton_polylinelist : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Polyline List");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mbview_gislistpopup();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_pushButton_polygonlist : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Polygon List");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mbview_gislistpopup();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_pushButton_gispointlist : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Point List");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mbview_gislistpopup();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object mbview_pulldownMenu_controls : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
@@ -4602,6 +4945,9 @@ object mbview_pulldownMenu_controls : XmPulldownMenu widget {
          managed XmPushButton mB3DView_mbview_pushButton_sitelist;
          managed XmPushButton mB3DView_mbview_pushButton_routelist;
          managed XmPushButton mB3DView_mbview_pushButton_navlist;
+         managed XmPushButton mB3DView_mbview_pushButton_polylinelist;
+         managed XmPushButton mB3DView_mbview_pushButton_polygonlist;
+         managed XmPushButton mB3DView_mbview_pushButton_gispointlist;
     };
     callbacks {
         callbacks Style_useReasons;

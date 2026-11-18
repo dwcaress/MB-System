@@ -718,6 +718,9 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
       if (beamflag[i] != MB_FLAG_NULL) {
         store->amp[i] = amp[i];
       }
+      else {
+        store->amp[i] = 0;
+      }
     }
     store->pixels_ss = nss;
     for (int i = 0; i < nss; i++) {

@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbnavlist</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  7 September 2026 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  16 October 2026 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -320,23 +320,23 @@ type <I>kind</I>, where <I>kind</I> may be integer values such as:
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_HEADING<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>17<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Simrad,&nbsp;Hypack&nbsp;*/<BR>
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>18<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Simrad,&nbsp;Hypack,&nbsp;Reson&nbsp;7k&nbsp;*/<BR>
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SSV<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>19<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Simrad&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV1<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>28<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;nav&nbsp;system&nbsp;1&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV2<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>29<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;nav&nbsp;system&nbsp;2&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV3<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>30<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;nav&nbsp;system&nbsp;3&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_MOTION<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>32<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Reson&nbsp;7k&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SIDESCAN2<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>37<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Reson&nbsp;7k,&nbsp;XTF&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SIDESCAN3<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>38<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Reson&nbsp;7k,&nbsp;XTF&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ROLL<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>40<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Reson&nbsp;7k&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_PITCH<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>41<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Reson&nbsp;7k&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_RMC<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>48<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;NMEA&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_DBT<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>49<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;NMEA&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_DPT<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>50<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;NMEA&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_ZDA<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>51<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;NMEA&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_GLL<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>52<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;NMEA&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_GGA<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>53<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;NMEA&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE1<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>55<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;attitude&nbsp;system&nbsp;1&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE2<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>56&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/*&nbsp;ancillary&nbsp;attitude&nbsp;system&nbsp;2&nbsp;*/<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE3<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>57<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;attitude&nbsp;system&nbsp;3&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV1<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>29<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;nav&nbsp;system&nbsp;1&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV2<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>30<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;nav&nbsp;system&nbsp;2&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV3<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>31<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;nav&nbsp;system&nbsp;3&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_MOTION<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>33<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Reson&nbsp;7k&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SIDESCAN2<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>38<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Reson&nbsp;7k,&nbsp;XTF&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SIDESCAN3<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>39<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Reson&nbsp;7k,&nbsp;XTF&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ROLL<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>41<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Reson&nbsp;7k&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_PITCH<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>42<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Reson&nbsp;7k&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_RMC<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>49<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;NMEA&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_DBT<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>50<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;NMEA&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_DPT<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>51<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;NMEA&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_ZDA<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>52<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;NMEA&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_GLL<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>53<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;NMEA&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_GGA<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>54<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;NMEA&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE1<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>56<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;attitude&nbsp;system&nbsp;1&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE2<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>57<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;attitude&nbsp;system&nbsp;2&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE3<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>58<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;attitude&nbsp;system&nbsp;3&nbsp;*/<BR>
 <BR>
 
 For example, using <B>-K</B><I>18</I> will cause <B>mbnavlist</B> to output
@@ -554,7 +554,7 @@ output be keyed to the time stamps of particular record types by
 using the <B>-K</B><I>kind</I> option where <I>kind</I> corresponds
 to the desired record type identifier from this table.
 <P>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_KINDS<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>54<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_KINDS<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>75<BR>
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NONE<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0<BR>
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_DATA<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>general&nbsp;survey&nbsp;data<BR>
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_COMMENT<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>general&nbsp;comment<BR>
@@ -582,37 +582,55 @@ to the desired record type identifier from this table.
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_PROCESSING_PARAMETERS<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>24<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>GSF<BR>
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SENSOR_PARAMETERS<TT>&nbsp;&nbsp;</TT>25<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>GSF<BR>
 <BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAVIGATION_ERROR<TT>&nbsp;&nbsp;&nbsp;</TT>26<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>GSF<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_RAW_LINE<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>27<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>uninterpretable&nbsp;line&nbsp;for&nbsp;ascii&nbsp;formats<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV1<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>28<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ancillary&nbsp;nav&nbsp;system&nbsp;1<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV2<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>29<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ancillary&nbsp;nav&nbsp;system&nbsp;2<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV3<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>30<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ancillary&nbsp;nav&nbsp;system&nbsp;3<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_TILT<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>31<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Simrad<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_MOTION<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>32<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_CTD<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>33<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SUBBOTTOM_MCS<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>34<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SUBBOTTOM_CNTRBEAM<TT>&nbsp;</TT>35<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Simrad<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SUBBOTTOM_SUBBOTTOM<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>36<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k,&nbsp;XTF<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SIDESCAN2<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>37<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k,&nbsp;XTF<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SIDESCAN3<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>38<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k,&nbsp;XTF<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_IMAGE<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>39<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ROLL<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>40<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_PITCH<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>41<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ABSORPTIONLOSS<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>42<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SPREADINGLOSS<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>43<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_INSTALLATION<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>44<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_WATER_COLUMN<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>45<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Simrad<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_STATUS<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>46<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Simrad,&nbsp;XTF<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_DVL<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>47<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>JSTAR<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_RMC<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>48<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>NMEA<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_DBT<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>49<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>NMEA<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_DPT<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>50<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>NMEA<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_ZDA<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>51<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>NMEA<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_GLL<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>52<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>NMEA<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_GGA<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>53<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>NMEA<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SURVEY_LINE<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>54<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE1<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>55<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ancillary&nbsp;attitude&nbsp;system&nbsp;1<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE2<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>56&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ancillary&nbsp;attitude&nbsp;system&nbsp;2<BR>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE3<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>57<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ancillary&nbsp;attitude&nbsp;system&nbsp;3<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SINGLE_BEAM_PING<TT>&nbsp;&nbsp;&nbsp;</TT>27<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>GSF<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_RAW_LINE<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>28<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>uninterpretable&nbsp;line&nbsp;for&nbsp;ascii&nbsp;formats<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV1<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>29<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ancillary&nbsp;nav&nbsp;system&nbsp;1<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV2<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>30<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ancillary&nbsp;nav&nbsp;system&nbsp;2<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV3<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>31<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ancillary&nbsp;nav&nbsp;system&nbsp;3<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_TILT<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>32<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Simrad<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_MOTION<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>33<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_CTD<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>34<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SUBBOTTOM_MCS<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>35<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SUBBOTTOM_CNTRBEAM<TT>&nbsp;</TT>36<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Simrad<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SUBBOTTOM_SUBBOTTOM<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>37<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k,&nbsp;XTF<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SIDESCAN2<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>38<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k,&nbsp;XTF<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SIDESCAN3<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>39<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k,&nbsp;XTF<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_IMAGE<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>40<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ROLL<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>41<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_PITCH<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>42<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ABSORPTIONLOSS<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>43<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SPREADINGLOSS<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>44<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_INSTALLATION<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>45<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_WATER_COLUMN<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>46<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Simrad<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_STATUS<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>47<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Simrad,&nbsp;XTF<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_DVL<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>48<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>JSTAR<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_RMC<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>49<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>NMEA<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_DBT<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>50<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>NMEA<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_DPT<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>51<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>NMEA<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_ZDA<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>52<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>NMEA<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_GLL<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>53<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>NMEA<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_GGA<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>54<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>NMEA<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SURVEY_LINE<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>55<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE1<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>56<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ancillary&nbsp;attitude&nbsp;system&nbsp;1<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE2<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>57<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ancillary&nbsp;attitude&nbsp;system&nbsp;2<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE3<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>58<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ancillary&nbsp;attitude&nbsp;system&nbsp;3<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SENSORDEPTH<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>59<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>HYSWEEP&nbsp;dynamic&nbsp;draft<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ALTITUDE<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>60<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>HYSWEEP&nbsp;single&nbsp;beam&nbsp;echosounder<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_GEN_SENS<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>61<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>WASSP&nbsp;generic&nbsp;sensor&nbsp;data<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_WC_PICKS<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>62<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>WASSP&nbsp;water&nbsp;column&nbsp;picks<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_TIMESTAMP<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>63<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>JSTAR&nbsp;file&nbsp;timestamp<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_HEAVE<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>64<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Kongsberg&nbsp;kmall<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_BIST<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>65<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Kongsberg&nbsp;BIST&nbsp;report<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_BIST1<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>66<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Kongsberg&nbsp;BIST&nbsp;reply<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_BIST2<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>67<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Kongsberg&nbsp;BIST&nbsp;short&nbsp;reply<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_MBSYSTEM<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>68<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Written&nbsp;by&nbsp;MB-System&nbsp;-&nbsp;extension&nbsp;to&nbsp;Kongsberg&nbsp;kmall<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_BSCALIBRATIONFILE<TT>&nbsp;&nbsp;</TT>69<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Kongsberg&nbsp;backscatter&nbsp;calibration&nbsp;file<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SALINITY<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>70<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_TEMPERATURE<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>71<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_PIPE<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>72<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_CONTACT<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>73<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_GATES<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>74<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_DATUM<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>75<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Kongsberg&nbsp;SPD&nbsp;Sensor&nbsp;Position&nbsp;Datum<BR>
 <P>
 <A NAME="lbAJ">&nbsp;</A>
 <H2>SEE ALSO</H2>
@@ -644,7 +662,7 @@ available in some swath data formats.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 7 September 2026</P></CENTER>
+Last Updated: 16 October 2026</P></CENTER>
 
 <HR>
 <center>

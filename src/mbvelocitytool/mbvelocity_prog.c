@@ -608,6 +608,7 @@ int mbvt_open_edit_profile(char *file) {
 	char *result;
 	struct profile *profile;
 	FILE *fp;
+	double dtmp, vtmp;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -639,7 +640,7 @@ int mbvt_open_edit_profile(char *file) {
 		return (status);
 	}
 	while ((result = fgets(buffer, MB_PATH_MAXLINE, fp)) == buffer)
-		if (buffer[0] != '#')
+		if (buffer[0] != '#' && sscanf(buffer, "%lf %lf", &dtmp, &vtmp) == 2)
 			profile->n++;
 	fclose(fp);
 
@@ -669,12 +670,16 @@ int mbvt_open_edit_profile(char *file) {
 	if ((fp = fopen(file, "r")) == NULL) {
 		status = MB_FAILURE;
 		fprintf(stderr, "\nUnable to Open Velocity Profile File <%s> for reading\n", file);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&edit_x, &error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&edit_y, &error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&profile->depth, &error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&profile->velocity, &error);
 		return (status);
 	}
 	strncpy(buffer, "", sizeof(buffer));
 	while ((result = fgets(buffer, MB_PATH_MAXLINE, fp)) == buffer) {
-		if (buffer[0] != '#') {
-			sscanf(buffer, "%lf %lf", &(profile->depth[profile->n]), &(profile->velocity[profile->n]));
+		if (buffer[0] != '#' && profile->n < profile->nalloc
+		    && sscanf(buffer, "%lf %lf", &(profile->depth[profile->n]), &(profile->velocity[profile->n])) == 2) {
 
 			/* output some debug values */
 			if (verbose >= 5) {
@@ -1005,7 +1010,7 @@ int mbvt_save_residuals(char *file) {
 		for (i = 0; i < nbeams; i++) {
 			rr = sqrt(residual_acrosstrack[i] * residual_acrosstrack[i] +
 			          (residual_altitude[i] + residual[i]) * (residual_altitude[i] + residual[i]));
-			xx = copysign(sqrt(rr * rr - residual_altitude[i] * residual_altitude[i]), residual_acrosstrack[i]);
+			xx = copysign(sqrt(MAX(rr * rr - residual_altitude[i] * residual_altitude[i], 0.0)), residual_acrosstrack[i]);
 			if (rr > 0.0)
 				dangle = asin(residual_acrosstrack[i] / rr) - asin(xx / rr);
 			else
@@ -1040,6 +1045,7 @@ int mbvt_open_display_profile(char *file) {
 	char *result;
 	struct profile *profile;
 	FILE *fp;
+	double dtmp, vtmp;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1068,9 +1074,15 @@ int mbvt_open_display_profile(char *file) {
 		return (status);
 	}
 	while ((result = fgets(buffer, MB_PATH_MAXLINE, fp)) == buffer)
-		if (buffer[0] != '#')
+		if (buffer[0] != '#' && sscanf(buffer, "%lf %lf", &dtmp, &vtmp) == 2)
 			profile->n++;
 	fclose(fp);
+	if (profile->n <= 0) {
+		status = MB_FAILURE;
+		fprintf(stderr, "\nNo velocity values found in Velocity Profile File <%s>\n", file);
+		do_error_dialog("Unable to read input SVP file.", "No depth and velocity values", "were found in the file!");
+		return (status);
+	}
 
 	/* allocate space for the velocity profile and raytracing tables */
 	profile->depth = NULL;
@@ -1094,12 +1106,15 @@ int mbvt_open_display_profile(char *file) {
 	if ((fp = fopen(file, "r")) == NULL) {
 		status = MB_FAILURE;
 		fprintf(stderr, "\nUnable to Open Velocity Profile File <%s> for reading\n", file);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&profile->depth, &error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&profile->velocity, &error);
+		profile->n = 0;
 		return (status);
 	}
 	strncpy(buffer, "", sizeof(buffer));
 	while ((result = fgets(buffer, MB_PATH_MAXLINE, fp)) == buffer) {
-		if (buffer[0] != '#') {
-			sscanf(buffer, "%lf %lf", &(profile->depth[profile->n]), &(profile->velocity[profile->n]));
+		if (buffer[0] != '#' && profile->n < profile->nalloc
+		    && sscanf(buffer, "%lf %lf", &(profile->depth[profile->n]), &(profile->velocity[profile->n])) == 2) {
 
 			/* output some debug values */
 			if (verbose >= 5) {
@@ -1393,6 +1408,8 @@ int mbvt_plot() {
 	xrminimum = beam_first - 1.0;
 	xrmaximum = beam_last + 1.0;
 	deltaxr = (int)(0.1 * (xrmaximum - xrminimum));
+	if (deltaxr < 1)
+		deltaxr = 1;
 	xrscale = (xrmax - xrmin) / (xrmaximum - xrminimum);
 	xr_int = deltaxr * xrscale;
 	nxr_int = (xrmaximum - xrminimum) / deltaxr + 1;
@@ -1563,6 +1580,8 @@ int mbvt_plot() {
 			if (nraypath[i] > 0) {
 				xxo = xpmin + (raypathx[i][0] - xpminimum) * xpscale;
 				yyo = ypmin + (raypathy[i][0] - ypminimum) * ypscale;
+				xx = xxo;
+				yy = yyo;
 				for (j = 1; j < nraypath[i]; j++) {
 					xx = xpmin + (raypathx[i][j] - xpminimum) * xpscale;
 					yy = ypmin + (raypathy[i][j] - ypminimum) * ypscale;
@@ -1867,7 +1886,7 @@ int mbvt_action_delete_node(int x, int y) {
 
 		/* delete the node */
 		if (delete > -1 && profile_edit.n > 2) {
-			for (i = delete; i < profile_edit.n; i++) {
+			for (i = delete; i < profile_edit.n - 1; i++) {
 				profile_edit.depth[i] = profile_edit.depth[i + 1];
 				profile_edit.velocity[i] = profile_edit.velocity[i + 1];
 				edit_x[i] = edit_x[i + 1];
@@ -2451,6 +2470,7 @@ int mbvt_process_multibeam() {
 	double depth_predict, res;
 	double sensordepth, sensordepthshift, heave_use;
 	bool found;
+	int *rt_ok = NULL;
 	int i, j, k;
 
 	if (verbose >= 2) {
@@ -2466,6 +2486,13 @@ int mbvt_process_multibeam() {
 	if (nbuffer <= 0) {
 		fprintf(stderr, "\nNo swath sonar data available - bathymetry processing aborted.\n");
 		status = MB_FAILURE;
+		return (status);
+	}
+
+	/* allocate flags marking beams successfully raytraced in the current ping */
+	status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(int), (void **)&rt_ok, &error);
+	if (status != MB_SUCCESS) {
+		fprintf(stderr, "\nUnable to allocate memory - bathymetry processing aborted.\n");
 		return (status);
 	}
 
@@ -2536,6 +2563,8 @@ int mbvt_process_multibeam() {
 
 		/* loop over the beams */
 		for (i = 0; i < ping[k].beams_bath; i++) {
+			rt_ok[i] = false;
+
 			/* trace the ray */
 			if (mb_beam_ok(ping[k].beamflag[i])) {
 				/* get max beam id */
@@ -2562,9 +2591,21 @@ int mbvt_process_multibeam() {
 					               &acrosstrack[i], &depth[i], &ttime, &ray_stat, &error);
 
 					/* reset acrosstrack distances */
-					for (j = 0; j < nraypath[i]; j++)
-						raypathx[i][j] = factor * raypathx[i][j];
+					if (status == MB_SUCCESS) {
+						for (j = 0; j < nraypath[i]; j++)
+							raypathx[i][j] = factor * raypathx[i][j];
+					}
+					else
+						nraypath[i] = 0;
 				}
+
+				/* skip beams that could not be raytraced (e.g. sensor depth outside the SVP) */
+				if (status != MB_SUCCESS) {
+					status = MB_SUCCESS;
+					error = MB_ERROR_NO_ERROR;
+					continue;
+				}
+				rt_ok[i] = true;
 
 				/* get acrosstrack distance */
 				acrosstrack[i] = factor * acrosstrack[i];
@@ -2596,8 +2637,10 @@ int mbvt_process_multibeam() {
 			}
 		}
 
-		/* reset first flag */
-		first = false;
+		/* reset first flag once raypaths have been obtained from a ping
+		   with good beams */
+		if (ns > 0)
+			first = false;
 
 		/* get linear fit to ping -- need at least two points for a well-defined
 		   fit; with exactly one point delta is exactly zero (0/0 = NaN) */
@@ -2617,7 +2660,7 @@ int mbvt_process_multibeam() {
 
 			/* loop over all beams */
 			for (i = 0; i < ping[k].beams_bath; i++)
-				if (mb_beam_ok(ping[k].beamflag[i])) {
+				if (mb_beam_ok(ping[k].beamflag[i]) && rt_ok[i]) {
 					depth_predict = a + b * acrosstrack[i];
 					res = depth[i] - depth_predict;
 					angle[i] += ping[k].angles[i];
@@ -2636,6 +2679,7 @@ int mbvt_process_multibeam() {
 
 	/* end raytracing */
 	status = mb_rt_deall(verbose, (void **)&rt_svp, &error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&rt_ok, &error);
 
 	/* calculate final residuals */
 	beam_first = nbeams;
@@ -2646,7 +2690,7 @@ int mbvt_process_multibeam() {
 			residual_acrosstrack[i] = residual_acrosstrack[i] / nresidual[i];
 			residual_altitude[i] = residual_altitude[i] / nresidual[i];
 			residual[i] = residual[i] / nresidual[i];
-			res_sd[i] = sqrt(res_sd[i] / nresidual[i] - residual[i] * residual[i]);
+			res_sd[i] = sqrt(MAX(res_sd[i] / nresidual[i] - residual[i] * residual[i], 0.0));
 			if (i < beam_first)
 				beam_first = i;
 			if (i > beam_last)

@@ -1,0 +1,368 @@
+.TH mbedit-qt 1 "2 November 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbedit-qt\fP \- Interactive editor used to flag bad bathymetry values in swath sonar bathymetry data (Qt6 version).
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbedit-qt\fP
+.br
+[--begin-time=yr/mo/da/hr/mn/sc {-Byr/mo/da/hr/mn/sc}
+.br
+--browse {-D}
+.br
+--end-time=yr/mo/da/hr/mn/sc {-Eyr/mo/da/hr/mn/sc}
+.br
+--format=format_id {-Fformat_id}
+.br
+--gui-mode {-G}
+.br
+--help {-H}
+.br
+--input=file {-Ifile}
+.br
+--reference=grid
+.br
+--run-mbprocess {-X}
+.br
+--use-edit-save {-S}
+.br
+--verbose {-V}
+.br
+--dump
+.br
+--export=image [--size=WxH]
+.br
+--replay=script]
+
+.SH DESCRIPTION
+\fBmbedit-qt\fP is a Qt6 port of \fBmbedit\fP. It displays the bathymetry
+profiles of several pings and lets the user flag and unflag soundings. The
+edits are written to an edit save file, which \fBmbprocess\fP applies when it
+writes a processed swath file. It reads and writes the same edit save
+files, parameter files and lock files as \fBmbedit\fP, so a file can move
+between the two programs. The two cannot edit one file at the same time.
+
+The window can be resized, and it follows the light or dark mode of the system.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian dos Santos Ferreira
+.br
+  MARUM - Center for Marine Environmental Sciences
+.br
+  University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-\-begin\-time=yr/mo/da/hr/mn/sc \-Byr/mo/da/hr/mn/sc
+Pings before this time are ignored. Default: 1962/2/21/10/30/0.
+.TP
+.B \-\-browse \-D
+Starts in browse mode: no edits are written.
+.TP
+.B \-\-end\-time=yr/mo/da/hr/mn/sc \-Eyr/mo/da/hr/mn/sc
+Pings after this time are ignored. Default: 2062/2/21/10/30/0.
+.TP
+.B \-\-format=format_id \-Fformat_id
+Sets the \fBMBIO\fP format id for the \fB\-\-input\fP options that follow it. By
+default it is inferred from the file name. A format of \-1 means a datalist.
+.TP
+.B \-\-gui\-mode \-G
+\fBDone\fP also quits the program, for use when another program starts
+\fBmbedit-qt\fP for one file.
+.TP
+.B \-\-help \-H
+Prints a description of the program and exits.
+.TP
+.B \-\-input=file \-Ifile
+Adds a swath file, or the files of a datalist, to the list of files to edit.
+The first is loaded at startup. May be given several times.
+.TP
+.B \-\-reference=\fIgrid\fP
+Loads this grid as a reference surface (see REFERENCE SURFACE).
+.TP
+.B \-\-run\-mbprocess \-X
+Runs \fBmbprocess\fP on a file when it is closed, if its edits were saved.
+.TP
+.B \-\-use\-edit\-save \-S
+Applies an existing edit save file of the first input file without asking.
+.TP
+.B \-\-verbose \-V
+Prints more information to stderr.
+.TP
+.B \-\-dump
+Without a window, prints one line per ping of the input files: file, record,
+time, number of beams, and the numbers of good, null, manual, filter, sonar and
+other flagged beams. Nothing is written.
+.TP
+.B \-\-export=image \-\-size=WxH
+Without a window, writes an image of the first pings of the first input file.
+Nothing else is written. The default size is 1400x900.
+.TP
+.B \-\-replay=script
+Without a window, runs a script of editing actions, one per line, for testing.
+
+.SH THE WINDOW
+Clicking a time series beside the soundings, or the map shown by
+\fBShow Track Map\fP in the \fBView\fP menu, moves to that ping. The map draws the
+navigation of the pings in memory, with those in view marked.
+
+.TP
+.B File
+\fBOpen\fP adds a swath file or datalist to the list and loads it.
+\fBFile Selection List\fP shows the list, with \fB<loaded>\fP, \fB<locked>\fP
+and \fB<esf>\fP marks; a file can be edited or removed from it. \fBBrowse Only\fP
+sets the output mode for the files loaded next. \fBSave\fP writes the edits without
+closing the file.
+.TP
+.B Edit
+\fBUndo\fP and \fBRedo\fP (the usual shortcuts of the system). One click or one drag, or
+one key or filter run, is one step. Undo reaches back to the last \fBNext Buffer\fP, because
+the pings written then have left memory. Saving does not end it.
+\fBFlags by Reason\fP shows or hides manual, filter and sonar flags, and unflags those of one
+reason in the pings in view, from the first ping in view, or in all pings in memory. Filter
+flags of earlier sessions count as filter flags; the edit save file does not record
+which program made them. Soundings hidden here are not changed by clicks.
+.TP
+.B View
+\fBWaterfall\fP, \fBAlongtrack\fP and \fBAcrosstrack View\fP. \fBShow Flagged
+Soundings\fP and \fBShow Flagged Profile\fP. Colours by \fBFlag State\fP (unflagged
+in the text colour, manual red, filter blue, sonar green), by \fBBottom Detect
+Algorithm\fP, by \fBSource Pulse Type\fP, by \fBAmplitude\fP or by \fBBeam Angle\fP, the last
+two with a colour bar for the soundings in view. Amplitude is offered only if the file has
+one for each beam; 2% of the values at each end are left out of its scale. \fBReset Zoom\fP
+sets the plot width from the data again. \fBWide Bathymetry Profiles\fP,
+\fBPrint Time Stamps\fP, or a time series beside the soundings: ping interval,
+longitude, latitude, heading, speed, center beam depth, sonar altitude, sonar
+depth, roll, pitch or heave. With the roll, the acrosstrack slope is red and the
+difference between them blue; if they correlate, there may be a timing error in
+the roll correction.
+.TP
+.B Controls
+\fBGo To Specified Time\fP finds the first ping later than the time, reading
+further buffers if needed; if the time is past the end of the file, the file
+is saved and closed. \fBBuffer Controls\fP sets the number of pings held in memory
+(30000 to start with, limited only by memory; about 40 bytes per sounding) and the
+number retained at \fBNext Buffer\fP. \fBAnnotation\fP sets the tick intervals.
+\fBFilters\fP opens the filters below. \fBReverse Right/Left Key Macros\fP is for
+data with beams ordered starboard to port. \fBReverse Mouse Buttons\fP swaps the left
+and right buttons.
+.TP
+.B Tools
+\fBNext Suspect Ping\fP and \fBPrevious Suspect Ping\fP are the review queue, below.
+\fBPreview mbclean\fP runs \fBmbclean\fP with the options given on a link to the file in a
+temporary folder, starting from the current edits, and outlines what it would change;
+\fBAccept\fP takes it as one step of undo, for the pings in memory.
+.TP
+.B Acrosstrack Width, Vertical Exaggeration, Pings Shown, Pings to Step
+Set the plot. The sliders double their range at their upper end. The width is at
+most 40000 m and the number of pings shown at most 250.
+.TP
+.B Ping slider
+At the bottom of the window. Shows the first ping in view and moves through the
+pings in memory, one ping per wheel notch. Data are read forward only, so in a
+file larger than the buffer it cannot go back past the retained pings.
+.TP
+.B Start, Reverse, Forward, End
+Move in the pings in memory, by \fBPings to Step\fP.
+.TP
+.B Next Buffer
+Writes the pings that leave memory and reads more. They cannot be edited again
+in this session.
+.TP
+.B Done | Next File
+Saves the edits without asking, closes the file, and loads the next in the list if
+there is one.
+.TP
+.B Flag View, Unflag View, Unflag Forward
+Flag or unflag the soundings in view; the last unflags from the first ping in view to
+the end of the buffer.
+.TP
+.B Quit
+As closing the window.
+
+.SH EDIT MODES
+With the left mouse button, and the keys given:
+.TP
+.B Toggle Q U
+The sounding within 50 pixels nearest the click changes state.
+.TP
+.B Pick W I
+The nearest good sounding is flagged.
+.TP
+.B Erase E O
+Good soundings within 15 pixels of the mouse are flagged while the button is down.
+.TP
+.B Restore R P
+As Erase, but flagged soundings are unflagged.
+.TP
+.B Grab T { [
+Good soundings inside the rectangle dragged are flagged.
+.TP
+.B Lasso H
+Good soundings inside the outline drawn are flagged.
+.TP
+.B Info Y } ]
+Shows, and prints to stdout, the data of the nearest sounding.
+.P
+In Toggle, Pick and Info a ring marks the sounding that a click would take.
+
+A ping with good soundings outside the plot has a red label with a small box beside it:
+clicking the box flags those soundings. A green label means that only
+flagged soundings are outside. A label is left out where it would overlap the one
+below; its colour and box remain.
+
+.SH MOUSE AND KEYS
+.TP
+.B Middle button, right button
+One step back, one step forward; more if held for 2 seconds. With \fBG\fP held, to the start
+or the end. \fBShift\fP with the right button opens a menu for the
+nearest sounding: flag or unflag its ping, center on it, open its water column, and undo or redo.
+.TP
+.B Wheel
+Steps by \fBPings to Step\fP: up goes forward, down goes back.
+.TP
+.B Command or Control with the wheel, or the pinch of a trackpad
+Zooms the width around the mouse.
+.TP
+.B Shift with the wheel
+Changes the vertical exaggeration.
+.TP
+.B Space with the left button
+Moves the plot. \fB0\fP puts it back and sets the width from the data.
+.P
+After zooming the width or moving the plot, what lies outside the plot is hidden: clicks,
+drags, \fBFlag View\fP and \fBUnflag View\fP do not change it, and ping labels have no
+colours or zap boxes. \fBBad Ping\fP, \fBGood Ping\fP and the left and right keys
+still act on the whole ping.
+.TP
+.B F, V, left and right arrows
+One step forward or back; with \fBG\fP held, to the end or start. The arrows move one ping.
+.TP
+.B Z M
+Flags the good soundings of the last picked ping.
+.TP
+.B S K
+Unflags the flagged soundings of the last picked ping.
+.TP
+.B A J, D L
+Flags the good soundings of the last picked ping to the left, or right, of and including
+the last picked beam.
+.TP
+.B X < ,
+Flag View.
+.TP
+.B C > .
+Unflag View.
+.TP
+.B !
+Makes all beams of the last picked ping null. Only \fBUndo\fP brings them back. They cannot be
+unflagged afterwards in \fBmbedit-qt\fP or \fBmbedit\fP; the data file is not changed.
+.TP
+.B 2 @, 3 #, 4 $
+Waterfall, alongtrack and acrosstrack views.
+.P
+\fBZ\fP, \fBS\fP, \fBA\fP or \fBD\fP held while clicking applies the action to the
+sounding just picked.
+
+.SH FILTERS
+Apply removes the flags of the previous filter runs of this session and runs the filters
+from the first ping in view to the end of the buffer. Active filters also run on
+each new buffer. Flags of earlier sessions and of other programs are not removed.
+.TP
+.B Median Spike
+Flags soundings further from the local median depth than a percentage of the
+sonar altitude. The window has an odd number of beams and of pings.
+.TP
+.B Wrong Side
+Flags soundings on the wrong side of the swath, except within a number of
+beams from the center.
+.TP
+.B Flag by Beam Number, Distance, Beam Angle
+Flags soundings between a start and an end value, or if the start is above the end, on both
+edges of the swath.
+
+A \fBPreview\fP in the dialog, on by default, outlines what \fBApply\fP would change, orange for
+new flags and turquoise for flags removed, and gives the numbers. It runs the same steps as
+\fBApply\fP on a copy of the flags, and nothing changes until then.
+
+.SH REVIEW QUEUE
+After each buffer is read, pings are ranked without changing anything: by soundings further
+than 0.25% of the altitude from the median of nine beams of their ping, by a drop in good
+soundings against the neighbouring pings, and by jumps in attitude or ping time. The
+strip above the ping slider shows them, darkest for the worst. \fBN\fP goes to the next
+worst and \fBB\fP back; the status bar says why, and the ping label is outlined. Treat this
+as a suggestion of an order: pings without a mark can still have bad soundings. It is
+not recalculated after edits, until the next buffer is read.
+
+.SH REFERENCE SURFACE
+\fBLoad Reference Surface\fP in the \fBTools\fP menu reads a grid in any form
+that \fBmbgrid\fP writes, geographic or projected, or starts with
+\fB\-\-reference\fP. \fBShow Difference from Reference\fP then colours each sounding
+by its depth minus the depth of the grid, interpolated between the four nearest
+nodes: red is deeper than the grid, blue is shallower. Green soundings have no grid
+value. The range of the colours is symmetric about zero and is set by the soundings
+in view. Whether the grid holds depths or topography (seafloor negative) is decided by
+comparing it with the soundings, and the status bar says which was found.
+While a surface is loaded, the review queue also counts soundings further than 2%
+of the altitude from it.
+
+.SH OTHER PROGRAMS
+\fBEdit History\fP lists the versions of the edit save file kept by
+\fBmbhistory\fP. \fBPreview\fP outlines what a version would change in the
+pings in memory. \fBRestore\fP closes the file, runs \fBmbhistory \-\-restore\fP,
+which keeps the current edits as a new version, and reopens the file.
+
+\fBWater Column at Center Ping\fP starts \fBmbwcdview\fP on this file or on a
+Kongsberg file of the same name beside it. The item is there only if
+\fBmbwcdview\fP can be found. It takes no lock, so editing can go on. The
+ping number is that of this program; \fBmbwcdview\fP counts water column
+pings, so it can show another ping if some pings have no water column data, or
+if each ping holds two swaths.
+
+\fBSave and Open in mbeditviz\fP closes the file, asking whether to save, and
+starts \fBmbeditviz\fP, which takes the lock. It opens at the start of the file.
+
+.SH SAVING
+The existing edit save file is not touched until the edits are saved. Until then new edits go
+to \fIfile\fP\.esf.new and \fIfile\fP\.esf.new.stream. Saving keeps the old edit
+save file in the \fBmbhistory\fP directory, replaces it and updates the
+\fBmbprocess\fP parameter file.
+
+When the window is closed, the program quits or another file is opened with changes
+unsaved, the program asks whether to save or discard them, or to cancel. After Discard,
+the files are as they were before the session. Without changes, nothing is written. If an
+existing edit save file is not applied when asked, saving replaces it.
+
+After a crash the lock file remains and the edits are in the two files above. When
+the file is opened again, the program offers to remove the lock and to recover the edits.
+Beams made null and brought back by undo before the crash stay null.
+
+.SH DIFFERENCES FROM MBEDIT
+Toggle and Restore do not change soundings that are not
+drawn. An edit save file is written only with changes, and always in explicit mode, even
+if an earlier one was implicit (\fBmbgetesf\fP). Erase and Restore also take the soundings
+between the mouse positions reported. The roll difference starts from the first ping in
+view. Ping labels are numbered from 1 in every plot mode. Where the center beam is flagged
+or null, as is usual in dual swath data, ping labels and the center beam depth plot use the
+sonar altitude plus the sonar depth instead of its value. The automatic plot width and
+the width slider stop at 40000 m. \fBmbprocess\fP does not
+block the window. The program name in the edit save file, lock file and history is mbedit-qt.
+
+.SH SEE ALSO
+\fBmbsystem\fP(1), \fBmbedit\fP(1), \fBmbprocess\fP(1), \fBmbhistory\fP(1),
+\fBmbclean\fP(1), \fBmbeditviz\fP(1), \fBmbgetesf\fP(1), \fBmbhistory\fP(1), \fBmbwcdview\fP(1)
+
+.SH BUGS
+Only tested on macOS so far.

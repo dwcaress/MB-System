@@ -49,6 +49,7 @@ man_MANS =  \
 	mbgrdviz.1 \
 	mbgrid.1 \
 	mbhistogram.1 \
+	mbhistory.1 \
 	mbinfo.1 \
 	mblevitus.1 \
 	mblist.1 \
@@ -91,6 +92,7 @@ man_MANS =  \
 	mbotps.1 \
 	mbpreprocess.1 \
 	mbprocess.1 \
+	mbpy_wcdview.1 \
 	mbrolltimelag.1 \
 	mbroutetime.1 \
 	mbsegygrid.1 \
@@ -99,6 +101,8 @@ man_MANS =  \
 	mbsegypsd.1 \
 	mbset.1 \
 	mbsslayout.1 \
+	mbsvpbest.1 \
+	mbsvpextract.1 \
 	mbsvplist.1 \
 	mbsvpselect.1 \
 	mbswath.1 \

@@ -708,11 +708,11 @@ if (!$color_mode && !$contour_mode && !$navigation_mode)
 	}
 if ($shade_control && $color_mode == 3)
 	{
-	($magnitude, $zero_level) = $shade_control =~ /^(\S+)\/(\S+)/;
+	($magnitude, $zero_level) = $shade_control =~ /^([^\/]+)(?:\/(\S+))?/;
 	}
 elsif ($shade_control)
 	{
-	($magnitude, $azimuth) = $shade_control =~ /^(\S+)\/(\S+)/;
+	($magnitude, $azimuth) = $shade_control =~ /^([^\/]+)(?:\/(\S+))?/;
 	}
 if ($color_control)
 	{
@@ -859,17 +859,6 @@ if ($color_flip_control)
 elsif ($color_flip_mode)
 	{
 	$color_flip = 1;
-	}
-if ($color_mode == 2 && $shade_flip)
-	{
-	if ($azimuth > 180)
-		{
-		$azimuth = $azimuth - 180;
-		}
-	else
-		{
-		$azimuth = $azimuth + 180;
-		}
 	}
 if ($stretch_control)
 	{
@@ -1786,7 +1775,6 @@ elsif ($contour_control =~ /\S+\/\S+\/\S+\/\S+\/\S+\/\S+/)
 		$contour_label_hgt)
 		= $contour_control
 		=~ /(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
-	$contour_label_hgt = 0.1;
 	}
 elsif ($contour_control =~ /\S+\/\S+\/\S+\/\S+\/\S+/)
 	{
@@ -1870,7 +1858,7 @@ if ($length_scale && $length_scale =~ /\S+center\S+/)
         $xcen = 0.5 * ($xmin + $xmax);
         $ycen = 0.5 * ($ymin + $ymax);
         $b = "$xcen/$ycen";
-        $length_scale = "$a$b$s";
+        $length_scale = "$a$b$c";
         }
 
 # come up with the filenames
@@ -1918,30 +1906,55 @@ $gmt_def = "FORMAT_GEO_MAP/$degree_format";
 push(@gmt_macro_defs, $gmt_def);
 
 # set shade control if not set by user
-if (!$shade_control && $color_mode == 3 && !stretch_shade)
+if ($color_mode == 3)
 	{
-	$magnitude = 2.0/($amax_data - $amin_data);
-	$zero_level = $amin_data + 0.2 * ($amax_data - $amin_data);
+	# amplitude shading: magnitude and zero level default from the
+	# amplitude range, or to 1/191 for a stretched (-S../1) shade
+	if (!$shade_control)
+		{
+		if ($stretch_shade)
+			{
+			$magnitude = 1;
+			}
+		else
+			{
+			$magnitude = 2.0/($amax_data - $amin_data);
+			}
+		}
+	if (!defined($zero_level) || $zero_level eq "")
+		{
+		if ($stretch_shade)
+			{
+			$zero_level = 191;
+			}
+		else
+			{
+			$zero_level = $amin_data + 0.2 * ($amax_data - $amin_data);
+			}
+		}
 	$shade_control = sprintf("%.4g/%.4g",$magnitude,$zero_level);
-	}
-elsif (!$shade_control && $color_mode == 3)
-	{
-	$magnitude = 1;
-	$zero_level = 191;
-	$shade_control = sprintf("%.4g/%.4g",$magnitude,$zero_level);
-	}
-elsif (!$shade_control)
-	{
-	$azimuth = 0;
-	$magnitude = 2.5;
-	$shade_control = "2.5/0";
-	}
-elsif ($color_mode == 3)
-	{
-	$shade_control = "$magnitude/$zero_level";
 	}
 else
 	{
+	if (!$shade_control)
+		{
+		$magnitude = 2.5;
+		}
+	if (!defined($azimuth) || $azimuth eq "")
+		{
+		$azimuth = 0;
+		}
+	if ($color_mode == 2 && $shade_flip)
+		{
+		if ($azimuth > 180)
+			{
+			$azimuth = $azimuth - 180;
+			}
+		else
+			{
+			$azimuth = $azimuth + 180;
+			}
+		}
 	$shade_control = "$magnitude/$azimuth";
 	}
 
@@ -2206,7 +2219,7 @@ elsif ($color_mode)
 			printf FCMD "echo %6g %3d %3d %3d %6g %3d %3d %3d",
 				$d1,@cptr[$i],@cptg[$i],@cptb[$i],
 				$d2,@cptr[$i],@cptg[$i],@cptb[$i];
-			if ($i == ($ncolors - 2))
+			if ($i == ($ncolors - 1))
 				{
 				print FCMD " >|";
 				}
@@ -2237,7 +2250,7 @@ if ($color_mode == 3 && $stretch_shade)
 	$d1 = shift @mbhistogram;
 	if (!$shade_flip)
 		{
-		foreach $i (0 .. $ncolors - 2)
+		foreach $i (0 .. $ncpt - 2)
 			{
 			$d2 = shift @mbhistogram;
 			printf FCMD "echo %6g %3d %3d %3d %6g %3d %3d %3d",
@@ -2257,13 +2270,13 @@ if ($color_mode == 3 && $stretch_shade)
 		}
 	else
 		{
-		for ($i = $ncolors - 2; $i >= 0; $i--)
+		for ($i = $ncpt - 2; $i >= 0; $i--)
 			{
 			$d2 = shift @mbhistogram;
 			printf FCMD "echo %6g %3d %3d %3d %6g %3d %3d %3d",
 				$d1,@cptbr4[$i+1],@cptbg4[$i+1],@cptbb4[$i+1],
 				$d2,@cptbr4[$i],@cptbg4[$i],@cptbb4[$i];
-			if ($i == ($ncolors - 2))
+			if ($i == ($ncpt - 2))
 				{
 				print FCMD " >";
 				}
@@ -2312,7 +2325,7 @@ if ($color_mode)
 		}
 	if ($dpi)
 		{
-		printf FCMD "-Q$dpi \\\n\t";
+		printf FCMD "-E$dpi \\\n\t";
 		}
 	if ($mb_btime)
 		{

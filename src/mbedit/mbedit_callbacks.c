@@ -481,7 +481,7 @@ void do_mbedit_init(int argc, char **argv) {
 /*--------------------------------------------------------------------*/
 
 void do_parse_datalist(char *file, int form) {
-	int format;
+	int format = 0;
 
 	/* try to resolve format if necessary */
 	if (form == 0)
@@ -549,10 +549,6 @@ void do_editlistselection(Widget w, XtPointer client_data, XtPointer call_data) 
 	XtSetArg(args[ac], XmNselectedPositions, (XtPointer)&position_list);
 	ac++;
 	XtGetValues(list_filelist, args, ac);
-
-	fprintf(stderr, "position_count:%d\n", position_count);
-	for (int i = 0; i < position_count; i++)
-		fprintf(stderr, "  %d %d\n", i, position_list[i]);
 
 	int quit;
 	/* if the selected file is different than what's already loaded, unload the old file and load the new one */
@@ -1461,7 +1457,7 @@ void do_load_check(Widget w, XtPointer client_data, XtPointer call_data) {
 		/* read the mbio format number from the dialog */
 		static char format_text[40];
 		mb_get_text_string(textfield_format, format_text, sizeof(format_text));
-		int format;
+		int format = 0;
 		sscanf(format_text, "%d", &format);
 
 		/* try to parse the selection */
@@ -1651,11 +1647,13 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 								mplot_size, mshow_beammode, mshow_flaggedsoundings, mshow_flaggedprofiles,
 			                            mshow_time, &nbuffer, &ngood, &icurrent, &mnplot);
 
-		char buffer[1];
+		char buffer[1] = {'\0'};
 		/* Deal with KeyPress events */
 		if (event->xany.type == KeyPress) {
 			/* Get key pressed - buffer[0] */
-			/* const int actual = */ XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
+			/* keys without a character (shift, arrows, ...) leave buffer[0] null */
+			if (XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL) < 1)
+				buffer[0] = '\0';
 
 			/* process events */
 			switch (buffer[0]) {
@@ -1919,7 +1917,9 @@ void do_event(Widget w, XtPointer client_data, XtPointer call_data) {
 		/* Deal with KeyRelease events */
 		if (event->xany.type == KeyRelease) {
 			/* Get key pressed - buffer[0] */
-			/* const int actual = */ XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
+			/* keys without a character (shift, arrows, ...) leave buffer[0] null */
+			if (XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL) < 1)
+				buffer[0] = '\0';
 
 			/* process events */
 			switch (buffer[0]) {

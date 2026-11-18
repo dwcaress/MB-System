@@ -2971,11 +2971,15 @@ int mbr_reson7k3_rd_Mystery(int verbose, char *buffer, void *store_ptr, int *err
 
   /* extract the header */
   index = 0;
-  const int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
-  for (unsigned int i = 0; i < R7KHDRSIZE_Mystery; i++) {
+  if (status == MB_SUCCESS && header->Size < (unsigned int)index + R7KHDRSIZE_Mystery + MBSYS_RESON7K_RECORDTAIL_SIZE) {
+    status = MB_FAILURE;
+    *error = MB_ERROR_UNINTELLIGIBLE;
+  }
+  for (unsigned int i = 0; status == MB_SUCCESS && i < R7KHDRSIZE_Mystery; i++) {
     Mystery->data[i] = (mb_u_char)buffer[index];
     index++;
   }
@@ -4946,8 +4950,16 @@ int mbr_reson7k3_rd_AdaptiveGate(int verbose, char *buffer, void *store_ptr, int
   mb_get_binary_short(true, &buffer[index], &(AdaptiveGate->gate_size));
   index += 2;
 
+  /* check that the number of gates fits the record */
+  if (status == MB_SUCCESS
+      && header->Size < (unsigned int)index + MBSYS_RESON7K_RECORDTAIL_SIZE + 3 * sizeof(float) * AdaptiveGate->n) {
+    AdaptiveGate->n = 0;
+    status = MB_FAILURE;
+    *error = MB_ERROR_UNINTELLIGIBLE;
+  }
+
   /* allocate memory for AdaptiveGate if needed */
-  if (status == MB_SUCCESS && AdaptiveGate->nalloc < AdaptiveGate->n) {
+  if (status == MB_SUCCESS && AdaptiveGate->nalloc < sizeof(float) * AdaptiveGate->n) {
     AdaptiveGate->nalloc = sizeof(float) * AdaptiveGate->n;
     if (status == MB_SUCCESS)
       status = mb_reallocd(verbose, __FILE__, __LINE__, AdaptiveGate->nalloc, (void **)&(AdaptiveGate->angle), error);
@@ -4963,6 +4975,7 @@ int mbr_reson7k3_rd_AdaptiveGate(int verbose, char *buffer, void *store_ptr, int
       status = mb_reallocd(verbose, __FILE__, __LINE__, AdaptiveGate->nalloc, (void **)&(AdaptiveGate->max_limit), error);
     if (status != MB_SUCCESS) {
       AdaptiveGate->nalloc = 0;
+      AdaptiveGate->n = 0;
     }
   }
 
@@ -5347,58 +5360,88 @@ int mbr_reson7k3_rd_VernierProcessingDataRaw(int verbose, char *buffer, void *st
     mb_get_binary_int(true, &buffer[index], &(VernierProcessingDataRaw->reserved3[i]));
     index += 4;
   }
-  unsigned int nalloc = sizeof(short) * VernierProcessingDataRaw->decimated_samples;
-  if (VernierProcessingDataRaw->nalloc < nalloc) {
-    for (int j = 0; j < VernierProcessingDataRaw->beam_number; j++) {
+  /* check that the beam and sample counts fit the storage and the record */
+  if (status == MB_SUCCESS
+      && (VernierProcessingDataRaw->beam_number > MBSYS_RESON7K_MAX_BEAMS
+          || header->Size < (unsigned int)index + MBSYS_RESON7K_RECORDTAIL_SIZE
+          || (VernierProcessingDataRaw->beam_number > 0
+              && VernierProcessingDataRaw->decimated_samples
+                  > (header->Size - index - MBSYS_RESON7K_RECORDTAIL_SIZE)
+                    / (12 * (unsigned int)VernierProcessingDataRaw->beam_number)))) {
+    status = MB_FAILURE;
+    *error = MB_ERROR_UNINTELLIGIBLE;
+  }
+
+  /* allocate memory for the angle and magnitude time series of each beam;
+     every non-NULL array is kept at least nalloc bytes long */
+  if (status == MB_SUCCESS) {
+    unsigned int nalloc = sizeof(short) * VernierProcessingDataRaw->decimated_samples;
+    if (nalloc < VernierProcessingDataRaw->nalloc)
+      nalloc = VernierProcessingDataRaw->nalloc;
+    for (int j = 0; j < MBSYS_RESON7K_MAX_BEAMS && status == MB_SUCCESS; j++) {
       anglemagnitude = &VernierProcessingDataRaw->anglemagnitude[j];
-      mb_reallocd(verbose, __FILE__, __LINE__, nalloc, (void **)&(anglemagnitude->angle), error);
-      mb_reallocd(verbose, __FILE__, __LINE__, nalloc, (void **)&(anglemagnitude->magnitude), error);
-      mb_reallocd(verbose, __FILE__, __LINE__, nalloc, (void **)&(anglemagnitude->coherence), error);
-      mb_reallocd(verbose, __FILE__, __LINE__, nalloc, (void **)&(anglemagnitude->cross_power), error);
-      mb_reallocd(verbose, __FILE__, __LINE__, nalloc, (void **)&(anglemagnitude->quality_factor), error);
-      mb_reallocd(verbose, __FILE__, __LINE__, nalloc, (void **)&(anglemagnitude->reserved), error);
+      const bool missing = anglemagnitude->angle == NULL || anglemagnitude->magnitude == NULL
+                            || anglemagnitude->coherence == NULL || anglemagnitude->cross_power == NULL
+                            || anglemagnitude->quality_factor == NULL || anglemagnitude->reserved == NULL;
+      const bool allocated = anglemagnitude->angle != NULL || anglemagnitude->magnitude != NULL
+                            || anglemagnitude->coherence != NULL || anglemagnitude->cross_power != NULL
+                            || anglemagnitude->quality_factor != NULL || anglemagnitude->reserved != NULL;
+      if ((j < VernierProcessingDataRaw->beam_number && missing)
+          || (allocated && nalloc > VernierProcessingDataRaw->nalloc)) {
+        status = mb_reallocd(verbose, __FILE__, __LINE__, nalloc, (void **)&(anglemagnitude->angle), error);
+        if (status == MB_SUCCESS)
+          status = mb_reallocd(verbose, __FILE__, __LINE__, nalloc, (void **)&(anglemagnitude->magnitude), error);
+        if (status == MB_SUCCESS)
+          status = mb_reallocd(verbose, __FILE__, __LINE__, nalloc, (void **)&(anglemagnitude->coherence), error);
+        if (status == MB_SUCCESS)
+          status = mb_reallocd(verbose, __FILE__, __LINE__, nalloc, (void **)&(anglemagnitude->cross_power), error);
+        if (status == MB_SUCCESS)
+          status = mb_reallocd(verbose, __FILE__, __LINE__, nalloc, (void **)&(anglemagnitude->quality_factor), error);
+        if (status == MB_SUCCESS)
+          status = mb_reallocd(verbose, __FILE__, __LINE__, nalloc, (void **)&(anglemagnitude->reserved), error);
+      }
     }
-    if (status == MB_SUCCESS) {
+    if (status == MB_SUCCESS)
       VernierProcessingDataRaw->nalloc = nalloc;
-    }
-    else {
-      VernierProcessingDataRaw->nalloc = 0;
-    }
   }
-  for (unsigned int i = 0; i < VernierProcessingDataRaw->decimated_samples; i++) {
-    for (int j = 0; j < VernierProcessingDataRaw->beam_number; j++) {
-      mb_get_binary_short(true, &buffer[index], &(VernierProcessingDataRaw->anglemagnitude[i].angle[j]));
-      index += 2;
+
+  /* extract the data - each part is ordered sample by sample, beams within each sample */
+  if (status == MB_SUCCESS) {
+    for (unsigned int i = 0; i < VernierProcessingDataRaw->decimated_samples; i++) {
+      for (int j = 0; j < VernierProcessingDataRaw->beam_number; j++) {
+        mb_get_binary_short(true, &buffer[index], &(VernierProcessingDataRaw->anglemagnitude[j].angle[i]));
+        index += 2;
+      }
     }
-  }
-  for (unsigned int i = 0; i < VernierProcessingDataRaw->decimated_samples; i++) {
-    for (int j = 0; j < VernierProcessingDataRaw->beam_number; j++) {
-      mb_get_binary_short(true, &buffer[index], &(VernierProcessingDataRaw->anglemagnitude[i].magnitude[j]));
-      index += 2;
+    for (unsigned int i = 0; i < VernierProcessingDataRaw->decimated_samples; i++) {
+      for (int j = 0; j < VernierProcessingDataRaw->beam_number; j++) {
+        mb_get_binary_short(true, &buffer[index], &(VernierProcessingDataRaw->anglemagnitude[j].magnitude[i]));
+        index += 2;
+      }
     }
-  }
-  for (unsigned int i = 0; i < VernierProcessingDataRaw->decimated_samples; i++) {
-    for (int j = 0; j < VernierProcessingDataRaw->beam_number; j++) {
-      mb_get_binary_short(true, &buffer[index], &(VernierProcessingDataRaw->anglemagnitude[i].coherence[j]));
-      index += 2;
+    for (unsigned int i = 0; i < VernierProcessingDataRaw->decimated_samples; i++) {
+      for (int j = 0; j < VernierProcessingDataRaw->beam_number; j++) {
+        mb_get_binary_short(true, &buffer[index], &(VernierProcessingDataRaw->anglemagnitude[j].coherence[i]));
+        index += 2;
+      }
     }
-  }
-  for (unsigned int i = 0; i < VernierProcessingDataRaw->decimated_samples; i++) {
-    for (int j = 0; j < VernierProcessingDataRaw->beam_number; j++) {
-      mb_get_binary_short(true, &buffer[index], &(VernierProcessingDataRaw->anglemagnitude[i].cross_power[j]));
-      index += 2;
+    for (unsigned int i = 0; i < VernierProcessingDataRaw->decimated_samples; i++) {
+      for (int j = 0; j < VernierProcessingDataRaw->beam_number; j++) {
+        mb_get_binary_short(true, &buffer[index], &(VernierProcessingDataRaw->anglemagnitude[j].cross_power[i]));
+        index += 2;
+      }
     }
-  }
-  for (unsigned int i = 0; i < VernierProcessingDataRaw->decimated_samples; i++) {
-    for (int j = 0; j < VernierProcessingDataRaw->beam_number; j++) {
-      mb_get_binary_short(true, &buffer[index], &(VernierProcessingDataRaw->anglemagnitude[i].quality_factor[j]));
-      index += 2;
+    for (unsigned int i = 0; i < VernierProcessingDataRaw->decimated_samples; i++) {
+      for (int j = 0; j < VernierProcessingDataRaw->beam_number; j++) {
+        mb_get_binary_short(true, &buffer[index], &(VernierProcessingDataRaw->anglemagnitude[j].quality_factor[i]));
+        index += 2;
+      }
     }
-  }
-  for (unsigned int i = 0; i < VernierProcessingDataRaw->decimated_samples; i++) {
-    for (int j = 0; j < VernierProcessingDataRaw->beam_number; j++) {
-      mb_get_binary_short(true, &buffer[index], &(VernierProcessingDataRaw->anglemagnitude[i].reserved[j]));
-      index += 2;
+    for (unsigned int i = 0; i < VernierProcessingDataRaw->decimated_samples; i++) {
+      for (int j = 0; j < VernierProcessingDataRaw->beam_number; j++) {
+        mb_get_binary_short(true, &buffer[index], &(VernierProcessingDataRaw->anglemagnitude[j].reserved[i]));
+        index += 2;
+      }
     }
   }
 
@@ -6142,14 +6185,24 @@ int mbr_reson7k3_rd_VernierProcessingDataFiltered(int verbose, char *buffer, voi
   index += 4;
   mb_get_binary_short(true, &buffer[index], &(VernierProcessingDataFiltered->multi_ping));
   index += 2;
-  mb_get_binary_int(true, &buffer[index], &(VernierProcessingDataFiltered->number_soundings));
-  index += 4;
+  mb_get_binary_short(true, &buffer[index], &(VernierProcessingDataFiltered->number_soundings));
+  index += 2;
   mb_get_binary_float(true, &buffer[index], &(VernierProcessingDataFiltered->min_angle));
   index += 4;
   mb_get_binary_float(true, &buffer[index], &(VernierProcessingDataFiltered->max_angle));
   index += 4;
   mb_get_binary_short(true, &buffer[index], &(VernierProcessingDataFiltered->repeat_size));
   index += 2;
+
+  /* check that the number of soundings fits the storage and the record */
+  if (status == MB_SUCCESS
+      && (VernierProcessingDataFiltered->number_soundings > MBSYS_RESON7K_MAX_SOUNDINGS
+          || header->Size < (unsigned int)index + MBSYS_RESON7K_RECORDTAIL_SIZE
+                              + R7KRDTSIZE_VernierProcessingDataFiltered * VernierProcessingDataFiltered->number_soundings)) {
+    VernierProcessingDataFiltered->number_soundings = 0;
+    status = MB_FAILURE;
+    *error = MB_ERROR_UNINTELLIGIBLE;
+  }
 
   /* extract the data */
   for (unsigned int i = 0; i < VernierProcessingDataFiltered->number_soundings; i++) {
@@ -6160,7 +6213,7 @@ int mbr_reson7k3_rd_VernierProcessingDataFiltered(int verbose, char *buffer, voi
     index += 4;
     mb_get_binary_float(true, &buffer[index], &(vernierprocessingdatasoundings->elevation));
     index += 4;
-    mb_get_binary_float(true, &buffer[index], &(vernierprocessingdatasoundings->elevation));
+    mb_get_binary_float(true, &buffer[index], &(vernierprocessingdatasoundings->reserved));
     index += 4;
   }
 
@@ -6460,10 +6513,85 @@ int mbr_reson7k3_rd_CompressedBeamformedMagnitude(int verbose, char *buffer, voi
   int index = 0;
   int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
-  // TODO Notdone
-  // Not implemented because documentation is vague about the actual sample size
-  // and because this record is deprecated and unlikely to be part of a 7k3
-  // data stream
+  /* check that the record is long enough for the record type header */
+  index = header->Offset + 4;
+  if (status == MB_SUCCESS && header->Size < (unsigned int)index + R7KHDRSIZE_CompressedBeamformedMagnitude + MBSYS_RESON7K_RECORDTAIL_SIZE) {
+    status = MB_FAILURE;
+    *error = MB_ERROR_UNINTELLIGIBLE;
+  }
+
+  /* extract the record type header */
+  if (status == MB_SUCCESS) {
+    mb_get_binary_long(true, &buffer[index], &(CompressedBeamformedMagnitude->serial_number));
+    index += 8;
+    mb_get_binary_int(true, &buffer[index], &(CompressedBeamformedMagnitude->ping_number));
+    index += 4;
+    mb_get_binary_short(true, &buffer[index], &(CompressedBeamformedMagnitude->multi_ping));
+    index += 2;
+    mb_get_binary_short(true, &buffer[index], &(CompressedBeamformedMagnitude->number_beams));
+    index += 2;
+    mb_get_binary_short(true, &buffer[index], &(CompressedBeamformedMagnitude->flags));
+    index += 2;
+    mb_get_binary_float(true, &buffer[index], &(CompressedBeamformedMagnitude->sample_rate));
+    index += 4;
+    for (int i = 0; i < 4; i++) {
+      mb_get_binary_int(true, &buffer[index], &(CompressedBeamformedMagnitude->reserved[i]));
+      index += 4;
+    }
+  }
+
+  /* keep the beam data as raw bytes - the DFD does not define the sample size */
+  if (status == MB_SUCCESS) {
+    CompressedBeamformedMagnitude->data_size = header->Size - index - MBSYS_RESON7K_RECORDTAIL_SIZE;
+    if (CompressedBeamformedMagnitude->data_alloc < CompressedBeamformedMagnitude->data_size) {
+      status = mb_reallocd(verbose, __FILE__, __LINE__, CompressedBeamformedMagnitude->data_size,
+                           (void **)&(CompressedBeamformedMagnitude->data), error);
+      if (status == MB_SUCCESS)
+        CompressedBeamformedMagnitude->data_alloc = CompressedBeamformedMagnitude->data_size;
+      else
+        CompressedBeamformedMagnitude->data_alloc = 0;
+    }
+    if (status == MB_SUCCESS) {
+      memcpy(CompressedBeamformedMagnitude->data, &buffer[index], CompressedBeamformedMagnitude->data_size);
+      index += CompressedBeamformedMagnitude->data_size;
+    }
+  }
+  if (status != MB_SUCCESS)
+    CompressedBeamformedMagnitude->data_size = 0;
+
+  /* set kind */
+  if (status == MB_SUCCESS) {
+    /* set kind */
+    store->kind = MB_DATA_WATER_COLUMN;
+    store->type = R7KRECID_CompressedBeamformedMagnitude;
+
+    /* get the time */
+    int time_j[5];
+    time_j[0] = header->s7kTime.Year;
+    time_j[1] = header->s7kTime.Day;
+    time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+    time_j[3] = (int)header->s7kTime.Seconds;
+    time_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time_j[3]));
+    mb_get_itime(verbose, time_j, store->time_i);
+    mb_get_time(verbose, store->time_i, &(store->time_d));
+  }
+  else {
+    store->kind = MB_DATA_NONE;
+  }
+
+/* print out the results */
+#ifdef MBR_RESON7K3_DEBUG
+  fprintf(stderr,
+          "R7KRECID_CompressedBeamformedMagnitude: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) size:%d index:%d\n",
+          store->time_i[0], store->time_i[1], store->time_i[2], store->time_i[3], store->time_i[4], store->time_i[5],
+          store->time_i[6], header->Size, index);
+#endif
+#ifdef MBR_RESON7K3_DEBUG2
+  if (verbose > 0)
+#else
+  if (verbose >= 2)
+#endif
+    mbsys_reson7k3_print_CompressedBeamformedMagnitude(verbose, CompressedBeamformedMagnitude, error);
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -6474,7 +6602,6 @@ int mbr_reson7k3_rd_CompressedBeamformedMagnitude(int verbose, char *buffer, voi
   }
 
   return (status);
-
 }
 
 /*--------------------------------------------------------------------*/
@@ -7204,6 +7331,41 @@ int mbr_reson7k3_rd_SystemEventMessage(int verbose, char *buffer, void *store_pt
   return (status);
 }
 /*--------------------------------------------------------------------*/
+/* read a u32 count followed by that many u32 values (record 7052) */
+static int mbr_reson7k3_rd_u32array(int verbose, char *buffer, unsigned int size, int *index,
+                                    u32 *n, u32 *nalloc, u32 **values, int *error) {
+  if ((unsigned int)*index + 4 + MBSYS_RESON7K_RECORDTAIL_SIZE > size) {
+    *n = 0;
+    *error = MB_ERROR_UNINTELLIGIBLE;
+    return (MB_FAILURE);
+  }
+  mb_get_binary_int(true, &buffer[*index], n);
+  *index += 4;
+  if (*n > (size - (unsigned int)*index - MBSYS_RESON7K_RECORDTAIL_SIZE) / 4) {
+    *n = 0;
+    *error = MB_ERROR_UNINTELLIGIBLE;
+    return (MB_FAILURE);
+  }
+
+  int status = MB_SUCCESS;
+  if (*nalloc < *n) {
+    status = mb_reallocd(verbose, __FILE__, __LINE__, *n * sizeof(u32), (void **)values, error);
+    if (status != MB_SUCCESS) {
+      *n = 0;
+      *nalloc = 0;
+      return (status);
+    }
+    *nalloc = *n;
+  }
+  for (u32 i = 0; i < *n; i++) {
+    mb_get_binary_int(true, &buffer[*index], &((*values)[i]));
+    *index += 4;
+  }
+
+  return (status);
+}
+
+/*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_RDRRecordingStatus(int verbose, char *buffer, void *store_ptr, int *error){
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -7222,7 +7384,127 @@ int mbr_reson7k3_rd_RDRRecordingStatus(int verbose, char *buffer, void *store_pt
   int index = 0;
   int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
-  // TODO Notdone
+  /* check that the record is long enough for the record type header */
+  index = header->Offset + 4;
+  if (status == MB_SUCCESS && header->Size < (unsigned int)index + R7KHDRSIZE_RDRRecordingStatus + MBSYS_RESON7K_RECORDTAIL_SIZE) {
+    status = MB_FAILURE;
+    *error = MB_ERROR_UNINTELLIGIBLE;
+  }
+
+  /* extract the record type header */
+  if (status == MB_SUCCESS) {
+    mb_get_binary_int(true, &buffer[index], &(RDRRecordingStatus->position));
+    index += 4;
+    RDRRecordingStatus->disk_free = (mb_u_char)buffer[index];
+    index++;
+    RDRRecordingStatus->mode = (mb_u_char)buffer[index];
+    index++;
+    mb_get_binary_int(true, &buffer[index], &(RDRRecordingStatus->filerecords));
+    index += 4;
+    mb_get_binary_long(true, &buffer[index], &(RDRRecordingStatus->filesize));
+    index += 8;
+    for (int i = 0; i < 10; i++) {
+      RDRRecordingStatus->first_time[i] = (mb_u_char)buffer[index];
+      index++;
+    }
+    for (int i = 0; i < 10; i++) {
+      RDRRecordingStatus->last_time[i] = (mb_u_char)buffer[index];
+      index++;
+    }
+    mb_get_binary_int(true, &buffer[index], &(RDRRecordingStatus->totaltime));
+    index += 4;
+    memcpy(RDRRecordingStatus->directory_name, &buffer[index], 256);
+    RDRRecordingStatus->directory_name[255] = '\0';
+    index += 256;
+    memcpy(RDRRecordingStatus->filename, &buffer[index], 256);
+    RDRRecordingStatus->filename[255] = '\0';
+    index += 256;
+    mb_get_binary_int(true, &buffer[index], &(RDRRecordingStatus->error));
+    index += 4;
+    mb_get_binary_int(true, &buffer[index], &(RDRRecordingStatus->flags));
+    index += 4;
+    mb_get_binary_int(true, &buffer[index], &(RDRRecordingStatus->logger_address));
+    index += 4;
+    RDRRecordingStatus->file_number = (mb_u_char)buffer[index];
+    index++;
+    RDRRecordingStatus->ping_data = (mb_u_char)buffer[index];
+    index++;
+    mb_get_binary_short(true, &buffer[index], &(RDRRecordingStatus->reserved));
+    index += 2;
+    for (int i = 0; i < 4; i++) {
+      mb_get_binary_int(true, &buffer[index], &(RDRRecordingStatus->reserved2[i]));
+      index += 4;
+    }
+  }
+
+  /* extract the record data - five arrays, each a u32 count followed by u32 values */
+  s7k3_rdrrecordingstatusdata *rdrrecordingstatusdata = &(RDRRecordingStatus->rdrrecordingstatusdata);
+  if (status == MB_SUCCESS)
+    status = mbr_reson7k3_rd_u32array(verbose, buffer, header->Size, &index,
+                                      &(rdrrecordingstatusdata->threshold_length),
+                                      &(rdrrecordingstatusdata->threshold_alloc),
+                                      &(rdrrecordingstatusdata->threshold_value_array), error);
+  if (status == MB_SUCCESS)
+    status = mbr_reson7k3_rd_u32array(verbose, buffer, header->Size, &index,
+                                      &(rdrrecordingstatusdata->included_records),
+                                      &(rdrrecordingstatusdata->included_records_alloc),
+                                      &(rdrrecordingstatusdata->included_records_array), error);
+  if (status == MB_SUCCESS)
+    status = mbr_reson7k3_rd_u32array(verbose, buffer, header->Size, &index,
+                                      &(rdrrecordingstatusdata->excluded_records),
+                                      &(rdrrecordingstatusdata->excluded_records_alloc),
+                                      &(rdrrecordingstatusdata->excluded_records_array), error);
+  if (status == MB_SUCCESS)
+    status = mbr_reson7k3_rd_u32array(verbose, buffer, header->Size, &index,
+                                      &(rdrrecordingstatusdata->included_devices),
+                                      &(rdrrecordingstatusdata->included_devices_alloc),
+                                      &(rdrrecordingstatusdata->included_devices_array), error);
+  if (status == MB_SUCCESS)
+    status = mbr_reson7k3_rd_u32array(verbose, buffer, header->Size, &index,
+                                      &(rdrrecordingstatusdata->excluded_devices),
+                                      &(rdrrecordingstatusdata->excluded_devices_alloc),
+                                      &(rdrrecordingstatusdata->excluded_devices_array), error);
+  if (status != MB_SUCCESS) {
+    rdrrecordingstatusdata->threshold_length = 0;
+    rdrrecordingstatusdata->included_records = 0;
+    rdrrecordingstatusdata->excluded_records = 0;
+    rdrrecordingstatusdata->included_devices = 0;
+    rdrrecordingstatusdata->excluded_devices = 0;
+  }
+
+  /* set kind */
+  if (status == MB_SUCCESS) {
+    /* set kind */
+    store->kind = MB_DATA_STATUS;
+    store->type = R7KRECID_RDRRecordingStatus;
+
+    /* get the time */
+    int time_j[5];
+    time_j[0] = header->s7kTime.Year;
+    time_j[1] = header->s7kTime.Day;
+    time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+    time_j[3] = (int)header->s7kTime.Seconds;
+    time_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time_j[3]));
+    mb_get_itime(verbose, time_j, store->time_i);
+    mb_get_time(verbose, store->time_i, &(store->time_d));
+  }
+  else {
+    store->kind = MB_DATA_NONE;
+  }
+
+/* print out the results */
+#ifdef MBR_RESON7K3_DEBUG
+  fprintf(stderr,
+          "R7KRECID_RDRRecordingStatus: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) size:%d index:%d\n",
+          store->time_i[0], store->time_i[1], store->time_i[2], store->time_i[3], store->time_i[4], store->time_i[5],
+          store->time_i[6], header->Size, index);
+#endif
+#ifdef MBR_RESON7K3_DEBUG2
+  if (verbose > 0)
+#else
+  if (verbose >= 2)
+#endif
+    mbsys_reson7k3_print_RDRRecordingStatus(verbose, RDRRecordingStatus, error);
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -7254,7 +7536,94 @@ int mbr_reson7k3_rd_Subscriptions(int verbose, char *buffer, void *store_ptr, in
   int index = 0;
   int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
-  // TODO Notdone
+  /* check that the record is long enough for the record type header */
+  index = header->Offset + 4;
+  if (status == MB_SUCCESS && header->Size < (unsigned int)index + R7KHDRSIZE_Subscriptions + MBSYS_RESON7K_RECORDTAIL_SIZE) {
+    status = MB_FAILURE;
+    *error = MB_ERROR_UNINTELLIGIBLE;
+  }
+
+  /* extract the record type header */
+  if (status == MB_SUCCESS) {
+    mb_get_binary_int(true, &buffer[index], &(Subscriptions->n_subscriptions));
+    index += 4;
+  }
+
+  /* check that the number of subscriptions fits the record */
+  if (status == MB_SUCCESS
+      && (Subscriptions->n_subscriptions < 0
+          || (unsigned int)Subscriptions->n_subscriptions
+              > (header->Size - index - MBSYS_RESON7K_RECORDTAIL_SIZE) / R7KRDTSIZE_Subscriptions)) {
+    status = MB_FAILURE;
+    *error = MB_ERROR_UNINTELLIGIBLE;
+  }
+
+  /* allocate memory for the subscriptions if needed */
+  if (status == MB_SUCCESS && Subscriptions->nalloc < (u32)Subscriptions->n_subscriptions) {
+    status = mb_reallocd(verbose, __FILE__, __LINE__, Subscriptions->n_subscriptions * sizeof(s7k3_subscriptionsdata),
+                         (void **)&(Subscriptions->subscriptionsdata), error);
+    if (status == MB_SUCCESS)
+      Subscriptions->nalloc = Subscriptions->n_subscriptions;
+    else
+      Subscriptions->nalloc = 0;
+  }
+  if (status != MB_SUCCESS)
+    Subscriptions->n_subscriptions = 0;
+
+  /* extract the record data */
+  for (int j = 0; j < Subscriptions->n_subscriptions; j++) {
+    s7k3_subscriptionsdata *subscriptionsdata = &(Subscriptions->subscriptionsdata[j]);
+    mb_get_binary_int(true, &buffer[index], &(subscriptionsdata->address));
+    index += 4;
+    mb_get_binary_short(true, &buffer[index], &(subscriptionsdata->port));
+    index += 2;
+    mb_get_binary_short(true, &buffer[index], &(subscriptionsdata->type));
+    index += 2;
+    mb_get_binary_int(true, &buffer[index], &(subscriptionsdata->records_number));
+    index += 4;
+    for (int i = 0; i < 64; i++) {
+      mb_get_binary_int(true, &buffer[index], &(subscriptionsdata->record_list[i]));
+      index += 4;
+    }
+    for (int i = 0; i < 128; i++) {
+      mb_get_binary_int(true, &buffer[index], &(subscriptionsdata->reserved[i]));
+      index += 4;
+    }
+  }
+
+  /* set kind */
+  if (status == MB_SUCCESS) {
+    /* set kind */
+    store->kind = MB_DATA_STATUS;
+    store->type = R7KRECID_Subscriptions;
+
+    /* get the time */
+    int time_j[5];
+    time_j[0] = header->s7kTime.Year;
+    time_j[1] = header->s7kTime.Day;
+    time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+    time_j[3] = (int)header->s7kTime.Seconds;
+    time_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time_j[3]));
+    mb_get_itime(verbose, time_j, store->time_i);
+    mb_get_time(verbose, store->time_i, &(store->time_d));
+  }
+  else {
+    store->kind = MB_DATA_NONE;
+  }
+
+/* print out the results */
+#ifdef MBR_RESON7K3_DEBUG
+  fprintf(stderr,
+          "R7KRECID_Subscriptions: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) size:%d index:%d\n",
+          store->time_i[0], store->time_i[1], store->time_i[2], store->time_i[3], store->time_i[4], store->time_i[5],
+          store->time_i[6], header->Size, index);
+#endif
+#ifdef MBR_RESON7K3_DEBUG2
+  if (verbose > 0)
+#else
+  if (verbose >= 2)
+#endif
+    mbsys_reson7k3_print_Subscriptions(verbose, Subscriptions, error);
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -7265,7 +7634,6 @@ int mbr_reson7k3_rd_Subscriptions(int verbose, char *buffer, void *store_ptr, in
   }
 
   return (status);
-
 }
 
 /*--------------------------------------------------------------------*/
@@ -7300,6 +7668,7 @@ int mbr_reson7k3_rd_RDRStorageRecording(int verbose, char *buffer, void *store_p
     index += 4;
   }
   RDRStorageRecording->mode = buffer[index];
+  index++;
   for (unsigned int i = 0; i < 256; i++) {
     RDRStorageRecording->file_name[i] = buffer[index];
     index++;
@@ -8681,7 +9050,76 @@ int mbr_reson7k3_rd_RemoteControl(int verbose, char *buffer, void *store_ptr, in
   int index = 0;
   int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
-  // TODO Notdone
+  /* check that the record is long enough for the record type header */
+  index = header->Offset + 4;
+  if (status == MB_SUCCESS && header->Size < (unsigned int)index + R7KHDRSIZE_RemoteControl + MBSYS_RESON7K_RECORDTAIL_SIZE) {
+    status = MB_FAILURE;
+    *error = MB_ERROR_UNINTELLIGIBLE;
+  }
+
+  /* extract the record type header */
+  if (status == MB_SUCCESS) {
+    mb_get_binary_int(true, &buffer[index], &(RemoteControl->remote_id));
+    index += 4;
+    mb_get_binary_int(true, &buffer[index], &(RemoteControl->ticket));
+    index += 4;
+    for (int i = 0; i < 2; i++) {
+      mb_get_binary_long(true, &buffer[index], &(RemoteControl->tracking_n[i]));
+      index += 8;
+    }
+  }
+
+  /* keep the remote control data as raw bytes */
+  if (status == MB_SUCCESS) {
+    RemoteControl->data_size = header->Size - index - MBSYS_RESON7K_RECORDTAIL_SIZE;
+    if (RemoteControl->data_alloc < RemoteControl->data_size) {
+      status = mb_reallocd(verbose, __FILE__, __LINE__, RemoteControl->data_size, (void **)&(RemoteControl->data), error);
+      if (status == MB_SUCCESS)
+        RemoteControl->data_alloc = RemoteControl->data_size;
+      else
+        RemoteControl->data_alloc = 0;
+    }
+    if (status == MB_SUCCESS) {
+      memcpy(RemoteControl->data, &buffer[index], RemoteControl->data_size);
+      index += RemoteControl->data_size;
+    }
+  }
+  if (status != MB_SUCCESS)
+    RemoteControl->data_size = 0;
+
+  /* set kind */
+  if (status == MB_SUCCESS) {
+    /* set kind */
+    store->kind = MB_DATA_STATUS;
+    store->type = R7KRECID_RemoteControl;
+
+    /* get the time */
+    int time_j[5];
+    time_j[0] = header->s7kTime.Year;
+    time_j[1] = header->s7kTime.Day;
+    time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+    time_j[3] = (int)header->s7kTime.Seconds;
+    time_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time_j[3]));
+    mb_get_itime(verbose, time_j, store->time_i);
+    mb_get_time(verbose, store->time_i, &(store->time_d));
+  }
+  else {
+    store->kind = MB_DATA_NONE;
+  }
+
+/* print out the results */
+#ifdef MBR_RESON7K3_DEBUG
+  fprintf(stderr,
+          "R7KRECID_RemoteControl: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) size:%d index:%d\n",
+          store->time_i[0], store->time_i[1], store->time_i[2], store->time_i[3], store->time_i[4], store->time_i[5],
+          store->time_i[6], header->Size, index);
+#endif
+#ifdef MBR_RESON7K3_DEBUG2
+  if (verbose > 0)
+#else
+  if (verbose >= 2)
+#endif
+    mbsys_reson7k3_print_RemoteControl(verbose, RemoteControl, error);
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -8692,7 +9130,6 @@ int mbr_reson7k3_rd_RemoteControl(int verbose, char *buffer, void *store_ptr, in
   }
 
   return (status);
-
 }
 
 /*--------------------------------------------------------------------*/
@@ -8714,7 +9151,56 @@ int mbr_reson7k3_rd_RemoteControlAcknowledge(int verbose, char *buffer, void *st
   int index = 0;
   int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
-  // TODO Notdone
+  /* check that the record is long enough for the record type header */
+  index = header->Offset + 4;
+  if (status == MB_SUCCESS && header->Size < (unsigned int)index + R7KHDRSIZE_RemoteControlAcknowledge + MBSYS_RESON7K_RECORDTAIL_SIZE) {
+    status = MB_FAILURE;
+    *error = MB_ERROR_UNINTELLIGIBLE;
+  }
+
+  /* extract the record type header */
+  if (status == MB_SUCCESS) {
+    mb_get_binary_int(true, &buffer[index], &(RemoteControlAcknowledge->ticket));
+    index += 4;
+    for (int i = 0; i < 2; i++) {
+      mb_get_binary_long(true, &buffer[index], &(RemoteControlAcknowledge->tracking_n[i]));
+      index += 8;
+    }
+  }
+
+  /* set kind */
+  if (status == MB_SUCCESS) {
+    /* set kind */
+    store->kind = MB_DATA_STATUS;
+    store->type = R7KRECID_RemoteControlAcknowledge;
+
+    /* get the time */
+    int time_j[5];
+    time_j[0] = header->s7kTime.Year;
+    time_j[1] = header->s7kTime.Day;
+    time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+    time_j[3] = (int)header->s7kTime.Seconds;
+    time_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time_j[3]));
+    mb_get_itime(verbose, time_j, store->time_i);
+    mb_get_time(verbose, store->time_i, &(store->time_d));
+  }
+  else {
+    store->kind = MB_DATA_NONE;
+  }
+
+/* print out the results */
+#ifdef MBR_RESON7K3_DEBUG
+  fprintf(stderr,
+          "R7KRECID_RemoteControlAcknowledge: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) size:%d index:%d\n",
+          store->time_i[0], store->time_i[1], store->time_i[2], store->time_i[3], store->time_i[4], store->time_i[5],
+          store->time_i[6], header->Size, index);
+#endif
+#ifdef MBR_RESON7K3_DEBUG2
+  if (verbose > 0)
+#else
+  if (verbose >= 2)
+#endif
+    mbsys_reson7k3_print_RemoteControlAcknowledge(verbose, RemoteControlAcknowledge, error);
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -8725,7 +9211,6 @@ int mbr_reson7k3_rd_RemoteControlAcknowledge(int verbose, char *buffer, void *st
   }
 
   return (status);
-
 }
 
 /*--------------------------------------------------------------------*/
@@ -8747,7 +9232,58 @@ int mbr_reson7k3_rd_RemoteControlNotAcknowledge(int verbose, char *buffer, void 
   int index = 0;
   int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
-  // TODO Notdone
+  /* check that the record is long enough for the record type header */
+  index = header->Offset + 4;
+  if (status == MB_SUCCESS && header->Size < (unsigned int)index + R7KHDRSIZE_RemoteControlNotAcknowledge + MBSYS_RESON7K_RECORDTAIL_SIZE) {
+    status = MB_FAILURE;
+    *error = MB_ERROR_UNINTELLIGIBLE;
+  }
+
+  /* extract the record type header */
+  if (status == MB_SUCCESS) {
+    mb_get_binary_int(true, &buffer[index], &(RemoteControlNotAcknowledge->ticket));
+    index += 4;
+    for (int i = 0; i < 2; i++) {
+      mb_get_binary_long(true, &buffer[index], &(RemoteControlNotAcknowledge->tracking_n[i]));
+      index += 8;
+    }
+    mb_get_binary_int(true, &buffer[index], &(RemoteControlNotAcknowledge->error_code));
+    index += 4;
+  }
+
+  /* set kind */
+  if (status == MB_SUCCESS) {
+    /* set kind */
+    store->kind = MB_DATA_STATUS;
+    store->type = R7KRECID_RemoteControlNotAcknowledge;
+
+    /* get the time */
+    int time_j[5];
+    time_j[0] = header->s7kTime.Year;
+    time_j[1] = header->s7kTime.Day;
+    time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+    time_j[3] = (int)header->s7kTime.Seconds;
+    time_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time_j[3]));
+    mb_get_itime(verbose, time_j, store->time_i);
+    mb_get_time(verbose, store->time_i, &(store->time_d));
+  }
+  else {
+    store->kind = MB_DATA_NONE;
+  }
+
+/* print out the results */
+#ifdef MBR_RESON7K3_DEBUG
+  fprintf(stderr,
+          "R7KRECID_RemoteControlNotAcknowledge: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) size:%d index:%d\n",
+          store->time_i[0], store->time_i[1], store->time_i[2], store->time_i[3], store->time_i[4], store->time_i[5],
+          store->time_i[6], header->Size, index);
+#endif
+#ifdef MBR_RESON7K3_DEBUG2
+  if (verbose > 0)
+#else
+  if (verbose >= 2)
+#endif
+    mbsys_reson7k3_print_RemoteControlNotAcknowledge(verbose, RemoteControlNotAcknowledge, error);
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -8758,7 +9294,6 @@ int mbr_reson7k3_rd_RemoteControlNotAcknowledge(int verbose, char *buffer, void 
   }
 
   return (status);
-
 }
 
 /*--------------------------------------------------------------------*/
@@ -9078,7 +9613,11 @@ int mbr_reson7k3_rd_CommonSystemSettings(int verbose, char *buffer, void *store_
   index++;
   CommonSystemSettings->ignorepps_errors = buffer[index];
   index++;
-  for (unsigned int i = 0;i<15;i++) {
+  CommonSystemSettings->restore_recording = buffer[index];
+  index++;
+  CommonSystemSettings->restore_tracker = buffer[index];
+  index++;
+  for (unsigned int i = 0;i<13;i++) {
     CommonSystemSettings->reserved1[i] = buffer[index];
     index++;
   }
@@ -9336,6 +9875,20 @@ int mbr_reson7k3_rd_SoundVelocity(int verbose, char *buffer, void *store_ptr, in
   index = header->Offset + 4;
   mb_get_binary_float(true, &buffer[index], &(SoundVelocity->soundvelocity));
   index += 4;
+
+  /* temperature and pressure are present only from IO Module V4.0.0.8 on */
+  if (header->Size >= (unsigned int)index + 8 + MBSYS_RESON7K_RECORDTAIL_SIZE) {
+    SoundVelocity->optionaldata = true;
+    mb_get_binary_float(true, &buffer[index], &(SoundVelocity->temperature));
+    index += 4;
+    mb_get_binary_float(true, &buffer[index], &(SoundVelocity->pressure));
+    index += 4;
+  }
+  else {
+    SoundVelocity->optionaldata = false;
+    SoundVelocity->temperature = 0.0;
+    SoundVelocity->pressure = 0.0;
+  }
 
   /* set kind */
   if (status == MB_SUCCESS) {
@@ -9910,6 +10463,7 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
           store->read_TVG = false;
           store->read_Image = false;
           store->read_PingMotion = false;
+          store->read_AdaptiveGate = false;
           store->read_DetectionDataSetup = false;
           store->read_Beamformed = false;
           store->read_VernierProcessingDataRaw = false;
@@ -11197,6 +11751,9 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
         status = mbr_reson7k3_rd_AdaptiveGate(verbose, buffer, store_ptr, error);
         if (status == MB_SUCCESS) {
           store->nrec_AdaptiveGate++;
+          store->read_AdaptiveGate = true;
+          s7k3_AdaptiveGate *AdaptiveGate = &(store->AdaptiveGate);
+          header = &(AdaptiveGate->header);
         }
       }
       else if (*recordid == R7KRECID_DetectionDataSetup) {
@@ -16697,6 +17254,7 @@ int mbr_reson7k3_wr_VernierProcessingDataRaw(int verbose, int *bufferalloc, char
   /* figure out size of output record */
   *size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
   *size += R7KHDRSIZE_VernierProcessingDataRaw;
+  *size += 12 * VernierProcessingDataRaw->beam_number * VernierProcessingDataRaw->decimated_samples;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -16772,37 +17330,37 @@ int mbr_reson7k3_wr_VernierProcessingDataRaw(int verbose, int *bufferalloc, char
     }
     for (unsigned int i = 0; i < VernierProcessingDataRaw->decimated_samples; i++) {
       for (int j = 0; j < VernierProcessingDataRaw->beam_number; j++) {
-        mb_put_binary_short(true, VernierProcessingDataRaw->anglemagnitude[i].angle[j], &buffer[index]);
+        mb_put_binary_short(true, VernierProcessingDataRaw->anglemagnitude[j].angle[i], &buffer[index]);
         index += 2;
       }
     }
     for (unsigned int i = 0; i < VernierProcessingDataRaw->decimated_samples; i++) {
       for (int j = 0; j < VernierProcessingDataRaw->beam_number; j++) {
-        mb_put_binary_short(true, VernierProcessingDataRaw->anglemagnitude[i].magnitude[j], &buffer[index]);
+        mb_put_binary_short(true, VernierProcessingDataRaw->anglemagnitude[j].magnitude[i], &buffer[index]);
         index += 2;
       }
     }
     for (unsigned int i = 0; i < VernierProcessingDataRaw->decimated_samples; i++) {
       for (int j = 0; j < VernierProcessingDataRaw->beam_number; j++) {
-        mb_put_binary_short(true, VernierProcessingDataRaw->anglemagnitude[i].coherence[j], &buffer[index]);
+        mb_put_binary_short(true, VernierProcessingDataRaw->anglemagnitude[j].coherence[i], &buffer[index]);
         index += 2;
       }
     }
     for (unsigned int i = 0; i < VernierProcessingDataRaw->decimated_samples; i++) {
       for (int j = 0; j < VernierProcessingDataRaw->beam_number; j++) {
-        mb_put_binary_short(true, VernierProcessingDataRaw->anglemagnitude[i].cross_power[j], &buffer[index]);
+        mb_put_binary_short(true, VernierProcessingDataRaw->anglemagnitude[j].cross_power[i], &buffer[index]);
         index += 2;
       }
     }
     for (unsigned int i = 0; i < VernierProcessingDataRaw->decimated_samples; i++) {
       for (int j = 0; j < VernierProcessingDataRaw->beam_number; j++) {
-        mb_put_binary_short(true, VernierProcessingDataRaw->anglemagnitude[i].quality_factor[j], &buffer[index]);
+        mb_put_binary_short(true, VernierProcessingDataRaw->anglemagnitude[j].quality_factor[i], &buffer[index]);
         index += 2;
       }
     }
     for (unsigned int i = 0; i < VernierProcessingDataRaw->decimated_samples; i++) {
       for (int j = 0; j < VernierProcessingDataRaw->beam_number; j++) {
-        mb_put_binary_short(true, VernierProcessingDataRaw->anglemagnitude[i].reserved[j], &buffer[index]);
+        mb_put_binary_short(true, VernierProcessingDataRaw->anglemagnitude[j].reserved[i], &buffer[index]);
         index += 2;
       }
     }
@@ -17628,8 +18186,8 @@ int mbr_reson7k3_wr_VernierProcessingDataFiltered(int verbose, int *bufferalloc,
     index += 4;
     mb_put_binary_short(true, VernierProcessingDataFiltered->multi_ping, &buffer[index]);
     index += 2;
-    mb_put_binary_int(true, VernierProcessingDataFiltered->number_soundings, &buffer[index]);
-    index += 4;
+    mb_put_binary_short(true, VernierProcessingDataFiltered->number_soundings, &buffer[index]);
+    index += 2;
     mb_put_binary_float(true, VernierProcessingDataFiltered->min_angle, &buffer[index]);
     index += 4;
     mb_put_binary_float(true, VernierProcessingDataFiltered->max_angle, &buffer[index]);
@@ -17644,7 +18202,7 @@ int mbr_reson7k3_wr_VernierProcessingDataFiltered(int verbose, int *bufferalloc,
       index += 4;
       mb_put_binary_float(true, vernierprocessingdatasoundings->elevation, &buffer[index]);
       index += 4;
-      mb_put_binary_float(true, vernierprocessingdatasoundings->elevation, &buffer[index]);
+      mb_put_binary_float(true, vernierprocessingdatasoundings->reserved, &buffer[index]);
       index += 4;
     }
 
@@ -17970,11 +18528,7 @@ int mbr_reson7k3_wr_CompressedBeamformedMagnitude(int verbose, int *bufferalloc,
   /* figure out size of output record */
   *size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
   *size += R7KHDRSIZE_CompressedBeamformedMagnitude;
-
-    // TODO Notdone
-    // Not implemented because documentation is vague about the actual sample size
-    // and because this record is deprecated and unlikely to be part of a 7k3
-    // data stream
+  *size += CompressedBeamformedMagnitude->data_size;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -17997,10 +18551,27 @@ int mbr_reson7k3_wr_CompressedBeamformedMagnitude(int verbose, int *bufferalloc,
     status = mbr_reson7k3_wr_header(verbose, buffer, &index, header, error);
 
     /* insert the data */
-    // TODO Notdone
-    // Not implemented because documentation is vague about the actual sample size
-    // and because this record is deprecated and unlikely to be part of a 7k3
-    // data stream
+    index = header->Offset + 4;
+    mb_put_binary_long(true, CompressedBeamformedMagnitude->serial_number, &buffer[index]);
+    index += 8;
+    mb_put_binary_int(true, CompressedBeamformedMagnitude->ping_number, &buffer[index]);
+    index += 4;
+    mb_put_binary_short(true, CompressedBeamformedMagnitude->multi_ping, &buffer[index]);
+    index += 2;
+    mb_put_binary_short(true, CompressedBeamformedMagnitude->number_beams, &buffer[index]);
+    index += 2;
+    mb_put_binary_short(true, CompressedBeamformedMagnitude->flags, &buffer[index]);
+    index += 2;
+    mb_put_binary_float(true, CompressedBeamformedMagnitude->sample_rate, &buffer[index]);
+    index += 4;
+    for (int i = 0; i < 4; i++) {
+      mb_put_binary_int(true, CompressedBeamformedMagnitude->reserved[i], &buffer[index]);
+      index += 4;
+    }
+    if (CompressedBeamformedMagnitude->data_size > 0) {
+      memcpy(&buffer[index], CompressedBeamformedMagnitude->data, CompressedBeamformedMagnitude->data_size);
+      index += CompressedBeamformedMagnitude->data_size;
+    }
 
     /* reset the header size value */
     mb_put_binary_int(true, ((unsigned int)(index + 4)), &buffer[8]);
@@ -18031,6 +18602,7 @@ int mbr_reson7k3_wr_CompressedBeamformedMagnitude(int verbose, int *bufferalloc,
 
   return (status);
 }
+
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_CompressedWaterColumn(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
@@ -18758,10 +19330,14 @@ int mbr_reson7k3_wr_RDRRecordingStatus(int verbose, int *bufferalloc, char **buf
 #endif
     mbsys_reson7k3_print_RDRRecordingStatus(verbose, RDRRecordingStatus, error);
 
+  s7k3_rdrrecordingstatusdata *rdrrecordingstatusdata = &(RDRRecordingStatus->rdrrecordingstatusdata);
+
   /* figure out size of output record */
   *size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
   *size += R7KHDRSIZE_RDRRecordingStatus;
-    // TODO Notdone
+  *size += 4 * (5 + rdrrecordingstatusdata->threshold_length + rdrrecordingstatusdata->included_records
+                + rdrrecordingstatusdata->excluded_records + rdrrecordingstatusdata->included_devices
+                + rdrrecordingstatusdata->excluded_devices);
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -18784,7 +19360,77 @@ int mbr_reson7k3_wr_RDRRecordingStatus(int verbose, int *bufferalloc, char **buf
     status = mbr_reson7k3_wr_header(verbose, buffer, &index, header, error);
 
     /* insert the data */
-    // TODO Notdone
+    index = header->Offset + 4;
+    mb_put_binary_int(true, RDRRecordingStatus->position, &buffer[index]);
+    index += 4;
+    buffer[index] = (char) RDRRecordingStatus->disk_free;
+    index++;
+    buffer[index] = (char) RDRRecordingStatus->mode;
+    index++;
+    mb_put_binary_int(true, RDRRecordingStatus->filerecords, &buffer[index]);
+    index += 4;
+    mb_put_binary_long(true, RDRRecordingStatus->filesize, &buffer[index]);
+    index += 8;
+    for (int i = 0; i < 10; i++) {
+      buffer[index] = (char) RDRRecordingStatus->first_time[i];
+      index++;
+    }
+    for (int i = 0; i < 10; i++) {
+      buffer[index] = (char) RDRRecordingStatus->last_time[i];
+      index++;
+    }
+    mb_put_binary_int(true, RDRRecordingStatus->totaltime, &buffer[index]);
+    index += 4;
+    memcpy(&buffer[index], RDRRecordingStatus->directory_name, 256);
+    index += 256;
+    memcpy(&buffer[index], RDRRecordingStatus->filename, 256);
+    index += 256;
+    mb_put_binary_int(true, RDRRecordingStatus->error, &buffer[index]);
+    index += 4;
+    mb_put_binary_int(true, RDRRecordingStatus->flags, &buffer[index]);
+    index += 4;
+    mb_put_binary_int(true, RDRRecordingStatus->logger_address, &buffer[index]);
+    index += 4;
+    buffer[index] = (char) RDRRecordingStatus->file_number;
+    index++;
+    buffer[index] = (char) RDRRecordingStatus->ping_data;
+    index++;
+    mb_put_binary_short(true, RDRRecordingStatus->reserved, &buffer[index]);
+    index += 2;
+    for (int i = 0; i < 4; i++) {
+      mb_put_binary_int(true, RDRRecordingStatus->reserved2[i], &buffer[index]);
+      index += 4;
+    }
+    mb_put_binary_int(true, rdrrecordingstatusdata->threshold_length, &buffer[index]);
+    index += 4;
+    for (u32 i = 0; i < rdrrecordingstatusdata->threshold_length; i++) {
+      mb_put_binary_int(true, rdrrecordingstatusdata->threshold_value_array[i], &buffer[index]);
+      index += 4;
+    }
+    mb_put_binary_int(true, rdrrecordingstatusdata->included_records, &buffer[index]);
+    index += 4;
+    for (u32 i = 0; i < rdrrecordingstatusdata->included_records; i++) {
+      mb_put_binary_int(true, rdrrecordingstatusdata->included_records_array[i], &buffer[index]);
+      index += 4;
+    }
+    mb_put_binary_int(true, rdrrecordingstatusdata->excluded_records, &buffer[index]);
+    index += 4;
+    for (u32 i = 0; i < rdrrecordingstatusdata->excluded_records; i++) {
+      mb_put_binary_int(true, rdrrecordingstatusdata->excluded_records_array[i], &buffer[index]);
+      index += 4;
+    }
+    mb_put_binary_int(true, rdrrecordingstatusdata->included_devices, &buffer[index]);
+    index += 4;
+    for (u32 i = 0; i < rdrrecordingstatusdata->included_devices; i++) {
+      mb_put_binary_int(true, rdrrecordingstatusdata->included_devices_array[i], &buffer[index]);
+      index += 4;
+    }
+    mb_put_binary_int(true, rdrrecordingstatusdata->excluded_devices, &buffer[index]);
+    index += 4;
+    for (u32 i = 0; i < rdrrecordingstatusdata->excluded_devices; i++) {
+      mb_put_binary_int(true, rdrrecordingstatusdata->excluded_devices_array[i], &buffer[index]);
+      index += 4;
+    }
 
     /* reset the header size value */
     mb_put_binary_int(true, ((unsigned int)(index + 4)), &buffer[8]);
@@ -18815,6 +19461,7 @@ int mbr_reson7k3_wr_RDRRecordingStatus(int verbose, int *bufferalloc, char **buf
 
   return (status);
 }
+
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Subscriptions(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
@@ -18846,7 +19493,8 @@ int mbr_reson7k3_wr_Subscriptions(int verbose, int *bufferalloc, char **bufferpt
   /* figure out size of output record */
   *size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
   *size += R7KHDRSIZE_Subscriptions;
-  *size += Subscriptions->n_subscriptions * R7KRDTSIZE_Subscriptions;
+  if (Subscriptions->n_subscriptions > 0)
+    *size += Subscriptions->n_subscriptions * R7KRDTSIZE_Subscriptions;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -18869,7 +19517,28 @@ int mbr_reson7k3_wr_Subscriptions(int verbose, int *bufferalloc, char **bufferpt
     status = mbr_reson7k3_wr_header(verbose, buffer, &index, header, error);
 
     /* insert the data */
-    // TODO Notdone
+    index = header->Offset + 4;
+    mb_put_binary_int(true, Subscriptions->n_subscriptions, &buffer[index]);
+    index += 4;
+    for (int j = 0; j < Subscriptions->n_subscriptions; j++) {
+      s7k3_subscriptionsdata *subscriptionsdata = &(Subscriptions->subscriptionsdata[j]);
+      mb_put_binary_int(true, subscriptionsdata->address, &buffer[index]);
+      index += 4;
+      mb_put_binary_short(true, subscriptionsdata->port, &buffer[index]);
+      index += 2;
+      mb_put_binary_short(true, subscriptionsdata->type, &buffer[index]);
+      index += 2;
+      mb_put_binary_int(true, subscriptionsdata->records_number, &buffer[index]);
+      index += 4;
+      for (int i = 0; i < 64; i++) {
+        mb_put_binary_int(true, subscriptionsdata->record_list[i], &buffer[index]);
+        index += 4;
+      }
+      for (int i = 0; i < 128; i++) {
+        mb_put_binary_int(true, subscriptionsdata->reserved[i], &buffer[index]);
+        index += 4;
+      }
+    }
 
     /* reset the header size value */
     mb_put_binary_int(true, ((unsigned int)(index + 4)), &buffer[8]);
@@ -18900,6 +19569,7 @@ int mbr_reson7k3_wr_Subscriptions(int verbose, int *bufferalloc, char **bufferpt
 
   return (status);
 }
+
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_RDRStorageRecording(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
@@ -18965,6 +19635,7 @@ int mbr_reson7k3_wr_RDRStorageRecording(int verbose, int *bufferalloc, char **bu
       index += 4;
     }
     buffer[index] = (char) RDRStorageRecording->mode;
+    index++;
     for (unsigned int i = 0; i < 256; i++) {
       buffer[index] = (char) RDRStorageRecording->file_name[i];
       index++;
@@ -19946,6 +20617,7 @@ int mbr_reson7k3_wr_RemoteControl(int verbose, int *bufferalloc, char **bufferpt
   /* figure out size of output record */
   *size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
   *size += R7KHDRSIZE_RemoteControl;
+  *size += RemoteControl->data_size;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -19968,7 +20640,19 @@ int mbr_reson7k3_wr_RemoteControl(int verbose, int *bufferalloc, char **bufferpt
     status = mbr_reson7k3_wr_header(verbose, buffer, &index, header, error);
 
     /* insert the data */
-    // TODO Notdone
+    index = header->Offset + 4;
+    mb_put_binary_int(true, RemoteControl->remote_id, &buffer[index]);
+    index += 4;
+    mb_put_binary_int(true, RemoteControl->ticket, &buffer[index]);
+    index += 4;
+    for (int i = 0; i < 2; i++) {
+      mb_put_binary_long(true, RemoteControl->tracking_n[i], &buffer[index]);
+      index += 8;
+    }
+    if (RemoteControl->data_size > 0) {
+      memcpy(&buffer[index], RemoteControl->data, RemoteControl->data_size);
+      index += RemoteControl->data_size;
+    }
 
     /* reset the header size value */
     mb_put_binary_int(true, ((unsigned int)(index + 4)), &buffer[8]);
@@ -19999,6 +20683,7 @@ int mbr_reson7k3_wr_RemoteControl(int verbose, int *bufferalloc, char **bufferpt
 
   return (status);
 }
+
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_RemoteControlAcknowledge(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
@@ -20052,7 +20737,13 @@ int mbr_reson7k3_wr_RemoteControlAcknowledge(int verbose, int *bufferalloc, char
     status = mbr_reson7k3_wr_header(verbose, buffer, &index, header, error);
 
     /* insert the data */
-    // TODO Notdone
+    index = header->Offset + 4;
+    mb_put_binary_int(true, RemoteControlAcknowledge->ticket, &buffer[index]);
+    index += 4;
+    for (int i = 0; i < 2; i++) {
+      mb_put_binary_long(true, RemoteControlAcknowledge->tracking_n[i], &buffer[index]);
+      index += 8;
+    }
 
     /* reset the header size value */
     mb_put_binary_int(true, ((unsigned int)(index + 4)), &buffer[8]);
@@ -20083,6 +20774,7 @@ int mbr_reson7k3_wr_RemoteControlAcknowledge(int verbose, int *bufferalloc, char
 
   return (status);
 }
+
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_RemoteControlNotAcknowledge(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
@@ -20136,7 +20828,15 @@ int mbr_reson7k3_wr_RemoteControlNotAcknowledge(int verbose, int *bufferalloc, c
     status = mbr_reson7k3_wr_header(verbose, buffer, &index, header, error);
 
     /* insert the data */
-    // TODO Notdone
+    index = header->Offset + 4;
+    mb_put_binary_int(true, RemoteControlNotAcknowledge->ticket, &buffer[index]);
+    index += 4;
+    for (int i = 0; i < 2; i++) {
+      mb_put_binary_long(true, RemoteControlNotAcknowledge->tracking_n[i], &buffer[index]);
+      index += 8;
+    }
+    mb_put_binary_int(true, RemoteControlNotAcknowledge->error_code, &buffer[index]);
+    index += 4;
 
     /* reset the header size value */
     mb_put_binary_int(true, ((unsigned int)(index + 4)), &buffer[8]);
@@ -20167,6 +20867,7 @@ int mbr_reson7k3_wr_RemoteControlNotAcknowledge(int verbose, int *bufferalloc, c
 
   return (status);
 }
+
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_RemoteControlSonarSettings(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size,
                                           int *error) {
@@ -20535,7 +21236,11 @@ int mbr_reson7k3_wr_CommonSystemSettings(int verbose, int *bufferalloc, char **b
     index++;
     buffer[index] = (char) CommonSystemSettings->ignorepps_errors;
     index++;
-    for (unsigned int i = 0;i<15;i++) {
+    buffer[index] = (char) CommonSystemSettings->restore_recording;
+    index++;
+    buffer[index] = (char) CommonSystemSettings->restore_tracker;
+    index++;
+    for (unsigned int i = 0;i<13;i++) {
       buffer[index] = (char) CommonSystemSettings->reserved1[i];
       index++;
     }
@@ -20812,6 +21517,8 @@ int mbr_reson7k3_wr_SoundVelocity(int verbose, int *bufferalloc, char **bufferpt
   /* figure out size of output record */
   *size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
   *size += R7KHDRSIZE_SoundVelocity;
+  if (SoundVelocity->optionaldata)
+    *size += 8;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -20837,6 +21544,12 @@ int mbr_reson7k3_wr_SoundVelocity(int verbose, int *bufferalloc, char **bufferpt
     index = header->Offset + 4;
     mb_put_binary_float(true, SoundVelocity->soundvelocity, &buffer[index]);
     index += 4;
+    if (SoundVelocity->optionaldata) {
+      mb_put_binary_float(true, SoundVelocity->temperature, &buffer[index]);
+      index += 4;
+      mb_put_binary_float(true, SoundVelocity->pressure, &buffer[index]);
+      index += 4;
+    }
 
     /* reset the header size value */
     mb_put_binary_int(true, ((unsigned int)(index + 4)), &buffer[8]);
@@ -21500,6 +22213,19 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
       status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
     }
 
+    /* Reson 7k Adaptive Gate (record 7014) */
+    if (status == MB_SUCCESS && store->read_AdaptiveGate) {
+      store->type = R7KRECID_AdaptiveGate;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_AdaptiveGate:                      %4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_AdaptiveGate(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->AdaptiveGate.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+
     /* Reson 7k DetectionDataSetup (record 7017) */
     if (status == MB_SUCCESS && store->read_DetectionDataSetup) {
       store->type = R7KRECID_DetectionDataSetup;
@@ -21526,6 +22252,19 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
       status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
     }
 
+    /* Reson 7k Vernier Processing Data Raw (record 7019) */
+    if (status == MB_SUCCESS && store->read_VernierProcessingDataRaw) {
+      store->type = R7KRECID_VernierProcessingDataRaw;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_VernierProcessingDataRaw:          %4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_VernierProcessingDataRaw(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->VernierProcessingDataRaw.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+
     /* Reson 7k RawDetection (record 7027) */
     if (status == MB_SUCCESS && store->read_RawDetection) {
       store->type = R7KRECID_RawDetection;
@@ -21549,6 +22288,19 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
       buffer = (char *)*bufferptr;
       write_len = (size_t)size;
       status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Snippet.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+
+    /* Reson 7k Vernier Processing Data Filtered (record 7029) */
+    if (status == MB_SUCCESS && store->read_VernierProcessingDataFiltered) {
+      store->type = R7KRECID_VernierProcessingDataFiltered;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_VernierProcessingDataFiltered:     %4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_VernierProcessingDataFiltered(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->VernierProcessingDataFiltered.header, error);
       status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
     }
 
@@ -21935,6 +22687,12 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
         buffer = (char *)*bufferptr;
         write_len = (size_t)size;
         status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SonarInstallationIDs.header, error);
+        break;
+      case R7KRECID_Mystery:
+        status = mbr_reson7k3_wr_Mystery(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Mystery.header, error);
         break;
       case R7KRECID_SonarPipeEnvironment:
         status = mbr_reson7k3_wr_SonarPipeEnvironment(verbose, bufferalloc, bufferptr, store_ptr, &size, error);

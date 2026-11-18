@@ -1,4 +1,4 @@
-.TH mbkongsbergpreprocess 1 "7 September 2026" "MB-System 5.0" "MB-System 5.0"
+.TH mbkongsbergpreprocess 1 "16 October 2026" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbkongsbergpreprocess\fP \- performs preprocessing of data from third generation
 Kongsberg multibeam sonars (e.g. EM122, EM302, EM710, EM2040, M3).
@@ -203,12 +203,12 @@ a data record type. The possibilities for Kongsberg data include:
      MB_DATA_HEIGHT		16
      MB_DATA_HEADING		17
      MB_DATA_ATTITUDE		18
-     MB_DATA_NAV1		28
-     MB_DATA_NAV2		29
-     MB_DATA_NAV3		30
-     MB_DATA_ATTITUDE1		55
-     MB_DATA_ATTITUDE2		56
-     MB_DATA_ATTITUDE3		57
+     MB_DATA_NAV1		29
+     MB_DATA_NAV2		30
+     MB_DATA_NAV3		31
+     MB_DATA_ATTITUDE1		56
+     MB_DATA_ATTITUDE2		57
+     MB_DATA_ATTITUDE3		58
 .br
 The default sources for position, heading and sensor depth are:
      nav_source = MB_DATA_NAV
@@ -311,10 +311,10 @@ types read in the file at the end of the file statistics:
     DN: 3022 MB_DATA_CLOCK (ID=14): Simrad clock datagram
     DN: 2964 MB_DATA_ATTITUDE (ID=18): Attitude record
     DN: 731 MB_DATA_SSV (ID=19): Surface sound speed record
-    DN: 3022 MB_DATA_NAV3 (ID=30): Auxiliary nav system 3
-    DN: 3023 MB_DATA_STATUS (ID=46): Status record
-    DN: 2964 MB_DATA_ATTITUDE1 (55): ancillary attitude system 1
-    DN: 1512 MB_DATA_ATTITUDE2 (56): ancillary attitude system 2
+    DN: 3022 MB_DATA_NAV3 (ID=31): Auxiliary nav system 3
+    DN: 3023 MB_DATA_STATUS (ID=47): Status record
+    DN: 2964 MB_DATA_ATTITUDE1 (56): ancillary attitude system 1
+    DN: 1512 MB_DATA_ATTITUDE2 (57): ancillary attitude system 2
 
     Nonfatal Error Notices:
     EN: 20551 MB_ERROR_NO_DATA_REQUESTED (ID=\-11): No data requested for buffer load
@@ -322,10 +322,10 @@ types read in the file at the end of the file statistics:
     Problem Notices:
 
 This listing shows that the format 58 file includes
-MB_DATA_NAV (\fIsource\fP = 12) and MB_DATA_NAV3 (\fIsource\fP = 30) records,
+MB_DATA_NAV (\fIsource\fP = 12) and MB_DATA_NAV3 (\fIsource\fP = 31) records,
 both of which include both position and heading data. Also included are three
 sources of attitude data: MB_DATA_ATTITUDE (\fIsource\fP = 18),
-MB_DATA_ATTITUDE1 (\fIsource\fP = 55), and MB_DATA_ATTITUDE2 (\fIsource\fP = 56).
+MB_DATA_ATTITUDE1 (\fIsource\fP = 56), and MB_DATA_ATTITUDE2 (\fIsource\fP = 57).
 
 To extract and use the default navigation, heading, and attitude data, the
 following will suffice:
@@ -337,10 +337,10 @@ heading, and \fB\-S\fP\fI3/source\fP for attitude is:
     mbkongsbergpreprocess \-I datalist_raw.mb-1 \-V \fB\-S\fP\fI1/12\fP \fB\-S\fP\fI2/12\fP \fB\-S\fP\fI3/18\fP
 
 To interpolate navigation and heading from the secondary navigation source, use
-    \fB\-S\fP\fI1/30\fP \fB\-S\fP\fI2/30\fP
+    \fB\-S\fP\fI1/31\fP \fB\-S\fP\fI2/31\fP
 
 To interpolate attitude from ancillary attitude system 2, use:
-    \fB\-S\fP\fI3/56\fP
+    \fB\-S\fP\fI3/57\fP
 
 .SH SEE ALSO
 \fBmbsystem\fP(1), \fBmbformat\fP(1), \fBmbinfo\fP(1)

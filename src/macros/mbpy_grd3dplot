@@ -188,7 +188,8 @@ def build_cpt(args, grid_info: layout.GridInfo, contour_int: float):
 
 
 def main(argv=None) -> int:
-    args = build_arg_parser().parse_args(argv)
+    parser = build_arg_parser()
+    args = parser.parse_args(misc.join_dash_values(parser, argv))
 
     root = args.output or re.sub(r"\.[A-Za-z0-9]+$", "", os.path.basename(args.input))
 

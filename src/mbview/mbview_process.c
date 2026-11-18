@@ -402,7 +402,8 @@ int mbview_derivative(size_t instance, int i, int j) {
 	if (i == 0) {
 		k1 = i * data->primary_n_rows + j;
 		k2 = (i + 1) * data->primary_n_rows + j;
-		if (data->primary_data[k1] != data->primary_nodatavalue && data->primary_data[k2] != data->primary_nodatavalue)
+		if (data->primary_n_columns > 1
+			&& data->primary_data[k1] != data->primary_nodatavalue && data->primary_data[k2] != data->primary_nodatavalue)
 			derivative_ok = true;
 	}
 	else if (i == data->primary_n_columns - 1) {
@@ -442,10 +443,11 @@ int mbview_derivative(size_t instance, int i, int j) {
 	if (j == 0) {
 		k1 = i * data->primary_n_rows + j;
 		k2 = i * data->primary_n_rows + (j + 1);
-		if (data->primary_data[k1] != data->primary_nodatavalue && data->primary_data[k2] != data->primary_nodatavalue)
+		if (data->primary_n_rows > 1
+			&& data->primary_data[k1] != data->primary_nodatavalue && data->primary_data[k2] != data->primary_nodatavalue)
 			derivative_ok = true;
 	}
-	else if (i == data->primary_n_rows - 1) {
+	else if (j == data->primary_n_rows - 1) {
 		k1 = i * data->primary_n_rows + (j - 1);
 		k2 = i * data->primary_n_rows + j;
 		if (data->primary_data[k1] != data->primary_nodatavalue && data->primary_data[k2] != data->primary_nodatavalue)
@@ -642,9 +644,9 @@ int mbview_projectglobaldata(size_t instance) {
 					                             &(pointw->ygrid[instance]), &(pointw->xdisplay[instance]),
 					                             &(pointw->ydisplay[instance]), &(pointw->zdisplay[instance]));
 				}
-				for (j = 0; j < shared.shareddata.navs[i].npoints - 1; j++) {
-					for (k = 0; k < shared.shareddata.navs[i].segments[j].nls; k++) {
-						pointw = &(shared.shareddata.navs[i].segments[j].lspoints[k]);
+				for (j = 0; j < shared.shareddata.vectors[i].npoints - 1; j++) {
+					for (k = 0; k < shared.shareddata.vectors[i].segments[j].nls; k++) {
+						pointw = &(shared.shareddata.vectors[i].segments[j].lspoints[k]);
 						status = mbview_projectfromlonlat(instance, pointw->xlon, pointw->ylat, pointw->zdata,
 						                                  &(pointw->xgrid[instance]), &(pointw->ygrid[instance]),
 						                                  &(pointw->xdisplay[instance]), &(pointw->ydisplay[instance]),
@@ -652,6 +654,50 @@ int mbview_projectglobaldata(size_t instance) {
 					}
 				}
 			}
+		}
+
+		/* handle GIS polylines */
+		for (i = 0; i < shared.shareddata.npolyline; i++) {
+			struct mbview_polyline_struct *polyline = &(shared.shareddata.polylines[i]);
+			for (j = 0; j < polyline->npoints; j++) {
+				pointw = &(polyline->points[j]);
+				status = mbview_projectfromlonlat(instance, pointw->xlon, pointw->ylat, pointw->zdata, &(pointw->xgrid[instance]),
+				                                  &(pointw->ygrid[instance]), &(pointw->xdisplay[instance]),
+				                                  &(pointw->ydisplay[instance]), &(pointw->zdisplay[instance]));
+				for (k = 0; k < polyline->segments[j].nls; k++) {
+					pointw = &(polyline->segments[j].lspoints[k]);
+					status = mbview_projectfromlonlat(instance, pointw->xlon, pointw->ylat, pointw->zdata,
+					                                  &(pointw->xgrid[instance]), &(pointw->ygrid[instance]),
+					                                  &(pointw->xdisplay[instance]), &(pointw->ydisplay[instance]),
+					                                  &(pointw->zdisplay[instance]));
+				}
+			}
+		}
+
+		/* handle GIS polygons */
+		for (i = 0; i < shared.shareddata.npolygon; i++) {
+			struct mbview_polygon_struct *polygon = &(shared.shareddata.polygons[i]);
+			for (j = 0; j < polygon->npoints; j++) {
+				pointw = &(polygon->points[j]);
+				status = mbview_projectfromlonlat(instance, pointw->xlon, pointw->ylat, pointw->zdata, &(pointw->xgrid[instance]),
+				                                  &(pointw->ygrid[instance]), &(pointw->xdisplay[instance]),
+				                                  &(pointw->ydisplay[instance]), &(pointw->zdisplay[instance]));
+				for (k = 0; k < polygon->segments[j].nls; k++) {
+					pointw = &(polygon->segments[j].lspoints[k]);
+					status = mbview_projectfromlonlat(instance, pointw->xlon, pointw->ylat, pointw->zdata,
+					                                  &(pointw->xgrid[instance]), &(pointw->ygrid[instance]),
+					                                  &(pointw->xdisplay[instance]), &(pointw->ydisplay[instance]),
+					                                  &(pointw->zdisplay[instance]));
+				}
+			}
+		}
+
+		/* handle GIS points */
+		for (i = 0; i < shared.shareddata.ngispoint; i++) {
+			pointw = &(shared.shareddata.gispoints[i].point);
+			status = mbview_projectfromlonlat(instance, pointw->xlon, pointw->ylat, pointw->zdata, &(pointw->xgrid[instance]),
+			                                  &(pointw->ygrid[instance]), &(pointw->xdisplay[instance]),
+			                                  &(pointw->ydisplay[instance]), &(pointw->zdisplay[instance]));
 		}
 
 		/* set globalprojected flag */
@@ -1063,6 +1109,33 @@ int mbview_zscale(size_t instance) {
 		}
 	}
 
+	/* handle GIS polylines */
+	for (i = 0; i < shared.shareddata.npolyline; i++) {
+		struct mbview_polyline_struct *polyline = &(shared.shareddata.polylines[i]);
+		for (j = 0; j < polyline->npoints; j++) {
+			mbview_zscalepointw(instance, globalview, offset_factor, &(polyline->points[j]));
+			for (k = 0; k < polyline->segments[j].nls; k++) {
+				mbview_zscalepointw(instance, globalview, offset_factor, &(polyline->segments[j].lspoints[k]));
+			}
+		}
+	}
+
+	/* handle GIS polygons */
+	for (i = 0; i < shared.shareddata.npolygon; i++) {
+		struct mbview_polygon_struct *polygon = &(shared.shareddata.polygons[i]);
+		for (j = 0; j < polygon->npoints; j++) {
+			mbview_zscalepointw(instance, globalview, offset_factor, &(polygon->points[j]));
+			for (k = 0; k < polygon->segments[j].nls; k++) {
+				mbview_zscalepointw(instance, globalview, offset_factor, &(polygon->segments[j].lspoints[k]));
+			}
+		}
+	}
+
+	/* handle GIS points */
+	for (i = 0; i < shared.shareddata.ngispoint; i++) {
+		mbview_zscalepointw(instance, globalview, offset_factor, &(shared.shareddata.gispoints[i].point));
+	}
+
 	/* set rez flags only if plotting not done */
 	if (!view->plot_done) {
 		view->contourlorez = false;
@@ -1124,8 +1197,10 @@ int mbview_projectforward(size_t instance, bool needlonlat, double xgrid, double
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
-		fprintf(stderr, "dbg2       xlon:        %f\n", *xlon);
-		fprintf(stderr, "dbg2       ylat:        %f\n", *ylat);
+		if (needlonlat || data->primary_grid_projection_mode != MBV_PROJECTION_ALREADYPROJECTED) {
+			fprintf(stderr, "dbg2       xlon:        %f\n", *xlon);
+			fprintf(stderr, "dbg2       ylat:        %f\n", *ylat);
+		}
 		fprintf(stderr, "dbg2       xdisplay:    %f\n", *xdisplay);
 		fprintf(stderr, "dbg2       ydisplay:    %f\n", *ydisplay);
 		fprintf(stderr, "dbg2       zdisplay:    %f\n", *zdisplay);
@@ -1964,7 +2039,7 @@ int mbview_sphere_rotate(double *eulermatrix, double *v, double *vr) {
 		fprintf(stderr, "dbg2       eulermatrix       %f %f %f\n", eulermatrix[3], eulermatrix[4], eulermatrix[5]);
 		fprintf(stderr, "dbg2       eulermatrix       %f %f %f\n", eulermatrix[6], eulermatrix[7], eulermatrix[8]);
 		fprintf(stderr, "dbg2       -----------\n");
-		fprintf(stderr, "dbg2       v:                %f %f %f\n", v[0], v[1], v[3]);
+		fprintf(stderr, "dbg2       v:                %f %f %f\n", v[0], v[1], v[2]);
 	}
 
 	/* get original view direction in cartesian coordinates */
@@ -1993,7 +2068,8 @@ int mbview_sphere_rotate(double *eulermatrix, double *v, double *vr) {
 int mbview_greatcircle_distbearing(size_t instance, double lon1, double lat1, double lon2, double lat2, double *bearing,
                                    double *distance) {
 	double rlon1, rlat1, rlon2, rlat2, rbearing;
-	double t1, t2, t3, dd;
+	double t1, t2, dd;
+	double t3 = 0.0;
 
 	if (mbv_verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2391,6 +2467,14 @@ int mbview_make_histogram(struct mbview_world_struct *view, struct mbview_struct
 	for (i = 0; i < 3 * MBV_NUM_COLORS; i++)
 		histogram[i] = 0.0;
 
+	/* a zero or inverted color range (e.g. constant grid) cannot be
+	    equalized - set a flat histogram and avoid dividing by zero */
+	if (!(dhist > 0.0)) {
+		for (i = 0; i < 3 * MBV_NUM_COLORS; i++)
+			histogram[i] = min;
+		return (MB_SUCCESS);
+	}
+
 	/* initialize bins */
 	for (i = 0; i < MBV_RAW_HISTOGRAM_DIM; i++)
 		binned_counts[i] = 0;
@@ -2460,7 +2544,7 @@ int mbview_make_histogram(struct mbview_world_struct *view, struct mbview_struct
 
 	/* construct histogram equalization for data < 0.0 */
 	if (nbinnedneg > MBV_NUM_COLORS) {
-		jbinzero = MIN(-min / dhist, MBV_RAW_HISTOGRAM_DIM - 1);
+		jbinzero = MAX(0.0, MIN(-min / dhist, MBV_RAW_HISTOGRAM_DIM - 1));
 		histogram[MBV_NUM_COLORS] = MIN(0.0, min);
 		histogram[2 * MBV_NUM_COLORS - 1] = MIN(0.0, max);
 		binnedsum = 0;
@@ -2477,7 +2561,7 @@ int mbview_make_histogram(struct mbview_world_struct *view, struct mbview_struct
 
 	/* construct histogram equalization for data >= 0.0 */
 	if (nbinnedpos > MBV_NUM_COLORS) {
-		jbinzero = -min / dhist;
+		jbinzero = MAX(0.0, MIN(-min / dhist, MBV_RAW_HISTOGRAM_DIM - 1));
 		histogram[2 * MBV_NUM_COLORS] = MAX(0.0, min);
 		histogram[3 * MBV_NUM_COLORS - 1] = MAX(0.0, max);
 		binnedsum = 0;
@@ -2821,7 +2905,7 @@ int mbview_colorpoint(struct mbview_world_struct *view, struct mbview_struct *da
 				svalue = data->secondary_data[k];
 			else
 				mbview_getsecondaryvalue(view, data, i, j, &svalue);
-			if (svalue != data->secondary_nodatavalue) {
+			if (svalue != data->secondary_nodatavalue && data->secondary_max > data->secondary_min) {
 				intensity = view->sign * data->overlay_shade_magnitude * (svalue - data->overlay_shade_center) /
 				            (data->secondary_max - data->secondary_min);
 				mbview_applyshade(intensity, &data->primary_r[k], &data->primary_g[k], &data->primary_b[k]);
@@ -2940,7 +3024,9 @@ int mbview_getcolor_histogram(double value, double min, double max, int colortab
 	}
 
 	/* get color */
-	if (colortablemode == MBV_COLORTABLE_NORMAL)
+	if (max <= min)
+		factor = 0.5;
+	else if (colortablemode == MBV_COLORTABLE_NORMAL)
 		factor = (max - value) / (max - min);
 	else
 		factor = (value - min) / (max - min);
@@ -2959,6 +3045,7 @@ int mbview_getcolor_histogram(double value, double min, double max, int colortab
 	else {
 		/* find place in histogram */
 		found = false;
+		ii = 0;
 		for (i = 0; i < MBV_NUM_COLORS - 1 && !found; i++) {
 			if (value >= histogram[i] && value <= histogram[i + 1]) {
 				ii = i;
@@ -2966,14 +3053,25 @@ int mbview_getcolor_histogram(double value, double min, double max, int colortab
 			}
 		}
 
+		/* if the histogram does not bracket the value (e.g. stale histogram
+		   after the color bounds changed) use the nearest end interval */
+		if (!found && value > histogram[MBV_NUM_COLORS - 1])
+			ii = MBV_NUM_COLORS - 2;
+
 		/* get color */
-		if (colortablemode == MBV_COLORTABLE_NORMAL) {
+		if (histogram[ii + 1] <= histogram[ii]) {
+			ff = 0.5;
+			if (colortablemode == MBV_COLORTABLE_NORMAL)
+				ii = MBV_NUM_COLORS - 2 - ii;
+		}
+		else if (colortablemode == MBV_COLORTABLE_NORMAL) {
 			ff = (histogram[ii + 1] - value) / (histogram[ii + 1] - histogram[ii]);
 			ii = MBV_NUM_COLORS - 2 - ii;
 		}
 		else {
 			ff = (value - histogram[ii]) / (histogram[ii + 1] - histogram[ii]);
 		}
+		ff = MAX(0.0, MIN(1.0, ff));
 		*red = colortable_red[ii] + ff * (colortable_red[ii + 1] - colortable_red[ii]);
 		*green = colortable_green[ii] + ff * (colortable_green[ii + 1] - colortable_green[ii]);
 		*blue = colortable_blue[ii] + ff * (colortable_blue[ii + 1] - colortable_blue[ii]);
@@ -3278,8 +3376,9 @@ int mbview_contour(size_t instance, int rez) {
 			    data->primary_data[vertex[2]] != data->primary_nodatavalue)
 				triangleB = true;
 
-			/* if at least one triangle is valid, contour it */
-			if (triangleA || triangleB) {
+			/* if at least one triangle is valid, contour it
+			    (a contour interval <= 0 would never terminate) */
+			if ((triangleA || triangleB) && data->contour_interval > 0.0) {
 				/* get min max values and number of contours */
 				nvertex = 0;
 				datamin = 0.0;

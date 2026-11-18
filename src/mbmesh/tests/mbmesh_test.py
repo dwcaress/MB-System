@@ -116,7 +116,7 @@ class MbmeshTest(unittest.TestCase):
       (['--html', '--geoviewpoint=1,2,3,4,5'], '6 numbers'),
       (['--html', '--geoviewpoint=1,2,3,4,5,x'], "'x'"),
       (['--html', '--geoviewpoint=1 2 3 4 5 6'], 'not a number'),
-      (['--geoviewpoint=1,2,3,4,5,6'], 'use --html too'),
+      (['--geoviewpoint=1,2,3,4,5,6'], 'use one of them too'),
     )
     for args, message in cases:
       proc = subprocess.run([self.cmd, '-I', 'nonexistent'] + args,

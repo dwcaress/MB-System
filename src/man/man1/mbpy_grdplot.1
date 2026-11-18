@@ -204,6 +204,13 @@ rounded ("nice") interval.
 .TP
 .B \-\-stretch\-color
 Histogram-equalize the color stretch (\fB\-\-color\-mode\fP 1 only).
+With a sealevel palette (\fB\-W\fP\fIstyle\fP\fB/8\fP or \fB/9\fP), the
+parts of the grid below and above 0 m are equalized separately, with a
+color boundary exactly at 0: Haxby colors span the bathymetry bins and
+the land colors span the topography bins (swapped with \fB\-D\fP). The
+color bins are shared between the two sides in proportion to their
+number of grid nodes. Grids with more than 16 million nodes are
+decimated before equalization to limit memory use.
 .TP
 .B \-Z\fP, \fB\-\-zbounds \fIzmin/zmax\fP
 Override the grid's own detected z-range for every z-dependent

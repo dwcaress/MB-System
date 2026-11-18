@@ -779,6 +779,7 @@ void do_update_status() {
 				bool first = true;
 				double btime_d = 0.0;
 				double etime_d = 0.0;
+				filestatus = filestatus_unknown;
     		for (int ifile=0; ifile < project.num_files; ifile++) {
 					struct mbna_file *file = &(project.files[ifile]);
 	
@@ -893,22 +894,23 @@ void do_update_status() {
 
       int nblocklist = 0;
       int iblocklist_select = MBNA_SELECT_NONE;
+      const bool file_select_ok = mbna_file_select >= 0 && mbna_file_select < project.num_files;
       for (int iblock=0; iblock < num_blocks; iblock++) {
         if (mbna_view_mode == MBNA_VIEW_MODE_ALL
             || (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
           && survey1[iblock] == mbna_survey_select
           && survey2[iblock] == mbna_survey_select)
             || (mbna_view_mode == MBNA_VIEW_MODE_BLOCK)
-            || (mbna_view_mode == MBNA_VIEW_MODE_FILE
+            || (mbna_view_mode == MBNA_VIEW_MODE_FILE && file_select_ok
           && survey1[iblock] == project.files[mbna_file_select].survey
           && survey2[iblock] == project.files[mbna_file_select].survey)
             || (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
           && (survey1[iblock] == mbna_survey_select
               || survey2[iblock] == mbna_survey_select))
-            || (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+            || (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE && file_select_ok
           && (survey1[iblock] == project.files[mbna_file_select].survey
               || survey2[iblock] == project.files[mbna_file_select].survey))
-            || (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
+            || (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && file_select_ok
           && (survey1[iblock] == project.files[mbna_file_select].survey
               || survey2[iblock] == project.files[mbna_file_select].survey))) {
           snprintf(string, sizeof(string), "block %4.4d: Survey %2.2d vs Survey %2.2d : Crossings: %4d %4d %4d %4d : Ties: %4d",
@@ -923,13 +925,10 @@ void do_update_status() {
           nblocklist++;
         }
       }
-fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
       XmListAddItems(list_data, xstr, nblocklist, 0);
-fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
       for (int iblocklist = 0; iblocklist < nblocklist; iblocklist++) {
         XmStringFree(xstr[iblocklist]);
       }
-fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
       free(xstr);
       free(survey1);
       free(survey2);
@@ -938,15 +937,12 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
       free(n_25crossing);
       free(n_allcrossing);
       free(n_tie);
-fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
       if (mbna_survey_select != MBNA_SELECT_NONE && iblocklist_select != MBNA_SELECT_NONE) {
         XmListSelectPos(list_data, iblocklist_select + 1, 0);
         XmListSetPos(list_data, MAX(iblocklist_select + 1 - 5, 1));
       }
-fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
       }
     }
-fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
   }
   else if (mbna_view_list == MBNA_VIEW_LIST_FILES) {
     if (mbna_view_mode == MBNA_VIEW_MODE_ALL)
@@ -2128,7 +2124,8 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
     XtVaSetValues(pushButton_fixedxynav, XmNsensitive, False, NULL);
     XtVaSetValues(pushButton_fixedznav, XmNsensitive, False, NULL);
   }
-  else if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS && project.num_files > 0 && mbna_survey_select != MBNA_SELECT_NONE) {
+  else if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS && project.num_files > 0 && mbna_survey_select != MBNA_SELECT_NONE
+           && mbna_file_select >= 0 && mbna_file_select < project.num_files) {
     XtVaSetValues(pushButton_poornav, XmNsensitive, True, NULL);
     XtVaSetValues(pushButton_goodnav, XmNsensitive, True, NULL);
     XtVaSetValues(pushButton_fixednav, XmNsensitive, True, NULL);
@@ -2150,7 +2147,8 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
       XtVaSetValues(pushButton_fixedznav, XmNsensitive, False, NULL);
     }
   }
-  else if (mbna_view_list == MBNA_VIEW_LIST_FILES && project.num_files > 0 && mbna_file_select != MBNA_SELECT_NONE) {
+  else if (mbna_view_list == MBNA_VIEW_LIST_FILES && project.num_files > 0 && mbna_file_select != MBNA_SELECT_NONE
+           && mbna_file_select < project.num_files) {
     XtVaSetValues(pushButton_poornav, XmNsensitive, True, NULL);
     XtVaSetValues(pushButton_goodnav, XmNsensitive, True, NULL);
     XtVaSetValues(pushButton_fixednav, XmNsensitive, True, NULL);
@@ -2184,7 +2182,9 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
         || mbna_view_list == MBNA_VIEW_LIST_TIESSORTEDALL
         || mbna_view_list == MBNA_VIEW_LIST_TIESSORTEDWORST
         || mbna_view_list == MBNA_VIEW_LIST_TIESSORTEDBAD)
-      && project.num_files > 0 && mbna_tie_select != MBNA_SELECT_NONE) {
+      && project.num_files > 0 && mbna_tie_select != MBNA_SELECT_NONE
+      && mbna_crossing_select >= 0 && mbna_crossing_select < project.num_crossings
+      && mbna_tie_select >= 0 && mbna_tie_select < project.crossings[mbna_crossing_select].num_ties) {
     if (project.crossings[mbna_crossing_select].ties[mbna_tie_select].status == MBNA_TIE_XY
         || project.crossings[mbna_crossing_select].ties[mbna_tie_select].status == MBNA_TIE_XY_FIXED) {
       XtVaSetValues(pushButton_tie_xyz, XmNsensitive, True, NULL);
@@ -2218,6 +2218,8 @@ fprintf(stderr, "%s:%d:%s: \n", __FILE__, __LINE__, __FUNCTION__);
             || mbna_view_list == MBNA_VIEW_LIST_GLOBALTIESSORTED)
       && project.num_files > 0 && mbna_file_select != MBNA_SELECT_NONE
       && mbna_section_select != MBNA_SELECT_NONE
+      && mbna_file_select >= 0 && mbna_file_select < project.num_files
+      && mbna_section_select >= 0 && mbna_section_select < project.files[mbna_file_select].num_sections
       && project.files[mbna_file_select].sections[mbna_section_select].status == MBNA_CROSSING_STATUS_SET) {
     if (project.files[mbna_file_select].sections[mbna_section_select].globaltie.status == MBNA_TIE_XY
         || project.files[mbna_file_select].sections[mbna_section_select].globaltie.status == MBNA_TIE_XY_FIXED) {
@@ -2503,7 +2505,7 @@ void do_update_modelplot_status() {
     /* set model view status label */
     if (mbna_modelplot_mode == MBNA_MODELPLOT_MODE_CROSSINGS) {
 			if (project.modelplot_style == MBNA_MODELPLOT_TIMESERIES || project.modelplot_style == MBNA_MODELPLOT_PERTURBATION) {
-				if (mbna_crossing_select == MBNA_SELECT_NONE) {
+				if (mbna_crossing_select < 0 || mbna_crossing_select >= project.num_crossings) {
 					snprintf(string, sizeof(string), ":::t\"Mouse: <left> select  tie; <middle> select untied crossing; <right> drag zoom "
 						"extent\":t\"No Selection\"");
 				}
@@ -2517,7 +2519,7 @@ void do_update_modelplot_status() {
 				}
 			}
 			else {
-				if (mbna_crossing_select == MBNA_SELECT_NONE) {
+				if (mbna_crossing_select < 0 || mbna_crossing_select >= project.num_crossings) {
 					snprintf(string, sizeof(string), ":::t\"Mouse: <left> select  tie; <middle> select block to view; <right> drag zoom "
 						"extent\":t\"No Selection\"");
 				}
@@ -2533,12 +2535,12 @@ void do_update_modelplot_status() {
     }
     else /* if (mbna_modelplot_mode == MBNA_MODELPLOT_MODE_SECTIONS) */ {
 			if (project.modelplot_style == MBNA_MODELPLOT_TIMESERIES || project.modelplot_style == MBNA_MODELPLOT_PERTURBATION) {
-				if (mbna_section_select == MBNA_SELECT_NONE) {
+				if (mbna_section_select == MBNA_SELECT_NONE
+						|| mbna_current_file < 0 || mbna_current_file >= project.num_files) {
 					snprintf(string, sizeof(string), ":::t\"Mouse: <left> select global tie; <middle> select untied section; <right> drag zoom "
 						"extent\":t\"No Selection\"");
 				}
 				else /* if (mbna_section_select != MBNA_SELECT_NONE) */ {
-					crossing = &(project.crossings[mbna_crossing_select]);
 					snprintf(string, sizeof(string),
 						":::t\"Mouse: <left> select global tie; <middle> select untied section <right> drag zoom "
 						"extent\":t\"Selected Section: %2.2d:%3.3d:%3.3d\"",
@@ -2546,7 +2548,7 @@ void do_update_modelplot_status() {
 				}
 			}
 			else {
-				if (mbna_crossing_select == MBNA_SELECT_NONE) {
+				if (mbna_crossing_select < 0 || mbna_crossing_select >= project.num_crossings) {
 					snprintf(string, sizeof(string), ":::t\"Mouse: <left> select  tie; <middle> select block to view; <right> drag zoom "
 						"extent\":t\"No Selection\"");
 				}
@@ -2587,7 +2589,7 @@ void do_update_visualization_status() {
     mbview_getsharedptr(mbna_verbose, &shareddata, &error);
 
     if (mbna_naverr_mode == MBNA_NAVERR_MODE_CROSSING
-        && mbna_crossing_select != MBNA_SELECT_NONE) {
+        && mbna_crossing_select >= 0 && mbna_crossing_select < project.num_crossings) {
       /* select the data sections associated with the loaded crossing */
       struct mbna_crossing *crossing = &(project.crossings[mbna_crossing_select]);
       mbview_clearnavpicks(0);
@@ -3053,7 +3055,7 @@ void do_list_data_select(Widget w, XtPointer client_data, XtPointer call_data) {
     char *tmp = NULL;
     struct mbna_file *file;
     int num_files, num_sections, num_crossings, num_ties;
-    bool found = true;
+    bool found = false;
 
     if (mbna_view_list == MBNA_VIEW_LIST_REFERENCEGRIDS) {
       project.refgrid_select = position_list[0] - 2;
@@ -4418,7 +4420,10 @@ void do_biases_apply(Widget w, XtPointer client_data, XtPointer call_data) {
 
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* get file structures */
+  /* get file structures (nothing to do unless a crossing's two files are set) */
+  if (mbna_file_id_1 < 0 || mbna_file_id_1 >= project.num_files
+      || mbna_file_id_2 < 0 || mbna_file_id_2 >= project.num_files)
+    return;
   struct mbna_file *file1 = &(project.files[mbna_file_id_1]);
   struct mbna_file *file2 = &(project.files[mbna_file_id_2]);
 
@@ -4512,7 +4517,10 @@ void do_biases_init(Widget w, XtPointer client_data, XtPointer call_data) {
 
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
 
-  /* get file structures */
+  /* get file structures (nothing to do unless a crossing's two files are set) */
+  if (mbna_file_id_1 < 0 || mbna_file_id_1 >= project.num_files
+      || mbna_file_id_2 < 0 || mbna_file_id_2 >= project.num_files)
+    return;
   struct mbna_file *file1 = &(project.files[mbna_file_id_1]);
   struct mbna_file *file2 = &(project.files[mbna_file_id_2]);
 
@@ -4965,6 +4973,40 @@ void do_file_importdata(Widget w, XtPointer client_data, XtPointer call_data) {
 }
 
 /*--------------------------------------------------------------------*/
+/* Reset all selection and current-item globals (and the list view mode) to
+    their mbnavadjust_init_globals() values, so that indices left over from a
+    previous project are never used to index a newly opened or created one. */
+static void do_reset_selection_globals(void) {
+  mbna_view_mode = MBNA_VIEW_MODE_ALL;
+  mbna_file_id_1 = MBNA_SELECT_NONE;
+  mbna_section_1 = MBNA_SELECT_NONE;
+  mbna_file_id_2 = MBNA_SELECT_NONE;
+  mbna_section_2 = MBNA_SELECT_NONE;
+  mbna_current_crossing = MBNA_SELECT_NONE;
+  mbna_current_tie = MBNA_SELECT_NONE;
+  mbna_current_file = MBNA_SELECT_NONE;
+  mbna_current_section = MBNA_SELECT_NONE;
+  mbna_file_select = MBNA_SELECT_NONE;
+  mbna_survey_select = MBNA_SELECT_NONE;
+  mbna_survey_select1 = MBNA_SELECT_NONE;
+  mbna_survey_select2 = MBNA_SELECT_NONE;
+  mbna_section_select = MBNA_SELECT_NONE;
+  mbna_crossing_select = MBNA_SELECT_NONE;
+  mbna_tie_select = MBNA_SELECT_NONE;
+  mbna_modelplot_pickfile = MBNA_SELECT_NONE;
+  mbna_modelplot_picksection = MBNA_SELECT_NONE;
+  mbna_modelplot_picksnav = MBNA_SELECT_NONE;
+  mbna_modelplot_zoom = false;
+  mbna_modelplot_zoom_x1 = 0;
+  mbna_modelplot_zoom_x2 = 0;
+  mbna_modelplot_tiezoom = false;
+  mbna_modelplot_tiestart = 0;
+  mbna_modelplot_tieend = 0;
+  mbna_modelplot_tiestartzoom = 0;
+  mbna_modelplot_tieendzoom = 0;
+}
+
+/*--------------------------------------------------------------------*/
 void do_file_close(Widget w, XtPointer client_data, XtPointer call_data) {
   (void)w; // Unused parameter
   (void)client_data; // Unused parameter
@@ -4973,7 +5015,14 @@ void do_file_close(Widget w, XtPointer client_data, XtPointer call_data) {
   // XmAnyCallbackStruct *acs = (XmAnyCallbackStruct *)call_data;
   int error = MB_ERROR_NO_ERROR;
 
+  /* unload any crossing or section loaded in the naverr window and dismiss it
+      (runs do_naverr_dismiss() and unmanages the naverr and biases dialogs) */
+  if (mbna_naverr_mode != MBNA_NAVERR_MODE_UNLOADED) {
+    XtCallCallbacks(pushButton_naverr_dismiss, XmNactivateCallback, NULL);
+  }
+
   mbnavadjust_close_project(mbna_verbose, &project, &error);
+  do_reset_selection_globals();
   do_update_status();
   if (project.modelplot) {
     do_update_modelplot_status();
@@ -5073,6 +5122,8 @@ void do_fileselection_ok(Widget w, XtPointer client_data, XtPointer call_data) {
     snprintf(message, sizeof(message), "Creating new MBnavadjust project %s", ifile);
     do_message_on(message);
     status = mbnavadjust_file_new(ifile);
+    if (status == MB_SUCCESS)
+      do_reset_selection_globals();
     do_message_off();
     do_update_status();
   }
@@ -5080,6 +5131,8 @@ void do_fileselection_ok(Widget w, XtPointer client_data, XtPointer call_data) {
     snprintf(message, sizeof(message), "Opening MBnavadjust project %s", ifile);
     do_message_on(message);
     status = mbnavadjust_file_open(ifile);
+    if (status == MB_SUCCESS)
+      do_reset_selection_globals();
     do_message_off();
     do_update_status();
   }
@@ -6585,7 +6638,13 @@ void do_pickroute_notify(size_t instance) {
       int isurvey;
       int ifile;
       int isection;
-      sscanf(route->name, "%d:%d:%d", &isurvey, &ifile, &isection);
+      const int nscan = sscanf(route->name, "%d:%d:%d", &isurvey, &ifile, &isection);
+      if (nscan != 3 || ifile < 0 || ifile >= project.num_files
+          || isection < 0 || isection >= project.files[ifile].num_sections) {
+        ifile = MBNA_SELECT_NONE;
+        isection = MBNA_SELECT_NONE;
+      }
+      if (ifile != MBNA_SELECT_NONE) {
       mbna_current_file = ifile;
       mbna_current_section = isection;
       mbna_file_select = ifile;
@@ -6606,6 +6665,7 @@ void do_pickroute_notify(size_t instance) {
         do_naverr_update();
         do_update_status();
       }
+      }
     }
     else {
       int icrossing;
@@ -6616,8 +6676,12 @@ void do_pickroute_notify(size_t instance) {
       int ifile2;
       int isection2;
       int isnav2;
-      sscanf(route->name, "%d:%d %d:%d:%d %d:%d:%d", &icrossing, &itie, &ifile1, &isection1, &isnav1, &ifile2, &isection2,
-             &isnav2);
+      const int nscan = sscanf(route->name, "%d:%d %d:%d:%d %d:%d:%d", &icrossing, &itie, &ifile1, &isection1, &isnav1,
+                               &ifile2, &isection2, &isnav2);
+      if (nscan < 2) {
+        icrossing = MBNA_SELECT_NONE;
+        itie = MBNA_SELECT_NONE;
+      }
 
       mbnavadjust_visualization_selectcrossingfromroute(icrossing, itie);
 
@@ -6678,12 +6742,17 @@ void do_picknav_notify(size_t instance) {
         (struct mbview_nav_struct *)&shareddata->navs[shareddata->nav_selected_mbnavadjust[0]];
       int ifile1;
       int isection1;
-      sscanf(nav1->name, "%d:%d", &ifile1, &isection1);
+      const int nscan = sscanf(nav1->name, "%d:%d", &ifile1, &isection1);
+      if (nscan != 2 || ifile1 < 0 || ifile1 >= project.num_files
+          || isection1 < 0 || isection1 >= project.files[ifile1].num_sections) {
+        ifile1 = MBNA_SELECT_NONE;
+        isection1 = MBNA_SELECT_NONE;
+      }
       mbna_current_file = ifile1;
       mbna_current_section = isection1;
       mbna_file_select = ifile1;
       mbna_section_select = isection1;
-      mbna_survey_select = project.files[mbna_file_select].survey;
+      mbna_survey_select = ifile1 != MBNA_SELECT_NONE ? project.files[mbna_file_select].survey : MBNA_SELECT_NONE;
       mbna_file_id_2 = ifile1;
       mbna_section_2 = isection1;
 
@@ -6719,10 +6788,10 @@ void do_picknav_notify(size_t instance) {
         (struct mbview_nav_struct *)&shareddata->navs[shareddata->nav_selected_mbnavadjust[0]];
       struct mbview_nav_struct *nav2 =
         (struct mbview_nav_struct *)&shareddata->navs[shareddata->nav_selected_mbnavadjust[1]];
-      int ifile1;
-      int isection1;
-      int ifile2;
-      int isection2;
+      int ifile1 = MBNA_SELECT_NONE;
+      int isection1 = MBNA_SELECT_NONE;
+      int ifile2 = MBNA_SELECT_NONE;
+      int isection2 = MBNA_SELECT_NONE;
       sscanf(nav1->name, "%d:%d", &ifile1, &isection1);
       sscanf(nav2->name, "%d:%d", &ifile2, &isection2);
       status = mbnavadjust_visualization_selectcrossingfromnav(ifile1, isection1, ifile2, isection2);
@@ -6773,10 +6842,10 @@ void do_mbnavadjust_addcrossing(Widget w, XtPointer client, XtPointer call) {
       (struct mbview_nav_struct *)&shareddata->navs[shareddata->nav_selected_mbnavadjust[0]];
     struct mbview_nav_struct *nav2 =
       (struct mbview_nav_struct *)&shareddata->navs[shareddata->nav_selected_mbnavadjust[1]];
-    int ifile1;
-    int isection1;
-    int ifile2;
-    int isection2;
+    int ifile1 = MBNA_SELECT_NONE;
+    int isection1 = MBNA_SELECT_NONE;
+    int ifile2 = MBNA_SELECT_NONE;
+    int isection2 = MBNA_SELECT_NONE;
     sscanf(nav1->name, "%d:%d", &ifile1, &isection1);
     sscanf(nav2->name, "%d:%d", &ifile2, &isection2);
     status = mbnavadjust_addcrossing(mbna_verbose, &project, ifile1, isection1, ifile2, isection2, &error);

@@ -325,11 +325,8 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 
 	/* deal with a memory allocation failure */
 	if (status == MB_FAILURE) {
-		status = mb_deall_ioarrays(verbose, mbio_ptr, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr, error);
-		mb_io_ptr->beams_bath_alloc = 0;
-		mb_io_ptr->beams_amp_alloc = 0;
-		mb_io_ptr->pixels_ss_alloc = 0;
+		status = mb_deall_ioarrays(verbose, *mbio_ptr, error);
+		status = mb_freed(verbose, __FILE__, __LINE__, (void **)mbio_ptr, error);
 		status = MB_FAILURE;
 		*error = MB_ERROR_MEMORY_FAIL;
 		if (verbose >= 2) {
@@ -1162,11 +1159,8 @@ int mb_input_init(int verbose, char *socket_definition, int format,
 
 	/* deal with a memory allocation failure */
 	if (status == MB_FAILURE) {
-		status = mb_deall_ioarrays(verbose, mbio_ptr, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr, error);
-		mb_io_ptr->beams_bath_alloc = 0;
-		mb_io_ptr->beams_amp_alloc = 0;
-		mb_io_ptr->pixels_ss_alloc = 0;
+		status = mb_deall_ioarrays(verbose, *mbio_ptr, error);
+		status = mb_freed(verbose, __FILE__, __LINE__, (void **)mbio_ptr, error);
 		status = MB_FAILURE;
 		*error = MB_ERROR_MEMORY_FAIL;
 		if (verbose >= 2) {

@@ -11,7 +11,7 @@
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
 <PRE>
 <H1>mbm_plot</H1>
-Section:  MB-System 5.0  (1)<BR>Updated:  7 September 2026 <BR><A HREF="#index">Index</A>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 November 2026 <BR><A HREF="#index">Index</A>
 <HR>
 
 <A NAME="lbAB">&nbsp;</A>
@@ -172,6 +172,11 @@ If <I>mode</I> is set to 3 (bathymetry shaded using amplitudes) using the
 <B>-G</B> option, then the value <I>magnitude</I>
 modulates the intensity of the shading; the value <I>median</I> sets the
 amplitude value which serves as the zero or neutral level.
+Either value may be omitted. The defaults are a <I>magnitude</I> of 2.5
+and an <I>azimuth</I> of 0 for mode 2; for mode 3, <I>magnitude</I> =
+2/(amax - amin) and <I>median</I> = amin + 0.2 (amax - amin) from the
+amplitude range of the data, or 1 and 191 when the amplitude shading is
+equalized with <B>-S</B><I>color</I><B>/1</B>.
 <DT><B>-C</B>
 
 <DD>
@@ -418,6 +423,11 @@ If <I>mode</I> is set to 3 (bathymetry shaded using amplitudes) using the
 <B>-G</B> option, then the value <I>magnitude</I>
 modulates the intensity of the shading; the value <I>median</I> sets the
 amplitude value which serves as the zero or neutral level.
+Either value may be omitted. The defaults are a <I>magnitude</I> of 2.5
+and an <I>azimuth</I> of 0 for mode 2; for mode 3, <I>magnitude</I> =
+2/(amax - amin) and <I>median</I> = amin + 0.2 (amax - amin) from the
+amplitude range of the data, or 1 and 191 when the amplitude shading is
+equalized with <B>-S</B><I>color</I><B>/1</B>.
 <DT><B>-B</B>
 
 <DD>
@@ -1641,7 +1651,7 @@ more complex.
 </PRE>
 
 <CENTER><P><BR>
-Last Updated: 7 September 2026</P></CENTER>
+Last Updated: 3 November 2026</P></CENTER>
 
 <HR>
 <center>

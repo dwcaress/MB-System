@@ -64,7 +64,7 @@
 #define MB_IMAGERY_TYPE_POINT 8
 
 /* MBIO data type ("kind") convention */
-#define MB_DATA_KINDS 74
+#define MB_DATA_KINDS 75
 #define MB_DATA_NONE 0
 #define MB_DATA_DATA 1                   /* general survey data */
 #define MB_DATA_COMMENT 2                /* general comment */
@@ -338,6 +338,7 @@ const char *notice_msg[] = {
     "MB_DATA_PIPE (72): Teledyne s7k pipe tracking",
     "MB_DATA_CONTACT (73): Teledyne s7k sonar contact",
     "MB_DATA_GATES (74): Teledyne s7k bathymetry picking gates",
+    "MB_DATA_DATUM (75): Kongsberg sensor position datum",
 
     /* notices for nonfatal error messages */
     "MB_ERROR_TIME_GAP (ID=-1): Time gap in data",

@@ -1,0 +1,208 @@
+#!/usr/bin/env python3
+#--------------------------------------------------------------------
+#    The MB-system:  mbpy_grdtiff
+#
+#    Copyright (c) 2026 by
+#    David W. Caress (caress@mbari.org)
+#      Monterey Bay Aquarium Research Institute
+#      Moss Landing, California, USA
+#
+#    See README.md file for copying and redistribution conditions.
+#--------------------------------------------------------------------
+#
+# Purpose:
+#   Python/PyGMT-era replacement for the Perl macro mbm_grdtiff: reads a
+#   grid and generates a GMT **modern mode** shellscript that makes a
+#   georeferenced TIFF image of it (GeoTIFF plus .tfw world file, via
+#   MB-System's `gmt mbgrdtiff` module), suitable for loading into GIS
+#   packages. The color fill and shading styles (color_mode 1-5) and
+#   color-palette conventions match mbm_grdtiff and mbpy_grdplot, so a
+#   GeoTIFF and an mbpy_grdplot map of the same grid look the same. See
+#   src/macros/python/mbpy_grdtiff_script.py for the script generator
+#   and its differences from mbm_grdtiff; mbpy_layout, mbpy_color and
+#   mbpy_misc are shared with the other mbpy_* macros.
+#
+# Usage:
+#   mbpy_grdtiff -I data.grd [-O root] [options...]
+#   mbpy_grdtiff --input data.grd --color-mode 2 --azimuth 45 --execute
+#
+import argparse
+import dataclasses
+import os
+import re
+import shlex
+import subprocess
+import sys
+
+_here = os.path.dirname(os.path.realpath(__file__))
+for _candidate in (_here, os.path.join(_here, "python")):
+    if _candidate not in sys.path:
+        sys.path.insert(0, _candidate)
+
+import mbpy_layout as layout
+import mbpy_color as color
+import mbpy_misc as misc
+import mbpy_grdtiff_script as script
+
+
+def build_arg_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(
+        prog="mbpy_grdtiff",
+        description="Generate a GMT modern-mode script that makes a georeferenced TIFF "
+                    "(GeoTIFF + world file) image of a grid (Python/PyGMT-era replacement "
+                    "for mbm_grdtiff).",
+    )
+
+    g = p.add_argument_group("input/output")
+    g.add_argument("-I", "--input", required=True, metavar="GRID", help="input grid file")
+    g.add_argument("-O", "--output", metavar="ROOT",
+                   help="output root name: writes ROOT_tiff.sh, ROOT.tif, ROOT.tfw "
+                        "[default: input's basename without extension]")
+    g.add_argument("-X", "--execute", action="store_true", help="run the generated script immediately")
+    g.add_argument("-V", "--verbose", action="store_true", help="print the generated script path and a brief summary")
+
+    g = p.add_argument_group("region / placement")
+    g.add_argument("-R", "--region", metavar="W/E/S/N", help="image bounds [default: the grid's own bounds]")
+    g.add_argument("-N", "--nudge", metavar="DX/DY", help="shift the image DX meters east and DY meters north")
+
+    g = p.add_argument_group("color")
+    g.add_argument("-G", "--color-mode", type=int, choices=range(1, 6), metavar="{1-5}",
+                   help="1 color fill, 2 shaded relief, 3 shade by intensity file, "
+                        "4 slope-magnitude fill, 5 shade by slope magnitude "
+                        "[1, or 3 when --intensity-file is given]")
+    g.add_argument("-W", "--color-control", metavar="SPEC",
+                   help='"style/palette/ncolors" (e.g. "1/2/11"), or a path to an existing .cpt file')
+    g.add_argument("-D", "--color-flip", action="store_true", help="reverse the color palette")
+    g.add_argument("-Y", "--no-nice-interval", action="store_true",
+                   help="use a direct linear color stretch instead of rounded intervals")
+    g.add_argument("-S", "--stretch-color", action="store_true",
+                   help="histogram-equalize the color stretch (color_mode 1-3, 5); with sealevel "
+                        "palette 8 or 9, equalize below and above 0 m separately")
+    g.add_argument("-Z", "--zbounds", metavar="ZMIN/ZMAX[/MODE]",
+                   help="override the grid's z-range for the color stretch; MODE 1 extends the "
+                        "end colors to the data's own minimum and maximum")
+    g.add_argument("--data-scale", type=float, metavar="FACTOR",
+                   help="rescale grid values before coloring/shading (mbm_grdtiff -MGS)")
+
+    g = p.add_argument_group("shading (color_mode 2/3/4/5)")
+    g.add_argument("-A", "--shade", metavar="MAG[/AZIM[/ELEV]]",
+                   help="shading magnitude, illumination azimuth and elevation in one spec, as in mbm_grdtiff -A")
+    g.add_argument("--magnitude", type=float, metavar="VAL")
+    g.add_argument("--azimuth", type=float, metavar="DEG")
+    g.add_argument("--elevation", type=float, metavar="DEG")
+    g.add_argument("--shade-flip", action="store_true", help="reverse the shading direction (negates magnitude)")
+    g.add_argument("-K", "--intensity-file", metavar="GRID", help="intensity grid for color_mode 3")
+    g.add_argument("--stretch-shade", action="store_true", help="histogram-equalize the intensity file (color_mode 3)")
+
+    g = p.add_argument_group("GMT defaults")
+    g.add_argument("--gmt-default", action="append", default=[], metavar="PARAM/VALUE",
+                   help="override a GMT default (repeatable)")
+
+    return p
+
+
+def main(argv=None) -> int:
+    parser = build_arg_parser()
+    raw_argv = sys.argv[1:] if argv is None else list(argv)
+    args = parser.parse_args(misc.join_dash_values(parser, raw_argv))
+
+    if not os.path.exists(args.input):
+        parser.error(f"input grid {args.input} does not exist")
+    if args.intensity_file and not os.path.exists(args.intensity_file):
+        parser.error(f"intensity grid {args.intensity_file} does not exist")
+    color_mode = args.color_mode
+    if color_mode is None:
+        color_mode = 3 if args.intensity_file else 1   # as in mbm_grdtiff
+    if color_mode == 3 and not args.intensity_file:
+        parser.error("--color-mode 3 requires --intensity-file")
+
+    root = args.output or re.sub(r"\.[A-Za-z0-9]+$", "", os.path.basename(args.input))
+
+    grid_info = layout.run_grdinfo(args.input)
+    xmin, xmax, ymin, ymax = grid_info.xmin, grid_info.xmax, grid_info.ymin, grid_info.ymax
+    if args.region:
+        if args.region.endswith("r"):
+            parser.error("corner-point regions (W/S/E/Nr) are not supported; give W/E/S/N")
+        parts = args.region.split("/")
+        if len(parts) != 4:
+            parser.error("--region must be W/E/S/N")
+        xmin, xmax, ymin, ymax = (layout.get_decimal_degrees(v) for v in parts)
+    region = f"{xmin:.11g}/{xmax:.11g}/{ymin:.11g}/{ymax:.11g}"
+
+    # projected (not lon/lat) if the grid says so or its bounds cannot be
+    # degrees -- decides grdgradient's -fg in the shading commands
+    geographic = grid_info.gridprojected == 0 and not (
+        xmin < -360.0 or xmax > 360.0 or ymin < -90.0 or ymax > 90.0)
+
+    # z bounds for the color stretch; zmin_t/zmax_t are the data's own
+    # (inside --region, if given)
+    zmin_t, zmax_t = grid_info.zmin, grid_info.zmax
+    if args.region:
+        zmin_t, zmax_t = script.grid_zrange(args.input, region)
+    zmin, zmax, zmode = zmin_t, zmax_t, 0
+    if args.zbounds:
+        zparts = args.zbounds.split("/")
+        if len(zparts) not in (2, 3):
+            parser.error("--zbounds must be ZMIN/ZMAX[/MODE]")
+        zmin, zmax = float(zparts[0]), float(zparts[1])
+        zmode = int(zparts[2]) if len(zparts) == 3 else 0
+    if args.data_scale is not None:
+        zmin, zmax = sorted((zmin * args.data_scale, zmax * args.data_scale))
+        zmin_t, zmax_t = sorted((zmin_t * args.data_scale, zmax_t * args.data_scale))
+    if zmin >= zmax:
+        parser.error(f"improper z bounds: {zmin} {zmax}")
+
+    magnitude, azimuth, elevation = args.magnitude, args.azimuth, args.elevation
+    if args.shade:
+        sparts = args.shade.split("/")
+        magnitude = float(sparts[0]) if magnitude is None else magnitude
+        if len(sparts) > 1 and azimuth is None:
+            azimuth = float(sparts[1])
+        if len(sparts) > 2 and elevation is None:
+            elevation = float(sparts[2])
+
+    shade = None
+    if color_mode != 1:
+        shade = script.ShadeOptions(
+            color_mode=color_mode, magnitude=magnitude, azimuth=azimuth, elevation=elevation,
+            shade_flip=args.shade_flip, file_intensity=args.intensity_file,
+            stretch_shade=args.stretch_shade,
+        )
+
+    cc = color.resolve_color_control(args.color_control)
+    cpt_lines = None
+    if not cc.file_cpt:
+        resolved = script.resolve_shade_defaults(shade) if shade else None
+        cpt_lines = script.build_cpt(
+            args.input, color_mode, cc, zmin, zmax, zmode=zmode, zmin_t=zmin_t, zmax_t=zmax_t,
+            color_flip=args.color_flip, no_nice_interval=args.no_nice_interval,
+            stretch_color=args.stretch_color,
+            magnitude=resolved.magnitude if resolved else None,
+            data_scale=args.data_scale,
+        )
+
+    opts = script.ScriptOptionsTiff(
+        grid=args.input, root=root, region=region, geographic=geographic,
+        color_mode=color_mode, shade=shade, cpt_lines=cpt_lines, cpt_file=cc.file_cpt,
+        color_flip=args.color_flip, data_scale=args.data_scale, nudge=args.nudge,
+        gmt_defs=list(args.gmt_default),
+    )
+    command_line = "mbpy_grdtiff " + " ".join(shlex.quote(a) for a in raw_argv)
+    script_path = script.generate_and_write_tiff(opts, command_line)
+
+    if args.verbose:
+        print(f"Generated {script_path}")
+        print(f"  Style:   {script.COLOR_MODE_NAMES[color_mode]}")
+        print(f"  Region:  {region}  ({'geographic' if geographic else 'projected'})")
+        print(f"  Z range: {zmin:g} {zmax:g}")
+        print(f"  CPT:     {cc.file_cpt or root + '.cpt'}")
+        print(f"  Image:   {opts.tiff_file} (+ {root}.tfw)")
+
+    if args.execute:
+        subprocess.run(["bash", script_path], check=True)
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

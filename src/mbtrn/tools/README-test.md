@@ -663,23 +663,23 @@ Sonar File </Volumes/wdcs/20210609m1/20210609_164631.s7k> of format <89> initial
           6 MB_DATA_HEADING (ID=17): Heading record
           6 MB_DATA_NAV1 (ID=29): Auxiliary nav system 1
           5 MB_DATA_ATTITUDE1 (56): ancillary attitude system 1
-          4 MB_DATA_SONARDEPTH (59): HYSWEEP dynamic draft
+          4 MB_DATA_SENSORDEPTH (59): HYSWEEP dynamic draft
 2021/06/09-16:46:30.777343 1623257190.777343 | Read 25 non-survey data records...
           6 MB_DATA_HEADING (ID=17): Heading record
           6 MB_DATA_NAV1 (ID=29): Auxiliary nav system 1
           7 MB_DATA_ATTITUDE1 (56): ancillary attitude system 1
-          6 MB_DATA_SONARDEPTH (59): HYSWEEP dynamic draft
+          6 MB_DATA_SENSORDEPTH (59): HYSWEEP dynamic draft
 2021/06/09-16:46:31.335937 1623257191.335937 | Read 25 non-survey data records...
           1 MB_DATA_PARAMETER (ID=9): Parameter record
           6 MB_DATA_HEADING (ID=17): Heading record
           7 MB_DATA_NAV1 (ID=29): Auxiliary nav system 1
           7 MB_DATA_ATTITUDE1 (56): ancillary attitude system 1
-          4 MB_DATA_SONARDEPTH (59): HYSWEEP dynamic draft
+          4 MB_DATA_SENSORDEPTH (59): HYSWEEP dynamic draft
 2021/06/09-16:46:31.816406 1623257191.816406 | Read 25 non-survey data records...
           7 MB_DATA_HEADING (ID=17): Heading record
           6 MB_DATA_NAV1 (ID=29): Auxiliary nav system 1
           6 MB_DATA_ATTITUDE1 (56): ancillary attitude system 1
-          6 MB_DATA_SONARDEPTH (59): HYSWEEP dynamic draft
+          6 MB_DATA_SENSORDEPTH (59): HYSWEEP dynamic draft
 --reinit time_d:1623257192.230743 centered on offset: 0.000000 0.000000 0.000000
 2021/06/09-16:46:34.896498 1623257194.896499 | -121.878200   36.779408   61.286 | 0 filtered beams - Ping not used - failed bias estimate
 2021/06/09-16:46:37.895652 1623257197.895652 | -121.878241   36.779422   61.308 | 0 filtered beams - Ping not used - failed bias estimate

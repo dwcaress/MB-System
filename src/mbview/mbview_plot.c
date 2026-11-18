@@ -461,6 +461,13 @@ int mbview_drawdata(size_t instance, int rez) {
           // secondary data are partly mislocated - this bug is not understood
           // - somehow the color grids are being written or overwritten incorrectly
           // before.
+          // Note 24 October 2026: the likely cause was the background color
+          // work function (do_mbview_workfunction in mbview_callbacks.c), which
+          // computed the column index as k / primary_n_columns instead of
+          // k / primary_n_rows, so on non-square grids it colored cells with the
+          // secondary value of the wrong location and marked them done. That is
+          // now fixed; this workaround is left in place until it is confirmed
+          // that it is no longer needed.
 					if (stride == 1 || !(data->primary_stat_z[kk / 8] & statmask[kk % 8]))
 						mbview_zscalegridpoint(instance, kk);
 					if (stride == 1 || !(data->primary_stat_color[kk / 8] & statmask[kk % 8])) {
@@ -502,6 +509,13 @@ int mbview_drawdata(size_t instance, int rez) {
           // secondary data are partly mislocated - this bug is not understood
           // - somehow the color grids are being written or overwritten incorrectly
           // before.
+          // Note 24 October 2026: the likely cause was the background color
+          // work function (do_mbview_workfunction in mbview_callbacks.c), which
+          // computed the column index as k / primary_n_columns instead of
+          // k / primary_n_rows, so on non-square grids it colored cells with the
+          // secondary value of the wrong location and marked them done. That is
+          // now fixed; this workaround is left in place until it is confirmed
+          // that it is no longer needed.
 					if (stride == 1 || !(data->primary_stat_z[ll / 8] & statmask[ll % 8]))
 						mbview_zscalegridpoint(instance, ll);
 					if (stride == 1 || !(data->primary_stat_color[ll / 8] & statmask[ll % 8])) {
@@ -610,6 +624,11 @@ int mbview_drawdata(size_t instance, int rez) {
 
 	/* draw current navpick */
 	mbview_drawnavpick(instance);
+
+	/* draw GIS polygons, polylines, and points beneath sites and routes */
+	mbview_drawpolygon(instance, rez);
+	mbview_drawpolyline(instance, rez);
+	mbview_drawgispoint(instance, rez);
 
 	/* draw sites */
 	mbview_drawsite(instance, rez);
@@ -1981,6 +2000,10 @@ int mbview_drapesegment_gc(size_t instance, struct mbview_linesegment_struct *se
 	if (nsegpoint <= 2) {
 		done = true;
 		seg->nls = 0;
+		if (seg->lspoints != NULL) {
+			int error = MB_ERROR_NO_ERROR;
+			mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(seg->lspoints), &error);
+		}
 		seg->nls_alloc = 0;
 	} else {
 		/* get the points along the great circle arc */
@@ -2147,6 +2170,7 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 			if (status == MB_FAILURE) {
 				done = true;
 				seg->nls_alloc = 0;
+				seg->nls = 0;
 			}
 		}
 	}
@@ -2261,6 +2285,10 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 							done = true;
 						}
 					}
+				if (insert < 0)
+					insert = 0;
+				else if (insert > seg->nls)
+					insert = seg->nls;
 				if (found) {
 					for (int ii = seg->nls; ii > insert; ii--) {
 						seg->lspoints[ii].xgrid = seg->lspoints[ii - 1].xgrid;
@@ -2272,6 +2300,10 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 					seg->lspoints[insert].zdata = zdata;
 					seg->nls++;
 				}
+				if (insert <= 0)
+					insert = 1;
+				else if (insert >= seg->nls)
+					insert = seg->nls - 1;
 			}
 		}
 
@@ -2433,6 +2465,10 @@ int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *
 	if (nsegpoint <= 2) {
 		done = true;
 		seg->nls = 0;
+		if (seg->lspoints != NULL) {
+			int error = MB_ERROR_NO_ERROR;
+			mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(seg->lspoints), &error);
+		}
 		seg->nls_alloc = 0;
 	} else {
 		/* get the points along the great circle arc */
@@ -2626,6 +2662,7 @@ int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct
 			if (status == MB_FAILURE) {
 				done = true;
 				seg->nls_alloc = 0;
+				seg->nls = 0;
 			}
 		}
 	}

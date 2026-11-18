@@ -268,6 +268,13 @@ rounded (&quot;nice&quot;) interval.
 
 <DD>
 Histogram-equalize the color stretch (<B>--color-mode</B> 1 only).
+With a sealevel palette (<B>-W</B><I>style</I><B>/8</B> or <B>/9</B>), the
+parts of the grid below and above 0 m are equalized separately, with a
+color boundary exactly at 0: Haxby colors span the bathymetry bins and
+the land colors span the topography bins (swapped with <B>-D</B>). The
+color bins are shared between the two sides in proportion to their
+number of grid nodes. Grids with more than 16 million nodes are
+decimated before equalization to limit memory use.
 <DT><B>-Z</B>, <B>--zbounds </B><I>zmin/zmax</I>
 
 <DD>

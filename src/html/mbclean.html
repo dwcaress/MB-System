@@ -100,6 +100,33 @@ Version 5.0
 <BR>
 
 --help {-H}]
+<BR>
+
+<B>mbclean</B> --input=infile --cube-spacing=dx[/dy]
+<BR>
+
+[--cube-region=west/east/south/north
+<BR>
+
+--cube-flag=hypothesis|outlier|both
+<BR>
+
+--cube-flag-threshold=threshold
+<BR>
+
+--cube-flag-nadir=angle/threshold[/shallow|both]
+<BR>
+
+--cube-flag-strength-max=strength
+<BR>
+
+--cube-prediction-topography
+<BR>
+
+--cube-* options of <B>mbgrid</B> -F9 (see below)
+<BR>
+
+--format=format {-Fformat} --lonflip=lonflip {-Llonflip} --verbose {-V}]
 <P>
 <A NAME="lbAE">&nbsp;</A>
 <H2>DESCRIPTION</H2>
@@ -115,6 +142,9 @@ If desired, <B>mbclean</B> will also flag beams
 associated with &quot;rails&quot; where
 outer beams have smaller acrosstrack distances
 than more inner beams (<B>-Q</B> option).
+Soundings can also be compared with a CUBE surface built from all of
+the input data, as in <B>mbgrid</B> -F9 (<B>--cube-spacing</B>
+option, see CUBE FLAGGING below).
 Low and high bounds on acceptable depth values can be set; depth values
 outside the acceptable range will be flagged. The acceptable depth
 ranges can either be absolute (<B>-B</B> option), relative to
@@ -174,6 +204,115 @@ edited navigation, recalculate bathymetry, and apply
 other corrections to swath bathymetry data.
 <P>
 <A NAME="lbAF">&nbsp;</A>
+<H2>CUBE FLAGGING</H2>
+
+With the <B>--cube-spacing</B> option <B>mbclean</B> builds a CUBE
+(Combined Uncertainty and Bathymetric Estimator; Calder and Mayer, 2003)
+surface from all of the input data and flags the soundings that do not
+belong to it. This is the &quot;data cleaning&quot; use of CUBE described in the
+CUBE User's Manual (Calder and Wells, 2007): soundings that do not belong
+to the depth hypotheses selected by CUBE are flagged. The CUBE flagging
+cannot be combined with the other tests of <B>mbclean</B> in one run;
+run <B>mbclean</B> once with the other tests and once with CUBE flagging.
+<P>
+The CUBE grid is the one <B>mbgrid</B> -F9 builds with the same
+region (<B>--cube-region</B>, <B>mbgrid</B> -R), the same node spacing
+in meters (<B>--cube-spacing</B>, <B>mbgrid</B> -E<I>dx/dy</I>/meters)
+and the same <B>--cube-*</B> options on a geographic grid (no <B>-J</B>),
+so the surface the soundings are judged against can be seen by running
+<B>mbgrid</B>. The data are read as <B>mbgrid</B> reads them: processed
+files where the datalist asks for them (<B>$PROCESSED</B>), raw files
+otherwise, and alternative navigation where the datalist gives it. In
+addition the current edits of each raw file (its edit save file) are
+applied, so soundings already flagged are left out. If a processed file
+is older than its raw file, parameter file or edit save file, a warning
+asks for <B>mbprocess</B> to be run first. <B>mbgrid</B> sees these edits
+only in processed files: for edited files without processed versions, run
+<B>mbprocess</B> before comparing with <B>mbgrid</B>. The edit save file is
+registered in the parameter file only when edits are added, so a run
+that flags nothing leaves the processed files up to date.
+<P>
+The data are read twice: the first time to build the CUBE grid, the
+second time to compare every unflagged sounding with it. A median
+predicted surface (<B>--cube-prediction=median</B>) adds one more read.
+Only the CUBE grid is kept in memory. Each sounding is offered to the
+nodes as during the insertion into the grid (influence radius, capture
+distance, and the blunder test and slope correction of a predicted
+surface); the nearest of these nodes holding data decides. There the
+following criteria are applied (by default only <B>outlier</B> and
+<B>blunder</B>, see <B>--cube-flag</B>):
+<DL COMPACT>
+<DT><B>hypothesis</B>
+
+<DD>
+The sounding is flagged if the depth hypothesis it belongs to is not the
+one selected for the node. As in the CUBE estimator, a sounding belongs
+to the hypothesis with the smallest normalized error
+|z - d| / sqrt(v_d + v), where d and v_d are the predicted depth and
+variance of the hypothesis and v the variance of the sounding propagated
+to the node. This criterion never flags soundings at nodes with a single
+hypothesis.
+<DT><B>outlier</B>
+
+<DD>
+The sounding is flagged if its normalized error from the selected
+hypothesis exceeds a threshold. By default the threshold is the one at
+which the CUBE monitor rejects a single sample,
+(h^2 - 2 ln B) / (2 h) with h from <B>--cube-est-offset</B> and B from
+<B>--cube-bayes-factor</B>: 2.50 with the defaults. With
+<B>--cube-flag-nadir</B>, soundings in the nadir sector have their own
+threshold and, by default, are flagged only when they are shallower than
+the hypothesis (see below).
+<DT><B>blunder</B>
+
+<DD>
+With a predicted surface and the blunder test on, soundings that the
+blunder test rejects at the deciding node are always flagged.
+</DL>
+<P>
+
+Soundings that reach no node holding data (for example near the edges of
+the grid) are not tested and are counted as such. Only flags are added;
+nothing is unflagged. The flags are appended to the edit save file of
+the raw file as filter flags, as for the other <B>mbclean</B> tests; they
+cannot be told apart from other filter flags once <B>mbprocess</B> has
+applied them.
+<P>
+Deep water multibeam data can show a centre-beam artefact: near nadir,
+bottom detections that are too shallow, by a fraction of a percent to a
+few percent of the depth, often over several adjacent beams. These soundings are one-sided (almost
+all shallower than the seafloor) and many are small, so a symmetric
+threshold that catches them also flags many valid soundings in the outer
+beams and on slopes. <B>--cube-flag-nadir</B> gives the soundings in a
+sector around nadir their own outlier threshold, applied by default only to
+soundings shallower than the selected hypothesis; the soundings outside the
+sector keep the threshold of <B>--cube-flag-threshold</B>. The beam
+angle is the angle from the vertical between the sonar and the sounding,
+from the horizontal distance between the sonar position and the sounding
+and the depth of the sounding below the sonar. The CUBE surface itself is
+the same with and without this option.
+<P>
+The test depends on the sounding uncertainties as much as the CUBE
+surface does. The propagated variance v grows with the horizontal
+uncertainty of the sounding relative to the node spacing, so with the
+default IHO S-44 Order 2 model, whose horizontal uncertainty is 20 m plus
+10% of the depth, soundings in shallow water or on a fine grid are
+rarely flagged. Choose <B>--cube-order</B> or the <B>constant</B> or
+<B>depth</B> models (<B>--cube-model</B>) to match the survey, as
+described in the <B>mbgrid</B> manual page.
+<P>
+The node spacing must resolve the terrain. Each sounding is compared with
+the estimate at a node that can be up to 0.7 node spacings away, and the
+slope between them is not part of CUBE's variance propagation: with tight
+vertical uncertainties and a coarse grid over rough or sloping seafloor,
+many valid soundings exceed the outlier threshold. In a test on a deep
+water EM122 survey (1400 to 5300 m), the default model at 200 m flagged
+0.004% of the soundings, most of them gross blunders, whereas a vertical
+uncertainty of 0.14% of depth flagged 28% at 200 m and 4.7% at 50 m.
+Check the number of flagged soundings, and look at them in
+<B>mbeditviz</B>, before applying the edits with <B>mbprocess</B>.
+<P>
+<A NAME="lbAG">&nbsp;</A>
 <H2>MB-SYSTEM AUTHORSHIP</H2>
 
 David W. Caress
@@ -199,7 +338,7 @@ Christian do Santos Ferreira
 
 <BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
 <P>
-<A NAME="lbAG">&nbsp;</A>
+<A NAME="lbAH">&nbsp;</A>
 <H2>ALSO CONTRIBUTED TO THIS PROGRAM</H2>
 
 Alberto Malinverno
@@ -213,7 +352,7 @@ Dana Yoerger
 
 <BR>&nbsp;&nbsp;Woods&nbsp;Hole&nbsp;Oceanographic&nbsp;Institution
 <P>
-<A NAME="lbAH">&nbsp;</A>
+<A NAME="lbAI">&nbsp;</A>
 <H2>OPTIONS</H2>
 
 <DL COMPACT>
@@ -474,9 +613,88 @@ negative.
 <DD>
 This option causes <B>mbclean</B> to flag as bad all beams in pings
 with zero longitude and latitude values.
+<DT><B>--cube-spacing=dx[/dy]</B>
+
+<DD>
+Turns on CUBE flagging (see CUBE FLAGGING) with a CUBE grid of node
+spacing <I>dx</I> meters east and <I>dy</I> meters north (default
+<I>dy</I> = <I>dx</I>). CUBE flagging cannot be combined with the other
+tests.
+<DT><B>--cube-region=west/east/south/north</B>
+
+<DD>
+Sets the bounds of the CUBE grid in degrees. By default the bounds of
+the input data are used (from the &quot;.inf&quot; files, which are created if
+needed), as in <B>mbgrid</B>.
+<DT><B>--cube-flag=hypothesis|outlier|both</B>
+
+<DD>
+Selects the CUBE flagging criteria (see CUBE FLAGGING). Default: outlier.
+The <B>hypothesis</B> criterion, the literal rule of the CUBE User's
+Manual, also flags valid soundings where CUBE has split a sloping or
+rough seafloor into several hypotheses at a node; use it only with a node
+spacing that resolves the terrain, and preferably with
+<B>--cube-flag-strength-max</B>.
+<DT><B>--cube-flag-threshold=threshold</B>
+
+<DD>
+Sets the normalized error from the selected hypothesis above which the
+<B>outlier</B> criterion flags a sounding. Default: the single sample
+outlier threshold of the CUBE monitor, 2.50 with the default
+<B>--cube-est-offset</B> and <B>--cube-bayes-factor</B>.
+<DT><B>--cube-flag-nadir=angle/threshold[/shallow|both]</B>
+
+<DD>
+Gives the soundings whose beam angle from the vertical is less than
+<I>angle</I> degrees on either side of nadir their own <B>outlier</B>
+threshold <I>threshold</I> (a normalized error, see CUBE FLAGGING). With
+<B>shallow</B> (the default) only soundings shallower than the selected
+hypothesis by more than <I>threshold</I> are flagged there; with
+<B>both</B>, soundings deeper by more than <I>threshold</I> are flagged
+too. Soundings outside the sector keep the threshold of
+<B>--cube-flag-threshold</B>. Needs the <B>outlier</B> criterion. With
+<B>-V</B> the beam angle is added at the end of the lines listing the
+flagged soundings. Default: off.
+<DT><B>--cube-flag-strength-max=strength</B>
+
+<DD>
+Applies the <B>hypothesis</B> criterion only at nodes whose hypothesis
+strength (0 for a certain node, up to 5 for an ambiguous one) is at most
+<I>strength</I>, leaving soundings at ambiguous nodes for inspection, for
+example in <B>mbeditviz</B>. Default: 5 (no limit).
+<DT><B>--cube-prediction-topography</B>
+
+<DD>
+The predicted surface grid file (--cube-prediction=<I>gridfile</I>)
+holds heights (positive up), as a grid made with <B>mbgrid</B> -A2 or a
+global relief model, instead of depths (positive down).
+<DT><B>--cube-*</B>
+
+<DD>
+The CUBE algorithm, uncertainty model and predicted surface options of
+<B>mbgrid</B> -F9 are accepted with the same meanings and defaults:
+--cube-bayes-factor, --cube-blunder, --cube-capture-min,
+--cube-capture-scale, --cube-context, --cube-depth-reference,
+--cube-dist-exp, --cube-est-offset, --cube-extractor,
+--cube-horiz-scale, --cube-iho-ccom, --cube-iho-edition,
+--cube-influence-scale, --cube-median-length, --cube-memory-limit,
+--cube-model, --cube-model-a, --cube-model-b, --cube-model-c,
+--cube-order, --cube-prediction, --cube-prediction-hypotheses,
+--cube-prediction-uncertainty, --cube-quotient-limit,
+--cube-runlength, --cube-sigma-h and --cube-sigma-v.
+See the <B>mbgrid</B> manual page. A predicted surface grid file
+(--cube-prediction=<I>gridfile</I>) must be a geographic grid of
+depths (positive down), or of heights (positive up) with
+<B>--cube-prediction-topography</B>. If more of the soundings
+compared with it have the opposite sign than the same sign, <B>mbclean</B>
+stops after the first read of the data without flagging anything.
+With the likelihood and posterior selection rules, the
+--cube-context distances must reach at least one node spacing
+(--cube-spacing); otherwise the rules fall back to the prior rule and a
+warning is printed.
 <P>
 </DL>
-<A NAME="lbAI">&nbsp;</A>
+<A NAME="lbAJ">&nbsp;</A>
 <H2>EXAMPLES</H2>
 
 Suppose one wishes to do a first pass edit of
@@ -603,13 +821,108 @@ is flagged. Here is an example of the nonverbose output:
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2702&nbsp;total&nbsp;beams&nbsp;flagged<BR>
 <BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;total&nbsp;beams&nbsp;unflagged<BR>
 <P>
-<A NAME="lbAJ">&nbsp;</A>
+To flag the soundings of the same data that do not belong to a CUBE
+surface with 50 m node spacing, for a deep water survey from a surface
+vessel (IHO S-44 Order 2, the default):
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbclean&nbsp;-Idatalist.mb-1&nbsp;--cube-spacing=50<BR>
+<P>
+and to see the surface the soundings were compared with:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbgrid&nbsp;-Idatalist.mb-1&nbsp;-Ocube&nbsp;-F9&nbsp;-E50/50/meters&nbsp;-A1&nbsp;-M<BR>
+<P>
+Here <B>mbgrid</B> must use the same region as <B>mbclean</B>, which by
+default is the bounds of the data for both programs. If the processed
+files are out of date, run <B>mbprocess</B> first.
+<P>
+In deep water the horizontal uncertainties of the IHO S-44 orders (Order 2:
+20 m plus 10% of the depth; Orders 1a and 1b: 5 m plus 5%) leave only gross
+blunders flagged. To flag more, describe the sounding uncertainties with
+the <B>depth</B> model instead, here one standard deviation of 0.3% of the
+depth vertically and 1 m horizontally, and raise the outlier threshold
+(<B>--cube-order=special</B> then only sets the TVU bound of the
+influence radius):
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbclean&nbsp;-Idatalist.mb-1&nbsp;--cube-spacing=50&nbsp;--cube-order=special&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;--cube-model=depth&nbsp;--cube-model-a=0.13&nbsp;--cube-model-b=0.003&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;--cube-sigma-h=1&nbsp;--cube-model-c=0&nbsp;--cube-flag-threshold=3.5<BR>
+<P>
+On the EM122 survey described under CUBE FLAGGING this flagged 0.76% of
+the soundings. Compared with a manual cleaning of the same survey in
+<B>mbeditviz</B>, 34% of these flags agreed with manual flags and they
+covered 30% of the manual flags; most of the manual flags not found were
+small offsets near nadir. A 100 m node spacing flagged more valid soundings
+on steep slopes. Tune the vertical uncertainty and the threshold together
+(their product, here about 1% of the depth, sets the cutoff) and inspect
+the result in <B>mbeditviz</B> before running <B>mbprocess</B>.
+<P>
+To aim at the centre-beam artefact instead, flag soundings within 10
+degrees of nadir that are more than 1.5 normalized errors shallower than
+the CUBE surface, and elsewhere only those more than 5 normalized errors
+away:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbclean&nbsp;-Idatalist.mb-1&nbsp;--cube-spacing=50&nbsp;--cube-order=special&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;--cube-flag-nadir=10/1.5&nbsp;--cube-flag-threshold=5<BR>
+<P>
+On the same EM122 survey, preprocessed and corrected for sound speed, this
+flagged 10,231 soundings (0.44%), of which 54% agreed with manual flags,
+covering 27% of the manual flags; a single threshold of 2.5 with the same
+grid and model flagged 19,759 soundings for 29% agreement and 29% coverage.
+The sector and the thresholds were chosen on this survey; check them on
+other systems and depths.
+<P>
+Surveys that combine steep slopes and flat plains may need more than one
+set of parameters. On the EM122 survey above, the centre-beam artefact was
+1 to 2% of the depth on the slopes but only about 0.2% (around 10 m at
+5000 m) on the abyssal plain, inside the scatter of the valid soundings
+there. A nadir threshold low enough for the plain flagged many valid
+soundings on the slopes, and one suited to the slopes left the plain
+almost untouched. Such a survey can be cleaned in two runs. The first run
+covers the whole survey; besides the slope and centre-beam settings it
+tightens the blunder test, because the nadir sector flags only shallow
+soundings by default and the default blunder test rejects only soundings
+more than 25% of the depth deeper than the predicted surface:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbclean&nbsp;-Idatalist.mb-1&nbsp;--cube-spacing=50&nbsp;--cube-order=special&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;--cube-model=depth&nbsp;--cube-model-a=0.13&nbsp;--cube-model-b=0.003&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;--cube-sigma-h=1&nbsp;--cube-model-c=0&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;--cube-prediction=median/4&nbsp;--cube-extractor=predicted&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;--cube-flag=outlier&nbsp;--cube-flag-threshold=5&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;--cube-flag-nadir=10/2&nbsp;--cube-blunder=10/0.05/3<BR>
+<P>
+The second run is limited to the flat area with <B>--cube-region</B>,
+switches the general outlier test off with a very high threshold, and only
+removes the crest of shallow soundings at nadir with a low nadir
+threshold:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbclean&nbsp;-Idatalist.mb-1&nbsp;--cube-spacing=50&nbsp;--cube-order=special&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;--cube-model=depth&nbsp;--cube-model-a=0.13&nbsp;--cube-model-b=0.003&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;--cube-sigma-h=1&nbsp;--cube-model-c=0&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;--cube-prediction=median/4&nbsp;--cube-extractor=predicted&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;--cube-region=-11.81/-11.50/36.86/37.14&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;--cube-flag=outlier&nbsp;--cube-flag-threshold=1000&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;--cube-flag-nadir=5/0.1<BR>
+<P>
+The second run applies the edits of the first, so its CUBE surface is built
+without the soundings already flagged, and its flags are appended to the
+same edit save files. Run each step once: running the second step again
+adds more flags. On this survey the two runs flagged 17,953 soundings
+(0.78%), of which 43% agreed with the manual cleaning, covering 38% of the
+manual flags; the second run's threshold was chosen by inspecting the result
+in <B>mbeditviz</B>. The region, the sectors and the thresholds belong to
+this survey. The beam angle is measured from the sonar position of the
+ping; on this survey the nadir soundings lay several degrees from it along
+track, so a sector of 5 degrees covered about 3 degrees on either side of
+nadir. With <B>-V</B> the beam angle of each flagged sounding is listed,
+which shows how the sector falls on other data.
+<P>
+<A NAME="lbAK">&nbsp;</A>
 <H2>SEE ALSO</H2>
 
 <B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbedit.html">mbedit</A></B>(1),
-<B><A HREF="mbinfo.html">mbinfo</A></B>(1) <B><A HREF="mbprocess.html">mbprocess</A></B>(1),
+<B><A HREF="mbinfo.html">mbinfo</A></B>(1) <B><A HREF="mbprocess.html">mbprocess</A></B>(1), <B><A HREF="mbgrid.html">mbgrid</A></B>(1),
 <P>
-<A NAME="lbAK">&nbsp;</A>
+<A NAME="lbAL">&nbsp;</A>
 <H2>BUGS</H2>
 
 The algorithms implemented in <B>mbclean</B> simply
@@ -629,12 +942,13 @@ bathymetry data (e.g. <B>mbedit</B>).
 <DT><A HREF="#lbAC">VERSION</A><DD>
 <DT><A HREF="#lbAD">SYNOPSIS</A><DD>
 <DT><A HREF="#lbAE">DESCRIPTION</A><DD>
-<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
-<DT><A HREF="#lbAG">ALSO CONTRIBUTED TO THIS PROGRAM</A><DD>
-<DT><A HREF="#lbAH">OPTIONS</A><DD>
-<DT><A HREF="#lbAI">EXAMPLES</A><DD>
-<DT><A HREF="#lbAJ">SEE ALSO</A><DD>
-<DT><A HREF="#lbAK">BUGS</A><DD>
+<DT><A HREF="#lbAF">CUBE FLAGGING</A><DD>
+<DT><A HREF="#lbAG">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAH">ALSO CONTRIBUTED TO THIS PROGRAM</A><DD>
+<DT><A HREF="#lbAI">OPTIONS</A><DD>
+<DT><A HREF="#lbAJ">EXAMPLES</A><DD>
+<DT><A HREF="#lbAK">SEE ALSO</A><DD>
+<DT><A HREF="#lbAL">BUGS</A><DD>
 </DL>
 <HR>
 </PRE>

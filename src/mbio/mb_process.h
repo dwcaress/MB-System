@@ -1036,6 +1036,31 @@ struct mb_esf_struct {
   int startnextsearch;
 };
 
+/* file history (snapshot) definitions - see mb_history.c
+ * Before a file is modified, a copy may be saved in a directory named
+ * MB_HISTORY_DIR next to the file as <file>.vNNNN_YYYYMMDDTHHMMSS (UTC),
+ * with one line per snapshot appended to <file>.manifest in that directory. */
+#define MB_HISTORY_DIR "mbhistory"
+#define MB_HISTORY_ENV "MB_HISTORY"
+#define MB_HISTORY_MANIFEST_SUFFIX ".manifest"
+#define MB_HISTORY_MODE_DEFAULT 0      /* skip if identical to newest snapshot (esf: same edits) */
+#define MB_HISTORY_MODE_ONCE 1         /* also at most once per file per process */
+#define MB_HISTORY_MODE_FORCE 2        /* always make a new snapshot */
+#define MB_HISTORY_NOTE_CREATED "created" /* note of the snapshot of a new esf file */
+#define MB_HISTORY_NAME_LENGTH 256
+struct mb_history_entry {
+  int version;
+  char utc[32];                        /* YYYY-MM-DDTHH:MM:SSZ */
+  double time_d;                       /* seconds since 1970-01-01 00:00:00 */
+  char program[MB_HISTORY_NAME_LENGTH];
+  char user[MB_HISTORY_NAME_LENGTH];
+  char host[MB_HISTORY_NAME_LENGTH];
+  long size;                           /* bytes */
+  unsigned int crc32;
+  char snapshot[MB_PATH_MAXLINE];      /* file name inside MB_HISTORY_DIR */
+  char note[MB_HISTORY_NAME_LENGTH];
+};
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -1166,6 +1191,13 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 int mb_esf_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam, int action, int *error);
 int mb_ess_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam, int action, int *error);
 int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error);
+int mb_history_paths(int verbose, const char *file, char *dir, size_t dirsize, char *base, size_t basesize, int *error);
+int mb_history_crc32(int verbose, const char *file, unsigned int *crc32, long *size, int *error);
+int mb_history_copy(int verbose, const char *ifile, const char *ofile, int *error);
+int mb_history_read_manifest(int verbose, const char *file, int *nentry, struct mb_history_entry **entries, int *error);
+int mb_history_write_manifest(int verbose, const char *file, int nentry, struct mb_history_entry *entries, int *error);
+int mb_history_snapshot(int verbose, const char *file, const char *program_name, const char *note, int mode, int *version,
+                        int *error);
 int mb_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *, const void *));
 void mb_mergesort_setup(mb_u_char *list1, mb_u_char *list2, size_t n, size_t size, int (*cmp)(const void *, const void *));
 void mb_mergesort_insertionsort(mb_u_char *a, size_t n, size_t size, int (*cmp)(const void *, const void *));

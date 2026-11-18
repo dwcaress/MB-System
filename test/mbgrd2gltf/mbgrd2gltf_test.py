@@ -24,7 +24,7 @@ class Mbgrd2gltfTest(unittest.TestCase):
       (['--html', '--geoviewpoint=1,2,3'], 'takes 6 numbers'),
       (['--html', '--geoviewpoint=a,b,c,d,e,f'], 'is not a number'),
       (['--html', '--geoviewpoint=36.6,-122.4,-900,36.61,-122.39,-950'], 'lon,lat,elev'),
-      (['--geoviewpoint=-122.4,36.6,-900,-122.39,36.61,-950'], 'use --html too'),
+      (['--geoviewpoint=-122.4,36.6,-900,-122.39,36.61,-950'], 'use one of them too'),
     )
     for args, message in cases:
       proc = subprocess.run([self.cmd, '-I', 'nonexistent.grd'] + args,

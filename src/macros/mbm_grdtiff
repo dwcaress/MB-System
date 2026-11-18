@@ -226,7 +226,8 @@ if ($misc)
 				/^[Gg][Ss](\S+)/;
 			}
 
-		# turn on world file generation
+		# world file generation: accepted for backward compatibility;
+		# mbgrdtiff always writes the .tfw world file, and has no -W option
 		if ($cmd =~ /^[Gg][Ww]/)
 			{
 			$make_worldfile = 1;
@@ -1157,6 +1158,12 @@ if (@files_intensity)
 # Define shell variables
 print FCMD "#\n# Define data files to be plotted:\n";
 print FCMD "DATA_FILE=$file_grd\n";
+if (!$file_data_no_list)
+  {
+  # each grid in a list gets its own image, named after the grid
+  ($grd_root) = $file_grd =~ /([^\/]+?)(\.[^.\/]*)?$/;
+  print FCMD "TIFF_FILE=$grd_root.tif\n";
+  }
 if ($file_int)
   {
   print FCMD "INTENSITY_FILE=$file_int\n";
@@ -1169,7 +1176,7 @@ if ($data_scale)
 	printf FCMD "#\n# Rescale data\n";
 	printf FCMD "echo Rescaling data by $data_scale...\n";
 	printf FCMD "echo Running gmt module grdmath...\n";
-	printf FCMD "gmt grdmath \$DATA_FILE $data_scale x = \$DATA_FILE.scale\n";
+	printf FCMD "gmt grdmath \$DATA_FILE $data_scale MUL = \$DATA_FILE.scale\n";
 	$file_use = "\$DATA_FILE.scale";
 	}
 
@@ -1235,7 +1242,7 @@ if ($color_mode == 3 && $file_int && $stretch_shade)
 	printf FCMD "echo Running gmt module grdhisteq...\n";
 	printf FCMD "gmt grdhisteq \$INTENSITY_FILE -G\$INTENSITY_FILE.eq -N\n";
 	printf FCMD "echo Running gmt module grdmath...\n";
-	printf FCMD "gmt grdmath \$INTENSITY_FILE.eq $magnitude x = \$INTENSITY_FILE.int\n";
+	printf FCMD "gmt grdmath \$INTENSITY_FILE.eq $magnitude MUL = \$INTENSITY_FILE.int\n";
 	printf FCMD "/bin/rm -f \$INTENSITY_FILE.eq\n";
 	$file_shade = "\$INTENSITY_FILE.int";
 	}
@@ -1307,10 +1314,6 @@ if ($color_mode)
 		{
 		printf FCMD "-I$file_slope \\\n\t";
 		}
-	if ($make_worldfile == 1)
-		{
-		printf FCMD "-W \\\n\t";
-		}
 	printf FCMD "-V \n";
 	}
 } # end loop over grd data files
@@ -1358,19 +1361,19 @@ print FCMD "$hash"; print FCMD "    else\n";
 print FCMD "$hash"; print FCMD "      \$image_viewer \$TIFF_FILE &\n";
 print FCMD "$hash"; print FCMD "    fi\n";
 print FCMD "$hash"; print FCMD "  elif [[ ( -x \"\$(command -v open)\" ) && ( \$os_name == \"Darwin\" ) ]]; then\n";
-print FCMD "$hash"; print FCMD "    echo Displaying $TIFF_FILE using system default program through open...\n";
+print FCMD "$hash"; print FCMD "    echo Displaying \$TIFF_FILE using system default program through open...\n";
 print FCMD "$hash"; print FCMD "    open \$TIFF_FILE\n";
 print FCMD "$hash"; print FCMD "  elif [[ -x \"\$(command -v gio)\" ]]; then\n";
-print FCMD "$hash"; print FCMD "    echo Displaying $TIFF_FILE using system default program through  gio open...\n";
+print FCMD "$hash"; print FCMD "    echo Displaying \$TIFF_FILE using system default program through  gio open...\n";
 print FCMD "$hash"; print FCMD "    gio open \$TIFF_FILE\n";
 print FCMD "$hash"; print FCMD "  elif [[ -x \"\$(command -v xdg-open)\" ]]; then\n";
-print FCMD "$hash"; print FCMD "    echo Displaying $TIFF_FILE using system default program through xdg-open...\n";
+print FCMD "$hash"; print FCMD "    echo Displaying \$TIFF_FILE using system default program through xdg-open...\n";
 print FCMD "$hash"; print FCMD "    xdg-open \$TIFF_FILE\n";
 print FCMD "$hash"; print FCMD "  elif [[ -x \"\$(command -v cygstart)\" ]]; then\n";
-print FCMD "$hash"; print FCMD "    echo Displaying $TIFF_FILE using system default program through cygstart...\n";
+print FCMD "$hash"; print FCMD "    echo Displaying \$TIFF_FILE using system default program through cygstart...\n";
 print FCMD "$hash"; print FCMD "    cygstart \$TIFF_FILE\n";
 print FCMD "$hash"; print FCMD "  elif [[ -x \"\$(command -v open)\" ]]; then\n";
-print FCMD "$hash"; print FCMD "    echo Displaying $TIFF_FILE using system default program through open...\n";
+print FCMD "$hash"; print FCMD "    echo Displaying \$TIFF_FILE using system default program through open...\n";
 print FCMD "$hash"; print FCMD "    open \$TIFF_FILE\n";
 print FCMD "$hash"; print FCMD "  fi\n";
 print FCMD "$hash"; print FCMD "fi\n";

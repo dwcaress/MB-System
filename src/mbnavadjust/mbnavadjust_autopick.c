@@ -1045,7 +1045,7 @@ int mbnavadjust_get_misfit() {
         for (int jc = 0; jc < gridm_ny; jc++)
           for (int kc = 0; kc < nzmisfitcalc; kc++) {
             lc = kc + nzmisfitcalc * (ic + jc * gridm_nx);
-            if (gridnm[lc] > mbna_minmisfit_nthreshold / 10 &&
+            if (gridnm[lc] > mbna_minmisfit_nthreshold &&
                 (mbna_minmisfit_n == 0 || gridm[lc] < mbna_minmisfit)) {
               mbna_minmisfit = gridm[lc];
               mbna_minmisfit_n = gridnm[lc];
@@ -1124,9 +1124,19 @@ int mbnavadjust_get_misfit() {
               }
             }
           }
-      mbna_minmisfit_sx1[0] /= mbna_minmisfit_sr1;
-      mbna_minmisfit_sx1[1] /= mbna_minmisfit_sr1;
-      mbna_minmisfit_sx1[2] /= mbna_minmisfit_sr1;
+      if (mbna_minmisfit_sr1 > MBNA_SMALL) {
+        mbna_minmisfit_sx1[0] /= mbna_minmisfit_sr1;
+        mbna_minmisfit_sx1[1] /= mbna_minmisfit_sr1;
+        mbna_minmisfit_sx1[2] /= mbna_minmisfit_sr1;
+      }
+      else {
+        /* no other point within the threshold - use a unit vector and a
+            minimal radius rather than dividing by zero */
+        mbna_minmisfit_sx1[0] = 1.0;
+        mbna_minmisfit_sx1[1] = 0.0;
+        mbna_minmisfit_sx1[2] = 0.0;
+        mbna_minmisfit_sr1 = MBNA_SMALL;
+      }
 
       /* now get a horizontal unit vector perpendicular to the the longest vector
           and then find the largest r associated with that vector */
@@ -1266,6 +1276,7 @@ int mbnavadjust_get_misfitxy() {
       misfit_max = 0.0;
       misfit_min = 0.0;
       kc = (int)((mbna_offset_z - zmin) / zoff_dz);
+      kc = MAX(0, MIN(kc, nzmisfitcalc - 1));
       for (int ic = 0; ic < gridm_nx; ic++)
         for (int jc = 0; jc < gridm_ny; jc++) {
           lc = kc + nzmisfitcalc * (ic + jc * gridm_nx);
@@ -1273,6 +1284,9 @@ int mbnavadjust_get_misfitxy() {
             if (misfit_max == 0.0) {
               misfit_min = gridm[lc];
               misfit_max = gridm[lc];
+              mbna_minmisfit_xh = (ic - gridm_nx / 2) * grid_dx + mbna_misfit_offset_x;
+              mbna_minmisfit_yh = (jc - gridm_ny / 2) * grid_dy + mbna_misfit_offset_y;
+              mbna_minmisfit_zh = zmin + zoff_dz * kc;
             }
             else if (gridm[lc] < misfit_min) {
               misfit_min = gridm[lc];

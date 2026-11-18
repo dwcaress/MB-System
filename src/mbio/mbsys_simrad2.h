@@ -1149,6 +1149,11 @@ int mbsys_simrad2_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error);
 
+/* translation from the old Simrad data structure (see mbsys_simrad.h) */
+struct mbsys_simrad_struct;
+int mbsys_simrad2_from_simrad(int verbose, struct mbsys_simrad_struct *istore, struct mbsys_simrad2_struct *ostore,
+                              int *error);
+
 #ifdef __cplusplus
 }  /* extern "C" */
 #endif

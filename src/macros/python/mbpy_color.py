@@ -59,7 +59,9 @@
 #   -- see compute_sealevel_izero()'s docstring.
 #
 import math
+import os
 import subprocess
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -587,6 +589,192 @@ def build_histogram_boundaries(
         hist.pop()
 
     return HistBoundaries(hist=hist, ncolors=ncolors)
+
+
+# ---------------------------------------------------------------------------
+# Histogram-equalized sealevel dual-colormap stretch (palettes 8 and 9
+# with --stretch-color). Not in mbm_grdplot, which never combined -S
+# with the sealevel palettes. The parts of the grid below and above
+# 0 m are equalized separately, so one CPT boundary always falls exactly
+# at sea level: Haxby colors (stops 1..10, as in
+# interpolate_palette_sealevel()) span the bathymetry bins and the land
+# palette spans the topography bins. With color_flip (depth-positive
+# grids) the sides swap: Haxby above 0, land below. The number of bins
+# on each side is proportional to its share of the grid's nodes, so the
+# whole CPT stays (approximately) equal-area.
+#
+# grdhisteq -C -D on a large grid is memory hungry (more than 3 GB for
+# a 19744 x 15815 node grid), so grids with more than
+# SEALEVEL_HISTEQ_MAX_NODES nodes are first decimated with nearest-
+# neighbor grdsample; the bin edges barely change, and the outermost
+# edges are reset to the grid's real zmin/zmax anyway.
+# ---------------------------------------------------------------------------
+
+SEALEVEL_HISTEQ_MAX_NODES = 16000000
+
+
+def allocate_sealevel_bins(nbins: int, count_below: int, count_above: int) -> Tuple[int, int]:
+    """Split `nbins` histogram bins between the below-zero and
+    above-zero parts of a grid in proportion to their node counts,
+    giving each side that has data at least one bin."""
+    if count_below <= 0 and count_above <= 0:
+        raise ValueError("grid has no non-NaN nodes")
+    if count_above <= 0:
+        return nbins, 0
+    if count_below <= 0:
+        return 0, nbins
+    if nbins < 2:
+        raise ValueError("need at least 2 color bins to color both sides of sea level")
+    nbelow = int(round(nbins * count_below / (count_below + count_above)))
+    nbelow = min(max(nbelow, 1), nbins - 1)
+    return nbelow, nbins - nbelow
+
+
+def _grdinfo_columns(grid_path: str, extra: Tuple[str, ...] = ()) -> List[str]:
+    proc = subprocess.run(
+        ["gmt", "grdinfo", grid_path, "-C", *extra],
+        capture_output=True, text=True, check=True, errors="replace",
+    )
+    # tab-separated, so a grid path containing spaces stays one field
+    return proc.stdout.rstrip("\n").split("\t")
+
+
+def _parse_grdhisteq_rows(text: str) -> List[Tuple[float, float]]:
+    rows = []
+    for line in text.splitlines():
+        parts = line.split()
+        if len(parts) >= 2:
+            rows.append((float(parts[0]), float(parts[1])))
+    return rows
+
+
+def run_grdhisteq_sealevel(
+    grid_path: str,
+    nbins: int,
+    zmin: float,
+    zmax: float,
+    max_nodes: int = SEALEVEL_HISTEQ_MAX_NODES,
+) -> Tuple[List[Tuple[float, float]], List[Tuple[float, float]]]:
+    """Run `gmt grdhisteq -C<n> -D` separately on the below-zero and
+    above-zero parts of `grid_path` (decimated first if it has more
+    than `max_nodes` nodes), with `nbins` split between the two sides
+    by allocate_sealevel_bins(). Returns (rows_below, rows_above); a
+    side with no data (zmin >= 0 or zmax <= 0) gets an empty list.
+    Nodes exactly at 0 belong to the below-zero side."""
+    with tempfile.TemporaryDirectory(prefix="mbpy_histeq_") as tmpdir:
+        cols = _grdinfo_columns(grid_path)
+        nx, ny = int(cols[9]), int(cols[10])
+        source = grid_path
+        if nx * ny > max_nodes:
+            factor = math.ceil(math.sqrt(nx * ny / max_nodes))
+            source = os.path.join(tmpdir, "decimated.nc")
+            subprocess.run(
+                ["gmt", "grdsample", grid_path,
+                 f"-I{(nx - 1) // factor + 1}+n/{(ny - 1) // factor + 1}+n",
+                 "-nn", f"-G{source}"],
+                capture_output=True, text=True, check=True,
+            )
+
+        # clip away the other side of sea level (NaN nodes are ignored
+        # by grdhisteq) and count what is left on each side
+        sides = []
+        for name, clip, has_data in (("below", "-Sa0/NaN", zmin < 0.0),
+                                     ("above", "-Sb0/NaN", zmax > 0.0)):
+            if not has_data:
+                sides.append((None, 0))
+                continue
+            part = os.path.join(tmpdir, f"{name}.nc")
+            subprocess.run(["gmt", "grdclip", source, clip, f"-G{part}"],
+                           capture_output=True, text=True, check=True)
+            cols = _grdinfo_columns(part, ("-M",))
+            count = int(cols[9]) * int(cols[10]) - int(float(cols[15]))
+            sides.append((part, count))
+
+        nbins_side = allocate_sealevel_bins(nbins, sides[0][1], sides[1][1])
+        rows = []
+        for (part, _count), n in zip(sides, nbins_side):
+            if part is None or n == 0:
+                rows.append([])
+                continue
+            proc = subprocess.run(
+                ["gmt", "grdhisteq", part, f"-C{n}", "-D"],
+                capture_output=True, text=True, check=True,
+            )
+            rows.append(_parse_grdhisteq_rows(proc.stdout))
+    return rows[0], rows[1]
+
+
+def _side_boundaries(rows: List[Tuple[float, float]], lo: float, hi: float) -> List[float]:
+    """Increasing bin edges for one side of sea level from grdhisteq -D
+    rows, with the outer edges forced to exactly `lo` and `hi`.
+    Degenerate (non-increasing) edges are dropped as in
+    build_histogram_boundaries(), as are interior edges not strictly
+    inside (lo, hi)."""
+    edges = [d1 for d1, _d2 in rows]
+    interior = []
+    for d in edges[1:]:
+        if lo < d < hi and (not interior or d > interior[-1]):
+            interior.append(d)
+    return [lo, *interior, hi]
+
+
+def build_sealevel_histogram_boundaries(
+    rows_below: List[Tuple[float, float]],
+    rows_above: List[Tuple[float, float]],
+    zmin: float,
+    zmax: float,
+    dzz: float,
+) -> Tuple[List[float], List[float]]:
+    """Bin edges (each increasing) for the below-zero and above-zero
+    sides from run_grdhisteq_sealevel() output. The edges meet exactly
+    at 0, and the outer edges are padded by 1% of dzz beyond the data
+    range as in build_histogram_boundaries(). A side with no rows
+    gets an empty list."""
+    below = above = []
+    if rows_below:
+        below = _side_boundaries(rows_below, min(zmin, rows_below[0][0]) - 0.01 * dzz, 0.0)
+    if rows_above:
+        above = _side_boundaries(rows_above, 0.0, max(zmax, rows_above[-1][1]) + 0.01 * dzz)
+    return below, above
+
+
+def build_cpt_sealevel_from_boundaries(
+    color_palette: int,
+    below: List[float],
+    above: List[float],
+    color_flip: bool = False,
+) -> List[CptLine]:
+    """CPT lines for the histogram-equalized sealevel stretch, ordered
+    by increasing z. Without color_flip the land palette (8 or 9) runs
+    from its last stop at 0 up to its first stop at the top edge, and
+    Haxby runs from stop 1 just below 0 down to stop 10 at the bottom
+    edge -- the same color assignment as the arithmetic sealevel CPT
+    (interpolate_palette_sealevel()). With color_flip the two palettes
+    swap sides of sea level. Each side's colors are spread evenly over
+    its bins, and the colors jump from one palette to the other at 0."""
+    if color_palette not in SEALEVEL_PALETTES:
+        raise ValueError(f"{color_palette} is not a sealevel palette (must be 8 or 9)")
+    land = _PALETTES_RGB[color_palette]
+    haxby = _PALETTES_RGB[1]
+
+    def sea_color(f):    # f: 0 at sea level .. 1 at the deepest edge
+        return _interp_stop(*haxby, 1 + (NCPT - 2) * f)
+
+    def land_color(f):   # f: 0 at sea level .. 1 at the highest edge
+        return _interp_stop(*land, (NCPT - 1) * (1 - f))
+
+    below_color, above_color = (land_color, sea_color) if color_flip else (sea_color, land_color)
+
+    lines: List[CptLine] = []
+    n = len(below) - 1
+    for k in range(n):
+        lines.append(CptLine(below[k], *below_color((n - k) / n),
+                             below[k + 1], *below_color((n - k - 1) / n)))
+    n = len(above) - 1
+    for k in range(n):
+        lines.append(CptLine(above[k], *above_color(k / n),
+                             above[k + 1], *above_color((k + 1) / n)))
+    return lines
 
 
 def build_slope_boundaries(magnitude: float, ncolors: int, color_style: int = 1) -> List[float]:

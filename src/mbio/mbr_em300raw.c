@@ -64,15 +64,15 @@ int mbr_info_em300raw(int verbose, int *system, int *beams_bath_max, int *beams_
 	/* set format info parameters */
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_SIMRAD2;
-	*beams_bath_max = 254;
-	*beams_amp_max = 254;
+	*beams_bath_max = MBSYS_SIMRAD2_MAXBEAMS;
+	*beams_amp_max = MBSYS_SIMRAD2_MAXBEAMS;
 	*pixels_ss_max = 1024;
 	strncpy(format_name, "EM300RAW", MB_NAME_LENGTH);
 	strncpy(system_name, "SIMRAD2", MB_NAME_LENGTH);
 	strncpy(format_description,
 	        "Format name:          MBF_EM300RAW\nInformal Description: Simrad current multibeam vendor format\nAttributes:       "
 	        "    Simrad EM120, EM300, EM1002, EM3000, \n                      bathymetry, amplitude, and sidescan,\n             "
-	        "         up to 254 beams, variable pixels, ascii + binary, Simrad.\n",
+	        "         up to 256 beams, variable pixels, ascii + binary, Simrad.\n",
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;

@@ -37,6 +37,7 @@
  */
 
 #include <math.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -185,9 +186,6 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	SurfSignalParameter *MultibeamSignalParametersPtr;
 	SurfTxParameter *MultibeamTransmitterParametersPtr;
 	SurfSidescanData *SidescanDataPtr;
-	int utm_zone;
-	char projection[MB_NAME_LENGTH];
-	double easting, northing, lon, lat;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -200,8 +198,6 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* get pointer to mbio descriptor and data structure */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr;
-	double *refeasting = &(mb_io_ptr->saved1);
-	double *refnorthing = &(mb_io_ptr->saved2);
 
 	/* set sapi verbosity */
         // TODO(schwehr): What?
@@ -234,37 +230,48 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->PositionSensor[i] = *(SAPI_getPositionSensor(i));
 		}
 
-		/* initialize UTM projection if required */
-		if (store->GlobalData.presentationOfPosition == 'X' && !mb_io_ptr->projection_initialized) {
-			/* initialize UTM projection */
-			utm_zone = (int)(((RTD * store->GlobalData.referenceMeridian + 183.0) / 6.0) + 0.5);
-			sprintf(projection, "UTM%2.2dN", utm_zone);
-			mb_proj_init(verbose, projection, &(mb_io_ptr->pjptr), error);
-			store->GlobalData.presentationOfPosition = 'E';
-			mb_io_ptr->projection_initialized = true;
+		/* If the positions are projected easting and northing in meters, set up
+		    the projection. The SURF records are left in projected coordinates;
+		    mbsys_surf_extract() returns eastings and northings and MBIO
+		    (mb_extract, mb_insert, etc.) converts to and from longitude
+		    and latitude because projection_initialized is set.
+		    SURF does not record the projection parameters completely:
+		    the projection name is "GK" (Gauss-Krueger) or "UTM", the
+		    falseEasting is often zero even when the eastings include a
+		    500 km offset (plus a zone prefix for Gauss-Krueger), and no
+		    datum shift is given, so only the ellipsoid is used. */
+		if (store->GlobalData.presentationOfPosition == X_Y && !mb_io_ptr->projection_initialized) {
+			const double lon_0 = RTD * store->GlobalData.referenceMeridian;
+			double x_0 = store->GlobalData.falseEasting;
+			if (x_0 == 0.0)
+				x_0 = 1.0e6 * floor(store->GlobalData.referenceOfPositionX / 1.0e6) + 500000.0;
+			const double k_0 = (strncmp(store->GlobalData.projection, "UTM", 3) == 0 ? 0.9996 : 1.0);
+			char ellipsoid[MB_PATH_MAXLINE];
+			if (store->GlobalData.semiMajorAxis > 0.0 && store->GlobalData.flattening > 0.0)
+				snprintf(ellipsoid, sizeof(ellipsoid), "+a=%.4f +rf=%.9f", store->GlobalData.semiMajorAxis,
+				         1.0 / store->GlobalData.flattening);
+			else
+				snprintf(ellipsoid, sizeof(ellipsoid), "+ellps=WGS84");
+			char projection[MB_PATH_MAXLINE];
+			snprintf(projection, sizeof(projection),
+			         "+proj=tmerc +lat_0=0 +lon_0=%.9f +k=%.6f +x_0=%.3f +y_0=%.3f %s +units=m +no_defs",
+			         lon_0, k_0, x_0, store->GlobalData.falseNorthing, ellipsoid);
+			int proj_status = mb_proj_init(verbose, projection, &(mb_io_ptr->pjptr), error);
 
-			/* Set reference longitude and latitude */
-			easting = store->GlobalData.referenceOfPositionX;
-			northing = store->GlobalData.referenceOfPositionY;
-			mb_proj_inverse(verbose, mb_io_ptr->pjptr, easting, northing, &lon, &lat, error);
-			store->GlobalData.referenceOfPositionX = DTR * lon;
-			store->GlobalData.referenceOfPositionY = DTR * lat;
-			*refeasting = easting;
-			*refnorthing = northing;
-
-			/* Set min longitude and latitude */
-			easting = store->Statistics.minEasting;
-			northing = store->Statistics.minNorthing;
-			mb_proj_inverse(verbose, mb_io_ptr->pjptr, easting, northing, &lon, &lat, error);
-			store->Statistics.minEasting = DTR * lon;
-			store->Statistics.minNorthing = DTR * lat;
-
-			/* Set max longitude and latitude */
-			easting = store->Statistics.maxEasting;
-			northing = store->Statistics.maxNorthing;
-			mb_proj_inverse(verbose, mb_io_ptr->pjptr, easting, northing, &lon, &lat, error);
-			store->Statistics.maxEasting = DTR * lon;
-			store->Statistics.maxNorthing = DTR * lat;
+			/* fall back to a UTM zone if the projection string is not accepted
+			    (e.g. built with the PROJ 4 API) */
+			if (proj_status != MB_SUCCESS) {
+				const int utm_zone = (int)(((lon_0 + 183.0) / 6.0) + 0.5);
+				snprintf(projection, sizeof(projection), "UTM%2.2dN", utm_zone);
+				proj_status = mb_proj_init(verbose, projection, &(mb_io_ptr->pjptr), error);
+			}
+			if (proj_status == MB_SUCCESS) {
+				mb_io_ptr->projection_initialized = true;
+			}
+			else {
+				status = MB_FAILURE;
+				*error = MB_ERROR_BAD_PROJECTION;
+			}
 		}
 
 		store->initialized = true;
@@ -296,33 +303,25 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		ActualAngleTablePtr = SAPI_getActualAngleTable();
 		if (ActualAngleTablePtr != NULL) {
 			store->ActualAngleTable = *ActualAngleTablePtr;
-			for (int i = 1; i < MIN(MBSYS_SURF_MAXBEAMS, ActualAngleTablePtr->actualNumberOfBeams); i++) {
-				store->ActualAngleTable.beamAngle[i] = ActualAngleTablePtr->beamAngle[i];
-			}
+			const int nangles = MIN(MBSYS_SURF_MAXBEAMS, ActualAngleTablePtr->actualNumberOfBeams);
+			if (nangles > 0)
+				memcpy(store->beamAngle, (const char *)ActualAngleTablePtr + offsetof(SurfMultiBeamAngleTable, beamAngle),
+				       nangles * sizeof(float));
 		}
 
 		ActualCProfileTablePtr = SAPI_getActualCProfileTable();
 		if (ActualCProfileTablePtr != NULL) {
 			store->ActualCProfileTable = *ActualCProfileTablePtr;
-			for (int i = 1; i < MIN(MBSYS_SURF_MAXCVALUES, ActualCProfileTablePtr->numberOfActualValues); i++) {
-				store->ActualCProfileTable.values[i] = ActualCProfileTablePtr->values[i];
-			}
+			const int nvalues = MIN(MBSYS_SURF_MAXCVALUES, ActualCProfileTablePtr->numberOfActualValues);
+			if (nvalues > 0)
+				memcpy(store->cProfileValues, (const char *)ActualCProfileTablePtr + offsetof(SurfCProfileTable, values),
+				       nvalues * sizeof(CProfileValues));
 		}
 
 		for (int i = 0; i < MIN(MBSYS_SURF_MAXCPOS, store->NrPositionsensors); i++) {
 			CenterPositionPtr = SAPI_getCenterPosition(i);
 			if (CenterPositionPtr != NULL) {
 				store->CenterPosition[i] = *CenterPositionPtr;
-
-				/* convert position from UTM easting and northing
-				    to lon lat if necessary */
-				if (mb_io_ptr->projection_initialized) {
-					easting = store->CenterPosition[i].centerPositionX + *refeasting;
-					northing = store->CenterPosition[i].centerPositionY + *refnorthing;
-					mb_proj_inverse(verbose, mb_io_ptr->pjptr, easting, northing, &lon, &lat, error);
-					store->CenterPosition[i].centerPositionX = (float)(DTR * lon - store->GlobalData.referenceOfPositionX);
-					store->CenterPosition[i].centerPositionY = (float)(DTR * lat - store->GlobalData.referenceOfPositionY);
-				}
 			}
 		}
 
@@ -367,9 +366,10 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		MultibeamSignalParametersPtr = SAPI_getMultibeamSignalParameters();
 		if (MultibeamSignalParametersPtr != NULL) {
 			store->MultibeamSignalParameters = *MultibeamSignalParametersPtr;
-			for (int i = 1; i < MIN(MBSYS_SURF_MAXRXSETS, MultibeamSignalParametersPtr->nrActualGainSets); i++) {
-				store->MultibeamSignalParameters.rxSets[i] = MultibeamSignalParametersPtr->rxSets[i];
-			}
+			const int nrxsets = MIN(MBSYS_SURF_MAXRXSETS, MultibeamSignalParametersPtr->nrActualGainSets);
+			if (nrxsets > 0)
+				memcpy(store->rxSets, (const char *)MultibeamSignalParametersPtr + offsetof(SurfSignalParameter, rxSets),
+				       nrxsets * sizeof(TvgRxSets));
 		}
 
 		store->NrTxSets = 0;
@@ -377,9 +377,9 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		if (MultibeamTransmitterParametersPtr != NULL) {
 			store->NrTxSets = MIN(MBSYS_SURF_MAXTXSETS, store->NrTxSets);
 			store->MultibeamTransmitterParameters = *MultibeamTransmitterParametersPtr;
-			for (int i = 1; i < store->NrTxSets; i++) {
-				store->MultibeamTransmitterParameters.txSets[i] = MultibeamTransmitterParametersPtr->txSets[i];
-			}
+			if (store->NrTxSets > 0)
+				memcpy(store->txSets, (const char *)MultibeamTransmitterParametersPtr + offsetof(SurfTxParameter, txSets),
+				       store->NrTxSets * sizeof(TxSets));
 		}
 
 		store->NrSidescan = 0;
@@ -388,9 +388,9 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->SidescanData = *SidescanDataPtr;
 			store->NrSidescan =
 			    MIN(MBSYS_SURF_MAXPIXELS, SidescanDataPtr->actualNrOfSsDataPort + SidescanDataPtr->actualNrOfSsDataStb);
-			for (int i = 1; i < store->NrSidescan; i++) {
-				store->SidescanData.ssData[i] = SidescanDataPtr->ssData[i];
-			}
+			if (store->NrSidescan > 0)
+				memcpy(store->ssData, (const char *)SidescanDataPtr + offsetof(SurfSidescanData, ssData),
+				       store->NrSidescan * sizeof(u_char));
 		}
 	}
 
@@ -555,7 +555,7 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg4       ActualAngleTable.label:                 %s\n", store->ActualAngleTable.label);
 		fprintf(stderr, "dbg4       ActualAngleTable.actualNumberOfBeams:   %d\n", store->ActualAngleTable.actualNumberOfBeams);
 		for (int i = 0; i < MIN(MBSYS_SURF_MAXBEAMS, store->ActualAngleTable.actualNumberOfBeams); i++)
-			fprintf(stderr, "dbg4       ActualAngleTable.beamAngle[%3d]:        %f\n", i, store->ActualAngleTable.beamAngle[i]);
+			fprintf(stderr, "dbg4       ActualAngleTable.beamAngle[%3d]:        %f\n", i, store->beamAngle[i]);
 
 		fprintf(stderr, "dbg4       ActualCProfileTable.label:                     %s\n", store->ActualCProfileTable.label);
 		fprintf(stderr, "dbg4       ActualCProfileTable.relTime:                   %f\n", store->ActualCProfileTable.relTime);
@@ -563,7 +563,7 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		        store->ActualCProfileTable.numberOfActualValues);
 		for (int i = 0; i < MIN(MBSYS_SURF_MAXCVALUES, store->ActualCProfileTable.numberOfActualValues); i++)
 			fprintf(stderr, "dbg4       ActualCProfileTable.values[%3d]:               %f %f\n", i,
-			        store->ActualCProfileTable.values[i].depth, store->ActualCProfileTable.values[i].cValue);
+			        store->cProfileValues[i].depth, store->cProfileValues[i].cValue);
 
 		for (int i = 0; i < MIN(MBSYS_SURF_MAXCPOS, store->NrPositionsensors); i++) {
 			fprintf(stderr, "dbg4       CenterPosition[%2d].positionFlag:            %d\n", i,
@@ -616,7 +616,7 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg4       MultibeamSignalParameters.ar:                  %f\n", store->MultibeamSignalParameters.ar);
 		for (int i = 0; i < MIN(MBSYS_SURF_MAXRXSETS, store->MultibeamSignalParameters.nrActualGainSets); i++)
 			fprintf(stderr, "dbg4       MultibeamSignalParameters.rxSets[%3d]:               %f %f\n", i,
-			        store->MultibeamSignalParameters.rxSets[i].time, store->MultibeamSignalParameters.rxSets[i].gain);
+			        store->rxSets[i].time, store->rxSets[i].gain);
 
 		fprintf(stderr, "dbg4       MultibeamTransmitterParameters.txSets[0].txBeamIndex: %d\n",
 		        store->MultibeamTransmitterParameters.txSets[0].txBeamIndex);
@@ -634,10 +634,8 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg4       SidescanData.minSsTimeStb:              %f\n", store->SidescanData.minSsTimeStb);
 		fprintf(stderr, "dbg4       SidescanData.maxSsTimePort:             %f\n", store->SidescanData.maxSsTimePort);
 		fprintf(stderr, "dbg4       SidescanData.maxSsTimeStb:              %f\n", store->SidescanData.maxSsTimeStb);
-		for (int i = 0;
-		     i < MIN(MBSYS_SURF_MAXPIXELS, store->SidescanData.actualNrOfSsDataPort + store->SidescanData.actualNrOfSsDataPort);
-		     i++)
-			fprintf(stderr, "dbg4       SidescanData.ssData[%d]:        %d\n", i, store->SidescanData.ssData[i]);
+		for (int i = 0; i < store->NrSidescan; i++)
+			fprintf(stderr, "dbg4       SidescanData.ssData[%d]:        %d\n", i, store->ssData[i]);
 	}
 
 	if (verbose >= 2) {

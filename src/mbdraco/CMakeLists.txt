@@ -11,7 +11,9 @@ message("In src/mbdraco")
 
 set(MBDRACO_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
-file(GLOB_RECURSE MBDRACO_DRACO_SOURCES "${MBDRACO_DIR}/draco/*.cc")
+# The sources are held as paths relative to this directory (draco/...), so that the filter of the test files below does not
+# depend on where the source tree is located: a path such as /home/test/MB-System has "test" in it.
+file(GLOB_RECURSE MBDRACO_DRACO_SOURCES RELATIVE "${MBDRACO_DIR}" "${MBDRACO_DIR}/draco/*.cc")
 list(FILTER MBDRACO_DRACO_SOURCES EXCLUDE REGEX ".*/.*test.*")
 
 add_library(mbdraco STATIC ${MBDRACO_DRACO_SOURCES} draco_mesh.cpp)

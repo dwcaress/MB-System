@@ -63,6 +63,9 @@ identifier BXG_pushButton_realtime_setup;
 identifier BXG_pushButton_saveroute;
 identifier BXG_pushButton_savesite;
 identifier BXG_pushButton_openvector;
+identifier BXG_pushButton_openpolyline;
+identifier BXG_pushButton_openpolygon;
+identifier BXG_pushButton_opengispoint;
 identifier BXG_pushButton_openswath;
 identifier BXG_pushButton_opennav;
 identifier BXG_pushButton_openroute;
@@ -125,6 +128,9 @@ procedure do_mbgrdviz_fileSelectionBox_openroute();
 procedure do_mbgrdviz_fileSelectionBox_opensite();
 procedure do_mbgrdviz_fileSelectionBox_openswath();
 procedure do_mbgrdviz_fileSelectionBox_openvector();
+procedure do_mbgrdviz_fileSelectionBox_openpolyline();
+procedure do_mbgrdviz_fileSelectionBox_openpolygon();
+procedure do_mbgrdviz_fileSelectionBox_opengispoint();
 procedure do_mbgrdviz_fileSelectionBox_saveroute();
 procedure do_mbgrdviz_fileSelectionBox_savesite();
 procedure do_mbgrdviz_generate_survey();
@@ -2588,6 +2594,57 @@ object pushButton_openvector : XmPushButton widget {
 !(BX)    };
 };
 
+object pushButton_openpolyline : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Open Polyline");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_openpolyline);
+        XmNactivateCallback = procedure do_mbgrdviz_fileSelectionBox_openpolyline();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_openpolygon : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Open Polygon");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_openpolygon);
+        XmNactivateCallback = procedure do_mbgrdviz_fileSelectionBox_openpolygon();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_opengispoint : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Open Point");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_opengispoint);
+        XmNactivateCallback = procedure do_mbgrdviz_fileSelectionBox_opengispoint();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object pushButton_savesite : XmPushButton widget {
     arguments {
         arguments Style_use;
@@ -2666,6 +2723,9 @@ object pulldownMenu_file : XmPulldownMenu widget {
          managed XmPushButton pushButton_opennav;
          managed XmPushButton pushButton_openswath;
          managed XmPushButton pushButton_openvector;
+         managed XmPushButton pushButton_openpolyline;
+         managed XmPushButton pushButton_openpolygon;
+         managed XmPushButton pushButton_opengispoint;
          managed XmPushButton pushButton_savesite;
          managed XmPushButton pushButton_saveroute;
          managed XmSeparator separator2;

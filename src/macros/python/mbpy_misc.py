@@ -40,8 +40,9 @@
 #
 import re
 import subprocess
+import sys
 from dataclasses import dataclass, field, replace
-from typing import List, Optional
+from typing import List, Optional, Sequence
 
 
 @dataclass
@@ -488,3 +489,43 @@ def parse_misc(misc: Optional[str]) -> MiscOptions:
     for cmd in misc.split(":"):
         apply_misc_command(cmd, opts)
     return opts
+
+
+def join_dash_values(parser, argv: Optional[Sequence[str]] = None) -> List[str]:
+    """Rewrite argv so that a value beginning with "-" is attached to the
+    option that takes it, before handing argv to parser.parse_args().
+
+    argparse only accepts a separate value starting with "-" when it looks
+    like a plain negative number, so "--zbounds -30/0" or
+    "--region -125/-120/30/35" fail with "expected one argument". For
+    each option taking exactly one value, a following token that starts
+    with "-" and is not itself one of the parser's option strings is
+    joined to it: "--zbounds=-30/0" for long options and "-Z-30/0" for
+    short ones, both of which argparse already parses correctly.
+    """
+    if argv is None:
+        argv = sys.argv[1:]
+    known = set()
+    one_value = set()
+    for action in parser._actions:
+        known.update(action.option_strings)
+        if action.option_strings and action.nargs is None:
+            one_value.update(action.option_strings)
+    out: List[str] = []
+    i = 0
+    while i < len(argv):
+        tok = argv[i]
+        if tok == "--":
+            out.extend(argv[i:])
+            break
+        if tok in one_value and i + 1 < len(argv):
+            nxt = argv[i + 1]
+            if nxt.startswith("-") and nxt != "--" and nxt not in known:
+                out.append(tok + ("=" if tok.startswith("--") else "") + nxt)
+            else:
+                out.extend((tok, nxt))
+            i += 2
+            continue
+        out.append(tok)
+        i += 1
+    return out

@@ -279,7 +279,7 @@
 #define R7KHDRSIZE_CalibratedBeam 56
 #define R7KHDRSIZE_SystemEvents 12
 #define R7KHDRSIZE_SystemEventMessage 14
-#define R7KHDRSIZE_RDRRecordingStatus 566
+#define R7KHDRSIZE_RDRRecordingStatus 586
 #define R7KHDRSIZE_Subscriptions 4
 #define R7KRDTSIZE_Subscriptions 780
 #define R7KHDRSIZE_RDRStorageRecording 303
@@ -1898,14 +1898,6 @@ typedef struct s7k3_BITESummary_struct {
   u32 reserved[2];  // Reserved
 } s7k3_BITESummary;
 
-// Reson 7k Compressed Beamformed Magnitude Data (part of Record 7041)
-typedef struct s7k3_beamformedmagnitude_struct {
-  u32 beam;          // Identification for the beam
-  u32 samples;       // Total number of samples recorded ofr this beam
-  u32 nalloc;        // Bytes allocated to hold amplitude time series
-  u32 *data;         // Data series for each sample
-} s7k3_beamformedmagnitude;
-
 // Reson 7k Compressed Beamformed Magnitude Data (Record 7041)
 typedef struct s7k3_CompressedBeamformedMagnitude_struct {
   s7k3_header header;
@@ -1931,8 +1923,12 @@ typedef struct s7k3_CompressedBeamformedMagnitude_struct {
                         // 1 = beam angle (f32, in radians)
                         // Bit 9-15: Reserved
   f32 sample_rate;   // Sampling rate for the data
-  u32 reserved;      // Reserved
-  s7k3_beamformedmagnitude beamformedmagnitude[MBSYS_RESON7K_MAX_BEAMS];
+  u32 reserved[4];   // Reserved
+  u32 data_size;     // Number of bytes of beam data (record data)
+  u32 data_alloc;    // Number of bytes allocated for beam data
+  mb_u_char *data;   // Beam data kept as raw bytes: the DFD does not define the
+                     //   sample size, and this record is deprecated (7042
+                     //   replaces it; 7111 and 7150 systems only)
 } s7k3_CompressedBeamformedMagnitude;
 
 // Reson 7k Compressed Water Column Data (part of Record 7042)
@@ -2208,16 +2204,21 @@ typedef struct s7k3_SystemEventMessage_struct {
 
 // Reson 7k RDR Recording Status (part of Record 7052)
 typedef struct s7k3_rdrrecordingstatusdata_struct {
-  u32 threshold_length;
-  u32 *threshold_value_array;
-  u32 included_records;
-  u32 *included_records_array;
-  u32 excluded_records;
-  u32 *excluded_records_array;
-  u32 included_devices;
-  u32 *included_devices_array;
-  u32 excluded_devices;
-  u32 *excluded_devices_array;
+  u32 threshold_length;            // Threshold array length (NT)
+  u32 threshold_alloc;             // Number of threshold values allocated
+  u32 *threshold_value_array;      // Array of NT percentage threshold values
+  u32 included_records;            // Number of included records (IR)
+  u32 included_records_alloc;      // Number of included record ids allocated
+  u32 *included_records_array;     // Array of IR included records
+  u32 excluded_records;            // Number of excluded records (ER) (not used)
+  u32 excluded_records_alloc;      // Number of excluded record ids allocated
+  u32 *excluded_records_array;     // Array of ER excluded records (not used)
+  u32 included_devices;            // Number of included devices (ID) (not used)
+  u32 included_devices_alloc;      // Number of included device ids allocated
+  u32 *included_devices_array;     // Array of ID included devices (not used)
+  u32 excluded_devices;            // Number of excluded devices (ED) (not used)
+  u32 excluded_devices_alloc;      // Number of excluded device ids allocated
+  u32 *excluded_devices_array;     // Array of ED excluded devices (not used)
 } s7k3_rdrrecordingstatusdata;
 
 // Reson 7k RDR Recording Status (Record 7052)
@@ -2271,6 +2272,7 @@ typedef struct s7k3_subscriptionsdata_struct {
 typedef struct s7k3_Subscriptions_struct {
   s7k3_header header;
   i32 n_subscriptions; // Number of subscriptions
+  u32 nalloc;          // Number of subscriptions allocated
   s7k3_subscriptionsdata *subscriptionsdata;
 } s7k3_Subscriptions;
 
@@ -2673,6 +2675,10 @@ typedef struct s7k3_RemoteControl_struct {
   u32 ticket;         // Ticket number. Set by client for control packet matching
                       //   ACK or NAK packets
   u64 tracking_n[2];  // Unique number. Set by client for packet tracking
+  u32 data_size;      // Number of bytes of remote control data (record data)
+  u32 data_alloc;     // Number of bytes allocated for remote control data
+  mb_u_char *data;    // Remote control data, kept as raw bytes (see section 11
+                      //   of the DFD for the formats of the commands)
 } s7k3_RemoteControl;
 
 // Reson 7k Remote Control Acknowledge (Record 7501)
@@ -3025,7 +3031,11 @@ typedef struct s7k3_CommonSystemSettings_struct {
                                 // errors. Proper functioning of the PPS signal is
                                 // normally required for accurate data time-stamping
                                 // in bathymetry systems.
-  u8 reserved1[15];             // Reserved. Zero
+  u8 restore_recording;         // Non-zero to restore recording to the setting in
+                                // effect at the last shutdown (added in DFD 3.11)
+  u8 restore_tracker;           // Non-zero to restore the tracker to the setting in
+                                // effect at the last shutdown (added in DFD 3.11)
+  u8 reserved1[13];             // Reserved. Zero
   u32 compressed_wcflags;       // Bit field:
                                 // Bit 0: Use maximum bottom detection point in each
                                 // beam to limit data. Data is included up to the
@@ -3149,6 +3159,7 @@ struct mbsys_reson7k3_struct {
   int read_TVG;
   int read_Image;
   int read_PingMotion;
+  int read_AdaptiveGate;
   int read_DetectionDataSetup;
   int read_Beamformed;
   int read_VernierProcessingDataRaw;

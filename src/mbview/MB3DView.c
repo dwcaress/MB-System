@@ -122,6 +122,9 @@ extern void do_mbview_nav(Widget, XtPointer, XtPointer);
 extern void do_mbview_navswathbounds(Widget, XtPointer, XtPointer);
 extern void do_mbview_navdrape(Widget, XtPointer, XtPointer);
 extern void do_mbview_vector(Widget, XtPointer, XtPointer);
+extern void do_mbview_polyline(Widget, XtPointer, XtPointer);
+extern void do_mbview_polygon(Widget, XtPointer, XtPointer);
+extern void do_mbview_gispoint(Widget, XtPointer, XtPointer);
 extern void do_mbview_colortable_haxby(Widget, XtPointer, XtPointer);
 extern void do_mbview_colortable_bright(Widget, XtPointer, XtPointer);
 extern void do_mbview_colortable_muted(Widget, XtPointer, XtPointer);
@@ -139,6 +142,7 @@ extern void do_mbview_projection_popup(Widget, XtPointer, XtPointer);
 extern void do_mbview_sitelistpopup(Widget, XtPointer, XtPointer);
 extern void do_mbview_routelistpopup(Widget, XtPointer, XtPointer);
 extern void do_mbview_navlistpopup(Widget, XtPointer, XtPointer);
+extern void do_mbview_gislistpopup(Widget, XtPointer, XtPointer);
 extern void do_mbview_mouse_mode(Widget, XtPointer, XtPointer);
 extern void do_mbview_aboutpopup(Widget, XtPointer, XtPointer);
 extern void do_mbview_dismiss(Widget, XtPointer, XtPointer);
@@ -1122,6 +1126,10 @@ MB3DViewDataPtr MB3DViewCreate(MB3DViewDataPtr class_in, Widget parent, String n
 	XtAddCallback(class_in->mbview_toggleButton_route, XmNvalueChangedCallback, do_mbview_route, (XtPointer)0);
 
 	ac = 0;
+	class_in->mbview_separator22 = XmCreateSeparator(class_in->mbview_pulldownMenu_view, (char *)"mbview_separator22", args, ac);
+	XtManageChild(class_in->mbview_separator22);
+
+	ac = 0;
 	{
 		XmString tmp0;
 
@@ -1220,6 +1228,81 @@ MB3DViewDataPtr MB3DViewCreate(MB3DViewDataPtr class_in, Widget parent, String n
 	}
 
 	XtAddCallback(class_in->mbview_toggleButton_vector, XmNvalueChangedCallback, do_mbview_vector, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Polylines", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_polyline =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_polyline", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_polyline);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_polyline, XmNvalueChangedCallback, do_mbview_polyline, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Polygons", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_polygon =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_polygon", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_polygon);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_polygon, XmNvalueChangedCallback, do_mbview_polygon, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Points", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_toggleButton_gispoint =
+		    XmCreateToggleButton(class_in->mbview_pulldownMenu_view, (char *)"mbview_toggleButton_gispoint", args, ac);
+		XtManageChild(class_in->mbview_toggleButton_gispoint);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_toggleButton_gispoint, XmNvalueChangedCallback, do_mbview_gispoint, (XtPointer)0);
 
 	ac = 0;
 	class_in->mbview_separator8 = XmCreateSeparator(class_in->mbview_pulldownMenu_view, (char *)"mbview_separator8", args, ac);
@@ -1710,6 +1793,84 @@ MB3DViewDataPtr MB3DViewCreate(MB3DViewDataPtr class_in, Widget parent, String n
 	}
 
 	XtAddCallback(class_in->mbview_pushButton_navlist, XmNactivateCallback, do_mbview_navlistpopup, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"Polyline List", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_polylinelist =
+		    XmCreatePushButton(class_in->mbview_pulldownMenu_controls, (char *)"mbview_pushButton_polylinelist", args, ac);
+		XtManageChild(class_in->mbview_pushButton_polylinelist);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_polylinelist, XmNactivateCallback, do_mbview_gislistpopup,
+	              (XtPointer)1); /* MBV_GISLAYER_POLYLINE */
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"Polygon List", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_polygonlist =
+		    XmCreatePushButton(class_in->mbview_pulldownMenu_controls, (char *)"mbview_pushButton_polygonlist", args, ac);
+		XtManageChild(class_in->mbview_pushButton_polygonlist);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_polygonlist, XmNactivateCallback, do_mbview_gislistpopup,
+	              (XtPointer)2); /* MBV_GISLAYER_POLYGON */
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"Point List", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(args[ac], XmNfontList,
+		         BX_CONVERT(class_in->mbview_pulldownMenu_controls, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1",
+		                    XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		class_in->mbview_pushButton_gispointlist =
+		    XmCreatePushButton(class_in->mbview_pulldownMenu_controls, (char *)"mbview_pushButton_gispointlist", args, ac);
+		XtManageChild(class_in->mbview_pushButton_gispointlist);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(class_in->mbview_pushButton_gispointlist, XmNactivateCallback, do_mbview_gislistpopup,
+	              (XtPointer)3); /* MBV_GISLAYER_GISPOINT */
 
 	ac = 0;
 	XtSetArg(args[ac], XmNsubMenuId, class_in->mbview_pulldownMenu_controls);

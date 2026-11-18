@@ -1,0 +1,505 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbpy_plot</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbpy_plot</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  3 November 2026 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbpy_plot</B> - Create an executable shellscript which will generate
+a GMT modern-mode map of swath sonar data.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbpy_plot</B> [<B>-I</B><I>file</I>] [<B>-F</B><I>format</I>]
+[<B>-O</B><I>root</I>]
+[<B>--format</B> <I>fmt</I>]
+[<B>--title</B> <I>text</I>]
+[<B>--colorbar-label</B> <I>text</I>]
+[<B>--dpi</B> <I>dpi</I>]
+[<B>-X</B>] [<B>-V</B>]
+<BR>
+
+[<B>-R</B><I>west/east/south/north</I>]
+[<B>-J</B><I>spec</I>]
+[<B>-P</B><I>pagesize</I>]
+[<B>--portrait</B> | <B>--landscape</B>]
+[<B>--scale-location</B> <I>l|r|t|b</I>]
+[<B>--tick-info</B> <I>spec</I>]
+[<B>--length-scale</B> <I>spec</I>]
+[<B>--timestamp</B> [<I>label</I>]]
+<BR>
+
+[<B>-G</B><I>color_mode</I>] [<B>--filtered</B>]
+[<B>-W</B><I>color_style/palette</I>[<I>/ncolors</I>] | <I>cptfile</I>]
+[<B>-D</B>] [<B>-Y</B>] [<B>-S</B>]
+[<B>-Z</B><I>min/max</I>]
+<BR>
+
+[<B>-A</B><I>magnitude</I>[<I>/azimuth</I> | <I>/zero_level</I>]]
+[<B>--magnitude</B> <I>val</I>]
+[<B>--azimuth</B> <I>deg</I>]
+[<B>--zero-level</B> <I>val</I>]
+[<B>--shade-flip</B>]
+[<B>--stretch-shade</B>]
+<BR>
+
+[<B>-C</B>[<I>cont_int/color_int/tick_int/label_int/tick_len/label_hgt</I>]]
+[<B>--contour-algorithm</B> <I>n</I>]
+[<B>--contour-nplot</B> <I>pings</I>]
+<BR>
+
+[<B>-N</B>[<I>time_tick/time_annot/date_annot/tick_len</I> | <B>F</B> | <B>FP</B>]]
+[<B>--nav-names</B> [<I>height</I>[<I>/P</I>]]]
+[<B>--ping-ticks</B> [<I>tick/annot/len</I>]]
+<BR>
+
+[<B>--footprint</B> <I>factor/mode/depth</I>]
+[<B>--swath-scale</B> <I>mode/scale</I>[<I>/min/max</I>]]
+[<B>--begin-time</B> <I>yr/mo/da/hr/mn/sc</I>]
+[<B>--end-time</B> <I>yr/mo/da/hr/mn/sc</I>]
+[<B>--speedmin</B> <I>speed</I>]
+[<B>--timegap</B> <I>minutes</I>]
+[<B>--lonflip</B> <I>-1|0|1</I>]
+<BR>
+
+[<B>-T</B>] [<B>--coast-resolution</B> <I>res</I>]
+[<B>--coast-dry-fill</B> <I>color</I>]
+[<B>--coast-wet-fill</B> <I>color</I>]
+[<B>--coast-lake-fill</B> <I>color</I>]
+[<B>--coast-river</B> <I>spec</I>]
+[<B>--coast-boundary</B> <I>spec</I>]
+[<B>--coast-pen</B> <I>pen</I>]
+<BR>
+
+[<B>--xy-overlay</B> <I>file</I>[<I>:fill=..</I>][<I>:symbol=..</I>][<I>:pen=..</I>]]
+[<B>--text</B> <I>lon/lat/size/angle/font/justify/text</I>]
+[<B>--gmt-default</B> <I>param/value</I>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbpy_plot</B> is a Python/PyGMT-era replacement for the Perl macro
+<B>mbm_plot</B>. It reads a swath sonar data file, or a datalist of
+them, and generates an executable shellscript of <B>GMT</B> <B>modern
+mode</B> commands which, when run, maps the swath data themselves
+(rather than a grid made from them) with the <B>MB-System</B> GMT
+modules <B>mbswath</B> and <B>mbcontour</B>. The map may include a
+bathymetry color fill (<B>-G1</B>), bathymetry color shaded relief
+(<B>-G2</B>), bathymetry shaded by beam amplitude (<B>-G3</B>), an
+amplitude fill (<B>-G4</B>) or a sidescan fill (<B>-G5</B>);
+bathymetry contours (<B>-C</B>); the ship track with time and file name
+annotation (<B>-N</B>); a coastline; xy data drawn as lines or symbols;
+text labels; a color scale; and a distance scale. If none of <B>-G</B>,
+<B>-C</B> and <B>-N</B> is given, the navigation track is plotted.
+<P>
+The map bounds come from the files' &quot;.inf&quot; files (made by <B>mbinfo</B>
+or <B>mbdatalist -O</B>) when they exist and no time window is given,
+and otherwise from running <B>mbinfo</B>; they are padded by 5% and,
+if needed, widened so that the map is no more than twice as long as
+it is wide. The map is scaled to fit the page size (<B>-P</B>) in the
+orientation that gives the larger map, unless the projection or scale
+is given with <B>-J</B>. Page layout and projection fitting are shared
+with <B>mbpy_grdplot</B>.
+<P>
+The generated script is named <I>root</I>.sh and makes
+<I>root</I>.<I>fmt</I> (<B>pdf</B> by default). A generated color palette
+is written to <I>root</I>.cpt (and, for a stretched amplitude shade,
+<I>root</I>.shade.cpt) by <B>mbpy_plot</B> itself. When the input is a
+single swath file rather than a datalist, the script makes and then
+removes a one-line datalist <I>root</I>_datalist.mb-1 for it. No gmt.conf
+file is created or deleted in the current directory.
+<P>
+As in <B>mbpy_grdplot</B>, the colon-separated <B>-M</B><I>sub</I>
+options of <B>mbm_plot</B> are replaced by descriptive long options.
+Palettes are limited to 1-7, as in <B>mbm_plot</B>.
+<P>
+<B>mbpy_plot</B> requires <B>GMT</B> 6 or later with the <B>MB-System</B>
+GMT modules, and a Python 3 interpreter. It uses the modules
+<B>mbpy_layout.py</B>, <B>mbpy_color.py</B>, <B>mbpy_misc.py</B>,
+<B>mbpy_grdplot_script.py</B> and <B>mbpy_plot_script.py</B>, installed
+alongside it.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian do Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-I</B>, <B>--input</B> <I>file</I>
+
+<DD>
+Swath data file or datalist. Default: datalist.mb-1.
+<DT><B>-F</B>, <B>--data-format</B> <I>format</I>
+
+<DD>
+<B>MB-System</B> format id of the input file, or -1 for a datalist.
+Default: determined with <B>mbformat</B>.
+<DT><B>-O</B>, <B>--output</B> <I>root</I>
+
+<DD>
+Output root name. Default: the input's basename without its extension.
+<DT><B>--format</B> <I>fmt</I>
+
+<DD>
+Output format passed to <B>gmt begin</B>: pdf, png, ps, jpg, tif, eps,
+... Default <B>pdf</B>.
+<DT><B>--title</B> <I>text</I>
+
+<DD>
+Map title. Default: &quot;Data List File <I>file</I>&quot; or &quot;Data File
+<I>file</I>&quot;.
+<DT><B>--colorbar-label</B> <I>text</I>
+
+<DD>
+Color scale label. Default: &quot;Depth (meters)&quot;, &quot;Beam Amplitude Values&quot;
+or &quot;Sidescan Pixel Values&quot;, by color mode.
+<DT><B>--dpi</B> <I>dpi</I>
+
+<DD>
+Resolution of the <B>mbswath</B> image (<B>mbswath -E</B>) and of a
+raster output file.
+<DT><B>-X</B>, <B>--execute</B>
+
+<DD>
+Run the generated script immediately after writing it.
+<DT><B>-V</B>, <B>--verbose</B>
+
+<DD>
+Print progress and a summary of the map.
+<DT><B>-R</B>, <B>--region</B> <I>west/east/south/north</I>
+
+<DD>
+Map bounds in longitude and latitude. Default: the data bounds,
+padded as described above.
+<DT><B>-J</B>, <B>--projection</B> <I>spec</I>
+
+<DD>
+GMT map projection with a scale or width, e.g. <B>m1.0</B> or
+<B>M6i</B>; giving only the projection lets <B>mbpy_plot</B> choose the
+scale. Default: a Mercator projection scaled to fill the page.
+<DT><B>-P</B>, <B>--pagesize</B> <I>pagesize</I>
+
+<DD>
+Page size code (a, b, c, d, e, f, e1, a0-a10, b0-b10, c0-c7, m1-m6),
+as in <B>mbm_plot</B>. Default <B>a</B>.
+<DT><B>--portrait</B>, <B>--landscape</B>
+
+<DD>
+Force the page orientation instead of choosing it automatically.
+<DT><B>--scale-location</B> <I>l|r|t|b</I>
+
+<DD>
+Place the color scale at the left, right, top or bottom of the map.
+Default <B>b</B>.
+<DT><B>--tick-info</B> <I>spec</I>
+
+<DD>
+Raw <B>-B</B> basemap tick-interval spec, replacing the computed one.
+<DT><B>--length-scale</B> <I>spec</I>
+
+<DD>
+Draw a distance scale with <B>gmt basemap -L</B><I>spec</I>, e.g.
+&quot;jBL+c36.8+w5k+o0.3/0.3&quot;. The word &quot;center&quot; in <I>spec</I> is replaced
+by the longitude/latitude of the map center, e.g. &quot;gcenter+c36.8+w5k&quot;.
+<DT><B>--timestamp</B> [<I>label</I>]
+
+<DD>
+Add a GMT time stamp (<B>-U</B>), with an optional label.
+<DT><B>-G</B>, <B>--color-mode</B> <I>color_mode</I>
+
+<DD>
+Swath image style (<B>mbswath -Z</B>):
+<BR>
+
+<BR>&nbsp;&nbsp;<I>color_mode</I>&nbsp;=&nbsp;1:&nbsp;Bathymetry&nbsp;color&nbsp;fill.
+<BR>
+
+<BR>&nbsp;&nbsp;<I>color_mode</I>&nbsp;=&nbsp;2:&nbsp;Bathymetry&nbsp;color&nbsp;shaded&nbsp;relief.
+<BR>
+
+<BR>&nbsp;&nbsp;<I>color_mode</I>&nbsp;=&nbsp;3:&nbsp;Bathymetry&nbsp;color&nbsp;shaded&nbsp;by&nbsp;beam&nbsp;amplitude.
+<BR>
+
+<BR>&nbsp;&nbsp;<I>color_mode</I>&nbsp;=&nbsp;4:&nbsp;Beam&nbsp;amplitude&nbsp;fill.
+<BR>
+
+<BR>&nbsp;&nbsp;<I>color_mode</I>&nbsp;=&nbsp;5:&nbsp;Sidescan&nbsp;fill.
+<DT><B>--filtered</B>
+
+<DD>
+Plot filtered amplitude or sidescan values (<B>mbswath
+-Z</B><I>mode</I><B>F</B>).
+<DT><B>-W</B>, <B>--color-control</B> <I>color_style/palette</I>[<I>/ncolors</I>] | <I>cptfile</I>
+
+<DD>
+Color palette. <I>color_style</I> 1 gives a continuous palette, 2 a
+discrete one. <I>palette</I> is 1 Haxby colors, 2 high intensity
+colors, 3 low intensity colors, 4 grayscale, 5 uniform gray, 6
+uniform black or 7 uniform white; no color scale is drawn for 5-7.
+<I>ncolors</I> is the number of colors [11]. Default: 1/1, or 1/4
+(grayscale) for color modes 4 and 5. If the argument names an existing
+file, that file is used as the color palette table. With the default
+order, the smallest values (the shallowest depths) get the first color
+of the palette.
+<DT><B>-D</B>, <B>--color-flip</B>
+
+<DD>
+Reverse the color palette.
+<DT><B>-Y</B>, <B>--no-nice-interval</B>
+
+<DD>
+Stretch the colors linearly over the data range instead of using
+rounded color intervals.
+<DT><B>-S</B>, <B>--stretch-color</B>
+
+<DD>
+Set the color boundaries from the distribution of the plotted values
+(<B>mbhistogram</B>), so that each color covers the same number of
+values.
+<DT><B>-Z</B>, <B>--zbounds</B> <I>min/max</I>
+
+<DD>
+Range of the colored quantity: depth for color modes 1-3, amplitude for
+mode 4, sidescan for mode 5. Default: the data range.
+<DT><B>-A</B>, <B>--shade</B> <I>magnitude</I>[<I>/azimuth</I> | <I>/zero_level</I>]
+
+<DD>
+Shading parameters in one argument, as in <B>mbm_plot -A</B>:
+magnitude and illumination azimuth for mode 2, or magnitude and the
+amplitude of zero shading for mode 3 (<B>mbswath -G</B>). The separate
+options below take precedence.
+<DT><B>--magnitude</B> <I>val</I>
+
+<DD>
+Shading magnitude. Defaults: 2.5 for mode 2; for mode 3, 2/(amax -
+amin) from the amplitude range, or 1 with <B>--stretch-shade</B>.
+<DT><B>--azimuth</B> <I>deg</I>
+
+<DD>
+Illumination azimuth for mode 2 [0].
+<DT><B>--zero-level</B> <I>val</I>
+
+<DD>
+Amplitude giving zero shading for mode 3. Default: amin + 0.2 (amax -
+amin), or 191 with <B>--stretch-shade</B>.
+<DT><B>--shade-flip</B>
+
+<DD>
+Reverse the shading: for mode 2 the illumination azimuth is turned by
+180 degrees; for a stretched mode 3 shade the gray scale is reversed.
+<DT><B>--stretch-shade</B>
+
+<DD>
+Shade mode 3 maps with a gray scale fitted to a Gaussian distribution
+of the amplitudes (<B>mbhistogram -G</B>), written to
+<I>root</I>.shade.cpt and passed to <B>mbswath -N</B>.
+<DT><B>-C</B>, <B>--contour</B> [<I>cont_int/color_int/tick_int/label_int/tick_len/label_hgt</I>]
+
+<DD>
+Plot bathymetry contours (<B>mbcontour -A</B>) at <I>cont_int</I>,
+with heavier contours every <I>color_int</I>, downhill ticks every
+<I>tick_int</I> and labels every <I>label_int</I>; <I>tick_len</I> and
+<I>label_hgt</I> are in inches. Missing fields get the defaults of
+<B>mbm_plot</B>. With no argument, the contour interval is chosen from
+the depth range, and the heavier contours, ticks and labels are every
+fourth contour (or omitted when a swath image is also drawn).
+<DT><B>--contour-algorithm</B> <I>n</I>
+
+<DD>
+Contouring algorithm (<B>mbcontour -Z</B>). Default: chosen by
+<B>mbcontour</B>, except 1 for formats 41, 101 and 102.
+<DT><B>--contour-nplot</B> <I>pings</I>
+
+<DD>
+Number of pings contoured at a time (<B>mbcontour -N</B>).
+<DT><B>-N</B>, <B>--navigation</B> [<I>time_tick/time_annot/date_annot/tick_len</I> | <B>F</B> | <B>FP</B>]
+
+<DD>
+Plot the ship track (<B>mbcontour -D</B>), with ticks every
+<I>time_tick</I> hours, time annotations every <I>time_annot</I> hours
+and date annotations every <I>date_annot</I> hours; <I>tick_len</I> is in
+inches. With no argument only the track is drawn. <B>F</B> annotates
+the track with file names as well (<B>FP</B> perpendicular to the
+track), with ticks every 0.25 hours.
+<DT><B>--nav-names</B> [<I>height</I>[<I>/P</I>]]
+
+<DD>
+Annotate the track with file names of this height in inches [0.15];
+<I>/P</I> places them perpendicular to the track.
+<DT><B>--ping-ticks</B> [<I>tick/annot/len</I>]
+
+<DD>
+Mark ping numbers along the track (<B>mbcontour -M</B>). Default
+50/100/0.1.
+<DT><B>--footprint</B> <I>factor/mode/depth</I>
+
+<DD>
+Beam footprint parameters (<B>mbswath -A</B>). Default 1.
+<DT><B>--swath-scale</B> <I>mode/scale</I>[<I>/min/max</I>]
+
+<DD>
+Amplitude or sidescan scaling (<B>mbswath -D</B>).
+<DT><B>--begin-time</B> <I>yr/mo/da/hr/mn/sc</I>, <B>--end-time</B> <I>yr/mo/da/hr/mn/sc</I>
+
+<DD>
+Plot only data inside this time window.
+<DT><B>--speedmin</B> <I>speed</I>
+
+<DD>
+Minimum ship speed in km/hr.
+<DT><B>--timegap</B> <I>minutes</I>
+
+<DD>
+Time gap threshold.
+<DT><B>--lonflip</B> <I>-1|0|1</I>
+
+<DD>
+Longitude range: -1 for -360 to 0, 0 for -180 to 180, 1 for 0 to
+360. Default 0.
+<DT><B>-T</B>, <B>--coast</B>
+
+<DD>
+Plot a coastline (<B>gmt coast</B>). If no coastline fill, pen, river
+or boundary option is given, land is filled with gray 200 and the
+coastline drawn with a 1p pen.
+<DT><B>--coast-resolution</B> <I>res</I>
+
+<DD>
+Coastline resolution: f, h, i, l or c. Default <B>f</B>.
+<DT><B>--coast-dry-fill</B> <I>color</I>, <B>--coast-wet-fill</B> <I>color</I>, <B>--coast-lake-fill</B> <I>color</I>
+
+<DD>
+Fill land, water or lakes.
+<DT><B>--coast-river</B> <I>spec</I>, <B>--coast-boundary</B> <I>spec</I>, <B>--coast-pen</B> <I>pen</I>
+
+<DD>
+Draw rivers (<B>gmt coast -I</B>), national boundaries (<B>-N</B>,
+repeatable) or the coastline (<B>-W</B>).
+<DT><B>--xy-overlay</B> <I>file</I>[<I>:fill=color</I>][<I>:symbol=symbol</I>][<I>:pen=pen</I>]
+
+<DD>
+Plot the lon/lat data in <I>file</I> with <B>gmt plot</B>, as lines
+(with a pen) or symbols; repeatable. Example:
+&quot;stations.xy:symbol=c0.1:fill=red&quot;.
+<DT><B>--text</B> <I>lon/lat/size/angle/font/justify/text</I>
+
+<DD>
+Place a text label; repeatable. Example: &quot;-11.7/36.8/12/0/1/LB/Gorringe
+Bank&quot;.
+<DT><B>--gmt-default</B> <I>param/value</I>
+
+<DD>
+Override a GMT default parameter in the generated script; repeatable.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+A shaded relief map of the swath bathymetry in a datalist, with
+contours and an annotated ship track, rendered at once to a PNG:
+<P>
+<BR>
+
+<BR>&nbsp;mbpy_plot&nbsp;-I&nbsp;datalist.mb-1&nbsp;-G2&nbsp;-C&nbsp;-N&nbsp;0.25/1/4&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--format&nbsp;png&nbsp;-X&nbsp;-V
+<P>
+A sidescan map of one file with an equalized grayscale stretch:
+<P>
+<BR>
+
+<BR>&nbsp;mbpy_plot&nbsp;-I&nbsp;0003_20111219_180559_METEOR_EM122p.mb59&nbsp;-G5&nbsp;-S
+<P>
+A track map with file names, a coastline and a distance scale at the
+map center:
+<P>
+<BR>
+
+<BR>&nbsp;mbpy_plot&nbsp;-I&nbsp;datalist.mb-1&nbsp;-N&nbsp;F&nbsp;-T&nbsp;\
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--length-scale&nbsp;&quot;gcenter+c36.8+w5k&quot;
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbm_plot.html">mbm_plot</A></B>(1), <B><A HREF="mbswath.html">mbswath</A></B>(1), <B><A HREF="mbcontour.html">mbcontour</A></B>(1),
+<B><A HREF="mbpy_grdplot.html">mbpy_grdplot</A></B>(1), <B><A HREF="mbpy_grdtiff.html">mbpy_grdtiff</A></B>(1), <B><A HREF="mbinfo.html">mbinfo</A></B>(1),
+<B><A HREF="mbhistogram.html">mbhistogram</A></B>(1), <B><A HREF="mbsystem.html">mbsystem</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Please report any bugs to the MB-System project on GitHub
+(<A HREF="https://github.com/dwcaress/MB-System).">https://github.com/dwcaress/MB-System).</A>
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 3 November 2026</P></CENTER>
+
+<HR>
+<center>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>

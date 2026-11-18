@@ -32,8 +32,8 @@
 #
 #------------------------------------------------------------------------------
 #
-# Two optional documentation targets are not part of the default build (the
-# "all" target) and must be built explicitly. Both require Homebrew (or
+# Three optional documentation targets are not part of the default build (the
+# "all" target) and must be built explicitly. All require Homebrew (or
 # equivalent) installs of pandoc and weasyprint; htmldocs additionally
 # requires groff and perl. If any required tool is missing, CMake prints a
 # status message at configure time and the target is simply unavailable.
@@ -45,6 +45,13 @@
 #   manual MacDown export workflow.
 #
 #     cmake --build . --target changelog
+#
+# - buildandinstall: regenerates the top-level BuildAndInstall.pdf from
+#   BuildAndInstall.md (via pandoc + weasyprint, using ChangeLog_style.css plus
+#   the print overrides in src/htmlsrc/BuildAndInstall_print.css), replacing
+#   the previously manual MacDown export workflow.
+#
+#     cmake --build . --target buildandinstall
 #
 # - htmldocs: regenerates src/html/*.html and src/html/*.pdf from the man
 #   pages in src/man/ plus ChangeLog.md/COPYING.md/GPL.md (via man2html,
@@ -72,6 +79,9 @@ message("Disable building TRN software with -DbuildTRN=OFF")
 message("Disable building photomosaicing software with -DbuildOpenCV=OFF")
 message("Disable supporting GSF format data with -DbuildGSF=OFF")
 message("Build Qt-based GUIs with -DbuildQt=ON")
+message("Build the Qt6 tools (mbwcdview, mbvelocitytool-qt, mbedit-qt, mbnavedit-qt, mbnavadjust-qt) with -DbuildQt6Tools=ON")
+message("Draw the graphics of the Qt6 tools with OpenGL instead of QRhi with -DbuildQt6Rhi=OFF")
+message("Also build the OpenGL drawing of the Qt6 tools (MB_RENDERER=legacy-gl) with -DbuildQt6LegacyGL=ON (default except on macOS)")
 message("Build deprecated programs with -DbuildDeprecated=ON")
 message("Disable unit tests with -DbuildTests=OFF (run unit tests with make test)")
 message("Specify OTPS install location with -DotpsDir=directory")
@@ -134,6 +144,13 @@ option(buildTRNLCM "build MBTRN LCM tools" OFF)
 option(buildTrnNoRand "build with TRN_NORAND (random seed disabled)" OFF)
 option(buildPCL "build point-cloud-library tools" OFF)
 option(buildQt "build Qt tools" OFF)
+option(buildQt6Tools "build the Qt6 tools (mbwcdview, mbvelocitytool-qt, mbedit-qt, mbnavedit-qt, mbnavadjust-qt)" OFF)
+option(buildQt6Rhi "draw the graphics of the Qt6 tools with QRhi (Metal, Direct3D, OpenGL) when Qt 6.8 or later with Qt Shader Tools is found" ON)
+if(APPLE)
+  option(buildQt6LegacyGL "also build the OpenGL drawing of the Qt6 tools, chosen with MB_RENDERER=legacy-gl" OFF)
+else()
+  option(buildQt6LegacyGL "also build the OpenGL drawing of the Qt6 tools, chosen with MB_RENDERER=legacy-gl" ON)
+endif()
 option(buildTests "build unit tests exercised by make test" ON)
 if (DEFINED CACHE{otpsDir})
   set(otpsDir $CACHE{otpsDir})
@@ -286,7 +303,9 @@ add_subdirectory(src/gmt)
 
 # Executables
 add_subdirectory(src/utilities)
+add_subdirectory(src/svptools)
 add_subdirectory(src/macros)
+add_subdirectory(src/python)
 add_subdirectory(src/mbdraco)
 add_subdirectory(src/mbgrd2gltf)
 add_subdirectory(src/mbmesh)
@@ -328,6 +347,13 @@ if(buildQt)
   add_subdirectory(src/qt-mbedit-widgets)
   add_subdirectory(src/pointCloudEditor)
 endif()
+if(buildQt6Tools)
+  add_subdirectory(src/mbwcdview)
+  add_subdirectory(src/mbvelocitytool-qt)
+  add_subdirectory(src/mbedit-qt)
+  add_subdirectory(src/mbnavedit-qt)
+  add_subdirectory(src/mbnavadjust-qt)
+endif()
 if(buildDeprecated)
   add_subdirectory(src/deprecated)
 endif()
@@ -335,7 +361,17 @@ endif()
 if(buildTests)
   add_subdirectory(third_party)
   add_subdirectory(test/mbio)
+  add_subdirectory(test/mbaux)
   add_subdirectory(test/utilities)
+  add_subdirectory(test/svptools)
+  add_subdirectory(test/python)
+  if(buildQt6Tools)
+    add_subdirectory(test/mbvelocitytool-qt)
+    add_subdirectory(test/mbedit-qt)
+    add_subdirectory(test/mbnavedit-qt)
+    add_subdirectory(test/mbnavadjust-qt)
+    add_subdirectory(test/mbwcdview)
+  endif()
   if(buildGSF)
     add_subdirectory(test/gsf)
   endif()
@@ -393,9 +429,37 @@ if(PANDOC_EXECUTABLE AND WEASYPRINT_EXECUTABLE)
     VERBATIM)
   add_custom_target(changelog
     DEPENDS ${CMAKE_SOURCE_DIR}/ChangeLog.html ${CMAKE_SOURCE_DIR}/ChangeLog.pdf)
+
+  # BuildAndInstall.pdf: only the PDF is kept in the repository, so the
+  # intermediate HTML is written to the build directory.
+  add_custom_command(
+    OUTPUT ${CMAKE_BINARY_DIR}/BuildAndInstall.html
+    COMMAND ${PANDOC_EXECUTABLE} ${CMAKE_SOURCE_DIR}/BuildAndInstall.md
+            -f gfm -t html5 --standalone
+            "--metadata=pagetitle:How to Download, Build, and Install MB-System"
+            --css=${CMAKE_SOURCE_DIR}/src/htmlsrc/ChangeLog_style.css
+            --css=${CMAKE_SOURCE_DIR}/src/htmlsrc/BuildAndInstall_print.css
+            --embed-resources
+            -o ${CMAKE_BINARY_DIR}/BuildAndInstall.html
+    DEPENDS ${CMAKE_SOURCE_DIR}/BuildAndInstall.md
+            ${CMAKE_SOURCE_DIR}/src/htmlsrc/ChangeLog_style.css
+            ${CMAKE_SOURCE_DIR}/src/htmlsrc/BuildAndInstall_print.css
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Generating BuildAndInstall.html from BuildAndInstall.md via pandoc"
+    VERBATIM)
+  add_custom_command(
+    OUTPUT ${CMAKE_SOURCE_DIR}/BuildAndInstall.pdf
+    COMMAND ${WEASYPRINT_EXECUTABLE} ${CMAKE_BINARY_DIR}/BuildAndInstall.html ${CMAKE_SOURCE_DIR}/BuildAndInstall.pdf
+    DEPENDS ${CMAKE_BINARY_DIR}/BuildAndInstall.html
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Generating BuildAndInstall.pdf from BuildAndInstall.html via weasyprint"
+    VERBATIM)
+  add_custom_target(buildandinstall
+    DEPENDS ${CMAKE_SOURCE_DIR}/BuildAndInstall.pdf)
 else()
-  message(STATUS "pandoc and/or weasyprint not found - 'changelog' build target "
-                  "unavailable (install via: brew install pandoc weasyprint)")
+  message(STATUS "pandoc and/or weasyprint not found - 'changelog' and "
+                  "'buildandinstall' build targets unavailable "
+                  "(install via: brew install pandoc weasyprint)")
 endif()
 
 message("----------------------------------------------------------")

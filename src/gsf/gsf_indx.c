@@ -2058,7 +2058,7 @@ is_path(const char *path)
     {
         return 0; /* Cannot access */
     }
-    else if (info.st_mode & S_IFDIR)
+    else if (S_ISDIR(info.st_mode))
     {
         return 1;  /* Exists */
     }

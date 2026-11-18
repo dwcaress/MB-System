@@ -136,6 +136,9 @@ extern void do_mbgrdviz_fileSelectionBox_openroute(Widget, XtPointer, XtPointer)
 extern void do_mbgrdviz_fileSelectionBox_opennav(Widget, XtPointer, XtPointer);
 extern void do_mbgrdviz_fileSelectionBox_openswath(Widget, XtPointer, XtPointer);
 extern void do_mbgrdviz_fileSelectionBox_openvector(Widget, XtPointer, XtPointer);
+extern void do_mbgrdviz_fileSelectionBox_openpolyline(Widget, XtPointer, XtPointer);
+extern void do_mbgrdviz_fileSelectionBox_openpolygon(Widget, XtPointer, XtPointer);
+extern void do_mbgrdviz_fileSelectionBox_opengispoint(Widget, XtPointer, XtPointer);
 extern void do_mbgrdviz_fileSelectionBox_savesite(Widget, XtPointer, XtPointer);
 extern void do_mbgrdviz_fileSelectionBox_saveroute(Widget, XtPointer, XtPointer);
 extern void BxManageCB(Widget, XtPointer, XtPointer);
@@ -436,6 +439,78 @@ Widget CreatemainWindow_mbgrdviz(Widget parent) {
 	}
 
 	XtAddCallback(pushButton_openvector, XmNactivateCallback, do_mbgrdviz_fileSelectionBox_openvector, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_file, (char *)"Open Polyline", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_file, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_openpolyline = XmCreatePushButton(pulldownMenu_file, (char *)"pushButton_openpolyline", args, ac);
+		XtManageChild(pushButton_openpolyline);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_openpolyline, XmNactivateCallback, do_mbgrdviz_fileSelectionBox_openpolyline, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_file, (char *)"Open Polygon", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_file, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_openpolygon = XmCreatePushButton(pulldownMenu_file, (char *)"pushButton_openpolygon", args, ac);
+		XtManageChild(pushButton_openpolygon);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_openpolygon, XmNactivateCallback, do_mbgrdviz_fileSelectionBox_openpolygon, (XtPointer)0);
+
+	ac = 0;
+	{
+		XmString tmp0;
+
+		tmp0 = (XmString)BX_CONVERT(pulldownMenu_file, (char *)"Open Point", XmRXmString, 0, &argok);
+		XtSetArg(args[ac], XmNlabelString, tmp0);
+		if (argok)
+			ac++;
+		XtSetArg(
+		    args[ac], XmNfontList,
+		    BX_CONVERT(pulldownMenu_file, (char *)"-*-" SANS "-bold-r-*-*-*-140-75-75-*-*-iso8859-1", XmRFontList, 0, &argok));
+		if (argok)
+			ac++;
+		pushButton_opengispoint = XmCreatePushButton(pulldownMenu_file, (char *)"pushButton_opengispoint", args, ac);
+		XtManageChild(pushButton_opengispoint);
+
+		/**
+		 * Free any memory allocated for resources.
+		 */
+		XmStringFree((XmString)tmp0);
+	}
+
+	XtAddCallback(pushButton_opengispoint, XmNactivateCallback, do_mbgrdviz_fileSelectionBox_opengispoint, (XtPointer)0);
 
 	ac = 0;
 	{

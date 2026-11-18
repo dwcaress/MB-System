@@ -1270,16 +1270,18 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 			                         time_annot_int, date_annot_int, time_tick_len_map, name_hgt_map, pingnumber_tick_int,
 			                         pingnumber_annot_int, pingnumber_tick_len_map, &mbcontour_plot, &mbcontour_newpen,
 			                         &mbcontour_setline, &mbcontour_justify_string, &mbcontour_plot_string, &error);
-			swath_plot->beams_bath = beams_bath;
 
 			/* if error initializing memory then quit */
-			if (error != MB_ERROR_NO_ERROR) {
+			if (status != MB_SUCCESS || error != MB_ERROR_NO_ERROR || swath_plot == NULL) {
+				if (error == MB_ERROR_NO_ERROR)
+					error = MB_ERROR_MEMORY_FAIL;
 				char *message = NULL;
 				mb_error(verbose, error, &message);
 				fprintf(stderr, "\nMBIO Error allocating contour control structure:\n%s\n", message);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 				exit(error);
 			}
+			swath_plot->beams_bath = beams_bath;
 
 			/* print message */
 			if (verbose >= 2)

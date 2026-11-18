@@ -348,7 +348,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 			}
 			isp--;
 		}
-		if (iv1[i] == iv2[i] || iv2[i] == iv3[i] || iv3[i] == iv1[i]) {
+		else if (iv1[i] == iv2[i] || iv2[i] == iv3[i] || iv3[i] == iv1[i]) {
 fprintf(stderr, "%s:%d:%s: Removing degenerate triangle: %d %d %d\n", 
 __FILE__, __LINE__, __FUNCTION__, iv1[i], iv2[i], iv3[i]);
 			for (int j = i; j < isp - 1; j++) {

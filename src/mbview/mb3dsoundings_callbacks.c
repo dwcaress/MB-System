@@ -494,8 +494,21 @@ int mb3dsoundings_end(int verbose, int *error) {
     mb3dsoundings.init = MBS_WINDOW_NULL;
   }
 
-  /* reinitialize parameters */
+  /* reinitialize parameters, but keep the patch test bias values: the
+   * calling application keeps applying them (e.g. mbeditviz regrids
+   * with the values returned by mb3dsoundings_get_bias_values()), so the
+   * sliders must still show them when the window is reopened */
+  const int irollbias = mb3dsoundings.irollbias;
+  const int ipitchbias = mb3dsoundings.ipitchbias;
+  const int iheadingbias = mb3dsoundings.iheadingbias;
+  const int itimelag = mb3dsoundings.itimelag;
+  const int isnell = mb3dsoundings.isnell;
   mb3dsoundings_reset();
+  mb3dsoundings.irollbias = irollbias;
+  mb3dsoundings.ipitchbias = ipitchbias;
+  mb3dsoundings.iheadingbias = iheadingbias;
+  mb3dsoundings.itimelag = itimelag;
+  mb3dsoundings.isnell = isnell;
 
   /* set flags */
   mbs_status = MB_SUCCESS;
@@ -734,6 +747,7 @@ int mb3dsoundings_reset() {
   mb3dsoundings.mb3dsoundings_biasapply_notify = NULL;
   mb3dsoundings.mb3dsoundings_flagsparsevoxels_notify = NULL;
   mb3dsoundings.mb3dsoundings_colorsoundings_notify = NULL;
+  mb3dsoundings.mb3dsoundings_optimizebiasvalues_notify = NULL;
 
   mb3dsoundings.topLevelShell = NULL;
   mb3dsoundings.mainWindow = NULL;
@@ -1560,13 +1574,12 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
     if (event->xany.type == KeyPress) {
       fprintf(stderr,"KeyPress event\n");
       /* Get key pressed - buffer[0] */
-      // int actual =
-      char buffer[1];
+      char buffer[2] = {0};
       KeySym keysym;
-      XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
+      const int actual = XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
 
-      /* process events */
-      switch (buffer[0]) {
+      /* process events (keys without a character, e.g. Shift, are ignored) */
+      switch (actual > 0 ? buffer[0] : '\0') {
       case 'G':
       case 'g':
         key_g_down = 1;
@@ -1688,13 +1701,12 @@ void do_mb3dsdg_glwda_input(Widget w, XtPointer client_data, XtPointer call_data
     /* Deal with KeyRelease events */
     if (event->xany.type == KeyRelease) {
       /* Get key pressed - buffer[0] */
-      // int actual =
-      char buffer[1];
+      char buffer[2] = {0};
       KeySym keysym;
-      XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
+      const int actual = XLookupString((XKeyEvent *)event, buffer, 1, &keysym, NULL);
 
-      /* process events */
-      switch (buffer[0]) {
+      /* process events (keys without a character, e.g. Shift, are ignored) */
+      switch (actual > 0 ? buffer[0] : '\0') {
       case 'G':
       case 'g':
         key_g_down = 0;
@@ -1799,7 +1811,14 @@ int mb3dsoundings_pick(int x, int y) {
     const double dx = (double)(x - sounding->winx);
     const double dy = (double)(y - sounding->winy);
     const double r = sqrt(dx * dx + dy * dy);
-    if (r < rmin && (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE || mb_beam_ok(sounding->beamflag))) {
+    /* only pick displayed soundings: unflagged ones, or in toggle mode flagged
+     * ones that are shown (never null/zeroed beams) */
+    if (r < rmin
+        && (mb_beam_ok(sounding->beamflag)
+            || (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE
+                && mb3dsoundings.view_flagged
+                && !mb_beam_check_flag_null(sounding->beamflag)
+                && (mb3dsoundings.view_secondary || !mb_beam_check_flag_multipick(sounding->beamflag))))) {
       irmin = i;
       rmin = r;
     }
@@ -1820,7 +1839,8 @@ int mb3dsoundings_pick(int x, int y) {
         mb3dsoundings.last_sounding_defined = true;
         mb3dsoundings.last_sounding_edited = irmin;
       }
-      else if (mb3dsoundings.view_secondary || !mb_beam_check_flag_multipick(sounding->beamflag)) {
+      else if (!mb_beam_check_flag_null(sounding->beamflag)
+               && (mb3dsoundings.view_secondary || !mb_beam_check_flag_multipick(sounding->beamflag))) {
         sounding->beamflag = MB_FLAG_NONE;
         soundingdata->num_soundings_unflagged++;
         soundingdata->num_soundings_flagged--;
@@ -1897,6 +1917,7 @@ int mb3dsoundings_eraserestore(int x, int y) {
       }
       else if (mb3dsoundings.edit_mode == MBS_EDIT_RESTORE
                 && !mb_beam_ok(sounding->beamflag)
+                && !mb_beam_check_flag_null(sounding->beamflag)
                 && (mb3dsoundings.view_secondary
                     || !mb_beam_check_flag_multipick(sounding->beamflag))) {
 
@@ -2033,7 +2054,7 @@ int mb3dsoundings_unflag_view() {
   for (int i = 0; i < soundingdata->num_soundings; i++) {
     struct mb3dsoundings_sounding_struct *sounding =
       (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
-    if (!mb_beam_ok(sounding->beamflag)) {
+    if (!mb_beam_ok(sounding->beamflag) && !mb_beam_check_flag_null(sounding->beamflag)) {
       sounding->beamflag = MB_FLAG_NONE;
       soundingdata->num_soundings_unflagged++;
       soundingdata->num_soundings_flagged--;
@@ -2207,7 +2228,8 @@ int mb3dsoundings_zero_ping() {
     for (int i = 0; i < soundingdata->num_soundings; i++) {
       struct mb3dsoundings_sounding_struct *sounding =
         (struct mb3dsoundings_sounding_struct *)&(soundingdata->soundings[i]);
-      if (sounding->ifile == lastsounding->ifile && sounding->iping == lastsounding->iping) {
+      if (sounding->ifile == lastsounding->ifile && sounding->iping == lastsounding->iping
+          && !mb_beam_check_flag_null(sounding->beamflag)) {
         if (mb_beam_ok(sounding->beamflag))
           soundingdata->num_soundings_unflagged--;
         if (!mb_beam_ok(sounding->beamflag))
@@ -2412,7 +2434,7 @@ int mb3dsoundings_setzscale(int verbose, int *error) {
   /* else get vertical min maxes for scaling of only unflagged soundings */
   else if (soundingdata->num_soundings > 0) {
     int nunflagged = 0;
-    for (int i = 1; i < soundingdata->num_soundings; i++) {
+    for (int i = 0; i < soundingdata->num_soundings; i++) {
       if (mb_beam_ok(soundingdata->soundings[i].beamflag)) {
         if (nunflagged == 0) {
           zmin = soundingdata->soundings[i].z;
@@ -2695,8 +2717,8 @@ soundingdata->num_soundings); */
       if (mb_beam_ok(sounding->beamflag)
           || (mb3dsoundings.view_flagged
               && !mb_beam_check_flag_null(sounding->beamflag)
-              && (!mb_beam_check_flag_multipick(sounding->beamflag
-                  || mb3dsoundings.view_secondary)))) {
+              && (!mb_beam_check_flag_multipick(sounding->beamflag)
+                  || mb3dsoundings.view_secondary))) {
         glColor3f(sounding->r, sounding->g, sounding->b);
         glVertex3f(sounding->glx, sounding->gly, sounding->glz);
       }
@@ -2740,8 +2762,8 @@ soundingdata->num_soundings); */
       if (mb_beam_ok(sounding->beamflag)
           || (mb3dsoundings.view_flagged
               && !mb_beam_check_flag_null(sounding->beamflag)
-              && (!mb_beam_check_flag_multipick(sounding->beamflag
-                  || mb3dsoundings.view_secondary)))) {
+              && (!mb_beam_check_flag_multipick(sounding->beamflag)
+                  || mb3dsoundings.view_secondary))) {
         float r, g, b;
         mbview_getcolor(sounding->z, zmin, zmax, MBV_COLORTABLE_NORMAL,
                         colortable_haxby_red[0], colortable_haxby_green[0], colortable_haxby_blue[0],
@@ -2768,8 +2790,8 @@ soundingdata->num_soundings); */
       if (mb_beam_ok(sounding->beamflag)
           || (mb3dsoundings.view_flagged
               && !mb_beam_check_flag_null(sounding->beamflag)
-              && (!mb_beam_check_flag_multipick(sounding->beamflag
-                  || mb3dsoundings.view_secondary)))) {
+              && (!mb_beam_check_flag_multipick(sounding->beamflag)
+                  || mb3dsoundings.view_secondary))) {
         if (first) {
           first = false;
           ampmin = sounding->a;
@@ -2791,8 +2813,8 @@ soundingdata->num_soundings); */
       if (mb_beam_ok(sounding->beamflag)
           || (mb3dsoundings.view_flagged
               && !mb_beam_check_flag_null(sounding->beamflag)
-              && (!mb_beam_check_flag_multipick(sounding->beamflag
-                  || mb3dsoundings.view_secondary)))) {
+              && (!mb_beam_check_flag_multipick(sounding->beamflag)
+                  || mb3dsoundings.view_secondary))) {
         float r, g, b;
         mbview_getcolor(sounding->a, ampmin, ampmax, MBV_COLORTABLE_NORMAL,
                         (float)0.0, (float)0.0, (float)1.0, (float)1.0, (float)0.0, (float)0.0,

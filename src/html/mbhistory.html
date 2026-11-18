@@ -1,0 +1,260 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbhistory</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbhistory</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  25 October 2026 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbhistory</B> - List, compare, tag, prune and restore the versions of edit save files.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbhistory</B> <B>--input=</B><I>file</I> {<B>-I</B><I>file</I>}
+[<B>--list</B> <B>--show=</B><I>version</I> <B>--diff=</B><I>version</I>[<B>:</B><I>version</I>]
+<B>--restore=</B><I>version</I> <B>--restore-tag=</B><I>name</I>
+<B>--restore-date=</B><I>yyyy-mm-dd</I>[<B>T</B><I>hh:mm</I>[<B>:</B><I>ss</I>]]
+<B>--tag=</B><I>name</I> <B>--prune</B> <B>--keep=</B><I>number</I> <B>--older-than=</B><I>days</I>
+<B>--dry-run</B> <B>--yes</B> <B>--force</B> <B>--process</B>
+<B>--verbose</B> <B>--help</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+In <B>MB-System</B>, bathymetry edits made with <B>mbedit</B>, <B>mbeditviz</B>,
+<B>mbclean</B>, <B>mbareaclean</B> and other programs are stored in binary
+&quot;edit save files&quot; (file suffix &quot;.esf&quot;). Before any of these programs rewrites
+or appends to an existing esf file, the MBIO library saves a copy of it
+(a snapshot) in a directory named <B>mbhistory</B> in the same directory as
+the esf file (normally the directory of the swath file). The program <B>mbhistory</B> lists these versions, compares
+them, labels them with tags, removes old ones, and restores an earlier
+version, so that edits can be reverted to a previous state of a single
+file or of a whole survey.
+<P>
+Each snapshot is named after the esf file, followed by a version number and
+the UTC date and time at which it was saved:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbhistory/0001_20261020.mb88.esf.v0003_20261021T091530<BR>
+<BR>
+
+Each esf file also has a text manifest (for example
+mbhistory/0001_20261020.mb88.esf.manifest) with one line per version giving
+the version number, date, the program that was about to modify the file,
+user, host, size, CRC-32 checksum, snapshot name and an optional note.
+Tags are stored in mbhistory/tags.txt. A snapshot holds the state of the
+edits at the time it was saved, just before the named program changed them.
+The current esf file is always the newest state and is called <B>now</B>.
+A program run that reopens the same esf file several times saves at most one
+snapshot of it, and no snapshot is saved if the file is unchanged since the
+newest one. Every rewrite of an esf file updates the program, user, cpu and
+date lines of its header, so a rewrite that leaves the edits and the ESF mode
+unchanged also counts as unchanged.
+<P>
+When a program creates a new esf file, the empty file (no edits) is saved as
+the first version with the note &quot;created&quot;, so the history also shows when
+editing of the swath file began. Esf files created before this was done have
+no such version; their history starts with the first rewrite.
+<P>
+Restoring never deletes versions. Before a version is restored, the current
+esf file is saved as a new version with the note &quot;restore (vN -&gt; vM)&quot;, where
+vN is that new version and vM the restored one, so a restore can itself be
+undone. Only <B>--prune</B> removes versions, and it keeps tagged versions
+unless <B>--force</B> is given. After a restore the processed swath file is
+out of date: run <B>mbprocess</B>, or use <B>--process</B>.
+<P>
+The input may be a single swath file or a datalist. With a datalist each
+command is applied to every swath file in it; for example
+<B>--restore-date</B> returns every file to the state it had at that
+time, and files that were not changed since are left alone.
+<P>
+Snapshots are not saved if the environment variable <B>MB_HISTORY</B> is set
+to &quot;off&quot; or &quot;0&quot;.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>MB-SYSTEM AUTHORSHIP</H2>
+
+David W. Caress
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes
+<BR>
+
+<BR>&nbsp;&nbsp;Center&nbsp;for&nbsp;Coastal&nbsp;and&nbsp;Ocean&nbsp;Mapping
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;New&nbsp;Hampshire
+<BR>
+
+Christian dos Santos Ferreira
+<BR>
+
+<BR>&nbsp;&nbsp;MARUM&nbsp;-&nbsp;Center&nbsp;for&nbsp;Marine&nbsp;Environmental&nbsp;Sciences
+<BR>
+
+<BR>&nbsp;&nbsp;University&nbsp;of&nbsp;Bremen
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>MBHISTORY OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>--input=</B><I>file</I> <B>-I</B><I>file</I><DD>
+Swath file or datalist whose edit save file versions are handled. The esf
+file of a swath file is the one named in its mbprocess parameter file, or
+otherwise the swath file name followed by &quot;.esf&quot;.
+<DT><B>--list</B><DD>
+Lists the versions with their date, the program that was about to modify
+the file, the user, the number of edit events, tags and notes, followed by
+the current file. This is the default.
+<DT><B>--show=</B><I>version</I><DD>
+Shows the details of one version (a number, or <B>now</B> for the current
+file), including the counts of each edit action and the header stored in the
+esf file.
+<DT><B>--diff=</B><I>version</I>[<B>:</B><I>version</I>]<DD>
+Compares the final edit of every beam between two versions (the second one
+defaults to <B>now</B>) and reports how many beams are now flagged, now
+unflagged, have a different flag type or no longer have an edit, and the
+pings affected. With <B>--verbose</B> every changed beam is listed.
+<DT><B>--restore=</B><I>version</I><DD>
+Restores the given version as the current esf file.
+<DT><B>--restore-tag=</B><I>name</I><DD>
+Restores the version that carries the tag <I>name</I>.
+<DT><B>--restore-date=</B><I>yyyy-mm-dd</I>[<B>T</B><I>hh:mm</I>[<B>:</B><I>ss</I>]]<DD>
+Restores the edits as they were at the given UTC date and time, which is the
+first version saved at or after that time; if no version was saved since,
+the current file is already in that state and nothing is changed. A date
+without a time means the end of that day. A date before the &quot;created&quot;
+version restores an esf file with no edits. If the oldest version of a file
+is not a &quot;created&quot; version and the date is before it, the edits made before
+that version were not recorded: the oldest version is restored and a warning
+is printed.
+<DT><B>--tag=</B><I>name</I><DD>
+Labels the current state with the one-word tag <I>name</I>. A snapshot is
+saved if the current file differs from the newest version. An existing tag
+of the same name is moved only with <B>--force</B>.
+<DT><B>--prune</B><DD>
+Removes old versions selected with <B>--keep</B> and/or
+<B>--older-than</B> (a version is removed only if all given conditions
+select it). Tagged versions are kept unless <B>--force</B> is given.
+<DT><B>--keep=</B><I>number</I><DD>
+With <B>--prune</B>, keeps the newest <I>number</I> versions.
+<DT><B>--older-than=</B><I>days</I><DD>
+With <B>--prune</B>, removes only versions older than <I>days</I> days.
+<DT><B>--dry-run</B><DD>
+Shows what a restore or prune would do without changing anything.
+<DT><B>--yes</B><DD>
+Restores and prunes change files only when <B>--yes</B> is given;
+without it they run as a dry run.
+<DT><B>--force</B><DD>
+Allows <B>--prune</B> to remove tagged versions and <B>--tag</B> to
+move an existing tag.
+<DT><B>--process</B><DD>
+Runs <B>mbprocess</B> <B>--force</B> on each restored swath file, so that
+the processed file is regenerated even if its time stamp looks up to date.
+<DT><B>--verbose</B> <B>-V</B><DD>
+Increases the amount of output; with <B>--diff</B> and restores, every
+changed beam is listed.
+<DT><B>--help</B> <B>-H</B><DD>
+This &quot;help&quot; flag causes the program to print out a description
+of its operation and then exit immediately.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+To list the versions of the edits of one swath file:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbhistory&nbsp;-I&nbsp;0001_20261020.mb88<BR>
+<BR>
+
+To see what changed between version 2 and the current edits:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbhistory&nbsp;-I&nbsp;0001_20261020.mb88&nbsp;--diff=2<BR>
+<BR>
+
+To return every file of a survey to the state of 21 October 2026 at
+12:00 UTC, first as a dry run and then for real, reprocessing the files:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbhistory&nbsp;-I&nbsp;datalist.mb-1&nbsp;--restore-date=2026-10-21T12:00<BR>
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbhistory&nbsp;-I&nbsp;datalist.mb-1&nbsp;--restore-date=2026-10-21T12:00&nbsp;--yes&nbsp;--process<BR>
+<BR>
+
+To tag the current edits of a survey before a risky operation, and to
+return to them later:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbhistory&nbsp;-I&nbsp;datalist.mb-1&nbsp;--tag=before-areaclean<BR>
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbhistory&nbsp;-I&nbsp;datalist.mb-1&nbsp;--restore-tag=before-areaclean&nbsp;--yes<BR>
+<BR>
+
+To keep only the 20 newest versions of each file:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbhistory&nbsp;-I&nbsp;datalist.mb-1&nbsp;--prune&nbsp;--keep=20&nbsp;--yes<BR>
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(1), <B><A HREF="mbedit.html">mbedit</A></B>(1), <B><A HREF="mbeditviz.html">mbeditviz</A></B>(1), <B><A HREF="mbclean.html">mbclean</A></B>(1),
+<B><A HREF="mbareaclean.html">mbareaclean</A></B>(1), <B><A HREF="mbprocess.html">mbprocess</A></B>(1), <B><A HREF="mbdumpesf.html">mbdumpesf</A></B>(1)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Versions are matched to swath files by file name, so renaming a swath file
+detaches it from its history.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">MB-SYSTEM AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">MBHISTORY OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 25 October 2026</P></CENTER>
+
+<HR>
+<center>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>

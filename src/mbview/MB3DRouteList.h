@@ -29,6 +29,7 @@ typedef struct _MB3DRouteListData {
 	Widget MB3DRouteList;
 	Widget mbview_routelist_label;
 	Widget mbview_pushButton_routelist_delete;
+	Widget mbview_pushButton_routelist_topolylines;
 	Widget mbview_pushButton_routelist_dismiss;
 	Widget mbview_scrolledWindow_routelist;
 	Widget mbview_list_routelist;

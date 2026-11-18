@@ -1,7 +1,7 @@
 lib_LTLIBRARIES = libr7kr.la libmb1r.la
 
-LIBMBTRNFRAME = ${top_srcdir}/src/mbtrnframe/libmbtrnframe.la
-LIBMB1 = ${top_srcdir}/src/mbtrnav/libmb1.la
+LIBMBTRNFRAME = ${top_builddir}/src/mbtrnframe/libmbtrnframe.la
+LIBMB1 = ${top_builddir}/src/mbtrnav/libmb1.la
 
 include_HEADERS = \
         utils/mb71_msg.h \
@@ -45,7 +45,7 @@ libmb1r_la_SOURCES =  \
 		utils/mb71_msg.c \
 		mb1r/mb1-reader.c
 
-libmb1r_la_LIBADD = ${top_srcdir}/src/mbtrnav/libmb1.la ${LIBMBTRNFRAME} -lpthread
+libmb1r_la_LIBADD = ${top_builddir}/src/mbtrnav/libmb1.la ${LIBMBTRNFRAME} -lpthread
 
 bin_PROGRAMS =  udps udpc mbtnav-cli stream7k frames7k emu7k r7kr_test trnc tbinx mb1conv mb12csv mb1r_test mb1-cli
 

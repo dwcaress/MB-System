@@ -1,4 +1,4 @@
-.TH mbnavlist 1 "7 September 2026" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavlist 1 "16 October 2026" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavlist\fP \- List navigation data in swath sonar data files.
 
@@ -255,23 +255,23 @@ type \fIkind\fP, where \fIkind\fP may be integer values such as:
      MB_DATA_HEADING			17	/* Simrad, Hypack */
      MB_DATA_ATTITUDE		18	/* Simrad, Hypack, Reson 7k */
      MB_DATA_SSV			19	/* Simrad */
-     MB_DATA_NAV1			28	/* ancillary nav system 1 */
-     MB_DATA_NAV2			29	/* ancillary nav system 2 */
-     MB_DATA_NAV3			30	/* ancillary nav system 3 */
-     MB_DATA_MOTION			32	/* Reson 7k */
-     MB_DATA_SIDESCAN2		37	/* Reson 7k, XTF */
-     MB_DATA_SIDESCAN3		38	/* Reson 7k, XTF */
-     MB_DATA_ROLL			40	/* Reson 7k */
-     MB_DATA_PITCH			41	/* Reson 7k */
-     MB_DATA_NMEA_RMC		48	/* NMEA */
-     MB_DATA_NMEA_DBT		49	/* NMEA */
-     MB_DATA_NMEA_DPT		50	/* NMEA */
-     MB_DATA_NMEA_ZDA		51	/* NMEA */
-     MB_DATA_NMEA_GLL		52	/* NMEA */
-     MB_DATA_NMEA_GGA		53	/* NMEA */
-     MB_DATA_ATTITUDE1		55	/* ancillary attitude system 1 */
-     MB_DATA_ATTITUDE2		56      /* ancillary attitude system 2 */
-     MB_DATA_ATTITUDE3		57	/* ancillary attitude system 3 */
+     MB_DATA_NAV1			29	/* ancillary nav system 1 */
+     MB_DATA_NAV2			30	/* ancillary nav system 2 */
+     MB_DATA_NAV3			31	/* ancillary nav system 3 */
+     MB_DATA_MOTION			33	/* Reson 7k */
+     MB_DATA_SIDESCAN2		38	/* Reson 7k, XTF */
+     MB_DATA_SIDESCAN3		39	/* Reson 7k, XTF */
+     MB_DATA_ROLL			41	/* Reson 7k */
+     MB_DATA_PITCH			42	/* Reson 7k */
+     MB_DATA_NMEA_RMC		49	/* NMEA */
+     MB_DATA_NMEA_DBT		50	/* NMEA */
+     MB_DATA_NMEA_DPT		51	/* NMEA */
+     MB_DATA_NMEA_ZDA		52	/* NMEA */
+     MB_DATA_NMEA_GLL		53	/* NMEA */
+     MB_DATA_NMEA_GGA		54	/* NMEA */
+     MB_DATA_ATTITUDE1		56	/* ancillary attitude system 1 */
+     MB_DATA_ATTITUDE2		57	/* ancillary attitude system 2 */
+     MB_DATA_ATTITUDE3		58	/* ancillary attitude system 3 */
 .br
 For example, using \fB\-K\fP\fI18\fP will cause \fBmbnavlist\fP to output
 at the times of attitude data records. One consequence will be that
@@ -474,7 +474,7 @@ output be keyed to the time stamps of particular record types by
 using the \fB\-K\fP\fIkind\fP option where \fIkind\fP corresponds
 to the desired record type identifier from this table.
 
-     MB_DATA_KINDS			54
+     MB_DATA_KINDS			75
      MB_DATA_NONE			0
      MB_DATA_DATA			1	general survey data
      MB_DATA_COMMENT			2	general comment
@@ -502,37 +502,55 @@ to the desired record type identifier from this table.
      MB_DATA_PROCESSING_PARAMETERS	24	GSF
      MB_DATA_SENSOR_PARAMETERS	25	GSF
      MB_DATA_NAVIGATION_ERROR	26	GSF
-     MB_DATA_RAW_LINE		27	uninterpretable line for ascii formats
-     MB_DATA_NAV1			28	ancillary nav system 1
-     MB_DATA_NAV2			29	ancillary nav system 2
-     MB_DATA_NAV3			30	ancillary nav system 3
-     MB_DATA_TILT			31	Simrad
-     MB_DATA_MOTION			32	Reson 7k
-     MB_DATA_CTD			33	Reson 7k
-     MB_DATA_SUBBOTTOM_MCS		34	Reson 7k
-     MB_DATA_SUBBOTTOM_CNTRBEAM	35	Simrad
-     MB_DATA_SUBBOTTOM_SUBBOTTOM	36	Reson 7k, XTF
-     MB_DATA_SIDESCAN2		37	Reson 7k, XTF
-     MB_DATA_SIDESCAN3		38	Reson 7k, XTF
-     MB_DATA_IMAGE			39	Reson 7k
-     MB_DATA_ROLL			40	Reson 7k
-     MB_DATA_PITCH			41	Reson 7k
-     MB_DATA_ABSORPTIONLOSS		42	Reson 7k
-     MB_DATA_SPREADINGLOSS		43	Reson 7k
-     MB_DATA_INSTALLATION		44	Reson 7k
-     MB_DATA_WATER_COLUMN		45	Simrad
-     MB_DATA_STATUS			46	Simrad, XTF
-     MB_DATA_DVL			47	JSTAR
-     MB_DATA_NMEA_RMC		48	NMEA
-     MB_DATA_NMEA_DBT		49	NMEA
-     MB_DATA_NMEA_DPT		50	NMEA
-     MB_DATA_NMEA_ZDA		51	NMEA
-     MB_DATA_NMEA_GLL		52	NMEA
-     MB_DATA_NMEA_GGA		53	NMEA
-     MB_DATA_SURVEY_LINE		54	Reson 7k
-     MB_DATA_ATTITUDE1		55	ancillary attitude system 1
-     MB_DATA_ATTITUDE2		56      ancillary attitude system 2
-     MB_DATA_ATTITUDE3		57	ancillary attitude system 3
+     MB_DATA_SINGLE_BEAM_PING	27	GSF
+     MB_DATA_RAW_LINE		28	uninterpretable line for ascii formats
+     MB_DATA_NAV1			29	ancillary nav system 1
+     MB_DATA_NAV2			30	ancillary nav system 2
+     MB_DATA_NAV3			31	ancillary nav system 3
+     MB_DATA_TILT			32	Simrad
+     MB_DATA_MOTION			33	Reson 7k
+     MB_DATA_CTD			34	Reson 7k
+     MB_DATA_SUBBOTTOM_MCS		35	Reson 7k
+     MB_DATA_SUBBOTTOM_CNTRBEAM	36	Simrad
+     MB_DATA_SUBBOTTOM_SUBBOTTOM	37	Reson 7k, XTF
+     MB_DATA_SIDESCAN2		38	Reson 7k, XTF
+     MB_DATA_SIDESCAN3		39	Reson 7k, XTF
+     MB_DATA_IMAGE			40	Reson 7k
+     MB_DATA_ROLL			41	Reson 7k
+     MB_DATA_PITCH			42	Reson 7k
+     MB_DATA_ABSORPTIONLOSS		43	Reson 7k
+     MB_DATA_SPREADINGLOSS		44	Reson 7k
+     MB_DATA_INSTALLATION		45	Reson 7k
+     MB_DATA_WATER_COLUMN		46	Simrad
+     MB_DATA_STATUS			47	Simrad, XTF
+     MB_DATA_DVL			48	JSTAR
+     MB_DATA_NMEA_RMC		49	NMEA
+     MB_DATA_NMEA_DBT		50	NMEA
+     MB_DATA_NMEA_DPT		51	NMEA
+     MB_DATA_NMEA_ZDA		52	NMEA
+     MB_DATA_NMEA_GLL		53	NMEA
+     MB_DATA_NMEA_GGA		54	NMEA
+     MB_DATA_SURVEY_LINE		55	Reson 7k
+     MB_DATA_ATTITUDE1		56	ancillary attitude system 1
+     MB_DATA_ATTITUDE2		57	ancillary attitude system 2
+     MB_DATA_ATTITUDE3		58	ancillary attitude system 3
+     MB_DATA_SENSORDEPTH		59	HYSWEEP dynamic draft
+     MB_DATA_ALTITUDE		60	HYSWEEP single beam echosounder
+     MB_DATA_GEN_SENS		61	WASSP generic sensor data
+     MB_DATA_WC_PICKS		62	WASSP water column picks
+     MB_DATA_TIMESTAMP		63	JSTAR file timestamp
+     MB_DATA_HEAVE			64	Kongsberg kmall
+     MB_DATA_BIST			65	Kongsberg BIST report
+     MB_DATA_BIST1			66	Kongsberg BIST reply
+     MB_DATA_BIST2			67	Kongsberg BIST short reply
+     MB_DATA_MBSYSTEM		68	Written by MB-System - extension to Kongsberg kmall
+     MB_DATA_BSCALIBRATIONFILE	69	Kongsberg backscatter calibration file
+     MB_DATA_SALINITY		70	Reson 7k
+     MB_DATA_TEMPERATURE		71	Reson 7k
+     MB_DATA_PIPE			72	Reson 7k
+     MB_DATA_CONTACT			73	Reson 7k
+     MB_DATA_GATES			74	Reson 7k
+     MB_DATA_DATUM			75	Kongsberg SPD Sensor Position Datum
 
 .SH SEE ALSO
 \fBmbsystem\fP(1), \fBmbinfo\fP(1)

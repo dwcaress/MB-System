@@ -126,6 +126,7 @@ libmbio_la_SOURCES += mb_format.c
 libmbio_la_SOURCES += mb_get_all.c
 libmbio_la_SOURCES += mb_get.c
 libmbio_la_SOURCES += mb_get_value.c
+libmbio_la_SOURCES += mb_history.c
 libmbio_la_SOURCES += mb_mem.c
 libmbio_la_SOURCES += mb_navint.c
 libmbio_la_SOURCES += mb_platform.c
