@@ -4,7 +4,7 @@ mbmesh \- reconstruct triangle meshes from swath bathymetry data
 .SH SYNOPSIS
 \fBmbmesh\fR \fB-I\fI datalist\fR [\fB-O\fI outputdir\fR]
 [\fB-R\fI west/east/south/north\fR] [\fB-L\fI meters\fR]
-[\fB--metadata\fR] [\fIoutput options\fR] [\fB-V\fR] [\fB-H\fR]
+[\fB--info\fR] [\fIoutput options\fR] [\fB-V\fR] [\fB-H\fR]
 .SH DESCRIPTION
 .LP
 \fBmbmesh\fR reads swath sonar data through the MB-System datalist
@@ -15,22 +15,20 @@ signed scalar field with screened Poisson, extracts a surface with marching
 cubes, trims unsupported mesh regions, and writes the result as a binary glTF
 mesh.
 .LP
-The output mesh vertices are positioned in the same local Cartesian coordinate
-frame used for reconstruction, with units in meters. This is an east-north-up
-frame initialized from the first accepted ping's sensor position: X is positive
-east, Y is positive north, and Z is positive up relative to that origin.
-Longitude and latitude are converted to local meters using an equirectangular
-approximation based on the origin latitude.
+The output mesh vertices are WGS84 Earth-Centered, Earth-Fixed (ECEF)
+coordinates in meters, following the conventions of \fBmbgrd2gltf\fR. Without
+\fB--geoorigin\fR the vertices are absolute ECEF coordinates. With
+\fB--geoorigin\fR they are offsets from the ECEF position of a GeoOrigin; the
+axes stay aligned with ECEF. An \fBmbmesh\fR product and an \fBmbgrd2gltf\fR
+product made with the same GeoOrigin therefore line up directly. GLB positions
+are 32-bit floats, so absolute ECEF coordinates resolve only about 0.5 m; use a
+GeoOrigin to preserve finer detail.
 .LP
-This local frame is not the Earth-Centered, Earth-Fixed (ECEF) frame used by
-\fBmbgrd2gltf\fR by default, and it is not the ECEF-offset frame produced by
-\fBmbgrd2gltf --geoorigin\fR. The \fB--geoorigin\fR option in
-\fBmbgrd2gltf\fR allows vertices to be expressed as offsets from a local origin
-point rather than from Earth's center in order to reduce coordinate magnitudes
-and improve rendering precision. \fBmbmesh\fR currently uses its own local
-projected frame instead. When combining \fBmbmesh\fR GLB output with
-\fBmbgrd2gltf\fR output, transform both products into the same coordinate
-frame first; otherwise their vertices can appear offset or fail to line up.
+Reconstruction itself runs in a local east-north-up frame tangent to the WGS84
+ellipsoid at the point below the centroid of the accepted soundings. Soundings
+are converted to ECEF and rigidly translated and rotated into this frame, so no
+map-projection distortion is introduced, and results are converted back to ECEF
+exactly on output. This frame does not depend on \fB--geoorigin\fR.
 .LP
 The default output is:
 .RS
@@ -46,32 +44,243 @@ with command-line output options.
 .TP
 .B \-I\fI datalist\fR, \fB--input\fR \fIdatalist\fR
 Input MB-System datalist file. This option is required unless the datalist path
-is supplied as the first non-option argument.
+is supplied as the first non-option argument. If it names a directory instead,
+\fBmbmesh\fR reconstructs nothing and writes \fBmbmesh_survey.html\fR in the current
+directory: a viewer page with a check box for every .glb file beneath that directory,
+in accordions that mirror its layout, for example a survey directory with
+\fImultibeam\fR and \fIlidar\fR subdirectories. The chunk files and the tiles of a tileset are left out and its
+tileset.json is offered. The track.glb files are switched on when the page opens, the other GLBs are not. The page has an overview viewpoint over all the mbmesh GLBs found, as the page of a run does,
+with the GeoOrigin of the first. A GLB with another GeoOrigin, or with absolute vertices, does not line up
+with it, and is logged as an ERROR that names it. \fB--geoviewpoint\fR adds GeoViewpoints to its
+Viewpoint menu, without \fB--html\fR. With \fB--cesium-html\fR it also writes \fImbmesh_survey_cesium.html\fR for CesiumJS. Run \fBmbmesh\fR in the
+survey directory or above it and serve that directory.
 .TP
 .B \-O\fI outputdir\fR, \fB--output\fR \fIoutputdir\fR
 Output directory for generated files. The directory is created if needed.
-The default is \fImbmesh_output\fR.
+The default is \fImbmesh_output\fR in the directory of the input datalist, so
+\fB-I multibeam/datalistp.mb-1\fR writes \fImultibeam/mbmesh_output\fR.
 .TP
 .B \-R\fI west/east/south/north\fR, \fB--bounds\fR \fIwest/east/south/north\fR
 Restrict accepted soundings to a geographic bounding box in degrees longitude
 and latitude.
 .TP
 .B \-L\fI meters\fR, \fB--lod\fR \fImeters\fR, \fB--level-of-detail\fR \fImeters\fR
-Requested smallest feature size in local meters. If omitted, \fBmbmesh\fR
-derives level of detail from estimated point spacing. The implementation clamps
-the resolved value to a supported range and uses it to derive default
-normal-estimation, Poisson, and trimming parameters.
+Requested smallest feature size in local meters. The Poisson cell is a quarter
+of it, but no finer than half the point spacing, so \fB-L 0.2\fR gives a 5 cm
+cell even where the soundings are much denser. If omitted, \fBmbmesh\fR
+derives level of detail from the measured point spacing (twice the spacing),
+raised if needed to keep the reconstruction within about 500 million Poisson
+cells across the survey, and logs that it did so. A level of detail given here is
+never limited, but a warning is printed when it needs more than about 2 billion
+cells, which may take hours. The implementation clamps the resolved value to a
+supported range and uses it to derive default normal-estimation, Poisson, and
+trimming parameters. Use \fB--info\fR to see the resulting cell size and
+chunk plan before running.
+.TP
+.B \--geoorigin[=\fIlon,lat,elev\fR], \-G[\fIlon,lat,elev\fR]
+Write vertices as ECEF offsets from a GeoOrigin, with the same syntax and meaning
+as in \fBmbgrd2gltf\fR. With a value, longitude and latitude in decimal degrees
+and elevation in meters above the WGS84 ellipsoid are all required. With no
+value, the GeoOrigin is the center of the data bounds at the mean sounding
+elevation. If the option is not given, vertices are absolute ECEF coordinates.
+GLB positions are 32-bit floats, so absolute ECEF (magnitudes of about 6.4
+million meters) resolves only about 0.5 m; use a GeoOrigin to preserve
+sub-meter detail.
+As in \fBmbgrd2gltf\fR the value must be attached to the option: for the long
+form write an equals sign and no spaces, as in \fB--geoorigin=-122.4,36.6,0\fR;
+for the short form put the value directly after \fB-G\fR, as in
+\fB-G-122.4,36.6,0\fR. A value given as a separate argument, such as
+\fB--geoorigin -122.4,36.6,0\fR, is not accepted, and neither is a value with
+spaces unless it is quoted so that the shell passes it as one argument. With
+\fB--html\fR, the viewer page positions the model with GeoOrigin and
+GeoViewpoint nodes.
+.TP
+.B \-\-geoviewpoint=\fIVALUES\fR
+With \fB\-\-html\fR, add a GeoViewpoint to the page; the option can be repeated, and each
+adds a GeoViewpoint, written with its position as latitude, longitude and elevation and the GeoOrigin used again, named USER_GEOVIEW_1, USER_GEOVIEW_2 and so on, to the Viewpoint menu of the
+page, after the two overview viewpoints, where Page Down also steps through them. The
+values are geodetic, in the order of \fB\-\-geoorigin\fR, longitude first, so they do not depend on the
+GeoOrigin or the data and can be used again in another run: \fIlon,lat,elev,clon,clat,celev\fR, the camera
+position and the point it looks at, or \fIlon,lat,elev,ax,ay,az,angle,clon,clat,celev\fR, with the
+orientation as an axis and an angle, as a GeoViewpoint takes it. Heights are above the
+ellipsoid. Without an orientation the top of the view is toward local up. The
+\fBCopy GeoViewpoint\fR button of the page gives the ten-number form for the view on the screen, on
+the clipboard and in the X3DOM log. The value must be attached to the option, with an
+equals sign and no spaces, for example \fB\-\-geoviewpoint=\-122.4,36.6,\-900,\-122.39,36.61,\-950\fR.
+.TP
+.B \-\-pointcloud-colormap=\fINAME\fR
+How \fBpointcloud.glb\fR is colored by height, with the Haxby color table that \fBmbm_grdplot\fR
+uses, 11 colors from dark blue to white: \fBlinear\fR (the default), 11 equal steps between rounded
+heights chosen from the range, as \fBmbm_grdplot -G5\fR does; \fBequalized\fR, steps with equal
+numbers of points, as \fBmbm_grdplot -G5 -S\fR does; or \fBnone\fR, one orange. The heights the color
+changes between are in the description of the file's MB-System.content metadata.
+.TP
+.B \-\-no\-colors
+With \fB\-\-tileset\fR, do not color the tiles by height. By default every vertex has a color (\fBCOLOR_0\fR) from the Haxby table over the heights of the whole survey, so that all tiles agree, with a white base color; \fBtileset.json\fR records the bounds as \fBheightColors\fR, and the page of \fB\-\-html\fR has a "color by height" checkbox that turns the colors off, which shows the tiles in gray.
+.TP
+.B \-\-lift\fR[=\fIMETERS\fR]
+With \fB\-\-tileset\fR, lift the tileset above the ellipsoid along the local vertical, in the
+transform of \fBtileset.json\fR. As \fB\-\-geoorigin\fR works, without the option the tileset has the true heights (a warning says so
+if any are below the ellipsoid), the option alone takes the default, and a value must be attached, as in \fB\-\-lift=900\fR. X3DOM's GeoTileset takes the height of the camera as at least 1 m, so tiles
+below the ellipsoid, as seafloor is, never get near enough to refine. The default lift puts the lowest point of the
+mesh 10 m above the ellipsoid, to a meter, if it is lower. The lift is logged and written as \fBliftMeters\fR in
+the extras of \fBtileset.json\fR. The page of \fB\-\-html\fR puts its other models in GeoTransform nodes that lift
+them the same, raises the viewpoints, and sets the maximumScreenSpaceError of the GeoTileset to 1 pixel. The
+\fBCopy GeoViewpoint\fR button takes the lift off again, so the option it gives is for the true heights.
+.TP
+.B \--chunk-size \fImeters\fR
+Reconstruct in square horizontal chunks of about this size (rounded up to a whole
+number of Poisson cells) instead of in one pass. Chunking turns on
+automatically when a single Poisson grid would exceed about 8 million cells.
+See \fBChunked reconstruction\fR below.
+.TP
+.B \--chunk-halo \fImeters\fR
+Read this many meters of neighboring points beyond the edge of each chunk, rounded up to a whole
+number of Poisson cells. The default is the reach of the normal estimation, splatting and
+trimming. A halo smaller than that reach is used, with a warning. A larger halo needs more memory,
+disk and time, because every chunk reconstructs its halo again, and it changes the chunk size; it
+did not improve the match of neighboring chunks at their edges. It has an effect only when the run is chunked.
+.TP
+.B \--no-draco
+Write the triangle meshes of the GLB files as arrays of 32-bit floats and integers. By default
+\fImesh.glb\fR, \fIraw_mesh.glb\fR, the chunks and the tileset tiles are compressed with Draco
+(the glTF extension \fBKHR_draco_mesh_compression\fR), which makes them about a tenth of the size.
+The point cloud, normals, sensor positions and track are never compressed, since the extension is for triangles.
+.TP
+.B \--draco-precision \fImeters\fR
+With Draco, keep the positions to this many meters (default 0.001). Each file gets the number of bits
+(8 to 30) that makes the step of its quantization no more than this over its extent.
+.TP
+.B \--draco-normal-bits \fIn\fR
+With Draco, the bits of each normal, 2 to 30 (default 10).
+.TP
+.B \--seam-method \fIname\fR
+How chunks are matched on the edges they share: \fBsolve\fR (the default) solves each chunk with the final fields of its west and south neighbors held
+fixed on the shared edges, which removes the edge effect on those sides, but a chunk
+waits for those neighbors before its solve, so fewer chunks are solved at the same time, and
+the threads without a chunk to solve share the sweeps of the solver of those that have one.
+The output does not depend on the number of threads.
+\fBblend\fR solves each chunk free, all of them at the same time, and then blends its field to the neighbors'
+over \fB--seam-blend\fR.
+.TP
+.B \--seam-blend \fImeters\fR
+With \fB--seam-method blend\fR, over this width on each side of an edge between two chunks, the Poisson field of a chunk is made
+to match the final field of the chunk to its west or to its south on that edge, so that the two
+meshes meet exactly, with no step and no gap. The fields of neighboring chunks are solved apart and
+differ where they meet (by about 2 cm on one multibeam survey at \fB-L 0.1\fR). The chunks share one
+lattice of grid nodes, so with the same field values on the nodes of an edge, marching cubes makes
+the same vertices along it; the correction is the difference on the edge, fading smoothly to zero
+over the width. The vertices that the chunks have in common are merged in \fBmesh.glb\fR. The default
+is 1 m, or a quarter of the chunk size if that is less. Zero does not match the chunks, and lets
+them be started in any order; with a width the chunks are started in order, since a chunk waits
+for its neighbors. It has an effect only when the run is chunked.
+.TP
+.B \--label-chunks
+With \fB--html\fR, the page draws the outline of each chunk, at the mean height of its surface,
+and its file name, for example \fBchunk_2_-10.glb\fR, as text that faces the viewer, one text height above
+the highest point of the chunk. A check box
+switches them off. It is for finding which chunk a seam, a void or an overhang belongs to. It
+needs a chunked run. The survey page that a directory input writes draws them too, for the chunk files
+in the \fBchunks\fR directories beneath it that say where their chunk is (each carries it in
+\fBMB-System.content.chunkLabel\fR); those of a run made before that was written are not drawn.
+.TP
+.B \--chunk \fIi,j\fR
+Reconstruct only chunk (i,j). Chunk (i,j) covers x from i*size to (i+1)*size and y
+from j*size to (j+1)*size in the local east-north frame. Intended for testing. Each of
+\fIi\fR and \fIj\fR can be a range \fIfirst\fR..\fIlast\fR, both included, so that
+\fB--chunk 2..3,-11..-10\fR is four chunks, and the option can be repeated, to add chunks:
+\fB--chunk 2,-10 --chunk 3,-10\fR is two neighbors, for looking at the seam between them.
+\fBmesh.glb\fR and the pages then hold only those chunks.
+.TP
+.B \--max-chunks \fIn\fR
+Stop after n chunks. Intended for testing.
+.TP
+.B \--threads \fIn\fR
+Number of chunks reconstructed at the same time when chunking. The default is the
+smaller of the number of processor cores and 4. Each chunk holds its own Poisson
+grid, so memory use grows with this value. With automatic chunking, a larger value
+also gives smaller chunks, since at least two chunks per thread are wanted. The
+output does not depend on it.
+.TP
+.B \--void-size \fIm\fR
+Put back voids of up to \fIm\fR meters across (default 2) that support trimming
+would remove from inside the surface. The sonar returns thin out in the depressions
+of the seafloor and under overhangs, so the surface bridging such a gap has too few
+soundings near it and is trimmed, leaving a hole in a surface that is otherwise there.
+A raster of the soundings of the whole survey, with their heights, shows where they are. A mesh vertex that was rejected only for too few neighbors
+is kept if it has a sounding within three support radii, or if its nearest sounding is within half this size, soundings are all around it in the tangent plane
+of the mesh, and the nearest soundings are beside it and not above it. Pieces of the surface that are not joined to the rest and are smaller than a quarter of the area of a disk of this size are taken out. Gaps at the edge of the survey stay trimmed,
+as does surface that disagrees with the soundings, except for holes that are entirely surrounded by surface that is kept, which are filled up to the area of a disk of this size. Zero trims all of them.
+.TP
+.B \--island-size \fIm\fR
+When the survey is reconstructed in chunks, remove from \fImesh.glb\fR the pieces of the
+merged mesh that are not joined to the rest and have an area of up to that of a disk
+\fIm\fR meters across (default 2), if fewer than half of their vertices have a
+sounding within a support radius, in three dimensions, as the raster of the soundings knows
+them. Small pieces with soundings under them, such as rock that the trimming cut from the rest, stay. Zero
+keeps all of them. \fIraw_mesh.glb\fR is not cleaned.
+.TP
+.B \--primitive-size \fIm\fR
+Write \fImesh.glb\fR and \fIraw_mesh.glb\fR as one mesh of many primitives, one for each
+square of this many meters of the local east-north frame (anchored at its origin), as \fBmbgrd2gltf\fR
+writes blocks of 256 cells. Each primitive has the vertices that its triangles use and, with Draco, its
+own compressed stream, so a viewer decodes and draws the surface in parts and not as one array of tens of
+millions of vertices. The default is 256 Poisson cells. Zero writes one primitive. The vertices
+on the edges of the squares are in both primitives. The chunk files and the tiles of a tileset are one
+primitive each.
+.TP
+.B \--spill-points \fIn\fR
+A survey with more than \fIn\fR accepted soundings (default 50000000) is not held
+in memory. The soundings are written to a file in a directory \fBmbmesh_work\fR
+beside the results, and then sorted into one file per chunk, each holding the
+points of the chunk and of its halo, so that memory use follows the size of a chunk
+and not of the survey. Each chunk is reconstructed from its file and gives the same
+mesh as from memory. The directory is deleted when the run ends. The disk needs
+28 bytes for each sounding for the spill file, and 48 bytes for each point,
+about 1.3 times as many as there are, for the chunk files, which are small when
+\fB\--decimate\fR is on. Use \fB-O\fR to put the work directory on a disk with room. 0 always spills. Chunking, which this needs, is turned on for such a
+survey. The files that hold points as one file, \fBpointcloud.glb\fR,
+\fBorigins.glb\fR, \fBnormals.glb\fR and the oriented PLY, then hold one point in n,
+so that there are at most 5 million; the xyz files hold every point. The log gives
+the peak memory of the process after each stage.
+.TP
+.B \--poisson-solver \fIname\fR
+Select how the Poisson grid equation is solved: \fBsor\fR, the default, which is
+red-black successive over-relaxation, updated in place, or \fBjacobi\fR. An iteration
+of either costs about the same, but \fBsor\fR converges in far fewer, so it needs
+a much smaller number of iterations, which it chooses itself; on a test survey
+about 100 of its iterations reached the residual of 473 Jacobi iterations.
+.TP
+.B \--poisson-iterations \fIn\fR
+Number of iterations of the solver, from 1 to 100000, for either solver. By
+default \fBsor\fR takes one iteration per cell across the longest edge of
+each chunk's grid, but at least 50, and \fBjacobi\fR takes a count chosen from the
+level of detail, between 200 and 500. The relative residual after the iterations,
+which shows how far the solver converged, is logged with \fB-V\fR for each chunk
+and at INFO level in a single pass.
 .TP
 .B \--decimate \fImeters\fR
 Enable voxel-grid point decimation with the specified cell size in local meters.
 The legacy single-dash form \fB-decimate\fR is also accepted.
 .TP
-.B \--metadata, \--info
-Print dataset metadata and exit before mesh reconstruction. The metadata
-includes input counts, geodetic bounds, and estimated point spacing.
+.B \--info
+Print dataset information and the reconstruction plan, and exit before mesh
+reconstruction. This includes input counts, geodetic bounds, the estimated point
+spacing, and the resulting Poisson cell size, chunk plan and cell count. This
+option was called \fB--metadata\fR in earlier versions; \fB--metadata\fR is no
+longer accepted.
 .TP
 .B \-V, \--verbose
-Enable progress and diagnostic logging.
+Enable progress and diagnostic logging. Messages use the same line format as
+\fBmbgrd2gltf\fR: level, local date and time, source file, function and line,
+then the message, for example
+\fBINFO 2026-10-19 14:35:15.419 mbmesh.cpp main():151 [startup] ...\fR.
+Without \fB-V\fR, INFO, WARN and ERROR lines are shown. When chunking, these
+include at most one progress line a minute (chunks finished, percentage, elapsed
+time and an estimate of the time left) and a final line with the time spent in
+each stage, added up over all chunks; in a single pass they include one line for
+each finished stage. \fB-V\fR adds DEBUG lines with the start of each stage and
+a line for each chunk. All messages go to standard error.
 .TP
 .B \-H, \-h, \--help
 Display help message and exit.
@@ -82,9 +291,16 @@ Every long option in this section also accepts a legacy single-dash form
 compatibility.
 .TP
 .B \--html
-Also write \fBmesh.html\fR, an X3DOM viewer page that references
-\fBmesh.glb\fR, launch a local Python HTTP server, and open the viewer in the
-default web browser.
+Also write an X3DOM viewer page, in the parent of the output directory and named
+after it (for example \fBmbmesh_output.html\fR beside \fBmbmesh_output\fR), and
+print the command to serve and view it. The page is laid out like the one
+\fBmbgrd2gltf\fR writes: a heads-up display with the navigation mode, the debug
+displays and the view controls, a check box for each GLB, and a panel with the
+processing log of the run (see \fBOUTPUT FILES\fR). \fBmbmesh\fR does not start
+a web server or a browser; run the printed command
+(\fBpython3 -m http.server 8000 --bind 127.0.0.1 --directory\fR \fIwebroot\fR,
+where the web root is the parent of the output directory) in a terminal, press
+Ctrl-C to stop it, and open the printed URL.
 .TP
 .B \--xyz
 Also write both local and ECEF XYZ point cloud files.
@@ -104,7 +320,10 @@ for inspection.
 .TP
 .B \--pointcloud-glb
 Also write \fBpointcloud.glb\fR, a diagnostic GLB point cloud for smaller
-datasets.
+datasets. The points are colored by their height in the local frame, in a COLOR_0 attribute, the way
+\fBmbm_grdplot -G5 -S\fR colors a grid: the Haxby color table, 11 colors from dark blue to white,
+changing linearly between heights that divide the points into 11 cells of equal numbers. Those heights
+are in the description of the file's MB-System.content metadata.
 .TP
 .B \--normal-glb
 Also write \fBnormals.glb\fR, diagnostic normal vectors for smaller datasets.
@@ -112,6 +331,40 @@ Also write \fBnormals.glb\fR, diagnostic normal vectors for smaller datasets.
 .B \--origin-glb
 Also write \fBorigins.glb\fR, diagnostic sensor-origin rays for smaller
 datasets.
+.TP
+.B \--track-glb
+Also write \fBtrack.glb\fR, the sensor track as a black 3D line, with one position per
+ping. The positions are in the same coordinates as \fBmesh.glb\fR, including any
+\fB--geoorigin\fR offset, so the two overlay directly.
+.TP
+.B \--tileset
+Also write the surface as an OGC 3D Tiles 1.1 tileset, \fBtileset/tileset.json\fR and
+one \fBtileset/L0/tile_I_J.glb\fR for each reconstruction chunk (one tile, \fBtile_0_0.glb\fR, if
+reconstruction is not chunked), so that a viewer can load a part of a survey at a
+time; a browser will not load a GLB of more than 2 GiB. The vertices of a tile are in the
+local east-north-up frame of the reconstruction, written Y-up as glTF requires (X east,
+Y up, Z south), and the transform of the root tile places that frame on the Earth in
+WGS 84 ECEF, so the tileset does not depend on \fB--geoorigin\fR. The root has no content
+and its children are the tiles, each with a box bounding volume and a geometric error of
+0; the geometric error of the root is the diagonal of its box. The \fBgeoreference\fR,
+\fBprovenance\fR and \fBMB-System\fR blocks are written in the extras of the tiles and
+of \fBtileset.json\fR, with \fBvertexCoordinates\fR \fBlocalFrame\fR. With \fB--html\fR the page
+shows the tileset with a GeoTileset node in place of \fBmesh.glb\fR; X3DOM has that node only
+in its master of October 2026, so use \fB--x3dom-url\fR.
+.TP
+.B \--cesium-html
+Also write a viewer page for CesiumJS, with a check box for each GLB and tileset, beside the output directory (\fImbmesh_output_cesium.html\fR) and inside it
+(\fImbmesh_cesium.html\fR). The globe of Cesium would hide data below the ellipsoid, so the page starts with it hidden and has a check box that shows it,
+translucent. Tilesets are shown at their true height whatever \fB--lift\fR says. The page has the Viewpoint menu, the \fB--geoviewpoint\fR viewpoints, a Copy viewpoint
+button and the scale axes, but no chunk outlines or labels. It must be served over HTTP, like the \fB--html\fR page. With a directory input it also writes \fImbmesh_survey_cesium.html\fR.
+.TP
+.B \--cesium-url \fIurl\fR
+The directory of the CesiumJS build that the \fB--cesium-html\fR page loads, with Cesium.js and Widgets/widgets.css in it (default
+https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium).
+.TP
+.B \--x3dom-url \fIurl\fR
+The X3DOM script that the page written by \fB--html\fR loads, and the stylesheet \fBx3dom.css\fR beside
+it. The default is the build on www.x3dom.org, which has no GeoTileset node.
 .TP
 .B \--raw-mesh-glb
 Also write \fBraw_mesh.glb\fR, the untrimmed triangle mesh produced by marching
@@ -140,9 +393,9 @@ detail:
 .B mbmesh -Idatalist.mb-1 -R-122.5/-121.8/36.5/37.2 -L 0.5 -V
 .RE
 .LP
-Print dataset metadata without reconstructing a mesh:
+Print dataset information and the reconstruction plan without reconstructing a mesh:
 .RS
-.B mbmesh -Idatalist.mb-1 --metadata
+.B mbmesh -Idatalist.mb-1 --info
 .RE
 .SH OUTPUT FILES
 .LP
@@ -150,16 +403,64 @@ Print dataset metadata without reconstructing a mesh:
 their corresponding output options are supplied.
 .TP
 .B mesh.glb
-Final trimmed triangle mesh in binary glTF format. Vertex positions are in the
-\fBmbmesh\fR local Cartesian coordinate frame.
+Final trimmed triangle mesh in binary glTF format. Vertex positions are ECEF
+coordinates, or ECEF offsets from the GeoOrigin when \fB--geoorigin\fR is
+used. When reconstruction is chunked this is the merged mesh of all chunks.
+.IP
+Every GLB records where it is and how it was made in its glTF \fBasset.extras\fR, in
+three blocks. \fBgeoreference\fR gives the coordinate reference system
+(\fBEPSG:4978\fR), whether the vertices are \fBabsolute\fR or \fBrelativeToCenter\fR,
+the \fBcenter\fR (the GeoOrigin as ECEF meters, with absolute = vertex + center), the same
+point as \fBgeodeticCenter\fR (longitude, latitude, height), the \fBheightReference\fR
+(the ellipsoid) and the \fBextent\fR of the data. \fBprovenance\fR gives the software and
+version, the time of execution (UTC), the command line, working directory, user and host,
+and the input datalist, formats and swath files. \fBMB-System\fR gives what the file holds
+(mesh, chunk, track, and so on), the sounding counts, the reconstruction settings and the
+vertical reference. The page written by \fB--html\fR holds the same in X3D
+\fBGeoMetadata\fR and \fBWorldInfo\fR nodes. See \fBsrc/mbmesh/GEOREFERENCE.md\fR for the
+names. The vertical reference has no geoid correction: a sounding's depth, negated, is used
+as a height above the WGS 84 ellipsoid.
+.TP
+.B chunks/chunk_I_J.glb
+Written only when reconstruction is chunked: one file per chunk, with vertices
+placed exactly as in \fBmesh.glb\fR.
+.TP
+.B tileset/tileset.json, tileset/L0/tile_I_J.glb
+Optional OGC 3D Tiles tileset of the surface; see \fB--tileset\fR. \fBmbglb2tiles\fR writes the same layout into the same directory by
+default, with coarser levels as well, and replaces this tileset.
 .TP
 .B raw_mesh.glb
 Optional untrimmed triangle mesh before support trimming.
 .TP
-.B mesh.html
-Optional X3DOM preview page referencing \fBmesh.glb\fR. When \fB--html\fR is
-used, \fBmbmesh\fR attempts to serve this page from the output directory and
-open it in the default web browser.
+.B <outputdir>/mbmesh.html
+The same page inside the output directory: it refers to its models by their names there
+and offers none from beside the directory, so it works when the web server is rooted
+higher up, for example at a survey directory. Written with \fB--html\fR.
+.TP
+.B <outputdir>.html
+Optional X3DOM viewer page, written in the parent of the output directory and named
+after it, for example \fBmbmesh_output.html\fR. The parent is the root of the web
+server, so the page refers to its models by paths relative to it, such as
+\fBmbmesh_output/mesh.glb\fR. It is titled with the last three directories of the
+web root, which identify the survey, for example
+\fBOceanImaging2018/20180923d1/multibeam\fR. It is laid out in the style of the page
+\fBmbgrd2gltf\fR writes, with a heads-up display and a Processing Log panel,
+opened with the button at the bottom left, which shows every message of the run
+up to DEBUG level, whether or not \fB-V\fR was used: the command line, the
+settings, the timing of each stage and, when chunking, of each chunk. At most
+20,000 messages are kept, and the log says how many were left out. The log is
+written to \fImbmesh.log\fR in the output directory, one message a line, and not
+into the page, which it would make large and hard to edit; the page loads it when
+the panel is first opened, so it must be served over HTTP. The log is written
+last so that it is complete.
+.IP
+The page has a check box for every GLB it can show: the .glb files in the output
+directory, with \fBmesh.glb\fR and \fBtrack.glb\fR first, and then the .glb files in the
+web root beside the output directory, such as the product of \fBmbgrd2gltf\fR.
+\fBmesh.glb\fR and \fBtrack.glb\fR are shown when the page opens; the others are
+loaded when first switched on. The chunk files are not listed. GLBs from the web
+root line up with the mesh only if they use the same GeoOrigin. Browsers will not
+load GLB files from a file URL, so the page must be served.
 .TP
 .B pointcloud-local.xyz
 Optional XYZ point cloud in the same local Cartesian coordinate frame as
@@ -172,13 +473,20 @@ Optional WGS84 Earth-Centered, Earth-Fixed XYZ point cloud.
 Optional oriented ECEF point cloud.
 .TP
 .B pointcloud.glb
-Optional diagnostic point cloud GLB.
+Optional diagnostic point cloud GLB, colored by height.
 .TP
 .B normals.glb
 Optional diagnostic normal-vector GLB.
 .TP
 .B origins.glb
 Optional diagnostic sensor-origin-ray GLB.
+.TP
+.B track.glb
+Optional sensor track, drawn as line segments through the sensor position of each
+ping that contributes an accepted sounding. The track is broken where the swath
+file changes, where the time runs backwards, and where the time between two pings
+is more than ten times the median ping interval of the file, so that it does not
+run straight across the turns between survey lines or across gaps in the data.
 .SH PROCESSING NOTES
 .LP
 .B Sounding filtering
@@ -188,21 +496,35 @@ soundings. Geographic filtering is applied when \fB-R\fR is specified.
 .LP
 .B Coordinate frame
 .br
-\fBmbmesh\fR initializes its local Cartesian frame from the first accepted
-ping's sensor position. Sounding elevation is stored as negative bathymetry,
-and sensor elevation is stored as negative sensor depth. The local-to-geodetic
-conversion used for optional ECEF point-cloud outputs reverses this
-equirectangular approximation before converting to WGS84 ECEF coordinates.
+\fBmbmesh\fR converts each sounding and sensor position to WGS84 ECEF
+coordinates and then to a local east-north-up frame (see above). Sounding
+elevation is taken as negative bathymetry, and sensor elevation as negative
+sensor depth, both treated as heights above the WGS84 ellipsoid. The optional
+ECEF point-cloud outputs apply the exact inverse transform.
+.LP
+.B Chunked reconstruction
+.br
+A single screened-Poisson grid covers the bounding box of its input, so memory
+and run time grow quickly with survey size and level of detail. In chunked mode
+the survey is divided into square horizontal chunks on a fixed lattice anchored at
+the local-frame origin. Each chunk is reconstructed from its own points plus a
+surrounding halo of neighboring points, on a Poisson grid aligned to a lattice
+shared by all chunks, and keeps only the triangles whose centroids fall inside
+it. Chunks are reconstructed in parallel and delivered in chunk order. All
+soundings are still read into memory before chunking, and chunk edges are not
+welded, so small steps or cracks can occur where chunks meet.
 .LP
 .B Automatic settings
 .br
-The program estimates point spacing from accepted soundings and derives
+The program estimates point spacing from nearest-neighbor distances inside blocks
+of consecutive soundings, which does not depend on the number of soundings, and derives
 default normal-estimation, screened-Poisson, marching-cubes, and support
 trimming settings from the data and requested level of detail.
 .LP
 .B Support trimming
 .br
-Unsupported mesh regions are removed after marching cubes. If trimming removes
+Unsupported mesh regions are removed after marching cubes, except for the voids
+inside the surveyed surface that \fB--void-size\fR puts back. If trimming removes
 the entire mesh, \fBmbmesh\fR exits with an error rather than writing an empty
 surface.
 .LP
@@ -216,9 +538,20 @@ David W. Caress and Dale N. Chayes
 .br
 Monterey Bay Aquarium Research Institute
 .br
-Initial mbmesh implementation: CSUMB Capstone - Spring 2026
+Initial mbmesh implementation (PR #1584: reading swath datalists, projected and ECEF XYZ and GLB point clouds, the X3DOM
+viewer page, build, documentation and the mbm_tmap tiling macro): CSUMB Capstone - Spring 2026:
+Jorge Barrera-Simental, Kevin Crapo, Joceline Cortez-Arellano, Noah Mckegney, Lyn Larson, Metztli Herrera, Andre Gutierrez and David Martinez
+.br
+Construction and architectural layout of the mesh reconstruction pipeline (datalist reader, normal estimation, screened
+Poisson reconstruction, marching cubes, support trimming and the output writers): CSUMB Capstone - Summer 2026, Daniel
+Karnofel and Benjamin Shimek
+.br
+Continued refinement: Mike McCann (supervising Claude Sonnet 5.5, an AI coding agent from Anthropic), MBARI (issues #1559 and #1629): ECEF frame and \fB\-\-geoorigin\fR, chunked threaded
+reconstruction, Draco compression, OGC 3D Tiles tilesets with levels of detail for X3DOM (\fBmbglb2tiles\fR), viewer
+and survey pages, height colors
 .SH SEE ALSO
 .BR mb-system (1),
+.BR mbglb2tiles (1),
 .BR mbgrid (1),
 .BR mbgrd2gltf (1),
 .BR mbgrdviz (1)

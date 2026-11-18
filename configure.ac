@@ -1506,9 +1506,11 @@ AC_CONFIG_FILES([\
     src/macros/Makefile \
     src/python/Makefile \
     src/otps/Makefile \
+    src/mbdraco/Makefile \
     src/mbgrd2gltf/Makefile \
     src/mbmesh/Makefile \
     src/mbnavadjust/Makefile \
+    src/mbglb2tiles/Makefile \
     src/man/Makefile \
     src/man/man1/Makefile \
     src/man/man3/Makefile \

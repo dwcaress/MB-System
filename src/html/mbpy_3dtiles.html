@@ -1,0 +1,198 @@
+<!DOCTYPE HTML>
+<HTML>
+<HEAD>
+   <meta charset="utf-8">
+   <TITLE>MB-System Unix Manual Page: mbpy_3dtiles</TITLE>
+<style>
+  .manual-text { font-family: monospace; max-width: 52em; margin: 0 auto; padding: 0 1em; }
+  h1.Sh { font-size: 1.2em; margin-top: 1.4em; }
+  h2.Ss { font-size: 1.05em; }
+  dl.Bl-tag dt { margin-top: 0.7em; }
+  dl.Bl-tag dd { margin-left: 3em; }
+  pre { overflow-x: auto; }
+  a.permalink { color: inherit; text-decoration: none; }
+</style>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<div class="manual-text">
+<table class="head">
+  <tr>
+    <td class="head-ltitle">mbpy_3dtiles(1)</td>
+    <td class="head-vol">MB-System 5.0</td>
+    <td class="head-rtitle">mbpy_3dtiles(1)</td>
+  </tr>
+</table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp"><b>mbpy_3dtiles</b> - Create an executable shellscript which will
+    make the standard 3D products of a survey (GLBs, OGC 3D Tiles tilesets and
+    X3DOM and CesiumJS pages) with mbgrd2gltf, mbmesh and mbglb2tiles.</p>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="VERSION"><a class="permalink" href="#VERSION">VERSION</a></h1>
+<p class="Pp">Version 5.0</p>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<p class="Pp"><b>mbpy_3dtiles</b> [<b>-I</b><i>surveydir</i>]
+    [<b>-O</b><i>root</i>] [<b>--subdir</b><i>name</i>]
+    [<b>--grid</b><i>name</i>] [<b>--datalist</b><i>name</i>]
+  <br/>
+  [<b>--geoorigin=</b><i>lon,lat,elev</i>] [<b>--lift</b><i>meters</i>]
+    [<b>--reference-subdir</b><i>name</i>] [<b>-L</b><i>meters</i>]
+    [<b>--threads</b><i>n</i>] [<b>--no-label-chunks</b>]
+  <br/>
+  [<b>--x3dom-url</b><i>url</i>] [<b>--no-cesium-html</b>]
+    [<b>--cesium-url</b><i>url</i>] [<b>--no-survey-page</b>]
+    [<b>--mbgrd2gltf-args=</b><i>args</i>] [<b>--mbmesh-args=</b><i>args</i>]
+    [<b>--mbglb2tiles-args=</b><i>args</i>]
+  <br/>
+  [<b>--force</b>] [<b>-X</b>] [<b>-V</b>]</p>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>mbpy_3dtiles</b> is a macro that writes a shellscript,
+    <i>root</i>.sh (default 3dtiles.sh, in the survey directory), and with
+    <b>-X</b> runs it. It is meant to be run in a survey directory that has a
+    subdirectory for each kind of data, by default <b>multibeam</b> and
+    <b>lidar</b>, each with a grid, <b>ZTopo.grd</b>, and a datalist of
+    processed swath data, <b>datalistp.mb-1</b>. A subdirectory, or a file in
+    it, that is not there is left out. The commands, in the order that they run,
+    with paths relative to the survey directory:
+  <br/>
+  1. <b>mbgrd2gltf</b> --input <i>dir</i>/ZTopo.grd --html --cesium-html
+    --geoorigin --output <i>dir</i>/ZTopo
+  <br/>
+  2. <b>mbmesh</b> --input <i>dir</i>/datalistp.mb-1 --html --cesium-html
+    --threads --geoorigin -L --raw-mesh-glb --pointcloud-glb --track-glb
+    --label-chunks --output <i>dir</i>/mbmesh_output
+  <br/>
+  3. <b>mbglb2tiles</b> of <i>dir</i>/ZTopo.glb (to <i>dir</i>/ZTopo_tileset)
+    and of <i>dir</i>/mbmesh_output/mesh.glb, each with --html --cesium-html
+    --x3dom-url --lift
+  <br/>
+  4. <b>mbmesh</b> --input . --html --cesium-html --geoorigin --x3dom-url, the
+    survey pages, mbmesh_survey.html and mbmesh_survey_cesium.html.</p>
+<p class="Pp">There is one GeoOrigin for a survey, which every program gets so
+    that the models line up, and one lift, which every tileset gets. Without
+    <b>--geoorigin</b> the GeoOrigin is the center of the grid of the reference
+    subdirectory (<b>multibeam</b>) and the mean of its heights, read with
+    <b>gmt grdinfo</b>; without <b>--lift</b> the lift puts the lowest point of
+    that grid 10 m above the ellipsoid, to a meter. The other subdirectories,
+    the lidar for example, get the same ones. <b>ZTopo.grd</b> is a standard
+    product of a survey, which this macro does not make: a subdirectory that has
+    a datalist and no grid, or a grid and no datalist, gets a warning on
+    standard error that says what will not be made, whatever <b>-V</b> says.</p>
+<p class="Pp">A full run takes hours, so the shellscript runs a command only if
+    it has something to do: if one of its outputs (the GLBs, the tilesets and
+    the pages that it writes) is missing or older, by modification time, than
+    one of its inputs. The inputs are the grid, for <b>mbgrd2gltf</b>; the
+    datalist and every swath file that it names, the processed files too, for
+    <b>mbmesh</b>; the GLB, for <b>mbglb2tiles</b>; and the outputs of all the
+    other commands, for the survey pages. The commands run in order, so what an
+    earlier command makes again makes what depends on it stale. The shellscript
+    checks when it runs, not when it is written. A command that is not run is
+    reported as up to date. A change of an option cannot be seen this way: use
+    <b>--force</b>, or <b>FORCE=1</b> in the environment of a shellscript made
+    without it.</p>
+<p class="Pp">The pages and their logs need a web server: from the survey
+    directory, <b>python3 -m http.server</b>.</p>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPTIONS"><a class="permalink" href="#OPTIONS">OPTIONS</a></h1>
+<dl class="Bl-tag">
+  <dt id="I"><a class="permalink" href="#I"><b>-I<i>surveydir</i>,
+    --input</b></a></dt>
+  <dd>The survey directory [the current directory].</dd>
+  <dt id="O"><a class="permalink" href="#O"><b>-O<i>root</i>,
+    --output</b></a></dt>
+  <dd>The shellscript is <i>root</i>.sh [3dtiles].</dd>
+  <dt id="subdir"><a class="permalink" href="#subdir"><b>--subdir
+    <i>name</i></b></a></dt>
+  <dd>A subdirectory to process; can be repeated [multibeam, lidar].</dd>
+  <dt id="grid"><a class="permalink" href="#grid"><b>--grid <i>name</i>,
+    --datalist <i>name</i></b></a></dt>
+  <dd>The names of the grid and the datalist [ZTopo.grd, datalistp.mb-1].</dd>
+  <dt id="geoorigin="><a class="permalink" href="#geoorigin="><b>--geoorigin=<i>lon,lat,elev</i></b></a></dt>
+  <dd>The GeoOrigin, with the height above the ellipsoid. A value that begins
+      with a minus has to be attached with an equals sign.</dd>
+  <dt id="lift"><a class="permalink" href="#lift"><b>--lift
+    <i>meters</i></b></a></dt>
+  <dd>How far the tilesets are lifted above the ellipsoid.</dd>
+  <dt id="force"><a class="permalink" href="#force"><b>--force</b></a></dt>
+  <dd>Make every product again, whatever the modification times say.</dd>
+  <dt id="reference"><a class="permalink" href="#reference"><b>--reference-subdir
+    <i>name</i></b></a></dt>
+  <dd>The subdirectory whose grid sets the GeoOrigin and the lift of the whole
+      survey [multibeam].</dd>
+  <dt id="L"><a class="permalink" href="#L"><b>-L<i>meters</i>,
+    --lod</b></a></dt>
+  <dd>The smallest feature size of <b>mbmesh</b> [0.1].</dd>
+  <dt id="threads"><a class="permalink" href="#threads"><b>--threads <i>n</i>,
+    --no-label-chunks</b></a></dt>
+  <dd>Chunks that <b>mbmesh</b> reconstructs at once [8]; leave the chunk
+      outlines out of the pages.</dd>
+  <dt id="x3dom"><a class="permalink" href="#x3dom"><b>--x3dom-url
+    <i>url</i></b></a></dt>
+  <dd>The X3DOM script of the pages of <b>mbglb2tiles</b> and the survey page
+      [./x3dom-full.js]; it is relative to each page.</dd>
+  <dt id="no"><a class="permalink" href="#no"><b>--no-cesium-html</b></a></dt>
+  <dd>Leave out <b>--cesium-html</b>, the pages for CesiumJS, from every
+      command.</dd>
+  <dt id="cesium"><a class="permalink" href="#cesium"><b>--cesium-url
+    <i>url</i></b></a></dt>
+  <dd>The directory of the CesiumJS build that the pages for CesiumJS load,
+      given to each command as <b>--cesium-url</b> [the default of each program,
+      release 1.114 from Cesium's web site].</dd>
+  <dt id="no~2"><a class="permalink" href="#no~2"><b>--no-survey-page</b></a></dt>
+  <dd>Leave out the survey page.</dd>
+  <dt id="mbgrd2gltf"><a class="permalink" href="#mbgrd2gltf"><b>--mbgrd2gltf-args=<i>args</i>,
+    --mbmesh-args=<i>args</i>, --mbglb2tiles-args=<i>args</i></b></a></dt>
+  <dd>More options for the programs, as one quoted string.</dd>
+  <dt id="X"><a class="permalink" href="#X"><b>-X</b></a></dt>
+  <dd>Run the shellscript.</dd>
+  <dt id="V"><a class="permalink" href="#V"><b>-V</b></a></dt>
+  <dd>Print how the GeoOrigin and the lift were set and the commands, each
+      marked &quot;will run&quot; or &quot;skipped&quot; with the reason, as the
+      modification times are now: an output that is missing, an input that is
+      newer than an output, or an input that an earlier command that will run
+      makes again; with <b>--force</b> every command will run. The shellscript
+      looks at the files again each time it runs, so this is what it would do if
+      it were run now.
+    <p class="Pp"></p>
+  </dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="AUTHOR"><a class="permalink" href="#AUTHOR">AUTHOR</a></h1>
+<p class="Pp">Mike McCann (supervising Claude Sonnet 5.5, an AI coding agent
+    from Anthropic), Monterey Bay Aquarium Research Institute, with the
+    MB-System macros by David W. Caress and Dale N. Chayes.</p>
+<p class="Pp"></p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>mbgrd2gltf</b>(1), <b>mbmesh</b>(1), <b>mbglb2tiles</b>(1),
+    <b>mbpy_grdplot</b>(1)</p>
+</section>
+</div>
+<table class="foot">
+  <tr>
+    <td class="foot-date">12 November 2026</td>
+    <td class="foot-os">MB-System 5.0</td>
+  </tr>
+</table>
+</div>
+<HR>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>

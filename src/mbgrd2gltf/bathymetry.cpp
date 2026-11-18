@@ -114,15 +114,18 @@ Bathymetry::Bathymetry(const Options& options) {
     get_variable_attribute_double(netcdf_id, x_name.c_str(), "actual_range", _x_range);
     get_variable_attribute_double(netcdf_id, y_name.c_str(), "actual_range", _y_range);
     get_variable_attribute_double(netcdf_id, z_name.c_str(), "actual_range", _z_range);
-    std::swap(_y_range[0], _y_range[1]);
   }
 
   // --- Spacing ---
-  if (nc_inq_varid(netcdf_id, "spacing", &varid) == NC_NOERR)
+  // Only the old GMT layout stores the grid increments. For the other layouts the
+  // spacing comes from the node coordinates below, not from the range divided by
+  // the number of nodes, which would be wrong by one cell (see set_node_positions).
+  const bool has_spacing_variable = nc_inq_varid(netcdf_id, "spacing", &varid) == NC_NOERR;
+  if (has_spacing_variable)
     get_variable_double_array(netcdf_id, "spacing", _spacing, _side);
   else {
-    _spacing[0] = (_x_range[1] - _x_range[0]) / _x;
-    _spacing[1] = (_y_range[1] - _y_range[0]) / _y;
+    _spacing[0] = 0.0;
+    _spacing[1] = 0.0;
   }
 
   // --- Dimensions array ---
@@ -180,6 +183,36 @@ Bathymetry::Bathymetry(const Options& options) {
     }
   }
 
+  // --- Node positions ---
+  // Follow GMT: the number of columns and rows, the registration (gridline or
+  // pixel) and the range or the coordinate variables fix where every node is.
+  const int node_offset = get_node_offset(netcdf_id, z_name.c_str());
+  _pixel_registered = node_offset == 1;
+  const size_t columns = _dimension[0];
+  const size_t rows = _dimension[1];
+
+  std::vector<double> x_values;
+  std::vector<double> y_values;
+  if (convention != GridConvention::GMT) {
+    // The coordinate variables hold the node positions themselves: the outer
+    // nodes for a gridline grid, the cell centers for a pixel grid.
+    if (nc_inq_varid(netcdf_id, x_name.c_str(), &varid) == NC_NOERR && columns > 1) {
+      x_values.resize(columns);
+      get_variable_double_array(netcdf_id, x_name.c_str(), x_values.data(), columns);
+    }
+    if (nc_inq_varid(netcdf_id, y_name.c_str(), &varid) == NC_NOERR && rows > 1) {
+      y_values.resize(rows);
+      get_variable_double_array(netcdf_id, y_name.c_str(), y_values.data(), rows);
+    }
+  }
+  set_node_positions(convention == GridConvention::GMT, has_spacing_variable, node_offset, columns, rows,
+                     x_values, y_values);
+
+  if (options.is_verbose()) {
+    LOG_DEBUG("Grid registration:", node_offset == 1 ? "pixel" : "gridline", "; first node:", _first_longitude, ",",
+              _first_latitude, "; steps:", _longitude_step, ",", _latitude_step);
+  }
+
   // --- Cleanup ---
   int return_value = nc_close(netcdf_id);
   if (return_value != NC_NOERR)
@@ -187,6 +220,75 @@ Bathymetry::Bathymetry(const Options& options) {
 
   LOG_INFO("Loaded bathymetry grid:", _dimension[0], "x", _dimension[1], "=", 
            Logger::format_with_commas(_xysize), "points");
+}
+
+// Registration, as GMT stores it: node_offset is 1 for a pixel-registered grid and
+// 0 (or absent) for a gridline-registered one. It is a global attribute in
+// netCDF CF grids and an attribute of the z variable in the old GMT layout.
+int Bathymetry::get_node_offset(int netcdf_id, const char* z_name) {
+  int value = 0;
+  if (nc_get_att_int(netcdf_id, NC_GLOBAL, "node_offset", &value) == NC_NOERR)
+    return value;
+  int z_id;
+  if (nc_inq_varid(netcdf_id, z_name, &z_id) == NC_NOERR &&
+      nc_get_att_int(netcdf_id, z_id, "node_offset", &value) == NC_NOERR)
+    return value;
+  return 0;
+}
+
+// Sets where the grid nodes are, the way GMT does.
+//
+// A gridline-registered grid has a node on each edge of the region, so N nodes
+// are spaced (max - min) / (N - 1) apart. A pixel-registered grid has N cells
+// across the region, so the spacing is (max - min) / N and the nodes are at the
+// cell centers, half a spacing in from the edges. Dividing by N for a gridline
+// grid, as this code once did, squeezes the grid by one cell.
+//
+// If the file has coordinate variables their values are used directly, which is
+// exact for both registrations and for rows that run either way.
+void Bathymetry::set_node_positions(bool old_gmt_layout, bool has_spacing_variable, int node_offset, size_t columns,
+                                    size_t rows, const std::vector<double>& x_values,
+                                    const std::vector<double>& y_values) {
+  const bool pixel = node_offset == 1;
+  const double half = pixel ? 0.5 : 0.0;
+
+  // --- columns (longitude), always west to east
+  if (x_values.size() > 1) {
+    _first_longitude = x_values.front();
+    _longitude_step = (x_values.back() - x_values.front()) / static_cast<double>(x_values.size() - 1);
+  } else {
+    double spacing = _spacing[0];
+    if (!has_spacing_variable) {
+      const double cells = pixel ? static_cast<double>(columns) : static_cast<double>(columns > 1 ? columns - 1 : 1);
+      spacing = (_x_range[1] - _x_range[0]) / cells;
+    }
+    _first_longitude = _x_range[0] + half * spacing;
+    _longitude_step = spacing;
+  }
+
+  // --- rows (latitude)
+  if (y_values.size() > 1) {
+    _first_latitude = y_values.front();
+    _latitude_step = (y_values.back() - y_values.front()) / static_cast<double>(y_values.size() - 1);
+  } else {
+    double spacing = _spacing[1];
+    if (!has_spacing_variable) {
+      const double cells = pixel ? static_cast<double>(rows) : static_cast<double>(rows > 1 ? rows - 1 : 1);
+      spacing = (_y_range[1] - _y_range[0]) / cells;
+    }
+    if (old_gmt_layout) {
+      // The old GMT layout stores the top (northern) row first.
+      _first_latitude = _y_range[1] - half * spacing;
+      _latitude_step = -spacing;
+    } else {
+      // Without a y variable assume south to north, as netCDF CF grids are written.
+      _first_latitude = _y_range[0] + half * spacing;
+      _latitude_step = spacing;
+    }
+  }
+
+  _spacing[0] = std::fabs(_longitude_step);
+  _spacing[1] = std::fabs(_latitude_step);
 }
 
 int Bathymetry::get_netcdf_id(const char* filepath) {

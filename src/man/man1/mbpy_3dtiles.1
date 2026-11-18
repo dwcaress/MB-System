@@ -1,0 +1,127 @@
+.TH mbpy_3dtiles 1 "12 November 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbpy_3dtiles\fP \- Create an executable shellscript which will make the
+standard 3D products of a survey (GLBs, OGC 3D Tiles tilesets and X3DOM and CesiumJS pages)
+with mbgrd2gltf, mbmesh and mbglb2tiles.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbpy_3dtiles\fP [\fB\-I\fP\fIsurveydir\fP] [\fB\-O\fP\fIroot\fP]
+[\fB\-\-subdir\fP\fIname\fP] [\fB\-\-grid\fP\fIname\fP] [\fB\-\-datalist\fP\fIname\fP]
+.br
+[\fB\-\-geoorigin=\fP\fIlon,lat,elev\fP] [\fB\-\-lift\fP\fImeters\fP] [\fB\-\-reference\-subdir\fP\fIname\fP]
+[\fB\-L\fP\fImeters\fP] [\fB\-\-threads\fP\fIn\fP] [\fB\-\-no\-label\-chunks\fP]
+.br
+[\fB\-\-x3dom\-url\fP\fIurl\fP] [\fB\-\-no\-cesium\-html\fP] [\fB\-\-cesium\-url\fP\fIurl\fP] [\fB\-\-no\-survey\-page\fP]
+[\fB\-\-mbgrd2gltf\-args=\fP\fIargs\fP] [\fB\-\-mbmesh\-args=\fP\fIargs\fP]
+[\fB\-\-mbglb2tiles\-args=\fP\fIargs\fP]
+.br
+[\fB\-\-force\fP] [\fB\-X\fP] [\fB\-V\fP]
+
+.SH DESCRIPTION
+\fBmbpy_3dtiles\fP is a macro that writes a shellscript, \fIroot\fP.sh
+(default 3dtiles.sh, in the survey directory), and with \fB\-X\fP runs it.
+It is meant to be run in a survey directory that has a subdirectory for each
+kind of data, by default \fBmultibeam\fP and \fBlidar\fP, each with a grid,
+\fBZTopo.grd\fP, and a datalist of processed swath data, \fBdatalistp.mb\-1\fP.
+A subdirectory, or a file in it, that is not there is left out. The commands,
+in the order that they run, with paths relative to the survey directory:
+.br
+1. \fBmbgrd2gltf\fP \-\-input \fIdir\fP/ZTopo.grd \-\-html \-\-cesium\-html \-\-geoorigin \-\-output \fIdir\fP/ZTopo
+.br
+2. \fBmbmesh\fP \-\-input \fIdir\fP/datalistp.mb\-1 \-\-html \-\-cesium\-html \-\-threads \-\-geoorigin \-L
+\-\-raw\-mesh\-glb \-\-pointcloud\-glb \-\-track\-glb \-\-label\-chunks \-\-output \fIdir\fP/mbmesh_output
+.br
+3. \fBmbglb2tiles\fP of \fIdir\fP/ZTopo.glb (to \fIdir\fP/ZTopo_tileset) and of
+\fIdir\fP/mbmesh_output/mesh.glb, each with \-\-html \-\-cesium\-html \-\-x3dom\-url \-\-lift
+.br
+4. \fBmbmesh\fP \-\-input . \-\-html \-\-cesium\-html \-\-geoorigin \-\-x3dom\-url, the survey pages, mbmesh_survey.html and mbmesh_survey_cesium.html.
+.PP
+There is one GeoOrigin for a survey, which every program gets so that the models line up,
+and one lift, which every tileset gets. Without \fB\-\-geoorigin\fP the GeoOrigin is the center
+of the grid of the reference subdirectory (\fBmultibeam\fP) and the mean of its heights, read with \fBgmt grdinfo\fP; without
+\fB\-\-lift\fP the lift puts the lowest point of that grid 10 m above the
+ellipsoid, to a meter. The other subdirectories, the lidar for example, get the same ones.
+\fBZTopo.grd\fP is a standard product of a survey, which this macro does not make: a subdirectory
+that has a datalist and no grid, or a grid and no datalist, gets a warning on standard error
+that says what will not be made, whatever \fB\-V\fP says.
+.PP
+A full run takes hours, so the shellscript runs a command only if it has something to do: if one of its
+outputs (the GLBs, the tilesets and the pages that it writes) is missing or older, by modification time, than
+one of its inputs. The inputs are the grid, for \fBmbgrd2gltf\fP; the datalist and every swath file that it names, the
+processed files too, for \fBmbmesh\fP; the GLB, for \fBmbglb2tiles\fP; and the outputs of all the other commands, for the
+survey pages. The commands run in order, so what an earlier command makes again makes what depends on it stale. The shellscript
+checks when it runs, not when it is written. A command that is not run is reported as up to date. A change of an
+option cannot be seen this way: use \fB\-\-force\fP, or \fBFORCE=1\fP in the environment of a shellscript made without it.
+.PP
+The pages and their logs need a web server: from the
+survey directory, \fBpython3 \-m http.server\fP.
+
+.SH OPTIONS
+.TP
+.B \-I\fIsurveydir\fP, \-\-input
+The survey directory [the current directory].
+.TP
+.B \-O\fIroot\fP, \-\-output
+The shellscript is \fIroot\fP.sh [3dtiles].
+.TP
+.B \-\-subdir \fIname\fP
+A subdirectory to process; can be repeated [multibeam, lidar].
+.TP
+.B \-\-grid \fIname\fP, \-\-datalist \fIname\fP
+The names of the grid and the datalist [ZTopo.grd, datalistp.mb\-1].
+.TP
+.B \-\-geoorigin=\fIlon,lat,elev\fP
+The GeoOrigin, with the height above the ellipsoid. A value that begins with a
+minus has to be attached with an equals sign.
+.TP
+.B \-\-lift \fImeters\fP
+How far the tilesets are lifted above the ellipsoid.
+.TP
+.B \-\-force
+Make every product again, whatever the modification times say.
+.TP
+.B \-\-reference\-subdir \fIname\fP
+The subdirectory whose grid sets the GeoOrigin and the lift of the whole survey [multibeam].
+.TP
+.B \-L\fImeters\fP, \-\-lod
+The smallest feature size of \fBmbmesh\fP [0.1].
+.TP
+.B \-\-threads \fIn\fP, \-\-no\-label\-chunks
+Chunks that \fBmbmesh\fP reconstructs at once [8]; leave the chunk outlines out of the pages.
+.TP
+.B \-\-x3dom\-url \fIurl\fP
+The X3DOM script of the pages of \fBmbglb2tiles\fP and the survey page
+[./x3dom\-full.js]; it is relative to each page.
+.TP
+.B \-\-no\-cesium\-html
+Leave out \fB\-\-cesium\-html\fP, the pages for CesiumJS, from every command.
+.TP
+.B \-\-cesium\-url \fIurl\fP
+The directory of the CesiumJS build that the pages for CesiumJS load, given to each command as \fB\-\-cesium\-url\fP
+[the default of each program, release 1.114 from Cesium's web site].
+.TP
+.B \-\-no\-survey\-page
+Leave out the survey page.
+.TP
+.B \-\-mbgrd2gltf\-args=\fIargs\fP, \-\-mbmesh\-args=\fIargs\fP, \-\-mbglb2tiles\-args=\fIargs\fP
+More options for the programs, as one quoted string.
+.TP
+.B \-X
+Run the shellscript.
+.TP
+.B \-V
+Print how the GeoOrigin and the lift were set and the commands, each marked "will run" or "skipped" with the reason, as the
+modification times are now: an output that is missing, an input that is newer than an output, or an input that an earlier
+command that will run makes again; with \fB\-\-force\fP every command will run. The shellscript looks at the files again each time
+it runs, so this is what it would do if it were run now.
+
+.SH AUTHOR
+Mike McCann (supervising Claude Sonnet 5.5, an AI coding agent from Anthropic),
+Monterey Bay Aquarium Research Institute, with the
+MB\-System macros by David W. Caress and Dale N. Chayes.
+
+.SH SEE ALSO
+\fBmbgrd2gltf\fP(1), \fBmbmesh\fP(1), \fBmbglb2tiles\fP(1), \fBmbpy_grdplot\fP(1)

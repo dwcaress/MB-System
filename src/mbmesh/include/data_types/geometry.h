@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <vector>
 
 #include "../math/vec3.h"
@@ -7,6 +8,14 @@
 struct CollectedPoint {
     Vec3 point;
     Vec3 origin;
+};
+
+// The sensor position of one ping, for drawing the track. Only pings that
+// contribute at least one accepted sounding are recorded.
+struct TrackPoint {
+    double time = 0.0;          // seconds, as MBIO reports it
+    Vec3 position;              // sensor position; local frame once reading is complete
+    std::size_t segment = 0;    // index of the swath file the ping came from
 };
 
 struct OrientedPoint {
@@ -65,6 +74,17 @@ struct ReconstructionDomain {
     int nx = 0;
     int ny = 0;
     int nz = 0;
+
+    // Explicit domain, used by chunked reconstruction so that grid nodes land
+    // on a lattice shared by neighboring chunks.
+    ReconstructionDomain(const Bounds3D &domain_bounds, double cells) {
+        bounds = domain_bounds;
+        origin = domain_bounds.min;
+        cell_size = cells;
+        nx = static_cast<int>(std::ceil(bounds.size().x / cell_size)) + 1;
+        ny = static_cast<int>(std::ceil(bounds.size().y / cell_size)) + 1;
+        nz = static_cast<int>(std::ceil(bounds.size().z / cell_size)) + 1;
+    }
 
     ReconstructionDomain(const std::vector<OrientedPoint> &oriented_points, double padding, double cells) {
 
@@ -164,5 +184,6 @@ struct VectorGrid3D {
 struct Mesh {
     std::vector<Vec3> vertices;
     std::vector<Vec3> normals;
+    std::vector<std::uint8_t> colors;   // red, green, blue bytes for each vertex, or none
     std::vector<unsigned int> indices;
 };

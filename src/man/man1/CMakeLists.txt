@@ -21,6 +21,7 @@ set(manpages
     mbfnv2navlab.1
     mbformat.1
     mbgetesf.1
+    mbglb2tiles.1
     mbgpstide.1
     mbgrd2gltf.1
     mbgrd2obj.1
@@ -76,6 +77,7 @@ set(manpages
     mbpreprocess.1
     mbprocess.1
     mbpy_wcdview.1
+    mbpy_3dtiles.1
     mbpy_grd3dplot.1
     mbpy_grdplot.1
     mbpy_grdtiff.1

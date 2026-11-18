@@ -46,19 +46,32 @@ namespace mbgrd2gltf {
 class Geometry {
 
 public:
-  // One triangle vector per tile; use this to emit multiple glTF primitives.
-  struct Tile {
+  // One triangle vector per block; use this to emit multiple glTF primitives.
+  struct Block {
     size_t x0, y0, x1, y1; // inclusive start (x0,y0), exclusive end (x1,y1) in cell space
     std::vector<Triangle> triangles;
   };
-  static std::vector<Tile> get_triangles_tiled(const Matrix<Vertex>& vertices, size_t tileSize);
+  static std::vector<Block> get_triangles_blocked(const Matrix<Vertex>& vertices, size_t blockSize);
+
+public:
+  // A position in WGS84 Earth-Centered Earth-Fixed coordinates, in meters, kept
+  // in double precision. ECEF magnitudes are millions of meters, where a float
+  // can only resolve 0.25-0.5 m, so positions must stay in double until any
+  // GeoOrigin has been subtracted and only then be narrowed to float.
+  struct EcefPosition {
+    double x = 0.0;
+    double y = 0.0;
+    double z = 0.0;
+  };
 
 private: // members
   Matrix<Vertex> _vertices;
-  std::vector<Tile> _tiles;
+  std::vector<Block> _blocks;
   double _geoorigin_x = 0.0;
   double _geoorigin_y = 0.0;
   double _geoorigin_z = 0.0;
+  double _reference_altitude = 0.0;
+  std::vector<float> _altitudes;   // the grid value of each vertex, in the order of Vertex::index(): the true height, whatever the vertical exaggeration
 
 private: // methods
   static double to_radians(double degrees);
@@ -67,15 +80,24 @@ private: // methods
   static Vertex get_earth_centered_vertex(double longitude, double latitude, double altitude,
                                           uint32_t id);
   static Matrix<Vertex> get_vertices(const Bathymetry& bathymetry, double vertical_exaggeration,
-                                     double geoorigin_x, double geoorigin_y, double geoorigin_z);
+                                     double reference_altitude,
+                                     double geoorigin_x, double geoorigin_y, double geoorigin_z,
+                                     std::vector<float>* vertex_altitudes);
 
 public: // methods
+  // The WGS84 ECEF position of a longitude and latitude in degrees and a height above the ellipsoid in meters.
+  static EcefPosition get_ecef_position(double longitude, double latitude, double altitude);
   Geometry(const Bathymetry& bathymetry, const Options& options);
   const Matrix<Vertex>& vertices() const { return _vertices; }
-  const std::vector<Tile>& tiles() const { return _tiles; }
+  const std::vector<Block>& blocks() const { return _blocks; }
   double geoorigin_x() const { return _geoorigin_x; }
   double geoorigin_y() const { return _geoorigin_y; }
   double geoorigin_z() const { return _geoorigin_z; }
+  // The mean altitude of the valid grid values: the automatic GeoOrigin's height, and the
+  // level that vertical exaggeration is applied about.
+  double reference_altitude() const { return _reference_altitude; }
+  // The grid value (height above the ellipsoid) of each vertex, indexed by Vertex::index(), without the vertical exaggeration: what --colors colors by.
+  const std::vector<float>& altitudes() const { return _altitudes; }
 };
 } // namespace mbgrd2gltf
 

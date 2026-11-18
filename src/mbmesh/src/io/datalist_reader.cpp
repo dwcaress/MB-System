@@ -1,6 +1,12 @@
 #include "io/datalist_reader.h"
 
+#include "io/point_spill.h"
+#include "util/logger.h"
+
+#include <algorithm>
 #include <cmath>
+#include <filesystem>
+#include <system_error>
 #include <cstddef>
 #include <cstring>
 #include <string>
@@ -27,7 +33,21 @@ struct ReadArrays {
 struct ReadContext {
     const DatalistReaderOptions &options;
     DatalistReadResult &result;
-    bool has_frame = false;
+
+    // Soundings are held as absolute ECEF until the frame origin is known.
+    // The centroid is accumulated relative to the first point to keep the
+    // sum well conditioned.
+    // Track: the file being read, and whether the current ping is recorded yet.
+    std::size_t file_index = 0;
+    bool ping_recorded = false;
+
+    bool has_reference = false;
+    Vec3 reference_ecef;
+    Vec3 offset_sum;
+
+    // Once more soundings are accepted than the options allow in memory, they go to this file instead.
+    PointSpill spill;
+    bool spilling = false;
 };
 
 void set_error(std::string *error, const std::string &message) {
@@ -53,10 +73,10 @@ void set_error(std::string *error, const std::string &message) {
     return std::isfinite(ping.timestamp) && is_finite(ping.sensor_position) && is_finite(sounding.position);
 }
 
-[[nodiscard]] CollectedPoint make_collected_point(const Ping &ping, const Sounding &sounding, const CoordinateFrame &frame) {
+[[nodiscard]] CollectedPoint make_collected_point(const Ping &ping, const Sounding &sounding) {
     CollectedPoint collected_point;
-    collected_point.point = geodetic_to_local(sounding.position, frame);
-    collected_point.origin = geodetic_to_local(ping.sensor_position, frame);
+    collected_point.point = geodetic_to_ecef(sounding.position);
+    collected_point.origin = geodetic_to_ecef(ping.sensor_position);
     return collected_point;
 }
 
@@ -84,12 +104,62 @@ bool append_sounding_to_pointcloud(const Ping &ping, const Sounding &sounding, R
         return true;
     }
 
-    if (!context->has_frame) {
-        context->result.frame = coordinate_frame_from_origin(ping.sensor_position);
-        context->has_frame = true;
+    const CollectedPoint collected_point = make_collected_point(ping, sounding);
+    if (!context->ping_recorded) {
+        // Held as absolute ECEF, like the points, until the frame is chosen.
+        context->result.track.push_back({ping.timestamp, collected_point.origin, context->file_index});
+        context->ping_recorded = true;
     }
-
-    context->result.points.push_back(make_collected_point(ping, sounding, context->result.frame));
+    if (!context->has_reference) {
+        context->reference_ecef = collected_point.point;
+        context->has_reference = true;
+    }
+    context->offset_sum += collected_point.point - context->reference_ecef;
+    // The sensor position is the same for all the soundings of a ping, so a spilled sounding keeps the number of its
+    // ping, which is the last in the track, instead of the position.
+    const std::uint32_t ping_index = static_cast<std::uint32_t>(context->result.track.size() - 1);
+    if (context->spilling) {
+        if (!context->spill.append(collected_point.point, ping_index, error)) {
+            return false;
+        }
+    } else {
+        context->result.points.push_back(collected_point);
+        if (context->result.points.size() > context->options.spill_points) {
+            // Too many for memory: what has been read so far goes to the file, and so does everything after.
+            std::error_code directory_error;
+            std::filesystem::create_directories(context->options.spill_path.parent_path(), directory_error);
+            if (directory_error) {
+                set_error(error, "unable to create the directory of the spilled soundings: " + directory_error.message());
+                return false;
+            }
+            if (!context->spill.open(context->options.spill_path, error)) {
+                return false;
+            }
+            const std::filesystem::space_info space = std::filesystem::space(context->options.spill_path.parent_path(), directory_error);
+            if (!directory_error) {
+                LOG_INFO("[input]", "spilling the soundings to " + context->options.spill_path.string() + ", " + std::to_string(spill_record_bytes) +
+                                        " bytes each; " + std::to_string(space.available / 1000000000) + " GB of disk is free there");
+            }
+            // The points held so far have their sensor positions in them: find their pings, which are in the track in order.
+            std::size_t ping = 0;
+            for (const CollectedPoint &held : context->result.points) {
+                while (ping < context->result.track.size() && !(context->result.track[ping].position.x == held.origin.x &&
+                                                                  context->result.track[ping].position.y == held.origin.y &&
+                                                                  context->result.track[ping].position.z == held.origin.z)) {
+                    ping++;
+                }
+                if (ping >= context->result.track.size()) {
+                    set_error(error, "internal error: a sounding has a sensor position that is not in the track");
+                    return false;
+                }
+                if (!context->spill.append(held.point, static_cast<std::uint32_t>(ping), error)) {
+                    return false;
+                }
+            }
+            context->spilling = true;
+            CollectedPointCloud().swap(context->result.points);
+        }
+    }
     ++stats.soundings_accepted;
     return true;
 }
@@ -133,6 +203,8 @@ bool process_ping(int verbose, double timestamp, double navigation_longitude, do
     constexpr double degrees_to_radians = pi / 180.0;
     const double heading_x = std::sin(heading * degrees_to_radians);
     const double heading_y = std::cos(heading * degrees_to_radians);
+
+    context->ping_recorded = false;
 
     Ping ping;
     ping.timestamp = timestamp;
@@ -301,23 +373,8 @@ bool GeographicBounds::contains(double lon, double lat) const {
     return latitude_in_bounds && longitude_in_bounds;
 }
 
-CoordinateFrame coordinate_frame_from_origin(
-    const GeodeticPosition &origin) {
-    constexpr double pi = 3.14159265358979323846;
-    constexpr double earth_radius_meters = 6378137.0;
-    constexpr double degrees_to_radians = pi / 180.0;
-
-    CoordinateFrame frame;
-    frame.origin = origin;
-    frame.meters_per_degree_lat = earth_radius_meters * degrees_to_radians;
-    frame.meters_per_degree_lon = earth_radius_meters * std::cos(origin.latitude * degrees_to_radians) * degrees_to_radians;
-    return frame;
-}
-
-Vec3 geodetic_to_local(const GeodeticPosition &position, const CoordinateFrame &frame) {
-    return Vec3((position.longitude - frame.origin.longitude) * frame.meters_per_degree_lon,
-                (position.latitude - frame.origin.latitude) * frame.meters_per_degree_lat,
-                position.elevation - frame.origin.elevation);
+std::string mbsystem_version() {
+    return MB_VERSION;
 }
 
 bool read_datalist(const std::filesystem::path &path, const DatalistReaderOptions &options, DatalistReadResult *result, std::string *error) {
@@ -392,9 +449,19 @@ bool read_datalist(const std::filesystem::path &path, const DatalistReaderOption
         ++read_result.stats.files_seen;
         char *file = processed_status == MB_PROCESSED_USE ? processed_path : raw_path;
 
+        context.file_index = read_result.stats.files_read;
         if (!read_swath_file(file, format, alternate_navigation_status, alternate_navigation_path, &context, error)) {
             success = false;
             break;
+        }
+
+        {
+            std::error_code path_error;
+            const std::filesystem::path absolute_file = std::filesystem::absolute(file, path_error);
+            read_result.files.push_back(path_error ? std::string(file) : absolute_file.lexically_normal().string());
+            if (std::find(read_result.formats.begin(), read_result.formats.end(), format) == read_result.formats.end()) {
+                read_result.formats.push_back(format);
+            }
         }
 
         ++read_result.stats.files_read;
@@ -410,10 +477,42 @@ bool read_datalist(const std::filesystem::path &path, const DatalistReaderOption
         return false;
     }
 
-    if (read_result.points.empty()) {
+    if (read_result.stats.soundings_accepted == 0) {
         set_error(error, "Datalist produced no accepted bathymetry soundings: " + datalist_path);
         return false;
     }
+    if (context.spilling) {
+        if (!context.spill.finish(error)) {
+            return false;
+        }
+        read_result.spilled = true;
+        read_result.spill_path = context.spill.path();
+    }
+
+    // Choose the reconstruction frame origin now that all soundings have been
+    // seen: the point on the ellipsoid below the centroid. This internal frame
+    // is independent of --geoorigin, which only sets the output offset.
+    const double count = static_cast<double>(read_result.stats.soundings_accepted);
+    const Vec3 centroid_ecef = context.reference_ecef + context.offset_sum * (1.0 / count);
+    GeodeticPosition origin = ecef_to_geodetic(centroid_ecef);
+    origin.elevation = 0.0;
+
+    // Round so the same survey always yields the same, readable origin.
+    constexpr double origin_resolution_degrees = 1.0e-6;
+    origin.longitude = std::round(origin.longitude / origin_resolution_degrees) * origin_resolution_degrees;
+    origin.latitude = std::round(origin.latitude / origin_resolution_degrees) * origin_resolution_degrees;
+    read_result.frame = coordinate_frame_from_origin(origin);
+
+    for (CollectedPoint &collected_point : read_result.points) {
+        collected_point.point = ecef_to_local(collected_point.point, read_result.frame);
+        collected_point.origin = ecef_to_local(collected_point.origin, read_result.frame);
+    }
+
+    for (TrackPoint &track_point : read_result.track) {
+        track_point.position = ecef_to_local(track_point.position, read_result.frame);
+    }
+
+    std::sort(read_result.formats.begin(), read_result.formats.end());
 
     *result = std::move(read_result);
     return true;

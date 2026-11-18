@@ -59,6 +59,7 @@ set(HTML
     mbfnv2navlab.html
     mbformat.html
     mbgetesf.html
+    mbglb2tiles.html
     mbgpstide.html
 	mbgrd2gltf.html
     mbgrd2obj.html
@@ -107,6 +108,7 @@ set(HTML
     mbmapscale.html
     mbmesh.html
     mbminirovnav.html
+    mbmesh.html
     mbmosaic.html
     mbnavadjust.html
     mbnavadjustmerge.html
@@ -118,6 +120,7 @@ set(HTML
     mbotpsold.html
     mbpreprocess.html
     mbprocess.html
+    mbpy_3dtiles.html
     mbpy_grd3dplot.html
     mbpy_grdplot.html
     mbpy_grdtiff.html
@@ -175,6 +178,7 @@ set(PDF
     mbfnv2navlab.pdf
     mbformat.pdf
     mbgetesf.pdf
+    mbglb2tiles.pdf
     mbgpstide.pdf
 	mbgrd2gltf.pdf
     mbgrd2obj.pdf
@@ -223,6 +227,7 @@ set(PDF
     mbmapscale.pdf
     mbmesh.pdf
     mbminirovnav.pdf
+    mbmesh.pdf
     mbmosaic.pdf
     mbnavadjust.pdf
     mbnavadjustmerge.pdf
@@ -234,6 +239,7 @@ set(PDF
     mbotpsold.pdf
     mbpreprocess.pdf
     mbprocess.pdf
+    mbpy_3dtiles.pdf
     mbpy_grd3dplot.pdf
     mbpy_grdplot.pdf
     mbpy_grdtiff.pdf

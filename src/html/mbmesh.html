@@ -1,366 +1,672 @@
-<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
-<HTML VERSION="2.0">
+<!DOCTYPE HTML>
+<HTML>
 <HEAD>
+   <meta charset="utf-8">
    <TITLE>MB-System Unix Manual Page: mbmesh</TITLE>
-<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
-<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
-<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+<style>
+  .manual-text { font-family: monospace; max-width: 52em; margin: 0 auto; padding: 0 1em; }
+  h1.Sh { font-size: 1.2em; margin-top: 1.4em; }
+  h2.Ss { font-size: 1.05em; }
+  dl.Bl-tag dt { margin-top: 0.7em; }
+  dl.Bl-tag dd { margin-left: 3em; }
+  pre { overflow-x: auto; }
+  a.permalink { color: inherit; text-decoration: none; }
+</style>
 </HEAD>
 <BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
-<BODY>
 <CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
-<PRE>
-<H1>mbmesh</H1>
-Section: User Commands  (1)<BR>Updated:  7 September 2026 <BR><A HREF="#index">Index</A>
+<div class="manual-text">
+<table class="head">
+  <tr>
+    <td class="head-ltitle">mbmesh(1)</td>
+    <td class="head-vol">General Commands Manual</td>
+    <td class="head-rtitle">mbmesh(1)</td>
+  </tr>
+</table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">mbmesh - reconstruct triangle meshes from swath bathymetry
+  data</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<p class="Pp"><b>mbmesh</b> <b>-I</b><i> datalist</i> [<b>-O</b><i>
+    outputdir</i>] [<b>-R</b><i> west/east/south/north</i>] [<b>-L</b><i>
+    meters</i>] [<b>--info</b>] [<i>output options</i>] [<b>-V</b>]
+  [<b>-H</b>]</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>mbmesh</b> reads swath sonar data through the MB-System
+    datalist processing framework and reconstructs a triangle mesh from accepted
+    bathymetry soundings. The program estimates local point spacing, derives
+    default reconstruction settings, estimates oriented normals, reconstructs a
+    signed scalar field with screened Poisson, extracts a surface with marching
+    cubes, trims unsupported mesh regions, and writes the result as a binary
+    glTF mesh.</p>
+<p class="Pp">The output mesh vertices are WGS84 Earth-Centered, Earth-Fixed
+    (ECEF) coordinates in meters, following the conventions of
+    <b>mbgrd2gltf</b>. Without <b>--geoorigin</b> the vertices are absolute ECEF
+    coordinates. With <b>--geoorigin</b> they are offsets from the ECEF position
+    of a GeoOrigin; the axes stay aligned with ECEF. An <b>mbmesh</b> product
+    and an <b>mbgrd2gltf</b> product made with the same GeoOrigin therefore line
+    up directly. GLB positions are 32-bit floats, so absolute ECEF coordinates
+    resolve only about 0.5 m; use a GeoOrigin to preserve finer detail.</p>
+<p class="Pp">Reconstruction itself runs in a local east-north-up frame tangent
+    to the WGS84 ellipsoid at the point below the centroid of the accepted
+    soundings. Soundings are converted to ECEF and rigidly translated and
+    rotated into this frame, so no map-projection distortion is introduced, and
+    results are converted back to ECEF exactly on output. This frame does not
+    depend on <b>--geoorigin</b>.</p>
+<p class="Pp">The default output is:</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="mesh.glb"><a class="permalink" href="#mesh.glb"><b>mesh.glb</b></a></dt>
+  <dd>Final triangle mesh in binary glTF format using the <b>mbmesh</b> local
+      Cartesian coordinate frame.</dd>
+</dl>
+</div>
+<p class="Pp">Point cloud, diagnostic, and HTML viewer files are written only
+    when requested with command-line output options.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPTIONS"><a class="permalink" href="#OPTIONS">OPTIONS</a></h1>
+<dl class="Bl-tag">
+  <dt id="I"><a class="permalink" href="#I"><b>-I<i> datalist</i>,
+    <b>--input</b> <i>datalist</i></b></a></dt>
+  <dd>Input MB-System datalist file. This option is required unless the datalist
+      path is supplied as the first non-option argument. If it names a directory
+      instead, <b>mbmesh</b> reconstructs nothing and writes
+      <b>mbmesh_survey.html</b> in the current directory: a viewer page with a
+      check box for every .glb file beneath that directory, in accordions that
+      mirror its layout, for example a survey directory with <i>multibeam</i>
+      and <i>lidar</i> subdirectories. The chunk files and the tiles of a
+      tileset are left out and its tileset.json is offered. The track.glb files
+      are switched on when the page opens, the other GLBs are not. The page has
+      an overview viewpoint over all the mbmesh GLBs found, as the page of a run
+      does, with the GeoOrigin of the first. A GLB with another GeoOrigin, or
+      with absolute vertices, does not line up with it, and is logged as an
+      ERROR that names it. <b>--geoviewpoint</b> adds GeoViewpoints to its
+      Viewpoint menu, without <b>--html</b>. With <b>--cesium-html</b> it also
+      writes <i>mbmesh_survey_cesium.html</i> for CesiumJS. Run <b>mbmesh</b> in
+      the survey directory or above it and serve that directory.</dd>
+  <dt id="O"><a class="permalink" href="#O"><b>-O<i> outputdir</i>,
+    <b>--output</b> <i>outputdir</i></b></a></dt>
+  <dd>Output directory for generated files. The directory is created if needed.
+      The default is <i>mbmesh_output</i> in the directory of the input
+      datalist, so <b>-I multibeam/datalistp.mb-1</b> writes
+      <i>multibeam/mbmesh_output</i>.</dd>
+  <dt id="R"><a class="permalink" href="#R"><b>-R<i> west/east/south/north</i>,
+    <b>--bounds</b> <i>west/east/south/north</i></b></a></dt>
+  <dd>Restrict accepted soundings to a geographic bounding box in degrees
+      longitude and latitude.</dd>
+  <dt id="L"><a class="permalink" href="#L"><b>-L<i> meters</i>, <b>--lod</b>
+    <i>meters</i>, <b>--level-of-detail</b> <i>meters</i></b></a></dt>
+  <dd>Requested smallest feature size in local meters. The Poisson cell is a
+      quarter of it, but no finer than half the point spacing, so <b>-L 0.2</b>
+      gives a 5 cm cell even where the soundings are much denser. If omitted,
+      <b>mbmesh</b> derives level of detail from the measured point spacing
+      (twice the spacing), raised if needed to keep the reconstruction within
+      about 500 million Poisson cells across the survey, and logs that it did
+      so. A level of detail given here is never limited, but a warning is
+      printed when it needs more than about 2 billion cells, which may take
+      hours. The implementation clamps the resolved value to a supported range
+      and uses it to derive default normal-estimation, Poisson, and trimming
+      parameters. Use <b>--info</b> to see the resulting cell size and chunk
+      plan before running.</dd>
+  <dt id="geoorigin_="><a class="permalink" href="#geoorigin_="><b>--geoorigin[=<i>lon,lat,elev</i>],
+    -G[<i>lon,lat,elev</i>]</b></a></dt>
+  <dd>Write vertices as ECEF offsets from a GeoOrigin, with the same syntax and
+      meaning as in <b>mbgrd2gltf</b>. With a value, longitude and latitude in
+      decimal degrees and elevation in meters above the WGS84 ellipsoid are all
+      required. With no value, the GeoOrigin is the center of the data bounds at
+      the mean sounding elevation. If the option is not given, vertices are
+      absolute ECEF coordinates. GLB positions are 32-bit floats, so absolute
+      ECEF (magnitudes of about 6.4 million meters) resolves only about 0.5 m;
+      use a GeoOrigin to preserve sub-meter detail. As in <b>mbgrd2gltf</b> the
+      value must be attached to the option: for the long form write an equals
+      sign and no spaces, as in <b>--geoorigin=-122.4,36.6,0</b>; for the short
+      form put the value directly after <b>-G</b>, as in <b>-G-122.4,36.6,0</b>.
+      A value given as a separate argument, such as <b>--geoorigin
+      -122.4,36.6,0</b>, is not accepted, and neither is a value with spaces
+      unless it is quoted so that the shell passes it as one argument. With
+      <b>--html</b>, the viewer page positions the model with GeoOrigin and
+      GeoViewpoint nodes.</dd>
+  <dt id="geoviewpoint="><a class="permalink" href="#geoviewpoint="><b>--geoviewpoint=<i>VALUES</i></b></a></dt>
+  <dd>With <b>--html</b>, add a GeoViewpoint to the page; the option can be
+      repeated, and each adds a GeoViewpoint, written with its position as
+      latitude, longitude and elevation and the GeoOrigin used again, named
+      USER_GEOVIEW_1, USER_GEOVIEW_2 and so on, to the Viewpoint menu of the
+      page, after the two overview viewpoints, where Page Down also steps
+      through them. The values are geodetic, in the order of <b>--geoorigin</b>,
+      longitude first, so they do not depend on the GeoOrigin or the data and
+      can be used again in another run: <i>lon,lat,elev,clon,clat,celev</i>, the
+      camera position and the point it looks at, or
+      <i>lon,lat,elev,ax,ay,az,angle,clon,clat,celev</i>, with the orientation
+      as an axis and an angle, as a GeoViewpoint takes it. Heights are above the
+      ellipsoid. Without an orientation the top of the view is toward local up.
+      The <b>Copy GeoViewpoint</b> button of the page gives the ten-number form
+      for the view on the screen, on the clipboard and in the X3DOM log. The
+      value must be attached to the option, with an equals sign and no spaces,
+      for example
+    <b>--geoviewpoint=-122.4,36.6,-900,-122.39,36.61,-950</b>.</dd>
+  <dt id="pointcloud-colormap="><a class="permalink" href="#pointcloud-colormap="><b>--pointcloud-colormap=<i>NAME</i></b></a></dt>
+  <dd>How <b>pointcloud.glb</b> is colored by height, with the Haxby color table
+      that <b>mbm_grdplot</b> uses, 11 colors from dark blue to white:
+      <b>linear</b> (the default), 11 equal steps between rounded heights chosen
+      from the range, as <b>mbm_grdplot -G5</b> does; <b>equalized</b>, steps
+      with equal numbers of points, as <b>mbm_grdplot -G5 -S</b> does; or
+      <b>none</b>, one orange. The heights the color changes between are in the
+      description of the file's MB-System.content metadata.</dd>
+  <dt id="no"><a class="permalink" href="#no"><b>--no-colors</b></a></dt>
+  <dd>With <b>--tileset</b>, do not color the tiles by height. By default every
+      vertex has a color (<b>COLOR_0</b>) from the Haxby table over the heights
+      of the whole survey, so that all tiles agree, with a white base color;
+      <b>tileset.json</b> records the bounds as <b>heightColors</b>, and the
+      page of <b>--html</b> has a &quot;color by height&quot; checkbox that
+      turns the colors off, which shows the tiles in gray.</dd>
+  <dt id="lift"><a class="permalink" href="#lift"><b>--lift[=<i>METERS</i>]</b></a></dt>
+  <dd>With <b>--tileset</b>, lift the tileset above the ellipsoid along the
+      local vertical, in the transform of <b>tileset.json</b>. As
+      <b>--geoorigin</b> works, without the option the tileset has the true
+      heights (a warning says so if any are below the ellipsoid), the option
+      alone takes the default, and a value must be attached, as in
+      <b>--lift=900</b>. X3DOM's GeoTileset takes the height of the camera as at
+      least 1 m, so tiles below the ellipsoid, as seafloor is, never get near
+      enough to refine. The default lift puts the lowest point of the mesh 10 m
+      above the ellipsoid, to a meter, if it is lower. The lift is logged and
+      written as <b>liftMeters</b> in the extras of <b>tileset.json</b>. The
+      page of <b>--html</b> puts its other models in GeoTransform nodes that
+      lift them the same, raises the viewpoints, and sets the
+      maximumScreenSpaceError of the GeoTileset to 1 pixel. The <b>Copy
+      GeoViewpoint</b> button takes the lift off again, so the option it gives
+      is for the true heights.</dd>
+  <dt id="chunk-size"><a class="permalink" href="#chunk-size"><b>--chunk-size
+    <i>meters</i></b></a></dt>
+  <dd>Reconstruct in square horizontal chunks of about this size (rounded up to
+      a whole number of Poisson cells) instead of in one pass. Chunking turns on
+      automatically when a single Poisson grid would exceed about 8 million
+      cells. See <b>Chunked reconstruction</b> below.</dd>
+  <dt id="chunk-halo"><a class="permalink" href="#chunk-halo"><b>--chunk-halo
+    <i>meters</i></b></a></dt>
+  <dd>Read this many meters of neighboring points beyond the edge of each chunk,
+      rounded up to a whole number of Poisson cells. The default is the reach of
+      the normal estimation, splatting and trimming. A halo smaller than that
+      reach is used, with a warning. A larger halo needs more memory, disk and
+      time, because every chunk reconstructs its halo again, and it changes the
+      chunk size; it did not improve the match of neighboring chunks at their
+      edges. It has an effect only when the run is chunked.</dd>
+  <dt id="no-draco"><a class="permalink" href="#no-draco"><b>--no-draco</b></a></dt>
+  <dd>Write the triangle meshes of the GLB files as arrays of 32-bit floats and
+      integers. By default <i>mesh.glb</i>, <i>raw_mesh.glb</i>, the chunks and
+      the tileset tiles are compressed with Draco (the glTF extension
+      <b>KHR_draco_mesh_compression</b>), which makes them about a tenth of the
+      size. The point cloud, normals, sensor positions and track are never
+      compressed, since the extension is for triangles.</dd>
+  <dt id="draco-precision"><a class="permalink" href="#draco-precision"><b>--draco-precision
+    <i>meters</i></b></a></dt>
+  <dd>With Draco, keep the positions to this many meters (default 0.001). Each
+      file gets the number of bits (8 to 30) that makes the step of its
+      quantization no more than this over its extent.</dd>
+  <dt id="draco-normal-bits"><a class="permalink" href="#draco-normal-bits"><b>--draco-normal-bits
+    <i>n</i></b></a></dt>
+  <dd>With Draco, the bits of each normal, 2 to 30 (default 10).</dd>
+  <dt id="seam-method"><a class="permalink" href="#seam-method"><b>--seam-method
+    <i>name</i></b></a></dt>
+  <dd>How chunks are matched on the edges they share: <b>solve</b> (the default)
+      solves each chunk with the final fields of its west and south neighbors
+      held fixed on the shared edges, which removes the edge effect on those
+      sides, but a chunk waits for those neighbors before its solve, so fewer
+      chunks are solved at the same time, and the threads without a chunk to
+      solve share the sweeps of the solver of those that have one. The output
+      does not depend on the number of threads. <b>blend</b> solves each chunk
+      free, all of them at the same time, and then blends its field to the
+      neighbors' over <b>--seam-blend</b>.</dd>
+  <dt id="seam-blend"><a class="permalink" href="#seam-blend"><b>--seam-blend
+    <i>meters</i></b></a></dt>
+  <dd>With <b>--seam-method blend</b>, over this width on each side of an edge
+      between two chunks, the Poisson field of a chunk is made to match the
+      final field of the chunk to its west or to its south on that edge, so that
+      the two meshes meet exactly, with no step and no gap. The fields of
+      neighboring chunks are solved apart and differ where they meet (by about 2
+      cm on one multibeam survey at <b>-L 0.1</b>). The chunks share one lattice
+      of grid nodes, so with the same field values on the nodes of an edge,
+      marching cubes makes the same vertices along it; the correction is the
+      difference on the edge, fading smoothly to zero over the width. The
+      vertices that the chunks have in common are merged in <b>mesh.glb</b>. The
+      default is 1 m, or a quarter of the chunk size if that is less. Zero does
+      not match the chunks, and lets them be started in any order; with a width
+      the chunks are started in order, since a chunk waits for its neighbors. It
+      has an effect only when the run is chunked.</dd>
+  <dt id="label-chunks"><a class="permalink" href="#label-chunks"><b>--label-chunks</b></a></dt>
+  <dd>With <b>--html</b>, the page draws the outline of each chunk, at the mean
+      height of its surface, and its file name, for example
+      <b>chunk_2_-10.glb</b>, as text that faces the viewer, one text height
+      above the highest point of the chunk. A check box switches them off. It is
+      for finding which chunk a seam, a void or an overhang belongs to. It needs
+      a chunked run. The survey page that a directory input writes draws them
+      too, for the chunk files in the <b>chunks</b> directories beneath it that
+      say where their chunk is (each carries it in
+      <b>MB-System.content.chunkLabel</b>); those of a run made before that was
+      written are not drawn.</dd>
+  <dt id="chunk"><a class="permalink" href="#chunk"><b>--chunk
+    <i>i,j</i></b></a></dt>
+  <dd>Reconstruct only chunk (i,j). Chunk (i,j) covers x from i*size to
+      (i+1)*size and y from j*size to (j+1)*size in the local east-north frame.
+      Intended for testing. Each of <i>i</i> and <i>j</i> can be a range
+      <i>first</i>..<i>last</i>, both included, so that <b>--chunk
+      2..3,-11..-10</b> is four chunks, and the option can be repeated, to add
+      chunks: <b>--chunk 2,-10 --chunk 3,-10</b> is two neighbors, for looking
+      at the seam between them. <b>mesh.glb</b> and the pages then hold only
+      those chunks.</dd>
+  <dt id="max-chunks"><a class="permalink" href="#max-chunks"><b>--max-chunks
+    <i>n</i></b></a></dt>
+  <dd>Stop after n chunks. Intended for testing.</dd>
+  <dt id="threads"><a class="permalink" href="#threads"><b>--threads
+    <i>n</i></b></a></dt>
+  <dd>Number of chunks reconstructed at the same time when chunking. The default
+      is the smaller of the number of processor cores and 4. Each chunk holds
+      its own Poisson grid, so memory use grows with this value. With automatic
+      chunking, a larger value also gives smaller chunks, since at least two
+      chunks per thread are wanted. The output does not depend on it.</dd>
+  <dt id="void-size"><a class="permalink" href="#void-size"><b>--void-size
+    <i>m</i></b></a></dt>
+  <dd>Put back voids of up to <i>m</i> meters across (default 2) that support
+      trimming would remove from inside the surface. The sonar returns thin out
+      in the depressions of the seafloor and under overhangs, so the surface
+      bridging such a gap has too few soundings near it and is trimmed, leaving
+      a hole in a surface that is otherwise there. A raster of the soundings of
+      the whole survey, with their heights, shows where they are. A mesh vertex
+      that was rejected only for too few neighbors is kept if it has a sounding
+      within three support radii, or if its nearest sounding is within half this
+      size, soundings are all around it in the tangent plane of the mesh, and
+      the nearest soundings are beside it and not above it. Pieces of the
+      surface that are not joined to the rest and are smaller than a quarter of
+      the area of a disk of this size are taken out. Gaps at the edge of the
+      survey stay trimmed, as does surface that disagrees with the soundings,
+      except for holes that are entirely surrounded by surface that is kept,
+      which are filled up to the area of a disk of this size. Zero trims all of
+      them.</dd>
+  <dt id="island-size"><a class="permalink" href="#island-size"><b>--island-size
+    <i>m</i></b></a></dt>
+  <dd>When the survey is reconstructed in chunks, remove from <i>mesh.glb</i>
+      the pieces of the merged mesh that are not joined to the rest and have an
+      area of up to that of a disk <i>m</i> meters across (default 2), if fewer
+      than half of their vertices have a sounding within a support radius, in
+      three dimensions, as the raster of the soundings knows them. Small pieces
+      with soundings under them, such as rock that the trimming cut from the
+      rest, stay. Zero keeps all of them. <i>raw_mesh.glb</i> is not
+    cleaned.</dd>
+  <dt id="primitive-size"><a class="permalink" href="#primitive-size"><b>--primitive-size
+    <i>m</i></b></a></dt>
+  <dd>Write <i>mesh.glb</i> and <i>raw_mesh.glb</i> as one mesh of many
+      primitives, one for each square of this many meters of the local
+      east-north frame (anchored at its origin), as <b>mbgrd2gltf</b> writes
+      blocks of 256 cells. Each primitive has the vertices that its triangles
+      use and, with Draco, its own compressed stream, so a viewer decodes and
+      draws the surface in parts and not as one array of tens of millions of
+      vertices. The default is 256 Poisson cells. Zero writes one primitive. The
+      vertices on the edges of the squares are in both primitives. The chunk
+      files and the tiles of a tileset are one primitive each.</dd>
+  <dt id="spill-points"><a class="permalink" href="#spill-points"><b>--spill-points
+    <i>n</i></b></a></dt>
+  <dd>A survey with more than <i>n</i> accepted soundings (default 50000000) is
+      not held in memory. The soundings are written to a file in a directory
+      <b>mbmesh_work</b> beside the results, and then sorted into one file per
+      chunk, each holding the points of the chunk and of its halo, so that
+      memory use follows the size of a chunk and not of the survey. Each chunk
+      is reconstructed from its file and gives the same mesh as from memory. The
+      directory is deleted when the run ends. The disk needs 28 bytes for each
+      sounding for the spill file, and 48 bytes for each point, about 1.3 times
+      as many as there are, for the chunk files, which are small when
+      <b>--decimate</b> is on. Use <b>-O</b> to put the work directory on a disk
+      with room. 0 always spills. Chunking, which this needs, is turned on for
+      such a survey. The files that hold points as one file,
+      <b>pointcloud.glb</b>, <b>origins.glb</b>, <b>normals.glb</b> and the
+      oriented PLY, then hold one point in n, so that there are at most 5
+      million; the xyz files hold every point. The log gives the peak memory of
+      the process after each stage.</dd>
+  <dt id="poisson-solver"><a class="permalink" href="#poisson-solver"><b>--poisson-solver
+    <i>name</i></b></a></dt>
+  <dd>Select how the Poisson grid equation is solved: <b>sor</b>, the default,
+      which is red-black successive over-relaxation, updated in place, or
+      <b>jacobi</b>. An iteration of either costs about the same, but <b>sor</b>
+      converges in far fewer, so it needs a much smaller number of iterations,
+      which it chooses itself; on a test survey about 100 of its iterations
+      reached the residual of 473 Jacobi iterations.</dd>
+  <dt id="poisson-iterations"><a class="permalink" href="#poisson-iterations"><b>--poisson-iterations
+    <i>n</i></b></a></dt>
+  <dd>Number of iterations of the solver, from 1 to 100000, for either solver.
+      By default <b>sor</b> takes one iteration per cell across the longest edge
+      of each chunk's grid, but at least 50, and <b>jacobi</b> takes a count
+      chosen from the level of detail, between 200 and 500. The relative
+      residual after the iterations, which shows how far the solver converged,
+      is logged with <b>-V</b> for each chunk and at INFO level in a single
+      pass.</dd>
+  <dt id="decimate"><a class="permalink" href="#decimate"><b>--decimate
+    <i>meters</i></b></a></dt>
+  <dd>Enable voxel-grid point decimation with the specified cell size in local
+      meters. The legacy single-dash form <b>-decimate</b> is also
+    accepted.</dd>
+  <dt id="info"><a class="permalink" href="#info"><b>--info</b></a></dt>
+  <dd>Print dataset information and the reconstruction plan, and exit before
+      mesh reconstruction. This includes input counts, geodetic bounds, the
+      estimated point spacing, and the resulting Poisson cell size, chunk plan
+      and cell count. This option was called <b>--metadata</b> in earlier
+      versions; <b>--metadata</b> is no longer accepted.</dd>
+  <dt id="V,"><a class="permalink" href="#V,"><b>-V, --verbose</b></a></dt>
+  <dd>Enable progress and diagnostic logging. Messages use the same line format
+      as <b>mbgrd2gltf</b>: level, local date and time, source file, function
+      and line, then the message, for example <b>INFO 2026-10-19 14:35:15.419
+      mbmesh.cpp main():151 [startup] ...</b>. Without <b>-V</b>, INFO, WARN and
+      ERROR lines are shown. When chunking, these include at most one progress
+      line a minute (chunks finished, percentage, elapsed time and an estimate
+      of the time left) and a final line with the time spent in each stage,
+      added up over all chunks; in a single pass they include one line for each
+      finished stage. <b>-V</b> adds DEBUG lines with the start of each stage
+      and a line for each chunk. All messages go to standard error.</dd>
+  <dt id="H,"><a class="permalink" href="#H,"><b>-H, -h, --help</b></a></dt>
+  <dd>Display help message and exit.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OUTPUT_OPTIONS"><a class="permalink" href="#OUTPUT_OPTIONS">OUTPUT
+  OPTIONS</a></h1>
+<p class="Pp">Every long option in this section also accepts a legacy
+    single-dash form (e.g. <b>-html</b>, <b>-diagnostics</b>,
+    <b>-all-outputs</b>) for backward compatibility.</p>
+<dl class="Bl-tag">
+  <dt id="html"><a class="permalink" href="#html"><b>--html</b></a></dt>
+  <dd>Also write an X3DOM viewer page, in the parent of the output directory and
+      named after it (for example <b>mbmesh_output.html</b> beside
+      <b>mbmesh_output</b>), and print the command to serve and view it. The
+      page is laid out like the one <b>mbgrd2gltf</b> writes: a heads-up display
+      with the navigation mode, the debug displays and the view controls, a
+      check box for each GLB, and a panel with the processing log of the run
+      (see <b>OUTPUT FILES</b>). <b>mbmesh</b> does not start a web server or a
+      browser; run the printed command (<b>python3 -m http.server 8000 --bind
+      127.0.0.1 --directory</b> <i>webroot</i>, where the web root is the parent
+      of the output directory) in a terminal, press Ctrl-C to stop it, and open
+      the printed URL.</dd>
+  <dt id="xyz"><a class="permalink" href="#xyz"><b>--xyz</b></a></dt>
+  <dd>Also write both local and ECEF XYZ point cloud files.</dd>
+  <dt id="local-xyz"><a class="permalink" href="#local-xyz"><b>--local-xyz</b></a></dt>
+  <dd>Also write <b>pointcloud-local.xyz</b>, containing accepted and decimated
+      soundings in the local Cartesian coordinate frame used for reconstruction.
+      This is the same coordinate frame used by <b>mesh.glb</b>.</dd>
+  <dt id="ecef-xyz"><a class="permalink" href="#ecef-xyz"><b>--ecef-xyz</b></a></dt>
+  <dd>Also write <b>pointcloud-ecef.xyz</b>, containing accepted and decimated
+      soundings in WGS84 Earth-Centered, Earth-Fixed coordinates.</dd>
+  <dt id="oriented-ply"><a class="permalink" href="#oriented-ply"><b>--oriented-ply</b></a></dt>
+  <dd>Also write <b>oriented-pointcloud-ecef.ply</b>, an oriented point cloud
+      suitable for inspection.</dd>
+  <dt id="pointcloud-glb"><a class="permalink" href="#pointcloud-glb"><b>--pointcloud-glb</b></a></dt>
+  <dd>Also write <b>pointcloud.glb</b>, a diagnostic GLB point cloud for smaller
+      datasets. The points are colored by their height in the local frame, in a
+      COLOR_0 attribute, the way <b>mbm_grdplot -G5 -S</b> colors a grid: the
+      Haxby color table, 11 colors from dark blue to white, changing linearly
+      between heights that divide the points into 11 cells of equal numbers.
+      Those heights are in the description of the file's MB-System.content
+      metadata.</dd>
+  <dt id="normal-glb"><a class="permalink" href="#normal-glb"><b>--normal-glb</b></a></dt>
+  <dd>Also write <b>normals.glb</b>, diagnostic normal vectors for smaller
+      datasets.</dd>
+  <dt id="origin-glb"><a class="permalink" href="#origin-glb"><b>--origin-glb</b></a></dt>
+  <dd>Also write <b>origins.glb</b>, diagnostic sensor-origin rays for smaller
+      datasets.</dd>
+  <dt id="track-glb"><a class="permalink" href="#track-glb"><b>--track-glb</b></a></dt>
+  <dd>Also write <b>track.glb</b>, the sensor track as a black 3D line, with one
+      position per ping. The positions are in the same coordinates as
+      <b>mesh.glb</b>, including any <b>--geoorigin</b> offset, so the two
+      overlay directly.</dd>
+  <dt id="tileset"><a class="permalink" href="#tileset"><b>--tileset</b></a></dt>
+  <dd>Also write the surface as an OGC 3D Tiles 1.1 tileset,
+      <b>tileset/tileset.json</b> and one <b>tileset/L0/tile_I_J.glb</b> for
+      each reconstruction chunk (one tile, <b>tile_0_0.glb</b>, if
+      reconstruction is not chunked), so that a viewer can load a part of a
+      survey at a time; a browser will not load a GLB of more than 2 GiB. The
+      vertices of a tile are in the local east-north-up frame of the
+      reconstruction, written Y-up as glTF requires (X east, Y up, Z south), and
+      the transform of the root tile places that frame on the Earth in WGS 84
+      ECEF, so the tileset does not depend on <b>--geoorigin</b>. The root has
+      no content and its children are the tiles, each with a box bounding volume
+      and a geometric error of 0; the geometric error of the root is the
+      diagonal of its box. The <b>georeference</b>, <b>provenance</b> and
+      <b>MB-System</b> blocks are written in the extras of the tiles and of
+      <b>tileset.json</b>, with <b>vertexCoordinates</b> <b>localFrame</b>. With
+      <b>--html</b> the page shows the tileset with a GeoTileset node in place
+      of <b>mesh.glb</b>; X3DOM has that node only in its master of October
+      2026, so use <b>--x3dom-url</b>.</dd>
+  <dt id="cesium-html"><a class="permalink" href="#cesium-html"><b>--cesium-html</b></a></dt>
+  <dd>Also write a viewer page for CesiumJS, with a check box for each GLB and
+      tileset, beside the output directory (<i>mbmesh_output_cesium.html</i>)
+      and inside it (<i>mbmesh_cesium.html</i>). The globe of Cesium would hide
+      data below the ellipsoid, so the page starts with it hidden and has a
+      check box that shows it, translucent. Tilesets are shown at their true
+      height whatever <b>--lift</b> says. The page has the Viewpoint menu, the
+      <b>--geoviewpoint</b> viewpoints, a Copy viewpoint button and the scale
+      axes, but no chunk outlines or labels. It must be served over HTTP, like
+      the <b>--html</b> page. With a directory input it also writes
+      <i>mbmesh_survey_cesium.html</i>.</dd>
+  <dt id="cesium-url"><a class="permalink" href="#cesium-url"><b>--cesium-url
+    <i>url</i></b></a></dt>
+  <dd>The directory of the CesiumJS build that the <b>--cesium-html</b> page
+      loads, with Cesium.js and Widgets/widgets.css in it (default
+      https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium).</dd>
+  <dt id="x3dom-url"><a class="permalink" href="#x3dom-url"><b>--x3dom-url
+    <i>url</i></b></a></dt>
+  <dd>The X3DOM script that the page written by <b>--html</b> loads, and the
+      stylesheet <b>x3dom.css</b> beside it. The default is the build on
+      www.x3dom.org, which has no GeoTileset node.</dd>
+  <dt id="raw-mesh-glb"><a class="permalink" href="#raw-mesh-glb"><b>--raw-mesh-glb</b></a></dt>
+  <dd>Also write <b>raw_mesh.glb</b>, the untrimmed triangle mesh produced by
+      marching cubes before support trimming.</dd>
+  <dt id="diagnostics"><a class="permalink" href="#diagnostics"><b>--diagnostics</b></a></dt>
+  <dd>Also write <b>pointcloud.glb</b>, <b>normals.glb</b>, and
+      <b>origins.glb</b>.</dd>
+  <dt id="all-outputs"><a class="permalink" href="#all-outputs"><b>--all-outputs</b></a></dt>
+  <dd>Write all optional output files.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">Reconstruct a mesh and write the default <b>mesh.glb</b>:</p>
+<div class="Bd-indent"><b>mbmesh -Idatalist.mb-1</b></div>
+<p class="Pp">Write the mesh, X3DOM viewer, and local/ECEF XYZ point clouds:</p>
+<div class="Bd-indent"><b>mbmesh -Idatalist.mb-1 -O output/mbmesh_run --html
+  --xyz -V</b></div>
+<p class="Pp">Restrict processing to a geographic region and request a coarser
+    level of detail:</p>
+<div class="Bd-indent"><b>mbmesh -Idatalist.mb-1 -R-122.5/-121.8/36.5/37.2 -L
+  0.5 -V</b></div>
+<p class="Pp">Print dataset information and the reconstruction plan without
+    reconstructing a mesh:</p>
+<div class="Bd-indent"><b>mbmesh -Idatalist.mb-1 --info</b></div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OUTPUT_FILES"><a class="permalink" href="#OUTPUT_FILES">OUTPUT
+  FILES</a></h1>
+<p class="Pp"><b>mbmesh</b> always writes <b>mesh.glb</b>. Optional files are
+    written only when their corresponding output options are supplied.</p>
+<dl class="Bl-tag">
+  <dt id="mesh.glb~2"><a class="permalink" href="#mesh.glb~2"><b>mesh.glb</b></a></dt>
+  <dd>Final trimmed triangle mesh in binary glTF format. Vertex positions are
+      ECEF coordinates, or ECEF offsets from the GeoOrigin when
+      <b>--geoorigin</b> is used. When reconstruction is chunked this is the
+      merged mesh of all chunks.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>Every GLB records where it is and how it was made in its glTF
+      <b>asset.extras</b>, in three blocks. <b>georeference</b> gives the
+      coordinate reference system (<b>EPSG:4978</b>), whether the vertices are
+      <b>absolute</b> or <b>relativeToCenter</b>, the <b>center</b> (the
+      GeoOrigin as ECEF meters, with absolute = vertex + center), the same point
+      as <b>geodeticCenter</b> (longitude, latitude, height), the
+      <b>heightReference</b> (the ellipsoid) and the <b>extent</b> of the data.
+      <b>provenance</b> gives the software and version, the time of execution
+      (UTC), the command line, working directory, user and host, and the input
+      datalist, formats and swath files. <b>MB-System</b> gives what the file
+      holds (mesh, chunk, track, and so on), the sounding counts, the
+      reconstruction settings and the vertical reference. The page written by
+      <b>--html</b> holds the same in X3D <b>GeoMetadata</b> and
+      <b>WorldInfo</b> nodes. See <b>src/mbmesh/GEOREFERENCE.md</b> for the
+      names. The vertical reference has no geoid correction: a sounding's depth,
+      negated, is used as a height above the WGS 84 ellipsoid.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="chunks/chunk_I_J.glb"><a class="permalink" href="#chunks/chunk_I_J.glb"><b>chunks/chunk_I_J.glb</b></a></dt>
+  <dd>Written only when reconstruction is chunked: one file per chunk, with
+      vertices placed exactly as in <b>mesh.glb</b>.</dd>
+  <dt id="tileset/tileset.json,"><a class="permalink" href="#tileset/tileset.json,"><b>tileset/tileset.json,
+    tileset/L0/tile_I_J.glb</b></a></dt>
+  <dd>Optional OGC 3D Tiles tileset of the surface; see <b>--tileset</b>.
+      <b>mbglb2tiles</b> writes the same layout into the same directory by
+      default, with coarser levels as well, and replaces this tileset.</dd>
+  <dt id="raw_mesh.glb"><a class="permalink" href="#raw_mesh.glb"><b>raw_mesh.glb</b></a></dt>
+  <dd>Optional untrimmed triangle mesh before support trimming.</dd>
+  <dt><b>&lt;outputdir&gt;/mbmesh.html</b></dt>
+  <dd>The same page inside the output directory: it refers to its models by
+      their names there and offers none from beside the directory, so it works
+      when the web server is rooted higher up, for example at a survey
+      directory. Written with <b>--html</b>.</dd>
+  <dt><b>&lt;outputdir&gt;.html</b></dt>
+  <dd>Optional X3DOM viewer page, written in the parent of the output directory
+      and named after it, for example <b>mbmesh_output.html</b>. The parent is
+      the root of the web server, so the page refers to its models by paths
+      relative to it, such as <b>mbmesh_output/mesh.glb</b>. It is titled with
+      the last three directories of the web root, which identify the survey, for
+      example <b>OceanImaging2018/20180923d1/multibeam</b>. It is laid out in
+      the style of the page <b>mbgrd2gltf</b> writes, with a heads-up display
+      and a Processing Log panel, opened with the button at the bottom left,
+      which shows every message of the run up to DEBUG level, whether or not
+      <b>-V</b> was used: the command line, the settings, the timing of each
+      stage and, when chunking, of each chunk. At most 20,000 messages are kept,
+      and the log says how many were left out. The log is written to
+      <i>mbmesh.log</i> in the output directory, one message a line, and not
+      into the page, which it would make large and hard to edit; the page loads
+      it when the panel is first opened, so it must be served over HTTP. The log
+      is written last so that it is complete.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt></dt>
+  <dd>The page has a check box for every GLB it can show: the .glb files in the
+      output directory, with <b>mesh.glb</b> and <b>track.glb</b> first, and
+      then the .glb files in the web root beside the output directory, such as
+      the product of <b>mbgrd2gltf</b>. <b>mesh.glb</b> and <b>track.glb</b> are
+      shown when the page opens; the others are loaded when first switched on.
+      The chunk files are not listed. GLBs from the web root line up with the
+      mesh only if they use the same GeoOrigin. Browsers will not load GLB files
+      from a file URL, so the page must be served.</dd>
+</dl>
+<dl class="Bl-tag">
+  <dt id="pointcloud-local.xyz"><a class="permalink" href="#pointcloud-local.xyz"><b>pointcloud-local.xyz</b></a></dt>
+  <dd>Optional XYZ point cloud in the same local Cartesian coordinate frame as
+      <b>mesh.glb</b>.</dd>
+  <dt id="pointcloud-ecef.xyz"><a class="permalink" href="#pointcloud-ecef.xyz"><b>pointcloud-ecef.xyz</b></a></dt>
+  <dd>Optional WGS84 Earth-Centered, Earth-Fixed XYZ point cloud.</dd>
+  <dt id="oriented-pointcloud-ecef.ply"><a class="permalink" href="#oriented-pointcloud-ecef.ply"><b>oriented-pointcloud-ecef.ply</b></a></dt>
+  <dd>Optional oriented ECEF point cloud.</dd>
+  <dt id="pointcloud.glb"><a class="permalink" href="#pointcloud.glb"><b>pointcloud.glb</b></a></dt>
+  <dd>Optional diagnostic point cloud GLB, colored by height.</dd>
+  <dt id="normals.glb"><a class="permalink" href="#normals.glb"><b>normals.glb</b></a></dt>
+  <dd>Optional diagnostic normal-vector GLB.</dd>
+  <dt id="origins.glb"><a class="permalink" href="#origins.glb"><b>origins.glb</b></a></dt>
+  <dd>Optional diagnostic sensor-origin-ray GLB.</dd>
+  <dt id="track.glb"><a class="permalink" href="#track.glb"><b>track.glb</b></a></dt>
+  <dd>Optional sensor track, drawn as line segments through the sensor position
+      of each ping that contributes an accepted sounding. The track is broken
+      where the swath file changes, where the time runs backwards, and where the
+      time between two pings is more than ten times the median ping interval of
+      the file, so that it does not run straight across the turns between survey
+      lines or across gaps in the data.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="PROCESSING_NOTES"><a class="permalink" href="#PROCESSING_NOTES">PROCESSING
+  NOTES</a></h1>
+<p class="Pp"><b>Sounding filtering</b>
+  <br/>
+  <b>mbmesh</b> uses MB-System datalist processing and accepts valid bathymetry
+    soundings. Geographic filtering is applied when <b>-R</b> is specified.</p>
+<p class="Pp"><b>Coordinate frame</b>
+  <br/>
+  <b>mbmesh</b> converts each sounding and sensor position to WGS84 ECEF
+    coordinates and then to a local east-north-up frame (see above). Sounding
+    elevation is taken as negative bathymetry, and sensor elevation as negative
+    sensor depth, both treated as heights above the WGS84 ellipsoid. The
+    optional ECEF point-cloud outputs apply the exact inverse transform.</p>
+<p class="Pp"><b>Chunked reconstruction</b>
+  <br/>
+  A single screened-Poisson grid covers the bounding box of its input, so memory
+    and run time grow quickly with survey size and level of detail. In chunked
+    mode the survey is divided into square horizontal chunks on a fixed lattice
+    anchored at the local-frame origin. Each chunk is reconstructed from its own
+    points plus a surrounding halo of neighboring points, on a Poisson grid
+    aligned to a lattice shared by all chunks, and keeps only the triangles
+    whose centroids fall inside it. Chunks are reconstructed in parallel and
+    delivered in chunk order. All soundings are still read into memory before
+    chunking, and chunk edges are not welded, so small steps or cracks can occur
+    where chunks meet.</p>
+<p class="Pp"><b>Automatic settings</b>
+  <br/>
+  The program estimates point spacing from nearest-neighbor distances inside
+    blocks of consecutive soundings, which does not depend on the number of
+    soundings, and derives default normal-estimation, screened-Poisson,
+    marching-cubes, and support trimming settings from the data and requested
+    level of detail.</p>
+<p class="Pp"><b>Support trimming</b>
+  <br/>
+  Unsupported mesh regions are removed after marching cubes, except for the
+    voids inside the surveyed surface that <b>--void-size</b> puts back. If
+    trimming removes the entire mesh, <b>mbmesh</b> exits with an error rather
+    than writing an empty surface.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="MB-SYSTEM_INTEGRATION"><a class="permalink" href="#MB-SYSTEM_INTEGRATION">MB-SYSTEM
+  INTEGRATION</a></h1>
+<p class="Pp"><b>mbmesh</b> integrates with the MB-System datalist processing
+    framework and can read swath files in MB-System supported formats.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="AUTHOR"><a class="permalink" href="#AUTHOR">AUTHOR</a></h1>
+<p class="Pp">David W. Caress and Dale N. Chayes
+  <br/>
+  Monterey Bay Aquarium Research Institute
+  <br/>
+  Initial mbmesh implementation (PR #1584: reading swath datalists, projected
+    and ECEF XYZ and GLB point clouds, the X3DOM viewer page, build,
+    documentation and the mbm_tmap tiling macro): CSUMB Capstone - Spring 2026:
+    Jorge Barrera-Simental, Kevin Crapo, Joceline Cortez-Arellano, Noah
+    Mckegney, Lyn Larson, Metztli Herrera, Andre Gutierrez and David Martinez
+  <br/>
+  Construction and architectural layout of the mesh reconstruction pipeline
+    (datalist reader, normal estimation, screened Poisson reconstruction,
+    marching cubes, support trimming and the output writers): CSUMB Capstone -
+    Summer 2026, Daniel Karnofel and Benjamin Shimek
+  <br/>
+  Continued refinement: Mike McCann (supervising Claude Sonnet 5.5, an AI coding
+    agent from Anthropic), MBARI (issues #1559 and #1629): ECEF frame and
+    <b>--geoorigin</b>, chunked threaded reconstruction, Draco compression, OGC
+    3D Tiles tilesets with levels of detail for X3DOM (<b>mbglb2tiles</b>),
+    viewer and survey pages, height colors</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>mb-system</b>(1), <b>mbglb2tiles</b>(1), <b>mbgrid</b>(1),
+    <b>mbgrd2gltf</b>(1), <b>mbgrdviz</b>(1)</p>
+</section>
+</div>
+<table class="foot">
+  <tr>
+    <td class="foot-date">7 September 2026</td>
+    <td class="foot-os"></td>
+  </tr>
+</table>
+</div>
 <HR>
-
-<A NAME="lbAB">&nbsp;</A>
-<H2>NAME</H2>
-
-mbmesh - reconstruct triangle meshes from swath bathymetry data
-<A NAME="lbAC">&nbsp;</A>
-<H2>SYNOPSIS</H2>
-
-<B>mbmesh</B> <B>-I</B><I> datalist</I> [<B>-O</B><I> outputdir</I>]
-[<B>-R</B><I> west/east/south/north</I>] [<B>-L</B><I> meters</I>]
-[<B>--metadata</B>] [<I>output options</I>] [<B>-V</B>] [<B>-H</B>]
-<A NAME="lbAD">&nbsp;</A>
-<H2>DESCRIPTION</H2>
-
-<P>
-
-<B>mbmesh</B> reads swath sonar data through the MB-System datalist
-processing framework and reconstructs a triangle mesh from accepted
-bathymetry soundings. The program estimates local point spacing, derives
-default reconstruction settings, estimates oriented normals, reconstructs a
-signed scalar field with screened Poisson, extracts a surface with marching
-cubes, trims unsupported mesh regions, and writes the result as a binary glTF
-mesh.
-<P>
-
-The output mesh vertices are positioned in the same local Cartesian coordinate
-frame used for reconstruction, with units in meters. This is an east-north-up
-frame initialized from the first accepted ping's sensor position: X is positive
-east, Y is positive north, and Z is positive up relative to that origin.
-Longitude and latitude are converted to local meters using an equirectangular
-approximation based on the origin latitude.
-<P>
-
-This local frame is not the Earth-Centered, Earth-Fixed (ECEF) frame used by
-<B>mbgrd2gltf</B> by default, and it is not the ECEF-offset frame produced by
-<B>mbgrd2gltf --geoorigin</B>. The <B>--geoorigin</B> option in
-<B>mbgrd2gltf</B> allows vertices to be expressed as offsets from a local origin
-point rather than from Earth's center in order to reduce coordinate magnitudes
-and improve rendering precision. <B>mbmesh</B> currently uses its own local
-projected frame instead. When combining <B>mbmesh</B> GLB output with
-<B>mbgrd2gltf</B> output, transform both products into the same coordinate
-frame first; otherwise their vertices can appear offset or fail to line up.
-<P>
-
-The default output is:
-<DL COMPACT><DT><DD>
-<DL COMPACT>
-<DT><B>mesh.glb</B>
-
-<DD>
-Final triangle mesh in binary glTF format using the <B>mbmesh</B> local
-Cartesian coordinate frame.
-</DL></DL>
-
-<P>
-
-Point cloud, diagnostic, and HTML viewer files are written only when requested
-with command-line output options.
-<A NAME="lbAE">&nbsp;</A>
-<H2>OPTIONS</H2>
-
-<DL COMPACT>
-<DT><B>-I</B><I> datalist</I>, <B>--input</B> <I>datalist</I>
-
-<DD>
-Input MB-System datalist file. This option is required unless the datalist path
-is supplied as the first non-option argument.
-<DT><B>-O</B><I> outputdir</I>, <B>--output</B> <I>outputdir</I>
-
-<DD>
-Output directory for generated files. The directory is created if needed.
-The default is <I>mbmesh_output</I>.
-<DT><B>-R</B><I> west/east/south/north</I>, <B>--bounds</B> <I>west/east/south/north</I>
-
-<DD>
-Restrict accepted soundings to a geographic bounding box in degrees longitude
-and latitude.
-<DT><B>-L</B><I> meters</I>, <B>--lod</B> <I>meters</I>, <B>--level-of-detail</B> <I>meters</I>
-
-<DD>
-Requested smallest feature size in local meters. If omitted, <B>mbmesh</B>
-derives level of detail from estimated point spacing. The implementation clamps
-the resolved value to a supported range and uses it to derive default
-normal-estimation, Poisson, and trimming parameters.
-<DT><B>--decimate </B><I>meters</I>
-
-<DD>
-Enable voxel-grid point decimation with the specified cell size in local meters.
-The legacy single-dash form <B>-decimate</B> is also accepted.
-<DT><B>--metadata, --info</B>
-
-<DD>
-Print dataset metadata and exit before mesh reconstruction. The metadata
-includes input counts, geodetic bounds, and estimated point spacing.
-<DT><B>-V, --verbose</B>
-
-<DD>
-Enable progress and diagnostic logging.
-<DT><B>-H, -h, --help</B>
-
-<DD>
-Display help message and exit.
-</DL>
-<A NAME="lbAF">&nbsp;</A>
-<H2>OUTPUT OPTIONS</H2>
-
-<P>
-
-Every long option in this section also accepts a legacy single-dash form
-(e.g. <B>-html</B>, <B>-diagnostics</B>, <B>-all-outputs</B>) for backward
-compatibility.
-<DL COMPACT>
-<DT><B>--html</B>
-
-<DD>
-Also write <B>mesh.html</B>, an X3DOM viewer page that references
-<B>mesh.glb</B>, launch a local Python HTTP server, and open the viewer in the
-default web browser.
-<DT><B>--xyz</B>
-
-<DD>
-Also write both local and ECEF XYZ point cloud files.
-<DT><B>--local-xyz</B>
-
-<DD>
-Also write <B>pointcloud-local.xyz</B>, containing accepted and decimated
-soundings in the local Cartesian coordinate frame used for reconstruction.
-This is the same coordinate frame used by <B>mesh.glb</B>.
-<DT><B>--ecef-xyz</B>
-
-<DD>
-Also write <B>pointcloud-ecef.xyz</B>, containing accepted and decimated
-soundings in WGS84 Earth-Centered, Earth-Fixed coordinates.
-<DT><B>--oriented-ply</B>
-
-<DD>
-Also write <B>oriented-pointcloud-ecef.ply</B>, an oriented point cloud suitable
-for inspection.
-<DT><B>--pointcloud-glb</B>
-
-<DD>
-Also write <B>pointcloud.glb</B>, a diagnostic GLB point cloud for smaller
-datasets.
-<DT><B>--normal-glb</B>
-
-<DD>
-Also write <B>normals.glb</B>, diagnostic normal vectors for smaller datasets.
-<DT><B>--origin-glb</B>
-
-<DD>
-Also write <B>origins.glb</B>, diagnostic sensor-origin rays for smaller
-datasets.
-<DT><B>--raw-mesh-glb</B>
-
-<DD>
-Also write <B>raw_mesh.glb</B>, the untrimmed triangle mesh produced by marching
-cubes before support trimming.
-<DT><B>--diagnostics</B>
-
-<DD>
-Also write <B>pointcloud.glb</B>, <B>normals.glb</B>, and <B>origins.glb</B>.
-<DT><B>--all-outputs</B>
-
-<DD>
-Write all optional output files.
-</DL>
-<A NAME="lbAG">&nbsp;</A>
-<H2>EXAMPLES</H2>
-
-<P>
-
-Reconstruct a mesh and write the default <B>mesh.glb</B>:
-<DL COMPACT><DT><DD>
-<B>mbmesh -Idatalist.mb-1</B>
-
-</DL>
-
-<P>
-
-Write the mesh, X3DOM viewer, and local/ECEF XYZ point clouds:
-<DL COMPACT><DT><DD>
-<B>mbmesh -Idatalist.mb-1 -O output/mbmesh_run --html --xyz -V</B>
-
-</DL>
-
-<P>
-
-Restrict processing to a geographic region and request a coarser level of
-detail:
-<DL COMPACT><DT><DD>
-<B>mbmesh -Idatalist.mb-1 -R-122.5/-121.8/36.5/37.2 -L 0.5 -V</B>
-
-</DL>
-
-<P>
-
-Print dataset metadata without reconstructing a mesh:
-<DL COMPACT><DT><DD>
-<B>mbmesh -Idatalist.mb-1 --metadata</B>
-
-</DL>
-
-<A NAME="lbAH">&nbsp;</A>
-<H2>OUTPUT FILES</H2>
-
-<P>
-
-<B>mbmesh</B> always writes <B>mesh.glb</B>. Optional files are written only when
-their corresponding output options are supplied.
-<DL COMPACT>
-<DT><B>mesh.glb</B>
-
-<DD>
-Final trimmed triangle mesh in binary glTF format. Vertex positions are in the
-<B>mbmesh</B> local Cartesian coordinate frame.
-<DT><B>raw_mesh.glb</B>
-
-<DD>
-Optional untrimmed triangle mesh before support trimming.
-<DT><B>mesh.html</B>
-
-<DD>
-Optional X3DOM preview page referencing <B>mesh.glb</B>. When <B>--html</B> is
-used, <B>mbmesh</B> attempts to serve this page from the output directory and
-open it in the default web browser.
-<DT><B>pointcloud-local.xyz</B>
-
-<DD>
-Optional XYZ point cloud in the same local Cartesian coordinate frame as
-<B>mesh.glb</B>.
-<DT><B>pointcloud-ecef.xyz</B>
-
-<DD>
-Optional WGS84 Earth-Centered, Earth-Fixed XYZ point cloud.
-<DT><B>oriented-pointcloud-ecef.ply</B>
-
-<DD>
-Optional oriented ECEF point cloud.
-<DT><B>pointcloud.glb</B>
-
-<DD>
-Optional diagnostic point cloud GLB.
-<DT><B>normals.glb</B>
-
-<DD>
-Optional diagnostic normal-vector GLB.
-<DT><B>origins.glb</B>
-
-<DD>
-Optional diagnostic sensor-origin-ray GLB.
-</DL>
-<A NAME="lbAI">&nbsp;</A>
-<H2>PROCESSING NOTES</H2>
-
-<P>
-
-<B>Sounding filtering</B>
-
-<BR>
-
-<B>mbmesh</B> uses MB-System datalist processing and accepts valid bathymetry
-soundings. Geographic filtering is applied when <B>-R</B> is specified.
-<P>
-
-<B>Coordinate frame</B>
-
-<BR>
-
-<B>mbmesh</B> initializes its local Cartesian frame from the first accepted
-ping's sensor position. Sounding elevation is stored as negative bathymetry,
-and sensor elevation is stored as negative sensor depth. The local-to-geodetic
-conversion used for optional ECEF point-cloud outputs reverses this
-equirectangular approximation before converting to WGS84 ECEF coordinates.
-<P>
-
-<B>Automatic settings</B>
-
-<BR>
-
-The program estimates point spacing from accepted soundings and derives
-default normal-estimation, screened-Poisson, marching-cubes, and support
-trimming settings from the data and requested level of detail.
-<P>
-
-<B>Support trimming</B>
-
-<BR>
-
-Unsupported mesh regions are removed after marching cubes. If trimming removes
-the entire mesh, <B>mbmesh</B> exits with an error rather than writing an empty
-surface.
-<P>
-
-<A NAME="lbAJ">&nbsp;</A>
-<H2>MB-SYSTEM INTEGRATION</H2>
-
-<P>
-
-<B>mbmesh</B> integrates with the MB-System datalist processing framework and can
-read swath files in MB-System supported formats.
-<A NAME="lbAK">&nbsp;</A>
-<H2>AUTHOR</H2>
-
-<P>
-
-David W. Caress and Dale N. Chayes
-<BR>
-
-Monterey Bay Aquarium Research Institute
-<BR>
-
-Initial mbmesh implementation: CSUMB Capstone - Spring 2026
-<A NAME="lbAL">&nbsp;</A>
-<H2>SEE ALSO</H2>
-
-<B><A HREF="mb-system.html">mb-system</A></B>(1),
-
-<B><A HREF="mbgrid.html">mbgrid</A></B>(1),
-
-<B><A HREF="mbgrd2gltf.html">mbgrd2gltf</A></B>(1),
-
-<B><A HREF="mbgrdviz.html">mbgrdviz</A></B>(1)
-
-<P>
-
-<HR>
-<A NAME="index">&nbsp;</A><H2>Index</H2>
-<DL>
-<DT><A HREF="#lbAB">NAME</A><DD>
-<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
-<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
-<DT><A HREF="#lbAE">OPTIONS</A><DD>
-<DT><A HREF="#lbAF">OUTPUT OPTIONS</A><DD>
-<DT><A HREF="#lbAG">EXAMPLES</A><DD>
-<DT><A HREF="#lbAH">OUTPUT FILES</A><DD>
-<DT><A HREF="#lbAI">PROCESSING NOTES</A><DD>
-<DT><A HREF="#lbAJ">MB-SYSTEM INTEGRATION</A><DD>
-<DT><A HREF="#lbAK">AUTHOR</A><DD>
-<DT><A HREF="#lbAL">SEE ALSO</A><DD>
-</DL>
-<HR>
-</PRE>
-
-<CENTER><P><BR>
-Last Updated: 7 September 2026</P></CENTER>
-
-<HR>
-<center>
 <p>
 <a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
 </center>

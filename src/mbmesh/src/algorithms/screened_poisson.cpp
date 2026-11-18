@@ -1,5 +1,38 @@
  #include "algorithms/screened_poisson.h"
 
+#include "util/parallel.h"
+#include "util/stopwatch.h"
+
+#include <algorithm>
+#include <functional>
+#include <thread>
+
+const char *poisson_solver_name(PoissonSolver solver) {
+	switch (solver) {
+	case PoissonSolver::Jacobi:
+		return "jacobi";
+	case PoissonSolver::Sor:
+		return "sor";
+	}
+	return "unknown";
+}
+
+const char *poisson_solver_names() {
+	return "jacobi, sor";
+}
+
+bool parse_poisson_solver(const std::string &name, PoissonSolver *solver) {
+	if (name == "jacobi") {
+		*solver = PoissonSolver::Jacobi;
+		return true;
+	}
+	if (name == "sor") {
+		*solver = PoissonSolver::Sor;
+		return true;
+	}
+	return false;
+}
+
 Vec3 cell_index(Vec3 point, Vec3 origin, double cell_size) {
 	return Vec3(static_cast<int>(std::floor((point.x - origin.x) / cell_size)),
 	            static_cast<int>(std::floor((point.y - origin.y) / cell_size)),
@@ -42,7 +75,10 @@ double finite_difference_component(const VectorGrid3D &vector_grid, int x, int y
  * Extracts an implicit surface from an OrientedPoint set.
  ******************************************************************************/
 
-ScalarGrid3D screened_poisson(const OrientedPointCloud &oriented_points, ScreenedPoissonOptions options) {
+ScalarGrid3D screened_poisson(const OrientedPointCloud &oriented_points, ScreenedPoissonOptions options,
+                              PoissonDiagnostics *diagnostics) {
+
+	const mbmesh::Stopwatch splat_timer;
 
 	if (oriented_points.empty() || options.cell_size <= 0.0 || options.normal_splat_radius <= 0.0) {
 		return ScalarGrid3D();
@@ -56,7 +92,9 @@ ScalarGrid3D screened_poisson(const OrientedPointCloud &oriented_points, Screene
 	 * observed surface instead of being clipped at the input bounds.
 	 **************************************************************************/
 
-	const ReconstructionDomain domain(oriented_points, options.padding, options.cell_size);
+	const ReconstructionDomain domain = options.use_fixed_domain
+	                                        ? ReconstructionDomain(options.domain_bounds, options.cell_size)
+	                                        : ReconstructionDomain(oriented_points, options.padding, options.cell_size);
 
 	/**************************************************************************
 	 * Step 2: Splat oriented samples into a vector field.
@@ -219,40 +257,183 @@ ScalarGrid3D screened_poisson(const OrientedPointCloud &oriented_points, Screene
 
 	ScalarGrid3D scalar_indicator_field(domain);
 
-	ScalarGrid3D next_iteration(domain);
-	const int iteration_count = std::max(0, options.solver_iterations);
+	// Jacobi writes each sweep to a second grid; sor updates the field in place.
+	ScalarGrid3D next_iteration;
+	if (options.solver == PoissonSolver::Jacobi) {
+		next_iteration = ScalarGrid3D(domain);
+	}
+	int iteration_count = std::max(0, options.solver_iterations);
+	if (iteration_count == 0) {
+		iteration_count = options.solver == PoissonSolver::Sor
+		                      ? std::max({50, static_cast<int>(scalar_indicator_field.nx), static_cast<int>(scalar_indicator_field.ny),
+		                                static_cast<int>(scalar_indicator_field.nz)})
+		                      : 200;
+	}
+	const double cell_size_squared = scalar_indicator_field.cell_size * scalar_indicator_field.cell_size;
 
-	for (int iteration = 0; iteration < iteration_count; iteration++) {
+	// Nodes that hold the values of a neighbor and are not solved for.
+	std::vector<unsigned char> fixed_nodes;
+	std::size_t fixed_count = 0;
+	if (options.fix_nodes) {
+		fixed_nodes.assign(scalar_indicator_field.values.size(), 0);
+		fixed_count = options.fix_nodes(&scalar_indicator_field, &fixed_nodes);
+		if (fixed_count == 0) {
+			fixed_nodes.clear();
+		}
+	}
+	const bool has_fixed_nodes = !fixed_nodes.empty();
 
-		std::fill(next_iteration.values.begin(), next_iteration.values.end(), 0.0);
+	// The equation at an interior cell is  diagonal * u = (sum of the six neighbors) + right_hand_side.
+	const auto cell_equation = [&](int x, int y, int z, double *diagonal, double *right_hand_side) {
+		*diagonal = 6.0;
+		*right_hand_side = -cell_size_squared * normal_divergence.at(x, y, z);
 
+		if (options.use_screening && options.screening_weight > 0.0) {
+			const double sample_weight = screening_weights.at(x, y, z);
+			if (sample_weight > 0.0) {
+				const double scaled_screening_weight = cell_size_squared * options.screening_weight * sample_weight;
+				*diagonal += scaled_screening_weight;
+				*right_hand_side += scaled_screening_weight * screening_targets.at(x, y, z);
+			}
+		}
+	};
+
+	// Relative residual of the current field; see PoissonDiagnostics.
+	const auto relative_residual = [&]() {
+		double residual_sum = 0.0;
+		double right_hand_side_sum = 0.0;
 		for (int z = 1; z < scalar_indicator_field.nz - 1; z++) {
 			for (int y = 1; y < scalar_indicator_field.ny - 1; y++) {
 				for (int x = 1; x < scalar_indicator_field.nx - 1; x++) {
-
+					if (has_fixed_nodes && fixed_nodes[scalar_indicator_field.index(x, y, z)] != 0) {
+						continue;
+					}
+					double diagonal = 0.0;
+					double right_hand_side = 0.0;
+					cell_equation(x, y, z, &diagonal, &right_hand_side);
 					const double neighbor_sum = scalar_indicator_field.at(x - 1, y, z) + scalar_indicator_field.at(x + 1, y, z) +
 					                            scalar_indicator_field.at(x, y - 1, z) + scalar_indicator_field.at(x, y + 1, z) +
 					                            scalar_indicator_field.at(x, y, z - 1) + scalar_indicator_field.at(x, y, z + 1);
-
-					const double cell_size_squared = scalar_indicator_field.cell_size * scalar_indicator_field.cell_size;
-					double diagonal = 6.0;
-					double numerator = neighbor_sum - cell_size_squared * normal_divergence.at(x, y, z);
-
-					if (options.use_screening && options.screening_weight > 0.0) {
-						const double sample_weight = screening_weights.at(x, y, z);
-						if (sample_weight > 0.0) {
-							const double scaled_screening_weight = cell_size_squared * options.screening_weight * sample_weight;
-							diagonal += scaled_screening_weight;
-							numerator += scaled_screening_weight * screening_targets.at(x, y, z);
-						}
-					}
-
-					next_iteration.at(x, y, z) = numerator / diagonal;
+					const double residual = neighbor_sum + right_hand_side - diagonal * scalar_indicator_field.at(x, y, z);
+					residual_sum += residual * residual;
+					right_hand_side_sum += right_hand_side * right_hand_side;
 				}
 			}
 		}
+		return right_hand_side_sum > 0.0 ? std::sqrt(residual_sum / right_hand_side_sum) : 0.0;
+	};
 
-		scalar_indicator_field.values.swap(next_iteration.values);
+	// Over-relaxation factor of sor. Without the screening term, the Jacobi iteration
+	// matrix of the 7-point Laplacian on this grid has the spectral radius
+	// (cos(pi/nx) + cos(pi/ny) + cos(pi/nz)) / 3, and the best factor is
+	// 2 / (1 + sqrt(1 - radius^2)). Screening only strengthens the diagonal, so that
+	// factor still converges (any factor below 2 does); it is kept below 1.98 so that
+	// a very large grid cannot push it to 2.
+	double relaxation = 1.0;
+	if (options.solver == PoissonSolver::Sor) {
+		const double pi = std::acos(-1.0);
+		const auto width = [](auto cells) { return std::max(2.0, static_cast<double>(cells) - 1.0); };
+		const double radius = (std::cos(pi / width(scalar_indicator_field.nx)) + std::cos(pi / width(scalar_indicator_field.ny)) +
+		                       std::cos(pi / width(scalar_indicator_field.nz))) / 3.0;
+		relaxation = std::min(1.98, 2.0 / (1.0 + std::sqrt(std::max(0.0, 1.0 - radius * radius))));
+	}
+
+	if (diagnostics != nullptr) {
+		*diagnostics = PoissonDiagnostics();
+		diagnostics->relaxation = relaxation;
+		diagnostics->solver = options.solver;
+		diagnostics->cells = static_cast<long long>(domain.nx) * domain.ny * domain.nz;
+		diagnostics->iterations = iteration_count;
+		diagnostics->splat_seconds = splat_timer.seconds();
+	}
+
+	// Runs body(first z, one past the last z) over the interior slabs of the grid, split between the threads of the solve. Each color
+	// of sor and each sweep of jacobi writes a cell from cells that no thread writes in the same pass, so the result does not
+	// depend on the number of threads.
+	const int solver_threads = std::max(1, std::min({options.threads, static_cast<int>(scalar_indicator_field.nz) / 8, 64}));
+	const auto run_slabs = [&](const std::function<void(int, int)> &body) {
+		mbmesh::parallel_for_ranges(1, static_cast<long>(scalar_indicator_field.nz) - 1, solver_threads,
+		                            [&](long begin, long end) { body(static_cast<int>(begin), static_cast<int>(end)); });
+	};
+
+	const mbmesh::Stopwatch solve_timer;
+	double residual_seconds = 0.0;   // measuring the residual is not part of the solve
+
+	for (int iteration = 0; iteration < iteration_count; iteration++) {
+
+		if (options.solver == PoissonSolver::Sor) {
+
+			// Red-black order: the cells whose x + y + z is even, then those where it is
+			// odd. A cell's six neighbors all have the other color, so each color can be
+			// updated in place and the result does not depend on the order within it.
+			for (int color = 0; color < 2; color++) {
+				run_slabs([&](int z_begin, int z_end) {
+				for (int z = z_begin; z < z_end; z++) {
+					for (int y = 1; y < scalar_indicator_field.ny - 1; y++) {
+						const int first_x = ((1 + y + z) & 1) == color ? 1 : 2;
+						for (int x = first_x; x < scalar_indicator_field.nx - 1; x += 2) {
+
+							if (has_fixed_nodes && fixed_nodes[scalar_indicator_field.index(x, y, z)] != 0) {
+								continue;
+							}
+							const double neighbor_sum = scalar_indicator_field.at(x - 1, y, z) + scalar_indicator_field.at(x + 1, y, z) +
+							                            scalar_indicator_field.at(x, y - 1, z) + scalar_indicator_field.at(x, y + 1, z) +
+							                            scalar_indicator_field.at(x, y, z - 1) + scalar_indicator_field.at(x, y, z + 1);
+
+							double diagonal = 0.0;
+							double right_hand_side = 0.0;
+							cell_equation(x, y, z, &diagonal, &right_hand_side);
+
+							double &value = scalar_indicator_field.at(x, y, z);
+							value += relaxation * ((neighbor_sum + right_hand_side) / diagonal - value);
+						}
+					}
+				}
+				});
+			}
+		}
+		else {
+
+			std::fill(next_iteration.values.begin(), next_iteration.values.end(), 0.0);
+
+			run_slabs([&](int z_begin, int z_end) {
+			for (int z = z_begin; z < z_end; z++) {
+				for (int y = 1; y < scalar_indicator_field.ny - 1; y++) {
+					for (int x = 1; x < scalar_indicator_field.nx - 1; x++) {
+
+						if (has_fixed_nodes && fixed_nodes[scalar_indicator_field.index(x, y, z)] != 0) {
+							next_iteration.at(x, y, z) = scalar_indicator_field.at(x, y, z);
+							continue;
+						}
+						const double neighbor_sum = scalar_indicator_field.at(x - 1, y, z) + scalar_indicator_field.at(x + 1, y, z) +
+						                            scalar_indicator_field.at(x, y - 1, z) + scalar_indicator_field.at(x, y + 1, z) +
+						                            scalar_indicator_field.at(x, y, z - 1) + scalar_indicator_field.at(x, y, z + 1);
+
+						double diagonal = 0.0;
+						double right_hand_side = 0.0;
+						cell_equation(x, y, z, &diagonal, &right_hand_side);
+
+						next_iteration.at(x, y, z) = (neighbor_sum + right_hand_side) / diagonal;
+					}
+				}
+			}
+			});
+
+			scalar_indicator_field.values.swap(next_iteration.values);
+		}
+
+		if (diagnostics != nullptr && iteration + 1 == iteration_count / 2 && iteration + 1 < iteration_count) {
+			const mbmesh::Stopwatch residual_timer;
+			diagnostics->residual_midway = relative_residual();
+			residual_seconds += residual_timer.seconds();
+		}
+	}
+
+	if (diagnostics != nullptr) {
+		const mbmesh::Stopwatch residual_timer;
+		diagnostics->residual_final = relative_residual();
+		residual_seconds += residual_timer.seconds();
+		diagnostics->solve_seconds = solve_timer.seconds() - residual_seconds;
 	}
 
 	/**************************************************************************
@@ -262,6 +443,10 @@ ScalarGrid3D screened_poisson(const OrientedPointCloud &oriented_points, Screene
 	 * the average scalar value at the input samples, the surface samples
 	 * cluster around iso_value = 0.0.
 	 **************************************************************************/
+
+	if (has_fixed_nodes) {
+		return scalar_indicator_field;
+	}
 
 	double scalar_sum = 0.0;
 

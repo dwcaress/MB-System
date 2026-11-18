@@ -1,0 +1,158 @@
+#!/usr/bin/env python3
+#--------------------------------------------------------------------
+#    The MB-system:  mbpy_3dtiles
+#
+#    Copyright (c) 2026 by
+#    David W. Caress (caress@mbari.org)
+#      Monterey Bay Aquarium Research Institute
+#      Moss Landing, California, USA
+#
+#    See README.md file for copying and redistribution conditions.
+#--------------------------------------------------------------------
+#
+# Purpose:
+#   Macro to generate a shellscript which, when executed, makes the standard
+#   3D products of a survey with mbgrd2gltf, mbmesh and mbglb2tiles: GLBs of
+#   the grid and the mesh of each kind of data, OGC 3D Tiles tilesets of levels
+#   of detail, and X3DOM and CesiumJS pages, including a survey page that offers all of it.
+#   The inputs of each subdirectory of the survey directory (multibeam and
+#   lidar) are a grid, ZTopo.grd, and a datalist, datalistp.mb-1.
+#   Like the other macros it writes the shellscript and, with -X, runs it. The shellscript runs each command only if one of its outputs is missing or older than
+#   one of its inputs (modification times); --force makes everything again.
+#   See src/macros/python/mbpy_3dtiles_script.py for the commands.
+#
+# Usage:
+#   mbpy_3dtiles                      (in a survey directory)
+#   mbpy_3dtiles -I survey_directory -O root -X
+#   mbpy_3dtiles --geoorigin=-122.304,36.3928,-842.845 --lift 856 -X
+#
+import argparse
+import os
+import shlex
+import shutil
+import subprocess
+import sys
+
+# The sibling module sits beside this script once installed (flat bindir), and in
+# python/ of a checkout.
+_here = os.path.dirname(os.path.realpath(__file__))
+for _candidate in (_here, os.path.join(_here, "python")):
+    if _candidate not in sys.path:
+        sys.path.insert(0, _candidate)
+
+import mbpy_3dtiles_script as script
+
+
+def build_arg_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(
+        prog="mbpy_3dtiles",
+        description="Generate a shellscript that makes the 3D products of a survey (GLBs, OGC 3D Tiles tilesets and X3DOM pages) "
+                    "with mbgrd2gltf, mbmesh and mbglb2tiles, from the ZTopo.grd and datalistp.mb-1 of each subdirectory.",
+        epilog="A value that begins with a minus has to be attached with an equals sign, for example --geoorigin=-122.3,36.4,-840",
+    )
+    g = p.add_argument_group("input/output")
+    g.add_argument("-I", "--input", default=".", metavar="DIR", help="the survey directory [the current directory]")
+    g.add_argument("-O", "--output", default="3dtiles", metavar="ROOT", help="the shellscript is ROOT.sh, in the survey directory unless ROOT has a path [3dtiles]")
+    g.add_argument("--subdir", action="append", metavar="NAME", help="a subdirectory of the survey directory to process, which can be repeated; those that are not there are left out [multibeam, lidar]")
+    g.add_argument("--grid", default="ZTopo.grd", metavar="NAME", help="the grid file of each subdirectory [ZTopo.grd]")
+    g.add_argument("--datalist", default="datalistp.mb-1", metavar="NAME", help="the datalist of each subdirectory [datalistp.mb-1]")
+    g.add_argument("-X", "--execute", action="store_true", help="run the generated shellscript")
+    g.add_argument("--force", action="store_true", help="make every product again; without it a command is run only if one of its outputs is missing or older than one of its inputs, "
+                   "by modification times (FORCE=1 does the same for a shellscript that was made without --force)")
+    g.add_argument("-V", "--verbose", action="store_true", help="print how the GeoOrigin and the lift were set, and the commands, each marked will run or skipped, with the reason, as the modification times are now")
+
+    g = p.add_argument_group("products")
+    g.add_argument("--geoorigin", metavar="LON,LAT,ELEV", help="the GeoOrigin of every program, with the height above the ellipsoid; there is one for the survey [the center of the grid of the reference subdirectory and the mean of its heights, from gmt grdinfo]")
+    g.add_argument("--lift", metavar="METERS", help="how far every tileset is lifted above the ellipsoid, so that GeoTileset refines it [enough to put the lowest point of the grid of the reference subdirectory 10 m above it, to a meter]")
+    g.add_argument("--reference-subdir", default=script.DEFAULT_REFERENCE_SUBDIR, metavar="NAME", help="the subdirectory whose grid sets the GeoOrigin and the lift of the whole survey [multibeam]")
+    g.add_argument("-L", "--lod", type=float, default=0.1, metavar="METERS", help="mbmesh: the smallest feature size [0.1]")
+    g.add_argument("--threads", type=int, default=8, metavar="N", help="mbmesh: chunks reconstructed at once [8]")
+    g.add_argument("--no-label-chunks", action="store_true", help="mbmesh: do not draw the outline and the name of each chunk in the page")
+    g.add_argument("--x3dom-url", default="./x3dom-full.js", metavar="URL", help="the X3DOM script of the pages of mbglb2tiles and of the survey; a GeoTileset needs a build that has it [./x3dom-full.js]. "
+                   "It is relative to each page, so that every page needs to find it there")
+    g.add_argument("--no-cesium-html", action="store_true", help="do not make the pages for CesiumJS (--cesium-html of each program)")
+    g.add_argument("--cesium-url", metavar="URL", help="the directory of the CesiumJS build of the pages for CesiumJS [each program's default, release 1.114 from Cesium's web site]")
+    g.add_argument("--no-survey-page", action="store_true", help="do not make the survey page, mbmesh_survey.html")
+    g.add_argument("--mbgrd2gltf-args", default="", metavar="ARGS", help="more options for each mbgrd2gltf, as one quoted string, with '=' after the option: --mbgrd2gltf-args='-E 2'")
+    g.add_argument("--mbmesh-args", default="", metavar="ARGS", help="more options for each mbmesh that reads a datalist")
+    g.add_argument("--mbglb2tiles-args", default="", metavar="ARGS", help="more options for each mbglb2tiles")
+    return p
+
+
+def main(argv=None) -> int:
+    args = build_arg_parser().parse_args(argv)
+    survey = args.input
+    if not os.path.isdir(survey):
+        print(f"\nSpecified survey directory {survey} does not exist!\nmbpy_3dtiles aborted", file=sys.stderr)
+        return 1
+
+    options = script.TilesOptions(
+        survey_directory=survey, subdirectories=tuple(args.subdir) if args.subdir else script.DEFAULT_SUBDIRS,
+        grid_name=args.grid, datalist_name=args.datalist, lod=args.lod, threads=args.threads,
+        label_chunks=not args.no_label_chunks, x3dom_url=args.x3dom_url, survey_page=not args.no_survey_page,
+        cesium_html=not args.no_cesium_html, cesium_url=args.cesium_url, force=args.force,
+        extra_mbgrd2gltf=shlex.split(args.mbgrd2gltf_args), extra_mbmesh=shlex.split(args.mbmesh_args),
+        extra_mbglb2tiles=shlex.split(args.mbglb2tiles_args))
+
+    subdirectories = script.existing_subdirectories(options)
+    if not subdirectories:
+        print(f"\nNo {options.grid_name} or {options.datalist_name} in {', '.join(os.path.join(survey, d) for d in options.subdirectories)}!\nmbpy_3dtiles aborted", file=sys.stderr)
+        return 1
+
+    # A standard input that a subdirectory lacks is a warning, which is printed whatever -V says
+    for warning in script.missing_inputs(options):
+        print(f"Warning: {warning}", file=sys.stderr)
+
+    # The one GeoOrigin and the lift of the survey, from the command line or from the grid of the reference subdirectory
+    try:
+        reference = os.path.join(survey, args.reference_subdir, options.grid_name)
+        extent = script.read_grid_extent(reference) if os.path.isfile(reference) and not (args.geoorigin and args.lift) else None
+        if args.geoorigin:
+            lon, lat, height = (float(v) for v in args.geoorigin.split(","))
+            options.geoorigin = (lon, lat, height)
+        elif extent:
+            options.geoorigin = script.geoorigin_of([extent])
+        else:
+            print(f"\n{reference} not found to take the GeoOrigin from: give --geoorigin, or --reference-subdir\nmbpy_3dtiles aborted", file=sys.stderr)
+            return 1
+        if args.lift:
+            options.lift_meters = float(args.lift)
+        elif extent:
+            options.lift_meters = script.lift_of([extent])
+        else:
+            print(f"\n{reference} not found to take the lift from: give --lift, or --reference-subdir\nmbpy_3dtiles aborted", file=sys.stderr)
+            return 1
+    except (ValueError, RuntimeError) as e:
+        print(f"\n{e}\nmbpy_3dtiles aborted", file=sys.stderr)
+        return 1
+
+    root = args.output
+    script_path = root + ".sh" if os.path.dirname(root) else os.path.join(survey, root + ".sh")
+    commands = script.generate_and_write(options, script_path, "mbpy_3dtiles " + " ".join(shlex.quote(a) for a in (argv if argv is not None else sys.argv[1:])))
+
+    missing = sorted({c.program for c in commands if shutil.which(c.program) is None})
+    if args.verbose:
+        status = script.freshness(options, commands)
+        print(f"Generated {script_path}")
+        print(f"  GeoOrigin: {script.geoorigin_option(options.geoorigin)[len('--geoorigin='):]} ({'given' if args.geoorigin else 'from ' + reference})")
+        print(f"  Lift: {script.format_number(options.lift_meters, 3)} m ({'given' if args.lift else 'from ' + reference})")
+        if options.force:
+            print("  --force: the script runs every command, whatever the modification times say")
+        else:
+            print("  A command is run only if one of its outputs is missing or older than one of its inputs; the script looks at the files each time it runs. As they are now:")
+        for command, (runs, why) in zip(commands, status):
+            print(f"  {'will run' if runs else 'skipped':<9}{command.line()}")
+            print(f"            {why}")
+        count = sum(1 for runs, _ in status if runs)
+        print(f"  {count} of {len(commands)} commands will run now, {len(commands) - count} are up to date" + ("" if options.force else "; --force runs all of them"))
+    if missing:
+        print(f"Not found on the PATH: {', '.join(missing)}", file=sys.stderr)
+        if args.execute:
+            return 1
+    if args.execute:
+        subprocess.run(["bash", script_path], check=True)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
