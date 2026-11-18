@@ -133,6 +133,12 @@ int BatchRenderer::batch_resources() const {
 int BatchRenderer::resources() const { return fixed_resources() + batch_resources(); }
 
 bool BatchRenderer::create(QRhiRenderPassDescriptor *pass, int samples) {
+  /* the time of this call, however it returns (RenderStats::create_ms) */
+  const Clock::time_point start = Clock::now();
+  const auto timed = [&](bool made) {
+    stats_.create_ms = milliseconds(start, Clock::now());
+    return made;
+  };
   release_view();
   release_batch_part();
   /* Qt's Metal backend keeps every buffer that is not a storage buffer once
@@ -150,16 +156,16 @@ bool BatchRenderer::create(QRhiRenderPassDescriptor *pass, int samples) {
      without instancing nothing is drawn, rather than a view that lacks
      them */
   if (!rhi_->isFeatureSupported(QRhi::Instancing))
-    return false;
+    return timed(false);
 
   pass_.reset(pass->newCompatibleRenderPassDescriptor());
   samples_ = samples;
   if (!make_fixed()) {
     release_view();
     release_batch_part();
-    return false;
+    return timed(false);
   }
-  return true;
+  return timed(true);
 }
 
 bool BatchRenderer::make_fixed() {
