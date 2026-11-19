@@ -8826,8 +8826,8 @@ int mbsys_reson7k3_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr
 /* Check the Compressed Water Column record (7042) of the current ping and get its number
     of beams, the largest number of samples of a beam and the sample rate of the record.
     Returns false if the ping has no usable water column: no 7042 record, a 7042 record of
-    another ping (copies of the store do not copy it), or a beam without a beam geometry
-    (7004) angle. */
+    another ping (copies of the store do not copy it), no sample rate, a beam without a
+    beam geometry (7004) angle, or a beam with more samples than its buffer holds. */
 static bool mbsys_reson7k3_wc_size(const struct mbsys_reson7k3_struct *store, int *nbeams, int *nsamples_max,
                                    double *sample_rate) {
   *nbeams = 0;
@@ -8852,24 +8852,39 @@ static bool mbsys_reson7k3_wc_size(const struct mbsys_reson7k3_struct *store, in
     return false;
 
   /* the sample rate of the record is the rate after downsampling; without it use the
-      sonar's sample rate (7000) divided by the downsampling divisor (flags bits 4-7),
-      which applies only with a downsampling type (flags bits 8-11) */
+      sonar's sample rate of this ping, from its sonar settings (7000) or else its
+      detections (7027, or the first segment of 7047), divided by the downsampling divisor
+      (flags bits 4-7), which applies only with a downsampling type (flags bits 8-11) */
   *sample_rate = CompressedWaterColumn->sample_rate;
   if (!(*sample_rate > 0.0)) {
+    double sonar_rate = 0.0;
+    if (store->read_SonarSettings && store->SonarSettings.ping_number == ping_number)
+      sonar_rate = store->SonarSettings.sample_rate;
+    if (!(sonar_rate > 0.0) && store->read_RawDetection)
+      sonar_rate = store->RawDetection.sampling_rate;
+    const s7k3_SegmentedRawDetection *SegmentedRawDetection = &(store->SegmentedRawDetection);
+    if (!(sonar_rate > 0.0) && store->read_SegmentedRawDetection && SegmentedRawDetection->ping_number == ping_number
+        && SegmentedRawDetection->n_segments > 0)
+      sonar_rate = SegmentedRawDetection->segmentedrawdetectiontxdata[0].sampling_rate;
     const unsigned int divisor = (CompressedWaterColumn->flags & 0x00F0) >> 4;
     const unsigned int type = (CompressedWaterColumn->flags & 0x0F00) >> 8;
-    *sample_rate = store->SonarSettings.sample_rate / ((type != 0 && divisor > 1) ? divisor : 1);
+    *sample_rate = sonar_rate / ((type != 0 && divisor > 1) ? divisor : 1);
   }
   if (!(*sample_rate > 0.0) || !isfinite(*sample_rate))
     return false;
 
+  /* every beam's samples must lie in its buffer */
+  const size_t samplesize = CompressedWaterColumn->magsamplesize + CompressedWaterColumn->phasesamplesize;
+  if (samplesize == 0)
+    return false;
   for (unsigned int i = 0; i < CompressedWaterColumn->number_beams; i++) {
     const s7k3_compressedwatercolumndata *compressedwatercolumndata =
         &(CompressedWaterColumn->compressedwatercolumndata[i]);
     if (compressedwatercolumndata->beam_number >= BeamGeometry->number_beams
         || compressedwatercolumndata->beam_number >= MBSYS_RESON7K_MAX_BEAMS
         || compressedwatercolumndata->samples > (unsigned int)INT_MAX
-        || (compressedwatercolumndata->samples > 0 && compressedwatercolumndata->data == NULL))
+        || (compressedwatercolumndata->samples > 0 && compressedwatercolumndata->data == NULL)
+        || compressedwatercolumndata->samples > compressedwatercolumndata->nalloc / samplesize)
       return false;
     *nsamples_max = MAX(*nsamples_max, (int)compressedwatercolumndata->samples);
   }
@@ -8973,19 +8988,21 @@ int mbsys_reson7k3_extract_wc(int verbose, void *mbio_ptr, void *store_ptr, int 
       s7k3_RawDetection *RawDetection = &(store->RawDetection);
       s7k3_SonarSettings *SonarSettings = &(store->SonarSettings);
 
-      /* sound speed at the transducer as for the bathymetry: sonar settings (7000), else
-          sound velocity (7610), else 1500 m/s */
+      /* sound speed at the transducer as for the bathymetry (mbsys_reson7k3_preprocess):
+          the last sonar settings (7000) read, else 1500 m/s */
       double sv = 1500.0;
       if (SonarSettings->sound_velocity > 0.0)
         sv = SonarSettings->sound_velocity;
-      else if (store->SoundVelocity.soundvelocity > 0.0)
-        sv = store->SoundVelocity.soundvelocity;
 
       /* the beam angles (7004, radians, positive to starboard) are taken relative to the
           sonar, as the bathymetry takes them, whatever the roll compensation flag (7000
           receive flags bit 0) says (the angles of a T50 line with the flag set were
           relative to the sonar): subtract the roll at the ping that the bathymetry
-          calculation stored with the detections (radians) */
+          calculation stored with the detections (radians, the transmitter's roll).
+          The roll at each echo's arrival and the pitch, which the bathymetry applies to
+          each detection, mount angles that differ between the arrays, sound speed
+          corrections and the geometry of soundings logged by PDS are not applied (see
+          mbio.3) */
       double roll = 0.0;
       if (store->read_RawDetection && RawDetection->optionaldata)
         roll = RawDetection->roll;

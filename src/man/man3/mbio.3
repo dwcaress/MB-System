@@ -2960,13 +2960,29 @@ the water column record.
 For Reson and Teledyne 7k data (format 89, *.s7k files and their processed
 *.mb89 copies) the water column is the ping's Compressed Water Column record
 (7042), read with the ping, so \fBmb_extract_wc\fP applies to \fBMB_DATA_DATA\fP
-records. The beam angles are those of the Beam Geometry record (7004), turned to
-the vertical with the roll at the ping, as for the bathymetry: they are taken as
-relative to the sonar, whatever the roll compensation flag of the Sonar Settings
-record (7000) says. The along track angle is the
-transmit steering, the detection that of the beam's primary detection in the Raw
-Detection record, the sound speed that of the Sonar Settings record (7000),
-\fIsample_interval\fP that of the record (after any downsampling) and \fIswath\fP
+records. The beam angles are those of the Beam Geometry record (7004), taken as
+relative to the sonar whatever the roll compensation flag of the Sonar Settings
+record (7000) says, and turned to the vertical with the roll at transmit that the
+bathymetry calculation stored with the detections. The along track angle is the
+transmit steering of the Raw Detection record (7027); for pings whose detections are
+a Segmented Raw Detection record (7047) it is the steering of the 7000 record, not
+that of the 7047 segments. The soundings MB-System calculates turn each detection
+with the roll at the arrival of its echo and include the pitch. So the water column
+angles match them across track only while the platform does not roll between
+transmit and echo (a roll rate of r degrees per second turns a beam whose echo
+returns after t seconds by r times t degrees), and without transmit steering the
+water column detections lie deeper than the soundings, by the soundings' depth
+below the sonar times (1/cos(pitch) - 1).
+Nor do the angles follow mount angles that differ between the two arrays or a
+reversed array (from a platform file), a sound speed correction by
+\fBmbpreprocess\fP (which changes the 7000 sound speed and the detection angles,
+not the 7004 angles), or the mount angles that Teledyne PDS includes in the
+soundings it logs. The detection is that of the beam's primary detection in the Raw
+Detection record (7027), the sound speed that of the last Sonar Settings record
+(7000) read, as for the soundings (1500 m/s if it gives none),
+\fIsample_interval\fP that of the 7042 record (after any downsampling; without it
+the sonar's sample rate of the ping, from its 7000, 7027 or 7047 record, divided by
+the downsampling divisor) and \fIswath\fP
 is 0. The amplitudes are 20 log10 of the logged magnitudes, in dB relative to one
 magnitude count with the sonar's gain and TVG applied; 8 bit samples, logged as
 factor x log10(magnitude) with a factor of 40 unless the record gives one, are
