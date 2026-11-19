@@ -25,9 +25,9 @@
  * MBWCDVIEW displays water column data, one swath at a time, read through MBIO.
  * Opening a Kongsberg *.kmwcd, *.kmall, *.wcd or *.all finds the other file of the line,
  * so the soundings, navigation and transducer depth of the *.kmall or *.all can be shown
- * with the water column of the *.kmwcd or *.wcd. The samples are ray traced through the logged sound
- * velocity profile. Without a window, --dump prints a summary of a line and
- * --export writes an image of one swath.
+ * with the water column of the *.kmwcd or *.wcd; Reson 7k *.s7k files hold both. The samples
+ * are ray traced through the logged sound velocity profile. Without a window, --dump prints
+ * a summary of a line and --export writes an image of one swath.
  *
  * Author:  C. dos Santos Ferreira
  * Date:    November 1, 2026
@@ -58,7 +58,8 @@ constexpr char program_name[] = "MBWCDVIEW";
 constexpr char help_message[] =
     "MBWCDVIEW displays water column data, one swath at a time, read through MBIO.\n"
     "Opening a Kongsberg *.kmwcd, *.kmall, *.wcd or *.all finds the other file of the survey\n"
-    "line, so that its soundings and navigation are shown with the water column.\n"
+    "line, so that its soundings and navigation are shown with the water column; Reson 7k\n"
+    "*.s7k files hold both.\n"
     "--dump prints a summary of the line and --export writes an image of one swath,\n"
     "both without opening a window.";
 constexpr char usage_message[] =
@@ -180,7 +181,7 @@ int main(int argc, char **argv) {
     wcd::build_scene(line, i, s, scene, data, info);
     wcd::WcdPlot plot;
     plot.setColorRange(line.wc.amp_min, line.wc.amp_max);
-    plot.setDepthWindow(0.0, 1.0e5);
+    plot.setDepthWindow(line.default_depth_min(), 1.0e5);
     plot.setData(std::move(data));
     const QString caption = QString::fromStdString(input.substr(input.find_last_of("/\\") + 1)) + " | " +
                             wcd::metadata_text(line, i, s);

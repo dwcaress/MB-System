@@ -200,7 +200,7 @@ WaterColumnWidget::WaterColumnWidget(Presentation presentation, QWidget *parent)
     bar->setObjectName("panel_bar");
     bar->setToolButtonStyle(Qt::ToolButtonTextOnly);
   }
-  auto *open = new QPushButton(panel ? "Open" : "Open .kmwcd/.kmall/.wcd/.all");
+  auto *open = new QPushButton(panel ? "Open" : "Open .kmwcd/.kmall/.wcd/.all/.s7k");
   connect(open, &QPushButton::clicked, this, &WaterColumnWidget::openDialog);
   to_header(open);
   file_name_ = new QLabel("No file loaded");
@@ -358,7 +358,8 @@ void WaterColumnWidget::showStatus(const QString &message, int timeout_ms) { emi
 
 /*--------------------------------------------------------------------*/
 void WaterColumnWidget::openDialog() {
-  const QString path = QFileDialog::getOpenFileName(this, "Open .kmwcd/.kmall/.wcd/.all", "", "*.kmwcd *.kmall *.wcd *.all");
+  const QString path = QFileDialog::getOpenFileName(this, "Open .kmwcd/.kmall/.wcd/.all/.s7k", "",
+                                                    "Swath files (*.kmwcd *.kmall *.wcd *.all *.s7k);;All files (*)");
   if (!path.isEmpty())
     openFile(path);
 }
@@ -443,7 +444,7 @@ void WaterColumnWidget::finishOpen(const QString &path, Line line, bool ok, cons
   const double depth_max = wc.range_max_m + draft_max;
   dmin_->setRange(0, depth_max);
   dmax_->setRange(0, depth_max);
-  dmin_->setValue(0);
+  dmin_->setValue(line_.default_depth_min());
   dmax_->setValue(depth_max);
   xmax_->setRange(0, wc.range_max_m > 0 ? 2.0 * wc.range_max_m : 1.0e5);
   xmax_->setValue(0);

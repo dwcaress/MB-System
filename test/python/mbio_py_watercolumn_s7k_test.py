@@ -104,6 +104,21 @@ class WaterColumnS7kTest(unittest.TestCase):
     self.assertEqual(wcf.amp_min, 0.0)
     np.testing.assert_array_equal(wcf.ping_numbers, [S.PING0 + p for p in range(S.NPINGS) if p not in S.NO_WC])
 
+  def test_line(self):
+    """A *.s7k is both the survey file and the water column file of its line."""
+    line = mb.KongsbergLine(self.s7k)
+    self.assertEqual((line.kmall, line.kmwcd), (self.s7k, self.s7k))
+    self.assertEqual(line.matched, S.NPINGS - len(S.NO_WC))
+    for i in range(len(line.wc)):
+      j = line.survey_index(i)
+      self.assertEqual(line.survey.ping_number[j], line.wc.ping_numbers[i])
+      self.assertAlmostEqual(line.draft(i), S.SENSORDEPTH, places=3)
+    t = line.wc.times[1]
+    lon, lat, _, _ = line.nav_at(t)
+    lat_s, lon_s = S.position(t)
+    self.assertAlmostEqual(lat, lat_s, places=7)
+    self.assertAlmostEqual(lon, lon_s, places=7)
+
   def test_soundings(self):
     s = mb.load_survey(self.s7k)
     self.assertEqual(list(s.ping_number), list(range(S.PING0, S.PING0 + S.NPINGS)))

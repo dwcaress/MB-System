@@ -18,7 +18,8 @@
 #    See README.md file for copying and redistribution conditions.
 #--------------------------------------------------------------------
 """mbwcdview (C++/Qt6) without a window: usage, --dump and --export on a synthetic
-*.kmall/*.kmwcd pair and *.wcd file. Run only when built with -DbuildQt6Tools=ON."""
+*.kmall/*.kmwcd pair, *.wcd file and Reson 7k *.s7k file. Run only when built with
+-DbuildQt6Tools=ON."""
 
 import os
 import re
@@ -32,6 +33,7 @@ import zlib
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import synth_all as A  # noqa: E402
 import synth_kmall as S  # noqa: E402
+import synth_s7k as R  # noqa: E402
 
 
 def read_png(path):
@@ -138,6 +140,45 @@ class MbwcdviewTest(unittest.TestCase):
     self.assertIn("fill value none", out)
     self.assertIn("ping number %d" % A.PINGS[2], out)
     self.assertIn("beams %d," % (A.nbeams_read(2) + 2), out)  # two empty beams mark the lost datagram
+
+  def test_dump_s7k(self):
+    """A *.s7k holds the survey pings and the water column; its soundings are the detections,
+    so with an extra detection in ping 0 the beams are compared with the soundings by direction."""
+    s7k = R.write(self.tmp.name)
+    out = subprocess.run([self.program, "--dump", "-I", s7k, "--ping=1"], capture_output=True, text=True,
+                         check=True).stdout
+    nwc = R.NPINGS - len(R.NO_WC)
+    self.assertIn("survey file: %s\nwater column file: %s" % (s7k, s7k), out)
+    self.assertIn("survey pings %d," % R.NPINGS, out)
+    self.assertIn("water column pings %d, matched %d" % (nwc, nwc), out)
+    self.assertIn("fill value none", out)
+    self.assertIn("ping number %d" % (R.PING0 + 1), out)
+    # the sonar is far below the surface: the depth window starts just above it
+    window = re.search(r"longest slant range ([0-9.]+) m, depth window from ([0-9.]+) m", out)
+    self.assertIsNotNone(window, out)
+    self.assertAlmostEqual(float(window.group(2)), R.SENSORDEPTH - 0.1 * float(window.group(1)), delta=0.11)
+    ratio = re.search(r"straight ([0-9.]+), ray traced ([0-9.]+)", out)
+    self.assertIsNotNone(ratio, out)
+    # flat seafloor, constant sound speed, no profile: the detections lie on the soundings
+    self.assertAlmostEqual(float(ratio.group(1)), 1.0, delta=1.0e-4)
+    self.assertEqual(ratio.group(1), ratio.group(2))
+    across = re.search(r"sounding\|: straight ([0-9.]+) m", out)
+    self.assertIsNotNone(across, out)
+    self.assertLess(float(across.group(1)), 0.05)
+
+  def test_export_s7k(self):
+    image = os.path.join(self.tmp.name, "s7k.png")
+    subprocess.run([self.program, "-I", R.write(self.tmp.name), "--ping=0", "--bottom", "--wc-bottom",
+                    "--export=" + image, "--size=400x300"], check=True)
+    width, height, bpp, rows = read_png(image)
+    colours = set()  # image area of the plot, as in test_export_draws_swath
+    for y in range(16 + 4, height - 66 - 4):
+      row = rows[y]
+      for x in range(72 + 4, width - 104 - 4):
+        r, g, b = row[x * bpp], row[x * bpp + 1], row[x * bpp + 2]
+        if max(r, g, b) - min(r, g, b) > 16:
+          colours.add((r, g, b))
+    self.assertGreater(len(colours), 20)
 
   def test_window(self):
     env = dict(os.environ, QT_QPA_PLATFORM="offscreen")

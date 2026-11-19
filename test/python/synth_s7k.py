@@ -48,7 +48,7 @@ import struct
 
 NBEAMS = 32
 ANGLE_MAX = 64.0          # deg
-SENSORDEPTH = 20.0        # m, depth record (1008, depth to sensor)
+SENSORDEPTH = 500.0       # m, depth record (1008, depth to sensor): a sonar on a vehicle
 BOTTOM_BELOW_TX = 100.0   # m
 SOUNDSPEED = 1500.0       # m/s
 FS = 1000.0               # Hz, sonar sample rate (7000, 7027)

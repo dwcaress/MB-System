@@ -17,7 +17,7 @@
 #    See README.md file for copying and redistribution conditions.
 #--------------------------------------------------------------------
 """Pairing of a Kongsberg survey line: *.kmall or *.all (nav, attitude, bathymetry) + *.kmwcd or *.wcd
-(water column).
+(water column). Other files, such as Reson 7k *.s7k files, hold both.
 
 SIS names each file nnnn_YYYYMMDD_HHMMSS after the time of its first datagram, so the
 two files of one line can differ by seconds: they are paired by line number nnnn and
@@ -119,7 +119,8 @@ class KongsbergLine:
     """A *.kmall and its *.kmwcd, or a *.all and its *.wcd, either of which may be missing.
 
     The attributes kmall and kmwcd name the survey file and the water column file of either
-    kind. A *.all without a *.wcd is both, as it may hold the water column itself.
+    kind. A *.all without a *.wcd is both, as it may hold the water column itself. Any other
+    file, such as a Reson 7k *.s7k, is both.
 
     line = KongsbergLine("0080_20250618_223434.kmwcd")
     wc = line.wc.ping(i)                 # water column (WaterColumnFile)
@@ -129,10 +130,13 @@ class KongsbergLine:
 
     def __init__(self, path, progress=None, max_dt_s=1.0):
         suffix = os.path.splitext(path)[1].lower()
-        self.kmwcd = path if suffix in (".kmwcd", ".wcd") else find_companion(path)
-        self.kmall = path if suffix in (".kmall", ".all") else find_companion(path)
-        if suffix == ".all" and self.kmwcd is None:
-            self.kmwcd = path
+        if suffix in _COMPANION:
+            self.kmwcd = path if suffix in (".kmwcd", ".wcd") else find_companion(path)
+            self.kmall = path if suffix in (".kmall", ".all") else find_companion(path)
+            if suffix == ".all" and self.kmwcd is None:
+                self.kmwcd = path
+        else:
+            self.kmwcd = self.kmall = path
         self.survey = load_survey(self.kmall) if self.kmall else None
         self.wc = WaterColumnFile(self.kmwcd, progress=progress) if self.kmwcd else None
         if self.wc is not None and len(self.wc) == 0:

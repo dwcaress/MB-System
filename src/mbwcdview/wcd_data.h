@@ -25,7 +25,7 @@
  * Data layer of mbwcdview (no Qt): reads water column and survey data through
  * MBIO, keeps all water column pings of a file in memory and pairs a Kongsberg
  * *.kmall or *.all (navigation, attitude, bathymetry) with its *.kmwcd or *.wcd
- * (water column).
+ * (water column). Other files, such as Reson 7k *.s7k files, hold both.
  *
  * Conventions as in MBIO: time_d seconds since 1970, depths positive down,
  * acrosstrack positive to starboard, angles in degrees.
@@ -97,7 +97,7 @@ class WaterColumnFile {
   void amplitudes(size_t i, int s, std::vector<int> &beams, int &nsamples_max, std::vector<float> &out) const;
 };
 
-/* The survey pings of a *.kmall or *.all */
+/* The survey pings of a *.kmall, *.all or other survey file */
 struct SurveyPings {
   std::vector<double> time_d, navlon, navlat, speed, heading, sensordepth;
   std::vector<unsigned int> ping_number;
@@ -119,7 +119,8 @@ int get_format(const std::string &path);
 std::string find_companion(const std::string &path, double max_offset_s = 600.0);
 
 /* A *.kmall and its *.kmwcd or a *.all and its *.wcd, either may be missing; kmall and
-   kmwcd name the survey and water column files of either kind */
+   kmwcd name the survey and water column files of either kind. Any other file, such as
+   a Reson 7k *.s7k, is both */
 class Line {
  public:
   /* path: either file of a line; format 0 = from the file name (applies to path only) */
@@ -132,6 +133,9 @@ class Line {
 
   int survey_index(size_t i) const;      // matching survey ping of water column ping i, or -1
   int matched() const;
+  /* top of the default depth window: 0, or just above the transducer of a sonar deep below
+     the surface (on a vehicle), so that its swath fills the view */
+  double default_depth_min() const;
   /* lon, lat, speed over ground (knots), course over ground (deg); NaN if unavailable */
   void nav_at(double time_d, double &lon, double &lat, double &sog_kn, double &cog) const;
   double heading_at(double time_d) const;  // NaN if unavailable

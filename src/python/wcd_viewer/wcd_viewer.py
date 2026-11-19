@@ -28,7 +28,8 @@ print(f"[WCD Viewer] BUILD_ID={BUILD_ID}")
 
 Water column viewer reading the data through MB-System's MBIO library (mbio_py),
 successor of kmwcd_viewer.py (which used KMALL.py). Opens a *.kmwcd, *.kmall, *.wcd or *.all and
-finds the other file of the line; any of the records may be missing.
+finds the other file of the line, or a Reson 7k *.s7k, which holds both; any of the records may be
+missing.
 """
 import math
 import os
@@ -95,7 +96,7 @@ class MainWindow(QMainWindow):
 
         # header
         hh = QHBoxLayout()
-        btn_open = QPushButton("Open .kmwcd/.kmall/.wcd/.all")
+        btn_open = QPushButton("Open .kmwcd/.kmall/.wcd/.all/.s7k")
         btn_open.clicked.connect(self.open_dialog)
         hh.addWidget(btn_open)
         self.lbl_file = QLabel("No file loaded")
@@ -203,7 +204,8 @@ class MainWindow(QMainWindow):
 
     # ------------------------------------------------------------------ loading
     def open_dialog(self):
-        fname, _ = QFileDialog.getOpenFileName(self, "Open .kmwcd/.kmall/.wcd/.all", "", "*.kmwcd *.kmall *.wcd *.all")
+        fname, _ = QFileDialog.getOpenFileName(self, "Open .kmwcd/.kmall/.wcd/.all/.s7k", "",
+                                               "Swath files (*.kmwcd *.kmall *.wcd *.all *.s7k);;All files (*)")
         if fname:
             self.open_file(fname)
 
@@ -261,12 +263,14 @@ class MainWindow(QMainWindow):
             self.amax.setValue(wcf.amp_max)
             for sb in (self.amin, self.amax):
                 sb.blockSignals(False)
-        depth_max = wcf.range_max_m + (float(np.nanmax(line.survey.sensordepth)) if line.survey is not None and
-                                       len(line.survey) else 0.0)
+        drafts = line.survey.sensordepth if line.survey is not None and len(line.survey) else np.zeros(1)
+        depth_max = wcf.range_max_m + float(np.nanmax(drafts))
+        # a sonar deep below the surface (on a vehicle) shows its swath, not the water above it
+        depth_min = max(0.0, float(np.nanmin(drafts)) - 0.1 * wcf.range_max_m)
         for sb in (self.dmin, self.dmax):
             sb.blockSignals(True)
             sb.setRange(0, depth_max)
-        self.dmin.setValue(0)
+        self.dmin.setValue(depth_min)
         self.dmax.setValue(depth_max)
         for sb in (self.dmin, self.dmax):
             sb.blockSignals(False)

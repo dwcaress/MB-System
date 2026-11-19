@@ -33,6 +33,7 @@
 #include <chrono>
 #include <cmath>
 #include <cstdio>
+#include <utility>
 #include <vector>
 
 #include "mb_define.h"
@@ -71,8 +72,8 @@ int dump(const std::string &path, int format, int ping_index) {
   const WaterColumnFile &wc = line.wc;
   printf("water column pings %zu, matched %d, samples %zu, position records %zu, profiles %zu\n", wc.size(),
          line.matched(), wc.amp.size(), wc.nav.size(), wc.svps.size());
-  printf("fill value %s%.1f dB, amplitude %.1f .. %.1f dB, longest slant range %.1f m\n", wc.has_fill ? "" : "none ",
-         wc.fill_value, wc.amp_min, wc.amp_max, wc.range_max_m);
+  printf("fill value %s%.1f dB, amplitude %.1f .. %.1f dB, longest slant range %.1f m, depth window from %.1f m\n",
+         wc.has_fill ? "" : "none ", wc.fill_value, wc.amp_min, wc.amp_max, wc.range_max_m, line.default_depth_min());
 
   const size_t i0 = std::min((size_t)std::max(ping_index, 0), wc.size() - 1);
   const WcPing &p0 = wc.pings[i0];
@@ -102,11 +103,10 @@ int dump(const std::string &path, int format, int ping_index) {
     const std::vector<double> &bz = line.survey.bath[j];
     const std::vector<double> &bx = line.survey.bathacrosstrack[j];
     const std::vector<char> &bf = line.survey.beamflag[j];
-    const size_t n = std::min(bz.size(), (size_t)p.nbeams());
     double xmax = 0.0;
-    for (size_t b = 0; b < n; b++)
-      if (!mb_beam_check_flag_null(bf[b]))
-        xmax = std::max(xmax, std::fabs(bx[b]));
+    for (size_t k = 0; k < bz.size(); k++)
+      if (!mb_beam_check_flag_null(bf[k]))
+        xmax = std::max(xmax, std::fabs(bx[k]));
     for (int mode = 0; mode < 2; mode++) {
       SwathGeometry g;
       const auto t0 = std::chrono::steady_clock::now();
@@ -115,13 +115,42 @@ int dump(const std::string &path, int format, int ping_index) {
         seconds += std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
         traced_pings++;
       }
+
+      /* each beam's sounding: the sounding of the same index where every beam has one
+         (Kongsberg), else the sounding seen in the direction of the beam's water column
+         detection, within 0.5 deg (Reson 7k soundings are the detections of some beams) */
+      std::vector<std::pair<int, size_t>> pairs;
+      if (bz.size() == (size_t)p.nbeams()) {
+        for (int b = 0; b < p.nbeams(); b++)
+          pairs.emplace_back(b, (size_t)b);
+      }
+      else {
+        std::vector<std::pair<double, size_t>> direction;
+        for (size_t k = 0; k < bz.size(); k++)
+          if (!mb_beam_check_flag_null(bf[k]))
+            direction.emplace_back(std::atan2(bx[k], bz[k] - draft), k);
+        std::sort(direction.begin(), direction.end());
+        for (int b = 0; b < p.nbeams() && !direction.empty(); b++) {
+          if (!std::isfinite(g.detect_depth[b]))
+            continue;
+          const double a = std::atan2(g.detect_across[b], g.detect_depth[b] - draft);
+          auto it = std::lower_bound(direction.begin(), direction.end(), std::make_pair(a, (size_t)0));
+          if (it == direction.end() || (it != direction.begin() && a - (it - 1)->first < it->first - a))
+            --it;
+          if (std::fabs(it->first - a) < 0.5 * DTR)
+            pairs.emplace_back(b, it->second);
+        }
+      }
+
       std::vector<double> r, dx;
-      for (size_t b = 0; b < n; b++) {
-        if (mb_beam_check_flag_null(bf[b]) || !std::isfinite(g.detect_depth[b]) || bz[b] <= 0.0)
+      for (const auto &pair : pairs) {
+        const int b = pair.first;
+        const size_t k = pair.second;
+        if (mb_beam_check_flag_null(bf[k]) || !std::isfinite(g.detect_depth[b]) || bz[k] <= 0.0)
           continue;
-        r.push_back(g.detect_depth[b] / bz[b]);
-        if (std::fabs(bx[b]) > 0.6 * xmax)
-          dx.push_back(std::fabs(g.detect_across[b] - bx[b]));
+        r.push_back(g.detect_depth[b] / bz[k]);
+        if (std::fabs(bx[k]) > 0.6 * xmax)
+          dx.push_back(std::fabs(g.detect_across[b] - bx[k]));
       }
       ratio[mode].push_back(median(r));
       across[mode].push_back(median(dx));

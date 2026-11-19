@@ -18,7 +18,8 @@
 #    See README.md file for copying and redistribution conditions.
 #--------------------------------------------------------------------
 """The Python water column viewer (mbpy_wcdview, wcd_viewer.py): usage always; with PySide6
-and matplotlib installed, an offscreen session on a synthetic *.kmall/*.kmwcd pair."""
+and matplotlib installed, an offscreen session on a synthetic *.kmall/*.kmwcd pair, *.wcd
+file and Reson 7k *.s7k file."""
 
 import importlib.util
 import os
@@ -30,6 +31,7 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import synth_all as A  # noqa: E402
 import synth_kmall as S  # noqa: E402
+import synth_s7k as R  # noqa: E402
 
 SOURCE = os.environ["MB_SOURCE_DIR"]
 LAUNCHER = os.path.join(SOURCE, "src", "python", "mbpy_wcdview")
@@ -83,6 +85,20 @@ class MbpyWcdviewTest(unittest.TestCase):
       self.assertIsNone(w.line.survey)
       w.slider.setValue(2)
       self.assertIn("Ping %d swath 0" % A.PINGS[2], w.meta_label.text())
+      w.close()
+      # a Reson 7k *.s7k holds the survey pings and the water column
+      w = wcd_viewer.MainWindow()
+      w.open_file(R.write(tmp))
+      nwc = R.NPINGS - len(R.NO_WC)
+      self.assertEqual(len(w.steps), nwc)
+      self.assertEqual(w.line.matched, nwc)
+      # the sonar is far below the surface: the depth window starts just above it
+      self.assertAlmostEqual(w.dmin.value(), R.SENSORDEPTH - 0.1 * w.line.wc.range_max_m, delta=0.01)
+      w.chk_bottom.setChecked(True)
+      w.chk_wcbottom.setChecked(True)
+      w.slider.setValue(1)
+      self.assertIn("Ping %d swath 0" % (R.PING0 + 1), w.meta_label.text())
+      self.assertIn("soundings", w.statusBar().currentMessage())
       w.close()
     del app
 

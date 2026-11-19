@@ -439,7 +439,8 @@ bool Line::load(const std::string &path, const Progress &progress, std::string *
   kmwcd = is_kmwcd ? path : (is_kmall ? find_companion(path) : path);
   if (ext == ".all" && kmwcd.empty())
     kmwcd = path;  // a *.all without a *.wcd may hold the water column itself
-  kmall = is_kmall ? path : (is_kmwcd ? find_companion(path) : std::string());
+  /* other files, such as Reson 7k *.s7k files, hold the survey and the water column */
+  kmall = is_kmall ? path : (is_kmwcd ? find_companion(path) : path);
   has_survey = !kmall.empty() && load_survey(kmall, kmall == path ? format : 0, survey, message);
   has_wc = !kmwcd.empty() && wc.load(kmwcd, kmwcd == path ? format : 0, progress, message) && wc.size() > 0;
 
@@ -468,6 +469,13 @@ int Line::survey_index(size_t i) const { return i < match_.size() ? match_[i] : 
 
 int Line::matched() const {
   return (int)std::count_if(match_.begin(), match_.end(), [](int j) { return j >= 0; });
+}
+
+double Line::default_depth_min() const {
+  if (!has_survey || survey.sensordepth.empty())
+    return 0.0;
+  const double draft_min = *std::min_element(survey.sensordepth.begin(), survey.sensordepth.end());
+  return std::max(0.0, draft_min - 0.1 * wc.range_max_m);
 }
 
 /*--------------------------------------------------------------------*/
