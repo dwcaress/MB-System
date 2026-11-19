@@ -79,7 +79,7 @@ class SurveyPings:
     bath: list = field(repr=False)             # m below the waterline
     bathacrosstrack: list = field(repr=False)  # m, positive starboard, from the sonar
     bathalongtrack: list = field(repr=False)
-    detects: list = field(repr=False)          # MB_DETECT_* per beam
+    detects: list = field(repr=False)          # MB_DETECT_* per sounding (type in bits 0-7)
     nav_time_d: np.ndarray = field(repr=False, default=None)  # asynchronous position records
     nav_lon: np.ndarray = field(repr=False, default=None)
     nav_lat: np.ndarray = field(repr=False, default=None)
@@ -102,6 +102,14 @@ def load_survey(path, format=0):
             elif rec.kind == K.MB_DATA_DATA and rec.ok:
                 for k in cols:
                     v = getattr(rec, k)
+                    if k == "detects":
+                        # one value per sounding, as mbwcdview reads them: MBIO may give fewer
+                        # (format 89 with multi-detection) or none (MB_DETECT_UNKNOWN)
+                        d = np.full(len(rec.bath), K.MB_DETECT_UNKNOWN, np.int32)
+                        if v is not None:
+                            n = min(len(v), len(d))
+                            d[:n] = v[:n]
+                        v = d
                     cols[k].append(v if v is not None else np.zeros(len(rec.bath), np.int32))
             elif rec.kind == K.MB_DATA_NAV and rec.ok and (rec.navlon != 0.0 or rec.navlat != 0.0):
                 nav["t"].append(rec.time_d)
@@ -141,6 +149,12 @@ class KongsbergLine:
         self.wc = WaterColumnFile(self.kmwcd, progress=progress) if self.kmwcd else None
         if self.wc is not None and len(self.wc) == 0:
             self.wc = None
+        self._drafts = None  # (time, transducer depth) of the survey pings, by time
+        if self.survey is not None:
+            ok = np.isfinite(self.survey.time_d) & np.isfinite(self.survey.sensordepth)
+            if ok.any():
+                order = np.argsort(self.survey.time_d[ok], kind="stable")
+                self._drafts = (self.survey.time_d[ok][order], self.survey.sensordepth[ok][order])
         self._match = {}
         if self.survey is not None and self.wc is not None:
             by_ping = {}
@@ -208,9 +222,15 @@ class KongsbergLine:
         return None
 
     def draft(self, i):
-        """Transducer depth (m) for water column ping i from the matched *.kmall ping, or None."""
+        """Transducer depth (m) of water column ping i: that of the matched survey ping, else
+        interpolated in time between the survey pings around it (beyond them the nearest
+        one), or None without survey pings."""
         j = self.survey_index(i)
-        return float(self.survey.sensordepth[j]) if j is not None else None
+        if j is not None:
+            return float(self.survey.sensordepth[j])
+        if self._drafts is None or self.wc is None:
+            return None
+        return float(np.interp(self.wc.times[i], *self._drafts))
 
     def heading_at(self, time_d):
         """Vessel heading (deg) interpolated at time_d from the *.kmall pings; NaN if unavailable."""

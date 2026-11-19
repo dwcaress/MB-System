@@ -17,7 +17,8 @@
 #    See README.md file for copying and redistribution conditions.
 #--------------------------------------------------------------------
 """Plot one water column ping with the soundings of the matching *.kmall ping on top,
-both as depth below the waterline (transducer depth from the *.kmall ping).
+both as depth below the waterline (transducer depth from the *.kmall ping, for a water column
+ping without one interpolated from the pings around it).
 
 Usage: python3 plot_paired.py file.kmwcd|file.kmall [ping_index] [out.png]
 """
@@ -39,7 +40,9 @@ if line.wc is None:
     sys.exit("no *.kmwcd found for " + path)
 wc = line.wc.ping(n)
 j = line.survey_index(n)
-draft = line.survey.sensordepth[j] if j is not None else 0.0
+draft = line.draft(n)
+below = "waterline" if draft is not None else "transducer"  # without survey pings
+draft = draft if draft is not None else 0.0
 lon, lat, sog, cog = line.nav_at(wc.time_d)
 
 swaths = wc.split_swaths()
@@ -51,19 +54,23 @@ for ax, s in zip(axes[0], swaths):
         flag, bz, bx, det = (line.survey.beamflag[j], line.survey.bath[j], line.survey.bathacrosstrack[j],
                              line.survey.detects[j])
         # soundings of all swaths of the ping are in one MBIO ping; keep those of this swath by
-        # their order (MBIO keeps the receive fans in order, beams of fan k follow fan k-1)
-        nfan = len(bz) // len(swaths)
-        sel = slice(nfan * int(s.swath[0]), nfan * (int(s.swath[0]) + 1))
+        # their order (MBIO keeps the receive fans in order, beams of fan k follow fan k-1), all
+        # of them where the fans do not have as many (extra detections), as the viewers do
+        sel = slice(None)
+        if len(bz) % len(swaths) == 0:
+            nfan = len(bz) // len(swaths)
+            sel = slice(nfan * int(s.swath[0]), nfan * (int(s.swath[0]) + 1))
         f, zz, xx, dd = flag[sel], bz[sel], bx[sel], det[sel]
+        kind = dd & 0xFF  # detection type; format 89 adds the multi-detection priority above
         for code, colour in ((K.MB_DETECT_AMPLITUDE, "red"), (K.MB_DETECT_PHASE, "darkblue")):
-            good = (dd == code) & K.beam_ok(f)
-            bad = (dd == code) & K.beam_flagged(f) & ~K.beam_null(f)
+            good = (kind == code) & K.beam_ok(f)
+            bad = (kind == code) & K.beam_flagged(f) & ~K.beam_null(f)
             ax.plot(xx[good], zz[good], "o", ms=2.5, color=colour)
             ax.plot(xx[bad], zz[bad], "o", ms=2.5, mfc="none", color=colour)
     _common.limit_to_data(ax, x, z + draft, s.amplitude)
     ax.set_aspect("equal")
     ax.set_xlabel("across track (m, starboard +)")
-    ax.set_ylabel("depth below waterline (m)")
+    ax.set_ylabel(f"depth below {below} (m)")
     ax.set_title(f"swath {s.swath[0]}")
 fig.colorbar(m, ax=axes[0].tolist(), label="amplitude (dB)")
 fig.suptitle(f"ping {wc.ping_number}  {lat:.6f} {lon:.6f}  SOG {sog:.1f} kn  COG {cog:.1f}"

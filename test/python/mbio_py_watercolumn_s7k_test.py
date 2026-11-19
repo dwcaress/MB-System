@@ -140,15 +140,25 @@ class WaterColumnS7kTest(unittest.TestCase):
       if p == S.STEER_PING:  # transmit steering moves the soundings
         continue
       flag, bath, x, det = s.beamflag[p], s.bath[p], s.bathacrosstrack[p], s.detects[p]
+      self.assertEqual(len(det), len(bath))  # one detection type per sounding, also with multi-detection
       good = np.array([K.beam_ok(f) for f in flag])
       self.assertEqual(int(good.sum()), S.NBEAMS)
       np.testing.assert_allclose(bath[good], S.SENSORDEPTH + S.BOTTOM_BELOW_TX, atol=1.0e-3)
       # 7k beam angles are positive to starboard, so are MB-System acrosstrack distances
       expected_x = [S.BOTTOM_BELOW_TX * math.tan(math.radians(S.vertical_angle(b))) for b in range(S.NBEAMS)]
       np.testing.assert_allclose(x[good], expected_x, atol=1.0e-2)
-      if p != 0:  # with multi-detection mb_detects gives one value per beam, not per sounding
-        for b in range(S.NBEAMS):
-          self.assertEqual(det[b], K.MB_DETECT_AMPLITUDE if b % 2 == 0 else K.MB_DETECT_PHASE)
+      # the detection type of each sounding (7027 order); format 89 puts the multi-detection
+      # priority in bits 8-11 (ping 0: the second detection of beam MULTI_BEAM comes first)
+      expected = []
+      for b in range(S.NBEAMS):
+        kind = K.MB_DETECT_AMPLITUDE if b % 2 == 0 else K.MB_DETECT_PHASE
+        if p == 0 and b == S.MULTI_BEAM:
+          expected.append(kind | (1 << 8))
+        expected.append(kind)
+      self.assertEqual(list(det[:S.NBEAMS]), expected[:S.NBEAMS])
+      # MBIO gives only as many types as beams (mbsys_reson7k3_detects): the rest are unknown
+      for k in range(S.NBEAMS, len(det)):
+        self.assertIn(det[k], (expected[k], K.MB_DETECT_UNKNOWN))
 
 
 class ReaderCasesTest(unittest.TestCase):

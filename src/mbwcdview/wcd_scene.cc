@@ -29,6 +29,7 @@
 #include <limits>
 
 #include <QDateTime>
+#include <QStringList>
 #include <QTimeZone>
 
 #include "mb_define.h"
@@ -69,9 +70,11 @@ bool build_scene(const Line &line, size_t i, int swath, const SceneOptions &opti
   data.nbeams = (int)beams.size();
   data.nsamples = nsamples;
 
-  /* positions: depth below the waterline when the transducer depth is known */
+  /* positions: depth below the waterline when the transducer depth is known, also
+     interpolated from the survey pings around a ping without its own */
   double draft = 0.0;
-  info.has_draft = line.draft(i, draft);
+  bool interpolated = false;
+  info.has_draft = line.draft(i, draft, &interpolated);
   const Svp *svp = options.raytrace ? line.svp(ping.time_d) : nullptr;
   SwathGeometry g;
   std::string message;
@@ -83,8 +86,15 @@ bool build_scene(const Line &line, size_t i, int swath, const SceneOptions &opti
   data.detect_depth = std::move(g.detect_depth);
   data.show_wc_bottom = options.wc_bottom;
   data.ylabel = info.has_draft ? "Depth below waterline (m)" : "Depth below transducer (m)";
+  QStringList notes;
   if (info.traced)
-    data.ylabel += info.has_draft ? " - ray traced" : " - ray traced, draft 0";
+    notes << "ray traced";
+  if (interpolated)
+    notes << "draft interpolated";
+  else if (info.traced && !info.has_draft)
+    notes << "draft 0";
+  if (!notes.isEmpty())
+    data.ylabel += "\n" + notes.join(", ");  // a second line
 
   /* soundings of the matched survey ping; MBIO keeps the receive fans of a ping in
      order, so with equal fans the soundings of swath k are the k-th block (dual swath) */
@@ -109,9 +119,11 @@ bool build_scene(const Line &line, size_t i, int swath, const SceneOptions &opti
       for (size_t b = first; b < last; b++) {
         if (mb_beam_check_flag_null(bf[b]))
           continue;
-        const QColor color = bd[b] == MB_DETECT_AMPLITUDE ? QColor(Qt::red)
-                             : bd[b] == MB_DETECT_PHASE   ? QColor(0, 0, 139)
-                                                          : QColor(Qt::gray);
+        /* detection type in bits 0-7; format 89 adds the multi-detection priority above */
+        const int type = bd[b] & 0xFF;
+        const QColor color = type == MB_DETECT_AMPLITUDE ? QColor(Qt::red)
+                             : type == MB_DETECT_PHASE   ? QColor(0, 0, 139)
+                                                         : QColor(Qt::gray);
         data.soundings.push_back({bx[b], bz[b], color, mb_beam_ok(bf[b]) != 0});
       }
       info.soundings = (int)data.soundings.size();

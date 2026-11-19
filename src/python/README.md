@@ -127,8 +127,8 @@ along straight rays with the sound speed at the transducer.
     print(len(wcf), wcf.fill_value, wcf.amp_min, wcf.amp_max)
 
 Amplitudes are kept as float16 (exact for 0.5 dB steps), about 2 bytes per
-sample. Also: the file's own position records (`nav_time_d`, `nav_lon`,
-`nav_lat`) and sound velocity profiles (`svps`).
+sample, in one array per ping. Also: the file's own position records (`nav_time_d`,
+`nav_lon`, `nav_lat`) and sound velocity profiles (`svps`).
 
 ### KongsbergLine: a *.kmall and its *.kmwcd, a *.all and its *.wcd, or a *.s7k
 
@@ -138,7 +138,7 @@ sample. Also: the file's own position records (`nav_time_d`, `nav_lon`,
     soundings = line.survey.bath[j], line.survey.bathacrosstrack[j]
     lon, lat, sog_kn, cog = line.nav_at(wc.time_d)
     heading = line.heading_at(wc.time_d)
-    draft = line.draft(10)                    # transducer depth from the .kmall ping
+    draft = line.draft(10)                    # transducer depth of the survey ping (else interpolated)
     depth, velocity = line.svp(wc.time_d)
 
 SIS names each file after its first datagram's time, so the two files of a line
@@ -147,9 +147,13 @@ name time (`mb.find_companion`), then pings are matched by ping number and time.
 Any other file, such as a Reson 7k *.s7k, holds both the survey and the water
 column and is opened as both.
 Either file may be missing; `nav_at` falls back to the survey ping positions and
-then to the position records of the water column file. `line.kmall` and `line.kmwcd`
-name the survey and water column files of either kind; a *.all without a *.wcd is
-both, and `line.wc` is None if it holds no water column.
+then to the position records of the water column file. `draft` interpolates the
+transducer depth in time from the survey pings around a water column ping without
+its own, and is None without survey pings. In `line.survey` (`mb.load_survey`)
+`detects` has one value per sounding (MB_DETECT_UNKNOWN where MBIO gives none; the
+detection type is in bits 0-7, format 89 adds the multi-detection priority above).
+`line.kmall` and `line.kmwcd` name the survey and water column files of either kind;
+a *.all without a *.wcd is both, and `line.wc` is None if it holds no water column.
 
 ### raytrace: samples through a sound velocity profile
 

@@ -66,7 +66,8 @@ PING_OFFSET = 0.25        # s, ping times between the sensor records
 HEADING = 45.0            # deg
 LAT0, LON0 = 54.0, 8.0
 DEVICE = 50               # T50
-MULTI_BEAM = 5            # beam with a second detection in ping 0
+MULTI_BEAM = 1            # beam with a second detection in ping 0 (early in the fan: paired with
+                          # the beams by index, most soundings would be a neighbour's)
 ROLL = 2.0                # deg, roll of the sonar (1012 records)
 TX_STEER = 0.02           # rad, transmit steering of the steered ping
 S7K_NAME = "20250101_120000.s7k"

@@ -52,6 +52,15 @@ class MbpyWcdviewTest(unittest.TestCase):
     import wcd_viewer
     from PySide6.QtWidgets import QApplication
     app = QApplication.instance() or QApplication([])
+    # an exception in a slot is only printed: print and collect them, and fail at the end
+    errors = []
+    excepthook = sys.excepthook
+
+    def collect(*exc):
+      errors.append(exc)
+      excepthook(*exc)
+    sys.excepthook = collect
+    self.addCleanup(setattr, sys, "excepthook", excepthook)
     with tempfile.TemporaryDirectory() as tmp:
       kmall, kmwcd = S.write_line(tmp)
       w = wcd_viewer.MainWindow()
@@ -94,13 +103,48 @@ class MbpyWcdviewTest(unittest.TestCase):
       self.assertEqual(w.line.matched, nwc)
       # the sonar is far below the surface: the depth window starts just above it
       self.assertAlmostEqual(w.dmin.value(), R.SENSORDEPTH - 0.1 * w.line.wc.range_max_m, delta=0.01)
+      # ping 0 has more detections (soundings) than beams
       w.chk_bottom.setChecked(True)
+      self.assertIn("soundings: %d" % (R.NBEAMS + 1), w.statusBar().currentMessage())
       w.chk_wcbottom.setChecked(True)
       w.slider.setValue(1)
       self.assertIn("Ping %d swath 0" % (R.PING0 + 1), w.meta_label.text())
-      self.assertIn("soundings", w.statusBar().currentMessage())
+      self.assertIn("soundings: %d" % R.NBEAMS, w.statusBar().currentMessage())
+      w.close()
+      # a water column ping without its survey ping, deep below the surface: drawn at the
+      # transducer depth interpolated between the pings around it (3010 and 3030 m), inside
+      # the default window
+      deep = os.path.join(tmp, "deep")
+      os.mkdir(deep)
+      w = wcd_viewer.MainWindow()
+      w.open_file(S.write_line(deep, draft=3000.0, draft_step=10.0, skip_mrz=(S.PING0 + 2,))[1])
+      self.assertAlmostEqual(w.dmin.value(), 3000.0 - 0.1 * w.line.wc.range_max_m, delta=0.01)
+      w.slider.setValue(2)
+      self.assertIn("Ping %d swath 0" % (S.PING0 + 2), w.meta_label.text())
+      self.assertIn("draft interpolated", w.ax.get_ylabel())
+      self.assertTrue(np.isfinite(w._last_grid["amp"]).any())
+      # the first sample of the even beams (start sample 0) is at the transducer
+      self.assertAlmostEqual(float(np.nanmin(w._last_grid["depth"])), 3020.0, delta=0.01)
+      # the two-line depth label fits the plot height, also after the window is resized
+      label = w.ax.yaxis.label
+      w.show()
+      for size, fontsize in (((1200, 400), None), ((1200, 900), label.get_fontsize())):
+        w.resize(*size)
+        app.processEvents()
+        renderer = w.canvas.get_renderer()
+        self.assertLessEqual(label.get_window_extent(renderer).height, w.ax.get_window_extent(renderer).height + 0.5)
+        if fontsize is not None:
+          self.assertEqual(label.get_fontsize(), fontsize)
+      w.close()
+      # a ship: the window starts at the surface
+      ship = os.path.join(tmp, "ship")
+      os.mkdir(ship)
+      w = wcd_viewer.MainWindow()
+      w.open_file(S.write_line(ship, draft=300.0)[1])
+      self.assertEqual(w.dmin.value(), 0.0)
       w.close()
     del app
+    self.assertEqual(errors, [], "".join(str(e[1]) for e in errors))
 
 
 if __name__ == "__main__":

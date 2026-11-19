@@ -37,6 +37,7 @@
 #include <cstdint>
 #include <functional>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace wcd {
@@ -99,17 +100,23 @@ class WaterColumnFile {
 
 /* The survey pings of a *.kmall, *.all or other survey file */
 struct SurveyPings {
+  int format = 0;            // MBIO format of the file
   std::vector<double> time_d, navlon, navlat, speed, heading, sensordepth;
   std::vector<unsigned int> ping_number;
   std::vector<std::vector<char>> beamflag;
   std::vector<std::vector<double>> bath, bathacrosstrack;
   std::vector<std::vector<int>> detects;
+  /* only on request (load_survey travel_times): two-way travel time (s) and beam angle across track
+     (deg from vertical, positive starboard) of each sounding as mb_ttimes() gives them, NaN if unknown */
+  std::vector<std::vector<double>> ttimes, beam_angles;
   NavSeries nav;             // position records
   std::vector<Svp> svps;
   size_t size() const { return time_d.size(); }
 };
 
-bool load_survey(const std::string &path, int format, SurveyPings &survey, std::string *message);
+/* travel_times: also the two-way travel times and beam angles of the soundings (mb_ttimes) */
+bool load_survey(const std::string &path, int format, SurveyPings &survey, std::string *message,
+                 bool travel_times = false);
 
 /* MBIO format of a file name (0 if unknown); *.kmwcd gives 261, *.wcd 58 */
 int get_format(const std::string &path);
@@ -123,8 +130,10 @@ std::string find_companion(const std::string &path, double max_offset_s = 600.0)
    a Reson 7k *.s7k, is both */
 class Line {
  public:
-  /* path: either file of a line; format 0 = from the file name (applies to path only) */
-  bool load(const std::string &path, const Progress &progress, std::string *message, int format = 0);
+  /* path: either file of a line; format 0 = from the file name (applies to path only);
+     travel_times: also the two-way travel times and beam angles of the soundings */
+  bool load(const std::string &path, const Progress &progress, std::string *message, int format = 0,
+            bool travel_times = false);
 
   std::string kmall, kmwcd;
   bool has_wc = false, has_survey = false;
@@ -133,17 +142,22 @@ class Line {
 
   int survey_index(size_t i) const;      // matching survey ping of water column ping i, or -1
   int matched() const;
-  /* top of the default depth window: 0, or just above the transducer of a sonar deep below
-     the surface (on a vehicle), so that its swath fills the view */
+  /* top of the default depth window: the surface, or for a sonar deeper than its longest
+     slant range (on a vehicle) a tenth of that range above its shallowest depth, so that its
+     swath fills the view */
   double default_depth_min() const;
   /* lon, lat, speed over ground (knots), course over ground (deg); NaN if unavailable */
   void nav_at(double time_d, double &lon, double &lat, double &sog_kn, double &cog) const;
   double heading_at(double time_d) const;  // NaN if unavailable
   const Svp *svp(double time_d) const;     // nullptr if none
-  bool draft(size_t i, double &sensordepth) const;
+  /* transducer depth of water column ping i: that of its survey ping, else interpolated in
+     time between the survey pings around it, beyond them the nearest one (*interpolated set);
+     false without survey pings */
+  bool draft(size_t i, double &sensordepth, bool *interpolated = nullptr) const;
 
  private:
   std::vector<int> match_;
+  std::vector<std::pair<double, double>> drafts_;  // (time, transducer depth) of the survey pings, by time
 };
 
 }  // namespace wcd

@@ -58,10 +58,17 @@ supplies the navigation, the vessel heading, the transducer depth and the soundi
 the *.kmwcd or *.wcd supplies the water column. A *.all without a *.wcd supplies the
 water column too, if it holds any. Any of these may be missing: without a *.kmall or
 *.all the navigation is taken from the position records of the *.kmwcd or *.wcd, if
-present, and depths are given below the transducer. Where water column datagrams
+present, and depths are given below the transducer. A water column ping without a
+matching survey ping is drawn at the transducer depth interpolated in time from the
+survey pings around it. Where water column datagrams
 were lost in a ping (*.wcd, *.all) the part of the swath they held stays blank.
 A Reson 7k *.s7k file holds the survey pings and the water column together and
-supplies both.
+supplies both. Its water column beam angles are turned to the vertical with the roll
+at transmit; the soundings MB-System calculates also follow the roll between transmit
+and echo and the pitch, mount angles that differ between the arrays (from a platform
+file) and a sound speed correction by \fBmbpreprocess\fP, and soundings logged by
+Teledyne PDS include its mount angles. Where these matter the soundings lie off the
+seafloor echo (see \fBmbio\fP(3)).
 
 The water column samples are ray traced through the sound velocity profile
 logged with the data (\fBmb_rt\fP(3), as \fBmbprocess\fP traces soundings), from
@@ -98,9 +105,9 @@ The image is drawn on the graphics card through Qt's QRhi (Metal on macOS,
 Direct3D 11 on Windows, OpenGL on Linux), or with OpenGL where \fBmbwcdview\fP
 was built with Qt older than 6.8, so stepping through the pings is fast.
 
-The depth range starts at the surface, or, for a sonar far below it (on a
-vehicle), just above the shallowest transducer depth, by a tenth of the longest
-slant range; so does the image written with \fB\-\-export\fP.
+The depth range starts at the surface, or, for a sonar deeper than its longest
+slant range (on a vehicle), a tenth of that range above the shallowest transducer
+depth; so does the image written with \fB\-\-export\fP.
 
 Without a window, \fB\-\-dump\fP prints a summary of a survey line and
 \fB\-\-export\fP writes an image of one swath.
@@ -168,12 +175,25 @@ The size in pixels of the exported image. Default: 1400x900.
 Print a summary of the survey line and exit: the files found, the numbers of
 pings, matched pings and position records, the amplitude range and fill value,
 the longest slant range and the top of the default depth window,
-the position, speed, course and heading at the ping given by \fB\-\-ping\fP, and the
+the position, speed, course, heading and transducer depth (interpolated for a water
+column ping without a survey ping) at the ping given by \fB\-\-ping\fP, and the
 depth ratio and across track difference between the bottom detections of the
-water column and the soundings, for straight and for ray traced geometry. Each beam
-is compared with the sounding of the same index where every beam has one (Kongsberg
-data), else with the sounding seen within 0.5 degrees of the direction of the beam's
-water column detection (Reson 7k soundings are the detections of some of the beams).
+water column and the soundings, for straight and for ray traced geometry, over every
+tenth water column ping. Each beam's detection is compared with the sounding (not
+null) whose two-way travel time (from \fBmb_ttimes\fP, see \fBmbio\fP(3)) is
+nearest to its own among those seen within 10 degrees of its direction in straight
+geometry: the detection recorded with the water column is the sonar's own detection
+of the beam, so its travel time finds the beam's sounding however the soundings are
+ordered (extra and multiple detections, several receive fans, lost water column
+datagrams) and positioned. Of several soundings as near in time, where the ping gives
+its detections in fractions of a sample (Kongsberg *.kmall, Reson 7k), within the
+float precision of the travel times, the one nearest in direction is taken; where it
+gives them in whole samples (*.all and *.wcd, *.kmall water column datagrams of
+version 0), within a sample, the one whose beam angle (\fBmb_ttimes\fP) is nearest
+to the beam's own, unless the ping's beam angles disagree with those of the water
+column by more than half the beam spacing (as MBIO's for *.kmall, computed with the
+roll at the echo, can), and then again the one nearest in direction. The summary
+says how many beams were compared each way. The same pairs serve both geometries.
 .TP
 .B \-\-verbose {\fB\-V\fP}
 Print the program name and version, and with \fB\-\-export\fP what was written.

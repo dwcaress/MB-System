@@ -36,6 +36,18 @@ through MBIO can be computed exactly:
 - soundings: method amplitude in even beams, phase in odd beams; beam REJECTED of
   fan 0 rejected (detectionType 2), beam EXTRA of fan 0 an extra detection (1)
 - position records every 0.5 s in both files, moving north-east
+
+Options of write_line(): the transducer depth (draft) and its change from ping to ping
+(draft_step, m per ping), pings whose #MRZ datagrams are left out of the .kmall (skip_mrz),
+an extra detection (numExtraDetections 1) after the soundings of fan extra_fan of every ping,
+half way to the seafloor in the direction of beam EXTRA_BEAM (extra), a sound speed falling
+by svp_gradient m/s in the 150 m below the transducer in the #SVP datagrams (the soundings
+stay at their straight ray positions), and soundings placed at sounding_scale times their
+straight ray across track distance on the seafloor, as a sonar's ray tracing moves them
+toward nadir (the travel times and the water column stay those of straight rays), water
+column detections in whole samples (whole_samples), as *.all and *.wcd files give them, and
+an offset added to the soundings' beam angles re the receive array (rx_angle_offset, deg), so
+that the beam angles MBIO computes for the soundings differ from those of the water column.
 """
 import math
 import os
@@ -62,6 +74,7 @@ FAN_DELAY = 0.03          # s, fan 1 after fan 0
 HEADING = 45.0
 LAT0, LON0 = 54.0, 8.0
 REJECTED, EXTRA = 4, 3
+EXTRA_BEAM = 8            # beam of the extra detection of write_line(extra=True)
 KMALL_NAME = LINE + "_20250101_120000.kmall"
 KMWCD_NAME = LINE + "_20250101_120001.kmwcd"
 
@@ -108,8 +121,11 @@ def _cmn_part(ping, fan):
     return struct.pack("<HHBBBBBBBB", 12, ping % 65536, 2, fan, 2, fan, 0, 0, 1, 0)
 
 
-def svp(t):
+def svp(t, draft=DRAFT, gradient=0.0):
     points = [(0.0, SOUNDSPEED), (5000.0, SOUNDSPEED)]
+    if gradient:
+        points = [(0.0, SOUNDSPEED), (draft, SOUNDSPEED), (draft + 150.0, SOUNDSPEED - gradient),
+                  (draft + 5000.0, SOUNDSPEED - gradient)]
     lat, lon = position(t)
     body = struct.pack("<HH4sIdd", 28, len(points), b"S00 ", int(t), lat, lon)
     for d, c in points:
@@ -126,7 +142,12 @@ def spo(t):
     return _datagram(b"#SPO", 0, t, body)
 
 
-def mrz(ping, fan):
+def ping_draft(ping, draft=DRAFT, draft_step=0.0):
+    """Transducer depth of a ping."""
+    return draft + draft_step * (ping - PING0)
+
+
+def mrz(ping, fan, draft=DRAFT, extra=False, extra_fan=1, sounding_scale=1.0, rx_angle_offset=0.0):
     t = ping_time(ping, fan)
     lat, lon = position(t)
     ping_info = struct.pack(
@@ -134,29 +155,34 @@ def mrz(ping, fan):
         0, 0, 1.0 / PING_INTERVAL, 0, 3, 0, 0, 0, 0, 0, 0,
         12000.0, 11000.0, 13000.0, 0.01, 0.01, 1000.0, 1.0,
         ANGLE_MAX, ANGLE_MAX, ANGLE_MAX, ANGLE_MAX, 800, 800, 0, 0, 0, 0,
-        1.0, 1.0, 0.0, 0, 0, 0.0, 1, 48, HEADING, SOUNDSPEED, DRAFT, 0.0, 0.0, 0.0,
+        1.0, 1.0, 0.0, 0, 0, 0.0, 1, 48, HEADING, SOUNDSPEED, draft, 0.0, 0.0, 0.0,
         0, 0, 0, 0, lat, lon, 0.0, 0.0, 0, 0, 0)
     ping_info = struct.pack("<H", len(ping_info)) + ping_info[2:]
     tx_sector = struct.pack("<BBBBfffffffBBHfff", 0, 0, 0, 0, 0.0, 1.0 + fan, 220.0, 0.0, 12000.0, 2000.0,
                             0.01, 0, 0, 0, 0.0, 0.0, 0.01)
     sounding_format = "<HBBBBBBBBHffffffHHffffffffffffffffffHHHH"
+    nextra = 1 if (extra and fan == extra_fan) else 0
     rx_info = struct.pack("<HHHHffffHHHH", 32, NBEAMS, NBEAMS, struct.calcsize(sounding_format), FS, FS,
-                          -20.0, -25.0, 0, 0, 0, 4)
+                          -20.0, -25.0, 0, nextra, 0, 4)
     soundings = b""
-    for b in range(NBEAMS):
+    # (beam, fraction of the range to the seafloor, detectionType of an extra detection)
+    entries = [(b, 1.0, None) for b in range(NBEAMS)] + [(EXTRA_BEAM, 0.5, 1)] * nextra
+    for b, f, extra_type in entries:
         a = beam_angle(b)
-        r = BOTTOM_BELOW_TX / math.cos(math.radians(a))
+        r = f * BOTTOM_BELOW_TX / math.cos(math.radians(a))
         dtype = 2 if (fan == 0 and b == REJECTED) else (1 if (fan == 0 and b == EXTRA) else 0)
+        if extra_type is not None:
+            dtype = extra_type
         soundings += struct.pack(
             sounding_format, b, 0, dtype, 1 + b % 2, 0, 0, 0, 0, 0, 0, 1.0, 0.0, 0.1, 0.1, 0.001, 0.001,
-            b, int(detect_samples(b)), a, 1.0, -20.0, -20.0, 0.0, 220.0, 0.0, 0.0, a, 0.0,
-            2.0 * r / SOUNDSPEED, 0.0, 0.0, 0.0, DRAFT + BOTTOM_BELOW_TX,
-            -BOTTOM_BELOW_TX * math.tan(math.radians(a)), 0.0, 0.0, 0, 0, 0, 0)
+            b, int(f * detect_samples(b)), a, 1.0, -20.0, -20.0, 0.0, 220.0, 0.0, 0.0, a + rx_angle_offset, 0.0,
+            2.0 * r / SOUNDSPEED, 0.0, 0.0, 0.0, draft + f * BOTTOM_BELOW_TX,
+            -sounding_scale * f * BOTTOM_BELOW_TX * math.tan(math.radians(a)), 0.0, 0.0, 0, 0, 0, 0)
     body = struct.pack("<HH", 1, 1) + _cmn_part(ping, fan) + ping_info + tx_sector + rx_info + soundings
     return _datagram(b"#MRZ", 3, t, body)
 
 
-def mwc(ping, fan):
+def mwc(ping, fan, whole_samples=False):
     t = ping_time(ping, fan)
     body = struct.pack("<HH", 1, 1) + _cmn_part(ping, fan)
     body += struct.pack("<HHHhf", 12, 1, 16, 0, 0.1)
@@ -165,15 +191,17 @@ def mwc(ping, fan):
     for b in range(NBEAMS):
         det = detect_samples(b)
         start = START_SAMPLE if b % 2 else 0
-        body += struct.pack("<fHHHHf", beam_angle(b), start, int(det), 0, NSAMPLES, det)
+        body += struct.pack("<fHHHHf", beam_angle(b), start, int(det), 0, NSAMPLES,
+                            float(int(det)) if whole_samples else det)
         body += bytes((ampl_raw(ping, fan, b, k) & 0xFF) for k in range(NSAMPLES))
     return _datagram(b"#MWC", 2, t, body)
 
 
-def write_line(directory):
-    """Write the .kmall and .kmwcd into directory; return their paths."""
+def write_line(directory, draft=DRAFT, skip_mrz=(), extra=False, svp_gradient=0.0, extra_fan=1, sounding_scale=1.0,
+               draft_step=0.0, whole_samples=False, rx_angle_offset=0.0):
+    """Write the .kmall and .kmwcd into directory; return their paths (options: see above)."""
     t_end = ping_time(PING0 + NPINGS)
-    kmall, kmwcd = [svp(T0 - 2.0)], [svp(T0 - 2.0)]
+    kmall, kmwcd = [svp(T0 - 2.0, draft, svp_gradient)], [svp(T0 - 2.0, draft, svp_gradient)]
     t = T0 - 1.0
     events = []
     while t < t_end:
@@ -188,10 +216,12 @@ def write_line(directory):
             kmwcd.append(spo(t))
             continue
         _, p, fan = ev
-        kmall.append(mrz(p, fan))
+        if p not in skip_mrz:
+            kmall.append(mrz(p, fan, ping_draft(p, draft, draft_step), extra, extra_fan, sounding_scale,
+                             rx_angle_offset))
         last = PING0 + NPINGS - 1
         if p > PING0 and not (p == last and fan == 1):
-            kmwcd.append(mwc(p, fan))
+            kmwcd.append(mwc(p, fan, whole_samples))
     paths = (os.path.join(directory, KMALL_NAME), os.path.join(directory, KMWCD_NAME))
     for path, dgms in zip(paths, (kmall, kmwcd)):
         with open(path, "wb") as f:
