@@ -221,8 +221,8 @@ void resolve_backend(Backend *backend, RhiApi *api, std::string *message) {
   if (*backend == Backend::Rhi) {
     *backend = Backend::LegacyGL;
     *api = RhiApi::Default;
-    *message = "mbview-qt: this build has no QRhi drawing (it needs -DbuildQt6Rhi=ON and Qt 6.8 or later with Qt "
-               "Shader Tools); the views are drawn with OpenGL";
+    *message = "mbview-qt: this build has no QRhi drawing (it needs -DbuildQt6Rhi=ON, Qt 6.8 or later, Qt Shader "
+               "Tools and Qt's private Gui headers); the views are drawn with OpenGL";
   }
   else {
     *backend = Backend::Rhi;

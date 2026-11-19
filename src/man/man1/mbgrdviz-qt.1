@@ -1,4 +1,4 @@
-.TH mbgrdviz-qt 1 "17 November 2026" "MB-System 5.0" "MB-System 5.0"
+.TH mbgrdviz-qt 1 "19 November 2026" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbgrdviz-qt\fP \- Simple interactive 2D/3D visualization of GMT grids (Qt6 version).
 
@@ -84,16 +84,17 @@ draws with the legacy OpenGL drawing; \fBnull\fP draws nothing (for tests).
 cannot draw with OpenGL, whose context there lacks instancing: the views show
 the message described below, so there \fBopengl\fP is only for tests.
 .IP
-Without \fBMB_RENDERER\fP, or with another value, the program draws with QRhi
-on macOS and with the legacy OpenGL drawing on Linux and Windows; a program
-built with only one of the two draws with that one. A value it cannot follow
-gives one line on the stderr stream saying what it draws with instead.
+Without \fBMB_RENDERER\fP, or with a value not listed above, the program draws
+with QRhi on macOS and with the legacy OpenGL drawing on Linux and Windows; a
+program built with only one of the two draws with that one. A value it cannot
+follow gives one line on the stderr stream saying what it draws with instead.
 .IP
-The legacy OpenGL drawing is built only with \fB\-DbuildQt6LegacyGL=ON\fP,
-the default except on macOS, or where QRhi is not built: QRhi needs
-\fB\-DbuildQt6Rhi=ON\fP and Qt 6.8 or later with Qt Shader Tools. Where QRhi
-cannot draw (for example in a
-virtual machine without Metal), each view shows a message instead of the
+The legacy OpenGL drawing is built in two cases: with
+\fB\-DbuildQt6LegacyGL=ON\fP (the default except on macOS), and when QRhi is
+not built. QRhi needs \fB\-DbuildQt6Rhi=ON\fP (the default), Qt 6.8 or later,
+Qt Shader Tools and Qt's private Gui headers (on Debian and Ubuntu the package
+qt6-base-private-dev). Where QRhi cannot draw (for example in a virtual machine
+without Metal), each view shows a message instead of the
 drawing and one line goes to the stderr stream; the program does not change
 to the legacy OpenGL drawing by itself.
 
@@ -139,4 +140,5 @@ the whole map, as in \fBmbgrdviz\fP.
 \fBmbvelocitytool-qt\fP(1), \fBmbeditviz-qt\fP(1), \fBmbnavedit\fP(1)
 
 .SH BUGS
-Only tested on macOS so far.
+Tested on macOS; on Linux (Ubuntu) only in automated tests with software
+rendering; not yet run on Windows.

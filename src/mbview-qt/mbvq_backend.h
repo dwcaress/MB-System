@@ -28,12 +28,12 @@
  * on macOS, and always without QRhi, where MBVQ_HAVE_GL is defined) holds all
  * OpenGL code of the Qt half and runs the core's OpenGL drawing. The QRhi
  * backend (mbvq_backend_rhi.cc and the mbvq_rhi_* files; built with Qt 6.8 or
- * later and Qt Shader Tools, where MBVQ_HAVE_RHI is defined) draws what the
- * core records in a batch (mbv_draw_batch.h) with Metal, Direct3D, Vulkan or
- * OpenGL, without any OpenGL call of the core. The null backend
- * (mbvq_backend_null.cc) draws nothing. One backend per process, chosen in
- * main() before the QApplication exists (mbvq.h); the views come from the
- * backend chosen.
+ * later, its private Gui headers and Qt Shader Tools, where MBVQ_HAVE_RHI is
+ * defined) draws what the core records in a batch (mbv_draw_batch.h) with
+ * Metal, Direct3D, Vulkan or OpenGL, without any OpenGL call of the core. The
+ * null backend (mbvq_backend_null.cc) draws nothing. One backend per process,
+ * chosen in main() before the QApplication exists (mbvq.h); the views come
+ * from the backend chosen.
  */
 
 #ifndef MBVIEW_QT_MBVQ_BACKEND_H

@@ -24,9 +24,10 @@
 
 # Tests of mbgrdviz-qt. mbgrdviz_qt_test runs without drawing (null backend,
 # offscreen platform): the main window menus, and sites and routes saved and
-# read again through the shared mbgrdviz core; with --gl or --rhi (the OpenGL
-# or the QRhi backend; need a display, not run by ctest) also the comparison
-# with files the Motif mbgrdviz saved.
+# read again through the shared mbgrdviz core; with --gl (the legacy OpenGL
+# backend) or --rhi (QRhi), which need a display and are not run by ctest,
+# also the comparison with files the Motif mbgrdviz saved; each mode exits
+# with 77 (skipped) where the build lacks its backend.
 # mbgrdviz_qt_test.py checks the usage text and a bad option.
 
 if(APPLE)

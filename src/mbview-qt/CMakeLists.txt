@@ -45,10 +45,33 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets)
 # QRhi needs Qt 6.8 or later, the private Gui module (rhi/qrhi.h) and Qt Shader
 # Tools (qt6_add_shaders); without them the views are drawn with OpenGL only
 set(mbvq_rhi OFF)
+set(mbvq_rhi_headers ON)
 if(buildQt6Rhi)
   find_package(Qt6 QUIET COMPONENTS GuiPrivate ShaderTools)
   if(Qt6_VERSION VERSION_GREATER_EQUAL 6.8 AND TARGET Qt6::GuiPrivate AND COMMAND qt6_add_shaders)
-    set(mbvq_rhi ON)
+    # the private headers themselves: Debian and Ubuntu install the CMake files
+    # of Qt6::GuiPrivate and Qt6::CorePrivate with qt6-base-dev but their
+    # headers with qt6-base-private-dev, and CMake stops at generate time when
+    # an include directory of an imported target is missing; so look at each
+    # one (Qt wraps them in a condition on private headers) and draw with
+    # OpenGL where one is missing
+    foreach(mbvq_private Qt6::GuiPrivate Qt6::CorePrivate)
+      if(TARGET ${mbvq_private})
+        get_target_property(mbvq_private_dirs ${mbvq_private} INTERFACE_INCLUDE_DIRECTORIES)
+        if(NOT mbvq_private_dirs)
+          set(mbvq_private_dirs "")
+        endif()
+        foreach(mbvq_dir IN LISTS mbvq_private_dirs)
+          string(REGEX REPLACE "^\\$<\\$<BOOL:.*>>:(.*)>$" "\\1" mbvq_dir "${mbvq_dir}")
+          if(mbvq_dir AND NOT mbvq_dir MATCHES "\\$<" AND NOT EXISTS "${mbvq_dir}")
+            set(mbvq_rhi_headers OFF)
+          endif()
+        endforeach()
+      endif()
+    endforeach()
+    if(mbvq_rhi_headers)
+      set(mbvq_rhi ON)
+    endif()
   endif()
 endif()
 # the legacy OpenGL backend: with -DbuildQt6LegacyGL=ON, and always without QRhi
@@ -166,6 +189,11 @@ if(mbvq_gl)
   target_compile_definitions(mbview-qt PUBLIC MBVQ_HAVE_GL)
 endif()
 
+# what QRhi needs, for the lines below where it is not built
+set(mbvq_rhi_needs "QRhi needs -DbuildQt6Rhi=ON, Qt 6.8 or later, Qt Shader Tools and Qt's private Gui headers")
+if(NOT mbvq_rhi_headers)
+  set(mbvq_rhi_needs "QRhi needs Qt's private headers, on Debian and Ubuntu in the package qt6-base-private-dev")
+endif()
 if(mbvq_rhi AND mbvq_gl AND APPLE)
   message(STATUS "mbview-qt: the maps, profiles and 3D soundings are drawn with QRhi, or with OpenGL with MB_RENDERER=legacy-gl")
 elseif(mbvq_rhi AND mbvq_gl)
@@ -173,7 +201,7 @@ elseif(mbvq_rhi AND mbvq_gl)
 elseif(mbvq_rhi)
   message(STATUS "mbview-qt: the maps, profiles and 3D soundings are drawn with QRhi")
 elseif(APPLE)
-  message(WARNING "mbview-qt: the maps, profiles and 3D soundings are drawn with OpenGL. QRhi needs -DbuildQt6Rhi=ON and Qt 6.8 or later with Qt Shader Tools")
+  message(WARNING "mbview-qt: the maps, profiles and 3D soundings are drawn with OpenGL. ${mbvq_rhi_needs}")
 else()
-  message(STATUS "mbview-qt: the maps, profiles and 3D soundings are drawn with OpenGL (QRhi needs -DbuildQt6Rhi=ON and Qt 6.8 or later with Qt Shader Tools)")
+  message(STATUS "mbview-qt: the maps, profiles and 3D soundings are drawn with OpenGL (${mbvq_rhi_needs})")
 endif()

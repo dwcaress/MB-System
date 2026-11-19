@@ -2216,16 +2216,16 @@ struct TestBatch {
 const double kIdentity[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
 
 /* the size rule in the test's own words: max(1, floor(logical x ratio +
-   0.25)), rounded up only from three quarters (design section 7, with the
-   rounding the developer chose by eye on 17 November) */
+   0.25)), rounded up only from three quarters, so that thin lines stay thin
+   at fractional pixel ratios (chosen by eye at ratios 1, 1.5 and 2) */
 int expected_px(double logical, double ratio) {
   return std::max(1, static_cast<int>(std::floor(logical * ratio + 0.25)));
 }
 
 void model_style() {
-  /* section 7: widths 1, 2, 3 and 4, the stipple factor 1 and the point size
-     3; ratio 1.74, just below 1.75 where 1 px lines become 2 px, and ratio
-     1.25 pin the rule's 0.25 */
+  /* the rule's table: widths 1, 2, 3 and 4, the stipple factor 1 and the
+     point size 3; ratio 1.74, just below 1.75 where 1 px lines become 2 px,
+     and ratio 1.25 pin the rule's 0.25 */
   struct Row {
     double ratio;
     int widths[4];

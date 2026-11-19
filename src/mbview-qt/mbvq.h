@@ -52,7 +52,8 @@ enum class Backend {
   LegacyGL, /* the mbview OpenGL drawing code in a 2.1 compatibility context */
   Null,     /* draws nothing, for tests without a display */
   Rhi       /* QRhi: the drawing the core records, with Metal, Direct3D, Vulkan
-               or OpenGL; built with Qt 6.8 or later and Qt Shader Tools */
+               or OpenGL; built with Qt 6.8 or later, its private Gui headers
+               and Qt Shader Tools */
 };
 /* the graphics API of the QRhi backend, as QRhiWidget::Api; Default is Metal
    on Apple, Direct3D 11 on Windows and OpenGL elsewhere */
