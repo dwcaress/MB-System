@@ -34,6 +34,7 @@
  */
 
 #include <assert.h>
+#include <limits.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8819,6 +8820,273 @@ int mbsys_reson7k3_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr
     fprintf(stderr, "dbg2       status:     %d\n", status);
   }
 
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+/* Check the Compressed Water Column record (7042) of the current ping and get its number
+    of beams, the largest number of samples of a beam and the sample rate of the record.
+    Returns false if the ping has no usable water column: no 7042 record, a 7042 record of
+    another ping (copies of the store do not copy it), or a beam without a beam geometry
+    (7004) angle. */
+static bool mbsys_reson7k3_wc_size(const struct mbsys_reson7k3_struct *store, int *nbeams, int *nsamples_max,
+                                   double *sample_rate) {
+  *nbeams = 0;
+  *nsamples_max = 0;
+  *sample_rate = 0.0;
+  if (store->kind != MB_DATA_DATA || !store->read_CompressedWaterColumn || !store->read_BeamGeometry)
+    return false;
+  const s7k3_CompressedWaterColumn *CompressedWaterColumn = &(store->CompressedWaterColumn);
+  const s7k3_BeamGeometry *BeamGeometry = &(store->BeamGeometry);
+
+  /* the ping number is that of the detections, as in mbsys_reson7k3_pingnumber() */
+  unsigned int ping_number;
+  if (store->read_RawDetection)
+    ping_number = store->RawDetection.ping_number;
+  else if (store->read_SegmentedRawDetection)
+    ping_number = store->SegmentedRawDetection.ping_number;
+  else
+    return false;
+  if (CompressedWaterColumn->ping_number != ping_number || CompressedWaterColumn->number_beams == 0
+      || CompressedWaterColumn->number_beams > MBSYS_RESON7K_MAX_BEAMS
+      || CompressedWaterColumn->first_sample > (unsigned int)INT_MAX)
+    return false;
+
+  /* the sample rate of the record is the rate after downsampling; without it use the
+      sonar's sample rate (7000) divided by the downsampling divisor (flags bits 4-7),
+      which applies only with a downsampling type (flags bits 8-11) */
+  *sample_rate = CompressedWaterColumn->sample_rate;
+  if (!(*sample_rate > 0.0)) {
+    const unsigned int divisor = (CompressedWaterColumn->flags & 0x00F0) >> 4;
+    const unsigned int type = (CompressedWaterColumn->flags & 0x0F00) >> 8;
+    *sample_rate = store->SonarSettings.sample_rate / ((type != 0 && divisor > 1) ? divisor : 1);
+  }
+  if (!(*sample_rate > 0.0) || !isfinite(*sample_rate))
+    return false;
+
+  for (unsigned int i = 0; i < CompressedWaterColumn->number_beams; i++) {
+    const s7k3_compressedwatercolumndata *compressedwatercolumndata =
+        &(CompressedWaterColumn->compressedwatercolumndata[i]);
+    if (compressedwatercolumndata->beam_number >= BeamGeometry->number_beams
+        || compressedwatercolumndata->beam_number >= MBSYS_RESON7K_MAX_BEAMS
+        || compressedwatercolumndata->samples > (unsigned int)INT_MAX
+        || (compressedwatercolumndata->samples > 0 && compressedwatercolumndata->data == NULL))
+      return false;
+    *nsamples_max = MAX(*nsamples_max, (int)compressedwatercolumndata->samples);
+  }
+  *nbeams = (int)CompressedWaterColumn->number_beams;
+  return true;
+}
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k3_extract_wcdimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams,
+                                        int *nsamples_max, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+  }
+
+  /* get data structure pointer */
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
+
+  /* get data kind */
+  *kind = store->kind;
+
+  int status = MB_SUCCESS;
+
+  /* get the dimensions of the water column data (record 7042) of the current ping */
+  double sample_rate;
+  if (mbsys_reson7k3_wc_size(store, nbeams, nsamples_max, &sample_rate)) {
+    *error = MB_ERROR_NO_ERROR;
+  }
+  else if (*kind == MB_DATA_COMMENT) {
+    status = MB_FAILURE;
+    *error = MB_ERROR_COMMENT;
+  }
+  else {
+    status = MB_FAILURE;
+    *error = MB_ERROR_OTHER;
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       kind:         %d\n", *kind);
+    fprintf(stderr, "dbg2       nbeams:       %d\n", *nbeams);
+    fprintf(stderr, "dbg2       nsamples_max: %d\n", *nsamples_max);
+    fprintf(stderr, "dbg2       error:        %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:       %d\n", status);
+  }
+
+  /* return status */
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k3_extract_wc(int verbose, void *mbio_ptr, void *store_ptr, int nbeams_alloc, int nsamples_alloc,
+                              int *kind, int time_i[7], double *time_d, int *nbeams, int *nsamples_max,
+                              int *swath, double *angle_across, double *angle_along, double *sample_interval,
+                              double *soundspeed, int *start_sample, int *nsamples, double *detect_sample,
+                              float *amplitude, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
+    fprintf(stderr, "dbg2       mb_ptr:         %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:      %p\n", (void *)store_ptr);
+    fprintf(stderr, "dbg2       nbeams_alloc:   %d\n", nbeams_alloc);
+    fprintf(stderr, "dbg2       nsamples_alloc: %d\n", nsamples_alloc);
+  }
+
+  /* get data structure pointer */
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
+
+  /* get data kind */
+  *kind = store->kind;
+
+  int status = MB_SUCCESS;
+
+  /* extract the water column data (record 7042) of the current ping */
+  double sample_rate;
+  if (mbsys_reson7k3_wc_size(store, nbeams, nsamples_max, &sample_rate)) {
+    /* get time from the detection record as mbsys_reson7k3_extract() does */
+    const s7k3_header *header = store->read_RawDetection ? &(store->RawDetection.header)
+                                                         : &(store->SegmentedRawDetection.header);
+    int time_j[5];
+    time_j[0] = header->s7kTime.Year;
+    time_j[1] = header->s7kTime.Day;
+    time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+    time_j[3] = (int)header->s7kTime.Seconds;
+    time_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time_j[3]));
+    mb_get_itime(verbose, time_j, time_i);
+    mb_get_time(verbose, time_i, time_d);
+
+    /* the caller's arrays must be large enough */
+    if (*nbeams > nbeams_alloc || *nsamples_max > nsamples_alloc) {
+      status = MB_FAILURE;
+      *error = MB_ERROR_BAD_PARAMETER;
+    }
+    else {
+      s7k3_CompressedWaterColumn *CompressedWaterColumn = &(store->CompressedWaterColumn);
+      s7k3_BeamGeometry *BeamGeometry = &(store->BeamGeometry);
+      s7k3_RawDetection *RawDetection = &(store->RawDetection);
+      s7k3_SonarSettings *SonarSettings = &(store->SonarSettings);
+
+      /* sound speed at the transducer as for the bathymetry: sonar settings (7000), else
+          sound velocity (7610), else 1500 m/s */
+      double sv = 1500.0;
+      if (SonarSettings->sound_velocity > 0.0)
+        sv = SonarSettings->sound_velocity;
+      else if (store->SoundVelocity.soundvelocity > 0.0)
+        sv = store->SoundVelocity.soundvelocity;
+
+      /* the beam angles (7004, radians, positive to starboard) are taken relative to the
+          sonar, as the bathymetry takes them, whatever the roll compensation flag (7000
+          receive flags bit 0) says (the angles of a T50 line with the flag set were
+          relative to the sonar): subtract the roll at the ping that the bathymetry
+          calculation stored with the detections (radians) */
+      double roll = 0.0;
+      if (store->read_RawDetection && RawDetection->optionaldata)
+        roll = RawDetection->roll;
+      else if (store->read_SegmentedRawDetection && store->SegmentedRawDetection.optionaldata)
+        roll = store->SegmentedRawDetection.roll;
+
+      /* the transmit steering along track (pitch stabilisation, radians, positive
+          forward) is in 7027 and in 7000 */
+      const double tx_steer = store->read_RawDetection ? RawDetection->tx_angle : SonarSettings->steering_vertical;
+
+      /* detections (7027) are in samples at the sonar's sample rate */
+      double detect_scale = 0.0;
+      if (store->read_RawDetection && RawDetection->sampling_rate > 0.0)
+        detect_scale = sample_rate / RawDetection->sampling_rate;
+
+      /* 8 bit samples (flags bit 2) are factor * log10(magnitude), rounded, with the factor
+          of the record (flags bit 13) or 40; 16 and 32 bit samples (flags bit 12) are
+          magnitudes; phase values follow the magnitude of each sample and are skipped */
+      double factor = 40.0;
+      if ((CompressedWaterColumn->flags & 0x2000) && CompressedWaterColumn->compression_factor > 0.0)
+        factor = CompressedWaterColumn->compression_factor;
+      const double db_per_step = 20.0 / factor;
+      const size_t magsamplesize = CompressedWaterColumn->magsamplesize;
+      const size_t samplesize = CompressedWaterColumn->magsamplesize + CompressedWaterColumn->phasesamplesize;
+
+      for (int i = 0; i < *nbeams; i++) {
+        s7k3_compressedwatercolumndata *compressedwatercolumndata = &(CompressedWaterColumn->compressedwatercolumndata[i]);
+        const unsigned int beam_number = compressedwatercolumndata->beam_number;
+        swath[i] = 0;
+        angle_across[i] = RTD * (BeamGeometry->angle_acrosstrack[beam_number] - roll);
+        angle_along[i] = RTD * tx_steer;
+        sample_interval[i] = 1.0 / sample_rate;
+        soundspeed[i] = sv;
+        start_sample[i] = (int)CompressedWaterColumn->first_sample;
+        nsamples[i] = (int)compressedwatercolumndata->samples;
+
+        /* the two-way range of the beam's detection with the highest priority (bits 9-12
+            of the detection flags zero), 0 if there is none */
+        detect_sample[i] = 0.0;
+        for (unsigned int j = 0;
+             detect_scale > 0.0 && j < RawDetection->number_beams && j < MBSYS_RESON7K_MAX_SOUNDINGS; j++) {
+          const s7k3_rawdetectiondata *rawdetectiondata = &(RawDetection->rawdetectiondata[j]);
+          if (rawdetectiondata->beam_descriptor == beam_number && ((rawdetectiondata->flags >> 9) & 0x0F) == 0) {
+            detect_sample[i] = detect_scale * rawdetectiondata->detection_point;
+            break;
+          }
+        }
+
+        /* amplitudes in dB */
+        float *beam_amplitude = &amplitude[(size_t)i * (size_t)nsamples_alloc];
+        u8 *data = compressedwatercolumndata->data;
+        for (int k = 0; k < nsamples[i]; k++) {
+          u8 *sample = &data[(size_t)k * samplesize];
+          if (magsamplesize == 1) {
+            beam_amplitude[k] = (float)(db_per_step * sample[0]);
+          }
+          else if (magsamplesize == 2) {
+            unsigned short magnitude;
+            mb_get_binary_short(true, sample, &magnitude);
+            beam_amplitude[k] = (float)(20.0 * log10(MAX(magnitude, 1)));
+          }
+          else {
+            unsigned int magnitude;
+            mb_get_binary_int(true, sample, &magnitude);
+            beam_amplitude[k] = (float)(20.0 * log10(MAX(magnitude, 1)));
+          }
+        }
+      }
+      *error = MB_ERROR_NO_ERROR;
+    }
+  }
+  else if (*kind == MB_DATA_COMMENT) {
+    status = MB_FAILURE;
+    *error = MB_ERROR_COMMENT;
+  }
+  else {
+    status = MB_FAILURE;
+    *error = MB_ERROR_OTHER;
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       kind:         %d\n", *kind);
+    fprintf(stderr, "dbg2       nbeams:       %d\n", *nbeams);
+    fprintf(stderr, "dbg2       nsamples_max: %d\n", *nsamples_max);
+  }
+  if (verbose >= 2 && status == MB_SUCCESS) {
+    fprintf(stderr, "dbg2       time_d:       %f\n", *time_d);
+    for (int i = 0; i < *nbeams; i++)
+      fprintf(stderr, "dbg2       beam:%d swath:%d angle_across:%f angle_along:%f sample_interval:%g soundspeed:%f "
+              "start_sample:%d nsamples:%d detect_sample:%f\n", i, swath[i], angle_across[i], angle_along[i],
+              sample_interval[i], soundspeed[i], start_sample[i], nsamples[i], detect_sample[i]);
+  }
+  if (verbose >= 2) {
+    fprintf(stderr, "dbg2       error:        %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:       %d\n", status);
+  }
+
+  /* return status */
   return (status);
 }
 /*--------------------------------------------------------------------*/

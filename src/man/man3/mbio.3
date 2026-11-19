@@ -2957,6 +2957,20 @@ formats \fBmb_get_all\fP returns \fBMB_FAILURE\fP with \fI*error\fP set to
 without an error do not copy them; test \fIkind\fP for \fBMB_DATA_WATER_COLUMN\fP
 before calling \fBmb_extract_wc\fP. \fBmb_pingnumber\fP gives the ping number of
 the water column record.
+For Reson and Teledyne 7k data (format 89, *.s7k files and their processed
+*.mb89 copies) the water column is the ping's Compressed Water Column record
+(7042), read with the ping, so \fBmb_extract_wc\fP applies to \fBMB_DATA_DATA\fP
+records. The beam angles are those of the Beam Geometry record (7004), turned to
+the vertical with the roll at the ping, as for the bathymetry: they are taken as
+relative to the sonar, whatever the roll compensation flag of the Sonar Settings
+record (7000) says. The along track angle is the
+transmit steering, the detection that of the beam's primary detection in the Raw
+Detection record, the sound speed that of the Sonar Settings record (7000),
+\fIsample_interval\fP that of the record (after any downsampling) and \fIswath\fP
+is 0. The amplitudes are 20 log10 of the logged magnitudes, in dB relative to one
+magnitude count with the sonar's gain and TVG applied; 8 bit samples, logged as
+factor x log10(magnitude) with a factor of 40 unless the record gives one, are
+converted to the same scale. Phase samples are not returned.
 This function is not implemented for all data formats.
 
 \---------------------------------------------------------
