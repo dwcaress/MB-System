@@ -6805,6 +6805,11 @@ int mbr_reson7k3_rd_CompressedWaterColumn(int verbose, char *buffer, void *store
   }
   else {
     store->kind = MB_DATA_NONE;
+
+    /* keep no part of a rejected record: the header and beams stored before the
+        failure are not a whole record (mbr_reson7k3_rd_data also clears
+        read_CompressedWaterColumn) */
+    CompressedWaterColumn->number_beams = 0;
   }
 
 /* print out the results */
@@ -11888,6 +11893,12 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
           store->read_CompressedWaterColumn = true;
           s7k3_CompressedWaterColumn *CompressedWaterColumn = &(store->CompressedWaterColumn);
           header = &(CompressedWaterColumn->header);
+        }
+        else {
+          /* a rejected record leaves its ping without water column, also when the
+              ping already had a 7042 record or the flag is left over from a dropped
+              partial ping */
+          store->read_CompressedWaterColumn = false;
         }
       }
       else if (*recordid == R7KRECID_SegmentedRawDetection) {

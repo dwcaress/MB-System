@@ -22,6 +22,8 @@ MBIO (mb_extract_wc) and mbio_py, on a synthetic *.s7k file."""
 
 import math
 import os
+import struct
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -33,6 +35,17 @@ from mbio_py import constants as K
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import synth_s7k as S  # noqa: E402
+
+
+def records(path):
+  """(record type, record bytes) of the 7k records of a file, in order."""
+  with open(path, "rb") as f:
+    data = f.read()
+  k = 0
+  while k + 64 <= len(data):
+    size, rtype = struct.unpack_from("<I", data, k + 8)[0], struct.unpack_from("<I", data, k + 32)[0]
+    yield rtype, data[k:k + size]
+    k += size
 
 
 class WaterColumnS7kTest(unittest.TestCase):
@@ -121,6 +134,94 @@ class WaterColumnS7kTest(unittest.TestCase):
       if p != 0:  # with multi-detection mb_detects gives one value per beam, not per sounding
         for b in range(S.NBEAMS):
           self.assertEqual(det[b], K.MB_DETECT_AMPLITUDE if b % 2 == 0 else K.MB_DETECT_PHASE)
+
+
+class ReaderCasesTest(unittest.TestCase):
+  """Pings that MBIO must read with their own sample rate and water column only: broken 7042
+  records after a dropped partial ping or after a good 7042 record of the same ping, pings
+  without a 7000 record, and a ping with segmented detections (7047) (synth_s7k.CASES)."""
+
+  @classmethod
+  def setUpClass(cls):
+    cls.tmp = tempfile.TemporaryDirectory()
+    cls.s7k = S.write_cases(cls.tmp.name)
+    with mb.Reader(cls.s7k) as r:
+      cls.records = list(r)
+    cls.pings = {rec.ping_number: rec for rec in cls.records if rec.kind == K.MB_DATA_DATA}
+    cls.utilities = os.path.join(os.environ["MB_BINARY_DIR"], "src", "utilities")
+
+  @classmethod
+  def tearDownClass(cls):
+    cls.tmp.cleanup()
+
+  def test_pings(self):
+    """The reader drops the pings without detections; the broken 7042 records are rejected
+    with a non-fatal error."""
+    kept = [S.PING0 + S.CASE0 + i for i, case in enumerate(S.CASES) if case["rate"] != "dropped"]
+    self.assertEqual(sorted(self.pings), kept)
+    self.assertTrue(all(rec.ok for rec in self.pings.values()))
+    errors = [rec.error for rec in self.records if not rec.ok]
+    self.assertEqual(errors, [K.MB_ERROR_UNINTELLIGIBLE] * sum(case["rate"] is None for case in S.CASES))
+
+  def test_water_column(self):
+    """A rejected 7042 record leaves its ping without water column, also when the ping had a
+    good one or the ping before it was dropped with one; without a record sample rate and a
+    7000 record of the ping (a 7000 of a dropped ping is not one), the rate is that of the
+    ping's 7027 or 7047 record. The sound speed is that of the last 7000 record read (that of
+    an earlier or dropped ping for a ping without one), else 1500 m/s, as for the soundings."""
+    last_sv = 0.0
+    for i, case in enumerate(S.CASES):
+      if case["s7000"] is not None:
+        last_sv = case.get("sv7000", S.SOUNDSPEED)
+      if case["rate"] == "dropped":
+        continue
+      p = S.CASE0 + i
+      wc = self.pings[S.PING0 + p].water_column
+      with self.subTest(case=case["name"]):
+        if case["rate"] is None:
+          self.assertIsNone(wc)
+          continue
+        self.assertIsNotNone(wc)
+        self.assertEqual(wc.ping_number, S.PING0 + p)
+        self.assertEqual(wc.nbeams, S.NBEAMS)
+        for b in range(S.NBEAMS):
+          self.assertAlmostEqual(wc.sample_interval[b], 1.0 / case["rate"], places=12)
+          self.assertEqual(wc.soundspeed[b], last_sv or 1500.0)
+          # mb_extract_wc gives the detections of a 7027 record only
+          detect = 0.0 if case.get("s7047") else float(np.float32(S.detect_samples(b))) * case["rate"] / S.FS
+          self.assertAlmostEqual(wc.detect_sample[b], detect, places=4)
+          n = S.nsamples(p, b)
+          self.assertEqual(wc.nsamples[b], n)
+          np.testing.assert_array_equal(wc.amplitude[b, :n],
+                                        np.array([S.amplitude_db(p, b, k) for k in range(n)], np.float32))
+
+  def test_programs(self):
+    """The record prints of mbinfo (-V -V, --debug-record-contents) and the writer of mbcopy
+    cope with the rejected records."""
+    mbinfo = os.path.join(self.utilities, "mbinfo")
+    line = S.write(self.tmp.name)
+    for args in (["-V", "-V", "-F89", "-I", line], ["-V", "-V", "-F89", "-I", self.s7k],
+                 ["-F89", "-I", self.s7k, "--debug-record-contents=7042"]):
+      run = subprocess.run([mbinfo] + args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+      self.assertEqual(run.returncode, 0, " ".join(args))
+    copy = os.path.join(self.tmp.name, "copy.mb89")
+    run = subprocess.run([os.path.join(self.utilities, "mbcopy"), "-F89/89", "-I", self.s7k, "-O", copy],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    self.assertEqual(run.returncode, 0)
+    with mb.Reader(copy) as r:
+      copied = {rec.ping_number: rec.water_column for rec in r if rec.kind == K.MB_DATA_DATA}
+    for number, rec in self.pings.items():
+      wc = copied[number]
+      self.assertEqual(wc is None, rec.water_column is None, number)
+      if wc is not None:
+        np.testing.assert_array_equal(wc.amplitude, rec.water_column.amplitude)
+    # no 7042 record (not even an empty one) for the pings whose record was rejected
+    written = {}
+    for rtype, data in records(copy):
+      if rtype == 7042:
+        ping, nbeams = struct.unpack_from("<IxxH", data, 64 + 8)
+        written[ping] = max(written.get(ping, 0), nbeams)
+    self.assertEqual(written, {number: S.NBEAMS for number, rec in self.pings.items() if rec.water_column is not None})
 
 
 if __name__ == "__main__":
