@@ -130,9 +130,45 @@ contained "test", because the filter for the Draco test files saw absolute paths
 programs no longer link -lm and -lpthread twice, which removes 55 macOS linker warnings.
 Contributed by Christian Ferreira.
 
-The above work was done with the assistance of the AI coding assistant Claude Opus 5.5
-(Anthropic, model claude-opus-5-5), operating as Claude Code under developer
-supervision and review.
+Program mbmesh (src/mbmesh, src/man/man1/mbmesh.1): the mesh is now reconstructed in a
+local frame derived from ECEF coordinates, and --geoorigin works as in mbgrd2gltf so
+that the products of both programs line up. Large surveys are reconstructed in chunks
+on several threads, with matched seams, with soundings spilled to disk when they
+exceed memory, and with a faster SOR Poisson solver. The GLB meshes are compressed
+with Draco by default. mbmesh can also write the sensor track, a point cloud colored by
+height, an OGC 3D Tiles tileset, X3DOM and CesiumJS viewer pages, and a survey page
+for a directory of surveys. Contributed by Mike McCann.
+
+Program mbgrd2gltf (src/mbgrd2gltf, src/man/man1/mbgrd2gltf.1): grid node positions now
+follow GMT, fixing a one cell squeeze of grids without a spacing variable (such as
+those of mbgrid) and a half cell shift of pixel registered grids. The first vertex is
+no longer lost, and vertical exaggeration now scales the relief about the mean height
+instead of moving the model. Binary glTF is now the default (--no-binary), the Draco
+options are those of mbmesh, and the viewer pages gain scale axes, coloring by height
+and a CesiumJS page (--cesium-html). A regression test has been added. Contributed by
+Mike McCann.
+
+Program mbglb2tiles and library mbdraco (src/mbglb2tiles, src/mbdraco,
+src/man/man1/mbglb2tiles.1): the new program mbglb2tiles makes an OGC 3D Tiles tileset
+with levels of detail from a GLB mesh of mbmesh or mbgrd2gltf, with X3DOM and CesiumJS
+viewer pages. The new library mbdraco holds the Draco encoder and options shared by the
+three programs; the Draco source moved there from src/mbgrd2gltf/draco. Contributed by
+Mike McCann.
+
+Macro mbpy\_3dtiles (src/macros/mbpy\_3dtiles, src/man/man1/mbpy\_3dtiles.1): new macro
+that writes a shellscript making the standard 3D products of a survey with mbgrd2gltf,
+mbmesh and mbglb2tiles, all with one GeoOrigin taken from the multibeam grid. The
+script reruns only the steps whose outputs are missing or out of date, unless --force
+is given. Contributed by Mike McCann.
+
+Build system (configure.ac, src/Makefile.am, Makefile.am of src/mbdraco, src/mbmesh,
+src/mbglb2tiles and src/mbgrd2gltf): mbgrd2gltf, mbmesh and mbglb2tiles, with the
+mbdraco library, have been added to the Autotools build. configure and Makefile.in have
+not been regenerated. Contributed by Mike McCann.
+
+The above work was done with the assistance of the AI coding assistants Claude Opus 5.5
+(Anthropic, model claude-opus-5-5) and Claude Sonnet 5.5 (Anthropic, model
+claude-sonnet-5-5), operating as Claude Code under developer supervision and review.
 
 Macro mbm_route2mission: Fixed bug created by recent changes, which had left non-spindown 
 missions broken with no waypoint behavior between the descent and survey start. 
@@ -3054,6 +3090,15 @@ are time breaks between some of the files.
 
 Format MBF\_3DWISSL2 (id 234): Add kluge to deal with WiSSL2 lidar bathymetry needing 
 additional correction.
+
+Program mbgrd2gltf: Options now follow MB-System conventions, with long options
+(--input, --output, --exaggeration, ...) alongside the single letter ones, and -O
+works as in mbgrid. The obsolete --stride and --max-size options and unused code were
+removed, since tiled output now handles large grids. Added --geoorigin (-G) to write
+vertices as offsets from a GeoOrigin, given or taken from the grid center, to avoid
+the precision limit of GPU coordinates. Added --html (-W) to write an X3DOM viewer page
+with a GeoViewpoint framing the grid and the processing log and settings of the run.
+Contributed by Mike McCann.
 
 #### 5.8.3beta12 (January 7, 2026)
 
