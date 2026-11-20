@@ -193,7 +193,8 @@ class ReaderCasesTest(unittest.TestCase):
     good one or the ping before it was dropped with one; without a record sample rate and a
     7000 record of the ping (a 7000 of a dropped ping is not one), the rate is that of the
     ping's 7027 or 7047 record. The sound speed is that of the last 7000 record read (that of
-    an earlier or dropped ping for a ping without one), else 1500 m/s, as for the soundings."""
+    an earlier or dropped ping for a ping without one), else 1500 m/s, as for the soundings.
+    The detections and, for a 7047 record, the along track angle come from that record."""
     last_sv = 0.0
     for i, case in enumerate(S.CASES):
       if case["s7000"] is not None:
@@ -212,9 +213,11 @@ class ReaderCasesTest(unittest.TestCase):
         for b in range(S.NBEAMS):
           self.assertAlmostEqual(wc.sample_interval[b], 1.0 / case["rate"], places=12)
           self.assertEqual(wc.soundspeed[b], last_sv or 1500.0)
-          # mb_extract_wc gives the detections of a 7027 record only
-          detect = 0.0 if case.get("s7047") else float(np.float32(S.detect_samples(b))) * case["rate"] / S.FS
+          # the detections of the 7027 or 7047 record (the 7047 segment has the sonar's rate)
+          detect = float(np.float32(S.detect_samples(b))) * case["rate"] / S.FS
           self.assertAlmostEqual(wc.detect_sample[b], detect, places=4)
+          if case.get("s7047"):  # the along track steering of the 7047 segment
+            self.assertAlmostEqual(wc.angle_along[b], math.degrees(float(np.float32(S.SEG_STEER))), places=5)
           n = S.nsamples(p, b)
           self.assertEqual(wc.nsamples[b], n)
           np.testing.assert_array_equal(wc.amplitude[b, :n],
