@@ -287,6 +287,20 @@ class MbwcdviewTest(unittest.TestCase):
     subprocess.run([self.program, "-I", kmwcd, "--ping=1", "--export=" + image, "--size=400x300"], check=True)
     self.assertGreater(len(self.plot_colours(image)), 20)
 
+  def test_dump_no_data(self):
+    """An empty file or one without data of its format has neither survey nor water column:
+    --dump fails with a message."""
+    directory = os.path.join(self.tmp.name, "nodata")
+    os.mkdir(directory)
+    for name, content in (("empty.kmall", b""), ("garbage.kmall", b"no sonar data here\n" * 50),
+                          ("empty.s7k", b""), ("garbage.s7k", b"no sonar data here\n" * 50)):
+      path = os.path.join(directory, name)
+      with open(path, "wb") as f:
+        f.write(content)
+      result = subprocess.run([self.program, "--dump", "-I", path], capture_output=True, text=True)
+      self.assertNotEqual(result.returncode, 0, name)
+      self.assertIn("no water column or survey data", result.stderr, name)
+
   def test_ship_window(self):
     """A ship's transducer is shallower than the longest slant range: the window starts at the
     surface."""
