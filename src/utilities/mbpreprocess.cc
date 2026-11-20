@@ -1418,6 +1418,7 @@ int main(int argc, char **argv) {
   int n_rt_att3 = 0;
   int n_rt_files = 0;
   int n_rt_dup_timestamp = 0;
+  int n_rt_data_missing = 0;
 
   int n_wt_data = 0;
   int n_wt_comment = 0;
@@ -2779,6 +2780,7 @@ int main(int argc, char **argv) {
   int n_rf_att2 = 0;
   int n_rf_att3 = 0;
   int n_rf_dup_timestamp = 0;
+  int n_rf_data_missing = 0;
   n_rt_data = 0;
   n_rt_comment = 0;
   n_rt_nav = 0;
@@ -2791,6 +2793,7 @@ int main(int argc, char **argv) {
   n_rt_att3 = 0;
   n_rt_files = 0;
   n_rt_dup_timestamp = 0;
+  n_rt_data_missing = 0;
 
   int n_wf_data = 0;
   int n_wf_comment = 0;
@@ -3143,6 +3146,7 @@ int main(int argc, char **argv) {
       n_rf_att2 = 0;
       n_rf_att3 = 0;
 	    n_rf_dup_timestamp = 0;
+      n_rf_data_missing = 0;
       n_wf_data = 0;
       n_wf_comment = 0;
       n_wf_nav = 0;
@@ -3435,6 +3439,13 @@ int main(int argc, char **argv) {
            * is applied here regardless of whether this format has a dedicated
            * implementation. */
           status = mb_preprocess(verbose, imbio_ptr, istore_ptr, (void *)platform, (void *)&preprocess_pars, &error);
+
+          /* count survey records left out because navigation, heading or attitude
+              are missing at the ping time */
+          if (kind == MB_DATA_DATA && error == MB_ERROR_MISSING_NAVATTITUDE) {
+            n_rf_data_missing++;
+            n_rt_data_missing++;
+          }
         }
         
         if (kluge_ignore_duplicate_pings && kind == MB_DATA_DATA) {
@@ -3682,6 +3693,14 @@ int main(int argc, char **argv) {
       /* end read+process+output data loop */
       /* --------------------------------- */
 
+      /* warn about survey records left out for lack of ancillary data */
+      if (n_rf_data_missing > 0) {
+        fprintf(stderr, "\nWarning: %d of %d survey records of %s not written: navigation, heading\n"
+                "or attitude missing (choose their sources with --nav-async, --heading-async\n"
+                "and --attitude-async, or give them with the --*-file options)\n",
+                n_rf_data_missing, n_rf_data, ifile);
+      }
+
       /* output data counts */
       if (verbose > 0) {
         fprintf(stderr, "Pass 2: Records read from input file %d: %s\n", n_rt_files, ifile);
@@ -3871,6 +3890,12 @@ int main(int argc, char **argv) {
   }
   if (read_datalist)
     mb_datalist_close(verbose, &datalist, &error);
+
+  /* warn about survey records left out for lack of ancillary data */
+  if (n_rt_data_missing > 0 && n_rt_files > 1) {
+    fprintf(stderr, "\nWarning: %d of %d survey records in total not written: navigation, heading\n"
+            "or attitude missing\n", n_rt_data_missing, n_rt_data);
+  }
 
   /* output data counts */
   if (verbose > 0) {

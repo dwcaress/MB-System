@@ -82,7 +82,7 @@ int mbr_info_reson7k3(int verbose, int *system, int *beams_bath_max, int *beams_
   strncpy(format_description,
           "Format name:          MBF_RESON7K3\nInformal Description: Reson 7K multibeam vendor format\nAttributes:           "
           "Reson 7K series multibeam sonars, \n                      bathymetry, amplitude, three channels sidescan, and "
-          "subbottom\n                      up to 254 beams, variable pixels, binary, Reson.\n",
+          "subbottom\n                      up to 2048 beams, variable pixels, binary, Reson.\n",
           MB_DESCRIPTION_LENGTH);
   *numfile = 1;
   *filetype = MB_FILETYPE_SINGLE;
@@ -12691,6 +12691,14 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       if (preprocess) {
       	status = mbsys_reson7k3_preprocess(verbose, mbio_ptr, store_ptr,
                   mb_io_ptr->platformptr, preprocess_pars, error);
+
+      	/* when reading, return the ping even if no navigation, heading or attitude
+      	    has been read yet - its bathymetry is calculated with the values available,
+      	    as before; only mbpreprocess leaves such pings out */
+      	if (status == MB_FAILURE && *error == MB_ERROR_MISSING_NAVATTITUDE) {
+      	  status = MB_SUCCESS;
+      	  *error = MB_ERROR_NO_ERROR;
+      	}
       }
     }
 

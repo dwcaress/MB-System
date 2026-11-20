@@ -5179,6 +5179,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
 
   *error = MB_ERROR_NO_ERROR;
   int status = MB_SUCCESS;
+  bool missing_navattitude = false;
 
   /* check for non-null data */
   assert(mbio_ptr != NULL);
@@ -5884,6 +5885,8 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
     if (interp_status == MB_FAILURE) {
       status = MB_FAILURE;
       *error = MB_ERROR_MISSING_NAVATTITUDE;
+      if (pars->n_nav < 1 || pars->n_heading < 1 || pars->n_attitude < 1)
+        missing_navattitude = true;
     }
 
     /*--------------------------------------------------------------*/
@@ -5989,7 +5992,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
         RawDetection->roll = DTR * roll;
         RawDetection->pitch = DTR * pitch;
         RawDetection->heave = heave;
-        if ((SonarSettings->rx_flags & 0x2) != 0) {
+        if ((SonarSettings->rx_flags & 0x4) != 0) {  /* bit 2: heave compensation */
           RawDetection->vehicle_depth = sensordepth + heave;
         }
         else {
@@ -6005,7 +6008,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
         SegmentedRawDetection->roll = DTR * roll;
         SegmentedRawDetection->pitch = DTR * pitch;
         SegmentedRawDetection->heave = heave;
-        if ((SonarSettings->rx_flags & 0x2) != 0) {
+        if ((SonarSettings->rx_flags & 0x4) != 0) {  /* bit 2: heave compensation */
           SegmentedRawDetection->vehicle_depth = sensordepth + heave;
         }
         else {
@@ -6360,6 +6363,15 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
     /*--------------------------------------------------------------*/
   }
 
+  /* the calls made when recalculating the bathymetry reset *error, so set the
+      error again if there is no navigation, heading or attitude at all: the
+      ping is not to be used (a missing sensordepth alone leaves it at zero, as
+      before) */
+  if (missing_navattitude) {
+    status = MB_FAILURE;
+    *error = MB_ERROR_MISSING_NAVATTITUDE;
+  }
+
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -6424,16 +6436,16 @@ int mbsys_reson7k3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr
       }
       if (status == MB_SUCCESS)
         status = mb_platform_set_sensor_offset(
-            verbose, (void *)platform, 0, 0, (double)InstallationParameters->transmit_x,
+            verbose, (void *)platform, sensor_multibeam, 0, (double)InstallationParameters->transmit_x,
             (double)InstallationParameters->transmit_y, (double)InstallationParameters->transmit_z,
-            (double)InstallationParameters->transmit_heading, (double)InstallationParameters->transmit_roll,
-            (double)InstallationParameters->transmit_pitch, error);
+            RTD * InstallationParameters->transmit_heading, RTD * InstallationParameters->transmit_roll,
+            RTD * InstallationParameters->transmit_pitch, error);
       if (status == MB_SUCCESS)
-        status = mb_platform_set_sensor_offset(verbose, (void *)platform, 0, 1,
+        status = mb_platform_set_sensor_offset(verbose, (void *)platform, sensor_multibeam, 1,
                                                (double)InstallationParameters->receive_x, (double)InstallationParameters->receive_y,
                                                (double)InstallationParameters->receive_z,
-                                               (double)InstallationParameters->receive_heading, (double)InstallationParameters->receive_roll,
-                                               (double)InstallationParameters->receive_pitch, error);
+                                               RTD * InstallationParameters->receive_heading, RTD * InstallationParameters->receive_roll,
+                                               RTD * InstallationParameters->receive_pitch, error);
     }
 
     /* look for position sensor, add it if necessary */
@@ -6462,13 +6474,13 @@ int mbsys_reson7k3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr
       }
 
       if (status == MB_SUCCESS)
-        status = mb_platform_set_sensor_offset(verbose, (void *)platform, 1, 0,
+        status = mb_platform_set_sensor_offset(verbose, (void *)platform, sensor_position, 0,
                                                (double)InstallationParameters->position_x, (double)InstallationParameters->position_y,
                                                (double)InstallationParameters->position_z,
                                                (double)0.0, (double)0.0, (double)0.0, error);
       if (status == MB_SUCCESS && InstallationParameters->position_time_delay != 0) {
         status =
-            mb_platform_set_sensor_timelatency(verbose, (void *)platform, 1, MB_SENSOR_TIME_LATENCY_STATIC,
+            mb_platform_set_sensor_timelatency(verbose, (void *)platform, sensor_position, MB_SENSOR_TIME_LATENCY_STATIC,
                                                (double)(0.001 * InstallationParameters->position_time_delay), 0, NULL, NULL, error);
       }
     }
@@ -6501,14 +6513,14 @@ int mbsys_reson7k3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr
       }
 
       if (status == MB_SUCCESS)
-        status = mb_platform_set_sensor_offset(verbose, (void *)platform, 2, 0,
+        status = mb_platform_set_sensor_offset(verbose, (void *)platform, sensor_Attitude, 0,
                                                (double)InstallationParameters->motion_x, (double)InstallationParameters->motion_y,
                                                (double)InstallationParameters->motion_z,
-                                               (double)InstallationParameters->motion_heading, (double)InstallationParameters->motion_roll,
-                                               (double)InstallationParameters->motion_pitch, error);
+                                               RTD * InstallationParameters->motion_heading, RTD * InstallationParameters->motion_roll,
+                                               RTD * InstallationParameters->motion_pitch, error);
       if (status == MB_SUCCESS && InstallationParameters->motion_time_delay != 0) {
         status =
-            mb_platform_set_sensor_timelatency(verbose, (void *)platform, 1, MB_SENSOR_TIME_LATENCY_STATIC,
+            mb_platform_set_sensor_timelatency(verbose, (void *)platform, sensor_Attitude, MB_SENSOR_TIME_LATENCY_STATIC,
                                                (double)(0.001 * InstallationParameters->motion_time_delay), 0, NULL, NULL, error);
       }
     }
@@ -7475,7 +7487,6 @@ int mbsys_reson7k3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 
   struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   s7k3_RawDetection *RawDetection = (s7k3_RawDetection *)&store->RawDetection;
-  s7k3_BeamGeometry *BeamGeometry = (s7k3_BeamGeometry *)&store->BeamGeometry;
   s7k3_SegmentedRawDetection *SegmentedRawDetection = (s7k3_SegmentedRawDetection *)&store->SegmentedRawDetection;
 
   /* get data kind */
@@ -7487,8 +7498,9 @@ int mbsys_reson7k3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *ki
   if (*kind == MB_DATA_DATA) {
     if (store->read_BeamGeometry
         && store->read_RawDetection) {
-      /* read beam detects into storage arrays */
-      *nbeams = BeamGeometry->number_beams;
+      /* read beam detects into storage arrays - one value per 7027 detection,
+          as mbsys_reson7k3_extract() returns one sounding per detection */
+      *nbeams = RawDetection->number_beams;
       for (unsigned int i = 0; i < RawDetection->number_beams; i++) {
         rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
 
@@ -7529,10 +7541,16 @@ int mbsys_reson7k3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *ki
         else
           detects[i] = MB_DETECT_UNKNOWN;
 
-        // multidetect priority (0=highest) is in flags bits 9-12, shift to 8-11 in detects value
-        if (RawDetection->flags & 0x10) {
-          // TODO(schwehr): Bug?  rawdetectiondata->flags is Uninitialized according to cppcheck
-          detects[i] = detects[i] | (int)((rawdetectiondata->flags & 0x1E00) >> 1);
+        // multidetect priority (0=highest) is in flags2 bits 9-12 when multi-detection is
+        // enabled for the segment used (bit 4 of its flags), shift to 8-11 in detects value
+        for (unsigned int j = 0; j < SegmentedRawDetection->n_segments && j < MBSYS_RESON7K_MAX_SEGMENTS; j++) {
+          const s7k3_segmentedrawdetectiontxdata *segmentedrawdetectiontxdata =
+              &(SegmentedRawDetection->segmentedrawdetectiontxdata[j]);
+          if (segmentedrawdetectiontxdata->segment_number == segmentedrawdetectionrxdata->used_segment) {
+            if (segmentedrawdetectiontxdata->flags & 0x10)
+              detects[i] = detects[i] | (int)((segmentedrawdetectionrxdata->flags2 & 0x1E00) >> 1);
+            break;
+          }
         }
       }
 
@@ -9132,25 +9150,27 @@ int mbsys_reson7k3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy
   copy->read_MatchFilter = store->read_MatchFilter;
   copy->read_BeamGeometry = store->read_BeamGeometry;
   copy->read_Bathymetry = store->read_Bathymetry;
-  copy->read_SideScan = store->read_SideScan;
-  copy->read_WaterColumn = store->read_WaterColumn;
+  /* records that own allocated memory and are not copied below are marked as
+      not read in the copy, so that the copy never claims data it does not hold */
+  copy->read_SideScan = false;
+  copy->read_WaterColumn = false;
   copy->read_VerticalDepth = store->read_VerticalDepth;
-  copy->read_TVG = store->read_TVG;
+  copy->read_TVG = false;
   copy->read_Image = store->read_Image;
   copy->read_PingMotion = store->read_PingMotion;
-  copy->read_AdaptiveGate = store->read_AdaptiveGate;
+  copy->read_AdaptiveGate = false;
   copy->read_DetectionDataSetup = store->read_DetectionDataSetup;
-  copy->read_Beamformed = store->read_Beamformed;
-  copy->read_VernierProcessingDataRaw = store->read_VernierProcessingDataRaw;
+  copy->read_Beamformed = false;
+  copy->read_VernierProcessingDataRaw = false;
   copy->read_RawDetection = store->read_RawDetection;
-  copy->read_Snippet = store->read_Snippet;
+  copy->read_Snippet = false;
   copy->read_VernierProcessingDataFiltered = store->read_VernierProcessingDataFiltered;
-  copy->read_CompressedBeamformedMagnitude = store->read_CompressedBeamformedMagnitude;
+  copy->read_CompressedBeamformedMagnitude = false;
   copy->read_CompressedWaterColumn = store->read_CompressedWaterColumn;
   copy->read_SegmentedRawDetection = store->read_SegmentedRawDetection;
-  copy->read_CalibratedBeam = store->read_CalibratedBeam;
-  copy->read_CalibratedSideScan = store->read_CalibratedSideScan;
-  copy->read_SnippetBackscatteringStrength = store->read_SnippetBackscatteringStrength;
+  copy->read_CalibratedBeam = false;
+  copy->read_CalibratedSideScan = false;
+  copy->read_SnippetBackscatteringStrength = false;
   copy->read_RemoteControlSonarSettings = store->read_RemoteControlSonarSettings;
 
   /* MB-System time stamp */
@@ -9501,7 +9521,7 @@ int mbsys_reson7k3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy
   //copy->WaterColumn = store->WaterColumn;
 
   /* Reson 7k Vertical Depth data (record 7009) */
-  //copy->VerticalDepth = store->VerticalDepth;
+  copy->VerticalDepth = store->VerticalDepth;
 
   /* Reson 7k TVG data (record 7010) */
   //copy->TVG = store->TVG;
@@ -9534,7 +9554,36 @@ int mbsys_reson7k3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy
   }
 
   /* Ping motion (record 7012) */
-  //copy->PingMotion = store->PingMotion;
+  copy->PingMotion.header = store->PingMotion.header;
+  copy->PingMotion.serial_number = store->PingMotion.serial_number;
+  copy->PingMotion.ping_number = store->PingMotion.ping_number;
+  copy->PingMotion.multi_ping = store->PingMotion.multi_ping;
+  copy->PingMotion.n = store->PingMotion.n;
+  copy->PingMotion.flags = store->PingMotion.flags;
+  copy->PingMotion.error_flags = store->PingMotion.error_flags;
+  copy->PingMotion.frequency = store->PingMotion.frequency;
+  copy->PingMotion.pitch = store->PingMotion.pitch;
+  if (status == MB_SUCCESS && copy->PingMotion.nalloc < copy->PingMotion.n) {
+    const size_t size = sizeof(f32) * copy->PingMotion.n;
+    status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)&(copy->PingMotion.roll), error);
+    if (status == MB_SUCCESS)
+      status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)&(copy->PingMotion.heading), error);
+    if (status == MB_SUCCESS)
+      status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)&(copy->PingMotion.heave), error);
+    if (status == MB_SUCCESS)
+      copy->PingMotion.nalloc = copy->PingMotion.n;
+    else
+      copy->PingMotion.nalloc = 0;
+  }
+  if (status == MB_SUCCESS && copy->PingMotion.n > 0 && store->PingMotion.nalloc >= copy->PingMotion.n) {
+    memcpy(copy->PingMotion.roll, store->PingMotion.roll, sizeof(f32) * copy->PingMotion.n);
+    memcpy(copy->PingMotion.heading, store->PingMotion.heading, sizeof(f32) * copy->PingMotion.n);
+    memcpy(copy->PingMotion.heave, store->PingMotion.heave, sizeof(f32) * copy->PingMotion.n);
+  }
+  else {
+    copy->PingMotion.n = 0;
+    copy->read_PingMotion = false;
+  }
 
   /* Reson 7k Adaptive Gate (record 7014) */
   //copy->AdaptiveGate = store->AdaptiveGate;
@@ -9576,10 +9625,48 @@ int mbsys_reson7k3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy
   //copy->CompressedBeamformedMagnitude = store->CompressedBeamformedMagnitude;
 
   /* Reson 7k Compressed Water Column Data (Record 7042) */
-  //copy->CompressedWaterColumn = store->CompressedWaterColumn;
+  {
+    s7k3_CompressedWaterColumn *cwc_store = &(store->CompressedWaterColumn);
+    s7k3_CompressedWaterColumn *cwc_copy = &(copy->CompressedWaterColumn);
+    cwc_copy->header = cwc_store->header;
+    cwc_copy->serial_number = cwc_store->serial_number;
+    cwc_copy->ping_number = cwc_store->ping_number;
+    cwc_copy->multi_ping = cwc_store->multi_ping;
+    cwc_copy->number_beams = cwc_store->number_beams;
+    cwc_copy->samples = cwc_store->samples;
+    cwc_copy->compressed_samples = cwc_store->compressed_samples;
+    cwc_copy->flags = cwc_store->flags;
+    cwc_copy->first_sample = cwc_store->first_sample;
+    cwc_copy->sample_rate = cwc_store->sample_rate;
+    cwc_copy->compression_factor = cwc_store->compression_factor;
+    cwc_copy->reserved = cwc_store->reserved;
+    cwc_copy->magsamplesize = cwc_store->magsamplesize;
+    cwc_copy->phasesamplesize = cwc_store->phasesamplesize;
+    const size_t samplesize = cwc_store->magsamplesize + cwc_store->phasesamplesize;
+    for (int i = 0; i < cwc_store->number_beams && i < MBSYS_RESON7K_MAX_BEAMS; i++) {
+      s7k3_compressedwatercolumndata *beam_store = &(cwc_store->compressedwatercolumndata[i]);
+      s7k3_compressedwatercolumndata *beam_copy = &(cwc_copy->compressedwatercolumndata[i]);
+      beam_copy->beam_number = beam_store->beam_number;
+      beam_copy->segment_number = beam_store->segment_number;
+      beam_copy->samples = beam_store->samples;
+      const size_t nbytes = (size_t)beam_store->samples * samplesize;
+      if (status == MB_SUCCESS && nbytes > beam_copy->nalloc) {
+        status = mb_reallocd(verbose, __FILE__, __LINE__, nbytes, (void **)&(beam_copy->data), error);
+        beam_copy->nalloc = status == MB_SUCCESS ? nbytes : 0;
+      }
+      if (status == MB_SUCCESS && nbytes > 0 && nbytes <= beam_store->nalloc && beam_store->data != NULL)
+        memcpy(beam_copy->data, beam_store->data, nbytes);
+      else
+        beam_copy->samples = 0;
+    }
+    if (status != MB_SUCCESS) {
+      cwc_copy->number_beams = 0;
+      copy->read_CompressedWaterColumn = false;
+    }
+  }
 
   /* Reson 7k Segmented Raw Detection Data (Record 7047) */
-  //copy->SegmentedRawDetection = store->SegmentedRawDetection;
+  copy->SegmentedRawDetection = store->SegmentedRawDetection;
 
   /* Reson 7k Calibrated Beam Data (Record 7048) */
   //copy->CalibratedBeam = store->CalibratedBeam;
