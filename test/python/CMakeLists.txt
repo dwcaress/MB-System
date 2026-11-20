@@ -50,6 +50,7 @@ if(mbio_py_tests_ok)
 
   set(tests
       mbio_py_constants_test
+      mbio_py_reson7k3_mbsys_test
       mbio_py_reader_test
       mbio_py_watercolumn_test
       mbio_py_watercolumn_all_test

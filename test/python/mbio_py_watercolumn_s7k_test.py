@@ -155,10 +155,8 @@ class WaterColumnS7kTest(unittest.TestCase):
         if p == 0 and b == S.MULTI_BEAM:
           expected.append(kind | (1 << 8))
         expected.append(kind)
-      self.assertEqual(list(det[:S.NBEAMS]), expected[:S.NBEAMS])
-      # MBIO gives only as many types as beams (mbsys_reson7k3_detects): the rest are unknown
-      for k in range(S.NBEAMS, len(det)):
-        self.assertIn(det[k], (expected[k], K.MB_DETECT_UNKNOWN))
+      # one type per 7027 detection, as many as soundings (mbsys_reson7k3_detects)
+      self.assertEqual(list(det), expected)
 
 
 class ReaderCasesTest(unittest.TestCase):
