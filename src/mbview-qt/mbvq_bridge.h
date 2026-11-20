@@ -263,6 +263,18 @@ void mbvq_c_setlonlatstyle(size_t instance, int style);
 void mbvq_c_soundings_resize(int width, int height);
 /* draw the soundings, inside a paint */
 void mbvq_c_soundings_plot(void);
+/* The same drawing without the profile lines, into the batch target
+   (mbv_draw_set_target), for the QRhi frame, whose renderer draws those
+   lines itself (mbvq_c_soundings_profile_pairs): the profile mode is set to
+   none for the call and back before it returns, so that the drawing records
+   no LINES command and does not grow with the soundings. The caller reads
+   the mode outside the call and puts the slot of the lines where the
+   drawing records them, after the bounding box and before the soundings
+   slot. This rests on the drawing (mb3dsoundings_plot) reading the mode
+   only for the profile lines and calling nothing that reads it while it
+   fills a batch: a core change that reads or sets the mode elsewhere in the
+   drawing needs a change here. */
+void mbvq_c_soundings_plot_decorations(void);
 /* the edit mode radio buttons, the mouse mode buttons and menu, Reset View */
 void mbvq_c_soundings_edit_mode(int mode);
 void mbvq_c_soundings_mouse_mode(int mode);

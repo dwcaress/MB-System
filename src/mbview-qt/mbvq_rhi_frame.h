@@ -265,9 +265,9 @@ class ProfileFrame {
 };
 
 /* what one frame of the 3D soundings view gives its renderer: the batch
-   (the decorations: the core's batch with the vertices of the profile lines
-   left out, SoundingsFrame::decorations), the camera and the projection,
-   and the soundings' state */
+   (the decorations: the core's batch, recorded without the profile lines,
+   and their slot, SoundingsFrame::decorations), the camera and the
+   projection, and the soundings' state */
 struct SoundingsInput {
   FrameInput frame;
   int count = 0;         /* soundings (0: none, and nothing is drawn) */
@@ -282,13 +282,18 @@ struct SoundingsInput {
    A frame draws nothing while there are none (after Dismiss the count is 0
    while the drawing's information highlight would read the released
    array). Otherwise it fills the batch with the decorations of the drawing
-   (mb3dsoundings_plot: the bounding box, the profile lines, the soundings
-   slot, the information highlight, the grab rectangle), unless it only
-   continues uploads and nothing changed, and takes the camera from the core
-   in every frame (mbvq_c_soundings_camera, which also sets the view's
-   extents that mb3dsoundings_reset() leaves swapped). The positions, colours
-   and profile pairs of the soundings are read only when the renderer asks
-   for them, after their change marks rose: each read is O(count). */
+   (mb3dsoundings_plot: the bounding box, the soundings slot, the
+   information highlight, the grab rectangle), unless it only continues
+   uploads and nothing changed, and takes the camera from the core in every
+   frame (mbvq_c_soundings_camera, which also sets the view's extents that
+   mb3dsoundings_reset() leaves swapped). The fill records the drawing
+   without its profile lines (mbvq_c_soundings_plot_decorations), so that it
+   does not grow with the soundings; while they are shown, a slot stands
+   where the drawing records them, and the renderer draws them. The
+   positions, colours and profile pairs of the soundings are read only when
+   the renderer asks for them, after their change marks rose (the pairs also
+   after a change of the profile mode, which raises no mark): each read is
+   O(count). */
 class SoundingsFrame {
  public:
   SoundingsFrame();
@@ -323,9 +328,10 @@ class SoundingsFrame {
      next frame fills again), and true. */
   bool release();
 
-  /* the batch as the core recorded it, and the decorations the renderer
-     draws: the same commands, the LINES command of the profile lines
-     replaced by the slot kSlotProfileLines without vertices */
+  /* the batch as the core recorded it, without the profile lines, and the
+     decorations the renderer draws: the same commands and, while the
+     profile lines are shown, the slot kSlotProfileLines without vertices
+     right before the soundings slot */
   const struct mbv_draw_batch &batch() const { return batch_; }
   const struct mbv_draw_batch &decorations() const { return decorations_; }
   int fills() const { return fills_; }
@@ -337,7 +343,9 @@ class SoundingsFrame {
 
  private:
   bool fill();
-  void decorate();
+  /* the batch's commands for the renderer, with the slot of the profile
+     lines if they are shown (profiles) */
+  void decorate(bool profiles);
 
   int width_ = 0;
   int height_ = 0;

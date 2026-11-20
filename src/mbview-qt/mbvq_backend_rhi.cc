@@ -157,7 +157,7 @@ class RhiView : public QRhiWidget {
   void resizeEvent(QResizeEvent *event) override;
 
   /* the view's renderer for a QRhi, not made yet */
-  virtual std::unique_ptr<rhi::ViewRenderer> make_renderer(QRhi *qrhi) = 0;
+  virtual std::unique_ptr<rhi::BatchRenderer> make_renderer(QRhi *qrhi) = 0;
   /* the core gets the size of the drawing in physical pixels */
   virtual void size_core(QSize pixels) = 0;
   /* a new QRhi, or the view's QRhi died: anything tied to the old window goes */
@@ -174,7 +174,7 @@ class RhiView : public QRhiWidget {
      another window. The QRhi of renderer_ whenever there is one. */
   QRhi *view_rhi() const { return rhi_; }
 
-  std::unique_ptr<rhi::ViewRenderer> renderer_;
+  std::unique_ptr<rhi::BatchRenderer> renderer_;
 
  private:
   void render_failed();
@@ -218,7 +218,7 @@ ViewState RhiView::state() const {
 }
 
 RenderStats RhiView::stats() const {
-  return renderer_ != nullptr ? static_cast<const rhi::BatchRenderer *>(renderer_.get())->stats() : RenderStats();
+  return renderer_ != nullptr ? renderer_->stats() : RenderStats();
 }
 
 void RhiView::releaseResources() { renderer_.reset(); }
@@ -250,7 +250,7 @@ void RhiView::initialize(QRhiCommandBuffer *) {
   if (renderer_ != nullptr && !renderer_->compatible(renderTarget()->renderPassDescriptor()))
     renderer_.reset();
   if (renderer_ == nullptr) {
-    std::unique_ptr<rhi::ViewRenderer> renderer = make_renderer(rhi_);
+    std::unique_ptr<rhi::BatchRenderer> renderer = make_renderer(rhi_);
     if (!renderer->create(renderTarget()->renderPassDescriptor(), renderTarget()->sampleCount())) {
       /* tried again at the next initialize() */
       report_failure();
@@ -333,7 +333,7 @@ class RhiMapView final : public RhiView {
   void set_fell_back(bool fell_back) { frame_.set_fell_back(fell_back); }
 
  protected:
-  std::unique_ptr<rhi::ViewRenderer> make_renderer(QRhi *qrhi) override;
+  std::unique_ptr<rhi::BatchRenderer> make_renderer(QRhi *qrhi) override;
   void size_core(QSize pixels) override;
   void new_rhi() override;
   void initialize(QRhiCommandBuffer *cb) override;
@@ -411,7 +411,7 @@ RenderStats RhiMapView::stats() const {
   return renderer_ != nullptr ? static_cast<const rhi::MapRenderer *>(renderer_.get())->stats() : RenderStats();
 }
 
-std::unique_ptr<rhi::ViewRenderer> RhiMapView::make_renderer(QRhi *qrhi) {
+std::unique_ptr<rhi::BatchRenderer> RhiMapView::make_renderer(QRhi *qrhi) {
   auto renderer = std::make_unique<rhi::MapRenderer>(qrhi, RenderOptions());
   /* For the memory budget: another view evicted tile levels of this one,
      whose GPU memory a frame frees, or let go of levels while this view's
@@ -635,7 +635,7 @@ class RhiProfileView final : public RhiView {
   void cap();
 
  protected:
-  std::unique_ptr<rhi::ViewRenderer> make_renderer(QRhi *qrhi) override;
+  std::unique_ptr<rhi::BatchRenderer> make_renderer(QRhi *qrhi) override;
   void size_core(QSize pixels) override;
   void initialize(QRhiCommandBuffer *cb) override;
   void render(QRhiCommandBuffer *cb) override;
@@ -673,7 +673,7 @@ void RhiProfileView::cap() {
     setMaximumSize(largest, largest);
 }
 
-std::unique_ptr<rhi::ViewRenderer> RhiProfileView::make_renderer(QRhi *qrhi) {
+std::unique_ptr<rhi::BatchRenderer> RhiProfileView::make_renderer(QRhi *qrhi) {
   return std::make_unique<rhi::ProfileRenderer>(qrhi, RenderOptions());
 }
 
@@ -753,7 +753,7 @@ class RhiSoundingsView final : public RhiView {
   void release();
 
  protected:
-  std::unique_ptr<rhi::ViewRenderer> make_renderer(QRhi *qrhi) override;
+  std::unique_ptr<rhi::BatchRenderer> make_renderer(QRhi *qrhi) override;
   void size_core(QSize pixels) override;
   void new_rhi() override;
   void initialize(QRhiCommandBuffer *cb) override;
@@ -799,7 +799,7 @@ ViewState RhiSoundingsView::state() const {
   return state;
 }
 
-std::unique_ptr<rhi::ViewRenderer> RhiSoundingsView::make_renderer(QRhi *qrhi) {
+std::unique_ptr<rhi::BatchRenderer> RhiSoundingsView::make_renderer(QRhi *qrhi) {
   return std::make_unique<rhi::SoundingsRenderer>(qrhi, RenderOptions());
 }
 

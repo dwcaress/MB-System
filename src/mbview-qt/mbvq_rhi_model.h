@@ -510,11 +510,12 @@ enum class DrawKind {
 };
 
 /* The slot of the profile lines in the decorations of the 3D soundings view
-   (SoundingsFrame): it stands where the core recorded the LINES command of
-   the profile lines, whose vertices it leaves out (two per pair of
-   soundings, 48 bytes for every sounding); the renderer draws those lines
-   from the soundings' positions with index lists of its own. A slot of
-   mbview-qt only: the core has none of this number (mbv_draw_batch.h). */
+   (SoundingsFrame): it stands where the core records the LINES command of
+   the profile lines, which the frame's fill leaves out (two vertices per
+   pair of soundings, 48 bytes for every sounding, in every fill); the
+   renderer draws those lines from the soundings' positions with index
+   lists of its own. A slot of mbview-qt only: the core has none of this
+   number (mbv_draw_batch.h). */
 constexpr int kSlotProfileLines = 100;
 /* above the core's highest slot id: if the core adds slots, compare with its
    new highest here, and raise kSlotProfileLines should that reach it */
