@@ -26065,7 +26065,7 @@ printf '%s\n' "#define MBSYSTEM_OTPS_LOCATION \"$OTPS_DIR\"" >>confdefs.h
 printf '%s\n' " "
 printf '%s\n' "About to create Makefiles..."
 
-ac_config_files="$ac_config_files Makefile src/Makefile src/mbio/Makefile src/surf/Makefile src/bsio/Makefile src/mbbitpack/Makefile src/mbaux/Makefile src/utilities/Makefile src/gmt/Makefile src/macros/Makefile src/otps/Makefile src/mbgrd2gltf/Makefile src/mbmesh/Makefile src/mbnavadjust/Makefile src/man/Makefile src/man/man1/Makefile src/man/man3/Makefile src/html/Makefile src/share/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile src/mbio/Makefile src/surf/Makefile src/bsio/Makefile src/mbbitpack/Makefile src/mbaux/Makefile src/utilities/Makefile src/gmt/Makefile src/macros/Makefile src/otps/Makefile src/mbdraco/Makefile src/mbgrd2gltf/Makefile src/mbmesh/Makefile src/mbglb2tiles/Makefile src/mbmesh/Makefile src/mbnavadjust/Makefile src/man/Makefile src/man/man1/Makefile src/man/man3/Makefile src/html/Makefile src/share/Makefile"
 
 if test "$enable_deprecated" = "yes" ; then
     ac_config_files="$ac_config_files src/deprecated/Makefile"
@@ -27252,9 +27252,12 @@ do
     "src/gmt/Makefile") CONFIG_FILES="$CONFIG_FILES src/gmt/Makefile" ;;
     "src/macros/Makefile") CONFIG_FILES="$CONFIG_FILES src/macros/Makefile" ;;
     "src/otps/Makefile") CONFIG_FILES="$CONFIG_FILES src/otps/Makefile" ;;
+    "src/mbdraco/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbdraco/Makefile" ;;
     "src/mbgrd2gltf/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbgrd2gltf/Makefile" ;;
     "src/mbmesh/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbmesh/Makefile" ;;
     "src/mbnavadjust/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbnavadjust/Makefile" ;;
+    "src/mbmesh/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbmesh/Makefile" ;;
+    "src/mbglb2tiles/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbglb2tiles/Makefile" ;;
     "src/man/Makefile") CONFIG_FILES="$CONFIG_FILES src/man/Makefile" ;;
     "src/man/man1/Makefile") CONFIG_FILES="$CONFIG_FILES src/man/man1/Makefile" ;;
     "src/man/man3/Makefile") CONFIG_FILES="$CONFIG_FILES src/man/man3/Makefile" ;;

@@ -3556,6 +3556,13 @@ int mbsys_reson7k3_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 int mbsys_reson7k3_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsamples, double *time_d,
                                    double *sensor1, double *sensor2, double *sensor3, double *sensor4, double *sensor5,
                                    double *sensor6, double *sensor7, double *sensor8, int *error);
+int mbsys_reson7k3_extract_wcdimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams,
+                                        int *nsamples_max, int *error);
+int mbsys_reson7k3_extract_wc(int verbose, void *mbio_ptr, void *store_ptr, int nbeams_alloc, int nsamples_alloc,
+                              int *kind, int time_i[7], double *time_d, int *nbeams, int *nsamples_max,
+                              int *swath, double *angle_across, double *angle_along, double *sample_interval,
+                              double *soundspeed, int *start_sample, int *nsamples, double *detect_sample,
+                              float *amplitude, int *error);
 int mbsys_reson7k3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error);
 int mbsys_reson7k3_checkheader(s7k3_header header);
 int mbsys_reson7k3_makess_source(int verbose, void *mbio_ptr, void *store_ptr, int source, int pixel_size_set, double *pixel_size,

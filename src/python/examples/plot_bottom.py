@@ -36,11 +36,12 @@ plt = _common.pyplot(out)
 
 s = mb.load_survey(path)
 flag, z, x, det = s.beamflag[n], s.bath[n], s.bathacrosstrack[n], s.detects[n]
+kind = det & 0xFF  # detection type; format 89 adds the multi-detection priority above
 fig, ax = plt.subplots(figsize=(9, 4.5))
 for code, name, colour in ((K.MB_DETECT_AMPLITUDE, "amplitude", "red"), (K.MB_DETECT_PHASE, "phase", "darkblue"),
                            (K.MB_DETECT_UNKNOWN, "unknown", "gray")):
-    good = (det == code) & K.beam_ok(flag)
-    bad = (det == code) & K.beam_flagged(flag) & ~K.beam_null(flag)
+    good = (kind == code) & K.beam_ok(flag)
+    bad = (kind == code) & K.beam_flagged(flag) & ~K.beam_null(flag)
     ax.plot(x[good], z[good], "o", ms=3, color=colour, label=f"{name} ({good.sum()})")
     ax.plot(x[bad], z[bad], "o", ms=3, mfc="none", color=colour, label=f"{name} flagged ({bad.sum()})")
 ax.invert_yaxis()

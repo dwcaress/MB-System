@@ -86,6 +86,8 @@
   <li>mbmosaic (<a href="mbmosaic.html">html</a>)(<a href="mbmosaic.pdf">pdf</a>): Mosaic sidescan and amplitude data.</li>
   <li>mbgrd2gltf (<a href="mbgrd2gltf.html">html</a>)(<a href="mbgrd2gltf.pdf">pdf</a>): Convert bathymetric grid data to GLTF format with optional settings, including Draco compression.</li>
   <li>mbmesh (<a href="mbmesh.html">html</a>)(<a href="mbmesh.pdf">pdf</a>): Process swath bathymetry data and generate 3D point clouds and GLB models.</li>
+  <li>mbglb2tiles (<a href="mbglb2tiles.html">html</a>)(<a href="mbglb2tiles.pdf">pdf</a>): Make an OGC 3D Tiles tileset of levels of detail from a GLB mesh of mbmesh or mbgrd2gltf, with X3DOM and CesiumJS viewer pages.</li>
+  <li>mbpy_3dtiles (<a href="mbpy_3dtiles.html">html</a>)(<a href="mbpy_3dtiles.pdf">pdf</a>): Python macro that writes a shellscript making the standard 3D products of a survey with mbgrd2gltf, mbmesh and mbglb2tiles.</li>
   <li>mbswath2las (<a href="mbswath2las.html">html</a>)(<a href="mbswath2las.pdf">pdf</a>): Exports swath bathymetry soundings to LAS 1.4 point cloud files.</li>
   <li>mbm_arc2grd (<a href="mbm_arc2grd.html">html</a>)(<a href="mbm_arc2grd.pdf">pdf</a>): Convert an ArcView ASCII grid file to a GMT grid file.</li>
   <li>mbm_grd2arc (<a href="mbm_grd2arc.html">html</a>)(<a href="mbm_grd2arc.pdf">pdf</a>): Convert a GMT grid file to an ArcView ASCII grid file.</li>
@@ -191,6 +193,7 @@
 <p><strong>Miscellaneous Utilities:&nbsp;</strong></p>
 <ul>
   <li>mb7k2jstar (<a href="mb7k2jstar.html">html</a>)(<a href="mb7k2jstar.pdf">pdf</a>): Extract Jstar format (format 132) sidescan and subbottom data from Reson 7k (format 88) data files.</li>
+  <li>mbglb2tiles (<a href="mbglb2tiles.html">html</a>)(<a href="mbglb2tiles.pdf">pdf</a>): Make an OGC 3D Tiles tileset of levels of detail from a GLB mesh of mbmesh or mbgrd2gltf, with X3DOM and CesiumJS viewer pages.</li>
   <li>mbgpstide (<a href="mbgpstide.html">html</a>)(<a href="mbgpstide.pdf">pdf</a>): Generate tide files from the height above ellipsoid data in the 'h' datagrams of Kongsberg multibeam data files</li>
   <li>mbhistogram (<a href="mbhistogram.html">html</a>)(<a href="mbhistogram.pdf">pdf</a>): Obtain histogram of bathymetry, amplitude, or sidescan data from swath sonar data files.</li>
   <li>mbrolltimelag (<a href="mbrolltimelag.html">html</a>)(<a href="mbrolltimelag.pdf">pdf</a>): Estimate attitude time lag by cross correlation of apparent bottom slope with the roll time series: </li>
@@ -321,6 +324,7 @@ easily. Some are written in Perl and others in Python3.
   <li>mbm_utm (<a href="mbm_utm.html">html</a>)(<a href="mbm_utm.pdf">pdf</a>): Performs forward and inverse UTM projections of ASCII data triples. </li>
   <li>mbm_xbt (<a href="mbm_xbt.html">html</a>)(<a href="mbm_xbt.pdf">pdf</a>): Processes a Sparton XBT data file and outputs a sound velocity profile file which can be used to process swath sonar data.</li>
   <li>mbm_xyplot (<a href="mbm_xyplot.html">html</a>)(<a href="mbm_xyplot.pdf">pdf</a>): Reads one or more xy data files and writes a shellscript which will generate GMT plot of the data.</li>
+  <li>mbpy_3dtiles (<a href="mbpy_3dtiles.html">html</a>)(<a href="mbpy_3dtiles.pdf">pdf</a>): Python macro that writes a shellscript making the standard 3D products of a survey with mbgrd2gltf, mbmesh and mbglb2tiles.</li>
   <li>mbpy_grd3dplot (<a href="mbpy_grd3dplot.html">html</a>)(<a href="mbpy_grd3dplot.pdf">pdf</a>): Python/PyGMT-era replacement for mbm_grd3dplot; reads a GMT grid file and writes a GMT modern-mode shellscript which will generate a 3D perspective view of the data.</li>
   <li>mbpy_grdplot (<a href="mbpy_grdplot.html">html</a>)(<a href="mbpy_grdplot.pdf">pdf</a>): Python/PyGMT-era replacement for mbm_grdplot; reads a GMT grid file (or georeferenced image) and writes a GMT modern-mode shellscript which will generate a map of the data.</li>
   <li>mbpy_grdtiff (<a href="mbpy_grdtiff.html">html</a>)(<a href="mbpy_grdtiff.pdf">pdf</a>): Python replacement for mbm_grdtiff; reads a GMT grid file and writes a GMT modern-mode shellscript which will generate a georeferenced TIFF image of the data.</li>

@@ -1,5 +1,7 @@
 #include "algorithms/point_decimation.h"
 
+#include <cmath>
+
 struct GridKey {
     int x;
     int y;
@@ -24,6 +26,38 @@ struct CellAccumulator {
     unsigned int count = 0;
 };
 
+struct PointDecimator::Impl {
+    Vec3 cloud_origin;
+    double cell_size;
+    std::map<GridKey, CellAccumulator> cells;
+};
+
+PointDecimator::PointDecimator(const Vec3 &cloud_origin, double cell_size) : impl_(new Impl{cloud_origin, cell_size, {}}) {}
+
+PointDecimator::~PointDecimator() {
+    delete impl_;
+}
+
+void PointDecimator::add(const CollectedPoint &point) {
+    CellAccumulator &cell = impl_->cells[GridKey(point.point, impl_->cloud_origin, impl_->cell_size)];
+    cell.point_sum += point.point;
+    cell.origin_sum += point.origin;
+    cell.count++;
+}
+
+std::size_t PointDecimator::cell_count() const {
+    return impl_->cells.size();
+}
+
+void PointDecimator::for_each(const std::function<void(const CollectedPoint &)> &visitor) const {
+    for (const auto &entry : impl_->cells) {
+        const CellAccumulator &cell = entry.second;
+        if (cell.count > 0) {
+            visitor(CollectedPoint{cell.point_sum / static_cast<double>(cell.count), cell.origin_sum / static_cast<double>(cell.count)});
+        }
+    }
+}
+
 CollectedPointCloud point_decimation(CollectedPointCloud collected_points, PointDecimationOptions options) {
 
     if (!options.decimate ||
@@ -37,29 +71,14 @@ CollectedPointCloud point_decimation(CollectedPointCloud collected_points, Point
         bounds.include(collected_point.point);
     }
 
-    const Vec3 cloud_origin = bounds.min;
-
-    std::map<GridKey, CellAccumulator> cells;
+    PointDecimator decimator(bounds.min, options.cell_size);
     for (const CollectedPoint &collected_point : collected_points) {
-        CellAccumulator &cell = cells[GridKey(collected_point.point, cloud_origin, options.cell_size)];
-        cell.point_sum += collected_point.point;
-        cell.origin_sum += collected_point.origin;
-        cell.count++;
+        decimator.add(collected_point);
     }
+    CollectedPointCloud().swap(collected_points);   // the input is no longer needed
 
     CollectedPointCloud decimated_points;
-    decimated_points.reserve(cells.size());
-
-    for (const auto &entry : cells) {
-        const CellAccumulator &cell = entry.second;
-        if (cell.count > 0) {
-            CollectedPoint collected_point {
-                cell.point_sum / static_cast<double>(cell.count),
-                cell.origin_sum / static_cast<double>(cell.count)
-            };
-            decimated_points.push_back(collected_point);
-        }
-    }
-
+    decimated_points.reserve(decimator.cell_count());
+    decimator.for_each([&](const CollectedPoint &point) { decimated_points.push_back(point); });
     return decimated_points;
 }

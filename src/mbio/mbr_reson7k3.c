@@ -6632,28 +6632,41 @@ int mbr_reson7k3_rd_CompressedWaterColumn(int verbose, char *buffer, void *store
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_long(true, &buffer[index], &(CompressedWaterColumn->serial_number));
-  index += 8;
-  mb_get_binary_int(true, &buffer[index], &(CompressedWaterColumn->ping_number));
-  index += 4;
-  mb_get_binary_short(true, &buffer[index], &(CompressedWaterColumn->multi_ping));
-  index += 2;
-  mb_get_binary_short(true, &buffer[index], &(CompressedWaterColumn->number_beams));
-  index += 2;
-  mb_get_binary_int(true, &buffer[index], &(CompressedWaterColumn->samples));
-  index += 4;
-  mb_get_binary_int(true, &buffer[index], &(CompressedWaterColumn->compressed_samples));
-  index += 4;
-  mb_get_binary_int(true, &buffer[index], &(CompressedWaterColumn->flags));
-  index += 4;
-  mb_get_binary_int(true, &buffer[index], &(CompressedWaterColumn->first_sample));
-  index += 4;
-  mb_get_binary_float(true, &buffer[index], &(CompressedWaterColumn->sample_rate));
-  index += 4;
-  mb_get_binary_float(true, &buffer[index], &(CompressedWaterColumn->compression_factor));
-  index += 4;
-  mb_get_binary_int(true, &buffer[index], &(CompressedWaterColumn->reserved));
-  index += 4;
+  if (status == MB_SUCCESS
+      && header->Size < (unsigned int)index + R7KHDRSIZE_CompressedWaterColumn + MBSYS_RESON7K_RECORDTAIL_SIZE) {
+    status = MB_FAILURE;
+    *error = MB_ERROR_UNINTELLIGIBLE;
+  }
+  if (status == MB_SUCCESS) {
+    mb_get_binary_long(true, &buffer[index], &(CompressedWaterColumn->serial_number));
+    index += 8;
+    mb_get_binary_int(true, &buffer[index], &(CompressedWaterColumn->ping_number));
+    index += 4;
+    mb_get_binary_short(true, &buffer[index], &(CompressedWaterColumn->multi_ping));
+    index += 2;
+    mb_get_binary_short(true, &buffer[index], &(CompressedWaterColumn->number_beams));
+    index += 2;
+    mb_get_binary_int(true, &buffer[index], &(CompressedWaterColumn->samples));
+    index += 4;
+    mb_get_binary_int(true, &buffer[index], &(CompressedWaterColumn->compressed_samples));
+    index += 4;
+    mb_get_binary_int(true, &buffer[index], &(CompressedWaterColumn->flags));
+    index += 4;
+    mb_get_binary_int(true, &buffer[index], &(CompressedWaterColumn->first_sample));
+    index += 4;
+    mb_get_binary_float(true, &buffer[index], &(CompressedWaterColumn->sample_rate));
+    index += 4;
+    mb_get_binary_float(true, &buffer[index], &(CompressedWaterColumn->compression_factor));
+    index += 4;
+    mb_get_binary_int(true, &buffer[index], &(CompressedWaterColumn->reserved));
+    index += 4;
+  }
+
+  /* the beams must fit in the beam array */
+  if (status == MB_SUCCESS && CompressedWaterColumn->number_beams > MBSYS_RESON7K_MAX_BEAMS) {
+    status = MB_FAILURE;
+    *error = MB_ERROR_UNINTELLIGIBLE;
+  }
 
   /* calculate bytes per sample and allocate memory for time series if needed */
   /* Flags bit 0 : Use maximum bottom detection point in each beam to
@@ -6678,7 +6691,7 @@ int mbr_reson7k3_rd_CompressedWaterColumn(int verbose, char *buffer, void *store
 
   /* Flags bit 3 : Reserved. 0x08) */
 
-  /* Flags bit 4-7 : Downsampling divisor. Value = ((flags | 0xF0) >> 4). Only
+  /* Flags bit 4-7 : Downsampling divisor. Value = ((flags & 0xF0) >> 4). Only
           values 2-16 are valid. This field is ignored if downsampling
           is not enabled (type = “none”). */
   // int downsampling = (CompressedWaterColumn->flags & 0x00F0) >> 4;
@@ -6727,9 +6740,18 @@ int mbr_reson7k3_rd_CompressedWaterColumn(int verbose, char *buffer, void *store
       CompressedWaterColumn->phasesamplesize = CompressedWaterColumn->magsamplesize;
   }
 
-  /* loop over all beams to get CompressedWaterColumn parameters */
-  for (unsigned int i = 0; i < CompressedWaterColumn->number_beams; i++) {
+  /* loop over all beams to get CompressedWaterColumn parameters - each beam header and
+      its samples must fit in the record before the checksum */
+  const size_t beamheadersize = segmentnumbersvalid ? 7 : 6;
+  const size_t samplesize = CompressedWaterColumn->magsamplesize + CompressedWaterColumn->phasesamplesize;
+  const size_t datalimit = (size_t)header->Size - MBSYS_RESON7K_RECORDTAIL_SIZE;
+  for (unsigned int i = 0; status == MB_SUCCESS && i < CompressedWaterColumn->number_beams; i++) {
     compressedwatercolumndata = (s7k3_compressedwatercolumndata *)&(CompressedWaterColumn->compressedwatercolumndata[i]);
+    if ((size_t)index + beamheadersize > datalimit) {
+      status = MB_FAILURE;
+      *error = MB_ERROR_UNINTELLIGIBLE;
+      break;
+    }
 
     /* extract CompressedWaterColumn data */
     mb_get_binary_short(true, &buffer[index], &(compressedwatercolumndata->beam_number));
@@ -6740,6 +6762,11 @@ int mbr_reson7k3_rd_CompressedWaterColumn(int verbose, char *buffer, void *store
     }
     mb_get_binary_int(true, &buffer[index], &(compressedwatercolumndata->samples));
     index += 4;
+    if (compressedwatercolumndata->samples > (datalimit - (size_t)index) / samplesize) {
+      status = MB_FAILURE;
+      *error = MB_ERROR_UNINTELLIGIBLE;
+      break;
+    }
 
     /* allocate memory for compressedwatercolumndata data if needed */
     nread = (CompressedWaterColumn->magsamplesize + CompressedWaterColumn->phasesamplesize)
@@ -6778,6 +6805,11 @@ int mbr_reson7k3_rd_CompressedWaterColumn(int verbose, char *buffer, void *store
   }
   else {
     store->kind = MB_DATA_NONE;
+
+    /* keep no part of a rejected record: the header and beams stored before the
+        failure are not a whole record (mbr_reson7k3_rd_data also clears
+        read_CompressedWaterColumn) */
+    CompressedWaterColumn->number_beams = 0;
   }
 
 /* print out the results */
@@ -11861,6 +11893,12 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
           store->read_CompressedWaterColumn = true;
           s7k3_CompressedWaterColumn *CompressedWaterColumn = &(store->CompressedWaterColumn);
           header = &(CompressedWaterColumn->header);
+        }
+        else {
+          /* a rejected record leaves its ping without water column, also when the
+              ping already had a 7042 record or the flag is left over from a dropped
+              partial ping */
+          store->read_CompressedWaterColumn = false;
         }
       }
       else if (*recordid == R7KRECID_SegmentedRawDetection) {
@@ -23146,6 +23184,8 @@ int mbr_register_reson7k3(int verbose, void *mbio_ptr, int *error) {
   mb_io_ptr->mb_io_makess = &mbsys_reson7k3_makess;
   mb_io_ptr->mb_io_extract_rawss = NULL;
   mb_io_ptr->mb_io_insert_rawss = NULL;
+  mb_io_ptr->mb_io_extract_wcdimensions = &mbsys_reson7k3_extract_wcdimensions;
+  mb_io_ptr->mb_io_extract_wc = &mbsys_reson7k3_extract_wc;
   mb_io_ptr->mb_io_extract_segytraceheader = NULL;
   mb_io_ptr->mb_io_extract_segy = NULL;
   mb_io_ptr->mb_io_insert_segy = NULL;
@@ -23194,6 +23234,8 @@ int mbr_register_reson7k3(int verbose, void *mbio_ptr, int *error) {
     fprintf(stderr, "dbg2       makess:             %p\n", (void *)mb_io_ptr->mb_io_makess);
     fprintf(stderr, "dbg2       extract_rawss:      %p\n", (void *)mb_io_ptr->mb_io_extract_rawss);
     fprintf(stderr, "dbg2       insert_rawss:       %p\n", (void *)mb_io_ptr->mb_io_insert_rawss);
+    fprintf(stderr, "dbg2       extract_wcdimensions: %p\n", (void *)mb_io_ptr->mb_io_extract_wcdimensions);
+    fprintf(stderr, "dbg2       extract_wc:         %p\n", (void *)mb_io_ptr->mb_io_extract_wc);
     fprintf(stderr, "dbg2       extract_segytraceheader: %p\n", (void *)mb_io_ptr->mb_io_extract_segytraceheader);
     fprintf(stderr, "dbg2       extract_segy:       %p\n", (void *)mb_io_ptr->mb_io_extract_segy);
     fprintf(stderr, "dbg2       insert_segy:        %p\n", (void *)mb_io_ptr->mb_io_insert_segy);

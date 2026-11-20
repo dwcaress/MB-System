@@ -26,64 +26,20 @@ message("In src/mbgrd2gltf")
 
 find_package(NetCDF REQUIRED)
 
-# Attempt to find an installed version of Draco
-# Commented out to force use of local Draco source files for compatibility
-# find_package(Draco)
-
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Set the draco directory
-set(DRACO_DIR "${CMAKE_CURRENT_SOURCE_DIR}/draco")
-
-# Initialize INCLUDE_DIRS
-set(INCLUDE_DIRS "")
-
 # Set the sources for the executable
-set(SOURCES bathymetry.cpp geometry.cpp logger.cpp main.cpp model.cpp options.cpp)
+# The page for CesiumJS (--cesium-html) is written by the source of mbmesh and mbglb2tiles, which uses only the standard library.
+set(SOURCES bathymetry.cpp geometry.cpp logger.cpp main.cpp model.cpp options.cpp provenance.cpp viewpoint.cpp
+	${CMAKE_SOURCE_DIR}/src/mbmesh/src/io/cesium_writer.cpp)
 
-# Manually set the include directories for Draco and other components
+# Include directories (Draco is in the shared mbdraco library, src/mbdraco)
 include_directories(
 	${NetCDF_INCLUDE_DIRS}
 	${CMAKE_CURRENT_SOURCE_DIR}/tinygltf
-	${DRACO_DIR}
 )
-
-if(NOT TARGET Draco::Draco)
-	if(NOT Draco_FOUND)
-		message("Using local Draco source files from the project directory")
-
-		# Recursively find all Draco .cc files and .h files, as paths
-		# relative to this directory (draco/...), so that the test filter
-		# below does not depend on where the source tree is located
-		file(GLOB_RECURSE DRACO_SOURCES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
-			"${DRACO_DIR}/*.cc" "${DRACO_DIR}/*.h")
-
-		# Recursively filter out all test files
-		list(FILTER DRACO_SOURCES EXCLUDE REGEX ".*/.*test.*")
-
-		# Set the include directories and sources conditionally.
-		set(INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/draco)
-		set(SOURCES ${SOURCES} ${DRACO_SOURCES})
-		# No external libraries needed since we're compiling the source
-		set(DRACO_LIBRARIES "")
-	else()
-		message("Using installed Draco, but Draco target not found, checking for libraries...")
-		find_library(DRACO_LIBRARY NAMES draco PATHS /usr/local/lib)
-
-		if(DRACO_LIBRARY)
-			set(DRACO_LIBRARIES ${DRACO_LIBRARY})
-			find_path(DRACO_INCLUDE_DIR draco/draco_features.h /usr/local/include)
-			include_directories(${DRACO_INCLUDE_DIR})
-		else()
-			message(FATAL_ERROR "Draco library not found.")
-		endif()
-	endif()
-else()
-	message("Using installed Draco target: Draco::Draco")
-	set(DRACO_LIBRARIES Draco::Draco)
-endif()
 
 # Specify sources for the executable
 add_executable(mbgrd2gltf ${SOURCES})
@@ -93,16 +49,41 @@ target_include_directories(mbgrd2gltf
 	PRIVATE ${NetCDF_INCLUDE_DIRS}
 	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tinygltf
-	PRIVATE ${DRACO_DIR}
-	PRIVATE ${INCLUDE_DIRS}
+	PRIVATE ${CMAKE_SOURCE_DIR}/src/mbmesh/include
 )
 
 target_link_libraries(mbgrd2gltf
 	PRIVATE mbsystem
 	PRIVATE ${NetCDF_LIBRARIES}
-	PRIVATE ${DRACO_LIBRARIES}
+	PRIVATE mbdraco
 	PRIVATE ${CMAKE_DL_LIBS}
 )
+
+# Regression test for the vertex geometry (no Draco or glTF code is needed).
+if(buildTests)
+	add_executable(mbgrd2gltf_test_geometry
+		tests/test_geometry.cpp bathymetry.cpp geometry.cpp logger.cpp options.cpp viewpoint.cpp)
+	target_include_directories(mbgrd2gltf_test_geometry
+		PRIVATE ${NetCDF_INCLUDE_DIRS}
+		PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+	)
+	target_link_libraries(mbgrd2gltf_test_geometry PRIVATE ${NetCDF_LIBRARIES} mbdraco)
+	add_test(NAME mbgrd2gltf_geometry COMMAND mbgrd2gltf_test_geometry)
+
+	add_executable(mbgrd2gltf_test_provenance tests/test_provenance.cpp provenance.cpp)
+	target_link_libraries(mbgrd2gltf_test_provenance PRIVATE mbdraco)
+	target_include_directories(mbgrd2gltf_test_provenance PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+	add_test(NAME mbgrd2gltf_provenance COMMAND mbgrd2gltf_test_provenance)
+
+	add_executable(mbgrd2gltf_test_viewpoint tests/test_viewpoint.cpp viewpoint.cpp)
+	target_include_directories(mbgrd2gltf_test_viewpoint PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+	add_test(NAME mbgrd2gltf_viewpoint COMMAND mbgrd2gltf_test_viewpoint)
+
+	# The scale object of the pages, held in scale_axes.h for mbmesh and mbglb2tiles as well.
+	add_executable(mbgrd2gltf_test_scale_axes tests/test_scale_axes.cpp)
+	target_include_directories(mbgrd2gltf_test_scale_axes PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+	add_test(NAME mbgrd2gltf_scale_axes COMMAND mbgrd2gltf_test_scale_axes)
+endif()
 
 install(TARGETS mbgrd2gltf
 	DESTINATION ${CMAKE_INSTALL_BINDIR}

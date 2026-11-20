@@ -28,7 +28,8 @@ print(f"[WCD Viewer] BUILD_ID={BUILD_ID}")
 
 Water column viewer reading the data through MB-System's MBIO library (mbio_py),
 successor of kmwcd_viewer.py (which used KMALL.py). Opens a *.kmwcd, *.kmall, *.wcd or *.all and
-finds the other file of the line; any of the records may be missing.
+finds the other file of the line, or a Reson 7k *.s7k, which holds both; any of the records may be
+missing.
 """
 import math
 import os
@@ -95,7 +96,7 @@ class MainWindow(QMainWindow):
 
         # header
         hh = QHBoxLayout()
-        btn_open = QPushButton("Open .kmwcd/.kmall/.wcd/.all")
+        btn_open = QPushButton("Open .kmwcd/.kmall/.wcd/.all/.s7k")
         btn_open.clicked.connect(self.open_dialog)
         hh.addWidget(btn_open)
         self.lbl_file = QLabel("No file loaded")
@@ -182,9 +183,11 @@ class MainWindow(QMainWindow):
         self.fig, self.ax = plt.subplots()
         self.fig.subplots_adjust(right=0.85)
         self.cax = self.fig.add_axes([0.87, 0.15, 0.03, 0.7])
+        self._cbar = None  # the colour bar, made on the first drawing
         self.canvas = FigureCanvas(self.fig)
         layout.addWidget(self.canvas, stretch=1)
         self.canvas.mpl_connect("button_press_event", self._on_plot_click)
+        self.canvas.mpl_connect("resize_event", self._fit_ylabel)
 
         # ping slider
         ph = QHBoxLayout()
@@ -203,7 +206,8 @@ class MainWindow(QMainWindow):
 
     # ------------------------------------------------------------------ loading
     def open_dialog(self):
-        fname, _ = QFileDialog.getOpenFileName(self, "Open .kmwcd/.kmall/.wcd/.all", "", "*.kmwcd *.kmall *.wcd *.all")
+        fname, _ = QFileDialog.getOpenFileName(self, "Open .kmwcd/.kmall/.wcd/.all/.s7k", "",
+                                               "Swath files (*.kmwcd *.kmall *.wcd *.all *.s7k);;All files (*)")
         if fname:
             self.open_file(fname)
 
@@ -226,7 +230,7 @@ class MainWindow(QMainWindow):
 
         try:
             self.line = mb.KongsbergLine(fname, progress=progress)
-        except mb.MBIOError as ex:
+        except (mb.MBIOError, MemoryError) as ex:
             self.line = None
             self.steps = []
             self.statusBar().showMessage(f"Cannot read {os.path.basename(fname)}: {ex}")
@@ -261,12 +265,17 @@ class MainWindow(QMainWindow):
             self.amax.setValue(wcf.amp_max)
             for sb in (self.amin, self.amax):
                 sb.blockSignals(False)
-        depth_max = wcf.range_max_m + (float(np.nanmax(line.survey.sensordepth)) if line.survey is not None and
-                                       len(line.survey) else 0.0)
+        drafts = line.survey.sensordepth if line.survey is not None and len(line.survey) else np.zeros(1)
+        depth_max = wcf.range_max_m + float(np.nanmax(drafts))
+        # from the surface, unless the sonar is deeper than its longest slant range (on a
+        # vehicle): then from a tenth of that range above its shallowest depth, so that the
+        # swath fills the view (as mbwcdview)
+        draft_min = float(np.nanmin(drafts))
+        depth_min = draft_min - 0.1 * wcf.range_max_m if draft_min > wcf.range_max_m else 0.0
         for sb in (self.dmin, self.dmax):
             sb.blockSignals(True)
             sb.setRange(0, depth_max)
-        self.dmin.setValue(0)
+        self.dmin.setValue(depth_min)
         self.dmax.setValue(depth_max)
         for sb in (self.dmin, self.dmax):
             sb.blockSignals(False)
@@ -370,14 +379,18 @@ class MainWindow(QMainWindow):
     def redraw(self):
         self.ax.clear()
         if self.line is None or not self.steps:
-            self.cax.clear()
+            self.cax.set_visible(False)  # hidden, not cleared: the colour bar is kept
             self.canvas.draw_idle()
             return
         step = min(self.current, len(self.steps) - 1)
         i, swath, wc_all, wc = self._swath_ping(step)
+        # transducer depth of the matched survey ping, else interpolated from the survey pings
+        # around this one
         j = self.line.survey_index(i)
-        draft = float(self.line.survey.sensordepth[j]) if j is not None else 0.0
-        zlabel = "Depth below waterline (m)" if j is not None else "Depth below transducer (m)"
+        draft = self.line.draft(i)
+        interpolated = j is None and draft is not None
+        zlabel = "Depth below waterline (m)" if draft is not None else "Depth below transducer (m)"
+        draft = draft if draft is not None else 0.0
 
         # metadata line
         lon, lat, sog_kn, cog = self.line.nav_at(wc.time_d)
@@ -389,8 +402,10 @@ class MainWindow(QMainWindow):
 
         # geometry: ray traced through the sound velocity profile, or straight rays
         x, depth, det_x, det_depth, traced = self._geometry(step, i, wc, draft)
-        if traced:
-            zlabel += " - ray traced" + ("" if j is not None else ", draft 0")
+        notes = (["ray traced"] if traced else []) + (["draft interpolated"] if interpolated else
+                                                      ["draft 0"] if traced and j is None else [])
+        if notes:
+            zlabel += "\n" + ", ".join(notes)  # a second line
         amp = wc.amplitude.copy()
         if self.line.wc.fill_value is not None:
             # no data only before the first echo of a beam (the near field); later in the
@@ -416,10 +431,11 @@ class MainWindow(QMainWindow):
             else:
                 sx, sz, sf, sd, _ = snd
                 shown = 0
+                kind = sd & 0xFF  # detection type; format 89 adds the multi-detection priority above
                 for code, colour in ((K.MB_DETECT_AMPLITUDE, "red"), (K.MB_DETECT_PHASE, "darkblue"),
                                      (K.MB_DETECT_UNKNOWN, "gray")):
-                    good = (sd == code) & K.beam_ok(sf)
-                    flagged = (sd == code) & K.beam_flagged(sf) & ~K.beam_null(sf)
+                    good = (kind == code) & K.beam_ok(sf)
+                    flagged = (kind == code) & K.beam_flagged(sf) & ~K.beam_null(sf)
                     self.ax.scatter(sx[good], sz[good], s=12, marker="o", edgecolors="none", c=colour)
                     self.ax.scatter(sx[flagged], sz[flagged], s=12, marker="o", facecolors="none",
                                     edgecolors=colour, linewidths=0.8)
@@ -428,8 +444,13 @@ class MainWindow(QMainWindow):
         if self.chk_wcbottom.isChecked():
             self.ax.plot(det_x, det_depth, "-", color="orange", lw=0.8)
 
-        self.cax.clear()
-        self.fig.colorbar(mesh, cax=self.cax, label="Amplitude (dB)")
+        # one colour bar, updated to each new mesh: a new colour bar in the same axes on every
+        # redraw keeps all the earlier ones, and their meshes, alive
+        if self._cbar is None:
+            self._cbar = self.fig.colorbar(mesh, cax=self.cax, label="Amplitude (dB)")
+        else:
+            self._cbar.update_normal(mesh)
+        self.cax.set_visible(True)
         d0, d1 = self.dmin.value(), self.dmax.value()
         if valid.any():
             d1 = min(d1, float(depth[valid].max()))
@@ -444,9 +465,22 @@ class MainWindow(QMainWindow):
         self.ax.invert_yaxis()
         self.ax.set_xlabel("Across-track (m, starboard +)")
         self.ax.set_ylabel(zlabel)
+        self._fit_ylabel()
         self.canvas.draw()
         if status:
             self.statusBar().showMessage(" | ".join(status))
+
+    def _fit_ylabel(self, event=None):
+        """The depth axis label in a smaller font where it is longer than the plot is high (on
+        every redraw and window resize)."""
+        label = self.ax.yaxis.label
+        label.set_fontsize(plt.rcParams["axes.labelsize"])
+        if not label.get_text():
+            return
+        renderer = self.canvas.get_renderer()
+        height, room = label.get_window_extent(renderer).height, self.ax.get_window_extent(renderer).height
+        if height > room > 0:
+            label.set_fontsize(max(6.0, label.get_fontsize() * room / height))
 
     # ------------------------------------------------------------------ export
     def save_image(self, path=None):

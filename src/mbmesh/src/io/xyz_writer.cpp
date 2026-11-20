@@ -1,5 +1,7 @@
 #include "io/xyz_writer.h"
 
+#include "io/coordinate_frame.h"
+
 #include <cstddef>
 #include <cmath>
 #include <fstream>
@@ -7,11 +9,6 @@
 #include <string>
 
 namespace {
-
-constexpr double pi = 3.14159265358979323846;
-constexpr double degrees_to_radians = pi / 180.0;
-constexpr double wgs84_semi_major_axis = 6378137.0;
-constexpr double wgs84_first_eccentricity_squared = 6.6943799901413165e-3;
 
 void set_error(std::string *error_message, const std::string &message) {
     if (error_message != nullptr) {
@@ -23,61 +20,9 @@ bool is_finite_vec3(const Vec3 &value) {
     return std::isfinite(value.x) && std::isfinite(value.y) && std::isfinite(value.z);
 }
 
-bool is_valid_frame(const CoordinateFrame &frame) {
-    return std::isfinite(frame.origin.longitude) &&
-           std::isfinite(frame.origin.latitude) &&
-           std::isfinite(frame.origin.elevation) &&
-           std::isfinite(frame.meters_per_degree_lon) &&
-           std::isfinite(frame.meters_per_degree_lat) &&
-           frame.meters_per_degree_lon > 0.0 &&
-           frame.meters_per_degree_lat > 0.0;
-}
-
-GeodeticPosition local_to_geodetic(const Vec3 &point, const CoordinateFrame &frame) {
-    GeodeticPosition position;
-    position.longitude = frame.origin.longitude + point.x / frame.meters_per_degree_lon;
-    position.latitude = frame.origin.latitude + point.y / frame.meters_per_degree_lat;
-    position.elevation = frame.origin.elevation + point.z;
-    return position;
-}
-
-Vec3 geodetic_to_ecef(const GeodeticPosition &position) {
-    const double lon = position.longitude * degrees_to_radians;
-    const double lat = position.latitude * degrees_to_radians;
-    const double sin_lat = std::sin(lat);
-    const double cos_lat = std::cos(lat);
-    const double sin_lon = std::sin(lon);
-    const double cos_lon = std::cos(lon);
-    const double prime_vertical_radius =
-        wgs84_semi_major_axis / std::sqrt(1.0 - wgs84_first_eccentricity_squared * sin_lat * sin_lat);
-
-    return Vec3(
-        (prime_vertical_radius + position.elevation) * cos_lat * cos_lon,
-        (prime_vertical_radius + position.elevation) * cos_lat * sin_lon,
-        ((1.0 - wgs84_first_eccentricity_squared) * prime_vertical_radius + position.elevation) * sin_lat);
-}
-
-Vec3 local_to_ecef(const Vec3 &point, const CoordinateFrame &frame) {
-    return geodetic_to_ecef(local_to_geodetic(point, frame));
-}
-
-Vec3 local_enu_vector_to_ecef(const Vec3 &vector, const GeodeticPosition &position) {
-    const double lon = position.longitude * degrees_to_radians;
-    const double lat = position.latitude * degrees_to_radians;
-    const double sin_lat = std::sin(lat);
-    const double cos_lat = std::cos(lat);
-    const double sin_lon = std::sin(lon);
-    const double cos_lon = std::cos(lon);
-
-    return Vec3(
-        -sin_lon * vector.x - sin_lat * cos_lon * vector.y + cos_lat * cos_lon * vector.z,
-        cos_lon * vector.x - sin_lat * sin_lon * vector.y + cos_lat * sin_lon * vector.z,
-        cos_lat * vector.y + sin_lat * vector.z);
-}
-
 } // namespace
 
-bool write_local_xyz_pointcloud(const PointCloud &pointcloud, const std::string &path, std::string *error_message) {
+bool write_local_xyz_pointcloud(const PointCloud &pointcloud, const std::string &path, std::string *error_message, bool append) {
     if (error_message != nullptr) {
         error_message->clear();
     }
@@ -87,7 +32,7 @@ bool write_local_xyz_pointcloud(const PointCloud &pointcloud, const std::string 
         return false;
     }
 
-    std::ofstream output(path);
+    std::ofstream output(path, append ? std::ios::app : std::ios::out);
     if (!output) {
         set_error(error_message, "Unable to create XYZ file: " + path);
         return false;
@@ -115,7 +60,8 @@ bool write_ecef_xyz_pointcloud(
     const PointCloud &pointcloud,
     const CoordinateFrame &frame,
     const std::string &path,
-    std::string *error_message) {
+    std::string *error_message,
+    bool append) {
     if (error_message != nullptr) {
         error_message->clear();
     }
@@ -130,7 +76,7 @@ bool write_ecef_xyz_pointcloud(
         return false;
     }
 
-    std::ofstream output(path);
+    std::ofstream output(path, append ? std::ios::app : std::ios::out);
     if (!output) {
         set_error(error_message, "Unable to create ECEF XYZ file: " + path);
         return false;
@@ -215,9 +161,8 @@ bool write_ply_oriented_pointcloud(
             return false;
         }
 
-        const GeodeticPosition geodetic_point = local_to_geodetic(oriented_point.point, frame);
-        const Vec3 ecef_point = geodetic_to_ecef(geodetic_point);
-        const Vec3 ecef_normal = normalize(local_enu_vector_to_ecef(oriented_point.normal, geodetic_point));
+        const Vec3 ecef_point = local_to_ecef(oriented_point.point, frame);
+        const Vec3 ecef_normal = normalize(local_vector_to_ecef(oriented_point.normal, frame));
         output << ecef_point.x << ' ' << ecef_point.y << ' ' << ecef_point.z << ' '
                << ecef_normal.x << ' ' << ecef_normal.y << ' ' << ecef_normal.z << ' '
                << oriented_point.lambdas.x << ' ' << oriented_point.lambdas.y << ' ' << oriented_point.lambdas.z << '\n';
