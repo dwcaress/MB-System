@@ -2965,8 +2965,9 @@ relative to the sonar whatever the roll compensation flag of the Sonar Settings
 record (7000) says, and turned to the vertical with the roll at transmit that the
 bathymetry calculation stored with the detections. The along track angle is the
 transmit steering of the Raw Detection record (7027); for pings whose detections are
-a Segmented Raw Detection record (7047) it is the steering of the 7000 record, not
-that of the 7047 segments. The soundings MB-System calculates turn each detection
+a Segmented Raw Detection record (7047) it is the steering of the segment in which the
+beam's detection was made (that of the 7000 record for a beam without a detection).
+The soundings MB-System calculates turn each detection
 with the roll at the arrival of its echo and include the pitch. So the water column
 angles match them across track only while the platform does not roll between
 transmit and echo (a roll rate of r degrees per second turns a beam whose echo
@@ -2978,7 +2979,8 @@ reversed array (from a platform file), a sound speed correction by
 \fBmbpreprocess\fP (which changes the 7000 sound speed and the detection angles,
 not the 7004 angles), or the mount angles that Teledyne PDS includes in the
 soundings it logs. The detection is that of the beam's primary detection in the Raw
-Detection record (7027), the sound speed that of the last Sonar Settings record
+Detection record (7027) or the Segmented Raw Detection record (7047, converted from
+the sample rate of its segment), the sound speed that of the last Sonar Settings record
 (7000) read, as for the soundings (1500 m/s if it gives none),
 \fIsample_interval\fP that of the 7042 record (after any downsampling; without it
 the sonar's sample rate of the ping, from its 7000, 7027 or 7047 record, divided by

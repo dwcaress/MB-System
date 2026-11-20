@@ -9028,7 +9028,7 @@ int mbsys_reson7k3_extract_wc(int verbose, void *mbio_ptr, void *store_ptr, int 
         roll = store->SegmentedRawDetection.roll;
 
       /* the transmit steering along track (pitch stabilisation, radians, positive
-          forward) is in 7027 and in 7000 */
+          forward) is in 7027 and in 7000 (for 7047 detections see below) */
       const double tx_steer = store->read_RawDetection ? RawDetection->tx_angle : SonarSettings->steering_vertical;
 
       /* detections (7027) are in samples at the sonar's sample rate */
@@ -9066,6 +9066,32 @@ int mbsys_reson7k3_extract_wc(int verbose, void *mbio_ptr, void *store_ptr, int 
           if (rawdetectiondata->beam_descriptor == beam_number && ((rawdetectiondata->flags >> 9) & 0x0F) == 0) {
             detect_sample[i] = detect_scale * rawdetectiondata->detection_point;
             break;
+          }
+        }
+
+        /* pings whose detections are a 7047 record: the beam's primary detection, in
+            samples at the sample rate of the segment it was made in, and the along track
+            transmit steering of that segment (that of the 7000 record for beams without
+            a detection) */
+        if (!store->read_RawDetection && store->read_SegmentedRawDetection) {
+          const s7k3_SegmentedRawDetection *SegmentedRawDetection = &(store->SegmentedRawDetection);
+          for (unsigned int j = 0; j < SegmentedRawDetection->n_rx && j < MBSYS_RESON7K_MAX_SOUNDINGS; j++) {
+            const s7k3_segmentedrawdetectionrxdata *segmentedrawdetectionrxdata =
+                &(SegmentedRawDetection->segmentedrawdetectionrxdata[j]);
+            if (segmentedrawdetectionrxdata->beam_number == beam_number
+                && ((segmentedrawdetectionrxdata->flags2 >> 9) & 0x0F) == 0) {
+              const unsigned int used_segment = segmentedrawdetectionrxdata->used_segment;
+              if (used_segment >= 1 && used_segment <= SegmentedRawDetection->n_segments
+                  && used_segment <= MBSYS_RESON7K_MAX_SEGMENTS) {
+                const s7k3_segmentedrawdetectiontxdata *segmentedrawdetectiontxdata =
+                    &(SegmentedRawDetection->segmentedrawdetectiontxdata[used_segment - 1]);
+                if (segmentedrawdetectiontxdata->sampling_rate > 0.0)
+                  detect_sample[i] = sample_rate / segmentedrawdetectiontxdata->sampling_rate
+                                     * segmentedrawdetectionrxdata->detection_point;
+                angle_along[i] = RTD * segmentedrawdetectiontxdata->tx_angle_along;
+              }
+              break;
+            }
           }
         }
 
