@@ -1038,7 +1038,7 @@ int main(int argc, char **argv) {
           btime_i[6] = 1000000 * (seconds - btime_i[5]);
         }
         else if (strcmp("comment-file", options[option_index].name) == 0) {
-          sscanf(optarg, "%1023s", commentfile);
+          snprintf(commentfile, sizeof(commentfile), "%s", optarg);
           insertcomments = true;
         }
         else if (strcmp("bathymetry-only", options[option_index].name) == 0) {
@@ -1059,14 +1059,14 @@ int main(int argc, char **argv) {
           help = true;
         }
         else if (strcmp("input", options[option_index].name) == 0) {
-          sscanf(optarg, "%1023s", ifile);
+          snprintf(ifile, sizeof(ifile), "%s", optarg);
         }
         else if (strcmp("lonflip", options[option_index].name) == 0) {
           sscanf(optarg, "%d", &lonflip);
         }
         else if (strcmp("merge-file", options[option_index].name) == 0) {
-          const int i = sscanf(optarg, "%1023s", mfile);
-          if (i == 1)
+          snprintf(mfile, sizeof(mfile), "%s", optarg);
+          if (mfile[0] != '\0')
             merge = true;
         }
         else if (strcmp("strip-comments", options[option_index].name) == 0) {
@@ -1080,7 +1080,7 @@ int main(int argc, char **argv) {
           }
         }
         else if (strcmp("output", options[option_index].name) == 0) {
-          sscanf(optarg, "%1023s", ofile);
+          snprintf(ofile, sizeof(ofile), "%s", optarg);
         }
         else if (strcmp("ping-average", options[option_index].name) == 0) {
           sscanf(optarg, "%d", &pings);
@@ -1114,7 +1114,7 @@ int main(int argc, char **argv) {
       }
       case 'C':
       case 'c':
-        sscanf(optarg, "%1023s", commentfile);
+        snprintf(commentfile, sizeof(commentfile), "%s", optarg);
         insertcomments = true;
         break;
       case 'D':
@@ -1144,7 +1144,7 @@ int main(int argc, char **argv) {
         break;
       case 'I':
       case 'i':
-        sscanf(optarg, "%1023s", ifile);
+        snprintf(ifile, sizeof(ifile), "%s", optarg);
         break;
       case 'L':
       case 'l':
@@ -1153,8 +1153,8 @@ int main(int argc, char **argv) {
       case 'M':
       case 'm':
       {
-        const int i = sscanf(optarg, "%1023s", mfile);
-        if (i == 1)
+        snprintf(mfile, sizeof(mfile), "%s", optarg);
+        if (mfile[0] != '\0')
           merge = true;
         break;
       }
@@ -1171,7 +1171,7 @@ int main(int argc, char **argv) {
         break;
       case 'O':
       case 'o':
-        sscanf(optarg, "%1023s", ofile);
+        snprintf(ofile, sizeof(ofile), "%s", optarg);
         break;
       case 'P':
       case 'p':
