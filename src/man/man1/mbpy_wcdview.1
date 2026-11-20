@@ -32,6 +32,13 @@ soundings, navigation, heading and transducer depth; the *.kmwcd or *.wcd the wa
 column. A *.all without a *.wcd supplies the water column too, if it holds any.
 Either may be missing: without a *.kmall or *.all the navigation comes from the
 position records of the *.kmwcd or *.wcd and depths are given below the transducer.
+A water column ping without a matching survey ping is drawn at the transducer depth
+interpolated in time from the survey pings around it.
+A Reson 7k *.s7k file (format 89) holds the survey pings and the water column
+together and supplies both; its water column beam angles leave out some of what the
+soundings include (the roll between transmit and echo, the pitch, differing mount
+angles and sound speed corrections; see \fBmbio\fP(3)), so the soundings may lie off
+the seafloor echo.
 
 The window has an Open button, Save Image (twice the screen resolution, with the
 file name and ping information), check boxes \fBBottom\fP (soundings of the
@@ -41,11 +48,15 @@ column), \fBRay trace (SVP)\fP (samples traced through the logged sound velocity
 profile; on when a profile is found) and \fBPick\fP (positions clicked in the
 image go into a table that can be saved as text), the depth and amplitude ranges,
 a fixed across track scale, a replay rate, and a slider that steps one swath at a
-time (also the mouse wheel and the left and right arrow keys). Amplitudes are in
+time (also the mouse wheel and the left and right arrow keys). The depth range
+starts at the surface, or, for a sonar deeper than its longest slant range (on a
+vehicle), a tenth of that range above the shallowest transducer depth. Amplitudes are in
 dB; the fill value of Kongsberg kmall data is drawn as no data before the first echo of
 each beam (the near field), and later in the beam, where it is a weak echo clipped to the
 lowest level, with the lowest color. In *.wcd and *.all data
-the lowest value is a valid level and is drawn with the lowest color.
+the lowest value is a valid level and is drawn with the lowest color. In *.s7k data
+the amplitudes are 20 log10 of the logged magnitudes (dB relative to one magnitude
+count), and the lowest value (a magnitude of 0 or 1) is a valid level.
 
 \fBmbpy_wcdview\fP needs Python >= 3.11, numpy, matplotlib and PySide6, and an
 MB-System libmbio with \fBmb_extract_wc\fP(3). The README in
@@ -73,7 +84,8 @@ Christian dos Santos Ferreira
 .TP
 .B \-\-input\fP=\fIfile\fP {\fB\-I\fP\fIfile\fP}
 .br
-The *.kmwcd, *.kmall, *.wcd or *.all to open; it may also be given as the last argument.
+The *.kmwcd, *.kmall, *.wcd, *.all or *.s7k to open; it may also be given as the last
+argument.
 .TP
 .B \-\-help {\fB\-H\fP}
 Print the usage message and exit.

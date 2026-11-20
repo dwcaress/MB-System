@@ -5,7 +5,7 @@ with Python's `ctypes` and `numpy`. Nothing is compiled: the package calls the
 `libmbio` of the MB-System installation it belongs to. It reads every format
 MBIO reads, and gives access to water column data (`mb_extract_wc()`, at present
 for Kongsberg data: *.kmwcd files, format 261, and *.wcd and *.all files, formats 58
-and 59).
+and 59; and for Reson 7k data: *.s7k files, format 89).
 
 It is meant for prototypes and small tools in Python. Two examples come with it:
 the scripts in `examples/` and the water column viewer `mbpy_wcdview`
@@ -87,7 +87,7 @@ or in the script:
 
 Fatal MBIO errors raise `mb.MBIOError` (with MB-System's message); non-fatal
 ones are in `rec.error` and reading continues. `mb.get_format(path)` gives the
-format of a file name (*.kmwcd: 261, *.wcd: 58).
+format of a file name (*.kmwcd: 261, *.wcd: 58, *.s7k: 89).
 
 ### WaterColumnPing: one ping of water column
 
@@ -110,7 +110,13 @@ value (-128, i.e. -94 dB with a 30 dB offset) is a fill value. For *.wcd and *.a
 data a record is one ping assembled from its datagrams, the amplitude is the logged
 value minus the TVG offset C, the lowest value is a valid level (weak samples clipped
 to it, no fill value), `swath` is 0, and two empty beams (`nsamples` 0) inside
-the gap mark datagrams lost inside the swath.
+the gap mark datagrams lost inside the swath. For Reson 7k data (*.s7k) the
+water column comes with the survey ping (`rec.kind` is `MB_DATA_DATA`), the
+amplitude is 20 log10 of the logged magnitude (dB relative to one magnitude
+count, with the sonar's gain and TVG applied; 8 bit values are converted to the
+same scale), the lowest value (a magnitude of 0 or 1) is a valid level, `swath`
+is 0, and `detect_sample` is the beam's primary detection of its Raw Detection
+record (7027).
 `range_m()`, `detect_range_m()`, `xyz()` and `detect_xyz()` give positions
 along straight rays with the sound speed at the transducer.
 
@@ -121,10 +127,10 @@ along straight rays with the sound speed at the transducer.
     print(len(wcf), wcf.fill_value, wcf.amp_min, wcf.amp_max)
 
 Amplitudes are kept as float16 (exact for 0.5 dB steps), about 2 bytes per
-sample. Also: the file's own position records (`nav_time_d`, `nav_lon`,
-`nav_lat`) and sound velocity profiles (`svps`).
+sample, in one array per ping. Also: the file's own position records (`nav_time_d`,
+`nav_lon`, `nav_lat`) and sound velocity profiles (`svps`).
 
-### KongsbergLine: a *.kmall and its *.kmwcd, or a *.all and its *.wcd
+### KongsbergLine: a *.kmall and its *.kmwcd, a *.all and its *.wcd, or a *.s7k
 
     line = mb.KongsbergLine("0080_20250618_223434.kmwcd")   # or the .kmall
     wc = line.wc.ping(10)
@@ -132,16 +138,22 @@ sample. Also: the file's own position records (`nav_time_d`, `nav_lon`,
     soundings = line.survey.bath[j], line.survey.bathacrosstrack[j]
     lon, lat, sog_kn, cog = line.nav_at(wc.time_d)
     heading = line.heading_at(wc.time_d)
-    draft = line.draft(10)                    # transducer depth from the .kmall ping
+    draft = line.draft(10)                    # transducer depth of the survey ping (else interpolated)
     depth, velocity = line.svp(wc.time_d)
 
 SIS names each file after its first datagram's time, so the two files of a line
 may differ by seconds: the companion is found by line number and nearest file
 name time (`mb.find_companion`), then pings are matched by ping number and time.
+Any other file, such as a Reson 7k *.s7k, holds both the survey and the water
+column and is opened as both.
 Either file may be missing; `nav_at` falls back to the survey ping positions and
-then to the position records of the water column file. `line.kmall` and `line.kmwcd`
-name the survey and water column files of either kind; a *.all without a *.wcd is
-both, and `line.wc` is None if it holds no water column.
+then to the position records of the water column file. `draft` interpolates the
+transducer depth in time from the survey pings around a water column ping without
+its own, and is None without survey pings. In `line.survey` (`mb.load_survey`)
+`detects` has one value per sounding (MB_DETECT_UNKNOWN where MBIO gives none; the
+detection type is in bits 0-7, format 89 adds the multi-detection priority above).
+`line.kmall` and `line.kmwcd` name the survey and water column files of either kind;
+a *.all without a *.wcd is both, and `line.wc` is None if it holds no water column.
 
 ### raytrace: samples through a sound velocity profile
 

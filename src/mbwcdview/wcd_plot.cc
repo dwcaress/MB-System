@@ -29,6 +29,7 @@
 #include <limits>
 
 #include <QPainterPath>
+#include <QStringList>
 
 #ifdef MBWCD_HAVE_GL
 #include <QOffscreenSurface>
@@ -338,17 +339,44 @@ void WcdPlot::drawOverlay(QPainter &p, const QSize &size, const QString &caption
     p.drawText(QPointF(px(x) - fm.horizontalAdvance(t) / 2, r.bottom() + 6 + fm.ascent()), t);
   }
   const double zs = tick_step(view_z1_ - view_z0_, 8);
+  double tick_width = 0.0;
   for (double z = std::ceil(view_z0_ / zs) * zs; z <= view_z1_ + 1.0e-9; z += zs) {
     p.drawLine(QPointF(r.left() - 4, pz(z)), QPointF(r.left(), pz(z)));
     const QString t = tick_label(z, zs);
+    tick_width = std::max(tick_width, fm.horizontalAdvance(t));
     p.drawText(QPointF(r.left() - 6 - fm.horizontalAdvance(t), pz(z) + fm.ascent() / 2 - 1), t);
   }
   const QString xlabel = "Across-track (m, starboard +)";
   p.drawText(QPointF(r.center().x() - fm.horizontalAdvance(xlabel) / 2, r.bottom() + 8 + 2 * fm.height()), xlabel);
+  /* the depth label and its notes (second line), left of the depth tick labels, in a smaller
+     font where the lines are longer than the plot is high or do not fit beside the tick labels */
   p.save();
-  p.translate(14, r.center().y() + fm.horizontalAdvance(data_.ylabel) / 2);
+  const QStringList ylines = data_.ylabel.split('\n');
+  const double room = r.left() - 8.0 - tick_width;  // the lines end left of this x
+  double ywidth = 0.0;
+  for (const QString &line : ylines)
+    ywidth = std::max(ywidth, fm.horizontalAdvance(line));
+  const double thickness = fm.ascent() + fm.descent() + (ylines.size() - 1) * fm.lineSpacing();
+  double scale = 1.0;
+  if (ywidth > r.height() && r.height() > 0.0)
+    scale = r.height() / ywidth;
+  if (thickness > room && room > 0.0)
+    scale = std::min(scale, room / thickness);
+  if (scale < 1.0) {
+    QFont font = p.font();
+    if (font.pointSizeF() > 0.0)
+      font.setPointSizeF(std::max(6.0, font.pointSizeF() * scale));
+    else if (font.pixelSize() > 0)
+      font.setPixelSize(std::max(8, (int)(font.pixelSize() * scale)));
+    p.setFont(font);
+  }
+  const QFontMetricsF yfm(p.font());
+  /* the first line at x 14, further left where the lines would reach the tick labels */
+  const double x0 = std::max(yfm.ascent(), std::min(14.0, room - yfm.descent() - (ylines.size() - 1) * yfm.lineSpacing()));
+  p.translate(x0, r.center().y());
   p.rotate(-90);
-  p.drawText(QPointF(0, 0), data_.ylabel);
+  for (int k = 0; k < ylines.size(); k++)
+    p.drawText(QPointF(-yfm.horizontalAdvance(ylines[k]) / 2, k * yfm.lineSpacing()), ylines[k]);
   p.restore();
 
   /* colour bar */

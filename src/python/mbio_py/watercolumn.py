@@ -162,8 +162,8 @@ class WaterColumnFile:
     ping(i) returns a full WaterColumnPing (float32).
     fill_value: the lowest amplitude if it is a fill value (more than 0.1 % of the samples
     and the next 0.5 dB step practically absent, as the logged -128 of Kongsberg kmall data; in
-    *.all and *.wcd data it is a valid level, weak samples clipped to it),
-    else None. amp_min/amp_max exclude the fill value.
+    *.all and *.wcd data it is a valid level, weak samples clipped to it, and in Reson 7k *.s7k
+    data a magnitude of 0 or 1), else None. amp_min/amp_max exclude the fill value.
     nav_time_d/nav_lon/nav_lat: the file's own position records (may be empty).
     """
 
@@ -171,8 +171,7 @@ class WaterColumnFile:
         from .reader import Reader
         self.path = path
         self._geom = []
-        self._offsets = [0]
-        chunks = []
+        self._amp = []    # amplitudes of each ping (float16, beam by beam, without padding)
         self.other_kinds = {}
         self.svps = []    # (time_d, depth, velocity) of the file's sound velocity profiles
         nav = []
@@ -187,15 +186,14 @@ class WaterColumnFile:
                     elif rec.svp_depth is not None:
                         self.svps.append((rec.time_d, rec.svp_depth, rec.svp_velocity))
                     continue
+                # each ping's amplitudes in an array of its own: joined into one array they
+                # would need twice their memory while being joined
                 valid = np.arange(wc.nsamples_max)[None, :] < wc.nsamples[:, None]
-                data = wc.amplitude[valid].astype(np.float16)
-                chunks.append(data)
-                self._offsets.append(self._offsets[-1] + data.size)
+                self._amp.append(wc.amplitude[valid].astype(np.float16))
                 wc.amplitude = None
                 self._geom.append(wc)
                 if progress is not None:
                     progress(len(self._geom), min(1.0, r.wc_samples_read / max(r.file_size, 1)))
-        self._amp = np.concatenate(chunks) if chunks else np.zeros(0, np.float16)
         self.times = np.array([g.time_d for g in self._geom])
         self.ping_numbers = np.array([g.ping_number for g in self._geom])
         nav = np.asarray(nav, float).reshape(-1, 3)
@@ -204,14 +202,20 @@ class WaterColumnFile:
         # value histogram (float16 bit patterns) for the range and the fill value
         self.fill_value = None
         self.amp_min = self.amp_max = np.nan
-        if self._amp.size:
-            counts = np.bincount(self._amp.view(np.uint16), minlength=65536)
+        nsamples = sum(a.size for a in self._amp)
+        if nsamples:
+            # ping by ping, in blocks: bincount converts its input to 64 bit integers
+            counts = np.zeros(65536, np.int64)
+            for a in self._amp:
+                bits = a.view(np.uint16)
+                for k in range(0, bits.size, 1 << 24):
+                    counts += np.bincount(bits[k:k + (1 << 24)], minlength=65536)
             with np.errstate(invalid="ignore"):
                 values = np.arange(65536, dtype=np.uint16).view(np.float16).astype(np.float64)
             present = (counts > 0) & np.isfinite(values)
             order = np.argsort(values[present])
             v, c = values[present][order], counts[present][order]
-            if self.format == K.MBF_KEMKMALL and len(v) > 1 and c[0] > 0.001 * self._amp.size and c[1] < 0.01 * c[0]:
+            if self.format == K.MBF_KEMKMALL and len(v) > 1 and c[0] > 0.001 * nsamples and c[1] < 0.01 * c[0]:
                 self.fill_value = float(v[0])
                 v = v[1:]
             if len(v):
@@ -228,7 +232,7 @@ class WaterColumnFile:
 
     def ping(self, i):
         g = self._geom[i]
-        data = self._amp[self._offsets[i]:self._offsets[i + 1]].astype(np.float32)
+        data = self._amp[i].astype(np.float32)
         nsmax = int(g.nsamples.max()) if g.nbeams else 0
         amp = np.full((g.nbeams, nsmax), np.nan, np.float32)
         amp[np.arange(nsmax)[None, :] < g.nsamples[:, None]] = data
@@ -237,4 +241,4 @@ class WaterColumnFile:
 
     @property
     def nbytes(self):
-        return self._amp.nbytes
+        return sum(a.nbytes for a in self._amp)

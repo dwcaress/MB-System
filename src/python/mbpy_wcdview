@@ -39,9 +39,9 @@ import sys
 program_name = "MBPY_WCDVIEW"
 help_message = (
     "MBPY_WCDVIEW starts the Python water column viewer, an example application of the\n"
-    "mbio_py Python API to the MB-System MBIO library. It opens a Kongsberg *.kmwcd or\n"
-    "*.kmall and finds the other file of the survey line. Needs Python >= 3.11, numpy,\n"
-    "PySide6 and matplotlib.")
+    "mbio_py Python API to the MB-System MBIO library. It opens a Kongsberg *.kmwcd,\n"
+    "*.kmall, *.wcd or *.all and finds the other file of the survey line, or a Reson 7k\n"
+    "*.s7k, which holds both. Needs Python >= 3.11, numpy, PySide6 and matplotlib.")
 usage_message = "mbpy_wcdview [--input=file -Ifile] [file] [--help -H]"
 
 
