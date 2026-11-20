@@ -54,6 +54,7 @@ if(mbio_py_tests_ok)
       mbio_py_watercolumn_test
       mbio_py_watercolumn_all_test
       mbio_py_watercolumn_s7k_test
+      mbio_py_reson7k3_reader_test
       mbpy_wcdview_test)
   foreach(test ${tests})
     add_test(NAME ${test} COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/${test}.py")
