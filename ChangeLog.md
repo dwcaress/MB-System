@@ -21,6 +21,7 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.3beta31    November 20, 2026
 - Version 5.8.3beta30    November 17, 2026
 - Version 5.8.3beta29    November 11, 2026
 - Version 5.8.3beta28    November 3, 2026
@@ -84,6 +85,54 @@ or beta, are equally accessible as tarballs through the Github interface.
 - Version 5.8.1beta02    February 7, 2024
 - Version 5.8.1beta01    February 1, 2024
 - **Version 5.8.0          January 22, 2024**
+
+---
+
+#### 5.8.3beta31 (November 20, 2026)
+
+MBIO library, format 89 (MBF\_RESON7K3, src/mbio/mbr\_reson7k3.c,
+mbsys\_reson7k3.c, src/man/man3/mbio.3): the water column of Teledyne Reson 7k data
+(7042 Compressed Water Column records, logged by the T20 and T50 series) can now be read
+through mb\_extract\_wcdimensions() and mb\_extract\_wc(), with the detections of the
+7027 or 7047 records. Malformed 7042 records, which overflowed the beam array, are now
+rejected and their pings read without water column. Contributed by Christian Ferreira.
+
+Programs mbwcdview and mbpy\_wcdview and Python API mbio\_py (src/mbwcdview,
+src/python): Reson 7k \*.s7k files are now shown with their soundings and navigation.
+The depth window starts below the surface for a sonar on a vehicle, water column pings
+without a survey ping are drawn at the interpolated transducer depth, mbwcdview --dump
+pairs each beam with its sounding by travel time, and a file without survey or water
+column data is now an error. mbpy\_wcdview no longer keeps a colour bar and swath image
+per redraw, which grew its memory and failed after about 985 redraws. Contributed by
+Christian Ferreira.
+
+MBIO library, format 89 (src/mbio/mbr\_reson7k3.c, mbsys\_reson7k3.c): fixed reader
+and data structure errors. Files read through their 7300 file catalog returned their
+last ping twice (as do all files written by format 89), headers with too small a size
+and 7004, 7027 and 7047 records with oversized counts could read past their buffers,
+and every 7012 Ping Motion record kept the values of the first. mb\_detects() gave the
+7004 beam count instead of the number of detections, record copies (mb\_buffer) were
+incomplete, 7030 installation angles were taken as degrees instead of radians, and the
+heave compensation flag was read from the wrong bit. Contributed by Christian Ferreira.
+
+Program mbpreprocess (src/utilities/mbpreprocess.cc, src/man/man1/mbpreprocess.1): for
+format 89 data, the position, sensor depth, heading and attitude sources are now chosen
+from the records present, in the reader's order of priority, instead of always the 1015
+and 1016 records; data without them, such as T50 lines, previously produced no output
+pings. Pings left out for missing navigation or attitude are now counted in a warning
+rather than written with zero heading and attitude. Contributed by Christian Ferreira.
+
+MBIO library (src/mbio/mb\_read\_init.c, mb\_close.c): programs run with -V -V crashed
+when a file could not be opened, because a freed descriptor was still used. Contributed
+by Christian Ferreira.
+
+Programs mbinfo and mbcopy (src/utilities/mbinfo.cc, mbcopy.cc): input, output, merge
+and comment file names containing spaces are no longer cut at the first space.
+Contributed by Christian Ferreira.
+
+The above work was done with the assistance of the AI coding assistant Claude Opus 5.5
+(Anthropic, model claude-opus-5-5), operating as Claude Code under developer
+supervision and review.
 
 ---
 
