@@ -72,6 +72,41 @@ constexpr mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_ALL_ANCILLIARY = 0x7F;
 constexpr mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_SURVEY = 0x80;
 constexpr mb_u_char MBPREPROCESS_TIME_LATENCY_APPLY_ALL = 0xFF;
 
+/* Reson 7k (format 89) asynchronous data sources, highest priority first,
+   following the order the format 89 reader uses itself (mbr_reson7k3.c):
+   position 1015 Navigation, 1003 Position; sensor depth 1015 Navigation
+   (the earlier default of this program), 1008 Depth; heading 1015
+   Navigation, 1016 Attitude, 1013 Heading, 1004 Custom Attitude; roll,
+   pitch and heave 1016 Attitude, 1012 Roll Pitch Heave, 1004 Custom Attitude. */
+constexpr int MBPREPROCESS_RESON7K3_NAV_SOURCES[] = {MB_DATA_NAV, MB_DATA_NAV1};
+constexpr int MBPREPROCESS_RESON7K3_SENSORDEPTH_SOURCES[] = {MB_DATA_NAV, MB_DATA_SENSORDEPTH};
+constexpr int MBPREPROCESS_RESON7K3_HEADING_SOURCES[] = {MB_DATA_NAV, MB_DATA_ATTITUDE, MB_DATA_HEADING,
+                                                         MB_DATA_ATTITUDE2};
+constexpr int MBPREPROCESS_RESON7K3_ATTITUDE_SOURCES[] = {MB_DATA_ATTITUDE, MB_DATA_ATTITUDE1, MB_DATA_ATTITUDE2};
+
+/* Choose the asynchronous source automatically from the record kinds found in
+   the data: switch *async to kind if kind is one of the sources and either no
+   data have been taken from the current source yet or kind has a higher
+   priority. Data already taken from a lower priority source are discarded
+   (*n = 0), so the values are never a mixture of two sources. */
+template <size_t N>
+static void mbpreprocess_auto_source(int kind, const int (&sources)[N], int *async, int *n) {
+  if (kind == *async)
+    return;
+  size_t rank_kind = N;
+  size_t rank_async = N;
+  for (size_t i = 0; i < N; i++) {
+    if (sources[i] == kind)
+      rank_kind = i;
+    if (sources[i] == *async)
+      rank_async = i;
+  }
+  if (rank_kind < N && (*n == 0 || rank_kind < rank_async)) {
+    *async = kind;
+    *n = 0;
+  }
+}
+
 // #define DEBUG_MBPREPROCESS 1
 
 constexpr char program_name[] = "mbpreprocess";
@@ -271,6 +306,15 @@ int main(int argc, char **argv) {
   bool nav_async_kmall_auto = false;
   bool heading_async_kmall_auto = false;
   bool attitude_async_kmall_auto = false;
+  /* Reson 7k (format 89) data carry position, heading and attitude in different
+      records depending on the installation (e.g. 1015/1016, or 1003, 1012 and
+      1013 for a T50 without a navigation system feeding the sonar). When the user
+      has not chosen a source, these flags mark that each is chosen from the
+      records found, by the priorities in MBPREPROCESS_RESON7K3_*_SOURCES. */
+  bool nav_async_reson7k3_auto = false;
+  bool sensordepth_async_reson7k3_auto = false;
+  bool heading_async_reson7k3_auto = false;
+  bool attitude_async_reson7k3_auto = false;
   bool zero_heave = false;
   merge_t soundspeed_mode = MBPREPROCESS_MERGE_OFF;
   int soundspeed_file_format = 0;
@@ -1648,6 +1692,7 @@ int main(int argc, char **argv) {
 				else if (iformat == MBF_RESON7K3) {
 					nav_mode = MBPREPROCESS_MERGE_ASYNC;
 					nav_async = MB_DATA_NAV;
+					nav_async_reson7k3_auto = true;
 				}
 			}
 			if (sensordepth_mode == MBPREPROCESS_MERGE_OFF) {
@@ -1666,6 +1711,7 @@ int main(int argc, char **argv) {
 				else if (iformat == MBF_RESON7K3) {
 					sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;
 					sensordepth_async = MB_DATA_NAV;
+					sensordepth_async_reson7k3_auto = true;
 				}
 			}
 			if (heading_mode == MBPREPROCESS_MERGE_OFF) {
@@ -1685,6 +1731,7 @@ int main(int argc, char **argv) {
 				else if (iformat == MBF_RESON7K3) {
 					heading_mode = MBPREPROCESS_MERGE_ASYNC;
 					heading_async = MB_DATA_NAV;
+					heading_async_reson7k3_auto = true;
 				}
 			}
 			if (attitude_mode == MBPREPROCESS_MERGE_OFF) {
@@ -1704,8 +1751,17 @@ int main(int argc, char **argv) {
 				else if (iformat == MBF_RESON7K3) {
 					attitude_mode = MBPREPROCESS_MERGE_ASYNC;
 					attitude_async = MB_DATA_ATTITUDE;
+					attitude_async_reson7k3_auto = true;
 				}
 			}
+	
+			/* Reson 7k data: when reading, the format 89 reader already calculates
+				 bathymetry for pings without it, using the ancillary data read so far
+				 (with a file catalog these end before the ping). As with sources chosen
+				 by the --*-async options, recalculate it from the merged ancillary data. */
+			if (nav_async_reson7k3_auto || sensordepth_async_reson7k3_auto || heading_async_reson7k3_auto
+			    || attitude_async_reson7k3_auto)
+				preprocess_pars.recalculate_bathymetry = true;
 	
 			if (verbose > 0)
 				fprintf(stderr, "\nPass 1: Opening file %s %d\n", ifile, iformat);
@@ -1867,6 +1923,8 @@ int main(int argc, char **argv) {
 					if (active_system > 0)
 						nav_async = active_system;
 				}
+				if (status == MB_SUCCESS && nav_async_reson7k3_auto)
+					mbpreprocess_auto_source(kind, MBPREPROCESS_RESON7K3_NAV_SOURCES, &nav_async, &n_nav);
 				if (status == MB_SUCCESS && nav_mode == MBPREPROCESS_MERGE_ASYNC && kind == nav_async) {
 					/* extract nav data */
 					int extract_status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr, nanavmax, &kind, &nanav, atime_i, atime_d, alon, alat,
@@ -1905,6 +1963,9 @@ int main(int argc, char **argv) {
 				}
 	
 				/* look for sensordepth if not externally defined */
+				if (status == MB_SUCCESS && sensordepth_async_reson7k3_auto)
+					mbpreprocess_auto_source(kind, MBPREPROCESS_RESON7K3_SENSORDEPTH_SOURCES, &sensordepth_async,
+					                         &n_sensordepth);
 				if (status == MB_SUCCESS && sensordepth_mode == MBPREPROCESS_MERGE_ASYNC && kind == sensordepth_async) {
 					/* extract sensordepth data */
 					int extract_status = status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr, nanavmax, &kind, &nanav, atime_i, atime_d, alon, alat,
@@ -1944,6 +2005,8 @@ int main(int argc, char **argv) {
 					if (active_system > 0)
 						heading_async = active_system;
 				}
+				if (status == MB_SUCCESS && heading_async_reson7k3_auto)
+					mbpreprocess_auto_source(kind, MBPREPROCESS_RESON7K3_HEADING_SOURCES, &heading_async, &n_heading);
 				if (status == MB_SUCCESS && heading_mode == MBPREPROCESS_MERGE_ASYNC && kind == heading_async) {
 					/* extract heading data */
 					int extract_status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr, nanavmax, &kind, &nanav, atime_i, atime_d, alon, alat,
@@ -2014,6 +2077,8 @@ int main(int argc, char **argv) {
 					if (active_system > 0)
 						attitude_async = active_system;
 				}
+				if (status == MB_SUCCESS && attitude_async_reson7k3_auto)
+					mbpreprocess_auto_source(kind, MBPREPROCESS_RESON7K3_ATTITUDE_SOURCES, &attitude_async, &n_attitude);
 				if (status == MB_SUCCESS && attitude_mode == MBPREPROCESS_MERGE_ASYNC && kind == attitude_async) {
 					/* extract attitude data */
 					int extract_status = mb_extract_nnav(verbose, imbio_ptr, istore_ptr, nanavmax, &kind, &nanav, atime_i, atime_d, alon, alat,
@@ -2139,7 +2204,26 @@ int main(int argc, char **argv) {
     fprintf(stderr, "     %d altitude data (mode:%d)\n", n_altitude, altitude_mode);
     fprintf(stderr, "     %d attitude data (mode:%d)\n", n_attitude, attitude_mode);
     fprintf(stderr, "     %d time_latency data (mode:%d)\n", time_latency_num, time_latency_mode);
+    if (nav_async_reson7k3_auto || sensordepth_async_reson7k3_auto || heading_async_reson7k3_auto
+        || attitude_async_reson7k3_auto)
+      fprintf(stderr, "Record kinds chosen as sources: navigation:%d sensordepth:%d heading:%d attitude:%d\n",
+              nav_async, sensordepth_async, heading_async, attitude_async);
     fprintf(stderr, "-----------------------------------------------\n");
+  }
+
+  /* Reson 7k data: warn if none of the records searched for a value were found */
+  if ((nav_async_reson7k3_auto && n_nav == 0) || (sensordepth_async_reson7k3_auto && n_sensordepth == 0)
+      || (heading_async_reson7k3_auto && n_heading == 0) || (attitude_async_reson7k3_auto && n_attitude == 0)) {
+    fprintf(stderr, "\nWarning: no asynchronous");
+    if (nav_async_reson7k3_auto && n_nav == 0)
+      fprintf(stderr, " navigation (records 1015, 1003)");
+    if (sensordepth_async_reson7k3_auto && n_sensordepth == 0)
+      fprintf(stderr, " sensordepth (records 1015, 1008)");
+    if (heading_async_reson7k3_auto && n_heading == 0)
+      fprintf(stderr, " heading (records 1015, 1016, 1013, 1004)");
+    if (attitude_async_reson7k3_auto && n_attitude == 0)
+      fprintf(stderr, " attitude (records 1016, 1012, 1004)");
+    fprintf(stderr, "\nfound in the input; give these data with the --*-file options\n");
   }
 
   /* end first pass through data */
