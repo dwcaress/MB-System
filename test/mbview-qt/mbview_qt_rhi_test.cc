@@ -89,8 +89,10 @@
  *        backend with the same script, where the legacy OpenGL drawing is
  *        built (77, skipped, elsewhere); WxH is the window size given to
  *        mbview (640x480); --gis N adds a GIS layer of N synthetic polyline
- *        parts of 20 to 100 points each (a fixed seed, steps of one grid
- *        cell; N at most 100,000) inside the grid
+ *        parts of 20 to 100 points each (a fixed seed, steps of the larger
+ *        cell size; N at most 100,000) inside the grid after the map's first
+ *        complete frame, as mbgrdviz adds a GIS file, and reports the time
+ *        to the first complete frame with it
  *   mbview_qt_rhi_test --bench-soundings n [--frames n] [--point-size p]
  *        [--files k] [--order pings|tiles]   frame times of the
  *        3D soundings view with n synthetic soundings (needs a display, not
@@ -4420,10 +4422,11 @@ void permute_sdg(std::vector<struct mb3dsoundings_sounding_struct> *soundings, s
    several lines over one area (the soundings bench's --files): file f holds
    the pings p with p % files == f, the array runs file by file, and the
    pings are numbered from 0 in each file, as mbeditviz numbers them. The
-   soundings change places only (in place). iprofile stays make_sdg()'s
-   ping number, unlike mbeditviz (0 or 1 in a ping), so no profile pair can
-   join two files here: a test of pairs across a file boundary needs its
-   own numbers. One file leaves the soundings as they are */
+   soundings are moved in place (no second copy); of their fields, only the
+   file and ping numbers change. iprofile stays make_sdg()'s ping number,
+   unlike mbeditviz (0 or 1 in a ping), so no profile pair can join two
+   files here: a test of pairs across a file boundary needs its own
+   numbers. One file leaves the soundings as they are */
 void split_sdg_files(int npings, int nbeams, int files) {
   if (files <= 1)
     return;
@@ -4439,6 +4442,19 @@ void split_sdg_files(int npings, int nbeams, int files) {
       }
   permute_sdg(&sdg_storage, &order);
   sdg_data.soundings = sdg_storage.data();
+}
+
+/* the row of the array that holds make_sdg()'s ping after
+   split_sdg_files() into files: the pings of the files before its own,
+   (npings - f + files - 1) / files in file f, then its place in its file;
+   the ping itself with one file */
+size_t sdg_ping_row(int npings, int files, int ping) {
+  if (files <= 1)
+    return static_cast<size_t>(ping);
+  size_t row = static_cast<size_t>(ping / files);
+  for (int file = 0; file < ping % files; file++)
+    row += static_cast<size_t>((npings - file + files - 1) / files);
+  return row;
 }
 
 /* 7a: the soundings in a spatially coherent order, to compare with ping
@@ -4866,11 +4882,13 @@ void model_profile_frame() {
 
 /* 7a: the soundings bench's files overlap in space: each file's pings span
    the area, the array runs file by file with the pings numbered from 0 in
-   each file, and every sounding is the one of a single file but for its
-   file and ping numbers; one file changes nothing */
-void model_split_files() {
+   each file, every sounding is equal to make_sdg()'s sounding of its ping
+   and beam but for its file and ping numbers, and sdg_ping_row() finds
+   make_sdg()'s pings in the array; one file changes nothing. Checked on 120
+   pings in 3 files and on 122 pings in 4 files (31, 31, 30 and 30 pings) */
+void model_split_files(int npings, int files) {
   using Sounding = struct mb3dsoundings_sounding_struct;
-  const int npings = 120, nbeams = 50, files = 3;
+  const int nbeams = 50;
   make_sdg(npings, nbeams, 7);
   const std::vector<Sounding> one = sdg_storage;
   split_sdg_files(npings, nbeams, 1);
@@ -4882,7 +4900,21 @@ void model_split_files() {
   for (size_t k = 0; unchanged && k < one.size(); k++)
     unchanged = fields(sdg_storage[k]) == fields(one[k]) && sdg_storage[k].ifile == 0 &&
                 sdg_storage[k].iping == one[k].iping;
+  /* make_sdg()'s ping p and beam b at row sdg_ping_row(npings, k, p) of the
+     array with k files (make_sdg() numbers iprofile by ping) */
+  const auto rows_at = [&](int k) {
+    bool at = true;
+    for (int p = 0; at && p < npings; p++)
+      for (int b = 0; at && b < nbeams; b++) {
+        const size_t row = sdg_ping_row(npings, k, p) * nbeams + b;
+        at = row < sdg_storage.size() && sdg_storage[row].iprofile == p && sdg_storage[row].ibeam == b;
+      }
+    return at;
+  };
+  bool rows = rows_at(1);
+  make_sdg(npings, nbeams, 7);
   split_sdg_files(npings, nbeams, files);
+  rows = rows && rows_at(files);
   /* every sounding once: make_sdg() numbers iprofile by ping */
   bool same = sdg_storage.size() == one.size();
   std::vector<int> seen(one.size(), 0);
@@ -4892,17 +4924,25 @@ void model_split_files() {
     same = at < one.size() && seen[at]++ == 0 && fields(s) == fields(one[at]);
   }
   /* file by file, the pings of a file numbered 0, 1, ... with all their
-     beams, each file reaching both ends of the area (each part found on its
-     own, so that a failing one leaves the others as they are) */
-  bool runs = true, spans = true;
-  std::vector<int> pings(files, 0);
-  const size_t per_file = sdg_storage.size() / files;
+     beams (counted from where the file begins); file f holds the pings p
+     with p % files == f, (npings - f + files - 1) / files of them; each file
+     spans at least 90 % of the area along the pings, which holds while
+     files is at most about npings / 20 (npings / 10 where files divides
+     npings); each part found on its own, so that a failing one leaves the
+     others as they are */
+  bool runs = true, labels = true, sizes = true, spans = true;
+  std::vector<size_t> held(files, 0);
+  size_t within = 0;
   for (size_t k = 0; k < sdg_storage.size(); k++) {
     const Sounding &s = sdg_storage[k];
+    if (k > 0 && s.ifile != sdg_storage[k - 1].ifile)
+      within = 0;
     runs = runs && s.ifile >= 0 && s.ifile < files && (k == 0 || s.ifile >= sdg_storage[k - 1].ifile) &&
-           s.iping == static_cast<int>(k % per_file / nbeams) && s.ibeam == static_cast<int>(k % nbeams);
+           s.iping == static_cast<int>(within / nbeams) && s.ibeam == static_cast<int>(within % nbeams);
+    labels = labels && s.ifile == s.iprofile % files && s.iping == s.iprofile / files;
     if (s.ifile >= 0 && s.ifile < files)
-      pings[s.ifile] = std::max(pings[s.ifile], s.iping + 1);
+      held[s.ifile]++;
+    within++;
   }
   std::string counts;
   for (int file = 0; file < files; file++) {
@@ -4913,20 +4953,25 @@ void model_split_files() {
         yhi = std::max(yhi, s.y);
       }
     spans = spans && yhi - ylo >= 0.9 * (sdg_data.ymax - sdg_data.ymin);
-    counts += (file > 0 ? ", " : "") + std::to_string(pings[file]);
+    sizes = sizes && held[file] == static_cast<size_t>((npings - file + files - 1) / files) * nbeams;
+    counts += (file > 0 ? ", " : "") + std::to_string(held[file] / nbeams);
   }
-  check(unchanged && same && runs && spans,
-        "7a: the soundings bench's --files " + std::to_string(files) + " puts the " + std::to_string(npings) +
+  const std::string nfiles = std::to_string(files);
+  check(unchanged && same && runs && labels && sizes && spans && rows,
+        "7a: the soundings bench's --files " + nfiles + " puts the " + std::to_string(npings) +
             " pings into files of " + counts + " pings that overlap in space (each spans the area: " +
-            (spans ? "yes" : "no") + "), the array file by file with the pings numbered from 0 in each (" +
-            (runs ? "yes" : "no") + "), each sounding once and unchanged but for its file and ping (" +
-            (same ? "yes" : "no") + "); one file leaves them as they are (" + (unchanged ? "yes" : "no") + ")");
+            (spans ? "yes" : "no") + "), file f holding the pings p with p % " + nfiles + " == f (" +
+            (labels ? "yes" : "no") + "; the sizes that p % " + nfiles + " gives: " + (sizes ? "yes" : "no") +
+            "), the array file by file with the pings numbered from 0 in each (" + (runs ? "yes" : "no") +
+            "), each sounding once and unchanged but for its file and ping (" + (same ? "yes" : "no") +
+            "), every ping and beam at the row sdg_ping_row() gives, with one file and with " + nfiles + " (" +
+            (rows ? "yes" : "no") + "); one file leaves them as they are (" + (unchanged ? "yes" : "no") + ")");
 }
 
 /* 7a: the soundings bench's tile order hands over the soundings of ping
    order, each once and unchanged (the same count, the same multiset of
    ids, positions, colours and flags), sorted by tile and shuffled inside the
-   tiles, in the same order in every run */
+   tiles, in the same order in a second run */
 void model_tile_order() {
   using Sounding = struct mb3dsoundings_sounding_struct;
   const int npings = 120, nbeams = 50;
@@ -4947,13 +4992,24 @@ void model_tile_order() {
   std::sort(sorted_tiles.begin(), sorted_tiles.end(), less);
   const bool multiset = sorted_pings.size() == sorted_tiles.size() &&
                         std::equal(sorted_pings.begin(), sorted_pings.end(), sorted_tiles.begin(), same);
-  /* the tiles of make_sdg()'s bounds in row-major order never go back along
-     the array, and inside a tile some sounding comes before one that came
-     before it in the array handed over, which runs by file, ping and beam
-     (shuffled: the counting sort alone keeps that order inside a tile) */
+  /* the tiles as the sort cuts them (64 x 64 of the x and y bounds of the
+     soundings handed over, with its factor 0.999999; written out here, not
+     taken from the sort) in row-major order never go back along the array,
+     and inside a tile some sounding comes before one that came before it in
+     the array handed over, which runs by file, ping and beam (shuffled: the
+     counting sort alone keeps that order inside a tile) */
+  double lo[2] = {1.0e30, 1.0e30}, hi[2] = {-1.0e30, -1.0e30};
+  for (const Sounding &s : pings) {
+    lo[0] = std::min(lo[0], s.x);
+    hi[0] = std::max(hi[0], s.x);
+    lo[1] = std::min(lo[1], s.y);
+    hi[1] = std::max(hi[1], s.y);
+  }
+  const double sx = 64.0 / std::max(1.0e-6, hi[0] - lo[0]) * 0.999999;
+  const double sy = 64.0 / std::max(1.0e-6, hi[1] - lo[1]) * 0.999999;
   const auto cell = [&](const Sounding &s) {
-    const int bx = std::min(63, static_cast<int>((s.x - sdg_data.xmin) / (sdg_data.xmax - sdg_data.xmin) * 64.0));
-    const int by = std::min(63, static_cast<int>((s.y - sdg_data.ymin) / (sdg_data.ymax - sdg_data.ymin) * 64.0));
+    const int bx = std::min(63, static_cast<int>((s.x - lo[0]) * sx));
+    const int by = std::min(63, static_cast<int>((s.y - lo[1]) * sy));
     return by * 64 + bx;
   };
   bool sorted = true, shuffled = false;
@@ -4976,9 +5032,14 @@ void model_tile_order() {
 }
 
 /* 7a: each renderer times its create() into RenderStats::create_ms: -1
-   before a renderer was made, set (0 or more) after the first frame of the
-   map, profile and soundings renderers, again by a renderer made anew after
-   release(), and by a create() that failed */
+   before a renderer was made, set after the first frame of the map, profile
+   and soundings renderers, and again by a renderer made anew after
+   release(), which counts only the frames of the call after release()
+   (last_frames()) and draws what the first one drew; at least 0.01 ms, since
+   the shaders are loaded and the pipelines made inside the time. A create()
+   that fails after its first resources (RenderOptions::fail_create, in
+   make_fixed()) is timed too; so is the return for a QRhi without
+   instancing, which Null and Metal cannot reach (checked by reading only) */
 void null_create_time() {
   Grid grid;
   size_t instance = MBV_NO_WINDOW;
@@ -5007,18 +5068,23 @@ void null_create_time() {
     renderer.release();
     const bool again = kind.frame(renderer);
     const mbvq::RenderStats remade = renderer.stats();
-    check(before == -1.0 && drawn && !first.failed && first.create_ms >= 0.0 && again && !remade.failed &&
-              remade.create_ms >= 0.0,
+    const bool anew = remade.frames == renderer.last_frames() && remade.draws == first.draws &&
+                      remade.soundings_drawn == first.soundings_drawn && remade.resources == first.resources;
+    check(before == -1.0 && drawn && !first.failed && first.create_ms >= 0.01 && again && !remade.failed &&
+              remade.create_ms >= 0.01 && anew,
           std::string("7a Null: the ") + kind.name + " renderer's create() time is -1 before it is made (" +
               text("%.0f", before) + "), set after its first frame (" + text("%.3f ms", first.create_ms) +
-              ") and by a renderer made anew after release() (" + text("%.3f ms", remade.create_ms) + ")");
+              ") and by a renderer made anew after release() (" + text("%.3f ms", remade.create_ms) + "; its frames " +
+              std::to_string(remade.frames) + " of " + std::to_string(renderer.last_frames()) +
+              ", the same draws, soundings and resources: " + (anew ? "yes" : "no") + ")");
   }
   mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
   options.fail_create = true;
   const bool drawn = renderer.render_map(instance, 320, 240, options, nullptr);
   const mbvq::RenderStats failed = renderer.stats();
   check(!drawn && failed.failed && failed.create_ms >= 0.0,
-        "7a Null: a create() that fails is timed too (" + text("%.3f ms", failed.create_ms) + ")");
+        "7a Null: a create() that fails after its first resources (RenderOptions::fail_create, in make_fixed()) is "
+        "timed too (" + text("%.3f ms", failed.create_ms) + ")");
   int error = MB_ERROR_NO_ERROR;
   mb3dsoundings_end(0, &error);
   mbvq_c_profile_show(instance, false);
@@ -6299,8 +6365,9 @@ int test_model() {
   model_soundings_plan();
   model_soundings_frame();
   model_profile_frame();
-  /* 7a: the soundings bench's files and tile order */
-  model_split_files();
+  /* 7a: the soundings bench's files (also of unequal sizes) and tile order */
+  model_split_files(120, 3);
+  model_split_files(122, 4);
   model_tile_order();
   return result();
 }
@@ -9610,7 +9677,10 @@ void report_levels(const char *scenario, const FrameProbe &probe, const std::vec
    time, which the next frame reports, and the lattice nodes whose positions
    or colours the frame gathered, with the preparation and gathering per
    node; and (7a) the bytes the frame wrote into the uniform ring and into
-   the batch's buffers, its draws and its uniform slots. */
+   the batch's buffers (those queued for its five buffers: 0 for a batch
+   reused or empty; not the contours, the marker meshes or a rewrite of the
+   stipple values alone), its draws (draw items, the terrain once whatever
+   its tiles) and its uniform slots. */
 void report_frames(const char *scenario, const FrameProbe &probe, const std::vector<size_t> &indices, bool rhi) {
   std::vector<double> frame, by_rez[4], paint, paint_event, after_paint, render, fill, marks, prepare, gather, upload,
       record, gpu, before_render, after_render, beyond_gpu, nodes_k, prepare_ns, gather_ns, ring_mb, batch_mb, draws,
@@ -9659,8 +9729,8 @@ void report_frames(const char *scenario, const FrameProbe &probe, const std::vec
        RGBA8 colours); every tile gathered was prepared */
     if (i > 0 && probe.frames[i - 1].stats.frames + 1 == f.stats.frames) {
       const mbvq::RenderStats &before = probe.frames[i - 1].stats;
-      /* the batch's bytes written in this frame: its running total since
-         the renderer's frame before (7a) */
+      /* the bytes queued for the batch's buffers in this frame: their
+         running total since the renderer's frame before (7a) */
       if (f.stats.batch_bytes >= before.batch_bytes)
         batch_mb.push_back(static_cast<double>(f.stats.batch_bytes - before.batch_bytes) / 1048576.0);
       double nodes = 0.0;
@@ -9921,13 +9991,20 @@ long add_navigation(size_t instance, const char *list) {
 
 /* 7a: a synthetic GIS layer of one polyline of parts of 20 to 100 points
    each (--gis), as a shapefile's lines would be: random walks inside the
-   grid's bounds, steps of one grid cell (so that the core's draping, a
-   point at every grid line a segment crosses, gives about the same number
-   of points per part on every grid), from a fixed seed (std::mt19937's
-   numbers taken as they are, so the layer is the same with every C++
-   library), draped on the grid and drawn as an overlay of the map, each
-   part a line strip; the points added (0 if the layer could not be), and
-   in *draped the draped points the core keeps for them */
+   grid's bounds with steps of the larger cell size, so that a step
+   typically crosses one or two grid lines. The core keeps both ends of each
+   draped segment and a point at each crossing whose two nodes have data,
+   so the draped points per part depend on the cell shape and on the nodes
+   without data (2.4 to 2.6 per point on em122_ref_clean, auv_topo and
+   grid_geo); on em122_ref_clean about 45 % of the walk points lie over
+   cells without data, which the core draws at the top of the depth range
+   in 3D. From a fixed seed (std::mt19937's numbers taken as they are, so the
+   random numbers are the same with every C++ library; the coordinates may
+   differ in the last bit with another libm or FMA contraction, and the
+   draped points a little: on grid_utm 143,442 on macOS, 143,376 on Ubuntu
+   26.04), draped on the grid and drawn as an overlay of the map, each part
+   a line strip; the points added (0 if the layer could not be), and in
+   *draped the draped points the core keeps for them */
 long add_gis(size_t instance, int parts, long *draped) {
   *draped = 0;
   const struct mbview_struct *data = data_of(instance);
@@ -9992,21 +10069,6 @@ int bench(bool mode3d, const char *grdfile, int steps, int width, int height, co
   const double opened = bench_ms();
   if (navlist != nullptr)
     std::printf("info\tnavigation\t%ld points from %s\n", add_navigation(instance, navlist), navlist);
-  /* the GIS layer's build is left out of the open figures of the paints
-     after it, as the soundings bench leaves out its sort */
-  double layer_ms = 0.0, layer_at = 1.0e30;
-  if (gis_parts > 0) {
-    const double building = bench_ms();
-    long draped = 0;
-    const long points = add_gis(instance, gis_parts, &draped);
-    std::printf("info\tgis\t%d parts, %ld points in one polyline of a GIS layer, %ld points draped on the grid, built "
-                "in %.0f ms (left out of the open figures)\n",
-                gis_parts, points, draped, bench_ms() - building);
-    report_memory("gis layer made");
-    layer_at = bench_ms();
-    layer_ms = layer_at - building;
-  }
-  const auto since_opening = [&](double at) { return at - opening - (at >= layer_at ? layer_ms : 0.0); };
   QWidget *view = mbvq::map_view(instance);
   if (view == nullptr || !probe.attached) {
     std::printf("bench: no map view, or no frame signal on it\n");
@@ -10054,8 +10116,7 @@ int bench(bool mode3d, const char *grdfile, int steps, int width, int height, co
   for (const BenchFrame &f : paints) {
     std::printf("info\topen paint\tat %.1f ms, submitted %s, resolution %d, renderer frame %d, render %.1f ms, tiles "
                 "waiting %d\n",
-                since_opening(f.paint), f.submitted < 0.0 ? "never" : text("%.1f ms", since_opening(f.submitted)).c_str(),
-                f.rez,
+                f.paint - opening, f.submitted < 0.0 ? "never" : text("%.1f ms", f.submitted - opening).c_str(), f.rez,
                 f.stats.frames, f.stats.render_ms, f.stats.tiles_waiting);
     if (f.stats.frames > rendered) {
       const mbvq::RenderStats &s = f.stats;
@@ -10067,10 +10128,9 @@ int bench(bool mode3d, const char *grdfile, int steps, int width, int height, co
   }
   report("open", "open_grid", {opened - opening});
   report("open", "first",
-         probe.frames.empty() ? std::vector<double>() : std::vector<double>{since_opening(probe.frames[0].submitted)});
+         probe.frames.empty() ? std::vector<double>() : std::vector<double>{probe.frames[0].submitted - opening});
   report("open", "complete",
-         done < probe.frames.size() ? std::vector<double>{since_opening(probe.frames[done].submitted)}
-                                    : std::vector<double>());
+         done < probe.frames.size() ? std::vector<double>{probe.frames[done].submitted - opening} : std::vector<double>());
   if (rhi)
     std::printf("info\topen sums\trender %.1f, fill %.1f, marks %.1f, prepare %.1f, gather %.1f, upload %.1f, record "
                 "%.1f ms in %d renderer frames\n",
@@ -10084,9 +10144,53 @@ int bench(bool mode3d, const char *grdfile, int steps, int width, int height, co
                 "triangles\n",
                 static_cast<double>(s.bytes_positions) / 1048576.0, static_cast<double>(s.bytes_colours) / 1048576.0,
                 static_cast<double>(s.bytes_indices) / 1048576.0, s.tiles, s.tiles_drawn, s.triangles);
-    std::printf("info\trenderer\tcreate() %.2f ms; the last frame %d draws (%d thin, %d wide, %d markers), %d uniform "
-                "slots\n",
-                s.create_ms, s.draws, s.thin_draws, s.wide_draws, s.marker_draws, s.uniform_slots);
+  }
+  /* the GIS layer (7a), added to the map that is shown, as mbgrdviz adds a
+     GIS file, so that the open figures are the map's alone: built, then
+     drawn after a plot request (the core's add functions ask for none;
+     mbgrdviz's mbview_update() also colours and z-scales the grid again),
+     with the times from the request to the first frame and to the first
+     complete frame (under the legacy backend the background work's full
+     plot), and the memory after it */
+  size_t shown = done;
+  if (gis_parts > 0) {
+    const double building = bench_ms();
+    long draped = 0;
+    const long points = add_gis(instance, gis_parts, &draped);
+    if (points == 0 || draped == 0) {
+      std::printf("bench: the GIS layer %s\n", points == 0 ? "could not be made" : "drapes no point");
+      return 1;
+    }
+    std::printf("info\tgis\t%d parts, %ld points in one polyline of a GIS layer, %ld points draped on the grid, built "
+                "in %.0f ms\n",
+                gis_parts, points, draped, bench_ms() - building);
+    report_memory("gis layer made");
+    const size_t before = probe.frames.size();
+    const double asked = bench_ms();
+    mbview_plotlowhigh(instance);
+    /* a frame first: until then the open's last frame, which is complete,
+       would end settle() */
+    const bool drawn =
+        wait_for(probe, [&] { return probe.frames.size() > before; }, 20000) && settle(probe, rhi, 300000);
+    shown = first_complete(probe, before, rhi);
+    std::printf("info\tgis\tfirst frame with the layer %s, first complete frame with it %s after the plot request "
+                "(settled %d)\n",
+                before < probe.frames.size() ? text("%.1f ms", probe.frames[before].submitted - asked).c_str() : "none",
+                shown < probe.frames.size() ? text("%.1f ms", probe.frames[shown].submitted - asked).c_str() : "none",
+                drawn ? 1 : 0);
+    report_memory("gis layer drawn");
+  }
+  if (rhi) {
+    /* the renderer's create(), and the draws of the first complete frame
+       (with a GIS layer, the first with the layer); the view's last frame
+       if none was complete */
+    const bool complete_frame = shown < probe.frames.size();
+    const mbvq::RenderStats s = complete_frame ? probe.frames[shown].stats : mbvq::view_stats(view);
+    std::printf("info\trenderer\tcreate() %.2f ms; %s %d draws (%d thin, %d wide, %d markers, %d other: the terrain "
+                "once, triangles, points), %d uniform slots\n",
+                s.create_ms, complete_frame ? "the first complete frame" : "the last frame (no complete frame)",
+                s.draws, s.thin_draws, s.wide_draws, s.marker_draws,
+                s.draws - s.thin_draws - s.wide_draws - s.marker_draws, s.uniform_slots);
   }
 
   const int warmup = 5;
@@ -10125,18 +10229,20 @@ int bench(bool mode3d, const char *grdfile, int steps, int width, int height, co
    position marks; without a program's bias notify, so the view's own costs
    only), a rotation with all profiles shown, and last an erase drag with
    all profiles shown (along other pings than the first erase drag, so that
-   it erases soundings too; 7a). The soundings window's point size, the
-   files the pings are split into and the tile order of the soundings (only
-   the rotation and the exaggeration drag then: tile order breaks the
-   profile pairs and the erase drag's search by ping and beam) as the
-   options ask (7a). Each step is a motion (or
+   it erases soundings too, with the default 60 steps and 100,000 soundings
+   or more; 7a). The soundings window's point size, the files the pings are
+   split into and the tile order of the soundings (only the rotation and the
+   exaggeration drag then: tile order breaks the profile pairs and the erase
+   drag's search by ping and beam, and the bias changes are left out too) as
+   the options ask (7a). Each step is a motion (or
    a bias change) sent, then the wait for the view's next frame (latency),
    and under QRhi also for the frames that complete the writes it started
    (complete); per step the renderer's phases of its first frame and,
    summed over all its frames, step_render to step_record (7a), the GPU time
-   of the frame (which the next frame reports), the writes and the malloc
-   heap and footprint. Output as --bench: "bench scenario metric n median
-   p95 max" and "values" lines. A measurement, not a test. */
+   of a step's last frame (which the first frame of the next step reports),
+   the writes and the malloc heap and footprint. Output as --bench: "bench
+   scenario metric n median p95 max" and "values" lines. A measurement, not
+   a test. */
 int bench_soundings(int count, int steps, double point_size, int files, bool tiles) {
   const bool rhi = mbvq::backend() == mbvq::Backend::Rhi;
   std::printf("info\tbackend\t%s\n", rhi ? "QRhi" : "OpenGL");
@@ -10152,7 +10258,11 @@ int bench_soundings(int count, int steps, double point_size, int files, bool til
   opening.start();
   make_sdg(pings, beams, 23);
   /* the split into files and the sort are left out of the time to the
-     first complete frame, so that every number of files and order compare */
+     first complete frame, so that every number of files and order compare;
+     the memory lines are not corrected for them: their freed vectors (8 and
+     12 bytes per sounding) stay resident on macOS and serve later
+     allocations, so memory compares only within one setting of --files and
+     --order */
   qint64 sort_ms = 0;
   if (files > 1 || tiles) {
     QElapsedTimer sorting;
@@ -10222,8 +10332,8 @@ int bench_soundings(int count, int steps, double point_size, int files, bool til
   next_frame(0, 120000);
   complete(120000);
   const mbvq::RenderStats first = mbvq::view_stats(view);
-  std::printf("info\topen\t%d soundings, first complete frame %.0f ms after the soundings were handed over "
-              "(view %d x %d logical px, ratio %.2f; %d chunks, %d shown)\n",
+  std::printf("info\topen\t%d soundings, first complete frame %.0f ms after making the soundings began (their split "
+              "and sort left out; view %d x %d logical px, ratio %.2f; %d chunks, %d shown)\n",
               sdg_data.num_soundings, static_cast<double>(opening.elapsed() - sort_ms), view->width(), view->height(),
               view->devicePixelRatioF(), first.sounding_chunks, first.soundings_shown);
   if (rhi) {
@@ -10250,16 +10360,20 @@ int bench_soundings(int count, int steps, double point_size, int files, bool til
     QMouseEvent event(type, at, view->mapToGlobal(at), button, buttons, Qt::NoModifier);
     QApplication::sendEvent(view, &event);
   };
-  /* the erase drag goes along pings across the middle of the data, so that
-     every motion erases soundings: from the first to the last beam of a
-     ping, the next motions along the pings after it */
+  /* the erase drag goes along make_sdg()'s pings across the middle of the
+     data (through sdg_ping_row() with several files), from the first to the
+     last beam of a ping, the next motions along the pings after it, so that
+     its motions erase soundings. With several million soundings the data
+     are only a few tens of physical px wide: the new part of the erase
+     circle of the last one or two motions along a ping lies outside them,
+     and those motions erase nothing (counted as unchanged) */
   const auto ping_end = [&](int ping, int beam) {
     int error = MB_ERROR_NO_ERROR;
     mb3dsoundings_screen_positions(0, &error);
     const double ratio = view->devicePixelRatioF();
     const int height = static_cast<int>(std::lround(view->height() * ratio));
     const struct mb3dsoundings_sounding_struct &sounding =
-        sdg_storage[static_cast<size_t>(ping) * beams + static_cast<size_t>(beam)];
+        sdg_storage[sdg_ping_row(pings, files, ping) * beams + static_cast<size_t>(beam)];
     return QPointF(sounding.winx / ratio, (height - 1 - sounding.winy) / ratio);
   };
   struct Scenario {
@@ -10276,18 +10390,22 @@ int bench_soundings(int count, int steps, double point_size, int files, bool til
                                 {"erase_profiles", Qt::LeftButton, MBS_EDIT_ERASE, MBS_VIEW_PROFILES_ALL}};
   /* the end lines: after rotate_profiles, where 6e's five scenarios end, so
      that they compare with 6e's; after erase_profiles again under keys of
-     their own (7a); in tile order after its two scenarios */
+     their own (7a); in tile order after its two scenarios, under the keys
+     "end tiles" and "after tiles", the profile lines not shown */
   const auto report_end = [&](const char *key, const char *when) {
     const mbvq::RenderStats last = mbvq::view_stats(view);
     if (rhi)
       std::printf("info\t%s\tGPU bytes of the soundings' buffers %.1f MB (every copy), swaps %d, allocations %d, "
                   "profile lines %s\n",
                   key, static_cast<double>(last.sounding_held_bytes) / 1048576.0, last.sounding_swaps,
-                  last.sounding_allocations, last.profile_wide ? "wide" : "thin");
+                  last.sounding_allocations, tiles ? "not shown" : last.profile_wide ? "wide" : "thin");
     report_memory(when);
   };
   for (const Scenario &scenario : scenarios) {
-    /* tile order: the rotation and the exaggeration drag only */
+    /* tile order: the rotation and the exaggeration drag only. The bias
+       changes would run (they use neither the profile pairs nor a search by
+       ping, and the bench sets no bias notify) but are left out too, so the
+       orders are compared on the two drags only */
     if (tiles && (scenario.profiles != MBS_VIEW_PROFILES_NONE ||
                   (scenario.button != Qt::MiddleButton && scenario.button != Qt::RightButton)))
       continue;
@@ -10306,7 +10424,12 @@ int bench_soundings(int count, int steps, double point_size, int files, bool til
     std::vector<double> stream_mb[4];
     /* the phases summed over every renderer frame of a step, its first and
        those that complete its writes, which can span frames (7a); frames
-       that came between two readings are counted, not summed */
+       that came between two readings are counted, not summed. On Metal a
+       frame's record also copies earlier writes into the buffers of its
+       frame slot (RenderStats::record_ms), so step_record holds one copy of
+       each byte written in a step of one frame and two in a step of several
+       frames, part of them the step before's writes; in the erase drag with
+       profiles at ratio 1 that is most of the step's record, not all */
     std::vector<double> step_phase[6];
     int phase_frames = 0, phase_missed = 0;
     int timeouts = 0, unchanged = 0;
@@ -10314,7 +10437,7 @@ int bench_soundings(int count, int steps, double point_size, int files, bool til
     const int first_ping = std::max(0, pings / 4);
     /* the erase drag with profiles goes along the pings mirrored about the
        middle ping, so that it erases soundings the erase drag before it did
-       not reach (with the default 60 steps) */
+       not reach (with the default 60 steps and 100,000 soundings or more) */
     const auto erase_ping = [&](int ping) {
       return scenario.profiles == MBS_VIEW_PROFILES_NONE ? ping : pings - 1 - ping;
     };
@@ -10385,6 +10508,8 @@ int bench_soundings(int count, int steps, double point_size, int files, bool til
         record.push_back(after_first.record_ms);
         for (int p = 0; p < 6; p++)
           step_phase[p].push_back(sums[p]);
+        /* a step assumes one renderer; a new one would restart the frame
+           count and the totals (no run made one) */
         const mbvq::RenderStats after = mbvq::view_stats(view);
         size_t bytes = 0;
         for (int stream = 0; stream < 4; stream++) {
@@ -10435,7 +10560,7 @@ int bench_soundings(int count, int steps, double point_size, int files, bool til
       report_end("end", "end");
   }
   if (tiles)
-    report_end("end", "end");
+    report_end("end tiles", "after tiles");
   else
     report_end("end erase_profiles", "after erase_profiles");
   int error = MB_ERROR_NO_ERROR;
@@ -10461,14 +10586,14 @@ int main(int argc, char **argv) {
   bool maps_only = false;
   bool arguments = true;
   const bool soundings_bench = std::strcmp(mode, "--bench-soundings") == 0;
-  /* the options of the benches (7a): recognised in every mode, so that
-     neither an option nor its value is taken for the grid, and refused
-     outside their bench or without a valid value */
+  /* the options of the benches (7a): recognised in every mode; in their
+     bench neither the option nor its value is taken for the grid; outside
+     it, or without a valid value, they are refused (the usage line, exit 2) */
   double point_size = 0.0;
   int files = 1;
   bool tiles = false;
   int gis_parts = 0;
-  for (int i = quit || std::strcmp(mode, "--bench-soundings") == 0 ? 3 : 2; i < argc; i++) {
+  for (int i = quit || soundings_bench ? 3 : 2; i < argc; i++) {
     if (std::strcmp(argv[i], "--3d") == 0)
       mode3d = true;
     else if (quit && std::strcmp(argv[i], "--maps-only") == 0)
@@ -10507,8 +10632,9 @@ int main(int argc, char **argv) {
         arguments = false;
     }
     else if (std::strcmp(argv[i], "--gis") == 0) {
-      /* at most 100,000 parts: a part took about 175 kB in a run of 1,000
-         (its draped points in the core and the batch), so about 17 GB */
+      /* at most 100,000 parts, about 17 GiB: a part takes about 160 KiB in
+         the core (1,296 bytes per point, 424 per allocated draped point), and
+         QRhi holds 12 to 17 KiB more per part than the legacy backend */
       char rest = 0;
       if (std::strcmp(mode, "--bench") != 0 || i + 1 >= argc ||
           std::sscanf(argv[++i], "%d%c", &gis_parts, &rest) != 1 || gis_parts < 1 || gis_parts > 100000)
