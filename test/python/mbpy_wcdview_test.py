@@ -44,6 +44,55 @@ class MbpyWcdviewTest(unittest.TestCase):
     self.assertIn("usage: mbpy_wcdview", result.stderr)
 
   @unittest.skipUnless(HAVE_GUI, "PySide6 and matplotlib not installed")
+  def test_redraws_keep_one_colour_bar(self):
+    """Every redraw (slider step, replay tick, check box, spin box) updates the one colour bar,
+    so that the earlier swath images are freed: a new colour bar per redraw kept all the earlier
+    ones and their images alive, and the 985th redraw raised RecursionError."""
+    os.environ["QT_QPA_PLATFORM"] = "offscreen"
+    sys.path.insert(0, os.path.join(SOURCE, "src", "python", "wcd_viewer"))
+    import gc
+    import weakref
+    import wcd_viewer
+    from matplotlib.collections import QuadMesh
+    from matplotlib.colorbar import Colorbar
+    from PySide6.QtWidgets import QApplication
+    app = QApplication.instance() or QApplication([])
+
+    def colour_bars(w):
+      gc.collect()
+      return sum(isinstance(o, Colorbar) and o.ax is w.cax for o in gc.get_objects())
+    with tempfile.TemporaryDirectory() as tmp:
+      kmall, kmwcd = S.write_line(tmp)
+      w = wcd_viewer.MainWindow()
+      w.open_file(kmwcd)
+      image = weakref.ref(next(m for m in w.ax.collections if isinstance(m, QuadMesh)))
+      for step in range(1, 51):
+        w.on_slide(step % len(w.steps))  # the slider's slot, so that exceptions reach the test
+      self.assertEqual(colour_bars(w), 1)
+      self.assertIsNone(image(), "the swath image of the first drawing is still alive")
+      self.assertEqual(sum(isinstance(m, QuadMesh) for m in w.cax.collections), 1)
+      self.assertEqual(w.cax.get_ylabel(), "Amplitude (dB)")
+      # the colour bar follows the amplitude limits
+      w.amin.setValue(w.amin.value() + 5.0)
+      w.amax.setValue(w.amax.value() - 5.0)
+      for limit, expected in zip(w.cax.get_ylim(), (w.amin.value(), w.amax.value())):
+        self.assertAlmostEqual(limit, expected, places=6)
+      # no colour bar while a line without water column is open; the next line has it again
+      survey_only = os.path.join(tmp, "survey_only")
+      os.mkdir(survey_only)
+      only_kmall, only_kmwcd = S.write_line(survey_only)
+      os.remove(only_kmwcd)
+      w.open_file(only_kmall)
+      self.assertEqual(w.steps, [])
+      self.assertFalse(w.cax.get_visible())
+      w.open_file(kmwcd)
+      self.assertTrue(w.cax.get_visible())
+      self.assertEqual(w.cax.get_ylabel(), "Amplitude (dB)")
+      self.assertEqual(colour_bars(w), 1)
+      w.close()
+    del app
+
+  @unittest.skipUnless(HAVE_GUI, "PySide6 and matplotlib not installed")
   def test_offscreen_session(self):
     os.environ["QT_QPA_PLATFORM"] = "offscreen"
     sys.path.insert(0, os.path.join(SOURCE, "src", "python", "wcd_viewer"))

@@ -182,6 +182,7 @@ class MainWindow(QMainWindow):
         self.fig, self.ax = plt.subplots()
         self.fig.subplots_adjust(right=0.85)
         self.cax = self.fig.add_axes([0.87, 0.15, 0.03, 0.7])
+        self._cbar = None  # the colour bar, made on the first drawing
         self.canvas = FigureCanvas(self.fig)
         layout.addWidget(self.canvas, stretch=1)
         self.canvas.mpl_connect("button_press_event", self._on_plot_click)
@@ -370,7 +371,7 @@ class MainWindow(QMainWindow):
     def redraw(self):
         self.ax.clear()
         if self.line is None or not self.steps:
-            self.cax.clear()
+            self.cax.set_visible(False)  # hidden, not cleared: the colour bar is kept
             self.canvas.draw_idle()
             return
         step = min(self.current, len(self.steps) - 1)
@@ -428,8 +429,13 @@ class MainWindow(QMainWindow):
         if self.chk_wcbottom.isChecked():
             self.ax.plot(det_x, det_depth, "-", color="orange", lw=0.8)
 
-        self.cax.clear()
-        self.fig.colorbar(mesh, cax=self.cax, label="Amplitude (dB)")
+        # one colour bar, updated to each new mesh: a new colour bar in the same axes on every
+        # redraw keeps all the earlier ones, and their meshes, alive
+        if self._cbar is None:
+            self._cbar = self.fig.colorbar(mesh, cax=self.cax, label="Amplitude (dB)")
+        else:
+            self._cbar.update_normal(mesh)
+        self.cax.set_visible(True)
         d0, d1 = self.dmin.value(), self.dmax.value()
         if valid.any():
             d1 = min(d1, float(depth[valid].max()))
