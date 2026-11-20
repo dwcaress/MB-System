@@ -70,6 +70,7 @@ MULTI_BEAM = 1            # beam with a second detection in ping 0 (early in the
                           # the beams by index, most soundings would be a neighbour's)
 ROLL = 2.0                # deg, roll of the sonar (1012 records)
 TX_STEER = 0.02           # rad, transmit steering of the steered ping
+SEG_STEER = 0.03          # rad, along track transmit steering of the 7047 segment
 S7K_NAME = "20250101_120000.s7k"
 
 # the 7042 record of each ping: flags, sample rate written in the record (0: none), compression
@@ -231,9 +232,10 @@ def raw_detection(p):
 
 
 def segmented_raw_detection(p, rate=FS):
-    """7047 with one segment of sample rate rate and one detection per beam, no optional data."""
+    """7047 with one segment of sample rate rate and along track steering SEG_STEER and one
+    detection per beam, no optional data."""
     header = struct.pack("<HIHIHQIHff", 36, 1, 68, NBEAMS, 32, 0, PING0 + p, 0, SOUNDSPEED, 0.0)
-    segment = struct.pack("<HffffIffffIfffBIfBf", 1, 0.0, 0.0, 0.0, 400000.0, 0, 0.0, 0.001, 0.0175, 0.0175, 0,
+    segment = struct.pack("<HffffIffffIfffBIfBf", 1, SEG_STEER, 0.0, 0.0, 400000.0, 0, 0.0, 0.001, 0.0175, 0.0175, 0,
                           0.0, 0.0, 0.0096, 0, 0, rate, 0, 0.0)
     detections = b"".join(struct.pack("<HHffIIfff", b, 1, detect_samples(b) * rate / FS,
                                       math.radians(beam_angle(b)), 0, 3, 0.01, 100.0, 0.0) for b in range(NBEAMS))

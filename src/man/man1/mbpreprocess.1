@@ -437,6 +437,19 @@ longitude and latitude logged in the MRZ datagrams, which are the position of th
 reference point rather than of the sonar; the navigation reported by \fBMB-System\fP is the position
 of the sonar reference point derived from it. Reading kmall data without \fBmbpreprocess\fP
 leaves the logged MRZ navigation, heading, and sensor depth unchanged.
+.br
+For Teledyne Reson 7k data (format 89), each of \fB\-\-nav-async\fP, \fB\-\-sensordepth-async\fP,
+\fB\-\-heading-async\fP and \fB\-\-attitude-async\fP that is not specified is chosen from the
+records found in the data, in the order of priority used by the format 89 reader itself:
+position from Navigation records (1015, MB_DATA_NAV), else Position records (1003,
+MB_DATA_NAV1); sensor depth from Navigation records, else Depth records (1008,
+MB_DATA_SENSORDEPTH); heading from Navigation records, else Attitude records (1016,
+MB_DATA_ATTITUDE), else Heading records (1013, MB_DATA_HEADING), else Custom Attitude
+records (1004, MB_DATA_ATTITUDE2); roll, pitch and heave from Attitude records, else Roll
+Pitch Heave records (1012, MB_DATA_ATTITUDE1), else Custom Attitude records. Values from
+two record types are never mixed. As when a source is specified explicitly, the bathymetry
+is then recalculated with the merged data. A warning is printed if none of these records is
+found for a value.
 .TP
 .B --nav-sensor=\fISENSORID\fP
 If a platform file has been specified, this option defines the id of the sensor

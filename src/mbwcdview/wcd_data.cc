@@ -473,7 +473,9 @@ bool Line::load(const std::string &path, const Progress &progress, std::string *
     kmwcd = path;  // a *.all without a *.wcd may hold the water column itself
   /* other files, such as Reson 7k *.s7k files, hold the survey and the water column */
   kmall = is_kmall ? path : (is_kmwcd ? find_companion(path) : path);
-  has_survey = !kmall.empty() && load_survey(kmall, kmall == path ? format : 0, survey, message, travel_times);
+  /* a file that opens but holds no survey pings (empty or not of this format) has no survey */
+  has_survey = !kmall.empty() && load_survey(kmall, kmall == path ? format : 0, survey, message, travel_times)
+               && survey.size() > 0;
   has_wc = !kmwcd.empty() && wc.load(kmwcd, kmwcd == path ? format : 0, progress, message) && wc.size() > 0;
 
   match_.assign(has_wc ? wc.size() : 0, -1);
