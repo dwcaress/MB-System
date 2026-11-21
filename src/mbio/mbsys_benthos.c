@@ -904,7 +904,10 @@ int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mbsys_benthos_struct *store = (struct mbsys_benthos_struct *)store_ptr;
 
 	/* insert data in structure */
-	if (store->kind == MB_DATA_DATA && store->ssrawstbdsamples > 0 && store->ssrawportsamples > 0) {
+	/* a ping may hold one side only (e.g. single-channel XTF); the raw sample
+	   spacing then comes from the side that is present */
+	if (store->kind == MB_DATA_DATA && (store->ssrawstbdsamples > 0 || store->ssrawportsamples > 0)) {
+		const int rawsamples = store->ssrawportsamples > 0 ? store->ssrawportsamples : store->ssrawstbdsamples;
 		double ss[MBSYS_BENTHOS_MAXPIXELS];
 		int ss_cnt[MBSYS_BENTHOS_MAXPIXELS];
 		double ssacrosstrack[MBSYS_BENTHOS_MAXPIXELS];
@@ -919,11 +922,11 @@ int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 
 		/* get raw pixel size */
-		const double ss_spacing = store->ssrawtimeduration / store->ssrawportsamples;
+		const double ss_spacing = store->ssrawtimeduration / rawsamples;
 
 		/* get sidescan pixel size */
 		const int pixel1 = (2.0 * store->bath[0] / (store->png_computedsv * ss_spacing)) + 1;
-		const int groundsamples = store->ssrawportsamples - pixel1;
+		const int groundsamples = rawsamples - pixel1;
 
 		const double groundrange = sqrt(pow(store->ssrawslantrange, 2) - pow(store->bath[0], 2));
 
