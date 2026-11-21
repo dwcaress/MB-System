@@ -80,7 +80,11 @@ struct FrameInput {
   bool depth_test = false;   /* ... with the depth test (3D, or on the spheroid) */
   bool filled = false;       /* the batch was filled for this frame */
   int rez = MBVQ_REZ_NONE;   /* the resolution of the batch */
-  bool drag = false;         /* a map mouse button is down: the drag budget applies */
+  /* the view's press: a map mouse button down (the drag budget applies),
+     or the 3D soundings' camera press, the middle or right button down and
+     the left up (left-button edits keep every sounding); the GPU-time
+     fallback acts only during it */
+  bool drag = false;
   /* the projection alone of mbview_camera() (commands drawn without the
      camera), OpenGL's convention, column-major */
   double projection[16] = {};
@@ -304,6 +308,12 @@ class SoundingsFrame {
   /* a drawing the core asked for (defer_draw) */
   void request() { requested_ = true; }
   bool requested() const { return requested_; }
+  /* whether the view's camera press is on in the next frames (the middle
+     or right button down and the left up; SoundingsInput::frame.drag): the
+     GPU-time fallback may draw fewer soundings then (a test and the
+     offscreen renderer, which have no view, set it themselves) */
+  void set_drag(bool down) { drag_ = down; }
+  bool drag() const { return drag_; }
   /* give the core the size of the drawing in physical pixels if it differs
      from the size given last (mbvq_c_soundings_resize); true if it did */
   bool size_core(int width, int height);
@@ -361,6 +371,7 @@ class SoundingsFrame {
   int refusals_ = 0;
   bool warned_refused_ = false;
   bool warned_failed_ = false;
+  bool drag_ = false; /* the view's camera press (set_drag) */
   double fill_ms_ = 0.0;
   double marks_ms_ = 0.0;
 };

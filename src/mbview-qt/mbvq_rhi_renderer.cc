@@ -367,6 +367,8 @@ void BatchRenderer::drop_batch() {
 }
 
 bool BatchRenderer::begin_frame(const FrameInput &input) {
+  /* a painted frame whose window never submitted it is not measured */
+  paint_due_ = false;
   stats_.frames++;
   stats_.failed = false;
   stats_.frame_slot = rhi_->currentFrameSlot();
@@ -689,6 +691,7 @@ void BatchRenderer::record(QRhiCommandBuffer *cb, QSize pixels) {
   stats_.marker_draws = 0;
   stats_.point_quad_draws = 0;
   stats_.soundings_drawn = 0;
+  stats_.soundings_stride = 0;
   stats_.profile_indices = 0;
   stats_.profile_instances = 0;
   if (bindings_ == nullptr)
@@ -826,6 +829,77 @@ void BatchRenderer::set_pass_times(double upload_ms, double record_ms, double re
   stats_.gpu_ms = gpu_ms;
   stats_.render_begin_ms = begin_ms;
   stats_.render_end_ms = end_ms;
+}
+
+void BatchRenderer::frame_painted(double paint_start_ms, double paint_end_ms) {
+  paint_start_ms_ = paint_start_ms;
+  paint_wait_ms_ = std::max(0.0, paint_end_ms - stats_.render_end_ms);
+  paint_due_ = true;
+}
+
+void BatchRenderer::frame_submitted(double at_ms) {
+  /* once per painted frame: a window can submit frames this view did not
+     paint (a grab renders outside a paint, and is never submitted) */
+  if (!paint_due_)
+    return;
+  paint_due_ = false;
+  measured(paint_wait_ms_, std::max(0.0, at_ms - paint_start_ms_));
+}
+
+void BatchRenderer::offscreen_ended(double start_ms, double end_ms) {
+  /* Null and OpenGL do not wait for the GPU there: a frame is measured
+     only while a fake time is set, with its own times (the fake values
+     replace them in the rule's input only, measured()) */
+  const QRhi::Implementation api = rhi_->backend();
+  const bool waits = api == QRhi::Metal || api == QRhi::Vulkan || api == QRhi::D3D12;
+  if (!waits && options_.gpu_wait_ms < 0.0 && options_.gpu_total_ms < 0.0)
+    return;
+  measured(std::max(0.0, end_ms - stats_.render_end_ms), std::max(0.0, end_ms - start_ms));
+}
+
+void BatchRenderer::measured(double wait_ms, double total_ms) {
+  stats_.wait_ms = wait_ms;
+  stats_.frame_ms = total_ms;
+  stats_.wait_frames++;
+  /* a fake wait takes the measured one's place, also in the total */
+  double wait = wait_ms;
+  double total = total_ms;
+  if (options_.gpu_wait_ms >= 0.0) {
+    total = total - wait_ms + options_.gpu_wait_ms;
+    wait = options_.gpu_wait_ms;
+  }
+  if (options_.gpu_total_ms >= 0.0)
+    total = options_.gpu_total_ms;
+  feed_gpu(wait, total);
+}
+
+bool BatchRenderer::gpu_rule() const {
+  WaitApi api = WaitApi::Null;
+  switch (rhi_->backend()) {
+  case QRhi::Metal:
+    api = WaitApi::Metal;
+    break;
+  case QRhi::Vulkan:
+    api = WaitApi::Vulkan;
+    break;
+  case QRhi::D3D12:
+    api = WaitApi::Direct3D12;
+    break;
+  case QRhi::D3D11:
+    api = WaitApi::Direct3D11;
+    break;
+  case QRhi::OpenGLES2:
+    api = WaitApi::OpenGL;
+    break;
+  default:
+    break;
+  }
+  return gpu_wait_counts(api, options_.gpu_wait_ms >= 0.0 || options_.gpu_total_ms >= 0.0);
+}
+
+bool BatchRenderer::uploads_in_wait() const {
+  const QRhi::Implementation api = rhi_->backend();
+  return (api == QRhi::Vulkan || api == QRhi::D3D12) && options_.gpu_wait_ms < 0.0;
 }
 
 /*--------------------------------------------------------------------*/
@@ -1063,9 +1137,17 @@ Prepared MapRenderer::prepare(QRhiResourceUpdateBatch *updates, const FrameInput
      stride is weighed with the latest such costs of a frame drawn at it, if
      larger: a finer stride is not taken on the costs of a coarser frame
      alone, only to be dropped again in the next frame for its own. */
-  if (input.drag && !dragging_)
+  if (input.drag && !dragging_) {
     std::fill(outside_level_ms_, outside_level_ms_ + kLevels, -1.0);
+    /* the GPU-time fallback's marks go with the press's start */
+    gpu_.start();
+  }
   dragging_ = input.drag;
+  /* the levels the fallback marked at each zoom in this press, where it
+     acts */
+  stats_.gpu_rule = gpu_rule();
+  for (int z = 0; z < kLevels; z++)
+    options.gpu_marks[z] = stats_.gpu_rule ? gpu_.marks(z) : 0u;
   options.budget_ms = options_.prep_budget_ms >= 0.0 ? options_.prep_budget_ms : drag_budget_ms(outside_ms_);
   if (options_.prep_budget_ms < 0.0)
     for (int l = 0; l < kLevels; l++)
@@ -1114,6 +1196,14 @@ Prepared MapRenderer::prepare(QRhiResourceUpdateBatch *updates, const FrameInput
   stats_.drag_budget = plan_stats.drag_coarser;
   stats_.memory_budget = plan_stats.memory_coarser;
   stats_.over_memory_budget = plan_stats.over_memory;
+  stats_.gpu_coarser = plan_stats.gpu_coarser;
+  /* the zoom's level of this frame, at which the GPU-time fallback
+     compares its waits */
+  gpu_zoom_ = 0;
+  while (gpu_zoom_ + 1 < kLevels && level_stride(gpu_zoom_) < plan_stats.stride_zoom)
+    gpu_zoom_++;
+  /* this frame's uploads, which a measured wait holds on some APIs */
+  gpu_skip_ = uploads_in_wait() && plan_stats.bytes_positions + plan_stats.bytes_colours + plan_stats.bytes_indices > 0;
   stats_.budget_ms = plan_stats.budget_ms;
   stats_.outside_ms = outside_ms_;
   for (int l = 0; l < kLevels; l++)
@@ -1188,12 +1278,20 @@ void MapRenderer::set_pass_times(double upload_ms, double record_ms, double rend
 
 void MapRenderer::frame_submitted(double at_ms) {
   /* once per frame: a window can submit frames this view did not render */
-  if (!submission_due_)
+  if (submission_due_) {
+    outside_ms_ += std::max(0.0, at_ms - stats_.render_end_ms);
+    if (dragging_ && outside_level_ >= 0)
+      outside_level_ms_[outside_level_] = outside_ms_;
+    submission_due_ = false;
+  }
+  BatchRenderer::frame_submitted(at_ms);
+}
+
+void MapRenderer::feed_gpu(double wait_ms, double total_ms) {
+  /* during a drag, where the fallback acts, at the level the frame drew */
+  if (!dragging_ || !stats_.gpu_rule || drawn_.empty())
     return;
-  outside_ms_ += std::max(0.0, at_ms - stats_.render_end_ms);
-  if (dragging_ && outside_level_ >= 0)
-    outside_level_ms_[outside_level_] = outside_ms_;
-  submission_due_ = false;
+  gpu_.frame(drawn_.front().level, wait_ms, total_ms, gpu_skip_, gpu_zoom_);
 }
 
 
@@ -1311,6 +1409,30 @@ bool SoundingsRenderer::make_view_pipelines(QRhiRenderPassDescriptor *pass, int 
         nullptr)
       return false;
   }
+  /* the levels of detail of the GPU-time fallback: every k-th sounding (k =
+     2, 4, 8, 16), the soundings' shaders and buffers with the positions and
+     colours stepping k soundings (per vertex, or per instance as quads) */
+  for (int level = 1; level <= kSoundingLevels; level++) {
+    const quint32 k = static_cast<quint32>(level_stride(level));
+    const quint32 position_stride = k * static_cast<quint32>(3 * sizeof(float));
+    const quint32 colour_stride = k * 4u;
+    QRhiVertexInputLayout layout;
+    if (point_quads_) {
+      layout.setBindings({{2 * sizeof(float)}, B(position_stride, B::PerInstance), B(colour_stride, B::PerInstance)});
+      layout.setAttributes({{0, 0, A::Float2, 0}, {1, 1, A::Float3, 0}, {2, 2, A::UNormByte4, 0}});
+    }
+    else {
+      layout.setBindings({{position_stride}, {colour_stride}});
+      layout.setAttributes({{0, 0, A::Float3, 0}, {1, 1, A::UNormByte4, 0}});
+    }
+    for (int depth = 0; depth < 2; depth++) {
+      std::unique_ptr<QRhiGraphicsPipeline> &stride = view_pipelines_[kSoundingLevel1 + level - 1][depth];
+      stride = point_quads_ ? pipeline(quads, colour, layout, T::Triangles, depth != 0, pass, samples)
+                            : pipeline(points, colour, layout, T::Points, depth != 0, pass, samples);
+      if (stride == nullptr)
+        return false;
+    }
+  }
   return true;
 }
 
@@ -1323,6 +1445,18 @@ Prepared SoundingsRenderer::frame(SoundingsFrame *frame, QRhiResourceUpdateBatch
   const Clock::time_point start = Clock::now();
   Prepared prepared = Prepared::Failed;
   if (begin_frame(input.frame)) {
+    /* the camera press (its first frame starts the GPU-time fallback) and
+       the level of detail of this frame: a forced one (tests), else the
+       fallback's during a press where it acts, else every sounding */
+    const bool pressed = input.frame.drag;
+    if (pressed && !pressed_)
+      gpu_.start();
+    pressed_ = pressed;
+    stats_.gpu_rule = gpu_rule();
+    level_ = options_.soundings_lod >= 0 ? std::min(options_.soundings_lod, kSoundingLevels)
+             : pressed && stats_.gpu_rule ? gpu_.level()
+                                          : 0;
+    stats_.soundings_lod = level_;
     /* the sizes of this frame (as prepare_batch() takes them), for the
        width of the profile lines: one physical pixel from the index lists
        where the API has 32-bit indices, wider as quads */
@@ -1335,7 +1469,14 @@ Prepared SoundingsRenderer::frame(SoundingsFrame *frame, QRhiResourceUpdateBatch
         if (command.kind == MBV_DRAW_SLOT && command.primitive == kSlotProfileLines)
           wide_ = wide_ || !Style::thin(style_.line(command.line_width));
       }
-    if (prepare_soundings(updates, frame, input)) {
+    /* this frame's writes, which a measured wait holds on some APIs */
+    const size_t before = stats_.sounding_bytes[0] + stats_.sounding_bytes[1] + stats_.sounding_bytes[2] +
+                          stats_.sounding_bytes[3];
+    const bool read = prepare_soundings(updates, frame, input);
+    gpu_skip_ = uploads_in_wait() && stats_.sounding_bytes[0] + stats_.sounding_bytes[1] +
+                                         stats_.sounding_bytes[2] + stats_.sounding_bytes[3] >
+                                     before;
+    if (read) {
       prepared = prepare_batch(updates, input.frame, pixels);
       if (prepared != Prepared::Failed && !write_slots(updates, input.frame, pixels))
         prepared = Prepared::Failed;
@@ -1374,6 +1515,14 @@ Prepared SoundingsRenderer::frame(SoundingsFrame *frame, QRhiResourceUpdateBatch
      fill was refused: another frame */
   return plan_.waiting() || behind(input) || !not_refused || prepared == Prepared::More ? Prepared::More
                                                                                         : Prepared::Done;
+}
+
+void SoundingsRenderer::feed_gpu(double wait_ms, double total_ms) {
+  /* during a camera press, where the fallback acts, at the level drawn (a
+     forced level is the tests') */
+  if (!pressed_ || !stats_.gpu_rule || options_.soundings_lod >= 0)
+    return;
+  gpu_.frame(level_, wait_ms, total_ms, gpu_skip_);
 }
 
 bool SoundingsRenderer::behind(const SoundingsInput &input) const {
@@ -1560,10 +1709,16 @@ void SoundingsRenderer::record_view(QRhiCommandBuffer *cb, QSize pixels, const D
 void SoundingsRenderer::record_soundings(QRhiCommandBuffer *cb, QSize pixels, const DrawItem &item, int depth) {
   /* every sounding of the chunks drawn, in the order of the array, as
      points of the slot's size (or quads); depth Less, so that the first
-     drawn wins a tie as in OpenGL */
-  QRhiGraphicsPipeline *pipeline = view_pipelines_[point_quads_ ? kSoundingQuads : kSoundingPoints][depth].get();
+     drawn wins a tie as in OpenGL. At the level that draws every k-th
+     sounding (k = 2, 4, 8 or 16) those whose index in the array is a
+     multiple of k: in each chunk from its first such sounding (the phase,
+     (k - first % k) % k soundings in, 0 for the views' chunks of 2^21), with
+     the pipeline whose bindings step k soundings */
+  const int kind = level_ > 0 ? kSoundingLevel1 + level_ - 1 : point_quads_ ? kSoundingQuads : kSoundingPoints;
+  QRhiGraphicsPipeline *pipeline = view_pipelines_[kind][depth].get();
   if (pipeline == nullptr || (point_quads_ && quad_corners_ == nullptr))
     return;
+  const quint32 k = static_cast<quint32>(level_stride(level_));
   bool bound = false;
   for (int c = 0; c < plan_.chunks(); c++) {
     if (!plan_.drawn(c))
@@ -1574,22 +1729,32 @@ void SoundingsRenderer::record_soundings(QRhiCommandBuffer *cb, QSize pixels, co
     const quint32 points = static_cast<quint32>(plan_.points(c));
     if (positions == nullptr || colours == nullptr || points == 0)
       continue;
+    const quint32 phase = (k - static_cast<quint32>(plan_.first(c)) % k) % k;
+    if (points <= phase)
+      continue;
+    const quint32 drawn = (points - phase + k - 1) / k;
     if (!bound) {
       bind(cb, pipeline, item.slot, pixels);
       bound = true;
     }
+    const quint32 position_offset = phase * static_cast<quint32>(3 * sizeof(float));
     if (point_quads_) {
-      const QRhiCommandBuffer::VertexInput inputs[] = {{quad_corners_.get(), 0}, {positions, 0}, {colours, 0}};
+      const QRhiCommandBuffer::VertexInput inputs[] = {{quad_corners_.get(), 0}, {positions, position_offset},
+                                                       {colours, phase * 4u}};
       cb->setVertexInput(0, 3, inputs);
-      cb->draw(6, points);
+      cb->draw(6, drawn);
     }
     else {
-      const QRhiCommandBuffer::VertexInput inputs[] = {{positions, 0}, {colours, 0}};
+      const QRhiCommandBuffer::VertexInput inputs[] = {{positions, position_offset}, {colours, phase * 4u}};
       cb->setVertexInput(0, 2, inputs);
-      cb->draw(points);
+      cb->draw(drawn);
     }
     stats_.draws++;
-    stats_.soundings_drawn += static_cast<int>(points);
+    stats_.soundings_drawn += static_cast<int>(drawn);
+  }
+  if (bound) {
+    stats_.soundings_stride = static_cast<int>(k * 3 * sizeof(float));
+    stats_.lod_frames += level_ > 0 ? 1 : 0;
   }
 }
 
@@ -1840,6 +2005,9 @@ bool OffscreenRenderer::Impl::frames(QSize pixels, int max_frames, QImage *image
                                rhi::milliseconds(start), rhi::milliseconds(end));
     /* waits for the GPU, so the read-back is complete */
     d.rhi->endOffscreenFrame();
+    /* the GPU-time fallback's measurement of the frame (its wait where the
+       API waits there, or the fake times; never 6b's costs) */
+    d.renderer->offscreen_ended(rhi::milliseconds(start), rhi::milliseconds(rhi::Clock::now()));
     d.last_frames++;
   }
   d.stats = d.renderer->stats();
@@ -1918,6 +2086,8 @@ bool OffscreenRenderer::render_soundings(int width, int height, const RenderOpti
     return false;
   if (d.soundings == nullptr)
     d.soundings = std::make_unique<rhi::SoundingsFrame>();
+  /* the frames as during a camera press, or not */
+  d.soundings->set_drag(options.drag);
   /* the frames after the first only continue the writes */
   return d.frames(pixels, max_frames, image, [&](QRhiResourceUpdateBatch *updates, int f) {
     return static_cast<rhi::SoundingsRenderer *>(d.renderer.get())->frame(d.soundings.get(), updates, f > 0, pixels);

@@ -35,7 +35,8 @@
  *   lattice's full cells as 16-bit indices, with the core's A/B split). A
  *   frame draws one stride for every tile (no cracks): the stride of the
  *   zoom, which keeps a cell under a pixel, made coarser only by the drag
- *   budget while a map mouse button is down and by the memory budget. Tiles
+ *   budget and the levels the GPU-time fallback marked while a map mouse
+ *   button is down, and by the memory budget. Tiles
  *   outside the view are left out. The plan reads the core's change marks
  *   (mbv_marks.h) after each fill and says which levels must be prepared
  *   (mbview_prepare_nodes), gathered and uploaded within an upload budget per
@@ -122,6 +123,86 @@ constexpr double kDragMarginMs = 2.0;
 constexpr double kDragMinimumMs = 4.0;
 double drag_budget_ms(double outside_ms);
 
+/* The GPU-time fallback. During a view's press (the map: a map mouse button
+   down; the 3D soundings: a camera press, the middle or right button down
+   and the left up) a frame is GPU-slow when its total (paint start to the
+   window's frameSubmitted) exceeds a frame of 60 Hz less the drag margin,
+   the paint's wait after render() is at least kGpuMinimumMs, and the total
+   without that wait stays under the same mark (else the CPU or the
+   composition fills the frame, which no level shortens). Each zoom's level
+   (the map's stride of the zoom; the soundings have one) has a rule of its
+   own (GpuFallback): kGpuSlowFrames GPU-slow frames in a row at a level of
+   that zoom mark the level there for the rest of the press, and its next
+   frames draw a coarser level; a step to a level coarser than the one last
+   marked there must cut the wait of the frames that marked it by
+   kGpuGainShare or more, or that zoom keeps its level. */
+constexpr double kGpuMinimumMs = 4.0;
+constexpr int kGpuSlowFrames = 2;
+constexpr double kGpuGainShare = 0.1;
+
+/* The APIs whose offscreen frames wait for the GPU in endOffscreenFrame():
+   Metal, Vulkan and Direct3D 12. On OpenGL and Direct3D 11 that wait is the
+   driver's CPU work for the frame, which no coarser level shortens, so the
+   fallback acts there only with a test's fake times (fake). */
+enum class WaitApi { Null, OpenGL, Direct3D11, Direct3D12, Metal, Vulkan };
+bool gpu_wait_counts(WaitApi api, bool fake);
+
+/* The rule of the GPU-time fallback for one view, over the levels 0 to
+   coarsest (finer to coarser), one for each zoom's level (0 to kLevels - 1:
+   the map's stride of the zoom; the soundings have only zoom 0), each on
+   its own, so that waits are compared only at one scale of the drawing and
+   what one zoom found never changes another's levels. At a zoom, GPU-slow
+   frames in a row at one level mark it (frames at other zooms neither count
+   nor reset there); a step to a level coarser than the one last marked
+   there is judged by the waits that marked that one, and a step without the
+   gain stops that zoom (stuck) at the level reached; a frame at a finer
+   level (where 6b's drag budget or the memory budget admits one again) is
+   no step and counts as any other frame. The coarsest level is never
+   marked, but a step into it is judged. Under constant waits a zoom so ends
+   at the next level the budgets admit past the finest one they admit there
+   (one level past its own where they admit every level; they can skip a
+   level, since one with nothing to prepare costs nothing in 6b's drag
+   test), as long as they admit no finer level again in the press: a finer
+   level they admit after two GPU-slow frames at a coarser one is marked
+   too, without a judged step, so budgets that relax in such steps can take
+   the zoom further, up to the coarsest level. The caller feeds the frames
+   of a press only, and calls start() at each press. */
+class GpuFallback {
+ public:
+  explicit GpuFallback(int coarsest) : coarsest_(coarsest) { start(); }
+  /* a press starts: no level marked, nothing counted, at every zoom */
+  void start();
+  /* a frame of the press drawn at level, its paint's wait and its total
+     (ms), at the zoom's level (0 to kLevels - 1, others clamped); skipped:
+     its wait holds uploads (GPU copies), so it neither counts nor resets */
+  void frame(int level, double wait_ms, double total_ms, bool skipped = false, int zoom = 0);
+  /* the levels marked at a zoom, bit l for level l */
+  unsigned marks(int zoom = 0) const;
+  /* the finest level not marked at a zoom */
+  int level(int zoom = 0) const;
+  /* a step at a zoom did not cut the wait: no more marks there in this
+     press */
+  bool stuck(int zoom = 0) const;
+  /* a GPU-slow frame, by its wait and total */
+  static bool slow(double wait_ms, double total_ms);
+
+ private:
+  /* the rule at one zoom's level */
+  struct Zoom {
+    unsigned marks = 0;
+    int count_level = -1;     /* the level of the slow frames counted */
+    int count = 0;            /* GPU-slow frames in a row at it */
+    double count_wait = 0.0;  /* their summed wait */
+    double reference = -1.0;  /* the mean wait of the frames that marked the last level (-1: none) */
+    int reference_level = -1; /* ... and that level */
+    bool stuck = false;
+  };
+  static int zoom_index(int zoom);
+
+  int coarsest_;
+  Zoom zooms_[kLevels];
+};
+
 /* The stride of the zoom: 1 where a stride-1 cell covers kCellPixels
    physical pixels or more, otherwise the largest power of two up to 128 that
    keeps a cell under it. The level of that stride for the size of a cell in
@@ -202,6 +283,10 @@ struct PlanOptions {
      < 0: the averages */
   double node_ns_colour = -1.0;
   double node_ns_z = -1.0;
+  /* per zoom's level, the levels the GPU-time fallback marked there in
+     this press (bit l for level l): while dragged, the stride passes over
+     the marks of the zoom's level the plan finds for the frame */
+  unsigned gpu_marks[kLevels] = {};
 };
 
 /* what one tile level uploads in a frame; positions and colours have one
@@ -244,6 +329,7 @@ struct PlanStats {
   int tiles_culled = 0;  /* tiles with data outside it */
   bool drag_coarser = false;   /* the drag budget made the stride coarser than the zoom's */
   bool memory_coarser = false; /* the memory budget did */
+  bool gpu_coarser = false;    /* the GPU-time fallback's marks did */
   bool over_memory = false;    /* stride 128 above the memory budget */
   bool split = false;          /* uploads split: drawn at another stride than planned */
   double budget_ms = -1.0;     /* the drag budget of the stride planned (-1: no button down) */

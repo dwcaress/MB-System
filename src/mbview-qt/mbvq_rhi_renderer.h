@@ -71,9 +71,13 @@
  *   lie outside it.
  * - ProfileRenderer, the profile view: its batch alone.
  * - SoundingsRenderer, the 3D soundings view: the soundings slot as points
- *   (or point quads) of every sounding in the order of the array, with the
- *   depth test, the soundings that are not drawn moved out of the clip
- *   volume; the profile lines from index lists over the soundings' positions,
+ *   (or point quads) of every sounding in the order of the array, or, in the
+ *   frames of a camera press that the GPU-time fallback found GPU-slow
+ *   (Metal, Vulkan, Direct3D 12), of every 2nd, 4th, 8th or 16th (those
+ *   whose index is a multiple of it, record_soundings; the others are not
+ *   drawn at all), with the depth test, the soundings the core hides
+ *   (alpha 0) moved out of the clip volume; the profile lines from index
+ *   lists over the soundings' positions,
  *   or, wider than one physical pixel, as quads instanced over the same
  *   positions with a colour per pair. The soundings' buffers are chunks that
  *   are always written whole (SoundingsPlan): dynamic buffers on Metal, so
@@ -173,6 +177,32 @@ class BatchRenderer : public ViewRenderer {
      (-1 if none), and where the frame began and ended on the clock */
   virtual void set_pass_times(double upload_ms, double record_ms, double render_ms, double gpu_ms, double begin_ms,
                               double end_ms);
+  /* The GPU-time fallback's signal. A view painted the frame whose render()
+     ran last (its paint began at or before that render()): the paint's
+     start and end (ms since the epoch of the clock, as begin_ms); the time
+     from the end of render() to the paint's end is the frame's wait, in
+     which QRhiWidget ends the offscreen frame and waits for it. */
+  void frame_painted(double paint_start_ms, double paint_end_ms);
+  /* the view's window submitted the frame (QRhiWidget::frameSubmitted) at
+     a time of the same clock: the frame painted last is measured, from the
+     paint's start to here, once (a window can submit frames this view did
+     not paint) */
+  virtual void frame_submitted(double at_ms);
+  /* an offscreen frame of the tests ended (endOffscreenFrame, which waits
+     for the GPU where the API does: Metal, Vulkan and Direct3D 12): its wait
+     from the end of the pass and its total from its start are measured
+     there; on other APIs only while a fake time is set
+     (RenderOptions::gpu_wait_ms, gpu_total_ms), whose values then replace
+     the measured ones in the rule's input only */
+  void offscreen_ended(double start_ms, double end_ms);
+  /* the GPU-time fallback's fake wait for the next frames
+     (RenderOptions::gpu_wait_ms; a view's, mbvq::set_gpu_wait) */
+  void set_gpu_wait(double wait_ms) { options_.gpu_wait_ms = wait_ms; }
+  /* the view's press ended (its release, or a lost one), whatever frames
+     come: the next pressed frame starts a new press, also where no frame
+     without the press came between (a release and a new press before the
+     next paint, or a frame that failed) */
+  virtual void end_press() {}
 
   const RenderStats &stats() const { return stats_; }
   const BatchPlan &batch_plan() const { return batch_; }
@@ -237,6 +267,19 @@ class BatchRenderer : public ViewRenderer {
            QRhiBuffer::UsageFlags usage = QRhiBuffer::VertexBuffer);
   /* a shader of the resources (":/mbvq/...qsb") */
   static QShader shader(const char *name);
+  /* the GPU-time fallback: a frame's measured wait and total into the
+     statistics, then, with the fake times where set, to feed_gpu() */
+  void measured(double wait_ms, double total_ms);
+  /* a measured frame for the view's rule (the map, the 3D soundings) */
+  virtual void feed_gpu(double /* wait_ms */, double /* total_ms */) {}
+  /* the fallback can act in this frame (it acts only during the view's
+     press): the QRhi's API waits for the GPU in endOffscreenFrame(), or the
+     times are fake (gpu_wait_counts) */
+  bool gpu_rule() const;
+  /* uploads are copies on the GPU in the frame's command buffer (Vulkan,
+     Direct3D 12), so a measured wait holds them (on Metal they are copied on
+     the CPU in render()); false while a fake wait replaces the measured one */
+  bool uploads_in_wait() const;
   /* the device pixel ratio the sizes are scaled with: the view's, else the
      options' */
   double pixel_ratio() const { return view_ratio_ > 0.0 ? view_ratio_ : options_.pixel_ratio; }
@@ -260,6 +303,11 @@ class BatchRenderer : public ViewRenderer {
   RenderStats stats_;
 
  private:
+  /* the GPU-time fallback: a painted frame whose submission is still to
+     come, its paint's start and its wait */
+  bool paint_due_ = false;
+  double paint_start_ms_ = 0.0;
+  double paint_wait_ms_ = 0.0;
   struct MeshGpu {
     struct mbv_draw_shape shape;
     GluVariant variant = GluVariant::Sgi;
@@ -333,8 +381,12 @@ class MapRenderer final : public BatchRenderer {
      time of the same clock (ms since its epoch): the time from the end of
      render() to there, the wait for the frame's GPU work and the window's
      composition, counts among the frame's costs outside its preparing and
-     gathering, which the next drag budget leaves room for */
-  void frame_submitted(double at_ms);
+     gathering, which the next drag budget leaves room for; then the GPU-time
+     fallback's measurement (BatchRenderer) */
+  void frame_submitted(double at_ms) override;
+  /* the drag ended: the next frame with a button down starts a new one
+     (the drag budget's costs per level, the GPU-time fallback) */
+  void end_press() override { dragging_ = false; }
   /* the view is shown (true) or hidden: a shown view's latest levels are
      kept from other views' evictions */
   void set_visible(bool visible) { plan_.set_visible(visible); }
@@ -353,6 +405,7 @@ class MapRenderer final : public BatchRenderer {
   int view_fixed_resources() const override;
   void record_view(QRhiCommandBuffer *cb, QSize pixels, const DrawItem &item, int depth) override;
   void release_view() override { drop_tiles(); }
+  void feed_gpu(double wait_ms, double total_ms) override;
 
  private:
   struct TileGpu {
@@ -381,6 +434,14 @@ class MapRenderer final : public BatchRenderer {
   bool submission_due_ = false;
   bool dragging_ = false;
   double outside_level_ms_[kLevels];
+  /* the GPU-time fallback over the terrain's levels, a rule for each
+     zoom's level (started at a drag's first frame, with outside_level_ms_),
+     the zoom's level of the last frame (whose rule its waits are fed to),
+     and whether the last frame's wait holds uploads, which it then does not
+     count */
+  GpuFallback gpu_{kLevels - 1};
+  int gpu_zoom_ = 0;
+  bool gpu_skip_ = false;
   std::unique_ptr<QRhiGraphicsPipeline> terrain_[2]; /* without and with the depth test */
   std::unique_ptr<QRhiBuffer> id_positions_;
   std::unique_ptr<QRhiBuffer> id_colours_;
@@ -425,6 +486,9 @@ class SoundingsRenderer final : public BatchRenderer {
      buffers and the data read go now (the next frame with soundings reads
      and writes everything again). */
   void release_soundings();
+  /* the camera press ended: the next frame with one starts a new one (the
+     GPU-time fallback) */
+  void end_press() override { pressed_ = false; }
 
   const SoundingsPlan &plan() const { return plan_; }
   /* the profile lines are drawn wide (instanced quads with a colour per
@@ -437,6 +501,7 @@ class SoundingsRenderer final : public BatchRenderer {
   int view_fixed_resources() const override;
   void record_view(QRhiCommandBuffer *cb, QSize pixels, const DrawItem &item, int depth) override;
   void release_view() override { drop_soundings(); }
+  void feed_gpu(double wait_ms, double total_ms) override;
 
  private:
   /* the buffers of a chunk: positions and colours in two sets, the index
@@ -455,7 +520,21 @@ class SoundingsRenderer final : public BatchRenderer {
     quint32 black_inner = 0;
     quint32 red_inner = 0;
   };
-  enum ViewPipeline { kSoundingPoints, kSoundingQuads, kProfileThin, kProfileWide, kViewPipelines };
+  /* the soundings as points or quads, at level 0 and at the levels of
+     detail 1 to 4 (every 2nd, 4th, 8th or 16th sounding, kSoundingLevel1 +
+     level - 1, of the kind in use), the thin and the wide profile lines */
+  enum ViewPipeline {
+    kSoundingPoints,
+    kSoundingQuads,
+    kProfileThin,
+    kProfileWide,
+    kSoundingLevel1,
+    kSoundingLevel2,
+    kSoundingLevel3,
+    kSoundingLevel4,
+    kViewPipelines
+  };
+  static constexpr int kSoundingLevels = 4;
 
   void drop_soundings();
   /* the soundings' data read again where their marks rose, and the uploads
@@ -506,6 +585,13 @@ class SoundingsRenderer final : public BatchRenderer {
   uint64_t lists_uploaded_ = 0;
   uint64_t pair_colours_uploaded_ = 0;
   bool wide_ = false;
+  /* the GPU-time fallback over the levels of detail (started at a camera
+     press's first frame), the press of the last frame, the level of detail
+     it draws, and whether its wait holds uploads */
+  GpuFallback gpu_{kSoundingLevels};
+  bool pressed_ = false;
+  int level_ = 0;
+  bool gpu_skip_ = false;
 };
 
 }  // namespace rhi
