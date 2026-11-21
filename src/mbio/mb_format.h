@@ -82,9 +82,10 @@
 #define MB_SYS_STEREOPAIR 39
 #define MB_SYS_KMBES 40
 #define MB_SYS_RESON7K3 41
+#define MB_SYS_HISAS 42
 
 /* Number of supported MBIO data formats */
-#define MB_FORMATS 87
+#define MB_FORMATS 88
 
 /* Data formats supported by MBIO */
 
@@ -501,6 +502,11 @@ variable pixels, dual frequency sidescan and subbottom,                         
 xtf variant, single files, \
 low frequency sidescan returned as survey data, Benthos. */
 
+#define MBF_HISASALL 212
+/* Kongsberg HISAS synthetic aperture sonar sidescan \
+variable pixels, sidescan, binary datagrams, \
+Kongsberg *.all files, single files, read only, Kongsberg. */
+
 #define MBF_SWPLSSXI 221
 /* SEA intermediate format for SWATHplus interferometric sonar,                                 \
 variable beams, bathymetry, amplitude, \
@@ -634,6 +640,7 @@ int mbr_register_image83p(int verbose, void *mbio_ptr, int *error);
 int mbr_register_imagemba(int verbose, void *mbio_ptr, int *error);
 int mbr_register_hysweep1(int verbose, void *mbio_ptr, int *error);
 int mbr_register_xtfb1624(int verbose, void *mbio_ptr, int *error);
+int mbr_register_hisasall(int verbose, void *mbio_ptr, int *error);
 int mbr_register_swplssxi(int verbose, void *mbio_ptr, int *error);
 int mbr_register_swplssxp(int verbose, void *mbio_ptr, int *error);
 int mbr_register_3ddepthp(int verbose, void *mbio_ptr, int *error);
@@ -1049,6 +1056,11 @@ int mbr_info_hysweep1(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error);
 int mbr_info_xtfb1624(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
+                      char *system_name, char *format_description, int *numfile, int *filetype, bool *variable_beams,
+                      bool *traveltime, bool *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
+                      int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
+                      double *beamwidth_ltrack, int *error);
+int mbr_info_hisasall(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, bool *variable_beams,
                       bool *traveltime, bool *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,

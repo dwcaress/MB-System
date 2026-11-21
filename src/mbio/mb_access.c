@@ -326,7 +326,7 @@ int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, i
 
   /* Some systems are definitively sidescans */
   else if (mb_io_ptr->system == MB_SYS_MSTIFF || mb_io_ptr->system == MB_SYS_JSTAR || mb_io_ptr->system == MB_SYS_BENTHOS ||
-           mb_io_ptr->system == MB_SYS_IMAGE83P) {
+           mb_io_ptr->system == MB_SYS_IMAGE83P || mb_io_ptr->system == MB_SYS_HISAS) {
     *sonartype = MB_TOPOGRAPHY_TYPE_SIDESCAN;
   }
 
