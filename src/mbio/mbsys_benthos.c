@@ -124,6 +124,8 @@ int mbsys_benthos_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	store->ssrawbottompick = 0.0;   /* bottom pick time (sec) */
 	store->ssrawportsamples = 0;    /* number of port raw sidescan samples */
 	store->ssrawstbdsamples = 0;    /* number of stbd raw sidescan samples */
+	store->ssportweight = 0;        /* port weighting exponent */
+	store->ssstbdweight = 0;        /* stbd weighting exponent */
 	for (int i = 0; i < MBSYS_BENTHOS_MAXRAWPIXELS; i++) {
 		store->ssrawport[i] = 0; /* raw port sidescan */
 		store->ssrawstbd[i] = 0; /* raw starboard sidescan */
@@ -957,6 +959,10 @@ int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr,
 				(*pixel_size) = pixel_size_calc;
 		}
 
+		/* scale factors that undo the weighting of the raw samples, if any */
+		const double portscale = ldexp(1.0, -store->ssportweight);
+		const double stbdscale = ldexp(1.0, -store->ssstbdweight);
+
 		/* loop over the port beams, figuring out
 		    acrosstrack distance for each raw sidescan sample */
 		for (int i = 0; i < store->ssrawportsamples; i++) {
@@ -968,7 +974,7 @@ int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr,
 				xtrackss = -sqrt(pow(0.5 * port_spacing * (store->ssrawportsamples - i) * store->png_computedsv, 2) -
 				                 pow(store->bath[0], 2));
 			}
-			ss[i] += store->ssrawport[i];
+			ss[i] += portscale * store->ssrawport[i];
 			ssacrosstrack[i] = xtrackss;
 			ss_cnt[i]++;
 		}
@@ -983,7 +989,7 @@ int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr,
 			else {
 				xtrackss = sqrt(pow(0.5 * stbd_spacing * i * store->png_computedsv, 2) - pow(store->bath[0], 2));
 			}
-			ss[i + store->ssrawportsamples] += store->ssrawstbd[i];
+			ss[i + store->ssrawportsamples] += stbdscale * store->ssrawstbd[i];
 			ssacrosstrack[i + store->ssrawportsamples] = xtrackss;
 			ss_cnt[i + store->ssrawportsamples]++;
 		}

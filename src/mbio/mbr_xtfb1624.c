@@ -63,6 +63,7 @@ static const mb_u_char XTF_DATA_SIDESCAN = 0;
 // #define XTF_DATA_ANNOTATION 1
 // #define XTF_DATA_BATHYMETRY 2
 static const mb_u_char XTF_DATA_ATTITUDE = 3;
+static const unsigned short XTF_SONAR_KONGSBERG_SAS = 48;
 // #define XTF_DATA_POSITION 100
 // #define XTF_HEADER_SONAR 0              // sidescan and subbottom
 // #define XTF_HEADER_NOTES 1              // notes - text annotation
@@ -309,7 +310,9 @@ struct mbf_xtfpingchanheader {
 	                 /* or later must be set in */
 	                 /* XTFFILEHEADER.RecordingProgramVersion */
 
-	mb_u_char ReservedSpace[6]; /* reserved for future expansion */
+	short Weight;               /* weighting factor; for Kongsberg SAS (sonar type 48) */
+	                            /*   raw sample = amplitude * 2^Weight */
+	mb_u_char ReservedSpace[4]; /* reserved for future expansion */
 };
 
 struct mbf_xftnotesheader {
@@ -612,7 +615,9 @@ static void mbr_xtfb1624_rd_chanheader(char *line, struct mbf_xtfpingchanheader 
 	index++;
 	mb_get_binary_float(true, &line[index], &(chanheader->FixedVSOP));
 	index += 4;
-	for (int i = 0; i < 6; i++) {
+	mb_get_binary_short(true, &line[index], &(chanheader->Weight));
+	index += 2;
+	for (int i = 0; i < 4; i++) {
 		chanheader->ReservedSpace[i] = (mb_u_char)line[index];
 		index++;
 	}
@@ -1367,7 +1372,8 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 				fprintf(stderr, "dbg5       ContactCloseNumber:         %d\n", pingchanportheader->ContactCloseNumber);
 				fprintf(stderr, "dbg5       Reserved2:                  %d\n", pingchanportheader->Reserved2);
 				fprintf(stderr, "dbg5       FixedVSOP:                  %f\n", pingchanportheader->FixedVSOP);
-				for (int i = 0; i < 6; i++)
+				fprintf(stderr, "dbg5       Weight:                     %d\n", pingchanportheader->Weight);
+				for (int i = 0; i < 4; i++)
 					fprintf(stderr, "dbg5       ReservedSpace[%2.2d]:          %d\n", i, pingchanportheader->ReservedSpace[i]);
 				fprintf(stderr, "dbg5       ChannelNumber:              %d\n", pingchanstbdheader->ChannelNumber);
 				fprintf(stderr, "dbg5       DownsampleMethod:           %d\n", pingchanstbdheader->DownsampleMethod);
@@ -1391,7 +1397,8 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 				fprintf(stderr, "dbg5       ContactCloseNumber:         %d\n", pingchanstbdheader->ContactCloseNumber);
 				fprintf(stderr, "dbg5       Reserved2:                  %d\n", pingchanstbdheader->Reserved2);
 				fprintf(stderr, "dbg5       FixedVSOP:                  %f\n", pingchanstbdheader->FixedVSOP);
-				for (int i = 0; i < 6; i++)
+				fprintf(stderr, "dbg5       Weight:                     %d\n", pingchanstbdheader->Weight);
+				for (int i = 0; i < 4; i++)
 					fprintf(stderr, "dbg5       ReservedSpace[%2.2d]:          %d\n", i, pingchanstbdheader->ReservedSpace[i]);
 				for (unsigned int i = 0; i < MAX(pingchanportheader->NumSamples, pingchanstbdheader->NumSamples); i++)
 					fprintf(stderr, "dbg5       sidescan[%4.4d]: %d %d\n", i, data->ssrawport[i], data->ssrawstbd[i]);
@@ -1767,6 +1774,18 @@ int mbr_rt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->ssstbdinitgain = data->pingchanstbdheader.InitialGainCode;
 		store->ssportgain = data->pingchanportheader.GainCode;
 		store->ssstbdgain = data->pingchanstbdheader.GainCode;
+
+		/* Kongsberg SAS (sonar type 48) samples are weighted per ping and channel:
+		   raw sample = amplitude * 2^Weight; the weighting is undone when the
+		   processed sidescan is made. Other sonar types keep their raw values. */
+		if (data->fileheader.SonarType == XTF_SONAR_KONGSBERG_SAS) {
+			store->ssportweight = data->pingchanportheader.Weight;
+			store->ssstbdweight = data->pingchanstbdheader.Weight;
+		}
+		else {
+			store->ssportweight = 0;
+			store->ssstbdweight = 0;
+		}
 
 		store->ssrawportsamples = data->pingchanportheader.NumSamples;
 		store->ssrawstbdsamples = data->pingchanstbdheader.NumSamples;
