@@ -294,7 +294,7 @@ int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_7
 		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_8
 		    || sonarunswap == MBSYS_SIMRAD3_EM3002
-		    || sonarunswap == MBSYS_SIMRAD3_HISAS) {
+		    || MBSYS_SIMRAD3_IS_HISAS(sonarunswap)) {
 			sonarunswapgood = true;
 		}
 		else {
@@ -326,7 +326,7 @@ int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		    || sonarswap == MBSYS_SIMRAD3_EM3000D_7
 		    || sonarswap == MBSYS_SIMRAD3_EM3000D_8
 		    || sonarswap == MBSYS_SIMRAD3_EM3002
-		    || sonarswap == MBSYS_SIMRAD3_HISAS) {
+		    || MBSYS_SIMRAD3_IS_HISAS(sonarswap)) {
 			sonarswapgood = true;
 		}
 		else {
@@ -388,7 +388,7 @@ int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	    || *sonar == MBSYS_SIMRAD3_EM3000D_7
 	    || *sonar == MBSYS_SIMRAD3_EM3000D_8
 	    || *sonar == MBSYS_SIMRAD3_EM3002
-	    || *sonar == MBSYS_SIMRAD3_HISAS) {
+	    || MBSYS_SIMRAD3_IS_HISAS(*sonar)) {
 		sonargood = true;
 	}
 	else {
@@ -4866,7 +4866,7 @@ store->pings[store->ping_index].png_ss_count);
 					done = true;
 				}
 			}
-			else if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD3_HISAS) {
+			else if (status == MB_SUCCESS && MBSYS_SIMRAD3_IS_HISAS(sonar)) {
 				if (store->pings[store->ping_index].png_bath_read) {
 					store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_COMPLETE;
 					done = true;
@@ -5204,7 +5204,8 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			netattitude->nat_ndata = MIN(netattitude->nat_ndata, MBSYS_SIMRAD3_MAXATTITUDE);
 			for (int i = 0; i < netattitude->nat_ndata; i++) {
 				att_time_d[i] = (double)(atime_d + 0.001 * netattitude->nat_time[i]);
-				att_heave[i] = (double)(0.01 * netattitude->nat_heave[i]);
+				/* HISAS: the heave field holds minus the vehicle depth, not heave */
+				att_heave[i] = MBSYS_SIMRAD3_IS_HISAS(store->sonar) ? 0.0 : (double)(0.01 * netattitude->nat_heave[i]);
 				att_roll[i] = (double)(0.01 * netattitude->nat_roll[i]);
 				att_pitch[i] = (double)(0.01 * netattitude->nat_pitch[i]);
 			}
@@ -5651,6 +5652,15 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			if (store->sonar == MBSYS_SIMRAD3_M3 && (ping->png_detection[i] & 128) == 128) {
 				ping->png_beamflag[i] = MB_FLAG_NULL;
 				ping->png_raw_rxdetection[i] = ping->png_raw_rxdetection[i] | 128;
+			}
+			else if (MBSYS_SIMRAD3_IS_HISAS(store->sonar)) {
+				/* HISAS writes no raw beam datagram; soundings marked invalid in
+				   the XYZ88 detection byte (bit 7) still carry positions: flag
+				   them so that they can be restored in editing */
+				if ((ping->png_detection[i] & 128) == 128)
+					ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
+				else
+					ping->png_beamflag[i] = MB_FLAG_NONE;
 			}
 			else if ((detection_mask & 128) == 128) {
 				if ((detection_mask & 15) == 0) {

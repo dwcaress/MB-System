@@ -1106,6 +1106,14 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		else
 			depthsensor_mode = MBSYS_SIMRAD3_ZMODE_USE_HEAVE_ONLY;
 
+		/* HISAS: the XYZ88 transducer depth is the vehicle sonar depth, and the
+		   heave field of the network attitude datagrams holds minus the vehicle
+		   depth, not heave. Use a sensordepth supplied to mbpreprocess if there
+		   is one, otherwise keep the XYZ88 transducer depth; never apply heave. */
+		const bool hisas = MBSYS_SIMRAD3_IS_HISAS(store->sonar);
+		if (hisas)
+			depthsensor_mode = pars->n_sensordepth > 0 ? MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY : MBSYS_SIMRAD3_ZMODE_UNKNOWN;
+
 		/*--------------------------------------------------------------*/
 		/* change timestamp if indicated */
 		/*--------------------------------------------------------------*/
@@ -1199,6 +1207,8 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		double heave;
 		mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude, time_d,
 		                                 &heave, &jattitude, &interp_error);
+		if (hisas)
+			heave = 0.0;
 
 		/*--------------------------------------------------------------*/
 		/* get transducer offsets */
@@ -1512,9 +1522,14 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 				                                 receive_time_d, &receive_pitch, &jattitude, error);
 			mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1, pars->n_attitude,
 				                                 receive_time_d, &receive_heave, &jattitude, error);
+			if (hisas) {
+				transmit_heave = 0.0;
+				receive_heave = 0.0;
+			}
 
 			/* use sensordepth instead of heave for submerged platforms */
-			if (depthsensor_mode != MBSYS_SIMRAD3_ZMODE_USE_HEAVE_ONLY) {
+			if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY ||
+			    depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_AND_HEAVE) {
 				double transmit_sensordepth, receive_sensordepth;
 				mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
 				                                 pars->n_sensordepth, transmit_time_d, &transmit_sensordepth, &jsensordepth, error);
@@ -1645,9 +1660,11 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 				ping->png_beamflag[i] = MB_FLAG_NULL;
 				ping->png_raw_rxdetection[i] = ping->png_raw_rxdetection[i] | 128;
 			}
-			else if (store->sonar == MBSYS_SIMRAD3_HISAS) {
+			else if (MBSYS_SIMRAD3_IS_HISAS(store->sonar)) {
+				/* HISAS soundings marked invalid (detection bit 7) still carry
+				   positions: flag them so that they can be restored in editing */
 				if ((ping->png_detection[i] & 128) == 128) {
-					ping->png_beamflag[i] = MB_FLAG_NULL;
+					ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
 				} else {
 					ping->png_beamflag[i] = MB_FLAG_NONE;
 				}
@@ -1839,8 +1856,14 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 			case MBSYS_SIMRAD3_EM1000:
 				strcpy(multibeam_model, "EM1000");
 				break;
-			case MBSYS_SIMRAD3_HISAS:
-				strcpy(multibeam_model, "HISAS");
+			case MBSYS_SIMRAD3_HISAS1032:
+				strcpy(multibeam_model, "HISAS 1032");
+				break;
+			case MBSYS_SIMRAD3_HISAS1034:
+				strcpy(multibeam_model, "HISAS 1034");
+				break;
+			case MBSYS_SIMRAD3_HISAS2040:
+				strcpy(multibeam_model, "HISAS 2040");
 				break;
 			default:
 				sprintf(multibeam_model, "Unknown sonar model %d", store->sonar);
@@ -3471,8 +3494,9 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 			time_d[i] = (double)(atime_d + 0.001 * netattitude->nat_time[i]);
 			mb_get_date(verbose, time_d[i], &(time_i[7 * i]));
 
-			/* get attitude from the data record */
-			heave[i] = (double)(0.01 * netattitude->nat_heave[i]);
+			/* get attitude from the data record (HISAS: the heave field holds
+			   minus the vehicle depth, not heave) */
+			heave[i] = MBSYS_SIMRAD3_IS_HISAS(store->sonar) ? 0.0 : (double)(0.01 * netattitude->nat_heave[i]);
 			roll[i] = (double)(0.01 * netattitude->nat_roll[i]);
 			pitch[i] = (double)(0.01 * netattitude->nat_pitch[i]);
 

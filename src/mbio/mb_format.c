@@ -1803,6 +1803,13 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
                 sonar2swap == MBSYS_SIMRAD3_EM2040 || sonar2 == MBSYS_SIMRAD3_EM2045 ||
                 sonar2swap == MBSYS_SIMRAD3_EM2045)
               *format = MBF_EM710RAW;
+            /* Kongsberg HISAS: 1032 files carry bathymetry (format 58), 2040 files
+               carry sidescan and navigation without bathymetry (format 212) */
+            else if (sonar2 == MBSYS_SIMRAD3_HISAS1032 || sonar2swap == MBSYS_SIMRAD3_HISAS1032
+                || sonar2 == MBSYS_SIMRAD3_HISAS1034 || sonar2swap == MBSYS_SIMRAD3_HISAS1034)
+              *format = MBF_EM710RAW;
+            else if (sonar2 == MBSYS_SIMRAD3_HISAS2040 || sonar2swap == MBSYS_SIMRAD3_HISAS2040)
+              *format = MBF_HISASALL;
             else if (type2 == EM_START || type2 == EM_STOP || type2 == EM_PARAMETER)
               *format = MBF_EMOLDRAW;
             else if (type2 == EM2_START || type2 == EM2_STOP || type2 == EM2_STOP2 || type2 == EM2_STATUS ||
@@ -1877,6 +1884,13 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
                 || sonar2 == MBSYS_SIMRAD3_EM2040 || sonar2swap == MBSYS_SIMRAD3_EM2040
                 || sonar2 == MBSYS_SIMRAD3_EM2045 || sonar2swap == MBSYS_SIMRAD3_EM2045)
               *format = MBF_EM710RAW;
+            /* Kongsberg HISAS: 1032 files carry bathymetry (format 58), 2040 files
+               carry sidescan and navigation without bathymetry (format 212) */
+            else if (sonar2 == MBSYS_SIMRAD3_HISAS1032 || sonar2swap == MBSYS_SIMRAD3_HISAS1032
+                || sonar2 == MBSYS_SIMRAD3_HISAS1034 || sonar2swap == MBSYS_SIMRAD3_HISAS1034)
+              *format = MBF_EM710RAW;
+            else if (sonar2 == MBSYS_SIMRAD3_HISAS2040 || sonar2swap == MBSYS_SIMRAD3_HISAS2040)
+              *format = MBF_HISASALL;
             else if (type2 == EM_START || type2 == EM_STOP || type2 == EM_PARAMETER)
               *format = MBF_EMOLDRAW;
             else if (type2 == EM2_START || type2 == EM2_STOP || type2 == EM2_STOP2 || type2 == EM2_STATUS ||

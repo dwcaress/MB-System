@@ -219,7 +219,13 @@
 #define MBSYS_SIMRAD3_EM100 9904
 #define MBSYS_SIMRAD3_EM1000 9905
 
-#define MBSYS_SIMRAD3_HISAS 11034
+/* Kongsberg HISAS synthetic aperture / interferometric sonars */
+#define MBSYS_SIMRAD3_HISAS1032 11032
+#define MBSYS_SIMRAD3_HISAS1034 11034 /* HISAS 1032 dual RX */
+#define MBSYS_SIMRAD3_HISAS2040 12040
+#define MBSYS_SIMRAD3_HISAS MBSYS_SIMRAD3_HISAS1034
+#define MBSYS_SIMRAD3_IS_HISAS(sonar)                                                                                        \
+	((sonar) == MBSYS_SIMRAD3_HISAS1032 || (sonar) == MBSYS_SIMRAD3_HISAS1034 || (sonar) == MBSYS_SIMRAD3_HISAS2040)
 
 /* number of ping structures available to store data */
 #define MBSYS_SIMRAD3_NUM_PING_STRUCTURES 4
