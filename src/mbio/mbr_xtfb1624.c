@@ -236,7 +236,7 @@ struct mbf_xtfpingheader {
 	mb_u_char FixTimeHour;   /* last nav fix time (hour) */
 	mb_u_char FixTimeMinute; /* last nav fix time (min) */
 	mb_u_char FixTimeSecond; /* last nav fix time (sec) */
-	char Reserved4;
+	mb_u_char FixTimeHsecond; /* last nav fix time (hundredths of sec) */
 	float SensorSpeed;        /* towfish speed (kts) */
 	float KP;                 /* kilometers pipe (km) */
 	double SensorYcoordinate; /* towfish latitude or northing */
@@ -1117,7 +1117,7 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 				index++;
 				pingheader->FixTimeSecond = line[index];
 				index++;
-				pingheader->Reserved4 = line[index];
+				pingheader->FixTimeHsecond = line[index];
 				index++;
 				mb_get_binary_float(true, &line[index], &(pingheader->SensorSpeed));
 				index += 4;
@@ -1327,7 +1327,7 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 				fprintf(stderr, "dbg5       FixTimeHour:                %d\n", pingheader->FixTimeHour);
 				fprintf(stderr, "dbg5       FixTimeMinute:              %d\n", pingheader->FixTimeMinute);
 				fprintf(stderr, "dbg5       FixTimeSecond:              %d\n", pingheader->FixTimeSecond);
-				fprintf(stderr, "dbg5       Reserved4:                  %d\n", pingheader->Reserved4);
+				fprintf(stderr, "dbg5       FixTimeHsecond:             %d\n", pingheader->FixTimeHsecond);
 				fprintf(stderr, "dbg5       SensorSpeed:                %f\n", pingheader->SensorSpeed);
 				fprintf(stderr, "dbg5       KP:                         %f\n", pingheader->KP);
 				fprintf(stderr, "dbg5       SensorYcoordinate:          %f\n", pingheader->SensorYcoordinate);
@@ -1497,13 +1497,19 @@ int mbr_rt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* get nav time */
 		double ntime_d = time_d;
-		/* Check if fixtime is valid */
-		if (data->pingheader.FixTimeHour || data->pingheader.FixTimeMinute || data->pingheader.FixTimeSecond) {
+		/* Check if fixtime is valid; the fix time has hundredths of seconds
+		   (FixTimeHsecond, byte 151 of the ping header) like the ping time */
+		if (data->pingheader.FixTimeHour || data->pingheader.FixTimeMinute || data->pingheader.FixTimeSecond ||
+		    data->pingheader.FixTimeHsecond) {
+			const double fix_hseconds = data->pingheader.FixTimeHsecond <= 99 ? 0.01 * data->pingheader.FixTimeHsecond : 0.0;
 			double dtime = 3600.0 * (data->pingheader.FixTimeHour - data->pingheader.Hour) +
-			        60.0 * (data->pingheader.FixTimeMinute - data->pingheader.Minute) + data->pingheader.FixTimeSecond -
-			        data->pingheader.Second - 0.01 * data->pingheader.HSeconds;
-			if (data->pingheader.FixTimeHour - data->pingheader.Hour > 1)
-				dtime -= 3600.0 * 24;
+			        60.0 * (data->pingheader.FixTimeMinute - data->pingheader.Minute) + data->pingheader.FixTimeSecond +
+			        fix_hseconds - data->pingheader.Second - 0.01 * data->pingheader.HSeconds;
+			/* fix and ping on different sides of midnight */
+			if (dtime > 43200.0)
+				dtime -= 86400.0;
+			else if (dtime < -43200.0)
+				dtime += 86400.0;
 			ntime_d = time_d + dtime;
 		}
 		/* check for use of projected coordinates
