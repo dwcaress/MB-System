@@ -291,7 +291,7 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_7
 		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_8
 		    || sonarunswap == MBSYS_SIMRAD3_EM3002
-		    || sonarunswap == MBSYS_SIMRAD3_HISAS) {
+		    || MBSYS_SIMRAD3_IS_HISAS(sonarunswap)) {
 			sonarunswapgood = true;
 		}
 		else {
@@ -323,7 +323,7 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		    || sonarswap == MBSYS_SIMRAD3_EM3000D_7
 		    || sonarswap == MBSYS_SIMRAD3_EM3000D_8
 		    || sonarswap == MBSYS_SIMRAD3_EM3002
-		    || sonarswap == MBSYS_SIMRAD3_HISAS) {
+		    || MBSYS_SIMRAD3_IS_HISAS(sonarswap)) {
 			sonarswapgood = true;
 		}
 		else {
@@ -383,7 +383,7 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	    || *sonar == MBSYS_SIMRAD3_EM3000D_7
 	    || *sonar == MBSYS_SIMRAD3_EM3000D_8
 	    || *sonar == MBSYS_SIMRAD3_EM3002
-	    || *sonar == MBSYS_SIMRAD3_HISAS) {
+	    || MBSYS_SIMRAD3_IS_HISAS(*sonar)) {
 		sonargood = true;
 	}
 	else {
@@ -5199,7 +5199,7 @@ Have a nice day...\n");
 					done = true;
 				}
 			}
-			else if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD3_HISAS) {
+			else if (status == MB_SUCCESS && MBSYS_SIMRAD3_IS_HISAS(sonar)) {
 				if (store->pings[store->ping_index].png_bath_read) {
 					store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_COMPLETE;
 					done = true;
@@ -5236,7 +5236,7 @@ Have a nice day...\n");
 					done = true;
 				}
 			}
-			else if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD3_HISAS) {
+			else if (status == MB_SUCCESS && MBSYS_SIMRAD3_IS_HISAS(sonar)) {
 				if (store->pings[store->ping_index].png_bath_read) {
 					store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_COMPLETE;
 					done = true;
@@ -5273,7 +5273,7 @@ Have a nice day...\n");
 					done = true;
 				}
 			}
-			else if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD3_HISAS) {
+			else if (status == MB_SUCCESS && MBSYS_SIMRAD3_IS_HISAS(sonar)) {
 				if (store->pings[store->ping_index].png_bath_read) {
 					store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_COMPLETE;
 					done = true;
