@@ -55,7 +55,8 @@
 // #define MBF_XTFB1624_MAXBEAMS 1
 #define MBF_XTFB1624_MAXRAWPIXELS 15360
 #define MBF_XTFB1624_COMMENT_LENGTH 200
-#define MBF_XTFB1624_MAXLINE 16384
+/* the read buffer must hold one channel of MBF_XTFB1624_MAXRAWPIXELS 2-byte samples */
+#define MBF_XTFB1624_MAXLINE (2 * MBF_XTFB1624_MAXRAWPIXELS)
 static const size_t MBF_XTFB1624_FILEHEADERLEN = 1024;
 // #define XTF_MAGIC_NUMBER 0xFACE
 static const mb_u_char XTF_DATA_SIDESCAN = 0;
@@ -548,6 +549,22 @@ int mbr_dem_xtfb1624(int verbose, void *mbio_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
+/* Check that a sidescan channel header refers to a channel in the file header
+   (which holds at most 6 CHANINFO structures) with 1- or 2-byte samples, and
+   that its samples fit the read buffer and the raw sidescan arrays. */
+static bool mbr_xtfb1624_chan_ok(const struct mbf_xtfb1624_xtffileheader *fileheader,
+                                 const struct mbf_xtfpingchanheader *chanheader) {
+	const int nchan = fileheader->NumberOfSonarChannels + fileheader->NumberOfBathymetryChannels;
+	if (chanheader->ChannelNumber >= nchan || chanheader->ChannelNumber >= 6)
+		return false;
+	const unsigned short bytes_per_sample = fileheader->chaninfo[chanheader->ChannelNumber].BytesPerSample;
+	if (bytes_per_sample != 1 && bytes_per_sample != 2)
+		return false;
+	if (chanheader->NumSamples > MBF_XTFB1624_MAXRAWPIXELS)
+		return false;
+	return true;
+}
+/*--------------------------------------------------------------------*/
 int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -775,6 +792,7 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	struct mbf_xtfpacketheader packetheader;
+	long packet_start = 0;
 
 	/* look for next recognizable record */
 	bool done = false;
@@ -804,6 +822,9 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 		/* read the next packet header */
 		read_len = fread(&(line[2]), 1, 12, mb_io_ptr->mbfp);
 		if (read_len == 12) {
+			/* file position of the start of this packet */
+			packet_start = ftell(mb_io_ptr->mbfp) - 14;
+
 			/* extract data from buffer */
 			int index = 0;
 			packetheader.MagicNumber[0] = line[index];
@@ -1138,47 +1159,39 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 				done = true;
 			}
 
-			/* check for corrupted record */
-			if (pingchanportheader->ChannelNumber >
-			    (fileheader->NumberOfSonarChannels + fileheader->NumberOfBathymetryChannels - 1)) {
+			/* check for corrupted record or a channel that does not fit the sample arrays
+			   (SamplesPerChannel in the file header is not used anymore, the number of
+			   samples can change with the range) */
+			if (status == MB_SUCCESS && !mbr_xtfb1624_chan_ok(fileheader, pingchanportheader)) {
 				status = MB_FAILURE;
 				*error = MB_ERROR_UNINTELLIGIBLE;
 			}
-			/*		else if (pingchanportheader->NumSamples
-			            > fileheader->chaninfo[pingchanportheader->ChannelNumber].SamplesPerChannel)
-			            {
-			            status = MB_FAILURE;
-			            *error = MB_ERROR_UNINTELLIGIBLE;
-			            }
-			jrenken: SamplesPerChannel not used anymore, value can change dependend on range
-			*/
+
 			/* read port sidescan data */
-			int read_len;
-			int read_bytes;
 			if (status == MB_SUCCESS) {
-				read_bytes =
+				const size_t read_bytes =
 				    pingchanportheader->NumSamples * fileheader->chaninfo[pingchanportheader->ChannelNumber].BytesPerSample;
-				read_len = fread(line, 1, read_bytes, mb_io_ptr->mbfp);
-			}
-			if (status == MB_SUCCESS && read_len == read_bytes) {
-				if (fileheader->chaninfo[pingchanportheader->ChannelNumber].BytesPerSample == 1) {
-					for (unsigned int i = 0; i < pingchanportheader->NumSamples; i++) {
-						mb_u_char *mb_u_char_ptr = (mb_u_char *)&line[i];
-						data->ssrawport[i] = (unsigned short)(*mb_u_char_ptr);
+				const size_t read_len = fread(line, 1, read_bytes, mb_io_ptr->mbfp);
+				if (read_len == read_bytes) {
+					if (fileheader->chaninfo[pingchanportheader->ChannelNumber].BytesPerSample == 1) {
+						for (unsigned int i = 0; i < pingchanportheader->NumSamples; i++) {
+							mb_u_char *mb_u_char_ptr = (mb_u_char *)&line[i];
+							data->ssrawport[i] = (unsigned short)(*mb_u_char_ptr);
+						}
+					}
+					else if (fileheader->chaninfo[pingchanportheader->ChannelNumber].BytesPerSample == 2) {
+						int index = 0;
+						for (unsigned int i = 0; i < pingchanportheader->NumSamples; i++) {
+							mb_get_binary_short(true, &line[index], (short *)&(data->ssrawport[i]));
+							index += 2;
+						}
 					}
 				}
-				else if (fileheader->chaninfo[pingchanportheader->ChannelNumber].BytesPerSample == 2) {
-					int index = 0;
-					for (unsigned int i = 0; i < pingchanportheader->NumSamples; i++) {
-						mb_get_binary_short(true, &line[index], (short *)&(data->ssrawport[i]));
-						index += 2;
-					}
+				else {
+					status = MB_FAILURE;
+					*error = MB_ERROR_EOF;
+					done = true;
 				}
-			}
-			else {
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
-				done = true;
 			}
 
 			/* read and parse the starboard sidescan channel header */
@@ -1240,54 +1253,56 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 					pingchanstbdheader->TimeDuration = pingchanstbdheader->SlantRange / pingheader->SoundVelocity;
 				}
 			}
-			else {
+			else if (status == MB_SUCCESS) {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
 				done = true;
 			}
 
-			/* check for corrupted record */
-			if (pingchanstbdheader->ChannelNumber >
-			    (fileheader->NumberOfSonarChannels + fileheader->NumberOfBathymetryChannels - 1)) {
+			/* check for corrupted record or a channel that does not fit the sample arrays */
+			if (status == MB_SUCCESS && !mbr_xtfb1624_chan_ok(fileheader, pingchanstbdheader)) {
 				status = MB_FAILURE;
 				*error = MB_ERROR_UNINTELLIGIBLE;
 			}
-			/*		else if (pingchanstbdheader->NumSamples
-			            > fileheader->chaninfo[pingchanstbdheader->ChannelNumber].SamplesPerChannel)
-			            {
-			            status = MB_FAILURE;
-			            *error = MB_ERROR_UNINTELLIGIBLE;
-			            }
-			jrenken: SamplesPerChannel not used anymore, value can change depending on range
-			*/
+
 			/* read starboard sidescan data */
 			if (status == MB_SUCCESS) {
-				read_bytes =
+				const size_t read_bytes =
 				    pingchanstbdheader->NumSamples * fileheader->chaninfo[pingchanstbdheader->ChannelNumber].BytesPerSample;
-				read_len = fread(line, 1, read_bytes, mb_io_ptr->mbfp);
-			}
-			if (status == MB_SUCCESS && read_len == read_bytes) {
-				if (fileheader->chaninfo[pingchanstbdheader->ChannelNumber].BytesPerSample == 1) {
-					for (unsigned int i = 0; i < pingchanstbdheader->NumSamples; i++) {
-						mb_u_char *mb_u_char_ptr = (mb_u_char *)&line[i];
-						data->ssrawstbd[i] = (unsigned short)(*mb_u_char_ptr);
+				const size_t read_len = fread(line, 1, read_bytes, mb_io_ptr->mbfp);
+				if (read_len == read_bytes) {
+					if (fileheader->chaninfo[pingchanstbdheader->ChannelNumber].BytesPerSample == 1) {
+						for (unsigned int i = 0; i < pingchanstbdheader->NumSamples; i++) {
+							mb_u_char *mb_u_char_ptr = (mb_u_char *)&line[i];
+							data->ssrawstbd[i] = (unsigned short)(*mb_u_char_ptr);
+						}
+					}
+					else if (fileheader->chaninfo[pingchanstbdheader->ChannelNumber].BytesPerSample == 2) {
+						int index = 0;
+						for (unsigned int i = 0; i < pingchanstbdheader->NumSamples; i++) {
+							mb_get_binary_short(true, &line[index], (short *)&(data->ssrawstbd[i]));
+							index += 2;
+						}
 					}
 				}
-				else if (fileheader->chaninfo[pingchanstbdheader->ChannelNumber].BytesPerSample == 2) {
-					int index = 0;
-					for (unsigned int i = 0; i < pingchanstbdheader->NumSamples; i++) {
-						mb_get_binary_short(true, &line[index], (short *)&(data->ssrawstbd[i]));
-						index += 2;
-					}
+				else {
+					status = MB_FAILURE;
+					*error = MB_ERROR_EOF;
+					done = true;
 				}
 			}
-			else {
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
+
+			/* skip the rest of a record with a bad sidescan channel so that the next
+			   read starts at the following packet */
+			if (status == MB_FAILURE && *error == MB_ERROR_UNINTELLIGIBLE) {
+				if (verbose > 0)
+					fprintf(stderr, "Bad sidescan channel in xtf ping %u - skip this record\n", pingheader->PingNumber);
+				if (packetheader.NumBytesThisRecord > 14)
+					fseek(mb_io_ptr->mbfp, packet_start + (long)packetheader.NumBytesThisRecord, SEEK_SET);
 				done = true;
 			}
 
-			if (verbose >= 5) {
+			if (status == MB_SUCCESS && verbose >= 5) {
 				fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg5       MagicNumber:                %d %d %x%x\n", pingheader->packetheader.MagicNumber[0],
 				        pingheader->packetheader.MagicNumber[1], pingheader->packetheader.MagicNumber[0],
@@ -1414,9 +1429,9 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 				for (unsigned int i = 0; i < MAX(pingchanportheader->NumSamples, pingchanstbdheader->NumSamples); i++)
 					fprintf(stderr, "dbg5       sidescan[%4.4d]: %d %d\n", i, data->ssrawport[i], data->ssrawstbd[i]);
 			}
-			/* set success */
-			status = MB_SUCCESS;
-			*error = MB_ERROR_NO_ERROR;
+			/* set success only if the whole ping was read */
+			if (status == MB_SUCCESS)
+				*error = MB_ERROR_NO_ERROR;
 			done = true;
 		}
 
