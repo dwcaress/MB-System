@@ -797,6 +797,9 @@ int mb_altint_interp(int verbose, void *mbio_ptr, double time_d, double *altitud
 int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int merge_nav_lonflip, int *merge_nav_num,
                    int *merge_nav_alloc, double **merge_nav_time_d, double **merge_nav_lon, double **merge_nav_lat,
                    double **merge_nav_speed, int *error);
+int mb_loadkmallnav(int verbose, char *nav_file, int *nav_num, double **nav_time_d, double **nav_lon, double **nav_lat,
+                    double **nav_speed, double **nav_heading, double **nav_roll, double **nav_pitch, double **nav_heave,
+                    int *error);
 int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_sensordepth_format, int *merge_sensordepth_num,
                            int *merge_sensordepth_alloc, double **merge_sensordepth_time_d,
                            double **merge_sensordepth_sensordepth, int *error);

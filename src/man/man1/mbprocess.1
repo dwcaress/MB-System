@@ -150,8 +150,9 @@ The \fBmbprocess\fP commands found in parameter files are:
  	see below (NAVIGATION FORMATS section) for
  	documentation of the supported navigation formats;
  	formats 1-10 are ASCII text, format 11 is RVDAS
- 	binary-like text, and format 12 is Kongsberg
- 	Navlab binary
+ 	binary-like text, format 12 is Kongsberg
+ 	Navlab binary, and format 13 is Kongsberg
+ 	kmall navigation (#SKM records)
    NAVHEADING boolean
         sets heading to be merged from navigation file
         \- note: heading merged from navigation before
@@ -957,6 +958,7 @@ include the following:
  	         10             R2RNAV (*_hires.r2rnav Files)
  	         11             RVDAS ($SPRINT sentences)
  	         12             Kongsberg Navlab Binary (navlab_smooth.bin)
+ 	         13             Kongsberg kmall navigation (#SKM records)
 
 Format 1 (Simple Decimal Time):
  	\- text
@@ -1162,6 +1164,25 @@ Format 12 (Kongsberg Navlab Binary (navlab_smooth.bin)):
  	\- NAVHEADING, NAVATTITUDE flags are supported with this format
  	\- the same file can be specified for NAVFILE, ATTITUDEFILE,
  	  and SONARDEPTHFILE simultaneously
+
+Format 13 (Kongsberg kmall navigation (#SKM records)):
+ 	\- binary Kongsberg kmall file; only the #SKM (sensor KM binary)
+ 	  records are used, other records are skipped
+ 	\- for example the NavLab and real\-time navigation files
+ 	  written with Kongsberg AUV data (decimated\-navlab.kmall,
+ 	  decimated\-navp.kmall); records that end with a length of 0
+ 	  instead of the repeated datagram length are accepted
+ 	\- fields used by mbprocess from each KMbinary sample:
+ 		time (seconds and nanoseconds since 1970 Jan 1 00:00:00.00)
+ 		latitude and longitude (decimal degrees)
+ 		heading, roll and pitch (degrees)
+ 		heave (m, passed on unchanged as for format 261)
+ 		speed from the north and east velocities
+ 	\- samples with the position flagged invalid in the status
+ 	  word (bit 0) are skipped
+ 	\- draft is not available (the ellipsoid height is not used);
+ 	  NAVDRAFT is disabled with this format
+ 	\- NAVHEADING, NAVSPEED and NAVATTITUDE are supported
 
 .SH EXAMPLES
 Suppose the user has a Simrad EM120 data file called

@@ -1240,6 +1240,55 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 
 	int status = MB_SUCCESS;
 
+	/* Kongsberg kmall #SKM navigation: read with mb_loadkmallnav() */
+	if (merge_nav_format == MB_PR_NAV_FORMAT_KMALL) {
+		int nkmall = 0;
+		double *k_time_d = NULL, *k_lon = NULL, *k_lat = NULL, *k_speed = NULL;
+		double *k_heading = NULL, *k_roll = NULL, *k_pitch = NULL, *k_heave = NULL;
+		status = mb_loadkmallnav(verbose, merge_nav_file, &nkmall, &k_time_d, &k_lon, &k_lat, &k_speed, &k_heading,
+		                         &k_roll, &k_pitch, &k_heave, error);
+		if (status == MB_SUCCESS && *merge_nav_alloc < nkmall) {
+			const size_t size = nkmall * sizeof(double);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)merge_nav_time_d, error);
+			if (status == MB_SUCCESS)
+				status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)merge_nav_lon, error);
+			if (status == MB_SUCCESS)
+				status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)merge_nav_lat, error);
+			if (status == MB_SUCCESS)
+				status = mb_reallocd(verbose, __FILE__, __LINE__, size, (void **)merge_nav_speed, error);
+			*merge_nav_alloc = status == MB_SUCCESS ? nkmall : 0;
+		}
+		*merge_nav_num = 0;
+		if (status == MB_SUCCESS) {
+			for (int i = 0; i < nkmall; i++) {
+				(*merge_nav_time_d)[i] = k_time_d[i];
+				(*merge_nav_lon)[i] = k_lon[i];
+				(*merge_nav_lat)[i] = k_lat[i];
+				(*merge_nav_speed)[i] = k_speed[i];
+				mb_apply_lonflip(verbose, merge_nav_lonflip, &(*merge_nav_lon)[i]);
+			}
+			*merge_nav_num = nkmall;
+		}
+		int error_free = MB_ERROR_NO_ERROR;
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&k_time_d, &error_free);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&k_lon, &error_free);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&k_lat, &error_free);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&k_speed, &error_free);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&k_heading, &error_free);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&k_roll, &error_free);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&k_pitch, &error_free);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&k_heave, &error_free);
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+			fprintf(stderr, "dbg2  Return values:\n");
+			fprintf(stderr, "dbg2       merge_nav_num:      %d\n", *merge_nav_num);
+			fprintf(stderr, "dbg2       error:              %d\n", *error);
+			fprintf(stderr, "dbg2  Return status:\n");
+			fprintf(stderr, "dbg2       status:             %d\n", status);
+		}
+		return (status);
+	}
+
 	/* count the records */
 	*error = MB_ERROR_NO_ERROR;
 	nrecord = 0;
@@ -3146,4 +3195,188 @@ int mb_apply_time_filter(int verbose, int data_num, double *data_time_d, double 
 	return (status);
 }
 
+/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/*	function mb_loadkmallnav reads the navigation and attitude samples of
+ *	the '#SKM' (KMbinary) records of a Kongsberg kmall file, for example the
+ *	navigation files written with Kongsberg AUV data (NavLab or real-time solution).
+ *	Records ending with a length of 0 instead of the repeated datagram
+ *	length are accepted. Samples flagged with invalid position (status bit 0)
+ *	are skipped, and so are samples not later than the previous one. The
+ *	arrays are allocated here and must be freed by the caller with mb_freed().
+ *	Speed is in km/hr from the north and east velocities; heading, roll and
+ *	pitch are in degrees; heave is in m and passed on unchanged, as the kmall
+ *	reader (format 261) does.
+ */
+int mb_loadkmallnav(int verbose, char *nav_file, int *nav_num, double **nav_time_d, double **nav_lon, double **nav_lat,
+                    double **nav_speed, double **nav_heading, double **nav_roll, double **nav_pitch, double **nav_heave,
+                    int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:                %d\n", verbose);
+		fprintf(stderr, "dbg2       nav_file:               %s\n", nav_file);
+	}
+
+	/* record layout: 20 byte header, info part, samples (KMbinary: 4 byte "#KMB",
+	   2 byte length, 2 byte version, time sec, nanosec, status, lat, lon (double),
+	   then floats from the ellipsoid height on) */
+	const size_t header_size = 20;
+	const size_t sample_bytes_used = 76; /* up to and including velEast */
+
+	int status = MB_SUCCESS;
+	*error = MB_ERROR_NO_ERROR;
+	*nav_num = 0;
+	*nav_time_d = NULL;
+	*nav_lon = NULL;
+	*nav_lat = NULL;
+	*nav_speed = NULL;
+	*nav_heading = NULL;
+	*nav_roll = NULL;
+	*nav_pitch = NULL;
+	*nav_heave = NULL;
+
+	FILE *fp = fopen(nav_file, "rb");
+	if (fp == NULL) {
+		*error = MB_ERROR_OPEN_FAIL;
+		status = MB_FAILURE;
+	}
+
+	char *buffer = NULL;
+	size_t buffer_size = 0;
+	int nalloc = 0;
+	for (int pass = 0; status == MB_SUCCESS && pass < 2; pass++) {
+		/* pass 0 counts the samples, pass 1 allocates the arrays and reads them */
+		if (pass == 1) {
+			if (nalloc < 1)
+				break;
+			const size_t size = nalloc * sizeof(double);
+			status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)nav_time_d, error);
+			if (status == MB_SUCCESS)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)nav_lon, error);
+			if (status == MB_SUCCESS)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)nav_lat, error);
+			if (status == MB_SUCCESS)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)nav_speed, error);
+			if (status == MB_SUCCESS)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)nav_heading, error);
+			if (status == MB_SUCCESS)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)nav_roll, error);
+			if (status == MB_SUCCESS)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)nav_pitch, error);
+			if (status == MB_SUCCESS)
+				status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)nav_heave, error);
+			if (status != MB_SUCCESS)
+				break;
+			rewind(fp);
+		}
+		int n = 0;
+		char header[20];
+		while (fread(header, 1, header_size, fp) == header_size) {
+			unsigned int num_bytes = 0;
+			mb_get_binary_int(true, &header[0], &num_bytes);
+			if (num_bytes < header_size + 4 || num_bytes > 10000000)
+				break;
+			const size_t body_size = num_bytes - header_size;
+			if (strncmp(&header[4], "#SKM", 4) != 0) {
+				if (fseek(fp, (long)body_size, SEEK_CUR) != 0)
+					break;
+				continue;
+			}
+			if (body_size > buffer_size) {
+				status = mb_reallocd(verbose, __FILE__, __LINE__, body_size, (void **)&buffer, error);
+				if (status != MB_SUCCESS) {
+					buffer_size = 0;
+					break;
+				}
+				buffer_size = body_size;
+			}
+			if (fread(buffer, 1, body_size, fp) != body_size)
+				break;
+
+			/* info part */
+			unsigned short num_bytes_info = 0, num_samples = 0, num_bytes_sample = 0;
+			mb_get_binary_short(true, &buffer[0], &num_bytes_info);
+			mb_get_binary_short(true, &buffer[6], &num_samples);
+			mb_get_binary_short(true, &buffer[8], &num_bytes_sample);
+			if (num_bytes_info < 12 || num_bytes_sample < sample_bytes_used ||
+			    (size_t)num_bytes_info + (size_t)num_samples * num_bytes_sample + 4 > body_size)
+				continue;
+
+			for (int i = 0; i < num_samples; i++) {
+				const char *sample = &buffer[num_bytes_info + i * num_bytes_sample];
+				if (strncmp(sample, "#KMB", 4) != 0)
+					continue;
+				unsigned int time_sec = 0, time_nanosec = 0, sample_status = 0;
+				mb_get_binary_int(true, (void *)&sample[8], &time_sec);
+				mb_get_binary_int(true, (void *)&sample[12], &time_nanosec);
+				mb_get_binary_int(true, (void *)&sample[16], &sample_status);
+				if ((sample_status & 0x01) != 0)
+					continue;
+				const double time_d = time_sec + 0.000000001 * time_nanosec;
+				if (n > 0 && pass == 1 && time_d <= (*nav_time_d)[n - 1])
+					continue;
+				if (pass == 1 && n < nalloc) {
+					double lat, lon;
+					float roll, pitch, heading, heave, vel_north, vel_east;
+					mb_get_binary_double(true, (void *)&sample[20], &lat);
+					mb_get_binary_double(true, (void *)&sample[28], &lon);
+					mb_get_binary_float(true, (void *)&sample[40], &roll);
+					mb_get_binary_float(true, (void *)&sample[44], &pitch);
+					mb_get_binary_float(true, (void *)&sample[48], &heading);
+					mb_get_binary_float(true, (void *)&sample[52], &heave);
+					mb_get_binary_float(true, (void *)&sample[68], &vel_north);
+					mb_get_binary_float(true, (void *)&sample[72], &vel_east);
+					(*nav_time_d)[n] = time_d;
+					(*nav_lon)[n] = lon;
+					(*nav_lat)[n] = lat;
+					(*nav_speed)[n] = 3.6 * sqrt((double)vel_north * vel_north + (double)vel_east * vel_east);
+					(*nav_heading)[n] = heading;
+					(*nav_roll)[n] = roll;
+					(*nav_pitch)[n] = pitch;
+					(*nav_heave)[n] = heave;
+				}
+				n++;
+			}
+		}
+		if (pass == 0)
+			nalloc = n;
+		else
+			*nav_num = n < nalloc ? n : nalloc;
+	}
+
+	if (buffer != NULL)
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&buffer, error);
+	if (fp != NULL)
+		fclose(fp);
+	if (status == MB_SUCCESS && *nav_num < 1) {
+		*error = MB_ERROR_NO_DATA_LOADED;
+		status = MB_FAILURE;
+	}
+	if (status == MB_SUCCESS)
+		*error = MB_ERROR_NO_ERROR;
+	else {
+		int error_free = MB_ERROR_NO_ERROR;
+		mb_freed(verbose, __FILE__, __LINE__, (void **)nav_time_d, &error_free);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)nav_lon, &error_free);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)nav_lat, &error_free);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)nav_speed, &error_free);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)nav_heading, &error_free);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)nav_roll, &error_free);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)nav_pitch, &error_free);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)nav_heave, &error_free);
+		*nav_num = 0;
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       nav_num:      %d\n", *nav_num);
+		fprintf(stderr, "dbg2       error:        %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:       %d\n", status);
+	}
+
+	return (status);
+}
 /*--------------------------------------------------------------------*/
