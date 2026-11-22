@@ -1106,6 +1106,13 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		else
 			depthsensor_mode = MBSYS_SIMRAD3_ZMODE_USE_HEAVE_ONLY;
 
+		/* a depth sensor is configured but no sensordepth data are available -
+		    keep the transducer depth logged in the ping */
+		if ((depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY
+		    || depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_AND_HEAVE)
+		    && pars->n_sensordepth < 1)
+			depthsensor_mode = MBSYS_SIMRAD3_ZMODE_UNKNOWN;
+
 		/*--------------------------------------------------------------*/
 		/* change timestamp if indicated */
 		/*--------------------------------------------------------------*/
@@ -1167,7 +1174,7 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		mb_linear_interp(verbose, pars->nav_time_d - 1, pars->nav_speed - 1, pars->n_nav, time_d, &speed, &jnav, &interp_error);
 
 		/* interpolate sensordepth */
-		double sensordepth;
+		double sensordepth = 0.0;
 		int jsensordepth;
 		mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
 		                                 pars->n_sensordepth, time_d, &sensordepth, &jsensordepth, &interp_error);
@@ -1514,8 +1521,9 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 				                                 receive_time_d, &receive_heave, &jattitude, error);
 
 			/* use sensordepth instead of heave for submerged platforms */
-			if (depthsensor_mode != MBSYS_SIMRAD3_ZMODE_USE_HEAVE_ONLY) {
-				double transmit_sensordepth, receive_sensordepth;
+			if (depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_ONLY
+			    || depthsensor_mode == MBSYS_SIMRAD3_ZMODE_USE_SENSORDEPTH_AND_HEAVE) {
+				double transmit_sensordepth = 0.0, receive_sensordepth = 0.0;
 				mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
 				                                 pars->n_sensordepth, transmit_time_d, &transmit_sensordepth, &jsensordepth, error);
 				mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
