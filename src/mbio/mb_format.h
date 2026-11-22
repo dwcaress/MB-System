@@ -505,7 +505,7 @@ low frequency sidescan returned as survey data, Benthos. */
 #define MBF_HISASALL 212
 /* Kongsberg HISAS synthetic aperture sonar sidescan \
 variable pixels, sidescan, binary datagrams, \
-Kongsberg *.all files, single files, read only, Kongsberg. */
+Kongsberg *.all files, single files, vehicle positions (no lever arm), read only, Kongsberg. */
 
 #define MBF_SWPLSSXI 221
 /* SEA intermediate format for SWATHplus interferometric sonar,                                 \
