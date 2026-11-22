@@ -1637,6 +1637,48 @@ void model_gpu_fallback() {
         "OpenGL, Direct3D 11 or Null; with a test's fake times on all of them");
 }
 
+/* 7d1 (7d-14): how the soundings' position and colour chunks are made, per
+   API and features: static with storage use where the backend can splat,
+   else dynamic on Metal and static elsewhere */
+void model_chunk_use() {
+  using rhi::WaitApi;
+  const auto is = [](rhi::ChunkUse use, bool storage, bool dynamic) {
+    return use.storage == storage && use.dynamic == dynamic;
+  };
+  const int g = rhi::kSplatGroup;
+  bool ok = rhi::kSplatGroup == 128;
+  /* the APIs that can splat, with Compute and limits of 1024 (Null: 0, not
+     reported) */
+  ok = ok && is(rhi::chunk_use(WaitApi::Metal, true, 1024, 1024), true, false) &&
+       is(rhi::chunk_use(WaitApi::Vulkan, true, 1024, 1024), true, false) &&
+       is(rhi::chunk_use(WaitApi::OpenGL, true, 1024, 1024), true, false) &&
+       is(rhi::chunk_use(WaitApi::Null, true, 0, 0), true, false);
+  /* Direct3D with and without Compute, and every other API without it */
+  ok = ok && is(rhi::chunk_use(WaitApi::Direct3D11, true, 1024, 1024), false, false) &&
+       is(rhi::chunk_use(WaitApi::Direct3D12, true, 1024, 1024), false, false) &&
+       is(rhi::chunk_use(WaitApi::Direct3D11, false, 1024, 1024), false, false) &&
+       is(rhi::chunk_use(WaitApi::Direct3D12, false, 1024, 1024), false, false) &&
+       is(rhi::chunk_use(WaitApi::Metal, false, 1024, 1024), false, true) &&
+       is(rhi::chunk_use(WaitApi::Vulkan, false, 1024, 1024), false, false) &&
+       is(rhi::chunk_use(WaitApi::OpenGL, false, 0, 0), false, false) &&
+       is(rhi::chunk_use(WaitApi::Null, false, 0, 0), false, false);
+  /* each limit held at the group size, crossed by one, and 0 (not reported) */
+  for (WaitApi api : {WaitApi::Metal, WaitApi::Vulkan, WaitApi::OpenGL}) {
+    const bool metal = api == WaitApi::Metal;
+    ok = ok && is(rhi::chunk_use(api, true, g, 1024), true, false) &&
+         is(rhi::chunk_use(api, true, 1024, g), true, false) &&
+         is(rhi::chunk_use(api, true, g - 1, 1024), false, metal) &&
+         is(rhi::chunk_use(api, true, 1024, g - 1), false, metal) &&
+         is(rhi::chunk_use(api, true, 64, 64), false, metal) && is(rhi::chunk_use(api, true, 0, 1024), true, false) &&
+         is(rhi::chunk_use(api, true, 1024, 0), true, false);
+  }
+  check(ok, "7d1: the soundings' chunks get storage use (static) on Metal, Vulkan, OpenGL and Null with Compute and "
+            "both thread limits " +
+                std::to_string(g) + " or more (or 0, not reported); not on Direct3D 11 or 12, without Compute, or "
+                                    "with a limit of " +
+                std::to_string(g - 1) + " (then dynamic on Metal, static elsewhere)");
+}
+
 /* 7c-2: the map's stride loop passes over the levels the GPU-time fallback
    marked at the frame's zoom's level, while dragged, never those of other
    zooms, and keeps every other rule */
@@ -7431,6 +7473,8 @@ int test_model() {
      its marks */
   model_gpu_fallback();
   model_gpu_marks();
+  /* 7d1: how the soundings' position and colour chunks are made (7d-14) */
+  model_chunk_use();
   return result();
 }
 
@@ -8112,6 +8156,42 @@ void null_lod_levels() {
   mb3dsoundings_end(0, &error);
 }
 
+/* 7d1 (7d-14) with a Null QRhi, which reports Compute and no thread limits:
+   the soundings' position and colour chunks have storage use, and the types
+   of the other soundings' buffers with chunk_storage 0; switching the option
+   on one offscreen renderer makes its soundings renderer again */
+void null_chunk_storage() {
+  make_sdg(40, 25, 7);
+  check(open_sdg(), "7d1 Null: the soundings handed over for the chunks' storage use");
+  sdg_camera(90.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+  sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_ALL, true);
+  mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+  mbvq::RenderOptions options;
+  options.soundings_chunk = 300;
+  /* a renderer made in the call has rendered only that call's frames (its
+     statistics are totals since it was made) */
+  std::vector<int> storage, made, drawn, held;
+  bool ok = true;
+  for (const int option : {-1, 0, -1}) {
+    options.chunk_storage = option;
+    ok = renderer.render_soundings(200, 150, options, nullptr) && ok;
+    const mbvq::RenderStats s = renderer.stats();
+    ok = ok && !s.failed;
+    storage.push_back(s.soundings_storage);
+    made.push_back(s.frames == renderer.last_frames() ? 1 : 0);
+    drawn.push_back(s.soundings_drawn);
+    held.push_back(static_cast<int>(s.sounding_held_bytes));
+  }
+  check(ok && storage == std::vector<int>{1, 0, 1} && made == std::vector<int>{1, 1, 1} &&
+            drawn == std::vector<int>{1000, 1000, 1000} && held[0] > 0 && held[0] == held[1] && held[1] == held[2],
+        "7d1 Null: the soundings' chunks with storage use by default and without it with chunk_storage 0 (" +
+            list(storage) + " for the default, 0, the default), the soundings renderer made again at each switch " +
+            list(made) + ", " + list(drawn) + " soundings drawn, the same GPU bytes " + list(held) +
+            " (Null keeps one copy of every buffer)");
+  int error = MB_ERROR_NO_ERROR;
+  mb3dsoundings_end(0, &error);
+}
+
 /* 7c with a Null QRhi: the GPU-time fallback of the map and of the 3D
    soundings. A Null QRhi waits for no GPU: without fake times
    (RenderOptions::gpu_wait_ms and gpu_total_ms) no frame is measured and
@@ -8641,6 +8721,8 @@ int test_render_null() {
   null_gpu_fallback();
   /* 7c: the map's fallback when the zoom moves to another stride in a press */
   null_gpu_zoom();
+  /* 7d1: the chunks' storage use, and the option chunk_storage on one renderer */
+  null_chunk_storage();
   return result();
 }
 
@@ -8843,9 +8925,9 @@ void metal_levels() {
             " of " + std::to_string(covered) + " terrain pixels differ from stride 1, " +
             std::to_string(covered_levels) + " pixels covered against " + std::to_string(covered));
 
-  /* Metal keeps each buffer once per frame in flight, and the memory budget
-     counts every copy (M2): a Metal renderer holds the Null one's bytes that
-     many times for the same frame */
+  /* Metal keeps each tile buffer (static, without storage use) once per
+     frame in flight, and the memory budget counts every copy (M2): a Metal
+     renderer holds the Null one's bytes that many times for the same frame */
   {
     mbvq::OffscreenRenderer metal(mbvq::OffscreenRenderer::Api::Metal), null(mbvq::OffscreenRenderer::Api::Null);
     metal.render_map(instance, kWidth, kHeight, options, nullptr);
@@ -9425,18 +9507,23 @@ void metal_soundings() {
   /* Every soundings frame on the same frame slot (an empty frame of the
      QRhi after each, as a window that draws a frame of its own between two
      frames of the view), with new positions in every frame (an exaggeration
-     drag over 50,000 soundings, 600 KB of positions): written whole into
-     dynamic buffers, the positions leave Qt's Metal backend one pending
-     write for the other slot, so the malloc heap stays flat over 90 frames
-     (8 MB allowed); static buffers would keep every frame's upload pending
-     there (54 MB). Each frame and the empty one after it run in an
-     autorelease pool (FramePool, as 6c's batch check). */
-  {
+     drag over 50,000 soundings, 600 KB of positions), so the malloc heap
+     stays flat over 90 frames (8 MB allowed). The positions are static
+     buffers with storage use (7d1), which Qt's Metal backend keeps once, not
+     per frame slot: each upload waits for the next bind, on either slot, and
+     the frame binds it. Then again with the positions dynamic
+     (chunk_storage 0, 6d's type): written whole, they leave one pending write
+     for the other slot. Static buffers without storage use would keep every
+     frame's upload pending there (54 MB). Each frame and the empty one after
+     it run in an autorelease pool (FramePool, as 6c's batch check). */
+  for (const int chunk_storage : {-1, 0}) {
     make_sdg(200, 250, 23);
     open_sdg();
     sdg_camera(35.0f, 125.0f, 1.3f, 0.05f, -0.05f);
     sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_NONE, false);
     mbvq::OffscreenRenderer slot_renderer(mbvq::OffscreenRenderer::Api::Metal);
+    mbvq::RenderOptions slot_options;
+    slot_options.chunk_storage = chunk_storage;
     bool drawn = true;
     int on_slot[2] = {0, 0};
     double heap_start = 0.0;
@@ -9446,7 +9533,7 @@ void metal_soundings() {
         const FramePool pool;
         mb3dsoundings.exaggeration = 1.0f + 0.01f * (f % 50);
         mb3dsoundings_scalez(0, &error);
-        drawn = slot_renderer.render_soundings(W, H, mbvq::RenderOptions(), nullptr, 1);
+        drawn = slot_renderer.render_soundings(W, H, slot_options, nullptr, 1);
         on_slot[slot_renderer.stats().frame_slot == 0 ? 0 : 1]++;
         drawn = drawn && slot_renderer.empty_frame();
       }
@@ -9455,12 +9542,197 @@ void metal_soundings() {
     }
     const double heap = heap_in_use() - heap_start;
     const mbvq::RenderStats st = slot_renderer.stats();
+    const bool storage = chunk_storage != 0;
+    const bool chunks_ok =
+        st.soundings_storage == (storage ? 1 : 0) && st.soundings_applied == 0 && st.soundings_rebuilt == 0;
     check(drawn && (on_slot[0] == 120 || on_slot[1] == 120) && st.sounding_writes[rhi::SoundingsPlan::kPositions] ==
                                                                     writes + 120 &&
-              heap_start > 0.0 && heap < 8.0,
-          "6d Metal: 90 frames of new positions for 50,000 soundings, all on one frame slot" +
+              heap_start > 0.0 && heap < 8.0 && chunks_ok,
+          (storage ? std::string("6d Metal: 90 frames of new positions for 50,000 soundings, all on one frame slot")
+                   : std::string("7d1 Metal: the same 90 frames with the positions dynamic (chunk_storage 0)")) +
               std::string(FramePool::available() ? ", each in an autorelease pool" : "") +
-              ", leave the malloc heap flat (" + text("%+.1f", heap) + " MB, less than 8 MB)");
+              ", leave the malloc heap flat (" + text("%+.1f", heap) + " MB, less than 8 MB)" +
+              (chunks_ok ? std::string()
+                         : "; storage " + std::to_string(st.soundings_storage) + ", applied " +
+                               std::to_string(st.soundings_applied) + ", rebuilt " +
+                               std::to_string(st.soundings_rebuilt)));
+  }
+
+  /* 7d1: the colours and the profile lines written on one frame slot, with a
+     colour mark in every frame and the data unchanged, so that every buffer
+     keeps its size and is written again, not made again: the colours
+     (storage chunks), and the index lists at ratio 1 (thin lines) or the
+     colours per pair at ratio 2 (wide), both dynamic */
+  for (const double ratio : {1.0, 2.0}) {
+    make_sdg(200, 250, 23);
+    open_sdg();
+    sdg_camera(35.0f, 125.0f, 1.3f, 0.05f, -0.05f);
+    sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_ALL, false);
+    mbvq::OffscreenRenderer colour_renderer(mbvq::OffscreenRenderer::Api::Metal);
+    mbvq::RenderOptions colour_options;
+    colour_options.pixel_ratio = ratio;
+    bool drawn = true;
+    int on_slot[2] = {0, 0};
+    double heap_start = 0.0;
+    mbvq::RenderStats at30;
+    for (int f = 0; f < 120 && drawn; f++) {
+      {
+        const FramePool pool;
+        mb3dsoundings_colors_changed(0, &error);
+        drawn = colour_renderer.render_soundings(W, H, colour_options, nullptr, 1);
+        on_slot[colour_renderer.stats().frame_slot == 0 ? 0 : 1]++;
+        drawn = drawn && colour_renderer.empty_frame();
+      }
+      if (f + 1 == 30) {
+        heap_start = heap_in_use();
+        at30 = colour_renderer.stats();
+      }
+    }
+    const double heap = heap_in_use() - heap_start;
+    const mbvq::RenderStats st = colour_renderer.stats();
+    const bool wide = ratio > 1.5;
+    const int stream = wide ? rhi::SoundingsPlan::kPairColours : rhi::SoundingsPlan::kLists;
+    const int colour_writes = st.sounding_writes[rhi::SoundingsPlan::kColours];
+    const int line_writes = st.sounding_writes[stream];
+    /* the lines drawn alike at frame 30 and at the end: the buffers kept their sizes */
+    const bool same = wide ? st.profile_instances == at30.profile_instances && st.profile_instances > 0
+                           : st.profile_indices == at30.profile_indices && st.profile_indices > 0;
+    check(drawn && (on_slot[0] == 120 || on_slot[1] == 120) && st.profile_wide == wide && colour_writes == 120 &&
+              line_writes == 120 && same && heap_start > 0.0 && heap < 8.0 && st.soundings_storage == 1,
+          "7d1 Metal: 90 frames of new colours for 50,000 soundings with the profile lines " +
+              std::string(wide ? "wide (the colours per pair" : "thin (the index lists") +
+              " written in every frame too, their sizes kept), all on one frame slot (" +
+              std::to_string(std::max(on_slot[0], on_slot[1])) + " of 120 frames), leave the malloc heap flat (" +
+              text("%+.1f", heap) + " MB, less than 8 MB; " + std::to_string(colour_writes) + " colour and " +
+              std::to_string(line_writes) + " line writes, storage " + std::to_string(st.soundings_storage) + ")");
+  }
+
+  /* 7d1: writes without a bind. 100,000 soundings in chunks of 36,666, a
+     budget of 1,250,000 bytes, thin profile lines (ratio 1): a positions
+     change before every frame from the allocation's first frame writes the
+     positions whole in every frame from the third (1,200,024 bytes) and
+     leaves too little of the budget for the last chunk's colours, so that
+     chunk is not drawn while the drag lasts (6d's plan) and its positions
+     are written in every frame without a draw. The frame binds them without
+     a draw, so Qt copies each upload at once and the heap stays flat; once
+     the drag stops, the last chunk is drawn. */
+  {
+    make_sdg(400, 250, 23);
+    open_sdg();
+    sdg_camera(35.0f, 125.0f, 1.3f, 0.05f, -0.05f);
+    sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_ALL, false);
+    mbvq::RenderOptions starve;
+    starve.soundings_chunk = 36666;
+    starve.upload_budget = 1250000;
+    mbvq::OffscreenRenderer starved(mbvq::OffscreenRenderer::Api::Metal);
+    bool drawn = true;
+    double heap_start = 0.0;
+    mbvq::RenderStats at30;
+    for (int f = 0; f < 120 && drawn; f++) {
+      {
+        const FramePool pool;
+        mb3dsoundings.exaggeration = 1.0f + 0.01f * (f % 50);
+        mb3dsoundings_scalez(0, &error);
+        drawn = starved.render_soundings(W, H, starve, nullptr, 1);
+        drawn = drawn && starved.empty_frame();
+      }
+      if (f + 1 == 30) {
+        heap_start = heap_in_use();
+        at30 = starved.stats();
+      }
+    }
+    const double heap = heap_in_use() - heap_start;
+    const mbvq::RenderStats st = starved.stats();
+    const int position_writes =
+        st.sounding_writes[rhi::SoundingsPlan::kPositions] - at30.sounding_writes[rhi::SoundingsPlan::kPositions];
+    const int applied = st.soundings_applied - at30.soundings_applied;
+    QImage last, now;
+    const bool still = starved.render_soundings(W, H, starve, &last, 50);
+    const mbvq::RenderStats end = starved.stats();
+    mbvq::OffscreenRenderer fresh(mbvq::OffscreenRenderer::Api::Metal);
+    fresh.render_soundings(W, H, starve, &now, 50);
+    const int differ = differing(last, now);
+    check(drawn && heap_start > 0.0 && !st.profile_wide && position_writes == 270 && st.soundings_shown == 73332 &&
+              applied == 90 && st.soundings_rebuilt == 0 && heap < 8.0 && still && end.soundings_shown == 100000 &&
+              !end.soundings_waiting && differ == 0 && non_white(now) > 0,
+          "7d1 Metal: 90 frames of a drag that starts with a first upload, whose last chunk's colours never fit "
+          "(" + std::to_string(position_writes) + " position writes, " + std::to_string(st.soundings_shown) +
+              " of 100,000 soundings drawn): the last chunk's positions bound without a draw in their frame (" +
+              std::to_string(applied) + " times, " + std::to_string(st.soundings_rebuilt) +
+              " buffers made again), the malloc heap flat (" + text("%+.1f", heap) +
+              " MB, less than 8 MB); after the drag " + std::to_string(end.soundings_shown) + " drawn" +
+              (end.soundings_waiting ? ", uploads still waiting" : "") + ", " + std::to_string(differ) +
+              " px from a renderer made now");
+  }
+
+  /* 7d1: the soundings drawn alike with the storage chunks and with the
+     chunks dynamic (chunk_storage 0): as points and as forced quads with the
+     profile lines thin (ratio 1), and as points with them wide (ratio 2) */
+  {
+    make_sdg(40, 25, 7);
+    open_sdg();
+    sdg_camera(25.0f, 35.0f, 1.0f, 0.0f, 0.0f);
+    sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_ALL, true);
+    std::vector<int> differ, storage, drawn;
+    bool ok = true;
+    for (int c = 0; c < 3; c++) {
+      QImage pictures[2];
+      for (int k = 0; k < 2; k++) {
+        mbvq::RenderOptions options;
+        options.soundings_chunk = 300;
+        options.point_quads = c == 1;
+        options.pixel_ratio = c == 2 ? 2.0 : 1.0;
+        options.chunk_storage = k == 0 ? -1 : 0;
+        mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Metal);
+        ok = renderer.render_soundings(W, H, options, &pictures[k], 50) && ok;
+        const mbvq::RenderStats s = renderer.stats();
+        storage.push_back(s.soundings_storage);
+        drawn.push_back(s.soundings_drawn);
+        ok = ok && s.soundings_storage == (k == 0 ? 1 : 0) && s.soundings_drawn == 1000 &&
+             s.profile_wide == (c == 2) && s.point_quads == (c == 1);
+      }
+      differ.push_back(differing(pictures[0], pictures[1]));
+      ok = ok && non_white(pictures[0]) > 0;
+    }
+    check(ok && differ == std::vector<int>{0, 0, 0},
+          "7d1 Metal: the soundings drawn with the storage chunks and with the chunks dynamic (chunk_storage 0) are "
+          "alike as points and as forced quads with thin profile lines and as points with wide ones (" +
+              list(differ) + " px differ; storage " + list(storage) + ", soundings drawn " + list(drawn) + ")");
+  }
+
+  /* 7d1: the GPU bytes of the soundings' buffers on Metal, each buffer by
+     its own copies: the positions and colours (storage) once, the index
+     lists and colours per pair (dynamic) twice; with the chunks dynamic
+     (chunk_storage 0) everything twice. 1000 soundings in 4 chunks of 300,
+     below the budget (one set per stream), a renderer for each profile mode
+     and no change mark between frames: 12 x (1000 + 3) + 4 x 1000 = 16,036
+     bytes of positions and colours; the thin lines' lists 7,680 and the wide
+     lines' colours per pair 3,996 */
+  {
+    make_sdg(40, 25, 7);
+    open_sdg();
+    sdg_camera(25.0f, 35.0f, 1.0f, 0.0f, 0.0f);
+    const int modes[3] = {MBS_VIEW_PROFILES_NONE, MBS_VIEW_PROFILES_ALL, MBS_VIEW_PROFILES_ALL};
+    const size_t expected[3][2] = {{16036, 32072}, {31396, 47432}, {24028, 40064}};
+    std::vector<int> held;
+    bool ok = true;
+    for (int m = 0; m < 3; m++) {
+      sdg_view(MBS_VIEW_COLOR_FLAG, true, modes[m], true);
+      for (int k = 0; k < 2; k++) {
+        mbvq::RenderOptions options;
+        options.soundings_chunk = 300;
+        options.pixel_ratio = m == 2 ? 2.0 : 1.0;
+        options.chunk_storage = k == 0 ? -1 : 0;
+        mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Metal);
+        ok = renderer.render_soundings(W, H, options, nullptr, 50) && ok;
+        const mbvq::RenderStats s = renderer.stats();
+        held.push_back(static_cast<int>(s.sounding_held_bytes));
+        ok = ok && s.sounding_held_bytes == expected[m][k] && !s.soundings_waiting;
+      }
+    }
+    check(ok, "7d1 Metal: the soundings' GPU bytes with the storage chunks and with the chunks dynamic, without "
+              "profile lines, thin and wide: " +
+                  list(held) + " (expected 16036, 32072; 31396, 47432; 24028, 40064)");
   }
 
   /* The frames a view draws for a drag's last motion, which came while the
@@ -9492,10 +9764,58 @@ void metal_soundings() {
     mbvq::OffscreenRenderer fresh(mbvq::OffscreenRenderer::Api::Metal);
     fresh.render_soundings(W, H, split, &now, 50);
     const int differ = differing(last, now);
-    check(drawn && running && frames < 50 && !dragged.stats().soundings_waiting && differ == 0 && non_white(now) > 0,
+    /* 7d1: the writes into the second set (storage chunks) bound without a
+       draw in their frames: P0 of the 3.5 motion's job, P1 and P2 of it,
+       then P0 to P2 of the 4.0 motion's job (each job's P3 swaps and is
+       drawn) */
+    const mbvq::RenderStats ds = dragged.stats();
+    const bool second_ok = ds.soundings_applied == 6 && ds.soundings_rebuilt == 0;
+    check(drawn && running && frames < 50 && !ds.soundings_waiting && differ == 0 && non_white(now) > 0 && second_ok,
           "6d Metal: the frames a view draws for a drag's last motion during the split upload of the one before end "
           "with the core's newest state (" + std::to_string(frames) + " frames; " + std::to_string(differ) +
-              " px differ from a renderer made now)");
+              " px differ from a renderer made now)" +
+              (second_ok ? std::string()
+                         : "; applied " + std::to_string(ds.soundings_applied) + ", rebuilt " +
+                               std::to_string(ds.soundings_rebuilt)));
+  }
+
+  /* 7d1: double-buffered colours, their second set bound without a draw in
+     the frame of each write before the swap: 1000 soundings in chunks of
+     250 and a budget of 3,500 bytes (positions 12,036 and colours 4,000
+     bytes, both double-buffered, no profile lines); after the first upload a
+     colour mark writes the colours into the second set, three chunks of
+     1,000 bytes in one frame, bound without a draw, and the fourth in the
+     next, which swaps; the last picture as a renderer made now draws it */
+  {
+    make_sdg(40, 25, 7);
+    open_sdg();
+    sdg_camera(25.0f, 35.0f, 1.0f, 0.0f, 0.0f);
+    sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_NONE, true);
+    mbvq::RenderOptions split;
+    split.soundings_chunk = 250;
+    split.upload_budget = 3500;
+    mbvq::OffscreenRenderer coloured(mbvq::OffscreenRenderer::Api::Metal);
+    const bool first = coloured.render_soundings(W, H, split, nullptr, 50);
+    const mbvq::RenderStats before = coloured.stats();
+    sdg_storage[12].beamflag = static_cast<char>(MB_FLAG_FLAG | MB_FLAG_MANUAL);
+    mb3dsoundings_colors_changed(0, &error);
+    QImage last, now;
+    const bool drawn = coloured.render_soundings(W, H, split, &last, 50);
+    const mbvq::RenderStats after = coloured.stats();
+    mbvq::OffscreenRenderer fresh(mbvq::OffscreenRenderer::Api::Metal);
+    fresh.render_soundings(W, H, split, &now, 50);
+    const int differ = differing(last, now);
+    const int writes =
+        after.sounding_writes[rhi::SoundingsPlan::kColours] - before.sounding_writes[rhi::SoundingsPlan::kColours];
+    const int applied = after.soundings_applied - before.soundings_applied;
+    const int swaps = after.sounding_swaps - before.sounding_swaps;
+    check(first && drawn && !before.soundings_waiting && !after.soundings_waiting && writes == 4 && swaps == 1 &&
+              applied == 3 && after.soundings_rebuilt == 0 && differ == 0 && non_white(now) > 0,
+          "7d1 Metal: a colour mark over double-buffered colours (1000 soundings in chunks of 250, a budget of 3,500 "
+          "bytes): " + std::to_string(writes) + " colour chunks written into the second set, " +
+              std::to_string(applied) + " of them bound without a draw before the swap (" + std::to_string(swaps) +
+              " swap), " + std::to_string(after.soundings_rebuilt) + " buffers made again; " +
+              std::to_string(differ) + " px from a renderer made now");
   }
   mb3dsoundings_end(0, &error);
 
@@ -10937,6 +11257,18 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
                   " ms to the submission; measured once (" + std::to_string(f.wait_frames - unpainted.wait_frames) +
                   "); the fallback can act: " + (f.gpu_rule ? "yes" : "no") + " (" +
                   mbvq::rhi_api_name(mbvq::rhi_api()) + ")");
+
+        /* 7d1: the view's position and colour chunks static with storage use
+           where the backend can splat, on Metal always; on the other APIs an
+           information line names the choice (it follows their Compute
+           feature and thread limits) */
+        if (api == QRhiWidget::Api::Metal)
+          check(repainted && f.soundings_storage == 1,
+                "7d1: the 3D soundings view's position and colour chunks are static with storage use on Metal (" +
+                    std::to_string(f.soundings_storage) + ")");
+        else
+          std::printf("info\t7d1\tthe soundings' chunks with storage use: %d (%s)\n", f.soundings_storage,
+                      mbvq::rhi_api_name(mbvq::rhi_api()));
 
         /* A grab renders outside a paint, and the window submits frames
            without a paint of the view (its central label repainted): neither
@@ -12789,14 +13121,20 @@ int bench_soundings(int count, int steps, double point_size, int files, bool til
   /* the end lines: after rotate_profiles, where 6e's five scenarios end, so
      that they compare with 6e's; after erase_profiles again under keys of
      their own (7a); in tile order after its two scenarios, under the keys
-     "end tiles" and "after tiles", the profile lines not shown */
+     "end tiles" and "after tiles", the profile lines not shown. Each gives
+     the GPU bytes of the soundings' buffers (every copy), the swaps and the
+     allocations, and (7d1) the chunks' storage use, the chunks bound without
+     a draw and those made again (RenderStats::soundings_storage,
+     soundings_applied, soundings_rebuilt; totals since the view's renderer
+     was made) */
   const auto report_end = [&](const char *key, const char *when) {
     const mbvq::RenderStats last = mbvq::view_stats(view);
     if (rhi)
       std::printf("info\t%s\tGPU bytes of the soundings' buffers %.1f MB (every copy), swaps %d, allocations %d, "
-                  "profile lines %s\n",
+                  "storage %d, applied %d, rebuilt %d, profile lines %s\n",
                   key, static_cast<double>(last.sounding_held_bytes) / 1048576.0, last.sounding_swaps,
-                  last.sounding_allocations, tiles ? "not shown" : last.profile_wide ? "wide" : "thin");
+                  last.sounding_allocations, last.soundings_storage, last.soundings_applied, last.soundings_rebuilt,
+                  tiles ? "not shown" : last.profile_wide ? "wide" : "thin");
     report_memory(when);
   };
   for (const Scenario &scenario : scenarios) {
@@ -12827,9 +13165,11 @@ int bench_soundings(int count, int steps, double point_size, int files, bool til
        those that complete its writes, which can span frames (7a); frames
        that came between two readings are counted, not summed. On Metal a
        frame's record also copies earlier writes into the buffers of its
-       frame slot (RenderStats::record_ms), so step_record holds one copy of
-       each byte written in a step of one frame and two in a step of several
-       frames, part of them the step before's writes; in the erase drag with
+       frame slot (RenderStats::record_ms): the index lists and colours per
+       pair, kept once per frame slot, one copy of each byte written in a
+       step of one frame and two in a step of several frames, part of them
+       the step before's writes; the positions and colours, kept once
+       (storage use, 7d1), one copy per write. In the erase drag with
        profiles at ratio 1 that is most of the step's record, not all */
     std::vector<double> step_phase[6];
     int phase_frames = 0, phase_missed = 0;
