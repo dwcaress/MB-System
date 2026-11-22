@@ -1,0 +1,35 @@
+/*--------------------------------------------------------------------
+ *    The MB-system:  mbvq_splat_clear.comp  11/22/2026
+ *
+ *    Copyright (c) 2026 by
+ *    Christian dos Santos Ferreira, MARUM, University of Bremen
+ *    David W. Caress, Monterey Bay Aquarium Research Institute
+ *    Dale N. Chayes, Center for Coastal and Ocean Mapping
+ *
+ *    See README.md file for copying and redistribution conditions.
+ *--------------------------------------------------------------------*/
+/* mbview-qt (QRhi): compute splatting of the 3D soundings (SoundingsRenderer), the clear: every pixel's depth to
+   empty (0xFFFFFFFF, behind every depth) and its winner to 0x7FFFFFFF (above every sounding's index, below every
+   colour), in a loop strided by the groups dispatched */
+#version 440
+
+layout(local_size_x = 128) in;
+
+/* the block of a splat dispatch or draw (the same in the splat shaders; SplatBlock, mbvq_rhi_model.h) */
+layout(std140, binding = 4) uniform Splat {
+  mat4 mvp;      // the soundings slot's matrix: clip-space correction x projection x modelview
+  vec4 viewport; // render-target width and height, the splat's size (physical pixels), 1 to flip the rows
+  uvec4 counts;  // soundings of the dispatch (at the stride), pixels, the chunk's first sounding, 1: clip depth 0..1
+  uvec4 grid;    // groups dispatched (no gl_NumWorkGroups), the stride, the phase, the pass
+};
+
+layout(std430, binding = 2) writeonly buffer Depth { uint depth[]; };
+layout(std430, binding = 3) writeonly buffer Winner { uint winner[]; };
+
+void main() {
+  uint advance = grid.x * gl_WorkGroupSize.x;
+  for (uint i = gl_GlobalInvocationID.x; i < counts.y; i += advance) {
+    depth[i] = 0xFFFFFFFFu;
+    winner[i] = 0x7FFFFFFFu;
+  }
+}

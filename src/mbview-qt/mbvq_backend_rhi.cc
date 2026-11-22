@@ -788,6 +788,9 @@ bool RhiProfileView::event(QEvent *qevent) {
 
 /* the point-size control of the 3D soundings view, logical pixels */
 double soundings_point_size = 3.0;
+/* how the 3D soundings view splats: tests and the hand mode
+   (mbvq::set_soundings_splat) */
+Splat soundings_splat = Splat::Auto;
 
 /* The 3D soundings view (one per program). */
 class RhiSoundingsView final : public RhiView {
@@ -922,6 +925,7 @@ void RhiSoundingsView::render(QRhiCommandBuffer *cb) {
      rose, at the view's pixel ratio and the program's point size. */
   renderer->set_pixel_ratio(devicePixelRatioF());
   renderer->set_point_size(soundings_point_size);
+  renderer->set_splat(soundings_splat);
   renderer->set_gpu_wait(gpu_wait_ms());
   /* during a camera press the GPU-time fallback may draw fewer soundings */
   frame_.set_drag(camera_press_);
@@ -939,8 +943,10 @@ void RhiSoundingsView::render(QRhiCommandBuffer *cb) {
     hide_failure();
   }
 
-  /* opaque white, as the OpenGL view clears */
+  /* opaque white, as the OpenGL view clears; the splat's compute passes
+     before the render pass, which then take the updates */
   const rhi::Clock::time_point pass = rhi::Clock::now();
+  updates = renderer->compute(cb, updates, pixels);
   cb->beginPass(renderTarget(), Qt::white, {1.0f, 0}, updates);
   const rhi::Clock::time_point commands = rhi::Clock::now();
   renderer->record(cb, pixels);
@@ -1045,6 +1051,14 @@ void set_gpu_wait(QWidget *view, double wait_ms) {
   if (auto *rhi_view = dynamic_cast<rhi_backend::RhiView *>(view))
     rhi_view->set_gpu_wait(wait_ms);
 }
+
+void set_soundings_splat(Splat splat) {
+  rhi_backend::soundings_splat = splat;
+  if (rhi_backend::soundings_view != nullptr)
+    rhi_backend::soundings_view->update();
+}
+
+Splat soundings_splat() { return rhi_backend::soundings_splat; }
 
 RenderStats view_stats(QWidget *view) {
   if (auto *rhi_view = dynamic_cast<rhi_backend::RhiView *>(view))

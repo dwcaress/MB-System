@@ -45,13 +45,25 @@
  *                                         processing (the legacy OpenGL
  *                                         backend, where it is built; 77,
  *                                         skipped, elsewhere)
- *   mbview_qt_soundings_test --show [N]   a window to use by hand, drawn as the
+ *   mbview_qt_soundings_test --show [N] [--point-size p] [--splat on|off]
+ *                                         a window to use by hand, drawn as the
  *                                         programs draw: with the backend
  *                                         MB_RENDERER names, else the build's
  *                                         default; Dismiss or closing the
  *                                         window ends the program
  *                                         (MBVIEW_QT_TEST_DISMISS: Dismiss after
- *                                         half a second)
+ *                                         half a second); N soundings (20,000),
+ *                                         p the Point size box's value under
+ *                                         QRhi (0.5 to 8 in steps of 0.5; the
+ *                                         other backends draw the core's 3
+ *                                         px), and under QRhi whether the view
+ *                                         splats (7d2); under QRhi, after the
+ *                                         view's first frame, a line gives the
+ *                                         physical size and whether it splats
+ *                                         (with the legacy OpenGL backend a
+ *                                         line says that it draws the core's
+ *                                         3 px, with the null backend that it
+ *                                         draws nothing)
  *
  * The synthetic soundings are pings of beams across a sloping, rippled
  * seafloor, every 23rd sounding flagged.
@@ -98,6 +110,7 @@ extern "C" {
 #include "mbvq_soundings.h"
 #ifdef MBVQ_HAVE_RHI
 #include "mbvq_rhi.h"
+#include "mbvq_rhi_model.h"
 #endif
 
 /* from the private soundings header, which needs the Motif-shaped headers */
@@ -889,9 +902,49 @@ int main(int argc, char **argv) {
   const char *mode = argc > 1 ? argv[1] : "";
   const bool null = std::strcmp(mode, "--null") == 0;
   const bool rhi = std::strcmp(mode, "--rhi") == 0;
-  if (!null && !rhi && std::strcmp(mode, "--gl") != 0 && std::strcmp(mode, "--time") != 0 &&
-      std::strcmp(mode, "--show") != 0) {
-    std::fprintf(stderr, "usage: mbview_qt_soundings_test --null | --gl | --rhi | --time N | --show [N]\n");
+  const bool show = std::strcmp(mode, "--show") == 0;
+  /* --show's options (7d2): the number of soundings first (a positive
+     integer, 20,000 if not given), the Point size box's value (as the box
+     allows: 0.5 to 8 in steps of 0.5) and, under QRhi, whether the view
+     splats; anything else gives the usage line */
+  int show_count = 20000;
+  double show_point_size = 0.0;
+  bool arguments = true;
+#ifdef MBVQ_HAVE_RHI
+  bool show_splat = false;
+  mbvq::Splat splat = mbvq::Splat::Auto;
+#endif
+  for (int i = 2; show && i < argc; i++) {
+    char rest = 0;
+    if (std::strcmp(argv[i], "--point-size") == 0) {
+      if (i + 1 >= argc || std::sscanf(argv[++i], "%lf%c", &show_point_size, &rest) != 1 ||
+          !(show_point_size >= 0.5 && show_point_size <= 8.0) ||
+          std::floor(2.0 * show_point_size) != 2.0 * show_point_size)
+        arguments = false;
+    }
+#ifdef MBVQ_HAVE_RHI
+    else if (std::strcmp(argv[i], "--splat") == 0) {
+      show_splat = true;
+      if (i + 1 < argc && std::strcmp(argv[i + 1], "on") == 0)
+        splat = mbvq::Splat::On;
+      else if (i + 1 < argc && std::strcmp(argv[i + 1], "off") == 0)
+        splat = mbvq::Splat::Off;
+      else
+        arguments = false;
+      i++;
+    }
+#endif
+    else if (i != 2 || std::sscanf(argv[i], "%d%c", &show_count, &rest) != 1 || show_count < 1)
+      arguments = false;
+  }
+  if (!arguments || (!null && !rhi && std::strcmp(mode, "--gl") != 0 && std::strcmp(mode, "--time") != 0 && !show)) {
+#ifdef MBVQ_HAVE_RHI
+    std::fprintf(stderr, "usage: mbview_qt_soundings_test --null | --gl | --rhi | --time N | --show [N] "
+                         "[--point-size p] [--splat on|off]\n");
+#else
+    std::fprintf(stderr, "usage: mbview_qt_soundings_test --null | --gl | --rhi | --time N | --show [N] "
+                         "[--point-size p]\n");
+#endif
     return 2;
   }
   /* --gl and --time need the legacy OpenGL backend: a build without it would
@@ -950,11 +1003,46 @@ int main(int argc, char **argv) {
   if (std::strcmp(mode, "--time") == 0)
     return test_time(argc > 2 ? std::atoi(argv[2]) : 200000);
 #endif
-  const int n = argc > 2 ? std::atoi(argv[2]) : 20000;
-  make_soundings(std::max(1, n / 200), 200);
+  /* the point size and the splat mode before the window opens */
+  if (show_point_size > 0.0)
+    mbvq::set_soundings_point_size(show_point_size);
+#ifdef MBVQ_HAVE_RHI
+  if (show_splat)
+    mbvq::set_soundings_splat(splat);
+#endif
+  make_soundings(std::max(1, show_count / 200), 200);
   /* Dismiss only hides the window, as in Motif, so it ends the program here */
   quit_on_dismiss = true;
   open_soundings();
+  /* under QRhi, after the view's first drawn frame: its physical point size
+     and whether its frames splat, from its statistics; the legacy OpenGL
+     backend draws the core's 3 px points, the null backend nothing */
+  bool qrhi_view = false;
+#ifdef MBVQ_HAVE_RHI
+  qrhi_view = mbvq::backend() == mbvq::Backend::Rhi;
+  if (qrhi_view) {
+    auto *first_frame = new QTimer(qApp);
+    QObject::connect(first_frame, &QTimer::timeout, qApp, [first_frame] {
+      QWidget *view = mbvq::soundings_widget() != nullptr ? mbvq::soundings_widget()->view() : nullptr;
+      if (view == nullptr || !mbvq::view_state(view).drawn)
+        return;
+      first_frame->stop();
+      first_frame->deleteLater();
+      const mbvq::RenderStats stats = mbvq::view_stats(view);
+      mbvq::rhi::Style style;
+      style.ratio = view->devicePixelRatioF();
+      style.point_size = mbvq::soundings_point_size();
+      std::printf("info\tshow\tpoint size %.1f logical px, %d physical px at ratio %.2f; splat %d (available %d)\n",
+                  style.point_size, style.point(3.0), style.ratio, stats.splat ? 1 : 0, stats.splat_available ? 1 : 0);
+    });
+    first_frame->start(20);
+  }
+#endif
+  if (!qrhi_view)
+    std::printf("info\tshow\t%s\n", mbvq::backend() == mbvq::Backend::LegacyGL
+                                        ? "the legacy OpenGL backend draws the core's 3 px points (no point size "
+                                          "or splatting of QRhi)"
+                                        : "the null backend draws nothing");
   /* MBVIEW_QT_TEST_DISMISS: press Dismiss after half a second (a check that
      Dismiss ends this program) */
   if (std::getenv("MBVIEW_QT_TEST_DISMISS") != nullptr)

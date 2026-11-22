@@ -76,11 +76,26 @@
  *   (Metal, Vulkan, Direct3D 12), of every 2nd, 4th, 8th or 16th (those
  *   whose index is a multiple of it, record_soundings; the others are not
  *   drawn at all), with the depth test, the soundings the core hides
- *   (alpha 0) moved out of the clip volume; the profile lines from index
+ *   (alpha 0) moved out of the clip volume; at up to rhi::kSplatLargest
+ *   physical pixels (the splat mode On: 1 and 2), where the backend can,
+ *   the soundings are splatted instead: before the render pass, compute
+ *   passes write each pixel's nearest sounding, the lowest index of the
+ *   array at equal depth (as points drawn in order with the depth test
+ *   Less, exactly so where the depth buffer holds 32-bit floats), into two
+ *   per-pixel storage buffers, and at the soundings slot's place a triangle
+ *   over the target draws them with their depth; the per-pixel buffers have
+ *   the target's size, made again whenever a frame splats at a size they do
+ *   not have (so at every step of a live resize, as the widget's own colour
+ *   buffer), and are held only while frames splat; a size at which they
+ *   could not be made is not tried again until a frame tries to splat at
+ *   another size (only the last refused size is remembered), the soundings
+ *   are dropped (new soundings, a failed frame, Dismiss) or the renderer or
+ *   its pipelines are made again; the profile lines from index
  *   lists over the soundings' positions,
  *   or, wider than one physical pixel, as quads instanced over the same
  *   positions with a colour per pair. The soundings' buffers are chunks that
- *   are always written whole (SoundingsPlan). The positions and colours are
+ *   are always written whole (SoundingsPlan), with their splat bindings per
+ *   pair of position and colour sets. The positions and colours are
  *   static buffers with storage use where the backend can splat (chunk_use;
  *   Qt refuses dynamic buffers with that use, and immutable ones are for data
  *   that never change): on Metal Qt keeps such a buffer once, not once per
@@ -128,6 +143,27 @@ namespace rhi {
 /* the size of the uniform slot of a drawing command (std140: mvp, colour,
    viewport, stipple; shaders/mbvq_terrain.vert) */
 constexpr quint32 kSlotBytes = 112;
+/* the bindings of the splat shaders (shaders/mbvq_splat_*): storage buffers
+   at 0 to 3, the uniform block at 4, whose blocks have the size of a slot
+   (SplatBlock). OpenGL ES 3.1 guarantees four storage blocks to compute
+   shaders only (Qt, too, guarantees storage buffers only in compute
+   pipelines: QRhiShaderResourceBinding::bufferLoad()): the resolve's
+   fragment shader reads two (2 and 3), which needs the driver's storage
+   blocks in the fragment stage; without them the resolve cannot be made,
+   and the renderer does not splat but draws points (make_splat) */
+constexpr int kSplatPositionsBinding = 0;
+constexpr int kSplatColoursBinding = 1;
+constexpr int kSplatDepthBinding = 2;
+constexpr int kSplatWinnerBinding = 3;
+constexpr int kSplatUniformBinding = 4;
+static_assert(sizeof(SplatBlock) == kSlotBytes, "a splat block has the size of a uniform slot");
+/* the uniform blocks of a splat frame: the clear's, the resolve's, then
+   three per chunk drawn (depth, winner, colour); room for 16 when the
+   renderer is made (four chunks: 8 M soundings), doubled in place when a
+   frame needs more */
+constexpr quint32 kSplatClearBlock = 0;
+constexpr quint32 kSplatResolveBlock = 1;
+constexpr quint32 kSplatBlocks = 16;
 /* a batch upload above this is reported (RenderStats::batch_over_cap); it is
    never split, since a batch is drawn in the frame that filled it */
 constexpr size_t kBatchCap = static_cast<size_t>(64) << 20;
@@ -175,9 +211,11 @@ class BatchRenderer : public ViewRenderer {
   int fixed_resources() const;
   int batch_resources() const;
   /* the options of the next frames (fail_create counts only when the
-     renderer or its pipelines are made, point_quads and chunk_storage only
-     when its pipelines are made, float_terrain_colours only when the
-     renderer is made) */
+     renderer or its pipelines are made, point_quads, chunk_storage and
+     fail_splat_pipelines only when its pipelines are made,
+     float_terrain_colours only when the renderer is made; splat,
+     splat_group_limit and fail_splat_buffers in every frame;
+     fail_splat_native when its pipelines are made and in every frame) */
   void set_options(const RenderOptions &options) { options_ = options; }
   /* the view's device pixel ratio (devicePixelRatioF()) for the next frames;
      <= 0: RenderOptions::pixel_ratio */
@@ -185,7 +223,18 @@ class BatchRenderer : public ViewRenderer {
   /* the point-size control of the 3D soundings view for the next frames
      (RenderOptions::soundings_point_size) */
   void set_point_size(double logical) { options_.soundings_point_size = logical; }
+  /* the splat mode of the 3D soundings view for the next frames
+     (RenderOptions::splat) */
+  void set_splat(Splat splat) { options_.splat = splat; }
 
+  /* The compute passes of a frame, recorded after frame() and before the
+     render pass begins (the splats are drawn inside the frame's single
+     render pass, which cannot be split around a compute pass: on Apple GPUs
+     its depth lives only inside the pass): a renderer that records any
+     takes the frame's updates in its first pass and returns null; otherwise
+     updates comes back unchanged, for the render pass. The map and profile
+     renderers have none; the 3D soundings' splat. */
+  virtual QRhiResourceUpdateBatch *compute(QRhiCommandBuffer *cb, QRhiResourceUpdateBatch *updates, QSize pixels);
   /* draw inside the render pass */
   void record(QRhiCommandBuffer *cb, QSize pixels);
   /* the times of the frame's pass, which its caller measures (RenderStats):
@@ -278,10 +327,18 @@ class BatchRenderer : public ViewRenderer {
   /* the resources and held bytes into the statistics */
   void count_resources();
   void bind(QRhiCommandBuffer *cb, QRhiGraphicsPipeline *pipeline, int slot, QSize pixels);
+  /* the floats write_slots() wrote for a slot in this frame (kSlotBytes / 4:
+     the matrix in 0 to 15, then colour, size, width, stipple;
+     mbvq_terrain.vert's block); false if the slot was not written */
+  bool slot_floats(int slot, float out[kSlotBytes / sizeof(float)]) const;
   /* a buffer of exactly size bytes, made again when the size changes, none
-     for 0 bytes; false if it cannot be made */
+     for 0 bytes; false if it cannot be made. new_object (if not null): set
+     to whether the buffer had none or another size, so that the old one, if
+     any, was deleted and a new one made (none for 0 bytes): bindings naming
+     the old one are to be made again (a new object can take the old one's
+     address, so a comparison of the pointers does not tell) */
   bool fit(std::unique_ptr<QRhiBuffer> *buffer, quint32 size, QRhiBuffer::Type type = QRhiBuffer::Dynamic,
-           QRhiBuffer::UsageFlags usage = QRhiBuffer::VertexBuffer);
+           QRhiBuffer::UsageFlags usage = QRhiBuffer::VertexBuffer, bool *new_object = nullptr);
   /* a shader of the resources (":/mbvq/...qsb") */
   static QShader shader(const char *name);
   /* the GPU-time fallback: a frame's measured wait and total into the
@@ -302,12 +359,13 @@ class BatchRenderer : public ViewRenderer {
   /* the device pixel ratio the sizes are scaled with: the view's, else the
      options' */
   double pixel_ratio() const { return view_ratio_ > 0.0 ? view_ratio_ : options_.pixel_ratio; }
-  /* a pipeline of the views' kind: the uniform slot's bindings, the pass,
-     the depth test and write (Less) or none */
+  /* a pipeline of the views' kind: the uniform slot's bindings (or other
+     bindings), the pass, the depth test and write (Less) or none */
   std::unique_ptr<QRhiGraphicsPipeline> pipeline(const QShader &vertex, const QShader &fragment,
                                                  const QRhiVertexInputLayout &layout,
                                                  QRhiGraphicsPipeline::Topology topology, bool depth,
-                                                 QRhiRenderPassDescriptor *pass, int samples);
+                                                 QRhiRenderPassDescriptor *pass, int samples,
+                                                 QRhiShaderResourceBindings *bindings = nullptr);
 
   RenderOptions options_;
   int copies_ = 1;         /* the copies the QRhi keeps of each static buffer (one of a storage buffer) */
@@ -515,6 +573,13 @@ class SoundingsRenderer final : public BatchRenderer {
   bool wide_lines() const { return wide_; }
   /* the option chunk_storage the pipelines were made with */
   int chunk_storage() const { return chunk_storage_; }
+  /* the splat passes of the frame frame() prepared (prepare_splat): the
+     clear, then the depth, winner and colour passes over the chunks drawn,
+     before the render pass (BatchRenderer::compute) */
+  QRhiResourceUpdateBatch *compute(QRhiCommandBuffer *cb, QRhiResourceUpdateBatch *updates, QSize pixels) override;
+  /* the renderer can splat: its chunks have storage use and its splat
+     objects were made */
+  bool splat_available() const { return splat_available_; }
 
  protected:
   bool make_view_pipelines(QRhiRenderPassDescriptor *pass, int samples) override;
@@ -545,6 +610,9 @@ class SoundingsRenderer final : public BatchRenderer {
        binds the buffer, since every bind runs its waiting writes */
     bool waiting_positions[2] = {false, false};
     bool waiting_colours[2] = {false, false};
+    /* the splat passes' bindings, per position set and colour set whose
+       buffers both exist (make_splat_sets) */
+    std::unique_ptr<QRhiShaderResourceBindings> splat[2][2];
   };
   /* the soundings as points or quads, at level 0 and at the levels of
      detail 1 to 4 (every 2nd, 4th, 8th or 16th sounding, kSoundingLevel1 +
@@ -575,11 +643,36 @@ class SoundingsRenderer final : public BatchRenderer {
   void split_lists();
   bool write(QRhiResourceUpdateBatch *updates, const SoundingsPlan::Upload &upload);
   /* waiting: the chunk's flag where the buffer's uploads wait for its next
-     bind (storage use on Metal), else null */
+     bind (storage use on Metal), else null; new_object (if not null): as
+     fit()'s, set where the buffer could be made */
   bool write_buffer(QRhiResourceUpdateBatch *updates, std::unique_ptr<QRhiBuffer> *buffer, const void *data,
-                    size_t bytes, QRhiBuffer::Type type, QRhiBuffer::UsageFlags usage, bool *waiting);
+                    size_t bytes, QRhiBuffer::Type type, QRhiBuffer::UsageFlags usage, bool *waiting,
+                    bool *new_object = nullptr);
   void record_soundings(QRhiCommandBuffer *cb, QSize pixels, const DrawItem &item, int depth);
   void record_lines(QRhiCommandBuffer *cb, QSize pixels, const DrawItem &item, int depth);
+  /* the splat objects of create() (make_view_pipelines): the pipelines,
+     the renderer-life bindings, the uniform blocks' buffer and the
+     per-pixel buffer objects (not native yet); false if one cannot be made,
+     or if a shader's Splat block is not laid out as SplatBlock (the caller
+     lets go of what was made) */
+  bool make_splat(QRhiRenderPassDescriptor *pass, int samples);
+  /* every splat object, the chunks' splat bindings first */
+  void release_splat();
+  bool make_splat_sets(ChunkGpu *chunk, int positions_set, int colours_set);
+  /* a buffer just made (create()) has its native buffers: on Metal a buffer
+     the device could not allocate is still reported made */
+  bool made_natively(QRhiBuffer *buffer) const;
+  /* create() of a splat buffer at the size set, with its native buffers
+     (made_natively); false if it is not made, and then it holds none */
+  bool create_splat_buffer(QRhiBuffer *buffer);
+  bool fit_splat_buffers(QSize pixels);
+  /* the per-pixel buffers natively let go of (a frame that does not splat,
+     Dismiss); their objects stay */
+  void release_splat_buffers();
+  bool fit_splat_uniforms(quint32 blocks);
+  /* whether this frame splats its soundings slot, and if so its dispatches
+     and its uniform blocks, written into updates; after write_slots() */
+  bool prepare_splat(QRhiResourceUpdateBatch *updates, QSize pixels);
 
   std::unique_ptr<QRhiGraphicsPipeline> view_pipelines_[kViewPipelines][2];
   bool uint_indices_ = false; /* 32-bit indices: the thin profile lines from index lists */
@@ -628,6 +721,53 @@ class SoundingsRenderer final : public BatchRenderer {
   bool pressed_ = false;
   int level_ = 0;
   bool gpu_skip_ = false;
+  /* Compute splatting: whether the renderer can (its chunks have storage
+     use and its splat objects were made); the clear's and the passes'
+     compute pipelines and the resolve (with the depth test, as the
+     soundings slot asks: prepare_splat); the bindings made with them (the
+     clear's and the resolve's name the per-pixel buffers; the passes'
+     template leaves the chunks out and is used only to make the pipeline);
+     the uniform blocks of a frame, splat_stride_ bytes apart, room for
+     splat_capacity_ (0: no native buffer), written whole; the per-pixel
+     depth and winner buffers, objects for the renderer's life, native only
+     while frames splat, of splat_pixels_ (empty: none); the target size at
+     which the splat path last could not make its buffers (empty: none;
+     frames of that size draw points without trying again); the QRhi's group
+     limit, row flip and clip depth; this frame's dispatches, their front
+     sets, the clear's groups and the soundings the passes process; whether
+     this frame splats (prepare_splat) */
+  bool splat_available_ = false;
+  std::unique_ptr<QRhiComputePipeline> splat_clear_;
+  std::unique_ptr<QRhiComputePipeline> splat_pass_;
+  std::unique_ptr<QRhiGraphicsPipeline> splat_resolve_;
+  std::unique_ptr<QRhiShaderResourceBindings> splat_clear_set_;
+  std::unique_ptr<QRhiShaderResourceBindings> splat_template_;
+  std::unique_ptr<QRhiShaderResourceBindings> splat_resolve_set_;
+  std::unique_ptr<QRhiBuffer> splat_uniforms_;
+  quint32 splat_stride_ = 0;
+  quint32 splat_capacity_ = 0;
+  std::vector<unsigned char> splat_bytes_;
+  std::unique_ptr<QRhiBuffer> splat_depth_;
+  std::unique_ptr<QRhiBuffer> splat_winner_;
+  QSize splat_pixels_;
+  QSize splat_refused_;
+  int splat_group_limit_ = 0;
+  bool splat_flip_ = false;
+  bool splat_zero_to_one_ = true;
+  struct SplatDispatch {
+    int chunk = 0;
+    QRhiShaderResourceBindings *set = nullptr;
+    int groups = 0;
+  };
+  std::vector<SplatDispatch> splat_list_;
+  int splat_front_[2] = {0, 0};
+  int splat_clear_groups_ = 0;
+  int splat_drawn_ = 0;
+  bool splat_ready_ = false;
+  /* the splat buffers left registered with the QRhi without their native
+     buffers (create_splat_buffer): kept for the process's life, never
+     deleted (release_splat) */
+  std::vector<const QRhiBuffer *> splat_kept_;
 };
 
 }  // namespace rhi

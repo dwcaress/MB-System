@@ -268,6 +268,68 @@ ChunkUse chunk_use(WaitApi api, bool compute, int threads_per_group, int thread_
   return use;
 }
 
+bool splat_size(int physical, bool available, bool quads, Splat mode) {
+  return available && !quads && physical >= 1 &&
+         (mode == Splat::Auto ? physical <= kSplatLargest : mode == Splat::On && physical <= 2);
+}
+
+int splat_groups(uint64_t items, int limit) {
+  const int cap = limit > 0 ? std::min(limit, kSplatGroupCap) : kSplatGroupCap;
+  const uint64_t groups = (items + static_cast<uint64_t>(kSplatGroup) - 1) / static_cast<uint64_t>(kSplatGroup);
+  return std::max(1, static_cast<int>(std::min(groups, static_cast<uint64_t>(cap))));
+}
+
+int stride_phase(int first, int stride) {
+  const int k = std::max(1, stride);
+  return (k - first % k) % k;
+}
+
+int stride_count(int first, int points, int stride) {
+  const int k = std::max(1, stride);
+  const int phase = stride_phase(first, k);
+  return points > phase ? (points - phase + k - 1) / k : 0;
+}
+
+bool splat_flip(bool y_up_ndc, bool y_up_framebuffer) { return y_up_ndc != y_up_framebuffer; }
+
+SplatBlock splat_block(const SplatFrame &frame, SplatPass pass, int first, int points, int stride) {
+  SplatBlock b = {};
+  std::copy(frame.mvp, frame.mvp + 16, b.mvp);
+  b.viewport[0] = static_cast<float>(frame.width);
+  b.viewport[1] = static_cast<float>(frame.height);
+  b.viewport[2] = static_cast<float>(frame.size);
+  b.viewport[3] = frame.flip ? 1.0f : 0.0f;
+  const uint64_t pixels =
+      static_cast<uint64_t>(std::max(0, frame.width)) * static_cast<uint64_t>(std::max(0, frame.height));
+  b.counts[1] = static_cast<uint32_t>(pixels);
+  b.counts[3] = frame.zero_to_one ? 1u : 0u;
+  b.grid[3] = static_cast<uint32_t>(pass);
+  switch (pass) {
+  case SplatPass::Clear:
+    b.grid[0] = static_cast<uint32_t>(splat_groups(pixels, frame.group_limit));
+    b.grid[1] = 1;
+    break;
+  case SplatPass::Depth:
+  case SplatPass::Winner:
+  case SplatPass::Colour: {
+    /* the level's soundings of the chunk, from its phase (the rule the
+       points path draws too, record_soundings) */
+    const int k = std::max(1, stride);
+    const int count = stride_count(first, points, k);
+    b.counts[0] = static_cast<uint32_t>(count);
+    b.counts[2] = static_cast<uint32_t>(first);
+    b.grid[0] = count > 0 ? static_cast<uint32_t>(splat_groups(static_cast<uint64_t>(count), frame.group_limit)) : 0u;
+    b.grid[1] = static_cast<uint32_t>(k);
+    b.grid[2] = static_cast<uint32_t>(stride_phase(first, k));
+    break;
+  }
+  case SplatPass::Resolve:
+    b.grid[1] = 1;
+    break;
+  }
+  return b;
+}
+
 bool GpuFallback::slow(double wait_ms, double total_ms) {
   const double mark = kDragFrameMs - kDragMarginMs;
   return total_ms > mark && wait_ms >= kGpuMinimumMs && total_ms - wait_ms < mark;
