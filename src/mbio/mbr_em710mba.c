@@ -5914,43 +5914,22 @@ int mbr_em710mba_wr_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 		sprintf(&buff[buff_len], "S3P=%.3f,", store->par_s3p);
 		buff_len = strlen(buff);
 	}
-	/* HISAS transmit and receive array locations */
+	/* HISAS transmit and receive array locations; each key is appended only if it
+	   fits whole in the buffer (leaving the 22 bytes reserved at its end) */
 	if (MBSYS_SIMRAD3_IS_HISAS(store->sonar)) {
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S11X=%.3f,", store->par_s11x);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S11Y=%.3f,", store->par_s11y);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S11Z=%.3f,", store->par_s11z);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S12X=%.3f,", store->par_s12x);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S12Y=%.3f,", store->par_s12y);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S12Z=%.3f,", store->par_s12z);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S13X=%.3f,", store->par_s13x);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S13Y=%.3f,", store->par_s13y);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S13Z=%.3f,", store->par_s13z);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S21X=%.3f,", store->par_s21x);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S21Y=%.3f,", store->par_s21y);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S21Z=%.3f,", store->par_s21z);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S22X=%.3f,", store->par_s22x);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S22Y=%.3f,", store->par_s22y);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S22Z=%.3f,", store->par_s22z);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S23X=%.3f,", store->par_s23x);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S23Y=%.3f,", store->par_s23y);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S23Z=%.3f,", store->par_s23z);
+		const char *hisas_keys[18] = {"S11X", "S11Y", "S11Z", "S12X", "S12Y", "S12Z", "S13X", "S13Y", "S13Z",
+		                              "S21X", "S21Y", "S21Z", "S22X", "S22Y", "S22Z", "S23X", "S23Y", "S23Z"};
+		const double hisas_values[18] = {store->par_s11x, store->par_s11y, store->par_s11z, store->par_s12x, store->par_s12y,
+		                                 store->par_s12z, store->par_s13x, store->par_s13y, store->par_s13z, store->par_s21x,
+		                                 store->par_s21y, store->par_s21z, store->par_s22x, store->par_s22y, store->par_s22z,
+		                                 store->par_s23x, store->par_s23y, store->par_s23z};
+		for (int k = 0; k < 18; k++) {
+			char entry[64];
+			const int entry_len = snprintf(entry, sizeof(entry), "%s=%.3f,", hisas_keys[k], hisas_values[k]);
+			const size_t used = strlen(buff);
+			if (entry_len > 0 && entry_len < (int)sizeof(entry) && used + (size_t)entry_len < MBSYS_SIMRAD3_BUFFER_SIZE - 22)
+				memcpy(&buff[used], entry, (size_t)entry_len + 1);
+		}
 		buff_len = strlen(buff);
 	}
 	if (store->par_go1 != 0.0) {

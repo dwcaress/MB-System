@@ -1498,9 +1498,12 @@ int mbr_rt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* get nav time */
 		double ntime_d = time_d;
 		/* Check if fixtime is valid; the fix time has hundredths of seconds
-		   (FixTimeHsecond, byte 151 of the ping header) like the ping time */
-		if (data->pingheader.FixTimeHour || data->pingheader.FixTimeMinute || data->pingheader.FixTimeSecond ||
-		    data->pingheader.FixTimeHsecond) {
+		   (FixTimeHsecond, byte 151 of the ping header, defined since XTF revision 34)
+		   like the ping time. As before, the fix time is taken as valid only if its
+		   hour, minute or second is set, so that a stray value in byte 151 alone (it
+		   was reserved in older revisions) is not taken as a fix time; values above 99
+		   are ignored. */
+		if (data->pingheader.FixTimeHour || data->pingheader.FixTimeMinute || data->pingheader.FixTimeSecond) {
 			const double fix_hseconds = data->pingheader.FixTimeHsecond <= 99 ? 0.01 * data->pingheader.FixTimeHsecond : 0.0;
 			double dtime = 3600.0 * (data->pingheader.FixTimeHour - data->pingheader.Hour) +
 			        60.0 * (data->pingheader.FixTimeMinute - data->pingheader.Minute) + data->pingheader.FixTimeSecond +
@@ -1756,6 +1759,11 @@ int mbr_rt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		    data->pingchanportheader.NumSamples > 0 ? &data->pingchanportheader : &data->pingchanstbdheader;
 		store->ssrawtimedelay = chanheader->TimeDelay;
 		store->ssrawtimeduration = chanheader->TimeDuration;
+		store->ssrawstbdtimeduration =
+		    (data->pingchanportheader.NumSamples > 0 && data->pingchanstbdheader.NumSamples > 0 &&
+		     data->pingchanstbdheader.TimeDuration != data->pingchanportheader.TimeDuration)
+		        ? data->pingchanstbdheader.TimeDuration
+		        : 0.0;
 		store->ssrawbottompick = data->pingheader.SensorPrimaryAltitude / data->pingheader.SoundVelocity;
 
 		store->ssrawslantrange = chanheader->SlantRange;
