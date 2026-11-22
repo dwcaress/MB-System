@@ -1288,10 +1288,12 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
         exit(MB_ERROR_OPEN_FAIL);
       }
+      /* the file is little-endian: swap on big-endian hosts only, as
+         mb_loadnavdata() does (mb_swap_check() is true on little-endian hosts) */
       bool swap = (mb_swap_check() == MB_YES);
       double brec[21];
       while (fread(brec, sizeof(double), 21, bfp) == 21) {
-        if (swap)
+        if (!swap)
           for (int ii = 0; ii < 21; ii++)
             mb_swap_double(&brec[ii]);
         if (nnav > 0 && brec[0] <= ntime[nnav - 1])
@@ -1890,10 +1892,12 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
         exit(MB_ERROR_OPEN_FAIL);
       }
+      /* the file is little-endian: swap on big-endian hosts only, as
+         mb_loadnavdata() does (mb_swap_check() is true on little-endian hosts) */
       bool swap = (mb_swap_check() == MB_YES);
       double brec[21];
       while (fread(brec, sizeof(double), 21, bfp) == 21) {
-        if (swap)
+        if (!swap)
           for (int ii = 0; ii < 21; ii++)
             mb_swap_double(&brec[ii]);
         if (nattitude > 0 && brec[0] <= attitudetime[nattitude - 1])
@@ -2093,10 +2097,12 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
         exit(MB_ERROR_OPEN_FAIL);
       }
+      /* the file is little-endian: swap on big-endian hosts only, as
+         mb_loadnavdata() does (mb_swap_check() is true on little-endian hosts) */
       bool swap = (mb_swap_check() == MB_YES);
       double brec[21];
       while (fread(brec, sizeof(double), 21, bfp) == 21) {
-        if (swap)
+        if (!swap)
           for (int ii = 0; ii < 21; ii++)
             mb_swap_double(&brec[ii]);
         if (nsensordepth > 0 && brec[0] <= fsensordepthtime[nsensordepth - 1])
