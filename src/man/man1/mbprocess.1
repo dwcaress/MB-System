@@ -272,7 +272,7 @@ The \fBmbprocess\fP commands found in parameter files are:
           11: RVDAS $SPRINT format; roll and pitch extracted;
               heave set to zero
           12: Kongsberg Navlab binary (navlab_smooth.bin);
-              roll from field 7, pitch from field 8;
+              roll from field 4, pitch from field 5;
               heave set to zero (not available)
         \- time_d = decimal seconds since 1/1/1970
         \- daymin = decimal minutes start of day
@@ -1150,10 +1150,14 @@ Format 12 (Kongsberg Navlab Binary (navlab_smooth.bin)):
  		field  1: latitude (decimal degrees, positive north)
  		field  2: longitude (decimal degrees, positive east)
  		field  3: depth (m, positive down); used as sensor depth
+ 		field  4: roll (deg; same values and sign as the roll of
+ 		  the Kongsberg kmall attitude written with the same data)
+ 		field  5: pitch (deg, positive bow up)
  		field  6: heading (deg, 0\-360, clockwise from north)
- 		field  7: roll (deg, positive starboard up)
- 		field  8: pitch (deg, positive bow up)
- 	\- speed is not stored; set to zero when used as nav source
+ 		field  7: velocity north (m/s)
+ 		field  8: velocity east (m/s)
+ 	\- speed (km/hr) is computed from fields 7 and 8 when the
+ 	  file is used as nav source
  	\- heave is not stored; set to zero when used as attitude source
  	\- NAVHEADING, NAVATTITUDE flags are supported with this format
  	\- the same file can be specified for NAVFILE, ATTITUDEFILE,
