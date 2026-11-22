@@ -117,6 +117,8 @@ struct mbsys_benthos_struct {
 
 	float ssrawtimedelay;    /* raw sidescan delay (sec) */
 	float ssrawtimeduration; /* raw sidescan duration (sec) */
+	float ssrawstbdtimeduration; /* raw starboard sidescan duration (sec) if it differs from
+	                                ssrawtimeduration (port), 0 otherwise */
 	float ssrawbottompick;   /* bottom pick time (sec) 	*/
 
 	float ssrawslantrange;  /* slant range (m) */

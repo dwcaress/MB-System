@@ -120,6 +120,7 @@ int mbsys_benthos_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 
 	store->ssrawtimedelay = 0.0;    /* raw sidescan delay (sec) */
 	store->ssrawtimeduration = 0.0; /* raw sidescan duration (sec) */
+	store->ssrawstbdtimeduration = 0.0; /* raw starboard sidescan duration (sec) */
 	store->ssrawbottompick = 0.0;   /* bottom pick time (sec) */
 	store->ssrawportsamples = 0;    /* number of port raw sidescan samples */
 	store->ssrawstbdsamples = 0;    /* number of stbd raw sidescan samples */
@@ -921,12 +922,21 @@ int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr,
 			ss_cnt[i] = 0;
 		}
 
-		/* get raw pixel size */
+		/* get raw sample spacing (two-way time) of each side: the two channels may
+		    differ in number of samples and in duration */
 		const double ss_spacing = store->ssrawtimeduration / rawsamples;
+		const double port_spacing =
+		    store->ssrawportsamples > 0 ? store->ssrawtimeduration / store->ssrawportsamples : ss_spacing;
+		const double stbd_duration =
+		    store->ssrawstbdtimeduration > 0.0 ? store->ssrawstbdtimeduration : store->ssrawtimeduration;
+		const double stbd_spacing =
+		    store->ssrawstbdsamples > 0 ? stbd_duration / store->ssrawstbdsamples : ss_spacing;
 
 		/* get sidescan pixel size */
 		const int pixel1 = (2.0 * store->bath[0] / (store->png_computedsv * ss_spacing)) + 1;
 		const int groundsamples = rawsamples - pixel1;
+		const int port_pixel1 = (2.0 * store->bath[0] / (store->png_computedsv * port_spacing)) + 1;
+		const int stbd_pixel1 = (2.0 * store->bath[0] / (store->png_computedsv * stbd_spacing)) + 1;
 
 		const double groundrange = sqrt(pow(store->ssrawslantrange, 2) - pow(store->bath[0], 2));
 
@@ -951,11 +961,11 @@ int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		    acrosstrack distance for each raw sidescan sample */
 		for (int i = 0; i < store->ssrawportsamples; i++) {
 			double xtrackss;
-			if (i > (store->ssrawportsamples - pixel1)) {
+			if (i > (store->ssrawportsamples - port_pixel1)) {
 				xtrackss = 0;
 			}
 			else {
-				xtrackss = -sqrt(pow(0.5 * ss_spacing * (store->ssrawportsamples - i) * store->png_computedsv, 2) -
+				xtrackss = -sqrt(pow(0.5 * port_spacing * (store->ssrawportsamples - i) * store->png_computedsv, 2) -
 				                 pow(store->bath[0], 2));
 			}
 			ss[i] += store->ssrawport[i];
@@ -967,11 +977,11 @@ int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		    acrosstrack distance for each raw sidescan sample */
 		for (int i = 0; i < store->ssrawstbdsamples; i++) {
 			double xtrackss;
-			if (i < pixel1) {
+			if (i < stbd_pixel1) {
 				xtrackss = 0;
 			}
 			else {
-				xtrackss = sqrt(pow(0.5 * ss_spacing * i * store->png_computedsv, 2) - pow(store->bath[0], 2));
+				xtrackss = sqrt(pow(0.5 * stbd_spacing * i * store->png_computedsv, 2) - pow(store->bath[0], 2));
 			}
 			ss[i + store->ssrawportsamples] += store->ssrawstbd[i];
 			ssacrosstrack[i + store->ssrawportsamples] = xtrackss;

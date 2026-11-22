@@ -1752,6 +1752,11 @@ int mbr_rt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		    data->pingchanportheader.NumSamples > 0 ? &data->pingchanportheader : &data->pingchanstbdheader;
 		store->ssrawtimedelay = chanheader->TimeDelay;
 		store->ssrawtimeduration = chanheader->TimeDuration;
+		store->ssrawstbdtimeduration =
+		    (data->pingchanportheader.NumSamples > 0 && data->pingchanstbdheader.NumSamples > 0 &&
+		     data->pingchanstbdheader.TimeDuration != data->pingchanportheader.TimeDuration)
+		        ? data->pingchanstbdheader.TimeDuration
+		        : 0.0;
 		store->ssrawbottompick = data->pingheader.SensorPrimaryAltitude / data->pingheader.SoundVelocity;
 
 		store->ssrawslantrange = chanheader->SlantRange;
