@@ -46,6 +46,9 @@
  *         and attitude fields are zero, so the ping time comes from the
  *         datagram header and the navigation is interpolated from the
  *         '>' datagrams. Both sides are stored near range to far range.
+ *         The ranges use the last sound speed measured by the vehicle
+ *         ('>' datagrams); the sound speed of the ping record (a sonar
+ *         setting, e.g. 1480 m/s) is used only when none is available.
  *   Other datagrams (including the 4.5 MB 'd' raw element records) are
  *   skipped. The raw per-side files HISAS-P-*.all and HISAS-S-*.all hold
  *   no navigation; it is read from the file of the same name starting
@@ -626,8 +629,6 @@ static int mbr_hisasall_parse_ping(int verbose, struct mbf_hisasall_struct *data
 		store->soundspeed = soundspeed;
 	else if (half_soundspeed > 500.0 && half_soundspeed < 1000.0)
 		store->soundspeed = 2.0 * half_soundspeed;
-	else if (data->soundspeed > 0.0)
-		store->soundspeed = data->soundspeed;
 	else
 		store->soundspeed = 1500.0;
 
@@ -877,6 +878,12 @@ int mbr_rt_hisasall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				if (!data->nfile_checked)
 					mbr_hisasall_open_nfile(verbose, mb_io_ptr, data);
 				mbr_hisasall_feed_nfile(verbose, mbio_ptr, data, time_d, error);
+
+				/* the sound speed measured by the vehicle ('>' datagrams) is
+				    preferred to the sound speed set in the sonar (ping record),
+				    which may be a fixed setting */
+				if (data->soundspeed > 1300.0 && data->soundspeed < 1700.0)
+					store->soundspeed = data->soundspeed;
 
 				store->kind = MB_DATA_DATA;
 				store->sonar = model;
