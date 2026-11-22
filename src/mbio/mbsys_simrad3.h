@@ -250,6 +250,7 @@
 #define MBSYS_SIMRAD3_COMMENT_LENGTH 256
 #define MBSYS_SIMRAD3_BUFFER_SIZE 2048
 #define MBSYS_SIMRAD3_MAXQUALITYFACTORS 4
+#define MBSYS_SIMRAD3_RA123_MAXARRAYS 8
 
 /* set precision of iterative raytracing depth & distance matching */
 #define MBSYS_SIMRAD3_BATH_RECALC_PRECISION 0.0001
@@ -385,6 +386,9 @@
 #define EM3_RAWBEAM4_HEADER_SIZE 28
 #define EM3_RAWBEAM4_TX_SIZE 24
 #define EM3_RAWBEAM4_BEAM_SIZE 16
+#define EM3_RA123_HEADER_SIZE 32 /* HISAS raw range and angle 123 ('{'): header after the label */
+#define EM3_RA123_ARRAY_SIZE 36  /* bytes used of each array entry (entry size BytesA in the header) */
+#define EM3_RA123_BEAM_SIZE 30   /* bytes used of each beam entry (entry size BytesR in the header) */
 #define EM3_QUALITY_HEADER_SIZE 16
 #define EM3_BATH3_MBA_HEADER_SIZE 48
 #define EM3_BATH3_MBA_BEAM_SIZE 38
@@ -579,6 +583,21 @@ struct mbsys_simrad3_ping_struct {
 	/* Heave correction to the sonar depth for each beam - this is half the difference
 	   between the sonar depth at ping time and the sonar depth at receive time,
 	   as measured by heave  */
+
+	/* HISAS raw range and angle 123 ('{', version 1) - held in memory only, used to set
+	   png_range, png_depression, png_azimuth and png_bheave for raytracing */
+	bool png_ra_read;   /* flag indicating actual reading of raw range and angle 123 record */
+	int png_ra_count;   /* ping counter */
+	int png_ra_serial;  /* system serial number */
+	int png_ra_side;    /* side of the arrays: bit 0: 0 = port, 1 = starboard;
+	                       bit 1: two-sided system */
+	float png_ra_ssv;   /* sound speed at transducer (m/sec) */
+	int png_ra_nbeams;  /* number of beams */
+	float png_ra_twtt[MBSYS_SIMRAD3_MAXBEAMS];       /* two-way travel time (sec) */
+	float png_ra_depression[MBSYS_SIMRAD3_MAXBEAMS]; /* depression angle below the horizontal (deg) */
+	float png_ra_azimuth[MBSYS_SIMRAD3_MAXBEAMS];    /* azimuth angle (deg) - positive forward in the
+	                                                    data seen, although the documentation says aft */
+	int png_ra_detection[MBSYS_SIMRAD3_MAXBEAMS];    /* detection info (bit 7 set = invalid) */
 
 	/* raw travel time and angle data version 4 */
 	bool png_raw_read;       /* flag indicating actual reading of raw beam record */
@@ -1153,6 +1172,27 @@ struct mbsys_simrad3_struct {
 	double par_s3r; /* Transducer 3 roll (m) */
 	double par_s3p; /* Transducer 3 pitch (m) */
 
+	/* HISAS transducer locations: S11 transmit port, S12 and S13 receive port
+	   (upper and lower), S21 transmit starboard, S22 and S23 receive starboard */
+	double par_s11x; /* HISAS port transmit array along location (m) */
+	double par_s11y; /* HISAS port transmit array athwart location (m) */
+	double par_s11z; /* HISAS port transmit array vertical location (m) */
+	double par_s12x; /* HISAS port upper receive array along location (m) */
+	double par_s12y; /* HISAS port upper receive array athwart location (m) */
+	double par_s12z; /* HISAS port upper receive array vertical location (m) */
+	double par_s13x; /* HISAS port lower receive array along location (m) */
+	double par_s13y; /* HISAS port lower receive array athwart location (m) */
+	double par_s13z; /* HISAS port lower receive array vertical location (m) */
+	double par_s21x; /* HISAS starboard transmit array along location (m) */
+	double par_s21y; /* HISAS starboard transmit array athwart location (m) */
+	double par_s21z; /* HISAS starboard transmit array vertical location (m) */
+	double par_s22x; /* HISAS starboard upper receive array along location (m) */
+	double par_s22y; /* HISAS starboard upper receive array athwart location (m) */
+	double par_s22z; /* HISAS starboard upper receive array vertical location (m) */
+	double par_s23x; /* HISAS starboard lower receive array along location (m) */
+	double par_s23y; /* HISAS starboard lower receive array athwart location (m) */
+	double par_s23z; /* HISAS starboard lower receive array vertical location (m) */
+
 	int par_s1s; /* TX array size (0=0.5 deg, 1 = 1 deg, 2 = 2 deg) */
 	int par_s2s; /* RX array size (1 = 1 deg, 2 = 2 deg) */
 
@@ -1536,6 +1576,8 @@ int mbsys_simrad3_ssv_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *e
 int mbsys_simrad3_tilt_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbsys_simrad3_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error);
 int mbsys_simrad3_zero_ss(int verbose, void *store_ptr, int *error);
+int mbsys_simrad3_hisas_ra123_angles(int verbose, struct mbsys_simrad3_struct *store, struct mbsys_simrad3_ping_struct *ping,
+                                     bool *applied, int *error);
 int mbsys_simrad3_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                              int *error);
 int mbsys_simrad3_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error);
