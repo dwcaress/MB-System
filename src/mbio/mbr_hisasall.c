@@ -53,8 +53,18 @@
  *   skipped. The raw per-side files HISAS-P-*.all and HISAS-S-*.all hold
  *   no navigation; it is read from the file of the same name starting
  *   with HISAS-N- in the same directory, if that file exists.
- *   The positions are those of the vehicle navigation; no lever arm
- *   correction to the sonar is applied in this version.
+ *   The positions are those of the vehicle navigation ('>' datagrams or
+ *   the HISAS-N- file), not of the sidescan arrays: no lever arm is
+ *   applied, which departs from the MB-System rule that formats report the
+ *   position of the mapping sensor. The location of the arrays relative to
+ *   the navigation point is not settled: the channel information of the
+ *   '"' datagram in the files seen gives OffsetX -0.29 / +0.29 m (port /
+ *   starboard) and OffsetY +0.623 m, the SAS XTF files of the same survey
+ *   give OffsetY +0.37 m, and comparing the sidescan with the SAS images
+ *   fits the arrays 0.37 m aft of the navigation point; the sign convention
+ *   and the reference point are to be confirmed with Kongsberg. Until then
+ *   a lever arm can be applied in mbprocess with NAVSHIFT and NAVOFFSETX/Y
+ *   (one file per side).
  */
 
 #include <math.h>
@@ -172,6 +182,7 @@ int mbr_info_hisasall(int verbose, int *system, int *beams_bath_max, int *beams_
 	        "                      sidescan, variable pixels, binary datagrams,\n"
 	        "                      single files, raw per-side files use the\n"
 	        "                      navigation of the HISAS-N- file,\n"
+	        "                      vehicle positions (no lever arm),\n"
 	        "                      read only, Kongsberg.\n",
 	        MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
@@ -891,7 +902,8 @@ int mbr_rt_hisasall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				store->time_d = time_d;
 
 				/* interpolate the vehicle navigation at the ping time; the
-				    positions are not moved to the sonar (no lever arm) */
+				    positions are not moved to the sonar (no lever arm, see the
+				    notes at the top of this file) */
 				int ierror = MB_ERROR_NO_ERROR;
 				store->heading = 0.0;
 				if (mb_io_ptr->nheading > 0)

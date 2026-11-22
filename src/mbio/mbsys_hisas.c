@@ -167,7 +167,8 @@ int mbsys_hisas_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		*time_d = store->time_d;
 		mb_get_date(verbose, *time_d, time_i);
 
-		/* get navigation (vehicle navigation, no lever arm applied) */
+		/* get navigation: the vehicle navigation, not the sonar position (no
+		    lever arm applied; see the notes in mbr_hisasall.c) */
 		*navlon = store->longitude;
 		*navlat = store->latitude;
 		*heading = store->heading;
