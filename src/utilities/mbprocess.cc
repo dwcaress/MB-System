@@ -5385,7 +5385,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
                 bathy = altitude + sensordepth;
               else
                 bathy = altitude_default + sensordepth;
-              angle = RTD * atan(bathacrosstrack[i] / (bathy - sensordepth));
+              angle = RTD * atan(ssacrosstrack[i] / (bathy - sensordepth));
               slope = 0.0;
             }
 
