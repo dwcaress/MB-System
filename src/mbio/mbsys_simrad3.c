@@ -1204,10 +1204,10 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		/* get transducer offsets */
 		/*--------------------------------------------------------------*/
 		/* transmit and receive array offsets embedded in file */
-		double tx_x, tx_y, tx_z;
-		double tx_h, tx_r, tx_p;
-		double rx_x, rx_y, rx_z;
-		double rx_h, rx_r, rx_p;
+		double tx_x = 0.0, tx_y = 0.0, tx_z = 0.0;
+		double tx_h = 0.0, tx_r = 0.0, tx_p = 0.0;
+		double rx_x = 0.0, rx_y = 0.0, rx_z = 0.0;
+		double rx_h = 0.0, rx_r = 0.0, rx_p = 0.0;
 		if (store->sonar == 30) {
 			tx_x = store->par_s1x;
 			tx_y = store->par_s1y;
@@ -1236,7 +1236,7 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 			rx_r = store->par_s2r;
 			rx_p = store->par_s2p;
 		}
-		else if (store->par_stc == 1) {
+		else if (store->par_stc == 1 || store->par_stc == 5 || store->par_stc == 6 || store->par_stc == 9) {
 			tx_x = store->par_s1x;
 			tx_y = store->par_s1y;
 			tx_z = store->par_s1z;
@@ -1868,13 +1868,14 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 			 *      0 = Single TX + single RX
 			 *              EM122, EM302, EM710, EM2040-Single
 			 *      1 = Single head
-			 *              EM3002S, EM2040C-Single, EM2040P
+			 *              EM3002S, EM2040C-Single
 			 *      2 = Dual Head
 			 *              EM3002-Dual, EM2040C-Dual
 			 *      3 = Single TX + Dual RX
 			 *              EM2040-Dual-RX
 			 *      4 = Dual TX + Dual RX
 			 *              EM2040-Dual-TX
+			 *      5, 6, 9 = Single head (5 = EM2040P), decoded as 1
 			 *  If present, the STC parameter can be used in
 			 *  decoding of the transducer installation parameters:
 			 *      STC  S0X/Y/Z/R/P/H  S1X/Y/Z/R/P/H  S2X/Y/Z/R/P/H  S3X/Y/Z/R/P/H
@@ -1884,6 +1885,7 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 			 *       2        ----          Head 1         Head 2         ----
 			 *       3        ----            TX            RX 1          RX 2
 			 *       4        TX 1           TX 2           RX 1          RX 2
+			 *     5,6,9      ----          Head 1          ----          ----
 			 */
 			if (store->par_stc == 0) {
 				if (status == MB_SUCCESS)
@@ -1897,7 +1899,7 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 					    (double)store->par_s2x, (double)-store->par_s2z, (double)store->par_s2h,
 					    (double)store->par_s2r, (double)store->par_s2p, error);
 			}
-			else if (store->par_stc == 1) {
+			else if (store->par_stc == 1 || store->par_stc == 5 || store->par_stc == 6 || store->par_stc == 9) {
 				if (status == MB_SUCCESS)
 					status = mb_platform_set_sensor_offset(
 					    verbose, (void *)platform, sensor_multibeam, 0, (double)store->par_s1y,
