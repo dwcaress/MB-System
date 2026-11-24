@@ -246,6 +246,8 @@ ViewState RhiView::state() const {
   state.failures = failures_;
   state.renderer = renderer_ != nullptr;
   state.texture_size_max = rhi_ != nullptr ? rhi_->resourceLimit(QRhi::TextureSizeMax) : 0;
+  state.strip_restart = rhi_ != nullptr && rhi_->isFeatureSupported(QRhi::PrimitiveRestart) &&
+                        rhi_->isFeatureSupported(QRhi::ElementIndexUint);
   return state;
 }
 

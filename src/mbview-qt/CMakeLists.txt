@@ -183,7 +183,7 @@ if(mbvq_rhi)
                   shaders/mbvq_contour.vert shaders/mbvq_wide_contour.vert shaders/mbvq_marker.vert
                   shaders/mbvq_stipple_thin.vert shaders/mbvq_stipple_wide.vert shaders/mbvq_stipple.frag
                   shaders/mbvq_batch_pointquad.vert shaders/mbvq_points.vert shaders/mbvq_pointquad.vert
-                  shaders/mbvq_wide_pairs.vert)
+                  shaders/mbvq_wide_pairs.vert shaders/mbvq_wide_run.vert)
   # compute splatting of the 3D soundings: the compute shaders and the resolve's
   # fragment shader, which reads their storage buffers, need GLSL ES 3.10 or
   # GLSL 4.30, and the resolve's vertex shader shares the call; HLSL and MSL at

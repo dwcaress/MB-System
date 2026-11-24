@@ -119,6 +119,10 @@ void BatchRenderer::release_batch_part() {
   contour_vertices_ = 0;
   meshes_.clear();
   item_meshes_.clear();
+  /* the run lists with the plan whose layout they were written from, so
+     that a later frame writes them again */
+  run_lists_.clear();
+  batch_ = BatchPlan();
   batch_ready_ = false;
   pass_.reset();
 }
@@ -159,6 +163,8 @@ int BatchRenderer::batch_resources() const {
     n += *buffer != nullptr;
   for (const std::unique_ptr<MeshGpu> &mesh : meshes_)
     n += mesh->buffer != nullptr;
+  for (const RunLists &lists : run_lists_)
+    n += (lists.indices != nullptr) + (lists.flags != nullptr);
   return n;
 }
 
@@ -217,6 +223,12 @@ bool BatchRenderer::make_fixed() {
      lacks it): elsewhere, or when the options ask for them, quads */
   points_ = rhi_->isFeatureSupported(QRhi::VertexShaderPointSize);
   point_quads_ = !points_ || options_.point_quads;
+  /* thin runs of strips as one line strip restarted between the strips
+     where the QRhi restarts strips at 0xffffffff and has 32-bit indices
+     (QRhi OpenGL from 4.3 and ES 3.0), else strip by strip; the run lists
+     dynamic on Metal, static elsewhere, as the 3D soundings' index lists */
+  restart_ = rhi_->isFeatureSupported(QRhi::PrimitiveRestart) && rhi_->isFeatureSupported(QRhi::ElementIndexUint);
+  run_type_ = rhi_->backend() == QRhi::Metal ? QRhiBuffer::Dynamic : QRhiBuffer::Static;
   return make_view_pipelines(pass_.get(), samples_) && make_pipelines(pass_.get(), samples_);
 }
 
@@ -257,8 +269,9 @@ bool BatchRenderer::make_pipelines(QRhiRenderPassDescriptor *pass, int samples) 
   const QShader stipple_thin = load_shader(":/mbvq/mbvq_stipple_thin.vert.qsb");
   const QShader stipple_wide = load_shader(":/mbvq/mbvq_stipple_wide.vert.qsb");
   const QShader marker = load_shader(":/mbvq/mbvq_marker.vert.qsb");
+  const QShader wide_run = load_shader(":/mbvq/mbvq_wide_run.vert.qsb");
   for (const QShader *shader : {&colour, &stipple, &line, &point, &point_quad, &wide, &contour, &wide_contour,
-                                &stipple_thin, &stipple_wide, &marker})
+                                &stipple_thin, &stipple_wide, &marker, &wide_run})
     if (!shader->isValid())
       return false;
 
@@ -285,6 +298,17 @@ bool BatchRenderer::make_pipelines(QRhiRenderPassDescriptor *pass, int samples) 
   wide_pairs.setBindings({{2 * sizeof(float)}, B(2 * vertex, B::PerInstance)});
   wide_pairs.setAttributes(
       {{0, 0, A::Float2, 0}, {1, 1, A::Float3, 0}, {1, 2, A::Float3, 12}, {1, 3, A::Float3, 24}, {1, 4, A::Float3, 36}});
+  /* a run of wide strips: a strip's bindings, and per instance its flag (1:
+     a segment of a strip, 0: none, between the strips) */
+  QRhiVertexInputLayout wide_runs;
+  wide_runs.setBindings(
+      {{2 * sizeof(float)}, B(vertex, B::PerInstance), B(vertex, B::PerInstance), B(sizeof(float), B::PerInstance)});
+  wide_runs.setAttributes({{0, 0, A::Float2, 0},
+                           {1, 1, A::Float3, 0},
+                           {1, 2, A::Float3, 12},
+                           {2, 3, A::Float3, 0},
+                           {2, 4, A::Float3, 12},
+                           {3, 5, A::Float, 0}});
   /* the contours: pairs of positions */
   QRhiVertexInputLayout contour_thin;
   contour_thin.setBindings({{3 * sizeof(float)}});
@@ -331,7 +355,8 @@ bool BatchRenderer::make_pipelines(QRhiRenderPassDescriptor *pass, int samples) 
                         {kStippleThin, &stipple_thin, &stipple, &stipple_pairs, T::Lines},
                         {kStippleWide, &stipple_wide, &stipple, &stipple_quads, T::Triangles},
                         {kMarkers, &marker, &colour, &markers, T::Triangles},
-                        {kPointQuads, &point_quad, &colour, &point_quads, T::Triangles}};
+                        {kPointQuads, &point_quad, &colour, &point_quads, T::Triangles},
+                        {kWideRun, &wide_run, &colour, &wide_runs, T::Triangles}};
   for (const Spec &spec : specs) {
     /* points with the point size of the vertex shader, or as quads */
     if ((spec.index == kPoints && point_quads_) || (spec.index == kPointQuads && !point_quads_))
@@ -373,6 +398,11 @@ void BatchRenderer::held_stats() {
   stats_.contour_held_bytes =
       (contours_ != nullptr ? static_cast<size_t>(contours_->size()) : 0) * static_cast<size_t>(dynamic_copies_);
   stats_.dynamic_copies = dynamic_copies_;
+  size_t runs = 0;
+  for (const RunLists &lists : run_lists_)
+    for (const std::unique_ptr<QRhiBuffer> *buffer : {&lists.indices, &lists.flags})
+      runs += *buffer != nullptr ? (*buffer)->size() : 0;
+  stats_.run_held_bytes = runs * static_cast<size_t>(run_type_ == QRhiBuffer::Dynamic ? dynamic_copies_ : copies_);
 }
 
 void BatchRenderer::count_resources() {
@@ -398,6 +428,7 @@ void BatchRenderer::drop_batch() {
   contour_vertices_ = 0;
   meshes_.clear();
   item_meshes_.clear();
+  run_lists_.clear();
   batch_ready_ = false;
   batch_ = BatchPlan();
 }
@@ -451,10 +482,17 @@ Prepared BatchRenderer::prepare_batch(QRhiResourceUpdateBatch *updates, const Fr
   stats_.pixel_ratio = style_.ratio;
   if (input.batch == nullptr) {
     batch_ = BatchPlan();
+    run_lists_.clear();
     return Prepared::Done;
   }
   const struct mbv_draw_batch &b = *input.batch;
-  batch_.build(b, style_, input.camera, input.projection, pixels.width(), pixels.height());
+  /* runs of strips of one state as one draw each: wide ones wherever the
+     batch is drawn (it needs instancing), thin ones where the QRhi restarts
+     strips (RenderOptions::unmerged_draws and no_restart for the tests) */
+  Merge merge;
+  merge.wide = !options_.unmerged_draws;
+  merge.thin = merge.wide && restart_ && !options_.no_restart;
+  batch_.build(b, style_, input.camera, input.projection, pixels.width(), pixels.height(), merge);
 
   /* the corners of a wide line's quad: (end, side), two triangles; and of a
      point's quad (where points are drawn as quads) */
@@ -524,6 +562,16 @@ Prepared BatchRenderer::prepare_batch(QRhiResourceUpdateBatch *updates, const Fr
     std::copy(input.projection, input.projection + 16, stipple_projection_);
   }
 
+  /* the run lists, per group of the batch: those of groups it no longer
+     has go, and a group's are written again only where the layout of its
+     runs changed (the plan compares it with the previous build's); they
+     count vertices from each run's first, so a change elsewhere in the
+     batch leaves them */
+  run_lists_.resize(static_cast<size_t>(batch_.run_groups()));
+  for (int g = 0; g < batch_.run_groups(); g++)
+    if (batch_.runs_changed(g) && !write_runs(updates, g))
+      return Prepared::Failed;
+
   /* the finest contours made, uploaded when they change: their pointer is
      valid only in this frame */
   stats_.contour_rez = 0;
@@ -575,6 +623,9 @@ Prepared BatchRenderer::prepare_batch(QRhiResourceUpdateBatch *updates, const Fr
   }
   stats_.markers = batch_.markers();
   stats_.uniform_slots = static_cast<int>(batch_.slot_specs().size());
+  stats_.runs = batch_.runs();
+  stats_.run_parts = batch_.run_parts();
+  stats_.restart = merge.thin;
   return Prepared::Done;
 }
 
@@ -610,6 +661,52 @@ BatchRenderer::MeshGpu *BatchRenderer::mesh(QRhiResourceUpdateBatch *updates, co
   stats_.meshes++;
   meshes_.push_back(std::move(m));
   return meshes_.back()->buffer != nullptr ? meshes_.back().get() : nullptr;
+}
+
+bool BatchRenderer::write_runs(QRhiResourceUpdateBatch *updates, int group) {
+  /* the group's index list and flags, each in a buffer of exactly its
+     bytes (none for none, as when the group's runs went), written whole
+     from an array made for the write and filled by the plan, not cleared
+     first */
+  RunLists &lists = run_lists_[static_cast<size_t>(group)];
+  const size_t index_bytes = 4 * batch_.run_index_entries(group);
+  const size_t flag_bytes = 4 * batch_.run_flag_entries(group);
+  if (index_bytes > 0xffffffffu || flag_bytes > 0xffffffffu ||
+      !fit(&lists.indices, static_cast<quint32>(index_bytes), run_type_, QRhiBuffer::IndexBuffer) ||
+      !fit(&lists.flags, static_cast<quint32>(flag_bytes), run_type_, QRhiBuffer::VertexBuffer))
+    return false;
+  const auto write = [updates](QRhiBuffer *buffer, QByteArray data) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+    /* moved into the batch: Qt keeps an array above 1 KB there instead of
+       a copy of its own */
+    if (buffer->type() == QRhiBuffer::Dynamic)
+      updates->updateDynamicBuffer(buffer, 0, std::move(data));
+    else
+      updates->uploadStaticBuffer(buffer, 0, std::move(data));
+#else
+    /* Qt copies it into the batch */
+    if (buffer->type() == QRhiBuffer::Dynamic)
+      updates->updateDynamicBuffer(buffer, 0, static_cast<quint32>(data.size()), data.constData());
+    else
+      updates->uploadStaticBuffer(buffer, data.constData());
+#endif
+  };
+  if (index_bytes > 0) {
+    QByteArray indices(static_cast<qsizetype>(index_bytes), Qt::Uninitialized);
+    batch_.run_indices(group, reinterpret_cast<uint32_t *>(indices.data()));
+    write(lists.indices.get(), std::move(indices));
+  }
+  if (flag_bytes > 0) {
+    QByteArray flags(static_cast<qsizetype>(flag_bytes), Qt::Uninitialized);
+    batch_.run_flags(group, reinterpret_cast<float *>(flags.data()));
+    write(lists.flags.get(), std::move(flags));
+  }
+  /* a write of nothing (the group's runs went) is not counted */
+  if (index_bytes + flag_bytes > 0) {
+    stats_.run_writes++;
+    stats_.run_bytes += index_bytes + flag_bytes;
+  }
+  return true;
 }
 
 bool BatchRenderer::write_slots(QRhiResourceUpdateBatch *updates, const FrameInput &input, QSize pixels) {
@@ -842,6 +939,45 @@ void BatchRenderer::record(QRhiCommandBuffer *cb, QSize pixels) {
         const QRhiCommandBuffer::VertexInput inputs[] = {corners, {buffer, item.offset}};
         cb->setVertexInput(0, 2, inputs);
       }
+      cb->draw(6, item.count);
+      stats_.draws++;
+      stats_.wide_draws++;
+      break;
+    }
+    case DrawKind::StripRun: {
+      /* a run of thin strips: one line strip over the run's entries of its
+         group's index list, restarted between the strips, the vertices
+         bound from the run's first */
+      QRhiBuffer *buffer = source(item.source);
+      QRhiGraphicsPipeline *pipeline = pipelines_[kThinStrip][depth].get();
+      const size_t g = static_cast<size_t>(item.group);
+      QRhiBuffer *indices = g < run_lists_.size() ? run_lists_[g].indices.get() : nullptr;
+      if (buffer == nullptr || pipeline == nullptr || indices == nullptr || item.count == 0)
+        break;
+      bind(cb, pipeline, item.slot, pixels);
+      const QRhiCommandBuffer::VertexInput input(buffer, item.offset);
+      cb->setVertexInput(0, 1, &input, indices, 4 * item.list, QRhiCommandBuffer::IndexUInt32);
+      cb->drawIndexed(item.count);
+      stats_.draws++;
+      stats_.thin_draws++;
+      break;
+    }
+    case DrawKind::WideRun: {
+      /* a run of wide strips: a quad per pair of consecutive vertices from
+         the run's first, as for a strip, with its flag from the group's
+         flags (0 between the strips: not drawn) */
+      QRhiBuffer *buffer = source(item.source);
+      const size_t g = static_cast<size_t>(item.group);
+      QRhiBuffer *flags = g < run_lists_.size() ? run_lists_[g].flags.get() : nullptr;
+      if (buffer == nullptr || flags == nullptr || item.count == 0)
+        break;
+      bind(cb, pipelines_[kWideRun][depth].get(), item.slot, pixels);
+      const QRhiCommandBuffer::VertexInput inputs[] = {
+          corners,
+          {buffer, item.offset},
+          {buffer, item.offset + static_cast<quint32>(sizeof(struct mbv_draw_vertex))},
+          {flags, 4 * item.list}};
+      cb->setVertexInput(0, 4, inputs);
       cb->draw(6, item.count);
       stats_.draws++;
       stats_.wide_draws++;
@@ -2529,6 +2665,7 @@ struct OffscreenRenderer::Impl {
     stats.contour_held_bytes = 0;
     stats.sounding_held_bytes = 0;
     stats.splat_held_bytes = 0;
+    stats.run_held_bytes = 0;
   }
   rhi::MapRenderer *map() const { return static_cast<rhi::MapRenderer *>(renderer.get()); }
 };

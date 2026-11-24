@@ -35,18 +35,26 @@
  * renderer of the tests run the same frame() and record().
  *
  * BatchRenderer draws a view's batch (mbv_draw_batch.h): the commands in
- * stream order (BatchPlan, mbvq_rhi_model.h), each with a uniform slot of its
- * own in one dynamic buffer per renderer, written once per frame; the contour
- * slot from the finest contours made, uploaded only when they change; lines
- * of one physical pixel with the line topology, wider ones as quads
- * extruded along their minor axis in the shaders; points of the point size,
- * or quads where the API has no point size; markers instanced per run, with
- * GLU's meshes (mbvq_rhi_glu.h). Line widths, point sizes and stipple
- * factors are scaled by the view's device pixel ratio (Style). The batch's
- * vertices and instances go up in the frame that filled them, whole: a batch
- * is drawn in the frame that filled it. They, what the plan made of them and
- * the contours are dynamic buffers of exactly the size of their data, and the
- * uniform ring one grown by doubling; each is always written whole. The
+ * stream order (BatchPlan, mbvq_rhi_model.h), each drawable command, or each
+ * run of consecutive line strips of one state within a group, with a uniform
+ * slot of its own in one dynamic buffer per renderer, written once per frame;
+ * the contour slot from the finest contours made, uploaded only when they
+ * change; lines of one physical pixel with the line topology, wider ones as
+ * quads extruded along their minor axis in the shaders; a run of thin
+ * strips as one line strip restarted between them where the API can (else
+ * strip by strip), a run of wide ones as quads instanced over the run's
+ * vertices that skip the segments between the strips; points of the point
+ * size, or quads where the API has no point size; markers instanced per
+ * run, with GLU's meshes (mbvq_rhi_glu.h). Line widths, point sizes and
+ * stipple factors are scaled by the view's device pixel ratio (Style). The
+ * batch's vertices and instances go up in the frame that filled them, whole:
+ * a batch is drawn in the frame that filled it. They, what the plan made of
+ * them and the contours are dynamic buffers of exactly the size of their
+ * data, and the uniform ring one grown by doubling; each is always written
+ * whole. The runs' lists, per group of the batch (its thin runs' index list,
+ * its wide runs' flags), are kept and written whole only when the layout of
+ * that group's runs changes, in buffers of exactly their size, dynamic on
+ * Metal and static elsewhere, as the 3D soundings' index lists. The
  * marker meshes and the corners of the quads of wide lines and of points are
  * static buffers, uploaded once. Qt's Metal, Vulkan and Direct3D 12 backends
  * keep a dynamic buffer once per frame slot and drop the writes still
@@ -290,6 +298,7 @@ class BatchRenderer : public ViewRenderer {
     kStippleWide,
     kMarkers,
     kPointQuads,
+    kWideRun,
     kPipelines
   };
 
@@ -401,8 +410,11 @@ class BatchRenderer : public ViewRenderer {
      *failed set if its buffer could not be made (then nothing is kept) */
   MeshGpu *mesh(QRhiResourceUpdateBatch *updates, const struct mbv_draw_shape &shape, bool *failed);
   QRhiBuffer *source(DrawSource source) const;
+  /* group g's run lists from the plan, each written whole into a buffer of
+     exactly its size (none for none); false if one cannot be made */
+  bool write_runs(QRhiResourceUpdateBatch *updates, int group);
 
-  std::unique_ptr<QRhiBuffer> uniforms_; /* the ring of uniform slots, one per drawable command */
+  std::unique_ptr<QRhiBuffer> uniforms_; /* the ring of uniform slots, one per drawable command or run */
   quint32 slot_stride_ = 0;
   quint32 slot_capacity_ = 0;
   std::vector<unsigned char> slot_bytes_;
@@ -416,6 +428,18 @@ class BatchRenderer : public ViewRenderer {
   std::unique_ptr<QRhiBuffer> stipple_;
   std::unique_ptr<QRhiBuffer> contours_;
   BatchPlan batch_;
+  /* the run lists of each group of the plan (BatchPlan::run_groups()), as
+     written from the plan's last layout of that group: its thin runs' index
+     list (index buffer) and its wide runs' flags (vertex buffer) */
+  struct RunLists {
+    std::unique_ptr<QRhiBuffer> indices;
+    std::unique_ptr<QRhiBuffer> flags;
+  };
+  std::vector<RunLists> run_lists_;
+  /* thin runs are drawn as one line strip: the QRhi restarts strips at
+     0xffffffff (PrimitiveRestart) and has 32-bit indices (ElementIndexUint) */
+  bool restart_ = false;
+  QRhiBuffer::Type run_type_ = QRhiBuffer::Static; /* the run lists': dynamic on Metal, static elsewhere */
   bool batch_ready_ = false; /* the batch's buffers hold the frame driver's batch */
   QSize batch_pixels_;
   double batch_ratio_ = 0.0;
