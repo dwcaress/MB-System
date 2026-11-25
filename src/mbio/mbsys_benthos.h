@@ -117,6 +117,8 @@ struct mbsys_benthos_struct {
 
 	float ssrawtimedelay;    /* raw sidescan delay (sec) */
 	float ssrawtimeduration; /* raw sidescan duration (sec) */
+	float ssrawstbdtimeduration; /* raw starboard sidescan duration (sec) if it differs from
+	                                ssrawtimeduration (port), 0 otherwise */
 	float ssrawbottompick;   /* bottom pick time (sec) 	*/
 
 	float ssrawslantrange;  /* slant range (m) */
@@ -128,6 +130,8 @@ struct mbsys_benthos_struct {
 	unsigned short ssstbdinitgain;
 	unsigned short ssportgain;
 	unsigned short ssstbdgain;
+	short ssportweight; /* weighting exponent: raw sample = amplitude * 2^weight (0 = none) */
+	short ssstbdweight;
 
 	unsigned short ssrawportsamples;                      /* number of port raw sidescan samples */
 	unsigned short ssrawstbdsamples;                      /* number of stbd raw sidescan samples */
