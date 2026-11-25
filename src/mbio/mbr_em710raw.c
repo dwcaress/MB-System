@@ -3687,6 +3687,30 @@ int mbr_em710raw_rd_ra123(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 		}
 	}
 
+	/* the HISAS reader returns a ping as soon as its XYZ88 datagram is read, so a raw range
+	   and angle 123 datagram that comes after the XYZ88 datagram of its ping (a ping already
+	   returned, whose structure has been emptied but still holds its counter) cannot be used:
+	   warn once per file (mb_io_ptr->save12) instead of dropping it silently. In the data seen
+	   the raw range and angle 123 datagram always comes first. */
+	bool late = false;
+	if (status == MB_SUCCESS && valid) {
+		for (int i = 0; i < MBSYS_SIMRAD3_NUM_PING_STRUCTURES && !late; i++) {
+			if (store->pings[i].read_status == MBSYS_SIMRAD3_PING_NO_DATA && store->pings[i].png_nbeams > 0 &&
+			    png_count == store->pings[i].count && serial == store->pings[i].serial)
+				late = true;
+		}
+		if (late) {
+			struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+			if (mb_io_ptr->save12 == 0)
+				fprintf(stderr,
+				        "MBF_EM710RAW: HISAS raw range and angle 123 datagram after the XYZ88 datagram of ping %d: not "
+				        "used; travel times and angles of such pings come from the XYZ88 data\n",
+				        png_count);
+			mb_io_ptr->save12 = 1;
+			valid = false;
+		}
+	}
+
 	/* figure out which storage structure to use */
 	struct mbsys_simrad3_ping_struct *ping = NULL;
 	if (status == MB_SUCCESS && valid) {
@@ -3751,7 +3775,7 @@ int mbr_em710raw_rd_ra123(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 		if (status == MB_SUCCESS)
 			*stored = true;
 	}
-	else if (status == MB_SUCCESS && verbose > 0) {
+	else if (status == MB_SUCCESS && !late && verbose > 0) {
 		fprintf(stderr, "MBF_EM710RAW: HISAS raw range and angle 123 datagram not used (ping %d: version %d, %d arrays, "
 		        "%d beams, entry sizes %d and %d bytes, datagram %d bytes)\n",
 		        png_count, version, narrays, nbeams, bytes_array, bytes_beam, record_size);
@@ -5838,6 +5862,9 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* calculate corrected ranges, angles, and bathymetry */
 		// const double theta_nadir = 90.0;
 		// int inadir = 0;
+		/* HISAS writes no raw beam datagram: its travel times and beam angles are set
+		   after this loop from the raw range and angle 123 datagram or the XYZ88 data */
+		const bool hisas = MBSYS_SIMRAD3_IS_HISAS(store->sonar);
 		for (int i = 0; i < ping->png_nbeams; i++) {
 			/* calculate time of transmit and receive */
 			transmit_time_d = ptime_d + (double)ping->png_raw_txoffset[ping->png_raw_rxsector[i]];
@@ -5857,11 +5884,12 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			if (ping->png_ssv <= 0)
 				ping->png_ssv = 150;
 			// const double soundspeed = 0.1 * ((double)ping->png_ssv);
-			ping->png_range[i] = ping->png_raw_rxrange[i];
+			ping->png_range[i] = hisas ? 0.0 : ping->png_raw_rxrange[i];
 			/* ping->png_bheave[i] is the difference between the heave at the ping timestamp time that is factored
 			 * into the ping->png_xducer_depth value and the average heave at the sector transmit time and the beam receive time
 			 */
-			ping->png_bheave[i] = 0.5 * (receive_heave + transmit_heave) - heave;
+			if (!hisas)
+				ping->png_bheave[i] = 0.5 * (receive_heave + transmit_heave) - heave;
 
 			/* calculate beam angles for raytracing using Jon Beaudoin's code based on:
 			    Beaudoin, J., Hughes Clarke, J., and Bartlett, J. Application of
@@ -5909,12 +5937,14 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			rx_orientation.heading = receive_heading;
 			reference_heading = pheading;
 
-			status = mb_beaudoin(verbose, tx_align, tx_orientation, tx_steer, rx_align, rx_orientation, rx_steer,
-			                     reference_heading, &beamAzimuth, &beamDepression, error);
-			ping->png_depression[i] = 90.0 - beamDepression;
-			ping->png_azimuth[i] = 90.0 + beamAzimuth;
-			if (ping->png_azimuth[i] < 0.0)
-				ping->png_azimuth[i] += 360.0;
+			if (!hisas) {
+				status = mb_beaudoin(verbose, tx_align, tx_orientation, tx_steer, rx_align, rx_orientation, rx_steer,
+				                     reference_heading, &beamAzimuth, &beamDepression, error);
+				ping->png_depression[i] = 90.0 - beamDepression;
+				ping->png_azimuth[i] = 90.0 + beamAzimuth;
+				if (ping->png_azimuth[i] < 0.0)
+					ping->png_azimuth[i] += 360.0;
+			}
 
 			/* calculate beamflag */
 			detection_mask = (mb_u_char)ping->png_raw_rxdetection[i];
@@ -5965,10 +5995,11 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 
 		/* HISAS: travel times and beam angles for raytracing from the raw range and
-		   angle 123 datagram if it was read for this ping */
-		if (MBSYS_SIMRAD3_IS_HISAS(store->sonar)) {
+		   angle 123 datagram if it was read for this ping, otherwise from the XYZ88 data */
+		if (hisas) {
 			bool ra123_applied = false;
-			status = mbsys_simrad3_hisas_ra123_angles(verbose, store, ping, &ra123_applied, error);
+			int ra_error = MB_ERROR_NO_ERROR;
+			mbsys_simrad3_hisas_ra123_angles(verbose, store, ping, &ra123_applied, &ra_error);
 		}
 
 		/* generate processed sidescan */
@@ -6287,43 +6318,22 @@ int mbr_em710raw_wr_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 		sprintf(&buff[buff_len], "S3P=%.3f,", store->par_s3p);
 		buff_len = strlen(buff);
 	}
-	/* HISAS transmit and receive array locations */
+	/* HISAS transmit and receive array locations; each key is appended only if it
+	   fits whole in the buffer (leaving the 22 bytes reserved at its end) */
 	if (MBSYS_SIMRAD3_IS_HISAS(store->sonar)) {
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S11X=%.3f,", store->par_s11x);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S11Y=%.3f,", store->par_s11y);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S11Z=%.3f,", store->par_s11z);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S12X=%.3f,", store->par_s12x);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S12Y=%.3f,", store->par_s12y);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S12Z=%.3f,", store->par_s12z);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S13X=%.3f,", store->par_s13x);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S13Y=%.3f,", store->par_s13y);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S13Z=%.3f,", store->par_s13z);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S21X=%.3f,", store->par_s21x);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S21Y=%.3f,", store->par_s21y);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S21Z=%.3f,", store->par_s21z);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S22X=%.3f,", store->par_s22x);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S22Y=%.3f,", store->par_s22y);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S22Z=%.3f,", store->par_s22z);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S23X=%.3f,", store->par_s23x);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S23Y=%.3f,", store->par_s23y);
-		buff_len = strlen(buff);
-		snprintf(&buff[buff_len], MBSYS_SIMRAD3_BUFFER_SIZE - 22 - buff_len, "S23Z=%.3f,", store->par_s23z);
+		const char *hisas_keys[18] = {"S11X", "S11Y", "S11Z", "S12X", "S12Y", "S12Z", "S13X", "S13Y", "S13Z",
+		                              "S21X", "S21Y", "S21Z", "S22X", "S22Y", "S22Z", "S23X", "S23Y", "S23Z"};
+		const double hisas_values[18] = {store->par_s11x, store->par_s11y, store->par_s11z, store->par_s12x, store->par_s12y,
+		                                 store->par_s12z, store->par_s13x, store->par_s13y, store->par_s13z, store->par_s21x,
+		                                 store->par_s21y, store->par_s21z, store->par_s22x, store->par_s22y, store->par_s22z,
+		                                 store->par_s23x, store->par_s23y, store->par_s23z};
+		for (int k = 0; k < 18; k++) {
+			char entry[64];
+			const int entry_len = snprintf(entry, sizeof(entry), "%s=%.3f,", hisas_keys[k], hisas_values[k]);
+			const size_t used = strlen(buff);
+			if (entry_len > 0 && entry_len < (int)sizeof(entry) && used + (size_t)entry_len < MBSYS_SIMRAD3_BUFFER_SIZE - 22)
+				memcpy(&buff[used], entry, (size_t)entry_len + 1);
+		}
 		buff_len = strlen(buff);
 	}
 	if (store->par_go1 != 0.0) {

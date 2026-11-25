@@ -766,9 +766,42 @@ static bool mbsys_simrad3_hisas_arrays(const struct mbsys_simrad3_struct *store,
 }
 
 /*--------------------------------------------------------------------*/
+/* HISAS: straight-ray travel time and beam angles of a beam from its XYZ88 sounding, for beams
+    without a usable raw range and angle 123 value. The XYZ88 depth is relative to the transmit
+    array and the acrosstrack and alongtrack distances to the position sensor, so the vector from
+    the transmit array is (acrosstrack - tx_across, alongtrack - tx_along, depth), with tx_across
+    and tx_along the transmit array location relative to the position sensor (roll and pitch of
+    the lever arm are neglected). Returns false for an empty sounding. */
+static bool mbsys_simrad3_hisas_xyz_beam(const struct mbsys_simrad3_ping_struct *ping, int i, double tx_across,
+                                         double tx_along, double soundspeed, double *twtt, double *depression,
+                                         double *azimuth) {
+	if (!isfinite(ping->png_depth[i]) || !isfinite(ping->png_acrosstrack[i]) || !isfinite(ping->png_alongtrack[i]))
+		return false;
+	const double a = ping->png_acrosstrack[i] - tx_across;
+	const double f = ping->png_alongtrack[i] - tx_along;
+	const double d = ping->png_depth[i];
+	const double range = sqrt(a * a + f * f + d * d);
+	if (ping->png_depth[i] == 0.0 || range <= 0.0)
+		return false;
+	*twtt = 2.0 * range / soundspeed;
+	*depression = RTD * acos(MAX(-1.0, MIN(1.0, d / range)));
+	*azimuth = 180.0 - RTD * atan2(f, a);
+	if (*azimuth < 0.0)
+		*azimuth += 360.0;
+	else if (*azimuth >= 360.0)
+		*azimuth -= 360.0;
+	return true;
+}
+
+/*--------------------------------------------------------------------*/
 /* HISAS: set the travel times and beam angles used for raytracing (png_range, png_depression,
     png_azimuth, png_bheave) from the raw range and angle 123 datagram of the ping, if it was read
-    for this ping with the same number of beams as the XYZ88 datagram. The RA123 depression
+    for this ping with the same number of beams as the XYZ88 datagram. HISAS writes no raw beam
+    datagram, so beams without a usable raw range and angle 123 value (no such datagram for the
+    ping, or an invalid travel time) keep a travel time already set (format 59 stores them; the
+    format 58 reader sets them to zero) or else get a straight-ray travel time and angles from
+    their XYZ88 sounding (mbsys_simrad3_hisas_xyz_beam()); only empty soundings are left with a
+    zero travel time. The RA123 depression
     (below the horizontal) and azimuth angles behave as levelled, heading-aligned angles in the
     data seen, with the azimuth positive forward, so roll and pitch are not applied again. The
     unit vector of a beam is then alongtrack f = sin(azimuth), down d = sin(depression) and
@@ -778,7 +811,8 @@ static bool mbsys_simrad3_hisas_arrays(const struct mbsys_simrad3_struct *store,
     sin(theta) sin(phi), phi = 180 - png_azimuth):
         png_depression = theta = acos(d)
         png_azimuth = 180 - atan2(f, a)
-    The heave correction is zero as HISAS heave is not used. The bathymetry is not changed. */
+    The heave correction is zero as HISAS heave is not used. The bathymetry is not changed.
+    applied is true if the raw range and angle 123 datagram was used. */
 int mbsys_simrad3_hisas_ra123_angles(int verbose, struct mbsys_simrad3_struct *store, struct mbsys_simrad3_ping_struct *ping,
                                      bool *applied, int *error) {
 	if (verbose >= 2) {
@@ -790,29 +824,65 @@ int mbsys_simrad3_hisas_ra123_angles(int verbose, struct mbsys_simrad3_struct *s
 	}
 
 	*applied = false;
-	if (MBSYS_SIMRAD3_IS_HISAS(store->sonar) && ping->png_ra_read && ping->png_ra_count == ping->png_count &&
-	    ping->png_ra_nbeams == ping->png_nbeams && ping->png_nbeams > 0 && ping->png_nbeams <= MBSYS_SIMRAD3_MAXBEAMS) {
-		const double side_sign = (ping->png_ra_side & 1) ? 1.0 : -1.0;
-		const double tx_y = (ping->png_ra_side & 1) ? store->par_s21y : store->par_s11y;
-		for (int i = 0; i < ping->png_nbeams; i++) {
+	if (!MBSYS_SIMRAD3_IS_HISAS(store->sonar) || ping->png_nbeams <= 0 || ping->png_nbeams > MBSYS_SIMRAD3_MAXBEAMS) {
+		*error = MB_ERROR_NO_ERROR;
+		return (MB_SUCCESS);
+	}
+
+	/* transmit array location relative to the active position sensor, for the XYZ88 fallback */
+	double tx_x = store->par_s1x, tx_y = store->par_s1y, tx_z = store->par_s1z;
+	double rx_x = tx_x, rx_y = tx_y, rx_z = tx_z;
+	mbsys_simrad3_hisas_arrays(store, ping, &tx_x, &tx_y, &tx_z, &rx_x, &rx_y, &rx_z);
+	double pos_x = store->par_p1x, pos_y = store->par_p1y;
+	if (store->par_aps == 1) {
+		pos_x = store->par_p2x;
+		pos_y = store->par_p2y;
+	}
+	else if (store->par_aps == 2) {
+		pos_x = store->par_p3x;
+		pos_y = store->par_p3y;
+	}
+	const double tx_across = tx_y - pos_y;
+	const double tx_along = tx_x - pos_x;
+	const double soundspeed = ping->png_ssv > 0 ? 0.1 * ping->png_ssv : 1500.0;
+
+	const bool use_ra123 = ping->png_ra_read && ping->png_ra_count == ping->png_count &&
+	                       ping->png_ra_nbeams == ping->png_nbeams;
+	const double side_sign = (ping->png_ra_side & 1) ? 1.0 : -1.0;
+	const double ra_tx_y = (ping->png_ra_side & 1) ? store->par_s21y : store->par_s11y;
+	for (int i = 0; i < ping->png_nbeams; i++) {
+		bool done = false;
+		if (use_ra123 && isfinite(ping->png_ra_twtt[i]) && ping->png_ra_twtt[i] > 0.0) {
 			const double f = sin(DTR * ping->png_ra_azimuth[i]);
 			const double d = sin(DTR * ping->png_ra_depression[i]);
-			/* the angles do not give the side of a beam: some soundings, mostly flagged, lie
-			   on the other side of the transmit array in the XYZ88 datagram, so take the sign
-			   of the acrosstrack component from the XYZ88 sounding (relative to the position
-			   sensor, which the XYZ88 data are relative to), and the side of the arrays only
-			   for a sounding right below the transmit array */
-			const double across_tx = ping->png_acrosstrack[i] - tx_y;
-			const double across_sign = across_tx > 0.0 ? 1.0 : (across_tx < 0.0 ? -1.0 : side_sign);
-			const double a = across_sign * sqrt(MAX(0.0, 1.0 - f * f - d * d));
-			double azimuth = 180.0 - RTD * atan2(f, a);
-			if (azimuth < 0.0)
-				azimuth += 360.0;
-			else if (azimuth >= 360.0)
-				azimuth -= 360.0;
-			if (isfinite(ping->png_ra_twtt[i]) && ping->png_ra_twtt[i] > 0.0 && isfinite(f) && isfinite(d)) {
+			if (isfinite(f) && isfinite(d)) {
+				/* the angles do not give the side of a beam: some soundings, mostly flagged, lie
+				   on the other side of the transmit array in the XYZ88 datagram, so take the sign
+				   of the acrosstrack component from the XYZ88 sounding (relative to the position
+				   sensor, which the XYZ88 data are relative to), and the side of the arrays only
+				   for a sounding right below the transmit array */
+				const double across_tx = ping->png_acrosstrack[i] - ra_tx_y;
+				const double across_sign = across_tx > 0.0 ? 1.0 : (across_tx < 0.0 ? -1.0 : side_sign);
+				const double a = across_sign * sqrt(MAX(0.0, 1.0 - f * f - d * d));
+				double azimuth = 180.0 - RTD * atan2(f, a);
+				if (azimuth < 0.0)
+					azimuth += 360.0;
+				else if (azimuth >= 360.0)
+					azimuth -= 360.0;
 				ping->png_range[i] = ping->png_ra_twtt[i];
 				ping->png_depression[i] = RTD * acos(MAX(-1.0, MIN(1.0, d)));
+				ping->png_azimuth[i] = azimuth;
+				done = true;
+			}
+		}
+		/* keep a travel time already set (e.g. read from a format 59 file) */
+		if (!done && isfinite(ping->png_range[i]) && ping->png_range[i] > 0.0)
+			done = true;
+		if (!done) {
+			double twtt, depression, azimuth;
+			if (mbsys_simrad3_hisas_xyz_beam(ping, i, tx_across, tx_along, soundspeed, &twtt, &depression, &azimuth)) {
+				ping->png_range[i] = twtt;
+				ping->png_depression[i] = depression;
 				ping->png_azimuth[i] = azimuth;
 			}
 			else {
@@ -820,10 +890,10 @@ int mbsys_simrad3_hisas_ra123_angles(int verbose, struct mbsys_simrad3_struct *s
 				ping->png_depression[i] = 0.0;
 				ping->png_azimuth[i] = 0.0;
 			}
-			ping->png_bheave[i] = 0.0;
 		}
-		*applied = true;
+		ping->png_bheave[i] = 0.0;
 	}
+	*applied = use_ra123;
 
 	const int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
@@ -1680,7 +1750,8 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 			}
 
 			/* get ssv and range - HISAS has no raw beam datagram: its travel times and angles
-			   are set from the raw range and angle 123 datagram after this loop, or kept as read */
+			   are set after this loop from the raw range and angle 123 datagram, kept as read,
+			   or taken from the XYZ88 data */
 			if (ping->png_ssv <= 0)
 				ping->png_ssv = 150;
 			if (!hisas)
@@ -1842,10 +1913,11 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		}
 
 		/* HISAS: travel times and beam angles for raytracing from the raw range and angle 123
-		   datagram if it was read for this ping, otherwise those read are kept */
+		   datagram if it was read for this ping, otherwise from the XYZ88 data */
 		if (hisas) {
 			bool ra123_applied = false;
-			status = mbsys_simrad3_hisas_ra123_angles(verbose, store, ping, &ra123_applied, error);
+			int ra_error = MB_ERROR_NO_ERROR;
+			mbsys_simrad3_hisas_ra123_angles(verbose, store, ping, &ra123_applied, &ra_error);
 		}
 
 		/* generate processed sidescan */
