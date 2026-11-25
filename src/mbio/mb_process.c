@@ -393,7 +393,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 				else if (strncmp(buffer, "NAVDRAFT", 8) == 0) {
 					sscanf(buffer, "%s %d", dummy, &process->mbp_nav_draft);
 				}
-				else if (strncmp(buffer, "NAVATTITUDE", 8) == 0) {
+				else if (strncmp(buffer, "NAVATTITUDE", 11) == 0) {
 					sscanf(buffer, "%s %d", dummy, &process->mbp_nav_attitude);
 				}
 				else if (strncmp(buffer, "NAVINTERP", 9) == 0) {
@@ -458,16 +458,16 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 				}
 
 				/* sensordepth merging */
-				else if (strncmp(buffer, "sensordepthMODE", 12) == 0) {
+				else if (strncmp(buffer, "sensordepthMODE", 15) == 0) {
 					sscanf(buffer, "%s %d", dummy, &process->mbp_sensordepth_mode);
 				}
-				else if (strncmp(buffer, "sensordepthFILE", 12) == 0) {
+				else if (strncmp(buffer, "sensordepthFILE", 15) == 0) {
 					sscanf(buffer, "%s %s", dummy, process->mbp_sensordepthfile);
 					if (!explicit) {
 						process->mbp_sensordepth_mode = MBP_SENSORDEPTH_ON;
 					}
 				}
-				else if (strncmp(buffer, "sensordepthFORMAT", 14) == 0) {
+				else if (strncmp(buffer, "sensordepthFORMAT", 17) == 0) {
 					sscanf(buffer, "%s %d", dummy, &process->mbp_sensordepth_format);
 				}
 
@@ -538,7 +538,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 						process->mbp_cut_num++;
 					}
 				}
-				else if (strncmp(buffer, "SSCUTNUMBER", 12) == 0) {
+				else if (strncmp(buffer, "SSCUTNUMBER", 11) == 0) {
 					if (process->mbp_cut_num < MBP_CUT_NUM_MAX) {
 						sscanf(buffer, "%s %lf %lf", dummy, &process->mbp_cut_min[process->mbp_cut_num],
 						       &process->mbp_cut_max[process->mbp_cut_num]);
@@ -547,7 +547,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 						process->mbp_cut_num++;
 					}
 				}
-				else if (strncmp(buffer, "SSCUTDISTANCE", 14) == 0) {
+				else if (strncmp(buffer, "SSCUTDISTANCE", 13) == 0) {
 					if (process->mbp_cut_num < MBP_CUT_NUM_MAX) {
 						sscanf(buffer, "%s %lf %lf", dummy, &process->mbp_cut_min[process->mbp_cut_num],
 						       &process->mbp_cut_max[process->mbp_cut_num]);
@@ -779,10 +779,10 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 				else if (strncmp(buffer, "SSPIXELSIZE", 11) == 0) {
 					sscanf(buffer, "%s %lf", dummy, &process->mbp_ssrecalc_pixelsize);
 				}
-				else if (strncmp(buffer, "SSSWATHWIDTH", 11) == 0) {
+				else if (strncmp(buffer, "SSSWATHWIDTH", 12) == 0) {
 					sscanf(buffer, "%s %lf", dummy, &process->mbp_ssrecalc_swathwidth);
 				}
-				else if (strncmp(buffer, "SSINTERPOLATE", 11) == 0) {
+				else if (strncmp(buffer, "SSINTERPOLATE", 13) == 0) {
 					sscanf(buffer, "%s %d", dummy, &process->mbp_ssrecalc_interpolate);
 				}
 
