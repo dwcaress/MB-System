@@ -48,24 +48,22 @@ The mapping from fnv columns to binary record fields is:
   field  1: latitude  <- latitude
   field  2: longitude <- longitude
   field  3: depth     <- draft
-  field  4: 0.0       (not available in fnv)
-  field  5: 0.0       (not available in fnv)
+  field  4: roll      <- roll
+  field  5: pitch     <- pitch
   field  6: heading   <- heading
-  field  7: roll      <- roll
-  field  8: pitch     <- pitch
+  field  7: vel_north <- speed / 3.6 * cos(heading) (m/s)
+  field  8: vel_east  <- speed / 3.6 * sin(heading) (m/s)
   field  9: 0.0       (vertical velocity, not in fnv)
-  field 10: speed_ms  <- speed / 3.6 (km/hr to m/s)
-  field 11: speed_ms  <- speed / 3.6 (copy of field 10)
-  fields 12\-20: 0.0   (uncertainties and covariance, not in fnv)
+  fields 10\-20: 0.0   (uncertainty estimates, not in fnv)
 .fi
 
 Heave from the fnv file is read but discarded; the navlab binary format
 does not have an explicit heave field.
 
-Speed is converted from km/hr to m/s. Both speed fields (10 and 11) in
-the output are set to the same value; in original navlab_smooth.bin files
-these two fields typically differ slightly because they represent
-estimates from different sensors or algorithms.
+Speed is converted from km/hr to m/s and split into north and east
+velocity components along the heading, because the fnv file has no
+course over ground. Roll and pitch are written unchanged, as the roll
+and pitch of Kongsberg kmall attitude are read by MB-System.
 
 If no input file is specified, \fBmbfnv2navlab\fP reads from standard
 input. If no output file is specified, it writes to standard output.

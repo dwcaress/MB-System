@@ -1300,7 +1300,9 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 			 *   [0] time_d (Unix epoch seconds)
 			 *   [1] latitude (decimal degrees, positive north)
 			 *   [2] longitude (decimal degrees, positive east)
-			 * Speed not available; set to 0.0
+			 *   [7] velocity north (m/s)
+			 *   [8] velocity east (m/s)
+			 * Speed (km/hr) is computed from the north and east velocities
 			 */
 			FILE *bfp;
 			if ((bfp = fopen(merge_nav_file, "rb")) == NULL) {
@@ -1318,7 +1320,7 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 					n_time_d[nrecord] = brec[0];
 					n_lat[nrecord]    = brec[1];
 					n_lon[nrecord]    = brec[2];
-					n_speed[nrecord]  = 0.0;
+					n_speed[nrecord]  = 3.6 * sqrt(brec[7] * brec[7] + brec[8] * brec[8]);
 					/* apply lonflip */
 					if (merge_nav_lonflip == -1 && n_lon[nrecord] > 0.0)
 						n_lon[nrecord] -= 360.0;
@@ -2497,8 +2499,11 @@ int mb_loadattitudedata(int verbose, char *merge_attitude_file, int merge_attitu
 		if (merge_attitude_format == MB_PR_ATTITUDE_FORMAT_NAVLAB) {
 			/* Kongsberg Navlab binary format
 			 *   [0] time_d (Unix epoch seconds)
-			 *   [7] roll   (degrees, positive starboard up)
-			 *   [8] pitch  (degrees, positive bow up) -- have to flip sign for the internal MB-System convention
+			 *   [4] roll   (degrees, same values and sign as the roll of the
+			 *              Kongsberg kmall attitude written with the same data;
+			 *              passed on unchanged as the kmall reader does)
+			 *   [5] pitch  (degrees, positive bow up)
+			 * Fields [7] and [8] are the north and east velocities, not attitude
 			 * Heave not available; set to 0.0
 			 */
 			FILE *bfp;
@@ -2514,8 +2519,8 @@ int mb_loadattitudedata(int verbose, char *merge_attitude_file, int merge_attitu
 						for (int ii = 0; ii < 21; ii++)
 							mb_swap_double(&brec[ii]);
 					n_time_d[nrecord] = brec[0];
-					n_roll[nrecord]   = brec[7];
-					n_pitch[nrecord]  = -brec[8];
+					n_roll[nrecord]   = brec[4];
+					n_pitch[nrecord]  = brec[5];
 					n_heave[nrecord]  = 0.0;
 					if (verbose >= 5) {
 						fprintf(stderr, "\ndbg5  New attitude point read in function <%s>\n", __func__);

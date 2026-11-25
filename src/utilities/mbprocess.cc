@@ -1288,10 +1288,12 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
         exit(MB_ERROR_OPEN_FAIL);
       }
+      /* the file is little-endian: swap on big-endian hosts only, as
+         mb_loadnavdata() does (mb_swap_check() is true on little-endian hosts) */
       bool swap = (mb_swap_check() == MB_YES);
       double brec[21];
       while (fread(brec, sizeof(double), 21, bfp) == 21) {
-        if (swap)
+        if (!swap)
           for (int ii = 0; ii < 21; ii++)
             mb_swap_double(&brec[ii]);
         if (nnav > 0 && brec[0] <= ntime[nnav - 1])
@@ -1300,10 +1302,12 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
         nlon[nnav]     = brec[2];
         nlat[nnav]     = brec[1];
         nheading[nnav] = brec[6];
-        nspeed[nnav]   = 0.0;
+        /* fields 7 and 8 are the north and east velocities (m/s),
+           fields 4 and 5 roll and pitch (degrees) */
+        nspeed[nnav]   = 3.6 * sqrt(brec[7] * brec[7] + brec[8] * brec[8]);
         ndraft[nnav]   = 0.0;
-        nroll[nnav]    = brec[7];
-        npitch[nnav]   = brec[8];
+        nroll[nnav]    = brec[4];
+        npitch[nnav]   = brec[5];
         nheave[nnav]   = 0.0;
         /* apply lonflip */
         if (lonflip == -1 && nlon[nnav] > 0.0)
@@ -1890,17 +1894,19 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
         exit(MB_ERROR_OPEN_FAIL);
       }
+      /* the file is little-endian: swap on big-endian hosts only, as
+         mb_loadnavdata() does (mb_swap_check() is true on little-endian hosts) */
       bool swap = (mb_swap_check() == MB_YES);
       double brec[21];
       while (fread(brec, sizeof(double), 21, bfp) == 21) {
-        if (swap)
+        if (!swap)
           for (int ii = 0; ii < 21; ii++)
             mb_swap_double(&brec[ii]);
         if (nattitude > 0 && brec[0] <= attitudetime[nattitude - 1])
           continue;
         attitudetime[nattitude]  = brec[0];
-        attituderoll[nattitude]  = brec[7];
-        attitudepitch[nattitude] = brec[8];
+        attituderoll[nattitude]  = brec[4];
+        attitudepitch[nattitude] = brec[5];
         attitudeheave[nattitude] = 0.0;
         if (verbose >= 5)
           fprintf(stderr, "\ndbg5  New attitude point read in program <%s>\ndbg5       attitude[%d]: %f %f %f %f\n",
@@ -2093,10 +2099,12 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
         exit(MB_ERROR_OPEN_FAIL);
       }
+      /* the file is little-endian: swap on big-endian hosts only, as
+         mb_loadnavdata() does (mb_swap_check() is true on little-endian hosts) */
       bool swap = (mb_swap_check() == MB_YES);
       double brec[21];
       while (fread(brec, sizeof(double), 21, bfp) == 21) {
-        if (swap)
+        if (!swap)
           for (int ii = 0; ii < 21; ii++)
             mb_swap_double(&brec[ii]);
         if (nsensordepth > 0 && brec[0] <= fsensordepthtime[nsensordepth - 1])

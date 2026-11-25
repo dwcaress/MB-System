@@ -404,7 +404,8 @@ value are:
         field 0: time in decimal epoch seconds (seconds since 1970)
         field 1: latitude in decimal degrees (positive north)
         field 2: longitude in decimal degrees (positive east)
-      Speed is not stored in this format and is set to zero.
+      Speed is computed from the north and east velocities in fields 7 and 8
+      (m/s).
 .TP
 .B \-\-nav-async\fP=\fIrecord_kind\fP
 .br
@@ -733,8 +734,9 @@ value are:
    12: Kongsberg Navlab smoothed navigation binary file (typically named
       navlab_smooth.bin). Records consist of 21 IEEE 754 double-precision
       floating-point values in little-endian byte order with no file header.
-      Roll is taken from field 7 (degrees, positive starboard up) and pitch
-      from field 8 (degrees, positive bow up). Heave is not available in this
+      Roll is taken from field 4 (degrees, same values and sign as the roll
+      of the Kongsberg kmall attitude written with the same data) and pitch
+      from field 5 (degrees, positive bow up). Heave is not available in this
       format and is set to zero. Field 0 provides the time in decimal epoch
       seconds (seconds since 1970).
 .TP
