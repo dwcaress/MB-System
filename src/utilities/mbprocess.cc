@@ -230,7 +230,7 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
       corrtableuse->sigma[i] = corrtable[0].sigma[i];
     }
   }
-  else if (time_d > corrtable[ncorrtable - 1].time_d) {
+  else if (time_d >= corrtable[ncorrtable - 1].time_d) {
     corrtableuse->time_d = corrtable[ncorrtable - 1].time_d;
     corrtableuse->nangle = corrtable[ncorrtable - 1].nangle;
     for (int i = 0; i < ncorrangle; i++) {
@@ -368,7 +368,7 @@ int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double
     int ifirst = nangle - 1;
     int ilast = 0;
     for (int i = 0; i < nangle; i++) {
-      if (corr[i] != 0.0) {
+      if (corrs[i] != 0.0) {
         if (ifirst > i)
           ifirst = i;
         if (ilast < i)
@@ -5393,7 +5393,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
                 bathy = altitude + sensordepth;
               else
                 bathy = altitude_default + sensordepth;
-              angle = RTD * atan(bathacrosstrack[i] / (bathy - sensordepth));
+              angle = RTD * atan(ssacrosstrack[i] / (bathy - sensordepth));
               slope = 0.0;
             }
 
