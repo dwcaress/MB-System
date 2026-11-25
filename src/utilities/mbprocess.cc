@@ -666,7 +666,8 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
   if (process->mbp_nav_mode == MBP_NAV_ON &&
       (process->mbp_nav_heading == MBP_NAV_ON || process->mbp_nav_speed == MBP_NAV_ON ||
        process->mbp_nav_draft == MBP_NAV_ON || process->mbp_nav_attitude == MBP_NAV_ON) &&
-      process->mbp_nav_format != 9 && process->mbp_nav_format != MB_PR_NAV_FORMAT_NAVLAB) {
+      process->mbp_nav_format != 9 && process->mbp_nav_format != MB_PR_NAV_FORMAT_NAVLAB &&
+      process->mbp_nav_format != MB_PR_NAV_FORMAT_KMALL) {
     fprintf(stderr, "\nWarning:\n\tNavigation format <%d> does not include \n", process->mbp_nav_format);
     fprintf(stderr, "\theading, speed, draft, roll, pitch and heave values.\n");
     if (process->mbp_nav_heading == MBP_NAV_ON) {
@@ -1221,7 +1222,26 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
     /* count the data points in the nav file */
     nnav = 0;
     char *result;
-    if (process->mbp_nav_format == MB_PR_NAV_FORMAT_NAVLAB) {
+    int nkmall = 0;
+    double *k_time_d = nullptr, *k_lon = nullptr, *k_lat = nullptr, *k_speed = nullptr;
+    double *k_heading = nullptr, *k_roll = nullptr, *k_pitch = nullptr, *k_heave = nullptr;
+    if (process->mbp_nav_format == MB_PR_NAV_FORMAT_KMALL) {
+      /* Kongsberg kmall #SKM navigation samples - no draft: the ellipsoid
+         height is not a sensor depth */
+      if (process->mbp_nav_draft == MBP_NAV_ON) {
+        fprintf(stderr, "\nWarning:\n\tNavigation format <%d> does not include draft values.\n", process->mbp_nav_format);
+        fprintf(stderr, "Merging of draft data disabled.\n");
+        process->mbp_nav_draft = MBP_NAV_OFF;
+      }
+      if (mb_loadkmallnav(verbose, process->mbp_navfile, &nkmall, &k_time_d, &k_lon, &k_lat, &k_speed, &k_heading,
+                          &k_roll, &k_pitch, &k_heave, error) != MB_SUCCESS) {
+        fprintf(stderr, "\nUnable to read kmall navigation from file <%s>\n", process->mbp_navfile);
+        fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+        exit(MB_ERROR_OPEN_FAIL);
+      }
+      nnav = nkmall;
+    }
+    else if (process->mbp_nav_format == MB_PR_NAV_FORMAT_NAVLAB) {
       /* Kongsberg Navlab binary: count records by file size */
       FILE *bfp;
       if ((bfp = fopen(process->mbp_navfile, "rb")) == nullptr) {
@@ -1280,8 +1300,33 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
     /* read the data points in the nav file */
     nnav = 0;
 
+    /* Kongsberg kmall #SKM navigation: copy the samples read above */
+    if (process->mbp_nav_format == MB_PR_NAV_FORMAT_KMALL) {
+      for (int i = 0; i < nkmall; i++) {
+        ntime[nnav] = k_time_d[i];
+        nlon[nnav] = k_lon[i];
+        nlat[nnav] = k_lat[i];
+        nheading[nnav] = k_heading[i];
+        nspeed[nnav] = k_speed[i];
+        ndraft[nnav] = 0.0;
+        nroll[nnav] = k_roll[i];
+        npitch[nnav] = k_pitch[i];
+        nheave[nnav] = k_heave[i];
+        mb_apply_lonflip(verbose, lonflip, &nlon[nnav]);
+        nnav++;
+      }
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&k_time_d, error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&k_lon, error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&k_lat, error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&k_speed, error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&k_heading, error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&k_roll, error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&k_pitch, error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&k_heave, error);
+    }
+
     /* Kongsberg Navlab binary format: read directly, bypassing ASCII loop */
-    if (process->mbp_nav_format == MB_PR_NAV_FORMAT_NAVLAB) {
+    else if (process->mbp_nav_format == MB_PR_NAV_FORMAT_NAVLAB) {
       FILE *bfp;
       if ((bfp = fopen(process->mbp_navfile, "rb")) == nullptr) {
         fprintf(stderr, "\nUnable to Open Navigation File <%s> for reading\n", process->mbp_navfile);

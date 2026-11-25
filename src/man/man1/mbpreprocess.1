@@ -406,6 +406,12 @@ value are:
         field 2: longitude in decimal degrees (positive east)
       Speed is computed from the north and east velocities in fields 7 and 8
       (m/s).
+.br
+   13: Kongsberg kmall file with #SKM (sensor KM binary) records, for
+      example the NavLab and real-time navigation files written with Kongsberg
+      AUV data. Time, latitude and longitude are taken from each sample, and the
+      speed from the north and east velocities. Records that end with a
+      length of 0 instead of the repeated datagram length are accepted.
 .TP
 .B \-\-nav-async\fP=\fIrecord_kind\fP
 .br
