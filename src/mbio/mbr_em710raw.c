@@ -5312,10 +5312,10 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	// transmit and receive array offsets
 	// double tx_x, tx_y, tx_z;
-	double tx_h, tx_r, tx_p;
+	double tx_h = 0.0, tx_r = 0.0, tx_p = 0.0;
 
 	// double rx_x, rx_y, rx_z;
-	double rx_h, rx_r, rx_p;
+	double rx_h = 0.0, rx_r = 0.0, rx_p = 0.0;
 	/* add some calculated data to survey records */
 	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA) {
 		/* get transducer offsets */
@@ -5333,7 +5333,7 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			rx_r = store->par_s2r;
 			rx_p = store->par_s2p;
 		}
-		else if (store->par_stc == 1) {
+		else if (store->par_stc == 1 || store->par_stc == 5 || store->par_stc == 6 || store->par_stc == 9) {
 			// tx_x = store->par_s1x;
 			// tx_y = store->par_s1y;
 			// tx_z = store->par_s1z;
