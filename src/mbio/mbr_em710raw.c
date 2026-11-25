@@ -294,7 +294,7 @@ int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_7
 		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_8
 		    || sonarunswap == MBSYS_SIMRAD3_EM3002
-		    || sonarunswap == MBSYS_SIMRAD3_HISAS) {
+		    || MBSYS_SIMRAD3_IS_HISAS(sonarunswap)) {
 			sonarunswapgood = true;
 		}
 		else {
@@ -326,7 +326,7 @@ int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		    || sonarswap == MBSYS_SIMRAD3_EM3000D_7
 		    || sonarswap == MBSYS_SIMRAD3_EM3000D_8
 		    || sonarswap == MBSYS_SIMRAD3_EM3002
-		    || sonarswap == MBSYS_SIMRAD3_HISAS) {
+		    || MBSYS_SIMRAD3_IS_HISAS(sonarswap)) {
 			sonarswapgood = true;
 		}
 		else {
@@ -388,7 +388,7 @@ int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	    || *sonar == MBSYS_SIMRAD3_EM3000D_7
 	    || *sonar == MBSYS_SIMRAD3_EM3000D_8
 	    || *sonar == MBSYS_SIMRAD3_EM3002
-	    || *sonar == MBSYS_SIMRAD3_HISAS) {
+	    || MBSYS_SIMRAD3_IS_HISAS(*sonar)) {
 		sonargood = true;
 	}
 	else {
@@ -901,6 +901,44 @@ int mbr_em710raw_rd_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 			else if (strncmp("S3P=", line, 4) == 0)
 				mb_get_double(&(store->par_s3p), &line[4], len - 5);
 
+			/* HISAS transmit and receive array locations */
+			else if (strncmp("S11X=", line, 5) == 0)
+				mb_get_double(&(store->par_s11x), &line[5], len - 6);
+			else if (strncmp("S11Y=", line, 5) == 0)
+				mb_get_double(&(store->par_s11y), &line[5], len - 6);
+			else if (strncmp("S11Z=", line, 5) == 0)
+				mb_get_double(&(store->par_s11z), &line[5], len - 6);
+			else if (strncmp("S12X=", line, 5) == 0)
+				mb_get_double(&(store->par_s12x), &line[5], len - 6);
+			else if (strncmp("S12Y=", line, 5) == 0)
+				mb_get_double(&(store->par_s12y), &line[5], len - 6);
+			else if (strncmp("S12Z=", line, 5) == 0)
+				mb_get_double(&(store->par_s12z), &line[5], len - 6);
+			else if (strncmp("S13X=", line, 5) == 0)
+				mb_get_double(&(store->par_s13x), &line[5], len - 6);
+			else if (strncmp("S13Y=", line, 5) == 0)
+				mb_get_double(&(store->par_s13y), &line[5], len - 6);
+			else if (strncmp("S13Z=", line, 5) == 0)
+				mb_get_double(&(store->par_s13z), &line[5], len - 6);
+			else if (strncmp("S21X=", line, 5) == 0)
+				mb_get_double(&(store->par_s21x), &line[5], len - 6);
+			else if (strncmp("S21Y=", line, 5) == 0)
+				mb_get_double(&(store->par_s21y), &line[5], len - 6);
+			else if (strncmp("S21Z=", line, 5) == 0)
+				mb_get_double(&(store->par_s21z), &line[5], len - 6);
+			else if (strncmp("S22X=", line, 5) == 0)
+				mb_get_double(&(store->par_s22x), &line[5], len - 6);
+			else if (strncmp("S22Y=", line, 5) == 0)
+				mb_get_double(&(store->par_s22y), &line[5], len - 6);
+			else if (strncmp("S22Z=", line, 5) == 0)
+				mb_get_double(&(store->par_s22z), &line[5], len - 6);
+			else if (strncmp("S23X=", line, 5) == 0)
+				mb_get_double(&(store->par_s23x), &line[5], len - 6);
+			else if (strncmp("S23Y=", line, 5) == 0)
+				mb_get_double(&(store->par_s23y), &line[5], len - 6);
+			else if (strncmp("S23Z=", line, 5) == 0)
+				mb_get_double(&(store->par_s23z), &line[5], len - 6);
+
 			else if (strncmp("S1S=", line, 4) == 0)
 				mb_get_int(&(store->par_s1s), &line[4], len - 5);
 			else if (strncmp("S2S=", line, 4) == 0)
@@ -1274,6 +1312,12 @@ file will return error */
 		fprintf(stderr, "dbg5       par_s3h:         %f\n", store->par_s3h);
 		fprintf(stderr, "dbg5       par_s3r:         %f\n", store->par_s3r);
 		fprintf(stderr, "dbg5       par_s3p:         %f\n", store->par_s3p);
+		fprintf(stderr, "dbg5       par_s11x/y/z:   %f %f %f\n", store->par_s11x, store->par_s11y, store->par_s11z);
+		fprintf(stderr, "dbg5       par_s12x/y/z:   %f %f %f\n", store->par_s12x, store->par_s12y, store->par_s12z);
+		fprintf(stderr, "dbg5       par_s13x/y/z:   %f %f %f\n", store->par_s13x, store->par_s13y, store->par_s13z);
+		fprintf(stderr, "dbg5       par_s21x/y/z:   %f %f %f\n", store->par_s21x, store->par_s21y, store->par_s21z);
+		fprintf(stderr, "dbg5       par_s22x/y/z:   %f %f %f\n", store->par_s22x, store->par_s22y, store->par_s22z);
+		fprintf(stderr, "dbg5       par_s23x/y/z:   %f %f %f\n", store->par_s23x, store->par_s23y, store->par_s23z);
 		fprintf(stderr, "dbg5       par_s1s:         %d\n", store->par_s1s);
 		fprintf(stderr, "dbg5       par_s2s:         %d\n", store->par_s2s);
 		fprintf(stderr, "dbg5       par_go1:         %f\n", store->par_go1);
@@ -3545,6 +3589,241 @@ int mbr_em710raw_rd_rawbeam4(int verbose, void *mbio_ptr, int swap, struct mbsys
 	return (status);
 }
 /*--------------------------------------------------------------------*/
+/* read and discard nbytes bytes */
+static int mbr_em710raw_rd_skip(int verbose, void *mbio_ptr, int nbytes, int *error) {
+	char junk[256];
+	int status = MB_SUCCESS;
+	while (nbytes > 0 && status == MB_SUCCESS) {
+		size_t read_len = (size_t)MIN(nbytes, (int)sizeof(junk));
+		status = mb_fileio_get(verbose, mbio_ptr, junk, &read_len, error);
+		nbytes -= (int)sizeof(junk);
+	}
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+/* Read a HISAS raw range and angle 123 datagram ('{'). Only version 1 with one or more arrays
+    of the same side and no more than MBSYS_SIMRAD3_MAXBEAMS beams is stored (in memory only);
+    any other content is read over with a warning, and the ping is then completed from the XYZ88
+    datagram alone. The array and beam entry sizes in the header are used as strides, and the
+    sizes are checked against the datagram length. */
+int mbr_em710raw_rd_ra123(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar,
+                          int record_size, bool *stored, int *goodend, int *error) {
+	char line[EM3_RA123_ARRAY_SIZE];
+	short short_val = 0;
+	float float_val = 0.0;
+	size_t read_len;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:     %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:    %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       swap:        %d\n", swap);
+		fprintf(stderr, "dbg2       store:       %p\n", (void *)store);
+		fprintf(stderr, "dbg2       sonar:       %d\n", sonar);
+		fprintf(stderr, "dbg2       record_size: %d\n", record_size);
+	}
+
+	/* set goodend false until a good end is found */
+	*goodend = false;
+	*stored = false;
+
+	/* number of bytes after the four byte label (start byte, type and model) */
+	const int nbytes_body = record_size - 4;
+	int nbytes_read = 0;
+	int status = MB_SUCCESS;
+
+	/* read binary header values into char array */
+	int png_count = 0;
+	int serial = 0;
+	int narrays = 0;
+	int nbeams = 0;
+	int version = 0;
+	int bytes_array = 0;
+	int bytes_beam = 0;
+	bool valid = false;
+	if (nbytes_body >= EM3_RA123_HEADER_SIZE + 4) {
+		read_len = (size_t)EM3_RA123_HEADER_SIZE;
+		status = mb_fileio_get(verbose, mbio_ptr, line, &read_len, error);
+		nbytes_read = EM3_RA123_HEADER_SIZE;
+		if (status == MB_SUCCESS) {
+			mb_get_binary_short(swap, &line[8], &short_val);
+			png_count = (int)((unsigned short)short_val);
+			mb_get_binary_short(swap, &line[10], &short_val);
+			serial = (int)((unsigned short)short_val);
+			mb_get_binary_short(swap, &line[12], &short_val);
+			narrays = (int)((unsigned short)short_val);
+			mb_get_binary_short(swap, &line[14], &short_val);
+			nbeams = (int)((unsigned short)short_val);
+			version = (int)((mb_u_char)line[18]);
+			mb_get_binary_short(swap, &line[28], &short_val);
+			bytes_array = (int)((unsigned short)short_val);
+			mb_get_binary_short(swap, &line[30], &short_val);
+			bytes_beam = (int)((unsigned short)short_val);
+			valid = version == 1 && narrays >= 1 && narrays <= MBSYS_SIMRAD3_RA123_MAXARRAYS && nbeams >= 1 &&
+			        nbeams <= MBSYS_SIMRAD3_MAXBEAMS && bytes_array >= EM3_RA123_ARRAY_SIZE && bytes_beam >= EM3_RA123_BEAM_SIZE &&
+			        EM3_RA123_HEADER_SIZE + narrays * bytes_array + nbeams * bytes_beam + 4 <= nbytes_body;
+		}
+	}
+
+	/* read the array entries - the arrays must all be on the same side */
+	int side = 0;
+	float ssv = 0.0;
+	if (status == MB_SUCCESS && valid) {
+		for (int i = 0; i < narrays && status == MB_SUCCESS; i++) {
+			read_len = (size_t)EM3_RA123_ARRAY_SIZE;
+			status = mb_fileio_get(verbose, mbio_ptr, line, &read_len, error);
+			if (status == MB_SUCCESS)
+				status = mbr_em710raw_rd_skip(verbose, mbio_ptr, bytes_array - EM3_RA123_ARRAY_SIZE, error);
+			nbytes_read += bytes_array;
+			if (status == MB_SUCCESS && i == 0) {
+				side = (int)((mb_u_char)line[0]);
+				mb_get_binary_float(swap, &line[16], &float_val);
+				ssv = float_val;
+			}
+			else if (status == MB_SUCCESS && ((side ^ (int)((mb_u_char)line[0])) & 1) != 0) {
+				valid = false;
+			}
+		}
+	}
+
+	/* the HISAS reader returns a ping as soon as its XYZ88 datagram is read, so a raw range
+	   and angle 123 datagram that comes after the XYZ88 datagram of its ping (a ping already
+	   returned, whose structure has been emptied but still holds its counter) cannot be used:
+	   warn once per file (mb_io_ptr->save12) instead of dropping it silently. In the data seen
+	   the raw range and angle 123 datagram always comes first. */
+	bool late = false;
+	if (status == MB_SUCCESS && valid) {
+		for (int i = 0; i < MBSYS_SIMRAD3_NUM_PING_STRUCTURES && !late; i++) {
+			if (store->pings[i].read_status == MBSYS_SIMRAD3_PING_NO_DATA && store->pings[i].png_nbeams > 0 &&
+			    png_count == store->pings[i].count && serial == store->pings[i].serial)
+				late = true;
+		}
+		if (late) {
+			struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+			if (mb_io_ptr->save12 == 0)
+				fprintf(stderr,
+				        "MBF_EM710RAW: HISAS raw range and angle 123 datagram after the XYZ88 datagram of ping %d: not "
+				        "used; travel times and angles of such pings come from the XYZ88 data\n",
+				        png_count);
+			mb_io_ptr->save12 = 1;
+			valid = false;
+		}
+	}
+
+	/* figure out which storage structure to use */
+	struct mbsys_simrad3_ping_struct *ping = NULL;
+	if (status == MB_SUCCESS && valid) {
+		bool found = false;
+		int oldest_ping = 999999999;
+		int oldest_ping_index = -1;
+		for (int i = 0; i < MBSYS_SIMRAD3_NUM_PING_STRUCTURES && !found; i++) {
+			/* look for this ping by ping number and sonar serial number - if we already read
+			 * a record from this ping it has to be stored in one of the structures */
+			if (store->pings[i].read_status > 0 && png_count == store->pings[i].count && serial == store->pings[i].serial) {
+				found = true;
+				store->ping_index = i;
+			}
+
+			/* figure out which structure is holding the oldest ping in case we need to drop one
+			 * from memory to make room for the new ping. */
+			else if (store->pings[i].read_status > 0) {
+				if (png_count < oldest_ping) {
+					oldest_ping = png_count;
+					oldest_ping_index = i;
+				}
+			}
+
+			/* if one of the ping structures is unused, set it to be used if we need to store
+			 * this ping */
+			else if (oldest_ping > 0) {
+				oldest_ping = 0;
+				oldest_ping_index = i;
+			}
+		}
+		if (!found) {
+			store->ping_index = oldest_ping_index;
+		}
+		ping = (struct mbsys_simrad3_ping_struct *)&store->pings[store->ping_index];
+		ping->count = png_count;
+		ping->serial = serial;
+		ping->png_ra_count = png_count;
+		ping->png_ra_serial = serial;
+		ping->png_ra_side = side;
+		ping->png_ra_ssv = ssv;
+		ping->png_ra_nbeams = nbeams;
+	}
+
+	/* read the beam entries */
+	if (status == MB_SUCCESS && valid) {
+		for (int i = 0; i < nbeams && status == MB_SUCCESS; i++) {
+			read_len = (size_t)EM3_RA123_BEAM_SIZE;
+			status = mb_fileio_get(verbose, mbio_ptr, line, &read_len, error);
+			if (status == MB_SUCCESS)
+				status = mbr_em710raw_rd_skip(verbose, mbio_ptr, bytes_beam - EM3_RA123_BEAM_SIZE, error);
+			nbytes_read += bytes_beam;
+			if (status == MB_SUCCESS) {
+				mb_get_binary_float(swap, &line[4], &float_val);
+				ping->png_ra_twtt[i] = check_fnan(float_val) ? 0.0 : float_val;
+				mb_get_binary_float(swap, &line[8], &float_val);
+				ping->png_ra_depression[i] = float_val;
+				mb_get_binary_float(swap, &line[12], &float_val);
+				ping->png_ra_azimuth[i] = float_val;
+				ping->png_ra_detection[i] = (int)((mb_u_char)line[29]);
+			}
+		}
+		if (status == MB_SUCCESS)
+			*stored = true;
+	}
+	else if (status == MB_SUCCESS && !late && verbose > 0) {
+		fprintf(stderr, "MBF_EM710RAW: HISAS raw range and angle 123 datagram not used (ping %d: version %d, %d arrays, "
+		        "%d beams, entry sizes %d and %d bytes, datagram %d bytes)\n",
+		        png_count, version, narrays, nbeams, bytes_array, bytes_beam, record_size);
+	}
+
+	/* read over the rest of the datagram, then get the last bytes of the record */
+	if (status == MB_SUCCESS) {
+		if (nbytes_body - nbytes_read >= 4) {
+			status = mbr_em710raw_rd_skip(verbose, mbio_ptr, nbytes_body - nbytes_read - 4, error);
+			if (status == MB_SUCCESS) {
+				read_len = (size_t)4;
+				status = mb_fileio_get(verbose, mbio_ptr, line, &read_len, error);
+				if (status == MB_SUCCESS && line[1] == EM3_END)
+					*goodend = true;
+			}
+		}
+		else {
+			status = mbr_em710raw_rd_skip(verbose, mbio_ptr, nbytes_body - nbytes_read, error);
+		}
+	}
+
+	if (verbose >= 5 && *stored) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
+		fprintf(stderr, "dbg5       png_ra_count:    %d\n", ping->png_ra_count);
+		fprintf(stderr, "dbg5       png_ra_serial:   %d\n", ping->png_ra_serial);
+		fprintf(stderr, "dbg5       png_ra_side:     %d\n", ping->png_ra_side);
+		fprintf(stderr, "dbg5       png_ra_ssv:      %f\n", ping->png_ra_ssv);
+		fprintf(stderr, "dbg5       png_ra_nbeams:   %d\n", ping->png_ra_nbeams);
+		fprintf(stderr, "dbg5       beam twtt depression azimuth detection\n");
+		fprintf(stderr, "dbg5       ------------------------------------------------------------\n");
+		for (int i = 0; i < ping->png_ra_nbeams; i++)
+			fprintf(stderr, "dbg5       %3d %f %f %f %3d\n", i, ping->png_ra_twtt[i], ping->png_ra_depression[i],
+			        ping->png_ra_azimuth[i], ping->png_ra_detection[i]);
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       stored:     %d\n", *stored);
+		fprintf(stderr, "dbg2       goodend:    %d\n", *goodend);
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_quality(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                             int *error) {
 	struct mbsys_simrad3_ping_struct *ping;
@@ -4474,6 +4753,7 @@ int mbr_em710raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			store->pings[i].read_status = MBSYS_SIMRAD3_PING_NO_DATA;
 			store->pings[i].png_bath_read = false;
 			store->pings[i].png_raw_read = false;
+			store->pings[i].png_ra_read = false;
 			store->pings[i].png_quality_read = false;
 			store->pings[i].png_ss_read = false;
 		}
@@ -4866,7 +5146,7 @@ store->pings[store->ping_index].png_ss_count);
 					done = true;
 				}
 			}
-			else if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD3_HISAS) {
+			else if (status == MB_SUCCESS && MBSYS_SIMRAD3_IS_HISAS(sonar)) {
 				if (store->pings[store->ping_index].png_bath_read) {
 					store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_COMPLETE;
 					done = true;
@@ -4909,6 +5189,19 @@ store->pings[store->ping_index].png_ss_count);
 			fprintf(stderr, "mbr_em710raw_rd_rawbeam4: ping_index:%d ping:%d serial:%d\n", store->ping_index,
 			        store->pings[store->ping_index].png_raw_count, store->pings[store->ping_index].png_raw_serial);
 #endif
+		}
+		else if (type == EM3_0x027B) {
+#ifdef MBR_EM710RAW_DEBUG
+			fprintf(stderr, "call mbr_em710raw_rd_ra123 type %x\n", type);
+#endif
+			bool ra123_stored = false;
+			status = mbr_em710raw_rd_ra123(verbose, mbio_ptr, swap, store, sonar, *record_size_save, &ra123_stored,
+			                               &good_end_bytes, error);
+			if (status == MB_SUCCESS && ra123_stored) {
+				store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_PARTIAL;
+				store->pings[store->ping_index].png_ra_read = true;
+			}
+			done = false;
 		}
 		else if (type == EM3_QUALITY) {
 #ifdef MBR_EM710RAW_DEBUG
@@ -5204,7 +5497,8 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			netattitude->nat_ndata = MIN(netattitude->nat_ndata, MBSYS_SIMRAD3_MAXATTITUDE);
 			for (int i = 0; i < netattitude->nat_ndata; i++) {
 				att_time_d[i] = (double)(atime_d + 0.001 * netattitude->nat_time[i]);
-				att_heave[i] = (double)(0.01 * netattitude->nat_heave[i]);
+				/* HISAS: the heave field holds minus the vehicle depth, not heave */
+				att_heave[i] = MBSYS_SIMRAD3_IS_HISAS(store->sonar) ? 0.0 : (double)(0.01 * netattitude->nat_heave[i]);
 				att_roll[i] = (double)(0.01 * netattitude->nat_roll[i]);
 				att_pitch[i] = (double)(0.01 * netattitude->nat_pitch[i]);
 			}
@@ -5568,6 +5862,9 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* calculate corrected ranges, angles, and bathymetry */
 		// const double theta_nadir = 90.0;
 		// int inadir = 0;
+		/* HISAS writes no raw beam datagram: its travel times and beam angles are set
+		   after this loop from the raw range and angle 123 datagram or the XYZ88 data */
+		const bool hisas = MBSYS_SIMRAD3_IS_HISAS(store->sonar);
 		for (int i = 0; i < ping->png_nbeams; i++) {
 			/* calculate time of transmit and receive */
 			transmit_time_d = ptime_d + (double)ping->png_raw_txoffset[ping->png_raw_rxsector[i]];
@@ -5587,11 +5884,12 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			if (ping->png_ssv <= 0)
 				ping->png_ssv = 150;
 			// const double soundspeed = 0.1 * ((double)ping->png_ssv);
-			ping->png_range[i] = ping->png_raw_rxrange[i];
+			ping->png_range[i] = hisas ? 0.0 : ping->png_raw_rxrange[i];
 			/* ping->png_bheave[i] is the difference between the heave at the ping timestamp time that is factored
 			 * into the ping->png_xducer_depth value and the average heave at the sector transmit time and the beam receive time
 			 */
-			ping->png_bheave[i] = 0.5 * (receive_heave + transmit_heave) - heave;
+			if (!hisas)
+				ping->png_bheave[i] = 0.5 * (receive_heave + transmit_heave) - heave;
 
 			/* calculate beam angles for raytracing using Jon Beaudoin's code based on:
 			    Beaudoin, J., Hughes Clarke, J., and Bartlett, J. Application of
@@ -5639,18 +5937,29 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			rx_orientation.heading = receive_heading;
 			reference_heading = pheading;
 
-			status = mb_beaudoin(verbose, tx_align, tx_orientation, tx_steer, rx_align, rx_orientation, rx_steer,
-			                     reference_heading, &beamAzimuth, &beamDepression, error);
-			ping->png_depression[i] = 90.0 - beamDepression;
-			ping->png_azimuth[i] = 90.0 + beamAzimuth;
-			if (ping->png_azimuth[i] < 0.0)
-				ping->png_azimuth[i] += 360.0;
+			if (!hisas) {
+				status = mb_beaudoin(verbose, tx_align, tx_orientation, tx_steer, rx_align, rx_orientation, rx_steer,
+				                     reference_heading, &beamAzimuth, &beamDepression, error);
+				ping->png_depression[i] = 90.0 - beamDepression;
+				ping->png_azimuth[i] = 90.0 + beamAzimuth;
+				if (ping->png_azimuth[i] < 0.0)
+					ping->png_azimuth[i] += 360.0;
+			}
 
 			/* calculate beamflag */
 			detection_mask = (mb_u_char)ping->png_raw_rxdetection[i];
 			if (store->sonar == MBSYS_SIMRAD3_M3 && (ping->png_detection[i] & 128) == 128) {
 				ping->png_beamflag[i] = MB_FLAG_NULL;
 				ping->png_raw_rxdetection[i] = ping->png_raw_rxdetection[i] | 128;
+			}
+			else if (MBSYS_SIMRAD3_IS_HISAS(store->sonar)) {
+				/* HISAS writes no raw beam datagram; soundings marked invalid in
+				   the XYZ88 detection byte (bit 7) still carry positions: flag
+				   them so that they can be restored in editing */
+				if ((ping->png_detection[i] & 128) == 128)
+					ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
+				else
+					ping->png_beamflag[i] = MB_FLAG_NONE;
 			}
 			else if ((detection_mask & 128) == 128) {
 				if ((detection_mask & 15) == 0) {
@@ -5683,6 +5992,14 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
           || isnan(ping->png_alongtrack[i])) {
 				ping->png_beamflag[i] = MB_FLAG_NULL;
 			}
+		}
+
+		/* HISAS: travel times and beam angles for raytracing from the raw range and
+		   angle 123 datagram if it was read for this ping, otherwise from the XYZ88 data */
+		if (hisas) {
+			bool ra123_applied = false;
+			int ra_error = MB_ERROR_NO_ERROR;
+			mbsys_simrad3_hisas_ra123_angles(verbose, store, ping, &ra123_applied, &ra_error);
 		}
 
 		/* generate processed sidescan */
@@ -5770,6 +6087,12 @@ int mbr_em710raw_wr_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 		fprintf(stderr, "dbg5       par_s3h:         %f\n", store->par_s3h);
 		fprintf(stderr, "dbg5       par_s3r:         %f\n", store->par_s3r);
 		fprintf(stderr, "dbg5       par_s3p:         %f\n", store->par_s3p);
+		fprintf(stderr, "dbg5       par_s11x/y/z:   %f %f %f\n", store->par_s11x, store->par_s11y, store->par_s11z);
+		fprintf(stderr, "dbg5       par_s12x/y/z:   %f %f %f\n", store->par_s12x, store->par_s12y, store->par_s12z);
+		fprintf(stderr, "dbg5       par_s13x/y/z:   %f %f %f\n", store->par_s13x, store->par_s13y, store->par_s13z);
+		fprintf(stderr, "dbg5       par_s21x/y/z:   %f %f %f\n", store->par_s21x, store->par_s21y, store->par_s21z);
+		fprintf(stderr, "dbg5       par_s22x/y/z:   %f %f %f\n", store->par_s22x, store->par_s22y, store->par_s22z);
+		fprintf(stderr, "dbg5       par_s23x/y/z:   %f %f %f\n", store->par_s23x, store->par_s23y, store->par_s23z);
 		fprintf(stderr, "dbg5       par_s1s:         %d\n", store->par_s1s);
 		fprintf(stderr, "dbg5       par_s2s:         %d\n", store->par_s2s);
 		fprintf(stderr, "dbg5       par_go1:         %f\n", store->par_go1);
@@ -5993,6 +6316,24 @@ int mbr_em710raw_wr_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 		sprintf(&buff[buff_len], "S3R=%.3f,", store->par_s3r);
 		buff_len = strlen(buff);
 		sprintf(&buff[buff_len], "S3P=%.3f,", store->par_s3p);
+		buff_len = strlen(buff);
+	}
+	/* HISAS transmit and receive array locations; each key is appended only if it
+	   fits whole in the buffer (leaving the 22 bytes reserved at its end) */
+	if (MBSYS_SIMRAD3_IS_HISAS(store->sonar)) {
+		const char *hisas_keys[18] = {"S11X", "S11Y", "S11Z", "S12X", "S12Y", "S12Z", "S13X", "S13Y", "S13Z",
+		                              "S21X", "S21Y", "S21Z", "S22X", "S22Y", "S22Z", "S23X", "S23Y", "S23Z"};
+		const double hisas_values[18] = {store->par_s11x, store->par_s11y, store->par_s11z, store->par_s12x, store->par_s12y,
+		                                 store->par_s12z, store->par_s13x, store->par_s13y, store->par_s13z, store->par_s21x,
+		                                 store->par_s21y, store->par_s21z, store->par_s22x, store->par_s22y, store->par_s22z,
+		                                 store->par_s23x, store->par_s23y, store->par_s23z};
+		for (int k = 0; k < 18; k++) {
+			char entry[64];
+			const int entry_len = snprintf(entry, sizeof(entry), "%s=%.3f,", hisas_keys[k], hisas_values[k]);
+			const size_t used = strlen(buff);
+			if (entry_len > 0 && entry_len < (int)sizeof(entry) && used + (size_t)entry_len < MBSYS_SIMRAD3_BUFFER_SIZE - 22)
+				memcpy(&buff[used], entry, (size_t)entry_len + 1);
+		}
 		buff_len = strlen(buff);
 	}
 	if (store->par_go1 != 0.0) {

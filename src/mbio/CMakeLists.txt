@@ -90,6 +90,7 @@ set(SRC
     mbr_em710raw.c
     mbr_emoldraw.c
     mbr_hir2rnav.c
+    mbr_hisasall.c
     mbr_hs10jams.c
     mbr_hsatlraw.c
     mbr_hsds2lam.c
@@ -158,6 +159,7 @@ set(SRC
     mbsys_elac.c
     mbsys_elacmk2.c
     mbsys_hdcs.c
+    mbsys_hisas.c
     mbsys_hs10.c
     mbsys_hsds.c
     mbsys_hsmd.c
