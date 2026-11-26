@@ -927,7 +927,7 @@ int main(int argc, char **argv) {
     mb_path fileroot;
     int testformat = 0;
     int formaterror = MB_ERROR_NO_ERROR;
-    mb_get_format(verbose, read_file, fileroot, &format, &formaterror);
+    mb_get_format(verbose, read_file, fileroot, &testformat, &formaterror);
     if (format == 0)
       format = testformat;
 

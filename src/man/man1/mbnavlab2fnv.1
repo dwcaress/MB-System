@@ -30,11 +30,15 @@ extracted by \fBmbnavlab2fnv\fP are:
   field  1: latitude (decimal degrees, positive north)
   field  2: longitude (decimal degrees, positive east)
   field  3: depth (meters, positive down) \- used as draft
+  field  4: roll (degrees, same values and sign as the roll of the
+            Kongsberg kmall attitude written with the same data)
+  field  5: pitch (degrees, positive bow up)
   field  6: heading (degrees, 0\-360, clockwise from north)
-  field  7: roll (degrees, positive starboard up)
-  field  8: pitch (degrees, positive bow up)
-  field 10: speed through water (m/s)
+  field  7: velocity north (m/s)
+  field  8: velocity east (m/s)
 .fi
+
+Speed over ground is computed from the north and east velocities.
 
 Heave is not stored in the navlab_smooth.bin format and is written as
 0.0 in the fnv output.
@@ -117,7 +121,8 @@ little-endian byte order.
 .IP \(bu 2
 Nominal sample rate: 100 Hz (10 ms steps).
 .IP \(bu 2
-The complete field inventory is:
+The field layout, checked against the Kongsberg kmall navigation
+written with the same data, is:
 .RE
 
 .nf
@@ -125,23 +130,13 @@ The complete field inventory is:
   field  1: latitude    \- decimal degrees, positive north
   field  2: longitude   \- decimal degrees, positive east
   field  3: depth       \- meters, positive down
-  field  4: unknown     \- (not used)
-  field  5: unknown     \- (not used)
+  field  4: roll        \- degrees, same values and sign as the kmall roll
+  field  5: pitch       \- degrees, positive bow up
   field  6: heading     \- degrees, 0\-360, clockwise from north
-  field  7: roll        \- degrees, positive starboard up
-  field  8: pitch       \- degrees, positive bow up
-  field  9: vert_vel    \- vertical velocity, m/s, positive down
-  field 10: speed       \- speed through water, m/s
-  field 11: speed_2     \- speed through water, m/s (alternate source)
-  field 12: unknown     \- (not used)
-  field 13: unknown     \- (not used)
-  field 14: std_lat     \- position uncertainty, latitude (deg)
-  field 15: std_lon     \- position uncertainty, longitude (deg)
-  field 16: std_hdg     \- heading uncertainty (deg)
-  field 17: std_17      \- velocity/attitude uncertainty
-  field 18: std_18      \- velocity/attitude uncertainty
-  field 19: std_19      \- velocity/attitude uncertainty
-  field 20: cov_20      \- Kalman covariance cross-term
+  field  7: vel_north   \- velocity north, m/s
+  field  8: vel_east    \- velocity east, m/s
+  field  9: vel_down    \- velocity down, m/s
+  fields 10\-20         \- uncertainty estimates of the solution (not used)
 .fi
 
 .SH EXAMPLES

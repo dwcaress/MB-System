@@ -33,10 +33,13 @@
  *   field  1: latitude (decimal degrees, positive north)
  *   field  2: longitude (decimal degrees, positive east)
  *   field  3: depth (meters, positive down) - used as draft
+ *   field  4: roll (degrees, same values and sign as the roll of the
+ *             Kongsberg kmall attitude written with the same data)
+ *   field  5: pitch (degrees, positive bow up)
  *   field  6: heading (degrees, 0-360, clockwise from north)
- *   field  7: roll (degrees, positive starboard up)
- *   field  8: pitch (degrees, positive bow up)
- *   field 10: speed through water (m/s) - converted to km/hr for fnv
+ *   field  7: velocity north (m/s)
+ *   field  8: velocity east (m/s) - speed over ground from fields 7 and 8,
+ *             converted to km/hr for fnv
  *
  * Heave is not available in navlab_smooth.bin and is output as 0.0.
  *
@@ -73,10 +76,12 @@ static const char help_message[] =
     "  field  1: latitude (decimal degrees, positive north)\n"
     "  field  2: longitude (decimal degrees, positive east)\n"
     "  field  3: depth (meters, positive down) - output as draft\n"
+    "  field  4: roll (degrees, Kongsberg kmall sign convention)\n"
+    "  field  5: pitch (degrees, positive bow up)\n"
     "  field  6: heading (degrees, 0-360)\n"
-    "  field  7: roll (degrees, positive starboard up)\n"
-    "  field  8: pitch (degrees, positive bow up)\n"
-    "  field 10: speed through water (m/s)\n"
+    "  field  7: velocity north (m/s)\n"
+    "  field  8: velocity east (m/s)\n"
+    "Speed is computed from the north and east velocities.\n"
     "Heave is not available and is output as 0.0.";
 
 static const char usage_message[] =
@@ -92,9 +97,10 @@ static const char usage_message[] =
 #define NAVLAB_FIELD_LON       2
 #define NAVLAB_FIELD_DEPTH     3
 #define NAVLAB_FIELD_HEADING   6
-#define NAVLAB_FIELD_ROLL      7
-#define NAVLAB_FIELD_PITCH     8
-#define NAVLAB_FIELD_SPEED     10
+#define NAVLAB_FIELD_ROLL      4
+#define NAVLAB_FIELD_PITCH     5
+#define NAVLAB_FIELD_VELNORTH  7
+#define NAVLAB_FIELD_VELEAST   8
 
 /*--------------------------------------------------------------------*/
 /* Conversion constants */
@@ -263,7 +269,7 @@ int main(int argc, char **argv) {
         const double heading = rec[NAVLAB_FIELD_HEADING];
         const double roll    = rec[NAVLAB_FIELD_ROLL];
         const double pitch   = rec[NAVLAB_FIELD_PITCH];
-        const double speed   = rec[NAVLAB_FIELD_SPEED] * MS_TO_KMHR;
+        const double speed   = hypot(rec[NAVLAB_FIELD_VELNORTH], rec[NAVLAB_FIELD_VELEAST]) * MS_TO_KMHR;
         const double heave   = 0.0;
 
         /* skip records with retrograde timestamps */

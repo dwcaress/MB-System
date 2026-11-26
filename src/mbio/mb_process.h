@@ -737,6 +737,7 @@
 #define MB_PR_NAV_FORMAT_R2NAV		10
 #define MB_PR_NAV_FORMAT_RVDAS		11
 #define MB_PR_NAV_FORMAT_NAVLAB		12  /* Kongsberg Navlab binary (navlab_smooth.bin) */
+#define MB_PR_NAV_FORMAT_KMALL		13  /* Kongsberg kmall #SKM navigation samples */
 
 #define MB_PR_SENSORDEPTH_FORMAT_TD			1
 #define MB_PR_SENSORDEPTH_FORMAT_YMDHMSD	2

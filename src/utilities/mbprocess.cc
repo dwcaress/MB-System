@@ -230,7 +230,7 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
       corrtableuse->sigma[i] = corrtable[0].sigma[i];
     }
   }
-  else if (time_d > corrtable[ncorrtable - 1].time_d) {
+  else if (time_d >= corrtable[ncorrtable - 1].time_d) {
     corrtableuse->time_d = corrtable[ncorrtable - 1].time_d;
     corrtableuse->nangle = corrtable[ncorrtable - 1].nangle;
     for (int i = 0; i < ncorrangle; i++) {
@@ -368,7 +368,7 @@ int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double
     int ifirst = nangle - 1;
     int ilast = 0;
     for (int i = 0; i < nangle; i++) {
-      if (corr[i] != 0.0) {
+      if (corrs[i] != 0.0) {
         if (ifirst > i)
           ifirst = i;
         if (ilast < i)
@@ -666,7 +666,8 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
   if (process->mbp_nav_mode == MBP_NAV_ON &&
       (process->mbp_nav_heading == MBP_NAV_ON || process->mbp_nav_speed == MBP_NAV_ON ||
        process->mbp_nav_draft == MBP_NAV_ON || process->mbp_nav_attitude == MBP_NAV_ON) &&
-      process->mbp_nav_format != 9 && process->mbp_nav_format != MB_PR_NAV_FORMAT_NAVLAB) {
+      process->mbp_nav_format != 9 && process->mbp_nav_format != MB_PR_NAV_FORMAT_NAVLAB &&
+      process->mbp_nav_format != MB_PR_NAV_FORMAT_KMALL) {
     fprintf(stderr, "\nWarning:\n\tNavigation format <%d> does not include \n", process->mbp_nav_format);
     fprintf(stderr, "\theading, speed, draft, roll, pitch and heave values.\n");
     if (process->mbp_nav_heading == MBP_NAV_ON) {
@@ -1221,7 +1222,26 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
     /* count the data points in the nav file */
     nnav = 0;
     char *result;
-    if (process->mbp_nav_format == MB_PR_NAV_FORMAT_NAVLAB) {
+    int nkmall = 0;
+    double *k_time_d = nullptr, *k_lon = nullptr, *k_lat = nullptr, *k_speed = nullptr;
+    double *k_heading = nullptr, *k_roll = nullptr, *k_pitch = nullptr, *k_heave = nullptr;
+    if (process->mbp_nav_format == MB_PR_NAV_FORMAT_KMALL) {
+      /* Kongsberg kmall #SKM navigation samples - no draft: the ellipsoid
+         height is not a sensor depth */
+      if (process->mbp_nav_draft == MBP_NAV_ON) {
+        fprintf(stderr, "\nWarning:\n\tNavigation format <%d> does not include draft values.\n", process->mbp_nav_format);
+        fprintf(stderr, "Merging of draft data disabled.\n");
+        process->mbp_nav_draft = MBP_NAV_OFF;
+      }
+      if (mb_loadkmallnav(verbose, process->mbp_navfile, &nkmall, &k_time_d, &k_lon, &k_lat, &k_speed, &k_heading,
+                          &k_roll, &k_pitch, &k_heave, error) != MB_SUCCESS) {
+        fprintf(stderr, "\nUnable to read kmall navigation from file <%s>\n", process->mbp_navfile);
+        fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+        exit(MB_ERROR_OPEN_FAIL);
+      }
+      nnav = nkmall;
+    }
+    else if (process->mbp_nav_format == MB_PR_NAV_FORMAT_NAVLAB) {
       /* Kongsberg Navlab binary: count records by file size */
       FILE *bfp;
       if ((bfp = fopen(process->mbp_navfile, "rb")) == nullptr) {
@@ -1280,18 +1300,45 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
     /* read the data points in the nav file */
     nnav = 0;
 
+    /* Kongsberg kmall #SKM navigation: copy the samples read above */
+    if (process->mbp_nav_format == MB_PR_NAV_FORMAT_KMALL) {
+      for (int i = 0; i < nkmall; i++) {
+        ntime[nnav] = k_time_d[i];
+        nlon[nnav] = k_lon[i];
+        nlat[nnav] = k_lat[i];
+        nheading[nnav] = k_heading[i];
+        nspeed[nnav] = k_speed[i];
+        ndraft[nnav] = 0.0;
+        nroll[nnav] = k_roll[i];
+        npitch[nnav] = k_pitch[i];
+        nheave[nnav] = k_heave[i];
+        mb_apply_lonflip(verbose, lonflip, &nlon[nnav]);
+        nnav++;
+      }
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&k_time_d, error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&k_lon, error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&k_lat, error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&k_speed, error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&k_heading, error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&k_roll, error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&k_pitch, error);
+      mb_freed(verbose, __FILE__, __LINE__, (void **)&k_heave, error);
+    }
+
     /* Kongsberg Navlab binary format: read directly, bypassing ASCII loop */
-    if (process->mbp_nav_format == MB_PR_NAV_FORMAT_NAVLAB) {
+    else if (process->mbp_nav_format == MB_PR_NAV_FORMAT_NAVLAB) {
       FILE *bfp;
       if ((bfp = fopen(process->mbp_navfile, "rb")) == nullptr) {
         fprintf(stderr, "\nUnable to Open Navigation File <%s> for reading\n", process->mbp_navfile);
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
         exit(MB_ERROR_OPEN_FAIL);
       }
+      /* the file is little-endian: swap on big-endian hosts only, as
+         mb_loadnavdata() does (mb_swap_check() is true on little-endian hosts) */
       bool swap = (mb_swap_check() == MB_YES);
       double brec[21];
       while (fread(brec, sizeof(double), 21, bfp) == 21) {
-        if (swap)
+        if (!swap)
           for (int ii = 0; ii < 21; ii++)
             mb_swap_double(&brec[ii]);
         if (nnav > 0 && brec[0] <= ntime[nnav - 1])
@@ -1300,10 +1347,12 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
         nlon[nnav]     = brec[2];
         nlat[nnav]     = brec[1];
         nheading[nnav] = brec[6];
-        nspeed[nnav]   = 0.0;
+        /* fields 7 and 8 are the north and east velocities (m/s),
+           fields 4 and 5 roll and pitch (degrees) */
+        nspeed[nnav]   = 3.6 * sqrt(brec[7] * brec[7] + brec[8] * brec[8]);
         ndraft[nnav]   = 0.0;
-        nroll[nnav]    = brec[7];
-        npitch[nnav]   = brec[8];
+        nroll[nnav]    = brec[4];
+        npitch[nnav]   = brec[5];
         nheave[nnav]   = 0.0;
         /* apply lonflip */
         if (lonflip == -1 && nlon[nnav] > 0.0)
@@ -1890,17 +1939,19 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
         exit(MB_ERROR_OPEN_FAIL);
       }
+      /* the file is little-endian: swap on big-endian hosts only, as
+         mb_loadnavdata() does (mb_swap_check() is true on little-endian hosts) */
       bool swap = (mb_swap_check() == MB_YES);
       double brec[21];
       while (fread(brec, sizeof(double), 21, bfp) == 21) {
-        if (swap)
+        if (!swap)
           for (int ii = 0; ii < 21; ii++)
             mb_swap_double(&brec[ii]);
         if (nattitude > 0 && brec[0] <= attitudetime[nattitude - 1])
           continue;
         attitudetime[nattitude]  = brec[0];
-        attituderoll[nattitude]  = brec[7];
-        attitudepitch[nattitude] = brec[8];
+        attituderoll[nattitude]  = brec[4];
+        attitudepitch[nattitude] = brec[5];
         attitudeheave[nattitude] = 0.0;
         if (verbose >= 5)
           fprintf(stderr, "\ndbg5  New attitude point read in program <%s>\ndbg5       attitude[%d]: %f %f %f %f\n",
@@ -2093,10 +2144,12 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
         exit(MB_ERROR_OPEN_FAIL);
       }
+      /* the file is little-endian: swap on big-endian hosts only, as
+         mb_loadnavdata() does (mb_swap_check() is true on little-endian hosts) */
       bool swap = (mb_swap_check() == MB_YES);
       double brec[21];
       while (fread(brec, sizeof(double), 21, bfp) == 21) {
-        if (swap)
+        if (!swap)
           for (int ii = 0; ii < 21; ii++)
             mb_swap_double(&brec[ii]);
         if (nsensordepth > 0 && brec[0] <= fsensordepthtime[nsensordepth - 1])
@@ -5385,7 +5438,7 @@ void process_file(int verbose, int thread_id, struct mb_process_struct *process,
                 bathy = altitude + sensordepth;
               else
                 bathy = altitude_default + sensordepth;
-              angle = RTD * atan(bathacrosstrack[i] / (bathy - sensordepth));
+              angle = RTD * atan(ssacrosstrack[i] / (bathy - sensordepth));
               slope = 0.0;
             }
 
