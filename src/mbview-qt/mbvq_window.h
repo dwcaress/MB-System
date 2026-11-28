@@ -79,7 +79,8 @@ class MapWidget final : public QWidget {
   /* for the library */
   QLabel *takeStatusLabel();
   QWidget *map_view() const { return map_view_; }
-  /* delete the map view now, while Qt and its OpenGL contexts are alive; the
+  /* delete the map view now, while Qt and the view's OpenGL context or QRhi
+     are alive (a QRhi view lets go of its GPU buffers as it is deleted); the
      widget itself may be deleted later, even during the exit of the program */
   void delete_map_view();
   /* show the state of the core: checked and enabled menu items, mouse modes */

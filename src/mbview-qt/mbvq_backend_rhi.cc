@@ -47,8 +47,20 @@
  *   (mbvq_rhi_frame.h), and when the last button goes up the maps whose last
  *   fill fell back ask for a frame as well.
  * - The core's line widths, point sizes and stipple factors are scaled by
- *   the view's devicePixelRatioF(), never the render target's ratio.
- * - The profile and 3D soundings views are null views for now.
+ *   the view's devicePixelRatioF(), never the render target's ratio; the
+ *   points of the 3D soundings also by the program's point-size control
+ *   (set_soundings_point_size).
+ * - The profile view of a map lies in its window's scroll area at the full
+ *   size of the drawing, at most as wide as the QRhi's largest texture at the
+ *   view's pixel ratio; it is filled in every frame and takes no input, as in
+ *   Motif.
+ * - The 3D soundings view draws the soundings from buffers written only where
+ *   the core's change marks rose (mbvq_rhi_renderer.h), and takes input after
+ *   its first frame, as the map does. Dismissed, it lets go of them as soon
+ *   as the program has released them.
+ * - The map and 3D soundings views let go of their renderers' buffers at once
+ *   when they are deleted (mbview_destroy, mb3dsoundings_end), since their
+ *   windows, hidden until a safe point, draw no frame that would.
  */
 
 #include <QEvent>
@@ -58,6 +70,7 @@
 #include <QResizeEvent>
 #include <QRhiWidget>
 #include <QSet>
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <memory>
@@ -134,7 +147,9 @@ class RhiView : public QRhiWidget {
  public:
   explicit RhiView(QWidget *parent);
   ~RhiView() override;
-  ViewState state() const;
+  virtual ViewState state() const;
+  /* the statistics of the view's renderer (empty without one) */
+  virtual RenderStats stats() const;
 
  protected:
   void initialize(QRhiCommandBuffer *cb) override;
@@ -153,6 +168,11 @@ class RhiView : public QRhiWidget {
   void report_failure();
   /* the view draws again: the label goes */
   void hide_failure();
+  /* The QRhi the view drew with last while it lives, null before the first
+     frame and after it died: outside initialize() and render(),
+     QRhiWidget::rhi() can name a QRhi that died after the view moved to
+     another window. The QRhi of renderer_ whenever there is one. */
+  QRhi *view_rhi() const { return rhi_; }
 
   std::unique_ptr<rhi::ViewRenderer> renderer_;
 
@@ -193,7 +213,12 @@ ViewState RhiView::state() const {
   state.failure_shown = failure_ != nullptr && !failure_->isHidden();
   state.failures = failures_;
   state.renderer = renderer_ != nullptr;
+  state.texture_size_max = rhi_ != nullptr ? rhi_->resourceLimit(QRhi::TextureSizeMax) : 0;
   return state;
+}
+
+RenderStats RhiView::stats() const {
+  return renderer_ != nullptr ? static_cast<const rhi::BatchRenderer *>(renderer_.get())->stats() : RenderStats();
 }
 
 void RhiView::releaseResources() { renderer_.reset(); }
@@ -275,6 +300,24 @@ void RhiView::hide_failure() {
     failure_->hide();
 }
 
+/* Qt frees the buffers a renderer released in a later frame of their QRhi,
+   which a hidden window does not draw: now, on a QRhi that is alive (the
+   QRhi of a renderer, alive while the renderer is). Metal, Vulkan and
+   Direct3D 12 free them in finish(), OpenGL when a frame begins (an empty
+   offscreen frame), Direct3D 11 at once; inside a frame of that QRhi a
+   later frame of it frees them. */
+void run_deferred_releases(QRhi *qrhi) {
+  if (qrhi == nullptr || qrhi->isRecordingFrame())
+    return;
+  if (qrhi->backend() == QRhi::OpenGLES2) {
+    QRhiCommandBuffer *cb = nullptr;
+    if (qrhi->beginOffscreenFrame(&cb) == QRhi::FrameOpSuccess)
+      qrhi->endOffscreenFrame();
+  }
+  else
+    qrhi->finish();
+}
+
 /* The map view of an mbview instance. */
 class RhiMapView final : public RhiView {
  public:
@@ -282,8 +325,8 @@ class RhiMapView final : public RhiView {
   ~RhiMapView() override;
   /* a drawing the core asked for: in the next frame */
   void request(int rez);
-  ViewState state() const;
-  RenderStats stats() const;
+  ViewState state() const override;
+  RenderStats stats() const override;
   /* for tests (mbvq::set_fell_back, mbvq_rhi.h) */
   void set_fell_back(bool fell_back) { frame_.set_fell_back(fell_back); }
 
@@ -336,10 +379,15 @@ RhiMapView::~RhiMapView() {
   /* a button down here goes with the view */
   buttons_ = 0;
   share_buttons();
-  /* the renderer goes later, with RhiView: other views' plans can no longer
-     ask this one for frames */
-  if (renderer_ != nullptr)
+  /* deleted while its window lives on hidden until a safe point
+     (mbview_destroy): once other views' plans can no longer ask this one
+     for frames, the renderer's buffers go now */
+  if (renderer_ != nullptr) {
     static_cast<rhi::MapRenderer *>(renderer_.get())->set_frame_request(nullptr);
+    QRhi *qrhi = view_rhi();
+    renderer_.reset();
+    run_deferred_releases(qrhi);
+  }
 }
 
 void RhiMapView::request(int rez) {
@@ -570,10 +618,286 @@ bool RhiMapView::event(QEvent *qevent) {
   return RhiView::event(qevent);
 }
 
+/* The profile view of a map: a QRhiWidget the size of the whole drawing in
+   the scroll area of the profile window, at most as wide as the QRhi's
+   largest texture at the view's pixel ratio. */
+class RhiProfileView final : public RhiView {
+ public:
+  RhiProfileView(size_t instance, QWidget *parent);
+  ~RhiProfileView() override;
+  /* The widest and highest drawing whose colour buffer the QRhi can have,
+     floor(TextureSizeMax / ratio) logical pixels with the view's
+     devicePixelRatioF() (16384 before a QRhi exists): taken in
+     initialize(), when the ratio or the screen changes, and by the profile
+     window before it sizes the view (cap_profile_view). */
+  void cap();
+
+ protected:
+  std::unique_ptr<rhi::ViewRenderer> make_renderer(QRhi *qrhi) override;
+  void size_core(QSize pixels) override;
+  void initialize(QRhiCommandBuffer *cb) override;
+  void render(QRhiCommandBuffer *cb) override;
+  bool event(QEvent *qevent) override;
+
+ private:
+  /* that size, logical pixels */
+  int largest_size() const;
+
+  size_t instance_;
+  rhi::ProfileFrame frame_;
+};
+
+RhiProfileView *profile_views[MBVQ_MAX_WINDOWS] = {};
+
+RhiProfileView::RhiProfileView(size_t instance, QWidget *parent) : RhiView(parent), instance_(instance), frame_(instance) {
+  profile_views[instance_] = this;
+  cap();
+}
+
+RhiProfileView::~RhiProfileView() {
+  if (profile_views[instance_] == this)
+    profile_views[instance_] = nullptr;
+}
+
+int RhiProfileView::largest_size() const {
+  const int limit = view_rhi() != nullptr ? view_rhi()->resourceLimit(QRhi::TextureSizeMax) : 16384;
+  const double ratio = devicePixelRatioF() > 0.0 ? devicePixelRatioF() : 1.0;
+  return std::max(1, static_cast<int>(std::floor(limit / ratio)));
+}
+
+void RhiProfileView::cap() {
+  const int largest = largest_size();
+  if (maximumWidth() != largest || maximumHeight() != largest)
+    setMaximumSize(largest, largest);
+}
+
+std::unique_ptr<rhi::ViewRenderer> RhiProfileView::make_renderer(QRhi *qrhi) {
+  return std::make_unique<rhi::ProfileRenderer>(qrhi, RenderOptions());
+}
+
+void RhiProfileView::size_core(QSize pixels) { frame_.size_core(pixels.width(), pixels.height()); }
+
+void RhiProfileView::initialize(QRhiCommandBuffer *cb) {
+  RhiView::initialize(cb);
+  /* The QRhi's largest texture is known now. A maximum below the view's
+     size would resize the view at once, and QRhiWidget paints a resized
+     view at once, inside this paint, where no frame can begin: that cap
+     comes after the paint. */
+  const int largest = largest_size();
+  if (width() <= largest && height() <= largest)
+    cap();
+  else
+    QMetaObject::invokeMethod(this, [this] { cap(); }, Qt::QueuedConnection);
+}
+
+void RhiProfileView::render(QRhiCommandBuffer *cb) {
+  const rhi::Clock::time_point start = rhi::Clock::now();
+  QRhiResourceUpdateBatch *updates = rhi()->nextResourceUpdateBatch();
+  auto *renderer = static_cast<rhi::ProfileRenderer *>(renderer_.get());
+  const QSize pixels = renderTarget()->pixelSize();
+  if (renderer == nullptr) {
+    cb->beginPass(renderTarget(), Qt::white, {1.0f, 0}, updates);
+    cb->endPass();
+    return;
+  }
+  /* filled in every frame (a few hundred vertices); the core's size first,
+     also when a window moved to a screen of another ratio */
+  renderer->set_pixel_ratio(devicePixelRatioF());
+  const rhi::Prepared prepared = renderer->frame(&frame_, updates, pixels);
+  if (prepared == rhi::Prepared::Failed) {
+    /* a buffer could not be made: nothing is drawn, the next frame tries
+       again */
+    cb->beginPass(renderTarget(), Qt::white, {1.0f, 0});
+    cb->endPass();
+    report_failure();
+    return;
+  }
+  hide_failure();
+  const rhi::Clock::time_point pass = rhi::Clock::now();
+  cb->beginPass(renderTarget(), Qt::white, {1.0f, 0}, updates);
+  const rhi::Clock::time_point commands = rhi::Clock::now();
+  renderer->record(cb, pixels);
+  cb->endPass();
+  const rhi::Clock::time_point end = rhi::Clock::now();
+  const double gpu = cb->lastCompletedGpuTime();
+  renderer->set_pass_times(rhi::milliseconds(pass, commands), rhi::milliseconds(commands, end),
+                           rhi::milliseconds(start, end), gpu > 0.0 ? 1000.0 * gpu : -1.0, rhi::milliseconds(start),
+                           rhi::milliseconds(end));
+  /* another view was filling: another frame */
+  if (prepared == rhi::Prepared::More)
+    update();
+}
+
+bool RhiProfileView::event(QEvent *qevent) {
+  /* a window moved to a screen of another ratio: the largest drawing again */
+  if (qevent->type() == QEvent::DevicePixelRatioChange || qevent->type() == QEvent::ScreenChangeInternal)
+    cap();
+  return RhiView::event(qevent);
+}
+
+/* the point-size control of the 3D soundings view, logical pixels */
+double soundings_point_size = 3.0;
+
+/* The 3D soundings view (one per program). */
+class RhiSoundingsView final : public RhiView {
+ public:
+  explicit RhiSoundingsView(QWidget *parent);
+  ~RhiSoundingsView() override;
+  /* a drawing the core asked for: in the next frame */
+  void request();
+  ViewState state() const override;
+  /* the program released its soundings while the view is hidden (Dismiss):
+     no frame comes, so what the view holds of them goes now */
+  void release();
+
+ protected:
+  std::unique_ptr<rhi::ViewRenderer> make_renderer(QRhi *qrhi) override;
+  void size_core(QSize pixels) override;
+  void new_rhi() override;
+  void initialize(QRhiCommandBuffer *cb) override;
+  void render(QRhiCommandBuffer *cb) override;
+  bool event(QEvent *qevent) override;
+
+ private:
+  rhi::SoundingsFrame frame_;
+  bool drawn_ = false;         /* a frame was filled: input may reach the core */
+  bool continued_ = false;     /* the next frame is one this view asked for to continue writes */
+  /* a buffer could not be made, or the soundings could not be read: wait
+     for the core's next request */
+  bool upload_failed_ = false;
+};
+
+RhiSoundingsView *soundings_view = nullptr;
+
+RhiSoundingsView::RhiSoundingsView(QWidget *parent) : RhiView(parent) {
+  setFocusPolicy(Qt::StrongFocus);
+  soundings_view = this;
+}
+
+RhiSoundingsView::~RhiSoundingsView() {
+  if (soundings_view == this)
+    soundings_view = nullptr;
+  /* deleted while its window lives on hidden until a safe point
+     (mb3dsoundings_end): the renderer's buffers go now */
+  if (renderer_ != nullptr) {
+    QRhi *qrhi = view_rhi();
+    renderer_.reset();
+    run_deferred_releases(qrhi);
+  }
+}
+
+void RhiSoundingsView::request() {
+  frame_.request();
+  update();
+}
+
+ViewState RhiSoundingsView::state() const {
+  ViewState state = RhiView::state();
+  state.drawn = drawn_;
+  return state;
+}
+
+std::unique_ptr<rhi::ViewRenderer> RhiSoundingsView::make_renderer(QRhi *qrhi) {
+  return std::make_unique<rhi::SoundingsRenderer>(qrhi, RenderOptions());
+}
+
+void RhiSoundingsView::size_core(QSize pixels) { frame_.size_core(pixels.width(), pixels.height()); }
+
+void RhiSoundingsView::new_rhi() {
+  /* the next frame fills and writes everything again */
+  continued_ = false;
+}
+
+void RhiSoundingsView::initialize(QRhiCommandBuffer *cb) {
+  RhiView::initialize(cb);
+  if (renderer_ != nullptr)
+    upload_failed_ = false;
+}
+
+void RhiSoundingsView::render(QRhiCommandBuffer *cb) {
+  const rhi::Clock::time_point start = rhi::Clock::now();
+  QRhiResourceUpdateBatch *updates = rhi()->nextResourceUpdateBatch();
+  auto *renderer = static_cast<rhi::SoundingsRenderer *>(renderer_.get());
+  const QSize pixels = renderTarget()->pixelSize();
+  /* Nothing to draw without a renderer, nor while a frame that failed (a
+     buffer that could not be made, or soundings that could not be read)
+     waits for the core's next request: trying again in every frame would
+     loop where the GPU memory ran out or the read keeps failing. */
+  if (renderer == nullptr || (upload_failed_ && !frame_.requested())) {
+    /* picks use the core's size, also while nothing is drawn */
+    if (renderer != nullptr)
+      frame_.size_core(pixels.width(), pixels.height());
+    cb->beginPass(renderTarget(), Qt::white, {1.0f, 0}, updates);
+    cb->endPass();
+    return;
+  }
+
+  /* The core's size first, then the fill (unless this frame only continues
+     writes and nothing changed), the soundings written where their marks
+     rose, at the view's pixel ratio and the program's point size. */
+  renderer->set_pixel_ratio(devicePixelRatioF());
+  renderer->set_point_size(soundings_point_size);
+  const rhi::Prepared prepared = renderer->frame(&frame_, updates, continued_, pixels);
+  continued_ = false;
+  if (prepared == rhi::Prepared::Failed) {
+    cb->beginPass(renderTarget(), Qt::white, {1.0f, 0});
+    cb->endPass();
+    upload_failed_ = true;
+    report_failure();
+    return;
+  }
+  if (upload_failed_) {
+    upload_failed_ = false;
+    hide_failure();
+  }
+
+  /* opaque white, as the OpenGL view clears */
+  const rhi::Clock::time_point pass = rhi::Clock::now();
+  cb->beginPass(renderTarget(), Qt::white, {1.0f, 0}, updates);
+  const rhi::Clock::time_point commands = rhi::Clock::now();
+  renderer->record(cb, pixels);
+  cb->endPass();
+  const rhi::Clock::time_point end = rhi::Clock::now();
+  const double gpu = cb->lastCompletedGpuTime();
+  renderer->set_pass_times(rhi::milliseconds(pass, commands), rhi::milliseconds(commands, end),
+                           rhi::milliseconds(start, end), gpu > 0.0 ? 1000.0 * gpu : -1.0, rhi::milliseconds(start),
+                           rhi::milliseconds(end));
+  /* input from now on, once the view is sized and filled */
+  drawn_ = drawn_ || frame_.fills() > 0;
+  /* writes wait, or another view was filling: another frame */
+  if (prepared == rhi::Prepared::More) {
+    continued_ = true;
+    update();
+  }
+}
+
+void RhiSoundingsView::release() {
+  if (isVisible() || !frame_.release() || renderer_ == nullptr)
+    return;
+  static_cast<rhi::SoundingsRenderer *>(renderer_.get())->release_soundings();
+  run_deferred_releases(view_rhi());
+}
+
+bool RhiSoundingsView::event(QEvent *qevent) {
+  struct mbv_input_event event;
+  if (translate_event(qevent, devicePixelRatioF(), &event)) {
+    /* nothing is drawn before the first frame, so nothing can be picked, and
+       the view's size is not known yet */
+    if (drawn_)
+      mb3dsoundings_input(&event);
+    return true;
+  }
+  return RhiView::event(qevent);
+}
+
 bool defer_draw(int view, size_t instance, int rez) {
   /* always deferred: there is no OpenGL context to draw in now */
   if (view == MBV_RENDER_MAP && instance < MBVQ_MAX_WINDOWS && views[instance] != nullptr)
     views[instance]->request(rez);
+  else if (view == MBV_RENDER_PROFILE && instance < MBVQ_MAX_WINDOWS && profile_views[instance] != nullptr)
+    profile_views[instance]->update();
+  else if (view == MBV_RENDER_SOUNDINGS && soundings_view != nullptr)
+    soundings_view->request();
   return true;
 }
 
@@ -588,11 +912,29 @@ void install() {
 
 QWidget *create_map_view(size_t instance, QWidget *parent) { return new RhiMapView(instance, parent); }
 
+QWidget *create_profile_view(size_t instance, QWidget *parent) { return new RhiProfileView(instance, parent); }
+
+QWidget *create_soundings_view(QWidget *parent) { return new RhiSoundingsView(parent); }
+
+void cap_profile_view(QWidget *view) {
+  if (auto *profile = dynamic_cast<RhiProfileView *>(view))
+    profile->cap();
+}
+
+void release_soundings_view(QWidget *view) {
+  if (auto *soundings = dynamic_cast<RhiSoundingsView *>(view))
+    soundings->release();
+}
+
+void set_soundings_point_size(double logical_px) {
+  soundings_point_size = logical_px;
+  if (soundings_view != nullptr)
+    soundings_view->update();
+}
+
 }  // namespace rhi_backend
 
 ViewState view_state(QWidget *view) {
-  if (auto *map = dynamic_cast<rhi_backend::RhiMapView *>(view))
-    return map->state();
   if (auto *rhi_view = dynamic_cast<rhi_backend::RhiView *>(view))
     return rhi_view->state();
   return ViewState();
@@ -604,8 +946,8 @@ void set_fell_back(QWidget *view, bool fell_back) {
 }
 
 RenderStats view_stats(QWidget *view) {
-  if (auto *map = dynamic_cast<rhi_backend::RhiMapView *>(view))
-    return map->stats();
+  if (auto *rhi_view = dynamic_cast<rhi_backend::RhiView *>(view))
+    return rhi_view->stats();
   return RenderStats();
 }
 

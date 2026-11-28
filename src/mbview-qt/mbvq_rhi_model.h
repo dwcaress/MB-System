@@ -46,8 +46,10 @@
  *   process under one budget, the least recently drawn levels evicted first.
  * - The style: the physical sizes of the line widths, point sizes and
  *   stipple factors the core asks for in logical pixels.
- * - The batch plan: the commands of the map's batch (mbv_draw_batch.h) as
+ * - The batch plan: the commands of a view's batch (mbv_draw_batch.h) as
  *   the draws of the renderer, in stream order.
+ * - The soundings plan: the soundings of the 3D soundings view in chunks of
+ *   GPU buffers, what each holds and what a frame writes.
  */
 
 #ifndef MBVIEW_QT_MBVQ_RHI_MODEL_H
@@ -463,19 +465,25 @@ class TerrainPlan {
    devicePixelRatioF() (RenderOptions::pixel_ratio offscreen), never the
    render target's, which is 1 in a QRhiWidget. One factor per kind, all 1,
    so that a kind can be changed in one place. Marker sizes are display units
-   and are not scaled. */
+   and are not scaled. The points are scaled by the point-size control of the
+   3D soundings view as well: the core draws them 3 logical pixels big, and
+   the control's value takes the place of those 3 (point_size; 3 changes
+   nothing, as in the map views). */
 struct Style {
   double ratio = 1.0;
   double line_factor = 1.0;
   double contour_factor = 1.0;
   double point_factor = 1.0;
   double stipple_factor = 1.0;
+  double point_size = 3.0;
 
   static int physical(double logical, double ratio, double factor);
   int line(double logical) const { return physical(logical, ratio, line_factor); }
   /* the contours are drawn 1 logical pixel wide (mbview_contour) */
   int contour() const { return physical(1.0, ratio, contour_factor); }
-  int point(double logical) const { return physical(logical, ratio, point_factor); }
+  /* multiplied before the division, so that the control's steps of 0.5 give
+     exact sizes (3 x 0.5 / 3 is 0.5, which rounds up to 1) */
+  int point(double logical) const { return physical(logical * point_size / 3.0, ratio, point_factor); }
   int stipple(int factor) const { return physical(factor, ratio, stipple_factor); }
   /* a line of one physical pixel is drawn with the line topology (as
      OpenGL's 1 px lines at ratio 1); a wider one as quads */
@@ -494,8 +502,22 @@ enum class DrawKind {
   WidePairs,    /* wide lines from pairs of vertices: quads instanced per pair */
   StippleLines, /* thin stippled lines from the stipple buffer (pairs) */
   StippleWide,  /* wide stippled lines from the stipple buffer (quads per pair) */
-  Markers       /* a run of markers of one shape, instanced */
+  Markers,      /* a run of markers of one shape, instanced */
+  Soundings,    /* the soundings slot of the 3D soundings view (SoundingsPlan) */
+  ProfileLines  /* the profile lines of the 3D soundings view: its slot, black, and the next one, red */
 };
+
+/* The slot of the profile lines in the decorations of the 3D soundings view
+   (SoundingsFrame): it stands where the core recorded the LINES command of
+   the profile lines, whose vertices it leaves out (two per pair of
+   soundings, 48 bytes for every sounding); the renderer draws those lines
+   from the soundings' positions with index lists of its own. A slot of
+   mbview-qt only: the core has none of this number (mbv_draw_batch.h). */
+constexpr int kSlotProfileLines = 100;
+/* above the core's highest slot id: if the core adds slots, compare with its
+   new highest here, and raise kSlotProfileLines should that reach it */
+static_assert(kSlotProfileLines > MBV_DRAW_SLOT_CONTOURS_FULL,
+              "kSlotProfileLines must lie above the core's slot ids (mbv_draw_batch.h)");
 
 /* the buffer a draw reads its vertices or instances from */
 enum class DrawSource {
@@ -553,7 +575,10 @@ struct StippleVertex {
    stipple counter, which counts the fragments, goes on along a strip or
    loop and starts again at every LINES segment and every primitive;
    markers are drawn one run per command, instanced over the batch's
-   instances. Shapes define the meshes of later runs; groups are counted. */
+   instances. Shapes define the meshes of later runs; groups are counted.
+   The slots of the 3D soundings view become draws of its renderer: the
+   soundings with the slot's point size, and the profile lines
+   (kSlotProfileLines) with two slots, black and then red. */
 class BatchPlan {
  public:
   /* camera: projection x modelview, projection: the projection alone
@@ -586,6 +611,155 @@ class BatchPlan {
   int markers_ = 0;
   size_t segments_ = 0;
 };
+
+/*--------------------------------------------------------------------*/
+/* The soundings of the 3D soundings view on the GPU (its renderer holds the
+   buffers; this plan says what is in them and what to write): four streams,
+   the soundings' positions (3 floats, 12 bytes per sounding) and colours
+   (RGBA8, 4 bytes; alpha 0 for a sounding that is not drawn), and their
+   profile lines as index lists (two 32-bit indices per pair, the black and
+   the red pairs apart) or, for wide lines, a colour per pair (RGBA8: black,
+   red, or alpha 0 for none). Every stream is cut into chunks of a fixed
+   number of soundings, each chunk of each stream a buffer of its own that is
+   always written whole, at most a frame's upload budget (64 MB) per frame:
+   Qt's Metal backend keeps a buffer once per frame in flight and applies
+   writes to a frame slot only when a frame on that slot uses the buffer, and
+   a whole write of a dynamic buffer drops the writes still waiting, so no
+   slot ever holds more than one write of a chunk. The positions of a chunk
+   reach one sounding into the next chunk, so that the pair across the
+   boundary lies in one buffer.
+   - A new allocation (reset(): another count, or the core handed over or
+     released the array) empties every stream. Its first upload writes the
+     chunks in order, every stream of a chunk before the next chunk, and
+     each frame draws the soundings whose positions and colours are both
+     written (a prefix in the order of the array, which is spatially
+     coherent in ping order) and the profile lines among them.
+   - Later, a stream whose data changed (start()) is written again. Positions
+     and colours above the budget are double-buffered: the new data go into
+     the second set of buffers over as many frames as they need, while the
+     frames draw the first, complete set; then the two swap. On Metal the
+     writes reach a frame slot's buffers only when a frame on that slot binds
+     them, so the second set, bound only from the swap on, is copied into
+     them whole in the frame of the swap and again in the next frame on the
+     other slot: the budget spreads the writes, not that copy. Below the
+     budget a stream is written whole within one frame. The index lists and
+     colours per pair are written chunk by chunk as the budget allows (each
+     chunk's lists are complete in themselves). A stream whose upload runs
+     is busy: its data, which the renderer keeps, must not change until the
+     upload is done, so a new change mark waits (a position mark during a
+     split upload does not restart it) and is read in a frame after it. */
+class SoundingsPlan {
+ public:
+  enum Stream { kPositions = 0, kColours = 1, kLists = 2, kPairColours = 3 };
+  static constexpr int kStreams = 4;
+  /* soundings per chunk: 2^21, so that a chunk's streams take at most 56 MB
+     (24 MB of positions, 8 MB of colours, 16 MB of indices, 8 MB of pair
+     colours) */
+  static constexpr int kChunk = 1 << 21;
+
+  /* a write of one chunk of a stream into one of its two sets of buffers */
+  struct Upload {
+    int stream = 0;
+    int set = 0;
+    int chunk = 0;
+    size_t bytes = 0;
+  };
+
+  /* a new allocation of count soundings, in chunks of chunk soundings, with
+     an upload budget per frame: every stream empty, no upload running */
+  void reset(int count, int chunk = kChunk, size_t budget = kUploadBudget);
+  int count() const { return count_; }
+  int chunk() const { return chunk_; }
+  int chunks() const { return chunks_; }
+  size_t budget() const { return budget_; }
+  /* the first sounding of chunk c; its soundings (drawn as points); the
+     positions its buffer holds (those, and the first of the next chunk); its
+     pairs (i, i + 1) with i in the chunk (the instances of its wide lines) */
+  int first(int c) const { return c * chunk_; }
+  int points(int c) const;
+  int positions(int c) const;
+  int pairs(int c) const;
+  /* the bytes of a chunk of a stream; the index lists' bytes are set for
+     each upload (set_list_bytes), one entry per chunk */
+  size_t bytes(int stream, int c) const;
+  void set_list_bytes(const std::vector<size_t> &bytes) { list_bytes_ = bytes; }
+  /* positions and colours above the budget have a second set of buffers */
+  bool double_buffered(int stream) const;
+
+  /* the data of a stream changed and were read again: their upload starts;
+     not while the stream is busy */
+  void start(int stream);
+  bool busy(int stream) const { return jobs_[stream].version != 0; }
+  /* the writes of this frame, at least one if any is waiting, within the
+     budget; the plan takes them as made (a renderer that fails one drops
+     everything and resets the plan) */
+  std::vector<Upload> frame();
+  /* writes wait for later frames */
+  bool waiting() const;
+
+  /* the set of a stream that is drawn (0 or 1) */
+  int front(int stream) const { return front_[stream]; }
+  /* the drawn set of a stream holds data for chunk c */
+  bool held(int stream, int c) const;
+  /* chunk c's points are drawn: its positions and colours are held */
+  bool drawn(int c) const { return held(kPositions, c) && held(kColours, c); }
+  /* the soundings drawn: the chunks drawn, in the first upload a prefix */
+  int soundings_drawn() const;
+  /* chunk c's profile lines are drawn from the stream (kLists or
+     kPairColours): its positions and that stream held; without the pair that
+     reaches into the next chunk while that chunk's points are not drawn
+     (only in the first upload) */
+  bool lines(int stream, int c) const { return held(kPositions, c) && held(stream, c); }
+  bool last_pair_out(int c) const { return c + 1 < chunks_ && !drawn(c + 1); }
+
+  /* totals since the last reset: chunks written per stream, swaps of the
+     two sets */
+  int writes(int stream) const { return writes_[stream]; }
+  int swaps() const { return swaps_; }
+
+ private:
+  struct Job {
+    uint64_t version = 0; /* the data being written (0: none) */
+    int set = 0;          /* the set written */
+    int next = 0;         /* the next chunk to write */
+    bool whole = false;   /* written whole within one frame */
+  };
+  bool complete(int stream, int set) const;
+
+  int count_ = 0;
+  int chunk_ = kChunk;
+  int chunks_ = 0;
+  size_t budget_ = kUploadBudget;
+  std::vector<size_t> list_bytes_;
+  /* the data each chunk of each set holds (0: none) */
+  std::vector<uint64_t> held_[kStreams][2];
+  int front_[kStreams] = {};
+  Job jobs_[kStreams];
+  uint64_t versions_ = 0;
+  int writes_[kStreams] = {};
+  int swaps_ = 0;
+};
+
+/* The pairs of the profile lines, two entries per pair (i and i + 1, in the
+   order of the sounding array, as mbvq_c_soundings_profile_pairs gives
+   them), made local to the chunks of a plan, in place: each chunk's pairs
+   (those whose first sounding lies in the chunk) follow one another, and
+   their entries become indices from the chunk's first sounding, into the
+   chunk's positions (which reach one sounding into the next chunk). range
+   gets each chunk's first entry, and the end (chunks + 1 entries). */
+void split_pairs(const SoundingsPlan &plan, std::vector<uint32_t> *list, std::vector<size_t> *range);
+/* the entries of chunk c of a list made local (split_pairs), and of them
+   those of the pairs inside the chunk's soundings: all but a last pair that
+   reaches into the next chunk */
+size_t pair_entries(const std::vector<size_t> &range, int c);
+size_t inner_pair_entries(const SoundingsPlan &plan, const std::vector<uint32_t> &list, const std::vector<size_t> &range,
+                          int c);
+/* the colour of each pair (i, i + 1), count - 1 entries of RGBA8: black (0,
+   0, 0, 255) for a black pair, red (255, 0, 0, 255) for a red one, none (0,
+   0, 0, 0) for the others, from the two lists made local (split_pairs) */
+void pair_colours(const SoundingsPlan &plan, const std::vector<uint32_t> &black, const std::vector<size_t> &black_range,
+                  const std::vector<uint32_t> &red, const std::vector<size_t> &red_range,
+                  std::vector<unsigned char> *rgba);
 
 }  // namespace rhi
 }  // namespace mbvq

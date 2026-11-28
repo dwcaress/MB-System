@@ -23,7 +23,8 @@
  *--------------------------------------------------------------------*/
 /*
  * The QRhi backend of mbview-qt, model layer: the fill policy, the terrain
- * plan and the terrain cache (mbvq_rhi_model.h).
+ * plan and the terrain cache, the style, the batch plan and the soundings
+ * plan (mbvq_rhi_model.h).
  */
 
 #include "mbvq_rhi_model.h"
@@ -1568,6 +1569,23 @@ void BatchPlan::build(const struct mbv_draw_batch &batch, const Style &style, co
         add(DrawKind::Contours, DrawSource::None, c, slot, 0, 0, 0);
         items_.back().shape = command.primitive;
       }
+      else if (command.primitive == MBV_DRAW_SLOT_SOUNDINGS) {
+        /* the soundings, points of the slot's point size (mb3dsoundings_plot) */
+        const int slot = add_slot(command, style);
+        slots_[slot].width = style.point(command.point_size);
+        slots_[slot].stipple = false;
+        add(DrawKind::Soundings, DrawSource::None, c, slot, 0, 0, 0);
+      }
+      else if (command.primitive == kSlotProfileLines) {
+        /* the profile lines, black and red (mb3dsoundings_plot), of the
+           LINES command's width: two slots, the red one after the black */
+        const int black = add_slot(command, style);
+        slots_[black].stipple = false;
+        const int red = add_slot(command, style);
+        slots_[red].stipple = false;
+        slots_[red].colour[0] = 1.0f;
+        add(DrawKind::ProfileLines, DrawSource::None, c, black, 0, 0, 0);
+      }
       break;
     case MBV_DRAW_MARKERS: {
       if (command.count <= 0 || command.primitive < 0 || command.primitive >= batch.num_shapes)
@@ -1651,6 +1669,205 @@ void BatchPlan::build(const struct mbv_draw_batch &batch, const Style &style, co
     default:
       break;
     }
+  }
+}
+
+/*--------------------------------------------------------------------*/
+void SoundingsPlan::reset(int count, int chunk, size_t budget) {
+  count_ = std::max(0, count);
+  chunk_ = std::max(1, chunk);
+  chunks_ = static_cast<int>((static_cast<int64_t>(count_) + chunk_ - 1) / chunk_);
+  budget_ = std::max<size_t>(1, budget);
+  list_bytes_.assign(static_cast<size_t>(chunks_), 0);
+  for (int s = 0; s < kStreams; s++) {
+    for (std::vector<uint64_t> &set : held_[s])
+      set.assign(static_cast<size_t>(chunks_), 0);
+    front_[s] = 0;
+    jobs_[s] = Job();
+    writes_[s] = 0;
+  }
+  swaps_ = 0;
+}
+
+int SoundingsPlan::points(int c) const {
+  return c < 0 || c >= chunks_ ? 0 : std::min(chunk_, count_ - first(c));
+}
+
+int SoundingsPlan::positions(int c) const {
+  return c < 0 || c >= chunks_ ? 0 : points(c) + (c + 1 < chunks_ ? 1 : 0);
+}
+
+int SoundingsPlan::pairs(int c) const {
+  return c < 0 || c >= chunks_ ? 0 : std::max(0, std::min(chunk_, count_ - 1 - first(c)));
+}
+
+size_t SoundingsPlan::bytes(int stream, int c) const {
+  switch (stream) {
+  case kPositions:
+    return 12 * static_cast<size_t>(positions(c));
+  case kColours:
+    return 4 * static_cast<size_t>(points(c));
+  case kLists:
+    return c >= 0 && static_cast<size_t>(c) < list_bytes_.size() ? list_bytes_[static_cast<size_t>(c)] : 0;
+  case kPairColours:
+    return 4 * static_cast<size_t>(pairs(c));
+  default:
+    return 0;
+  }
+}
+
+bool SoundingsPlan::double_buffered(int stream) const {
+  if (stream != kPositions && stream != kColours)
+    return false;
+  size_t total = 0;
+  for (int c = 0; c < chunks_; c++)
+    total += bytes(stream, c);
+  return total > budget_;
+}
+
+bool SoundingsPlan::complete(int stream, int set) const {
+  for (const uint64_t version : held_[stream][set])
+    if (version == 0)
+      return false;
+  return chunks_ > 0;
+}
+
+bool SoundingsPlan::held(int stream, int c) const {
+  return c >= 0 && c < chunks_ && held_[stream][front_[stream]][static_cast<size_t>(c)] != 0;
+}
+
+int SoundingsPlan::soundings_drawn() const {
+  int n = 0;
+  for (int c = 0; c < chunks_; c++)
+    n += drawn(c) ? points(c) : 0;
+  return n;
+}
+
+void SoundingsPlan::start(int stream) {
+  if (busy(stream) || chunks_ == 0)
+    return;
+  /* Into the second set where the stream has one and the drawn set is
+     complete, so that the frames draw the drawn set until the new data are
+     complete; else into the drawn set: whole within one frame where it is
+     complete (positions and colours), so that no frame draws a mix of old
+     and new data, chunk by chunk where it is not (the first upload) and for
+     the profile lines. */
+  Job &job = jobs_[stream];
+  job.version = ++versions_;
+  job.next = 0;
+  const bool full = complete(stream, front_[stream]);
+  const bool second = double_buffered(stream);
+  job.set = second && full ? 1 - front_[stream] : front_[stream];
+  job.whole = !second && full && (stream == kPositions || stream == kColours);
+}
+
+bool SoundingsPlan::waiting() const {
+  for (const Job &job : jobs_)
+    if (job.version != 0)
+      return true;
+  return false;
+}
+
+std::vector<SoundingsPlan::Upload> SoundingsPlan::frame() {
+  std::vector<Upload> uploads;
+  size_t remaining = budget_;
+  bool any = false;
+  const auto write = [&](int s, int c) {
+    Upload upload;
+    upload.stream = s;
+    upload.set = jobs_[s].set;
+    upload.chunk = c;
+    upload.bytes = bytes(s, c);
+    uploads.push_back(upload);
+    held_[s][upload.set][static_cast<size_t>(c)] = jobs_[s].version;
+    writes_[s]++;
+    remaining -= std::min(remaining, upload.bytes);
+    any = true;
+  };
+  const auto finish = [&](int s) {
+    /* the second set complete: it is drawn from now on */
+    if (jobs_[s].set != front_[s]) {
+      front_[s] = jobs_[s].set;
+      swaps_++;
+    }
+    jobs_[s] = Job();
+  };
+
+  /* the streams written whole: all their chunks in this frame, or none */
+  for (int s = 0; s < kStreams; s++) {
+    if (!busy(s) || !jobs_[s].whole)
+      continue;
+    size_t total = 0;
+    for (int c = jobs_[s].next; c < chunks_; c++)
+      total += bytes(s, c);
+    if (any && total > remaining)
+      continue;
+    for (int c = jobs_[s].next; c < chunks_; c++)
+      write(s, c);
+    finish(s);
+  }
+
+  /* the others chunk by chunk, every stream of a chunk before the next
+     chunk, until the budget is spent; at least one write per frame */
+  for (int c = 0; c < chunks_; c++) {
+    for (int s = 0; s < kStreams; s++) {
+      if (!busy(s) || jobs_[s].whole || jobs_[s].next != c)
+        continue;
+      if (any && bytes(s, c) > remaining)
+        return uploads;
+      write(s, c);
+      if (++jobs_[s].next == chunks_)
+        finish(s);
+    }
+  }
+  return uploads;
+}
+
+void split_pairs(const SoundingsPlan &plan, std::vector<uint32_t> *list, std::vector<size_t> *range) {
+  const int chunks = plan.chunks();
+  range->assign(static_cast<size_t>(chunks) + 1, list->size());
+  size_t k = 0;
+  for (int c = 0; c < chunks; c++) {
+    (*range)[static_cast<size_t>(c)] = k;
+    const uint32_t first = static_cast<uint32_t>(plan.first(c));
+    const uint32_t end = first + static_cast<uint32_t>(plan.points(c));
+    while (k + 1 < list->size() && (*list)[k] < end) {
+      (*list)[k] -= first;
+      (*list)[k + 1] -= first;
+      k += 2;
+    }
+  }
+  (*range)[static_cast<size_t>(chunks)] = k;
+}
+
+size_t pair_entries(const std::vector<size_t> &range, int c) {
+  return range[static_cast<size_t>(c) + 1] - range[static_cast<size_t>(c)];
+}
+
+size_t inner_pair_entries(const SoundingsPlan &plan, const std::vector<uint32_t> &list, const std::vector<size_t> &range,
+                          int c) {
+  /* the pairs follow the order of the array: such a pair is the last */
+  const size_t n = pair_entries(range, c);
+  const size_t end = range[static_cast<size_t>(c) + 1];
+  return n >= 2 && list[end - 1] >= static_cast<uint32_t>(plan.points(c)) ? n - 2 : n;
+}
+
+void pair_colours(const SoundingsPlan &plan, const std::vector<uint32_t> &black, const std::vector<size_t> &black_range,
+                  const std::vector<uint32_t> &red, const std::vector<size_t> &red_range,
+                  std::vector<unsigned char> *rgba) {
+  rgba->assign(4 * static_cast<size_t>(std::max(0, plan.count() - 1)), 0);
+  for (int c = 0; c < plan.chunks(); c++) {
+    const auto mark = [&](const std::vector<uint32_t> &list, const std::vector<size_t> &range, unsigned char r) {
+      for (size_t k = range[static_cast<size_t>(c)]; k + 1 < range[static_cast<size_t>(c) + 1]; k += 2) {
+        unsigned char *colour = &(*rgba)[4 * (static_cast<size_t>(plan.first(c)) + list[k])];
+        colour[0] = r;
+        colour[1] = 0;
+        colour[2] = 0;
+        colour[3] = 255;
+      }
+    };
+    mark(black, black_range, 0);
+    mark(red, red_range, 255);
   }
 }
 

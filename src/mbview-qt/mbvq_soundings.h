@@ -25,7 +25,8 @@
  * The 3D soundings window of mbview-qt, as the Motif "3D Soundings" window
  * (Mb3dsdg): the edit mode buttons, the status line, the bias and time lag
  * sliders, Reset View, the mouse mode buttons and label, the View, Mouse,
- * Action and Dismiss menus, and the soundings drawing of the backend. The
+ * Action and Dismiss menus, and the soundings drawing of the backend (under
+ * QRhi with a point-size control, set_soundings_point_size). The
  * content is SoundingsWidget; SoundingsWindow is the window of the standalone
  * programs. One per program, as in Motif.
  */
@@ -75,7 +76,8 @@ class SoundingsWidget final : public QWidget {
   void set_status(const QString &text, bool sliders);
   void set_view_cursor(int cursor);
   QWidget *view() const { return view_; }
-  /* free the drawing view (and its OpenGL context) now */
+  /* free the drawing view now (an OpenGL view with its context; a QRhi view
+     lets go of its GPU buffers as it is deleted) */
   void delete_view();
 
  signals:
@@ -104,6 +106,11 @@ class SoundingsWidget final : public QWidget {
   QWidget *sliders_ = nullptr;
   QSlider *bias_[MBVQ_SDG_BIASES] = {};
   QLabel *bias_value_[MBVQ_SDG_BIASES] = {};
+  /* the status of a QRhi fill, shown once after it (set_status) */
+  QString status_due_;
+  bool sliders_due_ = true;
+  bool status_queued_ = false;
+  bool status_signal_due_ = false;
 };
 
 class SoundingsWindow final : public QMainWindow {

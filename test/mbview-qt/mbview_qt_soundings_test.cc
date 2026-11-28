@@ -29,6 +29,13 @@
  *   mbview_qt_soundings_test --gl         draws synthetic soundings with the
  *                                         OpenGL backend and edits and
  *                                         inspects soundings with mouse events
+ *   mbview_qt_soundings_test --rhi        the same with the QRhi backend (where
+ *                                         it is built), with the QRhi API that
+ *                                         MB_RENDERER names (the platform's
+ *                                         otherwise); the screen positions are
+ *                                         computed when they are read
+ *                                         (mb3dsoundings_screen_positions), as
+ *                                         QRhi stores none
  *   mbview_qt_soundings_test --time N     draw times of N soundings with and
  *                                         without the bounding box, whose
  *                                         stippled lines make Apple's OpenGL
@@ -54,15 +61,20 @@
 #include <QMouseEvent>
 #include <QOpenGLWidget>
 #include <QRadioButton>
+#ifdef MBVQ_HAVE_RHI
+#include <QRhiWidget>
+#endif
 #include <QSlider>
 #include <QTimer>
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#include <thread>
 #include <vector>
 
 extern "C" {
@@ -72,8 +84,12 @@ extern "C" {
 #include "mbv_draw_batch.h"
 }
 #include "mbvq.h"
+#include "mbvq_backend.h"
 #include "mbvq_bridge.h"
 #include "mbvq_soundings.h"
+#ifdef MBVQ_HAVE_RHI
+#include "mbvq_rhi.h"
+#endif
 
 /* from the private soundings header, which needs the Motif-shaped headers */
 extern "C" void mb3dsoundings_setviewtoggle(int toggle, bool state);
@@ -696,15 +712,43 @@ int test_null() {
 }
 
 /*------------------------------------------------------------------------------*/
-bool wait_drawn(int timeout_ms) {
+/* The view's picture: QOpenGLWidget::grabFramebuffer() for OpenGL, and
+   QRhiWidget::grabFramebuffer() for QRhi, which renders a new frame (a fill
+   of the view, with its side effects) and reads it back. */
+QImage grab(QWidget *view) {
+  if (auto *gl = qobject_cast<QOpenGLWidget *>(view))
+    return gl->grabFramebuffer();
+#ifdef MBVQ_HAVE_RHI
+  if (auto *rhi = qobject_cast<QRhiWidget *>(view))
+    return rhi->grabFramebuffer();
+#endif
+  return QImage();
+}
+
+/* The soundings are drawn and have screen positions. OpenGL stores them
+   while it draws; QRhi stores none, so they are computed here when read, as
+   the pick, erase, grab and info functions compute them
+   (mb3dsoundings_screen_positions), once the view has drawn a frame (its
+   size is then known). */
+bool wait_drawn(QWidget *view, int timeout_ms) {
   QElapsedTimer timer;
   timer.start();
   while (timer.elapsed() < timeout_ms) {
-    for (const auto &s : storage)
-      if (s.winx != 0 || s.winy != 0)
-        return true;
+    bool drawn = true;
+#ifdef MBVQ_HAVE_RHI
+    if (mbvq::view_state(view).rhi_view)
+      drawn = mbvq::view_state(view).drawn;
+#endif
+    if (drawn) {
+      int error = MB_ERROR_NO_ERROR;
+      mb3dsoundings_screen_positions(0, &error);
+      for (const auto &s : storage)
+        if (s.winx != 0 || s.winy != 0)
+          return true;
+    }
     spin(50);
   }
+  (void)view;
   return false;
 }
 
@@ -732,16 +776,24 @@ QPointF window_position(QWidget *view, const struct mb3dsoundings_sounding_struc
   return QPointF(s.winx / ratio, (height - 1 - s.winy) / ratio);
 }
 
-int test_gl() {
+int test_gl(bool rhi) {
   make_soundings(100, 50);
   open_soundings();
   mbvq::SoundingsWindow *window = mbvq::soundings_window();
-  auto *view = window != nullptr ? qobject_cast<QOpenGLWidget *>(window->widget()->view()) : nullptr;
-  check(view != nullptr, "the soundings view is an OpenGL widget");
+  QWidget *view = window != nullptr ? window->widget()->view() : nullptr;
+  if (rhi) {
+#ifdef MBVQ_HAVE_RHI
+    check(view != nullptr && mbvq::view_state(view).rhi_view, "the soundings view is a QRhi widget");
+#endif
+  }
+  else {
+    view = qobject_cast<QOpenGLWidget *>(view);
+    check(view != nullptr, "the soundings view is an OpenGL widget");
+  }
   if (view == nullptr)
     return 1;
-  check(wait_drawn(10000), "the soundings are drawn and have screen positions");
-  const QImage image = view->grabFramebuffer();
+  check(wait_drawn(view, 10000), "the soundings are drawn and have screen positions");
+  const QImage image = grab(view);
   int dark = 0;
   for (int y = 0; y < image.height(); y += 3)
     for (int x = 0; x < image.width(); x += 3)
@@ -791,7 +843,7 @@ int test_time(int n) {
   open_soundings();
   mbvq::SoundingsWindow *window = mbvq::soundings_window();
   auto *view = window != nullptr ? qobject_cast<QOpenGLWidget *>(window->widget()->view()) : nullptr;
-  if (view == nullptr || !wait_drawn(20000)) {
+  if (view == nullptr || !wait_drawn(view, 20000)) {
     std::printf("FAIL: not drawn\n");
     return 1;
   }
@@ -817,11 +869,33 @@ int main(int argc, char **argv) {
   std::setvbuf(stdout, nullptr, _IOLBF, 0);
   const char *mode = argc > 1 ? argv[1] : "";
   const bool null = std::strcmp(mode, "--null") == 0;
-  if (!null && std::strcmp(mode, "--gl") != 0 && std::strcmp(mode, "--time") != 0 && std::strcmp(mode, "--show") != 0) {
-    std::fprintf(stderr, "usage: mbview_qt_soundings_test --null | --gl | --time N | --show [N]\n");
+  const bool rhi = std::strcmp(mode, "--rhi") == 0;
+  if (!null && !rhi && std::strcmp(mode, "--gl") != 0 && std::strcmp(mode, "--time") != 0 &&
+      std::strcmp(mode, "--show") != 0) {
+    std::fprintf(stderr, "usage: mbview_qt_soundings_test --null | --gl | --rhi | --time N | --show [N]\n");
     return 2;
   }
-  mbvq::set_backend(null ? mbvq::Backend::Null : mbvq::Backend::LegacyGL);
+  if (rhi) {
+    if (!mbvq::backend_built(mbvq::Backend::Rhi)) {
+      std::printf("skipped: this build has no QRhi drawing\n");
+      return 77;
+    }
+    /* the API that MB_RENDERER names, the platform's otherwise */
+    mbvq::Backend chosen = mbvq::Backend::Rhi;
+    mbvq::RhiApi api = mbvq::RhiApi::Default;
+    std::string message;
+    mbvq::choose_renderer(std::getenv("MB_RENDERER"), &chosen, &api, &message);
+    mbvq::set_backend(mbvq::Backend::Rhi, chosen == mbvq::Backend::Rhi ? api : mbvq::RhiApi::Default);
+    /* the test ends after two minutes even if it hangs */
+    std::thread([] {
+      std::this_thread::sleep_for(std::chrono::seconds(120));
+      std::fprintf(stderr, "mbview_qt_soundings_test --rhi: watchdog, stopped after 120 s\n");
+      std::fflush(stdout);
+      std::_Exit(4);
+    }).detach();
+  }
+  else
+    mbvq::set_backend(null ? mbvq::Backend::Null : mbvq::Backend::LegacyGL);
   QApplication app(argc, argv);
   int error = MB_ERROR_NO_ERROR;
   mbview_startup(0, nullptr, nullptr, &error);
@@ -829,8 +903,18 @@ int main(int argc, char **argv) {
 
   if (null)
     return test_null();
-  if (std::strcmp(mode, "--gl") == 0)
-    return test_gl();
+  if (std::strcmp(mode, "--gl") == 0 || rhi) {
+    const int status = test_gl(rhi);
+    /* under QRhi the test ends through the event loop's quit, as the
+       programs do: aboutToQuit deletes the closed soundings window before the
+       QApplication goes (a QRhiWidget window left for that leaves the Vulkan
+       swapchain behind its surface) */
+    if (rhi) {
+      QTimer::singleShot(0, qApp, &QCoreApplication::quit);
+      QApplication::exec();
+    }
+    return status;
+  }
   if (std::strcmp(mode, "--time") == 0)
     return test_time(argc > 2 ? std::atoi(argv[2]) : 200000);
   const int n = argc > 2 ? std::atoi(argv[2]) : 20000;

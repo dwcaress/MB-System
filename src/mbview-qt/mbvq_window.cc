@@ -301,7 +301,9 @@ void MapWidget::refresh_modes() {
 }
 
 void MapWidget::delete_map_view() {
-  /* the OpenGL views go now: the map view and the profile window */
+  /* the drawing views go now, the map view and the profile window (the
+     OpenGL views with their contexts; a QRhi view lets go of its GPU buffers
+     as it is deleted) */
   delete profile_;
   profile_ = nullptr;
   delete map_view_;

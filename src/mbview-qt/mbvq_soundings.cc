@@ -29,6 +29,7 @@
 #include <QApplication>
 #include <QButtonGroup>
 #include <QCloseEvent>
+#include <QDoubleSpinBox>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -39,6 +40,7 @@
 #include <QSignalBlocker>
 #include <QSlider>
 #include <QVBoxLayout>
+#include <cmath>
 #include <vector>
 
 #include "mbv_ui.h"
@@ -199,6 +201,33 @@ SoundingsWidget::SoundingsWidget(QWidget *parent) : QWidget(parent), title_(tr("
     connect(edit_[mode], &QRadioButton::clicked, this, [mode] { mbvq_c_soundings_edit_mode(mode); });
   }
   edit_row->addStretch();
+  /* the size of the soundings' points under QRhi, which draws them that many
+     logical pixels big times the screen's pixel ratio (the other backends
+     draw the core's 3 pixels); for the whole program, not saved */
+  if (backend() == Backend::Rhi) {
+    auto *point_size = new QDoubleSpinBox;
+    point_size->setRange(0.5, 8.0);
+    point_size->setSingleStep(0.5);
+    point_size->setDecimals(1);
+    point_size->setSuffix(tr(" px"));
+    point_size->setValue(soundings_point_size());
+    point_size->setToolTip(tr("logical pixels, times the screen's pixel ratio"));
+    /* a typed value counts once, on Enter or when the box loses the focus,
+       not at every key; the arrows and the wheel set it at once */
+    point_size->setKeyboardTracking(false);
+    auto *point_label = new QLabel(tr("Point size"));
+    point_label->setBuddy(point_size);
+    connect(point_size, &QDoubleSpinBox::valueChanged, this, [point_size](double value) {
+      /* in steps of 0.5, also when typed */
+      const double step = std::round(2.0 * value) / 2.0;
+      if (step != value)
+        point_size->setValue(step);
+      else
+        set_soundings_point_size(value);
+    });
+    edit_row->addWidget(point_label);
+    edit_row->addWidget(point_size);
+  }
   auto *reset = new QPushButton(tr("Reset View"));
   connect(reset, &QPushButton::clicked, this, [] { mbvq_c_soundings_resetview(); });
   edit_row->addWidget(reset);
@@ -333,10 +362,43 @@ void SoundingsWidget::set_mousemode(const QString &text) {
 }
 
 void SoundingsWidget::set_status(const QString &text, bool sliders) {
-  status_->setText(text);
-  emit statusMessage(text);
-  /* as in Motif, the sliders give way to the sounding information */
-  sliders_->setVisible(sliders);
+  /* While a QRhi view fills its batch, a slot of the program that processed
+     events could draw another view in the middle of the fill, and a label
+     that changed repaints in a window frame of its own between two frames
+     of the view: the status, the signal and the sliders take the fill's last
+     values once, after the fill (one queued call; the label only if its
+     text differs), as MapWidget::set_status does. A status set outside a
+     fill before the queued call ran wins: the call sends no text of the
+     fill after it. The OpenGL backend sets everything at once, as before. */
+  status_due_ = text;
+  sliders_due_ = sliders;
+  if (fill_active()) {
+    status_signal_due_ = true;
+    if (!status_queued_) {
+      status_queued_ = true;
+      QMetaObject::invokeMethod(
+          this,
+          [this] {
+            status_queued_ = false;
+            if (status_->text() != status_due_)
+              status_->setText(status_due_);
+            sliders_->setVisible(sliders_due_);
+            if (status_signal_due_) {
+              status_signal_due_ = false;
+              const QString last = status_due_;
+              emit statusMessage(last);
+            }
+          },
+          Qt::QueuedConnection);
+    }
+  }
+  else {
+    status_signal_due_ = false;
+    status_->setText(text);
+    emit statusMessage(text);
+    /* as in Motif, the sliders give way to the sounding information */
+    sliders_->setVisible(sliders);
+  }
 }
 
 void SoundingsWidget::set_view_cursor(int cursor) {
@@ -422,9 +484,15 @@ void mbvq_qt_soundings_hide(void) {
   emit mbvq::the_widget->closed();
 }
 
+void mbvq_qt_soundings_released(void) {
+  if (mbvq::the_widget != nullptr && mbvq::the_widget->view() != nullptr)
+    mbvq::release_soundings_view(mbvq::the_widget->view());
+}
+
 void mbvq_qt_soundings_destroy(void) {
-  /* possibly inside an event of the window: hide it now, free its OpenGL
-     view now, delete the window at a safe point */
+  /* possibly inside an event of the window: hide it now, free its drawing
+     view now (an OpenGL view with its context; a QRhi view lets go of its
+     GPU buffers as it is deleted), delete the window at a safe point */
   mbvq::SoundingsWidget *widget = mbvq::the_widget;
   if (widget == nullptr)
     return;

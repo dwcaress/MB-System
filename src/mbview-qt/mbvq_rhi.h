@@ -27,8 +27,9 @@
  * headers (built where MBVQ_HAVE_RHI is defined):
  * - RenderOptions: the renderer's switches. They are set only here, never
  *   read from the environment.
- * - OffscreenRenderer: a map drawn with a QRhi of its own into an image,
- *   without a window, by the frame driver and the renderer of the map view.
+ * - OffscreenRenderer: a map, its profile or the 3D soundings drawn with a
+ *   QRhi of its own into an image, without a window, by the frame driver and
+ *   the renderer of the view.
  * - view_state(): what a QRhi view of the backend shows of its state, and
  *   view_stats(): what its renderer did, with the times of its last frame.
  * - set_cache_budget(): the GPU memory budget of the terrain levels of every
@@ -70,6 +71,10 @@ struct RenderOptions {
      lets go of its pipelines, bindings and ring and makes them again in its
      next frame */
   bool fail_slot_restore = false;
+  /* the 3D soundings' positions, colours and profile pairs cannot be read,
+     as if the core no longer had the soundings the frame counted: the frame
+     fails as when a buffer cannot be made */
+  bool fail_reads = false;
   /* the terrain colours as the core's floats (16 bytes per node) instead of
      bytes (4), for comparisons with OpenGL without the 8-bit rounding of the
      node colours; taken when the renderer is made */
@@ -114,6 +119,17 @@ struct RenderOptions {
      core's plot alone, without the 3D pick-mark sizing), twice that for a
      frame that fills twice on the spheroid */
   double fill_fallback_ms = 12.0;
+  /* points (the 3D soundings, a batch's POINTS) drawn as quads, as where the
+     API has no point size in the vertex shader (Direct3D); taken when the
+     renderer or its pipelines are made */
+  bool point_quads = false;
+  /* the point-size control of the 3D soundings view in logical pixels (0.5
+     to 8; 3 draws the core's points as they are); a view takes the
+     program's (set_soundings_point_size) */
+  double soundings_point_size = 3.0;
+  /* soundings per chunk of the soundings' GPU buffers (2^21, the views'),
+     smaller in tests, so that small sets take several chunks and frames */
+  int soundings_chunk = 1 << 21;
 };
 
 /* what the renderer did; totals since the renderer was made, except where
@@ -217,7 +233,8 @@ struct RenderStats {
   double gpu_ms = -1.0;
   /* The map's batch (mbv_draw_batch.h) in the last frame: the device pixel
      ratio its sizes were scaled with; its draws (lines thin and wide,
-     points, triangles, marker runs, the terrain and contours), uniform slots
+     points, triangles, marker runs, the terrain and contours; of them the
+     draws of points as quads), uniform slots
      and markers; the contour level drawn (MBVQ_REZ_*, 0 none) and its
      vertices. Totals: batch uploads and their bytes, those above 64 MB (one
      batch is never split over frames), contour uploads and bytes, marker
@@ -229,6 +246,7 @@ struct RenderStats {
   int thin_draws = 0;
   int wide_draws = 0;
   int marker_draws = 0;
+  int point_quad_draws = 0;
   int uniform_slots = 0;
   int markers = 0;
   int contour_rez = 0;
@@ -269,6 +287,33 @@ struct RenderStats {
      ring, the slots beyond the commands as zeros, so that Qt keeps one
      pending write of it per frame slot (0 when the frame failed) */
   size_t ring_bytes = 0;
+  /* writes of the stipple values alone, for a frame that draws the batch it
+     has with a new camera */
+  int stipple_uploads = 0;
+  /* The 3D soundings view (the profile view has only its batch). Of the last
+     frame: the soundings and chunks of the allocation, the soundings whose
+     chunks are drawn (in the first upload a prefix) and those drawn as
+     points or quads, whether points are quads and the profile lines wide,
+     the profile lines' indices (thin) and instances (wide) drawn, the GPU
+     bytes of the soundings' buffers, every copy counted. Totals: the
+     allocations, the reads of the core's positions, colours and pairs, and
+     per stream (positions, colours, index lists, colours per pair) the
+     chunks written and their bytes; the swaps of a double-buffered stream. */
+  int soundings = 0;
+  int sounding_chunks = 0;
+  int soundings_shown = 0;
+  int soundings_drawn = 0;
+  bool point_quads = false;
+  bool profile_wide = false;
+  int profile_indices = 0;
+  int profile_instances = 0;
+  size_t sounding_held_bytes = 0;
+  bool soundings_waiting = false; /* writes of the soundings wait for later frames */
+  int sounding_allocations = 0;
+  int sounding_reads[3] = {};
+  int sounding_writes[4] = {};
+  size_t sounding_bytes[4] = {};
+  int sounding_swaps = 0;
 };
 
 class OffscreenRenderer {
@@ -298,12 +343,26 @@ class OffscreenRenderer {
      frame could not be made. */
   bool render_batch(const struct mbv_draw_batch *batch, const double camera[16], const double projection[16],
                     int width, int height, const RenderOptions &options, QImage *image);
+  /* Render a frame of the profile view of an instance, as the view draws
+     it (its batch, filled in every frame, with the profile's camera). False
+     if the renderer or the frame could not be made. */
+  bool render_profile(size_t instance, int width, int height, const RenderOptions &options, QImage *image);
+  /* Render frames of the 3D soundings view as the view draws them, until
+     every write is done or max_frames were rendered; image gets the last.
+     A call after another continues the writes left (the first frame of a
+     call fills, the others only continue). False if the renderer or a frame
+     could not be made. */
+  bool render_soundings(int width, int height, const RenderOptions &options, QImage *image, int max_frames = 16);
+  /* the batch of the last soundings frame as the core recorded it (null
+     before the first) */
+  const struct mbv_draw_batch *soundings_batch() const;
   /* A frame of the QRhi that the renderer does not draw, as a frame of a
      window in which another widget repainted and the map did not (the QRhi
      moves to its next frame slot). False without a QRhi, or before a frame
      made the render target. */
   bool empty_frame();
-  /* frames rendered by the last render_map() */
+  /* frames rendered by the last render_map(), render_batch(),
+     render_profile() or render_soundings() */
   int last_frames() const;
 
   const RenderStats &stats() const;
@@ -323,7 +382,7 @@ class OffscreenRenderer {
 struct ViewState {
   bool rhi_view = false;      /* a view of the QRhi backend */
   bool failure_shown = false; /* its label says it cannot be drawn */
-  bool drawn = false;         /* it has drawn a frame, so input reaches the core */
+  bool drawn = false;         /* it has drawn a frame, so input reaches the core (map, soundings) */
   int buttons = 0;            /* map mouse buttons down: bit 0 left, 1 middle, 2 right */
   int failures = 0;           /* failures it handled (renderFailed, a failed create()) */
   bool renderer = false;      /* it holds a renderer */
@@ -335,14 +394,18 @@ struct ViewState {
   bool fill_due = false;
   int frame_requests = 0;
   bool levels_kept = false;
+  /* the largest texture of the QRhi the view drew with last (0 before its
+     first frame, or after that QRhi died), which caps the profile view */
+  int texture_size_max = 0;
 };
 ViewState view_state(QWidget *view);
 /* for tests: mark whether a QRhi map view's last fill fell back
    (rhi::MapFrame), as a fill during a drag in another map view would leave
    it; nothing for any other widget */
 void set_fell_back(QWidget *view, bool fell_back);
-/* the statistics of the renderer of a QRhi map view, with the times of its
-   last frame (empty for any other view, or while it has no renderer) */
+/* the statistics of the renderer of a QRhi view (map, profile or 3D
+   soundings), with the times of its last frame (empty for any other view, or
+   while it has no renderer) */
 RenderStats view_stats(QWidget *view);
 /* how often the failure line was written to stderr: once per process */
 int failure_messages();

@@ -30,8 +30,8 @@
  *                                 waits for the full resolution drawing and checks
  *                                 picks made with mouse events
  *   mbview_qt_test --rhi [--3d]   the same with the QRhi backend, where it is built
- *                                 (77, skipped, elsewhere); its profile view does
- *                                 not draw yet
+ *                                 (77, skipped, elsewhere), its profile view a
+ *                                 QRhi view too
  *   mbview_qt_test --show [--3d] [--edit] [grid]   opens a window to use by hand
  *                                 (--edit: sites, routes and polylines enabled); with
  *                                 MBVIEW_QT_TEST_SNAPSHOT=file it saves the first
@@ -895,9 +895,27 @@ int test_drawing(bool mode3d, bool rhi) {
           "the profile view draws (" + std::to_string(data->prwidth) + " x " + std::to_string(data->prheight) + " pixels)");
   }
   else {
-    /* the QRhi profile view comes later: a null view, which passes its size on */
-    check(gl_window->widget()->profile()->isVisible() && data->prwidth > 0 && data->prheight > 0,
-          "the profile window opens (a null view under QRhi for now; " + std::to_string(data->prwidth) + " x " +
+    /* the QRhi profile view: a QRhiWidget, whose grabFramebuffer() draws a
+       frame of the profile; more dark pixels than the profile's frame alone
+       (2 logical px wide) could have around the whole picture */
+    QWidget *profile_view = gl_window->widget()->profile()->view();
+    bool rhi_view = false;
+#ifdef MBVQ_HAVE_RHI
+    rhi_view = qobject_cast<QRhiWidget *>(profile_view) != nullptr;
+#endif
+    const QImage picture = grab(profile_view);
+    int dark = 0;
+    for (int y = 0; y < picture.height(); y++)
+      for (int x = 0; x < picture.width(); x++)
+        dark += qGray(picture.pixel(x, y)) < 128;
+    const int frame_px = std::max(1, static_cast<int>(std::floor(2.0 * profile_view->devicePixelRatioF() + 0.5)));
+    const int frame_bound = 2 * frame_px * (picture.width() + picture.height());
+    check(gl_window->widget()->profile()->isVisible() && rhi_view && dark > frame_bound && data->prwidth > 0 &&
+              data->prheight > 0,
+          "the profile window opens, its view a QRhi view that draws the profile (" + std::to_string(dark) +
+              " dark pixels of " + std::to_string(picture.width()) + " x " + std::to_string(picture.height()) +
+              ", more than the " + std::to_string(frame_bound) + " of a " + std::to_string(frame_px) +
+              " px frame around the picture; the core's drawing " + std::to_string(data->prwidth) + " x " +
               std::to_string(data->prheight) + " pixels)");
   }
 

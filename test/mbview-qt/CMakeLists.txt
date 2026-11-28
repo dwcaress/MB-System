@@ -43,7 +43,8 @@ add_test(NAME mbview_qt_test COMMAND mbview_qt_test --null)
 set_tests_properties(mbview_qt_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 
 # The 3D soundings window: ctest runs the checks without drawing;
-# --gl, --time and --show need a display.
+# --gl, --rhi (the QRhi backend, where it is built), --time and --show need a
+# display.
 add_executable(mbview_qt_soundings_test mbview_qt_soundings_test.cc)
 set_target_properties(mbview_qt_soundings_test PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 target_link_libraries(mbview_qt_soundings_test PRIVATE mbview-qt mbio Qt6::Widgets Qt6::OpenGLWidgets ${MB_SYSLIBS})
@@ -74,6 +75,11 @@ if(MBVQ_RHI)
   add_test(NAME mbview_qt_rhi_null COMMAND mbview_qt_rhi_test --render-null)
   set_tests_properties(mbview_qt_rhi_model mbview_qt_rhi_widgets mbview_qt_rhi_null
                        PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 60)
+  # the widgets again at a pixel ratio of 2, where the profile view's cap is
+  # half as wide
+  add_test(NAME mbview_qt_rhi_widgets_ratio2 COMMAND mbview_qt_rhi_test --widgets)
+  set_tests_properties(mbview_qt_rhi_widgets_ratio2 PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_SCALE_FACTOR=2"
+                                                               TIMEOUT 60)
   if(APPLE)
     add_test(NAME mbview_qt_rhi_metal COMMAND mbview_qt_rhi_test --render-metal)
     set_tests_properties(mbview_qt_rhi_metal PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 60

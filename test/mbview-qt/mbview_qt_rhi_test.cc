@@ -42,18 +42,39 @@
  *        picture, incremental against from scratch, determinism, float
  *        colours; returns 77 (skipped) where no Metal QRhi can be made;
  *        --save file keeps the first picture
+ *   The model, widgets, Null and Metal modes also check the profile and 3D
+ *   soundings views (6d): the soundings plan, the frame drivers, the views
+ *   without drawing, the soundings' uploads, the failed frames of both
+ *   views' renderers and the pixels of both views.
  *   mbview_qt_rhi_test --display [--3d] [--save file] [grid]   a map window
  *        drawn with QRhi (needs a display, not in ctest): waits for the first
  *        frames, grabs the view, picks with the mouse, shows and hides the
- *        failure label, closes the window
- *   mbview_qt_rhi_test --quit close|quit|exit|float [grid]   a program with a
- *        QRhi map and its profile window open ends (needs a display, not in
- *        ctest): the map window closed as by its close button, then the event
- *        loop left (the closed window is deleted at aboutToQuit); the event
- *        loop left with the map open (QApplication::quit(), as Cmd-Q); the
- *        window closed and exit() called inside the event loop, as the macOS
- *        Quit menu does; or the event loop left with the map in a floating
- *        dock of a main window, which is deleted then (QTBUG-151834)
+ *        failure label, closes the window; with the profile of a two-point
+ *        pick (its frame's width at the view's ratio, the width cap, also
+ *        for a view wider than it at a frame, its picture against the
+ *        offscreen renderer's) and the 3D soundings in a dock of a main
+ *        window (point and line sizes at the view's ratio, the picture
+ *        against the offscreen renderer's, the point-size control, an edit
+ *        by a click, Dismiss with the memory it frees and the next soundings,
+ *        Dismiss while the dock is closed and while a host docks the
+ *        floating dock again, floated, docked again, ended while floating),
+ *        the soundings' positions read once when the standalone soundings
+ *        window opens and when it opens again after Dismiss, then a million
+ *        soundings in that window ended by mb3dsoundings_end with the
+ *        memory it frees, and a second map of the grid in a window of its
+ *        own closed by mbview_destroy with the memory its view frees
+ *   mbview_qt_rhi_test --quit close|quit|exit|float [--maps-only] [grid]
+ *        a program with a QRhi map, its profile window and the 3D soundings
+ *        in a floating dock of its main window open ends (needs a display,
+ *        not in ctest): the map window closed as by its close button, then
+ *        the event loop left (the closed window is deleted at aboutToQuit);
+ *        the event loop left with the map open (QApplication::quit(), as
+ *        Cmd-Q); the window closed and exit() called inside the event loop,
+ *        as the macOS Quit menu does; or the event loop left with the map in
+ *        a floating dock of the main window too; the main window is deleted
+ *        last (QTBUG-151834). --maps-only: the map and its profile window
+ *        alone, without soundings or a main window (except for "float"), as
+ *        mbgrdviz-qt has them
  *   mbview_qt_rhi_test --bench [--3d] [--frames n] [--size WxH] [--nav list] [grid]
  *        frame times of a map window (needs a display, not in ctest; a
  *        measurement, not a test): the time to the first complete frame, then
@@ -66,6 +87,11 @@
  *        memory. MB_RENDERER=legacy-gl measures the OpenGL
  *        backend with the same script; WxH is the window size given to
  *        mbview (640x480)
+ *   mbview_qt_rhi_test --bench-soundings n [--frames n]   frame times of the
+ *        3D soundings view with n synthetic soundings (needs a display, not
+ *        in ctest; a measurement): a rotation, an erase drag, an exaggeration
+ *        drag, bias changes and a rotation with profiles shown, n steps each
+ *        (60); also for the OpenGL backend with MB_RENDERER=legacy-gl
  *
  * The headless modes run on the offscreen platform unless QT_QPA_PLATFORM
  * names another; the modes with a window draw with the QRhi API that
@@ -77,6 +103,7 @@
 
 #include <QApplication>
 #include <QDockWidget>
+#include <QDoubleSpinBox>
 #include <QElapsedTimer>
 #include <QEventLoop>
 #include <QImage>
@@ -84,8 +111,11 @@
 #include <QMainWindow>
 #include <QMetaMethod>
 #include <QMouseEvent>
+#include <QPointer>
 #include <QRhiWidget>
 #include <QScreen>
+#include <QScrollArea>
+#include <QSlider>
 #include <QStatusBar>
 #include <QTimer>
 #include <QWindow>
@@ -124,6 +154,9 @@ extern "C" {
 #include "MB3DRouteList.h"
 #include "MB3DNavList.h"
 #include "mbviewprivate.h"
+/* the 3D soundings window's state: its camera, view switches and grab */
+#include "Mb3dsdg.h"
+#include "mb3dsoundingsprivate.h"
 }
 #include "mbv_draw_batch.h"
 #include "mbv_input.h"
@@ -137,6 +170,7 @@ extern "C" {
 #include "mbvq_rhi_glu.h"
 #include "mbvq_rhi_model.h"
 #include "mbview_qt_rhi_glu_fixtures.h"
+#include "mbvq_soundings.h"
 #include "mbvq_window.h"
 
 namespace {
@@ -4262,6 +4296,1073 @@ void null_meshes() {
   }
 }
 
+/*--------------------------------------------------------------------*/
+/* 6d: the profile and 3D soundings views */
+
+/* Synthetic soundings, as mbview_qt_soundings_test makes them: npings pings
+   along y of nbeams beams across x, 2 m apart, on a sloping, rippled
+   seafloor; every flag_every-th sounding flagged by hand (0: none). The
+   calling program's side, as mbeditviz. */
+std::vector<struct mb3dsoundings_sounding_struct> sdg_storage;
+struct mb3dsoundings_struct sdg_data;
+int sdg_edits = 0;
+/* the program's dismiss notification: where a test asks for it, it releases
+   the soundings there, as mbeditviz does (the array stays in sdg_storage
+   until the test frees it) */
+bool sdg_release_on_dismiss = false;
+void sdg_dismiss() {
+  if (sdg_release_on_dismiss) {
+    sdg_data.num_soundings = 0;
+    sdg_data.soundings = nullptr;
+  }
+}
+void sdg_edit(int, int, int, char, int flush) {
+  if (flush != MB3DSDG_EDIT_FLUSHPREVIOUS)
+    sdg_edits++;
+}
+
+void make_sdg(int npings, int nbeams, int flag_every) {
+  sdg_storage.assign(static_cast<size_t>(npings) * nbeams, {});
+  const double dx = 2.0, dy = 2.0;
+  const double xhalf = 0.5 * dx * (nbeams - 1), yhalf = 0.5 * dy * (npings - 1);
+  int flagged = 0;
+  for (int iping = 0; iping < npings; iping++)
+    for (int ibeam = 0; ibeam < nbeams; ibeam++) {
+      const int k = iping * nbeams + ibeam;
+      struct mb3dsoundings_sounding_struct &s = sdg_storage[static_cast<size_t>(k)];
+      s.ifile = 0;
+      s.iping = iping;
+      s.iprofile = iping;
+      s.ibeam = ibeam;
+      s.beamcolor = MBV_COLOR_BLACK;
+      s.x = -xhalf + dx * ibeam;
+      s.y = -yhalf + dy * iping;
+      s.z = -1000.0 + 0.05 * s.x + 3.0 * std::sin(s.y / 15.0);
+      s.a = 50.0 + 10.0 * std::cos(s.x / 20.0);
+      const bool flag = flag_every > 0 && k % flag_every == 0;
+      s.beamflag = flag ? static_cast<char>(MB_FLAG_FLAG | MB_FLAG_MANUAL) : static_cast<char>(MB_FLAG_NONE);
+      s.beamflagorg = s.beamflag;
+      flagged += flag ? 1 : 0;
+    }
+  std::memset(&sdg_data, 0, sizeof(sdg_data));
+  sdg_data.xmin = -xhalf;
+  sdg_data.xmax = xhalf;
+  sdg_data.ymin = -yhalf;
+  sdg_data.ymax = yhalf;
+  sdg_data.bearing = 90.0;
+  sdg_data.sinbearing = 1.0;
+  sdg_data.cosbearing = 0.0;
+  const double dxy = std::sqrt(4.0 * xhalf * xhalf + 4.0 * yhalf * yhalf);
+  sdg_data.scale = 2.0 / dxy;
+  sdg_data.zscale = sdg_data.scale;
+  sdg_data.num_soundings = static_cast<int>(sdg_storage.size());
+  sdg_data.num_soundings_alloc = sdg_data.num_soundings;
+  sdg_data.num_soundings_flagged = flagged;
+  sdg_data.num_soundings_unflagged = sdg_data.num_soundings - flagged;
+  sdg_data.soundings = sdg_storage.data();
+}
+
+/* hand the soundings to the view, as mbeditviz does: the soundings window
+   (with its QRhi view) is made the first time */
+bool open_sdg() {
+  static bool started = false;
+  int error = MB_ERROR_NO_ERROR;
+  if (!started) {
+    mb3dsoundings_startup(0, nullptr, nullptr, &error);
+    started = true;
+  }
+  mb3dsoundings_open(0, &sdg_data, &error);
+  mb3dsoundings_set_dismiss_notify(0, &sdg_dismiss, &error);
+  mb3dsoundings_set_edit_notify(0, &sdg_edit, &error);
+  return mbvq::soundings_widget() != nullptr;
+}
+
+/* the camera and what the view shows, as the soundings window sets them */
+void sdg_camera(float elevation, float azimuth, float size, float offx, float offy) {
+  mb3dsoundings.elevation = elevation;
+  mb3dsoundings.azimuth = azimuth;
+  mb3dsoundings.gl_size = size;
+  mb3dsoundings.gl_offset_x = offx;
+  mb3dsoundings.gl_offset_y = offy;
+}
+void sdg_view(int color, bool flagged, int profiles, bool box) {
+  mb3dsoundings.view_color = color;
+  mb3dsoundings.view_flagged = flagged;
+  mb3dsoundings.view_secondary = false;
+  mb3dsoundings.view_profiles = profiles;
+  mb3dsoundings.view_boundingbox = box;
+  mb3dsoundings.edit_mode = MBS_EDIT_TOGGLE;
+  mb3dsoundings.last_sounding_defined = false;
+  mb3dsoundings.button1down = false;
+  mb3dsoundings.grab_start_defined = false;
+  mb3dsoundings.grab_end_defined = false;
+  /* the colours changed (what the view switches raise) */
+  int error = MB_ERROR_NO_ERROR;
+  mb3dsoundings_colors_changed(0, &error);
+}
+
+/* the pairs of a soundings batch's LINES command, in their order: the first
+   sounding of each pair (found by its position) and whether it is red */
+struct BatchPair {
+  int first;
+  bool red;
+  bool found;
+};
+std::vector<BatchPair> batch_pairs(const struct mbv_draw_batch &batch, const std::vector<float> &xyz) {
+  std::vector<BatchPair> pairs;
+  for (int c = 0; c < batch.num_commands; c++) {
+    const struct mbv_draw_command &command = batch.commands[c];
+    if (command.kind != MBV_DRAW_PRIMITIVE || command.primitive != MBV_DRAW_LINES)
+      continue;
+    int at = 0;
+    for (int v = command.first; v + 1 < command.first + command.count; v += 2) {
+      const struct mbv_draw_vertex &a = batch.vertices[v];
+      const struct mbv_draw_vertex &b = batch.vertices[v + 1];
+      /* the soundings are in the order of the array: look from the last one */
+      BatchPair pair = {-1, a.r > 0.5f, false};
+      const size_t n = xyz.size() / 3;
+      for (size_t i = static_cast<size_t>(at); i + 1 < n; i++)
+        if (xyz[3 * i] == a.x && xyz[3 * i + 1] == a.y && xyz[3 * i + 2] == a.z && xyz[3 * i + 3] == b.x &&
+            xyz[3 * i + 4] == b.y && xyz[3 * i + 5] == b.z) {
+          pair.first = static_cast<int>(i);
+          pair.found = a.r == b.r && a.g == 0.0f && a.b == 0.0f && (a.r == 0.0f || a.r == 1.0f);
+          at = static_cast<int>(i) + 1;
+          break;
+        }
+      pairs.push_back(pair);
+    }
+  }
+  return pairs;
+}
+
+/* the pairs of the two lists of mbvq_c_soundings_profile_pairs merged in the
+   order of the array, as the batch's LINES command has them */
+std::vector<BatchPair> list_pairs(const std::vector<uint32_t> &black, const std::vector<uint32_t> &red) {
+  std::vector<BatchPair> pairs;
+  size_t b = 0, r = 0;
+  while (b + 1 < black.size() || r + 1 < red.size()) {
+    const bool take_red = b + 1 >= black.size() || (r + 1 < red.size() && red[r] < black[b]);
+    const std::vector<uint32_t> &list = take_red ? red : black;
+    size_t &k = take_red ? r : b;
+    pairs.push_back({static_cast<int>(list[k]), take_red, list[k + 1] == list[k] + 1});
+    k += 2;
+  }
+  return pairs;
+}
+
+bool same_pairs(const std::vector<BatchPair> &a, const std::vector<BatchPair> &b) {
+  if (a.size() != b.size())
+    return false;
+  for (size_t k = 0; k < a.size(); k++)
+    if (a[k].first != b[k].first || a[k].red != b[k].red || !a[k].found || !b[k].found)
+      return false;
+  return true;
+}
+
+/* the soundings plan on its own (no QRhi): layout, the first upload in
+   chunk order within the budget, the prefix, double buffering, streams
+   written whole, busy streams, the pair across chunks */
+void model_soundings_plan() {
+  rhi::SoundingsPlan plan;
+  plan.reset(10, 4, 1000);
+  check(plan.chunks() == 3 && plan.points(0) == 4 && plan.points(2) == 2 && plan.positions(0) == 5 &&
+            plan.positions(1) == 5 && plan.positions(2) == 2 && plan.pairs(0) == 4 && plan.pairs(1) == 4 &&
+            plan.pairs(2) == 1 && plan.bytes(rhi::SoundingsPlan::kPositions, 0) == 60 &&
+            plan.bytes(rhi::SoundingsPlan::kColours, 2) == 8 && plan.bytes(rhi::SoundingsPlan::kPairColours, 2) == 4,
+        "6d: the soundings in chunks: 10 soundings in chunks of 4 hold 4, 4, 2 points, 5, 5, 2 positions (one into "
+        "the next chunk) and 4, 4, 1 pairs");
+
+  /* the first upload: chunk by chunk, positions and colours of a chunk
+     before the next, within the budget (76 bytes of chunk 0 in 80) */
+  plan.reset(10, 4, 80);
+  plan.start(rhi::SoundingsPlan::kPositions);
+  plan.start(rhi::SoundingsPlan::kColours);
+  const bool second_set = plan.double_buffered(rhi::SoundingsPlan::kPositions) &&
+                          !plan.double_buffered(rhi::SoundingsPlan::kColours);
+  std::vector<int> shown;
+  std::string order;
+  bool whole_frames = true;
+  for (int f = 0; f < 6 && plan.waiting(); f++) {
+    size_t bytes = 0;
+    const std::vector<rhi::SoundingsPlan::Upload> uploads = plan.frame();
+    for (const rhi::SoundingsPlan::Upload &upload : uploads) {
+      order += (upload.stream == rhi::SoundingsPlan::kPositions ? "P" : "C") + std::to_string(upload.chunk) + " ";
+      bytes += upload.bytes;
+      whole_frames = whole_frames && upload.set == 0;
+    }
+    order += "| ";
+    whole_frames = whole_frames && (bytes <= 80 || uploads.size() == 1);
+    shown.push_back(plan.soundings_drawn());
+  }
+  check(second_set && whole_frames && order == "P0 C0 | P1 C1 | P2 C2 | " && shown == std::vector<int>({4, 8, 10}) &&
+            plan.last_pair_out(0) == false,
+        "6d: the first upload writes chunk by chunk within the budget (" + order + "), drawing its prefix " +
+            list(shown) + "; positions above the budget get a second set, colours below it do not");
+
+  /* the prefix leaves out the pair that reaches into a chunk not drawn */
+  plan.reset(10, 4, 76);
+  plan.start(rhi::SoundingsPlan::kPositions);
+  plan.start(rhi::SoundingsPlan::kColours);
+  plan.frame();
+  const bool out0 = plan.drawn(0) && !plan.drawn(1) && plan.last_pair_out(0);
+  plan.frame();
+  plan.frame();
+  check(out0 && !plan.last_pair_out(0) && !plan.last_pair_out(2),
+        "6d: during the first upload a drawn chunk's pair into the next chunk is left out until that chunk is drawn");
+
+  /* later: positions above the budget go into the second set over frames,
+     while the first set is drawn; a start while busy changes nothing; then
+     the sets swap */
+  const int front = plan.front(rhi::SoundingsPlan::kPositions);
+  plan.start(rhi::SoundingsPlan::kPositions);
+  std::vector<rhi::SoundingsPlan::Upload> uploads = plan.frame();
+  const bool back = uploads.size() == 1 && uploads[0].set == 1 - front && plan.soundings_drawn() == 10 &&
+                    plan.front(rhi::SoundingsPlan::kPositions) == front && plan.busy(rhi::SoundingsPlan::kPositions);
+  const int writes = plan.writes(rhi::SoundingsPlan::kPositions);
+  plan.start(rhi::SoundingsPlan::kPositions);
+  uploads = plan.frame();
+  const bool continued = uploads.size() == 1 && uploads[0].chunk == 1 && plan.swaps() == 0;
+  uploads = plan.frame();
+  check(back && continued && uploads.size() == 1 && uploads[0].chunk == 2 && plan.swaps() == 1 &&
+            plan.front(rhi::SoundingsPlan::kPositions) == 1 - front && !plan.busy(rhi::SoundingsPlan::kPositions) &&
+            plan.writes(rhi::SoundingsPlan::kPositions) == writes + 2 && plan.soundings_drawn() == 10,
+        "6d: positions above the budget are written into the second set over frames while the first is drawn; a "
+        "start while the upload runs does not restart it; then the sets swap");
+
+  /* colours below the budget, after the first upload: whole in one frame */
+  plan.start(rhi::SoundingsPlan::kColours);
+  uploads = plan.frame();
+  check(uploads.size() == 3 && uploads[0].set == plan.front(rhi::SoundingsPlan::kColours) && !plan.waiting(),
+        "6d: a stream below the budget is written whole within one frame, into the drawn set");
+
+  /* the index lists: chunk by chunk, whatever their size (an empty chunk
+     costs nothing) */
+  plan.set_list_bytes({40, 200, 0});
+  plan.start(rhi::SoundingsPlan::kLists);
+  uploads = plan.frame();
+  const bool first_lists = uploads.size() == 1 && uploads[0].chunk == 0 && !plan.held(rhi::SoundingsPlan::kLists, 1);
+  uploads = plan.frame();
+  check(first_lists && uploads.size() == 2 && uploads[0].bytes == 200 && uploads[1].bytes == 0 && !plan.waiting() &&
+            plan.held(rhi::SoundingsPlan::kLists, 2) && plan.lines(rhi::SoundingsPlan::kLists, 1),
+        "6d: the index lists go chunk by chunk, a chunk above the budget alone in its frame (an empty one beside it)");
+}
+
+/* the frame driver of the 3D soundings view on the core: the decorations,
+   the pairs of the profile lines against the batch's LINES command in the
+   three profile modes, the lists made local to chunks and the colours per
+   pair, the camera in every frame, and nothing read without soundings */
+void model_soundings_frame() {
+  make_sdg(30, 40, 7);
+  check(open_sdg(), "6d: the soundings handed over (a soundings window with a QRhi view)");
+  QWidget *view = mbvq::soundings_widget() != nullptr ? mbvq::soundings_widget()->view() : nullptr;
+  check(view != nullptr && mbvq::view_state(view).rhi_view, "6d: the soundings view is a QRhi view");
+  sdg_camera(35.0f, 125.0f, 1.3f, 0.05f, -0.05f);
+
+  rhi::SoundingsFrame frame;
+  bool modes = true;
+  std::string counts;
+  for (int mode : {MBS_VIEW_PROFILES_NONE, MBS_VIEW_PROFILES_UNFLAGGED, MBS_VIEW_PROFILES_ALL}) {
+    sdg_view(MBS_VIEW_COLOR_FLAG, true, mode, true);
+    rhi::SoundingsInput input;
+    const bool filled = frame.begin(false, 400, 300, &input);
+    std::vector<float> xyz;
+    std::vector<uint32_t> black, red;
+    const bool read = frame.positions(input.count, &xyz) && frame.pairs(input.count, &black, &red);
+    const std::vector<BatchPair> from_batch = batch_pairs(frame.batch(), xyz);
+    const std::vector<BatchPair> from_lists = list_pairs(black, red);
+    /* the decorations: the same commands, the profile lines a slot without vertices */
+    const struct mbv_draw_batch &d = frame.decorations();
+    int profile_slots = 0, lines = 0;
+    for (int c = 0; c < d.num_commands; c++) {
+      profile_slots += d.commands[c].kind == MBV_DRAW_SLOT && d.commands[c].primitive == rhi::kSlotProfileLines &&
+               d.commands[c].count == 0;
+      lines += d.commands[c].kind == MBV_DRAW_PRIMITIVE && d.commands[c].primitive == MBV_DRAW_LINES;
+    }
+    const int vertices = frame.batch().num_vertices - d.num_vertices;
+    modes = modes && filled && read && input.profiles == mode && same_pairs(from_batch, from_lists) &&
+            d.num_commands == frame.batch().num_commands && lines == 0 &&
+            profile_slots == (mode == MBS_VIEW_PROFILES_NONE ? 0 : 1) &&
+            vertices == 2 * static_cast<int>(from_batch.size()) &&
+            (mode == MBS_VIEW_PROFILES_NONE) == from_lists.empty() &&
+            (mode != MBS_VIEW_PROFILES_UNFLAGGED || red.empty()) && (mode != MBS_VIEW_PROFILES_ALL || !red.empty());
+    counts += std::to_string(black.size() / 2) + "+" + std::to_string(red.size() / 2) + " ";
+  }
+  check(modes, "6d: the pairs of the profile lines (black+red: " + counts +
+                   "in the None, Good and All modes) equal the batch's LINES command, pairs and colours, with the "
+                   "mode read from mbvq_c_soundings_state(); the decorations leave out its vertices");
+
+  /* the lists made local to chunks of 7 and of 11 soundings, and the colours
+     per pair (every 7th sounding is flagged: with chunks of 7 every pair
+     across chunks is red, with chunks of 11 black ones cross too) */
+  {
+    rhi::SoundingsInput input;
+    frame.begin(false, 400, 300, &input);
+    bool local = true, coloured = true, inner = true;
+    int across[2] = {0, 0};
+    for (const int size : {7, 11}) {
+      std::vector<uint32_t> black, red;
+      frame.pairs(input.count, &black, &red);
+      const std::vector<uint32_t> black_global = black, red_global = red;
+      rhi::SoundingsPlan plan;
+      plan.reset(input.count, size);
+      std::vector<size_t> black_range, red_range;
+      rhi::split_pairs(plan, &black, &black_range);
+      rhi::split_pairs(plan, &red, &red_range);
+      std::vector<unsigned char> colours;
+      rhi::pair_colours(plan, black, black_range, red, red_range, &colours);
+      local = local && black_range.size() == static_cast<size_t>(plan.chunks()) + 1 &&
+              black_range.back() == black.size();
+      for (int c = 0; c < plan.chunks() && local; c++)
+        for (const auto &[list, global, range] :
+             {std::tie(black, black_global, black_range), std::tie(red, red_global, red_range)})
+          for (size_t k = range[static_cast<size_t>(c)]; k < range[static_cast<size_t>(c) + 1]; k++)
+            local = local && list[k] + static_cast<uint32_t>(plan.first(c)) == global[k] &&
+                    list[k] <= static_cast<uint32_t>(plan.points(c)) &&
+                    (k % 2 == 1 || global[k] / static_cast<uint32_t>(size) == static_cast<uint32_t>(c));
+      /* each pair (i, i + 1): black, red or none, as the lists say */
+      coloured = coloured && colours.size() == 4 * static_cast<size_t>(input.count - 1);
+      std::vector<int> kind(static_cast<size_t>(std::max(0, input.count - 1)), 0);
+      for (size_t k = 0; k + 1 < black_global.size(); k += 2)
+        kind[black_global[k]] = 1;
+      for (size_t k = 0; k + 1 < red_global.size(); k += 2)
+        kind[red_global[k]] = 2;
+      for (size_t i = 0; i < kind.size() && coloured; i++) {
+        const unsigned char *rgba = &colours[4 * i];
+        coloured = kind[i] == 0   ? rgba[3] == 0
+                   : kind[i] == 1 ? rgba[0] == 0 && rgba[3] == 255
+                                  : rgba[0] == 255 && rgba[1] == 0 && rgba[3] == 255;
+      }
+      /* a chunk's pair into the next chunk is the last of its list, left out
+         by the inner count, black and red */
+      for (int c = 0; c + 1 < plan.chunks(); c++) {
+        const int last = kind[static_cast<size_t>(plan.first(c) + plan.points(c) - 1)];
+        const auto leaves_out = [&](const std::vector<uint32_t> &list, const std::vector<size_t> &range, int colour) {
+          const size_t n = rhi::pair_entries(range, c);
+          const size_t in = rhi::inner_pair_entries(plan, list, range, c);
+          across[colour - 1] += last == colour;
+          return in == (last == colour ? n - 2 : n);
+        };
+        const bool black_ok = leaves_out(black, black_range, 1);
+        const bool red_ok = leaves_out(red, red_range, 2);
+        inner = inner && black_ok && red_ok;
+      }
+    }
+    check(local && coloured && inner && across[0] > 0 && across[1] > 0,
+          "6d: the lists made local to chunks of 7 and of 11 soundings keep every pair in its chunk's positions; the "
+          "colours per pair equal the two lists (black, red, none); a pair across chunks (" +
+              std::to_string(across[0]) + " black, " + std::to_string(across[1]) +
+              " red) is the one the inner count leaves out");
+  }
+
+  /* mb3dsoundings_reset() leaves left and right swapped and raises every
+     mark: the next frame fills, which sets them (mb3dsoundings_plot), with or
+     without the camera. Only the precondition of the check after it, which
+     tests the camera in a frame that reuses the batch. */
+  {
+    mb3dsoundings_reset();
+    const bool swapped = mb3dsoundings.left > mb3dsoundings.right;
+    rhi::SoundingsInput input;
+    frame.begin(true, 400, 300, &input);
+    check(swapped && mb3dsoundings.left < mb3dsoundings.right,
+          "6d: the frame after mb3dsoundings_reset() fills, which sets the extents the reset leaves swapped (the "
+          "precondition of the next check)");
+    /* the reset also let go of the program's notify functions */
+    int error = MB_ERROR_NO_ERROR;
+    mb3dsoundings_set_dismiss_notify(0, &sdg_dismiss, &error);
+    mb3dsoundings_set_edit_notify(0, &sdg_edit, &error);
+  }
+  /* a frame that reuses the batch (continued, nothing changed) takes the
+     camera as well: the extents set by hand to swapped are set again (the
+     reset above raised every mark, so that frame filled) */
+  {
+    rhi::SoundingsInput input;
+    frame.begin(false, 400, 300, &input);
+    const int fills = frame.fills();
+    mb3dsoundings.left = 1.0f;
+    mb3dsoundings.right = -1.0f;
+    const bool reused = frame.begin(true, 400, 300, &input) && frame.fills() == fills;
+    check(reused && mb3dsoundings.left < mb3dsoundings.right,
+          "6d: a frame that reuses the batch takes the camera too, which sets the view's extents");
+  }
+
+  /* Dismiss: the program releases the soundings (count 0); the frame fills
+     nothing and reads nothing, where the information highlight would read
+     the released array */
+  {
+    mb3dsoundings.edit_mode = MBS_EDIT_INFO;
+    mb3dsoundings.last_sounding_defined = true;
+    mb3dsoundings.last_sounding_edited = 5;
+    mbvq_c_soundings_dismiss();
+    sdg_data.num_soundings = 0;
+    sdg_data.soundings = nullptr;
+    const int fills = frame.fills();
+    rhi::SoundingsInput input;
+    const bool ok = frame.begin(false, 400, 300, &input);
+    check(ok && input.count == 0 && input.frame.batch == nullptr && frame.fills() == fills,
+          "6d: after Dismiss (count 0) the frame neither fills nor reads, and draws nothing");
+  }
+  int error = MB_ERROR_NO_ERROR;
+  mb3dsoundings_end(0, &error);
+}
+
+/* the profile view's frame on a map whose profile has no points: it sizes
+   the core, fills the batch (only the frame, one loop) and takes the camera
+   of the accessor; the quads, green boundaries and frame of a profile with
+   points are checked in pixels by --render-metal (metal_profile) */
+void model_profile_frame() {
+  Grid grid;
+  size_t instance = MBV_NO_WINDOW;
+  check(open_grid(grid, nullptr, &instance), "6d: a map for the profile");
+  rhi::MapFrame map(instance);
+  rhi::FrameInput map_input;
+  map.begin(false, 640, 480, &map_input);
+  mbvq_c_profile_show(instance, true);
+  rhi::ProfileFrame frame(instance);
+  rhi::FrameInput input;
+  const bool filled = frame.begin(1200, 300, &input);
+  int quads = 0, lines = 0, loops = 0;
+  if (input.batch != nullptr)
+    for (int c = 0; c < input.batch->num_commands; c++) {
+      const struct mbv_draw_command &command = input.batch->commands[c];
+      quads += command.primitive == MBV_DRAW_QUADS;
+      lines += command.primitive == MBV_DRAW_LINES;
+      loops += command.primitive == MBV_DRAW_LINE_LOOP;
+    }
+  double projection[16], modelview[16];
+  mbvq_c_profile_camera(instance, projection, modelview);
+  double camera[16];
+  rhi::multiply(projection, modelview, camera);
+  check(filled && input.batch != nullptr && loops == 1 && std::equal(camera, camera + 16, input.camera) &&
+            std::equal(projection, projection + 16, input.projection) && data_of(instance)->prwidth == 1200 &&
+            data_of(instance)->prheight == 300,
+        "6d: the profile frame sizes the core, fills the profile (" + std::to_string(quads) + " quad, " +
+            std::to_string(lines) + " line, " + std::to_string(loops) + " loop commands) and takes the camera of "
+            "mbvq_c_profile_camera");
+  mbvq_c_profile_show(instance, false);
+  close_instance(instance);
+}
+
+/* 6d with a Null QRhi: the soundings renderer reads and writes only what its
+   marks say, keeps the drawn set during a split upload, rebuilds the lists
+   when it must, and draws only the pairs of the prefix in a first upload */
+void null_soundings() {
+  mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+  make_sdg(40, 25, 7);
+  check(open_sdg(), "6d Null: the soundings handed over");
+  sdg_camera(90.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+  sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_ALL, true);
+  mbvq::RenderOptions options;
+  options.soundings_chunk = 300;
+  const auto reads = [&](int stream) { return renderer.stats().sounding_reads[stream]; };
+  const auto writes = [&](int stream) { return renderer.stats().sounding_writes[stream]; };
+  const int P = rhi::SoundingsPlan::kPositions, C = rhi::SoundingsPlan::kColours, L = rhi::SoundingsPlan::kLists;
+
+  bool drawn = renderer.render_soundings(200, 150, options, nullptr);
+  mbvq::RenderStats s = renderer.stats();
+  check(drawn && s.soundings == 1000 && s.sounding_chunks == 4 && s.soundings_shown == 1000 &&
+            s.soundings_drawn == 1000 && reads(P) == 1 && reads(C) == 1 && reads(L) == 1 && writes(P) == 4 &&
+            writes(C) == 4 && writes(L) == 4 && s.sounding_allocations == 1 && s.profile_indices > 0 &&
+            !s.profile_wide && s.resources > s.fixed_resources + s.batch_resources,
+        "6d Null: the first frames read every stream once and write 4 chunks of 300 soundings each (" +
+            std::to_string(s.profile_indices) + " profile indices drawn, " + std::to_string(s.resources) +
+            " resources)");
+  renderer.render_soundings(200, 150, options, nullptr);
+  check(reads(P) == 1 && reads(C) == 1 && reads(L) == 1 && writes(P) == 4 && writes(C) == 4 && writes(L) == 4,
+        "6d Null: a frame without a risen mark reads and writes nothing");
+
+  /* an exaggeration change: the position mark, positions only */
+  int error = MB_ERROR_NO_ERROR;
+  mb3dsoundings.exaggeration = 2.0f;
+  mb3dsoundings_scalez(0, &error);
+  renderer.render_soundings(200, 150, options, nullptr);
+  check(reads(P) == 2 && reads(C) == 1 && reads(L) == 1 && writes(P) == 8 && writes(C) == 4 && writes(L) == 4,
+        "6d Null: a position mark reads and writes the positions only");
+
+  /* a flag edit: the colour mark, colours and the lists */
+  sdg_storage[12].beamflag = static_cast<char>(MB_FLAG_FLAG | MB_FLAG_MANUAL);
+  mb3dsoundings_colors_changed(0, &error);
+  renderer.render_soundings(200, 150, options, nullptr);
+  check(reads(P) == 2 && reads(C) == 2 && reads(L) == 2 && writes(P) == 8 && writes(C) == 8 && writes(L) == 8,
+        "6d Null: a colour mark (a flag edit) reads and writes the colours and makes the profile lists again");
+
+  /* another profile mode raises no mark: the lists alone */
+  mb3dsoundings_setprofiles(MBS_VIEW_PROFILES_UNFLAGGED);
+  renderer.render_soundings(200, 150, options, nullptr);
+  check(reads(P) == 2 && reads(C) == 2 && reads(L) == 3 && writes(L) == 12,
+        "6d Null: another profile mode makes the lists again, nothing else");
+
+  /* new soundings of another count: everything again */
+  make_sdg(20, 25, 9);
+  open_sdg();
+  renderer.render_soundings(200, 150, options, nullptr);
+  s = renderer.stats();
+  check(s.sounding_allocations == 2 && s.soundings == 500 && s.sounding_chunks == 2 && reads(P) == 3 && reads(C) == 3 &&
+            reads(L) == 4 && s.soundings_shown == 500,
+        "6d Null: another array (the mask) reallocates and reads everything again");
+
+  /* Dismiss: count 0, the mask rose; nothing is read, the copies go */
+  mbvq_c_soundings_dismiss();
+  sdg_data.num_soundings = 0;
+  sdg_data.soundings = nullptr;
+  renderer.render_soundings(200, 150, options, nullptr);
+  s = renderer.stats();
+  check(reads(P) == 3 && reads(C) == 3 && reads(L) == 4 && s.soundings == 0 && s.soundings_drawn == 0 &&
+            s.sounding_held_bytes == 0,
+        "6d Null: after Dismiss nothing is read or drawn, and the soundings' buffers go");
+
+  /* A split upload: 1000 soundings in chunks of 260 under a budget of
+     5000 bytes (positions 12 KB, double-buffered); the chunks cut pings, so
+     that profile pairs reach from one chunk into the next. The first upload
+     draws its prefix frame by frame, with only the pairs inside it (thin
+     lines at ratio 1, wide ones at ratio 2), counted here from the core's
+     lists without the renderer's helpers. */
+  const int kSplitChunk = 260;
+  const int kSplitChunks = (1000 + kSplitChunk - 1) / kSplitChunk;
+  for (int ratio = 1; ratio <= 2; ratio++) {
+    /* a renderer of its own, whose totals count this allocation only */
+    mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+    const auto reads = [&](int stream) { return renderer.stats().sounding_reads[stream]; };
+    make_sdg(40, 25, 7);
+    open_sdg();
+    sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_ALL, false);
+    mbvq::RenderOptions split;
+    split.soundings_chunk = kSplitChunk;
+    split.upload_budget = 5000;
+    split.pixel_ratio = ratio;
+    /* the core's pairs (i, i + 1), black and red */
+    std::vector<uint32_t> black, red;
+    rhi::SoundingsFrame reader;
+    reader.pairs(1000, &black, &red);
+    /* what chunk c draws: the entries (indices) of its pairs, or its pairs
+       (instances), without the pair that reaches into the next chunk (out) */
+    const auto chunk_lines = [&](int c, bool out) {
+      const uint32_t first = static_cast<uint32_t>(c * kSplitChunk);
+      const uint32_t end = std::min<uint32_t>(first + kSplitChunk, 1000);
+      int n = 0;
+      if (ratio == 1) {
+        for (const std::vector<uint32_t> *pairs : {&black, &red})
+          for (size_t k = 0; k + 1 < pairs->size(); k += 2)
+            n += (*pairs)[k] >= first && (*pairs)[k] < end && !(out && (*pairs)[k + 1] >= end) ? 2 : 0;
+      }
+      else {
+        for (uint32_t i = first; i < end && i + 1 < 1000; i++)
+          n += out && i + 1 >= end ? 0 : 1;
+      }
+      return n;
+    };
+    int across = 0;
+    for (const std::vector<uint32_t> *pairs : {&black, &red})
+      for (size_t k = 0; k + 1 < pairs->size(); k += 2)
+        across += (*pairs)[k] / kSplitChunk != (*pairs)[k + 1] / kSplitChunk;
+    std::vector<int> prefix;
+    bool pairs_ok = true;
+    std::string drawn_pairs;
+    for (int f = 0; f < 16; f++) {
+      renderer.render_soundings(200, 150, split, nullptr, 1);
+      s = renderer.stats();
+      prefix.push_back(s.soundings_shown);
+      /* the chunks whose lines are written (in the order of the chunks) and
+         whose points are drawn (a prefix of the chunks); the last one without
+         its pair into the next chunk while that one is not drawn */
+      const int written = ratio == 1 ? s.sounding_writes[L] : s.sounding_writes[rhi::SoundingsPlan::kPairColours];
+      int chunks_drawn = 0;
+      while (chunks_drawn < kSplitChunks && std::min((chunks_drawn + 1) * kSplitChunk, 1000) <= s.soundings_shown)
+        chunks_drawn++;
+      int expected = 0;
+      for (int c = 0; c < std::min(written, chunks_drawn); c++)
+        expected += chunk_lines(c, c + 1 < kSplitChunks && c + 1 >= chunks_drawn);
+      const int got = ratio == 1 ? s.profile_indices : s.profile_instances;
+      pairs_ok = pairs_ok && got == expected && s.profile_wide == (ratio == 2);
+      drawn_pairs += std::to_string(got) + " ";
+      if (s.soundings_shown == 1000 && written == kSplitChunks)
+        break;
+    }
+    const bool grows = prefix.size() >= 3 && prefix.front() > 0 && prefix.front() < 1000 && prefix.back() == 1000 &&
+                       std::is_sorted(prefix.begin(), prefix.end());
+    check(grows && pairs_ok && across > 0,
+          "6d Null: the first split upload at ratio " + std::to_string(ratio) + " draws its prefix " + list(prefix) +
+              " and only the pairs inside it (" + (ratio == 1 ? "indices " : "instances ") + drawn_pairs + "; " +
+              std::to_string(across) + " pairs reach into the next chunk)");
+
+    /* a position mark: the drawn set stays complete while the new positions
+       go into the second set; a mark during that upload does not restart it */
+    if (ratio == 1) {
+      const int read_before = reads(P);
+      const int swaps_before = renderer.stats().sounding_swaps;
+      mb3dsoundings.exaggeration = 3.0f;
+      mb3dsoundings_scalez(0, &error);
+      renderer.render_soundings(200, 150, split, nullptr, 1);
+      const mbvq::RenderStats first = renderer.stats();
+      mb3dsoundings.exaggeration = 4.0f;
+      mb3dsoundings_scalez(0, &error);
+      std::vector<int> shown;
+      int frames = 0, reads_during = 0;
+      while (renderer.stats().sounding_swaps == swaps_before && frames < 10) {
+        renderer.render_soundings(200, 150, split, nullptr, 1);
+        shown.push_back(renderer.stats().soundings_shown);
+        reads_during = reads(P);
+        frames++;
+      }
+      check(first.soundings_shown == 1000 && first.sounding_reads[P] == read_before + 1 &&
+                std::all_of(shown.begin(), shown.end(), [](int n) { return n == 1000; }) &&
+                reads_during == read_before + 1 && renderer.stats().sounding_swaps >= swaps_before + 1,
+            "6d Null: a position mark during a split upload keeps the previous complete set drawn (" + list(shown) +
+                ") and does not restart it");
+    }
+  }
+
+  /* The frames a view draws (the frame of the core's request, then frames
+     while the renderer asks for more, and no other): a mark that rises while
+     its stream's split upload runs is read and written in those frames,
+     since nothing else asks for a frame (the last motion of a drag; the
+     core draws nothing when the button is released). The positions
+     (double-buffered), then the index lists (written chunk by chunk). */
+  {
+    mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+    const auto reads = [&](int stream) { return renderer.stats().sounding_reads[stream]; };
+    make_sdg(40, 25, 7);
+    open_sdg();
+    sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_ALL, false);
+    mbvq::RenderOptions split;
+    split.soundings_chunk = 250;
+    split.upload_budget = 5000;
+    renderer.render_soundings(200, 150, split, nullptr, 50);
+    const int positions_before = reads(P);
+    const int swaps_before = renderer.stats().sounding_swaps;
+    /* motion 1: the core's request, its frame */
+    mb3dsoundings.exaggeration = 2.5f;
+    mb3dsoundings_scalez(0, &error);
+    renderer.render_soundings(200, 150, split, nullptr, 1);
+    const bool running = renderer.stats().soundings_waiting;
+    /* motion 2 before the next frame: the view's frames for it */
+    mb3dsoundings.exaggeration = 3.5f;
+    mb3dsoundings_scalez(0, &error);
+    renderer.render_soundings(200, 150, split, nullptr, 50);
+    const int position_frames = renderer.last_frames();
+    const bool positions_ok = running && position_frames < 50 && !renderer.stats().soundings_waiting &&
+                              reads(P) == positions_before + 2 &&
+                              renderer.stats().sounding_swaps == swaps_before + 2 &&
+                              renderer.stats().soundings_shown == 1000;
+    const std::string positions_text = std::to_string(reads(P) - positions_before) + " reads and " +
+                                       std::to_string(renderer.stats().sounding_swaps - swaps_before) + " swaps in " +
+                                       std::to_string(position_frames) + " frames";
+    /* the lists: a flag edit while the lists of the one before are written */
+    const int lists_before = reads(L);
+    sdg_storage[100].beamflag = static_cast<char>(MB_FLAG_FLAG | MB_FLAG_MANUAL);
+    mb3dsoundings_colors_changed(0, &error);
+    renderer.render_soundings(200, 150, split, nullptr, 1);
+    const bool lists_running = renderer.stats().soundings_waiting;
+    sdg_storage[600].beamflag = static_cast<char>(MB_FLAG_FLAG | MB_FLAG_MANUAL);
+    mb3dsoundings_colors_changed(0, &error);
+    renderer.render_soundings(200, 150, split, nullptr, 50);
+    const int list_frames = renderer.last_frames();
+    const bool lists_ok = lists_running && list_frames < 50 && !renderer.stats().soundings_waiting &&
+                          reads(L) == lists_before + 2;
+    check(positions_ok && lists_ok,
+          "6d Null: in the frames a view draws, a mark that rose during its stream's split upload is read after it: "
+          "positions " + positions_text + " (2 and 2 for two marks), lists made " +
+              std::to_string(reads(L) - lists_before) + " times in " + std::to_string(list_frames) +
+              " frames for two flag edits");
+  }
+
+  /* points as quads (forced, as on Direct3D) */
+  {
+    mbvq::OffscreenRenderer quads(mbvq::OffscreenRenderer::Api::Null);
+    mbvq::RenderOptions forced;
+    forced.point_quads = true;
+    sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_NONE, true);
+    mb3dsoundings.edit_mode = MBS_EDIT_INFO;
+    mb3dsoundings.last_sounding_defined = true;
+    mb3dsoundings.last_sounding_edited = 10;
+    const bool ok = quads.render_soundings(200, 150, forced, nullptr);
+    /* the information highlight is the batch's one POINTS command: one draw
+       of quads (the soundings' quads are the view's own draw) */
+    check(ok && quads.stats().point_quads && quads.stats().soundings_drawn == 1000 &&
+              quads.stats().point_quad_draws == 1 && !quads.stats().failed,
+          "6d Null: points as quads where forced: the soundings (" + std::to_string(quads.stats().soundings_drawn) +
+              ") and the information highlight (" + std::to_string(quads.stats().point_quad_draws) +
+              " draw of the batch's points as quads)");
+  }
+  mb3dsoundings_end(0, &error);
+}
+
+/* 6d with a Null QRhi: the failure paths of the soundings and profile
+   renderers, which no view reaches unless the GPU memory runs out. (A lost
+   uniform ring cannot happen in these views: their drawings have far fewer
+   commands than the ring's first 64 slots.) */
+void null_failures() {
+  int error = MB_ERROR_NO_ERROR;
+  const int P = rhi::SoundingsPlan::kPositions, C = rhi::SoundingsPlan::kColours, L = rhi::SoundingsPlan::kLists;
+  make_sdg(40, 25, 7);
+  check(open_sdg(), "6d Null failures: the soundings handed over");
+  sdg_camera(90.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+  sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_ALL, true);
+
+  /* A soundings frame whose buffers cannot be made (fail_buffers, after a
+     flag edit whose chunk needs index lists of another size) fails at once
+     and holds no GPU bytes, neither the soundings' nor the batch's; the
+     next frame reads every stream once and draws every sounding. */
+  {
+    mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+    mbvq::RenderOptions options;
+    options.soundings_chunk = 300;
+    const bool drawn = renderer.render_soundings(200, 150, options, nullptr);
+    const mbvq::RenderStats before = renderer.stats();
+    sdg_storage[12].beamflag = static_cast<char>(MB_FLAG_FLAG | MB_FLAG_MANUAL);
+    mb3dsoundings_colors_changed(0, &error);
+    options.fail_buffers = true;
+    const bool failed_frame = renderer.render_soundings(200, 150, options, nullptr);
+    const mbvq::RenderStats failed = renderer.stats();
+    const int failed_frames = renderer.last_frames();
+    options.fail_buffers = false;
+    const bool again = renderer.render_soundings(200, 150, options, nullptr);
+    const mbvq::RenderStats after = renderer.stats();
+    const int reads[3] = {after.sounding_reads[P] - failed.sounding_reads[P],
+                          after.sounding_reads[C] - failed.sounding_reads[C],
+                          after.sounding_reads[L] - failed.sounding_reads[L]};
+    check(drawn && before.sounding_held_bytes > 0 && before.batch_held_bytes > 0 && !failed_frame && failed.failed &&
+              failed_frames == 1 && failed.sounding_held_bytes == 0 && failed.batch_held_bytes == 0 &&
+              failed.batch_resources == 0 && failed.resources == failed.fixed_resources && failed.soundings_shown == 0 &&
+              again && !after.failed && reads[0] == 1 && reads[1] == 1 && reads[2] == 1 &&
+              after.soundings_shown == 1000 && after.soundings_drawn == 1000 && after.sounding_held_bytes > 0,
+          "6d Null: a soundings frame whose buffers cannot be made fails at once (" + std::to_string(failed_frames) +
+              " frame) and holds no GPU bytes (" + std::to_string(failed.sounding_held_bytes) + " of the soundings, " +
+              std::to_string(failed.batch_held_bytes) + " of the batch, against " +
+              std::to_string(before.sounding_held_bytes) + " and " + std::to_string(before.batch_held_bytes) +
+              " before); the next frame reads each stream once (" + std::to_string(reads[0]) + ", " +
+              std::to_string(reads[1]) + ", " + std::to_string(reads[2]) + ") and draws " +
+              std::to_string(after.soundings_drawn) + " soundings");
+  }
+
+  /* A read of the soundings' data that fails (fail_reads: none can today)
+     fails its frame at once, as a buffer that cannot be made does, rather
+     than asking for frames for ever while its mark stays ahead: the
+     positions after an exaggeration change, the colours after a flag edit,
+     the profile pairs after another profile mode; after each the next frame
+     reads and draws everything again. */
+  {
+    mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+    mbvq::RenderOptions options;
+    options.soundings_chunk = 300;
+    bool ok = renderer.render_soundings(200, 150, options, nullptr);
+    std::string frames;
+    for (int stream = 0; stream < 3; stream++) {
+      if (stream == 0) {
+        mb3dsoundings.exaggeration = 2.0f;
+        mb3dsoundings_scalez(0, &error);
+      }
+      else if (stream == 1) {
+        sdg_storage[600].beamflag = static_cast<char>(MB_FLAG_FLAG | MB_FLAG_MANUAL);
+        mb3dsoundings_colors_changed(0, &error);
+      }
+      else {
+        mb3dsoundings_setprofiles(MBS_VIEW_PROFILES_UNFLAGGED);
+      }
+      const int reads_before = renderer.stats().sounding_reads[stream];
+      options.fail_reads = true;
+      const bool read_failed = !renderer.render_soundings(200, 150, options, nullptr);
+      const mbvq::RenderStats failed = renderer.stats();
+      const int failed_frames = renderer.last_frames();
+      options.fail_reads = false;
+      const bool again = renderer.render_soundings(200, 150, options, nullptr);
+      const mbvq::RenderStats after = renderer.stats();
+      ok = ok && read_failed && failed.failed && failed_frames == 1 && failed.sounding_reads[stream] == reads_before &&
+           failed.sounding_held_bytes == 0 && failed.batch_held_bytes == 0 && again && !after.failed &&
+           after.sounding_reads[stream] == reads_before + 1 && after.soundings_drawn == 1000;
+      frames += (stream > 0 ? ", " : "") + std::to_string(failed_frames);
+    }
+    check(ok, "6d Null: a read that fails ends its frame at once, as a failed buffer does (positions, colours and "
+              "profile pairs: " +
+                  frames + " frames of 16 allowed), holding nothing; the next frame reads and draws everything again");
+  }
+
+  /* A failed frame hands its update batch back to the QRhi, whose pool
+     holds 64: kept by failed frames, the batches would run out after 64 of
+     them, and the frame that draws after these 70 would get none and
+     crash. Here every read fails; a buffer that cannot be made takes the
+     same path. */
+  {
+    mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+    mbvq::RenderOptions options;
+    options.soundings_chunk = 300;
+    const int tries = 70;
+    options.fail_reads = true;
+    int failures = 0;
+    for (int f = 0; f < tries; f++)
+      failures += !renderer.render_soundings(200, 150, options, nullptr) && renderer.stats().failed &&
+                  renderer.last_frames() == 1;
+    options.fail_reads = false;
+    const bool again = renderer.render_soundings(200, 150, options, nullptr);
+    const mbvq::RenderStats after = renderer.stats();
+    check(failures == tries && again && !after.failed && after.soundings_drawn == 1000,
+          "6d Null: failed soundings frames hand back their update batches (" + std::to_string(failures) + " of " +
+              std::to_string(tries) + " failed in a row, a QRhi's pool holds 64): the next frame draws " +
+              std::to_string(after.soundings_drawn) + " soundings");
+  }
+  mb3dsoundings_end(0, &error);
+
+  /* A profile frame whose buffers cannot be made (fail_buffers, when its
+     batch grows from the frame alone to a profile of seven points) fails,
+     draws nothing and lets go of the batch's buffers; the next frame draws
+     the profile again. */
+  Grid grid;
+  size_t instance = MBV_NO_WINDOW;
+  check(open_grid(grid, nullptr, &instance), "6d Null failures: a map for the profile");
+  struct mbview_struct *data = data_of(instance);
+  mbvq_c_profile_show(instance, true);
+  mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+  mbvq::RenderOptions options;
+  const bool first = renderer.render_profile(instance, 600, 200, options, nullptr);
+  const mbvq::RenderStats framed = renderer.stats();
+  const int n = 7;
+  if (data->profile.npoints_alloc < n && mbview_allocprofilepoints(0, n, &data->profile.points, &error) == MB_SUCCESS)
+    data->profile.npoints_alloc = n;
+  if (data->profile.npoints_alloc >= n) {
+    const double z[n] = {-1000.0, -985.0, -1012.0, -995.0, -1003.0, -990.0, -1008.0};
+    data->profile.npoints = n;
+    data->profile.length = 600.0;
+    data->profile.zmin = -1012.0;
+    data->profile.zmax = -985.0;
+    for (int i = 0; i < n; i++) {
+      struct mbview_profilepoint_struct &p = data->profile.points[i];
+      p.boundary = i == 0 || i == 3 || i == n - 1;
+      p.distance = 100.0 * i;
+      p.zdata = z[i];
+      p.slope = i % 2 == 0 ? 0.1 : 0.9;
+    }
+    data->profile_slopethreshold = 0.5;
+    data->profile_exaggeration = 1.0;
+  }
+  options.fail_buffers = true;
+  const bool failed_frame = renderer.render_profile(instance, 600, 200, options, nullptr);
+  const mbvq::RenderStats failed = renderer.stats();
+  options.fail_buffers = false;
+  const bool again = renderer.render_profile(instance, 600, 200, options, nullptr);
+  const mbvq::RenderStats drawn = renderer.stats();
+  check(first && !framed.failed && framed.batch_resources > 0 && data->profile.npoints == n && !failed_frame &&
+            failed.failed && failed.batch_resources == 0 && failed.batch_held_bytes == 0 &&
+            failed.resources == failed.fixed_resources && again && !drawn.failed && drawn.batch_resources > 0 &&
+            drawn.draws > framed.draws,
+        "6d Null: a profile frame whose buffers cannot be made fails and lets go of the batch's buffers (" +
+            std::to_string(failed.batch_resources) + " left, against " + std::to_string(framed.batch_resources) +
+            " before); the next frame draws the profile of " + std::to_string(n) + " points (" +
+            std::to_string(drawn.draws) + " draws, against " + std::to_string(framed.draws) + " for the frame alone)");
+
+  /* So does a failed profile frame (see the soundings above): 70 in a row
+     on another Null QRhi, then a frame that draws the profile. */
+  {
+    mbvq::OffscreenRenderer fresh(mbvq::OffscreenRenderer::Api::Null);
+    const int tries = 70;
+    options.fail_buffers = true;
+    int failures = 0;
+    for (int f = 0; f < tries; f++)
+      failures += !fresh.render_profile(instance, 600, 200, options, nullptr) && fresh.stats().failed;
+    options.fail_buffers = false;
+    const bool redrawn = fresh.render_profile(instance, 600, 200, options, nullptr);
+    const mbvq::RenderStats after = fresh.stats();
+    check(failures == tries && redrawn && !after.failed && after.draws > framed.draws,
+          "6d Null: failed profile frames hand back their update batches (" + std::to_string(failures) + " of " +
+              std::to_string(tries) + " failed in a row): the next frame draws the profile (" +
+              std::to_string(after.draws) + " draws, against " + std::to_string(framed.draws) +
+              " for the frame alone)");
+  }
+  mbvq_c_profile_show(instance, false);
+  close_instance(instance);
+}
+
+/* 6d without drawing: the profile and soundings views are QRhi views; the
+   profile's width cap; the soundings view's failure label, input before the
+   first frame, its point-size control and its status during a fill */
+void widgets_views(size_t instance, QRhiWidget::Api expected) {
+  mbvq::MapWidget *widget = mbvq::map_widget(instance);
+  mbvq::ProfileWindow *window = widget != nullptr ? widget->profile() : nullptr;
+  QWidget *profile = window != nullptr ? window->view() : nullptr;
+  auto *profile_rhi = qobject_cast<QRhiWidget *>(profile);
+  check(profile_rhi != nullptr && profile_rhi->api() == expected && mbvq::view_state(profile).rhi_view,
+        "6d: the profile view is a QRhiWidget with the platform's API set explicitly");
+  if (profile == nullptr)
+    return;
+  const double ratio = profile->devicePixelRatioF();
+  const int cap = static_cast<int>(std::floor(16384 / ratio));
+  check(profile->maximumWidth() == cap && profile->maximumHeight() == cap,
+        "6d: before a QRhi exists the profile view is at most floor(16384 / ratio) = " + std::to_string(cap) +
+            " logical px wide");
+  /* five times a viewport wider than that: the drawing is clamped */
+  window->open();
+  window->resize(4000, 400);
+  window->slider(0)->setValue(5);
+  spin(50);
+  const int clamped = profile->width();
+  /* The cap taken again on a change of the pixel ratio or the screen, and
+     when the window sizes the view. A smaller cap first, as on a screen of a
+     higher ratio, shrinks the view (still wider than the viewport, so that
+     the scroll bars stay and the viewport keeps its size); when the cap
+     rises again (back on the first screen) the drawing is sized again, to
+     the clamped width. */
+  bool again = true;
+  std::string widths;
+  const QWidget *viewport = profile->parentWidget();
+  const int smaller = (cap + (viewport != nullptr ? viewport->width() : 0)) / 2;
+  for (QEvent::Type type : {QEvent::DevicePixelRatioChange, QEvent::ScreenChangeInternal}) {
+    profile->setMaximumSize(smaller, smaller);
+    spin(20);
+    const bool shrunk = profile->width() == smaller && viewport != nullptr && viewport->width() < smaller;
+    QEvent event(type);
+    QApplication::sendEvent(profile, &event);
+    const bool capped = profile->maximumWidth() == cap;
+    spin(20);
+    widths += std::to_string(profile->width()) + " ";
+    again = again && shrunk && capped && profile->width() == clamped;
+  }
+  profile->setMaximumSize(100, 100);
+  window->slider(0)->setValue(4);
+  spin(20);
+  check(clamped == cap && again && profile->maximumWidth() == cap,
+        "6d: a profile 5 x 4000 px wide is clamped to the cap (" + std::to_string(clamped) +
+            "), taken again on DevicePixelRatioChange and ScreenChangeInternal, after which the drawing is sized "
+            "again (" + widths + "px), and by layout_profile()");
+  window->dismiss();
+
+  /* the soundings view */
+  make_sdg(20, 25, 7);
+  check(open_sdg(), "6d: the soundings window under QRhi");
+  mbvq::SoundingsWidget *soundings = mbvq::soundings_widget();
+  QWidget *view = soundings != nullptr ? soundings->view() : nullptr;
+  auto *view_rhi = qobject_cast<QRhiWidget *>(view);
+  check(view_rhi != nullptr && view_rhi->api() == expected && mbvq::view_state(view).rhi_view,
+        "6d: the soundings view is a QRhiWidget with the platform's API set explicitly");
+  if (view == nullptr)
+    return;
+  QElapsedTimer timer;
+  timer.start();
+  while (!mbvq::view_state(view).failure_shown && timer.elapsed() < 3000)
+    spin(20);
+  check(mbvq::view_state(view).failure_shown && mbvq::failure_messages() == 1,
+        "6d: the soundings view that cannot be drawn shows its label; the line came once per process");
+  /* A click right on a sounding before the first frame edits nothing (the
+     core is given a size and the screen positions here, so that a click
+     that reached it would edit that sounding). */
+  {
+    const double r = view->devicePixelRatioF();
+    const int pw = static_cast<int>(std::lround(view->width() * r));
+    const int ph = static_cast<int>(std::lround(view->height() * r));
+    mbvq_c_soundings_resize(pw, ph);
+    sdg_camera(90.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+    int error = MB_ERROR_NO_ERROR;
+    mb3dsoundings_screen_positions(0, &error);
+    QPointF at(view->width() / 2.0, view->height() / 2.0);
+    for (const struct mb3dsoundings_sounding_struct &sounding : sdg_storage)
+      if (sounding.beamflag == MB_FLAG_NONE && sounding.winx > 5 && sounding.winx < pw - 5 && sounding.winy > 5 &&
+          sounding.winy < ph - 5) {
+        at = QPointF(sounding.winx / r, (ph - 1 - sounding.winy) / r);
+        break;
+      }
+    const int edits = sdg_edits;
+    QMouseEvent press(QEvent::MouseButtonPress, at, view->mapToGlobal(at), Qt::LeftButton, Qt::LeftButton,
+                      Qt::NoModifier);
+    QApplication::sendEvent(view, &press);
+    QMouseEvent release(QEvent::MouseButtonRelease, at, view->mapToGlobal(at), Qt::LeftButton, Qt::NoButton,
+                        Qt::NoModifier);
+    QApplication::sendEvent(view, &release);
+    check(sdg_edits == edits && !mbvq::view_state(view).drawn,
+          "6d: a click on a sounding before the soundings view's first frame does not reach the core");
+  }
+
+  /* the point-size control, under QRhi only */
+  QDoubleSpinBox *point_size = soundings->findChild<QDoubleSpinBox *>();
+  QLabel *point_label = nullptr;
+  for (QLabel *label : soundings->findChildren<QLabel *>())
+    if (label->text() == QStringLiteral("Point size"))
+      point_label = label;
+  check(point_size != nullptr && point_size->minimum() == 0.5 && point_size->maximum() == 8.0 &&
+            point_size->singleStep() == 0.5 && point_size->value() == 3.0 &&
+            point_size->suffix() == QStringLiteral(" px") &&
+            point_size->toolTip() == QStringLiteral("logical pixels, times the screen's pixel ratio") &&
+            point_label != nullptr && point_label->buddy() == point_size && mbvq::soundings_point_size() == 3.0,
+        "6d: the soundings window has the point-size control: 0.5 to 8 px in steps of 0.5, 3 by default");
+  if (point_size != nullptr) {
+    point_size->setValue(2.0);
+    const double two = mbvq::soundings_point_size();
+    point_size->setValue(2.3);
+    const double snapped = mbvq::soundings_point_size();
+    point_size->setValue(3.0);
+    check(two == 2.0 && snapped == 2.5 && point_size->value() == 3.0 && mbvq::soundings_point_size() == 3.0,
+          "6d: the control sets the program's point size (2), a typed 2.3 becomes 2.5");
+
+    /* Keys as the user types them: a typed value counts once, on Enter or
+       when the box loses the focus (keyboard tracking off; with it the first
+       key set 2 and the third snapped the text to 2.5 under the cursor); the
+       arrows and the wheel set the size at once. */
+    const QString point = point_size->locale().decimalPoint();
+    const auto type = [point_size](const QString &keys) {
+      point_size->selectAll();
+      for (const QChar c : keys) {
+        QKeyEvent key(QEvent::KeyPress, 0, Qt::NoModifier, QString(c));
+        QApplication::sendEvent(point_size, &key);
+      }
+    };
+    type(QStringLiteral("2") + point + QStringLiteral("3"));
+    const double typing = mbvq::soundings_point_size();
+    QKeyEvent enter(QEvent::KeyPress, Qt::Key_Return, Qt::NoModifier);
+    QApplication::sendEvent(point_size, &enter);
+    const double entered = mbvq::soundings_point_size();
+    type(QStringLiteral("4") + point + QStringLiteral("2"));
+    const double typing_again = mbvq::soundings_point_size();
+    QFocusEvent leave(QEvent::FocusOut, Qt::TabFocusReason);
+    QApplication::sendEvent(point_size, &leave);
+    const double left = mbvq::soundings_point_size();
+    QKeyEvent up(QEvent::KeyPress, Qt::Key_Up, Qt::NoModifier);
+    QApplication::sendEvent(point_size, &up);
+    const double arrow = mbvq::soundings_point_size();
+    QWheelEvent wheel(QPointF(5, 5), point_size->mapToGlobal(QPointF(5, 5)), QPoint(), QPoint(0, 120), Qt::NoButton,
+                      Qt::NoModifier, Qt::NoScrollPhase, false);
+    QApplication::sendEvent(point_size, &wheel);
+    const double wheeled = mbvq::soundings_point_size();
+    point_size->setValue(3.0);
+    check(!point_size->keyboardTracking() && typing == 3.0 && entered == 2.5 && typing_again == 2.5 && left == 4.0 &&
+              arrow == 4.5 && wheeled == 5.0 && mbvq::soundings_point_size() == 3.0,
+          "6d: a size typed into the control counts once: 2" + point.toStdString() + "3 sets nothing (" +
+              text("%.1f", typing) + ") until Enter, then 2.5 (" + text("%.1f", entered) + "); 4" +
+              point.toStdString() + "2 nothing (" + text("%.1f", typing_again) + ") until the box loses the focus, " +
+              "then 4 (" + text("%.1f", left) + "); the up arrow and the wheel at once (" + text("%.1f", arrow) +
+              ", " + text("%.1f", wheeled) + ")");
+  }
+
+  /* the status during a QRhi fill: the label, the signal and the sliders
+     once, after the fill; outside a fill at once */
+  {
+    std::vector<QString> sent;
+    const QMetaObject::Connection connection =
+        QObject::connect(soundings, &mbvq::SoundingsWidget::statusMessage, [&sent](const QString &t) { sent.push_back(t); });
+    mbvq_qt_soundings_status("before the fill", true);
+    QLabel *status = nullptr;
+    for (QLabel *label : soundings->findChildren<QLabel *>())
+      if (label->text() == QStringLiteral("before the fill"))
+        status = label;
+    QSlider *slider = soundings->findChild<QSlider *>();
+    sent.clear();
+    mbvq::set_fill_active(true);
+    mbvq_qt_soundings_status("first", false);
+    mbvq_qt_soundings_status("second", false);
+    const bool during = status != nullptr && status->text() == QStringLiteral("before the fill") && sent.empty() &&
+                        slider != nullptr && slider->isVisible();
+    mbvq::set_fill_active(false);
+    QApplication::processEvents();
+    const bool after = status != nullptr && status->text() == QStringLiteral("second") && sent.size() == 1 &&
+                       sent[0] == QStringLiteral("second") && !slider->isVisible();
+    mbvq_qt_soundings_status("outside", true);
+    const bool outside = status != nullptr && status->text() == QStringLiteral("outside") && sent.size() == 2 &&
+                         slider->isVisible();
+    QObject::disconnect(connection);
+    check(during && after && outside,
+          "6d: SoundingsWidget::set_status during a QRhi fill sets the label, the signal and the sliders once, after "
+          "the fill; outside a fill at once");
+  }
+  int error = MB_ERROR_NO_ERROR;
+  mb3dsoundings_end(0, &error);
+}
+
+
 int test_model() {
   /* the names of MB_RENDERER, and what the environment chooses */
   {
@@ -4833,6 +5934,10 @@ int test_model() {
   model_batch_plan();
   model_glu();
   model_map_6c();
+  /* 6d: the profile and 3D soundings views */
+  model_soundings_plan();
+  model_soundings_frame();
+  model_profile_frame();
   return result();
 }
 
@@ -5243,9 +6348,9 @@ int test_widgets() {
     }
   }
 
-  /* the profile and soundings views are null views for now */
-  check(mbvq::view_state(mbvq::map_widget(instance)->profile()->view()).rhi_view == false,
-        "the profile view is not a QRhi view yet");
+  /* 6d: the profile and soundings views are QRhi views (this replaces the
+     check of 6a that the profile view is not a QRhi view yet) */
+  widgets_views(instance, expected);
 
   /* closing the window deletes the view that never had a QRhi; a button
      down in it goes with it */
@@ -5610,6 +6715,8 @@ int test_render_null() {
   null_batch();
   null_buffers();
   null_meshes();
+  null_soundings();
+  null_failures();
   return result();
 }
 
@@ -6036,6 +7143,558 @@ void metal_levels() {
   }
 }
 
+/*--------------------------------------------------------------------*/
+/* 6d on Metal: the soundings and the profile in pixels */
+
+/* where the camera puts a sounding in a drawing of width x height pixels:
+   window coordinates (x right, y up), as gluProject computes them */
+std::array<double, 2> sdg_window(const std::vector<float> &xyz, size_t i, int width, int height) {
+  double projection[16], modelview[16], camera[16];
+  mbvq_c_soundings_camera(projection, modelview);
+  rhi::multiply(projection, modelview, camera);
+  const double p[4] = {xyz[3 * i], xyz[3 * i + 1], xyz[3 * i + 2], 1.0};
+  double c[4] = {};
+  for (int r = 0; r < 4; r++)
+    for (int k = 0; k < 4; k++)
+      c[r] += camera[4 * k + r] * p[k];
+  return {(c[0] / c[3] + 1.0) * 0.5 * width, (c[1] / c[3] + 1.0) * 0.5 * height};
+}
+
+/* the colour of an image at window coordinates (y up) */
+uint32_t at_window(const QImage &image, double x, double y) {
+  const int column = static_cast<int>(std::floor(x));
+  const int row = image.height() - 1 - static_cast<int>(std::floor(y));
+  if (column < 0 || row < 0 || column >= image.width() || row >= image.height())
+    return 0xffffffffu;
+  return pixel_rgb(image, column, row);
+}
+
+uint32_t rgb_bytes(const unsigned char *rgba) {
+  return static_cast<uint32_t>(rgba[0]) | static_cast<uint32_t>(rgba[1]) << 8 | static_cast<uint32_t>(rgba[2]) << 16;
+}
+
+int non_white(const QImage &image) {
+  int n = 0;
+  for (int row = 0; row < image.height(); row++)
+    for (int x = 0; x < image.width(); x++)
+      n += pixel_rgb(image, x, row) != kWhite;
+  return n;
+}
+
+/* 6d: a batch's points drawn as quads, as where the API has no point size
+   in the vertex shader (Direct3D; the information highlight of the 3D
+   soundings view), against points: the same pixels at ratios 1 and 2, for
+   points of two sizes after a line, so that the points do not begin at the
+   batch's first vertex (the quads take their points per instance from
+   there), each square of its size */
+void metal_point_quads() {
+  mbvq::OffscreenRenderer points(mbvq::OffscreenRenderer::Api::Metal);
+  mbvq::OffscreenRenderer quads(mbvq::OffscreenRenderer::Api::Metal);
+  for (int ratio = 1; ratio <= 2; ratio++) {
+    TestBatch t;
+    mbv_draw_batch_line_width(&t.b, 1.0f);
+    t.primitive(MBV_DRAW_LINES, {{-0.9f, -0.60125f, 0}, {-0.1f, -0.60125f, 0}}, 0, 0, 1);
+    mbv_draw_batch_point_size(&t.b, 3.0f);
+    t.primitive(MBV_DRAW_POINTS, {{0.00125f, 0.00125f, 0}, {0.50125f, 0.25125f, 0}}, 1, 0, 0);
+    mbv_draw_batch_point_size(&t.b, 5.0f);
+    t.primitive(MBV_DRAW_POINTS, {{-0.49875f, 0.50125f, 0}}, 0, 1, 0);
+    mbvq::RenderOptions plain;
+    plain.pixel_ratio = ratio;
+    mbvq::RenderOptions forced = plain;
+    forced.point_quads = true;
+    const int size = 200 * ratio;
+    QImage a, b;
+    const bool drawn = points.render_batch(&t.b, kIdentity, kIdentity, size, size, plain, &a) &&
+                       quads.render_batch(&t.b, kIdentity, kIdentity, size, size, forced, &b);
+    const int differ = differing(a, b);
+    int red = 0, green = 0;
+    for (int y = 0; drawn && y < size; y++)
+      for (int x = 0; x < size; x++) {
+        red += pixel_rgb(b, x, y) == kRed;
+        green += pixel_rgb(b, x, y) == kGreen;
+      }
+    const int side3 = 3 * ratio, side5 = 5 * ratio;
+    check(drawn && differ == 0 && red == 2 * side3 * side3 && green == side5 * side5 &&
+              quads.stats().point_quad_draws == 2 && points.stats().point_quad_draws == 0,
+          "6d Metal: a batch's points as forced quads (" + std::to_string(quads.stats().point_quad_draws) +
+              " draws, after a line) give the pixels of its points at ratio " + std::to_string(ratio) + " (" +
+              std::to_string(differ) + " differ; " + std::to_string(red) + " px of two " + std::to_string(side3) +
+              " px squares, " + std::to_string(green) + " of a " + std::to_string(side5) + " px one)");
+  }
+}
+
+void metal_soundings() {
+  mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Metal);
+  const int W = 400, H = 300;
+  QImage image;
+  int error = MB_ERROR_NO_ERROR;
+
+  /* A sparse set, 8 pings of 10 beams about 35 px apart, seen from above;
+     beam colours and flag reasons varied. Sounding 0 is flagged and lies
+     above sounding 11 (same place, shallower): it comes first, and is not
+     drawn without the flagged soundings, so it must not hide 11. Sounding 79
+     is flagged alone. The camera has non-dyadic offsets and size, so that no
+     point square has an edge on a pixel centre (F7). */
+  make_sdg(8, 10, 0);
+  const unsigned char flags[] = {MB_FLAG_FLAG | MB_FLAG_MANUAL, MB_FLAG_FLAG | MB_FLAG_FILTER,
+                                 MB_FLAG_FLAG | MB_FLAG_SONAR, MB_FLAG_FLAG | MB_FLAG_FILTER2};
+  for (size_t i = 0; i < sdg_storage.size(); i++) {
+    sdg_storage[i].beamcolor = static_cast<int>(i % 8);
+    if (i % 9 == 4)
+      sdg_storage[i].beamflag = static_cast<char>(flags[(i / 9) % 4]);
+  }
+  sdg_storage[0].beamflag = static_cast<char>(MB_FLAG_FLAG | MB_FLAG_MANUAL);
+  sdg_storage[0].x = sdg_storage[11].x;
+  sdg_storage[0].y = sdg_storage[11].y;
+  sdg_storage[0].z = sdg_storage[11].z + 10.0;
+  sdg_storage[79].beamflag = static_cast<char>(MB_FLAG_FLAG | MB_FLAG_MANUAL);
+  check(open_sdg(), "6d Metal: the soundings handed over");
+  sdg_camera(90.0f, 0.0f, 1.0137f, 0.00123f, -0.00431f);
+
+  /* the colours of the flag mode, flagged soundings shown and not */
+  bool colours_ok = true;
+  int checked = 0;
+  std::string where;
+  for (int flagged = 1; flagged >= 0; flagged--) {
+    sdg_view(MBS_VIEW_COLOR_FLAG, flagged != 0, MBS_VIEW_PROFILES_NONE, false);
+    const bool drawn = renderer.render_soundings(W, H, mbvq::RenderOptions(), &image);
+    std::vector<float> xyz;
+    std::vector<unsigned char> rgba;
+    rhi::SoundingsFrame reader;
+    reader.positions(static_cast<int>(sdg_storage.size()), &xyz);
+    reader.colours(static_cast<int>(sdg_storage.size()), &rgba);
+    colours_ok = colours_ok && drawn;
+    for (size_t i = 1; i < sdg_storage.size(); i++) {
+      const std::array<double, 2> w = sdg_window(xyz, i, W, H);
+      /* sounding 0 shares the place of 11: drawn first and nearer, it shows
+         there while flagged soundings are shown */
+      const size_t shown = i == 11 && rgba[3] != 0 ? 0 : i;
+      const uint32_t expected = rgba[4 * shown + 3] != 0 ? rgb_bytes(&rgba[4 * shown]) : kWhite;
+      const uint32_t got = at_window(image, w[0], w[1]);
+      if (got != expected && where.size() < 120)
+        where += std::to_string(i) + ":" + colour_name(got) + " ";
+      colours_ok = colours_ok && got == expected;
+      checked++;
+    }
+    /* flagged soundings not shown: 79 leaves the background, 0 does not hide 11 */
+    if (flagged == 0) {
+      const std::array<double, 2> w79 = sdg_window(xyz, 79, W, H);
+      const std::array<double, 2> w11 = sdg_window(xyz, 11, W, H);
+      colours_ok = colours_ok && rgba[3] == 0 && rgba[4 * 79 + 3] == 0 && at_window(image, w79[0], w79[1]) == kWhite &&
+                   at_window(image, w11[0], w11[1]) == rgb_bytes(&rgba[4 * 11]);
+    }
+  }
+  check(colours_ok, "6d Metal: every sounding shows the colour of mb3dsoundings_colors() at its place, flagged ones "
+                    "in their flag's colour (" + std::to_string(checked) + " places" +
+                        (where.empty() ? std::string() : ", differ: " + where) +
+                        "); a sounding not drawn leaves the background and hides none behind it");
+
+  /* point sizes 1 and 6 (the control), and points against quads */
+  sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_NONE, false);
+  mbvq::RenderOptions one;
+  one.soundings_point_size = 1.0;
+  mbvq::RenderOptions six;
+  six.soundings_point_size = 6.0;
+  renderer.render_soundings(W, H, one, &image);
+  const int one_px = non_white(image);
+  renderer.render_soundings(W, H, six, &image);
+  const int six_px = non_white(image);
+  check(one_px > 0 && six_px == 36 * one_px,
+        "6d Metal: points of 6 px cover 36 times the pixels of points of 1 px (" + std::to_string(six_px) + " and " +
+            std::to_string(one_px) + ")");
+  {
+    mbvq::OffscreenRenderer quads(mbvq::OffscreenRenderer::Api::Metal);
+    mbvq::RenderOptions forced;
+    forced.point_quads = true;
+    QImage points_image, quads_image;
+    bool same = true;
+    std::string sizes;
+    for (double size : {1.0, 3.0, 4.5}) {
+      forced.soundings_point_size = size;
+      mbvq::RenderOptions plain;
+      plain.soundings_point_size = size;
+      renderer.render_soundings(W, H, plain, &points_image);
+      quads.render_soundings(W, H, forced, &quads_image);
+      const int differ = differing(points_image, quads_image);
+      sizes += std::to_string(differ) + " ";
+      same = same && differ == 0 && quads.stats().point_quads && !renderer.stats().point_quads;
+    }
+    check(same, "6d Metal: points and forced point quads give the same pixels at 1, 3 and 4.5 logical px (" + sizes +
+                    "pixels differ)");
+  }
+
+  /* the screen positions computed on the CPU (mb3dsoundings_screen_positions)
+     against the drawn points */
+  {
+    renderer.render_soundings(W, H, mbvq::RenderOptions(), &image);
+    mbvq_c_soundings_resize(W, H);
+    mb3dsoundings_screen_positions(0, &error);
+    std::vector<float> xyz;
+    std::vector<unsigned char> rgba;
+    rhi::SoundingsFrame reader;
+    reader.positions(static_cast<int>(sdg_storage.size()), &xyz);
+    reader.colours(static_cast<int>(sdg_storage.size()), &rgba);
+    int inside = 0, total = 0;
+    double worst = 0.0;
+    for (size_t i = 1; i < sdg_storage.size(); i++) {
+      /* not drawn, white on white, or under sounding 0 */
+      if (rgba[4 * i + 3] == 0 || rgb_bytes(&rgba[4 * i]) == kWhite || i == 11)
+        continue;
+      const uint32_t colour = rgb_bytes(&rgba[4 * i]);
+      const int x = sdg_storage[i].winx, y = sdg_storage[i].winy;
+      /* the drawn square of 3 px around the point: its pixels of the colour */
+      double sx = 0.0, sy = 0.0;
+      int n = 0;
+      for (int dy = -3; dy <= 3; dy++)
+        for (int dx = -3; dx <= 3; dx++)
+          if (at_window(image, x + dx + 0.5, y + dy + 0.5) == colour) {
+            sx += x + dx + 0.5;
+            sy += y + dy + 0.5;
+            n++;
+          }
+      const std::array<double, 2> w = sdg_window(xyz, i, W, H);
+      total++;
+      if (n == 9) {
+        worst = std::max(worst, std::max(std::fabs(sx / n - w[0]), std::fabs(sy / n - w[1])));
+        inside += at_window(image, x + 0.5, y + 0.5) == colour && x == static_cast<int>(w[0]) &&
+                  y == static_cast<int>(w[1]);
+      }
+    }
+    check(total > 0 && inside == total && worst < 0.5,
+          "6d Metal: the screen positions computed on the CPU name the pixel of every drawn point (" +
+              std::to_string(inside) + " of " + std::to_string(total) + "; the drawn 3 x 3 squares centred within " +
+              text("%.3f", worst) + " px of the projected places)");
+  }
+
+  /* the grab rectangle, drawn with the projection alone (camera == false):
+     at its window corners whatever the camera */
+  {
+    sdg_camera(35.0f, 125.0f, 1.3f, 0.05f, -0.05f);
+    /* no sounding yellow */
+    for (struct mb3dsoundings_sounding_struct &sounding : sdg_storage)
+      sounding.beamcolor = MBV_COLOR_BLACK;
+    sdg_view(MBS_VIEW_COLOR_FLAG, false, MBS_VIEW_PROFILES_NONE, false);
+    mbvq_c_soundings_resize(W, H);
+    mb3dsoundings.edit_mode = MBS_EDIT_GRAB;
+    mb3dsoundings.button1down = true;
+    mb3dsoundings.grab_start_defined = true;
+    mb3dsoundings.grab_end_defined = true;
+    mb3dsoundings.grab_start_x = 101;
+    mb3dsoundings.grab_start_y = 77;
+    mb3dsoundings.grab_end_x = 287;
+    mb3dsoundings.grab_end_y = 203;
+    renderer.render_soundings(W, H, mbvq::RenderOptions(), &image);
+    const uint32_t kYellow = 0x00ffff;
+    int left = 0, right = 0, bottom = 0, top = 0, inner = 0;
+    int xmin = W, xmax = -1, ymin = H, ymax = -1;
+    for (int row = 0; row < H; row++)
+      for (int x = 0; x < W; x++) {
+        if (pixel_rgb(image, x, row) != kYellow)
+          continue;
+        const int y = H - 1 - row;
+        xmin = std::min(xmin, x);
+        xmax = std::max(xmax, x);
+        ymin = std::min(ymin, y);
+        ymax = std::max(ymax, y);
+        left += std::abs(x - 101) <= 2;
+        right += std::abs(x - 287) <= 2;
+        bottom += std::abs(y - 77) <= 2;
+        top += std::abs(y - 203) <= 2;
+        inner += x > 104 && x < 284 && y > 80 && y < 200;
+      }
+    mb3dsoundings.button1down = false;
+    mb3dsoundings.grab_start_defined = false;
+    mb3dsoundings.grab_end_defined = false;
+    mb3dsoundings.edit_mode = MBS_EDIT_TOGGLE;
+    check(left > 3 * 100 && right > 3 * 100 && bottom > 3 * 150 && top > 3 * 150 && inner == 0 && xmin >= 99 &&
+              xmax <= 289 && ymin >= 75 && ymax <= 205,
+          "6d Metal: the grab rectangle (3 px, the projection alone) lies at its window corners 101 77 287 203 "
+          "under a rotated camera (yellow from " + std::to_string(xmin) + " " + std::to_string(ymin) + " to " +
+              std::to_string(xmax) + " " + std::to_string(ymax) + ")");
+  }
+
+  /* The profile lines: within a ping, pairs of beams 35 px apart; black
+     where both soundings are good, red where one is flagged; none between
+     pings. At ratio 1 one pixel thick from the index lists; at ratio 2 two
+     pixels by the minor-axis rule, from the instanced quads. Seen at azimuth
+     0 the lines run across the window (x-major), at azimuth 90 up it
+     (y-major); the line's pixels are counted along its minor axis. */
+  for (int view = 0; view < 4; view++) {
+    const int ratio = 1 + view % 2;
+    const float azimuth = view < 2 ? 0.0f : 90.0f;
+    sdg_camera(90.0f, azimuth, 1.0137f, 0.00123f, -0.00431f);
+    sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_ALL, false);
+    mbvq::RenderOptions options;
+    options.pixel_ratio = ratio;
+    renderer.render_soundings(W * ratio, H * ratio, options, &image);
+    const mbvq::RenderStats s = renderer.stats();
+    std::vector<float> xyz;
+    std::vector<uint32_t> black, red;
+    rhi::SoundingsFrame reader;
+    reader.positions(static_cast<int>(sdg_storage.size()), &xyz);
+    reader.pairs(static_cast<int>(sdg_storage.size()), &black, &red);
+    std::vector<int> kind(sdg_storage.size(), 0);
+    for (size_t k = 0; k + 1 < black.size(); k += 2)
+      kind[black[k]] = 1;
+    for (size_t k = 0; k + 1 < red.size(); k += 2)
+      kind[red[k]] = 2;
+    int good = 0, bad = 0;
+    std::string thick;
+    for (size_t i = 1; i + 1 < sdg_storage.size(); i++) {
+      /* the middle of the segment from i to i + 1 */
+      const std::array<double, 2> a = sdg_window(xyz, i, W * ratio, H * ratio);
+      const std::array<double, 2> b = sdg_window(xyz, i + 1, W * ratio, H * ratio);
+      const double mx = 0.5 * (a[0] + b[0]), my = 0.5 * (a[1] + b[1]);
+      const uint32_t expected = kind[i] == 1 ? 0x000000u : kind[i] == 2 ? kRed : kWhite;
+      if (kind[i] == 0) {
+        good += at_window(image, mx, my) == kWhite;
+        bad += at_window(image, mx, my) != kWhite;
+        continue;
+      }
+      /* the line's pixels across it in the middle: as many as its width */
+      const bool xmajor = std::fabs(b[0] - a[0]) >= std::fabs(b[1] - a[1]);
+      int n = 0;
+      for (int d = -4 * ratio; d <= 4 * ratio; d++)
+        n += (xmajor ? at_window(image, mx, my + d) : at_window(image, mx + d, my)) == expected;
+      if (n == ratio && xmajor == (azimuth == 0.0f))
+        good++;
+      else {
+        bad++;
+        if (thick.size() < 80)
+          thick += std::to_string(i) + ":" + std::to_string(n) + " ";
+      }
+    }
+    check(bad == 0 && good > 0 && s.profile_wide == (ratio == 2) &&
+              (ratio == 1 ? s.profile_indices > 0 && s.profile_instances == 0
+                          : s.profile_instances > 0 && s.profile_indices == 0),
+          "6d Metal: at ratio " + std::to_string(ratio) + " and azimuth " + std::to_string(static_cast<int>(azimuth)) +
+              " the profile lines (" + (azimuth == 0.0f ? "x" : "y") + "-major) are " +
+              (ratio == 1 ? "drawn thin from the index lists" : "drawn 2 px wide by the instanced quads") +
+              ", black and red where the core's pairs are and nothing between pings (" + std::to_string(good) +
+              " places right" + (thick.empty() ? std::string() : ", wrong: " + thick) + ")");
+  }
+  /* The stipple values follow the camera also in a frame that draws the
+     batch it has: a fill refused (another fill runs) after the camera
+     changed back draws the dotted box as a fill with that camera does (the
+     same elevation and azimuth, so the same batch). */
+  {
+    sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_NONE, true);
+    QImage expected;
+    sdg_camera(35.0f, 125.0f, 1.3f, 0.05f, -0.05f);
+    renderer.render_soundings(W, H, mbvq::RenderOptions(), &expected);
+    sdg_camera(35.0f, 125.0f, 1.5f, 0.1f, 0.0f);
+    renderer.render_soundings(W, H, mbvq::RenderOptions(), nullptr);
+    const int uploads = renderer.stats().stipple_uploads;
+    const int fills = renderer.stats().fills;
+    sdg_camera(35.0f, 125.0f, 1.3f, 0.05f, -0.05f);
+    TestBatch other;
+    mbv_draw_set_target(&other.b);
+    renderer.render_soundings(W, H, mbvq::RenderOptions(), &image);
+    mbv_draw_set_target(nullptr);
+    const int differ = differing(image, expected);
+    check(differ == 0 && renderer.stats().stipple_uploads == uploads + 1 && renderer.stats().fills == fills,
+          "6d Metal: after a refused fill the dotted box is drawn with the stipple of the new camera (" +
+              std::to_string(differ) + " pixels differ from a fill with that camera; " +
+              std::to_string(renderer.stats().stipple_uploads - uploads) + " stipple upload)");
+  }
+
+  /* Every soundings frame on the same frame slot (an empty frame of the
+     QRhi after each, as a window that draws a frame of its own between two
+     frames of the view), with new positions in every frame (an exaggeration
+     drag over 50,000 soundings, 600 KB of positions): written whole into
+     dynamic buffers, the positions leave Qt's Metal backend one pending
+     write for the other slot, so the malloc heap stays flat over 90 frames
+     (8 MB allowed); static buffers would keep every frame's upload pending
+     there (54 MB). Each frame and the empty one after it run in an
+     autorelease pool (FramePool, as 6c's batch check). */
+  {
+    make_sdg(200, 250, 23);
+    open_sdg();
+    sdg_camera(35.0f, 125.0f, 1.3f, 0.05f, -0.05f);
+    sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_NONE, false);
+    mbvq::OffscreenRenderer slot_renderer(mbvq::OffscreenRenderer::Api::Metal);
+    bool drawn = true;
+    int on_slot[2] = {0, 0};
+    double heap_start = 0.0;
+    const int writes = 0;
+    for (int f = 0; f < 120 && drawn; f++) {
+      {
+        const FramePool pool;
+        mb3dsoundings.exaggeration = 1.0f + 0.01f * (f % 50);
+        mb3dsoundings_scalez(0, &error);
+        drawn = slot_renderer.render_soundings(W, H, mbvq::RenderOptions(), nullptr, 1);
+        on_slot[slot_renderer.stats().frame_slot == 0 ? 0 : 1]++;
+        drawn = drawn && slot_renderer.empty_frame();
+      }
+      if (f + 1 == 30)
+        heap_start = heap_in_use();
+    }
+    const double heap = heap_in_use() - heap_start;
+    const mbvq::RenderStats st = slot_renderer.stats();
+    check(drawn && (on_slot[0] == 120 || on_slot[1] == 120) && st.sounding_writes[rhi::SoundingsPlan::kPositions] ==
+                                                                    writes + 120 &&
+              heap_start > 0.0 && heap < 8.0,
+          "6d Metal: 90 frames of new positions for 50,000 soundings, all on one frame slot" +
+              std::string(FramePool::available() ? ", each in an autorelease pool" : "") +
+              ", leave the malloc heap flat (" + text("%+.1f", heap) + " MB, less than 8 MB)");
+  }
+
+  /* The frames a view draws for a drag's last motion, which came while the
+     split upload of the motion before ran (1000 soundings in chunks of 250,
+     a budget of 5000 bytes): the last picture is the core's newest state,
+     as a renderer made now draws it (the dotted box from the batch, the
+     soundings from the newest positions). */
+  {
+    make_sdg(40, 25, 7);
+    open_sdg();
+    sdg_camera(25.0f, 35.0f, 1.0f, 0.0f, 0.0f);
+    sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_NONE, true);
+    mb3dsoundings.exaggeration = 3.0f;
+    mb3dsoundings_scalez(0, &error);
+    mbvq::RenderOptions split;
+    split.soundings_chunk = 250;
+    split.upload_budget = 5000;
+    mbvq::OffscreenRenderer dragged(mbvq::OffscreenRenderer::Api::Metal);
+    dragged.render_soundings(W, H, split, nullptr, 50);
+    mb3dsoundings.exaggeration = 3.5f;
+    mb3dsoundings_scalez(0, &error);
+    dragged.render_soundings(W, H, split, nullptr, 1);
+    const bool running = dragged.stats().soundings_waiting;
+    mb3dsoundings.exaggeration = 4.0f;
+    mb3dsoundings_scalez(0, &error);
+    QImage last, now;
+    const bool drawn = dragged.render_soundings(W, H, split, &last, 50);
+    const int frames = dragged.last_frames();
+    mbvq::OffscreenRenderer fresh(mbvq::OffscreenRenderer::Api::Metal);
+    fresh.render_soundings(W, H, split, &now, 50);
+    const int differ = differing(last, now);
+    check(drawn && running && frames < 50 && !dragged.stats().soundings_waiting && differ == 0 && non_white(now) > 0,
+          "6d Metal: the frames a view draws for a drag's last motion during the split upload of the one before end "
+          "with the core's newest state (" + std::to_string(frames) + " frames; " + std::to_string(differ) +
+              " px differ from a renderer made now)");
+  }
+  mb3dsoundings_end(0, &error);
+
+  /* stipple 0x1111 along a horizontal line: 1 on and 3 off at ratio 1, 2 on
+     and 6 off at ratio 2 (factor 2, the line 2 px wide) */
+  for (int ratio = 1; ratio <= 2; ratio++) {
+    TestBatch t;
+    mbv_draw_batch_enable(&t.b, MBV_DRAW_LINE_STIPPLE, true);
+    mbv_draw_batch_line_stipple(&t.b, 1, 0x1111);
+    t.primitive(MBV_DRAW_LINE_STRIP, {{-0.9f, 0.013f, 0}, {0.9f, 0.013f, 0}}, 1, 0, 0);
+    mbvq::RenderOptions options;
+    options.pixel_ratio = ratio;
+    const int size = 200 * ratio;
+    const bool drawn = renderer.render_batch(&t.b, kIdentity, kIdentity, size, size, options, &image);
+    /* the runs along the line, from its third on-run to its third-last */
+    const int row = image.height() - 1 - static_cast<int>(std::floor((0.013 + 1.0) * 0.5 * size));
+    std::vector<int> on, off;
+    int run = 0;
+    bool lit = false;
+    for (int x = 0; x < image.width(); x++) {
+      const bool red_here = pixel_rgb(image, x, row) == kRed;
+      if (x > 0 && red_here != lit) {
+        (lit ? on : off).push_back(run);
+        run = 0;
+      }
+      lit = red_here;
+      run++;
+    }
+    const bool runs = on.size() > 10 && off.size() > 10 &&
+                      std::all_of(on.begin() + 2, on.end() - 2, [ratio](int n) { return n == ratio; }) &&
+                      std::all_of(off.begin() + 3, off.end() - 2, [ratio](int n) { return n == 3 * ratio; });
+    check(drawn && runs,
+          "6d Metal: stipple 0x1111 runs " + std::to_string(ratio) + " on " + std::to_string(3 * ratio) +
+              " off at ratio " + std::to_string(ratio) + " (" + std::to_string(on.size()) + " dots)");
+  }
+}
+
+/* the profile view on Metal, of a profile made by hand: black and red quads
+   by the slope threshold, a green boundary, the frame black, red when a
+   value is clipped */
+void metal_profile() {
+  Grid grid;
+  size_t instance = MBV_NO_WINDOW;
+  check(open_grid(grid, nullptr, &instance), "6d Metal: a map for the profile");
+  struct mbview_struct *data = data_of(instance);
+  const int n = 7;
+  int error = MB_ERROR_NO_ERROR;
+  if (data->profile.npoints_alloc < n &&
+      mbview_allocprofilepoints(0, n, &data->profile.points, &error) == MB_SUCCESS)
+    data->profile.npoints_alloc = n;
+  const double z[n] = {-1000.0, -985.0, -1012.0, -995.0, -1003.0, -990.0, -1008.0};
+  data->profile.npoints = n;
+  data->profile.length = 600.0;
+  data->profile.zmin = -1012.0;
+  data->profile.zmax = -985.0;
+  for (int i = 0; i < n; i++) {
+    struct mbview_profilepoint_struct &p = data->profile.points[i];
+    p.boundary = i == 0 || i == 3 || i == n - 1;
+    p.distance = 100.0 * i;
+    p.zdata = z[i];
+    p.slope = i % 2 == 0 ? 0.1 : 0.9;
+  }
+  data->profile_slopethreshold = 0.5;
+  data->profile_exaggeration = 1.0;
+  mbvq_c_profile_show(instance, true);
+
+  mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Metal);
+  const int W = 1200, H = 300;
+  QImage image;
+  for (int clipped = 0; clipped <= 1; clipped++) {
+    if (clipped)
+      data->profile.points[2].zdata = -1200.0;
+    const bool drawn = renderer.render_profile(instance, W, H, mbvq::RenderOptions(), &image);
+    /* the drawing's coordinates (mbview_plotprofile) to window pixels with
+       the profile's camera */
+    double projection[16], modelview[16], camera[16];
+    mbvq_c_profile_camera(instance, projection, modelview);
+    rhi::multiply(projection, modelview, camera);
+    const auto window = [&](double x, double y) {
+      const double cx = camera[0] * x + camera[4] * y + camera[8] * MBV_OPENGL_ZPROFILE1 + camera[12];
+      const double cy = camera[1] * x + camera[5] * y + camera[9] * MBV_OPENGL_ZPROFILE1 + camera[13];
+      const double cw = camera[3] * x + camera[7] * y + camera[11] * MBV_OPENGL_ZPROFILE1 + camera[15];
+      return std::array<double, 2>{(cx / cw + 1.0) * 0.5 * W, (cy / cw + 1.0) * 0.5 * H};
+    };
+    const double scale = MBV_OPENGL_WIDTH / data->profile.length;
+    const double zcenter = 0.5 * (data->profile.zmax + data->profile.zmin);
+    const double aspect = static_cast<double>(H) / W;
+    const double yzmin = scale * (-0.5 * aspect * data->profile.length);
+    const double yzmax = -yzmin;
+    int quads = 0;
+    std::string wrong;
+    for (int i = 0; i + 1 < n; i++) {
+      const double y0 = std::min(std::max(scale * (data->profile.points[i].zdata - zcenter), yzmin), yzmax);
+      const double y1 = std::min(std::max(scale * (data->profile.points[i + 1].zdata - zcenter), yzmin), yzmax);
+      /* halfway between the bottom and the top edge in the middle of the quad */
+      const std::array<double, 2> w = window(scale * (100.0 * i + 50.0), 0.5 * (yzmin + 0.5 * (y0 + y1)));
+      const uint32_t expected = data->profile.points[i].slope < 0.5 ? 0x000000u : kRed;
+      const bool ok = at_window(image, w[0], w[1]) == expected;
+      quads += ok;
+      if (!ok)
+        wrong += std::to_string(i) + ":" + colour_name(at_window(image, w[0], w[1])) + " ";
+    }
+    /* the green boundary at point 3, 2 px wide, over the quads */
+    const std::array<double, 2> boundary = window(scale * 300.0, 0.5 * (yzmin + yzmax));
+    int green = 0;
+    for (int dx = -3; dx <= 3; dx++)
+      green += at_window(image, boundary[0] + dx, boundary[1]) == kGreen;
+    /* the frame's top edge, 2 px, black or red */
+    const std::array<double, 2> frame = window(0.5 * MBV_OPENGL_WIDTH, yzmax);
+    int framed = 0;
+    for (int dy = -3; dy <= 3; dy++)
+      framed += at_window(image, frame[0], frame[1] + dy) == (clipped ? kRed : 0x000000u);
+    check(drawn && quads == n - 1 && green == 2 && framed == 2,
+          std::string("6d Metal: the profile") + (clipped ? " with a clipped value" : "") +
+              " draws its quads black and red by the slope threshold (" + std::to_string(quads) + " of " +
+              std::to_string(n - 1) + (wrong.empty() ? std::string() : ", wrong " + wrong) + "), the boundary green, " +
+              std::to_string(green) + " px wide, and the frame " + (clipped ? "red" : "black") + ", " +
+              std::to_string(framed) + " px wide");
+  }
+  mbvq_c_profile_show(instance, false);
+  close_instance(instance);
+}
+
 int test_render_metal(const char *save) {
   mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Metal);
   if (!renderer.valid()) {
@@ -6255,9 +7914,12 @@ int test_render_metal(const char *save) {
   metal_batch();
   metal_buffers();
   metal_points();
+  metal_point_quads();
   metal_wide_layouts();
   metal_marker_runs();
   metal_contours();
+  metal_soundings();
+  metal_profile();
   return result();
 }
 
@@ -6277,6 +7939,51 @@ bool wait_full(size_t instance, int ms) {
          timer.elapsed() < ms)
     spin(20);
   return mbvq::view_state(mbvq::map_view(instance)).drawn && mbvq_c_lastdrawrez(instance) == MBVQ_REZ_FULL;
+}
+
+int npoints_of(const struct mbview_struct *data) { return data->profile.npoints; }
+
+/* A QRhi view's picture (W, grabFramebuffer) against the offscreen
+   renderer's picture of the same drawing (C) at the view's size and pixel
+   ratio; both Metal, so the same pixels (design 16). Elsewhere skipped. */
+void same_as_offscreen(QRhiWidget *view, const QImage &picture, double ratio, const std::string &what,
+                       const std::function<bool(mbvq::OffscreenRenderer &, const mbvq::RenderOptions &, QImage *)> &render) {
+  if (view == nullptr || view->api() != QRhiWidget::Api::Metal) {
+    std::printf("skipped: %s view's picture against the offscreen renderer's (Metal only)\n", what.c_str());
+    return;
+  }
+  mbvq::OffscreenRenderer offscreen(mbvq::OffscreenRenderer::Api::Metal);
+  mbvq::RenderOptions options;
+  options.pixel_ratio = ratio;
+  options.soundings_point_size = mbvq::soundings_point_size();
+  QImage c;
+  const bool drawn = offscreen.valid() && render(offscreen, options, &c);
+  const int differ = drawn ? differing(picture, c) : -1;
+  check(drawn && differ == 0, "6d: " + what + " view's picture (grabFramebuffer, " + std::to_string(picture.width()) +
+                                  " x " + std::to_string(picture.height()) + ") equals the offscreen renderer's at "
+                                  "its size and ratio " + text("%.2f", ratio) + " (" + std::to_string(differ) +
+                                  " px differ)");
+}
+
+/* The MB that the Metal device holds (MTLDevice.currentAllocatedSize; the
+   views' QRhis on Metal use the system's default device), -1 where there is
+   none. Metal and libobjc are looked up at run time, as for FramePool, so
+   that the test links nothing new. */
+double metal_allocated_mb() {
+#if defined(__APPLE__)
+  static void *device = [] {
+    void *create = dlsym(RTLD_DEFAULT, "MTLCreateSystemDefaultDevice");
+    return create != nullptr ? reinterpret_cast<void *(*)()>(create)() : nullptr;
+  }();
+  void *send = dlsym(RTLD_DEFAULT, "objc_msgSend");
+  void *selector = dlsym(RTLD_DEFAULT, "sel_registerName");
+  if (device == nullptr || send == nullptr || selector == nullptr)
+    return -1.0;
+  void *size = reinterpret_cast<void *(*)(const char *)>(selector)("currentAllocatedSize");
+  return static_cast<double>(reinterpret_cast<unsigned long (*)(void *, void *)>(send)(device, size)) / 1048576.0;
+#else
+  return -1.0;
+#endif
 }
 
 int test_display(bool mode3d, const char *grdfile, const char *save) {
@@ -6457,6 +8164,571 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
     }
   }
 
+  /* 6d: the profile view of a two-point pick across the map, in its window:
+     drawn; its frame (2 logical px) max(1, round(2 x ratio)) physical px
+     wide in grabFramebuffer(); at most floor(TextureSizeMax / ratio) logical
+     px wide (Metal's 16384), so a drawing 5 times a wide window is clamped
+     and the core's drawing is at most 16384 px */
+  {
+    /* from the centre, where the terrain is also in 3D (the click above
+       picked there), to the first of a few places beside it with data */
+    const int w = data->width, h = data->height;
+    for (const auto &end : {std::array<int, 2>{w * 3 / 5, h / 2 + h / 20}, std::array<int, 2>{w * 2 / 5, h / 2},
+                            std::array<int, 2>{w / 2, h * 3 / 5}, std::array<int, 2>{w / 2, h * 2 / 5}}) {
+      mbview_pick(instance, MBV_PICK_DOWN, w / 2, h / 2);
+      mbview_pick(instance, MBV_PICK_MOVE, end[0], end[1]);
+      mbview_pick(instance, MBV_PICK_UP, end[0], end[1]);
+      if (data->pickinfo_mode == MBV_PICK_TWOPOINT)
+        mbview_extract_pick_profile(instance);
+      if (npoints_of(data) > 2)
+        break;
+    }
+    mbvq::ProfileWindow *window = mbvq::map_widget(instance)->profile();
+    window->open();
+    QWidget *profile = window->view();
+    auto *profile_rhi = qobject_cast<QRhiWidget *>(profile);
+    timer.restart();
+    while (mbvq::view_stats(profile).frames == 0 && timer.elapsed() < 10000)
+      spin(20);
+    spin(200);
+    const double ratio = profile->devicePixelRatioF();
+    QImage picture;
+    if (profile_rhi != nullptr)
+      picture = profile_rhi->grabFramebuffer().convertToFormat(QImage::Format_RGB32);
+    int dark = 0;
+    for (int y = 0; y < picture.height(); y++)
+      for (int x = 0; x < picture.width(); x++)
+        dark += qGray(picture.pixel(x, y)) < 128;
+    /* the frame's top edge: the first run of black or red from the top of
+       the middle column */
+    int top = 0;
+    const int column = picture.width() / 2;
+    int y = 0;
+    const auto framed = [&](int row) {
+      const QRgb p = picture.pixel(column, row);
+      return qGreen(p) < 64 && qBlue(p) < 64 && (qRed(p) < 64 || qRed(p) > 192);
+    };
+    while (y < picture.height() && !framed(y))
+      y++;
+    while (y < picture.height() && framed(y)) {
+      top++;
+      y++;
+    }
+    const int width = std::max(1, static_cast<int>(std::floor(2.0 * ratio + 0.5)));
+    check(profile_rhi != nullptr && npoints_of(data) > 2 && dark > 0 && top == width &&
+              mbvq::view_stats(profile).pixel_ratio == ratio,
+          "6d: the profile of a two-point pick (" + std::to_string(npoints_of(data)) + " points) drawn with QRhi: " +
+              std::to_string(dark) + " dark pixels; its 2 px frame " + std::to_string(top) + " physical px wide at "
+              "the view's ratio " + text("%.2f", ratio) + " (" + std::to_string(width) + " expected)");
+    same_as_offscreen(profile_rhi, picture, ratio, "the profile", [&](mbvq::OffscreenRenderer &offscreen,
+                                                                      const mbvq::RenderOptions &options, QImage *c) {
+      return offscreen.render_profile(instance, picture.width(), picture.height(), options, c);
+    });
+    /* the cap from the view's QRhi; five times the visible width, clamped
+       to it where that is wider (at ratio 2 here; at ratio 1 the clamp is
+       checked by --widgets) */
+    const int limit = mbvq::view_state(profile).texture_size_max;
+    const int cap = static_cast<int>(std::floor(limit / ratio));
+    window->resize(1800, 360);
+    window->slider(0)->setValue(5);
+    spin(500);
+    const QWidget *viewport = profile->parentWidget();
+    const int asked = 5 * (viewport != nullptr ? viewport->width() : 0);
+    check(limit > 0 && profile->maximumWidth() == cap && profile->width() == std::min(cap, asked) &&
+              data->prwidth <= limit,
+          "6d: the profile view is at most floor(" + std::to_string(limit) + " / ratio) = " + std::to_string(cap) +
+              " px wide: a drawing 5 times its " + std::to_string(asked / 5) + " px viewport is " +
+              std::to_string(profile->width()) + " px (" + (asked > cap ? "clamped" : "below the cap") +
+              "), the core's " + std::to_string(data->prwidth) + " physical px");
+    if (save != nullptr) {
+      const std::string path = std::string(save) + ".profile.png";
+      check(picture.save(QString::fromStdString(path)), "the profile's picture saved as " + path);
+    }
+    window->slider(0)->setValue(1);
+    spin(300);
+    /* The view wider than its cap when a frame runs initialize(), as on a
+       QRhi whose largest texture is below the 16384 assumed before the QRhi
+       exists (OpenGL or Vulkan on some GPUs); here the maximum is lifted and
+       the view made wider. A cap that lowered the maximum inside that paint
+       would resize the view there, and QRhiWidget paints a resized view at
+       once, inside the paint's frame: the cap comes after the paint. The
+       horizontal scroll bar is kept out of the layout meanwhile: where it
+       takes space (macOS with scroll bars always shown, Linux), its
+       appearance resizes the viewport, and the window then caps the view
+       and sizes it to the viewport itself (layout_profile), whatever
+       initialize() did. Without it only initialize()'s cap brings the view
+       to its cap exactly. */
+    {
+      auto *area = window->findChild<QScrollArea *>();
+      const Qt::ScrollBarPolicy policy = area != nullptr ? area->horizontalScrollBarPolicy() : Qt::ScrollBarAsNeeded;
+      if (area != nullptr)
+        area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+      spin(200);
+      const int frames = mbvq::view_stats(profile).frames;
+      const int wide = cap + 4000;
+      profile->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+      profile->resize(wide, profile->height());
+      spin(500);
+      const int capped = profile->width();
+      const int maximum = profile->maximumWidth();
+      const int frames_drawn = mbvq::view_stats(profile).frames - frames;
+      if (area != nullptr)
+        area->setHorizontalScrollBarPolicy(policy);
+      spin(200);
+      check(area != nullptr && maximum == cap && capped == cap && frames_drawn > 0 &&
+                !mbvq::view_state(profile).failure_shown,
+            "6d: a profile view made " + std::to_string(wide) + " px wide, past its cap, draws and is capped after "
+            "that frame, with its window's horizontal scroll bar off: " + std::to_string(capped) + " px wide, its "
+            "cap " + std::to_string(cap) + " (" + std::to_string(frames_drawn) + " frames)");
+    }
+    window->dismiss();
+  }
+
+  /* 6d: the 3D soundings view in a dock of a main window: drawn, its points
+     (3 logical px) and profile lines (1 logical px) at the view's pixel
+     ratio in grabFramebuffer(), a click edits, the point-size control acts;
+     then floated, docked again, floated and closed while floating
+     (QTBUG-151834) */
+  {
+    auto *host = new QMainWindow;
+    host->setCentralWidget(new QLabel(QStringLiteral("the program")));
+    host->resize(1300, 900);
+    host->show();
+    QDockWidget *dock = nullptr;
+    mbvq::set_soundings_placement([host, &dock](mbvq::SoundingsWidget *widget) {
+      dock = new QDockWidget(widget->title());
+      dock->setWidget(widget);
+      host->addDockWidget(Qt::RightDockWidgetArea, dock);
+      dock->show();
+    });
+    make_sdg(60, 40, 23);
+    check(open_sdg() && dock != nullptr, "6d: the soundings in a dock of the program's main window");
+    QWidget *sview = mbvq::soundings_widget() != nullptr ? mbvq::soundings_widget()->view() : nullptr;
+    auto *sview_rhi = qobject_cast<QRhiWidget *>(sview);
+    if (sview_rhi != nullptr) {
+      sdg_camera(90.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+      sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_ALL, false);
+      mbvq_c_soundings_plot();
+      timer.restart();
+      while (!mbvq::view_state(sview).drawn && timer.elapsed() < 10000)
+        spin(20);
+      spin(300);
+      const double ratio = sview->devicePixelRatioF();
+      const QImage picture = sview_rhi->grabFramebuffer().convertToFormat(QImage::Format_RGB32);
+      int dark = 0;
+      for (int y = 0; y < picture.height(); y++)
+        for (int x = 0; x < picture.width(); x++)
+          dark += qGray(picture.pixel(x, y)) < 128;
+      /* a sounding in the middle, good, with good neighbours along its ping:
+         its point's height in its column, and the line's height between it
+         and the next sounding */
+      int error = MB_ERROR_NO_ERROR;
+      mb3dsoundings_screen_positions(0, &error);
+      const int H = picture.height();
+      size_t middle = sdg_storage.size() / 2 + 20;
+      while (middle + 1 < sdg_storage.size() &&
+             (sdg_storage[middle].beamflag != MB_FLAG_NONE || sdg_storage[middle + 1].beamflag != MB_FLAG_NONE ||
+              sdg_storage[middle - 1].beamflag != MB_FLAG_NONE))
+        middle++;
+      const auto run = [&](int x, int y0) {
+        const QRgb black = qRgb(0, 0, 0);
+        int y = y0, n = 0;
+        while (y > 0 && picture.pixel(x, y - 1) == black)
+          y--;
+        while (y < H && picture.pixel(x, y) == black) {
+          n++;
+          y++;
+        }
+        return n;
+      };
+      const int px = sdg_storage[middle].winx, py = H - 1 - sdg_storage[middle].winy;
+      const int point = run(px, py);
+      const int lx = (sdg_storage[middle].winx + sdg_storage[middle + 1].winx) / 2;
+      const int ly = H - 1 - (sdg_storage[middle].winy + sdg_storage[middle + 1].winy) / 2;
+      const int line = run(lx, ly);
+      const int point_px = std::max(1, static_cast<int>(std::floor(3.0 * ratio + 0.5)));
+      const int line_px = std::max(1, static_cast<int>(std::floor(1.0 * ratio + 0.5)));
+      if (save != nullptr) {
+        const std::string path = std::string(save) + ".soundings.png";
+        check(picture.save(QString::fromStdString(path)), "the soundings' picture saved as " + path);
+      }
+      check(dark > 0 && point == point_px && line == line_px && mbvq::view_stats(sview).profile_wide == (line_px > 1),
+            "6d: the soundings drawn with QRhi (" + std::to_string(dark) + " dark pixels): a 3 px point " +
+                std::to_string(point) + " and a 1 px profile line " + std::to_string(line) +
+                " physical px high at the view's ratio " + text("%.2f", ratio) + " (" + std::to_string(point_px) +
+                " and " + std::to_string(line_px) + " expected)");
+      same_as_offscreen(sview_rhi, picture, ratio, "the 3D soundings",
+                        [&](mbvq::OffscreenRenderer &offscreen, const mbvq::RenderOptions &options, QImage *c) {
+                          return offscreen.render_soundings(picture.width(), picture.height(), options, c, 50);
+                        });
+      /* the point-size control: 1 logical px */
+      QDoubleSpinBox *control = mbvq::soundings_widget()->findChild<QDoubleSpinBox *>();
+      if (control != nullptr)
+        control->setValue(1.0);
+      spin(300);
+      const QImage smaller = sview_rhi->grabFramebuffer().convertToFormat(QImage::Format_RGB32);
+      int small_point = 0;
+      {
+        const QRgb black = qRgb(0, 0, 0);
+        int y = py;
+        while (y > 0 && smaller.pixel(px, y - 1) == black)
+          y--;
+        while (y < H && smaller.pixel(px, y) == black) {
+          small_point++;
+          y++;
+        }
+      }
+      if (control != nullptr)
+        control->setValue(3.0);
+      const int small_px = std::max(1, static_cast<int>(std::floor(1.0 * ratio + 0.5)));
+      check(control != nullptr && small_point == std::max(small_px, line_px),
+            "6d: the point-size control at 1 px draws the points " + std::to_string(small_point) +
+                " physical px high (" + std::to_string(small_px) + ", within a line " + std::to_string(line_px) +
+                " high)");
+      /* a click on a sounding edits it */
+      const int edits = sdg_edits;
+      const QPointF at(sdg_storage[middle].winx / ratio, (H - 1 - sdg_storage[middle].winy) / ratio);
+      QMouseEvent down(QEvent::MouseButtonPress, at, sview->mapToGlobal(at), Qt::LeftButton, Qt::LeftButton,
+                       Qt::NoModifier);
+      QApplication::sendEvent(sview, &down);
+      QMouseEvent up(QEvent::MouseButtonRelease, at, sview->mapToGlobal(at), Qt::LeftButton, Qt::NoButton,
+                     Qt::NoModifier);
+      QApplication::sendEvent(sview, &up);
+      spin(200);
+      check(sdg_edits == edits + 1, "6d: a click on a sounding after the first frame edits it");
+      /* Dismiss, as mbeditviz-qt: the view is hidden, then the program
+         releases its soundings in the notification, and the hidden view,
+         which draws no frame that would drop them, lets go of what it holds
+         of them in the same call. A million soundings, whose buffers the
+         QRhi would otherwise free only in a frame. On Metal the GPU memory
+         itself is measured: the device's allocations right before and right
+         after the call, without an event between, after three more frames
+         of the view (at least two required, Metal's two frame slots), so
+         that the drop is the view's own: without them the call's finish()
+         also frees what the window's earlier frames left. A Metal device
+         that cannot be read fails the check; elsewhere only the renderer's
+         count. */
+      sdg_release_on_dismiss = true;
+      sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_NONE, false);
+      {
+        make_sdg(2500, 400, 23);
+        open_sdg();
+        mbvq_c_soundings_plot();
+        const int count = static_cast<int>(sdg_storage.size());
+        timer.restart();
+        while ((mbvq::view_stats(sview).soundings_drawn != count || mbvq::view_stats(sview).soundings_waiting) &&
+               timer.elapsed() < 20000)
+          spin(20);
+        spin(300);
+        const int drawn_frames = mbvq::view_stats(sview).frames;
+        for (int i = 0; i < 3; i++) {
+          sview->update();
+          spin(150);
+        }
+        const mbvq::RenderStats shown = mbvq::view_stats(sview);
+        const double gpu_before = metal_allocated_mb();
+        mbvq_c_soundings_dismiss();
+        const double gpu_after = metal_allocated_mb();
+        spin(300);
+        const mbvq::RenderStats hidden = mbvq::view_stats(sview);
+        const bool visible = sview->isVisible();
+        std::vector<struct mb3dsoundings_sounding_struct>().swap(sdg_storage);
+        const double held = shown.sounding_held_bytes / 1048576.0;
+        const int frames = shown.frames - drawn_frames;
+        const bool metal = sview_rhi->api() == QRhiWidget::Api::Metal;
+        const bool measured = metal && gpu_before >= 0.0 && gpu_after >= 0.0;
+        check(shown.soundings_drawn == count && held > 0.0 && !visible && hidden.frames == shown.frames &&
+                  hidden.soundings == 0 && hidden.sounding_held_bytes == 0 &&
+                  (!metal || (measured && frames >= 2 && gpu_before - gpu_after >= 0.75 * held)),
+              "6d: Dismiss lets go of the buffers of " + std::to_string(count) + " soundings (" + text("%.1f", held) +
+                  " MB) in its call, without a frame of the hidden view: " +
+                  (!metal     ? std::string("its renderer holds none (the GPU memory is measured on Metal only)")
+                   : measured ? "the Metal device holds " + text("%.1f", gpu_before - gpu_after) + " MB less (after " +
+                                    std::to_string(frames) + " more frames)"
+                              : std::string("the Metal device's allocations could not be read")));
+      }
+      /* The next soundings drawn; then Dismiss while the dock is closed (its
+         close button: the program keeps its soundings until a menu of its
+         own dismisses them): the view, hidden already, gets no Hide event,
+         and lets them go all the same. */
+      {
+        make_sdg(60, 40, 23);
+        open_sdg();
+        mbvq_c_soundings_plot();
+        timer.restart();
+        while (mbvq::view_stats(sview).soundings_drawn == 0 && timer.elapsed() < 10000)
+          spin(20);
+        spin(200);
+        const mbvq::RenderStats shown = mbvq::view_stats(sview);
+        dock->close();
+        spin(300);
+        const mbvq::RenderStats closed = mbvq::view_stats(sview);
+        mbvq_c_soundings_dismiss();
+        spin(300);
+        const mbvq::RenderStats dismissed = mbvq::view_stats(sview);
+        dock->show();
+        spin(300);
+        check(shown.soundings_drawn == static_cast<int>(sdg_storage.size()) && shown.sounding_held_bytes > 0 &&
+                  closed.sounding_held_bytes == shown.sounding_held_bytes && dismissed.soundings == 0 &&
+                  dismissed.sounding_held_bytes == 0,
+              "6d: the next soundings shown are drawn (" + std::to_string(shown.soundings_drawn) + "); Dismiss "
+              "while their dock is closed lets them go (GPU bytes " + std::to_string(closed.sounding_held_bytes) +
+                  " while the dock is closed, " + std::to_string(dismissed.sounding_held_bytes) + " after Dismiss)");
+      }
+      /* A host that docks its floating soundings dock again when the editor
+         tells it that it closed (SoundingsWidget::closed, at Dismiss): the
+         floating window and its QRhi go in the middle of Dismiss, before
+         the program releases the soundings. The view lets them go without
+         that QRhi, and draws the next soundings in the main window. */
+      {
+        make_sdg(60, 40, 23);
+        open_sdg();
+        dock->setFloating(true);
+        spin(1200);
+        mbvq_c_soundings_plot();
+        spin(400);
+        const bool floated = dock->isFloating() && mbvq::view_state(sview).renderer &&
+                             mbvq::view_stats(sview).soundings_drawn == static_cast<int>(sdg_storage.size());
+        const QMetaObject::Connection redock = QObject::connect(
+            mbvq::soundings_widget(), &mbvq::SoundingsWidget::closed, dock, [dock] { dock->setFloating(false); });
+        mbvq::soundings_widget()->dismiss();
+        QObject::disconnect(redock);
+        const bool docked = !dock->isFloating();
+        spin(800);
+        const mbvq::RenderStats dismissed = mbvq::view_stats(sview);
+        make_sdg(60, 40, 23);
+        open_sdg();
+        mbvq_c_soundings_plot();
+        timer.restart();
+        while (mbvq::view_stats(sview).soundings_drawn == 0 && timer.elapsed() < 10000)
+          spin(20);
+        const mbvq::RenderStats again = mbvq::view_stats(sview);
+        check(floated && docked && dismissed.sounding_held_bytes == 0 && !dock->isFloating() &&
+                  again.soundings_drawn == static_cast<int>(sdg_storage.size()) && mbvq::view_state(sview).renderer &&
+                  !mbvq::view_state(sview).failure_shown,
+              "6d: a host docks the floating soundings dock again at Dismiss (on SoundingsWidget::closed), which "
+              "takes the floating window's QRhi: the next soundings are drawn in the main window (" +
+                  std::to_string(again.soundings_drawn) + ")");
+      }
+      sdg_release_on_dismiss = false;
+      /* float, dock again, float, then end the soundings while floating */
+      bool moves = true;
+      std::string drawn_after;
+      for (bool floating : {true, false, true}) {
+        dock->setFloating(floating);
+        spin(1200);
+        const int frames = mbvq::view_stats(sview).frames;
+        mbvq_c_soundings_plot();
+        /* the frame comes when the window is next composed: waited for, up
+           to 5 s, rather than a fixed time */
+        timer.restart();
+        while (mbvq::view_stats(sview).frames == frames && timer.elapsed() < 5000)
+          spin(20);
+        const bool drew = mbvq::view_stats(sview).frames > frames && mbvq::view_state(sview).renderer &&
+                          !mbvq::view_state(sview).failure_shown;
+        drawn_after += drew ? "1" : "0";
+        moves = moves && drew && dock->isFloating() == floating;
+      }
+      const int removed = mbvq::stale_callbacks_removed();
+      mb3dsoundings_end(0, &error);
+      spin(200);
+      const int removed_after = mbvq::stale_callbacks_removed();
+      delete host;
+      spin(200);
+      check(moves && removed_after > removed,
+            "6d: the soundings dock floated, docked again and floated, drawing each time (" + drawn_after +
+                "); ended while floating, its view removed QRhiWidget's callback from the QRhi it left (" +
+                std::to_string(removed_after - removed) + "), then the main window went (QTBUG-151834)");
+    }
+    else {
+      delete host;
+    }
+    mbvq::set_soundings_placement({});
+  }
+
+  /* 6d: mb3dsoundings_open() shows the soundings window, and a QRhi view
+     paints at once when it is shown, inside the call: the call scales the
+     soundings before it shows the window, so that the view reads their
+     positions once, at their final scale, and writes them once. The first
+     open of the standalone soundings window, as mbeditviz-qt has it, then
+     Dismiss and the next area's open, as mbeditviz-qt opens each area (no
+     plot call of its own); each must paint inside the call. */
+  {
+    /* the next area's 100,000 soundings opened; the frames the view drew inside the call */
+    const auto open_area = [](int flag_every, int *inside) -> QWidget * {
+      make_sdg(250, 400, flag_every);
+      QWidget *previous = mbvq::soundings_widget() != nullptr ? mbvq::soundings_widget()->view() : nullptr;
+      const int frames = previous != nullptr ? mbvq::view_stats(previous).frames : 0;
+      QWidget *opened = open_sdg() ? mbvq::soundings_widget()->view() : nullptr;
+      *inside = opened != nullptr ? mbvq::view_stats(opened).frames - (opened == previous ? frames : 0) : 0;
+      return opened;
+    };
+    int inside_first = 0, inside_next = 0;
+    QWidget *sview = open_area(23, &inside_first);
+    const int count = static_cast<int>(sdg_storage.size());
+    const auto wait_stats = [&] {
+      timer.restart();
+      while ((mbvq::view_stats(sview).soundings_drawn != count || mbvq::view_stats(sview).soundings_waiting) &&
+             timer.elapsed() < 20000)
+        spin(20);
+      spin(200);
+      return mbvq::view_stats(sview);
+    };
+    mbvq::RenderStats first_open, dismissed, next_open;
+    QWidget *next_view = nullptr;
+    if (qobject_cast<QRhiWidget *>(sview) != nullptr) {
+      first_open = wait_stats();
+      sdg_release_on_dismiss = true;
+      mbvq_c_soundings_dismiss();
+      sdg_release_on_dismiss = false;
+      std::vector<struct mb3dsoundings_sounding_struct>().swap(sdg_storage);
+      spin(300);
+      dismissed = mbvq::view_stats(sview);
+      next_view = open_area(19, &inside_next);
+      next_open = wait_stats();
+    }
+    const size_t bytes = 12 * static_cast<size_t>(count);
+    const int next_reads = next_open.sounding_reads[0] - dismissed.sounding_reads[0];
+    const size_t next_bytes = next_open.sounding_bytes[0] - dismissed.sounding_bytes[0];
+    check(next_view != nullptr && next_view == sview && first_open.soundings_drawn == count &&
+              next_open.soundings_drawn == count && inside_first > 0 && inside_next > 0 &&
+              first_open.sounding_reads[0] == 1 && first_open.sounding_bytes[0] == bytes && next_reads == 1 &&
+              next_bytes == bytes,
+          "6d: the soundings window opened by mb3dsoundings_open() paints inside the call (" +
+              std::to_string(inside_first) + " and " + std::to_string(inside_next) + " frames) and reads the " +
+              std::to_string(count) + " positions once: " + std::to_string(first_open.sounding_reads[0]) +
+              " read, " + std::to_string(first_open.sounding_bytes[0]) + " bytes written at the first open, " +
+              std::to_string(next_reads) + " read, " + std::to_string(next_bytes) + " bytes at the open after "
+              "Dismiss (" + std::to_string(bytes) + " bytes each)");
+    int error = MB_ERROR_NO_ERROR;
+    mb3dsoundings_end(0, &error);
+    sdg_data.num_soundings = 0;
+    sdg_data.soundings = nullptr;
+    std::vector<struct mb3dsoundings_sounding_struct>().swap(sdg_storage);
+  }
+
+  /* 6d: the program's end paths (Quit, View All, Generate New Grid, the map
+     dismissed) call mb3dsoundings_end(), which deletes the soundings view at
+     once and its hidden window only at a safe point (the next soundings, or
+     Quit): the view lets go of its buffers when it is deleted, since that
+     window draws no frame that would. A million soundings in the standalone
+     soundings window, as mbeditviz-qt has it. On Metal the device's
+     allocations right before and right after the call, without an event
+     between, after three more frames of the view (at least two required,
+     Metal's two frame slots), so that the drop is the view's own: without
+     them the call's finish() also frees what the window's earlier frames
+     left. A Metal device that cannot be read fails the check. On the other
+     APIs nothing is measured (the view, and with it its renderer's count,
+     goes in the call). */
+  {
+    make_sdg(2500, 400, 23);
+    const bool opened = open_sdg();
+    const QPointer<QWidget> swindow = mbvq::soundings_window();
+    QWidget *sview = opened ? mbvq::soundings_widget()->view() : nullptr;
+    auto *sview_rhi = qobject_cast<QRhiWidget *>(sview);
+    const int count = static_cast<int>(sdg_storage.size());
+    int drawn_frames = 0;
+    if (swindow != nullptr && sview_rhi != nullptr) {
+      sdg_camera(90.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+      sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_NONE, false);
+      mbvq_c_soundings_plot();
+      timer.restart();
+      while ((mbvq::view_stats(sview).soundings_drawn != count || mbvq::view_stats(sview).soundings_waiting) &&
+             timer.elapsed() < 20000)
+        spin(20);
+      spin(300);
+      drawn_frames = mbvq::view_stats(sview).frames;
+      for (int i = 0; i < 3; i++) {
+        sview->update();
+        spin(150);
+      }
+    }
+    const mbvq::RenderStats shown = sview_rhi != nullptr ? mbvq::view_stats(sview) : mbvq::RenderStats();
+    /* the view goes in the call */
+    const bool metal = sview_rhi != nullptr && sview_rhi->api() == QRhiWidget::Api::Metal;
+    const double gpu_before = metal_allocated_mb();
+    int error = MB_ERROR_NO_ERROR;
+    mb3dsoundings_end(0, &error);
+    const double gpu_after = metal_allocated_mb();
+    /* the program releases its soundings after the call, as mbeditviz does */
+    sdg_data.num_soundings = 0;
+    sdg_data.soundings = nullptr;
+    std::vector<struct mb3dsoundings_sounding_struct>().swap(sdg_storage);
+    const bool waits = swindow != nullptr && !swindow->isVisible() && mbvq::soundings_widget() == nullptr;
+    const double held = shown.sounding_held_bytes / 1048576.0;
+    const int frames = shown.frames - drawn_frames;
+    const bool measured = metal && gpu_before >= 0.0 && gpu_after >= 0.0;
+    check(sview_rhi != nullptr && shown.soundings_drawn == count && held > 0.0 && waits &&
+              (!metal || (measured && frames >= 2 && gpu_before - gpu_after >= 0.75 * held)),
+          "6d: mb3dsoundings_end() (the program's end paths) deletes the view of " + std::to_string(count) +
+              " soundings (" + text("%.1f", held) + " MB) of the standalone soundings window, which waits hidden for "
+              "a safe point, and the view lets go of its buffers in that call: " +
+              (!metal     ? std::string("not measured (the GPU memory is measured on Metal only)")
+               : measured ? "the Metal device holds " + text("%.1f", gpu_before - gpu_after) + " MB less (after " +
+                                std::to_string(frames) + " more frames)"
+                          : std::string("the Metal device's allocations could not be read")));
+  }
+
+  /* 6d: mbview_destroy() (a map's Dismiss, the programs' Quit, a regrid in
+     mbeditviz-qt) deletes the map view at once and its hidden standalone
+     window only at a safe point (the next map, or Quit): the view lets go of
+     its renderer's buffers when it is deleted, since that window draws no
+     frame that would. A second map of the grid in a window of its own (the
+     first is needed below), drawn completely. On Metal the device's
+     allocations right before and right after the call, without an event
+     between, after three more frames of the view (at least two required,
+     Metal's two frame slots), so that the drop is the view's own: they must
+     drop by at least 3/4 of the bytes its renderer held (the terrain's tile
+     levels, the batch and the contours, every copy counted). A Metal device
+     that cannot be read fails the check. On the other APIs nothing is
+     measured (the view, and with it its renderer's count, goes in the
+     call). */
+  {
+    size_t second = MBV_NO_WINDOW;
+    const bool second_opened = open_grid(grid, grdfile, &second);
+    const QPointer<QWidget> mwindow = second_opened ? mbvq::window(second) : nullptr;
+    const QPointer<QWidget> mview = second_opened ? mbvq::map_view(second) : nullptr;
+    auto *mview_rhi = qobject_cast<QRhiWidget *>(mview.data());
+    int drawn_frames = 0;
+    if (mwindow != nullptr && mview_rhi != nullptr) {
+      timer.restart();
+      while ((!mbvq::view_state(mview).drawn || mbvq_c_lastdrawrez(second) != MBVQ_REZ_FULL ||
+              mbvq::view_stats(mview).tiles_drawn == 0 || mbvq::view_stats(mview).tiles_waiting > 0) &&
+             timer.elapsed() < 20000)
+        spin(20);
+      spin(300);
+      drawn_frames = mbvq::view_stats(mview).frames;
+      for (int i = 0; i < 3; i++) {
+        mview->update();
+        spin(150);
+      }
+    }
+    const mbvq::RenderStats shown = mview_rhi != nullptr ? mbvq::view_stats(mview) : mbvq::RenderStats();
+    /* the view goes in the call */
+    const bool metal = mview_rhi != nullptr && mview_rhi->api() == QRhiWidget::Api::Metal;
+    const double gpu_before = metal_allocated_mb();
+    int error = MB_ERROR_NO_ERROR;
+    if (second_opened)
+      mbview_destroy(0, second, true, &error);
+    const double gpu_after = metal_allocated_mb();
+    const bool waits = mwindow != nullptr && !mwindow->isVisible() && mview == nullptr &&
+                       mbvq::map_widget(second) == nullptr;
+    const double terrain = shown.resident_bytes / 1048576.0;
+    const double held = (shown.resident_bytes + shown.batch_held_bytes + shown.contour_held_bytes) / 1048576.0;
+    const int frames = shown.frames - drawn_frames;
+    const bool measured = metal && gpu_before >= 0.0 && gpu_after >= 0.0;
+    check(mview_rhi != nullptr && shown.tiles_drawn > 0 && shown.tiles_waiting == 0 && terrain > 0.0 && waits &&
+              (!metal || (measured && frames >= 2 && gpu_before - gpu_after >= 0.75 * held)),
+          "6d: mbview_destroy() deletes the view of a map drawn completely (" + std::to_string(shown.tiles_drawn) +
+              " tiles; " + text("%.1f", held) + " MB, the terrain " + text("%.1f", terrain) + " MB) of a "
+              "standalone map window, which waits hidden for a safe point, and the view lets go of its buffers in "
+              "that call: " +
+              (!metal     ? std::string("not measured (the GPU memory is measured on Metal only)")
+               : measured ? "the Metal device holds " + text("%.1f", gpu_before - gpu_after) + " MB less (after " +
+                                std::to_string(frames) + " more frames)"
+                          : std::string("the Metal device's allocations could not be read")));
+  }
+
   /* the failure label: shown on renderFailed, hidden again by a working initialize() */
   emit rhi_widget->renderFailed();
   const bool shown = mbvq::view_state(view).failure_shown;
@@ -6493,17 +8765,31 @@ int terrain_pixels(size_t instance) {
   return n;
 }
 
-/* A program with a QRhi map and its profile window open ends (--quit). */
-int test_quit(const char *how, const char *grdfile) {
+/* A program with a QRhi map, its profile window and the 3D soundings in a
+   floating dock of its main window open ends (--quit). With maps_only (the
+   shape of mbgrdviz-qt): the map and its profile window alone, without
+   soundings, and a main window only for "float" (its map in a dock). */
+int test_quit(const char *how, const char *grdfile, bool maps_only) {
   const bool floating = std::strcmp(how, "float") == 0;
-  /* "float": the map in a dock of the program's main window */
+  /* the program's main window: the soundings in a dock of it (6d), floated
+     below; with "float" the map too */
   QMainWindow *host = nullptr;
-  QDockWidget *dock = nullptr;
-  if (floating) {
+  if (!maps_only || floating) {
     host = new QMainWindow;
     host->setCentralWidget(new QLabel(QStringLiteral("the program")));
     host->resize(1200, 800);
     host->show();
+  }
+  QDockWidget *dock = nullptr;
+  QDockWidget *soundings_dock = nullptr;
+  if (!maps_only)
+    mbvq::set_soundings_placement([host, &soundings_dock](mbvq::SoundingsWidget *widget) {
+      soundings_dock = new QDockWidget(widget->title());
+      soundings_dock->setWidget(widget);
+      host->addDockWidget(Qt::RightDockWidgetArea, soundings_dock);
+      soundings_dock->show();
+    });
+  if (floating) {
     mbvq::set_map_placement([host, &dock](mbvq::MapWidget *map) {
       dock = new QDockWidget(map->title());
       dock->setWidget(map);
@@ -6517,7 +8803,7 @@ int test_quit(const char *how, const char *grdfile) {
   mbvq::MapWidget *map = mbvq::map_widget(instance);
   if (map == nullptr)
     return result();
-  /* its profile window too (a null view under QRhi for now) */
+  /* its profile window too (a QRhi view since 6d) */
   map->profile()->open();
   check(wait_full(instance, 20000) && terrain_pixels(instance) > 0,
         std::string("the map drawn (window exposed: ") + (exposed(mbvq::map_view(instance)) ? "1" : "0") + ")");
@@ -6529,6 +8815,30 @@ int test_quit(const char *how, const char *grdfile) {
     check(dock->isFloating() && terrain_pixels(instance) > 0 && mbvq::view_state(mbvq::map_view(instance)).renderer,
           "the map's dock floats: drawn with the QRhi of the floating window");
   }
+  /* 6d: the soundings, drawn in their dock, then floated */
+  if (!maps_only) {
+    make_sdg(60, 40, 23);
+    open_sdg();
+    QWidget *sview = mbvq::soundings_widget() != nullptr ? mbvq::soundings_widget()->view() : nullptr;
+    QElapsedTimer timer;
+    timer.start();
+    while (sview != nullptr && !mbvq::view_state(sview).drawn && timer.elapsed() < 10000)
+      spin(20);
+    const bool docked_drawn = sview != nullptr && mbvq::view_state(sview).drawn;
+    if (soundings_dock != nullptr)
+      soundings_dock->setFloating(true);
+    spin(1200);
+    const int frames = sview != nullptr ? mbvq::view_stats(sview).frames : 0;
+    mbvq_c_soundings_plot();
+    /* the frame comes when the window is next composed: waited for, up to
+       5 s, rather than a fixed time */
+    timer.restart();
+    while (sview != nullptr && mbvq::view_stats(sview).frames == frames && timer.elapsed() < 5000)
+      spin(20);
+    check(docked_drawn && soundings_dock != nullptr && soundings_dock->isFloating() &&
+              mbvq::view_stats(sview).frames > frames && mbvq::view_state(sview).renderer,
+          "6d: the soundings drawn in their dock, then floated and drawn with the QRhi of the floating window");
+  }
 
   bool about_to_quit = false;
   QObject::connect(qApp, &QCoreApplication::aboutToQuit, qApp, [&about_to_quit] { about_to_quit = true; });
@@ -6539,7 +8849,8 @@ int test_quit(const char *how, const char *grdfile) {
       QApplication::quit();
     }
     else if (std::strcmp(how, "exit") == 0) {
-      /* the macOS Quit menu of the programs: exit() inside the event loop */
+      /* the macOS Quit menu of the programs: exit() inside the event loop,
+         with the soundings (unless maps_only) still floating */
       mbvq::window(instance)->close();
       check(mbvq::window(instance) == nullptr, "the map window closes; exit() inside the event loop");
       std::exit(result());
@@ -6553,19 +8864,29 @@ int test_quit(const char *how, const char *grdfile) {
   check(status == 0 && about_to_quit, "the event loop ends (aboutToQuit)");
   if (std::strcmp(how, "close") == 0)
     check(mbvq::window(instance) == nullptr, "the closed map window is gone (deleted at aboutToQuit)");
-  if (floating) {
-    /* the program ends its maps, then its main window goes, which held the
-       map before it floated (QTBUG-151834) */
-    const int removed = mbvq::stale_callbacks_removed();
-    int error = MB_ERROR_NO_ERROR;
-    mbview_quit(0, &error);
-    spin(100);
-    delete host;
-    spin(100);
-    check(mbvq::stale_callbacks_removed() == removed + 1,
-          "the floated map's callback in the main window's QRhi was removed when its view went, before the main "
-          "window (QTBUG-151834)");
-  }
+  /* without a main window the program returns (its windows go with the
+     QApplication) */
+  if (host == nullptr)
+    return result();
+  /* The program ends its soundings and maps, then its main window goes,
+     which held the soundings (and with "float" the map) before they floated
+     (QTBUG-151834): the views removed QRhiWidget's callbacks from its QRhi. */
+  const int removed = mbvq::stale_callbacks_removed();
+  int error = MB_ERROR_NO_ERROR;
+  if (!maps_only)
+    mb3dsoundings_end(0, &error);
+  spin(100);
+  mbview_quit(0, &error);
+  spin(100);
+  delete host;
+  spin(100);
+  const int expected = (floating ? 1 : 0) + (maps_only ? 0 : 1);
+  const std::string floated = floating && !maps_only ? "map's and soundings' callbacks"
+                              : floating             ? "map's callback"
+                                                     : "soundings' callback";
+  check(mbvq::stale_callbacks_removed() == removed + expected,
+        "the floated " + floated +
+            " in the main window's QRhi were removed when their views went, before the main window (QTBUG-151834)");
   return result();
 }
 
@@ -7300,6 +9621,228 @@ int bench(bool mode3d, const char *grdfile, int steps, int width, int height, co
   return 0;
 }
 
+
+/*--------------------------------------------------------------------*/
+/* --bench-soundings n: the frame times of the 3D soundings view with n
+   synthetic soundings (pings of 400 beams) in its window, driven through the
+   view's input as a user drives it, with the backend MB_RENDERER names (QRhi
+   with the platform's API when it is unset; legacy-gl for the OpenGL
+   backend), so that both are measured by one script: a rotation (the middle
+   button), an erase drag (the left button in the Erase mode: a colour mark
+   per motion), an exaggeration drag (the right button: a position mark per
+   motion), bias changes (the roll bias, as a slider release: colour and
+   position marks; without a program's bias notify, so the view's own costs
+   only), and a rotation with all profiles shown. Each step is a motion (or
+   a bias change) sent, then the wait for the view's next frame (latency),
+   and under QRhi also for the frames that complete the writes it started
+   (complete); per step the renderer's phases, the GPU time of the frame
+   (which the next frame reports), the writes and the malloc heap and
+   footprint. Output as --bench: "bench scenario metric n median p95 max"
+   and "values" lines. A measurement, not a test. */
+int bench_soundings(int count, int steps) {
+  const bool rhi = mbvq::backend() == mbvq::Backend::Rhi;
+  std::printf("info\tbackend\t%s\n", rhi ? "QRhi" : "OpenGL");
+  const int beams = 400;
+  const int pings = std::max(1, count / beams);
+  QElapsedTimer opening;
+  opening.start();
+  make_sdg(pings, beams, 23);
+  report_memory("soundings made");
+  if (!open_sdg())
+    return 1;
+  mbvq::SoundingsWidget *widget = mbvq::soundings_widget();
+  QWidget *view = widget != nullptr ? widget->view() : nullptr;
+  if (view == nullptr)
+    return 1;
+  /* the view's frames: QRhiWidget::frameSubmitted, QOpenGLWidget::frameSwapped */
+  int submitted = 0;
+  double submitted_at = 0.0;
+  QEventLoop *waiting = nullptr;
+  QTimer relay_timer;
+  relay(view, rhi ? "frameSubmitted()" : "frameSwapped()", &relay_timer, [&] {
+    submitted++;
+    submitted_at = bench_ms();
+    if (waiting != nullptr)
+      waiting->quit();
+  });
+  /* waits for the next frame after the one counted as seen; false after
+     timeout_ms */
+  const auto next_frame = [&](int seen, int timeout_ms) {
+    QElapsedTimer timer;
+    timer.start();
+    while (submitted == seen && timer.elapsed() < timeout_ms) {
+      QEventLoop loop;
+      QTimer::singleShot(static_cast<int>(timeout_ms - timer.elapsed()), &loop, &QEventLoop::quit);
+      waiting = &loop;
+      loop.exec();
+      waiting = nullptr;
+    }
+    return submitted > seen;
+  };
+  /* waits until QRhi's writes are done (frames the view asks for itself) */
+  const auto complete = [&](int timeout_ms) {
+    QElapsedTimer timer;
+    timer.start();
+    while (rhi && mbvq::view_stats(view).soundings_waiting && timer.elapsed() < timeout_ms)
+      next_frame(submitted, 1000);
+    return !rhi || !mbvq::view_stats(view).soundings_waiting;
+  };
+  /* the first complete frame */
+  next_frame(0, 120000);
+  complete(120000);
+  const mbvq::RenderStats first = mbvq::view_stats(view);
+  std::printf("info\topen\t%d soundings, first complete frame %.0f ms after the soundings were handed over "
+              "(view %d x %d logical px, ratio %.2f; %d chunks, %d shown)\n",
+              sdg_data.num_soundings, static_cast<double>(opening.elapsed()), view->width(), view->height(),
+              view->devicePixelRatioF(), first.sounding_chunks, first.soundings_shown);
+  report_memory("opened");
+  spin(500);
+
+  /* seen from above, so that the erase drag crosses soundings in every step */
+  sdg_camera(90.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+  mbvq_c_soundings_plot();
+  next_frame(submitted, 30000);
+  complete(120000);
+  const QPointF centre(view->width() / 2.0, view->height() / 2.0);
+  const double pi = std::acos(-1.0);
+  auto mouse = [view](QEvent::Type type, const QPointF &at, Qt::MouseButton button, Qt::MouseButtons buttons) {
+    QMouseEvent event(type, at, view->mapToGlobal(at), button, buttons, Qt::NoModifier);
+    QApplication::sendEvent(view, &event);
+  };
+  /* the erase drag goes along pings across the middle of the data, so that
+     every motion erases soundings: from the first to the last beam of a
+     ping, the next motions along the pings after it */
+  const auto ping_end = [&](int ping, int beam) {
+    int error = MB_ERROR_NO_ERROR;
+    mb3dsoundings_screen_positions(0, &error);
+    const double ratio = view->devicePixelRatioF();
+    const int height = static_cast<int>(std::lround(view->height() * ratio));
+    const struct mb3dsoundings_sounding_struct &sounding =
+        sdg_storage[static_cast<size_t>(ping) * beams + static_cast<size_t>(beam)];
+    return QPointF(sounding.winx / ratio, (height - 1 - sounding.winy) / ratio);
+  };
+  struct Scenario {
+    const char *name;
+    Qt::MouseButton button; /* Qt::NoButton: bias changes */
+    int edit_mode;
+    int profiles;
+  };
+  const Scenario scenarios[] = {{"rotate", Qt::MiddleButton, MBS_EDIT_TOGGLE, MBS_VIEW_PROFILES_NONE},
+                                {"erase", Qt::LeftButton, MBS_EDIT_ERASE, MBS_VIEW_PROFILES_NONE},
+                                {"exaggerate", Qt::RightButton, MBS_EDIT_TOGGLE, MBS_VIEW_PROFILES_NONE},
+                                {"bias", Qt::NoButton, MBS_EDIT_TOGGLE, MBS_VIEW_PROFILES_NONE},
+                                {"rotate_profiles", Qt::MiddleButton, MBS_EDIT_TOGGLE, MBS_VIEW_PROFILES_ALL}};
+  for (const Scenario &scenario : scenarios) {
+    mb3dsoundings.mouse_mode = MBS_MOUSE_ROTATE;
+    mb3dsoundings.edit_mode = scenario.edit_mode;
+    if (mb3dsoundings.view_profiles != scenario.profiles) {
+      mb3dsoundings_setprofiles(scenario.profiles);
+      next_frame(submitted, 30000);
+      complete(120000);
+      spin(300);
+    }
+    std::vector<double> latency, done, frames, render, fill, prepare, gather, upload, record, gpu, written_mb, heap,
+        footprint;
+    int timeouts = 0, unchanged = 0;
+    const double radius = 0.2 * std::min(view->width(), view->height());
+    const int first_ping = std::max(0, pings / 4);
+    QPointF at = scenario.button == Qt::LeftButton ? ping_end(first_ping, 0) : centre;
+    if (scenario.button != Qt::NoButton)
+      mouse(QEvent::MouseButtonPress, at, scenario.button, scenario.button);
+    next_frame(submitted, 5000);
+    complete(60000);
+    for (int k = 0; k < steps; k++) {
+      const mbvq::RenderStats before = mbvq::view_stats(view);
+      const int seen = submitted;
+      const int flagged = sdg_data.num_soundings_flagged;
+      const double t0 = bench_ms();
+      if (scenario.button == Qt::MiddleButton) {
+        const double a = 2.0 * pi * (k + 1) / steps;
+        at = centre + QPointF(radius * std::sin(a), radius * (1.0 - std::cos(a)));
+      }
+      else if (scenario.button == Qt::LeftButton) {
+        /* ten motions along a ping, then a ping far enough away that its
+           soundings lie apart on the screen (pings closer than a pixel are
+           erased together) */
+        const int ping = std::min(pings - 1, first_ping + (k + 1) / 10 * std::max(1, pings / 25));
+        at = ping_end(ping, std::min(beams - 1, ((k + 1) % 10) * (beams - 1) / 9));
+      }
+      else if (scenario.button == Qt::RightButton)
+        at = centre + QPointF(0.0, (k % 20 < 10 ? 1.0 : -1.0) * 4.0 * (k % 10 + 1));
+      if (scenario.button != Qt::NoButton)
+        mouse(QEvent::MouseMove, at, Qt::NoButton, scenario.button);
+      else
+        mbvq_c_soundings_bias(MBVQ_SDG_BIAS_ROLL, (k % 2 == 0 ? 10 : -10) * (k / 2 + 1));
+      /* an erase motion over no unflagged sounding changes nothing: the core
+         does not replot, so no frame comes */
+      if (scenario.button == Qt::LeftButton && sdg_data.num_soundings_flagged == flagged) {
+        unchanged++;
+        continue;
+      }
+      if (!next_frame(seen, 3000)) {
+        timeouts++;
+        continue;
+      }
+      latency.push_back(submitted_at - t0);
+      const mbvq::RenderStats after_first = mbvq::view_stats(view);
+      /* the GPU time of the frame before, the last of the step before */
+      if (rhi && k > 0 && after_first.gpu_ms >= 0.0)
+        gpu.push_back(after_first.gpu_ms);
+      complete(120000);
+      done.push_back(submitted_at - t0);
+      frames.push_back(submitted - seen);
+      if (rhi) {
+        render.push_back(after_first.render_ms);
+        fill.push_back(after_first.fill_ms);
+        prepare.push_back(after_first.prepare_ms);
+        gather.push_back(after_first.gather_ms);
+        upload.push_back(after_first.upload_ms);
+        record.push_back(after_first.record_ms);
+        const mbvq::RenderStats after = mbvq::view_stats(view);
+        size_t bytes = 0;
+        for (int stream = 0; stream < 4; stream++)
+          bytes += after.sounding_bytes[stream] - before.sounding_bytes[stream];
+        written_mb.push_back(static_cast<double>(bytes) / 1048576.0);
+      }
+      heap.push_back(heap_in_use());
+      double resident = 0.0, peak = 0.0, foot = 0.0;
+      process_memory(&resident, &peak, &foot);
+      footprint.push_back(foot);
+    }
+    if (scenario.button != Qt::NoButton)
+      mouse(QEvent::MouseButtonRelease, at, scenario.button, Qt::NoButton);
+    next_frame(submitted, 5000);
+    complete(120000);
+    spin(300);
+    report(scenario.name, "latency", latency);
+    report(scenario.name, "complete", done);
+    report(scenario.name, "frames", frames);
+    if (rhi) {
+      report(scenario.name, "render", render);
+      report(scenario.name, "fill", fill);
+      report(scenario.name, "prepare", prepare);
+      report(scenario.name, "gather", gather);
+      report(scenario.name, "upload", upload);
+      report(scenario.name, "record", record);
+      report(scenario.name, "gpu", gpu);
+      report(scenario.name, "written_mb", written_mb);
+    }
+    report(scenario.name, "heap_mb", heap);
+    report(scenario.name, "footprint_mb", footprint);
+    std::printf("info\t%s\ttimeouts\t%d\tunchanged\t%d\n", scenario.name, timeouts, unchanged);
+  }
+  const mbvq::RenderStats last = mbvq::view_stats(view);
+  if (rhi)
+    std::printf("info\tend\tGPU bytes of the soundings' buffers %.1f MB (every copy), swaps %d, allocations %d, "
+                "profile lines %s\n",
+                static_cast<double>(last.sounding_held_bytes) / 1048576.0, last.sounding_swaps,
+                last.sounding_allocations, last.profile_wide ? "wide" : "thin");
+  report_memory("end");
+  int error = MB_ERROR_NO_ERROR;
+  mb3dsoundings_end(0, &error);
+  spin(200);
+  return 0;
+}
 }  // namespace
 
 int main(int argc, char **argv) {
@@ -7315,10 +9858,13 @@ int main(int argc, char **argv) {
   int width = 640;
   int height = 480;
   const char *navlist = nullptr;
+  bool maps_only = false;
   bool arguments = true;
-  for (int i = quit ? 3 : 2; i < argc; i++) {
+  for (int i = quit || std::strcmp(mode, "--bench-soundings") == 0 ? 3 : 2; i < argc; i++) {
     if (std::strcmp(argv[i], "--3d") == 0)
       mode3d = true;
+    else if (quit && std::strcmp(argv[i], "--maps-only") == 0)
+      maps_only = true;
     else if (std::strcmp(argv[i], "--save") == 0 && i + 1 < argc)
       save = argv[++i];
     else if (std::strcmp(argv[i], "--frames") == 0 && i + 1 < argc) {
@@ -7334,7 +9880,11 @@ int main(int argc, char **argv) {
     else
       grdfile = argv[i];
   }
-  const bool bench_mode = std::strcmp(mode, "--bench") == 0;
+  const bool soundings_bench = std::strcmp(mode, "--bench-soundings") == 0;
+  int sounding_count = 1000000;
+  if (soundings_bench && argc > 2 && std::sscanf(argv[2], "%d", &sounding_count) != 1)
+    sounding_count = 0;
+  const bool bench_mode = std::strcmp(mode, "--bench") == 0 || soundings_bench;
   const bool display = std::strcmp(mode, "--display") == 0 || quit || bench_mode;
   const bool known = arguments &&
                      (std::strcmp(mode, "--model") == 0 || std::strcmp(mode, "--widgets") == 0 ||
@@ -7342,10 +9892,11 @@ int main(int argc, char **argv) {
                       std::strcmp(mode, "--display") == 0 || bench_mode ||
                       (quit && (std::strcmp(how, "close") == 0 || std::strcmp(how, "quit") == 0 ||
                                 std::strcmp(how, "exit") == 0 || std::strcmp(how, "float") == 0)));
-  if (!known) {
+  if (!known || (soundings_bench && sounding_count < 1)) {
     std::fprintf(stderr, "usage: mbview_qt_rhi_test --model | --widgets | --render-null | --render-metal [--save file] "
-                         "| --display [--3d] [--save file] [grid] | --quit close|quit|exit|float [grid] "
-                         "| --bench [--3d] [--frames n] [--size WxH] [--nav list] [grid]\n");
+                         "| --display [--3d] [--save file] [grid] | --quit close|quit|exit|float [--maps-only] [grid] "
+                         "| --bench [--3d] [--frames n] [--size WxH] [--nav list] [grid] "
+                         "| --bench-soundings n [--frames n]\n");
     return 2;
   }
   /* 10 s for the headless modes (ctest gives 60 s), a minute with a window,
@@ -7391,7 +9942,9 @@ int main(int argc, char **argv) {
   if (std::strcmp(mode, "--render-metal") == 0)
     return test_render_metal(save);
   if (quit)
-    return test_quit(how, grdfile);
+    return test_quit(how, grdfile, maps_only);
+  if (soundings_bench)
+    return bench_soundings(sounding_count, steps);
   if (bench_mode)
     return bench(mode3d, grdfile, steps, width, height, navlist);
   return test_display(mode3d, grdfile, save);

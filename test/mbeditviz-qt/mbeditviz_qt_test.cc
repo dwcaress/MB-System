@@ -25,22 +25,27 @@
  * Test of mbeditviz-qt without drawing (null backend):
  *   mbeditviz_qt_test              the windows, menus, buttons and dialogs
  *                                  without data (for ctest)
- *   mbeditviz_qt_test [--gl] --data LIST  also with swath data from the datalist
- *                                  LIST, in Browse mode (nothing is written):
- *                                  the file list and status, View All, the
- *                                  grid parameters dialog, Apply (grid and
- *                                  map view), Generate New Grid, and Quit,
- *                                  which unloads and unlocks the files;
- *                                  with --gl (OpenGL backend, needs a display)
+ *   mbeditviz_qt_test [--gl | --rhi] --data LIST  also with swath data from
+ *                                  the datalist LIST, in Browse mode (nothing
+ *                                  is written): the file list and status,
+ *                                  View All, the grid parameters dialog, Apply
+ *                                  (grid and map view), Generate New Grid, and
+ *                                  Quit, which unloads and unlocks the files;
+ *                                  with --gl (OpenGL backend) or --rhi (QRhi
+ *                                  backend, where it is built, with the API
+ *                                  MB_RENDERER names), which need a display,
  *                                  also an area picked in the map opens the 3D
  *                                  soundings view with the soundings inside it
- *   mbeditviz_qt_test --parity-qt LIST EDITS N [OFFSET]
- *                                  edit parity, Qt side (OpenGL, needs a
- *                                  display): Edit mode, View All, Apply, an
- *                                  area pick, then N mouse clicks in Toggle
- *                                  mode on soundings of the 3D view, Quit;
- *                                  writes each edit made (file, ping, beam,
- *                                  new flag) to EDITS
+ *   mbeditviz_qt_test [--rhi] --parity-qt LIST EDITS N [OFFSET]
+ *                                  edit parity, Qt side (OpenGL, or QRhi with
+ *                                  --rhi; needs a display): Edit mode, View
+ *                                  All, Apply, an area pick, then N mouse
+ *                                  clicks in Toggle mode on soundings of the 3D
+ *                                  view, Quit; writes each edit made (file,
+ *                                  ping, beam, new flag) to EDITS. QRhi stores
+ *                                  no screen positions: they are computed for
+ *                                  the clicks as the soundings view's picks
+ *                                  compute them (mb3dsoundings_screen_positions)
  *   mbeditviz_qt_test --parity-ref LIST EDITS
  *                                  edit parity, reference side (no drawing):
  *                                  the same files in Edit mode, View All,
@@ -67,6 +72,7 @@
 #include <QRadioButton>
 #include <QSlider>
 #include <QTimer>
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -74,6 +80,7 @@
 #include <cstring>
 #include <cmath>
 #include <string>
+#include <thread>
 
 #include "mbeditviz_qt_bridge.h"
 #include "mbvq_bridge.h"
@@ -82,6 +89,10 @@
 #include "mbeditviz_qt_filelist.h"
 #include "mbeditviz_qt_window.h"
 #include "mbvq.h"
+#include "mbvq_backend.h"
+#ifdef MBVQ_HAVE_RHI
+#include "mbvq_rhi.h"
+#endif
 
 extern "C" {
 #include "mb_define.h"
@@ -150,6 +161,55 @@ QDialog *visible_dialog(QWidget *window, const char *title) {
   return nullptr;
 }
 
+/* The 3D soundings view drew a frame and its soundings have screen
+   positions. OpenGL stores them while it draws; QRhi stores none, so they are
+   computed here, once the view has drawn (its size is known then), as the
+   view's picks compute them (mb3dsoundings_screen_positions). */
+bool soundings_drawn(QWidget *view, int timeout_ms) {
+  QElapsedTimer timer;
+  timer.start();
+  while (timer.elapsed() < timeout_ms) {
+    bool drawn = true;
+#ifdef MBVQ_HAVE_RHI
+    if (mbvq::view_state(view).rhi_view)
+      drawn = mbvq::view_state(view).drawn;
+#endif
+    if (drawn) {
+      int error = MB_ERROR_NO_ERROR;
+      mb3dsoundings_screen_positions(0, &error);
+      for (int i = 0; i < mbev_selected.num_soundings; i++)
+        if (mbev_selected.soundings[i].winx != 0 || mbev_selected.soundings[i].winy != 0)
+          return true;
+    }
+    spin(50);
+  }
+  (void)view;
+  return false;
+}
+
+/* the backend of --rhi: QRhi with the API that MB_RENDERER names, the
+   platform's otherwise; false where this build has no QRhi drawing */
+bool set_rhi_backend() {
+  if (!mbvq::backend_built(mbvq::Backend::Rhi))
+    return false;
+  mbvq::Backend chosen = mbvq::Backend::Rhi;
+  mbvq::RhiApi api = mbvq::RhiApi::Default;
+  std::string message;
+  mbvq::choose_renderer(std::getenv("MB_RENDERER"), &chosen, &api, &message);
+  mbvq::set_backend(mbvq::Backend::Rhi, chosen == mbvq::Backend::Rhi ? api : mbvq::RhiApi::Default);
+  return true;
+}
+
+/* the test ends after seconds even if it hangs */
+void start_watchdog(int seconds) {
+  std::thread([seconds] {
+    std::this_thread::sleep_for(std::chrono::seconds(seconds));
+    std::fprintf(stderr, "mbeditviz_qt_test: watchdog, stopped after %d s\n", seconds);
+    std::fflush(stdout);
+    std::_Exit(4);
+  }).detach();
+}
+
 /* the Motif button labels, converted as the window converts them */
 const QString kViewAll = mbvq::label_text(":::t\"View\":t\"All\"\"Files\"");
 const QString kViewSelected = mbvq::label_text(":::t\"View\":t\"Selected\"\"Files\"");
@@ -180,6 +240,17 @@ struct Edit {
   int ifile, iping, ibeam, flag;
 };
 
+/* Under QRhi the test ends through the event loop's quit, as the program
+   does: aboutToQuit deletes the closed windows before the QApplication goes
+   (a QRhiWidget window left for that leaves the Vulkan swapchain behind its
+   surface). */
+void leave_event_loop() {
+  if (mbvq::backend() != mbvq::Backend::Rhi)
+    return;
+  QTimer::singleShot(0, qApp, &QCoreApplication::quit);
+  QApplication::exec();
+}
+
 /* the Qt side: real mouse clicks in Toggle mode on soundings of the 3D view */
 int parity_qt(const char *datalist, const char *edits_file, int count, int offset) {
   int qt_argc = 1;
@@ -208,13 +279,11 @@ int parity_qt(const char *datalist, const char *edits_file, int count, int offse
         "the soundings view opens with " + std::to_string(mbev_selected.num_soundings) + " soundings");
   if (view == nullptr || mbev_selected.num_soundings == 0)
     return 1;
-  timer.restart();
-  bool drawn = false;
-  while (!drawn && timer.elapsed() < 20000) {
-    for (int i = 0; i < mbev_selected.num_soundings && !drawn; i++)
-      drawn = mbev_selected.soundings[i].winx != 0 || mbev_selected.soundings[i].winy != 0;
-    spin(50);
-  }
+#ifdef MBVQ_HAVE_RHI
+  if (mbvq::backend() == mbvq::Backend::Rhi)
+    check(mbvq::view_state(view).rhi_view, "the soundings view is a QRhi view");
+#endif
+  check(soundings_drawn(view, 20000), "the soundings view drew and the soundings have screen positions");
 
   /* clicks on soundings spread over the selection; each click must change
      exactly one sounding, which is recorded */
@@ -225,6 +294,11 @@ int parity_qt(const char *datalist, const char *edits_file, int count, int offse
   std::vector<char> before(static_cast<size_t>(mbev_selected.num_soundings));
   const int n = mbev_selected.num_soundings;
   for (int k = 0; k < count; k++) {
+    /* the screen positions of the current camera (QRhi stores none) */
+    {
+      int error = MB_ERROR_NO_ERROR;
+      mb3dsoundings_screen_positions(0, &error);
+    }
     int i = (offset + (k * 9973) + k * n / count) % n;
     /* the next sounding inside the view */
     int tries = 0;
@@ -266,6 +340,7 @@ int parity_qt(const char *datalist, const char *edits_file, int count, int offse
   spin(300);
   check(mbev_num_files_loaded == 0, "Quit unloads the files");
   std::printf("%d failures\n", failures);
+  leave_event_loop();
   return failures == 0 ? 0 : 1;
 }
 
@@ -295,8 +370,20 @@ int parity_ref(const char *datalist, const char *edits_file) {
 
 int main(int argc, char **argv) {
   std::setvbuf(stdout, nullptr, _IOLBF, 0);
+  /* --rhi: the QRhi backend for the modes that draw */
+  const bool rhi = argc > 1 && std::strcmp(argv[1], "--rhi") == 0;
+  if (rhi) {
+    argc--;
+    argv++;
+    if (!set_rhi_backend()) {
+      std::printf("skipped: this build has no QRhi drawing\n");
+      return 77;
+    }
+    start_watchdog(240);
+  }
   if (argc >= 5 && std::strcmp(argv[1], "--parity-qt") == 0) {
-    mbvq::set_backend(mbvq::Backend::LegacyGL);
+    if (!rhi)
+      mbvq::set_backend(mbvq::Backend::LegacyGL);
     return parity_qt(argv[2], argv[3], std::atoi(argv[4]), argc > 5 ? std::atoi(argv[5]) : 0);
   }
   if (argc == 4 && std::strcmp(argv[1], "--parity-ref") == 0) {
@@ -304,18 +391,22 @@ int main(int argc, char **argv) {
     return parity_ref(argv[2], argv[3]);
   }
   const char *datalist = nullptr;
-  const bool gl = argc > 1 && std::strcmp(argv[1], "--gl") == 0;
+  bool gl = argc > 1 && std::strcmp(argv[1], "--gl") == 0;
   if (gl) {
     argc--;
     argv++;
   }
   if (argc == 3 && std::strcmp(argv[1], "--data") == 0)
     datalist = argv[2];
-  else if (argc != 1 || gl) {
-    std::fprintf(stderr, "usage: mbeditviz_qt_test [[--gl] --data datalist]\n");
+  else if (argc != 1 || gl || rhi) {
+    std::fprintf(stderr, "usage: mbeditviz_qt_test [[--gl | --rhi] --data datalist] | [--rhi] --parity-qt list edits "
+                         "n [offset] | --parity-ref list edits\n");
     return 2;
   }
-  mbvq::set_backend(gl ? mbvq::Backend::LegacyGL : mbvq::Backend::Null);
+  if (!rhi)
+    mbvq::set_backend(gl ? mbvq::Backend::LegacyGL : mbvq::Backend::Null);
+  /* the checks that draw: with OpenGL or QRhi */
+  gl = gl || rhi;
   int qt_argc = 1;
   QApplication app(qt_argc, argv);
   MbeditvizWindow window;
@@ -418,6 +509,14 @@ int main(int argc, char **argv) {
                   mbvq::soundings_window() != nullptr && mbvq::soundings_window()->isVisible(),
               "an area pick opens the soundings view with " + std::to_string(mbev_selected.num_soundings) +
                   " soundings");
+        QWidget *view = mbvq::soundings_window() != nullptr ? mbvq::soundings_window()->widget()->view() : nullptr;
+        if (rhi) {
+#ifdef MBVQ_HAVE_RHI
+          check(view != nullptr && mbvq::view_state(view).rhi_view, "the soundings view is a QRhi view");
+#endif
+        }
+        check(view != nullptr && soundings_drawn(view, 20000),
+              "the soundings view draws them and they have screen positions");
       }
 
       /* Generate New Grid asks for the grid parameters again */
@@ -438,5 +537,6 @@ int main(int argc, char **argv) {
   }
 
   std::printf("%d failures\n", failures);
+  leave_event_loop();
   return failures == 0 ? 0 : 1;
 }

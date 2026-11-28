@@ -69,6 +69,9 @@ ProfileWindow::ProfileWindow(size_t instance, QWidget *parent) : QWidget(parent,
   view_ = create_profile_view(instance, nullptr);
   scroll_->setWidget(view_);
   scroll_->viewport()->installEventFilter(this);
+  /* a QRhi view's largest size follows its pixel ratio (cap_profile_view) */
+  if (backend() == Backend::Rhi)
+    view_->installEventFilter(this);
   layout->addWidget(scroll_, 1);
   info_ = new QLabel;
   info_->setTextInteractionFlags(Qt::TextSelectableByMouse);
@@ -138,10 +141,12 @@ void ProfileWindow::layout_profile() {
   int width = 1, slope = 0, exaggeration = 0;
   mbvq_c_profile_controls(instance_, &width, &slope, &exaggeration);
   const QSize visible = scroll_->viewport()->size();
+  /* a QRhi view is at most as large as its QRhi can draw at its pixel ratio:
+     the size asked for is clamped to that */
+  cap_profile_view(view_);
   view_->resize(width * visible.width(), visible.height());
-  /* the OpenGL view passes its own size on; a null view (also under QRhi,
-     which has no profile view yet) does not */
-  if (backend() != Backend::LegacyGL) {
+  /* the OpenGL and QRhi views pass their own size on; a null view does not */
+  if (backend() == Backend::Null) {
     const double ratio = view_->devicePixelRatioF();
     mbvq_c_profile_resize(instance_, static_cast<int>(view_->width() * ratio), static_cast<int>(view_->height() * ratio));
   }
@@ -150,6 +155,14 @@ void ProfileWindow::layout_profile() {
 bool ProfileWindow::eventFilter(QObject *watched, QEvent *event) {
   if (watched == scroll_->viewport() && event->type() == QEvent::Resize)
     layout_profile();
+#ifdef MBVQ_HAVE_RHI
+  /* moved to a screen of another ratio: a cap that rose does not widen the
+     view by itself, so the drawing is sized again (after the view took the
+     new ratio); QRhi builds only, Qt 6.4 has no DevicePixelRatioChange */
+  if (watched == view_ &&
+      (event->type() == QEvent::DevicePixelRatioChange || event->type() == QEvent::ScreenChangeInternal))
+    QMetaObject::invokeMethod(this, [this] { layout_profile(); }, Qt::QueuedConnection);
+#endif
   return QWidget::eventFilter(watched, event);
 }
 

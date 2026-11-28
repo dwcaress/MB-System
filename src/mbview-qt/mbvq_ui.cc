@@ -52,6 +52,7 @@ Backend current_backend = Backend::LegacyGL;
 RhiApi current_api = RhiApi::Default;
 bool backend_installed = false;
 bool fill_active_flag = false;
+double point_size = 3.0; /* the point-size control of the 3D soundings view */
 MapWidget *widgets[MBVQ_MAX_WINDOWS] = {};
 MapWindow *windows[MBVQ_MAX_WINDOWS] = {}; /* none for a map placed by a host */
 std::function<void(MapWidget *)> map_placement;
@@ -273,18 +274,52 @@ QWidget *create_map_view(size_t instance, QWidget *parent) {
 }
 
 QWidget *create_profile_view(size_t instance, QWidget *parent) {
-  /* the QRhi backend has no profile view yet: it shows a null view */
   if (current_backend == Backend::LegacyGL)
     return gl_backend::create_profile_view(instance, parent);
+#ifdef MBVQ_HAVE_RHI
+  if (current_backend == Backend::Rhi)
+    return rhi_backend::create_profile_view(instance, parent);
+#endif
   return null_backend::create_profile_view(instance, parent);
 }
 
 QWidget *create_soundings_view(QWidget *parent) {
-  /* the QRhi backend has no 3D soundings view yet: it shows a null view */
   if (current_backend == Backend::LegacyGL)
     return gl_backend::create_soundings_view(parent);
+#ifdef MBVQ_HAVE_RHI
+  if (current_backend == Backend::Rhi)
+    return rhi_backend::create_soundings_view(parent);
+#endif
   return null_backend::create_soundings_view(parent);
 }
+
+void cap_profile_view(QWidget *view) {
+#ifdef MBVQ_HAVE_RHI
+  if (current_backend == Backend::Rhi)
+    rhi_backend::cap_profile_view(view);
+#else
+  (void)view;
+#endif
+}
+
+void release_soundings_view(QWidget *view) {
+#ifdef MBVQ_HAVE_RHI
+  if (current_backend == Backend::Rhi)
+    rhi_backend::release_soundings_view(view);
+#else
+  (void)view;
+#endif
+}
+
+void set_soundings_point_size(double logical_px) {
+  point_size = logical_px;
+#ifdef MBVQ_HAVE_RHI
+  if (current_backend == Backend::Rhi)
+    rhi_backend::set_soundings_point_size(logical_px);
+#endif
+}
+
+double soundings_point_size() { return point_size; }
 
 bool fill_active() { return fill_active_flag; }
 
@@ -360,7 +395,8 @@ void mbvq_qt_close_window(size_t instance) {
     return;
   /* Called from mbview_destroy(), possibly inside an event of this window: the
      window is hidden now and deleted at a safe point (see closed_windows). Its
-     OpenGL map view and context are freed now. */
+     drawing view goes now (an OpenGL map view with its context; a QRhi map
+     view lets go of its GPU buffers as it is deleted). */
   mbvq::MapWidget *widget = mbvq::widgets[instance];
   QWidget *top = mbvq::outermost(instance);
   mbvq::widgets[instance] = nullptr;

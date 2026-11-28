@@ -69,6 +69,14 @@ const char *rhi_api_name(RhiApi api);
 QWidget *create_map_view(size_t instance, QWidget *parent);
 QWidget *create_profile_view(size_t instance, QWidget *parent);
 QWidget *create_soundings_view(QWidget *parent);
+/* the profile window sizes its view: a QRhi profile view takes again the
+   largest size its QRhi can draw at its pixel ratio; nothing for the other
+   backends */
+void cap_profile_view(QWidget *view);
+/* the program released the soundings in its dismiss notification: a hidden
+   QRhi soundings view, which draws no frame that would drop them, lets go of
+   its copies of them; nothing for the other backends */
+void release_soundings_view(QWidget *view);
 
 /* true while a QRhi view fills its batch (mbv_draw_batch.h): the widgets then
    send their status signals after the fill, so that a slot of the program
@@ -95,11 +103,15 @@ QWidget *create_soundings_view(QWidget *parent);
 }  // namespace null_backend
 
 #ifdef MBVQ_HAVE_RHI
-/* the QRhi backend: the map view; the profile and 3D soundings views are those
-   of the null backend for now */
 namespace rhi_backend {
 void install();
 QWidget *create_map_view(size_t instance, QWidget *parent);
+QWidget *create_profile_view(size_t instance, QWidget *parent);
+QWidget *create_soundings_view(QWidget *parent);
+void cap_profile_view(QWidget *view);
+void release_soundings_view(QWidget *view);
+/* the point-size control of the 3D soundings view: the view draws again */
+void set_soundings_point_size(double logical_px);
 }  // namespace rhi_backend
 #endif
 

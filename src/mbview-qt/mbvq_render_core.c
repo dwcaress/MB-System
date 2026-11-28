@@ -28,10 +28,13 @@
  * in, which lattice nodes a triangle of the drawing may use, where nodes lie
  * (their longitude and latitude, and the display place of a longitude,
  * latitude and value, for the spheroid's tile boxes), and which contours are
- * made. Only plain C types cross to the Qt half (mbvq_bridge.h).
+ * made; the cameras of the profile and 3D soundings views, and the pairs of
+ * soundings their profile lines join. Only plain C types cross to the Qt
+ * half (mbvq_bridge.h).
  * Compiled in every build, like the CPU pick (mbvq_pick_cpu.c); nothing here
  * draws or changes the core's state, apart from the view extents that
- * mbview_camera() sets as a drawing does, with one exception:
+ * mbview_camera() and mb3dsoundings_camera() set as a drawing does, with one
+ * exception:
  * mbvq_c_pick_size() does what a plot does every MBV_BOUNDSFREQUENCY plots,
  * and so changes the view-bounds counter, data->viewbounds, the pick marks
  * and the CPU pick's cache of the view bounds (call it once per full fill,
@@ -191,5 +194,54 @@ bool mbvq_c_pick_size(size_t instance) {
 	if (data->pick_type != MBV_PICK_NONE)
 		mbview_picksize(instance);
 	return (true);
+}
+/*------------------------------------------------------------------------------*/
+int mbvq_c_profile_camera(size_t instance, double projection[16], double modelview[16]) {
+	return (mbview_profile_camera(instance, projection, modelview));
+}
+/*------------------------------------------------------------------------------*/
+int mbvq_c_soundings_camera(double projection[16], double modelview[16]) {
+	int error = MB_ERROR_NO_ERROR;
+	return (mb3dsoundings_camera(0, projection, modelview, &error));
+}
+/*------------------------------------------------------------------------------*/
+int mbvq_c_soundings_profile_pairs(unsigned int *black, int *n_black, unsigned int *red, int *n_red) {
+	const struct mb3dsoundings_struct *soundingdata = (const struct mb3dsoundings_struct *)mb3dsoundings.soundingdata;
+
+	*n_black = 0;
+	*n_red = 0;
+	if (soundingdata == NULL || soundingdata->soundings == NULL || soundingdata->num_soundings <= 0)
+		return (0);
+	if (mb3dsoundings.view_profiles == MBS_VIEW_PROFILES_NONE)
+		return (soundingdata->num_soundings);
+
+	/* the loop of the profile lines of mb3dsoundings_plot() */
+	for (int i = 0; i < soundingdata->num_soundings - 1; i++) {
+		const struct mb3dsoundings_sounding_struct *sounding = &(soundingdata->soundings[i]);
+		const struct mb3dsoundings_sounding_struct *sounding2 = &(soundingdata->soundings[i + 1]);
+
+		/* a segment only between soundings of the same ping and profile */
+		if (sounding2->ifile == sounding->ifile && sounding->iping == sounding2->iping &&
+		    sounding->iprofile == sounding2->iprofile) {
+			/* black if both soundings are good */
+			if (mb_beam_ok(sounding->beamflag) && mb_beam_ok(sounding2->beamflag)) {
+				if (black != NULL) {
+					black[*n_black] = (unsigned int)i;
+					black[*n_black + 1] = (unsigned int)(i + 1);
+				}
+				*n_black += 2;
+			}
+
+			/* else red if flagged profiles are shown */
+			else if (mb3dsoundings.view_profiles == MBS_VIEW_PROFILES_ALL) {
+				if (red != NULL) {
+					red[*n_red] = (unsigned int)i;
+					red[*n_red + 1] = (unsigned int)(i + 1);
+				}
+				*n_red += 2;
+			}
+		}
+	}
+	return (soundingdata->num_soundings);
 }
 /*------------------------------------------------------------------------------*/
