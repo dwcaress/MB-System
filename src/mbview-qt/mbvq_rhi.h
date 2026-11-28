@@ -314,6 +314,15 @@ struct RenderStats {
   int sounding_writes[4] = {};
   size_t sounding_bytes[4] = {};
   int sounding_swaps = 0;
+  /* the time of the renderer's create() in ms, from its start to its
+     return, for measurements; -1 before it. Each create() is that of a new
+     renderer, which a view makes at its first frame and again when it needs
+     one (for example when it is floated or docked: a new QRhi); the view
+     drops the old renderer before, outside this time. A create() that
+     failed is timed too where the renderer's statistics are kept (the
+     offscreen renderer); a view drops such a renderer, and its statistics
+     then give -1 */
+  double create_ms = -1.0;
 };
 
 class OffscreenRenderer {
