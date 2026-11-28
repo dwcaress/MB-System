@@ -425,10 +425,17 @@ bool SoundingsFrame::fill() {
     return false;
   }
   const Clock::time_point start = Clock::now();
+  /* The drawing without its profile lines, whose LINES command would hold
+     two vertices for every pair of soundings in every fill: the mode is
+     read here, mbvq_c_soundings_plot_decorations() hides it from the core
+     for the drawing, and decorate() puts in the slot of the lines, which
+     the renderer draws itself */
+  struct mbvq_soundings_state state;
+  mbvq_c_soundings_state(&state);
   mbv_draw_batch_clear(&batch_);
   set_fill_active(true);
   mbv_draw_set_target(&batch_);
-  mbvq_c_soundings_plot();
+  mbvq_c_soundings_plot_decorations();
   mbv_draw_set_target(nullptr);
   set_fill_active(false);
   fills_++;
@@ -439,34 +446,37 @@ bool SoundingsFrame::fill() {
                          "it goes\n");
     warned_failed_ = true;
   }
-  decorate();
+  decorate(state.profiles != MBVQ_SDG_PROFILES_NONE);
   fill_ms_ = milliseconds(start, Clock::now());
   return true;
 }
 
-void SoundingsFrame::decorate() {
-  /* The commands of the batch with their vertices, except the drawing's
-     LINES command of the profile lines (its only LINES command, recorded
-     before the soundings slot): a slot without vertices takes its place,
-     with its state (width, depth test, camera). The renderer draws those
+void SoundingsFrame::decorate(bool profiles) {
+  /* The commands of the batch with their vertices. The fill recorded the
+     drawing without its profile lines (mbvq_c_soundings_plot_decorations):
+     while they are shown, a slot without vertices stands where the drawing
+     records their LINES command, right before the soundings slot, with the
+     state that command has there (mb3dsoundings_plot): the soundings slot's
+     depth test, camera and stipple, which the drawing does not change
+     between the two, the lines' width of 1 and the point size from before
+     the soundings set theirs, OpenGL's initial 1. The renderer draws those
      lines from the soundings' positions. */
   decoration_vertices_.clear();
   decoration_commands_.clear();
-  bool soundings = false;
-  bool profiles = false;
+  bool inserted = false;
   for (int c = 0; c < batch_.num_commands; c++) {
     struct mbv_draw_command command = batch_.commands[c];
-    if (command.kind == MBV_DRAW_SLOT && command.primitive == MBV_DRAW_SLOT_SOUNDINGS)
-      soundings = true;
-    const bool primitive = command.kind == MBV_DRAW_PRIMITIVE;
-    if (primitive && command.primitive == MBV_DRAW_LINES && !soundings && !profiles) {
-      command.kind = MBV_DRAW_SLOT;
-      command.primitive = kSlotProfileLines;
-      command.first = static_cast<int>(decoration_vertices_.size());
-      command.count = 0;
-      profiles = true;
+    if (profiles && !inserted && command.kind == MBV_DRAW_SLOT && command.primitive == MBV_DRAW_SLOT_SOUNDINGS) {
+      struct mbv_draw_command lines = command;
+      lines.primitive = kSlotProfileLines;
+      lines.first = static_cast<int>(decoration_vertices_.size());
+      lines.count = 0;
+      lines.line_width = 1.0f;
+      lines.point_size = 1.0f;
+      decoration_commands_.push_back(lines);
+      inserted = true;
     }
-    else if (primitive) {
+    if (command.kind == MBV_DRAW_PRIMITIVE) {
       const int first = command.first;
       command.first = static_cast<int>(decoration_vertices_.size());
       decoration_vertices_.insert(decoration_vertices_.end(), batch_.vertices + first,
@@ -512,7 +522,7 @@ bool SoundingsFrame::begin(bool continued, int width, int height, SoundingsInput
   if (count <= 0) {
     requested_ = false;
     mbv_draw_batch_clear(&batch_);
-    decorate();
+    decorate(false);
     count_ = 0;
     input->position = marks[0];
     input->colour = marks[1];

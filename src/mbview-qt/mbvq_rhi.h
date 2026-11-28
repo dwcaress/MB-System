@@ -362,8 +362,8 @@ class OffscreenRenderer {
      call fills, the others only continue). False if the renderer or a frame
      could not be made. */
   bool render_soundings(int width, int height, const RenderOptions &options, QImage *image, int max_frames = 16);
-  /* the batch of the last soundings frame as the core recorded it (null
-     before the first) */
+  /* the batch of the last soundings frame as the core recorded it, without
+     the profile lines (null before the first) */
   const struct mbv_draw_batch *soundings_batch() const;
   /* A frame of the QRhi that the renderer does not draw, as a frame of a
      window in which another widget repainted and the map did not (the QRhi

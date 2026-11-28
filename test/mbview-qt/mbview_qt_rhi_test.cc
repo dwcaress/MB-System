@@ -46,7 +46,11 @@
  *   The model, widgets, Null and Metal modes also check the profile and 3D
  *   soundings views (6d): the soundings plan, the frame drivers, the views
  *   without drawing, the soundings' uploads, the failed frames of both
- *   views' renderers and the pixels of both views.
+ *   views' renderers and the pixels of both views. The model, widgets and
+ *   Null modes also check (7b) the drawing of the 3D soundings that a frame
+ *   records with the profile mode hidden from the core, against a fill with
+ *   the mode set, the mode after such fills (also in the View menu), and
+ *   the profile lines of soundings from three files.
  *   mbview_qt_rhi_test --display [--3d] [--save file] [grid]   a map window
  *        drawn with QRhi (needs a display, not in ctest): waits for the first
  *        frames, grabs the view, picks with the mouse, shows and hides the
@@ -122,6 +126,7 @@
  * without data and some single ones.
  */
 
+#include <QAction>
 #include <QApplication>
 #include <QDockWidget>
 #include <QDoubleSpinBox>
@@ -4426,7 +4431,8 @@ void permute_sdg(std::vector<struct mb3dsoundings_sounding_struct> *soundings, s
    file and ping numbers change. iprofile stays make_sdg()'s ping number,
    unlike mbeditviz (0 or 1 in a ping), so no profile pair can join two
    files here: a test of pairs across a file boundary needs its own
-   numbers. One file leaves the soundings as they are */
+   numbers (make_sdg_three_files). One file leaves the soundings as they
+   are */
 void split_sdg_files(int npings, int nbeams, int files) {
   if (files <= 1)
     return;
@@ -4455,6 +4461,62 @@ size_t sdg_ping_row(int npings, int files, int ping) {
   for (int file = 0; file < ping % files; file++)
     row += static_cast<size_t>((npings - file + files - 1) / files);
   return row;
+}
+
+/* 7b (F12): soundings from three files, as mbeditviz selects them from
+   three lines: make_sdg()'s pings, pings_per_file to a file, each ping
+   numbered by its place in its file (mbeditviz keeps that number:
+   mbev_files[ifile].pings[iping]), the files' parts chosen so that a
+   file's first ping has the number of the last ping of the file before (0
+   to 3, 3 to 6 and 6 to 9 for four pings to a file), and one profile to a
+   ping (iprofile 0, as mbeditviz numbers a ping without a dual profile).
+   Two consecutive soundings across a file boundary then differ in their
+   file alone, which only the "same file" part of the rule of the profile
+   lines tells apart (mb3dsoundings_plot, mbvq_c_soundings_profile_pairs).
+   At the first boundary both soundings are good, at the second the first
+   sounding of the third file is flagged: without that part the first
+   would give a black pair in the Good and All modes, the second a red one
+   in the All mode. */
+void make_sdg_three_files(int pings_per_file, int nbeams, int flag_every) {
+  make_sdg(3 * pings_per_file, nbeams, flag_every);
+  for (size_t k = 0; k < sdg_storage.size(); k++) {
+    struct mb3dsoundings_sounding_struct &s = sdg_storage[k];
+    const int ping = static_cast<int>(k) / nbeams;
+    s.ifile = ping / pings_per_file;
+    s.iping = ping - s.ifile;
+    s.iprofile = 0;
+  }
+  const size_t file = static_cast<size_t>(pings_per_file) * nbeams;
+  for (const size_t k : {file - 1, file, 2 * file - 1})
+    sdg_storage[k].beamflag = static_cast<char>(MB_FLAG_NONE);
+  sdg_storage[2 * file].beamflag = static_cast<char>(MB_FLAG_FLAG | MB_FLAG_MANUAL);
+  int flagged = 0;
+  for (struct mb3dsoundings_sounding_struct &s : sdg_storage) {
+    s.beamflagorg = s.beamflag;
+    flagged += mb_beam_ok(s.beamflag) ? 0 : 1;
+  }
+  sdg_data.num_soundings_flagged = flagged;
+  sdg_data.num_soundings_unflagged = sdg_data.num_soundings - flagged;
+}
+
+/* the consecutive soundings of the array that differ in their file alone
+   (the same ping and profile numbers): how many, and of them how many with
+   both soundings good and how many with one flagged */
+int sdg_file_boundaries(int *both_good, int *one_flagged) {
+  int alike = 0;
+  *both_good = 0;
+  *one_flagged = 0;
+  for (size_t k = 0; k + 1 < sdg_storage.size(); k++) {
+    const struct mb3dsoundings_sounding_struct &a = sdg_storage[k];
+    const struct mb3dsoundings_sounding_struct &b = sdg_storage[k + 1];
+    if (a.ifile == b.ifile || a.iping != b.iping || a.iprofile != b.iprofile)
+      continue;
+    alike++;
+    const int good = (mb_beam_ok(a.beamflag) ? 1 : 0) + (mb_beam_ok(b.beamflag) ? 1 : 0);
+    *both_good += good == 2 ? 1 : 0;
+    *one_flagged += good == 1 ? 1 : 0;
+  }
+  return alike;
 }
 
 /* 7a: the soundings in a spatially coherent order, to compare with ping
@@ -4574,7 +4636,7 @@ std::vector<BatchPair> batch_pairs(const struct mbv_draw_batch &batch, const std
 }
 
 /* the pairs of the two lists of mbvq_c_soundings_profile_pairs merged in the
-   order of the array, as the batch's LINES command has them */
+   order of the array, as a LINES command of the profile lines has them */
 std::vector<BatchPair> list_pairs(const std::vector<uint32_t> &black, const std::vector<uint32_t> &red) {
   std::vector<BatchPair> pairs;
   size_t b = 0, r = 0;
@@ -4595,6 +4657,127 @@ bool same_pairs(const std::vector<BatchPair> &a, const std::vector<BatchPair> &b
     if (a[k].first != b[k].first || a[k].red != b[k].red || !a[k].found || !b[k].found)
       return false;
   return true;
+}
+
+/* 7b: the drawing of the 3D soundings recorded into a batch of the test
+   with the profile mode as set, as the legacy OpenGL backend draws it
+   (mbvq_c_soundings_plot) and mbview_qt_soundings_test records it: the
+   reference for a frame (SoundingsFrame), whose fill records the drawing
+   with the mode hidden from the core (mbvq_c_soundings_plot_decorations).
+   The grab rectangle is placed by the size of the drawing that a frame's
+   begin() gives the core: where it is drawn, the reference is filled after
+   the frame's begin(). */
+void fill_reference(struct mbv_draw_batch *batch) {
+  mbv_draw_batch_clear(batch);
+  mbv_draw_set_target(batch);
+  mbvq_c_soundings_plot();
+  mbv_draw_set_target(nullptr);
+}
+
+/* the vertices of a batch's LINES commands, and the commands (the profile
+   lines of a drawing of the 3D soundings: one command, two vertices per
+   pair) */
+int line_vertices(const struct mbv_draw_batch &batch, int *commands = nullptr) {
+  int vertices = 0;
+  int n = 0;
+  for (int c = 0; c < batch.num_commands; c++)
+    if (batch.commands[c].kind == MBV_DRAW_PRIMITIVE && batch.commands[c].primitive == MBV_DRAW_LINES) {
+      vertices += batch.commands[c].count;
+      n++;
+    }
+  if (commands != nullptr)
+    *commands = n;
+  return vertices;
+}
+
+/* the state of two commands alike: line width, point size, stipple (on,
+   factor, pattern), depth test and camera */
+bool same_state(const struct mbv_draw_command &p, const struct mbv_draw_command &q) {
+  return p.line_width == q.line_width && p.point_size == q.point_size && p.stipple == q.stipple &&
+         p.stipple_factor == q.stipple_factor && p.stipple_pattern == q.stipple_pattern &&
+         p.depth_test == q.depth_test && p.camera == q.camera;
+}
+
+/* two commands of two batches alike: kind, primitive, count, state and, for
+   a primitive, its vertices, positions and colours (first aside, which
+   counts in each batch's own vertices) */
+bool same_command(const struct mbv_draw_batch &a, const struct mbv_draw_command &p, const struct mbv_draw_batch &b,
+                  const struct mbv_draw_command &q) {
+  if (p.kind != q.kind || p.primitive != q.primitive || p.count != q.count || !same_state(p, q))
+    return false;
+  for (int v = 0; p.kind == MBV_DRAW_PRIMITIVE && v < p.count; v++) {
+    const struct mbv_draw_vertex &s = a.vertices[p.first + v];
+    const struct mbv_draw_vertex &t = b.vertices[q.first + v];
+    if (s.x != t.x || s.y != t.y || s.z != t.z || s.r != t.r || s.g != t.g || s.b != t.b)
+      return false;
+  }
+  return true;
+}
+
+/* 7b: what differs between a frame's drawing of the 3D soundings and the
+   reference of the same state (fill_reference), or "". The frame's batch,
+   which the core records with the profile mode hidden, is the reference
+   without its LINES command (the profile lines, its only LINES command,
+   right before the soundings slot). The decorations are the reference with
+   that command replaced by the slot kSlotProfileLines without vertices, at
+   its place and with its state; where the reference has no LINES command
+   in the Good or All mode (no pair to draw), the slot stands right before
+   the soundings slot with the state that command would have there (the
+   soundings slot's, with the lines' width of 1 and the point size of 1
+   from before the soundings set theirs); the None mode has no slot. */
+std::string drawing_against(const struct mbv_draw_batch &batch, const struct mbv_draw_batch &decorations,
+                            const struct mbv_draw_batch &reference, int mode) {
+  const auto lines = [](const struct mbv_draw_command &c) {
+    return c.kind == MBV_DRAW_PRIMITIVE && c.primitive == MBV_DRAW_LINES;
+  };
+  /* the frame's batch: the reference without its LINES command */
+  int b = 0;
+  for (int r = 0; r < reference.num_commands; r++) {
+    if (lines(reference.commands[r]))
+      continue;
+    if (b >= batch.num_commands || !same_command(batch, batch.commands[b], reference, reference.commands[r]))
+      return "the frame's batch differs at its command " + std::to_string(b);
+    b++;
+  }
+  if (b != batch.num_commands)
+    return "the frame's batch has " + std::to_string(batch.num_commands - b) + " commands more";
+  /* the decorations: the reference with the slot for its LINES command */
+  int r = 0;
+  int profile_slots = 0;
+  for (int c = 0; c < decorations.num_commands; c++) {
+    const struct mbv_draw_command &d = decorations.commands[c];
+    const struct mbv_draw_command *at = r < reference.num_commands ? &reference.commands[r] : nullptr;
+    if (d.kind == MBV_DRAW_SLOT && d.primitive == rhi::kSlotProfileLines) {
+      profile_slots++;
+      if (mode == MBS_VIEW_PROFILES_NONE || profile_slots > 1 || d.count != 0 || at == nullptr)
+        return "a profile slot in the None mode, a second one, one with vertices or one after the reference's end";
+      struct mbv_draw_command expected = *at;
+      if (lines(*at))
+        r++;
+      else if (at->kind == MBV_DRAW_SLOT && at->primitive == MBV_DRAW_SLOT_SOUNDINGS) {
+        expected.line_width = 1.0f;
+        expected.point_size = 1.0f;
+      }
+      else
+        return "the profile slot (command " + std::to_string(c) +
+               ") is neither at the LINES command's place nor right before the soundings slot";
+      if (!same_state(d, expected))
+        return "the profile slot's state differs from the LINES command's (command " + std::to_string(c) + ")";
+      continue;
+    }
+    if (at == nullptr)
+      return "the decorations have commands after the reference's end";
+    if (lines(*at))
+      return "no profile slot at the LINES command's place (the decorations' command " + std::to_string(c) + ")";
+    if (!same_command(decorations, d, reference, *at))
+      return "the decorations differ at their command " + std::to_string(c);
+    r++;
+  }
+  if (r != reference.num_commands)
+    return "the decorations lack the reference's last " + std::to_string(reference.num_commands - r) + " commands";
+  if (mode != MBS_VIEW_PROFILES_NONE && profile_slots == 0)
+    return "no profile slot in the Good or All mode";
+  return std::string();
 }
 
 /* the soundings plan on its own (no QRhi): layout, the first upload in
@@ -4686,9 +4869,11 @@ void model_soundings_plan() {
 }
 
 /* the frame driver of the 3D soundings view on the core: the decorations,
-   the pairs of the profile lines against the batch's LINES command in the
-   three profile modes, the lists made local to chunks and the colours per
-   pair, the camera in every frame, and nothing read without soundings */
+   the pairs of the profile lines against the LINES command of a fill with
+   the profile mode set (fill_reference; the frame's own fill records the
+   drawing with the mode hidden from the core, 7b) in the three profile
+   modes, the lists made local to chunks and the colours per pair, the
+   camera in every frame, and nothing read without soundings */
 void model_soundings_frame() {
   make_sdg(30, 40, 7);
   check(open_sdg(), "6d: the soundings handed over (a soundings window with a QRhi view)");
@@ -4697,18 +4882,20 @@ void model_soundings_frame() {
   sdg_camera(35.0f, 125.0f, 1.3f, 0.05f, -0.05f);
 
   rhi::SoundingsFrame frame;
+  TestBatch reference;
   bool modes = true;
   std::string counts;
   for (int mode : {MBS_VIEW_PROFILES_NONE, MBS_VIEW_PROFILES_UNFLAGGED, MBS_VIEW_PROFILES_ALL}) {
     sdg_view(MBS_VIEW_COLOR_FLAG, true, mode, true);
     rhi::SoundingsInput input;
     const bool filled = frame.begin(false, 400, 300, &input);
+    fill_reference(&reference.b);
     std::vector<float> xyz;
     std::vector<uint32_t> black, red;
     const bool read = frame.positions(input.count, &xyz) && frame.pairs(input.count, &black, &red);
-    const std::vector<BatchPair> from_batch = batch_pairs(frame.batch(), xyz);
+    const std::vector<BatchPair> from_batch = batch_pairs(reference.b, xyz);
     const std::vector<BatchPair> from_lists = list_pairs(black, red);
-    /* the decorations: the same commands, the profile lines a slot without vertices */
+    /* the decorations: the reference's commands, the profile lines a slot without vertices */
     const struct mbv_draw_batch &d = frame.decorations();
     int profile_slots = 0, lines = 0;
     for (int c = 0; c < d.num_commands; c++) {
@@ -4716,9 +4903,9 @@ void model_soundings_frame() {
                d.commands[c].count == 0;
       lines += d.commands[c].kind == MBV_DRAW_PRIMITIVE && d.commands[c].primitive == MBV_DRAW_LINES;
     }
-    const int vertices = frame.batch().num_vertices - d.num_vertices;
+    const int vertices = reference.b.num_vertices - d.num_vertices;
     modes = modes && filled && read && input.profiles == mode && same_pairs(from_batch, from_lists) &&
-            d.num_commands == frame.batch().num_commands && lines == 0 &&
+            d.num_commands == reference.b.num_commands && lines == 0 &&
             profile_slots == (mode == MBS_VIEW_PROFILES_NONE ? 0 : 1) &&
             vertices == 2 * static_cast<int>(from_batch.size()) &&
             (mode == MBS_VIEW_PROFILES_NONE) == from_lists.empty() &&
@@ -4726,8 +4913,8 @@ void model_soundings_frame() {
     counts += std::to_string(black.size() / 2) + "+" + std::to_string(red.size() / 2) + " ";
   }
   check(modes, "6d: the pairs of the profile lines (black+red: " + counts +
-                   "in the None, Good and All modes) equal the batch's LINES command, pairs and colours, with the "
-                   "mode read from mbvq_c_soundings_state(); the decorations leave out its vertices");
+                   "in the None, Good and All modes) equal the LINES command of a fill with the mode set, pairs and "
+                   "colours, with the mode read from mbvq_c_soundings_state(); the decorations leave out its vertices");
 
   /* the lists made local to chunks of 7 and of 11 soundings, and the colours
      per pair (every 7th sounding is flagged: with chunks of 7 every pair
@@ -5029,6 +5216,209 @@ void model_tile_order() {
             (multiset ? "yes" : "no") + "), sorted by tile (" + (sorted ? "yes" : "no") + ", " +
             std::to_string(cells) + " tiles), shuffled inside them (" + (shuffled ? "yes" : "no") +
             "), the same order in a second run (" + (repeated ? "yes" : "no") + ")");
+}
+
+/* 7b: a frame's drawing of the 3D soundings, which it records with the
+   profile mode hidden from the core, against the reference of the same
+   state (drawing_against), in every combination of the three profile
+   modes, the bounding box off and on, the four colour modes and the
+   information highlight and the grab rectangle (neither, either, both):
+   96 drawings, 64 of them with a LINES command. The Good and All modes
+   again with the box seen from behind, where the slot must carry the
+   stipple pattern that the box's last face leaves. Then the Good mode with
+   every sounding flagged, so that no pair is drawn: the reference has no
+   LINES command, the slot stands right before the soundings slot, the
+   lists are empty. */
+void model_soundings_decorations() {
+  make_sdg(30, 40, 7);
+  const bool opened = open_sdg();
+  sdg_camera(35.0f, 125.0f, 1.3f, 0.05f, -0.05f);
+  rhi::SoundingsFrame frame;
+  TestBatch reference;
+  const char *const modes[3] = {"None", "Good", "All"};
+  const char *const colours[4] = {"flag", "topography", "amplitude", "soundings"}; /* MBS_VIEW_COLOR_* */
+  int drawings = 0, equal = 0, with_lines = 0;
+  std::string difference;
+  for (const int mode : {MBS_VIEW_PROFILES_NONE, MBS_VIEW_PROFILES_UNFLAGGED, MBS_VIEW_PROFILES_ALL})
+    for (const bool box : {false, true})
+      for (const int colour : {MBS_VIEW_COLOR_FLAG, MBS_VIEW_COLOR_TOPO, MBS_VIEW_COLOR_AMP, MBS_VIEW_COLOR_SOUNDING})
+        for (int extras = 0; extras < 4; extras++) {
+          sdg_view(colour, true, mode, box);
+          /* the information highlight: a POINTS command after the soundings slot */
+          if ((extras & 1) != 0) {
+            mb3dsoundings.edit_mode = MBS_EDIT_INFO;
+            mb3dsoundings.last_sounding_defined = true;
+            mb3dsoundings.last_sounding_edited = 517;
+          }
+          /* the grab rectangle: a LINE_LOOP 3 px wide without the camera, last */
+          if ((extras & 2) != 0) {
+            mb3dsoundings.button1down = true;
+            mb3dsoundings.grab_start_defined = true;
+            mb3dsoundings.grab_end_defined = true;
+            mb3dsoundings.grab_start_x = 101;
+            mb3dsoundings.grab_start_y = 77;
+            mb3dsoundings.grab_end_x = 287;
+            mb3dsoundings.grab_end_y = 203;
+          }
+          rhi::SoundingsInput input;
+          const bool filled = frame.begin(false, 400, 300, &input);
+          fill_reference(&reference.b);
+          const std::string why =
+              filled ? drawing_against(frame.batch(), frame.decorations(), reference.b, mode) : "the fill was refused";
+          int commands = 0;
+          line_vertices(reference.b, &commands);
+          drawings++;
+          equal += why.empty() ? 1 : 0;
+          with_lines += commands;
+          if (!why.empty() && difference.empty())
+            difference = std::string(modes[mode]) + " mode, box " + (box ? "on" : "off") + ", colour by " +
+                         colours[colour] + ", highlight " + ((extras & 1) != 0 ? "on" : "off") + ", grab " +
+                         ((extras & 2) != 0 ? "on" : "off") + ": " + why;
+        }
+
+  /* the box seen from behind (azimuth 300): its last face leaves the stipple
+     pattern 0x1111 on the LINES command and the soundings slot, which the
+     slot of the profile lines must carry as well (at azimuth 125 every
+     command keeps the pattern of the batch's initial state) */
+  sdg_camera(35.0f, 300.0f, 1.3f, 0.05f, -0.05f);
+  int behind = 0, patterned = 0;
+  for (const int mode : {MBS_VIEW_PROFILES_UNFLAGGED, MBS_VIEW_PROFILES_ALL}) {
+    sdg_view(MBS_VIEW_COLOR_FLAG, true, mode, true);
+    rhi::SoundingsInput input;
+    const bool filled = frame.begin(false, 400, 300, &input);
+    fill_reference(&reference.b);
+    const std::string why =
+        filled ? drawing_against(frame.batch(), frame.decorations(), reference.b, mode) : "the fill was refused";
+    behind += why.empty() ? 1 : 0;
+    for (int c = 0; c < reference.b.num_commands; c++) {
+      const struct mbv_draw_command &command = reference.b.commands[c];
+      patterned += command.kind == MBV_DRAW_PRIMITIVE && command.primitive == MBV_DRAW_LINES && !command.stipple &&
+                           command.stipple_pattern == 0x1111
+                       ? 1
+                       : 0;
+    }
+    if (!why.empty() && difference.empty())
+      difference = std::string(modes[mode]) + " mode, box on, seen from behind: " + why;
+  }
+  sdg_camera(35.0f, 125.0f, 1.3f, 0.05f, -0.05f);
+
+  /* no pair to draw: every sounding flagged, the Good mode */
+  for (struct mb3dsoundings_sounding_struct &sounding : sdg_storage)
+    sounding.beamflag = static_cast<char>(MB_FLAG_FLAG | MB_FLAG_MANUAL);
+  sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_UNFLAGGED, true);
+  rhi::SoundingsInput input;
+  const bool filled = frame.begin(false, 400, 300, &input);
+  fill_reference(&reference.b);
+  int commands = 0;
+  line_vertices(reference.b, &commands);
+  std::vector<uint32_t> black, red;
+  const std::string why =
+      filled ? drawing_against(frame.batch(), frame.decorations(), reference.b, MBS_VIEW_PROFILES_UNFLAGGED)
+             : "the fill was refused";
+  const bool without_pairs =
+      why.empty() && commands == 0 && frame.pairs(input.count, &black, &red) && black.empty() && red.empty();
+  if (!why.empty() && difference.empty())
+    difference = "Good mode without a pair: " + why;
+  check(opened && drawings == 96 && equal == drawings && with_lines == 64 && behind == 2 && patterned == 2 &&
+            without_pairs,
+        "7b: the 3D soundings' drawing of a frame against a fill of the same state with the profile mode set, in " +
+            std::to_string(drawings) + " drawings (the None, Good and All modes, the bounding box off and on, the "
+            "four colour modes, neither, either or both of the information highlight and the grab rectangle; " +
+            std::to_string(with_lines) + " with a LINES command): the frame's batch is that fill without its LINES "
+            "command, the decorations are that fill with the slot of the profile lines in its place and with its "
+            "state, and no slot in the None mode (" + std::to_string(equal) + " equal); also with the box seen "
+            "from behind, whose last face leaves the stipple pattern 0x1111 on the LINES command, in the Good and "
+            "All modes (" + std::to_string(behind) + " equal, " + std::to_string(patterned) + " LINES commands with "
+            "that pattern); in the Good mode with every sounding flagged (no pair) the slot stands right before "
+            "the soundings slot and the lists are empty (" + (without_pairs ? "yes" : "no") + ")" +
+            (difference.empty() ? std::string() : "; first difference: " + difference));
+  int error = MB_ERROR_NO_ERROR;
+  mb3dsoundings_end(0, &error);
+}
+
+/* 7b: with all profiles shown the core's batch of the 3D soundings, which
+   a frame records with the profile mode hidden from the core, holds the
+   same vertices for 10,000 and for 100,000 soundings, no LINES command,
+   and keeps no memory that grows with them (it is kept until Dismiss).
+   The reference (fill_reference) records the profile lines as 6e's fill
+   did: two vertices for each of the 249 pairs of a ping of 250 beams, of
+   which the 400 pings have 360 more than the 40. A frame of its own,
+   whose batch has not grown before. */
+void model_soundings_fill_size() {
+  rhi::SoundingsFrame frame;
+  TestBatch reference;
+  const int pings[2] = {40, 400};
+  int vertices[2] = {}, allocated[2] = {}, lines[2] = {}, recorded[2] = {};
+  bool filled = true;
+  for (int k = 0; k < 2; k++) {
+    make_sdg(pings[k], 250, 7);
+    filled = open_sdg() && filled;
+    sdg_camera(35.0f, 125.0f, 1.3f, 0.05f, -0.05f);
+    sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_ALL, true);
+    rhi::SoundingsInput input;
+    filled = frame.begin(false, 400, 300, &input) && input.count == 250 * pings[k] && filled;
+    vertices[k] = frame.batch().num_vertices;
+    allocated[k] = frame.batch().num_vertices_alloc;
+    line_vertices(frame.batch(), &lines[k]);
+    fill_reference(&reference.b);
+    recorded[k] = reference.b.num_vertices;
+  }
+  check(filled && vertices[0] == vertices[1] && allocated[0] == allocated[1] && lines[0] == 0 && lines[1] == 0 &&
+            recorded[1] - recorded[0] == 2 * 249 * (pings[1] - pings[0]),
+        "7b: with all profiles shown the core's batch of the 3D soundings holds " + std::to_string(vertices[0]) +
+            " and " + std::to_string(vertices[1]) + " vertices for 10,000 and 100,000 soundings (" +
+            std::to_string(allocated[0]) + " and " + std::to_string(allocated[1]) + " allocated) and " +
+            std::to_string(lines[0] + lines[1]) + " LINES commands; a fill with the mode set records " +
+            std::to_string(recorded[0]) + " and " + std::to_string(recorded[1]));
+  int error = MB_ERROR_NO_ERROR;
+  mb3dsoundings_end(0, &error);
+}
+
+/* 7b (F12): the profile lines of soundings from three files
+   (make_sdg_three_files), whose two file boundaries join soundings that
+   differ in their file alone, the first both good, the second with one
+   flagged (counted first, so that the check cannot pass for want of
+   them): in the Good and All modes no pair of the lists
+   (mbvq_c_soundings_profile_pairs) joins two files, and the pairs equal
+   the LINES command of a fill with the mode set (fill_reference), pairs
+   and colours */
+void model_profile_files() {
+  make_sdg_three_files(4, 25, 7);
+  const bool opened = open_sdg();
+  int both_good = 0, one_flagged = 0;
+  const int alike = sdg_file_boundaries(&both_good, &one_flagged);
+  sdg_camera(35.0f, 125.0f, 1.3f, 0.05f, -0.05f);
+  rhi::SoundingsFrame frame;
+  TestBatch reference;
+  bool apart = true, same = true;
+  std::string counts;
+  for (const int mode : {MBS_VIEW_PROFILES_UNFLAGGED, MBS_VIEW_PROFILES_ALL}) {
+    sdg_view(MBS_VIEW_COLOR_FLAG, true, mode, true);
+    rhi::SoundingsInput input;
+    const bool filled = frame.begin(false, 400, 300, &input);
+    fill_reference(&reference.b);
+    std::vector<float> xyz;
+    std::vector<uint32_t> black, red;
+    const bool read = frame.positions(input.count, &xyz) && frame.pairs(input.count, &black, &red);
+    int across = 0;
+    for (const std::vector<uint32_t> *list : {&black, &red})
+      for (size_t k = 0; k + 1 < list->size(); k += 2)
+        across += sdg_storage[(*list)[k]].ifile != sdg_storage[(*list)[k + 1]].ifile ? 1 : 0;
+    apart = apart && filled && read && across == 0 && !black.empty() &&
+            (mode == MBS_VIEW_PROFILES_ALL) == !red.empty();
+    same = same && filled && read && same_pairs(batch_pairs(reference.b, xyz), list_pairs(black, red));
+    counts += std::to_string(black.size() / 2) + "+" + std::to_string(red.size() / 2) +
+              (mode == MBS_VIEW_PROFILES_ALL ? "" : " and ");
+  }
+  check(opened && alike == 2 && both_good == 1 && one_flagged == 1 && apart && same,
+        "7b: soundings from three files, each file's first ping numbered as the last of the file before (" +
+            std::to_string(alike) + " file boundaries between soundings of the same ping and profile numbers, " +
+            std::to_string(both_good) + " of them both good, " + std::to_string(one_flagged) +
+            " with one flagged): no profile pair joins two files (" + (apart ? "yes" : "no") +
+            "), and the pairs (black+red: " + counts + " in the Good and All modes) equal the LINES command of a "
+            "fill with the mode set, pairs and colours (" + (same ? "yes" : "no") + ")");
+  int error = MB_ERROR_NO_ERROR;
+  mb3dsoundings_end(0, &error);
 }
 
 /* 7a: each renderer times its create() into RenderStats::create_ms: -1
@@ -5519,9 +5909,76 @@ void null_failures() {
   close_instance(instance);
 }
 
+/* 7b with a Null QRhi: the profile mode that a fill hides from the core
+   while it records the drawing (mbvq_c_soundings_plot_decorations) is the
+   one set after each frame, also after a frame whose fill was refused
+   (another batch the target, as while another view fills): the modes All,
+   Good, None and All again, as the View menu sets them
+   (mb3dsoundings_setprofiles). On soundings from three files
+   (make_sdg_three_files) the renderer draws the core's pairs from its own
+   lists: as many indices as the LINES command of a fill with the mode set
+   (fill_reference, filled before the frame, so that a mode left hidden
+   cannot empty it too) has vertices, none in the None mode, also in the
+   refused frame. */
+void null_profile_mode() {
+  mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+  make_sdg_three_files(4, 25, 7);
+  const bool opened = open_sdg();
+  int both_good = 0, one_flagged = 0;
+  const int alike = sdg_file_boundaries(&both_good, &one_flagged);
+  sdg_camera(90.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+  sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_NONE, true);
+  const mbvq::RenderOptions options;
+  TestBatch reference;
+  const char *const names[3] = {"None", "Good", "All"};
+  bool kept = opened;
+  bool drawn = opened && alike == 2 && both_good == 1 && one_flagged == 1;
+  std::string modes, indices;
+  for (const int mode : {MBS_VIEW_PROFILES_ALL, MBS_VIEW_PROFILES_UNFLAGGED, MBS_VIEW_PROFILES_NONE,
+                         MBS_VIEW_PROFILES_ALL}) {
+    mb3dsoundings_setprofiles(mode);
+    fill_reference(&reference.b);
+    const int expected = line_vertices(reference.b);
+    const bool ok = renderer.render_soundings(200, 150, options, nullptr);
+    const mbvq::RenderStats s = renderer.stats();
+    const bool after = mb3dsoundings.view_profiles == mode;
+    /* a frame whose fill is refused: it draws the batch it has (a failed
+       frame would leave the statistics of the frame before) */
+    bool refused_drawn = false;
+    {
+      TestBatch other;
+      mbv_draw_set_target(&other.b);
+      refused_drawn = renderer.render_soundings(200, 150, options, nullptr, 1);
+      mbv_draw_set_target(nullptr);
+    }
+    const mbvq::RenderStats refused = renderer.stats();
+    const bool after_refused = mb3dsoundings.view_profiles == mode;
+    kept = kept && ok && !s.failed && after && refused_drawn && refused.fills == s.fills && !refused.failed &&
+           after_refused;
+    drawn = drawn && ok && refused_drawn && !refused.failed && !s.profile_wide && s.profile_indices == expected &&
+            (mode == MBS_VIEW_PROFILES_NONE) == (expected == 0) && refused.profile_indices == expected;
+    modes += std::string(modes.empty() ? "" : ", ") + names[mode] + " " + (after ? "yes" : "no") + "/" +
+             (after_refused ? "yes" : "no") + (refused_drawn && !refused.failed ? "" : " (the refused frame failed)");
+    indices += std::string(indices.empty() ? "" : ", ") + std::to_string(s.profile_indices) + " of " +
+               std::to_string(expected) + " (refused " + std::to_string(refused.profile_indices) + ")";
+  }
+  check(kept, "7b Null: the profile mode that a fill hides from the core is the one set after each frame and after "
+              "a frame whose fill was refused, another batch the target (" + modes + ")");
+  check(drawn, "7b Null: on soundings from three files (" + std::to_string(alike) +
+                   " file boundaries between soundings of the same ping and profile numbers) the renderer draws as "
+                   "many profile indices as the LINES command of a fill with the mode set has vertices, in the All, "
+                   "Good, None and All modes (" + indices + "), also in a frame whose fill was refused");
+  int error = MB_ERROR_NO_ERROR;
+  mb3dsoundings_end(0, &error);
+}
+
 /* 6d without drawing: the profile and soundings views are QRhi views; the
    profile's width cap; the soundings view's failure label, input before the
-   first frame, its point-size control and its status during a fill */
+   first frame, its point-size control and its status during a fill; and
+   (7b) the profile mode that a fill hides from the core: the View menu's
+   item and the core's mode after a frame's fill, the core's mode after a
+   refused fill, and the item when the core asks the window to show its
+   state (mb3dsoundings_updategui) */
 void widgets_views(size_t instance, QRhiWidget::Api expected) {
   mbvq::MapWidget *widget = mbvq::map_widget(instance);
   mbvq::ProfileWindow *window = widget != nullptr ? widget->profile() : nullptr;
@@ -5706,6 +6163,57 @@ void widgets_views(size_t instance, QRhiWidget::Api expected) {
     check(during && after && outside,
           "6d: SoundingsWidget::set_status during a QRhi fill sets the label, the signal and the sliders once, after "
           "the fill; outside a fill at once");
+  }
+
+  /* 7b: the profile mode that a QRhi fill hides from the core while it
+     records the drawing (mbvq_c_soundings_plot_decorations) is the one set
+     again after the fill. The View menu's profile items, chosen as the user
+     chooses them (All, Good, None, All): after a frame of the frame driver
+     the item chosen is still the one checked (the fill did not show the
+     window the hidden mode), the core has the mode after that fill and
+     after a fill refused while another batch is the target, and the item
+     is checked again when the core asks the window to show its state
+     (mb3dsoundings_updategui) */
+  {
+    const char *const texts[3] = {"Show No Profiles", "Show Good Profiles", "Show All Profiles"};
+    const char *const names[3] = {"None", "Good", "All"};
+    QAction *items[3] = {};
+    for (QAction *action : soundings->findChildren<QAction *>())
+      for (int mode = 0; mode < 3; mode++)
+        if (action->isCheckable() && action->text() == QString::fromLatin1(texts[mode]))
+          items[mode] = action;
+    const auto checked = [&items, &names]() {
+      for (int mode = 0; mode < 3; mode++)
+        if (items[mode] != nullptr && items[mode]->isChecked())
+          return std::string(names[mode]);
+      return std::string("none");
+    };
+    bool kept = items[0] != nullptr && items[1] != nullptr && items[2] != nullptr;
+    std::string seen;
+    rhi::SoundingsFrame frame;
+    for (const int mode : {MBS_VIEW_PROFILES_ALL, MBS_VIEW_PROFILES_UNFLAGGED, MBS_VIEW_PROFILES_NONE,
+                           MBS_VIEW_PROFILES_ALL}) {
+      if (!kept)
+        break;
+      items[mode]->trigger();
+      rhi::SoundingsInput input;
+      const bool filled = frame.begin(false, 400, 300, &input);
+      const std::string after_fill = checked();
+      const bool core = mb3dsoundings.view_profiles == mode && input.profiles == mode;
+      TestBatch other;
+      mbv_draw_set_target(&other.b);
+      const bool refused = !frame.begin(false, 400, 300, &input);
+      mbv_draw_set_target(nullptr);
+      const bool core_refused = mb3dsoundings.view_profiles == mode && input.profiles == mode;
+      mb3dsoundings_updategui();
+      const std::string refreshed = checked();
+      kept = kept && filled && after_fill == names[mode] && core && refused && core_refused && refreshed == names[mode];
+      seen += (seen.empty() ? "" : ", ") + std::string(names[mode]) + ": " + after_fill + ", " + refreshed;
+    }
+    check(kept, "7b: the View menu's profile item chosen (All, Good, None, All) is still the one checked after a frame "
+                "of the frame driver, whose fill hides the mode from the core; the core has the mode after that fill "
+                "and after a refused one, and the item is checked when the core asks the window to show its state "
+                "(the mode chosen: checked after the fill, after the core's request: " + seen + ")");
   }
   int error = MB_ERROR_NO_ERROR;
   mb3dsoundings_end(0, &error);
@@ -6369,6 +6877,12 @@ int test_model() {
   model_split_files(120, 3);
   model_split_files(122, 4);
   model_tile_order();
+  /* 7b: a frame's drawing of the 3D soundings against a fill with the
+     profile mode set, the core's batch at two sizes, and the profile lines
+     of soundings from three files */
+  model_soundings_decorations();
+  model_soundings_fill_size();
+  model_profile_files();
   return result();
 }
 
@@ -6794,7 +7308,8 @@ int test_widgets() {
   }
 
   /* 6d: the profile and soundings views are QRhi views (this replaces the
-     check of 6a that the profile view is not a QRhi view yet) */
+     check of 6a that the profile view is not a QRhi view yet); 7b: the
+     profile mode after fills that hide it, in the View menu */
   widgets_views(instance, expected);
 
   /* closing the window deletes the view that never had a QRhi; a button
@@ -7164,6 +7679,9 @@ int test_render_null() {
   null_failures();
   /* 7a: the renderers' create() times */
   null_create_time();
+  /* 7b: the profile mode after fills that hide it, and the profile lines
+     of soundings from three files */
+  null_profile_mode();
   return result();
 }
 

@@ -1450,3 +1450,12 @@ void mbvq_c_soundings_modes(int *edit_mode, int *mouse_mode) {
 	*edit_mode = mb3dsoundings.edit_mode;
 	*mouse_mode = mb3dsoundings.mouse_mode;
 }
+
+/* the drawing without its profile lines (mbvq_bridge.h); the mode is set
+   directly, since mb3dsoundings_setprofiles() would draw again */
+void mbvq_c_soundings_plot_decorations(void) {
+	const int profiles = mb3dsoundings.view_profiles;
+	mb3dsoundings.view_profiles = MBS_VIEW_PROFILES_NONE;
+	mbvq_c_soundings_plot();
+	mb3dsoundings.view_profiles = profiles;
+}
