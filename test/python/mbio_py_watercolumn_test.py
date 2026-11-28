@@ -115,6 +115,19 @@ class WaterColumnTest(unittest.TestCase):
     depth, velocity = line.svp(t)
     self.assertTrue(np.all(np.asarray(velocity) == S.SOUNDSPEED))
 
+  def test_line_unmatched_ping(self):
+    """A water column ping without its survey ping takes the transducer depth interpolated in
+    time from the survey pings around it, beyond them that of the nearest one."""
+    with tempfile.TemporaryDirectory() as tmp:
+      kmall, kmwcd = S.write_line(tmp, draft=3000.0, draft_step=10.0, skip_mrz=(S.PING0 + 2, S.PING0 + 4))
+      line = mb.KongsbergLine(kmwcd)
+      self.assertEqual(line.matched, S.NPINGS - 3)
+      numbers = list(line.wc.ping_numbers)
+      for ping, draft in ((S.PING0 + 1, 3010.0), (S.PING0 + 2, 3020.0), (S.PING0 + 3, 3030.0), (S.PING0 + 4, 3030.0)):
+        i = numbers.index(ping)
+        self.assertEqual(line.survey_index(i) is None, ping in (S.PING0 + 2, S.PING0 + 4), ping)
+        self.assertAlmostEqual(line.draft(i), draft, places=3, msg=ping)
+
   def test_soundings(self):
     s = mb.load_survey(self.kmall)
     self.assertEqual(list(s.ping_number), list(range(S.PING0, S.PING0 + S.NPINGS)))

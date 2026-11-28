@@ -1,0 +1,271 @@
+<!DOCTYPE HTML>
+<HTML>
+<HEAD>
+   <meta charset="utf-8">
+   <TITLE>MB-System Unix Manual Page: mbglb2tiles</TITLE>
+<style>
+  .manual-text { font-family: monospace; max-width: 52em; margin: 0 auto; padding: 0 1em; }
+  h1.Sh { font-size: 1.2em; margin-top: 1.4em; }
+  h2.Ss { font-size: 1.05em; }
+  dl.Bl-tag dt { margin-top: 0.7em; }
+  dl.Bl-tag dd { margin-left: 3em; }
+  pre { overflow-x: auto; }
+  a.permalink { color: inherit; text-decoration: none; }
+</style>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<div class="manual-text">
+<table class="head">
+  <tr>
+    <td class="head-ltitle">mbglb2tiles(1)</td>
+    <td class="head-vol">General Commands Manual</td>
+    <td class="head-rtitle">mbglb2tiles(1)</td>
+  </tr>
+</table>
+<div class="manual-text">
+<section class="Sh">
+<h1 class="Sh" id="NAME"><a class="permalink" href="#NAME">NAME</a></h1>
+<p class="Pp">mbglb2tiles - make an OGC 3D Tiles tileset of levels of detail
+    from a GLB mesh of mbmesh or mbgrd2gltf</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SYNOPSIS"><a class="permalink" href="#SYNOPSIS">SYNOPSIS</a></h1>
+<p class="Pp"><b>mbglb2tiles</b> <b>-I</b><i> mesh.glb</i> [<b>-O</b><i>
+    outputdir</i>] [<b>--tile-size</b><i> meters</i>]
+    [<b>--weld-tolerance</b><i> meters</i>] [<b>--threads</b><i> n</i>]
+    [<b>--no-draco</b>] [<b>--draco-precision</b><i> meters</i>]
+    [<b>--draco-normal-bits</b><i> n</i>] [<b>--html</b> [<b>--x3dom-url</b><i>
+    url</i>] [<b>--sse</b><i> pixels</i>]] [<b>--cesium-html</b>
+    [<b>--cesium-url</b><i> url</i>]] [<b>--geoviewpoint</b><i>
+    lon,lat,elev,clon,clat,celev</i>]... [<b>--lift</b>[=<i>meters</i>]]
+    [<b>--no-colors</b>] [<b>-V</b>] [<b>-h</b>]</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="DESCRIPTION"><a class="permalink" href="#DESCRIPTION">DESCRIPTION</a></h1>
+<p class="Pp"><b>mbglb2tiles</b> turns a triangle mesh in a binary glTF (GLB)
+    file written by <b>mbmesh</b> or <b>mbgrd2gltf</b> into an OGC 3D Tiles
+    tileset that a viewer loads a part at a time, at a level of detail that
+    depends on the distance. A mesh of tens of millions of vertices, which a
+    browser cannot decode and hold at once, is shown as the few tiles that are
+    near enough to need their detail and coarser tiles for the rest. Nothing is
+    reconstructed: the mesh is read, coarsened, and cut into tiles.</p>
+<p class="Pp">The GLB must carry the georeference that <b>mbmesh</b> and
+    <b>mbgrd2gltf</b> write in the extras of the asset (<i>georeference</i>,
+    with the vertices either absolute WGS84 ECEF coordinates or relative to a
+    center), because that says where the mesh is on the Earth. Any other GLB is
+    refused. The mesh may have many primitives, as the GLB of <b>mbgrd2gltf</b>
+    and, by default, the <i>mesh.glb</i> of <b>mbmesh</b> have, Draco-compressed
+    (KHR_draco_mesh_compression) or not. A GLB whose vertices are absolute ECEF
+    coordinates in 32-bit floats resolves only about 0.5 m, and the program
+    warns; make the mesh with a GeoOrigin (<b>--geoorigin</b> of <b>mbmesh</b>
+    or <b>mbgrd2gltf</b>).</p>
+<p class="Pp">The program works as follows.</p>
+<div class="Bd-indent">
+<dl class="Bl-tag">
+  <dt id="Weld"><a class="permalink" href="#Weld"><b>Weld</b></a></dt>
+  <dd>The primitives of a GLB each have their own copies of the vertices on
+      their edges, each quantized on its own. Vertices closer than the weld
+      tolerance are made one, and the normals are made again from the whole
+      surface, so the shading is smooth across the edges of primitives and
+      tiles.</dd>
+  <dt id="Frame"><a class="permalink" href="#Frame"><b>Frame</b></a></dt>
+  <dd>The mesh is put in the east-north-up frame at the middle of its bounds.
+      The tiles are in that frame, written Y-up as glTF requires, and the
+      transform of the root tile of <i>tileset.json</i> places it on the
+    Earth.</dd>
+  <dt id="Levels"><a class="permalink" href="#Levels"><b>Levels</b></a></dt>
+  <dd>The finest level is the mesh. Each level above clusters the vertices of
+      the mesh in cubes whose side is the spacing of the mesh times two to the
+      power of the level, each cluster becoming the mean of its vertices, and
+      drops the triangles that collapse or repeat. The spacing is the square
+      root of the area of the triangles seen from above divided by the number of
+      vertices. The whole mesh is coarsened and then cut, so that the tiles of a
+      level meet exactly along their edges.</dd>
+  <dt id="Tiles"><a class="permalink" href="#Tiles"><b>Tiles</b></a></dt>
+  <dd>The tiles of a level are the squares of a lattice, anchored at a corner of
+      the bounds of the mesh, whose side is the tile size times two to the power
+      of the level, and each triangle goes to the tile that has its center. Four
+      tiles of a level are replaced by one of the next level, until one tile
+      holds everything, so every tile has about as many vertices as any other. A
+      tile is a GLB of one primitive, compressed with Draco unless
+      <b>--no-draco</b> is given.</dd>
+  <dt id="tileset.json"><a class="permalink" href="#tileset.json"><b>tileset.json</b></a></dt>
+  <dd>Version 1.1, with the refinement REPLACE, a box bounding volume for each
+      tile that holds its content and its children, and a geometric error that
+      is the cube size of its level (0 for the finest tiles). The tileset has
+      the georeference and provenance of the run in its extras, as the tiles do
+      in the extras of their assets.</dd>
+</dl>
+</div>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="OPTIONS"><a class="permalink" href="#OPTIONS">OPTIONS</a></h1>
+<dl class="Bl-tag">
+  <dt id="I"><a class="permalink" href="#I"><b>-I<i> mesh.glb</i>,
+    <b>--input</b> <i>mesh.glb</i></b></a></dt>
+  <dd>The GLB mesh. Required.</dd>
+  <dt id="O"><a class="permalink" href="#O"><b>-O<i> outputdir</i>,
+    <b>--output</b> <i>outputdir</i></b></a></dt>
+  <dd>Where <i>tileset.json</i> and the tiles go. The directory is created if
+      needed. The tiles are in a directory <i>L0</i>, <i>L1</i> and so on for
+      each level, <i>L0</i> being the finest, named <i>tile_I_J.glb</i> after
+      the position of the tile in the lattice of its level. The default is
+      <i>tileset</i> in the directory of the input, which is where <b>mbmesh
+      --tileset</b> writes its tileset, in the same layout. A tileset already in
+      the directory, from either program, is replaced: its <i>tileset.json</i>,
+      <i>L</i>level directories and flat <i>tile_I_J.glb</i> files are removed
+      first, and the log says so.</dd>
+  <dt id="tile-size"><a class="permalink" href="#tile-size"><b>--tile-size<i>
+    meters</i></b></a></dt>
+  <dd>The side of the tiles of the finest level. The default is 256 times the
+      spacing of the mesh, to two significant digits, as <b>mbgrd2gltf</b>
+      writes blocks of 256 cells. The side doubles with each level.</dd>
+  <dt id="weld-tolerance"><a class="permalink" href="#weld-tolerance"><b>--weld-tolerance<i>
+    meters</i></b></a></dt>
+  <dd>Vertices of the file this close to each other are one. The default is
+      twice the Draco quantization step that the file records, or 0.001 if that
+      is less.</dd>
+  <dt id="threads"><a class="permalink" href="#threads"><b>--threads<i>
+    n</i></b></a></dt>
+  <dd>The number of threads that decode the Draco primitives of the input and
+      write the tiles. The default is the number of cores, at most 8.</dd>
+  <dt id="no-draco"><a class="permalink" href="#no-draco"><b>--no-draco</b></a></dt>
+  <dd>Write the tiles as arrays, without compression. By default they are
+      compressed with Draco.</dd>
+  <dt id="draco-precision"><a class="permalink" href="#draco-precision"><b>--draco-precision<i>
+    meters</i></b></a></dt>
+  <dd>With Draco, keep positions to this many meters (default 0.001): each tile
+      gets the bits that make the step of its quantization no more than this
+      over its extent. The same option as <b>mbmesh</b> and <b>mbgrd2gltf</b>
+      take.</dd>
+  <dt id="draco-normal-bits"><a class="permalink" href="#draco-normal-bits"><b>--draco-normal-bits<i>
+    n</i></b></a></dt>
+  <dd>With Draco, the bits of each component of a normal, 2 to 30 (default
+    10).</dd>
+  <dt id="html"><a class="permalink" href="#html"><b>--html</b></a></dt>
+  <dd>Also write a viewer page, <i>outputdir</i>.html in the directory that
+      holds the output directory, which shows the tileset with an X3DOM
+      GeoTileset node, with a GeoOrigin at the origin of the frame and an
+      overview viewpoint from above. The processing log is in
+      <i>mbglb2tiles.log</i> in the output directory, which the page loads when
+      its log panel is opened. The page must be served over HTTP, as it loads
+      the tiles; the program prints the command that serves it (<b>python3 -m
+      http.server</b>), and does not start it.</dd>
+  <dt id="x3dom-url"><a class="permalink" href="#x3dom-url"><b>--x3dom-url<i>
+    url</i></b></a></dt>
+  <dd>The X3DOM script that the <b>--html</b> page loads (default
+      https://www.x3dom.org/x3dom/dist/x3dom-full.js). A GeoTileset needs a
+      build of X3DOM that has it, which that one may not.</dd>
+  <dt id="cesium-html"><a class="permalink" href="#cesium-html"><b>--cesium-html</b></a></dt>
+  <dd>Also write a viewer page for CesiumJS, <i>outputdir</i>_cesium.html in the
+      directory that holds the output directory. The globe of Cesium hides data
+      that are below the ellipsoid, so the page starts with the globe hidden and
+      has a check box that shows it, translucent. The page takes the lift of
+      <b>--lift</b> off again, so that the tileset is at its true height. It
+      must be served over HTTP, like the <b>--html</b> page.</dd>
+  <dt id="cesium-url"><a class="permalink" href="#cesium-url"><b>--cesium-url<i>
+    url</i></b></a></dt>
+  <dd>The directory of the CesiumJS build that the <b>--cesium-html</b> page
+      loads, with Cesium.js and Widgets/widgets.css in it (default
+      https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium).</dd>
+  <dt id="geoviewpoint"><a class="permalink" href="#geoviewpoint"><b>--geoviewpoint<i>
+    lon,lat,elev,clon,clat,celev</i></b></a></dt>
+  <dd>Add a viewpoint to the Viewpoint menu of the <b>--html</b> and
+      <b>--cesium-html</b> pages; the option can be repeated. The values are
+      geodetic, longitude first, with true heights whatever <b>--lift</b> says:
+      the position of the camera and the point it looks at. Ten numbers,
+      <i>lon,lat,elev,ax,ay,az,angle,clon,clat,celev</i>, give the orientation
+      as well, as an axis and an angle in the local frame (X east, Y up, Z
+      south) as a GeoViewpoint takes it; <i>1 0 0 -1.5708</i> looks straight
+      down. The Copy GeoViewpoint button of the X3DOM page and the Copy
+      viewpoint button of the Cesium page give the option for the view on the
+      screen.</dd>
+  <dt id="no-colors"><a class="permalink" href="#no-colors"><b>--no-colors</b></a></dt>
+  <dd>Do not color the tiles by height. By default every vertex has a color
+      (<b>COLOR_0</b>) from the Haxby table over the heights of the whole mesh,
+      so that all tiles and levels agree, with a white base color;
+      <b>tileset.json</b> records the bounds as <b>heightColors</b>, and the
+      <b>--html</b> page has a &quot;color by height&quot; checkbox that turns
+      the colors off, which shows the tiles in gray.</dd>
+  <dt id="lift"><a class="permalink" href="#lift"><b>--lift[=<i>meters</i>]</b></a></dt>
+  <dd>Put the tileset above the ellipsoid, along the local vertical, in the
+      transform of <b>tileset.json</b>. As <b>--geoorigin</b> of <b>mbmesh</b>
+      does, without the option there is no lift and the tileset has the true
+      heights (a warning says so if any are below the ellipsoid), the option
+      alone takes the default below, and a value must be attached, as in
+      <b>--lift=900</b>. X3DOM's GeoTileset takes the height of the camera as at
+      least 1 m, so a camera below the ellipsoid, as over the seafloor, never
+      gets close enough to refine a tile and only the root tile loads. The
+      default lift is enough to put the lowest point of the mesh 10 m above the
+      ellipsoid, to a meter, if it is lower. The lift is logged and written as
+      <b>liftMeters</b> in the extras of the tileset, and the viewpoints of the
+      <b>--html</b> page have it added.</dd>
+  <dt id="sse"><a class="permalink" href="#sse"><b>--sse<i>
+    pixels</i></b></a></dt>
+  <dd>With <b>--html</b>, the maximumScreenSpaceError of the page's GeoTileset:
+      a tile is replaced by its children when its geometric error would show
+      larger than this (default 1; X3DOM's own default of 8 refines tiles of
+      centimeter errors only within a few meters).</dd>
+  <dt id="V"><a class="permalink" href="#V"><b>-V, <b>--verbose</b></b></a></dt>
+  <dd>Log the debug messages as well as the information messages. The log always
+      says what each stage does and which options are in effect, default or
+    not.</dd>
+  <dt id="h"><a class="permalink" href="#h"><b>-h, <b>--help</b></b></a></dt>
+  <dd>Print the usage and exit.</dd>
+</dl>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="EXAMPLES"><a class="permalink" href="#EXAMPLES">EXAMPLES</a></h1>
+<p class="Pp">Make the tiles of a mesh from <b>mbmesh</b>, and a page to look at
+    them with:
+  <br/>
+  mbmesh -I datalist.mb-1 -L 0.1 --geoorigin
+  <br/>
+  mbglb2tiles -I mbmesh_output/mesh.glb --html
+  <br/>
+  python3 -m http.server 8000 --directory .</p>
+<p class="Pp">Tiles of 50 m at the finest level, not compressed:
+  <br/>
+  mbglb2tiles -I ZTopo.glb --tile-size 50 --no-draco</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="NOTES"><a class="permalink" href="#NOTES">NOTES</a></h1>
+<p class="Pp">The whole mesh is held in memory, about 100 bytes for each vertex
+    while it is welded and clustered; a mesh of 38 million vertices needed 12
+    GB. The tiles are in one frame for the whole tileset, which is fine for a
+    survey a few kilometers across. The coarse levels are made by clustering
+    vertices, not by collapsing edges with an error measure, so thin features
+    and sharp edges round off. <b>3d-tiles-validator</b> reports no errors or
+    warnings for the tilesets, only that it cannot validate the Draco
+  extension.</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="AUTHOR"><a class="permalink" href="#AUTHOR">AUTHOR</a></h1>
+<p class="Pp">David W. Caress and Dale N. Chayes
+  <br/>
+  Monterey Bay Aquarium Research Institute
+  <br/>
+  Levels of detail, OGC 3D Tiles tilesets and the viewer pages (issue #1629):
+    Mike McCann (supervising Claude Sonnet 5.5, an AI coding agent from
+    Anthropic), MBARI</p>
+</section>
+<section class="Sh">
+<h1 class="Sh" id="SEE_ALSO"><a class="permalink" href="#SEE_ALSO">SEE
+  ALSO</a></h1>
+<p class="Pp"><b>mb-system</b>(1), <b>mbmesh</b>(1), <b>mbgrd2gltf</b>(1)</p>
+</section>
+</div>
+<table class="foot">
+  <tr>
+    <td class="foot-date">7 November 2026</td>
+    <td class="foot-os"></td>
+  </tr>
+</table>
+</div>
+<HR>
+<p>
+<a href="https://www.mbari.org/products/research-software/mb-system/"><< MB-System website</a> | <a href="https://www.mbari.org/technology/mb-system/documentation/"> MB-System Documenation>></a> | <a href="mbsystem_man_list.html">MB-System Manual Page List</a></p>
+</center>
+</BODY>
+</HTML>

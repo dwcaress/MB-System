@@ -199,15 +199,28 @@ class MbvelocitytoolQtTest(unittest.TestCase):
     finally:
       os.remove(listed)
 
-  def test_window(self):
-    # two long stored profiles that differ, crossing near the surface, and the short one of the line
+  def with_profiles(self, name):
+    """a copy of the swath file with two long stored profiles that differ, crossing near the surface"""
     deep = [(10.0 * i, 1500.0 + 15.0 * math.sin(i / 10.0)) for i in range(120)] + [(5000.0, 1500.0)]
     other = [(8.0 * i, 1500.0 - 15.0 * math.sin(i / 10.0)) for i in range(150)] + [(5000.0, 1500.0)]
     with open(self.kmall, "rb") as f:
       data = f.read()
-    path = os.path.join(self.tmp.name, "window.kmall")
+    path = os.path.join(self.tmp.name, name)
     with open(path, "wb") as f:
       f.write(S.svp(S.T0 - 5.0, deep) + S.svp(S.T0 - 4.0, other) + data)
+    return path
+
+  def test_embed(self):
+    a = self.with_profiles("embed_a.kmall")
+    b = self.with_profiles("embed_b.kmall")
+    env = dict(os.environ, QT_QPA_PLATFORM="offscreen")
+    result = subprocess.run([os.environ["MBVELOCITYTOOL_QT_EMBED_TEST"], a, b, self.tmp.name], capture_output=True,
+                            text=True, cwd=self.tmp.name, env=env, timeout=300)
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+    self.assertIn(" 0 failed", result.stdout)
+
+  def test_window(self):
+    path = self.with_profiles("window.kmall")
     env = dict(os.environ, QT_QPA_PLATFORM="offscreen")
     result = subprocess.run([os.environ["MBVELOCITYTOOL_QT_WINDOW_TEST"], path, self.kmall, self.tmp.name], capture_output=True,
                             text=True, cwd=self.tmp.name, env=env, timeout=300)

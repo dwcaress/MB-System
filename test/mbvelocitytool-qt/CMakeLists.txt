@@ -33,27 +33,21 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
 set(CMAKE_AUTOMOC ON)
 
-set(tool_dir "${CMAKE_SOURCE_DIR}/src/mbvelocitytool-qt")
-
-add_executable(
-  mbvelocitytool_qt_window_test
-  mbvelocitytool_qt_window_test.cc
-  ${tool_dir}/MainWindow.cc
-  ${tool_dir}/MainWindow.h
-  ${tool_dir}/mbvt_core.cc
-  ${tool_dir}/mbvt_core.h
-  ${tool_dir}/mbvt_plots.cc
-  ${tool_dir}/mbvt_plots.h)
+add_executable(mbvelocitytool_qt_window_test mbvelocitytool_qt_window_test.cc)
 
 set_target_properties(mbvelocitytool_qt_window_test PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 
-target_include_directories(mbvelocitytool_qt_window_test PRIVATE ${tool_dir})
+target_link_libraries(mbvelocitytool_qt_window_test PRIVATE mbvelocitytool-qt-ui)
 
-target_link_libraries(mbvelocitytool_qt_window_test PRIVATE mbio Qt6::Widgets ${MB_SYSLIBS})
+add_executable(mbvelocitytool_qt_embed_test mbvelocitytool_qt_embed_test.cc)
+
+set_target_properties(mbvelocitytool_qt_embed_test PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+
+target_link_libraries(mbvelocitytool_qt_embed_test PRIVATE mbvelocitytool-qt-ui)
 
 find_package(Python3 COMPONENTS Interpreter)
 if(Python3_FOUND)
   add_test(NAME mbvelocitytool_qt_test COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mbvelocitytool_qt_test.py")
   set_tests_properties(mbvelocitytool_qt_test PROPERTIES ENVIRONMENT
-                       "MBVELOCITYTOOL_QT=$<TARGET_FILE:mbvelocitytool-qt>;MBVELOCITYTOOL_QT_WINDOW_TEST=$<TARGET_FILE:mbvelocitytool_qt_window_test>")
+                       "MBVELOCITYTOOL_QT=$<TARGET_FILE:mbvelocitytool-qt>;MBVELOCITYTOOL_QT_WINDOW_TEST=$<TARGET_FILE:mbvelocitytool_qt_window_test>;MBVELOCITYTOOL_QT_EMBED_TEST=$<TARGET_FILE:mbvelocitytool_qt_embed_test>")
 endif()

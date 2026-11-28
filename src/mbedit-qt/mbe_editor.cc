@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------
- *    The MB-system:  MainWindow.cc  2/11/2026
+ *    The MB-system:  mbe_editor.cc  2/11/2026
  *
  *    Copyright (c) 2026 by
  *    Christian dos Santos Ferreira
@@ -22,9 +22,10 @@
  *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 
-#include "MainWindow.h"
+#include "mbe_editor.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstring>
 #include <filesystem>
 #include <memory>
@@ -35,7 +36,6 @@
 #include <QApplication>
 #include <QButtonGroup>
 #include <QCheckBox>
-#include <QCloseEvent>
 #include <QComboBox>
 #include <QCoreApplication>
 #include <QDateTime>
@@ -47,29 +47,35 @@
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QHideEvent>
 #include <QInputDialog>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMenu>
-#include <QMenuBar>
+#include <QMetaMethod>
 #include <QMessageBox>
 #include <QProcess>
 #include <QPushButton>
 #include <QRadioButton>
 #include <QSpinBox>
 #include <QSettings>
+#include <QShowEvent>
 #include <QSplitter>
 #include <QStandardPaths>
-#include <QStatusBar>
 #include <QTableWidget>
 #include <QTemporaryDir>
 #include <QThread>
 #include <QTimeZone>
 #include <QTimer>
+#include <QToolBar>
+#include <QToolButton>
 #include <QVBoxLayout>
+#include <QWidgetAction>
 
 #include "mb_define.h"
 #include "mb_status.h"
+
+namespace mbe {
 
 namespace {
 
@@ -87,12 +93,10 @@ QAction *checkable(QMenu *menu, QActionGroup *group, const QString &text, int id
 }  // namespace
 
 /*--------------------------------------------------------------------*/
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
-  setWindowTitle("mbedit-qt[*]");
-
+EditorWidget::EditorWidget(Presentation presentation, QWidget *parent) : QWidget(parent), presentation_(presentation) {
   session_.on_progress = [this](const std::string &text) {
     const QString message = QString::fromStdString(text);
-    QMetaObject::invokeMethod(this, [this, message] { statusBar()->showMessage(message); }, Qt::QueuedConnection);
+    QMetaObject::invokeMethod(this, [this, message] { emit statusMessage(message, 0); }, Qt::QueuedConnection);
   };
   session_.on_error = [this](const std::string &a, const std::string &b, const std::string &c) {
     const QString qa = QString::fromStdString(a), qb = QString::fromStdString(b), qc = QString::fromStdString(c);
@@ -107,6 +111,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   map_->hide();
   buildControls();
   buildMenus();
+  if (presentation_ == Presentation::Panel)
+    buildPanel();
   buildGotoDialog();
   buildBufferDialog();
   buildAnnotationDialog();
@@ -116,22 +122,21 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   buildHistoryDialog();
   buildMbcleanDialog();
 
-  connect(canvas_, &Canvas::suspectKey, this, &MainWindow::nextSuspect);
-  connect(canvas_, &Canvas::edited, this, &MainWindow::afterEdit);
-  connect(canvas_, &Canvas::moved, this, &MainWindow::afterMove);
+  connect(canvas_, &Canvas::suspectKey, this, &EditorWidget::nextSuspect);
+  connect(canvas_, &Canvas::edited, this, &EditorWidget::afterEdit);
+  connect(canvas_, &Canvas::moved, this, &EditorWidget::afterMove);
   connect(canvas_, &Canvas::modeKey, this, [this](int mode) { mode_group_->button(mode)->setChecked(true); });
   connect(canvas_, &Canvas::viewKey, this, [this](int view) { setViewMode(view); });
-  connect(canvas_, &Canvas::viewChanged, this, &MainWindow::syncControls);
-  connect(canvas_, &Canvas::contextMenuAt, this, &MainWindow::pingContextMenu);
-  connect(panel_, &TimeSeriesPanel::pingClicked, this, &MainWindow::showPing);
-  connect(map_, &TrackMap::pingClicked, this, &MainWindow::showPing);
+  connect(canvas_, &Canvas::viewChanged, this, &EditorWidget::syncControls);
+  connect(canvas_, &Canvas::contextMenuAt, this, &EditorWidget::pingContextMenu);
+  connect(canvas_, &Canvas::soundingInfo, this, &EditorWidget::soundingInfo);
+  connect(panel_, &TimeSeriesPanel::pingClicked, this, &EditorWidget::showPing);
+  connect(map_, &TrackMap::pingClicked, this, &EditorWidget::showPing);
 
-  statusBar()->showMessage("Ready");
-  resize(1400, 900);
   syncControls();
 }
 
-MainWindow::~MainWindow() {
+EditorWidget::~EditorWidget() {
   if (worker_ != nullptr) {
     worker_->wait();
   }
@@ -143,14 +148,122 @@ MainWindow::~MainWindow() {
 }
 
 /*--------------------------------------------------------------------*/
-void MainWindow::buildControls() {
-  auto *central = new QWidget;
-  setCentralWidget(central);
-  auto *layout = new QVBoxLayout(central);
+QMenu *EditorWidget::newMenu(const QString &title) {
+  auto *menu = new QMenu(title, this);
+  menus_.push_back(menu);
+  return menu;
+}
+
+void EditorWidget::setWorking(bool working) {
+  central_->setEnabled(!working);
+  for (QMenu *menu : menus_)
+    menu->setEnabled(!working);
+  emit busyChanged(working);
+}
+
+void EditorWidget::setTimeWindow(const int begin[7], const int end[7]) {
+  std::copy(begin, begin + 7, session_.btime_i);
+  std::copy(end, end + 7, session_.etime_i);
+}
+
+void EditorWidget::setToolOpener(std::function<bool(const QString &, const QString &, int, long)> open) {
+  tool_opener_ = std::move(open);
+  water_column_->setVisible(tool_opener_ || !findProgram("mbwcdview").isEmpty());
+}
+
+bool EditorWidget::openFile(const QString &path, int format, SavedEdits edits) {
+  if (busy())
+    return false;
+  if (session_.isOpen() && path == QString::fromUtf8(session_.file()))
+    return true;
+  const std::string name = path.toStdString();
+  afterCurrentFileClosed([this, name, format, edits] {
+    int index = -1;
+    for (int i = 0; i < (int)files_.size(); i++)
+      if (files_[i].path == name)
+        index = i;
+    if (index < 0) {
+      const size_t before = files_.size();
+      std::string message;
+      if (!mbe::parse_input(name, format, files_, message) || files_.size() == before) {
+        showError(QString::fromStdString(message), QString::fromStdString(name), "");
+        return;
+      }
+      index = (int)before;
+      syncFileList();
+    }
+    loadFile(index, edits == SavedEdits::Ask, edits == SavedEdits::Apply);
+  });
+  return true;
+}
+
+bool EditorWidget::goToTime(double time_d) {
+  if (busy() || !session_.isOpen() || session_.nbuff() == 0)
+    return false;
+  const std::vector<mbe::Ping> &pings = session_.pings();
+  if (time_d < pings.front().time_d)
+    return false;
+  if (time_d > pings.back().time_d) {
+    /* in the pings not read yet */
+    auto target = std::make_shared<std::vector<int>>(7, 0);
+    mb_get_date(0, time_d, target->data());
+    runJob("Looking for the time...", [this, target] { session_.gotoTime(target->data()); }, [this] { canvas_->layoutChanged(); });
+    return true;
+  }
+  int nearest = 0;
+  for (int i = 1; i < (int)pings.size(); i++)
+    if (std::abs(pings[i].time_d - time_d) < std::abs(pings[nearest].time_d - time_d))
+      nearest = i;
+  showPing(nearest);
+  return true;
+}
+
+bool EditorWidget::showRecord(long record) {
+  if (busy() || !session_.isOpen())
+    return false;
+  const std::vector<mbe::Ping> &pings = session_.pings();
+  for (int i = 0; i < (int)pings.size(); i++) {
+    if (pings[i].record == record) {
+      showPing(i);
+      return true;
+    }
+  }
+  return false;
+}
+
+void EditorWidget::setDisplayName(const QString &name) {
+  display_name_ = name;
+  syncControls();
+}
+
+void EditorWidget::setShortcutContext(Qt::ShortcutContext context) {
+  for (QAction *action : {open_action_, save_action_, undo_action_, redo_action_}) {
+    action->setShortcutContext(context);
+    /* with a smaller scope than the window the key works only if the action is on this widget */
+    if (context != Qt::WindowShortcut)
+      addAction(action);
+  }
+}
+
+void EditorWidget::buildControls() {
+  /* the controls are disabled during a job, but not the dialogs, which are children of the editor */
+  central_ = new QWidget;
+  auto *outer = new QVBoxLayout(this);
+  outer->setContentsMargins(0, 0, 0, 0);
+  outer->addWidget(central_);
+  auto *layout = new QVBoxLayout(central_);
 
   /* edit mode */
-  auto *mode_row = new QHBoxLayout;
-  mode_row->addWidget(new QLabel("Mode:"));
+  const bool panel = presentation_ == Presentation::Panel;
+  QHBoxLayout *mode_row = panel ? nullptr : new QHBoxLayout;
+  if (panel) {
+    panel_bar_ = new QToolBar;
+    panel_bar_->setObjectName("panel_bar");
+    panel_bar_->setToolButtonStyle(Qt::ToolButtonTextOnly);
+  }
+  else {
+    mode_row->addWidget(new QLabel("Mode:"));
+  }
   mode_group_ = new QButtonGroup(this);
   const struct {
     const char *name;
@@ -158,16 +271,31 @@ void MainWindow::buildControls() {
   } mode_buttons[] = {{"Toggle", Canvas::MODE_TOGGLE}, {"Pick", Canvas::MODE_PICK},   {"Erase", Canvas::MODE_ERASE}, {"Restore", Canvas::MODE_RESTORE},
                       {"Grab", Canvas::MODE_GRAB},     {"Lasso", Canvas::MODE_LASSO}, {"Info", Canvas::MODE_INFO}};
   for (const auto &m : mode_buttons) {
-    auto *button = new QRadioButton(m.name);
+    QAbstractButton *button;
+    if (panel) {
+      auto *tool = new QToolButton;
+      tool->setText(m.name);
+      tool->setCheckable(true);
+      button = tool;
+      panel_bar_->addWidget(tool);
+    }
+    else {
+      button = new QRadioButton(m.name);
+      mode_row->addWidget(button);
+    }
     button->setObjectName(QString("mode_%1").arg(QString(m.name).toLower()));
     button->setFocusPolicy(Qt::NoFocus);
     mode_group_->addButton(button, m.mode);
-    mode_row->addWidget(button);
   }
   mode_group_->button(0)->setChecked(true);
-  connect(mode_group_, &QButtonGroup::idClicked, this, &MainWindow::setModeFromUi);
-  mode_row->addStretch(1);
-  layout->addLayout(mode_row);
+  connect(mode_group_, &QButtonGroup::idClicked, this, &EditorWidget::setModeFromUi);
+  if (panel) {
+    layout->addWidget(panel_bar_);
+  }
+  else {
+    mode_row->addStretch(1);
+    layout->addLayout(mode_row);
+  }
 
   /* scales */
   width_ = new ScaleControl(1, 20000, mbe::MAX_PLOT_WIDTH, 0);
@@ -187,7 +315,13 @@ void MainWindow::buildControls() {
   scales->addWidget(pings_, 1, 1);
   scales->addWidget(new QLabel("Pings to Step:"), 1, 2);
   scales->addWidget(step_, 1, 3);
-  layout->addLayout(scales);
+  if (panel) {
+    scales_panel_ = new QWidget;
+    scales_panel_->setLayout(scales);
+  }
+  else {
+    layout->addLayout(scales);
+  }
   connect(width_, &ScaleControl::valueChanged, this, [this](int v) {
     session_.settings.plot_width = v;
     applySettings();
@@ -196,8 +330,8 @@ void MainWindow::buildControls() {
     session_.settings.exagger = v;
     applySettings();
   });
-  connect(pings_, &ScaleControl::valueChanged, this, &MainWindow::pingsChanged);
-  connect(step_, &ScaleControl::valueChanged, this, &MainWindow::stepChanged);
+  connect(pings_, &ScaleControl::valueChanged, this, &EditorWidget::pingsChanged);
+  connect(step_, &ScaleControl::valueChanged, this, &EditorWidget::stepChanged);
 
   /* plot */
   splitter_ = new QSplitter(Qt::Horizontal);
@@ -213,27 +347,32 @@ void MainWindow::buildControls() {
   layout->addWidget(splitter_, 1);
 
   /* buttons */
-  auto *buttons = new QHBoxLayout;
+  QHBoxLayout *buttons = panel ? nullptr : new QHBoxLayout;
   auto button = [&](QPushButton *&member, const char *text, const char *name) {
-    member = new QPushButton(text);
+    member = new QPushButton(text, central_);
     member->setObjectName(name);
     member->setFocusPolicy(Qt::NoFocus);
-    buttons->addWidget(member);
+    if (buttons != nullptr)
+      buttons->addWidget(member);
   };
   button(start_, "Start", "button_start");
   button(reverse_, "Reverse", "button_reverse");
   button(forward_, "Forward", "button_forward");
   button(end_, "End", "button_end");
-  buttons->addSpacing(16);
+  if (buttons != nullptr)
+    buttons->addSpacing(16);
   button(next_, "Next Buffer", "button_next");
   button(done_, "Done", "button_done");
-  buttons->addSpacing(16);
+  if (buttons != nullptr)
+    buttons->addSpacing(16);
   button(flag_view_, "Flag View", "button_flag_view");
   button(unflag_view_, "Unflag View", "button_unflag_view");
   button(unflag_forward_, "Unflag Forward", "button_unflag_forward");
-  buttons->addStretch(1);
+  if (buttons != nullptr)
+    buttons->addStretch(1);
   button(quit_, "Quit", "button_quit");
-  layout->addLayout(buttons);
+  if (buttons != nullptr)
+    layout->addLayout(buttons);
 
   auto move = [this](int nsteps) {
     if (session_.step(nsteps) != MB_SUCCESS)
@@ -245,22 +384,28 @@ void MainWindow::buildControls() {
   connect(end_, &QPushButton::clicked, this, [this, move] { move(session_.nbuff() - session_.current() - 1); });
   connect(reverse_, &QPushButton::clicked, this, [this, move] { move(-canvas_->stepSize); });
   connect(forward_, &QPushButton::clicked, this, [this, move] { move(canvas_->stepSize); });
-  connect(next_, &QPushButton::clicked, this, &MainWindow::nextBuffer);
-  connect(done_, &QPushButton::clicked, this, &MainWindow::doneOrNextFile);
+  connect(next_, &QPushButton::clicked, this, &EditorWidget::nextBuffer);
+  connect(done_, &QPushButton::clicked, this, &EditorWidget::doneOrNextFile);
   connect(flag_view_, &QPushButton::clicked, this, [this] { flagAction([this] { return session_.flagView(); }); });
   connect(unflag_view_, &QPushButton::clicked, this, [this] { flagAction([this] { return session_.unflagView(); }); });
   connect(unflag_forward_, &QPushButton::clicked, this, [this] { flagAction([this] { return session_.unflagForward(); }); });
-  connect(quit_, &QPushButton::clicked, this, &QWidget::close);
+  connect(quit_, &QPushButton::clicked, this, &EditorWidget::closeRequested);
 
   /* position in the buffer */
   auto *slider_row = new QHBoxLayout;
-  slider_row->addWidget(new QLabel("Ping:"));
+  if (panel) {
+    slider_row->addWidget(start_);
+    slider_row->addWidget(reverse_);
+  }
+  else {
+    slider_row->addWidget(new QLabel("Ping:"));
+  }
   slider_ = new PingSlider(Qt::Horizontal);
   slider_->setObjectName("ping_slider");
   slider_->setFocusPolicy(Qt::NoFocus);
   strip_ = new SuspectStrip;
   strip_->setObjectName("suspect_strip");
-  connect(strip_, &SuspectStrip::pingClicked, this, &MainWindow::showPing);
+  connect(strip_, &SuspectStrip::pingClicked, this, &EditorWidget::showPing);
   auto *slider_column = new QVBoxLayout;
   slider_column->setSpacing(1);
   slider_column->addWidget(strip_);
@@ -268,14 +413,29 @@ void MainWindow::buildControls() {
   slider_row->addLayout(slider_column, 1);
   position_ = new QLabel;
   position_->setObjectName("ping_position");
-  slider_row->addWidget(position_);
-  layout->addLayout(slider_row);
-  connect(slider_, &QSlider::valueChanged, this, &MainWindow::sliderMoved);
+  if (panel) {
+    slider_row->addWidget(forward_);
+    slider_row->addWidget(end_);
+    slider_row->addWidget(next_);
+    layout->addLayout(slider_row);
+    auto *info_row = new QHBoxLayout;
+    info_line_ = new QLabel;
+    info_line_->setObjectName("panel_info");
+    info_line_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+    info_row->addWidget(info_line_, 1);
+    info_row->addWidget(position_);
+    layout->addLayout(info_row);
+  }
+  else {
+    slider_row->addWidget(position_);
+    layout->addLayout(slider_row);
+  }
+  connect(slider_, &QSlider::valueChanged, this, &EditorWidget::sliderMoved);
 }
 
-void MainWindow::buildMenus() {
-  QMenu *file = menuBar()->addMenu("File");
-  open_action_ = file->addAction("Open...", this, &MainWindow::openDialog);
+void EditorWidget::buildMenus() {
+  QMenu *file = newMenu("File");
+  open_action_ = file->addAction("Open...", this, &EditorWidget::openDialog);
   open_action_->setShortcut(QKeySequence::Open);
   filelist_action_ = file->addAction("File Selection List...", this, [this] {
     syncFileList();
@@ -285,16 +445,12 @@ void MainWindow::buildMenus() {
   file->addSeparator();
   browse_action_ = file->addAction("Browse Only");
   browse_action_->setCheckable(true);
-  connect(browse_action_, &QAction::toggled, this, &MainWindow::setBrowse);
+  connect(browse_action_, &QAction::toggled, this, &EditorWidget::setBrowse);
   file->addSeparator();
-  save_action_ = file->addAction("Save", this, &MainWindow::saveNow);
+  save_action_ = file->addAction("Save", this, &EditorWidget::save);
   save_action_->setShortcut(QKeySequence::Save);
-  file->addSeparator();
-  QAction *quit = file->addAction("Quit", this, &QWidget::close);
-  quit->setShortcut(QKeySequence::Quit);
-  quit->setMenuRole(QAction::QuitRole);
 
-  QMenu *edit = menuBar()->addMenu("Edit");
+  QMenu *edit = newMenu("Edit");
   undo_action_ = edit->addAction("Undo", this, [this] {
     session_.undo();
     canvas_->redraw();
@@ -314,7 +470,7 @@ void MainWindow::buildMenus() {
     reasons_dialog_->raise();
   });
 
-  QMenu *view = menuBar()->addMenu("View");
+  QMenu *view = newMenu("View");
   view_group_ = new QActionGroup(this);
   checkable(view, view_group_, "Waterfall View", mbe::VIEW_WATERFALL, true);
   checkable(view, view_group_, "Alongtrack View", mbe::VIEW_ALONGTRACK);
@@ -377,7 +533,7 @@ void MainWindow::buildMenus() {
     QTimer::singleShot(0, canvas_, [this] { canvas_->layoutChanged(); });
   });
 
-  QMenu *controls = menuBar()->addMenu("Controls");
+  QMenu *controls = newMenu("Controls");
   auto show_dialog = [this](QDialog *&dialog) {
     dialog->show();
     dialog->raise();
@@ -409,13 +565,13 @@ void MainWindow::buildMenus() {
   connect(reverse_mouse_, &QAction::toggled, this, [this](bool on) { canvas_->reverseMouse = on; });
 
   view->addSeparator();
-  view->addAction("Reset Zoom", this, [this] {
+  reset_zoom_ = view->addAction("Reset Zoom", this, [this] {
     session_.resetView();
     canvas_->redraw();
     syncControls();
   });
 
-  QMenu *tools = menuBar()->addMenu("Tools");
+  QMenu *tools = newMenu("Tools");
   tools->addAction("Next Suspect Ping", this, [this] { nextSuspect(1); });
   tools->addAction("Previous Suspect Ping", this, [this] { nextSuspect(-1); });
   tools->addSeparator();
@@ -429,22 +585,118 @@ void MainWindow::buildMenus() {
     if (!path.isEmpty())
       loadReference(path);
   });
-  clear_reference_ = tools->addAction("Clear Reference Surface", this, &MainWindow::clearReference);
+  clear_reference_ = tools->addAction("Clear Reference Surface", this, &EditorWidget::clearReference);
   tools->addSeparator();
-  history_action_ = tools->addAction("Edit History...", this, &MainWindow::showHistory);
+  history_action_ = tools->addAction("Edit History...", this, &EditorWidget::showHistory);
   /* mbwcdview is optional: the item is there only if the program is */
   water_column_ = tools->addAction("Water Column at Center Ping", this, [this] {
     openWaterColumn(session_.current() + session_.nplot() / 2);
   });
   water_column_->setVisible(!findProgram("mbwcdview").isEmpty());
-  mbeditviz_ = tools->addAction("Save and Open in mbeditviz", this, &MainWindow::openMbeditviz);
+  mbeditviz_ = tools->addAction("Save and Open in mbeditviz", this, &EditorWidget::openMbeditviz);
 
-  QMenu *help = menuBar()->addMenu("Help");
-  QAction *about_action = help->addAction("About mbedit-qt", this, &MainWindow::about);
+  QMenu *help = newMenu("Help");
+  QAction *about_action = help->addAction("About mbedit-qt", this, &EditorWidget::about);
   about_action->setMenuRole(QAction::AboutRole);
 }
 
-void MainWindow::buildGotoDialog() {
+/* the compact form: what the rows of the window hold, on one toolbar */
+void EditorWidget::buildPanel() {
+  panel_bar_->addSeparator();
+  panel_bar_->addAction(undo_action_);
+  panel_bar_->addAction(redo_action_);
+  panel_bar_->addSeparator();
+
+  auto popup_button = [this](const char *text, const char *name, QMenu *menu) {
+    auto *button = new QToolButton;
+    button->setText(text);
+    button->setObjectName(name);
+    button->setPopupMode(QToolButton::InstantPopup);
+    button->setMenu(menu);
+    panel_bar_->addWidget(button);
+  };
+  auto *scales_menu = new QMenu(this);
+  auto *scales_action = new QWidgetAction(scales_menu);
+  scales_action->setDefaultWidget(scales_panel_);
+  scales_menu->addAction(scales_action);
+  popup_button("Scales", "panel_scales", scales_menu);
+  auto *panel_menu = new QMenu(this);
+  for (QMenu *menu : menus_)
+    panel_menu->addMenu(menu);
+  popup_button("Menu", "panel_menu", panel_menu);
+  panel_bar_->addAction(reset_zoom_);
+  panel_bar_->addSeparator();
+  for (QPushButton *button : {flag_view_, unflag_view_, unflag_forward_}) {
+    button->setFlat(true);
+    panel_bar_->addWidget(button);
+  }
+
+  /* the program around the panel chooses the files and closes it */
+  done_->hide();
+  quit_->hide();
+  filelist_action_->setVisible(false);
+
+  const struct {
+    QPushButton *button;
+    const char *text, *tip;
+  } steps[] = {{start_, "|<", "Start"}, {reverse_, "<", "Reverse"}, {forward_, ">", "Forward"}, {end_, ">|", "End"}, {next_, "Next", "Next Buffer"}};
+  for (const auto &step : steps) {
+    step.button->setText(step.text);
+    step.button->setToolTip(step.tip);
+    step.button->setFixedWidth(step.button->fontMetrics().horizontalAdvance(step.text) + 20);
+  }
+
+  connect(canvas_, &Canvas::soundingHovered, this, [this](int ping, int beam) {
+    if (ping < 0 || ping >= session_.nbuff() || beam >= session_.pings()[ping].beams_bath) {
+      info_line_->clear();
+      return;
+    }
+    const mbe::Ping &p = session_.pings()[ping];
+    info_line_->setText(QString("%1/%2/%3 %4:%5:%6   Ping %7   Across %8 m   Depth %9 m")
+                            .arg(p.time_i[1], 2, 10, QChar('0'))
+                            .arg(p.time_i[2], 2, 10, QChar('0'))
+                            .arg(p.time_i[0])
+                            .arg(p.time_i[3], 2, 10, QChar('0'))
+                            .arg(p.time_i[4], 2, 10, QChar('0'))
+                            .arg(p.time_i[5], 2, 10, QChar('0'))
+                            .arg(p.record + 1)
+                            .arg(p.bathacrosstrack[beam], 0, 'f', 1)
+                            .arg(p.bath[beam], 0, 'f', 1));
+  });
+
+  setFocusProxy(canvas_);
+  setShortcutContext(Qt::WidgetWithChildrenShortcut);
+  canvas_->setCompact(true);
+  canvas_->setShowTitles(false);
+  setPlotMode(mbe::PLOT_WIDE);
+  for (QAction *action : plot_group_->actions())
+    action->setChecked(action->data().toInt() == mbe::PLOT_WIDE);
+}
+
+/* the dialogs are windows of their own: they go and come with the panel */
+void EditorWidget::hideEvent(QHideEvent *event) {
+  if (presentation_ == Presentation::Panel && !event->spontaneous()) {
+    hidden_dialogs_.clear();
+    for (QDialog *dialog : findChildren<QDialog *>(QString(), Qt::FindDirectChildrenOnly)) {
+      if (dialog->isVisible()) {
+        hidden_dialogs_.push_back(dialog);
+        dialog->hide();
+      }
+    }
+  }
+  QWidget::hideEvent(event);
+}
+
+void EditorWidget::showEvent(QShowEvent *event) {
+  QWidget::showEvent(event);
+  if (!event->spontaneous()) {
+    for (QDialog *dialog : hidden_dialogs_)
+      dialog->show();
+    hidden_dialogs_.clear();
+  }
+}
+
+void EditorWidget::buildGotoDialog() {
   goto_dialog_ = new QDialog(this);
   goto_dialog_->setObjectName("dialog_goto");
   goto_dialog_->setWindowTitle("Go To Specified Time");
@@ -464,10 +716,10 @@ void MainWindow::buildGotoDialog() {
   row->addWidget(apply);
   form->addRow(row);
   connect(cancel, &QPushButton::clicked, goto_dialog_, &QDialog::hide);
-  connect(apply, &QPushButton::clicked, this, &MainWindow::gotoApply);
+  connect(apply, &QPushButton::clicked, this, &EditorWidget::gotoApply);
 }
 
-void MainWindow::buildBufferDialog() {
+void EditorWidget::buildBufferDialog() {
   buffer_dialog_ = new QDialog(this);
   buffer_dialog_->setObjectName("dialog_buffer");
   buffer_dialog_->setWindowTitle("Buffer Controls");
@@ -488,7 +740,7 @@ void MainWindow::buildBufferDialog() {
   connect(buffer_hold_, &ScaleControl::valueChanged, this, apply);
 }
 
-void MainWindow::buildAnnotationDialog() {
+void EditorWidget::buildAnnotationDialog() {
   annotation_dialog_ = new QDialog(this);
   annotation_dialog_->setObjectName("dialog_annotation");
   annotation_dialog_->setWindowTitle("Annotation");
@@ -511,7 +763,7 @@ void MainWindow::buildAnnotationDialog() {
   });
 }
 
-void MainWindow::buildFiltersDialog() {
+void EditorWidget::buildFiltersDialog() {
   filters_dialog_ = new QDialog(this);
   filters_dialog_->setObjectName("dialog_filters");
   filters_dialog_->setWindowTitle("Filters");
@@ -578,14 +830,14 @@ void MainWindow::buildFiltersDialog() {
   preview_timer_ = new QTimer(this);
   preview_timer_->setSingleShot(true);
   preview_timer_->setInterval(200);
-  connect(preview_timer_, &QTimer::timeout, this, &MainWindow::startFilterPreview);
+  connect(preview_timer_, &QTimer::timeout, this, &EditorWidget::startFilterPreview);
   for (QCheckBox *box : {f_preview_, f_median_, f_wrongside_, f_cutbeam_, f_cutdistance_, f_cutangle_})
     connect(box, &QCheckBox::toggled, preview_timer_, qOverload<>(&QTimer::start));
   for (QSpinBox *box : {f_median_threshold_, f_median_ltrack_, f_median_xtrack_, f_wrongside_threshold_, f_cutbeam_begin_, f_cutbeam_end_})
     connect(box, &QSpinBox::valueChanged, preview_timer_, qOverload<>(&QTimer::start));
   for (QDoubleSpinBox *box : {f_cutdistance_begin_, f_cutdistance_end_, f_cutangle_begin_, f_cutangle_end_})
     connect(box, &QDoubleSpinBox::valueChanged, preview_timer_, qOverload<>(&QTimer::start));
-  connect(filters_dialog_, &QDialog::finished, this, &MainWindow::clearPreview);
+  connect(filters_dialog_, &QDialog::finished, this, &EditorWidget::clearPreview);
 
   auto *apply = new QPushButton("Apply");
   apply->setObjectName("filters_apply");
@@ -597,15 +849,15 @@ void MainWindow::buildFiltersDialog() {
   row->addStretch(1);
   row->addWidget(dismiss);
   form->addRow(row);
-  connect(apply, &QPushButton::clicked, this, &MainWindow::filtersApply);
-  connect(reset, &QPushButton::clicked, this, &MainWindow::filtersToDialog);
+  connect(apply, &QPushButton::clicked, this, &EditorWidget::filtersApply);
+  connect(reset, &QPushButton::clicked, this, &EditorWidget::filtersToDialog);
   connect(dismiss, &QPushButton::clicked, this, [this] {
     filters_dialog_->hide();
     clearPreview();
   });
 }
 
-void MainWindow::buildFileListDialog() {
+void EditorWidget::buildFileListDialog() {
   filelist_dialog_ = new QDialog(this);
   filelist_dialog_->setObjectName("dialog_filelist");
   filelist_dialog_->setWindowTitle("Files Available for Editing");
@@ -635,8 +887,8 @@ void MainWindow::buildFileListDialog() {
   auto *dismiss = new QPushButton("Dismiss");
   row->addWidget(dismiss);
   layout->addLayout(row);
-  connect(edit, &QPushButton::clicked, this, &MainWindow::editSelectedFile);
-  connect(remove, &QPushButton::clicked, this, &MainWindow::removeSelectedFile);
+  connect(edit, &QPushButton::clicked, this, &EditorWidget::editSelectedFile);
+  connect(remove, &QPushButton::clicked, this, &EditorWidget::removeSelectedFile);
   connect(dismiss, &QPushButton::clicked, filelist_dialog_, &QDialog::hide);
   connect(filelist_browse_, &QRadioButton::toggled, this, [this](bool on) { browse_action_->setChecked(on); });
 
@@ -652,20 +904,21 @@ void MainWindow::buildFileListDialog() {
 
 /*--------------------------------------------------------------------*/
 /* Reading and writing a whole file may take long, so it happens in a thread. Nothing else touches the session meanwhile. */
-void MainWindow::runJob(const QString &message, std::function<void()> work, std::function<void()> done) {
+void EditorWidget::runJob(const QString &message, std::function<void()> work, std::function<void()> done) {
   stopBackground();
   clearPreview();
   canvas_->setMarkedPing(-1);
-  statusBar()->showMessage(message);
-  centralWidget()->setEnabled(false);
-  menuBar()->setEnabled(false);
+  const QWidget *focus = QApplication::focusWidget();
+  job_had_focus_ = focus != nullptr && (focus == this || isAncestorOf(focus));
+  emit statusMessage(message, 0);
   worker_ = QThread::create(std::move(work));
+  setWorking(true);
   connect(worker_, &QThread::finished, this, [this, done = std::move(done)] {
     worker_->deleteLater();
     worker_ = nullptr;
-    centralWidget()->setEnabled(true);
-    menuBar()->setEnabled(true);
-    canvas_->setFocus();
+    setWorking(false);
+    if (presentation_ == Presentation::Window || job_had_focus_)
+      canvas_->setFocus();
     canvas_->layoutChanged();
     startMbprocess();
     done();
@@ -675,26 +928,28 @@ void MainWindow::runJob(const QString &message, std::function<void()> work, std:
   worker_->start();
 }
 
-void MainWindow::startMbprocess() {
+void EditorWidget::startMbprocess() {
   if (!saved_path_.empty() && run_mbprocess_) {
     if (!QProcess::startDetached("mbprocess", {"-I", QString::fromStdString(saved_path_)}))
       showError("Unable to start mbprocess", QString::fromStdString(saved_path_), "");
     else
-      statusBar()->showMessage("Edits being applied using mbprocess...", 5000);
+      emit statusMessage("Edits being applied using mbprocess...", 5000);
   }
+  if (!saved_path_.empty())
+    emit editsSaved(QString::fromStdString(saved_path_));
   saved_path_.clear();
 }
 
-void MainWindow::showError(const QString &a, const QString &b, const QString &c) { QMessageBox::warning(this, "mbedit-qt", a + "\n" + b + "\n" + c); }
+void EditorWidget::showError(const QString &a, const QString &b, const QString &c) { QMessageBox::warning(this, display_name_, a + "\n" + b + "\n" + c); }
 
-void MainWindow::addInput(const std::string &path, int format) {
+void EditorWidget::addInput(const std::string &path, int format) {
   std::string message;
   if (!mbe::parse_input(path, format, files_, message))
     showError(QString::fromStdString(message), "", "");
   syncFileList();
 }
 
-void MainWindow::setBrowse(bool browse) {
+void EditorWidget::setBrowse(bool browse) {
   browse_ = browse;
   browse_action_->blockSignals(true);
   browse_action_->setChecked(browse);
@@ -702,7 +957,7 @@ void MainWindow::setBrowse(bool browse) {
   (browse ? filelist_browse_ : filelist_edit_)->setChecked(true);
 }
 
-void MainWindow::loadFirstFile(bool use_saved_edits) {
+void EditorWidget::loadFirstFile(bool use_saved_edits) {
   if (!files_.empty()) {
     loadFile(0, !use_saved_edits, use_saved_edits);
   }
@@ -713,7 +968,7 @@ void MainWindow::loadFirstFile(bool use_saved_edits) {
   }
 }
 
-void MainWindow::openDialog() {
+void EditorWidget::openDialog() {
   const QString path = QFileDialog::getOpenFileName(this, "Open Swath File or Datalist");
   if (path.isEmpty())
     return;
@@ -735,7 +990,7 @@ void MainWindow::openDialog() {
   });
 }
 
-void MainWindow::loadFile(int index, bool ask_saved_edits, bool use_saved_edits) {
+void EditorWidget::loadFile(int index, bool ask_saved_edits, bool use_saved_edits) {
   if (index < 0 || index >= (int)files_.size())
     return;
   const std::string path = files_[index].path;
@@ -746,15 +1001,18 @@ void MainWindow::loadFile(int index, bool ask_saved_edits, bool use_saved_edits)
   std::string description;
   bool mine = false;
   if (mbe::Session::lockInfo(path, description, mine) && mine) {
-    if (QMessageBox::question(this, "mbedit-qt",
-                              QString("%1 is locked by %2.\nIf that program is no longer running, the lock was left by a crash. Open the file anyway?")
-                                  .arg(file_name(path), QString::fromStdString(description))) == QMessageBox::Yes)
+    const bool open_anyway =
+        lock_choice_ ? lock_choice_(QString::fromStdString(path), QString::fromStdString(description)) == LockChoice::OpenAnyway
+                     : QMessageBox::question(this, display_name_,
+                                             QString("%1 is locked by %2.\nIf that program is no longer running, the lock was left by a crash. Open the file anyway?")
+                                                 .arg(file_name(path), QString::fromStdString(description))) == QMessageBox::Yes;
+    if (open_anyway)
       mbe::Session::removeLock(path);
   }
 
   /* the edits of a session that ended in a crash */
   if (!browse_ && mbe::Session::hasInterruptedSession(path) && !mbe::Session::lockInfo(path, description, mine)) {
-    recover = QMessageBox::question(this, "mbedit-qt",
+    recover = QMessageBox::question(this, display_name_,
                                     QString("The last editing session of %1 did not end normally. Recover its edits?").arg(file_name(path))) == QMessageBox::Yes;
     if (recover)
       use_saved_edits = true;
@@ -762,7 +1020,7 @@ void MainWindow::loadFile(int index, bool ask_saved_edits, bool use_saved_edits)
   const QString esf = QString::fromStdString(mbe::Session::esfName(path));
   const bool have_esf = QFile::exists(esf) || QFile::exists(QString::fromStdString(path) + ".mbesf");
   if (!recover && ask_saved_edits && have_esf)
-    use_saved_edits = QMessageBox::question(this, "mbedit-qt", QString("%1 has an edit save file.\nDo you want to apply the saved edits to the data?").arg(file_name(path))) ==
+    use_saved_edits = QMessageBox::question(this, display_name_, QString("%1 has an edit save file.\nDo you want to apply the saved edits to the data?").arg(file_name(path))) ==
                       QMessageBox::Yes;
 
   current_file_ = index;
@@ -778,7 +1036,7 @@ void MainWindow::loadFile(int index, bool ask_saved_edits, bool use_saved_edits)
              QApplication::beep();
            }
            else {
-             statusBar()->showMessage(QString("%1 pings loaded").arg(session_.nbuff()), 5000);
+             emit statusMessage(QString("%1 pings loaded").arg(session_.nbuff()), 5000);
              reportReference();
            }
            canvas_->layoutChanged();
@@ -794,7 +1052,7 @@ void MainWindow::loadFile(int index, bool ask_saved_edits, bool use_saved_edits)
 }
 
 /* before another file is loaded */
-void MainWindow::afterCurrentFileClosed(std::function<void()> next) {
+void EditorWidget::afterCurrentFileClosed(std::function<void()> next) {
   stopBackground();
   clearPreview();
   if (!session_.isOpen()) {
@@ -802,7 +1060,7 @@ void MainWindow::afterCurrentFileClosed(std::function<void()> next) {
     return;
   }
   if (session_.unsaved()) {
-    const auto answer = QMessageBox::question(this, "mbedit-qt", QString("Save changes to %1?\n%2 soundings changed.").arg(file_name(session_.file())).arg(session_.changes()),
+    const auto answer = QMessageBox::question(this, display_name_, QString("Save changes to %1?\n%2 soundings changed.").arg(file_name(session_.file())).arg(session_.changes()),
                                               QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Save);
     if (answer == QMessageBox::Cancel)
       return;
@@ -824,38 +1082,39 @@ void MainWindow::afterCurrentFileClosed(std::function<void()> next) {
   next();
 }
 
-void MainWindow::saveNow() {
-  if (session_.save() == MB_SUCCESS)
-    statusBar()->showMessage("Edits saved", 3000);
+bool EditorWidget::save() {
+  if (busy())
+    return false;
+  const bool saved = session_.save() == MB_SUCCESS;
+  if (saved) {
+    emit statusMessage("Edits saved", 3000);
+    emit editsSaved(QString::fromUtf8(session_.file()));
+  }
   syncControls();
+  return saved;
 }
 
-void MainWindow::closeEvent(QCloseEvent *event) {
-  if (busy()) {
-    event->ignore();
-    return;
-  }
+bool EditorWidget::prepareToClose(std::function<void()> closed_later) {
+  if (busy())
+    return false;
   stopBackground();
   clearPreview();
   if (session_.isOpen()) {
     if (session_.unsaved()) {
-      const auto answer = QMessageBox::question(this, "mbedit-qt", QString("Save changes to %1?\n%2 soundings changed.").arg(file_name(session_.file())).arg(session_.changes()),
+      const auto answer = QMessageBox::question(this, display_name_, QString("Save changes to %1?\n%2 soundings changed.").arg(file_name(session_.file())).arg(session_.changes()),
                                                 QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Save);
-      if (answer == QMessageBox::Cancel) {
-        event->ignore();
-        return;
-      }
+      if (answer == QMessageBox::Cancel)
+        return false;
       if (answer == QMessageBox::Save) {
-        /* close again when the edits are written; if that failed the window stays with the error */
-        event->ignore();
+        /* close again when the edits are written; if that failed the editor stays with the error */
         auto status = std::make_shared<int>(MB_FAILURE);
-        runJob("Saving edits...", [this, status] { *status = session_.closeSave(); }, [this, status] {
+        runJob("Saving edits...", [this, status] { *status = session_.closeSave(); }, [this, status, closed_later = std::move(closed_later)] {
           current_file_ = -1;
           canvas_->layoutChanged();
-          if (*status == MB_SUCCESS)
-            close();
+          if (*status == MB_SUCCESS && closed_later)
+            closed_later();
         });
-        return;
+        return false;
       }
       session_.closeDiscard();
     }
@@ -864,16 +1123,17 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     }
   }
   startMbprocess();
-  event->accept();
+  syncControls();
+  return true;
 }
 
-void MainWindow::doneOrNextFile() {
+void EditorWidget::doneOrNextFile() {
   auto quit = std::make_shared<bool>(false);
   runJob("Saving edits...", [this, quit] { session_.done(quit.get()); }, [this, quit] {
     canvas_->layoutChanged();
     syncFileList();
     if (*quit) {
-      close();
+      emit closeRequested();
     }
     else if (current_file_ >= 0 && current_file_ < (int)files_.size() - 1) {
       const int next = current_file_ + 1;
@@ -885,16 +1145,16 @@ void MainWindow::doneOrNextFile() {
   });
 }
 
-void MainWindow::nextBuffer() {
+void EditorWidget::nextBuffer() {
   auto quit = std::make_shared<bool>(false);
   runJob("Reading the next buffer...", [this, quit] { session_.nextBuffer(quit.get()); }, [this, quit] {
     canvas_->layoutChanged();
     if (*quit)
-      close();
+      emit closeRequested();
   });
 }
 
-void MainWindow::gotoApply() {
+void EditorWidget::gotoApply() {
   int t[7] = {0, 0, 0, 0, 0, 0, 0};
   for (int i = 0; i < 6; i++)
     t[i] = goto_fields_[i]->value();
@@ -904,7 +1164,7 @@ void MainWindow::gotoApply() {
 }
 
 /*--------------------------------------------------------------------*/
-void MainWindow::syncControls() {
+void EditorWidget::syncControls() {
   const bool open = session_.isOpen();
   const bool have_data = open && session_.nbuff() > 0;
   slider_->blockSignals(true);
@@ -915,7 +1175,7 @@ void MainWindow::syncControls() {
   slider_->blockSignals(false);
   if (have_data) {
     const mbe::Ping &p = session_.pings()[session_.current()];
-    const QDateTime time = QDateTime::fromMSecsSinceEpoch((qint64)(p.time_d * 1000.0), QTimeZone::UTC);
+    const QDateTime time = QDateTime::fromMSecsSinceEpoch((qint64)(p.time_d * 1000.0), QTimeZone::utc());
     position_->setText(QString("%1-%2 of %3   %4")
                            .arg(session_.current() + 1)
                            .arg(session_.current() + session_.nplot())
@@ -941,8 +1201,16 @@ void MainWindow::syncControls() {
   history_action_->setEnabled(open);
   water_column_->setEnabled(have_data && !waterColumnFile().isEmpty());
   mbeditviz_->setEnabled(open);
-  setWindowModified(session_.unsaved());
-  setWindowTitle(open ? file_name(session_.file()) + "[*] - mbedit-qt" : "mbedit-qt[*]");
+  if (session_.unsaved() != unsaved_) {
+    unsaved_ = session_.unsaved();
+    emit unsavedChanged(unsaved_);
+  }
+  const QString title = open ? file_name(session_.file()) + "[*] - " + display_name_ : display_name_ + "[*]";
+  if (title != title_) {
+    title_ = title;
+    emit titleChanged(title_);
+  }
+  reportState();
 
   width_->setValueQuietly(session_.settings.plot_width);
   exagger_->setValueQuietly(session_.settings.exagger);
@@ -953,7 +1221,37 @@ void MainWindow::syncControls() {
   map_->update();
 }
 
-void MainWindow::syncFileList() {
+/* tells the surrounding program what changed since the last time */
+void EditorWidget::reportState() {
+  const QString path = session_.isOpen() ? QString::fromUtf8(session_.file()) : QString();
+  if (path != open_path_) {
+    if (!open_path_.isEmpty())
+      emit fileClosed(open_path_);
+    open_path_ = path;
+    view_first_ = view_last_ = reported_changes_ = -1;
+    if (!path.isEmpty())
+      emit fileOpened(path, session_.format());
+  }
+  if (path.isEmpty() || session_.nbuff() == 0)
+    return;
+  const mbe::Ping &first = session_.pings()[session_.current()];
+  const mbe::Ping &last = session_.pings()[std::min(session_.current() + std::max(session_.nplot(), 1) - 1, session_.nbuff() - 1)];
+  if (first.record != view_first_ || last.record != view_last_) {
+    view_first_ = first.record;
+    view_last_ = last.record;
+    emit viewChanged(path, view_first_, view_last_, first.time_d, last.time_d);
+  }
+  /* counting the changes takes time when the buffer is large */
+  if (isSignalConnected(QMetaMethod::fromSignal(&EditorWidget::editsChanged))) {
+    const long changes = session_.changes();
+    if (changes != reported_changes_) {
+      reported_changes_ = changes;
+      emit editsChanged(path, changes);
+    }
+  }
+}
+
+void EditorWidget::syncFileList() {
   if (filelist_ == nullptr)
     return;
   int selected = filelist_->currentRow();
@@ -981,14 +1279,14 @@ void MainWindow::syncFileList() {
     filelist_->selectRow(selected);
 }
 
-void MainWindow::applySettings() {
+void EditorWidget::applySettings() {
   if (session_.isOpen() && session_.nbuff() > 0)
     session_.plot(false);
   canvas_->redraw();
   syncControls();
 }
 
-void MainWindow::afterEdit() {
+void EditorWidget::afterEdit() {
   syncControls();
   if (filters_dialog_->isVisible())
     preview_timer_->start();
@@ -996,7 +1294,7 @@ void MainWindow::afterEdit() {
     updateReasonCount();
 }
 
-void MainWindow::afterMove() {
+void EditorWidget::afterMove() {
   syncControls();
   /* Apply starts from the first ping in view */
   if (filters_dialog_->isVisible())
@@ -1005,31 +1303,31 @@ void MainWindow::afterMove() {
     updateReasonCount();
 }
 
-void MainWindow::setModeFromUi(int mode) {
+void EditorWidget::setModeFromUi(int mode) {
   canvas_->setMode((Canvas::Mode)mode);
   canvas_->setFocus();
 }
 
-void MainWindow::setViewMode(int view) {
+void EditorWidget::setViewMode(int view) {
   session_.setViewMode(view);
   for (QAction *action : view_group_->actions())
     action->setChecked(action->data().toInt() == view);
   applySettings();
 }
 
-void MainWindow::setPlotMode(int mode) {
+void EditorWidget::setPlotMode(int mode) {
   session_.setPlotMode(mode);
   syncControls();
   canvas_->layoutChanged();
   panel_->update();
 }
 
-void MainWindow::setShowMode(int mode) {
+void EditorWidget::setShowMode(int mode) {
   session_.settings.show_mode = mode;
   applySettings();
 }
 
-void MainWindow::pingsChanged(int value) {
+void EditorWidget::pingsChanged(int value) {
   /* the step keeps its ratio to the number of pings shown */
   const double ratio = ((double)canvas_->stepSize) / ((double)session_.settings.plot_size);
   session_.settings.plot_size = value;
@@ -1037,7 +1335,7 @@ void MainWindow::pingsChanged(int value) {
   applySettings();
 }
 
-void MainWindow::stepChanged(int value) {
+void EditorWidget::stepChanged(int value) {
   canvas_->stepSize = value;
   if (value > session_.settings.plot_size) {
     session_.settings.plot_size = value;
@@ -1048,7 +1346,7 @@ void MainWindow::stepChanged(int value) {
   }
 }
 
-void MainWindow::sliderMoved(int value) {
+void EditorWidget::sliderMoved(int value) {
   if (session_.isOpen()) {
     session_.step(value - session_.current());
     canvas_->redraw();
@@ -1056,14 +1354,14 @@ void MainWindow::sliderMoved(int value) {
   }
 }
 
-void MainWindow::flagAction(std::function<int()> action) {
+void EditorWidget::flagAction(std::function<int()> action) {
   action();
   canvas_->redraw();
   syncControls();
 }
 
 /*--------------------------------------------------------------------*/
-void MainWindow::filtersToDialog() {
+void EditorWidget::filtersToDialog() {
   const mbe::Filters &f = session_.filters;
   f_median_->setChecked(f.medianspike);
   f_median_threshold_->setValue(f.medianspike_threshold);
@@ -1082,7 +1380,7 @@ void MainWindow::filtersToDialog() {
   f_cutangle_end_->setValue(f.cutangle_end);
 }
 
-mbe::Filters MainWindow::filtersFromDialog() const {
+mbe::Filters EditorWidget::filtersFromDialog() const {
   mbe::Filters f;
   f.medianspike = f_median_->isChecked();
   f.medianspike_threshold = f_median_threshold_->value();
@@ -1102,7 +1400,7 @@ mbe::Filters MainWindow::filtersFromDialog() const {
   return f;
 }
 
-void MainWindow::filtersApply() {
+void EditorWidget::filtersApply() {
   clearPreview();
   session_.filters = filtersFromDialog();
   runJob("Applying bathymetry filters...", [this] { session_.filterForward(); }, [this] { canvas_->redraw(); });
@@ -1110,7 +1408,7 @@ void MainWindow::filtersApply() {
 
 /*--------------------------------------------------------------------*/
 /* The thread reads the depths, which do not change, and a copy of the flags. */
-void MainWindow::stopBackground() {
+void EditorWidget::stopBackground() {
   preview_timer_->stop();
   background_cancel_ = true;
   if (preview_thread_ != nullptr) {
@@ -1125,7 +1423,7 @@ void MainWindow::stopBackground() {
   preview_generation_++;
 }
 
-void MainWindow::startFilterPreview() {
+void EditorWidget::startFilterPreview() {
   if (!filters_dialog_->isVisible() || !session_.isOpen() || session_.nbuff() == 0 || busy())
     return;
   if (!f_preview_->isChecked()) {
@@ -1156,12 +1454,12 @@ void MainWindow::startFilterPreview() {
   thread->start();
 }
 
-void MainWindow::showPreview(std::shared_ptr<mbe::FlagPreview> preview) {
+void EditorWidget::showPreview(std::shared_ptr<mbe::FlagPreview> preview) {
   preview_ = *preview;
   canvas_->setPreview(&preview_);
 }
 
-void MainWindow::clearPreview() {
+void EditorWidget::clearPreview() {
   preview_timer_->stop();
   preview_generation_++;
   preview_ = mbe::FlagPreview();
@@ -1169,7 +1467,7 @@ void MainWindow::clearPreview() {
   f_preview_label_->clear();
 }
 
-void MainWindow::startSuspects() {
+void EditorWidget::startSuspects() {
   suspects_.clear();
   suspect_index_ = -1;
   strip_->setSuspects(suspects_, 0);
@@ -1193,7 +1491,7 @@ void MainWindow::startSuspects() {
   thread->start();
 }
 
-void MainWindow::showPing(int ping) {
+void EditorWidget::showPing(int ping) {
   if (!session_.isOpen() || session_.nbuff() == 0)
     return;
   const int target = std::max(ping - session_.settings.plot_size / 2, 0);
@@ -1202,9 +1500,9 @@ void MainWindow::showPing(int ping) {
   afterMove();
 }
 
-void MainWindow::nextSuspect(int direction) {
+void EditorWidget::nextSuspect(int direction) {
   if (suspects_.empty()) {
-    statusBar()->showMessage("No suspect pings", 3000);
+    emit statusMessage("No suspect pings", 3000);
     return;
   }
   const int index = suspect_index_ + direction;
@@ -1225,11 +1523,11 @@ void MainWindow::nextSuspect(int direction) {
     why << "attitude jump";
   if (s.time_gap)
     why << "time gap";
-  statusBar()->showMessage(QString("Suspect %1 of %2: ping %3: %4").arg(index + 1).arg((int)suspects_.size()).arg(session_.pings()[s.ping].record + 1).arg(why.join(", ")));
+  emit statusMessage(QString("Suspect %1 of %2: ping %3: %4").arg(index + 1).arg((int)suspects_.size()).arg(session_.pings()[s.ping].record + 1).arg(why.join(", ")), 0);
 }
 
 /*--------------------------------------------------------------------*/
-void MainWindow::buildReasonsDialog() {
+void EditorWidget::buildReasonsDialog() {
   reasons_dialog_ = new QDialog(this);
   reasons_dialog_->setObjectName("dialog_reasons");
   reasons_dialog_->setWindowTitle("Flags by Reason");
@@ -1263,8 +1561,8 @@ void MainWindow::buildReasonsDialog() {
   reason_count_ = new QLabel;
   reason_count_->setObjectName("reason_count");
   form->addRow(reason_count_);
-  connect(reason_, &QComboBox::currentIndexChanged, this, &MainWindow::updateReasonCount);
-  connect(scope_, &QComboBox::currentIndexChanged, this, &MainWindow::updateReasonCount);
+  connect(reason_, &QComboBox::currentIndexChanged, this, &EditorWidget::updateReasonCount);
+  connect(scope_, &QComboBox::currentIndexChanged, this, &EditorWidget::updateReasonCount);
   auto *unflag = new QPushButton("Unflag");
   unflag->setObjectName("reason_unflag");
   auto *dismiss = new QPushButton("Dismiss");
@@ -1281,12 +1579,12 @@ void MainWindow::buildReasonsDialog() {
   connect(dismiss, &QPushButton::clicked, reasons_dialog_, &QDialog::hide);
 }
 
-void MainWindow::updateReasonCount() {
+void EditorWidget::updateReasonCount() {
   reason_count_->setText(QString("%1 soundings").arg(session_.countReason(reason_->currentData().toInt(), scope_->currentData().toInt())));
 }
 
 /*--------------------------------------------------------------------*/
-void MainWindow::buildMbcleanDialog() {
+void EditorWidget::buildMbcleanDialog() {
   mbclean_dialog_ = new QDialog(this);
   mbclean_dialog_->setObjectName("dialog_mbclean");
   mbclean_dialog_->setWindowTitle("Preview mbclean");
@@ -1317,7 +1615,7 @@ void MainWindow::buildMbcleanDialog() {
   row->addStretch(1);
   row->addWidget(dismiss);
   layout->addLayout(row);
-  connect(mbclean_run_, &QPushButton::clicked, this, &MainWindow::runMbclean);
+  connect(mbclean_run_, &QPushButton::clicked, this, &EditorWidget::runMbclean);
   auto clear = [this] {
     clearPreview();
     mbclean_accept_->setEnabled(false);
@@ -1341,13 +1639,13 @@ void MainWindow::buildMbcleanDialog() {
 }
 
 /* beside this program first, for a build that is not installed */
-QString MainWindow::findProgram(const QString &name) {
-  const QString here = QCoreApplication::applicationDirPath();
+QString EditorWidget::findProgram(const QString &name) const {
+  const QString here = program_directory_.isEmpty() ? QCoreApplication::applicationDirPath() : program_directory_;
   const QString program = QStandardPaths::findExecutable(name, {here, here + "/../utilities", here + "/../" + name});
   return program.isEmpty() ? QStandardPaths::findExecutable(name) : program;
 }
 
-void MainWindow::runMbclean() {
+void EditorWidget::runMbclean() {
   if (!session_.isOpen() || session_.nbuff() == 0 || mbclean_process_ != nullptr)
     return;
   QString program = findProgram("mbclean");
@@ -1376,7 +1674,7 @@ void MainWindow::runMbclean() {
   arguments += QProcess::splitCommand(mbclean_args_->text());
   mbclean_run_->setEnabled(false);
   mbclean_status_->setText("Running mbclean...");
-  connect(mbclean_process_, &QProcess::finished, this, &MainWindow::mbcleanFinished);
+  connect(mbclean_process_, &QProcess::finished, this, &EditorWidget::mbcleanFinished);
   connect(mbclean_process_, &QProcess::errorOccurred, this, [this](QProcess::ProcessError error) {
     if (error == QProcess::FailedToStart)
       mbcleanFinished();
@@ -1384,7 +1682,7 @@ void MainWindow::runMbclean() {
   mbclean_process_->start(program, arguments);
 }
 
-void MainWindow::mbcleanFinished() {
+void EditorWidget::mbcleanFinished() {
   QProcess *process = mbclean_process_;
   if (process == nullptr)
     return;
@@ -1415,14 +1713,14 @@ void MainWindow::mbcleanFinished() {
                                .arg(preview->complete ? "" : " It also edited pings beyond those in memory; those are not taken."));
 }
 
-void MainWindow::editSelectedFile() {
+void EditorWidget::editSelectedFile() {
   const int row = filelist_->currentRow();
   if (row < 0 || row == current_file_)
     return;
   afterCurrentFileClosed([this, row] { loadFile(row, true, false); });
 }
 
-void MainWindow::removeSelectedFile() {
+void EditorWidget::removeSelectedFile() {
   const int row = filelist_->currentRow();
   if (row < 0 || row == current_file_)
     return;
@@ -1433,7 +1731,7 @@ void MainWindow::removeSelectedFile() {
   syncControls();
 }
 
-void MainWindow::about() {
+void EditorWidget::about() {
   QMessageBox::about(this, "About mbedit-qt",
                      QString("<b>mbedit-qt</b><br>Interactive Swath Bathymetry Editor<br>One component of the MB-System open source software package "
                              "for processing and display of swath sonar data.<br><br>MB-System Release %1, %2<br><br>Created by David W. Caress and Dale N. Chayes. "
@@ -1442,7 +1740,7 @@ void MainWindow::about() {
 }
 
 /*--------------------------------------------------------------------*/
-void MainWindow::loadReference(const QString &path) {
+void EditorWidget::loadReference(const QString &path) {
   if (busy())
     return;
   stopBackground();
@@ -1464,7 +1762,7 @@ void MainWindow::loadReference(const QString &path) {
   });
 }
 
-void MainWindow::clearReference() {
+void EditorWidget::clearReference() {
   stopBackground();
   session_.clearReference();
   if (session_.settings.show_mode == mbe::SHOW_RESIDUAL) {
@@ -1479,20 +1777,20 @@ void MainWindow::clearReference() {
 }
 
 /* the kind of grid is found from the data, so it is said, and also if the grid is elsewhere */
-void MainWindow::reportReference() {
+void EditorWidget::reportReference() {
   if (!session_.hasReference() || !session_.isOpen())
     return;
   const long compared = session_.updateReferenceSign();
   canvas_->redraw();
   if (session_.nbuff() > 0 && compared == 0)
-    statusBar()->showMessage("The reference surface does not cover these pings");
+    emit statusMessage("The reference surface does not cover these pings", 0);
   else if (session_.nbuff() > 0)
-    statusBar()->showMessage(QString("Reference surface read as %1").arg(session_.referenceIsTopography() ? "topography (seafloor negative)" : "depth (seafloor positive)"));
+    emit statusMessage(QString("Reference surface read as %1").arg(session_.referenceIsTopography() ? "topography (seafloor negative)" : "depth (seafloor positive)"), 0);
 }
 
 /*--------------------------------------------------------------------*/
 /* The file of this line that mbwcdview reads: the file itself, or one beside it */
-QString MainWindow::waterColumnFile() const {
+QString EditorWidget::waterColumnFile() const {
   if (!session_.isOpen())
     return QString();
   const QFileInfo info(QString::fromStdString(session_.file()));
@@ -1507,18 +1805,36 @@ QString MainWindow::waterColumnFile() const {
   return QString();
 }
 
-void MainWindow::openWaterColumn(int ping) {
-  const QString program = findProgram("mbwcdview"), path = waterColumnFile();
-  if (program.isEmpty() || path.isEmpty() || session_.nbuff() == 0)
+void EditorWidget::openWaterColumn(int ping) {
+  const QString path = waterColumnFile();
+  if (path.isEmpty() || session_.nbuff() == 0)
     return;
   const long index = session_.pingsBefore() + std::min(std::max(ping, 0), session_.nbuff() - 1);
+  if (tool_opener_) {
+    if (!tool_opener_("mbwcdview", path, 0, index))
+      showError("Unable to open the water column", path, "");
+    return;
+  }
+  const QString program = findProgram("mbwcdview");
+  if (program.isEmpty())
+    return;
   if (QProcess::startDetached(program, {"--input=" + path, QString("--ping=%1").arg(index)}))
-    statusBar()->showMessage(QString("Opened %1 at ping %2: mbwcdview counts water column pings, so it may differ").arg(file_name(path.toStdString())).arg(index), 8000);
+    emit statusMessage(QString("Opened %1 at ping %2: mbwcdview counts water column pings, so it may differ").arg(file_name(path.toStdString())).arg(index), 8000);
   else
     showError("Unable to start mbwcdview", path, "");
 }
 
-void MainWindow::openMbeditviz() {
+void EditorWidget::openMbeditviz() {
+  if (tool_opener_) {
+    const QString path = QString::fromUtf8(session_.file());
+    const int format = session_.format();
+    afterCurrentFileClosed([this, path, format] {
+      syncControls();
+      if (!tool_opener_("mbeditviz", path, format, -1))
+        showError("Unable to open mbeditviz", path, "");
+    });
+    return;
+  }
   const QString program = findProgram("mbeditviz");
   if (program.isEmpty()) {
     showError("mbeditviz was not found", "", "");
@@ -1534,7 +1850,7 @@ void MainWindow::openMbeditviz() {
 }
 
 /*--------------------------------------------------------------------*/
-void MainWindow::buildHistoryDialog() {
+void EditorWidget::buildHistoryDialog() {
   history_dialog_ = new QDialog(this);
   history_dialog_->setObjectName("dialog_history");
   history_dialog_->setWindowTitle("Edit History");
@@ -1565,17 +1881,17 @@ void MainWindow::buildHistoryDialog() {
   buttons->addWidget(restore);
   buttons->addWidget(close);
   layout->addLayout(buttons);
-  connect(preview, &QPushButton::clicked, this, &MainWindow::historyPreview);
+  connect(preview, &QPushButton::clicked, this, &EditorWidget::historyPreview);
   connect(clear, &QPushButton::clicked, this, [this] {
     clearPreview();
     history_status_->clear();
   });
-  connect(restore, &QPushButton::clicked, this, &MainWindow::historyRestore);
+  connect(restore, &QPushButton::clicked, this, &EditorWidget::historyRestore);
   connect(close, &QPushButton::clicked, history_dialog_, &QDialog::hide);
   connect(history_dialog_, &QDialog::finished, this, [this] { clearPreview(); });
 }
 
-void MainWindow::showHistory() {
+void EditorWidget::showHistory() {
   history_ = mbe::Session::historyVersions(session_.file());
   history_table_->setRowCount((int)history_.size());
   for (int i = 0; i < (int)history_.size(); i++) {
@@ -1593,7 +1909,7 @@ void MainWindow::showHistory() {
   history_dialog_->raise();
 }
 
-void MainWindow::historyPreview() {
+void EditorWidget::historyPreview() {
   const int row = history_table_->currentRow();
   if (row < 0 || row >= (int)history_.size())
     return;
@@ -1612,7 +1928,7 @@ void MainWindow::historyPreview() {
                                .arg(preview.complete ? "" : " in memory; it reaches further"));
 }
 
-void MainWindow::historyRestore() {
+void EditorWidget::historyRestore() {
   const int row = history_table_->currentRow();
   if (row < 0 || row >= (int)history_.size())
     return;
@@ -1623,7 +1939,7 @@ void MainWindow::historyRestore() {
   }
   const int version = history_[row].version, index = current_file_;
   const QString path = QString::fromStdString(session_.file());
-  if (QMessageBox::question(this, "mbedit-qt", QString("Restore version %1 of the edits and reopen the file?\nThe edits now in the file are kept as a new version.").arg(version)) != QMessageBox::Yes)
+  if (QMessageBox::question(this, display_name_, QString("Restore version %1 of the edits and reopen the file?\nThe edits now in the file are kept as a new version.").arg(version)) != QMessageBox::Yes)
     return;
   history_dialog_->hide();
   /* mbhistory takes the same lock, so the file must be closed first */
@@ -1641,7 +1957,7 @@ void MainWindow::historyRestore() {
 }
 
 /*--------------------------------------------------------------------*/
-void MainWindow::flagWholePing(int ping, bool flag) {
+void EditorWidget::flagWholePing(int ping, bool flag) {
   mbe::FlagPreview preview;
   const mbe::Ping &p = session_.pings()[ping];
   const mbe::PlotBox &box = session_.box();
@@ -1659,7 +1975,7 @@ void MainWindow::flagWholePing(int ping, bool flag) {
   afterEdit();
 }
 
-void MainWindow::pingContextMenu(QPoint global, int ping, int beam) {
+void EditorWidget::pingContextMenu(QPoint global, int ping, int beam) {
   if (!session_.isOpen() || session_.nbuff() == 0)
     return;
   QMenu menu(this);
@@ -1680,3 +1996,5 @@ void MainWindow::pingContextMenu(QPoint global, int ping, int beam) {
     menu.addAction(redo_action_);
   menu.exec(global);
 }
+
+}  // namespace mbe

@@ -2062,21 +2062,93 @@ int main(int argc, char **argv) {
       }
     }
 
-    /* if needed translate grid to normal registration */
-    snprintf(plot_cmd, sizeof(plot_cmd), "gmt grdinfo %s", backgroundfile);
+    /* get the background grid registration (0 gridline, 1 pixel) and
+       coordinate type (0 Cartesian, 1 geographic) from the last two fields
+       of the one line grdinfo -C report */
     char backgroundfileuse[MB_PATH_MAXLINE] = "";
     strcpy(backgroundfileuse, backgroundfile);
+    double bg_bnd[4] = {0.0, 0.0, 0.0, 0.0};
+    int bg_registration = -1;
+    int bg_gtype = -1;
+    snprintf(plot_cmd, sizeof(plot_cmd), "gmt grdinfo -C %s", backgroundfile);
     if ((rfp = popen(plot_cmd, "r")) != nullptr) {
-      /* parse the grdinfo results */
-      char plot_stdout[MB_COMMENT_MAXLINE];
-      /* char *bufptr = */ fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
-      /* bufptr = */ fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
-      /* bufptr = */ fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
-      /* bufptr = */ fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
+      char plot_stdout[MB_COMMENT_MAXLINE] = "";
+      if (fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp) != nullptr) {
+        const char *ptr = strchr(plot_stdout, '\t');
+        double bg_z[2], bg_inc[2], bg_dim[2];
+        if (ptr == nullptr
+            || sscanf(ptr, "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d", &bg_bnd[0], &bg_bnd[1], &bg_bnd[2],
+                      &bg_bnd[3], &bg_z[0], &bg_z[1], &bg_inc[0], &bg_inc[1], &bg_dim[0], &bg_dim[1], &bg_registration,
+                      &bg_gtype) != 12) {
+          bg_registration = -1;
+          bg_gtype = -1;
+        }
+      }
       pclose(rfp);
-      if (strncmp(plot_stdout, "Pixel node registration used", 28) == 0) {
+    }
+
+    /* a Cartesian background grid is used if its remark names its projection
+       ("Projection: <id>", as written by mbgrid -J), or if its bounds are in
+       the geographic range (an older geographic grid not flagged as such) */
+    char bg_projection_id[MB_PATH_MAXLINE] = "";
+    void *bg_pjptr = nullptr;
+    bool bg_projected = false;
+    bool bg_same_projection = false;
+    if (bg_gtype == 0) {
+      snprintf(plot_cmd, sizeof(plot_cmd), "gmt grdinfo %s", backgroundfile);
+      if ((rfp = popen(plot_cmd, "r")) != nullptr) {
+        char plot_stdout[MB_COMMENT_MAXLINE];
+        while (fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp) != nullptr) {
+          /* the projection is on the first line of the remark or on a
+             following line of its own */
+          const char *ptr = strstr(plot_stdout, ": Remark: ");
+          ptr = ptr != nullptr ? ptr + 10 : plot_stdout;
+          ptr += strspn(ptr, " \t");
+          if (strlen(bg_projection_id) == 0 && strncmp(ptr, "Projection: ", 12) == 0)
+            sscanf(ptr + 12, "%1023s", bg_projection_id);
+        }
+        pclose(rfp);
+      }
+      if (strlen(bg_projection_id) > 0) {
+        int bg_error = MB_ERROR_NO_ERROR;
+        if (mb_proj_init(verbose, bg_projection_id, &bg_pjptr, &bg_error) != MB_SUCCESS) {
+          fprintf(outfp, "\nThe projection %s of the background grid %s was not found in the database\n",
+                  bg_projection_id, backgroundfile);
+          fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+          mb_memory_clear(verbose, &memclear_error);
+          exit(MB_ERROR_BAD_PARAMETER);
+        }
+        bg_projected = true;
+
+        /* the background is used without reprojection if its projection maps
+           the center of the area to the same place as the output projection
+           (the same projection may be named differently, e.g. UTM11N and
+           EPSG:32611) */
+        if (use_projection) {
+          const double lon = 0.5 * (bounds[0] + bounds[1]);
+          const double lat = 0.5 * (bounds[2] + bounds[3]);
+          double x1, y1, x2, y2;
+          mb_proj_forward(verbose, pjptr, lon, lat, &x1, &y1, &bg_error);
+          mb_proj_forward(verbose, bg_pjptr, lon, lat, &x2, &y2, &bg_error);
+          bg_same_projection = std::isfinite(x2) && std::isfinite(y2) && fabs(x1 - x2) < 1.0 && fabs(y1 - y2) < 1.0;
+        }
+      }
+      else if (bg_bnd[0] < -360.0 || bg_bnd[1] > 360.0 || bg_bnd[2] < -90.0 || bg_bnd[3] > 90.0) {
+        fprintf(outfp, "\nThe background grid %s is a Cartesian grid with bounds %f %f %f %f\n", backgroundfile,
+                bg_bnd[0], bg_bnd[1], bg_bnd[2], bg_bnd[3]);
+        fprintf(outfp, "and its remark does not name a projection (\"Projection: <id>\"), so it cannot be\n");
+        fprintf(outfp, "placed on the output grid. Use a geographic grid or one made by mbgrid -J.\n");
+        fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+        mb_memory_clear(verbose, &memclear_error);
+        exit(MB_ERROR_BAD_PARAMETER);
+      }
+    }
+
+    /* if needed translate grid to normal registration */
+    if (bg_gtype >= 0) {
+      if (bg_registration == 1) {
         snprintf(backgroundfileuse, sizeof(backgroundfileuse), "tmpgrdsampleT%d.grd", pid);
-        snprintf(plot_cmd, sizeof(plot_cmd), "grdsample %s -G%s -T", backgroundfile, backgroundfileuse);
+        snprintf(plot_cmd, sizeof(plot_cmd), "gmt grdsample %s -G%s -T", backgroundfile, backgroundfileuse);
         fprintf(stderr, "Executing: %s\n", plot_cmd);
         const int fork_status = system(plot_cmd);
         if (fork_status != 0) {
@@ -2102,13 +2174,61 @@ int main(int argc, char **argv) {
       exit(MB_ERROR_BAD_PARAMETER);
     }
 
+    /* region and spacing of the resampled background in its own coordinates:
+       a geographic background covers the lon lat data bounds; a projected one
+       covers those bounds projected (sampled along the edges) into its
+       projection, with the grid spacing in meters */
+    double sample_bnd[4];
+    double sample_dx, sample_dy;
+    if (!bg_projected) {
+      for (int i = 0; i < 4; i++)
+        sample_bnd[i] = bounds[i];
+      sample_dx = use_projection ? dx * mtodeglon : dx;
+      sample_dy = use_projection ? dy * mtodeglat : dy;
+    }
+    else {
+      const int nedge = 20;
+      int bg_error = MB_ERROR_NO_ERROR;
+      bool first = true;
+      for (int i = 0; i <= nedge; i++) {
+        const double f = (double)i / nedge;
+        const double edge_lon[4] = {bounds[0] + f * (bounds[1] - bounds[0]), bounds[0] + f * (bounds[1] - bounds[0]),
+                                    bounds[0], bounds[1]};
+        const double edge_lat[4] = {bounds[2], bounds[3], bounds[2] + f * (bounds[3] - bounds[2]),
+                                    bounds[2] + f * (bounds[3] - bounds[2])};
+        for (int j = 0; j < 4; j++) {
+          mb_proj_forward(verbose, bg_pjptr, edge_lon[j], edge_lat[j], &xx, &yy, &bg_error);
+          if (std::isfinite(xx) && std::isfinite(yy)) {
+            if (first) {
+              sample_bnd[0] = sample_bnd[1] = xx;
+              sample_bnd[2] = sample_bnd[3] = yy;
+              first = false;
+            }
+            sample_bnd[0] = std::min(sample_bnd[0], xx);
+            sample_bnd[1] = std::max(sample_bnd[1], xx);
+            sample_bnd[2] = std::min(sample_bnd[2], yy);
+            sample_bnd[3] = std::max(sample_bnd[3], yy);
+          }
+        }
+      }
+      if (first) {
+        fprintf(outfp, "\nThe area of the output grid cannot be projected into the projection %s\n"
+                       "of the background grid %s\n", bg_projection_id, backgroundfile);
+        fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+        mb_memory_clear(verbose, &memclear_error);
+        exit(MB_ERROR_BAD_PARAMETER);
+      }
+      sample_dx = use_projection ? dx : dx / mtodeglon;
+      sample_dy = use_projection ? dy : dy / mtodeglat;
+    }
+
+    /* make the region a whole number of sample intervals as GMT requires */
+    sample_bnd[1] = sample_bnd[0] + sample_dx * ceil((sample_bnd[1] - sample_bnd[0]) / sample_dx);
+    sample_bnd[3] = sample_bnd[2] + sample_dy * ceil((sample_bnd[3] - sample_bnd[2]) / sample_dy);
+
     /* resample extracted grid to have similar resolution as working grid */
-    if (use_projection)
-      snprintf(plot_cmd, sizeof(plot_cmd), "gmt grdsample %s -Gtmpgrdsample%d.grd -R%.12f/%.12f/%.12f/%.12f -I%.12f/%.12f", backgroundfileuse,
-              pid, bounds[0], bounds[1], bounds[2], bounds[3], dx * mtodeglon, dy * mtodeglat);
-    else
-      snprintf(plot_cmd, sizeof(plot_cmd), "gmt grdsample %s -Gtmpgrdsample%d.grd -R%.12f/%.12f/%.12f/%.12f -I%.12f/%.12f", backgroundfileuse,
-              pid, bounds[0], bounds[1], bounds[2], bounds[3], dx, dy);
+    snprintf(plot_cmd, sizeof(plot_cmd), "gmt grdsample %s -Gtmpgrdsample%d.grd -R%.12f/%.12f/%.12f/%.12f -I%.12f/%.12f",
+             backgroundfileuse, pid, sample_bnd[0], sample_bnd[1], sample_bnd[2], sample_bnd[3], sample_dx, sample_dy);
     fprintf(stderr, "Executing: %s\n", plot_cmd);
     int fork_status = system(plot_cmd);
     if (fork_status != 0) {
@@ -2119,15 +2239,24 @@ int main(int argc, char **argv) {
       exit(MB_ERROR_BAD_PARAMETER);
     }
 
+    /* grdsample may fail without an error status, e.g. if the background
+       grid does not overlap the area of the output grid */
+    snprintf(plot_cmd, sizeof(plot_cmd), "tmpgrdsample%d.grd", pid);
+    FILE *sample_fp = fopen(plot_cmd, "r");
+    if (sample_fp == nullptr) {
+      fprintf(outfp, "\nThe background grid %s could not be resampled over the area of the output grid;\n"
+                     "check that it overlaps that area\n", backgroundfile);
+      fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+      error = MB_ERROR_BAD_PARAMETER;
+      mb_memory_clear(verbose, &memclear_error);
+      exit(MB_ERROR_BAD_PARAMETER);
+    }
+    fclose(sample_fp);
+
     /* extract points with preprocessing if that will help */
-    if (use_projection) {
-      snprintf(plot_cmd, sizeof(plot_cmd), "gmt grd2xyz tmpgrdsample%d.grd -s -bo | gmt blockmean -bi -bo -C -R%f/%f/%f/%f -I%.12f/%.12f", pid,
-              bounds[0], bounds[1], bounds[2], bounds[3], dx * mtodeglon, dy * mtodeglat);
-    }
-    else {
-      snprintf(plot_cmd, sizeof(plot_cmd), "gmt grd2xyz tmpgrdsample%d.grd -s -bo | gmt blockmean -bi -bo -C -R%f/%f/%f/%f -I%.12f/%.12f", pid,
-              bounds[0], bounds[1], bounds[2], bounds[3], dx, dy);
-    }
+    snprintf(plot_cmd, sizeof(plot_cmd),
+             "gmt grd2xyz tmpgrdsample%d.grd -s -bo | gmt blockmean -bi -bo -C -R%.12f/%.12f/%.12f/%.12f -I%.12f/%.12f",
+             pid, sample_bnd[0], sample_bnd[1], sample_bnd[2], sample_bnd[3], sample_dx, sample_dy);
     fprintf(stderr, "Executing: %s\n", plot_cmd);
     if ((rfp = popen(plot_cmd, "r")) != nullptr) {
       /* loop over reading */
@@ -2135,16 +2264,27 @@ int main(int argc, char **argv) {
       while (fread(&tlon, sizeof(double), 1, rfp) == 1) {
         /* size_t freadsize = */ fread(&tlat, sizeof(double), 1, rfp);
         /* freadsize = */ fread(&tvalue, sizeof(double), 1, rfp);
-        if (lonflip == -1 && tlon > 0.0)
-          tlon -= 360.0;
-        else if (lonflip == 0 && tlon < -180.0)
-          tlon += 360.0;
-        else if (lonflip == 0 && tlon > 180.0)
-          tlon -= 360.0;
-        else if (lonflip == 1 && tlon < 0.0)
-          tlon += 360.0;
-        if (use_projection)
-          mb_proj_forward(verbose, pjptr, tlon, tlat, &tlon, &tlat, &error);
+
+        /* a background in the output projection is used as is; a projected
+           one in another projection is first inverse projected to lon lat */
+        if (bg_projected && !bg_same_projection) {
+          int bg_error = MB_ERROR_NO_ERROR;
+          mb_proj_inverse(verbose, bg_pjptr, tlon, tlat, &tlon, &tlat, &bg_error);
+          if (!std::isfinite(tlon) || !std::isfinite(tlat))
+            continue;
+        }
+        if (!bg_same_projection) {
+          if (lonflip == -1 && tlon > 0.0)
+            tlon -= 360.0;
+          else if (lonflip == 0 && tlon < -180.0)
+            tlon += 360.0;
+          else if (lonflip == 0 && tlon > 180.0)
+            tlon -= 360.0;
+          else if (lonflip == 1 && tlon < 0.0)
+            tlon += 360.0;
+          if (use_projection)
+            mb_proj_forward(verbose, pjptr, tlon, tlat, &tlon, &tlat, &error);
+        }
 #ifdef USESURFACE
         if (nbackground >= nbackground_alloc) {
           nbackground_alloc += 10000;
@@ -2200,6 +2340,13 @@ int main(int argc, char **argv) {
       error = MB_ERROR_BAD_PARAMETER;
       mb_memory_clear(verbose, &memclear_error);
       exit(MB_ERROR_BAD_PARAMETER);
+    }
+    if (bg_projected) {
+      if (verbose > 0)
+        fprintf(outfp, "Background grid projection %s %s\n", bg_projection_id,
+                bg_same_projection ? "matches the output grid" : "converted to the output grid coordinates");
+      int bg_error = MB_ERROR_NO_ERROR;
+      mb_proj_free(verbose, &bg_pjptr, &bg_error);
     }
 
     /* delete any temporary files */

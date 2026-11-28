@@ -17,10 +17,18 @@ struct GeodeticPosition {
 	double elevation = 0.0;
 };
 
+/*
+ * A local east-north-up (ENU) Cartesian frame tangent to the WGS84 ellipsoid
+ * at `origin`. It is a rigid transform of ECEF: a local point maps to ECEF as
+ * origin_ecef + east * x + north * y + up * z. Units are meters. The axes are
+ * unit vectors expressed in ECEF. See io/coordinate_frame.h.
+ */
 struct CoordinateFrame {
 	GeodeticPosition origin;
-	double meters_per_degree_lon = 0.0;
-	double meters_per_degree_lat = 0.0;
+	Vec3 origin_ecef;
+	Vec3 east;
+	Vec3 north;
+	Vec3 up;
 };
 
 struct GeographicBounds {

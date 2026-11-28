@@ -325,11 +325,8 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 
 	/* deal with a memory allocation failure */
 	if (status == MB_FAILURE) {
-		status = mb_deall_ioarrays(verbose, mbio_ptr, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr, error);
-		mb_io_ptr->beams_bath_alloc = 0;
-		mb_io_ptr->beams_amp_alloc = 0;
-		mb_io_ptr->pixels_ss_alloc = 0;
+		status = mb_deall_ioarrays(verbose, *mbio_ptr, error);
+		status = mb_freed(verbose, __FILE__, __LINE__, (void **)mbio_ptr, error);
 		status = MB_FAILURE;
 		*error = MB_ERROR_MEMORY_FAIL;
 		if (verbose >= 2) {
@@ -544,6 +541,7 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->new_ss_acrosstrack, error);
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->new_ss_alongtrack, error);
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr, error);
+		*mbio_ptr = NULL;
 
 		/* restore error and status values */
 		status = status_save;
@@ -863,7 +861,14 @@ int mb_read_init_altnav(int verbose, char *file, int format, int pings,
 
 	}
 
-	if (verbose >= 2) {
+	if (verbose >= 2 && mb_io_ptr == NULL) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> terminated with error\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+	else if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)*mbio_ptr);
@@ -1162,11 +1167,8 @@ int mb_input_init(int verbose, char *socket_definition, int format,
 
 	/* deal with a memory allocation failure */
 	if (status == MB_FAILURE) {
-		status = mb_deall_ioarrays(verbose, mbio_ptr, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr, error);
-		mb_io_ptr->beams_bath_alloc = 0;
-		mb_io_ptr->beams_amp_alloc = 0;
-		mb_io_ptr->pixels_ss_alloc = 0;
+		status = mb_deall_ioarrays(verbose, *mbio_ptr, error);
+		status = mb_freed(verbose, __FILE__, __LINE__, (void **)mbio_ptr, error);
 		status = MB_FAILURE;
 		*error = MB_ERROR_MEMORY_FAIL;
 		if (verbose >= 2) {
@@ -1213,6 +1215,7 @@ int mb_input_init(int verbose, char *socket_definition, int format,
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->new_ss_acrosstrack, error);
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->new_ss_alongtrack, error);
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr, error);
+		*mbio_ptr = NULL;
 
 		/* restore error and status values */
 		status = status_save;

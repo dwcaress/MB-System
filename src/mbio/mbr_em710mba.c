@@ -291,7 +291,7 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_7
 		    || sonarunswap == MBSYS_SIMRAD3_EM3000D_8
 		    || sonarunswap == MBSYS_SIMRAD3_EM3002
-		    || sonarunswap == MBSYS_SIMRAD3_HISAS) {
+		    || MBSYS_SIMRAD3_IS_HISAS(sonarunswap)) {
 			sonarunswapgood = true;
 		}
 		else {
@@ -323,7 +323,7 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		    || sonarswap == MBSYS_SIMRAD3_EM3000D_7
 		    || sonarswap == MBSYS_SIMRAD3_EM3000D_8
 		    || sonarswap == MBSYS_SIMRAD3_EM3002
-		    || sonarswap == MBSYS_SIMRAD3_HISAS) {
+		    || MBSYS_SIMRAD3_IS_HISAS(sonarswap)) {
 			sonarswapgood = true;
 		}
 		else {
@@ -383,7 +383,7 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	    || *sonar == MBSYS_SIMRAD3_EM3000D_7
 	    || *sonar == MBSYS_SIMRAD3_EM3000D_8
 	    || *sonar == MBSYS_SIMRAD3_EM3002
-	    || *sonar == MBSYS_SIMRAD3_HISAS) {
+	    || MBSYS_SIMRAD3_IS_HISAS(*sonar)) {
 		sonargood = true;
 	}
 	else {
@@ -885,6 +885,44 @@ int mbr_em710mba_rd_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 			else if (strncmp("S3P=", line, 4) == 0)
 				mb_get_double(&(store->par_s3p), &line[4], len - 5);
 
+			/* HISAS transmit and receive array locations */
+			else if (strncmp("S11X=", line, 5) == 0)
+				mb_get_double(&(store->par_s11x), &line[5], len - 6);
+			else if (strncmp("S11Y=", line, 5) == 0)
+				mb_get_double(&(store->par_s11y), &line[5], len - 6);
+			else if (strncmp("S11Z=", line, 5) == 0)
+				mb_get_double(&(store->par_s11z), &line[5], len - 6);
+			else if (strncmp("S12X=", line, 5) == 0)
+				mb_get_double(&(store->par_s12x), &line[5], len - 6);
+			else if (strncmp("S12Y=", line, 5) == 0)
+				mb_get_double(&(store->par_s12y), &line[5], len - 6);
+			else if (strncmp("S12Z=", line, 5) == 0)
+				mb_get_double(&(store->par_s12z), &line[5], len - 6);
+			else if (strncmp("S13X=", line, 5) == 0)
+				mb_get_double(&(store->par_s13x), &line[5], len - 6);
+			else if (strncmp("S13Y=", line, 5) == 0)
+				mb_get_double(&(store->par_s13y), &line[5], len - 6);
+			else if (strncmp("S13Z=", line, 5) == 0)
+				mb_get_double(&(store->par_s13z), &line[5], len - 6);
+			else if (strncmp("S21X=", line, 5) == 0)
+				mb_get_double(&(store->par_s21x), &line[5], len - 6);
+			else if (strncmp("S21Y=", line, 5) == 0)
+				mb_get_double(&(store->par_s21y), &line[5], len - 6);
+			else if (strncmp("S21Z=", line, 5) == 0)
+				mb_get_double(&(store->par_s21z), &line[5], len - 6);
+			else if (strncmp("S22X=", line, 5) == 0)
+				mb_get_double(&(store->par_s22x), &line[5], len - 6);
+			else if (strncmp("S22Y=", line, 5) == 0)
+				mb_get_double(&(store->par_s22y), &line[5], len - 6);
+			else if (strncmp("S22Z=", line, 5) == 0)
+				mb_get_double(&(store->par_s22z), &line[5], len - 6);
+			else if (strncmp("S23X=", line, 5) == 0)
+				mb_get_double(&(store->par_s23x), &line[5], len - 6);
+			else if (strncmp("S23Y=", line, 5) == 0)
+				mb_get_double(&(store->par_s23y), &line[5], len - 6);
+			else if (strncmp("S23Z=", line, 5) == 0)
+				mb_get_double(&(store->par_s23z), &line[5], len - 6);
+
 			else if (strncmp("S1S=", line, 4) == 0)
 				mb_get_int(&(store->par_s1s), &line[4], len - 5);
 			else if (strncmp("S2S=", line, 4) == 0)
@@ -1240,6 +1278,12 @@ file will return error */
 		fprintf(stderr, "dbg5       par_s3h:         %f\n", store->par_s3h);
 		fprintf(stderr, "dbg5       par_s3r:         %f\n", store->par_s3r);
 		fprintf(stderr, "dbg5       par_s3p:         %f\n", store->par_s3p);
+		fprintf(stderr, "dbg5       par_s11x/y/z:   %f %f %f\n", store->par_s11x, store->par_s11y, store->par_s11z);
+		fprintf(stderr, "dbg5       par_s12x/y/z:   %f %f %f\n", store->par_s12x, store->par_s12y, store->par_s12z);
+		fprintf(stderr, "dbg5       par_s13x/y/z:   %f %f %f\n", store->par_s13x, store->par_s13y, store->par_s13z);
+		fprintf(stderr, "dbg5       par_s21x/y/z:   %f %f %f\n", store->par_s21x, store->par_s21y, store->par_s21z);
+		fprintf(stderr, "dbg5       par_s22x/y/z:   %f %f %f\n", store->par_s22x, store->par_s22y, store->par_s22z);
+		fprintf(stderr, "dbg5       par_s23x/y/z:   %f %f %f\n", store->par_s23x, store->par_s23y, store->par_s23z);
 		fprintf(stderr, "dbg5       par_s1s:         %d\n", store->par_s1s);
 		fprintf(stderr, "dbg5       par_s2s:         %d\n", store->par_s2s);
 		fprintf(stderr, "dbg5       par_go1:         %f\n", store->par_go1);
@@ -4821,6 +4865,7 @@ int mbr_em710mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			store->pings[i].read_status = MBSYS_SIMRAD3_PING_NO_DATA;
 			store->pings[i].png_bath_read = false;
 			store->pings[i].png_raw_read = false;
+			store->pings[i].png_ra_read = false;
 			store->pings[i].png_quality_read = false;
 			store->pings[i].png_ss_read = false;
 		}
@@ -5199,7 +5244,7 @@ Have a nice day...\n");
 					done = true;
 				}
 			}
-			else if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD3_HISAS) {
+			else if (status == MB_SUCCESS && MBSYS_SIMRAD3_IS_HISAS(sonar)) {
 				if (store->pings[store->ping_index].png_bath_read) {
 					store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_COMPLETE;
 					done = true;
@@ -5236,7 +5281,7 @@ Have a nice day...\n");
 					done = true;
 				}
 			}
-			else if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD3_HISAS) {
+			else if (status == MB_SUCCESS && MBSYS_SIMRAD3_IS_HISAS(sonar)) {
 				if (store->pings[store->ping_index].png_bath_read) {
 					store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_COMPLETE;
 					done = true;
@@ -5273,7 +5318,7 @@ Have a nice day...\n");
 					done = true;
 				}
 			}
-			else if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD3_HISAS) {
+			else if (status == MB_SUCCESS && MBSYS_SIMRAD3_IS_HISAS(sonar)) {
 				if (store->pings[store->ping_index].png_bath_read) {
 					store->pings[store->ping_index].read_status = MBSYS_SIMRAD3_PING_COMPLETE;
 					done = true;
@@ -5641,6 +5686,12 @@ int mbr_em710mba_wr_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 		fprintf(stderr, "dbg5       par_s3h:         %f\n", store->par_s3h);
 		fprintf(stderr, "dbg5       par_s3r:         %f\n", store->par_s3r);
 		fprintf(stderr, "dbg5       par_s3p:         %f\n", store->par_s3p);
+		fprintf(stderr, "dbg5       par_s11x/y/z:   %f %f %f\n", store->par_s11x, store->par_s11y, store->par_s11z);
+		fprintf(stderr, "dbg5       par_s12x/y/z:   %f %f %f\n", store->par_s12x, store->par_s12y, store->par_s12z);
+		fprintf(stderr, "dbg5       par_s13x/y/z:   %f %f %f\n", store->par_s13x, store->par_s13y, store->par_s13z);
+		fprintf(stderr, "dbg5       par_s21x/y/z:   %f %f %f\n", store->par_s21x, store->par_s21y, store->par_s21z);
+		fprintf(stderr, "dbg5       par_s22x/y/z:   %f %f %f\n", store->par_s22x, store->par_s22y, store->par_s22z);
+		fprintf(stderr, "dbg5       par_s23x/y/z:   %f %f %f\n", store->par_s23x, store->par_s23y, store->par_s23z);
 		fprintf(stderr, "dbg5       par_s1s:         %d\n", store->par_s1s);
 		fprintf(stderr, "dbg5       par_s2s:         %d\n", store->par_s2s);
 		fprintf(stderr, "dbg5       par_go1:         %f\n", store->par_go1);
@@ -5861,6 +5912,24 @@ int mbr_em710mba_wr_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 		sprintf(&buff[buff_len], "S3R=%.3f,", store->par_s3r);
 		buff_len = strlen(buff);
 		sprintf(&buff[buff_len], "S3P=%.3f,", store->par_s3p);
+		buff_len = strlen(buff);
+	}
+	/* HISAS transmit and receive array locations; each key is appended only if it
+	   fits whole in the buffer (leaving the 22 bytes reserved at its end) */
+	if (MBSYS_SIMRAD3_IS_HISAS(store->sonar)) {
+		const char *hisas_keys[18] = {"S11X", "S11Y", "S11Z", "S12X", "S12Y", "S12Z", "S13X", "S13Y", "S13Z",
+		                              "S21X", "S21Y", "S21Z", "S22X", "S22Y", "S22Z", "S23X", "S23Y", "S23Z"};
+		const double hisas_values[18] = {store->par_s11x, store->par_s11y, store->par_s11z, store->par_s12x, store->par_s12y,
+		                                 store->par_s12z, store->par_s13x, store->par_s13y, store->par_s13z, store->par_s21x,
+		                                 store->par_s21y, store->par_s21z, store->par_s22x, store->par_s22y, store->par_s22z,
+		                                 store->par_s23x, store->par_s23y, store->par_s23z};
+		for (int k = 0; k < 18; k++) {
+			char entry[64];
+			const int entry_len = snprintf(entry, sizeof(entry), "%s=%.3f,", hisas_keys[k], hisas_values[k]);
+			const size_t used = strlen(buff);
+			if (entry_len > 0 && entry_len < (int)sizeof(entry) && used + (size_t)entry_len < MBSYS_SIMRAD3_BUFFER_SIZE - 22)
+				memcpy(&buff[used], entry, (size_t)entry_len + 1);
+		}
 		buff_len = strlen(buff);
 	}
 	if (store->par_go1 != 0.0) {

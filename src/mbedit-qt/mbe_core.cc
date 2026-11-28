@@ -26,6 +26,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdarg>
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
@@ -56,39 +57,22 @@ long file_size(const std::string &path) {
   return stat(path.c_str(), &file_status) == 0 ? (long)file_status.st_size : -1;
 }
 
-void set_environment(const char *name, const char *value) {
-#ifdef _WIN32
-  _putenv_s(name, value != nullptr ? value : "");
-#else
-  if (value != nullptr)
-    setenv(name, value, 1);
-  else
-    unsetenv(name);
-#endif
-}
-
 bool history_on() {
   const char *history_env = getenv(MB_HISTORY_ENV);
   return history_env == nullptr || (strcmp(history_env, "off") != 0 && strcmp(history_env, "0") != 0);
 }
 
-/* no history snapshots while the temporary edit save file is opened: the
-   history is about the real file, and is handled when that is replaced */
-class HistoryOff {
- public:
-  HistoryOff() {
-    const char *value = getenv(MB_HISTORY_ENV);
-    had_value_ = value != nullptr;
-    if (had_value_)
-      value_ = value;
-    set_environment(MB_HISTORY_ENV, "off");
-  }
-  ~HistoryOff() { set_environment(MB_HISTORY_ENV, had_value_ ? value_.c_str() : nullptr); }
-
- private:
-  bool had_value_ = false;
-  std::string value_;
-};
+/* the header of an edit save file or its stream, as the MBIO library writes it */
+bool write_esf_header(FILE *fp, const char *program) {
+  char user[256] = "", host[256] = "", date[32] = "";
+  int error = MB_ERROR_NO_ERROR;
+  mb_user_host_date(0, user, host, date, &error);
+  char header[ESF_HEADER_SIZE];
+  memset(header, 0, sizeof(header));
+  snprintf(header, sizeof(header), "ESFVERSION03\nESF Mode: %d\nMB-System Version %s\nProgram: %s\nUser: %s\nCPU: %s\nDate: %s\n", MB_ESF_MODE_EXPLICIT,
+           MB_VERSION, program, user, host, date);
+  return fwrite(header, ESF_HEADER_SIZE, 1, fp) == 1;
+}
 
 /* append a file to an open one, skipping the first bytes */
 bool append_file(FILE *out, const std::string &path, size_t skip) {
@@ -205,9 +189,26 @@ void Session::setBuffer(int size, int hold) {
 }
 
 void Session::error3(const std::string &a, const std::string &b, const std::string &c) {
-  fprintf(stderr, "%s %s %s\n", a.c_str(), b.c_str(), c.c_str());
+  log("%s %s %s\n", a.c_str(), b.c_str(), c.c_str());
   if (on_error)
     on_error(a, b, c);
+}
+
+void Session::log(const char *format, ...) const {
+  va_list args;
+  va_start(args, format);
+  va_list measure;
+  va_copy(measure, args);
+  const int size = vsnprintf(nullptr, 0, format, measure);
+  va_end(measure);
+  std::string text(size > 0 ? size : 0, '\0');
+  if (size > 0)
+    vsnprintf(&text[0], text.size() + 1, format, args);
+  va_end(args);
+  if (on_log)
+    on_log(text);
+  else
+    fputs(text.c_str(), stderr);
 }
 
 void Session::progress(const std::string &text) {
@@ -283,13 +284,13 @@ int Session::openFile(const std::string &path, int format, bool use_saved_edits,
 
   int status = MB_SUCCESS;
   if (uselockfiles_) {
-    status = mb_pr_lockswathfile(verbose, ifile_, MBP_LOCK_EDITBATHY, PROGRAM_NAME, &error_);
+    status = mb_pr_lockswathfile(verbose, ifile_, MBP_LOCK_EDITBATHY, program_name.c_str(), &error_);
   }
   else {
     std::string description;
     bool mine;
     if (lockInfo(ifile_, description, mine))
-      fprintf(stderr, "\nFile %s locked by %s but lock ignored\n", ifile_, description.c_str());
+      log("\nFile %s locked by %s but lock ignored\n", ifile_, description.c_str());
     error_ = MB_ERROR_NO_ERROR;
   }
   if (status == MB_FAILURE) {
@@ -313,7 +314,7 @@ int Session::openFile(const std::string &path, int format, bool use_saved_edits,
     error3("Unable to open input file:", path, message != nullptr ? message : "");
     if (uselockfiles_) {
       int unlock_error = MB_ERROR_NO_ERROR;
-      mb_pr_unlockswathfile(verbose, ifile_, MBP_LOCK_EDITBATHY, PROGRAM_NAME, &unlock_error);
+      mb_pr_unlockswathfile(verbose, ifile_, MBP_LOCK_EDITBATHY, program_name.c_str(), &unlock_error);
     }
     file_open_ = false;
     return MB_FAILURE;
@@ -345,7 +346,7 @@ int Session::openFile(const std::string &path, int format, bool use_saved_edits,
     int close_error = MB_ERROR_NO_ERROR;
     mb_close(verbose, &imbio_ptr_, &close_error);
     if (uselockfiles_)
-      mb_pr_unlockswathfile(verbose, ifile_, MBP_LOCK_EDITBATHY, PROGRAM_NAME, &close_error);
+      mb_pr_unlockswathfile(verbose, ifile_, MBP_LOCK_EDITBATHY, program_name.c_str(), &close_error);
     error3("Unable to allocate memory", "for the data arrays", "");
     file_open_ = false;
     return MB_FAILURE;
@@ -374,15 +375,15 @@ int Session::openFile(const std::string &path, int format, bool use_saved_edits,
     if (esf_.edit != nullptr || esf_.esffp != nullptr || esf_.essfp != nullptr)
       mb_esf_close(verbose, &esf_, &close_error);
     if (uselockfiles_)
-      mb_pr_unlockswathfile(verbose, ifile_, MBP_LOCK_EDITBATHY, PROGRAM_NAME, &close_error);
+      mb_pr_unlockswathfile(verbose, ifile_, MBP_LOCK_EDITBATHY, program_name.c_str(), &close_error);
     file_open_ = false;
-    fprintf(stderr, "\nERROR: Multibeam File <%s> NOT initialized for reading\n", ifile_);
+    log("\nERROR: Multibeam File <%s> NOT initialized for reading\n", ifile_);
     return status;
   }
 
   file_open_ = true;
-  fprintf(stderr, "\nMultibeam File <%s> initialized for reading\n", ifile_);
-  fprintf(stderr, "Multibeam Data Format ID: %d\n", format_);
+  log("\nMultibeam File <%s> initialized for reading\n", ifile_);
+  log("Multibeam Data Format ID: %d\n", format_);
   return MB_SUCCESS;
 }
 
@@ -394,7 +395,7 @@ int Session::openEsf(bool use_saved_edits, bool recover) {
 
   if (output_mode_ == OUTPUT_BROWSE) {
     if (use_saved_edits) {
-      status = mb_esf_load(verbose, PROGRAM_NAME, ifile_, true, MBP_ESF_NOWRITE, esffile_, &esf_, &error_);
+      status = mb_esf_load(verbose, program_name.c_str(), ifile_, true, MBP_ESF_NOWRITE, esffile_, &esf_, &error_);
       /* no existing edits to load is not an error */
       if (status == MB_FAILURE && error_ == MB_ERROR_NO_DATA_LOADED) {
         status = MB_SUCCESS;
@@ -430,7 +431,7 @@ int Session::openEsf(bool use_saved_edits, bool recover) {
     if (ok) {
       mb_path name;
       snprintf(name, sizeof(name), "%s", merged.c_str());
-      status = mb_esf_open(verbose, PROGRAM_NAME, name, true, MBP_ESF_NOWRITE, &esf_, &error_);
+      status = mb_esf_open(verbose, program_name.c_str(), name, true, MBP_ESF_NOWRITE, &esf_, &error_);
       snprintf(esf_.esffile, sizeof(esf_.esffile), "%s", esffile_);
     }
     else {
@@ -441,24 +442,33 @@ int Session::openEsf(bool use_saved_edits, bool recover) {
     replacing_ = true;
   }
   else {
-    status = mb_esf_open(verbose, PROGRAM_NAME, esffile_, use_saved_edits, MBP_ESF_NOWRITE, &esf_, &error_);
+    status = mb_esf_open(verbose, program_name.c_str(), esffile_, use_saved_edits, MBP_ESF_NOWRITE, &esf_, &error_);
     if (!use_saved_edits && file_size(esffile_) > (long)ESF_HEADER_SIZE)
       replacing_ = true;
   }
 
-  /* open the new files; the library writes their headers */
+  /* open the new files. They are not opened through the library, which would
+     start a history of these temporary names. */
   if (status == MB_SUCCESS) {
-    mb_path name;
-    snprintf(name, sizeof(name), "%s", esf_new_.c_str());
-    struct mb_esf_struct out;
-    memset(&out, 0, sizeof(out));
-    {
-      HistoryOff history_off;
-      status = mb_esf_open(verbose, PROGRAM_NAME, name, false, MBP_ESF_WRITE, &out, &error_);
+    const std::string stream_new = esf_new_ + ".stream";
+    FILE *new_esf = fopen(esf_new_.c_str(), "wb");
+    FILE *new_stream = new_esf != nullptr ? fopen(stream_new.c_str(), "wb") : nullptr;
+    if (new_esf == nullptr || new_stream == nullptr) {
+      log("Failed to open %s with file mode wb\n", new_esf == nullptr ? esf_new_.c_str() : stream_new.c_str());
+      if (new_esf != nullptr)
+        fclose(new_esf);
+      status = MB_FAILURE;
+      error_ = MB_ERROR_OPEN_FAIL;
     }
-    if (status == MB_SUCCESS) {
-      esf_.esffp = out.esffp;
-      esf_.essfp = out.essfp;
+    else if (!write_esf_header(new_esf, program_name.c_str()) || !write_esf_header(new_stream, program_name.c_str())) {
+      fclose(new_esf);
+      fclose(new_stream);
+      status = MB_FAILURE;
+      error_ = MB_ERROR_WRITE_FAIL;
+    }
+    else {
+      esf_.esffp = new_esf;
+      esf_.essfp = new_stream;
       fflush(esf_.esffp);
       fflush(esf_.essfp);
       esffile_open_ = true;
@@ -484,9 +494,9 @@ bool Session::commitEsf(const std::string &source) {
   int history_version = 0;
   if (history_on()) {
     if (file_exists(esffile_)) {
-      if (mb_history_snapshot(verbose, esffile_, PROGRAM_NAME, nullptr, MB_HISTORY_MODE_DEFAULT, &history_version, &history_error) !=
+      if (mb_history_snapshot(verbose, esffile_, program_name.c_str(), nullptr, MB_HISTORY_MODE_DEFAULT, &history_version, &history_error) !=
           MB_SUCCESS)
-        fprintf(stderr, "\nWarning: unable to save a history snapshot of edit save file %s\n", esffile_);
+        log("\nWarning: unable to save a history snapshot of edit save file %s\n", esffile_);
     }
     else {
       /* a new edit save file: the first history version holds no edits, and records when it was created */
@@ -501,9 +511,9 @@ bool Session::commitEsf(const std::string &source) {
         fclose(in);
       if (out != nullptr)
         fclose(out);
-      if (mb_history_snapshot(verbose, esffile_, PROGRAM_NAME, MB_HISTORY_NOTE_CREATED, MB_HISTORY_MODE_DEFAULT, &history_version,
+      if (mb_history_snapshot(verbose, esffile_, program_name.c_str(), MB_HISTORY_NOTE_CREATED, MB_HISTORY_MODE_DEFAULT, &history_version,
                               &history_error) != MB_SUCCESS)
-        fprintf(stderr, "\nWarning: unable to save a history snapshot of edit save file %s\n", esffile_);
+        log("\nWarning: unable to save a history snapshot of edit save file %s\n", esffile_);
     }
   }
   std::error_code code;
@@ -549,14 +559,7 @@ bool Session::writeCurrentEdits(const std::string &path) const {
     ok = append_file(fp, esf_new_, 0);
   }
   else {
-    char user[256] = "", host[256] = "", date[32] = "";
-    int error = MB_ERROR_NO_ERROR;
-    mb_user_host_date(0, user, host, date, &error);
-    char header[ESF_HEADER_SIZE];
-    memset(header, 0, sizeof(header));
-    snprintf(header, sizeof(header), "ESFVERSION03\nESF Mode: %d\nMB-System Version %s\nProgram: %s\nUser: %s\nCPU: %s\nDate: %s\n", MB_ESF_MODE_EXPLICIT,
-             MB_VERSION, PROGRAM_NAME, user, host, date);
-    ok = fwrite(header, ESF_HEADER_SIZE, 1, fp) == 1;
+    ok = write_esf_header(fp, program_name.c_str());
   }
   ok = ok && writeEdits(fp);
   if (fclose(fp) != 0)
@@ -643,12 +646,12 @@ int Session::closeFile(bool commit) {
 
   if (uselockfiles_) {
     int unlock_error = MB_ERROR_NO_ERROR;
-    mb_pr_unlockswathfile(verbose, ifile_, MBP_LOCK_EDITBATHY, PROGRAM_NAME, &unlock_error);
+    mb_pr_unlockswathfile(verbose, ifile_, MBP_LOCK_EDITBATHY, program_name.c_str(), &unlock_error);
   }
 
-  fprintf(stderr, "\nMultibeam Input File <%s> closed\n", ifile_);
-  fprintf(stderr, "%d data records loaded\n", nload_total_);
-  fprintf(stderr, "%d data records dumped\n", ndump_total_);
+  log("\nMultibeam Input File <%s> closed\n", ifile_);
+  log("%d data records loaded\n", nload_total_);
+  log("%d data records dumped\n", ndump_total_);
   file_open_ = false;
   esffile_open_ = false;
   nload_total_ = 0;
@@ -1023,8 +1026,8 @@ int Session::loadData(int buffer_size, int *nloaded) {
   pending_.clear();
   streamFlush();
 
-  fprintf(stderr, "\n%d data records loaded from input file <%s>\n", nload, ifile_);
-  fprintf(stderr, "%d data records now in buffer\n", nbuff());
+  log("\n%d data records loaded from input file <%s>\n", nload, ifile_);
+  log("%d data records now in buffer\n", nbuff());
   return status;
 }
 
@@ -1428,7 +1431,7 @@ void Session::setFlag(int i, int j, int action, char flag) {
     pending_.push_back({i, j, p.beamflag[j], flag});
   p.beamflag[j] = flag;
   if (verbose >= 1)
-    fprintf(stderr, "\nping: %d beam:%d depth:%10.3f flag:0x%2.2x\n", i, j, p.bath[j], (unsigned char)flag);
+    log("\nping: %d beam:%d depth:%10.3f flag:0x%2.2x\n", i, j, p.bath[j], (unsigned char)flag);
 }
 
 /* a beam already flagged in the data file goes back to its original flag */
@@ -2168,7 +2171,7 @@ bool Session::previewEditFile(const std::string &path, FlagPreview &preview, std
   struct mb_esf_struct esf;
   memset(&esf, 0, sizeof(esf));
   int error = MB_ERROR_NO_ERROR;
-  if (mb_esf_open(0, PROGRAM_NAME, name, true, MBP_ESF_NOWRITE, &esf, &error) != MB_SUCCESS) {
+  if (mb_esf_open(0, program_name.c_str(), name, true, MBP_ESF_NOWRITE, &esf, &error) != MB_SUCCESS) {
     message = "Unable to read " + path;
     return false;
   }

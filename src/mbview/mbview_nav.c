@@ -1577,7 +1577,6 @@ int mbview_extract_nav_profile(size_t instance) {
 	if (shared.shareddata.nnav > 0) {
 		data->profile.source = MBV_PROFILE_NAV;
 		strcpy(data->profile.source_name, "Navigation");
-		data->profile.length = 0.0;
 
 		/* make sure enough memory is allocated for the profile */
 		int nprpoints = 0;
@@ -1600,7 +1599,7 @@ int mbview_extract_nav_profile(size_t instance) {
 		}
 
 		/* extract the profile */
-		if (nprpoints > 2 && data->profile.npoints_alloc >= nprpoints) {
+		if (nprpoints >= 2 && data->profile.npoints_alloc >= nprpoints) {
 			data->profile.npoints = 0;
 			int lasti = 0;
 			int lastj = 0;
@@ -1717,6 +1716,13 @@ int mbview_extract_nav_profile(size_t instance) {
 				else
 					data->profile.points[i].slope = 0.0;
 			}
+
+			/* leave out the points without grid data, mark the gaps */
+			mbview_profile_markgaps(instance);
+		}
+		else {
+			/* do not keep the points of an earlier profile */
+			data->profile.npoints = 0;
 		}
 	}
 

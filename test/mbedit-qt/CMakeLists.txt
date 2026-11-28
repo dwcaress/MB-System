@@ -33,29 +33,27 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
 set(CMAKE_AUTOMOC ON)
 
-set(tool_dir "${CMAKE_SOURCE_DIR}/src/mbedit-qt")
-
-add_executable(
-  mbedit_qt_window_test
-  mbedit_qt_window_test.cc
-  ${tool_dir}/MainWindow.cc
-  ${tool_dir}/MainWindow.h
-  ${tool_dir}/mbe_canvas.cc
-  ${tool_dir}/mbe_canvas.h
-  ${tool_dir}/mbe_core.cc
-  ${tool_dir}/mbe_core.h
-  ${tool_dir}/mbe_panels.cc
-  ${tool_dir}/mbe_panels.h)
+add_executable(mbedit_qt_window_test mbedit_qt_window_test.cc)
 
 set_target_properties(mbedit_qt_window_test PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 
-target_include_directories(mbedit_qt_window_test PRIVATE ${tool_dir})
+target_link_libraries(mbedit_qt_window_test PRIVATE mbedit-qt-ui)
 
-target_link_libraries(mbedit_qt_window_test PRIVATE mbaux mbio Qt6::Widgets ${MB_SYSLIBS})
+add_executable(mbedit_qt_session_test mbedit_qt_session_test.cc)
+
+set_target_properties(mbedit_qt_session_test PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+
+target_link_libraries(mbedit_qt_session_test PRIVATE mbedit-qt-core)
+
+add_executable(mbedit_qt_embed_test mbedit_qt_embed_test.cc)
+
+set_target_properties(mbedit_qt_embed_test PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+
+target_link_libraries(mbedit_qt_embed_test PRIVATE mbedit-qt-ui)
 
 find_package(Python3 COMPONENTS Interpreter)
 if(Python3_FOUND)
   add_test(NAME mbedit_qt_test COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mbedit_qt_test.py")
   set_tests_properties(mbedit_qt_test PROPERTIES ENVIRONMENT
-                       "MBEDIT_QT=$<TARGET_FILE:mbedit-qt>;MBEDIT_QT_WINDOW_TEST=$<TARGET_FILE:mbedit_qt_window_test>;MBCLEAN=$<TARGET_FILE:mbclean>;MBGRID=$<TARGET_FILE:mbgrid>;MBHISTORY=$<TARGET_FILE:mbhistory>")
+                       "MBEDIT_QT=$<TARGET_FILE:mbedit-qt>;MBEDIT_QT_WINDOW_TEST=$<TARGET_FILE:mbedit_qt_window_test>;MBEDIT_QT_SESSION_TEST=$<TARGET_FILE:mbedit_qt_session_test>;MBEDIT_QT_EMBED_TEST=$<TARGET_FILE:mbedit_qt_embed_test>;MBCLEAN=$<TARGET_FILE:mbclean>;MBGRID=$<TARGET_FILE:mbgrid>;MBHISTORY=$<TARGET_FILE:mbhistory>")
 endif()

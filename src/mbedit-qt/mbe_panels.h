@@ -34,6 +34,8 @@
 
 class QDoubleSpinBox;
 
+namespace mbe {
+
 /* slider that moves exactly one step per mouse wheel notch */
 class PingSlider : public QSlider {
   Q_OBJECT
@@ -123,5 +125,7 @@ class TrackMap : public QWidget {
   bool bounds(double *lonmin, double *lonmax, double *latmin, double *latmax, double *scale) const;
   const mbe::Session &session_;
 };
+
+}  // namespace mbe
 
 #endif

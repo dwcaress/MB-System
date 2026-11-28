@@ -5,16 +5,20 @@
 #include "../data_types/geometry.h"
 #include "../data_types/swathfile.h"
 
+// With append, the points go at the end of the file, which is how a point cloud too large for memory is written in
+// pieces: the first piece without append, the rest with it.
 [[nodiscard]] bool write_local_xyz_pointcloud(
     const PointCloud &pointcloud,
     const std::string &path,
-    std::string *error_message = nullptr);
+    std::string *error_message = nullptr,
+    bool append = false);
 
 [[nodiscard]] bool write_ecef_xyz_pointcloud(
     const PointCloud &pointcloud,
     const CoordinateFrame &frame,
     const std::string &path,
-    std::string *error_message = nullptr);
+    std::string *error_message = nullptr,
+    bool append = false);
 
 [[nodiscard]] bool write_ply_oriented_pointcloud(
     const OrientedPointCloud &oriented_pointcloud,

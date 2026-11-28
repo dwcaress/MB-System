@@ -1,0 +1,103 @@
+.TH mbnavadjust-qt 1 "10 November 2026" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbnavadjust-qt\fP \- Interactive adjustment of the navigation of swath sonar surveys, using the bathymetry where the surveys overlap.
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbnavadjust-qt\fP
+.br
+[--input=project {-Iproject}
+.br
+--reset-crossings {-R}
+.br
+--dark-background {-D}
+.br
+--verbose {-V}
+.br
+--help {-H}
+.br
+--dump
+.br
+--replay=script
+.br
+--export=prefix
+.br
+--crossing=number]
+
+.SH DESCRIPTION
+\fBmbnavadjust-qt\fP is the Qt6 version of \fBmbnavadjust\fP. It reads and writes the same project files and runs
+the same project code as \fBmbnavadjust\fP, so the two programs can be used on one project, one after the other.
+The project is a *.nvh file with a directory *.dir beside it.
+
+The window holds the project status and the list of the project, the crossing being analyzed, the messages and,
+when it is shown, the model plot. These are docks that can be moved, or floated out of the window. The lists are
+tables: a click on a column header sorts the table.
+
+Clicking a section, crossing or tie in the list loads it in the crossing editor. A click on a survey, block, file or
+reference grid selects it. In the crossing editor the left mouse button drags the second section over the first, the
+middle mouse button (or Alt with the left button) drags out a box to zoom, and the right mouse button picks the
+navigation points nearest the mouse for the tie. A click in the misfit or vertical misfit plot sets the working offset.
+
+In the model plot the left mouse button picks a tie, the middle button picks an untied crossing, or a block in
+the Tie Offsets plot, and the right button drags out the range to zoom.
+
+Auto-Pick, Invert Navigation, Update Grids and the other long steps run in the background, and the window stays
+alive while they run. Edit > Undo takes back the tie edits and status changes made by hand; it does not take back the
+long steps.
+
+The project is written after every 10 tie edits, at once for status changes and for Apply in the Controls form, and when the
+project or the window is closed. Closing does not ask: the edits are written.
+
+The map of \fBmbnavadjust\fP (Visualize Survey) is not yet available in this program.
+
+.SH MB-SYSTEM AUTHORSHIP
+David W. Caress
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes
+.br
+  Center for Coastal and Ocean Mapping
+.br
+  University of New Hampshire
+.br
+Christian dos Santos Ferreira
+.br
+  MARUM, University of Bremen
+
+.SH OPTIONS
+.TP
+.B \-\-input=\fIproject\fP {\-I\fIproject\fP}
+Opens this project (a *.nvh file) at startup.
+.TP
+.B \-\-reset-crossings {\-R}
+Resets the crossings of the project when it is opened.
+.TP
+.B \-\-dark-background {\-D}
+Draws the plots white on black. Without this option the plots follow the light or dark setting of the system.
+.TP
+.B \-\-verbose {\-V}
+Writes more information to the standard error.
+.TP
+.B \-\-help {\-H}
+Prints the usage and exits.
+.TP
+.B \-\-dump
+With \-\-input: prints what each list shows, without a window.
+.TP
+.B \-\-replay=\fIscript\fP
+Runs the user actions in a text file, without a window, and prints what the program shows. Used to compare the program with \fBmbnavadjust\fP.
+.TP
+.B \-\-export=\fIprefix\fP
+With \-\-input: writes the plots as PNG files named after the prefix, without a window.
+.TP
+.B \-\-crossing=\fInumber\fP
+With \-\-export: the crossing to show. The default is the first crossing.
+
+.SH SEE ALSO
+\fBmbnavadjust\fP(1), \fBmbnavadjustmerge\fP(1), \fBmbsystem\fP(1), \fBmbgrid\fP(1)
+
+.SH BUGS
+A project can be open in one program at a time; nothing prevents two programs from opening the same project at once.

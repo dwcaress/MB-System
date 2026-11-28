@@ -1004,7 +1004,7 @@ int main(int argc, char **argv) {
 			int cpixels_ss_max = 0;
 			mb_path cformat_name;
 			mb_path csystem_name;
-			mb_path cformat_description;
+			char cformat_description[MB_DESCRIPTION_LENGTH];
 			int cnumfile = 0;
 			int cfiletype = 0;
 			bool cvariable_beams = 0;

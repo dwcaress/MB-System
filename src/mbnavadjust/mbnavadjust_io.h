@@ -506,6 +506,7 @@ int mbnavadjust_remove_short_sections(int verbose, struct mbna_project *project,
                               double minimum_section_length, int minimum_section_soundings, int *error);
 int mbnavadjust_remove_file_by_name(int verbose, struct mbna_project *project, char *path, int *error);
 int mbnavadjust_remove_file_by_id(int verbose, struct mbna_project *project, int ifile, int *error);
+int mbnavadjust_remove_survey(int verbose, struct mbna_project *project, int isurvey, int *error);
 int mbnavadjust_crossing_overlap(int verbose, struct mbna_project *project, int crossing_id, int *error);
 int mbnavadjust_crossing_overlapbounds(int verbose, struct mbna_project *project, int crossing_id, double offset_x,
                                        double offset_y, double *lonmin, double *lonmax, double *latmin, double *latmax,

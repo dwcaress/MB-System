@@ -33,7 +33,9 @@ dist_mbsystemhtml_DATA = \
     mbfnv2navlab.html \
     mbformat.html \
     mbgetesf.html \
+    mbglb2tiles.html \
     mbgpstide.html \
+    mbgrd2gltf.html \
     mbgrd2obj.html \
     mbgrdtiff.html \
     mbgrdviz.html \
@@ -76,6 +78,7 @@ dist_mbsystemhtml_DATA = \
     mbmapscale.html \
     mbmesh.html \
     mbminirovnav.html \
+    mbmesh.html \
     mbmosaic.html \
     mbnavadjust.html \
     mbnavadjustmerge.html \
@@ -136,7 +139,9 @@ dist_mbsystemhtml_DATA = \
     mbfnv2navlab.pdf \
     mbformat.pdf \
     mbgetesf.pdf \
+    mbglb2tiles.pdf \
     mbgpstide.pdf \
+    mbgrd2gltf.pdf \
     mbgrd2obj.pdf \
     mbgrdtiff.pdf \
     mbgrdviz.pdf \
@@ -179,6 +184,7 @@ dist_mbsystemhtml_DATA = \
     mbmapscale.pdf \
     mbmesh.pdf \
     mbminirovnav.pdf \
+    mbmesh.pdf \
     mbmosaic.pdf \
     mbnavadjust.pdf \
     mbnavadjustmerge.pdf \

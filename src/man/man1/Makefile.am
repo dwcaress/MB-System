@@ -40,6 +40,7 @@ man_MANS =  \
 	mbfnv2navlab.1 \
 	mbformat.1 \
 	mbgetesf.1 \
+	mbglb2tiles.1 \
 	mbgpstide.1 \
 	mbmesh.1 \
 	mbgrd2obj.1 \

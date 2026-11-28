@@ -21,6 +21,7 @@ set(manpages
     mbfnv2navlab.1
     mbformat.1
     mbgetesf.1
+    mbglb2tiles.1
     mbgpstide.1
     mbgrd2gltf.1
     mbgrd2obj.1
@@ -76,6 +77,7 @@ set(manpages
     mbpreprocess.1
     mbprocess.1
     mbpy_wcdview.1
+    mbpy_3dtiles.1
     mbpy_grd3dplot.1
     mbpy_grdplot.1
     mbpy_grdtiff.1
@@ -139,8 +141,10 @@ if(buildQt6Tools)
         mbwcdview.1
         mbvelocitytool-qt.1
         mbedit-qt.1
+        mbnavedit-qt.1
         mbgrdviz-qt.1
-        mbeditviz-qt.1)
+        mbeditviz-qt.1
+        mbnavadjust-qt.1)
 endif()
 
 install(FILES ${manpages} ${deprecated} ${trn} ${photo} ${qt6tools} DESTINATION ${CMAKE_INSTALL_MANPAGES}/man1)

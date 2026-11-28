@@ -21,6 +21,9 @@ or beta, are equally accessible as tarballs through the Github interface.
 ---
 ### MB-System Version 5.8 Releases and Release Notes:
 ---
+- Version 5.8.3beta31    November 20, 2026
+- Version 5.8.3beta30    November 17, 2026
+- Version 5.8.3beta29    November 11, 2026
 - Version 5.8.3beta28    November 3, 2026
 - Version 5.8.3beta27    November 3, 2026
 - Version 5.8.3beta26    November 1, 2026
@@ -85,6 +88,208 @@ or beta, are equally accessible as tarballs through the Github interface.
 
 ---
 
+#### 5.8.3beta31 (November 20, 2026)
+
+MBIO library, format 89 (MBF\_RESON7K3, src/mbio/mbr\_reson7k3.c,
+mbsys\_reson7k3.c, src/man/man3/mbio.3): the water column of Teledyne Reson 7k data
+(7042 Compressed Water Column records, logged by the T20 and T50 series) can now be read
+through mb\_extract\_wcdimensions() and mb\_extract\_wc(), with the detections of the
+7027 or 7047 records. Malformed 7042 records, which overflowed the beam array, are now
+rejected and their pings read without water column. Contributed by Christian Ferreira.
+
+Programs mbwcdview and mbpy\_wcdview and Python API mbio\_py (src/mbwcdview,
+src/python): Reson 7k \*.s7k files are now shown with their soundings and navigation.
+The depth window starts below the surface for a sonar on a vehicle, water column pings
+without a survey ping are drawn at the interpolated transducer depth, mbwcdview --dump
+pairs each beam with its sounding by travel time, and a file without survey or water
+column data is now an error. mbpy\_wcdview no longer keeps a colour bar and swath image
+per redraw, which grew its memory and failed after about 985 redraws. Contributed by
+Christian Ferreira.
+
+MBIO library, format 89 (src/mbio/mbr\_reson7k3.c, mbsys\_reson7k3.c): fixed reader
+and data structure errors. Files read through their 7300 file catalog returned their
+last ping twice (as do all files written by format 89), headers with too small a size
+and 7004, 7027 and 7047 records with oversized counts could read past their buffers,
+and every 7012 Ping Motion record kept the values of the first. mb\_detects() gave the
+7004 beam count instead of the number of detections, record copies (mb\_buffer) were
+incomplete, 7030 installation angles were taken as degrees instead of radians, and the
+heave compensation flag was read from the wrong bit. Contributed by Christian Ferreira.
+
+Program mbpreprocess (src/utilities/mbpreprocess.cc, src/man/man1/mbpreprocess.1): for
+format 89 data, the position, sensor depth, heading and attitude sources are now chosen
+from the records present, in the reader's order of priority, instead of always the 1015
+and 1016 records; data without them, such as T50 lines, previously produced no output
+pings. Pings left out for missing navigation or attitude are now counted in a warning
+rather than written with zero heading and attitude. Contributed by Christian Ferreira.
+
+MBIO library (src/mbio/mb\_read\_init.c, mb\_close.c): programs run with -V -V crashed
+when a file could not be opened, because a freed descriptor was still used. Contributed
+by Christian Ferreira.
+
+Programs mbinfo and mbcopy (src/utilities/mbinfo.cc, mbcopy.cc): input, output, merge
+and comment file names containing spaces are no longer cut at the first space.
+Contributed by Christian Ferreira.
+
+The above work was done with the assistance of the AI coding assistant Claude Opus 5.5
+(Anthropic, model claude-opus-5-5), operating as Claude Code under developer
+supervision and review.
+
+---
+
+#### 5.8.3beta30 (November 17, 2026)
+
+Macros mbpy_grdplot and mbpy_grd3dplot (src/macros/python): fixed failures
+when --coast was given without any coastline pen or fill. The coastline overlay
+now uses the same defaults as the Perl macros mbm_grdplot and mbm_grd3dplot
+(a 1 point pen at full resolution, plus gray land fill for mbpy_grd3dplot).
+
+Program mbgrid (src/utilities/mbgrid.cc): The -K background grid may now be a
+projected grid, such as one made by mbgrid -J. The grid is used directly if it
+has the output projection and converted otherwise. A Cartesian grid with no
+projection now stops with a clear message, and pixel registration of the
+background is now detected correctly.
+
+Program mbwcdview (src/mbwcdview): the water column is now drawn with Qt's QRhi (Metal,
+Direct3D 11 or OpenGL) when Qt 6.8 or later is found with Qt Shader Tools, with OpenGL
+kept as a fallback (new CMake options buildQt6Rhi and buildQt6LegacyGL). Kongsberg kmall
+fill values inside a beam, which are weak echoes clipped to the lowest level, are now
+drawn with the lowest colour instead of as no data, also in mbpy\_wcdview. Contributed
+by Christian Ferreira.
+
+MBIO library (src/mbio/mb\_mem.c, mb\_read\_init.c, mb\_write\_init.c,
+mbr\_mbarimb1.c): mb\_reallocd() and mb\_realloc() reported allocation failures as
+successes; they now return MB\_FAILURE with MB\_ERROR\_MEMORY\_FAIL. The failure branches
+this exposed were fixed: mb\_read\_init(), mb\_input\_init() and mb\_write\_init() no
+longer write through freed pointers, mb\_update\_arrays() and mb\_register\_array() leave
+the descriptor and its arrays usable with their previous sizes, and the format 72
+(MBARI MB1) writer no longer writes past a buffer it could not enlarge. A unit test has
+been added. Contributed by Christian Ferreira.
+
+Library mbview (src/mbview/mbview\_pick.c, mbview\_route.c, mbview\_nav.c,
+mbview\_plot.c, mbview\_profile.c): fixed the profiles of picks, routes and navigation
+in mbgrdviz. The slope of the first point was never set, profiles with too few draped
+points kept the points of the previous profile, and the pick drape could read outside
+its array. Profiles are now left blank where the grid has no data, instead of being
+bridged by straight lines or dropping to 0 m, and saved profile files hold only the
+points with data. Contributed by Christian Ferreira.
+
+Build system (src/mbgrd2gltf/CMakeLists.txt and the CMakeLists.txt of src/utilities,
+src/svptools and src/photo): mbgrd2gltf failed to link when the path of the source tree
+contained "test", because the filter for the Draco test files saw absolute paths. The
+programs no longer link -lm and -lpthread twice, which removes 55 macOS linker warnings.
+Contributed by Christian Ferreira.
+
+Program mbmesh (src/mbmesh, src/man/man1/mbmesh.1): the mesh is now reconstructed in a
+local frame derived from ECEF coordinates, and --geoorigin works as in mbgrd2gltf so
+that the products of both programs line up. Large surveys are reconstructed in chunks
+on several threads, with matched seams, with soundings spilled to disk when they
+exceed memory, and with a faster SOR Poisson solver. The GLB meshes are compressed
+with Draco by default. mbmesh can also write the sensor track, a point cloud colored by
+height, an OGC 3D Tiles tileset, X3DOM and CesiumJS viewer pages, and a survey page
+for a directory of surveys. Contributed by Mike McCann.
+
+Program mbgrd2gltf (src/mbgrd2gltf, src/man/man1/mbgrd2gltf.1): grid node positions now
+follow GMT, fixing a one cell squeeze of grids without a spacing variable (such as
+those of mbgrid) and a half cell shift of pixel registered grids. The first vertex is
+no longer lost, and vertical exaggeration now scales the relief about the mean height
+instead of moving the model. Binary glTF is now the default (--no-binary), the Draco
+options are those of mbmesh, and the viewer pages gain scale axes, coloring by height
+and a CesiumJS page (--cesium-html). A regression test has been added. Contributed by
+Mike McCann.
+
+Program mbglb2tiles and library mbdraco (src/mbglb2tiles, src/mbdraco,
+src/man/man1/mbglb2tiles.1): the new program mbglb2tiles makes an OGC 3D Tiles tileset
+with levels of detail from a GLB mesh of mbmesh or mbgrd2gltf, with X3DOM and CesiumJS
+viewer pages. The new library mbdraco holds the Draco encoder and options shared by the
+three programs; the Draco source moved there from src/mbgrd2gltf/draco. Contributed by
+Mike McCann.
+
+Macro mbpy\_3dtiles (src/macros/mbpy\_3dtiles, src/man/man1/mbpy\_3dtiles.1): new macro
+that writes a shellscript making the standard 3D products of a survey with mbgrd2gltf,
+mbmesh and mbglb2tiles, all with one GeoOrigin taken from the multibeam grid. The
+script reruns only the steps whose outputs are missing or out of date, unless --force
+is given. Contributed by Mike McCann.
+
+Build system (configure.ac, src/Makefile.am, Makefile.am of src/mbdraco, src/mbmesh,
+src/mbglb2tiles and src/mbgrd2gltf): mbgrd2gltf, mbmesh and mbglb2tiles, with the
+mbdraco library, have been added to the Autotools build. configure and Makefile.in have
+not been regenerated. Contributed by Mike McCann.
+
+The above work was done with the assistance of the AI coding assistants Claude Opus 5.5
+(Anthropic, model claude-opus-5-5) and Claude Sonnet 5.5 (Anthropic, model
+claude-sonnet-5-5), operating as Claude Code under developer supervision and review.
+
+Macro mbm_route2mission: Fixed bug created by recent changes, which had left non-spindown 
+missions broken with no waypoint behavior between the descent and survey start. 
+
+---
+
+#### 5.8.3beta29 (November 11, 2026)
+
+Program mbnavadjustmerge (src/mbnavadjust/mbnavadjustmerge.c): added the
+--remove-survey option, which removes all files of a survey from an MBnavadjust
+project. Fixed --remove-file so it can be given more than once. Removing a file
+now also keeps survey and block numbering, tie counts and the project's datalists
+consistent.
+
+Macro mbm_route2mission (src/macros/mbm_route2mission): fixed bugs in the
+generated MBARI AUV missions. The mission timeout now includes the time for
+surfacing GPS fixes (-G), so it no longer risks aborting the survey early. The
+magnetometer calibration turns are now only done for -N mode 2, four-value -R
+arguments no longer blank the multibeam settings, and malformed or misnumbered
+stopCamera, descend and delta_t behaviors are fixed. The distance to the first
+waypoint from -P now uses the correct latitude scaling, and -P can also give a
+distance. The macro now warns when commanded depths leave the vehicle below the
+minimum altitude, rejects invalid options and files with more than one route,
+handles filenames with spaces, and prints behavior messages only with -V. The
+man page was updated to match.
+
+Program mb7kpreprocess (src/deprecated/mb7kpreprocess.cc): updated calls to
+mb_platform_set_sensor_offset() to its current signature, fixing the build when
+deprecated programs are enabled.
+
+Test mbauvnavusbl_test (test/deprecated/mbauvnavusbl_test.py): updated an
+assertion that still expected the "usbl format" debug output removed in
+5.8.3beta21.
+
+Programs mbsvpbest and mbsvpextract and library mbsvptools (src/svptools): new C
+programs. mbsvpbest ranks World Ocean Atlas profiles and the profiles stored in swath
+files by how flat the reprocessed soundings are over locally planar seafloor, and can
+apply the best one; it is a port of the Python program mbbestsvp by Dominik Patrick
+Nommensen. mbsvpextract writes WOA profiles for the sites of a site file or the
+waypoints of a route. Both need the WOA sound speed grids posted at
+https://zenodo.org/communities/mb-system_woa_svp_datasets/. Profiles are completed to
+11000 m from deeper neighbouring cells and then a pressure-only tail, instead of a
+least-squares trend that could give impossible speeds. Built by CMake and Autotools.
+Contributed by Christian Ferreira.
+
+Programs mbedit-qt, mbvelocitytool-qt and mbwcdview: each tool is now built as a core
+library, an interface library and a small program, with widget and compact panel
+forms and calls and signals, so that a future unified application can embed it; the
+standalone programs are unchanged. mbwcdview now loads files in the background and has
+a dockable pick table. The tools now compile with Qt 6.4 (Ubuntu 24.04). Contributed
+by Christian Ferreira.
+
+Program mbnavedit-qt (src/mbnavedit-qt): new Qt6 port of mbnavedit using the same .nve
+files. It adds undo and redo of all edits, editing of roll and pitch and a sonar depth
+despike, keeps the previous .nve until a save, and interpolates heading across north.
+Contributed by Christian Ferreira.
+
+Program mbnavadjust-qt (src/mbnavadjust-qt): new Qt6 port of mbnavadjust that shares the
+program logic of src/mbnavadjust/mbnavadjust\_prog.c with the Motif program. Long project
+steps run in the background, the project lists are sortable tables in dockable panels,
+and interactive tie edits can be undone. The map view (Visualize Survey) is not yet
+available. Contributed by Christian Ferreira.
+
+The above work was done with the assistance of the AI coding assistant Claude Opus 5.5
+(Anthropic, model claude-opus-5-5), operating as Claude Code under developer
+supervision and review.
+
+Program mbpreprocess (src/utilities/mbpreprocess.cc): corrected informational print
+statements regarding pitch and roll sign flipping options.
+
+---
+
 #### 5.8.3beta28 (November 3, 2026)
 
 Documentation (src/html): regenerated the html and pdf versions of the manual
@@ -139,6 +344,50 @@ grids, each grid now makes its own image instead of all writing the same file.
 Library mbaux (src/mbaux/mb_gisfile.c): fixed a build failure on Linux introduced
 in 5.8.3beta26. The shapefile export used a GDAL file status type that is not
 available to C code with glibc; it now uses the standard stat() function.
+
+Program mbwcdview (src/mbwcdview, src/man/man1/mbwcdview.1): new Qt6 viewer for
+water column data read through MBIO, one swath at a time. Kongsberg \*.kmwcd and
+\*.kmall files of the same line are paired, so that soundings and navigation are
+shown with the water column, and the samples are ray traced through the logged sound
+velocity profile. It offers picking, replay and image export, and --dump and --export
+without a window. CMake only. Contributed by Christian Ferreira.
+
+Python API mbio\_py and program mbpy\_wcdview (src/python): new Python package giving
+access to MBIO through ctypes and numpy (records, beam arrays, sound velocity profiles,
+water column, pairing of kmall and kmwcd lines), with example scripts, and a PySide6
+water column viewer built on it. Installed by both build systems, with new tests in
+test/python. Contributed by Christian Ferreira.
+
+MBIO library, formats 58 and 59 (src/mbio/mbr\_em710raw.c, mbr\_em710mba.c,
+mbsys\_simrad3.c): the water column datagrams of Kongsberg \*.all and \*.wcd files are
+now assembled into one record per ping and available through mb\_extract\_wcdimensions()
+and mb\_extract\_wc(). The writers write each ping back as the datagrams it was read
+from, and no longer write a datagram size one byte too high. mbinfo -N now counts water
+column pings instead of datagrams. Contributed by Christian Ferreira.
+
+MBIO library (src/mbio/mb\_rt.c): fixed the ray path that mb\_rt() returns for
+plotting: times along arcs in gradient layers were wrong and could become negative, and
+turning rays could be drawn the long way around the circle. Ray end points and travel
+times, and therefore mbprocess, are unchanged. A unit test has been added. Contributed
+by Christian Ferreira.
+
+Program mbvelocitytool-qt (src/mbvelocitytool-qt): new Qt6 port of mbvelocitytool.
+Reprocess runs on all processors, profiles stored in the swath file are shown and can
+be activated for editing, and --dump, --save and --export work without a window.
+Contributed by Christian Ferreira.
+
+Program mbedit (src/mbedit/mbedit\_prog.c): edits made to pings retained from the
+previous buffer were silently undone by Next Buffer and Go To, because the saved edits
+and filters were applied again to the whole buffer. They now apply only to the newly
+loaded pings. The manual page was corrected against the code. Contributed by Christian
+Ferreira.
+
+Program mbedit-qt (src/mbedit-qt): new Qt6 port of mbedit with all of its functions,
+adding undo and redo, lasso, zoom, colouring by amplitude or beam angle, filter
+previews, a review queue of suspect pings, comparison with a reference grid and access
+to the mbhistory edit history. The new CMake option buildQt6Tools (off by default)
+builds mbwcdview, mbvelocitytool-qt and mbedit-qt, replacing the options buildWCDView
+and buildVelocityToolQt. Contributed by Christian Ferreira.
 
 The above work was done with the assistance of the AI coding assistant Claude Opus 5.5
 (Anthropic, model claude-opus-5-5), operating as Claude Code under developer
@@ -2890,6 +3139,15 @@ are time breaks between some of the files.
 
 Format MBF\_3DWISSL2 (id 234): Add kluge to deal with WiSSL2 lidar bathymetry needing 
 additional correction.
+
+Program mbgrd2gltf: Options now follow MB-System conventions, with long options
+(--input, --output, --exaggeration, ...) alongside the single letter ones, and -O
+works as in mbgrid. The obsolete --stride and --max-size options and unused code were
+removed, since tiled output now handles large grids. Added --geoorigin (-G) to write
+vertices as offsets from a GeoOrigin, given or taken from the grid center, to avoid
+the precision limit of GPU coordinates. Added --html (-W) to write an X3DOM viewer page
+with a GeoViewpoint framing the grid and the processing log and settings of the run.
+Contributed by Mike McCann.
 
 #### 5.8.3beta12 (January 7, 2026)
 

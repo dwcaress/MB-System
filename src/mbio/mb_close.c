@@ -54,8 +54,12 @@ int mb_close(int verbose, void **mbio_ptr, int *error) {
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)*mbio_ptr);
   }
 
-  /* get pointer to mbio descriptor */
+  /* get pointer to mbio descriptor - none if opening failed */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)*mbio_ptr;
+  if (mb_io_ptr == NULL) {
+    *error = MB_ERROR_BAD_DESCRIPTOR;
+    return (MB_FAILURE);
+  }
 
   /* deallocate format dependent structures */
   int status = (*mb_io_ptr->mb_io_format_free)(verbose, *mbio_ptr, error);

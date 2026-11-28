@@ -66,15 +66,18 @@ class MbioReader {
         *message = "cannot open " + path + ": " + error_message(error);
       return false;
     }
-    const int types[8] = {MB_MEM_TYPE_BATHYMETRY, MB_MEM_TYPE_BATHYMETRY, MB_MEM_TYPE_AMPLITUDE,
-                          MB_MEM_TYPE_BATHYMETRY, MB_MEM_TYPE_BATHYMETRY, MB_MEM_TYPE_SIDESCAN,
-                          MB_MEM_TYPE_SIDESCAN,   MB_MEM_TYPE_SIDESCAN};
-    void **handles[8] = {(void **)&beamflag, (void **)&bath, (void **)&amp, (void **)&bathacrosstrack,
-                         (void **)&bathalongtrack, (void **)&ss, (void **)&ssacrosstrack, (void **)&ssalongtrack};
-    const size_t sizes[8] = {sizeof(char), sizeof(double), sizeof(double), sizeof(double),
-                             sizeof(double), sizeof(double), sizeof(double), sizeof(double)};
-    for (int i = 0; i < 8; i++) {
-      if (mb_register_array(0, mbio_, types[i], sizes[i], handles[i], &error) != MB_SUCCESS) {
+    const int types[14] = {MB_MEM_TYPE_BATHYMETRY, MB_MEM_TYPE_BATHYMETRY, MB_MEM_TYPE_AMPLITUDE,
+                           MB_MEM_TYPE_BATHYMETRY, MB_MEM_TYPE_BATHYMETRY, MB_MEM_TYPE_SIDESCAN,
+                           MB_MEM_TYPE_SIDESCAN,   MB_MEM_TYPE_SIDESCAN,   MB_MEM_TYPE_BATHYMETRY,
+                           MB_MEM_TYPE_BATHYMETRY, MB_MEM_TYPE_BATHYMETRY, MB_MEM_TYPE_BATHYMETRY,
+                           MB_MEM_TYPE_BATHYMETRY, MB_MEM_TYPE_BATHYMETRY};
+    void **handles[14] = {(void **)&beamflag, (void **)&bath, (void **)&amp, (void **)&bathacrosstrack,
+                          (void **)&bathalongtrack, (void **)&ss, (void **)&ssacrosstrack, (void **)&ssalongtrack,
+                          (void **)&ttimes_, (void **)&angles_, (void **)&angles_forward_, (void **)&angles_null_,
+                          (void **)&heave_, (void **)&alongtrack_offset_};
+    for (int i = 0; i < 14; i++) {
+      const size_t size = i == 0 ? sizeof(char) : sizeof(double);
+      if (mb_register_array(0, mbio_, types[i], size, handles[i], &error) != MB_SUCCESS) {
         if (message != nullptr)
           *message = "cannot allocate arrays for " + path + ": " + error_message(error);
         close();
@@ -164,6 +167,23 @@ class MbioReader {
     return det;
   }
 
+  /* two-way travel times (s) and beam angles across track (deg from vertical, positive
+     starboard: from the takeoff angle and azimuth) of the soundings of the current ping, NaN
+     where MBIO gives none */
+  void ttimes(std::vector<double> &t, std::vector<double> &angle) {
+    int tkind, nb = 0, err = MB_ERROR_NO_ERROR;
+    double draft, ssv;
+    if (mb_ttimes(0, mbio_, store, &tkind, &nb, ttimes_, angles_, angles_forward_, angles_null_, heave_,
+                  alongtrack_offset_, &draft, &ssv, &err) != MB_SUCCESS)
+      nb = 0;
+    nb = std::max(0, std::min(nb, nbath));
+    t.assign(ttimes_, ttimes_ + nb);
+    t.resize(nbath, NaN);
+    angle.assign(nbath, NaN);
+    for (int k = 0; k < nb; k++)
+      angle[k] = RTD * std::asin(std::sin(DTR * angles_[k]) * std::cos(DTR * angles_forward_[k]));
+  }
+
   static std::string error_message(int error) {
     char *msg = nullptr;
     mb_error(0, error, &msg);
@@ -181,6 +201,10 @@ class MbioReader {
   double *bath = nullptr, *amp = nullptr, *bathacrosstrack = nullptr, *bathalongtrack = nullptr;
   double *ss = nullptr, *ssacrosstrack = nullptr, *ssalongtrack = nullptr;
   char comment[MB_COMMENT_MAXLINE];
+
+ private:
+  double *ttimes_ = nullptr, *angles_ = nullptr, *angles_forward_ = nullptr, *angles_null_ = nullptr;
+  double *heave_ = nullptr, *alongtrack_offset_ = nullptr;
 };
 
 /* seconds since 1970 of a UTC calendar date (no timegm() on all platforms) */
@@ -394,13 +418,15 @@ void WaterColumnFile::amplitudes(size_t i, int s, std::vector<int> &beams, int &
 }
 
 /*--------------------------------------------------------------------*/
-bool load_survey(const std::string &path, int format, SurveyPings &survey, std::string *message) {
+bool load_survey(const std::string &path, int format, SurveyPings &survey, std::string *message,
+                 bool travel_times) {
   survey = SurveyPings();
   if (format == 0)
     format = get_format(path);
   MbioReader reader;
   if (format == 0 || !reader.open(path, format, message))
     return false;
+  survey.format = format;
   while (reader.next(message)) {
     if (!reader.ok())
       continue;
@@ -426,21 +452,30 @@ bool load_survey(const std::string &path, int format, SurveyPings &survey, std::
       survey.bath.emplace_back(reader.bath, reader.bath + reader.nbath);
       survey.bathacrosstrack.emplace_back(reader.bathacrosstrack, reader.bathacrosstrack + reader.nbath);
       survey.detects.push_back(reader.detects());
+      if (travel_times) {
+        survey.ttimes.emplace_back();
+        survey.beam_angles.emplace_back();
+        reader.ttimes(survey.ttimes.back(), survey.beam_angles.back());
+      }
     }
   }
   return true;
 }
 
 /*--------------------------------------------------------------------*/
-bool Line::load(const std::string &path, const Progress &progress, std::string *message, int format) {
+bool Line::load(const std::string &path, const Progress &progress, std::string *message, int format,
+                bool travel_times) {
   const std::string ext = lower_extension(path);
   const bool is_kmwcd = ext == ".kmwcd" || ext == ".wcd";
   const bool is_kmall = ext == ".kmall" || ext == ".all";
   kmwcd = is_kmwcd ? path : (is_kmall ? find_companion(path) : path);
   if (ext == ".all" && kmwcd.empty())
     kmwcd = path;  // a *.all without a *.wcd may hold the water column itself
-  kmall = is_kmall ? path : (is_kmwcd ? find_companion(path) : std::string());
-  has_survey = !kmall.empty() && load_survey(kmall, kmall == path ? format : 0, survey, message);
+  /* other files, such as Reson 7k *.s7k files, hold the survey and the water column */
+  kmall = is_kmall ? path : (is_kmwcd ? find_companion(path) : path);
+  /* a file that opens but holds no survey pings (empty or not of this format) has no survey */
+  has_survey = !kmall.empty() && load_survey(kmall, kmall == path ? format : 0, survey, message, travel_times)
+               && survey.size() > 0;
   has_wc = !kmwcd.empty() && wc.load(kmwcd, kmwcd == path ? format : 0, progress, message) && wc.size() > 0;
 
   match_.assign(has_wc ? wc.size() : 0, -1);
@@ -458,6 +493,15 @@ bool Line::load(const std::string &path, const Progress &progress, std::string *
       }
     }
   }
+  /* transducer depths by time, for water column pings without a survey ping */
+  drafts_.clear();
+  for (size_t j = 0; has_survey && j < survey.size(); j++)
+    if (std::isfinite(survey.time_d[j]) && std::isfinite(survey.sensordepth[j]))
+      drafts_.emplace_back(survey.time_d[j], survey.sensordepth[j]);
+  std::stable_sort(drafts_.begin(), drafts_.end(),
+                   [](const std::pair<double, double> &a, const std::pair<double, double> &b) {
+                     return a.first < b.first;
+                   });
   if (!has_wc && !has_survey && message != nullptr && message->empty())
     *message = "no water column or survey data in " + path;
   return has_wc || has_survey;
@@ -468,6 +512,15 @@ int Line::survey_index(size_t i) const { return i < match_.size() ? match_[i] : 
 
 int Line::matched() const {
   return (int)std::count_if(match_.begin(), match_.end(), [](int j) { return j >= 0; });
+}
+
+double Line::default_depth_min() const {
+  if (!has_survey || survey.sensordepth.empty())
+    return 0.0;
+  const double draft_min = *std::min_element(survey.sensordepth.begin(), survey.sensordepth.end());
+  if (!(draft_min > wc.range_max_m))
+    return 0.0;
+  return draft_min - 0.1 * wc.range_max_m;
 }
 
 /*--------------------------------------------------------------------*/
@@ -539,11 +592,32 @@ const Svp *Line::svp(double time_d) const {
 }
 
 /*--------------------------------------------------------------------*/
-bool Line::draft(size_t i, double &sensordepth) const {
+bool Line::draft(size_t i, double &sensordepth, bool *interpolated) const {
+  if (interpolated != nullptr)
+    *interpolated = false;
   const int j = survey_index(i);
-  if (j < 0)
+  if (j >= 0) {
+    sensordepth = survey.sensordepth[j];
+    return true;
+  }
+  if (drafts_.empty() || i >= wc.size())
     return false;
-  sensordepth = survey.sensordepth[j];
+  const double t = wc.pings[i].time_d;
+  const auto after = std::lower_bound(drafts_.begin(), drafts_.end(), t,
+                                      [](const std::pair<double, double> &a, double v) { return a.first < v; });
+  if (after == drafts_.begin()) {
+    sensordepth = after->second;
+  }
+  else if (after == drafts_.end()) {
+    sensordepth = drafts_.back().second;
+  }
+  else {
+    const std::pair<double, double> &a = *(after - 1);
+    const double dt = after->first - a.first;
+    sensordepth = dt > 0.0 ? a.second + (after->second - a.second) * (t - a.first) / dt : after->second;
+  }
+  if (interpolated != nullptr)
+    *interpolated = true;
   return true;
 }
 

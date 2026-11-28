@@ -40,15 +40,16 @@
  *   field  1: latitude  <- latitude
  *   field  2: longitude <- longitude
  *   field  3: depth     <- draft_m
- *   field  4: 0.0       (not available in fnv)
- *   field  5: 0.0       (not available in fnv)
+ *   field  4: roll      <- roll
+ *   field  5: pitch     <- pitch
  *   field  6: heading   <- heading
- *   field  7: roll      <- roll
- *   field  8: pitch     <- pitch
+ *   field  7: vel_north <- speed_kmhr / 3.6 * cos(heading)
+ *   field  8: vel_east  <- speed_kmhr / 3.6 * sin(heading)
  *   field  9: 0.0       (vertical velocity, not in fnv)
- *   field 10: speed_ms  <- speed_kmhr / 3.6
- *   field 11: speed_ms  <- speed_kmhr / 3.6 (copy of field 10)
- *   fields 12-20: 0.0   (not available in fnv)
+ *   fields 10-20: 0.0   (uncertainty estimates, not in fnv)
+ *
+ * The fnv file has no course over ground, so the velocity is taken along
+ * the heading.
  *
  * Author:	D. W. Caress
  * 					Substantially written using Claude AI
@@ -78,13 +79,13 @@ static const char help_message[] =
     "  field  1: latitude (decimal degrees, positive north)\n"
     "  field  2: longitude (decimal degrees, positive east)\n"
     "  field  3: depth (meters, positive down) - from fnv draft column\n"
+    "  field  4: roll (degrees, Kongsberg kmall sign convention)\n"
+    "  field  5: pitch (degrees, positive bow up)\n"
     "  field  6: heading (degrees, 0-360)\n"
-    "  field  7: roll (degrees, positive starboard up)\n"
-    "  field  8: pitch (degrees, positive bow up)\n"
-    "  field 10: speed through water (m/s) - converted from km/hr\n"
-    "  field 11: speed through water (m/s) - copy of field 10\n"
+    "  field  7: velocity north (m/s) - from speed along the heading\n"
+    "  field  8: velocity east (m/s) - from speed along the heading\n"
     "Fields not available in fnv are set to 0.0:\n"
-    "  fields 4, 5, 9, 12-20";
+    "  fields 9-20";
 
 static const char usage_message[] =
     "mbfnv2navlab [-I input.fnv] [-O navlab_smooth.bin] [-V] [-H]";
@@ -99,10 +100,10 @@ static const char usage_message[] =
 #define NAVLAB_FIELD_LON       2
 #define NAVLAB_FIELD_DEPTH     3
 #define NAVLAB_FIELD_HEADING   6
-#define NAVLAB_FIELD_ROLL      7
-#define NAVLAB_FIELD_PITCH     8
-#define NAVLAB_FIELD_SPEED     10
-#define NAVLAB_FIELD_SPEED2    11
+#define NAVLAB_FIELD_ROLL      4
+#define NAVLAB_FIELD_PITCH     5
+#define NAVLAB_FIELD_VELNORTH  7
+#define NAVLAB_FIELD_VELEAST   8
 
 /*--------------------------------------------------------------------*/
 /* fnv tab-field indices (0-based after splitting on '\t') */
@@ -121,6 +122,7 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 /* Conversion constants */
 #define KMHR_TO_MS  (1.0 / 3.6)
+#define DEG_TO_RAD  (M_PI / 180.0)
 
 /*--------------------------------------------------------------------*/
 /* Check host byte order.
@@ -331,9 +333,9 @@ int main(int argc, char **argv) {
         rec[NAVLAB_FIELD_HEADING] = heading;
         rec[NAVLAB_FIELD_ROLL]    = roll;
         rec[NAVLAB_FIELD_PITCH]   = pitch;
-        rec[NAVLAB_FIELD_SPEED]   = speed;
-        rec[NAVLAB_FIELD_SPEED2]  = speed;   /* copy: best estimate */
-        /* fields 4, 5, 9, 12-20 remain 0.0 */
+        rec[NAVLAB_FIELD_VELNORTH] = speed * cos(heading * DEG_TO_RAD);
+        rec[NAVLAB_FIELD_VELEAST]  = speed * sin(heading * DEG_TO_RAD);
+        /* fields 9-20 remain 0.0 */
 
         /* --- write record --- */
         if (write_navlab_record(ofp, rec, swap) != NAVLAB_RECORD_NFIELDS) {

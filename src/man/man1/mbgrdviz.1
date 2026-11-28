@@ -874,7 +874,10 @@ This button closes the list window.
 The profile window shows the topography along the current two point pick,
 selected route, or selected navigation, with the source, length, and depth
 range above the plot. Segments steeper than the slope threshold are drawn in
-red, and the boundaries between route or pick segments in green.
+red, and the boundaries between route or pick segments in green. Where the
+line crosses grid cells that lack data at one or more of their corners, or
+runs outside the grid, the profile is left blank; points without data are
+left out of the profile, and slopes are not computed across such a gap.
 .TP
 .B [Profile]:==Display Width Multiple==
 This sets the width of the plot as a multiple (1 to 5) of the window width.
@@ -1123,7 +1126,11 @@ header of comment lines beginning with "##", including the profile source,
 length, and depth range, followed by one line per profile point with the
 white space separated values: distance along the profile (m), topography (m),
 segment boundary flag, longitude (deg), latitude (deg), distance along the
-topography (m), bearing (deg), and slope (m/m).
+topography (m), bearing (deg), and slope (m/m). Only points where the grid has
+data are written; the boundary flag is 1 at both ends of the profile, at
+route waypoints and navigation run ends, and at the points on both sides of a
+gap in the grid data, across which the distance along the topography is
+taken as the straight line between them.
 
 .SH MBGRDVIZ POLYLINE FILES
 MB-System polyline files (suffix ".pln") are text files. The file begins with

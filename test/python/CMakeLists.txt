@@ -50,9 +50,12 @@ if(mbio_py_tests_ok)
 
   set(tests
       mbio_py_constants_test
+      mbio_py_reson7k3_mbsys_test
       mbio_py_reader_test
       mbio_py_watercolumn_test
       mbio_py_watercolumn_all_test
+      mbio_py_watercolumn_s7k_test
+      mbio_py_reson7k3_reader_test
       mbpy_wcdview_test)
   foreach(test ${tests})
     add_test(NAME ${test} COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/${test}.py")
@@ -62,7 +65,7 @@ if(mbio_py_tests_ok)
   if(buildQt6Tools)
     add_test(NAME mbwcdview_test COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mbwcdview_test.py")
     set_tests_properties(mbwcdview_test PROPERTIES ENVIRONMENT
-                         "${test_environment};MBWCDVIEW=$<TARGET_FILE:mbwcdview>")
+                         "${test_environment};MBWCDVIEW=$<TARGET_FILE:mbwcdview>;MBWCDVIEW_WINDOW_TEST=$<TARGET_FILE:mbwcdview_window_test>;MBWCDVIEW_EMBED_TEST=$<TARGET_FILE:mbwcdview_embed_test>")
   endif()
 else()
   message("mbio_py tests not added: they need python3 with numpy and BUILD_SHARED_LIBS=ON")

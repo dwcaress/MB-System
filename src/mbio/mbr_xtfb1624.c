@@ -55,13 +55,15 @@
 // #define MBF_XTFB1624_MAXBEAMS 1
 #define MBF_XTFB1624_MAXRAWPIXELS 15360
 #define MBF_XTFB1624_COMMENT_LENGTH 200
-#define MBF_XTFB1624_MAXLINE 16384
+/* the read buffer must hold one channel of MBF_XTFB1624_MAXRAWPIXELS 2-byte samples */
+#define MBF_XTFB1624_MAXLINE (2 * MBF_XTFB1624_MAXRAWPIXELS)
 static const size_t MBF_XTFB1624_FILEHEADERLEN = 1024;
 // #define XTF_MAGIC_NUMBER 0xFACE
 static const mb_u_char XTF_DATA_SIDESCAN = 0;
 // #define XTF_DATA_ANNOTATION 1
 // #define XTF_DATA_BATHYMETRY 2
 static const mb_u_char XTF_DATA_ATTITUDE = 3;
+static const unsigned short XTF_SONAR_KONGSBERG_SAS = 48;
 // #define XTF_DATA_POSITION 100
 // #define XTF_HEADER_SONAR 0              // sidescan and subbottom
 // #define XTF_HEADER_NOTES 1              // notes - text annotation
@@ -234,7 +236,7 @@ struct mbf_xtfpingheader {
 	mb_u_char FixTimeHour;   /* last nav fix time (hour) */
 	mb_u_char FixTimeMinute; /* last nav fix time (min) */
 	mb_u_char FixTimeSecond; /* last nav fix time (sec) */
-	char Reserved4;
+	mb_u_char FixTimeHsecond; /* last nav fix time (hundredths of sec) */
 	float SensorSpeed;        /* towfish speed (kts) */
 	float KP;                 /* kilometers pipe (km) */
 	double SensorYcoordinate; /* towfish latitude or northing */
@@ -308,7 +310,9 @@ struct mbf_xtfpingchanheader {
 	                 /* or later must be set in */
 	                 /* XTFFILEHEADER.RecordingProgramVersion */
 
-	mb_u_char ReservedSpace[6]; /* reserved for future expansion */
+	short Weight;               /* weighting factor; for Kongsberg SAS (sonar type 48) */
+	                            /*   raw sample = amplitude * 2^Weight */
+	mb_u_char ReservedSpace[4]; /* reserved for future expansion */
 };
 
 struct mbf_xftnotesheader {
@@ -548,6 +552,95 @@ int mbr_dem_xtfb1624(int verbose, void *mbio_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
+/* Check that a sidescan channel header refers to a channel in the file header
+   (which holds at most 6 CHANINFO structures) with 1- or 2-byte samples, and
+   that its samples fit the read buffer and the raw sidescan arrays. */
+static bool mbr_xtfb1624_chan_ok(const struct mbf_xtfb1624_xtffileheader *fileheader,
+                                 const struct mbf_xtfpingchanheader *chanheader) {
+	const int nchan = fileheader->NumberOfSonarChannels + fileheader->NumberOfBathymetryChannels;
+	if (chanheader->ChannelNumber >= nchan || chanheader->ChannelNumber >= 6)
+		return false;
+	const unsigned short bytes_per_sample = fileheader->chaninfo[chanheader->ChannelNumber].BytesPerSample;
+	if (bytes_per_sample != 1 && bytes_per_sample != 2)
+		return false;
+	if (chanheader->NumSamples > MBF_XTFB1624_MAXRAWPIXELS)
+		return false;
+	return true;
+}
+/*--------------------------------------------------------------------*/
+/* Parse a 64-byte XTFPINGCHANHEADER. */
+static void mbr_xtfb1624_rd_chanheader(char *line, struct mbf_xtfpingchanheader *chanheader) {
+	int index = 0;
+	mb_get_binary_short(true, &line[index], (short int *)&(chanheader->ChannelNumber));
+	index += 2;
+	mb_get_binary_short(true, &line[index], (short int *)&(chanheader->DownsampleMethod));
+	index += 2;
+	mb_get_binary_float(true, &line[index], &(chanheader->SlantRange));
+	index += 4;
+	mb_get_binary_float(true, &line[index], &(chanheader->GroundRange));
+	index += 4;
+	mb_get_binary_float(true, &line[index], &(chanheader->TimeDelay));
+	index += 4;
+	mb_get_binary_float(true, &line[index], &(chanheader->TimeDuration));
+	index += 4;
+	mb_get_binary_float(true, &line[index], &(chanheader->SecondsPerPing));
+	index += 4;
+	mb_get_binary_short(true, &line[index], (short int *)&(chanheader->ProcessingFlags));
+	index += 2;
+	mb_get_binary_short(true, &line[index], (short int *)&(chanheader->Frequency));
+	index += 2;
+	mb_get_binary_short(true, &line[index], (short int *)&(chanheader->InitialGainCode));
+	index += 2;
+	mb_get_binary_short(true, &line[index], (short int *)&(chanheader->GainCode));
+	index += 2;
+	mb_get_binary_short(true, &line[index], (short int *)&(chanheader->BandWidth));
+	index += 2;
+	mb_get_binary_int(true, &line[index], (int *)&(chanheader->ContactNumber));
+	index += 4;
+	mb_get_binary_short(true, &line[index], (short int *)&(chanheader->ContactClassification));
+	index += 2;
+	chanheader->ContactSubNumber = (mb_u_char)line[index];
+	index++;
+	chanheader->ContactType = (mb_u_char)line[index];
+	index++;
+	mb_get_binary_int(true, &line[index], (int *)&(chanheader->NumSamples));
+	index += 4;
+	mb_get_binary_short(true, &line[index], (short int *)&(chanheader->Reserved));
+	index += 2;
+	mb_get_binary_float(true, &line[index], &(chanheader->ContactTimeOffTrack));
+	index += 4;
+	chanheader->ContactCloseNumber = (mb_u_char)line[index];
+	index++;
+	chanheader->Reserved2 = (mb_u_char)line[index];
+	index++;
+	mb_get_binary_float(true, &line[index], &(chanheader->FixedVSOP));
+	index += 4;
+	mb_get_binary_short(true, &line[index], &(chanheader->Weight));
+	index += 2;
+	for (int i = 0; i < 4; i++) {
+		chanheader->ReservedSpace[i] = (mb_u_char)line[index];
+		index++;
+	}
+}
+/*--------------------------------------------------------------------*/
+/* Convert 1- or 2-byte sidescan samples to unsigned short values. */
+static void mbr_xtfb1624_get_samples(char *line, unsigned short bytes_per_sample, unsigned int num_samples,
+                                     unsigned short *samples) {
+	if (bytes_per_sample == 1) {
+		for (unsigned int i = 0; i < num_samples; i++) {
+			mb_u_char *mb_u_char_ptr = (mb_u_char *)&line[i];
+			samples[i] = (unsigned short)(*mb_u_char_ptr);
+		}
+	}
+	else if (bytes_per_sample == 2) {
+		int index = 0;
+		for (unsigned int i = 0; i < num_samples; i++) {
+			mb_get_binary_short(true, &line[index], (short *)&(samples[i]));
+			index += 2;
+		}
+	}
+}
+/*--------------------------------------------------------------------*/
 int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -775,6 +868,7 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	struct mbf_xtfpacketheader packetheader;
+	long packet_start = 0;
 
 	/* look for next recognizable record */
 	bool done = false;
@@ -804,6 +898,9 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 		/* read the next packet header */
 		read_len = fread(&(line[2]), 1, 12, mb_io_ptr->mbfp);
 		if (read_len == 12) {
+			/* file position of the start of this packet */
+			packet_start = ftell(mb_io_ptr->mbfp) - 14;
+
 			/* extract data from buffer */
 			int index = 0;
 			packetheader.MagicNumber[0] = line[index];
@@ -1020,7 +1117,7 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 				index++;
 				pingheader->FixTimeSecond = line[index];
 				index++;
-				pingheader->Reserved4 = line[index];
+				pingheader->FixTimeHsecond = line[index];
 				index++;
 				mb_get_binary_float(true, &line[index], &(pingheader->SensorSpeed));
 				index += 4;
@@ -1073,221 +1170,111 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 				done = true;
 			}
 
-			/* read and parse the port sidescan channel header */
-			if (status == MB_SUCCESS)
+			/* read the sidescan channels: the channel type in CHANINFO selects port or
+			   starboard and the first channel of each side is kept; a channel without a
+			   port or starboard type is used by position (first port, second starboard)
+			   as before; a packet may hold one side only */
+			pingchanportheader->NumSamples = 0;
+			pingchanstbdheader->NumSamples = 0;
+			bool port_read = false;
+			bool stbd_read = false;
+			bool all_channels_read = true;
+			for (int ichan = 0; status == MB_SUCCESS && ichan < packetheader.NumChansToFollow; ichan++) {
+				/* stop when both sides have been read */
+				if (port_read && stbd_read) {
+					all_channels_read = false;
+					break;
+				}
+
+				/* read and parse the sidescan channel header */
+				struct mbf_xtfpingchanheader chanheader;
 				read_len = fread(line, 1, 64, mb_io_ptr->mbfp);
-			if (status == MB_SUCCESS && read_len == 64) {
-				int index = 0;
-				mb_get_binary_short(true, &line[index], (short int *)&(pingchanportheader->ChannelNumber));
-				index += 2;
-				mb_get_binary_short(true, &line[index], (short int *)&(pingchanportheader->DownsampleMethod));
-				index += 2;
-				mb_get_binary_float(true, &line[index], &(pingchanportheader->SlantRange));
-				index += 4;
-				mb_get_binary_float(true, &line[index], &(pingchanportheader->GroundRange));
-				index += 4;
-				mb_get_binary_float(true, &line[index], &(pingchanportheader->TimeDelay));
-				index += 4;
-				mb_get_binary_float(true, &line[index], &(pingchanportheader->TimeDuration));
-				index += 4;
-				mb_get_binary_float(true, &line[index], &(pingchanportheader->SecondsPerPing));
-				index += 4;
-				mb_get_binary_short(true, &line[index], (short int *)&(pingchanportheader->ProcessingFlags));
-				index += 2;
-				mb_get_binary_short(true, &line[index], (short int *)&(pingchanportheader->Frequency));
-				index += 2;
-				mb_get_binary_short(true, &line[index], (short int *)&(pingchanportheader->InitialGainCode));
-				index += 2;
-				mb_get_binary_short(true, &line[index], (short int *)&(pingchanportheader->GainCode));
-				index += 2;
-				mb_get_binary_short(true, &line[index], (short int *)&(pingchanportheader->BandWidth));
-				index += 2;
-				mb_get_binary_int(true, &line[index], (int *)&(pingchanportheader->ContactNumber));
-				index += 4;
-				mb_get_binary_short(true, &line[index], (short int *)&(pingchanportheader->ContactClassification));
-				index += 2;
-				pingchanportheader->ContactSubNumber = (mb_u_char)line[index];
-				index++;
-				pingchanportheader->ContactType = (mb_u_char)line[index];
-				index++;
-				mb_get_binary_int(true, &line[index], (int *)&(pingchanportheader->NumSamples));
-				index += 4;
-				mb_get_binary_short(true, &line[index], (short int *)&(pingchanportheader->Reserved));
-				index += 2;
-				mb_get_binary_float(true, &line[index], &(pingchanportheader->ContactTimeOffTrack));
-				index += 4;
-				pingchanportheader->ContactCloseNumber = (mb_u_char)line[index];
-				index++;
-				pingchanportheader->Reserved2 = (mb_u_char)line[index];
-				index++;
-				mb_get_binary_float(true, &line[index], &(pingchanportheader->FixedVSOP));
-				index += 4;
-				for (int i = 0; i < 6; i++) {
-					pingchanportheader->ReservedSpace[i] = (mb_u_char)line[index];
-					index++;
+				if (read_len == 64) {
+					mbr_xtfb1624_rd_chanheader(line, &chanheader);
+
+					/* fix up on time duration if needed */
+					if (chanheader.TimeDuration == 0.0) {
+						chanheader.TimeDuration = chanheader.SlantRange / pingheader->SoundVelocity;
+					}
+				}
+				else {
+					status = MB_FAILURE;
+					*error = MB_ERROR_EOF;
+					done = true;
 				}
 
-				/* fix up on time duration if needed */
-				if (pingchanportheader->TimeDuration == 0.0) {
-					pingchanportheader->TimeDuration = pingchanportheader->SlantRange / pingheader->SoundVelocity;
+				/* check for corrupted record or a channel that does not fit the sample arrays
+				   (SamplesPerChannel in the file header is not used anymore, the number of
+				   samples can change with the range); once a side has been read, an unusable
+				   channel only ends the packet */
+				if (status == MB_SUCCESS && !mbr_xtfb1624_chan_ok(fileheader, &chanheader)) {
+					if (port_read || stbd_read) {
+						all_channels_read = false;
+						break;
+					}
+					status = MB_FAILURE;
+					*error = MB_ERROR_UNINTELLIGIBLE;
+				}
+
+				/* read the sidescan samples */
+				if (status == MB_SUCCESS) {
+					const unsigned short bytes_per_sample = fileheader->chaninfo[chanheader.ChannelNumber].BytesPerSample;
+					const size_t read_bytes = chanheader.NumSamples * bytes_per_sample;
+					if (fread(line, 1, read_bytes, mb_io_ptr->mbfp) != read_bytes) {
+						status = MB_FAILURE;
+						*error = MB_ERROR_EOF;
+						done = true;
+					}
+					else {
+						/* port or starboard */
+						const int channel_type = fileheader->chaninfo[chanheader.ChannelNumber].TypeOfChannel;
+						bool is_port = false;
+						bool is_stbd = false;
+						if (channel_type == 1)
+							is_port = true;
+						else if (channel_type == 2)
+							is_stbd = true;
+						else if (ichan == 0)
+							is_port = true;
+						else if (ichan == 1)
+							is_stbd = true;
+
+						if (is_port && !port_read) {
+							*pingchanportheader = chanheader;
+							mbr_xtfb1624_get_samples(line, bytes_per_sample, chanheader.NumSamples, data->ssrawport);
+							port_read = true;
+						}
+						else if (is_stbd && !stbd_read) {
+							*pingchanstbdheader = chanheader;
+							mbr_xtfb1624_get_samples(line, bytes_per_sample, chanheader.NumSamples, data->ssrawstbd);
+							stbd_read = true;
+						}
+					}
 				}
 			}
-			else {
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
-				done = true;
-			}
 
-			/* check for corrupted record */
-			if (pingchanportheader->ChannelNumber >
-			    (fileheader->NumberOfSonarChannels + fileheader->NumberOfBathymetryChannels - 1)) {
+			/* a ping without port or starboard sidescan is unusable */
+			if (status == MB_SUCCESS && !port_read && !stbd_read) {
 				status = MB_FAILURE;
 				*error = MB_ERROR_UNINTELLIGIBLE;
 			}
-			/*		else if (pingchanportheader->NumSamples
-			            > fileheader->chaninfo[pingchanportheader->ChannelNumber].SamplesPerChannel)
-			            {
-			            status = MB_FAILURE;
-			            *error = MB_ERROR_UNINTELLIGIBLE;
-			            }
-			jrenken: SamplesPerChannel not used anymore, value can change dependend on range
-			*/
-			/* read port sidescan data */
-			int read_len;
-			int read_bytes;
-			if (status == MB_SUCCESS) {
-				read_bytes =
-				    pingchanportheader->NumSamples * fileheader->chaninfo[pingchanportheader->ChannelNumber].BytesPerSample;
-				read_len = fread(line, 1, read_bytes, mb_io_ptr->mbfp);
+
+			/* if channels were left unread, go to the end of the packet */
+			else if (status == MB_SUCCESS && !all_channels_read && packetheader.NumBytesThisRecord > 14) {
+				fseek(mb_io_ptr->mbfp, packet_start + (long)packetheader.NumBytesThisRecord, SEEK_SET);
 			}
-			if (status == MB_SUCCESS && read_len == read_bytes) {
-				if (fileheader->chaninfo[pingchanportheader->ChannelNumber].BytesPerSample == 1) {
-					for (unsigned int i = 0; i < pingchanportheader->NumSamples; i++) {
-						mb_u_char *mb_u_char_ptr = (mb_u_char *)&line[i];
-						data->ssrawport[i] = (unsigned short)(*mb_u_char_ptr);
-					}
-				}
-				else if (fileheader->chaninfo[pingchanportheader->ChannelNumber].BytesPerSample == 2) {
-					int index = 0;
-					for (unsigned int i = 0; i < pingchanportheader->NumSamples; i++) {
-						mb_get_binary_short(true, &line[index], (short *)&(data->ssrawport[i]));
-						index += 2;
-					}
-				}
-			}
-			else {
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
+
+			/* skip the rest of a record with a bad sidescan channel so that the next
+			   read starts at the following packet */
+			if (status == MB_FAILURE && *error == MB_ERROR_UNINTELLIGIBLE) {
+				if (verbose > 0)
+					fprintf(stderr, "Bad sidescan channel in xtf ping %u - skip this record\n", pingheader->PingNumber);
+				if (packetheader.NumBytesThisRecord > 14)
+					fseek(mb_io_ptr->mbfp, packet_start + (long)packetheader.NumBytesThisRecord, SEEK_SET);
 				done = true;
 			}
 
-			/* read and parse the starboard sidescan channel header */
-			if (status == MB_SUCCESS)
-				read_len = fread(line, 1, 64, mb_io_ptr->mbfp);
-			if (status == MB_SUCCESS && read_len == 64) {
-				int index = 0;
-				mb_get_binary_short(true, &line[index], (short int *)&(pingchanstbdheader->ChannelNumber));
-				index += 2;
-				mb_get_binary_short(true, &line[index], (short int *)&(pingchanstbdheader->DownsampleMethod));
-				index += 2;
-				mb_get_binary_float(true, &line[index], &(pingchanstbdheader->SlantRange));
-				index += 4;
-				mb_get_binary_float(true, &line[index], &(pingchanstbdheader->GroundRange));
-				index += 4;
-				mb_get_binary_float(true, &line[index], &(pingchanstbdheader->TimeDelay));
-				index += 4;
-				mb_get_binary_float(true, &line[index], &(pingchanstbdheader->TimeDuration));
-				index += 4;
-				mb_get_binary_float(true, &line[index], &(pingchanstbdheader->SecondsPerPing));
-				index += 4;
-				mb_get_binary_short(true, &line[index], (short int *)&(pingchanstbdheader->ProcessingFlags));
-				index += 2;
-				mb_get_binary_short(true, &line[index], (short int *)&(pingchanstbdheader->Frequency));
-				index += 2;
-				mb_get_binary_short(true, &line[index], (short int *)&(pingchanstbdheader->InitialGainCode));
-				index += 2;
-				mb_get_binary_short(true, &line[index], (short int *)&(pingchanstbdheader->GainCode));
-				index += 2;
-				mb_get_binary_short(true, &line[index], (short int *)&(pingchanstbdheader->BandWidth));
-				index += 2;
-				mb_get_binary_int(true, &line[index], (int *)&(pingchanstbdheader->ContactNumber));
-				index += 4;
-				mb_get_binary_short(true, &line[index], (short int *)&(pingchanstbdheader->ContactClassification));
-				index += 2;
-				pingchanstbdheader->ContactSubNumber = (mb_u_char)line[index];
-				index++;
-				pingchanstbdheader->ContactType = (mb_u_char)line[index];
-				index++;
-				mb_get_binary_int(true, &line[index], (int *)&(pingchanstbdheader->NumSamples));
-				index += 4;
-				mb_get_binary_short(true, &line[index], (short int *)&(pingchanstbdheader->Reserved));
-				index += 2;
-				mb_get_binary_float(true, &line[index], &(pingchanstbdheader->ContactTimeOffTrack));
-				index += 4;
-				pingchanstbdheader->ContactCloseNumber = (mb_u_char)line[index];
-				index++;
-				pingchanstbdheader->Reserved2 = (mb_u_char)line[index];
-				index++;
-				mb_get_binary_float(true, &line[index], &(pingchanstbdheader->FixedVSOP));
-				index += 4;
-				for (int i = 0; i < 6; i++) {
-					pingchanstbdheader->ReservedSpace[i] = (mb_u_char)line[index];
-					index++;
-				}
-
-				/* fix up on time duration if needed */
-				if (pingchanstbdheader->TimeDuration == 0.0) {
-					pingchanstbdheader->TimeDuration = pingchanstbdheader->SlantRange / pingheader->SoundVelocity;
-				}
-			}
-			else {
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
-				done = true;
-			}
-
-			/* check for corrupted record */
-			if (pingchanstbdheader->ChannelNumber >
-			    (fileheader->NumberOfSonarChannels + fileheader->NumberOfBathymetryChannels - 1)) {
-				status = MB_FAILURE;
-				*error = MB_ERROR_UNINTELLIGIBLE;
-			}
-			/*		else if (pingchanstbdheader->NumSamples
-			            > fileheader->chaninfo[pingchanstbdheader->ChannelNumber].SamplesPerChannel)
-			            {
-			            status = MB_FAILURE;
-			            *error = MB_ERROR_UNINTELLIGIBLE;
-			            }
-			jrenken: SamplesPerChannel not used anymore, value can change depending on range
-			*/
-			/* read starboard sidescan data */
-			if (status == MB_SUCCESS) {
-				read_bytes =
-				    pingchanstbdheader->NumSamples * fileheader->chaninfo[pingchanstbdheader->ChannelNumber].BytesPerSample;
-				read_len = fread(line, 1, read_bytes, mb_io_ptr->mbfp);
-			}
-			if (status == MB_SUCCESS && read_len == read_bytes) {
-				if (fileheader->chaninfo[pingchanstbdheader->ChannelNumber].BytesPerSample == 1) {
-					for (unsigned int i = 0; i < pingchanstbdheader->NumSamples; i++) {
-						mb_u_char *mb_u_char_ptr = (mb_u_char *)&line[i];
-						data->ssrawstbd[i] = (unsigned short)(*mb_u_char_ptr);
-					}
-				}
-				else if (fileheader->chaninfo[pingchanstbdheader->ChannelNumber].BytesPerSample == 2) {
-					int index = 0;
-					for (unsigned int i = 0; i < pingchanstbdheader->NumSamples; i++) {
-						mb_get_binary_short(true, &line[index], (short *)&(data->ssrawstbd[i]));
-						index += 2;
-					}
-				}
-			}
-			else {
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
-				done = true;
-			}
-
-			if (verbose >= 5) {
+			if (status == MB_SUCCESS && verbose >= 5) {
 				fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg5       MagicNumber:                %d %d %x%x\n", pingheader->packetheader.MagicNumber[0],
 				        pingheader->packetheader.MagicNumber[1], pingheader->packetheader.MagicNumber[0],
@@ -1340,7 +1327,7 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 				fprintf(stderr, "dbg5       FixTimeHour:                %d\n", pingheader->FixTimeHour);
 				fprintf(stderr, "dbg5       FixTimeMinute:              %d\n", pingheader->FixTimeMinute);
 				fprintf(stderr, "dbg5       FixTimeSecond:              %d\n", pingheader->FixTimeSecond);
-				fprintf(stderr, "dbg5       Reserved4:                  %d\n", pingheader->Reserved4);
+				fprintf(stderr, "dbg5       FixTimeHsecond:             %d\n", pingheader->FixTimeHsecond);
 				fprintf(stderr, "dbg5       SensorSpeed:                %f\n", pingheader->SensorSpeed);
 				fprintf(stderr, "dbg5       KP:                         %f\n", pingheader->KP);
 				fprintf(stderr, "dbg5       SensorYcoordinate:          %f\n", pingheader->SensorYcoordinate);
@@ -1385,7 +1372,8 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 				fprintf(stderr, "dbg5       ContactCloseNumber:         %d\n", pingchanportheader->ContactCloseNumber);
 				fprintf(stderr, "dbg5       Reserved2:                  %d\n", pingchanportheader->Reserved2);
 				fprintf(stderr, "dbg5       FixedVSOP:                  %f\n", pingchanportheader->FixedVSOP);
-				for (int i = 0; i < 6; i++)
+				fprintf(stderr, "dbg5       Weight:                     %d\n", pingchanportheader->Weight);
+				for (int i = 0; i < 4; i++)
 					fprintf(stderr, "dbg5       ReservedSpace[%2.2d]:          %d\n", i, pingchanportheader->ReservedSpace[i]);
 				fprintf(stderr, "dbg5       ChannelNumber:              %d\n", pingchanstbdheader->ChannelNumber);
 				fprintf(stderr, "dbg5       DownsampleMethod:           %d\n", pingchanstbdheader->DownsampleMethod);
@@ -1409,14 +1397,15 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 				fprintf(stderr, "dbg5       ContactCloseNumber:         %d\n", pingchanstbdheader->ContactCloseNumber);
 				fprintf(stderr, "dbg5       Reserved2:                  %d\n", pingchanstbdheader->Reserved2);
 				fprintf(stderr, "dbg5       FixedVSOP:                  %f\n", pingchanstbdheader->FixedVSOP);
-				for (int i = 0; i < 6; i++)
+				fprintf(stderr, "dbg5       Weight:                     %d\n", pingchanstbdheader->Weight);
+				for (int i = 0; i < 4; i++)
 					fprintf(stderr, "dbg5       ReservedSpace[%2.2d]:          %d\n", i, pingchanstbdheader->ReservedSpace[i]);
 				for (unsigned int i = 0; i < MAX(pingchanportheader->NumSamples, pingchanstbdheader->NumSamples); i++)
 					fprintf(stderr, "dbg5       sidescan[%4.4d]: %d %d\n", i, data->ssrawport[i], data->ssrawstbd[i]);
 			}
-			/* set success */
-			status = MB_SUCCESS;
-			*error = MB_ERROR_NO_ERROR;
+			/* set success only if the whole ping was read */
+			if (status == MB_SUCCESS)
+				*error = MB_ERROR_NO_ERROR;
 			done = true;
 		}
 
@@ -1508,13 +1497,22 @@ int mbr_rt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* get nav time */
 		double ntime_d = time_d;
-		/* Check if fixtime is valid */
+		/* Check if fixtime is valid; the fix time has hundredths of seconds
+		   (FixTimeHsecond, byte 151 of the ping header, defined since XTF revision 34)
+		   like the ping time. As before, the fix time is taken as valid only if its
+		   hour, minute or second is set, so that a stray value in byte 151 alone (it
+		   was reserved in older revisions) is not taken as a fix time; values above 99
+		   are ignored. */
 		if (data->pingheader.FixTimeHour || data->pingheader.FixTimeMinute || data->pingheader.FixTimeSecond) {
+			const double fix_hseconds = data->pingheader.FixTimeHsecond <= 99 ? 0.01 * data->pingheader.FixTimeHsecond : 0.0;
 			double dtime = 3600.0 * (data->pingheader.FixTimeHour - data->pingheader.Hour) +
-			        60.0 * (data->pingheader.FixTimeMinute - data->pingheader.Minute) + data->pingheader.FixTimeSecond -
-			        data->pingheader.Second - 0.01 * data->pingheader.HSeconds;
-			if (data->pingheader.FixTimeHour - data->pingheader.Hour > 1)
-				dtime -= 3600.0 * 24;
+			        60.0 * (data->pingheader.FixTimeMinute - data->pingheader.Minute) + data->pingheader.FixTimeSecond +
+			        fix_hseconds - data->pingheader.Second - 0.01 * data->pingheader.HSeconds;
+			/* fix and ping on different sides of midnight */
+			if (dtime > 43200.0)
+				dtime -= 86400.0;
+			else if (dtime < -43200.0)
+				dtime += 86400.0;
 			ntime_d = time_d + dtime;
 		}
 		/* check for use of projected coordinates
@@ -1755,18 +1753,39 @@ int mbr_rt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->beams_bath = 1;
 		store->bath[0] = data->pingheader.SensorPrimaryAltitude; /* bathymetry (m) */
 
-		store->ssrawtimedelay = data->pingchanportheader.TimeDelay;
-		store->ssrawtimeduration = data->pingchanportheader.TimeDuration;
+		/* sidescan geometry from the port channel, or from the starboard channel
+		   if the ping holds starboard data only */
+		const struct mbf_xtfpingchanheader *chanheader =
+		    data->pingchanportheader.NumSamples > 0 ? &data->pingchanportheader : &data->pingchanstbdheader;
+		store->ssrawtimedelay = chanheader->TimeDelay;
+		store->ssrawtimeduration = chanheader->TimeDuration;
+		store->ssrawstbdtimeduration =
+		    (data->pingchanportheader.NumSamples > 0 && data->pingchanstbdheader.NumSamples > 0 &&
+		     data->pingchanstbdheader.TimeDuration != data->pingchanportheader.TimeDuration)
+		        ? data->pingchanstbdheader.TimeDuration
+		        : 0.0;
 		store->ssrawbottompick = data->pingheader.SensorPrimaryAltitude / data->pingheader.SoundVelocity;
 
-		store->ssrawslantrange = data->pingchanportheader.SlantRange;
-		store->ssrawgroundrange = data->pingchanportheader.GroundRange;
-		store->ssfrequency = data->pingchanportheader.Frequency;
+		store->ssrawslantrange = chanheader->SlantRange;
+		store->ssrawgroundrange = chanheader->GroundRange;
+		store->ssfrequency = chanheader->Frequency;
 
 		store->ssportinitgain = data->pingchanportheader.InitialGainCode;
 		store->ssstbdinitgain = data->pingchanstbdheader.InitialGainCode;
 		store->ssportgain = data->pingchanportheader.GainCode;
 		store->ssstbdgain = data->pingchanstbdheader.GainCode;
+
+		/* Kongsberg SAS (sonar type 48) samples are weighted per ping and channel:
+		   raw sample = amplitude * 2^Weight; the weighting is undone when the
+		   processed sidescan is made. Other sonar types keep their raw values. */
+		if (data->fileheader.SonarType == XTF_SONAR_KONGSBERG_SAS) {
+			store->ssportweight = data->pingchanportheader.Weight;
+			store->ssstbdweight = data->pingchanstbdheader.Weight;
+		}
+		else {
+			store->ssportweight = 0;
+			store->ssstbdweight = 0;
+		}
 
 		store->ssrawportsamples = data->pingchanportheader.NumSamples;
 		store->ssrawstbdsamples = data->pingchanstbdheader.NumSamples;

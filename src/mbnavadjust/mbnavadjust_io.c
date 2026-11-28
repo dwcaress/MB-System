@@ -3022,7 +3022,6 @@ int mbnavadjust_remove_short_sections(int verbose, struct mbna_project *project,
     if (file->status != MBNA_FILE_FIXEDNAV) {
       for (int isection = 0; isection < file->num_sections; isection++) {
         struct mbna_section *section = &file->sections[isection];
-        project->num_snavs += section->num_snav;
         if (!(check_fnan(section->lonmin) || check_fnan(section->lonmax) || check_fnan(section->latmin) ||
               check_fnan(section->latmax))) {
           if (first) {
@@ -3340,7 +3339,80 @@ int mbnavadjust_remove_short_sections(int verbose, struct mbna_project *project,
 }
 
 /*--------------------------------------------------------------------*/
-int mbnavadjust_remove_file_by_name(int verbose, struct mbna_project *project, 
+/* Renumber file survey and block ids after files have been removed so that
+    both stay contiguous from 0, and recount num_surveys and num_blocks the
+    same way mbnavadjust_read_project() does. Surveys are runs of files with
+    the same survey id; blocks start at the first file and at every file whose
+    first section is not continuous with the prior file. */
+static void mbnavadjust_renumber_surveys_blocks(struct mbna_project *project) {
+  int survey_prev_old = -1;
+  project->num_surveys = 0;
+  project->num_blocks = 0;
+  for (int ifile = 0; ifile < project->num_files; ifile++) {
+    struct mbna_file *file = &project->files[ifile];
+    if (ifile == 0 || file->survey != survey_prev_old)
+      project->num_surveys++;
+    survey_prev_old = file->survey;
+    file->survey = project->num_surveys - 1;
+    if (ifile == 0 || file->num_sections == 0 || !file->sections[0].continuity)
+      project->num_blocks++;
+    file->block = project->num_blocks - 1;
+  }
+}
+
+/*--------------------------------------------------------------------*/
+/* Recount the snav, ping, beam, crossing and tie totals and the per-snav tie
+    counts from the files and crossings, and reset each tie's crossing and tie
+    indices, after files and crossings have been removed. */
+static void mbnavadjust_recount_after_removal(struct mbna_project *project) {
+  project->num_snavs = 0;
+  project->num_pings = 0;
+  project->num_beams = 0;
+  for (int ifile = 0; ifile < project->num_files; ifile++) {
+    struct mbna_file *file = &project->files[ifile];
+    for (int isection = 0; isection < file->num_sections; isection++) {
+      struct mbna_section *section = &file->sections[isection];
+      project->num_snavs += section->num_snav;
+      project->num_pings += section->num_pings;
+      project->num_beams += section->num_beams;
+      for (int isnav = 0; isnav < MBNA_SNAV_NUM; isnav++)
+        section->snav_num_ties[isnav] = 0;
+    }
+  }
+
+  project->num_ties = 0;
+  project->num_crossings_analyzed = 0;
+  project->num_goodcrossings = 0;
+  project->num_truecrossings = 0;
+  project->num_truecrossings_analyzed = 0;
+  for (int icrossing = 0; icrossing < project->num_crossings; icrossing++) {
+    struct mbna_crossing *crossing = &project->crossings[icrossing];
+    if (crossing->status != MBNA_CROSSING_STATUS_NONE)
+      project->num_crossings_analyzed++;
+    if (crossing->overlap >= 25)
+      project->num_goodcrossings++;
+    if (crossing->truecrossing) {
+      project->num_truecrossings++;
+      if (crossing->status != MBNA_CROSSING_STATUS_NONE)
+        project->num_truecrossings_analyzed++;
+    }
+    struct mbna_section *section1 = &project->files[crossing->file_id_1].sections[crossing->section_1];
+    struct mbna_section *section2 = &project->files[crossing->file_id_2].sections[crossing->section_2];
+    for (int itie = 0; itie < crossing->num_ties; itie++) {
+      struct mbna_tie *tie = &crossing->ties[itie];
+      tie->icrossing = icrossing;
+      tie->itie = itie;
+      if (tie->snav_1 >= 0 && tie->snav_1 < section1->num_snav)
+        section1->snav_num_ties[tie->snav_1]++;
+      if (tie->snav_2 >= 0 && tie->snav_2 < section2->num_snav)
+        section2->snav_num_ties[tie->snav_2]++;
+      project->num_ties++;
+    }
+  }
+}
+
+/*--------------------------------------------------------------------*/
+int mbnavadjust_remove_file_by_name(int verbose, struct mbna_project *project,
     char *path, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -3385,6 +3457,19 @@ int mbnavadjust_remove_file_by_id(int verbose, struct mbna_project *project,
     fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
     fprintf(stderr, "dbg2       project:        %p\n", project);
     fprintf(stderr, "dbg2       ifile:          %d\n", ifile);
+  }
+
+  /* validate the file index before using it to index project->files[] */
+  if (ifile < 0 || ifile >= project->num_files) {
+    *error = MB_ERROR_BAD_PARAMETER;
+    if (verbose >= 2) {
+      fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
+      fprintf(stderr, "dbg2  Return values:\n");
+      fprintf(stderr, "dbg2       error:       %d\n", *error);
+      fprintf(stderr, "dbg2  Return status:\n");
+      fprintf(stderr, "dbg2       status:      %d\n", MB_FAILURE);
+    }
+    return (MB_FAILURE);
   }
 
   int status = MB_SUCCESS;
@@ -3491,6 +3576,15 @@ int mbnavadjust_remove_file_by_id(int verbose, struct mbna_project *project,
   memset(&project->files[project->num_files-1], 0, (size_t)sizeof(struct mbna_file));
   project->num_files--;
 
+  /* the file that followed the removed one is not continuous with its new
+      predecessor, so it must start a new block */
+  if (ifile < project->num_files && project->files[ifile].num_sections > 0)
+    project->files[ifile].sections[0].continuity = false;
+
+  /* renumber surveys and blocks so their ids stay contiguous from 0 */
+  const int num_surveys_old = project->num_surveys;
+  mbnavadjust_renumber_surveys_blocks(project);
+
   /* update datalist files and mbgrid commands */
   snprintf(newfile, sizeof(mb_path), "%s/datalist.mb-1", project->datadir);
   FILE *ofp = NULL;
@@ -3516,6 +3610,13 @@ int mbnavadjust_remove_file_by_id(int verbose, struct mbna_project *project,
       }
       fclose(ofp);
     }
+  }
+  /* remove the datalists of survey ids that no longer exist */
+  for (int isurvey = project->num_surveys; isurvey < num_surveys_old; isurvey++) {
+    snprintf(deletefile, sizeof(deletefile), "%s/datalist_%4.4d.mb-1", project->datadir, isurvey);
+    remove(deletefile);
+    snprintf(deletefile, sizeof(deletefile), "%s/datalist_%4.4dp.mb-1", project->datadir, isurvey);
+    remove(deletefile);
   }
 
   double dlon = 0.1 * (project->lon_max - project->lon_min);
@@ -3619,8 +3720,53 @@ int mbnavadjust_remove_file_by_id(int verbose, struct mbna_project *project,
     }
   }
 
+  /* recount the tie and crossing totals and the per-snav tie counts, which
+      the deleted crossings and shifted file ids have invalidated */
+  mbnavadjust_recount_after_removal(project);
+
   if (crossing_changes != NULL) {
     status = mb_freed(verbose, __FILE__, __LINE__, (void **)&crossing_changes, error);
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:       %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:      %d\n", status);
+  }
+
+  return (status);
+}
+
+/*--------------------------------------------------------------------*/
+/* Remove all files of survey isurvey (file->survey, the import group shown as
+    a survey in MBnavadjust - not file->block) from the project, along with
+    their sections, crossings and ties. Later survey and file ids shift down. */
+int mbnavadjust_remove_survey(int verbose, struct mbna_project *project,
+    int isurvey, int *error) {
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
+    fprintf(stderr, "dbg2       project:        %p\n", project);
+    fprintf(stderr, "dbg2       isurvey:        %d\n", isurvey);
+  }
+
+  int status = MB_SUCCESS;
+  if (isurvey < 0 || isurvey >= project->num_surveys) {
+    status = MB_FAILURE;
+    *error = MB_ERROR_BAD_PARAMETER;
+  }
+  else {
+    /* remove the survey's files from the highest file id down, so that the
+        ids of the files still to be removed do not shift; the survey keeps
+        its id until its last file is removed */
+    for (int ifile = project->num_files - 1; ifile >= 0 && status == MB_SUCCESS; ifile--) {
+      if (project->files[ifile].survey == isurvey) {
+        status = mbnavadjust_remove_file_by_id(verbose, project, ifile, error);
+      }
+    }
   }
 
   if (verbose >= 2) {

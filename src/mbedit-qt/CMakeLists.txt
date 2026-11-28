@@ -24,6 +24,9 @@
 
 # mbedit-qt: Qt6 port of mbedit (CMake only, built with -DbuildQt6Tools=ON).
 # Needs Qt6 Widgets (in qtbase), libmbio, and libmbaux to read grids.
+# The tool is built as two libraries, so that another program can use it, and a
+# small program: mbedit-qt-core is the editing session, without Qt, and
+# mbedit-qt-ui holds the windows.
 
 # On macOS Qt uses the system OpenGL framework. build-utils/FindOpenGL.cmake finds
 # the X11 Mesa libGL of the Motif programs, so in this directory let Qt's
@@ -34,23 +37,32 @@ endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
+add_library(mbedit-qt-core STATIC mbe_core.cc mbe_core.h)
+
+target_include_directories(mbedit-qt-core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+target_link_libraries(mbedit-qt-core PUBLIC mbaux mbio ${MB_SYSLIBS})
+
 set(CMAKE_AUTOMOC ON)
 
-add_executable(
-  mbedit-qt
-  mbedit-qt.cc
-  MainWindow.cc
-  MainWindow.h
+add_library(
+  mbedit-qt-ui STATIC
   mbe_canvas.cc
   mbe_canvas.h
-  mbe_core.cc
-  mbe_core.h
+  mbe_editor.cc
+  mbe_editor.h
   mbe_panels.cc
-  mbe_panels.h)
+  mbe_panels.h
+  mbe_window.cc
+  mbe_window.h)
+
+target_link_libraries(mbedit-qt-ui PUBLIC mbedit-qt-core Qt6::Widgets)
+
+add_executable(mbedit-qt mbedit-qt.cc)
+
+target_link_libraries(mbedit-qt PRIVATE mbedit-qt-ui)
 
 # Qt6 needs C++17
-set_target_properties(mbedit-qt PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
-
-target_link_libraries(mbedit-qt PRIVATE mbaux mbio Qt6::Widgets ${MB_SYSLIBS})
+set_target_properties(mbedit-qt-core mbedit-qt-ui mbedit-qt PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 
 install(TARGETS mbedit-qt DESTINATION ${CMAKE_INSTALL_BINDIR})

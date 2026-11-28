@@ -348,6 +348,9 @@ int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error) {
   else if (*format == MBF_XTFB1624) {
     status = mbr_register_xtfb1624(verbose, mbio_ptr, error);
   }
+  else if (*format == MBF_HISASALL) {
+    status = mbr_register_hisasall(verbose, mbio_ptr, error);
+  }
   else if (*format == MBF_SWPLSSXI) {
     status = mbr_register_swplssxi(verbose, mbio_ptr, error);
   }
@@ -934,6 +937,12 @@ int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, i
   }
   else if (*format == MBF_XTFB1624) {
     status = mbr_info_xtfb1624(verbose, system, beams_bath_max, beams_amp_max, pixels_ss_max, format_name, system_name,
+                               format_description, numfile, filetype, variable_beams, traveltime, beam_flagging,
+                               platform_source, nav_source, sensordepth_source, heading_source, attitude_source, svp_source,
+                               beamwidth_xtrack, beamwidth_ltrack, error);
+  }
+  else if (*format == MBF_HISASALL) {
+    status = mbr_info_hisasall(verbose, system, beams_bath_max, beams_amp_max, pixels_ss_max, format_name, system_name,
                                format_description, numfile, filetype, variable_beams, traveltime, beam_flagging,
                                platform_source, nav_source, sensordepth_source, heading_source, attitude_source, svp_source,
                                beamwidth_xtrack, beamwidth_ltrack, error);
@@ -1794,6 +1803,13 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
                 sonar2swap == MBSYS_SIMRAD3_EM2040 || sonar2 == MBSYS_SIMRAD3_EM2045 ||
                 sonar2swap == MBSYS_SIMRAD3_EM2045)
               *format = MBF_EM710RAW;
+            /* Kongsberg HISAS: 1032 files carry bathymetry (format 58), 2040 files
+               carry sidescan and navigation without bathymetry (format 212) */
+            else if (sonar2 == MBSYS_SIMRAD3_HISAS1032 || sonar2swap == MBSYS_SIMRAD3_HISAS1032
+                || sonar2 == MBSYS_SIMRAD3_HISAS1034 || sonar2swap == MBSYS_SIMRAD3_HISAS1034)
+              *format = MBF_EM710RAW;
+            else if (sonar2 == MBSYS_SIMRAD3_HISAS2040 || sonar2swap == MBSYS_SIMRAD3_HISAS2040)
+              *format = MBF_HISASALL;
             else if (type2 == EM_START || type2 == EM_STOP || type2 == EM_PARAMETER)
               *format = MBF_EMOLDRAW;
             else if (type2 == EM2_START || type2 == EM2_STOP || type2 == EM2_STOP2 || type2 == EM2_STATUS ||
@@ -1868,6 +1884,13 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
                 || sonar2 == MBSYS_SIMRAD3_EM2040 || sonar2swap == MBSYS_SIMRAD3_EM2040
                 || sonar2 == MBSYS_SIMRAD3_EM2045 || sonar2swap == MBSYS_SIMRAD3_EM2045)
               *format = MBF_EM710RAW;
+            /* Kongsberg HISAS: 1032 files carry bathymetry (format 58), 2040 files
+               carry sidescan and navigation without bathymetry (format 212) */
+            else if (sonar2 == MBSYS_SIMRAD3_HISAS1032 || sonar2swap == MBSYS_SIMRAD3_HISAS1032
+                || sonar2 == MBSYS_SIMRAD3_HISAS1034 || sonar2swap == MBSYS_SIMRAD3_HISAS1034)
+              *format = MBF_EM710RAW;
+            else if (sonar2 == MBSYS_SIMRAD3_HISAS2040 || sonar2swap == MBSYS_SIMRAD3_HISAS2040)
+              *format = MBF_HISASALL;
             else if (type2 == EM_START || type2 == EM_STOP || type2 == EM_PARAMETER)
               *format = MBF_EMOLDRAW;
             else if (type2 == EM2_START || type2 == EM2_STOP || type2 == EM2_STOP2 || type2 == EM2_STATUS ||

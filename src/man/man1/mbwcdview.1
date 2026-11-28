@@ -41,10 +41,12 @@ Version 5.0
 sonar files, read through the MBIO library, as an image of the beamformed
 amplitudes against across track distance and depth, one swath at a time. Water
 column data are available for the Kongsberg kmall format (format 261), in the
-separate *.kmwcd files (water column only), and for the third generation Kongsberg
+separate *.kmwcd files (water column only), for the third generation Kongsberg
 multibeams (EM 122, 302, 710, 712, 2040 ...; formats 58 and 59), in the separate
-*.wcd files or in the *.all files. The original files are read; no preprocessing is
-needed. The formats 56 and 57 (for instance EM 3002) are not supported.
+*.wcd files or in the *.all files, and for the Reson and Teledyne 7k multibeams that
+log the Compressed Water Column record, such as the T20 and T50 series (format 89),
+in the *.s7k files. The original files are read; no preprocessing is needed. The
+formats 56 and 57 (for instance EM 3002) are not supported.
 
 When a Kongsberg *.kmwcd, *.kmall, *.wcd or *.all file is opened, \fBmbwcdview\fP
 looks for the other file of the same survey line in the same directory: the same line number
@@ -56,15 +58,25 @@ supplies the navigation, the vessel heading, the transducer depth and the soundi
 the *.kmwcd or *.wcd supplies the water column. A *.all without a *.wcd supplies the
 water column too, if it holds any. Any of these may be missing: without a *.kmall or
 *.all the navigation is taken from the position records of the *.kmwcd or *.wcd, if
-present, and depths are given below the transducer. Where water column datagrams
+present, and depths are given below the transducer. A water column ping without a
+matching survey ping is drawn at the transducer depth interpolated in time from the
+survey pings around it. Where water column datagrams
 were lost in a ping (*.wcd, *.all) the part of the swath they held stays blank.
+A Reson 7k *.s7k file holds the survey pings and the water column together and
+supplies both. Its water column beam angles are turned to the vertical with the roll
+at transmit; the soundings MB-System calculates also follow the roll between transmit
+and echo and the pitch, mount angles that differ between the arrays (from a platform
+file) and a sound speed correction by \fBmbpreprocess\fP, and soundings logged by
+Teledyne PDS include its mount angles. Where these matter the soundings lie off the
+seafloor echo (see \fBmbio\fP(3)).
 
 The water column samples are ray traced through the sound velocity profile
 logged with the data (\fBmb_rt\fP(3), as \fBmbprocess\fP traces soundings), from
 the transducer depth and with the beam angles and the sound speed at the
 transducer logged with the water column. The soundings then lie on the seafloor
-echo. With the \fBRay trace (SVP)\fP check box off (or \fB\-\-straight\fP) the
-samples are placed along straight rays with the sound speed at the transducer;
+echo. Without a logged profile, or with the \fBRay trace (SVP)\fP check box off
+(or \fB\-\-straight\fP), the samples are placed along straight rays with the sound
+speed at the transducer;
 in deep water with a fast surface layer this puts the seafloor echo noticeably
 deeper than the soundings and the outer beams tens of metres off. No motion
 during the ping (heave, pitch, roll) is applied.
@@ -72,9 +84,14 @@ during the ping (heave, pitch, roll) is applied.
 The amplitudes are shown in dB. For Kongsberg data these are the logged values
 (0.5 dB steps) minus the gain offset (TVGoffset_dB), the display value defined by
 Kongsberg. In kmall data the lowest logged value (\-128, i.e. \-94 dB with a 30 dB
-offset) is a fill value when the next values are practically absent, and is then drawn
-as no data. In *.wcd and *.all data the amplitudes are the logged values minus the TVG
+offset) is a fill value when the next values are practically absent. It is then drawn
+as no data before the first echo of each beam (the near field), and later in the beam,
+where it is a weak echo clipped to the lowest level, with the lowest colour.
+In *.wcd and *.all data the amplitudes are the logged values minus the TVG
 offset C, and the lowest value is a valid level, weak samples clipped to it.
+In *.s7k data they are 20 log10 of the logged magnitudes, in dB relative to one
+magnitude count with the sonar's gain and TVG applied; the lowest value (a magnitude
+of 0 or 1) is a valid level.
 
 The window has controls for the depth range, the amplitude range of the colour
 scale, a fixed across track scale, the display of the soundings of the matching
@@ -84,7 +101,13 @@ hollow flagged) and of the bottom detections recorded in the water column itself
 arrow keys, one swath per step), a replay at a given rate, saving the image at
 twice the screen resolution with the file name and ping information, and
 picking positions in the image (\fBPick\fP) into a table that can be saved as text.
-The image is drawn with OpenGL, so stepping through the pings is fast.
+The image is drawn on the graphics card through Qt's QRhi (Metal on macOS,
+Direct3D 11 on Windows, OpenGL on Linux), or with OpenGL where \fBmbwcdview\fP
+was built with Qt older than 6.8, so stepping through the pings is fast.
+
+The depth range starts at the surface, or, for a sonar deeper than its longest
+slant range (on a vehicle), a tenth of that range above the shallowest transducer
+depth; so does the image written with \fB\-\-export\fP.
 
 Without a window, \fB\-\-dump\fP prints a summary of a survey line and
 \fB\-\-export\fP writes an image of one swath.
@@ -111,13 +134,14 @@ Christian dos Santos Ferreira
 .B \-\-input\fP=\fIfile\fP {\fB\-I\fP\fIfile\fP}
 .br
 The swath file to open. For Kongsberg data either the *.kmwcd or the *.kmall,
-or the *.wcd or the *.all, of a survey line; the other file is found as described above. The file name may
-also be given as the last argument.
+or the *.wcd or the *.all, of a survey line; the other file is found as described above.
+For Reson 7k data the *.s7k file. The file name may also be given as the last argument.
 .TP
 .B \-\-format\fP=\fIformat_id\fP {\fB\-F\fP\fIformat_id\fP}
 .br
 The MBIO format of the input file. By default it is taken from the file name;
-*.kmwcd files are read as format 261 and *.wcd files as format 58.
+*.kmwcd files are read as format 261, *.wcd files as format 58 and *.s7k files
+as format 89.
 .TP
 .B \-\-ping\fP=\fIindex\fP {\fB\-P\fP\fIindex\fP}
 .br
@@ -150,15 +174,39 @@ The size in pixels of the exported image. Default: 1400x900.
 .B \-\-dump
 Print a summary of the survey line and exit: the files found, the numbers of
 pings, matched pings and position records, the amplitude range and fill value,
-the position, speed, course and heading at the ping given by \fB\-\-ping\fP, and the
+the longest slant range and the top of the default depth window,
+the position, speed, course, heading and transducer depth (interpolated for a water
+column ping without a survey ping) at the ping given by \fB\-\-ping\fP, and the
 depth ratio and across track difference between the bottom detections of the
-water column and the soundings, for straight and for ray traced geometry.
+water column and the soundings, for straight and for ray traced geometry, over every
+tenth water column ping. Each beam's detection is compared with the sounding (not
+null) whose two-way travel time (from \fBmb_ttimes\fP, see \fBmbio\fP(3)) is
+nearest to its own among those seen within 10 degrees of its direction in straight
+geometry: the detection recorded with the water column is the sonar's own detection
+of the beam, so its travel time finds the beam's sounding however the soundings are
+ordered (extra and multiple detections, several receive fans, lost water column
+datagrams) and positioned. Of several soundings as near in time, where the ping gives
+its detections in fractions of a sample (Kongsberg *.kmall, Reson 7k), within the
+float precision of the travel times, the one nearest in direction is taken; where it
+gives them in whole samples (*.all and *.wcd, *.kmall water column datagrams of
+version 0), within a sample, the one whose beam angle (\fBmb_ttimes\fP) is nearest
+to the beam's own, unless the ping's beam angles disagree with those of the water
+column by more than half the beam spacing (as MBIO's for *.kmall, computed with the
+roll at the echo, can), and then again the one nearest in direction. The summary
+says how many beams were compared each way. The same pairs serve both geometries.
 .TP
 .B \-\-verbose {\fB\-V\fP}
 Print the program name and version, and with \fB\-\-export\fP what was written.
 .TP
 .B \-\-help {\fB\-H\fP}
 Print the usage message and exit.
+
+.SH ENVIRONMENT
+.TP
+.B MB_RENDERER
+Set to \fBlegacy-gl\fP to draw with OpenGL instead of QRhi, where
+\fBmbwcdview\fP was built with both (\fB\-DbuildQt6LegacyGL=ON\fP, the default
+except on macOS).
 
 .SH EXAMPLES
 To view a Kongsberg survey line, open either of its files:

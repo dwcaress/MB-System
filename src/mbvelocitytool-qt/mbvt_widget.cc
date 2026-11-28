@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------
- *    The MB-system:  MainWindow.cc  2/11/2026
+ *    The MB-system:  mbvt_widget.cc  2/11/2026
  *
  *    Copyright (c) 2026 by
  *    Christian dos Santos Ferreira
@@ -22,44 +22,47 @@
  *    See README.md file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 
-#include "MainWindow.h"
+#include "mbvt_widget.h"
 
 #include <algorithm>
 #include <chrono>
 #include <cstdio>
+#include <initializer_list>
 #include <memory>
 #include <utility>
 
 #include <QAction>
 #include <QActionGroup>
 #include <QApplication>
-#include <QCloseEvent>
 #include <QDialogButtonBox>
 #include <QDoubleSpinBox>
 #include <QEventLoop>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QFormLayout>
+#include <QHideEvent>
 #include <QHBoxLayout>
 #include <QInputDialog>
 #include <QLabel>
 #include <QMenu>
-#include <QMenuBar>
 #include <QMessageBox>
-#include <QPixmap>
 #include <QProgressBar>
 #include <QRadioButton>
 #include <QScreen>
+#include <QShowEvent>
 #include <QSlider>
 #include <QSplitter>
-#include <QStatusBar>
 #include <QThread>
 #include <QToolBar>
+#include <QToolButton>
 #include <QVBoxLayout>
+#include <QWidgetAction>
 
 #include "mb_define.h"
 #include "mb_process.h"
 #include "mb_status.h"
+
+namespace mbvt {
 
 namespace {
 
@@ -73,17 +76,16 @@ constexpr int ASK_ABOVE_NODES = 50;  // a longer profile offers to be simplified
 }  // namespace
 
 /*--------------------------------------------------------------------*/
-ScalingDialog::ScalingDialog(QWidget *parent) : QDialog(parent) {
-  setWindowTitle("Plot Scaling");
+ScalingControls::ScalingControls(QWidget *parent) : QWidget(parent) {
   auto *form = new QFormLayout(this);
+  form->setContentsMargins(0, 0, 0, 0);
   maxdepth_ = addRow(form, "Maximum Depth (m):", 1.0, 17000.0, 0);
   velrange_ = addRow(form, "Velocity Range (m/s):", 25.0, 1000.0, 0);
   velcenter_ = addRow(form, "Velocity Center (m/s):", 1300.0, 1700.0, 0);
   resrange_ = addRow(form, "Residual Range (m):", 0.1, 200.0, 1);
-  setMinimumWidth(460);
 }
 
-ScalingDialog::Row ScalingDialog::addRow(QFormLayout *form, const QString &label, double low, double high, int decimals) {
+ScalingControls::Row ScalingControls::addRow(QFormLayout *form, const QString &label, double low, double high, int decimals) {
   Row row;
   row.factor = decimals > 0 ? 10.0 : 1.0;
   row.slider = new QSlider(Qt::Horizontal);
@@ -109,26 +111,35 @@ ScalingDialog::Row ScalingDialog::addRow(QFormLayout *form, const QString &label
   return row;
 }
 
-void ScalingDialog::setRow(const Row &row, double value) {
+void ScalingControls::setRow(const Row &row, double value) {
   const QSignalBlocker block_slider(row.slider), block_spin(row.spin);
   row.spin->setValue(value);
   row.slider->setValue((int)(row.spin->value() * row.factor + 0.5));
 }
 
-void ScalingDialog::setScale(const PlotScale &scale) {
+void ScalingControls::setScale(const PlotScale &scale) {
   setRow(maxdepth_, scale.maxdepth);
   setRow(velrange_, scale.velrange);
   setRow(velcenter_, scale.velcenter);
   setRow(resrange_, scale.resrange);
 }
 
-PlotScale ScalingDialog::scale() const {
+PlotScale ScalingControls::scale() const {
   PlotScale scale;
   scale.maxdepth = maxdepth_.spin->value();
   scale.velrange = velrange_.spin->value();
   scale.velcenter = velcenter_.spin->value();
   scale.resrange = resrange_.spin->value();
   return scale;
+}
+
+ScalingDialog::ScalingDialog(QWidget *parent) : QDialog(parent) {
+  setWindowTitle("Plot Scaling");
+  controls_ = new ScalingControls;
+  auto *layout = new QVBoxLayout(this);
+  layout->addWidget(controls_);
+  setMinimumWidth(460);
+  connect(controls_, &ScalingControls::changed, this, &ScalingDialog::changed);
 }
 
 /*--------------------------------------------------------------------*/
@@ -166,19 +177,20 @@ ActivateDialog::ActivateDialog(const mbvt::Profile &profile, QWidget *parent) : 
 double ActivateDialog::tolerance() const { return simplified_->isChecked() ? tolerance_->value() : 0.0; }
 
 /*--------------------------------------------------------------------*/
-MainWindow::MainWindow(int verbose, int nthreads, int anglemode, const int btime_i[7], const int etime_i[7], bool quiet)
-    : verbose_(verbose), nthreads_(nthreads), anglemode_(anglemode), quiet_(quiet) {
+VelocityWidget::VelocityWidget(int verbose, int nthreads, int anglemode, const int btime_i[7], const int etime_i[7], bool quiet,
+                               Presentation presentation)
+    : verbose_(verbose), nthreads_(nthreads), anglemode_(anglemode), quiet_(quiet), presentation_(presentation) {
   std::copy(btime_i, btime_i + 7, btime_i_);
   std::copy(etime_i, etime_i + 7, etime_i_);
-  setWindowTitle("mbvelocitytool-qt[*]");
+  title_ = "mbvelocitytool-qt[*]";
 
   velocity_plot_ = new mbvt::VelocityPlot;
   residual_plot_ = new mbvt::ResidualPlot;
   raypath_plot_ = new mbvt::RaypathPlot;
   velocity_plot_->setProfiles(nullptr, &display_);
-  connect(velocity_plot_, &mbvt::VelocityPlot::edited, this, &MainWindow::editChanged);
-  connect(velocity_plot_, &mbvt::VelocityPlot::profileAction, this, &MainWindow::onProfileAction);
-  connect(velocity_plot_, &mbvt::VelocityPlot::showHiddenProfiles, this, &MainWindow::showHiddenProfiles);
+  connect(velocity_plot_, &mbvt::VelocityPlot::edited, this, &VelocityWidget::editChanged);
+  connect(velocity_plot_, &mbvt::VelocityPlot::profileAction, this, &VelocityWidget::onProfileAction);
+  connect(velocity_plot_, &mbvt::VelocityPlot::showHiddenProfiles, this, &VelocityWidget::showHiddenProfiles);
   connect(velocity_plot_, &mbvt::VelocityPlot::pointer, this, [this](bool inside, double velocity, double depth) {
     pointer_label_->setText(inside ? QString("Velocity %1 m/s, depth %2 m").arg(velocity, 0, 'f', 2).arg(depth, 0, 'f', 1) : QString());
   });
@@ -201,80 +213,99 @@ MainWindow::MainWindow(int verbose, int nthreads, int anglemode, const int btime
   labels->addWidget(swath_label_, 3);
   labels->addWidget(edit_label_, 3);
   labels->addWidget(display_label_, 1);
-  auto *central = new QWidget;
-  auto *layout = new QVBoxLayout(central);
+  auto *layout = new QVBoxLayout(this);
+  if (presentation_ == Presentation::Panel) {
+    layout->setContentsMargins(2, 2, 2, 2);
+    layout->setSpacing(2);
+  }
   layout->addLayout(labels);
   layout->addWidget(plots, 1);
-  setCentralWidget(central);
 
-  pointer_label_ = new QLabel;
-  result_label_ = new QLabel;
+  /* a line under the plots, unless the window around the tool moves them to its status bar */
+  pointer_label_ = new QLabel(this);
+  result_label_ = new QLabel(this);
   result_label_->setContentsMargins(0, 0, 10, 0);
-  progress_ = new QProgressBar;
+  progress_ = new QProgressBar(this);
   progress_->setRange(0, 0);
   progress_->setMaximumWidth(160);
   progress_->hide();
-  statusBar()->addWidget(pointer_label_, 1);
-  statusBar()->addPermanentWidget(result_label_);
-  statusBar()->addPermanentWidget(progress_);
+  auto *status = new QHBoxLayout;
+  status->addWidget(pointer_label_, 1);
+  status->addWidget(result_label_);
+  status->addWidget(progress_);
+  layout->addLayout(status);
 
   scaling_dialog_ = new ScalingDialog(this);
   scaling_dialog_->setScale(scale_);
   connect(scaling_dialog_, &ScalingDialog::changed, this, [this] {
     scale_ = scaling_dialog_->scale();
+    if (panel_scales_ != nullptr)
+      panel_scales_->setScale(scale_);
     applyScale();
   });
 
   createMenus();
+  if (presentation_ == Presentation::Panel) {
+    buildPanelBar(layout);
+    setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    setFocusProxy(velocity_plot_);
+    for (QWidget *plot : std::initializer_list<QWidget *>{velocity_plot_, residual_plot_, raypath_plot_})
+      plot->setMinimumSize(160, 100);
+  }
   applyScale();
   updateState();
 
-  QSize size(1016, 668);
-  if (const QScreen *screen = QApplication::primaryScreen())
-    size = size.boundedTo(screen->availableGeometry().size());
-  resize(size);
+  const QSize size = initialSize();
   plots->setSizes({size.height() / 2, size.height() / 2});
   top->setSizes({size.width() / 2, size.width() / 2});
 }
 
-MainWindow::~MainWindow() {
+VelocityWidget::~VelocityWidget() {
   /* the thread reads swath_ */
   if (worker_ != nullptr)
     worker_->wait();
 }
 
-void MainWindow::createMenus() {
-  QMenu *file = menuBar()->addMenu("&File");
-  QAction *open_display = file->addAction("Open &Display Profile...", this, &MainWindow::openDisplayDialog);
-  file->addAction("Open &Editable Profile...", this, &MainWindow::openEditDialog);
+QSize VelocityWidget::initialSize() {
+  QSize size(1016, 668);
+  if (const QScreen *screen = QApplication::primaryScreen())
+    size = size.boundedTo(screen->availableGeometry().size());
+  return size;
+}
+
+void VelocityWidget::createMenus() {
+  const auto add_menu = [this](const char *title) {
+    auto *menu = new QMenu(title, this);
+    menus_.append(menu);
+    return menu;
+  };
+  QMenu *file = add_menu("&File");
+  open_display_action_ = file->addAction("Open &Display Profile...", this, &VelocityWidget::openDisplayDialog);
+  file->addAction("Open &Editable Profile...", this, &VelocityWidget::openEditDialog);
   file->addAction("&New Editable Profile", this, [this] {
     if (offerToSaveEdit())
       newEditProfile();
   });
-  save_edit_action_ = file->addAction("&Save Editable Profile...", this, &MainWindow::saveEditDialog);
+  save_edit_action_ = file->addAction("&Save Editable Profile...", this, &VelocityWidget::saveEditDialog);
   save_edit_action_->setShortcut(QKeySequence::Save);
   file->addSeparator();
   open_swath_action_ = file->addAction("&Open Swath Sonar Data...", this, [this] { openSwathDialog(false); });
   open_swath_action_->setShortcut(QKeySequence::Open);
   open_swath_format_action_ = file->addAction("Open Swath Sonar Data With &Format...", this, [this] { openSwathDialog(true); });
-  save_swath_action_ = file->addAction("Save Swath S&VP File", this, &MainWindow::saveSwathSvp);
-  save_residuals_action_ = file->addAction("Save &Residuals As Offsets", this, &MainWindow::saveResidualsAsOffsets);
-  file->addSeparator();
-  QAction *quit = file->addAction("&Quit", this, &QWidget::close);
-  quit->setShortcut(QKeySequence::Quit);
-  quit->setMenuRole(QAction::QuitRole);
+  save_swath_action_ = file->addAction("Save Swath S&VP File", this, &VelocityWidget::saveSwathSvp);
+  save_residuals_action_ = file->addAction("Save &Residuals As Offsets", this, &VelocityWidget::saveResidualsAsOffsets);
 
-  QMenu *view = menuBar()->addMenu("&View");
-  QAction *scaling = view->addAction("Plot &Scaling...", this, [this] {
+  QMenu *view = add_menu("&View");
+  scaling_action_ = view->addAction("Plot &Scaling...", this, [this] {
     scaling_dialog_->show();
     scaling_dialog_->raise();
     scaling_dialog_->activateWindow();
   });
 
-  show_hidden_action_ = view->addAction("Show &Hidden Profiles", this, &MainWindow::showHiddenProfiles);
+  show_hidden_action_ = view->addAction("Show &Hidden Profiles", this, &VelocityWidget::showHiddenProfiles);
 
-  QMenu *processing = menuBar()->addMenu("&Processing");
-  reprocess_action_ = processing->addAction("&Reprocess", this, &MainWindow::reprocess);
+  QMenu *processing = add_menu("&Processing");
+  reprocess_action_ = processing->addAction("&Reprocess", this, &VelocityWidget::reprocess);
   reprocess_action_->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_R));
   QMenu *angle = processing->addMenu("&Angle Mode");
   angle_group_ = new QActionGroup(this);
@@ -291,30 +322,110 @@ void MainWindow::createMenus() {
     connect(action, &QAction::triggered, this, [this, value] { setAngleMode(value); });
   }
 
-  QMenu *help = menuBar()->addMenu("&Help");
-  QAction *about = help->addAction("&About mbvelocitytool-qt", this, &MainWindow::showAbout);
+  QMenu *help = add_menu("&Help");
+  QAction *about = help->addAction("&About mbvelocitytool-qt", this, &VelocityWidget::showAbout);
   about->setMenuRole(QAction::AboutRole);
+}
 
-  QToolBar *tools = addToolBar("Main");
-  tools->setMovable(false);
-  tools->setToolButtonStyle(Qt::ToolButtonTextOnly);
-  tools->addAction(open_swath_action_);
-  tools->addAction(open_display);
-  tools->addSeparator();
-  tools->addAction(reprocess_action_);
-  tools->addAction(scaling);
-  setUnifiedTitleAndToolBarOnMac(true);
+void VelocityWidget::buildPanelBar(QBoxLayout *layout) {
+  auto *bar = new QToolBar;
+  bar->setObjectName("panel_bar");
+  bar->setToolButtonStyle(Qt::ToolButtonTextOnly);
+  const auto popup_button = [bar](const char *text, const char *name, QMenu *menu) {
+    auto *button = new QToolButton;
+    button->setText(text);
+    button->setObjectName(name);
+    button->setMenu(menu);
+    button->setPopupMode(QToolButton::InstantPopup);
+    button->setFocusPolicy(Qt::NoFocus);
+    bar->addWidget(button);
+  };
+
+  auto *panel_menu = new QMenu(this);
+  for (QMenu *menu : menus_)
+    panel_menu->addMenu(menu);
+  popup_button("Menu", "panel_menu", panel_menu);
+
+  panel_scales_ = new ScalingControls;
+  panel_scales_->setObjectName("panel_scales_controls");
+  panel_scales_->setContentsMargins(8, 8, 8, 8);
+  panel_scales_->setScale(scale_);
+  connect(panel_scales_, &ScalingControls::changed, this, [this] {
+    scale_ = panel_scales_->scale();
+    scaling_dialog_->setScale(scale_);
+    applyScale();
+  });
+  auto *scales_menu = new QMenu(this);
+  auto *scales_action = new QWidgetAction(scales_menu);
+  scales_action->setDefaultWidget(panel_scales_);
+  scales_menu->addAction(scales_action);
+  popup_button("Scales", "panel_scales", scales_menu);
+
+  bar->addAction(reprocess_action_);
+  layout->insertWidget(0, bar);
+}
+
+/* the dialogs are windows of their own: they go and come with the panel */
+void VelocityWidget::hideEvent(QHideEvent *event) {
+  if (presentation_ == Presentation::Panel && !event->spontaneous()) {
+    hidden_dialogs_.clear();
+    for (QDialog *dialog : findChildren<QDialog *>(QString(), Qt::FindDirectChildrenOnly)) {
+      if (dialog->isVisible()) {
+        hidden_dialogs_.push_back(dialog);
+        dialog->hide();
+      }
+    }
+  }
+  QWidget::hideEvent(event);
+}
+
+void VelocityWidget::showEvent(QShowEvent *event) {
+  QWidget::showEvent(event);
+  if (!event->spontaneous()) {
+    for (QDialog *dialog : hidden_dialogs_)
+      dialog->show();
+    hidden_dialogs_.clear();
+  }
+}
+
+void VelocityWidget::addToolActions(QToolBar *bar) {
+  bar->addAction(open_swath_action_);
+  bar->addAction(open_display_action_);
+  bar->addSeparator();
+  bar->addAction(reprocess_action_);
+  bar->addAction(scaling_action_);
+}
+
+void VelocityWidget::setShortcutContext(Qt::ShortcutContext context) {
+  for (QAction *action : {save_edit_action_, open_swath_action_, reprocess_action_}) {
+    action->setShortcutContext(context);
+    /* with a smaller scope than the window the key works only if the action is on this widget */
+    if (context != Qt::WindowShortcut)
+      addAction(action);
+  }
+}
+
+void VelocityWidget::setTitle(const QString &title) {
+  title_ = title;
+  emit titleChanged(title_);
+}
+
+void VelocityWidget::setEditModified(bool modified) {
+  const bool changed = modified != edit_modified_;
+  edit_modified_ = modified;
+  if (changed)
+    emit unsavedChanged(modified);
 }
 
 /*--------------------------------------------------------------------*/
-void MainWindow::report(const QString &title, const QString &text) {
+void VelocityWidget::report(const QString &title, const QString &text) {
   if (quiet_)
     fprintf(stderr, "%s: %s\n", title.toLocal8Bit().constData(), text.toLocal8Bit().constData());
   else
     QMessageBox::warning(this, title, text);
 }
 
-void MainWindow::runJob(const QString &message, std::function<void()> work, std::function<void()> done) {
+void VelocityWidget::runJob(const QString &message, std::function<void()> work, std::function<void()> done) {
   worker_ = QThread::create(std::move(work));
   worker_->setParent(this);
   connect(worker_, &QThread::finished, this, [this, done = std::move(done)] {
@@ -323,20 +434,29 @@ void MainWindow::runJob(const QString &message, std::function<void()> work, std:
     progress_->hide();
     done();
     updateState();
+    reportBusy();
   });
   result_label_->setText(message);
   progress_->show();
   worker_->start();
   updateState();
+  reportBusy();
 }
 
-void MainWindow::waitUntilIdle() {
+void VelocityWidget::reportBusy() {
+  if (busy() != reported_busy_) {
+    reported_busy_ = busy();
+    emit busyChanged(reported_busy_);
+  }
+}
+
+void VelocityWidget::waitUntilIdle() {
   while (worker_ != nullptr)
     QCoreApplication::processEvents(QEventLoop::WaitForMoreEvents);
 }
 
 /*--------------------------------------------------------------------*/
-bool MainWindow::openDisplayProfile(const QString &path) {
+bool VelocityWidget::openDisplayProfile(const QString &path) {
   mbvt::Profile profile;
   std::string error;
   if (!mbvt::read_profile(path.toStdString(), mbvt::ProfileSource::File, profile, error)) {
@@ -350,7 +470,7 @@ bool MainWindow::openDisplayProfile(const QString &path) {
   return true;
 }
 
-bool MainWindow::openEditProfile(const QString &path) {
+bool VelocityWidget::openEditProfile(const QString &path) {
   mbvt::Profile profile;
   std::string error;
   if (!mbvt::read_profile(path.toStdString(), mbvt::ProfileSource::File, profile, error)) {
@@ -362,31 +482,31 @@ bool MainWindow::openEditProfile(const QString &path) {
   have_edit_ = true;
   velocity_plot_->setProfiles(&edit_, &display_);
   edit_version_++;
-  edit_modified_ = false;
-  setWindowModified(false);
+  setEditModified(false);
   updateState();
+  emit editProfileChanged();
   return true;
 }
 
-void MainWindow::newEditProfile() {
+void VelocityWidget::newEditProfile() {
   const bool traced = have_residuals_ && residuals_.bath_max > residuals_.bath_min;
   edit_ = mbvt::default_profile(traced ? residuals_.bath_min : swath_.bath_min, traced ? residuals_.bath_max : swath_.bath_max);
   have_edit_ = true;
   velocity_plot_->setProfiles(&edit_, &display_);
   edit_version_++;
-  edit_modified_ = false;
-  setWindowModified(false);
+  setEditModified(false);
   updateState();
+  emit editProfileChanged();
 }
 
-void MainWindow::editChanged() {
+void VelocityWidget::editChanged() {
   edit_version_++;
-  edit_modified_ = true;
-  setWindowModified(true);
+  setEditModified(true);
   updateState();
+  emit editProfileChanged();
 }
 
-void MainWindow::setAngleMode(int anglemode) {
+void VelocityWidget::setAngleMode(int anglemode) {
   if (anglemode != anglemode_)
     edit_version_++;
   anglemode_ = anglemode;
@@ -395,14 +515,14 @@ void MainWindow::setAngleMode(int anglemode) {
   updateState();
 }
 
-void MainWindow::applyScale() {
+void VelocityWidget::applyScale() {
   velocity_plot_->setScale(scale_.maxdepth, scale_.velrange, scale_.velcenter);
   residual_plot_->setRange(scale_.resrange);
   raypath_plot_->setMaxDepth(scale_.maxdepth);
 }
 
 /*--------------------------------------------------------------------*/
-void MainWindow::onProfileAction(int index, const QString &name, mbvt::ProfileAction action) {
+void VelocityWidget::onProfileAction(int index, const QString &name, mbvt::ProfileAction action) {
   /* a new swath file may have replaced the profiles while the menu was open */
   const auto current = [this, index, name] {
     return index >= 0 && index < (int)display_.size() && QString::fromStdString(display_[index].name) == name;
@@ -437,7 +557,7 @@ void MainWindow::onProfileAction(int index, const QString &name, mbvt::ProfileAc
   }
 }
 
-bool MainWindow::activateDisplayProfile(int index, double tolerance) {
+bool VelocityWidget::activateDisplayProfile(int index, double tolerance) {
   if (index < 0 || index >= (int)display_.size())
     return false;
 
@@ -470,13 +590,13 @@ bool MainWindow::activateDisplayProfile(int index, double tolerance) {
   have_edit_ = true;
   velocity_plot_->setProfiles(&edit_, &display_);
   edit_version_++;
-  edit_modified_ = unsaved || tolerance > 0.0;
-  setWindowModified(edit_modified_);
+  setEditModified(unsaved || tolerance > 0.0);
   updateState();
+  emit editProfileChanged();
   return true;
 }
 
-void MainWindow::hideDisplayProfile(int index) {
+void VelocityWidget::hideDisplayProfile(int index) {
   if (index < 0 || index >= (int)display_.size())
     return;
   display_[index].hidden = true;
@@ -484,7 +604,7 @@ void MainWindow::hideDisplayProfile(int index) {
   updateState();
 }
 
-void MainWindow::removeDisplayProfile(int index) {
+void VelocityWidget::removeDisplayProfile(int index) {
   if (index < 0 || index >= (int)display_.size())
     return;
   display_.erase(display_.begin() + index);
@@ -492,14 +612,14 @@ void MainWindow::removeDisplayProfile(int index) {
   updateState();
 }
 
-void MainWindow::showHiddenProfiles() {
+void VelocityWidget::showHiddenProfiles() {
   for (mbvt::Profile &p : display_)
     p.hidden = false;
   velocity_plot_->update();
   updateState();
 }
 
-bool MainWindow::saveDisplayDialog(int index) {
+bool VelocityWidget::saveDisplayDialog(int index) {
   const QString path = QFileDialog::getSaveFileName(this, "Save Profile", QString(), "Sound Velocity Profiles (*.svp);;All Files (*)");
   if (path.isEmpty() || index >= (int)display_.size())
     return false;
@@ -509,12 +629,15 @@ bool MainWindow::saveDisplayDialog(int index) {
     return false;
   }
   display_[index].unsaved = false;
-  statusBar()->showMessage("Saved the profile to " + path, 5000);
+  emit statusMessage("Saved the profile to " + path, 5000);
+  emit fileSaved(path);
   return true;
 }
 
 /*--------------------------------------------------------------------*/
-void MainWindow::openSwath(const QString &path, int format) {
+bool VelocityWidget::openSwath(const QString &path, int format) {
+  if (worker_ != nullptr)
+    return false;
   if (format == 0 && !mbvt::identify_format(path.toStdString(), format)) {
     bool ok = false;
     if (!quiet_)
@@ -523,7 +646,8 @@ void MainWindow::openSwath(const QString &path, int format) {
     if (!ok || format == 0) {
       failed_ = true;
       report("Swath data not loaded", "The format of " + path + " is not known.");
-      return;
+      emit swathOpenFailed(path);
+      return false;
     }
   }
 
@@ -543,11 +667,12 @@ void MainWindow::openSwath(const QString &path, int format) {
              return;
            load->profiles = mbvt::swath_display_profiles(load->swath, load->levitus_error);
          },
-         [this, load] {
+         [this, load, path, format] {
            if (!load->ok) {
              failed_ = true;
              updateState();
              report("Data loading aborted", QString::fromStdString(load->error));
+             emit swathOpenFailed(path);
              return;
            }
 
@@ -574,9 +699,12 @@ void MainWindow::openSwath(const QString &path, int format) {
              scale_.maxdepth = 1.25 * swath_.bath_max;
              scale_.resrange = std::min(std::max(0.02 * swath_.bath_max, 0.1), 200.0);
              scaling_dialog_->setScale(scale_);
+             if (panel_scales_ != nullptr)
+               panel_scales_->setScale(scale_);
              applyScale();
            }
-           setWindowTitle("mbvelocitytool-qt - " + file_name(swath_.path) + "[*]");
+           setTitle("mbvelocitytool-qt - " + file_name(swath_.path) + "[*]");
+           emit swathOpened(path, format);
 
            reprocess();
 
@@ -585,9 +713,10 @@ void MainWindow::openSwath(const QString &path, int format) {
            if (!load->warning.empty())
              report("Data doesn't include travel times", QString::fromStdString(load->warning));
          });
+  return true;
 }
 
-void MainWindow::reprocess() {
+void VelocityWidget::reprocess() {
   if (worker_ != nullptr || !have_edit_ || swath_.pings.empty())
     return;
   struct Process {
@@ -622,11 +751,12 @@ void MainWindow::reprocess() {
            processed_version_ = job->version;
            residual_plot_->setData(&residuals_, swath_.beams_bath);
            raypath_plot_->setData(&residuals_);
+           emit residualsChanged();
          });
 }
 
 /*--------------------------------------------------------------------*/
-bool MainWindow::offerToSaveEdit() {
+bool VelocityWidget::offerToSaveEdit() {
   if (quiet_ || !have_edit_ || !edit_modified_)
     return true;
   const QMessageBox::StandardButton answer =
@@ -637,28 +767,32 @@ bool MainWindow::offerToSaveEdit() {
   return answer == QMessageBox::Discard;
 }
 
-bool MainWindow::saveEditDialog() {
+bool VelocityWidget::saveEditDialog() {
   const QString path = QFileDialog::getSaveFileName(this, "Save Editable Profile", QString(), "Sound Velocity Profiles (*.svp);;All Files (*)");
   if (path.isEmpty())
     return false;
+  return saveEditProfile(path);
+}
+
+bool VelocityWidget::saveEditProfile(const QString &path) {
   std::string error;
   if (!mbvt::write_profile(path.toStdString(), edit_, "", error)) {
     report("Unable to save the editable profile", QString::fromStdString(error));
     return false;
   }
-  edit_modified_ = false;
-  setWindowModified(false);
-  statusBar()->showMessage("Saved the editable profile to " + path, 5000);
+  setEditModified(false);
+  emit statusMessage("Saved the editable profile to " + path, 5000);
+  emit fileSaved(path);
   return true;
 }
 
-void MainWindow::openDisplayDialog() {
+void VelocityWidget::openDisplayDialog() {
   const QStringList paths = QFileDialog::getOpenFileNames(this, "Open Display Profile", QString(), "Sound Velocity Profiles (*.svp);;All Files (*)");
   for (const QString &path : paths)
     openDisplayProfile(path);
 }
 
-void MainWindow::openEditDialog() {
+void VelocityWidget::openEditDialog() {
   if (!offerToSaveEdit())
     return;
   const QString path = QFileDialog::getOpenFileName(this, "Open Editable Profile", QString(), "Sound Velocity Profiles (*.svp);;All Files (*)");
@@ -666,7 +800,7 @@ void MainWindow::openEditDialog() {
     openEditProfile(path);
 }
 
-void MainWindow::openSwathDialog(bool ask_format) {
+void VelocityWidget::openSwathDialog(bool ask_format) {
   const QString path = QFileDialog::getOpenFileName(this, "Open Swath Sonar Data");
   if (path.isEmpty())
     return;
@@ -681,31 +815,39 @@ void MainWindow::openSwathDialog(bool ask_format) {
   openSwath(path, format);
 }
 
-void MainWindow::saveSwathSvp() {
+bool VelocityWidget::saveSwathSvp() {
+  if (worker_ != nullptr)
+    return false;
   std::string saved, error;
   if (!mbvt::save_swath_profile(swath_, edit_, anglemode_, saved, error)) {
     report("Unable to save the swath SVP file", QString::fromStdString(error));
-    return;
+    return false;
   }
-  edit_modified_ = false;
-  setWindowModified(false);
-  statusBar()->showMessage("Saved " + QString::fromStdString(saved) + " and set it in the mbprocess parameter file", 5000);
+  setEditModified(false);
+  emit statusMessage("Saved " + QString::fromStdString(saved) + " and set it in the mbprocess parameter file", 5000);
+  emit fileSaved(QString::fromStdString(saved));
+  return true;
 }
 
-void MainWindow::saveResidualsAsOffsets() {
+bool VelocityWidget::saveResidualsAsOffsets() {
+  if (worker_ != nullptr)
+    return false;
   if (residualsOutOfDate() && !quiet_ &&
       QMessageBox::question(this, "Save Residuals As Offsets",
                             "The residuals are from before the latest change. Save them anyway?") != QMessageBox::Yes)
-    return;
+    return false;
   std::string saved, error;
   if (!mbvt::save_residuals(swath_, edit_, residuals_, saved, error)) {
     report("Unable to save the residuals", QString::fromStdString(error));
-    return;
+    return false;
   }
-  statusBar()->showMessage("Saved " + QString::fromStdString(saved) + " and set it in the mbprocess parameter file", 5000);
+  emit statusMessage("Saved " + QString::fromStdString(saved) + " and set it in the mbprocess parameter file", 5000);
+  emit fileSaved(QString::fromStdString(swath_.path + ".sbo"));
+  emit fileSaved(QString::fromStdString(swath_.path + ".sbao"));
+  return true;
 }
 
-void MainWindow::showAbout() {
+void VelocityWidget::showAbout() {
   QMessageBox::about(this, "About mbvelocitytool-qt",
                      QString("<b>mbvelocitytool-qt</b><br>Interactive water sound velocity profile editor.<br><br>"
                              "MB-System Release %1<br>%2<br><br>"
@@ -714,7 +856,7 @@ void MainWindow::showAbout() {
                          .arg(MB_VERSION, MB_VERSION_DATE));
 }
 
-void MainWindow::updateState() {
+void VelocityWidget::updateState() {
   const bool busy = worker_ != nullptr;
   const bool loaded = !swath_.pings.empty();
   show_hidden_action_->setEnabled(std::any_of(display_.begin(), display_.end(), [](const mbvt::Profile &p) { return p.hidden; }));
@@ -777,27 +919,16 @@ void MainWindow::updateState() {
   result_label_->setText(result);
 }
 
-bool MainWindow::saveImage(const QString &path, int width, int height) {
-  resize(width, height);
-  /* the window of the macOS style may be transparent where the desktop would show through */
-  QPixmap image(size());
-  image.fill(palette().color(QPalette::Window));
-  render(&image);
-  return image.save(path);
-}
-
-void MainWindow::closeEvent(QCloseEvent *event) {
-  if (!offerToSaveEdit()) {
-    event->ignore();
-    return;
-  }
+bool VelocityWidget::prepareToClose() {
+  if (!offerToSaveEdit())
+    return false;
   const long unsaved = std::count_if(display_.begin(), display_.end(), [](const mbvt::Profile &p) { return p.unsaved; });
   if (!quiet_ && unsaved > 0 &&
       QMessageBox::question(this, "mbvelocitytool-qt",
                             QString("%1 edited display profile%2 not saved: right-click to save. Quit anyway?").arg(unsaved).arg(unsaved == 1 ? " is" : "s are")) !=
-          QMessageBox::Yes) {
-    event->ignore();
-    return;
-  }
-  event->accept();
+          QMessageBox::Yes)
+    return false;
+  return true;
 }
+
+}  // namespace mbvt

@@ -35,6 +35,8 @@
 #include <QPainter>
 #include <QWheelEvent>
 
+namespace mbe {
+
 /*--------------------------------------------------------------------*/
 void PingSlider::wheelEvent(QWheelEvent *event) {
   const int delta = event->angleDelta().y();
@@ -326,3 +328,5 @@ void TrackMap::mousePressEvent(QMouseEvent *event) {
   if (nearest >= 0)
     emit pingClicked(nearest);
 }
+
+}  // namespace mbe
