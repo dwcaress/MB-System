@@ -39,6 +39,8 @@
  * - A view that cannot be drawn (no QRhi on this platform, a QRhi without
  *   instancing, a resource that cannot be made) shows a label saying so and
  *   writes one line per process to stderr; nothing falls back by itself.
+ * - While a map mouse button is down the terrain is planned within the drag
+ *   budget; after the last release the view asks for a frame without it.
  * - The profile and 3D soundings views are null views for now.
  */
 
@@ -282,12 +284,21 @@ class RhiMapView final : public RhiView {
   bool event(QEvent *qevent) override;
 
  private:
+  /* the mouse buttons changed; after the last release, and when the state
+     is cleared while the view is shown, a frame without the drag budget */
+  void set_buttons(int buttons);
+  /* a frame the view asks for itself, while it is shown */
+  void ask_frame();
+
   size_t instance_;
   rhi::MapFrame frame_;
   bool drawn_ = false;         /* a frame was drawn: input may reach the core */
   int buttons_ = 0;            /* mouse buttons down: bit 0 left, 1 middle, 2 right */
   bool continued_ = false;     /* the next frame is one this view asked for to continue uploads */
+  bool must_fill_ = false;     /* the next frame fills: the one after the last button's release */
   bool upload_failed_ = false; /* a tile buffer could not be made: wait for the core's next request */
+  bool shown_ = true;          /* not hidden: the renderer's latest levels are kept from other views' evictions */
+  int requests_ = 0;           /* frames asked for by ask_frame() */
 };
 
 RhiMapView *views[MBVQ_MAX_WINDOWS] = {};
@@ -295,11 +306,21 @@ RhiMapView *views[MBVQ_MAX_WINDOWS] = {};
 RhiMapView::RhiMapView(size_t instance, QWidget *parent) : RhiView(parent), instance_(instance), frame_(instance) {
   setFocusPolicy(Qt::StrongFocus);
   views[instance_] = this;
+  /* the frame's wait for its GPU work and the window's composition count
+     among its costs that the next drag budget leaves room for */
+  connect(this, &QRhiWidget::frameSubmitted, this, [this] {
+    if (renderer_ != nullptr)
+      static_cast<rhi::MapRenderer *>(renderer_.get())->frame_submitted(rhi::milliseconds(rhi::Clock::now()));
+  });
 }
 
 RhiMapView::~RhiMapView() {
   if (views[instance_] == this)
     views[instance_] = nullptr;
+  /* the renderer goes later, with RhiView: other views' plans can no longer
+     ask this one for frames */
+  if (renderer_ != nullptr)
+    static_cast<rhi::MapRenderer *>(renderer_.get())->set_frame_request(nullptr);
 }
 
 void RhiMapView::request(int rez) {
@@ -311,6 +332,9 @@ ViewState RhiMapView::state() const {
   ViewState state = RhiView::state();
   state.drawn = drawn_;
   state.buttons = buttons_;
+  state.fill_due = must_fill_;
+  state.frame_requests = requests_;
+  state.levels_kept = shown_;
   return state;
 }
 
@@ -319,14 +343,50 @@ RenderStats RhiMapView::stats() const {
 }
 
 std::unique_ptr<rhi::ViewRenderer> RhiMapView::make_renderer(QRhi *qrhi) {
-  return std::make_unique<rhi::MapRenderer>(qrhi, RenderOptions());
+  auto renderer = std::make_unique<rhi::MapRenderer>(qrhi, RenderOptions());
+  /* For the memory budget: another view evicted tile levels of this one,
+     whose GPU memory a frame frees, or let go of levels while this view's
+     latest frame was drawn coarser for the budget. A frame reuses the batch
+     unless something changed. */
+  renderer->set_frame_request([this] {
+    if (!must_fill_)
+      continued_ = true;
+    ask_frame();
+  });
+  renderer->set_visible(shown_);
+  return renderer;
+}
+
+void RhiMapView::ask_frame() {
+  /* a hidden view draws nothing: the frame comes when it is shown */
+  if (!isVisible())
+    return;
+  requests_++;
+  update();
 }
 
 void RhiMapView::size_core(QSize pixels) { frame_.size_core(pixels.width(), pixels.height()); }
 
 void RhiMapView::new_rhi() {
-  /* a release in the old window will not come */
+  /* a release in the old window will not come; this paint's frame follows
+     and fills, without the drag budget */
   buttons_ = 0;
+  must_fill_ = true;
+  continued_ = false;
+}
+
+void RhiMapView::set_buttons(int buttons) {
+  const bool released = buttons_ != 0 && buttons == 0;
+  buttons_ = buttons;
+  /* The core asks for no frame after most releases (its last drawing was
+     at full resolution), so the frames of a drag drawn within the drag
+     budget would stay: the view asks for a frame, which fills and draws the
+     terrain at the stride of the zoom without the budget. */
+  if (released) {
+    must_fill_ = true;
+    continued_ = false;
+    ask_frame();
+  }
 }
 
 void RhiMapView::initialize(QRhiCommandBuffer *cb) {
@@ -358,9 +418,16 @@ void RhiMapView::render(QRhiCommandBuffer *cb) {
      from exposures and shows stay right. The core's size comes first, also
      when a window moved to a screen of another ratio changed the pixel size
      at the same logical size. A frame this view asked for only to continue
-     uploads reuses the batch while nothing changed (MapFrame::begin). */
-  const rhi::Prepared prepared = renderer->frame(&frame_, updates, continued_, pixels);
+     uploads reuses the batch while nothing changed (MapFrame::begin), but not
+     the frame after a release. While a mouse button is down the terrain is
+     planned within the drag budget. A frame is drawn only while the view is
+     shown, whose levels are then kept from other views' evictions. */
+  frame_.set_drag(buttons_ != 0);
+  shown_ = true;
+  renderer->set_visible(true);
+  const rhi::Prepared prepared = renderer->frame(&frame_, updates, continued_ && !must_fill_, pixels);
   continued_ = false;
+  must_fill_ = false;
   if (prepared == rhi::Prepared::Failed) {
     /* a tile buffer could not be made: nothing is drawn; the renderer keeps
        its pipelines and uploads everything again at the next request */
@@ -398,22 +465,30 @@ void RhiMapView::render(QRhiCommandBuffer *cb) {
 }
 
 bool RhiMapView::event(QEvent *qevent) {
-  /* a release lost to a grab, a hide or another window: no button is down */
+  /* a release lost to a grab, a hide or another window: no button is down;
+     a hidden view keeps no tile level from other views' evictions */
   switch (qevent->type()) {
   case QEvent::UngrabMouse:
   case QEvent::Hide:
   case QEvent::WindowDeactivate:
-    buttons_ = 0;
+    set_buttons(0);
     break;
   default:
     break;
   }
+  if (qevent->type() == QEvent::Hide || qevent->type() == QEvent::Show) {
+    shown_ = qevent->type() == QEvent::Show;
+    if (renderer_ != nullptr)
+      static_cast<rhi::MapRenderer *>(renderer_.get())->set_visible(shown_);
+  }
   struct mbv_input_event event;
   if (translate_event(qevent, devicePixelRatioF(), &event)) {
+    int buttons = buttons_;
     if (event.type == MBV_INPUT_PRESS)
-      buttons_ |= 1 << (event.button - 1);
+      buttons |= 1 << (event.button - 1);
     else if (event.type == MBV_INPUT_RELEASE)
-      buttons_ &= ~(1 << (event.button - 1));
+      buttons &= ~(1 << (event.button - 1));
+    set_buttons(buttons);
     /* nothing is drawn before the first frame, so nothing can be picked: a
        pick then would project the data outside a drawing */
     if (drawn_)

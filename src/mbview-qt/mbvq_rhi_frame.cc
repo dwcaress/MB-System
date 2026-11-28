@@ -167,6 +167,7 @@ void MapFrame::make_input(FrameInput *input, bool filled, const uint64_t marks[5
   input->batch = &batch_;
   input->filled = filled;
   input->rez = rez_;
+  input->drag = drag_;
 
   TerrainInput &terrain = input->terrain;
   terrain.instance = instance_;
@@ -178,11 +179,15 @@ void MapFrame::make_input(FrameInput *input, bool filled, const uint64_t marks[5
   int error = MB_ERROR_NO_ERROR;
   mbview_getmarkblocks(0, instance_, &terrain.block_nodes, &terrain.nblock_i, &terrain.nblock_j, &error);
 
-  /* the camera the core would set with OpenGL */
+  /* the camera the core would set with OpenGL, and the size of the drawing
+     it was made for, for the culling and the stride of the terrain */
   double projection[16];
   double modelview[16];
   mbvq_c_camera(instance_, projection, modelview);
   multiply(projection, modelview, input->camera);
+  std::copy(input->camera, input->camera + 16, terrain.camera);
+  terrain.width = width_;
+  terrain.height = height_;
 
   /* where the batch draws the terrain, and with which depth test */
   for (int c = 0; c < batch_.num_commands; c++) {

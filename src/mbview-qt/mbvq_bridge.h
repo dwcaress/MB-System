@@ -345,11 +345,17 @@ struct mbvq_grid {
 	const float *g;
 	const float *b;
 	int grid_mode;                 /* MBV_GRID_VIEW_* */
+	int shade_mode;                /* the shading of that grid mode, MBV_SHADE_VIEW_* */
 	int display_mode;              /* MBV_DISPLAY_2D or MBV_DISPLAY_3D */
 	int projection_mode;           /* the display projection, MBV_PROJECTION_* */
 	bool secondary_sameas_primary; /* the secondary grid has the nodes of the primary */
 	bool contours;                 /* contours are shown */
 	int viewbounds[4];             /* the grid bounds seen: first and last column, first and last row */
+	/* the factors of the display z outside the spheroid, which the core computes
+	   as scale * (exaggeration * value - zorigin) (mbview_zscalegridpoint) */
+	double scale;
+	double exaggeration;
+	double zorigin;
 };
 void mbvq_c_grid(size_t instance, struct mbvq_grid *grid);
 /* the camera of the map view, column-major, in double precision
@@ -360,6 +366,15 @@ int mbvq_c_camera(size_t instance, double projection[16], double modelview[16]);
    holds data and, in the secondary grid mode, secondary data as well, as the
    drawing asks (mbview_drawdata); 0 otherwise and outside the grid */
 void mbvq_c_node_validity(size_t instance, int i0, int i1, int j0, int j1, int stride, unsigned char *valid);
+/* the longitude and latitude of n nodes (i[k], j[k]) of the primary grid
+   (mbview_projectgrid2ll), 2 doubles per node */
+void mbvq_c_node_lonlat(size_t instance, int n, const int *i, const int *j, double *lonlat);
+/* the display coordinates of n places (longitude and latitude, 2 doubles per
+   place) where the core would put a node of data value value, in a display
+   projection reached through longitude and latitude, as the spheroid is (not
+   a grid shown in its own projection) (mbview_projectll2display), 3 doubles
+   per place; nothing is prepared */
+void mbvq_c_display_points(size_t instance, int n, const double *lonlat, double value, double *xyz);
 /* whether the contours of a resolution (MBVQ_REZ_LOW, _HIGH or _FULL) are made */
 bool mbvq_c_contours_made(size_t instance, int rez);
 

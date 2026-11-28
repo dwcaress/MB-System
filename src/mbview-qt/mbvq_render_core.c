@@ -25,8 +25,10 @@
  * What a renderer that draws the core's arrays without OpenGL (the QRhi
  * backend) needs from the private part of the mbview core: the camera of the
  * map view, the node arrays of the primary grid with the modes they are drawn
- * in, which lattice nodes a triangle of the drawing may use, and which
- * contours are made. Only plain C types cross to the Qt half (mbvq_bridge.h).
+ * in, which lattice nodes a triangle of the drawing may use, where nodes lie
+ * (their longitude and latitude, and the display place of a longitude,
+ * latitude and value, for the spheroid's tile boxes), and which contours are
+ * made. Only plain C types cross to the Qt half (mbvq_bridge.h).
  * Compiled in every build, like the CPU pick (mbvq_pick_cpu.c); nothing here
  * draws or changes the core's state, apart from the view extents that
  * mbview_camera() sets as a drawing does.
@@ -88,12 +90,22 @@ void mbvq_c_grid(size_t instance, struct mbvq_grid *grid) {
 	}
 	grid->nodata = data->primary_nodatavalue;
 	grid->grid_mode = data->grid_mode;
+	/* the shading the colouring applies, as mbview_setcolorparms() takes it */
+	if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
+		grid->shade_mode = data->slope_shade_mode;
+	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
+		grid->shade_mode = data->secondary_shade_mode;
+	else
+		grid->shade_mode = data->primary_shade_mode;
 	grid->display_mode = data->display_mode;
 	grid->projection_mode = data->display_projection_mode;
 	grid->secondary_sameas_primary = data->secondary_sameas_primary;
 	grid->contours = data->grid_contour_mode == MBV_VIEW_ON;
 	for (int i = 0; i < 4; i++)
 		grid->viewbounds[i] = data->viewbounds[i];
+	grid->scale = mbviews[instance].scale;
+	grid->exaggeration = data->exaggeration;
+	grid->zorigin = mbviews[instance].zorigin;
 }
 /*------------------------------------------------------------------------------*/
 void mbvq_c_node_validity(size_t instance, int i0, int i1, int j0, int j1, int stride, unsigned char *valid) {
@@ -132,6 +144,22 @@ void mbvq_c_node_validity(size_t instance, int i0, int i1, int j0, int j1, int s
 			*v = 1;
 		}
 	}
+}
+/*------------------------------------------------------------------------------*/
+void mbvq_c_node_lonlat(size_t instance, int n, const int *i, const int *j, double *lonlat) {
+	const struct mbview_struct *data = &(mbviews[instance].data);
+
+	for (int k = 0; k < n; k++) {
+		const double xgrid = data->primary_xmin + i[k] * data->primary_dx;
+		const double ygrid = data->primary_ymin + j[k] * data->primary_dy;
+		mbview_projectgrid2ll(instance, xgrid, ygrid, &lonlat[2 * k], &lonlat[2 * k + 1]);
+	}
+}
+/*------------------------------------------------------------------------------*/
+void mbvq_c_display_points(size_t instance, int n, const double *lonlat, double value, double *xyz) {
+	for (int k = 0; k < n; k++)
+		mbview_projectll2display(instance, lonlat[2 * k], lonlat[2 * k + 1], value, &xyz[3 * k], &xyz[3 * k + 1],
+		                         &xyz[3 * k + 2]);
 }
 /*------------------------------------------------------------------------------*/
 bool mbvq_c_contours_made(size_t instance, int rez) {

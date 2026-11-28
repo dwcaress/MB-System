@@ -24,12 +24,13 @@
 /*
  * The QRhi backend of mbview-qt, frame layer: how a frame of the map view
  * talks to the core, without any QRhi type. MapFrame keeps the requests the
- * core made (defer_draw), gives the core the size of the drawing, fills the
- * map's batch (mbv_draw_batch.h) at the resolution of the fill policy, and
- * reads what the renderer needs after the fill: the node arrays, the change
- * marks and the camera. Several users can follow one view, because reading
- * the marks changes nothing (mbv_marks.h): a view and a test's offscreen
- * renderer each have their own MapFrame.
+ * core made (defer_draw) and whether a map mouse button is down, gives the
+ * core the size of the drawing, fills the map's batch (mbv_draw_batch.h) at
+ * the resolution of the fill policy, and reads what the renderer needs after
+ * the fill: the node arrays, the change marks and the camera. Several users
+ * can follow one view, because reading the marks changes nothing
+ * (mbv_marks.h): a view and a test's offscreen renderer each have their own
+ * MapFrame.
  *
  * The batch target is one for the whole process (mbv_draw.c): a fill sets it,
  * calls the core and sets it back to none. A fill asked for while another one
@@ -61,6 +62,7 @@ struct FrameInput {
   bool depth_test = false;   /* ... with the depth test (3D, or on the spheroid) */
   bool filled = false;       /* the batch was filled for this frame */
   int rez = MBVQ_REZ_NONE;   /* the resolution of the batch */
+  bool drag = false;         /* a map mouse button is down: the drag budget applies */
 };
 
 class MapFrame {
@@ -76,6 +78,10 @@ class MapFrame {
      for since the last fill is kept */
   void request(int rez);
   bool requested() const { return pending_ >= 0; }
+
+  /* whether a map mouse button is down in the next frames (the view's
+     buttons): the terrain is planned within the drag budget then */
+  void set_drag(bool down) { drag_ = down; }
 
   /* give the core the size of the drawing in physical pixels if it differs
      from the size given last; true if it did. The next frame then fills
@@ -119,6 +125,7 @@ class MapFrame {
   int width_ = 0;
   int height_ = 0;
   bool resized_ = false;
+  bool drag_ = false;
   struct mbv_draw_batch batch_;
   int rez_ = MBVQ_REZ_NONE;
   int fills_ = 0;

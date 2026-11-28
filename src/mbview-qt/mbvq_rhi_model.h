@@ -28,14 +28,22 @@
  *
  * - The fill policy: the resolution at which a frame fills the map's batch.
  * - The terrain plan: the terrain of the map in tiles of 128 x 128 cells
- *   (129 x 129 nodes, the far edge shared with the next tile), each with a
- *   compact copy for the GPU: positions (3 floats per node), colours (RGBA,
- *   4 bytes per node) and the triangles as 16-bit indices into the tile's
- *   nodes, with the core's A/B split of each cell. The plan reads the core's
- *   change marks (mbv_marks.h) after each fill and says which tiles must be
- *   prepared (mbview_prepare_nodes), gathered and uploaded, within an upload
- *   budget per frame; a tile is drawn only when every stream of it is as new
- *   as the marks. All tiles are drawn at full resolution (stride 1).
+ *   (129 x 129 nodes, the far edge shared with the next tile). A tile has a
+ *   level for each stride 1, 2, 4 ... 128, anchored at node 0: the lattice of
+ *   every stride-th node, with a compact copy for the GPU (positions, 3
+ *   floats per node; colours, RGBA, 4 bytes per node; the triangles of the
+ *   lattice's full cells as 16-bit indices, with the core's A/B split). A
+ *   frame draws one stride for every tile (no cracks): the stride of the
+ *   zoom, which keeps a cell under a pixel, made coarser only by the drag
+ *   budget while a map mouse button is down and by the memory budget. Tiles
+ *   outside the view are left out. The plan reads the core's change marks
+ *   (mbv_marks.h) after each fill and says which levels must be prepared
+ *   (mbview_prepare_nodes), gathered and uploaded within an upload budget per
+ *   frame; a level is drawn only when every stream of it is as new as the
+ *   marks. A level that does not fit in a frame's uploads is completed over
+ *   the next frames while the frame draws a coarser stride that is complete.
+ * - The terrain cache: the GPU memory of the levels of every map of the
+ *   process under one budget, the least recently drawn levels evicted first.
  */
 
 #ifndef MBVIEW_QT_MBVQ_RHI_MODEL_H
@@ -44,6 +52,7 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <vector>
 
 #include "mbvq_bridge.h"
@@ -51,8 +60,8 @@
 namespace mbvq {
 namespace rhi {
 
-/* the clock of the times in the renderer's statistics (RenderStats), which
-   only measure; nothing is decided by them */
+/* the clock of the times in the renderer's statistics (RenderStats); the
+   drag budget also measures with it */
 using Clock = std::chrono::steady_clock;
 /* milliseconds from one time of that clock to another */
 inline double milliseconds(Clock::time_point from, Clock::time_point to) {
@@ -73,9 +82,61 @@ int fill_resolution(int pending, int lastdrawrez, bool contours_shown, bool full
 
 /* cells per side of a terrain tile */
 constexpr int kTileCells = 128;
+/* the levels of a tile: strides 1, 2, 4 ... 128, anchored at node 0 */
+constexpr int kLevels = 8;
+constexpr int level_stride(int level) { return 1 << level; }
 
 /* the upload budget per frame (64 MB): more is uploaded in later frames */
 constexpr size_t kUploadBudget = static_cast<size_t>(64) << 20;
+/* the GPU memory of the tile levels of all maps of the process (512 MB), by
+   default; every copy a QRhi keeps of a buffer counts */
+constexpr size_t kCacheBudget = static_cast<size_t>(512) << 20;
+
+/* The drag budget: while a map mouse button is down, a frame aims at 60 Hz.
+   The time left for preparing and gathering nodes is a frame of 60 Hz, less
+   the previous frame's measured cost outside its preparing and gathering
+   (during a drag the latest such cost of a frame at the stride in question,
+   if larger, since uploads, recording and the GPU wait grow with the
+   stride's bytes), less a margin for the wait before the paint and the
+   spread of the frames, and at least the minimum. */
+constexpr double kDragFrameMs = 1000.0 / 60.0;
+constexpr double kDragMarginMs = 2.0;
+constexpr double kDragMinimumMs = 4.0;
+double drag_budget_ms(double outside_ms);
+
+/* The stride of the zoom: 1 where a stride-1 cell covers kCellPixels
+   physical pixels or more, otherwise the largest power of two up to 128 that
+   keeps a cell under it. The level of that stride for the size of a cell in
+   physical pixels (infinite: level 0). */
+constexpr double kCellPixels = 1.0;
+int zoom_level(double cell_pixels);
+
+/* What the camera (projection x modelview, OpenGL's convention,
+   column-major) makes of a box of display coordinates: whether any of it is
+   inside the six planes of the clip volume (Gribb and Hartmann), and the
+   most physical pixels one display unit can cover inside it, for a
+   displacement in x and y and one in z: the largest singular values of the
+   screen mapping's Jacobian where the box is seen, at its nearest depth. */
+class ViewGeometry {
+ public:
+  ViewGeometry(const double camera[16], int width, int height);
+  bool visible(const double lo[3], const double hi[3]) const;
+  /* false where the scale is unbounded: a box reaching the near plane of a
+     perspective camera; horizontal and vertical are the pixels per unit of
+     x and y and of z, any of a displacement in any direction */
+  bool scale(const double lo[3], const double hi[3], double *horizontal, double *vertical, double *any) const;
+
+ private:
+  /* the largest singular values of the Jacobian times the clip w at the
+     normalised device coordinates nx, ny */
+  void singular_values(double nx, double ny, double *horizontal, double *vertical, double *any) const;
+
+  double m_[16];
+  double planes_[6][4];
+  bool affine_ = true;
+  double half_width_ = 0.0;
+  double half_height_ = 0.0;
+};
 
 /* the state of the core a frame reads after its fill */
 struct TerrainInput {
@@ -91,12 +152,46 @@ struct TerrainInput {
   int block_nodes = 0;
   int nblock_i = 0;
   int nblock_j = 0;
+  /* the camera: projection x modelview of mbview_camera(), OpenGL's
+     convention, column-major; and the size of the drawing in physical
+     pixels, 0 when not known */
+  double camera[16] = {};
+  int width = 0;
+  int height = 0;
 };
 
-/* what one tile uploads in a frame; positions and colours have one entry per
-   node of the tile (node (a, b) at a * nj + b), indices three per triangle */
+/* how a frame plans the terrain */
+struct PlanOptions {
+  /* the most bytes uploaded in a frame */
+  size_t upload_budget = kUploadBudget;
+  /* stride 1 in every frame (comparisons): no zoom stride, no budget makes
+     it coarser, and while uploads are split over frames the tiles complete
+     at stride 1 are drawn and the others wait */
+  bool force_stride1 = false;
+  /* false: every tile is planned and drawn, also outside the view, at the
+     stride the tiles in the view give (comparisons) */
+  bool culling = true;
+  /* a map mouse button is down: the drag budget applies */
+  bool drag = false;
+  /* the drag budget's time for preparing and gathering nodes (ms), with the
+     tiles' bounds taken in the frame; per stride level where the frame's
+     other costs depend on the stride (< 0: budget_ms) */
+  double budget_ms = kDragFrameMs;
+  static_assert(kLevels == 8, "level_budget_ms starts with one -1 per level");
+  double level_budget_ms[kLevels] = {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0};
+  /* the cost of preparing and gathering a lattice node (ns) with colours
+     and without them, in place of the measured moving averages (tests);
+     < 0: the averages */
+  double node_ns_colour = -1.0;
+  double node_ns_z = -1.0;
+};
+
+/* what one tile level uploads in a frame; positions and colours have one
+   entry per lattice node (node (a, b) of the level at a * nj + b), indices
+   three per triangle */
 struct TileUpload {
   int tile = 0;
+  int level = 0;
   bool positions = false;
   bool colours = false;
   bool indices = false;
@@ -106,22 +201,79 @@ struct TileUpload {
   std::vector<uint16_t> index;
 };
 
+/* a level of a tile */
+struct LevelKey {
+  int tile = 0;
+  int level = 0;
+};
+
 /* what a plan did in one frame */
 struct PlanStats {
-  int tiles_prepared = 0;
+  int tiles_prepared = 0; /* tile levels prepared */
   int uploads_positions = 0;
   int uploads_colours = 0;
   int uploads_indices = 0;
   size_t bytes_positions = 0;
   size_t bytes_colours = 0;
   size_t bytes_indices = 0;
-  int tiles_waiting = 0; /* tiles left for later frames */
+  int tiles_waiting = 0; /* tile levels of the stride planned left for later frames */
   /* the time in mbview_prepare_nodes (ms), for measurements */
   double prepare_ms = 0.0;
+  int stride = 0;        /* the stride drawn (0: nothing) */
+  int stride_zoom = 0;   /* the stride of the zoom */
+  int stride_target = 0; /* the stride planned: while uploads are split, the one completed over the frames */
+  int tiles_visible = 0; /* tiles with data in the view */
+  int tiles_culled = 0;  /* tiles with data outside it */
+  bool drag_coarser = false;   /* the drag budget made the stride coarser than the zoom's */
+  bool memory_coarser = false; /* the memory budget did */
+  bool over_memory = false;    /* stride 128 above the memory budget */
+  bool split = false;          /* uploads split: drawn at another stride than planned */
+  double budget_ms = -1.0;     /* the drag budget of the stride planned (-1: no button down) */
+  double bounds_ms = 0.0;      /* the tiles' bounds taken (the spheroid's boxes), measured */
+  /* the preparing and gathering of the levels built, estimated, and measured;
+     both with bounds_ms, which the frame took before it chose the stride */
+  double estimated_ms = 0.0;
+  double work_ms = 0.0;
+  int evicted_own = 0;         /* levels of this plan the frame evicted */
+  int evicted_other = 0;       /* levels of other plans it evicted */
+};
+
+/* what a frame of the plan gives the renderer */
+struct PlanResult {
+  std::vector<TileUpload> uploads;
+  /* levels whose GPU copies go now, before the uploads: evicted by this frame
+     or, since the last frame, by another plan */
+  std::vector<LevelKey> drops;
+  /* the levels drawn, all of one stride, in tile order */
+  std::vector<LevelKey> drawn;
+  /* uploads wait for later frames */
+  bool more = false;
+  PlanStats stats;
 };
 
 class TerrainPlan {
  public:
+  struct Level {
+    int ni = 0; /* lattice nodes along i and j */
+    int nj = 0;
+    /* streams that must be gathered and uploaded before the level is drawn */
+    bool need_positions = true;
+    bool need_colours = true;
+    bool need_indices = true;
+    /* the last index list had no triangle: the level holds nothing on the GPU */
+    bool empty = false;
+    uint32_t index_count = 0; /* of the last index list, kept as a size hint when the level goes */
+    bool built = false;       /* an index list was made once (index_count is known) */
+    bool resident = false;    /* the GPU holds the level's buffers (in date or not) */
+    size_t bytes = 0;         /* GPU bytes of the level, every copy counted */
+    uint64_t used = 0;        /* the cache's number of the last frame that drew it */
+    bool drawn = false;       /* drawn in the plan's latest frame */
+    bool uploading = false;   /* the stride the latest frame planned, being uploaded over frames */
+    /* drawn or uploading in the plan's last frame before a map mouse button
+       went down: kept from other plans' evictions until the frame after the
+       release, so that the release frame can draw the stride of the zoom */
+    bool kept = false;
+  };
   struct Tile {
     int i0 = 0; /* first and last node, ends included */
     int i1 = 0;
@@ -129,46 +281,129 @@ class TerrainPlan {
     int j1 = 0;
     int ni = 0; /* nodes along i and j */
     int nj = 0;
-    /* streams that must be gathered and uploaded before the tile is drawn */
-    bool need_positions = true;
-    bool need_colours = true;
-    bool need_indices = true;
-    /* the last index list had no triangle: the tile holds nothing on the GPU */
-    bool empty = false;
-    uint32_t index_count = 0;
-    uint64_t version = 0; /* node version of the tile when it was gathered */
+    uint64_t version = 0; /* node version of the tile when it was last compared */
+    /* the tile's primary data: range and largest step between neighbours,
+       taken again when its version rose */
+    bool data = false;
+    bool data_stale = true;
+    float data_min = 0.0f;
+    float data_max = 0.0f;
+    float data_step = 0.0f;
+    /* the box in display coordinates (outside the spheroid x and y only,
+       z follows from the data), and the largest cell edge */
+    bool box_stale = true;
+    double lo[3] = {};
+    double hi[3] = {};
+    double edge = 0.0;
+    /* on the spheroid: the longitude and latitude of the lattice of the
+       tile's box (sphere_box) and its step in nodes, made once for the
+       tile's data */
+    std::vector<double> lonlat;
+    int lattice_step = 0;
+    /* the finest stride whose lattice was prepared since the marks (z, and
+       colours), 0 for none: what preparing a level is expected to cost */
+    int prepared_z = 0;
+    int prepared_colour = 0;
+    Level levels[kLevels];
   };
 
+  /* what preparing a lattice node computes: colours (and z where stale), z
+     only, or nothing (its status bits say it was prepared) */
+  enum Context { kColour = 0, kZ = 1, kCheck = 2 };
+  /* The classes of the cost averages: the grid mode (0 the primary grid and
+     its slope, 1 the secondary grid on the primary's nodes, 2 a secondary
+     grid apart, whose values cost PROJ calls), plus 3 on the spheroid (every
+     z reprojected), plus 6 with overlay shading of a secondary grid apart
+     (PROJ calls for each colour). */
+  static constexpr int kCostClasses = 12;
+  static int cost_class(const struct mbvq_grid &grid);
+  /* the costs of a lattice node in ns, moving averages: preparing it per
+     cost class and context, gathering its position and its colour, and
+     making the index list per cost class */
+  struct Costs {
+    double prepare[kCostClasses][3];
+    double gather[2];
+    double index[kCostClasses];
+  };
+
+  TerrainPlan();
+  ~TerrainPlan();
+  TerrainPlan(const TerrainPlan &) = delete;
+  TerrainPlan &operator=(const TerrainPlan &) = delete;
+
   /* Plan a frame: compare the marks with those of the last frame, mark the
-     streams that went stale, then prepare, gather and hand out the uploads of
-     tiles in order until the budget is reached. Returns true when tiles wait
-     for later frames. */
-  bool plan(const TerrainInput &input, size_t budget, std::vector<TileUpload> *uploads, PlanStats *stats);
+     streams that went stale, cull the tiles, choose the stride, then
+     prepare, gather and hand out the uploads within the budgets. Returns
+     true when uploads wait for later frames. */
+  bool plan(const TerrainInput &input, const PlanOptions &options, PlanResult *result);
+  /* forget every tile: the next plan lays them out and uploads them again
+     (the renderer dropped its GPU copies) */
+  void reset();
 
   /* gather the colours as the core's floats, 16 bytes per node, instead of
      bytes (RenderOptions::float_terrain_colours); set before the first plan */
   void set_float_colours(bool on) { float_colours_ = on; }
+  /* the copies a QRhi keeps of each buffer, which the memory budget counts */
+  void set_copies(int copies) { copies_ = copies < 1 ? 1 : copies; }
+  /* the plan's view is shown: the levels it drew last and those it uploads
+     are kept from other views' evictions while it is */
+  void set_visible(bool visible);
+  /* Called when this plan's view should draw a frame for the memory budget:
+     another plan evicted levels of this one, whose GPU copies go, and whose
+     bytes count as free, only after this plan's next frame; or the memory
+     budget made this plan's latest frame coarser and another plan let go of
+     levels it kept (hidden, gone, or drawing less). */
+  void set_evicted_callback(std::function<void()> callback) { evicted_callback_ = std::move(callback); }
+  /* the cost averages the drag budget's estimates use */
+  const Costs &costs() const { return costs_; }
 
   const std::vector<Tile> &tiles() const { return tiles_; }
   /* rises when the tiles are laid out again (a new grid size or block grid):
      every GPU copy of the old tiles goes */
   int generation() const { return generation_; }
-  /* the tile can be drawn: every stream as new as the marks, with triangles */
-  bool drawable(int tile) const;
+  /* the level can be drawn: every stream as new as the marks, with triangles */
+  bool drawable(int tile, int level = 0) const;
+  /* the level needs nothing before a frame draws it (it may hold no triangle) */
+  bool ready(int tile, int level) const;
+  /* GPU bytes the plan's levels hold now, every copy counted, with those of
+     levels evicted by other plans until this plan's next frame drops them */
+  size_t held_bytes() const { return resident_bytes_ + evicted_bytes_; }
+  /* levels of this plan evicted so far, by this or another plan */
+  int evictions() const { return evictions_; }
   /* the tile ranges of a grid, for tests */
   static std::vector<Tile> layout(int n_columns, int n_rows);
 
-  /* the index list of a tile from the validity of its nodes (one byte per
+  /* the index list of a lattice from the validity of its nodes (one byte per
      node, a * nj + b): for each cell A = (a,b)(a+1,b)(a,b+1) and
      B = (a+1,b)(a+1,b+1)(a,b+1), each where its three nodes are valid */
   static void build_indices(const unsigned char *valid, int ni, int nj, std::vector<uint16_t> *index);
 
  private:
+  friend class TerrainCache;
+  struct Work;
+
   void reset_layout(const TerrainInput &input);
+  void mark_stale(const TerrainInput &input);
+  void update_bounds(const TerrainInput &input, bool spheroid);
+  void scan_data(const struct mbvq_grid &grid, Tile *tile) const;
+  void sphere_box(const TerrainInput &input, Tile *tile);
+  void box(const struct mbvq_grid &grid, bool spheroid, const Tile &tile, double lo[3], double hi[3],
+           double *edge_h, double *edge_z) const;
+  size_t level_bytes(const Tile &tile, int level) const;
+  Work level_work(const Tile &tile, int level, int cost, const PlanOptions &options) const;
+  /* prepare and gather a level; false (its index list made, nothing else) if
+     must is false and its bytes do not fit in cap beside those uploaded */
+  bool build(const TerrainInput &input, int t, int level, int cost, const PlanOptions &options, size_t cap, bool must,
+             PlanResult *result, size_t *uploaded);
+  void drop_level(Level *level);
+  void learn(int cost);
 
   std::vector<Tile> tiles_;
   int generation_ = 0;
   bool float_colours_ = false;
+  int copies_ = 1;
+  bool visible_ = true;
+  std::function<void()> evicted_callback_;
   bool have_marks_ = false;
   int n_columns_ = 0;
   int n_rows_ = 0;
@@ -179,7 +414,30 @@ class TerrainPlan {
   uint64_t color_ = 0;
   uint64_t mask_ = 0;
   uint64_t version_ = 0;
+  int projection_mode_ = -1;
+  /* the cache's accounting: bytes of the resident levels, and of levels
+     evicted by other plans whose GPU copies go in this plan's next frame */
+  size_t resident_bytes_ = 0;
+  size_t evicted_bytes_ = 0;
+  std::vector<LevelKey> evicted_;    /* levels evicted by other plans, to drop */
+  std::vector<LevelKey> marked_;     /* levels with drawn or uploading set */
+  std::vector<LevelKey> kept_;       /* levels with kept set */
+  bool dragging_ = false;            /* the latest frame was planned with a map mouse button down */
+  /* bytes of the levels drawn last, uploading and kept (reserved) */
+  size_t pinned_bytes_ = 0;
+  bool memory_coarser_ = false;      /* the memory budget made the latest frame coarser */
+  int evictions_ = 0;
+  /* the cost averages, and this frame's sums for them (per context, of
+     gathering positions and colours, and of index lists) */
+  Costs costs_;
+  double sum_prepare_ms_[3] = {};
+  double sum_prepare_nodes_[3] = {};
+  double sum_gather_ms_[2] = {};
+  double sum_gather_nodes_[2] = {};
+  double sum_index_ms_ = 0.0;
+  double sum_index_nodes_ = 0.0;
   std::vector<unsigned char> valid_; /* scratch */
+  std::vector<double> points_;       /* scratch */
 };
 
 }  // namespace rhi
