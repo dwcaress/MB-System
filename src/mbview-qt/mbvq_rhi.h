@@ -53,13 +53,20 @@ namespace mbvq {
    with the OpenGL views on macOS */
 enum class GluVariant { Sgi, Apple };
 
+/* compute splatting of the 3D soundings: Auto splats where the renderer can
+   at the sizes of the size gate (rhi::kSplatLargest), Off draws points (or
+   quads), On splats at 1 and 2 physical pixels whatever the gate; never
+   where points are drawn as quads */
+enum class Splat { Auto, Off, On };
+
 struct RenderOptions {
   /* the most bytes uploaded in one frame (64 MB); the rest follows in the next frames */
   size_t upload_budget = static_cast<size_t>(64) << 20;
   /* create() of the renderer fails after it made its first resources, as when
      the GPU memory runs out */
   bool fail_create = false;
-  /* no buffer can be made, as when the GPU memory runs out: the frame fails
+  /* no buffer of the frame's uploads can be made (the splat path's own:
+     fail_splat_buffers), as when the GPU memory runs out: the frame fails
      and draws nothing, and the renderer drops its tiles, the batch's buffers
      and the contours but keeps its pipelines, so that a later frame uploads
      everything again */
@@ -148,6 +155,35 @@ struct RenderOptions {
      the other soundings' buffers (dynamic on Metal, static elsewhere); taken
      when the renderer or its pipelines are made, as point_quads */
   int chunk_storage = -1;
+  /* how the 3D soundings are splatted (Splat); read in every frame; a view
+     takes the program's (set_soundings_splat) */
+  Splat splat = Splat::Auto;
+  /* the buffers the splat path makes in a frame (the per-pixel depth and
+     winner buffers; its uniform buffer when it grows) cannot be made, as
+     when the GPU memory runs out: the frame draws points and does not fail,
+     and frames of that target size draw points without trying again until a
+     frame tries to splat at another size (only the last refused size is
+     remembered), the soundings are dropped (new soundings, a failed frame,
+     Dismiss) or the renderer or its pipelines are made again; read in every
+     frame */
+  bool fail_splat_buffers = false;
+  /* the buffers the splat path makes are reported without their native
+     buffers after a real create(), on every API, as where Metal's device
+     gave none to a buffer Qt reports made: the splat path's real failure
+     path (each such buffer made again small and destroyed), for tests. The
+     uniform buffer made with the renderer or its pipelines: no splatting,
+     as fail_splat_pipelines; the buffers made in a frame: as
+     fail_splat_buffers; read when the renderer or its pipelines are made
+     and in every frame */
+  bool fail_splat_native = false;
+  /* the last splat pipeline cannot be made, after the other splat objects:
+     no splatting, and the chunks keep the other soundings' buffers' types;
+     taken when the renderer or its pipelines are made, as point_quads */
+  bool fail_splat_pipelines = false;
+  /* above 0: at most this many work groups in every splat dispatch, below
+     the QRhi's own limit, so that the shaders' strided loops run (tests);
+     read in every frame */
+  int splat_group_limit = 0;
 };
 
 /* what the renderer did; totals since the renderer was made, except where
@@ -227,7 +263,10 @@ struct RenderStats {
      evictions, index lists, nodes gathered), the uploads and the uniforms */
   double gather_ms = 0.0;
   /* the render pass begun with the frame's resource updates; on Metal this
-     only queues the buffer uploads, which the batch copied in gather_ms */
+     only queues the buffer uploads, which the batch copied in gather_ms;
+     and, in a frame that splats the 3D soundings, the compute passes before
+     it, the first of which takes the updates (on Metal with the copies of
+     the splatted chunks' waiting uploads, made at their binds there) */
   double upload_ms = 0.0;
   /* the drawing commands recorded and the pass ended; on Metal with the
      copies of the queued uploads into the buffers, made when a buffer is
@@ -237,7 +276,9 @@ struct RenderStats {
      frame is copied twice per frame; a dynamic one written whole in every
      frame, as the batch's, once, since a whole write drops the writes still
      waiting for the other one); a buffer with storage use (the soundings'
-     positions and colours, chunk_use) is kept and copied once */
+     positions and colours, chunk_use) is kept and copied once; in a frame
+     that splats the 3D soundings, the drawn chunks' copies are made at
+     compute()'s binds, in upload_ms */
   double record_ms = 0.0;
   double render_ms = 0.0; /* the whole frame on the CPU, up to the end of the pass */
   /* where the last frame's render() began and ended, in ms since the epoch
@@ -313,11 +354,11 @@ struct RenderStats {
   /* The 3D soundings view (the profile view has only its batch). Of the last
      frame: the soundings and chunks of the allocation, the soundings whose
      chunks are drawn (in the first upload a prefix) and those drawn as
-     points or quads, whether points are quads and the profile lines wide,
-     the profile lines' indices (thin) and instances (wide) drawn, the GPU
-     bytes of the soundings' buffers, every copy counted (each buffer by the
-     copies its type and use take: on Metal two of a dynamic buffer, one of a
-     storage buffer). Totals: the
+     points, quads or splats, whether points are quads and the profile lines
+     wide, the profile lines' indices (thin) and instances (wide) drawn, the
+     GPU bytes of the soundings' buffers, every copy counted (each buffer by
+     the copies its type and use take: on Metal two of a dynamic buffer, one
+     of a storage buffer). Totals: the
      allocations, the reads of the core's positions, colours and pairs, and
      per stream (positions, colours, index lists, colours per pair) the
      chunks written and their bytes; the swaps of a double-buffered stream. */
@@ -376,11 +417,38 @@ struct RenderStats {
      renderer was made (chunk_use). Totals, on Metal: the chunks bound
      without a draw (normally in the frame of their write, else in the next
      frame with the soundings slot), so that Qt copies the upload it holds
-     for their next bind, and the chunks made again because an upload still
-     waited when the next came (a frame without the soundings slot). */
+     for their next bind (compute()'s binds of the chunks it splats are not
+     counted), and the chunks made again because an upload still waited when
+     the next came (a frame without the soundings slot). */
   int soundings_storage = -1;
   int soundings_applied = 0;
   int soundings_rebuilt = 0;
+  /* Compute splatting of the 3D soundings: whether the renderer can splat
+     (its chunks have storage use and its splat objects were made; false
+     before the soundings renderer was made), whether the last frame
+     splatted its soundings (else points or quads), the dispatches it
+     recorded (the clear and three per chunk drawn; 0 without splatting) and
+     the most work groups of one of them (the clear's at the usual sizes),
+     and the bytes of the per-pixel depth and winner buffers held now (8 per
+     physical pixel while frames splat; 0 after a frame that did not, after
+     Dismiss and after a failed frame), outside sounding_held_bytes. Totals:
+     the splat path's buffers made natively in frames (the per-pixel pair
+     counted twice at each splat frame that makes it: at a size it does not
+     have, also the same size after a frame that did not splat; its uniform
+     buffer once at each growth), the bindings made for the chunks (one per
+     chunk and pair of a position set and a colour set held, made with the
+     second of them, never at a swap, a resize or a change of the drawing
+     path), and the frames whose splat buffers could not be made (each
+     failure once: the frames after it at the same size draw points without
+     trying again). */
+  bool splat_available = false;
+  bool splat = false;
+  int splat_dispatches = 0;
+  int splat_group_max = 0;
+  size_t splat_held_bytes = 0;
+  int splat_creates = 0;
+  int splat_sets = 0;
+  int splat_failures = 0;
 };
 
 class OffscreenRenderer {
@@ -479,6 +547,11 @@ void set_fell_back(QWidget *view, bool fell_back);
    the frame's total, and acts on every API (< 0: measured, the default);
    nothing for any other widget */
 void set_gpu_wait(QWidget *view, double wait_ms);
+/* for tests and the hand mode: how the program's 3D soundings view splats
+   (RenderOptions::splat; Auto, the default), for its next frames, also for
+   a view made later and before its first frame */
+void set_soundings_splat(Splat splat);
+Splat soundings_splat();
 /* the statistics of the renderer of a QRhi view (map, profile or 3D
    soundings), with the times of its last frame (empty for any other view, or
    while it has no renderer) */

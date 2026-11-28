@@ -50,7 +50,11 @@
  *   Null modes also check (7b) the drawing of the 3D soundings that a frame
  *   records with the profile mode hidden from the core, against a fill with
  *   the mode set, the mode after such fills (also in the View menu), and
- *   the profile lines of soundings from three files.
+ *   the profile lines of soundings from three files. The model, Null and
+ *   Metal modes also check (7d2) the compute splatting of the 3D soundings
+ *   at 1 and 2 physical pixels: when it is used, the splat shaders' block,
+ *   the splat path's resources and what it cannot make, and the splats
+ *   against points.
  *   mbview_qt_rhi_test --display [--3d] [--save file] [grid]   a map window
  *        drawn with QRhi (needs a display, not in ctest): waits for the first
  *        frames, grabs the view, picks with the mouse, shows and hides the
@@ -62,13 +66,17 @@
  *        against the offscreen renderer's, the point-size control, an edit
  *        by a click, Dismiss with the memory it frees and the next soundings,
  *        Dismiss while the dock is closed and while a host docks the
- *        floating dock again, floated, docked again, ended while floating),
+ *        floating dock again, floated, docked again, ended while floating;
+ *        7d2: splatted at the controls of 1 and 2 physical px against the
+ *        offscreen renderer's, a resize and Dismiss while splatting, and the
+ *        float sequence again splatting),
  *        the soundings' positions read once when the standalone soundings
  *        window opens and when it opens again after Dismiss, then a million
  *        soundings in that window ended by mb3dsoundings_end with the
  *        memory it frees, and a second map of the grid in a window of its
  *        own closed by mbview_destroy with the memory its view frees
- *   mbview_qt_rhi_test --quit close|quit|exit|float [--maps-only] [grid]
+ *   mbview_qt_rhi_test --quit close|quit|exit|float
+ *        [--maps-only | [--point-size p] [--splat auto|off|on]] [grid]
  *        a program with a QRhi map, its profile window and the 3D soundings
  *        in a floating dock of its main window open ends (needs a display,
  *        not in ctest): the map window closed as by its close button, then
@@ -79,7 +87,10 @@
  *        a floating dock of the main window too; the main window is deleted
  *        last (QTBUG-151834). --maps-only: the map and its profile window
  *        alone, without soundings or a main window (except for "float"), as
- *        mbgrdviz-qt has them
+ *        mbgrdviz-qt has them; p the soundings' point size (as in the
+ *        soundings bench) and the splat mode, set before they open: with p
+ *        the floated view's splatting is checked on Metal (both refused
+ *        with --maps-only, which opens no soundings)
  *   mbview_qt_rhi_test --bench [--3d] [--frames n] [--size WxH] [--nav list] [--gis N] [grid]
  *        frame times of a map window (needs a display, not in ctest; a
  *        measurement, not a test): the time to the first complete frame, then
@@ -98,6 +109,7 @@
  *        complete frame, as mbgrdviz adds a GIS file, and reports the time
  *        to the first complete frame with it
  *   mbview_qt_rhi_test --bench-soundings n [--frames n] [--point-size p]
+ *        [--splat auto|off|on]
  *        [--files k] [--order pings|tiles]   frame times of the
  *        3D soundings view with n synthetic soundings (needs a display, not
  *        in ctest; a measurement): a rotation, an erase drag, an exaggeration
@@ -108,7 +120,11 @@
  *        control under QRhi (0.5 to 8 in steps of 0.5; 3 if not given), the
  *        pings split into k files that overlap in space (1), the soundings
  *        handed over in ping order or in the order of 64 x 64 spatial tiles
- *        (then the rotation and the exaggeration drag only)
+ *        (then the rotation and the exaggeration drag only); --splat how the
+ *        view splats under QRhi (7d2; auto if not given)
+ *   Every mode takes --watchdog s: its watchdog's limit in seconds (1 to
+ *   900; else 10 for the headless modes, 60 with a window, 900 for the
+ *   benches), for the runs under Metal's validation layers.
  *   Both benches report the time of the renderer's create() under QRhi.
  *   --display prints it for the map, profile and soundings views after
  *   their first frame (the soundings in their dock) and for the soundings
@@ -149,6 +165,7 @@
 #include <array>
 #include <chrono>
 #include <cmath>
+#include <cstddef>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -1677,6 +1694,266 @@ void model_chunk_use() {
                 std::to_string(g) + " or more (or 0, not reported); not on Direct3D 11 or 12, without Compute, or "
                                     "with a limit of " +
                 std::to_string(g - 1) + " (then dynamic on Metal, static elsewhere)");
+}
+
+/* the size rule in the test's own words (defined with model_style) */
+int expected_px(double logical, double ratio);
+
+/* the values of a list of the Point size box's controls, as text */
+std::string control_list(const std::vector<double> &values) {
+  std::string out;
+  for (double v : values)
+    out += (out.empty() ? "" : " ") + text("%g", v);
+  return "{" + out + "}";
+}
+
+/* 7d2 (7d-1): when the 3D soundings are splatted (splat_size), for the
+   controls of the Point size box (0.5 to 8 in steps of 0.5) at the ratios 1,
+   1.5 and 2: the physical size by the size rule; Auto splats at 1 to N px,
+   the size gate (N below, the gate 7d2's bench chose, pinned against
+   rhi::kSplatLargest), On at 1 and 2 px whatever the gate; never at 3 px or
+   more, with splat Off, where the renderer cannot splat or where points are
+   drawn as quads */
+void model_splat_choice() {
+  using mbvq::Splat;
+  /* the size gate: the largest physical size Auto splats at */
+  const int N = 1;
+  const double ratios[3] = {1.0, 1.5, 2.0};
+  bool sizes = true, modes = true;
+  /* the first case that is wrong, for the message: the ratio and control
+     (none for the sizes 3 to 16), the size, the mode and what splat_size
+     gave */
+  std::string wrong;
+  const auto splats = [&wrong](double ratio, double control, int size, bool available, bool quads, Splat mode,
+                               bool expected) {
+    const bool got = rhi::splat_size(size, available, quads, mode);
+    if (got != expected && wrong.empty())
+      wrong = (ratio > 0.0 ? "ratio " + text("%g", ratio) + ", control " + text("%g", control) + ", " : std::string()) +
+              std::to_string(size) + " px, " + (mode == Splat::Auto ? "Auto" : mode == Splat::On ? "On" : "Off") +
+              (available ? "" : ", not available") + (quads ? ", quads" : "") + ": " + (got ? "splats" : "points");
+    return got == expected;
+  };
+  std::vector<std::vector<double>> splatted(3);
+  for (int r = 0; r < 3; r++)
+    for (int step = 1; step <= 16; step++) {
+      const double control = 0.5 * step;
+      rhi::Style style;
+      style.ratio = ratios[r];
+      style.point_size = control;
+      const int size = style.point(3.0);
+      const int expected = expected_px(control, ratios[r]);
+      if (size != expected && wrong.empty())
+        wrong = "ratio " + text("%g", ratios[r]) + ", control " + text("%g", control) + ": " + std::to_string(size) +
+                " px (expected " + std::to_string(expected) + ")";
+      sizes = sizes && size == expected;
+      modes = modes && splats(ratios[r], control, size, true, false, Splat::Auto, size >= 1 && size <= N) &&
+              splats(ratios[r], control, size, true, false, Splat::On, size <= 2) &&
+              splats(ratios[r], control, size, true, false, Splat::Off, false);
+      for (Splat mode : {Splat::Auto, Splat::Off, Splat::On})
+        modes = modes && splats(ratios[r], control, size, false, false, mode, false) &&
+                splats(ratios[r], control, size, true, true, mode, false);
+      if (rhi::splat_size(size, true, false, Splat::Auto))
+        splatted[static_cast<size_t>(r)].push_back(control);
+    }
+  /* whatever the gate, never above 2 px */
+  bool never = true;
+  for (int s = 3; s <= 16; s++)
+    never = never && splats(0.0, 0.0, s, true, false, Splat::Auto, false) &&
+            splats(0.0, 0.0, s, true, false, Splat::On, false);
+  /* the controls Auto splats at the ratios 1, 1.5 and 2, for the gates 0, 1
+     and 2 */
+  const std::vector<std::vector<double>> lists[3] = {
+      {{}, {}, {}}, {{0.5, 1.0, 1.5}, {0.5, 1.0}, {0.5}}, {{0.5, 1.0, 1.5, 2.0, 2.5}, {0.5, 1.0, 1.5}, {0.5, 1.0}}};
+  const bool listed = N >= 0 && N <= 2 && splatted == lists[N];
+  check(sizes && modes && never && listed && rhi::kSplatLargest == N,
+        "7d2: the controls 0.5 to 8 of the Point size box give the size rule's physical sizes at ratios 1, 1.5 and "
+        "2; Auto splats at 1 to " + std::to_string(N) + " physical px (the size gate, rhi::kSplatLargest " +
+            std::to_string(rhi::kSplatLargest) + "): the controls " + control_list(splatted[0]) + " at ratio 1, " +
+            control_list(splatted[1]) + " at 1.5 and " + control_list(splatted[2]) + " at 2; On at 1 and 2 px "
+            "whatever the gate; never at 3 to 16 px, with splat Off, where the renderer cannot splat or with forced "
+            "quads (sizes " + (sizes ? "right" : "wrong") + ", modes " + (modes && never ? "right" : "wrong") +
+            (wrong.empty() ? std::string() : "; the first case wrong: " + wrong) + ")");
+}
+
+/* 7d2 (7d-2): the uniform block of the splat shaders (rhi::SplatBlock,
+   shaders/mbvq_splat_*): its std140 layout; the groups of a dispatch
+   (ceil(items / 128), capped at the limit: 0, not reported, as 65,535; a
+   limit above that is not used); the stride rule of the levels of detail by
+   brute force; the row flip per API; the blocks of a frame at the
+   --display dock's 2048 x 1548 px */
+void model_splat_block() {
+  using rhi::SplatBlock;
+  using rhi::SplatPass;
+  const bool layout = sizeof(SplatBlock) == 112 && offsetof(SplatBlock, viewport) == 64 &&
+                      offsetof(SplatBlock, counts) == 80 && offsetof(SplatBlock, grid) == 96;
+  struct GroupRow {
+    uint64_t items;
+    int limit;
+    int groups;
+  };
+  const GroupRow group_rows[] = {{1, 0, 1},
+                                 {128, 0, 1},
+                                 {129, 0, 2},
+                                 {uint64_t{1} << 21, 0, 16384},
+                                 {uint64_t{1} << 21, 65535, 16384},
+                                 {14745600, 65535, 65535},
+                                 {14745600, 0, 65535},
+                                 {5560000, 65535, 43438},
+                                 {3170304, 0, 24768},
+                                 {200000, 1000, 1000},
+                                 {14745600, 2000000, 65535},
+                                 {3170304, 3, 3}};
+  std::string groups_wrong;
+  for (const GroupRow &row : group_rows) {
+    const int got = rhi::splat_groups(row.items, row.limit);
+    if (got != row.groups)
+      groups_wrong += " " + std::to_string(row.items) + "/" + std::to_string(row.limit) + ":" + std::to_string(got);
+  }
+  /* the soundings a chunk draws at stride k: those whose index is a
+     multiple of k, from its phase; the first case wrong (first, points, k,
+     count, phase) for the message */
+  bool strides = true;
+  std::string strides_wrong;
+  for (int first = 0; first < 40; first++)
+    for (int points = 0; points < 40; points++)
+      for (const int k : {1, 2, 4, 8, 16}) {
+        int expected = 0;
+        for (int i = first; i < first + points; i++)
+          expected += i % k == 0 ? 1 : 0;
+        const int count = rhi::stride_count(first, points, k);
+        const int phase = rhi::stride_phase(first, k);
+        bool placed = true;
+        for (int t = 0; t < count; t++)
+          placed = placed && phase + t * k < points && (first + phase + t * k) % k == 0;
+        if ((count != expected || !placed) && strides_wrong.empty())
+          strides_wrong = "first " + std::to_string(first) + ", points " + std::to_string(points) + ", k " +
+                          std::to_string(k) + ": count " + std::to_string(count) + " (expected " +
+                          std::to_string(expected) + "), phase " + std::to_string(phase);
+        strides = strides && count == expected && placed;
+      }
+  for (int c = 0; c < 8; c++)
+    for (const int k : {1, 2, 4, 8, 16}) {
+      const int phase = rhi::stride_phase(c << 21, k);
+      if (phase != 0 && strides_wrong.empty())
+        strides_wrong = "first " + std::to_string(c << 21) + ", k " + std::to_string(k) + ": phase " +
+                        std::to_string(phase) + " (expected 0)";
+      strides = strides && phase == 0;
+    }
+  /* the flip per API (isYUpInNDC, isYUpInFramebuffer) */
+  struct FlipRow {
+    const char *api;
+    bool y_up_ndc;
+    bool y_up_framebuffer;
+    bool flip;
+  };
+  const FlipRow flip_rows[] = {{"Metal", true, false, true},
+                               {"Null", true, false, true},
+                               {"OpenGL", true, true, false},
+                               {"Vulkan", false, false, false}};
+  bool flips = true;
+  std::string flips_wrong;
+  for (const FlipRow &row : flip_rows) {
+    const bool flip = rhi::splat_flip(row.y_up_ndc, row.y_up_framebuffer);
+    if (flip != row.flip && flips_wrong.empty())
+      flips_wrong = std::string(row.api) + ": flip " + std::to_string(flip ? 1 : 0);
+    flips = flips && flip == row.flip;
+  }
+  /* the blocks of a frame: 16 distinct floats of a matrix, 2048 x 1548 px,
+     2 px, the rows flipped, the clip depth 0 to 1, Metal's group limit */
+  rhi::SplatFrame frame;
+  for (int i = 0; i < 16; i++)
+    frame.mvp[i] = 0.25f + 1.5f * static_cast<float>(i) + 0.0625f * static_cast<float>(i % 3);
+  frame.width = 2048;
+  frame.height = 1548;
+  frame.size = 2;
+  frame.flip = true;
+  frame.zero_to_one = true;
+  frame.group_limit = 65535;
+  const uint32_t pixels = 3170304;
+  /* a field of a block against its expected value; the first that differs
+     (block, field, got, expected) for the message */
+  std::string blocks_wrong;
+  const auto field = [&blocks_wrong](const std::string &block, const char *name, int i, double got,
+                                     double expected) {
+    if (got != expected && blocks_wrong.empty())
+      blocks_wrong = block + " " + name + "[" + std::to_string(i) + "] " + text("%.9g", got) + " (expected " +
+                     text("%.9g", expected) + ")";
+    return got == expected;
+  };
+  const auto is = [&field](const char *block, const SplatBlock &b, std::array<uint32_t, 4> counts,
+                           std::array<uint32_t, 4> grid) {
+    bool same = true;
+    for (int i = 0; i < 4; i++)
+      same = same && field(block, "counts", i, b.counts[i], counts[i]);
+    for (int i = 0; i < 4; i++)
+      same = same && field(block, "grid", i, b.grid[i], grid[i]);
+    return same;
+  };
+  /* the mvp's bytes copied and the viewport {2048, 1548, 2, 1} in every
+     block of the frame */
+  const auto shared = [&](const char *block, const SplatBlock &b) {
+    const bool copied = std::memcmp(b.mvp, frame.mvp, sizeof(b.mvp)) == 0;
+    if (!copied && blocks_wrong.empty())
+      blocks_wrong = std::string(block) + " mvp (not the input's bytes)";
+    const float viewport[4] = {2048.0f, 1548.0f, 2.0f, 1.0f};
+    bool same = copied;
+    for (int i = 0; i < 4; i++)
+      same = same && field(block, "viewport", i, b.viewport[i], viewport[i]);
+    return same;
+  };
+  const SplatBlock clear = rhi::splat_block(frame, SplatPass::Clear);
+  const SplatBlock depth = rhi::splat_block(frame, SplatPass::Depth, 300, 300, 4);
+  const SplatBlock phased = rhi::splat_block(frame, SplatPass::Depth, 301, 300, 4);
+  const SplatBlock winner = rhi::splat_block(frame, SplatPass::Winner, 250, 250, 4);
+  const SplatBlock colour = rhi::splat_block(frame, SplatPass::Colour, 1 << 21, 1 << 21, 1);
+  const SplatBlock resolve = rhi::splat_block(frame, SplatPass::Resolve);
+  bool blocks = shared("clear", clear) && shared("depth", depth) && shared("depth from 301", phased) &&
+                shared("winner", winner) && shared("colour", colour) && shared("resolve", resolve) &&
+                is("clear", clear, {0, pixels, 0, 1}, {24768, 1, 0, 0}) &&
+                is("depth", depth, {75, pixels, 300, 1}, {1, 4, 0, 1}) &&
+                is("depth from 301", phased, {75, pixels, 301, 1}, {1, 4, 3, 1}) &&
+                is("winner", winner, {62, pixels, 250, 1}, {1, 4, 2, 2}) &&
+                is("colour", colour, {2097152, pixels, 2097152, 1}, {16384, 1, 0, 3}) &&
+                is("resolve", resolve, {0, pixels, 0, 1}, {0, 1, 0, 4});
+  /* the flip (viewport.w) and the clip depth 0 to 1 (counts.w) apart:
+     OpenGL (no flip, the clip depth -1 to 1), Vulkan (no flip, 0 to 1) and
+     the flip with the clip depth -1 to 1; then a limit of 3 groups */
+  struct WRow {
+    const char *api;
+    bool flip;
+    bool zero_to_one;
+  };
+  const WRow w_rows[] = {{"OpenGL", false, false}, {"Vulkan", false, true}, {"flipped", true, false}};
+  for (const WRow &row : w_rows) {
+    rhi::SplatFrame f = frame;
+    f.flip = row.flip;
+    f.zero_to_one = row.zero_to_one;
+    const SplatBlock w_clear = rhi::splat_block(f, SplatPass::Clear);
+    const SplatBlock w_colour = rhi::splat_block(f, SplatPass::Colour, 0, 1000, 1);
+    const std::string api = row.api;
+    blocks = blocks && field(api + " clear", "viewport", 3, w_clear.viewport[3], row.flip ? 1.0 : 0.0) &&
+             field(api + " clear", "counts", 3, w_clear.counts[3], row.zero_to_one ? 1.0 : 0.0) &&
+             field(api + " colour", "viewport", 3, w_colour.viewport[3], row.flip ? 1.0 : 0.0) &&
+             field(api + " colour", "counts", 3, w_colour.counts[3], row.zero_to_one ? 1.0 : 0.0);
+  }
+  rhi::SplatFrame three = frame;
+  three.group_limit = 3;
+  const SplatBlock capped_clear = rhi::splat_block(three, SplatPass::Clear);
+  const SplatBlock capped_colour = rhi::splat_block(three, SplatPass::Colour, 1 << 21, 1 << 21, 1);
+  blocks = blocks && field("capped clear", "grid", 0, capped_clear.grid[0], 3.0) &&
+           field("capped colour", "grid", 0, capped_colour.grid[0], 3.0);
+  check(layout && groups_wrong.empty() && strides && flips && blocks,
+        "7d2: the splat shaders' block: 112 bytes, the viewport, counts and grid at 64, 80 and 96 (" +
+            std::string(layout ? "right" : "wrong") + "); the groups of a dispatch capped at the limit, 65,535 where "
+            "none is reported (" + (groups_wrong.empty() ? std::string("12 rows right") : "wrong:" + groups_wrong) +
+            "); the stride rule by brute force and the phase 0 of the views' chunks (" +
+            (strides ? std::string("right") : "wrong: " + strides_wrong) + "); the rows flipped on Metal and Null, "
+            "not on OpenGL or Vulkan (" + (flips ? std::string("right") : "wrong: " + flips_wrong) + "); the blocks "
+            "of a frame at 2048 x 1548 px: the mvp copied, the clear over the pixels in " +
+            std::to_string(clear.grid[0]) + " groups, a depth pass from 301 at stride 4 with the phase " +
+            std::to_string(phased.grid[2]) + ", the flip and the clip depth 0 to 1 apart (OpenGL neither, Vulkan "
+            "the clip depth alone, then the flip alone), a limit of 3 groups (" +
+            (blocks ? std::string("right") : "wrong: " + blocks_wrong) + ")");
 }
 
 /* 7c-2: the map's stride loop passes over the levels the GPU-time fallback
@@ -7475,6 +7752,10 @@ int test_model() {
   model_gpu_marks();
   /* 7d1: how the soundings' position and colour chunks are made (7d-14) */
   model_chunk_use();
+  /* 7d2: when the soundings are splatted (7d-1), and the splat shaders'
+     uniform block (7d-2) */
+  model_splat_choice();
+  model_splat_block();
   return result();
 }
 
@@ -8192,6 +8473,465 @@ void null_chunk_storage() {
   mb3dsoundings_end(0, &error);
 }
 
+/* 7d2 with a Null QRhi, which reports Compute: the fixture of the splat
+   checks, null_soundings' 1000 soundings from above with the flag colours,
+   every profile and the box, in chunks of 300 (4 chunks), the Point size
+   box at 0.5 (1 physical px at ratio 1) and splatting On, so that no check
+   depends on the size gate; whether the soundings were handed over */
+bool null_splat_fixture(mbvq::RenderOptions *options) {
+  make_sdg(40, 25, 7);
+  const bool opened = open_sdg();
+  sdg_camera(90.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+  sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_ALL, true);
+  *options = mbvq::RenderOptions();
+  options->soundings_chunk = 300;
+  options->soundings_point_size = 0.5;
+  options->splat = mbvq::Splat::On;
+  return opened;
+}
+
+/* 7d2 (7d-3) with a Null QRhi: the splat path's resources. The splat
+   objects come with create() (three pipelines, three bindings, the uniform
+   blocks' buffer and the two per-pixel buffer objects), the chunks' splat
+   bindings with their writes; the per-pixel buffers are made natively at
+   the first frame that splats (8 bytes per pixel) and in place at a resize,
+   let go of by a frame that draws points, a failed frame and a frame
+   without soundings; the uniform blocks' buffer grows in place; a chunk's
+   binding for a second position set is made with its first write, never at
+   the swap; a group limit caps the dispatches */
+void null_splat_resources() {
+  mbvq::RenderOptions on;
+  const bool opened = null_splat_fixture(&on);
+  int error = MB_ERROR_NO_ERROR;
+  const std::string held_text = " per-pixel bytes";
+
+  /* made: the renderer that can splat against one without storage chunks */
+  mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+  mbvq::OffscreenRenderer reference(mbvq::OffscreenRenderer::Api::Null);
+  mbvq::RenderOptions plain = on;
+  plain.chunk_storage = 0;
+  const bool drawn =
+      renderer.render_soundings(200, 150, on, nullptr) && reference.render_soundings(200, 150, plain, nullptr);
+  const mbvq::RenderStats s = renderer.stats();
+  const mbvq::RenderStats z = reference.stats();
+  check(opened && drawn && s.splat_available && s.splat && s.splat_dispatches == 13 && s.splat_held_bytes == 240000 &&
+            s.splat_creates == 2 && s.splat_sets == 4 && s.splat_failures == 0 && s.splat_group_max == 235 &&
+            !z.splat_available && !z.splat && s.fixed_resources - z.fixed_resources == 9 &&
+            s.resources - z.resources == 13 && s.soundings_drawn == 1000 && !s.failed,
+        "7d2 Null: a soundings renderer that can splat holds its 9 splat objects from create() (" +
+            std::to_string(s.fixed_resources) + " fixed resources, against " + std::to_string(z.fixed_resources) +
+            " with chunk_storage 0) and a splat binding per chunk (" + std::to_string(s.splat_sets) + " sets, " +
+            std::to_string(s.resources) + " resources against " + std::to_string(z.resources) + "); its first frame "
+            "at 200 x 150 splats the " + std::to_string(s.soundings_drawn) + " soundings at 1 px (splat " +
+            std::to_string(s.splat) + ", " + std::to_string(s.splat_dispatches) + " dispatches, at most " +
+            std::to_string(s.splat_group_max) + " groups), the per-pixel buffers made natively once (" +
+            std::to_string(s.splat_creates) + " creates, " + std::to_string(s.splat_held_bytes) + held_text +
+            ", 8 per pixel); without storage chunks nothing splats (available " +
+            std::to_string(z.splat_available) + ", splat " + std::to_string(z.splat) + ")");
+
+  /* kept over 50 calls of one frame each, then resized in place */
+  bool kept = true;
+  for (int i = 0; i < 50; i++) {
+    const bool ok = renderer.render_soundings(200, 150, on, nullptr);
+    const mbvq::RenderStats k = renderer.stats();
+    kept = kept && ok && renderer.last_frames() == 1 && k.splat && k.splat_creates == s.splat_creates &&
+           k.splat_sets == s.splat_sets && k.resources == s.resources && k.fixed_resources == s.fixed_resources &&
+           k.splat_held_bytes == s.splat_held_bytes;
+  }
+  const mbvq::RenderStats fifty = renderer.stats();
+  const bool resized = renderer.render_soundings(300, 200, on, nullptr);
+  const mbvq::RenderStats r = renderer.stats();
+  check(kept && resized && r.frames > renderer.last_frames() && r.splat && r.splat_creates == 4 &&
+            r.splat_sets == 4 && r.fixed_resources == s.fixed_resources && r.resources == s.resources &&
+            r.splat_held_bytes == 480000,
+        "7d2 Null: 50 more splat frames make nothing (" + std::to_string(fifty.splat_creates) + " creates, " +
+            std::to_string(fifty.splat_sets) + " sets, " + std::to_string(fifty.resources) + " resources, " +
+            std::to_string(fifty.splat_held_bytes) + held_text + " after them: " + (kept ? "the same" : "changed") +
+            "); a frame at 300 x 200 on the renderer kept (" + std::to_string(r.frames) + " frames) makes the "
+            "per-pixel buffers again in place (" + std::to_string(r.splat_creates) + " creates, " +
+            std::to_string(r.splat_sets) + " sets, " + std::to_string(r.fixed_resources) + " fixed and " +
+            std::to_string(r.resources) + " resources, " + std::to_string(r.splat_held_bytes) + held_text + ")");
+
+  /* let go of by a frame of points (3 px), made again at the next splat */
+  mbvq::RenderOptions three = on;
+  three.soundings_point_size = 3.0;
+  const bool points = renderer.render_soundings(300, 200, three, nullptr);
+  const mbvq::RenderStats p = renderer.stats();
+  const bool again = renderer.render_soundings(300, 200, on, nullptr);
+  const mbvq::RenderStats a = renderer.stats();
+  check(points && again && !p.splat && p.splat_held_bytes == 0 && p.splat_dispatches == 0 && p.splat_creates == 4 &&
+            p.soundings_drawn == 1000 && a.splat && a.splat_creates == 6 && a.splat_held_bytes == 480000,
+        "7d2 Null: a frame of 3 px points lets go of the per-pixel buffers (splat " + std::to_string(p.splat) + ", " +
+            std::to_string(p.splat_held_bytes) + held_text + ", " + std::to_string(p.splat_dispatches) +
+            " dispatches, " + std::to_string(p.soundings_drawn) + " soundings drawn), the next splat frame makes "
+            "them again (" + std::to_string(a.splat_creates) + " creates in all, " +
+            std::to_string(a.splat_held_bytes) + held_text + ")");
+
+  /* the uniform blocks grown in place: 10 chunks need 32 blocks, 16 made */
+  {
+    mbvq::OffscreenRenderer grown(mbvq::OffscreenRenderer::Api::Null);
+    mbvq::RenderOptions small = on;
+    small.soundings_chunk = 100;
+    bool ok = grown.render_soundings(200, 150, small, nullptr);
+    const mbvq::RenderStats g = grown.stats();
+    for (int i = 0; i < 10; i++)
+      ok = grown.render_soundings(200, 150, small, nullptr) && ok;
+    const mbvq::RenderStats g10 = grown.stats();
+    check(ok && g.sounding_chunks == 10 && g.splat && g.splat_creates == 3 && g.splat_sets == 10 &&
+              g.splat_dispatches == 31 && g.splat_failures == 0 && g.fixed_resources == s.fixed_resources &&
+              g10.splat && g10.splat_creates == 3 && g10.fixed_resources == g.fixed_resources,
+          "7d2 Null: 10 chunks of 100 soundings splat with 32 uniform blocks, the 16 made with the renderer grown "
+          "in place (" + std::to_string(g.splat_creates) + " creates with the per-pixel pair, " +
+              std::to_string(g.fixed_resources) + " fixed resources as with 4 chunks, " +
+              std::to_string(g.splat_sets) + " sets, " + std::to_string(g.splat_dispatches) + " dispatches); 10 "
+              "more frames make nothing (" + std::to_string(g10.splat_creates) + " creates)");
+  }
+
+  /* the bindings at the writes, none at a swap: chunks of 250 under a
+     budget of 5000 bytes (positions 3,012 bytes per chunk, double-buffered;
+     colours 4,000 bytes in all, written whole: one set) */
+  {
+    mbvq::OffscreenRenderer split(mbvq::OffscreenRenderer::Api::Null);
+    mbvq::RenderOptions budget = on;
+    budget.soundings_chunk = 250;
+    budget.upload_budget = 5000;
+    bool ok = split.render_soundings(200, 150, budget, nullptr, 50);
+    const mbvq::RenderStats first = split.stats();
+    mb3dsoundings.exaggeration = 3.0f;
+    mb3dsoundings_scalez(0, &error);
+    ok = split.render_soundings(200, 150, budget, nullptr, 1) && ok;
+    const mbvq::RenderStats waiting = split.stats();
+    ok = split.render_soundings(200, 150, budget, nullptr, 50) && ok;
+    const mbvq::RenderStats job = split.stats();
+    mb3dsoundings.exaggeration = 4.0f;
+    mb3dsoundings_scalez(0, &error);
+    ok = split.render_soundings(200, 150, budget, nullptr, 50) && ok;
+    const mbvq::RenderStats second = split.stats();
+    check(ok && first.splat && !first.soundings_waiting && first.splat_sets == 4 && waiting.splat &&
+              waiting.soundings_waiting && waiting.splat_sets == 5 && job.splat && !job.soundings_waiting &&
+              job.splat_sets == 8 && job.sounding_swaps == first.sounding_swaps + 1 && second.splat &&
+              !second.soundings_waiting && second.splat_sets == 8 && second.sounding_swaps == first.sounding_swaps + 2,
+          "7d2 Null: the chunks' splat bindings are made at their writes, none at a swap: " +
+              std::to_string(first.splat_sets) + " after the first upload, " + std::to_string(waiting.splat_sets) +
+              " after the first chunk of the second position set (written, before the swap), " +
+              std::to_string(job.splat_sets) + " after its job and " +
+              std::to_string(job.sounding_swaps - first.sounding_swaps) + " swap, " +
+              std::to_string(second.splat_sets) + " after a second job and " +
+              std::to_string(second.sounding_swaps - first.sounding_swaps) + " swaps; splatted in every call (" +
+              std::to_string(first.splat) + std::to_string(waiting.splat) + std::to_string(job.splat) +
+              std::to_string(second.splat) + ")");
+  }
+
+  /* the groups capped by the option, which is read in every frame */
+  {
+    mbvq::OffscreenRenderer capped(mbvq::OffscreenRenderer::Api::Null);
+    mbvq::RenderOptions limited = on;
+    limited.splat_group_limit = 3;
+    bool ok = capped.render_soundings(200, 150, limited, nullptr);
+    const mbvq::RenderStats c3 = capped.stats();
+    ok = capped.render_soundings(200, 150, on, nullptr) && ok;
+    const mbvq::RenderStats c = capped.stats();
+    check(ok && c3.splat && c3.splat_group_max == 3 && c3.splat_dispatches == 13 && c.splat &&
+              c.splat_group_max == 235,
+          "7d2 Null: splat_group_limit 3 caps every dispatch at 3 groups (at most " +
+              std::to_string(c3.splat_group_max) + " in " + std::to_string(c3.splat_dispatches) +
+              " dispatches); without it the clear takes " + std::to_string(c.splat_group_max) + " groups");
+  }
+
+  /* Let go of by a failed frame (fail_buffers after a flag edit whose chunk
+     needs index lists of another size, as null_failures), made again by
+     the next splat frame and by the renderer made again after release()
+     (whose release the statistics cannot show: the Metal mode measures it
+     on the device); then the soundings end as the program ends them
+     (Dismiss, count 0, the mask risen, as null_soundings): the next frame
+     holds none, and no soundings' buffer */
+  {
+    sdg_storage[12].beamflag = static_cast<char>(MB_FLAG_FLAG | MB_FLAG_MANUAL);
+    mb3dsoundings_colors_changed(0, &error);
+    mbvq::RenderOptions failing = on;
+    failing.fail_buffers = true;
+    const bool failed_frame = renderer.render_soundings(300, 200, failing, nullptr);
+    const mbvq::RenderStats f = renderer.stats();
+    const bool next = renderer.render_soundings(300, 200, on, nullptr);
+    const mbvq::RenderStats n = renderer.stats();
+    renderer.release();
+    const bool remade = renderer.render_soundings(300, 200, on, nullptr);
+    const mbvq::RenderStats m = renderer.stats();
+    mbvq_c_soundings_dismiss();
+    sdg_data.num_soundings = 0;
+    sdg_data.soundings = nullptr;
+    const bool ended = renderer.render_soundings(300, 200, on, nullptr);
+    const mbvq::RenderStats e = renderer.stats();
+    check(!failed_frame && f.failed && !f.splat && f.splat_held_bytes == 0 && f.resources == f.fixed_resources &&
+              next && n.splat && n.splat_creates == f.splat_creates + 2 && n.splat_held_bytes == 480000 && remade &&
+              m.splat && m.splat_held_bytes == 480000 && ended && !e.splat && e.soundings == 0 &&
+              e.splat_held_bytes == 0 && e.resources == e.fixed_resources + e.batch_resources,
+          "7d2 Null: a failed frame lets go of the per-pixel buffers (failed " + std::to_string(f.failed) + ", " +
+              std::to_string(f.splat_held_bytes) + held_text + ", " + std::to_string(f.resources) + " resources, " +
+              std::to_string(f.fixed_resources) + " fixed), the next frame splats and makes them again (" +
+              std::to_string(n.splat_creates - f.splat_creates) + " creates), and so does the renderer made again "
+              "after release() (splat " + std::to_string(m.splat) + ", " + std::to_string(m.splat_held_bytes) +
+              held_text + "); after Dismiss (no soundings) its frame draws none and holds none (splat " +
+              std::to_string(e.splat) + ", " + std::to_string(e.splat_held_bytes) + held_text + ", " +
+              std::to_string(e.resources) + " resources, " + std::to_string(e.fixed_resources) + " fixed and " +
+              std::to_string(e.batch_resources) + " of the batch)");
+  }
+}
+
+/* 7d2 (7d-4) with a Null QRhi: what cannot be made. Per-pixel buffers that
+   cannot be made (fail_splat_buffers): the frame draws points and does not
+   fail, and the size is not tried again until another size or new
+   soundings; a splat pipeline that cannot be made (fail_splat_pipelines):
+   no splatting, the chunks of 6d's types and every splat object let go of;
+   uniform blocks that cannot grow: the frame draws points, the pair it held
+   let go of */
+void null_splat_failures() {
+  mbvq::RenderOptions on;
+  const bool opened = null_splat_fixture(&on);
+  int error = MB_ERROR_NO_ERROR;
+  {
+    mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+    mbvq::RenderOptions failing = on;
+    failing.fail_splat_buffers = true;
+    bool ok = renderer.render_soundings(200, 150, failing, nullptr);
+    const mbvq::RenderStats first = renderer.stats();
+    bool remembered = true;
+    for (int i = 0; i < 9; i++) {
+      ok = renderer.render_soundings(200, 150, failing, nullptr) && ok;
+      remembered = remembered && renderer.stats().splat_failures == 1 && !renderer.stats().splat;
+    }
+    ok = renderer.render_soundings(200, 150, on, nullptr) && ok;
+    const mbvq::RenderStats same = renderer.stats();
+    ok = renderer.render_soundings(210, 150, on, nullptr) && ok;
+    const mbvq::RenderStats other = renderer.stats();
+    /* refused again at 200 x 150, then new soundings (another array, as
+       mb3dsoundings_end and the next open give): that size is tried again */
+    ok = renderer.render_soundings(200, 150, failing, nullptr) && ok;
+    const mbvq::RenderStats again = renderer.stats();
+    mb3dsoundings_end(0, &error);
+    const bool reopened = null_splat_fixture(&on);
+    ok = renderer.render_soundings(200, 150, on, nullptr) && ok;
+    const mbvq::RenderStats renewed = renderer.stats();
+    check(opened && ok && !first.failed && !first.splat && first.splat_available && first.splat_held_bytes == 0 &&
+              first.splat_creates == 0 && first.splat_failures == 1 && first.soundings_drawn == 1000 && remembered &&
+              !same.splat && same.splat_failures == 1 && same.splat_creates == 0 && other.splat &&
+              other.splat_creates == 2 && other.splat_held_bytes == 252000 && other.splat_failures == 1 &&
+              !again.splat && again.splat_failures == 2 && again.splat_creates == 2 && again.splat_held_bytes == 0 &&
+              reopened && renewed.sounding_allocations == again.sounding_allocations + 1 && renewed.splat &&
+              renewed.splat_failures == 2 && renewed.splat_creates == 4 && renewed.splat_held_bytes == 240000,
+          "7d2 Null: per-pixel buffers that cannot be made: the frame draws its " +
+              std::to_string(first.soundings_drawn) + " soundings as points and does not fail (failed " +
+              std::to_string(first.failed) + ", splat " + std::to_string(first.splat) + ", " +
+              std::to_string(first.splat_held_bytes) + " per-pixel bytes, " + std::to_string(first.splat_failures) +
+              " failure); 9 more frames and one without the switch at that size try nothing again (failures " +
+              std::to_string(same.splat_failures) + ", splat " + std::to_string(same.splat) + ", " +
+              std::to_string(same.splat_creates) + " creates); at 210 x 150 the frame splats (" +
+              std::to_string(other.splat_creates) + " creates, " + std::to_string(other.splat_held_bytes) +
+              " per-pixel bytes); refused again at 200 x 150 (failures " + std::to_string(again.splat_failures) +
+              ", splat " + std::to_string(again.splat) + ", " + std::to_string(again.splat_held_bytes) +
+              " per-pixel bytes), new soundings (" +
+              std::to_string(renewed.sounding_allocations - again.sounding_allocations) + " allocation) splat "
+              "there without the switch (splat " + std::to_string(renewed.splat) + ", " +
+              std::to_string(renewed.splat_creates) + " creates, " + std::to_string(renewed.splat_held_bytes) +
+              " per-pixel bytes, failures " + std::to_string(renewed.splat_failures) + ")");
+  }
+  {
+    mbvq::OffscreenRenderer refused(mbvq::OffscreenRenderer::Api::Null);
+    mbvq::OffscreenRenderer reference(mbvq::OffscreenRenderer::Api::Null);
+    mbvq::RenderOptions failing = on;
+    failing.fail_splat_pipelines = true;
+    mbvq::RenderOptions plain = on;
+    plain.chunk_storage = 0;
+    const bool ok =
+        refused.render_soundings(200, 150, failing, nullptr) && reference.render_soundings(200, 150, plain, nullptr);
+    const mbvq::RenderStats b = refused.stats();
+    const mbvq::RenderStats z = reference.stats();
+    check(ok && !b.failed && !b.splat_available && b.soundings_storage == 0 && !b.splat && b.soundings_drawn == 1000 &&
+              b.fixed_resources == z.fixed_resources && b.resources == z.resources,
+          "7d2 Null: a splat pipeline that cannot be made: no splatting (available " +
+              std::to_string(b.splat_available) + ", splat " + std::to_string(b.splat) + "), the chunks without "
+              "storage use (" + std::to_string(b.soundings_storage) + "), " + std::to_string(b.soundings_drawn) +
+              " soundings drawn as points, every splat object let go of (" + std::to_string(b.fixed_resources) +
+              " fixed and " + std::to_string(b.resources) + " resources, as with chunk_storage 0: " +
+              std::to_string(z.fixed_resources) + " and " + std::to_string(z.resources) + ")");
+  }
+  {
+    mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+    bool ok = renderer.render_soundings(200, 150, on, nullptr);
+    const mbvq::RenderStats before = renderer.stats();
+    /* a new allocation in chunks of 100: 32 blocks, above the 16 made */
+    mb3dsoundings_end(0, &error);
+    const bool reopened = null_splat_fixture(&on);
+    mbvq::RenderOptions small = on;
+    small.soundings_chunk = 100;
+    small.fail_splat_buffers = true;
+    ok = renderer.render_soundings(200, 150, small, nullptr) && ok;
+    const mbvq::RenderStats failed = renderer.stats();
+    bool remembered = true;
+    for (int i = 0; i < 4; i++) {
+      ok = renderer.render_soundings(200, 150, small, nullptr) && ok;
+      remembered = remembered && renderer.stats().splat_failures == 1 && !renderer.stats().splat;
+    }
+    small.fail_splat_buffers = false;
+    ok = renderer.render_soundings(210, 150, small, nullptr) && ok;
+    const mbvq::RenderStats after = renderer.stats();
+    check(ok && reopened && before.splat && before.sounding_chunks == 4 && before.splat_creates == 2 &&
+              !failed.failed && !failed.splat && failed.sounding_chunks == 10 && failed.splat_creates == 2 &&
+              failed.splat_failures == 1 && failed.splat_held_bytes == 0 && failed.soundings_drawn == 1000 &&
+              remembered && after.splat && after.splat_creates == 5 && after.splat_dispatches == 31 &&
+              after.splat_failures == 1,
+          "7d2 Null: uniform blocks that cannot grow (a new allocation of 10 chunks, 32 blocks above the 16 "
+          "made): the frame draws its " + std::to_string(failed.soundings_drawn) + " soundings as points and does "
+              "not fail (failed " + std::to_string(failed.failed) + ", " + std::to_string(failed.splat_failures) +
+              " failure, " + std::to_string(failed.splat_held_bytes) + " per-pixel bytes, " +
+              std::to_string(failed.splat_creates) + " creates as before); 4 more frames try nothing again; at "
+              "210 x 150 without the switch the blocks and the pair are made again (" +
+              std::to_string(after.splat_creates) + " creates) and the frame splats (" +
+              std::to_string(after.splat_dispatches) + " dispatches)");
+  }
+  mb3dsoundings_end(0, &error);
+}
+
+/* 7d2 (7d-4) with a Null or Metal QRhi: the splat path's real failure path,
+   where Qt reports a buffer made whose native buffer is missing, as Metal's
+   device can leave it (RenderOptions::fail_splat_native: a real create(),
+   then no native buffer reported; the buffer made again small and
+   destroyed). The 7d-3 fixture. A renderer made with the switch (its
+   uniform buffer) draws points without splatting, as with
+   fail_splat_pipelines; one made without it splats, then with the switch
+   refuses the per-pixel pair at a new size: points, not a failed frame,
+   that size not tried again (also without the switch) until another size
+   or new soundings; no per-pixel bytes held after a refusal, and the
+   renderer's objects the same (its fixed resources), none lost or added. */
+void splat_native_failures(mbvq::OffscreenRenderer::Api api, const char *name) {
+  mbvq::RenderOptions on;
+  const bool opened = null_splat_fixture(&on);
+  int error = MB_ERROR_NO_ERROR;
+  mbvq::RenderOptions failing = on;
+  failing.fail_splat_native = true;
+  mbvq::OffscreenRenderer refused(api);
+  mbvq::OffscreenRenderer reference(api);
+  mbvq::RenderOptions plain = on;
+  plain.chunk_storage = 0;
+  bool ok =
+      refused.render_soundings(200, 150, failing, nullptr) && reference.render_soundings(200, 150, plain, nullptr);
+  const mbvq::RenderStats b = refused.stats();
+  const mbvq::RenderStats z = reference.stats();
+  mbvq::OffscreenRenderer renderer(api);
+  ok = renderer.render_soundings(200, 150, on, nullptr) && ok;
+  const mbvq::RenderStats made = renderer.stats();
+  ok = renderer.render_soundings(240, 180, failing, nullptr) && ok;
+  const mbvq::RenderStats first = renderer.stats();
+  bool remembered = true;
+  for (int i = 0; i < 4; i++) {
+    ok = renderer.render_soundings(240, 180, failing, nullptr) && ok;
+    remembered = remembered && renderer.stats().splat_failures == 1 && !renderer.stats().splat;
+  }
+  ok = renderer.render_soundings(240, 180, on, nullptr) && ok;
+  const mbvq::RenderStats same = renderer.stats();
+  ok = renderer.render_soundings(280, 210, on, nullptr) && ok;
+  const mbvq::RenderStats other = renderer.stats();
+  /* refused again at 240 x 180, then new soundings: tried again there */
+  ok = renderer.render_soundings(240, 180, failing, nullptr) && ok;
+  const mbvq::RenderStats again = renderer.stats();
+  mb3dsoundings_end(0, &error);
+  const bool reopened = null_splat_fixture(&on);
+  ok = renderer.render_soundings(240, 180, on, nullptr) && ok;
+  const mbvq::RenderStats renewed = renderer.stats();
+  const int fixed = made.fixed_resources;
+  check(opened && reopened && ok && !b.failed && !b.splat_available && b.soundings_storage == 0 && !b.splat &&
+            b.soundings_drawn == 1000 && b.fixed_resources == z.fixed_resources && b.resources == z.resources &&
+            made.splat && made.splat_creates == 2 && made.splat_failures == 0 && !first.failed && !first.splat &&
+            first.splat_failures == 1 && first.splat_creates == 2 && first.splat_held_bytes == 0 &&
+            first.soundings_drawn == 1000 && first.fixed_resources == fixed && remembered && !same.splat &&
+            same.splat_failures == 1 && same.splat_creates == 2 && other.splat && other.splat_creates == 4 &&
+            other.splat_held_bytes == 470400 && other.splat_failures == 1 && other.fixed_resources == fixed &&
+            !again.splat && again.splat_failures == 2 && again.splat_creates == 4 && again.splat_held_bytes == 0 &&
+            again.fixed_resources == fixed && renewed.sounding_allocations == again.sounding_allocations + 1 &&
+            renewed.splat && renewed.splat_failures == 2 && renewed.splat_creates == 6 &&
+            renewed.splat_held_bytes == 345600 && renewed.fixed_resources == fixed,
+        std::string("7d2 ") + name + ": buffers Qt reports made without their native buffers (fail_splat_native): "
+            "a renderer made so draws its " + std::to_string(b.soundings_drawn) + " soundings as points (available " +
+            std::to_string(b.splat_available) + ", storage " + std::to_string(b.soundings_storage) + ", " +
+            std::to_string(b.fixed_resources) + " fixed resources, as with chunk_storage 0: " +
+            std::to_string(z.fixed_resources) + "); one made without it splats at 200 x 150 (" +
+            std::to_string(made.splat_creates) + " creates), then with it at 240 x 180 draws points without "
+            "failing (failed " + std::to_string(first.failed) + ", splat " + std::to_string(first.splat) + ", " +
+            std::to_string(first.splat_failures) + " failure, " + std::to_string(first.splat_held_bytes) +
+            " per-pixel bytes, " + std::to_string(first.fixed_resources) + " fixed resources, " +
+            std::to_string(fixed) + " before) and tries nothing again at that size, also without the switch "
+            "(failures " + std::to_string(same.splat_failures) + ", splat " + std::to_string(same.splat) +
+            "); at 280 x 210 it splats (" + std::to_string(other.splat_creates) + " creates, " +
+            std::to_string(other.splat_held_bytes) + " per-pixel bytes); refused again at 240 x 180 (failures " +
+            std::to_string(again.splat_failures) + ", " + std::to_string(again.splat_held_bytes) +
+            " per-pixel bytes), new soundings (" +
+            std::to_string(renewed.sounding_allocations - again.sounding_allocations) + " allocation) splat there (" +
+            std::to_string(renewed.splat_creates) + " creates, " + std::to_string(renewed.splat_held_bytes) +
+            " per-pixel bytes, " + std::to_string(renewed.fixed_resources) + " fixed resources)");
+  mb3dsoundings_end(0, &error);
+}
+
+/* 7d2 (7d-13) with a Null QRhi: the Point size box across the gate and
+   back on one renderer, splatting On: points and splats switch in the next
+   frame without a chunk written, read or made again, the per-pixel buffers
+   held only while frames splat; Auto at 1 px splats as the gate says; forced
+   quads never splat */
+void null_splat_gate() {
+  mbvq::RenderOptions on;
+  const bool opened = null_splat_fixture(&on);
+  mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+  const double sizes[4] = {3.0, 0.5, 3.0, 0.5};
+  std::vector<int> splats, held, creates;
+  bool kept = true, same = true;
+  mbvq::RenderStats first;
+  const auto uploads_as = [](const mbvq::RenderStats &s, const mbvq::RenderStats &f) {
+    return std::equal(s.sounding_writes, s.sounding_writes + 4, f.sounding_writes) &&
+           std::equal(s.sounding_reads, s.sounding_reads + 3, f.sounding_reads) &&
+           s.sounding_allocations == f.sounding_allocations && s.soundings_rebuilt == f.soundings_rebuilt &&
+           s.sounding_held_bytes == f.sounding_held_bytes && s.splat_sets == f.splat_sets;
+  };
+  for (int i = 0; i < 4; i++) {
+    mbvq::RenderOptions o = on;
+    o.soundings_point_size = sizes[i];
+    const bool ok = renderer.render_soundings(200, 150, o, nullptr);
+    const mbvq::RenderStats s = renderer.stats();
+    if (i == 0)
+      first = s;
+    else
+      kept = kept && s.frames > renderer.last_frames() && renderer.last_frames() == 1;
+    same = same && ok && !s.failed && s.soundings_drawn == 1000 && uploads_as(s, first);
+    splats.push_back(s.splat ? 1 : 0);
+    held.push_back(static_cast<int>(s.splat_held_bytes));
+    creates.push_back(s.splat_creates);
+  }
+  check(opened && kept && same && splats == std::vector<int>{0, 1, 0, 1} &&
+            held == std::vector<int>{0, 240000, 0, 240000} && creates == std::vector<int>{0, 2, 2, 4},
+        "7d2 Null: the Point size box at 3, 0.5, 3 and 0.5 on one renderer (kept: " + std::to_string(kept) +
+            "), splatting On: splat " + list(splats) + " in the next frame each, nothing written, read or made "
+            "again (" + (same ? "the same uploads" : "uploads changed") + ", " + std::to_string(first.splat_sets) +
+            " sets), per-pixel bytes " + list(held) + ", creates " + list(creates));
+  mbvq::RenderOptions automatic = on;
+  automatic.splat = mbvq::Splat::Auto;
+  const bool drawn = renderer.render_soundings(200, 150, automatic, nullptr);
+  const mbvq::RenderStats a = renderer.stats();
+  check(drawn && a.splat == (1 <= rhi::kSplatLargest) && uploads_as(a, first),
+        "7d2 Null: Auto at 1 px splats (" + std::to_string(a.splat) + ") as the size gate says (rhi::kSplatLargest " +
+            std::to_string(rhi::kSplatLargest) + "), without an upload");
+  mbvq::OffscreenRenderer quads(mbvq::OffscreenRenderer::Api::Null);
+  mbvq::RenderOptions forced = on;
+  forced.point_quads = true;
+  const bool quads_drawn = quads.render_soundings(200, 150, forced, nullptr);
+  const mbvq::RenderStats q = quads.stats();
+  check(quads_drawn && q.point_quads && q.splat_available && !q.splat && q.splat_dispatches == 0 &&
+            q.splat_held_bytes == 0 && q.soundings_drawn == 1000,
+        "7d2 Null: forced quads never splat, even when asked to at 1 px (quads " + std::to_string(q.point_quads) +
+            ", available " + std::to_string(q.splat_available) + ", splat " + std::to_string(q.splat) + ", " +
+            std::to_string(q.splat_dispatches) + " dispatches, " + std::to_string(q.splat_held_bytes) +
+            " per-pixel bytes, " + std::to_string(q.soundings_drawn) + " soundings drawn)");
+  int error = MB_ERROR_NO_ERROR;
+  mb3dsoundings_end(0, &error);
+}
+
 /* 7c with a Null QRhi: the GPU-time fallback of the map and of the 3D
    soundings. A Null QRhi waits for no GPU: without fake times
    (RenderOptions::gpu_wait_ms and gpu_total_ms) no frame is measured and
@@ -8723,6 +9463,13 @@ int test_render_null() {
   null_gpu_zoom();
   /* 7d1: the chunks' storage use, and the option chunk_storage on one renderer */
   null_chunk_storage();
+  /* 7d2: the splat path's resources (7d-3), what it cannot make (7d-4, also
+     through its real failure path), and the Point size box across the size
+     gate (7d-13) */
+  null_splat_resources();
+  null_splat_failures();
+  splat_native_failures(mbvq::OffscreenRenderer::Api::Null, "Null");
+  null_splat_gate();
   return result();
 }
 
@@ -9295,10 +10042,12 @@ void metal_soundings() {
                         (where.empty() ? std::string() : ", differ: " + where) +
                         "); a sounding not drawn leaves the background and hides none behind it");
 
-  /* point sizes 1 and 6 (the control), and points against quads */
+  /* point sizes 1 and 6 (the control), and points against quads; points,
+     not splats (7d2) */
   sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_NONE, false);
   mbvq::RenderOptions one;
   one.soundings_point_size = 1.0;
+  one.splat = mbvq::Splat::Off;
   mbvq::RenderOptions six;
   six.soundings_point_size = 6.0;
   renderer.render_soundings(W, H, one, &image);
@@ -9312,6 +10061,8 @@ void metal_soundings() {
     mbvq::OffscreenRenderer quads(mbvq::OffscreenRenderer::Api::Metal);
     mbvq::RenderOptions forced;
     forced.point_quads = true;
+    /* forced quads never splat, even when asked to */
+    forced.splat = mbvq::Splat::On;
     QImage points_image, quads_image;
     bool same = true;
     std::string sizes;
@@ -9319,14 +10070,15 @@ void metal_soundings() {
       forced.soundings_point_size = size;
       mbvq::RenderOptions plain;
       plain.soundings_point_size = size;
+      plain.splat = mbvq::Splat::Off;
       renderer.render_soundings(W, H, plain, &points_image);
       quads.render_soundings(W, H, forced, &quads_image);
       const int differ = differing(points_image, quads_image);
       sizes += std::to_string(differ) + " ";
-      same = same && differ == 0 && quads.stats().point_quads && !renderer.stats().point_quads;
+      same = same && differ == 0 && quads.stats().point_quads && !quads.stats().splat && !renderer.stats().point_quads;
     }
     check(same, "6d Metal: points and forced point quads give the same pixels at 1, 3 and 4.5 logical px (" + sizes +
-                    "pixels differ)");
+                    "pixels differ); the quads, asked to splat, never do");
   }
 
   /* the screen positions computed on the CPU (mb3dsoundings_screen_positions)
@@ -10352,6 +11104,888 @@ void metal_lod() {
   mb3dsoundings_end(0, &error);
 }
 
+/*--------------------------------------------------------------------*/
+/* 7d2 on Metal: the 3D soundings splatted by compute passes at 1 and 2
+   physical px against the same soundings drawn as points */
+
+/* how far (px) the edge f +- s/2 of a splat of s px at window position f
+   lies from a pixel centre in x or y (at most 0.5): beyond 1/256 px a point
+   of s px and the splat cover the same s x s pixels */
+double splat_edge_off(const std::array<double, 2> &f, int size) {
+  double least = 0.5;
+  for (const double v : f) {
+    const double d = v - 0.5 * size - 0.5;
+    least = std::min(least, std::fabs(d - std::round(d)));
+  }
+  return least;
+}
+
+/* ... the least of it over the soundings shown (alpha above 0) */
+double splat_edge_margin(const std::vector<float> &xyz, const std::vector<unsigned char> &rgba, int width, int height,
+                         int size) {
+  double least = 0.5;
+  for (size_t i = 0; 4 * i + 3 < rgba.size() && 3 * i + 2 < xyz.size(); i++)
+    if (rgba[4 * i + 3] != 0)
+      least = std::min(least, splat_edge_off(sdg_window(xyz, i, width, height), size));
+  return least;
+}
+
+/* The camera from above (elevation 90, azimuth 0, size 1.0137) of the splat
+   checks: the soundings checks' offsets 0.00123 and -0.00431 first, else
+   the first of 63 more, in steps of 0.0003 and 0.00027 (about a twentieth of
+   a pixel at 400 px), that meets a premise; the camera is left there (at
+   the first offsets if none does: false) */
+bool splat_camera(const std::function<bool()> &premise, float *offx, float *offy) {
+  for (int t = 0; t < 64; t++) {
+    *offx = 0.00123f + 0.0003f * static_cast<float>(t % 8);
+    *offy = -0.00431f + 0.00027f * static_cast<float>(t / 8);
+    sdg_camera(90.0f, 0.0f, 1.0137f, *offx, *offy);
+    if (premise())
+      return true;
+  }
+  *offx = 0.00123f;
+  *offy = -0.00431f;
+  sdg_camera(90.0f, 0.0f, 1.0137f, *offx, *offy);
+  return false;
+}
+
+std::string splat_camera_text(float offx, float offy) {
+  char buffer[96];
+  std::snprintf(buffer, sizeof(buffer), "the camera from above at size 1.0137, offsets %.5f %.5f", offx, offy);
+  return buffer;
+}
+
+/* the MB that the Metal device holds (defined with the window checks) */
+double metal_allocated_mb();
+
+/* The name of the Metal device the offscreen renderers draw with, as
+   QRhi::driverInfo().deviceName gives it: Qt's Metal backend makes its QRhi
+   on the system's default device and takes that device's name
+   (QRhiMetal::create). The test does not include the QRhi headers, so the
+   name is read from the same device through the Objective-C runtime, looked
+   up at run time as metal_allocated_mb() does; "" where there is none. Some
+   splat checks rest on what Apple's GPUs do (their names begin with
+   "Apple"); on other GPUs those comparisons are information. */
+std::string metal_device_name() {
+  static const std::string name = [] {
+    std::string found;
+#if defined(__APPLE__)
+    void *create = dlsym(RTLD_DEFAULT, "MTLCreateSystemDefaultDevice");
+    void *send = dlsym(RTLD_DEFAULT, "objc_msgSend");
+    void *selector = dlsym(RTLD_DEFAULT, "sel_registerName");
+    if (create == nullptr || send == nullptr || selector == nullptr)
+      return found;
+    FramePool pool;
+    const auto select = reinterpret_cast<void *(*)(const char *)>(selector);
+    const auto object = reinterpret_cast<void *(*)(void *, void *)>(send);
+    void *device = reinterpret_cast<void *(*)()>(create)();
+    void *text = device != nullptr ? object(device, select("name")) : nullptr;
+    const char *utf8 =
+        text != nullptr ? reinterpret_cast<const char *(*)(void *, void *)>(send)(text, select("UTF8String")) : nullptr;
+    if (utf8 != nullptr)
+      found = utf8;
+    /* MTLCreateSystemDefaultDevice() gave it retained */
+    if (device != nullptr)
+      reinterpret_cast<void (*)(void *, void *)>(send)(device, select("release"));
+#endif
+    return found;
+  }();
+  return name;
+}
+
+/* the colours of a splat's footprint, s x s pixels from floor(f - (s - 1) /
+   2) at window position f (y up); 0xffffffff outside the picture */
+std::vector<uint32_t> splat_footprint(const QImage &image, const std::array<double, 2> &f, int size) {
+  std::vector<uint32_t> colours;
+  const int x0 = static_cast<int>(std::floor(f[0] - 0.5 * (size - 1)));
+  const int y0 = static_cast<int>(std::floor(f[1] - 0.5 * (size - 1)));
+  for (int y = y0; y < y0 + size; y++)
+    for (int x = x0; x < x0 + size; x++)
+      colours.push_back(at_window(image, x + 0.5, y + 0.5));
+  return colours;
+}
+
+/* whether a soundings batch records the information highlight of sounding
+   i (mb3dsoundings_plot): one point after the soundings slot at the
+   sounding's display position, in the flag mode's colour, cyan */
+bool highlight_recorded(const struct mbv_draw_batch *batch, const std::vector<float> &xyz, size_t i) {
+  bool slot = false;
+  for (int k = 0; batch != nullptr && 3 * i + 2 < xyz.size() && k < batch->num_commands; k++) {
+    const struct mbv_draw_command &c = batch->commands[k];
+    if (c.kind == MBV_DRAW_SLOT && c.primitive == MBV_DRAW_SLOT_SOUNDINGS)
+      slot = true;
+    else if (slot && c.kind == MBV_DRAW_PRIMITIVE && c.primitive == MBV_DRAW_POINTS && c.count == 1 && c.first >= 0 &&
+             c.first < batch->num_vertices) {
+      const struct mbv_draw_vertex &v = batch->vertices[c.first];
+      if (v.x == xyz[3 * i] && v.y == xyz[3 * i + 1] && v.z == xyz[3 * i + 2] && v.r == 0.0f && v.g == 1.0f &&
+          v.b == 1.0f)
+        return true;
+    }
+  }
+  return false;
+}
+
+/* The pixels in which two pictures differ outside a mask (-1 if they
+   cannot be compared): the footprints of the shown soundings whose splat
+   edge f +- s/2 lies within 1/256 px of a pixel centre in x or y (E31's edge
+   part, where a point and a splat may each take or leave the pixel), each
+   widened by one pixel on those sides; the soundings and the pixels masked */
+struct MaskedDifference {
+  int differ = -1;
+  int soundings = 0;
+  int pixels = 0;
+};
+MaskedDifference masked_differing(const QImage &a, const QImage &b, const std::vector<float> &xyz,
+                                  const std::vector<unsigned char> &rgba, int size) {
+  MaskedDifference out;
+  if (a.isNull() || b.isNull() || a.size() != b.size())
+    return out;
+  const int width = a.width(), height = a.height();
+  std::vector<char> mask(static_cast<size_t>(width) * height, 0);
+  for (size_t i = 0; 4 * i + 3 < rgba.size() && 3 * i + 2 < xyz.size(); i++) {
+    if (rgba[4 * i + 3] == 0)
+      continue;
+    const std::array<double, 2> f = sdg_window(xyz, i, width, height);
+    int wide[2];
+    for (int axis = 0; axis < 2; axis++) {
+      const double d = f[axis] - 0.5 * size - 0.5;
+      wide[axis] = std::fabs(d - std::round(d)) <= 1.0 / 256.0 ? 1 : 0;
+    }
+    if (wide[0] == 0 && wide[1] == 0)
+      continue;
+    out.soundings++;
+    const int x0 = static_cast<int>(std::floor(f[0] - 0.5 * (size - 1)));
+    const int y0 = static_cast<int>(std::floor(f[1] - 0.5 * (size - 1)));
+    for (int y = y0 - wide[1]; y <= y0 + size - 1 + wide[1]; y++)
+      for (int x = x0 - wide[0]; x <= x0 + size - 1 + wide[0]; x++)
+        if (x >= 0 && x < width && y >= 0 && y < height)
+          mask[static_cast<size_t>(height - 1 - y) * width + x] = 1;
+  }
+  out.differ = 0;
+  for (int row = 0; row < height; row++)
+    for (int x = 0; x < width; x++) {
+      const bool masked = mask[static_cast<size_t>(row) * width + x] != 0;
+      out.pixels += masked ? 1 : 0;
+      out.differ += !masked && pixel_rgb(a, x, row) != pixel_rgb(b, x, row) ? 1 : 0;
+    }
+  return out;
+}
+
+/* 7d2 on Metal (7d-3's resize and release, 7d-4's buffers reported without
+   native buffers, 7d-5 to 7d-9, 7d-11): every splat picture is drawn with
+   splatting On and asserts that its frame splatted, every points picture
+   with it Off and asserts that it did not, so that no check depends on the
+   size gate */
+void metal_splat() {
+  const int W = 400, H = 300;
+  const double kMargin = 1.0 / 256.0;
+  const uint32_t kCyan = 0xffff00;
+  int error = MB_ERROR_NO_ERROR;
+  using mbvq::Splat;
+  std::vector<float> xyz;
+  std::vector<unsigned char> rgba;
+  const auto read_soundings = [&]() {
+    rhi::SoundingsFrame reader;
+    const int n = static_cast<int>(sdg_storage.size());
+    return reader.positions(n, &xyz) && reader.colours(n, &rgba) && xyz.size() >= 3u * n && rgba.size() >= 4u * n;
+  };
+  const auto options = [](double ratio, double control, Splat splat) {
+    mbvq::RenderOptions o;
+    o.pixel_ratio = ratio;
+    o.soundings_point_size = control;
+    o.splat = splat;
+    return o;
+  };
+  const auto flag = [](bool b) { return std::to_string(b ? 1 : 0); };
+  /* the Metal device, named by 7d-8 and 7d-9, whose comparisons that rest on
+     what Apple's GPUs do are information on another GPU (a name that cannot
+     be read keeps them checks) */
+  const std::string device = metal_device_name();
+  const bool apple = device.empty() || device.compare(0, 5, "Apple") == 0;
+
+  /* 7d-5: metal_soundings()'s sparse set (80 soundings about 35 px apart,
+     all shown) from above at 1 and 2 physical px, at ratio 1 (controls 1
+     and 2, 400 x 300) and ratio 2 (controls 0.5 and 1, 800 x 600): every
+     splat edge f +- s/2 lies more than 1/256 px from a pixel centre in each
+     configuration (the camera's offsets searched with that premise if the
+     usual ones miss it), so that a point and a splat cover exactly the same
+     pixels: 0 px differ */
+  const bool sparse = lod_sparse_set();
+  sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_NONE, false);
+  const bool sparse_read = read_soundings();
+  struct Config {
+    int ratio;
+    double control;
+    int size;
+  };
+  const Config configs[4] = {{1, 1.0, 1}, {1, 2.0, 2}, {2, 0.5, 1}, {2, 1.0, 2}};
+  float offx = 0.0f, offy = 0.0f;
+  const bool camera_found = sparse_read && splat_camera(
+                                               [&] {
+                                                 for (const Config &c : configs)
+                                                   if (!(splat_edge_margin(xyz, rgba, W * c.ratio, H * c.ratio,
+                                                                           c.size) > kMargin))
+                                                     return false;
+                                                 return true;
+                                               },
+                                               &offx, &offy);
+  const std::string camera = splat_camera_text(offx, offy);
+  {
+    mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Metal);
+    for (const Config &c : configs) {
+      const int w = W * c.ratio, h = H * c.ratio;
+      QImage points, splats;
+      bool drawn = renderer.render_soundings(w, h, options(c.ratio, c.control, Splat::Off), &points);
+      const bool pointed = renderer.stats().splat;
+      drawn = renderer.render_soundings(w, h, options(c.ratio, c.control, Splat::On), &splats) && drawn;
+      const bool splatted = renderer.stats().splat;
+      const double margin = splat_edge_margin(xyz, rgba, w, h, c.size);
+      const int differ = differing(points, splats);
+      const int coloured = non_white(points);
+      check(sparse && sparse_read && camera_found && drawn && margin > kMargin && differ == 0 && !pointed &&
+                splatted && coloured > 0,
+            "7d2 Metal: splats against points at " + std::to_string(c.size) + " physical px, ratio " +
+                std::to_string(c.ratio) + " (control " + text("%g", c.control) + ", " + std::to_string(w) + " x " +
+                std::to_string(h) + "): " + std::to_string(differ) + " px differ of " + std::to_string(coloured) +
+                " drawn (splat " + flag(pointed) + " then " + flag(splatted) + "); every splat edge " +
+                text("%.4f", margin) + " px or more from a pixel centre (" + camera + ")");
+    }
+  }
+
+  /* 7d-5's level variant: 7c-4's chunks of 27 (the first soundings 0, 27
+     and 54: at stride 4 the phases 0, 1 and 2) at the forced level 2 */
+  {
+    mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Metal);
+    bool ok = true;
+    std::vector<int> differ, drawn;
+    std::string flags;
+    for (const double control : {1.0, 2.0}) {
+      mbvq::RenderOptions off = options(1, control, Splat::Off);
+      off.soundings_chunk = 27;
+      off.soundings_lod = 2;
+      mbvq::RenderOptions on = off;
+      on.splat = Splat::On;
+      QImage points, splats;
+      ok = renderer.render_soundings(W, H, off, &points) && ok;
+      const mbvq::RenderStats p = renderer.stats();
+      ok = renderer.render_soundings(W, H, on, &splats) && ok;
+      const mbvq::RenderStats s = renderer.stats();
+      ok = ok && p.sounding_chunks == 3 && p.soundings_lod == 2 && s.soundings_lod == 2 &&
+           p.soundings_drawn == s.soundings_drawn && !p.splat && s.splat && non_white(points) > 0;
+      differ.push_back(differing(points, splats));
+      drawn.push_back(s.soundings_drawn);
+      flags += (flags.empty() ? "" : ", ") + flag(p.splat) + " then " + flag(s.splat);
+    }
+    check(camera_found && ok && differ == std::vector<int>{0, 0},
+          "7d2 Metal: splats against points at the forced level 2 in chunks of 27 (phases 0, 1 and 2 at stride 4) "
+          "at 1 and 2 px: " + list(differ) + " px differ, " + list(drawn) + " soundings drawn by both (splat " +
+              flags + "; 7d-5's camera premise met: " + flag(camera_found) + ")");
+  }
+
+  /* 7d-3 on Metal: a resize while splatting makes the per-pixel buffers
+     again in place, and the picture is a fresh renderer's */
+  {
+    mbvq::OffscreenRenderer kept(mbvq::OffscreenRenderer::Api::Metal);
+    mbvq::OffscreenRenderer fresh(mbvq::OffscreenRenderer::Api::Metal);
+    const mbvq::RenderOptions on = options(1, 1.0, Splat::On);
+    QImage first, resized, made;
+    bool ok = kept.render_soundings(W, H, on, &first);
+    const mbvq::RenderStats a = kept.stats();
+    ok = kept.render_soundings(520, 390, on, &resized) && ok;
+    const mbvq::RenderStats b = kept.stats();
+    ok = fresh.render_soundings(520, 390, on, &made) && ok;
+    const mbvq::RenderStats c = fresh.stats();
+    const int differ = differing(resized, made);
+    check(ok && a.splat && b.splat && c.splat && b.frames > kept.last_frames() &&
+              b.splat_creates == a.splat_creates + 2 && b.splat_sets == a.splat_sets && differ == 0 &&
+              non_white(made) > 0,
+          "7d2 Metal: splatting at 400 x 300, then at 520 x 390 on the renderer kept (" + std::to_string(b.frames) +
+              " frames): the per-pixel buffers made again in place (" +
+              std::to_string(b.splat_creates - a.splat_creates) + " creates, " +
+              std::to_string(b.splat_sets - a.splat_sets) + " sets more), " + std::to_string(differ) +
+              " px differ from a fresh renderer's picture (splat " + flag(a.splat) + flag(b.splat) + flag(c.splat) +
+              ")");
+  }
+
+  /* 7d-3 on Metal: release() lets go of the per-pixel buffers, which the
+     statistics cannot show (the offscreen renderer reports 0 bytes once it
+     has no renderer): a renderer splatting at 2048 x 1536 px, about the
+     --display dock's size (24 MB of per-pixel buffers), released, then two
+     empty frames, so that Qt's deferred releases of both frame slots run,
+     each step in an autorelease pool (FramePool, as the 7c heap checks): the
+     Metal device holds at least 3/4 of those bytes less */
+  {
+    mbvq::OffscreenRenderer large(mbvq::OffscreenRenderer::Api::Metal);
+    bool drawn = false, emptied = false;
+    mbvq::RenderStats s;
+    {
+      const FramePool pool;
+      drawn = large.render_soundings(2048, 1536, options(1, 1.0, Splat::On), nullptr);
+      s = large.stats();
+    }
+    const double gpu_before = metal_allocated_mb();
+    {
+      const FramePool pool;
+      large.release();
+      emptied = large.empty_frame() && large.empty_frame();
+    }
+    const double gpu_after = metal_allocated_mb();
+    const double held = static_cast<double>(s.splat_held_bytes) / 1048576.0;
+    const bool measured = gpu_before >= 0.0 && gpu_after >= 0.0;
+    check(drawn && s.splat && s.splat_held_bytes == size_t{8} * 2048 * 1536 && emptied && measured &&
+              gpu_before - gpu_after >= 0.75 * held,
+          "7d2 Metal: release() lets go of the per-pixel buffers of a renderer splatting at 2048 x 1536 (splat " +
+              flag(s.splat) + ", " + text("%.1f", held) + " MB of per-pixel buffers): " +
+              (measured ? "the Metal device holds " + text("%.1f", gpu_before - gpu_after) + " MB less after two "
+                          "empty frames (at least 3/4 of them expected)"
+                        : std::string("the Metal device's allocations could not be read")));
+  }
+
+  /* 7d-6: metal_soundings()'s colours of the flag mode splatted at 1 px
+     (whose footprint is the pixel of f, read with at_window), flagged
+     soundings shown and not */
+  {
+    mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Metal);
+    const mbvq::RenderOptions on = options(1, 1.0, Splat::On);
+    bool colours_ok = true, splatted = true;
+    int checked = 0;
+    std::string where;
+    for (int flagged = 1; flagged >= 0; flagged--) {
+      sdg_view(MBS_VIEW_COLOR_FLAG, flagged != 0, MBS_VIEW_PROFILES_NONE, false);
+      QImage image;
+      const bool drawn = renderer.render_soundings(W, H, on, &image) && read_soundings();
+      splatted = splatted && renderer.stats().splat;
+      colours_ok = colours_ok && drawn;
+      if (!drawn)
+        continue;
+      for (size_t i = 1; i < sdg_storage.size(); i++) {
+        const std::array<double, 2> w = sdg_window(xyz, i, W, H);
+        /* sounding 0 shares the place of 11: shown and nearer, it is there */
+        const size_t shown = i == 11 && rgba[3] != 0 ? 0 : i;
+        const uint32_t expected = rgba[4 * shown + 3] != 0 ? rgb_bytes(&rgba[4 * shown]) : kWhite;
+        const uint32_t got = at_window(image, w[0], w[1]);
+        if (got != expected && where.size() < 120)
+          where += std::to_string(i) + ":" + colour_name(got) + " ";
+        colours_ok = colours_ok && got == expected;
+        checked++;
+      }
+      /* flagged soundings not shown: 79 leaves the background, 0 does not
+         hide 11 */
+      if (flagged == 0) {
+        const std::array<double, 2> w79 = sdg_window(xyz, 79, W, H);
+        const std::array<double, 2> w11 = sdg_window(xyz, 11, W, H);
+        colours_ok = colours_ok && rgba[3] == 0 && rgba[4 * 79 + 3] == 0 &&
+                     at_window(image, w79[0], w79[1]) == kWhite &&
+                     at_window(image, w11[0], w11[1]) == rgb_bytes(&rgba[4 * 11]);
+      }
+    }
+    check(camera_found && colours_ok && splatted,
+          "7d2 Metal: splatted at 1 px, every sounding shows the exact colour bytes of mb3dsoundings_colors() at "
+          "its place, flagged ones in their flag's colour (" + std::to_string(checked) + " places" +
+              (where.empty() ? std::string() : ", differ: " + where) + "); a sounding not drawn leaves the "
+              "background and hides none behind it (splat in both frames: " + flag(splatted) +
+              "; 7d-5's camera premise met: " + flag(camera_found) + ")");
+  }
+  /* ... and a hidden sounding at exactly a shown one's place and depth with
+     a lower index (0, hidden, at 11's x, y and z): 11 shows */
+  {
+    const bool sparse_again = lod_sparse_set();
+    sdg_storage[0].z = sdg_storage[11].z;
+    const bool level_pair = open_sdg();
+    sdg_view(MBS_VIEW_COLOR_FLAG, false, MBS_VIEW_PROFILES_NONE, false);
+    mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Metal);
+    QImage points, splats;
+    bool ok = renderer.render_soundings(W, H, options(1, 1.0, Splat::Off), &points);
+    const bool pointed = renderer.stats().splat;
+    ok = renderer.render_soundings(W, H, options(1, 1.0, Splat::On), &splats) && ok && read_soundings();
+    const bool splatted = renderer.stats().splat;
+    const bool same_place = ok && xyz[0] == xyz[33] && xyz[1] == xyz[34] && xyz[2] == xyz[35];
+    const std::array<double, 2> w11 = ok ? sdg_window(xyz, 11, W, H) : std::array<double, 2>{-10.0, -10.0};
+    const uint32_t expected = ok ? rgb_bytes(&rgba[4 * 11]) : kWhite;
+    const uint32_t at_points = at_window(points, w11[0], w11[1]);
+    const uint32_t at_splats = at_window(splats, w11[0], w11[1]);
+    check(camera_found && sparse_again && level_pair && ok && same_place && rgba[3] == 0 && rgba[4 * 11 + 3] != 0 &&
+              at_points == expected && at_splats == expected && !pointed && splatted,
+          "7d2 Metal: a hidden sounding (0) at exactly the place and depth of a shown one (11) with a lower index "
+          "takes nothing from it: 11's colour (" + colour_name(expected) + ") with points (" +
+              colour_name(at_points) + ", splat " + flag(pointed) + ") and with splats (" + colour_name(at_splats) +
+              ", splat " + flag(splatted) + "; 7d-5's camera premise met: " + flag(camera_found) + ")");
+  }
+
+  /* 7d-4 on Metal: the real failure path of the splat buffers, as the Null
+     mode runs it (the 7d-3 fixture; the sparse set is not used after here) */
+  splat_native_failures(mbvq::OffscreenRenderer::Api::Metal, "Metal");
+
+  /* 7d-7: 1,000 soundings at one place and depth, each its own colour (the
+     topography colours: red i mod 256, green i div 256, blue 128), in
+     chunks of 300, so that the winner is the lowest index across the
+     chunks; at 64 x 48 with the place inside the target and more than
+     1/256 px from integers and half-integers: sounding 0's colour in every
+     one of 90 splat frames at 1 px and 30 at 2 px, as with points */
+  {
+    make_sdg(40, 25, 0);
+    const double x0 = sdg_storage[0].x, y0 = sdg_storage[0].y, z0 = sdg_storage[0].z;
+    for (size_t i = 0; i < sdg_storage.size(); i++) {
+      struct mb3dsoundings_sounding_struct &s = sdg_storage[i];
+      s.x = x0;
+      s.y = y0;
+      s.z = z0;
+      s.r = static_cast<float>(i % 256) / 255.0f;
+      s.g = static_cast<float>(i / 256) / 255.0f;
+      s.b = 0.5f;
+    }
+    const bool tied = open_sdg();
+    sdg_view(MBS_VIEW_COLOR_TOPO, true, MBS_VIEW_PROFILES_NONE, false);
+    const int TW = 64, TH = 48;
+    const bool tied_read = read_soundings();
+    float tx = 0.0f, ty = 0.0f;
+    const bool placed = tied_read && splat_camera(
+                                         [&] {
+                                           const std::array<double, 2> f = sdg_window(xyz, 0, TW, TH);
+                                           for (int axis = 0; axis < 2; axis++) {
+                                             const double v = f[axis];
+                                             const double h = v - 0.5;
+                                             if (!(v > 1.5 && v < (axis == 0 ? TW : TH) - 1.5) ||
+                                                 std::fabs(v - std::round(v)) <= kMargin ||
+                                                 std::fabs(h - std::round(h)) <= kMargin)
+                                               return false;
+                                           }
+                                           return true;
+                                         },
+                                         &tx, &ty);
+    const uint32_t expected = tied_read ? rgb_bytes(&rgba[0]) : kWhite;
+    const std::array<double, 2> f = tied_read ? sdg_window(xyz, 0, TW, TH) : std::array<double, 2>{-10.0, -10.0};
+    struct TieRun {
+      int size;
+      double control;
+      int calls;
+    };
+    for (const TieRun run : {TieRun{1, 1.0, 90}, TieRun{2, 2.0, 30}}) {
+      mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Metal);
+      mbvq::RenderOptions on = options(1, run.control, Splat::On);
+      on.soundings_chunk = 300;
+      mbvq::RenderOptions off = on;
+      off.splat = Splat::Off;
+      const auto zero_there = [&](const QImage &image) {
+        const std::vector<uint32_t> square = splat_footprint(image, f, run.size);
+        return std::all_of(square.begin(), square.end(), [&](uint32_t c) { return c == expected; });
+      };
+      bool drawn = true;
+      int held = 0, splat_frames = 0;
+      std::string seen;
+      for (int k = 0; k < run.calls; k++) {
+        QImage image;
+        drawn = renderer.render_soundings(TW, TH, on, &image) && drawn;
+        splat_frames += renderer.stats().splat ? 1 : 0;
+        const bool zero = zero_there(image);
+        held += zero ? 1 : 0;
+        if (!zero && seen.size() < 80) {
+          for (const uint32_t c : splat_footprint(image, f, run.size))
+            seen += colour_name(c) + " ";
+        }
+      }
+      const int chunks = renderer.stats().sounding_chunks;
+      QImage points;
+      drawn = renderer.render_soundings(TW, TH, off, &points) && drawn;
+      const bool pointed = renderer.stats().splat;
+      const bool points_zero = zero_there(points);
+      check(tied && placed && drawn && chunks == 4 && held == run.calls && splat_frames == run.calls && !pointed &&
+                points_zero,
+            "7d2 Metal: 1,000 soundings at one place and depth in 4 chunks, each its own colour: at " +
+                std::to_string(run.size) + " px the " + std::to_string(run.size * run.size) + " px of the place "
+                "hold sounding 0's colour (" + colour_name(expected) + ") in " + std::to_string(held) + " of " +
+                std::to_string(run.calls) + " splat frames (" + std::to_string(splat_frames) + " splatted)" +
+                (seen.empty() ? std::string() : ", else " + seen) + ", and with points (" +
+                (points_zero ? "yes" : "no") + ", splat " + flag(pointed) + "); the place at " +
+                text("%.3f", f[0]) + " " + text("%.3f", f[1]) + " of 64 x 48 (" + splat_camera_text(tx, ty) + ")");
+    }
+  }
+
+  /* 7d-8: 2 px splats cut by the view's edges, and centres 0.3 px outside
+     them. The map from data x, y to window x, y (from above: affine) fitted
+     from three soundings and checked at a fourth; eight soundings moved to
+     targets in window coordinates (y up), every other one flagged and
+     hidden: A at (0.3, H/2) and B at (W/2, H - 0.3), cut by the left and top
+     edges; C at (-0.3, H/3) and D at (W/3, H + 0.3), whose centres lie
+     outside, drawn as Metal draws such points; E to H the same at the right
+     and bottom edges, E at (W - 0.3, 2H/3), F at (2W/3, 0.3), G at (W + 0.3,
+     H/4) and H at (W/4, -0.3), where the shader cuts at the last column and,
+     the rows flipped on Metal, at the last row of the buffers. The points of
+     C, D, G and H rest on what Apple's GPUs do: on another GPU the splats
+     are compared with them as information */
+  {
+    make_sdg(8, 10, 0);
+    bool edges = open_sdg();
+    sdg_camera(90.0f, 0.0f, 1.0137f, 0.00123f, -0.00431f);
+    sdg_view(MBS_VIEW_COLOR_FLAG, false, MBS_VIEW_PROFILES_NONE, false);
+    edges = edges && read_soundings();
+    /* window = m[k][0] x + m[k][1] y + m[k][2], k = 0 (x) and 1 (y) */
+    double m[2][3] = {};
+    const auto fit = [&](size_t p, size_t q, size_t r) {
+      const double x[3] = {sdg_storage[p].x, sdg_storage[q].x, sdg_storage[r].x};
+      const double y[3] = {sdg_storage[p].y, sdg_storage[q].y, sdg_storage[r].y};
+      const std::array<double, 2> w[3] = {sdg_window(xyz, p, W, H), sdg_window(xyz, q, W, H),
+                                          sdg_window(xyz, r, W, H)};
+      const double det = (x[1] - x[0]) * (y[2] - y[0]) - (x[2] - x[0]) * (y[1] - y[0]);
+      if (det == 0.0)
+        return false;
+      for (int k = 0; k < 2; k++) {
+        const double d1 = w[1][k] - w[0][k], d2 = w[2][k] - w[0][k];
+        m[k][0] = (d1 * (y[2] - y[0]) - d2 * (y[1] - y[0])) / det;
+        m[k][1] = ((x[1] - x[0]) * d2 - (x[2] - x[0]) * d1) / det;
+        m[k][2] = w[0][k] - m[k][0] * x[0] - m[k][1] * y[0];
+      }
+      return true;
+    };
+    const auto off_by = [&](size_t i, double tx, double ty) {
+      const std::array<double, 2> w = sdg_window(xyz, i, W, H);
+      return std::max(std::fabs(w[0] - tx), std::fabs(w[1] - ty));
+    };
+    bool fitted = edges && fit(0, 9, 70);
+    const double residual =
+        fitted ? off_by(79, m[0][0] * sdg_storage[79].x + m[0][1] * sdg_storage[79].y + m[0][2],
+                        m[1][0] * sdg_storage[79].x + m[1][1] * sdg_storage[79].y + m[1][2])
+               : 1.0;
+    const double targets[8][2] = {{0.3, H / 2.0},
+                                  {W / 2.0, H - 0.3},
+                                  {-0.3, H / 3.0},
+                                  {W / 3.0, H + 0.3},
+                                  {W - 0.3, 2.0 * H / 3.0},
+                                  {2.0 * W / 3.0, 0.3},
+                                  {W + 0.3, H / 4.0},
+                                  {W / 4.0, -0.3}};
+    const size_t moved[8] = {22, 35, 47, 64, 13, 26, 51, 58};
+    double achieved = 1.0;
+    for (int attempt = 0; attempt < 3 && fitted && achieved > 1.0 / 64.0; attempt++) {
+      const double det = m[0][0] * m[1][1] - m[0][1] * m[1][0];
+      if (det == 0.0)
+        break;
+      for (int j = 0; j < 8; j++) {
+        const double dx = targets[j][0] - m[0][2], dy = targets[j][1] - m[1][2];
+        sdg_storage[moved[j]].x = (dx * m[1][1] - m[0][1] * dy) / det;
+        sdg_storage[moved[j]].y = (m[0][0] * dy - m[1][0] * dx) / det;
+      }
+      int hidden = 0;
+      for (size_t i = 0; i < sdg_storage.size(); i++)
+        if (std::find(std::begin(moved), std::end(moved), i) == std::end(moved)) {
+          sdg_storage[i].beamflag = static_cast<char>(MB_FLAG_FLAG | MB_FLAG_MANUAL);
+          sdg_storage[i].beamflagorg = sdg_storage[i].beamflag;
+          hidden++;
+        }
+      sdg_data.num_soundings_flagged = hidden;
+      sdg_data.num_soundings_unflagged = sdg_data.num_soundings - hidden;
+      edges = open_sdg() && edges;
+      sdg_view(MBS_VIEW_COLOR_FLAG, false, MBS_VIEW_PROFILES_NONE, false);
+      edges = read_soundings() && edges;
+      achieved = 0.0;
+      for (int j = 0; j < 8; j++)
+        achieved = std::max(achieved, off_by(moved[j], targets[j][0], targets[j][1]));
+      /* the core's scaling moved them: the map fitted again from three */
+      if (achieved > 1.0 / 64.0)
+        fitted = fit(moved[0], moved[1], moved[2]);
+    }
+    mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Metal);
+    QImage points, splats;
+    bool ok = renderer.render_soundings(W, H, options(1, 2.0, Splat::Off), &points);
+    const bool pointed = renderer.stats().splat;
+    ok = renderer.render_soundings(W, H, options(1, 2.0, Splat::On), &splats) && ok;
+    const bool splatted = renderer.stats().splat;
+    const int differ = differing(points, splats);
+    /* a pixel by its column and window row (y up) */
+    const auto at = [](const QImage &image, int x, int y) { return at_window(image, x + 0.5, y + 0.5); };
+    const int ay = static_cast<int>(std::floor(targets[0][1] - 0.5));
+    const int bx = static_cast<int>(std::floor(targets[1][0] - 0.5));
+    const int cy = static_cast<int>(std::floor(targets[2][1] - 0.5));
+    const int dx = static_cast<int>(std::floor(targets[3][0] - 0.5));
+    const bool a_cut = at(splats, 0, ay) == 0u && at(splats, 0, ay + 1) == 0u && at(splats, 1, ay) == kWhite &&
+                       at(splats, 1, ay + 1) == kWhite;
+    const bool b_cut = at(splats, bx, H - 1) == 0u && at(splats, bx + 1, H - 1) == 0u &&
+                       at(splats, bx, H - 2) == kWhite && at(splats, bx + 1, H - 2) == kWhite;
+    const int c_points = (at(points, 0, cy) == 0u ? 1 : 0) + (at(points, 0, cy + 1) == 0u ? 1 : 0);
+    const int d_points = (at(points, dx, H - 1) == 0u ? 1 : 0) + (at(points, dx + 1, H - 1) == 0u ? 1 : 0);
+    const int c_splats = (at(splats, 0, cy) == 0u ? 1 : 0) + (at(splats, 0, cy + 1) == 0u ? 1 : 0);
+    const int d_splats = (at(splats, dx, H - 1) == 0u ? 1 : 0) + (at(splats, dx + 1, H - 1) == 0u ? 1 : 0);
+    /* the same at the right and bottom edges: E's column W - 1 drawn and
+       W - 2 white, F's row 0 drawn and row 1 white */
+    const int ey = static_cast<int>(std::floor(targets[4][1] - 0.5));
+    const int fx = static_cast<int>(std::floor(targets[5][0] - 0.5));
+    const int gy = static_cast<int>(std::floor(targets[6][1] - 0.5));
+    const int hx = static_cast<int>(std::floor(targets[7][0] - 0.5));
+    const bool e_cut = at(splats, W - 1, ey) == 0u && at(splats, W - 1, ey + 1) == 0u &&
+                       at(splats, W - 2, ey) == kWhite && at(splats, W - 2, ey + 1) == kWhite;
+    const bool f_cut = at(splats, fx, 0) == 0u && at(splats, fx + 1, 0) == 0u && at(splats, fx, 1) == kWhite &&
+                       at(splats, fx + 1, 1) == kWhite;
+    const int g_points = (at(points, W - 1, gy) == 0u ? 1 : 0) + (at(points, W - 1, gy + 1) == 0u ? 1 : 0);
+    const int h_points = (at(points, hx, 0) == 0u ? 1 : 0) + (at(points, hx + 1, 0) == 0u ? 1 : 0);
+    const int g_splats = (at(splats, W - 1, gy) == 0u ? 1 : 0) + (at(splats, W - 1, gy + 1) == 0u ? 1 : 0);
+    const int h_splats = (at(splats, hx, 0) == 0u ? 1 : 0) + (at(splats, hx + 1, 0) == 0u ? 1 : 0);
+    /* the pixels in the view of C, D, G and H in which the pictures differ:
+       on a GPU that is not Apple's the rest of the picture must be equal */
+    const auto differs = [&](int x, int y) { return at(points, x, y) != at(splats, x, y) ? 1 : 0; };
+    const int outside_differ = differs(0, cy) + differs(0, cy + 1) + differs(dx, H - 1) + differs(dx + 1, H - 1) +
+                               differs(W - 1, gy) + differs(W - 1, gy + 1) + differs(hx, 0) + differs(hx + 1, 0);
+    const bool equal = apple ? differ == 0 : differ == outside_differ;
+    if (!apple)
+      std::printf("info\t7d2\tthe view's edges on the Metal device %s, not an Apple GPU: 2 px points whose centres "
+                  "lie 0.3 px outside the left, top, right and bottom edges drawn in %d, %d, %d and %d of 2 px, the "
+                  "splats in %d, %d, %d and %d (%d px differ there)\n",
+                  device.c_str(), c_points, d_points, g_points, h_points, c_splats, d_splats, g_splats, h_splats,
+                  outside_differ);
+    check(edges && fitted && residual <= 1.0 / 64.0 && achieved <= 1.0 / 64.0 && ok && !pointed && splatted &&
+              equal && a_cut && b_cut && e_cut && f_cut && non_white(points) > 0,
+          "7d2 Metal: 2 px splats at the view's four edges against points (splat " + flag(pointed) + " then " +
+              flag(splatted) + "; the Metal device " + device + "): " + std::to_string(differ) + " px differ" +
+              (apple ? std::string() : " (not an Apple GPU: " + std::to_string(outside_differ) + " of them where "
+                                       "the centres lie outside, information)") +
+              "; a splat 0.3 px inside the left edge cut, not moved (column 0 drawn at its two rows, column 1 "
+              "white: " + (a_cut ? "yes" : "no") + "), one 0.3 px below the top edge the same (" +
+              (b_cut ? "yes" : "no") + "), at the right edge (column " + std::to_string(W - 1) + " drawn, " +
+              std::to_string(W - 2) + " white: " + (e_cut ? "yes" : "no") + ") and the bottom edge (row 0 drawn, "
+              "row 1 white: " + (f_cut ? "yes" : "no") + "); Metal draws a 2 px point whose centre lies 0.3 px "
+              "outside the left edge in " + std::to_string(c_points) + ", the top edge in " +
+              std::to_string(d_points) + ", the right edge in " + std::to_string(g_points) + " and the bottom edge "
+              "in " + std::to_string(h_points) + " of 2 px (the splats " + std::to_string(c_splats) + ", " +
+              std::to_string(d_splats) + ", " + std::to_string(g_splats) + " and " + std::to_string(h_splats) +
+              "); the map from data to window fitted with a residual of " + text("%.5f", residual) +
+              " px, the soundings moved to within " + text("%.5f", achieved) + " px of their targets");
+  }
+
+  /* 7d-5's capped variant: the sloped set of 7d-9's scene (a), 1000
+     soundings in one chunk, at 1 px: a renderer with at most 2 groups a
+     dispatch (the clear's loop then runs 469 times per invocation over
+     120,000 pixels, the passes' 4 times) against one without the limit. The
+     capped renderer first draws the set from above at that size, so that
+     its per-pixel buffers, kept, hold another scene's depths and winners: a
+     loop that stops early leaves them, whatever Metal puts in new buffers */
+  make_sdg(40, 25, 7);
+  const bool sloped = open_sdg();
+  sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_NONE, false);
+  {
+    mbvq::OffscreenRenderer capped(mbvq::OffscreenRenderer::Api::Metal);
+    mbvq::OffscreenRenderer uncapped(mbvq::OffscreenRenderer::Api::Metal);
+    const mbvq::RenderOptions on = options(1, 1.0, Splat::On);
+    mbvq::RenderOptions two = on;
+    two.splat_group_limit = 2;
+    QImage above, a, b;
+    sdg_camera(90.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+    bool ok = capped.render_soundings(W, H, two, &above);
+    const mbvq::RenderStats c0 = capped.stats();
+    sdg_camera(35.0f, 125.0f, 1.3f, 0.05f, -0.05f);
+    ok = capped.render_soundings(W, H, two, &a) && uncapped.render_soundings(W, H, on, &b) && ok;
+    const mbvq::RenderStats c = capped.stats();
+    const mbvq::RenderStats u = uncapped.stats();
+    const int differ = differing(a, b);
+    const int scenes_differ = differing(above, a);
+    check(sloped && ok && c0.splat && c.splat && u.splat && c.frames > capped.last_frames() &&
+              c.splat_creates == c0.splat_creates && scenes_differ > 0 && c.splat_group_max == 2 &&
+              u.splat_group_max == 938 && c.sounding_chunks == 1 && differ == 0 && non_white(b) > 0,
+          "7d2 Metal: splats with at most 2 groups a dispatch (" + std::to_string(c.splat_group_max) + ", the "
+              "loops striding) against splats without the limit (" + std::to_string(u.splat_group_max) +
+              " groups) at 1 px, 1000 soundings in " + std::to_string(c.sounding_chunks) + " chunk: " +
+              std::to_string(differ) + " px differ of " + std::to_string(non_white(b)) + " drawn (splat " +
+              flag(c0.splat) + flag(c.splat) + flag(u.splat) + "); the capped renderer kept (" +
+              std::to_string(c.frames) + " frames) with its per-pixel buffers (" + std::to_string(c.splat_creates) +
+              " creates, as after its first scene) from the set seen from above, " + std::to_string(scenes_differ) +
+              " px unlike it");
+  }
+
+  /* 7d-9: splats against points with the decorations, at 1 and 2 px, at
+     ratio 1 (400 x 300, thin lines) and 2 (800 x 600, wide), splatting Off
+     then On; 0 px differ outside a mask of the soundings whose splat edges
+     lie within 1/256 px of a pixel centre (E31's edge part), counted. Scene
+     (a): the sloped set with the box, every profile line and the
+     information highlight on a shown sounding (one whose splat edges lie off
+     the pixel centres, so that its point's square is the splat's), whose
+     square over its own sounding stays hidden in both pictures (that
+     sounding's colour there, not the highlight's), unmasked, the highlight
+     itself found in the frame's batch; then the grab rectangle. Scene (b): a
+     flat set (every z equal) from above with the box and every profile
+     line, where each line meets the splats at equal depth, which the depth
+     test Less gives to the line drawn first, in the topography colours with
+     a colour of its own for each sounding, so that every crossing tells the
+     line (black or red) from the splat. Both rest on depth ties resolved as
+     Apple's GPUs resolve them: on another GPU the pixels are information. */
+  const auto decorations = [&](const char *scene, int colour_mode, bool highlight, bool grab, size_t highlighted,
+                               bool fixture) {
+    for (int ratio = 1; ratio <= 2; ratio++) {
+      const int w = W * ratio, h = H * ratio;
+      mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Metal);
+      mbvq_c_soundings_resize(w, h);
+      bool ok = fixture;
+      int differ = 0, masked_pixels = 0, cyan = 0, other = 0, pictures = 0, recorded = 0, highlight_frames = 0;
+      std::string flags, per_size;
+      for (int size = 1; size <= 2; size++) {
+        const double control = static_cast<double>(size) / ratio;
+        int size_differ = 0, size_masked = 0;
+        for (int kind = 0; kind < (grab ? 2 : 1); kind++) {
+          const bool grabbing = kind == 1;
+          sdg_view(colour_mode, true, MBS_VIEW_PROFILES_ALL, true);
+          if (highlight && !grabbing) {
+            mb3dsoundings.edit_mode = MBS_EDIT_INFO;
+            mb3dsoundings.last_sounding_defined = true;
+            mb3dsoundings.last_sounding_edited = static_cast<int>(highlighted);
+          }
+          if (grabbing) {
+            mb3dsoundings.edit_mode = MBS_EDIT_GRAB;
+            mb3dsoundings.button1down = true;
+            mb3dsoundings.grab_start_defined = true;
+            mb3dsoundings.grab_end_defined = true;
+            mb3dsoundings.grab_start_x = 101 * ratio;
+            mb3dsoundings.grab_start_y = 77 * ratio;
+            mb3dsoundings.grab_end_x = 287 * ratio;
+            mb3dsoundings.grab_end_y = 203 * ratio;
+          }
+          QImage points, splats;
+          ok = renderer.render_soundings(w, h, options(ratio, control, Splat::Off), &points) && ok;
+          const bool pointed = renderer.stats().splat;
+          ok = renderer.render_soundings(w, h, options(ratio, control, Splat::On), &splats) && ok;
+          const bool splatted = renderer.stats().splat;
+          mb3dsoundings.edit_mode = MBS_EDIT_TOGGLE;
+          mb3dsoundings.last_sounding_defined = false;
+          mb3dsoundings.button1down = false;
+          mb3dsoundings.grab_start_defined = false;
+          mb3dsoundings.grab_end_defined = false;
+          ok = ok && !pointed && splatted && non_white(points) > 0;
+          flags += flag(pointed) + flag(splatted) + " ";
+          const MaskedDifference d = masked_differing(points, splats, xyz, rgba, size);
+          ok = ok && d.differ >= 0;
+          size_differ += d.differ;
+          size_masked = d.soundings;
+          masked_pixels += d.pixels;
+          pictures++;
+          /* the highlight's square over its own sounding, unmasked; the
+             highlight recorded in the last (splat) frame's batch, so that a
+             highlight not recorded cannot pass as hidden */
+          if (highlight && !grabbing) {
+            recorded += highlight_recorded(renderer.soundings_batch(), xyz, highlighted) ? 1 : 0;
+            highlight_frames++;
+            const uint32_t colour = rgb_bytes(&rgba[4 * highlighted]);
+            const std::array<double, 2> f = sdg_window(xyz, highlighted, w, h);
+            for (const QImage *image : {&points, &splats})
+              for (const uint32_t c : splat_footprint(*image, f, size)) {
+                cyan += c == kCyan ? 1 : 0;
+                other += c != colour ? 1 : 0;
+              }
+          }
+        }
+        differ += size_differ;
+        per_size += (per_size.empty() ? "" : ", ") + std::to_string(size_differ) + " at " + std::to_string(size) +
+                    " px (" + std::to_string(size_masked) + " soundings masked)";
+      }
+      const bool highlight_hidden = !highlight || (cyan == 0 && other == 0);
+      const bool highlight_drawn = !highlight || (highlight_frames > 0 && recorded == highlight_frames);
+      if (!apple)
+        std::printf("info\t7d2\tsplats against points with the decorations, scene %s, ratio %d, on the Metal device "
+                    "%s, not an Apple GPU: %d px differ outside the mask (%s); the highlight's square %d highlight "
+                    "px, %d of another colour\n",
+                    scene, ratio, device.c_str(), differ, per_size.c_str(), cyan, other);
+      check(ok && highlight_drawn && (!apple || (differ == 0 && highlight_hidden)),
+            std::string("7d2 Metal: splats against points with the decorations, scene ") + scene + ", ratio " +
+                std::to_string(ratio) + " (" + std::to_string(w) + " x " + std::to_string(h) + ", " +
+                (ratio == 1 ? "thin" : "wide") + " profile lines; the Metal device " + device +
+                "): px differ outside the mask " + per_size + "; " + std::to_string(masked_pixels) +
+                " px masked in " + std::to_string(pictures) + " picture pairs" +
+                (highlight ? "; the highlight recorded after the soundings slot at its sounding " +
+                                 std::to_string(highlighted) + " in " + std::to_string(recorded) + " of " +
+                                 std::to_string(highlight_frames) + " frames, its square over the sounding hidden "
+                                 "in both pictures (" + std::to_string(cyan) + " highlight px, " +
+                                 std::to_string(other) + " of another colour than the sounding's)"
+                           : std::string()) +
+                (apple ? std::string() : "; not an Apple GPU: the pixels of the ties are information") +
+                " (splat off/on " + flags + ")");
+    }
+  };
+  /* scene (a): the highlighted sounding from 513 on, unflagged with
+     unflagged neighbours in its ping, its splat edges off the pixel centres
+     at both sizes and ratios */
+  sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_ALL, true);
+  const bool sloped_read = read_soundings();
+  size_t highlighted = 0;
+  for (size_t i = 513; sloped_read && i + 1 < sdg_storage.size() && highlighted == 0; i++) {
+    bool off = mb_beam_ok(sdg_storage[i - 1].beamflag) && mb_beam_ok(sdg_storage[i].beamflag) &&
+               mb_beam_ok(sdg_storage[i + 1].beamflag) && sdg_storage[i - 1].iping == sdg_storage[i].iping &&
+               sdg_storage[i + 1].iping == sdg_storage[i].iping;
+    for (const Config &c : configs)
+      off = off && splat_edge_off(sdg_window(xyz, i, W * c.ratio, H * c.ratio), c.size) > kMargin;
+    if (off)
+      highlighted = i;
+  }
+  decorations("(a), the sloped set with the highlight, then the grab rectangle", MBS_VIEW_COLOR_FLAG, true, true,
+              highlighted, sloped && sloped_read && highlighted > 0);
+  /* scene (b): the flat set from above with 7d-5's camera, each sounding in
+     a topography colour of its own (red i mod 256, green i div 256, blue
+     128: never the lines' black or red); the mask (E31) takes the soundings
+     shown from these colours' alpha, as in the flag colours */
+  make_sdg(40, 25, 7);
+  for (size_t i = 0; i < sdg_storage.size(); i++) {
+    struct mb3dsoundings_sounding_struct &s = sdg_storage[i];
+    s.z = -1000.0;
+    s.r = static_cast<float>(i % 256) / 255.0f;
+    s.g = static_cast<float>(i / 256) / 255.0f;
+    s.b = 0.5f;
+  }
+  const bool flat = open_sdg();
+  sdg_camera(90.0f, 0.0f, 1.0137f, offx, offy);
+  sdg_view(MBS_VIEW_COLOR_TOPO, true, MBS_VIEW_PROFILES_ALL, true);
+  const bool flat_read = read_soundings();
+  decorations("(b), the flat set from above in a colour per sounding, every line at the splats' depth",
+              MBS_VIEW_COLOR_TOPO, false, false, 0, flat && flat_read);
+
+  /* 7d-11: the frames a view draws for a drag's last motion during a split
+     upload, splatted at 1 px (1000 soundings in chunks of 250, a budget of
+     5000 bytes), with three position jobs after the first upload, so that
+     the last frame draws positions set 1: 3.5 through its whole job (set 1
+     swapped in), 4.0 for one frame (its job begun in set 0), 4.5 to the end
+     (the 4.0 job's last chunk swaps set 0 in, then the 4.5 job writes set 1
+     and swaps it in; set 0 holds the 4.0 positions in the last frame). The
+     last picture is a fresh renderer's at 4.5; the writes into the set not
+     drawn bound without a draw: P0 to P2 of each job (each job's P3 swaps
+     and is splatted, compute() binding it) */
+  {
+    make_sdg(40, 25, 7);
+    const bool split_open = open_sdg();
+    sdg_camera(25.0f, 35.0f, 1.0f, 0.0f, 0.0f);
+    sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_NONE, true);
+    mb3dsoundings.exaggeration = 3.0f;
+    mb3dsoundings_scalez(0, &error);
+    mbvq::RenderOptions split = options(1, 1.0, Splat::On);
+    split.soundings_chunk = 250;
+    split.upload_budget = 5000;
+    mbvq::OffscreenRenderer dragged(mbvq::OffscreenRenderer::Api::Metal);
+    bool ok = dragged.render_soundings(W, H, split, nullptr, 50);
+    const int swaps = dragged.stats().sounding_swaps;
+    mb3dsoundings.exaggeration = 3.5f;
+    mb3dsoundings_scalez(0, &error);
+    ok = dragged.render_soundings(W, H, split, nullptr, 50) && ok;
+    const bool swapped = !dragged.stats().soundings_waiting && dragged.stats().sounding_swaps == swaps + 1;
+    mb3dsoundings.exaggeration = 4.0f;
+    mb3dsoundings_scalez(0, &error);
+    ok = dragged.render_soundings(W, H, split, nullptr, 1) && ok;
+    const bool running = dragged.stats().soundings_waiting;
+    mb3dsoundings.exaggeration = 4.5f;
+    mb3dsoundings_scalez(0, &error);
+    QImage last, now;
+    ok = dragged.render_soundings(W, H, split, &last, 50) && ok;
+    const int frames = dragged.last_frames();
+    const mbvq::RenderStats ds = dragged.stats();
+    mbvq::OffscreenRenderer fresh(mbvq::OffscreenRenderer::Api::Metal);
+    ok = fresh.render_soundings(W, H, split, &now, 50) && ok;
+    const bool fresh_splat = fresh.stats().splat;
+    const int differ = differing(last, now);
+    check(split_open && ok && swapped && running && frames < 50 && !ds.soundings_waiting &&
+              ds.sounding_swaps == swaps + 3 && ds.splat && fresh_splat && differ == 0 && non_white(now) > 0 &&
+              ds.soundings_applied == 9 && ds.soundings_rebuilt == 0,
+          "7d2 Metal: splatted at 1 px, the frames a view draws for a drag's last motion during a split upload end "
+          "with the core's newest state, positions set 1 (" + std::to_string(frames) + " frames, " +
+              std::to_string(ds.sounding_swaps - swaps) + " swaps after the first upload; " +
+              std::to_string(differ) + " px differ from a renderer made now; splat " + flag(ds.splat) +
+              flag(fresh_splat) + "); the writes into the set not drawn bound without a draw " +
+              std::to_string(ds.soundings_applied) + " times (9 expected), " + std::to_string(ds.soundings_rebuilt) +
+              " buffers made again");
+  }
+  mb3dsoundings_end(0, &error);
+}
+
 int test_render_metal(const char *save) {
   mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Metal);
   if (!renderer.valid()) {
@@ -10580,6 +12214,10 @@ int test_render_metal(const char *save) {
      every 2^k-th sounding at its place, the decorations whole, the release
      frame equal to a still frame */
   metal_lod();
+  /* 7d2: the 3D soundings splatted at 1 and 2 physical px against points
+     (7d-5 to 7d-9, 7d-11), a resize while splatting and a release (7d-3),
+     buffers reported without native buffers (7d-4) */
+  metal_splat();
   metal_profile();
   return result();
 }
@@ -10606,9 +12244,14 @@ int npoints_of(const struct mbview_struct *data) { return data->profile.npoints;
 
 /* A QRhi view's picture (W, grabFramebuffer) against the offscreen
    renderer's picture of the same drawing (C) at the view's size and pixel
-   ratio; both Metal, so the same pixels (design 16). Elsewhere skipped. */
+   ratio, with the program's point size and splat mode (7d2); both Metal, so
+   the same pixels (design 16), and both splatted or neither (the view's
+   statistics of the grabbed frame against the offscreen renderer's).
+   Elsewhere skipped. The check is named by the sub-PR that asks for it (6d
+   unless given). */
 void same_as_offscreen(QRhiWidget *view, const QImage &picture, double ratio, const std::string &what,
-                       const std::function<bool(mbvq::OffscreenRenderer &, const mbvq::RenderOptions &, QImage *)> &render) {
+                       const std::function<bool(mbvq::OffscreenRenderer &, const mbvq::RenderOptions &, QImage *)> &render,
+                       const std::string &part = "6d") {
   if (view == nullptr || view->api() != QRhiWidget::Api::Metal) {
     std::printf("skipped: %s view's picture against the offscreen renderer's (Metal only)\n", what.c_str());
     return;
@@ -10617,13 +12260,18 @@ void same_as_offscreen(QRhiWidget *view, const QImage &picture, double ratio, co
   mbvq::RenderOptions options;
   options.pixel_ratio = ratio;
   options.soundings_point_size = mbvq::soundings_point_size();
+  options.splat = mbvq::soundings_splat();
   QImage c;
+  const bool view_splat = mbvq::view_stats(view).splat;
   const bool drawn = offscreen.valid() && render(offscreen, options, &c);
+  const bool offscreen_splat = offscreen.stats().splat;
   const int differ = drawn ? differing(picture, c) : -1;
-  check(drawn && differ == 0, "6d: " + what + " view's picture (grabFramebuffer, " + std::to_string(picture.width()) +
-                                  " x " + std::to_string(picture.height()) + ") equals the offscreen renderer's at "
-                                  "its size and ratio " + text("%.2f", ratio) + " (" + std::to_string(differ) +
-                                  " px differ)");
+  check(drawn && differ == 0 && offscreen_splat == view_splat,
+        part + ": " + what + " view's picture (grabFramebuffer, " + std::to_string(picture.width()) + " x " +
+            std::to_string(picture.height()) + ") equals the offscreen renderer's at its size and ratio " +
+            text("%.2f", ratio) + " (" + std::to_string(differ) + " px differ; splat " +
+            std::to_string(view_splat ? 1 : 0) + " in the view, " + std::to_string(offscreen_splat ? 1 : 0) +
+            " offscreen)");
 }
 
 /* The MB that the Metal device holds (MTLDevice.currentAllocatedSize; the
@@ -11113,12 +12761,21 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
                         [&](mbvq::OffscreenRenderer &offscreen, const mbvq::RenderOptions &options, QImage *c) {
                           return offscreen.render_soundings(picture.width(), picture.height(), options, c, 50);
                         });
-      /* the point-size control: 1 logical px */
+      /* the point-size control: 1 logical px, drawn as points, not splats
+         (7d2) */
       QDoubleSpinBox *control = mbvq::soundings_widget()->findChild<QDoubleSpinBox *>();
+      mbvq::set_soundings_splat(mbvq::Splat::Off);
       if (control != nullptr)
         control->setValue(1.0);
       spin(300);
       const QImage smaller = sview_rhi->grabFramebuffer().convertToFormat(QImage::Format_RGB32);
+      /* ... so that the frame's statistics say points (asserted on Metal,
+         an information line elsewhere) */
+      const mbvq::RenderStats small_stats = mbvq::view_stats(sview);
+      const bool small_metal = sview_rhi->api() == QRhiWidget::Api::Metal;
+      if (!small_metal)
+        std::printf("info\t7d2\tthe point-size control at 1 px with splatting Off: splat %d (%s)\n",
+                    small_stats.splat ? 1 : 0, mbvq::rhi_api_name(mbvq::rhi_api()));
       int small_point = 0;
       {
         const QRgb black = qRgb(0, 0, 0);
@@ -11132,11 +12789,13 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
       }
       if (control != nullptr)
         control->setValue(3.0);
+      mbvq::set_soundings_splat(mbvq::Splat::Auto);
       const int small_px = expected_px(1.0, ratio);
-      check(control != nullptr && small_point == std::max(small_px, line_px),
+      check(control != nullptr && small_point == std::max(small_px, line_px) && (!small_metal || !small_stats.splat),
             "6d: the point-size control at 1 px draws the points " + std::to_string(small_point) +
                 " physical px high (" + std::to_string(small_px) + ", within a line " + std::to_string(line_px) +
-                " high)");
+                " high); 7d2: splatting Off, so points (splat " + std::to_string(small_stats.splat ? 1 : 0) +
+                (small_metal ? std::string(")") : std::string("; not Metal: the information line)")));
       /* a click on a sounding edits it */
       const int edits = sdg_edits;
       const QPointF at(sdg_storage[middle].winx / ratio, (H - 1 - sdg_storage[middle].winy) / ratio);
@@ -11566,6 +13225,239 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
         sview->removeEventFilter(&probe);
         set_delivered(nullptr);
       }
+      /* 7d2: the Point size box set as by hand (its value then the
+         program's), and the program's size where the box is missing */
+      const auto point_size_to = [&control](double value) {
+        if (control != nullptr)
+          control->setValue(value);
+        mbvq::set_soundings_point_size(value);
+      };
+      const bool metal_view = sview_rhi->api() == QRhiWidget::Api::Metal;
+      /* 7d2 (7d-12): the splat twin of the point-size control, after 7c-7,
+         so that the click and 7c-7 run at 3 px as before. New soundings from
+         above without profile lines (the run through a sounding then
+         measures the splat alone), the controls of 1 and 2 physical px at
+         the view's ratio, splatting On: the run of black pixels through the
+         sounding as high as the size, the view splatting on Metal (an
+         information line elsewhere), the picture the offscreen renderer's
+         (Metal only). Then splats against points with the profile lines (an
+         information line), Auto at 1 px as the size gate says (Metal only)
+         and a resize while splatting; then Auto, 3 px and every profile line
+         again. Each frame waited for up to 2 s. A size that no control gives
+         at the view's ratio (2 px at ratios from 2.75 to below 3.5, 1 px from
+         3.5 on) is skipped with an information line, with the steps that
+         need it. */
+      {
+        const auto drawn_after = [&](int frames) {
+          timer.restart();
+          while (mbvq::view_stats(sview).frames <= frames && timer.elapsed() < 2000)
+            spin(20);
+          return mbvq::view_stats(sview).frames > frames;
+        };
+        make_sdg(60, 40, 23);
+        const bool twin_opened = open_sdg();
+        sdg_camera(90.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+        sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_NONE, false);
+        int frames = mbvq::view_stats(sview).frames;
+        mbvq_c_soundings_plot();
+        const bool twin_drawn = drawn_after(frames);
+        /* a sounding in the middle, good, with good neighbours along its ping */
+        mb3dsoundings_screen_positions(0, &error);
+        size_t at = sdg_storage.size() / 2 + 20;
+        while (at + 1 < sdg_storage.size() &&
+               (sdg_storage[at].beamflag != MB_FLAG_NONE || sdg_storage[at + 1].beamflag != MB_FLAG_NONE ||
+                sdg_storage[at - 1].beamflag != MB_FLAG_NONE))
+          at++;
+        /* the black pixels in a column through its pixel */
+        const auto run_at = [&](const QImage &image) {
+          const QRgb black = qRgb(0, 0, 0);
+          const int x = sdg_storage[at].winx, y0 = image.height() - 1 - sdg_storage[at].winy;
+          if (x < 0 || x >= image.width() || y0 < 0 || y0 >= image.height())
+            return 0;
+          int y = y0, n = 0;
+          while (y > 0 && image.pixel(x, y - 1) == black)
+            y--;
+          while (y < image.height() && image.pixel(x, y) == black) {
+            n++;
+            y++;
+          }
+          return n;
+        };
+        /* the smallest controls in steps of 0.5 of 1 and 2 physical px */
+        double controls[2] = {0.0, 0.0};
+        for (int size = 1; size <= 2; size++)
+          for (int step = 1; step <= 16 && controls[size - 1] == 0.0; step++)
+            if (expected_px(0.5 * step, ratio) == size)
+              controls[size - 1] = 0.5 * step;
+        mbvq::set_soundings_splat(mbvq::Splat::On);
+        for (int size = 1; size <= 2; size++) {
+          if (controls[size - 1] == 0.0) {
+            std::printf("info\t7d2\tno control of the Point size box gives %d physical px at ratio %.2f: the splat "
+                        "twin skipped there\n",
+                        size, ratio);
+            continue;
+          }
+          point_size_to(controls[size - 1]);
+          spin(300);
+          const QImage splatted = sview_rhi->grabFramebuffer().convertToFormat(QImage::Format_RGB32);
+          const mbvq::RenderStats s = mbvq::view_stats(sview);
+          const int height = run_at(splatted);
+          if (!metal_view)
+            std::printf("info\t7d2\tsplat %d, available %d, %d physical px, %d dispatches, %.1f MB per-pixel (%s)\n",
+                        s.splat ? 1 : 0, s.splat_available ? 1 : 0, size, s.splat_dispatches,
+                        static_cast<double>(s.splat_held_bytes) / 1048576.0, mbvq::rhi_api_name(mbvq::rhi_api()));
+          check(twin_opened && twin_drawn && height == size && (!metal_view || s.splat),
+                "7d2: the splat twin of the point-size control: at the control " + text("%g", controls[size - 1]) +
+                    " (" + std::to_string(size) + " physical px at ratio " + text("%.2f", ratio) + ") the sounding "
+                    "is " + std::to_string(height) + " physical px high, splatting On (" +
+                    (metal_view ? "the view splats: " + std::to_string(s.splat ? 1 : 0)
+                                : std::string("not Metal: the information line says whether it splats")) +
+                    "; the soundings opened " + std::to_string(twin_opened ? 1 : 0) + ", their first frame drawn " +
+                    std::to_string(twin_drawn ? 1 : 0) + ")");
+          same_as_offscreen(
+              sview_rhi, splatted, ratio, "the splatted 3D soundings (" + std::to_string(size) + " physical px)",
+              [&](mbvq::OffscreenRenderer &offscreen, const mbvq::RenderOptions &options, QImage *c) {
+                return offscreen.render_soundings(splatted.width(), splatted.height(), options, c, 50);
+              },
+              "7d2");
+        }
+        /* splats against points with the profile lines (information; the
+           Docker script bounds it, given the two grabs' splat states): the
+           2 px control, the topography colours (each sounding its own),
+           every profile line and the box, the set seen nearly from the side,
+           so that soundings of one beam lie on one another at different
+           depths and colours */
+        if (controls[1] == 0.0)
+          std::printf("info\t7d2\tno control of the Point size box gives 2 physical px at ratio %.2f: splats "
+                      "against points with profile lines skipped\n",
+                      ratio);
+        else {
+          point_size_to(controls[1]);
+          for (size_t i = 0; i < sdg_storage.size(); i++) {
+            sdg_storage[i].r = static_cast<float>(i % 256) / 255.0f;
+            sdg_storage[i].g = static_cast<float>((i / 256) % 256) / 255.0f;
+            sdg_storage[i].b = 0.5f;
+          }
+          const float elevation = 5.0f;
+          sdg_camera(elevation, 0.0f, 1.0f, 0.0f, 0.0f);
+          sdg_view(MBS_VIEW_COLOR_TOPO, true, MBS_VIEW_PROFILES_ALL, true);
+          spin(300);
+          const QImage on = sview_rhi->grabFramebuffer().convertToFormat(QImage::Format_RGB32);
+          const mbvq::RenderStats a = mbvq::view_stats(sview);
+          mbvq::set_soundings_splat(mbvq::Splat::Off);
+          spin(300);
+          const QImage off = sview_rhi->grabFramebuffer().convertToFormat(QImage::Format_RGB32);
+          const mbvq::RenderStats b = mbvq::view_stats(sview);
+          int differ = 0;
+          for (int y = 0; on.size() == off.size() && y < on.height(); y++)
+            for (int x = 0; x < on.width(); x++)
+              differ += on.pixel(x, y) != off.pixel(x, y) ? 1 : 0;
+          /* the soundings drawn that share their pixel with another */
+          mb3dsoundings_screen_positions(0, &error);
+          std::vector<unsigned char> rgba;
+          rhi::SoundingsFrame reader;
+          const int n = static_cast<int>(sdg_storage.size());
+          std::map<std::pair<int, int>, int> on_pixel;
+          if (reader.colours(n, &rgba))
+            for (int i = 0; i < n; i++)
+              if (rgba[4 * static_cast<size_t>(i) + 3] != 0)
+                on_pixel[{sdg_storage[static_cast<size_t>(i)].winx, sdg_storage[static_cast<size_t>(i)].winy}]++;
+          int sharing = 0;
+          for (const auto &pixel : on_pixel)
+            sharing += pixel.second > 1 ? pixel.second : 0;
+          std::printf("info\t7d2\tsplats against points at 2 px with profile lines: %d px differ of %d footprint px "
+                      "(%d soundings drawn, %d sharing their pixel; splat on %d, off %d; elevation %.0f; %s)\n",
+                      differ, 4 * a.soundings_drawn, a.soundings_drawn, sharing, a.splat ? 1 : 0, b.splat ? 1 : 0,
+                      static_cast<double>(elevation), mbvq::rhi_api_name(mbvq::rhi_api()));
+        }
+        /* Auto at the 1 px control: splatting as the size gate says */
+        sdg_camera(90.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+        sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_NONE, false);
+        mbvq::set_soundings_splat(mbvq::Splat::Auto);
+        if (controls[0] == 0.0)
+          std::printf("info\t7d2\tno control of the Point size box gives 1 physical px at ratio %.2f: Auto at 1 px "
+                      "and the resize while splatting skipped\n",
+                      ratio);
+        else {
+          /* first Off at that control: Off reaches the view through the
+             program's hook and draws points where Auto may splat (S11's box
+             check, at 2 px on a Retina screen, cannot show it) */
+          mbvq::set_soundings_splat(mbvq::Splat::Off);
+          frames = mbvq::view_stats(sview).frames;
+          point_size_to(controls[0]);
+          const bool off_drawn = drawn_after(frames);
+          const mbvq::RenderStats off = mbvq::view_stats(sview);
+          frames = off.frames;
+          mbvq::set_soundings_splat(mbvq::Splat::Auto);
+          const bool auto_drawn = drawn_after(frames);
+          const mbvq::RenderStats s = mbvq::view_stats(sview);
+          if (metal_view)
+            check(off_drawn && !off.splat && auto_drawn && s.splat == (1 <= rhi::kSplatLargest),
+                  "7d2: splatting Auto at the 1 px control: the view splats (" + std::to_string(s.splat ? 1 : 0) +
+                      ") as the size gate says (rhi::kSplatLargest " + std::to_string(rhi::kSplatLargest) +
+                      "), and with splatting Off before it draws points (splat " + std::to_string(off.splat ? 1 : 0) +
+                      ")");
+          else
+            std::printf("info\t7d2\tsplatting Off, then Auto at the 1 px control: splat %d, then %d (%s)\n",
+                        off.splat ? 1 : 0, s.splat ? 1 : 0, mbvq::rhi_api_name(mbvq::rhi_api()));
+        }
+        /* a resize while splatting at 1 px (the host 120 px lower, so that
+           the screen cannot clamp it): the renderer kept (its create() time
+           the same), the per-pixel buffers made again in place for the new
+           size, no binding made; then the host's size again */
+        if (controls[0] > 0.0) {
+          mbvq::set_soundings_splat(mbvq::Splat::On);
+          drawn_after(mbvq::view_stats(sview).frames);
+          const QImage before_image = sview_rhi->grabFramebuffer();
+          const mbvq::RenderStats before = mbvq::view_stats(sview);
+          const QSize host_size = host->size();
+          host->resize(host->width(), host->height() - 120);
+          const bool resized = drawn_after(before.frames);
+          const QImage after_image = sview_rhi->grabFramebuffer();
+          const mbvq::RenderStats after = mbvq::view_stats(sview);
+          host->resize(host_size);
+          const bool back = drawn_after(after.frames);
+          const QImage back_image = sview_rhi->grabFramebuffer();
+          const size_t pixels = static_cast<size_t>(after_image.width()) * static_cast<size_t>(after_image.height());
+          const size_t pixels_before =
+              static_cast<size_t>(before_image.width()) * static_cast<size_t>(before_image.height());
+          const bool smaller = !after_image.isNull() && after_image.height() < before_image.height();
+          const bool restored = !back_image.isNull() && back_image.size() == before_image.size();
+          if (!metal_view)
+            std::printf("info\t7d2\ta resize while splatting: splat %d, %.1f MB per-pixel for %d x %d px, creates "
+                        "%d, sets %d (%s)\n",
+                        after.splat ? 1 : 0, static_cast<double>(after.splat_held_bytes) / 1048576.0,
+                        after_image.width(), after_image.height(), after.splat_creates - before.splat_creates,
+                        after.splat_sets - before.splat_sets, mbvq::rhi_api_name(mbvq::rhi_api()));
+          /* on Metal also the premise: the frame before the resize splatted
+             with the pair of its size (a first pair would also give 2
+             creates) */
+          check(resized && back && smaller && restored &&
+                    (!metal_view || (before.splat && before.splat_held_bytes == 8 * pixels_before && after.splat &&
+                                     after.splat_held_bytes == 8 * pixels &&
+                                     after.splat_creates == before.splat_creates + 2 && after.frames > before.frames &&
+                                     after.create_ms == before.create_ms && after.splat_sets == before.splat_sets)),
+                "7d2: a resize of the 3D soundings view while it splats at 1 px: " +
+                    std::to_string(before_image.width()) + " x " + std::to_string(before_image.height()) + " to " +
+                    std::to_string(after_image.width()) + " x " + std::to_string(after_image.height()) +
+                    " physical px and back to " + std::to_string(back_image.width()) + " x " +
+                    std::to_string(back_image.height()) +
+                    (metal_view ? "; before it splat " + std::to_string(before.splat ? 1 : 0) + " with " +
+                                      std::to_string(before.splat_held_bytes) + " per-pixel bytes (8 per pixel: " +
+                                      std::to_string(8 * pixels_before) + "); after it splat " +
+                                      std::to_string(after.splat ? 1 : 0) + ", " +
+                                      std::to_string(after.splat_held_bytes) + " per-pixel bytes (8 per pixel: " +
+                                      std::to_string(8 * pixels) + "), " +
+                                      std::to_string(after.splat_creates - before.splat_creates) + " creates, " +
+                                      std::to_string(after.splat_sets - before.splat_sets) +
+                                      " sets more, the renderer kept (create() " + text("%.3f", after.create_ms) +
+                                      " ms, as before " + text("%.3f", before.create_ms) + ")"
+                                : std::string("; not Metal: the information line gives the statistics")));
+        }
+        mbvq::set_soundings_splat(mbvq::Splat::Auto);
+        point_size_to(3.0);
+        sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_ALL, false);
+      }
       /* Dismiss, as mbeditviz-qt: the view is hidden, then the program
          releases its soundings in the notification, and the hidden view,
          which draws no frame that would drop them, lets go of what it holds
@@ -11616,6 +13508,60 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
                    : measured ? "the Metal device holds " + text("%.1f", gpu_before - gpu_after) + " MB less (after " +
                                     std::to_string(frames) + " more frames)"
                               : std::string("the Metal device's allocations could not be read")));
+      }
+      /* 7d2 (7d-12): Dismiss while the view splats (the Point size box at
+         0.5 and splatting On, both set before the soundings, so that it
+         splats whatever the size gate), with the box check's 2,400
+         soundings, whose per-pixel buffers (8 bytes per physical pixel of
+         the dock) dominate: the view lets go of them in the call with the
+         soundings' buffers; on Metal the device holds at least 3/4 of both
+         less right after the call, after three more frames of the view, as
+         above */
+      {
+        point_size_to(0.5);
+        mbvq::set_soundings_splat(mbvq::Splat::On);
+        make_sdg(60, 40, 23);
+        const bool dismiss_opened = open_sdg();
+        mbvq_c_soundings_plot();
+        const int count = static_cast<int>(sdg_storage.size());
+        timer.restart();
+        while ((mbvq::view_stats(sview).soundings_drawn != count || mbvq::view_stats(sview).soundings_waiting ||
+                !mbvq::view_stats(sview).splat) &&
+               timer.elapsed() < 2000)
+          spin(20);
+        spin(300);
+        const int drawn_frames = mbvq::view_stats(sview).frames;
+        for (int i = 0; i < 3; i++) {
+          sview->update();
+          spin(150);
+        }
+        const mbvq::RenderStats shown = mbvq::view_stats(sview);
+        const double gpu_before = metal_allocated_mb();
+        mbvq_c_soundings_dismiss();
+        const double gpu_after = metal_allocated_mb();
+        spin(300);
+        const mbvq::RenderStats hidden = mbvq::view_stats(sview);
+        std::vector<struct mb3dsoundings_sounding_struct>().swap(sdg_storage);
+        const double held =
+            static_cast<double>(shown.sounding_held_bytes + shown.splat_held_bytes) / 1048576.0;
+        const int frames = shown.frames - drawn_frames;
+        const bool measured = metal_view && gpu_before >= 0.0 && gpu_after >= 0.0;
+        check(dismiss_opened && shown.soundings_drawn == count && hidden.splat_held_bytes == 0 &&
+                  hidden.sounding_held_bytes == 0 &&
+                  (!metal_view || (shown.splat && shown.splat_held_bytes > 0 && measured && frames >= 2 &&
+                                   gpu_before - gpu_after >= 0.75 * held)),
+              "7d2: Dismiss while the view splats " + std::to_string(count) + " soundings at 0.5 (opened " +
+                  std::to_string(dismiss_opened ? 1 : 0) + "; splat " +
+                  std::to_string(shown.splat ? 1 : 0) + ", " + text("%.1f", held) + " MB: " +
+                  text("%.1f", static_cast<double>(shown.splat_held_bytes) / 1048576.0) + " MB of per-pixel "
+                  "buffers) lets go of them in its call (" + std::to_string(hidden.splat_held_bytes) +
+                  " per-pixel and " + std::to_string(hidden.sounding_held_bytes) + " soundings' bytes after it): " +
+                  (!metal_view ? std::string("the GPU memory is measured on Metal only")
+                   : measured  ? "the Metal device holds " + text("%.1f", gpu_before - gpu_after) +
+                                    " MB less (after " + std::to_string(frames) + " more frames)"
+                               : std::string("the Metal device's allocations could not be read")));
+        mbvq::set_soundings_splat(mbvq::Splat::Auto);
+        point_size_to(3.0);
       }
       /* The next soundings drawn; then Dismiss while the dock is closed (its
          close button: the program keeps its soundings until a menu of its
@@ -11715,6 +13661,74 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
       delete host;
     }
     mbvq::set_soundings_placement({});
+  }
+
+  /* 7d2 (7d-12): the float sequence again with the view splatting: a new
+     host, dock and soundings, the Point size box at 0.5 and splatting On
+     before the soundings open; floated, docked again and floated, each time
+     a frame drawn (waited for up to 5 s, as in 6d's sequence: the frame
+     comes when the window is next composed) and on Metal splatted (an
+     information line elsewhere); then ended while floating, its view
+     removing QRhiWidget's callback from the QRhi it left (QTBUG-151834) */
+  {
+    auto *host = new QMainWindow;
+    host->setCentralWidget(new QLabel(QStringLiteral("the program")));
+    host->resize(1300, 900);
+    host->show();
+    QDockWidget *dock = nullptr;
+    mbvq::set_soundings_placement([host, &dock](mbvq::SoundingsWidget *widget) {
+      dock = new QDockWidget(widget->title());
+      dock->setWidget(widget);
+      host->addDockWidget(Qt::RightDockWidgetArea, dock);
+      dock->show();
+    });
+    mbvq::set_soundings_point_size(0.5);
+    mbvq::set_soundings_splat(mbvq::Splat::On);
+    make_sdg(60, 40, 23);
+    const bool opened = open_sdg() && dock != nullptr;
+    QWidget *sview = mbvq::soundings_widget() != nullptr ? mbvq::soundings_widget()->view() : nullptr;
+    auto *sview_rhi = qobject_cast<QRhiWidget *>(sview);
+    const bool metal = sview_rhi != nullptr && sview_rhi->api() == QRhiWidget::Api::Metal;
+    bool moves = opened && sview_rhi != nullptr;
+    std::string drawn_after, splatted_after;
+    if (moves) {
+      sdg_camera(90.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+      sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_NONE, false);
+      for (bool floating : {true, false, true}) {
+        dock->setFloating(floating);
+        spin(1200);
+        const int frames = mbvq::view_stats(sview).frames;
+        mbvq_c_soundings_plot();
+        timer.restart();
+        while (mbvq::view_stats(sview).frames == frames && timer.elapsed() < 5000)
+          spin(20);
+        const mbvq::RenderStats s = mbvq::view_stats(sview);
+        const bool drew =
+            s.frames > frames && mbvq::view_state(sview).renderer && !mbvq::view_state(sview).failure_shown;
+        drawn_after += drew ? "1" : "0";
+        splatted_after += s.splat ? "1" : "0";
+        moves = moves && drew && dock->isFloating() == floating && (!metal || s.splat);
+      }
+    }
+    if (!metal)
+      std::printf("info\t7d2\tthe float sequence at 0.5 with splatting On: splat after each move %s (%s)\n",
+                  splatted_after.c_str(), mbvq::rhi_api_name(mbvq::rhi_api()));
+    const int removed = mbvq::stale_callbacks_removed();
+    int error = MB_ERROR_NO_ERROR;
+    mb3dsoundings_end(0, &error);
+    spin(200);
+    const int removed_after = mbvq::stale_callbacks_removed();
+    delete host;
+    spin(200);
+    mbvq::set_soundings_placement({});
+    mbvq::set_soundings_splat(mbvq::Splat::Auto);
+    mbvq::set_soundings_point_size(3.0);
+    check(moves && removed_after > removed,
+          "7d2: a soundings dock at the Point size 0.5 with splatting On floated, docked again and floated, drawing "
+          "each time (" + drawn_after + ")" +
+              (metal ? " and splatting (" + splatted_after + ")" : std::string(" (not Metal: the information line)")) +
+              "; ended while floating, its view removed QRhiWidget's callback from the QRhi it left (" +
+              std::to_string(removed_after - removed) + "), then the main window went (QTBUG-151834)");
   }
 
   /* 6d: mb3dsoundings_open() shows the soundings window, and a QRhi view
@@ -11939,8 +13953,12 @@ int terrain_pixels(size_t instance) {
 /* A program with a QRhi map, its profile window and the 3D soundings in a
    floating dock of its main window open ends (--quit). With maps_only (the
    shape of mbgrdviz-qt): the map and its profile window alone, without
-   soundings, and a main window only for "float" (its map in a dock). */
-int test_quit(const char *how, const char *grdfile, bool maps_only) {
+   soundings, and a main window only for "float" (its map in a dock). 7d2:
+   point_size (above 0: the Point size box, as --point-size gives it) and
+   splat (--splat) are set before the soundings open; with a point size the
+   floated soundings view splats as the mode and the size say (checked on
+   Metal, an information line elsewhere). */
+int test_quit(const char *how, const char *grdfile, bool maps_only, double point_size, mbvq::Splat splat) {
   const bool floating = std::strcmp(how, "float") == 0;
   /* the program's main window: the soundings in a dock of it (6d), floated
      below; with "float" the map too */
@@ -11998,6 +14016,9 @@ int test_quit(const char *how, const char *grdfile, bool maps_only) {
   }
   /* 6d: the soundings, drawn in their dock, then floated */
   if (!maps_only) {
+    if (point_size > 0.0)
+      mbvq::set_soundings_point_size(point_size);
+    mbvq::set_soundings_splat(splat);
     make_sdg(60, 40, 23);
     open_sdg();
     QWidget *sview = mbvq::soundings_widget() != nullptr ? mbvq::soundings_widget()->view() : nullptr;
@@ -12021,6 +14042,28 @@ int test_quit(const char *how, const char *grdfile, bool maps_only) {
               mbvq::view_stats(sview).frames > frames && mbvq::view_state(sview).renderer,
           "6d: the soundings drawn in their dock, then floated and drawn with the QRhi of the floating window");
     print_create_time(sview, "the soundings view, its dock floated");
+    /* 7d2: the floated view splats as the mode and the point size say */
+    if (point_size > 0.0 && sview != nullptr) {
+      const double ratio = sview->devicePixelRatioF();
+      const int px = expected_px(point_size, ratio);
+      const bool expected = splat == mbvq::Splat::On     ? px <= 2
+                            : splat == mbvq::Splat::Auto ? px <= rhi::kSplatLargest
+                                                         : false;
+      const mbvq::RenderStats s = mbvq::view_stats(sview);
+      const char *mode = splat == mbvq::Splat::On ? "on" : splat == mbvq::Splat::Off ? "off" : "auto";
+      auto *sview_rhi = qobject_cast<QRhiWidget *>(sview);
+      if (sview_rhi != nullptr && sview_rhi->api() == QRhiWidget::Api::Metal)
+        check(s.splat == expected,
+              "7d2: the floated soundings view at the Point size " + text("%g", point_size) + " (" +
+                  std::to_string(px) + " physical px at ratio " + text("%.2f", ratio) + ") with splatting " + mode +
+                  " splats: " + std::to_string(s.splat ? 1 : 0) + " (" + std::to_string(expected ? 1 : 0) +
+                  " expected)");
+      else
+        std::printf("info\t7d2\tthe floated soundings view at the point size %.1f (%d physical px at ratio %.2f), "
+                    "splatting %s: splat %d, available %d (%s)\n",
+                    point_size, px, ratio, mode, s.splat ? 1 : 0, s.splat_available ? 1 : 0,
+                    mbvq::rhi_api_name(mbvq::rhi_api()));
+    }
   }
 
   bool about_to_quit = false;
@@ -12973,7 +15016,7 @@ int bench(bool mode3d, const char *grdfile, int steps, int width, int height, co
    those drawn at a coarser level, and the level and the soundings drawn in
    the frame after a release (7c). Output as --bench: "bench scenario metric
    n median p95 max" and "values" lines. A measurement, not a test. */
-int bench_soundings(int count, int steps, double point_size, int files, bool tiles) {
+int bench_soundings(int count, int steps, double point_size, int files, bool tiles, mbvq::Splat splat) {
   const bool rhi = mbvq::backend() == mbvq::Backend::Rhi;
   std::printf("info\tbackend\t%s\n", rhi ? "QRhi" : "OpenGL");
   const int beams = 400;
@@ -12984,6 +15027,8 @@ int bench_soundings(int count, int steps, double point_size, int files, bool til
   }
   if (point_size > 0.0)
     mbvq::set_soundings_point_size(point_size);
+  /* how the view splats (7d2; --splat, Auto if not given) */
+  mbvq::set_soundings_splat(splat);
   QElapsedTimer opening;
   opening.start();
   make_sdg(pings, beams, 23);
@@ -13075,6 +15120,11 @@ int bench_soundings(int count, int steps, double point_size, int files, bool til
     style.point_size = mbvq::soundings_point_size();
     std::printf("info\tpoint size\t%.1f logical px, %d physical px at ratio %.2f\n", style.point_size, style.point(3.0),
                 style.ratio);
+    /* whether the first complete frame splatted (7d2) */
+    std::printf("info\tsplat\tmode %s; splat %d (available %d), %d dispatches, per-pixel buffers %.1f MB\n",
+                splat == mbvq::Splat::On ? "on" : splat == mbvq::Splat::Off ? "off" : "auto", first.splat ? 1 : 0,
+                first.splat_available ? 1 : 0, first.splat_dispatches,
+                static_cast<double>(first.splat_held_bytes) / 1048576.0);
   }
   report_memory("opened");
   spin(500);
@@ -13126,14 +15176,16 @@ int bench_soundings(int count, int steps, double point_size, int files, bool til
      allocations, and (7d1) the chunks' storage use, the chunks bound without
      a draw and those made again (RenderStats::soundings_storage,
      soundings_applied, soundings_rebuilt; totals since the view's renderer
-     was made) */
+     was made), and (7d2) whether the last frame splatted and the bytes of
+     its per-pixel buffers */
   const auto report_end = [&](const char *key, const char *when) {
     const mbvq::RenderStats last = mbvq::view_stats(view);
     if (rhi)
       std::printf("info\t%s\tGPU bytes of the soundings' buffers %.1f MB (every copy), swaps %d, allocations %d, "
-                  "storage %d, applied %d, rebuilt %d, profile lines %s\n",
+                  "storage %d, applied %d, rebuilt %d, splat %d, splat MB %.1f, profile lines %s\n",
                   key, static_cast<double>(last.sounding_held_bytes) / 1048576.0, last.sounding_swaps,
                   last.sounding_allocations, last.soundings_storage, last.soundings_applied, last.soundings_rebuilt,
+                  last.splat ? 1 : 0, static_cast<double>(last.splat_held_bytes) / 1048576.0,
                   tiles ? "not shown" : last.profile_wide ? "wide" : "thin");
     report_memory(when);
   };
@@ -13352,11 +15404,16 @@ int main(int argc, char **argv) {
   const bool soundings_bench = std::strcmp(mode, "--bench-soundings") == 0;
   /* the options of the benches (7a): recognised in every mode; in their
      bench neither the option nor its value is taken for the grid; outside
-     it, or without a valid value, they are refused (the usage line, exit 2) */
+     it, or without a valid value, they are refused (the usage line, exit 2).
+     --point-size and --splat (7d2) also for --quit, but not with
+     --maps-only, which opens no soundings; --watchdog (7d2) in every mode */
   double point_size = 0.0;
   int files = 1;
   bool tiles = false;
   int gis_parts = 0;
+  mbvq::Splat splat = mbvq::Splat::Auto;
+  bool splat_given = false;
+  int watchdog = 0;
   for (int i = quit || soundings_bench ? 3 : 2; i < argc; i++) {
     if (std::strcmp(argv[i], "--3d") == 0)
       mode3d = true;
@@ -13377,8 +15434,29 @@ int main(int argc, char **argv) {
     else if (std::strcmp(argv[i], "--point-size") == 0) {
       /* as the soundings window's control allows: 0.5 to 8 in steps of 0.5 */
       char rest = 0;
-      if (!soundings_bench || i + 1 >= argc || std::sscanf(argv[++i], "%lf%c", &point_size, &rest) != 1 ||
+      if (!(soundings_bench || quit) || i + 1 >= argc || std::sscanf(argv[++i], "%lf%c", &point_size, &rest) != 1 ||
           !(point_size >= 0.5 && point_size <= 8.0) || std::floor(2.0 * point_size) != 2.0 * point_size)
+        arguments = false;
+    }
+    else if (std::strcmp(argv[i], "--splat") == 0) {
+      /* how the 3D soundings view splats (7d2): auto, off or on */
+      splat_given = true;
+      if (!(soundings_bench || quit) || i + 1 >= argc)
+        arguments = false;
+      else if (std::strcmp(argv[++i], "auto") == 0)
+        splat = mbvq::Splat::Auto;
+      else if (std::strcmp(argv[i], "off") == 0)
+        splat = mbvq::Splat::Off;
+      else if (std::strcmp(argv[i], "on") == 0)
+        splat = mbvq::Splat::On;
+      else
+        arguments = false;
+    }
+    else if (std::strcmp(argv[i], "--watchdog") == 0) {
+      /* the watchdog's limit in seconds (7d2; 1 to 900), for runs under
+         Metal's validation layers */
+      char rest = 0;
+      if (i + 1 >= argc || std::sscanf(argv[++i], "%d%c", &watchdog, &rest) != 1 || watchdog < 1 || watchdog > 900)
         arguments = false;
     }
     else if (std::strcmp(argv[i], "--files") == 0) {
@@ -13407,6 +15485,9 @@ int main(int argc, char **argv) {
     else
       grdfile = argv[i];
   }
+  /* --point-size and --splat would do nothing with --maps-only */
+  if (maps_only && (point_size > 0.0 || splat_given))
+    arguments = false;
   int sounding_count = 1000000;
   if (soundings_bench && argc > 2 && std::sscanf(argv[2], "%d", &sounding_count) != 1)
     sounding_count = 0;
@@ -13420,9 +15501,11 @@ int main(int argc, char **argv) {
                                 std::strcmp(how, "exit") == 0 || std::strcmp(how, "float") == 0)));
   if (!known || (soundings_bench && sounding_count < 1)) {
     std::fprintf(stderr, "usage: mbview_qt_rhi_test --model | --widgets | --render-null | --render-metal [--save file] "
-                         "| --display [--3d] [--save file] [grid] | --quit close|quit|exit|float [--maps-only] [grid] "
+                         "| --display [--3d] [--save file] [grid] | --quit close|quit|exit|float [--maps-only | "
+                         "[--point-size p] [--splat auto|off|on]] [grid] "
                          "| --bench [--3d] [--frames n] [--size WxH] [--nav list] [--gis N] [grid] "
-                         "| --bench-soundings n [--frames n] [--point-size p] [--files k] [--order pings|tiles]\n");
+                         "| --bench-soundings n [--frames n] [--point-size p] [--splat auto|off|on] [--files k] "
+                         "[--order pings|tiles]; every mode also [--watchdog s]\n");
     return 2;
   }
   /* the bench of the legacy OpenGL backend needs it: a build without it
@@ -13435,8 +15518,8 @@ int main(int argc, char **argv) {
     }
   }
   /* 10 s for the headless modes (ctest gives 60 s), a minute with a window,
-     a quarter of an hour for the bench */
-  start_watchdog(bench_mode ? 900 : display ? 60 : 10, mode);
+     a quarter of an hour for the bench; or --watchdog's */
+  start_watchdog(watchdog > 0 ? watchdog : bench_mode ? 900 : display ? 60 : 10, mode);
 
   /* the headless modes on the offscreen platform, as ctest runs them, unless
      another platform is named */
@@ -13480,9 +15563,9 @@ int main(int argc, char **argv) {
   if (std::strcmp(mode, "--render-metal") == 0)
     return test_render_metal(save);
   if (quit)
-    return test_quit(how, grdfile, maps_only);
+    return test_quit(how, grdfile, maps_only, point_size, splat);
   if (soundings_bench)
-    return bench_soundings(sounding_count, steps, point_size, files, tiles);
+    return bench_soundings(sounding_count, steps, point_size, files, tiles, splat);
   if (bench_mode)
     return bench(mode3d, grdfile, steps, width, height, navlist, gis_parts);
   return test_display(mode3d, grdfile, save);

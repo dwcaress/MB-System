@@ -31,6 +31,11 @@
 # legacy OpenGL backend runs the mbview drawing code in a 2.1 compatibility
 # context; it is built with -DbuildQt6LegacyGL=ON, the default except on macOS,
 # and always without QRhi, and is the default elsewhere where it is built.
+# Where QRhi can read storage buffers in the fragment stage (Metal, Vulkan,
+# OpenGL 4.3, and ES 3.1 where the driver can; Direct3D draws quads), the QRhi
+# backend splats the 3D soundings drawn at 1 physical pixel with compute shaders
+# (2 pixels can be asked for); those shaders and the resolve that reads their
+# storage buffers are built for GLSL ES 3.10 and GLSL 4.30 only.
 # MB_RENDERER chooses another backend at run time. The core keeps its OpenGL
 # drawing code in every build, so the system OpenGL and GLU stay linked, and on
 # macOS GL_SILENCE_DEPRECATION hides the deprecation warnings of the OpenGL
@@ -179,6 +184,15 @@ if(mbvq_rhi)
                   shaders/mbvq_stipple_thin.vert shaders/mbvq_stipple_wide.vert shaders/mbvq_stipple.frag
                   shaders/mbvq_batch_pointquad.vert shaders/mbvq_points.vert shaders/mbvq_pointquad.vert
                   shaders/mbvq_wide_pairs.vert)
+  # compute splatting of the 3D soundings: the compute shaders and the resolve's
+  # fragment shader, which reads their storage buffers, need GLSL ES 3.10 or
+  # GLSL 4.30, and the resolve's vertex shader shares the call; HLSL and MSL at
+  # the defaults, the HLSL unused: Direct3D draws quads and does not splat
+  # (Qt's Direct3D 11 backend binds storage buffers only at the compute stage;
+  # Direct3D 12 not checked)
+  qt6_add_shaders(mbview-qt "mbvq_compute_shaders" PREFIX "/mbvq" BASE shaders GLSL "310es,430" FILES
+                  shaders/mbvq_splat_clear.comp shaders/mbvq_splat_points.comp shaders/mbvq_splat_resolve.vert
+                  shaders/mbvq_splat_resolve.frag)
 endif()
 
 # the legacy OpenGL backend: the default elsewhere where it is built

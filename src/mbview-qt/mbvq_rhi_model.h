@@ -64,6 +64,7 @@
 
 #include "mbv_draw_batch.h"
 #include "mbvq_bridge.h"
+#include "mbvq_rhi.h"
 
 namespace mbvq {
 namespace rhi {
@@ -149,13 +150,14 @@ constexpr double kGpuGainShare = 0.1;
 enum class WaitApi { Null, OpenGL, Direct3D11, Direct3D12, Metal, Vulkan };
 bool gpu_wait_counts(WaitApi api, bool fake);
 
-/* the compute group size of the soundings' splat passes, which come later:
-   a backend whose limits are below it does not splat */
+/* the compute group size of the soundings' splat passes
+   (shaders/mbvq_splat_*.comp, local_size_x): a backend whose limits are
+   below it does not splat */
 constexpr int kSplatGroup = 128;
 
 /* How the soundings' position and colour chunks are made: static with
-   storage use where the backend can splat (without the splat pipelines,
-   which come later): Compute supported, the API Metal, Vulkan, OpenGL or
+   storage use where the backend can splat (and the renderer makes its
+   splat objects): Compute supported, the API Metal, Vulkan, OpenGL or
    Null, and MaxThreadsPerThreadGroup and MaxThreadGroupX each kSplatGroup
    or more, or 0 (not reported: Null). Direct3D 11: Qt binds storage buffers
    only at the compute stage (qrhid3d11.cpp), so a splat's resolve, which
@@ -168,6 +170,58 @@ struct ChunkUse {
   bool dynamic = false;
 };
 ChunkUse chunk_use(WaitApi api, bool compute, int threads_per_group, int thread_group_x);
+
+/* Compute splatting of the 3D soundings (SoundingsRenderer). The largest
+   physical point size Auto splats at: the size gate, kept only where 7d2's
+   bench measured the splat faster than points on Metal at 8 M soundings (2:
+   1 and 2 px; 1: 1 px; 0: never by Auto). 1: at 2 px the splats took more
+   GPU time than points in the rotation at pixel ratio 1. */
+constexpr int kSplatLargest = 1;
+/* the most groups of a dispatch where the QRhi reports none (Null): the
+   minimum of OpenGL and OpenGL ES, Metal's */
+constexpr int kSplatGroupCap = 65535;
+/* The soundings slot of a frame is splatted: the renderer can (available),
+   points are not drawn as quads, and mode (RenderOptions::splat) is Auto
+   with a physical size of 1 to kSplatLargest, or On with 1 or 2. */
+bool splat_size(int physical, bool available, bool quads, Splat mode);
+/* the groups of a dispatch over items: ceil(items / kSplatGroup), at most
+   the limit (0, not reported: kSplatGroupCap; never more than it), at
+   least 1 */
+int splat_groups(uint64_t items, int limit);
+/* The soundings of a chunk drawn at stride k (the levels of detail, 7c):
+   those whose index in the array is a multiple of k, from the chunk's first
+   such sounding (the phase, (k - first % k) % k soundings in) */
+int stride_phase(int first, int stride);
+int stride_count(int first, int points, int stride);
+/* the rows are flipped where the y directions of normalised device
+   coordinates and of the framebuffer differ (Metal: y up and y down) */
+bool splat_flip(bool y_up_ndc, bool y_up_framebuffer);
+/* the passes of a splat frame, as the shaders number them (the block's
+   grid.w) */
+enum class SplatPass { Clear = 0, Depth = 1, Winner = 2, Colour = 3, Resolve = 4 };
+/* the std140 block of the splat shaders (Splat, binding 4): 112 bytes */
+struct SplatBlock {
+  float mvp[16];      /* the soundings slot's matrix */
+  float viewport[4];  /* width, height, the size s (physical px), 1 = flip the rows */
+  uint32_t counts[4]; /* soundings of the dispatch, pixels, the chunk's first sounding, 1 = clip depth 0..1 */
+  uint32_t grid[4];   /* groups dispatched, stride, phase, pass */
+};
+static_assert(sizeof(SplatBlock) == 112, "the splat shaders' block (shaders/mbvq_splat_*)");
+/* what the blocks of a frame share */
+struct SplatFrame {
+  float mvp[16] = {};
+  int width = 0;
+  int height = 0;
+  int size = 1;
+  bool flip = false;
+  bool zero_to_one = true;
+  /* the groups' limit: MaxThreadGroupsPerDimension or
+     RenderOptions::splat_group_limit, 0: not reported */
+  int group_limit = 0;
+};
+/* the block of a pass: the clear over the pixels; a point pass over chunk
+   first .. first + points - 1 at stride k; the resolve (no dispatch) */
+SplatBlock splat_block(const SplatFrame &frame, SplatPass pass, int first = 0, int points = 0, int stride = 1);
 
 /* The rule of the GPU-time fallback for one view, over the levels 0 to
    coarsest (finer to coarser), one for each zoom's level (0 to kLevels - 1:
