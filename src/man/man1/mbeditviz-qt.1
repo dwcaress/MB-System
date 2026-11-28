@@ -1,4 +1,4 @@
-.TH mbeditviz-qt 1 "8 November 2026" "MB-System 5.0" "MB-System 5.0"
+.TH mbeditviz-qt 1 "19 November 2026" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbeditviz-qt\fP \- Bathymetry editor and patch test tool (Qt6 version).
 
@@ -33,9 +33,13 @@ The two programs share their program logic, the gridding and editing code and
 the \fBmbview\fP drawing code, so they read the same swath files and datalists
 and write the same edit save files and parameter files; a file edited with one
 program can be edited further with the other. Two programs cannot edit one
-file at the same time. The map is drawn by the original OpenGL drawing code of
-\fBmbview\fP in an OpenGL 2.1 compatibility context; the map window is
-described in \fBmbgrdviz\fP(1). The windows can be resized.
+file at the same time. The map and the 3D soundings are drawn with QRhi (Metal
+on macOS, Direct3D 11 on Windows, OpenGL on Linux) or with the legacy OpenGL
+drawing, the original OpenGL drawing code of \fBmbview\fP in an OpenGL 2.1
+compatibility context: QRhi is the default on macOS, the legacy OpenGL drawing
+on Linux and Windows where the program is built with it (see ENVIRONMENT). The
+map window is described in \fBmbgrdviz\fP(1); its differences under QRhi (the
+Resolution dialog) in \fBmbgrdviz-qt\fP(1). The windows can be resized.
 
 .SH MB-SYSTEM AUTHORSHIP
 David W. Caress
@@ -79,6 +83,34 @@ Grids with the simple mean algorithm instead of the footprint algorithm.
 Prints the program version and more information about its work to the
 stderr stream. Give it twice for debugging output.
 
+.SH ENVIRONMENT
+.TP
+.B MB_RENDERER
+Chooses how the map, its profiles and the 3D soundings are drawn, once when
+the program starts. \fBauto\fP draws with QRhi and the platform's graphics
+API (Metal on macOS, Direct3D 11 on Windows, OpenGL on Linux); \fBmetal\fP,
+\fBd3d11\fP, \fBd3d12\fP, \fBvulkan\fP and \fBopengl\fP draw with QRhi
+and that API where the platform has it, else with the platform's API;
+\fBlegacy-gl\fP draws with the legacy OpenGL drawing; \fBnull\fP draws
+nothing (for tests). \fBopengl\fP is QRhi's OpenGL, not the legacy OpenGL
+drawing. On macOS QRhi cannot draw with OpenGL, whose context there lacks
+instancing: the views show the message described below, so there
+\fBopengl\fP is only for tests.
+.IP
+Without \fBMB_RENDERER\fP, or with a value not listed above, the program draws
+with QRhi on macOS and with the legacy OpenGL drawing on Linux and Windows; a
+program built with only one of the two draws with that one. A value it cannot
+follow gives one line on the stderr stream saying what it draws with instead.
+.IP
+The legacy OpenGL drawing is built in two cases: with
+\fB\-DbuildQt6LegacyGL=ON\fP (the default except on macOS), and when QRhi is
+not built. QRhi needs \fB\-DbuildQt6Rhi=ON\fP (the default), Qt 6.8 or later,
+Qt Shader Tools and Qt's private Gui headers (on Debian and Ubuntu the package
+qt6-base-private-dev). Where QRhi cannot draw (for example in a virtual machine
+without Metal), each view shows a message instead of the
+drawing and one line goes to the stderr stream; the program does not change
+to the legacy OpenGL drawing by itself.
+
 .SH THE MAIN WINDOW
 The status shows the number of available and loaded files and the grid.
 \fBMode\fP chooses whether edits are written (Edit Bathymetry) or not (Browse
@@ -110,7 +142,7 @@ unflags the sounding nearest the mouse, Pick flags it, Erase flags and Restore
 unflags the soundings the mouse passes over, Grab flags the soundings in a
 dragged rectangle, and Info shows a sounding's file, ping and beam in the
 status line. The middle and right buttons rotate the soundings and change the
-vertical exaggeration, or pan and zoom (Mouse menu, or the buttons under Reset
+vertical exaggeration, or pan and zoom (Mouse menu, or the buttons beside Reset
 View).
 
 Keys: u or q Toggle, i or w Pick, o or e Erase, p or r Restore, t, [ or {
@@ -128,6 +160,11 @@ colours the unflagged soundings and optimises the bias values. The Heading,
 Roll and Pitch Bias, Time Lag and Snell Correction sliders set the values; a
 slider's range moves when it reaches an end. Dismiss closes the window.
 
+Where the soundings are drawn with QRhi, the Point size box beside the edit
+mode buttons sets their size, from 0.5 to 8 logical pixels in steps of 0.5
+(3 by default), times the screen's pixel ratio, for the whole program; it is
+not saved.
+
 .SH DIFFERENCES FROM MBEDITVIZ
 The program name in lock files and edit save files is mbeditviz-qt.
 
@@ -141,4 +178,5 @@ and the Info text replaces the bias sliders while it is shown, as in
 
 .SH BUGS
 The Shoal Bias gridding algorithm gives an empty grid, in \fBmbeditviz\fP
-too. Only tested on macOS so far.
+too. Tested on macOS; on Linux (Ubuntu) only in automated tests with
+software rendering; not yet run on Windows.

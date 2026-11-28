@@ -158,8 +158,9 @@ int main(int argc, char **argv) {
     exit(error);
   }
 
-  /* one renderer per process, chosen before the QApplication exists: OpenGL,
-     or the one MB_RENDERER names */
+  /* one renderer per process, chosen before the QApplication exists: the one
+     MB_RENDERER names, else the build's default (QRhi on macOS and the
+     legacy OpenGL backend elsewhere, each where it is built) */
   mbvq::set_backend_from_environment();
   QApplication app(argc, argv);
   QApplication::setApplicationName(QStringLiteral("mbgrdviz-qt"));

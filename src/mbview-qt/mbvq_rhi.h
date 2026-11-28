@@ -107,8 +107,8 @@ struct RenderOptions {
   double node_ns_colour = -1.0;
   double node_ns_z = -1.0;
   /* the device pixel ratio the core's line widths, point sizes and stipple
-     factors (logical pixels) are scaled by: physical = max(1, round(logical
-     x ratio)); a view takes its devicePixelRatioF() instead */
+     factors (logical pixels) are scaled by: physical = max(1, floor(logical
+     x ratio + 0.25)); a view takes its devicePixelRatioF() instead */
   double pixel_ratio = 1.0;
   /* the tessellation of the marker shapes */
   GluVariant glu_variant = GluVariant::Sgi;

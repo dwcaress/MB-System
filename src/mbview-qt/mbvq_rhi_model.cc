@@ -1387,7 +1387,7 @@ bool TerrainPlan::plan(const TerrainInput &input, const PlanOptions &options, Pl
 
 /*--------------------------------------------------------------------*/
 int Style::physical(double logical, double ratio, double factor) {
-  const double size = std::floor(logical * ratio * factor + 0.5);
+  const double size = std::floor(logical * ratio * factor + 0.25);
   if (!(size >= 1.0))
     return 1;
   return size > 4096.0 ? 4096 : static_cast<int>(size);

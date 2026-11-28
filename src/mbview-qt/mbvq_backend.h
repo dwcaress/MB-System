@@ -24,14 +24,16 @@
 /*
  * The backends of mbview-qt. A backend installs the mbview renderer
  * operations (mbv_render.h) and creates the views. The legacy OpenGL backend
- * (mbvq_backend_gl.cc) holds all OpenGL code of the Qt half and runs the
- * core's OpenGL drawing. The QRhi backend (mbvq_backend_rhi.cc and the
- * mbvq_rhi_* files; built with Qt 6.8 or later and Qt Shader Tools, where
- * MBVQ_HAVE_RHI is defined) draws what the core records in a batch
- * (mbv_draw_batch.h) with Metal, Direct3D, Vulkan or OpenGL, without any
- * OpenGL call of the core. The null backend (mbvq_backend_null.cc) draws
- * nothing. One backend per process, chosen in main() before the QApplication
- * exists (mbvq.h); the views come from the backend chosen.
+ * (mbvq_backend_gl.cc; built with -DbuildQt6LegacyGL=ON, the default except
+ * on macOS, and always without QRhi, where MBVQ_HAVE_GL is defined) holds all
+ * OpenGL code of the Qt half and runs the core's OpenGL drawing. The QRhi
+ * backend (mbvq_backend_rhi.cc and the mbvq_rhi_* files; built with Qt 6.8 or
+ * later, its private Gui headers and Qt Shader Tools, where MBVQ_HAVE_RHI is
+ * defined) draws what the core records in a batch (mbv_draw_batch.h) with
+ * Metal, Direct3D, Vulkan or OpenGL, without any OpenGL call of the core. The
+ * null backend (mbvq_backend_null.cc) draws nothing. One backend per process,
+ * chosen in main() before the QApplication exists (mbvq.h); the views come
+ * from the backend chosen.
  */
 
 #ifndef MBVIEW_QT_MBVQ_BACKEND_H
@@ -55,11 +57,20 @@ bool parse_renderer(const char *value, Backend *backend, RhiApi *api);
    Windows, Vulkan and OpenGL where Qt has them (Default always) */
 bool rhi_api_possible(RhiApi api);
 /* the backend and API that a value of MB_RENDERER chooses (null or empty when
-   it is not set), and the line to write to stderr (empty if none): an unknown
-   value gives the OpenGL backend, QRhi where this build has none the OpenGL
-   backend, an API this platform cannot have QRhi with the platform's API.
-   What set_backend_from_environment() asks before set_backend(). */
+   it is not set), and the line to write to stderr (empty if none): no value
+   gives the default of this build and platform without a line (QRhi with the
+   platform's API on Apple where it is built; elsewhere the legacy OpenGL
+   backend where it is built, else QRhi), an unknown value the default too, a
+   backend this build lacks what resolve_backend() makes of it, an API this
+   platform cannot have QRhi with the platform's API. Never a backend this
+   build lacks. What set_backend_from_environment() asks before set_backend(). */
 void choose_renderer(const char *value, Backend *backend, RhiApi *api, std::string *message);
+/* the backend and API that a request becomes in this build, and the line to
+   write to stderr (empty if none): a backend this build has stays as asked;
+   QRhi where this build has none gives the legacy OpenGL backend, and the
+   legacy OpenGL backend where it has none QRhi with the platform's API. What
+   set_backend() and choose_renderer() do with a request; no side effects. */
+void resolve_backend(Backend *backend, RhiApi *api, std::string *message);
 /* the API chosen for the QRhi backend */
 RhiApi rhi_api();
 /* the name of an API, for messages ("Metal", "Direct3D 11", ...) */
@@ -85,6 +96,7 @@ void release_soundings_view(QWidget *view);
 bool fill_active();
 void set_fill_active(bool active);
 
+#ifdef MBVQ_HAVE_GL
 namespace gl_backend {
 /* set the default surface format; before QApplication exists */
 void configure();
@@ -94,6 +106,7 @@ QWidget *create_map_view(size_t instance, QWidget *parent);
 QWidget *create_profile_view(size_t instance, QWidget *parent);
 QWidget *create_soundings_view(QWidget *parent);
 }  // namespace gl_backend
+#endif
 
 namespace null_backend {
 void install();

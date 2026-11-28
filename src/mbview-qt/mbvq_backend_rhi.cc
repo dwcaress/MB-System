@@ -275,9 +275,11 @@ void RhiView::render_failed() {
 
 void RhiView::report_failure() {
   failures_++;
-  const QString text =
-      QStringLiteral("mbview-qt: the views could not be drawn with QRhi (%1); MB_RENDERER=legacy-gl draws them with OpenGL")
-          .arg(QString::fromLatin1(widget_api_name(api())));
+  /* MB_RENDERER=legacy-gl is named only where this build has that backend */
+  const QString advice = backend_built(Backend::LegacyGL) ? QStringLiteral("MB_RENDERER=legacy-gl draws them with OpenGL")
+                                                          : QStringLiteral("this build has no legacy OpenGL drawing");
+  const QString text = QStringLiteral("mbview-qt: the views could not be drawn with QRhi (%1); %2")
+                           .arg(QString::fromLatin1(widget_api_name(api())), advice);
   if (failure_lines == 0) {
     std::fprintf(stderr, "%s\n", qPrintable(text));
     failure_lines++;

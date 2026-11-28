@@ -26,13 +26,16 @@
  *
  *   mbview_qt_test --null         checks without drawing (null backend; picks are
  *                                 found on the CPU), for ctest
- *   mbview_qt_test --gl [--3d]    draws a synthetic grid with the OpenGL backend,
- *                                 waits for the full resolution drawing and checks
- *                                 picks made with mouse events
+ *   mbview_qt_test --gl [--3d]    draws a synthetic grid with the legacy OpenGL
+ *                                 backend, where it is built (77, skipped,
+ *                                 elsewhere), waits for the full resolution
+ *                                 drawing and checks picks made with mouse events
  *   mbview_qt_test --rhi [--3d]   the same with the QRhi backend, where it is built
  *                                 (77, skipped, elsewhere), its profile view a
  *                                 QRhi view too
- *   mbview_qt_test --show [--3d] [--edit] [grid]   opens a window to use by hand
+ *   mbview_qt_test --show [--3d] [--edit] [grid]   opens a window to use by hand,
+ *                                 drawn as the programs draw: with the backend
+ *                                 MB_RENDERER names, else the build's default
  *                                 (--edit: sites, routes and polylines enabled); with
  *                                 MBVIEW_QT_TEST_SNAPSHOT=file it saves the first
  *                                 full resolution drawing and quits; with
@@ -55,7 +58,9 @@
 #include <QListWidget>
 #include <QMenu>
 #include <QMouseEvent>
+#ifdef MBVQ_HAVE_GL
 #include <QOpenGLWidget>
+#endif
 #include <QScrollArea>
 #include <QPushButton>
 #include <QRadioButton>
@@ -118,8 +123,10 @@ void start_watchdog(int seconds, const char *mode) {
 /* the picture of a map view that draws, OpenGL or QRhi; under QRhi
    grabFramebuffer() draws a new frame, a fill with its side effects */
 QImage grab(QWidget *view) {
+#ifdef MBVQ_HAVE_GL
   if (auto *gl = qobject_cast<QOpenGLWidget *>(view))
     return gl->grabFramebuffer();
+#endif
 #ifdef MBVQ_HAVE_RHI
   if (auto *rhi = qobject_cast<QRhiWidget *>(view))
     return rhi->grabFramebuffer();
@@ -744,10 +751,14 @@ int test_drawing(bool mode3d, bool rhi) {
   size_t instance = MBV_NO_WINDOW;
   check(open_view(mode3d, nullptr, &instance), "mbview_open with the " + backend + " backend");
   QWidget *view = mbvq::map_view(instance);
+  bool drawing = false;
 #ifdef MBVQ_HAVE_RHI
-  const bool drawing = rhi ? qobject_cast<QRhiWidget *>(view) != nullptr : qobject_cast<QOpenGLWidget *>(view) != nullptr;
-#else
-  const bool drawing = qobject_cast<QOpenGLWidget *>(view) != nullptr;
+  if (rhi)
+    drawing = qobject_cast<QRhiWidget *>(view) != nullptr;
+#endif
+#ifdef MBVQ_HAVE_GL
+  if (!rhi)
+    drawing = qobject_cast<QOpenGLWidget *>(view) != nullptr;
 #endif
   check(drawing, std::string(rhi ? "the map view is a QRhi widget" : "the map view is an OpenGL widget"));
   if (!drawing)
@@ -888,11 +899,13 @@ int test_drawing(bool mode3d, bool rhi) {
   gl_window->widget()->profile()->open();
   spin(300);
   if (!rhi) {
+#ifdef MBVQ_HAVE_GL
     if (const char *snapshot = std::getenv("MBVIEW_QT_TEST_PROFILE"))
       qobject_cast<QOpenGLWidget *>(gl_window->widget()->profile()->view())->grabFramebuffer().save(QString::fromLocal8Bit(snapshot));
     auto *profile_view = qobject_cast<QOpenGLWidget *>(gl_window->widget()->profile()->view());
     check(profile_view != nullptr && !profile_view->grabFramebuffer().isNull() && data->prwidth > 0 && data->prheight > 0,
           "the profile view draws (" + std::to_string(data->prwidth) + " x " + std::to_string(data->prheight) + " pixels)");
+#endif
   }
   else {
     /* the QRhi profile view: a QRhiWidget, whose grabFramebuffer() draws a
@@ -908,7 +921,7 @@ int test_drawing(bool mode3d, bool rhi) {
     for (int y = 0; y < picture.height(); y++)
       for (int x = 0; x < picture.width(); x++)
         dark += qGray(picture.pixel(x, y)) < 128;
-    const int frame_px = std::max(1, static_cast<int>(std::floor(2.0 * profile_view->devicePixelRatioF() + 0.5)));
+    const int frame_px = std::max(1, static_cast<int>(std::floor(2.0 * profile_view->devicePixelRatioF() + 0.25)));
     const int frame_bound = 2 * frame_px * (picture.width() + picture.height());
     check(gl_window->widget()->profile()->isVisible() && rhi_view && dark > frame_bound && data->prwidth > 0 &&
               data->prheight > 0,
@@ -959,11 +972,21 @@ int main(int argc, char **argv) {
     std::printf("skipped: this build has no QRhi drawing\n");
     return 77;
   }
+  /* and a build without the legacy OpenGL backend with QRhi */
+  if (gl && !mbvq::backend_built(mbvq::Backend::LegacyGL)) {
+    std::printf("skipped: this build has no legacy OpenGL drawing\n");
+    return 77;
+  }
   /* the modes that draw end after 120 s even if they hang */
   if (gl || rhi)
     start_watchdog(120, gl ? "--gl" : "--rhi");
 
-  mbvq::set_backend(null ? mbvq::Backend::Null : rhi ? mbvq::Backend::Rhi : mbvq::Backend::LegacyGL);
+  /* --show draws as the programs do: the backend MB_RENDERER names, else the
+     build's default */
+  if (show)
+    mbvq::set_backend_from_environment();
+  else
+    mbvq::set_backend(null ? mbvq::Backend::Null : rhi ? mbvq::Backend::Rhi : mbvq::Backend::LegacyGL);
   QApplication app(argc, argv);
   int error = MB_ERROR_NO_ERROR;
   mbview_startup(0, nullptr, nullptr, &error);
@@ -989,9 +1012,9 @@ int main(int argc, char **argv) {
     since->start();
     QObject::connect(poll, &QTimer::timeout, &app, [instance, snapshot, since] {
       if (mbvq_c_lastdrawrez(instance) == MBVQ_REZ_FULL) {
-        auto *view = qobject_cast<QOpenGLWidget *>(mbvq::map_view(instance));
-        if (view != nullptr)
-          view->grabFramebuffer().save(QString::fromLocal8Bit(snapshot));
+        const QImage image = grab(mbvq::map_view(instance));
+        if (!image.isNull())
+          image.save(QString::fromLocal8Bit(snapshot));
         std::printf("full resolution after %lld ms, saved %s\n", static_cast<long long>(since->elapsed()), snapshot);
         /* with MBVIEW_QT_TEST_CLOSE set, close the window as a user would */
         if (std::getenv("MBVIEW_QT_TEST_CLOSE") != nullptr && mbvq::window(instance) != nullptr) {

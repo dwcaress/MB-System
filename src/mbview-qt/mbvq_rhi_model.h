@@ -460,8 +460,10 @@ class TerrainPlan {
 
 /*--------------------------------------------------------------------*/
 /* The physical sizes of what the core asks for in logical pixels (line
-   widths, point sizes, stipple factors): physical = max(1, round(logical x
-   ratio x factor)), halves rounded up, with ratio the view's
+   widths, point sizes, stipple factors): physical = max(1, floor(logical x
+   ratio x factor + 0.25)), rounded up only from three quarters, so that thin
+   lines stay thin at fractional ratios (1 px stays 1 px below ratio 1.75;
+   a whole size at a whole ratio is its exact multiple), with ratio the view's
    devicePixelRatioF() (RenderOptions::pixel_ratio offscreen), never the
    render target's, which is 1 in a QRhiWidget. One factor per kind, all 1,
    so that a kind can be changed in one place. Marker sizes are display units
@@ -482,7 +484,7 @@ struct Style {
   /* the contours are drawn 1 logical pixel wide (mbview_contour) */
   int contour() const { return physical(1.0, ratio, contour_factor); }
   /* multiplied before the division, so that the control's steps of 0.5 give
-     exact sizes (3 x 0.5 / 3 is 0.5, which rounds up to 1) */
+     exact sizes (3 x 2.5 / 3 is 2.5, which at ratio 1.5 gives 4) */
   int point(double logical) const { return physical(logical * point_size / 3.0, ratio, point_factor); }
   int stipple(int factor) const { return physical(factor, ratio, stipple_factor); }
   /* a line of one physical pixel is drawn with the line topology (as

@@ -44,11 +44,27 @@
 #include "mbvq_lists.h"
 #include "mbvq_window.h"
 
+#if !defined(MBVQ_HAVE_RHI) && !defined(MBVQ_HAVE_GL)
+#error "mbview-qt needs QRhi (MBVQ_HAVE_RHI) or the legacy OpenGL backend (MBVQ_HAVE_GL) to draw the views"
+#endif
+
 namespace mbvq {
 
 namespace {
 
-Backend current_backend = Backend::LegacyGL;
+/* the backend of this build and platform when MB_RENDERER names none: QRhi on
+   Apple where it is built; elsewhere the legacy OpenGL backend where it is
+   built, since QRhi has no run-time fallback to it yet; otherwise the other
+   one. Always a backend this build has. */
+#if defined(__APPLE__) && defined(MBVQ_HAVE_RHI)
+constexpr Backend default_backend = Backend::Rhi;
+#elif defined(MBVQ_HAVE_GL)
+constexpr Backend default_backend = Backend::LegacyGL;
+#else
+constexpr Backend default_backend = Backend::Rhi;
+#endif
+
+Backend current_backend = default_backend;
 RhiApi current_api = RhiApi::Default;
 bool backend_installed = false;
 bool fill_active_flag = false;
@@ -73,14 +89,21 @@ void delete_closed_windows() {
 void install_backend() {
   if (backend_installed)
     return;
-  if (current_backend == Backend::LegacyGL)
+  switch (current_backend) {
+#ifdef MBVQ_HAVE_GL
+  case Backend::LegacyGL:
     gl_backend::install();
-#ifdef MBVQ_HAVE_RHI
-  else if (current_backend == Backend::Rhi)
-    rhi_backend::install();
+    break;
 #endif
-  else
+#ifdef MBVQ_HAVE_RHI
+  case Backend::Rhi:
+    rhi_backend::install();
+    break;
+#endif
+  default:
     null_backend::install();
+    break;
+  }
   backend_installed = true;
 }
 
@@ -125,52 +148,64 @@ QWidget *outermost(size_t instance) {
 }  // namespace
 
 void set_backend(Backend backend, RhiApi api) {
-  if (!backend_built(backend)) {
-    std::fprintf(stderr, "mbview-qt: this build has no QRhi drawing (it needs Qt 6.8 or later with Qt Shader Tools); "
-                         "the views are drawn with OpenGL\n");
-    backend = Backend::LegacyGL;
-    api = RhiApi::Default;
-  }
+  /* a backend this build lacks gives the other one, and a line saying so */
+  std::string message;
+  resolve_backend(&backend, &api, &message);
+  if (!message.empty())
+    std::fprintf(stderr, "%s\n", message.c_str());
   current_backend = backend;
   current_api = api;
   backend_installed = false;
   /* only the OpenGL backend sets OpenGL attributes: QRhi sets none */
+#ifdef MBVQ_HAVE_GL
   if (backend == Backend::LegacyGL)
     gl_backend::configure();
+#endif
   install_backend();
 }
 
 Backend backend() { return current_backend; }
 
 bool backend_built(Backend backend) {
+  switch (backend) {
+  case Backend::Rhi:
 #ifdef MBVQ_HAVE_RHI
-  (void)backend;
-  return true;
+    return true;
 #else
-  return backend != Backend::Rhi;
+    return false;
 #endif
+  case Backend::LegacyGL:
+#ifdef MBVQ_HAVE_GL
+    return true;
+#else
+    return false;
+#endif
+  case Backend::Null:
+    return true;
+  }
+  return false;
 }
 
 void choose_renderer(const char *value, Backend *backend, RhiApi *api, std::string *message) {
-  /* the default: the OpenGL backend (QRhi is chosen with MB_RENDERER) */
-  *backend = Backend::LegacyGL;
+  /* the default of this build and platform, without a line */
+  *backend = default_backend;
   *api = RhiApi::Default;
   message->clear();
   if (value == nullptr || value[0] == '\0')
     return;
   const std::string name(value);
   if (!parse_renderer(value, backend, api)) {
-    *backend = Backend::LegacyGL;
+    *backend = default_backend;
     *api = RhiApi::Default;
     *message = "mbview-qt: MB_RENDERER=" + name +
                " is not one of auto, metal, d3d11, d3d12, vulkan, opengl, legacy-gl and null; the views are drawn "
-               "with OpenGL";
+               "with " +
+               (default_backend == Backend::Rhi ? std::string("QRhi and ") + rhi_api_name(RhiApi::Default)
+                                                : std::string("OpenGL"));
   }
-  else if (*backend == Backend::Rhi && !backend_built(Backend::Rhi)) {
-    *backend = Backend::LegacyGL;
-    *api = RhiApi::Default;
-    *message = "mbview-qt: this build has no QRhi drawing (it needs Qt 6.8 or later with Qt Shader Tools); the views "
-               "are drawn with OpenGL";
+  else if (!backend_built(*backend)) {
+    /* the other backend, and a line saying so */
+    resolve_backend(backend, api, message);
   }
   else if (*backend == Backend::Rhi && !rhi_api_possible(*api)) {
     *api = RhiApi::Default;
@@ -179,8 +214,27 @@ void choose_renderer(const char *value, Backend *backend, RhiApi *api, std::stri
   }
 }
 
+void resolve_backend(Backend *backend, RhiApi *api, std::string *message) {
+  message->clear();
+  if (backend_built(*backend))
+    return;
+  if (*backend == Backend::Rhi) {
+    *backend = Backend::LegacyGL;
+    *api = RhiApi::Default;
+    *message = "mbview-qt: this build has no QRhi drawing (it needs -DbuildQt6Rhi=ON, Qt 6.8 or later, Qt Shader "
+               "Tools and Qt's private Gui headers); the views are drawn with OpenGL";
+  }
+  else {
+    *backend = Backend::Rhi;
+    *api = RhiApi::Default;
+    *message = std::string("mbview-qt: this build has no legacy OpenGL drawing (it needs -DbuildQt6LegacyGL=ON); the "
+                           "views are drawn with QRhi and ") +
+               rhi_api_name(RhiApi::Default);
+  }
+}
+
 void set_backend_from_environment() {
-  Backend chosen = Backend::LegacyGL;
+  Backend chosen = default_backend;
   RhiApi api = RhiApi::Default;
   std::string message;
   choose_renderer(std::getenv("MB_RENDERER"), &chosen, &api, &message);
@@ -264,8 +318,10 @@ const char *rhi_api_name(RhiApi api) {
 }
 
 QWidget *create_map_view(size_t instance, QWidget *parent) {
+#ifdef MBVQ_HAVE_GL
   if (current_backend == Backend::LegacyGL)
     return gl_backend::create_map_view(instance, parent);
+#endif
 #ifdef MBVQ_HAVE_RHI
   if (current_backend == Backend::Rhi)
     return rhi_backend::create_map_view(instance, parent);
@@ -274,8 +330,10 @@ QWidget *create_map_view(size_t instance, QWidget *parent) {
 }
 
 QWidget *create_profile_view(size_t instance, QWidget *parent) {
+#ifdef MBVQ_HAVE_GL
   if (current_backend == Backend::LegacyGL)
     return gl_backend::create_profile_view(instance, parent);
+#endif
 #ifdef MBVQ_HAVE_RHI
   if (current_backend == Backend::Rhi)
     return rhi_backend::create_profile_view(instance, parent);
@@ -284,8 +342,10 @@ QWidget *create_profile_view(size_t instance, QWidget *parent) {
 }
 
 QWidget *create_soundings_view(QWidget *parent) {
+#ifdef MBVQ_HAVE_GL
   if (current_backend == Backend::LegacyGL)
     return gl_backend::create_soundings_view(parent);
+#endif
 #ifdef MBVQ_HAVE_RHI
   if (current_backend == Backend::Rhi)
     return rhi_backend::create_soundings_view(parent);

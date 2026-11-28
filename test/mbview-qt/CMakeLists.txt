@@ -24,39 +24,48 @@
 
 # Tests of the mbview-qt library. ctest runs the checks without drawing (null
 # backend, offscreen platform). mbview_qt_test --gl checks drawing and picks with
-# the OpenGL backend, and --rhi with the QRhi backend where it is built; they
-# need a display and are not run by ctest.
+# the legacy OpenGL backend and --rhi with the QRhi backend, each where it is
+# built; they need a display and are not run by ctest.
 
 if(APPLE)
   list(REMOVE_ITEM CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/build-utils")
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets OpenGLWidgets)
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
+
+# the OpenGL modes of the three tests use QOpenGLWidget, where the legacy
+# OpenGL drawing is built (src/mbview-qt sets MBVQ_GL)
+set(mbvq_test_gl)
+if(MBVQ_GL)
+  find_package(Qt6 REQUIRED COMPONENTS OpenGLWidgets)
+  set(mbvq_test_gl Qt6::OpenGLWidgets)
+endif()
 
 set(CMAKE_AUTOMOC ON)
 
 add_executable(mbview_qt_test mbview_qt_test.cc)
 set_target_properties(mbview_qt_test PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
-target_link_libraries(mbview_qt_test PRIVATE mbview-qt mbaux mbio Qt6::Widgets Qt6::OpenGLWidgets ${MB_SYSLIBS})
+target_link_libraries(mbview_qt_test PRIVATE mbview-qt mbaux mbio Qt6::Widgets ${mbvq_test_gl} ${MB_SYSLIBS})
 
 add_test(NAME mbview_qt_test COMMAND mbview_qt_test --null)
 set_tests_properties(mbview_qt_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 
 # The 3D soundings window: ctest runs the checks without drawing;
-# --gl, --rhi (the QRhi backend, where it is built), --time and --show need a
-# display.
+# --gl and --time (where the legacy OpenGL drawing is built), --rhi (the QRhi
+# backend, where it is built) and --show need a display.
 add_executable(mbview_qt_soundings_test mbview_qt_soundings_test.cc)
 set_target_properties(mbview_qt_soundings_test PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
-target_link_libraries(mbview_qt_soundings_test PRIVATE mbview-qt mbio Qt6::Widgets Qt6::OpenGLWidgets ${MB_SYSLIBS})
+target_link_libraries(mbview_qt_soundings_test PRIVATE mbview-qt mbio Qt6::Widgets ${mbvq_test_gl} ${MB_SYSLIBS})
 
 add_test(NAME mbview_qt_soundings_test COMMAND mbview_qt_soundings_test --null)
 set_tests_properties(mbview_qt_soundings_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 
 # Maps and the 3D soundings editor inside another program's window: ctest runs
-# the checks without drawing; --gl needs a display.
+# the checks without drawing; --gl (where the legacy OpenGL drawing is built)
+# needs a display.
 add_executable(mbview_qt_embed_test mbview_qt_embed_test.cc)
 set_target_properties(mbview_qt_embed_test PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
-target_link_libraries(mbview_qt_embed_test PRIVATE mbview-qt mbio Qt6::Widgets Qt6::OpenGLWidgets ${MB_SYSLIBS})
+target_link_libraries(mbview_qt_embed_test PRIVATE mbview-qt mbio Qt6::Widgets ${mbvq_test_gl} ${MB_SYSLIBS})
 
 add_test(NAME mbview_qt_embed_test COMMAND mbview_qt_embed_test --null)
 set_tests_properties(mbview_qt_embed_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
@@ -64,8 +73,9 @@ set_tests_properties(mbview_qt_embed_test PROPERTIES ENVIRONMENT "QT_QPA_PLATFOR
 # The QRhi backend, where it is built (src/mbview-qt sets MBVQ_RHI): four
 # headless modes on the offscreen platform, each with its own watchdog. The
 # Metal mode returns 77 (skipped) where no Metal QRhi can be made. --display
-# and --bench (frame times, also of the OpenGL backend) draw in a window and
-# need a display; they are not run by ctest.
+# and --bench (frame times, also of the legacy OpenGL backend where the legacy
+# OpenGL drawing is built) draw in a window and need a display; they are not
+# run by ctest.
 if(MBVQ_RHI)
   add_executable(mbview_qt_rhi_test mbview_qt_rhi_test.cc)
   set_target_properties(mbview_qt_rhi_test PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)

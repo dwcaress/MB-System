@@ -38,8 +38,9 @@ int main(int argc, char **argv) {
   /* the options are for mbeditviz_init(), not for Qt */
   int qt_argc = 1;
 
-  /* one renderer per process, chosen before the QApplication exists: OpenGL,
-     or the one MB_RENDERER names */
+  /* one renderer per process, chosen before the QApplication exists: the one
+     MB_RENDERER names, else the build's default (QRhi on macOS and the
+     legacy OpenGL backend elsewhere, each where it is built) */
   mbvq::set_backend_from_environment();
   QApplication app(qt_argc, argv);
   QApplication::setApplicationName(QStringLiteral("mbeditviz-qt"));

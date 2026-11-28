@@ -206,7 +206,7 @@ std::unique_ptr<QRhiGraphicsPipeline> BatchRenderer::pipeline(const QShader &ver
 }
 
 bool BatchRenderer::make_pipelines(QRhiRenderPassDescriptor *pass, int samples) {
-  /* the shaders of the batch's draws (section 6 of the design) */
+  /* the shaders of the batch's draws */
   const QShader colour = load_shader(":/mbvq/mbvq_colour.frag.qsb");
   const QShader stipple = load_shader(":/mbvq/mbvq_stipple.frag.qsb");
   const QShader line = load_shader(":/mbvq/mbvq_line.vert.qsb");

@@ -52,7 +52,8 @@ enum class Backend {
   LegacyGL, /* the mbview OpenGL drawing code in a 2.1 compatibility context */
   Null,     /* draws nothing, for tests without a display */
   Rhi       /* QRhi: the drawing the core records, with Metal, Direct3D, Vulkan
-               or OpenGL; built with Qt 6.8 or later and Qt Shader Tools */
+               or OpenGL; built with Qt 6.8 or later, its private Gui headers
+               and Qt Shader Tools */
 };
 /* the graphics API of the QRhi backend, as QRhiWidget::Api; Default is Metal
    on Apple, Direct3D 11 on Windows and OpenGL elsewhere */
@@ -60,11 +61,14 @@ enum class RhiApi { Default, OpenGL, Metal, Vulkan, Direct3D11, Direct3D12 };
 /* a backend this build lacks gives a message and the other one */
 void set_backend(Backend backend, RhiApi api = RhiApi::Default);
 Backend backend();
-/* whether this build has the backend (the OpenGL and null backends always) */
+/* whether this build has the backend (the null backend always, QRhi where
+   MBVQ_HAVE_RHI is defined, the legacy OpenGL backend where MBVQ_HAVE_GL is) */
 bool backend_built(Backend backend);
 /* the backend that the environment variable MB_RENDERER names (auto, metal,
-   d3d11, d3d12, vulkan, opengl, legacy-gl or null), else the OpenGL backend;
-   in main() before creating the QApplication */
+   d3d11, d3d12, vulkan, opengl, legacy-gl or null), else the default of this
+   build: on macOS QRhi where it is built, elsewhere the legacy OpenGL backend
+   where it is built, otherwise the other one; in main() before creating the
+   QApplication */
 void set_backend_from_environment();
 
 /* The point size of the 3D soundings view in logical pixels, 0.5 to 8 (3 by

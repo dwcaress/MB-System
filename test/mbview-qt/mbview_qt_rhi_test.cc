@@ -84,19 +84,22 @@
  *        frames with every value, the parts of a frame before and after the
  *        view's paint, under QRhi with the renderer's phases, the waits
  *        around them, the GPU time and the nodes prepared, and the process
- *        memory. MB_RENDERER=legacy-gl measures the OpenGL
- *        backend with the same script; WxH is the window size given to
+ *        memory. MB_RENDERER=legacy-gl measures the legacy OpenGL
+ *        backend with the same script, where the legacy OpenGL drawing is
+ *        built (77, skipped, elsewhere); WxH is the window size given to
  *        mbview (640x480)
  *   mbview_qt_rhi_test --bench-soundings n [--frames n]   frame times of the
  *        3D soundings view with n synthetic soundings (needs a display, not
  *        in ctest; a measurement): a rotation, an erase drag, an exaggeration
  *        drag, bias changes and a rotation with profiles shown, n steps each
- *        (60); also for the OpenGL backend with MB_RENDERER=legacy-gl
+ *        (60); also for the legacy OpenGL backend with MB_RENDERER=legacy-gl,
+ *        where the legacy OpenGL drawing is built (77, skipped, elsewhere)
  *
  * The headless modes run on the offscreen platform unless QT_QPA_PLATFORM
  * names another; the modes with a window draw with the QRhi API that
  * MB_RENDERER names (the platform's API otherwise), the bench with the
- * OpenGL backend for MB_RENDERER=legacy-gl. The synthetic grid is a
+ * legacy OpenGL backend for MB_RENDERER=legacy-gl, where the legacy OpenGL
+ * drawing is built. The synthetic grid is a
  * seamount on a sloping plain, known in closed form, with a block of nodes
  * without data and some single ones.
  */
@@ -2212,16 +2215,27 @@ struct TestBatch {
 /* the identity camera: display coordinates are normalised device coordinates */
 const double kIdentity[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
 
+/* the size rule in the test's own words: max(1, floor(logical x ratio +
+   0.25)), rounded up only from three quarters, so that thin lines stay thin
+   at fractional pixel ratios (chosen by eye at ratios 1, 1.5 and 2) */
+int expected_px(double logical, double ratio) {
+  return std::max(1, static_cast<int>(std::floor(logical * ratio + 0.25)));
+}
+
 void model_style() {
-  /* section 7: widths 1, 2, 3 and 4, the stipple factor 1 and the point size 3 */
+  /* the rule's table: widths 1, 2, 3 and 4, the stipple factor 1 and the
+     point size 3; ratio 1.74, just below 1.75 where 1 px lines become 2 px,
+     and ratio 1.25 pin the rule's 0.25 */
   struct Row {
     double ratio;
     int widths[4];
     int point;
   };
   const Row rows[] = {{1.0, {1, 2, 3, 4}, 3},
-                      {1.25, {1, 3, 4, 5}, 4},
-                      {1.5, {2, 3, 5, 6}, 5},
+                      {1.25, {1, 2, 4, 5}, 4},
+                      {1.5, {1, 3, 4, 6}, 4},
+                      {1.74, {1, 3, 5, 7}, 5},
+                      {1.75, {2, 3, 5, 7}, 5},
                       {2.0, {2, 4, 6, 8}, 6},
                       {3.0, {3, 6, 9, 12}, 9}};
   bool table = true;
@@ -2236,8 +2250,8 @@ void model_style() {
     text_rows += " " + text("%g:", row.ratio) + std::to_string(style.line(1)) + "," + std::to_string(style.line(2)) +
                  "," + std::to_string(style.line(3)) + "," + std::to_string(style.line(4));
   }
-  check(table, "6c: the pixel-ratio rule max(1, round(logical x ratio)) for widths 1 to 4, contours, the stipple "
-               "factor and points of 3 (" + text_rows + ")");
+  check(table, "6c: the pixel-ratio rule max(1, floor(logical x ratio + 0.25)) for widths 1 to 4, contours, the "
+               "stipple factor and points of 3 (" + text_rows + ")");
   rhi::Style one;
   rhi::Style two;
   two.ratio = 2.0;
@@ -5362,6 +5376,10 @@ void widgets_views(size_t instance, QRhiWidget::Api expected) {
   mb3dsoundings_end(0, &error);
 }
 
+/* mbvq::backend() and rhi_api() before main's set_backend(): what a host that
+   never calls set_backend() draws with (set in main) */
+mbvq::Backend initial_backend = mbvq::Backend::Null;
+mbvq::RhiApi initial_api = mbvq::RhiApi::Vulkan;
 
 int test_model() {
   /* the names of MB_RENDERER, and what the environment chooses */
@@ -5420,21 +5438,58 @@ int test_model() {
           std::string("the APIs possible on this platform (Metal ") + (apple ? "yes" : "no") + ", Direct3D " +
               (windows ? "yes" : "no") + ", Vulkan " + (vulkan ? "yes" : "no") + ")");
 
-    std::string message;
+    /* The default of this build and platform: QRhi with the platform's API
+       on Apple; elsewhere the legacy OpenGL backend where it is built, else
+       QRhi. The legacy OpenGL backend only where MBVQ_HAVE_GL is defined. */
+#if defined(__APPLE__) || !defined(MBVQ_HAVE_GL)
+    const Backend expected = Backend::Rhi;
+#else
+    const Backend expected = Backend::LegacyGL;
+#endif
+#ifdef MBVQ_HAVE_GL
+    const bool legacy = true;
+#else
+    const bool legacy = false;
+#endif
+    const std::string platform = mbvq::rhi_api_name(RhiApi::Default);
+    const std::string no_legacy = "mbview-qt: this build has no legacy OpenGL drawing (it needs -DbuildQt6LegacyGL=ON); "
+                                  "the views are drawn with QRhi and " +
+                                  platform;
+    const std::string drawn = expected == Backend::Rhi ? "; the views are drawn with QRhi and " + platform
+                                                       : std::string("; the views are drawn with OpenGL");
+    const auto ends_with = [](const std::string &text, const std::string &tail) {
+      return text.size() >= tail.size() && text.compare(text.size() - tail.size(), tail.size(), tail) == 0;
+    };
+
+    std::string message = "before";
     mbvq::choose_renderer(nullptr, &backend, &api, &message);
-    bool chosen = backend == Backend::LegacyGL && api == RhiApi::Default && message.empty();
+    bool chosen = backend == expected && api == RhiApi::Default && message.empty();
+    message = "before";
     mbvq::choose_renderer("", &backend, &api, &message);
-    chosen = chosen && backend == Backend::LegacyGL && message.empty();
-    check(chosen, "MB_RENDERER unset or empty: the OpenGL backend, without a message");
+    chosen = chosen && backend == expected && api == RhiApi::Default && message.empty();
+    check(chosen, std::string("MB_RENDERER unset or empty: the default of this build, ") +
+                      (expected == Backend::Rhi ? "QRhi with the platform's API" : "the legacy OpenGL backend") +
+                      ", without a message");
+    check(initial_backend == expected && initial_api == RhiApi::Default,
+          "before any set_backend(): the default of this build with the platform's API, what a host that never "
+          "calls it draws with");
     mbvq::choose_renderer("auto", &backend, &api, &message);
     check(backend == Backend::Rhi && api == RhiApi::Default && message.empty(), "MB_RENDERER=auto: QRhi, the platform's API");
     mbvq::choose_renderer("legacy-gl", &backend, &api, &message);
-    chosen = backend == Backend::LegacyGL && message.empty();
+    if (legacy)
+      check(backend == Backend::LegacyGL && api == RhiApi::Default && message.empty(),
+            "MB_RENDERER=legacy-gl: the legacy OpenGL backend, without a message");
+    else
+      check(backend == Backend::Rhi && api == RhiApi::Default && message == no_legacy,
+            "MB_RENDERER=legacy-gl in a build without the legacy OpenGL backend: QRhi with the platform's API, and "
+            "one line (" +
+                message + ")");
     mbvq::choose_renderer("null", &backend, &api, &message);
-    check(chosen && backend == Backend::Null && message.empty(), "MB_RENDERER=legacy-gl and null: those backends");
+    check(backend == Backend::Null && message.empty(), "MB_RENDERER=null: the null backend");
     mbvq::choose_renderer("nonsense", &backend, &api, &message);
-    check(backend == Backend::LegacyGL && message.find("not one of auto, metal") != std::string::npos,
-          "an unknown MB_RENDERER: the OpenGL backend and a line naming the values");
+    check(backend == expected && api == RhiApi::Default && message.find("not one of auto, metal") != std::string::npos &&
+              ends_with(message, drawn),
+          "an unknown MB_RENDERER: the default, and a line naming the values and what draws (" + message + ")");
     const char *impossible = apple ? "d3d11" : "metal";
     mbvq::choose_renderer(impossible, &backend, &api, &message);
     check(backend == Backend::Rhi && api == RhiApi::Default &&
@@ -5444,8 +5499,45 @@ int test_model() {
     mbvq::choose_renderer(apple ? "metal" : "opengl", &backend, &api, &message);
     check(backend == Backend::Rhi && api == (apple ? RhiApi::Metal : RhiApi::OpenGL) && message.empty(),
           "a possible API is taken as named");
-    check(mbvq::backend_built(Backend::Rhi) && mbvq::backend_built(Backend::LegacyGL) && mbvq::backend_built(Backend::Null),
-          "this build has the QRhi, OpenGL and null backends");
+    check(mbvq::backend_built(Backend::Rhi) && mbvq::backend_built(Backend::Null) &&
+              mbvq::backend_built(Backend::LegacyGL) == legacy,
+          std::string("this build has the QRhi and null backends, ") + (legacy ? "and" : "but not") +
+              " the legacy OpenGL backend");
+
+    /* what set_backend() makes of a request (resolve_backend): a backend this
+       build lacks gives the other one and a line, a built one stays as asked
+       without a line */
+    Backend asked = Backend::LegacyGL;
+    RhiApi asked_api = RhiApi::Default;
+    std::string line = "before";
+    mbvq::resolve_backend(&asked, &asked_api, &line);
+    if (legacy)
+      check(asked == Backend::LegacyGL && asked_api == RhiApi::Default && line.empty(),
+            "set_backend(LegacyGL): the legacy OpenGL backend, without a line");
+    else
+      check(asked == Backend::Rhi && asked_api == RhiApi::Default && line == no_legacy,
+            "set_backend(LegacyGL) in a build without it: QRhi with the platform's API, and one line (" + line + ")");
+    bool kept = true;
+    for (const RhiApi possible : {RhiApi::Default, apple ? RhiApi::Metal : RhiApi::OpenGL}) {
+      asked = Backend::Rhi;
+      asked_api = possible;
+      line = "before";
+      mbvq::resolve_backend(&asked, &asked_api, &line);
+      kept = kept && asked == Backend::Rhi && asked_api == possible && line.empty();
+    }
+    asked = Backend::Null;
+    asked_api = RhiApi::Default;
+    line = "before";
+    mbvq::resolve_backend(&asked, &asked_api, &line);
+    kept = kept && asked == Backend::Null && line.empty();
+    check(kept, "set_backend(Rhi) with the platform's API or a named one, and set_backend(Null): kept, without a line");
+    /* set_backend() itself, where that changes nothing here (the line goes to
+       stderr): in a build without the legacy OpenGL backend it stays QRhi */
+    if (!legacy) {
+      mbvq::set_backend(Backend::LegacyGL);
+      check(mbvq::backend() == Backend::Rhi && mbvq::rhi_api() == RhiApi::Default,
+            "set_backend(LegacyGL) in a build without it draws with QRhi and the platform's API");
+    }
   }
 
   check(mbvq::backend() == mbvq::Backend::Rhi && mbvq_qt_drawable(), "under QRhi the core fills the map (glx_init)");
@@ -5989,6 +6081,20 @@ int test_widgets() {
         "renderFailed: a label on the view and one line on stderr (label " + std::to_string(failed.failure_shown) +
             ", " + std::to_string(failed.failures) + " failures, " + std::to_string(mbvq::failure_messages()) +
             " lines)");
+  /* the label (the line's text) names MB_RENDERER=legacy-gl only where the
+     legacy OpenGL backend is built */
+  {
+#ifdef MBVQ_HAVE_GL
+    const QString advice = QStringLiteral("; MB_RENDERER=legacy-gl draws them with OpenGL");
+#else
+    const QString advice = QStringLiteral("; this build has no legacy OpenGL drawing");
+#endif
+    const auto *label = view->findChild<QLabel *>(QString(), Qt::FindDirectChildrenOnly);
+    const QString text = label != nullptr ? label->text() : QString();
+    check(text == QStringLiteral("mbview-qt: the views could not be drawn with QRhi (") +
+                      QString::fromLatin1(mbvq::rhi_api_name(mbvq::RhiApi::Default)) + QLatin1Char(')') + advice,
+          "the label says what this build can draw with instead (" + text.toStdString() + ")");
+  }
   size_t second = MBV_NO_WINDOW;
   check(open_grid(grid, nullptr, &second), "a second map under QRhi");
   QWidget *view2 = mbvq::map_view(second);
@@ -8074,8 +8180,9 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
 
   /* 6c: the overlays and contours of the batch, with the sizes scaled by the
      view's own pixel ratio (devicePixelRatioF(), not the render target's):
-     contours (1 logical px) and a route (2 logical px, with its waypoint
-     disks) are thin only at ratio 1 */
+     contours (1 logical px) are thin while they stay 1 physical px (below
+     ratio 1.75, expected_px()), and a route (2 logical px, with its waypoint
+     disks) is wide from ratio 1 */
   {
     int error = MB_ERROR_NO_ERROR;
     const int nc = data->primary_n_columns, nr = data->primary_n_rows;
@@ -8117,7 +8224,7 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
       spin(50);
     const mbvq::RenderStats overlays = mbvq::view_stats(view);
     const double ratio = view->devicePixelRatioF();
-    const bool thin = std::floor(ratio + 0.5) <= 1.0;
+    const bool thin = expected_px(1.0, ratio) <= 1;
     check(overlays.pixel_ratio == ratio && overlays.contour_rez == MBVQ_REZ_FULL && overlays.marker_draws > 0 &&
               (thin ? overlays.thin_draws > 0 : overlays.thin_draws == 0 && overlays.wide_draws >= 2),
           "6c: contours (" + std::to_string(overlays.contour_vertices) + " vertices) and a route with its waypoints "
@@ -8126,7 +8233,7 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
               " wide line draws, " + std::to_string(overlays.marker_draws) + " marker runs");
     /* the straight route's width in physical pixels in grabFramebuffer(),
        across its major axis over the middle half of its length:
-       max(1, round(2 x the view's ratio)) by the minor-axis rule */
+       max(1, floor(2 x the view's ratio + 0.25)) by the minor-axis rule */
     const QImage with = rhi_widget->grabFramebuffer().convertToFormat(QImage::Format_RGB32);
     {
       const QRgb purple = qRgb(255, 0, 255);
@@ -8139,7 +8246,7 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
             y0 = std::min(y0, y);
             y1 = std::max(y1, y);
           }
-      const int expected = std::max(1, static_cast<int>(std::floor(2.0 * ratio + 0.5)));
+      const int expected = expected_px(2.0, ratio);
       const bool across_columns = x1 - x0 >= y1 - y0;
       const int from = across_columns ? x0 + (x1 - x0) / 4 : y0 + (y1 - y0) / 4;
       const int to = across_columns ? x1 - (x1 - x0) / 4 : y1 - (y1 - y0) / 4;
@@ -8165,7 +8272,7 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
   }
 
   /* 6d: the profile view of a two-point pick across the map, in its window:
-     drawn; its frame (2 logical px) max(1, round(2 x ratio)) physical px
+     drawn; its frame (2 logical px) max(1, floor(2 x ratio + 0.25)) physical px
      wide in grabFramebuffer(); at most floor(TextureSizeMax / ratio) logical
      px wide (Metal's 16384), so a drawing 5 times a wide window is clamped
      and the core's drawing is at most 16384 px */
@@ -8214,7 +8321,7 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
       top++;
       y++;
     }
-    const int width = std::max(1, static_cast<int>(std::floor(2.0 * ratio + 0.5)));
+    const int width = expected_px(2.0, ratio);
     check(profile_rhi != nullptr && npoints_of(data) > 2 && dark > 0 && top == width &&
               mbvq::view_stats(profile).pixel_ratio == ratio,
           "6d: the profile of a two-point pick (" + std::to_string(npoints_of(data)) + " points) drawn with QRhi: " +
@@ -8346,8 +8453,8 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
       const int lx = (sdg_storage[middle].winx + sdg_storage[middle + 1].winx) / 2;
       const int ly = H - 1 - (sdg_storage[middle].winy + sdg_storage[middle + 1].winy) / 2;
       const int line = run(lx, ly);
-      const int point_px = std::max(1, static_cast<int>(std::floor(3.0 * ratio + 0.5)));
-      const int line_px = std::max(1, static_cast<int>(std::floor(1.0 * ratio + 0.5)));
+      const int point_px = expected_px(3.0, ratio);
+      const int line_px = expected_px(1.0, ratio);
       if (save != nullptr) {
         const std::string path = std::string(save) + ".soundings.png";
         check(picture.save(QString::fromStdString(path)), "the soundings' picture saved as " + path);
@@ -8380,7 +8487,7 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
       }
       if (control != nullptr)
         control->setValue(3.0);
-      const int small_px = std::max(1, static_cast<int>(std::floor(1.0 * ratio + 0.5)));
+      const int small_px = expected_px(1.0, ratio);
       check(control != nullptr && small_point == std::max(small_px, line_px),
             "6d: the point-size control at 1 px draws the points " + std::to_string(small_point) +
                 " physical px high (" + std::to_string(small_px) + ", within a line " + std::to_string(line_px) +
@@ -9899,6 +10006,15 @@ int main(int argc, char **argv) {
                          "| --bench-soundings n [--frames n]\n");
     return 2;
   }
+  /* the bench of the legacy OpenGL backend needs it: a build without it
+     would measure QRhi under that name */
+  if (bench_mode && !mbvq::backend_built(mbvq::Backend::LegacyGL)) {
+    const char *value = std::getenv("MB_RENDERER");
+    if (value != nullptr && std::strcmp(value, "legacy-gl") == 0) {
+      std::printf("skipped: this build has no legacy OpenGL drawing\n");
+      return 77;
+    }
+  }
   /* 10 s for the headless modes (ctest gives 60 s), a minute with a window,
      a quarter of an hour for the bench */
   start_watchdog(bench_mode ? 900 : display ? 60 : 10, mode);
@@ -9925,6 +10041,9 @@ int main(int argc, char **argv) {
     if (named != mbvq::Backend::Rhi)
       api = mbvq::RhiApi::Default;
   }
+  /* nothing above sets the backend (--model checks the initial one) */
+  initial_backend = mbvq::backend();
+  initial_api = mbvq::rhi_api();
   mbvq::set_backend(backend, api);
   /* the program's own arguments stay away from Qt, whose X11 platform would
      take the one after --display for the name of a display */
