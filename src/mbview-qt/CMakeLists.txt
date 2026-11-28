@@ -130,12 +130,20 @@ endif()
 
 # the QRhi backend; the OpenGL backend stays the default and is always built
 if(mbvq_rhi)
-  target_sources(mbview-qt PRIVATE mbvq_rhi.h mbvq_rhi_model.cc mbvq_rhi_model.h mbvq_rhi_frame.cc mbvq_rhi_frame.h
-                                   mbvq_rhi_renderer.cc mbvq_rhi_renderer.h mbvq_backend_rhi.cc)
+  target_sources(mbview-qt PRIVATE mbvq_rhi.h mbvq_rhi_model.cc mbvq_rhi_model.h mbvq_rhi_glu.cc mbvq_rhi_glu.h
+                                   mbvq_rhi_frame.cc mbvq_rhi_frame.h mbvq_rhi_renderer.cc mbvq_rhi_renderer.h
+                                   mbvq_backend_rhi.cc)
+  # GLU's marker vertices are float products, matched bit for bit: no fused
+  # multiply-adds (GCC contracts them by default, Clang within expressions)
+  if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    set_source_files_properties(mbvq_rhi_glu.cc PROPERTIES COMPILE_OPTIONS -ffp-contract=off)
+  endif()
   target_link_libraries(mbview-qt PRIVATE Qt6::GuiPrivate)
   target_compile_definitions(mbview-qt PUBLIC MBVQ_HAVE_RHI)
   qt6_add_shaders(mbview-qt "mbvq_shaders" PREFIX "/mbvq" BASE shaders FILES shaders/mbvq_terrain.vert
-                  shaders/mbvq_colour.frag)
+                  shaders/mbvq_colour.frag shaders/mbvq_line.vert shaders/mbvq_point.vert shaders/mbvq_wide.vert
+                  shaders/mbvq_contour.vert shaders/mbvq_wide_contour.vert shaders/mbvq_marker.vert
+                  shaders/mbvq_stipple_thin.vert shaders/mbvq_stipple_wide.vert shaders/mbvq_stipple.frag)
   message(STATUS "mbview-qt: the views are drawn with OpenGL, or with QRhi with MB_RENDERER=auto")
 else()
   message(STATUS "mbview-qt: the views are drawn with OpenGL (QRhi needs Qt 6.8 or later with Qt Shader Tools)")

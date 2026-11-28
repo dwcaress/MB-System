@@ -43,8 +43,14 @@
 
 class QImage;
 class QWidget;
+struct mbv_draw_batch;
 
 namespace mbvq {
+
+/* how the marker shapes are tessellated (mbvq_rhi_glu.h): as Mesa's GLU (the
+   SGI sample implementation; the views), or as Apple's GLU, for comparisons
+   with the OpenGL views on macOS */
+enum class GluVariant { Sgi, Apple };
 
 struct RenderOptions {
   /* the most bytes uploaded in one frame (64 MB); the rest follows in the next frames */
@@ -52,10 +58,18 @@ struct RenderOptions {
   /* create() of the renderer fails after it made its first resources, as when
      the GPU memory runs out */
   bool fail_create = false;
-  /* no tile buffer can be made, as when the GPU memory runs out: the frame
-     fails and draws nothing, and the renderer drops its tiles but keeps its
-     pipelines, so that a later frame uploads everything again */
+  /* no buffer can be made, as when the GPU memory runs out: the frame fails
+     and draws nothing, and the renderer drops its tiles, the batch's buffers
+     and the contours but keeps its pipelines, so that a later frame uploads
+     everything again */
   bool fail_buffers = false;
+  /* the uniform ring of the batch cannot grow beyond its first 64 slots, as
+     when memory runs out: a frame with more drawable commands fails */
+  bool fail_slot_growth = false;
+  /* ... and cannot be made again at its old size either: the renderer then
+     lets go of its pipelines, bindings and ring and makes them again in its
+     next frame */
+  bool fail_slot_restore = false;
   /* the terrain colours as the core's floats (16 bytes per node) instead of
      bytes (4), for comparisons with OpenGL without the 8-bit rounding of the
      node colours; taken when the renderer is made */
@@ -71,8 +85,10 @@ struct RenderOptions {
   /* tiles outside the view are neither prepared nor drawn; false plans and
      draws every tile, at the stride of the tiles in the view (comparisons) */
   bool culling = true;
-  /* the frames are drawn as while a map mouse button is down, so that the
-     drag budget applies (a view takes this from its mouse buttons) */
+  /* the frames are drawn as while a map mouse button is down: the drag
+     budget and the fill fallback apply (a view takes this from its mouse
+     buttons; the fill fallback also applies while a button is down in any
+     map view of the process) */
   bool drag = false;
   /* the drag budget's time for preparing and gathering the nodes of a frame
      in ms; < 0: 1000/60 ms less the previous frame's other costs (during a
@@ -85,6 +101,19 @@ struct RenderOptions {
      measured moving averages; < 0: the averages */
   double node_ns_colour = -1.0;
   double node_ns_z = -1.0;
+  /* the device pixel ratio the core's line widths, point sizes and stipple
+     factors (logical pixels) are scaled by: physical = max(1, round(logical
+     x ratio)); a view takes its devicePixelRatioF() instead */
+  double pixel_ratio = 1.0;
+  /* the tessellation of the marker shapes */
+  GluVariant glu_variant = GluVariant::Sgi;
+  /* while a map mouse button is down (drag, or a button down in any map
+     view of the process), a frame fills at the resolution the core asked
+     for instead of full resolution once its plots at full resolution would
+     take longer than this (ms): the map's last full-resolution plot (the
+     core's plot alone, without the 3D pick-mark sizing), twice that for a
+     frame that fills twice on the spheroid */
+  double fill_fallback_ms = 12.0;
 };
 
 /* what the renderer did; totals since the renderer was made, except where
@@ -109,7 +138,14 @@ struct RenderStats {
   size_t bytes_indices = 0;
   size_t bytes_largest_frame = 0; /* the most bytes uploaded in one frame */
   int resources = 0;              /* QRhi resources the renderer holds now */
-  /* the last frame drew nothing: the renderer or a tile buffer could not be made */
+  /* ... of them its pipelines, bindings, uniform buffer and render pass (the
+     same in every frame), and the buffers of the batch and the marker
+     meshes; the rest are tile buffers */
+  int fixed_resources = 0;
+  int batch_resources = 0;
+  /* the last frame drew nothing: the renderer, one of its buffers (tiles,
+     batch, contours, uniform ring) or, after a ring it could not restore,
+     its pipelines could not be made */
   bool failed = false;
   int held_after_failure = 0; /* resources a renderer held right after its create() failed */
   /* The terrain's levels in the last frame: the stride drawn (1, 2, 4 ... 128;
@@ -163,7 +199,9 @@ struct RenderStats {
      copies of the queued uploads into the buffers, made when a buffer is
      bound: Qt keeps each buffer once per frame in flight, copies into the
      current frame's one now and into the other when a later frame binds the
-     buffer (so a buffer uploaded in every frame is copied twice per frame) */
+     buffer (so a static buffer uploaded in every frame is copied twice per
+     frame; a dynamic one written whole in every frame, as the batch's, once,
+     since a whole write drops the writes still waiting for the other one) */
   double record_ms = 0.0;
   double render_ms = 0.0; /* the whole frame on the CPU, up to the end of the pass */
   /* where the last frame's render() began and ended, in ms since the epoch
@@ -177,6 +215,60 @@ struct RenderStats {
      it was recorded); -1 where the QRhi reports none (Metal reports it;
      other APIs only with QRhi::EnableTimestamps) */
   double gpu_ms = -1.0;
+  /* The map's batch (mbv_draw_batch.h) in the last frame: the device pixel
+     ratio its sizes were scaled with; its draws (lines thin and wide,
+     points, triangles, marker runs, the terrain and contours), uniform slots
+     and markers; the contour level drawn (MBVQ_REZ_*, 0 none) and its
+     vertices. Totals: batch uploads and their bytes, those above 64 MB (one
+     batch is never split over frames), contour uploads and bytes, marker
+     meshes made, second fills on the spheroid, fills at the requested
+     resolution while a button was down in any map view (the 12 ms
+     fallback), and the 3D pick-mark sizings before a full-resolution fill. */
+  double pixel_ratio = 1.0;
+  int draws = 0;
+  int thin_draws = 0;
+  int wide_draws = 0;
+  int marker_draws = 0;
+  int uniform_slots = 0;
+  int markers = 0;
+  int contour_rez = 0;
+  size_t contour_vertices = 0;
+  int batch_uploads = 0;
+  size_t batch_bytes = 0;
+  size_t batch_largest = 0;
+  int batch_over_cap = 0;
+  int contour_uploads = 0;
+  size_t contour_bytes = 0;
+  int meshes = 0;
+  int refills = 0;
+  int fallback_fills = 0;
+  int pick_sizings = 0;
+  /* The bytes the batch's buffers (its vertices and instances, the closing
+     segments of loops, the quads as triangles and the stipple pairs) and the
+     contours hold after the last frame, every copy the QRhi keeps counted
+     (dynamic_copies): one per frame in flight on Metal, Vulkan and
+     Direct3D 12, the buffer and a copy in host memory on Direct3D 11, one on
+     OpenGL and Null. Besides, Qt keeps the latest write of such a buffer
+     until a frame on each frame slot has used it. They follow the size of
+     the batch and of the contours drawn, and lie outside the memory budget
+     of the terrain levels (set_cache_budget). The QRhi's frame slot of the
+     last frame (QRhi::currentFrameSlot(); always 0 with one frame in
+     flight). The tile levels are static buffers, whose uploads Qt's Metal
+     backend keeps for each frame slot until a frame on that slot draws
+     them: tile streams uploaded again in consecutive frames (shading,
+     exaggeration and colour changes) still pile up there, one upload per
+     frame, while something else puts every frame of a view on one frame
+     slot (a widget of its window that repaints between them), and the
+     uploads still pending for a level no longer drawn stay until that level
+     is drawn on that slot again or released. */
+  size_t batch_held_bytes = 0;
+  size_t contour_held_bytes = 0;
+  int dynamic_copies = 1;
+  int frame_slot = 0;
+  /* the bytes written into the uniform ring in the last frame: the whole
+     ring, the slots beyond the commands as zeros, so that Qt keeps one
+     pending write of it per frame slot (0 when the frame failed) */
+  size_t ring_bytes = 0;
 };
 
 class OffscreenRenderer {
@@ -199,6 +291,18 @@ class OffscreenRenderer {
      if the renderer or a frame could not be made. */
   bool render_map(size_t instance, int width, int height, const RenderOptions &options, QImage *image,
                   int max_frames = 16);
+  /* Render a batch a test made itself (mbv_draw_batch.h) as the map's batch
+     is drawn, without a map, terrain or contours: one frame, with camera
+     (projection x modelview) and projection (for commands drawn without the
+     camera), OpenGL's convention, column-major. False if the renderer or the
+     frame could not be made. */
+  bool render_batch(const struct mbv_draw_batch *batch, const double camera[16], const double projection[16],
+                    int width, int height, const RenderOptions &options, QImage *image);
+  /* A frame of the QRhi that the renderer does not draw, as a frame of a
+     window in which another widget repainted and the map did not (the QRhi
+     moves to its next frame slot). False without a QRhi, or before a frame
+     made the render target. */
+  bool empty_frame();
   /* frames rendered by the last render_map() */
   int last_frames() const;
 
@@ -233,6 +337,10 @@ struct ViewState {
   bool levels_kept = false;
 };
 ViewState view_state(QWidget *view);
+/* for tests: mark whether a QRhi map view's last fill fell back
+   (rhi::MapFrame), as a fill during a drag in another map view would leave
+   it; nothing for any other widget */
+void set_fell_back(QWidget *view, bool fell_back);
 /* the statistics of the renderer of a QRhi map view, with the times of its
    last frame (empty for any other view, or while it has no renderer) */
 RenderStats view_stats(QWidget *view);
@@ -246,7 +354,10 @@ int stale_callbacks_removed();
    (512 MB), shared by the views and the offscreen renderers: beyond it the
    least recently drawn levels are evicted, never those another visible map
    drew in its latest frame or uploads, and a frame whose levels do not fit
-   beside those is drawn at the finest stride that fits. For tests. */
+   beside those is drawn at the finest stride that fits. For tests. The
+   budget covers the terrain levels only: the buffers of the maps' batches
+   and contours lie outside it (RenderStats::batch_held_bytes and
+   contour_held_bytes), as do the uniform rings and the marker meshes. */
 void set_cache_budget(size_t bytes);
 size_t cache_budget();
 /* the bytes it holds now, every copy counted */

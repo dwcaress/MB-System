@@ -104,6 +104,10 @@ class MapWidget final : public QWidget {
 
  signals:
   void titleChanged(const QString &title);
+  /* the status text, for a host that shows it: during a QRhi fill it fires
+     once, after the fill, with the fill's last text; otherwise at once, as
+     with OpenGL. A host showing it in a QStatusBar or QLabel repaints only
+     when the text changed, since both ignore an equal text. */
   void statusMessage(const QString &text);
   void closed(size_t instance);
 
@@ -119,6 +123,12 @@ class MapWidget final : public QWidget {
   QWidget *control_panel_ = nullptr;
   QWidget *map_view_ = nullptr;
   QLabel *status_ = nullptr;
+  /* the latest status text, which the label takes after a QRhi fill, and
+     whether that is queued; whether a fill's last text is still to be sent
+     (a text set outside a fill clears that) */
+  QString status_due_;
+  bool status_queued_ = false;
+  bool status_signal_due_ = false;
   QLabel *pick_info_ = nullptr;
   QString labels_[MBVQ_LABEL_OTHER];
   QAction *view_action_[MBVQ_VIEW_ITEMS] = {};

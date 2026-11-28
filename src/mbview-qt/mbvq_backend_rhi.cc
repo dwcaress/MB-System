@@ -41,11 +41,20 @@
  *   writes one line per process to stderr; nothing falls back by itself.
  * - While a map mouse button is down the terrain is planned within the drag
  *   budget; after the last release the view asks for a frame without it.
+ *   The views share their buttons (rhi::set_map_buttons): while a button is
+ *   down in any map, a map's fill falls back to the resolution asked for once
+ *   the full-resolution plots of its frame would take longer than 12 ms
+ *   (mbvq_rhi_frame.h), and when the last button goes up the maps whose last
+ *   fill fell back ask for a frame as well.
+ * - The core's line widths, point sizes and stipple factors are scaled by
+ *   the view's devicePixelRatioF(), never the render target's ratio.
  * - The profile and 3D soundings views are null views for now.
  */
 
 #include <QEvent>
+#include <QFocusEvent>
 #include <QLabel>
+#include <QMouseEvent>
 #include <QResizeEvent>
 #include <QRhiWidget>
 #include <QSet>
@@ -136,7 +145,7 @@ class RhiView : public QRhiWidget {
   virtual std::unique_ptr<rhi::ViewRenderer> make_renderer(QRhi *qrhi) = 0;
   /* the core gets the size of the drawing in physical pixels */
   virtual void size_core(QSize pixels) = 0;
-  /* a new QRhi: anything tied to the old window goes */
+  /* a new QRhi, or the view's QRhi died: anything tied to the old window goes */
   virtual void new_rhi() {}
 
   /* the view cannot be drawn: one line per process on stderr, and a label on
@@ -203,6 +212,7 @@ void RhiView::initialize(QRhiCommandBuffer *) {
         if (dying == rhi_) {
           renderer_.reset();
           rhi_ = nullptr;
+          new_rhi();
         }
       });
     }
@@ -274,6 +284,8 @@ class RhiMapView final : public RhiView {
   void request(int rez);
   ViewState state() const;
   RenderStats stats() const;
+  /* for tests (mbvq::set_fell_back, mbvq_rhi.h) */
+  void set_fell_back(bool fell_back) { frame_.set_fell_back(fell_back); }
 
  protected:
   std::unique_ptr<rhi::ViewRenderer> make_renderer(QRhi *qrhi) override;
@@ -287,6 +299,10 @@ class RhiMapView final : public RhiView {
   /* the mouse buttons changed; after the last release, and when the state
      is cleared while the view is shown, a frame without the drag budget */
   void set_buttons(int buttons);
+  /* the view's buttons in the state of the process (rhi::set_map_buttons);
+     when the last map button of the process goes up, the other views whose
+     last fill fell back fill again in their next frame */
+  void share_buttons();
   /* a frame the view asks for itself, while it is shown */
   void ask_frame();
 
@@ -296,7 +312,7 @@ class RhiMapView final : public RhiView {
   int buttons_ = 0;            /* mouse buttons down: bit 0 left, 1 middle, 2 right */
   bool continued_ = false;     /* the next frame is one this view asked for to continue uploads */
   bool must_fill_ = false;     /* the next frame fills: the one after the last button's release */
-  bool upload_failed_ = false; /* a tile buffer could not be made: wait for the core's next request */
+  bool upload_failed_ = false; /* a buffer could not be made: wait for the core's next request */
   bool shown_ = true;          /* not hidden: the renderer's latest levels are kept from other views' evictions */
   int requests_ = 0;           /* frames asked for by ask_frame() */
 };
@@ -317,6 +333,9 @@ RhiMapView::RhiMapView(size_t instance, QWidget *parent) : RhiView(parent), inst
 RhiMapView::~RhiMapView() {
   if (views[instance_] == this)
     views[instance_] = nullptr;
+  /* a button down here goes with the view */
+  buttons_ = 0;
+  share_buttons();
   /* the renderer goes later, with RhiView: other views' plans can no longer
      ask this one for frames */
   if (renderer_ != nullptr)
@@ -368,9 +387,11 @@ void RhiMapView::ask_frame() {
 void RhiMapView::size_core(QSize pixels) { frame_.size_core(pixels.width(), pixels.height()); }
 
 void RhiMapView::new_rhi() {
-  /* a release in the old window will not come; this paint's frame follows
-     and fills, without the drag budget */
+  /* a release in the old window will not come; the next frame (this
+     paint's, or the first with a new QRhi after the old one died) fills,
+     without the drag budget */
   buttons_ = 0;
+  share_buttons();
   must_fill_ = true;
   continued_ = false;
 }
@@ -378,6 +399,7 @@ void RhiMapView::new_rhi() {
 void RhiMapView::set_buttons(int buttons) {
   const bool released = buttons_ != 0 && buttons == 0;
   buttons_ = buttons;
+  share_buttons();
   /* The core asks for no frame after most releases (its last drawing was
      at full resolution), so the frames of a drag drawn within the drag
      budget would stay: the view asks for a frame, which fills and draws the
@@ -387,6 +409,25 @@ void RhiMapView::set_buttons(int buttons) {
     continued_ = false;
     ask_frame();
   }
+}
+
+void RhiMapView::share_buttons() {
+  const bool down = rhi::map_buttons_down();
+  rhi::set_map_buttons(this, buttons_ != 0);
+  if (!down || rhi::map_buttons_down())
+    return;
+  /* The last map button of the process went up. A map that the core drew
+     during the drag at the resolution asked for (the fill fallback) would
+     keep that batch until the core asks for another drawing, which it does
+     after a release in the navigation, site and route modes
+     (mbview_plothighall), but not after a lost release: those maps ask for
+     a frame, which fills at full resolution. */
+  for (RhiMapView *view : views)
+    if (view != nullptr && view != this && view->frame_.fell_back()) {
+      view->must_fill_ = true;
+      view->continued_ = false;
+      view->ask_frame();
+    }
 }
 
 void RhiMapView::initialize(QRhiCommandBuffer *cb) {
@@ -423,14 +464,18 @@ void RhiMapView::render(QRhiCommandBuffer *cb) {
      planned within the drag budget. A frame is drawn only while the view is
      shown, whose levels are then kept from other views' evictions. */
   frame_.set_drag(buttons_ != 0);
+  /* line widths, point sizes and stipple factors follow this view's pixel
+     ratio, read in every frame (a window moved to another screen) */
+  renderer->set_pixel_ratio(devicePixelRatioF());
   shown_ = true;
   renderer->set_visible(true);
   const rhi::Prepared prepared = renderer->frame(&frame_, updates, continued_ && !must_fill_, pixels);
   continued_ = false;
   must_fill_ = false;
   if (prepared == rhi::Prepared::Failed) {
-    /* a tile buffer could not be made: nothing is drawn; the renderer keeps
-       its pipelines and uploads everything again at the next request */
+    /* a buffer could not be made: nothing is drawn; the renderer uploads
+       everything again at the next request, after making its pipelines again
+       if a uniform ring it could not restore took them */
     cb->beginPass(renderTarget(), Qt::white, {1.0f, 0});
     cb->endPass();
     upload_failed_ = true;
@@ -465,13 +510,19 @@ void RhiMapView::render(QRhiCommandBuffer *cb) {
 }
 
 bool RhiMapView::event(QEvent *qevent) {
-  /* a release lost to a grab, a hide or another window: no button is down;
-     a hidden view keeps no tile level from other views' evictions */
+  /* a release lost to a grab, a hide, another window, a modal window or a
+     popup: no button is down until a mouse event reports one again; a hidden
+     view keeps no tile level from other views' evictions */
   switch (qevent->type()) {
   case QEvent::UngrabMouse:
   case QEvent::Hide:
   case QEvent::WindowDeactivate:
+  case QEvent::WindowBlocked:
     set_buttons(0);
+    break;
+  case QEvent::FocusOut:
+    if (static_cast<QFocusEvent *>(qevent)->reason() == Qt::PopupFocusReason)
+      set_buttons(0);
     break;
   default:
     break;
@@ -481,9 +532,28 @@ bool RhiMapView::event(QEvent *qevent) {
     if (renderer_ != nullptr)
       static_cast<rhi::MapRenderer *>(renderer_.get())->set_visible(shown_);
   }
+  /* The buttons follow what each mouse event reports: a button it no
+     longer reports was released elsewhere (another widget's grab, which
+     sends this view nothing), and a button cleared above that is still down
+     (a popup closed while it was held) comes back with the next mouse event
+     that reports it. The event's own press or release is applied after
+     that, also where buttons() disagrees with it (a synthetic event). */
+  int buttons = buttons_;
+  switch (qevent->type()) {
+  case QEvent::MouseButtonPress:
+  case QEvent::MouseButtonDblClick:
+  case QEvent::MouseButtonRelease:
+  case QEvent::MouseMove: {
+    const Qt::MouseButtons down = static_cast<QMouseEvent *>(qevent)->buttons();
+    buttons = (down.testFlag(Qt::LeftButton) ? 1 : 0) | (down.testFlag(Qt::MiddleButton) ? 2 : 0) |
+              (down.testFlag(Qt::RightButton) ? 4 : 0);
+    break;
+  }
+  default:
+    break;
+  }
   struct mbv_input_event event;
   if (translate_event(qevent, devicePixelRatioF(), &event)) {
-    int buttons = buttons_;
     if (event.type == MBV_INPUT_PRESS)
       buttons |= 1 << (event.button - 1);
     else if (event.type == MBV_INPUT_RELEASE)
@@ -495,6 +565,8 @@ bool RhiMapView::event(QEvent *qevent) {
       mbview_input(instance_, &event);
     return true;
   }
+  if (buttons != buttons_)
+    set_buttons(buttons);
   return RhiView::event(qevent);
 }
 
@@ -524,6 +596,11 @@ ViewState view_state(QWidget *view) {
   if (auto *rhi_view = dynamic_cast<rhi_backend::RhiView *>(view))
     return rhi_view->state();
   return ViewState();
+}
+
+void set_fell_back(QWidget *view, bool fell_back) {
+  if (auto *map = dynamic_cast<rhi_backend::RhiMapView *>(view))
+    map->set_fell_back(fell_back);
 }
 
 RenderStats view_stats(QWidget *view) {

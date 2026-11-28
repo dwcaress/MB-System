@@ -370,14 +370,44 @@ void MapWidget::show_about() {
 }
 
 void MapWidget::set_status(const QString &text) {
-  status_->setText(text);
   /* While a QRhi view fills its batch, a slot of the program that processed
      events could draw another view in the middle of the fill: the signal then
-     goes out after the fill. The OpenGL backend sends it at once, as before. */
-  if (fill_active())
-    QMetaObject::invokeMethod(this, [this, text] { emit statusMessage(text); }, Qt::QueuedConnection);
-  else
+     goes out after the fill. The OpenGL backend sends it at once, as before.
+     The label takes the last text of a fill once, after it (one queued
+     call), and only if that text differs from its own, and the signal sends
+     it then, once: a full fill sets "Drawing full rez..." and then "Done.",
+     and a label, or a host's status bar showing the signal, that changed
+     repaints in a window frame of its own between two frames of the view
+     (QLabel and QStatusBar ignore a text equal to their own). On Metal every
+     frame of the view would then fall on the same frame slot of the
+     window's QRhi, at half the display rate. A text set outside a fill
+     before the queued call ran wins: the call sends no text of the fill
+     after it. */
+  status_due_ = text;
+  if (fill_active()) {
+    status_signal_due_ = true;
+    if (!status_queued_) {
+      status_queued_ = true;
+      QMetaObject::invokeMethod(
+          this,
+          [this] {
+            status_queued_ = false;
+            if (status_->text() != status_due_)
+              status_->setText(status_due_);
+            if (status_signal_due_) {
+              status_signal_due_ = false;
+              const QString last = status_due_;
+              emit statusMessage(last);
+            }
+          },
+          Qt::QueuedConnection);
+    }
+  }
+  else {
+    status_signal_due_ = false;
+    status_->setText(text);
     emit statusMessage(text);
+  }
 }
 
 void MapWidget::set_label(int label, const QString &text) {

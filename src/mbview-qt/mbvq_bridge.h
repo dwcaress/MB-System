@@ -327,7 +327,12 @@ void mbvq_pick_cpu_viewbounds(size_t instance, int viewbounds[4]);
 /* ---- implemented by the C half (mbvq_render_core.c) ---- */
 
 /* What a renderer that draws the core's arrays without OpenGL (the QRhi
-   backend) reads from the private part of the core. */
+   backend) reads from the private part of the core. Reading changes nothing,
+   apart from the view extents that mbvq_c_camera() sets as a drawing does;
+   mbvq_c_pick_size() is the exception that changes the core's state, as a
+   plot does: the view-bounds counter, data->viewbounds, the pick marks and
+   the CPU pick's cache of the view bounds (call it once per full fill, with
+   the batch target set). */
 
 /* the node arrays of the primary grid of a view, node k = i * n_rows + j (i is
    the column), and the modes they are drawn in; the pointers stay valid until
@@ -377,6 +382,18 @@ void mbvq_c_node_lonlat(size_t instance, int n, const int *i, const int *j, doub
 void mbvq_c_display_points(size_t instance, int n, const double *lonlat, double value, double *xyz);
 /* whether the contours of a resolution (MBVQ_REZ_LOW, _HIGH or _FULL) are made */
 bool mbvq_c_contours_made(size_t instance, int rez);
+/* Before a full-resolution fill of a 3D map: what the core's low and high
+   resolution plots do every MBV_BOUNDSFREQUENCY plots (mbview_plot), which a
+   full-resolution plot in 3D skips because it takes the whole grid as view
+   bounds: once the view-bounds counter has reached it, the view bounds of
+   the zoomed view (through the renderer's view bounds) and, with a pick, the
+   size of the pick marks from them (mbview_picksize); the counter back to
+   0. So it changes the core's state: the counter, data->viewbounds, the
+   CPU pick's cache of the view bounds (mbvq_pick_cpu_viewbounds) and the
+   pick marks, draped again. Nothing while the data are not projected (the
+   next fill projects them) or in 2D. Call once per full fill, with the
+   batch target set. True if it took the bounds. */
+bool mbvq_c_pick_size(size_t instance);
 
 /* ---- implemented by the Qt half ---- */
 

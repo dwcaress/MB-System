@@ -24,7 +24,7 @@ layout(std140, binding = 0) uniform Slot {
   mat4 mvp;      // clip-space correction x projection x modelview, built in double
   vec4 colour;   // the colour of commands drawn in one colour
   vec4 viewport; // render-target width and height, line width and point size (physical pixels)
-  vec4 stipple;  // pattern, factor (physical pixels), on (0 or 1), unused
+  vec4 stipple;  // pattern, factor (physical pixels), on (0 or 1), 1 where the clip depth runs from 0 to 1
 };
 
 void main() {

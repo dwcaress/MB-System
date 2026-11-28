@@ -44,6 +44,10 @@
  *   the next frames while the frame draws a coarser stride that is complete.
  * - The terrain cache: the GPU memory of the levels of every map of the
  *   process under one budget, the least recently drawn levels evicted first.
+ * - The style: the physical sizes of the line widths, point sizes and
+ *   stipple factors the core asks for in logical pixels.
+ * - The batch plan: the commands of the map's batch (mbv_draw_batch.h) as
+ *   the draws of the renderer, in stream order.
  */
 
 #ifndef MBVIEW_QT_MBVQ_RHI_MODEL_H
@@ -55,6 +59,7 @@
 #include <functional>
 #include <vector>
 
+#include "mbv_draw_batch.h"
 #include "mbvq_bridge.h"
 
 namespace mbvq {
@@ -79,6 +84,17 @@ inline double milliseconds(Clock::time_point at) {
    full resolution runs only when the core asks for full resolution, as with
    OpenGL. pending is MBVQ_REZ_* or -1 for none. */
 int fill_resolution(int pending, int lastdrawrez, bool contours_shown, bool full_contours_made);
+/* The same, with the fallback while a mouse button is down (button_down: in
+   the map view itself or in any map view of the process,
+   rhi::map_buttons_down): once the frame's plots at full resolution would
+   take longer than fallback_ms (full_ms: the map's last full-resolution
+   plot, the core's plot alone without the 3D pick-mark sizing, twice that
+   for a frame that fills twice on the spheroid; < 0 for none yet), a frame
+   fills at the resolution asked for, so that costly overlays (swath bounds
+   draped at stride 1 in 3D) do not slow a drag. */
+constexpr double kFillFallbackMs = 12.0;
+int fill_resolution(int pending, int lastdrawrez, bool contours_shown, bool full_contours_made, bool button_down,
+                    double full_ms, double fallback_ms = kFillFallbackMs);
 
 /* cells per side of a terrain tile */
 constexpr int kTileCells = 128;
@@ -438,6 +454,137 @@ class TerrainPlan {
   double sum_index_nodes_ = 0.0;
   std::vector<unsigned char> valid_; /* scratch */
   std::vector<double> points_;       /* scratch */
+};
+
+/*--------------------------------------------------------------------*/
+/* The physical sizes of what the core asks for in logical pixels (line
+   widths, point sizes, stipple factors): physical = max(1, round(logical x
+   ratio x factor)), halves rounded up, with ratio the view's
+   devicePixelRatioF() (RenderOptions::pixel_ratio offscreen), never the
+   render target's, which is 1 in a QRhiWidget. One factor per kind, all 1,
+   so that a kind can be changed in one place. Marker sizes are display units
+   and are not scaled. */
+struct Style {
+  double ratio = 1.0;
+  double line_factor = 1.0;
+  double contour_factor = 1.0;
+  double point_factor = 1.0;
+  double stipple_factor = 1.0;
+
+  static int physical(double logical, double ratio, double factor);
+  int line(double logical) const { return physical(logical, ratio, line_factor); }
+  /* the contours are drawn 1 logical pixel wide (mbview_contour) */
+  int contour() const { return physical(1.0, ratio, contour_factor); }
+  int point(double logical) const { return physical(logical, ratio, point_factor); }
+  int stipple(int factor) const { return physical(factor, ratio, stipple_factor); }
+  /* a line of one physical pixel is drawn with the line topology (as
+     OpenGL's 1 px lines at ratio 1); a wider one as quads */
+  static bool thin(int physical_width) { return physical_width <= 1; }
+};
+
+/* what a draw of the batch plan draws */
+enum class DrawKind {
+  Terrain,      /* the terrain slot (TerrainPlan) */
+  Contours,     /* a contour slot: the finest contours made */
+  Lines,        /* thin lines, pairs of vertices */
+  LineStrip,    /* a thin strip */
+  Points,       /* points */
+  Triangles,    /* triangles */
+  WideStrip,    /* a strip of wide lines: quads instanced per segment, two bindings one vertex apart */
+  WidePairs,    /* wide lines from pairs of vertices: quads instanced per pair */
+  StippleLines, /* thin stippled lines from the stipple buffer (pairs) */
+  StippleWide,  /* wide stippled lines from the stipple buffer (quads per pair) */
+  Markers       /* a run of markers of one shape, instanced */
+};
+
+/* the buffer a draw reads its vertices or instances from */
+enum class DrawSource {
+  None,      /* the terrain and contours: their own buffers */
+  Batch,     /* the batch's vertices (24 bytes each) */
+  Closings,  /* the closing segments of loops: pairs of batch vertices */
+  Triangles, /* the quads of the batch as triangles: batch vertices */
+  Stipple,   /* the stipple buffer (StippleVertex) */
+  Instances  /* the batch's marker instances (24 bytes each) */
+};
+
+/* one draw, in stream order */
+struct DrawItem {
+  DrawKind kind = DrawKind::Lines;
+  DrawSource source = DrawSource::None;
+  int command = -1; /* the batch command it comes from */
+  int slot = 0;     /* its uniform slot */
+  /* the first vertex and the vertex count of a draw of vertices; for
+     instanced draws (wide lines, markers) the instance count, and the byte
+     offset of the first instance in the source */
+  uint32_t first = 0;
+  uint32_t count = 0;
+  uint32_t offset = 0;
+  int shape = -1; /* markers: the shape in the batch; contours: the slot (MBV_DRAW_SLOT_CONTOURS_*) */
+};
+
+/* the state a slot carries: one per drawable command */
+struct SlotSpec {
+  bool camera = true;     /* the view's camera, or the projection alone */
+  bool depth_test = false;
+  float colour[3] = {0.0f, 0.0f, 0.0f}; /* contours: black; markers: the ring colour */
+  int width = 1;          /* line width or point size in physical pixels */
+  bool stipple = false;
+  int factor = 1;         /* stipple factor in physical pixels */
+  unsigned pattern = 0xffff;
+};
+
+/* a vertex of the stipple buffer: a batch vertex and OpenGL's stipple
+   counter at it, in physical pixels along the major axis, such that the
+   centre of each fragment gets its count plus 1/2, less a multiple of 16
+   times the factor that is the same along a segment (add_stipple) */
+struct StippleVertex {
+  float x, y, z;
+  float r, g, b;
+  float d;
+};
+
+/* The draws of the map's batch, in stream order: each drawable command gets
+   a uniform slot; lines of one physical pixel are drawn with the line
+   topology straight from the batch's vertices, wider ones as quads
+   instanced over them (a strip of n vertices n - 1 segments, a loop n with
+   its closing segment, n vertices of LINES n / 2); a loop's closing segment
+   comes from a small buffer of vertex pairs; quads become triangles;
+   stippled lines go through a buffer of vertex pairs that carry OpenGL's
+   stipple counter, which counts the fragments, goes on along a strip or
+   loop and starts again at every LINES segment and every primitive;
+   markers are drawn one run per command, instanced over the batch's
+   instances. Shapes define the meshes of later runs; groups are counted. */
+class BatchPlan {
+ public:
+  /* camera: projection x modelview, projection: the projection alone
+     (OpenGL's convention, column-major), width x height: the drawing in
+     physical pixels; they place the stipple only */
+  void build(const struct mbv_draw_batch &batch, const Style &style, const double camera[16],
+             const double projection[16], int width, int height);
+
+  const std::vector<DrawItem> &items() const { return items_; }
+  const std::vector<SlotSpec> &slot_specs() const { return slots_; }
+  const std::vector<struct mbv_draw_vertex> &closings() const { return closings_; }
+  const std::vector<struct mbv_draw_vertex> &triangles() const { return triangles_; }
+  const std::vector<StippleVertex> &stipple() const { return stipple_; }
+  int groups() const { return groups_; }
+  int markers() const { return markers_; }
+  /* line segments in the plan (thin and wide) */
+  size_t segments() const { return segments_; }
+
+ private:
+  int add_slot(const struct mbv_draw_command &command, const Style &style);
+  void add_stipple(const struct mbv_draw_batch &batch, int c, int slot, const double matrix[16], int width,
+                   int height);
+
+  std::vector<DrawItem> items_;
+  std::vector<SlotSpec> slots_;
+  std::vector<struct mbv_draw_vertex> closings_;
+  std::vector<struct mbv_draw_vertex> triangles_;
+  std::vector<StippleVertex> stipple_;
+  int groups_ = 0;
+  int markers_ = 0;
+  size_t segments_ = 0;
 };
 
 }  // namespace rhi

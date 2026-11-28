@@ -54,7 +54,7 @@
  *        window closed and exit() called inside the event loop, as the macOS
  *        Quit menu does; or the event loop left with the map in a floating
  *        dock of a main window, which is deleted then (QTBUG-151834)
- *   mbview_qt_rhi_test --bench [--3d] [--frames n] [--size WxH] [grid]
+ *   mbview_qt_rhi_test --bench [--3d] [--frames n] [--size WxH] [--nav list] [grid]
  *        frame times of a map window (needs a display, not in ctest; a
  *        measurement, not a test): the time to the first complete frame, then
  *        drags through the view's input, n measured motions each (60) - in 2D
@@ -86,6 +86,7 @@
 #include <QMouseEvent>
 #include <QRhiWidget>
 #include <QScreen>
+#include <QStatusBar>
 #include <QTimer>
 #include <QWindow>
 #include <algorithm>
@@ -103,7 +104,9 @@
 #include <thread>
 #include <vector>
 #if defined(__APPLE__)
+#include <dlfcn.h>
 #include <mach/mach.h>
+#include <malloc/malloc.h>
 #endif
 
 extern "C" {
@@ -131,7 +134,9 @@ extern "C" {
 #include "mbvq_profile.h"
 #include "mbvq_rhi.h"
 #include "mbvq_rhi_frame.h"
+#include "mbvq_rhi_glu.h"
 #include "mbvq_rhi_model.h"
+#include "mbview_qt_rhi_glu_fixtures.h"
 #include "mbvq_window.h"
 
 namespace {
@@ -348,6 +353,18 @@ void set_exaggeration(size_t instance, double exaggeration) {
     pointers[f] = fields[f].c_str();
   }
   mbvq_c_apply(instance, MBVQ_DIALOG_VIEW3D, pointers.data(), controls.toggle);
+}
+
+void set_contour_interval(size_t instance, double interval) {
+  struct mbvq_controls controls;
+  mbvq_c_controls(instance, &controls);
+  std::vector<std::string> fields(MBVQ_FIELDS);
+  std::vector<const char *> pointers(MBVQ_FIELDS);
+  for (int f = 0; f < MBVQ_FIELDS; f++) {
+    fields[f] = text("%.10g", f == MBVQ_F_CONTOURS ? interval : controls.field[f]);
+    pointers[f] = fields[f].c_str();
+  }
+  mbvq_c_apply(instance, MBVQ_DIALOG_COLORBOUNDS, pointers.data(), controls.toggle);
 }
 
 /* mbview_setviewcontrols with the controls the view has: nothing changes but
@@ -2132,6 +2149,2119 @@ void model_spheroid() {
 }
 
 /*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* 6c: the map's batch - the style, the fill fallback, the batch plan, GLU's
+   meshes, contours, the spheroid's second fill and the 3D pick marks */
+
+/* a batch made by hand, freed with it */
+struct TestBatch {
+  struct mbv_draw_batch b;
+  TestBatch() { mbv_draw_batch_init(&b); }
+  ~TestBatch() { mbv_draw_batch_free(&b); }
+  TestBatch(const TestBatch &) = delete;
+  TestBatch &operator=(const TestBatch &) = delete;
+  /* a primitive of points (x y z), one colour */
+  void primitive(int mode, const std::vector<std::array<float, 3>> &points, float r, float g, float bl) {
+    mbv_draw_batch_color3f(&b, r, g, bl);
+    mbv_draw_batch_begin(&b, mode);
+    for (const auto &p : points)
+      mbv_draw_batch_vertex3f(&b, p[0], p[1], p[2]);
+    mbv_draw_batch_end(&b);
+  }
+  /* a rectangle as two triangles */
+  void rectangle(float x0, float y0, float x1, float y1, float z, float r, float g, float bl) {
+    primitive(MBV_DRAW_TRIANGLES, {{x0, y0, z}, {x1, y0, z}, {x1, y1, z}, {x0, y0, z}, {x1, y1, z}, {x0, y1, z}}, r, g,
+              bl);
+  }
+};
+
+/* the identity camera: display coordinates are normalised device coordinates */
+const double kIdentity[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+
+void model_style() {
+  /* section 7: widths 1, 2, 3 and 4, the stipple factor 1 and the point size 3 */
+  struct Row {
+    double ratio;
+    int widths[4];
+    int point;
+  };
+  const Row rows[] = {{1.0, {1, 2, 3, 4}, 3},
+                      {1.25, {1, 3, 4, 5}, 4},
+                      {1.5, {2, 3, 5, 6}, 5},
+                      {2.0, {2, 4, 6, 8}, 6},
+                      {3.0, {3, 6, 9, 12}, 9}};
+  bool table = true;
+  std::string text_rows;
+  for (const Row &row : rows) {
+    rhi::Style style;
+    style.ratio = row.ratio;
+    for (int w = 0; w < 4; w++)
+      table = table && style.line(w + 1) == row.widths[w];
+    table = table && style.point(3) == row.point && style.contour() == row.widths[0] &&
+            style.stipple(1) == row.widths[0];
+    text_rows += " " + text("%g:", row.ratio) + std::to_string(style.line(1)) + "," + std::to_string(style.line(2)) +
+                 "," + std::to_string(style.line(3)) + "," + std::to_string(style.line(4));
+  }
+  check(table, "6c: the pixel-ratio rule max(1, round(logical x ratio)) for widths 1 to 4, contours, the stipple "
+               "factor and points of 3 (" + text_rows + ")");
+  rhi::Style one;
+  rhi::Style two;
+  two.ratio = 2.0;
+  check(rhi::Style::thin(one.line(1)) && !rhi::Style::thin(two.line(1)) && !rhi::Style::thin(one.line(2)) &&
+            one.line(0.0) == 1 && one.line(0.4) == 1,
+        "6c: a 1 px line is thin at ratio 1 and wide at ratio 2; no width below 1");
+
+  /* the fill fallback while a button is down (5.2.2) */
+  using rhi::fill_resolution;
+  check(fill_resolution(MBVQ_REZ_LOW, MBVQ_REZ_FULL, false, false, true, 13.0) == MBVQ_REZ_LOW &&
+            fill_resolution(MBVQ_REZ_LOW, MBVQ_REZ_FULL, false, false, true, 11.0) == MBVQ_REZ_FULL &&
+            fill_resolution(MBVQ_REZ_LOW, MBVQ_REZ_FULL, false, false, false, 13.0) == MBVQ_REZ_FULL &&
+            fill_resolution(-1, MBVQ_REZ_NONE, false, false, true, 30.0) == MBVQ_REZ_LOW &&
+            fill_resolution(MBVQ_REZ_HIGH, MBVQ_REZ_FULL, true, false, false, -1.0) == MBVQ_REZ_HIGH &&
+            fill_resolution(MBVQ_REZ_LOW, MBVQ_REZ_FULL, false, false, true, -1.0) == MBVQ_REZ_FULL,
+        "6c: while a button is down a fill falls back to the resolution asked for once a full-resolution plot took "
+        "over 12 ms, never without a button or before a full-resolution plot");
+}
+
+/* a point of a width x height picture (x right and y down, in pixels) in
+   normalised device coordinates, which the identity camera draws there */
+std::array<float, 3> ndc(double x, double y, int width, int height) {
+  return {static_cast<float>(2.0 * x / width - 1.0), static_cast<float>(1.0 - 2.0 * y / height), 0.0f};
+}
+
+/* the stipple counter values of a plan against OpenGL's counter, segment by
+   segment: the first value equal modulo 16 x the factor (the plan carries
+   the counter to the next segment modulo that, which leaves the pattern's
+   bits as they are), the second as far from the first as expected */
+bool same_counters(const std::vector<rhi::StippleVertex> &values, const float *expected, size_t n, int factor) {
+  bool same = values.size() == n && n % 2 == 0;
+  for (size_t k = 0; same && k < n; k += 2) {
+    const double first = static_cast<double>(values[k].d) - expected[k];
+    const double span = (static_cast<double>(values[k + 1].d) - values[k].d) -
+                        (static_cast<double>(expected[k + 1]) - expected[k]);
+    same = std::fabs(std::remainder(first, 16.0 * factor)) < 1.0e-3 && std::fabs(span) < 1.0e-3;
+  }
+  return same;
+}
+
+void model_batch_plan() {
+  TestBatch t;
+  struct mbv_draw_batch *b = &t.b;
+  mbv_draw_batch_group(b, MBV_DRAW_GROUP_ROUTE);
+  /* a strip of 5, a loop of 4, separate lines of 7 vertices 3 px wide */
+  t.primitive(MBV_DRAW_LINE_STRIP, {{0, 0, 0}, {0.1f, 0, 0}, {0.2f, 0, 0}, {0.3f, 0, 0}, {0.4f, 0, 0}}, 1, 0, 0);
+  t.primitive(MBV_DRAW_LINE_LOOP, {{0, 0, 0}, {0.1f, 0, 0}, {0.1f, 0.1f, 0}, {0, 0.1f, 0}}, 0, 1, 0);
+  mbv_draw_batch_line_width(b, 3.0f);
+  t.primitive(MBV_DRAW_LINES, {{0, 0, 0}, {0.1f, 0, 0}, {0.2f, 0, 0}, {0.3f, 0, 0}, {0.4f, 0, 0}, {0.5f, 0, 0}, {0.6f, 0, 0}},
+              0, 0, 1);
+  mbv_draw_batch_line_width(b, 1.0f);
+  /* stippled: a strip, a loop and separate lines */
+  mbv_draw_batch_line_stipple(b, 1, 0x1111);
+  mbv_draw_batch_enable(b, MBV_DRAW_LINE_STIPPLE, true);
+  t.primitive(MBV_DRAW_LINE_STRIP, {{0, 0, 0}, {0.1f, 0, 0}, {0.1f, 0.3f, 0}}, 0, 0, 0);
+  t.primitive(MBV_DRAW_LINE_LOOP, {{0, 0, 0}, {0.2f, 0, 0}, {0.2f, 0.1f, 0}}, 0, 0, 0);
+  t.primitive(MBV_DRAW_LINES, {{0, 0, 0}, {0.1f, 0, 0}, {0.5f, 0.5f, 0}, {0.5f, 0.9f, 0}}, 0, 0, 0);
+  mbv_draw_batch_enable(b, MBV_DRAW_LINE_STIPPLE, false);
+  /* markers: a disk shape, three markers, the same list defined again with
+     another radius, two more */
+  mbv_draw_batch_marker_disks(b, 7, 0.1, 0.08, 10, 10, 0.0f, 1.0f, 0.0f);
+  for (int k = 0; k < 3; k++) {
+    mbv_draw_batch_color3f(b, 1.0f, 0.0f, 0.0f);
+    mbv_draw_batch_marker(b, 7, 0.1f * k, 0.0f, 0.0f);
+  }
+  mbv_draw_batch_marker_disks(b, 7, 0.2, 0.16, 10, 10, 0.0f, 0.0f, 1.0f);
+  for (int k = 0; k < 2; k++) {
+    mbv_draw_batch_color3f(b, 1.0f, 0.0f, 0.0f);
+    mbv_draw_batch_marker(b, 7, 0.1f * k, 0.5f, 0.0f);
+  }
+
+  rhi::BatchPlan plan;
+  rhi::Style one;
+  plan.build(*b, one, kIdentity, kIdentity, 200, 200);
+  const std::vector<rhi::DrawItem> &items = plan.items();
+  auto kinds = [&](rhi::DrawKind kind) {
+    int n = 0;
+    for (const rhi::DrawItem &item : items)
+      n += item.kind == kind;
+    return n;
+  };
+  /* in stream order: strip, loop (strip and its closing pair), lines, three
+     stippled, two marker runs */
+  const bool order = items.size() == 9 && items[0].kind == rhi::DrawKind::LineStrip && items[0].count == 5 &&
+                     items[1].kind == rhi::DrawKind::LineStrip && items[1].count == 4 &&
+                     items[2].kind == rhi::DrawKind::Lines && items[2].source == rhi::DrawSource::Closings &&
+                     items[2].count == 2 && items[2].slot == items[1].slot &&
+                     items[3].kind == rhi::DrawKind::WidePairs && items[3].count == 3 &&
+                     items[3].offset == static_cast<uint32_t>(b->commands[3].first) * 24 &&
+                     items[4].kind == rhi::DrawKind::StippleLines && items[5].kind == rhi::DrawKind::StippleLines &&
+                     items[6].kind == rhi::DrawKind::StippleLines && items[7].kind == rhi::DrawKind::Markers &&
+                     items[8].kind == rhi::DrawKind::Markers;
+  check(order && plan.groups() == 1 && plan.closings().size() == 2 && plan.closings()[0].x == 0.0f &&
+            plan.closings()[0].y == 0.1f && plan.closings()[1].y == 0.0f,
+        "6c: BatchPlan keeps the stream order; a loop's closing pair goes from its last vertex to its first, in its "
+        "slot");
+  check(plan.segments() == 4 + 4 + 3 + (2 + 3 + 2),
+        "6c: a strip of n vertices gives n - 1 segments, a loop n, 2k + 1 separate vertices k (" +
+            std::to_string(plan.segments()) + " segments)");
+
+  /* the stipple counter in physical pixels along the major axis: on along a
+     strip and a loop, from 0 at every separate segment; with every vertex on
+     whole window coordinates (pixel corners) it is the summed length, since
+     each segment's first fragment lies in its start's column and it makes
+     one fragment per pixel of its length (compared modulo 16 x the factor,
+     same_counters) */
+  const std::vector<rhi::StippleVertex> &st = plan.stipple();
+  const float expected[] = {0, 10, 10, 40, 0, 20, 20, 30, 30, 50, 0, 10, 0, 40};
+  const bool distances = same_counters(st, expected, sizeof(expected) / sizeof(expected[0]), 1);
+  check(distances && items[4].count == 4 && items[5].count == 6 && items[6].count == 4 && items[5].first == 4,
+        "6c: stipple counter values continue along a strip (0 10 | 10 40) and a loop with its closing segment (0 20 "
+        "| 20 30 | 30 50) and restart at each separate segment (0 10 | 0 40), modulo 16 x the factor");
+
+  /* Off whole coordinates the counter is OpenGL's, which counts the
+     fragments of the diamond-exit rule, not the summed length: a segment's
+     first fragment lies in its start's column, or in the next one when the
+     start lies past that column's centre and outside its diamond, and the
+     centre of the k-th fragment gets s + k + 1/2. Window coordinates of a
+     200 x 200 drawing: the box (20.7, 40.3)-(120.2, 140.6) as a loop (each
+     side makes 100 fragments; summed lengths 0 99.5 | 99.5 199.8 | 199.8
+     299.3 | 299.3 399.6), a strip with a corner (summed 0 19.5 | 19.5 49.6),
+     and separate lines: rightward and leftward from inside the start's
+     diamond past its centre, and rightward from outside it (summed 0 40 |
+     0 39.7 | 0 29.5). The window's y runs up, the picture's of ndc() down. */
+  {
+    TestBatch f;
+    mbv_draw_batch_line_stipple(&f.b, 1, 0x1111);
+    mbv_draw_batch_enable(&f.b, MBV_DRAW_LINE_STIPPLE, true);
+    f.primitive(MBV_DRAW_LINE_LOOP,
+                {ndc(20.7, 200 - 40.3, 200, 200), ndc(120.2, 200 - 40.3, 200, 200), ndc(120.2, 200 - 140.6, 200, 200),
+                 ndc(20.7, 200 - 140.6, 200, 200)},
+                0, 0, 0);
+    f.primitive(MBV_DRAW_LINE_STRIP,
+                {ndc(10.7, 200 - 10.5, 200, 200), ndc(30.2, 200 - 10.5, 200, 200), ndc(30.2, 200 - 40.6, 200, 200)}, 0,
+                0, 0);
+    f.primitive(MBV_DRAW_LINES,
+                {ndc(10.7, 200 - 160.5, 200, 200), ndc(50.7, 200 - 160.5, 200, 200), ndc(50.3, 200 - 180.5, 200, 200),
+                 ndc(10.6, 200 - 180.5, 200, 200), ndc(30.8, 200 - 170.0, 200, 200), ndc(60.3, 200 - 170.0, 200, 200)},
+                0, 0, 0);
+    rhi::BatchPlan counted;
+    counted.build(f.b, one, kIdentity, kIdentity, 200, 200);
+    const float gl[] = {0.7f, 100.2f, 100.3f, 200.6f, 200.8f, 300.3f, 300.4f, 400.7f,
+                        0.7f, 20.2f,  20.5f,  50.6f,
+                        0.7f, 40.7f,  0.7f,   40.4f,  -0.2f,  29.3f};
+    const std::vector<rhi::StippleVertex> &sc = counted.stipple();
+    const bool fragments = same_counters(sc, gl, sizeof(gl) / sizeof(gl[0]), 1);
+    std::string found;
+    for (size_t k = 0; k < sc.size(); k++)
+      found += text(k % 2 == 0 ? (k == 0 ? "%.1f" : " | %.1f") : " %.1f", sc[k].d);
+    check(fragments, "6c: the stipple counter counts OpenGL's fragments, modulo 16 x the factor: around a loop 0.7 "
+                     "100.2 | 100.3 200.6 | 200.8 300.3 | 300.4 400.7, along a strip 0.7 20.2 | 20.5 50.6, separate "
+                     "lines 0.7 40.7 | 0.7 40.4 | -0.2 29.3 (" + found + ")");
+  }
+
+  /* The counter goes on modulo 16 x the factor, so it keeps its phase where
+     a float would not: in a drawing 2^24 px wide a strip on whole window
+     coordinates from x 0 to 2^24 (y 100), back 3 px and up 50 px makes 2^24
+     fragments, then 3, then 50, so its last segment starts at 2^24 + 3,
+     which is 3 modulo 16 and which a float rounds to 2^24 + 4 */
+  {
+    TestBatch f;
+    mbv_draw_batch_line_stipple(&f.b, 1, 0x0001);
+    mbv_draw_batch_enable(&f.b, MBV_DRAW_LINE_STIPPLE, true);
+    const float back = 1.0f - 3.0f / 8388608.0f; /* window x 2^24 - 3 */
+    f.primitive(MBV_DRAW_LINE_STRIP, {{-1.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {back, 0.0f, 0.0f}, {back, 0.5f, 0.0f}},
+                0, 0, 0);
+    rhi::BatchPlan beyond;
+    beyond.build(f.b, one, kIdentity, kIdentity, 1 << 24, 200);
+    const float expected_beyond[] = {0.0f, 16777216.0f, 0.0f, 3.0f, 3.0f, 53.0f};
+    std::string found;
+    for (const rhi::StippleVertex &vertex : beyond.stipple())
+      found += text(found.empty() ? "%.0f" : " %.0f", vertex.d);
+    check(same_counters(beyond.stipple(), expected_beyond, sizeof(expected_beyond) / sizeof(expected_beyond[0]), 1),
+          "6c: the stipple counter keeps its phase beyond 2^24 fragments: a strip of 2^24, 3 and 50 fragments goes "
+          "on at 0, 2^24 | 0, 3 | 3, 53 modulo 16 (" + found + ")");
+  }
+
+  /* the marker runs: instance offsets, and the shape each one names */
+  bool runs = kinds(rhi::DrawKind::Markers) == 2 && plan.markers() == 5;
+  int run = 0;
+  for (const rhi::DrawItem &item : items) {
+    if (item.kind != rhi::DrawKind::Markers)
+      continue;
+    const struct mbv_draw_shape &shape = b->shapes[item.shape];
+    runs = runs && item.offset == (run == 0 ? 0u : 3u * 24u) && item.count == (run == 0 ? 3u : 2u) &&
+           shape.outer == (run == 0 ? 0.1 : 0.2) &&
+           plan.slot_specs()[item.slot].colour[2] == (run == 0 ? 0.0f : 1.0f);
+    run++;
+  }
+  check(runs, "6c: marker runs become instance ranges (offsets 0 and 72 bytes); the shape defined again in "
+              "mid-stream serves only the later run, with its own ring colour");
+
+  /* at ratio 2 every line is wide: the strip instanced over its own
+     vertices, the loop's closing segment as one pair */
+  rhi::Style two;
+  two.ratio = 2.0;
+  plan.build(*b, two, kIdentity, kIdentity, 400, 400);
+  const std::vector<rhi::DrawItem> &wide = plan.items();
+  check(wide.size() == 9 && wide[0].kind == rhi::DrawKind::WideStrip && wide[0].count == 4 && wide[0].offset == 0 &&
+            wide[1].kind == rhi::DrawKind::WideStrip && wide[1].count == 3 &&
+            wide[2].kind == rhi::DrawKind::WidePairs && wide[2].source == rhi::DrawSource::Closings &&
+            wide[2].count == 1 && wide[4].kind == rhi::DrawKind::StippleWide && wide[4].count == 2 &&
+            plan.slot_specs()[wide[0].slot].width == 2 && plan.slot_specs()[wide[3].slot].width == 6 &&
+            plan.slot_specs()[wide[4].slot].factor == 2 && std::fabs(plan.stipple()[3].d - 80.0f) < 1.0e-3f,
+        "6c: at ratio 2 the 1 px lines are 2 px quads, the 3 px lines 6 px, the stipple factor 2 and its counter "
+        "values doubled");
+
+  /* a quad (a, b, c, d) becomes the triangles (a, b, c) and (a, c, d), in one
+     draw of the triangles buffer */
+  {
+    TestBatch q;
+    q.primitive(MBV_DRAW_QUADS, {{0, 0, 0}, {0.5f, 0, 0.1f}, {0.5f, 0.5f, 0.2f}, {0, 0.5f, 0.3f}}, 1, 0, 0);
+    rhi::BatchPlan quads;
+    quads.build(q.b, one, kIdentity, kIdentity, 200, 200);
+    const std::vector<struct mbv_draw_vertex> &tri = quads.triangles();
+    const int order[6] = {0, 1, 2, 0, 2, 3};
+    bool split = tri.size() == 6 && quads.items().size() == 1 && quads.items()[0].kind == rhi::DrawKind::Triangles &&
+                 quads.items()[0].count == 6;
+    for (int k = 0; split && k < 6; k++) {
+      const struct mbv_draw_vertex &v = q.b.vertices[order[k]];
+      split = tri[k].x == v.x && tri[k].y == v.y && tri[k].z == v.z;
+    }
+    check(split, "6c: a quad (a, b, c, d) becomes the triangles (a, b, c) and (a, c, d)");
+  }
+}
+
+void model_glu() {
+  /* every marker call of the overlays, at three radii, against the vertices
+     traced from Mesa's GLU and Apple's GLU, bit for bit */
+  int matched[2] = {0, 0};
+  int cases[2] = {0, 0};
+  std::string mismatches;
+  for (const glu_fixtures::Case &c : glu_fixtures::cases) {
+    const mbvq::GluVariant variant = c.apple ? mbvq::GluVariant::Apple : mbvq::GluVariant::Sgi;
+    const std::vector<rhi::GluPrimitive> mesh = c.disk ? rhi::glu_disk(c.inner * c.outer, c.outer, c.a, c.b, variant)
+                                                       : rhi::glu_sphere(c.outer, c.a, c.b, variant);
+    bool same = static_cast<int>(mesh.size()) == c.count;
+    for (int p = 0; same && p < c.count; p++) {
+      const glu_fixtures::Primitive &traced = glu_fixtures::primitives[c.first + p];
+      same = mesh[p].mode == traced.mode && static_cast<int>(mesh[p].xyz.size()) == traced.count &&
+             std::memcmp(mesh[p].xyz.data(), &glu_fixtures::words[traced.first], 4 * static_cast<size_t>(traced.count)) ==
+                 0;
+    }
+    cases[c.apple]++;
+    matched[c.apple] += same;
+    if (!same)
+      mismatches += std::string(" ") + (c.apple ? "apple " : "sgi ") + c.name + text("@%g", c.outer);
+  }
+  check(cases[0] == 24 && matched[0] == 24,
+        "6c: GLU's disks and spheres as Mesa's GLU makes them, bit for bit (" + std::to_string(matched[0]) + " of " +
+            std::to_string(cases[0]) + " traced calls" + mismatches + ")");
+  check(cases[1] == 24 && matched[1] == 24,
+        "6c: ... and as Apple's GLU makes them, for comparisons on macOS (" + std::to_string(matched[1]) + " of " +
+            std::to_string(cases[1]) + ")");
+
+  /* a disk shape's mesh: the fill (a fan of slices triangles), then its ring
+     (a quad strip of 2 ring_slices triangles) flagged for the ring colour */
+  struct mbv_draw_shape disks = {};
+  disks.kind = MBV_DRAW_SHAPE_DISKS;
+  disks.outer = 0.5;
+  disks.inner = 0.4;
+  disks.slices = 4;
+  disks.ring_slices = 10;
+  const std::vector<float> mesh = rhi::marker_mesh(disks, mbvq::GluVariant::Sgi);
+  const size_t fill = 3 * 4, ring = 3 * 2 * 10;
+  bool flags = mesh.size() == 4 * (fill + ring);
+  for (size_t k = 0; flags && k < fill + ring; k++)
+    flags = mesh[4 * k + 3] == (k < fill ? 0.0f : 1.0f);
+  struct mbv_draw_shape sphere = {};
+  sphere.kind = MBV_DRAW_SHAPE_SPHERE;
+  sphere.outer = 0.5;
+  sphere.slices = 10;
+  sphere.stacks = 10;
+  check(flags && rhi::marker_mesh(sphere, mbvq::GluVariant::Sgi).size() == 4 * 3 * (2 * 10 + 8 * 2 * 10),
+        "6c: a disk shape's mesh is its fill, then its ring flagged for the ring colour; a sphere's its two fans "
+        "and its bands");
+
+  /* the quad strips cover their quads: the ring's triangles add up to the
+     annulus between the two regular polygons, the fill's to the polygon, and
+     no triangle of the disks or the sphere is degenerate (a triangulation
+     that leaves half of each quad out fails here) */
+  const auto area = [](const std::vector<float> &m, size_t first, size_t last, double *smallest) {
+    double sum = 0.0;
+    for (size_t t = first; t < last; t++) {
+      const float *p = &m[12 * t];
+      const double ux = p[4] - p[0], uy = p[5] - p[1], uz = p[6] - p[2];
+      const double vx = p[8] - p[0], vy = p[9] - p[1], vz = p[10] - p[2];
+      const double cx = uy * vz - uz * vy, cy = uz * vx - ux * vz, cz = ux * vy - uy * vx;
+      const double a = 0.5 * std::sqrt(cx * cx + cy * cy + cz * cz);
+      sum += a;
+      *smallest = std::min(*smallest, a);
+    }
+    return sum;
+  };
+  const double kPi = 3.14159265358979323846;
+  double smallest = 1.0e30;
+  const double fill_area = area(mesh, 0, 4, &smallest), ring_area = area(mesh, 4, 4 + 20, &smallest);
+  const double fill_expected = 0.5 * 4 * std::sin(2.0 * kPi / 4) * 0.5 * 0.5;
+  const double ring_expected = 0.5 * 10 * std::sin(2.0 * kPi / 10) * (0.5 * 0.5 - 0.4 * 0.4);
+  const std::vector<float> ball = rhi::marker_mesh(sphere, mbvq::GluVariant::Sgi);
+  double ball_smallest = 1.0e30;
+  area(ball, 0, ball.size() / 12, &ball_smallest);
+  check(std::fabs(fill_area - fill_expected) <= 1.0e-6 && std::fabs(ring_area - ring_expected) <= 1.0e-6 &&
+            smallest > 1.0e-4 && ball_smallest > 1.0e-5,
+        "6c: the quad strips become triangles covering every quad: ring " + text("%.6f", ring_area) + " against " +
+            text("%.6f", ring_expected) + ", fill " + text("%.6f", fill_area) + ", no degenerate triangle (smallest " +
+            text("%.2g", std::min(smallest, ball_smallest)) + ")");
+}
+
+/* the renderer's view bounds on the CPU after a pause: a costly sizing of the
+   3D pick marks */
+constexpr double kSlowBoundsMs = 100.0;
+void slow_viewbounds(size_t instance, int viewbounds[4]) {
+  std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(kSlowBoundsMs)));
+  mbvq_pick_cpu_viewbounds(instance, viewbounds);
+}
+
+/* the map drawings the core asks for (defer_draw), kept for the test's own
+   frame drivers; true, as the QRhi backend's */
+std::vector<std::pair<size_t, int>> asked_drawings;
+bool record_drawing(int view, size_t instance, int rez) {
+  if (view == MBV_RENDER_MAP)
+    asked_drawings.emplace_back(instance, rez);
+  return true;
+}
+
+/* the site marker radius in a map's batch (MBV_GLLIST_SITESMALL), and the one
+   the core gives it from the corner nodes of the view bounds (vb0, vb2) and
+   (vb1, vb3) as mbview_site.c computes it: float differences, then double */
+double batch_site_radius(const struct mbv_draw_batch &batch) {
+  double radius = -1.0;
+  for (int s = 0; s < batch.num_shapes; s++)
+    if (batch.shapes[s].list == MBV_GLLIST_SITESMALL)
+      radius = batch.shapes[s].outer;
+  return radius;
+}
+double corner_site_radius(const struct mbview_struct *data) {
+  const int *vb = data->viewbounds;
+  const int k0 = vb[0] * data->primary_n_rows + vb[2];
+  const int k1 = vb[1] * data->primary_n_rows + vb[3];
+  const double xx = data->primary_x[k1] - data->primary_x[k0];
+  const double yy = data->primary_y[k1] - data->primary_y[k0];
+  return 0.004 * std::sqrt(xx * xx + yy * yy);
+}
+
+void model_map_6c() {
+  /* contours: the finest level made, judged by the core's flags */
+  {
+    Grid grid;
+    size_t instance = MBV_NO_WINDOW;
+    check(open_grid(grid, nullptr, &instance), "6c: a grid opens for the contours");
+    mbvq_c_view(instance, MBVQ_VIEW_CONTOUR, true);
+    rhi::MapFrame frame(instance);
+    rhi::FrameInput input;
+    frame.begin(false, 640, 480, &input);
+    const int first = input.contour_rez;
+    frame.request(MBVQ_REZ_FULL);
+    frame.begin(false, 640, 480, &input);
+    const bool full = input.contour_rez == MBVQ_REZ_FULL && input.contours != nullptr && input.contour_vertices > 0;
+    const uint64_t generation = input.contour_generation;
+    check(first == MBVQ_REZ_LOW && full,
+          "6c: contours drawn at the level made: low before the full ones are due, full once asked for (" +
+              std::to_string(input.contour_vertices) + " vertices)");
+    set_exaggeration(instance, 2.0);
+    frame.input(&input, false);
+    const bool none = input.contour_rez == MBVQ_REZ_NONE && input.contours == nullptr;
+    frame.request(MBVQ_REZ_LOW);
+    frame.begin(false, 640, 480, &input);
+    const int after = input.contour_rez;
+    const bool made = mbvq_c_contours_made(instance, after) && input.contour_generation != generation;
+    frame.request(MBVQ_REZ_FULL);
+    frame.begin(false, 640, 480, &input);
+    check(none && after == MBVQ_REZ_LOW && made && input.contour_rez == MBVQ_REZ_FULL,
+          "6c: after an exaggeration change no stale contours are drawn; the level made next (low), then full");
+    /* an interval above the range of z: the levels are made without
+       segments, which is no contours, as OpenGL's empty list */
+    set_contour_interval(instance, 1.0e7);
+    frame.request(MBVQ_REZ_LOW);
+    frame.begin(false, 640, 480, &input);
+    const bool low_made = mbvq_c_contours_made(instance, MBVQ_REZ_LOW);
+    const bool low_none = input.contours == nullptr && input.contour_rez == MBVQ_REZ_NONE;
+    frame.request(MBVQ_REZ_FULL);
+    frame.begin(false, 640, 480, &input);
+    check(low_made && low_none && mbvq_c_contours_made(instance, MBVQ_REZ_FULL) && input.contours == nullptr &&
+              input.contour_rez == MBVQ_REZ_NONE && input.contour_vertices == 0,
+          "6c: contours made without segments (an interval above the range of z) give no contours");
+    close_instance(instance);
+  }
+
+  /* the fill fallback times only the plots of fills without one-off costs:
+     the first drag after opening a view fills at full resolution, and the
+     plot of a fill made in it is measured (a fallback of 0 ms: any measured
+     time is above it) */
+  {
+    Grid grid;
+    size_t instance = MBV_NO_WINDOW;
+    check(open_grid(grid, nullptr, &instance), "6c: a grid opens for the fill fallback");
+    rhi::MapFrame frame(instance);
+    frame.set_fill_fallback_ms(0.0);
+    rhi::FrameInput input;
+    frame.begin(false, 640, 480, &input);
+    const bool opened = input.rez == MBVQ_REZ_FULL && frame.last_full_ms() < 0.0;
+    frame.set_drag(true);
+    frame.request(MBVQ_REZ_LOW);
+    frame.begin(false, 640, 480, &input);
+    const bool first = input.rez == MBVQ_REZ_FULL && frame.fallback_fills() == 0 && frame.last_full_ms() >= 0.0;
+    frame.request(MBVQ_REZ_LOW);
+    frame.begin(false, 640, 480, &input);
+    const bool second = input.rez == MBVQ_REZ_LOW && frame.fallback_fills() == 1;
+    /* a fill that makes the full contours after the release keeps the
+       time measured before */
+    frame.set_drag(false);
+    const double measured = frame.last_full_ms();
+    mbvq_c_view(instance, MBVQ_VIEW_CONTOUR, true);
+    frame.request(MBVQ_REZ_FULL);
+    frame.begin(false, 640, 480, &input);
+    const bool contoured = input.rez == MBVQ_REZ_FULL && input.contour_rez == MBVQ_REZ_FULL;
+    check(opened && first && second && contoured && frame.last_full_ms() == measured,
+          "6c: the fill fallback times only the plots of full fills that neither project nor make the full "
+          "contours: the first fill of a view is not timed, the first drag after it fills at full resolution and is "
+          "timed, the next drag frame falls back, the fill that makes the full contours is not timed (" +
+              text("%.3f", measured) + " ms)");
+    close_instance(instance);
+  }
+
+  /* the spheroid: a second fill after a fill that raised the position mark */
+  {
+    Grid grid;
+    size_t instance = MBV_NO_WINDOW;
+    check(open_grid(grid, nullptr, &instance), "6c: a grid opens for the spheroid's second fill");
+    mbvq_c_setprojection(instance, 2);
+    rhi::MapFrame frame(instance);
+    rhi::FrameInput input;
+    frame.begin(false, 640, 480, &input);
+    const int projected = frame.refills();
+    frame.request(MBVQ_REZ_FULL);
+    frame.begin(false, 640, 480, &input);
+    const int still = frame.refills();
+    set_exaggeration(instance, 3.0);
+    frame.request(MBVQ_REZ_FULL);
+    frame.begin(false, 640, 480, &input);
+    const int exaggerated = frame.refills();
+    frame.request(MBVQ_REZ_FULL);
+    frame.begin(false, 640, 480, &input);
+    check(projected == 1 && still == 1 && exaggerated == 2 && frame.refills() == 2,
+          "6c: on the spheroid the map is filled again after the projection and after an exaggeration change, "
+          "never otherwise (" + std::to_string(frame.refills()) + " second fills)");
+    /* a second fill under an active fallback: the resolution of the first,
+       one fallback counted, the time measured before kept */
+    frame.set_fill_fallback_ms(0.0);
+    frame.set_drag(true);
+    const double measured = frame.last_full_ms();
+    const int fallbacks = frame.fallback_fills();
+    set_exaggeration(instance, 4.0);
+    frame.request(MBVQ_REZ_LOW);
+    frame.begin(false, 640, 480, &input);
+    check(measured >= 0.0 && frame.refills() == 3 && input.rez == MBVQ_REZ_LOW &&
+              frame.fallback_fills() == fallbacks + 1 && frame.last_full_ms() == measured,
+          "6c: the spheroid's second fill under the fallback keeps the first fill's resolution and counts one "
+          "fallback (" + std::to_string(frame.fallback_fills() - fallbacks) + ")");
+    frame.set_drag(false);
+    frame.set_fill_fallback_ms(rhi::kFillFallbackMs);
+    mbvq_c_setprojection(instance, 1);
+    frame.request(MBVQ_REZ_FULL);
+    frame.begin(false, 640, 480, &input);
+    check(frame.refills() == 3, "6c: no second fill outside the spheroid");
+    close_instance(instance);
+  }
+
+  /* 3D: the pick marks sized from the zoomed view's bounds before a full
+     fill, the markers from the whole grid (B10) */
+  {
+    Grid grid;
+    grid.mode3d = true;
+    grid.holes = false;
+    size_t instance = MBV_NO_WINDOW;
+    check(open_grid(grid, nullptr, &instance), "6c: a 3D grid opens for the pick marks");
+    struct mbview_world_struct *view = &mbviews[instance];
+    struct mbview_struct *data = &view->data;
+    rhi::MapFrame frame(instance);
+    rhi::FrameInput input;
+    frame.begin(false, 640, 480, &input);
+    mbview_pick(instance, MBV_PICK_DOWN, 320, 240);
+    mbview_pick(instance, MBV_PICK_UP, 320, 240);
+    const bool picked = data->pick_type == MBV_PICK_ONEPOINT;
+    /* a drag with the middle button, the camera moved close to the grid (a
+       zoom in), then the release, as the view gets them */
+    core_drag(instance, MBV_MOUSE_MOVE, 2, 2, 1);
+    view->viewoffset3d_z = 2.0f;
+    core_release(instance, 2);
+    const bool counter = view->viewboundscount >= MBV_BOUNDSFREQUENCY;
+    int vb[4];
+    mbvq_pick_cpu_viewbounds(instance, vb);
+    const int sizings = frame.pick_sizings();
+    frame.begin(false, 640, 480, &input);
+    const double scalefactor = std::min(static_cast<double>(vb[1] - vb[0]) / data->primary_n_columns,
+                                        static_cast<double>(vb[3] - vb[2]) / data->primary_n_rows);
+    const double xlength = 0.05 * scalefactor;
+    const double measured = data->pick.endpoints[0].xdisplay - data->pick.xpoints[0].xdisplay;
+    const bool whole = data->viewbounds[0] == 0 && data->viewbounds[1] == data->primary_n_columns - 1 &&
+                       data->viewbounds[2] == 0 && data->viewbounds[3] == data->primary_n_rows - 1;
+    check(picked && counter && frame.pick_sizings() == sizings + 1 && view->viewboundscount == 0 &&
+              input.rez == MBVQ_REZ_FULL && std::fabs(measured - xlength) <= 1.0e-4 * xlength && whole &&
+              (vb[2] > 0 || vb[3] < data->primary_n_rows - 1),
+          "6c: after a 3D pick, a zoom and its release the full fill sizes the pick marks from the zoomed view's "
+          "bounds (" + text("%.5f", measured) + " against " + text("%.5f", xlength) +
+              "), sets the whole grid for the markers and resets the counter");
+    const int before = frame.pick_sizings();
+    frame.request(MBVQ_REZ_FULL);
+    frame.begin(false, 640, 480, &input);
+    check(frame.pick_sizings() == before, "6c: no new sizing until the counter reaches the bounds frequency again");
+    /* a drag with the pick shown, released: the frame after the release
+       (no request of the core) sizes the marks from the final view. The
+       sizing, made slow here, comes back every MBV_BOUNDSFREQUENCY mouse
+       events and in the frame after most releases: the fill is timed for
+       the fallback by its plot alone, which replaces the time before (that
+       of a fill that stalled) */
+    core_drag(instance, MBV_MOUSE_MOVE, 2, 2, 1);
+    view->viewoffset3d_z = 3.0f;
+    core_release(instance, 2);
+    mbvq_pick_cpu_viewbounds(instance, vb);
+    const struct mbv_render_ops slow = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+                                        [](int, size_t, int) { return true; }, mbvq_pick_cpu_terrain,
+                                        slow_viewbounds};
+    mbv_render_set_ops(&slow);
+    frame.set_last_full_ms(1000.0);
+    frame.begin(false, 640, 480, &input);
+    mbvq::rhi_backend::install();
+    const double final_length = 0.05 * std::min(static_cast<double>(vb[1] - vb[0]) / data->primary_n_columns,
+                                                 static_cast<double>(vb[3] - vb[2]) / data->primary_n_rows);
+    check(frame.pick_sizings() == before + 1 && vb[2] > 12 &&
+              std::fabs(data->pick.endpoints[0].xdisplay - data->pick.xpoints[0].xdisplay - final_length) <=
+                  1.0e-4 * final_length,
+          "6c: the frame after a released 3D drag sizes the pick marks from the final view");
+    check(frame.last_full_ms() == frame.plot_ms() && frame.last_full_ms() < kSlowBoundsMs &&
+              frame.fill_ms() >= kSlowBoundsMs,
+          "6c: a full fill that sized the 3D pick marks is timed for the fill fallback by its plot alone (" +
+              text("%.3f", frame.last_full_ms()) + " ms replaces 1000 ms; the fill with a sizing of " +
+              text("%.0f", kSlowBoundsMs) + " ms took " + text("%.1f", frame.fill_ms()) + " ms)");
+    close_instance(instance);
+  }
+
+  /* 3D: one fill that stalled (its time set above a threshold that normal
+     fills stay below) makes the frames of a drag fall back; the frame after
+     the release sizes the marks and measures the plot again, so the next
+     drag fills at full resolution */
+  {
+    Grid grid;
+    grid.mode3d = true;
+    grid.holes = false;
+    size_t instance = MBV_NO_WINDOW;
+    const bool opened = open_grid(grid, nullptr, &instance);
+    rhi::MapFrame frame(instance);
+    rhi::FrameInput input;
+    frame.begin(false, 640, 480, &input);
+    frame.request(MBVQ_REZ_FULL);
+    frame.begin(false, 640, 480, &input);
+    frame.set_fill_fallback_ms(500.0);
+    frame.set_last_full_ms(1000.0);
+    /* an orbit drag (the middle button in the rotate mode) */
+    frame.set_drag(true);
+    core_drag(instance, MBV_MOUSE_ROTATE, 2, 2, 1);
+    frame.request(MBVQ_REZ_LOW);
+    frame.begin(false, 640, 480, &input);
+    const bool fell = input.rez == MBVQ_REZ_LOW && frame.fallback_fills() == 1;
+    core_release(instance, 2);
+    frame.set_drag(false);
+    const int sizings = frame.pick_sizings();
+    frame.begin(false, 640, 480, &input);
+    const bool released = input.rez == MBVQ_REZ_FULL && frame.pick_sizings() == sizings + 1;
+    const double measured = frame.last_full_ms();
+    frame.set_drag(true);
+    core_drag(instance, MBV_MOUSE_ROTATE, 2, 2, 1);
+    frame.request(MBVQ_REZ_LOW);
+    frame.begin(false, 640, 480, &input);
+    check(opened && fell && released && measured < 500.0 && input.rez == MBVQ_REZ_FULL &&
+              frame.fallback_fills() == 1,
+          "6c: in 3D a stalled full fill makes a drag fall back until the frame after the release, which sizes the "
+          "pick marks and is timed again (" + text("%.3f", measured) + " ms): the next drag fills at full resolution");
+    core_release(instance, 2);
+    close_instance(instance);
+  }
+
+  /* The spheroid: a frame is judged by the plots it will make. One that
+     fills twice (the position mark rose: an exaggeration, Reset View)
+     compares twice the time of one full-resolution plot, the first fill's
+     plot, the only one timed; one that fills once compares one plot. With a
+     threshold between one plot and two, a drag frame that fills once after
+     a still frame that filled twice (the dialog's exaggeration, Reset View)
+     stays at full resolution, and an exaggeration frame of a drag falls
+     back, counted once. */
+  {
+    Grid grid;
+    grid.mode3d = true;
+    grid.holes = false;
+    size_t instance = MBV_NO_WINDOW;
+    const bool opened = open_grid(grid, nullptr, &instance);
+    mbvq_c_setprojection(instance, 2);
+    rhi::MapFrame frame(instance);
+    rhi::FrameInput input;
+    frame.begin(false, 640, 480, &input);
+    frame.request(MBVQ_REZ_FULL);
+    frame.begin(false, 640, 480, &input);
+    const bool one = frame.refills() == 1 && frame.last_full_ms() == frame.plot_ms();
+    bool stays = true;
+    std::string drags;
+    for (const bool reset : {false, true}) {
+      /* a still frame that fills twice: its first plot is the time kept */
+      const int refills = frame.refills();
+      if (reset)
+        mbvq_c_resetview(instance);
+      else
+        set_exaggeration(instance, 2.0);
+      frame.request(MBVQ_REZ_FULL);
+      frame.begin(false, 640, 480, &input);
+      const double first = frame.last_full_ms();
+      stays = stays && frame.refills() == refills + 1 && first > 0.0 && first < frame.plot_ms();
+      /* the next drag frame fills once: one plot, under 1.5 plots */
+      frame.set_fill_fallback_ms(1.5 * first);
+      frame.set_drag(true);
+      const int fallbacks = frame.fallback_fills();
+      frame.request(MBVQ_REZ_LOW);
+      frame.begin(false, 640, 480, &input);
+      stays = stays && input.rez == MBVQ_REZ_FULL && frame.refills() == refills + 1 &&
+              frame.fallback_fills() == fallbacks;
+      drags += std::string(reset ? ", Reset View: " : " the exaggeration: ") +
+               (input.rez == MBVQ_REZ_FULL ? "full" : "not full");
+      frame.set_drag(false);
+    }
+    /* an exaggeration frame of a drag fills twice: two plots, over 1.5 */
+    frame.set_fill_fallback_ms(1.5 * frame.last_full_ms());
+    frame.set_drag(true);
+    const int refills = frame.refills();
+    const int fallbacks = frame.fallback_fills();
+    set_exaggeration(instance, 3.0);
+    frame.request(MBVQ_REZ_LOW);
+    frame.begin(false, 640, 480, &input);
+    const bool fell =
+        input.rez == MBVQ_REZ_LOW && frame.refills() == refills + 1 && frame.fallback_fills() == fallbacks + 1;
+    const int counted = frame.fallback_fills() - fallbacks;
+    /* a frame whose first fill projected the data (back to the spheroid) is
+       not timed, nor is its second fill: the time kept stays */
+    frame.set_drag(false);
+    mbvq_c_setprojection(instance, 1);
+    frame.request(MBVQ_REZ_FULL);
+    frame.begin(false, 640, 480, &input);
+    mbvq_c_setprojection(instance, 2);
+    frame.set_last_full_ms(100.0);
+    frame.request(MBVQ_REZ_FULL);
+    frame.begin(false, 640, 480, &input);
+    const bool kept = frame.refills() == refills + 2 && frame.last_full_ms() == 100.0;
+    check(opened && one && stays && fell && kept,
+          "6c: on the spheroid a frame is judged by the plots it will make, one full-resolution plot (the first "
+          "fill's) twice for a frame that fills twice: with a threshold between one plot and two, a drag frame that "
+          "fills once after a still frame that filled twice stays at full resolution (after" + drags +
+              "), an exaggeration frame of a drag falls back, counted once (" + std::to_string(counted) +
+              "); a frame whose first fill projected is not timed (" + text("%.3f", frame.last_full_ms()) +
+              " ms kept)");
+    close_instance(instance);
+  }
+
+  /* the spheroid's second fill gives the site markers the size of the
+     corner nodes as they are for the new exaggeration (mbview_site.c), in
+     2D and in 3D: the radius in the batch equals the one from the corners
+     prepared again now */
+  for (const bool mode3d : {false, true}) {
+    Grid grid;
+    grid.mode3d = mode3d;
+    grid.holes = false;
+    size_t instance = MBV_NO_WINDOW;
+    const bool opened = open_grid(grid, nullptr, &instance);
+    struct mbview_struct *data = data_of(instance);
+    int error = MB_ERROR_NO_ERROR;
+    double lon[2] = {10.05, 10.15}, lat[2] = {54.05, 54.1}, topo[2] = {-1000.0, -1100.0};
+    int color[2] = {MBV_COLOR_RED, MBV_COLOR_BLUE}, size[2] = {1, 1};
+    mb_path name[2] = {"site_a", "site_b"};
+    mbview_addsites(0, instance, 2, lon, lat, topo, color, size, name, &error);
+    mbview_enableviewsites(0, instance, &error);
+    mbvq_c_view(instance, MBVQ_VIEW_SITE, true);
+    mbvq_c_setprojection(instance, 2);
+    rhi::MapFrame frame(instance);
+    rhi::FrameInput input;
+    frame.begin(false, 640, 480, &input);
+    frame.request(MBVQ_REZ_FULL);
+    frame.begin(false, 640, 480, &input);
+    for (const double exaggeration : {5.0, 30.0}) {
+      const int refills = frame.refills();
+      set_exaggeration(instance, exaggeration);
+      frame.request(MBVQ_REZ_FULL);
+      frame.begin(false, 640, 480, &input);
+      const double recorded = batch_site_radius(frame.batch());
+      const int *vb = data->viewbounds;
+      mbview_prepare_nodes(0, instance, vb[0], vb[0], vb[2], vb[2], 1, &error);
+      mbview_prepare_nodes(0, instance, vb[1], vb[1], vb[3], vb[3], 1, &error);
+      const double fresh = corner_site_radius(data);
+      check(opened && recorded > 0.0 && std::fabs(recorded - fresh) <= 1.0e-12 * fresh &&
+                frame.refills() == refills + 1,
+            std::string("6c: ") + (mode3d ? "3D" : "2D") + " on the spheroid, exaggeration " +
+                text("%g", exaggeration) + ": the site radius in the batch " + text("%.10g", recorded) +
+                " is that of the corner nodes prepared again now, " + text("%.10g", fresh) + " (difference " +
+                text("%.3g", recorded - fresh) + ")");
+    }
+    close_instance(instance);
+  }
+
+  /* Several maps: the core draws the other maps during some drags
+     (mbview_plotlowall, in the navigation, site and route modes), and a
+     button down in any map view is one state of the process
+     (rhi::set_map_buttons, which a view sets from its buttons). During a
+     drag in map A in the navigation mode, map B's frames fill at the
+     resolution asked for once B's full-resolution plot took longer than the
+     threshold (0 ms: any time measured is above it), and at full resolution
+     once no button is down. */
+  {
+    Grid grid;
+    size_t a = MBV_NO_WINDOW, b = MBV_NO_WINDOW;
+    const bool opened = open_grid(grid, nullptr, &a) && open_grid(grid, nullptr, &b);
+    /* down while any owner is down; the same said twice changes nothing */
+    int one = 0, two = 0;
+    rhi::set_map_buttons(&one, true);
+    rhi::set_map_buttons(&one, true);
+    rhi::set_map_buttons(&two, true);
+    rhi::set_map_buttons(&one, false);
+    const bool held = rhi::map_buttons_down();
+    rhi::set_map_buttons(&two, false);
+    const bool shared = held && !rhi::map_buttons_down();
+
+    const struct mbv_render_ops recording = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+                                             record_drawing, mbvq_pick_cpu_terrain, mbvq_pick_cpu_viewbounds};
+    mbv_render_set_ops(&recording);
+    rhi::MapFrame fa(a), fb(b);
+    rhi::FrameInput input;
+    fa.begin(false, 640, 480, &input);
+    fb.begin(false, 640, 480, &input);
+    fb.set_fill_fallback_ms(0.0);
+    fb.request(MBVQ_REZ_FULL);
+    fb.begin(false, 640, 480, &input);
+    const bool timed = fb.last_full_ms() > 0.0 && fb.fallback_fills() == 0;
+    mbvq_c_set_mouse_mode(a, MBV_MOUSE_NAV);
+    asked_drawings.clear();
+    /* each event as a view gets it: the buttons first, then the core; the
+       frames of both maps after it, for the drawings the core asked for */
+    int asked_b = 0, low_b = 0;
+    const auto event = [&](int type, int y) {
+      rhi::set_map_buttons(&fa, type != MBV_INPUT_RELEASE);
+      fa.set_drag(type != MBV_INPUT_RELEASE);
+      struct mbv_input_event e = {type, 2, 200, y, 0};
+      mbview_input(a, &e);
+      bool frame_a = false, frame_b = false;
+      for (const auto &drawing : asked_drawings) {
+        if (drawing.first == a) {
+          fa.request(drawing.second);
+          frame_a = true;
+        }
+        if (drawing.first == b) {
+          fb.request(drawing.second);
+          frame_b = true;
+        }
+      }
+      asked_drawings.clear();
+      if (frame_a)
+        fa.begin(false, 640, 480, &input);
+      if (frame_b) {
+        fb.begin(false, 640, 480, &input);
+        asked_b++;
+        low_b += input.rez == MBVQ_REZ_LOW;
+      }
+    };
+    event(MBV_INPUT_PRESS, 200);
+    for (int m = 1; m <= 3; m++)
+      event(MBV_INPUT_MOTION, 200 + 4 * m);
+    const bool dragged = asked_b == 4 && low_b == 4 && fb.fallback_fills() == 4 && fb.fell_back() && !fb.drag();
+    event(MBV_INPUT_RELEASE, 212);
+    mbvq::rhi_backend::install();
+    mbvq_c_set_mouse_mode(a, MBV_MOUSE_MOVE);
+    check(opened && shared && timed && dragged && asked_b == 5 && input.rez == MBVQ_REZ_FULL &&
+              fb.fallback_fills() == 4 && !fb.fell_back() && !rhi::map_buttons_down(),
+          "6c: several maps: during a drag in another map (navigation mode) a map the core draws fills at the "
+          "resolution asked for once its full-resolution plot took longer than the threshold (" +
+              std::to_string(low_b) + " of " + std::to_string(asked_b - 1) +
+              " frames), at full resolution once no button is down");
+    close_instance(b);
+    close_instance(a);
+  }
+}
+
+/*--------------------------------------------------------------------*/
+/* 6c on a Null QRhi: every kind of draw of the batch, the contours uploaded
+   once */
+void null_batch() {
+  mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+  TestBatch t;
+  struct mbv_draw_batch *b = &t.b;
+  mbv_draw_batch_slot(b, MBV_DRAW_SLOT_TERRAIN);
+  t.primitive(MBV_DRAW_LINE_STRIP, {{0, 0, 0}, {0.5f, 0, 0}, {0.5f, 0.5f, 0}}, 1, 0, 0);
+  t.primitive(MBV_DRAW_LINE_LOOP, {{0, 0, 0}, {0.5f, 0, 0}, {0.5f, 0.5f, 0}}, 1, 0, 0);
+  mbv_draw_batch_line_width(b, 3.0f);
+  t.primitive(MBV_DRAW_LINE_STRIP, {{0, 0, 0}, {0.5f, 0, 0}, {0.5f, 0.5f, 0}}, 1, 0, 0);
+  t.primitive(MBV_DRAW_LINES, {{0, 0, 0}, {0.5f, 0, 0}}, 1, 0, 0);
+  mbv_draw_batch_point_size(b, 3.0f);
+  t.primitive(MBV_DRAW_POINTS, {{0, 0, 0}, {0.5f, 0, 0}}, 1, 0, 0);
+  t.rectangle(-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0, 1, 0);
+  t.primitive(MBV_DRAW_QUADS, {{0, 0, 0}, {0.1f, 0, 0}, {0.1f, 0.1f, 0}, {0, 0.1f, 0}}, 0, 0, 1);
+  mbv_draw_batch_line_width(b, 1.0f);
+  mbv_draw_batch_line_stipple(b, 1, 0x1111);
+  mbv_draw_batch_enable(b, MBV_DRAW_LINE_STIPPLE, true);
+  t.primitive(MBV_DRAW_LINE_LOOP, {{0, 0, 0}, {0.5f, 0, 0}, {0.5f, 0.5f, 0}}, 0, 0, 0);
+  mbv_draw_batch_line_width(b, 2.0f);
+  t.primitive(MBV_DRAW_LINE_LOOP, {{0, 0, 0}, {0.5f, 0, 0}, {0.5f, 0.5f, 0}}, 0, 0, 0);
+  mbv_draw_batch_enable(b, MBV_DRAW_LINE_STIPPLE, false);
+  mbv_draw_batch_enable(b, MBV_DRAW_DEPTH_TEST, true);
+  mbv_draw_batch_marker_disks(b, 3, 0.1, 0.08, 10, 10, 0, 1, 0);
+  mbv_draw_batch_marker(b, 3, 0, 0, 0);
+  mbv_draw_batch_marker_sphere(b, 4, 0.1, 10, 10);
+  mbv_draw_batch_marker(b, 4, 0.2f, 0, 0);
+  mbv_draw_batch_marker(b, 4, 0.3f, 0, 0);
+  mbvq::RenderOptions options;
+  const bool rendered = renderer.render_batch(b, kIdentity, kIdentity, 200, 200, options, nullptr);
+  const mbvq::RenderStats stats = renderer.stats();
+  /* strip; loop and closing; wide strip; wide pair; points; triangles;
+     quads; stippled thin loop; stippled wide loop; two marker runs */
+  check(rendered && !stats.failed && stats.draws == 12 && stats.thin_draws == 4 && stats.wide_draws == 3 &&
+            stats.marker_draws == 2 && stats.markers == 3 && stats.meshes == 2 && stats.uniform_slots == 12,
+        "6c: every kind of the batch's draws is recorded: " + std::to_string(stats.draws) + " draws (" +
+            std::to_string(stats.thin_draws) + " thin, " + std::to_string(stats.wide_draws) + " wide, " +
+            std::to_string(stats.marker_draws) + " marker runs), " + std::to_string(stats.uniform_slots) +
+            " uniform slots");
+  const bool again = renderer.render_batch(b, kIdentity, kIdentity, 200, 200, options, nullptr);
+  check(again && renderer.stats().meshes == 2 && renderer.stats().batch_uploads == 2,
+        "6c: the marker meshes are kept for later frames; the batch is uploaded in every frame that filled it");
+  /* the same display list defined again with another outer radius, then
+     another inner one (a zoom redefines the lists): each is a new mesh, not
+     the one cached for the list's old radii */
+  int remeshed[2] = {0, 0};
+  for (int k = 0; k < 2; k++) {
+    TestBatch r;
+    mbv_draw_batch_enable(&r.b, MBV_DRAW_DEPTH_TEST, true);
+    mbv_draw_batch_marker_disks(&r.b, 3, 0.2, k == 0 ? 0.08 : 0.12, 10, 10, 0, 1, 0);
+    mbv_draw_batch_marker(&r.b, 3, 0, 0, 0);
+    const bool ok = renderer.render_batch(&r.b, kIdentity, kIdentity, 200, 200, options, nullptr);
+    remeshed[k] = ok ? renderer.stats().meshes : -1;
+  }
+  check(remeshed[0] == 3 && remeshed[1] == 4,
+        "6c: the marker meshes are cached by the whole shape: a list defined again with another outer or inner "
+        "radius gets its own mesh (" + std::to_string(remeshed[0]) + ", " + std::to_string(remeshed[1]) + " meshes)");
+
+  /* a map with contours: their bytes go up once */
+  Grid grid;
+  size_t instance = MBV_NO_WINDOW;
+  check(open_grid(grid, nullptr, &instance), "6c: a grid opens for the contours under QRhi");
+  mbvq_c_view(instance, MBVQ_VIEW_CONTOUR, true);
+  mbvq::OffscreenRenderer map(mbvq::OffscreenRenderer::Api::Null);
+  mbvq::RenderOptions full;
+  mbvq_c_fullrender(instance);
+  bool drawn = map.render_map(instance, 320, 240, full, nullptr);
+  /* the full contours are due: a full fill makes them */
+  drawn = drawn && map.render_map(instance, 320, 240, full, nullptr);
+  const mbvq::RenderStats first = map.stats();
+  drawn = drawn && map.render_map(instance, 320, 240, full, nullptr);
+  const mbvq::RenderStats second = map.stats();
+  check(drawn && first.contour_rez > 0 && first.contour_vertices > 0 && second.contour_uploads == first.contour_uploads &&
+            second.contour_bytes == first.contour_bytes && second.fills > first.fills,
+        "6c: the contours (" + std::to_string(first.contour_vertices) + " vertices at level " +
+            std::to_string(first.contour_rez) + ") are uploaded when they change, not in a frame that fills again");
+
+  /* contours made again at the same level with as many vertices (a new
+     exaggeration): uploaded again, by their generation */
+  set_exaggeration(instance, 2.0);
+  mbvq_c_fullrender(instance);
+  drawn = map.render_map(instance, 320, 240, full, nullptr);
+  const mbvq::RenderStats remade = map.stats();
+  check(drawn && remade.contour_rez == second.contour_rez && remade.contour_vertices == second.contour_vertices &&
+            remade.contour_uploads == second.contour_uploads + 1,
+        "6c: contours made again at the same level with the same count are uploaded again (" +
+            std::to_string(remade.contour_uploads - second.contour_uploads) + " upload, level " +
+            std::to_string(remade.contour_rez) + ", " + std::to_string(remade.contour_vertices) + " vertices)");
+
+  /* an interval above the range of z: no contour drawn, not the old ones */
+  set_contour_interval(instance, 1.0e7);
+  mbvq_c_fullrender(instance);
+  drawn = map.render_map(instance, 320, 240, full, nullptr);
+  drawn = drawn && map.render_map(instance, 320, 240, full, nullptr);
+  const mbvq::RenderStats empty = map.stats();
+  check(drawn && empty.contour_rez == 0 && empty.contour_vertices == 0 && empty.draws == remade.draws - 1,
+        "6c: contours made without segments draw nothing, not the contours of the old interval (" +
+            std::to_string(remade.draws) + " draws before, " + std::to_string(empty.draws) + " after)");
+  close_instance(instance);
+
+  /* the uniform ring grows past its first 64 slots; if it cannot, the frame
+     fails as for the other buffers */
+  {
+    TestBatch many;
+    for (int k = 0; k < 70; k++)
+      many.primitive(MBV_DRAW_LINE_STRIP, {{0, 0, 0}, {0.5f, 0.01f * k, 0}}, 1, 0, 0);
+    mbvq::OffscreenRenderer ring(mbvq::OffscreenRenderer::Api::Null);
+    mbvq::RenderOptions plain;
+    const bool grown = ring.render_batch(&many.b, kIdentity, kIdentity, 200, 200, plain, nullptr);
+    const mbvq::RenderStats grown_stats = ring.stats();
+    mbvq::OffscreenRenderer stuck(mbvq::OffscreenRenderer::Api::Null);
+    mbvq::RenderOptions fail;
+    fail.fail_slot_growth = true;
+    TestBatch few;
+    few.primitive(MBV_DRAW_LINE_STRIP, {{0, 0, 0}, {0.5f, 0, 0}}, 1, 0, 0);
+    const bool small_ok = stuck.render_batch(&few.b, kIdentity, kIdentity, 200, 200, fail, nullptr) &&
+                          !stuck.stats().failed && stuck.stats().draws == 1;
+    const bool stuck_drawn = stuck.render_batch(&many.b, kIdentity, kIdentity, 200, 200, fail, nullptr);
+    const mbvq::RenderStats stuck_stats = stuck.stats();
+    check(grown && !grown_stats.failed && grown_stats.uniform_slots == 70 && grown_stats.draws == 70 && small_ok &&
+              stuck_stats.failed,
+          "6c: the uniform ring grows to " + std::to_string(grown_stats.uniform_slots) +
+              " slots; a ring that cannot grow fails the frame (render_batch " + (stuck_drawn ? "true" : "false") +
+              ")");
+  }
+}
+
+/*--------------------------------------------------------------------*/
+/* 6c on Metal: pixels of hand-made batches */
+uint32_t pixel_rgb(const QImage &image, int column, int row) {
+  const QRgb pixel = image.pixel(column, row);
+  return static_cast<uint32_t>(qRed(pixel)) | static_cast<uint32_t>(qGreen(pixel)) << 8 |
+         static_cast<uint32_t>(qBlue(pixel)) << 16;
+}
+
+constexpr uint32_t kRed = 0x0000ff;
+constexpr uint32_t kGreen = 0x00ff00;
+constexpr uint32_t kBlue = 0xff0000;
+constexpr uint32_t kWhite = 0xffffff;
+
+/* the coloured pixels of each column (or row) of an image in a range */
+std::vector<int> run_lengths(const QImage &image, uint32_t colour, bool columns, int from, int to) {
+  std::vector<int> counts;
+  for (int a = from; a < to; a++) {
+    int n = 0;
+    const int length = columns ? image.height() : image.width();
+    for (int b = 0; b < length; b++)
+      n += pixel_rgb(image, columns ? a : b, columns ? b : a) == colour;
+    counts.push_back(n);
+  }
+  return counts;
+}
+
+bool all_equal(const std::vector<int> &values, int value) {
+  return !values.empty() && std::all_of(values.begin(), values.end(), [value](int v) { return v == value; });
+}
+
+/* the red pixels of an image in window coordinates (column, row from the
+   bottom), sorted */
+std::vector<std::pair<int, int>> red_pixels(const QImage &image) {
+  std::vector<std::pair<int, int>> found;
+  for (int row = 0; row < image.height(); row++)
+    for (int x = 0; x < image.width(); x++)
+      if (pixel_rgb(image, x, row) == kRed)
+        found.emplace_back(x, image.height() - 1 - row);
+  std::sort(found.begin(), found.end());
+  return found;
+}
+
+void metal_batch() {
+  mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Metal);
+  mbvq::RenderOptions one;
+  mbvq::RenderOptions two;
+  two.pixel_ratio = 2.0;
+  QImage image;
+
+  /* a 3 px line, nearly horizontal and nearly vertical: exactly 3 px per
+     column (row) at ratio 1, 6 at ratio 2, by the minor-axis rule */
+  for (int ratio = 1; ratio <= 2; ratio++) {
+    TestBatch t;
+    mbv_draw_batch_line_width(&t.b, 3.0f);
+    t.primitive(MBV_DRAW_LINE_STRIP, {{-0.8f, -0.13f, 0}, {0.8f, 0.11f, 0}}, 1, 0, 0);
+    t.primitive(MBV_DRAW_LINES, {{0.53f, -0.8f, 0}, {0.61f, 0.8f, 0}}, 0, 0, 1);
+    const int size = 200 * ratio;
+    const bool drawn = renderer.render_batch(&t.b, kIdentity, kIdentity, size, size, ratio == 1 ? one : two, &image);
+    /* columns well inside the horizontal line and away from the vertical one,
+       rows likewise */
+    const std::vector<int> columns = run_lengths(image, kRed, true, 30 * ratio, 140 * ratio);
+    const std::vector<int> rows = run_lengths(image, kBlue, false, 30 * ratio, 90 * ratio);
+    check(drawn && all_equal(columns, 3 * ratio) && all_equal(rows, 3 * ratio) && renderer.stats().wide_draws == 2,
+          "6c Metal: a 3 px line covers exactly " + std::to_string(3 * ratio) + " px per column, and per row when "
+          "steep, at ratio " + std::to_string(ratio) + " (" + std::to_string(columns.empty() ? 0 : columns.front()) +
+              ", " + std::to_string(rows.empty() ? 0 : rows.front()) + ")");
+  }
+
+  /* a 1 px line: the line topology at ratio 1, a 2 px quad at ratio 2 */
+  {
+    TestBatch t;
+    t.primitive(MBV_DRAW_LINE_STRIP, {{-0.8f, -0.13f, 0}, {0.8f, 0.11f, 0}}, 1, 0, 0);
+    bool drawn = renderer.render_batch(&t.b, kIdentity, kIdentity, 200, 200, one, &image);
+    const mbvq::RenderStats thin = renderer.stats();
+    const std::vector<int> thin_columns = run_lengths(image, kRed, true, 30, 170);
+    drawn = drawn && renderer.render_batch(&t.b, kIdentity, kIdentity, 400, 400, two, &image);
+    const mbvq::RenderStats wide = renderer.stats();
+    const std::vector<int> wide_columns = run_lengths(image, kRed, true, 60, 340);
+    check(drawn && thin.thin_draws == 1 && thin.wide_draws == 0 && all_equal(thin_columns, 1) &&
+              wide.wide_draws == 1 && wide.thin_draws == 0 && all_equal(wide_columns, 2) && wide.pixel_ratio == 2.0,
+          "6c Metal: a 1 px line is drawn with the line topology at ratio 1 (1 px per column) and as a 2 px quad at "
+          "ratio 2");
+  }
+
+  /* 2D: without the depth test the later command covers the earlier one */
+  {
+    TestBatch t;
+    t.rectangle(-0.5f, -0.5f, 0.2f, 0.2f, 0.5f, 1, 0, 0);
+    t.rectangle(-0.2f, -0.2f, 0.5f, 0.5f, -0.5f, 0, 0, 1);
+    t.rectangle(-0.2f, -0.2f, 0.5f, 0.5f, 0.9f, 0, 1, 0);
+    const bool drawn = renderer.render_batch(&t.b, kIdentity, kIdentity, 200, 200, one, &image);
+    check(drawn && pixel_rgb(image, 100, 100) == kGreen && pixel_rgb(image, 60, 140) == kRed,
+          "6c Metal: in 2D the stream order decides overlaps (the last drawn wins, whatever its depth)");
+  }
+
+  /* 3D: the depth test Less: the nearest wins in either order, the first at
+     equal depth */
+  {
+    TestBatch t;
+    mbv_draw_batch_enable(&t.b, MBV_DRAW_DEPTH_TEST, true);
+    t.rectangle(-0.9f, -0.2f, -0.4f, 0.2f, 0.5f, 1, 0, 0);
+    t.rectangle(-0.9f, -0.2f, -0.4f, 0.2f, -0.5f, 0, 0, 1);
+    t.rectangle(-0.2f, -0.2f, 0.2f, 0.2f, -0.5f, 0, 0, 1);
+    t.rectangle(-0.2f, -0.2f, 0.2f, 0.2f, 0.5f, 1, 0, 0);
+    t.rectangle(0.4f, -0.2f, 0.9f, 0.2f, 0.0f, 1, 0, 0);
+    t.rectangle(0.4f, -0.2f, 0.9f, 0.2f, 0.0f, 0, 0, 1);
+    const bool drawn = renderer.render_batch(&t.b, kIdentity, kIdentity, 200, 200, one, &image);
+    check(drawn && pixel_rgb(image, 35, 100) == kBlue && pixel_rgb(image, 100, 100) == kBlue &&
+              pixel_rgb(image, 165, 100) == kRed,
+          "6c Metal: with the depth test the nearer wins whichever comes first, and the first at equal depth");
+  }
+
+  /* markers: a disk in the instance's colour with its ring in the shape's
+     ring colour; a second disk's fill over the first one's ring */
+  {
+    TestBatch t;
+    mbv_draw_batch_marker_disks(&t.b, 5, 0.2, 0.16, 10, 10, 0.0f, 1.0f, 0.0f);
+    mbv_draw_batch_color3f(&t.b, 1, 0, 0);
+    mbv_draw_batch_marker(&t.b, 5, -0.4f, 0.0f, 0.0f);
+    mbv_draw_batch_color3f(&t.b, 1, 0, 0);
+    mbv_draw_batch_marker(&t.b, 5, 0.3f, 0.0f, 0.0f);
+    mbv_draw_batch_color3f(&t.b, 0, 0, 1);
+    mbv_draw_batch_marker(&t.b, 5, 0.5f, 0.0f, 0.0f);
+    one.glu_variant = mbvq::GluVariant::Sgi;
+    const bool drawn = renderer.render_batch(&t.b, kIdentity, kIdentity, 200, 200, one, &image);
+    /* centre of the first at column 60, its rim 18 px right; the second's
+       ring at x 0.48 (column 148) lies inside the third's fill */
+    check(drawn && renderer.stats().marker_draws == 1 && pixel_rgb(image, 60, 100) == kRed &&
+              pixel_rgb(image, 78, 100) == kGreen && pixel_rgb(image, 42, 100) == kGreen &&
+              pixel_rgb(image, 148, 100) == kBlue && pixel_rgb(image, 112, 100) == kGreen,
+          "6c Metal: a site's centre in its own colour and its rim in the ring colour; overlapping disks show the "
+          "second fill over the first ring (one instanced draw)");
+  }
+
+  /* the near plane: a 3 px segment from in front of it to behind the eye
+     (w < 0) under a perspective projection (near 1, far 10) is drawn up to
+     its crossing of the near plane, 3 px per column, plain and stippled
+     (pattern 0xffff); a segment wholly behind it draws nothing */
+  {
+    const double near_plane = 1.0, far_plane = 10.0;
+    const double a = -(far_plane + near_plane) / (far_plane - near_plane);
+    const double bz = -2.0 * far_plane * near_plane / (far_plane - near_plane);
+    const double perspective[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, a, -1, 0, 0, bz, 0};
+    TestBatch t;
+    mbv_draw_batch_line_width(&t.b, 3.0f);
+    /* NDC x from -0.8 to the crossing at -0.5; y 0.013 eye */
+    t.primitive(MBV_DRAW_LINE_STRIP, {{-2.0f, 0.013f, -2.5f}, {2.0f, 0.013f, 1.5f}}, 1, 0, 0);
+    /* behind the near plane at both ends */
+    t.primitive(MBV_DRAW_LINE_STRIP, {{-1.0f, -0.3f, -0.5f}, {1.0f, -0.3f, 2.0f}}, 0, 1, 0);
+    mbv_draw_batch_line_stipple(&t.b, 1, 0xffff);
+    mbv_draw_batch_enable(&t.b, MBV_DRAW_LINE_STIPPLE, true);
+    /* NDC y 0.4 along its visible part; reversed: the far end first */
+    t.primitive(MBV_DRAW_LINE_STRIP, {{2.0f, -0.6f, 1.5f}, {-2.0f, 1.0f, -2.5f}}, 0, 0, 1);
+    const bool drawn = renderer.render_batch(&t.b, perspective, perspective, 200, 200, one, &image);
+    const std::vector<int> red_in = run_lengths(image, kRed, true, 25, 45);
+    const std::vector<int> red_out = run_lengths(image, kRed, true, 56, 200);
+    const std::vector<int> blue_in = run_lengths(image, kBlue, true, 25, 45);
+    const std::vector<int> blue_out = run_lengths(image, kBlue, true, 56, 200);
+    const std::vector<int> green = run_lengths(image, kGreen, true, 0, 200);
+    check(drawn && all_equal(red_in, 3) && all_equal(red_out, 0) && all_equal(blue_in, 3) && all_equal(blue_out, 0) &&
+              all_equal(green, 0),
+          "6c Metal: wide lines are clipped at the near plane: 3 px per column up to the crossing, nothing beyond it "
+          "or behind it, plain and stippled (" + std::to_string(red_in.front()) + ", " +
+              std::to_string(*std::max_element(red_out.begin(), red_out.end())) + ", " +
+              std::to_string(blue_in.front()) + ", " +
+              std::to_string(*std::max_element(blue_out.begin(), blue_out.end())) + ")");
+  }
+
+  /* the stipple 0x1111 of factor 1 at ratio 1: 1 px on, 3 off */
+  {
+    TestBatch t;
+    mbv_draw_batch_line_stipple(&t.b, 1, 0x1111);
+    mbv_draw_batch_enable(&t.b, MBV_DRAW_LINE_STIPPLE, true);
+    t.primitive(MBV_DRAW_LINE_STRIP, {{-0.8f, 0.005f, 0}, {0.8f, 0.005f, 0}}, 1, 0, 0);
+    const bool drawn = renderer.render_batch(&t.b, kIdentity, kIdentity, 200, 200, one, &image);
+    int on = 0;
+    for (int x = 40; x < 160; x++)
+      on += pixel_rgb(image, x, 99) == kRed || pixel_rgb(image, x, 100) == kRed;
+    check(drawn && on == 30, "6c Metal: a stippled line of pattern 0x1111 draws 1 pixel in 4 (" + std::to_string(on) +
+                                 " of 120)");
+  }
+
+  /* The stipple's phase: OpenGL's counter starts at the first fragment of
+     the diamond-exit rule, which lies in the start's column also when the
+     start lies past that column's centre but inside its diamond, and goes on
+     along a loop by the fragments each side makes. The pixels expected are
+     those Apple's legacy OpenGL 2.1 (on Metal) draws for the same float
+     coordinates, in window coordinates of the drawing (y up; the picture's
+     of ndc() run down). */
+  {
+    using Dots = std::vector<std::pair<int, int>>;
+    bool drawn = true;
+    const auto stippled = [&](int mode, const std::vector<std::array<float, 3>> &points, unsigned short pattern,
+                              int size, const mbvq::RenderOptions &options) {
+      TestBatch t;
+      mbv_draw_batch_line_stipple(&t.b, 1, pattern);
+      mbv_draw_batch_enable(&t.b, MBV_DRAW_LINE_STIPPLE, true);
+      t.primitive(mode, points, 1, 0, 0);
+      drawn = renderer.render_batch(&t.b, kIdentity, kIdentity, size, size, options, &image) && drawn;
+      return red_pixels(image);
+    };
+    const auto columns = [](const Dots &dots) {
+      std::string list;
+      for (const std::pair<int, int> &dot : dots)
+        list += " " + std::to_string(dot.first);
+      return list;
+    };
+
+    /* 0x0001 from x 10.6 to 10.9 rightward (y 20.5): the first fragment in
+       column 10, the start's, so the dots are in 10, 26 and 42, not 11, 27
+       and 43 */
+    std::string right;
+    for (double start : {10.6, 10.7, 10.8, 10.9}) {
+      const Dots dots = stippled(MBV_DRAW_LINES,
+                                 {ndc(start, 200 - 20.5, 200, 200), ndc(start + 40.0, 200 - 20.5, 200, 200)}, 0x0001,
+                                 200, one);
+      if (right.empty() && dots != Dots{{10, 20}, {26, 20}, {42, 20}})
+        right = text(" (from %.1f:", start) + columns(dots) + ")";
+    }
+    check(drawn && right.empty(), "6c Metal: a stippled line (0x0001) from x 10.6 to 10.9 rightward has its dots in "
+                                  "columns 10, 26 and 42, from its start's column" + right);
+
+    /* leftward from x 50.1 to 50.4 (y 40.5): from column 50, not 49 */
+    std::string left;
+    for (double start : {50.1, 50.2, 50.3, 50.4}) {
+      const Dots dots = stippled(MBV_DRAW_LINES,
+                                 {ndc(start, 200 - 40.5, 200, 200), ndc(start - 40.0, 200 - 40.5, 200, 200)}, 0x0001,
+                                 200, one);
+      if (left.empty() && dots != Dots{{18, 40}, {34, 40}, {50, 40}})
+        left = text(" (from %.1f:", start) + columns(dots) + ")";
+    }
+    check(drawn && left.empty(), "6c Metal: a stippled line (0x0001) from x 50.1 to 50.4 leftward has its dots in "
+                                 "columns 50, 34 and 18, from its start's column" + left);
+
+    /* 0x1111 from x 20.7 to 140.7 (y 100.5): every fourth column from 20 to
+       136, not from 21 */
+    Dots fourth;
+    for (int k = 0; k < 30; k++)
+      fourth.emplace_back(20 + 4 * k, 100);
+    const Dots line = stippled(MBV_DRAW_LINES, {ndc(20.7, 200 - 100.5, 200, 200), ndc(140.7, 200 - 100.5, 200, 200)},
+                               0x1111, 200, one);
+    check(drawn && line == fourth, "6c Metal: a stippled line (0x1111) from x 20.7 has a dot in every fourth column "
+                                   "from 20 to 136 (" + std::to_string(line.size()) + " dots, the first in column " +
+                                       (line.empty() ? std::string("none") : std::to_string(line.front().first)) +
+                                       ")");
+
+    /* the soundings box's case: 0x1111 around (20.7, 40.3)-(120.2, 140.6) as
+       a loop; each side makes 100 fragments and the counter goes on from side
+       to side, so every side's dots start at its first fragment: (20 + 4k,
+       40) along the bottom, (120, 40 + 4k) up the right side, (120 - 4k, 140)
+       along the top and (20, 140 - 4k) down the left, k from 0 to 24 */
+    Dots box;
+    for (int k = 0; k < 25; k++) {
+      box.emplace_back(20 + 4 * k, 40);
+      box.emplace_back(120, 40 + 4 * k);
+      box.emplace_back(120 - 4 * k, 140);
+      box.emplace_back(20, 140 - 4 * k);
+    }
+    std::sort(box.begin(), box.end());
+    const Dots loop = stippled(MBV_DRAW_LINE_LOOP,
+                               {ndc(20.7, 200 - 40.3, 200, 200), ndc(120.2, 200 - 40.3, 200, 200),
+                                ndc(120.2, 200 - 140.6, 200, 200), ndc(20.7, 200 - 140.6, 200, 200)},
+                               0x1111, 200, one);
+    const auto in_place = std::count_if(loop.begin(), loop.end(), [&box](const std::pair<int, int> &dot) {
+      return std::binary_search(box.begin(), box.end(), dot);
+    });
+    check(drawn && loop == box, "6c Metal: a stippled loop (0x1111) around (20.7, 40.3)-(120.2, 140.6) has OpenGL's "
+                                "100 dots, every side's from its first fragment (" + std::to_string(in_place) + " of " +
+                                    std::to_string(loop.size()) + " in place)");
+
+    /* A loop around (64.8, 47.8)-(94.8, 117.5), its sides no multiple of the
+       pattern's period: its lower corners lie past their columns' centres
+       and outside their diamonds (|dx| + |dy| = 0.6), its upper corners on
+       their rows' centres inside their diamonds (0.3), each 0.1 or more from
+       a diamond's edge. The diamond-exit rule gives its fragments, in the
+       order OpenGL makes them, as row 47 from column 65 to 94, column 94 from
+       row 48 to 116, row 117 from column 94 to 65 and column 64 from row 117
+       to 48. The counter goes on from side to side, so the dots lie where the
+       pattern's bit of the count is set: 50 for 0x1111 and 39 for the
+       asymmetric 0x0007, as Apple's legacy OpenGL draws them. */
+    Dots around;
+    for (int x = 65; x <= 94; x++)
+      around.emplace_back(x, 47);
+    for (int y = 48; y <= 116; y++)
+      around.emplace_back(94, y);
+    for (int x = 94; x >= 65; x--)
+      around.emplace_back(x, 117);
+    for (int y = 117; y >= 48; y--)
+      around.emplace_back(64, y);
+    for (const int pattern : {0x1111, 0x0007}) {
+      Dots expected;
+      for (size_t s = 0; s < around.size(); s++)
+        if (((pattern >> (s % 16)) & 1) != 0)
+          expected.push_back(around[s]);
+      std::sort(expected.begin(), expected.end());
+      const Dots dots = stippled(MBV_DRAW_LINE_LOOP,
+                                 {ndc(64.8, 200 - 47.8, 200, 200), ndc(94.8, 200 - 47.8, 200, 200),
+                                  ndc(94.8, 200 - 117.5, 200, 200), ndc(64.8, 200 - 117.5, 200, 200)},
+                                 static_cast<unsigned short>(pattern), 200, one);
+      const auto placed = std::count_if(dots.begin(), dots.end(), [&expected](const std::pair<int, int> &dot) {
+        return std::binary_search(expected.begin(), expected.end(), dot);
+      });
+      check(drawn && dots == expected,
+            std::string("6c Metal: a stippled loop (") + (pattern == 0x1111 ? "0x1111" : "0x0007") +
+                ") around (64.8, 47.8)-(94.8, 117.5), its lower corners past their columns' centres and outside "
+                "their diamonds, its upper corners on their rows' centres inside their diamonds, has OpenGL's " +
+                std::to_string(expected.size()) + " dots: each side ends where the diamond-exit rule says and the "
+                "counter goes on (" + std::to_string(placed) + " of " + std::to_string(dots.size()) + " in place)");
+    }
+
+    /* at ratio 2 the line is a 2 px quad and the factor 2, the counter in
+       physical pixels: a line of 1 logical pixel from (10.85, 20.25), 0x0001,
+       has its dots in the columns of Apple's 2 px line from (21.7, 40.5) with
+       factor 2: 22 (the first dot's other column, 21, lies before the quad),
+       53 and 54, 85 and 86, each column whole (2 px) */
+    const Dots wide = stippled(MBV_DRAW_LINES, {ndc(10.85, 200 - 20.25, 200, 200), ndc(50.85, 200 - 20.25, 200, 200)},
+                               0x0001, 400, two);
+    std::map<int, int> per_column;
+    for (const std::pair<int, int> &dot : wide)
+      per_column[dot.first]++;
+    const std::map<int, int> whole = {{22, 2}, {53, 2}, {54, 2}, {85, 2}, {86, 2}};
+    std::string wide_found;
+    for (const std::pair<const int, int> &column : per_column)
+      wide_found += " " + std::to_string(column.first) + ":" + std::to_string(column.second);
+    check(drawn && per_column == whole, "6c Metal: at ratio 2 a stippled line (2 px quads, factor 2) has its dots in "
+                                        "OpenGL's columns 22, 53-54 and 85-86, each column whole (column:px" +
+                                            wide_found + ")");
+  }
+}
+
+/*--------------------------------------------------------------------*/
+/* the buffers of the batch, the contours and the uniform ring: the bytes
+   they hold, a ring that cannot grow, and frames that all land on one frame
+   slot, with Null and Metal QRhis */
+void process_memory(double *resident, double *peak, double *footprint);
+
+/* count line strips of n vertices each, one colour */
+void add_strips(TestBatch *t, int count, int n, float r, float g, float bl) {
+  for (int k = 0; k < count; k++) {
+    mbv_draw_batch_color3f(&t->b, r, g, bl);
+    mbv_draw_batch_begin(&t->b, MBV_DRAW_LINE_STRIP);
+    for (int v = 0; v < n; v++)
+      mbv_draw_batch_vertex3f(&t->b, -0.9f + 1.8f * v / n, -0.9f + 1.8f * static_cast<float>(k % 997) / 997.0f, 0.0f);
+    mbv_draw_batch_end(&t->b);
+  }
+}
+
+/* the bytes of the batch's buffers for a batch, once: its vertices and
+   instances, and the plan's loop closings, quads as triangles and stipple */
+size_t batch_buffer_bytes(const struct mbv_draw_batch &b, int width, int height) {
+  rhi::BatchPlan plan;
+  plan.build(b, rhi::Style(), kIdentity, kIdentity, width, height);
+  return (static_cast<size_t>(b.num_vertices) + plan.closings().size() + plan.triangles().size()) *
+             sizeof(struct mbv_draw_vertex) +
+         static_cast<size_t>(b.num_instances) * sizeof(struct mbv_draw_instance) +
+         plan.stipple().size() * sizeof(rhi::StippleVertex);
+}
+
+/* A uniform ring that cannot grow fails the frame; if it cannot be made
+   again at its old size either, the renderer lets go of its pipelines,
+   bindings and ring. Either way the failed frame lets go of the batch's
+   buffers and the contours and writes nothing into the ring, and a batch of
+   fewer commands on the same renderer draws again, twice (on Metal: its line
+   in the picture). render_batch() draws no contours: null_buffers checks a
+   failed frame that uploaded them. */
+void ring_failures(mbvq::OffscreenRenderer::Api api, const char *name) {
+  const bool metal = api == mbvq::OffscreenRenderer::Api::Metal;
+  TestBatch few;
+  few.primitive(MBV_DRAW_LINE_STRIP, {{-0.8f, 0.005f, 0}, {0.8f, 0.005f, 0}}, 1, 0, 0);
+  TestBatch many;
+  for (int k = 0; k < 70; k++)
+    many.primitive(MBV_DRAW_LINE_STRIP, {{-0.8f, -0.5f + 0.01f * k, 0}, {0.8f, -0.5f + 0.01f * k, 0}}, 0, 0, 1);
+  bool ok = true;
+  std::string kept;
+  std::string held;
+  std::string drawn_again;
+  for (int restore = 0; restore < 2; restore++) {
+    mbvq::OffscreenRenderer renderer(api);
+    mbvq::RenderOptions fail;
+    fail.fail_slot_growth = true;
+    fail.fail_slot_restore = restore != 0;
+    QImage image;
+    QImage *picture = metal ? &image : nullptr;
+    const bool first = renderer.render_batch(&few.b, kIdentity, kIdentity, 200, 200, fail, picture);
+    const int fixed = renderer.stats().fixed_resources;
+    const bool grown = renderer.render_batch(&many.b, kIdentity, kIdentity, 200, 200, fail, picture);
+    const mbvq::RenderStats failed = renderer.stats();
+    int again = 0;
+    for (int k = 0; k < 2; k++) {
+      image = QImage();
+      const bool drawn = renderer.render_batch(&few.b, kIdentity, kIdentity, 200, 200, fail, picture);
+      const mbvq::RenderStats stats = renderer.stats();
+      again += drawn && !stats.failed && stats.draws == 1 && stats.fixed_resources == fixed &&
+               (!metal || all_equal(run_lengths(image, kRed, true, 40, 160), 1));
+    }
+    ok = ok && first && fixed > 1 && !grown && failed.failed &&
+         failed.fixed_resources == (restore != 0 ? 1 : fixed) && failed.batch_held_bytes == 0 &&
+         failed.contour_held_bytes == 0 && failed.ring_bytes == 0 && again == 2;
+    kept += (restore != 0 ? ", " : "") + std::to_string(failed.fixed_resources) + " of " + std::to_string(fixed);
+    held += (restore != 0 ? "; " : "") + std::to_string(failed.batch_held_bytes) + " and " +
+            std::to_string(failed.contour_held_bytes) + " bytes held, " + std::to_string(failed.ring_bytes) +
+            " written";
+    drawn_again += (restore != 0 ? ", " : "") + std::to_string(again) + " of 2";
+  }
+  check(ok, "6c " + std::string(name) +
+                ": a uniform ring that cannot grow fails the frame, and one that cannot be made again at its old size "
+                "either lets go of the pipelines, bindings and ring (" +
+                kept + " pipelines, bindings, ring and pass kept); the failed frame lets go of the batch's buffers "
+                       "and the contours and writes nothing into the ring (" +
+                held + "); a smaller batch on the same renderer then draws again (" + drawn_again + " frames)");
+}
+
+void null_buffers() {
+  ring_failures(mbvq::OffscreenRenderer::Api::Null, "Null");
+
+  /* the batch's buffers have the size of the batch: a large batch (strips,
+     a loop, quads and a stippled loop), then a small one (one strip) */
+  {
+    mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+    TestBatch large;
+    add_strips(&large, 200, 500, 1, 0, 0);
+    large.primitive(MBV_DRAW_LINE_LOOP, {{0, 0, 0}, {0.5f, 0, 0}, {0.5f, 0.5f, 0}}, 0, 1, 0);
+    large.primitive(MBV_DRAW_QUADS, {{0, 0, 0}, {0.1f, 0, 0}, {0.1f, 0.1f, 0}, {0, 0.1f, 0}}, 0, 0, 1);
+    mbv_draw_batch_line_stipple(&large.b, 1, 0x1111);
+    mbv_draw_batch_enable(&large.b, MBV_DRAW_LINE_STIPPLE, true);
+    large.primitive(MBV_DRAW_LINE_LOOP, {{0, 0, 0}, {0.5f, 0, 0}, {0.5f, 0.5f, 0}}, 0, 0, 0);
+    TestBatch small_batch;
+    small_batch.primitive(MBV_DRAW_LINE_STRIP, {{0, 0, 0}, {0.5f, 0, 0}, {0.5f, 0.5f, 0}}, 1, 0, 0);
+    mbvq::RenderOptions options;
+    bool drawn = renderer.render_batch(&large.b, kIdentity, kIdentity, 200, 200, options, nullptr);
+    const mbvq::RenderStats big = renderer.stats();
+    drawn = drawn && renderer.render_batch(&small_batch.b, kIdentity, kIdentity, 200, 200, options, nullptr);
+    const mbvq::RenderStats little = renderer.stats();
+    const size_t large_bytes = batch_buffer_bytes(large.b, 200, 200);
+    const size_t small_bytes = batch_buffer_bytes(small_batch.b, 200, 200);
+    check(drawn && big.dynamic_copies == 1 && big.batch_held_bytes == large_bytes &&
+              little.batch_held_bytes == small_bytes && little.batch_resources == 2,
+          "6c Null: the batch's buffers hold " + std::to_string(big.batch_held_bytes) + " bytes for a large batch (" +
+              std::to_string(large_bytes) + ") and " + std::to_string(little.batch_held_bytes) +
+              " for a small one after it (" + std::to_string(small_bytes) + "; corners and vertices only)");
+  }
+
+  /* the contour buffer goes in a frame without contours (the contours
+     turned off), and is made and filled again when they come back: turned
+     on again, and the same contours after a frame of the same renderer
+     without them */
+  {
+    Grid grid;
+    size_t instance = MBV_NO_WINDOW;
+    const bool opened = open_grid(grid, nullptr, &instance);
+    mbvq_c_view(instance, MBVQ_VIEW_CONTOUR, true);
+    mbvq::OffscreenRenderer map(mbvq::OffscreenRenderer::Api::Null);
+    mbvq::RenderOptions options;
+    mbvq_c_fullrender(instance);
+    bool drawn = opened && map.render_map(instance, 320, 240, options, nullptr);
+    drawn = drawn && map.render_map(instance, 320, 240, options, nullptr);
+    const mbvq::RenderStats with = map.stats();
+    mbvq_c_view(instance, MBVQ_VIEW_CONTOUR, false);
+    drawn = drawn && map.render_map(instance, 320, 240, options, nullptr);
+    const mbvq::RenderStats without = map.stats();
+    mbvq_c_view(instance, MBVQ_VIEW_CONTOUR, true);
+    drawn = drawn && map.render_map(instance, 320, 240, options, nullptr);
+    const mbvq::RenderStats back = map.stats();
+    TestBatch none;
+    none.primitive(MBV_DRAW_LINE_STRIP, {{0, 0, 0}, {0.5f, 0, 0}}, 1, 0, 0);
+    drawn = drawn && map.render_batch(&none.b, kIdentity, kIdentity, 320, 240, options, nullptr);
+    const mbvq::RenderStats between = map.stats();
+    drawn = drawn && map.render_map(instance, 320, 240, options, nullptr);
+    const mbvq::RenderStats same = map.stats();
+    check(drawn && with.contour_vertices > 0 && with.contour_held_bytes == with.contour_vertices * 3 * sizeof(float) &&
+              without.contour_vertices == 0 && without.contour_held_bytes == 0 &&
+              without.batch_resources == with.batch_resources - 1 && back.contour_vertices > 0 &&
+              back.contour_held_bytes == back.contour_vertices * 3 * sizeof(float) &&
+              back.contour_uploads > with.contour_uploads && between.contour_held_bytes == 0 &&
+              same.contour_rez == back.contour_rez && same.contour_vertices == back.contour_vertices &&
+              same.contour_held_bytes == back.contour_held_bytes && same.contour_uploads == back.contour_uploads + 1,
+          "6c Null: the contour buffer (" + std::to_string(with.contour_held_bytes) + " bytes) goes in a frame without "
+          "contours (" + std::to_string(without.contour_held_bytes) + "), and is made and filled again when they come "
+          "back (" + std::to_string(back.contour_held_bytes) + " bytes), also with the same contours after a frame "
+          "without them (" + std::to_string(between.contour_held_bytes) + ", then " +
+              std::to_string(same.contour_held_bytes) + " bytes, " +
+              std::to_string(same.contour_uploads - back.contour_uploads) + " upload)");
+    close_instance(instance);
+  }
+
+  /* A frame that uploads the contours and then fails, its uniform ring
+     unable to grow beyond 64 slots for the terrain, the contours and 40
+     routes (a marker run and a line each), holds no contour buffer, and the
+     next frame uploads the same contours again: their upload went with the
+     failed frame's updates, and the core made no new ones in between. */
+  {
+    Grid grid;
+    size_t instance = MBV_NO_WINDOW;
+    const bool opened = open_grid(grid, nullptr, &instance);
+    struct mbview_struct *data = data_of(instance);
+    int error = MB_ERROR_NO_ERROR;
+    const int nc = grid.columns, nr = grid.rows;
+    for (int r = 0; r < 40; r++) {
+      const int ii[2] = {nc / 8, nc * 7 / 8};
+      const int jj[2] = {nr * (r + 1) / 42, nr * (r + 1) / 42};
+      double lonlat[4];
+      mbvq_c_node_lonlat(instance, 2, ii, jj, lonlat);
+      double lon[2] = {lonlat[0], lonlat[2]};
+      double lat[2] = {lonlat[1], lonlat[3]};
+      int waypoints[2] = {MBV_ROUTE_WAYPOINT_SIMPLE, MBV_ROUTE_WAYPOINT_SIMPLE};
+      char name[] = "route";
+      int route = 0;
+      mbview_addroute(0, instance, 2, lon, lat, waypoints, MBV_COLOR_RED, 2, 0, name, &route, &error);
+    }
+    mbview_enableviewroutes(0, instance, &error);
+    data->route_view_mode = MBV_VIEW_ON;
+    mbvq_c_view(instance, MBVQ_VIEW_CONTOUR, true);
+    mbvq_c_fullrender(instance);
+    mbvq::OffscreenRenderer map(mbvq::OffscreenRenderer::Api::Null);
+    mbvq::RenderOptions fail;
+    fail.fail_slot_growth = true;
+    const bool refused = opened && !map.render_map(instance, 320, 240, fail, nullptr, 1);
+    const mbvq::RenderStats failed = map.stats();
+    const bool drawn = map.render_map(instance, 320, 240, mbvq::RenderOptions(), nullptr, 1);
+    const mbvq::RenderStats next = map.stats();
+    check(refused && failed.failed && failed.uniform_slots > 64 && failed.contour_vertices > 0 &&
+              failed.contour_uploads == 1 && failed.contour_held_bytes == 0 && failed.batch_held_bytes == 0 &&
+              drawn && !next.failed && next.contour_rez == failed.contour_rez &&
+              next.contour_vertices == failed.contour_vertices && next.contour_uploads == 2 &&
+              next.contour_held_bytes == next.contour_vertices * 3 * sizeof(float),
+          "6c Null: a frame that uploads the contours (" + std::to_string(failed.contour_vertices) +
+              " vertices) and then fails (" + std::to_string(failed.uniform_slots) +
+              " uniform slots for a ring that cannot grow beyond 64) holds " +
+              std::to_string(failed.contour_held_bytes) +
+              " contour bytes; the next frame uploads the same contours again (" +
+              std::to_string(next.contour_uploads - failed.contour_uploads) + " upload, " +
+              std::to_string(next.contour_held_bytes) + " bytes)");
+    mbview_deleteallroutes(0, instance, &error);
+    close_instance(instance);
+  }
+
+  /* The uniform ring is written whole in every frame, the slots beyond the
+     commands as zeros: after a frame of 70 commands, which doubles the ring
+     of 64 slots to 128, and after a frame of one command after it. A slot of
+     112 bytes takes 256 at the 256-byte alignment of a Null QRhi's uniform
+     buffers. This checks the size the frame passes to the ring's update
+     (RenderStats::ring_bytes); the Metal heap check (metal_buffers) checks
+     the write itself. */
+  {
+    mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+    TestBatch many;
+    add_strips(&many, 70, 2, 0, 0, 1);
+    TestBatch few;
+    few.primitive(MBV_DRAW_LINE_STRIP, {{0, 0, 0}, {0.5f, 0, 0}}, 1, 0, 0);
+    mbvq::RenderOptions options;
+    bool drawn = renderer.render_batch(&many.b, kIdentity, kIdentity, 200, 200, options, nullptr);
+    const mbvq::RenderStats grown = renderer.stats();
+    drawn = drawn && renderer.render_batch(&few.b, kIdentity, kIdentity, 200, 200, options, nullptr);
+    const mbvq::RenderStats after = renderer.stats();
+    const size_t whole = static_cast<size_t>(128) * 256;
+    check(drawn && grown.uniform_slots == 70 && after.uniform_slots == 1 && grown.ring_bytes == whole &&
+              after.ring_bytes == whole,
+          "6c Null: the uniform ring is written whole in every frame: " + std::to_string(grown.ring_bytes) +
+              " bytes in a frame of " + std::to_string(grown.uniform_slots) + " commands and " +
+              std::to_string(after.ring_bytes) + " in a frame of " + std::to_string(after.uniform_slots) +
+              " after it (128 slots of 256 bytes, " + std::to_string(whole) + ")");
+  }
+}
+
+/* the malloc heap in use in MB, which holds the writes Qt keeps for a frame
+   slot (macOS, where the Metal checks run; 0 elsewhere) */
+double heap_in_use() {
+#if defined(__APPLE__)
+  malloc_statistics_t heap;
+  malloc_zone_statistics(nullptr, &heap);
+  return static_cast<double>(heap.size_in_use) / 1048576.0;
+#else
+  return 0.0;
+#endif
+}
+
+/* An autorelease pool around a frame on macOS, as the event loop puts one
+   around each event, and so around each frame of a view: the Metal objects
+   a frame autoreleases (its command buffer and encoders, many more with
+   Metal's validation layers on) go at the end of the frame instead of
+   staying in the malloc heap. libobjc's pool functions are looked up at run
+   time, so that the test links nothing new; where they are not found,
+   frames run without a pool. */
+class FramePool {
+ public:
+  FramePool() {
+    if (functions().push != nullptr)
+      pool_ = functions().push();
+  }
+  ~FramePool() {
+    if (pool_ != nullptr)
+      functions().pop(pool_);
+  }
+  FramePool(const FramePool &) = delete;
+  FramePool &operator=(const FramePool &) = delete;
+  /* whether frames get a pool */
+  static bool available() { return functions().push != nullptr; }
+
+ private:
+  struct Functions {
+    void *(*push)() = nullptr;
+    void (*pop)(void *) = nullptr;
+  };
+  static const Functions &functions() {
+    static const Functions looked_up = [] {
+      Functions f;
+#if defined(__APPLE__)
+      void *push = dlsym(RTLD_DEFAULT, "objc_autoreleasePoolPush");
+      void *pop = dlsym(RTLD_DEFAULT, "objc_autoreleasePoolPop");
+      if (push != nullptr && pop != nullptr) {
+        f.push = reinterpret_cast<void *(*)()>(push);
+        f.pop = reinterpret_cast<void (*)(void *)>(pop);
+      }
+#endif
+      return f;
+    }();
+    return looked_up;
+  }
+  void *pool_ = nullptr;
+};
+
+void metal_buffers() {
+  ring_failures(mbvq::OffscreenRenderer::Api::Metal, "Metal");
+
+  /* Metal keeps a dynamic buffer once per frame in flight: the held bytes
+     count both copies */
+  {
+    mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Metal);
+    TestBatch t;
+    add_strips(&t, 20, 100, 1, 0, 0);
+    const bool drawn = renderer.render_batch(&t.b, kIdentity, kIdentity, 200, 200, mbvq::RenderOptions(), nullptr);
+    const mbvq::RenderStats stats = renderer.stats();
+    check(drawn && stats.dynamic_copies == 2 && stats.batch_held_bytes == 2 * batch_buffer_bytes(t.b, 200, 200),
+          "6c Metal: the batch's buffers are counted once per frame in flight (" +
+              std::to_string(stats.dynamic_copies) + " copies, " + std::to_string(stats.batch_held_bytes) + " bytes)");
+  }
+
+  /* Every frame of a batch on the same frame slot, as when a window draws a
+     frame of its own between two frames of the view (a status label that
+     repainted after each fill did). The batch fills all five of its
+     buffers: 1,900 strips of 25 vertices, 100 loops (their closing
+     segments), 2,000 quads (as triangles), 20,000 markers in one run (their
+     instances) and a stippled line of 20,000 vertices (its stipple pairs),
+     with a uniform slot for each of their 2,003 commands. Each frame and
+     the empty frame after it run in an autorelease pool (FramePool), so
+     that the malloc heap in use holds Qt's pending writes and not the
+     frames' autoreleased Metal objects (without a pool those add 0.5 MB
+     over the 90 frames, 38 MB with MTL_DEBUG_LAYER=1 and 71 MB with
+     MTL_SHADER_VALIDATION=1). Written whole in every frame, the five
+     buffers (3.5 MB) and the ring of 2,048 slots (0.5 MB) leave Qt one
+     pending write per slot, so the heap stays flat over the last 90 frames
+     (at most 0.08 MB more on an Apple M3 Max, also with either variable
+     set; 8 MB allowed). Before, each frame left its writes pending for the
+     other slot, about 4 MB per frame: 165 MB more with the four buffers
+     other than the vertices static, 45 MB with the ring written for the
+     commands only. The footprint is shown for information only: it moves
+     by more than that in the same frames. */
+  {
+    mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Metal);
+    TestBatch t;
+    add_strips(&t, 1900, 25, 1, 0, 0);
+    for (int k = 0; k < 100; k++)
+      t.primitive(MBV_DRAW_LINE_LOOP, {{-0.5f, -0.5f, 0}, {0.5f, -0.5f, 0}, {0.5f, 0.5f, 0}}, 0, 0, 1);
+    std::vector<std::array<float, 3>> quads;
+    for (int k = 0; k < 2000; k++) {
+      const float x = -0.9f + 0.0008f * k;
+      quads.insert(quads.end(), {{x, 0.0f, 0.0f}, {x + 0.1f, 0.0f, 0.0f}, {x + 0.1f, 0.1f, 0.0f}, {x, 0.1f, 0.0f}});
+    }
+    t.primitive(MBV_DRAW_QUADS, quads, 0, 1, 0);
+    mbv_draw_batch_marker_disks(&t.b, 3, 0.01, 0.008, 10, 10, 0, 0, 0);
+    mbv_draw_batch_color3f(&t.b, 0, 1, 0);
+    for (int k = 0; k < 20000; k++)
+      mbv_draw_batch_marker(&t.b, 3, -0.9f + 1.8f * (k % 200) / 200.0f, -0.9f + 1.8f * (k / 200) / 100.0f, 0.0f);
+    mbv_draw_batch_line_stipple(&t.b, 1, 0x1111);
+    mbv_draw_batch_enable(&t.b, MBV_DRAW_LINE_STIPPLE, true);
+    std::vector<std::array<float, 3>> line;
+    for (int v = 0; v < 20000; v++)
+      line.push_back({-0.9f + 1.8f * v / 20000.0f, 0.3f, 0.0f});
+    t.primitive(MBV_DRAW_LINE_STRIP, line, 0, 0, 0);
+    rhi::BatchPlan plan;
+    plan.build(t.b, rhi::Style(), kIdentity, kIdentity, 256, 256);
+    const bool five = t.b.num_vertices > 0 && t.b.num_instances > 0 && !plan.closings().empty() &&
+                      !plan.triangles().empty() && !plan.stipple().empty();
+    mbvq::RenderOptions options;
+    bool drawn = true;
+    int on_slot[2] = {0, 0};
+    double start = -1.0, resident = 0.0, peak = 0.0, heap_start = 0.0;
+    for (int f = 0; f < 120 && drawn; f++) {
+      {
+        const FramePool pool;
+        drawn = renderer.render_batch(&t.b, kIdentity, kIdentity, 256, 256, options, nullptr);
+        const int slot = renderer.stats().frame_slot;
+        on_slot[slot == 0 ? 0 : 1]++;
+        drawn = drawn && renderer.empty_frame();
+      }
+      if (f + 1 == 30) {
+        process_memory(&resident, &peak, &start);
+        heap_start = heap_in_use();
+      }
+    }
+    const double heap = heap_in_use() - heap_start;
+    double end = -1.0;
+    process_memory(&resident, &peak, &end);
+    const int slot = renderer.stats().frame_slot;
+    const int ring_slots = renderer.stats().uniform_slots;
+    /* two batch frames in a row: the second lands on the other slot */
+    drawn = drawn && renderer.render_batch(&t.b, kIdentity, kIdentity, 256, 256, options, nullptr) &&
+            renderer.render_batch(&t.b, kIdentity, kIdentity, 256, 256, options, nullptr);
+    const int next = renderer.stats().frame_slot;
+    check(drawn && five && ring_slots == 2003 && (on_slot[0] == 120 || on_slot[1] == 120) && next != slot &&
+              heap_start > 0.0 && heap < 8.0,
+          "6c Metal: 90 frames of a batch that fills all five of its buffers (" +
+              text("%.1f", batch_buffer_bytes(t.b, 256, 256) / 1048576.0) + " MB: " +
+              std::to_string(t.b.num_vertices) + " vertices, " + std::to_string(t.b.num_instances) +
+              " instances, loop closings, quads as triangles and stipple pairs) and " + std::to_string(ring_slots) +
+              " uniform slots, all on frame slot " + std::to_string(slot) +
+              (FramePool::available() ? ", each in an autorelease pool" : ", without autorelease pools") +
+              ", leave the malloc heap flat (" + text("%+.1f", heap) + " MB, less than 8 MB; footprint " +
+              text("%.1f", start) + " to " + text("%.1f", end) + " MB); the next frame on slot " +
+              std::to_string(next));
+  }
+}
+
+/*--------------------------------------------------------------------*/
+/* 6c: what one segment, one marker run and square pictures cannot show -
+   the points pipeline and its size, the instance strides of wide lines and
+   the closing segments of loops, the picture's width and height kept apart
+   in the shaders, marker runs after the first, the contours drawn, and the
+   marker meshes the renderer keeps */
+
+/* The pixels of a colour across a segment w px wide from (x0, y0) to (x1,
+   y1), in picture pixels: for each column of its middle part, w + 2 px from
+   its ends (each row where the segment is steep), those within w + 3 px of
+   the segment, so that segments further apart are counted each on its own. */
+std::vector<int> across(const QImage &image, uint32_t colour, double x0, double y0, double x1, double y1, int w) {
+  std::vector<int> counts;
+  if (image.isNull())
+    return counts;
+  const bool steep = std::fabs(y1 - y0) > std::fabs(x1 - x0);
+  /* u along the segment, v across it */
+  const double u0 = steep ? y0 : x0, u1 = steep ? y1 : x1, v0 = steep ? x0 : y0, v1 = steep ? x1 : y1;
+  const int length = steep ? image.height() : image.width(), breadth = steep ? image.width() : image.height();
+  const int first = std::max(0, static_cast<int>(std::ceil(std::min(u0, u1) + w + 2)));
+  const int last = std::min(length - 1, static_cast<int>(std::floor(std::max(u0, u1) - w - 2)));
+  for (int u = first; u <= last; u++) {
+    const double v = v0 + (u + 0.5 - u0) * (v1 - v0) / (u1 - u0);
+    const int low = std::max(0, static_cast<int>(std::floor(v - w - 3)));
+    const int high = std::min(breadth - 1, static_cast<int>(std::ceil(v + w + 3)));
+    int n = 0;
+    for (int c = low; c <= high; c++)
+      n += pixel_rgb(image, steep ? c : u, steep ? u : c) == colour;
+    counts.push_back(n);
+  }
+  return counts;
+}
+
+/* counts as "3", or as "1..4" where they differ; "none" without any */
+std::string spread(const std::vector<int> &counts) {
+  if (counts.empty())
+    return "none";
+  const auto range = std::minmax_element(counts.begin(), counts.end());
+  return std::to_string(*range.first) + (*range.first == *range.second ? "" : ".." + std::to_string(*range.second));
+}
+
+/* a colour of the pictures by name */
+std::string colour_name(uint32_t colour) {
+  if (colour == kRed || colour == kGreen || colour == kBlue)
+    return colour == kRed ? "red" : colour == kGreen ? "green" : "blue";
+  if (colour == kWhite || colour == 0u)
+    return colour == 0u ? "black" : "white";
+  char buffer[16];
+  std::snprintf(buffer, sizeof(buffer), "rgb %06x", static_cast<unsigned>(colour));
+  return buffer;
+}
+
+/* Points of the batch: drawn by the points pipeline at the point size (3 px
+   times the ratio), not at the line width (1 px for the first point, 4 px
+   for the second). Their centres lie off the pixel edges (window x 100.125
+   and 150.125, y 100.125 at ratio 1), so each covers an exact square:
+   columns 99 to 101 and 149 to 151, image rows 98 to 100 at ratio 1, and
+   6 x 6 px at ratio 2. */
+void metal_points() {
+  mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Metal);
+  const float centres[2][2] = {{0.00125f, 0.00125f}, {0.50125f, 0.00125f}};
+  for (int ratio = 1; ratio <= 2; ratio++) {
+    TestBatch t;
+    mbv_draw_batch_point_size(&t.b, 3.0f);
+    mbv_draw_batch_line_width(&t.b, 1.0f);
+    t.primitive(MBV_DRAW_POINTS, {{centres[0][0], centres[0][1], 0}}, 1, 0, 0);
+    mbv_draw_batch_line_width(&t.b, 4.0f);
+    t.primitive(MBV_DRAW_POINTS, {{centres[1][0], centres[1][1], 0}}, 1, 0, 0);
+    mbvq::RenderOptions options;
+    options.pixel_ratio = ratio;
+    const int size = 200 * ratio, side = 3 * ratio;
+    QImage image;
+    const bool drawn = renderer.render_batch(&t.b, kIdentity, kIdentity, size, size, options, &image);
+    /* the first column and row whose pixel centres lie in a square */
+    const auto first = [side](double centre) { return static_cast<int>(std::ceil(centre - 0.5 * side - 0.5)); };
+    const int columns[2] = {first((centres[0][0] + 1.0) * 0.5 * size), first((centres[1][0] + 1.0) * 0.5 * size)};
+    const int row = first((1.0 - centres[0][1]) * 0.5 * size);
+    int inside = 0, outside = 0;
+    for (int y = 0; drawn && y < size; y++)
+      for (int x = 0; x < size; x++) {
+        const bool square = y >= row && y < row + side &&
+                            ((x >= columns[0] && x < columns[0] + side) || (x >= columns[1] && x < columns[1] + side));
+        const bool red = pixel_rgb(image, x, y) == kRed;
+        inside += red && square;
+        outside += red && !square;
+      }
+    const mbvq::RenderStats stats = renderer.stats();
+    check(drawn && inside == 2 * side * side && outside == 0 && stats.draws == 2 && stats.thin_draws == 0 &&
+              stats.wide_draws == 0,
+          "6c Metal: points of size 3, drawn with the line widths 1 and 4, cover " + std::to_string(side) + " x " +
+              std::to_string(side) + " px each at ratio " + std::to_string(ratio) + ", from columns " +
+              std::to_string(columns[0]) + " and " + std::to_string(columns[1]) + " and row " + std::to_string(row) +
+              " (" + std::to_string(inside) + " px there, " + std::to_string(outside) + " elsewhere)");
+  }
+}
+
+/* Wide lines on pictures that are not square, each segment measured across
+   its middle part: a picture's width and height swapped in the shaders make
+   lines too thin one way and too wide the other, and a wrong instance stride
+   leaves a segment out.
+   - a strip of three segments (a staircase), 3 px at ratio 1 and 1 px at
+     ratio 2 (2 px quads): a strip's segments come from two bindings of its
+     vertices, one vertex apart;
+   - three separate 3 px lines, each a pair of vertices;
+   - the 3 px staircase stippled with 0xffff, one pair of stipple vertices
+     per segment;
+   - a 3 px loop, whose closing side comes from the plan's closing pairs.
+   The corners lie at a quarter pixel, so that the edges of the quads, w/2
+   from them, pass a quarter pixel from the pixel centres. */
+void metal_wide_layouts() {
+  mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Metal);
+  struct Corner {
+    double x;
+    double y;
+  };
+  /* a primitive through corners given in picture pixels */
+  const auto primitive = [](TestBatch *t, int mode, const std::vector<Corner> &corners, int width, int height,
+                            float r, float g, float bl) {
+    std::vector<std::array<float, 3>> points;
+    for (const Corner &c : corners)
+      points.push_back(ndc(c.x, c.y, width, height));
+    t->primitive(mode, points, r, g, bl);
+  };
+  /* whether each segment (corner to corner) is exactly w px across, with
+     the counts of each in text */
+  const auto exact = [](const QImage &image, uint32_t colour, const std::vector<std::pair<Corner, Corner>> &segments,
+                        int w, std::string *counts_text) {
+    bool all = true;
+    for (const auto &segment : segments) {
+      const std::vector<int> counts =
+          across(image, colour, segment.first.x, segment.first.y, segment.second.x, segment.second.y, w);
+      all = all && all_equal(counts, w);
+      *counts_text += (counts_text->empty() ? "" : ", ") + spread(counts);
+    }
+    return all;
+  };
+  mbvq::RenderOptions one;
+  mbvq::RenderOptions two;
+  two.pixel_ratio = 2.0;
+
+  /* the staircase: 3 px at ratio 1 on 320 x 160, 1 px at ratio 2 on 400 x 300 */
+  for (int ratio = 1; ratio <= 2; ratio++) {
+    const int width = ratio == 1 ? 320 : 400, height = ratio == 1 ? 160 : 300, w = ratio == 1 ? 3 : 2;
+    const std::vector<Corner> stair =
+        ratio == 1 ? std::vector<Corner>{{32.25, 112.25}, {144.25, 112.25}, {144.25, 48.25}, {288.25, 48.25}}
+                   : std::vector<Corner>{{40.25, 210.25}, {180.25, 210.25}, {180.25, 90.25}, {360.25, 90.25}};
+    TestBatch t;
+    mbv_draw_batch_line_width(&t.b, ratio == 1 ? 3.0f : 1.0f);
+    primitive(&t, MBV_DRAW_LINE_STRIP, stair, width, height, 1, 0, 0);
+    QImage image;
+    const bool drawn = renderer.render_batch(&t.b, kIdentity, kIdentity, width, height, ratio == 1 ? one : two, &image);
+    std::string counts;
+    const bool segments =
+        exact(image, kRed, {{stair[0], stair[1]}, {stair[1], stair[2]}, {stair[2], stair[3]}}, w, &counts);
+    check(drawn && segments && renderer.stats().wide_draws == 1 && renderer.stats().thin_draws == 0,
+          "6c Metal: a " + std::to_string(ratio == 1 ? 3 : 1) + " px strip of three segments (a staircase) at ratio " +
+              std::to_string(ratio) + " on " + std::to_string(width) + " x " + std::to_string(height) +
+              ": each segment exactly " + std::to_string(w) + " px across (" + counts + ")");
+  }
+
+  /* three separate 3 px lines on 160 x 320 */
+  {
+    const std::vector<Corner> lines = {{16.25, 64.25},   {144.25, 64.25}, {16.25, 160.25},
+                                       {144.25, 160.25}, {16.25, 256.25}, {144.25, 256.25}};
+    TestBatch t;
+    mbv_draw_batch_line_width(&t.b, 3.0f);
+    primitive(&t, MBV_DRAW_LINES, lines, 160, 320, 0, 0, 1);
+    QImage image;
+    const bool drawn = renderer.render_batch(&t.b, kIdentity, kIdentity, 160, 320, one, &image);
+    std::string counts;
+    const bool pairs =
+        exact(image, kBlue, {{lines[0], lines[1]}, {lines[2], lines[3]}, {lines[4], lines[5]}}, 3, &counts);
+    check(drawn && pairs && renderer.stats().wide_draws == 1,
+          "6c Metal: three separate 3 px lines on 160 x 320: each exactly 3 px across (" + counts + ")");
+  }
+
+  /* the 3 px staircase stippled with 0xffff on 160 x 320 */
+  {
+    const std::vector<Corner> stair = {{16.25, 256.25}, {64.25, 256.25}, {64.25, 64.25}, {144.25, 64.25}};
+    TestBatch t;
+    mbv_draw_batch_line_width(&t.b, 3.0f);
+    mbv_draw_batch_line_stipple(&t.b, 1, 0xffff);
+    mbv_draw_batch_enable(&t.b, MBV_DRAW_LINE_STIPPLE, true);
+    primitive(&t, MBV_DRAW_LINE_STRIP, stair, 160, 320, 1, 0, 0);
+    QImage image;
+    const bool drawn = renderer.render_batch(&t.b, kIdentity, kIdentity, 160, 320, one, &image);
+    std::string counts;
+    const bool segments =
+        exact(image, kRed, {{stair[0], stair[1]}, {stair[1], stair[2]}, {stair[2], stair[3]}}, 3, &counts);
+    check(drawn && segments && renderer.stats().wide_draws == 1,
+          "6c Metal: the 3 px staircase stippled with 0xffff on 160 x 320: each segment exactly 3 px across (" +
+              counts + ")");
+  }
+
+  /* a 3 px loop on 400 x 300, its closing side (the left one) last */
+  {
+    const std::vector<Corner> loop = {{100.25, 225.25}, {300.25, 225.25}, {300.25, 75.25}, {100.25, 75.25}};
+    TestBatch t;
+    mbv_draw_batch_line_width(&t.b, 3.0f);
+    primitive(&t, MBV_DRAW_LINE_LOOP, loop, 400, 300, 0, 0, 1);
+    QImage image;
+    const bool drawn = renderer.render_batch(&t.b, kIdentity, kIdentity, 400, 300, one, &image);
+    std::string counts;
+    const bool sides = exact(
+        image, kBlue, {{loop[0], loop[1]}, {loop[1], loop[2]}, {loop[2], loop[3]}, {loop[3], loop[0]}}, 3, &counts);
+    check(drawn && sides && renderer.stats().wide_draws == 2,
+          "6c Metal: a 3 px loop on 400 x 300: each side exactly 3 px across, the closing side last (" + counts + ")");
+  }
+}
+
+/* Three marker runs, the first shape used again after another, so that the
+   third run starts at instance 3 (72 bytes into the instances): each
+   marker's centre in its own colour (a run drawn from the first instance
+   puts the first marker's colour at the first marker's place and leaves its
+   own place white). */
+void metal_marker_runs() {
+  mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Metal);
+  /* the list, the place (x; its column at y 0), the colour */
+  struct Marker {
+    int list;
+    float x;
+    int column;
+    float r, g, b;
+    uint32_t colour;
+  };
+  const Marker markers[] = {{5, -0.6f, 40, 1, 0, 0, kRed},
+                            {5, -0.3f, 70, 1, 0, 0, kRed},
+                            {6, 0.15f, 115, 0, 1, 0, kGreen},
+                            {5, 0.55f, 155, 0, 0, 1, kBlue}};
+  TestBatch t;
+  mbv_draw_batch_marker_disks(&t.b, 5, 0.08, 0.064, 10, 10, 0.0f, 0.0f, 0.0f);
+  mbv_draw_batch_marker_disks(&t.b, 6, 0.1, 0.08, 10, 10, 0.0f, 0.0f, 0.0f);
+  for (const Marker &m : markers) {
+    mbv_draw_batch_color3f(&t.b, m.r, m.g, m.b);
+    mbv_draw_batch_marker(&t.b, m.list, m.x, 0.0f, 0.0f);
+  }
+  QImage image;
+  const bool drawn = renderer.render_batch(&t.b, kIdentity, kIdentity, 200, 200, mbvq::RenderOptions(), &image);
+  bool centres = drawn;
+  std::string found;
+  for (const Marker &m : markers) {
+    const uint32_t pixel = drawn ? pixel_rgb(image, m.column, 100) : 0xffffffu;
+    centres = centres && pixel == m.colour;
+    found += (found.empty() ? "" : ", ") + colour_name(pixel);
+  }
+  check(centres && renderer.stats().marker_draws == 3 && renderer.stats().markers == 4,
+        "6c Metal: three marker runs (shapes 5, 6, then 5 again): each marker's centre in its own colour (" + found +
+            "; red, red, green, blue expected), " + std::to_string(renderer.stats().marker_draws) + " runs");
+}
+
+/* The contours of the synthetic grid on 400 x 300, at ratio 1 (the line
+   topology) and at ratio 2 (2 px quads), against the segments of the level
+   drawn (mbview_contour_segments) projected with the core's camera: a black
+   pixel within 1 px of the middle of every segment of 3 px or more, none
+   further than 2.5 px from every segment, and one draw of the kind the width
+   asks for. The terrain alone has no black pixel. */
+void metal_contours() {
+  const int width = 400, height = 300;
+  Grid grid;
+  size_t instance = MBV_NO_WINDOW;
+  const bool opened = open_grid(grid, nullptr, &instance);
+  mbvq::RenderOptions options;
+  options.force_stride1 = true;
+  int terrain_black = -1;
+  if (opened) {
+    mbvq::OffscreenRenderer metal(mbvq::OffscreenRenderer::Api::Metal);
+    QImage terrain;
+    if (metal.render_map(instance, width, height, options, &terrain)) {
+      terrain_black = 0;
+      for (int y = 0; y < height; y++)
+        for (int x = 0; x < width; x++)
+          terrain_black += pixel_rgb(terrain, x, y) == 0u;
+    }
+    mbvq_c_view(instance, MBVQ_VIEW_CONTOUR, true);
+    mbvq_c_fullrender(instance);
+  }
+  for (int ratio = 1; ratio <= 2; ratio++) {
+    mbvq::OffscreenRenderer metal(mbvq::OffscreenRenderer::Api::Metal);
+    options.pixel_ratio = ratio;
+    QImage picture;
+    /* the second frame draws the contours the first one's fill made */
+    bool drawn = opened && metal.render_map(instance, width, height, options, &picture);
+    drawn = drawn && metal.render_map(instance, width, height, options, &picture);
+    const mbvq::RenderStats stats = metal.stats();
+    const float *xyz = nullptr;
+    size_t n = 0;
+    uint64_t generation = 0;
+    int error = MB_ERROR_NO_ERROR;
+    if (drawn)
+      mbview_contour_segments(0, instance, stats.contour_rez, &xyz, &n, &generation, &error);
+    double projection[16] = {}, modelview[16] = {}, camera[16] = {};
+    if (drawn) {
+      mbvq_c_camera(instance, projection, modelview);
+      rhi::multiply(projection, modelview, camera);
+    }
+    /* a vertex in picture pixels (x right, y down); false behind the camera */
+    const auto to_picture = [&](const float *p, double *x, double *y) {
+      double c[4];
+      for (int r = 0; r < 4; r++)
+        c[r] = camera[r] * p[0] + camera[4 + r] * p[1] + camera[8 + r] * p[2] + camera[12 + r];
+      if (!(c[3] > 0.0))
+        return false;
+      *x = (c[0] / c[3] + 1.0) * 0.5 * width;
+      *y = (1.0 - c[1] / c[3]) * 0.5 * height;
+      return true;
+    };
+    /* the pixels within 2.5 px of a segment (not named near, which
+       <windows.h> defines away), and the black pixels at the segments'
+       middles */
+    std::vector<unsigned char> around(static_cast<size_t>(width) * height, 0);
+    int middles = 0, marked = 0;
+    for (size_t s = 0; xyz != nullptr && s + 1 < n; s += 2) {
+      double ax, ay, bx, by;
+      if (!to_picture(&xyz[3 * s], &ax, &ay) || !to_picture(&xyz[3 * s + 3], &bx, &by))
+        continue;
+      const double dx = bx - ax, dy = by - ay, length2 = dx * dx + dy * dy;
+      const int x0 = std::max(0, static_cast<int>(std::floor(std::min(ax, bx) - 3.0)));
+      const int x1 = std::min(width - 1, static_cast<int>(std::ceil(std::max(ax, bx) + 3.0)));
+      const int y0 = std::max(0, static_cast<int>(std::floor(std::min(ay, by) - 3.0)));
+      const int y1 = std::min(height - 1, static_cast<int>(std::ceil(std::max(ay, by) + 3.0)));
+      for (int y = y0; y <= y1; y++)
+        for (int x = x0; x <= x1; x++) {
+          const double t =
+              length2 > 0.0 ? std::clamp(((x + 0.5 - ax) * dx + (y + 0.5 - ay) * dy) / length2, 0.0, 1.0) : 0.0;
+          if (std::hypot(x + 0.5 - (ax + t * dx), y + 0.5 - (ay + t * dy)) <= 2.5)
+            around[static_cast<size_t>(y) * width + x] = 1;
+        }
+      const double mx = 0.5 * (ax + bx), my = 0.5 * (ay + by);
+      if (length2 >= 9.0 && mx >= 4.0 && mx <= width - 4.0 && my >= 4.0 && my <= height - 4.0) {
+        middles++;
+        const int cx = static_cast<int>(std::floor(mx)), cy = static_cast<int>(std::floor(my));
+        bool black = false;
+        for (int y = cy - 1; y <= cy + 1; y++)
+          for (int x = cx - 1; x <= cx + 1; x++)
+            black = black || pixel_rgb(picture, x, y) == 0u;
+        marked += black;
+      }
+    }
+    int black = 0, stray = 0;
+    for (int y = 0; drawn && y < height; y++)
+      for (int x = 0; x < width; x++)
+        if (pixel_rgb(picture, x, y) == 0u) {
+          black++;
+          stray += around[static_cast<size_t>(y) * width + x] == 0;
+        }
+    check(drawn && terrain_black == 0 && stats.contour_rez > 0 && middles > 200 && marked == middles && stray == 0 &&
+              stats.thin_draws == (ratio == 1 ? 1 : 0) && stats.wide_draws == (ratio == 2 ? 1 : 0),
+          "6c Metal: contours at ratio " + std::to_string(ratio) + " (level " + std::to_string(stats.contour_rez) +
+              ", " + std::to_string(n / 2) + " segments): black near the middle of " + std::to_string(marked) +
+              " of " + std::to_string(middles) + " segments of 3 px or more, " + std::to_string(stray) + " of " +
+              std::to_string(black) + " black px beyond 2.5 px of every segment (" + std::to_string(terrain_black) +
+              " without contours), " + std::to_string(stats.thin_draws) + " thin and " +
+              std::to_string(stats.wide_draws) + " wide draws");
+  }
+  if (opened)
+    close_instance(instance);
+}
+
+/* The marker meshes the renderer keeps (Null): beyond 32 (kMeshes of the
+   renderer) those not drawn in the last frame go, the least recently drawn
+   first. 41 frames each draw list 4 unchanged and list 3 at a new radius, the
+   last one at the first frame's radius again; then a frame of 40 new shapes,
+   drawn twice. The meshes held: the batch's buffers less its corners and its
+   instances. */
+void null_meshes() {
+  constexpr int kHeld = 32 + 1;
+  mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+  mbvq::RenderOptions options;
+  const auto held = [&renderer]() { return renderer.stats().batch_resources - 2; };
+  std::vector<int> kept, made;
+  bool drawn = true;
+  for (int f = 0; f <= 40; f++) {
+    TestBatch t;
+    const double radius = f < 40 ? 0.01 + 0.001 * f : 0.01;
+    mbv_draw_batch_marker_disks(&t.b, 3, radius, 0.8 * radius, 10, 10, 0, 0, 0);
+    mbv_draw_batch_marker_disks(&t.b, 4, 0.05, 0.04, 10, 10, 0, 0, 0);
+    mbv_draw_batch_color3f(&t.b, 1, 0, 0);
+    mbv_draw_batch_marker(&t.b, 3, 0.0f, 0.0f, 0.0f);
+    mbv_draw_batch_color3f(&t.b, 0, 1, 0);
+    mbv_draw_batch_marker(&t.b, 4, 0.5f, 0.0f, 0.0f);
+    drawn = drawn && renderer.render_batch(&t.b, kIdentity, kIdentity, 200, 200, options, nullptr);
+    kept.push_back(held());
+    made.push_back(renderer.stats().meshes);
+  }
+  /* until frame 30 every mesh stays; from frame 31 on 33 are held: the 32
+     and the one the frame made */
+  bool bounded = drawn && kept[40] == kHeld;
+  bool once = drawn;
+  for (int f = 0; f < 40; f++) {
+    bounded = bounded && kept[f] == std::min(f + 2, kHeld);
+    once = once && made[f] == f + 2;
+  }
+  check(bounded && once && made[40] == 42,
+        "6c: the marker meshes held stay at " + std::to_string(kHeld) + " (" + std::to_string(kept[0]) + ", " +
+            std::to_string(kept[30]) + ", " + std::to_string(kept[31]) + ", " + std::to_string(kept[39]) + ", " +
+            std::to_string(kept[40]) + " after frames 0, 30, 31, 39, 40) with a new radius in each frame; the shape "
+            "drawn in every frame is never made again (" + std::to_string(made[39]) + " made in 40 frames), and the "
+            "first frame's, evicted, is made again when it comes back (" + std::to_string(made[40]) + ")");
+
+  /* meshes drawn in the last frame stay, beyond 32 as well (shapes unlike
+     those above: the meshes are cached by the shape, not by the list) */
+  {
+    TestBatch t;
+    for (int k = 0; k < 40; k++) {
+      mbv_draw_batch_marker_disks(&t.b, 10 + k, 0.1 + 0.001 * k, 0.05, 10, 10, 0, 0, 0);
+      mbv_draw_batch_color3f(&t.b, 1, 0, 0);
+      mbv_draw_batch_marker(&t.b, 10 + k, 0.0f, 0.0f, 0.0f);
+    }
+    const bool first = renderer.render_batch(&t.b, kIdentity, kIdentity, 200, 200, options, nullptr);
+    const int made_first = renderer.stats().meshes;
+    const bool again = renderer.render_batch(&t.b, kIdentity, kIdentity, 200, 200, options, nullptr);
+    check(drawn && first && again && made_first == made[40] + 40 && renderer.stats().meshes == made_first &&
+              held() == 40,
+          "6c: the meshes drawn in the last frame are kept, beyond 32 as well: a frame of 40 new shapes makes " +
+              std::to_string(made_first - made[40]) + ", the same frame again " +
+              std::to_string(renderer.stats().meshes - made_first) + ", and then holds those 40 alone (" +
+              std::to_string(held()) + ")");
+  }
+}
+
 int test_model() {
   /* the names of MB_RENDERER, and what the environment chooses */
   {
@@ -2265,15 +4395,20 @@ int test_model() {
   check(first && same && resized && data->width == 640 && data->height == 480,
         "the frame driver resizes the core when the pixel size differs from the size it gave last, only then");
 
-  /* a fill: the terrain slot and the eleven overlay groups; the status texts
-     of the fill reach the program after it */
+  /* a fill: the terrain slot and the eleven overlay groups; the last status
+     text of the fill reaches the program once, after it (a text of its own
+     shown before, so that the fill's last text is a new one) */
   {
     mbvq::MapWidget *widget = mbvq::map_widget(instance);
+    widget->set_status(QStringLiteral("before the fill"));
+    QApplication::processEvents();
     int during = 0, after = 0;
     bool inside = false, active = false;
-    QObject::connect(widget, &mbvq::MapWidget::statusMessage, widget, [&](const QString &) {
+    QString last;
+    QObject::connect(widget, &mbvq::MapWidget::statusMessage, widget, [&](const QString &message) {
       (inside ? during : after)++;
       active = active || mbvq::fill_active();
+      last = message;
     });
     inside = true;
     const bool filled = frame.fill();
@@ -2287,9 +4422,9 @@ int test_model() {
     }
     check(filled && !batch.failed && terrain == 1 && groups == 11 && mbvq_c_lastdrawrez(instance) == MBVQ_REZ_FULL,
           "a fill records the terrain slot and the eleven groups, at full resolution");
-    check(during == 0 && after > 0 && !active,
-          "status signals raised inside a fill reach the program after it (" + std::to_string(after) + " after, " +
-              std::to_string(during) + " during)");
+    check(during == 0 && after == 1 && !active && !last.isEmpty() && last != QStringLiteral("before the fill"),
+          "the last status text of a fill reaches the program once, after it (" + std::to_string(after) +
+              " after, " + std::to_string(during) + " during: \"" + last.toStdString() + "\")");
     struct mbv_draw_batch other;
     mbv_draw_batch_init(&other);
     mbv_draw_set_target(&other);
@@ -2332,7 +4467,8 @@ int test_model() {
   }
 
   /* the 3D view bounds of a fill without the renderer's bounds: the whole grid
-     (mbview_viewbounds, the batch fallback; logs/TODO.md) */
+     (mbview_viewbounds' fallback while a batch is filled; the null backend
+     never plots, so only a backend that fills batches reaches it) */
   {
     const struct mbv_render_ops ops = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
                                        [](int, size_t, int) { return true; }, nullptr, nullptr};
@@ -2693,10 +4829,25 @@ int test_model() {
   model_split_complete();
   model_memory();
   model_spheroid();
+  model_style();
+  model_batch_plan();
+  model_glu();
+  model_map_6c();
   return result();
 }
 
 /*--------------------------------------------------------------------*/
+/* counts the paint events of a widget, as its event filter */
+class PaintCount : public QObject {
+ public:
+  int paints = 0;
+  bool eventFilter(QObject *object, QEvent *event) override {
+    if (event->type() == QEvent::Paint)
+      paints++;
+    return QObject::eventFilter(object, event);
+  }
+};
+
 int test_widgets() {
   /* the checks need a platform where no QRhi can be made */
   if (QGuiApplication::platformName() != QLatin1String("offscreen")) {
@@ -2754,10 +4905,14 @@ int test_widgets() {
                     Qt::NoModifier);
   QApplication::sendEvent(view, &press);
   const mbvq::ViewState down = mbvq::view_state(view);
+  /* the view's buttons are also the state of the process that every map's
+     fill fallback reads (rhi::map_buttons_down) */
+  bool shared = rhi::map_buttons_down();
   QMouseEvent release(QEvent::MouseButtonRelease, centre, view->mapToGlobal(centre), Qt::LeftButton, Qt::NoButton,
                       Qt::NoModifier);
   QApplication::sendEvent(view, &release);
   const mbvq::ViewState up = mbvq::view_state(view);
+  shared = shared && !rhi::map_buttons_down();
   check(data->pick_type == MBV_PICK_NONE && down.buttons == 1 && up.buttons == 0,
         "a click before the first frame picks nothing; the button is tracked");
   check(!idle.fill_due && !down.fill_due && down.frame_requests == idle.frame_requests && up.fill_due &&
@@ -2774,14 +4929,108 @@ int test_widgets() {
                        Qt::NoModifier);
     QApplication::sendEvent(view, &middle);
     const bool held = mbvq::view_state(view).buttons == 2;
+    shared = shared && rhi::map_buttons_down();
     QEvent lost(type);
     QApplication::sendEvent(view, &lost);
     cleared = cleared && held && mbvq::view_state(view).buttons == 0;
+    shared = shared && !rhi::map_buttons_down();
   }
   const mbvq::ViewState lost = mbvq::view_state(view);
   check(cleared && lost.frame_requests == asked + 3 && lost.fill_due,
         "UngrabMouse, Hide and WindowDeactivate clear the mouse buttons; the view, shown, asks for a filled frame "
         "after each (" + std::to_string(lost.frame_requests - asked) + ")");
+
+  /* Releases lost without those: to a modal window (WindowBlocked) and to a
+     popup, which takes the focus (FocusOut, Qt::PopupFocusReason), clear the
+     buttons, in the view and in the state of the process; a focus lost for
+     another reason does not. A release lost to another widget's grab sends
+     the view nothing: its next mouse event, a press of another button whose
+     buttons() no longer has the middle one, drops that button, as does a
+     press the core does not take or a move. The buttons follow what each
+     mouse event reports: a button cleared while it is still down comes back
+     with the next one that reports it. */
+  {
+    const auto press_button = [&](Qt::MouseButton button) {
+      QMouseEvent event(QEvent::MouseButtonPress, centre, view->mapToGlobal(centre), button, button, Qt::NoModifier);
+      QApplication::sendEvent(view, &event);
+    };
+    /* a mouse event of the button, reporting these buttons down */
+    const auto send_mouse = [&](QEvent::Type type, Qt::MouseButton button, Qt::MouseButtons buttons) {
+      QMouseEvent event(type, centre, view->mapToGlobal(centre), button, buttons, Qt::NoModifier);
+      QApplication::sendEvent(view, &event);
+    };
+    bool blocked_popup = true;
+    QEvent blocked(QEvent::WindowBlocked);
+    QFocusEvent popup(QEvent::FocusOut, Qt::PopupFocusReason);
+    for (QEvent *lost_by : {&blocked, static_cast<QEvent *>(&popup)}) {
+      press_button(Qt::MiddleButton);
+      const bool held = mbvq::view_state(view).buttons == 2 && rhi::map_buttons_down();
+      QApplication::sendEvent(view, lost_by);
+      blocked_popup = blocked_popup && held && mbvq::view_state(view).buttons == 0 && !rhi::map_buttons_down();
+    }
+    press_button(Qt::MiddleButton);
+    QFocusEvent tab(QEvent::FocusOut, Qt::TabFocusReason);
+    QApplication::sendEvent(view, &tab);
+    const bool kept = mbvq::view_state(view).buttons == 2 && rhi::map_buttons_down();
+    check(blocked_popup && kept, "6c: WindowBlocked and FocusOut for a popup clear the mouse buttons, in the view and "
+                                 "in the state of the process; FocusOut for another reason keeps them");
+    /* the middle button's release went elsewhere; the left button is pressed */
+    press_button(Qt::LeftButton);
+    const int pressed = mbvq::view_state(view).buttons;
+    const bool buttons_down = rhi::map_buttons_down();
+    send_mouse(QEvent::MouseButtonRelease, Qt::LeftButton, Qt::NoButton);
+    check(kept && pressed == 1 && buttons_down && mbvq::view_state(view).buttons == 0 && !rhi::map_buttons_down(),
+          "6c: a release lost to another widget's grab is noticed at the view's next mouse event: a press of the "
+          "left button whose buttons() lack the middle one leaves the left button alone down (" +
+              std::to_string(pressed) + "), and its release none, in the view and in the state of the process");
+
+    /* The middle button's release lost again: a press of XButton1, which the
+       core does not take (translate_event rejects it), and a move drop it
+       too. */
+    press_button(Qt::MiddleButton);
+    send_mouse(QEvent::MouseButtonPress, Qt::XButton1, Qt::XButton1);
+    const int extra = mbvq::view_state(view).buttons;
+    const bool extra_down = rhi::map_buttons_down();
+    send_mouse(QEvent::MouseButtonRelease, Qt::XButton1, Qt::NoButton);
+    press_button(Qt::MiddleButton);
+    send_mouse(QEvent::MouseMove, Qt::NoButton, Qt::LeftButton);
+    const int moved = mbvq::view_state(view).buttons;
+    const bool moved_down = rhi::map_buttons_down();
+    send_mouse(QEvent::MouseButtonRelease, Qt::LeftButton, Qt::NoButton);
+    check(extra == 0 && !extra_down && moved == 1 && moved_down && mbvq::view_state(view).buttons == 0 &&
+              !rhi::map_buttons_down(),
+          "6c: a release lost to another widget's grab is noticed also at a press that the core does not take and at "
+          "a move: a press of XButton1 whose buttons() lack the middle button leaves none down (" +
+              std::to_string(extra) + "); a move whose buttons() report the left button alone leaves that one alone "
+              "down (" + std::to_string(moved) + "), and its release none, in the view and in the state of the "
+              "process");
+
+    /* A popup that closes again while the middle button stays down, the drag
+       going on in the view: the popup's FocusOut clears the button, the next
+       move that reports it brings it back, and its release clears it. */
+    press_button(Qt::MiddleButton);
+    QApplication::sendEvent(view, &popup);
+    const bool popup_cleared = mbvq::view_state(view).buttons == 0 && !rhi::map_buttons_down();
+    send_mouse(QEvent::MouseMove, Qt::NoButton, Qt::MiddleButton);
+    const int back = mbvq::view_state(view).buttons;
+    const bool back_down = rhi::map_buttons_down();
+    send_mouse(QEvent::MouseButtonRelease, Qt::MiddleButton, Qt::NoButton);
+    check(popup_cleared && back == 2 && back_down && mbvq::view_state(view).buttons == 0 && !rhi::map_buttons_down(),
+          "6c: a drag that goes on after a popup closed: FocusOut for the popup clears the middle button, a move that "
+          "reports it brings it back (" + std::to_string(back) + "), in the view and in the state of the process, "
+          "and its release clears it");
+
+    /* the event's own press or release counts also where its buttons()
+       disagree, as in a synthetic event */
+    send_mouse(QEvent::MouseButtonPress, Qt::RightButton, Qt::NoButton);
+    const int own_press = mbvq::view_state(view).buttons;
+    const bool own_down = rhi::map_buttons_down();
+    send_mouse(QEvent::MouseButtonRelease, Qt::RightButton, Qt::RightButton);
+    check(own_press == 4 && own_down && mbvq::view_state(view).buttons == 0 && !rhi::map_buttons_down(),
+          "6c: a mouse event's own press or release counts also where its buttons() disagree: a press of the right "
+          "button whose buttons() report none leaves it down (" + std::to_string(own_press) +
+              "), its release whose buttons() still report it none, in the view and in the state of the process");
+  }
 
   /* Hidden for real with a button down: no frame asked for (a hidden view
      draws nothing), and its tile levels are not kept from other views'
@@ -2794,8 +5043,10 @@ int test_widgets() {
                        Qt::NoModifier);
     QApplication::sendEvent(view, &middle);
     const int before = mbvq::view_state(view).frame_requests;
+    shared = shared && rhi::map_buttons_down();
     view->hide();
     const mbvq::ViewState hidden = mbvq::view_state(view);
+    shared = shared && !rhi::map_buttons_down();
     view->show();
     const mbvq::ViewState again = mbvq::view_state(view);
     check(kept && hidden.buttons == 0 && hidden.frame_requests == before && hidden.fill_due && !hidden.levels_kept &&
@@ -2804,13 +5055,286 @@ int test_widgets() {
               std::to_string(hidden.frame_requests - before) + "), its levels not kept; shown again, they are");
   }
 
+  /* The status label and a QRhi fill: the label (in the window's status
+     bar) keeps its text while the fill runs and until events are processed,
+     then shows the fill's last text; a last text equal to its own changes
+     nothing, so the label does not repaint the window between two frames of
+     the view. The status signal sends the fill's last text once, after the
+     fill; a host's status bar showing it ignores a text equal to its own, so
+     it does not repaint either, and a bar the host cleared shows the text
+     again. */
+  {
+    mbvq::MapWidget *widget = mbvq::map_widget(instance);
+    const QString before = QStringLiteral("before the fill");
+    widget->set_status(before);
+    QLabel *label = nullptr;
+    for (QLabel *candidate : mbvq::window(instance)->findChildren<QLabel *>())
+      if (candidate->text() == before && candidate->isVisible())
+        label = candidate;
+    if (label == nullptr)
+      check(false, "6c: the status label is shown in the map's window and takes a text at once outside a fill");
+    else {
+      PaintCount paints;
+      label->installEventFilter(&paints);
+      std::vector<QString> sent;
+      const QMetaObject::Connection connection = QObject::connect(
+          widget, &mbvq::MapWidget::statusMessage, widget, [&sent](const QString &text) { sent.push_back(text); });
+      /* a fill with two texts, the last a new one */
+      spin(100);
+      paints.paints = 0;
+      mbvq::set_fill_active(true);
+      widget->set_status(QStringLiteral("Drawing full rez..."));
+      const QString during = label->text();
+      widget->set_status(QStringLiteral("Done."));
+      mbvq::set_fill_active(false);
+      const QString after_fill = label->text();
+      const size_t sent_in_fill = sent.size();
+      QApplication::processEvents();
+      const QString after_events = label->text();
+      spin(100);
+      const int changed_paints = paints.paints;
+      check(during == before && after_fill == before && after_events == QStringLiteral("Done.") && sent_in_fill == 0 &&
+                sent.size() == 1 && sent.back() == QStringLiteral("Done.") && changed_paints >= 1,
+            "6c: in a fill the status label keeps its text (\"" + during.toStdString() + "\", \"" +
+                after_fill.toStdString() + "\") and shows the last one after it (\"" + after_events.toStdString() +
+                "\", " + std::to_string(changed_paints) + " paints); the last text signalled once after the fill (" +
+                std::to_string(sent_in_fill) + " in it, " + std::to_string(sent.size()) + " in all)");
+      /* fills whose last text the label shows already: the same texts as
+         above, then two real full fills of the map, the second one with the
+         texts of the first; the label does not repaint, and the signal sends
+         each fill's last text once, after it */
+      spin(100);
+      paints.paints = 0;
+      sent.clear();
+      mbvq::set_fill_active(true);
+      widget->set_status(QStringLiteral("Drawing full rez..."));
+      const QString during_same = label->text();
+      widget->set_status(QStringLiteral("Done."));
+      mbvq::set_fill_active(false);
+      const size_t same_in_fill = sent.size();
+      QApplication::processEvents();
+      spin(100);
+      const int same_paints = paints.paints;
+      const size_t same_sent = sent.size();
+      const bool same_last = same_sent == 1 && sent.back() == QStringLiteral("Done.");
+      rhi::MapFrame frame(instance);
+      frame.size_core(320, 240);
+      bool filled = frame.fill();
+      QApplication::processEvents();
+      spin(100);
+      const QString shown = label->text();
+      paints.paints = 0;
+      sent.clear();
+      filled = filled && frame.fill();
+      const QString during_fill = label->text();
+      const size_t fill_in_fill = sent.size();
+      QApplication::processEvents();
+      spin(100);
+      const int fill_paints = paints.paints;
+      check(during_same == QStringLiteral("Done.") && label->text() == QStringLiteral("Done.") && same_paints == 0 &&
+                same_in_fill == 0 && same_last && filled && during_fill == shown && label->text() == shown &&
+                fill_in_fill == 0 && sent.size() == 1 && sent.back() == shown && fill_paints == 0,
+            "6c: a fill whose last text the label shows already does not repaint it (" + std::to_string(same_paints) +
+                " paints) and signals that text once, after the fill (" + std::to_string(same_in_fill) + " in it, " +
+                std::to_string(same_sent) + " in all); a second full fill (the last text \"" + shown.toStdString() +
+                "\"): " + std::to_string(fill_paints) + " paints, " + std::to_string(fill_in_fill) + " in it, " +
+                std::to_string(sent.size()) + " in all");
+
+      /* a text set outside a fill after a fill's texts, before the update
+         after the fill ran, stays: the label shows it, and the signal sent it
+         last, with no text of the fill after it */
+      sent.clear();
+      mbvq::set_fill_active(true);
+      widget->set_status(QStringLiteral("a text of the fill"));
+      mbvq::set_fill_active(false);
+      widget->set_status(QStringLiteral("a later text"));
+      QApplication::processEvents();
+      spin(50);
+      std::string sent_texts;
+      for (const QString &message : sent)
+        sent_texts += (sent_texts.empty() ? "\"" : ", \"") + message.toStdString() + "\"";
+      check(label->text() == QStringLiteral("a later text") && sent.size() == 1 &&
+                sent.back() == QStringLiteral("a later text"),
+            "6c: a text set outside a fill after the fill's texts stays: the label shows \"" +
+                label->text().toStdString() + "\", the signal sent " + (sent.empty() ? "nothing" : sent_texts));
+
+      /* A host that shows the status in its own status bar, as a program
+         that places the map in its window does: each fill sends its last
+         text once, after the fill, and the bar, which ignores a text equal
+         to its own, does not repaint between two frames of the view when
+         that is the text it shows; a fill whose last text is new shows it.
+         A bar the host cleared, as a message that timed out or a status tip
+         leaves it, shows the next fill's last text again. */
+      {
+        QMainWindow host;
+        QStatusBar *bar = host.statusBar();
+        const QMetaObject::Connection to_host = QObject::connect(
+            widget, &mbvq::MapWidget::statusMessage, bar, [bar](const QString &message) { bar->showMessage(message); });
+        widget->set_status(QStringLiteral("Done."));
+        host.resize(400, 120);
+        host.show();
+        spin(100);
+        PaintCount bar_paints;
+        bar->installEventFilter(&bar_paints);
+        /* the texts of a full fill, then two real full fills, each ending
+           with the text the bar shows */
+        bool host_filled = true;
+        int once_after = 0;
+        for (int f = 0; f < 3; f++) {
+          const QString showing = bar->currentMessage();
+          sent.clear();
+          if (f == 0) {
+            mbvq::set_fill_active(true);
+            widget->set_status(QStringLiteral("Drawing full rez..."));
+            widget->set_status(QStringLiteral("Done."));
+            mbvq::set_fill_active(false);
+          }
+          else
+            host_filled = host_filled && frame.fill();
+          const size_t in_fill = sent.size();
+          QApplication::processEvents();
+          once_after += in_fill == 0 && sent.size() == 1 && sent.back() == showing;
+        }
+        spin(100);
+        const int shown_paints = bar_paints.paints;
+        /* a text from outside a fill, sent at once; then a real full fill */
+        sent.clear();
+        widget->set_status(QStringLiteral("before the fill"));
+        const size_t outside_sent = sent.size();
+        spin(100);
+        bar_paints.paints = 0;
+        host_filled = host_filled && frame.fill();
+        const size_t in_fill_sent = sent.size();
+        QApplication::processEvents();
+        spin(100);
+        const QString last = bar->currentMessage();
+        check(host_filled && once_after == 3 && shown_paints == 0 && outside_sent == 1 && in_fill_sent == 1 &&
+                  sent.size() == 2 && sent.back() == label->text() && last == label->text() &&
+                  last != QStringLiteral("before the fill") && bar_paints.paints >= 1,
+              "6c: a host's status bar showing the status signal: fills whose last text it shows already send that "
+              "text once, after the fill (" +
+                  std::to_string(once_after) + " of 3 fills), and do not repaint the bar (" +
+                  std::to_string(shown_paints) +
+                  " paints); a full fill after a text from outside a fill sends its last text once, after the fill (" +
+                  std::to_string(in_fill_sent - outside_sent) + " in it, " +
+                  std::to_string(sent.size() - in_fill_sent) + " after it; the bar shows \"" + last.toStdString() +
+                  "\", " + std::to_string(bar_paints.paints) + " paints)");
+        /* the bar cleared by the host, then a real full fill */
+        bar->clearMessage();
+        const QString cleared = bar->currentMessage();
+        sent.clear();
+        host_filled = host_filled && frame.fill();
+        const size_t cleared_in_fill = sent.size();
+        QApplication::processEvents();
+        spin(50);
+        const QString again = bar->currentMessage();
+        check(host_filled && cleared.isEmpty() && cleared_in_fill == 0 && sent.size() == 1 && !again.isEmpty() &&
+                  again == label->text(),
+              "6c: a host's status bar cleared (as a message that timed out or a status tip leaves it) shows the "
+              "last text of the next fill again (\"" +
+                  cleared.toStdString() + "\", then \"" + again.toStdString() + "\"; " +
+                  std::to_string(cleared_in_fill) + " texts in the fill, " +
+                  std::to_string(sent.size() - cleared_in_fill) + " after it)");
+        QObject::disconnect(to_host);
+        bar->removeEventFilter(&bar_paints);
+      }
+      QObject::disconnect(connection);
+      label->removeEventFilter(&paints);
+    }
+  }
+
   /* the profile and soundings views are null views for now */
   check(mbvq::view_state(mbvq::map_widget(instance)->profile()->view()).rhi_view == false,
         "the profile view is not a QRhi view yet");
 
-  /* closing the window deletes the view that never had a QRhi */
+  /* closing the window deletes the view that never had a QRhi; a button
+     down in it goes with it */
+  {
+    QMouseEvent middle(QEvent::MouseButtonPress, centre, view->mapToGlobal(centre), Qt::MiddleButton, Qt::MiddleButton,
+                       Qt::NoModifier);
+    QApplication::sendEvent(view, &middle);
+    shared = shared && rhi::map_buttons_down();
+  }
   close_instance(instance);
   check(mbvq::window(instance) == nullptr, "a QRhi view that never drew is closed and deleted");
+  check(shared && !rhi::map_buttons_down(),
+        "6c: a map view's buttons are the state that every map's fill fallback reads: down from a press, up after "
+        "the release, after UngrabMouse, Hide and WindowDeactivate, when hidden, and when its window closed with a "
+        "button down");
+
+  /* a map view deleted while it is shown, so that no hide comes before (a
+     view of an instance without a map, on its own): a button down in it
+     goes with it */
+  {
+    QWidget *alone = mbvq::rhi_backend::create_map_view(MBVQ_MAX_WINDOWS - 1, nullptr);
+    alone->resize(200, 150);
+    alone->show();
+    spin(20);
+    const QPointF point(100.0, 75.0);
+    QMouseEvent middle(QEvent::MouseButtonPress, point, alone->mapToGlobal(point), Qt::MiddleButton, Qt::MiddleButton,
+                       Qt::NoModifier);
+    QApplication::sendEvent(alone, &middle);
+    const bool held = alone->isVisible() && mbvq::view_state(alone).buttons == 2 && rhi::map_buttons_down();
+    delete alone;
+    check(held && !rhi::map_buttons_down(),
+          "6c: a map view deleted while shown with a button down takes the button out of the state of the process");
+  }
+
+  /* When the last map button of the process goes up, the other map views
+     whose last fill fell back ask for a frame that fills: the core asks for
+     none after a lost release. Two map views of instances without a map,
+     shown: a click in A asks nothing of B while B's last fill did not fall
+     back. Once it did, a drag in A asks nothing of B while a button is down
+     (its motions, and a second button pressed and released while the first
+     is held), and a frame that fills after the last release. */
+  {
+    QWidget *a = mbvq::rhi_backend::create_map_view(MBVQ_MAX_WINDOWS - 1, nullptr);
+    QWidget *b = mbvq::rhi_backend::create_map_view(MBVQ_MAX_WINDOWS - 2, nullptr);
+    for (QWidget *shown : {a, b}) {
+      shown->resize(200, 150);
+      shown->show();
+    }
+    spin(20);
+    /* a mouse event in A, dx pixels right of its centre */
+    const auto mouse_a = [&](QEvent::Type type, Qt::MouseButton button, Qt::MouseButtons buttons, double dx) {
+      const QPointF at(100.0 + dx, 75.0);
+      QMouseEvent event(type, at, a->mapToGlobal(at), button, buttons, Qt::NoModifier);
+      QApplication::sendEvent(a, &event);
+    };
+    const mbvq::ViewState before = mbvq::view_state(b);
+    mouse_a(QEvent::MouseButtonPress, Qt::LeftButton, Qt::LeftButton, 0.0);
+    mouse_a(QEvent::MouseButtonRelease, Qt::LeftButton, Qt::NoButton, 0.0);
+    const mbvq::ViewState full = mbvq::view_state(b);
+    mbvq::set_fell_back(b, true);
+    /* the drag; B's frame requests after each step before the last release */
+    bool quiet = true;
+    std::string steps;
+    const auto drag_step = [&](QEvent::Type type, Qt::MouseButton button, Qt::MouseButtons buttons, double dx) {
+      mouse_a(type, button, buttons, dx);
+      const mbvq::ViewState during = mbvq::view_state(b);
+      quiet = quiet && during.frame_requests == full.frame_requests && during.fill_due == full.fill_due &&
+              rhi::map_buttons_down();
+      steps += " " + std::to_string(during.frame_requests - full.frame_requests);
+    };
+    drag_step(QEvent::MouseButtonPress, Qt::LeftButton, Qt::LeftButton, 0.0);
+    drag_step(QEvent::MouseMove, Qt::NoButton, Qt::LeftButton, 4.0);
+    drag_step(QEvent::MouseMove, Qt::NoButton, Qt::LeftButton, 8.0);
+    drag_step(QEvent::MouseButtonPress, Qt::MiddleButton, Qt::LeftButton | Qt::MiddleButton, 8.0);
+    drag_step(QEvent::MouseButtonRelease, Qt::MiddleButton, Qt::LeftButton, 8.0);
+    drag_step(QEvent::MouseMove, Qt::NoButton, Qt::LeftButton, 12.0);
+    mouse_a(QEvent::MouseButtonRelease, Qt::LeftButton, Qt::NoButton, 12.0);
+    const mbvq::ViewState fell = mbvq::view_state(b);
+    check(a->isVisible() && b->isVisible() && !before.fill_due && !full.fill_due &&
+              full.frame_requests == before.frame_requests && quiet && fell.fill_due &&
+              fell.frame_requests == before.frame_requests + 1 && !rhi::map_buttons_down(),
+          "6c: after the last map button of the process goes up, another map view whose last fill fell back asks "
+          "for a frame that fills (" + std::to_string(fell.frame_requests - full.frame_requests) +
+              "), none while a button is down (a drag with three motions and a second button pressed and released, "
+              "after each step:" + steps + "); one that did not fall back nothing (" +
+              std::to_string(full.frame_requests - before.frame_requests) + ")");
+    delete b;
+    delete a;
+  }
   return result();
 }
 
@@ -2992,10 +5516,17 @@ int test_render_null() {
   rendered = renderer.render_map(instance, 320, 240, options, nullptr);
   stats = renderer.stats();
   check(rendered && !stats.failed && stats.resources >= 5, "the next create() works");
+  /* the pipelines: the terrain's two and two for each of the eleven kinds
+     of the batch's draws (with and without the depth test), the bindings,
+     the uniform ring and the render pass */
+  check(stats.fixed_resources == 2 + 2 * 11 + 3,
+        "the renderer holds the pipelines of every draw of the batch (" + std::to_string(stats.fixed_resources) +
+            " fixed resources)");
 
   /* tile buffers that cannot be made (the GPU memory ran out): the frame
-     fails and draws nothing; the renderer keeps its five pipeline resources
-     and no tile, and the next frame uploads every tile again */
+     fails and draws nothing; the renderer keeps its pipelines and no tile
+     and no buffer of the batch, and the next frame uploads every tile and
+     the batch again */
   renderer.release();
   options.fail_buffers = true;
   rendered = renderer.render_map(instance, 320, 240, options, nullptr);
@@ -3003,9 +5534,10 @@ int test_render_null() {
   options.fail_buffers = false;
   rendered = !rendered && renderer.render_map(instance, 320, 240, options, nullptr);
   stats = renderer.stats();
-  check(failed.failed && failed.resources == 5 && failed.tiles_drawn == 0 && rendered && !stats.failed &&
+  check(failed.failed && failed.resources == failed.fixed_resources && failed.batch_resources == 0 &&
+            failed.tiles_drawn == 0 && rendered && !stats.failed &&
             stats.uploads_positions - failed.uploads_positions == tiles_uploaded && stats.tiles_drawn == tiles_uploaded &&
-            stats.resources == 5 + 3 * tiles_uploaded,
+            stats.resources == stats.fixed_resources + stats.batch_resources + 3 * tiles_uploaded,
         "tile buffers that cannot be made: nothing drawn, the pipelines kept (" + std::to_string(failed.resources) +
             " resources); the next frame uploads and draws every tile (" + std::to_string(stats.tiles_drawn) + ")");
 
@@ -3031,7 +5563,7 @@ int test_render_null() {
   check(open_grid(small, nullptr, &third), "a 241 x 181 grid opens under QRhi");
   rendered = renderer.render_map(third, 320, 240, options, nullptr);
   stats = renderer.stats();
-  check(rendered && stats.tiles == 4 && stats.tiles_drawn == 4 && stats.resources == 5 + 3 * 4,
+  check(rendered && stats.tiles == 4 && stats.tiles_drawn == 4 && stats.resources == stats.fixed_resources + stats.batch_resources + 3 * 4,
         "a grid of another size: " + std::to_string(stats.tiles) + " tiles, " + std::to_string(stats.resources) +
             " resources, none of the old tiles");
 
@@ -3057,9 +5589,10 @@ int test_render_null() {
     mbview_updateprimarygridcell(0, fourth, 10, 151, data4->primary_nodatavalue, &error);
     rendered = rendered && renderer.render_map(fourth, 320, 240, options, nullptr);
     stats = renderer.stats();
-    check(rendered && empty.tiles == 6 && empty.tiles_drawn == 5 && empty.resources == 5 + 3 * 5 &&
+    check(rendered && empty.tiles == 6 && empty.tiles_drawn == 5 && empty.resources == empty.fixed_resources + empty.batch_resources + 3 * 5 &&
               triangle.tiles_drawn == 6 && triangle.triangles == empty.triangles + 1 &&
-              triangle.resources == 5 + 3 * 6 && stats.tiles_drawn == 5 && stats.resources == 5 + 3 * 5,
+              triangle.resources == triangle.fixed_resources + triangle.batch_resources + 3 * 6 &&
+              stats.tiles_drawn == 5 && stats.resources == stats.fixed_resources + stats.batch_resources + 3 * 5,
           "a tile without data holds no buffer (" + std::to_string(empty.resources) + " resources), with a triangle " +
               "its three (" + std::to_string(triangle.resources) + "), without it none again (" +
               std::to_string(stats.resources) + ")");
@@ -3074,6 +5607,9 @@ int test_render_null() {
 
   close_instance(instance);
   null_levels();
+  null_batch();
+  null_buffers();
+  null_meshes();
   return result();
 }
 
@@ -3081,7 +5617,6 @@ int test_render_null() {
 /* pixels of the Metal mode */
 constexpr int kWidth = 400;
 constexpr int kHeight = 300;
-constexpr uint32_t kWhite = 0xffffff;
 
 uint32_t rgb(const QImage &image, int column, int row) {
   const QRgb pixel = image.pixel(column, row);
@@ -3717,6 +6252,12 @@ int test_render_metal(const char *save) {
 
   close_instance(instance);
   metal_levels();
+  metal_batch();
+  metal_buffers();
+  metal_points();
+  metal_wide_layouts();
+  metal_marker_runs();
+  metal_contours();
   return result();
 }
 
@@ -3822,6 +6363,98 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
           "a shading drag: frames within the drag budget (" + text("%.1f", during.budget_ms) +
               " ms, stride " + std::to_string(during.stride) + "); after the release a frame at the stride of the "
               "zoom (" + std::to_string(after.stride) + ") without it");
+  }
+
+  /* 6c: the overlays and contours of the batch, with the sizes scaled by the
+     view's own pixel ratio (devicePixelRatioF(), not the render target's):
+     contours (1 logical px) and a route (2 logical px, with its waypoint
+     disks) are thin only at ratio 1 */
+  {
+    int error = MB_ERROR_NO_ERROR;
+    const int nc = data->primary_n_columns, nr = data->primary_n_rows;
+    const int ii[6] = {nc / 8, nc / 4, nc * 3 / 8, nc / 2, nc * 5 / 8, nc * 3 / 4};
+    const int jj[6] = {nr / 3, nr / 2, nr / 3, nr / 2, nr / 3, nr / 2};
+    double lonlat[12];
+    mbvq_c_node_lonlat(instance, 6, ii, jj, lonlat);
+    double lon[6], lat[6];
+    int waypoints[6];
+    for (int k = 0; k < 6; k++) {
+      lon[k] = lonlat[2 * k];
+      lat[k] = lonlat[2 * k + 1];
+      waypoints[k] = MBV_ROUTE_WAYPOINT_SIMPLE;
+    }
+    char name[] = "test route";
+    int route = 0;
+    mbview_addroute(0, instance, 6, lon, lat, waypoints, MBV_COLOR_RED, 2, 0, name, &route, &error);
+    /* a straight purple route of 2 logical px along a row of nodes, for its
+       width in the view's own picture */
+    {
+      const int si[2] = {nc / 4, nc * 3 / 4};
+      const int sj[2] = {nr * 3 / 4, nr * 3 / 4};
+      double straight[4];
+      mbvq_c_node_lonlat(instance, 2, si, sj, straight);
+      double slon[2] = {straight[0], straight[2]};
+      double slat[2] = {straight[1], straight[3]};
+      int swaypoints[2] = {MBV_ROUTE_WAYPOINT_SIMPLE, MBV_ROUTE_WAYPOINT_SIMPLE};
+      char sname[] = "straight route";
+      int sroute = 0;
+      mbview_addroute(0, instance, 2, slon, slat, swaypoints, MBV_COLOR_PURPLE, 2, 0, sname, &sroute, &error);
+    }
+    mbview_enableviewroutes(0, instance, &error);
+    data->route_view_mode = MBV_VIEW_ON;
+    mbvq_c_view(instance, MBVQ_VIEW_CONTOUR, true);
+    mbvq_c_fullrender(instance);
+    timer.restart();
+    while ((mbvq::view_stats(view).contour_rez != MBVQ_REZ_FULL || mbvq::view_stats(view).marker_draws == 0) &&
+           timer.elapsed() < 20000)
+      spin(50);
+    const mbvq::RenderStats overlays = mbvq::view_stats(view);
+    const double ratio = view->devicePixelRatioF();
+    const bool thin = std::floor(ratio + 0.5) <= 1.0;
+    check(overlays.pixel_ratio == ratio && overlays.contour_rez == MBVQ_REZ_FULL && overlays.marker_draws > 0 &&
+              (thin ? overlays.thin_draws > 0 : overlays.thin_draws == 0 && overlays.wide_draws >= 2),
+          "6c: contours (" + std::to_string(overlays.contour_vertices) + " vertices) and a route with its waypoints "
+          "drawn at the view's pixel ratio " + text("%.2f", overlays.pixel_ratio) + ": " +
+              std::to_string(overlays.thin_draws) + " thin and " + std::to_string(overlays.wide_draws) +
+              " wide line draws, " + std::to_string(overlays.marker_draws) + " marker runs");
+    /* the straight route's width in physical pixels in grabFramebuffer(),
+       across its major axis over the middle half of its length:
+       max(1, round(2 x the view's ratio)) by the minor-axis rule */
+    const QImage with = rhi_widget->grabFramebuffer().convertToFormat(QImage::Format_RGB32);
+    {
+      const QRgb purple = qRgb(255, 0, 255);
+      int x0 = with.width(), x1 = -1, y0 = with.height(), y1 = -1;
+      for (int y = 0; y < with.height(); y++)
+        for (int x = 0; x < with.width(); x++)
+          if (with.pixel(x, y) == purple) {
+            x0 = std::min(x0, x);
+            x1 = std::max(x1, x);
+            y0 = std::min(y0, y);
+            y1 = std::max(y1, y);
+          }
+      const int expected = std::max(1, static_cast<int>(std::floor(2.0 * ratio + 0.5)));
+      const bool across_columns = x1 - x0 >= y1 - y0;
+      const int from = across_columns ? x0 + (x1 - x0) / 4 : y0 + (y1 - y0) / 4;
+      const int to = across_columns ? x1 - (x1 - x0) / 4 : y1 - (y1 - y0) / 4;
+      int lines = 0, right = 0, wider = 0;
+      for (int a = from; a < to; a++) {
+        int n = 0;
+        const int length = across_columns ? with.height() : with.width();
+        for (int b = 0; b < length; b++)
+          n += with.pixel(across_columns ? a : b, across_columns ? b : a) == purple;
+        lines++;
+        right += n == expected;
+        wider += n > expected;
+      }
+      check(x1 >= 0 && lines > 20 && wider == 0 && right >= lines * 9 / 10,
+            "6c: a 2 px route is " + std::to_string(expected) + " physical px wide in grabFramebuffer() at the view's "
+            "ratio " + text("%.2f", ratio) + " (" + std::to_string(right) + " of " + std::to_string(lines) +
+                (across_columns ? " columns" : " rows") + ", " + std::to_string(wider) + " wider)");
+    }
+    if (save != nullptr) {
+      const std::string path = std::string(save) + ".overlays.png";
+      check(with.save(QString::fromStdString(path)), "picture with the overlays saved as " + path);
+    }
   }
 
   /* the failure label: shown on renderFailed, hidden again by a working initialize() */
@@ -4318,6 +6951,14 @@ void report_frames(const char *scenario, const FrameProbe &probe, const std::vec
     report(scenario, "paint", paint);
     return;
   }
+  /* the fills the 12 ms fallback made at the resolution asked for, in the
+     frames measured (a running total of the view) */
+  if (!indices.empty()) {
+    const size_t first = indices.front() > 0 ? indices.front() - 1 : indices.front();
+    std::printf("info\t%s\tfallback_fills\t%d in %zu frames\n", scenario,
+                probe.frames[indices.back()].stats.fallback_fills - probe.frames[first].stats.fallback_fills,
+                indices.size());
+  }
   report(scenario, "render", render);
   report(scenario, "fill", fill);
   report(scenario, "marks", marks);
@@ -4486,7 +7127,58 @@ void bench_colour(FrameProbe &probe, size_t instance, bool rhi, int warmup, int 
   report_frames(name, probe, measured, rhi);
 }
 
-int bench(bool mode3d, const char *grdfile, int steps, int width, int height) {
+/* The navigation of a file listing .fnv files, one per line (the processed
+   navigation of mbnavlist), shown with its swath bounds, as mbgrdviz shows
+   it (z minus the sensor depth); the points added */
+long add_navigation(size_t instance, const char *list) {
+  FILE *files = std::fopen(list, "r");
+  if (files == nullptr)
+    return 0;
+  long total = 0;
+  char path[MB_PATH_MAXLINE];
+  int number = 0;
+  while (std::fgets(path, sizeof(path), files) != nullptr) {
+    path[std::strcspn(path, "\r\n")] = '\0';
+    FILE *fp = std::fopen(path, "r");
+    if (fp == nullptr)
+      continue;
+    std::vector<double> v[10];
+    char line[1024];
+    while (std::fgets(line, sizeof(line), fp) != nullptr) {
+      int yr, mo, dy, hr, mn;
+      double sec, td, lo, la, hd, sp, draft, roll, pitch, heave, pl, pa, sl, sa;
+      if (std::sscanf(line, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &yr, &mo, &dy, &hr,
+                      &mn, &sec, &td, &lo, &la, &hd, &sp, &draft, &roll, &pitch, &heave, &pl, &pa, &sl, &sa) != 19)
+        continue;
+      const double values[10] = {td, lo, la, -draft, hd, sp, pl, pa, sl, sa};
+      for (int k = 0; k < 10; k++)
+        v[k].push_back(values[k]);
+    }
+    std::fclose(fp);
+    const int n = static_cast<int>(v[0].size());
+    if (n == 0)
+      continue;
+    std::vector<unsigned int> zero(static_cast<size_t>(n), 0);
+    char name[MB_PATH_MAXLINE];
+    char raw[MB_PATH_MAXLINE];
+    std::snprintf(name, sizeof(name), "nav%d", number++);
+    std::snprintf(raw, sizeof(raw), "%s", path);
+    int error = MB_ERROR_NO_ERROR;
+    mbview_addnav(0, instance, n, v[0].data(), v[1].data(), v[2].data(), v[3].data(), v[4].data(), v[5].data(),
+                  v[6].data(), v[7].data(), v[8].data(), v[9].data(), zero.data(), zero.data(), zero.data(),
+                  MBV_COLOR_BLACK, 1, name, 0, raw, raw, 59, true, false, false, false, 1, &error);
+    total += n;
+  }
+  std::fclose(files);
+  int error = MB_ERROR_NO_ERROR;
+  mbview_enableviewnavs(0, instance, &error);
+  struct mbview_struct *data = data_of(instance);
+  data->nav_view_mode = MBV_VIEW_ON;
+  data->navswathbounds_view_mode = MBV_VIEW_ON;
+  return total;
+}
+
+int bench(bool mode3d, const char *grdfile, int steps, int width, int height, const char *navlist) {
   const bool rhi = mbvq::backend() == mbvq::Backend::Rhi;
   bench_start = BenchClock::now();
   Grid grid;
@@ -4506,6 +7198,8 @@ int bench(bool mode3d, const char *grdfile, int steps, int width, int height) {
     return 1;
   }
   const double opened = bench_ms();
+  if (navlist != nullptr)
+    std::printf("info\tnavigation\t%ld points from %s\n", add_navigation(instance, navlist), navlist);
   QWidget *view = mbvq::map_view(instance);
   if (view == nullptr || !probe.attached) {
     std::printf("bench: no map view, or no frame signal on it\n");
@@ -4620,6 +7314,7 @@ int main(int argc, char **argv) {
   int steps = 60;
   int width = 640;
   int height = 480;
+  const char *navlist = nullptr;
   bool arguments = true;
   for (int i = quit ? 3 : 2; i < argc; i++) {
     if (std::strcmp(argv[i], "--3d") == 0)
@@ -4630,6 +7325,8 @@ int main(int argc, char **argv) {
       if (std::sscanf(argv[++i], "%d", &steps) != 1 || steps < 2)
         arguments = false;
     }
+    else if (std::strcmp(argv[i], "--nav") == 0 && i + 1 < argc)
+      navlist = argv[++i];
     else if (std::strcmp(argv[i], "--size") == 0 && i + 1 < argc) {
       if (std::sscanf(argv[++i], "%dx%d", &width, &height) != 2 || width < 64 || height < 64)
         arguments = false;
@@ -4648,7 +7345,7 @@ int main(int argc, char **argv) {
   if (!known) {
     std::fprintf(stderr, "usage: mbview_qt_rhi_test --model | --widgets | --render-null | --render-metal [--save file] "
                          "| --display [--3d] [--save file] [grid] | --quit close|quit|exit|float [grid] "
-                         "| --bench [--3d] [--frames n] [--size WxH] [grid]\n");
+                         "| --bench [--3d] [--frames n] [--size WxH] [--nav list] [grid]\n");
     return 2;
   }
   /* 10 s for the headless modes (ctest gives 60 s), a minute with a window,
@@ -4696,6 +7393,6 @@ int main(int argc, char **argv) {
   if (quit)
     return test_quit(how, grdfile);
   if (bench_mode)
-    return bench(mode3d, grdfile, steps, width, height);
+    return bench(mode3d, grdfile, steps, width, height, navlist);
   return test_display(mode3d, grdfile, save);
 }
