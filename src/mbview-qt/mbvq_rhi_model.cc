@@ -253,6 +253,73 @@ int fill_resolution(int pending, int lastdrawrez, bool contours_shown, bool full
 
 double drag_budget_ms(double outside_ms) { return std::max(kDragMinimumMs, kDragFrameMs - outside_ms - kDragMarginMs); }
 
+bool gpu_wait_counts(WaitApi api, bool fake) {
+  return fake || api == WaitApi::Metal || api == WaitApi::Vulkan || api == WaitApi::Direct3D12;
+}
+
+bool GpuFallback::slow(double wait_ms, double total_ms) {
+  const double mark = kDragFrameMs - kDragMarginMs;
+  return total_ms > mark && wait_ms >= kGpuMinimumMs && total_ms - wait_ms < mark;
+}
+
+void GpuFallback::start() {
+  for (Zoom &z : zooms_)
+    z = Zoom();
+}
+
+int GpuFallback::zoom_index(int zoom) { return std::min(std::max(zoom, 0), kLevels - 1); }
+
+void GpuFallback::frame(int level, double wait_ms, double total_ms, bool skipped, int zoom) {
+  /* the coarsest level is never marked, but a step into it is judged
+     (below) */
+  if (skipped || level < 0 || level > coarsest_)
+    return;
+  Zoom &z = zooms_[zoom_index(zoom)];
+  /* a stopped zoom marks nothing more, nor is a marked level counted again */
+  if (z.stuck || (z.marks >> level & 1u) != 0)
+    return;
+  /* GPU-slow frames count in a row at one level of this zoom: any other
+     frame at it starts the count again */
+  if (level != z.count_level || !slow(wait_ms, total_ms)) {
+    z.count_level = level;
+    z.count = 0;
+    z.count_wait = 0.0;
+    if (!slow(wait_ms, total_ms))
+      return;
+  }
+  /* after a mark at this zoom, a step to a coarser level must cut the wait
+     by a share, or the zoom keeps its level */
+  if (z.reference >= 0.0 && level > z.reference_level && wait_ms > (1.0 - kGpuGainShare) * z.reference) {
+    z.stuck = true;
+    return;
+  }
+  /* the coarsest level is never marked */
+  if (level == coarsest_)
+    return;
+  z.count++;
+  z.count_wait += wait_ms;
+  if (z.count >= kGpuSlowFrames) {
+    z.marks |= 1u << level;
+    z.reference = z.count_wait / z.count;
+    z.reference_level = level;
+    z.count_level = -1;
+    z.count = 0;
+    z.count_wait = 0.0;
+  }
+}
+
+unsigned GpuFallback::marks(int zoom) const { return zooms_[zoom_index(zoom)].marks; }
+
+int GpuFallback::level(int zoom) const {
+  const unsigned marks = zooms_[zoom_index(zoom)].marks;
+  int level = 0;
+  while (level < coarsest_ && (marks >> level & 1u) != 0)
+    level++;
+  return level;
+}
+
+bool GpuFallback::stuck(int zoom) const { return zooms_[zoom_index(zoom)].stuck; }
+
 int zoom_level(double cell_pixels) {
   /* a cell of a pixel or more, an unbounded one, or none known: stride 1 */
   if (!(cell_pixels < kCellPixels))
@@ -1215,8 +1282,10 @@ bool TerrainPlan::plan(const TerrainInput &input, const PlanOptions &options, Pl
   /* The stride: the finest from the zoom's on whose drawn set fits beside
      the levels other visible plans keep, and, while a map mouse button is
      down, whose estimated preparing and gathering fits the drag budget of
-     that stride beside the bounds taken, and whose uploads fit in this
-     frame. Stride 128 if none does. */
+     that stride beside the bounds taken, whose uploads fit in this frame,
+     and which the GPU-time fallback has not marked at the frame's zoom's
+     level in this press (marks made at other zooms do not apply). Stride
+     128 if none does. */
   const int cost = cost_class(grid);
   const auto budget_of = [&options](int l) {
     return options.level_budget_ms[l] >= 0.0 ? options.level_budget_ms[l] : options.budget_ms;
@@ -1244,6 +1313,12 @@ bool TerrainPlan::plan(const TerrainInput &input, const PlanOptions &options, Pl
     }
     if (drag && (stats.bounds_ms + 1.0e-6 * estimate > budget_of(l) || upload_bytes > options.upload_budget)) {
       stats.drag_coarser = true;
+      continue;
+    }
+    /* a level the GPU-time fallback marked at this frame's zoom's level in
+       this press */
+    if (drag && (options.gpu_marks[zoom] >> l & 1u) != 0) {
+      stats.gpu_coarser = true;
       continue;
     }
     level = l;

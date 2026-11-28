@@ -90,10 +90,13 @@ struct RenderOptions {
   /* tiles outside the view are neither prepared nor drawn; false plans and
      draws every tile, at the stride of the tiles in the view (comparisons) */
   bool culling = true;
-  /* the frames are drawn as while a map mouse button is down: the drag
-     budget and the fill fallback apply (a view takes this from its mouse
-     buttons; the fill fallback also applies while a button is down in any
-     map view of the process) */
+  /* the frames are drawn as during the view's press. The map: as while a
+     map mouse button is down, so the drag budget and the fill fallback apply
+     (a view takes this from its mouse buttons; the fill fallback also applies
+     while a button is down in any map view of the process). The 3D
+     soundings: as during a camera press, the middle or right button down and
+     the left up (left-button edits keep every sounding). The GPU-time
+     fallback acts only during the press. */
   bool drag = false;
   /* the drag budget's time for preparing and gathering the nodes of a frame
      in ms; < 0: 1000/60 ms less the previous frame's other costs (during a
@@ -130,6 +133,16 @@ struct RenderOptions {
   /* soundings per chunk of the soundings' GPU buffers (2^21, the views'),
      smaller in tests, so that small sets take several chunks and frames */
   int soundings_chunk = 1 << 21;
+  /* the GPU-time fallback's input in ms, in place of the measured paint's
+     wait after render() and the frame's total (an offscreen frame has no
+     paint; < 0: measured). A fake wait alone replaces the wait inside the
+     measured total. With either set the fallback acts on every API, Null
+     included (gpu_wait_counts). */
+  double gpu_wait_ms = -1.0;
+  double gpu_total_ms = -1.0;
+  /* the 3D soundings drawn at this level of detail in every frame (0 to 4:
+     every 1st, 2nd, 4th, 8th or 16th sounding); < 0: the GPU-time fallback's */
+  int soundings_lod = -1;
 };
 
 /* what the renderer did; totals since the renderer was made, except where
@@ -323,6 +336,32 @@ struct RenderStats {
      offscreen renderer); a view drops such a renderer, and its statistics
      then give -1 */
   double create_ms = -1.0;
+  /* The GPU-time fallback. The last measured frame's wait (the paint's wait
+     after render(), in which the offscreen frame is ended and waited for) and
+     its total (paint start to the window's frameSubmitted), in ms, whatever
+     the press (-1 before the first), and the frames measured so far. Measured
+     are: a frame that a view's paint rendered, at its window's next
+     submission (not a grab, nor a frame rendered again before that
+     submission); an offscreen frame on Metal, from the end of its pass and
+     from its start to the end of endOffscreenFrame(); and, while a fake time
+     is set (RenderOptions::gpu_wait_ms, gpu_total_ms), an offscreen frame on
+     any API, Null included, with its own times (the fake values go into the
+     rule's input only). Whether the fallback can act in the last frame, by
+     its backend check (Metal, Vulkan and Direct3D 12, or with fake times:
+     gpu_wait_counts; it acts only during the view's press), whether the
+     map's last frame passed over a level it marked, the 3D soundings' level
+     of detail in the last frame (0 to 4) and the frames drawn at a level
+     above 0, and the bytes between two soundings drawn in the last frame's
+     positions (12 at level 0, 12 times 2^k at level k, which draws every
+     2^k-th sounding). */
+  double wait_ms = -1.0;
+  double frame_ms = -1.0;
+  int wait_frames = 0;
+  bool gpu_rule = false;
+  bool gpu_coarser = false;
+  int soundings_lod = 0;
+  int lod_frames = 0;
+  int soundings_stride = 0;
 };
 
 class OffscreenRenderer {
@@ -392,14 +431,18 @@ struct ViewState {
   bool rhi_view = false;      /* a view of the QRhi backend */
   bool failure_shown = false; /* its label says it cannot be drawn */
   bool drawn = false;         /* it has drawn a frame, so input reaches the core (map, soundings) */
-  int buttons = 0;            /* map mouse buttons down: bit 0 left, 1 middle, 2 right */
+  int buttons = 0;            /* mouse buttons down in the view (map or 3D soundings): bit 0 left, 1 middle, 2 right */
+  /* the 3D soundings view's camera press: the middle or right button down
+     and the left up (the GPU-time fallback may draw fewer soundings) */
+  bool camera_press = false;
   int failures = 0;           /* failures it handled (renderFailed, a failed create()) */
   bool renderer = false;      /* it holds a renderer */
   /* the map view's next frame fills, without the drag budget (the frame
      after the last mouse button's release, or after the button state was
-     cleared); frames the view asked for itself, for a release or the memory
-     budget (update() while shown); and whether its latest tile levels are
-     kept from other views' evictions (while shown) */
+     cleared); frames the view asked for itself (the map: for a release or
+     the memory budget; the 3D soundings: when a camera press ends), each by
+     update() while shown; and whether its latest tile levels are kept from
+     other views' evictions (while shown) */
   bool fill_due = false;
   int frame_requests = 0;
   bool levels_kept = false;
@@ -412,6 +455,11 @@ ViewState view_state(QWidget *view);
    (rhi::MapFrame), as a fill during a drag in another map view would leave
    it; nothing for any other widget */
 void set_fell_back(QWidget *view, bool fell_back);
+/* for tests: the GPU-time fallback of a QRhi view (map or 3D soundings)
+   takes this wait in ms in place of its paint's measured wait, also inside
+   the frame's total, and acts on every API (< 0: measured, the default);
+   nothing for any other widget */
+void set_gpu_wait(QWidget *view, double wait_ms);
 /* the statistics of the renderer of a QRhi view (map, profile or 3D
    soundings), with the times of its last frame (empty for any other view, or
    while it has no renderer) */

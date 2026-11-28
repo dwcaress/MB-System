@@ -506,6 +506,7 @@ bool SoundingsFrame::begin(bool continued, int width, int height, SoundingsInput
   marks_ms_ = 0.0;
   size_core(width, height);
   *input = SoundingsInput();
+  input->frame.drag = drag_;
 
   const Clock::time_point start = Clock::now();
   int error = MB_ERROR_NO_ERROR;

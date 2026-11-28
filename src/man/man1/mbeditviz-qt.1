@@ -1,4 +1,4 @@
-.TH mbeditviz-qt 1 "19 November 2026" "MB-System 5.0" "MB-System 5.0"
+.TH mbeditviz-qt 1 "20 November 2026" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbeditviz-qt\fP \- Bathymetry editor and patch test tool (Qt6 version).
 
@@ -164,6 +164,14 @@ Where the soundings are drawn with QRhi, the Point size box beside the edit
 mode buttons sets their size, from 0.5 to 8 logical pixels in steps of 0.5
 (3 by default), times the screen's pixel ratio, for the whole program; it is
 not saved.
+
+Where the soundings are drawn with QRhi on Metal, Vulkan or Direct3D 12 and
+the 3D view is rotated, moved, zoomed or exaggerated with the mouse, a share
+of them (every second, fourth, eighth or sixteenth) is drawn while drawing
+all of them would be too slow for 60 frames a second; all are drawn again
+when the button is released. Editing with the left button always draws all
+of them, and so does an exaggeration on Vulkan and Direct3D 12, which writes
+their positions again at every step.
 
 .SH DIFFERENCES FROM MBEDITVIZ
 The program name in lock files and edit save files is mbeditviz-qt.

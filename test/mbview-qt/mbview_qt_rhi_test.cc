@@ -1366,6 +1366,381 @@ void model_drag_budget() {
   close_instance(instance);
 }
 
+/* 7c-1: the rule of the GPU-time fallback (GpuFallback), and the APIs on
+   which the paint's wait is the view's GPU time */
+void model_gpu_fallback() {
+  const double mark = rhi::kDragFrameMs - rhi::kDragMarginMs;
+  const double e = 1.0e-9;
+  check(!rhi::GpuFallback::slow(10.0, mark) && rhi::GpuFallback::slow(10.0, mark + e) &&
+            rhi::GpuFallback::slow(rhi::kGpuMinimumMs, 16.0) &&
+            !rhi::GpuFallback::slow(rhi::kGpuMinimumMs - e, 16.0) &&
+            rhi::GpuFallback::slow(5.0 + e, mark + 5.0) && !rhi::GpuFallback::slow(5.0, mark + 5.0),
+        "7c: a frame is GPU-slow when its total exceeds " + text("%.3f", mark) +
+            " ms, its wait is 4 ms or more and the rest stays under " + text("%.3f", mark) +
+            " ms (each bound held and crossed by 1e-9 ms)");
+
+  rhi::GpuFallback two(4);
+  two.start();
+  two.frame(0, 10.0, 16.0);
+  const unsigned after_one = two.marks();
+  two.frame(0, 10.0, 16.0);
+  const unsigned after_two = two.marks();
+  const int level_two = two.level();
+  rhi::GpuFallback reset(4);
+  reset.start();
+  reset.frame(0, 10.0, 16.0);
+  reset.frame(0, 2.0, 10.0);
+  reset.frame(0, 10.0, 16.0);
+  rhi::GpuFallback between(4);
+  between.start();
+  between.frame(0, 10.0, 16.0);
+  between.frame(1, 10.0, 16.0);
+  between.frame(0, 10.0, 16.0);
+  rhi::GpuFallback skipped(4);
+  skipped.start();
+  skipped.frame(0, 10.0, 16.0);
+  skipped.frame(0, 1.0, 2.0, true);
+  skipped.frame(0, 10.0, 16.0);
+  rhi::GpuFallback skipped_only(4);
+  skipped_only.start();
+  skipped_only.frame(0, 10.0, 16.0, true);
+  skipped_only.frame(0, 10.0, 16.0, true);
+  check(after_one == 0 && after_two == 1u && level_two == 1 && reset.marks() == 0 && between.marks() == 0 &&
+            skipped.marks() == 1u && skipped_only.marks() == 0,
+        "7c: two GPU-slow frames in a row mark a level (marks " + std::to_string(after_two) + ", the next level " +
+            std::to_string(level_two) + "), one does not; a frame not slow, or one at another level, between two "
+            "slow ones starts the count again; a skipped frame (its wait holds uploads) neither counts nor resets");
+
+  /* no finer level during a press; start() clears */
+  for (int f = 0; f < 3; f++)
+    two.frame(1, 1.0, 5.0);
+  const int kept = two.level();
+  two.start();
+  check(kept == 1 && two.marks() == 0 && two.level() == 0 && !two.stuck(),
+        "7c: fast frames after a mark keep the coarser level for the press (level " + std::to_string(kept) +
+            "); start() at the next press clears the marks");
+
+  /* the gain check: a step must cut the wait by a tenth */
+  rhi::GpuFallback gain(4);
+  gain.start();
+  gain.frame(0, 10.0, 16.0);
+  gain.frame(0, 10.0, 16.0);
+  const double exact = (1.0 - rhi::kGpuGainShare) * 10.0;
+  gain.frame(1, exact, 16.0);
+  gain.frame(1, exact, 16.0);
+  const unsigned gained = gain.marks();
+  gain.frame(2, exact, 16.0);
+  rhi::GpuFallback constant(4);
+  constant.start();
+  for (int f = 0; f < 6; f++)
+    constant.frame(constant.level(), 12.0, 16.0);
+  rhi::GpuFallback mixed(4);
+  mixed.start();
+  mixed.frame(0, 10.0, 16.0);
+  mixed.frame(0, 10.0, 16.0);
+  mixed.frame(1, 8.0, 16.0);
+  mixed.frame(1, 9.5, 16.0);
+  check(gained == 3u && gain.marks() == 3u && gain.level() == 2 && gain.stuck() && constant.marks() == 1u &&
+            constant.level() == 1 && constant.stuck() && mixed.marks() == 1u && mixed.level() == 1 && mixed.stuck(),
+        "7c: the gain check: a wait of exactly 0.9 x the marked level's counts (marks " + std::to_string(gained) +
+            "), the same wait one level on stops the press there; constant waits allow one step; a slow frame with "
+            "the gain, then one without: no further mark");
+
+  /* the coarsest level is never marked: the soundings' 4, the map's 7 */
+  rhi::GpuFallback soundings(4);
+  soundings.start();
+  rhi::GpuFallback map(rhi::kLevels - 1);
+  map.start();
+  /* waits falling by 15 % per level (the gain check asks for 10 %), two
+     frames at each level, and still 4 ms or more at level 7 (4.49 ms), so
+     that the frames at either coarsest level are GPU-slow and only the rule
+     keeps it unmarked */
+  double wait = 14.0;
+  const bool coarsest_slow = rhi::GpuFallback::slow(14.0 * std::pow(0.85, rhi::kLevels - 1), 16.0);
+  for (int l = 0; l < rhi::kLevels; l++) {
+    for (int f = 0; f < rhi::kGpuSlowFrames; f++) {
+      soundings.frame(soundings.level(), wait, 16.0);
+      map.frame(map.level(), wait, 16.0);
+    }
+    wait *= 0.85;
+  }
+  check(coarsest_slow && soundings.marks() == 15u && soundings.level() == 4 && map.marks() == 127u &&
+            map.level() == rhi::kLevels - 1,
+        "7c: waits falling by 15 % per level walk the soundings to level 4 (every 16th sounding) and the map to "
+        "level 7 (stride 128); neither coarsest level is ever marked, though their frames are GPU-slow (marks " +
+            std::to_string(soundings.marks()) + " and " + std::to_string(map.marks()) + ")");
+
+  /* within one zoom, a frame at a level finer than the one whose frames
+     set the gain check's reference (6b's drag budget or the memory budget
+     admitting a finer level again) is no step of the rule: it counts as any
+     other frame, two such frames mark that level, and their waits become
+     the reference, at their level, which judges the next step */
+  bool finer_ok = true;
+  unsigned finer_marks = 0;
+  bool finer_stuck = false;
+  for (const int zoom : {0, 1}) {
+    rhi::GpuFallback finer(rhi::kLevels - 1);
+    finer.start();
+    finer.frame(3, 10.0, 16.0, false, zoom);
+    finer.frame(3, 10.0, 16.0, false, zoom);
+    finer.frame(4, 5.0, 9.0, false, zoom);
+    finer.frame(1, 12.0, 16.0, false, zoom);
+    const bool finer_first = !finer.stuck(zoom) && finer.marks(zoom) == 8u;
+    finer.frame(1, 12.0, 16.0, false, zoom);
+    finer_marks = finer.marks(zoom);
+    finer.frame(2, 10.5, 16.0, false, zoom);
+    const bool finer_free = !finer.stuck(zoom);
+    finer.frame(2, 11.0, 16.0, false, zoom);
+    finer_stuck = finer.stuck(zoom);
+    finer_ok = finer_ok && finer_first && finer_marks == 10u && finer_free && finer_stuck &&
+               finer.marks(zoom) == 10u && finer.marks(1 - zoom) == 0u && !finer.stuck(1 - zoom);
+  }
+  check(finer_ok,
+        "7c: after level 3 is marked (10 ms), two GPU-slow frames at level 1 (12 ms) are no step of the rule: they "
+        "mark level 1 (marks " + std::to_string(finer_marks) + "); a step to level 2 is then judged by level 1's "
+        "12 ms: 10.5 ms passes, 11.0 ms stops that zoom (stuck " + std::to_string(finer_stuck) + "); the same at "
+        "zoom 0 and at zoom 1, the other zoom untouched");
+
+  /* each zoom's level has a rule of its own (the map's stride of the
+     zoom): after level 1 is marked at zoom 1 (12 ms), the zoom's own level 2
+     at zoom 2 (the map zoomed out) is judged by frames at zoom 2 alone,
+     which mark it there with 11.5 ms (0.96 x 12 ms); a step at zoom 2 is
+     then judged by those and stops zoom 2, not zoom 1 */
+  rhi::GpuFallback zoomed(rhi::kLevels - 1);
+  zoomed.start();
+  zoomed.frame(1, 12.0, 16.0, false, 1);
+  zoomed.frame(1, 12.0, 16.0, false, 1);
+  zoomed.frame(2, 6.0, 10.0, false, 1);
+  zoomed.frame(2, 11.5, 16.0, false, 2);
+  zoomed.frame(2, 11.5, 16.0, false, 2);
+  const unsigned zoomed_marks = zoomed.marks(2);
+  const bool zoomed_free = !zoomed.stuck(2);
+  zoomed.frame(3, 11.5, 16.0, false, 2);
+  check(zoomed.marks(1) == 2u && zoomed_marks == 4u && zoomed_free && zoomed.stuck(2) && !zoomed.stuck(1) &&
+            zoomed.marks(0) == 0u,
+        "7c: after level 1 is marked at zoom 1, two GPU-slow frames at the zoom's own level 2 after a zoom out, "
+        "with 0.96 x level 1's wait, are judged at zoom 2 alone and mark it there (marks " +
+            std::to_string(zoomed.marks(1)) + " at zoom 1, " + std::to_string(zoomed_marks) + " at zoom 2); a step "
+            "at zoom 2 with the same wait stops zoom 2, and zoom 1 goes on");
+
+  /* GPU-slow frames count at each zoom on their own: a frame at level 1 at
+     zoom 1, then one at zoom 2, mark nothing; a second at zoom 2 marks level
+     1 there with the waits at zoom 2 alone (10 ms), so that a step there
+     waiting 8.5 ms (15 % less) is free; a count across the zooms (8 and
+     10 ms) would have marked with 9 ms and stopped it */
+  rhi::GpuFallback restarted(rhi::kLevels - 1);
+  restarted.start();
+  restarted.frame(1, 8.0, 16.0, false, 1);
+  restarted.frame(1, 10.0, 16.0, false, 2);
+  const unsigned restarted_first = restarted.marks(1) | restarted.marks(2);
+  restarted.frame(1, 10.0, 16.0, false, 2);
+  const unsigned restarted_marks = restarted.marks(2);
+  restarted.frame(2, 8.5, 16.0, false, 2);
+  check(restarted_first == 0u && restarted_marks == 2u && restarted.marks(1) == 0u && !restarted.stuck(2),
+        "7c: GPU-slow frames count at each zoom on their own: one at zoom 1 and one at zoom 2 mark nothing (marks " +
+            std::to_string(restarted_first) + "), a second at zoom 2 marks level 1 there with zoom 2's 10 ms, and "
+            "a step there waiting 8.5 ms is free (stuck " + std::to_string(restarted.stuck(2)) + ")");
+
+  /* a zoom that changes back and forth under constant waits (12 ms, total
+     16 ms): each zoom marks its own level in its own two frames, steps once
+     and stops there, whatever the other zooms do, so no zoom ends more than
+     one level past its own and none walks the levels; each frame draws the
+     finest level not marked at its zoom from the zoom's level on, as the
+     stride loop takes it */
+  const auto flipping = [](const std::vector<int> &zooms) {
+    rhi::GpuFallback g(rhi::kLevels - 1);
+    g.start();
+    std::vector<int> levels;
+    for (const int zoom : zooms) {
+      int level = zoom;
+      while (level < rhi::kLevels - 1 && (g.marks(zoom) >> level & 1u) != 0)
+        level++;
+      levels.push_back(level);
+      g.frame(level, 12.0, 16.0, false, zoom);
+    }
+    return levels;
+  };
+  const std::vector<int> every = flipping({0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0});
+  const std::vector<int> pairs = flipping({0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1});
+  const std::vector<int> apart = flipping({0, 0, 2, 2, 0, 0, 2, 2, 0, 0, 2, 2});
+  const std::vector<int> every_expected = {0, 0, 1, 1, 1, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1};
+  const std::vector<int> pairs_expected = {0, 0, 1, 1, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2};
+  const std::vector<int> apart_expected = {0, 0, 2, 2, 1, 1, 3, 3, 1, 1, 3, 3};
+  check(every == every_expected && pairs == pairs_expected && apart == apart_expected,
+        "7c: under constant waits each zoom marks its own level in its own two frames, steps once and stops: a "
+        "zoom changing every frame or every second frame between 0 and 1 ends at level 1 at zoom 0 and level 2 at "
+        "zoom 1, and between 0 and 2 at levels 1 and 3, one past each zoom's own level, never walking the levels "
+        "(levels " + list(every) + ", " + list(pairs) + " and " + list(apart) + ")");
+
+  /* a zoom in from zoom 6 (the map's stride of the zoom 64) under constant
+     waits, three frames at zoom 6 and five at each finer zoom: at each zoom
+     two frames mark its own level, the step after them is judged and stops
+     that zoom (also the step into the coarsest level at zoom 6, which only
+     its stop shows), its later frames keep the level reached, and a stop at
+     one zoom does not block the next */
+  rhi::GpuFallback swept(rhi::kLevels - 1);
+  swept.start();
+  std::vector<int> sweep_zooms = {6, 6, 6};
+  std::vector<int> sweep_expected = {6, 6, 7};
+  for (int zoom = 5; zoom >= 0; zoom--)
+    for (const int f : {0, 0, 1, 1, 1}) {
+      sweep_zooms.push_back(zoom);
+      sweep_expected.push_back(zoom + f);
+    }
+  std::vector<int> sweep;
+  for (const int zoom : sweep_zooms) {
+    int level = zoom;
+    while (level < rhi::kLevels - 1 && (swept.marks(zoom) >> level & 1u) != 0)
+      level++;
+    sweep.push_back(level);
+    swept.frame(level, 12.0, 16.0, false, zoom);
+  }
+  std::vector<int> stops;
+  for (int zoom = 0; zoom <= 6; zoom++)
+    stops.push_back(swept.stuck(zoom) ? 1 : 0);
+  check(sweep == sweep_expected && stops == std::vector<int>(7, 1),
+        "7c: a zoom in from zoom 6 under constant waits, three frames at zoom 6 and five at each finer zoom: at "
+        "each zoom two frames mark its own level, the step after them is judged and stops that zoom (also the "
+        "step into level 7 at zoom 6), and its later frames keep the level reached (levels " + list(sweep) +
+            "; stops at zooms 0 to 6 " + list(stops) + ")");
+
+  /* a GPU-slow step into the coarsest level is judged like any other:
+     after level 0 is marked (12 ms), a frame at level 7 (where 6b's drag
+     budget passed over the levels between) waiting 12 ms stops the zoom, so
+     that two frames at level 1 with 10 ms (a cut of 17 %) mark nothing;
+     without that frame they mark level 1 */
+  rhi::GpuFallback into(rhi::kLevels - 1), around(rhi::kLevels - 1);
+  for (rhi::GpuFallback *g : {&into, &around}) {
+    g->start();
+    g->frame(0, 12.0, 16.0);
+    g->frame(0, 12.0, 16.0);
+  }
+  into.frame(rhi::kLevels - 1, 12.0, 16.0);
+  for (rhi::GpuFallback *g : {&into, &around}) {
+    g->frame(1, 10.0, 16.0);
+    g->frame(1, 10.0, 16.0);
+  }
+  check(into.stuck() && into.marks() == 1u && !around.stuck() && around.marks() == 3u,
+        "7c: a GPU-slow step into level 7 without the gain stops the zoom (stuck " + std::to_string(into.stuck()) +
+            ", marks " + std::to_string(into.marks()) + "), so two later frames at level 1 with a cut of 17 % mark "
+            "nothing; without that frame they mark level 1 (marks " + std::to_string(around.marks()) + ")");
+
+  using rhi::WaitApi;
+  bool fake = true;
+  for (WaitApi api : {WaitApi::Null, WaitApi::OpenGL, WaitApi::Direct3D11, WaitApi::Direct3D12, WaitApi::Metal,
+                      WaitApi::Vulkan})
+    fake = fake && rhi::gpu_wait_counts(api, true);
+  check(rhi::gpu_wait_counts(WaitApi::Metal, false) && rhi::gpu_wait_counts(WaitApi::Vulkan, false) &&
+            rhi::gpu_wait_counts(WaitApi::Direct3D12, false) && !rhi::gpu_wait_counts(WaitApi::OpenGL, false) &&
+            !rhi::gpu_wait_counts(WaitApi::Direct3D11, false) && !rhi::gpu_wait_counts(WaitApi::Null, false) && fake,
+        "7c: the fallback can act on Metal, Vulkan and Direct3D 12, whose offscreen frames wait for the GPU, not on "
+        "OpenGL, Direct3D 11 or Null; with a test's fake times on all of them");
+}
+
+/* 7c-2: the map's stride loop passes over the levels the GPU-time fallback
+   marked at the frame's zoom's level, while dragged, never those of other
+   zooms, and keeps every other rule */
+void model_gpu_marks() {
+  Grid grid;
+  grid.columns = 300;
+  grid.rows = 200;
+  size_t instance = MBV_NO_WINDOW;
+  check(open_grid(grid, nullptr, &instance), "7c: a 300 x 200 grid opens for the GPU-time fallback's marks");
+  rhi::MapFrame frame(instance);
+  frame.size_core(2400, 1800);
+  /* a drag in which 6b's budget never binds: no cost per node, a large budget */
+  rhi::PlanOptions drag = view_options();
+  drag.drag = true;
+  drag.budget_ms = 1000.0;
+  drag.node_ns_colour = drag.node_ns_z = 0.0;
+  /* each case on a fresh plan whose first frame drew the zoom's stride 1 */
+  const auto planned = [&](const rhi::PlanOptions &options) {
+    rhi::TerrainPlan plan;
+    plan_frame(frame, plan, view_options());
+    rhi::PlanResult result;
+    plan_frame(frame, plan, options, &result);
+    return result.stats;
+  };
+  /* the marks of the zoom's level 0, the frame's here */
+  rhi::PlanOptions zero = drag;
+  zero.gpu_marks[0] = 1u;
+  const rhi::PlanStats a = planned(zero);
+  rhi::PlanOptions one = drag;
+  one.gpu_marks[0] = 2u;
+  const rhi::PlanStats b = planned(one);
+  rhi::PlanOptions both = drag;
+  both.gpu_marks[0] = 1u;
+  both.level_budget_ms[1] = 0.0;
+  both.node_ns_colour = both.node_ns_z = 1000.0;
+  const rhi::PlanStats c = planned(both);
+  check(a.stride == 2 && a.gpu_coarser && !a.drag_coarser && !a.memory_coarser && b.stride == 1 && !b.gpu_coarser &&
+            c.stride == 4 && c.gpu_coarser && c.drag_coarser,
+        "7c: while dragged, level 0 marked draws stride " + std::to_string(a.stride) +
+            " (gpu_coarser, no other budget), level 1 marked leaves stride 1; level 0 marked and level 1 over its own "
+            "drag budget draw stride " + std::to_string(c.stride) + " with both flags");
+
+  /* level 0 marked with a cache budget only level 2 fits: the memory test
+     comes first, so the levels it passes over are not reported as marked */
+  {
+    const size_t budget = mbvq::cache_budget();
+    rhi::TerrainPlan plan;
+    plan_frame(frame, plan, view_options());
+    const size_t level1 = level_set_bytes(plan, 1), level2 = level_set_bytes(plan, 2);
+    mbvq::set_cache_budget(level2 + (level1 - level2) / 2);
+    rhi::PlanResult result;
+    plan_frame(frame, plan, zero, &result);
+    mbvq::set_cache_budget(budget);
+    const rhi::PlanStats &m = result.stats;
+    check(level2 < level1 && m.stride == 4 && m.memory_coarser && !m.gpu_coarser && !m.drag_coarser,
+          "7c: level 0 marked with a cache budget only level 2 fits (" + std::to_string(level2 / 1024) + " of " +
+              std::to_string((level2 + (level1 - level2) / 2) / 1024) + " kB): stride " + std::to_string(m.stride) +
+              " for the memory alone (memory_coarser, not gpu_coarser)");
+  }
+
+  rhi::PlanOptions still = view_options();
+  still.gpu_marks[0] = 1u;
+  const rhi::PlanStats d = planned(still);
+  rhi::PlanOptions forced = zero;
+  forced.force_stride1 = true;
+  const rhi::PlanStats f = planned(forced);
+  rhi::PlanOptions all = drag;
+  all.gpu_marks[0] = 0xffu;
+  const rhi::PlanStats g = planned(all);
+  /* marks of other zooms' levels apply only at those zooms */
+  rhi::PlanOptions others = drag;
+  for (int zoom = 1; zoom < rhi::kLevels; zoom++)
+    others.gpu_marks[zoom] = 0xffu;
+  const rhi::PlanStats o = planned(others);
+  check(d.stride == 1 && !d.gpu_coarser && f.stride == 1 && !f.gpu_coarser && g.stride == 128 && g.gpu_coarser &&
+            o.stride == 1 && !o.gpu_coarser,
+        "7c: marks without a press, or with stride 1 forced, change nothing; with every level of the frame's zoom "
+        "marked the loop falls back to stride 128; every level marked at the other zooms changes nothing here");
+
+  /* zoomed out: the marks of the frame's zoom's level apply, from the
+     zoom's level on; those of zoom 0 not */
+  frame.size_core(150, 100);
+  const rhi::PlanStats z = planned(zero);
+  const int zl = level_of(z.stride_zoom);
+  rhi::PlanOptions coarser = drag;
+  coarser.gpu_marks[zl] = 1u << zl;
+  const rhi::PlanStats zc = planned(coarser);
+  rhi::PlanOptions finest = drag;
+  finest.gpu_marks[zl] = 1u;
+  const rhi::PlanStats zf = planned(finest);
+  rhi::PlanOptions elsewhere = drag;
+  elsewhere.gpu_marks[0] = 1u << zl;
+  const rhi::PlanStats ze = planned(elsewhere);
+  frame.size_core(2400, 1800);
+  check(z.stride_zoom > 1 && z.stride == z.stride_zoom && !z.gpu_coarser && zc.stride == 2 * z.stride_zoom &&
+            zc.gpu_coarser && zf.stride == z.stride_zoom && !zf.gpu_coarser && ze.stride == z.stride_zoom &&
+            !ze.gpu_coarser,
+        "7c: zoomed out to stride " + std::to_string(z.stride_zoom) + " (zoom level " + std::to_string(zl) +
+            "): a mark of that zoom at its own level draws stride " + std::to_string(zc.stride) +
+            "; a mark of that zoom at level 0, finer than the zoom, and a mark at the zoom's level kept for zoom 0, "
+            "change nothing");
+  close_instance(instance);
+}
+
 /* uploads above the budget outside a drag: one stride per frame, the
    coarser stride first, the planned one complete over the frames (F5) */
 void model_split() {
@@ -5972,13 +6347,178 @@ void null_profile_mode() {
   mb3dsoundings_end(0, &error);
 }
 
+/* 7c without drawing: the 3D soundings view's camera press, the middle or
+   right mouse button down and the left up, during which the GPU-time
+   fallback may draw fewer soundings. When a camera press ends the view asks
+   for a frame itself (update() while shown, counted in frame_requests),
+   which draws every sounding: the core asks for none after a camera
+   button's release. The left button, which edits, starts no camera press
+   and asks for nothing (the core asks for an edit's drawing). A release
+   lost to a grab, a hide, another window, a modal window or a popup ends
+   the press as in the map view; hidden for real, the view asks for nothing
+   (a hidden view draws nothing; its next frame comes when it is shown). The
+   buttons are the view's own, never the state of the process that every
+   map's fill fallback reads (rhi::map_buttons_down). The soundings window's
+   view, shown and never drawn (no QRhi here), read through view_state(). */
+void widgets_soundings_press(QWidget *view) {
+  const QPointF centre(view->width() / 2.0, view->height() / 2.0);
+  const QEvent::Type pressed = QEvent::MouseButtonPress, released = QEvent::MouseButtonRelease;
+  /* a mouse event of the button, reporting these buttons down */
+  const auto send_mouse = [&](QEvent::Type type, Qt::MouseButton button, Qt::MouseButtons buttons) {
+    QMouseEvent event(type, centre, view->mapToGlobal(centre), button, buttons, Qt::NoModifier);
+    QApplication::sendEvent(view, &event);
+  };
+  /* After a step: the view's buttons, its camera press and the frames it
+     asked for in the step, against the expected ones; the step added to the
+     text as "name (buttons on|off +frames)". No map button may be down
+     after any step. */
+  const mbvq::ViewState idle = mbvq::view_state(view);
+  int requests = idle.frame_requests;
+  int steps = 0;
+  bool maps_up = !rhi::map_buttons_down();
+  const auto state_after = [&](const std::string &name, int buttons, bool press, int asked, std::string *seen) {
+    const mbvq::ViewState state = mbvq::view_state(view);
+    const int new_requests = state.frame_requests - requests;
+    requests = state.frame_requests;
+    steps++;
+    maps_up = maps_up && !rhi::map_buttons_down();
+    *seen += std::string(seen->empty() || seen->back() == ' ' ? "" : ", ") + name + " (" +
+             std::to_string(state.buttons) + (state.camera_press ? " on +" : " off +") +
+             std::to_string(new_requests) + ")";
+    return state.buttons == buttons && state.camera_press == press && new_requests == asked;
+  };
+  /* mouse events in a row, each a press or a release of a button with the
+     buttons it reports down, then the expected buttons, camera press and
+     frames asked for; a sequence's text starts with its label, if any */
+  struct Step {
+    const char *name;
+    QEvent::Type type;
+    Qt::MouseButton button;
+    Qt::MouseButtons down;
+    int buttons;
+    bool press;
+    int asked;
+  };
+  const auto run = [&](const char *label, const std::vector<Step> &sequence, std::string *seen) {
+    if (*label != '\0')
+      *seen += std::string(seen->empty() ? "" : "; ") + label + ": ";
+    bool ok = true;
+    for (const Step &step : sequence) {
+      send_mouse(step.type, step.button, step.down);
+      ok = state_after(step.name, step.buttons, step.press, step.asked, seen) && ok;
+    }
+    return ok;
+  };
+
+  /* one button at a time */
+  std::string clicks;
+  const bool clicked = run("", {{"L", pressed, Qt::LeftButton, Qt::LeftButton, 1, false, 0},
+                                {"L up", released, Qt::LeftButton, Qt::NoButton, 0, false, 0},
+                                {"M", pressed, Qt::MiddleButton, Qt::MiddleButton, 2, true, 0},
+                                {"M up", released, Qt::MiddleButton, Qt::NoButton, 0, false, 1},
+                                {"R", pressed, Qt::RightButton, Qt::RightButton, 4, true, 0},
+                                {"R up", released, Qt::RightButton, Qt::NoButton, 0, false, 1}},
+                           &clicks);
+  check(view->isVisible() && idle.buttons == 0 && !idle.camera_press && idle.frame_requests == 0 && clicked,
+        "7c: in the 3D soundings view, shown, a left click is no camera press and asks for no frame; a middle or a "
+        "right click is one while its button is down, and its release asks for a frame (idle " +
+            std::to_string(idle.buttons) + (idle.camera_press ? " on, " : " off, ") +
+            std::to_string(idle.frame_requests) +
+            " frames asked so far, the left click before the first frame included; after each step the buttons, the "
+            "camera press and the frames asked for: " + clicks + ")");
+
+  /* two buttons: the left one ends a camera press, the right one added to
+     the middle keeps it, the middle one added to the left starts none */
+  std::string two;
+  const bool middle_left =
+      run("M then L", {{"M", pressed, Qt::MiddleButton, Qt::MiddleButton, 2, true, 0},
+                       {"L", pressed, Qt::LeftButton, Qt::LeftButton | Qt::MiddleButton, 3, false, 1},
+                       {"L up", released, Qt::LeftButton, Qt::MiddleButton, 2, true, 0},
+                       {"M up", released, Qt::MiddleButton, Qt::NoButton, 0, false, 1}},
+          &two);
+  const bool middle_right =
+      run("M then R", {{"M", pressed, Qt::MiddleButton, Qt::MiddleButton, 2, true, 0},
+                       {"R", pressed, Qt::RightButton, Qt::MiddleButton | Qt::RightButton, 6, true, 0},
+                       {"R up", released, Qt::RightButton, Qt::MiddleButton, 2, true, 0},
+                       {"M up", released, Qt::MiddleButton, Qt::NoButton, 0, false, 1}},
+          &two);
+  const bool left_middle =
+      run("L then M", {{"L", pressed, Qt::LeftButton, Qt::LeftButton, 1, false, 0},
+                       {"M", pressed, Qt::MiddleButton, Qt::LeftButton | Qt::MiddleButton, 3, false, 0},
+                       {"M up", released, Qt::MiddleButton, Qt::LeftButton, 1, false, 0},
+                       {"L up", released, Qt::LeftButton, Qt::NoButton, 0, false, 0}},
+          &two);
+  check(middle_left && middle_right && left_middle,
+        "7c: two buttons in the 3D soundings view: the left one pressed during a camera press ends it and asks for "
+        "a frame, its release starts the press again; the right one added to the middle keeps it, and the middle's "
+        "release asks for the frame; the middle one added to the left starts none, and nothing is asked for (" +
+            two + ")");
+
+  /* a camera press, then a release lost to a grab, a hide, another window, a
+     modal window or a popup, the view shown: a frame asked for after each;
+     a focus lost for another reason keeps the press */
+  QEvent ungrab(QEvent::UngrabMouse), hide_event(QEvent::Hide), deactivate(QEvent::WindowDeactivate),
+      blocked(QEvent::WindowBlocked);
+  QFocusEvent popup(QEvent::FocusOut, Qt::PopupFocusReason);
+  const std::pair<const char *, QEvent *> losses[] = {{"UngrabMouse", &ungrab},
+                                                      {"Hide", &hide_event},
+                                                      {"WindowDeactivate", &deactivate},
+                                                      {"WindowBlocked", &blocked},
+                                                      {"FocusOut for a popup", &popup}};
+  std::string lost_seen;
+  bool lost = true;
+  for (const auto &[name, event] : losses) {
+    send_mouse(pressed, Qt::MiddleButton, Qt::MiddleButton);
+    const bool held = state_after("M", 2, true, 0, &lost_seen);
+    QApplication::sendEvent(view, event);
+    const bool cleared = state_after(name, 0, false, 1, &lost_seen);
+    lost = lost && held && cleared && view->isVisible();
+  }
+  QFocusEvent tab(QEvent::FocusOut, Qt::TabFocusReason);
+  send_mouse(pressed, Qt::MiddleButton, Qt::MiddleButton);
+  const bool tab_held = state_after("M", 2, true, 0, &lost_seen);
+  QApplication::sendEvent(view, &tab);
+  const bool kept = state_after("FocusOut for the tab key", 2, true, 0, &lost_seen);
+  send_mouse(released, Qt::MiddleButton, Qt::NoButton);
+  const bool kept_released = state_after("M up", 0, false, 1, &lost_seen);
+  check(lost && tab_held && kept && kept_released,
+        "7c: UngrabMouse, Hide, WindowDeactivate, WindowBlocked and FocusOut for a popup end a camera press in the "
+        "3D soundings view, shown: the buttons cleared and a frame asked for after each; FocusOut for another reason "
+        "keeps the press, whose release asks for the frame (" + lost_seen + ")");
+
+  /* hidden for real during a camera press: the buttons cleared and no frame
+     asked for (a hidden view draws nothing; its next frame comes when it is
+     shown); shown again, the end of a camera press asks for one again */
+  std::string hiding;
+  send_mouse(pressed, Qt::MiddleButton, Qt::MiddleButton);
+  const bool hide_held = state_after("M", 2, true, 0, &hiding);
+  view->hide();
+  const bool gone = !view->isVisible();
+  const bool hidden = state_after("hide()", 0, false, 0, &hiding);
+  view->show();
+  const bool back = view->isVisible();
+  const bool shown = state_after("show()", 0, false, 0, &hiding);
+  const bool again = run("", {{"M", pressed, Qt::MiddleButton, Qt::MiddleButton, 2, true, 0},
+                              {"M up", released, Qt::MiddleButton, Qt::NoButton, 0, false, 1}},
+                         &hiding);
+  check(hide_held && gone && hidden && back && shown && again,
+        "7c: hidden for real during a camera press, the 3D soundings view clears its buttons and asks for no frame "
+        "(a hidden view draws nothing); shown again, a middle click asks for one again (hidden " +
+            std::string(gone ? "yes" : "no") + ", shown again " + (back ? "yes" : "no") + "; " + hiding + ")");
+
+  check(maps_up, "7c: the 3D soundings view's buttons stay out of the state of the process that every map's fill "
+                 "fallback reads: no map button down before or after any of its " +
+                     std::to_string(steps) + " steps (rhi::map_buttons_down)");
+}
+
 /* 6d without drawing: the profile and soundings views are QRhi views; the
    profile's width cap; the soundings view's failure label, input before the
    first frame, its point-size control and its status during a fill; and
    (7b) the profile mode that a fill hides from the core: the View menu's
    item and the core's mode after a frame's fill, the core's mode after a
    refused fill, and the item when the core asks the window to show its
-   state (mb3dsoundings_updategui) */
+   state (mb3dsoundings_updategui); and (7c) the 3D soundings view's camera
+   press (widgets_soundings_press) */
 void widgets_views(size_t instance, QRhiWidget::Api expected) {
   mbvq::MapWidget *widget = mbvq::map_widget(instance);
   mbvq::ProfileWindow *window = widget != nullptr ? widget->profile() : nullptr;
@@ -6073,6 +6613,10 @@ void widgets_views(size_t instance, QRhiWidget::Api expected) {
     check(sdg_edits == edits && !mbvq::view_state(view).drawn,
           "6d: a click on a sounding before the soundings view's first frame does not reach the core");
   }
+
+  /* 7c: the soundings view's camera press, and the frame it asks for when
+     one ends (widgets_soundings_press) */
+  widgets_soundings_press(view);
 
   /* the point-size control, under QRhi only */
   QDoubleSpinBox *point_size = soundings->findChild<QDoubleSpinBox *>();
@@ -6883,6 +7427,10 @@ int test_model() {
   model_soundings_decorations();
   model_soundings_fill_size();
   model_profile_files();
+  /* 7c: the rule of the GPU-time fallback and the map's stride loop with
+     its marks */
+  model_gpu_fallback();
+  model_gpu_marks();
   return result();
 }
 
@@ -7504,6 +8052,411 @@ void null_levels() {
 }
 
 /*--------------------------------------------------------------------*/
+/* 7c: of 1000 soundings, those whose index is a multiple of 1, 2, 4, 8 and
+   16: what the levels of detail 0 to 4 draw */
+constexpr int kLodSoundings[5] = {1000, 500, 250, 125, 63};
+
+/* 7c with a Null QRhi: the 3D soundings at a level of detail, forced
+   (RenderOptions::soundings_lod), on the soundings of null_soundings (1000
+   in chunks of 300), as points and, in a renderer of its own, as quads
+   (forced). Level k draws every 2^k-th sounding: those whose index in the
+   array is a multiple of 2^k, in each chunk from its first such sounding
+   (the phase), with the positions bound 12 x 2^k bytes apart (binding 1 of
+   the quads). A change of level reads, writes and allocates nothing, and
+   the pipelines of the levels come with create(). */
+void null_lod_levels() {
+  make_sdg(40, 25, 7);
+  check(open_sdg(), "7c Null: the soundings handed over for the levels of detail");
+  sdg_camera(90.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+  sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_ALL, true);
+  for (const bool quads : {false, true}) {
+    const std::string kind = std::string("7c Null soundings as ") + (quads ? "quads (forced)" : "points");
+    mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+    mbvq::RenderOptions options;
+    options.soundings_chunk = 300;
+    options.point_quads = quads;
+    options.soundings_lod = 0;
+    const bool primed = renderer.render_soundings(200, 150, options, nullptr);
+    const mbvq::RenderStats first = renderer.stats();
+    bool drawn = primed && !first.failed && first.point_quads == quads && first.sounding_chunks == 4 &&
+                 first.soundings_lod == 0 && first.soundings_drawn == 1000 && first.soundings_stride == 12;
+    bool kept = primed;
+    std::vector<int> counts, strides;
+    for (const int level : {1, 2, 3, 4, 0}) {
+      options.soundings_lod = level;
+      const bool ok = renderer.render_soundings(200, 150, options, nullptr);
+      const mbvq::RenderStats s = renderer.stats();
+      counts.push_back(s.soundings_drawn);
+      strides.push_back(s.soundings_stride);
+      drawn = drawn && ok && !s.failed && s.soundings_lod == level && s.soundings_drawn == kLodSoundings[level] &&
+              s.soundings_stride == 12 * rhi::level_stride(level);
+      kept = kept && ok && s.sounding_allocations == first.sounding_allocations &&
+             std::equal(s.sounding_reads, s.sounding_reads + 3, first.sounding_reads) &&
+             std::equal(s.sounding_writes, s.sounding_writes + 4, first.sounding_writes) &&
+             s.sounding_held_bytes == first.sounding_held_bytes && s.resources == first.resources &&
+             s.fixed_resources == first.fixed_resources && s.soundings_shown == 1000;
+    }
+    const int lod_frames = renderer.stats().lod_frames - first.lod_frames;
+    check(drawn && lod_frames == 4,
+          kind + ": the levels of detail 1, 2, 3, 4 and 0 forced draw " + list(counts) +
+              " of 1000 soundings in chunks of 300 (those whose index is a multiple of 2, 4, 8, 16 and 1), their "
+              "positions bound " + list(strides) + " bytes apart; " + std::to_string(lod_frames) +
+              " frames counted at a level above 0");
+    check(kept, kind + ": from level 0 through the levels 1, 2, 3, 4 and 0 nothing is read, written or allocated "
+                       "again; the soundings' GPU bytes (" + std::to_string(first.sounding_held_bytes) +
+                       ") and the resources (" + std::to_string(first.resources) + ", " +
+                       std::to_string(first.fixed_resources) +
+                       " fixed: the levels' pipelines come with create()) stay, all 1000 soundings shown");
+  }
+  int error = MB_ERROR_NO_ERROR;
+  mb3dsoundings_end(0, &error);
+}
+
+/* 7c with a Null QRhi: the GPU-time fallback of the map and of the 3D
+   soundings. A Null QRhi waits for no GPU: without fake times
+   (RenderOptions::gpu_wait_ms and gpu_total_ms) no frame is measured and
+   the fallback cannot act (gpu_rule); with them it can. The map on a
+   300 x 200 grid at 2400 x 1800, where 6b's drag budget never binds
+   (1000 ms, no cost per node), and the soundings of null_soundings; after a
+   priming call one frame per call, so that each call feeds the rule once
+   (every offscreen frame with fake times is measured). During a press
+   (RenderOptions::drag, for both) two GPU-slow frames at a level mark it,
+   and the next frames draw the next coarser level: the map's stride, the
+   soundings' level of detail. */
+void null_gpu_fallback() {
+  Grid grid;
+  grid.columns = 300;
+  grid.rows = 200;
+  size_t instance = MBV_NO_WINDOW;
+  check(open_grid(grid, nullptr, &instance), "7c Null: a 300 x 200 grid opens for the GPU-time fallback");
+  make_sdg(40, 25, 7);
+  check(open_sdg(), "7c Null: the soundings handed over for the GPU-time fallback");
+  sdg_camera(90.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+  sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_ALL, true);
+  mbvq::RenderOptions map_options;
+  map_options.prep_budget_ms = 1000.0;
+  map_options.node_ns_colour = 0.0;
+  map_options.node_ns_z = 0.0;
+  mbvq::RenderOptions soundings_options;
+  soundings_options.soundings_chunk = 300;
+  /* a call of the map's frames or of the soundings' */
+  const auto render = [instance](mbvq::OffscreenRenderer &renderer, bool map, const mbvq::RenderOptions &options) {
+    return map ? renderer.render_map(instance, 2400, 1800, options, nullptr)
+               : renderer.render_soundings(200, 150, options, nullptr);
+  };
+
+  /* Without fake times a frame is not measured (wait_ms and frame_ms -1,
+     wait_frames 0) and the fallback cannot act (gpu_rule false); a fake
+     wait, or a fake total, lets it act, and the frame is measured with its
+     own times, not the fake's: the wait from the end of its pass to after
+     endOffscreenFrame(), the total from its start, so that the two differ
+     by the pass's span; without them again nothing more is measured. */
+  for (const bool map : {true, false}) {
+    mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+    mbvq::RenderOptions options = map ? map_options : soundings_options;
+    bool drawn = render(renderer, map, options);
+    const mbvq::RenderStats none = renderer.stats();
+    options.gpu_wait_ms = 1000.0;
+    drawn = render(renderer, map, options) && drawn;
+    const mbvq::RenderStats waited = renderer.stats();
+    options.gpu_wait_ms = -1.0;
+    options.gpu_total_ms = 16.0;
+    drawn = render(renderer, map, options) && drawn;
+    const mbvq::RenderStats totalled = renderer.stats();
+    options.gpu_total_ms = -1.0;
+    drawn = render(renderer, map, options) && drawn;
+    const mbvq::RenderStats again = renderer.stats();
+    const double pass = waited.render_end_ms - waited.render_begin_ms;
+    check(drawn && !none.gpu_rule && none.wait_ms == -1.0 && none.frame_ms == -1.0 && none.wait_frames == 0 &&
+              waited.gpu_rule && waited.wait_frames == 1 && waited.wait_ms >= 0.0 &&
+              waited.wait_ms <= waited.frame_ms && waited.frame_ms < 1000.0 &&
+              std::fabs(waited.frame_ms - waited.wait_ms - pass) < 1.0e-3 && totalled.gpu_rule &&
+              totalled.wait_frames == 2 && !again.gpu_rule && again.wait_frames == 2 &&
+              again.wait_ms == totalled.wait_ms && again.frame_ms == totalled.frame_ms,
+          std::string("7c Null ") + (map ? "map" : "soundings") +
+              ": without fake times no frame is measured (wait_ms " + text("%.0f", none.wait_ms) + ", frame_ms " +
+              text("%.0f", none.frame_ms) + ") and the fallback cannot act (gpu_rule false); a fake wait of "
+              "1000 ms lets it act and the frame measured with its own times, the wait after its pass and the "
+              "total from its start (" + text("%.3f", waited.wait_ms) + " and " + text("%.3f", waited.frame_ms) +
+              " ms, the pass " + text("%.3f", pass) + " ms), as does a fake total; without them again it cannot "
+              "act and measures nothing (" + std::to_string(again.wait_frames) + " frames measured)");
+  }
+
+  /* A press with total 16 ms and a wait of 12 x 0.8^level ms: two GPU-slow
+     frames at each level, each step cuts the wait by 20 % (the gain check
+     asks for 10 %), and the wait stays 4 ms or more up to level 4, the
+     soundings' coarsest. Then the release, a second press with constant
+     times (one step, then the gain check stops it), and a third press with
+     a frame without fake times between frames with them. */
+  const std::vector<int> falling = {0, 0, 1, 1, 2, 2, 3, 3, 4, 4};
+  const std::vector<int> one_step = {0, 0, 1, 1, 1, 1};
+  const std::vector<int> per_frame = {0, 0, 0, 1};
+  for (const bool map : {true, false}) {
+    const std::string name = std::string("7c Null ") + (map ? "map" : "soundings");
+    mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+    mbvq::RenderOptions options = map ? map_options : soundings_options;
+    const bool primed = render(renderer, map, options);
+    /* a call after the priming one: one frame, during the press or not,
+       with fake times (< 0: none) */
+    bool one = primed;
+    int calls = 0, faked = 0;
+    const auto call = [&](bool press, double wait, double total) {
+      options.drag = press;
+      options.gpu_wait_ms = wait;
+      options.gpu_total_ms = total;
+      one = render(renderer, map, options) && one && renderer.last_frames() == 1 && !renderer.stats().failed;
+      calls++;
+      faked += wait >= 0.0 || total >= 0.0 ? 1 : 0;
+      return renderer.stats();
+    };
+    /* a frame at a level: the map at its stride (the zoom's is 1), passing
+       over the marked levels below it during a press; the soundings drawn
+       at it, with their positions' stride */
+    const auto at = [map](const mbvq::RenderStats &s, int level, bool press) {
+      if (map)
+        return s.stride == rhi::level_stride(level) && s.stride_zoom == 1 && s.gpu_coarser == (press && level > 0) &&
+               !s.drag_budget && !s.memory_budget && s.tiles_waiting == 0;
+      return s.soundings_lod == level && s.soundings_drawn == kLodSoundings[level] &&
+             s.soundings_stride == 12 * rhi::level_stride(level) && s.soundings_shown == 1000;
+    };
+    /* what frames drew: the map's strides, the soundings' levels */
+    const auto seen = [map](const std::vector<mbvq::RenderStats> &frames) {
+      std::vector<int> out;
+      for (const mbvq::RenderStats &s : frames)
+        out.push_back(map ? s.stride : s.soundings_lod);
+      return list(out);
+    };
+    const std::string what = map ? "the strides " : "the levels ";
+    std::vector<mbvq::RenderStats> still, dragged, constant, mixed;
+    for (int f = 0; f < 3; f++)
+      still.push_back(call(false, 12.0, 16.0));
+    const int lod_before = renderer.stats().lod_frames;
+    for (const int level : falling)
+      dragged.push_back(call(true, 12.0 * std::pow(0.8, level), 16.0));
+    const int lod_press = renderer.stats().lod_frames - lod_before;
+    const mbvq::RenderStats released = call(false, 12.0, 16.0);
+    for (int f = 0; f < 6; f++)
+      constant.push_back(call(true, 12.0, 16.0));
+    call(false, 12.0, 16.0);
+    for (int f = 0; f < 4; f++)
+      mixed.push_back(f == 2 ? call(true, -1.0, -1.0) : call(true, 12.0, 16.0));
+    call(false, -1.0, -1.0);
+    const mbvq::RenderStats end = renderer.stats();
+
+    check(one && end.wait_frames == faked,
+          name + ": after a priming call each of " + std::to_string(calls) + " calls draws one frame, and each of " +
+              "the " + std::to_string(faked) + " frames with fake times is measured once (" +
+              std::to_string(end.wait_frames) + ")");
+    bool ok = true;
+    for (const mbvq::RenderStats &s : still)
+      ok = ok && s.gpu_rule && at(s, 0, false);
+    check(ok, name + ": three frames with slow fake times (wait 12 ms, total 16 ms) but no press draw " + what +
+                  seen(still) + (map ? ", passing over no level" : ", all 1000 soundings") +
+                  ": the fallback acts only during a press");
+    ok = map || lod_press == 8;
+    std::vector<int> coarser, counts, strides;
+    for (size_t f = 0; f < dragged.size(); f++) {
+      ok = ok && dragged[f].gpu_rule && at(dragged[f], falling[f], true);
+      coarser.push_back(dragged[f].gpu_coarser ? 1 : 0);
+      counts.push_back(dragged[f].soundings_drawn);
+      strides.push_back(dragged[f].soundings_stride);
+    }
+    check(ok, name + ": a press with total 16 ms and a wait of 12 x 0.8^level ms draws " + what + seen(dragged) +
+                  ", two GPU-slow frames marking each level (each step cuts the wait by 20 %); " +
+                  (map ? "from the third frame it passes over the marked levels (gpu_coarser " + list(coarser) +
+                             "), never at stride 128"
+                       : list(counts) + " soundings, their positions " + list(strides) + " bytes apart, up to the "
+                             "coarsest level, 4; " + std::to_string(lod_press) + " frames counted at a level above 0"));
+    check(at(released, 0, false),
+          name + ": the release's frame draws " +
+              (map ? "stride 1 again (" + std::to_string(released.stride) + "), passing over no level"
+                   : "level 0 again (" + std::to_string(released.soundings_lod) + "), " +
+                         std::to_string(released.soundings_drawn) + " soundings, their positions " +
+                         std::to_string(released.soundings_stride) + " bytes apart"));
+    ok = true;
+    for (size_t f = 0; f < constant.size(); f++)
+      ok = ok && constant[f].gpu_rule && at(constant[f], one_step[f], true);
+    check(ok, name + ": a second press starts at " + (map ? "stride 1" : "level 0") + ", and constant fake times " +
+                  "(wait 12 ms, total 16 ms) take it one step only, since the step cuts no wait (the gain check): " +
+                  what + seen(constant));
+    ok = mixed[0].gpu_rule && mixed[1].gpu_rule && !mixed[2].gpu_rule && mixed[3].gpu_rule;
+    std::vector<int> rules;
+    for (size_t f = 0; f < mixed.size(); f++) {
+      ok = ok && at(mixed[f], per_frame[f], true);
+      rules.push_back(mixed[f].gpu_rule ? 1 : 0);
+    }
+    check(ok, name + ": in a third press, two GPU-slow frames with fake times, a frame without them and one with " +
+                  "them again draw " + what + seen(mixed) + ": the frame without them " +
+                  (map ? "stride 1" : "level 0") +
+                  ", since on Null the fallback acts only with fake times, checked in each frame (gpu_rule " +
+                  list(rules) + "), and the press's mark holds for the frame after it");
+  }
+  int error = MB_ERROR_NO_ERROR;
+  mb3dsoundings_end(0, &error);
+  close_instance(instance);
+}
+
+/* 7c with a Null QRhi: the map's GPU-time fallback when the zoom moves to
+   another stride during a press, with fake times (wait 12 ms and total
+   16 ms GPU-slow, wait 6 ms and total 10 ms not), on the 300 x 200 grid at
+   2400 x 1800 where 6b's drag budget never binds. Each stride of the zoom
+   has a rule of its own, and the frame passes over the marks of its own
+   zoom only. After a zoom in, two GPU-slow frames at the zoom's finer stride
+   mark it there, and the next frame draws the stride after it. After a zoom
+   out, the zoom's own stride, coarser than the one marked before, is judged
+   by its own frames at the new zoom: 0.96 x the marked stride's wait,
+   measured at the old zoom, would otherwise stop it there. Under constant
+   waits each zoom marks its own stride in its own two frames, steps once
+   and stops, whatever the other zooms do: with the zoom changing every
+   second frame, each zoom's stride doubles once, where a rule that forgot
+   its reference at each change would walk to stride 128; the same from the
+   default view's stride 1, and in a zoom in from the stride of the zoom 64,
+   where a stop at one zoom does not block the next. */
+void null_gpu_zoom() {
+  Grid grid;
+  grid.columns = 300;
+  grid.rows = 200;
+  size_t instance = MBV_NO_WINDOW;
+  check(open_grid(grid, nullptr, &instance), "7c Null: a 300 x 200 grid opens for the zoom during a press");
+  mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+  mbvq::RenderOptions options;
+  options.prep_budget_ms = 1000.0;
+  options.node_ns_colour = 0.0;
+  options.node_ns_z = 0.0;
+  /* the default view's zoom (stride 1), and the 2D zooms at which the
+     stride of the zoom is 2, 4, 16, 32 and 64, searched outwards from it */
+  const double zoom1 = 1.0;
+  camera_2d(instance, zoom1, 0.0, 0.0);
+  renderer.render_map(instance, 2400, 1800, options, nullptr);
+  const int stride1 = renderer.stats().stride_zoom;
+  double zoom2 = -1.0, zoom4 = -1.0, zoom16 = -1.0, zoom32 = -1.0, zoom64 = -1.0;
+  for (double z = 1.0; z > 1.0e-4 && zoom64 < 0.0; z *= 0.8) {
+    camera_2d(instance, z, 0.0, 0.0);
+    renderer.render_map(instance, 2400, 1800, options, nullptr);
+    const int stride = renderer.stats().stride_zoom;
+    double *found = stride == 2 ? &zoom2 : stride == 4 ? &zoom4 : stride == 16 ? &zoom16 : stride == 32 ? &zoom32
+                  : stride == 64 ? &zoom64 : nullptr;
+    if (found != nullptr && *found < 0.0)
+      *found = z;
+  }
+  bool one = stride1 == 1 && zoom2 > 0.0 && zoom4 > 0.0 && zoom16 > 0.0 && zoom32 > 0.0 && zoom64 > 0.0;
+  /* a call of one frame with these fake times, pressed or not */
+  const auto call = [&](bool press, double wait, double total) {
+    options.drag = press;
+    options.gpu_wait_ms = wait;
+    options.gpu_total_ms = total;
+    one = renderer.render_map(instance, 2400, 1800, options, nullptr) && one && renderer.last_frames() == 1 &&
+          !renderer.stats().failed;
+    return renderer.stats();
+  };
+  /* a press: frames at the first zoom, then at the second */
+  const auto press = [&](double first, double second, double wait_after) {
+    camera_2d(instance, first, 0.0, 0.0);
+    call(false, -1.0, -1.0);
+    std::vector<mbvq::RenderStats> frames;
+    frames.push_back(call(true, 12.0, 16.0));
+    frames.push_back(call(true, 12.0, 16.0));
+    frames.push_back(call(true, 6.0, 10.0));
+    camera_2d(instance, second, 0.0, 0.0);
+    frames.push_back(call(true, wait_after, 16.0));
+    frames.push_back(call(true, wait_after, 16.0));
+    frames.push_back(call(true, 6.0, 10.0));
+    call(false, -1.0, -1.0);
+    return frames;
+  };
+  /* what the frames drew, against the strides, the strides of the zoom and
+     the passed-over flags expected */
+  const auto drew = [](const std::vector<mbvq::RenderStats> &frames, const std::vector<int> &strides,
+                       const std::vector<int> &zooms, const std::vector<int> &coarser, std::string *seen) {
+    bool ok = frames.size() == strides.size();
+    std::vector<int> s, z, c;
+    for (size_t f = 0; f < frames.size(); f++) {
+      s.push_back(frames[f].stride);
+      z.push_back(frames[f].stride_zoom);
+      c.push_back(frames[f].gpu_coarser ? 1 : 0);
+      ok = ok && f < strides.size() && frames[f].stride == strides[f] && frames[f].stride_zoom == zooms[f] &&
+           (frames[f].gpu_coarser ? 1 : 0) == coarser[f] && frames[f].gpu_rule && !frames[f].drag_budget &&
+           !frames[f].memory_budget && frames[f].tiles_waiting == 0;
+    }
+    *seen = "strides " + list(s) + ", strides of the zoom " + list(z) + ", gpu_coarser " + list(c);
+    return ok;
+  };
+  std::string in_seen, out_seen;
+  const bool in = drew(press(zoom4, zoom2, 12.0), {4, 4, 8, 2, 2, 4}, {4, 4, 4, 2, 2, 2}, {0, 0, 1, 0, 0, 1}, &in_seen);
+  const bool out =
+      drew(press(zoom2, zoom4, 11.5), {2, 2, 4, 4, 4, 8}, {2, 2, 2, 4, 4, 4}, {0, 0, 1, 0, 0, 1}, &out_seen);
+  check(one && in,
+        "7c Null map: a press that zooms in after marking the stride of the zoom (4): two GPU-slow frames at the "
+        "new zoom's stride 2, with the wait that marked stride 4, mark it there, and the next frame draws stride 4, "
+        "stride 4's mark belonging to the other zoom (" + in_seen + ")");
+  check(one && out,
+        "7c Null map: a press that zooms out after marking the stride of the zoom (2): the new zoom's own stride 4, "
+        "GPU-slow with 0.96 x the wait that marked stride 2, is judged by its own frames, which mark it, and the "
+        "next frame draws stride 8 (" + out_seen + ")");
+  /* the zoom's stride changing every second frame, 2 and 4, under constant
+     fake times (12 ms, total 16 ms) */
+  camera_2d(instance, zoom2, 0.0, 0.0);
+  call(false, -1.0, -1.0);
+  std::vector<mbvq::RenderStats> flips;
+  for (int f = 0; f < 12; f++) {
+    camera_2d(instance, f / 2 % 2 == 0 ? zoom2 : zoom4, 0.0, 0.0);
+    flips.push_back(call(true, 12.0, 16.0));
+  }
+  call(false, -1.0, -1.0);
+  std::string flip_seen;
+  const bool flipped = drew(flips, {2, 2, 4, 4, 4, 4, 8, 8, 4, 4, 8, 8}, {2, 2, 4, 4, 2, 2, 4, 4, 2, 2, 4, 4},
+                            {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1}, &flip_seen);
+  check(one && flipped,
+        "7c Null map: a press whose stride of the zoom changes every second frame (2, 4) under constant fake times: "
+        "each zoom marks its own stride in its own two frames, steps once and stops there, so the zoom of 2 draws "
+        "4 and the zoom of 4 draws 8, never walking the levels (" + flip_seen + ")");
+  /* the same two cases from the default view's stride 1 */
+  std::string first_seen, first_flip_seen;
+  const bool first_out =
+      drew(press(zoom1, zoom2, 11.5), {1, 1, 2, 2, 2, 4}, {1, 1, 1, 2, 2, 2}, {0, 0, 1, 0, 0, 1}, &first_seen);
+  camera_2d(instance, zoom1, 0.0, 0.0);
+  call(false, -1.0, -1.0);
+  std::vector<mbvq::RenderStats> first_flips;
+  for (int f = 0; f < 12; f++) {
+    camera_2d(instance, f / 2 % 2 == 0 ? zoom1 : zoom2, 0.0, 0.0);
+    first_flips.push_back(call(true, 12.0, 16.0));
+  }
+  call(false, -1.0, -1.0);
+  const bool first_flipped = drew(first_flips, {1, 1, 2, 2, 2, 2, 4, 4, 2, 2, 4, 4},
+                                  {1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2}, {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1},
+                                  &first_flip_seen);
+  check(one && first_out && first_flipped,
+        "7c Null map: from the default view's stride of the zoom 1, a zoom out after marking stride 1 is judged at "
+        "the new zoom (" + first_seen + "), and with the zoom changing every second frame between 1 and 2 the zoom "
+        "of 1 draws 2 and the zoom of 2 draws 4 (" + first_flip_seen + ")");
+  /* a zoom in from the stride of the zoom 64 under constant fake times,
+     three frames at 64 and five at each of 32 and 16: at each zoom two
+     frames mark its own stride, the step after them is judged and stops
+     that zoom, so its later frames keep that stride, and a stop at one zoom
+     does not block the next (a rule that kept its marks for the whole press
+     and never judged a step into the coarsest level would draw stride 128
+     at every zoom) */
+  camera_2d(instance, zoom64, 0.0, 0.0);
+  call(false, -1.0, -1.0);
+  std::vector<mbvq::RenderStats> sweep;
+  for (const double z : {zoom64, zoom64, zoom64, zoom32, zoom32, zoom32, zoom32, zoom32, zoom16, zoom16, zoom16,
+                         zoom16, zoom16}) {
+    camera_2d(instance, z, 0.0, 0.0);
+    sweep.push_back(call(true, 12.0, 16.0));
+  }
+  call(false, -1.0, -1.0);
+  std::string sweep_seen;
+  const bool swept = drew(sweep, {64, 64, 128, 32, 32, 64, 64, 64, 16, 16, 32, 32, 32},
+                          {64, 64, 64, 32, 32, 32, 32, 32, 16, 16, 16, 16, 16},
+                          {0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1}, &sweep_seen);
+  check(one && swept,
+        "7c Null map: a zoom in from the stride of the zoom 64 under constant fake times: at each zoom two frames "
+        "mark its own stride, the step after them is judged and stops that zoom, so its later frames keep that "
+        "stride, one past its own, and a stop at one zoom does not block the next (" + sweep_seen + ")");
+  close_instance(instance);
+}
+
+/*--------------------------------------------------------------------*/
 int test_render_null() {
   mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
   check(renderer.valid(), std::string("a Null QRhi (") + renderer.backend_name() + ")");
@@ -7682,6 +8635,12 @@ int test_render_null() {
   /* 7b: the profile mode after fills that hide it, and the profile lines
      of soundings from three files */
   null_profile_mode();
+  /* 7c: the 3D soundings' levels of detail, and the GPU-time fallback of
+     the map and of the soundings with fake times */
+  null_lod_levels();
+  null_gpu_fallback();
+  /* 7c: the map's fallback when the zoom moves to another stride in a press */
+  null_gpu_zoom();
   return result();
 }
 
@@ -8660,6 +9619,419 @@ void metal_profile() {
   close_instance(instance);
 }
 
+/*--------------------------------------------------------------------*/
+/* 7c on Metal: the 3D soundings at the levels of detail of the GPU-time
+   fallback, in pixels */
+
+/* metal_soundings()'s sparse set handed over again: 8 pings of 10 beams
+   about 35 px apart seen from above, beam colours and flag reasons varied,
+   flagged sounding 0 above sounding 11 (same place, shallower), sounding 79
+   flagged alone */
+bool lod_sparse_set() {
+  make_sdg(8, 10, 0);
+  const unsigned char flags[] = {MB_FLAG_FLAG | MB_FLAG_MANUAL, MB_FLAG_FLAG | MB_FLAG_FILTER,
+                                 MB_FLAG_FLAG | MB_FLAG_SONAR, MB_FLAG_FLAG | MB_FLAG_FILTER2};
+  for (size_t i = 0; i < sdg_storage.size(); i++) {
+    sdg_storage[i].beamcolor = static_cast<int>(i % 8);
+    if (i % 9 == 4)
+      sdg_storage[i].beamflag = static_cast<char>(flags[(i / 9) % 4]);
+  }
+  sdg_storage[0].beamflag = static_cast<char>(MB_FLAG_FLAG | MB_FLAG_MANUAL);
+  sdg_storage[0].x = sdg_storage[11].x;
+  sdg_storage[0].y = sdg_storage[11].y;
+  sdg_storage[0].z = sdg_storage[11].z + 10.0;
+  sdg_storage[79].beamflag = static_cast<char>(MB_FLAG_FLAG | MB_FLAG_MANUAL);
+  return open_sdg();
+}
+
+/* 7c-4: the 3D soundings at a forced level of detail (RenderOptions::
+   soundings_lod: level k draws every 2^k-th sounding, by its index in the
+   array) on two Metal renderers of their own, points and forced quads, both
+   with soundings_chunk 27: the 80 soundings of the sparse set take three
+   chunks of 27, 27 and 26 from soundings 0, 27 and 54, so that chunk 1
+   begins off the stride at every level (its phase is 1, 1, 5 and 5
+   soundings for k = 2, 4, 8 and 16). The chunk is read when the soundings
+   are allocated and point_quads when the renderer is made, so
+   metal_soundings()'s renderer could take neither; every call gives both,
+   in case a renderer is made again. A level draws exactly the soundings
+   whose index is a multiple of 2^k, each at its place (40, 20, 10 and 5 of
+   the 80; 41, 21, 12 and 6 with every chunk drawn from its first
+   sounding); the profile lines, the bounding box, the information
+   highlight and the grab rectangle are drawn whole at every level (D11);
+   the frame after a camera press's release draws every sounding again. */
+void metal_lod() {
+  const int W = 400, H = 300;
+  const int n = 80;
+  const int drawn_at[5] = {80, 40, 20, 10, 5};
+  mbvq::OffscreenRenderer points(mbvq::OffscreenRenderer::Api::Metal);
+  mbvq::OffscreenRenderer quads(mbvq::OffscreenRenderer::Api::Metal);
+  mbvq::OffscreenRenderer *const renderers[2] = {&points, &quads};
+  const char *const kinds[2] = {"points", "forced quads"};
+  const auto lod_options = [](int r, int level) {
+    mbvq::RenderOptions options;
+    options.soundings_chunk = 27;
+    options.point_quads = r == 1;
+    options.soundings_lod = level;
+    return options;
+  };
+  /* the places and colours of the soundings as the core gives them now */
+  std::vector<float> xyz;
+  std::vector<unsigned char> rgba;
+  const auto read_soundings = [&]() {
+    rhi::SoundingsFrame reader;
+    return reader.positions(n, &xyz) && reader.colours(n, &rgba) && xyz.size() >= 3u * n && rgba.size() >= 4u * n;
+  };
+  int error = MB_ERROR_NO_ERROR;
+  const bool opened = lod_sparse_set();
+  sdg_camera(90.0f, 0.0f, 1.0137f, 0.00123f, -0.00431f);
+
+  /* The pictures of levels 0 to 4, flagged soundings shown and not: the
+     place of each sounding (that of 11 for sounding 0, drawn first and
+     nearer) holds its colour where its index is a multiple of 2^k and it is
+     drawn (alpha), else the background; the 3 x 3 px squares of those
+     soundings are the picture's only coloured pixels (a sounding of the
+     white beam colour shows as the background). */
+  for (int r = 0; r < 2; r++) {
+    mbvq::OffscreenRenderer &renderer = *renderers[r];
+    bool counted = opened, placed = opened;
+    std::string drawn, strides, where;
+    int places = 0, squares = 0;
+    for (int flagged = 1; flagged >= 0; flagged--) {
+      sdg_view(MBS_VIEW_COLOR_FLAG, flagged != 0, MBS_VIEW_PROFILES_NONE, false);
+      for (int level = 0; level <= 4; level++) {
+        const size_t k = static_cast<size_t>(1) << level;
+        const int lod_before = renderer.stats().lod_frames;
+        QImage image;
+        const bool ok = renderer.render_soundings(W, H, lod_options(r, level), &image) && read_soundings();
+        const mbvq::RenderStats s = renderer.stats();
+        counted = counted && ok && s.soundings == n && s.sounding_chunks == 3 && s.soundings_lod == level &&
+                  s.soundings_drawn == drawn_at[level] && s.soundings_stride == 12 * static_cast<int>(k) &&
+                  s.point_quads == (r == 1) &&
+                  s.lod_frames - lod_before == (level > 0 ? renderer.last_frames() : 0);
+        if (flagged == 1) {
+          drawn += (level > 0 ? " " : "") + std::to_string(s.soundings_drawn);
+          strides += (level > 0 ? " " : "") + std::to_string(s.soundings_stride);
+        }
+        placed = placed && ok;
+        if (!ok)
+          continue;
+        int coloured = 0;
+        for (size_t i = 1; i < static_cast<size_t>(n); i++) {
+          const size_t at = i == 11 && rgba[3] != 0 ? 0 : i;
+          const bool here = rgba[4 * at + 3] != 0 && at % k == 0;
+          const uint32_t expected = here ? rgb_bytes(&rgba[4 * at]) : kWhite;
+          const std::array<double, 2> w = sdg_window(xyz, i, W, H);
+          const uint32_t got = at_window(image, w[0], w[1]);
+          if (got != expected && where.size() < 120)
+            where += "level " + std::to_string(level) + (flagged != 0 ? " " : " hidden ") + std::to_string(i) + ":" +
+                     colour_name(got) + " ";
+          placed = placed && got == expected;
+          coloured += expected != kWhite ? 1 : 0;
+          places++;
+        }
+        const int pixels = non_white(image);
+        if (pixels != 9 * coloured && where.size() < 120)
+          where += "level " + std::to_string(level) + (flagged != 0 ? ": " : " hidden: ") + std::to_string(pixels) +
+                   " px for " + std::to_string(coloured) + " squares ";
+        placed = placed && pixels == 9 * coloured;
+        squares += coloured;
+      }
+    }
+    check(counted && placed,
+          std::string("7c Metal: forced levels 0 to 4 on 80 soundings in 3 chunks of 27, drawn as ") + kinds[r] +
+              ", draw " + drawn + " soundings (41 21 12 6 at levels 1 to 4 if every chunk were drawn from its first "
+              "sounding) at position strides of " + strides + " bytes, and each picture holds exactly the soundings "
+              "whose index is a multiple of 1, 2, 4, 8 or 16, in their colours at their places, flagged soundings "
+              "shown and hidden (" + std::to_string(places) + " places; " + std::to_string(squares) +
+              " coloured squares of 9 px, no other coloured pixel)" +
+              (where.empty() ? std::string() : "; differ: " + where));
+  }
+
+  /* The profile lines at levels 1 to 4 as metal_soundings() checks them at
+     level 0, with its expectations: within a ping black and red where the
+     core's pairs are, nothing between pings; at ratio 1 one pixel thick
+     from the index lists, at ratio 2 two pixels by the instanced quads;
+     x-major at azimuth 0, y-major at 90; counted across the middle of each
+     segment, about 17 px from the soundings at its ends. */
+  for (int r = 0; r < 2; r++) {
+    mbvq::OffscreenRenderer &renderer = *renderers[r];
+    int good = 0, bad = 0, frames_right = 0;
+    std::string wrong;
+    for (int level = 1; level <= 4; level++)
+      for (int view = 0; view < 4; view++) {
+        const int ratio = 1 + view % 2;
+        const float azimuth = view < 2 ? 0.0f : 90.0f;
+        sdg_camera(90.0f, azimuth, 1.0137f, 0.00123f, -0.00431f);
+        sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_ALL, false);
+        mbvq::RenderOptions options = lod_options(r, level);
+        options.pixel_ratio = ratio;
+        QImage image;
+        const bool drawn = renderer.render_soundings(W * ratio, H * ratio, options, &image);
+        const mbvq::RenderStats s = renderer.stats();
+        std::vector<uint32_t> black, red;
+        rhi::SoundingsFrame reader;
+        const bool read = drawn && reader.positions(n, &xyz) && reader.pairs(n, &black, &red);
+        const bool right = read && s.soundings_lod == level && s.soundings_drawn == drawn_at[level] &&
+                           s.profile_wide == (ratio == 2) &&
+                           (ratio == 1 ? s.profile_indices > 0 && s.profile_instances == 0
+                                       : s.profile_instances > 0 && s.profile_indices == 0);
+        frames_right += right ? 1 : 0;
+        if (!right && wrong.size() < 100)
+          wrong += "level " + std::to_string(level) + " ratio " + std::to_string(ratio) + " azimuth " +
+                   std::to_string(static_cast<int>(azimuth)) + ": statistics ";
+        if (!read)
+          continue;
+        std::vector<int> kind(static_cast<size_t>(n), 0);
+        for (size_t p = 0; p + 1 < black.size(); p += 2)
+          kind[black[p]] = 1;
+        for (size_t p = 0; p + 1 < red.size(); p += 2)
+          kind[red[p]] = 2;
+        for (size_t i = 1; i + 1 < static_cast<size_t>(n); i++) {
+          /* the middle of the segment from i to i + 1 */
+          const std::array<double, 2> a = sdg_window(xyz, i, W * ratio, H * ratio);
+          const std::array<double, 2> b = sdg_window(xyz, i + 1, W * ratio, H * ratio);
+          const double mx = 0.5 * (a[0] + b[0]), my = 0.5 * (a[1] + b[1]);
+          const uint32_t expected = kind[i] == 1 ? 0x000000u : kind[i] == 2 ? kRed : kWhite;
+          if (kind[i] == 0) {
+            good += at_window(image, mx, my) == kWhite;
+            bad += at_window(image, mx, my) != kWhite;
+            continue;
+          }
+          /* the line's pixels across it in the middle: as many as its width */
+          const bool xmajor = std::fabs(b[0] - a[0]) >= std::fabs(b[1] - a[1]);
+          int across = 0;
+          for (int d = -4 * ratio; d <= 4 * ratio; d++)
+            across += (xmajor ? at_window(image, mx, my + d) : at_window(image, mx + d, my)) == expected;
+          if (across == ratio && xmajor == (azimuth == 0.0f))
+            good++;
+          else {
+            bad++;
+            if (wrong.size() < 100)
+              wrong += "level " + std::to_string(level) + " ratio " + std::to_string(ratio) + " " + std::to_string(i) +
+                       ":" + std::to_string(across) + " ";
+          }
+        }
+      }
+    check(frames_right == 16 && bad == 0 && good > 0,
+          std::string("7c Metal: at levels 1 to 4 (") + kinds[r] + ", chunks of 27) the profile lines are drawn as "
+              "at level 0: at ratios 1 and 2 and azimuths 0 and 90 thin from the index lists or 2 px wide by the "
+              "instanced quads, black and red where the core's pairs are and nothing between pings (" +
+              std::to_string(good) + " places right in " + std::to_string(frames_right) + " of 16 frames" +
+              (wrong.empty() ? std::string() : "; wrong: " + wrong) + ")");
+  }
+
+  /* The bounding box and the information highlight on sounding 79, flagged
+     and not shown, so never drawn and the highlight shown at every level
+     (seen from above, at the box's corner): at levels 1 to 4 the picture
+     equals level 0's outside the squares of the soundings shown at level 0
+     (5 x 5 px around each place, the 3 x 3 px square and a pixel), the only
+     pixels where fewer soundings may differ. The highlight is cyan in the
+     flag colour mode. */
+  sdg_camera(90.0f, 0.0f, 1.0137f, 0.00123f, -0.00431f);
+  for (int r = 0; r < 2; r++) {
+    mbvq::OffscreenRenderer &renderer = *renderers[r];
+    const uint32_t kCyan = 0xffff00;
+    sdg_view(MBS_VIEW_COLOR_FLAG, false, MBS_VIEW_PROFILES_NONE, true);
+    mb3dsoundings.edit_mode = MBS_EDIT_INFO;
+    mb3dsoundings.last_sounding_defined = true;
+    mb3dsoundings.last_sounding_edited = 79;
+    QImage full;
+    bool drawn = renderer.render_soundings(W, H, lod_options(r, 0), &full) && read_soundings();
+    /* the squares of the soundings shown at level 0, by image row and column */
+    std::vector<char> masked(static_cast<size_t>(W) * H, 0);
+    int shown = 0;
+    for (size_t i = 0; drawn && i < static_cast<size_t>(n); i++) {
+      if (rgba[4 * i + 3] == 0)
+        continue;
+      shown++;
+      const std::array<double, 2> w = sdg_window(xyz, i, W, H);
+      const int cx = static_cast<int>(std::floor(w[0])), cy = static_cast<int>(std::floor(w[1]));
+      for (int y = cy - 2; y <= cy + 2; y++)
+        for (int x = cx - 2; x <= cx + 2; x++)
+          if (x >= 0 && x < W && y >= 0 && y < H)
+            masked[static_cast<size_t>(H - 1 - y) * W + x] = 1;
+    }
+    /* the highlight's pixels around the place of 79, and the pixels of the
+       box and the highlight outside the squares at level 0 */
+    const std::array<double, 2> w79 = drawn ? sdg_window(xyz, 79, W, H) : std::array<double, 2>{-10.0, -10.0};
+    const auto highlight = [&](const QImage &image) {
+      int cyan = 0;
+      for (int dy = -3; dy <= 3; dy++)
+        for (int dx = -3; dx <= 3; dx++)
+          cyan += at_window(image, w79[0] + dx, w79[1] + dy) == kCyan;
+      return cyan;
+    };
+    const int cyan_full = drawn ? highlight(full) : 0;
+    int decorations = 0;
+    for (int row = 0; drawn && row < H; row++)
+      for (int x = 0; x < W; x++)
+        decorations += masked[static_cast<size_t>(row) * W + x] == 0 && pixel_rgb(full, x, row) != kWhite;
+    int differ = 0, cyan_least = cyan_full;
+    bool levels = true;
+    for (int level = 1; drawn && level <= 4; level++) {
+      QImage image;
+      drawn = renderer.render_soundings(W, H, lod_options(r, level), &image);
+      levels = levels && renderer.stats().soundings_lod == level && renderer.stats().soundings_drawn == drawn_at[level];
+      for (int row = 0; drawn && row < H; row++)
+        for (int x = 0; x < W; x++)
+          differ +=
+              masked[static_cast<size_t>(row) * W + x] == 0 && pixel_rgb(image, x, row) != pixel_rgb(full, x, row);
+      cyan_least = drawn ? std::min(cyan_least, highlight(image)) : 0;
+    }
+    mb3dsoundings.edit_mode = MBS_EDIT_TOGGLE;
+    mb3dsoundings.last_sounding_defined = false;
+    check(drawn && levels && differ == 0 && cyan_least > 0 && decorations > cyan_full,
+          std::string("7c Metal: with flagged soundings hidden, the bounding box and the information highlight on "
+                      "flagged sounding 79 are drawn at levels 1 to 4 (") +
+              kinds[r] + ") as at level 0: " + std::to_string(differ) + " px differ outside the squares of the " +
+              std::to_string(shown) + " soundings shown at level 0 (" + std::to_string(decorations) +
+              " px of the box and the highlight there; at least " + std::to_string(cyan_least) +
+              " cyan px of the highlight at every level)");
+  }
+
+  /* The release frame (plan 6.8: it equals a still frame, 0 px), all
+     profiles and the box shown: a still picture A; three frames of a camera
+     press (RenderOptions::drag) with slow fake times (total 16 ms, wait 12
+     ms: the fallback marks level 0 after two), the third at level 1 and
+     unlike A; the frame after the release (drag off, the fake times kept)
+     at level 0 with every sounding, 0 px from A; then a forced level 4 and
+     the fallback's level again (-1): 0 px from A. Before, the still frame's
+     wait is measured: Metal waits for the GPU in endOffscreenFrame(), so
+     the fallback can act there without a fake (gpu_rule), and each frame
+     measured counts. */
+  sdg_camera(90.0f, 0.0f, 1.0137f, 0.00123f, -0.00431f);
+  sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_ALL, true);
+  bool measured = true;
+  std::string waits;
+  for (int r = 0; r < 2; r++) {
+    mbvq::OffscreenRenderer &renderer = *renderers[r];
+    const mbvq::RenderOptions plain = lod_options(r, -1);
+    const int wait_frames = renderer.stats().wait_frames;
+    QImage still;
+    bool drawn = renderer.render_soundings(W, H, plain, &still);
+    const mbvq::RenderStats a = renderer.stats();
+    measured = measured && drawn && a.gpu_rule && a.wait_ms > 0.0 && a.frame_ms >= a.wait_ms &&
+               a.wait_frames - wait_frames == renderer.last_frames() && renderer.last_frames() > 0;
+    waits += std::string(r > 0 ? "; " : "") + kinds[r] + ": gpu_rule " + (a.gpu_rule ? "true" : "false") + ", " +
+             text("%.3f", a.wait_ms) + " of " + text("%.3f", a.frame_ms) + " ms, wait_frames +" +
+             std::to_string(a.wait_frames - wait_frames) + " for " + std::to_string(renderer.last_frames()) +
+             (renderer.last_frames() == 1 ? " frame" : " frames");
+
+    mbvq::RenderOptions press = plain;
+    press.drag = true;
+    press.gpu_total_ms = 16.0;
+    press.gpu_wait_ms = 12.0;
+    QImage pressed;
+    std::string levels;
+    for (int f = 0; f < 3; f++) {
+      drawn = renderer.render_soundings(W, H, press, &pressed, 1) && drawn;
+      levels += (f > 0 ? " " : "") + std::to_string(renderer.stats().soundings_lod);
+    }
+    const mbvq::RenderStats third = renderer.stats();
+    mbvq::RenderOptions release = press;
+    release.drag = false;
+    QImage released;
+    drawn = renderer.render_soundings(W, H, release, &released, 1) && drawn;
+    const mbvq::RenderStats after = renderer.stats();
+    mbvq::RenderOptions four = plain;
+    four.soundings_lod = 4;
+    QImage forced, again;
+    drawn = renderer.render_soundings(W, H, four, &forced, 1) && drawn;
+    const int forced_level = renderer.stats().soundings_lod;
+    drawn = renderer.render_soundings(W, H, plain, &again, 1) && drawn;
+    const mbvq::RenderStats back = renderer.stats();
+    const int unlike = differing(pressed, still), after_release = differing(released, still);
+    const int unlike_forced = differing(forced, still), after_forced = differing(again, still);
+    check(drawn && levels == "0 0 1" && third.soundings_drawn == 40 && unlike > 0 && after.soundings_lod == 0 &&
+              after.soundings_drawn == n && after_release == 0 && forced_level == 4 && unlike_forced > 0 &&
+              back.soundings_lod == 0 && back.soundings_drawn == n && after_forced == 0,
+          std::string("7c Metal: the release frame (") + kinds[r] + ", all profiles and the box): three frames of "
+              "a camera press with slow fake times (total 16 ms, wait 12 ms) at levels " + levels + ", the third "
+              "with " + std::to_string(third.soundings_drawn) + " soundings and " + std::to_string(unlike) +
+              " px unlike the still picture; the frame after the release at level " +
+              std::to_string(after.soundings_lod) + " with " + std::to_string(after.soundings_drawn) + " of 80, " +
+              std::to_string(after_release) + " px from the still picture; forced level 4 (" +
+              std::to_string(unlike_forced) + " px unlike), then the fallback's level again: " +
+              std::to_string(after_forced) + " px from it");
+  }
+  check(measured, "7c Metal: a soundings frame without fake times is measured, since Metal waits for the GPU in "
+                  "endOffscreenFrame(): the fallback can act (gpu_rule), the wait lies above 0 and within the frame's "
+                  "total, and wait_frames rises by the frames drawn (" + waits + ")");
+
+  /* the grab rectangle, drawn with the projection alone, at levels 1 to 4
+     as metal_soundings() counts it at level 0: at its window corners under
+     a rotated camera, nothing inside */
+  {
+    sdg_camera(35.0f, 125.0f, 1.3f, 0.05f, -0.05f);
+    /* no sounding yellow */
+    for (struct mb3dsoundings_sounding_struct &sounding : sdg_storage)
+      sounding.beamcolor = MBV_COLOR_BLACK;
+    sdg_view(MBS_VIEW_COLOR_FLAG, false, MBS_VIEW_PROFILES_NONE, false);
+    mbvq_c_soundings_resize(W, H);
+    mb3dsoundings.edit_mode = MBS_EDIT_GRAB;
+    mb3dsoundings.button1down = true;
+    mb3dsoundings.grab_start_defined = true;
+    mb3dsoundings.grab_end_defined = true;
+    mb3dsoundings.grab_start_x = 101;
+    mb3dsoundings.grab_start_y = 77;
+    mb3dsoundings.grab_end_x = 287;
+    mb3dsoundings.grab_end_y = 203;
+    const uint32_t kYellow = 0x00ffff;
+    int frames_right = 0;
+    int xmin = W, xmax = -1, ymin = H, ymax = -1;
+    std::string wrong;
+    for (int r = 0; r < 2; r++)
+      for (int level = 1; level <= 4; level++) {
+        QImage image;
+        const bool drawn = renderers[r]->render_soundings(W, H, lod_options(r, level), &image);
+        int left = 0, right = 0, bottom = 0, top = 0, inner = 0;
+        int x0 = W, x1 = -1, y0 = H, y1 = -1;
+        for (int row = 0; drawn && row < H; row++)
+          for (int x = 0; x < W; x++) {
+            if (pixel_rgb(image, x, row) != kYellow)
+              continue;
+            const int y = H - 1 - row;
+            x0 = std::min(x0, x);
+            x1 = std::max(x1, x);
+            y0 = std::min(y0, y);
+            y1 = std::max(y1, y);
+            left += std::abs(x - 101) <= 2;
+            right += std::abs(x - 287) <= 2;
+            bottom += std::abs(y - 77) <= 2;
+            top += std::abs(y - 203) <= 2;
+            inner += x > 104 && x < 284 && y > 80 && y < 200;
+          }
+        const bool ok = drawn && renderers[r]->stats().soundings_lod == level && left > 3 * 100 && right > 3 * 100 &&
+                        bottom > 3 * 150 && top > 3 * 150 && inner == 0 && x0 >= 99 && x1 <= 289 && y0 >= 75 &&
+                        y1 <= 205;
+        frames_right += ok ? 1 : 0;
+        if (!ok && wrong.size() < 100)
+          wrong += std::string(kinds[r]) + " level " + std::to_string(level) + ": " +
+                   (x1 < 0 ? std::string("no yellow")
+                           : std::to_string(x0) + " " + std::to_string(y0) + " to " + std::to_string(x1) + " " +
+                                 std::to_string(y1)) +
+                   " ";
+        xmin = std::min(xmin, x0);
+        xmax = std::max(xmax, x1);
+        ymin = std::min(ymin, y0);
+        ymax = std::max(ymax, y1);
+      }
+    mb3dsoundings.button1down = false;
+    mb3dsoundings.grab_start_defined = false;
+    mb3dsoundings.grab_end_defined = false;
+    mb3dsoundings.edit_mode = MBS_EDIT_TOGGLE;
+    check(frames_right == 8,
+          "7c Metal: at levels 1 to 4 (points and forced quads) the grab rectangle (3 px, the projection alone) "
+          "lies at its window corners 101 77 287 203 under a rotated camera, as at level 0 (" +
+              std::to_string(frames_right) + " of 8 frames; " +
+              (xmax < 0 ? std::string("no yellow")
+                        : "yellow from " + std::to_string(xmin) + " " + std::to_string(ymin) + " to " +
+                              std::to_string(xmax) + " " + std::to_string(ymax)) +
+              (wrong.empty() ? std::string() : "; wrong: " + wrong) + ")");
+  }
+  mb3dsoundings_end(0, &error);
+}
+
 int test_render_metal(const char *save) {
   mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Metal);
   if (!renderer.valid()) {
@@ -8884,6 +10256,10 @@ int test_render_metal(const char *save) {
   metal_marker_runs();
   metal_contours();
   metal_soundings();
+  /* 7c: the 3D soundings at the levels of detail of the GPU-time fallback:
+     every 2^k-th sounding at its place, the decorations whole, the release
+     frame equal to a still frame */
+  metal_lod();
   metal_profile();
   return result();
 }
@@ -8960,6 +10336,12 @@ void print_create_time(QWidget *view, const char *what) {
   if (view != nullptr)
     std::printf("info\tcreate()\t%s: %.2f ms\n", what, mbvq::view_stats(view).create_ms);
 }
+
+/* 7c: the hook of this test's application (TestApplication, defined with
+   the bench below), called after each event it delivered, so that a test
+   sees the end of a paint (an event filter sees only its beginning); an
+   empty one: none */
+void set_delivered(std::function<void(const QObject *, QEvent::Type)> hook);
 
 int test_display(bool mode3d, const char *grdfile, const char *save) {
   Grid grid;
@@ -9046,6 +10428,77 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
           "a shading drag: frames within the drag budget (" + text("%.1f", during.budget_ms) +
               " ms, stride " + std::to_string(during.stride) + "); after the release a frame at the stride of the "
               "zoom (" + std::to_string(after.stride) + ") without it");
+  }
+
+  /* 7c: the map's GPU-time fallback in a window, under the hook's fake wait
+     of 15 ms (T or more, so that every frame's total exceeds T): a pan with
+     the middle button whose frames are GPU-slow where their measured rest
+     (frame - wait) stays under T; two such frames at a stride mark it, and
+     the next frames pass over it (gpu_coarser). Then a release and a new
+     press sent back to back, with no frame between: the view ends the drag
+     in its renderer at the release, so the new press starts afresh, and
+     its first frame passes over no level. Where the rests stay at T or more
+     (a slow composition) the rule stays inert: an info line. */
+  {
+    std::vector<mbvq::RenderStats> frames;
+    int last = mbvq::view_stats(view).frames;
+    const QMetaObject::Connection submitted =
+        QObject::connect(rhi_widget, &QRhiWidget::frameSubmitted, rhi_widget, [&] {
+          const mbvq::RenderStats s = mbvq::view_stats(view);
+          if (s.frames > last) {
+            last = s.frames;
+            frames.push_back(s);
+          }
+        });
+    const auto send = [&](QEvent::Type type, const QPointF &at, Qt::MouseButton button, Qt::MouseButtons buttons) {
+      QMouseEvent event(type, at, view->mapToGlobal(at), button, buttons, Qt::NoModifier);
+      QApplication::sendEvent(view, &event);
+    };
+    /* a motion with the middle button down, and the frame it brings */
+    const auto pan = [&](const QPointF &at) {
+      const size_t n = frames.size();
+      send(QEvent::MouseMove, at, Qt::NoButton, Qt::MiddleButton);
+      timer.restart();
+      while (frames.size() == n && timer.elapsed() < 3000)
+        spin(10);
+      return frames.size() > n;
+    };
+    mbvq_c_set_mouse_mode(instance, MBV_MOUSE_MOVE);
+    mbvq::set_gpu_wait(view, 15.0);
+    spin(300);
+    bool panned = true;
+    send(QEvent::MouseButtonPress, centre, Qt::MiddleButton, Qt::MiddleButton);
+    const size_t first = frames.size();
+    for (int m = 1; m <= 4; m++)
+      panned = pan(centre + QPointF(3.0 * m, 0.0)) && panned;
+    const size_t second = frames.size();
+    send(QEvent::MouseButtonRelease, centre + QPointF(12.0, 0.0), Qt::MiddleButton, Qt::NoButton);
+    send(QEvent::MouseButtonPress, centre + QPointF(12.0, 0.0), Qt::MiddleButton, Qt::MiddleButton);
+    const bool no_frame_between = frames.size() == second;
+    for (int m = 1; m <= 2; m++)
+      panned = pan(centre + QPointF(12.0 - 3.0 * m, 0.0)) && panned;
+    send(QEvent::MouseButtonRelease, centre + QPointF(6.0, 0.0), Qt::MiddleButton, Qt::NoButton);
+    spin(400);
+    mbvq::set_gpu_wait(view, -1.0);
+    QObject::disconnect(submitted);
+    bool marked = false;
+    std::string strides;
+    for (size_t i = first; i < frames.size(); i++) {
+      strides += std::string(i == first ? "" : i == second ? " | " : ", ") + std::to_string(frames[i].stride) +
+                 (frames[i].gpu_coarser ? "*" : "");
+      marked = marked || (i < second && frames[i].gpu_coarser);
+    }
+    if (!marked)
+      std::printf("info\t7c\tthe map's first press passed over no level (strides %s): the rule stayed inert, so the "
+                  "check below shows nothing\n",
+                  strides.c_str());
+    const bool fresh = frames.size() > second && !frames[second].gpu_coarser;
+    check(panned && no_frame_between && fresh,
+          "7c: a release and a new press of the map view sent back to back (no frame between: " +
+              std::string(no_frame_between ? "yes" : "no") + ") start a new drag: after the press before " +
+              (marked ? "passed over a marked level" : "passed over none (the rule inert)") +
+              ", the new press's first frame passes over none (strides " + strides +
+              ", * where a marked level was passed over, the new press after |)");
   }
 
   /* 6c: the overlays and contours of the batch, with the sizes scaled by the
@@ -9375,6 +10828,412 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
       QApplication::sendEvent(sview, &up);
       spin(200);
       check(sdg_edits == edits + 1, "6d: a click on a sounding after the first frame edits it");
+      /* 7c-7: the GPU-time fallback of the 3D soundings view in a window.
+         Its paints are timed from outside, as the bench times the map's
+         (FrameProbe): an event filter sees a paint begin, the application's
+         hook after the paint's delivery sees it end (set_delivered), and the
+         window's next submission (frameSubmitted, after the view's own
+         measurement) ends the frame, with the renderer's statistics then. */
+      {
+        struct PaintedFrame {
+          double paint = 0.0;      /* the paint event began (ms since the epoch of rhi::Clock) */
+          double painted = -1.0;   /* ... and ended */
+          double submitted = 0.0;  /* the window submitted the frame */
+          mbvq::RenderStats stats; /* the renderer's statistics then */
+        };
+        class PaintProbe : public QObject {
+         public:
+          explicit PaintProbe(QWidget *view) : view_(view) {}
+          bool eventFilter(QObject *object, QEvent *event) override {
+            if (object == view_ && event->type() == QEvent::Paint) {
+              paints++;
+              painting_ = true;
+              frame_ = PaintedFrame();
+              frame_.paint = rhi::milliseconds(rhi::Clock::now());
+            }
+            return QObject::eventFilter(object, event);
+          }
+          /* an event delivered (set_delivered): the end of a paint of the view */
+          void delivered(const QObject *receiver, QEvent::Type type) {
+            if (type == QEvent::Paint && painting_ && receiver == view_)
+              frame_.painted = rhi::milliseconds(rhi::Clock::now());
+          }
+          /* the window submitted a frame, after a paint of the view or without one */
+          void submitted() {
+            submissions++;
+            if (!painting_)
+              return;
+            painting_ = false;
+            frame_.submitted = rhi::milliseconds(rhi::Clock::now());
+            frame_.stats = mbvq::view_stats(view_);
+            frames.push_back(frame_);
+          }
+
+          std::vector<PaintedFrame> frames; /* the painted frames, in order */
+          int paints = 0;                   /* paint events of the view */
+          int submissions = 0;              /* submissions of its window */
+
+         private:
+          QWidget *view_;
+          bool painting_ = false;
+          PaintedFrame frame_;
+        };
+        PaintProbe probe(sview);
+        sview->installEventFilter(&probe);
+        set_delivered([&probe](const QObject *receiver, QEvent::Type type) { probe.delivered(receiver, type); });
+        QObject::connect(sview_rhi, &QRhiWidget::frameSubmitted, &probe, [&probe] { probe.submitted(); });
+        /* frame_after() waits up to timeout_ms for a painted frame after the
+           first n, quiet() until no frame came for 200 ms (at most 4 s) */
+        const auto frame_after = [&](size_t n, int timeout_ms) {
+          timer.restart();
+          while (probe.frames.size() <= n && timer.elapsed() < timeout_ms)
+            spin(20);
+          return probe.frames.size() > n;
+        };
+        const auto quiet = [&] {
+          for (int i = 0; i < 20; i++) {
+            const size_t n = probe.frames.size();
+            spin(200);
+            if (probe.frames.size() == n)
+              break;
+          }
+        };
+        const auto mouse = [sview](QEvent::Type type, const QPointF &where, Qt::MouseButton button,
+                                   Qt::MouseButtons buttons) {
+          QMouseEvent event(type, where, sview->mapToGlobal(where), button, buttons, Qt::NoModifier);
+          QApplication::sendEvent(sview, &event);
+        };
+        const int count = static_cast<int>(sdg_storage.size());
+        /* the soundings drawn at a level of detail: every 2^level-th */
+        const auto drawn_at = [count](int level) { return (count + (1 << level) - 1) >> level; };
+
+        /* 1. Without the hook, a painted frame: its render() begins inside
+           the paint; its wait (from the end of render() to the end of the
+           paint, in which QRhiWidget ends the offscreen frame and waits for
+           it) is above 0 and at most what is seen from outside; its total
+           lies between that wait and the time from the paint's start to the
+           submission seen here; it is measured once; and the fallback can
+           act on the APIs that wait for the GPU there (Metal, Vulkan and
+           Direct3D 12). */
+        quiet();
+        const mbvq::RenderStats unpainted = mbvq::view_stats(sview);
+        const size_t first_from = probe.frames.size();
+        sview->update();
+        const bool repainted = frame_after(first_from, 5000);
+        const PaintedFrame first = repainted ? probe.frames[first_from] : PaintedFrame();
+        const mbvq::RenderStats &f = first.stats;
+        const QRhiWidget::Api api = sview_rhi->api();
+        const bool api_waits =
+            api == QRhiWidget::Api::Metal || api == QRhiWidget::Api::Vulkan || api == QRhiWidget::Api::Direct3D12;
+        check(repainted && f.frames > unpainted.frames && first.painted >= first.paint &&
+                  f.render_begin_ms >= first.paint && f.wait_ms > 0.0 && f.wait_ms <= first.painted - f.render_end_ms &&
+                  f.frame_ms >= f.wait_ms && f.frame_ms <= first.submitted - first.paint &&
+                  f.wait_frames == unpainted.wait_frames + 1 && f.gpu_rule == api_waits,
+              "7c: a paint of the 3D soundings view timed from outside: its render() began " +
+                  text("%.3f", f.render_begin_ms - first.paint) + " ms after the paint; the wait " +
+                  text("%.3f", f.wait_ms) + " ms, at most the " + text("%.3f", first.painted - f.render_end_ms) +
+                  " ms from the end of render() to the end of the paint; the frame " + text("%.3f", f.frame_ms) +
+                  " ms, at most the " + text("%.3f", first.submitted - first.paint) +
+                  " ms to the submission; measured once (" + std::to_string(f.wait_frames - unpainted.wait_frames) +
+                  "); the fallback can act: " + (f.gpu_rule ? "yes" : "no") + " (" +
+                  mbvq::rhi_api_name(mbvq::rhi_api()) + ")");
+
+        /* A grab renders outside a paint, and the window submits frames
+           without a paint of the view (its central label repainted): neither
+           is measured. A flush that painted the view after all is tried
+           again, up to three times. */
+        mbvq::RenderStats ungrabbed, grabbed, flushed;
+        bool grab_drawn = false, view_painted = true;
+        int flushes = 0;
+        for (int attempt = 0; attempt < 3 && view_painted; attempt++) {
+          quiet();
+          ungrabbed = mbvq::view_stats(sview);
+          grab_drawn = !sview_rhi->grabFramebuffer().isNull();
+          grabbed = mbvq::view_stats(sview);
+          const int paints = probe.paints;
+          const int submissions = probe.submissions;
+          host->centralWidget()->update();
+          timer.restart();
+          while (probe.submissions == submissions && timer.elapsed() < 5000)
+            spin(20);
+          flushed = mbvq::view_stats(sview);
+          flushes = probe.submissions - submissions;
+          view_painted = probe.paints != paints;
+        }
+        check(grab_drawn && !view_painted && flushes > 0 && grabbed.frames > ungrabbed.frames &&
+                  flushed.frames == grabbed.frames && flushed.wait_ms == ungrabbed.wait_ms &&
+                  flushed.frame_ms == ungrabbed.frame_ms && flushed.wait_frames == ungrabbed.wait_frames,
+              "7c: a grabFramebuffer() of the 3D soundings view (its render() outside a paint) and " +
+                  std::to_string(flushes) + " submission" + (flushes == 1 ? "" : "s") +
+                  " of its window without a paint of the view (the central label repainted) measure nothing: the "
+                  "wait " + text("%.3f", flushed.wait_ms) + " ms, the frame " + text("%.3f", flushed.frame_ms) +
+                  " ms and the " + std::to_string(flushed.wait_frames) + " frames measured stay");
+
+        /* A paint of the view that runs no render() (sent while the view's
+           updates are disabled, so that QRhiWidget returns at once, as it
+           does without a size), then a submission of its window while they
+           stay disabled (no paint of the view can come between): not
+           measured, the paint having run no render(). Updates are enabled
+           again after the reading, which asks for a frame. */
+        mbvq::RenderStats unsent, sent;
+        bool sent_paint = false, sent_view_painted = true;
+        int sent_flushes = 0;
+        for (int attempt = 0; attempt < 3 && (!sent_paint || sent_view_painted); attempt++) {
+          quiet();
+          unsent = mbvq::view_stats(sview);
+          sview->setUpdatesEnabled(false);
+          const int paints = probe.paints;
+          QPaintEvent paint(sview->rect());
+          QApplication::sendEvent(sview, &paint);
+          sent_paint = probe.paints == paints + 1;
+          const int submissions = probe.submissions;
+          host->centralWidget()->update();
+          timer.restart();
+          while (probe.submissions == submissions && timer.elapsed() < 5000)
+            spin(20);
+          sent = mbvq::view_stats(sview);
+          sent_flushes = probe.submissions - submissions;
+          sent_view_painted = probe.paints != paints + 1;
+          sview->setUpdatesEnabled(true);
+        }
+        quiet();
+        check(sent_paint && !sent_view_painted && sent_flushes > 0 && sent.frames == unsent.frames &&
+                  sent.wait_ms == unsent.wait_ms && sent.frame_ms == unsent.frame_ms &&
+                  sent.wait_frames == unsent.wait_frames,
+              "7c: a paint event of the 3D soundings view that runs no render() (sent while its updates are "
+              "disabled) and " + std::to_string(sent_flushes) + " submission" + (sent_flushes == 1 ? "" : "s") +
+                  " of its window after it measure nothing: the wait " + text("%.3f", sent.wait_ms) +
+                  " ms, the frame " + text("%.3f", sent.frame_ms) + " ms and the " +
+                  std::to_string(sent.wait_frames) + " frames measured stay (renderer frames " +
+                  std::to_string(sent.frames - unsent.frames) + " more)");
+
+        /* 2. The hook's fake wait of 15 ms (T or more, so that the total of
+           every frame exceeds T): three still frames, without a press, draw
+           every sounding, each measured once */
+        mbvq::set_gpu_wait(sview, 15.0);
+        const mbvq::RenderStats unhooked = mbvq::view_stats(sview);
+        const size_t still_from = probe.frames.size();
+        bool still = true;
+        for (int i = 0; i < 3; i++) {
+          const size_t n = probe.frames.size();
+          mbvq_c_soundings_plot();
+          still = still && frame_after(n, 5000);
+        }
+        for (size_t i = still_from; i < probe.frames.size(); i++) {
+          const mbvq::RenderStats &s = probe.frames[i].stats;
+          still = still && s.soundings_lod == 0 && s.soundings_drawn == count && s.soundings_stride == 12 && s.gpu_rule;
+        }
+        const mbvq::RenderStats hooked = mbvq::view_stats(sview);
+        const int still_frames = static_cast<int>(probe.frames.size() - still_from);
+        check(still && !mbvq::view_state(sview).camera_press && hooked.lod_frames == unhooked.lod_frames &&
+                  hooked.wait_frames - unhooked.wait_frames == still_frames,
+              "7c: with the hook's fake wait of 15 ms, three still frames of the 3D soundings view (" +
+                  std::to_string(still_frames) + " painted, as many measured) draw all " + std::to_string(count) +
+                  " soundings at level 0; frames at a level above 0: " + std::to_string(hooked.lod_frames));
+
+        /* 3. A camera press (the middle button, rotating) and five motions,
+           each waited for. Under the fake wait a frame is GPU-slow where its
+           measured rest (frame - wait) stays under T: two such frames in a
+           row at level 0 mark it, the next frames draw every 2nd sounding,
+           and the constant wait stops the press at level 1 (the gain check).
+           Each frame's level is checked against that rule for the rests
+           measured: level 1 from the third frame on where the first two
+           rests are under T; otherwise an info line, and no frame reduced
+           while the rests stay at T or more (a slow composition). */
+        mb3dsoundings.mouse_mode = MBS_MOUSE_ROTATE;
+        const QPointF middle_of(sview->width() / 2.0, sview->height() / 2.0);
+        quiet();
+        const mbvq::RenderStats unpressed = mbvq::view_stats(sview);
+        const size_t press_from = probe.frames.size();
+        mouse(QEvent::MouseButtonPress, middle_of, Qt::MiddleButton, Qt::MiddleButton);
+        const mbvq::ViewState pressed = mbvq::view_state(sview);
+        bool moved = true;
+        for (int m = 1; m <= 5; m++) {
+          const size_t n = probe.frames.size();
+          mouse(QEvent::MouseMove, middle_of + QPointF(6.0 * m, 0.0), Qt::NoButton, Qt::MiddleButton);
+          moved = moved && frame_after(n, 3000);
+        }
+        const double mark = rhi::kDragFrameMs - rhi::kDragMarginMs;
+        const int press_frames = static_cast<int>(probe.frames.size() - press_from);
+        bool levels = moved && press_frames >= 5;
+        int level = 0, slow = 0, reduced = 0;
+        std::string lods, rests;
+        for (size_t i = press_from; i < probe.frames.size(); i++) {
+          const mbvq::RenderStats &s = probe.frames[i].stats;
+          const double rest = s.frame_ms - s.wait_ms;
+          levels = levels && s.soundings_lod == level && s.soundings_drawn == drawn_at(level) &&
+                   s.soundings_stride == (12 << level) && s.gpu_rule;
+          reduced += level > 0 ? 1 : 0;
+          lods += (lods.empty() ? "" : ", ") + std::to_string(s.soundings_lod);
+          rests += (rests.empty() ? "" : ", ") + text("%.2f", rest);
+          /* the rule with a constant fake wait: two GPU-slow frames in a row
+             at level 0 mark it, and level 1 stays */
+          if (level == 0) {
+            slow = rest < mark ? slow + 1 : 0;
+            if (slow == rhi::kGpuSlowFrames)
+              level = 1;
+          }
+        }
+        const auto rest_of = [&](size_t i) {
+          return i < probe.frames.size() ? probe.frames[i].stats.frame_ms - probe.frames[i].stats.wait_ms : mark;
+        };
+        const bool fast = rest_of(press_from) < mark && rest_of(press_from + 1) < mark;
+        if (!fast)
+          std::printf("info\t7c\trest >= T: the rule stays inert (the rests of the camera press's first two frames: "
+                      "%.2f and %.2f ms, T %.3f ms)\n",
+                      rest_of(press_from), rest_of(press_from + 1), mark);
+        const mbvq::RenderStats press_end = mbvq::view_stats(sview);
+        check(pressed.camera_press && pressed.buttons == 2 && levels &&
+                  press_end.lod_frames - unpressed.lod_frames == reduced && (!fast || reduced == press_frames - 2),
+              "7c: a camera press of the 3D soundings view (the middle button) with five motions under the fake wait "
+              "of 15 ms: levels " + lods + " in its " + std::to_string(press_frames) + " frames (rests " + rests +
+                  " ms, T " + text("%.3f", mark) + " ms): " +
+                  (fast ? "from the third frame on every 2nd sounding (" + std::to_string(drawn_at(1)) + " of " +
+                              std::to_string(count) + "), the constant wait stopping the press at level 1"
+                        : std::string("the levels the rule gives for these rests, the first two not both under T")) +
+                  "; " + std::to_string(press_end.lod_frames - unpressed.lod_frames) + " frames at a level above 0");
+
+        /* 4. Quiet for 200 ms, then the release: the core asks for no frame
+           after it, the view asks for one (frame_requests), drawn with every
+           sounding */
+        quiet();
+        const mbvq::ViewState held = mbvq::view_state(sview);
+        const mbvq::RenderStats unreleased = mbvq::view_stats(sview);
+        const size_t release_from = probe.frames.size();
+        mouse(QEvent::MouseButtonRelease, middle_of + QPointF(30.0, 0.0), Qt::MiddleButton, Qt::NoButton);
+        const mbvq::ViewState released = mbvq::view_state(sview);
+        const bool release_drawn = frame_after(release_from, 5000);
+        const mbvq::RenderStats r = release_drawn ? probe.frames[release_from].stats : unreleased;
+        check(held.camera_press && released.frame_requests == held.frame_requests + 1 && !released.camera_press &&
+                  released.buttons == 0 && release_drawn && r.soundings_lod == 0 && r.soundings_drawn == count &&
+                  r.soundings_stride == 12 && r.lod_frames == unreleased.lod_frames,
+              "7c: the release of the camera press asks for a frame (" +
+                  std::to_string(released.frame_requests - held.frame_requests) + " request), " +
+                  (release_drawn ? "drawn within 5 s" : "none drawn within 5 s") + " at level " +
+                  std::to_string(r.soundings_lod) + " with " + std::to_string(r.soundings_drawn) + " of " +
+                  std::to_string(count) + " soundings; frames at a level above 0 still " +
+                  std::to_string(r.lod_frames));
+
+        /* 4b. A release and a new camera press sent back to back, with no
+           frame between them: the view ends the press in its renderer at
+           the release, so the new press starts afresh. A press with three
+           motions (level 1 from its third frame where the rests are under
+           T), then the release and the press together, then two motions:
+           their frames draw every sounding again until two GPU-slow frames
+           mark level 0 anew. */
+        quiet();
+        const size_t again_from = probe.frames.size();
+        mouse(QEvent::MouseButtonPress, middle_of, Qt::MiddleButton, Qt::MiddleButton);
+        bool again_moved = true;
+        for (int m = 1; m <= 3; m++) {
+          const size_t n = probe.frames.size();
+          mouse(QEvent::MouseMove, middle_of + QPointF(6.0 * m, 0.0), Qt::NoButton, Qt::MiddleButton);
+          again_moved = again_moved && frame_after(n, 3000);
+        }
+        const bool marked = probe.frames.size() > again_from + 2 && probe.frames.back().stats.soundings_lod == 1;
+        const size_t repress_from = probe.frames.size();
+        mouse(QEvent::MouseButtonRelease, middle_of + QPointF(18.0, 0.0), Qt::MiddleButton, Qt::NoButton);
+        mouse(QEvent::MouseButtonPress, middle_of + QPointF(18.0, 0.0), Qt::MiddleButton, Qt::MiddleButton);
+        const bool no_frame_between = probe.frames.size() == repress_from;
+        const mbvq::ViewState repressed = mbvq::view_state(sview);
+        for (int m = 1; m <= 2; m++) {
+          const size_t n = probe.frames.size();
+          mouse(QEvent::MouseMove, middle_of + QPointF(18.0 - 6.0 * m, 0.0), Qt::NoButton, Qt::MiddleButton);
+          again_moved = again_moved && frame_after(n, 3000);
+        }
+        std::string again_lods;
+        bool fresh = probe.frames.size() >= repress_from + 2;
+        for (size_t i = again_from; i < probe.frames.size(); i++) {
+          again_lods += std::string(i == again_from ? "" : i == repress_from ? " | " : ", ") +
+                        std::to_string(probe.frames[i].stats.soundings_lod);
+          if (i >= repress_from && i < repress_from + 2)
+            fresh = fresh && probe.frames[i].stats.soundings_lod == 0 &&
+                    probe.frames[i].stats.soundings_drawn == count;
+        }
+        mouse(QEvent::MouseButtonRelease, middle_of + QPointF(6.0, 0.0), Qt::MiddleButton, Qt::NoButton);
+        quiet();
+        if (!marked)
+          std::printf("info\t7c\tthe press before the back-to-back release and press reached no level of detail "
+                      "(levels %s): the rule stayed inert, so the check below shows nothing\n",
+                      again_lods.c_str());
+        check(again_moved && no_frame_between && repressed.camera_press && fresh,
+              "7c: a release and a new camera press of the 3D soundings view sent back to back (no frame between: " +
+                  std::string(no_frame_between ? "yes" : "no") + ") start a new press: after the press before " +
+                  (marked ? "reached level 1" : "stayed at level 0 (the rule inert)") + ", the new press's first " +
+                  "two frames draw all " + std::to_string(count) + " soundings at level 0 (levels " + again_lods +
+                  ", the new press after |)");
+
+        /* 5. The camera from above again, then an erase drag (the left
+           button in the Erase mode): a press and five motions along ping
+           15, each onto a good sounding at least the erase radius
+           (MBS_ERASE_THRESHOLD px) and 2 px from those before, so that each
+           erases and draws (edits and frames rise). No camera press: every
+           sounding in every frame under the fake wait, and the release asks
+           for no frame. */
+        sdg_camera(90.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+        const size_t camera_from = probe.frames.size();
+        mbvq_c_soundings_plot();
+        frame_after(camera_from, 5000);
+        quiet();
+        mb3dsoundings.edit_mode = MBS_EDIT_ERASE;
+        mb3dsoundings_screen_positions(0, &error);
+        const int ping = 15;
+        std::vector<size_t> walk;
+        for (size_t k = 0; k < sdg_storage.size() && walk.size() < 6; k++) {
+          const struct mb3dsoundings_sounding_struct &s = sdg_storage[k];
+          bool apart = s.iping == ping && s.beamflag == MB_FLAG_NONE;
+          for (const size_t w : walk) {
+            const double dx = s.winx - sdg_storage[w].winx, dy = s.winy - sdg_storage[w].winy;
+            apart = apart && std::sqrt(dx * dx + dy * dy) >= MBS_ERASE_THRESHOLD + 2.0;
+          }
+          if (apart)
+            walk.push_back(k);
+        }
+        const auto on_screen = [&](size_t k) {
+          return QPointF(sdg_storage[k].winx / ratio, (H - 1 - sdg_storage[k].winy) / ratio);
+        };
+        const mbvq::ViewState unerased_state = mbvq::view_state(sview);
+        const mbvq::RenderStats unerased = mbvq::view_stats(sview);
+        const int edits_before = sdg_edits;
+        const size_t erase_from = probe.frames.size();
+        bool erasing = walk.size() == 6, no_press = true;
+        for (size_t i = 0; i < walk.size(); i++) {
+          const int edited = sdg_edits;
+          const size_t n = probe.frames.size();
+          if (i == 0)
+            mouse(QEvent::MouseButtonPress, on_screen(walk[i]), Qt::LeftButton, Qt::LeftButton);
+          else
+            mouse(QEvent::MouseMove, on_screen(walk[i]), Qt::NoButton, Qt::LeftButton);
+          const mbvq::ViewState during = mbvq::view_state(sview);
+          no_press = no_press && !during.camera_press && during.buttons == 1;
+          erasing = erasing && sdg_edits > edited && frame_after(n, 3000);
+        }
+        if (!walk.empty())
+          mouse(QEvent::MouseButtonRelease, on_screen(walk.back()), Qt::LeftButton, Qt::NoButton);
+        const mbvq::ViewState erased_state = mbvq::view_state(sview);
+        const int erase_frames = static_cast<int>(probe.frames.size() - erase_from);
+        bool every = true;
+        for (size_t i = erase_from; i < probe.frames.size(); i++) {
+          const mbvq::RenderStats &s = probe.frames[i].stats;
+          every = every && s.soundings_lod == 0 && s.soundings_drawn == count && s.soundings_stride == 12;
+        }
+        const mbvq::RenderStats erased = mbvq::view_stats(sview);
+        mb3dsoundings.edit_mode = MBS_EDIT_TOGGLE;
+        check(erasing && no_press && every && erased.lod_frames == unerased.lod_frames &&
+                  erased_state.frame_requests == unerased_state.frame_requests && erased_state.buttons == 0 &&
+                  !erased_state.camera_press,
+              "7c: an erase drag of the 3D soundings view (the left button: a press and five motions along ping " +
+                  std::to_string(ping) + ", " + std::to_string(sdg_edits - edits_before) + " soundings erased in " +
+                  std::to_string(erase_frames) + " frames) is no camera press: all " + std::to_string(count) +
+                  " soundings in every frame under the fake wait, frames at a level above 0 still " +
+                  std::to_string(erased.lod_frames) + ", and its release asks for no frame (" +
+                  std::to_string(erased_state.frame_requests - unerased_state.frame_requests) + " requests)");
+
+        /* 6. The hook off again (measured waits), and the probe's hooks gone */
+        mbvq::set_gpu_wait(sview, -1.0);
+        sview->removeEventFilter(&probe);
+        set_delivered(nullptr);
+      }
       /* Dismiss, as mbeditviz-qt: the view is hidden, then the program
          releases its soundings in the notification, and the hidden view,
          which draws no frame that would drop them, lets go of what it holds
@@ -9923,6 +11782,10 @@ class TestApplication : public QApplication {
   std::function<void(const QObject *, QEvent::Type)> delivered;
 };
 
+void set_delivered(std::function<void(const QObject *, QEvent::Type)> hook) {
+  static_cast<TestApplication *>(qApp)->delivered = std::move(hook);
+}
+
 /* this process's resident size, its peak and its physical footprint (macOS)
    in MB; -1 where not known */
 void process_memory(double *resident, double *peak, double *footprint) {
@@ -10140,12 +12003,15 @@ std::string stride_counts(const std::vector<double> &strides) {
    the frames with a mouse button down the drag budget and the other costs
    of the frame before it came from; the preparing and gathering estimated
    and measured; the GPU memory of the view's levels and of every view's
-   (MB, every copy counted) and the levels evicted from the view so far; and
-   a line with the frames per stride. */
+   (MB, every copy counted) and the levels evicted from the view so far;
+   whether the frame passed over a level the GPU-time fallback marked (7c);
+   a line with the frames that did and those in which it can act (its
+   backend check, gpu_rule; it acts only in the frames of a press);
+   and a line with the frames per stride. */
 void report_levels(const char *scenario, const FrameProbe &probe, const std::vector<size_t> &indices) {
   std::vector<double> stride, zoom, target, visible, culled, drag, memory, budget, outside, estimated, work, resident,
-      cache, evictions;
-  int over = 0;
+      cache, evictions, gpu_coarser;
+  int over = 0, gpu_rule = 0;
   for (size_t i : indices) {
     const mbvq::RenderStats &s = probe.frames[i].stats;
     stride.push_back(s.stride);
@@ -10165,6 +12031,8 @@ void report_levels(const char *scenario, const FrameProbe &probe, const std::vec
     cache.push_back(static_cast<double>(s.cache_bytes) / 1048576.0);
     evictions.push_back(s.evictions);
     over += s.over_memory_budget ? 1 : 0;
+    gpu_coarser.push_back(s.gpu_coarser ? 1.0 : 0.0);
+    gpu_rule += s.gpu_rule ? 1 : 0;
   }
   report(scenario, "stride", stride);
   report(scenario, "stride_zoom", zoom);
@@ -10180,6 +12048,9 @@ void report_levels(const char *scenario, const FrameProbe &probe, const std::vec
   report(scenario, "resident_mb", resident);
   report(scenario, "cache_mb", cache);
   report(scenario, "evictions", evictions);
+  report(scenario, "gpu_coarser", gpu_coarser);
+  std::printf("info\t%s\tGPU-time fallback\ta level passed over in %d, the rule on in %d of %zu frames\n", scenario,
+              static_cast<int>(std::count(gpu_coarser.begin(), gpu_coarser.end(), 1.0)), gpu_rule, indices.size());
   std::printf("info\t%s\tstrides\t%s; zoom %s; drag budget in %d, memory budget in %d, above it in %d of %zu frames\n",
               scenario, stride_counts(stride).c_str(), stride_counts(zoom).c_str(),
               static_cast<int>(std::count(drag.begin(), drag.end(), 1.0)),
@@ -10198,11 +12069,12 @@ void report_levels(const char *scenario, const FrameProbe &probe, const std::vec
    the batch's buffers (those queued for its five buffers: 0 for a batch
    reused or empty; not the contours, the marker meshes or a rewrite of the
    stipple values alone), its draws (draw items, the terrain once whatever
-   its tiles) and its uniform slots. */
+   its tiles) and its uniform slots; and (7c) the paint's wait after
+   render() that the GPU-time fallback reads, in the frames it measured. */
 void report_frames(const char *scenario, const FrameProbe &probe, const std::vector<size_t> &indices, bool rhi) {
   std::vector<double> frame, by_rez[4], paint, paint_event, after_paint, render, fill, marks, prepare, gather, upload,
       record, gpu, before_render, after_render, beyond_gpu, nodes_k, prepare_ns, gather_ns, ring_mb, batch_mb, draws,
-      uniforms;
+      uniforms, wait_ms;
   for (size_t i : indices) {
     const BenchFrame &f = probe.frames[i];
     frame.push_back(f.submitted - f.paint);
@@ -10227,6 +12099,10 @@ void report_frames(const char *scenario, const FrameProbe &probe, const std::vec
     ring_mb.push_back(static_cast<double>(f.stats.ring_bytes) / 1048576.0);
     draws.push_back(f.stats.draws);
     uniforms.push_back(f.stats.uniform_slots);
+    /* the paint's wait after render() that the GPU-time fallback reads, in
+       the frames it measured (7c) */
+    if (i > 0 && f.stats.wait_frames > probe.frames[i - 1].stats.wait_frames)
+      wait_ms.push_back(f.stats.wait_ms);
     /* the parts of the paint around render(), if render() ran in it */
     const double begun = bench_ms_of(f.stats.render_begin_ms);
     const double ended = bench_ms_of(f.stats.render_end_ms);
@@ -10302,6 +12178,7 @@ void report_frames(const char *scenario, const FrameProbe &probe, const std::vec
   report(scenario, "batch_mb", batch_mb);
   report(scenario, "draws", draws);
   report(scenario, "uniform_slots", uniforms);
+  report(scenario, "wait_ms", wait_ms);
   report_levels(scenario, probe, indices);
 }
 
@@ -10758,9 +12635,12 @@ int bench(bool mode3d, const char *grdfile, int steps, int width, int height, co
    (complete); per step the renderer's phases of its first frame and,
    summed over all its frames, step_render to step_record (7a), the GPU time
    of a step's last frame (which the first frame of the next step reports),
-   the writes and the malloc heap and footprint. Output as --bench: "bench
-   scenario metric n median p95 max" and "values" lines. A measurement, not
-   a test. */
+   the writes and the malloc heap and footprint; the GPU-time fallback's
+   wait and total of a step's first frame, where it measured that frame,
+   and the level of detail it drew, per scenario the frames measured and
+   those drawn at a coarser level, and the level and the soundings drawn in
+   the frame after a release (7c). Output as --bench: "bench scenario metric
+   n median p95 max" and "values" lines. A measurement, not a test. */
 int bench_soundings(int count, int steps, double point_size, int files, bool tiles) {
   const bool rhi = mbvq::backend() == mbvq::Backend::Rhi;
   std::printf("info\tbackend\t%s\n", rhi ? "QRhi" : "OpenGL");
@@ -10937,6 +12817,9 @@ int bench_soundings(int count, int steps, double point_size, int files, bool til
     }
     std::vector<double> latency, done, frames, render, fill, prepare, gather, upload, record, gpu, written_mb, heap,
         footprint;
+    /* the GPU-time fallback (7c): the wait and the total of each step's
+       first frame, where that frame was measured, and the level it drew */
+    std::vector<double> wait_ms, frame_ms, level;
     /* the writes per stream too (7a): positions, colours, index lists,
        colours per pair */
     std::vector<double> stream_mb[4];
@@ -10960,6 +12843,7 @@ int bench_soundings(int count, int steps, double point_size, int files, bool til
       return scenario.profiles == MBS_VIEW_PROFILES_NONE ? ping : pings - 1 - ping;
     };
     QPointF at = scenario.button == Qt::LeftButton ? ping_end(erase_ping(first_ping), 0) : centre;
+    const mbvq::RenderStats pressed = mbvq::view_stats(view);
     if (scenario.button != Qt::NoButton)
       mouse(QEvent::MouseButtonPress, at, scenario.button, scenario.button);
     next_frame(submitted, 5000);
@@ -11018,6 +12902,11 @@ int bench_soundings(int count, int steps, double point_size, int files, bool til
       done.push_back(submitted_at - t0);
       frames.push_back(submitted - seen);
       if (rhi) {
+        if (after_first.wait_frames > before.wait_frames) {
+          wait_ms.push_back(after_first.wait_ms);
+          frame_ms.push_back(after_first.frame_ms);
+        }
+        level.push_back(after_first.soundings_lod);
         render.push_back(after_first.render_ms);
         fill.push_back(after_first.fill_ms);
         prepare.push_back(after_first.prepare_ms);
@@ -11044,7 +12933,9 @@ int bench_soundings(int count, int steps, double point_size, int files, bool til
     }
     if (scenario.button != Qt::NoButton)
       mouse(QEvent::MouseButtonRelease, at, scenario.button, Qt::NoButton);
-    next_frame(submitted, 5000);
+    const bool release_frame = next_frame(submitted, 5000);
+    /* the level and the soundings drawn in the release's next frame (7c) */
+    const mbvq::RenderStats released = mbvq::view_stats(view);
     complete(120000);
     spin(300);
     report(scenario.name, "latency", latency);
@@ -11067,6 +12958,21 @@ int bench_soundings(int count, int steps, double point_size, int files, bool til
                                           "step_record"};
       for (int p = 0; p < 6; p++)
         report(scenario.name, phase_names[p], step_phase[p]);
+      report(scenario.name, "wait_ms", wait_ms);
+      report(scenario.name, "frame_ms", frame_ms);
+      report(scenario.name, "level", level);
+      if (scenario.button != Qt::NoButton) {
+        report(scenario.name, "release_lod",
+               release_frame ? std::vector<double>{static_cast<double>(released.soundings_lod)} : std::vector<double>());
+        report(scenario.name, "release_drawn",
+               release_frame ? std::vector<double>{static_cast<double>(released.soundings_drawn)}
+                             : std::vector<double>());
+      }
+      const mbvq::RenderStats last = mbvq::view_stats(view);
+      std::printf("info\t%s\tGPU-time fallback\t%d frames measured, %d drawn at a coarser level, the rule %s in the "
+                  "last frame\n",
+                  scenario.name, last.wait_frames - pressed.wait_frames, last.lod_frames - pressed.lod_frames,
+                  last.gpu_rule ? "on" : "off");
     }
     report(scenario.name, "heap_mb", heap);
     report(scenario.name, "footprint_mb", footprint);
