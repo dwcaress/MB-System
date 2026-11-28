@@ -1,0 +1,88 @@
+/*--------------------------------------------------------------------
+ *    The MB-system:  mbvq_splat_points.comp  11/22/2026
+ *
+ *    Copyright (c) 2026 by
+ *    Christian dos Santos Ferreira, MARUM, University of Bremen
+ *    David W. Caress, Monterey Bay Aquarium Research Institute
+ *    Dale N. Chayes, Center for Coastal and Ocean Mapping
+ *
+ *    See README.md file for copying and redistribution conditions.
+ *--------------------------------------------------------------------*/
+/* mbview-qt (QRhi): compute splatting of the 3D soundings, the passes over a chunk's soundings, one pipeline for
+   the three, so that each pass projects and tests a sounding with the same code before it branches on the pass:
+   1 the nearest depth of each pixel (atomic minimum); 2 at that depth, the lowest index of the array (atomic
+   minimum), as points drawn in the order of the array with the depth test Less; 3 the winner's colour into its
+   pixels. A sounding of the chunk is phase + t x stride (every sounding at stride 1; the level's every k-th, whose
+   index is a multiple of k, record_soundings). A sounding the core hides (alpha below 128) writes nothing. A
+   sounding whose centre lies outside the clip volume's depth range, or more than s/2 pixels beyond the view's
+   sides, is dropped (Metal draws the part in the view of a point whose centre lies just outside it); its
+   footprint, s x s pixels from floor(f - (s - 1) / 2) (f its window position), is cut at the target's edges. */
+#version 440
+
+layout(local_size_x = 128) in;
+
+/* the block of a splat dispatch or draw (the same in the splat shaders; SplatBlock, mbvq_rhi_model.h) */
+layout(std140, binding = 4) uniform Splat {
+  mat4 mvp;      // the soundings slot's matrix: clip-space correction x projection x modelview
+  vec4 viewport; // render-target width and height, the splat's size (physical pixels), 1 to flip the rows
+  uvec4 counts;  // soundings of the dispatch (at the stride), pixels, the chunk's first sounding, 1: clip depth 0..1
+  uvec4 grid;    // groups dispatched (no gl_NumWorkGroups), the stride, the phase, the pass
+};
+
+layout(std430, binding = 0) readonly buffer Positions { float positions[]; };
+layout(std430, binding = 1) readonly buffer Colours { uint colours[]; };
+layout(std430, binding = 2) buffer Depth { uint depth[]; };
+layout(std430, binding = 3) buffer Winner { uint winner[]; };
+
+void main() {
+  uint advance = grid.x * gl_WorkGroupSize.x;
+  int width = int(viewport.x);
+  int height = int(viewport.y);
+  int size = int(viewport.z);
+  float half_size = 0.5 * float(size - 1);
+  for (uint t = gl_GlobalInvocationID.x; t < counts.x; t += advance) {
+    uint sounding = grid.z + t * grid.y; /* in the chunk's buffers */
+    uint index = counts.z + sounding;    /* in the array: decides ties */
+    uint colour = colours[sounding];
+    /* hidden by the core (alpha below 128): no depth, no win, no colour, in every pass */
+    if (colour < 0x80000000u)
+      continue;
+    /* projected as mbvq_points.vert projects a point */
+    vec4 c = mvp * vec4(positions[3u * sounding], positions[3u * sounding + 1u], positions[3u * sounding + 2u], 1.0);
+    /* the centre at most s/2 pixels beyond the sides, so that x and y stay within the range of int below */
+    bool inside = c.w > 0.0 && abs(c.x) <= c.w * (1.0 + float(size) / viewport.x) &&
+                  abs(c.y) <= c.w * (1.0 + float(size) / viewport.y) &&
+                  (counts.w != 0u ? c.z >= 0.0 : c.z >= -c.w) && c.z <= c.w;
+    if (!inside)
+      continue;
+    vec3 ndc = c.xyz / c.w;
+    float x = (ndc.x * 0.5 + 0.5) * viewport.x;
+    float y = (ndc.y * 0.5 + 0.5) * viewport.y;
+    if (viewport.w > 0.5)
+      y = viewport.y - y;
+    /* the window depth of OpenGL's default range, or the clip depth where it runs from 0 to 1; -0.0 as 0.0 */
+    float z = counts.w != 0u ? ndc.z : ndc.z * 0.5 + 0.5;
+    uint bits = floatBitsToUint(z) & 0x7FFFFFFFu;
+    int x0 = int(floor(x - half_size));
+    int y0 = int(floor(y - half_size));
+    for (int dy = 0; dy < size; dy++) {
+      int row = y0 + dy;
+      if (row < 0 || row >= height)
+        continue;
+      for (int dx = 0; dx < size; dx++) {
+        int column = x0 + dx;
+        if (column < 0 || column >= width)
+          continue;
+        uint p = uint(row) * uint(width) + uint(column);
+        if (grid.w == 1u)
+          atomicMin(depth[p], bits);
+        else if (grid.w == 2u) {
+          if (depth[p] == bits)
+            atomicMin(winner[p], index);
+        }
+        else if (winner[p] == index)
+          winner[p] = colour;
+      }
+    }
+  }
+}

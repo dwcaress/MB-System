@@ -19,7 +19,7 @@ AM_LDFLAGS +=  ${libopengl_LDFLAGS}
 AM_LDFLAGS +=  ${libmotif_LDFLAGS}
 AM_LDFLAGS +=  ${libx11_LDFLAGS}
 
-mbgrdviz_SOURCES = mbgrdviz_main.c mbgrdviz_callbacks.c mbgrdviz_creation.c
+mbgrdviz_SOURCES = mbgrdviz_main.c mbgrdviz_callbacks.c mbgrdviz_core.c mbgrdviz_creation.c
 mbgrdviz_LDADD =
 mbgrdviz_LDADD += ${top_builddir}/src/mbio/libmbio.la
 mbgrdviz_LDADD += ${top_builddir}/src/mbaux/libmbaux.la

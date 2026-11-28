@@ -50,6 +50,7 @@
 #include <windows.h>
 #endif
 
+#ifndef MBVIEW_NO_MOTIF
 #include <X11/StringDefs.h>
 #include <X11/cursorfont.h>
 #include <Xm/Xm.h>
@@ -63,20 +64,22 @@
 #include <Xm/PushB.h>
 #include <Xm/Separator.h>
 #include <Xm/List.h>
+#else
+#include "mbv_xtypes.h"
+#endif
 #include "MB3DView.h"
 #include "MB3DSiteList.h"
 #include "MB3DRouteList.h"
 #include "MB3DNavList.h"
 
-#include <GL/gl.h>
-#include <GL/glu.h>
-#ifndef WIN32
-#include <GL/glx.h>
-#endif
+#include "mbv_gl.h"
+#ifndef MBVIEW_NO_MOTIF
 #include "mb_glwdrawa.h"
+#endif
 
 #include "mbview.h"
 #include "mbviewprivate.h"
+#include "mbv_draw.h"
 
 /*------------------------------------------------------------------------------*/
 int mbview_getgispointcount(int verbose, size_t instance, int *ngispoint, int *error) {
@@ -440,42 +443,22 @@ int mbview_drawgispoint(size_t instance, int rez) {
 
 		/* Use outlined triangles for 2D plotting */
 		if (data->display_mode == MBV_DISPLAY_2D) {
-			glNewList((GLuint)MBV_GLLIST_GISPOINTSMALL, GL_COMPILE);
-			GLUquadricObj *globj = gluNewQuadric();
-			gluDisk(globj, 0.0, pointsizesmall, 3, 1);
-			gluDeleteQuadric(globj);
 			int icolor = MBV_COLOR_BLACK;
-			glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
-			globj = gluNewQuadric();
-			gluDisk(globj, 0.7 * pointsizesmall, pointsizesmall, 3, 1);
-			gluDeleteQuadric(globj);
-			glEndList();
+			mbv_draw_marker_disks(MBV_GLLIST_GISPOINTSMALL, pointsizesmall, 0.7 * pointsizesmall, 3, 3,
+			                      colortable_object_red[icolor], colortable_object_green[icolor],
+			                      colortable_object_blue[icolor]);
 
-			glNewList((GLuint)MBV_GLLIST_GISPOINTLARGE, GL_COMPILE);
-			globj = gluNewQuadric();
-			gluDisk(globj, 0.0, pointsizelarge, 3, 1);
-			gluDeleteQuadric(globj);
 			icolor = MBV_COLOR_BLACK;
-			glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
-			globj = gluNewQuadric();
-			gluDisk(globj, 0.7 * pointsizelarge, pointsizelarge, 3, 1);
-			gluDeleteQuadric(globj);
-			glEndList();
+			mbv_draw_marker_disks(MBV_GLLIST_GISPOINTLARGE, pointsizelarge, 0.7 * pointsizelarge, 3, 3,
+			                      colortable_object_red[icolor], colortable_object_green[icolor],
+			                      colortable_object_blue[icolor]);
 		}
 
 		/* Use coarse spheres for 3D plotting */
 		else if (data->display_mode == MBV_DISPLAY_3D) {
-			glNewList((GLuint)MBV_GLLIST_GISPOINTSMALL, GL_COMPILE);
-			GLUquadricObj *globj = gluNewQuadric();
-			gluSphere(globj, pointsizesmall, 3, 2);
-			gluDeleteQuadric(globj);
-			glEndList();
+			mbv_draw_marker_sphere(MBV_GLLIST_GISPOINTSMALL, pointsizesmall, 3, 2);
 
-			glNewList((GLuint)MBV_GLLIST_GISPOINTLARGE, GL_COMPILE);
-			globj = gluNewQuadric();
-			gluSphere(globj, pointsizelarge, 3, 2);
-			gluDeleteQuadric(globj);
-			glEndList();
+			mbv_draw_marker_sphere(MBV_GLLIST_GISPOINTLARGE, pointsizelarge, 3, 2);
 		}
 
 		/* loop over the points */
@@ -483,15 +466,12 @@ int mbview_drawgispoint(size_t instance, int rez) {
 			struct mbview_gispoint_struct *gispoint = &(shared.shareddata.gispoints[i]);
 			if (gispoint->active && shared.shareddata.gislayers[gispoint->layer].active) {
 				const int icolor = i == shared.shareddata.gispoint_selected ? MBV_COLOR_RED : gispoint->color;
-				glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
-				glTranslatef(gispoint->point.xdisplay[instance], gispoint->point.ydisplay[instance],
-				             gispoint->point.zdisplay[instance]);
+				mbv_draw_color3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
+				int list = MBV_GLLIST_GISPOINTSMALL;
 				if (i == shared.shareddata.gispoint_selected || gispoint->size > 1)
-					glCallList((GLuint)MBV_GLLIST_GISPOINTLARGE);
-				else
-					glCallList((GLuint)MBV_GLLIST_GISPOINTSMALL);
-				glTranslatef(-gispoint->point.xdisplay[instance], -gispoint->point.ydisplay[instance],
-				             -gispoint->point.zdisplay[instance]);
+					list = MBV_GLLIST_GISPOINTLARGE;
+				mbv_draw_marker(list, gispoint->point.xdisplay[instance], gispoint->point.ydisplay[instance],
+				                gispoint->point.zdisplay[instance]);
 			}
 		}
 	}
