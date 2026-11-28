@@ -50,6 +50,7 @@
 #endif
 
 /* Motif required Headers */
+#ifndef MBVIEW_NO_MOTIF
 #include <X11/StringDefs.h>
 #include <X11/cursorfont.h>
 #include <Xm/Xm.h>
@@ -63,6 +64,9 @@
 #include <Xm/PushB.h>
 #include <Xm/Separator.h>
 #include <Xm/List.h>
+#else
+#include "mbv_xtypes.h"
+#endif
 #include "MB3DView.h"
 #include "MB3DSiteList.h"
 #include "MB3DRouteList.h"
@@ -70,12 +74,10 @@
 
 /* OpenGL include files */
 
-#include <GL/gl.h>
-#include <GL/glu.h>
-#ifndef WIN32
-#include <GL/glx.h>
-#endif
+#include "mbv_gl.h"
+#ifndef MBVIEW_NO_MOTIF
 #include "mb_glwdrawa.h"
+#endif
 
 /* MBIO include files */
 #include "mb_status.h"
@@ -84,11 +86,10 @@
 /* mbview include */
 #include "mbview.h"
 #include "mbviewprivate.h"
+#include "mbv_draw.h"
+#include "mbv_ui.h"
 
 /*------------------------------------------------------------------------------*/
-
-/* local variables */
-static char value_string[2*MB_PATH_MAXLINE];
 
 
 /*------------------------------------------------------------------------------*/
@@ -498,7 +499,7 @@ int mbview_addroute(int verbose, size_t instance, int npoint, double *routelon, 
 			        "Failed to add route point at position lon:%f lat:%f due to display coordinate projection (%f %f %f) far "
 			        "outside view...\n",
 			        routelon[i], routelat[i], xdisplay, ydisplay, zdisplay);
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 	}
 
@@ -1188,7 +1189,7 @@ int mbview_pick_route_select(int verbose, size_t instance, int which, int xpixel
 		}
 		else {
 			shared.shareddata.route_selected = MBV_SELECT_NONE;
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 		if (shared.shareddata.route_mode == MBV_ROUTE_NAVADJUST && shared.shareddata.route_selected != MBV_SELECT_NONE)
 			shared.shareddata.route_point_selected = MBV_SELECT_ALL;
@@ -1240,14 +1241,14 @@ int mbview_pick_route_select(int verbose, size_t instance, int which, int xpixel
 		/* else beep */
 		else {
 			shared.shareddata.route_selected = MBV_SELECT_NONE;
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 	}
 
 	/* else beep */
 	else {
 		shared.shareddata.route_selected = MBV_SELECT_NONE;
-		XBell(view->dpy, 100);
+		mbv_ui_bell(instance);
 	}
 
 	/* call pick notify if defined */
@@ -1576,14 +1577,14 @@ int mbview_pick_route_add(int verbose, size_t instance, int which, int xpixel, i
 
 		/* if selected route not editable then complain */
 		else if (found) {
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 
 		/* if not found then deselect the new route */
 		else {
 			shared.shareddata.route_selected = MBV_SELECT_NONE;
 			shared.shareddata.route_point_selected = MBV_SELECT_NONE;
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 	}
 
@@ -1656,7 +1657,7 @@ int mbview_pick_route_add(int verbose, size_t instance, int which, int xpixel, i
 	else {
 		shared.shareddata.route_selected = MBV_SELECT_NONE;
 		shared.shareddata.route_point_selected = MBV_SELECT_NONE;
-		XBell(view->dpy, 100);
+		mbv_ui_bell(instance);
 	}
 
 	/* set what kind of pick to annotate */
@@ -1788,13 +1789,13 @@ int mbview_pick_route_delete(int verbose, size_t instance, int xpixel, int ypixe
 
 		/* else beep */
 		else {
-			XBell(view->dpy, 100);
+			mbv_ui_bell(instance);
 		}
 	}
 
 	/* else beep */
 	else {
-		XBell(view->dpy, 100);
+		mbv_ui_bell(instance);
 	}
 
 	/* set pick annotation */
@@ -2045,7 +2046,7 @@ int mbview_route_add(int verbose, size_t instance, int inew, int jnew, int waypo
 
 	/* else beep */
 	else {
-		XBell(view->dpy, 100);
+		mbv_ui_bell(instance);
 	}
 
 	/* print route debug statements */
@@ -2254,7 +2255,7 @@ int mbview_route_delete(size_t instance, int iroute, int ipoint) {
 
 	/* else beep */
 	else {
-		XBell(view->dpy, 100);
+		mbv_ui_bell(instance);
 	}
 
 	/* print route debug statements */
@@ -2447,7 +2448,6 @@ int mbview_drawroute(size_t instance, int rez) {
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	GLUquadricObj *globj;
 	double routesizesmall, routesizelarge;
 	double xx, yy;
 	int iroute, jpoint;
@@ -2480,45 +2480,25 @@ int mbview_drawroute(size_t instance, int rez) {
 		/* Use disks for 2D plotting */
 		if (data->display_mode == MBV_DISPLAY_2D) {
 			/* make list for small route */
-			glNewList((GLuint)MBV_GLLIST_ROUTESMALL, GL_COMPILE);
-			globj = gluNewQuadric();
-			gluDisk(globj, 0.0, routesizesmall, 4, 1);
-			gluDeleteQuadric(globj);
 			icolor = MBV_COLOR_BLACK;
-			glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
-			globj = gluNewQuadric();
-			gluDisk(globj, 0.8 * routesizesmall, routesizesmall, 10, 1);
-			gluDeleteQuadric(globj);
-			glEndList();
+			mbv_draw_marker_disks(MBV_GLLIST_ROUTESMALL, routesizesmall, 0.8 * routesizesmall, 4, 10,
+			                      colortable_object_red[icolor], colortable_object_green[icolor],
+			                      colortable_object_blue[icolor]);
 
 			/* make list for large route */
-			glNewList((GLuint)MBV_GLLIST_ROUTELARGE, GL_COMPILE);
-			globj = gluNewQuadric();
-			gluDisk(globj, 0.0, routesizelarge, 4, 1);
-			gluDeleteQuadric(globj);
 			icolor = MBV_COLOR_BLACK;
-			glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
-			globj = gluNewQuadric();
-			gluDisk(globj, 0.8 * routesizelarge, routesizelarge, 10, 1);
-			gluDeleteQuadric(globj);
-			glEndList();
+			mbv_draw_marker_disks(MBV_GLLIST_ROUTELARGE, routesizelarge, 0.8 * routesizelarge, 4, 10,
+			                      colortable_object_red[icolor], colortable_object_green[icolor],
+			                      colortable_object_blue[icolor]);
 		}
 
 		/* Use spheres for 3D plotting */
 		else if (data->display_mode == MBV_DISPLAY_3D) {
 			/* make list for small route */
-			glNewList((GLuint)MBV_GLLIST_ROUTESMALL, GL_COMPILE);
-			globj = gluNewQuadric();
-			gluSphere(globj, routesizesmall, 4, 3);
-			gluDeleteQuadric(globj);
-			glEndList();
+			mbv_draw_marker_sphere(MBV_GLLIST_ROUTESMALL, routesizesmall, 4, 3);
 
 			/* make list for large route */
-			glNewList((GLuint)MBV_GLLIST_ROUTELARGE, GL_COMPILE);
-			globj = gluNewQuadric();
-			gluSphere(globj, routesizelarge, 4, 3);
-			gluDeleteQuadric(globj);
-			glEndList();
+			mbv_draw_marker_sphere(MBV_GLLIST_ROUTELARGE, routesizelarge, 4, 3);
 		}
 
 		/* loop over the route points */
@@ -2532,27 +2512,23 @@ int mbview_drawroute(size_t instance, int rez) {
   					icolor = MBV_COLOR_RED;
   				else
   					icolor = shared.shareddata.routes[iroute].color;
-  				glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
+  				mbv_draw_color3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
 
   				/* draw the route point as a disk or sphere using GLUT */
 
-  				glTranslatef(shared.shareddata.routes[iroute].points[jpoint].xdisplay[instance],
-  				             shared.shareddata.routes[iroute].points[jpoint].ydisplay[instance],
-  				             shared.shareddata.routes[iroute].points[jpoint].zdisplay[instance]);
+  				int list = MBV_GLLIST_ROUTESMALL;
   				if (iroute == shared.shareddata.route_selected && (jpoint == shared.shareddata.route_point_selected ||
   				                                                   shared.shareddata.route_point_selected == MBV_SELECT_ALL))
-  					glCallList((GLuint)MBV_GLLIST_ROUTELARGE);
-  				else
-  					glCallList((GLuint)MBV_GLLIST_ROUTESMALL);
-  				glTranslatef(-shared.shareddata.routes[iroute].points[jpoint].xdisplay[instance],
-  				             -shared.shareddata.routes[iroute].points[jpoint].ydisplay[instance],
-  				             -shared.shareddata.routes[iroute].points[jpoint].zdisplay[instance]);
+  					list = MBV_GLLIST_ROUTELARGE;
+  				mbv_draw_marker(list, shared.shareddata.routes[iroute].points[jpoint].xdisplay[instance],
+  				                shared.shareddata.routes[iroute].points[jpoint].ydisplay[instance],
+  				                shared.shareddata.routes[iroute].points[jpoint].zdisplay[instance]);
   			}
 
   			/* draw draped route line segments */
-  			glColor3f(0.0, 0.0, 0.0);
-  			glLineWidth((float)(2.0));
-  			glBegin(GL_LINE_STRIP);
+  			mbv_draw_color3f(0.0, 0.0, 0.0);
+  			mbv_draw_line_width((float)(2.0));
+  			mbv_draw_begin(MBV_DRAW_LINE_STRIP);
   			for (jpoint = 0; jpoint < shared.shareddata.routes[iroute].npoints - 1; jpoint++) {
   				/* set size and color */
   				if (iroute == shared.shareddata.route_selected &&
@@ -2563,17 +2539,17 @@ int mbview_drawroute(size_t instance, int rez) {
   				else {
   					icolor = shared.shareddata.routes[iroute].color;
   				}
-  				glColor3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
+  				mbv_draw_color3f(colortable_object_red[icolor], colortable_object_green[icolor], colortable_object_blue[icolor]);
 
   				/* draw draped segment */
   				for (k = 0; k < shared.shareddata.routes[iroute].segments[jpoint].nls; k++) {
   					/* draw points */
-  					glVertex3f((float)(shared.shareddata.routes[iroute].segments[jpoint].lspoints[k].xdisplay[instance]),
+  					mbv_draw_vertex3f((float)(shared.shareddata.routes[iroute].segments[jpoint].lspoints[k].xdisplay[instance]),
   					           (float)(shared.shareddata.routes[iroute].segments[jpoint].lspoints[k].ydisplay[instance]),
   					           (float)(shared.shareddata.routes[iroute].segments[jpoint].lspoints[k].zdisplay[instance]));
   				}
   			}
-  			glEnd();
+  			mbv_draw_end();
   		}
     }
 	}
@@ -2592,157 +2568,5 @@ int mbview_drawroute(size_t instance, int rez) {
 	return (status);
 }
 
-/*------------------------------------------------------------------------------*/
-int mbview_updateroutelist() {
-	/* local variables */
-	int status = MB_SUCCESS;
-	XmString *xstr;
-	int jpoint;
-	int nitems;
-	int iitem;
-	char londstr0[24], lonmstr0[24];
-	char latdstr0[24], latmstr0[24];
-	char waypointstr[10];
-	int iroute, jwaypoint;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-	}
-
-	/* update route list */
-	if (shared.init_routelist == MBV_WINDOW_VISIBLE) {
-		/* remove all existing items */
-		XmListDeleteAllItems(shared.mb3d_routelist.mbview_list_routelist);
-
-		if (shared.shareddata.nroute > 0) {
-			/* get number of items */
-			nitems = 0;
-			for (iroute = 0; iroute < shared.shareddata.nroute; iroute++) {
-        if (shared.shareddata.routes[iroute].active) {
-  				nitems += 1 + shared.shareddata.routes[iroute].npoints;
-        }
-			}
-
-      if (nitems > 0) {
-  			/* allocate array of label XmStrings */
-  			xstr = (XmString *)malloc(nitems * sizeof(XmString));
-  			if (xstr == NULL)
-  				return (MB_FAILURE);
-
-  			/* loop over the routes */
-  			nitems = 0;
-  			for (iroute = 0; iroute < shared.shareddata.nroute; iroute++) {
-          if (shared.shareddata.routes[iroute].active) {
-    				if (shared.shareddata.routes[iroute].editmode)
-    					sprintf(value_string, "Editable Route %3d | Waypoints:%3d | Length:%.2f %.2f m | %s | Name: %s", iroute,
-    					        shared.shareddata.routes[iroute].npoints, shared.shareddata.routes[iroute].distancelateral,
-    					        shared.shareddata.routes[iroute].distancetopo,
-    					        mbview_colorname[shared.shareddata.routes[iroute].color], shared.shareddata.routes[iroute].name);
-    				else
-    					sprintf(value_string, "Static Route %3d | Waypoints:%3d | Length:%.2f %.2f m | %s | Name: %s", iroute,
-    					        shared.shareddata.routes[iroute].npoints, shared.shareddata.routes[iroute].distancelateral,
-    					        shared.shareddata.routes[iroute].distancetopo,
-    					        mbview_colorname[shared.shareddata.routes[iroute].color], shared.shareddata.routes[iroute].name);
-    				xstr[nitems] = XmStringCreateLocalized(value_string);
-    				nitems++;
-
-    				/* add list item for each waypoint */
-    				for (jpoint = 0; jpoint < shared.shareddata.routes[iroute].npoints; jpoint++) {
-    					/* add list item for each route */
-    					mbview_setlonlatstrings(shared.shareddata.routes[iroute].points[jpoint].xlon,
-    					                        shared.shareddata.routes[iroute].points[jpoint].ylat, londstr0, latdstr0, lonmstr0,
-    					                        latmstr0);
-
-    					if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_SIMPLE)
-    						strcpy(waypointstr, "---------");
-    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_TRANSIT)
-    						strcpy(waypointstr, "-TRANSIT-");
-    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE)
-    						strcpy(waypointstr, "--START--");
-    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE)
-    						strcpy(waypointstr, "---END---");
-    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE2)
-    						strcpy(waypointstr, "--START2-");
-    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE2)
-    						strcpy(waypointstr, "---END2--");
-    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE3)
-    						strcpy(waypointstr, "--START3-");
-    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE3)
-    						strcpy(waypointstr, "---END3--");
-    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE4)
-    						strcpy(waypointstr, "--START4-");
-    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE4)
-    						strcpy(waypointstr, "---END4--");
-    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE5)
-    						strcpy(waypointstr, "--START5-");
-    					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE5)
-    						strcpy(waypointstr, "---END5--");
-    					else
-    						strcpy(waypointstr, "-------");
-    					if (shared.lonlatstyle == MBV_LONLAT_DEGREESDECIMAL)
-    						sprintf(value_string, "%3d | %3d | %s | %s | %.2f | %.2f | %.2f | %s", iroute, jpoint, londstr0, latdstr0,
-    						        shared.shareddata.routes[iroute].points[jpoint].zdata,
-    						        shared.shareddata.routes[iroute].distlateral[jpoint],
-    						        shared.shareddata.routes[iroute].disttopo[jpoint], waypointstr);
-    					else
-    						sprintf(value_string, "%3d | %3d | %s | %s | %.2f | %.2f | %.2f | %s", iroute, jpoint, lonmstr0, latmstr0,
-    						        shared.shareddata.routes[iroute].points[jpoint].zdata,
-    						        shared.shareddata.routes[iroute].distlateral[jpoint],
-    						        shared.shareddata.routes[iroute].disttopo[jpoint], waypointstr);
-    					xstr[nitems] = XmStringCreateLocalized(value_string);
-    					nitems++;
-    				}
-          }
-  			}
-
-  			/* add list items */
-  			XmListAddItems(shared.mb3d_routelist.mbview_list_routelist, xstr, nitems, 0);
-
-  			/* select list item for selected route */
-  			if (shared.shareddata.route_selected != MBV_SELECT_NONE) {
-    				/* get item number - inactive routes contribute no rows to the
-    				    widget (see the nitems loops above), so they must be skipped
-    				    here too to keep iitem in sync with the actual widget position */
-    				iitem = 0;
-    				for (iroute = 0; iroute < shared.shareddata.nroute; iroute++) {
-    					if (!shared.shareddata.routes[iroute].active)
-    						continue;
-    					iitem++;
-    					if (iroute == shared.shareddata.route_selected && shared.shareddata.route_point_selected == MBV_SELECT_ALL) {
-    						XmListSelectPos(shared.mb3d_routelist.mbview_list_routelist, iitem, 0);
-    						XmListSetPos(shared.mb3d_routelist.mbview_list_routelist, MAX(iitem - 5, 1));
-    					}
-    					for (jwaypoint = 0; jwaypoint < shared.shareddata.routes[iroute].npoints; jwaypoint++) {
-    						iitem++;
-    						if (iroute == shared.shareddata.route_selected && shared.shareddata.route_point_selected == jwaypoint) {
-    							XmListSelectPos(shared.mb3d_routelist.mbview_list_routelist, iitem, 0);
-    							XmListSetPos(shared.mb3d_routelist.mbview_list_routelist, MAX(iitem - 5, 1));
-    						}
-    					}
-    				}
-        }
-
-  			/* deallocate memory no longer needed */
-  			for (iitem = 0; iitem < nitems; iitem++) {
-  				XmStringFree(xstr[iitem]);
-  			}
-  			free(xstr);
-      }
-		}
-	}
-
-	/* print output debug statements */
-	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	/* return */
-	return (status);
-}
 
 /*------------------------------------------------------------------------------*/

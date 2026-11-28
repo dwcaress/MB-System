@@ -142,6 +142,8 @@ if(buildQt6Tools)
         mbvelocitytool-qt.1
         mbedit-qt.1
         mbnavedit-qt.1
+        mbgrdviz-qt.1
+        mbeditviz-qt.1
         mbnavadjust-qt.1)
 endif()
 
