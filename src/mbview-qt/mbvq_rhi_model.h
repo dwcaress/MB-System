@@ -667,6 +667,10 @@ enum class DrawKind {
   StippleLines, /* thin stippled lines from the stipple buffer (pairs) */
   StippleWide,  /* wide stippled lines from the stipple buffer (quads per pair) */
   Markers,      /* a run of markers of one shape, instanced */
+  StripRun,     /* a run of thin strips of one slot: one line strip over its entries of its group's index
+                   list, restarted between them */
+  WideRun,      /* a run of wide strips of one slot: quads instanced over the run's vertices, the segments
+                   between the strips skipped by its group's flags */
   Soundings,    /* the soundings slot of the 3D soundings view (SoundingsPlan) */
   ProfileLines  /* the profile lines of the 3D soundings view: its slot, black, and the next one, red */
 };
@@ -702,14 +706,21 @@ struct DrawItem {
   int slot = 0;     /* its uniform slot */
   /* the first vertex and the vertex count of a draw of vertices; for
      instanced draws (wide lines, markers) the instance count, and the byte
-     offset of the first instance in the source */
+     offset of the first instance in the source; for a run of strips
+     (StripRun, WideRun; first 0) its entries of its group's index list or
+     its instances, and the byte offset of its first vertex in the batch's
+     vertices */
   uint32_t first = 0;
   uint32_t count = 0;
   uint32_t offset = 0;
   int shape = -1; /* markers: the shape in the batch; contours: the slot (MBV_DRAW_SLOT_CONTOURS_*) */
+  /* a run: its first entry in its group's index list (StripRun) or flags (WideRun) */
+  uint32_t list = 0;
+  int group = 0; /* the group of the batch it lies in (BatchPlan::run_groups()) */
+  int parts = 1; /* the strips it draws (a run: two or more) */
 };
 
-/* the state a slot carries: one per drawable command */
+/* the state a slot carries: one per drawable command, or per run of strips */
 struct SlotSpec {
   bool camera = true;     /* the view's camera, or the projection alone */
   bool depth_test = false;
@@ -718,6 +729,15 @@ struct SlotSpec {
   bool stipple = false;
   int factor = 1;         /* stipple factor in physical pixels */
   unsigned pattern = 0xffff;
+
+  /* every field equal, the colours exactly and the stipple's factor and
+     pattern also with the stipple off, so that equal specs give the same
+     slot bytes (BatchRenderer::write_slots) */
+  bool operator==(const SlotSpec &other) const {
+    return camera == other.camera && depth_test == other.depth_test && colour[0] == other.colour[0] &&
+           colour[1] == other.colour[1] && colour[2] == other.colour[2] && width == other.width &&
+           stipple == other.stipple && factor == other.factor && pattern == other.pattern;
+  }
 };
 
 /* a vertex of the stipple buffer: a batch vertex and OpenGL's stipple
@@ -730,17 +750,45 @@ struct StippleVertex {
   float d;
 };
 
+/* What build() merges, the renderer's choice in each frame: runs of
+   consecutive line strips of one slot state within a group, thin ones (one
+   physical pixel) as one indexed line strip restarted between the strips,
+   where the API restarts strips at 0xffffffff and has 32-bit indices, wide
+   ones as one draw of quads instanced over the run's vertices that skips the
+   segments between the strips (instancing only, which the batch needs
+   anyway). Both false: each strip a draw and a slot of its own. A thin run
+   takes a strip only while its places (vertices counted from the run's first)
+   stay at or below max_place: 2^24 - 1, the largest index value Vulkan
+   without fullDrawIndexUint32 and OpenGL ES 3.0 guarantee (tests lower it). */
+struct Merge {
+  bool thin = true;
+  bool wide = true;
+  uint32_t max_place = 0xffffff;
+};
+
 /* The draws of the map's batch, in stream order: each drawable command gets
-   a uniform slot; lines of one physical pixel are drawn with the line
-   topology straight from the batch's vertices, wider ones as quads
-   instanced over them (a strip of n vertices n - 1 segments, a loop n with
-   its closing segment, n vertices of LINES n / 2); a loop's closing segment
-   comes from a small buffer of vertex pairs; quads become triangles;
-   stippled lines go through a buffer of vertex pairs that carry OpenGL's
-   stipple counter, which counts the fragments, goes on along a strip or
-   loop and starts again at every LINES segment and every primitive;
-   markers are drawn one run per command, instanced over the batch's
-   instances. Shapes define the meshes of later runs; groups are counted.
+   a uniform slot, or each run of consecutive line strips of one state
+   within a group (one draw: thin strips over the group's index list
+   restarted between them, wide ones instanced over the run's vertices with
+   the segments between them skipped by the group's flags); lines of one
+   physical pixel are drawn with the line topology straight from the batch's
+   vertices, wider ones as quads instanced over them (a strip of n vertices
+   n - 1 segments, a loop n with its closing segment, n vertices of LINES
+   n / 2); a loop's closing segment comes from a small buffer of vertex
+   pairs; quads become triangles; stippled lines go through a buffer of
+   vertex pairs that carry OpenGL's stipple counter, which counts the
+   fragments, goes on along a strip or loop and starts again at every LINES
+   segment and every primitive; markers are drawn one run per command,
+   instanced over the batch's instances. Shapes define the meshes of later
+   runs; groups are counted. A run takes the strips of two vertices or more,
+   not stippled, each beginning after the run's last strip, whose slots would
+   be equal and whose width (thin or wide) the Merge merges, a thin run only
+   while its places stay within Merge::max_place; a group command and every
+   command that adds a draw or a slot end it (a stippled primitive too short
+   to draw among them: it adds a slot), while one that adds neither (a shape,
+   an unstippled primitive too short to draw, an empty slot or marker
+   command) does not, so that a vertex no strip draws can lie between its
+   strips. A run of one strip stays the strip's own draw.
    The slots of the 3D soundings view become draws of its renderer: the
    soundings with the slot's point size, and the profile lines
    (kSlotProfileLines) with two slots, black and then red. */
@@ -748,9 +796,10 @@ class BatchPlan {
  public:
   /* camera: projection x modelview, projection: the projection alone
      (OpenGL's convention, column-major), width x height: the drawing in
-     physical pixels; they place the stipple only */
+     physical pixels; they place the stipple only; merge: the runs of
+     strips merged */
   void build(const struct mbv_draw_batch &batch, const Style &style, const double camera[16],
-             const double projection[16], int width, int height);
+             const double projection[16], int width, int height, Merge merge = Merge());
 
   const std::vector<DrawItem> &items() const { return items_; }
   const std::vector<SlotSpec> &slot_specs() const { return slots_; }
@@ -761,8 +810,30 @@ class BatchPlan {
   int markers() const { return markers_; }
   /* line segments in the plan (thin and wide) */
   size_t segments() const { return segments_; }
+  /* the groups of the last build: the commands before the first group
+     command, then those from each group command to the next (the map's
+     overlays, mbv_draw_batch.h); 0 before the first build */
+  int run_groups() const { return static_cast<int>(group_start_.size()); }
+  /* runs of two strips or more in the last build, and the strips in them */
+  int runs() const { return runs_; }
+  int run_parts() const { return run_parts_; }
+  /* A group's run lists: its thin runs' index list (per strip its vertices
+     counted from its run's first vertex, 0xffffffff between strips) and its
+     wide runs' flags (per segment of a run's vertices 1 inside a strip, 0
+     between strips), each in stream order; their entries; and whether the
+     layout of the group's runs (kinds, strips, the strips' places from their
+     run's first vertex and their vertex counts) differs from the same
+     group's in the previous build, so that its lists need writing again.
+     out holds run_index_entries() or run_flag_entries() entries; a group
+     the last build did not have has none and no change. */
+  size_t run_index_entries(int group) const;
+  size_t run_flag_entries(int group) const;
+  void run_indices(int group, uint32_t *out) const;
+  void run_flags(int group, float *out) const;
+  bool runs_changed(int group) const;
 
  private:
+  static SlotSpec slot_spec(const struct mbv_draw_command &command, const Style &style);
   int add_slot(const struct mbv_draw_command &command, const Style &style);
   void add_stipple(const struct mbv_draw_batch &batch, int c, int slot, const double matrix[16], int width,
                    int height);
@@ -775,6 +846,22 @@ class BatchPlan {
   int groups_ = 0;
   int markers_ = 0;
   size_t segments_ = 0;
+  /* The layout of the runs: per group, in stream order, per run of two
+     strips or more its kind (0 thin, 1 wide), its strips p, then per strip
+     its place (its first vertex less the run's first) and its vertex count;
+     this build's and the previous build's, swapped at each build so that
+     their capacity stays, with each group's first entry in them. This
+     build's entries of each group's index list and flags, whether each
+     group's layout changed, and the runs and their strips. */
+  std::vector<uint32_t> layout_;
+  std::vector<uint32_t> previous_layout_;
+  std::vector<uint32_t> group_start_;
+  std::vector<uint32_t> previous_group_start_;
+  std::vector<size_t> index_entries_;
+  std::vector<size_t> flag_entries_;
+  std::vector<unsigned char> changed_;
+  int runs_ = 0;
+  int run_parts_ = 0;
 };
 
 /*--------------------------------------------------------------------*/

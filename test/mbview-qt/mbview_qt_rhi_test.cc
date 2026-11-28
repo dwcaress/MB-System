@@ -3198,6 +3198,671 @@ void model_batch_plan() {
   }
 }
 
+/*--------------------------------------------------------------------*/
+/* 7e2: consecutive line strips of one state within a group of the batch
+   make a run, one draw with one uniform slot (BatchPlan): a run of thin
+   strips one line strip over its group's index list (per strip its
+   vertices counted from the run's first vertex, 0xffffffff between the
+   strips), a run of wide strips quads instanced over the run's vertices,
+   the segments between its strips skipped by its group's flags */
+
+constexpr uint32_t kRestart = 0xffffffffu;
+
+/* a draw kind by name, for the messages */
+const char *kind_name(rhi::DrawKind kind) {
+  using K = rhi::DrawKind;
+  const std::pair<K, const char *> names[] = {
+      {K::Terrain, "Terrain"},         {K::Contours, "Contours"},   {K::Lines, "Lines"},
+      {K::LineStrip, "LineStrip"},     {K::Points, "Points"},       {K::Triangles, "Triangles"},
+      {K::WideStrip, "WideStrip"},     {K::WidePairs, "WidePairs"}, {K::StippleLines, "StippleLines"},
+      {K::StippleWide, "StippleWide"}, {K::Markers, "Markers"},     {K::StripRun, "StripRun"},
+      {K::WideRun, "WideRun"},         {K::Soundings, "Soundings"}, {K::ProfileLines, "ProfileLines"}};
+  for (const auto &name : names)
+    if (name.first == kind)
+      return name.second;
+  return "?";
+}
+
+/* a plan's draws as text: kind first/count/offset (bytes) and its group; a
+   run's first entry in its group's list (l) and its strips (p) */
+std::string items_text(const rhi::BatchPlan &plan) {
+  std::string out;
+  for (const rhi::DrawItem &item : plan.items()) {
+    out += std::string(out.empty() ? "" : ", ") + kind_name(item.kind) + " " + std::to_string(item.first) + "/" +
+           std::to_string(item.count) + "/" + std::to_string(item.offset) + " g" + std::to_string(item.group);
+    if (item.kind == rhi::DrawKind::StripRun || item.kind == rhi::DrawKind::WideRun)
+      out += " l" + std::to_string(item.list) + " p" + std::to_string(item.parts);
+  }
+  return out;
+}
+
+/* a plan's draws in short: their kinds, a run's with its strips */
+std::string kinds_text(const rhi::BatchPlan &plan) {
+  std::string out;
+  for (const rhi::DrawItem &item : plan.items())
+    out += std::string(out.empty() ? "" : " ") + kind_name(item.kind) +
+           (item.parts > 1 ? ":" + std::to_string(item.parts) : "");
+  return out;
+}
+
+/* an index list as text: consecutive entries as a-b, a restart as R */
+std::string indices_text(const std::vector<uint32_t> &entries) {
+  std::string out;
+  for (size_t k = 0; k < entries.size(); k++) {
+    out += out.empty() ? "" : " ";
+    if (entries[k] == kRestart) {
+      out += "R";
+      continue;
+    }
+    size_t last = k;
+    while (last + 1 < entries.size() && entries[last + 1] != kRestart && entries[last + 1] == entries[last] + 1)
+      last++;
+    out += std::to_string(entries[k]) + (last > k ? "-" + std::to_string(entries[last]) : "");
+    k = last;
+  }
+  return out.empty() ? "none" : out;
+}
+
+/* flags as text, a digit each */
+std::string flags_text(const std::vector<float> &flags) {
+  std::string out;
+  for (const float flag : flags)
+    out += flag == 1.0f ? '1' : flag == 0.0f ? '0' : '?';
+  return out.empty() ? "none" : out;
+}
+
+/* a group's index list or flags as text, run by run as the plan's runs of
+   that group take their entries (| between runs) */
+template <typename T>
+std::string runs_text(const std::vector<T> &entries, const rhi::BatchPlan &plan, int group,
+                      std::string (*as_text)(const std::vector<T> &)) {
+  std::string out;
+  for (const rhi::DrawItem &item : plan.items()) {
+    if ((item.kind != rhi::DrawKind::StripRun && item.kind != rhi::DrawKind::WideRun) || item.group != group)
+      continue;
+    const size_t from = std::min<size_t>(item.list, entries.size());
+    const size_t to = std::min<size_t>(static_cast<size_t>(item.list) + item.count, entries.size());
+    out += (out.empty() ? "" : " | ") + as_text(std::vector<T>(entries.begin() + from, entries.begin() + to));
+  }
+  return out.empty() ? "none" : out;
+}
+
+/* a group's index list and flags as the plan writes them, into one entry
+   more than it says it writes, which must stay as it was: a list written
+   past its end comes back one entry longer */
+std::vector<uint32_t> plan_indices(const rhi::BatchPlan &plan, int group) {
+  const uint32_t untouched = 0xa5a5a5a5u;
+  std::vector<uint32_t> out(plan.run_index_entries(group) + 1, untouched);
+  plan.run_indices(group, out.data());
+  if (out.back() == untouched)
+    out.pop_back();
+  return out;
+}
+
+std::vector<float> plan_flags(const rhi::BatchPlan &plan, int group) {
+  std::vector<float> out(plan.run_flag_entries(group) + 1, -1.0f);
+  plan.run_flags(group, out.data());
+  if (out.back() == -1.0f)
+    out.pop_back();
+  return out;
+}
+
+/* what a run of the batch's strips (their commands, in order) needs, from
+   the commands: as a thin run, per strip its vertices counted from the
+   run's first vertex, 0xffffffff between the strips; as a wide run, per
+   segment from its first strip's first vertex to its last strip's last, 1
+   inside a strip, else 0 */
+std::vector<uint32_t> run_indices_of(const struct mbv_draw_batch &b, const std::vector<int> &strips) {
+  std::vector<uint32_t> out;
+  const int first = b.commands[strips.front()].first;
+  for (const int s : strips) {
+    if (!out.empty())
+      out.push_back(kRestart);
+    for (int v = 0; v < b.commands[s].count; v++)
+      out.push_back(static_cast<uint32_t>(b.commands[s].first + v - first));
+  }
+  return out;
+}
+
+std::vector<float> run_flags_of(const struct mbv_draw_batch &b, const std::vector<int> &strips) {
+  const int first = b.commands[strips.front()].first;
+  const struct mbv_draw_command &last = b.commands[strips.back()];
+  std::vector<float> out(static_cast<size_t>(last.first + last.count - 1 - first), 0.0f);
+  for (const int s : strips)
+    for (int v = 0; v + 1 < b.commands[s].count; v++)
+      out[static_cast<size_t>(b.commands[s].first + v - first)] = 1.0f;
+  return out;
+}
+
+/* 7e2-a1's batch: a strip of 3 vertices (vertices 0 to 2), a group, strips
+   of 5, 3, 1, 4 and 2 vertices of one state (3 to 17; the one-vertex strip
+   is vertex 11), LINES of 2 vertices (18, 19), strips of 2, 3 and 2
+   vertices of that state (20 to 26) and a strip of one vertex (27): the
+   strips of its first run are commands 2, 3, 5 and 6 (4 is the one-vertex
+   strip), those of its second 8, 9 and 10. separate: a group before every
+   strip, so that none joins another (7e2-a4's reference). */
+void strip_runs_batch(TestBatch *t, bool separate = false) {
+  const auto strip = [t, separate](int n) {
+    if (separate)
+      mbv_draw_batch_group(&t->b, MBV_DRAW_GROUP_POLYLINE);
+    std::vector<std::array<float, 3>> points;
+    for (int v = 0; v < n; v++)
+      points.push_back(
+          {-0.9f + 0.1f * static_cast<float>(v), -0.9f + 0.05f * static_cast<float>(t->b.num_commands), 0.0f});
+    t->primitive(MBV_DRAW_LINE_STRIP, points, 1, 0, 0);
+  };
+  strip(3);
+  mbv_draw_batch_group(&t->b, MBV_DRAW_GROUP_POLYLINE);
+  for (const int n : {5, 3, 1, 4, 2})
+    strip(n);
+  t->primitive(MBV_DRAW_LINES, {{-0.5f, 0.5f, 0}, {0.5f, 0.5f, 0}}, 0, 0, 1);
+  for (const int n : {2, 3, 2, 1})
+    strip(n);
+}
+
+/* model_batch_plan()'s batch again (7e2-a4): a strip, a loop, separate
+   lines 3 px wide, a stippled strip, loop and lines, and two marker runs;
+   no two consecutive strips of one state */
+void batch_plan_batch(TestBatch *t) {
+  struct mbv_draw_batch *b = &t->b;
+  mbv_draw_batch_group(b, MBV_DRAW_GROUP_ROUTE);
+  t->primitive(MBV_DRAW_LINE_STRIP, {{0, 0, 0}, {0.1f, 0, 0}, {0.2f, 0, 0}, {0.3f, 0, 0}, {0.4f, 0, 0}}, 1, 0, 0);
+  t->primitive(MBV_DRAW_LINE_LOOP, {{0, 0, 0}, {0.1f, 0, 0}, {0.1f, 0.1f, 0}, {0, 0.1f, 0}}, 0, 1, 0);
+  mbv_draw_batch_line_width(b, 3.0f);
+  t->primitive(MBV_DRAW_LINES,
+               {{0, 0, 0}, {0.1f, 0, 0}, {0.2f, 0, 0}, {0.3f, 0, 0}, {0.4f, 0, 0}, {0.5f, 0, 0}, {0.6f, 0, 0}}, 0, 0,
+               1);
+  mbv_draw_batch_line_width(b, 1.0f);
+  mbv_draw_batch_line_stipple(b, 1, 0x1111);
+  mbv_draw_batch_enable(b, MBV_DRAW_LINE_STIPPLE, true);
+  t->primitive(MBV_DRAW_LINE_STRIP, {{0, 0, 0}, {0.1f, 0, 0}, {0.1f, 0.3f, 0}}, 0, 0, 0);
+  t->primitive(MBV_DRAW_LINE_LOOP, {{0, 0, 0}, {0.2f, 0, 0}, {0.2f, 0.1f, 0}}, 0, 0, 0);
+  t->primitive(MBV_DRAW_LINES, {{0, 0, 0}, {0.1f, 0, 0}, {0.5f, 0.5f, 0}, {0.5f, 0.9f, 0}}, 0, 0, 0);
+  mbv_draw_batch_enable(b, MBV_DRAW_LINE_STIPPLE, false);
+  mbv_draw_batch_marker_disks(b, 7, 0.1, 0.08, 10, 10, 0.0f, 1.0f, 0.0f);
+  for (int k = 0; k < 3; k++) {
+    mbv_draw_batch_color3f(b, 1.0f, 0.0f, 0.0f);
+    mbv_draw_batch_marker(b, 7, 0.1f * k, 0.0f, 0.0f);
+  }
+  mbv_draw_batch_marker_disks(b, 7, 0.2, 0.16, 10, 10, 0.0f, 0.0f, 1.0f);
+  for (int k = 0; k < 2; k++) {
+    mbv_draw_batch_color3f(b, 1.0f, 0.0f, 0.0f);
+    mbv_draw_batch_marker(b, 7, 0.1f * k, 0.5f, 0.0f);
+  }
+}
+
+void model_strip_runs() {
+  rhi::Style one;
+  rhi::Style two;
+  two.ratio = 2.0;
+
+  /* 7e2-a1: thin runs and their list at ratio 1: the strip before the group
+     a draw of its own; the next four strips around the one-vertex strip
+     (vertex 11, place 8, which the list skips) a run, which the LINES end;
+     the next three a run; the trailing one-vertex strip nothing. Each run's
+     first vertex and list from the batch's commands, the lists compared
+     entry for entry; the segments as without the merge. */
+  {
+    TestBatch t;
+    strip_runs_batch(&t);
+    const struct mbv_draw_batch &b = t.b;
+    rhi::BatchPlan plan;
+    plan.build(b, one, kIdentity, kIdentity, 200, 200);
+    const std::vector<rhi::DrawItem> &items = plan.items();
+    const std::vector<uint32_t> list = plan_indices(plan, 1);
+    const std::vector<uint32_t> runs[2] = {run_indices_of(b, {2, 3, 5, 6}), run_indices_of(b, {8, 9, 10})};
+    std::vector<uint32_t> expected = runs[0];
+    expected.insert(expected.end(), runs[1].begin(), runs[1].end());
+    const uint32_t offsets[2] = {24u * static_cast<uint32_t>(b.commands[2].first),
+                                 24u * static_cast<uint32_t>(b.commands[8].first)};
+    const bool drawn = items.size() == 4 && items[0].kind == rhi::DrawKind::LineStrip && items[0].first == 0 &&
+                       items[0].count == 3 && items[0].group == 0 && items[1].kind == rhi::DrawKind::StripRun &&
+                       items[1].offset == offsets[0] && items[1].count == 17 && items[1].group == 1 &&
+                       items[1].list == 0 && items[1].parts == 4 && items[2].kind == rhi::DrawKind::Lines &&
+                       items[3].kind == rhi::DrawKind::StripRun && items[3].offset == offsets[1] &&
+                       items[3].count == 9 && items[3].group == 1 && items[3].list == 17 && items[3].parts == 3;
+    check(drawn && list == expected && plan.run_groups() == 2 && plan.run_index_entries(0) == 0 &&
+              plan.run_index_entries(1) == 26 && plan.runs() == 2 && plan.run_parts() == 7 &&
+              plan.slot_specs().size() == 4 && plan.segments() == 2 + 10 + 1 + 4,
+          "7e2: runs of thin strips at ratio 1: " + items_text(plan) +
+              " (kind first/count/offset in bytes and group; a run's first entry and strips; the runs at " +
+              std::to_string(offsets[0]) + " and " + std::to_string(offsets[1]) + " bytes expected); group 1's list " +
+              runs_text(list, plan, 1, indices_text) + " (R a restart; " + std::to_string(list.size()) +
+              " entries, expected " + indices_text(runs[0]) + " | " + indices_text(runs[1]) + "); " +
+              std::to_string(plan.run_groups()) + " groups of " +
+              std::to_string(plan.run_index_entries(0)) + " and " + std::to_string(plan.run_index_entries(1)) +
+              " entries, " + std::to_string(plan.runs()) + " runs of " + std::to_string(plan.run_parts()) +
+              " strips, " + std::to_string(plan.slot_specs().size()) + " slots, " + std::to_string(plan.segments()) +
+              " segments (17, as without the merge)");
+  }
+
+  /* 7e2-a2: what ends a run and what does not, one batch per case at ratio
+     1, mostly two strips of one state around what the case names. A group,
+     a strip of another width (3 and 4 px, both wide), the depth test, two
+     stippled strips of one state or one, LINES, a marker run, a terrain slot
+     and TRIANGLES end it: every strip a draw with a slot of its own. So does
+     the camera turned off (identity modelview, which only a clear turns on
+     again): the strip before it alone, the two after it a run. A loop after
+     a strip joins nothing (its strip and closing pair as before). A shape
+     definition, a one-vertex strip and one-vertex LINES end nothing: one
+     run. Widths 1 and 1.2 at ratio 1, both 1 physical px, merge;
+     Merge{false, true} merges no thin strips; two strips that differ only in
+     the stipple's factor, or only in its pattern, the stipple off, stay
+     apart; with max_place 8 a thin run of strips of 5 and 3 vertices closes
+     before one of 4, which would reach place 11, strips of 5 and 4 vertices
+     (the last place 8) join and strips of 5 and 5 (9) do not; a strip that
+     begins inside the one before it (its first vertex moved back into that
+     strip) joins nothing, thin or 3 px wide. */
+  {
+    /* a strip of n vertices of the cases' state */
+    const auto strip = [](TestBatch *t, int n) {
+      std::vector<std::array<float, 3>> points;
+      for (int v = 0; v < n; v++)
+        points.push_back({-0.5f + 0.1f * static_cast<float>(v), 0.1f * static_cast<float>(t->b.num_commands), 0.0f});
+      t->primitive(MBV_DRAW_LINE_STRIP, points, 1, 0, 0);
+    };
+    /* two strips of 2 vertices around what between records */
+    const auto around = [strip](const std::function<void(TestBatch *)> &between) {
+      return [strip, between](TestBatch *t) {
+        strip(t, 2);
+        between(t);
+        strip(t, 2);
+      };
+    };
+    std::string failed;
+    int cases = 0;
+    const auto expect = [&](const char *name, const std::function<void(TestBatch *)> &record, const char *draws,
+                            size_t slot_count, int runs, const rhi::Merge &merge) {
+      TestBatch t;
+      record(&t);
+      rhi::BatchPlan plan;
+      plan.build(t.b, one, kIdentity, kIdentity, 200, 200, merge);
+      cases++;
+      if (kinds_text(plan) != draws || plan.slot_specs().size() != slot_count || plan.runs() != runs)
+        failed += std::string(failed.empty() ? "" : "; ") + name + ": " + kinds_text(plan) + ", " +
+                  std::to_string(plan.slot_specs().size()) + " slots, " + std::to_string(plan.runs()) + " runs";
+    };
+    rhi::Merge merged;
+    rhi::Merge wide_only;
+    wide_only.thin = false;
+    rhi::Merge limited;
+    limited.max_place = 8;
+    expect("(a) a group", around([](TestBatch *t) { mbv_draw_batch_group(&t->b, MBV_DRAW_GROUP_POLYLINE); }),
+           "LineStrip LineStrip", 2, 0, merged);
+    expect(
+        "(b) a strip of another width",
+        [strip](TestBatch *t) {
+          mbv_draw_batch_line_width(&t->b, 3.0f);
+          strip(t, 2);
+          mbv_draw_batch_line_width(&t->b, 4.0f);
+          strip(t, 2);
+          mbv_draw_batch_line_width(&t->b, 3.0f);
+          strip(t, 2);
+        },
+        "WideStrip WideStrip WideStrip", 3, 0, merged);
+    expect("(c) the depth test", around([strip](TestBatch *t) {
+             mbv_draw_batch_enable(&t->b, MBV_DRAW_DEPTH_TEST, true);
+             strip(t, 2);
+             mbv_draw_batch_enable(&t->b, MBV_DRAW_DEPTH_TEST, false);
+           }),
+           "LineStrip LineStrip LineStrip", 3, 0, merged);
+    expect(
+        "(d) the camera",
+        [strip](TestBatch *t) {
+          strip(t, 2);
+          mbv_draw_batch_identity_modelview(&t->b);
+          strip(t, 2);
+          strip(t, 2);
+        },
+        "LineStrip StripRun:2", 2, 1, merged);
+    expect("(e) two stippled strips", around([strip](TestBatch *t) {
+             mbv_draw_batch_enable(&t->b, MBV_DRAW_LINE_STIPPLE, true);
+             strip(t, 2);
+             strip(t, 2);
+             mbv_draw_batch_enable(&t->b, MBV_DRAW_LINE_STIPPLE, false);
+           }),
+           "LineStrip StippleLines StippleLines LineStrip", 4, 0, merged);
+    expect("(e2) one stippled strip", around([strip](TestBatch *t) {
+             mbv_draw_batch_enable(&t->b, MBV_DRAW_LINE_STIPPLE, true);
+             strip(t, 2);
+             mbv_draw_batch_enable(&t->b, MBV_DRAW_LINE_STIPPLE, false);
+           }),
+           "LineStrip StippleLines LineStrip", 3, 0, merged);
+    expect("(f) LINES",
+           around([](TestBatch *t) { t->primitive(MBV_DRAW_LINES, {{0, 0, 0}, {0.5f, 0, 0}}, 0, 0, 1); }),
+           "LineStrip Lines LineStrip", 3, 0, merged);
+    expect("(g) a marker run", around([](TestBatch *t) {
+             mbv_draw_batch_marker_disks(&t->b, 3, 0.1, 0.08, 10, 10, 0, 1, 0);
+             mbv_draw_batch_marker(&t->b, 3, 0, 0, 0);
+           }),
+           "LineStrip Markers LineStrip", 3, 0, merged);
+    expect("(h) a terrain slot", around([](TestBatch *t) { mbv_draw_batch_slot(&t->b, MBV_DRAW_SLOT_TERRAIN); }),
+           "LineStrip Terrain LineStrip", 3, 0, merged);
+    expect("(i) TRIANGLES", around([](TestBatch *t) {
+             t->primitive(MBV_DRAW_TRIANGLES, {{0, 0, 0}, {0.5f, 0, 0}, {0, 0.5f, 0}}, 0, 1, 0);
+           }),
+           "LineStrip Triangles LineStrip", 3, 0, merged);
+    expect("(j) a shape definition",
+           around([](TestBatch *t) { mbv_draw_batch_marker_disks(&t->b, 3, 0.1, 0.08, 10, 10, 0, 1, 0); }),
+           "StripRun:2", 1, 1, merged);
+    expect("(k) a one-vertex strip", around([strip](TestBatch *t) { strip(t, 1); }), "StripRun:2", 1, 1, merged);
+    expect("(l) one-vertex LINES", around([](TestBatch *t) { t->primitive(MBV_DRAW_LINES, {{0, 0, 0}}, 0, 0, 1); }),
+           "StripRun:2", 1, 1, merged);
+    expect(
+        "(m) a loop after a strip",
+        [strip](TestBatch *t) {
+          strip(t, 2);
+          t->primitive(MBV_DRAW_LINE_LOOP, {{-0.5f, 0, 0}, {0.5f, 0, 0}, {0, 0.5f, 0}}, 1, 0, 0);
+        },
+        "LineStrip LineStrip Lines", 2, 0, merged);
+    expect(
+        "(n) widths 1 and 1.2",
+        [strip](TestBatch *t) {
+          strip(t, 2);
+          mbv_draw_batch_line_width(&t->b, 1.2f);
+          strip(t, 2);
+        },
+        "StripRun:2", 1, 1, merged);
+    expect(
+        "(o) Merge{false, true}",
+        [strip](TestBatch *t) {
+          strip(t, 2);
+          strip(t, 2);
+        },
+        "LineStrip LineStrip", 2, 0, wide_only);
+    expect(
+        "(p) the stipple's factor alone, the stipple off",
+        [strip](TestBatch *t) {
+          strip(t, 2);
+          mbv_draw_batch_line_stipple(&t->b, 2, 0xffff);
+          strip(t, 2);
+        },
+        "LineStrip LineStrip", 2, 0, merged);
+    expect(
+        "(p2) the stipple's pattern alone, the stipple off",
+        [strip](TestBatch *t) {
+          strip(t, 2);
+          mbv_draw_batch_line_stipple(&t->b, 1, 0x00ff);
+          strip(t, 2);
+        },
+        "LineStrip LineStrip", 2, 0, merged);
+    expect(
+        "(q) max_place 8",
+        [strip](TestBatch *t) {
+          strip(t, 5);
+          strip(t, 3);
+          strip(t, 4);
+        },
+        "StripRun:2 LineStrip", 2, 1, limited);
+    expect(
+        "(q2) max_place 8, the last place 8",
+        [strip](TestBatch *t) {
+          strip(t, 5);
+          strip(t, 4);
+        },
+        "StripRun:2", 1, 1, limited);
+    expect(
+        "(q3) max_place 8, the last place 9",
+        [strip](TestBatch *t) {
+          strip(t, 5);
+          strip(t, 5);
+        },
+        "LineStrip LineStrip", 2, 0, limited);
+    /* the second strip's first vertex moved back into the first strip
+       (commands 0 and 1: the batch's state adds no command) */
+    expect(
+        "(r) a strip beginning inside the one before it",
+        [strip](TestBatch *t) {
+          strip(t, 2);
+          strip(t, 2);
+          t->b.commands[1].first = t->b.commands[0].first + 1;
+        },
+        "LineStrip LineStrip", 2, 0, merged);
+    expect(
+        "(r2) the same, 3 px wide",
+        [strip](TestBatch *t) {
+          mbv_draw_batch_line_width(&t->b, 3.0f);
+          strip(t, 2);
+          strip(t, 2);
+          t->b.commands[1].first = t->b.commands[0].first + 1;
+        },
+        "WideStrip WideStrip", 2, 0, merged);
+    check(failed.empty(),
+          "7e2: a run of strips of one state ends at a group, a strip of another width (3 and 4 px), the depth test, "
+          "the camera (the strip before it alone, the two after it a run), stippled strips (two of one state, one), "
+          "LINES, a marker run, a terrain slot and TRIANGLES, and takes no loop (its strip and closing as before); "
+          "not at a shape, a one-vertex strip or one-vertex LINES; widths 1 and 1.2 at ratio 1 merge; "
+          "Merge{false, true} merges no thin strips; the stipple's factor alone and its pattern alone keep strips "
+          "apart with the stipple off; a thin run closes before a place beyond max_place 8 and takes a strip whose "
+          "last place is 8; a strip beginning inside the one before it joins nothing, thin or wide (" +
+              (failed.empty() ? std::to_string(cases) + " cases as expected" : "failing: " + failed) + ")");
+  }
+
+  /* 7e2-a3: wide runs at ratio 2, 7e2-a1's batch: the first strip a wide
+     strip; the first run 14 instances over a span of 15 vertices, the
+     one-vertex strip's among them, its flags 0 at the joints and on both
+     sides of vertex 11; the second run 6 instances, the trailing one-vertex
+     strip outside its span. With Merge{true, false} every wide strip a draw
+     with a slot of its own. */
+  {
+    TestBatch t;
+    strip_runs_batch(&t);
+    const struct mbv_draw_batch &b = t.b;
+    rhi::BatchPlan plan;
+    plan.build(b, two, kIdentity, kIdentity, 400, 400);
+    const std::vector<rhi::DrawItem> &items = plan.items();
+    const std::vector<float> flags = plan_flags(plan, 1);
+    const std::vector<float> runs[2] = {run_flags_of(b, {2, 3, 5, 6}), run_flags_of(b, {8, 9, 10})};
+    std::vector<float> expected = runs[0];
+    expected.insert(expected.end(), runs[1].begin(), runs[1].end());
+    const uint32_t offsets[3] = {24u * static_cast<uint32_t>(b.commands[0].first),
+                                 24u * static_cast<uint32_t>(b.commands[2].first),
+                                 24u * static_cast<uint32_t>(b.commands[8].first)};
+    const bool drawn = items.size() == 4 && items[0].kind == rhi::DrawKind::WideStrip &&
+                       items[0].offset == offsets[0] && items[0].count == 2 &&
+                       items[1].kind == rhi::DrawKind::WideRun && items[1].offset == offsets[1] &&
+                       items[1].count == 14 && items[1].group == 1 && items[1].list == 0 && items[1].parts == 4 &&
+                       items[2].kind == rhi::DrawKind::WidePairs && items[3].kind == rhi::DrawKind::WideRun &&
+                       items[3].offset == offsets[2] && items[3].count == 6 && items[3].group == 1 &&
+                       items[3].list == 14 && items[3].parts == 3;
+    rhi::Merge thin_only;
+    thin_only.wide = false;
+    rhi::BatchPlan apart;
+    apart.build(b, two, kIdentity, kIdentity, 400, 400, thin_only);
+    int wide_strips = 0;
+    for (const rhi::DrawItem &item : apart.items())
+      wide_strips += item.kind == rhi::DrawKind::WideStrip;
+    check(drawn && flags == expected && plan.run_flag_entries(1) == 20 && wide_strips == 8 &&
+              apart.items().size() == 9 && apart.slot_specs().size() == 9 && apart.runs() == 0,
+          "7e2: runs of wide strips at ratio 2: " + items_text(plan) + " (the runs at " + std::to_string(offsets[1]) +
+              " and " + std::to_string(offsets[2]) + " bytes expected); group 1's flags " +
+              runs_text(flags, plan, 1, flags_text) + " (" + std::to_string(plan.run_flag_entries(1)) +
+              ", expected " + flags_text(runs[0]) + " | " + flags_text(runs[1]) +
+              "); with Merge{true, false} " + std::to_string(wide_strips) + " wide strips in " +
+              std::to_string(apart.items().size()) + " draws, " + std::to_string(apart.slot_specs().size()) +
+              " slots, " + std::to_string(apart.runs()) + " runs (8, 9, 9 and 0 expected)");
+  }
+
+  /* 7e2-a4: the switches against an unmerged reference: Merge{false, false}
+     gives item for item (kind, source, first, count, offset, slot) and slot
+     for slot what the same batch with a group before every strip gives,
+     where no strip can join another (7e2-a1's batch, at ratios 1 and 2);
+     and a batch without two consecutive strips of one state
+     (model_batch_plan()'s) gives the same draws in every field with and
+     without Merge */
+  {
+    const auto alike = [](const rhi::BatchPlan &p, const rhi::BatchPlan &q, bool every) {
+      bool same = p.items().size() == q.items().size() && p.slot_specs() == q.slot_specs();
+      for (size_t i = 0; same && i < p.items().size(); i++) {
+        const rhi::DrawItem &a = p.items()[i];
+        const rhi::DrawItem &b = q.items()[i];
+        same = a.kind == b.kind && a.source == b.source && a.first == b.first && a.count == b.count &&
+               a.offset == b.offset && a.slot == b.slot &&
+               (!every || (a.command == b.command && a.shape == b.shape && a.list == b.list && a.group == b.group &&
+                           a.parts == b.parts));
+      }
+      return same;
+    };
+    TestBatch runs, separate, plain;
+    strip_runs_batch(&runs);
+    strip_runs_batch(&separate, true);
+    batch_plan_batch(&plain);
+    rhi::Merge none;
+    none.thin = false;
+    none.wide = false;
+    bool same = true;
+    std::string found;
+    for (const rhi::Style &style : {one, two}) {
+      const int size = style.ratio > 1.0 ? 400 : 200;
+      rhi::BatchPlan unmerged, reference, merged, plain_unmerged;
+      unmerged.build(runs.b, style, kIdentity, kIdentity, size, size, none);
+      reference.build(separate.b, style, kIdentity, kIdentity, size, size);
+      merged.build(plain.b, style, kIdentity, kIdentity, size, size);
+      plain_unmerged.build(plain.b, style, kIdentity, kIdentity, size, size, none);
+      const bool switched = unmerged.runs() == 0 && alike(unmerged, reference, false);
+      const bool unchanged = alike(merged, plain_unmerged, true);
+      same = same && switched && unchanged;
+      found += text(found.empty() ? "ratio %g: " : "; ratio %g: ", style.ratio) +
+               std::to_string(unmerged.items().size()) + " and " + std::to_string(reference.items().size()) +
+               " draws " + (switched ? "alike" : "unlike") + ", " + std::to_string(merged.items().size()) + " draws " +
+               (unchanged ? "alike" : "unlike");
+    }
+    check(same, "7e2: Merge{false, false} gives what a group before every strip gives, draw for draw and slot for "
+                "slot (7e2-a1's batch), and model_batch_plan()'s batch, without two consecutive strips of one state, "
+                "the same draws with and without Merge (" +
+                    found + ")");
+  }
+
+  /* 7e2-a5: the runs' layout compared per group, build after build of one
+     plan: a strip in group 0, a thin run in group 1 and one in group 2 (0
+     and 1 the change of groups 0, 1 and 2). The same batch again changes
+     nothing; another vertex count in group 1 changes group 1 alone, not
+     the later group 2, whose vertices it moves; one in group 2 group 2
+     alone; group 1's strips of 5 and 3 vertices as 3 and 5 (the same totals,
+     other places) group 1; group 0's strip 2 vertices longer nothing, the
+     runs' offsets 48 bytes on; ratio 2 after ratio 1 (the runs wide) groups 1
+     and 2; BatchPlan() and a build groups 1 and 2; a fourth strip in group
+     1's run, so that group 2 begins later in the layout, group 1 alone. */
+  {
+    rhi::BatchPlan plan;
+    bool runs = true;
+    const auto build = [&plan, &runs](int first, const std::vector<int> &group1, const std::vector<int> &group2,
+                                      const rhi::Style &style) {
+      TestBatch t;
+      const auto strip = [&t](int n) {
+        std::vector<std::array<float, 3>> points;
+        for (int v = 0; v < n; v++)
+          points.push_back(
+              {-0.9f + 0.1f * static_cast<float>(v), -0.9f + 0.05f * static_cast<float>(t.b.num_commands), 0.0f});
+        t.primitive(MBV_DRAW_LINE_STRIP, points, 1, 0, 0);
+      };
+      strip(first);
+      mbv_draw_batch_group(&t.b, MBV_DRAW_GROUP_PICK);
+      for (const int n : group1)
+        strip(n);
+      mbv_draw_batch_group(&t.b, MBV_DRAW_GROUP_POLYLINE);
+      for (const int n : group2)
+        strip(n);
+      plan.build(t.b, style, kIdentity, kIdentity, 400, 400);
+      runs = runs && plan.runs() == 2 && plan.run_groups() == 3;
+      std::string changed;
+      for (int g = 0; g < 3; g++)
+        changed += plan.runs_changed(g) ? '1' : '0';
+      return changed;
+    };
+    const auto run_offsets = [&plan]() {
+      return plan.items().size() == 3 ? std::array<uint32_t, 2>{plan.items()[1].offset, plan.items()[2].offset}
+                                      : std::array<uint32_t, 2>{0, 0};
+    };
+    const std::string first = build(3, {5, 3, 4}, {4, 2, 3}, one);
+    const std::string same = build(3, {5, 3, 4}, {4, 2, 3}, one);
+    const std::string group1 = build(3, {5, 3, 6}, {4, 2, 3}, one);
+    const std::string group2 = build(3, {5, 3, 6}, {4, 5, 3}, one);
+    const std::string swapped = build(3, {3, 5, 6}, {4, 5, 3}, one);
+    const std::array<uint32_t, 2> before = run_offsets();
+    const std::string grown = build(5, {3, 5, 6}, {4, 5, 3}, one);
+    const std::array<uint32_t, 2> after = run_offsets();
+    const std::string wide = build(5, {3, 5, 6}, {4, 5, 3}, two);
+    plan = rhi::BatchPlan();
+    const std::string reset = build(5, {3, 5, 6}, {4, 5, 3}, two);
+    const std::string added = build(5, {3, 5, 6, 2}, {4, 5, 3}, two);
+    const bool moved = before[0] > 0 && after[0] == before[0] + 48 && after[1] == before[1] + 48;
+    check(runs && same == "000" && group1 == "010" && group2 == "001" && swapped == "010" && grown == "000" &&
+              moved && wide == "011" && reset == "011" && added == "010",
+          "7e2: the runs' layout compared per group (groups 0, 1 and 2 changed: 1): the first build " + first +
+              ", the same batch again " + same + " (000), another vertex count in group 1 " + group1 +
+              " (010: group 2's lists kept), in group 2 " + group2 + " (001), group 1's strips of 5 and 3 vertices " +
+              "as 3 and 5 " + swapped + " (010), group 0's strip 2 vertices longer " + grown + " (000) with the "
+              "runs at " + std::to_string(after[0]) + " and " + std::to_string(after[1]) + " bytes, " +
+              std::to_string(before[0]) + " and " + std::to_string(before[1]) + " before (48 more), ratio 2 after "
+              "ratio 1 " + wide + " (011), BatchPlan() then a build " + reset + " (011), a fourth strip in group 1's "
+              "run " + added + " (010)");
+  }
+
+  /* 7e2-a6: a run beyond 16-bit indices: one group with strips of 40,000
+     and 30,001 vertices of one state, a strip 3 px wide, then a second run
+     of strips of 3 and 2 vertices of the first run's state, which begins
+     beyond entry 65,535 of the group's list and flags: the list and flags
+     against the commands' entry for entry, and the second run's first
+     entry */
+  {
+    TestBatch t;
+    mbv_draw_batch_group(&t.b, MBV_DRAW_GROUP_POLYLINE);
+    const int counts[5] = {40000, 30001, 2, 3, 2};
+    for (int k = 0; k < 5; k++) {
+      /* the third strip 3 px wide, the others 1 px */
+      const int n = counts[k];
+      mbv_draw_batch_line_width(&t.b, k == 2 ? 3.0f : 1.0f);
+      mbv_draw_batch_begin(&t.b, MBV_DRAW_LINE_STRIP);
+      for (int v = 0; v < n; v++)
+        mbv_draw_batch_vertex3f(&t.b, -0.9f + 1.8f * static_cast<float>(v) / static_cast<float>(n), 0.0f, 0.0f);
+      mbv_draw_batch_end(&t.b);
+    }
+    /* the second run's first entry in its group's list or flags: the
+       plan's last draw, a run */
+    const auto second = [](const rhi::BatchPlan &plan, rhi::DrawKind kind) {
+      return plan.items().size() == 3 && plan.items().back().kind == kind && plan.items().back().parts == 2
+                 ? static_cast<long>(plan.items().back().list)
+                 : -1L;
+    };
+    /* the commands' entries of both runs (commands 1 and 2, 4 and 5) */
+    std::vector<uint32_t> expected_list = run_indices_of(t.b, {1, 2});
+    std::vector<float> expected_flags = run_flags_of(t.b, {1, 2});
+    for (const uint32_t entry : run_indices_of(t.b, {4, 5}))
+      expected_list.push_back(entry);
+    for (const float flag : run_flags_of(t.b, {4, 5}))
+      expected_flags.push_back(flag);
+    rhi::BatchPlan plan;
+    plan.build(t.b, one, kIdentity, kIdentity, 200, 200);
+    const size_t entries = plan.run_index_entries(1);
+    const std::vector<uint32_t> list = plan_indices(plan, 1);
+    const bool listed = list == expected_list;
+    const long second_list = second(plan, rhi::DrawKind::StripRun);
+    plan.build(t.b, two, kIdentity, kIdentity, 400, 400);
+    const size_t flag_entries = plan.run_flag_entries(1);
+    const std::vector<float> flags = plan_flags(plan, 1);
+    const bool flagged = flags == expected_flags;
+    const long second_flags = second(plan, rhi::DrawKind::WideRun);
+    const auto entry = [&list](size_t k) {
+      return k >= list.size() ? std::string("none") : list[k] == kRestart ? std::string("R") : std::to_string(list[k]);
+    };
+    const auto flag = [&flags](size_t k) { return k >= flags.size() ? std::string("none") : text("%g", flags[k]); };
+    check(entries == 70008 && listed && list.size() == 70008 && list[40000] == kRestart && list[40001] == 40000 &&
+              list[70001] == 70000 && list[70002] == 0 && list[70005] == kRestart && second_list == 70002 &&
+              flag_entries == 70004 && flagged && flags.size() == 70004 && flags[39999] == 0.0f &&
+              flags[40000] == 1.0f && second_flags == 70000,
+          "7e2: a run beyond 16-bit indices (strips of 40,000 and 30,001 vertices), a strip 3 px wide and a second "
+          "run (strips of 3 and 2 vertices) in one group: at ratio 1 " +
+              std::to_string(entries) + " entries (70,008), entry 40,000 " + entry(40000) + " (R), 40,001 " +
+              entry(40001) + " (40000), 70,001 " + entry(70001) + " (70000), 70,002 " + entry(70002) +
+              " (0), 70,005 " + entry(70005) + " (R), every entry as the commands give " + (listed ? "yes" : "no") +
+              ", the second run from entry " + std::to_string(second_list) + " (70002); at ratio 2 " +
+              std::to_string(flag_entries) + " flags (70,004), flag 39,999 " + flag(39999) + " (0), 40,000 " +
+              flag(40000) + " (1), every flag as the commands give " + (flagged ? "yes" : "no") +
+              ", the second run from flag " + std::to_string(second_flags) + " (70000)");
+  }
+}
+
 void model_glu() {
   /* every marker call of the overlays, at three radii, against the vertices
      traced from Mesa's GLU and Apple's GLU, bit for bit */
@@ -3861,11 +4526,15 @@ void null_batch() {
   close_instance(instance);
 
   /* the uniform ring grows past its first 64 slots; if it cannot, the frame
-     fails as for the other buffers */
+     fails as for the other buffers (7e2: a group before each of the 70
+     strips of one state, so that no two form a run of one draw and one
+     slot) */
   {
     TestBatch many;
-    for (int k = 0; k < 70; k++)
+    for (int k = 0; k < 70; k++) {
+      mbv_draw_batch_group(&many.b, MBV_DRAW_GROUP_POLYLINE);
       many.primitive(MBV_DRAW_LINE_STRIP, {{0, 0, 0}, {0.5f, 0.01f * k, 0}}, 1, 0, 0);
+    }
     mbvq::OffscreenRenderer ring(mbvq::OffscreenRenderer::Api::Null);
     mbvq::RenderOptions plain;
     const bool grown = ring.render_batch(&many.b, kIdentity, kIdentity, 200, 200, plain, nullptr);
@@ -4223,9 +4892,13 @@ void metal_batch() {
    slot, with Null and Metal QRhis */
 void process_memory(double *resident, double *peak, double *footprint);
 
-/* count line strips of n vertices each, one colour */
-void add_strips(TestBatch *t, int count, int n, float r, float g, float bl) {
+/* count line strips of n vertices each, one colour; separate: a group
+   before each strip after the first (7e2), so that no two form a run and
+   each strip is a draw with a uniform slot of its own */
+void add_strips(TestBatch *t, int count, int n, float r, float g, float bl, bool separate = false) {
   for (int k = 0; k < count; k++) {
+    if (separate && k > 0)
+      mbv_draw_batch_group(&t->b, MBV_DRAW_GROUP_POLYLINE);
     mbv_draw_batch_color3f(&t->b, r, g, bl);
     mbv_draw_batch_begin(&t->b, MBV_DRAW_LINE_STRIP);
     for (int v = 0; v < n; v++)
@@ -4256,9 +4929,13 @@ void ring_failures(mbvq::OffscreenRenderer::Api api, const char *name) {
   const bool metal = api == mbvq::OffscreenRenderer::Api::Metal;
   TestBatch few;
   few.primitive(MBV_DRAW_LINE_STRIP, {{-0.8f, 0.005f, 0}, {0.8f, 0.005f, 0}}, 1, 0, 0);
+  /* 70 strips of one state, a group before each (7e2), so that no two form
+     a run: 70 draws and 70 slots, more than the ring's first 64 */
   TestBatch many;
-  for (int k = 0; k < 70; k++)
+  for (int k = 0; k < 70; k++) {
+    mbv_draw_batch_group(&many.b, MBV_DRAW_GROUP_POLYLINE);
     many.primitive(MBV_DRAW_LINE_STRIP, {{-0.8f, -0.5f + 0.01f * k, 0}, {0.8f, -0.5f + 0.01f * k, 0}}, 0, 0, 1);
+  }
   bool ok = true;
   std::string kept;
   std::string held;
@@ -4424,16 +5101,17 @@ void null_buffers() {
   }
 
   /* The uniform ring is written whole in every frame, the slots beyond the
-     commands as zeros: after a frame of 70 commands, which doubles the ring
-     of 64 slots to 128, and after a frame of one command after it. A slot of
-     112 bytes takes 256 at the 256-byte alignment of a Null QRhi's uniform
+     commands as zeros: after a frame of 70 commands (strips, each in a group
+     of its own so that no two form a run, 7e2), which doubles the ring of 64
+     slots to 128, and after a frame of one command after it. A slot of 112
+     bytes takes 256 at the 256-byte alignment of a Null QRhi's uniform
      buffers. This checks the size the frame passes to the ring's update
      (RenderStats::ring_bytes); the Metal heap check (metal_buffers) checks
      the write itself. */
   {
     mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
     TestBatch many;
-    add_strips(&many, 70, 2, 0, 0, 1);
+    add_strips(&many, 70, 2, 0, 0, 1, true);
     TestBatch few;
     few.primitive(MBV_DRAW_LINE_STRIP, {{0, 0, 0}, {0.5f, 0, 0}}, 1, 0, 0);
     mbvq::RenderOptions options;
@@ -4448,6 +5126,331 @@ void null_buffers() {
               " bytes in a frame of " + std::to_string(grown.uniform_slots) + " commands and " +
               std::to_string(after.ring_bytes) + " in a frame of " + std::to_string(after.uniform_slots) +
               " after it (128 slots of 256 bytes, " + std::to_string(whole) + ")");
+  }
+}
+
+/*--------------------------------------------------------------------*/
+/* 7e2 with a Null QRhi: a run of strips of one state drawn as one draw with
+   one slot, its group's lists written when the group's runs change and
+   kept otherwise (7e2-b1, b2), the test switches (7e2-b3), failures and
+   releases (7e2-b4), and each group's lists apart from the others'
+   (7e2-b5) */
+
+/* 7e2-b1's batch at ratio 1: a terrain slot, a strip of `first` vertices,
+   a group, 100 thin strips of 2 to 5 vertices of one state (the first of
+   5, the second of `second`; split: the first recorded as strips of 3 and
+   2 over its vertices), a group, 50 strips 3 px wide (wide at ratio 1; the
+   last of 3 vertices, split_last: recorded as strips of 2 and 1 over its
+   vertices, so that its last vertex lies outside the run), a group, the line
+   width set back to 1 (the batch keeps its state) and one strip of 2; *thin
+   and *wide get the vertices of the thin and of the wide strips */
+void null_runs_batch(TestBatch *t, int first, int second, bool split, bool split_last, size_t *thin, size_t *wide) {
+  const auto strip = [](int n, float y) {
+    std::vector<std::array<float, 3>> points;
+    for (int v = 0; v < n; v++)
+      points.push_back({-0.9f + 0.4f * static_cast<float>(v), y, 0.0f});
+    return points;
+  };
+  mbv_draw_batch_slot(&t->b, MBV_DRAW_SLOT_TERRAIN);
+  t->primitive(MBV_DRAW_LINE_STRIP, strip(first, 0.9f), 0, 0, 0);
+  mbv_draw_batch_group(&t->b, MBV_DRAW_GROUP_POLYLINE);
+  *thin = 0;
+  for (int k = 0; k < 100; k++) {
+    const int n = k == 0 ? 5 : k == 1 ? second : 2 + k % 4;
+    const std::vector<std::array<float, 3>> points = strip(n, -0.5f + 0.005f * static_cast<float>(k));
+    if (k == 0 && split) {
+      t->primitive(MBV_DRAW_LINE_STRIP, std::vector<std::array<float, 3>>(points.begin(), points.begin() + 3), 1, 0, 0);
+      t->primitive(MBV_DRAW_LINE_STRIP, std::vector<std::array<float, 3>>(points.begin() + 3, points.end()), 1, 0, 0);
+    }
+    else
+      t->primitive(MBV_DRAW_LINE_STRIP, points, 1, 0, 0);
+    *thin += static_cast<size_t>(n);
+  }
+  mbv_draw_batch_group(&t->b, MBV_DRAW_GROUP_NAV);
+  mbv_draw_batch_line_width(&t->b, 3.0f);
+  *wide = 0;
+  for (int k = 0; k < 50; k++) {
+    const int n = 2 + k % 3;
+    const std::vector<std::array<float, 3>> points = strip(n, 0.1f + 0.01f * static_cast<float>(k));
+    if (k == 49 && split_last) {
+      t->primitive(MBV_DRAW_LINE_STRIP, std::vector<std::array<float, 3>>(points.begin(), points.begin() + 2), 0, 0, 1);
+      t->primitive(MBV_DRAW_LINE_STRIP, std::vector<std::array<float, 3>>(points.begin() + 2, points.end()), 0, 0, 1);
+    }
+    else
+      t->primitive(MBV_DRAW_LINE_STRIP, points, 0, 0, 1);
+    *wide += static_cast<size_t>(n);
+  }
+  mbv_draw_batch_group(&t->b, MBV_DRAW_GROUP_VECTOR);
+  mbv_draw_batch_line_width(&t->b, 1.0f);
+  t->primitive(MBV_DRAW_LINE_STRIP, strip(2, 0.95f), 0, 1, 0);
+}
+
+void null_strip_runs() {
+  mbvq::RenderOptions merged;
+  mbvq::RenderOptions failing;
+  failing.fail_buffers = true;
+  size_t thin = 0, wide = 0;
+  TestBatch batch;
+  null_runs_batch(&batch, 3, 3, false, false, &thin, &wide);
+  /* the run lists' bytes: group 1's index list (each thin strip's vertices,
+     a restart between strips) and group 2's flags (one per segment of the
+     wide run's vertices) */
+  const size_t index_bytes = 4 * (thin + 99), flag_bytes = 4 * (wide - 1);
+  /* 7e2-b1's counts: the strip, the thin run, the wide run and the last
+     strip drawn (render_batch draws no terrain), their slots and the
+     terrain's; restarted; the lists held once (Null, static); the corners
+     of wide lines, the vertices, group 1's index list and group 2's flags */
+  const auto b1_counts = [index_bytes, flag_bytes](const mbvq::RenderStats &s) {
+    return !s.failed && s.draws == 4 && s.thin_draws == 3 && s.wide_draws == 1 && s.uniform_slots == 5 &&
+           s.runs == 2 && s.run_parts == 150 && s.restart && s.run_held_bytes == index_bytes + flag_bytes &&
+           s.batch_resources == 4;
+  };
+  const auto counts = [](const mbvq::RenderStats &s) {
+    return std::to_string(s.draws) + " draws (" + std::to_string(s.thin_draws) + " thin, " +
+           std::to_string(s.wide_draws) + " wide), " + std::to_string(s.uniform_slots) + " slots, " +
+           std::to_string(s.runs) + " runs of " + std::to_string(s.run_parts) + " strips, restart " +
+           std::to_string(s.restart ? 1 : 0) + ", " + std::to_string(s.run_writes) + " list writes of " +
+           std::to_string(s.run_bytes) + " bytes, " + std::to_string(s.run_held_bytes) + " bytes held, " +
+           std::to_string(s.batch_resources) + " batch buffers";
+  };
+
+  /* 7e2-b1: a strip, a run of 100 thin strips, a run of 50 strips 3 px
+     wide and a strip, in groups of their own: 4 draws, each run one draw
+     with one slot, both lists written in the first frame */
+  mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+  const bool drawn = renderer.render_batch(&batch.b, kIdentity, kIdentity, 200, 200, merged, nullptr);
+  const mbvq::RenderStats first = renderer.stats();
+  const size_t buffer_bytes = batch_buffer_bytes(batch.b, 200, 200);
+  check(drawn && b1_counts(first) && first.run_writes == 2 && first.run_bytes == index_bytes + flag_bytes &&
+            first.batch_held_bytes == buffer_bytes,
+        "7e2 Null: a strip, a run of 100 thin strips, a run of 50 strips 3 px wide and a strip, in groups of their "
+        "own: " + counts(first) + " (4 draws, 3 thin, 1 wide, 5 slots, 2 runs of 150 strips, restart 1, 2 writes of " +
+            std::to_string(index_bytes + flag_bytes) + " bytes held once, 4 buffers expected); the batch's buffers "
+            "hold " + std::to_string(first.batch_held_bytes) + " bytes (" + std::to_string(buffer_bytes) + ")");
+
+  /* 7e2-b2: the lists kept, on 7e2-b1's renderer, step by step: (1) the
+     same batch with fail_buffers: nothing is made, so the frame does not
+     fail; (2) the strip before the groups 2 vertices longer: the lists,
+     counted from each run's first vertex, kept; (3) the thin run's second
+     strip of 4 vertices: group 1's lists written alone, one entry more held;
+     (4) the thin run's first strip (5 vertices) recorded as strips of 3 and
+     2 over the same vertices, with fail_buffers: its index list one entry
+     longer while every batch buffer keeps its size, so that only group 1's
+     index buffer is new, the frame fails and lets go of every buffer; (5)
+     the same batch: both groups written again (the failed frame reset the
+     plan); (6) the wide run's last strip (3 vertices) recorded as strips of
+     2 and 1 over the same vertices, with fail_buffers: its flags one entry
+     shorter while every other buffer keeps its size, so that only group 2's
+     flags buffer is new, the frame fails and lets go of every buffer; (7)
+     the same batch: both groups written again */
+  {
+    std::string seen, failed;
+    const auto step = [&](const char *name, bool ok, const mbvq::RenderStats &s) {
+      const std::string found = std::string(name) + ": " + (s.failed ? "failed, " : "") + std::to_string(s.draws) +
+                                " draws, " + std::to_string(s.run_writes) + " writes, " +
+                                std::to_string(s.run_held_bytes) + " bytes held, " +
+                                std::to_string(s.batch_resources) + " batch buffers";
+      seen += (seen.empty() ? "" : "; ") + found;
+      if (!ok)
+        failed += (failed.empty() ? "" : ", ") + std::string(name);
+    };
+    const auto same_draws = [&first](const mbvq::RenderStats &s) {
+      return s.draws == first.draws && s.thin_draws == first.thin_draws && s.wide_draws == first.wide_draws;
+    };
+    bool ok = renderer.render_batch(&batch.b, kIdentity, kIdentity, 200, 200, failing, nullptr);
+    mbvq::RenderStats s = renderer.stats();
+    step("(1)", ok && !s.failed && same_draws(s) && s.run_writes == 2, s);
+    size_t longer_thin = 0, longer_wide = 0;
+    TestBatch longer;
+    null_runs_batch(&longer, 5, 3, false, false, &longer_thin, &longer_wide);
+    ok = renderer.render_batch(&longer.b, kIdentity, kIdentity, 200, 200, merged, nullptr);
+    s = renderer.stats();
+    step("(2)", ok && !s.failed && same_draws(s) && s.run_writes == 2, s);
+    size_t other_thin = 0, other_wide = 0;
+    TestBatch other;
+    null_runs_batch(&other, 5, 4, false, false, &other_thin, &other_wide);
+    ok = renderer.render_batch(&other.b, kIdentity, kIdentity, 200, 200, merged, nullptr);
+    s = renderer.stats();
+    step("(3)", ok && !s.failed && s.run_writes == 3 && other_thin == thin + 1 &&
+                    s.run_held_bytes == 4 * (other_thin + 99) + 4 * (other_wide - 1),
+         s);
+    size_t split_thin = 0, split_wide = 0;
+    TestBatch split;
+    null_runs_batch(&split, 5, 4, true, false, &split_thin, &split_wide);
+    ok = renderer.render_batch(&split.b, kIdentity, kIdentity, 200, 200, failing, nullptr);
+    s = renderer.stats();
+    step("(4)", !ok && s.failed && s.run_held_bytes == 0 && s.batch_resources == 0 &&
+                    split.b.num_vertices == other.b.num_vertices,
+         s);
+    ok = renderer.render_batch(&split.b, kIdentity, kIdentity, 200, 200, merged, nullptr);
+    s = renderer.stats();
+    step("(5)", ok && !s.failed && s.run_writes == 5, s);
+    size_t last_thin = 0, last_wide = 0;
+    TestBatch last;
+    null_runs_batch(&last, 5, 4, true, true, &last_thin, &last_wide);
+    ok = renderer.render_batch(&last.b, kIdentity, kIdentity, 200, 200, failing, nullptr);
+    s = renderer.stats();
+    step("(6)", !ok && s.failed && s.run_held_bytes == 0 && s.batch_resources == 0 &&
+                    last.b.num_vertices == split.b.num_vertices,
+         s);
+    ok = renderer.render_batch(&last.b, kIdentity, kIdentity, 200, 200, merged, nullptr);
+    s = renderer.stats();
+    step("(7)", ok && !s.failed && s.run_writes == 7 && s.run_held_bytes == 4 * (last_thin + 100) + 4 * (last_wide - 2),
+         s);
+    check(failed.empty(),
+          "7e2 Null: the run lists are kept: (1) the same batch with fail_buffers does not fail and writes no list "
+          "(2 writes in all); (2) the strip before the groups 2 vertices longer writes none (2); (3) a thin strip "
+          "of another vertex count writes group 1's lists alone (3), " +
+              std::to_string(4 * (other_thin + 99) + 4 * (other_wide - 1)) + " bytes held; (4) the thin run's "
+              "first strip as two over its vertices, with fail_buffers, fails the frame (only the index list's "
+              "buffer is new) and lets go of every buffer; (5) the next frame writes both groups again (5); (6) the "
+              "wide run's last strip as strips of 2 and 1 over its vertices, with fail_buffers, fails the frame (only "
+              "the flags' buffer is new) and lets go of every buffer; (7) the next frame writes both groups again "
+              "(7), " + std::to_string(4 * (last_thin + 100) + 4 * (last_wide - 2)) + " bytes held: " +
+              seen + (failed.empty() ? "" : "; failing: " + failed));
+  }
+
+  /* 7e2-b3: the switches, on a renderer that drew 7e2-b1's batch:
+     unmerged_draws draws every strip on its own with a slot of its own and
+     lets both groups' lists go; merged again, both are written again and
+     7e2-b1's counts come back; no_restart draws the thin strips on their
+     own and the wide run merged (group 1's index list let go of: a write of
+     nothing, not counted); then a frame of the terrain slot and the strip of
+     3 alone (group 0 only) lets the other groups' lists go, group 2's flags
+     among them; then the whole batch with no_restart again: the groups come
+     back, group 2's flags written again (compared with no group 2) */
+  {
+    mbvq::OffscreenRenderer switched(mbvq::OffscreenRenderer::Api::Null);
+    mbvq::RenderOptions unmerged;
+    unmerged.unmerged_draws = true;
+    mbvq::RenderOptions unrestarted;
+    unrestarted.no_restart = true;
+    TestBatch alone;
+    mbv_draw_batch_slot(&alone.b, MBV_DRAW_SLOT_TERRAIN);
+    alone.primitive(MBV_DRAW_LINE_STRIP, {{-0.9f, 0.9f, 0}, {-0.5f, 0.9f, 0}, {-0.1f, 0.9f, 0}}, 0, 0, 0);
+    bool frames = switched.render_batch(&batch.b, kIdentity, kIdentity, 200, 200, merged, nullptr);
+    frames = switched.render_batch(&batch.b, kIdentity, kIdentity, 200, 200, unmerged, nullptr) && frames;
+    const mbvq::RenderStats apart = switched.stats();
+    frames = switched.render_batch(&batch.b, kIdentity, kIdentity, 200, 200, merged, nullptr) && frames;
+    const mbvq::RenderStats again = switched.stats();
+    frames = switched.render_batch(&batch.b, kIdentity, kIdentity, 200, 200, unrestarted, nullptr) && frames;
+    const mbvq::RenderStats strips = switched.stats();
+    frames = switched.render_batch(&alone.b, kIdentity, kIdentity, 200, 200, unrestarted, nullptr) && frames;
+    const mbvq::RenderStats ungrouped = switched.stats();
+    frames = switched.render_batch(&batch.b, kIdentity, kIdentity, 200, 200, unrestarted, nullptr) && frames;
+    const mbvq::RenderStats returned = switched.stats();
+    check(frames && apart.draws == 1 + 100 + 50 + 1 && apart.uniform_slots == 153 && apart.runs == 0 &&
+              !apart.restart && apart.run_writes == 2 && apart.run_held_bytes == 0 && apart.batch_resources == 2 &&
+              again.run_writes == apart.run_writes + 2 && b1_counts(again) && strips.draws == 1 + 100 + 1 + 1 &&
+              strips.thin_draws == 102 && strips.uniform_slots == 104 && strips.runs == 1 && !strips.restart &&
+              strips.run_writes == again.run_writes && strips.run_held_bytes == flag_bytes &&
+              ungrouped.run_held_bytes == 0 && ungrouped.batch_resources == 2 &&
+              returned.run_writes == ungrouped.run_writes + 1 && returned.run_held_bytes == flag_bytes &&
+              returned.draws == 1 + 100 + 1 + 1 && returned.uniform_slots == 104,
+          "7e2 Null: unmerged_draws: " + counts(apart) + " (152 draws, 153 slots, no run, restart 0, the first "
+          "frame's 2 writes, nothing held, 2 buffers); merged again: " + counts(again) + " (2 writes more, 7e2-b1's "
+          "counts); no_restart: " + counts(strips) + " (103 draws, 102 thin, 104 slots, 1 run, restart 0, no write "
+          "more, the flags' " + std::to_string(flag_bytes) + " bytes held); the terrain slot and the strip alone "
+          "(group 0): " + std::to_string(ungrouped.run_held_bytes) + " bytes held, " +
+              std::to_string(ungrouped.batch_resources) + " batch buffers (0, 2); the whole batch with no_restart "
+              "again: " + counts(returned) + " (1 write more, the flags' bytes held, 103 draws, 104 slots)");
+  }
+
+  /* 7e2-b4: failures and releases: one group holding 35 thin runs of 2
+     strips each, each run followed by a strip 2 px wide: 70 slots, more
+     than the ring's first 64. With fail_slot_growth the frame fails after
+     its lists were queued (the ring is written after them) and lets them
+     go; the next frame writes them again and draws 70 draws in 70 slots,
+     the ring grown to 128 (256 bytes a slot on Null); release() leaves no
+     list bytes held in the statistics; the first frame of a new renderer
+     writes them again, its totals counted from it */
+  {
+    TestBatch many;
+    mbv_draw_batch_group(&many.b, MBV_DRAW_GROUP_POLYLINE);
+    for (int k = 0; k < 35; k++) {
+      const float y = -0.9f + 0.05f * static_cast<float>(k);
+      many.primitive(MBV_DRAW_LINE_STRIP, {{-0.9f, y, 0}, {-0.3f, y, 0}}, 1, 0, 0);
+      many.primitive(MBV_DRAW_LINE_STRIP, {{-0.2f, y, 0}, {0.3f, y, 0}}, 1, 0, 0);
+      mbv_draw_batch_line_width(&many.b, 2.0f);
+      many.primitive(MBV_DRAW_LINE_STRIP, {{0.4f, y, 0}, {0.9f, y, 0}}, 0, 0, 1);
+      mbv_draw_batch_line_width(&many.b, 1.0f);
+    }
+    mbvq::OffscreenRenderer ring(mbvq::OffscreenRenderer::Api::Null);
+    mbvq::RenderOptions stuck;
+    stuck.fail_slot_growth = true;
+    const bool refused = !ring.render_batch(&many.b, kIdentity, kIdentity, 200, 200, stuck, nullptr);
+    const mbvq::RenderStats failed = ring.stats();
+    const bool redrawn = ring.render_batch(&many.b, kIdentity, kIdentity, 200, 200, merged, nullptr);
+    const mbvq::RenderStats next = ring.stats();
+    ring.release();
+    const mbvq::RenderStats released = ring.stats();
+    const bool remade = ring.render_batch(&many.b, kIdentity, kIdentity, 200, 200, merged, nullptr);
+    const mbvq::RenderStats renewed = ring.stats();
+    const size_t whole = static_cast<size_t>(128) * 256;
+    check(refused && failed.failed && failed.run_writes == 1 && failed.run_held_bytes == 0 &&
+              failed.batch_resources == 0 && redrawn && !next.failed && next.run_writes == failed.run_writes + 1 &&
+              next.draws == 70 && next.uniform_slots == 70 && next.runs == 35 && next.ring_bytes == whole &&
+              next.run_held_bytes > 0 && released.run_held_bytes == 0 && released.resources == 0 && remade &&
+              !renewed.failed && renewed.run_writes == 1,
+          "7e2 Null: 35 thin runs of 2 strips, each with a strip 2 px wide after it, in one group: with "
+          "fail_slot_growth the frame fails after writing the lists (" +
+              std::to_string(failed.run_writes) + " write, " + std::to_string(failed.run_held_bytes) +
+              " bytes and " + std::to_string(failed.batch_resources) + " batch buffers held after it); the next "
+              "frame writes them again (" + std::to_string(next.run_writes) + " writes) and draws " +
+              std::to_string(next.draws) + " draws in " + std::to_string(next.uniform_slots) + " slots (" +
+              std::to_string(next.runs) + " runs), the ring written whole at " + std::to_string(next.ring_bytes) +
+              " bytes (" + std::to_string(whole) + ": grown to 128 slots); release() leaves " +
+              std::to_string(released.run_held_bytes) + " bytes of lists held (0, " +
+              std::to_string(next.run_held_bytes) + " before) and " + std::to_string(released.resources) +
+              " resources (0); the new renderer's first frame writes them (" + std::to_string(renewed.run_writes) +
+              " write in its totals)");
+  }
+
+  /* 7e2-b5: the groups' lists apart: group 1 a run of 5 strips 3 px wide
+     whose vertex counts change in every frame (as a 3D pick's marks, draped
+     again at each event), group 2 a run of 1,000 thin strips of 2 to 5
+     vertices; 4 frames: the first writes both groups, each later one group
+     1's flags alone, 4 x (the 5-strip run's span - 1) bytes, and never group
+     2's index list again */
+  {
+    mbvq::OffscreenRenderer apart(mbvq::OffscreenRenderer::Api::Null);
+    bool frames = true, kept = true;
+    std::string seen;
+    mbvq::RenderStats before;
+    for (int f = 0; f < 4; f++) {
+      TestBatch t;
+      mbv_draw_batch_group(&t.b, MBV_DRAW_GROUP_PICK);
+      mbv_draw_batch_line_width(&t.b, 3.0f);
+      size_t span = 0;
+      for (int k = 0; k < 5; k++) {
+        const int n = 2 + (k + f) % 3;
+        std::vector<std::array<float, 3>> points;
+        for (int v = 0; v < n; v++)
+          points.push_back({-0.9f + 0.2f * static_cast<float>(v), -0.9f + 0.1f * static_cast<float>(k), 0.0f});
+        t.primitive(MBV_DRAW_LINE_STRIP, points, 1, 0, 0);
+        span += static_cast<size_t>(n);
+      }
+      mbv_draw_batch_group(&t.b, MBV_DRAW_GROUP_POLYLINE);
+      mbv_draw_batch_line_width(&t.b, 1.0f);
+      for (int k = 0; k < 1000; k++) {
+        std::vector<std::array<float, 3>> points;
+        for (int v = 0; v < 2 + k % 4; v++)
+          points.push_back({-0.9f + 0.2f * static_cast<float>(v), 0.0005f * static_cast<float>(k), 0.0f});
+        t.primitive(MBV_DRAW_LINE_STRIP, points, 0, 0, 1);
+      }
+      frames = apart.render_batch(&t.b, kIdentity, kIdentity, 200, 200, merged, nullptr) && frames;
+      const mbvq::RenderStats s = apart.stats();
+      kept = kept && s.draws == 2 &&
+             (f == 0 ? s.run_writes == 2
+                     : s.run_writes == before.run_writes + 1 && s.run_bytes == before.run_bytes + 4 * (span - 1));
+      seen += (f == 0 ? "" : "; ") + std::to_string(s.draws) + " draws, " + std::to_string(s.run_writes) + " writes" +
+              (f == 0 ? "" : ", " + std::to_string(s.run_bytes - before.run_bytes) + " bytes (" +
+                                 std::to_string(4 * (span - 1)) + ")");
+      before = s;
+    }
+    check(frames && kept, "7e2 Null: a run of 5 wide strips whose vertex counts change in every frame and a run of "
+                          "1,000 thin strips in the group after it: the first frame writes both groups' lists, each "
+                          "later one only the first group's flags (" + seen + ")");
   }
 }
 
@@ -4527,10 +5530,11 @@ void metal_buffers() {
   /* Every frame of a batch on the same frame slot, as when a window draws a
      frame of its own between two frames of the view (a status label that
      repainted after each fill did). The batch fills all five of its
-     buffers: 1,900 strips of 25 vertices, 100 loops (their closing
-     segments), 2,000 quads (as triangles), 20,000 markers in one run (their
-     instances) and a stippled line of 20,000 vertices (its stipple pairs),
-     with a uniform slot for each of their 2,003 commands. Each frame and
+     buffers: 1,900 strips of 25 vertices (each in a group of its own, so
+     that no two form a run, 7e2), 100 loops (their closing segments), 2,000
+     quads (as triangles), 20,000 markers in one run (their instances) and a
+     stippled line of 20,000 vertices (its stipple pairs), with a uniform
+     slot for each of their 2,003 commands. Each frame and
      the empty frame after it run in an autorelease pool (FramePool), so
      that the malloc heap in use holds Qt's pending writes and not the
      frames' autoreleased Metal objects (without a pool those add 0.5 MB
@@ -4547,7 +5551,7 @@ void metal_buffers() {
   {
     mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Metal);
     TestBatch t;
-    add_strips(&t, 1900, 25, 1, 0, 0);
+    add_strips(&t, 1900, 25, 1, 0, 0, true);
     for (int k = 0; k < 100; k++)
       t.primitive(MBV_DRAW_LINE_LOOP, {{-0.5f, -0.5f, 0}, {0.5f, -0.5f, 0}, {0.5f, 0.5f, 0}}, 0, 0, 1);
     std::vector<std::array<float, 3>> quads;
@@ -4817,6 +5821,472 @@ void metal_wide_layouts() {
         image, kBlue, {{loop[0], loop[1]}, {loop[1], loop[2]}, {loop[2], loop[3]}, {loop[3], loop[0]}}, 3, &counts);
     check(drawn && sides && renderer.stats().wide_draws == 2,
           "6c Metal: a 3 px loop on 400 x 300: each side exactly 3 px across, the closing side last (" + counts + ")");
+  }
+}
+
+/*--------------------------------------------------------------------*/
+/* 7e2 on Metal: runs of strips of one state drawn as one draw each against
+   every strip drawn on its own (RenderOptions::unmerged_draws) and the thin
+   strips drawn on their own (no_restart), at 0 px (7e2-c1 to c5) */
+
+/* defined with the other picture helpers of the Metal mode */
+int differing(const QImage &a, const QImage &b);
+
+/* a vertex of 7e2-c1's batch: where it lies in picture pixels at ratio 1
+   (320 x 240, x right, y down; ndc()), a quarter pixel added to both, so
+   that no line runs along a pixel edge, and its colour */
+struct RunVertex {
+  double x;
+  double y;
+  float r;
+  float g;
+  float b;
+};
+
+/* 7e2-c1's batch: the commands of its runs' strips (A, B: group 1; W, C:
+   group 2) and the middles of the joints between their strips, in picture
+   pixels at ratio 1 */
+struct MetalRuns {
+  std::vector<int> a, b, w, c;
+  std::vector<std::array<double, 2>> joints;
+};
+
+/* 7e2-c1's batch: a strip S of 4 vertices; a group; a run A of 6 thin
+   strips of 5, 3, 4 (one vertex repeated), 3, 3 and 5 vertices with a
+   colour per vertex, each crossing the one before it, alternately down and
+   up, a one-vertex strip between the third and the fourth; LINES; a run B
+   of 2 thin strips (the first of 2 vertices); a group; a run W of 3 strips
+   3 px wide (wide at ratio 1); the width back to 1, a run C of 2 thin
+   strips; a group and a strip of 40 vertices, longer than any run's span.
+   Run A has 28 index entries, a multiple of 4. The joints (from each strip
+   of a run to the next, and around the one-vertex strip) cross empty
+   background. swapped (7e2-c4): run A's first two strips (5 and 3
+   vertices) recorded as strips of 3 and 5 over the same vertices; longer
+   (7e2-c4): strip S 2 vertices longer, so that every later vertex lies 2
+   vertices (48 bytes) further on. */
+MetalRuns metal_runs_batch(TestBatch *t, bool swapped, bool longer) {
+  MetalRuns runs;
+  /* a strip through vertices; its command in strips (may be null) */
+  const auto strip = [t](const std::vector<RunVertex> &vertices, std::vector<int> *strips) {
+    if (strips != nullptr)
+      strips->push_back(t->b.num_commands);
+    mbv_draw_batch_begin(&t->b, MBV_DRAW_LINE_STRIP);
+    for (const RunVertex &v : vertices) {
+      mbv_draw_batch_color3f(&t->b, v.r, v.g, v.b);
+      const std::array<float, 3> p = ndc(v.x + 0.25, v.y + 0.25, 320, 240);
+      mbv_draw_batch_vertex3f(&t->b, p[0], p[1], p[2]);
+    }
+    mbv_draw_batch_end(&t->b);
+  };
+  /* n vertices along a straight line, red rising along it and blue falling */
+  const auto line = [](double x0, double y0, double x1, double y1, int n, float g) {
+    std::vector<RunVertex> out;
+    for (int v = 0; v < n; v++) {
+      const double u = n > 1 ? static_cast<double>(v) / (n - 1) : 0.0;
+      out.push_back({x0 + (x1 - x0) * u, y0 + (y1 - y0) * u, 0.9f * static_cast<float>(u), g,
+                     0.9f * static_cast<float>(1.0 - u)});
+    }
+    return out;
+  };
+  /* the middle of the segment from the end of one strip to the start of
+     the next */
+  const auto joint = [&runs](const RunVertex &from, const RunVertex &to) {
+    runs.joints.push_back({0.5 * (from.x + to.x) + 0.25, 0.5 * (from.y + to.y) + 0.25});
+  };
+
+  std::vector<RunVertex> s = {{20, 15, 0.2f, 0.2f, 0.2f}, {60, 28, 0.2f, 0.2f, 0.2f}, {100, 15, 0.2f, 0.2f, 0.2f},
+                              {140, 28, 0.2f, 0.2f, 0.2f}};
+  if (longer)
+    s.insert(s.end(), {{180, 15, 0.2f, 0.2f, 0.2f}, {220, 28, 0.2f, 0.2f, 0.2f}});
+  strip(s, nullptr);
+  mbv_draw_batch_group(&t->b, MBV_DRAW_GROUP_POLYGON);
+  /* run A: strip k from x 20 + 35k to 70 + 35k, down from y 50 to 130 for
+     even k, up for odd k, so that it crosses the one before it */
+  std::vector<std::vector<RunVertex>> a;
+  const int counts[6] = {5, 3, 3, 3, 3, 5};
+  for (int k = 0; k < 6; k++) {
+    const double x0 = 20.0 + 35.0 * k, y0 = k % 2 == 0 ? 50.0 : 130.0;
+    std::vector<RunVertex> vertices =
+        line(x0, y0, x0 + 50.0, 180.0 - y0, counts[k], 0.1f + 0.12f * static_cast<float>(k));
+    if (k == 2) {
+      /* the third strip: 4 vertices, its middle one repeated */
+      const RunVertex middle = vertices[1];
+      vertices.insert(vertices.begin() + 1, middle);
+    }
+    a.push_back(vertices);
+  }
+  const RunVertex alone = {132.5, 140, 0, 0, 0};
+  for (int k = 0; k < 5; k++) {
+    if (k == 2) {
+      joint(a[2].back(), a[3].front());
+      joint(a[2].back(), alone);
+      joint(alone, a[3].front());
+    }
+    else
+      joint(a[static_cast<size_t>(k)].back(), a[static_cast<size_t>(k) + 1].front());
+  }
+  if (swapped) {
+    std::vector<RunVertex> both = a[0];
+    both.insert(both.end(), a[1].begin(), a[1].end());
+    a[0].assign(both.begin(), both.begin() + 3);
+    a[1].assign(both.begin() + 3, both.end());
+  }
+  for (size_t k = 0; k < a.size(); k++) {
+    strip(a[k], &runs.a);
+    if (k == 2)
+      strip({alone}, nullptr);
+  }
+  const std::array<float, 3> lines[2] = {ndc(15.25, 152.25, 320, 240), ndc(245.25, 152.25, 320, 240)};
+  t->primitive(MBV_DRAW_LINES, {lines[0], lines[1]}, 0.0f, 0.5f, 0.0f);
+  const std::vector<RunVertex> b[2] = {
+      line(25, 185, 85, 185, 2, 0.7f),
+      {{105, 185, 0.9f, 0.7f, 0.0f}, {135, 165, 0.45f, 0.7f, 0.45f}, {165, 185, 0.0f, 0.7f, 0.9f}}};
+  strip(b[0], &runs.b);
+  strip(b[1], &runs.b);
+  joint(b[0].back(), b[1].front());
+  mbv_draw_batch_group(&t->b, MBV_DRAW_GROUP_POLYLINE);
+  mbv_draw_batch_line_width(&t->b, 3.0f);
+  const std::vector<RunVertex> w[3] = {
+      {{258, 45, 0.8f, 0.2f, 0.0f}, {283, 60, 0.8f, 0.2f, 0.0f}, {308, 45, 0.8f, 0.2f, 0.0f}},
+      {{308, 77, 0.8f, 0.2f, 0.4f}, {283, 92, 0.8f, 0.2f, 0.4f}, {258, 77, 0.8f, 0.2f, 0.4f}},
+      {{258, 109, 0.8f, 0.2f, 0.8f}, {283, 124, 0.8f, 0.2f, 0.8f}, {308, 109, 0.8f, 0.2f, 0.8f}}};
+  for (int k = 0; k < 3; k++) {
+    strip(w[k], &runs.w);
+    if (k > 0)
+      joint(w[k - 1].back(), w[k].front());
+  }
+  mbv_draw_batch_line_width(&t->b, 1.0f);
+  const std::vector<RunVertex> c[2] = {line(180, 185, 215, 185, 2, 0.6f), line(235, 185, 270, 170, 2, 0.6f)};
+  strip(c[0], &runs.c);
+  strip(c[1], &runs.c);
+  joint(c[0].back(), c[1].front());
+  mbv_draw_batch_group(&t->b, MBV_DRAW_GROUP_NAV);
+  std::vector<RunVertex> last;
+  for (int v = 0; v < 40; v++)
+    last.push_back({10.0 + 300.0 * v / 39.0, 215.0 + 12.0 * (v % 2), 0.5f, 0.0f, 0.5f});
+  strip(last, nullptr);
+  return runs;
+}
+
+void metal_strip_runs() {
+  TestBatch batch;
+  const MetalRuns runs = metal_runs_batch(&batch, false, false);
+  const int joints = static_cast<int>(runs.joints.size());
+  mbvq::RenderOptions merged;
+  mbvq::RenderOptions unmerged;
+  unmerged.unmerged_draws = true;
+  mbvq::RenderOptions unrestarted;
+  unrestarted.no_restart = true;
+  /* the joints' middles that are white in a picture at a ratio, the pixel
+     there and its eight neighbours (the strips lie 6 px or more away at
+     ratio 1) */
+  const auto white_joints = [&runs](const QImage &image, int ratio) {
+    int white = 0;
+    for (const std::array<double, 2> &middle : runs.joints) {
+      const int x = static_cast<int>(middle[0] * ratio), y = static_cast<int>(middle[1] * ratio);
+      bool background = !image.isNull() && x >= 1 && y >= 1 && x + 1 < image.width() && y + 1 < image.height();
+      for (int dy = -1; background && dy <= 1; dy++)
+        for (int dx = -1; background && dx <= 1; dx++)
+          background = pixel_rgb(image, x + dx, y + dy) == kWhite;
+      white += background;
+    }
+    return white;
+  };
+  const auto shown = [](const QImage &image) {
+    int n = 0;
+    for (int y = 0; y < image.height(); y++)
+      for (int x = 0; x < image.width(); x++)
+        n += pixel_rgb(image, x, y) != kWhite;
+    return n;
+  };
+
+  /* 7e2-c1: at ratio 1, 2D, on 320 x 240: the default renderer, one with
+     unmerged_draws and one with no_restart draw the same picture (runs A, B
+     and C thin, W wide; the order of A's crossing strips decides their
+     overlaps), in 7, 16 and 14 draws, every joint's middle white; the
+     default renderer holds group 1's index list and group 2's index list
+     and flags twice (dynamic on Metal) */
+  mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Metal);
+  mbvq::OffscreenRenderer apart(mbvq::OffscreenRenderer::Api::Metal);
+  mbvq::OffscreenRenderer strips(mbvq::OffscreenRenderer::Api::Metal);
+  QImage picture, apart_picture, strips_picture;
+  bool drawn = renderer.render_batch(&batch.b, kIdentity, kIdentity, 320, 240, merged, &picture);
+  drawn = apart.render_batch(&batch.b, kIdentity, kIdentity, 320, 240, unmerged, &apart_picture) && drawn;
+  drawn = strips.render_batch(&batch.b, kIdentity, kIdentity, 320, 240, unrestarted, &strips_picture) && drawn;
+  const mbvq::RenderStats s = renderer.stats();
+  const size_t list_bytes =
+      4 * (run_indices_of(batch.b, runs.a).size() + run_indices_of(batch.b, runs.b).size() +
+           run_indices_of(batch.b, runs.c).size() + run_flags_of(batch.b, runs.w).size());
+  const int differ[2] = {differing(picture, apart_picture), differing(picture, strips_picture)};
+  const int white[3] = {white_joints(picture, 1), white_joints(apart_picture, 1), white_joints(strips_picture, 1)};
+  check(drawn && differ[0] == 0 && differ[1] == 0 && shown(picture) > 1000 && s.draws == 7 &&
+            apart.stats().draws == 16 && strips.stats().draws == 14 && white[0] == joints && white[1] == joints &&
+            white[2] == joints && run_indices_of(batch.b, runs.a).size() == 28 && s.run_held_bytes == 2 * list_bytes,
+        "7e2 Metal: runs of thin strips (A of 6 crossing strips, a one-vertex strip and a repeated vertex among "
+        "them; B; C) and of 3 px strips (W) at ratio 1: the same picture as each strip drawn on its own and as the "
+        "thin strips drawn on their own (" + std::to_string(differ[0]) + " and " + std::to_string(differ[1]) +
+            " px differ; " + std::to_string(shown(picture)) + " px drawn), in " + std::to_string(s.draws) + ", " +
+            std::to_string(apart.stats().draws) + " and " + std::to_string(strips.stats().draws) +
+            " draws (7, 16, 14); the joints' middles white in " + std::to_string(white[0]) + ", " +
+            std::to_string(white[1]) + " and " + std::to_string(white[2]) + " of " + std::to_string(joints) +
+            "; the lists held " + std::to_string(s.run_held_bytes) + " bytes (twice " + std::to_string(list_bytes) +
+            ")");
+
+  /* 7e2-c2: the same batch at ratio 2 on 640 x 480, every run wide (run B's
+     first flags 1, 0 where run A's are 1, 1): against unmerged_draws 0 px,
+     7 draws against 16, the joints' middles white; then 7e2-c1's renderer at
+     ratio 2 and at ratio 1 again: each picture equal to one of a new
+     unmerged_draws renderer at that ratio, both groups' lists written again
+     at each switch, their runs changing kind */
+  {
+    mbvq::RenderOptions merged_two = merged;
+    merged_two.pixel_ratio = 2.0;
+    mbvq::RenderOptions unmerged_two = unmerged;
+    unmerged_two.pixel_ratio = 2.0;
+    mbvq::OffscreenRenderer wide(mbvq::OffscreenRenderer::Api::Metal);
+    mbvq::OffscreenRenderer wide_apart(mbvq::OffscreenRenderer::Api::Metal);
+    QImage wide_picture, wide_apart_picture, to_two, to_one, one_apart;
+    bool switched = wide.render_batch(&batch.b, kIdentity, kIdentity, 640, 480, merged_two, &wide_picture);
+    switched = wide_apart.render_batch(&batch.b, kIdentity, kIdentity, 640, 480, unmerged_two, &wide_apart_picture) &&
+               switched;
+    const int writes = renderer.stats().run_writes;
+    switched = renderer.render_batch(&batch.b, kIdentity, kIdentity, 640, 480, merged_two, &to_two) && switched;
+    const int at_two = renderer.stats().run_writes;
+    switched = renderer.render_batch(&batch.b, kIdentity, kIdentity, 320, 240, merged, &to_one) && switched;
+    const int at_one = renderer.stats().run_writes;
+    {
+      mbvq::OffscreenRenderer fresh(mbvq::OffscreenRenderer::Api::Metal);
+      switched = fresh.render_batch(&batch.b, kIdentity, kIdentity, 320, 240, unmerged, &one_apart) && switched;
+    }
+    const int differ_two[3] = {differing(wide_picture, wide_apart_picture), differing(to_two, wide_apart_picture),
+                               differing(to_one, one_apart)};
+    const int white_two[2] = {white_joints(wide_picture, 2), white_joints(wide_apart_picture, 2)};
+    check(switched && differ_two[0] == 0 && wide.stats().draws == 7 && wide.stats().thin_draws == 0 &&
+              wide_apart.stats().draws == 16 && white_two[0] == joints && white_two[1] == joints &&
+              differ_two[1] == 0 && differ_two[2] == 0 && at_two == writes + 2 && at_one == at_two + 2,
+          "7e2 Metal: at ratio 2, every run wide, the same picture as each strip drawn on its own (" +
+              std::to_string(differ_two[0]) + " px differ), in " + std::to_string(wide.stats().draws) + " draws (" +
+              std::to_string(wide.stats().thin_draws) + " thin) against " + std::to_string(wide_apart.stats().draws) +
+              " (7, 0, 16); the joints' middles white in " + std::to_string(white_two[0]) + " and " +
+              std::to_string(white_two[1]) + " of " + std::to_string(joints) + "; the ratio-1 renderer at ratio 2, "
+              "then at ratio 1 again, against new unmerged renderers: " + std::to_string(differ_two[1]) + " and " +
+              std::to_string(differ_two[2]) + " px differ, lists written " + std::to_string(at_two - writes) +
+              " and " + std::to_string(at_one - at_two) + " times (2 and 2)");
+  }
+
+  /* 7e2-c3: 3D with the depth test and a perspective camera (near 1, far
+     10, as metal_batch's near-plane check): a run of strips of one state
+     crossing at different depths (the nearer wins whichever comes first),
+     two over each other at equal depth (the first wins: green over
+     magenta) and one crossing the near plane; a strip with the depth test
+     off; a second run: against unmerged_draws, 0 px, at ratios 1 and 2, in
+     three draws (the strip with the depth test off keeps the runs apart) */
+  {
+    const double near_plane = 1.0, far_plane = 10.0;
+    const double pa = -(far_plane + near_plane) / (far_plane - near_plane);
+    const double pb = -2.0 * far_plane * near_plane / (far_plane - near_plane);
+    const double perspective[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, pa, -1, 0, 0, pb, 0};
+    TestBatch deep;
+    mbv_draw_batch_enable(&deep.b, MBV_DRAW_DEPTH_TEST, true);
+    /* in eye coordinates: normalised device x and y are x / -z and y / -z */
+    deep.primitive(MBV_DRAW_LINE_STRIP, {{-1.2f, 0.4f, -2.0f}, {0.0f, 0.4f, -2.0f}, {1.2f, 0.4f, -2.0f}}, 1.0f, 0.3f,
+                   0.0f);
+    deep.primitive(MBV_DRAW_LINE_STRIP, {{0.0f, -0.4f, -4.0f}, {0.0f, 1.6f, -4.0f}}, 0.2f, 0.2f, 1.0f);
+    deep.primitive(MBV_DRAW_LINE_STRIP, {{0.45f, -0.15f, -1.5f}, {0.45f, 0.6f, -1.5f}}, 0.6f, 0.0f, 0.6f);
+    deep.primitive(MBV_DRAW_LINE_STRIP, {{-1.2f, -0.6f, -3.0f}, {1.2f, -0.6f, -3.0f}}, 0.0f, 1.0f, 0.0f);
+    deep.primitive(MBV_DRAW_LINE_STRIP, {{-1.2f, -0.6f, -3.0f}, {1.2f, -0.6f, -3.0f}}, 1.0f, 0.0f, 1.0f);
+    deep.primitive(MBV_DRAW_LINE_STRIP, {{-2.0f, -0.7f, -2.5f}, {2.0f, -0.7f, 1.5f}}, 0.0f, 0.6f, 0.6f);
+    mbv_draw_batch_enable(&deep.b, MBV_DRAW_DEPTH_TEST, false);
+    deep.primitive(MBV_DRAW_LINE_STRIP, {{-1.6f, 1.4f, -2.0f}, {1.6f, 1.4f, -2.0f}}, 0.5f, 0.5f, 0.0f);
+    mbv_draw_batch_enable(&deep.b, MBV_DRAW_DEPTH_TEST, true);
+    deep.primitive(MBV_DRAW_LINE_STRIP, {{-1.4f, -1.6f, -2.0f}, {1.4f, -1.6f, -2.0f}}, 0.9f, 0.5f, 0.1f);
+    deep.primitive(MBV_DRAW_LINE_STRIP, {{-0.3f, -2.7f, -3.0f}, {0.6f, -2.1f, -3.0f}}, 0.1f, 0.5f, 0.9f);
+    const uint32_t magenta = kRed | kBlue;
+    const auto count = [](const QImage &image, uint32_t colour) {
+      int n = 0;
+      for (int y = 0; y < image.height(); y++)
+        for (int x = 0; x < image.width(); x++)
+          n += pixel_rgb(image, x, y) == colour;
+      return n;
+    };
+    mbvq::OffscreenRenderer depth(mbvq::OffscreenRenderer::Api::Metal);
+    mbvq::OffscreenRenderer depth_apart(mbvq::OffscreenRenderer::Api::Metal);
+    bool deep_drawn = true, alike = true;
+    std::string found;
+    for (int ratio = 1; ratio <= 2; ratio++) {
+      mbvq::RenderOptions options, apart_options;
+      options.pixel_ratio = apart_options.pixel_ratio = ratio;
+      apart_options.unmerged_draws = true;
+      QImage image, apart_image;
+      deep_drawn = depth.render_batch(&deep.b, perspective, perspective, 320 * ratio, 240 * ratio, options, &image) &&
+                   deep_drawn;
+      deep_drawn = depth_apart.render_batch(&deep.b, perspective, perspective, 320 * ratio, 240 * ratio,
+                                            apart_options, &apart_image) &&
+                   deep_drawn;
+      const int differ_deep = differing(image, apart_image);
+      const int greens[2] = {count(image, kGreen), count(apart_image, kGreen)};
+      const int magentas[2] = {count(image, magenta), count(apart_image, magenta)};
+      alike = alike && differ_deep == 0 && depth.stats().draws == 3 && greens[0] > 0 && greens[1] > 0 &&
+              magentas[0] == 0 && magentas[1] == 0;
+      found += std::string(ratio == 1 ? "" : "; ") + "ratio " + std::to_string(ratio) + ": " +
+               std::to_string(differ_deep) + " px differ, " + std::to_string(depth.stats().draws) + " draws against " +
+               std::to_string(depth_apart.stats().draws) + ", green " + std::to_string(greens[0]) + " and " +
+               std::to_string(greens[1]) + " px, magenta " + std::to_string(magentas[0]) + " and " +
+               std::to_string(magentas[1]);
+    }
+    check(deep_drawn && alike,
+          "7e2 Metal: 3D with the depth test and a perspective camera: runs of strips crossing at different depths, "
+          "two at equal depth (the first, green, wins) and one crossing the near plane, kept apart by a strip with "
+          "the depth test off: the same pictures as each strip drawn on its own, in 3 draws (" + found + ")");
+  }
+
+  /* 7e2-c4: the lists over both frame slots (dynamic on Metal: a copy per
+     slot): 7e2-c1's batch in 4 frames in a row on a new renderer (the
+     offscreen QRhi alternates its two slots): written in the first frame
+     alone, every picture equal to the first; then run A's first two strips
+     recorded as strips of 3 and 5 vertices over the same vertices (the
+     same totals, other places) in 2 frames: group 1's lists written once
+     more, each picture equal to that of a new unmerged_draws renderer */
+  {
+    mbvq::OffscreenRenderer both_slots(mbvq::OffscreenRenderer::Api::Metal);
+    QImage first, image;
+    bool framed = both_slots.render_batch(&batch.b, kIdentity, kIdentity, 320, 240, merged, &first);
+    std::vector<int> used = {both_slots.stats().frame_slot};
+    int alike = 0;
+    for (int f = 1; f < 4; f++) {
+      framed = both_slots.render_batch(&batch.b, kIdentity, kIdentity, 320, 240, merged, &image) && framed;
+      alike += differing(first, image) == 0;
+      used.push_back(both_slots.stats().frame_slot);
+    }
+    const int writes = both_slots.stats().run_writes;
+    TestBatch swapped;
+    metal_runs_batch(&swapped, true, false);
+    QImage reference;
+    {
+      mbvq::OffscreenRenderer fresh(mbvq::OffscreenRenderer::Api::Metal);
+      framed = fresh.render_batch(&swapped.b, kIdentity, kIdentity, 320, 240, unmerged, &reference) && framed;
+    }
+    int swapped_alike = 0;
+    for (int f = 0; f < 2; f++) {
+      framed = both_slots.render_batch(&swapped.b, kIdentity, kIdentity, 320, 240, merged, &image) && framed;
+      swapped_alike += differing(reference, image) == 0;
+      used.push_back(both_slots.stats().frame_slot);
+    }
+    bool alternating = true;
+    for (size_t f = 1; f < used.size(); f++)
+      alternating = alternating && used[f] != used[f - 1];
+    check(framed && alternating && alike == 3 && writes == 2 && both_slots.stats().run_writes == 3 &&
+              swapped_alike == 2,
+          "7e2 Metal: the lists over both frame slots (frame slots " + list(used) + "): 4 frames of one batch, " +
+              std::to_string(alike) + " of 3 pictures equal to the first, lists written " + std::to_string(writes) +
+              " times (2); run A's strips of 5 and 3 vertices as 3 and 5 in 2 frames: lists written " +
+              std::to_string(both_slots.stats().run_writes - writes) + " time more (1), " +
+              std::to_string(swapped_alike) + " of 2 pictures equal to a new unmerged renderer's");
+
+    /* the lists kept while the runs' vertices move: the swapped batch with
+       strip S 2 vertices longer, in 2 frames on the same renderer (both
+       slots): every run 48 bytes further on in the batch, no list written,
+       each picture equal to that of a new unmerged_draws renderer */
+    const int swapped_writes = both_slots.stats().run_writes;
+    TestBatch moved;
+    metal_runs_batch(&moved, true, true);
+    QImage moved_reference;
+    {
+      mbvq::OffscreenRenderer fresh(mbvq::OffscreenRenderer::Api::Metal);
+      framed = fresh.render_batch(&moved.b, kIdentity, kIdentity, 320, 240, unmerged, &moved_reference) && framed;
+    }
+    int moved_alike = 0;
+    std::vector<int> moved_slots;
+    for (int f = 0; f < 2; f++) {
+      framed = both_slots.render_batch(&moved.b, kIdentity, kIdentity, 320, 240, merged, &image) && framed;
+      moved_alike += differing(moved_reference, image) == 0;
+      moved_slots.push_back(both_slots.stats().frame_slot);
+    }
+    check(framed && moved.b.num_vertices == swapped.b.num_vertices + 2 && moved_slots[0] != moved_slots[1] &&
+              both_slots.stats().run_writes == swapped_writes && both_slots.stats().draws == 7 && moved_alike == 2,
+          "7e2 Metal: the lists kept while the runs' vertices move (strip S before them 2 vertices longer), in 2 "
+          "frames (frame slots " + list(moved_slots) + "): lists written " +
+              std::to_string(both_slots.stats().run_writes - swapped_writes) + " times more (0), " +
+              std::to_string(both_slots.stats().draws) + " draws (7), " + std::to_string(moved_alike) +
+              " of 2 pictures equal to a new unmerged renderer's");
+  }
+
+  /* 7e2-c5: runs beyond 16-bit indices: a group with a thin run of strips
+     of 40,000 and 30,001 vertices, then a group with a wide run (3 px) of
+     the same shape, every vertex off the window (x 3) but each second
+     strip's last 20 (places 69,981 to 70,000), a zigzag, red and thin, blue
+     and wide; in each group after its run LINES off the window and a second
+     run of two zigzags of 8 vertices with a gap between them, green and
+     thin, yellow and wide, which begins beyond entry 65,535 of its group's
+     list (70,002) or flags (70,000): against unmerged_draws, 0 px, and each
+     zigzag drawn in every column it spans (places, counts or a second run's
+     first entry kept in 16 bits would read vertices off the window, or the
+     first run's entries) */
+  {
+    TestBatch big;
+    for (int run = 0; run < 2; run++) {
+      mbv_draw_batch_group(&big.b, run == 0 ? MBV_DRAW_GROUP_POLYLINE : MBV_DRAW_GROUP_NAV);
+      mbv_draw_batch_line_width(&big.b, run == 0 ? 1.0f : 3.0f);
+      mbv_draw_batch_color3f(&big.b, run == 0 ? 1.0f : 0.0f, 0.0f, run == 0 ? 0.0f : 1.0f);
+      const float y = run == 0 ? 0.4f : -0.4f;
+      for (const int n : {40000, 30001}) {
+        mbv_draw_batch_begin(&big.b, MBV_DRAW_LINE_STRIP);
+        for (int v = 0; v < n; v++) {
+          /* the zigzag's vertices from 0, right to left */
+          const int z = v - (n - 20);
+          if (n == 30001 && z >= 0)
+            mbv_draw_batch_vertex3f(&big.b, 0.85f - 0.085f * static_cast<float>(z),
+                                    y + 0.08f * static_cast<float>(z % 2), 0.0f);
+          else
+            mbv_draw_batch_vertex3f(&big.b, 3.0f, y, 0.0f);
+        }
+        mbv_draw_batch_end(&big.b);
+      }
+      /* LINES off the window end the run; the second run: zigzags from x
+         -0.8 to -0.2 and from 0.2 to 0.8 */
+      big.primitive(MBV_DRAW_LINES, {{3.0f, y, 0.0f}, {3.1f, y, 0.0f}}, 0.5f, 0.5f, 0.5f);
+      mbv_draw_batch_color3f(&big.b, run == 0 ? 0.0f : 1.0f, 1.0f, 0.0f);
+      const float second_y = run == 0 ? 0.0f : -0.2f;
+      for (const float x0 : {-0.8f, 0.2f}) {
+        mbv_draw_batch_begin(&big.b, MBV_DRAW_LINE_STRIP);
+        for (int v = 0; v < 8; v++)
+          mbv_draw_batch_vertex3f(&big.b, x0 + 0.6f * static_cast<float>(v) / 7.0f,
+                                  second_y + 0.08f * static_cast<float>(v % 2), 0.0f);
+        mbv_draw_batch_end(&big.b);
+      }
+    }
+    mbvq::OffscreenRenderer far_runs(mbvq::OffscreenRenderer::Api::Metal);
+    mbvq::OffscreenRenderer far_apart(mbvq::OffscreenRenderer::Api::Metal);
+    QImage runs_picture, apart_far;
+    bool far_drawn = far_runs.render_batch(&big.b, kIdentity, kIdentity, 320, 240, merged, &runs_picture);
+    far_drawn = far_apart.render_batch(&big.b, kIdentity, kIdentity, 320, 240, unmerged, &apart_far) && far_drawn;
+    /* the columns from one to another (the first runs' zigzags: x from
+       -0.765 to 0.85, columns 38 to 295; the second runs': x from -0.8 to
+       -0.2 and from 0.2 to 0.8, columns 32 to 128 and 192 to 288) with the
+       colour */
+    const auto spanned = [&runs_picture](uint32_t colour, int from, int to) {
+      int columns = 0;
+      for (int x = from; x < to && !runs_picture.isNull(); x++) {
+        bool found = false;
+        for (int y = 0; y < runs_picture.height() && !found; y++)
+          found = pixel_rgb(runs_picture, x, y) == colour;
+        columns += found;
+      }
+      return columns;
+    };
+    const int differ_far = differing(runs_picture, apart_far);
+    const int red = spanned(kRed, 40, 294), blue = spanned(kBlue, 40, 294);
+    const int green = spanned(kGreen, 34, 126) + spanned(kGreen, 194, 286);
+    const int yellow = spanned(kRed | kGreen, 34, 126) + spanned(kRed | kGreen, 194, 286);
+    check(far_drawn && far_runs.stats().runs == 4 && far_runs.stats().draws == 6 && differ_far == 0 && red == 254 &&
+              blue == 254 && green == 184 && yellow == 184,
+          "7e2 Metal: a thin and a wide run of strips of 40,000 and 30,001 vertices, off the window but a zigzag at "
+          "places 69,981 to 70,000, each followed by LINES and a second run from entry 70,002 or flag 70,000: " +
+              std::to_string(far_runs.stats().runs) + " runs in " + std::to_string(far_runs.stats().draws) +
+              " draws (4, 6), the same picture as each strip drawn on its own (" + std::to_string(differ_far) +
+              " px differ), the first zigzags in " + std::to_string(red) + " (red, thin) and " + std::to_string(blue) +
+              " (blue, wide) of their 254 columns, the second runs' in " + std::to_string(green) +
+              " (green, thin) and " + std::to_string(yellow) + " (yellow, wide) of their 184");
   }
 }
 
@@ -8166,6 +9636,9 @@ int test_model() {
   model_spheroid();
   model_style();
   model_batch_plan();
+  /* 7e2: runs of line strips of one state, their lists and the layout
+     compared per group */
+  model_strip_runs();
   model_glu();
   model_map_6c();
   /* 6d: the profile and 3D soundings views */
@@ -9794,10 +11267,11 @@ int test_render_null() {
   rendered = renderer.render_map(instance, 320, 240, options, nullptr);
   stats = renderer.stats();
   check(rendered && !stats.failed && stats.resources >= 5, "the next create() works");
-  /* the pipelines: the terrain's two and two for each of the eleven kinds
-     of the batch's draws (with and without the depth test), the bindings,
-     the uniform ring and the render pass */
-  check(stats.fixed_resources == 2 + 2 * 11 + 3,
+  /* the pipelines: the terrain's two and two for each of the twelve kinds
+     of the batch's draws (with and without the depth test; 7e2 added the
+     runs of wide strips), the bindings, the uniform ring and the render
+     pass */
+  check(stats.fixed_resources == 2 + 2 * 12 + 3,
         "the renderer holds the pipelines of every draw of the batch (" + std::to_string(stats.fixed_resources) +
             " fixed resources)");
 
@@ -9887,6 +11361,9 @@ int test_render_null() {
   null_levels();
   null_batch();
   null_buffers();
+  /* 7e2: runs of line strips of one state: their draws, slots and lists,
+     the lists kept, the switches, failures and releases, the groups apart */
+  null_strip_runs();
   null_meshes();
   null_soundings();
   null_failures();
@@ -13056,6 +14533,10 @@ int test_render_metal(const char *save) {
   metal_points();
   metal_point_quads();
   metal_wide_layouts();
+  /* 7e2: runs of line strips of one state against each strip drawn on its
+     own, at ratios 1 and 2, in 3D, over both frame slots, beyond 16-bit
+     indices */
+  metal_strip_runs();
   metal_marker_runs();
   metal_contours();
   metal_soundings();
@@ -13413,6 +14894,241 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
       const std::string path = std::string(save) + ".overlays.png";
       check(with.save(QString::fromStdString(path)), "picture with the overlays saved as " + path);
     }
+  }
+
+  /* 7e2-d1: a GIS polyline layer (as mbgrdviz adds one for a GIS file) of
+     3 parts in pure green, 1 logical px, along rows nr/8, nr/4 and nr x 7/8
+     of nodes (not the routes' rows), the second right to left, so that the
+     joints from each part's end to the next one's start run between the
+     rows, beside the parts. The core's polyline mode starts off
+     (mbview_enableviewpolylines turns it on) and its add functions ask for
+     no plot: a plot request, then a frame. Against the frame before the
+     layer (both full-resolution fills): one draw, one slot and one run more
+     where the parts are wide (ratio 1.75 and above) or the view's QRhi
+     restarts strips by its own feature report (which Qt's backends but
+     OpenGL give always; OpenGL from 4.3 and ES 3.0), else three draws and
+     slots more and no run, the renderer's restart statistic as that report.
+     Every pixel the layer changes, of any colour, lies within a band around
+     one part as the core draws it (its draped vertices through the core's
+     camera; in 2D the parts' width and 2 px, in 3D twice the width and 4
+     px), so that a strip that does not restart between the parts, which
+     would draw across the rows, is seen; in 2D also the green along each
+     part (the straight route's rule: as wide as expected in 90 % of the
+     columns of its middle half) and nowhere before the layer. The pictures
+     of merged and unmerged strips are compared at 0 px on Metal only
+     (7e2-c1 to c5). */
+  {
+    int error = MB_ERROR_NO_ERROR;
+    const QImage without = rhi_widget->grabFramebuffer().convertToFormat(QImage::Format_RGB32);
+    const mbvq::RenderStats before = mbvq::view_stats(view);
+    const QRgb green = qRgb(0, 255, 0);
+    const auto pixels_of = [](const QImage &image, QRgb colour) {
+      int n = 0;
+      for (int y = 0; y < image.height(); y++)
+        for (int x = 0; x < image.width(); x++)
+          n += image.pixel(x, y) == colour;
+      return n;
+    };
+    const int nc = data->primary_n_columns, nr = data->primary_n_rows;
+    const int rows[3] = {nr / 8, nr / 4, nr * 7 / 8};
+    const int ends[2] = {nc / 8, nc * 7 / 8};
+    std::vector<int> starts;
+    std::vector<double> lon, lat;
+    for (int k = 0; k < 3; k++) {
+      starts.push_back(static_cast<int>(lon.size()));
+      const int ii[2] = {ends[k % 2], ends[1 - k % 2]};
+      const int jj[2] = {rows[k], rows[k]};
+      double lonlat[4];
+      mbvq_c_node_lonlat(instance, 2, ii, jj, lonlat);
+      lon.insert(lon.end(), {lonlat[0], lonlat[2]});
+      lat.insert(lat.end(), {lonlat[1], lonlat[3]});
+    }
+    int layer = -1, polyline = -1;
+    const bool added =
+        mbview_addgislayer(0, instance, MBV_GISLAYER_POLYLINE, false, "7e2 test layer", &layer, &error) == MB_SUCCESS &&
+        mbview_addpolyline(0, instance, 3, starts.data(), static_cast<int>(lon.size()), lon.data(), lat.data(), nullptr,
+                           MBV_COLOR_GREEN, 1, "7e2 test lines", layer, &polyline, &error) == MB_SUCCESS;
+    mbview_enableviewpolylines(0, instance, &error);
+    mbview_plotlowhigh(instance);
+    timer.restart();
+    while (mbvq::view_stats(view).frames == before.frames && timer.elapsed() < 10000)
+      spin(20);
+    spin(200);
+    const QImage with_layer = rhi_widget->grabFramebuffer().convertToFormat(QImage::Format_RGB32);
+    const mbvq::RenderStats after = mbvq::view_stats(view);
+    const double ratio = view->devicePixelRatioF();
+    const int expected = expected_px(1.0, ratio);
+    /* the feature report of the view's QRhi, not the renderer's statistic:
+       every backend but OpenGL reports both features */
+    const mbvq::ViewState state = mbvq::view_state(view);
+    const bool restarts = state.strip_restart;
+    const bool reported = restarts || rhi_widget->api() == QRhiWidget::Api::OpenGL;
+    const bool merged = !rhi::Style::thin(expected) || restarts;
+    const int more = merged ? 1 : 3;
+    const bool counted = reported && after.restart == restarts && before.fill_rez == MBVQ_REZ_FULL &&
+                         after.fill_rez == MBVQ_REZ_FULL && after.draws == before.draws + more &&
+                         after.uniform_slots == before.uniform_slots + more &&
+                         after.runs == before.runs + (merged ? 1 : 0);
+    /* the parts as the core draws them (mbview_gis_drawlines: each
+       segment's draped points, or its two ends), in picture pixels through
+       the core's camera; and in 2D each part's two ends */
+    struct mbview_shareddata_struct *shared = nullptr;
+    const bool found = added && mbview_getsharedptr(0, &shared, &error) == MB_SUCCESS && shared != nullptr &&
+                       polyline >= 0 && polyline < shared->npolyline && shared->polylines[polyline].npoints == 6 &&
+                       shared->polylines[polyline].npart == 3 && without.size() == with_layer.size();
+    const auto picture_at = [&with_layer, instance](const struct mbview_pointw_struct &point) {
+      const double display[3] = {point.xdisplay[instance], point.ydisplay[instance], point.zdisplay[instance]};
+      double nx = 0.0, ny = 0.0, w = 0.0;
+      project(instance, display, &nx, &ny, &w);
+      return std::array<double, 2>{(nx + 1.0) * 0.5 * with_layer.width(), (1.0 - ny) * 0.5 * with_layer.height()};
+    };
+    std::vector<std::vector<std::array<double, 2>>> paths(3);
+    std::array<std::array<double, 2>, 6> at{};
+    for (int k = 0; found && k < 3; k++) {
+      const struct mbview_polyline_struct &gis = shared->polylines[polyline];
+      const int end = k < 2 ? gis.partstart[k + 1] : gis.npoints;
+      for (int j = gis.partstart[k]; j < end - 1; j++) {
+        if (gis.segments[j].nls > 0)
+          for (int i = 0; i < gis.segments[j].nls; i++)
+            paths[static_cast<size_t>(k)].push_back(picture_at(gis.segments[j].lspoints[i]));
+        else
+          for (const int i : {j, j + 1})
+            paths[static_cast<size_t>(k)].push_back(picture_at(gis.points[i]));
+      }
+      at[static_cast<size_t>(2 * k)] = picture_at(gis.points[gis.partstart[k]]);
+      at[static_cast<size_t>(2 * k + 1)] = picture_at(gis.points[end - 1]);
+    }
+    /* a point's distance from a path */
+    const auto distance = [](const std::vector<std::array<double, 2>> &path, double x, double y) {
+      double nearest = 1.0e30;
+      for (size_t i = 0; i < path.size(); i++) {
+        const std::array<double, 2> &a = path[i], &b = path[i + 1 < path.size() ? i + 1 : i];
+        const double dx = b[0] - a[0], dy = b[1] - a[1], length2 = dx * dx + dy * dy;
+        const double u = length2 > 0.0 ? std::clamp(((x - a[0]) * dx + (y - a[1]) * dy) / length2, 0.0, 1.0) : 0.0;
+        nearest = std::min(nearest, std::hypot(x - a[0] - u * dx, y - a[1] - u * dy));
+      }
+      return nearest;
+    };
+    /* the pixels the layer changed, and those farther than the band from
+       every part */
+    const double band = mode3d ? 2.0 * expected + 4.0 : expected + 2.0;
+    int changed = 0, outside = 0;
+    for (int y = 0; found && y < with_layer.height(); y++)
+      for (int x = 0; x < with_layer.width(); x++) {
+        if (with_layer.pixel(x, y) == without.pixel(x, y))
+          continue;
+        changed++;
+        bool inside = false; /* not named near, which <windows.h> defines away */
+        for (size_t k = 0; k < paths.size() && !inside; k++)
+          inside = distance(paths[k], x + 0.5, y + 0.5) <= band;
+        outside += !inside;
+      }
+    bool pictured = found && changed > 0 && outside == 0;
+    std::string pixels = "; " + std::to_string(changed) + " px changed, " + std::to_string(outside) +
+                         " of them farther than " + text("%.0f", band) + " px from every part (0)";
+    /* in 2D: each part's middle half as wide as expected in green, in
+       every column within a band around its row; no green before the
+       layer */
+    if (!mode3d) {
+      int right[3] = {0, 0, 0}, lines[3] = {0, 0, 0};
+      for (int k = 0; found && k < 3; k++) {
+        const std::array<double, 2> &a = at[static_cast<size_t>(2 * k)], &b = at[static_cast<size_t>(2 * k + 1)];
+        const double x0 = std::min(a[0], b[0]), x1 = std::max(a[0], b[0]), y = 0.5 * (a[1] + b[1]);
+        const int rows_band = 4 * expected + 4;
+        for (int x = static_cast<int>(x0 + 0.25 * (x1 - x0)); x < static_cast<int>(x1 - 0.25 * (x1 - x0)); x++) {
+          int n = 0;
+          for (int r = static_cast<int>(y) - rows_band; r <= static_cast<int>(y) + rows_band; r++)
+            n += x >= 0 && x < with_layer.width() && r >= 0 && r < with_layer.height() &&
+                 with_layer.pixel(x, r) == green;
+          lines[k]++;
+          right[k] += n == expected;
+        }
+      }
+      const int before_layer = pixels_of(without, green);
+      pictured = pictured && before_layer == 0;
+      for (int k = 0; k < 3; k++)
+        pictured = pictured && lines[k] > 20 && right[k] >= lines[k] * 9 / 10;
+      pixels += "; in 2D green " + std::to_string(expected) + " px wide in " + std::to_string(right[0]) + " of " +
+                std::to_string(lines[0]) + ", " + std::to_string(right[1]) + " of " + std::to_string(lines[1]) +
+                " and " + std::to_string(right[2]) + " of " + std::to_string(lines[2]) +
+                " columns of the parts' middle halves (90 %), on " + std::to_string(before_layer) +
+                " px before the layer (0)";
+    }
+    check(added && counted && pictured,
+          "7e2: a GIS layer of 3 parts (green, 1 logical px) at ratio " + text("%.2f", ratio) + ", " +
+              (merged ? "one run" : "thin without restart") + " (the QRhi restarts strips " +
+              std::to_string(restarts ? 1 : 0) + ", the renderer's restart " + std::to_string(after.restart ? 1 : 0) +
+              "): draws " + std::to_string(before.draws) + " to " + std::to_string(after.draws) + ", slots " +
+              std::to_string(before.uniform_slots) + " to " + std::to_string(after.uniform_slots) + ", runs " +
+              std::to_string(before.runs) + " to " + std::to_string(after.runs) + " (+" + std::to_string(more) +
+              ", +" + std::to_string(more) + ", +" + std::to_string(merged ? 1 : 0) + "), fills at resolution " +
+              std::to_string(before.fill_rez) + " and " + std::to_string(after.fill_rez) + " (" +
+              std::to_string(MBVQ_REZ_FULL) + ")" + pixels);
+  }
+
+  /* 7e2-d2: the groups' lists apart in a window, with 7e2-d1's layer: a
+     two-point pick moved over four places (down at the centre, four moves,
+     up), each followed by the low plot the core's input asks for after a
+     pick, and a frame: in 3D, where the core drapes the pick's marks again
+     at each event into strips 3 px wide, a frame writes at most one group's
+     lists (the pick's, never the layer's), and a frame of the moves at
+     least once; in 2D, where the marks are LINES, no frame writes any. Then
+     the polylines go (mbview_deleteallpolylines): they are process-wide
+     data, and no other test deletes them. */
+  {
+    std::vector<mbvq::RenderStats> frames;
+    const mbvq::RenderStats start = mbvq::view_stats(view);
+    int last = start.frames;
+    const QMetaObject::Connection submitted =
+        QObject::connect(rhi_widget, &QRhiWidget::frameSubmitted, rhi_widget, [&] {
+          const mbvq::RenderStats s = mbvq::view_stats(view);
+          if (s.frames > last) {
+            last = s.frames;
+            frames.push_back(s);
+          }
+        });
+    const int w = data->width, h = data->height;
+    /* a pick event, the core's low plot and a frame */
+    const auto event = [&](int which, int x, int y) {
+      const size_t n = frames.size();
+      mbview_pick(instance, which, x, y);
+      mbview_plotlow(instance);
+      timer.restart();
+      while (frames.size() == n && timer.elapsed() < 3000)
+        spin(10);
+      return frames.size() > n;
+    };
+    const int places[4][2] = {{w / 2 + w / 20, h / 2},
+                              {w / 2 + w / 10, h / 2 + h / 20},
+                              {w / 2 + w / 20, h / 2 + h / 10},
+                              {w / 2, h / 2 + h / 20}};
+    bool framed = event(MBV_PICK_DOWN, w / 2, h / 2);
+    const size_t moves = frames.size();
+    for (const auto &place : places)
+      framed = event(MBV_PICK_MOVE, place[0], place[1]) && framed;
+    const size_t moved = frames.size();
+    framed = event(MBV_PICK_UP, places[3][0], places[3][1]) && framed;
+    spin(200);
+    QObject::disconnect(submitted);
+    int most = 0, least = 0, during_moves = 0, previous = start.run_writes;
+    std::string writes;
+    for (size_t i = 0; i < frames.size(); i++) {
+      const int written = frames[i].run_writes - previous;
+      previous = frames[i].run_writes;
+      most = std::max(most, written);
+      least = std::min(least, written);
+      if (i >= moves && i < moved)
+        during_moves += written;
+      writes += std::string(i == 0 ? "" : i == moves || i == moved ? " | " : " ") + "+" + std::to_string(written);
+    }
+    const bool apart = mode3d ? least >= 0 && most <= 1 && during_moves >= 1 : least == 0 && most == 0;
+    check(framed && data->pick_type == MBV_PICK_TWOPOINT && apart,
+          "7e2: a two-point pick moved over four places with the GIS layer shown, " +
+              std::string(mode3d ? "in 3D (its marks strips 3 px wide)" : "in 2D (its marks LINES)") +
+              ": the run lists written per frame " + writes + " (down | moves | up; " +
+              (mode3d ? "at most 1 a frame, the pick's group, and at least 1 in the moves" : "none") + ")");
+    int error = MB_ERROR_NO_ERROR;
+    mbview_deleteallpolylines(0, instance, &error);
   }
 
   /* 6d: the profile view of a two-point pick across the map, in its window:
@@ -15400,12 +17116,15 @@ void report_levels(const char *scenario, const FrameProbe &probe, const std::vec
    the batch's buffers (those queued for its five buffers: 0 for a batch
    reused or empty; not the contours, the marker meshes or a rewrite of the
    stipple values alone), its draws (draw items, the terrain once whatever
-   its tiles) and its uniform slots; and (7c) the paint's wait after
-   render() that the GPU-time fallback reads, in the frames it measured. */
+   its tiles) and its uniform slots; (7e2) its runs of line strips of one
+   state, each one draw, the strips in them, and the bytes written into the
+   runs' lists (0 in a frame whose runs' layout stays); and (7c) the paint's
+   wait after render() that the GPU-time fallback reads, in the frames it
+   measured. */
 void report_frames(const char *scenario, const FrameProbe &probe, const std::vector<size_t> &indices, bool rhi) {
   std::vector<double> frame, by_rez[4], paint, paint_event, after_paint, render, fill, marks, prepare, gather, upload,
       record, gpu, before_render, after_render, beyond_gpu, nodes_k, prepare_ns, gather_ns, ring_mb, batch_mb, draws,
-      uniforms, wait_ms;
+      uniforms, runs, run_parts, run_mb, wait_ms;
   for (size_t i : indices) {
     const BenchFrame &f = probe.frames[i];
     frame.push_back(f.submitted - f.paint);
@@ -15430,6 +17149,8 @@ void report_frames(const char *scenario, const FrameProbe &probe, const std::vec
     ring_mb.push_back(static_cast<double>(f.stats.ring_bytes) / 1048576.0);
     draws.push_back(f.stats.draws);
     uniforms.push_back(f.stats.uniform_slots);
+    runs.push_back(f.stats.runs);
+    run_parts.push_back(f.stats.run_parts);
     /* the paint's wait after render() that the GPU-time fallback reads, in
        the frames it measured (7c) */
     if (i > 0 && f.stats.wait_frames > probe.frames[i - 1].stats.wait_frames)
@@ -15458,6 +17179,9 @@ void report_frames(const char *scenario, const FrameProbe &probe, const std::vec
          running total since the renderer's frame before (7a) */
       if (f.stats.batch_bytes >= before.batch_bytes)
         batch_mb.push_back(static_cast<double>(f.stats.batch_bytes - before.batch_bytes) / 1048576.0);
+      /* ... and into the runs' lists (7e2) */
+      if (f.stats.run_bytes >= before.run_bytes)
+        run_mb.push_back(static_cast<double>(f.stats.run_bytes - before.run_bytes) / 1048576.0);
       double nodes = 0.0;
       if (f.stats.bytes_positions >= before.bytes_positions)
         nodes = static_cast<double>(f.stats.bytes_positions - before.bytes_positions) / 12.0;
@@ -15509,6 +17233,9 @@ void report_frames(const char *scenario, const FrameProbe &probe, const std::vec
   report(scenario, "batch_mb", batch_mb);
   report(scenario, "draws", draws);
   report(scenario, "uniform_slots", uniforms);
+  report(scenario, "runs", runs);
+  report(scenario, "run_parts", run_parts);
+  report(scenario, "run_mb", run_mb);
   report(scenario, "wait_ms", wait_ms);
   report_levels(scenario, probe, indices);
 }
@@ -15909,14 +17636,18 @@ int bench(bool mode3d, const char *grdfile, int steps, int width, int height, co
   if (rhi) {
     /* the renderer's create(), and the draws of the first complete frame
        (with a GIS layer, the first with the layer); the view's last frame
-       if none was complete */
+       if none was complete; (7e2) its runs of line strips, whether its thin
+       runs were restarted, and the writes of the runs' lists so far (with a
+       layer, the layer's first) */
     const bool complete_frame = shown < probe.frames.size();
     const mbvq::RenderStats s = complete_frame ? probe.frames[shown].stats : mbvq::view_stats(view);
     std::printf("info\trenderer\tcreate() %.2f ms; %s %d draws (%d thin, %d wide, %d markers, %d other: the terrain "
-                "once, triangles, points), %d uniform slots\n",
+                "once, triangles, points), %d uniform slots, %d runs of %d strips, restart %d; run lists written %d "
+                "times, %.3f MB\n",
                 s.create_ms, complete_frame ? "the first complete frame" : "the last frame (no complete frame)",
                 s.draws, s.thin_draws, s.wide_draws, s.marker_draws,
-                s.draws - s.thin_draws - s.wide_draws - s.marker_draws, s.uniform_slots);
+                s.draws - s.thin_draws - s.wide_draws - s.marker_draws, s.uniform_slots, s.runs, s.run_parts,
+                s.restart ? 1 : 0, s.run_writes, static_cast<double>(s.run_bytes) / 1048576.0);
   }
 
   const int warmup = 5;
@@ -15930,6 +17661,13 @@ int bench(bool mode3d, const char *grdfile, int steps, int width, int height, co
     bench_drag(probe, instance, view, rhi, {"exaggerate", MBV_MOUSE_ROTATE, Qt::RightButton, false}, warmup, steps);
   }
   bench_colour(probe, instance, rhi, 1, 8);
+  if (rhi) {
+    /* the writes of the runs' lists over the whole run (7e2), from the
+       view's renderer */
+    const mbvq::RenderStats s = mbvq::view_stats(view);
+    std::printf("info\trun lists\tat the end: written %d times, %.3f MB\n", s.run_writes,
+                static_cast<double>(s.run_bytes) / 1048576.0);
+  }
   std::printf("info\tprobe\t%d paints, %zu frames, %d submissions without a paint\n", probe.paints, probe.frames.size(),
               probe.unpainted);
   report_memory("at the end");

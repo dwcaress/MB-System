@@ -160,6 +160,14 @@ struct RenderOptions {
      pairs through a staging copy): for tests of that path; read in every
      frame */
   bool lists_staging = false;
+  /* the batch's runs of line strips of one state drawn strip by strip, each
+     with a slot of its own, as when every strip was drawn on its own: for
+     comparisons; read in every frame */
+  bool unmerged_draws = false;
+  /* the batch's thin strips drawn strip by strip, as where the API restarts
+     no strips or has no 32-bit indices (QRhi OpenGL below 4.3 and ES 3.0),
+     the wide runs merged: for tests of that path; read in every frame */
+  bool no_restart = false;
   /* how the 3D soundings are splatted (Splat); read in every frame; a view
      takes the program's (set_soundings_splat) */
   Splat splat = Splat::Auto;
@@ -214,8 +222,8 @@ struct RenderStats {
   size_t bytes_largest_frame = 0; /* the most bytes uploaded in one frame */
   int resources = 0;              /* QRhi resources the renderer holds now */
   /* ... of them its pipelines, bindings, uniform buffer and render pass (the
-     same in every frame), and the buffers of the batch and the marker
-     meshes; the rest are tile buffers */
+     same in every frame), and the buffers of the batch (its run lists among
+     them) and the marker meshes; the rest are tile buffers */
   int fixed_resources = 0;
   int batch_resources = 0;
   /* the last frame drew nothing: the renderer, one of its buffers (tiles,
@@ -298,9 +306,10 @@ struct RenderStats {
      other APIs only with QRhi::EnableTimestamps) */
   double gpu_ms = -1.0;
   /* The map's batch (mbv_draw_batch.h) in the last frame: the device pixel
-     ratio its sizes were scaled with; its draws (lines thin and wide,
-     points, triangles, marker runs, the terrain and contours; of them the
-     draws of points as quads), uniform slots
+     ratio its sizes were scaled with; its draws (lines thin and wide, each
+     run of line strips of one state one draw with one slot, points,
+     triangles, marker runs, the terrain and contours; of them the draws of
+     points as quads), uniform slots
      and markers; the contour level drawn (MBVQ_REZ_*, 0 none) and its
      vertices. Totals: batch uploads and their bytes, those above 64 MB (one
      batch is never split over frames), contour uploads and bytes, marker
@@ -356,6 +365,22 @@ struct RenderStats {
   /* writes of the stipple values alone, for a frame that draws the batch it
      has with a new camera */
   int stipple_uploads = 0;
+  /* The batch's runs of line strips of one state (BatchPlan): the runs drawn
+     as one draw in the last frame and the strips in them; whether its thin
+     runs were merged, each one line strip restarted between its strips (the
+     QRhi restarts strips and has 32-bit indices, and neither
+     RenderOptions::unmerged_draws nor no_restart is on). Totals: the writes
+     of a group's run lists of more than 0 bytes (when the layout of its runs
+     changed, after a new renderer or a frame that let go of them) and their
+     bytes. The bytes the run lists hold after the last frame, every GPU copy
+     counted (on Metal two, dynamic); Vulkan's host staging copy of a static
+     list for each frame slot it was uploaded in is not. */
+  int runs = 0;
+  int run_parts = 0;
+  bool restart = false;
+  int run_writes = 0;
+  size_t run_bytes = 0;
+  size_t run_held_bytes = 0;
   /* The 3D soundings view (the profile view has only its batch). Of the last
      frame: the soundings and chunks of the allocation, the soundings whose
      chunks are drawn (in the first upload a prefix) and those drawn as
@@ -548,6 +573,11 @@ struct ViewState {
   /* the largest texture of the QRhi the view drew with last (0 before its
      first frame, or after that QRhi died), which caps the profile view */
   int texture_size_max = 0;
+  /* that QRhi restarts line strips at 0xffffffff and has 32-bit indices
+     (QRhi::PrimitiveRestart, ElementIndexUint), so that the map's runs of
+     thin strips can be merged (false before its first frame, or after that
+     QRhi died) */
+  bool strip_restart = false;
 };
 ViewState view_state(QWidget *view);
 /* for tests: mark whether a QRhi map view's last fill fell back
@@ -580,8 +610,9 @@ int stale_callbacks_removed();
    drew in its latest frame or uploads, and a frame whose levels do not fit
    beside those is drawn at the finest stride that fits. For tests. The
    budget covers the terrain levels only: the buffers of the maps' batches
-   and contours lie outside it (RenderStats::batch_held_bytes and
-   contour_held_bytes), as do the uniform rings and the marker meshes. */
+   and contours lie outside it (RenderStats::batch_held_bytes,
+   run_held_bytes and contour_held_bytes), as do the uniform rings and the
+   marker meshes. */
 void set_cache_budget(size_t bytes);
 size_t cache_budget();
 /* the bytes it holds now, every copy counted */

@@ -1542,7 +1542,7 @@ int Style::physical(double logical, double ratio, double factor) {
   return size > 4096.0 ? 4096 : static_cast<int>(size);
 }
 
-int BatchPlan::add_slot(const struct mbv_draw_command &command, const Style &style) {
+SlotSpec BatchPlan::slot_spec(const struct mbv_draw_command &command, const Style &style) {
   SlotSpec slot;
   slot.camera = command.camera;
   slot.depth_test = command.depth_test;
@@ -1551,7 +1551,11 @@ int BatchPlan::add_slot(const struct mbv_draw_command &command, const Style &sty
   slot.stipple = command.stipple;
   slot.factor = style.stipple(command.stipple_factor);
   slot.pattern = command.stipple_pattern;
-  slots_.push_back(slot);
+  return slot;
+}
+
+int BatchPlan::add_slot(const struct mbv_draw_command &command, const Style &style) {
+  slots_.push_back(slot_spec(command, style));
   return static_cast<int>(slots_.size()) - 1;
 }
 
@@ -1574,6 +1578,19 @@ bool window(const double m[16], const struct mbv_draw_vertex &v, int width, int 
    (OpenGL 2.1, 3.4.1) */
 bool in_diamond(double x, double y) {
   return std::fabs(x - std::floor(x) - 0.5) + std::fabs(y - std::floor(y) - 0.5) < 0.5;
+}
+
+/* group g's entries in a layout of the runs (BatchPlan), given each group's
+   first entry: up to the next group's, or the end; none for a group the
+   layout does not have */
+void layout_range(const std::vector<uint32_t> &layout, const std::vector<uint32_t> &starts, size_t g, size_t *begin,
+                  size_t *end) {
+  *begin = 0;
+  *end = 0;
+  if (g >= starts.size())
+    return;
+  *begin = starts[g];
+  *end = g + 1 < starts.size() ? starts[g + 1] : layout.size();
 }
 
 }  // namespace
@@ -1658,6 +1675,7 @@ void BatchPlan::add_stipple(const struct mbv_draw_batch &batch, int c, int slot,
   DrawItem item;
   item.command = c;
   item.slot = slot;
+  item.group = groups_;
   item.source = DrawSource::Stipple;
   if (Style::thin(slots_[slot].width)) {
     item.kind = DrawKind::StippleLines;
@@ -1674,7 +1692,7 @@ void BatchPlan::add_stipple(const struct mbv_draw_batch &batch, int c, int slot,
 }
 
 void BatchPlan::build(const struct mbv_draw_batch &batch, const Style &style, const double camera[16],
-                      const double projection[16], int width, int height) {
+                      const double projection[16], int width, int height, Merge merge) {
   items_.clear();
   slots_.clear();
   closings_.clear();
@@ -1683,6 +1701,17 @@ void BatchPlan::build(const struct mbv_draw_batch &batch, const Style &style, co
   groups_ = 0;
   markers_ = 0;
   segments_ = 0;
+  /* the runs' layout: the previous build's kept for the comparison at the
+     end, this build's made in the other vectors, whose capacity stays;
+     group 0 begins before the first group command */
+  layout_.swap(previous_layout_);
+  group_start_.swap(previous_group_start_);
+  layout_.clear();
+  group_start_.assign(1, 0);
+  index_entries_.assign(1, 0);
+  flag_entries_.assign(1, 0);
+  runs_ = 0;
+  run_parts_ = 0;
   const auto add = [this](DrawKind kind, DrawSource source, int c, int slot, uint32_t first, uint32_t count,
                           uint32_t offset) {
     DrawItem item;
@@ -1693,14 +1722,97 @@ void BatchPlan::build(const struct mbv_draw_batch &batch, const Style &style, co
     item.first = first;
     item.count = count;
     item.offset = offset;
+    item.group = groups_;
     items_.push_back(item);
   };
   constexpr uint32_t kVertex = sizeof(struct mbv_draw_vertex);
+  /* the open run of strips: its draw (-1: none), its first vertex, the end
+     of its last strip, its strips and index entries, and its first entry in
+     the layout */
+  int run = -1;
+  uint32_t run_first = 0;
+  uint32_t run_end = 0;
+  uint32_t run_strips = 0;
+  uint32_t run_entries = 0;
+  size_t run_at = 0;
+  /* the open run ends: of two strips or more it becomes one draw, after its
+     group's earlier runs of its kind, of its index entries (thin: each
+     strip's vertices, a restart between strips) or instances (wide: the
+     run's vertices less one); of one strip it stays that strip's draw, out
+     of the layout */
+  const auto end_run = [&]() {
+    if (run < 0)
+      return;
+    DrawItem &item = items_[static_cast<size_t>(run)];
+    run = -1;
+    if (run_strips < 2) {
+      layout_.resize(run_at);
+      return;
+    }
+    const bool thin = item.kind == DrawKind::LineStrip;
+    size_t &entries = (thin ? index_entries_ : flag_entries_)[static_cast<size_t>(item.group)];
+    item.kind = thin ? DrawKind::StripRun : DrawKind::WideRun;
+    item.first = 0;
+    item.offset = run_first * kVertex;
+    item.count = thin ? run_entries : run_end - run_first - 1;
+    item.list = static_cast<uint32_t>(entries);
+    item.parts = static_cast<int>(run_strips);
+    entries += item.count;
+    layout_[run_at + 1] = run_strips;
+    runs_++;
+    run_parts_ += static_cast<int>(run_strips);
+  };
   for (int c = 0; c < batch.num_commands; c++) {
     const struct mbv_draw_command &command = batch.commands[c];
+    /* a line strip of two vertices or more, not stippled: it joins the open
+       run where its slot would equal the run's, it begins after the run's
+       last strip (as the core records them) and, thin, its last place stays
+       within merge.max_place; else it ends that run, gets its own draw and
+       slot as any strip, and opens a run where its width is merged */
+    if (command.kind == MBV_DRAW_PRIMITIVE && command.primitive == MBV_DRAW_LINE_STRIP && command.count >= 2 &&
+        !command.stipple) {
+      const SlotSpec spec = slot_spec(command, style);
+      const bool thin = Style::thin(spec.width);
+      const uint32_t first = static_cast<uint32_t>(command.first);
+      const uint32_t n = static_cast<uint32_t>(command.count);
+      segments_ += n - 1;
+      if (run >= 0 && spec == slots_[static_cast<size_t>(items_[static_cast<size_t>(run)].slot)] &&
+          first >= run_end && (!thin || first + n - 1 - run_first <= merge.max_place)) {
+        layout_.push_back(first - run_first);
+        layout_.push_back(n);
+        run_end = first + n;
+        run_strips++;
+        run_entries += n + 1;
+        continue;
+      }
+      end_run();
+      slots_.push_back(spec);
+      const int slot = static_cast<int>(slots_.size()) - 1;
+      if (thin)
+        add(DrawKind::LineStrip, DrawSource::Batch, c, slot, first, n, 0);
+      else
+        add(DrawKind::WideStrip, DrawSource::Batch, c, slot, 0, n - 1, first * kVertex);
+      if (thin ? merge.thin : merge.wide) {
+        run = static_cast<int>(items_.size()) - 1;
+        run_first = first;
+        run_end = first + n;
+        run_strips = 1;
+        run_entries = n;
+        run_at = layout_.size();
+        layout_.insert(layout_.end(), {thin ? 0u : 1u, 1u, 0u, n});
+      }
+      continue;
+    }
+    const size_t items_before = items_.size();
+    const size_t slots_before = slots_.size();
     switch (command.kind) {
     case MBV_DRAW_GROUP:
+      /* a run ends with its group; the next group's lists begin */
+      end_run();
       groups_++;
+      group_start_.push_back(static_cast<uint32_t>(layout_.size()));
+      index_entries_.push_back(0);
+      flag_entries_.push_back(0);
       break;
     case MBV_DRAW_SHAPE:
       /* defines the mesh of later runs: a run names its shape by index */
@@ -1818,6 +1930,87 @@ void BatchPlan::build(const struct mbv_draw_batch &batch, const Style &style, co
     default:
       break;
     }
+    /* a command that adds a draw or a slot ends the open run (a stippled
+       primitive too short to draw adds a slot); one that adds neither (a
+       shape, an unstippled primitive too short to draw, an empty or unknown
+       slot or marker command) does not */
+    if (items_.size() != items_before || slots_.size() != slots_before)
+      end_run();
+  }
+  end_run();
+
+  /* each group's layout against the same group's in the previous build (a
+     group that build did not have compares as empty): only a group whose
+     layout changed needs its lists written again */
+  const size_t group_count = group_start_.size();
+  changed_.assign(group_count, 0);
+  for (size_t g = 0; g < group_count; g++) {
+    size_t begin = 0, end = 0, before = 0, after = 0;
+    layout_range(layout_, group_start_, g, &begin, &end);
+    layout_range(previous_layout_, previous_group_start_, g, &before, &after);
+    changed_[g] = !std::equal(layout_.data() + begin, layout_.data() + end, previous_layout_.data() + before,
+                              previous_layout_.data() + after);
+  }
+}
+
+size_t BatchPlan::run_index_entries(int group) const {
+  return group >= 0 && static_cast<size_t>(group) < index_entries_.size() ? index_entries_[static_cast<size_t>(group)]
+                                                                           : 0;
+}
+
+size_t BatchPlan::run_flag_entries(int group) const {
+  return group >= 0 && static_cast<size_t>(group) < flag_entries_.size() ? flag_entries_[static_cast<size_t>(group)]
+                                                                          : 0;
+}
+
+bool BatchPlan::runs_changed(int group) const {
+  return group >= 0 && static_cast<size_t>(group) < changed_.size() && changed_[static_cast<size_t>(group)] != 0;
+}
+
+void BatchPlan::run_indices(int group, uint32_t *out) const {
+  /* per thin run of the group, per strip its places, 0xffffffff between
+     its strips */
+  if (group < 0)
+    return;
+  size_t k = 0, end = 0;
+  layout_range(layout_, group_start_, static_cast<size_t>(group), &k, &end);
+  while (k < end) {
+    const uint32_t kind = layout_[k];
+    const uint32_t strips = layout_[k + 1];
+    const uint32_t *strip = &layout_[k + 2];
+    k += 2 + 2 * static_cast<size_t>(strips);
+    if (kind != 0)
+      continue;
+    for (uint32_t s = 0; s < strips; s++, strip += 2) {
+      if (s > 0)
+        *out++ = 0xffffffffu;
+      for (uint32_t v = 0; v < strip[1]; v++)
+        *out++ = strip[0] + v;
+    }
+  }
+}
+
+void BatchPlan::run_flags(int group, float *out) const {
+  /* per wide run of the group, per segment of its vertices (its last
+     strip's end less one): 1 inside a strip, 0 at a joint and beside a
+     vertex that no strip draws */
+  if (group < 0)
+    return;
+  size_t k = 0, end = 0;
+  layout_range(layout_, group_start_, static_cast<size_t>(group), &k, &end);
+  while (k < end) {
+    const uint32_t kind = layout_[k];
+    const uint32_t strips = layout_[k + 1];
+    const uint32_t *strip = &layout_[k + 2];
+    k += 2 + 2 * static_cast<size_t>(strips);
+    if (kind != 1)
+      continue;
+    const uint32_t *last = strip + 2 * (strips - 1);
+    const uint32_t segments = last[0] + last[1] - 1;
+    std::fill(out, out + segments, 0.0f);
+    for (uint32_t s = 0; s < strips; s++, strip += 2)
+      std::fill(out + strip[0], out + strip[0] + strip[1] - 1, 1.0f);
+    out += segments;
   }
 }
 
