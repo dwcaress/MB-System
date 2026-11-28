@@ -257,6 +257,17 @@ bool gpu_wait_counts(WaitApi api, bool fake) {
   return fake || api == WaitApi::Metal || api == WaitApi::Vulkan || api == WaitApi::Direct3D12;
 }
 
+ChunkUse chunk_use(WaitApi api, bool compute, int threads_per_group, int thread_group_x) {
+  /* a limit of 0 is one the backend does not report (Null) */
+  const auto enough = [](int limit) { return limit == 0 || limit >= kSplatGroup; };
+  ChunkUse use;
+  use.storage = compute &&
+                (api == WaitApi::Metal || api == WaitApi::Vulkan || api == WaitApi::OpenGL || api == WaitApi::Null) &&
+                enough(threads_per_group) && enough(thread_group_x);
+  use.dynamic = !use.storage && api == WaitApi::Metal;
+  return use;
+}
+
 bool GpuFallback::slow(double wait_ms, double total_ms) {
   const double mark = kDragFrameMs - kDragMarginMs;
   return total_ms > mark && wait_ms >= kGpuMinimumMs && total_ms - wait_ms < mark;

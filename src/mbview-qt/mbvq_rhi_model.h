@@ -140,12 +140,34 @@ constexpr double kGpuMinimumMs = 4.0;
 constexpr int kGpuSlowFrames = 2;
 constexpr double kGpuGainShare = 0.1;
 
-/* The APIs whose offscreen frames wait for the GPU in endOffscreenFrame():
-   Metal, Vulkan and Direct3D 12. On OpenGL and Direct3D 11 that wait is the
-   driver's CPU work for the frame, which no coarser level shortens, so the
-   fallback acts there only with a test's fake times (fake). */
+/* The QRhi backends as plain values, for the rules that depend on them (the
+   GPU-time fallback here; the soundings' chunks, chunk_use). The APIs whose
+   offscreen frames wait for the GPU in endOffscreenFrame(): Metal, Vulkan
+   and Direct3D 12. On OpenGL and Direct3D 11 that wait is the driver's CPU
+   work for the frame, which no coarser level shortens, so the fallback acts
+   there only with a test's fake times (fake). */
 enum class WaitApi { Null, OpenGL, Direct3D11, Direct3D12, Metal, Vulkan };
 bool gpu_wait_counts(WaitApi api, bool fake);
+
+/* the compute group size of the soundings' splat passes, which come later:
+   a backend whose limits are below it does not splat */
+constexpr int kSplatGroup = 128;
+
+/* How the soundings' position and colour chunks are made: static with
+   storage use where the backend can splat (without the splat pipelines,
+   which come later): Compute supported, the API Metal, Vulkan, OpenGL or
+   Null, and MaxThreadsPerThreadGroup and MaxThreadGroupX each kSplatGroup
+   or more, or 0 (not reported: Null). Direct3D 11: Qt binds storage buffers
+   only at the compute stage (qrhid3d11.cpp), so a splat's resolve, which
+   reads its per-pixel buffers at the fragment stage, cannot run there;
+   Direct3D 12: not checked. Elsewhere the types of the other soundings'
+   buffers: dynamic on Metal, static on the other APIs. The point quads are
+   no input: the type follows the backend, not the drawing path. */
+struct ChunkUse {
+  bool storage = false;
+  bool dynamic = false;
+};
+ChunkUse chunk_use(WaitApi api, bool compute, int threads_per_group, int thread_group_x);
 
 /* The rule of the GPU-time fallback for one view, over the levels 0 to
    coarsest (finer to coarser), one for each zoom's level (0 to kLevels - 1:
@@ -710,11 +732,18 @@ class BatchPlan {
    the red pairs apart) or, for wide lines, a colour per pair (RGBA8: black,
    red, or alpha 0 for none). Every stream is cut into chunks of a fixed
    number of soundings, each chunk of each stream a buffer of its own that is
-   always written whole, at most a frame's upload budget (64 MB) per frame:
-   Qt's Metal backend keeps a buffer once per frame in flight and applies
-   writes to a frame slot only when a frame on that slot uses the buffer, and
-   a whole write of a dynamic buffer drops the writes still waiting, so no
-   slot ever holds more than one write of a chunk. The positions of a chunk
+   always written whole, at most a frame's upload budget (64 MB) per frame.
+   Qt's Metal backend applies a buffer's writes only when a frame binds it.
+   It keeps a dynamic buffer, and a static one without storage use, once per
+   frame in flight, and a whole write of a dynamic buffer drops the writes
+   still waiting, so no slot holds more than one write of the index lists or
+   the colours per pair (dynamic on Metal), nor of positions and colours
+   where they are dynamic. With storage use (chunk_use) it keeps positions
+   and colours once and copies each write at their first bind; a write before
+   that bind would add to the waiting one, which the renderer prevents: each
+   frame that records the soundings binds every chunk still waiting, and a
+   write into a buffer whose upload still waits makes it again first. The
+   positions of a chunk
    reach one sounding into the next chunk, so that the pair across the
    boundary lies in one buffer.
    - A new allocation (reset(): another count, or the core handed over or
@@ -727,10 +756,13 @@ class BatchPlan {
      and colours above the budget are double-buffered: the new data go into
      the second set of buffers over as many frames as they need, while the
      frames draw the first, complete set; then the two swap. On Metal the
-     writes reach a frame slot's buffers only when a frame on that slot binds
-     them, so the second set, bound only from the swap on, is copied into
-     them whole in the frame of the swap and again in the next frame on the
-     other slot: the budget spreads the writes, not that copy. Below the
+     writes reach a buffer only when a frame binds it: a dynamic second set,
+     bound only from the swap on, is copied whole in the frame of the swap
+     and again in the next frame on the other slot (the budget spreads the
+     writes, not that copy); a second set with storage use is bound by the
+     renderer in the frame of each write (after a frame without the
+     soundings slot, in the next frame that has it), so its copies follow the
+     budget too. Below the
      budget a stream is written whole within one frame. The index lists and
      colours per pair are written chunk by chunk as the budget allows (each
      chunk's lists are complete in themselves). A stream whose upload runs

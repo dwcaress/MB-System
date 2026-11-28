@@ -873,28 +873,25 @@ void BatchRenderer::measured(double wait_ms, double total_ms) {
   feed_gpu(wait, total);
 }
 
-bool BatchRenderer::gpu_rule() const {
-  WaitApi api = WaitApi::Null;
+WaitApi BatchRenderer::wait_api() const {
   switch (rhi_->backend()) {
   case QRhi::Metal:
-    api = WaitApi::Metal;
-    break;
+    return WaitApi::Metal;
   case QRhi::Vulkan:
-    api = WaitApi::Vulkan;
-    break;
+    return WaitApi::Vulkan;
   case QRhi::D3D12:
-    api = WaitApi::Direct3D12;
-    break;
+    return WaitApi::Direct3D12;
   case QRhi::D3D11:
-    api = WaitApi::Direct3D11;
-    break;
+    return WaitApi::Direct3D11;
   case QRhi::OpenGLES2:
-    api = WaitApi::OpenGL;
-    break;
+    return WaitApi::OpenGL;
   default:
-    break;
+    return WaitApi::Null;
   }
-  return gpu_wait_counts(api, options_.gpu_wait_ms >= 0.0 || options_.gpu_total_ms >= 0.0);
+}
+
+bool BatchRenderer::gpu_rule() const {
+  return gpu_wait_counts(wait_api(), options_.gpu_wait_ms >= 0.0 || options_.gpu_total_ms >= 0.0);
 }
 
 bool BatchRenderer::uploads_in_wait() const {
@@ -1357,10 +1354,25 @@ void SoundingsRenderer::drop_soundings() {
 
 bool SoundingsRenderer::make_view_pipelines(QRhiRenderPassDescriptor *pass, int samples) {
   /* 32-bit indices for the thin profile lines (else the wide pipeline draws
-     them at every width); the soundings' buffers dynamic on Metal, static
-     elsewhere (mbvq_rhi_renderer.h) */
+     them at every width); the positions and colours static with storage use
+     where the backend can splat, else, as the index lists and the colours
+     per pair, dynamic on Metal and static elsewhere (mbvq_rhi_renderer.h).
+     This runs in create(), after the chunks were dropped, and after a ring
+     that could not be restored, whose frame dropped them: every chunk is
+     made under the decision in force. */
   uint_indices_ = rhi_->isFeatureSupported(QRhi::ElementIndexUint);
-  type_ = rhi_->backend() == QRhi::Metal ? QRhiBuffer::Dynamic : QRhiBuffer::Static;
+  const bool metal = rhi_->backend() == QRhi::Metal;
+  list_type_ = metal ? QRhiBuffer::Dynamic : QRhiBuffer::Static;
+  chunk_storage_ = options_.chunk_storage;
+  chunk_use_ = ChunkUse();
+  chunk_use_.dynamic = metal;
+  if (chunk_storage_ != 0)
+    chunk_use_ = chunk_use(wait_api(), rhi_->isFeatureSupported(QRhi::Compute),
+                           rhi_->resourceLimit(QRhi::MaxThreadsPerThreadGroup),
+                           rhi_->resourceLimit(QRhi::MaxThreadGroupX));
+  chunk_type_ = chunk_use_.dynamic ? QRhiBuffer::Dynamic : QRhiBuffer::Static;
+  chunk_usage_ = chunk_use_.storage ? QRhiBuffer::UsageFlags(QRhiBuffer::StorageBuffer) : QRhiBuffer::UsageFlags();
+  stats_.soundings_storage = chunk_use_.storage ? 1 : 0;
   const QShader colour = shader(":/mbvq/mbvq_colour.frag.qsb");
   const QShader points = shader(":/mbvq/mbvq_points.vert.qsb");
   const QShader quads = shader(":/mbvq/mbvq_pointquad.vert.qsb");
@@ -1500,12 +1512,21 @@ Prepared SoundingsRenderer::frame(SoundingsFrame *frame, QRhiResourceUpdateBatch
   stats_.soundings_waiting = plan_.waiting();
   stats_.profile_wide = wide_;
   stats_.point_quads = point_quads_;
+  /* each buffer by the copies its type and use take: Qt's Metal backend
+     keeps a dynamic buffer, and a static one without storage use, once per
+     frame in flight, a storage buffer once */
   size_t held = 0;
   for (const ChunkGpu &chunk : chunks_)
     for (const std::unique_ptr<QRhiBuffer> *buffer : {&chunk.positions[0], &chunk.positions[1], &chunk.colours[0],
                                                       &chunk.colours[1], &chunk.black, &chunk.red, &chunk.pair_colours})
-      held += *buffer != nullptr ? (*buffer)->size() : 0;
-  stats_.sounding_held_bytes = held * static_cast<size_t>(type_ == QRhiBuffer::Dynamic ? dynamic_copies_ : copies_);
+      if (*buffer != nullptr) {
+        const QRhiBuffer &b = **buffer;
+        const int copies = b.type() == QRhiBuffer::Dynamic                ? dynamic_copies_
+                           : b.usage().testFlag(QRhiBuffer::StorageBuffer) ? 1
+                                                                           : copies_;
+        held += b.size() * static_cast<size_t>(copies);
+      }
+  stats_.sounding_held_bytes = held;
   count_resources();
   set_pass_times(0.0, 0.0, 0.0, -1.0, 0.0, 0.0);
   if (prepared == Prepared::Failed)
@@ -1643,16 +1664,32 @@ void SoundingsRenderer::split_lists() {
 }
 
 bool SoundingsRenderer::write_buffer(QRhiResourceUpdateBatch *updates, std::unique_ptr<QRhiBuffer> *buffer,
-                                     const void *data, size_t bytes, QRhiBuffer::UsageFlags usage) {
-  /* a buffer of exactly the chunk's bytes, written whole */
-  if (bytes > 0xffffffffu || !fit(buffer, static_cast<quint32>(bytes), type_, usage))
+                                     const void *data, size_t bytes, QRhiBuffer::Type type,
+                                     QRhiBuffer::UsageFlags usage, bool *waiting) {
+  /* a buffer of exactly the chunk's bytes, written whole (a new buffer holds
+     no waiting upload) */
+  const QRhiBuffer *before = buffer->get();
+  if (bytes > 0xffffffffu || !fit(buffer, static_cast<quint32>(bytes), type, usage))
     return false;
+  if (waiting != nullptr && buffer->get() != before)
+    *waiting = false;
   if (bytes == 0)
     return true;
-  if (type_ == QRhiBuffer::Dynamic)
+  /* an upload still waiting for the buffer's next bind (a frame that did
+     not record the soundings slot): Qt would keep it beside the new one,
+     so the buffer is made again, which drops it */
+  if (waiting != nullptr && *waiting) {
+    (*buffer)->destroy();
+    if (!(*buffer)->create())
+      return false;
+    stats_.soundings_rebuilt++;
+  }
+  if ((*buffer)->type() == QRhiBuffer::Dynamic)
     updates->updateDynamicBuffer(buffer->get(), 0, static_cast<quint32>(bytes), data);
   else
     updates->uploadStaticBuffer(buffer->get(), data);
+  if (waiting != nullptr)
+    *waiting = true;
   return true;
 }
 
@@ -1660,15 +1697,18 @@ bool SoundingsRenderer::write(QRhiResourceUpdateBatch *updates, const SoundingsP
   const int c = upload.chunk;
   ChunkGpu &chunk = chunks_[static_cast<size_t>(c)];
   const size_t first = static_cast<size_t>(plan_.first(c));
+  /* the uploads of a storage chunk wait in Qt's Metal backend for the
+     chunk's next bind */
+  const bool wait = chunk_use_.storage && rhi_->backend() == QRhi::Metal;
   bool ok = true;
   switch (upload.stream) {
   case SoundingsPlan::kPositions:
-    ok = write_buffer(updates, &chunk.positions[upload.set], positions_.data() + 3 * first, upload.bytes,
-                      QRhiBuffer::VertexBuffer);
+    ok = write_buffer(updates, &chunk.positions[upload.set], positions_.data() + 3 * first, upload.bytes, chunk_type_,
+                      QRhiBuffer::VertexBuffer | chunk_usage_, wait ? &chunk.waiting_positions[upload.set] : nullptr);
     break;
   case SoundingsPlan::kColours:
-    ok = write_buffer(updates, &chunk.colours[upload.set], colours_.data() + 4 * first, upload.bytes,
-                      QRhiBuffer::VertexBuffer);
+    ok = write_buffer(updates, &chunk.colours[upload.set], colours_.data() + 4 * first, upload.bytes, chunk_type_,
+                      QRhiBuffer::VertexBuffer | chunk_usage_, wait ? &chunk.waiting_colours[upload.set] : nullptr);
     break;
   case SoundingsPlan::kLists: {
     /* the black and the red pairs of the chunk, each list in a buffer of its
@@ -1678,16 +1718,16 @@ bool SoundingsRenderer::write(QRhiResourceUpdateBatch *updates, const SoundingsP
       const size_t n = pair_entries(range, c);
       *count = static_cast<quint32>(n);
       *inner = static_cast<quint32>(inner_pair_entries(plan_, entries, range, c));
-      return write_buffer(updates, buffer, entries.data() + range[static_cast<size_t>(c)], 4 * n,
-                          QRhiBuffer::IndexBuffer);
+      return write_buffer(updates, buffer, entries.data() + range[static_cast<size_t>(c)], 4 * n, list_type_,
+                          QRhiBuffer::IndexBuffer, nullptr);
     };
     ok = list(&chunk.black, black_, black_range_, &chunk.black_count, &chunk.black_inner) &&
          list(&chunk.red, red_, red_range_, &chunk.red_count, &chunk.red_inner);
     break;
   }
   case SoundingsPlan::kPairColours:
-    ok = write_buffer(updates, &chunk.pair_colours, pair_colours_.data() + 4 * first, upload.bytes,
-                      QRhiBuffer::VertexBuffer);
+    ok = write_buffer(updates, &chunk.pair_colours, pair_colours_.data() + 4 * first, upload.bytes, list_type_,
+                      QRhiBuffer::VertexBuffer, nullptr);
     break;
   default:
     break;
@@ -1719,13 +1759,15 @@ void SoundingsRenderer::record_soundings(QRhiCommandBuffer *cb, QSize pixels, co
   if (pipeline == nullptr || (point_quads_ && quad_corners_ == nullptr))
     return;
   const quint32 k = static_cast<quint32>(level_stride(level_));
+  const int front_positions = plan_.front(SoundingsPlan::kPositions);
+  const int front_colours = plan_.front(SoundingsPlan::kColours);
   bool bound = false;
   for (int c = 0; c < plan_.chunks(); c++) {
     if (!plan_.drawn(c))
       continue;
-    const ChunkGpu &chunk = chunks_[static_cast<size_t>(c)];
-    QRhiBuffer *positions = chunk.positions[plan_.front(SoundingsPlan::kPositions)].get();
-    QRhiBuffer *colours = chunk.colours[plan_.front(SoundingsPlan::kColours)].get();
+    ChunkGpu &chunk = chunks_[static_cast<size_t>(c)];
+    QRhiBuffer *positions = chunk.positions[front_positions].get();
+    QRhiBuffer *colours = chunk.colours[front_colours].get();
     const quint32 points = static_cast<quint32>(plan_.points(c));
     if (positions == nullptr || colours == nullptr || points == 0)
       continue;
@@ -1749,6 +1791,8 @@ void SoundingsRenderer::record_soundings(QRhiCommandBuffer *cb, QSize pixels, co
       cb->setVertexInput(0, 2, inputs);
       cb->draw(drawn);
     }
+    chunk.waiting_positions[front_positions] = false;
+    chunk.waiting_colours[front_colours] = false;
     stats_.draws++;
     stats_.soundings_drawn += static_cast<int>(drawn);
   }
@@ -1756,6 +1800,32 @@ void SoundingsRenderer::record_soundings(QRhiCommandBuffer *cb, QSize pixels, co
     stats_.soundings_stride = static_cast<int>(k * 3 * sizeof(float));
     stats_.lod_frames += level_ > 0 ? 1 : 0;
   }
+  /* every position and colour buffer whose upload still waits (storage use
+     on Metal) is bound without a draw, so that Qt copies the upload now and
+     none waits for a later one: normally this frame's writes that it does
+     not draw (a chunk whose first upload is not complete, a second set
+     before its swap), else one left by an earlier frame without the
+     soundings slot; a bind needs the pipeline set */
+  for (ChunkGpu &chunk : chunks_)
+    for (int set = 0; set < 2; set++) {
+      const struct {
+        QRhiBuffer *buffer;
+        bool *waiting;
+      } streams[] = {{chunk.positions[set].get(), &chunk.waiting_positions[set]},
+                     {chunk.colours[set].get(), &chunk.waiting_colours[set]}};
+      for (const auto &stream : streams) {
+        if (!*stream.waiting || stream.buffer == nullptr)
+          continue;
+        if (!bound) {
+          bind(cb, pipeline, item.slot, pixels);
+          bound = true;
+        }
+        const QRhiCommandBuffer::VertexInput input(stream.buffer, 0);
+        cb->setVertexInput(0, 1, &input);
+        *stream.waiting = false;
+        stats_.soundings_applied++;
+      }
+    }
 }
 
 void SoundingsRenderer::record_lines(QRhiCommandBuffer *cb, QSize pixels, const DrawItem &item, int depth) {
@@ -1765,9 +1835,10 @@ void SoundingsRenderer::record_lines(QRhiCommandBuffer *cb, QSize pixels, const 
      from its entry (alpha 0: not drawn). During the first upload a chunk's
      pair that reaches into the next chunk is left out while that chunk's
      soundings are not drawn. */
+  const int front = plan_.front(SoundingsPlan::kPositions);
   for (int c = 0; c < plan_.chunks(); c++) {
-    const ChunkGpu &chunk = chunks_[static_cast<size_t>(c)];
-    QRhiBuffer *positions = chunk.positions[plan_.front(SoundingsPlan::kPositions)].get();
+    ChunkGpu &chunk = chunks_[static_cast<size_t>(c)];
+    QRhiBuffer *positions = chunk.positions[front].get();
     const bool out = plan_.last_pair_out(c);
     if (wide_) {
       QRhiGraphicsPipeline *pipeline = view_pipelines_[kProfileWide][depth].get();
@@ -1780,6 +1851,7 @@ void SoundingsRenderer::record_lines(QRhiCommandBuffer *cb, QSize pixels, const 
           {corners_.get(), 0}, {positions, 0}, {positions, 3 * sizeof(float)}, {chunk.pair_colours.get(), 0}};
       cb->setVertexInput(0, 4, inputs);
       cb->draw(6, static_cast<quint32>(instances));
+      chunk.waiting_positions[front] = false;
       stats_.draws++;
       stats_.wide_draws++;
       stats_.profile_instances += instances;
@@ -1801,6 +1873,7 @@ void SoundingsRenderer::record_lines(QRhiCommandBuffer *cb, QSize pixels, const 
       const QRhiCommandBuffer::VertexInput input(positions, 0);
       cb->setVertexInput(0, 1, &input, list.indices, 0, QRhiCommandBuffer::IndexUInt32);
       cb->drawIndexed(list.count);
+      chunk.waiting_positions[front] = false;
       stats_.draws++;
       stats_.thin_draws++;
       stats_.profile_indices += static_cast<int>(list.count);
@@ -1937,7 +2010,9 @@ bool OffscreenRenderer::Impl::begin(QSize pixels, const RenderOptions &options, 
     return false;
   if (d.renderer != nullptr &&
       (d.kind != of || !d.renderer->compatible(d.pass.get()) ||
-       (of == Kind::Map && d.map()->float_colours() != options.float_terrain_colours)))
+       (of == Kind::Map && d.map()->float_colours() != options.float_terrain_colours) ||
+       (of == Kind::Soundings &&
+        static_cast<rhi::SoundingsRenderer *>(d.renderer.get())->chunk_storage() != options.chunk_storage)))
     d.drop_renderer();
   if (d.renderer == nullptr) {
     d.kind = of;

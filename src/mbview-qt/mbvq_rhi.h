@@ -143,6 +143,11 @@ struct RenderOptions {
   /* the 3D soundings drawn at this level of detail in every frame (0 to 4:
      every 1st, 2nd, 4th, 8th or 16th sounding); < 0: the GPU-time fallback's */
   int soundings_lod = -1;
+  /* the soundings' position and colour chunks: < 0 as the backend allows
+     (static with storage use where it can splat, chunk_use), 0 the types of
+     the other soundings' buffers (dynamic on Metal, static elsewhere); taken
+     when the renderer or its pipelines are made, as point_quads */
+  int chunk_storage = -1;
 };
 
 /* what the renderer did; totals since the renderer was made, except where
@@ -226,11 +231,13 @@ struct RenderStats {
   double upload_ms = 0.0;
   /* the drawing commands recorded and the pass ended; on Metal with the
      copies of the queued uploads into the buffers, made when a buffer is
-     bound: Qt keeps each buffer once per frame in flight, copies into the
-     current frame's one now and into the other when a later frame binds the
-     buffer (so a static buffer uploaded in every frame is copied twice per
-     frame; a dynamic one written whole in every frame, as the batch's, once,
-     since a whole write drops the writes still waiting for the other one) */
+     bound: Qt keeps each buffer without storage use once per frame in
+     flight, copies into the current frame's one now and into the other when
+     a later frame binds the buffer (so a static buffer uploaded in every
+     frame is copied twice per frame; a dynamic one written whole in every
+     frame, as the batch's, once, since a whole write drops the writes still
+     waiting for the other one); a buffer with storage use (the soundings'
+     positions and colours, chunk_use) is kept and copied once */
   double record_ms = 0.0;
   double render_ms = 0.0; /* the whole frame on the CPU, up to the end of the pass */
   /* where the last frame's render() began and ended, in ms since the epoch
@@ -308,7 +315,9 @@ struct RenderStats {
      chunks are drawn (in the first upload a prefix) and those drawn as
      points or quads, whether points are quads and the profile lines wide,
      the profile lines' indices (thin) and instances (wide) drawn, the GPU
-     bytes of the soundings' buffers, every copy counted. Totals: the
+     bytes of the soundings' buffers, every copy counted (each buffer by the
+     copies its type and use take: on Metal two of a dynamic buffer, one of a
+     storage buffer). Totals: the
      allocations, the reads of the core's positions, colours and pairs, and
      per stream (positions, colours, index lists, colours per pair) the
      chunks written and their bytes; the swaps of a double-buffered stream. */
@@ -362,6 +371,16 @@ struct RenderStats {
   int soundings_lod = 0;
   int lod_frames = 0;
   int soundings_stride = 0;
+  /* The 3D soundings' position and colour chunks: 1 static with storage use,
+     0 the types of the other soundings' buffers, -1 before the soundings
+     renderer was made (chunk_use). Totals, on Metal: the chunks bound
+     without a draw (normally in the frame of their write, else in the next
+     frame with the soundings slot), so that Qt copies the upload it holds
+     for their next bind, and the chunks made again because an upload still
+     waited when the next came (a frame without the soundings slot). */
+  int soundings_storage = -1;
+  int soundings_applied = 0;
+  int soundings_rebuilt = 0;
 };
 
 class OffscreenRenderer {
