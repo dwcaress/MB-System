@@ -5724,6 +5724,166 @@ void model_soundings_frame() {
   mb3dsoundings_end(0, &error);
 }
 
+/* 7e1: a chunk's index lists in one buffer, its black pairs, then its red
+   ones: how many entries it holds (chunk_list_entries), the copy into the
+   buffer's array (chunk_lists) and where a chunk of one part already lies
+   in one piece, which the staging path writes without a copy
+   (chunk_list_piece). On the pairs of the All mode made local to chunks of
+   7 and of 11 (as model_soundings_frame), and on lists made by hand: a
+   chunk without pairs, one with only red and one with only black pairs,
+   chunks outside the ranges, ranges of unequal size and empty lists. An
+   out filled with a sentinel shows what is written; a piece's entries are
+   read only through the pointer expected. */
+void model_chunk_lists() {
+  make_sdg(30, 40, 7);
+  const bool opened = open_sdg();
+  sdg_camera(35.0f, 125.0f, 1.3f, 0.05f, -0.05f);
+  sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_ALL, true);
+  const int count = static_cast<int>(sdg_storage.size());
+  const uint32_t kSentinel = 0xa5a5a5a5u;
+  /* chunk c of lists made local against the three functions: its entries
+     (none where held is false: outside the ranges, ranges of unequal size),
+     out as the black part, then the red part, the sentinel behind them, and
+     the piece: the part where it lies for a chunk of one part (its entries
+     equal to out's), none for a chunk of both parts or none */
+  const auto chunk_right = [&](const std::vector<uint32_t> &black, const std::vector<size_t> &black_range,
+                               const std::vector<uint32_t> &red, const std::vector<size_t> &red_range, int c,
+                               bool held, std::vector<uint32_t> *out, int *pieces) {
+    const size_t nb = held ? rhi::pair_entries(black_range, c) : 0;
+    const size_t nr = held ? rhi::pair_entries(red_range, c) : 0;
+    const size_t n = rhi::chunk_list_entries(black_range, red_range, c);
+    out->assign(nb + nr + 2, kSentinel);
+    rhi::chunk_lists(black, black_range, red, red_range, c, out->data());
+    bool right = n == nb + nr && (*out)[nb + nr] == kSentinel && (*out)[nb + nr + 1] == kSentinel;
+    for (size_t k = 0; right && k < nb; k++)
+      right = (*out)[k] == black[black_range[static_cast<size_t>(c)] + k];
+    for (size_t k = 0; right && k < nr; k++)
+      right = (*out)[nb + k] == red[red_range[static_cast<size_t>(c)] + k];
+    const uint32_t *piece = rhi::chunk_list_piece(black, black_range, red, red_range, c);
+    const uint32_t *expected = (nb > 0) == (nr > 0) ? nullptr
+                               : nb > 0             ? black.data() + black_range[static_cast<size_t>(c)]
+                                                    : red.data() + red_range[static_cast<size_t>(c)];
+    right = right && piece == expected;
+    if (right && piece != nullptr) {
+      (*pieces)++;
+      right = std::equal(out->begin(), out->begin() + static_cast<std::ptrdiff_t>(nb + nr), piece);
+    }
+    return right;
+  };
+
+  /* the pairs of the All mode made local to chunks of 7 and of 11: every
+     chunk right, every pair back once in its colour, a pair into the next
+     chunk the last of its colour's part, which the inner count leaves out
+     (and none left out without one) */
+  bool real = opened;
+  int pairs[2] = {0, 0}, across[2] = {0, 0}, pieces = 0;
+  std::vector<int> chunks;
+  rhi::SoundingsFrame frame;
+  for (const int size : {7, 11}) {
+    std::vector<uint32_t> black, red;
+    real = real && frame.pairs(count, &black, &red) && !black.empty() && !red.empty();
+    const std::vector<uint32_t> global[2] = {black, red};
+    rhi::SoundingsPlan plan;
+    plan.reset(count, size);
+    std::vector<size_t> black_range, red_range;
+    rhi::split_pairs(plan, &black, &black_range);
+    rhi::split_pairs(plan, &red, &red_range);
+    std::vector<int> back[2] = {std::vector<int>(static_cast<size_t>(count), 0),
+                                std::vector<int>(static_cast<size_t>(count), 0)};
+    for (int c = 0; c < plan.chunks() && real; c++) {
+      std::vector<uint32_t> out;
+      real = chunk_right(black, black_range, red, red_range, c, true, &out, &pieces);
+      const size_t part_entries[2] = {rhi::pair_entries(black_range, c), rhi::pair_entries(red_range, c)};
+      const size_t inner[2] = {rhi::inner_pair_entries(plan, black, black_range, c),
+                               rhi::inner_pair_entries(plan, red, red_range, c)};
+      const uint32_t points = static_cast<uint32_t>(plan.points(c));
+      size_t from = 0;
+      for (int part = 0; part < 2 && real; part++) {
+        const size_t end = from + part_entries[part];
+        for (size_t k = from; k + 1 < end; k += 2) {
+          const size_t first = static_cast<size_t>(out[k]) + static_cast<size_t>(plan.first(c));
+          if (first < back[part].size())
+            back[part][first]++;
+          if (out[k + 1] >= points) {
+            across[part]++;
+            real = real && k + 2 == end && inner[part] + 2 == part_entries[part];
+          }
+        }
+        if (part_entries[part] >= 2 && out[end - 1] < points)
+          real = real && inner[part] == part_entries[part];
+        from = end;
+      }
+    }
+    chunks.push_back(plan.chunks());
+    for (int part = 0; part < 2; part++) {
+      int expected = 0, returned = 0;
+      for (size_t k = 0; k + 1 < global[part].size(); k += 2) {
+        real = real && global[part][k] < back[part].size() && back[part][global[part][k]] == 1;
+        expected++;
+      }
+      for (const int times : back[part])
+        returned += times;
+      real = real && returned == expected && (pairs[part] == 0 || pairs[part] == expected);
+      pairs[part] = expected;
+    }
+  }
+
+  /* by hand, four chunks: 0 with black and red pairs, 1 without pairs, 2
+     with only red pairs, 3 with only black ones; chunks -1, 4 and 5 outside
+     the ranges; ranges of unequal size (either one shorter); empty lists of
+     two chunks: no entries, out unchanged and no piece where none are held */
+  bool hand = true;
+  int cases = 0, hand_pieces = 0;
+  {
+    const std::vector<uint32_t> black = {0, 1, 2, 3, 1, 2, 4, 5};
+    const std::vector<size_t> black_range = {0, 4, 4, 4, 8};
+    const std::vector<uint32_t> red = {3, 4, 0, 1, 5, 6};
+    const std::vector<size_t> red_range = {0, 2, 2, 6, 6};
+    const std::vector<uint32_t> expected[4] = {{0, 1, 2, 3, 3, 4}, {}, {0, 1, 5, 6}, {1, 2, 4, 5}};
+    for (int c = 0; c < 4; c++) {
+      std::vector<uint32_t> out;
+      hand = hand && chunk_right(black, black_range, red, red_range, c, true, &out, &hand_pieces) &&
+             out.size() == expected[c].size() + 2 && std::equal(expected[c].begin(), expected[c].end(), out.begin());
+      cases++;
+    }
+    for (const int c : {-1, 4, 5}) {
+      std::vector<uint32_t> out;
+      hand = hand && chunk_right(black, black_range, red, red_range, c, false, &out, &hand_pieces);
+      cases++;
+    }
+    const std::vector<size_t> shorter = {0, 2, 2, 6};
+    for (int c = -1; c <= 4; c++) {
+      std::vector<uint32_t> out;
+      hand = hand && chunk_right(black, black_range, red, shorter, c, false, &out, &hand_pieces) &&
+             chunk_right(black, shorter, red, red_range, c, false, &out, &hand_pieces);
+      cases += 2;
+    }
+  }
+  {
+    const std::vector<uint32_t> none;
+    const std::vector<size_t> zero = {0, 0, 0};
+    for (int c = 0; c < 2; c++) {
+      std::vector<uint32_t> out;
+      hand = hand && chunk_right(none, zero, none, zero, c, true, &out, &hand_pieces);
+      cases++;
+    }
+  }
+  check(real && across[0] > 0 && across[1] > 0 && hand && hand_pieces == 2,
+        "7e1: a chunk's index lists in one buffer: on the " + std::to_string(pairs[0]) + " black and " +
+            std::to_string(pairs[1]) + " red pairs of the All mode made local to chunks of 7 and of 11 " +
+            list(chunks) + ", each chunk holds its black and red entries (chunk_list_entries), "
+            "copied black part first, then the red part, nothing behind them (chunk_lists); every pair comes back "
+            "once in its colour; a pair across chunks (" + std::to_string(across[0]) + " black, " +
+            std::to_string(across[1]) + " red) is the last of its colour's part, which the inner count leaves out; "
+            "no piece for a chunk of both parts or none (" + std::to_string(pieces) + " pieces); by hand (" +
+            std::to_string(cases) + " cases) a chunk without pairs, one with only red and one with only black "
+            "pairs (" + std::to_string(hand_pieces) + " pieces, each where its part lies and equal to the copy), "
+            "chunks outside the ranges, ranges of unequal size and empty lists: no entries, nothing written, no "
+            "piece");
+  int error = MB_ERROR_NO_ERROR;
+  mb3dsoundings_end(0, &error);
+}
+
 /* the profile view's frame on a map whose profile has no points: it sizes
    the core, fills the batch (only the frame, one loop) and takes the camera
    of the accessor; the quads, green boundaries and frame of a profile with
@@ -6432,13 +6592,17 @@ void null_failures() {
   sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_ALL, true);
 
   /* A soundings frame whose buffers cannot be made (fail_buffers, after a
-     flag edit whose chunk needs index lists of another size) fails at once
-     and holds no GPU bytes, neither the soundings' nor the batch's; the
-     next frame reads every stream once and draws every sounding. */
+     flag edit in the Good mode, which takes the sounding's black pairs out
+     of its chunk's index lists, so that they need a buffer of another size;
+     in the All mode a flag edit keeps every chunk's buffer, 7e1) fails at
+     once and holds no GPU bytes, neither the soundings' nor the batch's;
+     the next frame reads every stream once and draws every sounding. The
+     All mode again after it. */
   {
     mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
     mbvq::RenderOptions options;
     options.soundings_chunk = 300;
+    mb3dsoundings_setprofiles(MBS_VIEW_PROFILES_UNFLAGGED);
     const bool drawn = renderer.render_soundings(200, 150, options, nullptr);
     const mbvq::RenderStats before = renderer.stats();
     sdg_storage[12].beamflag = static_cast<char>(MB_FLAG_FLAG | MB_FLAG_MANUAL);
@@ -6458,7 +6622,8 @@ void null_failures() {
               failed.batch_resources == 0 && failed.resources == failed.fixed_resources && failed.soundings_shown == 0 &&
               again && !after.failed && reads[0] == 1 && reads[1] == 1 && reads[2] == 1 &&
               after.soundings_shown == 1000 && after.soundings_drawn == 1000 && after.sounding_held_bytes > 0,
-          "6d Null: a soundings frame whose buffers cannot be made fails at once (" + std::to_string(failed_frames) +
+          "6d Null: a soundings frame whose buffers cannot be made (a flag edit in the Good mode: index lists of "
+          "another size) fails at once (" + std::to_string(failed_frames) +
               " frame) and holds no GPU bytes (" + std::to_string(failed.sounding_held_bytes) + " of the soundings, " +
               std::to_string(failed.batch_held_bytes) + " of the batch, against " +
               std::to_string(before.sounding_held_bytes) + " and " + std::to_string(before.batch_held_bytes) +
@@ -6466,6 +6631,8 @@ void null_failures() {
               std::to_string(reads[1]) + ", " + std::to_string(reads[2]) + ") and draws " +
               std::to_string(after.soundings_drawn) + " soundings");
   }
+  /* the next block's other profile mode is the Good mode */
+  mb3dsoundings_setprofiles(MBS_VIEW_PROFILES_ALL);
 
   /* A read of the soundings' data that fails (fail_reads: none can today)
      fails its frame at once, as a buffer that cannot be made does, rather
@@ -6663,6 +6830,275 @@ void null_profile_mode() {
                    "many profile indices as the LINES command of a fill with the mode set has vertices, in the All, "
                    "Good, None and All modes (" + indices + "), also in a frame whose fill was refused");
   int error = MB_ERROR_NO_ERROR;
+  mb3dsoundings_end(0, &error);
+}
+
+/* 7e1: whether the renderer moves each chunk's array of index lists into
+   Qt's update batch (Qt 6.10 and later; the test program's Qt is the
+   library's) or writes a chunk with black and red pairs through its
+   staging copy, as with RenderOptions::lists_staging */
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+constexpr bool kListsMoved = true;
+#else
+constexpr bool kListsMoved = false;
+#endif
+
+/* 7e1 with a Null QRhi: each chunk's index lists in one buffer, its black
+   pairs, then its red ones, whose size stays while the pairs only change
+   colour (the All mode). null_soundings' fixture (1000 soundings from above
+   in 4 chunks of 300, every profile, ratio 1; every chunk with black and
+   red pairs), one frame per call after the first: frames that erase and
+   restore soundings write the lists again and make no buffer (7e1-b1), also
+   where no buffer could be made (7e1-b2); the None mode lets the buffers
+   go, the All mode makes them again (7e1-b3). A second renderer writes its
+   lists through the staging copy (RenderOptions::lists_staging, as with Qt
+   older than 6.10) beside the first in every frame, then also in the Good
+   mode (7e1-b4). The Good mode's buffers follow its pairs: an erase makes
+   its chunk's buffer again, a switch to the All mode and back every
+   chunk's (7e1-c). An erase flags good soundings with good neighbours in
+   their pings, a restore sets a flagged one with good neighbours good. */
+void null_erase_lists() {
+  int error = MB_ERROR_NO_ERROR;
+  const int P = rhi::SoundingsPlan::kPositions, C = rhi::SoundingsPlan::kColours, L = rhi::SoundingsPlan::kLists,
+            PC = rhi::SoundingsPlan::kPairColours;
+  make_sdg(40, 25, 7);
+  const bool opened = open_sdg();
+  sdg_camera(90.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+  sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_ALL, true);
+  mbvq::RenderOptions options;
+  options.soundings_chunk = 300;
+  mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Null);
+  mbvq::OffscreenRenderer staging(mbvq::OffscreenRenderer::Api::Null);
+  TestBatch reference;
+  /* the soundings' own resources: the renderer's fixed ones and the batch's aside */
+  const auto own = [](const mbvq::RenderStats &s) { return s.resources - s.fixed_resources - s.batch_resources; };
+  const auto made_alike = [](const mbvq::RenderStats &a, const mbvq::RenderStats &b) {
+    return std::equal(a.sounding_made, a.sounding_made + 4, b.sounding_made);
+  };
+  const auto made = [](const mbvq::RenderStats &s) {
+    return list(std::vector<int>(s.sounding_made, s.sounding_made + 4));
+  };
+  const auto edit = [&](const std::vector<int> &soundings, bool erase) {
+    for (const int k : soundings)
+      sdg_storage[static_cast<size_t>(k)].beamflag =
+          erase ? static_cast<char>(MB_FLAG_FLAG | MB_FLAG_MANUAL) : static_cast<char>(MB_FLAG_NONE);
+    mb3dsoundings_colors_changed(0, &error);
+  };
+  /* the core's black entries now (an edit frame's precondition) */
+  const auto black_entries = [] {
+    std::vector<uint32_t> black, red;
+    rhi::SoundingsFrame reader;
+    return reader.pairs(1000, &black, &red) ? static_cast<int>(black.size()) : -1;
+  };
+  /* the profile indices of a fill with the mode set */
+  const auto fill_indices = [&] {
+    fill_reference(&reference.b);
+    return line_vertices(reference.b);
+  };
+  /* a frame of both renderers (7e1-b4: the second with lists_staging): the
+     same profile indices, buffers made, GPU bytes and soundings' resources,
+     the second's frame not failed, its list writes all staged in an
+     All-mode frame (every chunk has black and red pairs: four) and none in
+     another; the first renderer's none on Qt 6.10 and later */
+  int both_frames = 0, both_alike = 0;
+  std::string unlike;
+  const auto both = [&](mbvq::RenderOptions frame_options, int max_frames, bool all_mode) {
+    const mbvq::RenderStats before = staging.stats();
+    const bool drawn = renderer.render_soundings(200, 150, frame_options, nullptr, max_frames);
+    frame_options.lists_staging = true;
+    const bool staged_drawn = staging.render_soundings(200, 150, frame_options, nullptr, max_frames);
+    const mbvq::RenderStats a = renderer.stats();
+    const mbvq::RenderStats b = staging.stats();
+    const int writes = b.sounding_writes[L] - before.sounding_writes[L];
+    const int staged = b.sounding_staged - before.sounding_staged;
+    const bool alike = staged_drawn && !b.failed && b.profile_indices == a.profile_indices && made_alike(a, b) &&
+                       b.sounding_held_bytes == a.sounding_held_bytes && own(b) == own(a) &&
+                       staged == (all_mode ? writes : 0) && (!all_mode || writes == 4) &&
+                       a.sounding_staged == (kListsMoved ? 0 : b.sounding_staged);
+    both_frames++;
+    both_alike += alike ? 1 : 0;
+    if (!alike && unlike.size() < 100)
+      unlike += " " + std::to_string(both_frames) + ": staged " + std::to_string(staged) + " of " +
+                std::to_string(writes) + ", made " + made(b) + " against " + made(a);
+    return drawn;
+  };
+
+  /* 7e1-b1: the first frames, then frames that erase (five in chunk 1, then
+     one sounding in every chunk) and restore (one in chunk 1) */
+  const bool first_drawn = both(options, 16, true);
+  const mbvq::RenderStats first = renderer.stats();
+  bool b1 = opened && first_drawn && !first.failed && first.sounding_made[P] == 4 && first.sounding_made[C] == 4 &&
+            first.sounding_made[L] == 4 && first.sounding_made[PC] == 0 && first.sounding_writes[L] == 4 &&
+            first.sounding_staged == (kListsMoved ? 0 : first.sounding_writes[L]);
+  struct Edit {
+    std::vector<int> soundings;
+    bool erase;
+  };
+  const Edit edits[] = {{{312}, true}, {{362}, true}, {{387}, true}, {{437}, true}, {{487}, true},
+                        {{12, 537, 612, 912}, true}, {{315}, false}};
+  int black = black_entries();
+  std::string blacks = std::to_string(black), steps;
+  for (const Edit &e : edits) {
+    const mbvq::RenderStats before = renderer.stats();
+    edit(e.soundings, e.erase);
+    const int black_after = black_entries();
+    const int expected = fill_indices();
+    const bool drawn = both(options, 1, true);
+    const mbvq::RenderStats s = renderer.stats();
+    const int change = (e.erase ? -4 : 4) * static_cast<int>(e.soundings.size());
+    b1 = b1 && drawn && !s.failed && black_after - black == change &&
+         s.sounding_reads[L] == before.sounding_reads[L] + 1 && s.sounding_writes[L] == before.sounding_writes[L] + 4 &&
+         s.sounding_bytes[L] == before.sounding_bytes[L] + 7680 && made_alike(s, first) &&
+         s.sounding_held_bytes == first.sounding_held_bytes && own(s) == own(first) && s.profile_indices == expected;
+    blacks += " " + std::to_string(black_after);
+    steps += std::string(steps.empty() ? "" : ", ") + std::to_string(s.sounding_reads[L] - before.sounding_reads[L]) +
+             "/" + std::to_string(s.sounding_writes[L] - before.sounding_writes[L]) + "/" +
+             std::to_string(s.sounding_bytes[L] - before.sounding_bytes[L]);
+    black = black_after;
+  }
+  const mbvq::RenderStats edited = renderer.stats();
+  check(b1, "7e1 Null: one index buffer per chunk: the first frames make " + made(first) +
+                " buffers (positions, colours, index lists, colours per pair; " +
+                std::to_string(first.sounding_staged) + " list writes staged" +
+                (kListsMoved ? ": the arrays are moved into Qt's batch" : ": Qt older than 6.10") +
+                "); 7 frames that erase soundings in the All mode (5 in chunk 1, then one in every chunk) and restore "
+                "one (the core's black entries " + blacks + ") each read the lists once and write them whole "
+                "(reads/writes/bytes per frame " + steps + ") without making a buffer (" + made(edited) +
+                " made), the GPU bytes (" + std::to_string(edited.sounding_held_bytes) +
+                ") and the soundings' resources (" + std::to_string(own(edited)) + ") as after the first frames ("
+                + std::to_string(first.sounding_held_bytes) + ", " + std::to_string(own(first)) +
+                "), the profile indices (" + std::to_string(edited.profile_indices) +
+                ") those of a fill with the mode set");
+
+  /* a frame's reads, writes and bytes of the index lists */
+  const auto list_step = [&](const mbvq::RenderStats &from, const mbvq::RenderStats &to) {
+    return std::to_string(to.sounding_reads[L] - from.sounding_reads[L]) + "/" +
+           std::to_string(to.sounding_writes[L] - from.sounding_writes[L]) + "/" +
+           std::to_string(to.sounding_bytes[L] - from.sounding_bytes[L]);
+  };
+
+  /* 7e1-b2: one more erase in every chunk where no buffer can be made: the
+     frame needs none (with a buffer per list it fails, null_failures) */
+  {
+    const mbvq::RenderStats before = renderer.stats();
+    edit({37, 562, 662, 962}, true);
+    const int black_after = black_entries();
+    const int expected = fill_indices();
+    mbvq::RenderOptions failing = options;
+    failing.fail_buffers = true;
+    const bool drawn = both(failing, 1, true);
+    const mbvq::RenderStats s = renderer.stats();
+    check(drawn && !s.failed && black_after - black == -16 && s.soundings_drawn == 1000 &&
+              s.sounding_reads[L] == before.sounding_reads[L] + 1 &&
+              s.sounding_writes[L] == before.sounding_writes[L] + 4 &&
+              s.sounding_bytes[L] == before.sounding_bytes[L] + 7680 &&
+              s.profile_indices == before.profile_indices && s.profile_indices == expected,
+          "7e1 Null: a frame that erases a sounding in every chunk where no buffer can be made (fail_buffers) does "
+          "not fail (failed " + std::to_string(s.failed) + "): it reads the lists once and writes them whole "
+          "(reads/writes/bytes " + list_step(before, s) + ") and nothing is made in it, the batch's buffers "
+          "included; it draws " + std::to_string(s.soundings_drawn) + " soundings and " +
+              std::to_string(s.profile_indices) +
+              " profile indices, as the frame before (" + std::to_string(before.profile_indices) +
+              ") and a fill with the mode set (" + std::to_string(expected) + "; the core's black entries " +
+              std::to_string(black) + " to " + std::to_string(black_after) + ")");
+    black = black_after;
+  }
+
+  /* 7e1-b3: All to None lets the list buffers go; an erase in the None mode
+     writes lists of 0 bytes (fit() reports new objects for them, not
+     counted); None to All makes the buffers again */
+  {
+    const mbvq::RenderStats all = renderer.stats();
+    mb3dsoundings_setprofiles(MBS_VIEW_PROFILES_NONE);
+    bool drawn = both(options, 1, false);
+    const mbvq::RenderStats none = renderer.stats();
+    edit({137}, true);
+    drawn = both(options, 1, false) && drawn;
+    const mbvq::RenderStats erased = renderer.stats();
+    mb3dsoundings_setprofiles(MBS_VIEW_PROFILES_ALL);
+    drawn = both(options, 1, true) && drawn;
+    const mbvq::RenderStats again = renderer.stats();
+    bool remade = again.sounding_made[L] == erased.sounding_made[L] + 4;
+    for (const int stream : {P, C, PC})
+      remade = remade && again.sounding_made[stream] == erased.sounding_made[stream];
+    check(drawn && !none.failed && !erased.failed && !again.failed && made_alike(none, all) &&
+              own(none) == own(all) - 4 && none.sounding_held_bytes + 7680 == all.sounding_held_bytes &&
+              made_alike(erased, none) && erased.sounding_reads[L] == none.sounding_reads[L] + 1 &&
+              erased.sounding_writes[L] == none.sounding_writes[L] + 4 &&
+              erased.sounding_bytes[L] == none.sounding_bytes[L] && remade && own(again) == own(erased) + 4 &&
+              again.sounding_held_bytes == erased.sounding_held_bytes + 7680,
+          "7e1 Null: All to None lets each chunk's list buffer go (made " + made(none) + " against " + made(all) +
+              "; the soundings' resources " + std::to_string(own(all)) + " to " + std::to_string(own(none)) +
+              ", GPU bytes " + std::to_string(all.sounding_held_bytes) + " to " +
+              std::to_string(none.sounding_held_bytes) + "; 7d2: 8 resources and 7680 bytes fewer); an erase in the "
+              "None mode writes lists of 0 bytes (reads/writes/bytes " + list_step(none, erased) + ") and makes "
+              "nothing (" + made(erased) + "); None to All makes one "
+              "per chunk again (" + made(again) + ", resources " + std::to_string(own(again)) + ", GPU bytes " +
+              std::to_string(again.sounding_held_bytes) + ")");
+  }
+
+  /* 7e1-b4: both renderers in the Good mode (every chunk with black pairs
+     only), a frame and an erase frame (410, chunk 1), after every frame of
+     7e1-b1 to 7e1-b3 */
+  {
+    mb3dsoundings_setprofiles(MBS_VIEW_PROFILES_UNFLAGGED);
+    bool drawn = both(options, 1, false);
+    edit({410}, true);
+    drawn = both(options, 1, false) && drawn;
+    const mbvq::RenderStats a = renderer.stats();
+    const mbvq::RenderStats b = staging.stats();
+    check(drawn && both_frames > 0 && both_alike == both_frames,
+          "7e1 Null: a second renderer that writes its index lists through the staging copy (lists_staging, as "
+          "with Qt older than 6.10) beside the first: " + std::to_string(both_alike) + " of " +
+              std::to_string(both_frames) + " frames alike (the profile indices, buffers made " + made(b) +
+              " against " + made(a) + ", GPU bytes, the soundings' resources; its fail_buffers frame not failed), "
+              "its list writes staged in the All-mode frames only (" + std::to_string(b.sounding_staged) + " of " +
+              std::to_string(b.sounding_writes[L]) + "; none of 0 bytes in the None mode, none of the black-only "
+              "chunks in the Good mode, written where they lie), the first renderer's " +
+              std::to_string(a.sounding_staged) + (kListsMoved ? " (Qt 6.10 and later)" : " (Qt older than 6.10)") +
+              unlike);
+  }
+
+  /* 7e1-c: the Good mode from the first frame, on fresh soundings and a
+     fresh renderer: an erase in chunk 2 (612) makes that chunk's buffer
+     again (4 entries fewer); a switch to the All mode makes every chunk's
+     buffer again, and so does the switch back */
+  {
+    make_sdg(40, 25, 7);
+    const bool reopened = open_sdg();
+    sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_UNFLAGGED, true);
+    mbvq::OffscreenRenderer good(mbvq::OffscreenRenderer::Api::Null);
+    int expected[4] = {};
+    expected[0] = fill_indices();
+    const bool first_drawn = good.render_soundings(200, 150, options, nullptr);
+    const mbvq::RenderStats g0 = good.stats();
+    edit({612}, true);
+    expected[1] = fill_indices();
+    bool drawn = good.render_soundings(200, 150, options, nullptr, 1);
+    const mbvq::RenderStats g1 = good.stats();
+    mb3dsoundings_setprofiles(MBS_VIEW_PROFILES_ALL);
+    expected[2] = fill_indices();
+    drawn = good.render_soundings(200, 150, options, nullptr, 1) && drawn;
+    const mbvq::RenderStats g2 = good.stats();
+    mb3dsoundings_setprofiles(MBS_VIEW_PROFILES_UNFLAGGED);
+    expected[3] = fill_indices();
+    drawn = good.render_soundings(200, 150, options, nullptr, 1) && drawn;
+    const mbvq::RenderStats g3 = good.stats();
+    const size_t erase_bytes = g1.sounding_bytes[L] - g0.sounding_bytes[L];
+    const std::vector<int> indices = {g0.profile_indices, g1.profile_indices, g2.profile_indices, g3.profile_indices};
+    check(reopened && first_drawn && drawn && !g0.failed && !g1.failed && !g2.failed && !g3.failed &&
+              g0.sounding_writes[L] == 4 && g1.sounding_made[L] == g0.sounding_made[L] + 1 &&
+              erase_bytes + 16 == g0.sounding_bytes[L] && g2.sounding_made[L] == g1.sounding_made[L] + 4 &&
+              g3.sounding_made[L] == g2.sounding_made[L] + 4 && indices == std::vector<int>(expected, expected + 4),
+          "7e1 Null: in the Good mode from the first frame an erase in chunk 2 makes that chunk's buffer again (" +
+              std::to_string(g1.sounding_made[L] - g0.sounding_made[L]) + " made; the frame writes " +
+              std::to_string(erase_bytes) + " bytes of lists, 16 fewer than the first upload's " +
+              std::to_string(g0.sounding_bytes[L]) + "), a switch to the All mode makes " +
+              std::to_string(g2.sounding_made[L] - g1.sounding_made[L]) + " again (7d2: 4, its red buffers), the "
+              "switch back " + std::to_string(g3.sounding_made[L] - g2.sounding_made[L]) + " (7d2: 0, its black "
+              "buffers keep their size and its red ones are let go of); the profile indices " + list(indices) +
+              " those of a fill with the mode set " + list(std::vector<int>(expected, expected + 4)));
+  }
   mb3dsoundings_end(0, &error);
 }
 
@@ -7735,6 +8171,8 @@ int test_model() {
   /* 6d: the profile and 3D soundings views */
   model_soundings_plan();
   model_soundings_frame();
+  /* 7e1: a chunk's index lists in one buffer, black then red */
+  model_chunk_lists();
   model_profile_frame();
   /* 7a: the soundings bench's files (also of unequal sizes) and tile order */
   model_split_files(120, 3);
@@ -8638,16 +9076,18 @@ void null_splat_resources() {
               " dispatches); without it the clear takes " + std::to_string(c.splat_group_max) + " groups");
   }
 
-  /* Let go of by a failed frame (fail_buffers after a flag edit whose chunk
-     needs index lists of another size, as null_failures), made again by
-     the next splat frame and by the renderer made again after release()
-     (whose release the statistics cannot show: the Metal mode measures it
-     on the device); then the soundings end as the program ends them
-     (Dismiss, count 0, the mask risen, as null_soundings): the next frame
-     holds none, and no soundings' buffer */
+  /* Let go of by a failed frame (fail_buffers after a switch to the Good
+     mode, in which every chunk's index lists lose their red pairs and need
+     a buffer of another size; in the All mode a flag edit keeps every
+     chunk's buffer, 7e1), made again by the next splat frame and by the
+     renderer made again after release() (whose release the statistics
+     cannot show: the Metal mode measures it on the device); then the
+     soundings end as the program ends them (Dismiss, count 0, the mask
+     risen, as null_soundings): the next frame holds none, and no soundings'
+     buffer. (null_splat_failures sets the All mode again through its
+     fixture.) */
   {
-    sdg_storage[12].beamflag = static_cast<char>(MB_FLAG_FLAG | MB_FLAG_MANUAL);
-    mb3dsoundings_colors_changed(0, &error);
+    mb3dsoundings_setprofiles(MBS_VIEW_PROFILES_UNFLAGGED);
     mbvq::RenderOptions failing = on;
     failing.fail_buffers = true;
     const bool failed_frame = renderer.render_soundings(300, 200, failing, nullptr);
@@ -9455,6 +9895,9 @@ int test_render_null() {
   /* 7b: the profile mode after fills that hide it, and the profile lines
      of soundings from three files */
   null_profile_mode();
+  /* 7e1: one index buffer per chunk, whose size stays during an erase in
+     the All mode, also written through the staging copy */
+  null_erase_lists();
   /* 7c: the 3D soundings' levels of detail, and the GPU-time fallback of
      the map and of the soundings with fake times */
   null_lod_levels();
@@ -10714,6 +11157,412 @@ bool lod_sparse_set() {
   sdg_storage[0].z = sdg_storage[11].z + 10.0;
   sdg_storage[79].beamflag = static_cast<char>(MB_FLAG_FLAG | MB_FLAG_MANUAL);
   return open_sdg();
+}
+
+/* 7e1 on Metal: each chunk's index lists in one buffer, its black pairs,
+   then its red ones from byte 4 x black_count, in pixels. The sparse set
+   (lod_sparse_set) in chunks of 23 (23, 23, 23 and 11 soundings; the pair
+   across the first boundary, 22 to 23, is red, those across the second and
+   third, 45 to 46 and 68 to 69, black), every profile, seen from above at
+   azimuth 0 as metal_soundings' profile lines, one frame per call. 7e1-d1:
+   frames that erase (one per chunk, then one in every chunk where no
+   buffer can be made) and restore soundings make no buffer and draw every
+   pair as the core's pairs say, one pixel thick; the last picture as a
+   renderer made now draws it. 7e1-d2: the first upload split over frames,
+   one chunk's streams per frame, draws the pairs of the chunks written but
+   the last pair of the last one where it reaches into a chunk not drawn
+   yet. 7e1-d3: ratio 2 (wide lines) and back, the Good and the None modes.
+   7e1-d4: lists above 1 KB (null_soundings' set in chunks of 300), an
+   erase and two consecutive frames, one per frame slot, each picture a
+   renderer's made after the erase.
+   7e1-e: a second renderer draws every frame of 7e1-d1 and 7e1-d3 with its
+   lists written through the staging copy (RenderOptions::lists_staging, as
+   with Qt older than 6.10), each picture the first's. An erase flags good
+   soundings with good neighbours in their pings, a restore sets a flagged
+   one with good neighbours good. */
+void metal_erase_lists() {
+  const int W = 400, H = 300, n = 80;
+  const int P = rhi::SoundingsPlan::kPositions, C = rhi::SoundingsPlan::kColours, L = rhi::SoundingsPlan::kLists,
+            PC = rhi::SoundingsPlan::kPairColours;
+  int error = MB_ERROR_NO_ERROR;
+  const bool opened = lod_sparse_set();
+  sdg_camera(90.0f, 0.0f, 1.0137f, 0.00123f, -0.00431f);
+  sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_ALL, false);
+  mbvq::RenderOptions options;
+  options.soundings_chunk = 23;
+  mbvq::OffscreenRenderer renderer(mbvq::OffscreenRenderer::Api::Metal);
+  mbvq::OffscreenRenderer staging(mbvq::OffscreenRenderer::Api::Metal);
+  /* the soundings' own resources: the renderer's fixed ones and the batch's aside */
+  const auto own = [](const mbvq::RenderStats &s) { return s.resources - s.fixed_resources - s.batch_resources; };
+  const auto made_alike = [](const mbvq::RenderStats &a, const mbvq::RenderStats &b) {
+    return std::equal(a.sounding_made, a.sounding_made + 4, b.sounding_made);
+  };
+  const auto made = [](const mbvq::RenderStats &s) {
+    return list(std::vector<int>(s.sounding_made, s.sounding_made + 4));
+  };
+  const auto edit = [&](const std::vector<int> &soundings, bool erase) {
+    for (const int k : soundings)
+      sdg_storage[static_cast<size_t>(k)].beamflag =
+          erase ? static_cast<char>(MB_FLAG_FLAG | MB_FLAG_MANUAL) : static_cast<char>(MB_FLAG_NONE);
+    mb3dsoundings_colors_changed(0, &error);
+  };
+  /* every pair's middle at ratio 1 as metal_soundings checks it (from
+     sounding 1: sounding 0 lies at 11's place): where shown(i), black, red
+     or the background as the core's pairs say, else the background; one
+     pixel thick across an x-major line. The core's pairs counted, their
+     kinds (1 black, 2 red, by first sounding), the first wrong places named
+     ("i:" and the pixels across, or the colour where the background was
+     expected) */
+  const auto pairs_right = [&](const QImage &image, const std::function<bool(size_t)> &shown, int *pairs,
+                               std::vector<int> *kinds, std::string *wrong) {
+    std::vector<float> xyz;
+    std::vector<uint32_t> black, red;
+    rhi::SoundingsFrame reader;
+    if (image.isNull() || !reader.positions(n, &xyz) || !reader.pairs(n, &black, &red))
+      return false;
+    *pairs = static_cast<int>((black.size() + red.size()) / 2);
+    std::vector<int> kind(static_cast<size_t>(n), 0);
+    for (size_t k = 0; k + 1 < black.size(); k += 2)
+      kind[black[k]] = 1;
+    for (size_t k = 0; k + 1 < red.size(); k += 2)
+      kind[red[k]] = 2;
+    bool right = true;
+    for (size_t i = 1; i + 1 < static_cast<size_t>(n); i++) {
+      /* the middle of the segment from i to i + 1 */
+      const std::array<double, 2> a = sdg_window(xyz, i, W, H);
+      const std::array<double, 2> b = sdg_window(xyz, i + 1, W, H);
+      const double mx = 0.5 * (a[0] + b[0]), my = 0.5 * (a[1] + b[1]);
+      const int k = shown(i) ? kind[i] : 0;
+      bool ok = false;
+      std::string seen;
+      if (k == 0) {
+        ok = at_window(image, mx, my) == kWhite;
+        seen = colour_name(at_window(image, mx, my));
+      }
+      else {
+        const uint32_t expected = k == 1 ? 0x000000u : kRed;
+        const bool xmajor = std::fabs(b[0] - a[0]) >= std::fabs(b[1] - a[1]);
+        int across = 0;
+        for (int d = -4; d <= 4; d++)
+          across += (xmajor ? at_window(image, mx, my + d) : at_window(image, mx + d, my)) == expected;
+        ok = across == 1 && xmajor;
+        seen = std::to_string(across);
+      }
+      if (!ok && wrong->size() < 100)
+        *wrong += std::to_string(i) + ":" + seen + " ";
+      right = right && ok;
+    }
+    if (kinds != nullptr)
+      *kinds = kind;
+    return right;
+  };
+  const auto every = [](size_t) { return true; };
+  /* a frame of both renderers (7e1-e: the second with lists_staging) at
+     ratio 1 or 2, one per call: the second's picture and buffers made the
+     first's, its frame not failed, its list writes all staged in a frame of
+     the All mode at ratio 1 (every chunk has black and red pairs there:
+     four), none in another; the first renderer's none on Qt 6.10 and later */
+  int both_frames = 0, both_alike = 0;
+  std::string unlike;
+  const auto both = [&](mbvq::RenderOptions frame_options, bool staged_frame, QImage *image) {
+    const int ratio = static_cast<int>(frame_options.pixel_ratio);
+    const mbvq::RenderStats before = staging.stats();
+    const bool drawn = renderer.render_soundings(W * ratio, H * ratio, frame_options, image, 1);
+    frame_options.lists_staging = true;
+    QImage second;
+    const bool second_drawn = staging.render_soundings(W * ratio, H * ratio, frame_options, &second, 1);
+    const mbvq::RenderStats a = renderer.stats();
+    const mbvq::RenderStats b = staging.stats();
+    const int writes = b.sounding_writes[L] - before.sounding_writes[L];
+    const int staged = b.sounding_staged - before.sounding_staged;
+    const int differ = differing(*image, second);
+    const bool alike = drawn && second_drawn && !b.failed && differ == 0 && made_alike(a, b) &&
+                       staged == (staged_frame ? writes : 0) && (!staged_frame || writes == 4) &&
+                       a.sounding_staged == (kListsMoved ? 0 : b.sounding_staged);
+    both_frames++;
+    both_alike += alike ? 1 : 0;
+    if (!alike && unlike.size() < 120)
+      unlike += " " + std::to_string(both_frames) + ": " + std::to_string(differ) + " px, staged " +
+                std::to_string(staged) + " of " + std::to_string(writes) + ", made " + made(b) + " against " + made(a);
+    return drawn;
+  };
+
+  /* the fixture's premises of 7e1-d1 and 7e1-d2, from the core's pair
+     kinds (pairs_right): the pairs across the chunk boundaries (22 to 23,
+     45 to 46, 68 to 69) red, black, black, so that a chunk's last pair of
+     either colour reaches into the next chunk */
+  const auto kind_name = [](const std::vector<int> &kind, size_t i) {
+    const int k = i < kind.size() ? kind[i] : 0;
+    return std::string(k == 1 ? "black" : k == 2 ? "red" : "none");
+  };
+  const auto boundaries_right = [&](const std::vector<int> &kind) {
+    return kind.size() == static_cast<size_t>(n) && kind[22] == 2 && kind[45] == 1 && kind[68] == 1;
+  };
+  const auto boundaries_text = [&](const std::vector<int> &kind) {
+    return kind_name(kind, 22) + ", " + kind_name(kind, 45) + ", " + kind_name(kind, 68);
+  };
+
+  /* 7e1-d1: the first complete picture, then frames that erase one sounding
+     per chunk, one in every chunk where no buffer can be made (only a new
+     list buffer could fail the frame: the colours' rebuild re-creates its
+     buffer in place, not through make_buffer()) and restore one; each edit
+     turns both pairs of its soundings, red for an erase, black for the
+     restore (the core's kinds before and after its frame) */
+  QImage image;
+  int pairs = 0;
+  std::string wrong;
+  std::vector<int> kinds;
+  const bool first_drawn = both(options, true, &image);
+  const mbvq::RenderStats first = renderer.stats();
+  bool d1 = opened && first_drawn && !first.failed && first.soundings_shown == n && !first.soundings_waiting &&
+            first.sounding_made[P] == 4 && first.sounding_made[C] == 4 && first.sounding_made[L] == 4 &&
+            first.sounding_made[PC] == 0 && pairs_right(image, every, &pairs, &kinds, &wrong) &&
+            first.profile_indices == 2 * pairs;
+  const bool boundaries = boundaries_right(kinds);
+  const std::string boundary_kinds = boundaries_text(kinds);
+  std::string unturned;
+  std::vector<int> indices = {first.profile_indices};
+  struct Edit {
+    std::vector<int> soundings;
+    bool erase;
+    bool fail;
+  };
+  const Edit edits[] = {{{16}, true, false}, {{26}, true, false}, {{52}, true, false}, {{73}, true, false},
+                        {{7, 35, 62, 71}, true, true}, {{13}, false, false}};
+  bool fail_frame = false;
+  for (const Edit &e : edits) {
+    const std::vector<int> before_kind = kinds;
+    edit(e.soundings, e.erase);
+    mbvq::RenderOptions frame_options = options;
+    frame_options.fail_buffers = e.fail;
+    const bool drawn = both(frame_options, true, &image);
+    const mbvq::RenderStats s = renderer.stats();
+    if (e.fail)
+      fail_frame = drawn && !s.failed;
+    const bool right = pairs_right(image, every, &pairs, &kinds, &wrong);
+    d1 = d1 && drawn && !s.failed && right && s.profile_indices == 2 * pairs && made_alike(s, first);
+    /* the pairs (k - 1, k) and (k, k + 1) of each edited sounding k */
+    const int from = e.erase ? 1 : 2, to = e.erase ? 2 : 1;
+    for (const int k : e.soundings) {
+      const size_t i = static_cast<size_t>(k);
+      if (!(before_kind.size() == static_cast<size_t>(n) && kinds.size() == static_cast<size_t>(n) &&
+            before_kind[i - 1] == from && before_kind[i] == from && kinds[i - 1] == to && kinds[i] == to))
+        unturned += " " + std::to_string(k);
+    }
+  }
+  {
+    const mbvq::RenderStats edited = renderer.stats();
+    QImage now;
+    mbvq::OffscreenRenderer fresh(mbvq::OffscreenRenderer::Api::Metal);
+    const bool fresh_drawn = fresh.render_soundings(W, H, options, &now, 50);
+    const int differ = differing(image, now);
+    check(d1 && boundaries && unturned.empty() && fail_frame && fresh_drawn && differ == 0,
+          "7e1 Metal: one index buffer per chunk (chunks of 23; the core's pairs across the boundaries 22 to 23, "
+          "45 to 46 and 68 to 69: " + boundary_kinds + "; expected red, black, black): the first complete picture (" +
+              std::to_string(first.soundings_shown) + " soundings, made " + made(first) + ") and 6 frames that "
+              "erase one sounding per chunk, then one in every chunk where no buffer can be made (failed " +
+              std::to_string(fail_frame ? 0 : 1) + "), and restore one (each turning both pairs of its soundings, "
+              "red for an erase, black for the restore: " +
+              (unturned.empty() ? std::string("every one") : "not" + unturned) +
+              ") draw every pair as the core's pairs say, black, red or none, one pixel thick (" +
+              (wrong.empty() ? std::string("every place right") : "wrong: " + wrong) + "), " + list(indices) +
+              " profile indices, twice the pairs, with no buffer made (" + made(edited) + "); the last picture "
+              "as a renderer made now draws it (" + std::to_string(differ) + " px differ)");
+  }
+
+  /* 7e1-d2: the same set's first upload split over frames, a budget of 600
+     bytes: one chunk's positions, colours and lists per frame (288 + 92 +
+     168 = 548 bytes for chunks 0 to 2, 248 for chunk 3); after frame k the
+     pairs of chunks 0 to k - 1, but the last one of chunk k - 1 where it
+     reaches into chunk k, and none of the chunks after; the core's pairs
+     across the boundaries in the last frame as in 7e1-d1 */
+  {
+    mbvq::RenderOptions split = options;
+    split.upload_budget = 600;
+    mbvq::OffscreenRenderer first_upload(mbvq::OffscreenRenderer::Api::Metal);
+    bool d2 = true;
+    std::string shown_text, split_wrong;
+    std::vector<int> split_kind;
+    QImage last;
+    for (int k = 1; k <= 4; k++) {
+      const bool drawn = first_upload.render_soundings(W, H, split, &last, 1);
+      const mbvq::RenderStats s = first_upload.stats();
+      /* a pair is drawn where both its soundings lie in the chunks written */
+      const auto written = [k](size_t i) { return static_cast<int>((i + 1) / 23) < k; };
+      int drawn_pairs = 0;
+      const bool right = pairs_right(last, written, &drawn_pairs, k == 4 ? &split_kind : nullptr, &split_wrong);
+      d2 = d2 && drawn && !s.failed && s.sounding_writes[P] == k && s.sounding_writes[C] == k &&
+           s.sounding_writes[L] == k && s.soundings_shown == std::min(23 * k, n) && right;
+      shown_text += std::string(k > 1 ? " " : "") + std::to_string(s.soundings_shown);
+    }
+    const bool waiting = first_upload.stats().soundings_waiting;
+    QImage now;
+    mbvq::OffscreenRenderer whole(mbvq::OffscreenRenderer::Api::Metal);
+    const bool whole_drawn = whole.render_soundings(W, H, options, &now, 50);
+    const int differ = differing(last, now);
+    check(d2 && boundaries_right(split_kind) && !waiting && whole_drawn && differ == 0,
+          "7e1 Metal: the first upload split over frames (a budget of 600 bytes, one chunk of 23 per frame: " +
+              shown_text + " soundings drawn; the core's pairs across the boundaries: " + boundaries_text(split_kind) +
+              "; expected red, black, black) draws after each frame the pairs of the chunks written, the last "
+              "pair of the last one left out where it reaches into the next chunk (" +
+              (split_wrong.empty() ? std::string("every place right") : "wrong: " + split_wrong) +
+              "); after the last frame the picture of a renderer made now at the default budget (" +
+              std::to_string(differ) + " px differ)");
+  }
+
+  /* 7e1-d3, on 7e1-d1's renderers: a frame at ratio 2 (wide lines: the
+     colours per pair made, the list buffers kept), an erase there (55,
+     chunk 2) and its frame, ratio 1 again (55's pairs red, no list buffer
+     made), the Good mode (every chunk has red pairs: each chunk's buffer
+     made again) and the None mode (the list buffers let go of) */
+  {
+    const mbvq::RenderStats before = renderer.stats();
+    mbvq::RenderOptions twice = options;
+    twice.pixel_ratio = 2.0;
+    QImage wide_image;
+    bool drawn = both(twice, false, &wide_image);
+    const mbvq::RenderStats wide = renderer.stats();
+    edit({55}, true);
+    drawn = both(twice, false, &wide_image) && drawn;
+    const mbvq::RenderStats wide_erased = renderer.stats();
+    std::string d3_wrong;
+    std::vector<int> kind;
+    int thin_pairs = 0, good_pairs = 0, none_pairs = 0;
+    drawn = both(options, true, &image) && drawn;
+    const mbvq::RenderStats thin = renderer.stats();
+    const bool thin_right = pairs_right(image, every, &thin_pairs, &kind, &d3_wrong) &&
+                            kind.size() == static_cast<size_t>(n) && kind[54] == 2 && kind[55] == 2;
+    mb3dsoundings_setprofiles(MBS_VIEW_PROFILES_UNFLAGGED);
+    drawn = both(options, false, &image) && drawn;
+    const mbvq::RenderStats good = renderer.stats();
+    const bool good_right = pairs_right(image, every, &good_pairs, nullptr, &d3_wrong);
+    mb3dsoundings_setprofiles(MBS_VIEW_PROFILES_NONE);
+    drawn = both(options, false, &image) && drawn;
+    const mbvq::RenderStats none = renderer.stats();
+    const bool none_right = pairs_right(image, every, &none_pairs, nullptr, &d3_wrong) && none_pairs == 0;
+    bool good_made = good.sounding_made[L] == thin.sounding_made[L] + 4;
+    for (const int stream : {P, C, PC})
+      good_made = good_made && good.sounding_made[stream] == thin.sounding_made[stream];
+    check(drawn && !wide.failed && !wide_erased.failed && !thin.failed && !good.failed && !none.failed &&
+              wide.profile_wide && wide.sounding_made[PC] == before.sounding_made[PC] + 4 &&
+              wide.sounding_made[L] == before.sounding_made[L] && own(wide) == own(before) + 4 &&
+              made_alike(wide_erased, wide) && !thin.profile_wide && thin_right &&
+              thin.profile_indices == 2 * thin_pairs && thin.sounding_made[L] == before.sounding_made[L] &&
+              good_right && good_made && good.profile_indices == 2 * good_pairs && none_right &&
+              made_alike(none, good) && own(none) == own(good) - 4,
+          "7e1 Metal: at ratio 2 the lines are wide (" + std::string(wide.profile_wide ? "yes" : "no") +
+              ": the colours per pair made, " + std::to_string(wide.sounding_made[PC] - before.sounding_made[PC]) +
+              ", the list buffers kept: lists made " + std::to_string(wide.sounding_made[L]) + ", resources " +
+              std::to_string(own(before)) + " to " + std::to_string(own(wide)) + "); an erase there (55) makes "
+              "nothing (" + made(wide_erased) + "); at ratio 1 again 55's pairs are red and every pair as the "
+              "core's pairs say (" + std::to_string(thin_pairs) + " pairs, " + std::to_string(thin.profile_indices) +
+              " indices; lists made " + std::to_string(thin.sounding_made[L]) + "); the Good mode draws the black "
+              "pairs alone (" + std::to_string(good_pairs) + ") and makes every chunk's buffer again (lists made " +
+              std::to_string(good.sounding_made[L]) + "); the None mode draws no pair (" +
+              std::to_string(none_pairs) + "), lets the buffers go (resources " + std::to_string(own(good)) + " to " +
+              std::to_string(own(none)) + ") and makes nothing (" + made(none) + ")" +
+              (d3_wrong.empty() ? std::string() : "; wrong: " + d3_wrong));
+  }
+
+  /* 7e1-d4: lists above 1 KB, whose moved arrays Qt keeps as its large data
+     (an array of up to 1 KB it copies into the batch's own storage), on
+     both frame slots. null_soundings' set (1000 soundings from above in
+     chunks of 300, every profile, ratio 1; lists of 2304 bytes in chunks 0
+     to 2, 768 in chunk 3; beams about 9 px, pings about 7 px apart): after
+     the first frames an erase in every chunk and two consecutive frames,
+     the first writing the lists (both slots' waiting writes hold the same
+     array), the second writing none and applying its slot's at the bind;
+     the erased soundings' pairs red, one pixel thick (black before), and
+     each picture that of a renderer made after the erase */
+  {
+    make_sdg(40, 25, 7);
+    const bool reopened = open_sdg();
+    sdg_camera(90.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+    sdg_view(MBS_VIEW_COLOR_FLAG, true, MBS_VIEW_PROFILES_ALL, false);
+    mbvq::RenderOptions large = options;
+    large.soundings_chunk = 300;
+    mbvq::OffscreenRenderer kept(mbvq::OffscreenRenderer::Api::Metal);
+    QImage unerased_image, pictures[2];
+    const bool kept_drawn = kept.render_soundings(W, H, large, &unerased_image, 50);
+    const mbvq::RenderStats start = kept.stats();
+    std::vector<float> xyz;
+    rhi::SoundingsFrame reader;
+    const bool positions_read = reader.positions(1000, &xyz);
+    const std::vector<int> erased = {12, 537, 612, 912};
+    /* the pixels of a colour across the middle of each erased sounding's
+       pairs (k - 1, k) and (k, k + 1), x-major lines, as pairs_right counts
+       them: one each */
+    std::string large_wrong;
+    const auto erased_pairs = [&](const QImage &picture, uint32_t colour, const std::string &name) {
+      if (!positions_read || picture.isNull())
+        return false;
+      bool right = true;
+      for (const int k : erased)
+        for (const size_t i : {static_cast<size_t>(k - 1), static_cast<size_t>(k)}) {
+          const std::array<double, 2> a = sdg_window(xyz, i, W, H);
+          const std::array<double, 2> b = sdg_window(xyz, i + 1, W, H);
+          const double mx = 0.5 * (a[0] + b[0]), my = 0.5 * (a[1] + b[1]);
+          int across = 0;
+          for (int d = -4; d <= 4; d++)
+            across += at_window(picture, mx, my + d) == colour;
+          right = right && across == 1;
+          if (across != 1 && large_wrong.size() < 100)
+            large_wrong += name + " " + std::to_string(i) + ":" + std::to_string(across) + " ";
+        }
+      return right;
+    };
+    const bool black_before = erased_pairs(unerased_image, 0x000000u, "before");
+    edit(erased, true);
+    const bool drawn_a = kept.render_soundings(W, H, large, &pictures[0], 1);
+    const mbvq::RenderStats a = kept.stats();
+    const bool drawn_b = kept.render_soundings(W, H, large, &pictures[1], 1);
+    const mbvq::RenderStats b = kept.stats();
+    const bool red_after = erased_pairs(pictures[0], kRed, "frame 1") && erased_pairs(pictures[1], kRed, "frame 2");
+    QImage now;
+    mbvq::OffscreenRenderer after(mbvq::OffscreenRenderer::Api::Metal);
+    const bool after_drawn = after.render_soundings(W, H, large, &now, 50);
+    const int differ[2] = {differing(pictures[0], now), differing(pictures[1], now)};
+    check(reopened && kept_drawn && !start.failed && start.soundings_shown == 1000 && !start.soundings_waiting &&
+              start.sounding_writes[L] == 4 && start.sounding_bytes[L] == 7680 && drawn_a && drawn_b && !a.failed &&
+              !b.failed && a.sounding_writes[L] == start.sounding_writes[L] + 4 &&
+              a.sounding_bytes[L] == start.sounding_bytes[L] + 7680 &&
+              b.sounding_writes[L] == a.sounding_writes[L] && a.frame_slot != b.frame_slot &&
+              made_alike(a, start) && made_alike(b, start) &&
+              b.sounding_staged == (kListsMoved ? 0 : b.sounding_writes[L]) && black_before && red_after &&
+              after_drawn && differ[0] == 0 && differ[1] == 0,
+          "7e1 Metal: lists above 1 KB, whose moved arrays Qt keeps as its large data (" +
+              std::string(kListsMoved ? "Qt 6.10 and later" : "Qt older than 6.10: staged instead") + ", " +
+              std::to_string(b.sounding_staged) + " staged; 1000 soundings in chunks of 300, lists of 2304 bytes "
+              "in chunks 0 to 2 and 768 in chunk 3, " + std::to_string(start.sounding_bytes[L]) + " bytes in " +
+              std::to_string(start.sounding_writes[L]) + " writes first): after an erase in every chunk (12, 537, "
+              "612, 912) two consecutive frames on the frame slots " + std::to_string(a.frame_slot) + " and " +
+              std::to_string(b.frame_slot) + " (lists written " +
+              std::to_string(a.sounding_writes[L] - start.sounding_writes[L]) + ", " +
+              std::to_string(a.sounding_bytes[L] - start.sounding_bytes[L]) + " bytes, then " +
+              std::to_string(b.sounding_writes[L] - a.sounding_writes[L]) + "; made " + made(b) + " against " +
+              made(start) + ") draw the erased soundings' pairs red, one pixel thick, black before (" +
+              (large_wrong.empty() ? std::string("every pair right") : "wrong: " + large_wrong) +
+              "), each picture that of a renderer made after the erase (" + std::to_string(differ[0]) + " and " +
+              std::to_string(differ[1]) + " px differ)");
+  }
+
+  /* 7e1-e: the staging renderer beside the first in every frame of 7e1-d1
+     and 7e1-d3 */
+  {
+    const mbvq::RenderStats a = renderer.stats();
+    const mbvq::RenderStats b = staging.stats();
+    check(both_frames > 0 && both_alike == both_frames,
+          "7e1 Metal: a second renderer that writes its index lists through the staging copy (lists_staging, as "
+          "with Qt older than 6.10) draws every frame of the first: " + std::to_string(both_alike) + " of " +
+              std::to_string(both_frames) + " frames alike (the same picture, 0 px, and buffers made " + made(b) +
+              " against " + made(a) + "; the fail_buffers frame included), its list writes staged in the frames of "
+              "the All mode at ratio 1 only (" + std::to_string(b.sounding_staged) + " of " +
+              std::to_string(b.sounding_writes[L]) + "; none at ratio 2, none of the black-only chunks in the Good "
+              "mode, none of 0 bytes in the None mode), the first renderer's " +
+              std::to_string(a.sounding_staged) + (kListsMoved ? " (Qt 6.10 and later)" : " (Qt older than 6.10)") +
+              unlike);
+  }
+  mb3dsoundings_end(0, &error);
 }
 
 /* 7c-4: the 3D soundings at a forced level of detail (RenderOptions::
@@ -12210,6 +13059,10 @@ int test_render_metal(const char *save) {
   metal_marker_runs();
   metal_contours();
   metal_soundings();
+  /* 7e1: one index buffer per chunk in pixels: erase frames that make no
+     buffer, a split first upload, ratio 2 and the profile modes, lists
+     above 1 KB on both frame slots, and the staging copy's pictures */
+  metal_erase_lists();
   /* 7c: the 3D soundings at the levels of detail of the GPU-time fallback:
      every 2^k-th sounding at its place, the decorations whole, the release
      frame equal to a still frame */
@@ -12721,7 +13574,10 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
           dark += qGray(picture.pixel(x, y)) < 128;
       /* a sounding in the middle, good, with good neighbours along its ping:
          its point's height in its column, and the line's height between it
-         and the next sounding */
+         and the next sounding; 7e1: the next flagged sounding (every 23rd)
+         with a good neighbour after it in its ping, and the red line's
+         height between them (where the lines are thin, from the red part of
+         its chunk's index buffer) */
       int error = MB_ERROR_NO_ERROR;
       mb3dsoundings_screen_positions(0, &error);
       const int H = picture.height();
@@ -12730,33 +13586,56 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
              (sdg_storage[middle].beamflag != MB_FLAG_NONE || sdg_storage[middle + 1].beamflag != MB_FLAG_NONE ||
               sdg_storage[middle - 1].beamflag != MB_FLAG_NONE))
         middle++;
-      const auto run = [&](int x, int y0) {
-        const QRgb black = qRgb(0, 0, 0);
+      /* a red pair as the core makes it (mbvq_c_soundings_profile_pairs: of
+         one file, ping and profile, not both good), here a flagged sounding
+         and a good one after it */
+      const auto red_pair = [&](size_t k) {
+        const struct mb3dsoundings_sounding_struct &here = sdg_storage[k], &next = sdg_storage[k + 1];
+        return !mb_beam_ok(here.beamflag) && mb_beam_ok(next.beamflag) && here.ifile == next.ifile &&
+               here.iping == next.iping && here.iprofile == next.iprofile;
+      };
+      size_t flagged = middle;
+      while (flagged + 1 < sdg_storage.size() && !red_pair(flagged))
+        flagged++;
+      const bool red_found = flagged + 1 < sdg_storage.size();
+      const auto run = [&](int x, int y0, QRgb colour) {
         int y = y0, n = 0;
-        while (y > 0 && picture.pixel(x, y - 1) == black)
+        while (y > 0 && picture.pixel(x, y - 1) == colour)
           y--;
-        while (y < H && picture.pixel(x, y) == black) {
+        while (y < H && picture.pixel(x, y) == colour) {
           n++;
           y++;
         }
         return n;
       };
+      const QRgb black_pixel = qRgb(0, 0, 0);
       const int px = sdg_storage[middle].winx, py = H - 1 - sdg_storage[middle].winy;
-      const int point = run(px, py);
+      const int point = run(px, py, black_pixel);
       const int lx = (sdg_storage[middle].winx + sdg_storage[middle + 1].winx) / 2;
       const int ly = H - 1 - (sdg_storage[middle].winy + sdg_storage[middle + 1].winy) / 2;
-      const int line = run(lx, ly);
+      const int line = run(lx, ly, black_pixel);
+      int red_line = -1;
+      if (red_found) {
+        const int rx = (sdg_storage[flagged].winx + sdg_storage[flagged + 1].winx) / 2;
+        const int ry = H - 1 - (sdg_storage[flagged].winy + sdg_storage[flagged + 1].winy) / 2;
+        red_line = run(rx, ry, qRgb(255, 0, 0));
+      }
       const int point_px = expected_px(3.0, ratio);
       const int line_px = expected_px(1.0, ratio);
       if (save != nullptr) {
         const std::string path = std::string(save) + ".soundings.png";
         check(picture.save(QString::fromStdString(path)), "the soundings' picture saved as " + path);
       }
-      check(dark > 0 && point == point_px && line == line_px && mbvq::view_stats(sview).profile_wide == (line_px > 1),
+      check(dark > 0 && point == point_px && line == line_px && red_found && red_line == line_px &&
+                mbvq::view_stats(sview).profile_wide == (line_px > 1),
             "6d: the soundings drawn with QRhi (" + std::to_string(dark) + " dark pixels): a 3 px point " +
                 std::to_string(point) + " and a 1 px profile line " + std::to_string(line) +
                 " physical px high at the view's ratio " + text("%.2f", ratio) + " (" + std::to_string(point_px) +
-                " and " + std::to_string(line_px) + " expected)");
+                " and " + std::to_string(line_px) + " expected); 7e1: " +
+                (red_found ? "the red line from flagged sounding " + std::to_string(flagged) +
+                                 " to its good neighbour " + std::to_string(red_line) + " physical px high"
+                           : std::string("no flagged pair found")) +
+                " (" + std::to_string(line_px) + " expected)");
       same_as_offscreen(sview_rhi, picture, ratio, "the 3D soundings",
                         [&](mbvq::OffscreenRenderer &offscreen, const mbvq::RenderOptions &options, QImage *c) {
                           return offscreen.render_soundings(picture.width(), picture.height(), options, c, 50);
@@ -13210,20 +14089,97 @@ int test_display(bool mode3d, const char *grdfile, const char *save) {
         }
         const mbvq::RenderStats erased = mbvq::view_stats(sview);
         mb3dsoundings.edit_mode = MBS_EDIT_TOGGLE;
+        /* 7e1: the core's own erase in a window makes no buffer of the
+           soundings at any ratio: thin lines keep their index buffers' sizes,
+           the colours per pair have one size, the colours are written again
+           (a rebuild re-creates its buffer in place: counted in
+           soundings_rebuilt, not in sounding_made) */
+        const bool none_made = std::equal(erased.sounding_made, erased.sounding_made + 4, unerased.sounding_made);
+        const auto made_text = [](const mbvq::RenderStats &s) {
+          return list(std::vector<int>(s.sounding_made, s.sounding_made + 4));
+        };
         check(erasing && no_press && every && erased.lod_frames == unerased.lod_frames &&
                   erased_state.frame_requests == unerased_state.frame_requests && erased_state.buttons == 0 &&
-                  !erased_state.camera_press,
+                  !erased_state.camera_press && none_made,
               "7c: an erase drag of the 3D soundings view (the left button: a press and five motions along ping " +
                   std::to_string(ping) + ", " + std::to_string(sdg_edits - edits_before) + " soundings erased in " +
                   std::to_string(erase_frames) + " frames) is no camera press: all " + std::to_string(count) +
                   " soundings in every frame under the fake wait, frames at a level above 0 still " +
                   std::to_string(erased.lod_frames) + ", and its release asks for no frame (" +
-                  std::to_string(erased_state.frame_requests - unerased_state.frame_requests) + " requests)");
+                  std::to_string(erased_state.frame_requests - unerased_state.frame_requests) +
+                  " requests); 7e1: no buffer of the soundings made in it (made " + made_text(unerased) +
+                  " before, " + made_text(erased) + " after, " + (erased.profile_wide ? "wide" : "thin") + " lines)");
 
         /* 6. The hook off again (measured waits), and the probe's hooks gone */
         mbvq::set_gpu_wait(sview, -1.0);
         sview->removeEventFilter(&probe);
         set_delivered(nullptr);
+
+        /* 7. 7e1: the view's lists as the erase drag left them, kept and
+           written again where the lines are thin (one chunk: the 2400
+           soundings' lists, above 1 KB, moved into Qt's batch on Qt 6.10 and
+           later), against lists made anew: grabbed twice (each grab draws a
+           frame of its own, on Metal on the other frame slot, so that both
+           slots draw the kept lists), then the None mode (the list buffer let
+           go) and the All mode again (made anew where the lines are thin,
+           nothing made where they are wide), each waited for up to 2 s, and
+           grabbed: the same picture, 0 px. Where the lines are thin also the
+           offscreen renderer's picture (Metal; an information line where
+           they are wide) */
+        {
+          const auto frame_drawn = [&](int frames) {
+            timer.restart();
+            while (mbvq::view_stats(sview).frames <= frames && timer.elapsed() < 2000)
+              spin(20);
+            return mbvq::view_stats(sview).frames > frames;
+          };
+          QImage kept[2];
+          int kept_slot[2] = {};
+          for (int k = 0; k < 2; k++) {
+            kept[k] = sview_rhi->grabFramebuffer().convertToFormat(QImage::Format_RGB32);
+            kept_slot[k] = mbvq::view_stats(sview).frame_slot;
+          }
+          const bool on_metal = sview_rhi->api() == QRhiWidget::Api::Metal;
+          const mbvq::RenderStats kept_stats = mbvq::view_stats(sview);
+          const bool thin = !kept_stats.profile_wide;
+          mb3dsoundings_setprofiles(MBS_VIEW_PROFILES_NONE);
+          const bool none_drawn = frame_drawn(kept_stats.frames);
+          const mbvq::RenderStats none_stats = mbvq::view_stats(sview);
+          mb3dsoundings_setprofiles(MBS_VIEW_PROFILES_ALL);
+          const bool all_drawn = frame_drawn(none_stats.frames);
+          const QImage anew = sview_rhi->grabFramebuffer().convertToFormat(QImage::Format_RGB32);
+          const mbvq::RenderStats anew_stats = mbvq::view_stats(sview);
+          const int L = rhi::SoundingsPlan::kLists;
+          bool others_kept = true;
+          for (const int stream : {rhi::SoundingsPlan::kPositions, rhi::SoundingsPlan::kColours,
+                                   rhi::SoundingsPlan::kPairColours})
+            others_kept = others_kept && anew_stats.sounding_made[stream] == kept_stats.sounding_made[stream];
+          const int differ[2] = {differing(kept[0], anew), differing(kept[1], anew)};
+          check(none_drawn && all_drawn && !anew.isNull() && differ[0] == 0 && differ[1] == 0 &&
+                    (!on_metal || kept_slot[0] != kept_slot[1]) &&
+                    anew_stats.sounding_made[L] == kept_stats.sounding_made[L] + (thin ? 1 : 0) && others_kept,
+                "7e1: after the erase drag the 3D soundings view (" +
+                    std::string(thin ? "its index lists kept and written again" : "wide lines: no index lists") +
+                    ") draws the picture of the lines made anew (the None mode, then All; frames " +
+                    std::string(none_drawn && all_drawn ? "" : "not ") + "drawn): " + std::to_string(differ[0]) +
+                    " and " + std::to_string(differ[1]) + " px differ in two grabs (frame slots " +
+                    std::to_string(kept_slot[0]) + " and " + std::to_string(kept_slot[1]) +
+                    (on_metal ? ", on Metal both slots" : "") + "); lists made " +
+                    std::to_string(anew_stats.sounding_made[L] - kept_stats.sounding_made[L]) + " (" +
+                    std::to_string(thin ? 1 : 0) + " expected, " + (thin ? "thin" : "wide") + " lines), made " +
+                    made_text(anew_stats) + " against " + made_text(kept_stats));
+          if (thin)
+            same_as_offscreen(
+                sview_rhi, kept[1], ratio, "after the erase drag, the 3D soundings",
+                [&](mbvq::OffscreenRenderer &offscreen, const mbvq::RenderOptions &options, QImage *c) {
+                  return offscreen.render_soundings(kept[1].width(), kept[1].height(), options, c, 50);
+                },
+                "7e1");
+          else
+            std::printf("info\t7e1\tafter the erase drag, the 3D soundings view's picture against the offscreen "
+                        "renderer's: not compared where the lines are wide (ratio %.2f), which draw no index lists\n",
+                        ratio);
+        }
       }
       /* 7d2: the Point size box set as by hand (its value then the
          program's), and the program's size where the box is missing */
@@ -15010,7 +15966,8 @@ int bench(bool mode3d, const char *grdfile, int steps, int width, int height, co
    (complete); per step the renderer's phases of its first frame and,
    summed over all its frames, step_render to step_record (7a), the GPU time
    of a step's last frame (which the first frame of the next step reports),
-   the writes and the malloc heap and footprint; the GPU-time fallback's
+   the writes, the soundings' buffers made (7e1) and the malloc heap and
+   footprint; the GPU-time fallback's
    wait and total of a step's first frame, where it measured that frame,
    and the level of detail it drew, per scenario the frames measured and
    those drawn at a coarser level, and the level and the soundings drawn in
@@ -15177,16 +16134,21 @@ int bench_soundings(int count, int steps, double point_size, int files, bool til
      a draw and those made again (RenderStats::soundings_storage,
      soundings_applied, soundings_rebuilt; totals since the view's renderer
      was made), and (7d2) whether the last frame splatted and the bytes of
-     its per-pixel buffers */
+     its per-pixel buffers, and (7e1) the soundings' buffers made per stream
+     (positions, colours, index lists, colours per pair) and the index
+     lists' writes through the staging copy (RenderStats::sounding_made,
+     sounding_staged; totals since the view's renderer was made) */
   const auto report_end = [&](const char *key, const char *when) {
     const mbvq::RenderStats last = mbvq::view_stats(view);
     if (rhi)
       std::printf("info\t%s\tGPU bytes of the soundings' buffers %.1f MB (every copy), swaps %d, allocations %d, "
-                  "storage %d, applied %d, rebuilt %d, splat %d, splat MB %.1f, profile lines %s\n",
+                  "storage %d, applied %d, rebuilt %d, splat %d, splat MB %.1f, profile lines %s, made %d %d %d %d, "
+                  "staged %d\n",
                   key, static_cast<double>(last.sounding_held_bytes) / 1048576.0, last.sounding_swaps,
                   last.sounding_allocations, last.soundings_storage, last.soundings_applied, last.soundings_rebuilt,
                   last.splat ? 1 : 0, static_cast<double>(last.splat_held_bytes) / 1048576.0,
-                  tiles ? "not shown" : last.profile_wide ? "wide" : "thin");
+                  tiles ? "not shown" : last.profile_wide ? "wide" : "thin", last.sounding_made[0],
+                  last.sounding_made[1], last.sounding_made[2], last.sounding_made[3], last.sounding_staged);
     report_memory(when);
   };
   for (const Scenario &scenario : scenarios) {
@@ -15211,8 +16173,9 @@ int bench_soundings(int count, int steps, double point_size, int files, bool til
        first frame, where that frame was measured, and the level it drew */
     std::vector<double> wait_ms, frame_ms, level;
     /* the writes per stream too (7a): positions, colours, index lists,
-       colours per pair */
-    std::vector<double> stream_mb[4];
+       colours per pair; and the soundings' buffers made in the step, the
+       four streams summed (7e1) */
+    std::vector<double> stream_mb[4], made;
     /* the phases summed over every renderer frame of a step, its first and
        those that complete its writes, which can span frames (7a); frames
        that came between two readings are counted, not summed. On Metal a
@@ -15311,12 +16274,15 @@ int bench_soundings(int count, int steps, double point_size, int files, bool til
            count and the totals (no run made one) */
         const mbvq::RenderStats after = mbvq::view_stats(view);
         size_t bytes = 0;
+        int buffers = 0;
         for (int stream = 0; stream < 4; stream++) {
           bytes += after.sounding_bytes[stream] - before.sounding_bytes[stream];
           stream_mb[stream].push_back(
               static_cast<double>(after.sounding_bytes[stream] - before.sounding_bytes[stream]) / 1048576.0);
+          buffers += after.sounding_made[stream] - before.sounding_made[stream];
         }
         written_mb.push_back(static_cast<double>(bytes) / 1048576.0);
+        made.push_back(buffers);
       }
       heap.push_back(heap_in_use());
       double resident = 0.0, peak = 0.0, foot = 0.0;
@@ -15346,6 +16312,7 @@ int bench_soundings(int count, int steps, double point_size, int files, bool til
                                       "written_pair_colours_mb"};
       for (int stream = 0; stream < 4; stream++)
         report(scenario.name, streams[stream], stream_mb[stream]);
+      report(scenario.name, "made", made);
       const char *const phase_names[6] = {"step_render", "step_fill", "step_prepare", "step_gather", "step_upload",
                                           "step_record"};
       for (int p = 0; p < 6; p++)

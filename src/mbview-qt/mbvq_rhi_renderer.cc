@@ -29,6 +29,7 @@
 
 #include "mbvq_rhi_renderer.h"
 
+#include <QByteArray>
 #include <QColor>
 #include <QFile>
 #include <QImage>
@@ -1391,7 +1392,7 @@ int SoundingsRenderer::resources() const {
   int n = BatchRenderer::resources();
   for (const ChunkGpu &chunk : chunks_) {
     for (const std::unique_ptr<QRhiBuffer> *buffer : {&chunk.positions[0], &chunk.positions[1], &chunk.colours[0],
-                                                      &chunk.colours[1], &chunk.black, &chunk.red, &chunk.pair_colours})
+                                                      &chunk.colours[1], &chunk.lists, &chunk.pair_colours})
       n += *buffer != nullptr;
     for (const auto &sets : chunk.splat)
       n += (sets[0] != nullptr) + (sets[1] != nullptr);
@@ -2012,7 +2013,7 @@ Prepared SoundingsRenderer::frame(SoundingsFrame *frame, QRhiResourceUpdateBatch
   size_t held = 0;
   for (const ChunkGpu &chunk : chunks_)
     for (const std::unique_ptr<QRhiBuffer> *buffer : {&chunk.positions[0], &chunk.positions[1], &chunk.colours[0],
-                                                      &chunk.colours[1], &chunk.black, &chunk.red, &chunk.pair_colours})
+                                                      &chunk.colours[1], &chunk.lists, &chunk.pair_colours})
       if (*buffer != nullptr) {
         const QRhiBuffer &b = **buffer;
         const int copies = b.type() == QRhiBuffer::Dynamic                ? dynamic_copies_
@@ -2059,6 +2060,7 @@ void SoundingsRenderer::release_soundings() {
   std::vector<size_t>().swap(black_range_);
   std::vector<size_t>().swap(red_range_);
   std::vector<unsigned char>().swap(pair_colours_);
+  std::vector<uint32_t>().swap(lists_staging_);
   stats_.soundings = 0;
   stats_.sounding_chunks = 0;
   stats_.soundings_shown = 0;
@@ -2195,6 +2197,50 @@ bool SoundingsRenderer::write_buffer(QRhiResourceUpdateBatch *updates, std::uniq
   return true;
 }
 
+bool SoundingsRenderer::write_lists(QRhiResourceUpdateBatch *updates, ChunkGpu *chunk, int c, size_t bytes,
+                                    bool *new_object) {
+  /* a buffer of exactly the chunk's black and red entries: while the pairs
+     only change colour it keeps its size and is written again. bytes (the
+     plan's, set when the lists job started) must be 4 x those entries now,
+     as the copies below write and Qt reads them, and fit 32 bits: else the
+     write (and so the frame) fails before anything is made or copied */
+  if (bytes > 0xffffffffu || bytes != 4 * chunk_list_entries(black_range_, red_range_, c) ||
+      !fit(&chunk->lists, static_cast<quint32>(bytes), list_type_, QRhiBuffer::IndexBuffer, new_object))
+    return false;
+  if (bytes == 0)
+    return true;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+  if (!options_.lists_staging) {
+    /* the black then the red entries in an array of their own, moved into
+       the batch: Qt keeps an array above 1 KB there instead of a copy of
+       its own, and copies one of up to 1 KB into the batch's own storage */
+    QByteArray data(static_cast<qsizetype>(bytes), Qt::Uninitialized);
+    chunk_lists(black_, black_range_, red_, red_range_, c, data.data());
+    if (chunk->lists->type() == QRhiBuffer::Dynamic)
+      updates->updateDynamicBuffer(chunk->lists.get(), 0, std::move(data));
+    else
+      updates->uploadStaticBuffer(chunk->lists.get(), 0, std::move(data));
+    return true;
+  }
+#endif
+  /* a chunk with one part from where it lies, one with both through the
+     staging copy (grown only: Qt reads exactly bytes of it); Qt copies
+     either into the batch */
+  const uint32_t *src = chunk_list_piece(black_, black_range_, red_, red_range_, c);
+  if (src == nullptr) {
+    if (lists_staging_.size() < bytes / 4)
+      lists_staging_.resize(bytes / 4);
+    chunk_lists(black_, black_range_, red_, red_range_, c, lists_staging_.data());
+    src = lists_staging_.data();
+    stats_.sounding_staged++;
+  }
+  if (chunk->lists->type() == QRhiBuffer::Dynamic)
+    updates->updateDynamicBuffer(chunk->lists.get(), 0, static_cast<quint32>(bytes), src);
+  else
+    updates->uploadStaticBuffer(chunk->lists.get(), src);
+  return true;
+}
+
 bool SoundingsRenderer::write(QRhiResourceUpdateBatch *updates, const SoundingsPlan::Upload &upload) {
   const int c = upload.chunk;
   ChunkGpu &chunk = chunks_[static_cast<size_t>(c)];
@@ -2202,9 +2248,10 @@ bool SoundingsRenderer::write(QRhiResourceUpdateBatch *updates, const SoundingsP
   /* the uploads of a storage chunk wait in Qt's Metal backend for the
      chunk's next bind */
   const bool wait = chunk_use_.storage && rhi_->backend() == QRhi::Metal;
-  /* a buffer that write_buffer() made as a new object (fit: where it had
-     none or another size, never within an allocation) gets its splat
-     bindings (make_splat_sets) */
+  /* a buffer made as a new object for the write (fit(): none or another
+     size) is counted in sounding_made; a new positions or colours buffer
+     (their sizes fixed per allocation) gets its splat bindings
+     (make_splat_sets) */
   bool new_object = false;
   bool ok = true;
   switch (upload.stream) {
@@ -2222,24 +2269,18 @@ bool SoundingsRenderer::write(QRhiResourceUpdateBatch *updates, const SoundingsP
     if (ok && splat_available_ && new_object)
       ok = make_splat_sets(&chunk, -1, upload.set);
     break;
-  case SoundingsPlan::kLists: {
-    /* the black and the red pairs of the chunk, each list in a buffer of its
-       own, with the entries drawn while the next chunk's soundings are not */
-    const auto list = [&](std::unique_ptr<QRhiBuffer> *buffer, const std::vector<uint32_t> &entries,
-                          const std::vector<size_t> &range, quint32 *count, quint32 *inner) {
-      const size_t n = pair_entries(range, c);
-      *count = static_cast<quint32>(n);
-      *inner = static_cast<quint32>(inner_pair_entries(plan_, entries, range, c));
-      return write_buffer(updates, buffer, entries.data() + range[static_cast<size_t>(c)], 4 * n, list_type_,
-                          QRhiBuffer::IndexBuffer, nullptr);
-    };
-    ok = list(&chunk.black, black_, black_range_, &chunk.black_count, &chunk.black_inner) &&
-         list(&chunk.red, red_, red_range_, &chunk.red_count, &chunk.red_inner);
+  case SoundingsPlan::kLists:
+    /* the black and the red pairs of the chunk in its one buffer, with the
+       entries drawn while the next chunk's soundings are not */
+    chunk.black_count = static_cast<quint32>(pair_entries(black_range_, c));
+    chunk.red_count = static_cast<quint32>(pair_entries(red_range_, c));
+    chunk.black_inner = static_cast<quint32>(inner_pair_entries(plan_, black_, black_range_, c));
+    chunk.red_inner = static_cast<quint32>(inner_pair_entries(plan_, red_, red_range_, c));
+    ok = write_lists(updates, &chunk, c, upload.bytes, &new_object);
     break;
-  }
   case SoundingsPlan::kPairColours:
     ok = write_buffer(updates, &chunk.pair_colours, pair_colours_.data() + 4 * first, upload.bytes, list_type_,
-                      QRhiBuffer::VertexBuffer, nullptr);
+                      QRhiBuffer::VertexBuffer, nullptr, &new_object);
     break;
   default:
     break;
@@ -2247,6 +2288,10 @@ bool SoundingsRenderer::write(QRhiResourceUpdateBatch *updates, const SoundingsP
   if (ok) {
     stats_.sounding_writes[upload.stream]++;
     stats_.sounding_bytes[upload.stream] += upload.bytes;
+    /* a buffer made for the write (fit() also reports a write of 0 bytes,
+       which leaves none) */
+    if (new_object && upload.bytes > 0)
+      stats_.sounding_made[upload.stream]++;
   }
   return ok;
 }
@@ -2362,12 +2407,12 @@ void SoundingsRenderer::record_soundings(QRhiCommandBuffer *cb, QSize pixels, co
 }
 
 void SoundingsRenderer::record_lines(QRhiCommandBuffer *cb, QSize pixels, const DrawItem &item, int depth) {
-  /* Thin: per chunk the black pairs, then the red ones, each with its
-     colour from its slot (the black one, then the next). Wide: per chunk
-     one instanced draw of every pair in the order of the array, its colour
-     from its entry (alpha 0: not drawn). During the first upload a chunk's
-     pair that reaches into the next chunk is left out while that chunk's
-     soundings are not drawn. */
+  /* Thin: from one index buffer per chunk, its black pairs, then its red
+     ones, each with its colour from its slot (the black one, then the
+     next). Wide: per chunk one instanced draw of every pair in the order of
+     the array, its colour from its entry (alpha 0: not drawn). During the
+     first upload a chunk's pair that reaches into the next chunk is left
+     out while that chunk's soundings are not drawn. */
   const int front = plan_.front(SoundingsPlan::kPositions);
   for (int c = 0; c < plan_.chunks(); c++) {
     ChunkGpu &chunk = chunks_[static_cast<size_t>(c)];
@@ -2391,25 +2436,28 @@ void SoundingsRenderer::record_lines(QRhiCommandBuffer *cb, QSize pixels, const 
       continue;
     }
     QRhiGraphicsPipeline *pipeline = view_pipelines_[kProfileThin][depth].get();
-    if (!plan_.lines(SoundingsPlan::kLists, c) || pipeline == nullptr || positions == nullptr)
+    if (!plan_.lines(SoundingsPlan::kLists, c) || pipeline == nullptr || positions == nullptr || chunk.lists == nullptr)
       continue;
+    /* the red part from byte 4 x black_count, never 4 x black_inner: a pair
+       into the next chunk is the last of its own colour's part, and only
+       the counts drawn leave it out */
     const struct {
-      QRhiBuffer *indices;
       quint32 count;
+      quint32 offset;
       int slot;
-    } lists[] = {{chunk.black.get(), out ? chunk.black_inner : chunk.black_count, item.slot},
-                 {chunk.red.get(), out ? chunk.red_inner : chunk.red_count, item.slot + 1}};
-    for (const auto &list : lists) {
-      if (list.indices == nullptr || list.count == 0)
+    } parts[] = {{out ? chunk.black_inner : chunk.black_count, 0, item.slot},
+                 {out ? chunk.red_inner : chunk.red_count, 4 * chunk.black_count, item.slot + 1}};
+    for (const auto &part : parts) {
+      if (part.count == 0)
         continue;
-      bind(cb, pipeline, list.slot, pixels);
+      bind(cb, pipeline, part.slot, pixels);
       const QRhiCommandBuffer::VertexInput input(positions, 0);
-      cb->setVertexInput(0, 1, &input, list.indices, 0, QRhiCommandBuffer::IndexUInt32);
-      cb->drawIndexed(list.count);
+      cb->setVertexInput(0, 1, &input, chunk.lists.get(), part.offset, QRhiCommandBuffer::IndexUInt32);
+      cb->drawIndexed(part.count);
       chunk.waiting_positions[front] = false;
       stats_.draws++;
       stats_.thin_draws++;
-      stats_.profile_indices += static_cast<int>(list.count);
+      stats_.profile_indices += static_cast<int>(part.count);
     }
   }
 }

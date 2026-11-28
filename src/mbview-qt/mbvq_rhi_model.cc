@@ -31,6 +31,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstring>
 #include <limits>
 #include <utility>
 
@@ -1998,6 +1999,40 @@ size_t inner_pair_entries(const SoundingsPlan &plan, const std::vector<uint32_t>
   const size_t n = pair_entries(range, c);
   const size_t end = range[static_cast<size_t>(c) + 1];
   return n >= 2 && list[end - 1] >= static_cast<uint32_t>(plan.points(c)) ? n - 2 : n;
+}
+
+size_t chunk_list_entries(const std::vector<size_t> &black_range, const std::vector<size_t> &red_range, int c) {
+  if (c < 0 || black_range.size() != red_range.size() || static_cast<size_t>(c) + 1 >= black_range.size())
+    return 0;
+  return pair_entries(black_range, c) + pair_entries(red_range, c);
+}
+
+void chunk_lists(const std::vector<uint32_t> &black, const std::vector<size_t> &black_range,
+                 const std::vector<uint32_t> &red, const std::vector<size_t> &red_range, int c, void *out) {
+  /* one copy per part that has entries: an empty list's data() may be null,
+     and a copy from null is undefined even for 0 bytes */
+  if (chunk_list_entries(black_range, red_range, c) == 0)
+    return;
+  const size_t nb = pair_entries(black_range, c);
+  const size_t nr = pair_entries(red_range, c);
+  char *to = static_cast<char *>(out);
+  if (nb > 0)
+    std::memcpy(to, black.data() + black_range[static_cast<size_t>(c)], 4 * nb);
+  if (nr > 0)
+    std::memcpy(to + 4 * nb, red.data() + red_range[static_cast<size_t>(c)], 4 * nr);
+}
+
+const uint32_t *chunk_list_piece(const std::vector<uint32_t> &black, const std::vector<size_t> &black_range,
+                                 const std::vector<uint32_t> &red, const std::vector<size_t> &red_range, int c) {
+  /* the entries chunk_lists() would write, where the lists hold them in
+     one piece (split_pairs made them local in place) */
+  if (chunk_list_entries(black_range, red_range, c) == 0)
+    return nullptr;
+  const size_t nb = pair_entries(black_range, c);
+  const size_t nr = pair_entries(red_range, c);
+  if (nb > 0 && nr > 0)
+    return nullptr;
+  return nb > 0 ? black.data() + black_range[static_cast<size_t>(c)] : red.data() + red_range[static_cast<size_t>(c)];
 }
 
 void pair_colours(const SoundingsPlan &plan, const std::vector<uint32_t> &black, const std::vector<size_t> &black_range,

@@ -782,11 +782,12 @@ class BatchPlan {
    buffers; this plan says what is in them and what to write): four streams,
    the soundings' positions (3 floats, 12 bytes per sounding) and colours
    (RGBA8, 4 bytes; alpha 0 for a sounding that is not drawn), and their
-   profile lines as index lists (two 32-bit indices per pair, the black and
-   the red pairs apart) or, for wide lines, a colour per pair (RGBA8: black,
-   red, or alpha 0 for none). Every stream is cut into chunks of a fixed
-   number of soundings, each chunk of each stream a buffer of its own that is
-   always written whole, at most a frame's upload budget (64 MB) per frame.
+   profile lines as index lists (two 32-bit indices per pair; per chunk one
+   list, its black pairs, then its red ones) or, for wide lines, a colour
+   per pair (RGBA8: black, red, or alpha 0 for none). Every stream is cut
+   into chunks of a fixed number of soundings, each chunk of each stream a
+   buffer of its own that is always written whole, at most a frame's upload
+   budget (64 MB) per frame.
    Qt's Metal backend applies a buffer's writes only when a frame binds it.
    It keeps a dynamic buffer, and a static one without storage use, once per
    frame in flight, and a whole write of a dynamic buffer drops the writes
@@ -929,6 +930,22 @@ void split_pairs(const SoundingsPlan &plan, std::vector<uint32_t> *list, std::ve
 size_t pair_entries(const std::vector<size_t> &range, int c);
 size_t inner_pair_entries(const SoundingsPlan &plan, const std::vector<uint32_t> &list, const std::vector<size_t> &range,
                           int c);
+/* The entries of chunk c's index buffer: its black pairs, then its red
+   ones (both lists made local, split_pairs), so that the buffer keeps its
+   size while the chunk's pairs only change colour (all profiles shown); 0
+   for a chunk outside the ranges or for ranges of unequal size. */
+size_t chunk_list_entries(const std::vector<size_t> &black_range, const std::vector<size_t> &red_range, int c);
+/* Chunk c's entries (chunk_list_entries) copied into out: the black part,
+   then the red part from entry pair_entries(black_range, c); a part only
+   where it has entries. */
+void chunk_lists(const std::vector<uint32_t> &black, const std::vector<size_t> &black_range,
+                 const std::vector<uint32_t> &red, const std::vector<size_t> &red_range, int c, void *out);
+/* Chunk c's entries where they already lie in one piece (the chunk has
+   only black or only red pairs): their first entry in black or in red,
+   which a write can take as it is; nullptr for a chunk with both parts or
+   none. */
+const uint32_t *chunk_list_piece(const std::vector<uint32_t> &black, const std::vector<size_t> &black_range,
+                                 const std::vector<uint32_t> &red, const std::vector<size_t> &red_range, int c);
 /* the colour of each pair (i, i + 1), count - 1 entries of RGBA8: black (0,
    0, 0, 255) for a black pair, red (255, 0, 0, 255) for a red one, none (0,
    0, 0, 0) for the others, from the two lists made local (split_pairs) */

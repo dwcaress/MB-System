@@ -91,7 +91,9 @@
  *   another size (only the last refused size is remembered), the soundings
  *   are dropped (new soundings, a failed frame, Dismiss) or the renderer or
  *   its pipelines are made again; the profile lines from index
- *   lists over the soundings' positions,
+ *   lists over the soundings' positions (per chunk one buffer, its black
+ *   pairs, then its red ones, whose size stays while the pairs only change
+ *   colour),
  *   or, wider than one physical pixel, as quads instanced over the same
  *   positions with a colour per pair. The soundings' buffers are chunks that
  *   are always written whole (SoundingsPlan), with their splat bindings per
@@ -591,16 +593,16 @@ class SoundingsRenderer final : public BatchRenderer {
 
  private:
   /* the buffers of a chunk: positions and colours in two sets, the index
-     lists of the black and the red pairs, the colours per pair */
+     lists in one buffer (the black pairs, then the red ones from entry
+     black_count), the colours per pair */
   struct ChunkGpu {
     std::unique_ptr<QRhiBuffer> positions[2];
     std::unique_ptr<QRhiBuffer> colours[2];
-    std::unique_ptr<QRhiBuffer> black;
-    std::unique_ptr<QRhiBuffer> red;
+    std::unique_ptr<QRhiBuffer> lists;
     std::unique_ptr<QRhiBuffer> pair_colours;
-    /* the indices the lists hold, and of them those of the pairs that stay
-       inside the chunk's own soundings (all but a pair that reaches into
-       the next chunk) */
+    /* the indices of the black and of the red pairs in lists, and of them
+       those of the pairs that stay inside the chunk's own soundings (all but
+       a pair that reaches into the next chunk) */
     quint32 black_count = 0;
     quint32 red_count = 0;
     quint32 black_inner = 0;
@@ -648,6 +650,18 @@ class SoundingsRenderer final : public BatchRenderer {
   bool write_buffer(QRhiResourceUpdateBatch *updates, std::unique_ptr<QRhiBuffer> *buffer, const void *data,
                     size_t bytes, QRhiBuffer::Type type, QRhiBuffer::UsageFlags usage, bool *waiting,
                     bool *new_object = nullptr);
+  /* chunk c's index lists into its one buffer (fit: exactly bytes, none
+     for 0), written whole; bytes must be 4 x chunk_list_entries() now and
+     fit 32 bits, else the write fails before anything is made or copied.
+     On Qt 6.10 and later from an array of their own moved into the batch,
+     which Qt keeps there above 1 KB instead of a copy of its own (an array
+     of up to 1 KB it copies into the batch's own storage); below, or with
+     RenderOptions::lists_staging, a chunk with both parts from
+     lists_staging_ and one with one part from where it lies
+     (chunk_list_piece), which Qt copies. new_object: fit()'s flag, set
+     before the buffer is made; write() reads it only after a write that
+     succeeded */
+  bool write_lists(QRhiResourceUpdateBatch *updates, ChunkGpu *chunk, int c, size_t bytes, bool *new_object);
   void record_soundings(QRhiCommandBuffer *cb, QSize pixels, const DrawItem &item, int depth);
   void record_lines(QRhiCommandBuffer *cb, QSize pixels, const DrawItem &item, int depth);
   /* the splat objects of create() (make_view_pipelines): the pipelines,
@@ -697,6 +711,10 @@ class SoundingsRenderer final : public BatchRenderer {
   std::vector<size_t> black_range_;
   std::vector<size_t> red_range_;
   std::vector<unsigned char> pair_colours_;
+  /* one chunk's index lists, black then red, for the write of a chunk with
+     both parts below Qt 6.10 or with RenderOptions::lists_staging; grown
+     only, empty otherwise */
+  std::vector<uint32_t> lists_staging_;
   /* what was read, and of which marks: the count of the allocation, the
      marks the positions and colours were read at, the marks, count and mode
      the lists were made for; versions of the lists and of what the GPU holds

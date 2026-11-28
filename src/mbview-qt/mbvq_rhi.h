@@ -155,6 +155,11 @@ struct RenderOptions {
      the other soundings' buffers (dynamic on Metal, static elsewhere); taken
      when the renderer or its pipelines are made, as point_quads */
   int chunk_storage = -1;
+  /* the 3D soundings' index lists written as with Qt older than 6.10, which
+     cannot move an array into the batch (a chunk with both black and red
+     pairs through a staging copy): for tests of that path; read in every
+     frame */
+  bool lists_staging = false;
   /* how the 3D soundings are splatted (Splat); read in every frame; a view
      takes the program's (set_soundings_splat) */
   Splat splat = Splat::Auto;
@@ -361,7 +366,12 @@ struct RenderStats {
      of a storage buffer). Totals: the
      allocations, the reads of the core's positions, colours and pairs, and
      per stream (positions, colours, index lists, colours per pair) the
-     chunks written and their bytes; the swaps of a double-buffered stream. */
+     chunks written and their bytes; the buffers made per stream (a write of
+     more than 0 bytes that found no buffer or one of another size; on Metal
+     a dynamic buffer is two new MTLBuffers), and the index lists' writes
+     through a staging copy (a chunk with both black and red pairs, below
+     Qt 6.10 or with RenderOptions::lists_staging); the swaps of a
+     double-buffered stream. */
   int soundings = 0;
   int sounding_chunks = 0;
   int soundings_shown = 0;
@@ -376,6 +386,8 @@ struct RenderStats {
   int sounding_reads[3] = {};
   int sounding_writes[4] = {};
   size_t sounding_bytes[4] = {};
+  int sounding_made[4] = {};
+  int sounding_staged = 0;
   int sounding_swaps = 0;
   /* the time of the renderer's create() in ms, from its start to its
      return, for measurements; -1 before it. Each create() is that of a new
