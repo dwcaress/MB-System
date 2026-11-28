@@ -31,6 +31,10 @@
 #include <QRegularExpression>
 #include <QString>
 #include <QTimer>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <string>
 #include <vector>
 
 #include "mbvq.h"
@@ -45,7 +49,9 @@ namespace mbvq {
 namespace {
 
 Backend current_backend = Backend::LegacyGL;
+RhiApi current_api = RhiApi::Default;
 bool backend_installed = false;
+bool fill_active_flag = false;
 MapWidget *widgets[MBVQ_MAX_WINDOWS] = {};
 MapWindow *windows[MBVQ_MAX_WINDOWS] = {}; /* none for a map placed by a host */
 std::function<void(MapWidget *)> map_placement;
@@ -68,9 +74,42 @@ void install_backend() {
     return;
   if (current_backend == Backend::LegacyGL)
     gl_backend::install();
+#ifdef MBVQ_HAVE_RHI
+  else if (current_backend == Backend::Rhi)
+    rhi_backend::install();
+#endif
   else
     null_backend::install();
   backend_installed = true;
+}
+
+/* the MB_RENDERER names of the QRhi APIs this platform can have */
+std::string possible_api_names() {
+  const struct {
+    RhiApi api;
+    const char *name;
+  } names[] = {{RhiApi::Metal, "metal"},   {RhiApi::Direct3D11, "d3d11"}, {RhiApi::Direct3D12, "d3d12"},
+               {RhiApi::Vulkan, "vulkan"}, {RhiApi::OpenGL, "opengl"}};
+  std::string text;
+  for (const auto &entry : names) {
+    if (!rhi_api_possible(entry.api))
+      continue;
+    if (!text.empty())
+      text += ", ";
+    text += entry.name;
+  }
+  return text;
+}
+
+/* the API that Default stands for on this platform */
+RhiApi platform_api() {
+#if defined(__APPLE__)
+  return RhiApi::Metal;
+#elif defined(_WIN32)
+  return RhiApi::Direct3D11;
+#else
+  return RhiApi::OpenGL;
+#endif
 }
 
 MapWidget *widget_of(size_t instance) { return instance < MBVQ_MAX_WINDOWS ? widgets[instance] : nullptr; }
@@ -84,15 +123,172 @@ QWidget *outermost(size_t instance) {
 
 }  // namespace
 
-void set_backend(Backend backend) {
+void set_backend(Backend backend, RhiApi api) {
+  if (!backend_built(backend)) {
+    std::fprintf(stderr, "mbview-qt: this build has no QRhi drawing (it needs Qt 6.8 or later with Qt Shader Tools); "
+                         "the views are drawn with OpenGL\n");
+    backend = Backend::LegacyGL;
+    api = RhiApi::Default;
+  }
   current_backend = backend;
+  current_api = api;
   backend_installed = false;
+  /* only the OpenGL backend sets OpenGL attributes: QRhi sets none */
   if (backend == Backend::LegacyGL)
     gl_backend::configure();
   install_backend();
 }
 
 Backend backend() { return current_backend; }
+
+bool backend_built(Backend backend) {
+#ifdef MBVQ_HAVE_RHI
+  (void)backend;
+  return true;
+#else
+  return backend != Backend::Rhi;
+#endif
+}
+
+void choose_renderer(const char *value, Backend *backend, RhiApi *api, std::string *message) {
+  /* the default: the OpenGL backend (QRhi is chosen with MB_RENDERER) */
+  *backend = Backend::LegacyGL;
+  *api = RhiApi::Default;
+  message->clear();
+  if (value == nullptr || value[0] == '\0')
+    return;
+  const std::string name(value);
+  if (!parse_renderer(value, backend, api)) {
+    *backend = Backend::LegacyGL;
+    *api = RhiApi::Default;
+    *message = "mbview-qt: MB_RENDERER=" + name +
+               " is not one of auto, metal, d3d11, d3d12, vulkan, opengl, legacy-gl and null; the views are drawn "
+               "with OpenGL";
+  }
+  else if (*backend == Backend::Rhi && !backend_built(Backend::Rhi)) {
+    *backend = Backend::LegacyGL;
+    *api = RhiApi::Default;
+    *message = "mbview-qt: this build has no QRhi drawing (it needs Qt 6.8 or later with Qt Shader Tools); the views "
+               "are drawn with OpenGL";
+  }
+  else if (*backend == Backend::Rhi && !rhi_api_possible(*api)) {
+    *api = RhiApi::Default;
+    *message = "mbview-qt: MB_RENDERER=" + name + " is not possible on this platform, which has " +
+               possible_api_names() + "; the views are drawn with QRhi and " + rhi_api_name(RhiApi::Default);
+  }
+}
+
+void set_backend_from_environment() {
+  Backend chosen = Backend::LegacyGL;
+  RhiApi api = RhiApi::Default;
+  std::string message;
+  choose_renderer(std::getenv("MB_RENDERER"), &chosen, &api, &message);
+  if (!message.empty())
+    std::fprintf(stderr, "%s\n", message.c_str());
+  set_backend(chosen, api);
+}
+
+bool parse_renderer(const char *value, Backend *backend, RhiApi *api) {
+  const struct {
+    const char *name;
+    Backend backend;
+    RhiApi api;
+  } names[] = {{"auto", Backend::Rhi, RhiApi::Default},        {"metal", Backend::Rhi, RhiApi::Metal},
+               {"d3d11", Backend::Rhi, RhiApi::Direct3D11},    {"d3d12", Backend::Rhi, RhiApi::Direct3D12},
+               {"vulkan", Backend::Rhi, RhiApi::Vulkan},       {"opengl", Backend::Rhi, RhiApi::OpenGL},
+               {"legacy-gl", Backend::LegacyGL, RhiApi::Default}, {"null", Backend::Null, RhiApi::Default}};
+  if (value == nullptr)
+    return false;
+  for (const auto &entry : names) {
+    if (std::strcmp(value, entry.name) == 0) {
+      *backend = entry.backend;
+      *api = entry.api;
+      return true;
+    }
+  }
+  return false;
+}
+
+bool rhi_api_possible(RhiApi api) {
+  switch (api) {
+  case RhiApi::Default:
+    return true;
+  case RhiApi::Metal:
+#if defined(__APPLE__)
+    return true;
+#else
+    return false;
+#endif
+  case RhiApi::Direct3D11:
+  case RhiApi::Direct3D12:
+#if defined(_WIN32)
+    return true;
+#else
+    return false;
+#endif
+  case RhiApi::Vulkan:
+#if QT_CONFIG(vulkan)
+    return true;
+#else
+    return false;
+#endif
+  case RhiApi::OpenGL:
+#if QT_CONFIG(opengl)
+    return true;
+#else
+    return false;
+#endif
+  }
+  return false;
+}
+
+RhiApi rhi_api() { return current_api; }
+
+const char *rhi_api_name(RhiApi api) {
+  switch (api == RhiApi::Default ? platform_api() : api) {
+  case RhiApi::OpenGL:
+    return "OpenGL";
+  case RhiApi::Metal:
+    return "Metal";
+  case RhiApi::Vulkan:
+    return "Vulkan";
+  case RhiApi::Direct3D11:
+    return "Direct3D 11";
+  case RhiApi::Direct3D12:
+    return "Direct3D 12";
+  case RhiApi::Default:
+    break;
+  }
+  return "QRhi";
+}
+
+QWidget *create_map_view(size_t instance, QWidget *parent) {
+  if (current_backend == Backend::LegacyGL)
+    return gl_backend::create_map_view(instance, parent);
+#ifdef MBVQ_HAVE_RHI
+  if (current_backend == Backend::Rhi)
+    return rhi_backend::create_map_view(instance, parent);
+#endif
+  return null_backend::create_map_view(instance, parent);
+}
+
+QWidget *create_profile_view(size_t instance, QWidget *parent) {
+  /* the QRhi backend has no profile view yet: it shows a null view */
+  if (current_backend == Backend::LegacyGL)
+    return gl_backend::create_profile_view(instance, parent);
+  return null_backend::create_profile_view(instance, parent);
+}
+
+QWidget *create_soundings_view(QWidget *parent) {
+  /* the QRhi backend has no 3D soundings view yet: it shows a null view */
+  if (current_backend == Backend::LegacyGL)
+    return gl_backend::create_soundings_view(parent);
+  return null_backend::create_soundings_view(parent);
+}
+
+bool fill_active() { return fill_active_flag; }
+
+void set_fill_active(bool active) { fill_active_flag = active; }
 
 void start(int verbose) { mbvq_c_start(verbose); }
 
@@ -133,7 +329,9 @@ extern "C" {
 
 bool mbvq_qt_drawable(void) {
   mbvq::install_backend();
-  return mbvq::current_backend == mbvq::Backend::LegacyGL;
+  /* the core fills the map only where a backend draws: with OpenGL, or with
+     QRhi from what the core records (mbv_draw_batch.h) */
+  return mbvq::current_backend == mbvq::Backend::LegacyGL || mbvq::current_backend == mbvq::Backend::Rhi;
 }
 
 void mbvq_qt_open_window(size_t instance) {

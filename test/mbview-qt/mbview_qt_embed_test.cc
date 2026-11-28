@@ -30,6 +30,14 @@
  *   mbview_qt_embed_test --gl     also checks the drawing with OpenGL: the
  *                                 contours survive moving and floating the
  *                                 map; needs a display
+ *   mbview_qt_embed_test --rhi    also checks the drawing with QRhi (where it
+ *                                 is built; 77, skipped, elsewhere): the
+ *                                 terrain is drawn docked, floating (a new
+ *                                 QRhi) and docked again, and a map closed
+ *                                 while its dock floats; needs a display
+ *
+ * The modes that draw have a watchdog. The summary comes after the main
+ * window is destroyed, so that a crash there comes before it.
  */
 
 #include <QAction>
@@ -43,11 +51,14 @@
 #include <QMenuBar>
 #include <QOpenGLWidget>
 #include <QTimer>
+#include <QWindow>
+#include <chrono>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#include <thread>
 #include <vector>
 
 extern "C" {
@@ -60,6 +71,11 @@ extern "C" {
 #include "mbvq_bridge.h"
 #include "mbvq_soundings.h"
 #include "mbvq_window.h"
+#ifdef MBVQ_HAVE_RHI
+#include <QRhiWidget>
+
+#include "mbvq_rhi.h"
+#endif
 
 namespace {
 
@@ -75,6 +91,23 @@ void spin(int ms) {
   QEventLoop loop;
   QTimer::singleShot(ms, &loop, &QEventLoop::quit);
   loop.exec();
+}
+
+/* the test ends after seconds even if it hangs */
+void start_watchdog(int seconds, const char *mode) {
+  std::thread([seconds, mode] {
+    std::this_thread::sleep_for(std::chrono::seconds(seconds));
+    std::fprintf(stderr, "mbview_qt_embed_test %s: watchdog, stopped after %d s\n", mode, seconds);
+    std::fflush(stdout);
+    std::_Exit(4);
+  }).detach();
+}
+
+/* the window of a view is exposed (a first frame that does not come is then
+   not the window system's doing) */
+bool exposed(QWidget *view) {
+  const QWindow *window = view != nullptr ? view->window()->windowHandle() : nullptr;
+  return window != nullptr && window->isExposed();
 }
 
 int dismissed = 0;
@@ -147,6 +180,46 @@ void open_soundings() {
   mb3dsoundings_set_dismiss_notify(0, &dismiss_soundings, &error);
 }
 
+/* the pixels of a QRhi map view that are not white: the terrain;
+   grabFramebuffer() draws a new frame for it, a fill with its side effects */
+int terrain_pixels(size_t instance) {
+#ifdef MBVQ_HAVE_RHI
+  auto *view = qobject_cast<QRhiWidget *>(mbvq::map_view(instance));
+  if (view == nullptr)
+    return -1;
+  const QImage image = view->grabFramebuffer();
+  int n = 0;
+  for (int y = 0; y < image.height(); y++)
+    for (int x = 0; x < image.width(); x++)
+      if ((image.pixel(x, y) & 0xffffffu) != 0xffffffu)
+        n++;
+  return n;
+#else
+  (void)instance;
+  return -1;
+#endif
+}
+
+/* the QRhi map view holds a renderer, made for its current QRhi */
+bool rhi_renderer(size_t instance) {
+#ifdef MBVQ_HAVE_RHI
+  return mbvq::view_state(mbvq::map_view(instance)).renderer;
+#else
+  (void)instance;
+  return false;
+#endif
+}
+
+/* callbacks of QRhiWidget that view destructors removed from a QRhi their view
+   had left (QTBUG-151834) */
+int stale_callbacks() {
+#ifdef MBVQ_HAVE_RHI
+  return mbvq::stale_callbacks_removed();
+#else
+  return -1;
+#endif
+}
+
 /* dark pixels of a map view: the contours */
 int dark_pixels(size_t instance) {
   auto *view = qobject_cast<QOpenGLWidget *>(mbvq::map_view(instance));
@@ -164,7 +237,9 @@ void wait_drawn(size_t instance) {
     spin(50);
 }
 
-int run(bool gl) {
+int run(bool gl, bool rhi) {
+  /* the backends that draw */
+  const bool draws = gl || rhi;
   QMainWindow host;
   host.setWindowTitle(QStringLiteral("host"));
   host.setCentralWidget(new QLabel(QStringLiteral("the program")));
@@ -229,10 +304,18 @@ int run(bool gl) {
     dark_docked = dark_pixels(first);
     check(dark_docked > 0, "OpenGL: contours are drawn in the dock (" + std::to_string(dark_docked) + " dark pixels)");
   }
+  if (rhi) {
+    host.resizeDocks({docks[0]}, {900}, Qt::Horizontal);
+    wait_drawn(first);
+    const int docked = terrain_pixels(first);
+    check(docked > 0 && rhi_renderer(first), "QRhi: the terrain is drawn in the dock (" + std::to_string(docked) +
+                                                 " pixels, window exposed: " +
+                                                 std::to_string(exposed(mbvq::map_view(first))) + ")");
+  }
 
   /* float and attach again */
   docks[0]->setFloating(true);
-  spin(gl ? 1500 : 100);
+  spin(draws ? 1500 : 100);
   check(docks[0]->isFloating() && map->isVisible() && mbvq::map_widget(first) == map, "the dock floats with the map");
   if (gl) {
     mbvq_c_resetview(first);
@@ -241,8 +324,14 @@ int run(bool gl) {
     check(qobject_cast<QOpenGLWidget *>(mbvq::map_view(first))->context() == context, "OpenGL: floating keeps the context");
     check(dark_pixels(first) > 0, "OpenGL: the contours survive floating");
   }
+  if (rhi) {
+    mbvq_c_resetview(first);
+    spin(1500);
+    wait_drawn(first);
+    check(terrain_pixels(first) > 0 && rhi_renderer(first), "QRhi: floating, the terrain is drawn with the new QRhi");
+  }
   docks[0]->setFloating(false);
-  spin(gl ? 1500 : 100);
+  spin(draws ? 1500 : 100);
   check(!docks[0]->isFloating() && map->isVisible(), "the dock attaches again");
   if (gl) {
     mbvq_c_resetview(first);
@@ -251,11 +340,17 @@ int run(bool gl) {
     check(qobject_cast<QOpenGLWidget *>(mbvq::map_view(first))->context() == context, "OpenGL: attaching keeps the context");
     check(dark_pixels(first) > 0, "OpenGL: the contours survive attaching");
   }
+  if (rhi) {
+    mbvq_c_resetview(first);
+    spin(1500);
+    wait_drawn(first);
+    check(terrain_pixels(first) > 0 && rhi_renderer(first), "QRhi: attached again, the terrain is drawn");
+  }
 
   /* a second map, close one, open another */
   size_t second = MBV_NO_WINDOW;
   check(open_map(&second) && second != first && placed.size() == 2, "a second map in another dock");
-  spin(gl ? 800 : 50);
+  spin(draws ? 800 : 50);
   host.resize(1500, 901);
   mbvq::start(0);
   check(mbvq::map_widget(first) == map && mbvq::map_widget(second) == placed[1], "start() again changes nothing");
@@ -271,10 +366,33 @@ int run(bool gl) {
 
   size_t third = MBV_NO_WINDOW;
   check(open_map(&third) && third == first && placed.size() == 3, "the next map reuses the instance");
-  spin(gl ? 800 : 50);
+  spin(draws ? 800 : 50);
   if (gl) {
     wait_drawn(third);
     check(mbvq::map_view(third)->isVisible(), "OpenGL: the new map draws");
+  }
+  if (rhi) {
+    wait_drawn(third);
+    check(terrain_pixels(third) > 0, "QRhi: the new map draws");
+
+    /* a map closed while its dock floats: its view leaves the QRhi of the main
+       window behind (QTBUG-151834, the workaround in the view's destructor
+       removes QRhiWidget's callback from it); the main window is destroyed at
+       the end of the test */
+    docks[1]->setFloating(true);
+    spin(1500);
+    wait_drawn(second);
+    const bool floated = docks[1]->isFloating() && terrain_pixels(second) > 0;
+    const int removed = stale_callbacks();
+    mbvq::map_widget(second)->dismiss();
+    spin(100);
+    delete docks[1];
+    docks[1] = nullptr;
+    spin(100);
+    check(floated && mbvq::map_widget(second) == nullptr, "QRhi: a map closed while its dock floats");
+    check(stale_callbacks() == removed + 1,
+          "QRhi: its view removed the callback it left in the main window's QRhi (QTBUG-151834; " +
+              std::to_string(stale_callbacks() - removed) + " removed)");
   }
 
   /* without a placement a map gets its own window, as in the standalone programs */
@@ -327,7 +445,7 @@ int run(bool gl) {
 
   mbview_quit(0, &error);
   spin(20);
-  std::printf("%d failures\n", failures);
+  /* the main window and its docks are destroyed on return */
   return failures == 0 ? 0 : 1;
 }
 
@@ -336,14 +454,25 @@ int run(bool gl) {
 int main(int argc, char **argv) {
   std::setvbuf(stdout, nullptr, _IOLBF, 0);
   const bool gl = argc > 1 && std::strcmp(argv[1], "--gl") == 0;
-  if (!gl && !(argc > 1 && std::strcmp(argv[1], "--null") == 0)) {
-    std::fprintf(stderr, "usage: mbview_qt_embed_test --null|--gl\n");
+  const bool rhi = argc > 1 && std::strcmp(argv[1], "--rhi") == 0;
+  if (!gl && !rhi && !(argc > 1 && std::strcmp(argv[1], "--null") == 0)) {
+    std::fprintf(stderr, "usage: mbview_qt_embed_test --null|--gl|--rhi\n");
     return 2;
   }
-  mbvq::set_backend(gl ? mbvq::Backend::LegacyGL : mbvq::Backend::Null);
+  /* a build without QRhi would draw with OpenGL instead */
+  if (rhi && !mbvq::backend_built(mbvq::Backend::Rhi)) {
+    std::printf("skipped: this build has no QRhi drawing\n");
+    return 77;
+  }
+  /* the modes that draw end after 150 s even if they hang (their own waits
+     add up to about 110 s at most) */
+  if (gl || rhi)
+    start_watchdog(150, argv[1]);
+  mbvq::set_backend(gl ? mbvq::Backend::LegacyGL : rhi ? mbvq::Backend::Rhi : mbvq::Backend::Null);
   int qt_argc = 1;
   QApplication app(qt_argc, argv);
-  const int result = run(gl);
+  const int result = run(gl, rhi);
+  std::printf("%d failures\n", failures);
   std::fflush(stdout);
   return result;
 }

@@ -29,6 +29,9 @@
  *   mbview_qt_test --gl [--3d]    draws a synthetic grid with the OpenGL backend,
  *                                 waits for the full resolution drawing and checks
  *                                 picks made with mouse events
+ *   mbview_qt_test --rhi [--3d]   the same with the QRhi backend, where it is built
+ *                                 (77, skipped, elsewhere); its profile view does
+ *                                 not draw yet
  *   mbview_qt_test --show [--3d] [--edit] [grid]   opens a window to use by hand
  *                                 (--edit: sites, routes and polylines enabled); with
  *                                 MBVIEW_QT_TEST_SNAPSHOT=file it saves the first
@@ -38,7 +41,7 @@
  *                                 exit() as the macOS Quit menu does)
  *
  * The synthetic grid is a smooth surface known in closed form, so that the
- * picked depths can be checked against it.
+ * picked depths can be checked against it. --gl and --rhi have a watchdog.
  */
 
 #include <QAction>
@@ -60,12 +63,17 @@
 #include <QTimer>
 #include <QWindow>
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#include <thread>
 #include <vector>
+#ifdef MBVQ_HAVE_RHI
+#include <QRhiWidget>
+#endif
 
 extern "C" {
 #include "mb_aux.h"
@@ -95,6 +103,28 @@ void spin(int ms) {
   QEventLoop loop;
   QTimer::singleShot(ms, &loop, &QEventLoop::quit);
   loop.exec();
+}
+
+/* the test ends after seconds even if it hangs */
+void start_watchdog(int seconds, const char *mode) {
+  std::thread([seconds, mode] {
+    std::this_thread::sleep_for(std::chrono::seconds(seconds));
+    std::fprintf(stderr, "mbview_qt_test %s: watchdog, stopped after %d s\n", mode, seconds);
+    std::fflush(stdout);
+    std::_Exit(4);
+  }).detach();
+}
+
+/* the picture of a map view that draws, OpenGL or QRhi; under QRhi
+   grabFramebuffer() draws a new frame, a fill with its side effects */
+QImage grab(QWidget *view) {
+  if (auto *gl = qobject_cast<QOpenGLWidget *>(view))
+    return gl->grabFramebuffer();
+#ifdef MBVQ_HAVE_RHI
+  if (auto *rhi = qobject_cast<QRhiWidget *>(view))
+    return rhi->grabFramebuffer();
+#endif
+  return QImage();
 }
 
 /* the synthetic surface: a seamount on a sloping plain, depth negative */
@@ -708,22 +738,33 @@ int test_null() {
   return failures == 0 ? 0 : 1;
 }
 
-int test_gl(bool mode3d) {
+/* the drawing with the OpenGL backend, or with the QRhi backend (rhi) */
+int test_drawing(bool mode3d, bool rhi) {
+  const std::string backend = rhi ? "QRhi" : "OpenGL";
   size_t instance = MBV_NO_WINDOW;
-  check(open_view(mode3d, nullptr, &instance), "mbview_open with the OpenGL backend");
-  auto *view = qobject_cast<QOpenGLWidget *>(mbvq::map_view(instance));
-  check(view != nullptr, "the map view is an OpenGL widget");
-  if (view == nullptr)
+  check(open_view(mode3d, nullptr, &instance), "mbview_open with the " + backend + " backend");
+  QWidget *view = mbvq::map_view(instance);
+#ifdef MBVQ_HAVE_RHI
+  const bool drawing = rhi ? qobject_cast<QRhiWidget *>(view) != nullptr : qobject_cast<QOpenGLWidget *>(view) != nullptr;
+#else
+  const bool drawing = qobject_cast<QOpenGLWidget *>(view) != nullptr;
+#endif
+  check(drawing, std::string(rhi ? "the map view is a QRhi widget" : "the map view is an OpenGL widget"));
+  if (!drawing)
     return 1;
 
-  /* the background work draws at full resolution after a pause */
+  /* the background work draws at full resolution after a pause (under QRhi
+     every fill is at full resolution) */
   QElapsedTimer timer;
   timer.start();
   while (mbvq_c_lastdrawrez(instance) != MBVQ_REZ_FULL && timer.elapsed() < 20000)
     spin(50);
   check(mbvq_c_lastdrawrez(instance) == MBVQ_REZ_FULL,
-        "full resolution drawn by the background work after " + std::to_string(timer.elapsed()) + " ms");
-  const QImage image = view->grabFramebuffer();
+        "full resolution drawn by the background work after " + std::to_string(timer.elapsed()) +
+            " ms (window exposed: " +
+            std::to_string(view->window()->windowHandle() != nullptr && view->window()->windowHandle()->isExposed()) +
+            ")");
+  const QImage image = grab(view);
   int distinct = 0;
   {
     std::vector<QRgb> seen;
@@ -782,11 +823,13 @@ int test_gl(bool mode3d) {
   check(pick_info != nullptr && pick_info->text().startsWith(QStringLiteral("Pick Info:")) &&
             pick_info->text().contains(QStringLiteral("Lon:")),
         "the pick information label shows the last pick");
-  const QImage after = view->grabFramebuffer();
+  const QImage after = grab(view);
   check(!after.isNull(), "the view still draws after the picks");
 
   /* Full: draws at full resolution at once when the last drawing was coarser
-     (Reset draws low then high; the background work would take about 1 s) */
+     (Reset draws low then high; the background work would take about 1 s).
+     Under QRhi every fill is at full resolution, so there is no coarser
+     drawing to leave. */
   QPushButton *reset_button = nullptr, *full_button = nullptr;
   for (QPushButton *button : mbvq::window(instance)->findChildren<QPushButton *>()) {
     if (button->text() == QStringLiteral("Reset"))
@@ -794,26 +837,29 @@ int test_gl(bool mode3d) {
     if (button->text() == QStringLiteral("Full"))
       full_button = button;
   }
-  reset_button->click();
-  {
-    /* wait for the low or high drawing of the reset */
-    QElapsedTimer wait;
-    wait.start();
-    while (mbvq_c_lastdrawrez(instance) == MBVQ_REZ_NONE && wait.elapsed() < 2000)
+  if (!rhi) {
+    reset_button->click();
+    {
+      /* wait for the low or high drawing of the reset */
+      QElapsedTimer wait;
+      wait.start();
+      while (mbvq_c_lastdrawrez(instance) == MBVQ_REZ_NONE && wait.elapsed() < 2000)
+        spin(10);
+    }
+    const int before_full = mbvq_c_lastdrawrez(instance);
+    full_button->click();
+    QElapsedTimer full_timer;
+    full_timer.start();
+    while (mbvq_c_lastdrawrez(instance) != MBVQ_REZ_FULL && full_timer.elapsed() < 3000)
       spin(10);
+    /* the background work would need about a second of rest: well before that */
+    check(before_full != MBVQ_REZ_NONE && before_full != MBVQ_REZ_FULL &&
+              mbvq_c_lastdrawrez(instance) == MBVQ_REZ_FULL && full_timer.elapsed() < 700,
+          "Full draws at full resolution at once after a coarser drawing (before: " + std::to_string(before_full) +
+              ", " + std::to_string(full_timer.elapsed()) + " ms, window exposed: " +
+              std::to_string(view->window()->windowHandle() != nullptr && view->window()->windowHandle()->isExposed()) +
+              ")");
   }
-  const int before_full = mbvq_c_lastdrawrez(instance);
-  full_button->click();
-  QElapsedTimer full_timer;
-  full_timer.start();
-  while (mbvq_c_lastdrawrez(instance) != MBVQ_REZ_FULL && full_timer.elapsed() < 3000)
-    spin(10);
-  /* the background work would need about a second of rest: well before that */
-  check(before_full != MBVQ_REZ_NONE && before_full != MBVQ_REZ_FULL && mbvq_c_lastdrawrez(instance) == MBVQ_REZ_FULL &&
-            full_timer.elapsed() < 700,
-        "Full draws at full resolution at once after a coarser drawing (before: " + std::to_string(before_full) + ", " +
-            std::to_string(full_timer.elapsed()) + " ms, window exposed: " +
-            std::to_string(view->window()->windowHandle() != nullptr && view->window()->windowHandle()->isExposed()) + ")");
 
   full_button->click();
   QString status_text;
@@ -841,16 +887,25 @@ int test_gl(bool mode3d) {
   auto *gl_window = static_cast<mbvq::MapWindow *>(mbvq::window(instance));
   gl_window->widget()->profile()->open();
   spin(300);
-  if (const char *snapshot = std::getenv("MBVIEW_QT_TEST_PROFILE"))
-    qobject_cast<QOpenGLWidget *>(gl_window->widget()->profile()->view())->grabFramebuffer().save(QString::fromLocal8Bit(snapshot));
-  auto *profile_view = qobject_cast<QOpenGLWidget *>(gl_window->widget()->profile()->view());
-  check(profile_view != nullptr && !profile_view->grabFramebuffer().isNull() && data->prwidth > 0 && data->prheight > 0,
-        "the profile view draws (" + std::to_string(data->prwidth) + " x " + std::to_string(data->prheight) + " pixels)");
+  if (!rhi) {
+    if (const char *snapshot = std::getenv("MBVIEW_QT_TEST_PROFILE"))
+      qobject_cast<QOpenGLWidget *>(gl_window->widget()->profile()->view())->grabFramebuffer().save(QString::fromLocal8Bit(snapshot));
+    auto *profile_view = qobject_cast<QOpenGLWidget *>(gl_window->widget()->profile()->view());
+    check(profile_view != nullptr && !profile_view->grabFramebuffer().isNull() && data->prwidth > 0 && data->prheight > 0,
+          "the profile view draws (" + std::to_string(data->prwidth) + " x " + std::to_string(data->prheight) + " pixels)");
+  }
+  else {
+    /* the QRhi profile view comes later: a null view, which passes its size on */
+    check(gl_window->widget()->profile()->isVisible() && data->prwidth > 0 && data->prheight > 0,
+          "the profile window opens (a null view under QRhi for now; " + std::to_string(data->prwidth) + " x " +
+              std::to_string(data->prheight) + " pixels)");
+  }
 
-  /* closing the window removes the OpenGL view and frees the instance */
+  /* closing the window removes the drawing view and frees the instance */
   mbvq::window(instance)->close();
   spin(300);
-  check(mbvq::window(instance) == nullptr && !data->active, "closing the OpenGL window dismisses the instance");
+  check(mbvq::window(instance) == nullptr && !data->active,
+        std::string(rhi ? "closing the QRhi window" : "closing the OpenGL window") + " dismisses the instance");
   return failures == 0 ? 0 : 1;
 }
 
@@ -859,13 +914,15 @@ int test_gl(bool mode3d) {
 int main(int argc, char **argv) {
   /* line by line, so that results before a crash are not lost */
   std::setvbuf(stdout, nullptr, _IOLBF, 0);
-  bool null = false, gl = false, show = false, mode3d = false, edit = false;
+  bool null = false, gl = false, rhi = false, show = false, mode3d = false, edit = false;
   const char *grdfile = nullptr;
   for (int i = 1; i < argc; i++) {
     if (std::strcmp(argv[i], "--null") == 0)
       null = true;
     else if (std::strcmp(argv[i], "--gl") == 0)
       gl = true;
+    else if (std::strcmp(argv[i], "--rhi") == 0)
+      rhi = true;
     else if (std::strcmp(argv[i], "--show") == 0)
       show = true;
     else if (std::strcmp(argv[i], "--3d") == 0)
@@ -875,20 +932,28 @@ int main(int argc, char **argv) {
     else
       grdfile = argv[i];
   }
-  if (null + gl + show != 1) {
-    std::fprintf(stderr, "usage: mbview_qt_test --null | --gl [--3d] | --show [--3d] [--edit] [grid]\n");
+  if (null + gl + rhi + show != 1) {
+    std::fprintf(stderr, "usage: mbview_qt_test --null | --gl [--3d] | --rhi [--3d] | --show [--3d] [--edit] [grid]\n");
     return 2;
   }
+  /* a build without QRhi would draw with OpenGL instead */
+  if (rhi && !mbvq::backend_built(mbvq::Backend::Rhi)) {
+    std::printf("skipped: this build has no QRhi drawing\n");
+    return 77;
+  }
+  /* the modes that draw end after 120 s even if they hang */
+  if (gl || rhi)
+    start_watchdog(120, gl ? "--gl" : "--rhi");
 
-  mbvq::set_backend(null ? mbvq::Backend::Null : mbvq::Backend::LegacyGL);
+  mbvq::set_backend(null ? mbvq::Backend::Null : rhi ? mbvq::Backend::Rhi : mbvq::Backend::LegacyGL);
   QApplication app(argc, argv);
   int error = MB_ERROR_NO_ERROR;
   mbview_startup(0, nullptr, nullptr, &error);
 
   if (null)
     return test_null();
-  if (gl)
-    return test_gl(mode3d);
+  if (gl || rhi)
+    return test_drawing(mode3d, rhi);
   size_t instance = MBV_NO_WINDOW;
   if (!open_view(mode3d, grdfile, &instance))
     return 1;
